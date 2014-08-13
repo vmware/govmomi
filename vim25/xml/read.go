@@ -268,6 +268,36 @@ var (
 	textUnmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 )
 
+// Find reflect.Type for an element's type attribute.
+func (p *Decoder) typeForElement(start *StartElement) reflect.Type {
+	t := ""
+	for _, a := range start.Attr {
+		if a.Name == xmlSchemaInstance {
+			t = a.Value
+			break
+		}
+	}
+
+	if t == "" {
+		return nil
+	}
+
+	// Maybe the type is a basic xsd:* type.
+	typ := stringToType(t)
+	if typ != nil {
+		return typ
+	}
+
+	// Maybe the type is a custom type.
+	if p.Types != nil {
+		if typ, ok := p.Types[t]; ok {
+			return typ
+		}
+	}
+
+	return nil
+}
+
 // Unmarshal a single XML element into val.
 func (p *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 	// Find start element if we need it.
@@ -281,6 +311,31 @@ func (p *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 				start = &t
 				break
 			}
+		}
+	}
+
+	// Try to figure out type for empty interface values.
+	if val.Kind() == reflect.Interface && val.IsNil() {
+		typ := p.typeForElement(start)
+		if typ != nil {
+			pval := reflect.New(typ).Elem()
+			err := p.unmarshal(pval, start)
+			if err != nil {
+				return err
+			}
+
+			for i := 0; i < 2; i++ {
+				if typ.Implements(val.Type()) {
+					val.Set(pval)
+					return nil
+				}
+
+				typ = reflect.PtrTo(typ)
+				pval = pval.Addr()
+			}
+
+			val.Set(pval)
+			return nil
 		}
 	}
 

@@ -441,6 +441,11 @@ func (p *printer) marshalValue(val reflect.Value, finfo *fieldInfo, startTemplat
 		start.Name.Local = name
 	}
 
+	// Add type attribute if necessary
+	if finfo != nil && finfo.flags&fTypeAttr != 0 {
+		start.Attr = append(start.Attr, Attr{xmlSchemaInstance, typeToString(typ)})
+	}
+
 	// Attributes
 	for i := range tinfo.fields {
 		finfo := &tinfo.fields[i]
@@ -569,6 +574,12 @@ func defaultStart(typ reflect.Type, finfo *fieldInfo, startTemplate *StartElemen
 		// since it has the Marshaler methods.
 		start.Name.Local = typ.Elem().Name()
 	}
+
+	// Add type attribute if necessary
+	if finfo != nil && finfo.flags&fTypeAttr != 0 {
+		start.Attr = append(start.Attr, Attr{xmlSchemaInstance, typeToString(typ)})
+	}
+
 	return start
 }
 

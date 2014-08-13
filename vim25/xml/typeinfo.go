@@ -37,6 +37,7 @@ const (
 	fAny
 
 	fOmitEmpty
+	fTypeAttr
 
 	fMode = fElement | fAttr | fCharData | fInnerXml | fComment | fAny
 )
@@ -140,6 +141,8 @@ func structFieldInfo(typ reflect.Type, f *reflect.StructField) (*fieldInfo, erro
 				finfo.flags |= fAny
 			case "omitempty":
 				finfo.flags |= fOmitEmpty
+			case "typeattr":
+				finfo.flags |= fTypeAttr
 			}
 		}
 
