@@ -31,7 +31,7 @@ func TestVirtualMachineConfigSpec(t *testing.T) {
 		MemoryMB: 128,
 		DeviceChange: []BaseVirtualDeviceConfigSpec{
 			&VirtualDeviceConfigSpec{
-				Operation: &VirtualDeviceConfigSpecOperationAdd,
+				Operation: VirtualDeviceConfigSpecOperationAdd,
 				Device: &VirtualLsiLogicController{VirtualSCSIController{
 					SharedBus: VirtualSCSISharingNoSharing,
 					VirtualController: VirtualController{
@@ -43,8 +43,8 @@ func TestVirtualMachineConfigSpec(t *testing.T) {
 				}},
 			},
 			&VirtualDeviceConfigSpec{
-				Operation:     &VirtualDeviceConfigSpecOperationAdd,
-				FileOperation: &VirtualDeviceConfigSpecFileOperationCreate,
+				Operation:     VirtualDeviceConfigSpecOperationAdd,
+				FileOperation: VirtualDeviceConfigSpecFileOperationCreate,
 				Device: &VirtualDisk{
 					VirtualDevice: VirtualDevice{
 						Key:           0,
@@ -62,7 +62,7 @@ func TestVirtualMachineConfigSpec(t *testing.T) {
 				},
 			},
 			&VirtualDeviceConfigSpec{
-				Operation: &VirtualDeviceConfigSpecOperationAdd,
+				Operation: VirtualDeviceConfigSpecOperationAdd,
 				Device: &VirtualE1000{VirtualEthernetCard{
 					VirtualDevice: VirtualDevice{
 						Key: 0,
