@@ -49,8 +49,9 @@ func buildValueMap(v reflect.Value, m map[string]reflect.Value) {
 	t := v.Type().Elem()
 	for i := 0; i < t.NumField(); i++ {
 		sft := t.Field(i)
+
+		// Recurse into embedded field
 		if sft.Anonymous {
-			// Recurse into embedded field
 			buildValueMap(v.Elem().Field(i).Addr(), m)
 			continue
 		}
@@ -106,7 +107,10 @@ func objectContentToType(o types.ObjectContent, t reflect.Type) reflect.Value {
 	return v
 }
 
-func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReference, dst interface{}) error {
+// RetrievePropertiesForRequest calls the RetrieveProperties method with the
+// specified request and decodes the response struct into the value pointed to
+// by dst.
+func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrieveProperties, dst interface{}) error {
 	rt := reflect.TypeOf(dst)
 	if rt.Kind() != reflect.Ptr {
 		panic("need pointer")
@@ -117,8 +121,7 @@ func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReferenc
 		panic("cannot set dst")
 	}
 
-	var isSlice bool
-
+	isSlice := false
 	switch rt.Elem().Kind() {
 	case reflect.Struct:
 	case reflect.Slice:
@@ -127,6 +130,36 @@ func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReferenc
 		panic("unexpected type")
 	}
 
+	res, err := methods.RetrieveProperties(r, &req)
+	if err != nil {
+		return err
+	}
+
+	if isSlice {
+		elemType := rt.Elem().Elem()
+		for _, p := range res.Returnval {
+			v := objectContentToType(p, elemType)
+			rv.Set(reflect.Append(rv, v.Elem()))
+		}
+	} else {
+		ptrType := rt.Elem()
+		switch len(res.Returnval) {
+		case 0:
+		case 1:
+			v := objectContentToType(res.Returnval[0], ptrType)
+			rv.Set(v.Elem())
+		default:
+			// If dst is not a slice, expect to receive 0 or 1 results
+			panic("more than 1 result")
+		}
+	}
+
+	return nil
+}
+
+// RetrieveProperties retrieves the properties of the managed object specified
+// as obj and decodes the response struct into the value pointed to by dst.
+func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReference, dst interface{}) error {
 	req := types.RetrieveProperties{
 		This: pc,
 		SpecSet: []types.PropertyFilterSpec{
@@ -147,24 +180,5 @@ func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReferenc
 		},
 	}
 
-	res, err := methods.RetrieveProperties(r, &req)
-	if err != nil {
-		return err
-	}
-
-	if isSlice {
-		panic("TODO(PN)")
-	} else {
-		switch len(res.Returnval) {
-		case 0:
-		case 1:
-			v := objectContentToType(res.Returnval[0], rt.Elem())
-			rv.Set(v.Elem())
-		default:
-			// If dst is not a slice, expect to receive 0 or 1 results
-			panic("more than 1 result")
-		}
-	}
-
-	return nil
+	return RetrievePropertiesForRequest(r, req, dst)
 }
