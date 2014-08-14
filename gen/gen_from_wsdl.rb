@@ -27,50 +27,56 @@ wsdl.peek()
 ifs = Peek.types.keys.select { |name| Peek.base?(name) }.size()
 puts "%d classes, %d interfaces" % [Peek.types.size(), ifs]
 
-types_go = File.open(File.join(ARGV.first, "types/types.go"), "w")
-io = types_go
-io.print "package types\n\n"
+File.open(File.join(ARGV.first, "types/enum.go"), "w") do |io|
+  io.print WSDL.header("types")
 
-wsdl.
-  types.
-  sort_by { |x| x.name }.
-  uniq { |x| x.name }.
-  select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
-  select { |t| t.is_enum? }.
-  each { |e| e.dump(io); e.dump_init(io) }
+  wsdl.
+    types.
+    sort_by { |x| x.name }.
+    uniq { |x| x.name }.
+    select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
+    select { |t| t.is_enum? }.
+    each { |e| e.dump(io); e.dump_init(io) }
+end
 
-wsdl.
-  types.
-  sort_by { |x| x.name }.
-  uniq { |x| x.name }.
-  select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
-  select { |t| !t.is_enum? }.
-  each { |e| e.dump(io); e.dump_init(io) }
+File.open(File.join(ARGV.first, "types/types.go"), "w") do |io|
+  io.print WSDL.header("types")
 
-if_go = File.open(File.join(ARGV.first, "types/if.go"), "w")
-io = if_go
-io.print "package types\n\n"
-Peek.dump_interfaces(io)
+  wsdl.
+    types.
+    sort_by { |x| x.name }.
+    uniq { |x| x.name }.
+    select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
+    select { |t| !t.is_enum? }.
+    each { |e| e.dump(io); e.dump_init(io) }
+end
 
-methods_go = File.open(File.join(ARGV.first, "methods/methods.go"), "w")
-io = methods_go
-io.print "package methods\n\n"
+File.open(File.join(ARGV.first, "types/if.go"), "w") do |io|
+  io.print WSDL.header("types")
 
-wsdl.
-  operations.
-  sort_by { |x| x.name }.
-  select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
-  each { |e| e.dump(io) }
+  Peek.dump_interfaces(io)
+end
 
-methods_go = File.open(File.join(ARGV.first, "tasks/tasks.go"), "w")
-io = methods_go
-io.print "package tasks\n\n"
+File.open(File.join(ARGV.first, "methods/methods.go"), "w") do |io|
+  io.print WSDL.header("methods")
 
-wsdl.
-  operations.
-  sort_by { |x| x.name }.
-  select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
-  select { |x| x.name =~ /_Task$/ }.
-  each { |e| e.dump_task(io) }
+  wsdl.
+    operations.
+    sort_by { |x| x.name }.
+    select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
+    each { |e| e.dump(io) }
+end
+
+
+File.open(File.join(ARGV.first, "tasks/tasks.go"), "w") do |io|
+  io.print WSDL.header("tasks")
+
+  wsdl.
+    operations.
+    sort_by { |x| x.name }.
+    select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
+    select { |x| x.name =~ /_Task$/ }.
+    each { |e| e.dump_task(io) }
+end
 
 exit(0)

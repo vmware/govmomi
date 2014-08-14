@@ -191,15 +191,15 @@ wsdl = WSDL.new(WSDL.read "vim.wsdl")
 wsdl.validate_assumptions!
 wsdl.peek()
 
-mo_go = File.open(File.join(ARGV.first, "mo/mo.go"), "w")
-io = mo_go
-io.print "package mo\n\n"
+File.open(File.join(ARGV.first, "mo/mo.go"), "w") do |io|
+  io.print WSDL.header("mo")
 
-vmodl = Vmodl.new(read "vmodl.db")
+  vmodl = Vmodl.new(read "vmodl.db")
 
-vmodl.
-  managed.
-  sort_by { |m| m.name }.
-  each { |m| m.dump(io) }
+  vmodl.
+    managed.
+    sort_by { |m| m.name }.
+    each { |m| m.dump(io) }
+end
 
 exit(0)
