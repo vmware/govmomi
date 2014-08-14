@@ -33,7 +33,7 @@ var serviceInstance = types.ManagedObjectReference{
 type Client struct {
 	*soap.Client
 
-	ServiceContent types.ServiceContent
+	types.ServiceContent
 
 	u url.URL
 }
@@ -99,7 +99,7 @@ func NewClient(u url.URL) (*Client, error) {
 func (c *Client) UserSession() (*types.UserSession, error) {
 	var sm mo.SessionManager
 
-	err := mo.RetrieveProperties(c, c.ServiceContent.PropertyCollector, *c.ServiceContent.SessionManager, &sm)
+	err := mo.RetrieveProperties(c, c.PropertyCollector, *c.SessionManager, &sm)
 	if err != nil {
 		return nil, err
 	}
