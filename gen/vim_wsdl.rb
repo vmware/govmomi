@@ -34,6 +34,7 @@ class Peek
 
   @@types = {}
   @@refs = {}
+  @@enums = {}
 
   def self.types
     return @@types
@@ -43,8 +44,20 @@ class Peek
     return @@refs
   end
 
+  def self.enums
+    return @@enums
+  end
+
   def self.ref(type)
     refs[type] = true
+  end
+
+  def self.enum(type)
+    enums[type] = true
+  end
+
+  def self.enum?(type)
+    enums[type]
   end
 
   def self.register(name)
@@ -144,6 +157,10 @@ class Simple
     vim_type? && Peek.base?(vim_type)
   end
 
+  def enum_type?
+    vim_type? && Peek.enum?(vim_type)
+  end
+
   def any_type?
     self.type == "xsd:anyType"
   end
@@ -185,7 +202,7 @@ class Simple
       if base_type?
         prefix += "Base"
       else
-        prefix += "*" if !slice? && optional?
+        prefix += "*" if !slice? && !enum_type? && optional?
       end
     end
 
@@ -294,7 +311,7 @@ class SimpleType < Simple
     end
 
     io.print "type %s string\n\n" % name
-    io.print "var (\n"
+    io.print "const (\n"
     enums.each { |e| e.dump(io) }
     io.print ")\n\n"
   end
@@ -303,6 +320,10 @@ class SimpleType < Simple
     io.print "func init() {\n"
     io.print "t[\"%s\"] = reflect.TypeOf((*%s)(nil)).Elem()\n" % [name, name]
     io.print "}\n\n"
+  end
+
+  def peek
+    Peek.enum(name)
   end
 end
 
@@ -707,7 +728,6 @@ class WSDL
       sort_by { |x| x.name }.
       uniq { |x| x.name }.
       select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
-      select { |t| !t.is_enum? }.
       each { |e| e.peek() }
   end
 

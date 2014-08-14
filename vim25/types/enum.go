@@ -20,7 +20,7 @@ import "reflect"
 
 type ActionParameter string
 
-var (
+const (
 	ActionParameterTargetName        = ActionParameter("targetName")
 	ActionParameterAlarmName         = ActionParameter("alarmName")
 	ActionParameterOldStatus         = ActionParameter("oldStatus")
@@ -38,7 +38,7 @@ func init() {
 
 type ActionType string
 
-var (
+const (
 	ActionTypeMigrationV1        = ActionType("MigrationV1")
 	ActionTypeVmPowerV1          = ActionType("VmPowerV1")
 	ActionTypeHostPowerV1        = ActionType("HostPowerV1")
@@ -53,7 +53,7 @@ func init() {
 
 type AffinityType string
 
-var (
+const (
 	AffinityTypeMemory = AffinityType("memory")
 	AffinityTypeCpu    = AffinityType("cpu")
 )
@@ -64,7 +64,7 @@ func init() {
 
 type AgentInstallFailedReason string
 
-var (
+const (
 	AgentInstallFailedReasonNotEnoughSpaceOnDevice      = AgentInstallFailedReason("NotEnoughSpaceOnDevice")
 	AgentInstallFailedReasonPrepareToUpgradeFailed      = AgentInstallFailedReason("PrepareToUpgradeFailed")
 	AgentInstallFailedReasonAgentNotRunning             = AgentInstallFailedReason("AgentNotRunning")
@@ -82,7 +82,7 @@ func init() {
 
 type ArrayUpdateOperation string
 
-var (
+const (
 	ArrayUpdateOperationAdd    = ArrayUpdateOperation("add")
 	ArrayUpdateOperationRemove = ArrayUpdateOperation("remove")
 	ArrayUpdateOperationEdit   = ArrayUpdateOperation("edit")
@@ -94,7 +94,7 @@ func init() {
 
 type AutoStartAction string
 
-var (
+const (
 	AutoStartActionNone          = AutoStartAction("none")
 	AutoStartActionSystemDefault = AutoStartAction("systemDefault")
 	AutoStartActionPowerOn       = AutoStartAction("powerOn")
@@ -109,7 +109,7 @@ func init() {
 
 type AutoStartWaitHeartbeatSetting string
 
-var (
+const (
 	AutoStartWaitHeartbeatSettingYes           = AutoStartWaitHeartbeatSetting("yes")
 	AutoStartWaitHeartbeatSettingNo            = AutoStartWaitHeartbeatSetting("no")
 	AutoStartWaitHeartbeatSettingSystemDefault = AutoStartWaitHeartbeatSetting("systemDefault")
@@ -121,7 +121,7 @@ func init() {
 
 type CannotMoveFaultToleranceVmMoveType string
 
-var (
+const (
 	CannotMoveFaultToleranceVmMoveTypeResourcePool = CannotMoveFaultToleranceVmMoveType("resourcePool")
 	CannotMoveFaultToleranceVmMoveTypeCluster      = CannotMoveFaultToleranceVmMoveType("cluster")
 )
@@ -132,7 +132,7 @@ func init() {
 
 type CannotPowerOffVmInClusterOperation string
 
-var (
+const (
 	CannotPowerOffVmInClusterOperationSuspend       = CannotPowerOffVmInClusterOperation("suspend")
 	CannotPowerOffVmInClusterOperationPowerOff      = CannotPowerOffVmInClusterOperation("powerOff")
 	CannotPowerOffVmInClusterOperationGuestShutdown = CannotPowerOffVmInClusterOperation("guestShutdown")
@@ -145,7 +145,7 @@ func init() {
 
 type CannotUseNetworkReason string
 
-var (
+const (
 	CannotUseNetworkReasonNetworkReservationNotSupported  = CannotUseNetworkReason("NetworkReservationNotSupported")
 	CannotUseNetworkReasonMismatchedNetworkPolicies       = CannotUseNetworkReason("MismatchedNetworkPolicies")
 	CannotUseNetworkReasonMismatchedDvsVersionOrVendor    = CannotUseNetworkReason("MismatchedDvsVersionOrVendor")
@@ -158,7 +158,7 @@ func init() {
 
 type CheckTestType string
 
-var (
+const (
 	CheckTestTypeSourceTests       = CheckTestType("sourceTests")
 	CheckTestTypeHostTests         = CheckTestType("hostTests")
 	CheckTestTypeResourcePoolTests = CheckTestType("resourcePoolTests")
@@ -172,7 +172,7 @@ func init() {
 
 type ClusterDasAamNodeStateDasState string
 
-var (
+const (
 	ClusterDasAamNodeStateDasStateUninitialized = ClusterDasAamNodeStateDasState("uninitialized")
 	ClusterDasAamNodeStateDasStateInitialized   = ClusterDasAamNodeStateDasState("initialized")
 	ClusterDasAamNodeStateDasStateConfiguring   = ClusterDasAamNodeStateDasState("configuring")
@@ -189,7 +189,7 @@ func init() {
 
 type ClusterDasConfigInfoHBDatastoreCandidate string
 
-var (
+const (
 	ClusterDasConfigInfoHBDatastoreCandidateUserSelectedDs                  = ClusterDasConfigInfoHBDatastoreCandidate("userSelectedDs")
 	ClusterDasConfigInfoHBDatastoreCandidateAllFeasibleDs                   = ClusterDasConfigInfoHBDatastoreCandidate("allFeasibleDs")
 	ClusterDasConfigInfoHBDatastoreCandidateAllFeasibleDsWithUserPreference = ClusterDasConfigInfoHBDatastoreCandidate("allFeasibleDsWithUserPreference")
@@ -201,7 +201,7 @@ func init() {
 
 type ClusterDasConfigInfoServiceState string
 
-var (
+const (
 	ClusterDasConfigInfoServiceStateDisabled = ClusterDasConfigInfoServiceState("disabled")
 	ClusterDasConfigInfoServiceStateEnabled  = ClusterDasConfigInfoServiceState("enabled")
 )
@@ -212,7 +212,7 @@ func init() {
 
 type ClusterDasConfigInfoVmMonitoringState string
 
-var (
+const (
 	ClusterDasConfigInfoVmMonitoringStateVmMonitoringDisabled = ClusterDasConfigInfoVmMonitoringState("vmMonitoringDisabled")
 	ClusterDasConfigInfoVmMonitoringStateVmMonitoringOnly     = ClusterDasConfigInfoVmMonitoringState("vmMonitoringOnly")
 	ClusterDasConfigInfoVmMonitoringStateVmAndAppMonitoring   = ClusterDasConfigInfoVmMonitoringState("vmAndAppMonitoring")
@@ -224,7 +224,7 @@ func init() {
 
 type ClusterDasFdmAvailabilityState string
 
-var (
+const (
 	ClusterDasFdmAvailabilityStateUninitialized                = ClusterDasFdmAvailabilityState("uninitialized")
 	ClusterDasFdmAvailabilityStateElection                     = ClusterDasFdmAvailabilityState("election")
 	ClusterDasFdmAvailabilityStateMaster                       = ClusterDasFdmAvailabilityState("master")
@@ -243,7 +243,7 @@ func init() {
 
 type ClusterDasVmSettingsIsolationResponse string
 
-var (
+const (
 	ClusterDasVmSettingsIsolationResponseNone                     = ClusterDasVmSettingsIsolationResponse("none")
 	ClusterDasVmSettingsIsolationResponsePowerOff                 = ClusterDasVmSettingsIsolationResponse("powerOff")
 	ClusterDasVmSettingsIsolationResponseShutdown                 = ClusterDasVmSettingsIsolationResponse("shutdown")
@@ -256,7 +256,7 @@ func init() {
 
 type ClusterDasVmSettingsRestartPriority string
 
-var (
+const (
 	ClusterDasVmSettingsRestartPriorityDisabled               = ClusterDasVmSettingsRestartPriority("disabled")
 	ClusterDasVmSettingsRestartPriorityLow                    = ClusterDasVmSettingsRestartPriority("low")
 	ClusterDasVmSettingsRestartPriorityMedium                 = ClusterDasVmSettingsRestartPriority("medium")
@@ -270,7 +270,7 @@ func init() {
 
 type ClusterPowerOnVmOption string
 
-var (
+const (
 	ClusterPowerOnVmOptionOverrideAutomationLevel = ClusterPowerOnVmOption("OverrideAutomationLevel")
 	ClusterPowerOnVmOptionReserveResources        = ClusterPowerOnVmOption("ReserveResources")
 )
@@ -281,7 +281,7 @@ func init() {
 
 type ClusterProfileServiceType string
 
-var (
+const (
 	ClusterProfileServiceTypeDRS = ClusterProfileServiceType("DRS")
 	ClusterProfileServiceTypeHA  = ClusterProfileServiceType("HA")
 	ClusterProfileServiceTypeDPM = ClusterProfileServiceType("DPM")
@@ -294,7 +294,7 @@ func init() {
 
 type ComplianceResultStatus string
 
-var (
+const (
 	ComplianceResultStatusCompliant    = ComplianceResultStatus("compliant")
 	ComplianceResultStatusNonCompliant = ComplianceResultStatus("nonCompliant")
 	ComplianceResultStatusUnknown      = ComplianceResultStatus("unknown")
@@ -306,7 +306,7 @@ func init() {
 
 type ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState string
 
-var (
+const (
 	ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateLicensed   = ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState("licensed")
 	ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateUnlicensed = ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState("unlicensed")
 	ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateUnknown    = ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState("unknown")
@@ -318,7 +318,7 @@ func init() {
 
 type ConfigSpecOperation string
 
-var (
+const (
 	ConfigSpecOperationAdd    = ConfigSpecOperation("add")
 	ConfigSpecOperationEdit   = ConfigSpecOperation("edit")
 	ConfigSpecOperationRemove = ConfigSpecOperation("remove")
@@ -330,7 +330,7 @@ func init() {
 
 type CustomizationLicenseDataMode string
 
-var (
+const (
 	CustomizationLicenseDataModePerServer = CustomizationLicenseDataMode("perServer")
 	CustomizationLicenseDataModePerSeat   = CustomizationLicenseDataMode("perSeat")
 )
@@ -341,7 +341,7 @@ func init() {
 
 type CustomizationNetBIOSMode string
 
-var (
+const (
 	CustomizationNetBIOSModeEnableNetBIOSViaDhcp = CustomizationNetBIOSMode("enableNetBIOSViaDhcp")
 	CustomizationNetBIOSModeEnableNetBIOS        = CustomizationNetBIOSMode("enableNetBIOS")
 	CustomizationNetBIOSModeDisableNetBIOS       = CustomizationNetBIOSMode("disableNetBIOS")
@@ -353,7 +353,7 @@ func init() {
 
 type CustomizationSysprepRebootOption string
 
-var (
+const (
 	CustomizationSysprepRebootOptionReboot   = CustomizationSysprepRebootOption("reboot")
 	CustomizationSysprepRebootOptionNoreboot = CustomizationSysprepRebootOption("noreboot")
 	CustomizationSysprepRebootOptionShutdown = CustomizationSysprepRebootOption("shutdown")
@@ -365,7 +365,7 @@ func init() {
 
 type DVPortStatusVmDirectPathGen2InactiveReasonNetwork string
 
-var (
+const (
 	DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptIncompatibleDvs             = DVPortStatusVmDirectPathGen2InactiveReasonNetwork("portNptIncompatibleDvs")
 	DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptNoCompatibleNics            = DVPortStatusVmDirectPathGen2InactiveReasonNetwork("portNptNoCompatibleNics")
 	DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptNoVirtualFunctionsAvailable = DVPortStatusVmDirectPathGen2InactiveReasonNetwork("portNptNoVirtualFunctionsAvailable")
@@ -378,7 +378,7 @@ func init() {
 
 type DVPortStatusVmDirectPathGen2InactiveReasonOther string
 
-var (
+const (
 	DVPortStatusVmDirectPathGen2InactiveReasonOtherPortNptIncompatibleHost      = DVPortStatusVmDirectPathGen2InactiveReasonOther("portNptIncompatibleHost")
 	DVPortStatusVmDirectPathGen2InactiveReasonOtherPortNptIncompatibleConnectee = DVPortStatusVmDirectPathGen2InactiveReasonOther("portNptIncompatibleConnectee")
 )
@@ -389,7 +389,7 @@ func init() {
 
 type DasConfigFaultDasConfigFaultReason string
 
-var (
+const (
 	DasConfigFaultDasConfigFaultReasonHostNetworkMisconfiguration = DasConfigFaultDasConfigFaultReason("HostNetworkMisconfiguration")
 	DasConfigFaultDasConfigFaultReasonHostMisconfiguration        = DasConfigFaultDasConfigFaultReason("HostMisconfiguration")
 	DasConfigFaultDasConfigFaultReasonInsufficientPrivileges      = DasConfigFaultDasConfigFaultReason("InsufficientPrivileges")
@@ -405,7 +405,7 @@ func init() {
 
 type DasVmPriority string
 
-var (
+const (
 	DasVmPriorityDisabled = DasVmPriority("disabled")
 	DasVmPriorityLow      = DasVmPriority("low")
 	DasVmPriorityMedium   = DasVmPriority("medium")
@@ -418,7 +418,7 @@ func init() {
 
 type DatastoreAccessible string
 
-var (
+const (
 	DatastoreAccessibleTrue  = DatastoreAccessible("True")
 	DatastoreAccessibleFalse = DatastoreAccessible("False")
 )
@@ -429,7 +429,7 @@ func init() {
 
 type DatastoreSummaryMaintenanceModeState string
 
-var (
+const (
 	DatastoreSummaryMaintenanceModeStateNormal              = DatastoreSummaryMaintenanceModeState("normal")
 	DatastoreSummaryMaintenanceModeStateEnteringMaintenance = DatastoreSummaryMaintenanceModeState("enteringMaintenance")
 	DatastoreSummaryMaintenanceModeStateInMaintenance       = DatastoreSummaryMaintenanceModeState("inMaintenance")
@@ -441,7 +441,7 @@ func init() {
 
 type DayOfWeek string
 
-var (
+const (
 	DayOfWeekSunday    = DayOfWeek("sunday")
 	DayOfWeekMonday    = DayOfWeek("monday")
 	DayOfWeekTuesday   = DayOfWeek("tuesday")
@@ -457,7 +457,7 @@ func init() {
 
 type DeviceNotSupportedReason string
 
-var (
+const (
 	DeviceNotSupportedReasonHost  = DeviceNotSupportedReason("host")
 	DeviceNotSupportedReasonGuest = DeviceNotSupportedReason("guest")
 )
@@ -468,7 +468,7 @@ func init() {
 
 type DiagnosticManagerLogCreator string
 
-var (
+const (
 	DiagnosticManagerLogCreatorVpxd      = DiagnosticManagerLogCreator("vpxd")
 	DiagnosticManagerLogCreatorVpxa      = DiagnosticManagerLogCreator("vpxa")
 	DiagnosticManagerLogCreatorHostd     = DiagnosticManagerLogCreator("hostd")
@@ -484,7 +484,7 @@ func init() {
 
 type DiagnosticManagerLogFormat string
 
-var (
+const (
 	DiagnosticManagerLogFormatPlain = DiagnosticManagerLogFormat("plain")
 )
 
@@ -494,7 +494,7 @@ func init() {
 
 type DiagnosticPartitionStorageType string
 
-var (
+const (
 	DiagnosticPartitionStorageTypeDirectAttached  = DiagnosticPartitionStorageType("directAttached")
 	DiagnosticPartitionStorageTypeNetworkAttached = DiagnosticPartitionStorageType("networkAttached")
 )
@@ -505,7 +505,7 @@ func init() {
 
 type DiagnosticPartitionType string
 
-var (
+const (
 	DiagnosticPartitionTypeSingleHost = DiagnosticPartitionType("singleHost")
 	DiagnosticPartitionTypeMultiHost  = DiagnosticPartitionType("multiHost")
 )
@@ -516,7 +516,7 @@ func init() {
 
 type DisallowedChangeByServiceDisallowedChange string
 
-var (
+const (
 	DisallowedChangeByServiceDisallowedChangeHotExtendDisk = DisallowedChangeByServiceDisallowedChange("hotExtendDisk")
 )
 
@@ -526,7 +526,7 @@ func init() {
 
 type DistributedVirtualPortgroupMetaTagName string
 
-var (
+const (
 	DistributedVirtualPortgroupMetaTagNameDvsName       = DistributedVirtualPortgroupMetaTagName("dvsName")
 	DistributedVirtualPortgroupMetaTagNamePortgroupName = DistributedVirtualPortgroupMetaTagName("portgroupName")
 	DistributedVirtualPortgroupMetaTagNamePortIndex     = DistributedVirtualPortgroupMetaTagName("portIndex")
@@ -538,7 +538,7 @@ func init() {
 
 type DistributedVirtualPortgroupPortgroupType string
 
-var (
+const (
 	DistributedVirtualPortgroupPortgroupTypeEarlyBinding = DistributedVirtualPortgroupPortgroupType("earlyBinding")
 	DistributedVirtualPortgroupPortgroupTypeLateBinding  = DistributedVirtualPortgroupPortgroupType("lateBinding")
 	DistributedVirtualPortgroupPortgroupTypeEphemeral    = DistributedVirtualPortgroupPortgroupType("ephemeral")
@@ -550,7 +550,7 @@ func init() {
 
 type DistributedVirtualSwitchHostInfrastructureTrafficClass string
 
-var (
+const (
 	DistributedVirtualSwitchHostInfrastructureTrafficClassManagement     = DistributedVirtualSwitchHostInfrastructureTrafficClass("management")
 	DistributedVirtualSwitchHostInfrastructureTrafficClassFaultTolerance = DistributedVirtualSwitchHostInfrastructureTrafficClass("faultTolerance")
 	DistributedVirtualSwitchHostInfrastructureTrafficClassVmotion        = DistributedVirtualSwitchHostInfrastructureTrafficClass("vmotion")
@@ -567,7 +567,7 @@ func init() {
 
 type DistributedVirtualSwitchHostMemberHostComponentState string
 
-var (
+const (
 	DistributedVirtualSwitchHostMemberHostComponentStateUp           = DistributedVirtualSwitchHostMemberHostComponentState("up")
 	DistributedVirtualSwitchHostMemberHostComponentStatePending      = DistributedVirtualSwitchHostMemberHostComponentState("pending")
 	DistributedVirtualSwitchHostMemberHostComponentStateOutOfSync    = DistributedVirtualSwitchHostMemberHostComponentState("outOfSync")
@@ -582,7 +582,7 @@ func init() {
 
 type DistributedVirtualSwitchNicTeamingPolicyMode string
 
-var (
+const (
 	DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_ip        = DistributedVirtualSwitchNicTeamingPolicyMode("loadbalance_ip")
 	DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_srcmac    = DistributedVirtualSwitchNicTeamingPolicyMode("loadbalance_srcmac")
 	DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_srcid     = DistributedVirtualSwitchNicTeamingPolicyMode("loadbalance_srcid")
@@ -596,7 +596,7 @@ func init() {
 
 type DistributedVirtualSwitchPortConnecteeConnecteeType string
 
-var (
+const (
 	DistributedVirtualSwitchPortConnecteeConnecteeTypePnic            = DistributedVirtualSwitchPortConnecteeConnecteeType("pnic")
 	DistributedVirtualSwitchPortConnecteeConnecteeTypeVmVnic          = DistributedVirtualSwitchPortConnecteeConnecteeType("vmVnic")
 	DistributedVirtualSwitchPortConnecteeConnecteeTypeHostConsoleVnic = DistributedVirtualSwitchPortConnecteeConnecteeType("hostConsoleVnic")
@@ -609,7 +609,7 @@ func init() {
 
 type DistributedVirtualSwitchProductSpecOperationType string
 
-var (
+const (
 	DistributedVirtualSwitchProductSpecOperationTypePreInstall             = DistributedVirtualSwitchProductSpecOperationType("preInstall")
 	DistributedVirtualSwitchProductSpecOperationTypeUpgrade                = DistributedVirtualSwitchProductSpecOperationType("upgrade")
 	DistributedVirtualSwitchProductSpecOperationTypeNotifyAvailableUpgrade = DistributedVirtualSwitchProductSpecOperationType("notifyAvailableUpgrade")
@@ -623,7 +623,7 @@ func init() {
 
 type DpmBehavior string
 
-var (
+const (
 	DpmBehaviorManual    = DpmBehavior("manual")
 	DpmBehaviorAutomated = DpmBehavior("automated")
 )
@@ -634,7 +634,7 @@ func init() {
 
 type DrsBehavior string
 
-var (
+const (
 	DrsBehaviorManual             = DrsBehavior("manual")
 	DrsBehaviorPartiallyAutomated = DrsBehavior("partiallyAutomated")
 	DrsBehaviorFullyAutomated     = DrsBehavior("fullyAutomated")
@@ -646,7 +646,7 @@ func init() {
 
 type DrsInjectorWorkloadCorrelationState string
 
-var (
+const (
 	DrsInjectorWorkloadCorrelationStateCorrelated   = DrsInjectorWorkloadCorrelationState("Correlated")
 	DrsInjectorWorkloadCorrelationStateUncorrelated = DrsInjectorWorkloadCorrelationState("Uncorrelated")
 )
@@ -657,7 +657,7 @@ func init() {
 
 type DrsRecommendationReasonCode string
 
-var (
+const (
 	DrsRecommendationReasonCodeFairnessCpuAvg = DrsRecommendationReasonCode("fairnessCpuAvg")
 	DrsRecommendationReasonCodeFairnessMemAvg = DrsRecommendationReasonCode("fairnessMemAvg")
 	DrsRecommendationReasonCodeJointAffin     = DrsRecommendationReasonCode("jointAffin")
@@ -671,7 +671,7 @@ func init() {
 
 type DvsFilterOnFailure string
 
-var (
+const (
 	DvsFilterOnFailureFailOpen   = DvsFilterOnFailure("failOpen")
 	DvsFilterOnFailureFailClosed = DvsFilterOnFailure("failClosed")
 )
@@ -682,7 +682,7 @@ func init() {
 
 type DvsNetworkRuleDirectionType string
 
-var (
+const (
 	DvsNetworkRuleDirectionTypeIncomingPackets = DvsNetworkRuleDirectionType("incomingPackets")
 	DvsNetworkRuleDirectionTypeOutgoingPackets = DvsNetworkRuleDirectionType("outgoingPackets")
 	DvsNetworkRuleDirectionTypeBoth            = DvsNetworkRuleDirectionType("both")
@@ -694,7 +694,7 @@ func init() {
 
 type EntityImportType string
 
-var (
+const (
 	EntityImportTypeCreateEntityWithNewIdentifier      = EntityImportType("createEntityWithNewIdentifier")
 	EntityImportTypeCreateEntityWithOriginalIdentifier = EntityImportType("createEntityWithOriginalIdentifier")
 	EntityImportTypeApplyToEntitySpecified             = EntityImportType("applyToEntitySpecified")
@@ -706,7 +706,7 @@ func init() {
 
 type EntityType string
 
-var (
+const (
 	EntityTypeDistributedVirtualSwitch    = EntityType("distributedVirtualSwitch")
 	EntityTypeDistributedVirtualPortgroup = EntityType("distributedVirtualPortgroup")
 )
@@ -717,7 +717,7 @@ func init() {
 
 type EventAlarmExpressionComparisonOperator string
 
-var (
+const (
 	EventAlarmExpressionComparisonOperatorEquals           = EventAlarmExpressionComparisonOperator("equals")
 	EventAlarmExpressionComparisonOperatorNotEqualTo       = EventAlarmExpressionComparisonOperator("notEqualTo")
 	EventAlarmExpressionComparisonOperatorStartsWith       = EventAlarmExpressionComparisonOperator("startsWith")
@@ -732,7 +732,7 @@ func init() {
 
 type EventCategory string
 
-var (
+const (
 	EventCategoryInfo    = EventCategory("info")
 	EventCategoryWarning = EventCategory("warning")
 	EventCategoryError   = EventCategory("error")
@@ -745,7 +745,7 @@ func init() {
 
 type EventEventSeverity string
 
-var (
+const (
 	EventEventSeverityError   = EventEventSeverity("error")
 	EventEventSeverityWarning = EventEventSeverity("warning")
 	EventEventSeverityInfo    = EventEventSeverity("info")
@@ -758,7 +758,7 @@ func init() {
 
 type EventFilterSpecRecursionOption string
 
-var (
+const (
 	EventFilterSpecRecursionOptionSelf     = EventFilterSpecRecursionOption("self")
 	EventFilterSpecRecursionOptionChildren = EventFilterSpecRecursionOption("children")
 	EventFilterSpecRecursionOptionAll      = EventFilterSpecRecursionOption("all")
@@ -770,7 +770,7 @@ func init() {
 
 type FibreChannelPortType string
 
-var (
+const (
 	FibreChannelPortTypeFabric       = FibreChannelPortType("fabric")
 	FibreChannelPortTypeLoop         = FibreChannelPortType("loop")
 	FibreChannelPortTypePointToPoint = FibreChannelPortType("pointToPoint")
@@ -783,7 +783,7 @@ func init() {
 
 type FileSystemMountInfoVStorageSupportStatus string
 
-var (
+const (
 	FileSystemMountInfoVStorageSupportStatusVStorageSupported   = FileSystemMountInfoVStorageSupportStatus("vStorageSupported")
 	FileSystemMountInfoVStorageSupportStatusVStorageUnsupported = FileSystemMountInfoVStorageSupportStatus("vStorageUnsupported")
 	FileSystemMountInfoVStorageSupportStatusVStorageUnknown     = FileSystemMountInfoVStorageSupportStatus("vStorageUnknown")
@@ -795,7 +795,7 @@ func init() {
 
 type FtIssuesOnHostHostSelectionType string
 
-var (
+const (
 	FtIssuesOnHostHostSelectionTypeUser = FtIssuesOnHostHostSelectionType("user")
 	FtIssuesOnHostHostSelectionTypeVc   = FtIssuesOnHostHostSelectionType("vc")
 	FtIssuesOnHostHostSelectionTypeDrs  = FtIssuesOnHostHostSelectionType("drs")
@@ -807,7 +807,7 @@ func init() {
 
 type GuestFileType string
 
-var (
+const (
 	GuestFileTypeFile      = GuestFileType("file")
 	GuestFileTypeDirectory = GuestFileType("directory")
 	GuestFileTypeSymlink   = GuestFileType("symlink")
@@ -819,7 +819,7 @@ func init() {
 
 type GuestInfoAppStateType string
 
-var (
+const (
 	GuestInfoAppStateTypeNone              = GuestInfoAppStateType("none")
 	GuestInfoAppStateTypeAppStateOk        = GuestInfoAppStateType("appStateOk")
 	GuestInfoAppStateTypeAppStateNeedReset = GuestInfoAppStateType("appStateNeedReset")
@@ -831,7 +831,7 @@ func init() {
 
 type GuestOsDescriptorFirmwareType string
 
-var (
+const (
 	GuestOsDescriptorFirmwareTypeBios = GuestOsDescriptorFirmwareType("bios")
 	GuestOsDescriptorFirmwareTypeEfi  = GuestOsDescriptorFirmwareType("efi")
 )
@@ -842,7 +842,7 @@ func init() {
 
 type GuestOsDescriptorSupportLevel string
 
-var (
+const (
 	GuestOsDescriptorSupportLevelExperimental = GuestOsDescriptorSupportLevel("experimental")
 	GuestOsDescriptorSupportLevelLegacy       = GuestOsDescriptorSupportLevel("legacy")
 	GuestOsDescriptorSupportLevelTerminated   = GuestOsDescriptorSupportLevel("terminated")
@@ -858,7 +858,7 @@ func init() {
 
 type HostActiveDirectoryInfoDomainMembershipStatus string
 
-var (
+const (
 	HostActiveDirectoryInfoDomainMembershipStatusUnknown           = HostActiveDirectoryInfoDomainMembershipStatus("unknown")
 	HostActiveDirectoryInfoDomainMembershipStatusOk                = HostActiveDirectoryInfoDomainMembershipStatus("ok")
 	HostActiveDirectoryInfoDomainMembershipStatusNoServers         = HostActiveDirectoryInfoDomainMembershipStatus("noServers")
@@ -874,7 +874,7 @@ func init() {
 
 type HostCapabilityFtUnsupportedReason string
 
-var (
+const (
 	HostCapabilityFtUnsupportedReasonVMotionNotLicensed  = HostCapabilityFtUnsupportedReason("vMotionNotLicensed")
 	HostCapabilityFtUnsupportedReasonMissingVMotionNic   = HostCapabilityFtUnsupportedReason("missingVMotionNic")
 	HostCapabilityFtUnsupportedReasonMissingFTLoggingNic = HostCapabilityFtUnsupportedReason("missingFTLoggingNic")
@@ -888,7 +888,7 @@ func init() {
 
 type HostCapabilityVmDirectPathGen2UnsupportedReason string
 
-var (
+const (
 	HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptIncompatibleProduct  = HostCapabilityVmDirectPathGen2UnsupportedReason("hostNptIncompatibleProduct")
 	HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptIncompatibleHardware = HostCapabilityVmDirectPathGen2UnsupportedReason("hostNptIncompatibleHardware")
 	HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptDisabled             = HostCapabilityVmDirectPathGen2UnsupportedReason("hostNptDisabled")
@@ -900,7 +900,7 @@ func init() {
 
 type HostConfigChangeMode string
 
-var (
+const (
 	HostConfigChangeModeModify  = HostConfigChangeMode("modify")
 	HostConfigChangeModeReplace = HostConfigChangeMode("replace")
 )
@@ -911,7 +911,7 @@ func init() {
 
 type HostConfigChangeOperation string
 
-var (
+const (
 	HostConfigChangeOperationAdd    = HostConfigChangeOperation("add")
 	HostConfigChangeOperationRemove = HostConfigChangeOperation("remove")
 	HostConfigChangeOperationEdit   = HostConfigChangeOperation("edit")
@@ -923,7 +923,7 @@ func init() {
 
 type HostCpuPackageVendor string
 
-var (
+const (
 	HostCpuPackageVendorUnknown = HostCpuPackageVendor("unknown")
 	HostCpuPackageVendorIntel   = HostCpuPackageVendor("intel")
 	HostCpuPackageVendorAmd     = HostCpuPackageVendor("amd")
@@ -935,7 +935,7 @@ func init() {
 
 type HostCpuPowerManagementInfoPolicyType string
 
-var (
+const (
 	HostCpuPowerManagementInfoPolicyTypeOff           = HostCpuPowerManagementInfoPolicyType("off")
 	HostCpuPowerManagementInfoPolicyTypeStaticPolicy  = HostCpuPowerManagementInfoPolicyType("staticPolicy")
 	HostCpuPowerManagementInfoPolicyTypeDynamicPolicy = HostCpuPowerManagementInfoPolicyType("dynamicPolicy")
@@ -947,7 +947,7 @@ func init() {
 
 type HostDasErrorEventHostDasErrorReason string
 
-var (
+const (
 	HostDasErrorEventHostDasErrorReasonConfigFailed               = HostDasErrorEventHostDasErrorReason("configFailed")
 	HostDasErrorEventHostDasErrorReasonTimeout                    = HostDasErrorEventHostDasErrorReason("timeout")
 	HostDasErrorEventHostDasErrorReasonCommunicationInitFailed    = HostDasErrorEventHostDasErrorReason("communicationInitFailed")
@@ -964,7 +964,7 @@ func init() {
 
 type HostDigestInfoDigestMethodType string
 
-var (
+const (
 	HostDigestInfoDigestMethodTypeSHA1 = HostDigestInfoDigestMethodType("SHA1")
 	HostDigestInfoDigestMethodTypeMD5  = HostDigestInfoDigestMethodType("MD5")
 )
@@ -975,7 +975,7 @@ func init() {
 
 type HostDisconnectedEventReasonCode string
 
-var (
+const (
 	HostDisconnectedEventReasonCodeSslThumbprintVerifyFailed = HostDisconnectedEventReasonCode("sslThumbprintVerifyFailed")
 	HostDisconnectedEventReasonCodeLicenseExpired            = HostDisconnectedEventReasonCode("licenseExpired")
 	HostDisconnectedEventReasonCodeAgentUpgrade              = HostDisconnectedEventReasonCode("agentUpgrade")
@@ -993,7 +993,7 @@ func init() {
 
 type HostDiskPartitionInfoPartitionFormat string
 
-var (
+const (
 	HostDiskPartitionInfoPartitionFormatGpt     = HostDiskPartitionInfoPartitionFormat("gpt")
 	HostDiskPartitionInfoPartitionFormatMbr     = HostDiskPartitionInfoPartitionFormat("mbr")
 	HostDiskPartitionInfoPartitionFormatUnknown = HostDiskPartitionInfoPartitionFormat("unknown")
@@ -1005,7 +1005,7 @@ func init() {
 
 type HostDiskPartitionInfoType string
 
-var (
+const (
 	HostDiskPartitionInfoTypeNone          = HostDiskPartitionInfoType("none")
 	HostDiskPartitionInfoTypeVmfs          = HostDiskPartitionInfoType("vmfs")
 	HostDiskPartitionInfoTypeLinuxNative   = HostDiskPartitionInfoType("linuxNative")
@@ -1022,7 +1022,7 @@ func init() {
 
 type HostFeatureVersionKey string
 
-var (
+const (
 	HostFeatureVersionKeyFaultTolerance = HostFeatureVersionKey("faultTolerance")
 )
 
@@ -1032,7 +1032,7 @@ func init() {
 
 type HostFirewallRuleDirection string
 
-var (
+const (
 	HostFirewallRuleDirectionInbound  = HostFirewallRuleDirection("inbound")
 	HostFirewallRuleDirectionOutbound = HostFirewallRuleDirection("outbound")
 )
@@ -1043,7 +1043,7 @@ func init() {
 
 type HostFirewallRulePortType string
 
-var (
+const (
 	HostFirewallRulePortTypeSrc = HostFirewallRulePortType("src")
 	HostFirewallRulePortTypeDst = HostFirewallRulePortType("dst")
 )
@@ -1054,7 +1054,7 @@ func init() {
 
 type HostFirewallRuleProtocol string
 
-var (
+const (
 	HostFirewallRuleProtocolTcp = HostFirewallRuleProtocol("tcp")
 	HostFirewallRuleProtocolUdp = HostFirewallRuleProtocol("udp")
 )
@@ -1065,7 +1065,7 @@ func init() {
 
 type HostGraphicsInfoGraphicsType string
 
-var (
+const (
 	HostGraphicsInfoGraphicsTypeBasic  = HostGraphicsInfoGraphicsType("basic")
 	HostGraphicsInfoGraphicsTypeShared = HostGraphicsInfoGraphicsType("shared")
 	HostGraphicsInfoGraphicsTypeDirect = HostGraphicsInfoGraphicsType("direct")
@@ -1077,7 +1077,7 @@ func init() {
 
 type HostHardwareElementStatus string
 
-var (
+const (
 	HostHardwareElementStatusUnknown = HostHardwareElementStatus("Unknown")
 	HostHardwareElementStatusGreen   = HostHardwareElementStatus("Green")
 	HostHardwareElementStatusYellow  = HostHardwareElementStatus("Yellow")
@@ -1090,7 +1090,7 @@ func init() {
 
 type HostImageAcceptanceLevel string
 
-var (
+const (
 	HostImageAcceptanceLevelVmware_certified = HostImageAcceptanceLevel("vmware_certified")
 	HostImageAcceptanceLevelVmware_accepted  = HostImageAcceptanceLevel("vmware_accepted")
 	HostImageAcceptanceLevelPartner          = HostImageAcceptanceLevel("partner")
@@ -1103,7 +1103,7 @@ func init() {
 
 type HostIncompatibleForFaultToleranceReason string
 
-var (
+const (
 	HostIncompatibleForFaultToleranceReasonProduct   = HostIncompatibleForFaultToleranceReason("product")
 	HostIncompatibleForFaultToleranceReasonProcessor = HostIncompatibleForFaultToleranceReason("processor")
 )
@@ -1114,7 +1114,7 @@ func init() {
 
 type HostIncompatibleForRecordReplayReason string
 
-var (
+const (
 	HostIncompatibleForRecordReplayReasonProduct   = HostIncompatibleForRecordReplayReason("product")
 	HostIncompatibleForRecordReplayReasonProcessor = HostIncompatibleForRecordReplayReason("processor")
 )
@@ -1125,7 +1125,7 @@ func init() {
 
 type HostInternetScsiHbaChapAuthenticationType string
 
-var (
+const (
 	HostInternetScsiHbaChapAuthenticationTypeChapProhibited  = HostInternetScsiHbaChapAuthenticationType("chapProhibited")
 	HostInternetScsiHbaChapAuthenticationTypeChapDiscouraged = HostInternetScsiHbaChapAuthenticationType("chapDiscouraged")
 	HostInternetScsiHbaChapAuthenticationTypeChapPreferred   = HostInternetScsiHbaChapAuthenticationType("chapPreferred")
@@ -1138,7 +1138,7 @@ func init() {
 
 type HostInternetScsiHbaDigestType string
 
-var (
+const (
 	HostInternetScsiHbaDigestTypeDigestProhibited  = HostInternetScsiHbaDigestType("digestProhibited")
 	HostInternetScsiHbaDigestTypeDigestDiscouraged = HostInternetScsiHbaDigestType("digestDiscouraged")
 	HostInternetScsiHbaDigestTypeDigestPreferred   = HostInternetScsiHbaDigestType("digestPreferred")
@@ -1151,7 +1151,7 @@ func init() {
 
 type HostInternetScsiHbaNetworkBindingSupportType string
 
-var (
+const (
 	HostInternetScsiHbaNetworkBindingSupportTypeNotsupported = HostInternetScsiHbaNetworkBindingSupportType("notsupported")
 	HostInternetScsiHbaNetworkBindingSupportTypeOptional     = HostInternetScsiHbaNetworkBindingSupportType("optional")
 	HostInternetScsiHbaNetworkBindingSupportTypeRequired     = HostInternetScsiHbaNetworkBindingSupportType("required")
@@ -1163,7 +1163,7 @@ func init() {
 
 type HostInternetScsiHbaStaticTargetTargetDiscoveryMethod string
 
-var (
+const (
 	HostInternetScsiHbaStaticTargetTargetDiscoveryMethodStaticMethod     = HostInternetScsiHbaStaticTargetTargetDiscoveryMethod("staticMethod")
 	HostInternetScsiHbaStaticTargetTargetDiscoveryMethodSendTargetMethod = HostInternetScsiHbaStaticTargetTargetDiscoveryMethod("sendTargetMethod")
 	HostInternetScsiHbaStaticTargetTargetDiscoveryMethodSlpMethod        = HostInternetScsiHbaStaticTargetTargetDiscoveryMethod("slpMethod")
@@ -1177,7 +1177,7 @@ func init() {
 
 type HostIpConfigIpV6AddressConfigType string
 
-var (
+const (
 	HostIpConfigIpV6AddressConfigTypeOther     = HostIpConfigIpV6AddressConfigType("other")
 	HostIpConfigIpV6AddressConfigTypeManual    = HostIpConfigIpV6AddressConfigType("manual")
 	HostIpConfigIpV6AddressConfigTypeDhcp      = HostIpConfigIpV6AddressConfigType("dhcp")
@@ -1191,7 +1191,7 @@ func init() {
 
 type HostIpConfigIpV6AddressStatus string
 
-var (
+const (
 	HostIpConfigIpV6AddressStatusPreferred    = HostIpConfigIpV6AddressStatus("preferred")
 	HostIpConfigIpV6AddressStatusDeprecated   = HostIpConfigIpV6AddressStatus("deprecated")
 	HostIpConfigIpV6AddressStatusInvalid      = HostIpConfigIpV6AddressStatus("invalid")
@@ -1207,7 +1207,7 @@ func init() {
 
 type HostLicensableResourceKey string
 
-var (
+const (
 	HostLicensableResourceKeyNumCpuPackages = HostLicensableResourceKey("numCpuPackages")
 	HostLicensableResourceKeyNumCpuCores    = HostLicensableResourceKey("numCpuCores")
 	HostLicensableResourceKeyMemorySize     = HostLicensableResourceKey("memorySize")
@@ -1222,7 +1222,7 @@ func init() {
 
 type HostLowLevelProvisioningManagerReloadTarget string
 
-var (
+const (
 	HostLowLevelProvisioningManagerReloadTargetCurrentConfig  = HostLowLevelProvisioningManagerReloadTarget("currentConfig")
 	HostLowLevelProvisioningManagerReloadTargetSnapshotConfig = HostLowLevelProvisioningManagerReloadTarget("snapshotConfig")
 )
@@ -1233,7 +1233,7 @@ func init() {
 
 type HostMountInfoInaccessibleReason string
 
-var (
+const (
 	HostMountInfoInaccessibleReasonAllPathsDown_Start   = HostMountInfoInaccessibleReason("AllPathsDown_Start")
 	HostMountInfoInaccessibleReasonAllPathsDown_Timeout = HostMountInfoInaccessibleReason("AllPathsDown_Timeout")
 	HostMountInfoInaccessibleReasonPermanentDeviceLoss  = HostMountInfoInaccessibleReason("PermanentDeviceLoss")
@@ -1245,7 +1245,7 @@ func init() {
 
 type HostMountMode string
 
-var (
+const (
 	HostMountModeReadWrite = HostMountMode("readWrite")
 	HostMountModeReadOnly  = HostMountMode("readOnly")
 )
@@ -1256,7 +1256,7 @@ func init() {
 
 type HostNetStackInstanceCongestionControlAlgorithmType string
 
-var (
+const (
 	HostNetStackInstanceCongestionControlAlgorithmTypeNewreno = HostNetStackInstanceCongestionControlAlgorithmType("newreno")
 	HostNetStackInstanceCongestionControlAlgorithmTypeCubic   = HostNetStackInstanceCongestionControlAlgorithmType("cubic")
 )
@@ -1267,7 +1267,7 @@ func init() {
 
 type HostNetStackInstanceSystemStackKey string
 
-var (
+const (
 	HostNetStackInstanceSystemStackKeyDefaultTcpipStack = HostNetStackInstanceSystemStackKey("defaultTcpipStack")
 )
 
@@ -1277,7 +1277,7 @@ func init() {
 
 type HostNumericSensorHealthState string
 
-var (
+const (
 	HostNumericSensorHealthStateUnknown = HostNumericSensorHealthState("unknown")
 	HostNumericSensorHealthStateGreen   = HostNumericSensorHealthState("green")
 	HostNumericSensorHealthStateYellow  = HostNumericSensorHealthState("yellow")
@@ -1290,7 +1290,7 @@ func init() {
 
 type HostNumericSensorType string
 
-var (
+const (
 	HostNumericSensorTypeFan         = HostNumericSensorType("fan")
 	HostNumericSensorTypePower       = HostNumericSensorType("power")
 	HostNumericSensorTypeTemperature = HostNumericSensorType("temperature")
@@ -1304,7 +1304,7 @@ func init() {
 
 type HostPatchManagerInstallState string
 
-var (
+const (
 	HostPatchManagerInstallStateHostRestarted = HostPatchManagerInstallState("hostRestarted")
 	HostPatchManagerInstallStateImageActive   = HostPatchManagerInstallState("imageActive")
 )
@@ -1315,7 +1315,7 @@ func init() {
 
 type HostPatchManagerIntegrityStatus string
 
-var (
+const (
 	HostPatchManagerIntegrityStatusValidated           = HostPatchManagerIntegrityStatus("validated")
 	HostPatchManagerIntegrityStatusKeyNotFound         = HostPatchManagerIntegrityStatus("keyNotFound")
 	HostPatchManagerIntegrityStatusKeyRevoked          = HostPatchManagerIntegrityStatus("keyRevoked")
@@ -1331,7 +1331,7 @@ func init() {
 
 type HostPatchManagerReason string
 
-var (
+const (
 	HostPatchManagerReasonObsoleted         = HostPatchManagerReason("obsoleted")
 	HostPatchManagerReasonMissingPatch      = HostPatchManagerReason("missingPatch")
 	HostPatchManagerReasonMissingLib        = HostPatchManagerReason("missingLib")
@@ -1346,7 +1346,7 @@ func init() {
 
 type HostPowerOperationType string
 
-var (
+const (
 	HostPowerOperationTypePowerOn  = HostPowerOperationType("powerOn")
 	HostPowerOperationTypePowerOff = HostPowerOperationType("powerOff")
 )
@@ -1357,7 +1357,7 @@ func init() {
 
 type HostProfileManagerAnswerFileStatus string
 
-var (
+const (
 	HostProfileManagerAnswerFileStatusValid   = HostProfileManagerAnswerFileStatus("valid")
 	HostProfileManagerAnswerFileStatusInvalid = HostProfileManagerAnswerFileStatus("invalid")
 	HostProfileManagerAnswerFileStatusUnknown = HostProfileManagerAnswerFileStatus("unknown")
@@ -1369,7 +1369,7 @@ func init() {
 
 type HostReplayUnsupportedReason string
 
-var (
+const (
 	HostReplayUnsupportedReasonIncompatibleProduct = HostReplayUnsupportedReason("incompatibleProduct")
 	HostReplayUnsupportedReasonIncompatibleCpu     = HostReplayUnsupportedReason("incompatibleCpu")
 	HostReplayUnsupportedReasonHvDisabled          = HostReplayUnsupportedReason("hvDisabled")
@@ -1384,7 +1384,7 @@ func init() {
 
 type HostRuntimeInfoNetStackInstanceRuntimeInfoState string
 
-var (
+const (
 	HostRuntimeInfoNetStackInstanceRuntimeInfoStateInactive     = HostRuntimeInfoNetStackInstanceRuntimeInfoState("inactive")
 	HostRuntimeInfoNetStackInstanceRuntimeInfoStateActive       = HostRuntimeInfoNetStackInstanceRuntimeInfoState("active")
 	HostRuntimeInfoNetStackInstanceRuntimeInfoStateDeactivating = HostRuntimeInfoNetStackInstanceRuntimeInfoState("deactivating")
@@ -1397,7 +1397,7 @@ func init() {
 
 type HostServicePolicy string
 
-var (
+const (
 	HostServicePolicyOn        = HostServicePolicy("on")
 	HostServicePolicyAutomatic = HostServicePolicy("automatic")
 	HostServicePolicyOff       = HostServicePolicy("off")
@@ -1409,7 +1409,7 @@ func init() {
 
 type HostSnmpAgentCapability string
 
-var (
+const (
 	HostSnmpAgentCapabilityCOMPLETE      = HostSnmpAgentCapability("COMPLETE")
 	HostSnmpAgentCapabilityDIAGNOSTICS   = HostSnmpAgentCapability("DIAGNOSTICS")
 	HostSnmpAgentCapabilityCONFIGURATION = HostSnmpAgentCapability("CONFIGURATION")
@@ -1421,7 +1421,7 @@ func init() {
 
 type HostStandbyMode string
 
-var (
+const (
 	HostStandbyModeEntering = HostStandbyMode("entering")
 	HostStandbyModeExiting  = HostStandbyMode("exiting")
 	HostStandbyModeIn       = HostStandbyMode("in")
@@ -1434,7 +1434,7 @@ func init() {
 
 type HostSystemConnectionState string
 
-var (
+const (
 	HostSystemConnectionStateConnected     = HostSystemConnectionState("connected")
 	HostSystemConnectionStateNotResponding = HostSystemConnectionState("notResponding")
 	HostSystemConnectionStateDisconnected  = HostSystemConnectionState("disconnected")
@@ -1446,7 +1446,7 @@ func init() {
 
 type HostSystemIdentificationInfoIdentifier string
 
-var (
+const (
 	HostSystemIdentificationInfoIdentifierAssetTag          = HostSystemIdentificationInfoIdentifier("AssetTag")
 	HostSystemIdentificationInfoIdentifierServiceTag        = HostSystemIdentificationInfoIdentifier("ServiceTag")
 	HostSystemIdentificationInfoIdentifierOemSpecificString = HostSystemIdentificationInfoIdentifier("OemSpecificString")
@@ -1458,7 +1458,7 @@ func init() {
 
 type HostSystemPowerState string
 
-var (
+const (
 	HostSystemPowerStatePoweredOn  = HostSystemPowerState("poweredOn")
 	HostSystemPowerStatePoweredOff = HostSystemPowerState("poweredOff")
 	HostSystemPowerStateStandBy    = HostSystemPowerState("standBy")
@@ -1471,7 +1471,7 @@ func init() {
 
 type HostUnresolvedVmfsExtentUnresolvedReason string
 
-var (
+const (
 	HostUnresolvedVmfsExtentUnresolvedReasonDiskIdMismatch = HostUnresolvedVmfsExtentUnresolvedReason("diskIdMismatch")
 	HostUnresolvedVmfsExtentUnresolvedReasonUuidConflict   = HostUnresolvedVmfsExtentUnresolvedReason("uuidConflict")
 )
@@ -1482,7 +1482,7 @@ func init() {
 
 type HostUnresolvedVmfsResolutionSpecVmfsUuidResolution string
 
-var (
+const (
 	HostUnresolvedVmfsResolutionSpecVmfsUuidResolutionResignature = HostUnresolvedVmfsResolutionSpecVmfsUuidResolution("resignature")
 	HostUnresolvedVmfsResolutionSpecVmfsUuidResolutionForceMount  = HostUnresolvedVmfsResolutionSpecVmfsUuidResolution("forceMount")
 )
@@ -1493,7 +1493,7 @@ func init() {
 
 type HostVirtualNicManagerNicType string
 
-var (
+const (
 	HostVirtualNicManagerNicTypeVmotion               = HostVirtualNicManagerNicType("vmotion")
 	HostVirtualNicManagerNicTypeFaultToleranceLogging = HostVirtualNicManagerNicType("faultToleranceLogging")
 	HostVirtualNicManagerNicTypeVSphereReplication    = HostVirtualNicManagerNicType("vSphereReplication")
@@ -1507,7 +1507,7 @@ func init() {
 
 type HostVmciAccessManagerMode string
 
-var (
+const (
 	HostVmciAccessManagerModeGrant   = HostVmciAccessManagerMode("grant")
 	HostVmciAccessManagerModeReplace = HostVmciAccessManagerMode("replace")
 	HostVmciAccessManagerModeRevoke  = HostVmciAccessManagerMode("revoke")
@@ -1519,7 +1519,7 @@ func init() {
 
 type HttpNfcLeaseState string
 
-var (
+const (
 	HttpNfcLeaseStateInitializing = HttpNfcLeaseState("initializing")
 	HttpNfcLeaseStateReady        = HttpNfcLeaseState("ready")
 	HttpNfcLeaseStateDone         = HttpNfcLeaseState("done")
@@ -1532,7 +1532,7 @@ func init() {
 
 type InternetScsiSnsDiscoveryMethod string
 
-var (
+const (
 	InternetScsiSnsDiscoveryMethodIsnsStatic = InternetScsiSnsDiscoveryMethod("isnsStatic")
 	InternetScsiSnsDiscoveryMethodIsnsDhcp   = InternetScsiSnsDiscoveryMethod("isnsDhcp")
 	InternetScsiSnsDiscoveryMethodIsnsSlp    = InternetScsiSnsDiscoveryMethod("isnsSlp")
@@ -1544,7 +1544,7 @@ func init() {
 
 type InvalidDasConfigArgumentEntryForInvalidArgument string
 
-var (
+const (
 	InvalidDasConfigArgumentEntryForInvalidArgumentAdmissionControl = InvalidDasConfigArgumentEntryForInvalidArgument("admissionControl")
 	InvalidDasConfigArgumentEntryForInvalidArgumentUserHeartbeatDs  = InvalidDasConfigArgumentEntryForInvalidArgument("userHeartbeatDs")
 	InvalidDasConfigArgumentEntryForInvalidArgumentVmConfig         = InvalidDasConfigArgumentEntryForInvalidArgument("vmConfig")
@@ -1556,7 +1556,7 @@ func init() {
 
 type InvalidProfileReferenceHostReason string
 
-var (
+const (
 	InvalidProfileReferenceHostReasonIncompatibleVersion  = InvalidProfileReferenceHostReason("incompatibleVersion")
 	InvalidProfileReferenceHostReasonMissingReferenceHost = InvalidProfileReferenceHostReason("missingReferenceHost")
 )
@@ -1567,7 +1567,7 @@ func init() {
 
 type IscsiPortInfoPathStatus string
 
-var (
+const (
 	IscsiPortInfoPathStatusNotUsed    = IscsiPortInfoPathStatus("notUsed")
 	IscsiPortInfoPathStatusActive     = IscsiPortInfoPathStatus("active")
 	IscsiPortInfoPathStatusStandBy    = IscsiPortInfoPathStatus("standBy")
@@ -1580,7 +1580,7 @@ func init() {
 
 type LatencySensitivitySensitivityLevel string
 
-var (
+const (
 	LatencySensitivitySensitivityLevelLow    = LatencySensitivitySensitivityLevel("low")
 	LatencySensitivitySensitivityLevelNormal = LatencySensitivitySensitivityLevel("normal")
 	LatencySensitivitySensitivityLevelMedium = LatencySensitivitySensitivityLevel("medium")
@@ -1594,7 +1594,7 @@ func init() {
 
 type LicenseAssignmentFailedReason string
 
-var (
+const (
 	LicenseAssignmentFailedReasonKeyEntityMismatch                                    = LicenseAssignmentFailedReason("keyEntityMismatch")
 	LicenseAssignmentFailedReasonDowngradeDisallowed                                  = LicenseAssignmentFailedReason("downgradeDisallowed")
 	LicenseAssignmentFailedReasonInventoryNotManageableByVirtualCenter                = LicenseAssignmentFailedReason("inventoryNotManageableByVirtualCenter")
@@ -1607,7 +1607,7 @@ func init() {
 
 type LicenseFeatureInfoSourceRestriction string
 
-var (
+const (
 	LicenseFeatureInfoSourceRestrictionUnrestricted = LicenseFeatureInfoSourceRestriction("unrestricted")
 	LicenseFeatureInfoSourceRestrictionServed       = LicenseFeatureInfoSourceRestriction("served")
 	LicenseFeatureInfoSourceRestrictionFile         = LicenseFeatureInfoSourceRestriction("file")
@@ -1619,7 +1619,7 @@ func init() {
 
 type LicenseFeatureInfoState string
 
-var (
+const (
 	LicenseFeatureInfoStateEnabled  = LicenseFeatureInfoState("enabled")
 	LicenseFeatureInfoStateDisabled = LicenseFeatureInfoState("disabled")
 	LicenseFeatureInfoStateOptional = LicenseFeatureInfoState("optional")
@@ -1631,7 +1631,7 @@ func init() {
 
 type LicenseFeatureInfoUnit string
 
-var (
+const (
 	LicenseFeatureInfoUnitHost       = LicenseFeatureInfoUnit("host")
 	LicenseFeatureInfoUnitCpuCore    = LicenseFeatureInfoUnit("cpuCore")
 	LicenseFeatureInfoUnitCpuPackage = LicenseFeatureInfoUnit("cpuPackage")
@@ -1645,7 +1645,7 @@ func init() {
 
 type LicenseManagerLicenseKey string
 
-var (
+const (
 	LicenseManagerLicenseKeyEsxFull    = LicenseManagerLicenseKey("esxFull")
 	LicenseManagerLicenseKeyEsxVmtn    = LicenseManagerLicenseKey("esxVmtn")
 	LicenseManagerLicenseKeyEsxExpress = LicenseManagerLicenseKey("esxExpress")
@@ -1671,7 +1671,7 @@ func init() {
 
 type LicenseManagerState string
 
-var (
+const (
 	LicenseManagerStateInitializing = LicenseManagerState("initializing")
 	LicenseManagerStateNormal       = LicenseManagerState("normal")
 	LicenseManagerStateMarginal     = LicenseManagerState("marginal")
@@ -1684,7 +1684,7 @@ func init() {
 
 type LicenseReservationInfoState string
 
-var (
+const (
 	LicenseReservationInfoStateNotUsed       = LicenseReservationInfoState("notUsed")
 	LicenseReservationInfoStateNoLicense     = LicenseReservationInfoState("noLicense")
 	LicenseReservationInfoStateUnlicensedUse = LicenseReservationInfoState("unlicensedUse")
@@ -1697,7 +1697,7 @@ func init() {
 
 type LinkDiscoveryProtocolConfigOperationType string
 
-var (
+const (
 	LinkDiscoveryProtocolConfigOperationTypeNone      = LinkDiscoveryProtocolConfigOperationType("none")
 	LinkDiscoveryProtocolConfigOperationTypeListen    = LinkDiscoveryProtocolConfigOperationType("listen")
 	LinkDiscoveryProtocolConfigOperationTypeAdvertise = LinkDiscoveryProtocolConfigOperationType("advertise")
@@ -1710,7 +1710,7 @@ func init() {
 
 type LinkDiscoveryProtocolConfigProtocolType string
 
-var (
+const (
 	LinkDiscoveryProtocolConfigProtocolTypeCdp  = LinkDiscoveryProtocolConfigProtocolType("cdp")
 	LinkDiscoveryProtocolConfigProtocolTypeLldp = LinkDiscoveryProtocolConfigProtocolType("lldp")
 )
@@ -1721,7 +1721,7 @@ func init() {
 
 type ManagedEntityStatus string
 
-var (
+const (
 	ManagedEntityStatusGray   = ManagedEntityStatus("gray")
 	ManagedEntityStatusGreen  = ManagedEntityStatus("green")
 	ManagedEntityStatusYellow = ManagedEntityStatus("yellow")
@@ -1734,7 +1734,7 @@ func init() {
 
 type MetricAlarmOperator string
 
-var (
+const (
 	MetricAlarmOperatorIsAbove = MetricAlarmOperator("isAbove")
 	MetricAlarmOperatorIsBelow = MetricAlarmOperator("isBelow")
 )
@@ -1745,7 +1745,7 @@ func init() {
 
 type MultipathState string
 
-var (
+const (
 	MultipathStateStandby  = MultipathState("standby")
 	MultipathStateActive   = MultipathState("active")
 	MultipathStateDisabled = MultipathState("disabled")
@@ -1759,7 +1759,7 @@ func init() {
 
 type NetBIOSConfigInfoMode string
 
-var (
+const (
 	NetBIOSConfigInfoModeUnknown        = NetBIOSConfigInfoMode("unknown")
 	NetBIOSConfigInfoModeEnabled        = NetBIOSConfigInfoMode("enabled")
 	NetBIOSConfigInfoModeDisabled       = NetBIOSConfigInfoMode("disabled")
@@ -1772,7 +1772,7 @@ func init() {
 
 type NetIpConfigInfoIpAddressOrigin string
 
-var (
+const (
 	NetIpConfigInfoIpAddressOriginOther     = NetIpConfigInfoIpAddressOrigin("other")
 	NetIpConfigInfoIpAddressOriginManual    = NetIpConfigInfoIpAddressOrigin("manual")
 	NetIpConfigInfoIpAddressOriginDhcp      = NetIpConfigInfoIpAddressOrigin("dhcp")
@@ -1786,7 +1786,7 @@ func init() {
 
 type NetIpConfigInfoIpAddressStatus string
 
-var (
+const (
 	NetIpConfigInfoIpAddressStatusPreferred    = NetIpConfigInfoIpAddressStatus("preferred")
 	NetIpConfigInfoIpAddressStatusDeprecated   = NetIpConfigInfoIpAddressStatus("deprecated")
 	NetIpConfigInfoIpAddressStatusInvalid      = NetIpConfigInfoIpAddressStatus("invalid")
@@ -1802,7 +1802,7 @@ func init() {
 
 type NetIpStackInfoEntryType string
 
-var (
+const (
 	NetIpStackInfoEntryTypeOther   = NetIpStackInfoEntryType("other")
 	NetIpStackInfoEntryTypeInvalid = NetIpStackInfoEntryType("invalid")
 	NetIpStackInfoEntryTypeDynamic = NetIpStackInfoEntryType("dynamic")
@@ -1815,7 +1815,7 @@ func init() {
 
 type NetIpStackInfoPreference string
 
-var (
+const (
 	NetIpStackInfoPreferenceReserved = NetIpStackInfoPreference("reserved")
 	NetIpStackInfoPreferenceLow      = NetIpStackInfoPreference("low")
 	NetIpStackInfoPreferenceMedium   = NetIpStackInfoPreference("medium")
@@ -1828,7 +1828,7 @@ func init() {
 
 type NotSupportedDeviceForFTDeviceType string
 
-var (
+const (
 	NotSupportedDeviceForFTDeviceTypeVirtualVmxnet3            = NotSupportedDeviceForFTDeviceType("virtualVmxnet3")
 	NotSupportedDeviceForFTDeviceTypeParaVirtualSCSIController = NotSupportedDeviceForFTDeviceType("paraVirtualSCSIController")
 )
@@ -1839,7 +1839,7 @@ func init() {
 
 type NumVirtualCpusIncompatibleReason string
 
-var (
+const (
 	NumVirtualCpusIncompatibleReasonRecordReplay   = NumVirtualCpusIncompatibleReason("recordReplay")
 	NumVirtualCpusIncompatibleReasonFaultTolerance = NumVirtualCpusIncompatibleReason("faultTolerance")
 )
@@ -1850,7 +1850,7 @@ func init() {
 
 type ObjectUpdateKind string
 
-var (
+const (
 	ObjectUpdateKindModify = ObjectUpdateKind("modify")
 	ObjectUpdateKindEnter  = ObjectUpdateKind("enter")
 	ObjectUpdateKindLeave  = ObjectUpdateKind("leave")
@@ -1862,7 +1862,7 @@ func init() {
 
 type OvfConsumerOstNodeType string
 
-var (
+const (
 	OvfConsumerOstNodeTypeEnvelope                = OvfConsumerOstNodeType("envelope")
 	OvfConsumerOstNodeTypeVirtualSystem           = OvfConsumerOstNodeType("virtualSystem")
 	OvfConsumerOstNodeTypeVirtualSystemCollection = OvfConsumerOstNodeType("virtualSystemCollection")
@@ -1874,7 +1874,7 @@ func init() {
 
 type OvfCreateImportSpecParamsDiskProvisioningType string
 
-var (
+const (
 	OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicSparse     = OvfCreateImportSpecParamsDiskProvisioningType("monolithicSparse")
 	OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicFlat       = OvfCreateImportSpecParamsDiskProvisioningType("monolithicFlat")
 	OvfCreateImportSpecParamsDiskProvisioningTypeTwoGbMaxExtentSparse = OvfCreateImportSpecParamsDiskProvisioningType("twoGbMaxExtentSparse")
@@ -1893,7 +1893,7 @@ func init() {
 
 type PerfFormat string
 
-var (
+const (
 	PerfFormatNormal = PerfFormat("normal")
 	PerfFormatCsv    = PerfFormat("csv")
 )
@@ -1904,7 +1904,7 @@ func init() {
 
 type PerfStatsType string
 
-var (
+const (
 	PerfStatsTypeAbsolute = PerfStatsType("absolute")
 	PerfStatsTypeDelta    = PerfStatsType("delta")
 	PerfStatsTypeRate     = PerfStatsType("rate")
@@ -1916,7 +1916,7 @@ func init() {
 
 type PerfSummaryType string
 
-var (
+const (
 	PerfSummaryTypeAverage   = PerfSummaryType("average")
 	PerfSummaryTypeMaximum   = PerfSummaryType("maximum")
 	PerfSummaryTypeMinimum   = PerfSummaryType("minimum")
@@ -1931,7 +1931,7 @@ func init() {
 
 type PerformanceManagerUnit string
 
-var (
+const (
 	PerformanceManagerUnitPercent            = PerformanceManagerUnit("percent")
 	PerformanceManagerUnitKiloBytes          = PerformanceManagerUnit("kiloBytes")
 	PerformanceManagerUnitMegaBytes          = PerformanceManagerUnit("megaBytes")
@@ -1952,7 +1952,7 @@ func init() {
 
 type PhysicalNicResourcePoolSchedulerDisallowedReason string
 
-var (
+const (
 	PhysicalNicResourcePoolSchedulerDisallowedReasonUserOptOut          = PhysicalNicResourcePoolSchedulerDisallowedReason("userOptOut")
 	PhysicalNicResourcePoolSchedulerDisallowedReasonHardwareUnsupported = PhysicalNicResourcePoolSchedulerDisallowedReason("hardwareUnsupported")
 )
@@ -1963,7 +1963,7 @@ func init() {
 
 type PhysicalNicVmDirectPathGen2SupportedMode string
 
-var (
+const (
 	PhysicalNicVmDirectPathGen2SupportedModeUpt = PhysicalNicVmDirectPathGen2SupportedMode("upt")
 )
 
@@ -1973,7 +1973,7 @@ func init() {
 
 type PortGroupConnecteeType string
 
-var (
+const (
 	PortGroupConnecteeTypeVirtualMachine   = PortGroupConnecteeType("virtualMachine")
 	PortGroupConnecteeTypeSystemManagement = PortGroupConnecteeType("systemManagement")
 	PortGroupConnecteeTypeHost             = PortGroupConnecteeType("host")
@@ -1986,7 +1986,7 @@ func init() {
 
 type ProfileExecuteResultStatus string
 
-var (
+const (
 	ProfileExecuteResultStatusSuccess   = ProfileExecuteResultStatus("success")
 	ProfileExecuteResultStatusNeedInput = ProfileExecuteResultStatus("needInput")
 	ProfileExecuteResultStatusError     = ProfileExecuteResultStatus("error")
@@ -1998,7 +1998,7 @@ func init() {
 
 type ProfileNumericComparator string
 
-var (
+const (
 	ProfileNumericComparatorLessThan         = ProfileNumericComparator("lessThan")
 	ProfileNumericComparatorLessThanEqual    = ProfileNumericComparator("lessThanEqual")
 	ProfileNumericComparatorEqual            = ProfileNumericComparator("equal")
@@ -2013,7 +2013,7 @@ func init() {
 
 type PropertyChangeOp string
 
-var (
+const (
 	PropertyChangeOpAdd            = PropertyChangeOp("add")
 	PropertyChangeOpRemove         = PropertyChangeOp("remove")
 	PropertyChangeOpAssign         = PropertyChangeOp("assign")
@@ -2026,7 +2026,7 @@ func init() {
 
 type RecommendationReasonCode string
 
-var (
+const (
 	RecommendationReasonCodeFairnessCpuAvg             = RecommendationReasonCode("fairnessCpuAvg")
 	RecommendationReasonCodeFairnessMemAvg             = RecommendationReasonCode("fairnessMemAvg")
 	RecommendationReasonCodeJointAffin                 = RecommendationReasonCode("jointAffin")
@@ -2058,7 +2058,7 @@ func init() {
 
 type RecommendationType string
 
-var (
+const (
 	RecommendationTypeV1 = RecommendationType("V1")
 )
 
@@ -2068,7 +2068,7 @@ func init() {
 
 type ReplicationDiskConfigFaultReasonForFault string
 
-var (
+const (
 	ReplicationDiskConfigFaultReasonForFaultDiskNotFound                           = ReplicationDiskConfigFaultReasonForFault("diskNotFound")
 	ReplicationDiskConfigFaultReasonForFaultDiskTypeNotSupported                   = ReplicationDiskConfigFaultReasonForFault("diskTypeNotSupported")
 	ReplicationDiskConfigFaultReasonForFaultInvalidDiskKey                         = ReplicationDiskConfigFaultReasonForFault("invalidDiskKey")
@@ -2084,7 +2084,7 @@ func init() {
 
 type ReplicationVmConfigFaultReasonForFault string
 
-var (
+const (
 	ReplicationVmConfigFaultReasonForFaultIncompatibleHwVersion                    = ReplicationVmConfigFaultReasonForFault("incompatibleHwVersion")
 	ReplicationVmConfigFaultReasonForFaultInvalidVmReplicationId                   = ReplicationVmConfigFaultReasonForFault("invalidVmReplicationId")
 	ReplicationVmConfigFaultReasonForFaultInvalidGenerationNumber                  = ReplicationVmConfigFaultReasonForFault("invalidGenerationNumber")
@@ -2107,7 +2107,7 @@ func init() {
 
 type ReplicationVmFaultReasonForFault string
 
-var (
+const (
 	ReplicationVmFaultReasonForFaultNotConfigured      = ReplicationVmFaultReasonForFault("notConfigured")
 	ReplicationVmFaultReasonForFaultPoweredOff         = ReplicationVmFaultReasonForFault("poweredOff")
 	ReplicationVmFaultReasonForFaultSuspended          = ReplicationVmFaultReasonForFault("suspended")
@@ -2123,7 +2123,7 @@ func init() {
 
 type ReplicationVmState string
 
-var (
+const (
 	ReplicationVmStateNone    = ReplicationVmState("none")
 	ReplicationVmStatePaused  = ReplicationVmState("paused")
 	ReplicationVmStateSyncing = ReplicationVmState("syncing")
@@ -2138,7 +2138,7 @@ func init() {
 
 type ScheduledHardwareUpgradeInfoHardwareUpgradePolicy string
 
-var (
+const (
 	ScheduledHardwareUpgradeInfoHardwareUpgradePolicyNever          = ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("never")
 	ScheduledHardwareUpgradeInfoHardwareUpgradePolicyOnSoftPowerOff = ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("onSoftPowerOff")
 	ScheduledHardwareUpgradeInfoHardwareUpgradePolicyAlways         = ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("always")
@@ -2150,7 +2150,7 @@ func init() {
 
 type ScheduledHardwareUpgradeInfoHardwareUpgradeStatus string
 
-var (
+const (
 	ScheduledHardwareUpgradeInfoHardwareUpgradeStatusNone    = ScheduledHardwareUpgradeInfoHardwareUpgradeStatus("none")
 	ScheduledHardwareUpgradeInfoHardwareUpgradeStatusPending = ScheduledHardwareUpgradeInfoHardwareUpgradeStatus("pending")
 	ScheduledHardwareUpgradeInfoHardwareUpgradeStatusSuccess = ScheduledHardwareUpgradeInfoHardwareUpgradeStatus("success")
@@ -2163,7 +2163,7 @@ func init() {
 
 type ScsiLunDescriptorQuality string
 
-var (
+const (
 	ScsiLunDescriptorQualityHighQuality    = ScsiLunDescriptorQuality("highQuality")
 	ScsiLunDescriptorQualityMediumQuality  = ScsiLunDescriptorQuality("mediumQuality")
 	ScsiLunDescriptorQualityLowQuality     = ScsiLunDescriptorQuality("lowQuality")
@@ -2176,7 +2176,7 @@ func init() {
 
 type ScsiLunState string
 
-var (
+const (
 	ScsiLunStateUnknownState      = ScsiLunState("unknownState")
 	ScsiLunStateOk                = ScsiLunState("ok")
 	ScsiLunStateError             = ScsiLunState("error")
@@ -2193,7 +2193,7 @@ func init() {
 
 type ScsiLunType string
 
-var (
+const (
 	ScsiLunTypeDisk                   = ScsiLunType("disk")
 	ScsiLunTypeTape                   = ScsiLunType("tape")
 	ScsiLunTypePrinter                = ScsiLunType("printer")
@@ -2215,7 +2215,7 @@ func init() {
 
 type ScsiLunVStorageSupportStatus string
 
-var (
+const (
 	ScsiLunVStorageSupportStatusVStorageSupported   = ScsiLunVStorageSupportStatus("vStorageSupported")
 	ScsiLunVStorageSupportStatusVStorageUnsupported = ScsiLunVStorageSupportStatus("vStorageUnsupported")
 	ScsiLunVStorageSupportStatusVStorageUnknown     = ScsiLunVStorageSupportStatus("vStorageUnknown")
@@ -2227,7 +2227,7 @@ func init() {
 
 type SessionManagerHttpServiceRequestSpecMethod string
 
-var (
+const (
 	SessionManagerHttpServiceRequestSpecMethodHttpOptions = SessionManagerHttpServiceRequestSpecMethod("httpOptions")
 	SessionManagerHttpServiceRequestSpecMethodHttpGet     = SessionManagerHttpServiceRequestSpecMethod("httpGet")
 	SessionManagerHttpServiceRequestSpecMethodHttpHead    = SessionManagerHttpServiceRequestSpecMethod("httpHead")
@@ -2244,7 +2244,7 @@ func init() {
 
 type SharesLevel string
 
-var (
+const (
 	SharesLevelLow    = SharesLevel("low")
 	SharesLevelNormal = SharesLevel("normal")
 	SharesLevelHigh   = SharesLevel("high")
@@ -2257,7 +2257,7 @@ func init() {
 
 type SimpleCommandEncoding string
 
-var (
+const (
 	SimpleCommandEncodingCSV    = SimpleCommandEncoding("CSV")
 	SimpleCommandEncodingHEX    = SimpleCommandEncoding("HEX")
 	SimpleCommandEncodingSTRING = SimpleCommandEncoding("STRING")
@@ -2269,7 +2269,7 @@ func init() {
 
 type SlpDiscoveryMethod string
 
-var (
+const (
 	SlpDiscoveryMethodSlpDhcp          = SlpDiscoveryMethod("slpDhcp")
 	SlpDiscoveryMethodSlpAutoUnicast   = SlpDiscoveryMethod("slpAutoUnicast")
 	SlpDiscoveryMethodSlpAutoMulticast = SlpDiscoveryMethod("slpAutoMulticast")
@@ -2282,7 +2282,7 @@ func init() {
 
 type StateAlarmOperator string
 
-var (
+const (
 	StateAlarmOperatorIsEqual   = StateAlarmOperator("isEqual")
 	StateAlarmOperatorIsUnequal = StateAlarmOperator("isUnequal")
 )
@@ -2293,7 +2293,7 @@ func init() {
 
 type StorageDrsPodConfigInfoBehavior string
 
-var (
+const (
 	StorageDrsPodConfigInfoBehaviorManual    = StorageDrsPodConfigInfoBehavior("manual")
 	StorageDrsPodConfigInfoBehaviorAutomated = StorageDrsPodConfigInfoBehavior("automated")
 )
@@ -2304,7 +2304,7 @@ func init() {
 
 type StorageIORMThresholdMode string
 
-var (
+const (
 	StorageIORMThresholdModeAutomatic = StorageIORMThresholdMode("automatic")
 	StorageIORMThresholdModeManual    = StorageIORMThresholdMode("manual")
 )
@@ -2315,7 +2315,7 @@ func init() {
 
 type StoragePlacementSpecPlacementType string
 
-var (
+const (
 	StoragePlacementSpecPlacementTypeCreate      = StoragePlacementSpecPlacementType("create")
 	StoragePlacementSpecPlacementTypeReconfigure = StoragePlacementSpecPlacementType("reconfigure")
 	StoragePlacementSpecPlacementTypeRelocate    = StoragePlacementSpecPlacementType("relocate")
@@ -2328,7 +2328,7 @@ func init() {
 
 type TaskFilterSpecRecursionOption string
 
-var (
+const (
 	TaskFilterSpecRecursionOptionSelf     = TaskFilterSpecRecursionOption("self")
 	TaskFilterSpecRecursionOptionChildren = TaskFilterSpecRecursionOption("children")
 	TaskFilterSpecRecursionOptionAll      = TaskFilterSpecRecursionOption("all")
@@ -2340,7 +2340,7 @@ func init() {
 
 type TaskFilterSpecTimeOption string
 
-var (
+const (
 	TaskFilterSpecTimeOptionQueuedTime    = TaskFilterSpecTimeOption("queuedTime")
 	TaskFilterSpecTimeOptionStartedTime   = TaskFilterSpecTimeOption("startedTime")
 	TaskFilterSpecTimeOptionCompletedTime = TaskFilterSpecTimeOption("completedTime")
@@ -2352,7 +2352,7 @@ func init() {
 
 type TaskInfoState string
 
-var (
+const (
 	TaskInfoStateQueued  = TaskInfoState("queued")
 	TaskInfoStateRunning = TaskInfoState("running")
 	TaskInfoStateSuccess = TaskInfoState("success")
@@ -2365,7 +2365,7 @@ func init() {
 
 type ThirdPartyLicenseAssignmentFailedReason string
 
-var (
+const (
 	ThirdPartyLicenseAssignmentFailedReasonLicenseAssignmentFailed = ThirdPartyLicenseAssignmentFailedReason("licenseAssignmentFailed")
 	ThirdPartyLicenseAssignmentFailedReasonModuleNotInstalled      = ThirdPartyLicenseAssignmentFailedReason("moduleNotInstalled")
 )
@@ -2376,7 +2376,7 @@ func init() {
 
 type UpgradePolicy string
 
-var (
+const (
 	UpgradePolicyManual              = UpgradePolicy("manual")
 	UpgradePolicyUpgradeAtPowerCycle = UpgradePolicy("upgradeAtPowerCycle")
 )
@@ -2387,7 +2387,7 @@ func init() {
 
 type VAppAutoStartAction string
 
-var (
+const (
 	VAppAutoStartActionNone          = VAppAutoStartAction("none")
 	VAppAutoStartActionPowerOn       = VAppAutoStartAction("powerOn")
 	VAppAutoStartActionPowerOff      = VAppAutoStartAction("powerOff")
@@ -2401,7 +2401,7 @@ func init() {
 
 type VAppCloneSpecProvisioningType string
 
-var (
+const (
 	VAppCloneSpecProvisioningTypeSameAsSource = VAppCloneSpecProvisioningType("sameAsSource")
 	VAppCloneSpecProvisioningTypeThin         = VAppCloneSpecProvisioningType("thin")
 	VAppCloneSpecProvisioningTypeThick        = VAppCloneSpecProvisioningType("thick")
@@ -2413,7 +2413,7 @@ func init() {
 
 type VAppIPAssignmentInfoAllocationSchemes string
 
-var (
+const (
 	VAppIPAssignmentInfoAllocationSchemesDhcp   = VAppIPAssignmentInfoAllocationSchemes("dhcp")
 	VAppIPAssignmentInfoAllocationSchemesOvfenv = VAppIPAssignmentInfoAllocationSchemes("ovfenv")
 )
@@ -2424,7 +2424,7 @@ func init() {
 
 type VAppIPAssignmentInfoIpAllocationPolicy string
 
-var (
+const (
 	VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy           = VAppIPAssignmentInfoIpAllocationPolicy("dhcpPolicy")
 	VAppIPAssignmentInfoIpAllocationPolicyTransientPolicy      = VAppIPAssignmentInfoIpAllocationPolicy("transientPolicy")
 	VAppIPAssignmentInfoIpAllocationPolicyFixedPolicy          = VAppIPAssignmentInfoIpAllocationPolicy("fixedPolicy")
@@ -2437,7 +2437,7 @@ func init() {
 
 type VAppIPAssignmentInfoProtocols string
 
-var (
+const (
 	VAppIPAssignmentInfoProtocolsIPv4 = VAppIPAssignmentInfoProtocols("IPv4")
 	VAppIPAssignmentInfoProtocolsIPv6 = VAppIPAssignmentInfoProtocols("IPv6")
 )
@@ -2448,7 +2448,7 @@ func init() {
 
 type VFlashModuleNotSupportedReason string
 
-var (
+const (
 	VFlashModuleNotSupportedReasonCacheModeNotSupported            = VFlashModuleNotSupportedReason("CacheModeNotSupported")
 	VFlashModuleNotSupportedReasonCacheConsistencyTypeNotSupported = VFlashModuleNotSupportedReason("CacheConsistencyTypeNotSupported")
 	VFlashModuleNotSupportedReasonCacheBlockSizeNotSupported       = VFlashModuleNotSupportedReason("CacheBlockSizeNotSupported")
@@ -2462,7 +2462,7 @@ func init() {
 
 type VMotionCompatibilityType string
 
-var (
+const (
 	VMotionCompatibilityTypeCpu      = VMotionCompatibilityType("cpu")
 	VMotionCompatibilityTypeSoftware = VMotionCompatibilityType("software")
 )
@@ -2473,7 +2473,7 @@ func init() {
 
 type VMwareDVSTeamingMatchStatus string
 
-var (
+const (
 	VMwareDVSTeamingMatchStatusIphashMatch       = VMwareDVSTeamingMatchStatus("iphashMatch")
 	VMwareDVSTeamingMatchStatusNonIphashMatch    = VMwareDVSTeamingMatchStatus("nonIphashMatch")
 	VMwareDVSTeamingMatchStatusIphashMismatch    = VMwareDVSTeamingMatchStatus("iphashMismatch")
@@ -2486,7 +2486,7 @@ func init() {
 
 type VMwareDVSVspanSessionType string
 
-var (
+const (
 	VMwareDVSVspanSessionTypeMixedDestMirror                = VMwareDVSVspanSessionType("mixedDestMirror")
 	VMwareDVSVspanSessionTypeDvPortMirror                   = VMwareDVSVspanSessionType("dvPortMirror")
 	VMwareDVSVspanSessionTypeRemoteMirrorSource             = VMwareDVSVspanSessionType("remoteMirrorSource")
@@ -2500,7 +2500,7 @@ func init() {
 
 type VMwareDvsLacpApiVersion string
 
-var (
+const (
 	VMwareDvsLacpApiVersionSingleLag   = VMwareDvsLacpApiVersion("singleLag")
 	VMwareDvsLacpApiVersionMultipleLag = VMwareDvsLacpApiVersion("multipleLag")
 )
@@ -2511,7 +2511,7 @@ func init() {
 
 type VMwareDvsLacpLoadBalanceAlgorithm string
 
-var (
+const (
 	VMwareDvsLacpLoadBalanceAlgorithmSrcMac                  = VMwareDvsLacpLoadBalanceAlgorithm("srcMac")
 	VMwareDvsLacpLoadBalanceAlgorithmDestMac                 = VMwareDvsLacpLoadBalanceAlgorithm("destMac")
 	VMwareDvsLacpLoadBalanceAlgorithmSrcDestMac              = VMwareDvsLacpLoadBalanceAlgorithm("srcDestMac")
@@ -2540,7 +2540,7 @@ func init() {
 
 type VMwareUplinkLacpMode string
 
-var (
+const (
 	VMwareUplinkLacpModeActive  = VMwareUplinkLacpMode("active")
 	VMwareUplinkLacpModePassive = VMwareUplinkLacpMode("passive")
 )
@@ -2551,7 +2551,7 @@ func init() {
 
 type ValidateMigrationTestType string
 
-var (
+const (
 	ValidateMigrationTestTypeSourceTests            = ValidateMigrationTestType("sourceTests")
 	ValidateMigrationTestTypeCompatibilityTests     = ValidateMigrationTestType("compatibilityTests")
 	ValidateMigrationTestTypeDiskAccessibilityTests = ValidateMigrationTestType("diskAccessibilityTests")
@@ -2564,7 +2564,7 @@ func init() {
 
 type VirtualAppVAppState string
 
-var (
+const (
 	VirtualAppVAppStateStarted  = VirtualAppVAppState("started")
 	VirtualAppVAppStateStopped  = VirtualAppVAppState("stopped")
 	VirtualAppVAppStateStarting = VirtualAppVAppState("starting")
@@ -2577,7 +2577,7 @@ func init() {
 
 type VirtualDeviceConfigSpecFileOperation string
 
-var (
+const (
 	VirtualDeviceConfigSpecFileOperationCreate  = VirtualDeviceConfigSpecFileOperation("create")
 	VirtualDeviceConfigSpecFileOperationDestroy = VirtualDeviceConfigSpecFileOperation("destroy")
 	VirtualDeviceConfigSpecFileOperationReplace = VirtualDeviceConfigSpecFileOperation("replace")
@@ -2589,7 +2589,7 @@ func init() {
 
 type VirtualDeviceConfigSpecOperation string
 
-var (
+const (
 	VirtualDeviceConfigSpecOperationAdd    = VirtualDeviceConfigSpecOperation("add")
 	VirtualDeviceConfigSpecOperationRemove = VirtualDeviceConfigSpecOperation("remove")
 	VirtualDeviceConfigSpecOperationEdit   = VirtualDeviceConfigSpecOperation("edit")
@@ -2601,7 +2601,7 @@ func init() {
 
 type VirtualDeviceConnectInfoStatus string
 
-var (
+const (
 	VirtualDeviceConnectInfoStatusOk                 = VirtualDeviceConnectInfoStatus("ok")
 	VirtualDeviceConnectInfoStatusRecoverableError   = VirtualDeviceConnectInfoStatus("recoverableError")
 	VirtualDeviceConnectInfoStatusUnrecoverableError = VirtualDeviceConnectInfoStatus("unrecoverableError")
@@ -2614,7 +2614,7 @@ func init() {
 
 type VirtualDeviceFileExtension string
 
-var (
+const (
 	VirtualDeviceFileExtensionIso  = VirtualDeviceFileExtension("iso")
 	VirtualDeviceFileExtensionFlp  = VirtualDeviceFileExtension("flp")
 	VirtualDeviceFileExtensionVmdk = VirtualDeviceFileExtension("vmdk")
@@ -2628,7 +2628,7 @@ func init() {
 
 type VirtualDeviceURIBackingOptionDirection string
 
-var (
+const (
 	VirtualDeviceURIBackingOptionDirectionServer = VirtualDeviceURIBackingOptionDirection("server")
 	VirtualDeviceURIBackingOptionDirectionClient = VirtualDeviceURIBackingOptionDirection("client")
 )
@@ -2639,7 +2639,7 @@ func init() {
 
 type VirtualDiskAdapterType string
 
-var (
+const (
 	VirtualDiskAdapterTypeIde      = VirtualDiskAdapterType("ide")
 	VirtualDiskAdapterTypeBusLogic = VirtualDiskAdapterType("busLogic")
 	VirtualDiskAdapterTypeLsiLogic = VirtualDiskAdapterType("lsiLogic")
@@ -2651,7 +2651,7 @@ func init() {
 
 type VirtualDiskCompatibilityMode string
 
-var (
+const (
 	VirtualDiskCompatibilityModeVirtualMode  = VirtualDiskCompatibilityMode("virtualMode")
 	VirtualDiskCompatibilityModePhysicalMode = VirtualDiskCompatibilityMode("physicalMode")
 )
@@ -2662,7 +2662,7 @@ func init() {
 
 type VirtualDiskDeltaDiskFormat string
 
-var (
+const (
 	VirtualDiskDeltaDiskFormatRedoLogFormat  = VirtualDiskDeltaDiskFormat("redoLogFormat")
 	VirtualDiskDeltaDiskFormatNativeFormat   = VirtualDiskDeltaDiskFormat("nativeFormat")
 	VirtualDiskDeltaDiskFormatSeSparseFormat = VirtualDiskDeltaDiskFormat("seSparseFormat")
@@ -2674,7 +2674,7 @@ func init() {
 
 type VirtualDiskMode string
 
-var (
+const (
 	VirtualDiskModePersistent                = VirtualDiskMode("persistent")
 	VirtualDiskModeNonpersistent             = VirtualDiskMode("nonpersistent")
 	VirtualDiskModeUndoable                  = VirtualDiskMode("undoable")
@@ -2689,7 +2689,7 @@ func init() {
 
 type VirtualDiskType string
 
-var (
+const (
 	VirtualDiskTypePreallocated     = VirtualDiskType("preallocated")
 	VirtualDiskTypeThin             = VirtualDiskType("thin")
 	VirtualDiskTypeSeSparse         = VirtualDiskType("seSparse")
@@ -2711,7 +2711,7 @@ func init() {
 
 type VirtualDiskVFlashCacheConfigInfoCacheConsistencyType string
 
-var (
+const (
 	VirtualDiskVFlashCacheConfigInfoCacheConsistencyTypeStrong = VirtualDiskVFlashCacheConfigInfoCacheConsistencyType("strong")
 	VirtualDiskVFlashCacheConfigInfoCacheConsistencyTypeWeak   = VirtualDiskVFlashCacheConfigInfoCacheConsistencyType("weak")
 )
@@ -2722,7 +2722,7 @@ func init() {
 
 type VirtualDiskVFlashCacheConfigInfoCacheMode string
 
-var (
+const (
 	VirtualDiskVFlashCacheConfigInfoCacheModeWrite_thru = VirtualDiskVFlashCacheConfigInfoCacheMode("write_thru")
 	VirtualDiskVFlashCacheConfigInfoCacheModeWrite_back = VirtualDiskVFlashCacheConfigInfoCacheMode("write_back")
 )
@@ -2733,7 +2733,7 @@ func init() {
 
 type VirtualEthernetCardLegacyNetworkDeviceName string
 
-var (
+const (
 	VirtualEthernetCardLegacyNetworkDeviceNameBridged  = VirtualEthernetCardLegacyNetworkDeviceName("bridged")
 	VirtualEthernetCardLegacyNetworkDeviceNameNat      = VirtualEthernetCardLegacyNetworkDeviceName("nat")
 	VirtualEthernetCardLegacyNetworkDeviceNameHostonly = VirtualEthernetCardLegacyNetworkDeviceName("hostonly")
@@ -2745,7 +2745,7 @@ func init() {
 
 type VirtualEthernetCardMacType string
 
-var (
+const (
 	VirtualEthernetCardMacTypeManual    = VirtualEthernetCardMacType("manual")
 	VirtualEthernetCardMacTypeGenerated = VirtualEthernetCardMacType("generated")
 	VirtualEthernetCardMacTypeAssigned  = VirtualEthernetCardMacType("assigned")
@@ -2757,7 +2757,7 @@ func init() {
 
 type VirtualMachineAppHeartbeatStatusType string
 
-var (
+const (
 	VirtualMachineAppHeartbeatStatusTypeAppStatusGray  = VirtualMachineAppHeartbeatStatusType("appStatusGray")
 	VirtualMachineAppHeartbeatStatusTypeAppStatusGreen = VirtualMachineAppHeartbeatStatusType("appStatusGreen")
 	VirtualMachineAppHeartbeatStatusTypeAppStatusRed   = VirtualMachineAppHeartbeatStatusType("appStatusRed")
@@ -2769,7 +2769,7 @@ func init() {
 
 type VirtualMachineConfigInfoNpivWwnType string
 
-var (
+const (
 	VirtualMachineConfigInfoNpivWwnTypeVc       = VirtualMachineConfigInfoNpivWwnType("vc")
 	VirtualMachineConfigInfoNpivWwnTypeHost     = VirtualMachineConfigInfoNpivWwnType("host")
 	VirtualMachineConfigInfoNpivWwnTypeExternal = VirtualMachineConfigInfoNpivWwnType("external")
@@ -2781,7 +2781,7 @@ func init() {
 
 type VirtualMachineConfigInfoSwapPlacementType string
 
-var (
+const (
 	VirtualMachineConfigInfoSwapPlacementTypeInherit     = VirtualMachineConfigInfoSwapPlacementType("inherit")
 	VirtualMachineConfigInfoSwapPlacementTypeVmDirectory = VirtualMachineConfigInfoSwapPlacementType("vmDirectory")
 	VirtualMachineConfigInfoSwapPlacementTypeHostLocal   = VirtualMachineConfigInfoSwapPlacementType("hostLocal")
@@ -2793,7 +2793,7 @@ func init() {
 
 type VirtualMachineConfigSpecNpivWwnOp string
 
-var (
+const (
 	VirtualMachineConfigSpecNpivWwnOpGenerate = VirtualMachineConfigSpecNpivWwnOp("generate")
 	VirtualMachineConfigSpecNpivWwnOpSet      = VirtualMachineConfigSpecNpivWwnOp("set")
 	VirtualMachineConfigSpecNpivWwnOpRemove   = VirtualMachineConfigSpecNpivWwnOp("remove")
@@ -2806,7 +2806,7 @@ func init() {
 
 type VirtualMachineConnectionState string
 
-var (
+const (
 	VirtualMachineConnectionStateConnected    = VirtualMachineConnectionState("connected")
 	VirtualMachineConnectionStateDisconnected = VirtualMachineConnectionState("disconnected")
 	VirtualMachineConnectionStateOrphaned     = VirtualMachineConnectionState("orphaned")
@@ -2820,7 +2820,7 @@ func init() {
 
 type VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther string
 
-var (
+const (
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOtherVmNptIncompatibleHost    = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther("vmNptIncompatibleHost")
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOtherVmNptIncompatibleNetwork = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther("vmNptIncompatibleNetwork")
 )
@@ -2831,7 +2831,7 @@ func init() {
 
 type VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm string
 
-var (
+const (
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleGuest                      = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm("vmNptIncompatibleGuest")
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleGuestDriver                = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm("vmNptIncompatibleGuestDriver")
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleAdapterType                = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm("vmNptIncompatibleAdapterType")
@@ -2854,7 +2854,7 @@ func init() {
 
 type VirtualMachineFaultToleranceState string
 
-var (
+const (
 	VirtualMachineFaultToleranceStateNotConfigured = VirtualMachineFaultToleranceState("notConfigured")
 	VirtualMachineFaultToleranceStateDisabled      = VirtualMachineFaultToleranceState("disabled")
 	VirtualMachineFaultToleranceStateEnabled       = VirtualMachineFaultToleranceState("enabled")
@@ -2869,7 +2869,7 @@ func init() {
 
 type VirtualMachineFileLayoutExFileType string
 
-var (
+const (
 	VirtualMachineFileLayoutExFileTypeConfig               = VirtualMachineFileLayoutExFileType("config")
 	VirtualMachineFileLayoutExFileTypeExtendedConfig       = VirtualMachineFileLayoutExFileType("extendedConfig")
 	VirtualMachineFileLayoutExFileTypeDiskDescriptor       = VirtualMachineFileLayoutExFileType("diskDescriptor")
@@ -2897,7 +2897,7 @@ func init() {
 
 type VirtualMachineFlagInfoMonitorType string
 
-var (
+const (
 	VirtualMachineFlagInfoMonitorTypeRelease = VirtualMachineFlagInfoMonitorType("release")
 	VirtualMachineFlagInfoMonitorTypeDebug   = VirtualMachineFlagInfoMonitorType("debug")
 	VirtualMachineFlagInfoMonitorTypeStats   = VirtualMachineFlagInfoMonitorType("stats")
@@ -2909,7 +2909,7 @@ func init() {
 
 type VirtualMachineFlagInfoVirtualExecUsage string
 
-var (
+const (
 	VirtualMachineFlagInfoVirtualExecUsageHvAuto = VirtualMachineFlagInfoVirtualExecUsage("hvAuto")
 	VirtualMachineFlagInfoVirtualExecUsageHvOn   = VirtualMachineFlagInfoVirtualExecUsage("hvOn")
 	VirtualMachineFlagInfoVirtualExecUsageHvOff  = VirtualMachineFlagInfoVirtualExecUsage("hvOff")
@@ -2921,7 +2921,7 @@ func init() {
 
 type VirtualMachineFlagInfoVirtualMmuUsage string
 
-var (
+const (
 	VirtualMachineFlagInfoVirtualMmuUsageAutomatic = VirtualMachineFlagInfoVirtualMmuUsage("automatic")
 	VirtualMachineFlagInfoVirtualMmuUsageOn        = VirtualMachineFlagInfoVirtualMmuUsage("on")
 	VirtualMachineFlagInfoVirtualMmuUsageOff       = VirtualMachineFlagInfoVirtualMmuUsage("off")
@@ -2933,7 +2933,7 @@ func init() {
 
 type VirtualMachineGuestOsFamily string
 
-var (
+const (
 	VirtualMachineGuestOsFamilyWindowsGuest      = VirtualMachineGuestOsFamily("windowsGuest")
 	VirtualMachineGuestOsFamilyLinuxGuest        = VirtualMachineGuestOsFamily("linuxGuest")
 	VirtualMachineGuestOsFamilyNetwareGuest      = VirtualMachineGuestOsFamily("netwareGuest")
@@ -2948,7 +2948,7 @@ func init() {
 
 type VirtualMachineGuestOsIdentifier string
 
-var (
+const (
 	VirtualMachineGuestOsIdentifierDosGuest                = VirtualMachineGuestOsIdentifier("dosGuest")
 	VirtualMachineGuestOsIdentifierWin31Guest              = VirtualMachineGuestOsIdentifier("win31Guest")
 	VirtualMachineGuestOsIdentifierWin95Guest              = VirtualMachineGuestOsIdentifier("win95Guest")
@@ -3079,7 +3079,7 @@ func init() {
 
 type VirtualMachineGuestState string
 
-var (
+const (
 	VirtualMachineGuestStateRunning      = VirtualMachineGuestState("running")
 	VirtualMachineGuestStateShuttingDown = VirtualMachineGuestState("shuttingDown")
 	VirtualMachineGuestStateResetting    = VirtualMachineGuestState("resetting")
@@ -3094,7 +3094,7 @@ func init() {
 
 type VirtualMachineHtSharing string
 
-var (
+const (
 	VirtualMachineHtSharingAny      = VirtualMachineHtSharing("any")
 	VirtualMachineHtSharingNone     = VirtualMachineHtSharing("none")
 	VirtualMachineHtSharingInternal = VirtualMachineHtSharing("internal")
@@ -3106,7 +3106,7 @@ func init() {
 
 type VirtualMachineMemoryAllocationPolicy string
 
-var (
+const (
 	VirtualMachineMemoryAllocationPolicySwapNone = VirtualMachineMemoryAllocationPolicy("swapNone")
 	VirtualMachineMemoryAllocationPolicySwapSome = VirtualMachineMemoryAllocationPolicy("swapSome")
 	VirtualMachineMemoryAllocationPolicySwapMost = VirtualMachineMemoryAllocationPolicy("swapMost")
@@ -3118,7 +3118,7 @@ func init() {
 
 type VirtualMachineMetadataManagerVmMetadataOp string
 
-var (
+const (
 	VirtualMachineMetadataManagerVmMetadataOpUpdate = VirtualMachineMetadataManagerVmMetadataOp("Update")
 	VirtualMachineMetadataManagerVmMetadataOpRemove = VirtualMachineMetadataManagerVmMetadataOp("Remove")
 )
@@ -3129,7 +3129,7 @@ func init() {
 
 type VirtualMachineMetadataManagerVmMetadataOwnerOwner string
 
-var (
+const (
 	VirtualMachineMetadataManagerVmMetadataOwnerOwnerComVmwareVsphereHA = VirtualMachineMetadataManagerVmMetadataOwnerOwner("ComVmwareVsphereHA")
 )
 
@@ -3139,7 +3139,7 @@ func init() {
 
 type VirtualMachineMovePriority string
 
-var (
+const (
 	VirtualMachineMovePriorityLowPriority     = VirtualMachineMovePriority("lowPriority")
 	VirtualMachineMovePriorityHighPriority    = VirtualMachineMovePriority("highPriority")
 	VirtualMachineMovePriorityDefaultPriority = VirtualMachineMovePriority("defaultPriority")
@@ -3151,7 +3151,7 @@ func init() {
 
 type VirtualMachineNeedSecondaryReason string
 
-var (
+const (
 	VirtualMachineNeedSecondaryReasonInitializing           = VirtualMachineNeedSecondaryReason("initializing")
 	VirtualMachineNeedSecondaryReasonDivergence             = VirtualMachineNeedSecondaryReason("divergence")
 	VirtualMachineNeedSecondaryReasonLostConnection         = VirtualMachineNeedSecondaryReason("lostConnection")
@@ -3166,7 +3166,7 @@ func init() {
 
 type VirtualMachinePowerOffBehavior string
 
-var (
+const (
 	VirtualMachinePowerOffBehaviorPowerOff = VirtualMachinePowerOffBehavior("powerOff")
 	VirtualMachinePowerOffBehaviorRevert   = VirtualMachinePowerOffBehavior("revert")
 	VirtualMachinePowerOffBehaviorPrompt   = VirtualMachinePowerOffBehavior("prompt")
@@ -3178,7 +3178,7 @@ func init() {
 
 type VirtualMachinePowerOpType string
 
-var (
+const (
 	VirtualMachinePowerOpTypeSoft   = VirtualMachinePowerOpType("soft")
 	VirtualMachinePowerOpTypeHard   = VirtualMachinePowerOpType("hard")
 	VirtualMachinePowerOpTypePreset = VirtualMachinePowerOpType("preset")
@@ -3190,7 +3190,7 @@ func init() {
 
 type VirtualMachinePowerState string
 
-var (
+const (
 	VirtualMachinePowerStatePoweredOff = VirtualMachinePowerState("poweredOff")
 	VirtualMachinePowerStatePoweredOn  = VirtualMachinePowerState("poweredOn")
 	VirtualMachinePowerStateSuspended  = VirtualMachinePowerState("suspended")
@@ -3202,7 +3202,7 @@ func init() {
 
 type VirtualMachineRecordReplayState string
 
-var (
+const (
 	VirtualMachineRecordReplayStateRecording = VirtualMachineRecordReplayState("recording")
 	VirtualMachineRecordReplayStateReplaying = VirtualMachineRecordReplayState("replaying")
 	VirtualMachineRecordReplayStateInactive  = VirtualMachineRecordReplayState("inactive")
@@ -3214,7 +3214,7 @@ func init() {
 
 type VirtualMachineRelocateDiskMoveOptions string
 
-var (
+const (
 	VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndAllowSharing    = VirtualMachineRelocateDiskMoveOptions("moveAllDiskBackingsAndAllowSharing")
 	VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndDisallowSharing = VirtualMachineRelocateDiskMoveOptions("moveAllDiskBackingsAndDisallowSharing")
 	VirtualMachineRelocateDiskMoveOptionsMoveChildMostDiskBacking              = VirtualMachineRelocateDiskMoveOptions("moveChildMostDiskBacking")
@@ -3228,7 +3228,7 @@ func init() {
 
 type VirtualMachineRelocateTransformation string
 
-var (
+const (
 	VirtualMachineRelocateTransformationFlat   = VirtualMachineRelocateTransformation("flat")
 	VirtualMachineRelocateTransformationSparse = VirtualMachineRelocateTransformation("sparse")
 )
@@ -3239,7 +3239,7 @@ func init() {
 
 type VirtualMachineScsiPassthroughType string
 
-var (
+const (
 	VirtualMachineScsiPassthroughTypeDisk      = VirtualMachineScsiPassthroughType("disk")
 	VirtualMachineScsiPassthroughTypeTape      = VirtualMachineScsiPassthroughType("tape")
 	VirtualMachineScsiPassthroughTypePrinter   = VirtualMachineScsiPassthroughType("printer")
@@ -3260,7 +3260,7 @@ func init() {
 
 type VirtualMachineStandbyActionType string
 
-var (
+const (
 	VirtualMachineStandbyActionTypeCheckpoint     = VirtualMachineStandbyActionType("checkpoint")
 	VirtualMachineStandbyActionTypePowerOnSuspend = VirtualMachineStandbyActionType("powerOnSuspend")
 )
@@ -3271,7 +3271,7 @@ func init() {
 
 type VirtualMachineTargetInfoConfigurationTag string
 
-var (
+const (
 	VirtualMachineTargetInfoConfigurationTagCompliant   = VirtualMachineTargetInfoConfigurationTag("compliant")
 	VirtualMachineTargetInfoConfigurationTagClusterWide = VirtualMachineTargetInfoConfigurationTag("clusterWide")
 )
@@ -3282,7 +3282,7 @@ func init() {
 
 type VirtualMachineTicketType string
 
-var (
+const (
 	VirtualMachineTicketTypeMks          = VirtualMachineTicketType("mks")
 	VirtualMachineTicketTypeDevice       = VirtualMachineTicketType("device")
 	VirtualMachineTicketTypeGuestControl = VirtualMachineTicketType("guestControl")
@@ -3294,7 +3294,7 @@ func init() {
 
 type VirtualMachineToolsRunningStatus string
 
-var (
+const (
 	VirtualMachineToolsRunningStatusGuestToolsNotRunning       = VirtualMachineToolsRunningStatus("guestToolsNotRunning")
 	VirtualMachineToolsRunningStatusGuestToolsRunning          = VirtualMachineToolsRunningStatus("guestToolsRunning")
 	VirtualMachineToolsRunningStatusGuestToolsExecutingScripts = VirtualMachineToolsRunningStatus("guestToolsExecutingScripts")
@@ -3306,7 +3306,7 @@ func init() {
 
 type VirtualMachineToolsStatus string
 
-var (
+const (
 	VirtualMachineToolsStatusToolsNotInstalled = VirtualMachineToolsStatus("toolsNotInstalled")
 	VirtualMachineToolsStatusToolsNotRunning   = VirtualMachineToolsStatus("toolsNotRunning")
 	VirtualMachineToolsStatusToolsOld          = VirtualMachineToolsStatus("toolsOld")
@@ -3319,7 +3319,7 @@ func init() {
 
 type VirtualMachineToolsVersionStatus string
 
-var (
+const (
 	VirtualMachineToolsVersionStatusGuestToolsNotInstalled = VirtualMachineToolsVersionStatus("guestToolsNotInstalled")
 	VirtualMachineToolsVersionStatusGuestToolsNeedUpgrade  = VirtualMachineToolsVersionStatus("guestToolsNeedUpgrade")
 	VirtualMachineToolsVersionStatusGuestToolsCurrent      = VirtualMachineToolsVersionStatus("guestToolsCurrent")
@@ -3337,7 +3337,7 @@ func init() {
 
 type VirtualMachineUsbInfoFamily string
 
-var (
+const (
 	VirtualMachineUsbInfoFamilyAudio           = VirtualMachineUsbInfoFamily("audio")
 	VirtualMachineUsbInfoFamilyHid             = VirtualMachineUsbInfoFamily("hid")
 	VirtualMachineUsbInfoFamilyHid_bootable    = VirtualMachineUsbInfoFamily("hid_bootable")
@@ -3365,7 +3365,7 @@ func init() {
 
 type VirtualMachineUsbInfoSpeed string
 
-var (
+const (
 	VirtualMachineUsbInfoSpeedLow          = VirtualMachineUsbInfoSpeed("low")
 	VirtualMachineUsbInfoSpeedFull         = VirtualMachineUsbInfoSpeed("full")
 	VirtualMachineUsbInfoSpeedHigh         = VirtualMachineUsbInfoSpeed("high")
@@ -3379,7 +3379,7 @@ func init() {
 
 type VirtualMachineVideoCardUse3dRenderer string
 
-var (
+const (
 	VirtualMachineVideoCardUse3dRendererAutomatic = VirtualMachineVideoCardUse3dRenderer("automatic")
 	VirtualMachineVideoCardUse3dRendererSoftware  = VirtualMachineVideoCardUse3dRenderer("software")
 	VirtualMachineVideoCardUse3dRendererHardware  = VirtualMachineVideoCardUse3dRenderer("hardware")
@@ -3391,7 +3391,7 @@ func init() {
 
 type VirtualPointingDeviceHostChoice string
 
-var (
+const (
 	VirtualPointingDeviceHostChoiceAutodetect           = VirtualPointingDeviceHostChoice("autodetect")
 	VirtualPointingDeviceHostChoiceIntellimouseExplorer = VirtualPointingDeviceHostChoice("intellimouseExplorer")
 	VirtualPointingDeviceHostChoiceIntellimousePs2      = VirtualPointingDeviceHostChoice("intellimousePs2")
@@ -3408,7 +3408,7 @@ func init() {
 
 type VirtualSCSISharing string
 
-var (
+const (
 	VirtualSCSISharingNoSharing       = VirtualSCSISharing("noSharing")
 	VirtualSCSISharingVirtualSharing  = VirtualSCSISharing("virtualSharing")
 	VirtualSCSISharingPhysicalSharing = VirtualSCSISharing("physicalSharing")
@@ -3420,7 +3420,7 @@ func init() {
 
 type VirtualSerialPortEndPoint string
 
-var (
+const (
 	VirtualSerialPortEndPointClient = VirtualSerialPortEndPoint("client")
 	VirtualSerialPortEndPointServer = VirtualSerialPortEndPoint("server")
 )
@@ -3431,7 +3431,7 @@ func init() {
 
 type VmDasBeingResetEventReasonCode string
 
-var (
+const (
 	VmDasBeingResetEventReasonCodeVmtoolsHeartbeatFailure  = VmDasBeingResetEventReasonCode("vmtoolsHeartbeatFailure")
 	VmDasBeingResetEventReasonCodeAppHeartbeatFailure      = VmDasBeingResetEventReasonCode("appHeartbeatFailure")
 	VmDasBeingResetEventReasonCodeAppImmediateResetRequest = VmDasBeingResetEventReasonCode("appImmediateResetRequest")
@@ -3443,7 +3443,7 @@ func init() {
 
 type VmFailedStartingSecondaryEventFailureReason string
 
-var (
+const (
 	VmFailedStartingSecondaryEventFailureReasonIncompatibleHost = VmFailedStartingSecondaryEventFailureReason("incompatibleHost")
 	VmFailedStartingSecondaryEventFailureReasonLoginFailed      = VmFailedStartingSecondaryEventFailureReason("loginFailed")
 	VmFailedStartingSecondaryEventFailureReasonRegisterVmFailed = VmFailedStartingSecondaryEventFailureReason("registerVmFailed")
@@ -3456,7 +3456,7 @@ func init() {
 
 type VmFaultToleranceConfigIssueReasonForIssue string
 
-var (
+const (
 	VmFaultToleranceConfigIssueReasonForIssueHaNotEnabled                   = VmFaultToleranceConfigIssueReasonForIssue("haNotEnabled")
 	VmFaultToleranceConfigIssueReasonForIssueMoreThanOneSecondary           = VmFaultToleranceConfigIssueReasonForIssue("moreThanOneSecondary")
 	VmFaultToleranceConfigIssueReasonForIssueRecordReplayNotSupported       = VmFaultToleranceConfigIssueReasonForIssue("recordReplayNotSupported")
@@ -3487,7 +3487,7 @@ func init() {
 
 type VmFaultToleranceInvalidFileBackingDeviceType string
 
-var (
+const (
 	VmFaultToleranceInvalidFileBackingDeviceTypeVirtualFloppy       = VmFaultToleranceInvalidFileBackingDeviceType("virtualFloppy")
 	VmFaultToleranceInvalidFileBackingDeviceTypeVirtualCdrom        = VmFaultToleranceInvalidFileBackingDeviceType("virtualCdrom")
 	VmFaultToleranceInvalidFileBackingDeviceTypeVirtualSerialPort   = VmFaultToleranceInvalidFileBackingDeviceType("virtualSerialPort")
@@ -3501,7 +3501,7 @@ func init() {
 
 type VmShutdownOnIsolationEventOperation string
 
-var (
+const (
 	VmShutdownOnIsolationEventOperationShutdown   = VmShutdownOnIsolationEventOperation("shutdown")
 	VmShutdownOnIsolationEventOperationPoweredOff = VmShutdownOnIsolationEventOperation("poweredOff")
 )
@@ -3512,7 +3512,7 @@ func init() {
 
 type VmwareDistributedVirtualSwitchPvlanPortType string
 
-var (
+const (
 	VmwareDistributedVirtualSwitchPvlanPortTypePromiscuous = VmwareDistributedVirtualSwitchPvlanPortType("promiscuous")
 	VmwareDistributedVirtualSwitchPvlanPortTypeIsolated    = VmwareDistributedVirtualSwitchPvlanPortType("isolated")
 	VmwareDistributedVirtualSwitchPvlanPortTypeCommunity   = VmwareDistributedVirtualSwitchPvlanPortType("community")
@@ -3524,7 +3524,7 @@ func init() {
 
 type VsanDiskIssueType string
 
-var (
+const (
 	VsanDiskIssueTypeNonExist      = VsanDiskIssueType("nonExist")
 	VsanDiskIssueTypeStampMismatch = VsanDiskIssueType("stampMismatch")
 	VsanDiskIssueTypeUnknown       = VsanDiskIssueType("unknown")
@@ -3536,7 +3536,7 @@ func init() {
 
 type VsanHostDecommissionModeObjectAction string
 
-var (
+const (
 	VsanHostDecommissionModeObjectActionNoAction                  = VsanHostDecommissionModeObjectAction("noAction")
 	VsanHostDecommissionModeObjectActionEnsureObjectAccessibility = VsanHostDecommissionModeObjectAction("ensureObjectAccessibility")
 	VsanHostDecommissionModeObjectActionEvacuateAllData           = VsanHostDecommissionModeObjectAction("evacuateAllData")
@@ -3548,7 +3548,7 @@ func init() {
 
 type VsanHostDiskResultState string
 
-var (
+const (
 	VsanHostDiskResultStateInUse      = VsanHostDiskResultState("inUse")
 	VsanHostDiskResultStateEligible   = VsanHostDiskResultState("eligible")
 	VsanHostDiskResultStateIneligible = VsanHostDiskResultState("ineligible")
@@ -3560,7 +3560,7 @@ func init() {
 
 type VsanHostHealthState string
 
-var (
+const (
 	VsanHostHealthStateUnknown   = VsanHostHealthState("unknown")
 	VsanHostHealthStateHealthy   = VsanHostHealthState("healthy")
 	VsanHostHealthStateUnhealthy = VsanHostHealthState("unhealthy")
@@ -3572,7 +3572,7 @@ func init() {
 
 type VsanHostNodeState string
 
-var (
+const (
 	VsanHostNodeStateError                   = VsanHostNodeState("error")
 	VsanHostNodeStateDisabled                = VsanHostNodeState("disabled")
 	VsanHostNodeStateAgent                   = VsanHostNodeState("agent")
@@ -3591,7 +3591,7 @@ func init() {
 
 type WeekOfMonth string
 
-var (
+const (
 	WeekOfMonthFirst  = WeekOfMonth("first")
 	WeekOfMonthSecond = WeekOfMonth("second")
 	WeekOfMonthThird  = WeekOfMonth("third")
@@ -3605,7 +3605,7 @@ func init() {
 
 type WillLoseHAProtectionResolution string
 
-var (
+const (
 	WillLoseHAProtectionResolutionSvmotion = WillLoseHAProtectionResolution("svmotion")
 	WillLoseHAProtectionResolutionRelocate = WillLoseHAProtectionResolution("relocate")
 )
