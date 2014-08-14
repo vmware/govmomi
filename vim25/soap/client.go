@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
 	"os"
@@ -46,7 +47,6 @@ type Client struct {
 	http.Client
 
 	u url.URL
-	c *http.Cookie
 	t map[string]reflect.Type
 }
 
@@ -59,6 +59,7 @@ func NewClient(u url.URL) *Client {
 		c.Client.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
 	}
 
+	c.Jar, _ = cookiejar.New(nil)
 	c.u.User = nil
 	c.t = types.TypeMap()
 
@@ -84,10 +85,6 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 	httpreq.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
 	httpreq.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
 
-	if c.c != nil {
-		httpreq.AddCookie(c.c)
-	}
-
 	if debug {
 		b, _ := httputil.DumpRequest(httpreq, true)
 		fmt.Printf("----------- request\n")
@@ -109,17 +106,7 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 	dec.Types = c.t
 	err = dec.Decode(res)
 	if err != nil {
-		panic(err)
-	}
-
-	cookies := httpres.Cookies()
-	for _, cookie := range cookies {
-		if cookie.Name != "vmware_soap_session" {
-			continue
-		}
-
-		c.c = cookie
-		c.c.Secure = false // Don't care
+		return err
 	}
 
 	return err
