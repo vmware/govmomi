@@ -55,7 +55,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 		case "Network":
 			panic("TODO")
 		case "Datastore":
-			panic("TODO")
+			rs = append(rs, Datastore{ManagedObjectReference: e})
 		default:
 			panic("Unknown managed entity: " + e.Type)
 		}
