@@ -16,12 +16,69 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"errors"
+
+	"github.com/vmware/govmomi/vim25/tasks"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type VirtualMachine struct {
 	types.ManagedObjectReference
 }
 
-func (d VirtualMachine) Reference() types.ManagedObjectReference {
-	return d.ManagedObjectReference
+func (v VirtualMachine) Reference() types.ManagedObjectReference {
+	return v.ManagedObjectReference
+}
+
+func (v VirtualMachine) waitForTask(t tasks.Task) error {
+	info, err := t.Wait()
+	if err != nil {
+		return err
+	}
+
+	if info.Error != nil {
+		return errors.New(info.Error.LocalizedMessage)
+	}
+
+	return nil
+}
+
+func (v VirtualMachine) PowerOn(c *Client) error {
+	req := types.PowerOnVM_Task{
+		This: v.Reference(),
+	}
+
+	task, err := tasks.PowerOnVM(c, &req)
+	if err != nil {
+		return err
+	}
+
+	return v.waitForTask(task)
+}
+
+func (v VirtualMachine) PowerOff(c *Client) error {
+	req := types.PowerOffVM_Task{
+		This: v.Reference(),
+	}
+
+	task, err := tasks.PowerOffVM(c, &req)
+	if err != nil {
+		return err
+	}
+
+	return v.waitForTask(task)
+}
+
+func (v VirtualMachine) Reset(c *Client) error {
+	req := types.ResetVM_Task{
+		This: v.Reference(),
+	}
+
+	task, err := tasks.ResetVM(c, &req)
+	if err != nil {
+		return err
+	}
+
+	return v.waitForTask(task)
 }
