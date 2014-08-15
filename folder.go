@@ -50,7 +50,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 			rs = append(rs, VirtualMachine{ManagedObjectReference: e})
 		case "VirtualApp": // Skip
 		case "ComputeResource":
-			panic("TODO")
+			rs = append(rs, ComputeResource{ManagedObjectReference: e})
 		case "Network":
 			rs = append(rs, Network{ManagedObjectReference: e})
 		case "DistributedVirtualSwitch": // Skip
