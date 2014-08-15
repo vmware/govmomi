@@ -32,7 +32,7 @@ func (f Folder) Reference() types.ManagedObjectReference {
 func (f Folder) Children(c *Client) ([]Reference, error) {
 	var mf mo.Folder
 
-	err := c.Properties(f.Reference(), []string{"childType", "childEntity"}, &mf)
+	err := c.Properties(f.Reference(), []string{"childEntity"}, &mf)
 	if err != nil {
 		return nil, err
 	}
@@ -43,19 +43,20 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 		// A folder contains managed entities, all of which are listed below.
 		switch e.Type {
 		case "Folder":
-			rs = append(rs, Folder{e})
+			rs = append(rs, Folder{ManagedObjectReference: e})
 		case "Datacenter":
-			rs = append(rs, Datacenter{e})
+			rs = append(rs, Datacenter{ManagedObjectReference: e})
 		case "VirtualMachine":
-			panic("TODO")
-		case "VirtualApp":
-			panic("TODO")
+			rs = append(rs, VirtualMachine{ManagedObjectReference: e})
+		case "VirtualApp": // Skip
 		case "ComputeResource":
-			panic("TODO")
+			rs = append(rs, ComputeResource{ManagedObjectReference: e})
 		case "Network":
-			panic("TODO")
+			rs = append(rs, Network{ManagedObjectReference: e})
+		case "DistributedVirtualSwitch": // Skip
+		case "DistributedVirtualPortgroup": // Skip
 		case "Datastore":
-			panic("TODO")
+			rs = append(rs, Datastore{ManagedObjectReference: e})
 		default:
 			panic("Unknown managed entity: " + e.Type)
 		}
