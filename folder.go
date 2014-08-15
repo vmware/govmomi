@@ -53,7 +53,9 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 		case "ComputeResource":
 			panic("TODO")
 		case "Network":
-			panic("TODO")
+			rs = append(rs, Network{ManagedObjectReference: e})
+		case "DistributedVirtualSwitch": // Skip
+		case "DistributedVirtualPortgroup": // Skip
 		case "Datastore":
 			rs = append(rs, Datastore{ManagedObjectReference: e})
 		default:
