@@ -106,3 +106,32 @@ func (c *Client) UserSession() (*types.UserSession, error) {
 
 	return sm.CurrentSession, nil
 }
+
+func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
+	ospec := types.ObjectSpec{
+		Obj:  obj,
+		Skip: false,
+	}
+
+	pspec := types.PropertySpec{
+		Type: obj.Type,
+	}
+
+	if p == nil {
+		pspec.All = true
+	} else {
+		pspec.PathSet = p
+	}
+
+	req := types.RetrieveProperties{
+		This: c.PropertyCollector,
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				ObjectSet: []types.ObjectSpec{ospec},
+				PropSet:   []types.PropertySpec{pspec},
+			},
+		},
+	}
+
+	return mo.RetrievePropertiesForRequest(c, req, dst)
+}
