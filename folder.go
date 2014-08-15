@@ -47,9 +47,8 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 		case "Datacenter":
 			rs = append(rs, Datacenter{ManagedObjectReference: e})
 		case "VirtualMachine":
-			panic("TODO")
-		case "VirtualApp":
-			panic("TODO")
+			rs = append(rs, VirtualMachine{ManagedObjectReference: e})
+		case "VirtualApp": // Skip
 		case "ComputeResource":
 			panic("TODO")
 		case "Network":
