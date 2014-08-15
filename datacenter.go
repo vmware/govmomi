@@ -16,12 +16,41 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
+)
+
+type DatacenterFolders struct {
+	VmFolder        Folder
+	HostFolder      Folder
+	DatastoreFolder Folder
+	NetworkFolder   Folder
+}
 
 type Datacenter struct {
 	types.ManagedObjectReference
 }
 
-func (f Datacenter) Reference() types.ManagedObjectReference {
-	return f.ManagedObjectReference
+func (d Datacenter) Reference() types.ManagedObjectReference {
+	return d.ManagedObjectReference
+}
+
+func (d *Datacenter) Folders(c *Client) (*DatacenterFolders, error) {
+	var md mo.Datacenter
+
+	ps := []string{"vmFolder", "hostFolder", "datastoreFolder", "networkFolder"}
+	err := c.Properties(d.Reference(), ps, &md)
+	if err != nil {
+		return nil, err
+	}
+
+	df := &DatacenterFolders{
+		VmFolder:        Folder{md.VmFolder},
+		HostFolder:      Folder{md.HostFolder},
+		DatastoreFolder: Folder{md.DatastoreFolder},
+		NetworkFolder:   Folder{md.NetworkFolder},
+	}
+
+	return df, nil
 }
