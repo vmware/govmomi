@@ -21,3 +21,30 @@ import "github.com/vmware/govmomi/vim25/types"
 type Reference interface {
 	Reference() types.ManagedObjectReference
 }
+
+func newReference(e types.ManagedObjectReference) Reference {
+	switch e.Type {
+	case "Folder":
+		return &Folder{ManagedObjectReference: e}
+	case "Datacenter":
+		return &Datacenter{ManagedObjectReference: e}
+	case "VirtualMachine":
+		return &VirtualMachine{ManagedObjectReference: e}
+	case "VirtualApp": // Skip
+		return nil
+	case "ComputeResource":
+		return &ComputeResource{ManagedObjectReference: e}
+	case "HostSystem":
+		return &HostSystem{ManagedObjectReference: e}
+	case "Network":
+		return &Network{ManagedObjectReference: e}
+	case "DistributedVirtualSwitch": // Skip
+		return nil
+	case "DistributedVirtualPortgroup": // Skip
+		return nil
+	case "Datastore":
+		return &Datastore{ManagedObjectReference: e}
+	default:
+		panic("Unknown managed entity: " + e.Type)
+	}
+}
