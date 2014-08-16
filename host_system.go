@@ -16,34 +16,12 @@ limitations under the License.
 
 package govmomi
 
-import (
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
-)
+import "github.com/vmware/govmomi/vim25/types"
 
-type Folder struct {
+type HostSystem struct {
 	types.ManagedObjectReference
 }
 
-func (f Folder) Reference() types.ManagedObjectReference {
-	return f.ManagedObjectReference
-}
-
-func (f Folder) Children(c *Client) ([]Reference, error) {
-	var mf mo.Folder
-
-	err := c.Properties(f.Reference(), []string{"childEntity"}, &mf)
-	if err != nil {
-		return nil, err
-	}
-
-	var rs []Reference
-
-	for _, e := range mf.ChildEntity {
-		if r := newReference(e); r != nil {
-			rs = append(rs, r)
-		}
-	}
-
-	return rs, nil
+func (h HostSystem) Reference() types.ManagedObjectReference {
+	return h.ManagedObjectReference
 }

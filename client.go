@@ -135,3 +135,11 @@ func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst in
 
 	return mo.RetrievePropertiesForRequest(c, req, dst)
 }
+
+func (c *Client) Folder() Folder {
+	return Folder{c.RootFolder}
+}
+
+func (c *Client) Search() Search {
+	return Search{c}
+}
