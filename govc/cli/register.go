@@ -14,27 +14,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package version
+package cli
 
 import (
-	"flag"
 	"fmt"
-
-	"github.com/vmware/govmomi/govc/cli"
+	"path/filepath"
+	"reflect"
 )
 
-type version struct {
+var commands = map[string]Command{}
+
+func name(c Command) string {
+	t := reflect.TypeOf(c).Elem()
+	base := filepath.Base(t.PkgPath())
+	if base == t.Name() {
+		return t.Name()
+	}
+	return fmt.Sprintf("%s.%s", base, t.Name())
 }
 
-func init() {
-	cli.Register(&version{})
-}
-
-func (c *version) Register(f *flag.FlagSet) {}
-
-func (c *version) Process() error { return nil }
-
-func (c *version) Run(f *flag.FlagSet) error {
-	fmt.Println("govc version 0.0.1-dev")
-	return nil
+func Register(c Command) {
+	commands[name(c)] = c
 }

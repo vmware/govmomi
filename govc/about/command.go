@@ -24,14 +24,19 @@ import (
 )
 
 type about struct {
-	flag.FlagSet
+	Client *cli.Client
 }
 
 func init() {
 	cli.Register(&about{})
 }
 
-func (c *about) Run() error {
-	fmt.Printf("%#v\n", cli.Client.About)
+func (c *about) Register(f *flag.FlagSet) {}
+
+func (c *about) Process() error { return nil }
+
+func (c *about) Run(f *flag.FlagSet) error {
+	fmt.Printf("%#v\n", c.Client.About)
+
 	return nil
 }

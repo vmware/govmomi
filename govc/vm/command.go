@@ -17,6 +17,7 @@ limitations under the License.
 package vm
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 
@@ -24,11 +25,15 @@ import (
 )
 
 type vm struct {
-	flag.FlagSet
+	Client *cli.Client
 }
 
+func (v *vm) Register(f *flag.FlagSet) {}
+
+func (v *vm) Process() error { return nil }
+
 type create struct {
-	vm
+	VM *vm
 
 	pool      string
 	host      string
@@ -38,46 +43,68 @@ type create struct {
 	guestID   string
 }
 
-type power struct {
-	vm
-}
-
 func init() {
 	cli.Register(&create{})
 	cli.Register(&power{})
 }
 
-func (c *vm) Name() string {
-	return c.Args()[0]
+func (c *create) Register(f *flag.FlagSet) {
+	f.StringVar(&c.pool, "p", "", "Resource pool")
+	f.StringVar(&c.host, "o", "", "Host")
+	f.StringVar(&c.datastore, "d", "", "Datastore")
+	f.IntVar(&c.memory, "m", 128, "Size in MB of memory")
+	f.IntVar(&c.cpus, "c", 1, "Number of CPUs")
+	f.StringVar(&c.guestID, "g", "otherGuest", "Guest OS")
 }
 
-func (c *create) Parse(args []string) error {
-	c.StringVar(&c.pool, "p", "", "Resource pool")
-	c.StringVar(&c.host, "o", "", "Host")
-	c.StringVar(&c.datastore, "d", "", "Datastore")
-	c.IntVar(&c.memory, "m", 128, "Size in MB of memory")
-	c.IntVar(&c.cpus, "c", 1, "Number of CPUs")
-	c.StringVar(&c.guestID, "g", "otherGuest", "Guest OS")
+func (c *create) Process() error { return nil }
 
-	return c.FlagSet.Parse(args)
-}
-
-func (c *create) Run() error {
-	if len(c.Args()) != 1 {
+func (c *create) Run(f *flag.FlagSet) error {
+	if len(f.Args()) != 1 {
 		return flag.ErrHelp
 	}
 
-	fmt.Printf("create %s VM '%s' with %d MB memory\n", c.guestID, c.Name(), c.memory)
+	fmt.Printf("create %s VM '%s' with %d MB memory\n", c.guestID, f.Arg(0), c.memory)
 
 	return nil
 }
 
-func (c *power) Run() error {
-	if len(c.Args()) != 1 {
+type power struct {
+	VM *vm
+
+	On  bool
+	Off bool
+}
+
+func (c *power) Register(f *flag.FlagSet) {
+	f.BoolVar(&c.On, "on", false, "Power on")
+	f.BoolVar(&c.Off, "off", false, "Power off")
+}
+
+func (c *power) Process() error {
+	if !c.On && !c.Off || (c.On && c.Off) {
+		return errors.New("specify -on OR -off")
+	}
+	return nil
+}
+
+func (c *power) PowerToString() string {
+	switch {
+	case c.On:
+		return "on"
+	case c.Off:
+		return "off"
+	default:
+		panic("invalid state")
+	}
+}
+
+func (c *power) Run(f *flag.FlagSet) error {
+	if len(f.Args()) != 1 {
 		return flag.ErrHelp
 	}
 
-	fmt.Printf("power %s VM %s\n", c.Name(), c.Arg(1))
+	fmt.Printf("power %s VM %s\n", c.PowerToString(), f.Arg(0))
 
 	return nil
 }

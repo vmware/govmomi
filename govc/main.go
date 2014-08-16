@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"fmt"
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -28,9 +27,5 @@ import (
 )
 
 func main() {
-	err := cli.Run(os.Args[1:])
-	if err != nil {
-		fmt.Fprintf(os.Stderr, "%s\n", err)
-		os.Exit(1)
-	}
+	os.Exit(cli.Run(os.Args[1:]))
 }
