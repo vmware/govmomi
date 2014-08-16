@@ -21,10 +21,11 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
 )
 
 type about struct {
-	Client *cli.Client
+	Client *flags.Client
 }
 
 func init() {

@@ -22,10 +22,11 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
 )
 
 type vm struct {
-	Client *cli.Client
+	Client *flags.Client
 }
 
 func (v *vm) Register(f *flag.FlagSet) {}
