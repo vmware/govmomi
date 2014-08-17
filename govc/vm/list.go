@@ -17,10 +17,9 @@ limitations under the License.
 package vm
 
 import (
-	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
+	"io"
 	"reflect"
 
 	"github.com/vmware/govmomi"
@@ -32,17 +31,14 @@ import (
 type list struct {
 	*flags.ClientFlag
 	*flags.DatacenterFlag
-
-	JSON bool
+	*flags.OutputFlag
 }
 
 func init() {
 	cli.Register(&list{})
 }
 
-func (c *list) Register(f *flag.FlagSet) {
-	f.BoolVar(&c.JSON, "json", false, "Enable JSON output")
-}
+func (c *list) Register(f *flag.FlagSet) {}
 
 func (c *list) Process() error { return nil }
 
@@ -93,14 +89,7 @@ func (c *list) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	if c.JSON {
-		enc := json.NewEncoder(os.Stdout)
-		enc.Encode(result)
-	} else {
-		result.Write()
-	}
-
-	return nil
+	return c.WriteResult(&result)
 }
 
 type listResult struct {
@@ -108,18 +97,30 @@ type listResult struct {
 	VirtualMachines []mo.VirtualMachine
 }
 
-func (l *listResult) Write() {
+func (l *listResult) WriteTo(w io.Writer) error {
+	var err error
+
 	if len(l.Folders) > 0 {
-		fmt.Printf("## Folders:\n")
-		for _, m := range l.Folders {
-			fmt.Printf("%s/", m.Name)
+		if _, err = fmt.Fprintf(w, "## Folders:\n"); err != nil {
+			return err
+		}
+		for _, f := range l.Folders {
+			if _, err = fmt.Fprintf(w, "%s/", f.Name); err != nil {
+				return err
+			}
 		}
 	}
 
 	if len(l.VirtualMachines) > 0 {
-		fmt.Printf("## Virtual Machines:\n")
+		if _, err = fmt.Fprintf(w, "## Virtual Machines:\n"); err != nil {
+			return err
+		}
 		for _, m := range l.VirtualMachines {
-			fmt.Printf("%s %s\n", m.Name, m.Runtime.PowerState)
+			if _, err = fmt.Fprintf(w, "%s %s\n", m.Name, m.Runtime.PowerState); err != nil {
+				return err
+			}
 		}
 	}
+
+	return nil
 }
