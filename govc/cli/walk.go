@@ -40,7 +40,14 @@ func Walk(c interface{}, ifaceType reflect.Type, fn WalkFn) error {
 
 	visited := make(map[reflect.Type]reflect.Value)
 	walker = func(c interface{}) error {
-		v := reflect.ValueOf(c).Elem()
+		v := reflect.ValueOf(c)
+		if v.Kind() == reflect.Interface {
+			v = v.Elem()
+		}
+		if v.Kind() == reflect.Ptr {
+			v = v.Elem()
+		}
+
 		t := v.Type()
 
 		for i := 0; i < t.NumField(); i++ {
@@ -69,20 +76,6 @@ func Walk(c interface{}, ifaceType reflect.Type, fn WalkFn) error {
 			// Type must be a pointer.
 			if ft.Kind() != reflect.Ptr {
 				panic(fmt.Sprintf(`field "%s" in struct "%s" must be a pointer`, ff.Name, v.Type()))
-			}
-
-			// Field must not be anonymous.
-			//
-			// Fields implementing the specified interface may not be anonymous,
-			// because it can make its parent struct implement the specified
-			// interface implicitly.
-			//
-			// This, in turn, means that the functions as specified per the interface
-			// may be called twice: once on the parent, where the calls as dispatched
-			// to this field's type, and once for the field itself.
-			//
-			if ff.Anonymous {
-				panic(fmt.Sprintf(`field "%s" in struct "%s" must not be anonymous`, ff.Name, v.Type()))
 			}
 
 			if _, ok := visited[ft]; !ok {

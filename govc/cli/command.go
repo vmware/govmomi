@@ -27,7 +27,10 @@ import (
 )
 
 type HasFlags interface {
+	// Register may be called more than once and should be idempotent.
 	Register(f *flag.FlagSet)
+
+	// Process may be called more than once and should be idempotent.
 	Process() error
 }
 
@@ -36,12 +39,6 @@ type Command interface {
 
 	Run(f *flag.FlagSet) error
 }
-
-type NoFlags struct{}
-
-func (n *NoFlags) Register(f *flag.FlagSet) {}
-
-func (n *NoFlags) Process() error { return nil }
 
 var hasFlagsType = reflect.TypeOf((*HasFlags)(nil)).Elem()
 

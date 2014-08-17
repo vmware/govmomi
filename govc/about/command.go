@@ -25,19 +25,20 @@ import (
 )
 
 type about struct {
-	Client *flags.Client
+	*flags.ClientFlag
 }
 
 func init() {
 	cli.Register(&about{})
 }
 
-func (c *about) Register(f *flag.FlagSet) {}
-
-func (c *about) Process() error { return nil }
-
 func (c *about) Run(f *flag.FlagSet) error {
-	fmt.Printf("%#v\n", c.Client.About)
+	client, err := c.Client()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%#v\n", client.About)
 
 	return nil
 }

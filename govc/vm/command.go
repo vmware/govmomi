@@ -26,15 +26,11 @@ import (
 )
 
 type vm struct {
-	Client *flags.Client
+	*flags.ClientFlag
 }
 
-func (v *vm) Register(f *flag.FlagSet) {}
-
-func (v *vm) Process() error { return nil }
-
 type create struct {
-	VM *vm
+	*vm
 
 	pool      string
 	host      string
@@ -71,7 +67,7 @@ func (c *create) Run(f *flag.FlagSet) error {
 }
 
 type power struct {
-	VM *vm
+	*vm
 
 	On  bool
 	Off bool

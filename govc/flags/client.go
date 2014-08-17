@@ -21,18 +21,21 @@ import (
 	"flag"
 	"net/url"
 	"os"
+	"sync"
 
 	"github.com/vmware/govmomi"
 )
 
 const cDescr = "ESX or vCenter URL"
 
-type Client struct {
-	*govmomi.Client
+type ClientFlag struct {
+	c *govmomi.Client
 	u *url.URL
+
+	register sync.Once
 }
 
-func (c *Client) String() string {
+func (c *ClientFlag) String() string {
 	if c.u != nil {
 		withoutCredentials := *c.u
 		withoutCredentials.User = nil
@@ -41,7 +44,7 @@ func (c *Client) String() string {
 	return ""
 }
 
-func (c *Client) Set(s string) error {
+func (c *ClientFlag) Set(s string) error {
 	var err error
 
 	c.u, err = url.Parse(s)
@@ -52,22 +55,31 @@ func (c *Client) Set(s string) error {
 	return nil
 }
 
-func (c *Client) Register(f *flag.FlagSet) {
-	c.Set(os.Getenv("GOVMOMI_URL"))
-	f.Var(c, "u", cDescr)
+func (c *ClientFlag) Register(f *flag.FlagSet) {
+	c.register.Do(func() {
+		c.Set(os.Getenv("GOVMOMI_URL"))
+		f.Var(c, "u", cDescr)
+	})
 }
 
-func (c *Client) Process() error {
-	var err error
-
+func (c *ClientFlag) Process() error {
 	if c.u == nil {
 		return errors.New("specify an " + cDescr)
 	}
 
-	c.Client, err = govmomi.NewClient(*c.u)
-	if err != nil {
-		return err
+	return nil
+}
+
+func (c *ClientFlag) Client() (*govmomi.Client, error) {
+	if c.c != nil {
+		return c.c, nil
 	}
 
-	return nil
+	client, err := govmomi.NewClient(*c.u)
+	if err != nil {
+		return nil, err
+	}
+
+	c.c = client
+	return c.c, nil
 }

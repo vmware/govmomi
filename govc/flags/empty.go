@@ -14,25 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package version
+package flags
 
-import (
-	"flag"
-	"fmt"
+import "flag"
 
-	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
-)
+type EmptyFlag struct{}
 
-type version struct {
-	*flags.EmptyFlag
-}
+func (n *EmptyFlag) Register(f *flag.FlagSet) {}
 
-func init() {
-	cli.Register(&version{})
-}
-
-func (c *version) Run(f *flag.FlagSet) error {
-	fmt.Println("govc version 0.0.1-dev")
-	return nil
-}
+func (n *EmptyFlag) Process() error { return nil }
