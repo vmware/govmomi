@@ -155,6 +155,14 @@ class Managed
       io.print "}\n\n"
     end
   end
+
+  def dump_init(io)
+    if !props.empty?
+      io.print "func init() {\n"
+      io.print "t[\"%s\"] = reflect.TypeOf((*%s)(nil)).Elem()\n" % [name, name]
+      io.print "}\n\n"
+    end
+  end
 end
 
 class Vmodl
@@ -199,7 +207,7 @@ File.open(File.join(ARGV.first, "mo/mo.go"), "w") do |io|
   vmodl.
     managed.
     sort_by { |m| m.name }.
-    each { |m| m.dump(io) }
+    each { |m| m.dump(io); m.dump_init(io); }
 end
 
 exit(0)
