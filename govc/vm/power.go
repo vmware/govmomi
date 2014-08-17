@@ -19,7 +19,6 @@ package vm
 import (
 	"errors"
 	"flag"
-	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -28,6 +27,7 @@ import (
 type power struct {
 	*flags.ClientFlag
 	*flags.DatacenterFlag
+	*flags.SearchFlag
 
 	On  bool
 	Off bool
@@ -61,11 +61,24 @@ func (c *power) PowerToString() string {
 }
 
 func (c *power) Run(f *flag.FlagSet) error {
-	if len(f.Args()) != 1 {
-		return flag.ErrHelp
+	client, err := c.Client()
+	if err != nil {
+		return err
 	}
 
-	fmt.Printf("power %s VM %s\n", c.PowerToString(), f.Arg(0))
+	vm, err := c.VirtualMachine()
+	if err != nil {
+		return err
+	}
 
-	return nil
+	switch {
+	case c.On:
+		err = vm.PowerOn(client)
+	case c.Off:
+		err = vm.PowerOff(client)
+	default:
+		panic("invalid state")
+	}
+
+	return err
 }
