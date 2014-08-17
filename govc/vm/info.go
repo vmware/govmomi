@@ -58,8 +58,15 @@ func (c *info) Run(f *flag.FlagSet) error {
 	}
 
 	var res infoResult
+	var props []string
 
-	err = client.Properties(vm.Reference(), []string{"summary"}, &res.VirtualMachine)
+	if c.OutputFlag.JSON {
+		props = nil // Load everything
+	} else {
+		props = []string{"summary"} // Load summary
+	}
+
+	err = client.Properties(vm.Reference(), props, &res.VirtualMachine)
 	if err != nil {
 		return err
 	}
