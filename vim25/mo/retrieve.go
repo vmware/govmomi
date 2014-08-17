@@ -66,7 +66,12 @@ func buildValueMap(v reflect.Value, m map[string]reflect.Value) {
 }
 
 // Returns pointer to type t.
-func objectContentToType(o types.ObjectContent, t reflect.Type) reflect.Value {
+func objectContentToType(o types.ObjectContent) reflect.Value {
+	t, ok := t[o.Obj.Type]
+	if !ok {
+		panic("unknown type: " + o.Obj.Type)
+	}
+
 	v := reflect.New(t)
 
 	// Build map of property names to assignable reflect.Value
@@ -136,17 +141,15 @@ func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrievePropert
 	}
 
 	if isSlice {
-		elemType := rt.Elem().Elem()
 		for _, p := range res.Returnval {
-			v := objectContentToType(p, elemType)
+			v := objectContentToType(p)
 			rv.Set(reflect.Append(rv, v.Elem()))
 		}
 	} else {
-		ptrType := rt.Elem()
 		switch len(res.Returnval) {
 		case 0:
 		case 1:
-			v := objectContentToType(res.Returnval[0], ptrType)
+			v := objectContentToType(res.Returnval[0])
 			rv.Set(v.Elem())
 		default:
 			// If dst is not a slice, expect to receive 0 or 1 results
