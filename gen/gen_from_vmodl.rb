@@ -145,7 +145,7 @@ class Managed
       case @data["wsdl_base"]
       when nil, "ManagedObject", "View"
         include_ref_getter = true
-        io.print "Ref types.ManagedObjectReference\n\n"
+        io.print "Self types.ManagedObjectReference\n\n"
       else
         io.print "%s\n\n" % @data["wsdl_base"]
       end
@@ -157,7 +157,7 @@ class Managed
 
       if include_ref_getter
         io.print "func (m %s) Reference() types.ManagedObjectReference {\n" % [name]
-        io.print "return m.Ref\n"
+        io.print "return m.Self\n"
         io.print "}\n\n"
       end
     end

@@ -65,7 +65,7 @@ func buildValueMap(v reflect.Value, m map[string]reflect.Value) {
 	}
 }
 
-// assignReference looks for the "ref" field in the specified struct and
+// assignReference looks for the "Self" field in the specified struct and
 // assigns the specified ManagedObjectReference.
 //
 // TODO(PN): buildValueMap and assignReference can be improved by combinding
@@ -84,7 +84,7 @@ func assignReference(v reflect.Value, ref types.ManagedObjectReference) bool {
 			continue
 		}
 
-		if sft.Name == "Ref" {
+		if sft.Name == "Self" {
 			v.Elem().Field(i).Set(reflect.ValueOf(ref))
 			return true
 		}
