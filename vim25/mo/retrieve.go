@@ -65,6 +65,34 @@ func buildValueMap(v reflect.Value, m map[string]reflect.Value) {
 	}
 }
 
+// assignReference looks for the "ref" field in the specified struct and
+// assigns the specified ManagedObjectReference.
+//
+// TODO(PN): buildValueMap and assignReference can be improved by combinding
+// their functionality and having a type that only traversed the entire struct
+// once. The type can then store the field indices (fields can be nested) for
+// all the managed object references and the reference to itself.
+//
+func assignReference(v reflect.Value, ref types.ManagedObjectReference) bool {
+	t := v.Type().Elem()
+	for i := 0; i < t.NumField(); i++ {
+		sft := t.Field(i)
+		if sft.Anonymous {
+			if assignReference(v.Elem().Field(i).Addr(), ref) {
+				return true
+			}
+			continue
+		}
+
+		if sft.Name == "Ref" {
+			v.Elem().Field(i).Set(reflect.ValueOf(ref))
+			return true
+		}
+	}
+
+	return false
+}
+
 // Returns pointer to type t.
 func objectContentToType(o types.ObjectContent) reflect.Value {
 	t, ok := t[o.Obj.Type]
@@ -73,6 +101,9 @@ func objectContentToType(o types.ObjectContent) reflect.Value {
 	}
 
 	v := reflect.New(t)
+
+	// Assign reference to self
+	assignReference(v, o.Obj)
 
 	// Build map of property names to assignable reflect.Value
 	m := make(map[string]reflect.Value)
