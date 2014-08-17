@@ -21,17 +21,24 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
 )
 
 type about struct {
-	flag.FlagSet
+	*flags.ClientFlag
 }
 
 func init() {
 	cli.Register(&about{})
 }
 
-func (c *about) Run() error {
-	fmt.Printf("%#v\n", cli.Client.About)
+func (c *about) Run(f *flag.FlagSet) error {
+	client, err := c.Client()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("%#v\n", client.About)
+
 	return nil
 }

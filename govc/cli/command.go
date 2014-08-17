@@ -19,96 +19,132 @@ package cli
 import (
 	"flag"
 	"fmt"
-	"net/url"
+	"io/ioutil"
 	"os"
-	"path/filepath"
 	"reflect"
-	"strings"
-
-	"github.com/vmware/govmomi"
+	"sort"
+	"text/tabwriter"
 )
 
-type cli struct {
-	flag.FlagSet
-	url string
+type HasFlags interface {
+	// Register may be called more than once and should be idempotent.
+	Register(f *flag.FlagSet)
+
+	// Process may be called more than once and should be idempotent.
+	Process() error
 }
-
-var commands = map[string]Command{}
-
-var Client *govmomi.Client
 
 type Command interface {
-	Parse([]string) error
-	Run() error
+	HasFlags
+
+	Run(f *flag.FlagSet) error
 }
 
-func name(c Command) string {
-	t := reflect.TypeOf(c).Elem()
-	base := filepath.Base(t.PkgPath())
-	if base == t.Name() {
-		return t.Name()
-	}
-	return fmt.Sprintf("%s.%s", base, t.Name())
+var hasFlagsType = reflect.TypeOf((*HasFlags)(nil)).Elem()
+
+func RegisterCommand(h HasFlags, f *flag.FlagSet) {
+	Walk(h, hasFlagsType, func(v interface{}) error {
+		v.(HasFlags).Register(f)
+		return nil
+	})
 }
 
-func Register(c Command) {
-	commands[name(c)] = c
-}
-
-func (c *cli) Parse(args []string) error {
-	c.StringVar(&c.url, "u", os.Getenv("GOVMOMI_URL"), "ESX or vCenter URL")
-
-	if err := c.FlagSet.Parse(args); err != nil {
+func ProcessCommand(h HasFlags) error {
+	err := Walk(h, hasFlagsType, func(v interface{}) error {
+		err := v.(HasFlags).Process()
 		return err
-	}
-
-	if c.url == "" {
-		return flag.ErrHelp
-	}
-
-	u, err := url.Parse(c.url)
-	if err != nil {
-		return err
-	}
-
-	Client, err = govmomi.NewClient(*u)
-
+	})
 	return err
 }
 
-func (c *cli) help() {
+func generalHelp() {
 	fmt.Fprintf(os.Stderr, "Usage of %s:\n", os.Args[0])
-	c.FlagSet.PrintDefaults()
+
 	cmds := []string{}
 	for name := range commands {
 		cmds = append(cmds, name)
 	}
-	fmt.Fprintf(os.Stderr, "%s\n", strings.Join(cmds, "|"))
+
+	sort.Strings(cmds)
+
+	for _, name := range cmds {
+		fmt.Fprintf(os.Stderr, "  %s\n", name)
+	}
 }
 
-func Run(args []string) error {
-	c := &cli{}
-	c.Usage = c.help
+func commandHelp(name string, f *flag.FlagSet) {
+	fmt.Fprintf(os.Stderr, "Usage of %s %s:\n", os.Args[0], name)
 
-	if err := c.Parse(args); err != nil {
-		if err == flag.ErrHelp {
-			return nil
+	n := 0
+	f.VisitAll(func(_ *flag.Flag) {
+		n += 1
+	})
+
+	if n == 0 {
+		fmt.Fprintf(os.Stderr, "  (no flags)\n")
+	} else {
+		tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
+
+		type IsBoolFlagger interface {
+			IsBoolFlag() bool
 		}
-		return err
-	}
 
-	args = c.Args()
+		f.VisitAll(func(f *flag.Flag) {
+			if b, ok := f.Value.(IsBoolFlagger); ok && b.IsBoolFlag() {
+				fmt.Fprintf(tw, "\t-%s\t%s\n", f.Name, f.Usage)
+				return
+			}
+
+			fmt.Fprintf(tw, "\t-%s=%s\t%s\n", f.Name, f.DefValue, f.Usage)
+		})
+
+		tw.Flush()
+	}
+}
+
+func Run(args []string) int {
 	if len(args) == 0 {
-		c.Usage()
-		return nil
+		generalHelp()
+		return 1
 	}
 
-	if cmd, ok := commands[args[0]]; ok {
-		if err := cmd.Parse(args[1:]); err != nil {
-			return err
+	cmd, ok := commands[args[0]]
+	if !ok {
+		generalHelp()
+		return 1
+	}
+
+	f := flag.NewFlagSet("", flag.ContinueOnError)
+	f.SetOutput(ioutil.Discard)
+
+	RegisterCommand(cmd, f)
+
+	if err := f.Parse(args[1:]); err != nil {
+		if err == flag.ErrHelp {
+			commandHelp(args[0], f)
+		} else {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}
-		return cmd.Run()
+		return 1
 	}
 
-	return nil
+	if err := ProcessCommand(cmd); err != nil {
+		if err == flag.ErrHelp {
+			commandHelp(args[0], f)
+		} else {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		}
+		return 1
+	}
+
+	if err := cmd.Run(f); err != nil {
+		if err == flag.ErrHelp {
+			commandHelp(args[0], f)
+		} else {
+			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
+		}
+		return 1
+	}
+
+	return 0
 }
