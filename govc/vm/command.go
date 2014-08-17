@@ -25,12 +25,9 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-type vm struct {
-	*flags.ClientFlag
-}
-
 type create struct {
-	*vm
+	*flags.ClientFlag
+	*flags.DatacenterFlag
 
 	pool      string
 	host      string
@@ -67,7 +64,8 @@ func (c *create) Run(f *flag.FlagSet) error {
 }
 
 type power struct {
-	*vm
+	*flags.ClientFlag
+	*flags.DatacenterFlag
 
 	On  bool
 	Off bool
