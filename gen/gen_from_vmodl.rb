@@ -138,21 +138,28 @@ class Managed
 
   def dump(io)
     if !props.empty?
+      include_ref_getter = false
+
       io.print "type %s struct {\n" % name
 
       case @data["wsdl_base"]
       when nil, "ManagedObject", "View"
-        # skip
+        include_ref_getter = true
+        io.print "Ref types.ManagedObjectReference\n\n"
       else
-        if @data["wsdl_base"]
-          io.print "%s\n\n" % @data["wsdl_base"]
-        end
+        io.print "%s\n\n" % @data["wsdl_base"]
       end
 
       props.each do |p|
         p.dump(io)
       end
       io.print "}\n\n"
+
+      if include_ref_getter
+        io.print "func (m %s) Reference() types.ManagedObjectReference {\n" % [name]
+        io.print "return m.Ref\n"
+        io.print "}\n\n"
+      end
     end
   end
 
