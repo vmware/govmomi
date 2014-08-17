@@ -29,15 +29,14 @@ import (
 const cDescr = "ESX or vCenter URL"
 
 type ClientFlag struct {
-	c *govmomi.Client
-	u *url.URL
-
 	register sync.Once
+	url      *url.URL
+	client   *govmomi.Client
 }
 
 func (c *ClientFlag) String() string {
-	if c.u != nil {
-		withoutCredentials := *c.u
+	if c.url != nil {
+		withoutCredentials := *c.url
 		withoutCredentials.User = nil
 		return withoutCredentials.String()
 	}
@@ -47,7 +46,7 @@ func (c *ClientFlag) String() string {
 func (c *ClientFlag) Set(s string) error {
 	var err error
 
-	c.u, err = url.Parse(s)
+	c.url, err = url.Parse(s)
 	if err != nil {
 		return err
 	}
@@ -63,7 +62,7 @@ func (c *ClientFlag) Register(f *flag.FlagSet) {
 }
 
 func (c *ClientFlag) Process() error {
-	if c.u == nil {
+	if c.url == nil {
 		return errors.New("specify an " + cDescr)
 	}
 
@@ -71,15 +70,15 @@ func (c *ClientFlag) Process() error {
 }
 
 func (c *ClientFlag) Client() (*govmomi.Client, error) {
-	if c.c != nil {
-		return c.c, nil
+	if c.client != nil {
+		return c.client, nil
 	}
 
-	client, err := govmomi.NewClient(*c.u)
+	client, err := govmomi.NewClient(*c.url)
 	if err != nil {
 		return nil, err
 	}
 
-	c.c = client
-	return c.c, nil
+	c.client = client
+	return c.client, nil
 }
