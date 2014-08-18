@@ -55,5 +55,5 @@ func (c *download) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return ds.UploadFile(client, f.Arg(0), u)
+	return ds.DownloadFile(client, f.Arg(0), u)
 }

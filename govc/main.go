@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 
 	_ "github.com/vmware/govmomi/govc/about"
+	_ "github.com/vmware/govmomi/govc/datastore"
 	_ "github.com/vmware/govmomi/govc/host"
 	_ "github.com/vmware/govmomi/govc/ls"
 	_ "github.com/vmware/govmomi/govc/version"
