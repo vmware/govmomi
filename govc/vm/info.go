@@ -23,15 +23,19 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 	*flags.SearchFlag
+
+	WaitForIP bool
 }
 
 func init() {
@@ -42,7 +46,9 @@ func init() {
 	cli.Register(&i)
 }
 
-func (c *info) Register(f *flag.FlagSet) {}
+func (c *info) Register(f *flag.FlagSet) {
+	f.BoolVar(&c.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
+}
 
 func (c *info) Process() error { return nil }
 
@@ -63,12 +69,26 @@ func (c *info) Run(f *flag.FlagSet) error {
 	if c.OutputFlag.JSON {
 		props = nil // Load everything
 	} else {
-		props = []string{"summary"} // Load summary
+		props = []string{"summary", "guest"} // Load summary
 	}
 
-	err = client.Properties(vm.Reference(), props, &res.VirtualMachine)
-	if err != nil {
-		return err
+	for {
+		err = client.Properties(vm.Reference(), props, &res.VirtualMachine)
+		if err != nil {
+			return err
+		}
+
+		if res.VirtualMachine.Guest.IpAddress == "" {
+			err = WaitForIP(vm, client)
+			if err != nil {
+				return err
+			}
+
+			// Reload virtual machine object
+			continue
+		}
+
+		break
 	}
 
 	return c.WriteResult(&res)
@@ -89,5 +109,68 @@ func (r *infoResult) WriteTo(w io.Writer) error {
 	fmt.Fprintf(tw, "CPU:\t%d vCPU(s)\n", s.Config.NumCpu)
 	fmt.Fprintf(tw, "Power state:\t%s\n", s.Runtime.PowerState)
 	fmt.Fprintf(tw, "Boot time:\t%s\n", s.Runtime.BootTime)
+	fmt.Fprintf(tw, "IP address:\t%s\n", s.Guest.IpAddress)
 	return tw.Flush()
+}
+
+func WaitForIP(vm *govmomi.VirtualMachine, c *govmomi.Client) error {
+	p, err := c.NewPropertyCollector()
+	if err != nil {
+		return err
+	}
+
+	defer p.Destroy()
+
+	req := types.CreateFilter{
+		Spec: types.PropertyFilterSpec{
+			ObjectSet: []types.ObjectSpec{
+				{
+					Obj: vm.Reference(),
+				},
+			},
+			PropSet: []types.PropertySpec{
+				{
+					PathSet: []string{"guest"},
+					Type:    "VirtualMachine",
+				},
+			},
+		},
+	}
+
+	err = p.CreateFilter(req)
+	if err != nil {
+		return err
+	}
+
+	for version := ""; ; {
+		var gi *types.GuestInfo
+
+		res, err := p.WaitForUpdates(version)
+		if err != nil {
+			return err
+		}
+
+		version = res.Version
+
+		for _, fs := range res.FilterSet {
+			for _, os := range fs.ObjectSet {
+				if os.Obj == vm.Reference() {
+					for _, c := range os.ChangeSet {
+						if c.Name == "guest" {
+							giv := c.Val.(types.GuestInfo)
+							gi = &giv
+						}
+					}
+				}
+			}
+		}
+
+		if gi == nil {
+			panic("expected GuestInfo update")
+		}
+
+		if gi.IpAddress != "" {
+			return nil
+		}
+	}
 }

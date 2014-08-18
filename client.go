@@ -147,3 +147,24 @@ func (c *Client) RootFolder() Folder {
 func (c *Client) SearchIndex() SearchIndex {
 	return SearchIndex{c}
 }
+
+// NewPropertyCollector creates a new property collector based on the
+// root property collector. It is the responsibility of the caller to
+// clean up the property collector when done.
+func (c *Client) NewPropertyCollector() (*PropertyCollector, error) {
+	req := types.CreatePropertyCollector{
+		This: c.ServiceContent.PropertyCollector,
+	}
+
+	res, err := methods.CreatePropertyCollector(c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	p := PropertyCollector{
+		c: c,
+		r: res.Returnval,
+	}
+
+	return &p, nil
+}
