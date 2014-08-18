@@ -55,7 +55,7 @@ func (l *ls) Run(f *flag.FlagSet) error {
 
 	arg := path.Clean(f.Arg(0))
 	if len(arg) > 0 && arg[0] == '/' {
-		root = client.RootFolder
+		root = client.ServiceContent.RootFolder
 		arg = arg[1:]
 	} else {
 		dc, err := l.Datacenter()
@@ -120,7 +120,7 @@ func (l *ls) listFolder(m types.ManagedObjectReference, full bool) (listResult, 
 	}
 
 	req := types.RetrieveProperties{
-		This: c.PropertyCollector,
+		This: c.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
 				ObjectSet: []types.ObjectSpec{
@@ -209,7 +209,7 @@ func (l *ls) listDatacenter(m types.ManagedObjectReference, all bool) (listResul
 	}
 
 	req := types.RetrieveProperties{
-		This: c.PropertyCollector,
+		This: c.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
 				ObjectSet: []types.ObjectSpec{

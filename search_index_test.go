@@ -35,9 +35,9 @@ func TestSearch(t *testing.T) {
 		t.Error(err)
 	}
 
-	s := c.Search()
+	s := c.SearchIndex()
 
-	ref, err := s.FindChild(c.Folder(), "ha-datacenter")
+	ref, err := s.FindChild(c.RootFolder(), "ha-datacenter")
 	if err != nil {
 		t.Fatal(err)
 	}

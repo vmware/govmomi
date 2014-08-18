@@ -33,7 +33,7 @@ var serviceInstance = types.ManagedObjectReference{
 type Client struct {
 	*soap.Client
 
-	types.ServiceContent
+	ServiceContent types.ServiceContent
 
 	u url.URL
 }
@@ -99,7 +99,7 @@ func NewClient(u url.URL) (*Client, error) {
 func (c *Client) UserSession() (*types.UserSession, error) {
 	var sm mo.SessionManager
 
-	err := mo.RetrieveProperties(c, c.PropertyCollector, *c.SessionManager, &sm)
+	err := mo.RetrieveProperties(c, c.ServiceContent.PropertyCollector, *c.ServiceContent.SessionManager, &sm)
 	if err != nil {
 		return nil, err
 	}
@@ -124,7 +124,7 @@ func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst in
 	}
 
 	req := types.RetrieveProperties{
-		This: c.PropertyCollector,
+		This: c.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
 				ObjectSet: []types.ObjectSpec{ospec},
@@ -136,10 +136,10 @@ func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst in
 	return mo.RetrievePropertiesForRequest(c, req, dst)
 }
 
-func (c *Client) Folder() Folder {
-	return Folder{c.RootFolder}
+func (c *Client) RootFolder() Folder {
+	return Folder{c.ServiceContent.RootFolder}
 }
 
-func (c *Client) Search() Search {
-	return Search{c}
+func (c *Client) SearchIndex() SearchIndex {
+	return SearchIndex{c}
 }

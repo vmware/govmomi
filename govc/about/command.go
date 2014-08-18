@@ -38,7 +38,7 @@ func (c *about) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	fmt.Printf("%#v\n", client.About)
+	fmt.Printf("%#v\n", client.ServiceContent.About)
 
 	return nil
 }
