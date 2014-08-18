@@ -38,6 +38,8 @@ func newReference(e types.ManagedObjectReference) Reference {
 		return &HostSystem{ManagedObjectReference: e}
 	case "Network":
 		return &Network{ManagedObjectReference: e}
+	case "ResourcePool":
+		return &ResourcePool{ManagedObjectReference: e}
 	case "DistributedVirtualSwitch": // Skip
 		return nil
 	case "DistributedVirtualPortgroup": // Skip
