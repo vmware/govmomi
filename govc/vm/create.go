@@ -20,20 +20,19 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 )
 
 type create struct {
-	*flags.ClientFlag
-	*flags.DatacenterFlag
+	*flags.ResourcePoolFlag
+	*flags.HostSystemFlag
+	*flags.DatastoreFlag
 
-	pool      string
-	host      string
-	datastore string
-	memory    int
-	cpus      int
-	guestID   string
+	memory  int
+	cpus    int
+	guestID string
 }
 
 func init() {
@@ -41,9 +40,6 @@ func init() {
 }
 
 func (c *create) Register(f *flag.FlagSet) {
-	f.StringVar(&c.pool, "p", "", "Resource pool")
-	f.StringVar(&c.host, "o", "", "Host")
-	f.StringVar(&c.datastore, "d", "", "Datastore")
 	f.IntVar(&c.memory, "m", 128, "Size in MB of memory")
 	f.IntVar(&c.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&c.guestID, "g", "otherGuest", "Guest OS")
@@ -56,7 +52,30 @@ func (c *create) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	fmt.Printf("create %s VM '%s' with %d MB memory\n", c.guestID, f.Arg(0), c.memory)
+	var pool *govmomi.ResourcePool
+
+	host, err := c.HostSystem()
+	if err != nil {
+		return err
+	}
+
+	if host == nil { // -host is optional
+		if pool, err = c.ResourcePool(); err != nil {
+			return err
+		}
+	} else {
+		if pool, err = c.HostResourcePool(); err != nil {
+			return err
+		}
+	}
+
+	ds, err := c.DatastoreFlag.Name()
+	if err != nil {
+		return err
+	}
+
+	fmt.Printf("create %s VM '%s' on datastore %s, with %d MB memory (pool=%s)\n",
+		c.guestID, f.Arg(0), ds, c.memory, pool.Value)
 
 	return nil
 }
