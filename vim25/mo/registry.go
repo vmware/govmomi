@@ -14,20 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package mo
 
-import (
-	"os"
+import "reflect"
 
-	"github.com/vmware/govmomi/govc/cli"
-
-	_ "github.com/vmware/govmomi/govc/about"
-	_ "github.com/vmware/govmomi/govc/host"
-	_ "github.com/vmware/govmomi/govc/ls"
-	_ "github.com/vmware/govmomi/govc/version"
-	_ "github.com/vmware/govmomi/govc/vm"
-)
-
-func main() {
-	os.Exit(cli.Run(os.Args[1:]))
-}
+var t = map[string]reflect.Type{}

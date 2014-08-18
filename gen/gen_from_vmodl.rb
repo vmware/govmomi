@@ -138,20 +138,35 @@ class Managed
 
   def dump(io)
     if !props.empty?
+      include_ref_getter = false
+
       io.print "type %s struct {\n" % name
 
       case @data["wsdl_base"]
       when nil, "ManagedObject", "View"
-        # skip
+        include_ref_getter = true
+        io.print "Self types.ManagedObjectReference\n\n"
       else
-        if @data["wsdl_base"]
-          io.print "%s\n\n" % @data["wsdl_base"]
-        end
+        io.print "%s\n\n" % @data["wsdl_base"]
       end
 
       props.each do |p|
         p.dump(io)
       end
+      io.print "}\n\n"
+
+      if include_ref_getter
+        io.print "func (m %s) Reference() types.ManagedObjectReference {\n" % [name]
+        io.print "return m.Self\n"
+        io.print "}\n\n"
+      end
+    end
+  end
+
+  def dump_init(io)
+    if !props.empty?
+      io.print "func init() {\n"
+      io.print "t[\"%s\"] = reflect.TypeOf((*%s)(nil)).Elem()\n" % [name, name]
       io.print "}\n\n"
     end
   end
@@ -199,7 +214,7 @@ File.open(File.join(ARGV.first, "mo/mo.go"), "w") do |io|
   vmodl.
     managed.
     sort_by { |m| m.name }.
-    each { |m| m.dump(io) }
+    each { |m| m.dump(io); m.dump_init(io); }
 end
 
 exit(0)

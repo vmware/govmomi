@@ -17,6 +17,7 @@ limitations under the License.
 package mo
 
 import (
+	"reflect"
 	"time"
 
 	"github.com/vmware/govmomi/vim25/types"
@@ -28,15 +29,39 @@ type Alarm struct {
 	Info types.AlarmInfo `mo:"info"`
 }
 
+func init() {
+	t["Alarm"] = reflect.TypeOf((*Alarm)(nil)).Elem()
+}
+
 type AlarmManager struct {
+	Self types.ManagedObjectReference
+
 	DefaultExpression []types.BaseAlarmExpression `mo:"defaultExpression"`
 	Description       types.AlarmDescription      `mo:"description"`
 }
 
+func (m AlarmManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["AlarmManager"] = reflect.TypeOf((*AlarmManager)(nil)).Elem()
+}
+
 type AuthorizationManager struct {
+	Self types.ManagedObjectReference
+
 	PrivilegeList []types.AuthorizationPrivilege `mo:"privilegeList"`
 	RoleList      []types.AuthorizationRole      `mo:"roleList"`
 	Description   types.AuthorizationDescription `mo:"description"`
+}
+
+func (m AuthorizationManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["AuthorizationManager"] = reflect.TypeOf((*AuthorizationManager)(nil)).Elem()
 }
 
 type ClusterComputeResource struct {
@@ -48,6 +73,10 @@ type ClusterComputeResource struct {
 	MigrationHistory  []types.ClusterDrsMigration      `mo:"migrationHistory"`
 	ActionHistory     []types.ClusterActionHistory     `mo:"actionHistory"`
 	DrsFault          []types.ClusterDrsFaults         `mo:"drsFault"`
+}
+
+func init() {
+	t["ClusterComputeResource"] = reflect.TypeOf((*ClusterComputeResource)(nil)).Elem()
 }
 
 type ComputeResource struct {
@@ -62,6 +91,10 @@ type ComputeResource struct {
 	ConfigurationEx    types.BaseComputeResourceConfigInfo `mo:"configurationEx"`
 }
 
+func init() {
+	t["ComputeResource"] = reflect.TypeOf((*ComputeResource)(nil)).Elem()
+}
+
 type ContainerView struct {
 	ManagedObjectView
 
@@ -70,13 +103,37 @@ type ContainerView struct {
 	Recursive bool                         `mo:"recursive"`
 }
 
+func init() {
+	t["ContainerView"] = reflect.TypeOf((*ContainerView)(nil)).Elem()
+}
+
 type CustomFieldsManager struct {
+	Self types.ManagedObjectReference
+
 	Field []types.CustomFieldDef `mo:"field"`
 }
 
+func (m CustomFieldsManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["CustomFieldsManager"] = reflect.TypeOf((*CustomFieldsManager)(nil)).Elem()
+}
+
 type CustomizationSpecManager struct {
+	Self types.ManagedObjectReference
+
 	Info          []types.CustomizationSpecInfo `mo:"info"`
 	EncryptionKey []byte                        `mo:"encryptionKey"`
+}
+
+func (m CustomizationSpecManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["CustomizationSpecManager"] = reflect.TypeOf((*CustomizationSpecManager)(nil)).Elem()
 }
 
 type Datacenter struct {
@@ -91,6 +148,10 @@ type Datacenter struct {
 	Configuration   types.DatacenterConfigInfo     `mo:"configuration"`
 }
 
+func init() {
+	t["Datacenter"] = reflect.TypeOf((*Datacenter)(nil)).Elem()
+}
+
 type Datastore struct {
 	ManagedEntity
 
@@ -103,12 +164,20 @@ type Datastore struct {
 	IormConfiguration *types.StorageIORMInfo         `mo:"iormConfiguration"`
 }
 
+func init() {
+	t["Datastore"] = reflect.TypeOf((*Datastore)(nil)).Elem()
+}
+
 type DistributedVirtualPortgroup struct {
 	Network
 
 	Key      string                      `mo:"key"`
 	Config   types.DVPortgroupConfigInfo `mo:"config"`
 	PortKeys []string                    `mo:"portKeys"`
+}
+
+func init() {
+	t["DistributedVirtualPortgroup"] = reflect.TypeOf((*DistributedVirtualPortgroup)(nil)).Elem()
 }
 
 type DistributedVirtualSwitch struct {
@@ -123,8 +192,22 @@ type DistributedVirtualSwitch struct {
 	Runtime             *types.DVSRuntimeInfo          `mo:"runtime"`
 }
 
+func init() {
+	t["DistributedVirtualSwitch"] = reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem()
+}
+
 type EnvironmentBrowser struct {
+	Self types.ManagedObjectReference
+
 	DatastoreBrowser *types.ManagedObjectReference `mo:"datastoreBrowser"`
+}
+
+func (m EnvironmentBrowser) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["EnvironmentBrowser"] = reflect.TypeOf((*EnvironmentBrowser)(nil)).Elem()
 }
 
 type EventHistoryCollector struct {
@@ -133,19 +216,53 @@ type EventHistoryCollector struct {
 	LatestPage []types.BaseEvent `mo:"latestPage"`
 }
 
+func init() {
+	t["EventHistoryCollector"] = reflect.TypeOf((*EventHistoryCollector)(nil)).Elem()
+}
+
 type EventManager struct {
+	Self types.ManagedObjectReference
+
 	Description  types.EventDescription `mo:"description"`
 	LatestEvent  types.BaseEvent        `mo:"latestEvent"`
 	MaxCollector int                    `mo:"maxCollector"`
 }
 
+func (m EventManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["EventManager"] = reflect.TypeOf((*EventManager)(nil)).Elem()
+}
+
 type ExtensibleManagedObject struct {
+	Self types.ManagedObjectReference
+
 	Value          []types.BaseCustomFieldValue `mo:"value"`
 	AvailableField []types.CustomFieldDef       `mo:"availableField"`
 }
 
+func (m ExtensibleManagedObject) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ExtensibleManagedObject"] = reflect.TypeOf((*ExtensibleManagedObject)(nil)).Elem()
+}
+
 type ExtensionManager struct {
+	Self types.ManagedObjectReference
+
 	ExtensionList []types.Extension `mo:"extensionList"`
+}
+
+func (m ExtensionManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ExtensionManager"] = reflect.TypeOf((*ExtensionManager)(nil)).Elem()
 }
 
 type Folder struct {
@@ -155,31 +272,95 @@ type Folder struct {
 	ChildEntity []types.ManagedObjectReference `mo:"childEntity"`
 }
 
+func init() {
+	t["Folder"] = reflect.TypeOf((*Folder)(nil)).Elem()
+}
+
 type GuestOperationsManager struct {
+	Self types.ManagedObjectReference
+
 	AuthManager    *types.ManagedObjectReference `mo:"authManager"`
 	FileManager    *types.ManagedObjectReference `mo:"fileManager"`
 	ProcessManager *types.ManagedObjectReference `mo:"processManager"`
 }
 
+func (m GuestOperationsManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["GuestOperationsManager"] = reflect.TypeOf((*GuestOperationsManager)(nil)).Elem()
+}
+
 type HistoryCollector struct {
+	Self types.ManagedObjectReference
+
 	Filter types.AnyType `mo:"filter"`
 }
 
+func (m HistoryCollector) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HistoryCollector"] = reflect.TypeOf((*HistoryCollector)(nil)).Elem()
+}
+
 type HostAuthenticationManager struct {
+	Self types.ManagedObjectReference
+
 	Info           types.HostAuthenticationManagerInfo `mo:"info"`
 	SupportedStore []types.ManagedObjectReference      `mo:"supportedStore"`
 }
 
+func (m HostAuthenticationManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostAuthenticationManager"] = reflect.TypeOf((*HostAuthenticationManager)(nil)).Elem()
+}
+
 type HostAuthenticationStore struct {
+	Self types.ManagedObjectReference
+
 	Info types.BaseHostAuthenticationStoreInfo `mo:"info"`
 }
 
+func (m HostAuthenticationStore) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostAuthenticationStore"] = reflect.TypeOf((*HostAuthenticationStore)(nil)).Elem()
+}
+
 type HostAutoStartManager struct {
+	Self types.ManagedObjectReference
+
 	Config types.HostAutoStartManagerConfig `mo:"config"`
 }
 
+func (m HostAutoStartManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostAutoStartManager"] = reflect.TypeOf((*HostAutoStartManager)(nil)).Elem()
+}
+
 type HostCacheConfigurationManager struct {
+	Self types.ManagedObjectReference
+
 	CacheConfigurationInfo []types.HostCacheConfigurationInfo `mo:"cacheConfigurationInfo"`
+}
+
+func (m HostCacheConfigurationManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostCacheConfigurationManager"] = reflect.TypeOf((*HostCacheConfigurationManager)(nil)).Elem()
 }
 
 type HostCpuSchedulerSystem struct {
@@ -188,26 +369,80 @@ type HostCpuSchedulerSystem struct {
 	HyperthreadInfo *types.HostHyperThreadScheduleInfo `mo:"hyperthreadInfo"`
 }
 
+func init() {
+	t["HostCpuSchedulerSystem"] = reflect.TypeOf((*HostCpuSchedulerSystem)(nil)).Elem()
+}
+
 type HostDatastoreBrowser struct {
+	Self types.ManagedObjectReference
+
 	Datastore     []types.ManagedObjectReference `mo:"datastore"`
 	SupportedType []types.BaseFileQuery          `mo:"supportedType"`
 }
 
+func (m HostDatastoreBrowser) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostDatastoreBrowser"] = reflect.TypeOf((*HostDatastoreBrowser)(nil)).Elem()
+}
+
 type HostDatastoreSystem struct {
+	Self types.ManagedObjectReference
+
 	Datastore    []types.ManagedObjectReference        `mo:"datastore"`
 	Capabilities types.HostDatastoreSystemCapabilities `mo:"capabilities"`
 }
 
+func (m HostDatastoreSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostDatastoreSystem"] = reflect.TypeOf((*HostDatastoreSystem)(nil)).Elem()
+}
+
 type HostDateTimeSystem struct {
+	Self types.ManagedObjectReference
+
 	DateTimeInfo types.HostDateTimeInfo `mo:"dateTimeInfo"`
 }
 
+func (m HostDateTimeSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostDateTimeSystem"] = reflect.TypeOf((*HostDateTimeSystem)(nil)).Elem()
+}
+
 type HostDiagnosticSystem struct {
+	Self types.ManagedObjectReference
+
 	ActivePartition *types.HostDiagnosticPartition `mo:"activePartition"`
 }
 
+func (m HostDiagnosticSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostDiagnosticSystem"] = reflect.TypeOf((*HostDiagnosticSystem)(nil)).Elem()
+}
+
 type HostEsxAgentHostManager struct {
+	Self types.ManagedObjectReference
+
 	ConfigInfo types.HostEsxAgentHostManagerConfigInfo `mo:"configInfo"`
+}
+
+func (m HostEsxAgentHostManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostEsxAgentHostManager"] = reflect.TypeOf((*HostEsxAgentHostManager)(nil)).Elem()
 }
 
 type HostFirewallSystem struct {
@@ -216,14 +451,32 @@ type HostFirewallSystem struct {
 	FirewallInfo *types.HostFirewallInfo `mo:"firewallInfo"`
 }
 
+func init() {
+	t["HostFirewallSystem"] = reflect.TypeOf((*HostFirewallSystem)(nil)).Elem()
+}
+
 type HostGraphicsManager struct {
 	ExtensibleManagedObject
 
 	GraphicsInfo []types.HostGraphicsInfo `mo:"graphicsInfo"`
 }
 
+func init() {
+	t["HostGraphicsManager"] = reflect.TypeOf((*HostGraphicsManager)(nil)).Elem()
+}
+
 type HostHealthStatusSystem struct {
+	Self types.ManagedObjectReference
+
 	Runtime types.HealthSystemRuntime `mo:"runtime"`
+}
+
+func (m HostHealthStatusSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostHealthStatusSystem"] = reflect.TypeOf((*HostHealthStatusSystem)(nil)).Elem()
 }
 
 type HostMemorySystem struct {
@@ -231,6 +484,10 @@ type HostMemorySystem struct {
 
 	ConsoleReservationInfo        *types.ServiceConsoleReservationInfo       `mo:"consoleReservationInfo"`
 	VirtualMachineReservationInfo *types.VirtualMachineMemoryReservationInfo `mo:"virtualMachineReservationInfo"`
+}
+
+func init() {
+	t["HostMemorySystem"] = reflect.TypeOf((*HostMemorySystem)(nil)).Elem()
 }
 
 type HostNetworkSystem struct {
@@ -245,15 +502,33 @@ type HostNetworkSystem struct {
 	ConsoleIpRouteConfig types.BaseHostIpRouteConfig       `mo:"consoleIpRouteConfig"`
 }
 
+func init() {
+	t["HostNetworkSystem"] = reflect.TypeOf((*HostNetworkSystem)(nil)).Elem()
+}
+
 type HostPciPassthruSystem struct {
 	ExtensibleManagedObject
 
 	PciPassthruInfo []types.BaseHostPciPassthruInfo `mo:"pciPassthruInfo"`
 }
 
+func init() {
+	t["HostPciPassthruSystem"] = reflect.TypeOf((*HostPciPassthruSystem)(nil)).Elem()
+}
+
 type HostPowerSystem struct {
+	Self types.ManagedObjectReference
+
 	Capability types.PowerSystemCapability `mo:"capability"`
 	Info       types.PowerSystemInfo       `mo:"info"`
+}
+
+func (m HostPowerSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostPowerSystem"] = reflect.TypeOf((*HostPowerSystem)(nil)).Elem()
 }
 
 type HostProfile struct {
@@ -262,15 +537,33 @@ type HostProfile struct {
 	ReferenceHost *types.ManagedObjectReference `mo:"referenceHost"`
 }
 
+func init() {
+	t["HostProfile"] = reflect.TypeOf((*HostProfile)(nil)).Elem()
+}
+
 type HostServiceSystem struct {
 	ExtensibleManagedObject
 
 	ServiceInfo types.HostServiceInfo `mo:"serviceInfo"`
 }
 
+func init() {
+	t["HostServiceSystem"] = reflect.TypeOf((*HostServiceSystem)(nil)).Elem()
+}
+
 type HostSnmpSystem struct {
+	Self types.ManagedObjectReference
+
 	Configuration types.HostSnmpConfigSpec        `mo:"configuration"`
 	Limits        types.HostSnmpSystemAgentLimits `mo:"limits"`
+}
+
+func (m HostSnmpSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostSnmpSystem"] = reflect.TypeOf((*HostSnmpSystem)(nil)).Elem()
 }
 
 type HostStorageSystem struct {
@@ -280,6 +573,10 @@ type HostStorageSystem struct {
 	FileSystemVolumeInfo types.HostFileSystemVolumeInfo `mo:"fileSystemVolumeInfo"`
 	SystemFile           []string                       `mo:"systemFile"`
 	MultipathStateInfo   *types.HostMultipathStateInfo  `mo:"multipathStateInfo"`
+}
+
+func init() {
+	t["HostStorageSystem"] = reflect.TypeOf((*HostStorageSystem)(nil)).Elem()
 }
 
 type HostSystem struct {
@@ -299,8 +596,22 @@ type HostSystem struct {
 	SystemResources    *types.HostSystemResourceInfo    `mo:"systemResources"`
 }
 
+func init() {
+	t["HostSystem"] = reflect.TypeOf((*HostSystem)(nil)).Elem()
+}
+
 type HostVFlashManager struct {
+	Self types.ManagedObjectReference
+
 	VFlashConfigInfo *types.HostVFlashManagerVFlashConfigInfo `mo:"vFlashConfigInfo"`
+}
+
+func (m HostVFlashManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostVFlashManager"] = reflect.TypeOf((*HostVFlashManager)(nil)).Elem()
 }
 
 type HostVMotionSystem struct {
@@ -310,24 +621,54 @@ type HostVMotionSystem struct {
 	IpConfig  *types.HostIpConfig         `mo:"ipConfig"`
 }
 
+func init() {
+	t["HostVMotionSystem"] = reflect.TypeOf((*HostVMotionSystem)(nil)).Elem()
+}
+
 type HostVirtualNicManager struct {
 	ExtensibleManagedObject
 
 	Info types.HostVirtualNicManagerInfo `mo:"info"`
 }
 
+func init() {
+	t["HostVirtualNicManager"] = reflect.TypeOf((*HostVirtualNicManager)(nil)).Elem()
+}
+
 type HostVsanSystem struct {
+	Self types.ManagedObjectReference
+
 	Config types.VsanHostConfigInfo `mo:"config"`
 }
 
+func (m HostVsanSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostVsanSystem"] = reflect.TypeOf((*HostVsanSystem)(nil)).Elem()
+}
+
 type HttpNfcLease struct {
+	Self types.ManagedObjectReference
+
 	InitializeProgress int                         `mo:"initializeProgress"`
 	Info               *types.HttpNfcLeaseInfo     `mo:"info"`
 	State              types.HttpNfcLeaseState     `mo:"state"`
 	Error              *types.LocalizedMethodFault `mo:"error"`
 }
 
+func (m HttpNfcLease) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HttpNfcLease"] = reflect.TypeOf((*HttpNfcLease)(nil)).Elem()
+}
+
 type LicenseManager struct {
+	Self types.ManagedObjectReference
+
 	Source                   types.BaseLicenseSource            `mo:"source"`
 	SourceAvailable          bool                               `mo:"sourceAvailable"`
 	Diagnostics              *types.LicenseDiagnostics          `mo:"diagnostics"`
@@ -338,8 +679,26 @@ type LicenseManager struct {
 	Evaluation               types.LicenseManagerEvaluationInfo `mo:"evaluation"`
 }
 
+func (m LicenseManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["LicenseManager"] = reflect.TypeOf((*LicenseManager)(nil)).Elem()
+}
+
 type LocalizationManager struct {
+	Self types.ManagedObjectReference
+
 	Catalog []types.LocalizationManagerMessageCatalog `mo:"catalog"`
+}
+
+func (m LocalizationManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["LocalizationManager"] = reflect.TypeOf((*LocalizationManager)(nil)).Elem()
 }
 
 type ManagedEntity struct {
@@ -361,8 +720,22 @@ type ManagedEntity struct {
 	Tag                 []types.Tag                    `mo:"tag"`
 }
 
+func init() {
+	t["ManagedEntity"] = reflect.TypeOf((*ManagedEntity)(nil)).Elem()
+}
+
 type ManagedObjectView struct {
+	Self types.ManagedObjectReference
+
 	View []types.ManagedObjectReference `mo:"view"`
+}
+
+func (m ManagedObjectView) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ManagedObjectView"] = reflect.TypeOf((*ManagedObjectView)(nil)).Elem()
 }
 
 type Network struct {
@@ -374,23 +747,59 @@ type Network struct {
 	Vm      []types.ManagedObjectReference `mo:"vm"`
 }
 
+func init() {
+	t["Network"] = reflect.TypeOf((*Network)(nil)).Elem()
+}
+
 type OptionManager struct {
+	Self types.ManagedObjectReference
+
 	SupportedOption []types.OptionDef   `mo:"supportedOption"`
 	Setting         []types.OptionValue `mo:"setting"`
 }
 
+func (m OptionManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["OptionManager"] = reflect.TypeOf((*OptionManager)(nil)).Elem()
+}
+
 type OvfManager struct {
+	Self types.ManagedObjectReference
+
 	OvfImportOption []types.OvfOptionInfo `mo:"ovfImportOption"`
 	OvfExportOption []types.OvfOptionInfo `mo:"ovfExportOption"`
 }
 
+func (m OvfManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["OvfManager"] = reflect.TypeOf((*OvfManager)(nil)).Elem()
+}
+
 type PerformanceManager struct {
+	Self types.ManagedObjectReference
+
 	Description        types.PerformanceDescription `mo:"description"`
 	HistoricalInterval []types.PerfInterval         `mo:"historicalInterval"`
 	PerfCounter        []types.PerfCounterInfo      `mo:"perfCounter"`
 }
 
+func (m PerformanceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["PerformanceManager"] = reflect.TypeOf((*PerformanceManager)(nil)).Elem()
+}
+
 type Profile struct {
+	Self types.ManagedObjectReference
+
 	Config           types.BaseProfileConfigInfo    `mo:"config"`
 	Description      *types.ProfileDescription      `mo:"description"`
 	Name             string                         `mo:"name"`
@@ -400,17 +809,55 @@ type Profile struct {
 	ComplianceStatus string                         `mo:"complianceStatus"`
 }
 
+func (m Profile) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["Profile"] = reflect.TypeOf((*Profile)(nil)).Elem()
+}
+
 type ProfileManager struct {
+	Self types.ManagedObjectReference
+
 	Profile []types.ManagedObjectReference `mo:"profile"`
 }
 
+func (m ProfileManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ProfileManager"] = reflect.TypeOf((*ProfileManager)(nil)).Elem()
+}
+
 type PropertyCollector struct {
+	Self types.ManagedObjectReference
+
 	Filter []types.ManagedObjectReference `mo:"filter"`
 }
 
+func (m PropertyCollector) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["PropertyCollector"] = reflect.TypeOf((*PropertyCollector)(nil)).Elem()
+}
+
 type PropertyFilter struct {
+	Self types.ManagedObjectReference
+
 	Spec           types.PropertyFilterSpec `mo:"spec"`
 	PartialUpdates bool                     `mo:"partialUpdates"`
+}
+
+func (m PropertyFilter) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["PropertyFilter"] = reflect.TypeOf((*PropertyFilter)(nil)).Elem()
 }
 
 type ResourcePool struct {
@@ -425,28 +872,68 @@ type ResourcePool struct {
 	ChildConfiguration []types.ResourceConfigSpec     `mo:"childConfiguration"`
 }
 
+func init() {
+	t["ResourcePool"] = reflect.TypeOf((*ResourcePool)(nil)).Elem()
+}
+
 type ScheduledTask struct {
 	ExtensibleManagedObject
 
 	Info types.ScheduledTaskInfo `mo:"info"`
 }
 
+func init() {
+	t["ScheduledTask"] = reflect.TypeOf((*ScheduledTask)(nil)).Elem()
+}
+
 type ScheduledTaskManager struct {
+	Self types.ManagedObjectReference
+
 	ScheduledTask []types.ManagedObjectReference `mo:"scheduledTask"`
 	Description   types.ScheduledTaskDescription `mo:"description"`
 }
 
+func (m ScheduledTaskManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ScheduledTaskManager"] = reflect.TypeOf((*ScheduledTaskManager)(nil)).Elem()
+}
+
 type ServiceInstance struct {
+	Self types.ManagedObjectReference
+
 	ServerClock time.Time            `mo:"serverClock"`
 	Capability  types.Capability     `mo:"capability"`
 	Content     types.ServiceContent `mo:"content"`
 }
 
+func (m ServiceInstance) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ServiceInstance"] = reflect.TypeOf((*ServiceInstance)(nil)).Elem()
+}
+
 type ServiceManager struct {
+	Self types.ManagedObjectReference
+
 	Service []types.ServiceManagerServiceInfo `mo:"service"`
 }
 
+func (m ServiceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ServiceManager"] = reflect.TypeOf((*ServiceManager)(nil)).Elem()
+}
+
 type SessionManager struct {
+	Self types.ManagedObjectReference
+
 	SessionList         []types.UserSession `mo:"sessionList"`
 	CurrentSession      *types.UserSession  `mo:"currentSession"`
 	Message             *string             `mo:"message"`
@@ -455,9 +942,27 @@ type SessionManager struct {
 	DefaultLocale       string              `mo:"defaultLocale"`
 }
 
+func (m SessionManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["SessionManager"] = reflect.TypeOf((*SessionManager)(nil)).Elem()
+}
+
 type SimpleCommand struct {
+	Self types.ManagedObjectReference
+
 	EncodingType types.SimpleCommandEncoding     `mo:"encodingType"`
 	Entity       types.ServiceManagerServiceInfo `mo:"entity"`
+}
+
+func (m SimpleCommand) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["SimpleCommand"] = reflect.TypeOf((*SimpleCommand)(nil)).Elem()
 }
 
 type StoragePod struct {
@@ -467,10 +972,18 @@ type StoragePod struct {
 	PodStorageDrsEntry *types.PodStorageDrsEntry `mo:"podStorageDrsEntry"`
 }
 
+func init() {
+	t["StoragePod"] = reflect.TypeOf((*StoragePod)(nil)).Elem()
+}
+
 type Task struct {
 	ExtensibleManagedObject
 
 	Info types.TaskInfo `mo:"info"`
+}
+
+func init() {
+	t["Task"] = reflect.TypeOf((*Task)(nil)).Elem()
 }
 
 type TaskHistoryCollector struct {
@@ -479,18 +992,52 @@ type TaskHistoryCollector struct {
 	LatestPage []types.TaskInfo `mo:"latestPage"`
 }
 
+func init() {
+	t["TaskHistoryCollector"] = reflect.TypeOf((*TaskHistoryCollector)(nil)).Elem()
+}
+
 type TaskManager struct {
+	Self types.ManagedObjectReference
+
 	RecentTask   []types.ManagedObjectReference `mo:"recentTask"`
 	Description  types.TaskDescription          `mo:"description"`
 	MaxCollector int                            `mo:"maxCollector"`
 }
 
+func (m TaskManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["TaskManager"] = reflect.TypeOf((*TaskManager)(nil)).Elem()
+}
+
 type UserDirectory struct {
+	Self types.ManagedObjectReference
+
 	DomainList []string `mo:"domainList"`
 }
 
+func (m UserDirectory) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["UserDirectory"] = reflect.TypeOf((*UserDirectory)(nil)).Elem()
+}
+
 type ViewManager struct {
+	Self types.ManagedObjectReference
+
 	ViewList []types.ManagedObjectReference `mo:"viewList"`
+}
+
+func (m ViewManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ViewManager"] = reflect.TypeOf((*ViewManager)(nil)).Elem()
 }
 
 type VirtualApp struct {
@@ -502,6 +1049,10 @@ type VirtualApp struct {
 	VAppConfig   *types.VAppConfigInfo          `mo:"vAppConfig"`
 	ParentVApp   *types.ManagedObjectReference  `mo:"parentVApp"`
 	ChildLink    []types.VirtualAppLinkInfo     `mo:"childLink"`
+}
+
+func init() {
+	t["VirtualApp"] = reflect.TypeOf((*VirtualApp)(nil)).Elem()
 }
 
 type VirtualMachine struct {
@@ -526,9 +1077,17 @@ type VirtualMachine struct {
 	GuestHeartbeatStatus types.ManagedEntityStatus         `mo:"guestHeartbeatStatus"`
 }
 
+func init() {
+	t["VirtualMachine"] = reflect.TypeOf((*VirtualMachine)(nil)).Elem()
+}
+
 type VirtualMachineSnapshot struct {
 	ExtensibleManagedObject
 
 	Config        types.VirtualMachineConfigInfo `mo:"config"`
 	ChildSnapshot []types.ManagedObjectReference `mo:"childSnapshot"`
+}
+
+func init() {
+	t["VirtualMachineSnapshot"] = reflect.TypeOf((*VirtualMachineSnapshot)(nil)).Elem()
 }

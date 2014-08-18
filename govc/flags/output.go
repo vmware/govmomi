@@ -14,20 +14,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package flags
 
 import (
+	"encoding/json"
+	"flag"
+	"io"
 	"os"
-
-	"github.com/vmware/govmomi/govc/cli"
-
-	_ "github.com/vmware/govmomi/govc/about"
-	_ "github.com/vmware/govmomi/govc/host"
-	_ "github.com/vmware/govmomi/govc/ls"
-	_ "github.com/vmware/govmomi/govc/version"
-	_ "github.com/vmware/govmomi/govc/vm"
 )
 
-func main() {
-	os.Exit(cli.Run(os.Args[1:]))
+type OutputWriter interface {
+	WriteTo(io.Writer) error
+}
+
+type OutputFlag struct {
+	JSON bool
+}
+
+func (o *OutputFlag) Register(f *flag.FlagSet) {
+	f.BoolVar(&o.JSON, "json", false, "Enable JSON output")
+}
+
+func (o *OutputFlag) Process() error {
+	return nil
+}
+
+func (o *OutputFlag) WriteResult(result OutputWriter) error {
+	var err error
+	var out = os.Stdout
+
+	if o.JSON {
+		enc := json.NewEncoder(out)
+		err = enc.Encode(result)
+	} else {
+		err = result.WriteTo(out)
+	}
+
+	return err
 }

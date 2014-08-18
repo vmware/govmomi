@@ -19,56 +19,22 @@ package vm
 import (
 	"errors"
 	"flag"
-	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-type create struct {
-	*flags.ClientFlag
-	*flags.DatacenterFlag
-
-	pool      string
-	host      string
-	datastore string
-	memory    int
-	cpus      int
-	guestID   string
-}
-
-func init() {
-	cli.Register(&create{})
-	cli.Register(&power{})
-}
-
-func (c *create) Register(f *flag.FlagSet) {
-	f.StringVar(&c.pool, "p", "", "Resource pool")
-	f.StringVar(&c.host, "o", "", "Host")
-	f.StringVar(&c.datastore, "d", "", "Datastore")
-	f.IntVar(&c.memory, "m", 128, "Size in MB of memory")
-	f.IntVar(&c.cpus, "c", 1, "Number of CPUs")
-	f.StringVar(&c.guestID, "g", "otherGuest", "Guest OS")
-}
-
-func (c *create) Process() error { return nil }
-
-func (c *create) Run(f *flag.FlagSet) error {
-	if len(f.Args()) != 1 {
-		return flag.ErrHelp
-	}
-
-	fmt.Printf("create %s VM '%s' with %d MB memory\n", c.guestID, f.Arg(0), c.memory)
-
-	return nil
-}
-
 type power struct {
 	*flags.ClientFlag
 	*flags.DatacenterFlag
+	*flags.SearchFlag
 
 	On  bool
 	Off bool
+}
+
+func init() {
+	cli.Register(&power{})
 }
 
 func (c *power) Register(f *flag.FlagSet) {
@@ -95,11 +61,24 @@ func (c *power) PowerToString() string {
 }
 
 func (c *power) Run(f *flag.FlagSet) error {
-	if len(f.Args()) != 1 {
-		return flag.ErrHelp
+	client, err := c.Client()
+	if err != nil {
+		return err
 	}
 
-	fmt.Printf("power %s VM %s\n", c.PowerToString(), f.Arg(0))
+	vm, err := c.VirtualMachine()
+	if err != nil {
+		return err
+	}
 
-	return nil
+	switch {
+	case c.On:
+		err = vm.PowerOn(client)
+	case c.Off:
+		err = vm.PowerOff(client)
+	default:
+		panic("invalid state")
+	}
+
+	return err
 }
