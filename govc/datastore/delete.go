@@ -14,21 +14,46 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package datastore
 
 import (
-	"os"
+	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
-
-	_ "github.com/vmware/govmomi/govc/about"
-	_ "github.com/vmware/govmomi/govc/datastore"
-	_ "github.com/vmware/govmomi/govc/host"
-	_ "github.com/vmware/govmomi/govc/ls"
-	_ "github.com/vmware/govmomi/govc/version"
-	_ "github.com/vmware/govmomi/govc/vm"
+	"github.com/vmware/govmomi/govc/flags"
 )
 
-func main() {
-	os.Exit(cli.Run(os.Args[1:]))
+type delete struct {
+	*flags.ClientFlag
+	*flags.DatastorePath
+}
+
+func init() {
+	cli.Register(&delete{})
+}
+
+func (c *delete) Register(f *flag.FlagSet) {
+}
+
+func (c *delete) Process() error {
+	return nil
+}
+
+func (c *delete) Run(f *flag.FlagSet) error {
+	client, err := c.Client()
+	if err != nil {
+		return err
+	}
+
+	dc, err := c.Datacenter()
+	if err != nil {
+		return err
+	}
+
+	name, err := c.Name()
+	if err != nil {
+		return err
+	}
+
+	return client.FileManager().DeleteDatastoreFile(name, dc)
 }

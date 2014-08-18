@@ -136,6 +136,10 @@ func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst in
 	return mo.RetrievePropertiesForRequest(c, req, dst)
 }
 
+func (c *Client) FileManager() FileManager {
+	return FileManager{c}
+}
+
 func (c *Client) RootFolder() Folder {
 	return Folder{c.ServiceContent.RootFolder}
 }

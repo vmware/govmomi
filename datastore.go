@@ -16,7 +16,17 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"errors"
+	"fmt"
+	"io"
+	"net/http"
+	"net/url"
+	"os"
+
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type Datastore struct {
 	types.ManagedObjectReference
@@ -24,4 +34,81 @@ type Datastore struct {
 
 func (d Datastore) Reference() types.ManagedObjectReference {
 	return d.ManagedObjectReference
+}
+
+// URL for datastore access over HTTP
+func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error) {
+	var ds mo.Datastore
+	if err := c.Properties(d.Reference(), []string{"name"}, &ds); err != nil {
+		return nil, err
+	}
+
+	return &url.URL{
+		Scheme: c.u.Scheme,
+		Host:   c.u.Host,
+		Path:   fmt.Sprintf("/folder/%s", path),
+		RawQuery: url.Values{
+			"dcPath": []string{dc.Value},
+			"dsName": []string{ds.Name},
+		}.Encode(),
+	}, nil
+}
+
+// UploadFile uploads the local file to the given datastore URL
+func (d Datastore) UploadFile(c *Client, file string, u *url.URL) error {
+	s, err := os.Stat(file)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	req, err := http.NewRequest("PUT", u.String(), f)
+	if err != nil {
+		return err
+	}
+
+	req.ContentLength = s.Size()
+	req.Header.Set("Content-Type", "application/octet-stream")
+
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusCreated {
+		return nil
+
+	}
+	return errors.New(res.Status)
+}
+
+// DownloadFile downloads the given datastore URL to a local file
+func (d Datastore) DownloadFile(c *Client, file string, u *url.URL) error {
+	fh, err := os.Create(file)
+	if err != nil {
+		return err
+	}
+	defer fh.Close()
+
+	res, err := c.Get(u.String())
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
+	if res.StatusCode != http.StatusOK {
+		return errors.New(res.Status)
+	}
+
+	_, err = io.Copy(fh, res.Body)
+	if err != nil {
+		return err
+	}
+
+	return fh.Close()
 }
