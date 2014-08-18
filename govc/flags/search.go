@@ -91,7 +91,7 @@ func (s *SearchFlag) Process() error {
 func (s *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch s.t {
 	case SearchVirtualMachines:
-		return c.Search().FindByDatastorePath(dc, s.byDatastorePath)
+		return c.SearchIndex().FindByDatastorePath(dc, s.byDatastorePath)
 	default:
 		panic("unsupported type")
 	}
@@ -100,9 +100,9 @@ func (s *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datace
 func (s *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch s.t {
 	case SearchVirtualMachines:
-		return c.Search().FindByDnsName(dc, s.byDNSName, true)
+		return c.SearchIndex().FindByDnsName(dc, s.byDNSName, true)
 	case SearchHosts:
-		return c.Search().FindByDnsName(dc, s.byDNSName, false)
+		return c.SearchIndex().FindByDnsName(dc, s.byDNSName, false)
 	default:
 		panic("unsupported type")
 	}
@@ -110,15 +110,15 @@ func (s *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacenter) 
 
 func (s *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	// TODO(PN): The datacenter flag should not be set because it is ignored.
-	return c.Search().FindByInventoryPath(s.byInventoryPath)
+	return c.SearchIndex().FindByInventoryPath(s.byInventoryPath)
 }
 
 func (s *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch s.t {
 	case SearchVirtualMachines:
-		return c.Search().FindByIp(dc, s.byIP, true)
+		return c.SearchIndex().FindByIp(dc, s.byIP, true)
 	case SearchHosts:
-		return c.Search().FindByIp(dc, s.byIP, false)
+		return c.SearchIndex().FindByIp(dc, s.byIP, false)
 	default:
 		panic("unsupported type")
 	}
@@ -127,9 +127,9 @@ func (s *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (govm
 func (s *SearchFlag) searchByUUID(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch s.t {
 	case SearchVirtualMachines:
-		return c.Search().FindByUuid(dc, s.byUUID, true)
+		return c.SearchIndex().FindByUuid(dc, s.byUUID, true)
 	case SearchHosts:
-		return c.Search().FindByUuid(dc, s.byUUID, false)
+		return c.SearchIndex().FindByUuid(dc, s.byUUID, false)
 	default:
 		panic("unsupported type")
 	}
