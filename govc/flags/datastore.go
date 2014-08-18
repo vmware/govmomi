@@ -47,6 +47,10 @@ func (f *DatastoreFlag) Process() error {
 }
 
 func (f *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
+	if f.ds != nil {
+		return f.ds, nil
+	}
+
 	dc, err := f.Datacenter()
 	if err != nil {
 		return nil, err
