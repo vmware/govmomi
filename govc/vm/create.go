@@ -39,6 +39,7 @@ type create struct {
 	memory  int
 	cpus    int
 	guestID string
+	on      bool
 }
 
 func init() {
@@ -49,6 +50,7 @@ func (c *create) Register(f *flag.FlagSet) {
 	f.IntVar(&c.memory, "m", 128, "Size in MB of memory")
 	f.IntVar(&c.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&c.guestID, "g", "otherGuest", "Guest OS")
+	f.BoolVar(&c.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
 }
 
 func (c *create) Process() error { return nil }
@@ -108,9 +110,16 @@ func (c *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	_, err = folder.CreateVM(client, spec, pool, host)
+	vm, err := folder.CreateVM(client, spec, pool, host)
+	if err != nil {
+		return err
+	}
 
-	return err
+	if c.DiskFlag.IsSet() && c.on {
+		return vm.PowerOn(client)
+	}
+
+	return nil
 }
 
 func (c *create) addDevice(spec *types.VirtualMachineConfigSpec, device types.BaseVirtualDevice) {
