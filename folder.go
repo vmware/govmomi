@@ -66,5 +66,6 @@ func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool 
 		return err
 	}
 
-	return c.waitForTask(task)
+	_, err = c.waitForTask(task)
+	return err
 }

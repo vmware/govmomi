@@ -54,5 +54,6 @@ func (m VirtualDiskManager) CopyVirtualDisk(c *Client,
 		return err
 	}
 
-	return m.c.waitForTask(task)
+	_, err = m.c.waitForTask(task)
+	return err
 }
