@@ -94,7 +94,7 @@ func assignReference(v reflect.Value, ref types.ManagedObjectReference) bool {
 }
 
 // Returns pointer to type t.
-func objectContentToType(o types.ObjectContent) reflect.Value {
+func objectContentToType(o types.ObjectContent) (reflect.Value, error) {
 	t, ok := t[o.Obj.Type]
 	if !ok {
 		panic("unknown type: " + o.Obj.Type)
@@ -108,6 +108,11 @@ func objectContentToType(o types.ObjectContent) reflect.Value {
 	// Build map of property names to assignable reflect.Value
 	m := make(map[string]reflect.Value)
 	buildValueMap(v, m)
+
+	// Expect no properties in the missing set
+	for _, p := range o.MissingSet {
+		return v, soap.WrapVimFault(p.Fault.Fault)
+	}
 
 	for _, p := range o.PropSet {
 		rv, ok := m[p.Name]
@@ -140,13 +145,12 @@ func objectContentToType(o types.ObjectContent) reflect.Value {
 		}
 	}
 
-	return v
+	return v, nil
 }
 
-// RetrievePropertiesForRequest calls the RetrieveProperties method with the
-// specified request and decodes the response struct into the value pointed to
-// by dst.
-func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrieveProperties, dst interface{}) error {
+// LoadRetrievePropertiesResponse converts the response of a call to
+// RetrieveProperties to one or more managed objects.
+func LoadRetrievePropertiesResponse(res *types.RetrievePropertiesResponse, dst interface{}) error {
 	rt := reflect.TypeOf(dst)
 	if rt.Kind() != reflect.Ptr {
 		panic("need pointer")
@@ -166,21 +170,22 @@ func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrievePropert
 		panic("unexpected type")
 	}
 
-	res, err := methods.RetrieveProperties(r, &req)
-	if err != nil {
-		return err
-	}
-
 	if isSlice {
 		for _, p := range res.Returnval {
-			v := objectContentToType(p)
+			v, err := objectContentToType(p)
+			if err != nil {
+				return err
+			}
 			rv.Set(reflect.Append(rv, v.Elem()))
 		}
 	} else {
 		switch len(res.Returnval) {
 		case 0:
 		case 1:
-			v := objectContentToType(res.Returnval[0])
+			v, err := objectContentToType(res.Returnval[0])
+			if err != nil {
+				return err
+			}
 			rv.Set(v.Elem())
 		default:
 			// If dst is not a slice, expect to receive 0 or 1 results
@@ -189,6 +194,18 @@ func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrievePropert
 	}
 
 	return nil
+}
+
+// RetrievePropertiesForRequest calls the RetrieveProperties method with the
+// specified request and decodes the response struct into the value pointed to
+// by dst.
+func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrieveProperties, dst interface{}) error {
+	res, err := methods.RetrieveProperties(r, &req)
+	if err != nil {
+		return err
+	}
+
+	return LoadRetrievePropertiesResponse(res, dst)
 }
 
 // RetrieveProperties retrieves the properties of the managed object specified

@@ -16,7 +16,12 @@ limitations under the License.
 
 package soap
 
-import "fmt"
+import (
+	"fmt"
+	"reflect"
+
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type regularError struct {
 	err error
@@ -34,11 +39,26 @@ func (s soapFaultError) Error() string {
 	return fmt.Sprintf("%s: %s", s.fault.Code, s.fault.String)
 }
 
+type vimFaultError struct {
+	fault types.BaseMethodFault
+}
+
+func (v vimFaultError) Error() string {
+	typ := reflect.TypeOf(v.fault)
+	for typ.Kind() == reflect.Ptr {
+		typ = typ.Elem()
+	}
+
+	return typ.Name()
+}
+
 func Wrap(err error) error {
 	switch err.(type) {
 	case regularError:
 		return err
 	case soapFaultError:
+		return err
+	case vimFaultError:
 		return err
 	}
 
@@ -69,4 +89,17 @@ func IsSoapFault(err error) bool {
 
 func ToSoapFault(err error) *Fault {
 	return err.(soapFaultError).fault
+}
+
+func WrapVimFault(v types.BaseMethodFault) error {
+	return vimFaultError{v}
+}
+
+func IsVimFault(err error) bool {
+	_, ok := err.(vimFaultError)
+	return ok
+}
+
+func ToVimFault(err error) types.BaseMethodFault {
+	return err.(vimFaultError).fault
 }
