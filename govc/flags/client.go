@@ -17,10 +17,13 @@ limitations under the License.
 package flags
 
 import (
+	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"net/url"
 	"os"
+	"path"
 	"sync"
 
 	"github.com/vmware/govmomi"
@@ -71,14 +74,77 @@ func (c *ClientFlag) Process() error {
 	return nil
 }
 
+func (c *ClientFlag) sessionFile() string {
+	file := fmt.Sprintf("%s@%s", c.url.User.Username(), c.url.Host)
+	return path.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
+}
+
+func (c *ClientFlag) loadClient() (*govmomi.Client, error) {
+	var client govmomi.Client
+
+	f, err := os.Open(c.sessionFile())
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, nil
+		}
+
+		return nil, err
+	}
+
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	err = dec.Decode(&client)
+	if err != nil {
+		return nil, err
+	}
+
+	return &client, nil
+}
+
+func (c *ClientFlag) newClient() (*govmomi.Client, error) {
+	client, err := govmomi.NewClient(*c.url)
+	if err != nil {
+		return nil, err
+	}
+
+	p := c.sessionFile()
+	err = os.MkdirAll(path.Dir(p), 0700)
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := os.Create(p)
+	if err != nil {
+		return nil, err
+	}
+
+	defer f.Close()
+
+	enc := json.NewEncoder(f)
+	err = enc.Encode(client)
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
 func (c *ClientFlag) Client() (*govmomi.Client, error) {
 	if c.client != nil {
 		return c.client, nil
 	}
 
-	client, err := govmomi.NewClient(*c.url)
+	client, err := c.loadClient()
 	if err != nil {
 		return nil, err
+	}
+
+	if client == nil {
+		client, err = c.newClient()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	c.client = client

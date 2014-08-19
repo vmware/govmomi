@@ -33,8 +33,7 @@ var serviceInstance = types.ManagedObjectReference{
 }
 
 type Client struct {
-	*soap.Client
-
+	Client         *soap.Client
 	ServiceContent types.ServiceContent
 
 	u url.URL
@@ -96,6 +95,11 @@ func NewClient(u url.URL) (*Client, error) {
 	c.ServiceContent = sc
 
 	return &c, nil
+}
+
+// RoundTrip dispatches to the client's SOAP client RoundTrip function.
+func (c *Client) RoundTrip(req, res *soap.Envelope) error {
+	return c.Client.RoundTrip(req, res)
 }
 
 func (c *Client) UserSession() (*types.UserSession, error) {

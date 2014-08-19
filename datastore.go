@@ -95,10 +95,16 @@ func (d Datastore) DownloadFile(c *Client, file string, u *url.URL) error {
 	}
 	defer fh.Close()
 
-	res, err := c.Get(u.String())
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return err
 	}
+
+	res, err := c.Client.Do(req)
+	if err != nil {
+		return err
+	}
+
 	defer res.Body.Close()
 
 	if res.StatusCode != http.StatusOK {
