@@ -24,7 +24,7 @@ import (
 )
 
 type delete struct {
-	*flags.DatastorePath
+	*flags.DatastorePathFlag
 }
 
 func init() {
@@ -49,10 +49,10 @@ func (c *delete) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	name, err := c.Name()
+	path, err := c.Path()
 	if err != nil {
 		return err
 	}
 
-	return client.FileManager().DeleteDatastoreFile(name, dc)
+	return client.FileManager().DeleteDatastoreFile(path, dc)
 }

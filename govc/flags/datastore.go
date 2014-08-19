@@ -88,7 +88,7 @@ func (f *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
 	return f.ds, nil
 }
 
-func (f *DatastoreFlag) Properties(p []string) (*mo.Datastore, error) {
+func (f *DatastoreFlag) DatastoreProperties(p []string) (*mo.Datastore, error) {
 	c, err := f.Client()
 	if err != nil {
 		return nil, err
@@ -106,13 +106,21 @@ func (f *DatastoreFlag) Properties(p []string) (*mo.Datastore, error) {
 	return &ds, nil
 }
 
-func (f *DatastoreFlag) Name() (string, error) {
+func (f *DatastoreFlag) DatastoreName() (string, error) {
 	if f.name == "" {
-		ds, err := f.Properties([]string{"name"})
+		ds, err := f.DatastoreProperties([]string{"name"})
 		if err != nil {
 			return "", nil
 		}
 		f.name = ds.Name
 	}
 	return f.name, nil
+}
+
+func (f *DatastoreFlag) DatastorePath(name string) (string, error) {
+	ds, err := f.DatastoreName()
+	if err != nil {
+		return "", err
+	}
+	return fmt.Sprintf("[%s] %s", ds, name), nil
 }

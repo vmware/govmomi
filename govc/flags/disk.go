@@ -18,13 +18,11 @@ package flags
 
 import (
 	"flag"
-	"fmt"
 	"path/filepath"
 
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-// TODO: rework this to use DatastorePathFlag
 type DiskFlag struct {
 	*DatastoreFlag
 
@@ -44,16 +42,8 @@ func (f *DiskFlag) IsSet() bool {
 	return f.name != ""
 }
 
-func (f *DiskFlag) Name() (string, error) {
+func (f *DiskFlag) Path() (string, error) {
 	return f.DatastorePath(f.name)
-}
-
-func (f *DiskFlag) DatastorePath(name string) (string, error) {
-	ds, err := f.DatastoreFlag.Name()
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("[%s] %s", ds, name), nil
 }
 
 func (f *DiskFlag) Copy(name string) (types.BaseVirtualDevice, error) {
@@ -67,7 +57,7 @@ func (f *DiskFlag) Copy(name string) (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
-	src, err := f.Name()
+	src, err := f.Path()
 	if err != nil {
 		return nil, err
 	}
