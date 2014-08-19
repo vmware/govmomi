@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"net/url"
@@ -34,6 +35,9 @@ func (f *DatastorePathFlag) Register(fs *flag.FlagSet) {
 }
 
 func (f *DatastorePathFlag) Process() error {
+	if f.path == "" {
+		return errors.New("-n flag is required")
+	}
 	return nil
 }
 
