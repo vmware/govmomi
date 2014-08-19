@@ -16,15 +16,28 @@ limitations under the License.
 
 package types
 
-import "reflect"
+import (
+	"reflect"
+	"testing"
+)
 
-var t = map[string]reflect.Type{}
+func TestTypeFunc(t *testing.T) {
+	var ok bool
 
-type Func func(string) (reflect.Type, bool)
+	fn := TypeFunc()
 
-func TypeFunc() Func {
-	return func(name string) (reflect.Type, bool) {
-		typ, ok := t[name]
-		return typ, ok
+	_, ok = fn("unknown")
+	if ok {
+		t.Errorf("Expected ok==false")
+	}
+
+	actual, ok := fn("UserProfile")
+	if !ok {
+		t.Errorf("Expected ok==true")
+	}
+
+	expected := reflect.TypeOf(UserProfile{})
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
 	}
 }

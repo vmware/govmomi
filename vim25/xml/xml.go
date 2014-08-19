@@ -185,8 +185,8 @@ type Decoder struct {
 	// the attribute xmlns="DefaultSpace".
 	DefaultSpace string
 
-	// Types is used to map type names to actual types.
-	Types map[string]reflect.Type
+	// TypeFunc is used to map type names to actual types.
+	TypeFunc func(string) (reflect.Type, bool)
 
 	r              io.ByteReader
 	buf            bytes.Buffer
@@ -215,13 +215,6 @@ func NewDecoder(r io.Reader) *Decoder {
 	}
 	d.switchToReader(r)
 	return d
-}
-
-func (d *Decoder) AddType(typ reflect.Type) {
-	if d.Types == nil {
-		d.Types = make(map[string]reflect.Type)
-	}
-	d.Types[typ.Name()] = typ
 }
 
 // Token returns the next XML token in the input stream.

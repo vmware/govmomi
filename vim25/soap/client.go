@@ -26,7 +26,6 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
-	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -48,7 +47,6 @@ type Client struct {
 	http.Client
 
 	u url.URL
-	t map[string]reflect.Type
 
 	mu  sync.Mutex
 	c   int            // Request counter
@@ -66,7 +64,6 @@ func NewClient(u url.URL) *Client {
 
 	c.Jar, _ = cookiejar.New(nil)
 	c.u.User = nil
-	c.t = types.TypeMap()
 
 	if debug.Enabled() {
 		c.log = debug.NewFile("client.log")
@@ -159,7 +156,7 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	}
 
 	dec := xml.NewDecoder(httpres.Body)
-	dec.Types = c.t
+	dec.TypeFunc = types.TypeFunc()
 	err = dec.Decode(&resEnv)
 	if err != nil {
 		return err
