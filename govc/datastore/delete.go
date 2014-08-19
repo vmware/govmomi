@@ -24,7 +24,7 @@ import (
 )
 
 type delete struct {
-	*flags.DatastorePath
+	*flags.DatastorePathFlag
 }
 
 func init() {

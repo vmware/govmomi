@@ -24,7 +24,7 @@ import (
 )
 
 type download struct {
-	*flags.DatastorePath
+	*flags.DatastorePathFlag
 }
 
 func init() {

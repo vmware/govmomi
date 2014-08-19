@@ -24,7 +24,7 @@ import (
 )
 
 type upload struct {
-	*flags.DatastorePath
+	*flags.DatastorePathFlag
 }
 
 func init() {

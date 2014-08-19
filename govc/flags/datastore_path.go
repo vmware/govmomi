@@ -22,22 +22,22 @@ import (
 	"net/url"
 )
 
-type DatastorePath struct {
+type DatastorePathFlag struct {
 	*DatastoreFlag
 
 	path string
 	name string
 }
 
-func (f *DatastorePath) Register(fs *flag.FlagSet) {
+func (f *DatastorePathFlag) Register(fs *flag.FlagSet) {
 	fs.StringVar(&f.path, "n", "", "Datastore path name")
 }
 
-func (f *DatastorePath) Process() error {
+func (f *DatastorePathFlag) Process() error {
 	return nil
 }
 
-func (f *DatastorePath) Name() (string, error) {
+func (f *DatastorePathFlag) Name() (string, error) {
 	if f.name == "" {
 		ds, err := f.DatastoreFlag.Name()
 		if err != nil {
@@ -49,7 +49,7 @@ func (f *DatastorePath) Name() (string, error) {
 	return f.name, nil
 }
 
-func (f *DatastorePath) URL() (*url.URL, error) {
+func (f *DatastorePathFlag) URL() (*url.URL, error) {
 	client, err := f.Client()
 	if err != nil {
 		return nil, err
