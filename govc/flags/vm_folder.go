@@ -14,45 +14,49 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore
+package flags
 
 import (
 	"flag"
 
-	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi"
 )
 
-type download struct {
-	*flags.DatastorePath
+type VmFolderFlag struct {
+	*DatacenterFlag
+
+	folder *govmomi.Folder
+	// TODO: optional name + lookup. using default dc vm folder for now.
 }
 
-func init() {
-	cli.Register(&download{})
+func (f *VmFolderFlag) Register(fs *flag.FlagSet) {
 }
 
-func (c *download) Register(f *flag.FlagSet) {
-}
-
-func (c *download) Process() error {
+func (f *VmFolderFlag) Process() error {
 	return nil
 }
 
-func (c *download) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
-	if err != nil {
-		return err
+func (f *VmFolderFlag) VmFolder() (*govmomi.Folder, error) {
+	if f.folder != nil {
+		return f.folder, nil
 	}
 
-	ds, err := c.Datastore()
+	c, err := f.Client()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	u, err := c.URL()
+	dc, err := f.Datacenter()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return ds.DownloadFile(client, f.Arg(0), u)
+	folders, err := dc.Folders(c)
+	if err != nil {
+		return nil, err
+	}
+
+	f.folder = &folders.VmFolder
+
+	return f.folder, nil
 }

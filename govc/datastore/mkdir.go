@@ -26,7 +26,6 @@ import (
 )
 
 type mkdir struct {
-	*flags.ClientFlag
 	*flags.DatastorePath
 
 	createParents bool

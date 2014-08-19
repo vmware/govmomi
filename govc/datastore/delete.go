@@ -24,7 +24,6 @@ import (
 )
 
 type delete struct {
-	*flags.ClientFlag
 	*flags.DatastorePath
 }
 

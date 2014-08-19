@@ -17,11 +17,13 @@ limitations under the License.
 package govmomi
 
 import (
+	"errors"
 	"net/url"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -148,6 +150,10 @@ func (c *Client) SearchIndex() SearchIndex {
 	return SearchIndex{c}
 }
 
+func (c *Client) VirtualDiskManager() VirtualDiskManager {
+	return VirtualDiskManager{c}
+}
+
 // NewPropertyCollector creates a new property collector based on the
 // root property collector. It is the responsibility of the caller to
 // clean up the property collector when done.
@@ -167,4 +173,17 @@ func (c *Client) NewPropertyCollector() (*PropertyCollector, error) {
 	}
 
 	return &p, nil
+}
+
+func (c *Client) waitForTask(t tasks.Task) error {
+	info, err := t.Wait()
+	if err != nil {
+		return err
+	}
+
+	if info.Error != nil {
+		return errors.New(info.Error.LocalizedMessage)
+	}
+
+	return nil
 }

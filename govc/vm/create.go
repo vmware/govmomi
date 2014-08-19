@@ -17,18 +17,24 @@ limitations under the License.
 package vm
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"path/filepath"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type create struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.DatastoreFlag
+	*flags.VmFolderFlag
+	*flags.NetworkFlag
+	*flags.DiskFlag
 
 	memory  int
 	cpus    int
@@ -74,8 +80,83 @@ func (c *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	fmt.Printf("create %s VM '%s' on datastore %s, with %d MB memory (pool=%s)\n",
-		c.guestID, f.Arg(0), ds, c.memory, pool.Value)
+	name := f.Arg(0)
+
+	spec := types.VirtualMachineConfigSpec{
+		Name:     name,
+		GuestId:  c.guestID,
+		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", ds)},
+		NumCPUs:  c.cpus,
+		MemoryMB: int64(c.memory),
+	}
+
+	if err = c.addDisk(&spec); err != nil {
+		return err
+	}
+
+	if err = c.addNetwork(&spec); err != nil {
+		return err
+	}
+
+	client, err := c.DatastoreFlag.Client()
+	if err != nil {
+		return err
+	}
+
+	folder, err := c.VmFolder()
+	if err != nil {
+		return err
+	}
+
+	return folder.CreateVM(client, spec, pool, host)
+}
+
+func (c *create) addDevice(spec *types.VirtualMachineConfigSpec, device types.BaseVirtualDevice) {
+	spec.DeviceChange = append(spec.DeviceChange, &types.VirtualDeviceConfigSpec{
+		Operation: types.VirtualDeviceConfigSpecOperationAdd,
+		Device:    device,
+	})
+}
+
+func (c *create) addNetwork(spec *types.VirtualMachineConfigSpec) error {
+	network, err := c.NetworkFlag.Device()
+	if err != nil {
+		return err
+	}
+
+	c.addDevice(spec, network)
+
+	return nil
+}
+
+func (c *create) addDisk(spec *types.VirtualMachineConfigSpec) error {
+	if !c.DiskFlag.IsSet() {
+		return nil
+	}
+
+	diskPath, err := c.DiskFlag.Name()
+	if err != nil {
+		return err
+	}
+
+	switch filepath.Ext(diskPath) {
+	case ".vmdk":
+		device, err := c.DiskFlag.Controller()
+		if err != nil {
+			return err
+		}
+		c.addDevice(spec, device)
+
+		device, err = c.DiskFlag.Copy(fmt.Sprintf("%s/%s.vmdk", spec.Name, spec.Name))
+		if err != nil {
+			return err
+		}
+		c.addDevice(spec, device)
+	case ".iso":
+		return errors.New("TODO: .iso not supported yet")
+	default:
+		return errors.New("unsupported disk type")
+	}
 
 	return nil
 }
