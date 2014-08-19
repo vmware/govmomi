@@ -29,6 +29,8 @@ import (
 const cDescr = "ESX or vCenter URL"
 
 type ClientFlag struct {
+	*DebugFlag
+
 	register sync.Once
 	url      *url.URL
 	client   *govmomi.Client

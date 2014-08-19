@@ -130,7 +130,7 @@ func WaitForIP(vm *govmomi.VirtualMachine, c *govmomi.Client) error {
 			},
 			PropSet: []types.PropertySpec{
 				{
-					PathSet: []string{"guest"},
+					PathSet: []string{"guest.ipAddress"},
 					Type:    "VirtualMachine",
 				},
 			},
@@ -143,7 +143,7 @@ func WaitForIP(vm *govmomi.VirtualMachine, c *govmomi.Client) error {
 	}
 
 	for version := ""; ; {
-		var gi *types.GuestInfo
+		var prop *types.PropertyChange
 
 		res, err := p.WaitForUpdates(version)
 		if err != nil {
@@ -156,20 +156,26 @@ func WaitForIP(vm *govmomi.VirtualMachine, c *govmomi.Client) error {
 			for _, os := range fs.ObjectSet {
 				if os.Obj == vm.Reference() {
 					for _, c := range os.ChangeSet {
-						if c.Name == "guest" {
-							giv := c.Val.(types.GuestInfo)
-							gi = &giv
+						if c.Name != "guest.ipAddress" {
+							continue
 						}
+
+						if c.Op != types.PropertyChangeOpAssign {
+							continue
+						}
+
+						prop = &c
+						break
 					}
 				}
 			}
 		}
 
-		if gi == nil {
-			panic("expected GuestInfo update")
+		if prop == nil {
+			panic("expected to receive property change")
 		}
 
-		if gi.IpAddress != "" {
+		if prop.Val != nil {
 			return nil
 		}
 	}

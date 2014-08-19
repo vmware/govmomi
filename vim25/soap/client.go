@@ -25,19 +25,15 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
-	"os"
 	"reflect"
 	"strings"
+	"sync"
+	"time"
 
+	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
-
-var debug = false
-
-func init() {
-	debug = (os.Getenv("DEBUG") != "")
-}
 
 type RoundTripper interface {
 	RoundTrip(req, res *Envelope) error
@@ -48,6 +44,10 @@ type Client struct {
 
 	u url.URL
 	t map[string]reflect.Type
+
+	mu  sync.Mutex
+	c   int            // Request counter
+	log io.WriteCloser // Request log
 }
 
 func NewClient(u url.URL) *Client {
@@ -63,6 +63,10 @@ func NewClient(u url.URL) *Client {
 	c.u.User = nil
 	c.t = types.TypeMap()
 
+	if debug.Enabled() {
+		c.log = debug.NewFile("client.log")
+	}
+
 	return &c
 }
 
@@ -70,6 +74,11 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 	var httpreq *http.Request
 	var httpres *http.Response
 	var err error
+
+	c.mu.Lock()
+	num := c.c
+	c.c++
+	c.mu.Unlock()
 
 	b, err := xml.Marshal(req)
 	if err != nil {
@@ -85,21 +94,32 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 	httpreq.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
 	httpreq.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
 
-	if debug {
+	if debug.Enabled() {
 		b, _ := httputil.DumpRequest(httpreq, true)
-		fmt.Printf("----------- request\n")
-		fmt.Printf("%s\n", string(b))
+		wc := debug.NewFile(fmt.Sprintf("%04d.req", num))
+		wc.Write(b)
+		wc.Close()
 	}
 
+	tstart := time.Now()
 	httpres, err = c.Client.Do(httpreq)
+	tstop := time.Now()
+
+	if debug.Enabled() {
+		now := time.Now().Format("2006-01-02T15-04-05.999999999")
+		ms := tstop.Sub(tstart) / time.Millisecond
+		fmt.Fprintf(c.log, "%s: %4d took %6dms\n", now, num, ms)
+	}
+
 	if err != nil {
 		return err
 	}
 
-	if debug {
+	if debug.Enabled() {
 		b, _ := httputil.DumpResponse(httpres, true)
-		fmt.Printf("----------- response\n")
-		fmt.Printf("%s\n", string(b))
+		wc := debug.NewFile(fmt.Sprintf("%04d.res", num))
+		wc.Write(b)
+		wc.Close()
 	}
 
 	dec := xml.NewDecoder(httpres.Body)
