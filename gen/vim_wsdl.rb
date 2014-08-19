@@ -19,7 +19,8 @@ class Peek
   class Type
     attr_accessor :parent, :children, :klass
 
-    def initialize
+    def initialize(name)
+      @name = name
       @children = []
     end
 
@@ -28,7 +29,7 @@ class Peek
         # skip interface generation if there are direct refs to all children
         return children.size() != children.count { |s| Peek.refs[s] }
       end
-      false
+      return parent.nil? && !children.empty?
     end
   end
 
@@ -62,7 +63,7 @@ class Peek
 
   def self.register(name)
     raise unless name
-    types[name] ||= Type.new()
+    types[name] ||= Type.new(name)
   end
 
   def self.base?(name)

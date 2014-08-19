@@ -245,6 +245,12 @@ type BaseDvsNetworkRuleQualifier interface {
 	isDvsNetworkRuleQualifier()
 }
 
+func (b *DynamicData) isDynamicData() {}
+
+type BaseDynamicData interface {
+	isDynamicData()
+}
+
 func (b *Event) isEvent() {}
 
 type BaseEvent interface {
@@ -394,6 +400,12 @@ func (b *LicenseSource) isLicenseSource() {}
 
 type BaseLicenseSource interface {
 	isLicenseSource()
+}
+
+func (b *MethodFault) isMethodFault() {}
+
+type BaseMethodFault interface {
+	isMethodFault()
 }
 
 func (b *NetBIOSConfigInfo) isNetBIOSConfigInfo() {}
