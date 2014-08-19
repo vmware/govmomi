@@ -54,12 +54,12 @@ func (c *mkdir) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	name, err := c.Name()
+	path, err := c.Path()
 	if err != nil {
 		return err
 	}
 
-	err = client.FileManager().MakeDirectory(name, dc, c.createParents)
+	err = client.FileManager().MakeDirectory(path, dc, c.createParents)
 
 	// ignore EEXIST if -p flag is given
 	if err != nil && c.createParents {

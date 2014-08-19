@@ -19,38 +19,28 @@ package flags
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"net/url"
 )
 
 type DatastorePathFlag struct {
 	*DatastoreFlag
 
-	path string
 	name string
 }
 
 func (f *DatastorePathFlag) Register(fs *flag.FlagSet) {
-	fs.StringVar(&f.path, "n", "", "Datastore path name")
+	fs.StringVar(&f.name, "n", "", "Datastore path name")
 }
 
 func (f *DatastorePathFlag) Process() error {
-	if f.path == "" {
+	if f.name == "" {
 		return errors.New("-n flag is required")
 	}
 	return nil
 }
 
-func (f *DatastorePathFlag) Name() (string, error) {
-	if f.name == "" {
-		ds, err := f.DatastoreFlag.Name()
-		if err != nil {
-			return "", err
-		}
-		f.name = fmt.Sprintf("[%s] %s", ds, f.path)
-	}
-
-	return f.name, nil
+func (f *DatastorePathFlag) Path() (string, error) {
+	return f.DatastorePath(f.name)
 }
 
 func (f *DatastorePathFlag) URL() (*url.URL, error) {
@@ -69,5 +59,5 @@ func (f *DatastorePathFlag) URL() (*url.URL, error) {
 		return nil, err
 	}
 
-	return ds.URL(client, dc, f.path)
+	return ds.URL(client, dc, f.name)
 }

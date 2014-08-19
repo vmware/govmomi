@@ -75,7 +75,7 @@ func (c *create) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	ds, err := c.DatastoreFlag.Name()
+	ds, err := c.DatastoreName()
 	if err != nil {
 		return err
 	}
@@ -134,7 +134,7 @@ func (c *create) addDisk(spec *types.VirtualMachineConfigSpec) error {
 		return nil
 	}
 
-	diskPath, err := c.DiskFlag.Name()
+	diskPath, err := c.DiskFlag.Path()
 	if err != nil {
 		return err
 	}
