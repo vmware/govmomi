@@ -57,7 +57,7 @@ func TestLogin(t *testing.T) {
 	// check cookie is valid with a non-sdk request
 	u.User = nil // turn off Basic auth
 	u.Path = "/folder"
-	r, err := c.Get(u.String())
+	r, err := c.Client.Get(u.String())
 	if err != nil {
 		t.Error(err)
 	}
@@ -66,7 +66,7 @@ func TestLogin(t *testing.T) {
 	}
 
 	// sdk request should fail w/o a valid cookie
-	c.Jar = nil
+	c.Client.Jar = nil
 	if err := f(); err == nil {
 		t.Error("should fail")
 	}
