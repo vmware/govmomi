@@ -19,6 +19,7 @@ package soap
 import (
 	"bytes"
 	"crypto/tls"
+	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
@@ -68,6 +69,34 @@ func NewClient(u url.URL) *Client {
 	}
 
 	return &c
+}
+
+type marshaledClient struct {
+	Cookies []*http.Cookie
+	URL     *url.URL
+}
+
+func (c *Client) MarshalJSON() ([]byte, error) {
+	m := marshaledClient{
+		Cookies: c.Jar.Cookies(&c.u),
+		URL:     &c.u,
+	}
+
+	return json.Marshal(m)
+}
+
+func (c *Client) UnmarshalJSON(b []byte) error {
+	var m marshaledClient
+
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	*c = *NewClient(*m.URL)
+	c.Jar.SetCookies(m.URL, m.Cookies)
+
+	return nil
 }
 
 func (c *Client) RoundTrip(req, res *Envelope) error {
