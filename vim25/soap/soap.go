@@ -39,3 +39,7 @@ type Fault struct {
 		Fault types.AnyType `xml:",any"`
 	} `xml:"detail"`
 }
+
+func (f *Fault) VimFault() types.AnyType {
+	return f.Detail.Fault
+}

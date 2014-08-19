@@ -36,8 +36,12 @@ import (
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
+type HasFault interface {
+	Fault() *Fault
+}
+
 type RoundTripper interface {
-	RoundTrip(req, res *Envelope) error
+	RoundTrip(req, res HasFault) error
 }
 
 type Client struct {
@@ -99,17 +103,20 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (c *Client) RoundTrip(req, res *Envelope) error {
+func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	var httpreq *http.Request
 	var httpres *http.Response
 	var err error
+
+	reqEnv := Envelope{Body: reqBody}
+	resEnv := Envelope{Body: resBody}
 
 	c.mu.Lock()
 	num := c.c
 	c.c++
 	c.mu.Unlock()
 
-	b, err := xml.Marshal(req)
+	b, err := xml.Marshal(reqEnv)
 	if err != nil {
 		panic(err)
 	}
@@ -153,9 +160,13 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 
 	dec := xml.NewDecoder(httpres.Body)
 	dec.Types = c.t
-	err = dec.Decode(res)
+	err = dec.Decode(&resEnv)
 	if err != nil {
 		return err
+	}
+
+	if f := resBody.Fault(); f != nil {
+		return WrapSoapFault(f)
 	}
 
 	return err

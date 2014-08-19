@@ -631,24 +631,24 @@ class Operation
   type #{name}Body struct{
     Req *#{go_input} `xml:"urn:vim25 #{input},omitempty"`
     Res *#{go_output} `xml:"urn:vim25 #{output},omitempty"`
-    Fault *soap.Fault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+    Fault_ *soap.Fault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
   }
 
-  func (b *#{name}Body) fault() *soap.Fault { return b.Fault }
+  func (b *#{name}Body) Fault() *soap.Fault { return b.Fault_ }
 
 EOS
 
-    io.print "func %s(r soap.RoundTripper, req *%s) (*%s, Error) {\n" % [name, go_input, go_output]
+    io.print "func %s(r soap.RoundTripper, req *%s) (*%s, error) {\n" % [name, go_input, go_output]
     io.print <<EOS
-  var body = #{name}Body{
-    Req: req,
-  }
+  var reqBody, resBody #{name}Body
 
-  if err := roundTrip(r, &body); err != nil {
+  reqBody.Req = req
+
+  if err := r.RoundTrip(&reqBody, &resBody); err != nil {
     return nil, err
   }
 
-  return body.Res, nil
+  return resBody.Res, nil
 EOS
 
     io.print "}\n\n"
