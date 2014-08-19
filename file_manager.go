@@ -17,8 +17,6 @@ limitations under the License.
 package govmomi
 
 import (
-	"errors"
-
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
@@ -26,19 +24,6 @@ import (
 
 type FileManager struct {
 	c *Client
-}
-
-func (f FileManager) waitForTask(t tasks.Task) error {
-	info, err := t.Wait()
-	if err != nil {
-		return err
-	}
-
-	if info.Error != nil {
-		return errors.New(info.Error.LocalizedMessage)
-	}
-
-	return nil
 }
 
 // DeleteDatastoreFile deletes the specified file or folder from the datastore.
@@ -58,7 +43,7 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) error {
 		return err
 	}
 
-	return f.waitForTask(task)
+	return f.c.waitForTask(task)
 }
 
 // MakeDirectory creates a folder using the specified name.

@@ -17,8 +17,6 @@ limitations under the License.
 package govmomi
 
 import (
-	"errors"
-
 	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -31,19 +29,6 @@ func (v VirtualMachine) Reference() types.ManagedObjectReference {
 	return v.ManagedObjectReference
 }
 
-func (v VirtualMachine) waitForTask(t tasks.Task) error {
-	info, err := t.Wait()
-	if err != nil {
-		return err
-	}
-
-	if info.Error != nil {
-		return errors.New(info.Error.LocalizedMessage)
-	}
-
-	return nil
-}
-
 func (v VirtualMachine) PowerOn(c *Client) error {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
@@ -54,7 +39,7 @@ func (v VirtualMachine) PowerOn(c *Client) error {
 		return err
 	}
 
-	return v.waitForTask(task)
+	return c.waitForTask(task)
 }
 
 func (v VirtualMachine) PowerOff(c *Client) error {
@@ -67,7 +52,7 @@ func (v VirtualMachine) PowerOff(c *Client) error {
 		return err
 	}
 
-	return v.waitForTask(task)
+	return c.waitForTask(task)
 }
 
 func (v VirtualMachine) Reset(c *Client) error {
@@ -80,5 +65,5 @@ func (v VirtualMachine) Reset(c *Client) error {
 		return err
 	}
 
-	return v.waitForTask(task)
+	return c.waitForTask(task)
 }

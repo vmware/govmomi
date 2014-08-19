@@ -17,11 +17,13 @@ limitations under the License.
 package govmomi
 
 import (
+	"errors"
 	"net/url"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -167,4 +169,17 @@ func (c *Client) NewPropertyCollector() (*PropertyCollector, error) {
 	}
 
 	return &p, nil
+}
+
+func (c *Client) waitForTask(t tasks.Task) error {
+	info, err := t.Wait()
+	if err != nil {
+		return err
+	}
+
+	if info.Error != nil {
+		return errors.New(info.Error.LocalizedMessage)
+	}
+
+	return nil
 }
