@@ -179,15 +179,15 @@ func (c *Client) NewPropertyCollector() (*PropertyCollector, error) {
 	return &p, nil
 }
 
-func (c *Client) waitForTask(t tasks.Task) error {
+func (c *Client) waitForTask(t tasks.Task) (types.AnyType, error) {
 	info, err := t.Wait()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	if info.Error != nil {
-		return errors.New(info.Error.LocalizedMessage)
+		return nil, errors.New(info.Error.LocalizedMessage)
 	}
 
-	return nil
+	return info.Result, nil
 }

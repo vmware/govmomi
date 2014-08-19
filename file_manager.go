@@ -43,7 +43,8 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) error {
 		return err
 	}
 
-	return f.c.waitForTask(task)
+	_, err = f.c.waitForTask(task)
+	return err
 }
 
 // MakeDirectory creates a folder using the specified name.

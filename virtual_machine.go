@@ -39,7 +39,8 @@ func (v VirtualMachine) PowerOn(c *Client) error {
 		return err
 	}
 
-	return c.waitForTask(task)
+	_, err = c.waitForTask(task)
+	return err
 }
 
 func (v VirtualMachine) PowerOff(c *Client) error {
@@ -52,7 +53,8 @@ func (v VirtualMachine) PowerOff(c *Client) error {
 		return err
 	}
 
-	return c.waitForTask(task)
+	_, err = c.waitForTask(task)
+	return err
 }
 
 func (v VirtualMachine) Reset(c *Client) error {
@@ -65,5 +67,6 @@ func (v VirtualMachine) Reset(c *Client) error {
 		return err
 	}
 
-	return c.waitForTask(task)
+	_, err = c.waitForTask(task)
+	return err
 }
