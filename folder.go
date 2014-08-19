@@ -49,7 +49,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 	return rs, nil
 }
 
-func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) error {
+func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*VirtualMachine, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
 		Config: config,
@@ -63,9 +63,13 @@ func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool 
 
 	task, err := tasks.CreateVM(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = c.waitForTask(task)
-	return err
+	res, err := c.waitForTask(task)
+	if err != nil {
+		return nil, err
+	}
+
+	return &VirtualMachine{res.(types.ManagedObjectReference)}, err
 }

@@ -108,7 +108,9 @@ func (c *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return folder.CreateVM(client, spec, pool, host)
+	_, err = folder.CreateVM(client, spec, pool, host)
+
+	return err
 }
 
 func (c *create) addDevice(spec *types.VirtualMachineConfigSpec, device types.BaseVirtualDevice) {
