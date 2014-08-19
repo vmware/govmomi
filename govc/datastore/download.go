@@ -24,7 +24,6 @@ import (
 )
 
 type download struct {
-	*flags.ClientFlag
 	*flags.DatastorePath
 }
 

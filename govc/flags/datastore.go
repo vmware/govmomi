@@ -27,7 +27,6 @@ import (
 )
 
 type DatastoreFlag struct {
-	*ClientFlag
 	*DatacenterFlag
 
 	register sync.Once

@@ -24,7 +24,6 @@ import (
 )
 
 type upload struct {
-	*flags.ClientFlag
 	*flags.DatastorePath
 }
 
