@@ -14,38 +14,30 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package methods
+package types
 
 import (
-	"fmt"
-
-	"github.com/vmware/govmomi/vim25/soap"
+	"reflect"
+	"testing"
 )
 
-type Error interface {
-	error
+func TestTypeFunc(t *testing.T) {
+	var ok bool
 
-	IsFault() bool
-	Fault() interface{}
-}
+	fn := TypeFunc()
 
-type methodErr struct {
-	fault *soap.Fault
-	err   error
-}
-
-func (e *methodErr) Error() string {
-	if e.fault == nil {
-		return e.err.Error()
+	_, ok = fn("unknown")
+	if ok {
+		t.Errorf("Expected ok==false")
 	}
 
-	return fmt.Sprintf("%s: %s", e.fault.Code, e.fault.String)
-}
+	actual, ok := fn("UserProfile")
+	if !ok {
+		t.Errorf("Expected ok==true")
+	}
 
-func (e *methodErr) IsFault() bool {
-	return e.fault != nil
-}
-
-func (e *methodErr) Fault() interface{} {
-	return e.fault.Detail.Fault
+	expected := reflect.TypeOf(UserProfile{})
+	if !reflect.DeepEqual(expected, actual) {
+		t.Errorf("Expected: %#v, actual: %#v", expected, actual)
+	}
 }

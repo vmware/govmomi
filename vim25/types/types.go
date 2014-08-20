@@ -3247,7 +3247,7 @@ func init() {
 }
 
 type ArrayOfMethodFault struct {
-	MethodFault []MethodFault `xml:"MethodFault,omitempty"`
+	MethodFault []BaseMethodFault `xml:"MethodFault,omitempty,typeattr"`
 }
 
 func init() {
@@ -23024,8 +23024,8 @@ func init() {
 type LocalizedMethodFault struct {
 	DynamicData
 
-	Fault            MethodFault `xml:"fault"`
-	LocalizedMessage string      `xml:"localizedMessage,omitempty"`
+	Fault            BaseMethodFault `xml:"fault,typeattr"`
+	LocalizedMessage string          `xml:"localizedMessage,omitempty"`
 }
 
 func init() {
@@ -23632,7 +23632,7 @@ func init() {
 	t["MethodFault"] = reflect.TypeOf((*MethodFault)(nil)).Elem()
 }
 
-type MethodFaultFault MethodFault
+type MethodFaultFault BaseMethodFault
 
 func init() {
 	t["MethodFaultFault"] = reflect.TypeOf((*MethodFaultFault)(nil)).Elem()

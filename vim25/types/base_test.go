@@ -51,7 +51,7 @@ func TestAnyType(t *testing.T) {
 		}
 
 		dec := xml.NewDecoder(bytes.NewReader(test.Input))
-		dec.AddType(reflect.TypeOf(ArrayOfString{}))
+		dec.TypeFunc = TypeFunc()
 
 		err := dec.Decode(&r)
 		if err != nil {

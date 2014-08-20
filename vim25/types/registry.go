@@ -20,6 +20,11 @@ import "reflect"
 
 var t = map[string]reflect.Type{}
 
-func TypeMap() map[string]reflect.Type {
-	return t
+type Func func(string) (reflect.Type, bool)
+
+func TypeFunc() Func {
+	return func(name string) (reflect.Type, bool) {
+		typ, ok := t[name]
+		return typ, ok
+	}
 }

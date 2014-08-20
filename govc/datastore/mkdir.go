@@ -21,7 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -63,8 +63,9 @@ func (c *mkdir) Run(f *flag.FlagSet) error {
 
 	// ignore EEXIST if -p flag is given
 	if err != nil && c.createParents {
-		if merr, ok := err.(methods.Error); ok && merr.IsFault() {
-			if _, ok := merr.Fault().(types.FileAlreadyExists); ok {
+		if soap.IsSoapFault(err) {
+			soapFault := soap.ToSoapFault(err)
+			if _, ok := soapFault.VimFault().(types.FileAlreadyExists); ok {
 				return nil
 			}
 		}

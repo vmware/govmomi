@@ -98,7 +98,7 @@ func NewClient(u url.URL) (*Client, error) {
 }
 
 // RoundTrip dispatches to the client's SOAP client RoundTrip function.
-func (c *Client) RoundTrip(req, res *soap.Envelope) error {
+func (c *Client) RoundTrip(req, res soap.HasFault) error {
 	return c.Client.RoundTrip(req, res)
 }
 

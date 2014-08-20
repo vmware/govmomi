@@ -289,8 +289,8 @@ func (p *Decoder) typeForElement(start *StartElement) reflect.Type {
 	}
 
 	// Maybe the type is a custom type.
-	if p.Types != nil {
-		if typ, ok := p.Types[t]; ok {
+	if p.TypeFunc != nil {
+		if typ, ok := p.TypeFunc(t); ok {
 			return typ
 		}
 	}

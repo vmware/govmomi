@@ -26,9 +26,8 @@ import (
 	"net/http/cookiejar"
 	"net/http/httputil"
 	"net/url"
-	"reflect"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/vmware/govmomi/vim25/debug"
@@ -36,24 +35,33 @@ import (
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
-type RoundTripper interface {
-	RoundTrip(req, res *Envelope) error
+type HasFault interface {
+	Fault() *Fault
 }
+
+type RoundTripper interface {
+	RoundTrip(req, res HasFault) error
+}
+
+var cn uint64 // Client counter
 
 type Client struct {
 	http.Client
 
 	u url.URL
-	t map[string]reflect.Type
 
-	mu  sync.Mutex
-	c   int            // Request counter
+	cn  uint64         // Client counter
+	rn  uint64         // Request counter
 	log io.WriteCloser // Request log
 }
 
 func NewClient(u url.URL) *Client {
+
 	c := Client{
 		u: u,
+
+		cn: atomic.AddUint64(&cn, 1),
+		rn: 0,
 	}
 
 	if c.u.Scheme == "https" {
@@ -62,10 +70,9 @@ func NewClient(u url.URL) *Client {
 
 	c.Jar, _ = cookiejar.New(nil)
 	c.u.User = nil
-	c.t = types.TypeMap()
 
 	if debug.Enabled() {
-		c.log = debug.NewFile("client.log")
+		c.log = debug.NewFile(fmt.Sprintf("%d-client.log", c.cn))
 	}
 
 	return &c
@@ -99,17 +106,17 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (c *Client) RoundTrip(req, res *Envelope) error {
+func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	var httpreq *http.Request
 	var httpres *http.Response
 	var err error
 
-	c.mu.Lock()
-	num := c.c
-	c.c++
-	c.mu.Unlock()
+	reqEnv := Envelope{Body: reqBody}
+	resEnv := Envelope{Body: resBody}
 
-	b, err := xml.Marshal(req)
+	num := atomic.AddUint64(&c.rn, 1)
+
+	b, err := xml.Marshal(reqEnv)
 	if err != nil {
 		panic(err)
 	}
@@ -125,7 +132,7 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 
 	if debug.Enabled() {
 		b, _ := httputil.DumpRequest(httpreq, true)
-		wc := debug.NewFile(fmt.Sprintf("%04d.req", num))
+		wc := debug.NewFile(fmt.Sprintf("%d-%04d.req", c.cn, num))
 		wc.Write(b)
 		wc.Close()
 	}
@@ -146,16 +153,20 @@ func (c *Client) RoundTrip(req, res *Envelope) error {
 
 	if debug.Enabled() {
 		b, _ := httputil.DumpResponse(httpres, true)
-		wc := debug.NewFile(fmt.Sprintf("%04d.res", num))
+		wc := debug.NewFile(fmt.Sprintf("%d-%04d.res", c.cn, num))
 		wc.Write(b)
 		wc.Close()
 	}
 
 	dec := xml.NewDecoder(httpres.Body)
-	dec.Types = c.t
-	err = dec.Decode(res)
+	dec.TypeFunc = types.TypeFunc()
+	err = dec.Decode(&resEnv)
 	if err != nil {
 		return err
+	}
+
+	if f := resBody.Fault(); f != nil {
+		return WrapSoapFault(f)
 	}
 
 	return err

@@ -14,32 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package soap
+package mo
 
 import (
+	"os"
+	"testing"
+
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
-type Envelope struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Envelope"`
-	Header  *Header  `xml:",omitempty"`
-	Body    interface{}
-}
+func TestNotAuthenticated(t *testing.T) {
+	f, err := os.Open("fixtures/not_authenticated.xml")
+	if err != nil {
+		panic(err)
+	}
 
-type Header struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Header"`
-}
+	defer f.Close()
 
-type Fault struct {
-	XMLName xml.Name `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault"`
-	Code    string   `xml:"faultcode"`
-	String  string   `xml:"faultstring"`
-	Detail  struct {
-		Fault types.AnyType `xml:",any"`
-	} `xml:"detail"`
-}
+	var b types.RetrievePropertiesResponse
 
-func (f *Fault) VimFault() types.AnyType {
-	return f.Detail.Fault
+	dec := xml.NewDecoder(f)
+	dec.TypeFunc = types.TypeFunc()
+	if err := dec.Decode(&b); err != nil {
+		panic(err)
+	}
+
+	var s SessionManager
+
+	err = LoadRetrievePropertiesResponse(&b, &s)
+	if !soap.IsVimFault(err) {
+		t.Errorf("Expected IsVimFault")
+	}
+
+	fault := soap.ToVimFault(err).(*types.NotAuthenticated)
+	if fault.PrivilegeId != "System.View" {
+		t.Errorf("Expected first fault to be returned")
+	}
 }
