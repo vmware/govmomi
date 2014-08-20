@@ -29,21 +29,37 @@ type OutputWriter interface {
 
 type OutputFlag struct {
 	JSON bool
+	TTY  bool
 }
 
-func (o *OutputFlag) Register(f *flag.FlagSet) {
-	f.BoolVar(&o.JSON, "json", false, "Enable JSON output")
+func (flag *OutputFlag) Register(f *flag.FlagSet) {
+	f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
 }
 
-func (o *OutputFlag) Process() error {
+func (flag *OutputFlag) Process() error {
+	if !flag.JSON {
+		// Assume we have a tty if not outputting JSON
+		flag.TTY = true
+	}
+
 	return nil
 }
 
-func (o *OutputFlag) WriteResult(result OutputWriter) error {
+func (flag *OutputFlag) Write(b []byte) (int, error) {
+	if !flag.TTY {
+		return 0, nil
+	}
+
+	n, err := os.Stdout.Write(b)
+	os.Stdout.Sync()
+	return n, err
+}
+
+func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 	var err error
 	var out = os.Stdout
 
-	if o.JSON {
+	if flag.JSON {
 		enc := json.NewEncoder(out)
 		err = enc.Encode(result)
 	} else {

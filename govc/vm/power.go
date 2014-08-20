@@ -19,6 +19,7 @@ package vm
 import (
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -68,14 +69,24 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 	for _, vm := range vms {
 		switch {
 		case cmd.On:
+			fmt.Fprintf(cmd, "Powering on %s... ", vm.Reference())
 			err = vm.PowerOn(c)
 		case cmd.Off:
+			fmt.Fprintf(cmd, "Powering off %s... ", vm.Reference())
 			err = vm.PowerOff(c)
 		}
 
-		if !cmd.Force && err != nil {
-			return err
+		if err == nil {
+			fmt.Fprintf(cmd, "OK\n")
+			continue
 		}
+
+		if cmd.Force {
+			fmt.Fprintf(cmd, "Error: %s\n", err)
+			continue
+		}
+
+		return err
 	}
 
 	return nil
