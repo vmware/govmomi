@@ -22,6 +22,7 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 const (
@@ -32,6 +33,7 @@ const (
 type SearchFlag struct {
 	*ClientFlag
 	*DatacenterFlag
+	*ListFlag
 
 	t int
 
@@ -181,6 +183,34 @@ func (s *SearchFlag) search() (govmomi.Reference, error) {
 	return ref, nil
 }
 
+func (s *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
+	c, err := s.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	dc, err := s.Datacenter()
+	if err != nil {
+		return nil, err
+	}
+
+	f, err := dc.Folders(c)
+	if err != nil {
+		return nil, err
+	}
+
+	return f, nil
+}
+
+func (s *SearchFlag) relativeToVmFolder() (types.ManagedObjectReference, error) {
+	f, err := s.relativeTo()
+	if err != nil {
+		return types.ManagedObjectReference{}, err
+	}
+
+	return f.VmFolder.Reference(), nil
+}
+
 func (s *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 	ref, err := s.search()
 	if err != nil {
@@ -193,6 +223,40 @@ func (s *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 	}
 
 	return vm, nil
+}
+
+func (s *SearchFlag) VirtualMachines(arg string) ([]*govmomi.VirtualMachine, error) {
+	var out []*govmomi.VirtualMachine
+
+	if s.Isset() {
+		vm, err := s.VirtualMachine()
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, vm)
+		return out, nil
+	}
+
+	// List virtual machines
+	if arg == "" {
+		return nil, errors.New("no argument")
+	}
+
+	es, err := s.List(arg, s.relativeToVmFolder)
+	if err != nil {
+		return nil, err
+	}
+
+	// Filter non-VMs
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "VirtualMachine" {
+			out = append(out, &govmomi.VirtualMachine{ref})
+		}
+	}
+
+	return out, nil
 }
 
 func (s *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
