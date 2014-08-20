@@ -27,6 +27,7 @@ import (
 	"sync"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
 const cDescr = "ESX or vCenter URL"
@@ -130,17 +131,45 @@ func (c *ClientFlag) newClient() (*govmomi.Client, error) {
 	return client, nil
 }
 
+// currentSessionValid returns whether or not the current session is valid. It
+// is valid if the "currentSession" field of the SessionManager managed object
+// can be retrieved. It is not valid it cannot be retrieved, but no error
+// occurs. An error is returned otherwise.
+func currentSessionValid(c *govmomi.Client) (bool, error) {
+	var sm mo.SessionManager
+
+	err := c.Properties(*c.ServiceContent.SessionManager, []string{"currentSession"}, &sm)
+	if err != nil {
+		return false, err
+	}
+
+	if sm.CurrentSession == nil {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func (c *ClientFlag) Client() (*govmomi.Client, error) {
 	if c.client != nil {
 		return c.client, nil
 	}
+
+	var ok = false
 
 	client, err := c.loadClient()
 	if err != nil {
 		return nil, err
 	}
 
-	if client == nil {
+	if client != nil {
+		ok, err = currentSessionValid(client)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if !ok {
 		client, err = c.newClient()
 		if err != nil {
 			return nil, err
