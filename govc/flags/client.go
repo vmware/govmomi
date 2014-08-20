@@ -52,9 +52,11 @@ func (c *ClientFlag) String() string {
 func (c *ClientFlag) Set(s string) error {
 	var err error
 
-	c.url, err = url.Parse(s)
-	if err != nil {
-		return err
+	if s != "" {
+		c.url, err = url.Parse(s)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
