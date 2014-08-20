@@ -17,6 +17,7 @@ limitations under the License.
 package vm
 
 import (
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -34,6 +35,7 @@ type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 	*flags.SearchFlag
+	*flags.ListFlag
 
 	WaitForIP bool
 }
@@ -52,15 +54,60 @@ func (c *info) Register(f *flag.FlagSet) {
 
 func (c *info) Process() error { return nil }
 
+func (c *info) PathRelativeTo() (types.ManagedObjectReference, error) {
+	client, err := c.Client()
+	if err != nil {
+		return types.ManagedObjectReference{}, err
+	}
+
+	dc, err := c.Datacenter()
+	if err != nil {
+		return types.ManagedObjectReference{}, err
+	}
+
+	f, err := dc.Folders(client)
+	if err != nil {
+		return types.ManagedObjectReference{}, err
+	}
+
+	return f.VmFolder.Reference(), nil
+}
+
 func (c *info) Run(f *flag.FlagSet) error {
 	client, err := c.Client()
 	if err != nil {
 		return err
 	}
 
-	vm, err := c.VirtualMachine()
-	if err != nil {
-		return err
+	var vm *govmomi.VirtualMachine
+
+	if c.SearchFlag.Isset() {
+		vm, err = c.SearchFlag.VirtualMachine()
+		if err != nil {
+			return err
+		}
+	} else {
+		arg := f.Arg(0)
+		if arg == "" {
+			return errors.New("no argument")
+		}
+
+		es, err := c.ListFlag.List(f.Arg(0), c.PathRelativeTo)
+		if err != nil {
+			return err
+		}
+
+		for _, e := range es {
+			ref := e.Object.Reference()
+			if ref.Type == "VirtualMachine" {
+				vm = &govmomi.VirtualMachine{ref}
+				break
+			}
+		}
+
+		if vm == nil {
+			return errors.New("argument doesn't resolve to VM")
+		}
 	}
 
 	var res infoResult
@@ -78,7 +125,7 @@ func (c *info) Run(f *flag.FlagSet) error {
 			return err
 		}
 
-		if res.VirtualMachine.Guest.IpAddress == "" {
+		if c.WaitForIP && res.VirtualMachine.Guest.IpAddress == "" {
 			err = WaitForIP(vm, client)
 			if err != nil {
 				return err
