@@ -20,7 +20,10 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/flags/list"
+	"github.com/vmware/govmomi/vim25/types"
 )
+
+type ListRelativeFunc func() (types.ManagedObjectReference, error)
 
 type ListFlag struct {
 	*DatastoreFlag
@@ -31,11 +34,11 @@ func (l *ListFlag) Register(f *flag.FlagSet) {}
 
 func (l *ListFlag) Process() error { return nil }
 
-func (l *ListFlag) ListSlice(args []string) ([]list.Element, error) {
+func (l *ListFlag) ListSlice(args []string, fn ListRelativeFunc) ([]list.Element, error) {
 	var out []list.Element
 
 	for _, arg := range args {
-		es, err := l.List(arg)
+		es, err := l.List(arg, fn)
 		if err != nil {
 			return nil, err
 		}
@@ -46,7 +49,7 @@ func (l *ListFlag) ListSlice(args []string) ([]list.Element, error) {
 	return out, nil
 }
 
-func (l *ListFlag) List(arg string) ([]list.Element, error) {
+func (l *ListFlag) List(arg string, fn ListRelativeFunc) ([]list.Element, error) {
 	client, err := l.Client()
 	if err != nil {
 		return nil, err
@@ -63,13 +66,8 @@ func (l *ListFlag) List(arg string) ([]list.Element, error) {
 			for len(parts) > 0 && parts[0] == ".." {
 				parts = parts[1:]
 			}
-		case ".": // Relative to datacenter
-			dc, err := l.Datacenter()
-			if err != nil {
-				return nil, err
-			}
-
-			root = dc.Reference()
+		case ".": // Relative to whatever
+			root, err = fn()
 			prefix = "/" + root.Value
 			parts = parts[1:]
 		}
