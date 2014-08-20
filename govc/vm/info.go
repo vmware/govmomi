@@ -23,11 +23,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type info struct {
@@ -83,7 +81,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 			}
 
 			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
-				err = WaitForIP(vm, c)
+				_, err = vm.WaitForIP(c)
 				if err != nil {
 					return err
 				}
@@ -121,72 +119,4 @@ func (r *infoResult) WriteTo(w io.Writer) error {
 	}
 
 	return tw.Flush()
-}
-
-func WaitForIP(vm *govmomi.VirtualMachine, c *govmomi.Client) error {
-	p, err := c.NewPropertyCollector()
-	if err != nil {
-		return err
-	}
-
-	defer p.Destroy()
-
-	req := types.CreateFilter{
-		Spec: types.PropertyFilterSpec{
-			ObjectSet: []types.ObjectSpec{
-				{
-					Obj: vm.Reference(),
-				},
-			},
-			PropSet: []types.PropertySpec{
-				{
-					PathSet: []string{"guest.ipAddress"},
-					Type:    "VirtualMachine",
-				},
-			},
-		},
-	}
-
-	err = p.CreateFilter(req)
-	if err != nil {
-		return err
-	}
-
-	for version := ""; ; {
-		var prop *types.PropertyChange
-
-		res, err := p.WaitForUpdates(version)
-		if err != nil {
-			return err
-		}
-
-		version = res.Version
-
-		for _, fs := range res.FilterSet {
-			for _, os := range fs.ObjectSet {
-				if os.Obj == vm.Reference() {
-					for _, c := range os.ChangeSet {
-						if c.Name != "guest.ipAddress" {
-							continue
-						}
-
-						if c.Op != types.PropertyChangeOpAssign {
-							continue
-						}
-
-						prop = &c
-						break
-					}
-				}
-			}
-		}
-
-		if prop == nil {
-			panic("expected to receive property change")
-		}
-
-		if prop.Val != nil {
-			return nil
-		}
-	}
 }

@@ -84,3 +84,79 @@ func (v VirtualMachine) Destroy(c *Client) error {
 	_, err = c.waitForTask(task)
 	return err
 }
+
+func (v VirtualMachine) WaitForIP(c *Client) (string, error) {
+	p, err := c.NewPropertyCollector()
+	if err != nil {
+		return "", err
+	}
+
+	defer p.Destroy()
+
+	ref := v.Reference()
+	req := types.CreateFilter{
+		Spec: types.PropertyFilterSpec{
+			ObjectSet: []types.ObjectSpec{
+				{
+					Obj: ref,
+				},
+			},
+			PropSet: []types.PropertySpec{
+				{
+					PathSet: []string{"guest.ipAddress"},
+					Type:    ref.Type,
+				},
+			},
+		},
+	}
+
+	err = p.CreateFilter(req)
+	if err != nil {
+		return "", err
+	}
+
+	for version := ""; ; {
+		var prop *types.PropertyChange
+
+		res, err := p.WaitForUpdates(version)
+		if err != nil {
+			return "", err
+		}
+
+		version = res.Version
+
+		for _, fs := range res.FilterSet {
+			for _, os := range fs.ObjectSet {
+				if os.Obj == ref {
+					for _, c := range os.ChangeSet {
+						if c.Name != "guest.ipAddress" {
+							continue
+						}
+
+						if c.Op != types.PropertyChangeOpAssign {
+							continue
+						}
+
+						prop = &c
+						break
+					}
+				}
+			}
+		}
+
+		if prop == nil {
+			panic("expected to receive property change")
+		}
+
+		if prop.Val != nil {
+			s, ok := prop.Val.(string)
+			if !ok {
+				panic("expected to receive string")
+			}
+
+			if s != "" {
+				return s, nil
+			}
+		}
+	}
+}
