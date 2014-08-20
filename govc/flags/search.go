@@ -55,6 +55,10 @@ func NewSearchFlag(t int) *SearchFlag {
 }
 
 func (s *SearchFlag) Register(f *flag.FlagSet) {
+	if s.t == 0 {
+		panic("search type not set")
+	}
+
 	switch s.t {
 	case SearchVirtualMachines:
 		f.StringVar(&s.byDatastorePath, "path", "", "Find VM by path to .vmx file")

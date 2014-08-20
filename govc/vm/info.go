@@ -40,11 +40,11 @@ type info struct {
 }
 
 func init() {
-	i := info{
+	flag := info{
 		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
 	}
 
-	cli.Register(&i)
+	cli.Register(&flag)
 }
 
 func (c *info) Register(f *flag.FlagSet) {

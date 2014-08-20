@@ -25,12 +25,15 @@ import (
 
 type destroy struct {
 	*flags.ClientFlag
-	*flags.DatacenterFlag
 	*flags.SearchFlag
 }
 
 func init() {
-	cli.Register(&destroy{})
+	flag := destroy{
+		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
+	}
+
+	cli.Register(&flag)
 }
 
 func (c *destroy) Register(f *flag.FlagSet) {

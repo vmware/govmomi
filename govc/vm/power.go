@@ -26,7 +26,6 @@ import (
 
 type power struct {
 	*flags.ClientFlag
-	*flags.DatacenterFlag
 	*flags.SearchFlag
 
 	On  bool
@@ -34,7 +33,11 @@ type power struct {
 }
 
 func init() {
-	cli.Register(&power{})
+	flag := power{
+		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
+	}
+
+	cli.Register(&flag)
 }
 
 func (c *power) Register(f *flag.FlagSet) {
