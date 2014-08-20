@@ -70,3 +70,17 @@ func (v VirtualMachine) Reset(c *Client) error {
 	_, err = c.waitForTask(task)
 	return err
 }
+
+func (v VirtualMachine) Destroy(c *Client) error {
+	req := types.Destroy_Task{
+		This: v.Reference(),
+	}
+
+	task, err := tasks.Destroy(c, &req)
+	if err != nil {
+		return err
+	}
+
+	_, err = c.waitForTask(task)
+	return err
+}
