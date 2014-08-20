@@ -17,7 +17,6 @@ limitations under the License.
 package vm
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -54,60 +53,15 @@ func (c *info) Register(f *flag.FlagSet) {
 
 func (c *info) Process() error { return nil }
 
-func (c *info) PathRelativeTo() (types.ManagedObjectReference, error) {
-	client, err := c.Client()
-	if err != nil {
-		return types.ManagedObjectReference{}, err
-	}
-
-	dc, err := c.Datacenter()
-	if err != nil {
-		return types.ManagedObjectReference{}, err
-	}
-
-	f, err := dc.Folders(client)
-	if err != nil {
-		return types.ManagedObjectReference{}, err
-	}
-
-	return f.VmFolder.Reference(), nil
-}
-
 func (c *info) Run(f *flag.FlagSet) error {
 	client, err := c.Client()
 	if err != nil {
 		return err
 	}
 
-	var vm *govmomi.VirtualMachine
-
-	if c.SearchFlag.Isset() {
-		vm, err = c.SearchFlag.VirtualMachine()
-		if err != nil {
-			return err
-		}
-	} else {
-		arg := f.Arg(0)
-		if arg == "" {
-			return errors.New("no argument")
-		}
-
-		es, err := c.ListFlag.List(f.Arg(0), c.PathRelativeTo)
-		if err != nil {
-			return err
-		}
-
-		for _, e := range es {
-			ref := e.Object.Reference()
-			if ref.Type == "VirtualMachine" {
-				vm = &govmomi.VirtualMachine{ref}
-				break
-			}
-		}
-
-		if vm == nil {
-			return errors.New("argument doesn't resolve to VM")
-		}
+	vms, err := c.VirtualMachines(f.Arg(0))
+	if err != nil {
+		return err
 	}
 
 	var res infoResult
@@ -119,44 +73,53 @@ func (c *info) Run(f *flag.FlagSet) error {
 		props = []string{"summary", "guest"} // Load summary
 	}
 
-	for {
-		err = client.Properties(vm.Reference(), props, &res.VirtualMachine)
-		if err != nil {
-			return err
-		}
+	for _, vm := range vms {
+		for {
+			var mvm mo.VirtualMachine
 
-		if c.WaitForIP && res.VirtualMachine.Guest.IpAddress == "" {
-			err = WaitForIP(vm, client)
+			err = client.Properties(vm.Reference(), props, &mvm)
 			if err != nil {
 				return err
 			}
 
-			// Reload virtual machine object
-			continue
-		}
+			if c.WaitForIP && mvm.Guest.IpAddress == "" {
+				err = WaitForIP(vm, client)
+				if err != nil {
+					return err
+				}
 
-		break
+				// Reload virtual machine object
+				continue
+			}
+
+			res.VirtualMachines = append(res.VirtualMachines, mvm)
+			break
+		}
 	}
 
 	return c.WriteResult(&res)
 }
 
 type infoResult struct {
-	VirtualMachine mo.VirtualMachine
+	VirtualMachines []mo.VirtualMachine
 }
 
 func (r *infoResult) WriteTo(w io.Writer) error {
-	s := r.VirtualMachine.Summary
+	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
-	fmt.Fprintf(tw, "UUID:\t%s\n", s.Config.Uuid)
-	fmt.Fprintf(tw, "Guest name:\t%s\n", s.Config.GuestFullName)
-	fmt.Fprintf(tw, "Memory:\t%dMB\n", s.Config.MemorySizeMB)
-	fmt.Fprintf(tw, "CPU:\t%d vCPU(s)\n", s.Config.NumCpu)
-	fmt.Fprintf(tw, "Power state:\t%s\n", s.Runtime.PowerState)
-	fmt.Fprintf(tw, "Boot time:\t%s\n", s.Runtime.BootTime)
-	fmt.Fprintf(tw, "IP address:\t%s\n", s.Guest.IpAddress)
+	for _, vm := range r.VirtualMachines {
+		s := vm.Summary
+
+		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
+		fmt.Fprintf(tw, "  UUID:\t%s\n", s.Config.Uuid)
+		fmt.Fprintf(tw, "  Guest name:\t%s\n", s.Config.GuestFullName)
+		fmt.Fprintf(tw, "  Memory:\t%dMB\n", s.Config.MemorySizeMB)
+		fmt.Fprintf(tw, "  CPU:\t%d vCPU(s)\n", s.Config.NumCpu)
+		fmt.Fprintf(tw, "  Power state:\t%s\n", s.Runtime.PowerState)
+		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
+		fmt.Fprintf(tw, "  IP address:\t%s\n", s.Guest.IpAddress)
+	}
+
 	return tw.Flush()
 }
 
