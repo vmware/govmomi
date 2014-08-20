@@ -35,8 +35,6 @@ var serviceInstance = types.ManagedObjectReference{
 type Client struct {
 	Client         *soap.Client
 	ServiceContent types.ServiceContent
-
-	u url.URL
 }
 
 func serviceContent(r soap.RoundTripper) (types.ServiceContent, error) {
@@ -78,8 +76,6 @@ func login(r soap.RoundTripper, u url.URL, sc types.ServiceContent) error {
 func NewClient(u url.URL) (*Client, error) {
 	c := Client{
 		Client: soap.NewClient(u),
-
-		u: u,
 	}
 
 	sc, err := serviceContent(c.Client)
@@ -87,7 +83,7 @@ func NewClient(u url.URL) (*Client, error) {
 		return nil, err
 	}
 
-	err = login(c.Client, c.u, sc)
+	err = login(c.Client, u, sc)
 	if err != nil {
 		return nil, err
 	}

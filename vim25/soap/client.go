@@ -78,6 +78,10 @@ func NewClient(u url.URL) *Client {
 	return &c
 }
 
+func (c *Client) URL() url.URL {
+	return c.u
+}
+
 type marshaledClient struct {
 	Cookies []*http.Cookie
 	URL     *url.URL
