@@ -27,7 +27,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"strings"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/vmware/govmomi/vim25/debug"
@@ -43,19 +43,25 @@ type RoundTripper interface {
 	RoundTrip(req, res HasFault) error
 }
 
+var cn uint64 // Client counter
+
 type Client struct {
 	http.Client
 
 	u url.URL
 
-	mu  sync.Mutex
-	c   int            // Request counter
+	cn  uint64         // Client counter
+	rn  uint64         // Request counter
 	log io.WriteCloser // Request log
 }
 
 func NewClient(u url.URL) *Client {
+
 	c := Client{
 		u: u,
+
+		cn: atomic.AddUint64(&cn, 1),
+		rn: 0,
 	}
 
 	if c.u.Scheme == "https" {
@@ -66,7 +72,7 @@ func NewClient(u url.URL) *Client {
 	c.u.User = nil
 
 	if debug.Enabled() {
-		c.log = debug.NewFile("client.log")
+		c.log = debug.NewFile(fmt.Sprintf("%d-client.log", c.cn))
 	}
 
 	return &c
@@ -108,10 +114,7 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	reqEnv := Envelope{Body: reqBody}
 	resEnv := Envelope{Body: resBody}
 
-	c.mu.Lock()
-	num := c.c
-	c.c++
-	c.mu.Unlock()
+	num := atomic.AddUint64(&c.rn, 1)
 
 	b, err := xml.Marshal(reqEnv)
 	if err != nil {
@@ -129,7 +132,7 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 
 	if debug.Enabled() {
 		b, _ := httputil.DumpRequest(httpreq, true)
-		wc := debug.NewFile(fmt.Sprintf("%04d.req", num))
+		wc := debug.NewFile(fmt.Sprintf("%d-%04d.req", c.cn, num))
 		wc.Write(b)
 		wc.Close()
 	}
@@ -150,7 +153,7 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 
 	if debug.Enabled() {
 		b, _ := httputil.DumpResponse(httpres, true)
-		wc := debug.NewFile(fmt.Sprintf("%04d.res", num))
+		wc := debug.NewFile(fmt.Sprintf("%d-%04d.res", c.cn, num))
 		wc.Write(b)
 		wc.Close()
 	}
