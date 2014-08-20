@@ -21,20 +21,39 @@ import (
 	"path/filepath"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type Recurser struct {
 	Client *govmomi.Client
 
-	All bool // Fetch complete objects for leaf nodes
+	// All configures the recurses to fetch complete objects for leaf nodes.
+	All bool
+
+	// TraverseLeafs configures the Recurser to traverse traversable leaf nodes.
+	// This is typically set to true when used from the ls command, where listing
+	// a folder means listing its contents. This is typically set to false for
+	// commands that take managed entities that are not folders as input.
+	TraverseLeafs bool
 }
 
-func (r Recurser) Recurse(root types.ManagedObjectReference, prefix string, parts []string) ([]Element, error) {
+func (r Recurser) Recurse(root Element, parts []string) ([]Element, error) {
+	if len(parts) == 0 {
+		// Include non-traversable leaf elements in result. For example, consider
+		// the pattern "./vm/my-vm-*", where the pattern should match the VMs and
+		// not try to traverse them.
+		//
+		// Include traversable leaf elements in result, if the TraverseLeafs
+		// field is set to false.
+		//
+		if !traversable(root.Object.Reference()) || !r.TraverseLeafs {
+			return []Element{root}, nil
+		}
+	}
+
 	k := Lister{
 		Client:    r.Client,
-		Reference: root,
-		Prefix:    prefix,
+		Reference: root.Object.Reference(),
+		Prefix:    root.Path,
 	}
 
 	if r.All && len(parts) < 2 {
@@ -56,7 +75,6 @@ func (r Recurser) Recurse(root types.ManagedObjectReference, prefix string, part
 
 	var out []Element
 	for _, e := range in {
-		ref := e.Object.Reference()
 		matched, err := filepath.Match(pattern, path.Base(e.Path))
 		if err != nil {
 			return nil, err
@@ -66,14 +84,7 @@ func (r Recurser) Recurse(root types.ManagedObjectReference, prefix string, part
 			continue
 		}
 
-		// Include non-traversable leaf elements in result.
-		// (consider the pattern "./vm/my-vm-*")
-		if len(parts) == 0 && !traversable(ref) {
-			out = append(out, e)
-			continue
-		}
-
-		nres, err := r.Recurse(ref, path.Join(prefix, path.Base(e.Path)), parts)
+		nres, err := r.Recurse(e, parts)
 		if err != nil {
 			return nil, err
 		}

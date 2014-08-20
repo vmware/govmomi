@@ -22,7 +22,6 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 const (
@@ -206,13 +205,13 @@ func (s *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
 	return f, nil
 }
 
-func (s *SearchFlag) relativeToVmFolder() (types.ManagedObjectReference, error) {
+func (s *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
 	f, err := s.relativeTo()
 	if err != nil {
-		return types.ManagedObjectReference{}, err
+		return nil, err
 	}
 
-	return f.VmFolder.Reference(), nil
+	return govmomi.Folder{f.VmFolder.Reference()}, nil
 }
 
 func (s *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
@@ -229,7 +228,7 @@ func (s *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 	return vm, nil
 }
 
-func (s *SearchFlag) VirtualMachines(arg string) ([]*govmomi.VirtualMachine, error) {
+func (s *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, error) {
 	var out []*govmomi.VirtualMachine
 
 	if s.Isset() {
@@ -243,11 +242,11 @@ func (s *SearchFlag) VirtualMachines(arg string) ([]*govmomi.VirtualMachine, err
 	}
 
 	// List virtual machines
-	if arg == "" {
+	if len(args) == 0 {
 		return nil, errors.New("no argument")
 	}
 
-	es, err := s.List(arg, s.relativeToVmFolder)
+	es, err := s.ListSlice(args, false, s.relativeToVmFolder)
 	if err != nil {
 		return nil, err
 	}
