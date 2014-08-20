@@ -40,6 +40,8 @@ type SearchFlag struct {
 	byInventoryPath string
 	byIP            string
 	byUUID          string
+
+	isset bool
 }
 
 func NewSearchFlag(t int) *SearchFlag {
@@ -75,17 +77,21 @@ func (s *SearchFlag) Process() error {
 		s.byUUID,
 	}
 
-	isset := false
+	s.isset = false
 	for _, f := range flags {
 		if f != "" {
-			if isset {
+			if s.isset {
 				return errors.New("cannot use more than one search flag")
 			}
-			isset = true
+			s.isset = true
 		}
 	}
 
 	return nil
+}
+
+func (s *SearchFlag) Isset() bool {
+	return s.isset
 }
 
 func (s *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
