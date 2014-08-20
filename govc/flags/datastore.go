@@ -68,7 +68,7 @@ func (f *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
 
 	if f.name != "" {
 		ref, err := c.SearchIndex().FindChild(df, f.name)
-		if err == nil {
+		if err != nil {
 			return nil, err
 		}
 		f.ds = ref.(*govmomi.Datastore)
