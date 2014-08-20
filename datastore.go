@@ -43,9 +43,11 @@ func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error)
 		return nil, err
 	}
 
+	u := c.Client.URL()
+
 	return &url.URL{
-		Scheme: c.u.Scheme,
-		Host:   c.u.Host,
+		Scheme: u.Scheme,
+		Host:   u.Host,
 		Path:   fmt.Sprintf("/folder/%s", path),
 		RawQuery: url.Values{
 			"dcPath": []string{dc.Value},
