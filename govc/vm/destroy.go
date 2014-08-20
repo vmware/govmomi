@@ -25,33 +25,43 @@ import (
 
 type destroy struct {
 	*flags.ClientFlag
-	*flags.DatacenterFlag
 	*flags.SearchFlag
 }
 
 func init() {
-	cli.Register(&destroy{})
+	flag := destroy{
+		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
+	}
+
+	cli.Register(&flag)
 }
 
-func (c *destroy) Register(f *flag.FlagSet) {
+func (cmd *destroy) Register(f *flag.FlagSet) {
 }
 
-func (c *destroy) Process() error {
+func (cmd *destroy) Process() error {
 	return nil
 }
 
-func (c *destroy) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *destroy) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	vm, err := c.VirtualMachine()
+	vms, err := cmd.VirtualMachines(f.Arg(0))
 	if err != nil {
 		return err
 	}
 
-	_ = vm.PowerOff(client)
+	for _, vm := range vms {
+		_ = vm.PowerOff(c)
 
-	return vm.Destroy(client)
+		err = vm.Destroy(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

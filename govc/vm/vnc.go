@@ -40,7 +40,11 @@ type vnc struct {
 }
 
 func init() {
-	cli.Register(&vnc{})
+	flag := vnc{
+		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
+	}
+
+	cli.Register(&flag)
 }
 
 func (cmd *vnc) Register(f *flag.FlagSet) {

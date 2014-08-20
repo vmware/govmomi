@@ -26,59 +26,57 @@ import (
 
 type power struct {
 	*flags.ClientFlag
-	*flags.DatacenterFlag
 	*flags.SearchFlag
 
-	On  bool
-	Off bool
+	On    bool
+	Off   bool
+	Force bool
 }
 
 func init() {
-	cli.Register(&power{})
+	flag := power{
+		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
+	}
+
+	cli.Register(&flag)
 }
 
-func (c *power) Register(f *flag.FlagSet) {
-	f.BoolVar(&c.On, "on", false, "Power on")
-	f.BoolVar(&c.Off, "off", false, "Power off")
+func (cmd *power) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.On, "on", false, "Power on")
+	f.BoolVar(&cmd.Off, "off", false, "Power off")
+	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error)")
 }
 
-func (c *power) Process() error {
-	if !c.On && !c.Off || (c.On && c.Off) {
+func (cmd *power) Process() error {
+	if !cmd.On && !cmd.Off || (cmd.On && cmd.Off) {
 		return errors.New("specify -on OR -off")
 	}
 	return nil
 }
 
-func (c *power) PowerToString() string {
-	switch {
-	case c.On:
-		return "on"
-	case c.Off:
-		return "off"
-	default:
-		panic("invalid state")
-	}
-}
-
-func (c *power) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *power) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	vm, err := c.VirtualMachine()
+	vms, err := cmd.VirtualMachines(f.Arg(0))
 	if err != nil {
 		return err
 	}
 
-	switch {
-	case c.On:
-		err = vm.PowerOn(client)
-	case c.Off:
-		err = vm.PowerOff(client)
-	default:
-		panic("invalid state")
+	for _, vm := range vms {
+		switch {
+		case cmd.On:
+			err = vm.PowerOn(c)
+		case cmd.Off:
+			err = vm.PowerOff(c)
+		}
+
+		if !cmd.Force && err != nil {
+			return err
+		}
 	}
 
-	return err
+	return nil
 }
