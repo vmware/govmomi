@@ -40,45 +40,45 @@ func init() {
 	cli.Register(&flag)
 }
 
-func (c *power) Register(f *flag.FlagSet) {
-	f.BoolVar(&c.On, "on", false, "Power on")
-	f.BoolVar(&c.Off, "off", false, "Power off")
+func (cmd *power) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.On, "on", false, "Power on")
+	f.BoolVar(&cmd.Off, "off", false, "Power off")
 }
 
-func (c *power) Process() error {
-	if !c.On && !c.Off || (c.On && c.Off) {
+func (cmd *power) Process() error {
+	if !cmd.On && !cmd.Off || (cmd.On && cmd.Off) {
 		return errors.New("specify -on OR -off")
 	}
 	return nil
 }
 
-func (c *power) PowerToString() string {
+func (cmd *power) PowerToString() string {
 	switch {
-	case c.On:
+	case cmd.On:
 		return "on"
-	case c.Off:
+	case cmd.Off:
 		return "off"
 	default:
 		panic("invalid state")
 	}
 }
 
-func (c *power) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *power) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	vm, err := c.VirtualMachine()
+	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
 
 	switch {
-	case c.On:
-		err = vm.PowerOn(client)
-	case c.Off:
-		err = vm.PowerOff(client)
+	case cmd.On:
+		err = vm.PowerOn(c)
+	case cmd.Off:
+		err = vm.PowerOff(c)
 	default:
 		panic("invalid state")
 	}

@@ -47,19 +47,19 @@ func init() {
 	cli.Register(&flag)
 }
 
-func (c *info) Register(f *flag.FlagSet) {
-	f.BoolVar(&c.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
+func (cmd *info) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
 }
 
-func (c *info) Process() error { return nil }
+func (cmd *info) Process() error { return nil }
 
-func (c *info) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *info) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	vms, err := c.VirtualMachines(f.Arg(0))
+	vms, err := cmd.VirtualMachines(f.Arg(0))
 	if err != nil {
 		return err
 	}
@@ -67,7 +67,7 @@ func (c *info) Run(f *flag.FlagSet) error {
 	var res infoResult
 	var props []string
 
-	if c.OutputFlag.JSON {
+	if cmd.OutputFlag.JSON {
 		props = nil // Load everything
 	} else {
 		props = []string{"summary", "guest"} // Load summary
@@ -77,13 +77,13 @@ func (c *info) Run(f *flag.FlagSet) error {
 		for {
 			var mvm mo.VirtualMachine
 
-			err = client.Properties(vm.Reference(), props, &mvm)
+			err = c.Properties(vm.Reference(), props, &mvm)
 			if err != nil {
 				return err
 			}
 
-			if c.WaitForIP && mvm.Guest.IpAddress == "" {
-				err = WaitForIP(vm, client)
+			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
+				err = WaitForIP(vm, c)
 				if err != nil {
 					return err
 				}
@@ -97,7 +97,7 @@ func (c *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	return c.WriteResult(&res)
+	return cmd.WriteResult(&res)
 }
 
 type infoResult struct {

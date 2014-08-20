@@ -46,38 +46,38 @@ func init() {
 	cli.Register(&create{})
 }
 
-func (c *create) Register(f *flag.FlagSet) {
-	f.IntVar(&c.memory, "m", 128, "Size in MB of memory")
-	f.IntVar(&c.cpus, "c", 1, "Number of CPUs")
-	f.StringVar(&c.guestID, "g", "otherGuest", "Guest OS")
-	f.BoolVar(&c.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
+func (cmd *create) Register(f *flag.FlagSet) {
+	f.IntVar(&cmd.memory, "m", 128, "Size in MB of memory")
+	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
+	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
+	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
 }
 
-func (c *create) Process() error { return nil }
+func (cmd *create) Process() error { return nil }
 
-func (c *create) Run(f *flag.FlagSet) error {
+func (cmd *create) Run(f *flag.FlagSet) error {
 	if len(f.Args()) != 1 {
 		return flag.ErrHelp
 	}
 
 	var pool *govmomi.ResourcePool
 
-	host, err := c.HostSystem()
+	host, err := cmd.HostSystem()
 	if err != nil {
 		return err
 	}
 
 	if host == nil { // -host is optional
-		if pool, err = c.ResourcePool(); err != nil {
+		if pool, err = cmd.ResourcePool(); err != nil {
 			return err
 		}
 	} else {
-		if pool, err = c.HostResourcePool(); err != nil {
+		if pool, err = cmd.HostResourcePool(); err != nil {
 			return err
 		}
 	}
 
-	ds, err := c.DatastoreName()
+	ds, err := cmd.DatastoreName()
 	if err != nil {
 		return err
 	}
@@ -86,89 +86,89 @@ func (c *create) Run(f *flag.FlagSet) error {
 
 	spec := types.VirtualMachineConfigSpec{
 		Name:     name,
-		GuestId:  c.guestID,
+		GuestId:  cmd.guestID,
 		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", ds)},
-		NumCPUs:  c.cpus,
-		MemoryMB: int64(c.memory),
+		NumCPUs:  cmd.cpus,
+		MemoryMB: int64(cmd.memory),
 	}
 
-	if err = c.addDisk(&spec); err != nil {
+	if err = cmd.addDisk(&spec); err != nil {
 		return err
 	}
 
-	if err = c.addNetwork(&spec); err != nil {
+	if err = cmd.addNetwork(&spec); err != nil {
 		return err
 	}
 
-	client, err := c.DatastoreFlag.Client()
+	c, err := cmd.DatastoreFlag.Client()
 	if err != nil {
 		return err
 	}
 
-	folder, err := c.VmFolder()
+	folder, err := cmd.VmFolder()
 	if err != nil {
 		return err
 	}
 
-	vm, err := folder.CreateVM(client, spec, pool, host)
+	vm, err := folder.CreateVM(c, spec, pool, host)
 	if err != nil {
 		return err
 	}
 
-	if c.DiskFlag.IsSet() && c.on {
-		return vm.PowerOn(client)
+	if cmd.DiskFlag.IsSet() && cmd.on {
+		return vm.PowerOn(c)
 	}
 
 	return nil
 }
 
-func (c *create) addDevice(spec *types.VirtualMachineConfigSpec, device types.BaseVirtualDevice) {
+func (cmd *create) addDevice(spec *types.VirtualMachineConfigSpec, device types.BaseVirtualDevice) {
 	spec.DeviceChange = append(spec.DeviceChange, &types.VirtualDeviceConfigSpec{
 		Operation: types.VirtualDeviceConfigSpecOperationAdd,
 		Device:    device,
 	})
 }
 
-func (c *create) addNetwork(spec *types.VirtualMachineConfigSpec) error {
-	network, err := c.NetworkFlag.Device()
+func (cmd *create) addNetwork(spec *types.VirtualMachineConfigSpec) error {
+	network, err := cmd.NetworkFlag.Device()
 	if err != nil {
 		return err
 	}
 
-	c.addDevice(spec, network)
+	cmd.addDevice(spec, network)
 
 	return nil
 }
 
-func (c *create) addDisk(spec *types.VirtualMachineConfigSpec) error {
-	if !c.DiskFlag.IsSet() {
+func (cmd *create) addDisk(spec *types.VirtualMachineConfigSpec) error {
+	if !cmd.DiskFlag.IsSet() {
 		return nil
 	}
 
-	diskPath, err := c.DiskFlag.Path()
+	diskPath, err := cmd.DiskFlag.Path()
 	if err != nil {
 		return err
 	}
 
 	switch filepath.Ext(diskPath) {
 	case ".vmdk":
-		device, err := c.DiskFlag.Controller()
+		device, err := cmd.DiskFlag.Controller()
 		if err != nil {
 			return err
 		}
-		c.addDevice(spec, device)
+		cmd.addDevice(spec, device)
 
-		device, err = c.DiskFlag.Copy(fmt.Sprintf("%s/%s.vmdk", spec.Name, spec.Name))
+		device, err = cmd.DiskFlag.Copy(fmt.Sprintf("%s/%s.vmdk", spec.Name, spec.Name))
 		if err != nil {
 			return err
 		}
-		c.addDevice(spec, device)
+		cmd.addDevice(spec, device)
 	case ".iso":
-		device, err := c.DiskFlag.Cdrom(diskPath)
+		device, err := cmd.DiskFlag.Cdrom(diskPath)
 		if err != nil {
 			return err
 		}
-		c.addDevice(spec, device)
+		cmd.addDevice(spec, device)
 	default:
 		return errors.New("unsupported disk type")
 	}

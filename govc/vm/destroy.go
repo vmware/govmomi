@@ -36,25 +36,25 @@ func init() {
 	cli.Register(&flag)
 }
 
-func (c *destroy) Register(f *flag.FlagSet) {
+func (cmd *destroy) Register(f *flag.FlagSet) {
 }
 
-func (c *destroy) Process() error {
+func (cmd *destroy) Process() error {
 	return nil
 }
 
-func (c *destroy) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *destroy) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	vm, err := c.VirtualMachine()
+	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
 
-	_ = vm.PowerOff(client)
+	_ = vm.PowerOff(c)
 
-	return vm.Destroy(client)
+	return vm.Destroy(c)
 }
