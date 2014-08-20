@@ -60,7 +60,7 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vms, err := cmd.VirtualMachines(f.Arg(0))
+	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err
 	}

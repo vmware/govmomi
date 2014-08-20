@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"io"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/flags/list"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ls struct {
@@ -40,12 +40,12 @@ func (l *ls) Register(f *flag.FlagSet) {}
 
 func (l *ls) Process() error { return nil }
 
-func (l *ls) PathRelativeTo() (types.ManagedObjectReference, error) {
+func (l *ls) PathRelativeTo() (govmomi.Reference, error) {
 	dc, err := l.Datacenter()
 	if err != nil {
-		return types.ManagedObjectReference{}, err
+		return nil, err
 	}
-	return dc.Reference(), nil
+	return dc, nil
 }
 
 func (l *ls) Run(f *flag.FlagSet) error {
@@ -54,7 +54,7 @@ func (l *ls) Run(f *flag.FlagSet) error {
 		args = append(args, "")
 	}
 
-	es, err := l.ListSlice(args, l.PathRelativeTo)
+	es, err := l.ListSlice(args, true, l.PathRelativeTo)
 	if err != nil {
 		return err
 	}

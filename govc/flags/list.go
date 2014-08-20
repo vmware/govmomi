@@ -19,11 +19,11 @@ package flags
 import (
 	"flag"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/flags/list"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
-type ListRelativeFunc func() (types.ManagedObjectReference, error)
+type ListRelativeFunc func() (govmomi.Reference, error)
 
 type ListFlag struct {
 	*DatastoreFlag
@@ -34,11 +34,11 @@ func (l *ListFlag) Register(f *flag.FlagSet) {}
 
 func (l *ListFlag) Process() error { return nil }
 
-func (l *ListFlag) ListSlice(args []string, fn ListRelativeFunc) ([]list.Element, error) {
+func (l *ListFlag) ListSlice(args []string, tl bool, fn ListRelativeFunc) ([]list.Element, error) {
 	var out []list.Element
 
 	for _, arg := range args {
-		es, err := l.List(arg, fn)
+		es, err := l.List(arg, tl, fn)
 		if err != nil {
 			return nil, err
 		}
@@ -49,14 +49,17 @@ func (l *ListFlag) ListSlice(args []string, fn ListRelativeFunc) ([]list.Element
 	return out, nil
 }
 
-func (l *ListFlag) List(arg string, fn ListRelativeFunc) ([]list.Element, error) {
-	client, err := l.Client()
+func (l *ListFlag) List(arg string, tl bool, fn ListRelativeFunc) ([]list.Element, error) {
+	c, err := l.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	root := client.ServiceContent.RootFolder
-	prefix := "/"
+	root := list.Element{
+		Path:   "/",
+		Object: c.RootFolder(),
+	}
+
 	parts := list.ToParts(arg)
 
 	if len(parts) > 0 {
@@ -67,18 +70,24 @@ func (l *ListFlag) List(arg string, fn ListRelativeFunc) ([]list.Element, error)
 				parts = parts[1:]
 			}
 		case ".": // Relative to whatever
-			root, err = fn()
-			prefix = "/" + root.Value
+			rootObj, err := fn()
+			if err != nil {
+				return nil, err
+			}
+
+			root.Path = "/" + rootObj.Reference().Value
+			root.Object = rootObj
 			parts = parts[1:]
 		}
 	}
 
 	r := list.Recurser{
-		Client: client,
-		All:    l.JSON,
+		Client:        c,
+		All:           l.JSON,
+		TraverseLeafs: tl,
 	}
 
-	es, err := r.Recurse(root, prefix, parts)
+	es, err := r.Recurse(root, parts)
 	if err != nil {
 		return nil, err
 	}
