@@ -18,7 +18,6 @@ package methods
 
 import (
 	"bytes"
-	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi/vim25/soap"
@@ -46,7 +45,7 @@ func TestFaultDetail(t *testing.T) {
 	env := soap.Envelope{Body: &body}
 
 	dec := xml.NewDecoder(bytes.NewReader([]byte(invalidLoginFault)))
-	dec.AddType(reflect.TypeOf(types.InvalidLogin{}))
+	dec.TypeFunc = types.TypeFunc()
 
 	err := dec.Decode(&env)
 	if err != nil {
