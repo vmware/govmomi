@@ -49,12 +49,19 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
+	vms, err := cmd.VirtualMachines(f.Arg(0))
 	if err != nil {
 		return err
 	}
 
-	_ = vm.PowerOff(c)
+	for _, vm := range vms {
+		_ = vm.PowerOff(c)
 
-	return vm.Destroy(c)
+		err = vm.Destroy(c)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
