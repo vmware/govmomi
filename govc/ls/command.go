@@ -30,46 +30,62 @@ import (
 
 type ls struct {
 	*flags.ListFlag
+
+	Long bool
 }
 
 func init() {
 	cli.Register(&ls{})
 }
 
-func (l *ls) Register(f *flag.FlagSet) {}
+func (cmd *ls) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.Long, "l", false, "Long listing format")
+}
 
-func (l *ls) Process() error { return nil }
+func (cmd *ls) Process() error { return nil }
 
-func (l *ls) PathRelativeTo() (govmomi.Reference, error) {
-	dc, err := l.Datacenter()
+func (cmd *ls) PathRelativeTo() (govmomi.Reference, error) {
+	dc, err := cmd.Datacenter()
 	if err != nil {
 		return nil, err
 	}
 	return dc, nil
 }
 
-func (l *ls) Run(f *flag.FlagSet) error {
+func (cmd *ls) Run(f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) == 0 {
-		args = append(args, "")
+		args = []string{"."}
 	}
 
-	es, err := l.ListSlice(args, true, l.PathRelativeTo)
+	es, err := cmd.ListSlice(args, true, cmd.PathRelativeTo)
 	if err != nil {
 		return err
 	}
 
-	return l.WriteResult(listResult{es})
+	lr := listResult{
+		Elements: es,
+		Long:     cmd.Long,
+	}
+
+	return cmd.WriteResult(lr)
 }
 
 type listResult struct {
 	Elements []list.Element `json:"elements"`
+
+	Long bool `json:"-"`
 }
 
 func (l listResult) WriteTo(w io.Writer) error {
 	var err error
 
 	for _, e := range l.Elements {
+		if !l.Long {
+			fmt.Fprintf(w, "%s\n", e.Path)
+			continue
+		}
+
 		switch e.Object.(type) {
 		case mo.Folder:
 			if _, err = fmt.Fprintf(w, "%s/\n", e.Path); err != nil {
