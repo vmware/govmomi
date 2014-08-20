@@ -164,7 +164,11 @@ func (c *create) addDisk(spec *types.VirtualMachineConfigSpec) error {
 		}
 		c.addDevice(spec, device)
 	case ".iso":
-		return errors.New("TODO: .iso not supported yet")
+		device, err := c.DiskFlag.Cdrom(diskPath)
+		if err != nil {
+			return err
+		}
+		c.addDevice(spec, device)
 	default:
 		return errors.New("unsupported disk type")
 	}
