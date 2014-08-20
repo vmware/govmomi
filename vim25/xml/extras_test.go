@@ -27,6 +27,17 @@ type MyType struct {
 	Value string
 }
 
+var myTypes = map[string]reflect.Type{
+	"MyType":      reflect.TypeOf(MyType{}),
+	"ValueType":   reflect.TypeOf(ValueType{}),
+	"PointerType": reflect.TypeOf(PointerType{}),
+}
+
+func MyTypes(name string) (reflect.Type, bool) {
+	t, ok := myTypes[name]
+	return t, ok
+}
+
 func TestMarshalWithEmptyInterface(t *testing.T) {
 	var r1, r2 struct {
 		XMLName Name          `xml:"root"`
@@ -65,7 +76,7 @@ func TestMarshalWithEmptyInterface(t *testing.T) {
 		}
 
 		dec := NewDecoder(bytes.NewReader(b))
-		dec.AddType(reflect.TypeOf(MyType{}))
+		dec.TypeFunc = MyTypes
 		err = dec.Decode(&r2)
 		if err != nil {
 			t.Fatalf("Unmarshal: %s", err)
@@ -115,8 +126,7 @@ func TestMarshalWithInterface(t *testing.T) {
 	}
 
 	dec := NewDecoder(bytes.NewReader(b))
-	dec.AddType(reflect.TypeOf(ValueType{}))
-	dec.AddType(reflect.TypeOf(PointerType{}))
+	dec.TypeFunc = MyTypes
 	err = dec.Decode(&r2)
 	if err != nil {
 		t.Fatalf("Unmarshal: %s", err)
