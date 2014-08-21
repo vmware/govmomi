@@ -138,6 +138,75 @@ func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst in
 	return mo.RetrievePropertiesForRequest(c, req, dst)
 }
 
+// Ancestors returns the entire ancestry tree of a specified managed object.
+// The return value includes the root node and the specified object itself.
+func (c *Client) Ancestors(r Reference) ([]mo.ManagedEntity, error) {
+	ospec := types.ObjectSpec{
+		Obj: r.Reference(),
+		SelectSet: []types.BaseSelectionSpec{
+			&types.TraversalSpec{
+				SelectionSpec: types.SelectionSpec{Name: "traverseParent"},
+				Type:          "ManagedEntity",
+				Path:          "parent",
+				Skip:          false,
+				SelectSet: []types.BaseSelectionSpec{
+					&types.SelectionSpec{Name: "traverseParent"},
+				},
+			},
+		},
+		Skip: false,
+	}
+
+	pspec := types.PropertySpec{
+		Type:    "ManagedEntity",
+		PathSet: []string{"name", "parent"},
+	}
+
+	req := types.RetrieveProperties{
+		This: c.ServiceContent.PropertyCollector,
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				ObjectSet: []types.ObjectSpec{ospec},
+				PropSet:   []types.PropertySpec{pspec},
+			},
+		},
+	}
+
+	var ifaces []interface{}
+
+	err := mo.RetrievePropertiesForRequest(c, req, &ifaces)
+	if err != nil {
+		return nil, err
+	}
+
+	var out []mo.ManagedEntity
+
+	// Build ancestry tree by iteratively finding a new child.
+	for len(out) < len(ifaces) {
+		var find types.ManagedObjectReference
+
+		if len(out) > 0 {
+			find = out[len(out)-1].Self
+		}
+
+		// Find entity we're looking for given the last entity in the current tree.
+		for _, iface := range ifaces {
+			me := iface.(mo.IsManagedEntity).GetManagedEntity()
+			if me.Parent == nil {
+				out = append(out, me)
+				break
+			}
+
+			if *me.Parent == find {
+				out = append(out, me)
+				break
+			}
+		}
+	}
+
+	return out, nil
+}
+
 func (c *Client) FileManager() FileManager {
 	return FileManager{c}
 }
