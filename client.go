@@ -142,6 +142,10 @@ func (c *Client) FileManager() FileManager {
 	return FileManager{c}
 }
 
+func (c *Client) GuestOperationsManager() GuestOperationsManager {
+	return GuestOperationsManager{c}
+}
+
 func (c *Client) RootFolder() Folder {
 	return Folder{c.ServiceContent.RootFolder}
 }
