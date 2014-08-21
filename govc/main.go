@@ -27,6 +27,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/ls"
 	_ "github.com/vmware/govmomi/govc/version"
 	_ "github.com/vmware/govmomi/govc/vm"
+	_ "github.com/vmware/govmomi/govc/vm/guest"
 )
 
 func main() {
