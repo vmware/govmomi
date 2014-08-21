@@ -44,15 +44,10 @@ func (c *upload) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	ds, err := c.Datastore()
-	if err != nil {
-		return err
-	}
-
 	u, err := c.URL()
 	if err != nil {
 		return err
 	}
 
-	return ds.UploadFile(client, f.Arg(0), u)
+	return client.Client.UploadFile(f.Arg(0), u)
 }

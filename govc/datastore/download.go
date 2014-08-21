@@ -44,15 +44,10 @@ func (c *download) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	ds, err := c.Datastore()
-	if err != nil {
-		return err
-	}
-
 	u, err := c.URL()
 	if err != nil {
 		return err
 	}
 
-	return ds.DownloadFile(client, f.Arg(0), u)
+	return client.Client.DownloadFile(f.Arg(0), u)
 }

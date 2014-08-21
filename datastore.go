@@ -17,12 +17,9 @@ limitations under the License.
 package govmomi
 
 import (
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
+
 	"net/url"
-	"os"
 
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -59,69 +56,4 @@ func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error)
 			"dsName": []string{mds.Name},
 		}.Encode(),
 	}, nil
-}
-
-// UploadFile uploads the local file to the given datastore URL
-func (d Datastore) UploadFile(c *Client, file string, u *url.URL) error {
-	s, err := os.Stat(file)
-	if err != nil {
-		return err
-	}
-
-	f, err := os.Open(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	req, err := http.NewRequest("PUT", u.String(), f)
-	if err != nil {
-		return err
-	}
-
-	req.ContentLength = s.Size()
-	req.Header.Set("Content-Type", "application/octet-stream")
-
-	res, err := c.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusCreated {
-		return nil
-
-	}
-	return errors.New(res.Status)
-}
-
-// DownloadFile downloads the given datastore URL to a local file
-func (d Datastore) DownloadFile(c *Client, file string, u *url.URL) error {
-	fh, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer fh.Close()
-
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		return err
-	}
-
-	res, err := c.Client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	defer res.Body.Close()
-
-	if res.StatusCode != http.StatusOK {
-		return errors.New(res.Status)
-	}
-
-	_, err = io.Copy(fh, res.Body)
-	if err != nil {
-		return err
-	}
-
-	return fh.Close()
 }
