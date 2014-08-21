@@ -21,11 +21,11 @@ import (
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type upload struct {
 	*GuestFlag
+	*FileAttrFlag
 
 	overwrite bool
 }
@@ -61,8 +61,7 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	attr := &types.GuestPosixFileAttributes{} // TODO: opts
-	url, err := m.InitiateFileTransferToGuest(vm, cmd.Auth(), dst, attr, s.Size(), cmd.overwrite)
+	url, err := m.InitiateFileTransferToGuest(vm, cmd.Auth(), dst, cmd.Attr(), s.Size(), cmd.overwrite)
 	if err != nil {
 		return err
 	}
