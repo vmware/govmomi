@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"sync"
 
@@ -134,11 +135,35 @@ func (flag *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
 	return flag.findSpecifiedDatastore(flag.name)
 }
 
-func (f *DatastoreFlag) DatastorePath(name string) (string, error) {
-	ds, err := f.Datastore()
+func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
+	ds, err := flag.Datastore()
 	if err != nil {
 		return "", err
 	}
 
 	return fmt.Sprintf("[%s] %s", ds.Name(), name), nil
+}
+
+func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	dc, err := flag.Datacenter()
+	if err != nil {
+		return nil, err
+	}
+
+	ds, err := flag.Datastore()
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := ds.URL(c, dc, path)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }

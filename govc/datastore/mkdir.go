@@ -17,6 +17,7 @@ limitations under the License.
 package datastore
 
 import (
+	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -26,7 +27,7 @@ import (
 )
 
 type mkdir struct {
-	*flags.DatastorePathFlag
+	*flags.DatastoreFlag
 
 	createParents bool
 }
@@ -35,34 +36,38 @@ func init() {
 	cli.Register(&mkdir{})
 }
 
-func (c *mkdir) Register(f *flag.FlagSet) {
-	f.BoolVar(&c.createParents, "p", false, "Create intermediate directories as needed")
+func (cmd *mkdir) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.createParents, "p", false, "Create intermediate directories as needed")
 }
 
-func (c *mkdir) Process() error {
-	return nil
-}
+func (cmd *mkdir) Process() error { return nil }
 
-func (c *mkdir) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *mkdir) Run(f *flag.FlagSet) error {
+	args := f.Args()
+	if len(args) == 0 {
+		return errors.New("missing operand")
+	}
+
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	dc, err := c.Datacenter()
+	dc, err := cmd.Datacenter()
 	if err != nil {
 		return err
 	}
 
-	path, err := c.Path()
+	// TODO(PN): Accept multiple args
+	path, err := cmd.DatastorePath(args[0])
 	if err != nil {
 		return err
 	}
 
-	err = client.FileManager().MakeDirectory(path, dc, c.createParents)
+	err = c.FileManager().MakeDirectory(path, dc, cmd.createParents)
 
 	// ignore EEXIST if -p flag is given
-	if err != nil && c.createParents {
+	if err != nil && cmd.createParents {
 		if soap.IsSoapFault(err) {
 			soapFault := soap.ToSoapFault(err)
 			if _, ok := soapFault.VimFault().(types.FileAlreadyExists); ok {

@@ -17,6 +17,7 @@ limitations under the License.
 package datastore
 
 import (
+	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -24,35 +25,38 @@ import (
 )
 
 type delete struct {
-	*flags.DatastorePathFlag
+	*flags.DatastoreFlag
 }
 
 func init() {
 	cli.Register(&delete{})
 }
 
-func (c *delete) Register(f *flag.FlagSet) {
-}
+func (cmd *delete) Register(f *flag.FlagSet) {}
 
-func (c *delete) Process() error {
-	return nil
-}
+func (cmd *delete) Process() error { return nil }
 
-func (c *delete) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *delete) Run(f *flag.FlagSet) error {
+	args := f.Args()
+	if len(args) == 0 {
+		return errors.New("missing operand")
+	}
+
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	dc, err := c.Datacenter()
+	dc, err := cmd.Datacenter()
 	if err != nil {
 		return err
 	}
 
-	path, err := c.Path()
+	// TODO(PN): Accept multiple args
+	path, err := cmd.DatastorePath(args[0])
 	if err != nil {
 		return err
 	}
 
-	return client.FileManager().DeleteDatastoreFile(path, dc)
+	return c.FileManager().DeleteDatastoreFile(path, dc)
 }
