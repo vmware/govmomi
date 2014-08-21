@@ -18,6 +18,7 @@ package govmomi
 
 import (
 	"fmt"
+	"path"
 
 	"net/url"
 
@@ -27,10 +28,16 @@ import (
 
 type Datastore struct {
 	types.ManagedObjectReference
+
+	Path string
 }
 
 func (d Datastore) Reference() types.ManagedObjectReference {
 	return d.ManagedObjectReference
+}
+
+func (d Datastore) Name() string {
+	return path.Base(d.Path)
 }
 
 // URL for datastore access over HTTP

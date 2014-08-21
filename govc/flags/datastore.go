@@ -17,13 +17,14 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 	"sync"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type DatastoreFlag struct {
@@ -34,93 +35,135 @@ type DatastoreFlag struct {
 	ds       *govmomi.Datastore
 }
 
-func (f *DatastoreFlag) Register(fs *flag.FlagSet) {
-	f.register.Do(func() {
-		f.name = os.Getenv("GOVMOMI_DATASTORE")
-		fs.StringVar(&f.name, "ds", "", "Datastore")
+func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		flag.name = os.Getenv("GOVMOMI_DATASTORE")
+		f.StringVar(&flag.name, "ds", "", "Datastore")
 	})
 }
 
-func (f *DatastoreFlag) Process() error {
+func (flag *DatastoreFlag) Process() error {
 	return nil
 }
 
-func (f *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
-	if f.ds != nil {
-		return f.ds, nil
-	}
-
-	dc, err := f.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	folders, err := dc.Folders(c)
-	if err != nil {
-		return nil, err
-	}
-	df := folders.DatastoreFolder
-
-	if f.name != "" {
-		ref, err := c.SearchIndex().FindChild(df, f.name)
+func (flag *DatastoreFlag) findDatastore(path string) ([]*govmomi.Datastore, error) {
+	relativeFunc := func() (govmomi.Reference, error) {
+		dc, err := flag.Datacenter()
 		if err != nil {
 			return nil, err
 		}
-		f.ds = ref.(*govmomi.Datastore)
-		return f.ds, nil
-	}
 
-	cs, err := df.Children(c)
-	if err != nil {
-		return nil, err
-	}
-	// Default to using the only datastore if there is only one.
-	if len(cs) != 1 {
-		return nil, fmt.Errorf("more than one datastore, please specify one")
-	}
-
-	f.ds = cs[0].(*govmomi.Datastore)
-	return f.ds, nil
-}
-
-func (f *DatastoreFlag) DatastoreProperties(p []string) (*mo.Datastore, error) {
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = f.Datastore()
-	if err != nil {
-		return nil, err
-	}
-
-	var ds mo.Datastore
-	if err := c.Properties(f.ds.Reference(), p, &ds); err != nil {
-		return nil, err
-	}
-	return &ds, nil
-}
-
-func (f *DatastoreFlag) DatastoreName() (string, error) {
-	if f.name == "" {
-		ds, err := f.DatastoreProperties([]string{"name"})
+		c, err := flag.Client()
 		if err != nil {
-			return "", nil
+			return nil, err
 		}
-		f.name = ds.Name
+
+		f, err := dc.Folders(c)
+		if err != nil {
+			return nil, err
+		}
+
+		return f.DatastoreFolder, nil
 	}
-	return f.name, nil
+
+	es, err := flag.List(path, false, relativeFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	var dss []*govmomi.Datastore
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "Datastore" {
+			ds := govmomi.Datastore{
+				ManagedObjectReference: ref,
+				Path: e.Path,
+			}
+
+			dss = append(dss, &ds)
+		}
+	}
+
+	return dss, nil
 }
 
-func (f *DatastoreFlag) DatastorePath(name string) (string, error) {
-	ds, err := f.DatastoreName()
+func (flag *DatastoreFlag) findSpecifiedDatastore(path string) (*govmomi.Datastore, error) {
+	dss, err := flag.findDatastore(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dss) == 0 {
+		return nil, errors.New("no such datastore")
+	}
+
+	if len(dss) > 1 {
+		return nil, errors.New("path resolves to multiple datastores")
+	}
+
+	flag.ds = dss[0]
+	return flag.ds, nil
+}
+
+func (flag *DatastoreFlag) findDefaultDatastore() (*govmomi.Datastore, error) {
+	dss, err := flag.findDatastore("*")
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dss) == 0 {
+		panic("no datastores") // Should never happen
+	}
+
+	if len(dss) > 1 {
+		return nil, errors.New("please specify a datastore")
+	}
+
+	flag.ds = dss[0]
+	return flag.ds, nil
+}
+
+func (flag *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
+	if flag.ds != nil {
+		return flag.ds, nil
+	}
+
+	if flag.name == "" {
+		return flag.findDefaultDatastore()
+	}
+
+	return flag.findSpecifiedDatastore(flag.name)
+}
+
+func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
+	ds, err := flag.Datastore()
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("[%s] %s", ds, name), nil
+
+	return fmt.Sprintf("[%s] %s", ds.Name(), name), nil
+}
+
+func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	dc, err := flag.Datacenter()
+	if err != nil {
+		return nil, err
+	}
+
+	ds, err := flag.Datastore()
+	if err != nil {
+		return nil, err
+	}
+
+	u, err := ds.URL(c, dc, path)
+	if err != nil {
+		return nil, err
+	}
+
+	return u, nil
 }

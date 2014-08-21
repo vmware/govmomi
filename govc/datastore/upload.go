@@ -17,6 +17,7 @@ limitations under the License.
 package datastore
 
 import (
+	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -24,30 +25,36 @@ import (
 )
 
 type upload struct {
-	*flags.DatastorePathFlag
+	*flags.DatastoreFlag
 }
 
 func init() {
 	cli.Register(&upload{})
 }
 
-func (cmd *upload) Register(f *flag.FlagSet) {
-}
+func (cmd *upload) Register(f *flag.FlagSet) {}
 
-func (cmd *upload) Process() error {
-	return nil
+func (cmd *upload) Process() error { return nil }
+
+func (cmd *upload) Usage() string {
+	return "LOCAL REMOTE"
 }
 
 func (cmd *upload) Run(f *flag.FlagSet) error {
+	args := f.Args()
+	if len(args) != 2 {
+		return errors.New("invalid arguments")
+	}
+
 	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	u, err := cmd.URL()
+	u, err := cmd.DatastoreURL(args[1])
 	if err != nil {
 		return err
 	}
 
-	return c.Client.UploadFile(f.Arg(0), u)
+	return c.Client.UploadFile(args[0], u)
 }

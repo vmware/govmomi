@@ -77,7 +77,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	ds, err := cmd.DatastoreName()
+	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	spec := types.VirtualMachineConfigSpec{
 		Name:     name,
 		GuestId:  cmd.guestID,
-		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", ds)},
+		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", ds.Name())},
 		NumCPUs:  cmd.cpus,
 		MemoryMB: int64(cmd.memory),
 	}
