@@ -17,8 +17,8 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
-	"fmt"
 	"os"
 	"sync"
 
@@ -26,50 +26,94 @@ import (
 )
 
 type DatacenterFlag struct {
-	*ClientFlag
+	*ListFlag
 
 	register sync.Once
-	name     string
+	path     string
 	dc       *govmomi.Datacenter
 }
 
-func (f *DatacenterFlag) Register(fs *flag.FlagSet) {
-	f.register.Do(func() {
-		f.name = os.Getenv("GOVMOMI_DATACENTER")
-		fs.StringVar(&f.name, "dc", "", "Datacenter")
+func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		flag.path = os.Getenv("GOVMOMI_DATACENTER")
+		f.StringVar(&flag.path, "dc", "", "Datacenter")
 	})
 }
 
-func (f *DatacenterFlag) Process() error {
+func (flag *DatacenterFlag) Process() error {
 	return nil
 }
 
-func (f *DatacenterFlag) Datacenter() (*govmomi.Datacenter, error) {
-	if f.dc != nil {
-		return f.dc, nil
+func (flag *DatacenterFlag) findDatacenter(path string) ([]*govmomi.Datacenter, error) {
+	relativeFunc := func() (govmomi.Reference, error) {
+		c, err := flag.Client()
+		if err != nil {
+			return nil, err
+		}
+
+		return c.RootFolder(), nil
 	}
 
-	if f.name != "" {
-		dc := govmomi.NewDatacenter(f.name)
-		f.dc = &dc
-		return f.dc, nil
-	}
-
-	c, err := f.Client()
+	es, err := flag.List(path, false, relativeFunc)
 	if err != nil {
 		return nil, err
 	}
 
-	// Default to using the only datacenter if there is only one.
-	cs, err := govmomi.Folder{c.ServiceContent.RootFolder}.Children(c)
+	var dcs []*govmomi.Datacenter
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "Datacenter" {
+			dcs = append(dcs, &govmomi.Datacenter{ref})
+		}
+	}
+
+	return dcs, nil
+}
+
+func (flag *DatacenterFlag) findSpecifiedDatacenter(path string) (*govmomi.Datacenter, error) {
+	dcs, err := flag.findDatacenter(path)
 	if err != nil {
 		return nil, err
 	}
 
-	if len(cs) != 1 {
-		return nil, fmt.Errorf("more than one datacenter, please specify one")
+	if len(dcs) == 0 {
+		return nil, errors.New("no such datacenter")
 	}
 
-	f.dc = cs[0].(*govmomi.Datacenter)
-	return f.dc, nil
+	if len(dcs) > 1 {
+		return nil, errors.New("path resolves to multiple datacenters")
+	}
+
+	flag.dc = dcs[0]
+	return flag.dc, nil
+}
+
+func (flag *DatacenterFlag) findDefaultDatacenter() (*govmomi.Datacenter, error) {
+	dcs, err := flag.findDatacenter("*")
+	if err != nil {
+		return nil, err
+	}
+
+	if len(dcs) == 0 {
+		panic("no datacenters") // Should never happen
+	}
+
+	if len(dcs) > 1 {
+		return nil, errors.New("please specify a datacenter")
+	}
+
+	flag.dc = dcs[0]
+	return flag.dc, nil
+}
+
+func (flag *DatacenterFlag) Datacenter() (*govmomi.Datacenter, error) {
+	if flag.dc != nil {
+		return flag.dc, nil
+	}
+
+	if flag.path == "" {
+		return flag.findDefaultDatacenter()
+	}
+
+	return flag.findSpecifiedDatacenter(flag.path)
 }

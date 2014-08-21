@@ -30,6 +30,7 @@ import (
 
 type ls struct {
 	*flags.ListFlag
+	*flags.DatacenterFlag
 
 	Long bool
 }

@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi"
@@ -26,7 +27,7 @@ import (
 type ListRelativeFunc func() (govmomi.Reference, error)
 
 type ListFlag struct {
-	*DatastoreFlag
+	*ClientFlag
 	*OutputFlag
 }
 
@@ -64,11 +65,8 @@ func (l *ListFlag) List(arg string, tl bool, fn ListRelativeFunc) ([]list.Elemen
 
 	if len(parts) > 0 {
 		switch parts[0] {
-		case "..": // Relative to datacenter, back to root
-			// Remove every occurance of ..
-			for len(parts) > 0 && parts[0] == ".." {
-				parts = parts[1:]
-			}
+		case "..": // Not supported; many edge case, little value
+			return nil, errors.New("cannot traverse up a tree")
 		case ".": // Relative to whatever
 			rootObj, err := fn()
 			if err != nil {
