@@ -18,32 +18,28 @@ package guest
 
 import (
 	"flag"
-	"os"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 )
 
-type upload struct {
+type getenv struct {
 	*GuestFlag
-	*FileAttrFlag
-
-	overwrite bool
 }
 
 func init() {
-	cli.Register(&upload{GuestFlag: NewGuestFlag()})
+	cli.Register(&getenv{GuestFlag: NewGuestFlag()})
 }
 
-func (cmd *upload) Register(f *flag.FlagSet) {
-	f.BoolVar(&cmd.overwrite, "f", false, "If set, the guest destination file is clobbered")
+func (cmd *getenv) Register(f *flag.FlagSet) {
 }
 
-func (cmd *upload) Process() error {
+func (cmd *getenv) Process() error {
 	return nil
 }
 
-func (cmd *upload) Run(f *flag.FlagSet) error {
-	m, err := cmd.FileManager()
+func (cmd *getenv) Run(f *flag.FlagSet) error {
+	m, err := cmd.ProcessManager()
 	if err != nil {
 		return err
 	}
@@ -53,28 +49,14 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	src := f.Arg(0)
-	dst := f.Arg(1)
-
-	s, err := os.Stat(src)
+	vars, err := m.ReadEnvironmentVariableInGuest(vm, cmd.Auth(), f.Args())
 	if err != nil {
 		return err
 	}
 
-	url, err := m.InitiateFileTransferToGuest(vm, cmd.Auth(), dst, cmd.Attr(), s.Size(), cmd.overwrite)
-	if err != nil {
-		return err
+	for _, v := range vars {
+		fmt.Printf("%s\n", v)
 	}
 
-	u, err := cmd.ParseURL(url)
-	if err != nil {
-		return err
-	}
-
-	c, err := cmd.Client()
-	if err != nil {
-		return nil
-	}
-
-	return c.Client.UploadFile(src, u)
+	return nil
 }

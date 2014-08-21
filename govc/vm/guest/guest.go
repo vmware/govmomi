@@ -18,8 +18,8 @@ package guest
 
 import (
 	"flag"
+	"strings"
 
-	"net"
 	"net/url"
 
 	"github.com/vmware/govmomi"
@@ -73,11 +73,10 @@ func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {
 		return nil, err
 	}
 
-	host, port, _ := net.SplitHostPort(u.Host)
-
-	if host == "*" {
-		host, _, _ := net.SplitHostPort(c.Client.URL().Host)
-		u.Host = net.JoinHostPort(host, port)
+	host := strings.Split(u.Host, ":")
+	if host[0] == "*" {
+		host[0] = strings.Split(c.Client.URL().Host, ":")[0]
+		u.Host = strings.Join(host, ":")
 	}
 
 	return u, nil
