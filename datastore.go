@@ -38,8 +38,13 @@ func (d Datastore) Reference() types.ManagedObjectReference {
 
 // URL for datastore access over HTTP
 func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error) {
-	var ds mo.Datastore
-	if err := c.Properties(d.Reference(), []string{"name"}, &ds); err != nil {
+	var mdc mo.Datacenter
+	if err := c.Properties(dc.Reference(), []string{"name"}, &mdc); err != nil {
+		return nil, err
+	}
+
+	var mds mo.Datastore
+	if err := c.Properties(d.Reference(), []string{"name"}, &mds); err != nil {
 		return nil, err
 	}
 
@@ -50,8 +55,8 @@ func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error)
 		Host:   u.Host,
 		Path:   fmt.Sprintf("/folder/%s", path),
 		RawQuery: url.Values{
-			"dcPath": []string{dc.Value},
-			"dsName": []string{ds.Name},
+			"dcPath": []string{mdc.Name},
+			"dsName": []string{mds.Name},
 		}.Encode(),
 	}, nil
 }
