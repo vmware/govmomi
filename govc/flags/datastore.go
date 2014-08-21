@@ -19,7 +19,6 @@ package flags
 import (
 	"errors"
 	"flag"
-	"fmt"
 	"net/url"
 	"os"
 	"sync"
@@ -77,7 +76,7 @@ func (flag *DatastoreFlag) findDatastore(path string) ([]*govmomi.Datastore, err
 		if ref.Type == "Datastore" {
 			ds := govmomi.Datastore{
 				ManagedObjectReference: ref,
-				Path: e.Path,
+				InventoryPath:          e.Path,
 			}
 
 			dss = append(dss, &ds)
@@ -141,7 +140,7 @@ func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
 		return "", err
 	}
 
-	return fmt.Sprintf("[%s] %s", ds.Name(), name), nil
+	return ds.Path(name), nil
 }
 
 func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
