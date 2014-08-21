@@ -31,23 +31,23 @@ func init() {
 	cli.Register(&download{})
 }
 
-func (c *download) Register(f *flag.FlagSet) {
+func (cmd *download) Register(f *flag.FlagSet) {
 }
 
-func (c *download) Process() error {
+func (cmd *download) Process() error {
 	return nil
 }
 
-func (c *download) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *download) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	u, err := c.URL()
+	u, err := cmd.URL()
 	if err != nil {
 		return err
 	}
 
-	return client.Client.DownloadFile(f.Arg(0), u)
+	return c.Client.DownloadFile(f.Arg(0), u)
 }

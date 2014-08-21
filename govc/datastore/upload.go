@@ -31,23 +31,23 @@ func init() {
 	cli.Register(&upload{})
 }
 
-func (c *upload) Register(f *flag.FlagSet) {
+func (cmd *upload) Register(f *flag.FlagSet) {
 }
 
-func (c *upload) Process() error {
+func (cmd *upload) Process() error {
 	return nil
 }
 
-func (c *upload) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *upload) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	u, err := c.URL()
+	u, err := cmd.URL()
 	if err != nil {
 		return err
 	}
 
-	return client.Client.UploadFile(f.Arg(0), u)
+	return c.Client.UploadFile(f.Arg(0), u)
 }
