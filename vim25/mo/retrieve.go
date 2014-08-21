@@ -152,7 +152,7 @@ func objectContentToType(o types.ObjectContent) (reflect.Value, error) {
 // RetrieveProperties to one or more managed objects.
 func LoadRetrievePropertiesResponse(res *types.RetrievePropertiesResponse, dst interface{}) error {
 	rt := reflect.TypeOf(dst)
-	if rt.Kind() != reflect.Ptr {
+	if rt == nil || rt.Kind() != reflect.Ptr {
 		panic("need pointer")
 	}
 
