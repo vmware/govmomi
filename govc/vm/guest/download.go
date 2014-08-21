@@ -14,24 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore
+package guest
 
 import (
 	"flag"
 
+	"os"
+
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
 )
 
 type download struct {
-	*flags.DatastorePathFlag
+	*GuestFlag
+
+	overwrite bool
 }
 
 func init() {
-	cli.Register(&download{})
+	cli.Register(&download{GuestFlag: NewGuestFlag()})
 }
 
 func (cmd *download) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.overwrite, "f", false, "If set, the local destination file is clobbered")
 }
 
 func (cmd *download) Process() error {
@@ -39,15 +43,38 @@ func (cmd *download) Process() error {
 }
 
 func (cmd *download) Run(f *flag.FlagSet) error {
+	m, err := cmd.FileManager()
+	if err != nil {
+		return err
+	}
+
+	vm, err := cmd.VirtualMachine()
+	if err != nil {
+		return err
+	}
+
+	src := f.Arg(0)
+	dst := f.Arg(1)
+
+	_, err = os.Stat(dst)
+	if err == nil && !cmd.overwrite {
+		return os.ErrExist
+	}
+
+	info, err := m.InitiateFileTransferFromGuest(vm, cmd.Auth(), src)
+	if err != nil {
+		return err
+	}
+
+	u, err := cmd.ParseURL(info.Url)
+	if err != nil {
+		return err
+	}
+
 	c, err := cmd.Client()
 	if err != nil {
-		return err
+		return nil
 	}
 
-	u, err := cmd.URL()
-	if err != nil {
-		return err
-	}
-
-	return c.Client.DownloadFile(f.Arg(0), u)
+	return c.Client.DownloadFile(dst, u)
 }

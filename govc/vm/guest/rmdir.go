@@ -14,40 +14,42 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore
+package guest
 
 import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
 )
 
-type upload struct {
-	*flags.DatastorePathFlag
+type rmdir struct {
+	*GuestFlag
+
+	recursive bool
 }
 
 func init() {
-	cli.Register(&upload{})
+	cli.Register(&rmdir{GuestFlag: NewGuestFlag()})
 }
 
-func (cmd *upload) Register(f *flag.FlagSet) {
+func (cmd *rmdir) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.recursive, "p", false, "Recursive removal")
 }
 
-func (cmd *upload) Process() error {
+func (cmd *rmdir) Process() error {
 	return nil
 }
 
-func (cmd *upload) Run(f *flag.FlagSet) error {
-	c, err := cmd.Client()
+func (cmd *rmdir) Run(f *flag.FlagSet) error {
+	m, err := cmd.FileManager()
 	if err != nil {
 		return err
 	}
 
-	u, err := cmd.URL()
+	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
 
-	return c.Client.UploadFile(f.Arg(0), u)
+	return m.DeleteDirectoryInGuest(vm, cmd.Auth(), f.Arg(0), cmd.recursive)
 }

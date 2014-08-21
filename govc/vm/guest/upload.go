@@ -14,24 +14,28 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore
+package guest
 
 import (
 	"flag"
+	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type upload struct {
-	*flags.DatastorePathFlag
+	*GuestFlag
+
+	overwrite bool
 }
 
 func init() {
-	cli.Register(&upload{})
+	cli.Register(&upload{GuestFlag: NewGuestFlag()})
 }
 
 func (cmd *upload) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.overwrite, "f", false, "If set, the guest destination file is clobbered")
 }
 
 func (cmd *upload) Process() error {
@@ -39,15 +43,39 @@ func (cmd *upload) Process() error {
 }
 
 func (cmd *upload) Run(f *flag.FlagSet) error {
+	m, err := cmd.FileManager()
+	if err != nil {
+		return err
+	}
+
+	vm, err := cmd.VirtualMachine()
+	if err != nil {
+		return err
+	}
+
+	src := f.Arg(0)
+	dst := f.Arg(1)
+
+	s, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	attr := &types.GuestPosixFileAttributes{} // TODO: opts
+	url, err := m.InitiateFileTransferToGuest(vm, cmd.Auth(), dst, attr, s.Size(), cmd.overwrite)
+	if err != nil {
+		return err
+	}
+
+	u, err := cmd.ParseURL(url)
+	if err != nil {
+		return err
+	}
+
 	c, err := cmd.Client()
 	if err != nil {
-		return err
+		return nil
 	}
 
-	u, err := cmd.URL()
-	if err != nil {
-		return err
-	}
-
-	return c.Client.UploadFile(f.Arg(0), u)
+	return c.Client.UploadFile(src, u)
 }

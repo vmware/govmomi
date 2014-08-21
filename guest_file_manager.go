@@ -137,3 +137,62 @@ func (m GuestFileManager) InitiateFileTransferToGuest(vm *VirtualMachine, auth t
 
 	return res.Returnval, nil
 }
+
+func (m GuestFileManager) ListFilesInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication, filePath string, index int, maxResults int, matchPattern string) (*types.GuestListFileInfo, error) {
+	req := types.ListFilesInGuest{
+		This:         m.Reference(),
+		Vm:           vm.Reference(),
+		Auth:         auth,
+		FilePath:     filePath,
+		Index:        index,
+		MaxResults:   maxResults,
+		MatchPattern: matchPattern,
+	}
+
+	res, err := methods.ListFilesInGuest(m.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
+}
+
+func (m GuestFileManager) MakeDirectoryInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication, directoryPath string, createParentDirectories bool) error {
+	req := types.MakeDirectoryInGuest{
+		This:                    m.Reference(),
+		Vm:                      vm.Reference(),
+		Auth:                    auth,
+		DirectoryPath:           directoryPath,
+		CreateParentDirectories: createParentDirectories,
+	}
+
+	_, err := methods.MakeDirectoryInGuest(m.c, &req)
+	return err
+}
+
+func (m GuestFileManager) MoveDirectoryInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication, srcDirectoryPath string, dstDirectoryPath string) error {
+	req := types.MoveDirectoryInGuest{
+		This:             m.Reference(),
+		Vm:               vm.Reference(),
+		Auth:             auth,
+		SrcDirectoryPath: srcDirectoryPath,
+		DstDirectoryPath: dstDirectoryPath,
+	}
+
+	_, err := methods.MoveDirectoryInGuest(m.c, &req)
+	return err
+}
+
+func (m GuestFileManager) MoveFileInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication, srcFilePath string, dstFilePath string, overwrite bool) error {
+	req := types.MoveFileInGuest{
+		This:        m.Reference(),
+		Vm:          vm.Reference(),
+		Auth:        auth,
+		SrcFilePath: srcFilePath,
+		DstFilePath: dstFilePath,
+		Overwrite:   overwrite,
+	}
+
+	_, err := methods.MoveFileInGuest(m.c, &req)
+	return err
+}
