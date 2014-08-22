@@ -64,3 +64,14 @@ func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error)
 		}.Encode(),
 	}, nil
 }
+
+func (d Datastore) Browser(c *Client) (*HostDatastoreBrowser, error) {
+	var do mo.Datastore
+
+	err := c.Properties(d.Reference(), []string{"browser"}, &do)
+	if err != nil {
+		return nil, err
+	}
+
+	return &HostDatastoreBrowser{do.Browser}, nil
+}
