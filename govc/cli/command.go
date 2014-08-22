@@ -90,11 +90,6 @@ func commandHelp(name string, f *flag.FlagSet) {
 		}
 
 		f.VisitAll(func(f *flag.Flag) {
-			if b, ok := f.Value.(IsBoolFlagger); ok && b.IsBoolFlag() {
-				fmt.Fprintf(tw, "\t-%s\t%s\n", f.Name, f.Usage)
-				return
-			}
-
 			fmt.Fprintf(tw, "\t-%s=%s\t%s\n", f.Name, f.DefValue, f.Usage)
 		})
 
