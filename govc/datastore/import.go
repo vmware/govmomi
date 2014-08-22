@@ -90,7 +90,7 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.upload {
-		u, err := cmd.DatastoreURL(file.RemoteSrc())
+		u, err := cmd.DatastoreURL(file.RemoteVMDK())
 		if err != nil {
 			return err
 		}
@@ -108,7 +108,8 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 		}
 
 		fm := cmd.Client.FileManager()
-		err = fm.DeleteDatastoreFile(cmd.Datastore.Path(file.RemoteSrc()), cmd.Datacenter)
+		dsVMDK := cmd.Datastore.Path(path.Dir(file.RemoteVMDK()))
+		err = fm.DeleteDatastoreFile(dsVMDK, cmd.Datacenter)
 		if err != nil {
 			return err
 		}
@@ -131,7 +132,7 @@ func (cmd *import_) Copy(i importable) error {
 		},
 	}
 
-	spec.AddDisk(cmd.Datastore, i.RemoteSrc())
+	spec.AddDisk(cmd.Datastore, i.RemoteVMDK())
 
 	src, err := cmd.CreateVM(spec)
 	if err != nil {
@@ -251,9 +252,9 @@ func (i importable) BaseClean() string {
 	return b[:len(b)-len(e)]
 }
 
-func (i importable) RemoteSrc() string {
+func (i importable) RemoteVMDK() string {
 	bc := i.BaseClean()
-	return fmt.Sprintf(".%s.vmdk", bc)
+	return fmt.Sprintf("%s-vmdk/%s.vmdk", bc, bc)
 }
 
 func (i importable) RemoteDst() string {
