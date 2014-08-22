@@ -127,8 +127,13 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 		panic(err)
 	}
 
-	xmlbody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
-	httpreq, err = http.NewRequest("POST", c.u.String(), xmlbody)
+	rawreqbody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
+	if debug.Enabled() {
+		f := debug.NewFile(fmt.Sprintf("%d-%04d.req.xml", c.cn, num))
+		rawreqbody = io.TeeReader(rawreqbody, f)
+	}
+
+	httpreq, err = http.NewRequest("POST", c.u.String(), rawreqbody)
 	if err != nil {
 		panic(err)
 	}
@@ -137,8 +142,8 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	httpreq.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
 
 	if debug.Enabled() {
-		b, _ := httputil.DumpRequest(httpreq, true)
-		wc := debug.NewFile(fmt.Sprintf("%d-%04d.req", c.cn, num))
+		b, _ := httputil.DumpRequest(httpreq, false)
+		wc := debug.NewFile(fmt.Sprintf("%d-%04d.req.headers", c.cn, num))
 		wc.Write(b)
 		wc.Close()
 	}
@@ -157,14 +162,22 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 		return err
 	}
 
+	var rawresbody io.Reader = httpres.Body
+	defer httpres.Body.Close()
+
 	if debug.Enabled() {
-		b, _ := httputil.DumpResponse(httpres, true)
-		wc := debug.NewFile(fmt.Sprintf("%d-%04d.res", c.cn, num))
+		f := debug.NewFile(fmt.Sprintf("%d-%04d.res.xml", c.cn, num))
+		rawresbody = io.TeeReader(rawresbody, f)
+	}
+
+	if debug.Enabled() {
+		b, _ := httputil.DumpResponse(httpres, false)
+		wc := debug.NewFile(fmt.Sprintf("%d-%04d.res.headers", c.cn, num))
 		wc.Write(b)
 		wc.Close()
 	}
 
-	dec := xml.NewDecoder(httpres.Body)
+	dec := xml.NewDecoder(rawresbody)
 	dec.TypeFunc = types.TypeFunc()
 	err = dec.Decode(&resEnv)
 	if err != nil {
