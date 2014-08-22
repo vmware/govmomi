@@ -29,7 +29,7 @@ import (
 type Datastore struct {
 	types.ManagedObjectReference
 
-	Path string
+	InventoryPath string
 }
 
 func (d Datastore) Reference() types.ManagedObjectReference {
@@ -37,7 +37,16 @@ func (d Datastore) Reference() types.ManagedObjectReference {
 }
 
 func (d Datastore) Name() string {
-	return path.Base(d.Path)
+	return path.Base(d.InventoryPath)
+}
+
+func (d Datastore) Path(path string) string {
+	name := d.Name()
+	if name == "" {
+		panic("expected non-empty name")
+	}
+
+	return fmt.Sprintf("[%s] %s", name, path)
 }
 
 // URL for datastore access over HTTP
