@@ -27,7 +27,6 @@ type DiskFlag struct {
 	*DatastoreFlag
 
 	name string
-	path string
 }
 
 func (f *DiskFlag) Register(fs *flag.FlagSet) {
@@ -110,6 +109,30 @@ func (f *DiskFlag) Controller() (types.BaseVirtualDevice, error) {
 			},
 		},
 	}}, nil
+}
+
+func (f *DiskFlag) Disk() (types.BaseVirtualDevice, error) {
+	dsPath, err := f.DatastorePath(f.name)
+	if err != nil {
+		return nil, err
+	}
+
+	disk := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Key:           -1,
+			ControllerKey: -1,
+			UnitNumber:    -1,
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: true,
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: dsPath,
+				},
+			},
+		},
+	}
+
+	return disk, nil
 }
 
 func (f *DiskFlag) Cdrom(path string) (types.BaseVirtualDevice, error) {
