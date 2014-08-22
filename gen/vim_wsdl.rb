@@ -391,8 +391,8 @@ class ComplexType < Simple
     end
 
     def dump_interface(io, name)
-      method = "is%s()" % name
-      io.print "func (b *%s) %s { }\n" % [name, method]
+      method = "Get%s() *%s" % [name, name]
+      io.print "func (b *%s) %s { return b }\n" % [name, method]
       io.print "type Base%s interface {\n" % name
       io.print "%s\n" % method
       io.print "}\n\n"
