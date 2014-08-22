@@ -26,6 +26,33 @@ type FileManager struct {
 	c *Client
 }
 
+func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) error {
+	req := types.CopyDatastoreFile_Task{
+		This:            *f.c.ServiceContent.FileManager,
+		SourceName:      sourceName,
+		DestinationName: destinationName,
+		Force:           force,
+	}
+
+	if sourceDatacenter != nil {
+		ref := sourceDatacenter.Reference()
+		req.SourceDatacenter = &ref
+	}
+
+	if destinationDatacenter != nil {
+		ref := destinationDatacenter.Reference()
+		req.DestinationDatacenter = &ref
+	}
+
+	task, err := tasks.CopyDatastoreFile(f.c, &req)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.c.waitForTask(task)
+	return err
+}
+
 // DeleteDatastoreFile deletes the specified file or folder from the datastore.
 func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) error {
 	req := types.DeleteDatastoreFile_Task{
@@ -61,5 +88,32 @@ func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDire
 	}
 
 	_, err := methods.MakeDirectory(f.c, &req)
+	return err
+}
+
+func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) error {
+	req := types.MoveDatastoreFile_Task{
+		This:            *f.c.ServiceContent.FileManager,
+		SourceName:      sourceName,
+		DestinationName: destinationName,
+		Force:           force,
+	}
+
+	if sourceDatacenter != nil {
+		ref := sourceDatacenter.Reference()
+		req.SourceDatacenter = &ref
+	}
+
+	if destinationDatacenter != nil {
+		ref := destinationDatacenter.Reference()
+		req.DestinationDatacenter = &ref
+	}
+
+	task, err := tasks.MoveDatastoreFile(f.c, &req)
+	if err != nil {
+		return err
+	}
+
+	_, err = f.c.waitForTask(task)
 	return err
 }
