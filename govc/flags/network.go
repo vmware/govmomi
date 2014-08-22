@@ -17,12 +17,12 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
-	"fmt"
+	"os"
 	"sync"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -34,106 +34,129 @@ type NetworkFlag struct {
 	net      *govmomi.Network
 }
 
-func (f *NetworkFlag) Register(fs *flag.FlagSet) {
-	fs.StringVar(&f.name, "net", "", "Network")
+func (flag *NetworkFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		f.StringVar(&flag.name, "net", os.Getenv("GOVMOMI_NETWORK"), "Network")
+	})
 }
 
-func (f *NetworkFlag) Process() error {
+func (flag *NetworkFlag) Process() error {
 	return nil
 }
 
-func (f *NetworkFlag) Network() (*govmomi.Network, error) {
-	if f.net != nil {
-		return f.net, nil
-	}
-
-	dc, err := f.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	folders, err := dc.Folders(c)
-	if err != nil {
-		return nil, err
-	}
-	nf := folders.NetworkFolder
-
-	if f.name != "" {
-		ref, err := c.SearchIndex().FindChild(nf, f.name)
-		if err == nil {
+func (flag *NetworkFlag) findNetwork(path string) ([]*govmomi.Network, error) {
+	relativeFunc := func() (govmomi.Reference, error) {
+		dc, err := flag.Datacenter()
+		if err != nil {
 			return nil, err
 		}
-		f.net = ref.(*govmomi.Network)
-		return f.net, nil
-	}
 
-	cs, err := nf.Children(c)
-	if err != nil {
-		return nil, err
-	}
-	// Default to using the only network if there is only one.
-	if len(cs) != 1 {
-		return nil, fmt.Errorf("more than one network, please specify one")
-	}
-
-	f.net = cs[0].(*govmomi.Network)
-	return f.net, nil
-}
-
-func (f *NetworkFlag) Properties(p []string) (*mo.Network, error) {
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = f.Network()
-	if err != nil {
-		return nil, err
-	}
-
-	var net mo.Network
-	if err := c.Properties(f.net.Reference(), p, &net); err != nil {
-		return nil, err
-	}
-	return &net, nil
-}
-
-func (f *NetworkFlag) Name() (string, error) {
-	if f.name == "" {
-		net, err := f.Properties([]string{"name"})
+		c, err := flag.Client()
 		if err != nil {
-			return "", nil
+			return nil, err
 		}
-		f.name = net.Name
+
+		f, err := dc.Folders(c)
+		if err != nil {
+			return nil, err
+		}
+
+		return f.NetworkFolder, nil
 	}
-	return f.name, nil
+
+	es, err := flag.List(path, false, relativeFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	var ns []*govmomi.Network
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "Network" {
+			n := govmomi.Network{
+				ManagedObjectReference: ref,
+				InventoryPath:          e.Path,
+			}
+
+			ns = append(ns, &n)
+		}
+	}
+
+	return ns, nil
 }
 
-func (f *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
-	name, err := f.Name()
+func (flag *NetworkFlag) findSpecifiedNetwork(path string) (*govmomi.Network, error) {
+	networks, err := flag.findNetwork(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(networks) == 0 {
+		return nil, errors.New("no such network")
+	}
+
+	if len(networks) > 1 {
+		return nil, errors.New("path resolves to multiple networks")
+	}
+
+	flag.net = networks[0]
+	return flag.net, nil
+}
+
+func (flag *NetworkFlag) findDefaultNetwork() (*govmomi.Network, error) {
+	networks, err := flag.findNetwork("*")
+	if err != nil {
+		return nil, err
+	}
+
+	if len(networks) == 0 {
+		panic("no networks") // Should never happen
+	}
+
+	if len(networks) > 1 {
+		return nil, errors.New("please specify a network")
+	}
+
+	flag.net = networks[0]
+	return flag.net, nil
+}
+
+func (flag *NetworkFlag) Network() (*govmomi.Network, error) {
+	if flag.net != nil {
+		return flag.net, nil
+	}
+
+	if flag.name == "" {
+		return flag.findDefaultNetwork()
+	}
+
+	return flag.findSpecifiedNetwork(flag.name)
+}
+
+func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
+	net, err := flag.Network()
 	if err != nil {
 		return nil, err
 	}
 
 	// TODO: adapter type should be an option, default to e1000 for now.
-	return &types.VirtualE1000{types.VirtualEthernetCard{
-		VirtualDevice: types.VirtualDevice{
-			Key: -1,
-			DeviceInfo: &types.Description{
-				Label:   "Network Adapter 1",
-				Summary: name,
-			},
-			Backing: &types.VirtualEthernetCardNetworkBackingInfo{
-				VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
-					DeviceName: name,
+	device := &types.VirtualE1000{
+		types.VirtualEthernetCard{
+			VirtualDevice: types.VirtualDevice{
+				Key: -1,
+				DeviceInfo: &types.Description{
+					Label:   "Network Adapter 1",
+					Summary: net.Name(),
+				},
+				Backing: &types.VirtualEthernetCardNetworkBackingInfo{
+					VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+						DeviceName: net.Name(),
+					},
 				},
 			},
+			AddressType: string(types.VirtualEthernetCardMacTypeGenerated),
 		},
-		AddressType: string(types.VirtualEthernetCardMacTypeGenerated),
-	}}, nil
+	}
+
+	return device, nil
 }

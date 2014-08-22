@@ -16,12 +16,22 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"path"
+
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type Network struct {
 	types.ManagedObjectReference
+
+	InventoryPath string
 }
 
 func (n Network) Reference() types.ManagedObjectReference {
 	return n.ManagedObjectReference
+}
+
+func (n Network) Name() string {
+	return path.Base(n.InventoryPath)
 }
