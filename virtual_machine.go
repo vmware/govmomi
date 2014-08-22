@@ -17,6 +17,8 @@ limitations under the License.
 package govmomi
 
 import (
+	"errors"
+
 	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -83,6 +85,50 @@ func (v VirtualMachine) Destroy(c *Client) error {
 
 	_, err = c.waitForTask(task)
 	return err
+}
+
+func (v VirtualMachine) Clone(c *Client, folder Folder, name string, config types.VirtualMachineCloneSpec) (*VirtualMachine, error) {
+	req := types.CloneVM_Task{
+		This:   v.Reference(),
+		Folder: folder.Reference(),
+		Name:   name,
+		Spec:   config,
+	}
+
+	task, err := tasks.CloneVM(c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	res, err := c.waitForTask(task)
+	if err != nil {
+		return nil, err
+	}
+
+	return &VirtualMachine{res.(types.ManagedObjectReference)}, err
+}
+
+func (v VirtualMachine) Reconfigure(c *Client, config types.VirtualMachineConfigSpec) error {
+	req := types.ReconfigVM_Task{
+		This: v.Reference(),
+		Spec: config,
+	}
+
+	t, err := tasks.ReconfigVM(c, &req)
+	if err != nil {
+		return err
+	}
+
+	info, err := t.Wait()
+	if err != nil {
+		return err
+	}
+
+	if info.Error != nil {
+		return errors.New(info.Error.LocalizedMessage)
+	}
+
+	return nil
 }
 
 func (v VirtualMachine) WaitForIP(c *Client) (string, error) {
