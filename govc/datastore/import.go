@@ -34,6 +34,9 @@ type import_ struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
 
+	upload  bool
+	import_ bool
+
 	Client       *govmomi.Client
 	Datacenter   *govmomi.Datacenter
 	Datastore    *govmomi.Datastore
@@ -44,7 +47,10 @@ func init() {
 	cli.Register(&import_{})
 }
 
-func (cmd *import_) Register(f *flag.FlagSet) {}
+func (cmd *import_) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.upload, "upload", true, "Upload specified disk")
+	f.BoolVar(&cmd.import_, "import", true, "Import specified disk")
+}
 
 func (cmd *import_) Process() error { return nil }
 
@@ -83,25 +89,30 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	u, err := cmd.DatastoreURL(file.RemoteSrc())
-	if err != nil {
-		return err
+	if cmd.upload {
+		u, err := cmd.DatastoreURL(file.RemoteVMDK())
+		if err != nil {
+			return err
+		}
+
+		err = cmd.Client.Client.UploadFile(string(file), u)
+		if err != nil {
+			return err
+		}
 	}
 
-	err = cmd.Client.Client.UploadFile(string(file), u)
-	if err != nil {
-		return err
-	}
+	if cmd.import_ {
+		err = cmd.Copy(file)
+		if err != nil {
+			return err
+		}
 
-	err = cmd.Copy(file)
-	if err != nil {
-		return err
-	}
-
-	fm := cmd.Client.FileManager()
-	err = fm.DeleteDatastoreFile(cmd.Datastore.Path(file.RemoteSrc()), cmd.Datacenter)
-	if err != nil {
-		return err
+		fm := cmd.Client.FileManager()
+		dsVMDK := cmd.Datastore.Path(path.Dir(file.RemoteVMDK()))
+		err = fm.DeleteDatastoreFile(dsVMDK, cmd.Datacenter)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -121,7 +132,7 @@ func (cmd *import_) Copy(i importable) error {
 		},
 	}
 
-	spec.AddDisk(cmd.Datastore, i.RemoteSrc())
+	spec.AddDisk(cmd.Datastore, i.RemoteVMDK())
 
 	src, err := cmd.CreateVM(spec)
 	if err != nil {
@@ -241,9 +252,9 @@ func (i importable) BaseClean() string {
 	return b[:len(b)-len(e)]
 }
 
-func (i importable) RemoteSrc() string {
+func (i importable) RemoteVMDK() string {
 	bc := i.BaseClean()
-	return fmt.Sprintf(".%s.vmdk", bc)
+	return fmt.Sprintf("%s-vmdk/%s.vmdk", bc, bc)
 }
 
 func (i importable) RemoteDst() string {
