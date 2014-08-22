@@ -36,8 +36,7 @@ type DatastoreFlag struct {
 
 func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		flag.name = os.Getenv("GOVMOMI_DATASTORE")
-		f.StringVar(&flag.name, "ds", "", "Datastore")
+		f.StringVar(&flag.name, "ds", os.Getenv("GOVMOMI_DATASTORE"), "Datastore")
 	})
 }
 
