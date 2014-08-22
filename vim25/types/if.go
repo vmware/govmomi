@@ -16,575 +16,612 @@ limitations under the License.
 
 package types
 
-func (b *Action) isAction() {}
+func (b *Action) GetAction() *Action { return b }
 
 type BaseAction interface {
-	isAction()
+	GetAction() *Action
 }
 
-func (b *AlarmAction) isAlarmAction() {}
+func (b *AlarmAction) GetAlarmAction() *AlarmAction { return b }
 
 type BaseAlarmAction interface {
-	isAlarmAction()
+	GetAlarmAction() *AlarmAction
 }
 
-func (b *AlarmExpression) isAlarmExpression() {}
+func (b *AlarmExpression) GetAlarmExpression() *AlarmExpression { return b }
 
 type BaseAlarmExpression interface {
-	isAlarmExpression()
+	GetAlarmExpression() *AlarmExpression
 }
 
-func (b *AlarmSpec) isAlarmSpec() {}
+func (b *AlarmSpec) GetAlarmSpec() *AlarmSpec { return b }
 
 type BaseAlarmSpec interface {
-	isAlarmSpec()
+	GetAlarmSpec() *AlarmSpec
 }
 
-func (b *AnswerFileCreateSpec) isAnswerFileCreateSpec() {}
+func (b *AnswerFileCreateSpec) GetAnswerFileCreateSpec() *AnswerFileCreateSpec { return b }
 
 type BaseAnswerFileCreateSpec interface {
-	isAnswerFileCreateSpec()
+	GetAnswerFileCreateSpec() *AnswerFileCreateSpec
 }
 
-func (b *ApplyProfile) isApplyProfile() {}
+func (b *ApplyProfile) GetApplyProfile() *ApplyProfile { return b }
 
 type BaseApplyProfile interface {
-	isApplyProfile()
+	GetApplyProfile() *ApplyProfile
 }
 
-func (b *ClusterAction) isClusterAction() {}
+func (b *ClusterAction) GetClusterAction() *ClusterAction { return b }
 
 type BaseClusterAction interface {
-	isClusterAction()
+	GetClusterAction() *ClusterAction
 }
 
-func (b *ClusterDasAdmissionControlInfo) isClusterDasAdmissionControlInfo() {}
+func (b *ClusterDasAdmissionControlInfo) GetClusterDasAdmissionControlInfo() *ClusterDasAdmissionControlInfo {
+	return b
+}
 
 type BaseClusterDasAdmissionControlInfo interface {
-	isClusterDasAdmissionControlInfo()
+	GetClusterDasAdmissionControlInfo() *ClusterDasAdmissionControlInfo
 }
 
-func (b *ClusterDasAdmissionControlPolicy) isClusterDasAdmissionControlPolicy() {}
+func (b *ClusterDasAdmissionControlPolicy) GetClusterDasAdmissionControlPolicy() *ClusterDasAdmissionControlPolicy {
+	return b
+}
 
 type BaseClusterDasAdmissionControlPolicy interface {
-	isClusterDasAdmissionControlPolicy()
+	GetClusterDasAdmissionControlPolicy() *ClusterDasAdmissionControlPolicy
 }
 
-func (b *ClusterDasAdvancedRuntimeInfo) isClusterDasAdvancedRuntimeInfo() {}
+func (b *ClusterDasAdvancedRuntimeInfo) GetClusterDasAdvancedRuntimeInfo() *ClusterDasAdvancedRuntimeInfo {
+	return b
+}
 
 type BaseClusterDasAdvancedRuntimeInfo interface {
-	isClusterDasAdvancedRuntimeInfo()
+	GetClusterDasAdvancedRuntimeInfo() *ClusterDasAdvancedRuntimeInfo
 }
 
-func (b *ClusterDasData) isClusterDasData() {}
+func (b *ClusterDasData) GetClusterDasData() *ClusterDasData { return b }
 
 type BaseClusterDasData interface {
-	isClusterDasData()
+	GetClusterDasData() *ClusterDasData
 }
 
-func (b *ClusterDasHostInfo) isClusterDasHostInfo() {}
+func (b *ClusterDasHostInfo) GetClusterDasHostInfo() *ClusterDasHostInfo { return b }
 
 type BaseClusterDasHostInfo interface {
-	isClusterDasHostInfo()
+	GetClusterDasHostInfo() *ClusterDasHostInfo
 }
 
-func (b *ClusterDrsFaultsFaultsByVm) isClusterDrsFaultsFaultsByVm() {}
+func (b *ClusterDrsFaultsFaultsByVm) GetClusterDrsFaultsFaultsByVm() *ClusterDrsFaultsFaultsByVm {
+	return b
+}
 
 type BaseClusterDrsFaultsFaultsByVm interface {
-	isClusterDrsFaultsFaultsByVm()
+	GetClusterDrsFaultsFaultsByVm() *ClusterDrsFaultsFaultsByVm
 }
 
-func (b *ClusterGroupInfo) isClusterGroupInfo() {}
+func (b *ClusterGroupInfo) GetClusterGroupInfo() *ClusterGroupInfo { return b }
 
 type BaseClusterGroupInfo interface {
-	isClusterGroupInfo()
+	GetClusterGroupInfo() *ClusterGroupInfo
 }
 
-func (b *ClusterRuleInfo) isClusterRuleInfo() {}
+func (b *ClusterRuleInfo) GetClusterRuleInfo() *ClusterRuleInfo { return b }
 
 type BaseClusterRuleInfo interface {
-	isClusterRuleInfo()
+	GetClusterRuleInfo() *ClusterRuleInfo
 }
 
-func (b *ClusterSlotPolicy) isClusterSlotPolicy() {}
+func (b *ClusterSlotPolicy) GetClusterSlotPolicy() *ClusterSlotPolicy { return b }
 
 type BaseClusterSlotPolicy interface {
-	isClusterSlotPolicy()
+	GetClusterSlotPolicy() *ClusterSlotPolicy
 }
 
-func (b *ComputeResourceConfigInfo) isComputeResourceConfigInfo() {}
+func (b *ComputeResourceConfigInfo) GetComputeResourceConfigInfo() *ComputeResourceConfigInfo {
+	return b
+}
 
 type BaseComputeResourceConfigInfo interface {
-	isComputeResourceConfigInfo()
+	GetComputeResourceConfigInfo() *ComputeResourceConfigInfo
 }
 
-func (b *ComputeResourceSummary) isComputeResourceSummary() {}
+func (b *ComputeResourceSummary) GetComputeResourceSummary() *ComputeResourceSummary { return b }
 
 type BaseComputeResourceSummary interface {
-	isComputeResourceSummary()
+	GetComputeResourceSummary() *ComputeResourceSummary
 }
 
-func (b *CustomFieldValue) isCustomFieldValue() {}
+func (b *CustomFieldValue) GetCustomFieldValue() *CustomFieldValue { return b }
 
 type BaseCustomFieldValue interface {
-	isCustomFieldValue()
+	GetCustomFieldValue() *CustomFieldValue
 }
 
-func (b *CustomizationIdentitySettings) isCustomizationIdentitySettings() {}
+func (b *CustomizationIdentitySettings) GetCustomizationIdentitySettings() *CustomizationIdentitySettings {
+	return b
+}
 
 type BaseCustomizationIdentitySettings interface {
-	isCustomizationIdentitySettings()
+	GetCustomizationIdentitySettings() *CustomizationIdentitySettings
 }
 
-func (b *CustomizationIpGenerator) isCustomizationIpGenerator() {}
+func (b *CustomizationIpGenerator) GetCustomizationIpGenerator() *CustomizationIpGenerator { return b }
 
 type BaseCustomizationIpGenerator interface {
-	isCustomizationIpGenerator()
+	GetCustomizationIpGenerator() *CustomizationIpGenerator
 }
 
-func (b *CustomizationIpV6Generator) isCustomizationIpV6Generator() {}
+func (b *CustomizationIpV6Generator) GetCustomizationIpV6Generator() *CustomizationIpV6Generator {
+	return b
+}
 
 type BaseCustomizationIpV6Generator interface {
-	isCustomizationIpV6Generator()
+	GetCustomizationIpV6Generator() *CustomizationIpV6Generator
 }
 
-func (b *CustomizationName) isCustomizationName() {}
+func (b *CustomizationName) GetCustomizationName() *CustomizationName { return b }
 
 type BaseCustomizationName interface {
-	isCustomizationName()
+	GetCustomizationName() *CustomizationName
 }
 
-func (b *CustomizationOptions) isCustomizationOptions() {}
+func (b *CustomizationOptions) GetCustomizationOptions() *CustomizationOptions { return b }
 
 type BaseCustomizationOptions interface {
-	isCustomizationOptions()
+	GetCustomizationOptions() *CustomizationOptions
 }
 
-func (b *DVPortSetting) isDVPortSetting() {}
+func (b *DVPortSetting) GetDVPortSetting() *DVPortSetting { return b }
 
 type BaseDVPortSetting interface {
-	isDVPortSetting()
+	GetDVPortSetting() *DVPortSetting
 }
 
-func (b *DVPortgroupPolicy) isDVPortgroupPolicy() {}
+func (b *DVPortgroupPolicy) GetDVPortgroupPolicy() *DVPortgroupPolicy { return b }
 
 type BaseDVPortgroupPolicy interface {
-	isDVPortgroupPolicy()
+	GetDVPortgroupPolicy() *DVPortgroupPolicy
 }
 
-func (b *DVSConfigInfo) isDVSConfigInfo() {}
+func (b *DVSConfigInfo) GetDVSConfigInfo() *DVSConfigInfo { return b }
 
 type BaseDVSConfigInfo interface {
-	isDVSConfigInfo()
+	GetDVSConfigInfo() *DVSConfigInfo
 }
 
-func (b *DVSConfigSpec) isDVSConfigSpec() {}
+func (b *DVSConfigSpec) GetDVSConfigSpec() *DVSConfigSpec { return b }
 
 type BaseDVSConfigSpec interface {
-	isDVSConfigSpec()
+	GetDVSConfigSpec() *DVSConfigSpec
 }
 
-func (b *DVSFeatureCapability) isDVSFeatureCapability() {}
+func (b *DVSFeatureCapability) GetDVSFeatureCapability() *DVSFeatureCapability { return b }
 
 type BaseDVSFeatureCapability interface {
-	isDVSFeatureCapability()
+	GetDVSFeatureCapability() *DVSFeatureCapability
 }
 
-func (b *DVSHealthCheckCapability) isDVSHealthCheckCapability() {}
+func (b *DVSHealthCheckCapability) GetDVSHealthCheckCapability() *DVSHealthCheckCapability { return b }
 
 type BaseDVSHealthCheckCapability interface {
-	isDVSHealthCheckCapability()
+	GetDVSHealthCheckCapability() *DVSHealthCheckCapability
 }
 
-func (b *DVSHealthCheckConfig) isDVSHealthCheckConfig() {}
+func (b *DVSHealthCheckConfig) GetDVSHealthCheckConfig() *DVSHealthCheckConfig { return b }
 
 type BaseDVSHealthCheckConfig interface {
-	isDVSHealthCheckConfig()
+	GetDVSHealthCheckConfig() *DVSHealthCheckConfig
 }
 
-func (b *DVSUplinkPortPolicy) isDVSUplinkPortPolicy() {}
+func (b *DVSUplinkPortPolicy) GetDVSUplinkPortPolicy() *DVSUplinkPortPolicy { return b }
 
 type BaseDVSUplinkPortPolicy interface {
-	isDVSUplinkPortPolicy()
+	GetDVSUplinkPortPolicy() *DVSUplinkPortPolicy
 }
 
-func (b *DatastoreInfo) isDatastoreInfo() {}
+func (b *DatastoreInfo) GetDatastoreInfo() *DatastoreInfo { return b }
 
 type BaseDatastoreInfo interface {
-	isDatastoreInfo()
+	GetDatastoreInfo() *DatastoreInfo
 }
 
-func (b *Description) isDescription() {}
+func (b *Description) GetDescription() *Description { return b }
 
 type BaseDescription interface {
-	isDescription()
+	GetDescription() *Description
 }
 
-func (b *DistributedVirtualSwitchHostMemberBacking) isDistributedVirtualSwitchHostMemberBacking() {}
+func (b *DistributedVirtualSwitchHostMemberBacking) GetDistributedVirtualSwitchHostMemberBacking() *DistributedVirtualSwitchHostMemberBacking {
+	return b
+}
 
 type BaseDistributedVirtualSwitchHostMemberBacking interface {
-	isDistributedVirtualSwitchHostMemberBacking()
+	GetDistributedVirtualSwitchHostMemberBacking() *DistributedVirtualSwitchHostMemberBacking
 }
 
-func (b *DistributedVirtualSwitchManagerHostDvsFilterSpec) isDistributedVirtualSwitchManagerHostDvsFilterSpec() {
+func (b *DistributedVirtualSwitchManagerHostDvsFilterSpec) GetDistributedVirtualSwitchManagerHostDvsFilterSpec() *DistributedVirtualSwitchManagerHostDvsFilterSpec {
+	return b
 }
 
 type BaseDistributedVirtualSwitchManagerHostDvsFilterSpec interface {
-	isDistributedVirtualSwitchManagerHostDvsFilterSpec()
+	GetDistributedVirtualSwitchManagerHostDvsFilterSpec() *DistributedVirtualSwitchManagerHostDvsFilterSpec
 }
 
-func (b *DvsNetworkRuleAction) isDvsNetworkRuleAction() {}
+func (b *DvsNetworkRuleAction) GetDvsNetworkRuleAction() *DvsNetworkRuleAction { return b }
 
 type BaseDvsNetworkRuleAction interface {
-	isDvsNetworkRuleAction()
+	GetDvsNetworkRuleAction() *DvsNetworkRuleAction
 }
 
-func (b *DvsNetworkRuleQualifier) isDvsNetworkRuleQualifier() {}
+func (b *DvsNetworkRuleQualifier) GetDvsNetworkRuleQualifier() *DvsNetworkRuleQualifier { return b }
 
 type BaseDvsNetworkRuleQualifier interface {
-	isDvsNetworkRuleQualifier()
+	GetDvsNetworkRuleQualifier() *DvsNetworkRuleQualifier
 }
 
-func (b *DynamicData) isDynamicData() {}
+func (b *DynamicData) GetDynamicData() *DynamicData { return b }
 
 type BaseDynamicData interface {
-	isDynamicData()
+	GetDynamicData() *DynamicData
 }
 
-func (b *Event) isEvent() {}
+func (b *Event) GetEvent() *Event { return b }
 
 type BaseEvent interface {
-	isEvent()
+	GetEvent() *Event
 }
 
-func (b *FaultToleranceConfigInfo) isFaultToleranceConfigInfo() {}
+func (b *FaultToleranceConfigInfo) GetFaultToleranceConfigInfo() *FaultToleranceConfigInfo { return b }
 
 type BaseFaultToleranceConfigInfo interface {
-	isFaultToleranceConfigInfo()
+	GetFaultToleranceConfigInfo() *FaultToleranceConfigInfo
 }
 
-func (b *FileInfo) isFileInfo() {}
+func (b *FileInfo) GetFileInfo() *FileInfo { return b }
 
 type BaseFileInfo interface {
-	isFileInfo()
+	GetFileInfo() *FileInfo
 }
 
-func (b *FileQuery) isFileQuery() {}
+func (b *FileQuery) GetFileQuery() *FileQuery { return b }
 
 type BaseFileQuery interface {
-	isFileQuery()
+	GetFileQuery() *FileQuery
 }
 
-func (b *GuestAuthentication) isGuestAuthentication() {}
+func (b *GuestAuthentication) GetGuestAuthentication() *GuestAuthentication { return b }
 
 type BaseGuestAuthentication interface {
-	isGuestAuthentication()
+	GetGuestAuthentication() *GuestAuthentication
 }
 
-func (b *GuestFileAttributes) isGuestFileAttributes() {}
+func (b *GuestFileAttributes) GetGuestFileAttributes() *GuestFileAttributes { return b }
 
 type BaseGuestFileAttributes interface {
-	isGuestFileAttributes()
+	GetGuestFileAttributes() *GuestFileAttributes
 }
 
-func (b *GuestProgramSpec) isGuestProgramSpec() {}
+func (b *GuestProgramSpec) GetGuestProgramSpec() *GuestProgramSpec { return b }
 
 type BaseGuestProgramSpec interface {
-	isGuestProgramSpec()
+	GetGuestProgramSpec() *GuestProgramSpec
 }
 
-func (b *HostAccountSpec) isHostAccountSpec() {}
+func (b *HostAccountSpec) GetHostAccountSpec() *HostAccountSpec { return b }
 
 type BaseHostAccountSpec interface {
-	isHostAccountSpec()
+	GetHostAccountSpec() *HostAccountSpec
 }
 
-func (b *HostAuthenticationStoreInfo) isHostAuthenticationStoreInfo() {}
+func (b *HostAuthenticationStoreInfo) GetHostAuthenticationStoreInfo() *HostAuthenticationStoreInfo {
+	return b
+}
 
 type BaseHostAuthenticationStoreInfo interface {
-	isHostAuthenticationStoreInfo()
+	GetHostAuthenticationStoreInfo() *HostAuthenticationStoreInfo
 }
 
-func (b *HostConnectInfoNetworkInfo) isHostConnectInfoNetworkInfo() {}
+func (b *HostConnectInfoNetworkInfo) GetHostConnectInfoNetworkInfo() *HostConnectInfoNetworkInfo {
+	return b
+}
 
 type BaseHostConnectInfoNetworkInfo interface {
-	isHostConnectInfoNetworkInfo()
+	GetHostConnectInfoNetworkInfo() *HostConnectInfoNetworkInfo
 }
 
-func (b *HostDatastoreConnectInfo) isHostDatastoreConnectInfo() {}
+func (b *HostDatastoreConnectInfo) GetHostDatastoreConnectInfo() *HostDatastoreConnectInfo { return b }
 
 type BaseHostDatastoreConnectInfo interface {
-	isHostDatastoreConnectInfo()
+	GetHostDatastoreConnectInfo() *HostDatastoreConnectInfo
 }
 
-func (b *HostDnsConfig) isHostDnsConfig() {}
+func (b *HostDnsConfig) GetHostDnsConfig() *HostDnsConfig { return b }
 
 type BaseHostDnsConfig interface {
-	isHostDnsConfig()
+	GetHostDnsConfig() *HostDnsConfig
 }
 
-func (b *HostFileSystemVolume) isHostFileSystemVolume() {}
+func (b *HostFileSystemVolume) GetHostFileSystemVolume() *HostFileSystemVolume { return b }
 
 type BaseHostFileSystemVolume interface {
-	isHostFileSystemVolume()
+	GetHostFileSystemVolume() *HostFileSystemVolume
 }
 
-func (b *HostHostBusAdapter) isHostHostBusAdapter() {}
+func (b *HostHostBusAdapter) GetHostHostBusAdapter() *HostHostBusAdapter { return b }
 
 type BaseHostHostBusAdapter interface {
-	isHostHostBusAdapter()
+	GetHostHostBusAdapter() *HostHostBusAdapter
 }
 
-func (b *HostIpRouteConfig) isHostIpRouteConfig() {}
+func (b *HostIpRouteConfig) GetHostIpRouteConfig() *HostIpRouteConfig { return b }
 
 type BaseHostIpRouteConfig interface {
-	isHostIpRouteConfig()
+	GetHostIpRouteConfig() *HostIpRouteConfig
 }
 
-func (b *HostMemberHealthCheckResult) isHostMemberHealthCheckResult() {}
+func (b *HostMemberHealthCheckResult) GetHostMemberHealthCheckResult() *HostMemberHealthCheckResult {
+	return b
+}
 
 type BaseHostMemberHealthCheckResult interface {
-	isHostMemberHealthCheckResult()
+	GetHostMemberHealthCheckResult() *HostMemberHealthCheckResult
 }
 
-func (b *HostMultipathInfoLogicalUnitPolicy) isHostMultipathInfoLogicalUnitPolicy() {}
+func (b *HostMultipathInfoLogicalUnitPolicy) GetHostMultipathInfoLogicalUnitPolicy() *HostMultipathInfoLogicalUnitPolicy {
+	return b
+}
 
 type BaseHostMultipathInfoLogicalUnitPolicy interface {
-	isHostMultipathInfoLogicalUnitPolicy()
+	GetHostMultipathInfoLogicalUnitPolicy() *HostMultipathInfoLogicalUnitPolicy
 }
 
-func (b *HostPciPassthruConfig) isHostPciPassthruConfig() {}
+func (b *HostPciPassthruConfig) GetHostPciPassthruConfig() *HostPciPassthruConfig { return b }
 
 type BaseHostPciPassthruConfig interface {
-	isHostPciPassthruConfig()
+	GetHostPciPassthruConfig() *HostPciPassthruConfig
 }
 
-func (b *HostPciPassthruInfo) isHostPciPassthruInfo() {}
+func (b *HostPciPassthruInfo) GetHostPciPassthruInfo() *HostPciPassthruInfo { return b }
 
 type BaseHostPciPassthruInfo interface {
-	isHostPciPassthruInfo()
+	GetHostPciPassthruInfo() *HostPciPassthruInfo
 }
 
-func (b *HostSystemSwapConfigurationSystemSwapOption) isHostSystemSwapConfigurationSystemSwapOption() {
+func (b *HostSystemSwapConfigurationSystemSwapOption) GetHostSystemSwapConfigurationSystemSwapOption() *HostSystemSwapConfigurationSystemSwapOption {
+	return b
 }
 
 type BaseHostSystemSwapConfigurationSystemSwapOption interface {
-	isHostSystemSwapConfigurationSystemSwapOption()
+	GetHostSystemSwapConfigurationSystemSwapOption() *HostSystemSwapConfigurationSystemSwapOption
 }
 
-func (b *HostTargetTransport) isHostTargetTransport() {}
+func (b *HostTargetTransport) GetHostTargetTransport() *HostTargetTransport { return b }
 
 type BaseHostTargetTransport interface {
-	isHostTargetTransport()
+	GetHostTargetTransport() *HostTargetTransport
 }
 
-func (b *HostTpmEventDetails) isHostTpmEventDetails() {}
+func (b *HostTpmEventDetails) GetHostTpmEventDetails() *HostTpmEventDetails { return b }
 
 type BaseHostTpmEventDetails interface {
-	isHostTpmEventDetails()
+	GetHostTpmEventDetails() *HostTpmEventDetails
 }
 
-func (b *HostVirtualSwitchBridge) isHostVirtualSwitchBridge() {}
+func (b *HostVirtualSwitchBridge) GetHostVirtualSwitchBridge() *HostVirtualSwitchBridge { return b }
 
 type BaseHostVirtualSwitchBridge interface {
-	isHostVirtualSwitchBridge()
+	GetHostVirtualSwitchBridge() *HostVirtualSwitchBridge
 }
 
-func (b *ImportSpec) isImportSpec() {}
+func (b *ImportSpec) GetImportSpec() *ImportSpec { return b }
 
 type BaseImportSpec interface {
-	isImportSpec()
+	GetImportSpec() *ImportSpec
 }
 
-func (b *LicenseSource) isLicenseSource() {}
+func (b *LicenseSource) GetLicenseSource() *LicenseSource { return b }
 
 type BaseLicenseSource interface {
-	isLicenseSource()
+	GetLicenseSource() *LicenseSource
 }
 
-func (b *MethodFault) isMethodFault() {}
+func (b *MethodFault) GetMethodFault() *MethodFault { return b }
 
 type BaseMethodFault interface {
-	isMethodFault()
+	GetMethodFault() *MethodFault
 }
 
-func (b *NetBIOSConfigInfo) isNetBIOSConfigInfo() {}
+func (b *NetBIOSConfigInfo) GetNetBIOSConfigInfo() *NetBIOSConfigInfo { return b }
 
 type BaseNetBIOSConfigInfo interface {
-	isNetBIOSConfigInfo()
+	GetNetBIOSConfigInfo() *NetBIOSConfigInfo
 }
 
-func (b *OptionType) isOptionType() {}
+func (b *OptionType) GetOptionType() *OptionType { return b }
 
 type BaseOptionType interface {
-	isOptionType()
+	GetOptionType() *OptionType
 }
 
-func (b *PerfEntityMetricBase) isPerfEntityMetricBase() {}
+func (b *PerfEntityMetricBase) GetPerfEntityMetricBase() *PerfEntityMetricBase { return b }
 
 type BasePerfEntityMetricBase interface {
-	isPerfEntityMetricBase()
+	GetPerfEntityMetricBase() *PerfEntityMetricBase
 }
 
-func (b *PerfMetricSeries) isPerfMetricSeries() {}
+func (b *PerfMetricSeries) GetPerfMetricSeries() *PerfMetricSeries { return b }
 
 type BasePerfMetricSeries interface {
-	isPerfMetricSeries()
+	GetPerfMetricSeries() *PerfMetricSeries
 }
 
-func (b *PolicyOption) isPolicyOption() {}
+func (b *PolicyOption) GetPolicyOption() *PolicyOption { return b }
 
 type BasePolicyOption interface {
-	isPolicyOption()
+	GetPolicyOption() *PolicyOption
 }
 
-func (b *ProfileConfigInfo) isProfileConfigInfo() {}
+func (b *ProfileConfigInfo) GetProfileConfigInfo() *ProfileConfigInfo { return b }
 
 type BaseProfileConfigInfo interface {
-	isProfileConfigInfo()
+	GetProfileConfigInfo() *ProfileConfigInfo
 }
 
-func (b *ProfileCreateSpec) isProfileCreateSpec() {}
+func (b *ProfileCreateSpec) GetProfileCreateSpec() *ProfileCreateSpec { return b }
 
 type BaseProfileCreateSpec interface {
-	isProfileCreateSpec()
+	GetProfileCreateSpec() *ProfileCreateSpec
 }
 
-func (b *ProfileExpression) isProfileExpression() {}
+func (b *ProfileExpression) GetProfileExpression() *ProfileExpression { return b }
 
 type BaseProfileExpression interface {
-	isProfileExpression()
+	GetProfileExpression() *ProfileExpression
 }
 
-func (b *ProfilePolicyOptionMetadata) isProfilePolicyOptionMetadata() {}
+func (b *ProfilePolicyOptionMetadata) GetProfilePolicyOptionMetadata() *ProfilePolicyOptionMetadata {
+	return b
+}
 
 type BaseProfilePolicyOptionMetadata interface {
-	isProfilePolicyOptionMetadata()
+	GetProfilePolicyOptionMetadata() *ProfilePolicyOptionMetadata
 }
 
-func (b *ResourcePoolSummary) isResourcePoolSummary() {}
+func (b *ResourcePoolSummary) GetResourcePoolSummary() *ResourcePoolSummary { return b }
 
 type BaseResourcePoolSummary interface {
-	isResourcePoolSummary()
+	GetResourcePoolSummary() *ResourcePoolSummary
 }
 
-func (b *ScheduledTaskSpec) isScheduledTaskSpec() {}
+func (b *ScheduledTaskSpec) GetScheduledTaskSpec() *ScheduledTaskSpec { return b }
 
 type BaseScheduledTaskSpec interface {
-	isScheduledTaskSpec()
+	GetScheduledTaskSpec() *ScheduledTaskSpec
 }
 
-func (b *SelectionSet) isSelectionSet() {}
+func (b *SelectionSet) GetSelectionSet() *SelectionSet { return b }
 
 type BaseSelectionSet interface {
-	isSelectionSet()
+	GetSelectionSet() *SelectionSet
 }
 
-func (b *SelectionSpec) isSelectionSpec() {}
+func (b *SelectionSpec) GetSelectionSpec() *SelectionSpec { return b }
 
 type BaseSelectionSpec interface {
-	isSelectionSpec()
+	GetSelectionSpec() *SelectionSpec
 }
 
-func (b *SessionManagerServiceRequestSpec) isSessionManagerServiceRequestSpec() {}
+func (b *SessionManagerServiceRequestSpec) GetSessionManagerServiceRequestSpec() *SessionManagerServiceRequestSpec {
+	return b
+}
 
 type BaseSessionManagerServiceRequestSpec interface {
-	isSessionManagerServiceRequestSpec()
+	GetSessionManagerServiceRequestSpec() *SessionManagerServiceRequestSpec
 }
 
-func (b *TaskReason) isTaskReason() {}
+func (b *TaskReason) GetTaskReason() *TaskReason { return b }
 
 type BaseTaskReason interface {
-	isTaskReason()
+	GetTaskReason() *TaskReason
 }
 
-func (b *TaskScheduler) isTaskScheduler() {}
+func (b *TaskScheduler) GetTaskScheduler() *TaskScheduler { return b }
 
 type BaseTaskScheduler interface {
-	isTaskScheduler()
+	GetTaskScheduler() *TaskScheduler
 }
 
-func (b *UserSearchResult) isUserSearchResult() {}
+func (b *UserSearchResult) GetUserSearchResult() *UserSearchResult { return b }
 
 type BaseUserSearchResult interface {
-	isUserSearchResult()
+	GetUserSearchResult() *UserSearchResult
 }
 
-func (b *VirtualDevice) isVirtualDevice() {}
+func (b *VirtualDevice) GetVirtualDevice() *VirtualDevice { return b }
 
 type BaseVirtualDevice interface {
-	isVirtualDevice()
+	GetVirtualDevice() *VirtualDevice
 }
 
-func (b *VirtualDeviceBackingInfo) isVirtualDeviceBackingInfo() {}
+func (b *VirtualDeviceBackingInfo) GetVirtualDeviceBackingInfo() *VirtualDeviceBackingInfo { return b }
 
 type BaseVirtualDeviceBackingInfo interface {
-	isVirtualDeviceBackingInfo()
+	GetVirtualDeviceBackingInfo() *VirtualDeviceBackingInfo
 }
 
-func (b *VirtualDeviceBackingOption) isVirtualDeviceBackingOption() {}
+func (b *VirtualDeviceBackingOption) GetVirtualDeviceBackingOption() *VirtualDeviceBackingOption {
+	return b
+}
 
 type BaseVirtualDeviceBackingOption interface {
-	isVirtualDeviceBackingOption()
+	GetVirtualDeviceBackingOption() *VirtualDeviceBackingOption
 }
 
-func (b *VirtualDeviceBusSlotInfo) isVirtualDeviceBusSlotInfo() {}
+func (b *VirtualDeviceBusSlotInfo) GetVirtualDeviceBusSlotInfo() *VirtualDeviceBusSlotInfo { return b }
 
 type BaseVirtualDeviceBusSlotInfo interface {
-	isVirtualDeviceBusSlotInfo()
+	GetVirtualDeviceBusSlotInfo() *VirtualDeviceBusSlotInfo
 }
 
-func (b *VirtualDeviceConfigSpec) isVirtualDeviceConfigSpec() {}
+func (b *VirtualDeviceConfigSpec) GetVirtualDeviceConfigSpec() *VirtualDeviceConfigSpec { return b }
 
 type BaseVirtualDeviceConfigSpec interface {
-	isVirtualDeviceConfigSpec()
+	GetVirtualDeviceConfigSpec() *VirtualDeviceConfigSpec
 }
 
-func (b *VirtualDeviceOption) isVirtualDeviceOption() {}
+func (b *VirtualDeviceOption) GetVirtualDeviceOption() *VirtualDeviceOption { return b }
 
 type BaseVirtualDeviceOption interface {
-	isVirtualDeviceOption()
+	GetVirtualDeviceOption() *VirtualDeviceOption
 }
 
-func (b *VirtualDiskSpec) isVirtualDiskSpec() {}
+func (b *VirtualDiskSpec) GetVirtualDiskSpec() *VirtualDiskSpec { return b }
 
 type BaseVirtualDiskSpec interface {
-	isVirtualDiskSpec()
+	GetVirtualDiskSpec() *VirtualDiskSpec
 }
 
-func (b *VirtualMachineBootOptionsBootableDevice) isVirtualMachineBootOptionsBootableDevice() {}
+func (b *VirtualMachineBootOptionsBootableDevice) GetVirtualMachineBootOptionsBootableDevice() *VirtualMachineBootOptionsBootableDevice {
+	return b
+}
 
 type BaseVirtualMachineBootOptionsBootableDevice interface {
-	isVirtualMachineBootOptionsBootableDevice()
+	GetVirtualMachineBootOptionsBootableDevice() *VirtualMachineBootOptionsBootableDevice
 }
 
-func (b *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState) isVirtualMachineDeviceRuntimeInfoDeviceRuntimeState() {
+func (b *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState) GetVirtualMachineDeviceRuntimeInfoDeviceRuntimeState() *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState {
+	return b
 }
 
 type BaseVirtualMachineDeviceRuntimeInfoDeviceRuntimeState interface {
-	isVirtualMachineDeviceRuntimeInfoDeviceRuntimeState()
+	GetVirtualMachineDeviceRuntimeInfoDeviceRuntimeState() *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState
 }
 
-func (b *VirtualMachineProfileSpec) isVirtualMachineProfileSpec() {}
+func (b *VirtualMachineProfileSpec) GetVirtualMachineProfileSpec() *VirtualMachineProfileSpec {
+	return b
+}
 
 type BaseVirtualMachineProfileSpec interface {
-	isVirtualMachineProfileSpec()
+	GetVirtualMachineProfileSpec() *VirtualMachineProfileSpec
 }
 
-func (b *VirtualMachineTargetInfo) isVirtualMachineTargetInfo() {}
+func (b *VirtualMachineTargetInfo) GetVirtualMachineTargetInfo() *VirtualMachineTargetInfo { return b }
 
 type BaseVirtualMachineTargetInfo interface {
-	isVirtualMachineTargetInfo()
+	GetVirtualMachineTargetInfo() *VirtualMachineTargetInfo
 }
 
-func (b *VmConfigInfo) isVmConfigInfo() {}
+func (b *VmConfigInfo) GetVmConfigInfo() *VmConfigInfo { return b }
 
 type BaseVmConfigInfo interface {
-	isVmConfigInfo()
+	GetVmConfigInfo() *VmConfigInfo
 }
 
-func (b *VmfsDatastoreBaseOption) isVmfsDatastoreBaseOption() {}
+func (b *VmfsDatastoreBaseOption) GetVmfsDatastoreBaseOption() *VmfsDatastoreBaseOption { return b }
 
 type BaseVmfsDatastoreBaseOption interface {
-	isVmfsDatastoreBaseOption()
+	GetVmfsDatastoreBaseOption() *VmfsDatastoreBaseOption
 }
