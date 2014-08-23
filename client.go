@@ -215,6 +215,10 @@ func (c *Client) GuestOperationsManager() GuestOperationsManager {
 	return GuestOperationsManager{c}
 }
 
+func (c *Client) OvfManager() OvfManager {
+	return OvfManager{c}
+}
+
 func (c *Client) RootFolder() Folder {
 	return Folder{c.ServiceContent.RootFolder}
 }
