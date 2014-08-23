@@ -111,8 +111,8 @@ func (f *DiskFlag) Controller() (types.BaseVirtualDevice, error) {
 	}}, nil
 }
 
-func (f *DiskFlag) Disk() (types.BaseVirtualDevice, error) {
-	dsPath, err := f.DatastorePath(f.name)
+func (f *DiskFlag) Disk() (*types.VirtualDisk, error) {
+	ds, err := f.Datastore()
 	if err != nil {
 		return nil, err
 	}
@@ -126,7 +126,7 @@ func (f *DiskFlag) Disk() (types.BaseVirtualDevice, error) {
 				DiskMode:        string(types.VirtualDiskModePersistent),
 				ThinProvisioned: true,
 				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: dsPath,
+					FileName: ds.Path(f.name),
 				},
 			},
 		},
