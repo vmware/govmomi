@@ -20,6 +20,8 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type mkdir struct {
@@ -49,5 +51,17 @@ func (cmd *mkdir) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return m.MakeDirectoryInGuest(vm, cmd.Auth(), f.Arg(0), cmd.createParents)
+	err = m.MakeDirectoryInGuest(vm, cmd.Auth(), f.Arg(0), cmd.createParents)
+
+	// ignore EEXIST if -p flag is given
+	if err != nil && cmd.createParents {
+		if soap.IsSoapFault(err) {
+			soapFault := soap.ToSoapFault(err)
+			if _, ok := soapFault.VimFault().(types.FileAlreadyExists); ok {
+				return nil
+			}
+		}
+	}
+
+	return err
 }
