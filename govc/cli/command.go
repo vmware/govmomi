@@ -43,14 +43,24 @@ type Command interface {
 var hasFlagsType = reflect.TypeOf((*HasFlags)(nil)).Elem()
 
 func RegisterCommand(h HasFlags, f *flag.FlagSet) {
+	visited := make(map[interface{}]struct{})
 	Walk(h, hasFlagsType, func(v interface{}) error {
+		if _, ok := visited[v]; ok {
+			return nil
+		}
+		visited[v] = struct{}{}
 		v.(HasFlags).Register(f)
 		return nil
 	})
 }
 
 func ProcessCommand(h HasFlags) error {
+	visited := make(map[interface{}]struct{})
 	err := Walk(h, hasFlagsType, func(v interface{}) error {
+		if _, ok := visited[v]; ok {
+			return nil
+		}
+		visited[v] = struct{}{}
 		err := v.(HasFlags).Process()
 		return err
 	})
