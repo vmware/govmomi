@@ -36,7 +36,7 @@ func (d *DebugFlag) Register(f *flag.FlagSet) {
 func (d *DebugFlag) Process() error {
 	if d.enable {
 		// Base path for storing debug logs.
-		r := os.Getenv("GOVMOMI_DEBUG_PATH")
+		r := os.Getenv("GOVC_DEBUG_PATH")
 		if r == "" {
 			r = path.Join(os.Getenv("HOME"), ".govmomi")
 		}

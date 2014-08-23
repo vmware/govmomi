@@ -64,7 +64,7 @@ func (c *ClientFlag) Set(s string) error {
 
 func (c *ClientFlag) Register(f *flag.FlagSet) {
 	c.register.Do(func() {
-		c.Set(os.Getenv("GOVMOMI_URL"))
+		c.Set(os.Getenv("GOVC_URL"))
 		f.Var(c, "u", cDescr)
 	})
 }

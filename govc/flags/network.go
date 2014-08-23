@@ -36,7 +36,7 @@ type NetworkFlag struct {
 
 func (flag *NetworkFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "net", os.Getenv("GOVMOMI_NETWORK"), "Network")
+		f.StringVar(&flag.name, "net", os.Getenv("GOVC_NETWORK"), "Network")
 	})
 }
 

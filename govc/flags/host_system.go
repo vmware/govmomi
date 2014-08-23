@@ -37,7 +37,7 @@ type HostSystemFlag struct {
 
 func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "host", os.Getenv("GOVMOMI_HOST"), "Host system")
+		f.StringVar(&flag.name, "host", os.Getenv("GOVC_HOST"), "Host system")
 	})
 }
 
