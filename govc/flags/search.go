@@ -35,7 +35,8 @@ type SearchFlag struct {
 	*DatacenterFlag
 	*ListFlag
 
-	t int
+	t      int
+	entity string
 
 	byDatastorePath string
 	byDNSName       string
@@ -51,24 +52,22 @@ func NewSearchFlag(t int) *SearchFlag {
 		t: t,
 	}
 
+	switch t {
+	case SearchVirtualMachines:
+		s.entity = "VM"
+	case SearchHosts:
+		s.entity = "host"
+	default:
+		panic("invalid search type")
+	}
+
 	return &s
 }
 
 func (flag *SearchFlag) Register(fs *flag.FlagSet) {
-	var entity string
-
-	switch flag.t {
-	case SearchVirtualMachines:
-		entity = "VM"
-	case SearchHosts:
-		entity = "host"
-	default:
-		panic("search type not set")
-	}
-
 	register := func(v *string, f string, d string) {
-		f = fmt.Sprintf("%s.%s", strings.ToLower(entity), f)
-		d = fmt.Sprintf(d, entity)
+		f = fmt.Sprintf("%s.%s", strings.ToLower(flag.entity), f)
+		d = fmt.Sprintf(d, flag.entity)
 		fs.StringVar(v, f, "", d)
 	}
 
@@ -194,7 +193,7 @@ func (flag *SearchFlag) search() (govmomi.Reference, error) {
 	}
 
 	if ref == nil {
-		return nil, fmt.Errorf("not found")
+		return nil, fmt.Errorf("no such %s", flag.entity)
 	}
 
 	return ref, nil
