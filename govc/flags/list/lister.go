@@ -47,6 +47,8 @@ func ToElement(r govmomi.Reference, prefix string) Element {
 		name = m.Name
 	case mo.Datastore:
 		name = m.Name
+	case mo.ResourcePool:
+		name = m.Name
 	default:
 		panic("not implemented for type " + reflect.TypeOf(r).String())
 	}
@@ -70,6 +72,7 @@ func traversable(ref types.ManagedObjectReference) bool {
 	switch ref.Type {
 	case "Folder":
 	case "Datacenter":
+	case "ComputeResource":
 	default:
 		return false
 	}
@@ -83,6 +86,8 @@ func (l Lister) List() ([]Element, error) {
 		return l.ListFolder()
 	case "Datacenter":
 		return l.ListDatacenter()
+	case "ComputeResource":
+		return l.ListComputeResource()
 	default:
 		return nil, fmt.Errorf("cannot traverse type " + l.Reference.Type)
 	}
@@ -124,6 +129,12 @@ func (l Lister) ListFolder() ([]Element, error) {
 			pspec.All = true
 		} else {
 			pspec.PathSet = []string{"name"}
+
+			// Additional basic properties.
+			switch t {
+			case "ComputeResource":
+				pspec.PathSet = append(pspec.PathSet, "resourcePool")
+			}
 		}
 
 		spec.PropSet = append(spec.PropSet, pspec)
@@ -189,6 +200,70 @@ func (l Lister) ListDatacenter() ([]Element, error) {
 			{
 				ObjectSet: []types.ObjectSpec{ospec},
 				PropSet:   []types.PropertySpec{pspec},
+			},
+		},
+	}
+
+	var dst []interface{}
+
+	err := mo.RetrievePropertiesForRequest(l.Client, req, &dst)
+	if err != nil {
+		return nil, err
+	}
+
+	es := []Element{}
+	for _, v := range dst {
+		es = append(es, ToElement(v.(govmomi.Reference), l.Prefix))
+	}
+
+	return es, nil
+}
+
+func (l Lister) ListComputeResource() ([]Element, error) {
+	ospec := types.ObjectSpec{
+		Obj:  l.Reference,
+		Skip: true,
+	}
+
+	fields := []string{
+		"resourcePool",
+	}
+
+	for _, f := range fields {
+		tspec := types.TraversalSpec{
+			Path: f,
+			Skip: false,
+			Type: "ComputeResource",
+		}
+
+		ospec.SelectSet = append(ospec.SelectSet, &tspec)
+	}
+
+	childTypes := []string{
+		"ResourcePool",
+	}
+
+	var pspecs []types.PropertySpec
+	for _, t := range childTypes {
+		pspec := types.PropertySpec{
+			Type: t,
+		}
+
+		if l.All {
+			pspec.All = true
+		} else {
+			pspec.PathSet = []string{"name"}
+		}
+
+		pspecs = append(pspecs, pspec)
+	}
+
+	req := types.RetrieveProperties{
+		This: l.Client.ServiceContent.PropertyCollector,
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				ObjectSet: []types.ObjectSpec{ospec},
+				PropSet:   pspecs,
 			},
 		},
 	}
