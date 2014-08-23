@@ -89,6 +89,8 @@ func (t *test2A) Set() {
 }
 
 type test2B struct {
+	t *testing.T
+
 	F1 *test2A
 	F2 *test2A
 	F3 *test2A
@@ -96,6 +98,10 @@ type test2B struct {
 }
 
 func (t *test2B) Set() {
+	// Assert that this function gets called before the walker recurses.
+	if t.F1 != nil || t.F3 != nil {
+		t.t.Errorf("Expected user function to be called before recursing")
+	}
 }
 
 type test2Set interface {
@@ -108,6 +114,7 @@ func TestWalkDoesntOverwrite(t *testing.T) {
 	var testSetType = reflect.TypeOf((*test2Set)(nil)).Elem()
 
 	// Set elements 2 and 4
+	t2b.t = t
 	t2b.F2 = &t2a
 	t2b.F4 = &t2a
 

@@ -50,6 +50,12 @@ func Walk(c interface{}, ifaceType reflect.Type, fn WalkFn) error {
 
 		t := v.Type()
 
+		// Call user specified function.
+		err := fn(c)
+		if err != nil {
+			return err
+		}
+
 		for i := 0; i < t.NumField(); i++ {
 			ff := t.Field(i)
 			ft := ff.Type
@@ -93,12 +99,6 @@ func Walk(c interface{}, ifaceType reflect.Type, fn WalkFn) error {
 			if err != nil {
 				return err
 			}
-		}
-
-		// Call user specified function.
-		err := fn(c)
-		if err != nil {
-			return err
 		}
 
 		return nil
