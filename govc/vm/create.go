@@ -19,7 +19,6 @@ package vm
 import (
 	"flag"
 	"fmt"
-	"reflect"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -106,16 +105,6 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.DiskFlag.IsSet() && cmd.link {
-		err = cmd.Link(vm)
-		if err != nil {
-			// Unable to link the disk. Make an attempt to clean up the VM, so that
-			// it doesn't hold a reference to this disk.
-			cmd.Cleanup(vm)
-			return err
-		}
-	}
-
 	if cmd.on {
 		err = vm.PowerOn(cmd.Client)
 		if err != nil {
@@ -148,7 +137,29 @@ func (cmd *create) CreateVM(name string) (*govmomi.VirtualMachine, error) {
 			return nil, err
 		}
 
-		spec.AddDevice(disk)
+		diskAddOp := &types.VirtualDeviceConfigSpec{
+			Operation: types.VirtualDeviceConfigSpecOperationAdd,
+			Device:    disk,
+		}
+
+		if cmd.link {
+			parent := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+
+			// Use specified disk as parent backing to a new disk.
+			disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: fmt.Sprintf("[%s]", cmd.Datastore.Name()),
+				},
+				Parent:          parent,
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: true,
+			}
+
+			// Create the new disk (won't happen without this flag).
+			diskAddOp.FileOperation = types.VirtualDeviceConfigSpecFileOperationCreate
+		}
+
+		spec.AddChange(diskAddOp)
 	}
 
 	netdev, err := cmd.NetworkFlag.Device()
@@ -164,61 +175,6 @@ func (cmd *create) CreateVM(name string) (*govmomi.VirtualMachine, error) {
 	}
 
 	return folders.VmFolder.CreateVM(cmd.Client, spec.ToSpec(), cmd.ResourcePool, cmd.HostSystem)
-}
-
-func (cmd *create) Link(vm *govmomi.VirtualMachine) error {
-	var mvm mo.VirtualMachine
-
-	// TODO(PN): Use `config.hardware` here, see issue #44.
-	err := cmd.Client.Properties(vm.Reference(), []string{"config"}, &mvm)
-	if err != nil {
-		return err
-	}
-
-	spec := new(configSpec)
-
-	for _, d := range mvm.Config.Hardware.Device {
-		switch device := d.(type) {
-		case *types.VirtualDisk:
-			var addBacking types.BaseVirtualDeviceBackingInfo
-
-			switch b := device.Backing.(type) {
-			case *types.VirtualDiskFlatVer2BackingInfo:
-				bcopy := *b // Make copy before modifying it
-				bcopy.Parent = b
-				bcopy.FileName = fmt.Sprintf("[%s]", cmd.Datastore.Name())
-				addBacking = &bcopy
-			case *types.VirtualDiskSparseVer2BackingInfo:
-				bcopy := *b // Make copy before modifying it
-				bcopy.Parent = b
-				bcopy.FileName = fmt.Sprintf("[%s]", cmd.Datastore.Name())
-				addBacking = &bcopy
-			default:
-				panic("backing not implemented: " + reflect.TypeOf(device.Backing).String())
-			}
-
-			removeDevice := *device
-			removeOp := &types.VirtualDeviceConfigSpec{
-				Operation: types.VirtualDeviceConfigSpecOperationRemove,
-				Device:    &removeDevice,
-			}
-
-			spec.AddChange(removeOp)
-
-			addDevice := *device
-			addDevice.Backing = addBacking
-			addDevice.UnitNumber = -1
-			addOp := &types.VirtualDeviceConfigSpec{
-				Operation:     types.VirtualDeviceConfigSpecOperationAdd,
-				FileOperation: types.VirtualDeviceConfigSpecFileOperationCreate,
-				Device:        &addDevice,
-			}
-
-			spec.AddChange(addOp)
-		}
-	}
-
-	return vm.Reconfigure(cmd.Client, spec.ToSpec())
 }
 
 // Cleanup tries to clean up the specified VM. As it is called from error
@@ -263,39 +219,6 @@ func (c *configSpec) AddDevice(d types.BaseVirtualDevice) {
 	}
 
 	c.AddChange(op)
-}
-
-func (c *configSpec) AddDisk(ds *govmomi.Datastore, path string) {
-	controller := &types.VirtualLsiLogicController{
-		types.VirtualSCSIController{
-			SharedBus: types.VirtualSCSISharingNoSharing,
-			VirtualController: types.VirtualController{
-				BusNumber: 0,
-				VirtualDevice: types.VirtualDevice{
-					Key: -1,
-				},
-			},
-		},
-	}
-
-	c.AddDevice(controller)
-
-	disk := &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key:           -1,
-			ControllerKey: -1,
-			UnitNumber:    -1,
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: ds.Path(path),
-				},
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: true,
-			},
-		},
-	}
-
-	c.AddDevice(disk)
 }
 
 func (c *configSpec) RemoveDisks(vm *mo.VirtualMachine) {
