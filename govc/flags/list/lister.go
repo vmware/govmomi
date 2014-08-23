@@ -47,6 +47,8 @@ func ToElement(r govmomi.Reference, prefix string) Element {
 		name = m.Name
 	case mo.Datastore:
 		name = m.Name
+	case mo.HostSystem:
+		name = m.Name
 	case mo.ResourcePool:
 		name = m.Name
 	default:
@@ -226,6 +228,7 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 	}
 
 	fields := []string{
+		"host",
 		"resourcePool",
 	}
 
@@ -240,6 +243,7 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 	}
 
 	childTypes := []string{
+		"HostSystem",
 		"ResourcePool",
 	}
 

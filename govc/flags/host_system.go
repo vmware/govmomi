@@ -17,9 +17,10 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
-	"fmt"
-	"strings"
+	"os"
+	"sync"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -28,106 +29,123 @@ import (
 type HostSystemFlag struct {
 	*DatacenterFlag
 
-	name string
-	host *govmomi.HostSystem
-	pool *govmomi.ResourcePool
+	register sync.Once
+	name     string
+	host     *govmomi.HostSystem
+	pool     *govmomi.ResourcePool
 }
 
-func (f *HostSystemFlag) Register(fs *flag.FlagSet) {
-	fs.StringVar(&f.name, "host", "", "Host system")
+func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		f.StringVar(&flag.name, "host", os.Getenv("GOVMOMI_HOST"), "Host system")
+	})
 }
 
-func (f *HostSystemFlag) Process() error {
+func (flag *HostSystemFlag) Process() error {
 	return nil
 }
 
-func (f *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
-	if f.name == "" {
-		return nil, nil // optional
-	}
-
-	if f.host != nil {
-		return f.host, nil
-	}
-
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	s := c.SearchIndex()
-
-	if strings.Contains(f.name, "/") {
-		// TODO: make use of the DatacenterFlag
-		ref, err := s.FindByInventoryPath(f.name)
-
-		if err != nil {
-			return nil, err
-		}
-		if host, ok := ref.(*govmomi.HostSystem); ok {
-			f.host = host
-			return host, nil
-		}
-	}
-
-	dc, err := f.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	folders, err := dc.Folders(c)
-	if err != nil {
-		return nil, err
-	}
-
-	cs, err := folders.HostFolder.Children(c)
-	if err != nil {
-		return nil, err
-	}
-	// TODO: find a lighter way
-	for _, child := range cs {
-		ref, err := s.FindChild(child, f.name)
+func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, error) {
+	relativeFunc := func() (govmomi.Reference, error) {
+		dc, err := flag.Datacenter()
 		if err != nil {
 			return nil, err
 		}
 
-		if host, ok := ref.(*govmomi.HostSystem); ok {
-			f.host = host
-			return host, nil
+		c, err := flag.Client()
+		if err != nil {
+			return nil, err
+		}
+
+		f, err := dc.Folders(c)
+		if err != nil {
+			return nil, err
+		}
+
+		return f.HostFolder, nil
+	}
+
+	es, err := flag.List(path, false, relativeFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	var hss []*govmomi.HostSystem
+	for _, e := range es {
+		switch o := e.Object.(type) {
+		case mo.HostSystem:
+			hs := govmomi.HostSystem{
+				ManagedObjectReference: o.Reference(),
+			}
+			hss = append(hss, &hs)
 		}
 	}
 
-	return nil, fmt.Errorf("host system not found")
+	return hss, nil
 }
 
-func (f *HostSystemFlag) HostResourcePool() (*govmomi.ResourcePool, error) {
-	if f.pool != nil {
-		return f.pool, nil
-	}
-
-	host, err := f.HostSystem()
+func (flag *HostSystemFlag) findSpecifiedHostSystem(path string) (*govmomi.HostSystem, error) {
+	hss, err := flag.findHostSystem(path)
 	if err != nil {
 		return nil, err
 	}
 
-	c, err := f.Client()
+	if len(hss) == 0 {
+		return nil, errors.New("no such host")
+	}
+
+	if len(hss) > 1 {
+		return nil, errors.New("path resolves to multiple hosts")
+	}
+
+	flag.host = hss[0]
+	return flag.host, nil
+}
+
+func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
+	if flag.host != nil {
+		return flag.host, nil
+	}
+
+	// Never look for a default host system.
+	// A host system parameter is optional for vm creation. It uses a mandatory
+	// resource pool parameter to determine where the vm should be placed.
+	if flag.name == "" {
+		return nil, nil
+	}
+
+	return flag.findSpecifiedHostSystem(flag.name)
+}
+
+// ResourcePool returns the host system's resource pool, if the host system
+// flag itself is specified and valid.
+func (flag *HostSystemFlag) ResourcePool() (*govmomi.ResourcePool, error) {
+	if flag.pool != nil {
+		return flag.pool, nil
+	}
+
+	h, err := flag.HostSystem()
 	if err != nil {
 		return nil, err
 	}
 
-	var h mo.HostSystem
-	err = c.Properties(host.Reference(), []string{"parent"}, &h)
+	c, err := flag.DatacenterFlag.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	var r mo.ComputeResource
-	err = c.Properties(*h.Parent, []string{"resourcePool"}, &r)
+	var mh mo.HostSystem
+	err = c.Properties(h.Reference(), []string{"parent"}, &mh)
 	if err != nil {
 		return nil, err
 	}
 
-	f.pool = &govmomi.ResourcePool{*r.ResourcePool}
+	var mcr mo.ComputeResource
+	err = c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
+	if err != nil {
+		return nil, err
+	}
 
-	return f.pool, nil
+	flag.pool = &govmomi.ResourcePool{*mcr.ResourcePool}
+	return flag.pool, nil
 }
