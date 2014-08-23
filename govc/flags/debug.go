@@ -29,12 +29,12 @@ type DebugFlag struct {
 	enable bool
 }
 
-func (d *DebugFlag) Register(f *flag.FlagSet) {
-	f.BoolVar(&d.enable, "debug", false, "Store debug logs")
+func (flag *DebugFlag) Register(f *flag.FlagSet) {
+	f.BoolVar(&flag.enable, "debug", false, "Store debug logs")
 }
 
-func (d *DebugFlag) Process() error {
-	if d.enable {
+func (flag *DebugFlag) Process() error {
+	if flag.enable {
 		// Base path for storing debug logs.
 		r := os.Getenv("GOVC_DEBUG_PATH")
 		if r == "" {

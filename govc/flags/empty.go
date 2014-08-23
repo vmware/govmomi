@@ -20,6 +20,6 @@ import "flag"
 
 type EmptyFlag struct{}
 
-func (n *EmptyFlag) Register(f *flag.FlagSet) {}
+func (flag *EmptyFlag) Register(f *flag.FlagSet) {}
 
-func (n *EmptyFlag) Process() error { return nil }
+func (flag *EmptyFlag) Process() error { return nil }

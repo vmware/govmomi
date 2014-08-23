@@ -53,124 +53,124 @@ func NewSearchFlag(t int) *SearchFlag {
 	return &s
 }
 
-func (s *SearchFlag) Register(f *flag.FlagSet) {
-	if s.t == 0 {
+func (flag *SearchFlag) Register(f *flag.FlagSet) {
+	if flag.t == 0 {
 		panic("search type not set")
 	}
 
-	switch s.t {
+	switch flag.t {
 	case SearchVirtualMachines:
-		f.StringVar(&s.byDatastorePath, "path", "", "Find VM by path to .vmx file")
+		f.StringVar(&flag.byDatastorePath, "path", "", "Find VM by path to .vmx file")
 	}
 
-	switch s.t {
+	switch flag.t {
 	case SearchVirtualMachines, SearchHosts:
-		f.StringVar(&s.byDNSName, "dns", "", "Find entity by FQDN")
-		f.StringVar(&s.byIP, "ip", "", "Find entity by IP address")
-		f.StringVar(&s.byUUID, "uuid", "", "Find entity by instance UUID")
+		f.StringVar(&flag.byDNSName, "dns", "", "Find entity by FQDN")
+		f.StringVar(&flag.byIP, "ip", "", "Find entity by IP address")
+		f.StringVar(&flag.byUUID, "uuid", "", "Find entity by instance UUID")
 	}
 
-	f.StringVar(&s.byInventoryPath, "ipath", "", "Find entity by inventory path")
+	f.StringVar(&flag.byInventoryPath, "ipath", "", "Find entity by inventory path")
 }
 
-func (s *SearchFlag) Process() error {
+func (flag *SearchFlag) Process() error {
 	flags := []string{
-		s.byDatastorePath,
-		s.byDNSName,
-		s.byInventoryPath,
-		s.byIP,
-		s.byUUID,
+		flag.byDatastorePath,
+		flag.byDNSName,
+		flag.byInventoryPath,
+		flag.byIP,
+		flag.byUUID,
 	}
 
-	s.isset = false
+	flag.isset = false
 	for _, f := range flags {
 		if f != "" {
-			if s.isset {
+			if flag.isset {
 				return errors.New("cannot use more than one search flag")
 			}
-			s.isset = true
+			flag.isset = true
 		}
 	}
 
 	return nil
 }
 
-func (s *SearchFlag) Isset() bool {
-	return s.isset
+func (flag *SearchFlag) Isset() bool {
+	return flag.isset
 }
 
-func (s *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
-	switch s.t {
+func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByDatastorePath(dc, s.byDatastorePath)
+		return c.SearchIndex().FindByDatastorePath(dc, flag.byDatastorePath)
 	default:
 		panic("unsupported type")
 	}
 }
 
-func (s *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
-	switch s.t {
+func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByDnsName(dc, s.byDNSName, true)
+		return c.SearchIndex().FindByDnsName(dc, flag.byDNSName, true)
 	case SearchHosts:
-		return c.SearchIndex().FindByDnsName(dc, s.byDNSName, false)
+		return c.SearchIndex().FindByDnsName(dc, flag.byDNSName, false)
 	default:
 		panic("unsupported type")
 	}
 }
 
-func (s *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+func (flag *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	// TODO(PN): The datacenter flag should not be set because it is ignored.
-	return c.SearchIndex().FindByInventoryPath(s.byInventoryPath)
+	return c.SearchIndex().FindByInventoryPath(flag.byInventoryPath)
 }
 
-func (s *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
-	switch s.t {
+func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByIp(dc, s.byIP, true)
+		return c.SearchIndex().FindByIp(dc, flag.byIP, true)
 	case SearchHosts:
-		return c.SearchIndex().FindByIp(dc, s.byIP, false)
+		return c.SearchIndex().FindByIp(dc, flag.byIP, false)
 	default:
 		panic("unsupported type")
 	}
 }
 
-func (s *SearchFlag) searchByUUID(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
-	switch s.t {
+func (flag *SearchFlag) searchByUUID(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByUuid(dc, s.byUUID, true)
+		return c.SearchIndex().FindByUuid(dc, flag.byUUID, true)
 	case SearchHosts:
-		return c.SearchIndex().FindByUuid(dc, s.byUUID, false)
+		return c.SearchIndex().FindByUuid(dc, flag.byUUID, false)
 	default:
 		panic("unsupported type")
 	}
 }
 
-func (s *SearchFlag) search() (govmomi.Reference, error) {
+func (flag *SearchFlag) search() (govmomi.Reference, error) {
 	var ref govmomi.Reference
 	var err error
 
-	c, err := s.Client()
+	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	dc, err := s.Datacenter()
+	dc, err := flag.Datacenter()
 	if err != nil {
 		return nil, err
 	}
 
 	switch {
-	case s.byDatastorePath != "":
-		ref, err = s.searchByDatastorePath(c, dc)
-	case s.byDNSName != "":
-		ref, err = s.searchByDNSName(c, dc)
-	case s.byInventoryPath != "":
-		ref, err = s.searchByInventoryPath(c, dc)
-	case s.byIP != "":
-		ref, err = s.searchByIP(c, dc)
-	case s.byUUID != "":
-		ref, err = s.searchByUUID(c, dc)
+	case flag.byDatastorePath != "":
+		ref, err = flag.searchByDatastorePath(c, dc)
+	case flag.byDNSName != "":
+		ref, err = flag.searchByDNSName(c, dc)
+	case flag.byInventoryPath != "":
+		ref, err = flag.searchByInventoryPath(c, dc)
+	case flag.byIP != "":
+		ref, err = flag.searchByIP(c, dc)
+	case flag.byUUID != "":
+		ref, err = flag.searchByUUID(c, dc)
 	default:
 		err = errors.New("no search flag specified")
 	}
@@ -186,13 +186,13 @@ func (s *SearchFlag) search() (govmomi.Reference, error) {
 	return ref, nil
 }
 
-func (s *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
-	c, err := s.Client()
+func (flag *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
+	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	dc, err := s.Datacenter()
+	dc, err := flag.Datacenter()
 	if err != nil {
 		return nil, err
 	}
@@ -205,8 +205,8 @@ func (s *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
 	return f, nil
 }
 
-func (s *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
-	f, err := s.relativeTo()
+func (flag *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
+	f, err := flag.relativeTo()
 	if err != nil {
 		return nil, err
 	}
@@ -214,8 +214,8 @@ func (s *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
 	return govmomi.Folder{f.VmFolder.Reference()}, nil
 }
 
-func (s *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
-	ref, err := s.search()
+func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
+	ref, err := flag.search()
 	if err != nil {
 		return nil, err
 	}
@@ -228,11 +228,11 @@ func (s *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 	return vm, nil
 }
 
-func (s *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, error) {
+func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, error) {
 	var out []*govmomi.VirtualMachine
 
-	if s.Isset() {
-		vm, err := s.VirtualMachine()
+	if flag.Isset() {
+		vm, err := flag.VirtualMachine()
 		if err != nil {
 			return nil, err
 		}
@@ -246,7 +246,7 @@ func (s *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, 
 		return nil, errors.New("no argument")
 	}
 
-	es, err := s.ListSlice(args, false, s.relativeToVmFolder)
+	es, err := flag.ListSlice(args, false, flag.relativeToVmFolder)
 	if err != nil {
 		return nil, err
 	}
@@ -262,8 +262,8 @@ func (s *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, 
 	return out, nil
 }
 
-func (s *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
-	ref, err := s.search()
+func (flag *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
+	ref, err := flag.search()
 	if err != nil {
 		return nil, err
 	}
