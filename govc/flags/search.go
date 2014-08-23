@@ -95,7 +95,7 @@ func (flag *SearchFlag) Process() error {
 	return nil
 }
 
-func (flag *SearchFlag) Isset() bool {
+func (flag *SearchFlag) IsSet() bool {
 	return flag.isset
 }
 
@@ -231,7 +231,7 @@ func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, error) {
 	var out []*govmomi.VirtualMachine
 
-	if flag.Isset() {
+	if flag.IsSet() {
 		vm, err := flag.VirtualMachine()
 		if err != nil {
 			return nil, err
