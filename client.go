@@ -138,6 +138,55 @@ func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst in
 	return mo.RetrievePropertiesForRequest(c, req, dst)
 }
 
+func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
+	p, err := c.NewPropertyCollector()
+	if err != nil {
+		return err
+	}
+
+	defer p.Destroy()
+
+	req := types.CreateFilter{
+		Spec: types.PropertyFilterSpec{
+			ObjectSet: []types.ObjectSpec{
+				{
+					Obj: obj,
+				},
+			},
+			PropSet: []types.PropertySpec{
+				{
+					PathSet: ps,
+					Type:    obj.Type,
+				},
+			},
+		},
+	}
+
+	err = p.CreateFilter(req)
+	if err != nil {
+		return err
+	}
+
+	for version := ""; ; {
+		res, err := p.WaitForUpdates(version)
+		if err != nil {
+			return err
+		}
+
+		version = res.Version
+
+		for _, fs := range res.FilterSet {
+			for _, os := range fs.ObjectSet {
+				if os.Obj == obj {
+					if f(os.ChangeSet) {
+						return nil
+					}
+				}
+			}
+		}
+	}
+}
+
 // Ancestors returns the entire ancestry tree of a specified managed object.
 // The return value includes the root node and the specified object itself.
 func (c *Client) Ancestors(r Reference) ([]mo.ManagedEntity, error) {
