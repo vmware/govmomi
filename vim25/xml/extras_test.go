@@ -136,3 +136,79 @@ func TestMarshalWithInterface(t *testing.T) {
 		t.Errorf("expected: %#v, actual: %#v", r1, r2)
 	}
 }
+
+type test3iface interface {
+	Value() string
+}
+
+type test3a struct {
+	V string `xml:",chardata"`
+}
+
+func (t test3a) Value() string { return t.V }
+
+type test3b struct {
+	V string `xml:",chardata"`
+}
+
+func (t test3b) Value() string { return t.V }
+
+func TestUnmarshalInterfaceWithoutTypeAttr(t *testing.T) {
+	var r struct {
+		XMLName Name         `xml:"root"`
+		Values  []test3iface `xml:"value,typeattr"`
+	}
+
+	b := `
+	<root xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<value xsi:type="test3a">A</value>
+	<value>B</value>
+	</root>
+	`
+
+	fn := func(name string) (reflect.Type, bool) {
+		switch name {
+		case "test3a":
+			return reflect.TypeOf(test3a{}), true
+		case "test3iface":
+			return reflect.TypeOf(test3b{}), true
+		default:
+			return nil, false
+		}
+	}
+
+	dec := NewDecoder(bytes.NewReader([]byte(b)))
+	dec.TypeFunc = fn
+	err := dec.Decode(&r)
+	if err != nil {
+		t.Fatalf("Unmarshal: %s", err)
+	}
+
+	if len(r.Values) != 2 {
+		t.Errorf("Expected 2 values")
+	}
+
+	exps := []struct {
+		Typ reflect.Type
+		Val string
+	}{
+		{
+			Typ: reflect.TypeOf(test3a{}),
+			Val: "A",
+		},
+		{
+			Typ: reflect.TypeOf(test3b{}),
+			Val: "B",
+		},
+	}
+
+	for i, e := range exps {
+		if val := r.Values[i].Value(); val != e.Val {
+			t.Errorf("Expected: %s, got: %s", e.Val, val)
+		}
+
+		if typ := reflect.TypeOf(r.Values[i]); typ.Name() != e.Typ.Name() {
+			t.Errorf("Expected: %s, got: %s", e.Typ.Name(), typ.Name())
+		}
+	}
+}
