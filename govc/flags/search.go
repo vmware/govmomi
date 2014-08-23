@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"strings"
 
 	"github.com/vmware/govmomi"
 )
@@ -53,24 +54,37 @@ func NewSearchFlag(t int) *SearchFlag {
 	return &s
 }
 
-func (flag *SearchFlag) Register(f *flag.FlagSet) {
-	if flag.t == 0 {
+func (flag *SearchFlag) Register(fs *flag.FlagSet) {
+	var entity string
+
+	switch flag.t {
+	case SearchVirtualMachines:
+		entity = "VM"
+	case SearchHosts:
+		entity = "host"
+	default:
 		panic("search type not set")
+	}
+
+	register := func(v *string, f string, d string) {
+		f = fmt.Sprintf("%s.%s", strings.ToLower(entity), f)
+		d = fmt.Sprintf(d, entity)
+		fs.StringVar(v, f, "", d)
 	}
 
 	switch flag.t {
 	case SearchVirtualMachines:
-		f.StringVar(&flag.byDatastorePath, "path", "", "Find VM by path to .vmx file")
+		register(&flag.byDatastorePath, "path", "Find %s by path to .vmx file")
 	}
 
 	switch flag.t {
 	case SearchVirtualMachines, SearchHosts:
-		f.StringVar(&flag.byDNSName, "dns", "", "Find entity by FQDN")
-		f.StringVar(&flag.byIP, "ip", "", "Find entity by IP address")
-		f.StringVar(&flag.byUUID, "uuid", "", "Find entity by instance UUID")
+		register(&flag.byDNSName, "dns", "Find %s by FQDN")
+		register(&flag.byIP, "ip", "Find %s by IP address")
+		register(&flag.byUUID, "uuid", "Find %s by instance UUID")
 	}
 
-	f.StringVar(&flag.byInventoryPath, "ipath", "", "Find entity by inventory path")
+	register(&flag.byInventoryPath, "ipath", "Find %s by inventory path")
 }
 
 func (flag *SearchFlag) Process() error {
