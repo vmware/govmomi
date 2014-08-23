@@ -40,20 +40,20 @@ type ClientFlag struct {
 	client   *govmomi.Client
 }
 
-func (c *ClientFlag) String() string {
-	if c.url != nil {
-		withoutCredentials := *c.url
+func (flag *ClientFlag) String() string {
+	if flag.url != nil {
+		withoutCredentials := *flag.url
 		withoutCredentials.User = nil
 		return withoutCredentials.String()
 	}
 	return ""
 }
 
-func (c *ClientFlag) Set(s string) error {
+func (flag *ClientFlag) Set(s string) error {
 	var err error
 
 	if s != "" {
-		c.url, err = url.Parse(s)
+		flag.url, err = url.Parse(s)
 		if err != nil {
 			return err
 		}
@@ -62,30 +62,30 @@ func (c *ClientFlag) Set(s string) error {
 	return nil
 }
 
-func (c *ClientFlag) Register(f *flag.FlagSet) {
-	c.register.Do(func() {
-		c.Set(os.Getenv("GOVMOMI_URL"))
-		f.Var(c, "u", cDescr)
+func (flag *ClientFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		flag.Set(os.Getenv("GOVC_URL"))
+		f.Var(flag, "u", cDescr)
 	})
 }
 
-func (c *ClientFlag) Process() error {
-	if c.url == nil {
+func (flag *ClientFlag) Process() error {
+	if flag.url == nil {
 		return errors.New("specify an " + cDescr)
 	}
 
 	return nil
 }
 
-func (c *ClientFlag) sessionFile() string {
-	file := fmt.Sprintf("%s@%s", c.url.User.Username(), c.url.Host)
+func (flag *ClientFlag) sessionFile() string {
+	file := fmt.Sprintf("%s@%s", flag.url.User.Username(), flag.url.Host)
 	return path.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
 }
 
-func (c *ClientFlag) loadClient() (*govmomi.Client, error) {
-	var client govmomi.Client
+func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
+	var c govmomi.Client
 
-	f, err := os.Open(c.sessionFile())
+	f, err := os.Open(flag.sessionFile())
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, nil
@@ -97,21 +97,21 @@ func (c *ClientFlag) loadClient() (*govmomi.Client, error) {
 	defer f.Close()
 
 	dec := json.NewDecoder(f)
-	err = dec.Decode(&client)
+	err = dec.Decode(&c)
 	if err != nil {
 		return nil, err
 	}
 
-	return &client, nil
+	return &c, nil
 }
 
-func (c *ClientFlag) newClient() (*govmomi.Client, error) {
-	client, err := govmomi.NewClient(*c.url)
+func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
+	c, err := govmomi.NewClient(*flag.url)
 	if err != nil {
 		return nil, err
 	}
 
-	p := c.sessionFile()
+	p := flag.sessionFile()
 	err = os.MkdirAll(path.Dir(p), 0700)
 	if err != nil {
 		return nil, err
@@ -125,12 +125,12 @@ func (c *ClientFlag) newClient() (*govmomi.Client, error) {
 	defer f.Close()
 
 	enc := json.NewEncoder(f)
-	err = enc.Encode(client)
+	err = enc.Encode(c)
 	if err != nil {
 		return nil, err
 	}
 
-	return client, nil
+	return c, nil
 }
 
 // currentSessionValid returns whether or not the current session is valid. It
@@ -152,32 +152,32 @@ func currentSessionValid(c *govmomi.Client) (bool, error) {
 	return true, nil
 }
 
-func (c *ClientFlag) Client() (*govmomi.Client, error) {
-	if c.client != nil {
-		return c.client, nil
+func (flag *ClientFlag) Client() (*govmomi.Client, error) {
+	if flag.client != nil {
+		return flag.client, nil
 	}
 
 	var ok = false
 
-	client, err := c.loadClient()
+	c, err := flag.loadClient()
 	if err != nil {
 		return nil, err
 	}
 
-	if client != nil {
-		ok, err = currentSessionValid(client)
+	if c != nil {
+		ok, err = currentSessionValid(c)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if !ok {
-		client, err = c.newClient()
+		c, err = flag.newClient()
 		if err != nil {
 			return nil, err
 		}
 	}
 
-	c.client = client
-	return c.client, nil
+	flag.client = c
+	return flag.client, nil
 }

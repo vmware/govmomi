@@ -38,14 +38,12 @@ type info struct {
 }
 
 func init() {
-	flag := info{
-		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
-	}
-
-	cli.Register(&flag)
+	cli.Register(&info{})
 }
 
 func (cmd *info) Register(f *flag.FlagSet) {
+	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+
 	f.BoolVar(&cmd.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
 }
 

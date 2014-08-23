@@ -79,3 +79,66 @@ func TestWalk(t *testing.T) {
 		t.Errorf("Expected Walk to remember value for type")
 	}
 }
+
+type test2A struct {
+	V int
+}
+
+func (t *test2A) Set() {
+	t.V++
+}
+
+type test2B struct {
+	t *testing.T
+
+	F1 *test2A
+	F2 *test2A
+	F3 *test2A
+	F4 *test2A
+}
+
+func (t *test2B) Set() {
+	// Assert that this function gets called before the walker recurses.
+	if t.F1 != nil || t.F3 != nil {
+		t.t.Errorf("Expected user function to be called before recursing")
+	}
+}
+
+type test2Set interface {
+	Set()
+}
+
+func TestWalkDoesntOverwrite(t *testing.T) {
+	var t2a test2A
+	var t2b test2B
+	var testSetType = reflect.TypeOf((*test2Set)(nil)).Elem()
+
+	// Set elements 2 and 4
+	t2b.t = t
+	t2b.F2 = &t2a
+	t2b.F4 = &t2a
+
+	Walk(&t2b, testSetType, func(v interface{}) error {
+		v.(test2Set).Set()
+		return nil
+	})
+
+	// Set fields should remain untouched
+	if t2b.F2 != &t2a {
+		t.Errorf("Expected t2b.F2 to be left intact")
+	}
+
+	if t2b.F4 != &t2a {
+		t.Errorf("Expected t2b.F4 to be left intact")
+	}
+
+	// Unset fields should be filled in with the same value
+	if t2b.F1 != t2b.F3 {
+		t.Errorf("Expected t2b.F1 to be equal to t2b.F3")
+	}
+
+	// All fields should be traversed.
+	if t2b.F1.V != 2 || t2b.F2.V != 2 {
+		t.Errorf("Expected all fields to be traversed")
+	}
+}

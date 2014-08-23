@@ -32,15 +32,15 @@ type ListFlag struct {
 	*OutputFlag
 }
 
-func (l *ListFlag) Register(f *flag.FlagSet) {}
+func (flag *ListFlag) Register(f *flag.FlagSet) {}
 
-func (l *ListFlag) Process() error { return nil }
+func (flag *ListFlag) Process() error { return nil }
 
-func (l *ListFlag) ListSlice(args []string, tl bool, fn ListRelativeFunc) ([]list.Element, error) {
+func (flag *ListFlag) ListSlice(args []string, tl bool, fn ListRelativeFunc) ([]list.Element, error) {
 	var out []list.Element
 
 	for _, arg := range args {
-		es, err := l.List(arg, tl, fn)
+		es, err := flag.List(arg, tl, fn)
 		if err != nil {
 			return nil, err
 		}
@@ -51,8 +51,8 @@ func (l *ListFlag) ListSlice(args []string, tl bool, fn ListRelativeFunc) ([]lis
 	return out, nil
 }
 
-func (l *ListFlag) List(arg string, tl bool, fn ListRelativeFunc) ([]list.Element, error) {
-	c, err := l.Client()
+func (flag *ListFlag) List(arg string, tl bool, fn ListRelativeFunc) ([]list.Element, error) {
+	c, err := flag.ClientFlag.Client()
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +94,7 @@ func (l *ListFlag) List(arg string, tl bool, fn ListRelativeFunc) ([]list.Elemen
 
 	r := list.Recurser{
 		Client:        c,
-		All:           l.JSON,
+		All:           flag.JSON,
 		TraverseLeafs: tl,
 	}
 

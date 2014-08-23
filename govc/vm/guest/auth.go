@@ -46,7 +46,7 @@ func (flag *AuthFlag) Set(s string) error {
 }
 
 func (flag *AuthFlag) Register(f *flag.FlagSet) {
-	flag.Set(os.Getenv("GOVMOMI_GUEST_LOGIN"))
+	flag.Set(os.Getenv("GOVC_GUEST_LOGIN"))
 	f.Var(flag, "l", "Guest VM login credentials")
 }
 

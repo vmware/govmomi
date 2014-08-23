@@ -28,15 +28,12 @@ type getenv struct {
 }
 
 func init() {
-	cli.Register(&getenv{GuestFlag: NewGuestFlag()})
+	cli.Register(&getenv{})
 }
 
-func (cmd *getenv) Register(f *flag.FlagSet) {
-}
+func (cmd *getenv) Register(f *flag.FlagSet) {}
 
-func (cmd *getenv) Process() error {
-	return nil
-}
+func (cmd *getenv) Process() error { return nil }
 
 func (cmd *getenv) Run(f *flag.FlagSet) error {
 	m, err := cmd.ProcessManager()

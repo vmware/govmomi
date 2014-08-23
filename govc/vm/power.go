@@ -35,14 +35,12 @@ type power struct {
 }
 
 func init() {
-	flag := power{
-		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
-	}
-
-	cli.Register(&flag)
+	cli.Register(&power{})
 }
 
 func (cmd *power) Register(f *flag.FlagSet) {
+	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+
 	f.BoolVar(&cmd.On, "on", false, "Power on")
 	f.BoolVar(&cmd.Off, "off", false, "Power off")
 	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error)")

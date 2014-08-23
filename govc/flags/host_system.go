@@ -27,7 +27,10 @@ import (
 )
 
 type HostSystemFlag struct {
+	*ClientFlag
 	*DatacenterFlag
+	*SearchFlag
+	*ListFlag
 
 	register sync.Once
 	name     string
@@ -36,8 +39,10 @@ type HostSystemFlag struct {
 }
 
 func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
+	flag.SearchFlag = NewSearchFlag(SearchHosts)
+
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "host", os.Getenv("GOVMOMI_HOST"), "Host system")
+		f.StringVar(&flag.name, "host", os.Getenv("GOVC_HOST"), "Host system")
 	})
 }
 
@@ -47,12 +52,12 @@ func (flag *HostSystemFlag) Process() error {
 
 func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, error) {
 	relativeFunc := func() (govmomi.Reference, error) {
-		dc, err := flag.Datacenter()
+		dc, err := flag.DatacenterFlag.Datacenter()
 		if err != nil {
 			return nil, err
 		}
 
-		c, err := flag.Client()
+		c, err := flag.ClientFlag.Client()
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +70,7 @@ func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, 
 		return f.HostFolder, nil
 	}
 
-	es, err := flag.List(path, false, relativeFunc)
+	es, err := flag.ListFlag.List(path, false, relativeFunc)
 	if err != nil {
 		return nil, err
 	}
@@ -104,6 +109,17 @@ func (flag *HostSystemFlag) findSpecifiedHostSystem(path string) (*govmomi.HostS
 
 func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 	if flag.host != nil {
+		return flag.host, nil
+	}
+
+	// Use search flags if specified.
+	if flag.SearchFlag.IsSet() {
+		host, err := flag.SearchFlag.HostSystem()
+		if err != nil {
+			return nil, err
+		}
+
+		flag.host = host
 		return flag.host, nil
 	}
 

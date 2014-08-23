@@ -29,19 +29,14 @@ type destroy struct {
 }
 
 func init() {
-	flag := destroy{
-		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
-	}
-
-	cli.Register(&flag)
+	cli.Register(&destroy{})
 }
 
 func (cmd *destroy) Register(f *flag.FlagSet) {
+	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 }
 
-func (cmd *destroy) Process() error {
-	return nil
-}
+func (cmd *destroy) Process() error { return nil }
 
 func (cmd *destroy) Run(f *flag.FlagSet) error {
 	c, err := cmd.Client()

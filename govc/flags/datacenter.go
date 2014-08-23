@@ -35,7 +35,7 @@ type DatacenterFlag struct {
 
 func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		flag.path = os.Getenv("GOVMOMI_DATACENTER")
+		flag.path = os.Getenv("GOVC_DATACENTER")
 		f.StringVar(&flag.path, "dc", "", "Datacenter")
 	})
 }

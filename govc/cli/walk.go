@@ -50,6 +50,12 @@ func Walk(c interface{}, ifaceType reflect.Type, fn WalkFn) error {
 
 		t := v.Type()
 
+		// Call user specified function.
+		err := fn(c)
+		if err != nil {
+			return err
+		}
+
 		for i := 0; i < t.NumField(); i++ {
 			ff := t.Field(i)
 			ft := ff.Type
@@ -78,27 +84,21 @@ func Walk(c interface{}, ifaceType reflect.Type, fn WalkFn) error {
 				panic(fmt.Sprintf(`field "%s" in struct "%s" must be a pointer`, ff.Name, v.Type()))
 			}
 
+			// Have not seen this type before, create a value.
 			if _, ok := visited[ft]; !ok {
-				if fv.IsNil() {
-					visited[ft] = reflect.New(ft.Elem())
-				} else {
-					visited[ft] = fv
-				}
-
-				// Not seen before, recurse.
-				err := walker(visited[ft].Interface())
-				if err != nil {
-					return err
-				}
+				visited[ft] = reflect.New(ft.Elem())
 			}
 
-			fv.Set(visited[ft])
-		}
+			// Make sure current field is set.
+			if fv.IsNil() {
+				fv.Set(visited[ft])
+			}
 
-		// Call user specified function.
-		err := fn(c)
-		if err != nil {
-			return err
+			// Recurse.
+			err := walker(fv.Interface())
+			if err != nil {
+				return err
+			}
 		}
 
 		return nil
