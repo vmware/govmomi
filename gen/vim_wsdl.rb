@@ -396,6 +396,9 @@ class ComplexType < Simple
       io.print "type Base%s interface {\n" % name
       io.print "%s\n" % method
       io.print "}\n\n"
+      io.print "func init() {\n"
+      io.print "t[\"Base%s\"] = reflect.TypeOf((*%s)(nil)).Elem()\n" % [name, name]
+      io.print "}\n\n"
     end
 
     def peek(base = nil)

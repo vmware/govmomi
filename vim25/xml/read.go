@@ -269,7 +269,7 @@ var (
 )
 
 // Find reflect.Type for an element's type attribute.
-func (p *Decoder) typeForElement(start *StartElement) reflect.Type {
+func (p *Decoder) typeForElement(val reflect.Value, start *StartElement) reflect.Type {
 	t := ""
 	for _, a := range start.Attr {
 		if a.Name == xmlSchemaInstance {
@@ -279,7 +279,8 @@ func (p *Decoder) typeForElement(start *StartElement) reflect.Type {
 	}
 
 	if t == "" {
-		return nil
+		// No type attribute; fall back to looking up type by interface name.
+		t = val.Type().Name()
 	}
 
 	// Maybe the type is a basic xsd:* type.
@@ -316,7 +317,7 @@ func (p *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 
 	// Try to figure out type for empty interface values.
 	if val.Kind() == reflect.Interface && val.IsNil() {
-		typ := p.typeForElement(start)
+		typ := p.typeForElement(val, start)
 		if typ != nil {
 			pval := reflect.New(typ).Elem()
 			err := p.unmarshal(pval, start)
