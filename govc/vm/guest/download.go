@@ -31,7 +31,7 @@ type download struct {
 }
 
 func init() {
-	cli.Register(&download{GuestFlag: NewGuestFlag()})
+	cli.Register(&download{})
 }
 
 func (cmd *download) Register(f *flag.FlagSet) {

@@ -29,16 +29,14 @@ type rmdir struct {
 }
 
 func init() {
-	cli.Register(&rmdir{GuestFlag: NewGuestFlag()})
+	cli.Register(&rmdir{})
 }
 
 func (cmd *rmdir) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.recursive, "p", false, "Recursive removal")
 }
 
-func (cmd *rmdir) Process() error {
-	return nil
-}
+func (cmd *rmdir) Process() error { return nil }
 
 func (cmd *rmdir) Run(f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

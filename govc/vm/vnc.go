@@ -40,14 +40,12 @@ type vnc struct {
 }
 
 func init() {
-	flag := vnc{
-		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
-	}
-
-	cli.Register(&flag)
+	cli.Register(&vnc{})
 }
 
 func (cmd *vnc) Register(f *flag.FlagSet) {
+	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+
 	f.BoolVar(&cmd.Enable, "enable", true, "Enable VNC")
 	f.IntVar(&cmd.Port, "port", -1, "VNC port")
 	f.StringVar(&cmd.Password, "password", "", "VNC password")

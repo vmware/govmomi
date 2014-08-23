@@ -35,14 +35,12 @@ type info struct {
 }
 
 func init() {
-	i := info{
-		SearchFlag: flags.NewSearchFlag(flags.SearchHosts),
-	}
-
-	cli.Register(&i)
+	cli.Register(&info{})
 }
 
-func (c *info) Register(f *flag.FlagSet) {}
+func (c *info) Register(f *flag.FlagSet) {
+	c.SearchFlag = flags.NewSearchFlag(flags.SearchHosts)
+}
 
 func (c *info) Process() error { return nil }
 

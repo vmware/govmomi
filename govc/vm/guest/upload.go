@@ -31,16 +31,14 @@ type upload struct {
 }
 
 func init() {
-	cli.Register(&upload{GuestFlag: NewGuestFlag()})
+	cli.Register(&upload{})
 }
 
 func (cmd *upload) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.overwrite, "f", false, "If set, the guest destination file is clobbered")
 }
 
-func (cmd *upload) Process() error {
-	return nil
-}
+func (cmd *upload) Process() error { return nil }
 
 func (cmd *upload) Run(f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

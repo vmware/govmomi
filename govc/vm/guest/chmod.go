@@ -28,15 +28,12 @@ type chmod struct {
 }
 
 func init() {
-	cli.Register(&chmod{GuestFlag: NewGuestFlag()})
+	cli.Register(&chmod{})
 }
 
-func (cmd *chmod) Register(f *flag.FlagSet) {
-}
+func (cmd *chmod) Register(f *flag.FlagSet) {}
 
-func (cmd *chmod) Process() error {
-	return nil
-}
+func (cmd *chmod) Process() error { return nil }
 
 func (cmd *chmod) Run(f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

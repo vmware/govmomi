@@ -29,16 +29,14 @@ type mkdir struct {
 }
 
 func init() {
-	cli.Register(&mkdir{GuestFlag: NewGuestFlag()})
+	cli.Register(&mkdir{})
 }
 
 func (cmd *mkdir) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.createParents, "p", false, "Create intermediate directories as needed")
 }
 
-func (cmd *mkdir) Process() error {
-	return nil
-}
+func (cmd *mkdir) Process() error { return nil }
 
 func (cmd *mkdir) Run(f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

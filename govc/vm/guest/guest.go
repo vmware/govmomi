@@ -33,13 +33,8 @@ type GuestFlag struct {
 	*AuthFlag
 }
 
-func NewGuestFlag() *GuestFlag {
-	return &GuestFlag{
-		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
-	}
-}
-
 func (flag *GuestFlag) Register(f *flag.FlagSet) {
+	flag.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 }
 
 func (flag *GuestFlag) Process() error {

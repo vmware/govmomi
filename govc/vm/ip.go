@@ -30,14 +30,12 @@ type ip struct {
 }
 
 func init() {
-	flag := ip{
-		SearchFlag: flags.NewSearchFlag(flags.SearchVirtualMachines),
-	}
-
-	cli.Register(&flag)
+	cli.Register(&ip{})
 }
 
-func (cmd *ip) Register(f *flag.FlagSet) {}
+func (cmd *ip) Register(f *flag.FlagSet) {
+	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+}
 
 func (cmd *ip) Process() error { return nil }
 
