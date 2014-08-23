@@ -17,9 +17,10 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
-	"fmt"
-	"strings"
+	"os"
+	"sync"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -28,84 +29,110 @@ import (
 type ResourcePoolFlag struct {
 	*DatacenterFlag
 
-	name string
-	pool *govmomi.ResourcePool
+	register sync.Once
+	name     string
+	pool     *govmomi.ResourcePool
 }
 
-func (f *ResourcePoolFlag) Register(fs *flag.FlagSet) {
-	fs.StringVar(&f.name, "pool", "", "Resource Pool")
+func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		f.StringVar(&flag.name, "pool", os.Getenv("GOVMOMI_RESOURCE_POOL"), "Resource Pool")
+	})
 }
 
-func (f *ResourcePoolFlag) Process() error {
+func (flag *ResourcePoolFlag) Process() error {
 	return nil
 }
 
-func (f *ResourcePoolFlag) ResourcePool() (*govmomi.ResourcePool, error) {
-	if f.pool != nil {
-		return f.pool, nil
-	}
-
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	s := c.SearchIndex()
-
-	if strings.Contains(f.name, "/") {
-		// e.g. ha-datacenter/host/esxbox.localdomain/Resources
-		// TODO: make use of the DatacenterFlag
-		ref, err := s.FindByInventoryPath(f.name)
+func (flag *ResourcePoolFlag) findResourcePool(path string) ([]*govmomi.ResourcePool, error) {
+	relativeFunc := func() (govmomi.Reference, error) {
+		dc, err := flag.Datacenter()
 		if err != nil {
 			return nil, err
 		}
 
-		if pool, ok := ref.(*govmomi.ResourcePool); ok {
-			f.pool = pool
-			return pool, nil
-		}
-	}
-
-	dc, err := f.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	folders, err := dc.Folders(c)
-	if err != nil {
-		return nil, err
-	}
-
-	cs, err := folders.HostFolder.Children(c)
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: defaulting to resourcePool of the first ComputeResource here,
-	// should find a better default
-	if f.name == "" {
-		var cr mo.ComputeResource
-		err = c.Properties(cs[0].Reference(), []string{"resourcePool"}, &cr)
+		c, err := flag.Client()
 		if err != nil {
 			return nil, err
 		}
 
-		f.pool = &govmomi.ResourcePool{*cr.ResourcePool}
-		return f.pool, nil
-	}
-
-	// TODO: find a lighter way
-	for _, child := range cs {
-		ref, err := s.FindChild(child, f.name)
+		f, err := dc.Folders(c)
 		if err != nil {
 			return nil, err
 		}
 
-		if pool, ok := ref.(*govmomi.ResourcePool); ok {
-			f.pool = pool
-			return pool, nil
+		return f.HostFolder, nil
+	}
+
+	es, err := flag.List(path, false, relativeFunc)
+	if err != nil {
+		return nil, err
+	}
+
+	var rps []*govmomi.ResourcePool
+	for _, e := range es {
+		switch o := e.Object.(type) {
+		case mo.ComputeResource:
+			// Use a compute resouce's root resource pool.
+			n := govmomi.ResourcePool{
+				ManagedObjectReference: *o.ResourcePool,
+			}
+			rps = append(rps, &n)
+		case mo.ResourcePool:
+			n := govmomi.ResourcePool{
+				ManagedObjectReference: o.Reference(),
+			}
+			rps = append(rps, &n)
 		}
 	}
 
-	return nil, fmt.Errorf("resource pool not found")
+	return rps, nil
+}
+
+func (flag *ResourcePoolFlag) findSpecifiedResourcePool(path string) (*govmomi.ResourcePool, error) {
+	rps, err := flag.findResourcePool(path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rps) == 0 {
+		return nil, errors.New("no such resource pool")
+	}
+
+	if len(rps) > 1 {
+		return nil, errors.New("path resolves to multiple resource pools")
+	}
+
+	flag.pool = rps[0]
+	return flag.pool, nil
+}
+
+func (flag *ResourcePoolFlag) findDefaultResourcePool() (*govmomi.ResourcePool, error) {
+	rps, err := flag.findResourcePool("*/Resources")
+	if err != nil {
+		return nil, err
+	}
+
+	if len(rps) == 0 {
+		panic("no resource pools") // Should never happen
+	}
+
+	if len(rps) > 1 {
+		return nil, errors.New("please specify a resource pool")
+	}
+
+	flag.pool = rps[0]
+	return flag.pool, nil
+}
+
+func (flag *ResourcePoolFlag) ResourcePool() (*govmomi.ResourcePool, error) {
+	if flag.pool != nil {
+		return flag.pool, nil
+	}
+
+	if flag.name == "" {
+		return flag.findDefaultResourcePool()
+	}
+
+	return flag.findSpecifiedResourcePool(flag.name)
 }

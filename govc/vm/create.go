@@ -86,11 +86,6 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool()
-	if err != nil {
-		return err
-	}
-
 	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystem()
 	if err != nil {
 		return err

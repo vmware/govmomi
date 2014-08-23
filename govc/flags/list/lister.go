@@ -129,6 +129,12 @@ func (l Lister) ListFolder() ([]Element, error) {
 			pspec.All = true
 		} else {
 			pspec.PathSet = []string{"name"}
+
+			// Additional basic properties.
+			switch t {
+			case "ComputeResource":
+				pspec.PathSet = append(pspec.PathSet, "resourcePool")
+			}
 		}
 
 		spec.PropSet = append(spec.PropSet, pspec)
