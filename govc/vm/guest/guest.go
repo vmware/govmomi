@@ -28,18 +28,14 @@ import (
 
 type GuestFlag struct {
 	*flags.ClientFlag
-	*flags.SearchFlag
+	*flags.VirtualMachineFlag
 
 	*AuthFlag
 }
 
-func (flag *GuestFlag) Register(f *flag.FlagSet) {
-	flag.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
-}
+func (flag *GuestFlag) Register(f *flag.FlagSet) {}
 
-func (flag *GuestFlag) Process() error {
-	return nil
-}
+func (flag *GuestFlag) Process() error { return nil }
 
 func (flag *GuestFlag) FileManager() (*govmomi.GuestFileManager, error) {
 	c, err := flag.Client()
