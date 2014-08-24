@@ -76,5 +76,5 @@ func (cmd *download) Run(f *flag.FlagSet) error {
 		return nil
 	}
 
-	return c.Client.DownloadFile(dst, u)
+	return c.Client.DownloadFile(dst, u, nil)
 }
