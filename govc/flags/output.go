@@ -25,7 +25,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25"
 )
 
 type OutputWriter interface {
@@ -90,51 +90,35 @@ func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 	return err
 }
 
-const (
-	KiB = 1024
-	MiB = 1024 * KiB
-	GiB = 1024 * MiB
-)
-
-func (flag *OutputFlag) ProgressLogger(prefix string, ch chan soap.Progress) *sync.WaitGroup {
+func (flag *OutputFlag) ProgressLogger(prefix string, ch chan vim25.Progress) *sync.WaitGroup {
 	var wg sync.WaitGroup
 
 	go func() {
-		var bps int64
-		var pos int64
-		var f float32
+		var p vim25.Progress
+		var ok bool
 		var err error
 
-		tick := time.NewTicker(1 * time.Second)
+		tick := time.NewTicker(100 * time.Millisecond)
 		defer wg.Done()
 
-		for done := false; !done && err == nil; {
+		for ok = true; ok && err == nil; {
 			select {
-			case p, ok := <-ch:
+			case p, ok = <-ch:
 				if !ok {
-					done = true
 					break
 				}
-
-				bps += (p.Pos - pos)
-				pos = p.Pos
-				f = float32(p.Pos) / float32(p.Size)
-				err = p.Error
+				err = p.Error()
 			case <-tick.C:
-				b := ""
-				switch {
-				case bps >= GiB:
-					b = fmt.Sprintf("%.1fGiB", float32(bps)/float32(GiB))
-				case bps >= MiB:
-					b = fmt.Sprintf("%.1fMiB", float32(bps)/float32(MiB))
-				case bps >= KiB:
-					b = fmt.Sprintf("%.1fKiB", float32(bps)/float32(KiB))
-				default:
-					b = fmt.Sprintf("%.1fB", bps)
+				line := fmt.Sprintf("\r%s", prefix)
+				if p != nil {
+					line += fmt.Sprintf("(%.0f%%", p.Percentage())
+					detail := p.Detail()
+					if detail != "" {
+						line += fmt.Sprintf(", %s", detail)
+					}
+					line += ")"
 				}
-
-				flag.Log(fmt.Sprintf("\r%s(%.0f%%, %s/s)", prefix, 100*f, b))
-				bps = 0
+				flag.Log(line)
 			}
 		}
 

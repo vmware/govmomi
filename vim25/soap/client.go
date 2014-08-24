@@ -32,6 +32,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -212,7 +213,7 @@ func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
 type Upload struct {
 	Type       string
 	Method     string
-	ProgressCh chan<- Progress
+	ProgressCh chan<- vim25.Progress
 }
 
 var DefaultUpload = Upload{
@@ -233,7 +234,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 	}
 
 	if pr.ch == nil {
-		pr.ch = make(chan Progress, 1)
+		pr.ch = make(chan vim25.Progress, 1)
 	}
 
 	// Mark progress reader as done when returning from this function.
@@ -279,7 +280,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 
 type Download struct {
 	Method     string
-	ProgressCh chan<- Progress
+	ProgressCh chan<- vim25.Progress
 }
 
 var DefaultDownload = Download{
@@ -299,7 +300,7 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 	}
 
 	if pr.ch == nil {
-		pr.ch = make(chan Progress, 1)
+		pr.ch = make(chan vim25.Progress, 1)
 	}
 
 	// Mark progress reader as done when returning from this function.
