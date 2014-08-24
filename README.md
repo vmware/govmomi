@@ -31,4 +31,4 @@ Refer to this document to become familiar with the upstream API.
 
 ## License
 
-govmomi is published under the [Apache 2 license](LICENSE).
+govmomi is available under the [Apache 2 license](LICENSE).

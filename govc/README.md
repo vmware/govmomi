@@ -55,4 +55,4 @@ to set defaults:
 
 ## License
 
-govc is published under the [Apache 2 license](../LICENSE).
+govc is available under the [Apache 2 license](../LICENSE).
