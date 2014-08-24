@@ -26,11 +26,15 @@ var commands = map[string]Command{}
 
 func name(c Command) string {
 	t := reflect.TypeOf(c).Elem()
-	base := filepath.Base(t.PkgPath())
-	if base == t.Name() {
-		return t.Name()
+	name := t.Name()
+	if name[len(name)-1] == '_' {
+		name = name[:len(name)-1]
 	}
-	return fmt.Sprintf("%s.%s", base, t.Name())
+	base := filepath.Base(t.PkgPath())
+	if base == name {
+		return name
+	}
+	return fmt.Sprintf("%s.%s", base, name)
 }
 
 func Register(c Command) {
