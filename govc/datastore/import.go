@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
@@ -103,12 +104,7 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.upload && !file.IsOvf() {
-		u, err := cmd.DatastoreURL(file.RemoteVMDK())
-		if err != nil {
-			return err
-		}
-
-		err = cmd.Client.Client.UploadFile(string(file), u, nil)
+		err = cmd.Upload(file)
 		if err != nil {
 			return err
 		}
@@ -119,6 +115,24 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 	}
 
 	return nil
+}
+
+func (cmd *import_) Upload(i importable) error {
+	u, err := cmd.Datastore.URL(cmd.Client, cmd.Datacenter, i.RemoteVMDK())
+	if err != nil {
+		return err
+	}
+
+	p := soap.DefaultUpload
+	if cmd.OutputFlag.TTY {
+		ch := make(chan vim25.Progress)
+		wg := cmd.ProgressLogger("Uploading... ", ch)
+		defer wg.Wait()
+
+		p.ProgressCh = ch
+	}
+
+	return cmd.Client.Client.UploadFile(string(i), u, &p)
 }
 
 func (cmd *import_) ImportVMDK(i importable) error {
