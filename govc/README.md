@@ -33,7 +33,7 @@ The relative path in this example can only be used if the command can
 umambigously resolve a datacenter to use as origin for the query. If no
 datacenter is specified, govc defaults to the only datacenter, if there is only
 one. The datacenter itself can be specified as a pattern as well, enabling the
-following arguments: `-dc='my*' -ds='*store3'`. The datastore pattern is looked
+following arguments: `-dc='my*' -ds='*store'`. The datastore pattern is looked
 up and matched relative to the datacenter which itself is specified as a
 pattern.
 
