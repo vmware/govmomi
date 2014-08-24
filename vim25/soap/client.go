@@ -210,18 +210,37 @@ func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
 }
 
 type Upload struct {
-	Type   string
-	Method string
+	Type       string
+	Method     string
+	ProgressCh chan<- Progress
 }
 
 var DefaultUpload = Upload{
 	Type:   "application/octet-stream",
 	Method: "PUT",
-	// TODO: progress callback
 }
 
 // UploadFile PUTs the local file to the given URL
 func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
+	var err error
+
+	if param == nil {
+		param = &DefaultUpload
+	}
+
+	pr := progressReader{
+		ch: param.ProgressCh,
+	}
+
+	if pr.ch == nil {
+		pr.ch = make(chan Progress, 1)
+	}
+
+	// Mark progress reader as done when returning from this function.
+	defer func() {
+		pr.Done(err)
+	}()
+
 	s, err := os.Stat(file)
 	if err != nil {
 		return err
@@ -233,11 +252,9 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 	}
 	defer f.Close()
 
-	if param == nil {
-		param = &DefaultUpload
-	}
-
-	req, err := http.NewRequest(param.Method, u.String(), f)
+	pr.r = f
+	pr.size = s.Size()
+	req, err := http.NewRequest(param.Method, u.String(), &pr)
 	if err != nil {
 		return err
 	}
@@ -250,22 +267,53 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 		return err
 	}
 
-	if res.StatusCode == http.StatusOK || res.StatusCode == http.StatusCreated {
-		return nil
-
+	switch res.StatusCode {
+	case http.StatusOK:
+	case http.StatusCreated:
+	default:
+		err = errors.New(res.Status)
 	}
-	return errors.New(res.Status)
+
+	return err
+}
+
+type Download struct {
+	Method     string
+	ProgressCh chan<- Progress
+}
+
+var DefaultDownload = Download{
+	Method: "GET",
 }
 
 // DownloadFile GETs the given URL to a local file
-func (c *Client) DownloadFile(file string, u *url.URL) error {
+func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
+	var err error
+
+	if param == nil {
+		param = &DefaultDownload
+	}
+
+	pr := progressReader{
+		ch: param.ProgressCh,
+	}
+
+	if pr.ch == nil {
+		pr.ch = make(chan Progress, 1)
+	}
+
+	// Mark progress reader as done when returning from this function.
+	defer func() {
+		pr.Done(err)
+	}()
+
 	fh, err := os.Create(file)
 	if err != nil {
 		return err
 	}
 	defer fh.Close()
 
-	req, err := http.NewRequest("GET", u.String(), nil)
+	req, err := http.NewRequest(param.Method, u.String(), nil)
 	if err != nil {
 		return err
 	}
@@ -277,14 +325,29 @@ func (c *Client) DownloadFile(file string, u *url.URL) error {
 
 	defer res.Body.Close()
 
-	if res.StatusCode != http.StatusOK {
-		return errors.New(res.Status)
+	switch res.StatusCode {
+	case http.StatusOK:
+	default:
+		err = errors.New(res.Status)
 	}
 
-	_, err = io.Copy(fh, res.Body)
 	if err != nil {
 		return err
 	}
 
-	return fh.Close()
+	pr.r = res.Body
+	pr.size = res.ContentLength
+	_, err = io.Copy(fh, &pr)
+	if err != nil {
+		return err
+	}
+
+	// Assign error before returning so that it gets picked up by the deferred
+	// function marking the progress reader as done.
+	err = fh.Close()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

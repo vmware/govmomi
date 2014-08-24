@@ -19,12 +19,15 @@ package datastore
 import (
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/soap"
 )
 
 type upload struct {
+	*flags.OutputFlag
 	*flags.DatastoreFlag
 }
 
@@ -56,5 +59,15 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return c.Client.UploadFile(args[0], u, nil)
+	p := soap.DefaultUpload
+	if cmd.OutputFlag.TTY {
+		cmd.Log(fmt.Sprintf("Uploading %s...\n", args[0]))
+		ch := make(chan soap.Progress)
+		wg := cmd.ProgressLogger("", ch)
+		defer wg.Wait()
+
+		p.ProgressCh = ch
+	}
+
+	return c.Client.UploadFile(args[0], u, &p)
 }

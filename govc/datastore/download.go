@@ -19,9 +19,11 @@ package datastore
 import (
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/soap"
 )
 
 type download struct {
@@ -56,5 +58,20 @@ func (cmd *download) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return c.Client.DownloadFile(args[1], u)
+	p := soap.DefaultDownload
+	if cmd.OutputFlag.TTY {
+		path, err := cmd.DatastorePath(args[0])
+		if err != nil {
+			return err
+		}
+
+		cmd.Log(fmt.Sprintf("Downloading %s...\n", path))
+		ch := make(chan soap.Progress)
+		wg := cmd.ProgressLogger("", ch)
+		defer wg.Wait()
+
+		p.ProgressCh = ch
+	}
+
+	return c.Client.DownloadFile(args[1], u, &p)
 }
