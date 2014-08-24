@@ -95,7 +95,7 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 			return err
 		}
 
-		err = cmd.Client.Client.UploadFile(string(file), u)
+		err = cmd.Client.Client.UploadFile(string(file), u, nil)
 		if err != nil {
 			return err
 		}
