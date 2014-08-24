@@ -16,7 +16,10 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type ResourcePool struct {
 	types.ManagedObjectReference
@@ -24,4 +27,28 @@ type ResourcePool struct {
 
 func (p ResourcePool) Reference() types.ManagedObjectReference {
 	return p.ManagedObjectReference
+}
+
+func (p ResourcePool) ImportVApp(c *Client, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
+	req := types.ImportVApp{
+		This: p.Reference(),
+		Spec: spec,
+	}
+
+	if folder != nil {
+		ref := folder.Reference()
+		req.Folder = &ref
+	}
+
+	if host != nil {
+		ref := host.Reference()
+		req.Host = &ref
+	}
+
+	res, err := methods.ImportVApp(c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &HttpNfcLease{res.Returnval}, nil
 }
