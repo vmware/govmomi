@@ -60,6 +60,7 @@ func TestMarshalWithEmptyInterface(t *testing.T) {
 		{Value: float64(64.0)},
 		{Value: string("string")},
 		{Value: time.Now()},
+		{Value: ParseTime("2009-10-04T01:35:58+00:00")},
 		{Value: []byte("bytes")},
 		{Value: MyType{Value: "v"}},
 	}
@@ -82,8 +83,15 @@ func TestMarshalWithEmptyInterface(t *testing.T) {
 			t.Fatalf("Unmarshal: %s", err)
 		}
 
-		if !reflect.DeepEqual(r1, r2) {
-			t.Errorf("Expected: %#v, actual: %#v", r1, r2)
+		switch r1.Values[0].(type) {
+		case time.Time:
+			if !r1.Values[0].(time.Time).Equal(r2.Values[0].(time.Time)) {
+				t.Errorf("Expected: %#v, actual: %#v", r1, r2)
+			}
+		default:
+			if !reflect.DeepEqual(r1, r2) {
+				t.Errorf("Expected: %#v, actual: %#v", r1, r2)
+			}
 		}
 	}
 }

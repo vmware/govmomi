@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/vmware/govmomi.png?branch=master)](https://travis-ci.org/vmware/govmomi)
+
 # govmomi
 
 govmomi is a Go library for interacting with VMware ESXi and/or vCenter.
