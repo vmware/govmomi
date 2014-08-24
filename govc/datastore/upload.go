@@ -56,5 +56,5 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return c.Client.UploadFile(args[0], u)
+	return c.Client.UploadFile(args[0], u, nil)
 }

@@ -191,8 +191,37 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	return err
 }
 
+// ParseURL wraps url.Parse to rewrite the URL.Host field
+// In the case of VM guest uploads or NFC lease URLs, a Host
+// field with a value of "*" is rewritten to the Client's Host.
+func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
+	u, err := url.Parse(urlStr)
+	if err != nil {
+		return nil, err
+	}
+
+	host := strings.Split(u.Host, ":")
+	if host[0] == "*" {
+		host[0] = strings.Split(c.URL().Host, ":")[0]
+		u.Host = strings.Join(host, ":")
+	}
+
+	return u, nil
+}
+
+type Upload struct {
+	Type   string
+	Method string
+}
+
+var DefaultUpload = Upload{
+	Type:   "application/octet-stream",
+	Method: "PUT",
+	// TODO: progress callback
+}
+
 // UploadFile PUTs the local file to the given URL
-func (c *Client) UploadFile(file string, u *url.URL) error {
+func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 	s, err := os.Stat(file)
 	if err != nil {
 		return err
@@ -204,13 +233,17 @@ func (c *Client) UploadFile(file string, u *url.URL) error {
 	}
 	defer f.Close()
 
-	req, err := http.NewRequest("PUT", u.String(), f)
+	if param == nil {
+		param = &DefaultUpload
+	}
+
+	req, err := http.NewRequest(param.Method, u.String(), f)
 	if err != nil {
 		return err
 	}
 
 	req.ContentLength = s.Size()
-	req.Header.Set("Content-Type", "application/octet-stream")
+	req.Header.Set("Content-Type", param.Type)
 
 	res, err := c.Client.Do(req)
 	if err != nil {

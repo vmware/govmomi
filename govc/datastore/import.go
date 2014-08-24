@@ -17,22 +17,27 @@ limitations under the License.
 package datastore
 
 import (
+	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type import_ struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
+	*flags.SearchFlag
 
 	upload  bool
 	import_ bool
@@ -44,7 +49,11 @@ type import_ struct {
 }
 
 func init() {
-	cli.Register(&import_{})
+	i := &import_{
+		SearchFlag: flags.NewSearchFlag(flags.SearchHosts),
+	}
+
+	cli.Register(i)
 }
 
 func (cmd *import_) Register(f *flag.FlagSet) {
@@ -55,6 +64,7 @@ func (cmd *import_) Register(f *flag.FlagSet) {
 func (cmd *import_) Process() error { return nil }
 
 func (cmd *import_) Run(f *flag.FlagSet) error {
+	var fimport func(importable) error
 	var err error
 
 	args := f.Args()
@@ -65,6 +75,9 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 	file := importable(f.Arg(0))
 	switch file.Ext() {
 	case ".vmdk":
+		fimport = cmd.ImportVMDK
+	case ".ovf":
+		fimport = cmd.ImportOVF
 	default:
 		return fmt.Errorf(`unknown type: %s`, file)
 	}
@@ -89,33 +102,34 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.upload {
+	if cmd.upload && !file.IsOvf() {
 		u, err := cmd.DatastoreURL(file.RemoteVMDK())
 		if err != nil {
 			return err
 		}
 
-		err = cmd.Client.Client.UploadFile(string(file), u)
+		err = cmd.Client.Client.UploadFile(string(file), u, nil)
 		if err != nil {
 			return err
 		}
 	}
 
 	if cmd.import_ {
-		err = cmd.Copy(file)
-		if err != nil {
-			return err
-		}
-
-		fm := cmd.Client.FileManager()
-		dsVMDK := cmd.Datastore.Path(path.Dir(file.RemoteVMDK()))
-		err = fm.DeleteDatastoreFile(dsVMDK, cmd.Datacenter)
-		if err != nil {
-			return err
-		}
+		return fimport(file)
 	}
 
 	return nil
+}
+
+func (cmd *import_) ImportVMDK(i importable) error {
+	err := cmd.Copy(i)
+	if err != nil {
+		return err
+	}
+
+	fm := cmd.Client.FileManager()
+	dsVMDK := cmd.Datastore.Path(path.Dir(i.RemoteVMDK()))
+	return fm.DeleteDatastoreFile(dsVMDK, cmd.Datacenter)
 }
 
 func (cmd *import_) Copy(i importable) error {
@@ -236,6 +250,114 @@ func (cmd *import_) DestroyVM(vm *govmomi.VirtualMachine) error {
 	return nil
 }
 
+func (cmd *import_) ImportOVF(i importable) error {
+	c := cmd.Client
+
+	desc, err := ioutil.ReadFile(string(i))
+	if err != nil {
+		return err
+	}
+
+	// extract name from .ovf for use as VM name
+	ovf := struct {
+		VirtualSystem struct {
+			Name string
+		}
+	}{}
+
+	if err := xml.Unmarshal(desc, &ovf); err != nil {
+		return fmt.Errorf("failed to parse ovf: %s", err.Error())
+	}
+
+	cisp := types.OvfCreateImportSpecParams{
+		EntityName: ovf.VirtualSystem.Name,
+		OvfManagerCommonParams: types.OvfManagerCommonParams{
+			Locale: "US",
+		},
+	}
+
+	spec, err := c.OvfManager().CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
+	if err != nil {
+		return err
+	}
+
+	if spec.Error != nil {
+		return errors.New(spec.Error[0].LocalizedMessage)
+	}
+
+	if spec.Warning != nil {
+		for _, w := range spec.Warning {
+			fmt.Printf("Warning: %s\n", w.LocalizedMessage)
+		}
+	}
+
+	// TODO: ImportSpec may have unitNumber==0, but this field is optional in the wsdl
+	// and hence omitempty in the struct tag; but unitNumber is required for certain devices.
+	s := &spec.ImportSpec.(*types.VirtualMachineImportSpec).ConfigSpec
+	for _, d := range s.DeviceChange {
+		n := &d.GetVirtualDeviceConfigSpec().Device.GetVirtualDevice().UnitNumber
+		if *n == 0 {
+			*n = -1
+		}
+	}
+
+	host, err := cmd.HostSystem()
+	if err != nil {
+		return err
+	}
+
+	// TODO: need a folder option
+	folders, err := cmd.Datacenter.Folders(c)
+	if err != nil {
+		return err
+	}
+	folder := &folders.VmFolder
+
+	lease, err := cmd.ResourcePool.ImportVApp(c, spec.ImportSpec, folder, host)
+	if err != nil {
+		return err
+	}
+
+	info, err := lease.Wait(c)
+	if err != nil {
+		return err
+	}
+
+	for _, device := range info.DeviceUrl {
+		for _, item := range spec.FileItem {
+			if device.ImportKey != item.DeviceId {
+				continue
+			}
+
+			file := filepath.Join(i.Dir(), item.Path)
+
+			u, err := c.Client.ParseURL(device.Url)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("Uploading file: %s to %s\n", file, u.String())
+
+			// TODO: progress callback to renew lease via HttpNfcLeaseProgress()
+			opts := soap.Upload{
+				Type:   "application/x-vnd.vmware-streamVmdk",
+				Method: "POST",
+			}
+
+			if item.Create {
+				opts.Method = "PUT"
+			}
+
+			err = c.Client.UploadFile(file, u, &opts)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return lease.HttpNfcLeaseComplete(c)
+}
+
 type importable string
 
 func (i importable) Ext() string {
@@ -244,6 +366,10 @@ func (i importable) Ext() string {
 
 func (i importable) Base() string {
 	return path.Base(string(i))
+}
+
+func (i importable) Dir() string {
+	return path.Dir(string(i))
 }
 
 func (i importable) BaseClean() string {
@@ -265,6 +391,10 @@ func (i importable) RemoteDst() string {
 func (i importable) RemoteDstWithSuffix(s string) string {
 	bc := i.BaseClean()
 	return fmt.Sprintf("%s/%s%s.vmdk", bc, bc, s)
+}
+
+func (i importable) IsOvf() bool {
+	return i.Ext() == ".ovf"
 }
 
 type configSpec types.VirtualMachineConfigSpec
