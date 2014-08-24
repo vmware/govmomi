@@ -18,7 +18,6 @@ package guest
 
 import (
 	"flag"
-	"strings"
 
 	"net/url"
 
@@ -59,16 +58,5 @@ func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {
 		return nil, err
 	}
 
-	u, err := url.Parse(urlStr)
-	if err != nil {
-		return nil, err
-	}
-
-	host := strings.Split(u.Host, ":")
-	if host[0] == "*" {
-		host[0] = strings.Split(c.Client.URL().Host, ":")[0]
-		u.Host = strings.Join(host, ":")
-	}
-
-	return u, nil
+	return c.Client.ParseURL(urlStr)
 }
