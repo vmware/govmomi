@@ -32,13 +32,17 @@ func init() {
 	cli.Register(&about{})
 }
 
-func (c *about) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *about) Register(f *flag.FlagSet) {}
+
+func (cmd *about) Process() error { return nil }
+
+func (cmd *about) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	fmt.Printf("%#v\n", client.ServiceContent.About)
+	fmt.Printf("%#v\n", c.ServiceContent.About)
 
 	return nil
 }
