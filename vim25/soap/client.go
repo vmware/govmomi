@@ -194,7 +194,7 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 
 // ParseURL wraps url.Parse to rewrite the URL.Host field
 // In the case of VM guest uploads or NFC lease URLs, a Host
-// field with a value of "*" is rewritten to the Client's Host.
+// field with a value of "*" is rewritten to the Client's URL.Host.
 func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
 	u, err := url.Parse(urlStr)
 	if err != nil {
@@ -203,8 +203,8 @@ func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
 
 	host := strings.Split(u.Host, ":")
 	if host[0] == "*" {
-		host[0] = strings.Split(c.URL().Host, ":")[0]
-		u.Host = strings.Join(host, ":")
+		// Also use Client's port, to support port forwarding
+		u.Host = c.URL().Host
 	}
 
 	return u, nil
