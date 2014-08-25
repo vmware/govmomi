@@ -67,16 +67,4 @@ File.open(File.join(ARGV.first, "methods/methods.go"), "w") do |io|
     each { |e| e.dump(io) }
 end
 
-
-File.open(File.join(ARGV.first, "tasks/tasks.go"), "w") do |io|
-  io.print WSDL.header("tasks")
-
-  wsdl.
-    operations.
-    sort_by { |x| x.name }.
-    select { |x| x.name[0] == x.name[0].upcase }. # Only capitalized methods for now...
-    select { |x| x.name =~ /_Task$/ }.
-    each { |e| e.dump_task(io) }
-end
-
 exit(0)

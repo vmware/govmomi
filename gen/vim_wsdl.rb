@@ -657,23 +657,6 @@ EOS
 
     io.print "}\n\n"
   end
-
-  def dump_task(io)
-    wo_task = name.gsub(/_Task$/, '')
-
-    io.print <<EOS
-    func #{wo_task}(r soap.RoundTripper, req *#{go_input}) (Task, error) {
-      res, err := methods.#{name}(r, req)
-      if err != nil {
-        return nil, err
-      }
-
-      t := newTask(r, res.Returnval)
-      return t, nil
-    }
-
-EOS
-  end
 end
 
 class WSDL

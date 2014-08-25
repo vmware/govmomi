@@ -18,7 +18,6 @@ package govmomi
 
 import (
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -26,7 +25,7 @@ type FileManager struct {
 	c *Client
 }
 
-func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) error {
+func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.CopyDatastoreFile_Task{
 		This:            *f.c.ServiceContent.FileManager,
 		SourceName:      sourceName,
@@ -44,17 +43,16 @@ func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Data
 		req.DestinationDatacenter = &ref
 	}
 
-	task, err := tasks.CopyDatastoreFile(f.c, &req)
+	res, err := methods.CopyDatastoreFile_Task(f.c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = f.c.waitForTask(task)
-	return err
+	return NewTask(f.c, res.Returnval), nil
 }
 
 // DeleteDatastoreFile deletes the specified file or folder from the datastore.
-func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) error {
+func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteDatastoreFile_Task{
 		This: *f.c.ServiceContent.FileManager,
 		Name: name,
@@ -65,13 +63,12 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) error {
 		req.Datacenter = &ref
 	}
 
-	task, err := tasks.DeleteDatastoreFile(f.c, &req)
+	res, err := methods.DeleteDatastoreFile_Task(f.c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = f.c.waitForTask(task)
-	return err
+	return NewTask(f.c, res.Returnval), nil
 }
 
 // MakeDirectory creates a folder using the specified name.
@@ -91,7 +88,7 @@ func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDire
 	return err
 }
 
-func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) error {
+func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.MoveDatastoreFile_Task{
 		This:            *f.c.ServiceContent.FileManager,
 		SourceName:      sourceName,
@@ -109,11 +106,10 @@ func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Data
 		req.DestinationDatacenter = &ref
 	}
 
-	task, err := tasks.MoveDatastoreFile(f.c, &req)
+	res, err := methods.MoveDatastoreFile_Task(f.c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = f.c.waitForTask(task)
-	return err
+	return NewTask(f.c, res.Returnval), nil
 }

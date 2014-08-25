@@ -17,7 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
-	"github.com/vmware/govmomi/vim25/tasks"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -29,44 +29,32 @@ func (b HostDatastoreBrowser) Reference() types.ManagedObjectReference {
 	return b.ManagedObjectReference
 }
 
-func (b HostDatastoreBrowser) SearchDatastore(c *Client, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*types.HostDatastoreBrowserSearchResults, error) {
+func (b HostDatastoreBrowser) SearchDatastore(c *Client, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastore_Task{
 		This:          b.Reference(),
 		DatastorePath: datastorePath,
 		SearchSpec:    searchSpec,
 	}
 
-	task, err := tasks.SearchDatastore(c, &req)
+	res, err := methods.SearchDatastore_Task(c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := c.waitForTask(task)
-	if err != nil {
-		return nil, err
-	}
-
-	r := res.(types.HostDatastoreBrowserSearchResults)
-	return &r, nil
+	return NewTask(c, res.Returnval), nil
 }
 
-func (b HostDatastoreBrowser) SearchDatastoreSubFolders(c *Client, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*types.HostDatastoreBrowserSearchResults, error) {
+func (b HostDatastoreBrowser) SearchDatastoreSubFolders(c *Client, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastoreSubFolders_Task{
 		This:          b.Reference(),
 		DatastorePath: datastorePath,
 		SearchSpec:    searchSpec,
 	}
 
-	task, err := tasks.SearchDatastoreSubFolders(c, &req)
+	res, err := methods.SearchDatastoreSubFolders_Task(c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := c.waitForTask(task)
-	if err != nil {
-		return nil, err
-	}
-
-	r := res.(types.HostDatastoreBrowserSearchResults)
-	return &r, nil
+	return NewTask(c, res.Returnval), nil
 }

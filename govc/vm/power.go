@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 )
@@ -65,15 +66,22 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
+		var task *govmomi.Task
+
 		switch {
 		case cmd.On:
 			fmt.Fprintf(cmd, "Powering on %s... ", vm.Reference())
-			err = vm.PowerOn(c)
+			task, err = vm.PowerOn(c)
 		case cmd.Off:
 			fmt.Fprintf(cmd, "Powering off %s... ", vm.Reference())
-			err = vm.PowerOff(c)
+			task, err = vm.PowerOff(c)
 		}
 
+		if err != nil {
+			return err
+		}
+
+		err = task.Wait()
 		if err == nil {
 			fmt.Fprintf(cmd, "OK\n")
 			continue
