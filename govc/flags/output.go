@@ -99,6 +99,7 @@ func (flag *OutputFlag) ProgressLogger(prefix string, ch chan vim25.Progress) *s
 		var err error
 
 		tick := time.NewTicker(100 * time.Millisecond)
+		defer tick.Stop()
 		defer wg.Done()
 
 		for ok = true; ok && err == nil; {
