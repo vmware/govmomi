@@ -29,8 +29,7 @@ import (
 )
 
 type vnc struct {
-	*flags.ClientFlag
-	*flags.SearchFlag
+	*flags.VirtualMachineFlag
 
 	Enable   bool
 	Port     int
@@ -42,8 +41,6 @@ func init() {
 }
 
 func (cmd *vnc) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
-
 	f.BoolVar(&cmd.Enable, "enable", true, "Enable VNC")
 	f.IntVar(&cmd.Port, "port", -1, "VNC port")
 	f.StringVar(&cmd.Password, "password", "", "VNC password")
