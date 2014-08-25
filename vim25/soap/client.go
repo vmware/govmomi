@@ -233,10 +233,6 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 		ch: param.ProgressCh,
 	}
 
-	if pr.ch == nil {
-		pr.ch = make(chan vim25.Progress, 1)
-	}
-
 	// Mark progress reader as done when returning from this function.
 	defer func() {
 		pr.Done(err)
@@ -297,10 +293,6 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 
 	pr := progressReader{
 		ch: param.ProgressCh,
-	}
-
-	if pr.ch == nil {
-		pr.ch = make(chan vim25.Progress, 1)
 	}
 
 	// Mark progress reader as done when returning from this function.
