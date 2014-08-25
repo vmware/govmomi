@@ -68,5 +68,10 @@ func (cmd *mv) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return c.FileManager().MoveDatastoreFile(src, dc, dst, dc, cmd.force)
+	task, err := c.FileManager().MoveDatastoreFile(src, dc, dst, dc, cmd.force)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
 }

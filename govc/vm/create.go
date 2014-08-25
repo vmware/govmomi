@@ -100,13 +100,25 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	vm, err := cmd.CreateVM(f.Arg(0))
+	task, err := cmd.CreateVM(f.Arg(0))
 	if err != nil {
 		return err
 	}
 
+	info, err := task.WaitForResult(nil)
+	if err != nil {
+		return err
+	}
+
+	vm := govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference))
+
 	if cmd.on {
-		err = vm.PowerOn(cmd.Client)
+		task, err := vm.PowerOn(cmd.Client)
+		if err != nil {
+			return err
+		}
+
+		_, err = task.WaitForResult(nil)
 		if err != nil {
 			return err
 		}
@@ -115,7 +127,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	return nil
 }
 
-func (cmd *create) CreateVM(name string) (*govmomi.VirtualMachine, error) {
+func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 	spec := &configSpec{
 		Name:     name,
 		GuestId:  cmd.guestID,
@@ -191,12 +203,23 @@ func (cmd *create) Cleanup(vm *govmomi.VirtualMachine) {
 
 	spec := new(configSpec)
 	spec.RemoveDisks(&mvm)
-	err = vm.Reconfigure(cmd.Client, spec.ToSpec())
+
+	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
 	if err != nil {
 		return
 	}
 
-	err = vm.Destroy(cmd.Client)
+	err = task.Wait()
+	if err != nil {
+		return
+	}
+
+	task, err = vm.Destroy(cmd.Client)
+	if err != nil {
+		return
+	}
+
+	err = task.Wait()
 	if err != nil {
 		return
 	}

@@ -37,8 +37,7 @@ func init() {
 	cli.Register(&ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {
-}
+func (cmd *ls) Register(f *flag.FlagSet) {}
 
 func (cmd *ls) Process() error { return nil }
 
@@ -72,10 +71,17 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		},
 	}
 
-	res, err := b.SearchDatastore(c, path, &spec)
+	task, err := b.SearchDatastore(c, path, &spec)
 	if err != nil {
 		return err
 	}
+
+	info, err := task.WaitForResult(nil)
+	if err != nil {
+		return err
+	}
+
+	res := info.Result.(types.HostDatastoreBrowserSearchResults)
 
 	tw := tabwriter.NewWriter(os.Stderr, 3, 0, 2, ' ', 0)
 

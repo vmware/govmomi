@@ -17,7 +17,6 @@ limitations under the License.
 package vm
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"reflect"
@@ -26,7 +25,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -104,25 +102,18 @@ func (cmd *vnc) Run(f *flag.FlagSet) error {
 
 	// Only update if configuration changed
 	if !reflect.DeepEqual(curOptions, newOptions) {
-		req := types.ReconfigVM_Task{
-			This: vm.ManagedObjectReference,
-			Spec: types.VirtualMachineConfigSpec{
-				ExtraConfig: newOptions.ToExtraConfig(),
-			},
+		spec := types.VirtualMachineConfigSpec{
+			ExtraConfig: newOptions.ToExtraConfig(),
 		}
 
-		t, err := tasks.ReconfigVM(c, &req)
+		task, err := vm.Reconfigure(c, spec)
 		if err != nil {
 			return err
 		}
 
-		info, err := t.Wait()
+		err = task.Wait()
 		if err != nil {
 			return err
-		}
-
-		if info.Error != nil {
-			return errors.New(info.Error.LocalizedMessage)
 		}
 	}
 

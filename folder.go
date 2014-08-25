@@ -17,8 +17,8 @@ limitations under the License.
 package govmomi
 
 import (
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/tasks"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -49,7 +49,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 	return rs, nil
 }
 
-func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*VirtualMachine, error) {
+func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
 		Config: config,
@@ -61,15 +61,10 @@ func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool 
 		req.Host = &ref
 	}
 
-	task, err := tasks.CreateVM(c, &req)
+	res, err := methods.CreateVM_Task(c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := c.waitForTask(task)
-	if err != nil {
-		return nil, err
-	}
-
-	return &VirtualMachine{res.(types.ManagedObjectReference)}, err
+	return NewTask(c, res.Returnval), nil
 }

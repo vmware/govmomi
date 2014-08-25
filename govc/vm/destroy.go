@@ -50,9 +50,22 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		_ = vm.PowerOff(c)
+		task, err := vm.PowerOff(c)
+		if err != nil {
+			return err
+		}
 
-		err = vm.Destroy(c)
+		err = task.Wait()
+		if err != nil {
+			return err
+		}
+
+		task, err = vm.Destroy(c)
+		if err != nil {
+			return err
+		}
+
+		err = task.Wait()
 		if err != nil {
 			return err
 		}

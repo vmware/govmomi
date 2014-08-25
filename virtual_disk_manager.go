@@ -17,7 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
-	"github.com/vmware/govmomi/vim25/tasks"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -29,7 +29,7 @@ type VirtualDiskManager struct {
 func (m VirtualDiskManager) CopyVirtualDisk(c *Client,
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
-	destSpec *types.VirtualDiskSpec, force bool) error {
+	destSpec *types.VirtualDiskSpec, force bool) (*Task, error) {
 
 	req := types.CopyVirtualDisk_Task{
 		This:       *c.ServiceContent.VirtualDiskManager,
@@ -49,11 +49,10 @@ func (m VirtualDiskManager) CopyVirtualDisk(c *Client,
 		req.DestDatacenter = &ref
 	}
 
-	task, err := tasks.CopyVirtualDisk(c, &req)
+	res, err := methods.CopyVirtualDisk_Task(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = m.c.waitForTask(task)
-	return err
+	return NewTask(c, res.Returnval), nil
 }

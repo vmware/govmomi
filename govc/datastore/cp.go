@@ -25,6 +25,7 @@ import (
 )
 
 type cp struct {
+	*flags.OutputFlag
 	*flags.DatastoreFlag
 
 	force bool
@@ -68,5 +69,10 @@ func (cmd *cp) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return c.FileManager().CopyDatastoreFile(src, dc, dst, dc, cmd.force)
+	task, err := c.FileManager().CopyDatastoreFile(src, dc, dst, dc, cmd.force)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
 }

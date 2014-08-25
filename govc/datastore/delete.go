@@ -58,5 +58,10 @@ func (cmd *delete) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return c.FileManager().DeleteDatastoreFile(path, dc)
+	task, err := c.FileManager().DeleteDatastoreFile(path, dc)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
 }

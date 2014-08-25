@@ -17,9 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
-	"errors"
-
-	"github.com/vmware/govmomi/vim25/tasks"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -27,67 +25,67 @@ type VirtualMachine struct {
 	types.ManagedObjectReference
 }
 
+func NewVirtualMachine(ref types.ManagedObjectReference) *VirtualMachine {
+	return &VirtualMachine{ManagedObjectReference: ref}
+}
+
 func (v VirtualMachine) Reference() types.ManagedObjectReference {
 	return v.ManagedObjectReference
 }
 
-func (v VirtualMachine) PowerOn(c *Client) error {
+func (v VirtualMachine) PowerOn(c *Client) (*Task, error) {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
 	}
 
-	task, err := tasks.PowerOnVM(c, &req)
+	res, err := methods.PowerOnVM_Task(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = c.waitForTask(task)
-	return err
+	return NewTask(c, res.Returnval), nil
 }
 
-func (v VirtualMachine) PowerOff(c *Client) error {
+func (v VirtualMachine) PowerOff(c *Client) (*Task, error) {
 	req := types.PowerOffVM_Task{
 		This: v.Reference(),
 	}
 
-	task, err := tasks.PowerOffVM(c, &req)
+	res, err := methods.PowerOffVM_Task(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = c.waitForTask(task)
-	return err
+	return NewTask(c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reset(c *Client) error {
+func (v VirtualMachine) Reset(c *Client) (*Task, error) {
 	req := types.ResetVM_Task{
 		This: v.Reference(),
 	}
 
-	task, err := tasks.ResetVM(c, &req)
+	res, err := methods.ResetVM_Task(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = c.waitForTask(task)
-	return err
+	return NewTask(c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Destroy(c *Client) error {
+func (v VirtualMachine) Destroy(c *Client) (*Task, error) {
 	req := types.Destroy_Task{
 		This: v.Reference(),
 	}
 
-	task, err := tasks.Destroy(c, &req)
+	res, err := methods.Destroy_Task(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_, err = c.waitForTask(task)
-	return err
+	return NewTask(c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Clone(c *Client, folder Folder, name string, config types.VirtualMachineCloneSpec) (*VirtualMachine, error) {
+func (v VirtualMachine) Clone(c *Client, folder Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
 	req := types.CloneVM_Task{
 		This:   v.Reference(),
 		Folder: folder.Reference(),
@@ -95,40 +93,26 @@ func (v VirtualMachine) Clone(c *Client, folder Folder, name string, config type
 		Spec:   config,
 	}
 
-	task, err := tasks.CloneVM(c, &req)
+	res, err := methods.CloneVM_Task(c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	res, err := c.waitForTask(task)
-	if err != nil {
-		return nil, err
-	}
-
-	return &VirtualMachine{res.(types.ManagedObjectReference)}, err
+	return NewTask(c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reconfigure(c *Client, config types.VirtualMachineConfigSpec) error {
+func (v VirtualMachine) Reconfigure(c *Client, config types.VirtualMachineConfigSpec) (*Task, error) {
 	req := types.ReconfigVM_Task{
 		This: v.Reference(),
 		Spec: config,
 	}
 
-	t, err := tasks.ReconfigVM(c, &req)
+	res, err := methods.ReconfigVM_Task(c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	info, err := t.Wait()
-	if err != nil {
-		return err
-	}
-
-	if info.Error != nil {
-		return errors.New(info.Error.LocalizedMessage)
-	}
-
-	return nil
+	return NewTask(c, res.Returnval), nil
 }
 
 func (v VirtualMachine) WaitForIP(c *Client) (string, error) {
