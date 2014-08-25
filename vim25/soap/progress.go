@@ -94,6 +94,10 @@ func (p *progressReader) Read(b []byte) (int, error) {
 		return n, err
 	}
 
+	if p.ch == nil {
+		return n, err
+	}
+
 	p.pos += int64(n)
 	q := Progress{
 		t:    time.Now(),
@@ -128,6 +132,10 @@ func (p *progressReader) Read(b []byte) (int, error) {
 // progress report. This final progress report is never dropped on the sending
 // side. After sending it, the underlying channel is closed.
 func (p *progressReader) Done(err error) {
+	if p.ch == nil {
+		return
+	}
+
 	q := Progress{
 		t:    time.Now(),
 		pos:  p.pos,
