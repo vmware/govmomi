@@ -59,7 +59,7 @@ func (t taskProgress) Error() error {
 }
 
 type taskCallback struct {
-	ch   chan vim25.Progress
+	ch   chan<- vim25.Progress
 	info *types.TaskInfo
 	err  error
 }
@@ -114,7 +114,7 @@ func (t *Task) Wait() error {
 	return err
 }
 
-func (t *Task) WaitForResult(ch chan vim25.Progress) (*types.TaskInfo, error) {
+func (t *Task) WaitForResult(ch chan<- vim25.Progress) (*types.TaskInfo, error) {
 	cb := &taskCallback{ch: ch}
 	if ch != nil {
 		defer close(ch)
