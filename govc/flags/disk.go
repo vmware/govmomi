@@ -77,7 +77,7 @@ func (f *DiskFlag) Copy(name string) (types.BaseVirtualDevice, error) {
 		DiskType:    "thin",
 	}
 
-	task, err := c.VirtualDiskManager().CopyVirtualDisk(c, src, dc, dst, dc, spec, false)
+	task, err := c.VirtualDiskManager().CopyVirtualDisk(src, dc, dst, dc, spec, false)
 	if err != nil {
 		return nil, err
 	}
