@@ -55,10 +55,9 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 			return err
 		}
 
-		err = task.Wait()
-		if err != nil {
-			return err
-		}
+		// Ignore error since the VM may already been in powered off state.
+		// vm.Destroy will fail if the VM is still powered on.
+		_ = task.Wait()
 
 		task, err = vm.Destroy(c)
 		if err != nil {

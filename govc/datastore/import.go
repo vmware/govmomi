@@ -22,9 +22,12 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/url"
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -301,6 +304,72 @@ func (cmd *import_) DestroyVM(vm *govmomi.VirtualMachine) error {
 	return nil
 }
 
+// LeaseUpdater consumes an Upload.Progress channel (in) used to update HttpNfcLeaseProgress.
+// Progress is forwarded to another channel (out), which can in turn be consumed by the ProgressLogger.
+func (cmd *import_) LeaseUpdater(lease *govmomi.HttpNfcLease, in <-chan vim25.Progress, out chan<- vim25.Progress) *sync.WaitGroup {
+	var wg sync.WaitGroup
+
+	go func() {
+		var p vim25.Progress
+		var ok bool
+		var err error
+		var percent int
+
+		tick := time.NewTicker(2 * time.Second)
+		defer tick.Stop()
+		defer wg.Done()
+
+		for ok = true; ok && err == nil; {
+			select {
+			case p, ok = <-in:
+				if !ok {
+					break
+				}
+				percent = int(p.Percentage())
+				err = p.Error()
+				out <- p // Forward to the ProgressLogger
+			case <-tick.C:
+				// From the vim api HttpNfcLeaseProgress(percent) doc, percent ==
+				// "Completion status represented as an integer in the 0-100 range."
+				// Always report the current value of percent,
+				// as it will renew the lease even if the value hasn't changed or is 0
+				err = lease.HttpNfcLeaseProgress(cmd.Client, percent)
+			}
+		}
+	}()
+
+	wg.Add(1)
+
+	return &wg
+}
+
+func (cmd *import_) nfcUpload(lease *govmomi.HttpNfcLease, file string, u *url.URL, create bool) error {
+	in := make(chan vim25.Progress)
+
+	out := make(chan vim25.Progress)
+
+	wg := cmd.LeaseUpdater(lease, in, out)
+
+	pwg := cmd.ProgressLogger("Uploading... ", out)
+
+	// defer queue is LIFO..
+	defer pwg.Wait() // .... 3) wait for ProgressLogger to return
+	defer close(out) // .... 2) propagate close to chained channel
+	defer wg.Wait()  // .... 1) wait for Progress channel to close
+
+	opts := soap.Upload{
+		Type:       "application/x-vnd.vmware-streamVmdk",
+		Method:     "POST",
+		ProgressCh: in,
+	}
+
+	if create {
+		opts.Method = "PUT"
+	}
+
+	return cmd.Client.Client.UploadFile(file, u, &opts)
+}
+
 func (cmd *import_) ImportOVF(i importable) error {
 	c := cmd.Client
 
@@ -387,19 +456,7 @@ func (cmd *import_) ImportOVF(i importable) error {
 				return err
 			}
 
-			fmt.Printf("Uploading file: %s to %s\n", file, u.String())
-
-			// TODO: progress callback to renew lease via HttpNfcLeaseProgress()
-			opts := soap.Upload{
-				Type:   "application/x-vnd.vmware-streamVmdk",
-				Method: "POST",
-			}
-
-			if item.Create {
-				opts.Method = "PUT"
-			}
-
-			err = c.Client.UploadFile(file, u, &opts)
+			err = cmd.nfcUpload(lease, file, u, item.Create)
 			if err != nil {
 				return err
 			}
