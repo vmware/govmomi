@@ -19,6 +19,8 @@ package about
 import (
 	"flag"
 	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -41,8 +43,17 @@ func (cmd *about) Run(f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	a := c.ServiceContent.About
 
-	fmt.Printf("%#v\n", c.ServiceContent.About)
-
-	return nil
+	tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
+	fmt.Fprintf(tw, "Name:\t%s\n", a.Name)
+	fmt.Fprintf(tw, "Vendor:\t%s\n", a.Vendor)
+	fmt.Fprintf(tw, "Version:\t%s\n", a.Version)
+	fmt.Fprintf(tw, "Build:\t%s\n", a.Build)
+	fmt.Fprintf(tw, "OS type:\t%s\n", a.OsType)
+	fmt.Fprintf(tw, "API type:\t%s\n", a.ApiType)
+	fmt.Fprintf(tw, "API version:\t%s\n", a.ApiVersion)
+	fmt.Fprintf(tw, "Product ID:\t%s\n", a.ProductLineId)
+	fmt.Fprintf(tw, "UUID:\t%s\n", a.InstanceUuid)
+	return tw.Flush()
 }
