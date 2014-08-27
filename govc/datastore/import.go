@@ -17,12 +17,15 @@ limitations under the License.
 package datastore
 
 import (
+	"archive/tar"
 	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/url"
+	"os"
 	"path"
 	"path/filepath"
 	"strings"
@@ -82,6 +85,8 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 		fimport = cmd.ImportVMDK
 	case ".ovf":
 		fimport = cmd.ImportOVF
+	case ".ova":
+		fimport = cmd.ImportOVA
 	default:
 		return fmt.Errorf(`unknown type: %s`, file)
 	}
@@ -106,7 +111,7 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.upload && !file.IsOvf() {
+	if cmd.upload && !file.IsOvf() && !file.IsOva() {
 		err = cmd.Upload(file)
 		if err != nil {
 			return err
@@ -350,7 +355,7 @@ func (cmd *import_) nfcUpload(lease *govmomi.HttpNfcLease, file string, u *url.U
 
 	wg := cmd.LeaseUpdater(lease, in, out)
 
-	pwg := cmd.ProgressLogger("Uploading... ", out)
+	pwg := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", importable(file).Base()), out)
 
 	// defer queue is LIFO..
 	defer pwg.Wait() // .... 3) wait for ProgressLogger to return
@@ -466,6 +471,58 @@ func (cmd *import_) ImportOVF(i importable) error {
 	return lease.HttpNfcLeaseComplete(c)
 }
 
+// ImportOVA extracts a .ova file to a temporary directory,
+// then imports as it would a .ovf file.
+func (cmd *import_) ImportOVA(i importable) error {
+	var ovf importable
+
+	f, err := os.Open(string(i))
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	dir, err := ioutil.TempDir("", "govc-")
+	if err != nil {
+		return err
+	}
+	defer os.RemoveAll(dir)
+
+	r := tar.NewReader(f)
+	for {
+		h, err := r.Next()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		path := filepath.Join(dir, h.Name)
+		entry, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("Extracting %s...\n", h.Name)
+
+		if _, err := io.Copy(entry, r); err != nil {
+			_ = entry.Close()
+			return err
+		}
+
+		if err := entry.Close(); err != nil {
+			return err
+		}
+
+		if (importable(path)).IsOvf() {
+			ovf = importable(path)
+		}
+	}
+
+	return cmd.ImportOVF(ovf)
+}
+
 type importable string
 
 func (i importable) Ext() string {
@@ -503,6 +560,10 @@ func (i importable) RemoteDstWithSuffix(s string) string {
 
 func (i importable) IsOvf() bool {
 	return i.Ext() == ".ovf"
+}
+
+func (i importable) IsOva() bool {
+	return i.Ext() == ".ova"
 }
 
 type configSpec types.VirtualMachineConfigSpec
