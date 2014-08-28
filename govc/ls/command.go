@@ -78,7 +78,7 @@ type listResult struct {
 	Long bool `json:"-"`
 }
 
-func (l listResult) WriteTo(w io.Writer) error {
+func (l listResult) Write(w io.Writer) error {
 	var err error
 
 	for _, e := range l.Elements {

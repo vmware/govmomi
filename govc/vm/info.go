@@ -100,7 +100,7 @@ type infoResult struct {
 	VirtualMachines []mo.VirtualMachine
 }
 
-func (r *infoResult) WriteTo(w io.Writer) error {
+func (r *infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
 	for _, vm := range r.VirtualMachines {

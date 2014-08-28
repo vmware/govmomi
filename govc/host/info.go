@@ -76,7 +76,7 @@ type infoResult struct {
 	HostSystem mo.HostSystem
 }
 
-func (r *infoResult) WriteTo(w io.Writer) error {
+func (r *infoResult) Write(w io.Writer) error {
 	s := r.HostSystem.Summary
 	h := s.Hardware
 
