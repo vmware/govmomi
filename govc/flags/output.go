@@ -90,7 +90,7 @@ func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 	return err
 }
 
-func (flag *OutputFlag) ProgressLogger(prefix string, ch chan vim25.Progress) *sync.WaitGroup {
+func (flag *OutputFlag) ProgressLogger(prefix string, ch <-chan vim25.Progress) *sync.WaitGroup {
 	var wg sync.WaitGroup
 
 	go func() {

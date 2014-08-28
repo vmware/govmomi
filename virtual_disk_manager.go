@@ -26,13 +26,13 @@ type VirtualDiskManager struct {
 }
 
 // CopyVirtualDisk copies a virtual disk, performing conversions as specified in the spec.
-func (m VirtualDiskManager) CopyVirtualDisk(c *Client,
+func (m VirtualDiskManager) CopyVirtualDisk(
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
 	destSpec *types.VirtualDiskSpec, force bool) (*Task, error) {
 
 	req := types.CopyVirtualDisk_Task{
-		This:       *c.ServiceContent.VirtualDiskManager,
+		This:       *m.c.ServiceContent.VirtualDiskManager,
 		SourceName: sourceName,
 		DestName:   destName,
 		DestSpec:   destSpec,
@@ -49,10 +49,30 @@ func (m VirtualDiskManager) CopyVirtualDisk(c *Client,
 		req.DestDatacenter = &ref
 	}
 
-	res, err := methods.CopyVirtualDisk_Task(c, &req)
+	res, err := methods.CopyVirtualDisk_Task(m.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(m.c, res.Returnval), nil
+}
+
+// DeleteVirtualDisk deletes a virtual disk.
+func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Task, error) {
+	req := types.DeleteVirtualDisk_Task{
+		This: *m.c.ServiceContent.VirtualDiskManager,
+		Name: name,
+	}
+
+	if dc != nil {
+		ref := dc.Reference()
+		req.Datacenter = &ref
+	}
+
+	res, err := methods.DeleteVirtualDisk_Task(m.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(m.c, res.Returnval), nil
 }
