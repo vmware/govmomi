@@ -25,6 +25,12 @@ type ResourcePool struct {
 	types.ManagedObjectReference
 }
 
+func NewResourcePool(ref types.ManagedObjectReference) *ResourcePool {
+	return &ResourcePool{
+		ManagedObjectReference: ref,
+	}
+}
+
 func (p ResourcePool) Reference() types.ManagedObjectReference {
 	return p.ManagedObjectReference
 }
