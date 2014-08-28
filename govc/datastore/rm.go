@@ -24,19 +24,20 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-type delete struct {
+type rm struct {
 	*flags.DatastoreFlag
 }
 
 func init() {
-	cli.Register("datastore.delete", &delete{})
+	cli.Register("datastore.rm", &rm{})
+	cli.Alias("datastore.rm", "datastore.delete")
 }
 
-func (cmd *delete) Register(f *flag.FlagSet) {}
+func (cmd *rm) Register(f *flag.FlagSet) {}
 
-func (cmd *delete) Process() error { return nil }
+func (cmd *rm) Process() error { return nil }
 
-func (cmd *delete) Run(f *flag.FlagSet) error {
+func (cmd *rm) Run(f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) == 0 {
 		return errors.New("missing operand")
