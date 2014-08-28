@@ -195,8 +195,7 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 func (cmd *create) Cleanup(vm *govmomi.VirtualMachine) {
 	var mvm mo.VirtualMachine
 
-	// TODO(PN): Use `config.hardware` here, see issue #44.
-	err := cmd.Client.Properties(vm.Reference(), []string{"config"}, &mvm)
+	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
 	if err != nil {
 		return
 	}

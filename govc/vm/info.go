@@ -66,7 +66,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 	if cmd.OutputFlag.JSON {
 		props = nil // Load everything
 	} else {
-		props = []string{"summary", "guest"} // Load summary
+		props = []string{"summary", "guest.ipAddress"} // Load summary
 	}
 
 	for _, vm := range vms {

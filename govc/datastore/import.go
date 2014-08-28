@@ -417,8 +417,7 @@ func (cmd *import_) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.V
 func (cmd *import_) DestroyVM(vm *govmomi.VirtualMachine) error {
 	var mvm mo.VirtualMachine
 
-	// TODO(PN): Use `config.hardware` here, see issue #44.
-	err := cmd.Client.Properties(vm.Reference(), []string{"config"}, &mvm)
+	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
 	if err != nil {
 		return err
 	}
