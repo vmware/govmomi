@@ -29,7 +29,7 @@ type rmdir struct {
 }
 
 func init() {
-	cli.Register(&rmdir{})
+	cli.Register("guest.rmdir", &rmdir{})
 }
 
 func (cmd *rmdir) Register(f *flag.FlagSet) {

@@ -113,7 +113,13 @@ func Run(args []string) int {
 		return 1
 	}
 
-	cmd, ok := commands[args[0]]
+	// Look up real command name in aliases table.
+	name, ok := aliases[args[0]]
+	if !ok {
+		name = args[0]
+	}
+
+	cmd, ok := commands[name]
 	if !ok {
 		generalHelp()
 		return 1

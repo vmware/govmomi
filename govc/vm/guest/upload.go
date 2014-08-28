@@ -31,7 +31,7 @@ type upload struct {
 }
 
 func init() {
-	cli.Register(&upload{})
+	cli.Register("guest.upload", &upload{})
 }
 
 func (cmd *upload) Register(f *flag.FlagSet) {

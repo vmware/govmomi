@@ -31,7 +31,7 @@ type about struct {
 }
 
 func init() {
-	cli.Register(&about{})
+	cli.Register("about", &about{})
 }
 
 func (cmd *about) Register(f *flag.FlagSet) {}

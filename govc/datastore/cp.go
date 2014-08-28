@@ -32,7 +32,7 @@ type cp struct {
 }
 
 func init() {
-	cli.Register(&cp{})
+	cli.Register("datastore.cp", &cp{})
 }
 
 func (cmd *cp) Register(f *flag.FlagSet) {

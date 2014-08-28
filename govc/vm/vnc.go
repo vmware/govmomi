@@ -37,7 +37,7 @@ type vnc struct {
 }
 
 func init() {
-	cli.Register(&vnc{})
+	cli.Register("vm.vnc", &vnc{})
 }
 
 func (cmd *vnc) Register(f *flag.FlagSet) {

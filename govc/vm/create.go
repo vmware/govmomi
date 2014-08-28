@@ -50,7 +50,7 @@ type create struct {
 }
 
 func init() {
-	cli.Register(&create{})
+	cli.Register("vm.create", &create{})
 }
 
 func (cmd *create) Register(f *flag.FlagSet) {

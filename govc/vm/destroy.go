@@ -29,7 +29,7 @@ type destroy struct {
 }
 
 func init() {
-	cli.Register(&destroy{})
+	cli.Register("vm.destroy", &destroy{})
 }
 
 func (cmd *destroy) Register(f *flag.FlagSet) {

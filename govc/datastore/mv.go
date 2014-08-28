@@ -31,7 +31,7 @@ type mv struct {
 }
 
 func init() {
-	cli.Register(&mv{})
+	cli.Register("datastore.mv", &mv{})
 }
 
 func (cmd *mv) Register(f *flag.FlagSet) {

@@ -28,7 +28,7 @@ type getenv struct {
 }
 
 func init() {
-	cli.Register(&getenv{})
+	cli.Register("guest.getenv", &getenv{})
 }
 
 func (cmd *getenv) Register(f *flag.FlagSet) {}

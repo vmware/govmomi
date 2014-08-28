@@ -64,7 +64,7 @@ func init() {
 		SearchFlag: flags.NewSearchFlag(flags.SearchHosts),
 	}
 
-	cli.Register(i)
+	cli.Register("datastore.import", i)
 }
 
 func (cmd *import_) Register(f *flag.FlagSet) {

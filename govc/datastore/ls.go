@@ -34,7 +34,7 @@ type ls struct {
 }
 
 func init() {
-	cli.Register(&ls{})
+	cli.Register("datastore.ls", &ls{})
 }
 
 func (cmd *ls) Register(f *flag.FlagSet) {}

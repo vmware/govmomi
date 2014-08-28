@@ -30,7 +30,7 @@ type ip struct {
 }
 
 func init() {
-	cli.Register(&ip{})
+	cli.Register("vm.ip", &ip{})
 }
 
 func (cmd *ip) Register(f *flag.FlagSet) {

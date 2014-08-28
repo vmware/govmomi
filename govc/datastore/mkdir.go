@@ -33,7 +33,7 @@ type mkdir struct {
 }
 
 func init() {
-	cli.Register(&mkdir{})
+	cli.Register("datastore.mkdir", &mkdir{})
 }
 
 func (cmd *mkdir) Register(f *flag.FlagSet) {
