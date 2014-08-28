@@ -36,7 +36,7 @@ type power struct {
 }
 
 func init() {
-	cli.Register(&power{})
+	cli.Register("vm.power", &power{})
 }
 
 func (cmd *power) Register(f *flag.FlagSet) {

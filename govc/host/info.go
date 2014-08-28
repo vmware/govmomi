@@ -35,7 +35,7 @@ type info struct {
 }
 
 func init() {
-	cli.Register(&info{})
+	cli.Register("host.info", &info{})
 }
 
 func (c *info) Register(f *flag.FlagSet) {

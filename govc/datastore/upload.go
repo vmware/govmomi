@@ -32,7 +32,7 @@ type upload struct {
 }
 
 func init() {
-	cli.Register(&upload{})
+	cli.Register("datastore.upload", &upload{})
 }
 
 func (cmd *upload) Register(f *flag.FlagSet) {}

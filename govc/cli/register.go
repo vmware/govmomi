@@ -16,27 +16,14 @@ limitations under the License.
 
 package cli
 
-import (
-	"fmt"
-	"path/filepath"
-	"reflect"
-)
-
 var commands = map[string]Command{}
 
-func name(c Command) string {
-	t := reflect.TypeOf(c).Elem()
-	name := t.Name()
-	if name[len(name)-1] == '_' {
-		name = name[:len(name)-1]
-	}
-	base := filepath.Base(t.PkgPath())
-	if base == name {
-		return name
-	}
-	return fmt.Sprintf("%s.%s", base, name)
+var aliases = map[string]string{}
+
+func Register(name string, c Command) {
+	commands[name] = c
 }
 
-func Register(c Command) {
-	commands[name(c)] = c
+func Alias(name string, alias string) {
+	aliases[alias] = name
 }

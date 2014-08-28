@@ -28,7 +28,7 @@ type chmod struct {
 }
 
 func init() {
-	cli.Register(&chmod{})
+	cli.Register("guest.chmod", &chmod{})
 }
 
 func (cmd *chmod) Register(f *flag.FlagSet) {}

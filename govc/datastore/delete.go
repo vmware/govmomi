@@ -29,7 +29,7 @@ type delete struct {
 }
 
 func init() {
-	cli.Register(&delete{})
+	cli.Register("datastore.delete", &delete{})
 }
 
 func (cmd *delete) Register(f *flag.FlagSet) {}

@@ -29,7 +29,7 @@ type version struct {
 }
 
 func init() {
-	cli.Register(&version{})
+	cli.Register("version", &version{})
 }
 
 func (c *version) Run(f *flag.FlagSet) error {

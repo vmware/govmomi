@@ -31,7 +31,7 @@ type mkdir struct {
 }
 
 func init() {
-	cli.Register(&mkdir{})
+	cli.Register("guest.mkdir", &mkdir{})
 }
 
 func (cmd *mkdir) Register(f *flag.FlagSet) {
