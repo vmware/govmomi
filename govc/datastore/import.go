@@ -28,6 +28,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strings"
 	"sync"
 	"time"
@@ -35,6 +36,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/govc/util"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -48,6 +50,8 @@ type import_ struct {
 
 	upload  bool
 	import_ bool
+	force   bool
+	keep    bool
 
 	Client       *govmomi.Client
 	Datacenter   *govmomi.Datacenter
@@ -66,6 +70,8 @@ func init() {
 func (cmd *import_) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.upload, "upload", true, "Upload specified disk")
 	f.BoolVar(&cmd.import_, "import", true, "Import specified disk")
+	f.BoolVar(&cmd.force, "force", false, "Overwrite existing disk")
+	f.BoolVar(&cmd.keep, "keep", false, "Keep uploaded disk after import")
 }
 
 func (cmd *import_) Process() error { return nil }
@@ -149,10 +155,161 @@ func (cmd *import_) ImportVMDK(i importable) error {
 		return err
 	}
 
-	return cmd.Delete(path.Dir(i.RemoteVMDK()))
+	if !cmd.keep {
+		err = cmd.Delete(path.Dir(i.RemoteVMDK()))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (cmd *import_) Copy(i importable) error {
+	var err error
+
+	pa := util.NewProgressAggregator(1)
+	wg := cmd.ProgressLogger("Importing... ", pa.C)
+	switch p := cmd.Client.ServiceContent.About.ApiType; p {
+	case "HostAgent":
+		err = cmd.CopyHostAgent(i, pa)
+	case "VirtualCenter":
+		err = cmd.CopyVirtualCenter(i, pa)
+	default:
+		return fmt.Errorf("unsupported product line: %s", p)
+	}
+
+	pa.Done()
+	wg.Wait()
+
+	return err
+}
+
+type basicProgressWrapper struct {
+	detail string
+	err    error
+}
+
+func (b basicProgressWrapper) Percentage() float32 {
+	return 0.0
+}
+
+func (b basicProgressWrapper) Detail() string {
+	return b.detail
+}
+
+func (b basicProgressWrapper) Error() error {
+	return b.err
+}
+
+// PrepareDestination makes sure that the destination VMDK does not yet exist.
+// If the force flag is passed, it removes the existing VMDK. This functions
+// exists to give a meaningful error if the remote VMDK already exists.
+//
+// CopyVirtualDisk can return a "<src> file does not exist" error while in fact
+// the source file *does* exist and the *destination* file also exist.
+//
+func (cmd *import_) PrepareDestination(i importable) error {
+	b, err := cmd.Datastore.Browser(cmd.Client)
+	if err != nil {
+		return err
+	}
+
+	vmdkPath := i.RemoteDst()
+	spec := types.HostDatastoreBrowserSearchSpec{
+		Details: &types.FileQueryFlags{
+			FileType:  true,
+			FileOwner: true, // TODO: omitempty is generated, but seems to be required
+		},
+		MatchPattern: []string{path.Base(vmdkPath)},
+	}
+
+	dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
+	task, err := b.SearchDatastore(cmd.Client, dsPath, &spec)
+	if err != nil {
+		return err
+	}
+
+	// Don't use progress aggregator here; an error may be a good thing.
+	info, err := task.WaitForResult(nil)
+	if err != nil {
+		if info.Error != nil {
+			_, ok := info.Error.Fault.(*types.FileNotFound)
+			if ok {
+				// FileNotFound means the base path doesn't exist. Create it.
+				dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
+				return cmd.Client.FileManager().MakeDirectory(dsPath, cmd.Datacenter, true)
+			}
+		}
+
+		return err
+	}
+
+	res := info.Result.(types.HostDatastoreBrowserSearchResults)
+	if len(res.File) == 0 {
+		// Destination path doesn't exist; all good to continue with import.
+		return nil
+	}
+
+	// Check that the returned entry has the right type.
+	switch res.File[0].(type) {
+	case *types.VmDiskFileInfo:
+	default:
+		expected := "VmDiskFileInfo"
+		actual := reflect.TypeOf(res.File[0])
+		panic(fmt.Sprintf("Expected: %s, actual: %s", expected, actual))
+	}
+
+	if !cmd.force {
+		dsPath := cmd.Datastore.Path(vmdkPath)
+		err = fmt.Errorf("File %s already exists", dsPath)
+		return err
+	}
+
+	// Delete existing disk.
+	vdm := cmd.Client.VirtualDiskManager()
+	task, err = vdm.DeleteVirtualDisk(cmd.Datastore.Path(vmdkPath), cmd.Datacenter)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
+}
+
+func (cmd *import_) CopyHostAgent(i importable, pa *util.ProgressAggregator) error {
+	pch := pa.NewChannel("preparing destination")
+	pch <- basicProgressWrapper{}
+	err := cmd.PrepareDestination(i)
+	pch <- basicProgressWrapper{err: err}
+	close(pch)
+	if err != nil {
+		return err
+	}
+
+	spec := &types.VirtualDiskSpec{
+		AdapterType: "lsiLogic",
+		DiskType:    "thin",
+	}
+
+	dc := cmd.Datacenter
+	src := cmd.Datastore.Path(i.RemoteVMDK())
+	dst := cmd.Datastore.Path(i.RemoteDst())
+	vdm := cmd.Client.VirtualDiskManager()
+	task, err := vdm.CopyVirtualDisk(src, dc, dst, dc, spec, false)
+	if err != nil {
+		return err
+	}
+
+	pch = pa.NewChannel("copying disk")
+	_, err = task.WaitForResult(pch)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cmd *import_) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) error {
 	var err error
 
 	dstName := path.Dir(i.RemoteDst())
@@ -184,23 +341,6 @@ func (cmd *import_) Copy(i importable) error {
 	}
 
 	err = cmd.DestroyVM(dst)
-	if err != nil {
-		return err
-	}
-
-	// TODO(PN): Don't use hardcoded file suffixes.
-	// TODO(PN): Support arbitrary destination paths, not just top level.
-	for _, s := range []string{"", "-flat"} {
-		src := i.RemoteDstWithSuffix(s)
-		dst := path.Base(src)
-		err = cmd.Move(src, dst)
-		if err != nil {
-			return err
-		}
-	}
-
-	// Delete source virtual machine directory.
-	err = cmd.Delete(dstName)
 	if err != nil {
 		return err
 	}
@@ -551,11 +691,6 @@ func (i importable) RemoteVMDK() string {
 func (i importable) RemoteDst() string {
 	bc := i.BaseClean()
 	return fmt.Sprintf("%s/%s.vmdk", bc, bc)
-}
-
-func (i importable) RemoteDstWithSuffix(s string) string {
-	bc := i.BaseClean()
-	return fmt.Sprintf("%s/%s%s.vmdk", bc, bc, s)
 }
 
 func (i importable) IsOvf() bool {
