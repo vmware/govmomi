@@ -25,8 +25,8 @@ import (
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
-func TestNotAuthenticated(t *testing.T) {
-	f, err := os.Open("fixtures/not_authenticated.xml")
+func load(name string) *types.RetrievePropertiesResponse {
+	f, err := os.Open(name)
 	if err != nil {
 		panic(err)
 	}
@@ -41,9 +41,13 @@ func TestNotAuthenticated(t *testing.T) {
 		panic(err)
 	}
 
+	return &b
+}
+
+func TestNotAuthenticatedFault(t *testing.T) {
 	var s SessionManager
 
-	err = LoadRetrievePropertiesResponse(&b, &s)
+	err := LoadRetrievePropertiesResponse(load("fixtures/not_authenticated_fault.xml"), &s)
 	if !soap.IsVimFault(err) {
 		t.Errorf("Expected IsVimFault")
 	}
@@ -51,5 +55,52 @@ func TestNotAuthenticated(t *testing.T) {
 	fault := soap.ToVimFault(err).(*types.NotAuthenticated)
 	if fault.PrivilegeId != "System.View" {
 		t.Errorf("Expected first fault to be returned")
+	}
+}
+
+func TestNestedProperty(t *testing.T) {
+	var vm VirtualMachine
+
+	err := LoadRetrievePropertiesResponse(load("fixtures/nested_property.xml"), &vm)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %s", err)
+	}
+
+	self := types.ManagedObjectReference{
+		Type:  "VirtualMachine",
+		Value: "vm-411",
+	}
+
+	if vm.Self != self {
+		t.Fatalf("Expected vm.Self to be set")
+	}
+
+	if vm.Config == nil {
+		t.Fatalf("Expected vm.Config to be set")
+	}
+
+	if vm.Config.Name != "kubernetes-master" {
+		t.Errorf("Got: %s", vm.Config.Name)
+	}
+
+	if vm.Config.Uuid != "422ec880-ab06-06b4-23f3-beb7a052a4c9" {
+		t.Errorf("Got: %s", vm.Config.Uuid)
+	}
+}
+
+func TestPointerProperty(t *testing.T) {
+	var vm VirtualMachine
+
+	err := LoadRetrievePropertiesResponse(load("fixtures/pointer_property.xml"), &vm)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %s", err)
+	}
+
+	if vm.Config == nil {
+		t.Fatalf("Expected vm.Config to be set")
+	}
+
+	if vm.Config.BootOptions == nil {
+		t.Fatalf("Expected vm.Config.BootOptions to be set")
 	}
 }

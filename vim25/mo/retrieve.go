@@ -17,135 +17,31 @@ limitations under the License.
 package mo
 
 import (
-	"fmt"
 	"reflect"
-	"regexp"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-var arrayOfRegexp = regexp.MustCompile("ArrayOf(.*)$")
-
-func anyTypeToValue(t interface{}) reflect.Value {
-	rt := reflect.TypeOf(t)
-	rv := reflect.ValueOf(t)
-
-	// Dereference if ArrayOfXYZ type
-	m := arrayOfRegexp.FindStringSubmatch(rt.Name())
-	if len(m) > 0 {
-		// ArrayOfXYZ type has single field named XYZ
-		rv = rv.FieldByName(m[1])
-		if !rv.IsValid() {
-			panic(fmt.Sprintf("expected %s type to have field %s", m[0], m[1]))
-		}
-	}
-
-	return rv
-}
-
-func buildValueMap(v reflect.Value, m map[string]reflect.Value) {
-	t := v.Type().Elem()
-	for i := 0; i < t.NumField(); i++ {
-		sft := t.Field(i)
-
-		// Recurse into embedded field
-		if sft.Anonymous {
-			buildValueMap(v.Elem().Field(i).Addr(), m)
-			continue
-		}
-
-		tag := sft.Tag.Get("mo")
-		if tag == "" {
-			continue
-		}
-
-		m[tag] = v.Elem().Field(i)
-	}
-}
-
-// assignReference looks for the "Self" field in the specified struct and
-// assigns the specified ManagedObjectReference.
-//
-// TODO(PN): buildValueMap and assignReference can be improved by combinding
-// their functionality and having a type that only traversed the entire struct
-// once. The type can then store the field indices (fields can be nested) for
-// all the managed object references and the reference to itself.
-//
-func assignReference(v reflect.Value, ref types.ManagedObjectReference) bool {
-	t := v.Type().Elem()
-	for i := 0; i < t.NumField(); i++ {
-		sft := t.Field(i)
-		if sft.Anonymous {
-			if assignReference(v.Elem().Field(i).Addr(), ref) {
-				return true
-			}
-			continue
-		}
-
-		if sft.Name == "Self" {
-			v.Elem().Field(i).Set(reflect.ValueOf(ref))
-			return true
-		}
-	}
-
-	return false
-}
-
-// Returns pointer to type t.
-func objectContentToType(o types.ObjectContent) (reflect.Value, error) {
-	t, ok := t[o.Obj.Type]
-	if !ok {
-		panic("unknown type: " + o.Obj.Type)
-	}
-
-	v := reflect.New(t)
-
-	// Assign reference to self
-	assignReference(v, o.Obj)
-
-	// Build map of property names to assignable reflect.Value
-	m := make(map[string]reflect.Value)
-	buildValueMap(v, m)
-
+// objectContentToType loads an ObjectContent value into the value it
+// represents. If the ObjectContent value has a non-empty 'MissingSet' field,
+// it returns the first fault it finds there as error. If the 'MissingSet'
+// field is empty, it returns a pointer to a reflect.Value. It handles contain
+// nested properties, such as 'guest.ipAddress' or 'config.hardware'.
+func objectContentToType(o types.ObjectContent) (*reflect.Value, error) {
 	// Expect no properties in the missing set
 	for _, p := range o.MissingSet {
-		return v, soap.WrapVimFault(p.Fault.Fault)
+		return nil, soap.WrapVimFault(p.Fault.Fault)
 	}
 
-	for _, p := range o.PropSet {
-		rv, ok := m[p.Name]
-		if ok {
-			pv := anyTypeToValue(p.Val)
-
-			// If type is a pointer, create new instance of type
-			if rv.Kind() == reflect.Ptr {
-				rv.Set(reflect.New(rv.Type().Elem()))
-				rv = rv.Elem()
-			}
-
-			// If type is an interface, check if pv implements it
-			if rv.Kind() == reflect.Interface {
-				rt := rv.Type()
-				pt := pv.Type()
-				if !pt.Implements(rt) {
-					// Check if pointer to pv implements it
-					if reflect.PtrTo(pt).Implements(rt) {
-						npv := reflect.New(pt)
-						npv.Elem().Set(pv)
-						pv = npv
-					} else {
-						panic(fmt.Sprintf("type %s doesn't implement %s", pt.Name(), rt.Name()))
-					}
-				}
-			}
-
-			rv.Set(pv)
-		}
+	ti := typeInfoForType(o.Obj.Type)
+	v, err := ti.LoadFromObjectContent(o)
+	if err != nil {
+		return nil, err
 	}
 
-	return v, nil
+	return &v, nil
 }
 
 // LoadRetrievePropertiesResponse converts the response of a call to
