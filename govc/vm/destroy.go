@@ -19,13 +19,19 @@ package vm
 import (
 	"flag"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type destroy struct {
 	*flags.ClientFlag
 	*flags.SearchFlag
+
+	detach bool
+
+	Client *govmomi.Client
 }
 
 func init() {
@@ -34,23 +40,26 @@ func init() {
 
 func (cmd *destroy) Register(f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+	f.BoolVar(&cmd.detach, "detach", true, "Detach disks before destroying VM")
 }
 
 func (cmd *destroy) Process() error { return nil }
 
 func (cmd *destroy) Run(f *flag.FlagSet) error {
-	c, err := cmd.Client()
+	var err error
+
+	cmd.Client, err = cmd.ClientFlag.Client()
 	if err != nil {
 		return err
 	}
 
-	vms, err := cmd.VirtualMachines(f.Args())
+	vms, err := cmd.SearchFlag.VirtualMachines(f.Args())
 	if err != nil {
 		return err
 	}
 
 	for _, vm := range vms {
-		task, err := vm.PowerOff(c)
+		task, err := vm.PowerOff(cmd.Client)
 		if err != nil {
 			return err
 		}
@@ -59,7 +68,15 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		// vm.Destroy will fail if the VM is still powered on.
 		_ = task.Wait()
 
-		task, err = vm.Destroy(c)
+		// Detach disks if necessary.
+		if cmd.detach {
+			err = cmd.DetachDisks(vm)
+			if err != nil {
+				return err
+			}
+		}
+
+		task, err = vm.Destroy(cmd.Client)
 		if err != nil {
 			return err
 		}
@@ -68,6 +85,31 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+func (cmd *destroy) DetachDisks(vm *govmomi.VirtualMachine) error {
+	var mvm mo.VirtualMachine
+
+	// TODO(PN): Use `config.hardware` here, see issue #44.
+	err := cmd.Client.Properties(vm.Reference(), []string{"config"}, &mvm)
+	if err != nil {
+		return err
+	}
+
+	spec := new(configSpec)
+	spec.RemoveDisks(&mvm)
+
+	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
+	if err != nil {
+		return err
+	}
+
+	err = task.Wait()
+	if err != nil {
+		return err
 	}
 
 	return nil

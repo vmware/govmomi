@@ -224,36 +224,3 @@ func (cmd *create) Cleanup(vm *govmomi.VirtualMachine) {
 		return
 	}
 }
-
-type configSpec types.VirtualMachineConfigSpec
-
-func (c *configSpec) ToSpec() types.VirtualMachineConfigSpec {
-	return types.VirtualMachineConfigSpec(*c)
-}
-
-func (c *configSpec) AddChange(d types.BaseVirtualDeviceConfigSpec) {
-	c.DeviceChange = append(c.DeviceChange, d)
-}
-
-func (c *configSpec) AddDevice(d types.BaseVirtualDevice) {
-	op := &types.VirtualDeviceConfigSpec{
-		Operation: types.VirtualDeviceConfigSpecOperationAdd,
-		Device:    d,
-	}
-
-	c.AddChange(op)
-}
-
-func (c *configSpec) RemoveDisks(vm *mo.VirtualMachine) {
-	for _, d := range vm.Config.Hardware.Device {
-		switch device := d.(type) {
-		case *types.VirtualDisk:
-			removeOp := &types.VirtualDeviceConfigSpec{
-				Operation: types.VirtualDeviceConfigSpecOperationRemove,
-				Device:    device,
-			}
-
-			c.AddChange(removeOp)
-		}
-	}
-}
