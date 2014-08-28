@@ -26,6 +26,12 @@ type Folder struct {
 	types.ManagedObjectReference
 }
 
+func NewFolder(ref types.ManagedObjectReference) *Folder {
+	return &Folder{
+		ManagedObjectReference: ref,
+	}
+}
+
 func (f Folder) Reference() types.ManagedObjectReference {
 	return f.ManagedObjectReference
 }
