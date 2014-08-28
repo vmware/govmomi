@@ -29,7 +29,7 @@ import (
 )
 
 type OutputWriter interface {
-	WriteTo(io.Writer) error
+	Write(io.Writer) error
 }
 
 type OutputFlag struct {
@@ -84,7 +84,7 @@ func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 		enc := json.NewEncoder(out)
 		err = enc.Encode(result)
 	} else {
-		err = result.WriteTo(out)
+		err = result.Write(out)
 	}
 
 	return err
