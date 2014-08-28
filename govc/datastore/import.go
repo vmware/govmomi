@@ -713,7 +713,7 @@ func (c *configSpec) AddChange(d types.BaseVirtualDeviceConfigSpec) {
 
 func (c *configSpec) AddDisk(ds *govmomi.Datastore, path string) {
 	controller := &types.VirtualLsiLogicController{
-		types.VirtualSCSIController{
+		VirtualSCSIController: types.VirtualSCSIController{
 			SharedBus: types.VirtualSCSISharingNoSharing,
 			VirtualController: types.VirtualController{
 				BusNumber: 0,

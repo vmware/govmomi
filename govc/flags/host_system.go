@@ -162,6 +162,6 @@ func (flag *HostSystemFlag) ResourcePool() (*govmomi.ResourcePool, error) {
 		return nil, err
 	}
 
-	flag.pool = &govmomi.ResourcePool{*mcr.ResourcePool}
+	flag.pool = govmomi.NewResourcePool(*mcr.ResourcePool)
 	return flag.pool, nil
 }

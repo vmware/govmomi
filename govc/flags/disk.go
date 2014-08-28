@@ -105,15 +105,16 @@ func (f *DiskFlag) Copy(name string) (types.BaseVirtualDevice, error) {
 
 func (f *DiskFlag) Controller() (types.BaseVirtualDevice, error) {
 	// TODO: adapter option
-	return &types.VirtualLsiLogicController{types.VirtualSCSIController{
-		SharedBus: types.VirtualSCSISharingNoSharing,
-		VirtualController: types.VirtualController{
-			BusNumber: 0,
-			VirtualDevice: types.VirtualDevice{
-				Key: -1,
+	return &types.VirtualLsiLogicController{
+		VirtualSCSIController: types.VirtualSCSIController{
+			SharedBus: types.VirtualSCSISharingNoSharing,
+			VirtualController: types.VirtualController{
+				BusNumber: 0,
+				VirtualDevice: types.VirtualDevice{
+					Key: -1,
+				},
 			},
-		},
-	}}, nil
+		}}, nil
 }
 
 func (f *DiskFlag) Disk() (*types.VirtualDisk, error) {
@@ -147,7 +148,7 @@ func (f *DiskFlag) Cdrom(path string) (types.BaseVirtualDevice, error) {
 			ControllerKey: 200,
 			UnitNumber:    -1,
 			Backing: &types.VirtualCdromIsoBackingInfo{
-				types.VirtualDeviceFileBackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
 					FileName: path,
 				},
 			},

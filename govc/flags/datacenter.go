@@ -63,7 +63,7 @@ func (flag *DatacenterFlag) findDatacenter(path string) ([]*govmomi.Datacenter, 
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "Datacenter" {
-			dcs = append(dcs, &govmomi.Datacenter{ref})
+			dcs = append(dcs, govmomi.NewDatacenter(ref))
 		}
 	}
 

@@ -141,7 +141,7 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 
 	// TODO: adapter type should be an option, default to e1000 for now.
 	device := &types.VirtualE1000{
-		types.VirtualEthernetCard{
+		VirtualEthernetCard: types.VirtualEthernetCard{
 			VirtualDevice: types.VirtualDevice{
 				Key: -1,
 				DeviceInfo: &types.Description{

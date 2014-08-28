@@ -224,7 +224,7 @@ func (flag *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
 		return nil, err
 	}
 
-	return govmomi.Folder{f.VmFolder.Reference()}, nil
+	return govmomi.NewFolder(f.VmFolder.Reference()), nil
 }
 
 func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
@@ -268,7 +268,7 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachin
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "VirtualMachine" {
-			out = append(out, &govmomi.VirtualMachine{ref})
+			out = append(out, govmomi.NewVirtualMachine(ref))
 		}
 	}
 
