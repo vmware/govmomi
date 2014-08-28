@@ -32,15 +32,10 @@ type Datacenter struct {
 	types.ManagedObjectReference
 }
 
-func NewDatacenter(v string) Datacenter {
-	d := Datacenter{
-		ManagedObjectReference: types.ManagedObjectReference{
-			Type:  "Datacenter",
-			Value: v,
-		},
+func NewDatacenter(ref types.ManagedObjectReference) *Datacenter {
+	return &Datacenter{
+		ManagedObjectReference: ref,
 	}
-
-	return d
 }
 
 func (d Datacenter) Reference() types.ManagedObjectReference {
