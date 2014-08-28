@@ -54,7 +54,7 @@ func TestProgressReader(t *testing.T) {
 	}
 
 	if f := q.Percentage(); f != 10.0 {
-		t.Errorf("Expected percentage after 1 byte to be 10%, but got: %.0f%%", f)
+		t.Errorf("Expected percentage after 1 byte to be 10%%, but got: %.0f%%", f)
 	}
 
 	// Read remaining bytes
@@ -72,7 +72,7 @@ func TestProgressReader(t *testing.T) {
 	}
 
 	if f := q.Percentage(); f != 100.0 {
-		t.Errorf("Expected percentage after 10 bytes to be 100%, but got: %.0f%%", f)
+		t.Errorf("Expected percentage after 10 bytes to be 100%%, but got: %.0f%%", f)
 	}
 
 	// Read EOF

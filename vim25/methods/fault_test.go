@@ -57,6 +57,6 @@ func TestFaultDetail(t *testing.T) {
 	}
 
 	if _, ok := body.Fault.Detail.Fault.(types.InvalidLogin); !ok {
-		t.Fatal("Expected InvalidLogin, got: %#v", body.Fault.Detail.Fault)
+		t.Fatalf("Expected InvalidLogin, got: %#v", body.Fault.Detail.Fault)
 	}
 }
