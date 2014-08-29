@@ -155,7 +155,7 @@ func (cmd *ovf) Import(i importable) error {
 
 	if spec.Warning != nil {
 		for _, w := range spec.Warning {
-			fmt.Printf("Warning: %s\n", w.LocalizedMessage)
+			_, _ = cmd.Log(fmt.Sprintf("Warning: %s\n", w.LocalizedMessage))
 		}
 	}
 
