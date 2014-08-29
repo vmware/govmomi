@@ -23,7 +23,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/url"
-	"path/filepath"
 	"sync"
 	"time"
 
@@ -45,6 +44,8 @@ type ovf struct {
 	Datacenter   *govmomi.Datacenter
 	Datastore    *govmomi.Datastore
 	ResourcePool *govmomi.ResourcePool
+
+	Archive
 }
 
 func init() {
@@ -68,6 +69,8 @@ func (cmd *ovf) Run(f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+
+	cmd.Archive = &FileArchive{file}
 
 	return cmd.Import(file)
 }
@@ -105,10 +108,20 @@ func (cmd *ovf) Prepare(f *flag.FlagSet) (importable, error) {
 	return file, nil
 }
 
+func (cmd *ovf) ReadAll(name string) ([]byte, error) {
+	f, _, err := cmd.Open(name)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return ioutil.ReadAll(f)
+}
+
 func (cmd *ovf) Import(i importable) error {
 	c := cmd.Client
 
-	desc, err := ioutil.ReadFile(string(i))
+	desc, err := cmd.ReadAll(string(i))
 	if err != nil {
 		return err
 	}
@@ -142,7 +155,7 @@ func (cmd *ovf) Import(i importable) error {
 
 	if spec.Warning != nil {
 		for _, w := range spec.Warning {
-			fmt.Printf("Warning: %s\n", w.LocalizedMessage)
+			_, _ = cmd.Log(fmt.Sprintf("Warning: %s\n", w.LocalizedMessage))
 		}
 	}
 
@@ -184,14 +197,12 @@ func (cmd *ovf) Import(i importable) error {
 				continue
 			}
 
-			file := filepath.Join(i.Dir(), item.Path)
-
 			u, err := c.Client.ParseURL(device.Url)
 			if err != nil {
 				return err
 			}
 
-			err = cmd.nfcUpload(lease, file, u, item.Create)
+			err = cmd.Upload(lease, &item, u)
 			if err != nil {
 				return err
 			}
@@ -240,7 +251,15 @@ func (cmd *ovf) LeaseUpdater(lease *govmomi.HttpNfcLease, in <-chan vim25.Progre
 	return &wg
 }
 
-func (cmd *ovf) nfcUpload(lease *govmomi.HttpNfcLease, file string, u *url.URL, create bool) error {
+func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, item *types.OvfFileItem, u *url.URL) error {
+	file := item.Path
+
+	f, size, err := cmd.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
 	in := make(chan vim25.Progress)
 
 	out := make(chan vim25.Progress)
@@ -255,14 +274,15 @@ func (cmd *ovf) nfcUpload(lease *govmomi.HttpNfcLease, file string, u *url.URL, 
 	defer wg.Wait()  // .... 1) wait for Progress channel to close
 
 	opts := soap.Upload{
-		Type:       "application/x-vnd.vmware-streamVmdk",
-		Method:     "POST",
-		ProgressCh: in,
+		Type:          "application/x-vnd.vmware-streamVmdk",
+		Method:        "POST",
+		ProgressCh:    in,
+		ContentLength: size,
 	}
 
-	if create {
+	if item.Create {
 		opts.Method = "PUT"
 	}
 
-	return cmd.Client.Client.UploadFile(file, u, &opts)
+	return cmd.Client.Client.Upload(f, u, &opts)
 }
