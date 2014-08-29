@@ -211,9 +211,10 @@ func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
 }
 
 type Upload struct {
-	Type       string
-	Method     string
-	ProgressCh chan<- vim25.Progress
+	Type          string
+	Method        string
+	ContentLength int64
+	ProgressCh    chan<- vim25.Progress
 }
 
 var DefaultUpload = Upload{
@@ -221,13 +222,9 @@ var DefaultUpload = Upload{
 	Method: "PUT",
 }
 
-// UploadFile PUTs the local file to the given URL
-func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
+// Upload PUTs the local file to the given URL
+func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 	var err error
-
-	if param == nil {
-		param = &DefaultUpload
-	}
 
 	pr := progressReader{
 		ch: param.ProgressCh,
@@ -238,25 +235,14 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 		pr.Done(err)
 	}()
 
-	s, err := os.Stat(file)
-	if err != nil {
-		return err
-	}
-
-	f, err := os.Open(file)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
 	pr.r = f
-	pr.size = s.Size()
+	pr.size = param.ContentLength
 	req, err := http.NewRequest(param.Method, u.String(), &pr)
 	if err != nil {
 		return err
 	}
 
-	req.ContentLength = s.Size()
+	req.ContentLength = param.ContentLength
 	req.Header.Set("Content-Type", param.Type)
 
 	res, err := c.Client.Do(req)
@@ -272,6 +258,29 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 	}
 
 	return err
+}
+
+// UploadFile PUTs the local file to the given URL
+func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
+	if param == nil {
+		p := DefaultUpload // Copy since we set ContentLength
+		param = &p
+	}
+
+	s, err := os.Stat(file)
+	if err != nil {
+		return err
+	}
+
+	f, err := os.Open(file)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	param.ContentLength = s.Size()
+
+	return c.Upload(f, u, param)
 }
 
 type Download struct {
