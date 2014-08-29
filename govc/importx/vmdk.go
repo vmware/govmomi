@@ -14,24 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore
+package importx
 
 import (
-	"archive/tar"
-	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/url"
-	"os"
 	"path"
-	"path/filepath"
 	"reflect"
-	"strings"
-	"sync"
-	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -43,15 +33,14 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type import_ struct {
+type vmdk struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
-	*flags.SearchFlag
+	*flags.OutputFlag
 
-	upload  bool
-	import_ bool
-	force   bool
-	keep    bool
+	upload bool
+	force  bool
+	keep   bool
 
 	Client       *govmomi.Client
 	Datacenter   *govmomi.Datacenter
@@ -60,24 +49,19 @@ type import_ struct {
 }
 
 func init() {
-	i := &import_{
-		SearchFlag: flags.NewSearchFlag(flags.SearchHosts),
-	}
-
-	cli.Register("datastore.import", i)
+	cli.Register("import.vmdk", &vmdk{})
+	cli.Alias("import.vmdk", "datastore.import")
 }
 
-func (cmd *import_) Register(f *flag.FlagSet) {
+func (cmd *vmdk) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.upload, "upload", true, "Upload specified disk")
-	f.BoolVar(&cmd.import_, "import", true, "Import specified disk")
 	f.BoolVar(&cmd.force, "force", false, "Overwrite existing disk")
 	f.BoolVar(&cmd.keep, "keep", false, "Keep uploaded disk after import")
 }
 
-func (cmd *import_) Process() error { return nil }
+func (cmd *vmdk) Process() error { return nil }
 
-func (cmd *import_) Run(f *flag.FlagSet) error {
-	var fimport func(importable) error
+func (cmd *vmdk) Run(f *flag.FlagSet) error {
 	var err error
 
 	args := f.Args()
@@ -86,16 +70,6 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 	}
 
 	file := importable(f.Arg(0))
-	switch file.Ext() {
-	case ".vmdk":
-		fimport = cmd.ImportVMDK
-	case ".ovf":
-		fimport = cmd.ImportOVF
-	case ".ova":
-		fimport = cmd.ImportOVA
-	default:
-		return fmt.Errorf(`unknown type: %s`, file)
-	}
 
 	cmd.Client, err = cmd.DatastoreFlag.Client()
 	if err != nil {
@@ -117,21 +91,33 @@ func (cmd *import_) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.upload && !file.IsOvf() && !file.IsOva() {
+	if cmd.upload {
 		err = cmd.Upload(file)
 		if err != nil {
 			return err
 		}
 	}
 
-	if cmd.import_ {
-		return fimport(file)
+	return cmd.Import(file)
+}
+
+func (cmd *vmdk) Import(i importable) error {
+	err := cmd.Copy(i)
+	if err != nil {
+		return err
+	}
+
+	if !cmd.keep {
+		err = cmd.Delete(path.Dir(i.RemoteVMDK()))
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
 }
 
-func (cmd *import_) Upload(i importable) error {
+func (cmd *vmdk) Upload(i importable) error {
 	u, err := cmd.Datastore.URL(cmd.Client, cmd.Datacenter, i.RemoteVMDK())
 	if err != nil {
 		return err
@@ -149,23 +135,7 @@ func (cmd *import_) Upload(i importable) error {
 	return cmd.Client.Client.UploadFile(string(i), u, &p)
 }
 
-func (cmd *import_) ImportVMDK(i importable) error {
-	err := cmd.Copy(i)
-	if err != nil {
-		return err
-	}
-
-	if !cmd.keep {
-		err = cmd.Delete(path.Dir(i.RemoteVMDK()))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (cmd *import_) Copy(i importable) error {
+func (cmd *vmdk) Copy(i importable) error {
 	var err error
 
 	pa := util.NewProgressAggregator(1)
@@ -209,7 +179,7 @@ func (b basicProgressWrapper) Error() error {
 // CopyVirtualDisk can return a "<src> file does not exist" error while in fact
 // the source file *does* exist and the *destination* file also exist.
 //
-func (cmd *import_) PrepareDestination(i importable) error {
+func (cmd *vmdk) PrepareDestination(i importable) error {
 	b, err := cmd.Datastore.Browser(cmd.Client)
 	if err != nil {
 		return err
@@ -276,7 +246,7 @@ func (cmd *import_) PrepareDestination(i importable) error {
 	return task.Wait()
 }
 
-func (cmd *import_) CopyHostAgent(i importable, pa *util.ProgressAggregator) error {
+func (cmd *vmdk) CopyHostAgent(i importable, pa *util.ProgressAggregator) error {
 	pch := pa.NewChannel("preparing destination")
 	pch <- basicProgressWrapper{}
 	err := cmd.PrepareDestination(i)
@@ -309,7 +279,7 @@ func (cmd *import_) CopyHostAgent(i importable, pa *util.ProgressAggregator) err
 	return nil
 }
 
-func (cmd *import_) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) error {
+func (cmd *vmdk) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) error {
 	var err error
 
 	dstName := path.Dir(i.RemoteDst())
@@ -348,7 +318,7 @@ func (cmd *import_) CopyVirtualCenter(i importable, pa *util.ProgressAggregator)
 	return nil
 }
 
-func (cmd *import_) Move(src, dst string) error {
+func (cmd *vmdk) Move(src, dst string) error {
 	fm := cmd.Client.FileManager()
 	dsSrc := cmd.Datastore.Path(src)
 	dsDst := cmd.Datastore.Path(dst)
@@ -360,7 +330,7 @@ func (cmd *import_) Move(src, dst string) error {
 	return task.Wait()
 }
 
-func (cmd *import_) Delete(path string) error {
+func (cmd *vmdk) Delete(path string) error {
 	fm := cmd.Client.FileManager()
 	dsPath := cmd.Datastore.Path(path)
 	task, err := fm.DeleteDatastoreFile(dsPath, cmd.Datacenter)
@@ -371,7 +341,7 @@ func (cmd *import_) Delete(path string) error {
 	return task.Wait()
 }
 
-func (cmd *import_) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
+func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
 	folders, err := cmd.Datacenter.Folders(cmd.Client)
 	if err != nil {
 		return nil, err
@@ -390,7 +360,7 @@ func (cmd *import_) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) 
 	return govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference)), nil
 }
 
-func (cmd *import_) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.VirtualMachine, error) {
+func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.VirtualMachine, error) {
 	folders, err := cmd.Datacenter.Folders(cmd.Client)
 	if err != nil {
 		return nil, err
@@ -414,7 +384,7 @@ func (cmd *import_) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.V
 	return govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference)), nil
 }
 
-func (cmd *import_) DestroyVM(vm *govmomi.VirtualMachine) error {
+func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {
 	var mvm mo.VirtualMachine
 
 	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
@@ -446,258 +416,6 @@ func (cmd *import_) DestroyVM(vm *govmomi.VirtualMachine) error {
 	}
 
 	return nil
-}
-
-// LeaseUpdater consumes an Upload.Progress channel (in) used to update HttpNfcLeaseProgress.
-// Progress is forwarded to another channel (out), which can in turn be consumed by the ProgressLogger.
-func (cmd *import_) LeaseUpdater(lease *govmomi.HttpNfcLease, in <-chan vim25.Progress, out chan<- vim25.Progress) *sync.WaitGroup {
-	var wg sync.WaitGroup
-
-	go func() {
-		var p vim25.Progress
-		var ok bool
-		var err error
-		var percent int
-
-		tick := time.NewTicker(2 * time.Second)
-		defer tick.Stop()
-		defer wg.Done()
-
-		for ok = true; ok && err == nil; {
-			select {
-			case p, ok = <-in:
-				if !ok {
-					break
-				}
-				percent = int(p.Percentage())
-				err = p.Error()
-				out <- p // Forward to the ProgressLogger
-			case <-tick.C:
-				// From the vim api HttpNfcLeaseProgress(percent) doc, percent ==
-				// "Completion status represented as an integer in the 0-100 range."
-				// Always report the current value of percent,
-				// as it will renew the lease even if the value hasn't changed or is 0
-				err = lease.HttpNfcLeaseProgress(cmd.Client, percent)
-			}
-		}
-	}()
-
-	wg.Add(1)
-
-	return &wg
-}
-
-func (cmd *import_) nfcUpload(lease *govmomi.HttpNfcLease, file string, u *url.URL, create bool) error {
-	in := make(chan vim25.Progress)
-
-	out := make(chan vim25.Progress)
-
-	wg := cmd.LeaseUpdater(lease, in, out)
-
-	pwg := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", importable(file).Base()), out)
-
-	// defer queue is LIFO..
-	defer pwg.Wait() // .... 3) wait for ProgressLogger to return
-	defer close(out) // .... 2) propagate close to chained channel
-	defer wg.Wait()  // .... 1) wait for Progress channel to close
-
-	opts := soap.Upload{
-		Type:       "application/x-vnd.vmware-streamVmdk",
-		Method:     "POST",
-		ProgressCh: in,
-	}
-
-	if create {
-		opts.Method = "PUT"
-	}
-
-	return cmd.Client.Client.UploadFile(file, u, &opts)
-}
-
-func (cmd *import_) ImportOVF(i importable) error {
-	c := cmd.Client
-
-	desc, err := ioutil.ReadFile(string(i))
-	if err != nil {
-		return err
-	}
-
-	// extract name from .ovf for use as VM name
-	ovf := struct {
-		VirtualSystem struct {
-			Name string
-		}
-	}{}
-
-	if err := xml.Unmarshal(desc, &ovf); err != nil {
-		return fmt.Errorf("failed to parse ovf: %s", err.Error())
-	}
-
-	cisp := types.OvfCreateImportSpecParams{
-		EntityName: ovf.VirtualSystem.Name,
-		OvfManagerCommonParams: types.OvfManagerCommonParams{
-			Locale: "US",
-		},
-	}
-
-	spec, err := c.OvfManager().CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
-	if err != nil {
-		return err
-	}
-
-	if spec.Error != nil {
-		return errors.New(spec.Error[0].LocalizedMessage)
-	}
-
-	if spec.Warning != nil {
-		for _, w := range spec.Warning {
-			fmt.Printf("Warning: %s\n", w.LocalizedMessage)
-		}
-	}
-
-	// TODO: ImportSpec may have unitNumber==0, but this field is optional in the wsdl
-	// and hence omitempty in the struct tag; but unitNumber is required for certain devices.
-	s := &spec.ImportSpec.(*types.VirtualMachineImportSpec).ConfigSpec
-	for _, d := range s.DeviceChange {
-		n := &d.GetVirtualDeviceConfigSpec().Device.GetVirtualDevice().UnitNumber
-		if *n == 0 {
-			*n = -1
-		}
-	}
-
-	host, err := cmd.HostSystem()
-	if err != nil {
-		return err
-	}
-
-	// TODO: need a folder option
-	folders, err := cmd.Datacenter.Folders(c)
-	if err != nil {
-		return err
-	}
-	folder := &folders.VmFolder
-
-	lease, err := cmd.ResourcePool.ImportVApp(c, spec.ImportSpec, folder, host)
-	if err != nil {
-		return err
-	}
-
-	info, err := lease.Wait(c)
-	if err != nil {
-		return err
-	}
-
-	for _, device := range info.DeviceUrl {
-		for _, item := range spec.FileItem {
-			if device.ImportKey != item.DeviceId {
-				continue
-			}
-
-			file := filepath.Join(i.Dir(), item.Path)
-
-			u, err := c.Client.ParseURL(device.Url)
-			if err != nil {
-				return err
-			}
-
-			err = cmd.nfcUpload(lease, file, u, item.Create)
-			if err != nil {
-				return err
-			}
-		}
-	}
-
-	return lease.HttpNfcLeaseComplete(c)
-}
-
-// ImportOVA extracts a .ova file to a temporary directory,
-// then imports as it would a .ovf file.
-func (cmd *import_) ImportOVA(i importable) error {
-	var ovf importable
-
-	f, err := os.Open(string(i))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	dir, err := ioutil.TempDir("", "govc-")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(dir)
-
-	r := tar.NewReader(f)
-	for {
-		h, err := r.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		path := filepath.Join(dir, h.Name)
-		entry, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("Extracting %s...\n", h.Name)
-
-		if _, err := io.Copy(entry, r); err != nil {
-			_ = entry.Close()
-			return err
-		}
-
-		if err := entry.Close(); err != nil {
-			return err
-		}
-
-		if (importable(path)).IsOvf() {
-			ovf = importable(path)
-		}
-	}
-
-	return cmd.ImportOVF(ovf)
-}
-
-type importable string
-
-func (i importable) Ext() string {
-	return strings.ToLower(path.Ext(string(i)))
-}
-
-func (i importable) Base() string {
-	return path.Base(string(i))
-}
-
-func (i importable) Dir() string {
-	return path.Dir(string(i))
-}
-
-func (i importable) BaseClean() string {
-	b := path.Base(string(i))
-	e := path.Ext(string(i))
-	return b[:len(b)-len(e)]
-}
-
-func (i importable) RemoteVMDK() string {
-	bc := i.BaseClean()
-	return fmt.Sprintf("%s-vmdk/%s.vmdk", bc, bc)
-}
-
-func (i importable) RemoteDst() string {
-	bc := i.BaseClean()
-	return fmt.Sprintf("%s/%s.vmdk", bc, bc)
-}
-
-func (i importable) IsOvf() bool {
-	return i.Ext() == ".ovf"
-}
-
-func (i importable) IsOva() bool {
-	return i.Ext() == ".ova"
 }
 
 type configSpec types.VirtualMachineConfigSpec
