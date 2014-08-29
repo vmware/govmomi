@@ -51,7 +51,13 @@ to set defaults:
 
 ## Examples
 
-**TODO(PN)**: Fill in.
+* [Upload ssh public key to a VM](examples/lib/ssh.sh)
+
+* [Create and configure a vCenter VM](examples/vcsa.sh)
+
+## Projects using govc
+
+* [Kubernetes vSphere Provider](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/cluster/vsphere)
 
 ## License
 
