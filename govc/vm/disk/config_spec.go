@@ -14,24 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package main
+package disk
 
-import (
-	"os"
+import "github.com/vmware/govmomi/vim25/types"
 
-	"github.com/vmware/govmomi/govc/cli"
+type configSpec types.VirtualMachineConfigSpec
 
-	_ "github.com/vmware/govmomi/govc/about"
-	_ "github.com/vmware/govmomi/govc/datastore"
-	_ "github.com/vmware/govmomi/govc/host"
-	_ "github.com/vmware/govmomi/govc/importx"
-	_ "github.com/vmware/govmomi/govc/ls"
-	_ "github.com/vmware/govmomi/govc/version"
-	_ "github.com/vmware/govmomi/govc/vm"
-	_ "github.com/vmware/govmomi/govc/vm/disk"
-	_ "github.com/vmware/govmomi/govc/vm/guest"
-)
+func (c *configSpec) ToSpec() types.VirtualMachineConfigSpec {
+	return types.VirtualMachineConfigSpec(*c)
+}
 
-func main() {
-	os.Exit(cli.Run(os.Args[1:]))
+func (c *configSpec) AddChange(d types.BaseVirtualDeviceConfigSpec) {
+	c.DeviceChange = append(c.DeviceChange, d)
 }
