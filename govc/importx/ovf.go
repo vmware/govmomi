@@ -169,9 +169,11 @@ func (cmd *ovf) Import(i importable) error {
 		}
 	}
 
-	host, err := cmd.HostSystem()
-	if err != nil {
-		return err
+	var host *govmomi.HostSystem
+	if cmd.SearchFlag.IsSet() {
+		if host, err = cmd.HostSystem(); err != nil {
+			return err
+		}
 	}
 
 	// TODO: need a folder option
