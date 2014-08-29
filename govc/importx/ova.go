@@ -17,13 +17,8 @@ limitations under the License.
 package importx
 
 import (
-	"archive/tar"
 	"flag"
-	"fmt"
-	"io"
-	"io/ioutil"
-	"os"
-	"path/filepath"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 )
@@ -47,57 +42,14 @@ func (cmd *ova) Run(f *flag.FlagSet) error {
 		return err
 	}
 
+	cmd.Archive = &TapeArchive{file}
+
 	return cmd.Import(file)
 }
 
-// ImportOVA extracts a .ova file to a temporary directory,
-// then imports as it would a .ovf file.
 func (cmd *ova) Import(i importable) error {
-	var ovf importable
+	// basename i | sed -e s/\.ova$/.ovf/
+	ovf := strings.TrimSuffix(i.Base(), i.Ext()) + ".ovf"
 
-	f, err := os.Open(string(i))
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	dir, err := ioutil.TempDir("", "govc-")
-	if err != nil {
-		return err
-	}
-	defer os.RemoveAll(dir)
-
-	r := tar.NewReader(f)
-	for {
-		h, err := r.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return err
-		}
-
-		path := filepath.Join(dir, h.Name)
-		entry, err := os.Create(path)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("Extracting %s...\n", h.Name)
-
-		if _, err := io.Copy(entry, r); err != nil {
-			_ = entry.Close()
-			return err
-		}
-
-		if err := entry.Close(); err != nil {
-			return err
-		}
-
-		if filepath.Ext(path) == ".ovf" {
-			ovf = importable(path)
-		}
-	}
-
-	return cmd.ovf.Import(ovf)
+	return cmd.ovf.Import(importable(ovf))
 }
