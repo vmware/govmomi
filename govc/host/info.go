@@ -80,7 +80,7 @@ func (r *infoResult) Write(w io.Writer) error {
 	s := r.HostSystem.Summary
 	h := s.Hardware
 
-	tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 	fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
 	fmt.Fprintf(tw, "Manufacturer:\t%s\n", h.Vendor)
 	fmt.Fprintf(tw, "Logical CPUs:\t%d CPUs @ %dMHz\n", h.NumCpuPkgs*h.NumCpuCores*h.NumCpuThreads, h.CpuMhz)

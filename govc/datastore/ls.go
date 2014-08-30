@@ -83,7 +83,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 
 	res := info.Result.(types.HostDatastoreBrowserSearchResults)
 
-	tw := tabwriter.NewWriter(os.Stderr, 3, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
 
 	for _, file := range res.File {
 		info := file.GetFileInfo()
