@@ -45,7 +45,7 @@ func (cmd *about) Run(f *flag.FlagSet) error {
 	}
 	a := c.ServiceContent.About
 
-	tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 	fmt.Fprintf(tw, "Name:\t%s\n", a.Name)
 	fmt.Fprintf(tw, "Vendor:\t%s\n", a.Vendor)
 	fmt.Fprintf(tw, "Version:\t%s\n", a.Version)

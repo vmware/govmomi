@@ -83,13 +83,9 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 
 	res := info.Result.(types.HostDatastoreBrowserSearchResults)
 
-	tw := tabwriter.NewWriter(os.Stderr, 3, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
 
 	for _, file := range res.File {
-		if file == nil {
-			// TODO: a types.FileInfo has no xsi:type in the response
-			continue
-		}
 		info := file.GetFileInfo()
 		fmt.Fprintf(tw, "%d\t%s\t%s\n", info.FileSize, info.Modification.Format("Mon Jan 2 15:04:05 2006"), info.Path)
 	}

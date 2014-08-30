@@ -17,6 +17,7 @@ limitations under the License.
 package guest
 
 import (
+	"errors"
 	"flag"
 
 	"net/url"
@@ -59,4 +60,15 @@ func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {
 	}
 
 	return c.Client.ParseURL(urlStr)
+}
+
+func (flag *GuestFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
+	vm, err := flag.VirtualMachineFlag.VirtualMachine()
+	if err != nil {
+		return nil, err
+	}
+	if vm == nil {
+		return nil, errors.New("no vm specified")
+	}
+	return vm, nil
 }
