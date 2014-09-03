@@ -91,7 +91,7 @@ func (m GuestFileManager) DeleteDirectoryInGuest(vm *VirtualMachine, auth types.
 	return err
 }
 
-func (m GuestFileManager) DeleteFileInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication, filePath string, recursive bool) error {
+func (m GuestFileManager) DeleteFileInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication, filePath string) error {
 	req := types.DeleteFileInGuest{
 		This:     m.Reference(),
 		Vm:       vm.Reference(),
