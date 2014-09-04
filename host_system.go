@@ -25,3 +25,7 @@ type HostSystem struct {
 func (h HostSystem) Reference() types.ManagedObjectReference {
 	return h.ManagedObjectReference
 }
+
+func (h HostSystem) ConfigManager(c *Client) *HostConfigManager {
+	return &HostConfigManager{c, h}
+}
