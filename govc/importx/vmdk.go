@@ -180,53 +180,29 @@ func (b basicProgressWrapper) Error() error {
 // the source file *does* exist and the *destination* file also exist.
 //
 func (cmd *vmdk) PrepareDestination(i importable) error {
-	b, err := cmd.Datastore.Browser(cmd.Client)
-	if err != nil {
-		return err
-	}
-
 	vmdkPath := i.RemoteDst()
-	spec := types.HostDatastoreBrowserSearchSpec{
-		Details: &types.FileQueryFlags{
-			FileType:  true,
-			FileOwner: true, // TODO: omitempty is generated, but seems to be required
-		},
-		MatchPattern: []string{path.Base(vmdkPath)},
-	}
 
-	dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
-	task, err := b.SearchDatastore(cmd.Client, dsPath, &spec)
+	res, err := cmd.Stat(vmdkPath)
 	if err != nil {
-		return err
-	}
-
-	// Don't use progress aggregator here; an error may be a good thing.
-	info, err := task.WaitForResult(nil)
-	if err != nil {
-		if info.Error != nil {
-			_, ok := info.Error.Fault.(*types.FileNotFound)
-			if ok {
-				// FileNotFound means the base path doesn't exist. Create it.
-				dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
-				return cmd.Client.FileManager().MakeDirectory(dsPath, cmd.Datacenter, true)
-			}
+		switch err {
+		case flags.ErrDatastoreDirNotExist:
+			// The base path doesn't exist. Create it.
+			dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
+			return cmd.Client.FileManager().MakeDirectory(dsPath, cmd.Datacenter, true)
+		case flags.ErrDatastoreFileNotExist:
+			// Destination path doesn't exist; all good to continue with import.
+			return nil
 		}
 
 		return err
 	}
 
-	res := info.Result.(types.HostDatastoreBrowserSearchResults)
-	if len(res.File) == 0 {
-		// Destination path doesn't exist; all good to continue with import.
-		return nil
-	}
-
 	// Check that the returned entry has the right type.
-	switch res.File[0].(type) {
+	switch res.(type) {
 	case *types.VmDiskFileInfo:
 	default:
 		expected := "VmDiskFileInfo"
-		actual := reflect.TypeOf(res.File[0])
+		actual := reflect.TypeOf(res)
 		panic(fmt.Sprintf("Expected: %s, actual: %s", expected, actual))
 	}
 
@@ -238,7 +214,7 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 
 	// Delete existing disk.
 	vdm := cmd.Client.VirtualDiskManager()
-	task, err = vdm.DeleteVirtualDisk(cmd.Datastore.Path(vmdkPath), cmd.Datacenter)
+	task, err := vdm.DeleteVirtualDisk(cmd.Datastore.Path(vmdkPath), cmd.Datacenter)
 	if err != nil {
 		return err
 	}

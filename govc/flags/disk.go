@@ -123,6 +123,11 @@ func (f *DiskFlag) Disk() (*types.VirtualDisk, error) {
 		return nil, err
 	}
 
+	_, err = f.Stat(f.name)
+	if err != nil {
+		return nil, err
+	}
+
 	disk := &types.VirtualDisk{
 		VirtualDevice: types.VirtualDevice{
 			Key:           -1,
