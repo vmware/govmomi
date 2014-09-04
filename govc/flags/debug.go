@@ -20,6 +20,7 @@ import (
 	"flag"
 	"os"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/vmware/govmomi/vim25/debug"
@@ -30,7 +31,16 @@ type DebugFlag struct {
 }
 
 func (flag *DebugFlag) Register(f *flag.FlagSet) {
-	f.BoolVar(&flag.enable, "debug", false, "Store debug logs")
+	var enable bool
+
+	switch env := strings.ToLower(os.Getenv("GOVC_DEBUG")); env {
+	case "", "0", "false":
+		enable = false
+	default:
+		enable = true
+	}
+
+	f.BoolVar(&flag.enable, "debug", enable, "Store debug logs")
 }
 
 func (flag *DebugFlag) Process() error {
