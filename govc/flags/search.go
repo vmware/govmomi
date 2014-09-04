@@ -288,3 +288,17 @@ func (flag *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
 
 	return host, nil
 }
+
+func (flag *SearchFlag) HostNetworkSystem() (*govmomi.HostNetworkSystem, error) {
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	host, err := flag.HostSystem()
+	if err != nil {
+		return nil, err
+	}
+
+	return host.ConfigManager(c).NetworkSystem()
+}
