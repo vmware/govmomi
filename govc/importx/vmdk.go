@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path"
 	"reflect"
+	"regexp"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -91,6 +92,11 @@ func (cmd *vmdk) Run(f *flag.FlagSet) error {
 		return err
 	}
 
+	err = cmd.PrepareDestination(file)
+	if err != nil {
+		return err
+	}
+
 	if cmd.upload {
 		err = cmd.Upload(file)
 		if err != nil {
@@ -101,77 +107,6 @@ func (cmd *vmdk) Run(f *flag.FlagSet) error {
 	return cmd.Import(file)
 }
 
-func (cmd *vmdk) Import(i importable) error {
-	err := cmd.Copy(i)
-	if err != nil {
-		return err
-	}
-
-	if !cmd.keep {
-		err = cmd.Delete(path.Dir(i.RemoteVMDK()))
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (cmd *vmdk) Upload(i importable) error {
-	u, err := cmd.Datastore.URL(cmd.Client, cmd.Datacenter, i.RemoteVMDK())
-	if err != nil {
-		return err
-	}
-
-	p := soap.DefaultUpload
-	if cmd.OutputFlag.TTY {
-		ch := make(chan vim25.Progress)
-		wg := cmd.ProgressLogger("Uploading... ", ch)
-		defer wg.Wait()
-
-		p.ProgressCh = ch
-	}
-
-	return cmd.Client.Client.UploadFile(string(i), u, &p)
-}
-
-func (cmd *vmdk) Copy(i importable) error {
-	var err error
-
-	pa := util.NewProgressAggregator(1)
-	wg := cmd.ProgressLogger("Importing... ", pa.C)
-	switch p := cmd.Client.ServiceContent.About.ApiType; p {
-	case "HostAgent":
-		err = cmd.CopyHostAgent(i, pa)
-	case "VirtualCenter":
-		err = cmd.CopyVirtualCenter(i, pa)
-	default:
-		return fmt.Errorf("unsupported product line: %s", p)
-	}
-
-	pa.Done()
-	wg.Wait()
-
-	return err
-}
-
-type basicProgressWrapper struct {
-	detail string
-	err    error
-}
-
-func (b basicProgressWrapper) Percentage() float32 {
-	return 0.0
-}
-
-func (b basicProgressWrapper) Detail() string {
-	return b.detail
-}
-
-func (b basicProgressWrapper) Error() error {
-	return b.err
-}
-
 // PrepareDestination makes sure that the destination VMDK does not yet exist.
 // If the force flag is passed, it removes the existing VMDK. This functions
 // exists to give a meaningful error if the remote VMDK already exists.
@@ -180,8 +115,7 @@ func (b basicProgressWrapper) Error() error {
 // the source file *does* exist and the *destination* file also exist.
 //
 func (cmd *vmdk) PrepareDestination(i importable) error {
-	vmdkPath := i.RemoteDst()
-
+	vmdkPath := i.RemoteDstVMDK()
 	res, err := cmd.Stat(vmdkPath)
 	if err != nil {
 		switch err {
@@ -213,40 +147,84 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 	}
 
 	// Delete existing disk.
-	vdm := cmd.Client.VirtualDiskManager()
-	task, err := vdm.DeleteVirtualDisk(cmd.Datastore.Path(vmdkPath), cmd.Datacenter)
+	err = cmd.DeleteDisk(vmdkPath)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait()
+	return nil
+}
+
+func (cmd *vmdk) Upload(i importable) error {
+	u, err := cmd.Datastore.URL(cmd.Client, cmd.Datacenter, i.RemoteSrcVMDK())
+	if err != nil {
+		return err
+	}
+
+	p := soap.DefaultUpload
+	if cmd.OutputFlag.TTY {
+		ch := make(chan vim25.Progress)
+		wg := cmd.ProgressLogger("Uploading... ", ch)
+		defer wg.Wait()
+
+		p.ProgressCh = ch
+	}
+
+	return cmd.Client.Client.UploadFile(string(i), u, &p)
+}
+
+func (cmd *vmdk) Import(i importable) error {
+	err := cmd.Copy(i)
+	if err != nil {
+		return err
+	}
+
+	if !cmd.keep {
+		err = cmd.DeleteDisk(i.RemoteSrcVMDK())
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (cmd *vmdk) Copy(i importable) error {
+	var err error
+
+	pa := util.NewProgressAggregator(1)
+	wg := cmd.ProgressLogger("Importing... ", pa.C)
+	switch p := cmd.Client.ServiceContent.About.ApiType; p {
+	case "HostAgent":
+		err = cmd.CopyHostAgent(i, pa)
+	case "VirtualCenter":
+		err = cmd.CopyVirtualCenter(i, pa)
+	default:
+		return fmt.Errorf("unsupported ApiType: %s", p)
+	}
+
+	pa.Done()
+	wg.Wait()
+
+	return err
 }
 
 func (cmd *vmdk) CopyHostAgent(i importable, pa *util.ProgressAggregator) error {
-	pch := pa.NewChannel("preparing destination")
-	pch <- basicProgressWrapper{}
-	err := cmd.PrepareDestination(i)
-	pch <- basicProgressWrapper{err: err}
-	close(pch)
-	if err != nil {
-		return err
-	}
-
 	spec := &types.VirtualDiskSpec{
 		AdapterType: "lsiLogic",
 		DiskType:    "thin",
 	}
 
 	dc := cmd.Datacenter
-	src := cmd.Datastore.Path(i.RemoteVMDK())
-	dst := cmd.Datastore.Path(i.RemoteDst())
+	src := cmd.Datastore.Path(i.RemoteSrcVMDK())
+	dst := cmd.Datastore.Path(i.RemoteDstVMDK())
 	vdm := cmd.Client.VirtualDiskManager()
 	task, err := vdm.CopyVirtualDisk(src, dc, dst, dc, spec, false)
 	if err != nil {
 		return err
 	}
 
-	pch = pa.NewChannel("copying disk")
+	pch := pa.NewChannel("copying disk")
 	_, err = task.WaitForResult(pch)
 	if err != nil {
 		return err
@@ -258,8 +236,8 @@ func (cmd *vmdk) CopyHostAgent(i importable, pa *util.ProgressAggregator) error 
 func (cmd *vmdk) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) error {
 	var err error
 
-	dstName := path.Dir(i.RemoteDst())
-	srcName := dstName + "-src"
+	srcName := i.BaseClean() + "-srcvm"
+	dstName := i.BaseClean() + "-dstvm"
 
 	spec := &configSpec{
 		Name:    srcName,
@@ -269,7 +247,7 @@ func (cmd *vmdk) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) er
 		},
 	}
 
-	spec.AddDisk(cmd.Datastore, i.RemoteVMDK())
+	spec.AddDisk(cmd.Datastore, i.RemoteSrcVMDK())
 
 	src, err := cmd.CreateVM(spec)
 	if err != nil {
@@ -286,6 +264,16 @@ func (cmd *vmdk) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) er
 		return err
 	}
 
+	vmdk, err := cmd.DetachDisk(dst)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.MoveDisk(vmdk, i.RemoteDstVMDK())
+	if err != nil {
+		return err
+	}
+
 	err = cmd.DestroyVM(dst)
 	if err != nil {
 		return err
@@ -294,11 +282,11 @@ func (cmd *vmdk) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) er
 	return nil
 }
 
-func (cmd *vmdk) Move(src, dst string) error {
-	fm := cmd.Client.FileManager()
+func (cmd *vmdk) MoveDisk(src, dst string) error {
 	dsSrc := cmd.Datastore.Path(src)
 	dsDst := cmd.Datastore.Path(dst)
-	task, err := fm.MoveDatastoreFile(dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
+	vdm := cmd.Client.VirtualDiskManager()
+	task, err := vdm.MoveVirtualDisk(dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
 	if err != nil {
 		return err
 	}
@@ -306,15 +294,38 @@ func (cmd *vmdk) Move(src, dst string) error {
 	return task.Wait()
 }
 
-func (cmd *vmdk) Delete(path string) error {
-	fm := cmd.Client.FileManager()
-	dsPath := cmd.Datastore.Path(path)
-	task, err := fm.DeleteDatastoreFile(dsPath, cmd.Datacenter)
+func (cmd *vmdk) DeleteDisk(path string) error {
+	vdm := cmd.Client.VirtualDiskManager()
+	task, err := vdm.DeleteVirtualDisk(cmd.Datastore.Path(path), cmd.Datacenter)
 	if err != nil {
 		return err
 	}
 
 	return task.Wait()
+}
+
+func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
+	var mvm mo.VirtualMachine
+
+	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
+	if err != nil {
+		return "", err
+	}
+
+	spec := new(configSpec)
+	dsFile := spec.RemoveDisk(&mvm)
+
+	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
+	if err != nil {
+		return "", err
+	}
+
+	err = task.Wait()
+	if err != nil {
+		return "", err
+	}
+
+	return dsFile, nil
 }
 
 func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
@@ -361,27 +372,12 @@ func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.Virt
 }
 
 func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {
-	var mvm mo.VirtualMachine
-
-	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
+	_, err := cmd.DetachDisk(vm)
 	if err != nil {
 		return err
 	}
 
-	spec := new(configSpec)
-	spec.RemoveDisks(&mvm)
-
-	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
-	if err != nil {
-		return err
-	}
-
-	err = task.Wait()
-	if err != nil {
-		return err
-	}
-
-	task, err = vm.Destroy(cmd.Client)
+	task, err := vm.Destroy(cmd.Client)
 	if err != nil {
 		return err
 	}
@@ -447,10 +443,41 @@ func (c *configSpec) AddDisk(ds *govmomi.Datastore, path string) {
 	c.AddChange(diskSpec)
 }
 
-func (c *configSpec) RemoveDisks(vm *mo.VirtualMachine) {
+var dsPathRegexp = regexp.MustCompile(`^\[.*\] (.*)$`)
+
+func (c *configSpec) RemoveDisk(vm *mo.VirtualMachine) string {
+	var file string
+
 	for _, d := range vm.Config.Hardware.Device {
 		switch device := d.(type) {
 		case *types.VirtualDisk:
+			if file != "" {
+				panic("expected VM to have only one disk")
+			}
+
+			switch backing := device.Backing.(type) {
+			case *types.VirtualDiskFlatVer1BackingInfo:
+				file = backing.FileName
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				file = backing.FileName
+			case *types.VirtualDiskSeSparseBackingInfo:
+				file = backing.FileName
+			case *types.VirtualDiskSparseVer1BackingInfo:
+				file = backing.FileName
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				file = backing.FileName
+			default:
+				name := reflect.TypeOf(device.Backing).String()
+				panic(fmt.Sprintf("unexpected backing type: %s", name))
+			}
+
+			// Remove [datastore] prefix
+			m := dsPathRegexp.FindStringSubmatch(file)
+			if len(m) != 2 {
+				panic(fmt.Sprintf("expected regexp match for %#v", file))
+			}
+			file = m[1]
+
 			removeOp := &types.VirtualDeviceConfigSpec{
 				Operation: types.VirtualDeviceConfigSpecOperationRemove,
 				Device:    device,
@@ -459,4 +486,6 @@ func (c *configSpec) RemoveDisks(vm *mo.VirtualMachine) {
 			c.AddChange(removeOp)
 		}
 	}
+
+	return file
 }
