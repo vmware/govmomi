@@ -41,6 +41,7 @@ type create struct {
 	guestID string
 	link    bool
 	on      bool
+	force   bool
 
 	Client       *govmomi.Client
 	Datacenter   *govmomi.Datacenter
@@ -59,6 +60,7 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
 	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
+	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
 }
 
 func (cmd *create) Process() error { return nil }
@@ -134,6 +136,16 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", cmd.Datastore.Name())},
 		NumCPUs:  cmd.cpus,
 		MemoryMB: int64(cmd.memory),
+	}
+
+	if !cmd.force {
+		vmxPath := fmt.Sprintf("%s/%s.vmx", name, name)
+
+		_, err := cmd.Stat(vmxPath)
+		if err == nil {
+			dsPath := cmd.Datastore.Path(vmxPath)
+			return nil, fmt.Errorf("File %s already exists", dsPath)
+		}
 	}
 
 	if cmd.DiskFlag.IsSet() {
