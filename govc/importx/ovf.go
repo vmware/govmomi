@@ -22,9 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"net/url"
-	"sync"
-	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -193,6 +190,10 @@ func (cmd *ovf) Import(i importable) error {
 		return err
 	}
 
+	// Build slice of items and URLs first, so that the lease updater can know
+	// about every item that needs to be uploaded, and thereby infer progress.
+	var items []ovfFileItem
+
 	for _, device := range info.DeviceUrl {
 		for _, item := range spec.FileItem {
 			if device.ImportKey != item.DeviceId {
@@ -204,56 +205,50 @@ func (cmd *ovf) Import(i importable) error {
 				return err
 			}
 
-			err = cmd.Upload(lease, &item, u)
-			if err != nil {
-				return err
+			i := ovfFileItem{
+				url:  u,
+				item: item,
+				ch:   make(chan vim25.Progress),
 			}
+
+			items = append(items, i)
+		}
+	}
+
+	u := newLeaseUpdater(cmd.Client, lease, items)
+	defer u.Done()
+
+	for _, i := range items {
+		err = cmd.Upload(lease, i)
+		if err != nil {
+			return err
 		}
 	}
 
 	return lease.HttpNfcLeaseComplete(c)
 }
 
-// LeaseUpdater consumes an Upload.Progress channel (in) used to update HttpNfcLeaseProgress.
-// Progress is forwarded to another channel (out), which can in turn be consumed by the ProgressLogger.
-func (cmd *ovf) LeaseUpdater(lease *govmomi.HttpNfcLease, in <-chan vim25.Progress, out chan<- vim25.Progress) *sync.WaitGroup {
-	var wg sync.WaitGroup
-
+// ProgressTee is like Unix tee, but for vim25.Progress structs.
+func ProgressTee(in <-chan vim25.Progress, out1, out2 chan<- vim25.Progress) {
 	go func() {
-		var p vim25.Progress
-		var ok bool
-		var err error
-		var percent int
-
-		tick := time.NewTicker(2 * time.Second)
-		defer tick.Stop()
-		defer wg.Done()
-
-		for ok = true; ok && err == nil; {
+		for {
 			select {
-			case p, ok = <-in:
+			case p, ok := <-in:
 				if !ok {
-					break
+					close(out1)
+					close(out2)
+					return
 				}
-				percent = int(p.Percentage())
-				err = p.Error()
-				out <- p // Forward to the ProgressLogger
-			case <-tick.C:
-				// From the vim api HttpNfcLeaseProgress(percent) doc, percent ==
-				// "Completion status represented as an integer in the 0-100 range."
-				// Always report the current value of percent,
-				// as it will renew the lease even if the value hasn't changed or is 0
-				err = lease.HttpNfcLeaseProgress(cmd.Client, percent)
+
+				out1 <- p
+				out2 <- p
 			}
 		}
 	}()
-
-	wg.Add(1)
-
-	return &wg
 }
 
-func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, item *types.OvfFileItem, u *url.URL) error {
+func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
+	item := ofi.item
 	file := item.Path
 
 	f, size, err := cmd.Open(file)
@@ -263,17 +258,13 @@ func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, item *types.OvfFileItem, u *
 	defer f.Close()
 
 	in := make(chan vim25.Progress)
-
 	out := make(chan vim25.Progress)
 
-	wg := cmd.LeaseUpdater(lease, in, out)
+	// Forward progress to item channel
+	ProgressTee(in, out, ofi.ch)
 
 	pwg := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", importable(file).Base()), out)
-
-	// defer queue is LIFO..
-	defer pwg.Wait() // .... 3) wait for ProgressLogger to return
-	defer close(out) // .... 2) propagate close to chained channel
-	defer wg.Wait()  // .... 1) wait for Progress channel to close
+	defer pwg.Wait()
 
 	opts := soap.Upload{
 		Type:          "application/x-vnd.vmware-streamVmdk",
@@ -286,5 +277,5 @@ func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, item *types.OvfFileItem, u *
 		opts.Method = "PUT"
 	}
 
-	return cmd.Client.Client.Upload(f, u, &opts)
+	return cmd.Client.Client.Upload(f, ofi.url, &opts)
 }
