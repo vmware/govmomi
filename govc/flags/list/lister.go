@@ -51,6 +51,8 @@ func ToElement(r govmomi.Reference, prefix string) Element {
 		name = m.Name
 	case mo.ResourcePool:
 		name = m.Name
+	case mo.ClusterComputeResource:
+		name = m.Name
 	default:
 		panic("not implemented for type " + reflect.TypeOf(r).String())
 	}
@@ -74,7 +76,9 @@ func traversable(ref types.ManagedObjectReference) bool {
 	switch ref.Type {
 	case "Folder":
 	case "Datacenter":
-	case "ComputeResource":
+	case "ComputeResource", "ClusterComputeResource":
+		// Treat ComputeResource and ClusterComputeResource as one and the same.
+		// It doesn't matter from the perspective of the lister.
 	default:
 		return false
 	}
@@ -88,7 +92,9 @@ func (l Lister) List() ([]Element, error) {
 		return l.ListFolder()
 	case "Datacenter":
 		return l.ListDatacenter()
-	case "ComputeResource":
+	case "ComputeResource", "ClusterComputeResource":
+		// Treat ComputeResource and ClusterComputeResource as one and the same.
+		// It doesn't matter from the perspective of the lister.
 		return l.ListComputeResource()
 	default:
 		return nil, fmt.Errorf("cannot traverse type " + l.Reference.Type)
@@ -119,6 +125,7 @@ func (l Lister) ListFolder() ([]Element, error) {
 		"VirtualMachine",
 		"Network",
 		"ComputeResource",
+		"ClusterComputeResource",
 		"Datastore",
 	}
 
@@ -134,7 +141,10 @@ func (l Lister) ListFolder() ([]Element, error) {
 
 			// Additional basic properties.
 			switch t {
-			case "ComputeResource":
+			case "ComputeResource", "ClusterComputeResource":
+				// The ComputeResource and ClusterComputeResource are dereferenced in
+				// the ResourcePoolFlag. Make sure they always have their resourcePool
+				// field populated.
 				pspec.PathSet = append(pspec.PathSet, "resourcePool")
 			}
 		}
