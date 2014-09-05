@@ -51,24 +51,25 @@ var cn uint64 // Client counter
 type Client struct {
 	http.Client
 
-	u url.URL
+	u        url.URL
+	insecure bool
 
 	cn  uint64         // Client counter
 	rn  uint64         // Request counter
 	log io.WriteCloser // Request log
 }
 
-func NewClient(u url.URL) *Client {
-
+func NewClient(u url.URL, insecure bool) *Client {
 	c := Client{
-		u: u,
+		u:        u,
+		insecure: insecure,
 
 		cn: atomic.AddUint64(&cn, 1),
 		rn: 0,
 	}
 
 	if c.u.Scheme == "https" {
-		c.Client.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: true}}
+		c.Client.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: c.insecure}}
 	}
 
 	c.Jar, _ = cookiejar.New(nil)
@@ -86,14 +87,16 @@ func (c *Client) URL() url.URL {
 }
 
 type marshaledClient struct {
-	Cookies []*http.Cookie
-	URL     *url.URL
+	Cookies  []*http.Cookie
+	URL      *url.URL
+	Insecure bool
 }
 
 func (c *Client) MarshalJSON() ([]byte, error) {
 	m := marshaledClient{
-		Cookies: c.Jar.Cookies(&c.u),
-		URL:     &c.u,
+		Cookies:  c.Jar.Cookies(&c.u),
+		URL:      &c.u,
+		Insecure: c.insecure,
 	}
 
 	return json.Marshal(m)
@@ -107,7 +110,7 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*c = *NewClient(*m.URL)
+	*c = *NewClient(*m.URL, m.Insecure)
 	c.Jar.SetCookies(m.URL, m.Cookies)
 
 	return nil

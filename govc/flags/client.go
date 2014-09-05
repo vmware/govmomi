@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"strings"
 	"sync"
 
 	"github.com/vmware/govmomi"
@@ -36,7 +37,9 @@ type ClientFlag struct {
 	*DebugFlag
 
 	register sync.Once
+
 	url      *url.URL
+	insecure bool
 	client   *govmomi.Client
 }
 
@@ -65,7 +68,15 @@ func (flag *ClientFlag) Set(s string) error {
 func (flag *ClientFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
 		flag.Set(os.Getenv("GOVC_URL"))
-		f.Var(flag, "u", cDescr)
+		f.Var(flag, "u", cDescr+" [GOVC_URL]")
+
+		insecure := false
+		switch env := strings.ToLower(os.Getenv("GOVC_INSECURE")); env {
+		case "1", "true":
+			insecure = true
+		}
+
+		f.BoolVar(&flag.insecure, "k", insecure, "Skip verification of server certificate [GOVC_INSECURE]")
 	})
 }
 
@@ -78,7 +89,7 @@ func (flag *ClientFlag) Process() error {
 }
 
 func (flag *ClientFlag) sessionFile() string {
-	file := fmt.Sprintf("%s@%s", flag.url.User.Username(), flag.url.Host)
+	file := fmt.Sprintf("%s@%s?insecure=%t", flag.url.User.Username(), flag.url.Host, flag.insecure)
 	return path.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
 }
 
@@ -106,7 +117,7 @@ func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
 }
 
 func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
-	c, err := govmomi.NewClient(*flag.url)
+	c, err := govmomi.NewClient(*flag.url, flag.insecure)
 	if err != nil {
 		return nil, err
 	}

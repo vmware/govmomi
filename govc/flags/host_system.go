@@ -42,7 +42,7 @@ func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchHosts)
 
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "host", os.Getenv("GOVC_HOST"), "Host system")
+		f.StringVar(&flag.name, "host", os.Getenv("GOVC_HOST"), "Host system [GOVC_HOST]")
 	})
 }
 

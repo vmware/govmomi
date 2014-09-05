@@ -36,7 +36,7 @@ type ResourcePoolFlag struct {
 
 func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "pool", os.Getenv("GOVC_RESOURCE_POOL"), "Resource Pool")
+		f.StringVar(&flag.name, "pool", os.Getenv("GOVC_RESOURCE_POOL"), "Resource Pool [GOVC_RESOURCE_POOL]")
 	})
 }
 

@@ -40,7 +40,7 @@ func (flag *DebugFlag) Register(f *flag.FlagSet) {
 		enable = true
 	}
 
-	f.BoolVar(&flag.enable, "debug", enable, "Store debug logs")
+	f.BoolVar(&flag.enable, "debug", enable, "Store debug logs [GOVC_DEBUG]")
 }
 
 func (flag *DebugFlag) Process() error {
