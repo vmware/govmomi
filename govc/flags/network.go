@@ -20,7 +20,6 @@ import (
 	"errors"
 	"flag"
 	"os"
-	"sync"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/types"
@@ -29,18 +28,28 @@ import (
 type NetworkFlag struct {
 	*DatacenterFlag
 
-	register sync.Once
-	name     string
-	net      *govmomi.Network
+	name string
+	net  *govmomi.Network
 }
 
-func (flag *NetworkFlag) Register(f *flag.FlagSet) {
-	flag.register.Do(func() {
-		f.StringVar(&flag.name, "net", os.Getenv("GOVC_NETWORK"), "Network")
-	})
+func NewNetworkFlag() *NetworkFlag {
+	f := &NetworkFlag{}
+	_ = f.Set(os.Getenv("GOVC_NETWORK"))
+	return f
 }
+
+func (flag *NetworkFlag) Register(f *flag.FlagSet) {}
 
 func (flag *NetworkFlag) Process() error {
+	return nil
+}
+
+func (flag *NetworkFlag) String() string {
+	return flag.name
+}
+
+func (flag *NetworkFlag) Set(name string) error {
+	flag.name = name
 	return nil
 }
 
