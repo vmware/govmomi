@@ -16,16 +16,25 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/mo"
+)
 
-type HostSystem struct {
-	types.ManagedObjectReference
+type HostConfigManager struct {
+	c *Client
+	h HostSystem
 }
 
-func (h HostSystem) Reference() types.ManagedObjectReference {
-	return h.ManagedObjectReference
-}
+func (m HostConfigManager) NetworkSystem() (*HostNetworkSystem, error) {
+	var h mo.HostSystem
 
-func (h HostSystem) ConfigManager(c *Client) *HostConfigManager {
-	return &HostConfigManager{c, h}
+	err := m.c.Properties(m.h.Reference(), []string{"configManager.networkSystem"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return &HostNetworkSystem{
+		ManagedObjectReference: *h.ConfigManager.NetworkSystem,
+		c: m.c,
+	}, nil
 }

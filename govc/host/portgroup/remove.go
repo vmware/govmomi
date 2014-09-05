@@ -14,18 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
+package portgroup
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"flag"
 
-type HostSystem struct {
-	types.ManagedObjectReference
+	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
+)
+
+type remove struct {
+	*flags.SearchFlag
 }
 
-func (h HostSystem) Reference() types.ManagedObjectReference {
-	return h.ManagedObjectReference
+func init() {
+	cli.Register("host.portgroup.remove", &remove{})
 }
 
-func (h HostSystem) ConfigManager(c *Client) *HostConfigManager {
-	return &HostConfigManager{c, h}
+func (cmd *remove) Register(f *flag.FlagSet) {
+	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchHosts)
+}
+
+func (cmd *remove) Process() error { return nil }
+
+func (cmd *remove) Run(f *flag.FlagSet) error {
+	ns, err := cmd.HostNetworkSystem()
+	if err != nil {
+		return err
+	}
+
+	return ns.RemovePortGroup(f.Arg(0))
 }
