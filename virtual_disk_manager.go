@@ -57,6 +57,36 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 	return NewTask(m.c, res.Returnval), nil
 }
 
+// MoveVirtualDisk moves a virtual disk.
+func (m VirtualDiskManager) MoveVirtualDisk(
+	sourceName string, sourceDatacenter *Datacenter,
+	destName string, destDatacenter *Datacenter,
+	force bool) (*Task, error) {
+	req := types.MoveVirtualDisk_Task{
+		This:       *m.c.ServiceContent.VirtualDiskManager,
+		SourceName: sourceName,
+		DestName:   destName,
+		Force:      force,
+	}
+
+	if sourceDatacenter != nil {
+		ref := sourceDatacenter.Reference()
+		req.SourceDatacenter = &ref
+	}
+
+	if destDatacenter != nil {
+		ref := destDatacenter.Reference()
+		req.DestDatacenter = &ref
+	}
+
+	res, err := methods.MoveVirtualDisk_Task(m.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(m.c, res.Returnval), nil
+}
+
 // DeleteVirtualDisk deletes a virtual disk.
 func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteVirtualDisk_Task{

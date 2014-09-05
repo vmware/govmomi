@@ -42,12 +42,12 @@ func (i importable) BaseClean() string {
 	return b[:len(b)-len(e)]
 }
 
-func (i importable) RemoteVMDK() string {
+func (i importable) RemoteSrcVMDK() string {
 	bc := i.BaseClean()
-	return fmt.Sprintf("%s-vmdk/%s.vmdk", bc, bc)
+	return fmt.Sprintf("%s-src.vmdk", bc)
 }
 
-func (i importable) RemoteDst() string {
+func (i importable) RemoteDstVMDK() string {
 	bc := i.BaseClean()
-	return fmt.Sprintf("%s/%s.vmdk", bc, bc)
+	return fmt.Sprintf("%s.vmdk", bc)
 }
