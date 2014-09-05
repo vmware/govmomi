@@ -20,6 +20,7 @@ import (
 	"archive/tar"
 	"io"
 	"os"
+	"path"
 	"path/filepath"
 )
 
@@ -28,7 +29,7 @@ type Archive interface {
 }
 
 type TapeArchive struct {
-	name importable
+	path string
 }
 
 type TapeArchiveEntry struct {
@@ -41,7 +42,7 @@ func (t *TapeArchiveEntry) Close() error {
 }
 
 func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
-	f, err := os.Open(string(t.name))
+	f, err := os.Open(t.path)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -66,22 +67,22 @@ func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
 }
 
 type FileArchive struct {
-	name importable
+	path string
 }
 
 func (t *FileArchive) Open(name string) (io.ReadCloser, int64, error) {
-	path := name
+	fpath := name
 
-	if !filepath.IsAbs(path) {
-		path = filepath.Join(t.name.Dir(), name)
+	if !filepath.IsAbs(fpath) {
+		fpath = filepath.Join(path.Dir(t.path), name)
 	}
 
-	s, err := os.Stat(path)
+	s, err := os.Stat(fpath)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	f, err := os.Open(path)
+	f, err := os.Open(fpath)
 	if err != nil {
 		return nil, 0, err
 	}

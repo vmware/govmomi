@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"path"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -72,15 +73,13 @@ func (cmd *ovf) Run(f *flag.FlagSet) error {
 	return cmd.Import(file)
 }
 
-func (cmd *ovf) Prepare(f *flag.FlagSet) (importable, error) {
+func (cmd *ovf) Prepare(f *flag.FlagSet) (string, error) {
 	var err error
 
 	args := f.Args()
 	if len(args) != 1 {
 		return "", errors.New("no file to import")
 	}
-
-	file := importable(f.Arg(0))
 
 	cmd.Client, err = cmd.DatastoreFlag.Client()
 	if err != nil {
@@ -102,7 +101,7 @@ func (cmd *ovf) Prepare(f *flag.FlagSet) (importable, error) {
 		return "", err
 	}
 
-	return file, nil
+	return f.Arg(0), nil
 }
 
 func (cmd *ovf) ReadAll(name string) ([]byte, error) {
@@ -115,10 +114,10 @@ func (cmd *ovf) ReadAll(name string) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
-func (cmd *ovf) Import(i importable) error {
+func (cmd *ovf) Import(fpath string) error {
 	c := cmd.Client
 
-	desc, err := cmd.ReadAll(string(i))
+	desc, err := cmd.ReadAll(fpath)
 	if err != nil {
 		return err
 	}
@@ -263,7 +262,7 @@ func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
 	// Forward progress to item channel
 	ProgressTee(in, out, ofi.ch)
 
-	pwg := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", importable(file).Base()), out)
+	pwg := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", path.Base(file)), out)
 	defer pwg.Wait()
 
 	opts := soap.Upload{
