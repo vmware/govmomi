@@ -71,9 +71,9 @@ func login(r soap.RoundTripper, u url.URL, sc types.ServiceContent) error {
 	return nil
 }
 
-func NewClient(u url.URL) (*Client, error) {
+func NewClient(u url.URL, insecure bool) (*Client, error) {
 	c := Client{
-		Client: soap.NewClient(u),
+		Client: soap.NewClient(u, insecure),
 	}
 
 	sc, err := serviceContent(c.Client)

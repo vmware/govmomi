@@ -30,7 +30,7 @@ func TestSearch(t *testing.T) {
 		t.SkipNow()
 	}
 
-	c, err := NewClient(*u)
+	c, err := NewClient(*u, true)
 	if err != nil {
 		t.Error(err)
 	}
