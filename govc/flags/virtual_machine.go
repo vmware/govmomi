@@ -41,7 +41,7 @@ func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchVirtualMachines)
 
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "vm", os.Getenv("GOVC_VM"), "Virtual machine")
+		f.StringVar(&flag.name, "vm", os.Getenv("GOVC_VM"), "Virtual machine [GOVC_VM]")
 	})
 }
 

@@ -56,7 +56,7 @@ func init() {
 
 func (cmd *create) Register(f *flag.FlagSet) {
 	cmd.NetworkFlag = flags.NewNetworkFlag()
-	f.Var(cmd.NetworkFlag, "net", "Network")
+	f.Var(cmd.NetworkFlag, "net", "Network [GOVC_NETWORK]")
 	f.IntVar(&cmd.memory, "m", 128, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
