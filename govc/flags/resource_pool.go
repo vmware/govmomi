@@ -78,6 +78,12 @@ func (flag *ResourcePoolFlag) findResourcePool(path string) ([]*govmomi.Resource
 				ManagedObjectReference: *o.ResourcePool,
 			}
 			rps = append(rps, &n)
+		case mo.ClusterComputeResource:
+			// Use a cluster compute resouce's root resource pool.
+			n := govmomi.ResourcePool{
+				ManagedObjectReference: *o.ResourcePool,
+			}
+			rps = append(rps, &n)
 		case mo.ResourcePool:
 			n := govmomi.ResourcePool{
 				ManagedObjectReference: o.Reference(),

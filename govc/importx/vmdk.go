@@ -66,11 +66,18 @@ func (cmd *vmdk) Run(f *flag.FlagSet) error {
 	var err error
 
 	args := f.Args()
-	if len(args) != 1 {
+	if len(args) < 1 {
 		return errors.New("no file to import")
 	}
 
-	file := importable(f.Arg(0))
+	file := importable{
+		localPath: f.Arg(0),
+	}
+
+	// Include remote path if specified
+	if len(args) >= 2 {
+		file.remotePath = f.Arg(1)
+	}
 
 	cmd.Client, err = cmd.DatastoreFlag.Client()
 	if err != nil {
@@ -170,7 +177,7 @@ func (cmd *vmdk) Upload(i importable) error {
 		p.ProgressCh = ch
 	}
 
-	return cmd.Client.Client.UploadFile(string(i), u, &p)
+	return cmd.Client.Client.UploadFile(i.localPath, u, &p)
 }
 
 func (cmd *vmdk) Import(i importable) error {

@@ -19,35 +19,41 @@ package importx
 import (
 	"fmt"
 	"path"
-	"strings"
 )
 
-type importable string
+type importable struct {
+	localPath  string
+	remotePath string
+}
 
 func (i importable) Ext() string {
-	return strings.ToLower(path.Ext(string(i)))
+	return path.Ext(i.localPath)
 }
 
 func (i importable) Base() string {
-	return path.Base(string(i))
-}
-
-func (i importable) Dir() string {
-	return path.Dir(string(i))
+	return path.Base(i.localPath)
 }
 
 func (i importable) BaseClean() string {
-	b := path.Base(string(i))
-	e := path.Ext(string(i))
+	b := i.Base()
+	e := i.Ext()
 	return b[:len(b)-len(e)]
 }
 
 func (i importable) RemoteSrcVMDK() string {
-	bc := i.BaseClean()
-	return fmt.Sprintf("%s-src.vmdk", bc)
+	file := fmt.Sprintf("%s-src.vmdk", i.BaseClean())
+	return i.toRemotePath(file)
 }
 
 func (i importable) RemoteDstVMDK() string {
-	bc := i.BaseClean()
-	return fmt.Sprintf("%s.vmdk", bc)
+	file := fmt.Sprintf("%s.vmdk", i.BaseClean())
+	return i.toRemotePath(file)
+}
+
+func (i importable) toRemotePath(p string) string {
+	if i.remotePath == "" {
+		return p
+	}
+
+	return path.Join(i.remotePath, p)
 }
