@@ -21,12 +21,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/progress"
 )
 
 func TestProgressReader(t *testing.T) {
 	s := "helloworld"
-	ch := make(chan vim25.Progress, 1)
+	ch := make(chan progress.Report, 1)
 	pr := &progressReader{
 		r:    strings.NewReader(s),
 		size: int64(len(s)),
@@ -34,7 +34,7 @@ func TestProgressReader(t *testing.T) {
 	}
 
 	var buf [10]byte
-	var q vim25.Progress
+	var q progress.Report
 	var n int
 	var err error
 

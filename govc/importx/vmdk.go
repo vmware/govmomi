@@ -27,9 +27,8 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/govc/util"
-	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -170,11 +169,9 @@ func (cmd *vmdk) Upload(i importable) error {
 
 	p := soap.DefaultUpload
 	if cmd.OutputFlag.TTY {
-		ch := make(chan vim25.Progress)
-		wg := cmd.ProgressLogger("Uploading... ", ch)
-		defer wg.Wait()
-
-		p.ProgressCh = ch
+		logger := cmd.ProgressLogger("Uploading... ")
+		p.Progress = logger
+		defer logger.Wait()
 	}
 
 	return cmd.Client.Client.UploadFile(i.localPath, u, &p)
@@ -199,24 +196,25 @@ func (cmd *vmdk) Import(i importable) error {
 func (cmd *vmdk) Copy(i importable) error {
 	var err error
 
-	pa := util.NewProgressAggregator(1)
-	wg := cmd.ProgressLogger("Importing... ", pa.C)
+	logger := cmd.ProgressLogger("Importing... ")
+	defer logger.Wait()
+
+	agg := progress.NewAggregator(logger)
+	defer agg.Done()
+
 	switch p := cmd.Client.ServiceContent.About.ApiType; p {
 	case "HostAgent":
-		err = cmd.CopyHostAgent(i, pa)
+		err = cmd.CopyHostAgent(i, agg)
 	case "VirtualCenter":
-		err = cmd.CopyVirtualCenter(i, pa)
+		err = cmd.CopyVirtualCenter(i, agg)
 	default:
 		return fmt.Errorf("unsupported ApiType: %s", p)
 	}
 
-	pa.Done()
-	wg.Wait()
-
 	return err
 }
 
-func (cmd *vmdk) CopyHostAgent(i importable, pa *util.ProgressAggregator) error {
+func (cmd *vmdk) CopyHostAgent(i importable, s progress.Sinker) error {
 	spec := &types.VirtualDiskSpec{
 		AdapterType: "lsiLogic",
 		DiskType:    "thin",
@@ -231,8 +229,8 @@ func (cmd *vmdk) CopyHostAgent(i importable, pa *util.ProgressAggregator) error 
 		return err
 	}
 
-	pch := pa.NewChannel("copying disk")
-	_, err = task.WaitForResult(pch)
+	ps := progress.Prefix(s, "copying disk")
+	_, err = task.WaitForResult(ps)
 	if err != nil {
 		return err
 	}
@@ -240,7 +238,7 @@ func (cmd *vmdk) CopyHostAgent(i importable, pa *util.ProgressAggregator) error 
 	return nil
 }
 
-func (cmd *vmdk) CopyVirtualCenter(i importable, pa *util.ProgressAggregator) error {
+func (cmd *vmdk) CopyVirtualCenter(i importable, s progress.Sinker) error {
 	var err error
 
 	srcName := i.BaseClean() + "-srcvm"
