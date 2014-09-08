@@ -22,7 +22,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
@@ -60,11 +59,9 @@ func (cmd *download) Run(f *flag.FlagSet) error {
 
 	p := soap.DefaultDownload
 	if cmd.OutputFlag.TTY {
-		ch := make(chan vim25.Progress)
-		wg := cmd.ProgressLogger("Downloading... ", ch)
-		defer wg.Wait()
-
-		p.ProgressCh = ch
+		logger := cmd.ProgressLogger("Downloading... ")
+		p.Progress = logger
+		defer logger.Wait()
 	}
 
 	return c.Client.DownloadFile(args[1], u, &p)

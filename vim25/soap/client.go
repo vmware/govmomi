@@ -32,8 +32,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/debug"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
@@ -217,7 +217,7 @@ type Upload struct {
 	Type          string
 	Method        string
 	ContentLength int64
-	ProgressCh    chan<- vim25.Progress
+	Progress      progress.Sinker
 }
 
 var DefaultUpload = Upload{
@@ -229,8 +229,10 @@ var DefaultUpload = Upload{
 func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 	var err error
 
-	pr := progressReader{
-		ch: param.ProgressCh,
+	pr := &progressReader{}
+	if param.Progress != nil {
+		pr.ch = param.Progress.Sink()
+		// Sink is closed by pr.Done()
 	}
 
 	// Mark progress reader as done when returning from this function.
@@ -240,7 +242,7 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 
 	pr.r = f
 	pr.size = param.ContentLength
-	req, err := http.NewRequest(param.Method, u.String(), &pr)
+	req, err := http.NewRequest(param.Method, u.String(), pr)
 	if err != nil {
 		return err
 	}
@@ -287,8 +289,8 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 }
 
 type Download struct {
-	Method     string
-	ProgressCh chan<- vim25.Progress
+	Method   string
+	Progress progress.Sinker
 }
 
 var DefaultDownload = Download{
@@ -303,8 +305,10 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 		param = &DefaultDownload
 	}
 
-	pr := progressReader{
-		ch: param.ProgressCh,
+	pr := &progressReader{}
+	if param.Progress != nil {
+		pr.ch = param.Progress.Sink()
+		// Sink is closed by pr.Done()
 	}
 
 	// Mark progress reader as done when returning from this function.
@@ -342,7 +346,7 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 
 	pr.r = res.Body
 	pr.size = res.ContentLength
-	_, err = io.Copy(fh, &pr)
+	_, err = io.Copy(fh, pr)
 	if err != nil {
 		return err
 	}

@@ -23,7 +23,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/progress"
 )
 
 const (
@@ -80,7 +80,7 @@ type progressReader struct {
 	size int64
 	bps  uint64
 
-	ch    chan<- vim25.Progress
+	ch    chan<- progress.Report
 	bpsch chan<- Progress
 }
 

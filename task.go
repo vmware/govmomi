@@ -19,7 +19,7 @@ package govmomi
 import (
 	"errors"
 
-	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -59,7 +59,7 @@ func (t taskProgress) Error() error {
 }
 
 type taskCallback struct {
-	ch   chan<- vim25.Progress
+	ch   chan<- progress.Report
 	info *types.TaskInfo
 	err  error
 }
@@ -98,7 +98,6 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 		}
 		return false
 	case types.TaskInfoStateSuccess, types.TaskInfoStateError:
-
 		if t.ch != nil {
 			// Last one must always be delivered
 			t.ch <- pr
@@ -114,10 +113,13 @@ func (t *Task) Wait() error {
 	return err
 }
 
-func (t *Task) WaitForResult(ch chan<- vim25.Progress) (*types.TaskInfo, error) {
-	cb := &taskCallback{ch: ch}
-	if ch != nil {
-		defer close(ch)
+func (t *Task) WaitForResult(s progress.Sinker) (*types.TaskInfo, error) {
+	cb := &taskCallback{}
+
+	// Include progress sink if specified
+	if s != nil {
+		cb.ch = s.Sink()
+		defer close(cb.ch)
 	}
 
 	err := t.c.WaitForProperties(t.ref, []string{"info"}, cb.fn)

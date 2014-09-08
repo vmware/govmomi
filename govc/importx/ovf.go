@@ -27,7 +27,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -207,7 +207,7 @@ func (cmd *ovf) Import(fpath string) error {
 			i := ovfFileItem{
 				url:  u,
 				item: item,
-				ch:   make(chan vim25.Progress),
+				ch:   make(chan progress.Report),
 			}
 
 			items = append(items, i)
@@ -227,25 +227,6 @@ func (cmd *ovf) Import(fpath string) error {
 	return lease.HttpNfcLeaseComplete(c)
 }
 
-// ProgressTee is like Unix tee, but for vim25.Progress structs.
-func ProgressTee(in <-chan vim25.Progress, out1, out2 chan<- vim25.Progress) {
-	go func() {
-		for {
-			select {
-			case p, ok := <-in:
-				if !ok {
-					close(out1)
-					close(out2)
-					return
-				}
-
-				out1 <- p
-				out2 <- p
-			}
-		}
-	}()
-}
-
 func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
 	item := ofi.item
 	file := item.Path
@@ -256,20 +237,14 @@ func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
 	}
 	defer f.Close()
 
-	in := make(chan vim25.Progress)
-	out := make(chan vim25.Progress)
-
-	// Forward progress to item channel
-	ProgressTee(in, out, ofi.ch)
-
-	pwg := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", path.Base(file)), out)
-	defer pwg.Wait()
+	logger := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", path.Base(file)))
+	defer logger.Wait()
 
 	opts := soap.Upload{
 		Type:          "application/x-vnd.vmware-streamVmdk",
 		Method:        "POST",
-		ProgressCh:    in,
 		ContentLength: size,
+		Progress:      progress.Tee(ofi, logger),
 	}
 
 	if item.Create {

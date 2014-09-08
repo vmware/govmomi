@@ -14,13 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package vim25
+package progress
 
-// Progress defines the interface for types that can report progress. Examples
-// include uploads/downloads in the http client and the task info field in the
-// task managed object.
-type Progress interface {
-	Percentage() float32
-	Detail() string
-	Error() error
+// Sinker defines what is expected of a type that can act as a sink for
+// progress reports. The semantics are as follows. If you call Sink(), you are
+// responsible for closing the returned channel. Closing this channel means
+// that the related task is done, or resulted in error.
+type Sinker interface {
+	Sink() chan<- Report
+}
+
+// SinkFunc defines a function that returns a progress report channel.
+type SinkFunc func() chan<- Report
+
+// Sink makes the SinkFunc implement the Sinker interface.
+func (fn SinkFunc) Sink() chan<- Report {
+	return fn()
 }

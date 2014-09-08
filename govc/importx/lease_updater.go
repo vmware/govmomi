@@ -24,14 +24,18 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ovfFileItem struct {
 	url  *url.URL
 	item types.OvfFileItem
-	ch   chan vim25.Progress
+	ch   chan progress.Report
+}
+
+func (o ovfFileItem) Sink() chan<- progress.Report {
+	return o.ch
 }
 
 type leaseUpdater struct {

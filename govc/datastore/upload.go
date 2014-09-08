@@ -22,7 +22,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
@@ -61,11 +60,9 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 
 	p := soap.DefaultUpload
 	if cmd.OutputFlag.TTY {
-		ch := make(chan vim25.Progress)
-		wg := cmd.ProgressLogger("Uploading... ", ch)
-		defer wg.Wait()
-
-		p.ProgressCh = ch
+		logger := cmd.ProgressLogger("Uploading... ")
+		p.Progress = logger
+		defer logger.Wait()
 	}
 
 	return c.Client.UploadFile(args[0], u, &p)
