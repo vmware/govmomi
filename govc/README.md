@@ -18,7 +18,7 @@ to these subcommands are often shared.
 
 Common flags include:
 
-* `-u`: ESXi or vCenter URL (ex: `https://user:pass@host/sdk`)
+* `-u`: ESXi or vCenter URL (ex: `user:pass@host`)
 * `-debug`: Trace requests and responses (to `~/.govmomi/debug`)
 
 Managed entities can be referred to by their absolute path or by their relative
@@ -41,12 +41,27 @@ Besides specifying managed entities as arguments, they can also be specified
 using environment variables. The following environment variables are used by govc
 to set defaults:
 
-* `GOVC_URL`: ESXi or vCenter URL to connect to
+* `GOVC_URL`: URL of ESXi or vCenter instance to connect to.
+
+  > The URL scheme defaults to `https` and the URL path defaults to `/sdk`.
+  > This means that specifying `user:pass@host` is equivalent to
+  > `https://user:pass@host/sdk`.
+
+* `GOVC_INSECURE`: Allow establishing insecure connections.
+
+  > Use this option when the host you're connecting is using self-signed
+  > certificates, or is otherwise trusted. Set this option to `1` to enable.
+
 * `GOVC_DATACENTER`
+
 * `GOVC_DATASTORE`
+
 * `GOVC_NETWORK`
+
 * `GOVC_RESOURCE_POOL`
+
 * `GOVC_HOST`
+
 * `GOVC_GUEST_LOGIN`: Guest credentials for guest operations
 
 ## Examples
