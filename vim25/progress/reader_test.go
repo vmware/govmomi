@@ -14,27 +14,21 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package soap
+package progress
 
 import (
 	"io"
 	"strings"
 	"testing"
-
-	"github.com/vmware/govmomi/vim25/progress"
 )
 
-func TestProgressReader(t *testing.T) {
+func TestReader(t *testing.T) {
 	s := "helloworld"
-	ch := make(chan progress.Report, 1)
-	pr := &progressReader{
-		r:    strings.NewReader(s),
-		size: int64(len(s)),
-		ch:   ch,
-	}
+	ch := make(chan Report, 1)
+	pr := NewReader(&dummySinker{ch}, strings.NewReader(s), int64(len(s)))
 
 	var buf [10]byte
-	var q progress.Report
+	var q Report
 	var n int
 	var err error
 
