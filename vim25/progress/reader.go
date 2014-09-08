@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package soap
+package progress
 
 import (
 	"container/list"
@@ -22,17 +22,9 @@ import (
 	"io"
 	"sync/atomic"
 	"time"
-
-	"github.com/vmware/govmomi/vim25/progress"
 )
 
-const (
-	KiB = 1024
-	MiB = 1024 * KiB
-	GiB = 1024 * MiB
-)
-
-type Progress struct {
+type readerReport struct {
 	t time.Time
 
 	pos  int64
@@ -42,18 +34,23 @@ type Progress struct {
 	err error
 }
 
-func (p Progress) Percentage() float32 {
-	return 100.0 * float32(p.pos) / float32(p.size)
+func (r readerReport) Percentage() float32 {
+	return 100.0 * float32(r.pos) / float32(r.size)
 }
 
-func (p Progress) Detail() string {
-	// Refer to the progress reader's bps field, so that this function always
-	// returns an up-to-date number.
+func (r readerReport) Detail() string {
+	const (
+		KiB = 1024
+		MiB = 1024 * KiB
+		GiB = 1024 * MiB
+	)
+
+	// Use the reader's bps field, so this report returns an up-to-date number.
 	//
 	// For example: if there hasn't been progress for the last 5 seconds, the
-	// most recent progress report should report "0B/s".
+	// most recent report should return "0B/s".
 	//
-	bps := atomic.LoadUint64(p.bps)
+	bps := atomic.LoadUint64(r.bps)
 
 	switch {
 	case bps >= GiB:
@@ -67,94 +64,84 @@ func (p Progress) Detail() string {
 	}
 }
 
-func (p Progress) Error() error {
+func (p readerReport) Error() error {
 	return p.err
 }
 
-// progressReader wraps a io.Reader and sends a progress report over a channel
-// for every read it handles.
-type progressReader struct {
+// reader wraps an io.Reader and sends a progress report over a channel for
+// every read it handles.
+type reader struct {
 	r io.Reader
 
 	pos  int64
 	size int64
-	bps  uint64
 
-	ch    chan<- progress.Report
-	bpsch chan<- Progress
+	bps uint64
+
+	ch chan<- Report
+}
+
+func NewReader(s Sinker, r io.Reader, size int64) *reader {
+	pr := reader{
+		r: r,
+
+		size: size,
+	}
+
+	// Reports must be sent downstream and to the bps computation loop.
+	pr.ch = Tee(s, newBpsLoop(&pr.bps)).Sink()
+
+	return &pr
 }
 
 // Read calls the Read function on the underlying io.Reader. Additionally,
 // every read causes a progress report to be sent to the progress reader's
-// underlying channel. This progress report is sent optimistically; it is
-// dropped if it cannot be received immediately.
-func (p *progressReader) Read(b []byte) (int, error) {
+// underlying channel.
+func (p *reader) Read(b []byte) (int, error) {
 	n, err := p.r.Read(b)
 	if err != nil {
 		return n, err
 	}
 
-	if p.ch == nil {
-		return n, err
-	}
-
 	p.pos += int64(n)
-	q := Progress{
+	q := readerReport{
 		t:    time.Now(),
 		pos:  p.pos,
 		size: p.size,
 		bps:  &p.bps,
 	}
 
-	// Start bps computation if not already running
-	if p.bpsch == nil {
-		ch := make(chan Progress)
-		p.bpsch = ch
-		go p.bpsLoop(ch)
-	}
-
-	// Don't care if this is dropped
-	select {
-	case p.ch <- q:
-	default:
-	}
-
-	// Don't care if this is dropped
-	select {
-	case p.bpsch <- q:
-	default:
-	}
+	p.ch <- q
 
 	return n, err
 }
 
 // Done marks the progress reader as done, optionally including an error in the
-// progress report. This final progress report is never dropped on the sending
-// side. After sending it, the underlying channel is closed.
-func (p *progressReader) Done(err error) {
-	if p.ch == nil {
-		return
-	}
-
-	q := Progress{
+// progress report. After sending it, the underlying channel is closed.
+func (r *reader) Done(err error) {
+	q := readerReport{
 		t:    time.Now(),
-		pos:  p.pos,
-		size: p.size,
+		pos:  r.pos,
+		size: r.size,
 		err:  err,
 	}
 
-	// Last one must always be delivered
-	p.ch <- q
-	close(p.ch)
-
-	// Stop bps computation if running
-	if p.bpsch != nil {
-		close(p.bpsch)
-	}
+	r.ch <- q
+	close(r.ch)
 }
 
-// bpsLoop computes the reader's throughput.
-func (p *progressReader) bpsLoop(ch chan Progress) {
+// newBpsLoop returns a sink that monitors and stores throughput.
+func newBpsLoop(dst *uint64) SinkFunc {
+	fn := func() chan<- Report {
+		sink := make(chan Report)
+		go bpsLoop(sink, dst)
+		return sink
+	}
+
+	return fn
+}
+
+func bpsLoop(ch <-chan Report, dst *uint64) {
 	l := list.New()
 
 	for {
@@ -162,7 +149,7 @@ func (p *progressReader) bpsLoop(ch chan Progress) {
 
 		// Setup timer for front of list to become stale.
 		if e := l.Front(); e != nil {
-			dt := time.Second - time.Now().Sub(e.Value.(Progress).t)
+			dt := time.Second - time.Now().Sub(e.Value.(readerReport).t)
 			tch = time.After(dt)
 		}
 
@@ -179,11 +166,11 @@ func (p *progressReader) bpsLoop(ch chan Progress) {
 
 		// Compute new bps
 		if l.Len() == 0 {
-			atomic.StoreUint64(&p.bps, 0)
+			atomic.StoreUint64(dst, 0)
 		} else {
-			f := l.Front().Value.(Progress)
-			b := l.Back().Value.(Progress)
-			atomic.StoreUint64(&p.bps, uint64(b.pos-f.pos))
+			f := l.Front().Value.(readerReport)
+			b := l.Back().Value.(readerReport)
+			atomic.StoreUint64(dst, uint64(b.pos-f.pos))
 		}
 	}
 }

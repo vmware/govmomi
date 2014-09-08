@@ -229,20 +229,17 @@ var DefaultUpload = Upload{
 func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 	var err error
 
-	pr := &progressReader{}
 	if param.Progress != nil {
-		pr.ch = param.Progress.Sink()
-		// Sink is closed by pr.Done()
+		pr := progress.NewReader(param.Progress, f, param.ContentLength)
+		f = pr
+
+		// Mark progress reader as done when returning from this function.
+		defer func() {
+			pr.Done(err)
+		}()
 	}
 
-	// Mark progress reader as done when returning from this function.
-	defer func() {
-		pr.Done(err)
-	}()
-
-	pr.r = f
-	pr.size = param.ContentLength
-	req, err := http.NewRequest(param.Method, u.String(), pr)
+	req, err := http.NewRequest(param.Method, u.String(), f)
 	if err != nil {
 		return err
 	}
@@ -305,17 +302,6 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 		param = &DefaultDownload
 	}
 
-	pr := &progressReader{}
-	if param.Progress != nil {
-		pr.ch = param.Progress.Sink()
-		// Sink is closed by pr.Done()
-	}
-
-	// Mark progress reader as done when returning from this function.
-	defer func() {
-		pr.Done(err)
-	}()
-
 	fh, err := os.Create(file)
 	if err != nil {
 		return err
@@ -344,9 +330,18 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 		return err
 	}
 
-	pr.r = res.Body
-	pr.size = res.ContentLength
-	_, err = io.Copy(fh, pr)
+	var r io.Reader = res.Body
+	if param.Progress != nil {
+		pr := progress.NewReader(param.Progress, res.Body, res.ContentLength)
+		r = pr
+
+		// Mark progress reader as done when returning from this function.
+		defer func() {
+			pr.Done(err)
+		}()
+	}
+
+	_, err = io.Copy(fh, r)
 	if err != nil {
 		return err
 	}
