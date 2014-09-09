@@ -132,36 +132,3 @@ func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 
 	return flag.findSpecifiedHostSystem(flag.name)
 }
-
-// ResourcePool returns the host system's resource pool, if the host system
-// flag itself is specified and valid.
-func (flag *HostSystemFlag) ResourcePool() (*govmomi.ResourcePool, error) {
-	if flag.pool != nil {
-		return flag.pool, nil
-	}
-
-	h, err := flag.HostSystem()
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := flag.DatacenterFlag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	var mh mo.HostSystem
-	err = c.Properties(h.Reference(), []string{"parent"}, &mh)
-	if err != nil {
-		return nil, err
-	}
-
-	var mcr mo.ComputeResource
-	err = c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
-	if err != nil {
-		return nil, err
-	}
-
-	flag.pool = govmomi.NewResourcePool(*mcr.ResourcePool)
-	return flag.pool, nil
-}
