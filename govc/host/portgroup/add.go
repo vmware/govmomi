@@ -25,7 +25,7 @@ import (
 )
 
 type add struct {
-	*flags.SearchFlag
+	*flags.HostSystemFlag
 
 	spec types.HostPortGroupSpec
 }
@@ -35,8 +35,6 @@ func init() {
 }
 
 func (cmd *add) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchHosts)
-
 	f.StringVar(&cmd.spec.VswitchName, "vswitch", "", "vSwitch Name")
 	f.IntVar(&cmd.spec.VlanId, "vlan", 0, "VLAN ID")
 }

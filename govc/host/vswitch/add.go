@@ -25,7 +25,7 @@ import (
 )
 
 type add struct {
-	*flags.SearchFlag
+	*flags.HostSystemFlag
 
 	nic  string
 	spec types.HostVirtualSwitchSpec
@@ -36,7 +36,6 @@ func init() {
 }
 
 func (cmd *add) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchHosts)
 	f.IntVar(&cmd.spec.NumPorts, "ports", 128, "Number of ports")
 	f.IntVar(&cmd.spec.Mtu, "mtu", 0, "MTU")
 	f.StringVar(&cmd.nic, "nic", "", "Bridge nic device")
