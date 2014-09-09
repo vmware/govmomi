@@ -24,16 +24,14 @@ import (
 )
 
 type remove struct {
-	*flags.SearchFlag
+	*flags.HostSystemFlag
 }
 
 func init() {
 	cli.Register("host.vswitch.remove", &remove{})
 }
 
-func (cmd *remove) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchHosts)
-}
+func (cmd *remove) Register(f *flag.FlagSet) {}
 
 func (cmd *remove) Process() error { return nil }
 

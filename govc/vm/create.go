@@ -89,17 +89,18 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystem()
+	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystemIfSpecified()
 	if err != nil {
 		return err
 	}
 
-	if cmd.HostSystem == nil { // -host is optional
-		if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
+	if cmd.HostSystem != nil {
+		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(cmd.Client); err != nil {
 			return err
 		}
 	} else {
-		if cmd.ResourcePool, err = cmd.HostSystemFlag.ResourcePool(); err != nil {
+		// -host is optional
+		if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
 			return err
 		}
 	}

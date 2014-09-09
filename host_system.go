@@ -16,7 +16,10 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type HostSystem struct {
 	types.ManagedObjectReference
@@ -28,4 +31,21 @@ func (h HostSystem) Reference() types.ManagedObjectReference {
 
 func (h HostSystem) ConfigManager(c *Client) *HostConfigManager {
 	return &HostConfigManager{c, h}
+}
+
+func (h HostSystem) ResourcePool(c *Client) (*ResourcePool, error) {
+	var mh mo.HostSystem
+	err := c.Properties(h.Reference(), []string{"parent"}, &mh)
+	if err != nil {
+		return nil, err
+	}
+
+	var mcr mo.ComputeResource
+	err = c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
+	if err != nil {
+		return nil, err
+	}
+
+	pool := NewResourcePool(*mcr.ResourcePool)
+	return pool, nil
 }

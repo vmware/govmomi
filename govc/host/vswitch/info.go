@@ -30,16 +30,14 @@ import (
 type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
-	*flags.SearchFlag
+	*flags.HostSystemFlag
 }
 
 func init() {
 	cli.Register("host.vswitch.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchHosts)
-}
+func (cmd *info) Register(f *flag.FlagSet) {}
 
 func (cmd *info) Process() error { return nil }
 
