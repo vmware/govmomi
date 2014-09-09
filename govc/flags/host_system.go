@@ -114,7 +114,7 @@ func (flag *HostSystemFlag) findDefaultHostSystem() (*govmomi.HostSystem, error)
 	}
 
 	if len(hss) == 0 {
-		panic("no host") // Should never happen
+		return nil, errors.New("no host")
 	}
 
 	if len(hss) > 1 {
