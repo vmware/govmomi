@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<soapenv:Envelope xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
+ xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
+ xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<soapenv:Body>
+<soapenv:Fault><faultcode>ServerFaultCode</faultcode><faultstring>Unable to resolve WSDL method name VimEsxCLIvmnetworklist for namespace name urn:vim25
+
+while parsing SOAP body
+at line 2, column 60
+
+while parsing SOAP envelope
+at line 2, column 0
+
+while parsing HTTP request before method was determined
+at line 1, column 0</faultstring><detail><InvalidRequestFault xmlns="urn:vim25" xsi:type="InvalidRequest"></InvalidRequestFault></detail></soapenv:Fault>
+</soapenv:Body>
+</soapenv:Envelope>
