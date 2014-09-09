@@ -89,7 +89,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystem()
+	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystemIfSpecified()
 	if err != nil {
 		return err
 	}

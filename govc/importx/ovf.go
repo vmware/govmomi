@@ -35,7 +35,7 @@ import (
 type ovf struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
-	*flags.SearchFlag
+	*flags.HostSystemFlag
 	*flags.OutputFlag
 
 	Client       *govmomi.Client
@@ -51,13 +51,10 @@ func init() {
 }
 
 func newOvf() *ovf {
-	return &ovf{
-		SearchFlag: flags.NewSearchFlag(flags.SearchHosts),
-	}
+	return &ovf{}
 }
 
-func (cmd *ovf) Register(f *flag.FlagSet) {
-}
+func (cmd *ovf) Register(f *flag.FlagSet) {}
 
 func (cmd *ovf) Process() error { return nil }
 

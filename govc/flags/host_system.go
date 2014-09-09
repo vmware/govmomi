@@ -107,7 +107,25 @@ func (flag *HostSystemFlag) findSpecifiedHostSystem(path string) (*govmomi.HostS
 	return flag.host, nil
 }
 
-func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
+func (flag *HostSystemFlag) findDefaultHostSystem() (*govmomi.HostSystem, error) {
+	hss, err := flag.findHostSystem("*/*")
+	if err != nil {
+		return nil, err
+	}
+
+	if len(hss) == 0 {
+		panic("no host") // Should never happen
+	}
+
+	if len(hss) > 1 {
+		return nil, errors.New("please specify a host")
+	}
+
+	flag.host = hss[0]
+	return flag.host, nil
+}
+
+func (flag *HostSystemFlag) HostSystemIfSpecified() (*govmomi.HostSystem, error) {
 	if flag.host != nil {
 		return flag.host, nil
 	}
@@ -131,6 +149,19 @@ func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 	}
 
 	return flag.findSpecifiedHostSystem(flag.name)
+}
+
+func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
+	host, err := flag.HostSystemIfSpecified()
+	if err != nil {
+		return nil, err
+	}
+
+	if host != nil {
+		return host, nil
+	}
+
+	return flag.findDefaultHostSystem()
 }
 
 func (flag *HostSystemFlag) HostNetworkSystem() (*govmomi.HostNetworkSystem, error) {
