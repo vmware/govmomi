@@ -47,11 +47,7 @@ type ovf struct {
 }
 
 func init() {
-	cli.Register("import.ovf", newOvf())
-}
-
-func newOvf() *ovf {
-	return &ovf{}
+	cli.Register("import.ovf", &ovf{})
 }
 
 func (cmd *ovf) Register(f *flag.FlagSet) {}
