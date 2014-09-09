@@ -24,6 +24,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"regexp"
 	"strings"
 	"sync"
 
@@ -52,13 +53,25 @@ func (flag *ClientFlag) String() string {
 	return ""
 }
 
+var schemeMatch = regexp.MustCompile(`^\w+://`)
+
 func (flag *ClientFlag) Set(s string) error {
 	var err error
 
 	if s != "" {
+		// Default the scheme to https
+		if !schemeMatch.MatchString(s) {
+			s = "https://" + s
+		}
+
 		flag.url, err = url.Parse(s)
 		if err != nil {
 			return err
+		}
+
+		// Default the path to /sdk
+		if flag.url.Path == "" {
+			flag.url.Path = "/sdk"
 		}
 	}
 
