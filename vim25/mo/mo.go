@@ -79,6 +79,22 @@ func init() {
 	t["ClusterComputeResource"] = reflect.TypeOf((*ClusterComputeResource)(nil)).Elem()
 }
 
+type ClusterProfile struct {
+	Profile
+}
+
+func init() {
+	t["ClusterProfile"] = reflect.TypeOf((*ClusterProfile)(nil)).Elem()
+}
+
+type ClusterProfileManager struct {
+	ProfileManager
+}
+
+func init() {
+	t["ClusterProfileManager"] = reflect.TypeOf((*ClusterProfileManager)(nil)).Elem()
+}
+
 type ComputeResource struct {
 	ManagedEntity
 
@@ -168,6 +184,30 @@ func init() {
 	t["Datastore"] = reflect.TypeOf((*Datastore)(nil)).Elem()
 }
 
+type DatastoreNamespaceManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m DatastoreNamespaceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["DatastoreNamespaceManager"] = reflect.TypeOf((*DatastoreNamespaceManager)(nil)).Elem()
+}
+
+type DiagnosticManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m DiagnosticManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["DiagnosticManager"] = reflect.TypeOf((*DiagnosticManager)(nil)).Elem()
+}
+
 type DistributedVirtualPortgroup struct {
 	Network
 
@@ -194,6 +234,18 @@ type DistributedVirtualSwitch struct {
 
 func init() {
 	t["DistributedVirtualSwitch"] = reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem()
+}
+
+type DistributedVirtualSwitchManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m DistributedVirtualSwitchManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["DistributedVirtualSwitchManager"] = reflect.TypeOf((*DistributedVirtualSwitchManager)(nil)).Elem()
 }
 
 type EnvironmentBrowser struct {
@@ -265,6 +317,18 @@ func init() {
 	t["ExtensionManager"] = reflect.TypeOf((*ExtensionManager)(nil)).Elem()
 }
 
+type FileManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m FileManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["FileManager"] = reflect.TypeOf((*FileManager)(nil)).Elem()
+}
+
 type Folder struct {
 	ManagedEntity
 
@@ -274,6 +338,30 @@ type Folder struct {
 
 func init() {
 	t["Folder"] = reflect.TypeOf((*Folder)(nil)).Elem()
+}
+
+type GuestAuthManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m GuestAuthManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["GuestAuthManager"] = reflect.TypeOf((*GuestAuthManager)(nil)).Elem()
+}
+
+type GuestFileManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m GuestFileManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["GuestFileManager"] = reflect.TypeOf((*GuestFileManager)(nil)).Elem()
 }
 
 type GuestOperationsManager struct {
@@ -292,6 +380,18 @@ func init() {
 	t["GuestOperationsManager"] = reflect.TypeOf((*GuestOperationsManager)(nil)).Elem()
 }
 
+type GuestProcessManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m GuestProcessManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["GuestProcessManager"] = reflect.TypeOf((*GuestProcessManager)(nil)).Elem()
+}
+
 type HistoryCollector struct {
 	Self types.ManagedObjectReference
 
@@ -304,6 +404,14 @@ func (m HistoryCollector) Reference() types.ManagedObjectReference {
 
 func init() {
 	t["HistoryCollector"] = reflect.TypeOf((*HistoryCollector)(nil)).Elem()
+}
+
+type HostActiveDirectoryAuthentication struct {
+	HostDirectoryStore
+}
+
+func init() {
+	t["HostActiveDirectoryAuthentication"] = reflect.TypeOf((*HostActiveDirectoryAuthentication)(nil)).Elem()
 }
 
 type HostAuthenticationManager struct {
@@ -347,6 +455,18 @@ func (m HostAutoStartManager) Reference() types.ManagedObjectReference {
 
 func init() {
 	t["HostAutoStartManager"] = reflect.TypeOf((*HostAutoStartManager)(nil)).Elem()
+}
+
+type HostBootDeviceSystem struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostBootDeviceSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostBootDeviceSystem"] = reflect.TypeOf((*HostBootDeviceSystem)(nil)).Elem()
 }
 
 type HostCacheConfigurationManager struct {
@@ -431,6 +551,14 @@ func init() {
 	t["HostDiagnosticSystem"] = reflect.TypeOf((*HostDiagnosticSystem)(nil)).Elem()
 }
 
+type HostDirectoryStore struct {
+	HostAuthenticationStore
+}
+
+func init() {
+	t["HostDirectoryStore"] = reflect.TypeOf((*HostDirectoryStore)(nil)).Elem()
+}
+
 type HostEsxAgentHostManager struct {
 	Self types.ManagedObjectReference
 
@@ -455,6 +583,18 @@ func init() {
 	t["HostFirewallSystem"] = reflect.TypeOf((*HostFirewallSystem)(nil)).Elem()
 }
 
+type HostFirmwareSystem struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostFirmwareSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostFirmwareSystem"] = reflect.TypeOf((*HostFirmwareSystem)(nil)).Elem()
+}
+
 type HostGraphicsManager struct {
 	ExtensibleManagedObject
 
@@ -477,6 +617,50 @@ func (m HostHealthStatusSystem) Reference() types.ManagedObjectReference {
 
 func init() {
 	t["HostHealthStatusSystem"] = reflect.TypeOf((*HostHealthStatusSystem)(nil)).Elem()
+}
+
+type HostImageConfigManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostImageConfigManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostImageConfigManager"] = reflect.TypeOf((*HostImageConfigManager)(nil)).Elem()
+}
+
+type HostKernelModuleSystem struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostKernelModuleSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostKernelModuleSystem"] = reflect.TypeOf((*HostKernelModuleSystem)(nil)).Elem()
+}
+
+type HostLocalAccountManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostLocalAccountManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostLocalAccountManager"] = reflect.TypeOf((*HostLocalAccountManager)(nil)).Elem()
+}
+
+type HostLocalAuthentication struct {
+	HostAuthenticationStore
+}
+
+func init() {
+	t["HostLocalAuthentication"] = reflect.TypeOf((*HostLocalAuthentication)(nil)).Elem()
 }
 
 type HostMemorySystem struct {
@@ -504,6 +688,18 @@ type HostNetworkSystem struct {
 
 func init() {
 	t["HostNetworkSystem"] = reflect.TypeOf((*HostNetworkSystem)(nil)).Elem()
+}
+
+type HostPatchManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostPatchManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostPatchManager"] = reflect.TypeOf((*HostPatchManager)(nil)).Elem()
 }
 
 type HostPciPassthruSystem struct {
@@ -539,6 +735,14 @@ type HostProfile struct {
 
 func init() {
 	t["HostProfile"] = reflect.TypeOf((*HostProfile)(nil)).Elem()
+}
+
+type HostProfileManager struct {
+	ProfileManager
+}
+
+func init() {
+	t["HostProfileManager"] = reflect.TypeOf((*HostProfileManager)(nil)).Elem()
 }
 
 type HostServiceSystem struct {
@@ -635,6 +839,18 @@ func init() {
 	t["HostVirtualNicManager"] = reflect.TypeOf((*HostVirtualNicManager)(nil)).Elem()
 }
 
+type HostVsanInternalSystem struct {
+	Self types.ManagedObjectReference
+}
+
+func (m HostVsanInternalSystem) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["HostVsanInternalSystem"] = reflect.TypeOf((*HostVsanInternalSystem)(nil)).Elem()
+}
+
 type HostVsanSystem struct {
 	Self types.ManagedObjectReference
 
@@ -666,6 +882,62 @@ func init() {
 	t["HttpNfcLease"] = reflect.TypeOf((*HttpNfcLease)(nil)).Elem()
 }
 
+type InternalDynamicTypeManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m InternalDynamicTypeManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["InternalDynamicTypeManager"] = reflect.TypeOf((*InternalDynamicTypeManager)(nil)).Elem()
+}
+
+type InventoryView struct {
+	ManagedObjectView
+}
+
+func init() {
+	t["InventoryView"] = reflect.TypeOf((*InventoryView)(nil)).Elem()
+}
+
+type IpPoolManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m IpPoolManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["IpPoolManager"] = reflect.TypeOf((*IpPoolManager)(nil)).Elem()
+}
+
+type IscsiManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m IscsiManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["IscsiManager"] = reflect.TypeOf((*IscsiManager)(nil)).Elem()
+}
+
+type LicenseAssignmentManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m LicenseAssignmentManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["LicenseAssignmentManager"] = reflect.TypeOf((*LicenseAssignmentManager)(nil)).Elem()
+}
+
 type LicenseManager struct {
 	Self types.ManagedObjectReference
 
@@ -685,6 +957,14 @@ func (m LicenseManager) Reference() types.ManagedObjectReference {
 
 func init() {
 	t["LicenseManager"] = reflect.TypeOf((*LicenseManager)(nil)).Elem()
+}
+
+type ListView struct {
+	ManagedObjectView
+}
+
+func init() {
+	t["ListView"] = reflect.TypeOf((*ListView)(nil)).Elem()
 }
 
 type LocalizationManager struct {
@@ -749,6 +1029,14 @@ type Network struct {
 
 func init() {
 	t["Network"] = reflect.TypeOf((*Network)(nil)).Elem()
+}
+
+type OpaqueNetwork struct {
+	Network
+}
+
+func init() {
+	t["OpaqueNetwork"] = reflect.TypeOf((*OpaqueNetwork)(nil)).Elem()
 }
 
 type OptionManager struct {
@@ -817,6 +1105,18 @@ func init() {
 	t["Profile"] = reflect.TypeOf((*Profile)(nil)).Elem()
 }
 
+type ProfileComplianceManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m ProfileComplianceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ProfileComplianceManager"] = reflect.TypeOf((*ProfileComplianceManager)(nil)).Elem()
+}
+
 type ProfileManager struct {
 	Self types.ManagedObjectReference
 
@@ -860,6 +1160,30 @@ func init() {
 	t["PropertyFilter"] = reflect.TypeOf((*PropertyFilter)(nil)).Elem()
 }
 
+type ReflectManagedMethodExecuter struct {
+	Self types.ManagedObjectReference
+}
+
+func (m ReflectManagedMethodExecuter) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ReflectManagedMethodExecuter"] = reflect.TypeOf((*ReflectManagedMethodExecuter)(nil)).Elem()
+}
+
+type ResourcePlanningManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m ResourcePlanningManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["ResourcePlanningManager"] = reflect.TypeOf((*ResourcePlanningManager)(nil)).Elem()
+}
+
 type ResourcePool struct {
 	ManagedEntity
 
@@ -899,6 +1223,18 @@ func (m ScheduledTaskManager) Reference() types.ManagedObjectReference {
 
 func init() {
 	t["ScheduledTaskManager"] = reflect.TypeOf((*ScheduledTaskManager)(nil)).Elem()
+}
+
+type SearchIndex struct {
+	Self types.ManagedObjectReference
+}
+
+func (m SearchIndex) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["SearchIndex"] = reflect.TypeOf((*SearchIndex)(nil)).Elem()
 }
 
 type ServiceInstance struct {
@@ -976,6 +1312,18 @@ func init() {
 	t["StoragePod"] = reflect.TypeOf((*StoragePod)(nil)).Elem()
 }
 
+type StorageResourceManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m StorageResourceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["StorageResourceManager"] = reflect.TypeOf((*StorageResourceManager)(nil)).Elem()
+}
+
 type Task struct {
 	ExtensibleManagedObject
 
@@ -1026,6 +1374,18 @@ func init() {
 	t["UserDirectory"] = reflect.TypeOf((*UserDirectory)(nil)).Elem()
 }
 
+type View struct {
+	Self types.ManagedObjectReference
+}
+
+func (m View) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["View"] = reflect.TypeOf((*View)(nil)).Elem()
+}
+
 type ViewManager struct {
 	Self types.ManagedObjectReference
 
@@ -1055,6 +1415,18 @@ func init() {
 	t["VirtualApp"] = reflect.TypeOf((*VirtualApp)(nil)).Elem()
 }
 
+type VirtualDiskManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VirtualDiskManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["VirtualDiskManager"] = reflect.TypeOf((*VirtualDiskManager)(nil)).Elem()
+}
+
 type VirtualMachine struct {
 	ManagedEntity
 
@@ -1081,6 +1453,30 @@ func init() {
 	t["VirtualMachine"] = reflect.TypeOf((*VirtualMachine)(nil)).Elem()
 }
 
+type VirtualMachineCompatibilityChecker struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VirtualMachineCompatibilityChecker) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["VirtualMachineCompatibilityChecker"] = reflect.TypeOf((*VirtualMachineCompatibilityChecker)(nil)).Elem()
+}
+
+type VirtualMachineProvisioningChecker struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VirtualMachineProvisioningChecker) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["VirtualMachineProvisioningChecker"] = reflect.TypeOf((*VirtualMachineProvisioningChecker)(nil)).Elem()
+}
+
 type VirtualMachineSnapshot struct {
 	ExtensibleManagedObject
 
@@ -1090,4 +1486,24 @@ type VirtualMachineSnapshot struct {
 
 func init() {
 	t["VirtualMachineSnapshot"] = reflect.TypeOf((*VirtualMachineSnapshot)(nil)).Elem()
+}
+
+type VirtualizationManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VirtualizationManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["VirtualizationManager"] = reflect.TypeOf((*VirtualizationManager)(nil)).Elem()
+}
+
+type VmwareDistributedVirtualSwitch struct {
+	DistributedVirtualSwitch
+}
+
+func init() {
+	t["VmwareDistributedVirtualSwitch"] = reflect.TypeOf((*VmwareDistributedVirtualSwitch)(nil)).Elem()
 }
