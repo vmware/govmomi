@@ -18,7 +18,7 @@ set -e
 
 dst=../vim25
 
-pkgs=$(echo $dst/{types,methods,tasks,mo})
+pkgs=$(echo $dst/{types,methods,mo})
 mkdir -p $pkgs
 
 bundle exec ruby gen_from_wsdl.rb $dst
