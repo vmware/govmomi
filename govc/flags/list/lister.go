@@ -53,6 +53,8 @@ func ToElement(r govmomi.Reference, prefix string) Element {
 		name = m.Name
 	case mo.ClusterComputeResource:
 		name = m.Name
+	case mo.DistributedVirtualPortgroup:
+		name = m.Name
 	default:
 		panic("not implemented for type " + reflect.TypeOf(r).String())
 	}
