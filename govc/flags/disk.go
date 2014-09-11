@@ -19,7 +19,6 @@ package flags
 import (
 	"errors"
 	"flag"
-	"path/filepath"
 
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -46,64 +45,6 @@ func (f *DiskFlag) IsSet() bool {
 
 func (f *DiskFlag) Path() (string, error) {
 	return f.DatastorePath(f.name)
-}
-
-func (f *DiskFlag) Copy(name string) (types.BaseVirtualDevice, error) {
-	c, err := f.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	dc, err := f.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	src, err := f.Path()
-	if err != nil {
-		return nil, err
-	}
-
-	// TODO: support cross-datacenter
-	dst, err := f.DatastorePath(name)
-	if err != nil {
-		return nil, err
-	}
-
-	dir := filepath.Dir(dst)
-	// ignore mkdir errors, copy will error if dir does not exist
-	_ = c.FileManager().MakeDirectory(dir, dc, false)
-
-	// TODO: adpater, type options
-	spec := &types.VirtualDiskSpec{
-		AdapterType: "lsiLogic",
-		DiskType:    "thin",
-	}
-
-	task, err := c.VirtualDiskManager().CopyVirtualDisk(src, dc, dst, dc, spec, false)
-	if err != nil {
-		return nil, err
-	}
-
-	err = task.Wait()
-	if err != nil {
-		return nil, err
-	}
-
-	return &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key:           -1,
-			ControllerKey: -1,
-			UnitNumber:    -1,
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: true,
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: dst,
-				},
-			},
-		},
-	}, nil
 }
 
 func (f *DiskFlag) Controller() (types.BaseVirtualDevice, error) {
