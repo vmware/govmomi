@@ -164,6 +164,8 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 			return nil, err
 		}
 
+		disk.VirtualDevice.ControllerKey = controller.GetVirtualDevice().Key
+
 		diskAddOp := &types.VirtualDeviceConfigSpec{
 			Operation: types.VirtualDeviceConfigSpecOperationAdd,
 			Device:    disk,

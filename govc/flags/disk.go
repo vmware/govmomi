@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"errors"
 	"flag"
 	"path/filepath"
 
@@ -26,11 +27,13 @@ import (
 type DiskFlag struct {
 	*DatastoreFlag
 
-	name string
+	name    string
+	adapter string
 }
 
 func (f *DiskFlag) Register(fs *flag.FlagSet) {
 	fs.StringVar(&f.name, "disk", "", "Disk path name")
+	fs.StringVar(&f.adapter, "disk.adapter", string(types.VirtualDiskAdapterTypeLsiLogic), "Disk adapter type")
 }
 
 func (f *DiskFlag) Process() error {
@@ -104,17 +107,29 @@ func (f *DiskFlag) Copy(name string) (types.BaseVirtualDevice, error) {
 }
 
 func (f *DiskFlag) Controller() (types.BaseVirtualDevice, error) {
-	// TODO: adapter option
-	return &types.VirtualLsiLogicController{
-		VirtualSCSIController: types.VirtualSCSIController{
-			SharedBus: types.VirtualSCSISharingNoSharing,
+	switch types.VirtualDiskAdapterType(f.adapter) {
+	case types.VirtualDiskAdapterTypeLsiLogic:
+		return &types.VirtualLsiLogicController{
+			VirtualSCSIController: types.VirtualSCSIController{
+				SharedBus: types.VirtualSCSISharingNoSharing,
+				VirtualController: types.VirtualController{
+					BusNumber: 0,
+					VirtualDevice: types.VirtualDevice{
+						Key: -1,
+					},
+				},
+			}}, nil
+	case types.VirtualDiskAdapterTypeIde:
+		return &types.VirtualIDEController{
 			VirtualController: types.VirtualController{
-				BusNumber: 0,
 				VirtualDevice: types.VirtualDevice{
-					Key: -1,
+					Key: 200,
 				},
 			},
-		}}, nil
+		}, nil
+	default:
+		return nil, errors.New("unknown disk.controller")
+	}
 }
 
 func (f *DiskFlag) Disk() (*types.VirtualDisk, error) {
