@@ -137,38 +137,34 @@ class Managed
   end
 
   def dump(io)
-    if !props.empty?
-      include_ref_getter = false
+    include_ref_getter = false
 
-      io.print "type %s struct {\n" % name
+    io.print "type %s struct {\n" % name
 
-      case @data["wsdl_base"]
-      when nil, "ManagedObject", "View"
-        include_ref_getter = true
-        io.print "Self types.ManagedObjectReference\n\n"
-      else
-        io.print "%s\n\n" % @data["wsdl_base"]
-      end
+    case @data["wsdl_base"]
+    when nil, "ManagedObject", "View"
+      include_ref_getter = true
+      io.print "Self types.ManagedObjectReference\n\n"
+    else
+      io.print "%s\n\n" % @data["wsdl_base"]
+    end
 
-      props.each do |p|
-        p.dump(io)
-      end
+    props.each do |p|
+      p.dump(io)
+    end
+    io.print "}\n\n"
+
+    if include_ref_getter
+      io.print "func (m %s) Reference() types.ManagedObjectReference {\n" % [name]
+      io.print "return m.Self\n"
       io.print "}\n\n"
-
-      if include_ref_getter
-        io.print "func (m %s) Reference() types.ManagedObjectReference {\n" % [name]
-        io.print "return m.Self\n"
-        io.print "}\n\n"
-      end
     end
   end
 
   def dump_init(io)
-    if !props.empty?
-      io.print "func init() {\n"
-      io.print "t[\"%s\"] = reflect.TypeOf((*%s)(nil)).Elem()\n" % [name, name]
-      io.print "}\n\n"
-    end
+    io.print "func init() {\n"
+    io.print "t[\"%s\"] = reflect.TypeOf((*%s)(nil)).Elem()\n" % [name, name]
+    io.print "}\n\n"
   end
 end
 
