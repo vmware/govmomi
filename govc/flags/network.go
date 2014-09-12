@@ -31,7 +31,7 @@ type NetworkFlag struct {
 	*DatacenterFlag
 
 	name string
-	net  *types.ManagedObjectReference
+	net  govmomi.Reference
 }
 
 func NewNetworkFlag() *NetworkFlag {
@@ -55,7 +55,7 @@ func (flag *NetworkFlag) Set(name string) error {
 	return nil
 }
 
-func (flag *NetworkFlag) findNetwork(path string) ([]*types.ManagedObjectReference, error) {
+func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 	relativeFunc := func() (govmomi.Reference, error) {
 		dc, err := flag.Datacenter()
 		if err != nil {
@@ -80,16 +80,29 @@ func (flag *NetworkFlag) findNetwork(path string) ([]*types.ManagedObjectReferen
 		return nil, err
 	}
 
-	var ns []*types.ManagedObjectReference
+	var ns []govmomi.Reference
 	for _, e := range es {
 		ref := e.Object.Reference()
-		ns = append(ns, &ref)
+		switch ref.Type {
+		case "Network":
+			r := &govmomi.Network{
+				ManagedObjectReference: ref,
+				InventoryPath:          e.Path,
+			}
+			ns = append(ns, r)
+		case "DistributedVirtualPortgroup":
+			r := &govmomi.DistributedVirtualPortgroup{
+				ManagedObjectReference: ref,
+				InventoryPath:          e.Path,
+			}
+			ns = append(ns, r)
+		}
 	}
 
 	return ns, nil
 }
 
-func (flag *NetworkFlag) findSpecifiedNetwork(path string) (*types.ManagedObjectReference, error) {
+func (flag *NetworkFlag) findSpecifiedNetwork(path string) (govmomi.Reference, error) {
 	networks, err := flag.findNetwork(path)
 	if err != nil {
 		return nil, err
@@ -107,7 +120,7 @@ func (flag *NetworkFlag) findSpecifiedNetwork(path string) (*types.ManagedObject
 	return flag.net, nil
 }
 
-func (flag *NetworkFlag) findDefaultNetwork() (*types.ManagedObjectReference, error) {
+func (flag *NetworkFlag) findDefaultNetwork() (govmomi.Reference, error) {
 	networks, err := flag.findNetwork("*")
 	if err != nil {
 		return nil, err
@@ -125,7 +138,7 @@ func (flag *NetworkFlag) findDefaultNetwork() (*types.ManagedObjectReference, er
 	return flag.net, nil
 }
 
-func (flag *NetworkFlag) Network() (*types.ManagedObjectReference, error) {
+func (flag *NetworkFlag) Network() (govmomi.Reference, error) {
 	if flag.net != nil {
 		return flag.net, nil
 	}
@@ -148,21 +161,23 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
+	var name string
 	var backing types.BaseVirtualDeviceBackingInfo
-	name := flag.name
 
-	switch net.Type {
-	case "Network":
+	switch net.(type) {
+	case *govmomi.Network:
+		name = net.(*govmomi.Network).Name()
 		backing = &types.VirtualEthernetCardNetworkBackingInfo{
 			VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
 				DeviceName: name,
 			},
 		}
-	case "DistributedVirtualPortgroup":
+	case *govmomi.DistributedVirtualPortgroup:
+		name = net.(*govmomi.DistributedVirtualPortgroup).Name()
 		var dvp mo.DistributedVirtualPortgroup
 		var dvs mo.VmwareDistributedVirtualSwitch // TODO: should be mo.BaseDistributedVirtualSwitch
 
-		if err := c.Properties(*net, []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
+		if err := c.Properties(net.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
 			return nil, err
 		}
 
@@ -177,7 +192,7 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 			},
 		}
 	default:
-		return nil, fmt.Errorf("%s not supported", net.Type)
+		return nil, fmt.Errorf("%#v not supported", net)
 	}
 
 	// TODO: adapter type should be an option, default to e1000 for now.
