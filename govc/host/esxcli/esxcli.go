@@ -200,7 +200,10 @@ func (v Values) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 			}
 
 			key := s.Name.Local
-			val := string(t.(xml.CharData))
+			var val string
+			if c, ok := t.(xml.CharData); ok {
+				val = string(c)
+			}
 			v[key] = append(v[key], val)
 		}
 	}
