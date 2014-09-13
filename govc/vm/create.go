@@ -34,6 +34,7 @@ type create struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.DiskFlag
+	*flags.IsoFlag
 	*flags.NetworkFlag
 
 	memory  int
@@ -189,6 +190,16 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 		}
 
 		spec.AddChange(diskAddOp)
+	}
+
+	if cmd.IsoFlag.IsSet() {
+		device, err := cmd.IsoFlag.Device()
+		if err != nil {
+			return nil, err
+		}
+
+		spec.AddDevice(cmd.IsoFlag.Controller())
+		spec.AddDevice(device)
 	}
 
 	netdev, err := cmd.NetworkFlag.Device()
