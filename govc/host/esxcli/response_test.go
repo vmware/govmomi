@@ -21,7 +21,6 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
@@ -45,35 +44,8 @@ func load(name string) *Response {
 	return &b
 }
 
-func TestSystemHostnameSetRequest(t *testing.T) {
-	expect := `<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
-  <Body>
-    <VimEsxCLIsystemhostnameset xmlns="urn:vim25">
-      <_this type="VimEsxCLIsystemhostname">ha-cli-handler-system-hostname</_this>
-      <host>esxbox</host>
-    </VimEsxCLIsystemhostnameset>
-  </Body>
-</Envelope>`
-
-	args := []string{"system", "hostname", "set", "--host", "esxbox"}
-	r := &Request{}
-	r.ParseArgs(args)
-
-	e := soap.Envelope{Body: r}
-	b, err := xml.MarshalIndent(e, "", "  ")
-	if err != nil {
-		t.Fatal(err)
-	}
-	if expect != string(b) {
-		t.Errorf("%s\n", string(b))
-	}
-}
-
 func TestSystemHostnameGetResponse(t *testing.T) {
 	res := load("fixtures/system_hostname_get.xml")
-	if res.Fault() != nil {
-		t.Error("Fault should be nil")
-	}
 
 	expect := []Values{
 		{
@@ -90,9 +62,6 @@ func TestSystemHostnameGetResponse(t *testing.T) {
 
 func TestNetworkVmList(t *testing.T) {
 	res := load("fixtures/network_vm_list.xml")
-	if res.Fault() != nil {
-		t.Error("Fault should be nil")
-	}
 
 	expect := []Values{
 		{
@@ -114,12 +83,23 @@ func TestNetworkVmList(t *testing.T) {
 	}
 }
 
-func TestMethodNameFault(t *testing.T) {
-	res := load("fixtures/method_name_fault.xml")
-	if res.Fault() == nil {
-		t.Error("Fault should not nil")
+func TestNetworkVmPortList(t *testing.T) {
+	r := load("fixtures/network_vm_port_list.xml")
+
+	expect := []Values{
+		{
+			"IPAddress":    {"192.168.247.149"},
+			"MACAddress":   {"00:0c:29:12:b2:cf"},
+			"PortID":       {"33554438"},
+			"Portgroup":    {"VM Network"},
+			"TeamUplink":   {"vmnic0"},
+			"UplinkPortID": {"33554434"},
+			"vSwitch":      {"vSwitch0"},
+			"DVPortID":     {""},
+		},
 	}
-	if len(res.Values) != 0 {
-		t.Error("Values should be empty")
+
+	if !reflect.DeepEqual(r.Values, expect) {
+		t.Errorf("%s != %s", r.Values, expect)
 	}
 }
