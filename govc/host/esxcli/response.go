@@ -2,36 +2,14 @@ package esxcli
 
 import (
 	"io"
-	"strings"
 
 	"github.com/vmware/govmomi/vim25/xml"
 )
-
-type Request struct {
-	Args  []string
-	Flags map[string]string
-}
 
 type Values map[string][]string
 
 type Response struct {
 	Values []Values
-}
-
-func (r *Request) ParseArgs(args []string) {
-	r.Flags = make(map[string]string)
-
-	for i := 0; i < len(args); i++ {
-		arg := args[i]
-
-		if strings.HasPrefix(arg, "--") {
-			i++
-			arg = strings.Replace(arg, "-", "", -1)
-			r.Flags[arg] = args[i]
-		} else {
-			r.Args = append(r.Args, arg)
-		}
-	}
 }
 
 func (v Values) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {

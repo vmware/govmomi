@@ -18,7 +18,6 @@ package esxcli
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -68,36 +67,70 @@ func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error)
 	return e, nil
 }
 
-func (e *Executor) Run(args []string) (*Response, error) {
-	req := Request{}
-	req.ParseArgs(args)
+func (e *Executor) ParamTypeInfo(c *Command) ([]types.DynamicTypeMgrParamTypeInfo, error) {
+	req := types.DynamicTypeMgrQueryTypeInfo{
+		This: e.dtm.ManagedObjectReference,
+		FilterSpec: &types.DynamicTypeMgrTypeFilterSpec{
+			TypeSubstr: c.Namespace(),
+		},
+	}
 
-	ns := req.Args[:len(req.Args)-1]
+	res, err := methods.DynamicTypeMgrQueryTypeInfo(e.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	name := c.Name()
+	for _, info := range res.Returnval.ManagedTypeInfo {
+		for _, method := range info.Method {
+			if method.Name == name {
+				return method.ParamTypeInfo, nil
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("method '%s' not found in name space '%s'", name, c.Namespace())
+}
+
+func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, error) {
+	c := NewCommand(args)
+
+	params, err := e.ParamTypeInfo(c)
+	if err != nil {
+		return nil, err
+	}
+
+	sargs, err := c.Parse(params)
+	if err != nil {
+		return nil, err
+	}
 
 	sreq := types.ExecuteSoap{
 		This:     e.mme.ManagedObjectReference,
-		Moid:     "ha-cli-handler-" + strings.Join(ns, "-"),
-		Method:   "vim.EsxCLI." + strings.Join(req.Args, "."),
+		Moid:     c.Moid(),
+		Method:   c.Method(),
 		Version:  "urn:vim25/5.0",
-		Argument: []types.ReflectManagedMethodExecuterSoapArgument{},
+		Argument: sargs,
 	}
 
-	for key, val := range req.Flags {
-		sreq.Argument = append(sreq.Argument, types.ReflectManagedMethodExecuterSoapArgument{
-			Name: key,
-			Val:  fmt.Sprintf("<%s>%s</%s>", key, val, key),
-		})
+	return &sreq, nil
+}
+
+func (e *Executor) Run(args []string) (*Response, error) {
+	req, err := e.NewRequest(args)
+	if err != nil {
+		return nil, err
 	}
 
-	sres, err := methods.ExecuteSoap(e.c, &sreq)
+	x, err := methods.ExecuteSoap(e.c, req)
 	if err != nil {
 		return nil, err
 	}
 
 	res := &Response{}
 
-	if sres.Returnval != nil {
-		if err := xml.Unmarshal([]byte(sres.Returnval.Response), res); err != nil {
+	if x.Returnval != nil {
+		if err := xml.Unmarshal([]byte(x.Returnval.Response), res); err != nil {
 			return nil, err
 		}
 	}
