@@ -29,6 +29,26 @@ type Command struct {
 	args []string
 }
 
+type CommandInfoItem struct {
+	Name        string `xml:"name"`
+	DisplayName string `xml:"displayName"`
+	Help        string `xml:"help"`
+}
+
+type CommandInfoParam struct {
+	CommandInfoItem
+	Aliases []string `xml:"aliases"`
+	Flag    bool     `xml:"flag"`
+}
+
+type CommandInfo struct {
+	CommandInfoItem
+	Method []struct {
+		CommandInfoItem
+		Param []CommandInfoParam `xml:"param"`
+	} `xml:"method"`
+}
+
 func NewCommand(args []string) *Command {
 	c := &Command{}
 
@@ -60,16 +80,18 @@ func (c *Command) Moid() string {
 	return "ha-cli-handler-" + strings.Join(c.name[:len(c.name)-1], "-")
 }
 
-// Parse generates a flag.FlagSet based on the given []types.DynamicTypeMgrParamTypeInfo and
+// Parse generates a flag.FlagSet based on the given []CommandInfoParam and
 // returns arguments for use with methods.ExecuteSoap
-func (c *Command) Parse(params []types.DynamicTypeMgrParamTypeInfo) ([]types.ReflectManagedMethodExecuterSoapArgument, error) {
-	flags := flag.NewFlagSet(c.Method(), flag.ExitOnError)
+func (c *Command) Parse(params []CommandInfoParam) ([]types.ReflectManagedMethodExecuterSoapArgument, error) {
+	flags := flag.NewFlagSet(strings.Join(c.name, " "), flag.ExitOnError)
 	vals := make([]string, len(params))
 
 	for i, p := range params {
 		v := &vals[i]
-		flags.StringVar(v, p.Name, "", p.Name)
-		flags.StringVar(v, p.Name[:1], "", p.Name)
+		for _, a := range p.Aliases {
+			a = strings.TrimPrefix(a[1:], "-")
+			flags.StringVar(v, a, "", p.Help)
+		}
 	}
 
 	err := flags.Parse(c.args)
@@ -83,13 +105,15 @@ func (c *Command) Parse(params []types.DynamicTypeMgrParamTypeInfo) ([]types.Ref
 		if vals[i] == "" {
 			continue
 		}
-		key := p.Name
-		val := vals[i]
-		args = append(args, types.ReflectManagedMethodExecuterSoapArgument{
-			Name: key,
-			Val:  fmt.Sprintf("<%s>%s</%s>", key, val, key),
-		})
+		args = append(args, c.Argument(p.Name, vals[i]))
 	}
 
 	return args, nil
+}
+
+func (c *Command) Argument(name string, val string) types.ReflectManagedMethodExecuterSoapArgument {
+	return types.ReflectManagedMethodExecuterSoapArgument{
+		Name: name,
+		Val:  fmt.Sprintf("<%s>%s</%s>", name, val, name),
+	}
 }

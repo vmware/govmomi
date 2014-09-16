@@ -17,6 +17,7 @@ limitations under the License.
 package esxcli
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/vmware/govmomi"
@@ -67,25 +68,25 @@ func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error)
 	return e, nil
 }
 
-func (e *Executor) ParamTypeInfo(c *Command) ([]types.DynamicTypeMgrParamTypeInfo, error) {
-	req := types.DynamicTypeMgrQueryTypeInfo{
-		This: e.dtm.ManagedObjectReference,
-		FilterSpec: &types.DynamicTypeMgrTypeFilterSpec{
-			TypeSubstr: c.Namespace(),
+func (e *Executor) CommandInfo(c *Command) ([]CommandInfoParam, error) {
+	req := types.ExecuteSoap{
+		Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
+		Method: "vim.CLIInfo.FetchCLIInfo",
+		Argument: []types.ReflectManagedMethodExecuterSoapArgument{
+			c.Argument("typeName", "vim.EsxCLI."+c.Namespace()),
 		},
 	}
 
-	res, err := methods.DynamicTypeMgrQueryTypeInfo(e.c, &req)
-	if err != nil {
+	var info CommandInfo
+
+	if err := e.Execute(&req, &info); err != nil {
 		return nil, err
 	}
 
 	name := c.Name()
-	for _, info := range res.Returnval.ManagedTypeInfo {
-		for _, method := range info.Method {
-			if method.Name == name {
-				return method.ParamTypeInfo, nil
-			}
+	for _, method := range info.Method {
+		if method.Name == name {
+			return method.Param, nil
 		}
 	}
 
@@ -95,7 +96,7 @@ func (e *Executor) ParamTypeInfo(c *Command) ([]types.DynamicTypeMgrParamTypeInf
 func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, error) {
 	c := NewCommand(args)
 
-	params, err := e.ParamTypeInfo(c)
+	params, err := e.CommandInfo(c)
 	if err != nil {
 		return nil, err
 	}
@@ -106,14 +107,34 @@ func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, error) {
 	}
 
 	sreq := types.ExecuteSoap{
-		This:     e.mme.ManagedObjectReference,
 		Moid:     c.Moid(),
 		Method:   c.Method(),
-		Version:  "urn:vim25/5.0",
 		Argument: sargs,
 	}
 
 	return &sreq, nil
+}
+
+func (e *Executor) Execute(req *types.ExecuteSoap, res interface{}) error {
+	req.This = e.mme.ManagedObjectReference
+	req.Version = "urn:vim25/5.0"
+
+	x, err := methods.ExecuteSoap(e.c, req)
+	if err != nil {
+		return err
+	}
+
+	if x.Returnval != nil {
+		if x.Returnval.Fault != nil {
+			return errors.New(x.Returnval.Fault.FaultMsg)
+		}
+
+		if err := xml.Unmarshal([]byte(x.Returnval.Response), res); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (e *Executor) Run(args []string) (*Response, error) {
@@ -122,17 +143,10 @@ func (e *Executor) Run(args []string) (*Response, error) {
 		return nil, err
 	}
 
-	x, err := methods.ExecuteSoap(e.c, req)
-	if err != nil {
-		return nil, err
-	}
-
 	res := &Response{}
 
-	if x.Returnval != nil {
-		if err := xml.Unmarshal([]byte(x.Returnval.Response), res); err != nil {
-			return nil, err
-		}
+	if err := e.Execute(req, res); err != nil {
+		return nil, err
 	}
 
 	return res, nil

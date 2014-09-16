@@ -43,22 +43,26 @@ func TestSystemSettingsAdvancedSetCommand(t *testing.T) {
 		}
 	}
 
-	params := []types.DynamicTypeMgrParamTypeInfo{
+	params := []CommandInfoParam{
 		{
-			Name: "default",
-			Type: "boolean",
+			CommandInfoItem: CommandInfoItem{Name: "default", DisplayName: "default", Help: "Reset the option to its default value."},
+			Aliases:         []string{"-d", "--default"},
+			Flag:            true,
 		},
 		{
-			Name: "intvalue",
-			Type: "long",
+			CommandInfoItem: CommandInfoItem{Name: "intvalue", DisplayName: "int-value", Help: "If the option is an integer value use this option."},
+			Aliases:         []string{"-i", "--int-value"},
+			Flag:            false,
 		},
 		{
-			Name: "option",
-			Type: "string",
+			CommandInfoItem: CommandInfoItem{Name: "option", DisplayName: "option", Help: "The name of the option to set the value of. Example: \"/Misc/HostName\""},
+			Aliases:         []string{"-o", "--option"},
+			Flag:            false,
 		},
 		{
-			Name: "stringvalue",
-			Type: "string",
+			CommandInfoItem: CommandInfoItem{Name: "stringvalue", DisplayName: "string-value", Help: "If the option is a string use this option."},
+			Aliases:         []string{"-s", "--string-value"},
+			Flag:            false,
 		},
 	}
 
@@ -105,7 +109,7 @@ func TestNetworkVmListCommand(t *testing.T) {
 		}
 	}
 
-	params := []types.DynamicTypeMgrParamTypeInfo{}
+	var params []CommandInfoParam
 
 	args, err := c.Parse(params)
 	if err != nil {
