@@ -101,18 +101,3 @@ func (f *DiskFlag) Disk() (*types.VirtualDisk, error) {
 
 	return disk, nil
 }
-
-func (f *DiskFlag) Cdrom(path string) (types.BaseVirtualDevice, error) {
-	return &types.VirtualCdrom{
-		VirtualDevice: types.VirtualDevice{
-			Key:           -2,
-			ControllerKey: 200,
-			UnitNumber:    -1,
-			Backing: &types.VirtualCdromIsoBackingInfo{
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: path,
-				},
-			},
-		},
-	}, nil
-}
