@@ -20,13 +20,17 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/govc/host/esxcli"
 )
 
 type ip struct {
 	*flags.OutputFlag
 	*flags.SearchFlag
+
+	esx bool
 }
 
 func init() {
@@ -35,6 +39,7 @@ func init() {
 
 func (cmd *ip) Register(f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+	f.BoolVar(&cmd.esx, "esxcli", false, "Use esxcli instead of guest tools")
 }
 
 func (cmd *ip) Process() error { return nil }
@@ -50,8 +55,18 @@ func (cmd *ip) Run(f *flag.FlagSet) error {
 		return err
 	}
 
+	var get func(*govmomi.VirtualMachine) (string, error)
+
+	if cmd.esx {
+		get = esxcli.NewGuestInfo(c).IpAddress
+	} else {
+		get = func(vm *govmomi.VirtualMachine) (string, error) {
+			return vm.WaitForIP(c)
+		}
+	}
+
 	for _, vm := range vms {
-		ip, err := vm.WaitForIP(c)
+		ip, err := get(vm)
 		if err != nil {
 			return err
 		}
