@@ -1,9 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
- xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
- xmlns:xsd="http://www.w3.org/2001/XMLSchema"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<VimEsxCLIsystemhostnamegetResponse xmlns="urn:vim25"><returnval><DomainName>localdomain</DomainName><FullyQualifiedDomainName>esxbox.localdomain</FullyQualifiedDomainName><HostName>esxbox</HostName></returnval></VimEsxCLIsystemhostnamegetResponse>
-</soapenv:Body>
-</soapenv:Envelope>
+<obj xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:vim25" versionId="5.0" xsi:type="VimEsxCLIsystemhostnamegetFullyQualifiedHostName">
+ <DomainName>localdomain</DomainName>
+ <FullyQualifiedDomainName>esxbox.localdomain</FullyQualifiedDomainName>
+ <HostName>esxbox</HostName>
+</obj>

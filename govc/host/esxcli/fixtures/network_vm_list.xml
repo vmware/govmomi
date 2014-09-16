@@ -1,9 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<soapenv:Envelope xmlns:soapenc="http://schemas.xmlsoap.org/soap/encoding/"
- xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
- xmlns:xsd="http://www.w3.org/2001/XMLSchema"
- xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-<soapenv:Body>
-<VimEsxCLInetworkvmlistResponse xmlns="urn:vim25"><returnval><Name>foo</Name><Networks>VM Network</Networks><Networks>dougm</Networks><NumPorts>2</NumPorts><WorldID>98842</WorldID></returnval><returnval><Name>bar</Name><Networks>VM Network</Networks><NumPorts>1</NumPorts><WorldID>236235</WorldID></returnval></VimEsxCLInetworkvmlistResponse>
-</soapenv:Body>
-</soapenv:Envelope>
+<obj xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="urn:vim25" versionId="5.0" xsi:type="ArrayOfDataObject">
+ <DataObject xsi:type="VimEsxCLInetworkvmlistVM">
+  <Name>foo</Name>
+  <Networks>VM Network</Networks>
+  <Networks>dougm</Networks>
+  <NumPorts>2</NumPorts>
+  <WorldID>98842</WorldID>
+ </DataObject>
+ <DataObject xsi:type="VimEsxCLInetworkvmlistVM">
+  <Name>bar</Name>
+  <Networks>VM Network</Networks>
+  <NumPorts>1</NumPorts>
+  <WorldID>236235</WorldID>
+ </DataObject>
+</obj>
