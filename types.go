@@ -26,24 +26,38 @@ func newReference(e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":
 		return &Folder{ManagedObjectReference: e}
+	case "StoragePod":
+		return &StoragePod{
+			Folder{ManagedObjectReference: e},
+		}
 	case "Datacenter":
 		return &Datacenter{ManagedObjectReference: e}
 	case "VirtualMachine":
 		return &VirtualMachine{ManagedObjectReference: e}
-	case "VirtualApp": // Skip
-		return nil
+	case "VirtualApp":
+		return &VirtualApp{
+			ResourcePool{ManagedObjectReference: e},
+		}
 	case "ComputeResource":
 		return &ComputeResource{ManagedObjectReference: e}
+	case "ClusterComputeResource":
+		return &ClusterComputeResource{
+			ComputeResource{ManagedObjectReference: e},
+		}
 	case "HostSystem":
 		return &HostSystem{ManagedObjectReference: e}
 	case "Network":
 		return &Network{ManagedObjectReference: e}
 	case "ResourcePool":
 		return &ResourcePool{ManagedObjectReference: e}
-	case "DistributedVirtualSwitch": // Skip
-		return nil
-	case "DistributedVirtualPortgroup": // Skip
-		return nil
+	case "DistributedVirtualSwitch":
+		return &DistributedVirtualSwitch{ManagedObjectReference: e}
+	case "VmwareDistributedVirtualSwitch":
+		return &VmwareDistributedVirtualSwitch{
+			DistributedVirtualSwitch{ManagedObjectReference: e},
+		}
+	case "DistributedVirtualPortgroup":
+		return &DistributedVirtualPortgroup{ManagedObjectReference: e}
 	case "Datastore":
 		return &Datastore{ManagedObjectReference: e}
 	default:
