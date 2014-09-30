@@ -46,8 +46,11 @@ func (flag *AuthFlag) Set(s string) error {
 }
 
 func (flag *AuthFlag) Register(f *flag.FlagSet) {
-	flag.Set(os.Getenv("GOVC_GUEST_LOGIN"))
-	f.Var(flag, "l", "Guest VM login credentials")
+	env := "GOVC_GUEST_LOGIN"
+	value := os.Getenv(env)
+	flag.Set(value)
+	usage := fmt.Sprintf("Guest VM credentials [%s]", env)
+	f.Var(flag, "l", usage)
 }
 
 func (flag *AuthFlag) Process() error {

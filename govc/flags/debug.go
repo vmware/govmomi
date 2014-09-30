@@ -18,6 +18,7 @@ package flags
 
 import (
 	"flag"
+	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -31,16 +32,15 @@ type DebugFlag struct {
 }
 
 func (flag *DebugFlag) Register(f *flag.FlagSet) {
-	var enable bool
-
-	switch env := strings.ToLower(os.Getenv("GOVC_DEBUG")); env {
-	case "", "0", "false":
-		enable = false
-	default:
+	env := "GOVC_DEBUG"
+	enable := false
+	switch env := strings.ToLower(os.Getenv(env)); env {
+	case "1", "true":
 		enable = true
 	}
 
-	f.BoolVar(&flag.enable, "debug", enable, "Store debug logs [GOVC_DEBUG]")
+	usage := fmt.Sprintf("Store debug logs [%s]", env)
+	f.BoolVar(&flag.enable, "debug", enable, usage)
 }
 
 func (flag *DebugFlag) Process() error {

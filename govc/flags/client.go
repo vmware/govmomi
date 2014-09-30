@@ -80,16 +80,24 @@ func (flag *ClientFlag) Set(s string) error {
 
 func (flag *ClientFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		flag.Set(os.Getenv("GOVC_URL"))
-		f.Var(flag, "u", cDescr+" [GOVC_URL]")
-
-		insecure := false
-		switch env := strings.ToLower(os.Getenv("GOVC_INSECURE")); env {
-		case "1", "true":
-			insecure = true
+		{
+			env := "GOVC_URL"
+			flag.Set(os.Getenv(env))
+			usage := fmt.Sprintf("%s [%s]", cDescr, env)
+			f.Var(flag, "u", usage)
 		}
 
-		f.BoolVar(&flag.insecure, "k", insecure, "Skip verification of server certificate [GOVC_INSECURE]")
+		{
+			env := "GOVC_INSECURE"
+			insecure := false
+			switch env := strings.ToLower(os.Getenv(env)); env {
+			case "1", "true":
+				insecure = true
+			}
+
+			usage := fmt.Sprintf("Skip verification of server certificate [%s]", env)
+			f.BoolVar(&flag.insecure, "k", insecure, usage)
+		}
 	})
 }
 

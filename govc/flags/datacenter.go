@@ -19,6 +19,7 @@ package flags
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 
@@ -35,8 +36,10 @@ type DatacenterFlag struct {
 
 func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		flag.path = os.Getenv("GOVC_DATACENTER")
-		f.StringVar(&flag.path, "dc", "", "Datacenter [GOVC_DATACENTER]")
+		env := "GOVC_DATACENTER"
+		value := os.Getenv(env)
+		usage := fmt.Sprintf("Datacenter [%s]", env)
+		f.StringVar(&flag.path, "dc", value, usage)
 	})
 }
 

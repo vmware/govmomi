@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -30,17 +31,24 @@ import (
 type NetworkFlag struct {
 	*DatacenterFlag
 
-	name string
-	net  govmomi.Reference
+	register sync.Once
+	name     string
+	net      govmomi.Reference
 }
 
 func NewNetworkFlag() *NetworkFlag {
-	f := &NetworkFlag{}
-	_ = f.Set(os.Getenv("GOVC_NETWORK"))
-	return f
+	return &NetworkFlag{}
 }
 
-func (flag *NetworkFlag) Register(f *flag.FlagSet) {}
+func (flag *NetworkFlag) Register(f *flag.FlagSet) {
+	flag.register.Do(func() {
+		env := "GOVC_NETWORK"
+		value := os.Getenv(env)
+		flag.Set(value)
+		usage := fmt.Sprintf("Network [%s]", env)
+		f.Var(flag, "net", usage)
+	})
+}
 
 func (flag *NetworkFlag) Process() error {
 	return nil

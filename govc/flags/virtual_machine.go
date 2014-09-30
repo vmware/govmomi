@@ -19,6 +19,7 @@ package flags
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 
@@ -41,7 +42,10 @@ func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchVirtualMachines)
 
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "vm", os.Getenv("GOVC_VM"), "Virtual machine [GOVC_VM]")
+		env := "GOVC_VM"
+		value := os.Getenv(env)
+		usage := fmt.Sprintf("Virtual machine [%s]", env)
+		f.StringVar(&flag.name, "vm", value, usage)
 	})
 }
 
