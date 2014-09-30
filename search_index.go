@@ -41,7 +41,7 @@ func (s SearchIndex) FindByDatastorePath(dc *Datacenter, path string) (Reference
 	if res.Returnval == nil {
 		return nil, nil
 	}
-	return newReference(*res.Returnval), nil
+	return NewReference(*res.Returnval), nil
 }
 
 // FindByDnsName finds a virtual machine or host by DNS name.
@@ -64,7 +64,7 @@ func (s SearchIndex) FindByDnsName(dc *Datacenter, dnsName string, vmSearch bool
 	if res.Returnval == nil {
 		return nil, nil
 	}
-	return newReference(*res.Returnval), nil
+	return NewReference(*res.Returnval), nil
 }
 
 // FindByInventoryPath finds a managed entity based on its location in the inventory.
@@ -82,7 +82,7 @@ func (s SearchIndex) FindByInventoryPath(path string) (Reference, error) {
 	if res.Returnval == nil {
 		return nil, nil
 	}
-	return newReference(*res.Returnval), nil
+	return NewReference(*res.Returnval), nil
 }
 
 // FindByIp finds a virtual machine or host by IP address.
@@ -105,7 +105,7 @@ func (s SearchIndex) FindByIp(dc *Datacenter, ip string, vmSearch bool) (Referen
 	if res.Returnval == nil {
 		return nil, nil
 	}
-	return newReference(*res.Returnval), nil
+	return NewReference(*res.Returnval), nil
 }
 
 // FindByUuid finds a virtual machine or host by UUID.
@@ -128,7 +128,7 @@ func (s SearchIndex) FindByUuid(dc *Datacenter, uuid string, vmSearch bool) (Ref
 	if res.Returnval == nil {
 		return nil, nil
 	}
-	return newReference(*res.Returnval), nil
+	return NewReference(*res.Returnval), nil
 }
 
 // FindChild finds a particular child based on a managed entity name.
@@ -147,5 +147,5 @@ func (s SearchIndex) FindChild(entity Reference, name string) (Reference, error)
 	if res.Returnval == nil {
 		return nil, nil
 	}
-	return newReference(*res.Returnval), nil
+	return NewReference(*res.Returnval), nil
 }

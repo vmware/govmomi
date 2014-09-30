@@ -47,7 +47,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 	var rs []Reference
 
 	for _, e := range mf.ChildEntity {
-		if r := newReference(e); r != nil {
+		if r := NewReference(e); r != nil {
 			rs = append(rs, r)
 		}
 	}

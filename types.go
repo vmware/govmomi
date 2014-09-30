@@ -22,7 +22,7 @@ type Reference interface {
 	Reference() types.ManagedObjectReference
 }
 
-func newReference(e types.ManagedObjectReference) Reference {
+func NewReference(e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":
 		return &Folder{ManagedObjectReference: e}
