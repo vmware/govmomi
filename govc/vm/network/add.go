@@ -34,9 +34,7 @@ func init() {
 	cli.Register("vm.network.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {
-	cmd.NetworkFlag = flags.NewNetworkFlag()
-}
+func (cmd *add) Register(f *flag.FlagSet) {}
 
 func (cmd *add) Process() error { return nil }
 
@@ -55,7 +53,10 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return errors.New("please specify a vm")
 	}
 
-	_ = cmd.NetworkFlag.Set(f.Arg(0))
+	// Set network if specified as extra argument.
+	if f.NArg() > 0 {
+		_ = cmd.NetworkFlag.Set(f.Arg(0))
+	}
 
 	net, err := cmd.NetworkFlag.Device()
 	if err != nil {

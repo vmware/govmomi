@@ -19,6 +19,7 @@ package flags
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 
@@ -42,7 +43,10 @@ func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchHosts)
 
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "host", os.Getenv("GOVC_HOST"), "Host system [GOVC_HOST]")
+		env := "GOVC_HOST"
+		value := os.Getenv(env)
+		usage := fmt.Sprintf("Host system [%s]", env)
+		f.StringVar(&flag.name, "host", value, usage)
 	})
 }
 

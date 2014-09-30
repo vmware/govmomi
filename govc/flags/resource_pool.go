@@ -19,6 +19,7 @@ package flags
 import (
 	"errors"
 	"flag"
+	"fmt"
 	"os"
 	"sync"
 
@@ -36,7 +37,10 @@ type ResourcePoolFlag struct {
 
 func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
-		f.StringVar(&flag.name, "pool", os.Getenv("GOVC_RESOURCE_POOL"), "Resource Pool [GOVC_RESOURCE_POOL]")
+		env := "GOVC_RESOURCE_POOL"
+		value := os.Getenv(env)
+		usage := fmt.Sprintf("Resource pool [%s]", env)
+		f.StringVar(&flag.name, "pool", value, usage)
 	})
 }
 
