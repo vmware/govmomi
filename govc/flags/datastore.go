@@ -205,7 +205,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 
 	info, err := task.WaitForResult(nil)
 	if err != nil {
-		if info.Error != nil {
+		if info != nil && info.Error != nil {
 			_, ok := info.Error.Fault.(*types.FileNotFound)
 			if ok {
 				// FileNotFound means the base path doesn't exist.
