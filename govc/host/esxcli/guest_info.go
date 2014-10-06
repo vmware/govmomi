@@ -17,7 +17,6 @@ limitations under the License.
 package esxcli
 
 import (
-	"fmt"
 	"strings"
 
 	"github.com/vmware/govmomi"
@@ -57,15 +56,7 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 		return nil, err
 	}
 
-	res, err := e.Run([]string{"system", "settings", "advanced", "list", "-o", "/Net/GuestIPHack"})
-	if err != nil {
-		return nil, err
-	}
-	if res.Values[0]["IntValue"][0] != "1" {
-		return nil, fmt.Errorf("/Net/GuestIPHack is not enabled on %s", ref.Value)
-	}
-
-	res, err = e.Run([]string{"vm", "process", "list"})
+	res, err := e.Run([]string{"vm", "process", "list"})
 	if err != nil {
 		return nil, err
 	}
@@ -86,6 +77,10 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 	return h, nil
 }
 
+// IpAddress attempts to find the guest IP address using esxcli.
+// ESX hosts must be configured with the /Net/GuestIPHack enabled.
+// For example:
+// $ govc host.esxcli -- system settings advanced set -o /Net/GuestIPHack -i 1
 func (g *GuestInfo) IpAddress(vm *govmomi.VirtualMachine) (string, error) {
 	var mvm mo.VirtualMachine
 	err := g.c.Properties(vm.ManagedObjectReference, []string{"runtime.host", "config.uuid"}, &mvm)
