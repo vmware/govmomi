@@ -55,11 +55,6 @@ func (cmd *power) Process() error {
 }
 
 func (cmd *power) Run(f *flag.FlagSet) error {
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err
@@ -71,10 +66,10 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 		switch {
 		case cmd.On:
 			fmt.Fprintf(cmd, "Powering on %s... ", vm.Reference())
-			task, err = vm.PowerOn(c)
+			task, err = vm.PowerOn()
 		case cmd.Off:
 			fmt.Fprintf(cmd, "Powering off %s... ", vm.Reference())
-			task, err = vm.PowerOff(c)
+			task, err = vm.PowerOff()
 		}
 
 		if err != nil {

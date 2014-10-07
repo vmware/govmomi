@@ -90,7 +90,7 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 	spec := types.VirtualMachineConfigSpec{}
 	spec.DeviceChange = append(spec.DeviceChange, config)
 
-	task, err := vm.Reconfigure(c, spec)
+	task, err := vm.Reconfigure(spec)
 	if err != nil {
 		return err
 	}

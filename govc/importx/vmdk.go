@@ -320,7 +320,7 @@ func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
 	spec := new(configSpec)
 	dsFile := spec.RemoveDisk(&mvm)
 
-	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
+	task, err := vm.Reconfigure(spec.ToSpec())
 	if err != nil {
 		return "", err
 	}
@@ -363,7 +363,7 @@ func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.Virt
 		Location: types.VirtualMachineRelocateSpec{},
 	}
 
-	task, err := vm.Clone(cmd.Client, folders.VmFolder, name, spec)
+	task, err := vm.Clone(folders.VmFolder, name, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -382,7 +382,7 @@ func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {
 		return err
 	}
 
-	task, err := vm.Destroy(cmd.Client)
+	task, err := vm.Destroy()
 	if err != nil {
 		return err
 	}

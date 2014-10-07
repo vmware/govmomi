@@ -39,18 +39,13 @@ func (cmd *destroy) Register(f *flag.FlagSet) {
 func (cmd *destroy) Process() error { return nil }
 
 func (cmd *destroy) Run(f *flag.FlagSet) error {
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err
 	}
 
 	for _, vm := range vms {
-		task, err := vm.PowerOff(c)
+		task, err := vm.PowerOff()
 		if err != nil {
 			return err
 		}
@@ -59,7 +54,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		// vm.Destroy will fail if the VM is still powered on.
 		_ = task.Wait()
 
-		task, err = vm.Destroy(c)
+		task, err = vm.Destroy()
 		if err != nil {
 			return err
 		}

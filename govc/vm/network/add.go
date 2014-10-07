@@ -39,11 +39,6 @@ func (cmd *add) Register(f *flag.FlagSet) {}
 func (cmd *add) Process() error { return nil }
 
 func (cmd *add) Run(f *flag.FlagSet) error {
-	c, err := cmd.ClientFlag.Client()
-	if err != nil {
-		return err
-	}
-
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return err
@@ -71,7 +66,7 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 	spec := types.VirtualMachineConfigSpec{}
 	spec.DeviceChange = append(spec.DeviceChange, config)
 
-	task, err := vm.Reconfigure(c, spec)
+	task, err := vm.Reconfigure(spec)
 	if err != nil {
 		return err
 	}

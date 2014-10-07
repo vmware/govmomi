@@ -163,7 +163,7 @@ func (cmd *add) CreateDisk(mvm mo.VirtualMachine) error {
 	spec := new(configSpec)
 	spec.AddChange(diskAddOp)
 
-	task, err := cmd.VirtualMachine.Reconfigure(cmd.Client, spec.ToSpec())
+	task, err := cmd.VirtualMachine.Reconfigure(spec.ToSpec())
 	if err != nil {
 		return err
 	}
