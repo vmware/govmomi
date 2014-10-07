@@ -39,13 +39,13 @@ func (o HttpNfcLease) Reference() types.ManagedObjectReference {
 }
 
 // HttpNfcLeaseAbort wraps methods.HttpNfcLeaseAbort
-func (o HttpNfcLease) HttpNfcLeaseAbort(c *Client, fault *types.LocalizedMethodFault) error {
+func (o HttpNfcLease) HttpNfcLeaseAbort(fault *types.LocalizedMethodFault) error {
 	req := types.HttpNfcLeaseAbort{
 		This:  o.Reference(),
 		Fault: fault,
 	}
 
-	_, err := methods.HttpNfcLeaseAbort(c, &req)
+	_, err := methods.HttpNfcLeaseAbort(o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -54,12 +54,12 @@ func (o HttpNfcLease) HttpNfcLeaseAbort(c *Client, fault *types.LocalizedMethodF
 }
 
 // HttpNfcLeaseComplete wraps methods.HttpNfcLeaseComplete
-func (o HttpNfcLease) HttpNfcLeaseComplete(c *Client) error {
+func (o HttpNfcLease) HttpNfcLeaseComplete() error {
 	req := types.HttpNfcLeaseComplete{
 		This: o.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseComplete(c, &req)
+	_, err := methods.HttpNfcLeaseComplete(o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -68,12 +68,12 @@ func (o HttpNfcLease) HttpNfcLeaseComplete(c *Client) error {
 }
 
 // HttpNfcLeaseGetManifest wraps methods.HttpNfcLeaseGetManifest
-func (o HttpNfcLease) HttpNfcLeaseGetManifest(c *Client) error {
+func (o HttpNfcLease) HttpNfcLeaseGetManifest() error {
 	req := types.HttpNfcLeaseGetManifest{
 		This: o.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseGetManifest(c, &req)
+	_, err := methods.HttpNfcLeaseGetManifest(o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -82,13 +82,13 @@ func (o HttpNfcLease) HttpNfcLeaseGetManifest(c *Client) error {
 }
 
 // HttpNfcLeaseProgress wraps methods.HttpNfcLeaseProgress
-func (o HttpNfcLease) HttpNfcLeaseProgress(c *Client, percent int) error {
+func (o HttpNfcLease) HttpNfcLeaseProgress(percent int) error {
 	req := types.HttpNfcLeaseProgress{
 		This:    o.Reference(),
 		Percent: percent,
 	}
 
-	_, err := methods.HttpNfcLeaseProgress(c, &req)
+	_, err := methods.HttpNfcLeaseProgress(o.c, &req)
 	if err != nil {
 		return err
 	}

@@ -176,7 +176,7 @@ func (cmd *ovf) Import(fpath string) error {
 		return err
 	}
 
-	info, err := lease.Wait(c)
+	info, err := lease.Wait()
 	if err != nil {
 		return err
 	}
@@ -216,7 +216,7 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	return lease.HttpNfcLeaseComplete(c)
+	return lease.HttpNfcLeaseComplete()
 }
 
 func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
