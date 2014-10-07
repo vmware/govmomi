@@ -166,7 +166,7 @@ func (cmd *ovf) Import(fpath string) error {
 	}
 
 	// TODO: need a folder option
-	folders, err := cmd.Datacenter.Folders(c)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return err
 	}

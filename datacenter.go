@@ -45,11 +45,11 @@ func (d Datacenter) Reference() types.ManagedObjectReference {
 	return d.ManagedObjectReference
 }
 
-func (d *Datacenter) Folders(c *Client) (*DatacenterFolders, error) {
+func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
 	ps := []string{"vmFolder", "hostFolder", "datastoreFolder", "networkFolder"}
-	err := c.Properties(d.Reference(), ps, &md)
+	err := d.c.Properties(d.Reference(), ps, &md)
 	if err != nil {
 		return nil, err
 	}

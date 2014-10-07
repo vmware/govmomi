@@ -334,7 +334,7 @@ func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
 }
 
 func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders(cmd.Client)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}
@@ -353,7 +353,7 @@ func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
 }
 
 func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders(cmd.Client)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}

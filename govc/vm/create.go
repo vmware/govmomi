@@ -207,7 +207,7 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 
 	spec.AddDevice(netdev)
 
-	folders, err := cmd.Datacenter.Folders(cmd.Client)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}

@@ -70,12 +70,7 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 			return nil, err
 		}
 
-		c, err := flag.Client()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders(c)
+		f, err := dc.Folders()
 		if err != nil {
 			return nil, err
 		}

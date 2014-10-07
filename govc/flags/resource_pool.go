@@ -55,12 +55,7 @@ func (flag *ResourcePoolFlag) findResourcePool(path string) ([]*govmomi.Resource
 			return nil, err
 		}
 
-		c, err := flag.Client()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders(c)
+		f, err := dc.Folders()
 		if err != nil {
 			return nil, err
 		}

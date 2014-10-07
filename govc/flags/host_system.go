@@ -61,12 +61,7 @@ func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, 
 			return nil, err
 		}
 
-		c, err := flag.ClientFlag.Client()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders(c)
+		f, err := dc.Folders()
 		if err != nil {
 			return nil, err
 		}

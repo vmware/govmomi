@@ -47,7 +47,7 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Datacenter: %#v", ref)
 	}
 
-	folders, err := dc.Folders(c)
+	folders, err := dc.Folders()
 	if err != nil {
 		t.Fatal(err)
 	}
