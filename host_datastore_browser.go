@@ -38,32 +38,32 @@ func (b HostDatastoreBrowser) Reference() types.ManagedObjectReference {
 	return b.ManagedObjectReference
 }
 
-func (b HostDatastoreBrowser) SearchDatastore(c *Client, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
+func (b HostDatastoreBrowser) SearchDatastore(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastore_Task{
 		This:          b.Reference(),
 		DatastorePath: datastorePath,
 		SearchSpec:    searchSpec,
 	}
 
-	res, err := methods.SearchDatastore_Task(c, &req)
+	res, err := methods.SearchDatastore_Task(b.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(b.c, res.Returnval), nil
 }
 
-func (b HostDatastoreBrowser) SearchDatastoreSubFolders(c *Client, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
+func (b HostDatastoreBrowser) SearchDatastoreSubFolders(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastoreSubFolders_Task{
 		This:          b.Reference(),
 		DatastorePath: datastorePath,
 		SearchSpec:    searchSpec,
 	}
 
-	res, err := methods.SearchDatastoreSubFolders_Task(c, &req)
+	res, err := methods.SearchDatastoreSubFolders_Task(b.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(b.c, res.Returnval), nil
 }
