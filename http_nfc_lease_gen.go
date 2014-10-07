@@ -23,6 +23,15 @@ import (
 
 type HttpNfcLease struct {
 	types.ManagedObjectReference
+
+	c *Client
+}
+
+func NewHttpNfcLease(c *Client, ref types.ManagedObjectReference) *HttpNfcLease {
+	return &HttpNfcLease{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (o HttpNfcLease) Reference() types.ManagedObjectReference {

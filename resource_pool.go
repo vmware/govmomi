@@ -56,5 +56,5 @@ func (p ResourcePool) ImportVApp(c *Client, spec types.BaseImportSpec, folder *F
 		return nil, err
 	}
 
-	return &HttpNfcLease{res.Returnval}, nil
+	return NewHttpNfcLease(c, res.Returnval), nil
 }
