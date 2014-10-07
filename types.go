@@ -59,7 +59,7 @@ func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 	case "DistributedVirtualPortgroup":
 		return &DistributedVirtualPortgroup{ManagedObjectReference: e}
 	case "Datastore":
-		return &Datastore{ManagedObjectReference: e}
+		return NewDatastore(c, e)
 	default:
 		panic("Unknown managed entity: " + e.Type)
 	}

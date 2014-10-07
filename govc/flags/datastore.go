@@ -75,16 +75,19 @@ func (flag *DatastoreFlag) findDatastore(path string) ([]*govmomi.Datastore, err
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	var dss []*govmomi.Datastore
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "Datastore" {
-			ds := govmomi.Datastore{
-				ManagedObjectReference: ref,
-				InventoryPath:          e.Path,
-			}
+			ds := govmomi.NewDatastore(c, ref)
+			ds.InventoryPath = e.Path
 
-			dss = append(dss, &ds)
+			dss = append(dss, ds)
 		}
 	}
 

@@ -30,6 +30,15 @@ type Datastore struct {
 	types.ManagedObjectReference
 
 	InventoryPath string
+
+	c *Client
+}
+
+func NewDatastore(c *Client, ref types.ManagedObjectReference) *Datastore {
+	return &Datastore{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (d Datastore) Reference() types.ManagedObjectReference {
