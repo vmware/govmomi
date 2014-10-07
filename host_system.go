@@ -38,19 +38,19 @@ func (h HostSystem) Reference() types.ManagedObjectReference {
 	return h.ManagedObjectReference
 }
 
-func (h HostSystem) ConfigManager(c *Client) *HostConfigManager {
-	return &HostConfigManager{c, h}
+func (h HostSystem) ConfigManager() *HostConfigManager {
+	return &HostConfigManager{h.c, h}
 }
 
-func (h HostSystem) ResourcePool(c *Client) (*ResourcePool, error) {
+func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 	var mh mo.HostSystem
-	err := c.Properties(h.Reference(), []string{"parent"}, &mh)
+	err := h.c.Properties(h.Reference(), []string{"parent"}, &mh)
 	if err != nil {
 		return nil, err
 	}
 
 	var mcr mo.ComputeResource
-	err = c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
+	err = h.c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
 	if err != nil {
 		return nil, err
 	}

@@ -94,7 +94,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.HostSystem != nil {
-		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(cmd.Client); err != nil {
+		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(); err != nil {
 			return err
 		}
 	} else {

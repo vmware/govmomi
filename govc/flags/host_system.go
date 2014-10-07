@@ -167,15 +167,10 @@ func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 }
 
 func (flag *HostSystemFlag) HostNetworkSystem() (*govmomi.HostNetworkSystem, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
 	host, err := flag.HostSystem()
 	if err != nil {
 		return nil, err
 	}
 
-	return host.ConfigManager(c).NetworkSystem()
+	return host.ConfigManager().NetworkSystem()
 }
