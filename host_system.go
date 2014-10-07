@@ -55,6 +55,6 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 		return nil, err
 	}
 
-	pool := NewResourcePool(*mcr.ResourcePool)
+	pool := NewResourcePool(h.c, *mcr.ResourcePool)
 	return pool, nil
 }

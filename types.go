@@ -36,7 +36,7 @@ func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 		return NewVirtualMachine(c, e)
 	case "VirtualApp":
 		return &VirtualApp{
-			ResourcePool{ManagedObjectReference: e},
+			NewResourcePool(c, e),
 		}
 	case "ComputeResource":
 		return &ComputeResource{ManagedObjectReference: e}
@@ -49,7 +49,7 @@ func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 	case "Network":
 		return NewNetwork(c, e)
 	case "ResourcePool":
-		return &ResourcePool{ManagedObjectReference: e}
+		return NewResourcePool(c, e)
 	case "DistributedVirtualSwitch":
 		return &DistributedVirtualSwitch{ManagedObjectReference: e}
 	case "VmwareDistributedVirtualSwitch":

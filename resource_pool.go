@@ -23,11 +23,14 @@ import (
 
 type ResourcePool struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewResourcePool(ref types.ManagedObjectReference) *ResourcePool {
+func NewResourcePool(c *Client, ref types.ManagedObjectReference) *ResourcePool {
 	return &ResourcePool{
 		ManagedObjectReference: ref,
+		c: c,
 	}
 }
 

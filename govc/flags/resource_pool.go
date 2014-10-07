@@ -68,26 +68,25 @@ func (flag *ResourcePoolFlag) findResourcePool(path string) ([]*govmomi.Resource
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	var rps []*govmomi.ResourcePool
 	for _, e := range es {
 		switch o := e.Object.(type) {
 		case mo.ComputeResource:
 			// Use a compute resouce's root resource pool.
-			n := govmomi.ResourcePool{
-				ManagedObjectReference: *o.ResourcePool,
-			}
-			rps = append(rps, &n)
+			n := govmomi.NewResourcePool(c, *o.ResourcePool)
+			rps = append(rps, n)
 		case mo.ClusterComputeResource:
 			// Use a cluster compute resouce's root resource pool.
-			n := govmomi.ResourcePool{
-				ManagedObjectReference: *o.ResourcePool,
-			}
-			rps = append(rps, &n)
+			n := govmomi.NewResourcePool(c, *o.ResourcePool)
+			rps = append(rps, n)
 		case mo.ResourcePool:
-			n := govmomi.ResourcePool{
-				ManagedObjectReference: o.Reference(),
-			}
-			rps = append(rps, &n)
+			n := govmomi.NewResourcePool(c, o.Reference())
+			rps = append(rps, n)
 		}
 	}
 
