@@ -91,5 +91,5 @@ func (d Datastore) Browser() (*HostDatastoreBrowser, error) {
 		return nil, err
 	}
 
-	return &HostDatastoreBrowser{do.Browser}, nil
+	return NewHostDatastoreBrowser(d.c, do.Browser), nil
 }

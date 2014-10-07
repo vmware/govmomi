@@ -23,6 +23,15 @@ import (
 
 type HostDatastoreBrowser struct {
 	types.ManagedObjectReference
+
+	c *Client
+}
+
+func NewHostDatastoreBrowser(c *Client, ref types.ManagedObjectReference) *HostDatastoreBrowser {
+	return &HostDatastoreBrowser{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (b HostDatastoreBrowser) Reference() types.ManagedObjectReference {
