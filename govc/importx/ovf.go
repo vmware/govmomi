@@ -171,7 +171,7 @@ func (cmd *ovf) Import(fpath string) error {
 		return err
 	}
 
-	lease, err := cmd.ResourcePool.ImportVApp(c, spec.ImportSpec, folders.VmFolder, host)
+	lease, err := cmd.ResourcePool.ImportVApp(spec.ImportSpec, folders.VmFolder, host)
 	if err != nil {
 		return err
 	}

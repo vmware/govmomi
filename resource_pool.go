@@ -38,7 +38,7 @@ func (p ResourcePool) Reference() types.ManagedObjectReference {
 	return p.ManagedObjectReference
 }
 
-func (p ResourcePool) ImportVApp(c *Client, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
+func (p ResourcePool) ImportVApp(spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
 	req := types.ImportVApp{
 		This: p.Reference(),
 		Spec: spec,
@@ -54,10 +54,10 @@ func (p ResourcePool) ImportVApp(c *Client, spec types.BaseImportSpec, folder *F
 		req.Host = &ref
 	}
 
-	res, err := methods.ImportVApp(c, &req)
+	res, err := methods.ImportVApp(p.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewHttpNfcLease(c, res.Returnval), nil
+	return NewHttpNfcLease(p.c, res.Returnval), nil
 }
