@@ -26,6 +26,15 @@ type Network struct {
 	types.ManagedObjectReference
 
 	InventoryPath string
+
+	c *Client
+}
+
+func NewNetwork(c *Client, ref types.ManagedObjectReference) *Network {
+	return &Network{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (n Network) Reference() types.ManagedObjectReference {
