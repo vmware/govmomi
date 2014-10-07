@@ -48,12 +48,12 @@ func (flag *DatacenterFlag) Process() error {
 }
 
 func (flag *DatacenterFlag) findDatacenter(path string) ([]*govmomi.Datacenter, error) {
-	relativeFunc := func() (govmomi.Reference, error) {
-		c, err := flag.Client()
-		if err != nil {
-			return nil, err
-		}
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
 
+	relativeFunc := func() (govmomi.Reference, error) {
 		return c.RootFolder(), nil
 	}
 
@@ -66,7 +66,7 @@ func (flag *DatacenterFlag) findDatacenter(path string) ([]*govmomi.Datacenter, 
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "Datacenter" {
-			dcs = append(dcs, govmomi.NewDatacenter(ref))
+			dcs = append(dcs, govmomi.NewDatacenter(c, ref))
 		}
 	}
 

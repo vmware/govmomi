@@ -31,7 +31,7 @@ func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 			Folder{ManagedObjectReference: e},
 		}
 	case "Datacenter":
-		return &Datacenter{ManagedObjectReference: e}
+		return NewDatacenter(c, e)
 	case "VirtualMachine":
 		return NewVirtualMachine(c, e)
 	case "VirtualApp":

@@ -30,11 +30,14 @@ type DatacenterFolders struct {
 
 type Datacenter struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewDatacenter(ref types.ManagedObjectReference) *Datacenter {
+func NewDatacenter(c *Client, ref types.ManagedObjectReference) *Datacenter {
 	return &Datacenter{
 		ManagedObjectReference: ref,
+		c: c,
 	}
 }
 
