@@ -90,7 +90,7 @@ func (v VirtualMachine) Destroy() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Clone(folder Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
+func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
 	req := types.CloneVM_Task{
 		This:   v.Reference(),
 		Folder: folder.Reference(),

@@ -24,11 +24,14 @@ import (
 
 type Folder struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewFolder(ref types.ManagedObjectReference) *Folder {
+func NewFolder(c *Client, ref types.ManagedObjectReference) *Folder {
 	return &Folder{
 		ManagedObjectReference: ref,
+		c: c,
 	}
 }
 

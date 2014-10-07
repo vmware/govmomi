@@ -214,12 +214,17 @@ func (flag *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
 }
 
 func (flag *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	f, err := flag.relativeTo()
 	if err != nil {
 		return nil, err
 	}
 
-	return govmomi.NewFolder(f.VmFolder.Reference()), nil
+	return govmomi.NewFolder(c, f.VmFolder.Reference()), nil
 }
 
 func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {

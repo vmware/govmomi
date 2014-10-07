@@ -17,5 +17,5 @@ limitations under the License.
 package govmomi
 
 type StoragePod struct {
-	Folder
+	*Folder
 }

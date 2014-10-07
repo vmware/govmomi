@@ -25,10 +25,10 @@ type Reference interface {
 func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":
-		return &Folder{ManagedObjectReference: e}
+		return NewFolder(c, e)
 	case "StoragePod":
 		return &StoragePod{
-			Folder{ManagedObjectReference: e},
+			NewFolder(c, e),
 		}
 	case "Datacenter":
 		return NewDatacenter(c, e)

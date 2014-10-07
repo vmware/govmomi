@@ -22,10 +22,10 @@ import (
 )
 
 type DatacenterFolders struct {
-	VmFolder        Folder
-	HostFolder      Folder
-	DatastoreFolder Folder
-	NetworkFolder   Folder
+	VmFolder        *Folder
+	HostFolder      *Folder
+	DatastoreFolder *Folder
+	NetworkFolder   *Folder
 }
 
 type Datacenter struct {
@@ -55,10 +55,10 @@ func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	}
 
 	df := &DatacenterFolders{
-		VmFolder:        Folder{md.VmFolder},
-		HostFolder:      Folder{md.HostFolder},
-		DatastoreFolder: Folder{md.DatastoreFolder},
-		NetworkFolder:   Folder{md.NetworkFolder},
+		VmFolder:        NewFolder(d.c, md.VmFolder),
+		HostFolder:      NewFolder(d.c, md.HostFolder),
+		DatastoreFolder: NewFolder(d.c, md.DatastoreFolder),
+		NetworkFolder:   NewFolder(d.c, md.NetworkFolder),
 	}
 
 	return df, nil
