@@ -212,7 +212,7 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(cmd.Client, spec.ToSpec(), cmd.ResourcePool, cmd.HostSystem)
+	return folders.VmFolder.CreateVM(spec.ToSpec(), cmd.ResourcePool, cmd.HostSystem)
 }
 
 // Cleanup tries to clean up the specified VM. As it is called from error

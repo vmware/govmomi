@@ -72,7 +72,7 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Network: %#v", ref)
 	}
 
-	crs, err := folders.HostFolder.Children(c)
+	crs, err := folders.HostFolder.Children()
 	if err != nil {
 		if err != nil {
 			t.Fatal(err)
@@ -110,7 +110,7 @@ func TestSearch(t *testing.T) {
 		}
 	}
 
-	vms, err := folders.VmFolder.Children(c)
+	vms, err := folders.VmFolder.Children()
 	if err != nil {
 		t.Fatal(err)
 	}
