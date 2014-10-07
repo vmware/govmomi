@@ -45,7 +45,7 @@ func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 			ComputeResource{ManagedObjectReference: e},
 		}
 	case "HostSystem":
-		return &HostSystem{ManagedObjectReference: e}
+		return NewHostSystem(c, e)
 	case "Network":
 		return &Network{ManagedObjectReference: e}
 	case "ResourcePool":

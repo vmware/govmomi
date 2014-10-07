@@ -74,14 +74,17 @@ func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, 
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	var hss []*govmomi.HostSystem
 	for _, e := range es {
 		switch o := e.Object.(type) {
 		case mo.HostSystem:
-			hs := govmomi.HostSystem{
-				ManagedObjectReference: o.Reference(),
-			}
-			hss = append(hss, &hs)
+			hs := govmomi.NewHostSystem(c, o.Reference())
+			hss = append(hss, hs)
 		}
 	}
 

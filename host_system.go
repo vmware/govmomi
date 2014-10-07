@@ -23,6 +23,15 @@ import (
 
 type HostSystem struct {
 	types.ManagedObjectReference
+
+	c *Client
+}
+
+func NewHostSystem(c *Client, ref types.ManagedObjectReference) *HostSystem {
+	return &HostSystem{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (h HostSystem) Reference() types.ManagedObjectReference {

@@ -87,7 +87,7 @@ func TestSearch(t *testing.T) {
 		}
 
 		var host mo.HostSystem
-		ref = &HostSystem{cr.Host[0]}
+		ref = NewHostSystem(c, cr.Host[0])
 		err = c.Properties(ref.Reference(), []string{"name", "hardware"}, &host)
 		if err != nil {
 			t.Fatal(err)
