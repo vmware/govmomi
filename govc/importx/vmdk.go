@@ -349,7 +349,7 @@ func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
 		return nil, err
 	}
 
-	return govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference)), nil
+	return govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
 
 func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.VirtualMachine, error) {
@@ -373,7 +373,7 @@ func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.Virt
 		return nil, err
 	}
 
-	return govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference)), nil
+	return govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
 
 func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {

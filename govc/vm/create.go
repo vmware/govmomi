@@ -114,7 +114,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm := govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference))
+	vm := govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
 
 	if cmd.on {
 		task, err := vm.PowerOn(cmd.Client)

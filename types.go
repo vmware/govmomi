@@ -22,7 +22,7 @@ type Reference interface {
 	Reference() types.ManagedObjectReference
 }
 
-func NewReference(e types.ManagedObjectReference) Reference {
+func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":
 		return &Folder{ManagedObjectReference: e}
@@ -33,7 +33,7 @@ func NewReference(e types.ManagedObjectReference) Reference {
 	case "Datacenter":
 		return &Datacenter{ManagedObjectReference: e}
 	case "VirtualMachine":
-		return &VirtualMachine{ManagedObjectReference: e}
+		return NewVirtualMachine(c, e)
 	case "VirtualApp":
 		return &VirtualApp{
 			ResourcePool{ManagedObjectReference: e},

@@ -54,13 +54,13 @@ func (flag *VirtualMachineFlag) Process() error {
 }
 
 func (flag *VirtualMachineFlag) findVirtualMachine(path string) ([]*govmomi.VirtualMachine, error) {
+	c, err := flag.ClientFlag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	relativeFunc := func() (govmomi.Reference, error) {
 		dc, err := flag.DatacenterFlag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-
-		c, err := flag.ClientFlag.Client()
 		if err != nil {
 			return nil, err
 		}
@@ -82,10 +82,8 @@ func (flag *VirtualMachineFlag) findVirtualMachine(path string) ([]*govmomi.Virt
 	for _, e := range es {
 		switch o := e.Object.(type) {
 		case mo.VirtualMachine:
-			vm := govmomi.VirtualMachine{
-				ManagedObjectReference: o.Reference(),
-			}
-			vms = append(vms, &vm)
+			vm := govmomi.NewVirtualMachine(c, o.Reference())
+			vms = append(vms, vm)
 		}
 	}
 

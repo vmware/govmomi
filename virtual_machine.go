@@ -23,10 +23,15 @@ import (
 
 type VirtualMachine struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewVirtualMachine(ref types.ManagedObjectReference) *VirtualMachine {
-	return &VirtualMachine{ManagedObjectReference: ref}
+func NewVirtualMachine(c *Client, ref types.ManagedObjectReference) *VirtualMachine {
+	return &VirtualMachine{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (v VirtualMachine) Reference() types.ManagedObjectReference {

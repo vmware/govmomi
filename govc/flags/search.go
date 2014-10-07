@@ -264,11 +264,16 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachin
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	// Filter non-VMs
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "VirtualMachine" {
-			out = append(out, govmomi.NewVirtualMachine(ref))
+			out = append(out, govmomi.NewVirtualMachine(c, ref))
 		}
 	}
 
