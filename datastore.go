@@ -59,18 +59,18 @@ func (d Datastore) Path(path string) string {
 }
 
 // URL for datastore access over HTTP
-func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error) {
+func (d Datastore) URL(dc *Datacenter, path string) (*url.URL, error) {
 	var mdc mo.Datacenter
-	if err := c.Properties(dc.Reference(), []string{"name"}, &mdc); err != nil {
+	if err := d.c.Properties(dc.Reference(), []string{"name"}, &mdc); err != nil {
 		return nil, err
 	}
 
 	var mds mo.Datastore
-	if err := c.Properties(d.Reference(), []string{"name"}, &mds); err != nil {
+	if err := d.c.Properties(d.Reference(), []string{"name"}, &mds); err != nil {
 		return nil, err
 	}
 
-	u := c.Client.URL()
+	u := d.c.Client.URL()
 
 	return &url.URL{
 		Scheme: u.Scheme,
@@ -83,10 +83,10 @@ func (d Datastore) URL(c *Client, dc *Datacenter, path string) (*url.URL, error)
 	}, nil
 }
 
-func (d Datastore) Browser(c *Client) (*HostDatastoreBrowser, error) {
+func (d Datastore) Browser() (*HostDatastoreBrowser, error) {
 	var do mo.Datastore
 
-	err := c.Properties(d.Reference(), []string{"browser"}, &do)
+	err := d.c.Properties(d.Reference(), []string{"browser"}, &do)
 	if err != nil {
 		return nil, err
 	}

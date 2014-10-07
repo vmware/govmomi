@@ -52,7 +52,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	b, err := ds.Browser(c)
+	b, err := ds.Browser()
 	if err != nil {
 		return err
 	}

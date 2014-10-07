@@ -162,7 +162,7 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 }
 
 func (cmd *vmdk) Upload(i importable) error {
-	u, err := cmd.Datastore.URL(cmd.Client, cmd.Datacenter, i.RemoteSrcVMDK())
+	u, err := cmd.Datastore.URL(cmd.Datacenter, i.RemoteSrcVMDK())
 	if err != nil {
 		return err
 	}
