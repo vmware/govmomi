@@ -94,7 +94,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.HostSystem != nil {
-		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(cmd.Client); err != nil {
+		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(); err != nil {
 			return err
 		}
 	} else {
@@ -114,10 +114,10 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm := govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference))
+	vm := govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
 
 	if cmd.on {
-		task, err := vm.PowerOn(cmd.Client)
+		task, err := vm.PowerOn()
 		if err != nil {
 			return err
 		}
@@ -207,12 +207,12 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 
 	spec.AddDevice(netdev)
 
-	folders, err := cmd.Datacenter.Folders(cmd.Client)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(cmd.Client, spec.ToSpec(), cmd.ResourcePool, cmd.HostSystem)
+	return folders.VmFolder.CreateVM(spec.ToSpec(), cmd.ResourcePool, cmd.HostSystem)
 }
 
 // Cleanup tries to clean up the specified VM. As it is called from error
@@ -229,7 +229,7 @@ func (cmd *create) Cleanup(vm *govmomi.VirtualMachine) {
 	spec := new(configSpec)
 	spec.RemoveDisks(&mvm)
 
-	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
+	task, err := vm.Reconfigure(spec.ToSpec())
 	if err != nil {
 		return
 	}
@@ -239,7 +239,7 @@ func (cmd *create) Cleanup(vm *govmomi.VirtualMachine) {
 		return
 	}
 
-	task, err = vm.Destroy(cmd.Client)
+	task, err = vm.Destroy()
 	if err != nil {
 		return
 	}

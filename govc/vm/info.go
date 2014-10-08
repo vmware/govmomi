@@ -79,7 +79,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 			}
 
 			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
-				_, err = vm.WaitForIP(c)
+				_, err = vm.WaitForIP()
 				if err != nil {
 					return err
 				}

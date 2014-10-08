@@ -266,8 +266,8 @@ func (c *Client) OvfManager() OvfManager {
 	return OvfManager{c}
 }
 
-func (c *Client) RootFolder() Folder {
-	return Folder{c.ServiceContent.RootFolder}
+func (c *Client) RootFolder() *Folder {
+	return NewFolder(c, c.ServiceContent.RootFolder)
 }
 
 func (c *Client) SearchIndex() SearchIndex {

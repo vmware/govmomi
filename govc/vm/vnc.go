@@ -103,7 +103,7 @@ func (cmd *vnc) Run(f *flag.FlagSet) error {
 			ExtraConfig: newOptions.ToExtraConfig(),
 		}
 
-		task, err := vm.Reconfigure(c, spec)
+		task, err := vm.Reconfigure(spec)
 		if err != nil {
 			return err
 		}

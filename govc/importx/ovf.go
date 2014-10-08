@@ -166,18 +166,17 @@ func (cmd *ovf) Import(fpath string) error {
 	}
 
 	// TODO: need a folder option
-	folders, err := cmd.Datacenter.Folders(c)
-	if err != nil {
-		return err
-	}
-	folder := &folders.VmFolder
-
-	lease, err := cmd.ResourcePool.ImportVApp(c, spec.ImportSpec, folder, host)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return err
 	}
 
-	info, err := lease.Wait(c)
+	lease, err := cmd.ResourcePool.ImportVApp(spec.ImportSpec, folders.VmFolder, host)
+	if err != nil {
+		return err
+	}
+
+	info, err := lease.Wait()
 	if err != nil {
 		return err
 	}
@@ -217,7 +216,7 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	return lease.HttpNfcLeaseComplete(c)
+	return lease.HttpNfcLeaseComplete()
 }
 
 func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {

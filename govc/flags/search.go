@@ -200,17 +200,12 @@ func (flag *SearchFlag) search() (govmomi.Reference, error) {
 }
 
 func (flag *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
 	dc, err := flag.Datacenter()
 	if err != nil {
 		return nil, err
 	}
 
-	f, err := dc.Folders(c)
+	f, err := dc.Folders()
 	if err != nil {
 		return nil, err
 	}
@@ -219,12 +214,17 @@ func (flag *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
 }
 
 func (flag *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	f, err := flag.relativeTo()
 	if err != nil {
 		return nil, err
 	}
 
-	return govmomi.NewFolder(f.VmFolder.Reference()), nil
+	return govmomi.NewFolder(c, f.VmFolder.Reference()), nil
 }
 
 func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
@@ -264,11 +264,16 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachin
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	// Filter non-VMs
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "VirtualMachine" {
-			out = append(out, govmomi.NewVirtualMachine(ref))
+			out = append(out, govmomi.NewVirtualMachine(c, ref))
 		}
 	}
 

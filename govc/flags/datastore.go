@@ -62,12 +62,7 @@ func (flag *DatastoreFlag) findDatastore(path string) ([]*govmomi.Datastore, err
 			return nil, err
 		}
 
-		c, err := flag.Client()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders(c)
+		f, err := dc.Folders()
 		if err != nil {
 			return nil, err
 		}
@@ -80,16 +75,19 @@ func (flag *DatastoreFlag) findDatastore(path string) ([]*govmomi.Datastore, err
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	var dss []*govmomi.Datastore
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "Datastore" {
-			ds := govmomi.Datastore{
-				ManagedObjectReference: ref,
-				InventoryPath:          e.Path,
-			}
+			ds := govmomi.NewDatastore(c, ref)
+			ds.InventoryPath = e.Path
 
-			dss = append(dss, &ds)
+			dss = append(dss, ds)
 		}
 	}
 
@@ -154,11 +152,6 @@ func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
 }
 
 func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
 	dc, err := flag.Datacenter()
 	if err != nil {
 		return nil, err
@@ -169,7 +162,7 @@ func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
 		return nil, err
 	}
 
-	u, err := ds.URL(c, dc, path)
+	u, err := ds.URL(dc, path)
 	if err != nil {
 		return nil, err
 	}
@@ -178,17 +171,12 @@ func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
 }
 
 func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
 	ds, err := flag.Datastore()
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := ds.Browser(c)
+	b, err := ds.Browser()
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +190,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 	}
 
 	dsPath := ds.Path(path.Dir(file))
-	task, err := b.SearchDatastore(c, dsPath, &spec)
+	task, err := b.SearchDatastore(dsPath, &spec)
 	if err != nil {
 		return nil, err
 	}

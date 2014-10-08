@@ -42,17 +42,12 @@ func (cmd *ls) Register(f *flag.FlagSet) {}
 func (cmd *ls) Process() error { return nil }
 
 func (cmd *ls) Run(f *flag.FlagSet) error {
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
 	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
 	}
 
-	b, err := ds.Browser(c)
+	b, err := ds.Browser()
 	if err != nil {
 		return err
 	}
@@ -71,7 +66,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		},
 	}
 
-	task, err := b.SearchDatastore(c, path, &spec)
+	task, err := b.SearchDatastore(path, &spec)
 	if err != nil {
 		return err
 	}

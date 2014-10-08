@@ -22,21 +22,21 @@ type Reference interface {
 	Reference() types.ManagedObjectReference
 }
 
-func NewReference(e types.ManagedObjectReference) Reference {
+func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":
-		return &Folder{ManagedObjectReference: e}
+		return NewFolder(c, e)
 	case "StoragePod":
 		return &StoragePod{
-			Folder{ManagedObjectReference: e},
+			NewFolder(c, e),
 		}
 	case "Datacenter":
-		return &Datacenter{ManagedObjectReference: e}
+		return NewDatacenter(c, e)
 	case "VirtualMachine":
-		return &VirtualMachine{ManagedObjectReference: e}
+		return NewVirtualMachine(c, e)
 	case "VirtualApp":
 		return &VirtualApp{
-			ResourcePool{ManagedObjectReference: e},
+			NewResourcePool(c, e),
 		}
 	case "ComputeResource":
 		return &ComputeResource{ManagedObjectReference: e}
@@ -45,11 +45,11 @@ func NewReference(e types.ManagedObjectReference) Reference {
 			ComputeResource{ManagedObjectReference: e},
 		}
 	case "HostSystem":
-		return &HostSystem{ManagedObjectReference: e}
+		return NewHostSystem(c, e)
 	case "Network":
-		return &Network{ManagedObjectReference: e}
+		return NewNetwork(c, e)
 	case "ResourcePool":
-		return &ResourcePool{ManagedObjectReference: e}
+		return NewResourcePool(c, e)
 	case "DistributedVirtualSwitch":
 		return &DistributedVirtualSwitch{ManagedObjectReference: e}
 	case "VmwareDistributedVirtualSwitch":
@@ -59,7 +59,7 @@ func NewReference(e types.ManagedObjectReference) Reference {
 	case "DistributedVirtualPortgroup":
 		return &DistributedVirtualPortgroup{ManagedObjectReference: e}
 	case "Datastore":
-		return &Datastore{ManagedObjectReference: e}
+		return NewDatastore(c, e)
 	default:
 		panic("Unknown managed entity: " + e.Type)
 	}

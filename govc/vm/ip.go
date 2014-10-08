@@ -61,7 +61,7 @@ func (cmd *ip) Run(f *flag.FlagSet) error {
 		get = esxcli.NewGuestInfo(c).IpAddress
 	} else {
 		get = func(vm *govmomi.VirtualMachine) (string, error) {
-			return vm.WaitForIP(c)
+			return vm.WaitForIP()
 		}
 	}
 

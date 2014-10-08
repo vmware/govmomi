@@ -47,9 +47,7 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 		return h, nil
 	}
 
-	host := &govmomi.HostSystem{
-		ManagedObjectReference: *ref,
-	}
+	host := govmomi.NewHostSystem(g.c, *ref)
 
 	e, err := NewExecutor(g.c, host)
 	if err != nil {

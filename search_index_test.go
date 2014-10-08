@@ -47,7 +47,7 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Datacenter: %#v", ref)
 	}
 
-	folders, err := dc.Folders(c)
+	folders, err := dc.Folders()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -72,7 +72,7 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Network: %#v", ref)
 	}
 
-	crs, err := folders.HostFolder.Children(c)
+	crs, err := folders.HostFolder.Children()
 	if err != nil {
 		if err != nil {
 			t.Fatal(err)
@@ -87,7 +87,7 @@ func TestSearch(t *testing.T) {
 		}
 
 		var host mo.HostSystem
-		ref = &HostSystem{cr.Host[0]}
+		ref = NewHostSystem(c, cr.Host[0])
 		err = c.Properties(ref.Reference(), []string{"name", "hardware"}, &host)
 		if err != nil {
 			t.Fatal(err)
@@ -110,7 +110,7 @@ func TestSearch(t *testing.T) {
 		}
 	}
 
-	vms, err := folders.VmFolder.Children(c)
+	vms, err := folders.VmFolder.Children()
 	if err != nil {
 		t.Fatal(err)
 	}

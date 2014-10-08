@@ -24,10 +24,10 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func (o HttpNfcLease) Wait(c *Client) (*types.HttpNfcLeaseInfo, error) {
+func (o HttpNfcLease) Wait() (*types.HttpNfcLeaseInfo, error) {
 	var lease mo.HttpNfcLease
 
-	err := c.WaitForProperties(o.Reference(), []string{"state", "info", "error"}, func(pc []types.PropertyChange) bool {
+	err := o.c.WaitForProperties(o.Reference(), []string{"state", "info", "error"}, func(pc []types.PropertyChange) bool {
 		done := false
 
 		for _, c := range pc {

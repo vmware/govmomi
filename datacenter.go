@@ -22,19 +22,22 @@ import (
 )
 
 type DatacenterFolders struct {
-	VmFolder        Folder
-	HostFolder      Folder
-	DatastoreFolder Folder
-	NetworkFolder   Folder
+	VmFolder        *Folder
+	HostFolder      *Folder
+	DatastoreFolder *Folder
+	NetworkFolder   *Folder
 }
 
 type Datacenter struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewDatacenter(ref types.ManagedObjectReference) *Datacenter {
+func NewDatacenter(c *Client, ref types.ManagedObjectReference) *Datacenter {
 	return &Datacenter{
 		ManagedObjectReference: ref,
+		c: c,
 	}
 }
 
@@ -42,20 +45,20 @@ func (d Datacenter) Reference() types.ManagedObjectReference {
 	return d.ManagedObjectReference
 }
 
-func (d *Datacenter) Folders(c *Client) (*DatacenterFolders, error) {
+func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
 	ps := []string{"vmFolder", "hostFolder", "datastoreFolder", "networkFolder"}
-	err := c.Properties(d.Reference(), ps, &md)
+	err := d.c.Properties(d.Reference(), ps, &md)
 	if err != nil {
 		return nil, err
 	}
 
 	df := &DatacenterFolders{
-		VmFolder:        Folder{md.VmFolder},
-		HostFolder:      Folder{md.HostFolder},
-		DatastoreFolder: Folder{md.DatastoreFolder},
-		NetworkFolder:   Folder{md.NetworkFolder},
+		VmFolder:        NewFolder(d.c, md.VmFolder),
+		HostFolder:      NewFolder(d.c, md.HostFolder),
+		DatastoreFolder: NewFolder(d.c, md.DatastoreFolder),
+		NetworkFolder:   NewFolder(d.c, md.NetworkFolder),
 	}
 
 	return df, nil

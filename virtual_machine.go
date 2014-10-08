@@ -23,69 +23,74 @@ import (
 
 type VirtualMachine struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewVirtualMachine(ref types.ManagedObjectReference) *VirtualMachine {
-	return &VirtualMachine{ManagedObjectReference: ref}
+func NewVirtualMachine(c *Client, ref types.ManagedObjectReference) *VirtualMachine {
+	return &VirtualMachine{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (v VirtualMachine) Reference() types.ManagedObjectReference {
 	return v.ManagedObjectReference
 }
 
-func (v VirtualMachine) PowerOn(c *Client) (*Task, error) {
+func (v VirtualMachine) PowerOn() (*Task, error) {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.PowerOnVM_Task(c, &req)
+	res, err := methods.PowerOnVM_Task(v.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) PowerOff(c *Client) (*Task, error) {
+func (v VirtualMachine) PowerOff() (*Task, error) {
 	req := types.PowerOffVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.PowerOffVM_Task(c, &req)
+	res, err := methods.PowerOffVM_Task(v.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reset(c *Client) (*Task, error) {
+func (v VirtualMachine) Reset() (*Task, error) {
 	req := types.ResetVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.ResetVM_Task(c, &req)
+	res, err := methods.ResetVM_Task(v.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Destroy(c *Client) (*Task, error) {
+func (v VirtualMachine) Destroy() (*Task, error) {
 	req := types.Destroy_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(c, &req)
+	res, err := methods.Destroy_Task(v.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Clone(c *Client, folder Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
+func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
 	req := types.CloneVM_Task{
 		This:   v.Reference(),
 		Folder: folder.Reference(),
@@ -93,32 +98,32 @@ func (v VirtualMachine) Clone(c *Client, folder Folder, name string, config type
 		Spec:   config,
 	}
 
-	res, err := methods.CloneVM_Task(c, &req)
+	res, err := methods.CloneVM_Task(v.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reconfigure(c *Client, config types.VirtualMachineConfigSpec) (*Task, error) {
+func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*Task, error) {
 	req := types.ReconfigVM_Task{
 		This: v.Reference(),
 		Spec: config,
 	}
 
-	res, err := methods.ReconfigVM_Task(c, &req)
+	res, err := methods.ReconfigVM_Task(v.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) WaitForIP(c *Client) (string, error) {
+func (v VirtualMachine) WaitForIP() (string, error) {
 	var ip string
 
-	err := c.WaitForProperties(v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
+	err := v.c.WaitForProperties(v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
 		for _, c := range pc {
 			if c.Name != "guest.ipAddress" {
 				continue

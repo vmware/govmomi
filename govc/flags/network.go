@@ -70,12 +70,7 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 			return nil, err
 		}
 
-		c, err := flag.Client()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders(c)
+		f, err := dc.Folders()
 		if err != nil {
 			return nil, err
 		}
@@ -88,15 +83,18 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	var ns []govmomi.Reference
 	for _, e := range es {
 		ref := e.Object.Reference()
 		switch ref.Type {
 		case "Network":
-			r := &govmomi.Network{
-				ManagedObjectReference: ref,
-				InventoryPath:          e.Path,
-			}
+			r := govmomi.NewNetwork(c, ref)
+			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		case "DistributedVirtualPortgroup":
 			r := &govmomi.DistributedVirtualPortgroup{

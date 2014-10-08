@@ -162,7 +162,7 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 }
 
 func (cmd *vmdk) Upload(i importable) error {
-	u, err := cmd.Datastore.URL(cmd.Client, cmd.Datacenter, i.RemoteSrcVMDK())
+	u, err := cmd.Datastore.URL(cmd.Datacenter, i.RemoteSrcVMDK())
 	if err != nil {
 		return err
 	}
@@ -320,7 +320,7 @@ func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
 	spec := new(configSpec)
 	dsFile := spec.RemoveDisk(&mvm)
 
-	task, err := vm.Reconfigure(cmd.Client, spec.ToSpec())
+	task, err := vm.Reconfigure(spec.ToSpec())
 	if err != nil {
 		return "", err
 	}
@@ -334,12 +334,12 @@ func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
 }
 
 func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders(cmd.Client)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}
 
-	task, err := folders.VmFolder.CreateVM(cmd.Client, spec.ToSpec(), cmd.ResourcePool, nil)
+	task, err := folders.VmFolder.CreateVM(spec.ToSpec(), cmd.ResourcePool, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -349,11 +349,11 @@ func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
 		return nil, err
 	}
 
-	return govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference)), nil
+	return govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
 
 func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders(cmd.Client)
+	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}
@@ -363,7 +363,7 @@ func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.Virt
 		Location: types.VirtualMachineRelocateSpec{},
 	}
 
-	task, err := vm.Clone(cmd.Client, folders.VmFolder, name, spec)
+	task, err := vm.Clone(folders.VmFolder, name, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -373,7 +373,7 @@ func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.Virt
 		return nil, err
 	}
 
-	return govmomi.NewVirtualMachine(info.Result.(types.ManagedObjectReference)), nil
+	return govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
 
 func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {
@@ -382,7 +382,7 @@ func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {
 		return err
 	}
 
-	task, err := vm.Destroy(cmd.Client)
+	task, err := vm.Destroy()
 	if err != nil {
 		return err
 	}

@@ -23,29 +23,38 @@ import (
 
 type HostSystem struct {
 	types.ManagedObjectReference
+
+	c *Client
+}
+
+func NewHostSystem(c *Client, ref types.ManagedObjectReference) *HostSystem {
+	return &HostSystem{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (h HostSystem) Reference() types.ManagedObjectReference {
 	return h.ManagedObjectReference
 }
 
-func (h HostSystem) ConfigManager(c *Client) *HostConfigManager {
-	return &HostConfigManager{c, h}
+func (h HostSystem) ConfigManager() *HostConfigManager {
+	return &HostConfigManager{h.c, h}
 }
 
-func (h HostSystem) ResourcePool(c *Client) (*ResourcePool, error) {
+func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 	var mh mo.HostSystem
-	err := c.Properties(h.Reference(), []string{"parent"}, &mh)
+	err := h.c.Properties(h.Reference(), []string{"parent"}, &mh)
 	if err != nil {
 		return nil, err
 	}
 
 	var mcr mo.ComputeResource
-	err = c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
+	err = h.c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
 	if err != nil {
 		return nil, err
 	}
 
-	pool := NewResourcePool(*mcr.ResourcePool)
+	pool := NewResourcePool(h.c, *mcr.ResourcePool)
 	return pool, nil
 }

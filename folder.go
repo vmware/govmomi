@@ -24,11 +24,14 @@ import (
 
 type Folder struct {
 	types.ManagedObjectReference
+
+	c *Client
 }
 
-func NewFolder(ref types.ManagedObjectReference) *Folder {
+func NewFolder(c *Client, ref types.ManagedObjectReference) *Folder {
 	return &Folder{
 		ManagedObjectReference: ref,
+		c: c,
 	}
 }
 
@@ -36,10 +39,10 @@ func (f Folder) Reference() types.ManagedObjectReference {
 	return f.ManagedObjectReference
 }
 
-func (f Folder) Children(c *Client) ([]Reference, error) {
+func (f Folder) Children() ([]Reference, error) {
 	var mf mo.Folder
 
-	err := c.Properties(f.Reference(), []string{"childEntity"}, &mf)
+	err := f.c.Properties(f.Reference(), []string{"childEntity"}, &mf)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +50,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 	var rs []Reference
 
 	for _, e := range mf.ChildEntity {
-		if r := NewReference(e); r != nil {
+		if r := NewReference(f.c, e); r != nil {
 			rs = append(rs, r)
 		}
 	}
@@ -55,7 +58,7 @@ func (f Folder) Children(c *Client) ([]Reference, error) {
 	return rs, nil
 }
 
-func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
+func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
 		Config: config,
@@ -67,10 +70,10 @@ func (f Folder) CreateVM(c *Client, config types.VirtualMachineConfigSpec, pool 
 		req.Host = &ref
 	}
 
-	res, err := methods.CreateVM_Task(c, &req)
+	res, err := methods.CreateVM_Task(f.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c, res.Returnval), nil
+	return NewTask(f.c, res.Returnval), nil
 }

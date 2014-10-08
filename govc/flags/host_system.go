@@ -61,12 +61,7 @@ func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, 
 			return nil, err
 		}
 
-		c, err := flag.ClientFlag.Client()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders(c)
+		f, err := dc.Folders()
 		if err != nil {
 			return nil, err
 		}
@@ -79,14 +74,17 @@ func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, 
 		return nil, err
 	}
 
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
 	var hss []*govmomi.HostSystem
 	for _, e := range es {
 		switch o := e.Object.(type) {
 		case mo.HostSystem:
-			hs := govmomi.HostSystem{
-				ManagedObjectReference: o.Reference(),
-			}
-			hss = append(hss, &hs)
+			hs := govmomi.NewHostSystem(c, o.Reference())
+			hss = append(hss, hs)
 		}
 	}
 
@@ -169,15 +167,10 @@ func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 }
 
 func (flag *HostSystemFlag) HostNetworkSystem() (*govmomi.HostNetworkSystem, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
 	host, err := flag.HostSystem()
 	if err != nil {
 		return nil, err
 	}
 
-	return host.ConfigManager(c).NetworkSystem()
+	return host.ConfigManager().NetworkSystem()
 }
