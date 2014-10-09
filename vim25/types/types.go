@@ -246,7 +246,7 @@ func init() {
 	t["ActiveDirectoryFault"] = reflect.TypeOf((*ActiveDirectoryFault)(nil)).Elem()
 }
 
-type ActiveDirectoryFaultFault ActiveDirectoryFault
+type ActiveDirectoryFaultFault BaseActiveDirectoryFault
 
 func init() {
 	t["ActiveDirectoryFaultFault"] = reflect.TypeOf((*ActiveDirectoryFaultFault)(nil)).Elem()
@@ -477,11 +477,11 @@ type AddServiceConsoleVirtualNicResponse struct {
 }
 
 type AddStandaloneHostRequestType struct {
-	This         ManagedObjectReference     `xml:"_this"`
-	Spec         HostConnectSpec            `xml:"spec"`
-	CompResSpec  *ComputeResourceConfigSpec `xml:"compResSpec,omitempty"`
-	AddConnected bool                       `xml:"addConnected"`
-	License      string                     `xml:"license,omitempty"`
+	This         ManagedObjectReference        `xml:"_this"`
+	Spec         HostConnectSpec               `xml:"spec"`
+	CompResSpec  BaseComputeResourceConfigSpec `xml:"compResSpec,omitempty,typeattr"`
+	AddConnected bool                          `xml:"addConnected"`
+	License      string                        `xml:"license,omitempty"`
 }
 
 func init() {
@@ -672,16 +672,16 @@ func init() {
 type AlarmDescription struct {
 	DynamicData
 
-	Expr                               []TypeDescription    `xml:"expr"`
-	StateOperator                      []ElementDescription `xml:"stateOperator"`
-	MetricOperator                     []ElementDescription `xml:"metricOperator"`
-	HostSystemConnectionState          []ElementDescription `xml:"hostSystemConnectionState"`
-	VirtualMachinePowerState           []ElementDescription `xml:"virtualMachinePowerState"`
-	DatastoreConnectionState           []ElementDescription `xml:"datastoreConnectionState,omitempty"`
-	HostSystemPowerState               []ElementDescription `xml:"hostSystemPowerState,omitempty"`
-	VirtualMachineGuestHeartbeatStatus []ElementDescription `xml:"virtualMachineGuestHeartbeatStatus,omitempty"`
-	EntityStatus                       []ElementDescription `xml:"entityStatus"`
-	Action                             []TypeDescription    `xml:"action"`
+	Expr                               []BaseTypeDescription    `xml:"expr,typeattr"`
+	StateOperator                      []BaseElementDescription `xml:"stateOperator,typeattr"`
+	MetricOperator                     []BaseElementDescription `xml:"metricOperator,typeattr"`
+	HostSystemConnectionState          []BaseElementDescription `xml:"hostSystemConnectionState,typeattr"`
+	VirtualMachinePowerState           []BaseElementDescription `xml:"virtualMachinePowerState,typeattr"`
+	DatastoreConnectionState           []BaseElementDescription `xml:"datastoreConnectionState,omitempty,typeattr"`
+	HostSystemPowerState               []BaseElementDescription `xml:"hostSystemPowerState,omitempty,typeattr"`
+	VirtualMachineGuestHeartbeatStatus []BaseElementDescription `xml:"virtualMachineGuestHeartbeatStatus,omitempty,typeattr"`
+	EntityStatus                       []BaseElementDescription `xml:"entityStatus,typeattr"`
+	Action                             []BaseTypeDescription    `xml:"action,typeattr"`
 }
 
 func init() {
@@ -1871,7 +1871,7 @@ func init() {
 }
 
 type ArrayOfDvsFilterConfig struct {
-	DvsFilterConfig []DvsFilterConfig `xml:"DvsFilterConfig,omitempty"`
+	DvsFilterConfig []BaseDvsFilterConfig `xml:"DvsFilterConfig,omitempty,typeattr"`
 }
 
 func init() {
@@ -1951,7 +1951,7 @@ func init() {
 }
 
 type ArrayOfElementDescription struct {
-	ElementDescription []ElementDescription `xml:"ElementDescription,omitempty"`
+	ElementDescription []BaseElementDescription `xml:"ElementDescription,omitempty,typeattr"`
 }
 
 func init() {
@@ -2439,7 +2439,7 @@ func init() {
 }
 
 type ArrayOfHostHardwareElementInfo struct {
-	HostHardwareElementInfo []HostHardwareElementInfo `xml:"HostHardwareElementInfo,omitempty"`
+	HostHardwareElementInfo []BaseHostHardwareElementInfo `xml:"HostHardwareElementInfo,omitempty,typeattr"`
 }
 
 func init() {
@@ -3399,7 +3399,7 @@ func init() {
 }
 
 type ArrayOfOptionValue struct {
-	OptionValue []OptionValue `xml:"OptionValue,omitempty"`
+	OptionValue []BaseOptionValue `xml:"OptionValue,omitempty,typeattr"`
 }
 
 func init() {
@@ -3839,7 +3839,7 @@ func init() {
 }
 
 type ArrayOfScsiLun struct {
-	ScsiLun []ScsiLun `xml:"ScsiLun,omitempty"`
+	ScsiLun []BaseScsiLun `xml:"ScsiLun,omitempty,typeattr"`
 }
 
 func init() {
@@ -3991,7 +3991,7 @@ func init() {
 }
 
 type ArrayOfTypeDescription struct {
-	TypeDescription []TypeDescription `xml:"TypeDescription,omitempty"`
+	TypeDescription []BaseTypeDescription `xml:"TypeDescription,omitempty,typeattr"`
 }
 
 func init() {
@@ -4415,7 +4415,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachinePciPassthroughInfo struct {
-	VirtualMachinePciPassthroughInfo []VirtualMachinePciPassthroughInfo `xml:"VirtualMachinePciPassthroughInfo,omitempty"`
+	VirtualMachinePciPassthroughInfo []BaseVirtualMachinePciPassthroughInfo `xml:"VirtualMachinePciPassthroughInfo,omitempty,typeattr"`
 }
 
 func init() {
@@ -4750,8 +4750,8 @@ func init() {
 type AuthorizationDescription struct {
 	DynamicData
 
-	Privilege      []ElementDescription `xml:"privilege"`
-	PrivilegeGroup []ElementDescription `xml:"privilegeGroup"`
+	Privilege      []BaseElementDescription `xml:"privilege,typeattr"`
+	PrivilegeGroup []BaseElementDescription `xml:"privilegeGroup,typeattr"`
 }
 
 func init() {
@@ -5143,7 +5143,7 @@ func init() {
 	t["CannotAccessNetwork"] = reflect.TypeOf((*CannotAccessNetwork)(nil)).Elem()
 }
 
-type CannotAccessNetworkFault CannotAccessNetwork
+type CannotAccessNetworkFault BaseCannotAccessNetwork
 
 func init() {
 	t["CannotAccessNetworkFault"] = reflect.TypeOf((*CannotAccessNetworkFault)(nil)).Elem()
@@ -5157,7 +5157,7 @@ func init() {
 	t["CannotAccessVmComponent"] = reflect.TypeOf((*CannotAccessVmComponent)(nil)).Elem()
 }
 
-type CannotAccessVmComponentFault CannotAccessVmComponent
+type CannotAccessVmComponentFault BaseCannotAccessVmComponent
 
 func init() {
 	t["CannotAccessVmComponentFault"] = reflect.TypeOf((*CannotAccessVmComponentFault)(nil)).Elem()
@@ -5191,7 +5191,7 @@ func init() {
 	t["CannotAccessVmDevice"] = reflect.TypeOf((*CannotAccessVmDevice)(nil)).Elem()
 }
 
-type CannotAccessVmDeviceFault CannotAccessVmDevice
+type CannotAccessVmDeviceFault BaseCannotAccessVmDevice
 
 func init() {
 	t["CannotAccessVmDeviceFault"] = reflect.TypeOf((*CannotAccessVmDeviceFault)(nil)).Elem()
@@ -5207,7 +5207,7 @@ func init() {
 	t["CannotAccessVmDisk"] = reflect.TypeOf((*CannotAccessVmDisk)(nil)).Elem()
 }
 
-type CannotAccessVmDiskFault CannotAccessVmDisk
+type CannotAccessVmDiskFault BaseCannotAccessVmDisk
 
 func init() {
 	t["CannotAccessVmDiskFault"] = reflect.TypeOf((*CannotAccessVmDiskFault)(nil)).Elem()
@@ -5486,7 +5486,7 @@ func init() {
 	t["CannotMoveVsanEnabledHost"] = reflect.TypeOf((*CannotMoveVsanEnabledHost)(nil)).Elem()
 }
 
-type CannotMoveVsanEnabledHostFault CannotMoveVsanEnabledHost
+type CannotMoveVsanEnabledHostFault BaseCannotMoveVsanEnabledHost
 
 func init() {
 	t["CannotMoveVsanEnabledHostFault"] = reflect.TypeOf((*CannotMoveVsanEnabledHostFault)(nil)).Elem()
@@ -5848,8 +5848,8 @@ func init() {
 type ChoiceOption struct {
 	OptionType
 
-	ChoiceInfo   []ElementDescription `xml:"choiceInfo"`
-	DefaultIndex int                  `xml:"defaultIndex,omitempty"`
+	ChoiceInfo   []BaseElementDescription `xml:"choiceInfo,typeattr"`
+	DefaultIndex int                      `xml:"defaultIndex,omitempty"`
 }
 
 func init() {
@@ -6199,7 +6199,7 @@ type ClusterDasConfigInfo struct {
 	AdmissionControlPolicy     BaseClusterDasAdmissionControlPolicy `xml:"admissionControlPolicy,omitempty,typeattr"`
 	AdmissionControlEnabled    bool                                 `xml:"admissionControlEnabled,omitempty"`
 	DefaultVmSettings          *ClusterDasVmSettings                `xml:"defaultVmSettings,omitempty"`
-	Option                     []OptionValue                        `xml:"option,omitempty"`
+	Option                     []BaseOptionValue                    `xml:"option,omitempty,typeattr"`
 	HeartbeatDatastore         []ManagedObjectReference             `xml:"heartbeatDatastore,omitempty"`
 	HBDatastoreCandidatePolicy string                               `xml:"hBDatastoreCandidatePolicy,omitempty"`
 }
@@ -6356,10 +6356,10 @@ func init() {
 type ClusterDpmConfigInfo struct {
 	DynamicData
 
-	Enabled             bool          `xml:"enabled,omitempty"`
-	DefaultDpmBehavior  DpmBehavior   `xml:"defaultDpmBehavior,omitempty"`
-	HostPowerActionRate int           `xml:"hostPowerActionRate,omitempty"`
-	Option              []OptionValue `xml:"option,omitempty"`
+	Enabled             bool              `xml:"enabled,omitempty"`
+	DefaultDpmBehavior  DpmBehavior       `xml:"defaultDpmBehavior,omitempty"`
+	HostPowerActionRate int               `xml:"hostPowerActionRate,omitempty"`
+	Option              []BaseOptionValue `xml:"option,omitempty,typeattr"`
 }
 
 func init() {
@@ -6391,11 +6391,11 @@ func init() {
 type ClusterDrsConfigInfo struct {
 	DynamicData
 
-	Enabled                   bool          `xml:"enabled,omitempty"`
-	EnableVmBehaviorOverrides bool          `xml:"enableVmBehaviorOverrides,omitempty"`
-	DefaultVmBehavior         DrsBehavior   `xml:"defaultVmBehavior,omitempty"`
-	VmotionRate               int           `xml:"vmotionRate,omitempty"`
-	Option                    []OptionValue `xml:"option,omitempty"`
+	Enabled                   bool              `xml:"enabled,omitempty"`
+	EnableVmBehaviorOverrides bool              `xml:"enableVmBehaviorOverrides,omitempty"`
+	DefaultVmBehavior         DrsBehavior       `xml:"defaultVmBehavior,omitempty"`
+	VmotionRate               int               `xml:"vmotionRate,omitempty"`
+	Option                    []BaseOptionValue `xml:"option,omitempty,typeattr"`
 }
 
 func init() {
@@ -6499,7 +6499,7 @@ func init() {
 type ClusterEnterMaintenanceModeRequestType struct {
 	This   ManagedObjectReference   `xml:"_this"`
 	Host   []ManagedObjectReference `xml:"host"`
-	Option []OptionValue            `xml:"option,omitempty"`
+	Option []BaseOptionValue        `xml:"option,omitempty,typeattr"`
 }
 
 func init() {
@@ -7092,7 +7092,7 @@ type ConfigTarget struct {
 	MaxMemMBOptimalPerf         int                                     `xml:"maxMemMBOptimalPerf"`
 	ResourcePool                *ResourcePoolRuntimeInfo                `xml:"resourcePool,omitempty"`
 	AutoVmotion                 bool                                    `xml:"autoVmotion,omitempty"`
-	PciPassthrough              []VirtualMachinePciPassthroughInfo      `xml:"pciPassthrough,omitempty"`
+	PciPassthrough              []BaseVirtualMachinePciPassthroughInfo  `xml:"pciPassthrough,omitempty,typeattr"`
 	Sriov                       []VirtualMachineSriovInfo               `xml:"sriov,omitempty"`
 	VFlashModule                []VirtualMachineVFlashModuleInfo        `xml:"vFlashModule,omitempty"`
 }
@@ -7467,7 +7467,7 @@ func init() {
 	t["CpuIncompatible81EDXFault"] = reflect.TypeOf((*CpuIncompatible81EDXFault)(nil)).Elem()
 }
 
-type CpuIncompatibleFault CpuIncompatible
+type CpuIncompatibleFault BaseCpuIncompatible
 
 func init() {
 	t["CpuIncompatibleFault"] = reflect.TypeOf((*CpuIncompatibleFault)(nil)).Elem()
@@ -8537,7 +8537,7 @@ func init() {
 	t["CustomizationFault"] = reflect.TypeOf((*CustomizationFault)(nil)).Elem()
 }
 
-type CustomizationFaultFault CustomizationFault
+type CustomizationFaultFault BaseCustomizationFault
 
 func init() {
 	t["CustomizationFaultFault"] = reflect.TypeOf((*CustomizationFaultFault)(nil)).Elem()
@@ -10067,7 +10067,7 @@ func init() {
 	t["DatastoreNotWritableOnHost"] = reflect.TypeOf((*DatastoreNotWritableOnHost)(nil)).Elem()
 }
 
-type DatastoreNotWritableOnHostFault DatastoreNotWritableOnHost
+type DatastoreNotWritableOnHostFault BaseDatastoreNotWritableOnHost
 
 func init() {
 	t["DatastoreNotWritableOnHostFault"] = reflect.TypeOf((*DatastoreNotWritableOnHostFault)(nil)).Elem()
@@ -10722,7 +10722,7 @@ func init() {
 	t["DeviceBackingNotSupported"] = reflect.TypeOf((*DeviceBackingNotSupported)(nil)).Elem()
 }
 
-type DeviceBackingNotSupportedFault DeviceBackingNotSupported
+type DeviceBackingNotSupportedFault BaseDeviceBackingNotSupported
 
 func init() {
 	t["DeviceBackingNotSupportedFault"] = reflect.TypeOf((*DeviceBackingNotSupportedFault)(nil)).Elem()
@@ -10783,7 +10783,7 @@ func init() {
 	t["DeviceNotSupported"] = reflect.TypeOf((*DeviceNotSupported)(nil)).Elem()
 }
 
-type DeviceNotSupportedFault DeviceNotSupported
+type DeviceNotSupportedFault BaseDeviceNotSupported
 
 func init() {
 	t["DeviceNotSupportedFault"] = reflect.TypeOf((*DeviceNotSupportedFault)(nil)).Elem()
@@ -11181,7 +11181,7 @@ func init() {
 	t["DiskNotSupported"] = reflect.TypeOf((*DiskNotSupported)(nil)).Elem()
 }
 
-type DiskNotSupportedFault DiskNotSupported
+type DiskNotSupportedFault BaseDiskNotSupported
 
 func init() {
 	t["DiskNotSupportedFault"] = reflect.TypeOf((*DiskNotSupportedFault)(nil)).Elem()
@@ -11921,7 +11921,7 @@ func init() {
 	t["DvsFault"] = reflect.TypeOf((*DvsFault)(nil)).Elem()
 }
 
-type DvsFaultFault DvsFault
+type DvsFaultFault BaseDvsFault
 
 func init() {
 	t["DvsFaultFault"] = reflect.TypeOf((*DvsFaultFault)(nil)).Elem()
@@ -11964,7 +11964,7 @@ func init() {
 type DvsFilterPolicy struct {
 	InheritablePolicy
 
-	FilterConfig []DvsFilterConfig `xml:"filterConfig,omitempty"`
+	FilterConfig []BaseDvsFilterConfig `xml:"filterConfig,omitempty,typeattr"`
 }
 
 func init() {
@@ -12067,11 +12067,11 @@ func init() {
 type DvsIpNetworkRuleQualifier struct {
 	DvsNetworkRuleQualifier
 
-	SourceAddress      *IpAddress     `xml:"sourceAddress,omitempty"`
-	DestinationAddress *IpAddress     `xml:"destinationAddress,omitempty"`
+	SourceAddress      BaseIpAddress  `xml:"sourceAddress,omitempty,typeattr"`
+	DestinationAddress BaseIpAddress  `xml:"destinationAddress,omitempty,typeattr"`
 	Protocol           *IntExpression `xml:"protocol,omitempty"`
-	SourceIpPort       *DvsIpPort     `xml:"sourceIpPort,omitempty"`
-	DestinationIpPort  *DvsIpPort     `xml:"destinationIpPort,omitempty"`
+	SourceIpPort       BaseDvsIpPort  `xml:"sourceIpPort,omitempty,typeattr"`
+	DestinationIpPort  BaseDvsIpPort  `xml:"destinationIpPort,omitempty,typeattr"`
 	TcpFlags           *IntExpression `xml:"tcpFlags,omitempty"`
 }
 
@@ -12109,8 +12109,8 @@ func init() {
 type DvsMacNetworkRuleQualifier struct {
 	DvsNetworkRuleQualifier
 
-	SourceAddress      *MacAddress    `xml:"sourceAddress,omitempty"`
-	DestinationAddress *MacAddress    `xml:"destinationAddress,omitempty"`
+	SourceAddress      BaseMacAddress `xml:"sourceAddress,omitempty,typeattr"`
+	DestinationAddress BaseMacAddress `xml:"destinationAddress,omitempty,typeattr"`
 	Protocol           *IntExpression `xml:"protocol,omitempty"`
 	VlanId             *IntExpression `xml:"vlanId,omitempty"`
 }
@@ -12705,7 +12705,7 @@ func init() {
 	t["EVCAdmissionFailedCPUVendorUnknownFault"] = reflect.TypeOf((*EVCAdmissionFailedCPUVendorUnknownFault)(nil)).Elem()
 }
 
-type EVCAdmissionFailedFault EVCAdmissionFailed
+type EVCAdmissionFailedFault BaseEVCAdmissionFailed
 
 func init() {
 	t["EVCAdmissionFailedFault"] = reflect.TypeOf((*EVCAdmissionFailedFault)(nil)).Elem()
@@ -13074,8 +13074,8 @@ func init() {
 type EnumDescription struct {
 	DynamicData
 
-	Key  string               `xml:"key"`
-	Tags []ElementDescription `xml:"tags"`
+	Key  string                   `xml:"key"`
+	Tags []BaseElementDescription `xml:"tags,typeattr"`
 }
 
 func init() {
@@ -13206,9 +13206,9 @@ func init() {
 type EventArgDesc struct {
 	DynamicData
 
-	Name        string              `xml:"name"`
-	Type        string              `xml:"type"`
-	Description *ElementDescription `xml:"description,omitempty"`
+	Name        string                 `xml:"name"`
+	Type        string                 `xml:"type"`
+	Description BaseElementDescription `xml:"description,omitempty,typeattr"`
 }
 
 func init() {
@@ -13226,7 +13226,7 @@ func init() {
 type EventDescription struct {
 	DynamicData
 
-	Category        []ElementDescription          `xml:"category"`
+	Category        []BaseElementDescription      `xml:"category,typeattr"`
 	EventInfo       []EventDescriptionEventDetail `xml:"eventInfo"`
 	EnumeratedTypes []EnumDescription             `xml:"enumeratedTypes,omitempty"`
 }
@@ -13509,7 +13509,7 @@ func init() {
 	t["ExpiredFeatureLicense"] = reflect.TypeOf((*ExpiredFeatureLicense)(nil)).Elem()
 }
 
-type ExpiredFeatureLicenseFault ExpiredFeatureLicense
+type ExpiredFeatureLicenseFault BaseExpiredFeatureLicense
 
 func init() {
 	t["ExpiredFeatureLicenseFault"] = reflect.TypeOf((*ExpiredFeatureLicenseFault)(nil)).Elem()
@@ -14220,7 +14220,7 @@ func init() {
 	t["FcoeFault"] = reflect.TypeOf((*FcoeFault)(nil)).Elem()
 }
 
-type FcoeFaultFault FcoeFault
+type FcoeFaultFault BaseFcoeFault
 
 func init() {
 	t["FcoeFaultFault"] = reflect.TypeOf((*FcoeFaultFault)(nil)).Elem()
@@ -14347,7 +14347,7 @@ func init() {
 	t["FileFault"] = reflect.TypeOf((*FileFault)(nil)).Elem()
 }
 
-type FileFaultFault FileFault
+type FileFaultFault BaseFileFault
 
 func init() {
 	t["FileFaultFault"] = reflect.TypeOf((*FileFaultFault)(nil)).Elem()
@@ -15285,7 +15285,7 @@ func init() {
 	t["GuestOperationsFault"] = reflect.TypeOf((*GuestOperationsFault)(nil)).Elem()
 }
 
-type GuestOperationsFaultFault GuestOperationsFault
+type GuestOperationsFaultFault BaseGuestOperationsFault
 
 func init() {
 	t["GuestOperationsFaultFault"] = reflect.TypeOf((*GuestOperationsFaultFault)(nil)).Elem()
@@ -15975,7 +15975,7 @@ func init() {
 	t["HostCommunication"] = reflect.TypeOf((*HostCommunication)(nil)).Elem()
 }
 
-type HostCommunicationFault HostCommunication
+type HostCommunicationFault BaseHostCommunication
 
 func init() {
 	t["HostCommunicationFault"] = reflect.TypeOf((*HostCommunicationFault)(nil)).Elem()
@@ -16039,7 +16039,7 @@ func init() {
 	t["HostConfigFault"] = reflect.TypeOf((*HostConfigFault)(nil)).Elem()
 }
 
-type HostConfigFaultFault HostConfigFault
+type HostConfigFaultFault BaseHostConfigFault
 
 func init() {
 	t["HostConfigFaultFault"] = reflect.TypeOf((*HostConfigFaultFault)(nil)).Elem()
@@ -16067,7 +16067,7 @@ type HostConfigInfo struct {
 	Firewall                  *HostFirewallInfo                    `xml:"firewall,omitempty"`
 	AutoStart                 *HostAutoStartManagerConfig          `xml:"autoStart,omitempty"`
 	ActiveDiagnosticPartition *HostDiagnosticPartition             `xml:"activeDiagnosticPartition,omitempty"`
-	Option                    []OptionValue                        `xml:"option,omitempty"`
+	Option                    []BaseOptionValue                    `xml:"option,omitempty,typeattr"`
 	OptionDef                 []OptionDef                          `xml:"optionDef,omitempty"`
 	DatastorePrincipal        string                               `xml:"datastorePrincipal,omitempty"`
 	LocalSwapDatastore        *ManagedObjectReference              `xml:"localSwapDatastore,omitempty"`
@@ -16146,7 +16146,7 @@ type HostConfigSpec struct {
 	NicTypeSelection         []HostVirtualNicManagerNicTypeSelection `xml:"nicTypeSelection,omitempty"`
 	Service                  []HostServiceConfig                     `xml:"service,omitempty"`
 	Firewall                 *HostFirewallConfig                     `xml:"firewall,omitempty"`
-	Option                   []OptionValue                           `xml:"option,omitempty"`
+	Option                   []BaseOptionValue                       `xml:"option,omitempty,typeattr"`
 	DatastorePrincipal       string                                  `xml:"datastorePrincipal,omitempty"`
 	DatastorePrincipalPasswd string                                  `xml:"datastorePrincipalPasswd,omitempty"`
 	Datetime                 *HostDateTimeConfig                     `xml:"datetime,omitempty"`
@@ -16226,7 +16226,7 @@ func init() {
 	t["HostConnectFault"] = reflect.TypeOf((*HostConnectFault)(nil)).Elem()
 }
 
-type HostConnectFaultFault HostConnectFault
+type HostConnectFaultFault BaseHostConnectFault
 
 func init() {
 	t["HostConnectFaultFault"] = reflect.TypeOf((*HostConnectFaultFault)(nil)).Elem()
@@ -16253,7 +16253,7 @@ func init() {
 type HostConnectInfoNetworkInfo struct {
 	DynamicData
 
-	Summary NetworkSummary `xml:"summary"`
+	Summary BaseNetworkSummary `xml:"summary,typeattr"`
 }
 
 func init() {
@@ -17191,8 +17191,8 @@ func init() {
 type HostHardwareElementInfo struct {
 	DynamicData
 
-	Name   string             `xml:"name"`
-	Status ElementDescription `xml:"status"`
+	Name   string                 `xml:"name"`
+	Status BaseElementDescription `xml:"status,typeattr"`
 }
 
 func init() {
@@ -17222,9 +17222,9 @@ func init() {
 type HostHardwareStatusInfo struct {
 	DynamicData
 
-	MemoryStatusInfo  []HostHardwareElementInfo `xml:"memoryStatusInfo,omitempty"`
-	CpuStatusInfo     []HostHardwareElementInfo `xml:"cpuStatusInfo,omitempty"`
-	StorageStatusInfo []HostStorageElementInfo  `xml:"storageStatusInfo,omitempty"`
+	MemoryStatusInfo  []BaseHostHardwareElementInfo `xml:"memoryStatusInfo,omitempty,typeattr"`
+	CpuStatusInfo     []BaseHostHardwareElementInfo `xml:"cpuStatusInfo,omitempty,typeattr"`
+	StorageStatusInfo []HostStorageElementInfo      `xml:"storageStatusInfo,omitempty"`
 }
 
 func init() {
@@ -18592,13 +18592,13 @@ func init() {
 type HostNumericSensorInfo struct {
 	DynamicData
 
-	Name           string              `xml:"name"`
-	HealthState    *ElementDescription `xml:"healthState,omitempty"`
-	CurrentReading int64               `xml:"currentReading"`
-	UnitModifier   int                 `xml:"unitModifier"`
-	BaseUnits      string              `xml:"baseUnits"`
-	RateUnits      string              `xml:"rateUnits,omitempty"`
-	SensorType     string              `xml:"sensorType"`
+	Name           string                 `xml:"name"`
+	HealthState    BaseElementDescription `xml:"healthState,omitempty,typeattr"`
+	CurrentReading int64                  `xml:"currentReading"`
+	UnitModifier   int                    `xml:"unitModifier"`
+	BaseUnits      string                 `xml:"baseUnits"`
+	RateUnits      string                 `xml:"rateUnits,omitempty"`
+	SensorType     string                 `xml:"sensorType"`
 }
 
 func init() {
@@ -18724,7 +18724,7 @@ func init() {
 type HostPathSelectionPolicyOption struct {
 	DynamicData
 
-	Policy ElementDescription `xml:"policy"`
+	Policy BaseElementDescription `xml:"policy,typeattr"`
 }
 
 func init() {
@@ -18935,7 +18935,7 @@ func init() {
 	t["HostPowerOpFailed"] = reflect.TypeOf((*HostPowerOpFailed)(nil)).Elem()
 }
 
-type HostPowerOpFailedFault HostPowerOpFailed
+type HostPowerOpFailedFault BaseHostPowerOpFailed
 
 func init() {
 	t["HostPowerOpFailedFault"] = reflect.TypeOf((*HostPowerOpFailedFault)(nil)).Elem()
@@ -19462,7 +19462,7 @@ func init() {
 type HostStorageArrayTypePolicyOption struct {
 	DynamicData
 
-	Policy ElementDescription `xml:"policy"`
+	Policy BaseElementDescription `xml:"policy,typeattr"`
 }
 
 func init() {
@@ -19473,7 +19473,7 @@ type HostStorageDeviceInfo struct {
 	DynamicData
 
 	HostBusAdapter              []BaseHostHostBusAdapter `xml:"hostBusAdapter,omitempty,typeattr"`
-	ScsiLun                     []ScsiLun                `xml:"scsiLun,omitempty"`
+	ScsiLun                     []BaseScsiLun            `xml:"scsiLun,omitempty,typeattr"`
 	ScsiTopology                *HostScsiTopology        `xml:"scsiTopology,omitempty"`
 	MultipathInfo               *HostMultipathInfo       `xml:"multipathInfo,omitempty"`
 	PlugStoreTopology           *HostPlugStoreTopology   `xml:"plugStoreTopology,omitempty"`
@@ -19528,8 +19528,8 @@ func init() {
 type HostSystemIdentificationInfo struct {
 	DynamicData
 
-	IdentifierValue string             `xml:"identifierValue"`
-	IdentifierType  ElementDescription `xml:"identifierType"`
+	IdentifierValue string                 `xml:"identifierValue"`
+	IdentifierType  BaseElementDescription `xml:"identifierType,typeattr"`
 }
 
 func init() {
@@ -20948,7 +20948,7 @@ func init() {
 	t["InsufficientHostCapacityFault"] = reflect.TypeOf((*InsufficientHostCapacityFault)(nil)).Elem()
 }
 
-type InsufficientHostCapacityFaultFault InsufficientHostCapacityFault
+type InsufficientHostCapacityFaultFault BaseInsufficientHostCapacityFault
 
 func init() {
 	t["InsufficientHostCapacityFaultFault"] = reflect.TypeOf((*InsufficientHostCapacityFaultFault)(nil)).Elem()
@@ -21027,7 +21027,7 @@ func init() {
 	t["InsufficientResourcesFault"] = reflect.TypeOf((*InsufficientResourcesFault)(nil)).Elem()
 }
 
-type InsufficientResourcesFaultFault InsufficientResourcesFault
+type InsufficientResourcesFaultFault BaseInsufficientResourcesFault
 
 func init() {
 	t["InsufficientResourcesFaultFault"] = reflect.TypeOf((*InsufficientResourcesFaultFault)(nil)).Elem()
@@ -21075,7 +21075,7 @@ func init() {
 	t["InsufficientStandbyResource"] = reflect.TypeOf((*InsufficientStandbyResource)(nil)).Elem()
 }
 
-type InsufficientStandbyResourceFault InsufficientStandbyResource
+type InsufficientStandbyResourceFault BaseInsufficientStandbyResource
 
 func init() {
 	t["InsufficientStandbyResourceFault"] = reflect.TypeOf((*InsufficientStandbyResourceFault)(nil)).Elem()
@@ -21168,7 +21168,7 @@ func init() {
 	t["InvalidArgument"] = reflect.TypeOf((*InvalidArgument)(nil)).Elem()
 }
 
-type InvalidArgumentFault InvalidArgument
+type InvalidArgumentFault BaseInvalidArgument
 
 func init() {
 	t["InvalidArgumentFault"] = reflect.TypeOf((*InvalidArgumentFault)(nil)).Elem()
@@ -21226,7 +21226,7 @@ func init() {
 	t["InvalidCAMServer"] = reflect.TypeOf((*InvalidCAMServer)(nil)).Elem()
 }
 
-type InvalidCAMServerFault InvalidCAMServer
+type InvalidCAMServerFault BaseInvalidCAMServer
 
 func init() {
 	t["InvalidCAMServerFault"] = reflect.TypeOf((*InvalidCAMServerFault)(nil)).Elem()
@@ -21321,7 +21321,7 @@ func init() {
 	t["InvalidDatastore"] = reflect.TypeOf((*InvalidDatastore)(nil)).Elem()
 }
 
-type InvalidDatastoreFault InvalidDatastore
+type InvalidDatastoreFault BaseInvalidDatastore
 
 func init() {
 	t["InvalidDatastoreFault"] = reflect.TypeOf((*InvalidDatastoreFault)(nil)).Elem()
@@ -21400,7 +21400,7 @@ func init() {
 	t["InvalidDeviceSpec"] = reflect.TypeOf((*InvalidDeviceSpec)(nil)).Elem()
 }
 
-type InvalidDeviceSpecFault InvalidDeviceSpec
+type InvalidDeviceSpecFault BaseInvalidDeviceSpec
 
 func init() {
 	t["InvalidDeviceSpecFault"] = reflect.TypeOf((*InvalidDeviceSpecFault)(nil)).Elem()
@@ -21487,7 +21487,7 @@ func init() {
 	t["InvalidFolder"] = reflect.TypeOf((*InvalidFolder)(nil)).Elem()
 }
 
-type InvalidFolderFault InvalidFolder
+type InvalidFolderFault BaseInvalidFolder
 
 func init() {
 	t["InvalidFolderFault"] = reflect.TypeOf((*InvalidFolderFault)(nil)).Elem()
@@ -21501,7 +21501,7 @@ func init() {
 	t["InvalidFormat"] = reflect.TypeOf((*InvalidFormat)(nil)).Elem()
 }
 
-type InvalidFormatFault InvalidFormat
+type InvalidFormatFault BaseInvalidFormat
 
 func init() {
 	t["InvalidFormatFault"] = reflect.TypeOf((*InvalidFormatFault)(nil)).Elem()
@@ -21559,7 +21559,7 @@ func init() {
 	t["InvalidHostState"] = reflect.TypeOf((*InvalidHostState)(nil)).Elem()
 }
 
-type InvalidHostStateFault InvalidHostState
+type InvalidHostStateFault BaseInvalidHostState
 
 func init() {
 	t["InvalidHostStateFault"] = reflect.TypeOf((*InvalidHostStateFault)(nil)).Elem()
@@ -21666,7 +21666,7 @@ func init() {
 	t["InvalidLogin"] = reflect.TypeOf((*InvalidLogin)(nil)).Elem()
 }
 
-type InvalidLoginFault InvalidLogin
+type InvalidLoginFault BaseInvalidLogin
 
 func init() {
 	t["InvalidLoginFault"] = reflect.TypeOf((*InvalidLoginFault)(nil)).Elem()
@@ -21841,7 +21841,7 @@ func init() {
 	t["InvalidPropertyValue"] = reflect.TypeOf((*InvalidPropertyValue)(nil)).Elem()
 }
 
-type InvalidPropertyValueFault InvalidPropertyValue
+type InvalidPropertyValueFault BaseInvalidPropertyValue
 
 func init() {
 	t["InvalidPropertyValueFault"] = reflect.TypeOf((*InvalidPropertyValueFault)(nil)).Elem()
@@ -21855,7 +21855,7 @@ func init() {
 	t["InvalidRequest"] = reflect.TypeOf((*InvalidRequest)(nil)).Elem()
 }
 
-type InvalidRequestFault InvalidRequest
+type InvalidRequestFault BaseInvalidRequest
 
 func init() {
 	t["InvalidRequestFault"] = reflect.TypeOf((*InvalidRequestFault)(nil)).Elem()
@@ -21897,7 +21897,7 @@ func init() {
 	t["InvalidState"] = reflect.TypeOf((*InvalidState)(nil)).Elem()
 }
 
-type InvalidStateFault InvalidState
+type InvalidStateFault BaseInvalidState
 
 func init() {
 	t["InvalidStateFault"] = reflect.TypeOf((*InvalidStateFault)(nil)).Elem()
@@ -21929,7 +21929,7 @@ func init() {
 	t["InvalidVmConfig"] = reflect.TypeOf((*InvalidVmConfig)(nil)).Elem()
 }
 
-type InvalidVmConfigFault InvalidVmConfig
+type InvalidVmConfigFault BaseInvalidVmConfig
 
 func init() {
 	t["InvalidVmConfigFault"] = reflect.TypeOf((*InvalidVmConfigFault)(nil)).Elem()
@@ -22119,7 +22119,7 @@ func init() {
 	t["IscsiFault"] = reflect.TypeOf((*IscsiFault)(nil)).Elem()
 }
 
-type IscsiFaultFault IscsiFault
+type IscsiFaultFault BaseIscsiFault
 
 func init() {
 	t["IscsiFaultFault"] = reflect.TypeOf((*IscsiFaultFault)(nil)).Elem()
@@ -23733,7 +23733,7 @@ func init() {
 	t["MigrationFault"] = reflect.TypeOf((*MigrationFault)(nil)).Elem()
 }
 
-type MigrationFaultFault MigrationFault
+type MigrationFaultFault BaseMigrationFault
 
 func init() {
 	t["MigrationFaultFault"] = reflect.TypeOf((*MigrationFaultFault)(nil)).Elem()
@@ -23751,7 +23751,7 @@ func init() {
 	t["MigrationFeatureNotSupported"] = reflect.TypeOf((*MigrationFeatureNotSupported)(nil)).Elem()
 }
 
-type MigrationFeatureNotSupportedFault MigrationFeatureNotSupported
+type MigrationFeatureNotSupportedFault BaseMigrationFeatureNotSupported
 
 func init() {
 	t["MigrationFeatureNotSupportedFault"] = reflect.TypeOf((*MigrationFeatureNotSupportedFault)(nil)).Elem()
@@ -24485,7 +24485,7 @@ func init() {
 	t["NasConfigFault"] = reflect.TypeOf((*NasConfigFault)(nil)).Elem()
 }
 
-type NasConfigFaultFault NasConfigFault
+type NasConfigFaultFault BaseNasConfigFault
 
 func init() {
 	t["NasConfigFaultFault"] = reflect.TypeOf((*NasConfigFaultFault)(nil)).Elem()
@@ -25068,7 +25068,7 @@ func init() {
 	t["NoCompatibleHost"] = reflect.TypeOf((*NoCompatibleHost)(nil)).Elem()
 }
 
-type NoCompatibleHostFault NoCompatibleHost
+type NoCompatibleHostFault BaseNoCompatibleHost
 
 func init() {
 	t["NoCompatibleHostFault"] = reflect.TypeOf((*NoCompatibleHostFault)(nil)).Elem()
@@ -25288,7 +25288,7 @@ func init() {
 	t["NoPermission"] = reflect.TypeOf((*NoPermission)(nil)).Elem()
 }
 
-type NoPermissionFault NoPermission
+type NoPermissionFault BaseNoPermission
 
 func init() {
 	t["NoPermissionFault"] = reflect.TypeOf((*NoPermissionFault)(nil)).Elem()
@@ -25515,7 +25515,7 @@ func init() {
 	t["NotEnoughCpus"] = reflect.TypeOf((*NotEnoughCpus)(nil)).Elem()
 }
 
-type NotEnoughCpusFault NotEnoughCpus
+type NotEnoughCpusFault BaseNotEnoughCpus
 
 func init() {
 	t["NotEnoughCpusFault"] = reflect.TypeOf((*NotEnoughCpusFault)(nil)).Elem()
@@ -25529,7 +25529,7 @@ func init() {
 	t["NotEnoughLicenses"] = reflect.TypeOf((*NotEnoughLicenses)(nil)).Elem()
 }
 
-type NotEnoughLicensesFault NotEnoughLicenses
+type NotEnoughLicensesFault BaseNotEnoughLicenses
 
 func init() {
 	t["NotEnoughLicensesFault"] = reflect.TypeOf((*NotEnoughLicensesFault)(nil)).Elem()
@@ -25616,7 +25616,7 @@ func init() {
 	t["NotSupportedDeviceForFTFault"] = reflect.TypeOf((*NotSupportedDeviceForFTFault)(nil)).Elem()
 }
 
-type NotSupportedFault NotSupported
+type NotSupportedFault BaseNotSupported
 
 func init() {
 	t["NotSupportedFault"] = reflect.TypeOf((*NotSupportedFault)(nil)).Elem()
@@ -25633,7 +25633,7 @@ func init() {
 	t["NotSupportedHost"] = reflect.TypeOf((*NotSupportedHost)(nil)).Elem()
 }
 
-type NotSupportedHostFault NotSupportedHost
+type NotSupportedHostFault BaseNotSupportedHost
 
 func init() {
 	t["NotSupportedHostFault"] = reflect.TypeOf((*NotSupportedHostFault)(nil)).Elem()
@@ -25679,7 +25679,7 @@ func init() {
 	t["NotSupportedHostInCluster"] = reflect.TypeOf((*NotSupportedHostInCluster)(nil)).Elem()
 }
 
-type NotSupportedHostInClusterFault NotSupportedHostInCluster
+type NotSupportedHostInClusterFault BaseNotSupportedHostInCluster
 
 func init() {
 	t["NotSupportedHostInClusterFault"] = reflect.TypeOf((*NotSupportedHostInClusterFault)(nil)).Elem()
@@ -26053,7 +26053,7 @@ func init() {
 	t["OvfAttribute"] = reflect.TypeOf((*OvfAttribute)(nil)).Elem()
 }
 
-type OvfAttributeFault OvfAttribute
+type OvfAttributeFault BaseOvfAttribute
 
 func init() {
 	t["OvfAttributeFault"] = reflect.TypeOf((*OvfAttributeFault)(nil)).Elem()
@@ -26067,7 +26067,7 @@ func init() {
 	t["OvfConnectedDevice"] = reflect.TypeOf((*OvfConnectedDevice)(nil)).Elem()
 }
 
-type OvfConnectedDeviceFault OvfConnectedDevice
+type OvfConnectedDeviceFault BaseOvfConnectedDevice
 
 func init() {
 	t["OvfConnectedDeviceFault"] = reflect.TypeOf((*OvfConnectedDeviceFault)(nil)).Elem()
@@ -26115,7 +26115,7 @@ func init() {
 	t["OvfConstraint"] = reflect.TypeOf((*OvfConstraint)(nil)).Elem()
 }
 
-type OvfConstraintFault OvfConstraint
+type OvfConstraintFault BaseOvfConstraint
 
 func init() {
 	t["OvfConstraintFault"] = reflect.TypeOf((*OvfConstraintFault)(nil)).Elem()
@@ -26132,7 +26132,7 @@ func init() {
 	t["OvfConsumerCallbackFault"] = reflect.TypeOf((*OvfConsumerCallbackFault)(nil)).Elem()
 }
 
-type OvfConsumerCallbackFaultFault OvfConsumerCallbackFault
+type OvfConsumerCallbackFaultFault BaseOvfConsumerCallbackFault
 
 func init() {
 	t["OvfConsumerCallbackFaultFault"] = reflect.TypeOf((*OvfConsumerCallbackFaultFault)(nil)).Elem()
@@ -26487,7 +26487,7 @@ func init() {
 	t["OvfElement"] = reflect.TypeOf((*OvfElement)(nil)).Elem()
 }
 
-type OvfElementFault OvfElement
+type OvfElementFault BaseOvfElement
 
 func init() {
 	t["OvfElementFault"] = reflect.TypeOf((*OvfElementFault)(nil)).Elem()
@@ -26531,7 +26531,7 @@ func init() {
 	t["OvfExportFailedFault"] = reflect.TypeOf((*OvfExportFailedFault)(nil)).Elem()
 }
 
-type OvfExportFault OvfExport
+type OvfExportFault BaseOvfExport
 
 func init() {
 	t["OvfExportFault"] = reflect.TypeOf((*OvfExportFault)(nil)).Elem()
@@ -26545,7 +26545,7 @@ func init() {
 	t["OvfFault"] = reflect.TypeOf((*OvfFault)(nil)).Elem()
 }
 
-type OvfFaultFault OvfFault
+type OvfFaultFault BaseOvfFault
 
 func init() {
 	t["OvfFaultFault"] = reflect.TypeOf((*OvfFaultFault)(nil)).Elem()
@@ -26608,7 +26608,7 @@ func init() {
 	t["OvfHardwareExport"] = reflect.TypeOf((*OvfHardwareExport)(nil)).Elem()
 }
 
-type OvfHardwareExportFault OvfHardwareExport
+type OvfHardwareExportFault BaseOvfHardwareExport
 
 func init() {
 	t["OvfHardwareExportFault"] = reflect.TypeOf((*OvfHardwareExportFault)(nil)).Elem()
@@ -26669,7 +26669,7 @@ func init() {
 	t["OvfImportFailedFault"] = reflect.TypeOf((*OvfImportFailedFault)(nil)).Elem()
 }
 
-type OvfImportFault OvfImport
+type OvfImportFault BaseOvfImport
 
 func init() {
 	t["OvfImportFault"] = reflect.TypeOf((*OvfImportFault)(nil)).Elem()
@@ -26699,7 +26699,7 @@ func init() {
 	t["OvfInvalidPackage"] = reflect.TypeOf((*OvfInvalidPackage)(nil)).Elem()
 }
 
-type OvfInvalidPackageFault OvfInvalidPackage
+type OvfInvalidPackageFault BaseOvfInvalidPackage
 
 func init() {
 	t["OvfInvalidPackageFault"] = reflect.TypeOf((*OvfInvalidPackageFault)(nil)).Elem()
@@ -26743,7 +26743,7 @@ func init() {
 	t["OvfInvalidValueEmptyFault"] = reflect.TypeOf((*OvfInvalidValueEmptyFault)(nil)).Elem()
 }
 
-type OvfInvalidValueFault OvfInvalidValue
+type OvfInvalidValueFault BaseOvfInvalidValue
 
 func init() {
 	t["OvfInvalidValueFault"] = reflect.TypeOf((*OvfInvalidValueFault)(nil)).Elem()
@@ -26846,7 +26846,7 @@ func init() {
 	t["OvfMissingElement"] = reflect.TypeOf((*OvfMissingElement)(nil)).Elem()
 }
 
-type OvfMissingElementFault OvfMissingElement
+type OvfMissingElementFault BaseOvfMissingElement
 
 func init() {
 	t["OvfMissingElementFault"] = reflect.TypeOf((*OvfMissingElementFault)(nil)).Elem()
@@ -27041,7 +27041,7 @@ func init() {
 	t["OvfPropertyExportFault"] = reflect.TypeOf((*OvfPropertyExportFault)(nil)).Elem()
 }
 
-type OvfPropertyFault OvfProperty
+type OvfPropertyFault BaseOvfProperty
 
 func init() {
 	t["OvfPropertyFault"] = reflect.TypeOf((*OvfPropertyFault)(nil)).Elem()
@@ -27174,7 +27174,7 @@ func init() {
 	t["OvfSystemFault"] = reflect.TypeOf((*OvfSystemFault)(nil)).Elem()
 }
 
-type OvfSystemFaultFault OvfSystemFault
+type OvfSystemFaultFault BaseOvfSystemFault
 
 func init() {
 	t["OvfSystemFaultFault"] = reflect.TypeOf((*OvfSystemFaultFault)(nil)).Elem()
@@ -27286,7 +27286,7 @@ func init() {
 	t["OvfUnsupportedAttribute"] = reflect.TypeOf((*OvfUnsupportedAttribute)(nil)).Elem()
 }
 
-type OvfUnsupportedAttributeFault OvfUnsupportedAttribute
+type OvfUnsupportedAttributeFault BaseOvfUnsupportedAttribute
 
 func init() {
 	t["OvfUnsupportedAttributeFault"] = reflect.TypeOf((*OvfUnsupportedAttributeFault)(nil)).Elem()
@@ -27387,7 +27387,7 @@ func init() {
 	t["OvfUnsupportedElement"] = reflect.TypeOf((*OvfUnsupportedElement)(nil)).Elem()
 }
 
-type OvfUnsupportedElementFault OvfUnsupportedElement
+type OvfUnsupportedElementFault BaseOvfUnsupportedElement
 
 func init() {
 	t["OvfUnsupportedElementFault"] = reflect.TypeOf((*OvfUnsupportedElementFault)(nil)).Elem()
@@ -27419,7 +27419,7 @@ func init() {
 	t["OvfUnsupportedPackage"] = reflect.TypeOf((*OvfUnsupportedPackage)(nil)).Elem()
 }
 
-type OvfUnsupportedPackageFault OvfUnsupportedPackage
+type OvfUnsupportedPackageFault BaseOvfUnsupportedPackage
 
 func init() {
 	t["OvfUnsupportedPackageFault"] = reflect.TypeOf((*OvfUnsupportedPackageFault)(nil)).Elem()
@@ -27679,7 +27679,7 @@ func init() {
 	t["PatchMetadataInvalid"] = reflect.TypeOf((*PatchMetadataInvalid)(nil)).Elem()
 }
 
-type PatchMetadataInvalidFault PatchMetadataInvalid
+type PatchMetadataInvalidFault BasePatchMetadataInvalid
 
 func init() {
 	t["PatchMetadataInvalidFault"] = reflect.TypeOf((*PatchMetadataInvalidFault)(nil)).Elem()
@@ -27726,7 +27726,7 @@ func init() {
 	t["PatchNotApplicable"] = reflect.TypeOf((*PatchNotApplicable)(nil)).Elem()
 }
 
-type PatchNotApplicableFault PatchNotApplicable
+type PatchNotApplicableFault BasePatchNotApplicable
 
 func init() {
 	t["PatchNotApplicableFault"] = reflect.TypeOf((*PatchNotApplicableFault)(nil)).Elem()
@@ -27762,15 +27762,15 @@ func init() {
 type PerfCounterInfo struct {
 	DynamicData
 
-	Key                 int                `xml:"key"`
-	NameInfo            ElementDescription `xml:"nameInfo"`
-	GroupInfo           ElementDescription `xml:"groupInfo"`
-	UnitInfo            ElementDescription `xml:"unitInfo"`
-	RollupType          PerfSummaryType    `xml:"rollupType"`
-	StatsType           PerfStatsType      `xml:"statsType"`
-	Level               int                `xml:"level,omitempty"`
-	PerDeviceLevel      int                `xml:"perDeviceLevel,omitempty"`
-	AssociatedCounterId []int              `xml:"associatedCounterId,omitempty"`
+	Key                 int                    `xml:"key"`
+	NameInfo            BaseElementDescription `xml:"nameInfo,typeattr"`
+	GroupInfo           BaseElementDescription `xml:"groupInfo,typeattr"`
+	UnitInfo            BaseElementDescription `xml:"unitInfo,typeattr"`
+	RollupType          PerfSummaryType        `xml:"rollupType"`
+	StatsType           PerfStatsType          `xml:"statsType"`
+	Level               int                    `xml:"level,omitempty"`
+	PerDeviceLevel      int                    `xml:"perDeviceLevel,omitempty"`
+	AssociatedCounterId []int                  `xml:"associatedCounterId,omitempty"`
 }
 
 func init() {
@@ -27928,8 +27928,8 @@ type PerformDvsProductSpecOperation_TaskResponse struct {
 type PerformanceDescription struct {
 	DynamicData
 
-	CounterType []ElementDescription `xml:"counterType"`
-	StatsType   []ElementDescription `xml:"statsType"`
+	CounterType []BaseElementDescription `xml:"counterType,typeattr"`
+	StatsType   []BaseElementDescription `xml:"statsType,typeattr"`
 }
 
 func init() {
@@ -28203,7 +28203,7 @@ func init() {
 	t["PlatformConfigFault"] = reflect.TypeOf((*PlatformConfigFault)(nil)).Elem()
 }
 
-type PlatformConfigFaultFault PlatformConfigFault
+type PlatformConfigFaultFault BasePlatformConfigFault
 
 func init() {
 	t["PlatformConfigFaultFault"] = reflect.TypeOf((*PlatformConfigFaultFault)(nil)).Elem()
@@ -28398,7 +28398,7 @@ func init() {
 type PowerOnMultiVMRequestType struct {
 	This   ManagedObjectReference   `xml:"_this"`
 	Vm     []ManagedObjectReference `xml:"vm"`
-	Option []OptionValue            `xml:"option,omitempty"`
+	Option []BaseOptionValue        `xml:"option,omitempty,typeattr"`
 }
 
 func init() {
@@ -29987,7 +29987,7 @@ func init() {
 }
 
 type QueryOptionsResponse struct {
-	Returnval []OptionValue `xml:"returnval,omitempty"`
+	Returnval []BaseOptionValue `xml:"returnval,omitempty,typeattr"`
 }
 
 type QueryPartitionCreateDesc QueryPartitionCreateDescRequestType
@@ -30678,7 +30678,7 @@ func init() {
 	t["RDMNotSupported"] = reflect.TypeOf((*RDMNotSupported)(nil)).Elem()
 }
 
-type RDMNotSupportedFault RDMNotSupported
+type RDMNotSupportedFault BaseRDMNotSupported
 
 func init() {
 	t["RDMNotSupportedFault"] = reflect.TypeOf((*RDMNotSupportedFault)(nil)).Elem()
@@ -31025,9 +31025,9 @@ type ReconfigureCluster_TaskResponse struct {
 }
 
 type ReconfigureComputeResourceRequestType struct {
-	This   ManagedObjectReference    `xml:"_this"`
-	Spec   ComputeResourceConfigSpec `xml:"spec"`
-	Modify bool                      `xml:"modify"`
+	This   ManagedObjectReference        `xml:"_this"`
+	Spec   BaseComputeResourceConfigSpec `xml:"spec,typeattr"`
+	Modify bool                          `xml:"modify"`
 }
 
 func init() {
@@ -32262,7 +32262,7 @@ func init() {
 	t["ReplicationConfigFault"] = reflect.TypeOf((*ReplicationConfigFault)(nil)).Elem()
 }
 
-type ReplicationConfigFaultFault ReplicationConfigFault
+type ReplicationConfigFaultFault BaseReplicationConfigFault
 
 func init() {
 	t["ReplicationConfigFaultFault"] = reflect.TypeOf((*ReplicationConfigFaultFault)(nil)).Elem()
@@ -32294,7 +32294,7 @@ func init() {
 	t["ReplicationFault"] = reflect.TypeOf((*ReplicationFault)(nil)).Elem()
 }
 
-type ReplicationFaultFault ReplicationFault
+type ReplicationFaultFault BaseReplicationFault
 
 func init() {
 	t["ReplicationFaultFault"] = reflect.TypeOf((*ReplicationFaultFault)(nil)).Elem()
@@ -32766,7 +32766,7 @@ func init() {
 	t["ResourceInUse"] = reflect.TypeOf((*ResourceInUse)(nil)).Elem()
 }
 
-type ResourceInUseFault ResourceInUse
+type ResourceInUseFault BaseResourceInUse
 
 func init() {
 	t["ResourceInUseFault"] = reflect.TypeOf((*ResourceInUseFault)(nil)).Elem()
@@ -33521,7 +33521,7 @@ func init() {
 	t["RuntimeFault"] = reflect.TypeOf((*RuntimeFault)(nil)).Elem()
 }
 
-type RuntimeFaultFault RuntimeFault
+type RuntimeFaultFault BaseRuntimeFault
 
 func init() {
 	t["RuntimeFaultFault"] = reflect.TypeOf((*RuntimeFaultFault)(nil)).Elem()
@@ -33657,11 +33657,11 @@ func init() {
 type ScheduledTaskDescription struct {
 	DynamicData
 
-	Action        []TypeDescription     `xml:"action"`
-	SchedulerInfo []ScheduledTaskDetail `xml:"schedulerInfo"`
-	State         []ElementDescription  `xml:"state"`
-	DayOfWeek     []ElementDescription  `xml:"dayOfWeek"`
-	WeekOfMonth   []ElementDescription  `xml:"weekOfMonth"`
+	Action        []BaseTypeDescription    `xml:"action,typeattr"`
+	SchedulerInfo []ScheduledTaskDetail    `xml:"schedulerInfo"`
+	State         []BaseElementDescription `xml:"state,typeattr"`
+	DayOfWeek     []BaseElementDescription `xml:"dayOfWeek,typeattr"`
+	WeekOfMonth   []BaseElementDescription `xml:"weekOfMonth,typeattr"`
 }
 
 func init() {
@@ -33972,7 +33972,7 @@ func init() {
 	t["SecurityError"] = reflect.TypeOf((*SecurityError)(nil)).Elem()
 }
 
-type SecurityErrorFault SecurityError
+type SecurityErrorFault BaseSecurityError
 
 func init() {
 	t["SecurityErrorFault"] = reflect.TypeOf((*SecurityErrorFault)(nil)).Elem()
@@ -34696,7 +34696,7 @@ func init() {
 	t["SnapshotCopyNotSupported"] = reflect.TypeOf((*SnapshotCopyNotSupported)(nil)).Elem()
 }
 
-type SnapshotCopyNotSupportedFault SnapshotCopyNotSupported
+type SnapshotCopyNotSupportedFault BaseSnapshotCopyNotSupported
 
 func init() {
 	t["SnapshotCopyNotSupportedFault"] = reflect.TypeOf((*SnapshotCopyNotSupportedFault)(nil)).Elem()
@@ -34724,7 +34724,7 @@ func init() {
 	t["SnapshotFault"] = reflect.TypeOf((*SnapshotFault)(nil)).Elem()
 }
 
-type SnapshotFaultFault SnapshotFault
+type SnapshotFaultFault BaseSnapshotFault
 
 func init() {
 	t["SnapshotFaultFault"] = reflect.TypeOf((*SnapshotFaultFault)(nil)).Elem()
@@ -35295,7 +35295,7 @@ func init() {
 type StorageDrsOptionSpec struct {
 	ArrayUpdateSpec
 
-	Option *OptionValue `xml:"option,omitempty"`
+	Option BaseOptionValue `xml:"option,omitempty,typeattr"`
 }
 
 func init() {
@@ -35313,7 +35313,7 @@ type StorageDrsPodConfigInfo struct {
 	SpaceLoadBalanceConfig *StorageDrsSpaceLoadBalanceConfig `xml:"spaceLoadBalanceConfig,omitempty"`
 	IoLoadBalanceConfig    *StorageDrsIoLoadBalanceConfig    `xml:"ioLoadBalanceConfig,omitempty"`
 	Rule                   []BaseClusterRuleInfo             `xml:"rule,omitempty,typeattr"`
-	Option                 []OptionValue                     `xml:"option,omitempty"`
+	Option                 []BaseOptionValue                 `xml:"option,omitempty,typeattr"`
 }
 
 func init() {
@@ -35792,9 +35792,9 @@ func init() {
 type TaskDescription struct {
 	DynamicData
 
-	MethodInfo []ElementDescription `xml:"methodInfo"`
-	State      []ElementDescription `xml:"state"`
-	Reason     []TypeDescription    `xml:"reason"`
+	MethodInfo []BaseElementDescription `xml:"methodInfo,typeattr"`
+	State      []BaseElementDescription `xml:"state,typeattr"`
+	Reason     []BaseTypeDescription    `xml:"reason,typeattr"`
 }
 
 func init() {
@@ -35874,7 +35874,7 @@ func init() {
 	t["TaskInProgress"] = reflect.TypeOf((*TaskInProgress)(nil)).Elem()
 }
 
-type TaskInProgressFault TaskInProgress
+type TaskInProgressFault BaseTaskInProgress
 
 func init() {
 	t["TaskInProgressFault"] = reflect.TypeOf((*TaskInProgressFault)(nil)).Elem()
@@ -36166,7 +36166,7 @@ func init() {
 	t["Timedout"] = reflect.TypeOf((*Timedout)(nil)).Elem()
 }
 
-type TimedoutFault Timedout
+type TimedoutFault BaseTimedout
 
 func init() {
 	t["TimedoutFault"] = reflect.TypeOf((*TimedoutFault)(nil)).Elem()
@@ -36838,7 +36838,7 @@ func init() {
 	t["UnsupportedDatastore"] = reflect.TypeOf((*UnsupportedDatastore)(nil)).Elem()
 }
 
-type UnsupportedDatastoreFault UnsupportedDatastore
+type UnsupportedDatastoreFault BaseUnsupportedDatastore
 
 func init() {
 	t["UnsupportedDatastoreFault"] = reflect.TypeOf((*UnsupportedDatastoreFault)(nil)).Elem()
@@ -37008,8 +37008,8 @@ func init() {
 }
 
 type UpdateClusterProfileRequestType struct {
-	This   ManagedObjectReference   `xml:"_this"`
-	Config ClusterProfileConfigSpec `xml:"config"`
+	This   ManagedObjectReference       `xml:"_this"`
+	Config BaseClusterProfileConfigSpec `xml:"config,typeattr"`
 }
 
 func init() {
@@ -37282,8 +37282,8 @@ func init() {
 }
 
 type UpdateHostProfileRequestType struct {
-	This   ManagedObjectReference `xml:"_this"`
-	Config HostProfileConfigSpec  `xml:"config"`
+	This   ManagedObjectReference    `xml:"_this"`
+	Config BaseHostProfileConfigSpec `xml:"config,typeattr"`
 }
 
 func init() {
@@ -37662,7 +37662,7 @@ func init() {
 
 type UpdateOptionsRequestType struct {
 	This         ManagedObjectReference `xml:"_this"`
-	ChangedValue []OptionValue          `xml:"changedValue"`
+	ChangedValue []BaseOptionValue      `xml:"changedValue,typeattr"`
 }
 
 func init() {
@@ -38393,7 +38393,7 @@ func init() {
 	t["VAppConfigFault"] = reflect.TypeOf((*VAppConfigFault)(nil)).Elem()
 }
 
-type VAppConfigFaultFault VAppConfigFault
+type VAppConfigFaultFault BaseVAppConfigFault
 
 func init() {
 	t["VAppConfigFaultFault"] = reflect.TypeOf((*VAppConfigFaultFault)(nil)).Elem()
@@ -38551,7 +38551,7 @@ func init() {
 	t["VAppPropertyFault"] = reflect.TypeOf((*VAppPropertyFault)(nil)).Elem()
 }
 
-type VAppPropertyFaultFault VAppPropertyFault
+type VAppPropertyFaultFault BaseVAppPropertyFault
 
 func init() {
 	t["VAppPropertyFaultFault"] = reflect.TypeOf((*VAppPropertyFaultFault)(nil)).Elem()
@@ -38738,7 +38738,7 @@ func init() {
 	t["VMotionInterfaceIssue"] = reflect.TypeOf((*VMotionInterfaceIssue)(nil)).Elem()
 }
 
-type VMotionInterfaceIssueFault VMotionInterfaceIssue
+type VMotionInterfaceIssueFault BaseVMotionInterfaceIssue
 
 func init() {
 	t["VMotionInterfaceIssueFault"] = reflect.TypeOf((*VMotionInterfaceIssueFault)(nil)).Elem()
@@ -38919,13 +38919,13 @@ func init() {
 type VMwareDVSPortSetting struct {
 	DVPortSetting
 
-	Vlan                *VmwareDistributedVirtualSwitchVlanSpec `xml:"vlan,omitempty"`
-	QosTag              *IntPolicy                              `xml:"qosTag,omitempty"`
-	UplinkTeamingPolicy *VmwareUplinkPortTeamingPolicy          `xml:"uplinkTeamingPolicy,omitempty"`
-	SecurityPolicy      *DVSSecurityPolicy                      `xml:"securityPolicy,omitempty"`
-	IpfixEnabled        *BoolPolicy                             `xml:"ipfixEnabled,omitempty"`
-	TxUplink            *BoolPolicy                             `xml:"txUplink,omitempty"`
-	LacpPolicy          *VMwareUplinkLacpPolicy                 `xml:"lacpPolicy,omitempty"`
+	Vlan                BaseVmwareDistributedVirtualSwitchVlanSpec `xml:"vlan,omitempty,typeattr"`
+	QosTag              *IntPolicy                                 `xml:"qosTag,omitempty"`
+	UplinkTeamingPolicy *VmwareUplinkPortTeamingPolicy             `xml:"uplinkTeamingPolicy,omitempty"`
+	SecurityPolicy      *DVSSecurityPolicy                         `xml:"securityPolicy,omitempty"`
+	IpfixEnabled        *BoolPolicy                                `xml:"ipfixEnabled,omitempty"`
+	TxUplink            *BoolPolicy                                `xml:"txUplink,omitempty"`
+	LacpPolicy          *VMwareUplinkLacpPolicy                    `xml:"lacpPolicy,omitempty"`
 }
 
 func init() {
@@ -39278,7 +39278,7 @@ func init() {
 	t["VimFault"] = reflect.TypeOf((*VimFault)(nil)).Elem()
 }
 
-type VimFaultFault VimFault
+type VimFaultFault BaseVimFault
 
 func init() {
 	t["VimFaultFault"] = reflect.TypeOf((*VimFaultFault)(nil)).Elem()
@@ -40317,7 +40317,7 @@ func init() {
 	t["VirtualHardwareCompatibilityIssue"] = reflect.TypeOf((*VirtualHardwareCompatibilityIssue)(nil)).Elem()
 }
 
-type VirtualHardwareCompatibilityIssueFault VirtualHardwareCompatibilityIssue
+type VirtualHardwareCompatibilityIssueFault BaseVirtualHardwareCompatibilityIssue
 
 func init() {
 	t["VirtualHardwareCompatibilityIssueFault"] = reflect.TypeOf((*VirtualHardwareCompatibilityIssueFault)(nil)).Elem()
@@ -40626,7 +40626,7 @@ type VirtualMachineConfigInfo struct {
 	CpuAffinity                  *VirtualMachineAffinityInfo                `xml:"cpuAffinity,omitempty"`
 	MemoryAffinity               *VirtualMachineAffinityInfo                `xml:"memoryAffinity,omitempty"`
 	NetworkShaper                *VirtualMachineNetworkShaperInfo           `xml:"networkShaper,omitempty"`
-	ExtraConfig                  []OptionValue                              `xml:"extraConfig,omitempty"`
+	ExtraConfig                  []BaseOptionValue                          `xml:"extraConfig,omitempty,typeattr"`
 	CpuFeatureMask               []HostCpuIdInfo                            `xml:"cpuFeatureMask,omitempty"`
 	DatastoreUrl                 []VirtualMachineConfigInfoDatastoreUrlPair `xml:"datastoreUrl,omitempty"`
 	SwapPlacement                string                                     `xml:"swapPlacement,omitempty"`
@@ -40750,10 +40750,10 @@ type VirtualMachineConfigSpec struct {
 	MemoryAffinity               *VirtualMachineAffinityInfo       `xml:"memoryAffinity,omitempty"`
 	NetworkShaper                *VirtualMachineNetworkShaperInfo  `xml:"networkShaper,omitempty"`
 	CpuFeatureMask               []VirtualMachineCpuIdInfoSpec     `xml:"cpuFeatureMask,omitempty"`
-	ExtraConfig                  []OptionValue                     `xml:"extraConfig,omitempty"`
+	ExtraConfig                  []BaseOptionValue                 `xml:"extraConfig,omitempty,typeattr"`
 	SwapPlacement                string                            `xml:"swapPlacement,omitempty"`
 	BootOptions                  *VirtualMachineBootOptions        `xml:"bootOptions,omitempty"`
-	VAppConfig                   *VmConfigSpec                     `xml:"vAppConfig,omitempty"`
+	VAppConfig                   BaseVmConfigSpec                  `xml:"vAppConfig,omitempty,typeattr"`
 	FtInfo                       BaseFaultToleranceConfigInfo      `xml:"ftInfo,omitempty,typeattr"`
 	VAppConfigRemoved            bool                              `xml:"vAppConfigRemoved,omitempty"`
 	VAssertsEnabled              bool                              `xml:"vAssertsEnabled,omitempty"`
@@ -41246,7 +41246,7 @@ func init() {
 type VirtualMachineNetworkInfo struct {
 	VirtualMachineTargetInfo
 
-	Network NetworkSummary `xml:"network"`
+	Network BaseNetworkSummary `xml:"network,typeattr"`
 }
 
 func init() {
@@ -42546,7 +42546,7 @@ func init() {
 	t["VmConfigFault"] = reflect.TypeOf((*VmConfigFault)(nil)).Elem()
 }
 
-type VmConfigFaultFault VmConfigFault
+type VmConfigFaultFault BaseVmConfigFault
 
 func init() {
 	t["VmConfigFaultFault"] = reflect.TypeOf((*VmConfigFaultFault)(nil)).Elem()
@@ -42738,8 +42738,8 @@ func init() {
 type VmDeployFailedEvent struct {
 	VmEvent
 
-	DestDatastore EntityEventArgument  `xml:"destDatastore"`
-	Reason        LocalizedMethodFault `xml:"reason"`
+	DestDatastore BaseEntityEventArgument `xml:"destDatastore,typeattr"`
+	Reason        LocalizedMethodFault    `xml:"reason"`
 }
 
 func init() {
@@ -43071,7 +43071,7 @@ func init() {
 	t["VmFaultToleranceIssue"] = reflect.TypeOf((*VmFaultToleranceIssue)(nil)).Elem()
 }
 
-type VmFaultToleranceIssueFault VmFaultToleranceIssue
+type VmFaultToleranceIssueFault BaseVmFaultToleranceIssue
 
 func init() {
 	t["VmFaultToleranceIssueFault"] = reflect.TypeOf((*VmFaultToleranceIssueFault)(nil)).Elem()
@@ -43830,7 +43830,7 @@ func init() {
 	t["VmToolsUpgradeFault"] = reflect.TypeOf((*VmToolsUpgradeFault)(nil)).Elem()
 }
 
-type VmToolsUpgradeFaultFault VmToolsUpgradeFault
+type VmToolsUpgradeFaultFault BaseVmToolsUpgradeFault
 
 func init() {
 	t["VmToolsUpgradeFaultFault"] = reflect.TypeOf((*VmToolsUpgradeFaultFault)(nil)).Elem()
@@ -44086,7 +44086,7 @@ type VmfsDatastoreOption struct {
 	DynamicData
 
 	Info BaseVmfsDatastoreBaseOption `xml:"info,typeattr"`
-	Spec VmfsDatastoreSpec           `xml:"spec"`
+	Spec BaseVmfsDatastoreSpec       `xml:"spec,typeattr"`
 }
 
 func init() {
@@ -44123,7 +44123,7 @@ func init() {
 	t["VmfsMountFault"] = reflect.TypeOf((*VmfsMountFault)(nil)).Elem()
 }
 
-type VmfsMountFaultFault VmfsMountFault
+type VmfsMountFaultFault BaseVmfsMountFault
 
 func init() {
 	t["VmfsMountFaultFault"] = reflect.TypeOf((*VmfsMountFaultFault)(nil)).Elem()
@@ -44286,7 +44286,7 @@ func init() {
 	t["VsanDiskFault"] = reflect.TypeOf((*VsanDiskFault)(nil)).Elem()
 }
 
-type VsanDiskFaultFault VsanDiskFault
+type VsanDiskFaultFault BaseVsanDiskFault
 
 func init() {
 	t["VsanDiskFaultFault"] = reflect.TypeOf((*VsanDiskFaultFault)(nil)).Elem()
@@ -44300,7 +44300,7 @@ func init() {
 	t["VsanFault"] = reflect.TypeOf((*VsanFault)(nil)).Elem()
 }
 
-type VsanFaultFault VsanFault
+type VsanFaultFault BaseVsanFault
 
 func init() {
 	t["VsanFaultFault"] = reflect.TypeOf((*VsanFaultFault)(nil)).Elem()
