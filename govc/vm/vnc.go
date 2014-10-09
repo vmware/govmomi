@@ -127,9 +127,10 @@ type vncOptions map[string]string
 
 var vncPrefix = "RemoteDisplay.vnc."
 
-func vncOptionsFromExtraConfig(ov []types.OptionValue) vncOptions {
+func vncOptionsFromExtraConfig(ov []types.BaseOptionValue) vncOptions {
 	vo := make(vncOptions)
-	for _, o := range ov {
+	for _, b := range ov {
+		o := b.GetOptionValue()
 		if strings.HasPrefix(o.Key, vncPrefix) {
 			key := o.Key[len(vncPrefix):]
 			if key != "key" {
@@ -140,8 +141,8 @@ func vncOptionsFromExtraConfig(ov []types.OptionValue) vncOptions {
 	return vo
 }
 
-func (vo vncOptions) ToExtraConfig() []types.OptionValue {
-	ov := make([]types.OptionValue, 0, 0)
+func (vo vncOptions) ToExtraConfig() []types.BaseOptionValue {
+	ov := make([]types.BaseOptionValue, 0, 0)
 	for k, v := range vo {
 		key := vncPrefix + k
 		value := v
@@ -151,7 +152,7 @@ func (vo vncOptions) ToExtraConfig() []types.OptionValue {
 			Value: &value, // Pass pointer to avoid omitempty
 		}
 
-		ov = append(ov, o)
+		ov = append(ov, &o)
 	}
 
 	// Don't know how to deal with the key option, set it to be empty...
@@ -160,7 +161,7 @@ func (vo vncOptions) ToExtraConfig() []types.OptionValue {
 		Value: new(string), // Pass pointer to avoid omitempty
 	}
 
-	ov = append(ov, o)
+	ov = append(ov, &o)
 
 	return ov
 }
