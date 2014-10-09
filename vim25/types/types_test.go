@@ -80,8 +80,8 @@ func TestVirtualMachineConfigSpec(t *testing.T) {
 				}},
 			},
 		},
-		ExtraConfig: []OptionValue{
-			{Key: "bios.bootOrder", Value: "ethernet0"},
+		ExtraConfig: []BaseOptionValue{
+			&OptionValue{Key: "bios.bootOrder", Value: "ethernet0"},
 		},
 	}
 

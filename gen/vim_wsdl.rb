@@ -25,11 +25,7 @@ class Peek
     end
 
     def base?
-      if parent == "DynamicData"
-        # skip interface generation if there are direct refs to all children
-        return children.size() != children.count { |s| Peek.refs[s] }
-      end
-      return parent.nil? && !children.empty?
+      return !children.empty?
     end
   end
 

@@ -1022,7 +1022,7 @@ type Network struct {
 	ManagedEntity
 
 	Name    string                         `mo:"name"`
-	Summary types.NetworkSummary           `mo:"summary"`
+	Summary types.BaseNetworkSummary       `mo:"summary"`
 	Host    []types.ManagedObjectReference `mo:"host"`
 	Vm      []types.ManagedObjectReference `mo:"vm"`
 }
@@ -1042,8 +1042,8 @@ func init() {
 type OptionManager struct {
 	Self types.ManagedObjectReference
 
-	SupportedOption []types.OptionDef   `mo:"supportedOption"`
-	Setting         []types.OptionValue `mo:"setting"`
+	SupportedOption []types.OptionDef       `mo:"supportedOption"`
+	Setting         []types.BaseOptionValue `mo:"setting"`
 }
 
 func (m OptionManager) Reference() types.ManagedObjectReference {
