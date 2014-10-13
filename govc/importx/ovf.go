@@ -233,14 +233,20 @@ func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
 	defer logger.Wait()
 
 	opts := soap.Upload{
-		Type:          "application/x-vnd.vmware-streamVmdk",
-		Method:        "POST",
 		ContentLength: size,
 		Progress:      progress.Tee(ofi, logger),
 	}
 
+	// Non-disk files (such as .iso) use the PUT method.
+	// Overwrite: t header is also required in this case (ovftool does the same)
 	if item.Create {
 		opts.Method = "PUT"
+		opts.Headers = map[string]string{
+			"Overwrite": "t",
+		}
+	} else {
+		opts.Method = "POST"
+		opts.Type = "application/x-vnd.vmware-streamVmdk"
 	}
 
 	return cmd.Client.Client.Upload(f, ofi.url, &opts)
