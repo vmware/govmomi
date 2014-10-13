@@ -25,11 +25,11 @@ import (
 )
 
 type ova struct {
-	ovf
+	*ovf
 }
 
 func init() {
-	cli.Register("import.ova", &ova{})
+	cli.Register("import.ova", &ova{&ovf{}})
 }
 
 func (cmd *ova) Run(f *flag.FlagSet) error {
