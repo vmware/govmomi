@@ -18,6 +18,7 @@ package govmomi
 
 import (
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -147,4 +148,51 @@ func (v VirtualMachine) WaitForIP() (string, error) {
 	}
 
 	return ip, nil
+}
+
+// Device returns the VirtualMachine's config.hardware.device property.
+func (v VirtualMachine) Device() (VirtualDeviceList, error) {
+	var o mo.VirtualMachine
+
+	err := v.c.Properties(v.Reference(), []string{"config.hardware.device"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	return VirtualDeviceList(o.Config.Hardware.Device), nil
+}
+
+func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperation, devices ...types.BaseVirtualDevice) error {
+	spec := types.VirtualMachineConfigSpec{}
+
+	for _, device := range devices {
+		config := &types.VirtualDeviceConfigSpec{
+			Device:    device,
+			Operation: op,
+		}
+
+		spec.DeviceChange = append(spec.DeviceChange, config)
+	}
+
+	task, err := v.Reconfigure(spec)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
+}
+
+// AddDevice adds the given devices to the VirtualMachine
+func (v VirtualMachine) AddDevice(device ...types.BaseVirtualDevice) error {
+	return v.configureDevice(types.VirtualDeviceConfigSpecOperationAdd, device...)
+}
+
+// EditDevice edits the given (existing) devices on the VirtualMachine
+func (v VirtualMachine) EditDevice(device ...types.BaseVirtualDevice) error {
+	return v.configureDevice(types.VirtualDeviceConfigSpecOperationEdit, device...)
+}
+
+// RemoveDevice removes the given devices on the VirtualMachine
+func (v VirtualMachine) RemoveDevice(device ...types.BaseVirtualDevice) error {
+	return v.configureDevice(types.VirtualDeviceConfigSpecOperationRemove, device...)
 }
