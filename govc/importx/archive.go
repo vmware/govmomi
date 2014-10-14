@@ -73,7 +73,7 @@ type FileArchive struct {
 func (t *FileArchive) Open(name string) (io.ReadCloser, int64, error) {
 	fpath := name
 
-	if !filepath.IsAbs(fpath) {
+	if name != t.path {
 		fpath = filepath.Join(path.Dir(t.path), name)
 	}
 

@@ -217,6 +217,7 @@ type Upload struct {
 	Type          string
 	Method        string
 	ContentLength int64
+	Headers       map[string]string
 	Progress      progress.Sinker
 }
 
@@ -246,6 +247,10 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 
 	req.ContentLength = param.ContentLength
 	req.Header.Set("Content-Type", param.Type)
+
+	for k, v := range param.Headers {
+		req.Header.Add(k, v)
+	}
 
 	res, err := c.Client.Do(req)
 	if err != nil {
