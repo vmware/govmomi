@@ -236,6 +236,17 @@ func (l VirtualDeviceList) setDefaultCdromBacking(device *types.VirtualCdrom) {
 	}
 }
 
+// PrimaryMacAddress returns the MacAddress field of the primary VirtualEthernetCard
+func (l VirtualDeviceList) PrimaryMacAddress() string {
+	eth0 := l.Find("ethernet-0")
+
+	if eth0 == nil {
+		return ""
+	}
+
+	return eth0.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard().MacAddress
+}
+
 // TypeName returns the vmodl type name of the device
 func (l VirtualDeviceList) TypeName(device types.BaseVirtualDevice) string {
 	return reflect.TypeOf(device).Elem().Name()

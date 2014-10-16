@@ -596,6 +596,14 @@ func TestCdrom(t *testing.T) {
 	}
 }
 
+func TestPrimaryMacAddress(t *testing.T) {
+	expect := "00:0c:29:93:d7:27"
+	mac := devices.PrimaryMacAddress()
+	if expect != mac {
+		t.Errorf("expected: %s, got: %s", expect, mac)
+	}
+}
+
 func TestName(t *testing.T) {
 	tests := []struct {
 		device types.BaseVirtualDevice
