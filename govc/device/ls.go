@@ -28,13 +28,17 @@ import (
 
 type ls struct {
 	*flags.VirtualMachineFlag
+
+	boot bool
 }
 
 func init() {
 	cli.Register("device.ls", &ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {}
+func (cmd *ls) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.boot, "boot", false, "List devices configured in the VM's boot options")
+}
 
 func (cmd *ls) Process() error { return nil }
 
@@ -51,6 +55,15 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 	devices, err := vm.Device()
 	if err != nil {
 		return err
+	}
+
+	if cmd.boot {
+		options, err := vm.BootOptions()
+		if err != nil {
+			return err
+		}
+
+		devices = devices.SelectBootOrder(options.BootOrder)
 	}
 
 	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
