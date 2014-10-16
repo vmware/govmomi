@@ -50,7 +50,7 @@ func (l VirtualDeviceList) Select(f func(device types.BaseVirtualDevice) bool) V
 	return found
 }
 
-// SelectByType returns a new list with devices that are equal to or extend the given types.
+// SelectByType returns a new list with devices that are equal to or extend the given type.
 func (l VirtualDeviceList) SelectByType(deviceType types.BaseVirtualDevice) VirtualDeviceList {
 	dtype := reflect.TypeOf(deviceType)
 	dname := dtype.Elem().Name()
@@ -253,6 +253,69 @@ func (l VirtualDeviceList) PrimaryMacAddress() string {
 	}
 
 	return eth0.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard().MacAddress
+}
+
+// convert a BaseVirtualDevice to a BaseVirtualMachineBootOptionsBootableDevice
+var bootableDevices = map[string]func(device types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice{
+	DeviceTypeCdrom: func(types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableCdromDevice{}
+	},
+	DeviceTypeDisk: func(d types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableDiskDevice{
+			DeviceKey: d.GetVirtualDevice().Key,
+		}
+	},
+	DeviceTypeEthernet: func(d types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableEthernetDevice{
+			DeviceKey: d.GetVirtualDevice().Key,
+		}
+	},
+	DeviceTypeFloppy: func(types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableFloppyDevice{}
+	},
+}
+
+// BootOrder returns a list of devices which can be used to set boot order via VirtualMachine.SetBootOptions.
+// The order can any of "ethernet", "cdrom", "floppy" or "disk" or by specific device name.
+func (l VirtualDeviceList) BootOrder(order []string) []types.BaseVirtualMachineBootOptionsBootableDevice {
+	var devices []types.BaseVirtualMachineBootOptionsBootableDevice
+
+	for _, name := range order {
+		if kind, ok := bootableDevices[name]; ok {
+			for _, device := range l {
+				if l.Type(device) == name {
+					devices = append(devices, kind(device))
+				}
+
+			}
+			continue
+		}
+
+		if d := l.Find(name); d != nil {
+			if kind, ok := bootableDevices[l.Type(d)]; ok {
+				devices = append(devices, kind(d))
+			}
+		}
+	}
+
+	return devices
+}
+
+// SelectBootOrder returns an ordered list of devices matching the given bootable device order
+func (l VirtualDeviceList) SelectBootOrder(order []types.BaseVirtualMachineBootOptionsBootableDevice) VirtualDeviceList {
+	var devices VirtualDeviceList
+
+	for _, bd := range order {
+		for _, device := range l {
+			if kind, ok := bootableDevices[l.Type(device)]; ok {
+				if reflect.DeepEqual(kind(device), bd) {
+					devices = append(devices, device)
+				}
+			}
+		}
+	}
+
+	return devices
 }
 
 // TypeName returns the vmodl type name of the device
