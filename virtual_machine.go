@@ -196,3 +196,29 @@ func (v VirtualMachine) EditDevice(device ...types.BaseVirtualDevice) error {
 func (v VirtualMachine) RemoveDevice(device ...types.BaseVirtualDevice) error {
 	return v.configureDevice(types.VirtualDeviceConfigSpecOperationRemove, device...)
 }
+
+// BootOptions returns the VirtualMachine's config.bootOptions property.
+func (v VirtualMachine) BootOptions() (*types.VirtualMachineBootOptions, error) {
+	var o mo.VirtualMachine
+
+	err := v.c.Properties(v.Reference(), []string{"config.bootOptions"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	return o.Config.BootOptions, nil
+}
+
+// SetBootOptions reconfigures the VirtualMachine with the given options.
+func (v VirtualMachine) SetBootOptions(options *types.VirtualMachineBootOptions) error {
+	spec := types.VirtualMachineConfigSpec{}
+
+	spec.BootOptions = options
+
+	task, err := v.Reconfigure(spec)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
+}
