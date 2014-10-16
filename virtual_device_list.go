@@ -26,6 +26,14 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// Type values for use in BootOrder
+const (
+	DeviceTypeCdrom    = "cdrom"
+	DeviceTypeDisk     = "disk"
+	DeviceTypeEthernet = "ethernet"
+	DeviceTypeFloppy   = "floppy"
+)
+
 // VirtualDeviceList provides helper methods for working with a list of virtual devices.
 type VirtualDeviceList []types.BaseVirtualDevice
 
@@ -230,7 +238,7 @@ func (l VirtualDeviceList) EjectIso(device *types.VirtualCdrom) *types.VirtualCd
 func (l VirtualDeviceList) setDefaultCdromBacking(device *types.VirtualCdrom) {
 	device.Backing = &types.VirtualCdromAtapiBackingInfo{
 		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
-			DeviceName:    fmt.Sprintf("cdrom-%d-%d", device.ControllerKey, device.UnitNumber),
+			DeviceName:    fmt.Sprintf("%s-%d-%d", DeviceTypeCdrom, device.ControllerKey, device.UnitNumber),
 			UseAutoDetect: false,
 		},
 	}
@@ -258,7 +266,7 @@ var deviceNameRegexp = regexp.MustCompile(`(?:Virtual)?(?:Machine)?(\w+?)(?:Card
 func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 	switch device.(type) {
 	case types.BaseVirtualEthernetCard:
-		return "ethernet"
+		return DeviceTypeEthernet
 	case *types.ParaVirtualSCSIController:
 		return "pvscsi"
 	default:
@@ -279,9 +287,9 @@ func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
 	dtype := l.Type(device)
 
 	switch dtype {
-	case "ethernet":
+	case DeviceTypeEthernet:
 		key = fmt.Sprintf("%d", d.UnitNumber-7)
-	case "disk":
+	case DeviceTypeDisk:
 		key = fmt.Sprintf("%d-%d", d.ControllerKey, d.UnitNumber)
 	default:
 		key = fmt.Sprintf("%d", d.Key)
