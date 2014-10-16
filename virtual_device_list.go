@@ -254,24 +254,38 @@ func (l VirtualDeviceList) TypeName(device types.BaseVirtualDevice) string {
 
 var deviceNameRegexp = regexp.MustCompile(`(?:Virtual)?(?:Machine)?(\w+?)(?:Card|Device|Controller)?$`)
 
-// Name returns a stable, human-readable name for the given device
-func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
-	typeName := l.TypeName(device)
-	d := device.GetVirtualDevice()
-
+// Type returns a human-readable name for the given device
+func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 	switch device.(type) {
 	case types.BaseVirtualEthernetCard:
-		return fmt.Sprintf("ethernet-%d", d.UnitNumber-7)
+		return "ethernet"
 	case *types.ParaVirtualSCSIController:
-		return fmt.Sprintf("pvscsi-%d", d.Key)
-	case *types.VirtualDisk:
-		return fmt.Sprintf("disk-%d-%d", d.ControllerKey, d.UnitNumber)
+		return "pvscsi"
 	default:
 		name := "device"
+		typeName := l.TypeName(device)
 		m := deviceNameRegexp.FindStringSubmatch(typeName)
 		if len(m) == 2 {
 			name = strings.ToLower(m[1])
 		}
-		return fmt.Sprintf("%s-%d", name, d.Key)
+		return name
 	}
+}
+
+// Name returns a stable, human-readable name for the given device
+func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
+	var key string
+	d := device.GetVirtualDevice()
+	dtype := l.Type(device)
+
+	switch dtype {
+	case "ethernet":
+		key = fmt.Sprintf("%d", d.UnitNumber-7)
+	case "disk":
+		key = fmt.Sprintf("%d-%d", d.ControllerKey, d.UnitNumber)
+	default:
+		key = fmt.Sprintf("%d", d.Key)
+	}
+
+	return fmt.Sprintf("%s-%s", dtype, key)
 }
