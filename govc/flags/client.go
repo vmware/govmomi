@@ -73,6 +73,10 @@ func (flag *ClientFlag) Set(s string) error {
 		if flag.url.Path == "" {
 			flag.url.Path = "/sdk"
 		}
+
+		if flag.url.User == nil {
+			flag.url.User = url.UserPassword("", "")
+		}
 	}
 
 	return nil
