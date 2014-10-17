@@ -18,31 +18,35 @@ package device
 
 import (
 	"flag"
-	"fmt"
-	"os"
-	"text/tabwriter"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
-type ls struct {
+type boot struct {
 	*flags.VirtualMachineFlag
 
-	boot bool
+	order string
+	types.VirtualMachineBootOptions
 }
 
 func init() {
-	cli.Register("device.ls", &ls{})
+	cli.Register("device.boot", &boot{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {
-	f.BoolVar(&cmd.boot, "boot", false, "List devices configured in the VM's boot options")
+func (cmd *boot) Register(f *flag.FlagSet) {
+	f.Int64Var(&cmd.BootDelay, "delay", 0, "Delay in ms before starting the boot sequence")
+	f.StringVar(&cmd.order, "order", "", "Boot device order")
+	f.Int64Var(&cmd.BootRetryDelay, "retry-delay", 0, "Delay in ms before a boot retry")
+	f.BoolVar(&cmd.BootRetryEnabled, "retry", false, "If true, retry boot after retry-delay")
+	f.BoolVar(&cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
 }
 
-func (cmd *ls) Process() error { return nil }
+func (cmd *boot) Process() error { return nil }
 
-func (cmd *ls) Run(f *flag.FlagSet) error {
+func (cmd *boot) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
@@ -57,21 +61,10 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.boot {
-		options, err := vm.BootOptions()
-		if err != nil {
-			return err
-		}
-
-		devices = devices.SelectBootOrder(options.BootOrder)
+	if cmd.order != "" {
+		o := strings.Split(cmd.order, ",")
+		cmd.BootOrder = devices.BootOrder(o)
 	}
 
-	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
-
-	for _, device := range devices {
-		fmt.Fprintf(tw, "%s\t%s\t%s\n", devices.Name(device), devices.TypeName(device),
-			device.GetVirtualDevice().DeviceInfo.GetDescription().Summary)
-	}
-
-	return tw.Flush()
+	return vm.SetBootOptions(&cmd.VirtualMachineBootOptions)
 }

@@ -18,6 +18,7 @@ package govmomi
 
 import (
 	"math/rand"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi/vim25/types"
@@ -601,6 +602,59 @@ func TestPrimaryMacAddress(t *testing.T) {
 	mac := devices.PrimaryMacAddress()
 	if expect != mac {
 		t.Errorf("expected: %s, got: %s", expect, mac)
+	}
+}
+
+func TestBootOrder(t *testing.T) {
+	o := []string{DeviceTypeEthernet, DeviceTypeCdrom, DeviceTypeFloppy, DeviceTypeDisk}
+	list := devices
+
+	n := 4 // 1 ethernet, 1 cdrom, 2 disk
+	order := list.BootOrder(o)
+	if len(order) != n {
+		t.Errorf("expected %d boot devices, got: %d", n, len(order))
+	}
+
+	list = list.SelectBootOrder(order)
+	if len(list) != n {
+		t.Errorf("expected %d boot devices, got: %d", n, len(list))
+	}
+
+	// test lookup by name
+	var names []string
+	for _, x := range list {
+		names = append(names, list.Name(x))
+	}
+
+	order = list.BootOrder(names)
+	if len(order) != n {
+		t.Errorf("expected %d boot devices, got: %d", n, len(order))
+	}
+
+	if !reflect.DeepEqual(list, list.SelectBootOrder(order)) {
+		t.Error("boot order mismatch")
+	}
+
+	// remove disks
+	list = list.Select(func(device types.BaseVirtualDevice) bool {
+		if _, ok := device.(*types.VirtualDisk); ok {
+			return false
+		}
+		return true
+	})
+
+	n = 2 // 1 ethernet, 1 cdrom
+	order = list.BootOrder(o)
+	if len(order) != n {
+		t.Errorf("expected %d boot devices, got: %d", n, len(order))
+	}
+
+	if !reflect.DeepEqual(list, list.SelectBootOrder(order)) {
+		t.Error("boot order mismatch")
+	}
+
+	if len(list.BootOrder([]string{DeviceTypeDisk})) != 0 {
+		t.Error("expected 0 disks")
 	}
 }
 

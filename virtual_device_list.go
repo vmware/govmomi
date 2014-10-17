@@ -26,6 +26,14 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// Type values for use in BootOrder
+const (
+	DeviceTypeCdrom    = "cdrom"
+	DeviceTypeDisk     = "disk"
+	DeviceTypeEthernet = "ethernet"
+	DeviceTypeFloppy   = "floppy"
+)
+
 // VirtualDeviceList provides helper methods for working with a list of virtual devices.
 type VirtualDeviceList []types.BaseVirtualDevice
 
@@ -42,7 +50,7 @@ func (l VirtualDeviceList) Select(f func(device types.BaseVirtualDevice) bool) V
 	return found
 }
 
-// SelectByType returns a new list with devices that are equal to or extend the given types.
+// SelectByType returns a new list with devices that are equal to or extend the given type.
 func (l VirtualDeviceList) SelectByType(deviceType types.BaseVirtualDevice) VirtualDeviceList {
 	dtype := reflect.TypeOf(deviceType)
 	dname := dtype.Elem().Name()
@@ -230,7 +238,7 @@ func (l VirtualDeviceList) EjectIso(device *types.VirtualCdrom) *types.VirtualCd
 func (l VirtualDeviceList) setDefaultCdromBacking(device *types.VirtualCdrom) {
 	device.Backing = &types.VirtualCdromAtapiBackingInfo{
 		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
-			DeviceName:    fmt.Sprintf("cdrom-%d-%d", device.ControllerKey, device.UnitNumber),
+			DeviceName:    fmt.Sprintf("%s-%d-%d", DeviceTypeCdrom, device.ControllerKey, device.UnitNumber),
 			UseAutoDetect: false,
 		},
 	}
@@ -247,6 +255,69 @@ func (l VirtualDeviceList) PrimaryMacAddress() string {
 	return eth0.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard().MacAddress
 }
 
+// convert a BaseVirtualDevice to a BaseVirtualMachineBootOptionsBootableDevice
+var bootableDevices = map[string]func(device types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice{
+	DeviceTypeCdrom: func(types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableCdromDevice{}
+	},
+	DeviceTypeDisk: func(d types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableDiskDevice{
+			DeviceKey: d.GetVirtualDevice().Key,
+		}
+	},
+	DeviceTypeEthernet: func(d types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableEthernetDevice{
+			DeviceKey: d.GetVirtualDevice().Key,
+		}
+	},
+	DeviceTypeFloppy: func(types.BaseVirtualDevice) types.BaseVirtualMachineBootOptionsBootableDevice {
+		return &types.VirtualMachineBootOptionsBootableFloppyDevice{}
+	},
+}
+
+// BootOrder returns a list of devices which can be used to set boot order via VirtualMachine.SetBootOptions.
+// The order can any of "ethernet", "cdrom", "floppy" or "disk" or by specific device name.
+func (l VirtualDeviceList) BootOrder(order []string) []types.BaseVirtualMachineBootOptionsBootableDevice {
+	var devices []types.BaseVirtualMachineBootOptionsBootableDevice
+
+	for _, name := range order {
+		if kind, ok := bootableDevices[name]; ok {
+			for _, device := range l {
+				if l.Type(device) == name {
+					devices = append(devices, kind(device))
+				}
+
+			}
+			continue
+		}
+
+		if d := l.Find(name); d != nil {
+			if kind, ok := bootableDevices[l.Type(d)]; ok {
+				devices = append(devices, kind(d))
+			}
+		}
+	}
+
+	return devices
+}
+
+// SelectBootOrder returns an ordered list of devices matching the given bootable device order
+func (l VirtualDeviceList) SelectBootOrder(order []types.BaseVirtualMachineBootOptionsBootableDevice) VirtualDeviceList {
+	var devices VirtualDeviceList
+
+	for _, bd := range order {
+		for _, device := range l {
+			if kind, ok := bootableDevices[l.Type(device)]; ok {
+				if reflect.DeepEqual(kind(device), bd) {
+					devices = append(devices, device)
+				}
+			}
+		}
+	}
+
+	return devices
+}
+
 // TypeName returns the vmodl type name of the device
 func (l VirtualDeviceList) TypeName(device types.BaseVirtualDevice) string {
 	return reflect.TypeOf(device).Elem().Name()
@@ -254,24 +325,38 @@ func (l VirtualDeviceList) TypeName(device types.BaseVirtualDevice) string {
 
 var deviceNameRegexp = regexp.MustCompile(`(?:Virtual)?(?:Machine)?(\w+?)(?:Card|Device|Controller)?$`)
 
-// Name returns a stable, human-readable name for the given device
-func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
-	typeName := l.TypeName(device)
-	d := device.GetVirtualDevice()
-
+// Type returns a human-readable name for the given device
+func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 	switch device.(type) {
 	case types.BaseVirtualEthernetCard:
-		return fmt.Sprintf("ethernet-%d", d.UnitNumber-7)
+		return DeviceTypeEthernet
 	case *types.ParaVirtualSCSIController:
-		return fmt.Sprintf("pvscsi-%d", d.Key)
-	case *types.VirtualDisk:
-		return fmt.Sprintf("disk-%d-%d", d.ControllerKey, d.UnitNumber)
+		return "pvscsi"
 	default:
 		name := "device"
+		typeName := l.TypeName(device)
 		m := deviceNameRegexp.FindStringSubmatch(typeName)
 		if len(m) == 2 {
 			name = strings.ToLower(m[1])
 		}
-		return fmt.Sprintf("%s-%d", name, d.Key)
+		return name
 	}
+}
+
+// Name returns a stable, human-readable name for the given device
+func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
+	var key string
+	d := device.GetVirtualDevice()
+	dtype := l.Type(device)
+
+	switch dtype {
+	case DeviceTypeEthernet:
+		key = fmt.Sprintf("%d", d.UnitNumber-7)
+	case DeviceTypeDisk:
+		key = fmt.Sprintf("%d-%d", d.ControllerKey, d.UnitNumber)
+	default:
+		key = fmt.Sprintf("%d", d.Key)
+	}
+
+	return fmt.Sprintf("%s-%s", dtype, key)
 }
