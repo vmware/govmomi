@@ -53,6 +53,7 @@ type Client struct {
 
 	u        url.URL
 	insecure bool
+	_        uint32 // for alignment: https://code.google.com/p/go/issues/detail?id=6404
 
 	cn  uint64         // Client counter
 	rn  uint64         // Request counter
