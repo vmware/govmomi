@@ -58,6 +58,21 @@ func (f Folder) Children() ([]Reference, error) {
 	return rs, nil
 }
 
+func (f Folder) CreateDatacenter(datacenter string) (*Datacenter, error) {
+	req := types.CreateDatacenter{
+		This: f.Reference(),
+		Name: datacenter,
+	}
+
+	// response will be nil if this is an ESX host that does not belong to a vCenter
+	res, err := methods.CreateDatacenter(f.c, &req)
+	if res != nil {
+		return NewDatacenter(f.c, res.Returnval), err
+	}
+
+	return nil, err
+}
+
 func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
