@@ -19,9 +19,6 @@ package disk
 import (
 	"errors"
 	"flag"
-	"fmt"
-	"reflect"
-	"regexp"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -30,7 +27,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type add struct {
+type create struct {
 	*flags.VirtualMachineFlag
 
 	Name  string
@@ -41,10 +38,10 @@ type add struct {
 }
 
 func init() {
-	cli.Register("vm.disk.add", &add{})
+	cli.Register("vm.disk.create", &create{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {
+func (cmd *create) Register(f *flag.FlagSet) {
 	err := (&cmd.Bytes).Set("10G")
 	if err != nil {
 		panic(err)
@@ -54,9 +51,9 @@ func (cmd *add) Register(f *flag.FlagSet) {
 	f.Var(&cmd.Bytes, "size", "Size of new disk")
 }
 
-func (cmd *add) Process() error { return nil }
+func (cmd *create) Process() error { return nil }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
+func (cmd *create) Run(f *flag.FlagSet) error {
 	var err error
 
 	cmd.Client, err = cmd.ClientFlag.Client()
@@ -80,7 +77,7 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	dev, err := cmd.FindDisk(mvm)
+	dev, err := FindDisk(cmd.Name, mvm)
 	if err != nil {
 		return err
 	}
@@ -98,42 +95,8 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 	return nil
 }
 
-var dsPathRegexp = regexp.MustCompile(`^\[.*\] (?:.*/)?([^/]+)\.vmdk$`)
-
-func (cmd *add) FindDisk(mvm mo.VirtualMachine) (*types.VirtualDisk, error) {
-	for _, dev := range mvm.Config.Hardware.Device {
-		switch disk := dev.(type) {
-		case *types.VirtualDisk:
-			switch backing := disk.Backing.(type) {
-			case *types.VirtualDiskFlatVer2BackingInfo:
-				m := dsPathRegexp.FindStringSubmatch(backing.FileName)
-				if len(m) >= 2 && m[1] == cmd.Name {
-					return disk, nil
-				}
-			default:
-				name := reflect.TypeOf(disk.Backing).String()
-				panic(fmt.Sprintf("unsupported backing: %s", name))
-			}
-		}
-	}
-
-	return nil, nil
-}
-
-func (cmd *add) FindController(mvm mo.VirtualMachine) (int, error) {
-	for _, dev := range mvm.Config.Hardware.Device {
-		switch disk := dev.(type) {
-		case *types.VirtualLsiLogicController:
-			vdev := disk.GetVirtualDevice()
-			return vdev.Key, nil
-		}
-	}
-
-	return -1, nil
-}
-
-func (cmd *add) CreateDisk(mvm mo.VirtualMachine) error {
-	controllerKey, err := cmd.FindController(mvm)
+func (cmd *create) CreateDisk(mvm mo.VirtualMachine) error {
+	controllerKey, err := FindController(mvm)
 	if err != nil {
 		return err
 	}
