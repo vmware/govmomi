@@ -1,0 +1,116 @@
+GOVC_TEST_URL=${GOVC_TEST_URL-"https://root:vagrant@localhost:18443/sdk"}
+export GOVC_URL=$GOVC_TEST_URL
+export GOVC_DATASTORE=datastore1
+export GOVC_INSECURE=true
+
+GOVC_IMAGES=$BATS_TEST_DIRNAME/images
+TTYLINUX_NAME=ttylinux-pc_i486-16.1
+
+GOVC_TEST_VMDK_SRC=$GOVC_IMAGES/${TTYLINUX_NAME}-disk1.vmdk
+GOVC_TEST_VMDK=$(basename $GOVC_TEST_VMDK_SRC)
+
+PATH="$(dirname $(readlink -nf $BATS_TEST_DIRNAME)):$PATH"
+
+teardown() {
+  govc ls vm | grep govc-test- | xargs govc vm.destroy
+}
+
+new_id() {
+  echo "govc-test-$(uuidgen)"
+}
+
+import_ttylinux_vmdk() {
+  if [ ! $(govc datastore.ls | grep $GOVC_TEST_VMDK) ]
+  then
+    govc import.vmdk $GOVC_TEST_VMDK_SRC
+  fi
+}
+
+new_ttylinux_vm() {
+  import_ttylinux_vmdk # TODO: make this part of vagrant provision
+  id=$(new_id)
+  govc vm.create -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $id
+  echo $id
+}
+
+new_empty_vm() {
+  id=$(new_id)
+  govc vm.create -on=false $id
+  echo $id
+}
+
+# the following helpers are borrowed from the test_helper.bash in https://github.com/sstephenson/rbenv
+
+flunk() {
+  { if [ "$#" -eq 0 ]; then cat -
+    else echo "$@"
+    fi
+  } >&2
+  return 1
+}
+
+assert_success() {
+  if [ "$status" -ne 0 ]; then
+    flunk "command failed with exit status $status: $output"
+  elif [ "$#" -gt 0 ]; then
+    assert_output "$1"
+  fi
+}
+
+assert_failure() {
+  if [ "$status" -eq 0 ]; then
+    flunk "expected failed exit status"
+  elif [ "$#" -gt 0 ]; then
+    assert_output "$1"
+  fi
+}
+
+assert_equal() {
+  if [ "$1" != "$2" ]; then
+    { echo "expected: $1"
+      echo "actual:   $2"
+    } | flunk
+  fi
+}
+
+assert_output() {
+  local expected
+  if [ $# -eq 0 ]; then expected="$(cat -)"
+  else expected="$1"
+  fi
+  assert_equal "$expected" "$output"
+}
+
+assert_line() {
+  if [ "$1" -ge 0 ] 2>/dev/null; then
+    assert_equal "$2" "${lines[$1]}"
+  else
+    local line
+    for line in "${lines[@]}"; do
+      if [ "$line" = "$1" ]; then return 0; fi
+    done
+    flunk "expected line \`$1'"
+  fi
+}
+
+refute_line() {
+  if [ "$1" -ge 0 ] 2>/dev/null; then
+    local num_lines="${#lines[@]}"
+    if [ "$1" -lt "$num_lines" ]; then
+      flunk "output has $num_lines lines"
+    fi
+  else
+    local line
+    for line in "${lines[@]}"; do
+      if [ "$line" = "$1" ]; then
+        flunk "expected to not find line \`$line'"
+      fi
+    done
+  fi
+}
+
+assert() {
+  if ! "$@"; then
+    flunk "failed: $@"
+  fi
+}
