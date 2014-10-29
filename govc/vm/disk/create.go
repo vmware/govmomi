@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type create struct {
@@ -84,7 +83,13 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 
 	if dev == nil {
 		cmd.Log("Creating disk\n")
-		err = cmd.CreateDisk(mvm)
+
+		controllerKey, err := FindController(mvm)
+		if err != nil {
+			return err
+		}
+
+		err = CreateDisk(cmd.Name, cmd.Bytes, controllerKey, cmd.VirtualMachine)
 		if err != nil {
 			return err
 		}
@@ -93,43 +98,4 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	return nil
-}
-
-func (cmd *create) CreateDisk(mvm mo.VirtualMachine) error {
-	controllerKey, err := FindController(mvm)
-	if err != nil {
-		return err
-	}
-
-	disk := &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key: -1,
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: cmd.Name + ".vmdk",
-				},
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: true,
-			},
-			ControllerKey: controllerKey,
-			UnitNumber:    -1,
-		},
-		CapacityInKB: cmd.Bytes.Bytes / 1024,
-	}
-
-	diskAddOp := &types.VirtualDeviceConfigSpec{
-		Device:        disk,
-		FileOperation: types.VirtualDeviceConfigSpecFileOperationCreate,
-		Operation:     types.VirtualDeviceConfigSpecOperationAdd,
-	}
-
-	spec := new(configSpec)
-	spec.AddChange(diskAddOp)
-
-	task, err := cmd.VirtualMachine.Reconfigure(spec.ToSpec())
-	if err != nil {
-		return err
-	}
-
-	return task.Wait()
 }

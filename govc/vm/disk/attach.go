@@ -18,13 +18,11 @@ package disk
 
 import (
 	"flag"
-	"fmt"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type attach struct {
@@ -82,17 +80,6 @@ func (cmd *attach) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	err = cmd.AttachDisk(mvm)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cmd *attach) AttachDisk(mvm mo.VirtualMachine) error {
-	var err error
-
 	disk, err := cmd.DiskFlag.Disk()
 	if err != nil {
 		return err
@@ -106,56 +93,10 @@ func (cmd *attach) AttachDisk(mvm mo.VirtualMachine) error {
 		return err
 	}
 
-	disk.VirtualDevice.ControllerKey = controllerKey
-
-	diskAddOp := &types.VirtualDeviceConfigSpec{
-		Device:    disk,
-		Operation: types.VirtualDeviceConfigSpecOperationAdd,
-	}
-
-	if cmd.link {
-		linkDisk(disk, cmd.persist, fmt.Sprintf("[%s]", cmd.Datastore.Name()))
-		diskAddOp.FileOperation = types.VirtualDeviceConfigSpecFileOperationCreate
-	} else {
-		configureDisk(disk, cmd.persist)
-	}
-
-	spec := new(configSpec)
-	spec.AddChange(diskAddOp)
-
-	task, err := cmd.VirtualMachine.Reconfigure(spec.ToSpec())
+	err = AttachDisk(disk, cmd.VirtualMachine, cmd.Datastore, controllerKey, cmd.link, cmd.persist)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait()
-}
-
-func configureDisk(disk *types.VirtualDisk, persist bool) error {
-	diskMode := string(types.VirtualDiskModeNonpersistent)
-	if persist {
-		diskMode = string(types.VirtualDiskModePersistent)
-	}
-	disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).DiskMode = diskMode
-
-	return nil
-}
-
-func linkDisk(disk *types.VirtualDisk, persist bool, datastore string) error {
-	parent := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
-
-	diskMode := string(types.VirtualDiskModeIndependent_nonpersistent)
-	if persist {
-		diskMode = string(types.VirtualDiskModeIndependent_persistent)
-	}
-
-	disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
-		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-			FileName: datastore,
-		},
-		Parent:          parent,
-		DiskMode:        diskMode,
-		ThinProvisioned: true,
-	}
 	return nil
 }

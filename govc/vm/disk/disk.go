@@ -21,6 +21,7 @@ import (
 	"reflect"
 	"regexp"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -57,4 +58,98 @@ func FindDisk(dname string, mvm mo.VirtualMachine) (*types.VirtualDisk, error) {
 	}
 
 	return nil, nil
+}
+
+func CreateDisk(name string, bytes ByteValue, controllerKey int, vm *govmomi.VirtualMachine) error {
+	var err error
+
+	disk := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Key: -1,
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: name + ".vmdk",
+				},
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: true,
+			},
+			ControllerKey: controllerKey,
+			UnitNumber:    -1,
+		},
+		CapacityInKB: bytes.Bytes / 1024,
+	}
+
+	diskAddOp := &types.VirtualDeviceConfigSpec{
+		Device:        disk,
+		FileOperation: types.VirtualDeviceConfigSpecFileOperationCreate,
+		Operation:     types.VirtualDeviceConfigSpecOperationAdd,
+	}
+
+	spec := new(configSpec)
+	spec.AddChange(diskAddOp)
+
+	task, err := vm.Reconfigure(spec.ToSpec())
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
+}
+
+func AttachDisk(disk *types.VirtualDisk, vm *govmomi.VirtualMachine, ds *govmomi.Datastore, controllerKey int, link bool, persist bool) error {
+	var err error
+
+	disk.VirtualDevice.ControllerKey = controllerKey
+
+	diskAddOp := &types.VirtualDeviceConfigSpec{
+		Device:    disk,
+		Operation: types.VirtualDeviceConfigSpecOperationAdd,
+	}
+
+	if link {
+		LinkDisk(disk, ds, persist)
+		diskAddOp.FileOperation = types.VirtualDeviceConfigSpecFileOperationCreate
+	} else {
+		ConfigureDisk(disk, persist)
+	}
+
+	spec := new(configSpec)
+	spec.AddChange(diskAddOp)
+
+	task, err := vm.Reconfigure(spec.ToSpec())
+	if err != nil {
+		return err
+	}
+
+	return task.Wait()
+}
+
+func ConfigureDisk(disk *types.VirtualDisk, persist bool) error {
+	diskMode := string(types.VirtualDiskModeNonpersistent)
+	if persist {
+		diskMode = string(types.VirtualDiskModePersistent)
+	}
+	disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).DiskMode = diskMode
+
+	return nil
+}
+
+func LinkDisk(disk *types.VirtualDisk, ds *govmomi.Datastore, persist bool) error {
+	datastore := fmt.Sprintf("[%s]", ds.Name())
+	parent := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+
+	diskMode := string(types.VirtualDiskModeIndependent_nonpersistent)
+	if persist {
+		diskMode = string(types.VirtualDiskModeIndependent_persistent)
+	}
+
+	disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
+		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+			FileName: datastore,
+		},
+		Parent:          parent,
+		DiskMode:        diskMode,
+		ThinProvisioned: true,
+	}
+	return nil
 }
