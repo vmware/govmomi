@@ -19,6 +19,31 @@ load test_helper
   assert_failure
 }
 
+@test "device.boot" {
+  vm=$(new_ttylinux_vm)
+
+  result=$(govc device.ls -vm $vm -boot | wc -l)
+  [ $result -eq 0 ]
+
+  run govc device.boot -vm $vm -order floppy,cdrom,ethernet,disk
+  assert_success
+
+  result=$(govc device.ls -vm $vm -boot | wc -l)
+  [ $result -eq 2 ]
+
+  run govc device.cdrom.add -vm $vm
+  assert_success
+
+  run govc device.floppy.add -vm $vm
+  assert_success
+
+  run govc device.boot -vm $vm -order floppy,cdrom,ethernet,disk
+  assert_success
+
+  result=$(govc device.ls -vm $vm -boot | wc -l)
+  [ $result -eq 4 ]
+}
+
 @test "device.cdrom" {
   vm=$(new_empty_vm)
 
