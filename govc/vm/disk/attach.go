@@ -78,7 +78,14 @@ func (cmd *attach) Run(f *flag.FlagSet) error {
 	var mvm mo.VirtualMachine
 
 	err = cmd.Client.Properties(cmd.VirtualMachine.Reference(), []string{"config.hardware"}, &mvm)
-	cmd.AttachDisk(mvm)
+	if err != nil {
+		return err
+	}
+
+	err = cmd.AttachDisk(mvm)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
