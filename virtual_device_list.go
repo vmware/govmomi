@@ -120,8 +120,10 @@ func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) type
 		switch device.(type) {
 		case types.BaseVirtualSCSIController:
 			return num < 15
-		default:
+		case *types.VirtualIDEController:
 			return num < 2
+		default:
+			return true
 		}
 	})
 
@@ -239,6 +241,75 @@ func (l VirtualDeviceList) setDefaultCdromBacking(device *types.VirtualCdrom) {
 	device.Backing = &types.VirtualCdromAtapiBackingInfo{
 		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
 			DeviceName:    fmt.Sprintf("%s-%d-%d", DeviceTypeCdrom, device.ControllerKey, device.UnitNumber),
+			UseAutoDetect: false,
+		},
+	}
+}
+
+// FindFloppy finds a floppy device with the given name, defaulting to the first floppy device if any.
+func (l VirtualDeviceList) FindFloppy(name string) (*types.VirtualFloppy, error) {
+	if name != "" {
+		d := l.Find(name)
+		if d == nil {
+			return nil, fmt.Errorf("device '%s' not found", name)
+		}
+		if c, ok := d.(*types.VirtualFloppy); ok {
+			return c, nil
+		}
+		return nil, fmt.Errorf("%s is not a floppy device", name)
+	}
+
+	c := l.SelectByType((*types.VirtualFloppy)(nil))
+	if len(c) == 0 {
+		return nil, errors.New("no floppy device found")
+	}
+
+	return c[0].(*types.VirtualFloppy), nil
+}
+
+// CreateFloppy creates a new VirtualFloppy device which can be added to a VM.
+func (l VirtualDeviceList) CreateFloppy() (*types.VirtualFloppy, error) {
+	device := &types.VirtualFloppy{}
+
+	c := l.PickController((*types.VirtualSIOController)(nil))
+	if c == nil {
+		return nil, errors.New("no available SIO controller")
+	}
+
+	l.AssignController(device, c)
+
+	l.setDefaultFloppyBacking(device)
+
+	device.Connectable = &types.VirtualDeviceConnectInfo{
+		AllowGuestControl: true,
+		Connected:         true,
+		StartConnected:    true,
+	}
+
+	return device, nil
+}
+
+// InsertImg changes the floppy device backing to use the given img file.
+func (l VirtualDeviceList) InsertImg(device *types.VirtualFloppy, img string) *types.VirtualFloppy {
+	device.Backing = &types.VirtualFloppyImageBackingInfo{
+		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+			FileName: img,
+		},
+	}
+
+	return device
+}
+
+// EjectImg removes the img file based backing and replaces with the default floppy backing.
+func (l VirtualDeviceList) EjectImg(device *types.VirtualFloppy) *types.VirtualFloppy {
+	l.setDefaultFloppyBacking(device)
+	return device
+}
+
+func (l VirtualDeviceList) setDefaultFloppyBacking(device *types.VirtualFloppy) {
+	device.Backing = &types.VirtualFloppyDeviceBackingInfo{
+		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+			DeviceName:    fmt.Sprintf("%s-%d", DeviceTypeFloppy, device.UnitNumber),
 			UseAutoDetect: false,
 		},
 	}

@@ -3,11 +3,22 @@ export GOVC_URL=$GOVC_TEST_URL
 export GOVC_DATASTORE=datastore1
 export GOVC_INSECURE=true
 
+if [ -z "$BATS_TEST_DIRNAME" ]
+then
+  BATS_TEST_DIRNAME=$(dirname ${BASH_SOURCE})
+fi
+
 GOVC_IMAGES=$BATS_TEST_DIRNAME/images
 TTYLINUX_NAME=ttylinux-pc_i486-16.1
 
 GOVC_TEST_VMDK_SRC=$GOVC_IMAGES/${TTYLINUX_NAME}-disk1.vmdk
 GOVC_TEST_VMDK=$(basename $GOVC_TEST_VMDK_SRC)
+
+GOVC_TEST_ISO_SRC=$GOVC_IMAGES/${TTYLINUX_NAME}.iso
+GOVC_TEST_ISO=$(basename $GOVC_TEST_ISO_SRC)
+
+GOVC_TEST_IMG_SRC=$GOVC_IMAGES/floppybird.img
+GOVC_TEST_IMG=$(basename $GOVC_TEST_IMG_SRC)
 
 PATH="$(dirname $(readlink -nf $BATS_TEST_DIRNAME)):$PATH"
 
@@ -20,10 +31,25 @@ new_id() {
 }
 
 import_ttylinux_vmdk() {
-  if [ ! $(govc datastore.ls | grep $GOVC_TEST_VMDK) ]
-  then
-    govc import.vmdk $GOVC_TEST_VMDK_SRC
-  fi
+  # TODO: fix datastore.ls do we don't need grep
+  govc datastore.ls | grep -q $GOVC_TEST_VMDK || \
+    govc import.vmdk $GOVC_TEST_VMDK_SRC > /dev/null
+}
+
+datastore_upload() {
+  src=$1
+  dst=$(basename $src)
+  # TODO: fix datastore.ls do we don't need grep
+  govc datastore.ls | grep -q $dst || \
+    govc datastore.upload $src $dst > /dev/null
+}
+
+upload_img() {
+  datastore_upload $GOVC_TEST_IMG_SRC
+}
+
+upload_iso() {
+  datastore_upload $GOVC_TEST_ISO_SRC
 }
 
 new_ttylinux_vm() {
@@ -37,6 +63,27 @@ new_empty_vm() {
   id=$(new_id)
   govc vm.create -on=false $id
   echo $id
+}
+
+quit_vnc() {
+  if [ "$(uname)" = "Darwin" ]
+  then
+    osascript <<EOF
+tell application "Screen Sharing"
+   quit
+end tell
+EOF
+  fi
+}
+
+open_vnc() {
+  url=$1
+  echo "open $url"
+
+  if [ "$(uname)" = "Darwin" ]
+  then
+    open $url
+  fi
 }
 
 # the following helpers are borrowed from the test_helper.bash in https://github.com/sstephenson/rbenv

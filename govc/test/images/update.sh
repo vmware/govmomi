@@ -10,6 +10,8 @@ for name in $files ; do
   wget -N $base_url/$name
 done
 
+wget -N https://github.com/icebreaker/floppybird/raw/master/build/floppybird.img
+
 # extract ova so we can also use the .vmdk and .ovf files directly
 tar -xvf ${ttylinux}.ova
 
