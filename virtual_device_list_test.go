@@ -597,6 +597,14 @@ func TestCdrom(t *testing.T) {
 	}
 }
 
+func TestSerialPort(t *testing.T) {
+	device, err := devices.CreateSerialPort()
+	if err != nil {
+		t.Error(err)
+	}
+	devices.ConnectSerialPort(device, "telnet://:33233", false)
+}
+
 func TestPrimaryMacAddress(t *testing.T) {
 	expect := "00:0c:29:93:d7:27"
 	mac := devices.PrimaryMacAddress()

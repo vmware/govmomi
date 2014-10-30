@@ -26,6 +26,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/device"
 	_ "github.com/vmware/govmomi/govc/device/cdrom"
 	_ "github.com/vmware/govmomi/govc/device/floppy"
+	_ "github.com/vmware/govmomi/govc/device/serial"
 	_ "github.com/vmware/govmomi/govc/host"
 	_ "github.com/vmware/govmomi/govc/host/esxcli"
 	_ "github.com/vmware/govmomi/govc/host/portgroup"

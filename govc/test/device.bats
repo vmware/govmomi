@@ -125,3 +125,51 @@ load test_helper
   run govc device.remove -vm $vm $id
   assert_failure "Error: device '$id' not found"
 }
+
+@test "device.serial" {
+  vm=$(new_empty_vm)
+
+  result=$(govc device.ls -vm $vm | grep serial- | wc -l)
+  [ $result -eq 0 ]
+
+  run govc device.serial.add -vm $vm
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm $vm | grep $id | wc -l)
+  [ $result -eq 1 ]
+
+  run govc device.info -vm $vm $id
+  assert_success
+
+  uri=telnet://:33233
+  run govc device.serial.connect -vm $vm -device $id $uri
+  assert_success
+
+  run govc device.info -vm $vm $id
+  assert_line "  Summary:          Remote $uri"
+
+  run govc device.serial.disconnect -vm $vm -device $id
+  assert_success
+
+  run govc device.info -vm $vm $id
+  assert_line "  Summary:          Remote localhost:0"
+
+  run govc device.disconnect -vm $vm $id
+  assert_success
+
+  run govc device.connect -vm $vm $id
+  assert_success
+
+  run govc device.remove -vm $vm $id
+  assert_success
+
+  run govc device.disconnect -vm $vm $id
+  assert_failure "Error: device '$id' not found"
+
+  run govc device.serial.connect -vm $vm -device $id $uri
+  assert_failure "Error: device '$id' not found"
+
+  run govc device.remove -vm $vm $id
+  assert_failure "Error: device '$id' not found"
+}
