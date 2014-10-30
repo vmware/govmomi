@@ -315,6 +315,77 @@ func (l VirtualDeviceList) setDefaultFloppyBacking(device *types.VirtualFloppy) 
 	}
 }
 
+// FindSerialPort finds a serial port device with the given name, defaulting to the first serial port device if any.
+func (l VirtualDeviceList) FindSerialPort(name string) (*types.VirtualSerialPort, error) {
+	if name != "" {
+		d := l.Find(name)
+		if d == nil {
+			return nil, fmt.Errorf("device '%s' not found", name)
+		}
+		if c, ok := d.(*types.VirtualSerialPort); ok {
+			return c, nil
+		}
+		return nil, fmt.Errorf("%s is not a serial port device", name)
+	}
+
+	c := l.SelectByType((*types.VirtualSerialPort)(nil))
+	if len(c) == 0 {
+		return nil, errors.New("no serial port device found")
+	}
+
+	return c[0].(*types.VirtualSerialPort), nil
+}
+
+// CreateSerialPort creates a new VirtualSerialPort device which can be added to a VM.
+func (l VirtualDeviceList) CreateSerialPort() (*types.VirtualSerialPort, error) {
+	device := &types.VirtualSerialPort{
+		YieldOnPoll: true,
+	}
+
+	c := l.PickController((*types.VirtualSIOController)(nil))
+	if c == nil {
+		return nil, errors.New("no available SIO controller")
+	}
+
+	l.AssignController(device, c)
+
+	l.setDefaultSerialPortBacking(device)
+
+	return device, nil
+}
+
+// ConnectSerialPort connects a serial port to a server or client uri.
+func (l VirtualDeviceList) ConnectSerialPort(device *types.VirtualSerialPort, uri string, client bool) *types.VirtualSerialPort {
+	direction := types.VirtualDeviceURIBackingOptionDirectionServer
+	if client {
+		direction = types.VirtualDeviceURIBackingOptionDirectionClient
+	}
+
+	device.Backing = &types.VirtualSerialPortURIBackingInfo{
+		VirtualDeviceURIBackingInfo: types.VirtualDeviceURIBackingInfo{
+			Direction:  string(direction),
+			ServiceURI: uri,
+		},
+	}
+
+	return device
+}
+
+// DisconnectSerialPort disconnects the serial port backing.
+func (l VirtualDeviceList) DisconnectSerialPort(device *types.VirtualSerialPort) *types.VirtualSerialPort {
+	l.setDefaultSerialPortBacking(device)
+	return device
+}
+
+func (l VirtualDeviceList) setDefaultSerialPortBacking(device *types.VirtualSerialPort) {
+	device.Backing = &types.VirtualSerialPortURIBackingInfo{
+		VirtualDeviceURIBackingInfo: types.VirtualDeviceURIBackingInfo{
+			Direction:  "client",
+			ServiceURI: "localhost:0",
+		},
+	}
+}
+
 // PrimaryMacAddress returns the MacAddress field of the primary VirtualEthernetCard
 func (l VirtualDeviceList) PrimaryMacAddress() string {
 	eth0 := l.Find("ethernet-0")
