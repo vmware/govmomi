@@ -15,6 +15,7 @@ upload_iso
 id=$(new_ttylinux_vm)
 
 function cleanup() {
+  pkill -TERM -g $$ ^nc
   govc vm.destroy $id
   quit_vnc $vnc
 }
@@ -52,8 +53,16 @@ govc vm.power -off $id
 
 govc device.cdrom.eject -vm $id
 
+host_ip=$(echo $vnc | awk -F@ '{print $2}' | awk -F: '{print $1}')
+serial_port=33233
+govc device.serial.add -vm $id > /dev/null
+govc device.serial.connect -vm $id $uri telnet://:$serial_port
+
 echo "booting from network, will timeout then boot from disk..."
 govc vm.power -on $id
+
+# capture serial console
+echo | nc $host_ip $serial_port 2>/dev/null &
 
 ip=$(govc vm.ip $id)
 
