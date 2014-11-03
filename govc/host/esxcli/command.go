@@ -41,12 +41,22 @@ type CommandInfoParam struct {
 	Flag    bool     `xml:"flag"`
 }
 
+type CommandInfoHint struct {
+	Key   string `xml:"key"`
+	Value string `xml:"value"`
+}
+
+type CommandInfoHints []CommandInfoHint
+
+type CommandInfoMethod struct {
+	CommandInfoItem
+	Param []CommandInfoParam `xml:"param"`
+	Hints CommandInfoHints   `xml:"hints"`
+}
+
 type CommandInfo struct {
 	CommandInfoItem
-	Method []struct {
-		CommandInfoItem
-		Param []CommandInfoParam `xml:"param"`
-	} `xml:"method"`
+	Method []*CommandInfoMethod `xml:"method"`
 }
 
 func NewCommand(args []string) *Command {
@@ -116,4 +126,24 @@ func (c *Command) Argument(name string, val string) types.ReflectManagedMethodEx
 		Name: name,
 		Val:  fmt.Sprintf("<%s>%s</%s>", name, val, name),
 	}
+}
+
+func (h CommandInfoHints) Formatter() string {
+	for _, hint := range h {
+		if hint.Key == "formatter" {
+			return hint.Value
+		}
+	}
+
+	return "simple"
+}
+
+func (h CommandInfoHints) Fields() []string {
+	for _, hint := range h {
+		if strings.HasPrefix(hint.Key, "fields:") {
+			return strings.Split(hint.Value, ",")
+		}
+	}
+
+	return nil
 }
