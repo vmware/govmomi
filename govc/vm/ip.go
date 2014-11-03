@@ -19,6 +19,7 @@ package vm
 import (
 	"flag"
 	"fmt"
+	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
@@ -58,7 +59,26 @@ func (cmd *ip) Run(f *flag.FlagSet) error {
 	var get func(*govmomi.VirtualMachine) (string, error)
 
 	if cmd.esx {
-		get = esxcli.NewGuestInfo(c).IpAddress
+		get = func(vm *govmomi.VirtualMachine) (string, error) {
+			guest := esxcli.NewGuestInfo(c)
+
+			ticker := time.NewTicker(time.Millisecond * 500)
+			defer ticker.Stop()
+
+			for {
+				select {
+				case <-ticker.C:
+					ip, err := guest.IpAddress(vm)
+					if err != nil {
+						return "", err
+					}
+
+					if ip != "0.0.0.0" {
+						return ip, nil
+					}
+				}
+			}
+		}
 	} else {
 		get = func(vm *govmomi.VirtualMachine) (string, error) {
 			return vm.WaitForIP()
