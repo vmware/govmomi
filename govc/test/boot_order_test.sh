@@ -15,9 +15,9 @@ upload_iso
 id=$(new_ttylinux_vm)
 
 function cleanup() {
-  pkill -TERM -g $$ ^nc
-  govc vm.destroy $id
   quit_vnc $vnc
+  govc vm.destroy $id
+  pkill -TERM -g $$ ^nc
 }
 
 trap cleanup EXIT
@@ -28,7 +28,7 @@ govc device.cdrom.insert -vm $id $GOVC_TEST_ISO
 govc device.floppy.add -vm $id > /dev/null
 govc device.floppy.insert -vm $id $GOVC_TEST_IMG
 
-govc device.boot -vm $id -delay 2000 -order floppy,cdrom,ethernet,disk
+govc device.boot -vm $id -delay 1000 -order floppy,cdrom,ethernet,disk
 
 vnc=$(govc vm.vnc -vm $id -port 21122 -password govmomi | awk '{print $5}')
 
