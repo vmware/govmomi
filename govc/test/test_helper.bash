@@ -55,7 +55,7 @@ upload_iso() {
 new_ttylinux_vm() {
   import_ttylinux_vmdk # TODO: make this part of vagrant provision
   id=$(new_id)
-  govc vm.create -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $id
+  govc vm.create -m 32 -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $id
   echo $id
 }
 
