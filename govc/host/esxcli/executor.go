@@ -68,7 +68,7 @@ func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error)
 	return e, nil
 }
 
-func (e *Executor) CommandInfo(c *Command) ([]CommandInfoParam, error) {
+func (e *Executor) CommandInfo(c *Command) (*CommandInfoMethod, error) {
 	req := types.ExecuteSoap{
 		Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
 		Method: "vim.CLIInfo.FetchCLIInfo",
@@ -86,24 +86,24 @@ func (e *Executor) CommandInfo(c *Command) ([]CommandInfoParam, error) {
 	name := c.Name()
 	for _, method := range info.Method {
 		if method.Name == name {
-			return method.Param, nil
+			return method, nil
 		}
 	}
 
 	return nil, fmt.Errorf("method '%s' not found in name space '%s'", name, c.Namespace())
 }
 
-func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, error) {
+func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, *CommandInfoMethod, error) {
 	c := NewCommand(args)
 
-	params, err := e.CommandInfo(c)
+	info, err := e.CommandInfo(c)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	sargs, err := c.Parse(params)
+	sargs, err := c.Parse(info.Param)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
 	sreq := types.ExecuteSoap{
@@ -112,7 +112,7 @@ func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, error) {
 		Argument: sargs,
 	}
 
-	return &sreq, nil
+	return &sreq, info, nil
 }
 
 func (e *Executor) Execute(req *types.ExecuteSoap, res interface{}) error {
@@ -138,12 +138,14 @@ func (e *Executor) Execute(req *types.ExecuteSoap, res interface{}) error {
 }
 
 func (e *Executor) Run(args []string) (*Response, error) {
-	req, err := e.NewRequest(args)
+	req, info, err := e.NewRequest(args)
 	if err != nil {
 		return nil, err
 	}
 
-	res := &Response{}
+	res := &Response{
+		Info: info,
+	}
 
 	if err := e.Execute(req, res); err != nil {
 		return nil, err

@@ -65,6 +65,18 @@ func (cmd *esxcli) Run(f *flag.FlagSet) error {
 		return nil
 	}
 
+	// TODO: OutputFlag / format options
+	switch res.Info.Hints.Formatter() {
+	case "table":
+		cmd.formatTable(res)
+	default:
+		cmd.formatSimple(res)
+	}
+
+	return nil
+}
+
+func (cmd *esxcli) formatSimple(res *Response) {
 	var keys []string
 	for key := range res.Values[0] {
 		keys = append(keys, key)
@@ -73,7 +85,6 @@ func (cmd *esxcli) Run(f *flag.FlagSet) error {
 
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	// TODO: OutputFlag / format options
 	for i, rv := range res.Values {
 		if i > 0 {
 			fmt.Fprintln(tw)
@@ -84,5 +95,36 @@ func (cmd *esxcli) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	return tw.Flush()
+	_ = tw.Flush()
+}
+
+func (cmd *esxcli) formatTable(res *Response) {
+	fields := res.Info.Hints.Fields()
+
+	tw := tabwriter.NewWriter(os.Stdout, len(fields), 0, 2, ' ', 0)
+
+	var hr []string
+	for _, name := range fields {
+		hr = append(hr, strings.Repeat("-", len(name)))
+	}
+
+	fmt.Fprintln(tw, strings.Join(fields, "\t"))
+	fmt.Fprintln(tw, strings.Join(hr, "\t"))
+
+	for _, vals := range res.Values {
+		var row []string
+
+		for _, name := range fields {
+			key := strings.Replace(name, " ", "", -1)
+			if val, ok := vals[key]; ok {
+				row = append(row, strings.Join(val, ", "))
+			} else {
+				row = append(row, "")
+			}
+		}
+
+		fmt.Fprintln(tw, strings.Join(row, "\t"))
+	}
+
+	_ = tw.Flush()
 }

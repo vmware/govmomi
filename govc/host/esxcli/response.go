@@ -9,6 +9,7 @@ import (
 type Values map[string][]string
 
 type Response struct {
+	Info   *CommandInfoMethod
 	Values []Values
 }
 

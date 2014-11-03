@@ -55,7 +55,7 @@ upload_iso() {
 new_ttylinux_vm() {
   import_ttylinux_vmdk # TODO: make this part of vagrant provision
   id=$(new_id)
-  govc vm.create -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $id
+  govc vm.create -m 32 -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $id
   echo $id
 }
 
@@ -86,6 +86,11 @@ open_vnc() {
   fi
 }
 
+# collapse spaces, for example testing against Go's tabwriter output
+collapse_ws() {
+  echo "$line" | tr -s ' ' | sed -e 's/^ //'
+}
+
 # the following helpers are borrowed from the test_helper.bash in https://github.com/sstephenson/rbenv
 
 flunk() {
@@ -105,8 +110,8 @@ assert_success() {
 }
 
 assert_failure() {
-  if [ "$status" -eq 0 ]; then
-    flunk "expected failed exit status"
+  if [ "$status" -ne 1 ]; then
+    flunk $(printf "expected failed exit status=1, got status=%d" $status)
   elif [ "$#" -gt 0 ]; then
     assert_output "$1"
   fi
@@ -130,11 +135,11 @@ assert_output() {
 
 assert_line() {
   if [ "$1" -ge 0 ] 2>/dev/null; then
-    assert_equal "$2" "${lines[$1]}"
+    assert_equal "$2" "$(collapse_ws ${lines[$1]})"
   else
     local line
     for line in "${lines[@]}"; do
-      if [ "$line" = "$1" ]; then return 0; fi
+      if [ "$(collapse_ws $line)" = "$1" ]; then return 0; fi
     done
     flunk "expected line \`$1'"
   fi
