@@ -5,7 +5,7 @@ load test_helper
 @test "about" {
   run govc about
   assert_success
-  assert_line "Vendor:       VMware, Inc."
+  assert_line "Vendor: VMware, Inc."
 }
 
 @test "login attempt without credentials" {

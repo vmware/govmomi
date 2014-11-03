@@ -86,6 +86,11 @@ open_vnc() {
   fi
 }
 
+# collapse spaces, for example testing against Go's tabwriter output
+collapse_ws() {
+  echo "$line" | tr -s ' ' | sed -e 's/^ //'
+}
+
 # the following helpers are borrowed from the test_helper.bash in https://github.com/sstephenson/rbenv
 
 flunk() {
@@ -130,11 +135,11 @@ assert_output() {
 
 assert_line() {
   if [ "$1" -ge 0 ] 2>/dev/null; then
-    assert_equal "$2" "${lines[$1]}"
+    assert_equal "$2" "$(collapse_ws ${lines[$1]})"
   else
     local line
     for line in "${lines[@]}"; do
-      if [ "$line" = "$1" ]; then return 0; fi
+      if [ "$(collapse_ws $line)" = "$1" ]; then return 0; fi
     done
     flunk "expected line \`$1'"
   fi

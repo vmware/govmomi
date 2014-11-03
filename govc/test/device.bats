@@ -64,7 +64,7 @@ load test_helper
   assert_success
 
   run govc device.info -vm $vm $id
-  assert_line "  Summary:          ISO [${GOVC_DATASTORE}] x.iso"
+  assert_line "Summary: ISO [${GOVC_DATASTORE}] x.iso"
 
   run govc device.disconnect -vm $vm $id
   assert_success
@@ -105,7 +105,7 @@ load test_helper
   assert_success
 
   run govc device.info -vm $vm $id
-  assert_line "  Summary:          Image [${GOVC_DATASTORE}] x.img"
+  assert_line "Summary: Image [${GOVC_DATASTORE}] x.img"
 
   run govc device.disconnect -vm $vm $id
   assert_success
@@ -147,13 +147,13 @@ load test_helper
   assert_success
 
   run govc device.info -vm $vm $id
-  assert_line "  Summary:          Remote $uri"
+  assert_line "Summary: Remote $uri"
 
   run govc device.serial.disconnect -vm $vm -device $id
   assert_success
 
   run govc device.info -vm $vm $id
-  assert_line "  Summary:          Remote localhost:0"
+  assert_line "Summary: Remote localhost:0"
 
   run govc device.disconnect -vm $vm $id
   assert_success
