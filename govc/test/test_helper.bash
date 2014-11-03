@@ -110,8 +110,8 @@ assert_success() {
 }
 
 assert_failure() {
-  if [ "$status" -eq 0 ]; then
-    flunk "expected failed exit status"
+  if [ "$status" -ne 1 ]; then
+    flunk $(printf "expected failed exit status=1, got status=%d" $status)
   elif [ "$#" -gt 0 ]; then
     assert_output "$1"
   fi
