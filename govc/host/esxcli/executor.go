@@ -31,12 +31,14 @@ type Executor struct {
 	host *govmomi.HostSystem
 	mme  *types.ReflectManagedMethodExecuter
 	dtm  *types.InternalDynamicTypeManager
+	info map[string]*CommandInfo
 }
 
 func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error) {
 	e := &Executor{
 		c:    c,
 		host: host,
+		info: make(map[string]*CommandInfo),
 	}
 
 	{
@@ -69,18 +71,25 @@ func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error)
 }
 
 func (e *Executor) CommandInfo(c *Command) (*CommandInfoMethod, error) {
-	req := types.ExecuteSoap{
-		Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
-		Method: "vim.CLIInfo.FetchCLIInfo",
-		Argument: []types.ReflectManagedMethodExecuterSoapArgument{
-			c.Argument("typeName", "vim.EsxCLI."+c.Namespace()),
-		},
-	}
+	ns := c.Namespace()
+	var info *CommandInfo
+	var ok bool
 
-	var info CommandInfo
+	if info, ok = e.info[ns]; !ok {
+		req := types.ExecuteSoap{
+			Moid:   "ha-dynamic-type-manager-local-cli-cliinfo",
+			Method: "vim.CLIInfo.FetchCLIInfo",
+			Argument: []types.ReflectManagedMethodExecuterSoapArgument{
+				c.Argument("typeName", "vim.EsxCLI."+ns),
+			},
+		}
 
-	if err := e.Execute(&req, &info); err != nil {
-		return nil, err
+		info = new(CommandInfo)
+		if err := e.Execute(&req, info); err != nil {
+			return nil, err
+		}
+
+		e.info[ns] = info
 	}
 
 	name := c.Name()
