@@ -19,6 +19,7 @@ package govmomi
 import (
 	"path"
 
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -43,4 +44,27 @@ func (p DistributedVirtualPortgroup) Reference() types.ManagedObjectReference {
 
 func (p DistributedVirtualPortgroup) Name() string {
 	return path.Base(p.InventoryPath)
+}
+
+// EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this DistributedVirtualPortgroup
+func (p DistributedVirtualPortgroup) EthernetCardBackingInfo() (types.BaseVirtualDeviceBackingInfo, error) {
+	var dvp mo.DistributedVirtualPortgroup
+	var dvs mo.VmwareDistributedVirtualSwitch // TODO: should be mo.BaseDistributedVirtualSwitch
+
+	if err := p.c.Properties(p.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
+		return nil, err
+	}
+
+	if err := p.c.Properties(*dvp.Config.DistributedVirtualSwitch, []string{"uuid"}, &dvs); err != nil {
+		return nil, err
+	}
+
+	backing := &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
+		Port: types.DistributedVirtualSwitchPortConnection{
+			PortgroupKey: dvp.Key,
+			SwitchUuid:   dvs.Uuid,
+		},
+	}
+
+	return backing, nil
 }
