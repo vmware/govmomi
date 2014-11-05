@@ -26,6 +26,15 @@ type DistributedVirtualPortgroup struct {
 	types.ManagedObjectReference
 
 	InventoryPath string
+
+	c *Client
+}
+
+func NewDistributedVirtualPortgroup(c *Client, ref types.ManagedObjectReference) *DistributedVirtualPortgroup {
+	return &DistributedVirtualPortgroup{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (p DistributedVirtualPortgroup) Reference() types.ManagedObjectReference {

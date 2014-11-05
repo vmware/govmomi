@@ -97,10 +97,8 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		case "DistributedVirtualPortgroup":
-			r := &govmomi.DistributedVirtualPortgroup{
-				ManagedObjectReference: ref,
-				InventoryPath:          e.Path,
-			}
+			r := govmomi.NewDistributedVirtualPortgroup(c, ref)
+			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		}
 	}
