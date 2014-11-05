@@ -44,3 +44,16 @@ func (n Network) Reference() types.ManagedObjectReference {
 func (n Network) Name() string {
 	return path.Base(n.InventoryPath)
 }
+
+// EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this Network
+func (n Network) EthernetCardBackingInfo() (types.BaseVirtualDeviceBackingInfo, error) {
+	name := n.Name()
+
+	backing := &types.VirtualEthernetCardNetworkBackingInfo{
+		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+			DeviceName: name,
+		},
+	}
+
+	return backing, nil
+}

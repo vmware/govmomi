@@ -24,7 +24,6 @@ import (
 	"sync"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,7 +32,7 @@ type NetworkFlag struct {
 
 	register sync.Once
 	name     string
-	net      govmomi.Reference
+	net      govmomi.NetworkReference
 }
 
 func NewNetworkFlag() *NetworkFlag {
@@ -63,7 +62,7 @@ func (flag *NetworkFlag) Set(name string) error {
 	return nil
 }
 
-func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
+func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.NetworkReference, error) {
 	relativeFunc := func() (govmomi.Reference, error) {
 		dc, err := flag.Datacenter()
 		if err != nil {
@@ -88,7 +87,7 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 		return nil, err
 	}
 
-	var ns []govmomi.Reference
+	var ns []govmomi.NetworkReference
 	for _, e := range es {
 		ref := e.Object.Reference()
 		switch ref.Type {
@@ -97,10 +96,8 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		case "DistributedVirtualPortgroup":
-			r := &govmomi.DistributedVirtualPortgroup{
-				ManagedObjectReference: ref,
-				InventoryPath:          e.Path,
-			}
+			r := govmomi.NewDistributedVirtualPortgroup(c, ref)
+			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		}
 	}
@@ -108,7 +105,7 @@ func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.Reference, error) {
 	return ns, nil
 }
 
-func (flag *NetworkFlag) findSpecifiedNetwork(path string) (govmomi.Reference, error) {
+func (flag *NetworkFlag) findSpecifiedNetwork(path string) (govmomi.NetworkReference, error) {
 	networks, err := flag.findNetwork(path)
 	if err != nil {
 		return nil, err
@@ -126,7 +123,7 @@ func (flag *NetworkFlag) findSpecifiedNetwork(path string) (govmomi.Reference, e
 	return flag.net, nil
 }
 
-func (flag *NetworkFlag) findDefaultNetwork() (govmomi.Reference, error) {
+func (flag *NetworkFlag) findDefaultNetwork() (govmomi.NetworkReference, error) {
 	networks, err := flag.findNetwork("*")
 	if err != nil {
 		return nil, err
@@ -144,7 +141,7 @@ func (flag *NetworkFlag) findDefaultNetwork() (govmomi.Reference, error) {
 	return flag.net, nil
 }
 
-func (flag *NetworkFlag) Network() (govmomi.Reference, error) {
+func (flag *NetworkFlag) Network() (govmomi.NetworkReference, error) {
 	if flag.net != nil {
 		return flag.net, nil
 	}
@@ -157,59 +154,21 @@ func (flag *NetworkFlag) Network() (govmomi.Reference, error) {
 }
 
 func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
 	net, err := flag.Network()
 	if err != nil {
 		return nil, err
 	}
 
-	var name string
-	var backing types.BaseVirtualDeviceBackingInfo
-
-	switch net.(type) {
-	case *govmomi.Network:
-		name = net.(*govmomi.Network).Name()
-		backing = &types.VirtualEthernetCardNetworkBackingInfo{
-			VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
-				DeviceName: name,
-			},
-		}
-	case *govmomi.DistributedVirtualPortgroup:
-		name = net.(*govmomi.DistributedVirtualPortgroup).Name()
-		var dvp mo.DistributedVirtualPortgroup
-		var dvs mo.VmwareDistributedVirtualSwitch // TODO: should be mo.BaseDistributedVirtualSwitch
-
-		if err := c.Properties(net.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
-			return nil, err
-		}
-
-		if err := c.Properties(*dvp.Config.DistributedVirtualSwitch, []string{"uuid"}, &dvs); err != nil {
-			return nil, err
-		}
-
-		backing = &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
-			Port: types.DistributedVirtualSwitchPortConnection{
-				PortgroupKey: dvp.Key,
-				SwitchUuid:   dvs.Uuid,
-			},
-		}
-	default:
-		return nil, fmt.Errorf("%#v not supported", net)
+	backing, err := net.EthernetCardBackingInfo()
+	if err != nil {
+		return nil, err
 	}
 
 	// TODO: adapter type should be an option, default to e1000 for now.
 	device := &types.VirtualE1000{
 		VirtualEthernetCard: types.VirtualEthernetCard{
 			VirtualDevice: types.VirtualDevice{
-				Key: -1,
-				DeviceInfo: &types.Description{
-					Label:   "", // Label will be chosen for us
-					Summary: name,
-				},
+				Key:     -1,
 				Backing: backing,
 			},
 			AddressType: string(types.VirtualEthernetCardMacTypeGenerated),

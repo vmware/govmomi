@@ -65,6 +65,25 @@ new_empty_vm() {
   echo $id
 }
 
+# returns an enviroment for using vcsim if running
+vcsim_env() {
+  if [ "$(uname)" == "Darwin" ]
+  then
+    PATH="/Applications/VMware Fusion.app/Contents/Library:$PATH"
+  fi
+
+  if [ "$(vmrun list | grep contrib/vagrant/vcsim | wc -l)" -eq 1 ]
+  then
+    cat <<EOF
+GOVC_URL=https://root:vmware@localhost:16443/sdk
+GOVC_DATACENTER=DC0
+GOVC_DATASTORE=GlobalDS_0
+GOVC_RESOURCE_POOL=/DC0/host/DC0_C0/Resources
+GOVC_NETWORK=/DC0/network/DC0_DVPG0
+EOF
+  fi
+}
+
 quit_vnc() {
   if [ "$(uname)" = "Darwin" ]
   then
@@ -88,6 +107,7 @@ open_vnc() {
 
 # collapse spaces, for example testing against Go's tabwriter output
 collapse_ws() {
+  local line=$1
   echo "$line" | tr -s ' ' | sed -e 's/^ //'
 }
 

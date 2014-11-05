@@ -16,8 +16,10 @@ limitations under the License.
 
 package govmomi
 
-// Network should implement the Reference interface.
-var _ Reference = Network{}
+import "github.com/vmware/govmomi/vim25/types"
 
-// Network should implement the NetworkReference interface.
-var _ NetworkReference = Network{}
+// The NetworkReference interface is implemented by managed objects
+// which can be used as the backing for a VirtualEthernetCard.
+type NetworkReference interface {
+	EthernetCardBackingInfo() (types.BaseVirtualDeviceBackingInfo, error)
+}

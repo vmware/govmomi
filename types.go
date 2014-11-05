@@ -57,7 +57,7 @@ func NewReference(c *Client, e types.ManagedObjectReference) Reference {
 			DistributedVirtualSwitch{ManagedObjectReference: e},
 		}
 	case "DistributedVirtualPortgroup":
-		return &DistributedVirtualPortgroup{ManagedObjectReference: e}
+		return NewDistributedVirtualPortgroup(c, e)
 	case "Datastore":
 		return NewDatastore(c, e)
 	default:

@@ -16,8 +16,8 @@ limitations under the License.
 
 package govmomi
 
-// Network should implement the Reference interface.
-var _ Reference = Network{}
+// DistributedVirtualPortgroup should implement the Reference interface.
+var _ Reference = DistributedVirtualPortgroup{}
 
-// Network should implement the NetworkReference interface.
-var _ NetworkReference = Network{}
+// DistributedVirtualPortgroup should implement the NetworkReference interface.
+var _ NetworkReference = DistributedVirtualPortgroup{}
