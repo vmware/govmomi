@@ -88,6 +88,7 @@ open_vnc() {
 
 # collapse spaces, for example testing against Go's tabwriter output
 collapse_ws() {
+  local line=$1
   echo "$line" | tr -s ' ' | sed -e 's/^ //'
 }
 
