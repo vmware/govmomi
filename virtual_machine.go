@@ -222,3 +222,19 @@ func (v VirtualMachine) SetBootOptions(options *types.VirtualMachineBootOptions)
 
 	return task.Wait()
 }
+
+// Answer answers a pending question.
+func (v VirtualMachine) Answer(id, answer string) error {
+	req := types.AnswerVM{
+		This:         v.Reference(),
+		QuestionId:   id,
+		AnswerChoice: answer,
+	}
+
+	_, err := methods.AnswerVM(v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
