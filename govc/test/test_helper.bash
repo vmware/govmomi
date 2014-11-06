@@ -8,6 +8,10 @@ then
   BATS_TEST_DIRNAME=$(dirname ${BASH_SOURCE})
 fi
 
+# canonicalize
+readlink=$(type -p greadlink readlink | head -1)
+BATS_TEST_DIRNAME=$($readlink -nf $BATS_TEST_DIRNAME)
+
 GOVC_IMAGES=$BATS_TEST_DIRNAME/images
 TTYLINUX_NAME=ttylinux-pc_i486-16.1
 
@@ -20,7 +24,7 @@ GOVC_TEST_ISO=$(basename $GOVC_TEST_ISO_SRC)
 GOVC_TEST_IMG_SRC=$GOVC_IMAGES/floppybird.img
 GOVC_TEST_IMG=$(basename $GOVC_TEST_IMG_SRC)
 
-PATH="$(dirname $(readlink -nf $BATS_TEST_DIRNAME)):$PATH"
+PATH="$(dirname $BATS_TEST_DIRNAME):$PATH"
 
 teardown() {
   govc ls vm | grep govc-test- | xargs govc vm.destroy
@@ -72,7 +76,7 @@ vcsim_env() {
     PATH="/Applications/VMware Fusion.app/Contents/Library:$PATH"
   fi
 
-  if [ "$(vmrun list | grep contrib/vagrant/vcsim | wc -l)" -eq 1 ]
+  if [ "$(vmrun list | grep $BATS_TEST_DIRNAME/vcsim | wc -l)" -eq 1 ]
   then
     cat <<EOF
 GOVC_URL=https://root:vmware@localhost:16443/sdk
