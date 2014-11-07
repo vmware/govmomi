@@ -20,7 +20,7 @@ load test_helper
   assert_success
 
   eth0=$(govc device.ls -vm $vm | grep ethernet- | awk '{print $1}')
-  [ -n "$eth0"]
+  [ -z "$eth0" ]
 
   # Standard network backing
   run govc vm.network.add -vm $vm -net "VM Network"
