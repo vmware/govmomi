@@ -29,3 +29,16 @@ load test_helper
 
   assert_equal $ip_esxcli $ip_tools
 }
+
+@test "vm.create in cluster" {
+  vcsim_env
+
+  # using GOVC_HOST and its resource pool
+  run govc vm.create -on=false $(new_id)
+  assert_success
+
+  # using no -host and the default resource pool for DC0
+  unset GOVC_HOST
+  run govc vm.create -on=false $(new_id)
+  assert_success
+}
