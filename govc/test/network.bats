@@ -3,12 +3,7 @@
 load test_helper
 
 @test "network dvs backing" {
-  env=$(vcsim_env)
-  if [ -z "$env" ]
-  then
-    skip "requires vcsim"
-  fi
-  export $env
+  vcsim_env
 
   # DVS backed network by default (from vcsim_env)
   vm=$(new_empty_vm)
