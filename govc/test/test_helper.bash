@@ -81,6 +81,7 @@ vcsim_env() {
     export GOVC_URL=https://root:vmware@localhost:16443/sdk \
            GOVC_DATACENTER=DC0 \
            GOVC_DATASTORE=GlobalDS_0 \
+           GOVC_HOST=/DC0/host/DC0_C0/DC0_C0_H0 \
            GOVC_RESOURCE_POOL=/DC0/host/DC0_C0/Resources \
            GOVC_NETWORK=/DC0/network/DC0_DVPG0
   else
