@@ -59,3 +59,12 @@ load test_helper
   run govc device.info -vm $vm ethernet-0
   assert_success
 }
+
+@test "network flag required" {
+  vcsim_env
+
+  # -net flag is required when there are multiple networks
+  unset GOVC_NETWORK
+  run govc vm.create -on=false $(new_id)
+  assert_failure "Error: please specify a network"
+}
