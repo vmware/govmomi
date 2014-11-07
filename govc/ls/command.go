@@ -24,7 +24,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/govc/flags/list"
+	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/vim25/mo"
 )
 

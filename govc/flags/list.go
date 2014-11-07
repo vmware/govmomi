@@ -22,7 +22,7 @@ import (
 	"path"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/govc/flags/list"
+	"github.com/vmware/govmomi/list"
 )
 
 type ListRelativeFunc func() (govmomi.Reference, error)
