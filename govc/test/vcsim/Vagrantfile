@@ -14,4 +14,10 @@ Vagrant.configure("2") do |config|
   config.vm.provision "shell", path: "provision.sh"
 
   config.vm.network "forwarded_port", guest: 443, host: 16443
+
+  [:vmware_fusion, :vmware_workstation].each do |name|
+    config.vm.provider name do |v,override|
+      v.vmx["memsize"] = "4096"
+    end
+  end
 end
