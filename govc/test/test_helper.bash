@@ -69,7 +69,7 @@ new_empty_vm() {
   echo $id
 }
 
-# returns an enviroment for using vcsim if running
+# exports an enviroment for using vcsim if running, otherwise skips the calling test.
 vcsim_env() {
   if [ "$(uname)" == "Darwin" ]
   then
@@ -78,13 +78,14 @@ vcsim_env() {
 
   if [ "$(vmrun list | grep $BATS_TEST_DIRNAME/vcsim | wc -l)" -eq 1 ]
   then
-    cat <<EOF
-GOVC_URL=https://root:vmware@localhost:16443/sdk
-GOVC_DATACENTER=DC0
-GOVC_DATASTORE=GlobalDS_0
-GOVC_RESOURCE_POOL=/DC0/host/DC0_C0/Resources
-GOVC_NETWORK=/DC0/network/DC0_DVPG0
-EOF
+    export GOVC_URL=https://root:vmware@localhost:16443/sdk \
+           GOVC_DATACENTER=DC0 \
+           GOVC_DATASTORE=GlobalDS_0 \
+           GOVC_HOST=/DC0/host/DC0_C0/DC0_C0_H0 \
+           GOVC_RESOURCE_POOL=/DC0/host/DC0_C0/Resources \
+           GOVC_NETWORK=/DC0/network/DC0_DVPG0
+  else
+    skip "requires vcsim"
   fi
 }
 

@@ -3,12 +3,7 @@
 load test_helper
 
 @test "network dvs backing" {
-  env=$(vcsim_env)
-  if [ -z "$env" ]
-  then
-    skip "requires vcsim"
-  fi
-  export $env
+  vcsim_env
 
   # DVS backed network by default (from vcsim_env)
   vm=$(new_empty_vm)
@@ -25,7 +20,7 @@ load test_helper
   assert_success
 
   eth0=$(govc device.ls -vm $vm | grep ethernet- | awk '{print $1}')
-  [ -n "$eth0"]
+  [ -z "$eth0" ]
 
   # Standard network backing
   run govc vm.network.add -vm $vm -net "VM Network"
@@ -63,4 +58,13 @@ load test_helper
 
   run govc device.info -vm $vm ethernet-0
   assert_success
+}
+
+@test "network flag required" {
+  vcsim_env
+
+  # -net flag is required when there are multiple networks
+  unset GOVC_NETWORK
+  run govc vm.create -on=false $(new_id)
+  assert_failure "Error: please specify a network"
 }

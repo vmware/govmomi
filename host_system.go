@@ -17,6 +17,8 @@ limitations under the License.
 package govmomi
 
 import (
+	"fmt"
+
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -49,8 +51,22 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 		return nil, err
 	}
 
-	var mcr mo.ComputeResource
-	err = h.c.Properties(*mh.Parent, []string{"resourcePool"}, &mcr)
+	var mcr *mo.ComputeResource
+	var parent interface{}
+
+	switch mh.Parent.Type {
+	case "ComputeResource":
+		mcr = new(mo.ComputeResource)
+		parent = mcr
+	case "ClusterComputeResource":
+		mcc := new(mo.ClusterComputeResource)
+		mcr = &mcc.ComputeResource
+		parent = mcc
+	default:
+		return nil, fmt.Errorf("unknown host parent type: %s", mh.Parent.Type)
+	}
+
+	err = h.c.Properties(*mh.Parent, []string{"resourcePool"}, parent)
 	if err != nil {
 		return nil, err
 	}
