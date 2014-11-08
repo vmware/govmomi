@@ -42,3 +42,23 @@ load test_helper
   run govc vm.create -on=false $(new_id)
   assert_success
 }
+
+@test "vm.info" {
+  local num=3
+
+  local prefix=$(new_id)
+
+  for x in $(seq $num)
+  do
+    local id="${prefix}-${x}"
+    run govc vm.create -on=false $id
+    assert_success
+
+    local found=$(govc vm.info $id | grep Name: | wc -l)
+    [ "$found" -eq 1 ]
+  done
+
+  # test find slice
+  local found=$(govc vm.info ${prefix}-* | grep Name: | wc -l)
+  [ "$found" -eq $num ]
+}
