@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/list"
@@ -29,7 +28,6 @@ import (
 )
 
 type ls struct {
-	*flags.ListFlag
 	*flags.DatacenterFlag
 
 	Long bool
@@ -45,21 +43,13 @@ func (cmd *ls) Register(f *flag.FlagSet) {
 
 func (cmd *ls) Process() error { return nil }
 
-func (cmd *ls) PathRelativeTo() (govmomi.Reference, error) {
-	dc, err := cmd.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-	return dc, nil
-}
-
 func (cmd *ls) Run(f *flag.FlagSet) error {
-	args := f.Args()
-	if len(args) == 0 {
-		args = []string{"."}
+	finder, err := cmd.Finder()
+	if err != nil {
+		return err
 	}
 
-	es, err := cmd.ListSlice(args, true, cmd.PathRelativeTo)
+	es, err := finder.ManagedObjectList(f.Args()...)
 	if err != nil {
 		return err
 	}
