@@ -55,91 +55,23 @@ func (flag *DatastoreFlag) Process() error {
 	return nil
 }
 
-func (flag *DatastoreFlag) findDatastore(path string) ([]*govmomi.Datastore, error) {
-	relativeFunc := func() (govmomi.Reference, error) {
-		dc, err := flag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders()
-		if err != nil {
-			return nil, err
-		}
-
-		return f.DatastoreFolder, nil
-	}
-
-	es, err := flag.List(path, false, relativeFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	var dss []*govmomi.Datastore
-	for _, e := range es {
-		ref := e.Object.Reference()
-		if ref.Type == "Datastore" {
-			ds := govmomi.NewDatastore(c, ref)
-			ds.InventoryPath = e.Path
-
-			dss = append(dss, ds)
-		}
-	}
-
-	return dss, nil
-}
-
-func (flag *DatastoreFlag) findSpecifiedDatastore(path string) (*govmomi.Datastore, error) {
-	dss, err := flag.findDatastore(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(dss) == 0 {
-		return nil, errors.New("no such datastore")
-	}
-
-	if len(dss) > 1 {
-		return nil, errors.New("path resolves to multiple datastores")
-	}
-
-	flag.ds = dss[0]
-	return flag.ds, nil
-}
-
-func (flag *DatastoreFlag) findDefaultDatastore() (*govmomi.Datastore, error) {
-	dss, err := flag.findDatastore("*")
-	if err != nil {
-		return nil, err
-	}
-
-	if len(dss) == 0 {
-		panic("no datastores") // Should never happen
-	}
-
-	if len(dss) > 1 {
-		return nil, errors.New("please specify a datastore")
-	}
-
-	flag.ds = dss[0]
-	return flag.ds, nil
-}
-
 func (flag *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
 	if flag.ds != nil {
 		return flag.ds, nil
 	}
 
-	if flag.name == "" {
-		return flag.findDefaultDatastore()
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
 	}
 
-	return flag.findSpecifiedDatastore(flag.name)
+	if flag.name == "" {
+		flag.ds, err = finder.DefaultDatastore()
+	} else {
+		flag.ds, err = finder.Datastore(flag.name)
+	}
+
+	return flag.ds, err
 }
 
 func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {

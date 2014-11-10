@@ -17,7 +17,6 @@ limitations under the License.
 package flags
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
@@ -62,95 +61,23 @@ func (flag *NetworkFlag) Set(name string) error {
 	return nil
 }
 
-func (flag *NetworkFlag) findNetwork(path string) ([]govmomi.NetworkReference, error) {
-	relativeFunc := func() (govmomi.Reference, error) {
-		dc, err := flag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders()
-		if err != nil {
-			return nil, err
-		}
-
-		return f.NetworkFolder, nil
-	}
-
-	es, err := flag.List(path, false, relativeFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	var ns []govmomi.NetworkReference
-	for _, e := range es {
-		ref := e.Object.Reference()
-		switch ref.Type {
-		case "Network":
-			r := govmomi.NewNetwork(c, ref)
-			r.InventoryPath = e.Path
-			ns = append(ns, r)
-		case "DistributedVirtualPortgroup":
-			r := govmomi.NewDistributedVirtualPortgroup(c, ref)
-			r.InventoryPath = e.Path
-			ns = append(ns, r)
-		}
-	}
-
-	return ns, nil
-}
-
-func (flag *NetworkFlag) findSpecifiedNetwork(path string) (govmomi.NetworkReference, error) {
-	networks, err := flag.findNetwork(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(networks) == 0 {
-		return nil, errors.New("no such network")
-	}
-
-	if len(networks) > 1 {
-		return nil, errors.New("path resolves to multiple networks")
-	}
-
-	flag.net = networks[0]
-	return flag.net, nil
-}
-
-func (flag *NetworkFlag) findDefaultNetwork() (govmomi.NetworkReference, error) {
-	networks, err := flag.findNetwork("*")
-	if err != nil {
-		return nil, err
-	}
-
-	if len(networks) == 0 {
-		panic("no networks") // Should never happen
-	}
-
-	if len(networks) > 1 {
-		return nil, errors.New("please specify a network")
-	}
-
-	flag.net = networks[0]
-	return flag.net, nil
-}
-
 func (flag *NetworkFlag) Network() (govmomi.NetworkReference, error) {
 	if flag.net != nil {
 		return flag.net, nil
 	}
 
-	if flag.name == "" {
-		return flag.findDefaultNetwork()
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
 	}
 
-	return flag.findSpecifiedNetwork(flag.name)
+	if flag.name == "" {
+		flag.net, err = finder.DefaultNetwork()
+	} else {
+		flag.net, err = finder.Network(flag.name)
+	}
+
+	return flag.net, err
 }
 
 func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {

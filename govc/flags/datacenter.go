@@ -17,21 +17,24 @@ limitations under the License.
 package flags
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"sync"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
 )
 
 type DatacenterFlag struct {
-	*ListFlag
+	*ClientFlag
+	*OutputFlag
 
 	register sync.Once
 	path     string
 	dc       *govmomi.Datacenter
+	finder   *find.Finder
+	err      error
 }
 
 func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
@@ -47,66 +50,34 @@ func (flag *DatacenterFlag) Process() error {
 	return nil
 }
 
-func (flag *DatacenterFlag) findDatacenter(path string) ([]*govmomi.Datacenter, error) {
-	c, err := flag.Client()
+func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
+	if flag.finder != nil {
+		return flag.finder, nil
+	}
+
+	c, err := flag.ClientFlag.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	relativeFunc := func() (govmomi.Reference, error) {
-		return c.RootFolder(), nil
-	}
+	finder := find.NewFinder(c, flag.JSON)
 
-	es, err := flag.List(path, false, relativeFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	var dcs []*govmomi.Datacenter
-	for _, e := range es {
-		ref := e.Object.Reference()
-		if ref.Type == "Datacenter" {
-			dcs = append(dcs, govmomi.NewDatacenter(c, ref))
+	// Datacenter is not required (ls command for example).
+	// Set for relative func if dc flag is given or
+	// if there is a single (default) Datacenter
+	if flag.path == "" {
+		flag.dc, flag.err = finder.DefaultDatacenter()
+	} else {
+		if flag.dc, err = finder.Datacenter(flag.path); err != nil {
+			return nil, err
 		}
 	}
 
-	return dcs, nil
-}
+	finder.SetDatacenter(flag.dc)
 
-func (flag *DatacenterFlag) findSpecifiedDatacenter(path string) (*govmomi.Datacenter, error) {
-	dcs, err := flag.findDatacenter(path)
-	if err != nil {
-		return nil, err
-	}
+	flag.finder = finder
 
-	if len(dcs) == 0 {
-		return nil, errors.New("no such datacenter")
-	}
-
-	if len(dcs) > 1 {
-		return nil, errors.New("path resolves to multiple datacenters")
-	}
-
-	flag.dc = dcs[0]
-	return flag.dc, nil
-}
-
-func (flag *DatacenterFlag) findDefaultDatacenter() (*govmomi.Datacenter, error) {
-	dcs, err := flag.findDatacenter("*")
-	if err != nil {
-		return nil, err
-	}
-
-	if len(dcs) == 0 {
-		panic("no datacenters") // Should never happen
-	}
-
-	if len(dcs) > 1 {
-		return nil, errors.New("please specify a datacenter")
-	}
-
-	flag.dc = dcs[0]
-	return flag.dc, nil
+	return flag.finder, nil
 }
 
 func (flag *DatacenterFlag) Datacenter() (*govmomi.Datacenter, error) {
@@ -114,9 +85,15 @@ func (flag *DatacenterFlag) Datacenter() (*govmomi.Datacenter, error) {
 		return flag.dc, nil
 	}
 
-	if flag.path == "" {
-		return flag.findDefaultDatacenter()
+	_, err := flag.Finder()
+	if err != nil {
+		return nil, err
 	}
 
-	return flag.findSpecifiedDatacenter(flag.path)
+	if flag.err != nil {
+		// Should only happen if no dc is specified and len(dcs) > 1
+		return nil, flag.err
+	}
+
+	return flag.dc, err
 }

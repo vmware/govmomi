@@ -33,7 +33,6 @@ const (
 type SearchFlag struct {
 	*ClientFlag
 	*DatacenterFlag
-	*ListFlag
 
 	t      int
 	entity string
@@ -199,34 +198,6 @@ func (flag *SearchFlag) search() (govmomi.Reference, error) {
 	return ref, nil
 }
 
-func (flag *SearchFlag) relativeTo() (*govmomi.DatacenterFolders, error) {
-	dc, err := flag.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := dc.Folders()
-	if err != nil {
-		return nil, err
-	}
-
-	return f, nil
-}
-
-func (flag *SearchFlag) relativeToVmFolder() (govmomi.Reference, error) {
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	f, err := flag.relativeTo()
-	if err != nil {
-		return nil, err
-	}
-
-	return govmomi.NewFolder(c, f.VmFolder.Reference()), nil
-}
-
 func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 	ref, err := flag.search()
 	if err != nil {
@@ -259,25 +230,12 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachin
 		return nil, errors.New("no argument")
 	}
 
-	es, err := flag.ListSlice(args, false, flag.relativeToVmFolder)
+	finder, err := flag.Finder()
 	if err != nil {
 		return nil, err
 	}
 
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	// Filter non-VMs
-	for _, e := range es {
-		ref := e.Object.Reference()
-		if ref.Type == "VirtualMachine" {
-			out = append(out, govmomi.NewVirtualMachine(c, ref))
-		}
-	}
-
-	return out, nil
+	return finder.VirtualMachineList(args...)
 }
 
 func (flag *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {

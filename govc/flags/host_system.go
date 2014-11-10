@@ -17,21 +17,18 @@ limitations under the License.
 package flags
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"sync"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type HostSystemFlag struct {
 	*ClientFlag
 	*DatacenterFlag
 	*SearchFlag
-	*ListFlag
 
 	register sync.Once
 	name     string
@@ -52,79 +49,6 @@ func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
 
 func (flag *HostSystemFlag) Process() error {
 	return nil
-}
-
-func (flag *HostSystemFlag) findHostSystem(path string) ([]*govmomi.HostSystem, error) {
-	relativeFunc := func() (govmomi.Reference, error) {
-		dc, err := flag.DatacenterFlag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders()
-		if err != nil {
-			return nil, err
-		}
-
-		return f.HostFolder, nil
-	}
-
-	es, err := flag.ListFlag.List(path, false, relativeFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	var hss []*govmomi.HostSystem
-	for _, e := range es {
-		switch o := e.Object.(type) {
-		case mo.HostSystem:
-			hs := govmomi.NewHostSystem(c, o.Reference())
-			hss = append(hss, hs)
-		}
-	}
-
-	return hss, nil
-}
-
-func (flag *HostSystemFlag) findSpecifiedHostSystem(path string) (*govmomi.HostSystem, error) {
-	hss, err := flag.findHostSystem(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(hss) == 0 {
-		return nil, errors.New("no such host")
-	}
-
-	if len(hss) > 1 {
-		return nil, errors.New("path resolves to multiple hosts")
-	}
-
-	flag.host = hss[0]
-	return flag.host, nil
-}
-
-func (flag *HostSystemFlag) findDefaultHostSystem() (*govmomi.HostSystem, error) {
-	hss, err := flag.findHostSystem("*/*")
-	if err != nil {
-		return nil, err
-	}
-
-	if len(hss) == 0 {
-		return nil, errors.New("no host")
-	}
-
-	if len(hss) > 1 {
-		return nil, errors.New("please specify a host")
-	}
-
-	flag.host = hss[0]
-	return flag.host, nil
 }
 
 func (flag *HostSystemFlag) HostSystemIfSpecified() (*govmomi.HostSystem, error) {
@@ -150,7 +74,13 @@ func (flag *HostSystemFlag) HostSystemIfSpecified() (*govmomi.HostSystem, error)
 		return nil, nil
 	}
 
-	return flag.findSpecifiedHostSystem(flag.name)
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	flag.host, err = finder.HostSystem(flag.name)
+	return flag.host, err
 }
 
 func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
@@ -163,7 +93,13 @@ func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 		return host, nil
 	}
 
-	return flag.findDefaultHostSystem()
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	flag.host, err = finder.DefaultHostSystem()
+	return flag.host, err
 }
 
 func (flag *HostSystemFlag) HostNetworkSystem() (*govmomi.HostNetworkSystem, error) {

@@ -17,14 +17,12 @@ limitations under the License.
 package flags
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"sync"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type ResourcePoolFlag struct {
@@ -48,95 +46,21 @@ func (flag *ResourcePoolFlag) Process() error {
 	return nil
 }
 
-func (flag *ResourcePoolFlag) findResourcePool(path string) ([]*govmomi.ResourcePool, error) {
-	relativeFunc := func() (govmomi.Reference, error) {
-		dc, err := flag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders()
-		if err != nil {
-			return nil, err
-		}
-
-		return f.HostFolder, nil
-	}
-
-	es, err := flag.List(path, false, relativeFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	var rps []*govmomi.ResourcePool
-	for _, e := range es {
-		switch o := e.Object.(type) {
-		case mo.ComputeResource:
-			// Use a compute resouce's root resource pool.
-			n := govmomi.NewResourcePool(c, *o.ResourcePool)
-			rps = append(rps, n)
-		case mo.ClusterComputeResource:
-			// Use a cluster compute resouce's root resource pool.
-			n := govmomi.NewResourcePool(c, *o.ResourcePool)
-			rps = append(rps, n)
-		case mo.ResourcePool:
-			n := govmomi.NewResourcePool(c, o.Reference())
-			rps = append(rps, n)
-		}
-	}
-
-	return rps, nil
-}
-
-func (flag *ResourcePoolFlag) findSpecifiedResourcePool(path string) (*govmomi.ResourcePool, error) {
-	rps, err := flag.findResourcePool(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(rps) == 0 {
-		return nil, errors.New("no such resource pool")
-	}
-
-	if len(rps) > 1 {
-		return nil, errors.New("path resolves to multiple resource pools")
-	}
-
-	flag.pool = rps[0]
-	return flag.pool, nil
-}
-
-func (flag *ResourcePoolFlag) findDefaultResourcePool() (*govmomi.ResourcePool, error) {
-	rps, err := flag.findResourcePool("*/Resources")
-	if err != nil {
-		return nil, err
-	}
-
-	if len(rps) == 0 {
-		panic("no resource pools") // Should never happen
-	}
-
-	if len(rps) > 1 {
-		return nil, errors.New("please specify a resource pool")
-	}
-
-	flag.pool = rps[0]
-	return flag.pool, nil
-}
-
 func (flag *ResourcePoolFlag) ResourcePool() (*govmomi.ResourcePool, error) {
 	if flag.pool != nil {
 		return flag.pool, nil
 	}
 
-	if flag.name == "" {
-		return flag.findDefaultResourcePool()
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
 	}
 
-	return flag.findSpecifiedResourcePool(flag.name)
+	if flag.name == "" {
+		flag.pool, err = finder.DefaultResourcePool()
+	} else {
+		flag.pool, err = finder.ResourcePool(flag.name)
+	}
+
+	return flag.pool, err
 }

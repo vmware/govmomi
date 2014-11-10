@@ -32,7 +32,6 @@ type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 	*flags.SearchFlag
-	*flags.ListFlag
 
 	WaitForIP bool
 }

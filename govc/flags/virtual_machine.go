@@ -17,21 +17,18 @@ limitations under the License.
 package flags
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"sync"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type VirtualMachineFlag struct {
 	*ClientFlag
 	*DatacenterFlag
 	*SearchFlag
-	*ListFlag
 
 	register sync.Once
 	name     string
@@ -51,61 +48,6 @@ func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
 
 func (flag *VirtualMachineFlag) Process() error {
 	return nil
-}
-
-func (flag *VirtualMachineFlag) findVirtualMachine(path string) ([]*govmomi.VirtualMachine, error) {
-	c, err := flag.ClientFlag.Client()
-	if err != nil {
-		return nil, err
-	}
-
-	relativeFunc := func() (govmomi.Reference, error) {
-		dc, err := flag.DatacenterFlag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-
-		f, err := dc.Folders()
-		if err != nil {
-			return nil, err
-		}
-
-		return f.VmFolder, nil
-	}
-
-	es, err := flag.ListFlag.List(path, false, relativeFunc)
-	if err != nil {
-		return nil, err
-	}
-
-	var vms []*govmomi.VirtualMachine
-	for _, e := range es {
-		switch o := e.Object.(type) {
-		case mo.VirtualMachine:
-			vm := govmomi.NewVirtualMachine(c, o.Reference())
-			vms = append(vms, vm)
-		}
-	}
-
-	return vms, nil
-}
-
-func (flag *VirtualMachineFlag) findSpecifiedVirtualMachine(path string) (*govmomi.VirtualMachine, error) {
-	vms, err := flag.findVirtualMachine(path)
-	if err != nil {
-		return nil, err
-	}
-
-	if len(vms) == 0 {
-		return nil, errors.New("no such vm")
-	}
-
-	if len(vms) > 1 {
-		return nil, errors.New("path resolves to multiple vms")
-	}
-
-	flag.vm = vms[0]
-	return flag.vm, nil
 }
 
 func (flag *VirtualMachineFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
@@ -129,5 +71,11 @@ func (flag *VirtualMachineFlag) VirtualMachine() (*govmomi.VirtualMachine, error
 		return nil, nil
 	}
 
-	return flag.findSpecifiedVirtualMachine(flag.name)
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	flag.vm, err = finder.VirtualMachine(flag.name)
+	return flag.vm, err
 }
