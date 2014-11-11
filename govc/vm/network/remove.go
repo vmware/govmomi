@@ -23,8 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type remove struct {
@@ -40,11 +38,6 @@ func (cmd *remove) Register(f *flag.FlagSet) {}
 func (cmd *remove) Process() error { return nil }
 
 func (cmd *remove) Run(f *flag.FlagSet) error {
-	c, err := cmd.ClientFlag.Client()
-	if err != nil {
-		return err
-	}
-
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return err
@@ -60,40 +53,31 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 		return errors.New("please specify a network")
 	}
 
-	var mvm mo.VirtualMachine
-
-	err = c.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
+	finder, err := cmd.Finder()
 	if err != nil {
 		return err
 	}
 
-	var net *types.VirtualDevice
-
-	for _, dev := range mvm.Config.Hardware.Device {
-		if eth, ok := dev.GetVirtualDevice().Backing.(*types.VirtualEthernetCardNetworkBackingInfo); ok {
-			if eth.DeviceName == name {
-				net = dev.GetVirtualDevice()
-				break
-			}
-		}
+	network, err := finder.Network(name)
+	if err != nil {
+		return nil
 	}
+
+	backing, err := network.EthernetCardBackingInfo()
+	if err != nil {
+		return nil
+	}
+
+	devices, err := vm.Device()
+	if err != nil {
+		return err
+	}
+
+	net := devices.FindByBackingInfo(backing)
 
 	if net == nil {
 		return fmt.Errorf("vm network device '%s' not found", name)
 	}
 
-	config := &types.VirtualDeviceConfigSpec{
-		Device:    net,
-		Operation: types.VirtualDeviceConfigSpecOperationRemove,
-	}
-
-	spec := types.VirtualMachineConfigSpec{}
-	spec.DeviceChange = append(spec.DeviceChange, config)
-
-	task, err := vm.Reconfigure(spec)
-	if err != nil {
-		return err
-	}
-
-	return task.Wait()
+	return vm.RemoveDevice(net)
 }

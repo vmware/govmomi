@@ -15,8 +15,7 @@ load test_helper
   summary=$(govc device.info -vm $vm $eth0 | grep Summary: | awk '{print $2}')
   assert_equal "DVSwitch:" $summary
 
-  # TODO: vm.network.remove does not work with DVS
-  run govc device.remove -vm $vm $eth0
+  run govc vm.network.remove -vm $vm $GOVC_NETWORK
   assert_success
 
   eth0=$(govc device.ls -vm $vm | grep ethernet- | awk '{print $1}')
@@ -33,6 +32,12 @@ load test_helper
 
   summary=$(govc device.info -vm $vm $eth0 | grep Summary: | awk -F: '{print $2}')
   assert_equal "VM Network" $(collapse_ws $summary)
+
+  run govc vm.network.remove -vm $vm "VM Network"
+  assert_success
+
+  run govc vm.network.remove -vm $vm "VM Network"
+  assert_failure "Error: vm network device 'VM Network' not found"
 }
 
 @test "network standard backing" {
