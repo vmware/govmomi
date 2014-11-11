@@ -88,6 +88,39 @@ func (l VirtualDeviceList) FindByKey(key int) types.BaseVirtualDevice {
 	return nil
 }
 
+// FindByBackingInfo returns the device matching the given backing info.
+func (l VirtualDeviceList) FindByBackingInfo(backing types.BaseVirtualDeviceBackingInfo) types.BaseVirtualDevice {
+	t := reflect.TypeOf(backing)
+
+	l = l.Select(func(device types.BaseVirtualDevice) bool {
+		db := device.GetVirtualDevice().Backing
+		if db == nil {
+			return false
+		}
+
+		if reflect.TypeOf(db) != t {
+			return false
+		}
+
+		switch a := db.(type) {
+		case *types.VirtualEthernetCardNetworkBackingInfo:
+			b := backing.(*types.VirtualEthernetCardNetworkBackingInfo)
+			return a.DeviceName == b.DeviceName
+		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
+			b := backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
+			return a.Port.SwitchUuid == b.Port.SwitchUuid
+		}
+
+		return false
+	})
+
+	if len(l) == 0 {
+		return nil
+	}
+
+	return l[0]
+}
+
 // FindIDEController will find the named IDE controller if given, otherwise will pick an available controller.
 // An error is returned if the named controller is not found or not an IDE controller.  Or, if name is not
 // given and no available controller can be found.
