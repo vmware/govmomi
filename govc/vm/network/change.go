@@ -25,19 +25,19 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-type remove struct {
+type change struct {
 	*flags.VirtualMachineFlag
 }
 
 func init() {
-	cli.Register("vm.network.remove", &remove{})
+	cli.Register("vm.network.change", &change{})
 }
 
-func (cmd *remove) Register(f *flag.FlagSet) {}
+func (cmd *change) Register(f *flag.FlagSet) {}
 
-func (cmd *remove) Process() error { return nil }
+func (cmd *change) Process() error { return nil }
 
-func (cmd *remove) Run(f *flag.FlagSet) error {
+func (cmd *change) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return err
@@ -60,12 +60,12 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 
 	network, err := finder.Network(name)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	backing, err := network.EthernetCardBackingInfo()
 	if err != nil {
-		return nil
+		return err
 	}
 
 	devices, err := vm.Device()
@@ -79,5 +79,17 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 		return fmt.Errorf("vm network device '%s' not found", name)
 	}
 
-	return vm.RemoveDevice(net)
+	network, err = finder.Network(f.Arg(1))
+	if err != nil {
+		return err
+	}
+
+	backing, err = network.EthernetCardBackingInfo()
+	if err != nil {
+		return err
+	}
+
+	net.GetVirtualDevice().Backing = backing
+
+	return vm.EditDevice(net)
 }
