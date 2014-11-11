@@ -40,6 +40,21 @@ load test_helper
   assert_failure "Error: vm network device 'VM Network' not found"
 }
 
+@test "network change backing" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  run govc vm.network.change -vm $vm $GOVC_NETWORK enoent
+  assert_failure "Error: no such network"
+
+  run govc vm.network.change -vm $vm enoent "VM Network"
+  assert_failure "Error: no such network"
+
+  run govc vm.network.change -vm $vm $GOVC_NETWORK "VM Network"
+  assert_success
+}
+
 @test "network standard backing" {
   vm=$(new_empty_vm)
 
