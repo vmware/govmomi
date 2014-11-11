@@ -27,6 +27,7 @@ import (
 
 type change struct {
 	*flags.VirtualMachineFlag
+	*flags.NetworkFlag
 }
 
 func init() {
@@ -50,22 +51,12 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 	name := f.Arg(0)
 
 	if name == "" {
-		return errors.New("please specify a network")
+		return errors.New("please specify a device name")
 	}
 
-	finder, err := cmd.Finder()
-	if err != nil {
-		return err
-	}
-
-	network, err := finder.Network(name)
-	if err != nil {
-		return err
-	}
-
-	backing, err := network.EthernetCardBackingInfo()
-	if err != nil {
-		return err
+	// Set network if specified as extra argument.
+	if f.NArg() > 1 {
+		_ = cmd.NetworkFlag.Set(f.Arg(1))
 	}
 
 	devices, err := vm.Device()
@@ -73,23 +64,18 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	net := devices.FindByBackingInfo(backing)
+	net := devices.Find(name)
 
 	if net == nil {
-		return fmt.Errorf("vm network device '%s' not found", name)
+		return fmt.Errorf("device '%s' not found", name)
 	}
 
-	network, err = finder.Network(f.Arg(1))
+	backing, err := cmd.NetworkFlag.Device()
 	if err != nil {
 		return err
 	}
 
-	backing, err = network.EthernetCardBackingInfo()
-	if err != nil {
-		return err
-	}
-
-	net.GetVirtualDevice().Backing = backing
+	net.GetVirtualDevice().Backing = backing.GetVirtualDevice().Backing
 
 	return vm.EditDevice(net)
 }
