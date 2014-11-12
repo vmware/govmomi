@@ -28,6 +28,7 @@ PATH="$(dirname $BATS_TEST_DIRNAME):$PATH"
 
 teardown() {
   govc ls vm | grep govc-test- | xargs govc vm.destroy
+  govc datastore.ls | grep govc-test- | awk '{print ($NF)}' | xargs -n1 govc datastore.rm
 }
 
 new_id() {
