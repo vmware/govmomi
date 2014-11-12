@@ -30,6 +30,19 @@ load test_helper
   assert_equal $ip_esxcli $ip_tools
 }
 
+@test "vm.create" {
+  id=$(new_ttylinux_vm)
+
+  run govc vm.power -on $id
+  assert_success
+
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 0 ]
+
+  result=$(govc device.ls -vm $vm | grep cdrom- | wc -l)
+  [ $result -eq 0 ]
+}
+
 @test "vm.create in cluster" {
   vcsim_env
 
@@ -61,4 +74,113 @@ load test_helper
   # test find slice
   local found=$(govc vm.info ${prefix}-* | grep Name: | wc -l)
   [ "$found" -eq $num ]
+}
+
+@test "vm.create linked ide disk" {
+  vm=$(new_id)
+  run govc vm.create -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-200-0
+  assert_success
+  assert_line "Controller: ide-200"
+}
+
+@test "vm.create linked scsi disk" {
+  vm=$(new_id)
+
+  run govc vm.create -disk enoent -on=false $vm
+  assert_failure "Error: datastore file does not exist"
+
+  run govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-1000-0
+  assert_success
+  assert_line "Controller: lsilogic-1000"
+  assert_line "Parent: [datastore1] $GOVC_TEST_VMDK"
+  assert_line "File: [datastore1] $vm/${vm}.vmdk"
+}
+
+@test "vm.create scsi disk" {
+  vm=$(new_id)
+
+  run govc vm.create -disk enoent -on=false $vm
+  assert_failure "Error: datastore file does not exist"
+
+  run govc vm.create -disk $GOVC_TEST_VMDK -on=false -link=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-1000-0
+  assert_success
+  assert_line "Controller: lsilogic-1000"
+  refute_line "Parent: [datastore1] $GOVC_TEST_VMDK"
+  assert_line "File: [datastore1] $GOVC_TEST_VMDK"
+}
+
+@test "vm.create iso" {
+  upload_iso
+
+  vm=$(new_id)
+
+  run govc vm.create -iso enoent -on=false $vm
+  assert_failure "Error: datastore file does not exist"
+
+  run govc vm.create -iso $GOVC_TEST_ISO -on=false $vm
+  assert_success
+
+  run govc device.info -vm $vm cdrom-3000
+  assert_success
+  assert_line "Controller: ide-200"
+  assert_line "Summary: ISO [datastore1] $GOVC_TEST_ISO"
+}
+
+@test "vm.disk.create no controller" {
+  skip "needs fix"
+  vm=$(new_empty_vm)
+
+  local name=$(new_id)
+
+  run govc vm.disk.create -vm $vm -name $name -size 1G
+  assert_success
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 1 ]
+}
+
+@test "vm.disk.create" {
+  import_ttylinux_vmdk
+  vm=$(new_id)
+
+  govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 1 ]
+
+  local name=$(new_id)
+
+  run govc vm.disk.create -vm $vm -name $name -size 1G
+  assert_success
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 2 ]
+
+  run govc vm.disk.create -vm $vm -name $name -size 1G
+  assert_success # TODO: should fail?
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 2 ]
+}
+
+@test "vm.disk.attach" {
+  import_ttylinux_vmdk
+  vm=$(new_id)
+
+  govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 1 ]
+
+  run govc import.vmdk $GOVC_TEST_VMDK_SRC $vm
+  assert_success
+
+  run govc vm.disk.attach -vm $vm -disk $vm/$GOVC_TEST_VMDK
+  assert_success
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 2 ]
 }
