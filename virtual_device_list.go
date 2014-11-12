@@ -68,6 +68,42 @@ func (l VirtualDeviceList) SelectByType(deviceType types.BaseVirtualDevice) Virt
 	})
 }
 
+// SelectByBackingInfo returns a new list with devices matching the given backing info.
+func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBackingInfo) VirtualDeviceList {
+	t := reflect.TypeOf(backing)
+
+	return l.Select(func(device types.BaseVirtualDevice) bool {
+		db := device.GetVirtualDevice().Backing
+		if db == nil {
+			return false
+		}
+
+		if reflect.TypeOf(db) != t {
+			return false
+		}
+
+		switch a := db.(type) {
+		case *types.VirtualEthernetCardNetworkBackingInfo:
+			b := backing.(*types.VirtualEthernetCardNetworkBackingInfo)
+			return a.DeviceName == b.DeviceName
+		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
+			b := backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
+			return a.Port.SwitchUuid == b.Port.SwitchUuid
+		case *types.VirtualDiskFlatVer2BackingInfo:
+			b := backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			if a.Parent != nil && b.Parent != nil {
+				return a.Parent.FileName == b.Parent.FileName
+			}
+			return a.FileName == b.FileName
+		case types.BaseVirtualDeviceFileBackingInfo:
+			b := backing.(types.BaseVirtualDeviceFileBackingInfo)
+			return a.GetVirtualDeviceFileBackingInfo().FileName == b.GetVirtualDeviceFileBackingInfo().FileName
+		default:
+			return false
+		}
+	})
+}
+
 // Find returns the device matching the given name.
 func (l VirtualDeviceList) Find(name string) types.BaseVirtualDevice {
 	for _, device := range l {
@@ -86,39 +122,6 @@ func (l VirtualDeviceList) FindByKey(key int) types.BaseVirtualDevice {
 		}
 	}
 	return nil
-}
-
-// FindByBackingInfo returns the device matching the given backing info.
-func (l VirtualDeviceList) FindByBackingInfo(backing types.BaseVirtualDeviceBackingInfo) types.BaseVirtualDevice {
-	t := reflect.TypeOf(backing)
-
-	l = l.Select(func(device types.BaseVirtualDevice) bool {
-		db := device.GetVirtualDevice().Backing
-		if db == nil {
-			return false
-		}
-
-		if reflect.TypeOf(db) != t {
-			return false
-		}
-
-		switch a := db.(type) {
-		case *types.VirtualEthernetCardNetworkBackingInfo:
-			b := backing.(*types.VirtualEthernetCardNetworkBackingInfo)
-			return a.DeviceName == b.DeviceName
-		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
-			b := backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
-			return a.Port.SwitchUuid == b.Port.SwitchUuid
-		}
-
-		return false
-	})
-
-	if len(l) == 0 {
-		return nil
-	}
-
-	return l[0]
 }
 
 // FindIDEController will find the named IDE controller if given, otherwise will pick an available controller.

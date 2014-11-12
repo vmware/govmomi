@@ -234,13 +234,14 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			DeviceInfo: &types.Description{
 				DynamicData: types.DynamicData{},
 				Label:       "CD/DVD drive 1",
-				Summary:     "ATAPI cdrom-200-1",
+				Summary:     "ISO [datastore1] ttylinux-pc_i486-16.1.iso",
 			},
-			Backing: &types.VirtualCdromAtapiBackingInfo{
-				VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+			Backing: &types.VirtualCdromIsoBackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
 					VirtualDeviceBackingInfo: types.VirtualDeviceBackingInfo{},
-					DeviceName:               "cdrom-200-1",
-					UseAutoDetect:            false,
+					FileName:                 "[datastore1] foo.iso",
+					Datastore:                &types.ManagedObjectReference{Type: "Datastore", Value: "53fe43cc-75dc5110-3643-000c2918dc41"},
+					BackingObjectId:          "",
 				},
 			},
 			Connectable: &types.VirtualDeviceConnectInfo{
@@ -496,6 +497,42 @@ func TestSelectByType(t *testing.T) {
 
 		if len(d) != test.expect {
 			t.Errorf("%#v has %d", test.dtype, len(devices))
+		}
+	}
+}
+
+func TestSelectByBackingInfo(t *testing.T) {
+	tests := []types.BaseVirtualDeviceBackingInfo{
+		&types.VirtualEthernetCardNetworkBackingInfo{
+			VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+				DeviceName: "VM Network",
+			},
+		},
+		&types.VirtualDiskFlatVer2BackingInfo{
+			VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+				FileName: "[datastore1] bar/bar.vmdk",
+			},
+		},
+		&types.VirtualDiskFlatVer2BackingInfo{
+			Parent: &types.VirtualDiskFlatVer2BackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: "[datastore1] ttylinux.vmdk",
+				},
+			},
+		},
+		&types.VirtualCdromIsoBackingInfo{
+			VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+				VirtualDeviceBackingInfo: types.VirtualDeviceBackingInfo{},
+				FileName:                 "[datastore1] foo.iso",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		l := devices.SelectByBackingInfo(test)
+
+		if len(l) != 1 {
+			t.Errorf("Expected 1, got %d: %#v", len(l), test)
 		}
 	}
 }
