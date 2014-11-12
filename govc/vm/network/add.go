@@ -22,7 +22,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type add struct {
@@ -58,18 +57,5 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	config := &types.VirtualDeviceConfigSpec{
-		Device:    net,
-		Operation: types.VirtualDeviceConfigSpecOperationAdd,
-	}
-
-	spec := types.VirtualMachineConfigSpec{}
-	spec.DeviceChange = append(spec.DeviceChange, config)
-
-	task, err := vm.Reconfigure(spec)
-	if err != nil {
-		return err
-	}
-
-	return task.Wait()
+	return vm.AddDevice(net)
 }
