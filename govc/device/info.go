@@ -92,8 +92,16 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 			fmt.Fprintf(tw, "  Status:\t%s\n", ca.Status)
 		}
 
-		if net, ok := device.(types.BaseVirtualEthernetCard); ok {
-			fmt.Fprintf(tw, "  MAC Address:\t%s\n", net.GetVirtualEthernetCard().MacAddress)
+		switch md := device.(type) {
+		case types.BaseVirtualEthernetCard:
+			fmt.Fprintf(tw, "  MAC Address:\t%s\n", md.GetVirtualEthernetCard().MacAddress)
+		case *types.VirtualDisk:
+			if b, ok := md.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
+				fmt.Fprintf(tw, "  File:\t%s\n", b.GetVirtualDeviceFileBackingInfo().FileName)
+			}
+			if b, ok := md.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok && b.Parent != nil {
+				fmt.Fprintf(tw, "  Parent:\t%s\n", b.Parent.GetVirtualDeviceFileBackingInfo().FileName)
+			}
 		}
 	}
 
