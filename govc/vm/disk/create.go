@@ -20,20 +20,18 @@ import (
 	"errors"
 	"flag"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type create struct {
+	*flags.DatastoreFlag
+	*flags.OutputFlag
 	*flags.VirtualMachineFlag
 
-	Name  string
-	Bytes ByteValue
-
-	Client         *govmomi.Client
-	VirtualMachine *govmomi.VirtualMachine
+	controller string
+	Name       string
+	Bytes      ByteValue
 }
 
 func init() {
@@ -46,6 +44,7 @@ func (cmd *create) Register(f *flag.FlagSet) {
 		panic(err)
 	}
 
+	f.StringVar(&cmd.controller, "controller", "", "Disk controller")
 	f.StringVar(&cmd.Name, "name", "", "Name for new disk")
 	f.Var(&cmd.Bytes, "size", "Size of new disk")
 }
@@ -55,44 +54,40 @@ func (cmd *create) Process() error { return nil }
 func (cmd *create) Run(f *flag.FlagSet) error {
 	var err error
 
-	cmd.Client, err = cmd.ClientFlag.Client()
+	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
 
-	cmd.VirtualMachine, err = cmd.VirtualMachineFlag.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
-	if cmd.VirtualMachine == nil {
+	if vm == nil {
 		return errors.New("please specify a vm")
 	}
 
-	var mvm mo.VirtualMachine
-
-	err = cmd.Client.Properties(cmd.VirtualMachine.Reference(), []string{"config.hardware"}, &mvm)
+	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
 	}
 
-	dev, err := FindDisk(cmd.Name, mvm)
+	devices, err := vm.Device()
 	if err != nil {
 		return err
 	}
 
-	if dev == nil {
+	controller, err := devices.FindDiskController(cmd.controller)
+	if err != nil {
+		return err
+	}
+
+	disk := devices.CreateDisk(controller, ds.Path(cmd.Name))
+
+	existing := devices.SelectByBackingInfo(disk.Backing)
+
+	if len(existing) == 0 {
 		cmd.Log("Creating disk\n")
 
-		controllerKey, err := FindController(mvm)
-		if err != nil {
-			return err
-		}
+		disk.CapacityInKB = cmd.Bytes.Bytes / 1024
 
-		err = CreateDisk(cmd.Name, cmd.Bytes, controllerKey, cmd.VirtualMachine)
-		if err != nil {
-			return err
-		}
+		return vm.AddDevice(disk)
 	} else {
 		cmd.Log("Disk already present\n")
 	}

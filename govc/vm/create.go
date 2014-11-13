@@ -23,7 +23,6 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,16 +32,17 @@ type create struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
-	*flags.DiskFlag
-	*flags.IsoFlag
 	*flags.NetworkFlag
 
-	memory  int
-	cpus    int
-	guestID string
-	link    bool
-	on      bool
-	force   bool
+	memory     int
+	cpus       int
+	guestID    string
+	link       bool
+	on         bool
+	force      bool
+	iso        string
+	disk       string
+	controller string
 
 	Client       *govmomi.Client
 	Datacenter   *govmomi.Datacenter
@@ -62,6 +62,9 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
 	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
+	f.StringVar(&cmd.iso, "iso", "", "Path to ISO")
+	f.StringVar(&cmd.controller, "disk.adapter", "scsi", "Disk controller type")
+	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
 }
 
 func (cmd *create) Process() error { return nil }
@@ -104,7 +107,16 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	task, err := cmd.CreateVM(f.Arg(0))
+	for _, file := range []*string{&cmd.iso, &cmd.disk} {
+		if *file != "" {
+			_, err = cmd.Stat(*file)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	task, err := cmd.createVM(f.Arg(0))
 	if err != nil {
 		return err
 	}
@@ -115,6 +127,10 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	vm := govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
+
+	if err := cmd.addDevices(vm); err != nil {
+		return err
+	}
 
 	if cmd.on {
 		task, err := vm.PowerOn()
@@ -131,13 +147,76 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	return nil
 }
 
-func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
-	spec := &configSpec{
+func (cmd *create) addDevices(vm *govmomi.VirtualMachine) error {
+	devices, err := vm.Device()
+	if err != nil {
+		return err
+	}
+
+	var add []types.BaseVirtualDevice
+
+	if cmd.disk != "" {
+		controller, err := devices.FindDiskController(cmd.controller)
+		if err != nil {
+			return err
+		}
+
+		disk := devices.CreateDisk(controller, cmd.Datastore.Path(cmd.disk))
+
+		if cmd.link {
+			disk = devices.ChildDisk(disk)
+		}
+
+		add = append(add, disk)
+	}
+
+	if cmd.iso != "" {
+		ide, err := devices.FindIDEController("")
+		if err != nil {
+			return err
+		}
+
+		cdrom, err := devices.CreateCdrom(ide)
+		if err != nil {
+			return err
+		}
+
+		add = append(add, devices.InsertIso(cdrom, cmd.Datastore.Path(cmd.iso)))
+	}
+
+	netdev, err := cmd.NetworkFlag.Device()
+	if err != nil {
+		return err
+	}
+
+	add = append(add, netdev)
+
+	return vm.AddDevice(add...)
+}
+
+func (cmd *create) createVM(name string) (*govmomi.Task, error) {
+	spec := types.VirtualMachineConfigSpec{
 		Name:     name,
 		GuestId:  cmd.guestID,
 		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", cmd.Datastore.Name())},
 		NumCPUs:  cmd.cpus,
 		MemoryMB: int64(cmd.memory),
+		DeviceChange: []types.BaseVirtualDeviceConfigSpec{
+			&types.VirtualDeviceConfigSpec{
+				Operation: types.VirtualDeviceConfigSpecOperationAdd,
+				Device: &types.VirtualLsiLogicController{
+					VirtualSCSIController: types.VirtualSCSIController{
+						SharedBus: types.VirtualSCSISharingNoSharing,
+						VirtualController: types.VirtualController{
+							BusNumber: 0,
+							VirtualDevice: types.VirtualDevice{
+								Key: -1,
+							},
+						},
+					},
+				},
+			},
+		},
 	}
 
 	if !cmd.force {
@@ -150,135 +229,10 @@ func (cmd *create) CreateVM(name string) (*govmomi.Task, error) {
 		}
 	}
 
-	if cmd.DiskFlag.IsSet() {
-		controller, err := cmd.DiskFlag.Controller()
-		if err != nil {
-			return nil, err
-		}
-
-		spec.AddDevice(controller)
-
-		disk, err := cmd.DiskFlag.Disk()
-		if err != nil {
-			return nil, err
-		}
-
-		disk.VirtualDevice.ControllerKey = controller.GetVirtualDevice().Key
-
-		diskAddOp := &types.VirtualDeviceConfigSpec{
-			Operation: types.VirtualDeviceConfigSpecOperationAdd,
-			Device:    disk,
-		}
-
-		if cmd.link {
-			parent := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
-
-			// Use specified disk as parent backing to a new disk.
-			disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: fmt.Sprintf("[%s]", cmd.Datastore.Name()),
-				},
-				Parent:          parent,
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: true,
-			}
-
-			// Create the new disk (won't happen without this flag).
-			diskAddOp.FileOperation = types.VirtualDeviceConfigSpecFileOperationCreate
-		}
-
-		spec.AddChange(diskAddOp)
-	}
-
-	if cmd.IsoFlag.IsSet() {
-		device, err := cmd.IsoFlag.Device()
-		if err != nil {
-			return nil, err
-		}
-
-		spec.AddDevice(cmd.IsoFlag.Controller())
-		spec.AddDevice(device)
-	}
-
-	netdev, err := cmd.NetworkFlag.Device()
-	if err != nil {
-		return nil, err
-	}
-
-	spec.AddDevice(netdev)
-
 	folders, err := cmd.Datacenter.Folders()
 	if err != nil {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(spec.ToSpec(), cmd.ResourcePool, cmd.HostSystem)
-}
-
-// Cleanup tries to clean up the specified VM. As it is called from error
-// handling paths, it is a best effort function. It attempts to remove disks
-// from the VM prior to destroying it, to prevent unintended purging of disks.
-func (cmd *create) Cleanup(vm *govmomi.VirtualMachine) {
-	var mvm mo.VirtualMachine
-
-	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
-	if err != nil {
-		return
-	}
-
-	spec := new(configSpec)
-	spec.RemoveDisks(&mvm)
-
-	task, err := vm.Reconfigure(spec.ToSpec())
-	if err != nil {
-		return
-	}
-
-	err = task.Wait()
-	if err != nil {
-		return
-	}
-
-	task, err = vm.Destroy()
-	if err != nil {
-		return
-	}
-
-	err = task.Wait()
-	if err != nil {
-		return
-	}
-}
-
-type configSpec types.VirtualMachineConfigSpec
-
-func (c *configSpec) ToSpec() types.VirtualMachineConfigSpec {
-	return types.VirtualMachineConfigSpec(*c)
-}
-
-func (c *configSpec) AddChange(d types.BaseVirtualDeviceConfigSpec) {
-	c.DeviceChange = append(c.DeviceChange, d)
-}
-
-func (c *configSpec) AddDevice(d types.BaseVirtualDevice) {
-	op := &types.VirtualDeviceConfigSpec{
-		Operation: types.VirtualDeviceConfigSpecOperationAdd,
-		Device:    d,
-	}
-
-	c.AddChange(op)
-}
-
-func (c *configSpec) RemoveDisks(vm *mo.VirtualMachine) {
-	for _, d := range vm.Config.Hardware.Device {
-		switch device := d.(type) {
-		case *types.VirtualDisk:
-			removeOp := &types.VirtualDeviceConfigSpec{
-				Operation: types.VirtualDeviceConfigSpecOperationRemove,
-				Device:    device,
-			}
-
-			c.AddChange(removeOp)
-		}
-	}
+	return folders.VmFolder.CreateVM(spec, cmd.ResourcePool, cmd.HostSystem)
 }

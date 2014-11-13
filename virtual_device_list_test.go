@@ -234,13 +234,14 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			DeviceInfo: &types.Description{
 				DynamicData: types.DynamicData{},
 				Label:       "CD/DVD drive 1",
-				Summary:     "ATAPI cdrom-200-1",
+				Summary:     "ISO [datastore1] ttylinux-pc_i486-16.1.iso",
 			},
-			Backing: &types.VirtualCdromAtapiBackingInfo{
-				VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+			Backing: &types.VirtualCdromIsoBackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
 					VirtualDeviceBackingInfo: types.VirtualDeviceBackingInfo{},
-					DeviceName:               "cdrom-200-1",
-					UseAutoDetect:            false,
+					FileName:                 "[datastore1] foo.iso",
+					Datastore:                &types.ManagedObjectReference{Type: "Datastore", Value: "53fe43cc-75dc5110-3643-000c2918dc41"},
+					BackingObjectId:          "",
 				},
 			},
 			Connectable: &types.VirtualDeviceConnectInfo{
@@ -500,6 +501,42 @@ func TestSelectByType(t *testing.T) {
 	}
 }
 
+func TestSelectByBackingInfo(t *testing.T) {
+	tests := []types.BaseVirtualDeviceBackingInfo{
+		&types.VirtualEthernetCardNetworkBackingInfo{
+			VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
+				DeviceName: "VM Network",
+			},
+		},
+		&types.VirtualDiskFlatVer2BackingInfo{
+			VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+				FileName: "[datastore1] bar/bar.vmdk",
+			},
+		},
+		&types.VirtualDiskFlatVer2BackingInfo{
+			Parent: &types.VirtualDiskFlatVer2BackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: "[datastore1] ttylinux.vmdk",
+				},
+			},
+		},
+		&types.VirtualCdromIsoBackingInfo{
+			VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+				VirtualDeviceBackingInfo: types.VirtualDeviceBackingInfo{},
+				FileName:                 "[datastore1] foo.iso",
+			},
+		},
+	}
+
+	for _, test := range tests {
+		l := devices.SelectByBackingInfo(test)
+
+		if len(l) != 1 {
+			t.Errorf("Expected 1, got %d: %#v", len(l), test)
+		}
+	}
+}
+
 func TestFind(t *testing.T) {
 	for _, device := range devices {
 		name := devices.Name(device)
@@ -512,6 +549,40 @@ func TestFind(t *testing.T) {
 	d := devices.Find("enoent")
 	if d != nil {
 		t.Errorf("unexpected: %#v", d)
+	}
+}
+
+func TestFindController(t *testing.T) {
+	for _, name := range []string{"", "ide-200"} {
+		_, err := devices.FindIDEController(name)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	for _, name := range []string{"", "lsilogic-1000"} {
+		_, err := devices.FindSCSIController(name)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	fns := []func() error{
+		func() error {
+			_, err := devices.FindIDEController("lsilogic-1000")
+			return err
+		},
+		func() error {
+			_, err := devices.FindSCSIController("ide-200")
+			return err
+		},
+	}
+
+	for _, f := range fns {
+		err := f()
+		if err == nil {
+			t.Error("should fail")
+		}
 	}
 }
 

@@ -19,23 +19,19 @@ package disk
 import (
 	"flag"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type attach struct {
 	*flags.DatastoreFlag
-	*flags.DiskFlag
 	*flags.VirtualMachineFlag
 
-	persist bool
-	link    bool
-
-	Client         *govmomi.Client
-	Datastore      *govmomi.Datastore
-	VirtualMachine *govmomi.VirtualMachine
+	persist    bool
+	link       bool
+	disk       string
+	controller string
 }
 
 func init() {
@@ -45,58 +41,56 @@ func init() {
 func (cmd *attach) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.persist, "persist", true, "Persist attached disk")
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
+	f.StringVar(&cmd.controller, "controller", "", "Disk controller")
+	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
 }
 
 func (cmd *attach) Process() error { return nil }
 
 func (cmd *attach) Run(f *flag.FlagSet) error {
-	var err error
-
-	cmd.Client, err = cmd.ClientFlag.Client()
+	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
 
-	cmd.VirtualMachine, err = cmd.VirtualMachineFlag.VirtualMachine()
-	if err != nil {
-		return err
-	}
-	if cmd.VirtualMachine == nil {
+	if vm == nil {
 		return flag.ErrHelp
 	}
 
-	cmd.Datastore, err = cmd.DatastoreFlag.Datastore()
-	if err != nil {
-		return err
-	}
-	if cmd.Datastore == nil {
-		return flag.ErrHelp
-	}
-
-	var mvm mo.VirtualMachine
-
-	err = cmd.Client.Properties(cmd.VirtualMachine.Reference(), []string{"config.hardware"}, &mvm)
+	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
 	}
 
-	disk, err := cmd.DiskFlag.Disk()
-	if err != nil {
-		return err
-	}
-	if disk == nil {
-		return flag.ErrHelp
-	}
-
-	controllerKey, err := FindController(mvm)
+	devices, err := vm.Device()
 	if err != nil {
 		return err
 	}
 
-	err = AttachDisk(disk, cmd.VirtualMachine, cmd.Datastore, controllerKey, cmd.link, cmd.persist)
+	controller, err := devices.FindDiskController(cmd.controller)
 	if err != nil {
 		return err
 	}
 
-	return nil
+	disk := devices.CreateDisk(controller, ds.Path(cmd.disk))
+	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+
+	if cmd.link {
+		if cmd.persist {
+			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
+		} else {
+			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
+		}
+
+		disk = devices.ChildDisk(disk)
+		return vm.AddDevice(disk)
+	}
+
+	if cmd.persist {
+		backing.DiskMode = string(types.VirtualDiskModePersistent)
+	} else {
+		backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
+	}
+
+	return vm.AddDevice(disk)
 }

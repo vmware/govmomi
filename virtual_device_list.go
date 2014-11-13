@@ -19,6 +19,7 @@ package govmomi
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -68,6 +69,42 @@ func (l VirtualDeviceList) SelectByType(deviceType types.BaseVirtualDevice) Virt
 	})
 }
 
+// SelectByBackingInfo returns a new list with devices matching the given backing info.
+func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBackingInfo) VirtualDeviceList {
+	t := reflect.TypeOf(backing)
+
+	return l.Select(func(device types.BaseVirtualDevice) bool {
+		db := device.GetVirtualDevice().Backing
+		if db == nil {
+			return false
+		}
+
+		if reflect.TypeOf(db) != t {
+			return false
+		}
+
+		switch a := db.(type) {
+		case *types.VirtualEthernetCardNetworkBackingInfo:
+			b := backing.(*types.VirtualEthernetCardNetworkBackingInfo)
+			return a.DeviceName == b.DeviceName
+		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
+			b := backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
+			return a.Port.SwitchUuid == b.Port.SwitchUuid
+		case *types.VirtualDiskFlatVer2BackingInfo:
+			b := backing.(*types.VirtualDiskFlatVer2BackingInfo)
+			if a.Parent != nil && b.Parent != nil {
+				return a.Parent.FileName == b.Parent.FileName
+			}
+			return a.FileName == b.FileName
+		case types.BaseVirtualDeviceFileBackingInfo:
+			b := backing.(types.BaseVirtualDeviceFileBackingInfo)
+			return a.GetVirtualDeviceFileBackingInfo().FileName == b.GetVirtualDeviceFileBackingInfo().FileName
+		default:
+			return false
+		}
+	})
+}
+
 // Find returns the device matching the given name.
 func (l VirtualDeviceList) Find(name string) types.BaseVirtualDevice {
 	for _, device := range l {
@@ -86,39 +123,6 @@ func (l VirtualDeviceList) FindByKey(key int) types.BaseVirtualDevice {
 		}
 	}
 	return nil
-}
-
-// FindByBackingInfo returns the device matching the given backing info.
-func (l VirtualDeviceList) FindByBackingInfo(backing types.BaseVirtualDeviceBackingInfo) types.BaseVirtualDevice {
-	t := reflect.TypeOf(backing)
-
-	l = l.Select(func(device types.BaseVirtualDevice) bool {
-		db := device.GetVirtualDevice().Backing
-		if db == nil {
-			return false
-		}
-
-		if reflect.TypeOf(db) != t {
-			return false
-		}
-
-		switch a := db.(type) {
-		case *types.VirtualEthernetCardNetworkBackingInfo:
-			b := backing.(*types.VirtualEthernetCardNetworkBackingInfo)
-			return a.DeviceName == b.DeviceName
-		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
-			b := backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
-			return a.Port.SwitchUuid == b.Port.SwitchUuid
-		}
-
-		return false
-	})
-
-	if len(l) == 0 {
-		return nil
-	}
-
-	return l[0]
 }
 
 // FindIDEController will find the named IDE controller if given, otherwise will pick an available controller.
@@ -142,6 +146,44 @@ func (l VirtualDeviceList) FindIDEController(name string) (*types.VirtualIDECont
 	}
 
 	return c.(*types.VirtualIDEController), nil
+}
+
+// FindSCSIController will find the named SCSI controller if given, otherwise will pick an available controller.
+// An error is returned if the named controller is not found or not an SCSI controller.  Or, if name is not
+// given and no available controller can be found.
+func (l VirtualDeviceList) FindSCSIController(name string) (*types.VirtualSCSIController, error) {
+	if name != "" {
+		d := l.Find(name)
+		if d == nil {
+			return nil, fmt.Errorf("device '%s' not found", name)
+		}
+		if c, ok := d.(types.BaseVirtualSCSIController); ok {
+			return c.GetVirtualSCSIController(), nil
+		}
+		return nil, fmt.Errorf("%s is not an SCSI controller", name)
+	}
+
+	c := l.PickController((*types.VirtualSCSIController)(nil))
+	if c == nil {
+		return nil, errors.New("no available SCSI controller")
+	}
+
+	return c.(types.BaseVirtualSCSIController).GetVirtualSCSIController(), nil
+}
+
+// FindDiskController will find an existing ide or scsi disk controller.
+func (l VirtualDeviceList) FindDiskController(name string) (types.BaseVirtualController, error) {
+	switch {
+	case name == "ide":
+		return l.FindIDEController("")
+	case name == "scsi" || name == "":
+		return l.FindSCSIController("")
+	default:
+		if c, ok := l.Find(name).(types.BaseVirtualController); ok {
+			return c, nil
+		}
+		return nil, fmt.Errorf("%s is not a valid controller", name)
+	}
 }
 
 // PickController returns a controller of the given type(s).
@@ -191,6 +233,54 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	d.ControllerKey = c.GetVirtualController().Key
 	d.UnitNumber = l.newUnitNumber(c)
 	d.Key = -1
+}
+
+// CreateDisk creates a new VirtualDisk device which can be added to a VM.
+func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string) *types.VirtualDisk {
+	// If name is not specified, one will be chosen for you.
+	// But if when given, make sure it ends in .vmdk, otherwise it will be treated as a directory.
+	if len(name) > 0 && filepath.Ext(name) != ".vmdk" {
+		name += ".vmdk"
+	}
+
+	device := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: true,
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: name,
+				},
+			},
+		},
+	}
+
+	l.AssignController(device, c)
+
+	if device.UnitNumber == 0 {
+		device.UnitNumber = -1 // TODO: this field is annotated as omitempty
+	}
+
+	return device
+}
+
+// ChildDisk creates a new VirtualDisk device, linked to the given parent disk, which can be added to a VM.
+func (l VirtualDeviceList) ChildDisk(parent *types.VirtualDisk) *types.VirtualDisk {
+	disk := *parent
+	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+	ds := strings.SplitN(backing.FileName[1:], "]", 2)
+
+	// Use specified disk as parent backing to a new disk.
+	disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
+		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+			FileName: fmt.Sprintf("[%s]", ds[0]),
+		},
+		Parent:          backing,
+		DiskMode:        backing.DiskMode,
+		ThinProvisioned: backing.ThinProvisioned,
+	}
+
+	return &disk
 }
 
 func (l VirtualDeviceList) connectivity(device types.BaseVirtualDevice, v bool) error {

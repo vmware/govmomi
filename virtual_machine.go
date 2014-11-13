@@ -162,13 +162,29 @@ func (v VirtualMachine) Device() (VirtualDeviceList, error) {
 	return VirtualDeviceList(o.Config.Hardware.Device), nil
 }
 
-func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperation, devices ...types.BaseVirtualDevice) error {
+func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, devices ...types.BaseVirtualDevice) error {
 	spec := types.VirtualMachineConfigSpec{}
 
 	for _, device := range devices {
 		config := &types.VirtualDeviceConfigSpec{
 			Device:    device,
 			Operation: op,
+		}
+
+		if disk, ok := device.(*types.VirtualDisk); ok {
+			config.FileOperation = fop
+
+			// Special case to attach an existing disk
+			if op == types.VirtualDeviceConfigSpecOperationAdd && disk.CapacityInKB == 0 {
+				childDisk := false
+				if b, ok := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+					childDisk = b.Parent != nil
+				}
+
+				if !childDisk {
+					config.FileOperation = "" // existing disk
+				}
+			}
 		}
 
 		spec.DeviceChange = append(spec.DeviceChange, config)
@@ -184,17 +200,17 @@ func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperatio
 
 // AddDevice adds the given devices to the VirtualMachine
 func (v VirtualMachine) AddDevice(device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(types.VirtualDeviceConfigSpecOperationAdd, device...)
+	return v.configureDevice(types.VirtualDeviceConfigSpecOperationAdd, types.VirtualDeviceConfigSpecFileOperationCreate, device...)
 }
 
 // EditDevice edits the given (existing) devices on the VirtualMachine
 func (v VirtualMachine) EditDevice(device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(types.VirtualDeviceConfigSpecOperationEdit, device...)
+	return v.configureDevice(types.VirtualDeviceConfigSpecOperationEdit, types.VirtualDeviceConfigSpecFileOperationReplace, device...)
 }
 
 // RemoveDevice removes the given devices on the VirtualMachine
 func (v VirtualMachine) RemoveDevice(device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(types.VirtualDeviceConfigSpecOperationRemove, device...)
+	return v.configureDevice(types.VirtualDeviceConfigSpecOperationRemove, types.VirtualDeviceConfigSpecFileOperationDestroy, device...)
 }
 
 // BootOptions returns the VirtualMachine's config.bootOptions property.
