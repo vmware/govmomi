@@ -170,6 +170,21 @@ func (l VirtualDeviceList) FindSCSIController(name string) (*types.VirtualSCSICo
 	return c.(types.BaseVirtualSCSIController).GetVirtualSCSIController(), nil
 }
 
+// FindDiskController will find an existing ide or scsi disk controller.
+func (l VirtualDeviceList) FindDiskController(name string) (types.BaseVirtualController, error) {
+	switch {
+	case name == "ide":
+		return l.FindIDEController("")
+	case name == "scsi" || name == "":
+		return l.FindSCSIController("")
+	default:
+		if c, ok := l.Find(name).(types.BaseVirtualController); ok {
+			return c, nil
+		}
+		return nil, fmt.Errorf("%s is not a valid controller", name)
+	}
+}
+
 // PickController returns a controller of the given type(s).
 // If no controllers are found or have no available slots, then nil is returned.
 func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) types.BaseVirtualController {
