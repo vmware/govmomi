@@ -552,6 +552,40 @@ func TestFind(t *testing.T) {
 	}
 }
 
+func TestFindController(t *testing.T) {
+	for _, name := range []string{"", "ide-200"} {
+		_, err := devices.FindIDEController(name)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	for _, name := range []string{"", "lsilogic-1000"} {
+		_, err := devices.FindSCSIController(name)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+
+	fns := []func() error{
+		func() error {
+			_, err := devices.FindIDEController("lsilogic-1000")
+			return err
+		},
+		func() error {
+			_, err := devices.FindSCSIController("ide-200")
+			return err
+		},
+	}
+
+	for _, f := range fns {
+		err := f()
+		if err == nil {
+			t.Error("should fail")
+		}
+	}
+}
+
 func TestPickController(t *testing.T) {
 	list := devices
 

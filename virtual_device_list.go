@@ -147,6 +147,29 @@ func (l VirtualDeviceList) FindIDEController(name string) (*types.VirtualIDECont
 	return c.(*types.VirtualIDEController), nil
 }
 
+// FindSCSIController will find the named SCSI controller if given, otherwise will pick an available controller.
+// An error is returned if the named controller is not found or not an SCSI controller.  Or, if name is not
+// given and no available controller can be found.
+func (l VirtualDeviceList) FindSCSIController(name string) (*types.VirtualSCSIController, error) {
+	if name != "" {
+		d := l.Find(name)
+		if d == nil {
+			return nil, fmt.Errorf("device '%s' not found", name)
+		}
+		if c, ok := d.(types.BaseVirtualSCSIController); ok {
+			return c.GetVirtualSCSIController(), nil
+		}
+		return nil, fmt.Errorf("%s is not an SCSI controller", name)
+	}
+
+	c := l.PickController((*types.VirtualSCSIController)(nil))
+	if c == nil {
+		return nil, errors.New("no available SCSI controller")
+	}
+
+	return c.(types.BaseVirtualSCSIController).GetVirtualSCSIController(), nil
+}
+
 // PickController returns a controller of the given type(s).
 // If no controllers are found or have no available slots, then nil is returned.
 func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) types.BaseVirtualController {
