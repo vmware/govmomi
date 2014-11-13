@@ -19,6 +19,7 @@ package govmomi
 import (
 	"errors"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"regexp"
 	"strings"
@@ -232,6 +233,54 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	d.ControllerKey = c.GetVirtualController().Key
 	d.UnitNumber = l.newUnitNumber(c)
 	d.Key = -1
+}
+
+// CreateDisk creates a new VirtualDisk device which can be added to a VM.
+func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string) *types.VirtualDisk {
+	// If name is not specified, one will be chosen for you.
+	// But if when given, make sure it ends in .vmdk, otherwise it will be treated as a directory.
+	if len(name) > 0 && filepath.Ext(name) != ".vmdk" {
+		name += ".vmdk"
+	}
+
+	device := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: true,
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: name,
+				},
+			},
+		},
+	}
+
+	l.AssignController(device, c)
+
+	if device.UnitNumber == 0 {
+		device.UnitNumber = -1 // TODO: this field is annotated as omitempty
+	}
+
+	return device
+}
+
+// ChildDisk creates a new VirtualDisk device, linked to the given parent disk, which can be added to a VM.
+func (l VirtualDeviceList) ChildDisk(parent *types.VirtualDisk) *types.VirtualDisk {
+	disk := *parent
+	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+	ds := strings.SplitN(backing.FileName[1:], "]", 2)
+
+	// Use specified disk as parent backing to a new disk.
+	disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
+		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+			FileName: fmt.Sprintf("[%s]", ds[0]),
+		},
+		Parent:          backing,
+		DiskMode:        backing.DiskMode,
+		ThinProvisioned: backing.ThinProvisioned,
+	}
+
+	return &disk
 }
 
 func (l VirtualDeviceList) connectivity(device types.BaseVirtualDevice, v bool) error {
