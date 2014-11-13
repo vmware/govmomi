@@ -135,8 +135,7 @@ load test_helper
   assert_line "Summary: ISO [datastore1] $GOVC_TEST_ISO"
 }
 
-@test "vm.disk.create no controller" {
-  skip "needs fix"
+@test "vm.disk.create empty vm" {
   vm=$(new_empty_vm)
 
   local name=$(new_id)
@@ -145,6 +144,13 @@ load test_helper
   assert_success
   result=$(govc device.ls -vm $vm | grep disk- | wc -l)
   [ $result -eq 1 ]
+
+  name=$(new_id)
+
+  run govc vm.disk.create -vm $vm -name $name -controller lsilogic-1000 -size 2G
+  assert_success
+  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
+  [ $result -eq 2 ]
 }
 
 @test "vm.disk.create" {
@@ -179,7 +185,13 @@ load test_helper
   run govc import.vmdk $GOVC_TEST_VMDK_SRC $vm
   assert_success
 
-  run govc vm.disk.attach -vm $vm -disk $vm/$GOVC_TEST_VMDK
+  run govc vm.disk.attach -vm $vm -link=false -disk enoent.vmdk
+  assert_failure "Error: File [datastore1] enoent.vmdk was not found"
+
+  run govc vm.disk.attach -vm $vm -disk enoent.vmdk
+  assert_failure "Error: Invalid configuration for device '0'."
+
+  run govc vm.disk.attach -vm $vm -disk $vm/$GOVC_TEST_VMDK -controller lsilogic-1000
   assert_success
   result=$(govc device.ls -vm $vm | grep disk- | wc -l)
   [ $result -eq 2 ]
