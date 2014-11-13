@@ -78,7 +78,7 @@ load test_helper
 
 @test "vm.create linked ide disk" {
   vm=$(new_id)
-  run govc vm.create -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $vm
+  run govc vm.create -disk $GOVC_TEST_VMDK -disk.controller ide -on=false $vm
   assert_success
 
   run govc device.info -vm $vm disk-200-0

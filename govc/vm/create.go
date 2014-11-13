@@ -63,7 +63,7 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
 	f.StringVar(&cmd.iso, "iso", "", "Path to ISO")
-	f.StringVar(&cmd.controller, "disk.adapter", "scsi", "Disk controller type")
+	f.StringVar(&cmd.controller, "disk.controller", "scsi", "Disk controller type")
 	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
 }
 
