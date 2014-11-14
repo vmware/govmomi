@@ -33,8 +33,9 @@ import (
 )
 
 const (
-	envURL      = "GOVC_URL"
-	envInsecure = "GOVC_INSECURE"
+	envURL           = "GOVC_URL"
+	envInsecure      = "GOVC_INSECURE"
+	envMinAPIVersion = "GOVC_MIN_API_VERSION"
 )
 
 const cDescr = "ESX or vCenter URL"
@@ -44,9 +45,11 @@ type ClientFlag struct {
 
 	register sync.Once
 
-	url      *url.URL
-	insecure bool
-	client   *govmomi.Client
+	url           *url.URL
+	insecure      bool
+	minAPIVersion string
+
+	client *govmomi.Client
 }
 
 func (flag *ClientFlag) String() string {
@@ -104,6 +107,15 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 
 			usage := fmt.Sprintf("Skip verification of server certificate [%s]", envInsecure)
 			f.BoolVar(&flag.insecure, "k", insecure, usage)
+		}
+
+		{
+			env := os.Getenv(envMinAPIVersion)
+			if env == "" {
+				env = "5.5"
+			}
+
+			flag.minAPIVersion = env
 		}
 	})
 }
@@ -191,6 +203,30 @@ func currentSessionValid(c *govmomi.Client) (bool, error) {
 	return true, nil
 }
 
+// apiVersionValid returns whether or not the API version supported by the
+// server the client is connected to is not recent enough.
+func apiVersionValid(c *govmomi.Client, minVersionString string) error {
+	realVersion, err := ParseVersion(c.ServiceContent.About.ApiVersion)
+	if err != nil {
+		return err
+	}
+
+	minVersion, err := ParseVersion(minVersionString)
+	if err != nil {
+		return err
+	}
+
+	if !minVersion.Lte(realVersion) {
+		err = fmt.Errorf("Require API version %s, connected to API version %s (set %s to override)",
+			minVersionString,
+			c.ServiceContent.About.ApiVersion,
+			envMinAPIVersion)
+		return err
+	}
+
+	return nil
+}
+
 func (flag *ClientFlag) Client() (*govmomi.Client, error) {
 	if flag.client != nil {
 		return flag.client, nil
@@ -215,6 +251,12 @@ func (flag *ClientFlag) Client() (*govmomi.Client, error) {
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	// Check that the endpoint has the right API version
+	err = apiVersionValid(c, flag.minAPIVersion)
+	if err != nil {
+		return nil, err
 	}
 
 	flag.client = c
