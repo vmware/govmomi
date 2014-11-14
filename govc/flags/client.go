@@ -32,6 +32,11 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 )
 
+const (
+	envURL      = "GOVC_URL"
+	envInsecure = "GOVC_INSECURE"
+)
+
 const cDescr = "ESX or vCenter URL"
 
 type ClientFlag struct {
@@ -85,21 +90,19 @@ func (flag *ClientFlag) Set(s string) error {
 func (flag *ClientFlag) Register(f *flag.FlagSet) {
 	flag.register.Do(func() {
 		{
-			env := "GOVC_URL"
-			flag.Set(os.Getenv(env))
-			usage := fmt.Sprintf("%s [%s]", cDescr, env)
+			flag.Set(os.Getenv(envURL))
+			usage := fmt.Sprintf("%s [%s]", cDescr, envURL)
 			f.Var(flag, "u", usage)
 		}
 
 		{
-			env := "GOVC_INSECURE"
 			insecure := false
-			switch env := strings.ToLower(os.Getenv(env)); env {
+			switch env := strings.ToLower(os.Getenv(envInsecure)); env {
 			case "1", "true":
 				insecure = true
 			}
 
-			usage := fmt.Sprintf("Skip verification of server certificate [%s]", env)
+			usage := fmt.Sprintf("Skip verification of server certificate [%s]", envInsecure)
 			f.BoolVar(&flag.insecure, "k", insecure, usage)
 		}
 	})
