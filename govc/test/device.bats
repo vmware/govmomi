@@ -173,3 +173,27 @@ load test_helper
   run govc device.remove -vm $vm $id
   assert_failure "Error: device '$id' not found"
 }
+
+@test "device.scsi" {
+  vm=$(new_empty_vm)
+
+  result=$(govc device.ls -vm $vm | grep lsilogic- | wc -l)
+  [ $result -eq 1 ]
+
+  run govc device.scsi.add -vm $vm
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm $vm | grep $id | wc -l)
+  [ $result -eq 1 ]
+
+  result=$(govc device.ls -vm $vm | grep lsilogic- | wc -l)
+  [ $result -eq 2 ]
+
+  run govc device.scsi.add -vm $vm -type pvscsi
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm $vm | grep $id | wc -l)
+  [ $result -eq 1 ]
+}
