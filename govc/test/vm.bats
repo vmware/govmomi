@@ -43,6 +43,17 @@ load test_helper
   [ $result -eq 0 ]
 }
 
+@test "vm.create pvscsi" {
+  vm=$(new_id)
+  govc vm.create -on=false -disk.controller pvscsi $vm
+
+  result=$(govc device.ls -vm $vm | grep pvscsi- | wc -l)
+  [ $result -eq 1 ]
+
+  result=$(govc device.ls -vm $vm | grep lsilogic- | wc -l)
+  [ $result -eq 0 ]
+}
+
 @test "vm.create in cluster" {
   vcsim_env
 
