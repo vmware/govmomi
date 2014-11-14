@@ -43,6 +43,17 @@ load test_helper
   [ $result -eq 0 ]
 }
 
+@test "vm.create pvscsi" {
+  vm=$(new_id)
+  govc vm.create -on=false -disk.controller pvscsi $vm
+
+  result=$(govc device.ls -vm $vm | grep pvscsi- | wc -l)
+  [ $result -eq 1 ]
+
+  result=$(govc device.ls -vm $vm | grep lsilogic- | wc -l)
+  [ $result -eq 0 ]
+}
+
 @test "vm.create in cluster" {
   vcsim_env
 
@@ -78,7 +89,7 @@ load test_helper
 
 @test "vm.create linked ide disk" {
   vm=$(new_id)
-  run govc vm.create -disk $GOVC_TEST_VMDK -disk.adapter ide -on=false $vm
+  run govc vm.create -disk $GOVC_TEST_VMDK -disk.controller ide -on=false $vm
   assert_success
 
   run govc device.info -vm $vm disk-200-0

@@ -63,7 +63,7 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
 	f.StringVar(&cmd.iso, "iso", "", "Path to ISO")
-	f.StringVar(&cmd.controller, "disk.adapter", "scsi", "Disk controller type")
+	f.StringVar(&cmd.controller, "disk.controller", "scsi", "Disk controller type")
 	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
 }
 
@@ -201,22 +201,6 @@ func (cmd *create) createVM(name string) (*govmomi.Task, error) {
 		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", cmd.Datastore.Name())},
 		NumCPUs:  cmd.cpus,
 		MemoryMB: int64(cmd.memory),
-		DeviceChange: []types.BaseVirtualDeviceConfigSpec{
-			&types.VirtualDeviceConfigSpec{
-				Operation: types.VirtualDeviceConfigSpecOperationAdd,
-				Device: &types.VirtualLsiLogicController{
-					VirtualSCSIController: types.VirtualSCSIController{
-						SharedBus: types.VirtualSCSISharingNoSharing,
-						VirtualController: types.VirtualController{
-							BusNumber: 0,
-							VirtualDevice: types.VirtualDevice{
-								Key: -1,
-							},
-						},
-					},
-				},
-			},
-		},
 	}
 
 	if !cmd.force {
@@ -227,6 +211,18 @@ func (cmd *create) createVM(name string) (*govmomi.Task, error) {
 			dsPath := cmd.Datastore.Path(vmxPath)
 			return nil, fmt.Errorf("File %s already exists", dsPath)
 		}
+	}
+
+	if cmd.controller != "ide" {
+		scsi, err := govmomi.SCSIControllerTypes().CreateSCSIController(cmd.controller)
+		if err != nil {
+			return nil, err
+		}
+
+		spec.DeviceChange = append(spec.DeviceChange, &types.VirtualDeviceConfigSpec{
+			Operation: types.VirtualDeviceConfigSpecOperationAdd,
+			Device:    scsi,
+		})
 	}
 
 	folders, err := cmd.Datacenter.Folders()
