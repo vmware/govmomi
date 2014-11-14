@@ -12,3 +12,8 @@ load test_helper
   run govc about -u $(echo $GOVC_URL | awk -F@ '{print $2}')
   assert_failure "Error: ServerFaultCode: Cannot complete login due to an incorrect user name or password."
 }
+
+@test "connect to an endpoint with a non-supported API version" {
+  run env GOVC_MIN_API_VERSION=24.4 govc about
+  assert grep -q "^Error: Require API version 24.4," <<<${output}
+}
