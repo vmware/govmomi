@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"sort"
 	"strings"
 
 	"github.com/vmware/govmomi/vim25/types"
@@ -37,6 +38,22 @@ const (
 
 // VirtualDeviceList provides helper methods for working with a list of virtual devices.
 type VirtualDeviceList []types.BaseVirtualDevice
+
+// SCSIControllerTypes are used for adding a new SCSI controller to a VM.
+func SCSIControllerTypes() VirtualDeviceList {
+	// Return a mutable list of SCSI controller types, initialized with defaults.
+	return VirtualDeviceList([]types.BaseVirtualDevice{
+		&types.VirtualLsiLogicController{},
+		&types.VirtualBusLogicController{},
+		&types.ParaVirtualSCSIController{},
+		&types.VirtualLsiLogicSASController{},
+	}).Select(func(device types.BaseVirtualDevice) bool {
+		c := device.(types.BaseVirtualSCSIController).GetVirtualSCSIController()
+		c.SharedBus = types.VirtualSCSISharingNoSharing
+		c.BusNumber = -1
+		return true
+	})
+}
 
 // Select returns a new list containing all elements of the list for which the given func returns true.
 func (l VirtualDeviceList) Select(f func(device types.BaseVirtualDevice) bool) VirtualDeviceList {
@@ -169,6 +186,59 @@ func (l VirtualDeviceList) FindSCSIController(name string) (*types.VirtualSCSICo
 	}
 
 	return c.(types.BaseVirtualSCSIController).GetVirtualSCSIController(), nil
+}
+
+// CreateSCSIController creates a new SCSI controller of type name if given, otherwise defaults to lsilogic.
+func (l VirtualDeviceList) CreateSCSIController(name string) (types.BaseVirtualDevice, error) {
+	ctypes := SCSIControllerTypes()
+
+	if name == "scsi" || name == "" {
+		name = ctypes.Type(ctypes[0])
+	}
+
+	found := ctypes.Select(func(device types.BaseVirtualDevice) bool {
+		return l.Type(device) == name
+	})
+
+	if len(found) == 0 {
+		return nil, fmt.Errorf("unknown SCSI controller type '%s'", name)
+	}
+
+	c, ok := found[0].(types.BaseVirtualSCSIController)
+	if !ok {
+		return nil, fmt.Errorf("invalid SCSI controller type '%s'", name)
+	}
+
+	scsi := c.GetVirtualSCSIController()
+
+	scsi.BusNumber = l.newSCSIBusNumber()
+
+	return c.(types.BaseVirtualDevice), nil
+}
+
+var scsiBusNumbers = []int{0, 1, 2, 3}
+
+// newSCSIBusNumber returns the bus number to use for adding a new SCSI bus device.
+// -1 is returned if there are no bus numbers available.
+func (l VirtualDeviceList) newSCSIBusNumber() int {
+	var used []int
+
+	for _, d := range l.SelectByType((*types.VirtualSCSIController)(nil)) {
+		num := d.(types.BaseVirtualSCSIController).GetVirtualSCSIController().BusNumber
+		if num >= 0 {
+			used = append(used, num)
+		} // else caller is creating a new vm using SCSIControllerTypes
+	}
+
+	sort.Ints(used)
+
+	for i, n := range scsiBusNumbers {
+		if i == len(used) || n != used[i] {
+			return n
+		}
+	}
+
+	return -1
 }
 
 // FindDiskController will find an existing ide or scsi disk controller.
@@ -597,6 +667,8 @@ func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 		return DeviceTypeEthernet
 	case *types.ParaVirtualSCSIController:
 		return "pvscsi"
+	case *types.VirtualLsiLogicSASController:
+		return "lsilogic-sas"
 	default:
 		name := "device"
 		typeName := l.TypeName(device)

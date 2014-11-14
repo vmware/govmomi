@@ -637,6 +637,22 @@ func TestPickController(t *testing.T) {
 	}
 }
 
+func TestCreateSCSIController(t *testing.T) {
+	for _, l := range []VirtualDeviceList{SCSIControllerTypes(), devices} {
+		_, err := l.CreateSCSIController("enoent")
+		if err == nil {
+			t.Error("should fail")
+		}
+
+		for _, name := range []string{"", "scsi", "pvscsi", "buslogic", "lsilogic", "lsilogic-sas"} {
+			_, err = l.CreateSCSIController(name)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+	}
+}
+
 func TestCdrom(t *testing.T) {
 	c, err := devices.FindCdrom("")
 	if err != nil {
