@@ -70,6 +70,10 @@ new_empty_vm() {
   echo $id
 }
 
+vm_power_state() {
+  govc vm.info "$1" | grep "Power state:" | awk -F: '{print $2}' | collapse_ws
+}
+
 # exports an enviroment for using vcsim if running, otherwise skips the calling test.
 vcsim_env() {
   if [ "$(uname)" == "Darwin" ]
@@ -113,7 +117,10 @@ open_vnc() {
 
 # collapse spaces, for example testing against Go's tabwriter output
 collapse_ws() {
-  local line=$1
+  local line
+  if [ $# -eq 0 ]; then line="$(cat -)"
+  else line="$1"
+  fi
   echo "$line" | tr -s ' ' | sed -e 's/^ //'
 }
 

@@ -43,6 +43,34 @@ load test_helper
   [ $result -eq 0 ]
 }
 
+@test "vm.power" {
+  vm=$(new_ttylinux_vm)
+
+  run vm_power_state $vm
+  assert_success "poweredOff"
+
+  run govc vm.power $vm
+  assert_failure
+
+  run govc vm.power -on -off $vm
+  assert_failure
+
+  run govc vm.power -on $vm
+  assert_success
+  run vm_power_state $vm
+  assert_success "poweredOn"
+
+  run govc vm.power -suspend $vm
+  assert_success
+  run vm_power_state $vm
+  assert_success "suspended"
+
+  run govc vm.power -on $vm
+  assert_success
+  run vm_power_state $vm
+  assert_success "poweredOn"
+}
+
 @test "vm.create pvscsi" {
   vm=$(new_id)
   govc vm.create -on=false -disk.controller pvscsi $vm
