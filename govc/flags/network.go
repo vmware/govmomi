@@ -32,6 +32,7 @@ type NetworkFlag struct {
 	register sync.Once
 	name     string
 	net      govmomi.NetworkReference
+	adapter  string
 }
 
 func NewNetworkFlag() *NetworkFlag {
@@ -45,6 +46,7 @@ func (flag *NetworkFlag) Register(f *flag.FlagSet) {
 		flag.Set(value)
 		usage := fmt.Sprintf("Network [%s]", env)
 		f.Var(flag, "net", usage)
+		f.StringVar(&flag.adapter, "net.adapter", "e1000", "Network adapter type")
 	})
 }
 
@@ -91,15 +93,9 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
-	// TODO: adapter type should be an option, default to e1000 for now.
-	device := &types.VirtualE1000{
-		VirtualEthernetCard: types.VirtualEthernetCard{
-			VirtualDevice: types.VirtualDevice{
-				Key:     -1,
-				Backing: backing,
-			},
-			AddressType: string(types.VirtualEthernetCardMacTypeGenerated),
-		},
+	device, err := govmomi.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
+	if err != nil {
+		return nil, err
 	}
 
 	return device, nil
