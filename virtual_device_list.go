@@ -55,6 +55,20 @@ func SCSIControllerTypes() VirtualDeviceList {
 	})
 }
 
+// EthernetCardTypes are used for adding a new ethernet card to a VM.
+func EthernetCardTypes() VirtualDeviceList {
+	return VirtualDeviceList([]types.BaseVirtualDevice{
+		&types.VirtualE1000{},
+		&types.VirtualE1000e{},
+		&types.VirtualVmxnet3{},
+	}).Select(func(device types.BaseVirtualDevice) bool {
+		c := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+		c.AddressType = string(types.VirtualEthernetCardMacTypeGenerated)
+		c.GetVirtualDevice().Key = -1
+		return true
+	})
+}
+
 // Select returns a new list containing all elements of the list for which the given func returns true.
 func (l VirtualDeviceList) Select(f func(device types.BaseVirtualDevice) bool) VirtualDeviceList {
 	var found VirtualDeviceList
@@ -579,6 +593,32 @@ func (l VirtualDeviceList) setDefaultSerialPortBacking(device *types.VirtualSeri
 	}
 }
 
+// CreateEthernetCard creates a new VirtualEthernetCard of the given name name and initialized with the given backing.
+func (l VirtualDeviceList) CreateEthernetCard(name string, backing types.BaseVirtualDeviceBackingInfo) (types.BaseVirtualDevice, error) {
+	ctypes := EthernetCardTypes()
+
+	if name == "" {
+		name = ctypes.deviceName(ctypes[0])
+	}
+
+	found := ctypes.Select(func(device types.BaseVirtualDevice) bool {
+		return l.deviceName(device) == name
+	})
+
+	if len(found) == 0 {
+		return nil, fmt.Errorf("unknown ethernet card type '%s'", name)
+	}
+
+	c, ok := found[0].(types.BaseVirtualEthernetCard)
+	if !ok {
+		return nil, fmt.Errorf("invalid ethernet card type '%s'", name)
+	}
+
+	c.GetVirtualEthernetCard().Backing = backing
+
+	return c.(types.BaseVirtualDevice), nil
+}
+
 // PrimaryMacAddress returns the MacAddress field of the primary VirtualEthernetCard
 func (l VirtualDeviceList) PrimaryMacAddress() string {
 	eth0 := l.Find("ethernet-0")
@@ -660,6 +700,18 @@ func (l VirtualDeviceList) TypeName(device types.BaseVirtualDevice) string {
 
 var deviceNameRegexp = regexp.MustCompile(`(?:Virtual)?(?:Machine)?(\w+?)(?:Card|Device|Controller)?$`)
 
+func (l VirtualDeviceList) deviceName(device types.BaseVirtualDevice) string {
+	name := "device"
+	typeName := l.TypeName(device)
+
+	m := deviceNameRegexp.FindStringSubmatch(typeName)
+	if len(m) == 2 {
+		name = strings.ToLower(m[1])
+	}
+
+	return name
+}
+
 // Type returns a human-readable name for the given device
 func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 	switch device.(type) {
@@ -670,13 +722,7 @@ func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 	case *types.VirtualLsiLogicSASController:
 		return "lsilogic-sas"
 	default:
-		name := "device"
-		typeName := l.TypeName(device)
-		m := deviceNameRegexp.FindStringSubmatch(typeName)
-		if len(m) == 2 {
-			name = strings.ToLower(m[1])
-		}
-		return name
+		return l.deviceName(device)
 	}
 }
 
