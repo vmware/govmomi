@@ -27,7 +27,7 @@ GOVC_TEST_IMG=$(basename $GOVC_TEST_IMG_SRC)
 PATH="$(dirname $BATS_TEST_DIRNAME):$PATH"
 
 teardown() {
-  govc ls vm | grep govc-test- | xargs govc vm.destroy
+  govc ls vm | grep govc-test- | xargs -r govc vm.destroy
   govc datastore.ls | grep govc-test- | awk '{print ($NF)}' | xargs -n1 -r govc datastore.rm
 }
 
@@ -68,6 +68,10 @@ new_empty_vm() {
   id=$(new_id)
   govc vm.create -on=false $id
   echo $id
+}
+
+vm_power_state() {
+  govc vm.info "$1" | grep "Power state:" | awk -F: '{print $2}' | collapse_ws
 }
 
 # exports an enviroment for using vcsim if running, otherwise skips the calling test.
@@ -113,7 +117,10 @@ open_vnc() {
 
 # collapse spaces, for example testing against Go's tabwriter output
 collapse_ws() {
-  local line=$1
+  local line
+  if [ $# -eq 0 ]; then line="$(cat -)"
+  else line="$1"
+  fi
   echo "$line" | tr -s ' ' | sed -e 's/^ //'
 }
 

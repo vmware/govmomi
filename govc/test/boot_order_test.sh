@@ -68,4 +68,8 @@ ip=$(govc vm.ip $id)
 
 echo "VM booted from disk (ip=$ip)"
 
-sleep 10
+sleep 5
+
+govc vm.power -s $id
+
+sleep 5

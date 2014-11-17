@@ -17,7 +17,6 @@ limitations under the License.
 package vm
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 
@@ -30,9 +29,13 @@ type power struct {
 	*flags.ClientFlag
 	*flags.SearchFlag
 
-	On    bool
-	Off   bool
-	Force bool
+	On       bool
+	Off      bool
+	Reset    bool
+	Reboot   bool
+	Shutdown bool
+	Suspend  bool
+	Force    bool
 }
 
 func init() {
@@ -44,13 +47,30 @@ func (cmd *power) Register(f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.On, "on", false, "Power on")
 	f.BoolVar(&cmd.Off, "off", false, "Power off")
+	f.BoolVar(&cmd.Reset, "reset", false, "Power reset")
+	f.BoolVar(&cmd.Suspend, "suspend", false, "Power suspend")
+	f.BoolVar(&cmd.Reboot, "r", false, "Reboot guest")
+	f.BoolVar(&cmd.Shutdown, "s", false, "Shutdown guest")
 	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error)")
 }
 
 func (cmd *power) Process() error {
-	if !cmd.On && !cmd.Off || (cmd.On && cmd.Off) {
-		return errors.New("specify -on OR -off")
+	opts := []bool{cmd.On, cmd.Off, cmd.Reset, cmd.Suspend, cmd.Reboot, cmd.Shutdown}
+	selected := false
+
+	for _, opt := range opts {
+		if opt {
+			if selected {
+				return flag.ErrHelp
+			}
+			selected = opt
+		}
 	}
+
+	if !selected {
+		return flag.ErrHelp
+	}
+
 	return nil
 }
 
@@ -70,13 +90,27 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 		case cmd.Off:
 			fmt.Fprintf(cmd, "Powering off %s... ", vm.Reference())
 			task, err = vm.PowerOff()
+		case cmd.Reset:
+			fmt.Fprintf(cmd, "Reset %s... ", vm.Reference())
+			task, err = vm.Reset()
+		case cmd.Suspend:
+			fmt.Fprintf(cmd, "Suspend %s... ", vm.Reference())
+			task, err = vm.Suspend()
+		case cmd.Reboot:
+			fmt.Fprintf(cmd, "Reboot guest %s... ", vm.Reference())
+			err = vm.RebootGuest()
+		case cmd.Shutdown:
+			fmt.Fprintf(cmd, "Shutdown guest %s... ", vm.Reference())
+			err = vm.ShutdownGuest()
 		}
 
 		if err != nil {
 			return err
 		}
 
-		err = task.Wait()
+		if task != nil {
+			err = task.Wait()
+		}
 		if err == nil {
 			fmt.Fprintf(cmd, "OK\n")
 			continue

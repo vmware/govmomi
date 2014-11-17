@@ -78,6 +78,37 @@ func (v VirtualMachine) Reset() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+func (v VirtualMachine) Suspend() (*Task, error) {
+	req := types.SuspendVM_Task{
+		This: v.Reference(),
+	}
+
+	res, err := methods.SuspendVM_Task(v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
+func (v VirtualMachine) ShutdownGuest() error {
+	req := types.ShutdownGuest{
+		This: v.Reference(),
+	}
+
+	_, err := methods.ShutdownGuest(v.c, &req)
+	return err
+}
+
+func (v VirtualMachine) RebootGuest() error {
+	req := types.RebootGuest{
+		This: v.Reference(),
+	}
+
+	_, err := methods.RebootGuest(v.c, &req)
+	return err
+}
+
 func (v VirtualMachine) Destroy() (*Task, error) {
 	req := types.Destroy_Task{
 		This: v.Reference(),
