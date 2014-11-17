@@ -278,6 +278,10 @@ func (c *Client) VirtualDiskManager() VirtualDiskManager {
 	return VirtualDiskManager{c}
 }
 
+func (c *Client) LicenseManager() LicenseManager {
+	return NewLicenseManager(c, *c.ServiceContent.LicenseManager)
+}
+
 // NewPropertyCollector creates a new property collector based on the
 // root property collector. It is the responsibility of the caller to
 // clean up the property collector when done.
