@@ -653,6 +653,20 @@ func TestCreateSCSIController(t *testing.T) {
 	}
 }
 
+func TestCreateEthernetCard(t *testing.T) {
+	_, err := EthernetCardTypes().CreateEthernetCard("enoent", nil)
+	if err == nil {
+		t.Error("should fail")
+	}
+
+	for _, name := range []string{"", "e1000", "e1000e", "vmxnet3"} {
+		_, err := EthernetCardTypes().CreateEthernetCard(name, nil)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestCdrom(t *testing.T) {
 	c, err := devices.FindCdrom("")
 	if err != nil {
