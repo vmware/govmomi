@@ -40,10 +40,14 @@ func (cmd *mv) Register(f *flag.FlagSet) {
 
 func (cmd *mv) Process() error { return nil }
 
+func (cmd *mv) Usage() string {
+	return "SRC DST"
+}
+
 func (cmd *mv) Run(f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) != 2 {
-		return errors.New("src and dst arguments are required")
+		return errors.New("SRC and DST arguments are required")
 	}
 
 	c, err := cmd.Client()

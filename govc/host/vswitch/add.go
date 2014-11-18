@@ -43,6 +43,10 @@ func (cmd *add) Register(f *flag.FlagSet) {
 
 func (cmd *add) Process() error { return nil }
 
+func (cmd *add) Usage() string {
+	return "NAME"
+}
+
 func (cmd *add) Run(f *flag.FlagSet) error {
 	ns, err := cmd.HostNetworkSystem()
 	if err != nil {

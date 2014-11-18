@@ -36,6 +36,10 @@ func (cmd *connect) Register(f *flag.FlagSet) {}
 
 func (cmd *connect) Process() error { return nil }
 
+func (cmd *connect) Usage() string {
+	return "DEVICE..."
+}
+
 func (cmd *connect) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {

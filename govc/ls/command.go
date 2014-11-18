@@ -43,6 +43,10 @@ func (cmd *ls) Register(f *flag.FlagSet) {
 
 func (cmd *ls) Process() error { return nil }
 
+func (cmd *ls) Usage() string {
+	return "[PATH]..."
+}
+
 func (cmd *ls) Run(f *flag.FlagSet) error {
 	finder, err := cmd.Finder()
 	if err != nil {

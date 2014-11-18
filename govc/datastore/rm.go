@@ -37,6 +37,10 @@ func (cmd *rm) Register(f *flag.FlagSet) {}
 
 func (cmd *rm) Process() error { return nil }
 
+func (cmd *rm) Usage() string {
+	return "FILE"
+}
+
 func (cmd *rm) Run(f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) == 0 {
