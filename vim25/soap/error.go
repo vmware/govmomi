@@ -52,6 +52,10 @@ func (v vimFaultError) Error() string {
 	return typ.Name()
 }
 
+func (v vimFaultError) Fault() types.BaseMethodFault {
+	return v.fault
+}
+
 func Wrap(err error) error {
 	switch err.(type) {
 	case regularError:

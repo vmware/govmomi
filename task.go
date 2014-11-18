@@ -17,8 +17,6 @@ limitations under the License.
 package govmomi
 
 import (
-	"errors"
-
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -38,6 +36,18 @@ func NewTask(c *Client, ref types.ManagedObjectReference) *Task {
 	return &t
 }
 
+type taskError struct {
+	*types.LocalizedMethodFault
+}
+
+func (e taskError) Error() string {
+	return e.LocalizedMethodFault.LocalizedMessage
+}
+
+func (e taskError) Fault() types.BaseMethodFault {
+	return e.LocalizedMethodFault.Fault
+}
+
 type taskProgress struct {
 	info *types.TaskInfo
 }
@@ -52,7 +62,7 @@ func (t taskProgress) Detail() string {
 
 func (t taskProgress) Error() error {
 	if t.info.Error != nil {
-		return errors.New(t.info.Error.LocalizedMessage)
+		return taskError{t.info.Error}
 	}
 
 	return nil
