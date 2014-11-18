@@ -17,11 +17,14 @@ limitations under the License.
 package datastore
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
-	"os"
+	"io"
+	"path"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
@@ -29,20 +32,23 @@ import (
 
 type ls struct {
 	*flags.DatastoreFlag
+	*flags.OutputFlag
 
-	force bool
+	long bool
 }
 
 func init() {
 	cli.Register("datastore.ls", &ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {}
+func (cmd *ls) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.long, "l", false, "Long listing format")
+}
 
 func (cmd *ls) Process() error { return nil }
 
 func (cmd *ls) Usage() string {
-	return "[FILE]"
+	return "[FILE]..."
 }
 
 func (cmd *ls) Run(f *flag.FlagSet) error {
@@ -56,38 +62,134 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	path, err := cmd.DatastorePath(f.Arg(0))
-	if err != nil {
-		return err
+	args := f.Args()
+	if len(args) == 0 {
+		args = []string{""}
 	}
 
-	spec := types.HostDatastoreBrowserSearchSpec{
-		Details: &types.FileQueryFlags{
-			FileType:     true,
-			FileSize:     true,
-			FileOwner:    true, // TODO: omitempty is generated, but seems to be required
-			Modification: true,
-		},
+	result := &listOutput{
+		rs:   make([]types.HostDatastoreBrowserSearchResults, 0),
+		long: cmd.long,
+	}
+
+	for _, arg := range args {
+		spec := types.HostDatastoreBrowserSearchSpec{
+			MatchPattern: []string{"*"},
+		}
+
+		if cmd.long {
+			spec.Details = &types.FileQueryFlags{
+				FileType:     true,
+				FileSize:     true,
+				FileOwner:    true, // TODO: omitempty is generated, but seems to be required
+				Modification: true,
+			}
+		}
+
+		for i := 0; ; i++ {
+			r, err := cmd.ListPath(b, arg, spec)
+			if err != nil {
+				// Treat the argument as a match pattern if not found as directory
+				if i == 0 && govmomi.IsFileNotFound(err) {
+					spec.MatchPattern[0] = path.Base(arg)
+					arg = path.Dir(arg)
+					continue
+				}
+
+				return err
+			}
+
+			// Treat an empty result against match pattern as file not found
+			if i == 1 && len(r.File) == 0 {
+				return fmt.Errorf("File %s/%s was not found", r.FolderPath, spec.MatchPattern[0])
+			}
+
+			result.add(r)
+			break
+		}
+	}
+
+	return cmd.WriteResult(result)
+}
+
+func (cmd *ls) ListPath(b *govmomi.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
+	var res types.HostDatastoreBrowserSearchResults
+
+	path, err := cmd.DatastorePath(path)
+	if err != nil {
+		return res, err
 	}
 
 	task, err := b.SearchDatastore(path, &spec)
 	if err != nil {
-		return err
+		return res, err
 	}
 
 	info, err := task.WaitForResult(nil)
 	if err != nil {
-		return err
+		return res, err
 	}
 
-	res := info.Result.(types.HostDatastoreBrowserSearchResults)
+	res = info.Result.(types.HostDatastoreBrowserSearchResults)
+	return res, nil
+}
 
-	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
+type listOutput struct {
+	rs   []types.HostDatastoreBrowserSearchResults
+	long bool
+}
 
-	for _, file := range res.File {
-		info := file.GetFileInfo()
-		fmt.Fprintf(tw, "%d\t%s\t%s\n", info.FileSize, info.Modification.Format("Mon Jan 2 15:04:05 2006"), info.Path)
+func (o *listOutput) add(r types.HostDatastoreBrowserSearchResults) {
+	o.rs = append(o.rs, r)
+}
+
+// hasMultiplePaths returns whether or not the slice of search results contains
+// results from more than one folder path.
+func (o *listOutput) hasMultiplePaths() bool {
+	if len(o.rs) == 0 {
+		return false
 	}
 
-	return tw.Flush()
+	p := o.rs[0].FolderPath
+
+	// Multiple paths if any entry is not equal to the first one.
+	for _, e := range o.rs {
+		if e.FolderPath != p {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (o *listOutput) MarshalJSON() ([]byte, error) {
+	return json.Marshal(o.rs)
+}
+
+func (o *listOutput) Write(w io.Writer) error {
+	// Only include path header if we're dealing with more than one path.
+	includeHeader := false
+	if o.hasMultiplePaths() {
+		includeHeader = true
+	}
+
+	tw := tabwriter.NewWriter(w, 3, 0, 2, ' ', 0)
+	for i, r := range o.rs {
+		if includeHeader {
+			if i > 0 {
+				fmt.Fprintf(tw, "\n")
+			}
+			fmt.Fprintf(tw, "%s:\n", r.FolderPath)
+		}
+		for _, file := range r.File {
+			info := file.GetFileInfo()
+			if o.long {
+				fmt.Fprintf(tw, "%d\t%s\t%s\n", info.FileSize, info.Modification.Format("Mon Jan 2 15:04:05 2006"), info.Path)
+			} else {
+				fmt.Fprintf(tw, "%s\n", info.Path)
+			}
+		}
+	}
+	tw.Flush()
+	return nil
 }
