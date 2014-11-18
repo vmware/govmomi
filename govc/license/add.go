@@ -38,6 +38,10 @@ func (cmd *add) Register(f *flag.FlagSet) {}
 
 func (cmd *add) Process() error { return nil }
 
+func (cmd *add) Usage() string {
+	return "KEY..."
+}
+
 func (cmd *add) Run(f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {

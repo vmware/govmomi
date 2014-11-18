@@ -82,27 +82,28 @@ func generalHelp() {
 	}
 }
 
-func commandHelp(name string, f *flag.FlagSet) {
-	fmt.Fprintf(os.Stderr, "Usage of %s %s:\n", os.Args[0], name)
+func commandHelp(name string, cmd Command, f *flag.FlagSet) {
+	type HasUsage interface {
+		Usage() string
+	}
+
+	fmt.Fprintf(os.Stderr, "Usage: %s %s [OPTIONS]", os.Args[0], name)
+	if u, ok := cmd.(HasUsage); ok {
+		fmt.Fprintf(os.Stderr, " %s", u.Usage())
+	}
+	fmt.Fprintf(os.Stderr, "\n")
 
 	n := 0
 	f.VisitAll(func(_ *flag.Flag) {
 		n += 1
 	})
 
-	if n == 0 {
-		fmt.Fprintf(os.Stderr, "  (no flags)\n")
-	} else {
+	if n > 0 {
+		fmt.Fprintf(os.Stderr, "\n")
 		tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
-
-		type IsBoolFlagger interface {
-			IsBoolFlag() bool
-		}
-
 		f.VisitAll(func(f *flag.Flag) {
 			fmt.Fprintf(tw, "\t-%s=%s\t%s\n", f.Name, f.DefValue, f.Usage)
 		})
-
 		tw.Flush()
 	}
 }
@@ -132,7 +133,7 @@ func Run(args []string) int {
 
 	if err := f.Parse(args[1:]); err != nil {
 		if err == flag.ErrHelp {
-			commandHelp(args[0], f)
+			commandHelp(args[0], cmd, f)
 		} else {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}
@@ -141,7 +142,7 @@ func Run(args []string) int {
 
 	if err := ProcessCommand(cmd); err != nil {
 		if err == flag.ErrHelp {
-			commandHelp(args[0], f)
+			commandHelp(args[0], cmd, f)
 		} else {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}
@@ -150,7 +151,7 @@ func Run(args []string) int {
 
 	if err := cmd.Run(f); err != nil {
 		if err == flag.ErrHelp {
-			commandHelp(args[0], f)
+			commandHelp(args[0], cmd, f)
 		} else {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}

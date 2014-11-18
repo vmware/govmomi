@@ -35,6 +35,10 @@ func (cmd *remove) Register(f *flag.FlagSet) {}
 
 func (cmd *remove) Process() error { return nil }
 
+func (cmd *remove) Usage() string {
+	return "NAME"
+}
+
 func (cmd *remove) Run(f *flag.FlagSet) error {
 	ns, err := cmd.HostNetworkSystem()
 	if err != nil {

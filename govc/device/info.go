@@ -40,6 +40,10 @@ func (cmd *info) Register(f *flag.FlagSet) {}
 
 func (cmd *info) Process() error { return nil }
 
+func (cmd *info) Usage() string {
+	return "DEVICE..."
+}
+
 func (cmd *info) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {

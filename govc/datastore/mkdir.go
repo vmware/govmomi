@@ -42,6 +42,10 @@ func (cmd *mkdir) Register(f *flag.FlagSet) {
 
 func (cmd *mkdir) Process() error { return nil }
 
+func (cmd *mkdir) Usage() string {
+	return "DIRECTORY"
+}
+
 func (cmd *mkdir) Run(f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) == 0 {
