@@ -166,6 +166,34 @@ assert_output() {
   assert_equal "$expected" "$output"
 }
 
+assert_matches() {
+  local pattern="${1}"
+  local actual="${2}"
+
+  if [ $# -eq 1 ]; then
+    actual="$(cat -)"
+  fi
+
+  if ! grep -q "${pattern}" <<<"${actual}"; then
+    { echo "pattern: ${pattern}"
+      echo "actual:  ${actual}"
+    } | flunk
+  fi
+}
+
+assert_empty() {
+  local actual="${1}"
+
+  if [ $# -eq 0 ]; then
+    actual="$(cat -)"
+  fi
+
+  if [ -n "${actual}" ]; then
+    { echo "actual: ${actual}"
+    } | flunk
+  fi
+}
+
 assert_line() {
   if [ "$1" -ge 0 ] 2>/dev/null; then
     assert_equal "$2" "$(collapse_ws ${lines[$1]})"

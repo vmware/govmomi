@@ -20,12 +20,15 @@ import (
 	"errors"
 	"flag"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 )
 
 type rm struct {
 	*flags.DatastoreFlag
+
+	force bool
 }
 
 func init() {
@@ -33,7 +36,9 @@ func init() {
 	cli.Alias("datastore.rm", "datastore.delete")
 }
 
-func (cmd *rm) Register(f *flag.FlagSet) {}
+func (cmd *rm) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.force, "f", false, "Force; ignore nonexistent files and arguments")
+}
 
 func (cmd *rm) Process() error { return nil }
 
@@ -68,5 +73,13 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return task.Wait()
+	err = task.Wait()
+	if err != nil {
+		if govmomi.IsFileNotFound(err) && cmd.force {
+			// Ignore error
+			return nil
+		}
+	}
+
+	return err
 }

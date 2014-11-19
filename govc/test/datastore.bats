@@ -2,7 +2,7 @@
 
 load test_helper
 
-@test "datastore.ls" {
+upload_file() {
   file=$(mktemp --tmpdir govc-test-XXXXX)
   name=$(basename ${file})
   echo "Hello world!" > ${file}
@@ -11,6 +11,11 @@ load test_helper
   assert_success
 
   rm -f "${file}"
+  echo "${name}"
+}
+
+@test "datastore.ls" {
+  name=$(upload_file)
 
   # Single argument
   run govc datastore.ls "${name}"
@@ -31,4 +36,31 @@ load test_helper
   run govc datastore.ls -l "./govc-test-*"
   assert_success
   assert_equal "13" $(awk '{ print $1 }' <<<${output})
+}
+
+@test "datastore.rm" {
+  name=$(upload_file)
+
+  # Not found is a failure
+  run govc datastore.rm "${name}.notfound"
+  assert_failure
+  assert_matches "Error: File .* was not found" "${output}"
+
+  # Not found is NOT a failure with the force flag
+  run govc datastore.rm -f "${name}.notfound"
+  assert_success
+  assert_empty "${output}"
+
+  # Verify the file is present
+  run govc datastore.ls "${name}"
+  assert_success
+
+  # Delete the file
+  run govc datastore.rm "${name}"
+  assert_success
+  assert_empty "${output}"
+
+  # Verify the file is gone
+  run govc datastore.ls "${name}"
+  assert_failure
 }
