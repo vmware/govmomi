@@ -34,7 +34,7 @@ func init() {
 }
 
 func (cmd *eject) Register(f *flag.FlagSet) {
-	f.StringVar(&cmd.device, "device", "", "cdrom device name")
+	f.StringVar(&cmd.device, "device", "", "CD-ROM device name")
 }
 
 func (cmd *eject) Process() error { return nil }
