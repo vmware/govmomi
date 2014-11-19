@@ -34,10 +34,16 @@ func init() {
 }
 
 func (cmd *eject) Register(f *flag.FlagSet) {
-	f.StringVar(&cmd.device, "device", "", "cdrom device name")
+	f.StringVar(&cmd.device, "device", "", "CD-ROM device name")
 }
 
 func (cmd *eject) Process() error { return nil }
+
+func (cmd *eject) Description() string {
+	return `Eject ISO from CD-ROM device.
+
+If device is not specified, the first CD-ROM device is used.`
+}
 
 func (cmd *eject) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()

@@ -32,6 +32,10 @@ func init() {
 	cli.Register("import.ova", &ova{&ovf{}})
 }
 
+func (cmd *ova) Usage() string {
+	return "PATH_TO_OVA"
+}
+
 func (cmd *ova) Run(f *flag.FlagSet) error {
 	file, err := cmd.Prepare(f)
 
