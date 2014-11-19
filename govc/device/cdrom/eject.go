@@ -39,6 +39,12 @@ func (cmd *eject) Register(f *flag.FlagSet) {
 
 func (cmd *eject) Process() error { return nil }
 
+func (cmd *eject) Description() string {
+	return `Eject ISO from CD-ROM device.
+
+If device is not specified, the first CD-ROM device is used.`
+}
+
 func (cmd *eject) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {

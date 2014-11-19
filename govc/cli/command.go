@@ -93,6 +93,14 @@ func commandHelp(name string, cmd Command, f *flag.FlagSet) {
 	}
 	fmt.Fprintf(os.Stderr, "\n")
 
+	type HasDescription interface {
+		Description() string
+	}
+
+	if u, ok := cmd.(HasDescription); ok {
+		fmt.Fprintf(os.Stderr, "%s\n", u.Description())
+	}
+
 	n := 0
 	f.VisitAll(func(_ *flag.Flag) {
 		n += 1

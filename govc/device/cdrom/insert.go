@@ -44,6 +44,12 @@ func (cmd *insert) Usage() string {
 	return "ISO"
 }
 
+func (cmd *insert) Description() string {
+	return `Insert ISO on datastore into CD-ROM device.
+
+If device is not specified, the first CD-ROM device is used.`
+}
+
 func (cmd *insert) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
