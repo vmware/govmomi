@@ -54,6 +54,10 @@ func (cmd *ovf) Register(f *flag.FlagSet) {}
 
 func (cmd *ovf) Process() error { return nil }
 
+func (cmd *ovf) Usage() string {
+	return "PATH_TO_OVF"
+}
+
 func (cmd *ovf) Run(f *flag.FlagSet) error {
 	file, err := cmd.Prepare(f)
 

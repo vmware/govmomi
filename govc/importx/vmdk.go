@@ -61,6 +61,10 @@ func (cmd *vmdk) Register(f *flag.FlagSet) {
 
 func (cmd *vmdk) Process() error { return nil }
 
+func (cmd *vmdk) Usage() string {
+	return "PATH_TO_VMDK [REMOTE_DIRECTORY]"
+}
+
 func (cmd *vmdk) Run(f *flag.FlagSet) error {
 	var err error
 
