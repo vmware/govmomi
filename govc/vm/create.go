@@ -56,7 +56,7 @@ func init() {
 }
 
 func (cmd *create) Register(f *flag.FlagSet) {
-	f.IntVar(&cmd.memory, "m", 128, "Size in MB of memory")
+	f.IntVar(&cmd.memory, "m", 1024, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
