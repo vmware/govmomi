@@ -129,7 +129,7 @@ func (flag *ClientFlag) Process() error {
 }
 
 func (flag *ClientFlag) sessionFile() string {
-	file := fmt.Sprintf("%s@%s?insecure=%t", flag.url.User.Username(), flag.url.Host, flag.insecure)
+	file := fmt.Sprintf("%s@%s-insecure=%t", flag.url.User.Username(), flag.url.Host, flag.insecure)
 	return filepath.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
 }
 
