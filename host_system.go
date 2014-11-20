@@ -18,6 +18,7 @@ package govmomi
 
 import (
 	"fmt"
+	"net"
 
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -73,4 +74,25 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 
 	pool := NewResourcePool(h.c, *mcr.ResourcePool)
 	return pool, nil
+}
+
+func (h HostSystem) ManagementIPs() ([]net.IP, error) {
+	var mh mo.HostSystem
+
+	err := h.c.Properties(h.Reference(), []string{"config.virtualNicManagerInfo.netConfig"}, &mh)
+	if err != nil {
+		return nil, err
+	}
+
+	var ips []net.IP
+	for _, nc := range mh.Config.VirtualNicManagerInfo.NetConfig {
+		if nc.NicType == "management" && len(nc.CandidateVnic) > 0 {
+			ip := net.ParseIP(nc.CandidateVnic[0].Spec.Ip.IpAddress)
+			if ip != nil {
+				ips = append(ips, ip)
+			}
+		}
+	}
+
+	return ips, nil
 }

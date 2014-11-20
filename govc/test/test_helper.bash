@@ -1,6 +1,7 @@
 GOVC_TEST_URL=${GOVC_TEST_URL-"https://root:vagrant@localhost:18443/sdk"}
 export GOVC_URL=$GOVC_TEST_URL
 export GOVC_DATASTORE=datastore1
+export GOVC_NETWORK="VM Network"
 export GOVC_INSECURE=true
 
 if [ -z "$BATS_TEST_DIRNAME" ]
