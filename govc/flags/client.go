@@ -23,7 +23,7 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"sync"
@@ -129,8 +129,8 @@ func (flag *ClientFlag) Process() error {
 }
 
 func (flag *ClientFlag) sessionFile() string {
-	file := fmt.Sprintf("%s@%s?insecure=%t", flag.url.User.Username(), flag.url.Host, flag.insecure)
-	return path.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
+	file := fmt.Sprintf("%s@%s-insecure=%t", flag.url.User.Username(), flag.url.Host, flag.insecure)
+	return filepath.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
 }
 
 func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
@@ -163,7 +163,7 @@ func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
 	}
 
 	p := flag.sessionFile()
-	err = os.MkdirAll(path.Dir(p), 0700)
+	err = os.MkdirAll(filepath.Dir(p), 0700)
 	if err != nil {
 		return nil, err
 	}

@@ -20,7 +20,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -48,13 +48,13 @@ func (flag *DebugFlag) Process() error {
 		// Base path for storing debug logs.
 		r := os.Getenv("GOVC_DEBUG_PATH")
 		if r == "" {
-			r = path.Join(os.Getenv("HOME"), ".govmomi")
+			r = filepath.Join(os.Getenv("HOME"), ".govmomi")
 		}
-		r = path.Join(r, "debug")
+		r = filepath.Join(r, "debug")
 
 		// Path for this particular run.
 		now := time.Now().Format("2006-01-02T15-04-05.999999999")
-		r = path.Join(r, now)
+		r = filepath.Join(r, now)
 
 		err := os.MkdirAll(r, 0700)
 		if err != nil {
