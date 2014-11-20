@@ -30,7 +30,7 @@ govc device.floppy.insert -vm $id $GOVC_TEST_IMG
 
 govc device.boot -vm $id -delay 1000 -order floppy,cdrom,ethernet,disk
 
-vnc=$(govc vm.vnc -vm $id -port 21122 -password govmomi | awk '{print $5}')
+vnc=$(govc vm.vnc -port 21122 -password govmomi -enable "${id}" | awk '{print $2}')
 
 echo "booting from floppy..."
 govc vm.power -on $id
