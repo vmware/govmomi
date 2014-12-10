@@ -34,10 +34,16 @@ func init() {
 }
 
 func (cmd *eject) Register(f *flag.FlagSet) {
-	f.StringVar(&cmd.device, "device", "", "floppy device name")
+	f.StringVar(&cmd.device, "device", "", "Floppy device name")
 }
 
 func (cmd *eject) Process() error { return nil }
+
+func (cmd *eject) Description() string {
+	return `Eject image from floppy device.
+
+If device is not specified, the first floppy device is used.`
+}
 
 func (cmd *eject) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()

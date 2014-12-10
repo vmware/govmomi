@@ -35,10 +35,20 @@ func init() {
 }
 
 func (cmd *insert) Register(f *flag.FlagSet) {
-	f.StringVar(&cmd.device, "device", "", "floppy device name")
+	f.StringVar(&cmd.device, "device", "", "Floppy device name")
 }
 
 func (cmd *insert) Process() error { return nil }
+
+func (cmd *insert) Usage() string {
+	return "IMG"
+}
+
+func (cmd *insert) Description() string {
+	return `Insert image on datastore into floppy device.
+
+If device is not specified, the first floppy device is used.`
+}
 
 func (cmd *insert) Run(f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
@@ -46,7 +56,7 @@ func (cmd *insert) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if vm == nil {
+	if vm == nil || f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 

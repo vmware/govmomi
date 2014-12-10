@@ -45,7 +45,7 @@ func (cmd *insert) Usage() string {
 }
 
 func (cmd *insert) Description() string {
-	return `Insert ISO on datastore into CD-ROM device.
+	return `Insert media on datastore into CD-ROM device.
 
 If device is not specified, the first CD-ROM device is used.`
 }
@@ -56,7 +56,7 @@ func (cmd *insert) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	if vm == nil {
+	if vm == nil || f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
