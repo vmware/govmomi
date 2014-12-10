@@ -17,6 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -62,4 +63,17 @@ func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	}
 
 	return df, nil
+}
+
+func (d Datacenter) Destroy() (*Task, error) {
+	req := types.Destroy_Task{
+		This: d.Reference(),
+	}
+
+	res, err := methods.Destroy_Task(d.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(d.c, res.Returnval), nil
 }
