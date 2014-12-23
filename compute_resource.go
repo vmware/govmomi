@@ -16,12 +16,35 @@ limitations under the License.
 
 package govmomi
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type ComputeResource struct {
 	types.ManagedObjectReference
+
+	c *Client
+}
+
+func NewComputeResource(c *Client, ref types.ManagedObjectReference) *ComputeResource {
+	return &ComputeResource{
+		ManagedObjectReference: ref,
+		c: c,
+	}
 }
 
 func (c ComputeResource) Reference() types.ManagedObjectReference {
 	return c.ManagedObjectReference
+}
+
+func (c ComputeResource) Hosts() ([]types.ManagedObjectReference, error) {
+	var cr mo.ComputeResource
+	ps := []string{"host"}
+
+	err := c.c.Properties(c.Reference(), ps, &cr)
+	if err != nil {
+		return nil, err
+	}
+	return cr.Host, nil
 }
