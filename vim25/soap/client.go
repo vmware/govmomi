@@ -70,7 +70,12 @@ func NewClient(u url.URL, insecure bool) *Client {
 	}
 
 	if c.u.Scheme == "https" {
-		c.Client.Transport = &http.Transport{TLSClientConfig: &tls.Config{InsecureSkipVerify: c.insecure}}
+		c.Client.Transport = &http.Transport{
+			Proxy: http.ProxyFromEnvironment,
+			TLSClientConfig: &tls.Config{
+				InsecureSkipVerify: c.insecure,
+			},
+		}
 	}
 
 	c.Jar, _ = cookiejar.New(nil)
