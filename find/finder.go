@@ -312,11 +312,23 @@ func (f *Finder) HostSystemList(path ...string) ([]*govmomi.HostSystem, error) {
 
 	var hss []*govmomi.HostSystem
 	for _, e := range es {
+		var hs *govmomi.HostSystem
+
 		switch o := e.Object.(type) {
 		case mo.HostSystem:
-			hs := govmomi.NewHostSystem(f.Client, o.Reference())
-			hss = append(hss, hs)
+			hs = govmomi.NewHostSystem(f.Client, o.Reference())
+		case mo.ComputeResource:
+			cr := govmomi.NewComputeResource(f.Client, o.Reference())
+			hosts, err := cr.Hosts()
+			if err != nil {
+				return nil, err
+			}
+			hs = govmomi.NewHostSystem(f.Client, hosts[0])
+		default:
+			continue
 		}
+
+		hss = append(hss, hs)
 	}
 
 	return hss, nil
