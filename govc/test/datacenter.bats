@@ -59,6 +59,9 @@ load test_helper
 
   run govc datacenter.create $dc
   assert_success
+
+  run govc datacenter.destroy $dc
+  assert_success
 }
 
 @test "fails when datacenter name not specified" {
