@@ -43,6 +43,29 @@ load test_helper
   [ $result -eq 0 ]
 }
 
+@test "vm.change" {
+  id=$(new_ttylinux_vm)
+
+  run govc vm.change -g ubuntu64Guest -m 1024 -c 2 -vm $id
+  assert_success
+
+  run govc vm.info $id
+  assert_success
+  assert_line "Guest name: Ubuntu Linux (64-bit)"
+  assert_line "Memory: 1024MB"
+  assert_line "CPU: 2 vCPU(s)"
+
+  nid=$(new_id)
+  run govc vm.change -name $nid -vm $id
+  assert_success
+
+  run govc vm.info $id
+  [ ${#lines[@]} -eq 0 ]
+
+  run govc vm.info $nid
+  [ ${#lines[@]} -gt 0 ]
+}
+
 @test "vm.power" {
   vm=$(new_ttylinux_vm)
 
