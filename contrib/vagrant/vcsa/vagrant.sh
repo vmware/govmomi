@@ -16,3 +16,9 @@ perl -pi -e 's/^#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
 perl -pi -e 's/^AllowTcpForwarding no//' /etc/ssh/sshd_config
 perl -pi -e 's/^PermitTunnel no//' /etc/ssh/sshd_config
 perl -pi -e 's/^MaxSessions \d+//' /etc/ssh/sshd_config
+
+# disable password expiration
+for uid in root vagrant
+do
+  chage -I -1 -E -1 -m 0 -M -1 $uid
+done
