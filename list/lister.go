@@ -98,6 +98,8 @@ func (l Lister) List() ([]Element, error) {
 		// Treat ComputeResource and ClusterComputeResource as one and the same.
 		// It doesn't matter from the perspective of the lister.
 		return l.ListComputeResource()
+	case "ResourcePool":
+		return l.ListResourcePool()
 	default:
 		return nil, fmt.Errorf("cannot traverse type " + l.Reference.Type)
 	}
@@ -256,6 +258,70 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 
 	childTypes := []string{
 		"HostSystem",
+		"ResourcePool",
+	}
+
+	var pspecs []types.PropertySpec
+	for _, t := range childTypes {
+		pspec := types.PropertySpec{
+			Type: t,
+		}
+
+		if l.All {
+			pspec.All = true
+		} else {
+			pspec.PathSet = []string{"name"}
+		}
+
+		pspecs = append(pspecs, pspec)
+	}
+
+	req := types.RetrieveProperties{
+		This: l.Client.ServiceContent.PropertyCollector,
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				ObjectSet: []types.ObjectSpec{ospec},
+				PropSet:   pspecs,
+			},
+		},
+	}
+
+	var dst []interface{}
+
+	err := mo.RetrievePropertiesForRequest(l.Client, req, &dst)
+	if err != nil {
+		return nil, err
+	}
+
+	es := []Element{}
+	for _, v := range dst {
+		es = append(es, ToElement(v.(govmomi.Reference), l.Prefix))
+	}
+
+	return es, nil
+}
+
+func (l Lister) ListResourcePool() ([]Element, error) {
+	ospec := types.ObjectSpec{
+		Obj:  l.Reference,
+		Skip: true,
+	}
+
+	fields := []string{
+		"resourcePool",
+	}
+
+	for _, f := range fields {
+		tspec := types.TraversalSpec{
+			Path: f,
+			Skip: false,
+			Type: "ResourcePool",
+		}
+
+		ospec.SelectSet = append(ospec.SelectSet, &tspec)
+	}
+
+	childTypes := []string{
 		"ResourcePool",
 	}
 
