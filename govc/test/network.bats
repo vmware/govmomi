@@ -47,7 +47,7 @@ load test_helper
 
   eth0=$(govc device.ls -vm $vm | grep ethernet- | awk '{print $1}')
   run govc vm.network.change -vm $vm $eth0 enoent
-  assert_failure "Error: no such network"
+  assert_failure "Error: network 'enoent' not found"
 
   run govc vm.network.change -vm $vm enoent "VM Network"
   assert_failure "Error: device 'enoent' not found"
@@ -79,7 +79,7 @@ load test_helper
   assert_failure
 
   run govc vm.network.add -vm $vm enoent
-  assert_failure "Error: no such network"
+  assert_failure "Error: network 'enoent' not found"
 
   run govc vm.network.add -vm $vm "VM Network"
   assert_success

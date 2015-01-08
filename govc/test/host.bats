@@ -8,7 +8,7 @@ load test_helper
   grep -q Manufacturer: <<<$output
 
   run govc host.info -host enoent
-  assert_failure "Error: no such host"
+  assert_failure "Error: host 'enoent' not found"
 
   for opt in dns ip ipath uuid
   do
@@ -46,7 +46,7 @@ load test_helper
   grep -q Manufacturer: <<<$output
 
   run govc host.info -host enoent
-  assert_failure "Error: no such host"
+  assert_failure "Error: host 'enoent' not found"
 
   for opt in dns ip ipath uuid
   do
