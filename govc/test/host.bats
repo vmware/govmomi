@@ -33,7 +33,7 @@ load test_helper
   run govc host.info -host.dns $(basename $(dirname $name))
   assert_success
 
-  uuid=$(govc host.info -json | jq -r .HostSystem.Hardware.SystemInfo.Uuid)
+  uuid=$(govc host.info -json | jq -r .HostSystems[].Hardware.SystemInfo.Uuid)
   run govc host.info -host.uuid $uuid
   assert_success
 }
@@ -70,7 +70,7 @@ load test_helper
   run govc host.info -host.dns $(basename $name)
   assert_success
 
-  uuid=$(govc host.info -host $name -json | jq -r .HostSystem.Hardware.SystemInfo.Uuid)
+  uuid=$(govc host.info -host $name -json | jq -r .HostSystems[].Hardware.SystemInfo.Uuid)
   run govc host.info -host.uuid $uuid
   assert_success
 }
