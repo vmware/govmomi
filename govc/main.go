@@ -36,6 +36,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/importx"
 	_ "github.com/vmware/govmomi/govc/license"
 	_ "github.com/vmware/govmomi/govc/ls"
+	_ "github.com/vmware/govmomi/govc/pool"
 	_ "github.com/vmware/govmomi/govc/version"
 	_ "github.com/vmware/govmomi/govc/vm"
 	_ "github.com/vmware/govmomi/govc/vm/disk"

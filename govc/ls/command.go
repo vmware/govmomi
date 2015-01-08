@@ -106,6 +106,10 @@ func (l listResult) Write(w io.Writer) error {
 			if _, err = fmt.Fprintf(w, "%s (Datastore)\n", e.Path); err != nil {
 				return err
 			}
+		case mo.ResourcePool:
+			if _, err = fmt.Fprintf(w, "%s (ResourcePool)\n", e.Path); err != nil {
+				return err
+			}
 		}
 	}
 

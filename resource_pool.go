@@ -61,3 +61,56 @@ func (p ResourcePool) ImportVApp(spec types.BaseImportSpec, folder *Folder, host
 
 	return NewHttpNfcLease(p.c, res.Returnval), nil
 }
+
+func (p ResourcePool) Create(name string, spec types.ResourceConfigSpec) (*ResourcePool, error) {
+	req := types.CreateResourcePool{
+		This: p.Reference(),
+		Name: name,
+		Spec: spec,
+	}
+
+	res, err := methods.CreateResourcePool(p.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewResourcePool(p.c, res.Returnval), nil
+}
+
+func (p ResourcePool) UpdateConfig(name string, config *types.ResourceConfigSpec) error {
+	req := types.UpdateConfig{
+		This:   p.Reference(),
+		Name:   name,
+		Config: config,
+	}
+
+	if config != nil && config.Entity == nil {
+		ref := p.Reference()
+		config.Entity = &ref
+	}
+
+	_, err := methods.UpdateConfig(p.c, &req)
+	return err
+}
+
+func (p ResourcePool) DestroyChildren() error {
+	req := types.DestroyChildren{
+		This: p.Reference(),
+	}
+
+	_, err := methods.DestroyChildren(p.c, &req)
+	return err
+}
+
+func (p ResourcePool) Destroy() (*Task, error) {
+	req := types.Destroy_Task{
+		This: p.Reference(),
+	}
+
+	res, err := methods.Destroy_Task(p.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(p.c, res.Returnval), nil
+}
