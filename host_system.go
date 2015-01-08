@@ -27,6 +27,8 @@ import (
 type HostSystem struct {
 	types.ManagedObjectReference
 
+	InventoryPath string
+
 	c *Client
 }
 
