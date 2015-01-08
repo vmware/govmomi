@@ -328,6 +328,7 @@ func (f *Finder) HostSystemList(path ...string) ([]*govmomi.HostSystem, error) {
 			continue
 		}
 
+		hs.InventoryPath = e.Path
 		hss = append(hss, hs)
 	}
 
@@ -427,25 +428,20 @@ func (f *Finder) DefaultNetwork() (govmomi.NetworkReference, error) {
 }
 
 func (f *Finder) ResourcePoolList(path ...string) ([]*govmomi.ResourcePool, error) {
-	es, err := f.find(f.hostFolder, false, path...)
+	es, err := f.find(f.hostFolder, true, path...)
 	if err != nil {
 		return nil, err
 	}
 
 	var rps []*govmomi.ResourcePool
 	for _, e := range es {
+		var rp *govmomi.ResourcePool
+
 		switch o := e.Object.(type) {
-		case mo.ComputeResource:
-			// Use a compute resource's root resource pool.
-			n := govmomi.NewResourcePool(f.Client, *o.ResourcePool)
-			rps = append(rps, n)
-		case mo.ClusterComputeResource:
-			// Use a cluster compute resource's root resource pool.
-			n := govmomi.NewResourcePool(f.Client, *o.ResourcePool)
-			rps = append(rps, n)
 		case mo.ResourcePool:
-			n := govmomi.NewResourcePool(f.Client, o.Reference())
-			rps = append(rps, n)
+			rp = govmomi.NewResourcePool(f.Client, o.Reference())
+			rp.InventoryPath = e.Path
+			rps = append(rps, rp)
 		}
 	}
 
@@ -497,6 +493,7 @@ func (f *Finder) VirtualMachineList(path ...string) ([]*govmomi.VirtualMachine, 
 		switch o := e.Object.(type) {
 		case mo.VirtualMachine:
 			vm := govmomi.NewVirtualMachine(f.Client, o.Reference())
+			vm.InventoryPath = e.Path
 			vms = append(vms, vm)
 		}
 	}
