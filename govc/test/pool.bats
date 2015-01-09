@@ -87,16 +87,66 @@ load test_helper
 }
 
 @test "vm.create -pool" {
+  # test with full inventory path to pools
+  parent_path=$(govc ls 'host/*/Resources')
+  parent_name=$(basename $parent_path)
+  [ "$parent_name" = "Resources" ]
+
+  child_name=$(new_id)
+  child_path="$parent_path/$child_name"
+
+  grand_child_name=$(new_id)
+  grand_child_path="$child_path/$grand_child_name"
+
+  run govc pool.create -pool $parent_path $child_name
+  assert_success
+
+  run govc pool.create -pool $child_path $grand_child_name
+  assert_success
+
+  for path in $parent_path $child_path $grand_child_path
+  do
+    run govc vm.create -on=false -pool $path $(new_id)
+    assert_success
+  done
+
+  # test with glob inventory path to pools
+  parent_path="*/$parent_name"
+  child_path="$parent_path/$child_name"
+  grand_child_path="$child_path/$grand_child_name"
+
+  for path in $grand_child_path $child_path
+  do
+    run govc pool.destroy $path
+    assert_success
+  done
+}
+
+@test "vm.create -pool host" {
   id=$(new_id)
 
-  run govc pool.create $id
+  path=$(govc ls host)
+
+  run govc vm.create -on=false -pool enoent $id
+  assert_failure "Error: resource pool 'enoent' not found"
+
+  run govc vm.create -on=false -pool $path $id
   assert_success
+}
 
-  path="*/Resources/$id"
+@test "vm.create -pool cluster" {
+  vcsim_env
 
-  run govc vm.create -pool $path $id
-  assert_success
+  id=$(new_id)
 
-  run govc pool.destroy $path
+  path=$(dirname $GOVC_HOST)
+
+  unset GOVC_HOST
+  unset GOVC_RESOURCE_POOL
+
+  run govc vm.create -on=false -pool enoent $id
+  assert_failure "Error: resource pool 'enoent' not found"
+
+  run govc vm.create -on=false -pool $path $id
   assert_success
 }

@@ -25,6 +25,8 @@ import (
 type VirtualMachine struct {
 	types.ManagedObjectReference
 
+	InventoryPath string
+
 	c *Client
 }
 

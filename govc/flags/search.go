@@ -251,3 +251,29 @@ func (flag *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
 
 	return host, nil
 }
+
+func (flag *SearchFlag) HostSystems(args []string) ([]*govmomi.HostSystem, error) {
+	var out []*govmomi.HostSystem
+
+	if flag.IsSet() {
+		host, err := flag.HostSystem()
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, host)
+		return out, nil
+	}
+
+	// List host system
+	if len(args) == 0 {
+		return nil, errors.New("no argument")
+	}
+
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	return finder.HostSystemList(args...)
+}

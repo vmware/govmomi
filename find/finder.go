@@ -223,11 +223,11 @@ func (f *Finder) Datacenter(path string) (*govmomi.Datacenter, error) {
 	}
 
 	if len(dcs) == 0 {
-		return nil, errors.New("no such datacenter")
+		return nil, &NotFoundError{"datacenter", path}
 	}
 
 	if len(dcs) > 1 {
-		return nil, errors.New("path resolves to multiple datacenters")
+		return nil, &MultipleFoundError{"datacenter", path}
 	}
 
 	return dcs[0], nil
@@ -277,11 +277,11 @@ func (f *Finder) Datastore(path string) (*govmomi.Datastore, error) {
 	}
 
 	if len(dss) == 0 {
-		return nil, errors.New("no such datastore")
+		return nil, &NotFoundError{"datastore", path}
 	}
 
 	if len(dss) > 1 {
-		return nil, errors.New("path resolves to multiple datastores")
+		return nil, &MultipleFoundError{"datastore", path}
 	}
 
 	return dss[0], nil
@@ -328,6 +328,7 @@ func (f *Finder) HostSystemList(path ...string) ([]*govmomi.HostSystem, error) {
 			continue
 		}
 
+		hs.InventoryPath = e.Path
 		hss = append(hss, hs)
 	}
 
@@ -341,11 +342,11 @@ func (f *Finder) HostSystem(path string) (*govmomi.HostSystem, error) {
 	}
 
 	if len(hss) == 0 {
-		return nil, errors.New("no such host")
+		return nil, &NotFoundError{"host", path}
 	}
 
 	if len(hss) > 1 {
-		return nil, errors.New("path resolves to multiple hosts")
+		return nil, &MultipleFoundError{"host", path}
 	}
 
 	return hss[0], nil
@@ -399,11 +400,11 @@ func (f *Finder) Network(path string) (govmomi.NetworkReference, error) {
 	}
 
 	if len(networks) == 0 {
-		return nil, errors.New("no such network")
+		return nil, &NotFoundError{"network", path}
 	}
 
 	if len(networks) > 1 {
-		return nil, errors.New("path resolves to multiple networks")
+		return nil, &MultipleFoundError{"network", path}
 	}
 
 	return networks[0], nil
@@ -427,25 +428,20 @@ func (f *Finder) DefaultNetwork() (govmomi.NetworkReference, error) {
 }
 
 func (f *Finder) ResourcePoolList(path ...string) ([]*govmomi.ResourcePool, error) {
-	es, err := f.find(f.hostFolder, false, path...)
+	es, err := f.find(f.hostFolder, true, path...)
 	if err != nil {
 		return nil, err
 	}
 
 	var rps []*govmomi.ResourcePool
 	for _, e := range es {
+		var rp *govmomi.ResourcePool
+
 		switch o := e.Object.(type) {
-		case mo.ComputeResource:
-			// Use a compute resource's root resource pool.
-			n := govmomi.NewResourcePool(f.Client, *o.ResourcePool)
-			rps = append(rps, n)
-		case mo.ClusterComputeResource:
-			// Use a cluster compute resource's root resource pool.
-			n := govmomi.NewResourcePool(f.Client, *o.ResourcePool)
-			rps = append(rps, n)
 		case mo.ResourcePool:
-			n := govmomi.NewResourcePool(f.Client, o.Reference())
-			rps = append(rps, n)
+			rp = govmomi.NewResourcePool(f.Client, o.Reference())
+			rp.InventoryPath = e.Path
+			rps = append(rps, rp)
 		}
 	}
 
@@ -459,11 +455,11 @@ func (f *Finder) ResourcePool(path string) (*govmomi.ResourcePool, error) {
 	}
 
 	if len(rps) == 0 {
-		return nil, errors.New("no such resource pool")
+		return nil, &NotFoundError{"resource pool", path}
 	}
 
 	if len(rps) > 1 {
-		return nil, errors.New("path resolves to multiple resource pools")
+		return nil, &MultipleFoundError{"resource pool", path}
 	}
 
 	return rps[0], nil
@@ -497,6 +493,7 @@ func (f *Finder) VirtualMachineList(path ...string) ([]*govmomi.VirtualMachine, 
 		switch o := e.Object.(type) {
 		case mo.VirtualMachine:
 			vm := govmomi.NewVirtualMachine(f.Client, o.Reference())
+			vm.InventoryPath = e.Path
 			vms = append(vms, vm)
 		}
 	}
@@ -511,11 +508,11 @@ func (f *Finder) VirtualMachine(path string) (*govmomi.VirtualMachine, error) {
 	}
 
 	if len(vms) == 0 {
-		return nil, errors.New("no such vm")
+		return nil, &NotFoundError{"vm", path}
 	}
 
 	if len(vms) > 1 {
-		return nil, errors.New("path resolves to multiple vms")
+		return nil, &MultipleFoundError{"vm", path}
 	}
 
 	return vms[0], nil

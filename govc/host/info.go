@@ -23,6 +23,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -48,9 +49,29 @@ func (c *info) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	host, err := c.HostSystem()
+	var hosts []*govmomi.HostSystem
+
+	// We could do without the -host flag, leaving it for compat
+	host, err := c.HostSystemIfSpecified()
 	if err != nil {
 		return err
+	}
+
+	// Default only if there is a single host
+	if host == nil && f.NArg() == 0 {
+		host, err = c.HostSystem()
+		if err != nil {
+			return err
+		}
+	}
+
+	if host != nil {
+		hosts = append(hosts, host)
+	} else {
+		hosts, err = c.HostSystems(f.Args())
+		if err != nil {
+			return err
+		}
 	}
 
 	var res infoResult
@@ -62,28 +83,37 @@ func (c *info) Run(f *flag.FlagSet) error {
 		props = []string{"summary"} // Load summary
 	}
 
-	err = client.Properties(host.Reference(), props, &res.HostSystem)
-	if err != nil {
-		return err
+	for _, host := range hosts {
+		var h mo.HostSystem
+		err = client.Properties(host.Reference(), props, &h)
+		if err != nil {
+			return err
+		}
+
+		res.HostSystems = append(res.HostSystems, h)
 	}
 
 	return c.WriteResult(&res)
 }
 
 type infoResult struct {
-	HostSystem mo.HostSystem
+	HostSystems []mo.HostSystem
 }
 
 func (r *infoResult) Write(w io.Writer) error {
-	s := r.HostSystem.Summary
-	h := s.Hardware
-
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
-	fmt.Fprintf(tw, "Manufacturer:\t%s\n", h.Vendor)
-	fmt.Fprintf(tw, "Logical CPUs:\t%d CPUs @ %dMHz\n", h.NumCpuPkgs*h.NumCpuCores*h.NumCpuThreads, h.CpuMhz)
-	fmt.Fprintf(tw, "Processor type:\t%s\n", h.CpuModel)
-	fmt.Fprintf(tw, "Memory:\t%dMB\n", h.MemorySize/(1024*1024))
-	fmt.Fprintf(tw, "Boot time:\t%s\n", s.Runtime.BootTime)
+
+	for _, host := range r.HostSystems {
+		s := host.Summary
+		h := s.Hardware
+
+		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
+		fmt.Fprintf(tw, "  Manufacturer:\t%s\n", h.Vendor)
+		fmt.Fprintf(tw, "  Logical CPUs:\t%d CPUs @ %dMHz\n", h.NumCpuPkgs*h.NumCpuCores*h.NumCpuThreads, h.CpuMhz)
+		fmt.Fprintf(tw, "  Processor type:\t%s\n", h.CpuModel)
+		fmt.Fprintf(tw, "  Memory:\t%dMB\n", h.MemorySize/(1024*1024))
+		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
+	}
+
 	return tw.Flush()
 }

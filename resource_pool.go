@@ -24,6 +24,8 @@ import (
 type ResourcePool struct {
 	types.ManagedObjectReference
 
+	InventoryPath string
+
 	c *Client
 }
 
