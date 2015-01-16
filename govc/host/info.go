@@ -106,12 +106,18 @@ func (r *infoResult) Write(w io.Writer) error {
 	for _, host := range r.HostSystems {
 		s := host.Summary
 		h := s.Hardware
+		z := s.QuickStats
+		ncpu := int(h.NumCpuPkgs * h.NumCpuCores)
+		cpuUsage := 100 * float64(z.OverallCpuUsage) / float64(ncpu*h.CpuMhz)
+		memUsage := 100 * float64(z.OverallMemoryUsage<<20) / float64(h.MemorySize)
 
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
 		fmt.Fprintf(tw, "  Manufacturer:\t%s\n", h.Vendor)
-		fmt.Fprintf(tw, "  Logical CPUs:\t%d CPUs @ %dMHz\n", h.NumCpuPkgs*h.NumCpuCores*h.NumCpuThreads, h.CpuMhz)
+		fmt.Fprintf(tw, "  Logical CPUs:\t%d CPUs @ %dMHz\n", ncpu, h.CpuMhz)
 		fmt.Fprintf(tw, "  Processor type:\t%s\n", h.CpuModel)
+		fmt.Fprintf(tw, "  CPU usage:\t%d MHz (%.1f%%)\n", z.OverallCpuUsage, cpuUsage)
 		fmt.Fprintf(tw, "  Memory:\t%dMB\n", h.MemorySize/(1024*1024))
+		fmt.Fprintf(tw, "  Memory usage:\t%d MB (%.1f%%)\n", z.OverallMemoryUsage, memUsage)
 		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
 	}
 
