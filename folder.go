@@ -92,3 +92,32 @@ func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePo
 
 	return NewTask(f.c, res.Returnval), nil
 }
+
+func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *ResourcePool, host *HostSystem) (*Task, error) {
+	req := types.RegisterVM_Task{
+		This:       f.Reference(),
+		Path:       path,
+		AsTemplate: asTemplate,
+	}
+
+	if name != "" {
+		req.Name = name
+	}
+
+	if host != nil {
+		ref := host.Reference()
+		req.Host = &ref
+	}
+
+	if pool != nil {
+		ref := pool.Reference()
+		req.Pool = &ref
+	}
+
+	res, err := methods.RegisterVM_Task(f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(f.c, res.Returnval), nil
+}
