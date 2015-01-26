@@ -287,3 +287,35 @@ func (v VirtualMachine) Answer(id, answer string) error {
 
 	return nil
 }
+
+func (v VirtualMachine) MarkAsTemplate() error {
+	req := types.MarkAsTemplate{
+		This: v.Reference(),
+	}
+
+	_, err := methods.MarkAsTemplate(v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (v VirtualMachine) MarkAsVirtualMachine(pool ResourcePool, host *HostSystem) error {
+	req := types.MarkAsVirtualMachine{
+		This: v.Reference(),
+		Pool: pool.Reference(),
+	}
+
+	if host != nil {
+		ref := host.Reference()
+		req.Host = &ref
+	}
+
+	_, err := methods.MarkAsVirtualMachine(v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
