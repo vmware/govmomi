@@ -126,6 +126,32 @@ load test_helper
   [ $result -eq 0 ]
 }
 
+@test "pool.destroy multiple" {
+  id=$(new_id)
+
+  govc pool.create $id
+  path="*/Resources/$id"
+
+  # Create some nested pools so that we can test destroying multiple in one call
+  govc pool.create -pool $path a
+  govc pool.create -pool $path b
+
+  # Test precondition
+  result=$(govc ls "host/$path/*" | wc -l)
+  [ $result -eq 2 ]
+
+  # Destroy both pools
+  run govc pool.destroy $path/{a,b}
+  assert_success
+
+  # Test postcondition
+  result=$(govc ls "host/$path/*" | wc -l)
+  [ $result -eq 0 ]
+
+  # Clean up
+  govc pool.destroy $path
+}
+
 @test "vm.create -pool" {
   # test with full inventory path to pools
   parent_path=$(govc ls 'host/*/Resources')
