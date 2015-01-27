@@ -43,12 +43,26 @@ func (cmd *create) Register(f *flag.FlagSet) {}
 
 func (cmd *create) Process() error { return nil }
 
+func (cmd *create) Usage() string {
+	return "NAME"
+}
+
+func (cmd *create) Description() string {
+	return "Create a resource pool.\n"
+}
+
 func (cmd *create) Run(f *flag.FlagSet) error {
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
+
+	name := f.Arg(0)
+
 	parent, err := cmd.ResourcePool()
 	if err != nil {
 		return err
 	}
 
-	_, err = parent.Create(f.Arg(0), cmd.ResourceConfigSpec)
+	_, err = parent.Create(name, cmd.ResourceConfigSpec)
 	return err
 }
