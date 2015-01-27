@@ -50,7 +50,7 @@ func (cmd *create) Usage() string {
 }
 
 func (cmd *create) Description() string {
-	return "Create one or more resource POOLs.\n"
+	return "Create one or more resource POOLs.\n" + poolCreateHelp
 }
 
 func (cmd *create) Run(f *flag.FlagSet) error {
