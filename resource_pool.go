@@ -88,7 +88,11 @@ func (p ResourcePool) UpdateConfig(name string, config *types.ResourceConfigSpec
 
 	if config != nil && config.Entity == nil {
 		ref := p.Reference()
-		config.Entity = &ref
+
+		// Create copy of config so changes won't leak back to the caller
+		newConfig := *config
+		newConfig.Entity = &ref
+		req.Config = &newConfig
 	}
 
 	_, err := methods.UpdateConfig(p.c, &req)

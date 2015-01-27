@@ -27,7 +27,7 @@ load test_helper
   assert_success
   path="*/Resources/$id"
 
-  run govc pool.change -pool $path -mem.shares high
+  run govc pool.change -mem.shares high $path
   assert_success
   run govc pool.info $path
   assert_success
@@ -35,7 +35,7 @@ load test_helper
   assert_line "CPU Shares: normal"
 
   nid=$(new_id)
-  run govc pool.change -pool $path -name $nid
+  run govc pool.change -name $nid $path
   assert_success
   path="*/Resources/$nid"
 
@@ -45,6 +45,46 @@ load test_helper
 
   run govc pool.destroy $path
   assert_success
+}
+
+@test "pool.change multiple" {
+  id=$(new_id)
+
+  govc pool.create $id
+  path="*/Resources/$id"
+
+  # Create some nested pools so that we can test changing multiple in one call
+  govc pool.create -pool $path a
+  govc pool.create -pool $path/a test
+  govc pool.create -pool $path b
+  govc pool.create -pool $path/b test
+
+  # Test precondition
+  run govc pool.info $path/a/test
+  assert_success
+  assert_line "Name: test"
+  run govc pool.info $path/b/test
+  assert_success
+  assert_line "Name: test"
+
+  # Change name of both test pools
+  run govc pool.change -name hello $path/*/test
+  assert_success
+
+  # Test postcondition
+  run govc pool.info $path/a/hello
+  assert_success
+  assert_line "Name: hello"
+  run govc pool.info $path/b/hello
+  assert_success
+  assert_line "Name: hello"
+
+  # Clean up
+  govc pool.destroy $path/a/hello
+  govc pool.destroy $path/a
+  govc pool.destroy $path/b/hello
+  govc pool.destroy $path/b
+  govc pool.destroy $path
 }
 
 @test "pool.destroy" {
