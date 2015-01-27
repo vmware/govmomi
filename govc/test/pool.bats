@@ -3,12 +3,16 @@
 load test_helper
 
 @test "pool.create" {
-  id=$(new_id)
+  path="*/Resources/$(new_id)/$(new_id)"
+  run govc pool.create $path
+  assert_failure
+  assert_line "Error: cannot create resource pool '$(basename ${path})': parent not found"
 
-  run govc pool.create -cpu.shares low -mem.reservation 500 $id
+  id=$(new_id)
+  path="*/Resources/$id"
+  run govc pool.create -cpu.shares low -mem.reservation 500 $path
   assert_success
 
-  path="*/Resources/$id"
   run govc pool.info $path
   assert_success
 
@@ -20,12 +24,32 @@ load test_helper
   assert_success
 }
 
+@test "pool.create multiple" {
+  id=$(new_id)
+  path="*/Resources/$id"
+  govc pool.create $path
+
+  # Create multiple parent pools with multiple arguments (without globbing)
+  run govc pool.create $path/a $path/b
+  assert_success
+  result=$(govc ls "host/$path/*" | wc -l)
+  [ $result -eq 2 ]
+
+  # Create multiple child pools with one argument (with globbing)
+  run govc pool.create $path/*/{a,b}
+  assert_success
+  result=$(govc ls "host/$path/*/*" | wc -l)
+  [ $result -eq 4 ]
+
+  # Clean up
+  run govc pool.destroy $path/*/* $path/* $path
+  assert_success
+}
+
 @test "pool.change" {
   id=$(new_id)
-
-  run govc pool.create $id
-  assert_success
   path="*/Resources/$id"
+  govc pool.create $path
 
   run govc pool.change -mem.shares high $path
   assert_success
@@ -49,15 +73,11 @@ load test_helper
 
 @test "pool.change multiple" {
   id=$(new_id)
-
-  govc pool.create $id
   path="*/Resources/$id"
+  govc pool.create $path
 
   # Create some nested pools so that we can test changing multiple in one call
-  govc pool.create -pool $path a
-  govc pool.create -pool $path/a test
-  govc pool.create -pool $path b
-  govc pool.create -pool $path/b test
+  govc pool.create $path/{a,b} $path/{a,b}/test
 
   # Test precondition
   run govc pool.info $path/a/test
@@ -95,19 +115,18 @@ load test_helper
   [ $result -eq 0 ]
 
   # parent pool
-  run govc pool.create $id
-  assert_success
-
   path="*/Resources/$id"
+  run govc pool.create $path
+  assert_success
 
   result=$(govc ls "host/$path/*" | wc -l)
   [ $result -eq 0 ]
 
   # child pools
-  run govc pool.create -pool $path $(new_id)
+  run govc pool.create $path/$(new_id)
   assert_success
 
-  run govc pool.create -pool $path $(new_id)
+  run govc pool.create $path/$(new_id)
   assert_success
 
   # 2 child pools
@@ -128,13 +147,11 @@ load test_helper
 
 @test "pool.destroy multiple" {
   id=$(new_id)
-
-  govc pool.create $id
   path="*/Resources/$id"
+  govc pool.create $path
 
   # Create some nested pools so that we can test destroying multiple in one call
-  govc pool.create -pool $path a
-  govc pool.create -pool $path b
+  govc pool.create $path/{a,b}
 
   # Test precondition
   result=$(govc ls "host/$path/*" | wc -l)
@@ -164,10 +181,7 @@ load test_helper
   grand_child_name=$(new_id)
   grand_child_path="$child_path/$grand_child_name"
 
-  run govc pool.create -pool $parent_path $child_name
-  assert_success
-
-  run govc pool.create -pool $child_path $grand_child_name
+  run govc pool.create $parent_path/$child_name{,/$grand_child_name}
   assert_success
 
   for path in $parent_path $child_path $grand_child_path
