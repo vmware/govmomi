@@ -234,20 +234,12 @@ func (f *Finder) Datacenter(path string) (*govmomi.Datacenter, error) {
 }
 
 func (f *Finder) DefaultDatacenter() (*govmomi.Datacenter, error) {
-	dcs, err := f.DatacenterList("*")
+	dc, err := f.Datacenter("*")
 	if err != nil {
-		return nil, err
+		return nil, toDefaultError(err)
 	}
 
-	if len(dcs) == 0 {
-		return nil, errors.New("no datacenters")
-	}
-
-	if len(dcs) > 1 {
-		return nil, errors.New("please specify a datacenter")
-	}
-
-	return dcs[0], nil
+	return dc, nil
 }
 
 func (f *Finder) DatastoreList(path ...string) ([]*govmomi.Datastore, error) {
@@ -288,20 +280,12 @@ func (f *Finder) Datastore(path string) (*govmomi.Datastore, error) {
 }
 
 func (f *Finder) DefaultDatastore() (*govmomi.Datastore, error) {
-	dss, err := f.DatastoreList("*")
+	ds, err := f.Datastore("*")
 	if err != nil {
-		return nil, err
+		return nil, toDefaultError(err)
 	}
 
-	if len(dss) == 0 {
-		return nil, errors.New("no datastores")
-	}
-
-	if len(dss) > 1 {
-		return nil, errors.New("please specify a datastore")
-	}
-
-	return dss[0], nil
+	return ds, nil
 }
 
 func (f *Finder) HostSystemList(path ...string) ([]*govmomi.HostSystem, error) {
@@ -353,20 +337,12 @@ func (f *Finder) HostSystem(path string) (*govmomi.HostSystem, error) {
 }
 
 func (f *Finder) DefaultHostSystem() (*govmomi.HostSystem, error) {
-	hss, err := f.HostSystemList("*/*")
+	hs, err := f.HostSystem("*/*")
 	if err != nil {
-		return nil, err
+		return nil, toDefaultError(err)
 	}
 
-	if len(hss) == 0 {
-		return nil, errors.New("no hosts")
-	}
-
-	if len(hss) > 1 {
-		return nil, errors.New("please specify a host")
-	}
-
-	return hss[0], nil
+	return hs, nil
 }
 
 func (f *Finder) NetworkList(path ...string) ([]govmomi.NetworkReference, error) {
@@ -411,20 +387,12 @@ func (f *Finder) Network(path string) (govmomi.NetworkReference, error) {
 }
 
 func (f *Finder) DefaultNetwork() (govmomi.NetworkReference, error) {
-	networks, err := f.NetworkList("*")
+	network, err := f.Network("*")
 	if err != nil {
-		return nil, err
+		return nil, toDefaultError(err)
 	}
 
-	if len(networks) == 0 {
-		return nil, errors.New("no networks")
-	}
-
-	if len(networks) > 1 {
-		return nil, errors.New("please specify a network")
-	}
-
-	return networks[0], nil
+	return network, nil
 }
 
 func (f *Finder) ResourcePoolList(path ...string) ([]*govmomi.ResourcePool, error) {
@@ -466,20 +434,12 @@ func (f *Finder) ResourcePool(path string) (*govmomi.ResourcePool, error) {
 }
 
 func (f *Finder) DefaultResourcePool() (*govmomi.ResourcePool, error) {
-	rps, err := f.ResourcePoolList("*/Resources")
+	rp, err := f.ResourcePool("*/Resources")
 	if err != nil {
-		return nil, err
+		return nil, toDefaultError(err)
 	}
 
-	if len(rps) == 0 {
-		return nil, errors.New("no resource pools")
-	}
-
-	if len(rps) > 1 {
-		return nil, errors.New("please specify a resource pool")
-	}
-
-	return rps[0], nil
+	return rp, nil
 }
 
 func (f *Finder) VirtualMachineList(path ...string) ([]*govmomi.VirtualMachine, error) {
