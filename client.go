@@ -290,6 +290,10 @@ func (c *Client) CustomizationSpecManager() CustomizationSpecManager {
 	return CustomizationSpecManager{c}
 }
 
+func (c *Client) EventManager() EventManager {
+	return EventManager{c}
+}
+
 // NewPropertyCollector creates a new property collector based on the
 // root property collector. It is the responsibility of the caller to
 // clean up the property collector when done.
