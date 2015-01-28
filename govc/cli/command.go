@@ -107,7 +107,7 @@ func commandHelp(name string, cmd Command, f *flag.FlagSet) {
 	})
 
 	if n > 0 {
-		fmt.Fprintf(os.Stderr, "\n")
+		fmt.Fprintf(os.Stderr, "\nOptions:\n")
 		tw := tabwriter.NewWriter(os.Stderr, 2, 0, 2, ' ', 0)
 		f.VisitAll(func(f *flag.Flag) {
 			fmt.Fprintf(tw, "\t-%s=%s\t%s\n", f.Name, f.DefValue, f.Usage)

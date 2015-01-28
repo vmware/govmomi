@@ -18,6 +18,8 @@ package pool
 
 import (
 	"flag"
+	"fmt"
+	"path"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -25,7 +27,7 @@ import (
 )
 
 type create struct {
-	*flags.ResourcePoolFlag
+	*flags.DatacenterFlag
 	*ResourceConfigSpecFlag
 }
 
@@ -43,12 +45,43 @@ func (cmd *create) Register(f *flag.FlagSet) {}
 
 func (cmd *create) Process() error { return nil }
 
+func (cmd *create) Usage() string {
+	return "POOL..."
+}
+
+func (cmd *create) Description() string {
+	return "Create one or more resource POOLs.\n" + poolCreateHelp
+}
+
 func (cmd *create) Run(f *flag.FlagSet) error {
-	parent, err := cmd.ResourcePool()
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
+
+	finder, err := cmd.Finder()
 	if err != nil {
 		return err
 	}
 
-	_, err = parent.Create(f.Arg(0), cmd.ResourceConfigSpec)
-	return err
+	for _, arg := range f.Args() {
+		dir := path.Dir(arg)
+		base := path.Base(arg)
+		parents, err := finder.ResourcePoolList(dir)
+		if err != nil {
+			return err
+		}
+
+		if len(parents) == 0 {
+			return fmt.Errorf("cannot create resource pool '%s': parent not found", base)
+		}
+
+		for _, parent := range parents {
+			_, err = parent.Create(base, cmd.ResourceConfigSpec)
+			if err != nil {
+				return err
+			}
+		}
+	}
+
+	return nil
 }

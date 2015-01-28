@@ -41,14 +41,22 @@ func (cmd *info) Register(f *flag.FlagSet) {}
 
 func (cmd *info) Process() error { return nil }
 
+func (cmd *info) Usage() string {
+	return "POOL..."
+}
+
+func (cmd *info) Description() string {
+	return "Retrieve information about one or more resource POOLs.\n" + poolNameHelp
+}
+
 func (cmd *info) Run(f *flag.FlagSet) error {
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
+
 	c, err := cmd.Client()
 	if err != nil {
 		return err
-	}
-
-	if f.NArg() == 0 {
-		return flag.ErrHelp
 	}
 
 	finder, err := cmd.Finder()

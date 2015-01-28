@@ -25,7 +25,7 @@ import (
 )
 
 type change struct {
-	*flags.ResourcePoolFlag
+	*flags.DatacenterFlag
 	*ResourceConfigSpecFlag
 	name string
 }
@@ -41,8 +41,20 @@ func (cmd *change) Register(f *flag.FlagSet) {
 
 func (cmd *change) Process() error { return nil }
 
+func (cmd *change) Usage() string {
+	return "POOL..."
+}
+
+func (cmd *change) Description() string {
+	return "Change the configuration of one or more resource POOLs.\n" + poolNameHelp
+}
+
 func (cmd *change) Run(f *flag.FlagSet) error {
-	pool, err := cmd.ResourcePool()
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
+
+	finder, err := cmd.Finder()
 	if err != nil {
 		return err
 	}
@@ -53,5 +65,17 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		}
 	})
 
-	return pool.UpdateConfig(cmd.name, &cmd.ResourceConfigSpec)
+	pools, err := finder.ResourcePoolList(f.Args()...)
+	if err != nil {
+		return err
+	}
+
+	for _, pool := range pools {
+		err := pool.UpdateConfig(cmd.name, &cmd.ResourceConfigSpec)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

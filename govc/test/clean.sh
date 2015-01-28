@@ -1,6 +1,7 @@
 #!/bin/bash
-
-# cleanup any VMs or .{vmdk,iso,img} artifacts created by govc
+#
+# Cleanup any artifacts created by govc
+#
 
 . $(dirname $0)/test_helper.bash
 
@@ -15,5 +16,9 @@ datastore_rm $GOVC_TEST_IMG
 datastore_rm $GOVC_TEST_ISO
 datastore_rm $GOVC_TEST_VMDK
 datastore_rm $(echo $GOVC_TEST_VMDK | sed 's/.vmdk/-flat.vmdk/')
+
+# Recursively destroy all resource pools created by the test suite
+govc ls host/*/Resources/govc-test-* | \
+  xargs -rt govc pool.destroy -r
 
 govc datastore.ls

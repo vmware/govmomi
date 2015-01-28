@@ -38,6 +38,14 @@ func (cmd *destroy) Register(f *flag.FlagSet) {
 
 func (cmd *destroy) Process() error { return nil }
 
+func (cmd *destroy) Usage() string {
+	return "POOL..."
+}
+
+func (cmd *destroy) Description() string {
+	return "Destroy one or more resource POOLs.\n" + poolNameHelp
+}
+
 func (cmd *destroy) Run(f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
