@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -52,13 +53,23 @@ type ClientFlag struct {
 	client *govmomi.Client
 }
 
-func (flag *ClientFlag) String() string {
-	if flag.url != nil {
-		withoutCredentials := *flag.url
-		withoutCredentials.User = nil
-		return withoutCredentials.String()
+func (flag *ClientFlag) URLWithoutPassword() *url.URL {
+	if flag.url == nil {
+		return nil
 	}
-	return ""
+
+	withoutCredentials := *flag.url
+	withoutCredentials.User = url.User(flag.url.User.Username())
+	return &withoutCredentials
+}
+
+func (flag *ClientFlag) String() string {
+	url := flag.URLWithoutPassword()
+	if url == nil {
+		return ""
+	}
+
+	return url.String()
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
@@ -129,8 +140,13 @@ func (flag *ClientFlag) Process() error {
 }
 
 func (flag *ClientFlag) sessionFile() string {
-	file := fmt.Sprintf("%s@%s-insecure=%t", flag.url.User.Username(), flag.url.Host, flag.insecure)
-	return filepath.Join(os.Getenv("HOME"), ".govmomi", "sessions", file)
+	url := flag.URLWithoutPassword()
+
+	// Key session file off of full URI and insecure setting.
+	// Hash key to get a predictable, canonical format.
+	key := fmt.Sprintf("%s#insecure=%t", url.String(), flag.insecure)
+	name := fmt.Sprintf("%040x", sha1.Sum([]byte(key)))
+	return filepath.Join(os.Getenv("HOME"), ".govmomi", "sessions", name)
 }
 
 func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
@@ -168,7 +184,7 @@ func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
 		return nil, err
 	}
 
-	f, err := os.Create(p)
+	f, err := os.OpenFile(p, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return nil, err
 	}
