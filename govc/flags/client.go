@@ -184,7 +184,7 @@ func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
 		return nil, err
 	}
 
-	f, err := os.Create(p)
+	f, err := os.OpenFile(p, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
 		return nil, err
 	}
