@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestLogin(t *testing.T) {
@@ -91,5 +92,46 @@ func TestInvalidSdk(t *testing.T) {
 	_, err := NewClient(*u, true)
 	if err == nil {
 		t.Error("should fail")
+	}
+}
+
+func TestPropertiesN(t *testing.T) {
+	u := test.URL()
+	if u == nil {
+		t.SkipNow()
+	}
+
+	c, err := NewClient(*u, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var f mo.Folder
+	err = c.Properties(c.ServiceContent.RootFolder, nil, &f)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var dc mo.Datacenter
+	err = c.Properties(f.ChildEntity[0], nil, &dc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var folderReferences = []types.ManagedObjectReference{
+		dc.DatastoreFolder,
+		dc.HostFolder,
+		dc.NetworkFolder,
+		dc.VmFolder,
+	}
+
+	var folders []mo.Folder
+	err = c.PropertiesN(folderReferences, []string{"name"}, &folders)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if len(folders) != len(folderReferences) {
+		t.Errorf("Expected %d, got %d", len(folderReferences), len(folders))
 	}
 }
