@@ -17,6 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
+	"errors"
 	"net/url"
 
 	"github.com/vmware/govmomi/vim25/methods"
@@ -108,27 +109,46 @@ func (c *Client) UserSession() (*types.UserSession, error) {
 }
 
 func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
-	ospec := types.ObjectSpec{
-		Obj:  obj,
-		Skip: false,
-	}
+	var objs = []types.ManagedObjectReference{obj}
+	return c.PropertiesN(objs, p, dst)
+}
 
-	pspec := types.PropertySpec{
-		Type: obj.Type,
-	}
+func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, dst interface{}) error {
+	var propSpec *types.PropertySpec
+	var objectSet []types.ObjectSpec
 
-	if p == nil {
-		pspec.All = true
-	} else {
-		pspec.PathSet = p
+	for _, obj := range objs {
+		// Ensure that all object reference types are the same
+		if propSpec == nil {
+			propSpec = &types.PropertySpec{
+				Type: obj.Type,
+			}
+
+			if p == nil {
+				propSpec.All = true
+			} else {
+				propSpec.PathSet = p
+			}
+		} else {
+			if obj.Type != propSpec.Type {
+				return errors.New("object references must have the same type")
+			}
+		}
+
+		objectSpec := types.ObjectSpec{
+			Obj:  obj,
+			Skip: false,
+		}
+
+		objectSet = append(objectSet, objectSpec)
 	}
 
 	req := types.RetrieveProperties{
 		This: c.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
-				ObjectSet: []types.ObjectSpec{ospec},
-				PropSet:   []types.PropertySpec{pspec},
+				ObjectSet: objectSet,
+				PropSet:   []types.PropertySpec{*propSpec},
 			},
 		},
 	}
