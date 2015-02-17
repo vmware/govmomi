@@ -36,7 +36,7 @@ type Client struct {
 	ServiceContent types.ServiceContent
 }
 
-func serviceContent(r soap.RoundTripper) (types.ServiceContent, error) {
+func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 	req := types.RetrieveServiceContent{
 		This: serviceInstance,
 	}
@@ -49,47 +49,50 @@ func serviceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 	return res.Returnval, nil
 }
 
-func login(r soap.RoundTripper, u url.URL, sc types.ServiceContent) error {
-	// Return if URL doesn't contain username/password information.
-	if u.User == nil {
-		return nil
+func NewClient(u url.URL, insecure bool) (*Client, error) {
+	soapClient := soap.NewClient(u, insecure)
+	serviceContent, err := getServiceContent(soapClient)
+	if err != nil {
+		return nil, err
 	}
 
+	c := Client{
+		Client:         soapClient,
+		ServiceContent: serviceContent,
+	}
+
+	// Only login if the URL contains user information.
+	if u.User != nil {
+		err = c.Login(*u.User)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	return &c, nil
+}
+
+func (c *Client) Login(u url.Userinfo) error {
 	req := types.Login{
-		This: *sc.SessionManager,
+		This: *c.ServiceContent.SessionManager,
 	}
 
-	req.UserName = u.User.Username()
-	if pw, ok := u.User.Password(); ok {
+	req.UserName = u.Username()
+	if pw, ok := u.Password(); ok {
 		req.Password = pw
 	}
 
-	_, err := methods.Login(r, &req)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	_, err := methods.Login(c, &req)
+	return err
 }
 
-func NewClient(u url.URL, insecure bool) (*Client, error) {
-	c := Client{
-		Client: soap.NewClient(u, insecure),
+func (c *Client) Logout() error {
+	req := types.Logout{
+		This: *c.ServiceContent.SessionManager,
 	}
 
-	sc, err := serviceContent(c.Client)
-	if err != nil {
-		return nil, err
-	}
-
-	err = login(c.Client, u, sc)
-	if err != nil {
-		return nil, err
-	}
-
-	c.ServiceContent = sc
-
-	return &c, nil
+	_, err := methods.Logout(c, &req)
+	return err
 }
 
 // RoundTrip dispatches to the client's SOAP client RoundTrip function.
