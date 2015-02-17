@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
@@ -45,28 +46,35 @@ type RoundTripper interface {
 type Client struct {
 	http.Client
 
-	u        url.URL
-	insecure bool
-	d        *debugContainer
+	u url.URL
+	k bool // Named after curl's -k flag
+	d *debugContainer
+	t *http.Transport
 }
 
 func NewClient(u url.URL, insecure bool) *Client {
 	c := Client{
-		u:        u,
-		insecure: insecure,
-		d:        newDebug(),
+		u: u,
+		k: insecure,
+		d: newDebug(),
+	}
+
+	// Initialize http.RoundTripper on client, so we can customize it below
+	c.t = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
 	}
 
 	if c.u.Scheme == "https" {
-		c.Client.Transport = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: c.insecure,
-			},
-		}
+		c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k}
+		c.t.TLSHandshakeTimeout = 10 * time.Second
 	}
 
-	c.Jar, _ = cookiejar.New(nil)
+	c.Client.Transport = c.t
+	c.Client.Jar, _ = cookiejar.New(nil)
 	c.u.User = nil
 
 	return &c
@@ -86,7 +94,7 @@ func (c *Client) MarshalJSON() ([]byte, error) {
 	m := marshaledClient{
 		Cookies:  c.Jar.Cookies(&c.u),
 		URL:      &c.u,
-		Insecure: c.insecure,
+		Insecure: c.k,
 	}
 
 	return json.Marshal(m)
