@@ -21,18 +21,14 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"net/http"
 	"net/http/cookiejar"
-	"net/http/httputil"
 	"net/url"
 	"os"
 	"strings"
-	"sync/atomic"
 	"time"
 
-	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -46,27 +42,19 @@ type RoundTripper interface {
 	RoundTrip(req, res HasFault) error
 }
 
-var cn uint64 // Client counter
-
 type Client struct {
 	http.Client
 
 	u        url.URL
 	insecure bool
-	_        uint32 // for alignment: https://code.google.com/p/go/issues/detail?id=6404
-
-	cn  uint64         // Client counter
-	rn  uint64         // Request counter
-	log io.WriteCloser // Request log
+	d        *debugContainer
 }
 
 func NewClient(u url.URL, insecure bool) *Client {
 	c := Client{
 		u:        u,
 		insecure: insecure,
-
-		cn: atomic.AddUint64(&cn, 1),
-		rn: 0,
+		d:        newDebug(),
 	}
 
 	if c.u.Scheme == "https" {
@@ -80,10 +68,6 @@ func NewClient(u url.URL, insecure bool) *Client {
 
 	c.Jar, _ = cookiejar.New(nil)
 	c.u.User = nil
-
-	if debug.Enabled() {
-		c.log = debug.NewFile(fmt.Sprintf("%d-client.log", c.cn))
-	}
 
 	return &c
 }
@@ -130,20 +114,19 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	reqEnv := Envelope{Body: reqBody}
 	resEnv := Envelope{Body: resBody}
 
-	num := atomic.AddUint64(&c.rn, 1)
+	// Create debugging context for this round trip
+	d := c.d.newRoundTrip()
+	if d.enabled() {
+		defer d.done()
+	}
 
 	b, err := xml.Marshal(reqEnv)
 	if err != nil {
 		panic(err)
 	}
 
-	rawreqbody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
-	if debug.Enabled() {
-		f := debug.NewFile(fmt.Sprintf("%d-%04d.req.xml", c.cn, num))
-		rawreqbody = io.TeeReader(rawreqbody, f)
-	}
-
-	httpreq, err = http.NewRequest("POST", c.u.String(), rawreqbody)
+	rawReqBody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
+	httpreq, err = http.NewRequest("POST", c.u.String(), rawReqBody)
 	if err != nil {
 		panic(err)
 	}
@@ -151,43 +134,30 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	httpreq.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
 	httpreq.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
 
-	if debug.Enabled() {
-		b, _ := httputil.DumpRequest(httpreq, false)
-		wc := debug.NewFile(fmt.Sprintf("%d-%04d.req.headers", c.cn, num))
-		wc.Write(b)
-		wc.Close()
+	if d.enabled() {
+		d.debugRequest(httpreq)
 	}
 
 	tstart := time.Now()
 	httpres, err = c.Client.Do(httpreq)
 	tstop := time.Now()
 
-	if debug.Enabled() {
-		now := time.Now().Format("2006-01-02T15-04-05.999999999")
-		ms := tstop.Sub(tstart) / time.Millisecond
-		fmt.Fprintf(c.log, "%s: %4d took %6dms\n", now, num, ms)
+	if d.enabled() {
+		d.logf("done in %6dms", tstop.Sub(tstart)/time.Millisecond)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	var rawresbody io.Reader = httpres.Body
+	if d.enabled() {
+		d.debugResponse(httpres)
+	}
+
+	// Close response regardless of what happens next
 	defer httpres.Body.Close()
 
-	if debug.Enabled() {
-		f := debug.NewFile(fmt.Sprintf("%d-%04d.res.xml", c.cn, num))
-		rawresbody = io.TeeReader(rawresbody, f)
-	}
-
-	if debug.Enabled() {
-		b, _ := httputil.DumpResponse(httpres, false)
-		wc := debug.NewFile(fmt.Sprintf("%d-%04d.res.headers", c.cn, num))
-		wc.Write(b)
-		wc.Close()
-	}
-
-	dec := xml.NewDecoder(rawresbody)
+	dec := xml.NewDecoder(httpres.Body)
 	dec.TypeFunc = types.TypeFunc()
 	err = dec.Decode(&resEnv)
 	if err != nil {
