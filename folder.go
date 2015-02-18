@@ -73,6 +73,20 @@ func (f Folder) CreateDatacenter(datacenter string) (*Datacenter, error) {
 	return nil, err
 }
 
+func (f Folder) CreateFolder(name string) (*Folder, error) {
+	req := types.CreateFolder{
+		This: f.Reference(),
+		Name: name,
+	}
+
+	res, err := methods.CreateFolder(f.c, &req)
+	if res != nil {
+		return NewFolder(f.c, res.Returnval), err
+	}
+
+	return nil, err
+}
+
 func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
