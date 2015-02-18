@@ -151,7 +151,7 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	tstop := time.Now()
 
 	if d.enabled() {
-		d.logf("done in %6dms", tstop.Sub(tstart)/time.Millisecond)
+		d.logf("%6dms (%T)", tstop.Sub(tstart)/time.Millisecond, resBody)
 	}
 
 	if err != nil {
