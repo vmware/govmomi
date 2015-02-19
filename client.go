@@ -95,6 +95,27 @@ func (c *Client) Logout() error {
 	return err
 }
 
+func (c *Client) SessionIsActive() (bool, error) {
+
+	user, err := c.UserSession()
+	if err != nil {
+		return false, err
+	}
+
+	req := types.SessionIsActive{
+		This:      *c.ServiceContent.SessionManager,
+		SessionID: user.Key,
+		UserName:  user.UserName,
+	}
+
+	active, err := methods.SessionIsActive(c, &req)
+	if err != nil {
+		return false, err
+	}
+
+	return active.Returnval, err
+}
+
 // RoundTrip dispatches to the client's SOAP client RoundTrip function.
 func (c *Client) RoundTrip(req, res soap.HasFault) error {
 	return c.Client.RoundTrip(req, res)

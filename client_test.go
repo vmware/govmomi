@@ -135,3 +135,33 @@ func TestPropertiesN(t *testing.T) {
 		t.Errorf("Expected %d, got %d", len(folderReferences), len(folders))
 	}
 }
+
+func TestSessionIsActive(t *testing.T) {
+	u := test.URL()
+	if u == nil {
+		t.SkipNow()
+	}
+
+	c, err := NewClient(*u, true)
+	if err != nil {
+		t.Error(err)
+	}
+
+	active, err := c.SessionIsActive()
+	if err != nil || !active {
+		t.Errorf("Expected %t, got %t", true, active)
+		t.Errorf("Expected nil, got %v", err)
+	}
+
+	err = c.Logout()
+	if err != nil {
+		t.Error(err)
+	}
+
+	active, err = c.SessionIsActive()
+	if err == nil || active {
+		t.Errorf("Expected %t, got %t", false, active)
+		t.Errorf("Expected NotAuthenticated, got %v", err)
+	}
+
+}
