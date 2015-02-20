@@ -80,11 +80,11 @@ func (f Folder) CreateFolder(name string) (*Folder, error) {
 	}
 
 	res, err := methods.CreateFolder(f.c, &req)
-	if res != nil {
-		return NewFolder(f.c, res.Returnval), err
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, err
+	return NewFolder(f.c, res.Returnval), err
 }
 
 func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
