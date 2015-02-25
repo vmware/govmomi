@@ -34,6 +34,7 @@ var serviceInstance = types.ManagedObjectReference{
 type Client struct {
 	Client         *soap.Client
 	ServiceContent types.ServiceContent
+	Session        SessionManager
 }
 
 func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
@@ -60,10 +61,11 @@ func NewClient(u url.URL, insecure bool) (*Client, error) {
 		Client:         soapClient,
 		ServiceContent: serviceContent,
 	}
-
+	// automatically create a new SessionManager
+	c.Session = NewSessionManager(&c, *c.ServiceContent.SessionManager)
 	// Only login if the URL contains user information.
 	if u.User != nil {
-		err = c.Login(*u.User)
+		err = c.Session.Login(*u.User)
 		if err != nil {
 			return nil, err
 		}
@@ -72,64 +74,14 @@ func NewClient(u url.URL, insecure bool) (*Client, error) {
 	return &c, nil
 }
 
-func (c *Client) Login(u url.Userinfo) error {
-	req := types.Login{
-		This: *c.ServiceContent.SessionManager,
-	}
-
-	req.UserName = u.Username()
-	if pw, ok := u.Password(); ok {
-		req.Password = pw
-	}
-
-	_, err := methods.Login(c, &req)
-	return err
-}
-
+// convience method for logout via SessionManager
 func (c *Client) Logout() error {
-	req := types.Logout{
-		This: *c.ServiceContent.SessionManager,
-	}
-
-	_, err := methods.Logout(c, &req)
-	return err
-}
-
-func (c *Client) SessionIsActive() (bool, error) {
-
-	user, err := c.UserSession()
-	if err != nil {
-		return false, err
-	}
-
-	req := types.SessionIsActive{
-		This:      *c.ServiceContent.SessionManager,
-		SessionID: user.Key,
-		UserName:  user.UserName,
-	}
-
-	active, err := methods.SessionIsActive(c, &req)
-	if err != nil {
-		return false, err
-	}
-
-	return active.Returnval, err
+	return c.Session.Logout()
 }
 
 // RoundTrip dispatches to the client's SOAP client RoundTrip function.
 func (c *Client) RoundTrip(req, res soap.HasFault) error {
 	return c.Client.RoundTrip(req, res)
-}
-
-func (c *Client) UserSession() (*types.UserSession, error) {
-	var sm mo.SessionManager
-
-	err := mo.RetrieveProperties(c, c.ServiceContent.PropertyCollector, *c.ServiceContent.SessionManager, &sm)
-	if err != nil {
-		return nil, err
-	}
-
-	return sm.CurrentSession, nil
 }
 
 func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
@@ -333,6 +285,10 @@ func (c *Client) StorageResourceManager() StorageResourceManager {
 func (c *Client) CustomizationSpecManager() CustomizationSpecManager {
 	return CustomizationSpecManager{c}
 }
+
+// func (c *Client) SessionManager() SessionManager {
+// 	return NewSessionManager(c, *c.ServiceContent.SessionManager)
+// }
 
 // NewPropertyCollector creates a new property collector based on the
 // root property collector. It is the responsibility of the caller to
