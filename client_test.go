@@ -27,8 +27,9 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func TestLogin(t *testing.T) {
+func TestNewClient(t *testing.T) {
 	u := test.URL()
+
 	if u == nil {
 		t.SkipNow()
 	}
