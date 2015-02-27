@@ -289,6 +289,7 @@ func (c *Client) CustomizationSpecManager() CustomizationSpecManager {
 func (c *Client) EventManager() EventManager {
 	return EventManager{c}
 }
+
 // func (c *Client) SessionManager() SessionManager {
 // 	return NewSessionManager(c, *c.ServiceContent.SessionManager)
 // }
