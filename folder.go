@@ -64,13 +64,31 @@ func (f Folder) CreateDatacenter(datacenter string) (*Datacenter, error) {
 		Name: datacenter,
 	}
 
-	// response will be nil if this is an ESX host that does not belong to a vCenter
 	res, err := methods.CreateDatacenter(f.c, &req)
-	if res != nil {
-		return NewDatacenter(f.c, res.Returnval), err
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, err
+	// Response will be nil if this is an ESX host that does not belong to a vCenter
+	if res == nil {
+		return nil, nil
+	}
+
+	return NewDatacenter(f.c, res.Returnval), nil
+}
+
+func (f Folder) CreateFolder(name string) (*Folder, error) {
+	req := types.CreateFolder{
+		This: f.Reference(),
+		Name: name,
+	}
+
+	res, err := methods.CreateFolder(f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewFolder(f.c, res.Returnval), err
 }
 
 func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {

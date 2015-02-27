@@ -47,6 +47,8 @@ func ToElement(r govmomi.Reference, prefix string) Element {
 		name = m.Name
 	case mo.Datastore:
 		name = m.Name
+	case mo.StoragePod:
+		name = m.Name
 	case mo.HostSystem:
 		name = m.Name
 	case mo.ResourcePool:

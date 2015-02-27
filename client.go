@@ -17,6 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
+	"errors"
 	"net/url"
 
 	"github.com/vmware/govmomi/vim25/methods"
@@ -33,9 +34,10 @@ var serviceInstance = types.ManagedObjectReference{
 type Client struct {
 	Client         *soap.Client
 	ServiceContent types.ServiceContent
+	Session        SessionManager
 }
 
-func serviceContent(r soap.RoundTripper) (types.ServiceContent, error) {
+func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 	req := types.RetrieveServiceContent{
 		This: serviceInstance,
 	}
@@ -48,47 +50,33 @@ func serviceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 	return res.Returnval, nil
 }
 
-func login(r soap.RoundTripper, u url.URL, sc types.ServiceContent) error {
-	// Return if URL doesn't contain username/password information.
-	if u.User == nil {
-		return nil
-	}
-
-	req := types.Login{
-		This: *sc.SessionManager,
-	}
-
-	req.UserName = u.User.Username()
-	if pw, ok := u.User.Password(); ok {
-		req.Password = pw
-	}
-
-	_, err := methods.Login(r, &req)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func NewClient(u url.URL, insecure bool) (*Client, error) {
+	soapClient := soap.NewClient(u, insecure)
+	serviceContent, err := getServiceContent(soapClient)
+	if err != nil {
+		return nil, err
+	}
+
 	c := Client{
-		Client: soap.NewClient(u, insecure),
+		Client:         soapClient,
+		ServiceContent: serviceContent,
 	}
-
-	sc, err := serviceContent(c.Client)
-	if err != nil {
-		return nil, err
+	// automatically create a new SessionManager
+	c.Session = NewSessionManager(&c, *c.ServiceContent.SessionManager)
+	// Only login if the URL contains user information.
+	if u.User != nil {
+		err = c.Session.Login(*u.User)
+		if err != nil {
+			return nil, err
+		}
 	}
-
-	err = login(c.Client, u, sc)
-	if err != nil {
-		return nil, err
-	}
-
-	c.ServiceContent = sc
 
 	return &c, nil
+}
+
+// convience method for logout via SessionManager
+func (c *Client) Logout() error {
+	return c.Session.Logout()
 }
 
 // RoundTrip dispatches to the client's SOAP client RoundTrip function.
@@ -96,39 +84,47 @@ func (c *Client) RoundTrip(req, res soap.HasFault) error {
 	return c.Client.RoundTrip(req, res)
 }
 
-func (c *Client) UserSession() (*types.UserSession, error) {
-	var sm mo.SessionManager
-
-	err := mo.RetrieveProperties(c, c.ServiceContent.PropertyCollector, *c.ServiceContent.SessionManager, &sm)
-	if err != nil {
-		return nil, err
-	}
-
-	return sm.CurrentSession, nil
+func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
+	var objs = []types.ManagedObjectReference{obj}
+	return c.PropertiesN(objs, p, dst)
 }
 
-func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
-	ospec := types.ObjectSpec{
-		Obj:  obj,
-		Skip: false,
-	}
+func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, dst interface{}) error {
+	var propSpec *types.PropertySpec
+	var objectSet []types.ObjectSpec
 
-	pspec := types.PropertySpec{
-		Type: obj.Type,
-	}
+	for _, obj := range objs {
+		// Ensure that all object reference types are the same
+		if propSpec == nil {
+			propSpec = &types.PropertySpec{
+				Type: obj.Type,
+			}
 
-	if p == nil {
-		pspec.All = true
-	} else {
-		pspec.PathSet = p
+			if p == nil {
+				propSpec.All = true
+			} else {
+				propSpec.PathSet = p
+			}
+		} else {
+			if obj.Type != propSpec.Type {
+				return errors.New("object references must have the same type")
+			}
+		}
+
+		objectSpec := types.ObjectSpec{
+			Obj:  obj,
+			Skip: false,
+		}
+
+		objectSet = append(objectSet, objectSpec)
 	}
 
 	req := types.RetrieveProperties{
 		This: c.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
-				ObjectSet: []types.ObjectSpec{ospec},
-				PropSet:   []types.PropertySpec{pspec},
+				ObjectSet: objectSet,
+				PropSet:   []types.PropertySpec{*propSpec},
 			},
 		},
 	}
@@ -293,6 +289,9 @@ func (c *Client) CustomizationSpecManager() CustomizationSpecManager {
 func (c *Client) EventManager() EventManager {
 	return EventManager{c}
 }
+// func (c *Client) SessionManager() SessionManager {
+// 	return NewSessionManager(c, *c.ServiceContent.SessionManager)
+// }
 
 // NewPropertyCollector creates a new property collector based on the
 // root property collector. It is the responsibility of the caller to
