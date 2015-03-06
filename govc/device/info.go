@@ -100,6 +100,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		switch md := device.(type) {
 		case types.BaseVirtualEthernetCard:
 			fmt.Fprintf(tw, "  MAC Address:\t%s\n", md.GetVirtualEthernetCard().MacAddress)
+			fmt.Fprintf(tw, "  Address type:\t%s\n", md.GetVirtualEthernetCard().AddressType)
 		case *types.VirtualDisk:
 			if b, ok := md.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
 				fmt.Fprintf(tw, "  File:\t%s\n", b.GetVirtualDeviceFileBackingInfo().FileName)

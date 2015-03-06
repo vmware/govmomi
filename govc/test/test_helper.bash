@@ -75,6 +75,10 @@ vm_power_state() {
   govc vm.info "$1" | grep "Power state:" | awk -F: '{print $2}' | collapse_ws
 }
 
+vm_mac() {
+  govc device.info -vm "$1" ethernet-0 | grep "MAC Address" | awk '{print $NF}'
+}
+
 # exports an enviroment for using vcsim if running, otherwise skips the calling test.
 vcsim_env() {
   if [ "$(uname)" == "Darwin" ]
