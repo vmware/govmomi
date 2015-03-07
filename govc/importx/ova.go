@@ -49,8 +49,8 @@ func (cmd *ova) Run(f *flag.FlagSet) error {
 }
 
 func (cmd *ova) Import(fpath string) error {
-	// basename i | sed -e s/\.ova$/.ovf/
-	ovf := strings.TrimSuffix(path.Base(fpath), path.Ext(fpath)) + ".ovf"
+	// basename i | sed -e s/\.ova$/*.ovf/
+	ovf := strings.TrimSuffix(path.Base(fpath), path.Ext(fpath)) + "*.ovf"
 
 	return cmd.ovf.Import(ovf)
 }
