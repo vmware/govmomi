@@ -22,7 +22,9 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/license"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type add struct {
@@ -48,7 +50,7 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	m := client.LicenseManager()
+	m := license.NewManager(client)
 
 	// From the vSphere 5.5 documentation:
 	//
@@ -56,19 +58,19 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 	//     updateLicense for ESX Server and addLicense follow by
 	//     LicenseAssingmentManager.updateAssignedLicense for VirtualCenter.
 	//
-	var addFunc func(key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error)
+	var addFunc func(ctx context.Context, key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error)
 	switch t := client.ServiceContent.About.ApiType; t {
 	case "HostAgent":
-		addFunc = m.UpdateLicense
+		addFunc = m.Update
 	case "VirtualCenter":
-		addFunc = m.AddLicense
+		addFunc = m.Add
 	default:
 		return fmt.Errorf("unsupported ApiType: %s", t)
 	}
 
 	result := make(licenseOutput, 0)
 	for _, v := range f.Args() {
-		license, err := addFunc(v, nil)
+		license, err := addFunc(context.TODO(), v, nil)
 		if err != nil {
 			return err
 		}

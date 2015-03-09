@@ -14,30 +14,34 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
+package license
 
 import (
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
-type LicenseManager struct {
-	types.ManagedObjectReference
+type Manager struct {
+	reference types.ManagedObjectReference
 
-	c *Client
+	c *govmomi.Client
 }
 
-func NewLicenseManager(c *Client, ref types.ManagedObjectReference) LicenseManager {
-	return LicenseManager{
-		ManagedObjectReference: ref,
+func NewManager(c *govmomi.Client) *Manager {
+	m := Manager{
+		reference: *c.ServiceContent.LicenseManager,
+
 		c: c,
 	}
+
+	return &m
 }
 
-func (l LicenseManager) Reference() types.ManagedObjectReference {
-	return l.ManagedObjectReference
+func (m Manager) Reference() types.ManagedObjectReference {
+	return m.reference
 }
 
 func mapToKeyValueSlice(m map[string]string) []types.KeyValue {
@@ -48,14 +52,14 @@ func mapToKeyValueSlice(m map[string]string) []types.KeyValue {
 	return r
 }
 
-func (l LicenseManager) AddLicense(key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error) {
+func (m Manager) Add(ctx context.Context, key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error) {
 	req := types.AddLicense{
-		This:       l.Reference(),
+		This:       m.Reference(),
 		LicenseKey: key,
 		Labels:     mapToKeyValueSlice(labels),
 	}
 
-	res, err := methods.AddLicense(context.TODO(), l.c, &req)
+	res, err := methods.AddLicense(ctx, m.c, &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}
@@ -63,24 +67,24 @@ func (l LicenseManager) AddLicense(key string, labels map[string]string) (types.
 	return res.Returnval, nil
 }
 
-func (l LicenseManager) RemoveLicense(key string) error {
+func (m Manager) Remove(ctx context.Context, key string) error {
 	req := types.RemoveLicense{
-		This:       l.Reference(),
+		This:       m.Reference(),
 		LicenseKey: key,
 	}
 
-	_, err := methods.RemoveLicense(context.TODO(), l.c, &req)
+	_, err := methods.RemoveLicense(ctx, m.c, &req)
 	return err
 }
 
-func (l LicenseManager) UpdateLicense(key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error) {
+func (m Manager) Update(ctx context.Context, key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error) {
 	req := types.UpdateLicense{
-		This:       l.Reference(),
+		This:       m.Reference(),
 		LicenseKey: key,
 		Labels:     mapToKeyValueSlice(labels),
 	}
 
-	res, err := methods.UpdateLicense(context.TODO(), l.c, &req)
+	res, err := methods.UpdateLicense(ctx, m.c, &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}
@@ -88,10 +92,10 @@ func (l LicenseManager) UpdateLicense(key string, labels map[string]string) (typ
 	return res.Returnval, nil
 }
 
-func (l LicenseManager) ListLicenses() ([]types.LicenseManagerLicenseInfo, error) {
+func (m Manager) List(ctx context.Context) ([]types.LicenseManagerLicenseInfo, error) {
 	var mlm mo.LicenseManager
 
-	err := l.c.Properties(l.Reference(), []string{"licenses"}, &mlm)
+	err := m.c.Properties(m.Reference(), []string{"licenses"}, &mlm)
 	if err != nil {
 		return nil, err
 	}

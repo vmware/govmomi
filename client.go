@@ -275,10 +275,6 @@ func (c *Client) VirtualDiskManager() VirtualDiskManager {
 	return VirtualDiskManager{c}
 }
 
-func (c *Client) LicenseManager() LicenseManager {
-	return NewLicenseManager(c, *c.ServiceContent.LicenseManager)
-}
-
 func (c *Client) StorageResourceManager() StorageResourceManager {
 	return StorageResourceManager{c}
 }
