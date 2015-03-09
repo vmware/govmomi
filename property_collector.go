@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type PropertyCollector struct {
@@ -31,7 +32,7 @@ func (p *PropertyCollector) Destroy() error {
 		This: p.r,
 	}
 
-	_, err := methods.DestroyPropertyCollector(p.c, &req)
+	_, err := methods.DestroyPropertyCollector(context.TODO(), p.c, &req)
 	if err != nil {
 		return err
 	}
@@ -43,7 +44,7 @@ func (p *PropertyCollector) Destroy() error {
 func (p *PropertyCollector) CreateFilter(req types.CreateFilter) error {
 	req.This = p.r
 
-	_, err := methods.CreateFilter(p.c, &req)
+	_, err := methods.CreateFilter(context.TODO(), p.c, &req)
 	if err != nil {
 		return err
 	}
@@ -57,7 +58,7 @@ func (p *PropertyCollector) WaitForUpdates(v string) (*types.UpdateSet, error) {
 		Version: v,
 	}
 
-	res, err := methods.WaitForUpdatesEx(p.c, &req)
+	res, err := methods.WaitForUpdatesEx(context.TODO(), p.c, &req)
 	if err != nil {
 		return nil, err
 	}

@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type HttpNfcLease struct {
@@ -45,7 +46,7 @@ func (o HttpNfcLease) HttpNfcLeaseAbort(fault *types.LocalizedMethodFault) error
 		Fault: fault,
 	}
 
-	_, err := methods.HttpNfcLeaseAbort(o.c, &req)
+	_, err := methods.HttpNfcLeaseAbort(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (o HttpNfcLease) HttpNfcLeaseComplete() error {
 		This: o.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseComplete(o.c, &req)
+	_, err := methods.HttpNfcLeaseComplete(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -73,7 +74,7 @@ func (o HttpNfcLease) HttpNfcLeaseGetManifest() error {
 		This: o.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseGetManifest(o.c, &req)
+	_, err := methods.HttpNfcLeaseGetManifest(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -88,7 +89,7 @@ func (o HttpNfcLease) HttpNfcLeaseProgress(percent int) error {
 		Percent: percent,
 	}
 
-	_, err := methods.HttpNfcLeaseProgress(o.c, &req)
+	_, err := methods.HttpNfcLeaseProgress(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}

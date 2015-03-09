@@ -20,6 +20,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type LicenseManager struct {
@@ -54,7 +55,7 @@ func (l LicenseManager) AddLicense(key string, labels map[string]string) (types.
 		Labels:     mapToKeyValueSlice(labels),
 	}
 
-	res, err := methods.AddLicense(l.c, &req)
+	res, err := methods.AddLicense(context.TODO(), l.c, &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}
@@ -68,7 +69,7 @@ func (l LicenseManager) RemoveLicense(key string) error {
 		LicenseKey: key,
 	}
 
-	_, err := methods.RemoveLicense(l.c, &req)
+	_, err := methods.RemoveLicense(context.TODO(), l.c, &req)
 	return err
 }
 
@@ -79,7 +80,7 @@ func (l LicenseManager) UpdateLicense(key string, labels map[string]string) (typ
 		Labels:     mapToKeyValueSlice(labels),
 	}
 
-	res, err := methods.UpdateLicense(l.c, &req)
+	res, err := methods.UpdateLicense(context.TODO(), l.c, &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}

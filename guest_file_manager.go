@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type GuestFileManager struct {
@@ -40,7 +41,7 @@ func (m GuestFileManager) ChangeFileAttributesInGuest(vm *VirtualMachine, auth t
 		FileAttributes: fileAttributes,
 	}
 
-	_, err := methods.ChangeFileAttributesInGuest(m.c, &req)
+	_, err := methods.ChangeFileAttributesInGuest(context.TODO(), m.c, &req)
 	return err
 }
 
@@ -53,7 +54,7 @@ func (m GuestFileManager) CreateTemporaryDirectoryInGuest(vm *VirtualMachine, au
 		Suffix: suffix,
 	}
 
-	res, err := methods.CreateTemporaryDirectoryInGuest(m.c, &req)
+	res, err := methods.CreateTemporaryDirectoryInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -70,7 +71,7 @@ func (m GuestFileManager) CreateTemporaryFileInGuest(vm *VirtualMachine, auth ty
 		Suffix: suffix,
 	}
 
-	res, err := methods.CreateTemporaryFileInGuest(m.c, &req)
+	res, err := methods.CreateTemporaryFileInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -87,7 +88,7 @@ func (m GuestFileManager) DeleteDirectoryInGuest(vm *VirtualMachine, auth types.
 		Recursive:     recursive,
 	}
 
-	_, err := methods.DeleteDirectoryInGuest(m.c, &req)
+	_, err := methods.DeleteDirectoryInGuest(context.TODO(), m.c, &req)
 	return err
 }
 
@@ -99,7 +100,7 @@ func (m GuestFileManager) DeleteFileInGuest(vm *VirtualMachine, auth types.BaseG
 		FilePath: filePath,
 	}
 
-	_, err := methods.DeleteFileInGuest(m.c, &req)
+	_, err := methods.DeleteFileInGuest(context.TODO(), m.c, &req)
 	return err
 }
 
@@ -111,7 +112,7 @@ func (m GuestFileManager) InitiateFileTransferFromGuest(vm *VirtualMachine, auth
 		GuestFilePath: guestFilePath,
 	}
 
-	res, err := methods.InitiateFileTransferFromGuest(m.c, &req)
+	res, err := methods.InitiateFileTransferFromGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +131,7 @@ func (m GuestFileManager) InitiateFileTransferToGuest(vm *VirtualMachine, auth t
 		Overwrite:      overwrite,
 	}
 
-	res, err := methods.InitiateFileTransferToGuest(m.c, &req)
+	res, err := methods.InitiateFileTransferToGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -149,7 +150,7 @@ func (m GuestFileManager) ListFilesInGuest(vm *VirtualMachine, auth types.BaseGu
 		MatchPattern: matchPattern,
 	}
 
-	res, err := methods.ListFilesInGuest(m.c, &req)
+	res, err := methods.ListFilesInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -166,7 +167,7 @@ func (m GuestFileManager) MakeDirectoryInGuest(vm *VirtualMachine, auth types.Ba
 		CreateParentDirectories: createParentDirectories,
 	}
 
-	_, err := methods.MakeDirectoryInGuest(m.c, &req)
+	_, err := methods.MakeDirectoryInGuest(context.TODO(), m.c, &req)
 	return err
 }
 
@@ -179,7 +180,7 @@ func (m GuestFileManager) MoveDirectoryInGuest(vm *VirtualMachine, auth types.Ba
 		DstDirectoryPath: dstDirectoryPath,
 	}
 
-	_, err := methods.MoveDirectoryInGuest(m.c, &req)
+	_, err := methods.MoveDirectoryInGuest(context.TODO(), m.c, &req)
 	return err
 }
 
@@ -193,6 +194,6 @@ func (m GuestFileManager) MoveFileInGuest(vm *VirtualMachine, auth types.BaseGue
 		Overwrite:   overwrite,
 	}
 
-	_, err := methods.MoveFileInGuest(m.c, &req)
+	_, err := methods.MoveFileInGuest(context.TODO(), m.c, &req)
 	return err
 }

@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type FileManager struct {
@@ -43,7 +44,7 @@ func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Data
 		req.DestinationDatacenter = &ref
 	}
 
-	res, err := methods.CopyDatastoreFile_Task(f.c, &req)
+	res, err := methods.CopyDatastoreFile_Task(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,7 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, er
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.DeleteDatastoreFile_Task(f.c, &req)
+	res, err := methods.DeleteDatastoreFile_Task(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDire
 		req.Datacenter = &ref
 	}
 
-	_, err := methods.MakeDirectory(f.c, &req)
+	_, err := methods.MakeDirectory(context.TODO(), f.c, &req)
 	return err
 }
 
@@ -106,7 +107,7 @@ func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Data
 		req.DestinationDatacenter = &ref
 	}
 
-	res, err := methods.MoveDatastoreFile_Task(f.c, &req)
+	res, err := methods.MoveDatastoreFile_Task(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}

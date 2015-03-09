@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type StorageResourceManager struct {
@@ -31,7 +32,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*T
 		Key:  key,
 	}
 
-	res, err := methods.ApplyStorageDrsRecommendation_Task(sr.c, &req)
+	res, err := methods.ApplyStorageDrsRecommendation_Task(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +50,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *Storage
 		req.Pod = pod.Reference()
 	}
 
-	res, err := methods.ApplyStorageDrsRecommendationToPod_Task(sr.c, &req)
+	res, err := methods.ApplyStorageDrsRecommendationToPod_Task(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -63,7 +64,7 @@ func (sr StorageResourceManager) CancelStorageDrsRecommendation(key []string) er
 		Key:  key,
 	}
 
-	_, err := methods.CancelStorageDrsRecommendation(sr.c, &req)
+	_, err := methods.CancelStorageDrsRecommendation(context.TODO(), sr.c, &req)
 
 	return err
 }
@@ -78,7 +79,7 @@ func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, sp
 		req.Datastore = datastore.Reference()
 	}
 
-	res, err := methods.ConfigureDatastoreIORM_Task(sr.c, &req)
+	res, err := methods.ConfigureDatastoreIORM_Task(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec
 		req.Pod = pod.Reference()
 	}
 
-	res, err := methods.ConfigureStorageDrsForPod_Task(sr.c, &req)
+	res, err := methods.ConfigureStorageDrsForPod_Task(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -114,7 +115,7 @@ func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Dat
 		req.Datastore = datastore.Reference()
 	}
 
-	res, err := methods.QueryDatastorePerformanceSummary(sr.c, &req)
+	res, err := methods.QueryDatastorePerformanceSummary(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +132,7 @@ func (sr StorageResourceManager) QueryIORMConfigOption(host *HostSystem) (*types
 		req.Host = host.Reference()
 	}
 
-	res, err := methods.QueryIORMConfigOption(sr.c, &req)
+	res, err := methods.QueryIORMConfigOption(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -145,7 +146,7 @@ func (sr StorageResourceManager) RecommendDatastores(storageSpec types.StoragePl
 		StorageSpec: storageSpec,
 	}
 
-	res, err := methods.RecommendDatastores(sr.c, &req)
+	res, err := methods.RecommendDatastores(context.TODO(), sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -162,7 +163,7 @@ func (sr StorageResourceManager) RefreshStorageDrsRecommendation(pod *StoragePod
 		req.Pod = pod.Reference()
 	}
 
-	_, err := methods.RefreshStorageDrsRecommendation(sr.c, &req)
+	_, err := methods.RefreshStorageDrsRecommendation(context.TODO(), sr.c, &req)
 
 	return err
 }

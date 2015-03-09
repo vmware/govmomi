@@ -20,6 +20,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type Folder struct {
@@ -64,7 +65,7 @@ func (f Folder) CreateDatacenter(datacenter string) (*Datacenter, error) {
 		Name: datacenter,
 	}
 
-	res, err := methods.CreateDatacenter(f.c, &req)
+	res, err := methods.CreateDatacenter(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -83,7 +84,7 @@ func (f Folder) CreateFolder(name string) (*Folder, error) {
 		Name: name,
 	}
 
-	res, err := methods.CreateFolder(f.c, &req)
+	res, err := methods.CreateFolder(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -103,7 +104,7 @@ func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePo
 		req.Host = &ref
 	}
 
-	res, err := methods.CreateVM_Task(f.c, &req)
+	res, err := methods.CreateVM_Task(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +133,7 @@ func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *Reso
 		req.Pool = &ref
 	}
 
-	res, err := methods.RegisterVM_Task(f.c, &req)
+	res, err := methods.RegisterVM_Task(context.TODO(), f.c, &req)
 	if err != nil {
 		return nil, err
 	}

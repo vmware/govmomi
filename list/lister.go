@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type Element struct {
@@ -165,7 +166,7 @@ func (l Lister) ListFolder() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(l.Client, req, &dst)
+	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
 	if err != nil {
 		return nil, err
 	}
@@ -224,7 +225,7 @@ func (l Lister) ListDatacenter() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(l.Client, req, &dst)
+	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
 	if err != nil {
 		return nil, err
 	}
@@ -290,7 +291,7 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(l.Client, req, &dst)
+	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
 	if err != nil {
 		return nil, err
 	}
@@ -354,7 +355,7 @@ func (l Lister) ListResourcePool() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(l.Client, req, &dst)
+	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
 	if err != nil {
 		return nil, err
 	}

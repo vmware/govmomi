@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type VirtualDiskManager struct {
@@ -49,7 +50,7 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 		req.DestDatacenter = &ref
 	}
 
-	res, err := methods.CopyVirtualDisk_Task(m.c, &req)
+	res, err := methods.CopyVirtualDisk_Task(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -79,7 +80,7 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 		req.DestDatacenter = &ref
 	}
 
-	res, err := methods.MoveVirtualDisk_Task(m.c, &req)
+	res, err := methods.MoveVirtualDisk_Task(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +100,7 @@ func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Tas
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.DeleteVirtualDisk_Task(m.c, &req)
+	res, err := methods.DeleteVirtualDisk_Task(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}

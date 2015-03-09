@@ -19,6 +19,7 @@ package methods
 import (
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type AcknowledgeAlarmBody struct {
@@ -29,12 +30,12 @@ type AcknowledgeAlarmBody struct {
 
 func (b *AcknowledgeAlarmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcknowledgeAlarm(r soap.RoundTripper, req *types.AcknowledgeAlarm) (*types.AcknowledgeAlarmResponse, error) {
+func AcknowledgeAlarm(ctx context.Context, r soap.RoundTripper, req *types.AcknowledgeAlarm) (*types.AcknowledgeAlarmResponse, error) {
 	var reqBody, resBody AcknowledgeAlarmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -49,12 +50,12 @@ type AcquireCimServicesTicketBody struct {
 
 func (b *AcquireCimServicesTicketBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireCimServicesTicket(r soap.RoundTripper, req *types.AcquireCimServicesTicket) (*types.AcquireCimServicesTicketResponse, error) {
+func AcquireCimServicesTicket(ctx context.Context, r soap.RoundTripper, req *types.AcquireCimServicesTicket) (*types.AcquireCimServicesTicketResponse, error) {
 	var reqBody, resBody AcquireCimServicesTicketBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -69,12 +70,12 @@ type AcquireCloneTicketBody struct {
 
 func (b *AcquireCloneTicketBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireCloneTicket(r soap.RoundTripper, req *types.AcquireCloneTicket) (*types.AcquireCloneTicketResponse, error) {
+func AcquireCloneTicket(ctx context.Context, r soap.RoundTripper, req *types.AcquireCloneTicket) (*types.AcquireCloneTicketResponse, error) {
 	var reqBody, resBody AcquireCloneTicketBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -89,12 +90,12 @@ type AcquireCredentialsInGuestBody struct {
 
 func (b *AcquireCredentialsInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireCredentialsInGuest(r soap.RoundTripper, req *types.AcquireCredentialsInGuest) (*types.AcquireCredentialsInGuestResponse, error) {
+func AcquireCredentialsInGuest(ctx context.Context, r soap.RoundTripper, req *types.AcquireCredentialsInGuest) (*types.AcquireCredentialsInGuestResponse, error) {
 	var reqBody, resBody AcquireCredentialsInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -109,12 +110,12 @@ type AcquireGenericServiceTicketBody struct {
 
 func (b *AcquireGenericServiceTicketBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireGenericServiceTicket(r soap.RoundTripper, req *types.AcquireGenericServiceTicket) (*types.AcquireGenericServiceTicketResponse, error) {
+func AcquireGenericServiceTicket(ctx context.Context, r soap.RoundTripper, req *types.AcquireGenericServiceTicket) (*types.AcquireGenericServiceTicketResponse, error) {
 	var reqBody, resBody AcquireGenericServiceTicketBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -129,12 +130,12 @@ type AcquireLocalTicketBody struct {
 
 func (b *AcquireLocalTicketBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireLocalTicket(r soap.RoundTripper, req *types.AcquireLocalTicket) (*types.AcquireLocalTicketResponse, error) {
+func AcquireLocalTicket(ctx context.Context, r soap.RoundTripper, req *types.AcquireLocalTicket) (*types.AcquireLocalTicketResponse, error) {
 	var reqBody, resBody AcquireLocalTicketBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -149,12 +150,12 @@ type AcquireMksTicketBody struct {
 
 func (b *AcquireMksTicketBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireMksTicket(r soap.RoundTripper, req *types.AcquireMksTicket) (*types.AcquireMksTicketResponse, error) {
+func AcquireMksTicket(ctx context.Context, r soap.RoundTripper, req *types.AcquireMksTicket) (*types.AcquireMksTicketResponse, error) {
 	var reqBody, resBody AcquireMksTicketBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -169,12 +170,12 @@ type AcquireTicketBody struct {
 
 func (b *AcquireTicketBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AcquireTicket(r soap.RoundTripper, req *types.AcquireTicket) (*types.AcquireTicketResponse, error) {
+func AcquireTicket(ctx context.Context, r soap.RoundTripper, req *types.AcquireTicket) (*types.AcquireTicketResponse, error) {
 	var reqBody, resBody AcquireTicketBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -189,12 +190,12 @@ type AddAuthorizationRoleBody struct {
 
 func (b *AddAuthorizationRoleBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddAuthorizationRole(r soap.RoundTripper, req *types.AddAuthorizationRole) (*types.AddAuthorizationRoleResponse, error) {
+func AddAuthorizationRole(ctx context.Context, r soap.RoundTripper, req *types.AddAuthorizationRole) (*types.AddAuthorizationRoleResponse, error) {
 	var reqBody, resBody AddAuthorizationRoleBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -209,12 +210,12 @@ type AddCustomFieldDefBody struct {
 
 func (b *AddCustomFieldDefBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddCustomFieldDef(r soap.RoundTripper, req *types.AddCustomFieldDef) (*types.AddCustomFieldDefResponse, error) {
+func AddCustomFieldDef(ctx context.Context, r soap.RoundTripper, req *types.AddCustomFieldDef) (*types.AddCustomFieldDefResponse, error) {
 	var reqBody, resBody AddCustomFieldDefBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -229,12 +230,12 @@ type AddDVPortgroup_TaskBody struct {
 
 func (b *AddDVPortgroup_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddDVPortgroup_Task(r soap.RoundTripper, req *types.AddDVPortgroup_Task) (*types.AddDVPortgroup_TaskResponse, error) {
+func AddDVPortgroup_Task(ctx context.Context, r soap.RoundTripper, req *types.AddDVPortgroup_Task) (*types.AddDVPortgroup_TaskResponse, error) {
 	var reqBody, resBody AddDVPortgroup_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -249,12 +250,12 @@ type AddDisks_TaskBody struct {
 
 func (b *AddDisks_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddDisks_Task(r soap.RoundTripper, req *types.AddDisks_Task) (*types.AddDisks_TaskResponse, error) {
+func AddDisks_Task(ctx context.Context, r soap.RoundTripper, req *types.AddDisks_Task) (*types.AddDisks_TaskResponse, error) {
 	var reqBody, resBody AddDisks_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -269,12 +270,12 @@ type AddHost_TaskBody struct {
 
 func (b *AddHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddHost_Task(r soap.RoundTripper, req *types.AddHost_Task) (*types.AddHost_TaskResponse, error) {
+func AddHost_Task(ctx context.Context, r soap.RoundTripper, req *types.AddHost_Task) (*types.AddHost_TaskResponse, error) {
 	var reqBody, resBody AddHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -289,12 +290,12 @@ type AddInternetScsiSendTargetsBody struct {
 
 func (b *AddInternetScsiSendTargetsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddInternetScsiSendTargets(r soap.RoundTripper, req *types.AddInternetScsiSendTargets) (*types.AddInternetScsiSendTargetsResponse, error) {
+func AddInternetScsiSendTargets(ctx context.Context, r soap.RoundTripper, req *types.AddInternetScsiSendTargets) (*types.AddInternetScsiSendTargetsResponse, error) {
 	var reqBody, resBody AddInternetScsiSendTargetsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -309,12 +310,12 @@ type AddInternetScsiStaticTargetsBody struct {
 
 func (b *AddInternetScsiStaticTargetsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddInternetScsiStaticTargets(r soap.RoundTripper, req *types.AddInternetScsiStaticTargets) (*types.AddInternetScsiStaticTargetsResponse, error) {
+func AddInternetScsiStaticTargets(ctx context.Context, r soap.RoundTripper, req *types.AddInternetScsiStaticTargets) (*types.AddInternetScsiStaticTargetsResponse, error) {
 	var reqBody, resBody AddInternetScsiStaticTargetsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -329,12 +330,12 @@ type AddLicenseBody struct {
 
 func (b *AddLicenseBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddLicense(r soap.RoundTripper, req *types.AddLicense) (*types.AddLicenseResponse, error) {
+func AddLicense(ctx context.Context, r soap.RoundTripper, req *types.AddLicense) (*types.AddLicenseResponse, error) {
 	var reqBody, resBody AddLicenseBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -349,12 +350,12 @@ type AddNetworkResourcePoolBody struct {
 
 func (b *AddNetworkResourcePoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddNetworkResourcePool(r soap.RoundTripper, req *types.AddNetworkResourcePool) (*types.AddNetworkResourcePoolResponse, error) {
+func AddNetworkResourcePool(ctx context.Context, r soap.RoundTripper, req *types.AddNetworkResourcePool) (*types.AddNetworkResourcePoolResponse, error) {
 	var reqBody, resBody AddNetworkResourcePoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -369,12 +370,12 @@ type AddPortGroupBody struct {
 
 func (b *AddPortGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddPortGroup(r soap.RoundTripper, req *types.AddPortGroup) (*types.AddPortGroupResponse, error) {
+func AddPortGroup(ctx context.Context, r soap.RoundTripper, req *types.AddPortGroup) (*types.AddPortGroupResponse, error) {
 	var reqBody, resBody AddPortGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -389,12 +390,12 @@ type AddServiceConsoleVirtualNicBody struct {
 
 func (b *AddServiceConsoleVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddServiceConsoleVirtualNic(r soap.RoundTripper, req *types.AddServiceConsoleVirtualNic) (*types.AddServiceConsoleVirtualNicResponse, error) {
+func AddServiceConsoleVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.AddServiceConsoleVirtualNic) (*types.AddServiceConsoleVirtualNicResponse, error) {
 	var reqBody, resBody AddServiceConsoleVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -409,12 +410,12 @@ type AddStandaloneHost_TaskBody struct {
 
 func (b *AddStandaloneHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddStandaloneHost_Task(r soap.RoundTripper, req *types.AddStandaloneHost_Task) (*types.AddStandaloneHost_TaskResponse, error) {
+func AddStandaloneHost_Task(ctx context.Context, r soap.RoundTripper, req *types.AddStandaloneHost_Task) (*types.AddStandaloneHost_TaskResponse, error) {
 	var reqBody, resBody AddStandaloneHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -429,12 +430,12 @@ type AddVirtualNicBody struct {
 
 func (b *AddVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddVirtualNic(r soap.RoundTripper, req *types.AddVirtualNic) (*types.AddVirtualNicResponse, error) {
+func AddVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.AddVirtualNic) (*types.AddVirtualNicResponse, error) {
 	var reqBody, resBody AddVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -449,12 +450,12 @@ type AddVirtualSwitchBody struct {
 
 func (b *AddVirtualSwitchBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AddVirtualSwitch(r soap.RoundTripper, req *types.AddVirtualSwitch) (*types.AddVirtualSwitchResponse, error) {
+func AddVirtualSwitch(ctx context.Context, r soap.RoundTripper, req *types.AddVirtualSwitch) (*types.AddVirtualSwitchResponse, error) {
 	var reqBody, resBody AddVirtualSwitchBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -469,12 +470,12 @@ type AllocateIpv4AddressBody struct {
 
 func (b *AllocateIpv4AddressBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AllocateIpv4Address(r soap.RoundTripper, req *types.AllocateIpv4Address) (*types.AllocateIpv4AddressResponse, error) {
+func AllocateIpv4Address(ctx context.Context, r soap.RoundTripper, req *types.AllocateIpv4Address) (*types.AllocateIpv4AddressResponse, error) {
 	var reqBody, resBody AllocateIpv4AddressBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -489,12 +490,12 @@ type AllocateIpv6AddressBody struct {
 
 func (b *AllocateIpv6AddressBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AllocateIpv6Address(r soap.RoundTripper, req *types.AllocateIpv6Address) (*types.AllocateIpv6AddressResponse, error) {
+func AllocateIpv6Address(ctx context.Context, r soap.RoundTripper, req *types.AllocateIpv6Address) (*types.AllocateIpv6AddressResponse, error) {
 	var reqBody, resBody AllocateIpv6AddressBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -509,12 +510,12 @@ type AnswerVMBody struct {
 
 func (b *AnswerVMBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AnswerVM(r soap.RoundTripper, req *types.AnswerVM) (*types.AnswerVMResponse, error) {
+func AnswerVM(ctx context.Context, r soap.RoundTripper, req *types.AnswerVM) (*types.AnswerVMResponse, error) {
 	var reqBody, resBody AnswerVMBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -529,12 +530,12 @@ type ApplyHostConfig_TaskBody struct {
 
 func (b *ApplyHostConfig_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ApplyHostConfig_Task(r soap.RoundTripper, req *types.ApplyHostConfig_Task) (*types.ApplyHostConfig_TaskResponse, error) {
+func ApplyHostConfig_Task(ctx context.Context, r soap.RoundTripper, req *types.ApplyHostConfig_Task) (*types.ApplyHostConfig_TaskResponse, error) {
 	var reqBody, resBody ApplyHostConfig_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -549,12 +550,12 @@ type ApplyRecommendationBody struct {
 
 func (b *ApplyRecommendationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ApplyRecommendation(r soap.RoundTripper, req *types.ApplyRecommendation) (*types.ApplyRecommendationResponse, error) {
+func ApplyRecommendation(ctx context.Context, r soap.RoundTripper, req *types.ApplyRecommendation) (*types.ApplyRecommendationResponse, error) {
 	var reqBody, resBody ApplyRecommendationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -569,12 +570,12 @@ type ApplyStorageDrsRecommendationToPod_TaskBody struct {
 
 func (b *ApplyStorageDrsRecommendationToPod_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ApplyStorageDrsRecommendationToPod_Task(r soap.RoundTripper, req *types.ApplyStorageDrsRecommendationToPod_Task) (*types.ApplyStorageDrsRecommendationToPod_TaskResponse, error) {
+func ApplyStorageDrsRecommendationToPod_Task(ctx context.Context, r soap.RoundTripper, req *types.ApplyStorageDrsRecommendationToPod_Task) (*types.ApplyStorageDrsRecommendationToPod_TaskResponse, error) {
 	var reqBody, resBody ApplyStorageDrsRecommendationToPod_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -589,12 +590,12 @@ type ApplyStorageDrsRecommendation_TaskBody struct {
 
 func (b *ApplyStorageDrsRecommendation_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ApplyStorageDrsRecommendation_Task(r soap.RoundTripper, req *types.ApplyStorageDrsRecommendation_Task) (*types.ApplyStorageDrsRecommendation_TaskResponse, error) {
+func ApplyStorageDrsRecommendation_Task(ctx context.Context, r soap.RoundTripper, req *types.ApplyStorageDrsRecommendation_Task) (*types.ApplyStorageDrsRecommendation_TaskResponse, error) {
 	var reqBody, resBody ApplyStorageDrsRecommendation_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -609,12 +610,12 @@ type AreAlarmActionsEnabledBody struct {
 
 func (b *AreAlarmActionsEnabledBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AreAlarmActionsEnabled(r soap.RoundTripper, req *types.AreAlarmActionsEnabled) (*types.AreAlarmActionsEnabledResponse, error) {
+func AreAlarmActionsEnabled(ctx context.Context, r soap.RoundTripper, req *types.AreAlarmActionsEnabled) (*types.AreAlarmActionsEnabledResponse, error) {
 	var reqBody, resBody AreAlarmActionsEnabledBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -629,12 +630,12 @@ type AssignUserToGroupBody struct {
 
 func (b *AssignUserToGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AssignUserToGroup(r soap.RoundTripper, req *types.AssignUserToGroup) (*types.AssignUserToGroupResponse, error) {
+func AssignUserToGroup(ctx context.Context, r soap.RoundTripper, req *types.AssignUserToGroup) (*types.AssignUserToGroupResponse, error) {
 	var reqBody, resBody AssignUserToGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -649,12 +650,12 @@ type AssociateProfileBody struct {
 
 func (b *AssociateProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AssociateProfile(r soap.RoundTripper, req *types.AssociateProfile) (*types.AssociateProfileResponse, error) {
+func AssociateProfile(ctx context.Context, r soap.RoundTripper, req *types.AssociateProfile) (*types.AssociateProfileResponse, error) {
 	var reqBody, resBody AssociateProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -669,12 +670,12 @@ type AttachScsiLunBody struct {
 
 func (b *AttachScsiLunBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AttachScsiLun(r soap.RoundTripper, req *types.AttachScsiLun) (*types.AttachScsiLunResponse, error) {
+func AttachScsiLun(ctx context.Context, r soap.RoundTripper, req *types.AttachScsiLun) (*types.AttachScsiLunResponse, error) {
 	var reqBody, resBody AttachScsiLunBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -689,12 +690,12 @@ type AttachVmfsExtentBody struct {
 
 func (b *AttachVmfsExtentBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AttachVmfsExtent(r soap.RoundTripper, req *types.AttachVmfsExtent) (*types.AttachVmfsExtentResponse, error) {
+func AttachVmfsExtent(ctx context.Context, r soap.RoundTripper, req *types.AttachVmfsExtent) (*types.AttachVmfsExtentResponse, error) {
 	var reqBody, resBody AttachVmfsExtentBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -709,12 +710,12 @@ type AutoStartPowerOffBody struct {
 
 func (b *AutoStartPowerOffBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AutoStartPowerOff(r soap.RoundTripper, req *types.AutoStartPowerOff) (*types.AutoStartPowerOffResponse, error) {
+func AutoStartPowerOff(ctx context.Context, r soap.RoundTripper, req *types.AutoStartPowerOff) (*types.AutoStartPowerOffResponse, error) {
 	var reqBody, resBody AutoStartPowerOffBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -729,12 +730,12 @@ type AutoStartPowerOnBody struct {
 
 func (b *AutoStartPowerOnBody) Fault() *soap.Fault { return b.Fault_ }
 
-func AutoStartPowerOn(r soap.RoundTripper, req *types.AutoStartPowerOn) (*types.AutoStartPowerOnResponse, error) {
+func AutoStartPowerOn(ctx context.Context, r soap.RoundTripper, req *types.AutoStartPowerOn) (*types.AutoStartPowerOnResponse, error) {
 	var reqBody, resBody AutoStartPowerOnBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -749,12 +750,12 @@ type BackupFirmwareConfigurationBody struct {
 
 func (b *BackupFirmwareConfigurationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func BackupFirmwareConfiguration(r soap.RoundTripper, req *types.BackupFirmwareConfiguration) (*types.BackupFirmwareConfigurationResponse, error) {
+func BackupFirmwareConfiguration(ctx context.Context, r soap.RoundTripper, req *types.BackupFirmwareConfiguration) (*types.BackupFirmwareConfigurationResponse, error) {
 	var reqBody, resBody BackupFirmwareConfigurationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -769,12 +770,12 @@ type BindVnicBody struct {
 
 func (b *BindVnicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func BindVnic(r soap.RoundTripper, req *types.BindVnic) (*types.BindVnicResponse, error) {
+func BindVnic(ctx context.Context, r soap.RoundTripper, req *types.BindVnic) (*types.BindVnicResponse, error) {
 	var reqBody, resBody BindVnicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -789,12 +790,12 @@ type BrowseDiagnosticLogBody struct {
 
 func (b *BrowseDiagnosticLogBody) Fault() *soap.Fault { return b.Fault_ }
 
-func BrowseDiagnosticLog(r soap.RoundTripper, req *types.BrowseDiagnosticLog) (*types.BrowseDiagnosticLogResponse, error) {
+func BrowseDiagnosticLog(ctx context.Context, r soap.RoundTripper, req *types.BrowseDiagnosticLog) (*types.BrowseDiagnosticLogResponse, error) {
 	var reqBody, resBody BrowseDiagnosticLogBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -809,12 +810,12 @@ type CancelRecommendationBody struct {
 
 func (b *CancelRecommendationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CancelRecommendation(r soap.RoundTripper, req *types.CancelRecommendation) (*types.CancelRecommendationResponse, error) {
+func CancelRecommendation(ctx context.Context, r soap.RoundTripper, req *types.CancelRecommendation) (*types.CancelRecommendationResponse, error) {
 	var reqBody, resBody CancelRecommendationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -829,12 +830,12 @@ type CancelRetrievePropertiesExBody struct {
 
 func (b *CancelRetrievePropertiesExBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CancelRetrievePropertiesEx(r soap.RoundTripper, req *types.CancelRetrievePropertiesEx) (*types.CancelRetrievePropertiesExResponse, error) {
+func CancelRetrievePropertiesEx(ctx context.Context, r soap.RoundTripper, req *types.CancelRetrievePropertiesEx) (*types.CancelRetrievePropertiesExResponse, error) {
 	var reqBody, resBody CancelRetrievePropertiesExBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -849,12 +850,12 @@ type CancelStorageDrsRecommendationBody struct {
 
 func (b *CancelStorageDrsRecommendationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CancelStorageDrsRecommendation(r soap.RoundTripper, req *types.CancelStorageDrsRecommendation) (*types.CancelStorageDrsRecommendationResponse, error) {
+func CancelStorageDrsRecommendation(ctx context.Context, r soap.RoundTripper, req *types.CancelStorageDrsRecommendation) (*types.CancelStorageDrsRecommendationResponse, error) {
 	var reqBody, resBody CancelStorageDrsRecommendationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -869,12 +870,12 @@ type CancelTaskBody struct {
 
 func (b *CancelTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CancelTask(r soap.RoundTripper, req *types.CancelTask) (*types.CancelTaskResponse, error) {
+func CancelTask(ctx context.Context, r soap.RoundTripper, req *types.CancelTask) (*types.CancelTaskResponse, error) {
 	var reqBody, resBody CancelTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -889,12 +890,12 @@ type CancelWaitForUpdatesBody struct {
 
 func (b *CancelWaitForUpdatesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CancelWaitForUpdates(r soap.RoundTripper, req *types.CancelWaitForUpdates) (*types.CancelWaitForUpdatesResponse, error) {
+func CancelWaitForUpdates(ctx context.Context, r soap.RoundTripper, req *types.CancelWaitForUpdates) (*types.CancelWaitForUpdatesResponse, error) {
 	var reqBody, resBody CancelWaitForUpdatesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -909,12 +910,12 @@ type ChangeFileAttributesInGuestBody struct {
 
 func (b *ChangeFileAttributesInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ChangeFileAttributesInGuest(r soap.RoundTripper, req *types.ChangeFileAttributesInGuest) (*types.ChangeFileAttributesInGuestResponse, error) {
+func ChangeFileAttributesInGuest(ctx context.Context, r soap.RoundTripper, req *types.ChangeFileAttributesInGuest) (*types.ChangeFileAttributesInGuestResponse, error) {
 	var reqBody, resBody ChangeFileAttributesInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -929,12 +930,12 @@ type ChangeOwnerBody struct {
 
 func (b *ChangeOwnerBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ChangeOwner(r soap.RoundTripper, req *types.ChangeOwner) (*types.ChangeOwnerResponse, error) {
+func ChangeOwner(ctx context.Context, r soap.RoundTripper, req *types.ChangeOwner) (*types.ChangeOwnerResponse, error) {
 	var reqBody, resBody ChangeOwnerBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -949,12 +950,12 @@ type CheckAnswerFileStatus_TaskBody struct {
 
 func (b *CheckAnswerFileStatus_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckAnswerFileStatus_Task(r soap.RoundTripper, req *types.CheckAnswerFileStatus_Task) (*types.CheckAnswerFileStatus_TaskResponse, error) {
+func CheckAnswerFileStatus_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckAnswerFileStatus_Task) (*types.CheckAnswerFileStatus_TaskResponse, error) {
 	var reqBody, resBody CheckAnswerFileStatus_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -969,12 +970,12 @@ type CheckCompatibility_TaskBody struct {
 
 func (b *CheckCompatibility_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckCompatibility_Task(r soap.RoundTripper, req *types.CheckCompatibility_Task) (*types.CheckCompatibility_TaskResponse, error) {
+func CheckCompatibility_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckCompatibility_Task) (*types.CheckCompatibility_TaskResponse, error) {
 	var reqBody, resBody CheckCompatibility_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -989,12 +990,12 @@ type CheckCompliance_TaskBody struct {
 
 func (b *CheckCompliance_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckCompliance_Task(r soap.RoundTripper, req *types.CheckCompliance_Task) (*types.CheckCompliance_TaskResponse, error) {
+func CheckCompliance_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckCompliance_Task) (*types.CheckCompliance_TaskResponse, error) {
 	var reqBody, resBody CheckCompliance_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1009,12 +1010,12 @@ type CheckCustomizationResourcesBody struct {
 
 func (b *CheckCustomizationResourcesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckCustomizationResources(r soap.RoundTripper, req *types.CheckCustomizationResources) (*types.CheckCustomizationResourcesResponse, error) {
+func CheckCustomizationResources(ctx context.Context, r soap.RoundTripper, req *types.CheckCustomizationResources) (*types.CheckCustomizationResourcesResponse, error) {
 	var reqBody, resBody CheckCustomizationResourcesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1029,12 +1030,12 @@ type CheckCustomizationSpecBody struct {
 
 func (b *CheckCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckCustomizationSpec(r soap.RoundTripper, req *types.CheckCustomizationSpec) (*types.CheckCustomizationSpecResponse, error) {
+func CheckCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.CheckCustomizationSpec) (*types.CheckCustomizationSpecResponse, error) {
 	var reqBody, resBody CheckCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1049,12 +1050,12 @@ type CheckForUpdatesBody struct {
 
 func (b *CheckForUpdatesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckForUpdates(r soap.RoundTripper, req *types.CheckForUpdates) (*types.CheckForUpdatesResponse, error) {
+func CheckForUpdates(ctx context.Context, r soap.RoundTripper, req *types.CheckForUpdates) (*types.CheckForUpdatesResponse, error) {
 	var reqBody, resBody CheckForUpdatesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1069,12 +1070,12 @@ type CheckHostPatch_TaskBody struct {
 
 func (b *CheckHostPatch_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckHostPatch_Task(r soap.RoundTripper, req *types.CheckHostPatch_Task) (*types.CheckHostPatch_TaskResponse, error) {
+func CheckHostPatch_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckHostPatch_Task) (*types.CheckHostPatch_TaskResponse, error) {
 	var reqBody, resBody CheckHostPatch_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1089,12 +1090,12 @@ type CheckLicenseFeatureBody struct {
 
 func (b *CheckLicenseFeatureBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckLicenseFeature(r soap.RoundTripper, req *types.CheckLicenseFeature) (*types.CheckLicenseFeatureResponse, error) {
+func CheckLicenseFeature(ctx context.Context, r soap.RoundTripper, req *types.CheckLicenseFeature) (*types.CheckLicenseFeatureResponse, error) {
 	var reqBody, resBody CheckLicenseFeatureBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1109,12 +1110,12 @@ type CheckMigrate_TaskBody struct {
 
 func (b *CheckMigrate_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckMigrate_Task(r soap.RoundTripper, req *types.CheckMigrate_Task) (*types.CheckMigrate_TaskResponse, error) {
+func CheckMigrate_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckMigrate_Task) (*types.CheckMigrate_TaskResponse, error) {
 	var reqBody, resBody CheckMigrate_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1129,12 +1130,12 @@ type CheckProfileCompliance_TaskBody struct {
 
 func (b *CheckProfileCompliance_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckProfileCompliance_Task(r soap.RoundTripper, req *types.CheckProfileCompliance_Task) (*types.CheckProfileCompliance_TaskResponse, error) {
+func CheckProfileCompliance_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckProfileCompliance_Task) (*types.CheckProfileCompliance_TaskResponse, error) {
 	var reqBody, resBody CheckProfileCompliance_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1149,12 +1150,12 @@ type CheckRelocate_TaskBody struct {
 
 func (b *CheckRelocate_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CheckRelocate_Task(r soap.RoundTripper, req *types.CheckRelocate_Task) (*types.CheckRelocate_TaskResponse, error) {
+func CheckRelocate_Task(ctx context.Context, r soap.RoundTripper, req *types.CheckRelocate_Task) (*types.CheckRelocate_TaskResponse, error) {
 	var reqBody, resBody CheckRelocate_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1169,12 +1170,12 @@ type ClearComplianceStatusBody struct {
 
 func (b *ClearComplianceStatusBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ClearComplianceStatus(r soap.RoundTripper, req *types.ClearComplianceStatus) (*types.ClearComplianceStatusResponse, error) {
+func ClearComplianceStatus(ctx context.Context, r soap.RoundTripper, req *types.ClearComplianceStatus) (*types.ClearComplianceStatusResponse, error) {
 	var reqBody, resBody ClearComplianceStatusBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1189,12 +1190,12 @@ type CloneSessionBody struct {
 
 func (b *CloneSessionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CloneSession(r soap.RoundTripper, req *types.CloneSession) (*types.CloneSessionResponse, error) {
+func CloneSession(ctx context.Context, r soap.RoundTripper, req *types.CloneSession) (*types.CloneSessionResponse, error) {
 	var reqBody, resBody CloneSessionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1209,12 +1210,12 @@ type CloneVApp_TaskBody struct {
 
 func (b *CloneVApp_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CloneVApp_Task(r soap.RoundTripper, req *types.CloneVApp_Task) (*types.CloneVApp_TaskResponse, error) {
+func CloneVApp_Task(ctx context.Context, r soap.RoundTripper, req *types.CloneVApp_Task) (*types.CloneVApp_TaskResponse, error) {
 	var reqBody, resBody CloneVApp_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1229,12 +1230,12 @@ type CloneVM_TaskBody struct {
 
 func (b *CloneVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CloneVM_Task(r soap.RoundTripper, req *types.CloneVM_Task) (*types.CloneVM_TaskResponse, error) {
+func CloneVM_Task(ctx context.Context, r soap.RoundTripper, req *types.CloneVM_Task) (*types.CloneVM_TaskResponse, error) {
 	var reqBody, resBody CloneVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1249,12 +1250,12 @@ type CloseInventoryViewFolderBody struct {
 
 func (b *CloseInventoryViewFolderBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CloseInventoryViewFolder(r soap.RoundTripper, req *types.CloseInventoryViewFolder) (*types.CloseInventoryViewFolderResponse, error) {
+func CloseInventoryViewFolder(ctx context.Context, r soap.RoundTripper, req *types.CloseInventoryViewFolder) (*types.CloseInventoryViewFolderResponse, error) {
 	var reqBody, resBody CloseInventoryViewFolderBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1269,12 +1270,12 @@ type ClusterEnterMaintenanceModeBody struct {
 
 func (b *ClusterEnterMaintenanceModeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ClusterEnterMaintenanceMode(r soap.RoundTripper, req *types.ClusterEnterMaintenanceMode) (*types.ClusterEnterMaintenanceModeResponse, error) {
+func ClusterEnterMaintenanceMode(ctx context.Context, r soap.RoundTripper, req *types.ClusterEnterMaintenanceMode) (*types.ClusterEnterMaintenanceModeResponse, error) {
 	var reqBody, resBody ClusterEnterMaintenanceModeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1289,12 +1290,12 @@ type ComputeDiskPartitionInfoBody struct {
 
 func (b *ComputeDiskPartitionInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ComputeDiskPartitionInfo(r soap.RoundTripper, req *types.ComputeDiskPartitionInfo) (*types.ComputeDiskPartitionInfoResponse, error) {
+func ComputeDiskPartitionInfo(ctx context.Context, r soap.RoundTripper, req *types.ComputeDiskPartitionInfo) (*types.ComputeDiskPartitionInfoResponse, error) {
 	var reqBody, resBody ComputeDiskPartitionInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1309,12 +1310,12 @@ type ComputeDiskPartitionInfoForResizeBody struct {
 
 func (b *ComputeDiskPartitionInfoForResizeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ComputeDiskPartitionInfoForResize(r soap.RoundTripper, req *types.ComputeDiskPartitionInfoForResize) (*types.ComputeDiskPartitionInfoForResizeResponse, error) {
+func ComputeDiskPartitionInfoForResize(ctx context.Context, r soap.RoundTripper, req *types.ComputeDiskPartitionInfoForResize) (*types.ComputeDiskPartitionInfoForResizeResponse, error) {
 	var reqBody, resBody ComputeDiskPartitionInfoForResizeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1329,12 +1330,12 @@ type ConfigureDatastoreIORM_TaskBody struct {
 
 func (b *ConfigureDatastoreIORM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigureDatastoreIORM_Task(r soap.RoundTripper, req *types.ConfigureDatastoreIORM_Task) (*types.ConfigureDatastoreIORM_TaskResponse, error) {
+func ConfigureDatastoreIORM_Task(ctx context.Context, r soap.RoundTripper, req *types.ConfigureDatastoreIORM_Task) (*types.ConfigureDatastoreIORM_TaskResponse, error) {
 	var reqBody, resBody ConfigureDatastoreIORM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1349,12 +1350,12 @@ type ConfigureDatastorePrincipalBody struct {
 
 func (b *ConfigureDatastorePrincipalBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigureDatastorePrincipal(r soap.RoundTripper, req *types.ConfigureDatastorePrincipal) (*types.ConfigureDatastorePrincipalResponse, error) {
+func ConfigureDatastorePrincipal(ctx context.Context, r soap.RoundTripper, req *types.ConfigureDatastorePrincipal) (*types.ConfigureDatastorePrincipalResponse, error) {
 	var reqBody, resBody ConfigureDatastorePrincipalBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1369,12 +1370,12 @@ type ConfigureHostCache_TaskBody struct {
 
 func (b *ConfigureHostCache_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigureHostCache_Task(r soap.RoundTripper, req *types.ConfigureHostCache_Task) (*types.ConfigureHostCache_TaskResponse, error) {
+func ConfigureHostCache_Task(ctx context.Context, r soap.RoundTripper, req *types.ConfigureHostCache_Task) (*types.ConfigureHostCache_TaskResponse, error) {
 	var reqBody, resBody ConfigureHostCache_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1389,12 +1390,12 @@ type ConfigureLicenseSourceBody struct {
 
 func (b *ConfigureLicenseSourceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigureLicenseSource(r soap.RoundTripper, req *types.ConfigureLicenseSource) (*types.ConfigureLicenseSourceResponse, error) {
+func ConfigureLicenseSource(ctx context.Context, r soap.RoundTripper, req *types.ConfigureLicenseSource) (*types.ConfigureLicenseSourceResponse, error) {
 	var reqBody, resBody ConfigureLicenseSourceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1409,12 +1410,12 @@ type ConfigurePowerPolicyBody struct {
 
 func (b *ConfigurePowerPolicyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigurePowerPolicy(r soap.RoundTripper, req *types.ConfigurePowerPolicy) (*types.ConfigurePowerPolicyResponse, error) {
+func ConfigurePowerPolicy(ctx context.Context, r soap.RoundTripper, req *types.ConfigurePowerPolicy) (*types.ConfigurePowerPolicyResponse, error) {
 	var reqBody, resBody ConfigurePowerPolicyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1429,12 +1430,12 @@ type ConfigureStorageDrsForPod_TaskBody struct {
 
 func (b *ConfigureStorageDrsForPod_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigureStorageDrsForPod_Task(r soap.RoundTripper, req *types.ConfigureStorageDrsForPod_Task) (*types.ConfigureStorageDrsForPod_TaskResponse, error) {
+func ConfigureStorageDrsForPod_Task(ctx context.Context, r soap.RoundTripper, req *types.ConfigureStorageDrsForPod_Task) (*types.ConfigureStorageDrsForPod_TaskResponse, error) {
 	var reqBody, resBody ConfigureStorageDrsForPod_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1449,12 +1450,12 @@ type ConfigureVFlashResourceEx_TaskBody struct {
 
 func (b *ConfigureVFlashResourceEx_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConfigureVFlashResourceEx_Task(r soap.RoundTripper, req *types.ConfigureVFlashResourceEx_Task) (*types.ConfigureVFlashResourceEx_TaskResponse, error) {
+func ConfigureVFlashResourceEx_Task(ctx context.Context, r soap.RoundTripper, req *types.ConfigureVFlashResourceEx_Task) (*types.ConfigureVFlashResourceEx_TaskResponse, error) {
 	var reqBody, resBody ConfigureVFlashResourceEx_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1469,12 +1470,12 @@ type ConsolidateVMDisks_TaskBody struct {
 
 func (b *ConsolidateVMDisks_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ConsolidateVMDisks_Task(r soap.RoundTripper, req *types.ConsolidateVMDisks_Task) (*types.ConsolidateVMDisks_TaskResponse, error) {
+func ConsolidateVMDisks_Task(ctx context.Context, r soap.RoundTripper, req *types.ConsolidateVMDisks_Task) (*types.ConsolidateVMDisks_TaskResponse, error) {
 	var reqBody, resBody ConsolidateVMDisks_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1489,12 +1490,12 @@ type ContinueRetrievePropertiesExBody struct {
 
 func (b *ContinueRetrievePropertiesExBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ContinueRetrievePropertiesEx(r soap.RoundTripper, req *types.ContinueRetrievePropertiesEx) (*types.ContinueRetrievePropertiesExResponse, error) {
+func ContinueRetrievePropertiesEx(ctx context.Context, r soap.RoundTripper, req *types.ContinueRetrievePropertiesEx) (*types.ContinueRetrievePropertiesExResponse, error) {
 	var reqBody, resBody ContinueRetrievePropertiesExBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1509,12 +1510,12 @@ type CopyDatastoreFile_TaskBody struct {
 
 func (b *CopyDatastoreFile_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CopyDatastoreFile_Task(r soap.RoundTripper, req *types.CopyDatastoreFile_Task) (*types.CopyDatastoreFile_TaskResponse, error) {
+func CopyDatastoreFile_Task(ctx context.Context, r soap.RoundTripper, req *types.CopyDatastoreFile_Task) (*types.CopyDatastoreFile_TaskResponse, error) {
 	var reqBody, resBody CopyDatastoreFile_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1529,12 +1530,12 @@ type CopyVirtualDisk_TaskBody struct {
 
 func (b *CopyVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CopyVirtualDisk_Task(r soap.RoundTripper, req *types.CopyVirtualDisk_Task) (*types.CopyVirtualDisk_TaskResponse, error) {
+func CopyVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.CopyVirtualDisk_Task) (*types.CopyVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody CopyVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1549,12 +1550,12 @@ type CreateAlarmBody struct {
 
 func (b *CreateAlarmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateAlarm(r soap.RoundTripper, req *types.CreateAlarm) (*types.CreateAlarmResponse, error) {
+func CreateAlarm(ctx context.Context, r soap.RoundTripper, req *types.CreateAlarm) (*types.CreateAlarmResponse, error) {
 	var reqBody, resBody CreateAlarmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1569,12 +1570,12 @@ type CreateChildVM_TaskBody struct {
 
 func (b *CreateChildVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateChildVM_Task(r soap.RoundTripper, req *types.CreateChildVM_Task) (*types.CreateChildVM_TaskResponse, error) {
+func CreateChildVM_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateChildVM_Task) (*types.CreateChildVM_TaskResponse, error) {
 	var reqBody, resBody CreateChildVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1589,12 +1590,12 @@ type CreateClusterBody struct {
 
 func (b *CreateClusterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateCluster(r soap.RoundTripper, req *types.CreateCluster) (*types.CreateClusterResponse, error) {
+func CreateCluster(ctx context.Context, r soap.RoundTripper, req *types.CreateCluster) (*types.CreateClusterResponse, error) {
 	var reqBody, resBody CreateClusterBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1609,12 +1610,12 @@ type CreateClusterExBody struct {
 
 func (b *CreateClusterExBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateClusterEx(r soap.RoundTripper, req *types.CreateClusterEx) (*types.CreateClusterExResponse, error) {
+func CreateClusterEx(ctx context.Context, r soap.RoundTripper, req *types.CreateClusterEx) (*types.CreateClusterExResponse, error) {
 	var reqBody, resBody CreateClusterExBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1629,12 +1630,12 @@ type CreateCollectorForEventsBody struct {
 
 func (b *CreateCollectorForEventsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateCollectorForEvents(r soap.RoundTripper, req *types.CreateCollectorForEvents) (*types.CreateCollectorForEventsResponse, error) {
+func CreateCollectorForEvents(ctx context.Context, r soap.RoundTripper, req *types.CreateCollectorForEvents) (*types.CreateCollectorForEventsResponse, error) {
 	var reqBody, resBody CreateCollectorForEventsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1649,12 +1650,12 @@ type CreateCollectorForTasksBody struct {
 
 func (b *CreateCollectorForTasksBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateCollectorForTasks(r soap.RoundTripper, req *types.CreateCollectorForTasks) (*types.CreateCollectorForTasksResponse, error) {
+func CreateCollectorForTasks(ctx context.Context, r soap.RoundTripper, req *types.CreateCollectorForTasks) (*types.CreateCollectorForTasksResponse, error) {
 	var reqBody, resBody CreateCollectorForTasksBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1669,12 +1670,12 @@ type CreateContainerViewBody struct {
 
 func (b *CreateContainerViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateContainerView(r soap.RoundTripper, req *types.CreateContainerView) (*types.CreateContainerViewResponse, error) {
+func CreateContainerView(ctx context.Context, r soap.RoundTripper, req *types.CreateContainerView) (*types.CreateContainerViewResponse, error) {
 	var reqBody, resBody CreateContainerViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1689,12 +1690,12 @@ type CreateCustomizationSpecBody struct {
 
 func (b *CreateCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateCustomizationSpec(r soap.RoundTripper, req *types.CreateCustomizationSpec) (*types.CreateCustomizationSpecResponse, error) {
+func CreateCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.CreateCustomizationSpec) (*types.CreateCustomizationSpecResponse, error) {
 	var reqBody, resBody CreateCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1709,12 +1710,12 @@ type CreateDVPortgroup_TaskBody struct {
 
 func (b *CreateDVPortgroup_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDVPortgroup_Task(r soap.RoundTripper, req *types.CreateDVPortgroup_Task) (*types.CreateDVPortgroup_TaskResponse, error) {
+func CreateDVPortgroup_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateDVPortgroup_Task) (*types.CreateDVPortgroup_TaskResponse, error) {
 	var reqBody, resBody CreateDVPortgroup_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1729,12 +1730,12 @@ type CreateDVS_TaskBody struct {
 
 func (b *CreateDVS_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDVS_Task(r soap.RoundTripper, req *types.CreateDVS_Task) (*types.CreateDVS_TaskResponse, error) {
+func CreateDVS_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateDVS_Task) (*types.CreateDVS_TaskResponse, error) {
 	var reqBody, resBody CreateDVS_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1749,12 +1750,12 @@ type CreateDatacenterBody struct {
 
 func (b *CreateDatacenterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDatacenter(r soap.RoundTripper, req *types.CreateDatacenter) (*types.CreateDatacenterResponse, error) {
+func CreateDatacenter(ctx context.Context, r soap.RoundTripper, req *types.CreateDatacenter) (*types.CreateDatacenterResponse, error) {
 	var reqBody, resBody CreateDatacenterBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1769,12 +1770,12 @@ type CreateDefaultProfileBody struct {
 
 func (b *CreateDefaultProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDefaultProfile(r soap.RoundTripper, req *types.CreateDefaultProfile) (*types.CreateDefaultProfileResponse, error) {
+func CreateDefaultProfile(ctx context.Context, r soap.RoundTripper, req *types.CreateDefaultProfile) (*types.CreateDefaultProfileResponse, error) {
 	var reqBody, resBody CreateDefaultProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1789,12 +1790,12 @@ type CreateDescriptorBody struct {
 
 func (b *CreateDescriptorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDescriptor(r soap.RoundTripper, req *types.CreateDescriptor) (*types.CreateDescriptorResponse, error) {
+func CreateDescriptor(ctx context.Context, r soap.RoundTripper, req *types.CreateDescriptor) (*types.CreateDescriptorResponse, error) {
 	var reqBody, resBody CreateDescriptorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1809,12 +1810,12 @@ type CreateDiagnosticPartitionBody struct {
 
 func (b *CreateDiagnosticPartitionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDiagnosticPartition(r soap.RoundTripper, req *types.CreateDiagnosticPartition) (*types.CreateDiagnosticPartitionResponse, error) {
+func CreateDiagnosticPartition(ctx context.Context, r soap.RoundTripper, req *types.CreateDiagnosticPartition) (*types.CreateDiagnosticPartitionResponse, error) {
 	var reqBody, resBody CreateDiagnosticPartitionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1829,12 +1830,12 @@ type CreateDirectoryBody struct {
 
 func (b *CreateDirectoryBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateDirectory(r soap.RoundTripper, req *types.CreateDirectory) (*types.CreateDirectoryResponse, error) {
+func CreateDirectory(ctx context.Context, r soap.RoundTripper, req *types.CreateDirectory) (*types.CreateDirectoryResponse, error) {
 	var reqBody, resBody CreateDirectoryBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1849,12 +1850,12 @@ type CreateFilterBody struct {
 
 func (b *CreateFilterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateFilter(r soap.RoundTripper, req *types.CreateFilter) (*types.CreateFilterResponse, error) {
+func CreateFilter(ctx context.Context, r soap.RoundTripper, req *types.CreateFilter) (*types.CreateFilterResponse, error) {
 	var reqBody, resBody CreateFilterBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1869,12 +1870,12 @@ type CreateFolderBody struct {
 
 func (b *CreateFolderBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateFolder(r soap.RoundTripper, req *types.CreateFolder) (*types.CreateFolderResponse, error) {
+func CreateFolder(ctx context.Context, r soap.RoundTripper, req *types.CreateFolder) (*types.CreateFolderResponse, error) {
 	var reqBody, resBody CreateFolderBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1889,12 +1890,12 @@ type CreateGroupBody struct {
 
 func (b *CreateGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateGroup(r soap.RoundTripper, req *types.CreateGroup) (*types.CreateGroupResponse, error) {
+func CreateGroup(ctx context.Context, r soap.RoundTripper, req *types.CreateGroup) (*types.CreateGroupResponse, error) {
 	var reqBody, resBody CreateGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1909,12 +1910,12 @@ type CreateImportSpecBody struct {
 
 func (b *CreateImportSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateImportSpec(r soap.RoundTripper, req *types.CreateImportSpec) (*types.CreateImportSpecResponse, error) {
+func CreateImportSpec(ctx context.Context, r soap.RoundTripper, req *types.CreateImportSpec) (*types.CreateImportSpecResponse, error) {
 	var reqBody, resBody CreateImportSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1929,12 +1930,12 @@ type CreateInventoryViewBody struct {
 
 func (b *CreateInventoryViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateInventoryView(r soap.RoundTripper, req *types.CreateInventoryView) (*types.CreateInventoryViewResponse, error) {
+func CreateInventoryView(ctx context.Context, r soap.RoundTripper, req *types.CreateInventoryView) (*types.CreateInventoryViewResponse, error) {
 	var reqBody, resBody CreateInventoryViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1949,12 +1950,12 @@ type CreateIpPoolBody struct {
 
 func (b *CreateIpPoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateIpPool(r soap.RoundTripper, req *types.CreateIpPool) (*types.CreateIpPoolResponse, error) {
+func CreateIpPool(ctx context.Context, r soap.RoundTripper, req *types.CreateIpPool) (*types.CreateIpPoolResponse, error) {
 	var reqBody, resBody CreateIpPoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1969,12 +1970,12 @@ type CreateListViewBody struct {
 
 func (b *CreateListViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateListView(r soap.RoundTripper, req *types.CreateListView) (*types.CreateListViewResponse, error) {
+func CreateListView(ctx context.Context, r soap.RoundTripper, req *types.CreateListView) (*types.CreateListViewResponse, error) {
 	var reqBody, resBody CreateListViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -1989,12 +1990,12 @@ type CreateListViewFromViewBody struct {
 
 func (b *CreateListViewFromViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateListViewFromView(r soap.RoundTripper, req *types.CreateListViewFromView) (*types.CreateListViewFromViewResponse, error) {
+func CreateListViewFromView(ctx context.Context, r soap.RoundTripper, req *types.CreateListViewFromView) (*types.CreateListViewFromViewResponse, error) {
 	var reqBody, resBody CreateListViewFromViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2009,12 +2010,12 @@ type CreateLocalDatastoreBody struct {
 
 func (b *CreateLocalDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateLocalDatastore(r soap.RoundTripper, req *types.CreateLocalDatastore) (*types.CreateLocalDatastoreResponse, error) {
+func CreateLocalDatastore(ctx context.Context, r soap.RoundTripper, req *types.CreateLocalDatastore) (*types.CreateLocalDatastoreResponse, error) {
 	var reqBody, resBody CreateLocalDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2029,12 +2030,12 @@ type CreateNasDatastoreBody struct {
 
 func (b *CreateNasDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateNasDatastore(r soap.RoundTripper, req *types.CreateNasDatastore) (*types.CreateNasDatastoreResponse, error) {
+func CreateNasDatastore(ctx context.Context, r soap.RoundTripper, req *types.CreateNasDatastore) (*types.CreateNasDatastoreResponse, error) {
 	var reqBody, resBody CreateNasDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2049,12 +2050,12 @@ type CreateObjectScheduledTaskBody struct {
 
 func (b *CreateObjectScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateObjectScheduledTask(r soap.RoundTripper, req *types.CreateObjectScheduledTask) (*types.CreateObjectScheduledTaskResponse, error) {
+func CreateObjectScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.CreateObjectScheduledTask) (*types.CreateObjectScheduledTaskResponse, error) {
 	var reqBody, resBody CreateObjectScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2069,12 +2070,12 @@ type CreatePerfIntervalBody struct {
 
 func (b *CreatePerfIntervalBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreatePerfInterval(r soap.RoundTripper, req *types.CreatePerfInterval) (*types.CreatePerfIntervalResponse, error) {
+func CreatePerfInterval(ctx context.Context, r soap.RoundTripper, req *types.CreatePerfInterval) (*types.CreatePerfIntervalResponse, error) {
 	var reqBody, resBody CreatePerfIntervalBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2089,12 +2090,12 @@ type CreateProfileBody struct {
 
 func (b *CreateProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateProfile(r soap.RoundTripper, req *types.CreateProfile) (*types.CreateProfileResponse, error) {
+func CreateProfile(ctx context.Context, r soap.RoundTripper, req *types.CreateProfile) (*types.CreateProfileResponse, error) {
 	var reqBody, resBody CreateProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2109,12 +2110,12 @@ type CreatePropertyCollectorBody struct {
 
 func (b *CreatePropertyCollectorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreatePropertyCollector(r soap.RoundTripper, req *types.CreatePropertyCollector) (*types.CreatePropertyCollectorResponse, error) {
+func CreatePropertyCollector(ctx context.Context, r soap.RoundTripper, req *types.CreatePropertyCollector) (*types.CreatePropertyCollectorResponse, error) {
 	var reqBody, resBody CreatePropertyCollectorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2129,12 +2130,12 @@ type CreateResourcePoolBody struct {
 
 func (b *CreateResourcePoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateResourcePool(r soap.RoundTripper, req *types.CreateResourcePool) (*types.CreateResourcePoolResponse, error) {
+func CreateResourcePool(ctx context.Context, r soap.RoundTripper, req *types.CreateResourcePool) (*types.CreateResourcePoolResponse, error) {
 	var reqBody, resBody CreateResourcePoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2149,12 +2150,12 @@ type CreateScheduledTaskBody struct {
 
 func (b *CreateScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateScheduledTask(r soap.RoundTripper, req *types.CreateScheduledTask) (*types.CreateScheduledTaskResponse, error) {
+func CreateScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.CreateScheduledTask) (*types.CreateScheduledTaskResponse, error) {
 	var reqBody, resBody CreateScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2169,12 +2170,12 @@ type CreateScreenshot_TaskBody struct {
 
 func (b *CreateScreenshot_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateScreenshot_Task(r soap.RoundTripper, req *types.CreateScreenshot_Task) (*types.CreateScreenshot_TaskResponse, error) {
+func CreateScreenshot_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateScreenshot_Task) (*types.CreateScreenshot_TaskResponse, error) {
 	var reqBody, resBody CreateScreenshot_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2189,12 +2190,12 @@ type CreateSecondaryVM_TaskBody struct {
 
 func (b *CreateSecondaryVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateSecondaryVM_Task(r soap.RoundTripper, req *types.CreateSecondaryVM_Task) (*types.CreateSecondaryVM_TaskResponse, error) {
+func CreateSecondaryVM_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateSecondaryVM_Task) (*types.CreateSecondaryVM_TaskResponse, error) {
 	var reqBody, resBody CreateSecondaryVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2209,12 +2210,12 @@ type CreateSnapshot_TaskBody struct {
 
 func (b *CreateSnapshot_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateSnapshot_Task(r soap.RoundTripper, req *types.CreateSnapshot_Task) (*types.CreateSnapshot_TaskResponse, error) {
+func CreateSnapshot_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateSnapshot_Task) (*types.CreateSnapshot_TaskResponse, error) {
 	var reqBody, resBody CreateSnapshot_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2229,12 +2230,12 @@ type CreateStoragePodBody struct {
 
 func (b *CreateStoragePodBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateStoragePod(r soap.RoundTripper, req *types.CreateStoragePod) (*types.CreateStoragePodResponse, error) {
+func CreateStoragePod(ctx context.Context, r soap.RoundTripper, req *types.CreateStoragePod) (*types.CreateStoragePodResponse, error) {
 	var reqBody, resBody CreateStoragePodBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2249,12 +2250,12 @@ type CreateTaskBody struct {
 
 func (b *CreateTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateTask(r soap.RoundTripper, req *types.CreateTask) (*types.CreateTaskResponse, error) {
+func CreateTask(ctx context.Context, r soap.RoundTripper, req *types.CreateTask) (*types.CreateTaskResponse, error) {
 	var reqBody, resBody CreateTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2269,12 +2270,12 @@ type CreateTemporaryDirectoryInGuestBody struct {
 
 func (b *CreateTemporaryDirectoryInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateTemporaryDirectoryInGuest(r soap.RoundTripper, req *types.CreateTemporaryDirectoryInGuest) (*types.CreateTemporaryDirectoryInGuestResponse, error) {
+func CreateTemporaryDirectoryInGuest(ctx context.Context, r soap.RoundTripper, req *types.CreateTemporaryDirectoryInGuest) (*types.CreateTemporaryDirectoryInGuestResponse, error) {
 	var reqBody, resBody CreateTemporaryDirectoryInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2289,12 +2290,12 @@ type CreateTemporaryFileInGuestBody struct {
 
 func (b *CreateTemporaryFileInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateTemporaryFileInGuest(r soap.RoundTripper, req *types.CreateTemporaryFileInGuest) (*types.CreateTemporaryFileInGuestResponse, error) {
+func CreateTemporaryFileInGuest(ctx context.Context, r soap.RoundTripper, req *types.CreateTemporaryFileInGuest) (*types.CreateTemporaryFileInGuestResponse, error) {
 	var reqBody, resBody CreateTemporaryFileInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2309,12 +2310,12 @@ type CreateUserBody struct {
 
 func (b *CreateUserBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateUser(r soap.RoundTripper, req *types.CreateUser) (*types.CreateUserResponse, error) {
+func CreateUser(ctx context.Context, r soap.RoundTripper, req *types.CreateUser) (*types.CreateUserResponse, error) {
 	var reqBody, resBody CreateUserBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2329,12 +2330,12 @@ type CreateVAppBody struct {
 
 func (b *CreateVAppBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateVApp(r soap.RoundTripper, req *types.CreateVApp) (*types.CreateVAppResponse, error) {
+func CreateVApp(ctx context.Context, r soap.RoundTripper, req *types.CreateVApp) (*types.CreateVAppResponse, error) {
 	var reqBody, resBody CreateVAppBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2349,12 +2350,12 @@ type CreateVM_TaskBody struct {
 
 func (b *CreateVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateVM_Task(r soap.RoundTripper, req *types.CreateVM_Task) (*types.CreateVM_TaskResponse, error) {
+func CreateVM_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateVM_Task) (*types.CreateVM_TaskResponse, error) {
 	var reqBody, resBody CreateVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2369,12 +2370,12 @@ type CreateVirtualDisk_TaskBody struct {
 
 func (b *CreateVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateVirtualDisk_Task(r soap.RoundTripper, req *types.CreateVirtualDisk_Task) (*types.CreateVirtualDisk_TaskResponse, error) {
+func CreateVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.CreateVirtualDisk_Task) (*types.CreateVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody CreateVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2389,12 +2390,12 @@ type CreateVmfsDatastoreBody struct {
 
 func (b *CreateVmfsDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CreateVmfsDatastore(r soap.RoundTripper, req *types.CreateVmfsDatastore) (*types.CreateVmfsDatastoreResponse, error) {
+func CreateVmfsDatastore(ctx context.Context, r soap.RoundTripper, req *types.CreateVmfsDatastore) (*types.CreateVmfsDatastoreResponse, error) {
 	var reqBody, resBody CreateVmfsDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2409,12 +2410,12 @@ type CurrentTimeBody struct {
 
 func (b *CurrentTimeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CurrentTime(r soap.RoundTripper, req *types.CurrentTime) (*types.CurrentTimeResponse, error) {
+func CurrentTime(ctx context.Context, r soap.RoundTripper, req *types.CurrentTime) (*types.CurrentTimeResponse, error) {
 	var reqBody, resBody CurrentTimeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2429,12 +2430,12 @@ type CustomizationSpecItemToXmlBody struct {
 
 func (b *CustomizationSpecItemToXmlBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CustomizationSpecItemToXml(r soap.RoundTripper, req *types.CustomizationSpecItemToXml) (*types.CustomizationSpecItemToXmlResponse, error) {
+func CustomizationSpecItemToXml(ctx context.Context, r soap.RoundTripper, req *types.CustomizationSpecItemToXml) (*types.CustomizationSpecItemToXmlResponse, error) {
 	var reqBody, resBody CustomizationSpecItemToXmlBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2449,12 +2450,12 @@ type CustomizeVM_TaskBody struct {
 
 func (b *CustomizeVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func CustomizeVM_Task(r soap.RoundTripper, req *types.CustomizeVM_Task) (*types.CustomizeVM_TaskResponse, error) {
+func CustomizeVM_Task(ctx context.Context, r soap.RoundTripper, req *types.CustomizeVM_Task) (*types.CustomizeVM_TaskResponse, error) {
 	var reqBody, resBody CustomizeVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2469,12 +2470,12 @@ type DVPortgroupRollback_TaskBody struct {
 
 func (b *DVPortgroupRollback_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DVPortgroupRollback_Task(r soap.RoundTripper, req *types.DVPortgroupRollback_Task) (*types.DVPortgroupRollback_TaskResponse, error) {
+func DVPortgroupRollback_Task(ctx context.Context, r soap.RoundTripper, req *types.DVPortgroupRollback_Task) (*types.DVPortgroupRollback_TaskResponse, error) {
 	var reqBody, resBody DVPortgroupRollback_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2489,12 +2490,12 @@ type DVSManagerExportEntity_TaskBody struct {
 
 func (b *DVSManagerExportEntity_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DVSManagerExportEntity_Task(r soap.RoundTripper, req *types.DVSManagerExportEntity_Task) (*types.DVSManagerExportEntity_TaskResponse, error) {
+func DVSManagerExportEntity_Task(ctx context.Context, r soap.RoundTripper, req *types.DVSManagerExportEntity_Task) (*types.DVSManagerExportEntity_TaskResponse, error) {
 	var reqBody, resBody DVSManagerExportEntity_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2509,12 +2510,12 @@ type DVSManagerImportEntity_TaskBody struct {
 
 func (b *DVSManagerImportEntity_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DVSManagerImportEntity_Task(r soap.RoundTripper, req *types.DVSManagerImportEntity_Task) (*types.DVSManagerImportEntity_TaskResponse, error) {
+func DVSManagerImportEntity_Task(ctx context.Context, r soap.RoundTripper, req *types.DVSManagerImportEntity_Task) (*types.DVSManagerImportEntity_TaskResponse, error) {
 	var reqBody, resBody DVSManagerImportEntity_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2529,12 +2530,12 @@ type DVSManagerLookupDvPortGroupBody struct {
 
 func (b *DVSManagerLookupDvPortGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DVSManagerLookupDvPortGroup(r soap.RoundTripper, req *types.DVSManagerLookupDvPortGroup) (*types.DVSManagerLookupDvPortGroupResponse, error) {
+func DVSManagerLookupDvPortGroup(ctx context.Context, r soap.RoundTripper, req *types.DVSManagerLookupDvPortGroup) (*types.DVSManagerLookupDvPortGroupResponse, error) {
 	var reqBody, resBody DVSManagerLookupDvPortGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2549,12 +2550,12 @@ type DVSRollback_TaskBody struct {
 
 func (b *DVSRollback_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DVSRollback_Task(r soap.RoundTripper, req *types.DVSRollback_Task) (*types.DVSRollback_TaskResponse, error) {
+func DVSRollback_Task(ctx context.Context, r soap.RoundTripper, req *types.DVSRollback_Task) (*types.DVSRollback_TaskResponse, error) {
 	var reqBody, resBody DVSRollback_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2569,12 +2570,12 @@ type DatastoreEnterMaintenanceModeBody struct {
 
 func (b *DatastoreEnterMaintenanceModeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DatastoreEnterMaintenanceMode(r soap.RoundTripper, req *types.DatastoreEnterMaintenanceMode) (*types.DatastoreEnterMaintenanceModeResponse, error) {
+func DatastoreEnterMaintenanceMode(ctx context.Context, r soap.RoundTripper, req *types.DatastoreEnterMaintenanceMode) (*types.DatastoreEnterMaintenanceModeResponse, error) {
 	var reqBody, resBody DatastoreEnterMaintenanceModeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2589,12 +2590,12 @@ type DatastoreExitMaintenanceMode_TaskBody struct {
 
 func (b *DatastoreExitMaintenanceMode_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DatastoreExitMaintenanceMode_Task(r soap.RoundTripper, req *types.DatastoreExitMaintenanceMode_Task) (*types.DatastoreExitMaintenanceMode_TaskResponse, error) {
+func DatastoreExitMaintenanceMode_Task(ctx context.Context, r soap.RoundTripper, req *types.DatastoreExitMaintenanceMode_Task) (*types.DatastoreExitMaintenanceMode_TaskResponse, error) {
 	var reqBody, resBody DatastoreExitMaintenanceMode_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2609,12 +2610,12 @@ type DecodeLicenseBody struct {
 
 func (b *DecodeLicenseBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DecodeLicense(r soap.RoundTripper, req *types.DecodeLicense) (*types.DecodeLicenseResponse, error) {
+func DecodeLicense(ctx context.Context, r soap.RoundTripper, req *types.DecodeLicense) (*types.DecodeLicenseResponse, error) {
 	var reqBody, resBody DecodeLicenseBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2629,12 +2630,12 @@ type DefragmentAllDisksBody struct {
 
 func (b *DefragmentAllDisksBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DefragmentAllDisks(r soap.RoundTripper, req *types.DefragmentAllDisks) (*types.DefragmentAllDisksResponse, error) {
+func DefragmentAllDisks(ctx context.Context, r soap.RoundTripper, req *types.DefragmentAllDisks) (*types.DefragmentAllDisksResponse, error) {
 	var reqBody, resBody DefragmentAllDisksBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2649,12 +2650,12 @@ type DefragmentVirtualDisk_TaskBody struct {
 
 func (b *DefragmentVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DefragmentVirtualDisk_Task(r soap.RoundTripper, req *types.DefragmentVirtualDisk_Task) (*types.DefragmentVirtualDisk_TaskResponse, error) {
+func DefragmentVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.DefragmentVirtualDisk_Task) (*types.DefragmentVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody DefragmentVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2669,12 +2670,12 @@ type DeleteCustomizationSpecBody struct {
 
 func (b *DeleteCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteCustomizationSpec(r soap.RoundTripper, req *types.DeleteCustomizationSpec) (*types.DeleteCustomizationSpecResponse, error) {
+func DeleteCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.DeleteCustomizationSpec) (*types.DeleteCustomizationSpecResponse, error) {
 	var reqBody, resBody DeleteCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2689,12 +2690,12 @@ type DeleteDatastoreFile_TaskBody struct {
 
 func (b *DeleteDatastoreFile_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteDatastoreFile_Task(r soap.RoundTripper, req *types.DeleteDatastoreFile_Task) (*types.DeleteDatastoreFile_TaskResponse, error) {
+func DeleteDatastoreFile_Task(ctx context.Context, r soap.RoundTripper, req *types.DeleteDatastoreFile_Task) (*types.DeleteDatastoreFile_TaskResponse, error) {
 	var reqBody, resBody DeleteDatastoreFile_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2709,12 +2710,12 @@ type DeleteDirectoryBody struct {
 
 func (b *DeleteDirectoryBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteDirectory(r soap.RoundTripper, req *types.DeleteDirectory) (*types.DeleteDirectoryResponse, error) {
+func DeleteDirectory(ctx context.Context, r soap.RoundTripper, req *types.DeleteDirectory) (*types.DeleteDirectoryResponse, error) {
 	var reqBody, resBody DeleteDirectoryBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2729,12 +2730,12 @@ type DeleteDirectoryInGuestBody struct {
 
 func (b *DeleteDirectoryInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteDirectoryInGuest(r soap.RoundTripper, req *types.DeleteDirectoryInGuest) (*types.DeleteDirectoryInGuestResponse, error) {
+func DeleteDirectoryInGuest(ctx context.Context, r soap.RoundTripper, req *types.DeleteDirectoryInGuest) (*types.DeleteDirectoryInGuestResponse, error) {
 	var reqBody, resBody DeleteDirectoryInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2749,12 +2750,12 @@ type DeleteFileBody struct {
 
 func (b *DeleteFileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteFile(r soap.RoundTripper, req *types.DeleteFile) (*types.DeleteFileResponse, error) {
+func DeleteFile(ctx context.Context, r soap.RoundTripper, req *types.DeleteFile) (*types.DeleteFileResponse, error) {
 	var reqBody, resBody DeleteFileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2769,12 +2770,12 @@ type DeleteFileInGuestBody struct {
 
 func (b *DeleteFileInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteFileInGuest(r soap.RoundTripper, req *types.DeleteFileInGuest) (*types.DeleteFileInGuestResponse, error) {
+func DeleteFileInGuest(ctx context.Context, r soap.RoundTripper, req *types.DeleteFileInGuest) (*types.DeleteFileInGuestResponse, error) {
 	var reqBody, resBody DeleteFileInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2789,12 +2790,12 @@ type DeleteScsiLunStateBody struct {
 
 func (b *DeleteScsiLunStateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteScsiLunState(r soap.RoundTripper, req *types.DeleteScsiLunState) (*types.DeleteScsiLunStateResponse, error) {
+func DeleteScsiLunState(ctx context.Context, r soap.RoundTripper, req *types.DeleteScsiLunState) (*types.DeleteScsiLunStateResponse, error) {
 	var reqBody, resBody DeleteScsiLunStateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2809,12 +2810,12 @@ type DeleteVffsVolumeStateBody struct {
 
 func (b *DeleteVffsVolumeStateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteVffsVolumeState(r soap.RoundTripper, req *types.DeleteVffsVolumeState) (*types.DeleteVffsVolumeStateResponse, error) {
+func DeleteVffsVolumeState(ctx context.Context, r soap.RoundTripper, req *types.DeleteVffsVolumeState) (*types.DeleteVffsVolumeStateResponse, error) {
 	var reqBody, resBody DeleteVffsVolumeStateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2829,12 +2830,12 @@ type DeleteVirtualDisk_TaskBody struct {
 
 func (b *DeleteVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteVirtualDisk_Task(r soap.RoundTripper, req *types.DeleteVirtualDisk_Task) (*types.DeleteVirtualDisk_TaskResponse, error) {
+func DeleteVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.DeleteVirtualDisk_Task) (*types.DeleteVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody DeleteVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2849,12 +2850,12 @@ type DeleteVmfsVolumeStateBody struct {
 
 func (b *DeleteVmfsVolumeStateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeleteVmfsVolumeState(r soap.RoundTripper, req *types.DeleteVmfsVolumeState) (*types.DeleteVmfsVolumeStateResponse, error) {
+func DeleteVmfsVolumeState(ctx context.Context, r soap.RoundTripper, req *types.DeleteVmfsVolumeState) (*types.DeleteVmfsVolumeStateResponse, error) {
 	var reqBody, resBody DeleteVmfsVolumeStateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2869,12 +2870,12 @@ type DeselectVnicBody struct {
 
 func (b *DeselectVnicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeselectVnic(r soap.RoundTripper, req *types.DeselectVnic) (*types.DeselectVnicResponse, error) {
+func DeselectVnic(ctx context.Context, r soap.RoundTripper, req *types.DeselectVnic) (*types.DeselectVnicResponse, error) {
 	var reqBody, resBody DeselectVnicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2889,12 +2890,12 @@ type DeselectVnicForNicTypeBody struct {
 
 func (b *DeselectVnicForNicTypeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DeselectVnicForNicType(r soap.RoundTripper, req *types.DeselectVnicForNicType) (*types.DeselectVnicForNicTypeResponse, error) {
+func DeselectVnicForNicType(ctx context.Context, r soap.RoundTripper, req *types.DeselectVnicForNicType) (*types.DeselectVnicForNicTypeResponse, error) {
 	var reqBody, resBody DeselectVnicForNicTypeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2909,12 +2910,12 @@ type DestroyChildrenBody struct {
 
 func (b *DestroyChildrenBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyChildren(r soap.RoundTripper, req *types.DestroyChildren) (*types.DestroyChildrenResponse, error) {
+func DestroyChildren(ctx context.Context, r soap.RoundTripper, req *types.DestroyChildren) (*types.DestroyChildrenResponse, error) {
 	var reqBody, resBody DestroyChildrenBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2929,12 +2930,12 @@ type DestroyCollectorBody struct {
 
 func (b *DestroyCollectorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyCollector(r soap.RoundTripper, req *types.DestroyCollector) (*types.DestroyCollectorResponse, error) {
+func DestroyCollector(ctx context.Context, r soap.RoundTripper, req *types.DestroyCollector) (*types.DestroyCollectorResponse, error) {
 	var reqBody, resBody DestroyCollectorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2949,12 +2950,12 @@ type DestroyDatastoreBody struct {
 
 func (b *DestroyDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyDatastore(r soap.RoundTripper, req *types.DestroyDatastore) (*types.DestroyDatastoreResponse, error) {
+func DestroyDatastore(ctx context.Context, r soap.RoundTripper, req *types.DestroyDatastore) (*types.DestroyDatastoreResponse, error) {
 	var reqBody, resBody DestroyDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2969,12 +2970,12 @@ type DestroyIpPoolBody struct {
 
 func (b *DestroyIpPoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyIpPool(r soap.RoundTripper, req *types.DestroyIpPool) (*types.DestroyIpPoolResponse, error) {
+func DestroyIpPool(ctx context.Context, r soap.RoundTripper, req *types.DestroyIpPool) (*types.DestroyIpPoolResponse, error) {
 	var reqBody, resBody DestroyIpPoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -2989,12 +2990,12 @@ type DestroyNetworkBody struct {
 
 func (b *DestroyNetworkBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyNetwork(r soap.RoundTripper, req *types.DestroyNetwork) (*types.DestroyNetworkResponse, error) {
+func DestroyNetwork(ctx context.Context, r soap.RoundTripper, req *types.DestroyNetwork) (*types.DestroyNetworkResponse, error) {
 	var reqBody, resBody DestroyNetworkBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3009,12 +3010,12 @@ type DestroyProfileBody struct {
 
 func (b *DestroyProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyProfile(r soap.RoundTripper, req *types.DestroyProfile) (*types.DestroyProfileResponse, error) {
+func DestroyProfile(ctx context.Context, r soap.RoundTripper, req *types.DestroyProfile) (*types.DestroyProfileResponse, error) {
 	var reqBody, resBody DestroyProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3029,12 +3030,12 @@ type DestroyPropertyCollectorBody struct {
 
 func (b *DestroyPropertyCollectorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyPropertyCollector(r soap.RoundTripper, req *types.DestroyPropertyCollector) (*types.DestroyPropertyCollectorResponse, error) {
+func DestroyPropertyCollector(ctx context.Context, r soap.RoundTripper, req *types.DestroyPropertyCollector) (*types.DestroyPropertyCollectorResponse, error) {
 	var reqBody, resBody DestroyPropertyCollectorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3049,12 +3050,12 @@ type DestroyPropertyFilterBody struct {
 
 func (b *DestroyPropertyFilterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyPropertyFilter(r soap.RoundTripper, req *types.DestroyPropertyFilter) (*types.DestroyPropertyFilterResponse, error) {
+func DestroyPropertyFilter(ctx context.Context, r soap.RoundTripper, req *types.DestroyPropertyFilter) (*types.DestroyPropertyFilterResponse, error) {
 	var reqBody, resBody DestroyPropertyFilterBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3069,12 +3070,12 @@ type DestroyVffsBody struct {
 
 func (b *DestroyVffsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyVffs(r soap.RoundTripper, req *types.DestroyVffs) (*types.DestroyVffsResponse, error) {
+func DestroyVffs(ctx context.Context, r soap.RoundTripper, req *types.DestroyVffs) (*types.DestroyVffsResponse, error) {
 	var reqBody, resBody DestroyVffsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3089,12 +3090,12 @@ type DestroyViewBody struct {
 
 func (b *DestroyViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DestroyView(r soap.RoundTripper, req *types.DestroyView) (*types.DestroyViewResponse, error) {
+func DestroyView(ctx context.Context, r soap.RoundTripper, req *types.DestroyView) (*types.DestroyViewResponse, error) {
 	var reqBody, resBody DestroyViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3109,12 +3110,12 @@ type Destroy_TaskBody struct {
 
 func (b *Destroy_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Destroy_Task(r soap.RoundTripper, req *types.Destroy_Task) (*types.Destroy_TaskResponse, error) {
+func Destroy_Task(ctx context.Context, r soap.RoundTripper, req *types.Destroy_Task) (*types.Destroy_TaskResponse, error) {
 	var reqBody, resBody Destroy_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3129,12 +3130,12 @@ type DetachScsiLunBody struct {
 
 func (b *DetachScsiLunBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DetachScsiLun(r soap.RoundTripper, req *types.DetachScsiLun) (*types.DetachScsiLunResponse, error) {
+func DetachScsiLun(ctx context.Context, r soap.RoundTripper, req *types.DetachScsiLun) (*types.DetachScsiLunResponse, error) {
 	var reqBody, resBody DetachScsiLunBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3149,12 +3150,12 @@ type DisableFeatureBody struct {
 
 func (b *DisableFeatureBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DisableFeature(r soap.RoundTripper, req *types.DisableFeature) (*types.DisableFeatureResponse, error) {
+func DisableFeature(ctx context.Context, r soap.RoundTripper, req *types.DisableFeature) (*types.DisableFeatureResponse, error) {
 	var reqBody, resBody DisableFeatureBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3169,12 +3170,12 @@ type DisableHyperThreadingBody struct {
 
 func (b *DisableHyperThreadingBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DisableHyperThreading(r soap.RoundTripper, req *types.DisableHyperThreading) (*types.DisableHyperThreadingResponse, error) {
+func DisableHyperThreading(ctx context.Context, r soap.RoundTripper, req *types.DisableHyperThreading) (*types.DisableHyperThreadingResponse, error) {
 	var reqBody, resBody DisableHyperThreadingBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3189,12 +3190,12 @@ type DisableMultipathPathBody struct {
 
 func (b *DisableMultipathPathBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DisableMultipathPath(r soap.RoundTripper, req *types.DisableMultipathPath) (*types.DisableMultipathPathResponse, error) {
+func DisableMultipathPath(ctx context.Context, r soap.RoundTripper, req *types.DisableMultipathPath) (*types.DisableMultipathPathResponse, error) {
 	var reqBody, resBody DisableMultipathPathBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3209,12 +3210,12 @@ type DisableRulesetBody struct {
 
 func (b *DisableRulesetBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DisableRuleset(r soap.RoundTripper, req *types.DisableRuleset) (*types.DisableRulesetResponse, error) {
+func DisableRuleset(ctx context.Context, r soap.RoundTripper, req *types.DisableRuleset) (*types.DisableRulesetResponse, error) {
 	var reqBody, resBody DisableRulesetBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3229,12 +3230,12 @@ type DisableSecondaryVM_TaskBody struct {
 
 func (b *DisableSecondaryVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DisableSecondaryVM_Task(r soap.RoundTripper, req *types.DisableSecondaryVM_Task) (*types.DisableSecondaryVM_TaskResponse, error) {
+func DisableSecondaryVM_Task(ctx context.Context, r soap.RoundTripper, req *types.DisableSecondaryVM_Task) (*types.DisableSecondaryVM_TaskResponse, error) {
 	var reqBody, resBody DisableSecondaryVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3249,12 +3250,12 @@ type DisconnectHost_TaskBody struct {
 
 func (b *DisconnectHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DisconnectHost_Task(r soap.RoundTripper, req *types.DisconnectHost_Task) (*types.DisconnectHost_TaskResponse, error) {
+func DisconnectHost_Task(ctx context.Context, r soap.RoundTripper, req *types.DisconnectHost_Task) (*types.DisconnectHost_TaskResponse, error) {
 	var reqBody, resBody DisconnectHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3269,12 +3270,12 @@ type DiscoverFcoeHbasBody struct {
 
 func (b *DiscoverFcoeHbasBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DiscoverFcoeHbas(r soap.RoundTripper, req *types.DiscoverFcoeHbas) (*types.DiscoverFcoeHbasResponse, error) {
+func DiscoverFcoeHbas(ctx context.Context, r soap.RoundTripper, req *types.DiscoverFcoeHbas) (*types.DiscoverFcoeHbasResponse, error) {
 	var reqBody, resBody DiscoverFcoeHbasBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3289,12 +3290,12 @@ type DissociateProfileBody struct {
 
 func (b *DissociateProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DissociateProfile(r soap.RoundTripper, req *types.DissociateProfile) (*types.DissociateProfileResponse, error) {
+func DissociateProfile(ctx context.Context, r soap.RoundTripper, req *types.DissociateProfile) (*types.DissociateProfileResponse, error) {
 	var reqBody, resBody DissociateProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3309,12 +3310,12 @@ type DoesCustomizationSpecExistBody struct {
 
 func (b *DoesCustomizationSpecExistBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DoesCustomizationSpecExist(r soap.RoundTripper, req *types.DoesCustomizationSpecExist) (*types.DoesCustomizationSpecExistResponse, error) {
+func DoesCustomizationSpecExist(ctx context.Context, r soap.RoundTripper, req *types.DoesCustomizationSpecExist) (*types.DoesCustomizationSpecExistResponse, error) {
 	var reqBody, resBody DoesCustomizationSpecExistBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3329,12 +3330,12 @@ type DuplicateCustomizationSpecBody struct {
 
 func (b *DuplicateCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DuplicateCustomizationSpec(r soap.RoundTripper, req *types.DuplicateCustomizationSpec) (*types.DuplicateCustomizationSpecResponse, error) {
+func DuplicateCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.DuplicateCustomizationSpec) (*types.DuplicateCustomizationSpecResponse, error) {
 	var reqBody, resBody DuplicateCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3349,12 +3350,12 @@ type EagerZeroVirtualDisk_TaskBody struct {
 
 func (b *EagerZeroVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EagerZeroVirtualDisk_Task(r soap.RoundTripper, req *types.EagerZeroVirtualDisk_Task) (*types.EagerZeroVirtualDisk_TaskResponse, error) {
+func EagerZeroVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.EagerZeroVirtualDisk_Task) (*types.EagerZeroVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody EagerZeroVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3369,12 +3370,12 @@ type EnableAlarmActionsBody struct {
 
 func (b *EnableAlarmActionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableAlarmActions(r soap.RoundTripper, req *types.EnableAlarmActions) (*types.EnableAlarmActionsResponse, error) {
+func EnableAlarmActions(ctx context.Context, r soap.RoundTripper, req *types.EnableAlarmActions) (*types.EnableAlarmActionsResponse, error) {
 	var reqBody, resBody EnableAlarmActionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3389,12 +3390,12 @@ type EnableFeatureBody struct {
 
 func (b *EnableFeatureBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableFeature(r soap.RoundTripper, req *types.EnableFeature) (*types.EnableFeatureResponse, error) {
+func EnableFeature(ctx context.Context, r soap.RoundTripper, req *types.EnableFeature) (*types.EnableFeatureResponse, error) {
 	var reqBody, resBody EnableFeatureBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3409,12 +3410,12 @@ type EnableHyperThreadingBody struct {
 
 func (b *EnableHyperThreadingBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableHyperThreading(r soap.RoundTripper, req *types.EnableHyperThreading) (*types.EnableHyperThreadingResponse, error) {
+func EnableHyperThreading(ctx context.Context, r soap.RoundTripper, req *types.EnableHyperThreading) (*types.EnableHyperThreadingResponse, error) {
 	var reqBody, resBody EnableHyperThreadingBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3429,12 +3430,12 @@ type EnableMultipathPathBody struct {
 
 func (b *EnableMultipathPathBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableMultipathPath(r soap.RoundTripper, req *types.EnableMultipathPath) (*types.EnableMultipathPathResponse, error) {
+func EnableMultipathPath(ctx context.Context, r soap.RoundTripper, req *types.EnableMultipathPath) (*types.EnableMultipathPathResponse, error) {
 	var reqBody, resBody EnableMultipathPathBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3449,12 +3450,12 @@ type EnableNetworkResourceManagementBody struct {
 
 func (b *EnableNetworkResourceManagementBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableNetworkResourceManagement(r soap.RoundTripper, req *types.EnableNetworkResourceManagement) (*types.EnableNetworkResourceManagementResponse, error) {
+func EnableNetworkResourceManagement(ctx context.Context, r soap.RoundTripper, req *types.EnableNetworkResourceManagement) (*types.EnableNetworkResourceManagementResponse, error) {
 	var reqBody, resBody EnableNetworkResourceManagementBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3469,12 +3470,12 @@ type EnableRulesetBody struct {
 
 func (b *EnableRulesetBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableRuleset(r soap.RoundTripper, req *types.EnableRuleset) (*types.EnableRulesetResponse, error) {
+func EnableRuleset(ctx context.Context, r soap.RoundTripper, req *types.EnableRuleset) (*types.EnableRulesetResponse, error) {
 	var reqBody, resBody EnableRulesetBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3489,12 +3490,12 @@ type EnableSecondaryVM_TaskBody struct {
 
 func (b *EnableSecondaryVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnableSecondaryVM_Task(r soap.RoundTripper, req *types.EnableSecondaryVM_Task) (*types.EnableSecondaryVM_TaskResponse, error) {
+func EnableSecondaryVM_Task(ctx context.Context, r soap.RoundTripper, req *types.EnableSecondaryVM_Task) (*types.EnableSecondaryVM_TaskResponse, error) {
 	var reqBody, resBody EnableSecondaryVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3509,12 +3510,12 @@ type EnterLockdownModeBody struct {
 
 func (b *EnterLockdownModeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnterLockdownMode(r soap.RoundTripper, req *types.EnterLockdownMode) (*types.EnterLockdownModeResponse, error) {
+func EnterLockdownMode(ctx context.Context, r soap.RoundTripper, req *types.EnterLockdownMode) (*types.EnterLockdownModeResponse, error) {
 	var reqBody, resBody EnterLockdownModeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3529,12 +3530,12 @@ type EnterMaintenanceMode_TaskBody struct {
 
 func (b *EnterMaintenanceMode_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EnterMaintenanceMode_Task(r soap.RoundTripper, req *types.EnterMaintenanceMode_Task) (*types.EnterMaintenanceMode_TaskResponse, error) {
+func EnterMaintenanceMode_Task(ctx context.Context, r soap.RoundTripper, req *types.EnterMaintenanceMode_Task) (*types.EnterMaintenanceMode_TaskResponse, error) {
 	var reqBody, resBody EnterMaintenanceMode_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3549,12 +3550,12 @@ type EstimateDatabaseSizeBody struct {
 
 func (b *EstimateDatabaseSizeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EstimateDatabaseSize(r soap.RoundTripper, req *types.EstimateDatabaseSize) (*types.EstimateDatabaseSizeResponse, error) {
+func EstimateDatabaseSize(ctx context.Context, r soap.RoundTripper, req *types.EstimateDatabaseSize) (*types.EstimateDatabaseSizeResponse, error) {
 	var reqBody, resBody EstimateDatabaseSizeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3569,12 +3570,12 @@ type EstimateStorageForConsolidateSnapshots_TaskBody struct {
 
 func (b *EstimateStorageForConsolidateSnapshots_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EstimateStorageForConsolidateSnapshots_Task(r soap.RoundTripper, req *types.EstimateStorageForConsolidateSnapshots_Task) (*types.EstimateStorageForConsolidateSnapshots_TaskResponse, error) {
+func EstimateStorageForConsolidateSnapshots_Task(ctx context.Context, r soap.RoundTripper, req *types.EstimateStorageForConsolidateSnapshots_Task) (*types.EstimateStorageForConsolidateSnapshots_TaskResponse, error) {
 	var reqBody, resBody EstimateStorageForConsolidateSnapshots_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3589,12 +3590,12 @@ type EsxAgentHostManagerUpdateConfigBody struct {
 
 func (b *EsxAgentHostManagerUpdateConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func EsxAgentHostManagerUpdateConfig(r soap.RoundTripper, req *types.EsxAgentHostManagerUpdateConfig) (*types.EsxAgentHostManagerUpdateConfigResponse, error) {
+func EsxAgentHostManagerUpdateConfig(ctx context.Context, r soap.RoundTripper, req *types.EsxAgentHostManagerUpdateConfig) (*types.EsxAgentHostManagerUpdateConfigResponse, error) {
 	var reqBody, resBody EsxAgentHostManagerUpdateConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3609,12 +3610,12 @@ type ExecuteHostProfileBody struct {
 
 func (b *ExecuteHostProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExecuteHostProfile(r soap.RoundTripper, req *types.ExecuteHostProfile) (*types.ExecuteHostProfileResponse, error) {
+func ExecuteHostProfile(ctx context.Context, r soap.RoundTripper, req *types.ExecuteHostProfile) (*types.ExecuteHostProfileResponse, error) {
 	var reqBody, resBody ExecuteHostProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3629,12 +3630,12 @@ type ExecuteSimpleCommandBody struct {
 
 func (b *ExecuteSimpleCommandBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExecuteSimpleCommand(r soap.RoundTripper, req *types.ExecuteSimpleCommand) (*types.ExecuteSimpleCommandResponse, error) {
+func ExecuteSimpleCommand(ctx context.Context, r soap.RoundTripper, req *types.ExecuteSimpleCommand) (*types.ExecuteSimpleCommandResponse, error) {
 	var reqBody, resBody ExecuteSimpleCommandBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3649,12 +3650,12 @@ type ExitLockdownModeBody struct {
 
 func (b *ExitLockdownModeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExitLockdownMode(r soap.RoundTripper, req *types.ExitLockdownMode) (*types.ExitLockdownModeResponse, error) {
+func ExitLockdownMode(ctx context.Context, r soap.RoundTripper, req *types.ExitLockdownMode) (*types.ExitLockdownModeResponse, error) {
 	var reqBody, resBody ExitLockdownModeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3669,12 +3670,12 @@ type ExitMaintenanceMode_TaskBody struct {
 
 func (b *ExitMaintenanceMode_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExitMaintenanceMode_Task(r soap.RoundTripper, req *types.ExitMaintenanceMode_Task) (*types.ExitMaintenanceMode_TaskResponse, error) {
+func ExitMaintenanceMode_Task(ctx context.Context, r soap.RoundTripper, req *types.ExitMaintenanceMode_Task) (*types.ExitMaintenanceMode_TaskResponse, error) {
 	var reqBody, resBody ExitMaintenanceMode_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3689,12 +3690,12 @@ type ExpandVmfsDatastoreBody struct {
 
 func (b *ExpandVmfsDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExpandVmfsDatastore(r soap.RoundTripper, req *types.ExpandVmfsDatastore) (*types.ExpandVmfsDatastoreResponse, error) {
+func ExpandVmfsDatastore(ctx context.Context, r soap.RoundTripper, req *types.ExpandVmfsDatastore) (*types.ExpandVmfsDatastoreResponse, error) {
 	var reqBody, resBody ExpandVmfsDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3709,12 +3710,12 @@ type ExpandVmfsExtentBody struct {
 
 func (b *ExpandVmfsExtentBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExpandVmfsExtent(r soap.RoundTripper, req *types.ExpandVmfsExtent) (*types.ExpandVmfsExtentResponse, error) {
+func ExpandVmfsExtent(ctx context.Context, r soap.RoundTripper, req *types.ExpandVmfsExtent) (*types.ExpandVmfsExtentResponse, error) {
 	var reqBody, resBody ExpandVmfsExtentBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3729,12 +3730,12 @@ type ExportAnswerFile_TaskBody struct {
 
 func (b *ExportAnswerFile_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExportAnswerFile_Task(r soap.RoundTripper, req *types.ExportAnswerFile_Task) (*types.ExportAnswerFile_TaskResponse, error) {
+func ExportAnswerFile_Task(ctx context.Context, r soap.RoundTripper, req *types.ExportAnswerFile_Task) (*types.ExportAnswerFile_TaskResponse, error) {
 	var reqBody, resBody ExportAnswerFile_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3749,12 +3750,12 @@ type ExportProfileBody struct {
 
 func (b *ExportProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExportProfile(r soap.RoundTripper, req *types.ExportProfile) (*types.ExportProfileResponse, error) {
+func ExportProfile(ctx context.Context, r soap.RoundTripper, req *types.ExportProfile) (*types.ExportProfileResponse, error) {
 	var reqBody, resBody ExportProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3769,12 +3770,12 @@ type ExportSnapshotBody struct {
 
 func (b *ExportSnapshotBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExportSnapshot(r soap.RoundTripper, req *types.ExportSnapshot) (*types.ExportSnapshotResponse, error) {
+func ExportSnapshot(ctx context.Context, r soap.RoundTripper, req *types.ExportSnapshot) (*types.ExportSnapshotResponse, error) {
 	var reqBody, resBody ExportSnapshotBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3789,12 +3790,12 @@ type ExportVAppBody struct {
 
 func (b *ExportVAppBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExportVApp(r soap.RoundTripper, req *types.ExportVApp) (*types.ExportVAppResponse, error) {
+func ExportVApp(ctx context.Context, r soap.RoundTripper, req *types.ExportVApp) (*types.ExportVAppResponse, error) {
 	var reqBody, resBody ExportVAppBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3809,12 +3810,12 @@ type ExportVmBody struct {
 
 func (b *ExportVmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExportVm(r soap.RoundTripper, req *types.ExportVm) (*types.ExportVmResponse, error) {
+func ExportVm(ctx context.Context, r soap.RoundTripper, req *types.ExportVm) (*types.ExportVmResponse, error) {
 	var reqBody, resBody ExportVmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3829,12 +3830,12 @@ type ExtendVffsBody struct {
 
 func (b *ExtendVffsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExtendVffs(r soap.RoundTripper, req *types.ExtendVffs) (*types.ExtendVffsResponse, error) {
+func ExtendVffs(ctx context.Context, r soap.RoundTripper, req *types.ExtendVffs) (*types.ExtendVffsResponse, error) {
 	var reqBody, resBody ExtendVffsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3849,12 +3850,12 @@ type ExtendVirtualDisk_TaskBody struct {
 
 func (b *ExtendVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExtendVirtualDisk_Task(r soap.RoundTripper, req *types.ExtendVirtualDisk_Task) (*types.ExtendVirtualDisk_TaskResponse, error) {
+func ExtendVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.ExtendVirtualDisk_Task) (*types.ExtendVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody ExtendVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3869,12 +3870,12 @@ type ExtendVmfsDatastoreBody struct {
 
 func (b *ExtendVmfsDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExtendVmfsDatastore(r soap.RoundTripper, req *types.ExtendVmfsDatastore) (*types.ExtendVmfsDatastoreResponse, error) {
+func ExtendVmfsDatastore(ctx context.Context, r soap.RoundTripper, req *types.ExtendVmfsDatastore) (*types.ExtendVmfsDatastoreResponse, error) {
 	var reqBody, resBody ExtendVmfsDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3889,12 +3890,12 @@ type ExtractOvfEnvironmentBody struct {
 
 func (b *ExtractOvfEnvironmentBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExtractOvfEnvironment(r soap.RoundTripper, req *types.ExtractOvfEnvironment) (*types.ExtractOvfEnvironmentResponse, error) {
+func ExtractOvfEnvironment(ctx context.Context, r soap.RoundTripper, req *types.ExtractOvfEnvironment) (*types.ExtractOvfEnvironmentResponse, error) {
 	var reqBody, resBody ExtractOvfEnvironmentBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3909,12 +3910,12 @@ type FetchDVPortKeysBody struct {
 
 func (b *FetchDVPortKeysBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FetchDVPortKeys(r soap.RoundTripper, req *types.FetchDVPortKeys) (*types.FetchDVPortKeysResponse, error) {
+func FetchDVPortKeys(ctx context.Context, r soap.RoundTripper, req *types.FetchDVPortKeys) (*types.FetchDVPortKeysResponse, error) {
 	var reqBody, resBody FetchDVPortKeysBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3929,12 +3930,12 @@ type FetchDVPortsBody struct {
 
 func (b *FetchDVPortsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FetchDVPorts(r soap.RoundTripper, req *types.FetchDVPorts) (*types.FetchDVPortsResponse, error) {
+func FetchDVPorts(ctx context.Context, r soap.RoundTripper, req *types.FetchDVPorts) (*types.FetchDVPortsResponse, error) {
 	var reqBody, resBody FetchDVPortsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3949,12 +3950,12 @@ type FindAllByDnsNameBody struct {
 
 func (b *FindAllByDnsNameBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindAllByDnsName(r soap.RoundTripper, req *types.FindAllByDnsName) (*types.FindAllByDnsNameResponse, error) {
+func FindAllByDnsName(ctx context.Context, r soap.RoundTripper, req *types.FindAllByDnsName) (*types.FindAllByDnsNameResponse, error) {
 	var reqBody, resBody FindAllByDnsNameBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3969,12 +3970,12 @@ type FindAllByIpBody struct {
 
 func (b *FindAllByIpBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindAllByIp(r soap.RoundTripper, req *types.FindAllByIp) (*types.FindAllByIpResponse, error) {
+func FindAllByIp(ctx context.Context, r soap.RoundTripper, req *types.FindAllByIp) (*types.FindAllByIpResponse, error) {
 	var reqBody, resBody FindAllByIpBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -3989,12 +3990,12 @@ type FindAllByUuidBody struct {
 
 func (b *FindAllByUuidBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindAllByUuid(r soap.RoundTripper, req *types.FindAllByUuid) (*types.FindAllByUuidResponse, error) {
+func FindAllByUuid(ctx context.Context, r soap.RoundTripper, req *types.FindAllByUuid) (*types.FindAllByUuidResponse, error) {
 	var reqBody, resBody FindAllByUuidBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4009,12 +4010,12 @@ type FindAssociatedProfileBody struct {
 
 func (b *FindAssociatedProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindAssociatedProfile(r soap.RoundTripper, req *types.FindAssociatedProfile) (*types.FindAssociatedProfileResponse, error) {
+func FindAssociatedProfile(ctx context.Context, r soap.RoundTripper, req *types.FindAssociatedProfile) (*types.FindAssociatedProfileResponse, error) {
 	var reqBody, resBody FindAssociatedProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4029,12 +4030,12 @@ type FindByDatastorePathBody struct {
 
 func (b *FindByDatastorePathBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindByDatastorePath(r soap.RoundTripper, req *types.FindByDatastorePath) (*types.FindByDatastorePathResponse, error) {
+func FindByDatastorePath(ctx context.Context, r soap.RoundTripper, req *types.FindByDatastorePath) (*types.FindByDatastorePathResponse, error) {
 	var reqBody, resBody FindByDatastorePathBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4049,12 +4050,12 @@ type FindByDnsNameBody struct {
 
 func (b *FindByDnsNameBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindByDnsName(r soap.RoundTripper, req *types.FindByDnsName) (*types.FindByDnsNameResponse, error) {
+func FindByDnsName(ctx context.Context, r soap.RoundTripper, req *types.FindByDnsName) (*types.FindByDnsNameResponse, error) {
 	var reqBody, resBody FindByDnsNameBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4069,12 +4070,12 @@ type FindByInventoryPathBody struct {
 
 func (b *FindByInventoryPathBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindByInventoryPath(r soap.RoundTripper, req *types.FindByInventoryPath) (*types.FindByInventoryPathResponse, error) {
+func FindByInventoryPath(ctx context.Context, r soap.RoundTripper, req *types.FindByInventoryPath) (*types.FindByInventoryPathResponse, error) {
 	var reqBody, resBody FindByInventoryPathBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4089,12 +4090,12 @@ type FindByIpBody struct {
 
 func (b *FindByIpBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindByIp(r soap.RoundTripper, req *types.FindByIp) (*types.FindByIpResponse, error) {
+func FindByIp(ctx context.Context, r soap.RoundTripper, req *types.FindByIp) (*types.FindByIpResponse, error) {
 	var reqBody, resBody FindByIpBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4109,12 +4110,12 @@ type FindByUuidBody struct {
 
 func (b *FindByUuidBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindByUuid(r soap.RoundTripper, req *types.FindByUuid) (*types.FindByUuidResponse, error) {
+func FindByUuid(ctx context.Context, r soap.RoundTripper, req *types.FindByUuid) (*types.FindByUuidResponse, error) {
 	var reqBody, resBody FindByUuidBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4129,12 +4130,12 @@ type FindChildBody struct {
 
 func (b *FindChildBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindChild(r soap.RoundTripper, req *types.FindChild) (*types.FindChildResponse, error) {
+func FindChild(ctx context.Context, r soap.RoundTripper, req *types.FindChild) (*types.FindChildResponse, error) {
 	var reqBody, resBody FindChildBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4149,12 +4150,12 @@ type FindExtensionBody struct {
 
 func (b *FindExtensionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FindExtension(r soap.RoundTripper, req *types.FindExtension) (*types.FindExtensionResponse, error) {
+func FindExtension(ctx context.Context, r soap.RoundTripper, req *types.FindExtension) (*types.FindExtensionResponse, error) {
 	var reqBody, resBody FindExtensionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4169,12 +4170,12 @@ type FormatVffsBody struct {
 
 func (b *FormatVffsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FormatVffs(r soap.RoundTripper, req *types.FormatVffs) (*types.FormatVffsResponse, error) {
+func FormatVffs(ctx context.Context, r soap.RoundTripper, req *types.FormatVffs) (*types.FormatVffsResponse, error) {
 	var reqBody, resBody FormatVffsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4189,12 +4190,12 @@ type FormatVmfsBody struct {
 
 func (b *FormatVmfsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func FormatVmfs(r soap.RoundTripper, req *types.FormatVmfs) (*types.FormatVmfsResponse, error) {
+func FormatVmfs(ctx context.Context, r soap.RoundTripper, req *types.FormatVmfs) (*types.FormatVmfsResponse, error) {
 	var reqBody, resBody FormatVmfsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4209,12 +4210,12 @@ type GenerateConfigTaskListBody struct {
 
 func (b *GenerateConfigTaskListBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GenerateConfigTaskList(r soap.RoundTripper, req *types.GenerateConfigTaskList) (*types.GenerateConfigTaskListResponse, error) {
+func GenerateConfigTaskList(ctx context.Context, r soap.RoundTripper, req *types.GenerateConfigTaskList) (*types.GenerateConfigTaskListResponse, error) {
 	var reqBody, resBody GenerateConfigTaskListBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4229,12 +4230,12 @@ type GenerateHostProfileTaskList_TaskBody struct {
 
 func (b *GenerateHostProfileTaskList_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GenerateHostProfileTaskList_Task(r soap.RoundTripper, req *types.GenerateHostProfileTaskList_Task) (*types.GenerateHostProfileTaskList_TaskResponse, error) {
+func GenerateHostProfileTaskList_Task(ctx context.Context, r soap.RoundTripper, req *types.GenerateHostProfileTaskList_Task) (*types.GenerateHostProfileTaskList_TaskResponse, error) {
 	var reqBody, resBody GenerateHostProfileTaskList_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4249,12 +4250,12 @@ type GenerateLogBundles_TaskBody struct {
 
 func (b *GenerateLogBundles_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GenerateLogBundles_Task(r soap.RoundTripper, req *types.GenerateLogBundles_Task) (*types.GenerateLogBundles_TaskResponse, error) {
+func GenerateLogBundles_Task(ctx context.Context, r soap.RoundTripper, req *types.GenerateLogBundles_Task) (*types.GenerateLogBundles_TaskResponse, error) {
 	var reqBody, resBody GenerateLogBundles_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4269,12 +4270,12 @@ type GetAlarmBody struct {
 
 func (b *GetAlarmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GetAlarm(r soap.RoundTripper, req *types.GetAlarm) (*types.GetAlarmResponse, error) {
+func GetAlarm(ctx context.Context, r soap.RoundTripper, req *types.GetAlarm) (*types.GetAlarmResponse, error) {
 	var reqBody, resBody GetAlarmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4289,12 +4290,12 @@ type GetAlarmStateBody struct {
 
 func (b *GetAlarmStateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GetAlarmState(r soap.RoundTripper, req *types.GetAlarmState) (*types.GetAlarmStateResponse, error) {
+func GetAlarmState(ctx context.Context, r soap.RoundTripper, req *types.GetAlarmState) (*types.GetAlarmStateResponse, error) {
 	var reqBody, resBody GetAlarmStateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4309,12 +4310,12 @@ type GetCustomizationSpecBody struct {
 
 func (b *GetCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GetCustomizationSpec(r soap.RoundTripper, req *types.GetCustomizationSpec) (*types.GetCustomizationSpecResponse, error) {
+func GetCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.GetCustomizationSpec) (*types.GetCustomizationSpecResponse, error) {
 	var reqBody, resBody GetCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4329,12 +4330,12 @@ type GetPublicKeyBody struct {
 
 func (b *GetPublicKeyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func GetPublicKey(r soap.RoundTripper, req *types.GetPublicKey) (*types.GetPublicKeyResponse, error) {
+func GetPublicKey(ctx context.Context, r soap.RoundTripper, req *types.GetPublicKey) (*types.GetPublicKeyResponse, error) {
 	var reqBody, resBody GetPublicKeyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4349,12 +4350,12 @@ type HasPrivilegeOnEntitiesBody struct {
 
 func (b *HasPrivilegeOnEntitiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HasPrivilegeOnEntities(r soap.RoundTripper, req *types.HasPrivilegeOnEntities) (*types.HasPrivilegeOnEntitiesResponse, error) {
+func HasPrivilegeOnEntities(ctx context.Context, r soap.RoundTripper, req *types.HasPrivilegeOnEntities) (*types.HasPrivilegeOnEntitiesResponse, error) {
 	var reqBody, resBody HasPrivilegeOnEntitiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4369,12 +4370,12 @@ type HasPrivilegeOnEntityBody struct {
 
 func (b *HasPrivilegeOnEntityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HasPrivilegeOnEntity(r soap.RoundTripper, req *types.HasPrivilegeOnEntity) (*types.HasPrivilegeOnEntityResponse, error) {
+func HasPrivilegeOnEntity(ctx context.Context, r soap.RoundTripper, req *types.HasPrivilegeOnEntity) (*types.HasPrivilegeOnEntityResponse, error) {
 	var reqBody, resBody HasPrivilegeOnEntityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4389,12 +4390,12 @@ type HostConfigVFlashCacheBody struct {
 
 func (b *HostConfigVFlashCacheBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HostConfigVFlashCache(r soap.RoundTripper, req *types.HostConfigVFlashCache) (*types.HostConfigVFlashCacheResponse, error) {
+func HostConfigVFlashCache(ctx context.Context, r soap.RoundTripper, req *types.HostConfigVFlashCache) (*types.HostConfigVFlashCacheResponse, error) {
 	var reqBody, resBody HostConfigVFlashCacheBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4409,12 +4410,12 @@ type HostConfigureVFlashResourceBody struct {
 
 func (b *HostConfigureVFlashResourceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HostConfigureVFlashResource(r soap.RoundTripper, req *types.HostConfigureVFlashResource) (*types.HostConfigureVFlashResourceResponse, error) {
+func HostConfigureVFlashResource(ctx context.Context, r soap.RoundTripper, req *types.HostConfigureVFlashResource) (*types.HostConfigureVFlashResourceResponse, error) {
 	var reqBody, resBody HostConfigureVFlashResourceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4429,12 +4430,12 @@ type HostGetVFlashModuleDefaultConfigBody struct {
 
 func (b *HostGetVFlashModuleDefaultConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HostGetVFlashModuleDefaultConfig(r soap.RoundTripper, req *types.HostGetVFlashModuleDefaultConfig) (*types.HostGetVFlashModuleDefaultConfigResponse, error) {
+func HostGetVFlashModuleDefaultConfig(ctx context.Context, r soap.RoundTripper, req *types.HostGetVFlashModuleDefaultConfig) (*types.HostGetVFlashModuleDefaultConfigResponse, error) {
 	var reqBody, resBody HostGetVFlashModuleDefaultConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4449,12 +4450,12 @@ type HostImageConfigGetAcceptanceBody struct {
 
 func (b *HostImageConfigGetAcceptanceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HostImageConfigGetAcceptance(r soap.RoundTripper, req *types.HostImageConfigGetAcceptance) (*types.HostImageConfigGetAcceptanceResponse, error) {
+func HostImageConfigGetAcceptance(ctx context.Context, r soap.RoundTripper, req *types.HostImageConfigGetAcceptance) (*types.HostImageConfigGetAcceptanceResponse, error) {
 	var reqBody, resBody HostImageConfigGetAcceptanceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4469,12 +4470,12 @@ type HostImageConfigGetProfileBody struct {
 
 func (b *HostImageConfigGetProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HostImageConfigGetProfile(r soap.RoundTripper, req *types.HostImageConfigGetProfile) (*types.HostImageConfigGetProfileResponse, error) {
+func HostImageConfigGetProfile(ctx context.Context, r soap.RoundTripper, req *types.HostImageConfigGetProfile) (*types.HostImageConfigGetProfileResponse, error) {
 	var reqBody, resBody HostImageConfigGetProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4489,12 +4490,12 @@ type HostRemoveVFlashResourceBody struct {
 
 func (b *HostRemoveVFlashResourceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HostRemoveVFlashResource(r soap.RoundTripper, req *types.HostRemoveVFlashResource) (*types.HostRemoveVFlashResourceResponse, error) {
+func HostRemoveVFlashResource(ctx context.Context, r soap.RoundTripper, req *types.HostRemoveVFlashResource) (*types.HostRemoveVFlashResourceResponse, error) {
 	var reqBody, resBody HostRemoveVFlashResourceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4509,12 +4510,12 @@ type HttpNfcLeaseAbortBody struct {
 
 func (b *HttpNfcLeaseAbortBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HttpNfcLeaseAbort(r soap.RoundTripper, req *types.HttpNfcLeaseAbort) (*types.HttpNfcLeaseAbortResponse, error) {
+func HttpNfcLeaseAbort(ctx context.Context, r soap.RoundTripper, req *types.HttpNfcLeaseAbort) (*types.HttpNfcLeaseAbortResponse, error) {
 	var reqBody, resBody HttpNfcLeaseAbortBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4529,12 +4530,12 @@ type HttpNfcLeaseCompleteBody struct {
 
 func (b *HttpNfcLeaseCompleteBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HttpNfcLeaseComplete(r soap.RoundTripper, req *types.HttpNfcLeaseComplete) (*types.HttpNfcLeaseCompleteResponse, error) {
+func HttpNfcLeaseComplete(ctx context.Context, r soap.RoundTripper, req *types.HttpNfcLeaseComplete) (*types.HttpNfcLeaseCompleteResponse, error) {
 	var reqBody, resBody HttpNfcLeaseCompleteBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4549,12 +4550,12 @@ type HttpNfcLeaseGetManifestBody struct {
 
 func (b *HttpNfcLeaseGetManifestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HttpNfcLeaseGetManifest(r soap.RoundTripper, req *types.HttpNfcLeaseGetManifest) (*types.HttpNfcLeaseGetManifestResponse, error) {
+func HttpNfcLeaseGetManifest(ctx context.Context, r soap.RoundTripper, req *types.HttpNfcLeaseGetManifest) (*types.HttpNfcLeaseGetManifestResponse, error) {
 	var reqBody, resBody HttpNfcLeaseGetManifestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4569,12 +4570,12 @@ type HttpNfcLeaseProgressBody struct {
 
 func (b *HttpNfcLeaseProgressBody) Fault() *soap.Fault { return b.Fault_ }
 
-func HttpNfcLeaseProgress(r soap.RoundTripper, req *types.HttpNfcLeaseProgress) (*types.HttpNfcLeaseProgressResponse, error) {
+func HttpNfcLeaseProgress(ctx context.Context, r soap.RoundTripper, req *types.HttpNfcLeaseProgress) (*types.HttpNfcLeaseProgressResponse, error) {
 	var reqBody, resBody HttpNfcLeaseProgressBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4589,12 +4590,12 @@ type ImpersonateUserBody struct {
 
 func (b *ImpersonateUserBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ImpersonateUser(r soap.RoundTripper, req *types.ImpersonateUser) (*types.ImpersonateUserResponse, error) {
+func ImpersonateUser(ctx context.Context, r soap.RoundTripper, req *types.ImpersonateUser) (*types.ImpersonateUserResponse, error) {
 	var reqBody, resBody ImpersonateUserBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4609,12 +4610,12 @@ type ImportCertificateForCAM_TaskBody struct {
 
 func (b *ImportCertificateForCAM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ImportCertificateForCAM_Task(r soap.RoundTripper, req *types.ImportCertificateForCAM_Task) (*types.ImportCertificateForCAM_TaskResponse, error) {
+func ImportCertificateForCAM_Task(ctx context.Context, r soap.RoundTripper, req *types.ImportCertificateForCAM_Task) (*types.ImportCertificateForCAM_TaskResponse, error) {
 	var reqBody, resBody ImportCertificateForCAM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4629,12 +4630,12 @@ type ImportVAppBody struct {
 
 func (b *ImportVAppBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ImportVApp(r soap.RoundTripper, req *types.ImportVApp) (*types.ImportVAppResponse, error) {
+func ImportVApp(ctx context.Context, r soap.RoundTripper, req *types.ImportVApp) (*types.ImportVAppResponse, error) {
 	var reqBody, resBody ImportVAppBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4649,12 +4650,12 @@ type InflateVirtualDisk_TaskBody struct {
 
 func (b *InflateVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func InflateVirtualDisk_Task(r soap.RoundTripper, req *types.InflateVirtualDisk_Task) (*types.InflateVirtualDisk_TaskResponse, error) {
+func InflateVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.InflateVirtualDisk_Task) (*types.InflateVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody InflateVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4669,12 +4670,12 @@ type InitializeDisks_TaskBody struct {
 
 func (b *InitializeDisks_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func InitializeDisks_Task(r soap.RoundTripper, req *types.InitializeDisks_Task) (*types.InitializeDisks_TaskResponse, error) {
+func InitializeDisks_Task(ctx context.Context, r soap.RoundTripper, req *types.InitializeDisks_Task) (*types.InitializeDisks_TaskResponse, error) {
 	var reqBody, resBody InitializeDisks_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4689,12 +4690,12 @@ type InitiateFileTransferFromGuestBody struct {
 
 func (b *InitiateFileTransferFromGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func InitiateFileTransferFromGuest(r soap.RoundTripper, req *types.InitiateFileTransferFromGuest) (*types.InitiateFileTransferFromGuestResponse, error) {
+func InitiateFileTransferFromGuest(ctx context.Context, r soap.RoundTripper, req *types.InitiateFileTransferFromGuest) (*types.InitiateFileTransferFromGuestResponse, error) {
 	var reqBody, resBody InitiateFileTransferFromGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4709,12 +4710,12 @@ type InitiateFileTransferToGuestBody struct {
 
 func (b *InitiateFileTransferToGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func InitiateFileTransferToGuest(r soap.RoundTripper, req *types.InitiateFileTransferToGuest) (*types.InitiateFileTransferToGuestResponse, error) {
+func InitiateFileTransferToGuest(ctx context.Context, r soap.RoundTripper, req *types.InitiateFileTransferToGuest) (*types.InitiateFileTransferToGuestResponse, error) {
 	var reqBody, resBody InitiateFileTransferToGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4729,12 +4730,12 @@ type InstallHostPatchV2_TaskBody struct {
 
 func (b *InstallHostPatchV2_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func InstallHostPatchV2_Task(r soap.RoundTripper, req *types.InstallHostPatchV2_Task) (*types.InstallHostPatchV2_TaskResponse, error) {
+func InstallHostPatchV2_Task(ctx context.Context, r soap.RoundTripper, req *types.InstallHostPatchV2_Task) (*types.InstallHostPatchV2_TaskResponse, error) {
 	var reqBody, resBody InstallHostPatchV2_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4749,12 +4750,12 @@ type InstallHostPatch_TaskBody struct {
 
 func (b *InstallHostPatch_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func InstallHostPatch_Task(r soap.RoundTripper, req *types.InstallHostPatch_Task) (*types.InstallHostPatch_TaskResponse, error) {
+func InstallHostPatch_Task(ctx context.Context, r soap.RoundTripper, req *types.InstallHostPatch_Task) (*types.InstallHostPatch_TaskResponse, error) {
 	var reqBody, resBody InstallHostPatch_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4769,12 +4770,12 @@ type IsSharedGraphicsActiveBody struct {
 
 func (b *IsSharedGraphicsActiveBody) Fault() *soap.Fault { return b.Fault_ }
 
-func IsSharedGraphicsActive(r soap.RoundTripper, req *types.IsSharedGraphicsActive) (*types.IsSharedGraphicsActiveResponse, error) {
+func IsSharedGraphicsActive(ctx context.Context, r soap.RoundTripper, req *types.IsSharedGraphicsActive) (*types.IsSharedGraphicsActiveResponse, error) {
 	var reqBody, resBody IsSharedGraphicsActiveBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4789,12 +4790,12 @@ type JoinDomainWithCAM_TaskBody struct {
 
 func (b *JoinDomainWithCAM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func JoinDomainWithCAM_Task(r soap.RoundTripper, req *types.JoinDomainWithCAM_Task) (*types.JoinDomainWithCAM_TaskResponse, error) {
+func JoinDomainWithCAM_Task(ctx context.Context, r soap.RoundTripper, req *types.JoinDomainWithCAM_Task) (*types.JoinDomainWithCAM_TaskResponse, error) {
 	var reqBody, resBody JoinDomainWithCAM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4809,12 +4810,12 @@ type JoinDomain_TaskBody struct {
 
 func (b *JoinDomain_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func JoinDomain_Task(r soap.RoundTripper, req *types.JoinDomain_Task) (*types.JoinDomain_TaskResponse, error) {
+func JoinDomain_Task(ctx context.Context, r soap.RoundTripper, req *types.JoinDomain_Task) (*types.JoinDomain_TaskResponse, error) {
 	var reqBody, resBody JoinDomain_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4829,12 +4830,12 @@ type LeaveCurrentDomain_TaskBody struct {
 
 func (b *LeaveCurrentDomain_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LeaveCurrentDomain_Task(r soap.RoundTripper, req *types.LeaveCurrentDomain_Task) (*types.LeaveCurrentDomain_TaskResponse, error) {
+func LeaveCurrentDomain_Task(ctx context.Context, r soap.RoundTripper, req *types.LeaveCurrentDomain_Task) (*types.LeaveCurrentDomain_TaskResponse, error) {
 	var reqBody, resBody LeaveCurrentDomain_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4849,12 +4850,12 @@ type ListFilesInGuestBody struct {
 
 func (b *ListFilesInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ListFilesInGuest(r soap.RoundTripper, req *types.ListFilesInGuest) (*types.ListFilesInGuestResponse, error) {
+func ListFilesInGuest(ctx context.Context, r soap.RoundTripper, req *types.ListFilesInGuest) (*types.ListFilesInGuestResponse, error) {
 	var reqBody, resBody ListFilesInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4869,12 +4870,12 @@ type ListProcessesInGuestBody struct {
 
 func (b *ListProcessesInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ListProcessesInGuest(r soap.RoundTripper, req *types.ListProcessesInGuest) (*types.ListProcessesInGuestResponse, error) {
+func ListProcessesInGuest(ctx context.Context, r soap.RoundTripper, req *types.ListProcessesInGuest) (*types.ListProcessesInGuestResponse, error) {
 	var reqBody, resBody ListProcessesInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4889,12 +4890,12 @@ type LogUserEventBody struct {
 
 func (b *LogUserEventBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LogUserEvent(r soap.RoundTripper, req *types.LogUserEvent) (*types.LogUserEventResponse, error) {
+func LogUserEvent(ctx context.Context, r soap.RoundTripper, req *types.LogUserEvent) (*types.LogUserEventResponse, error) {
 	var reqBody, resBody LogUserEventBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4909,12 +4910,12 @@ type LoginBody struct {
 
 func (b *LoginBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Login(r soap.RoundTripper, req *types.Login) (*types.LoginResponse, error) {
+func Login(ctx context.Context, r soap.RoundTripper, req *types.Login) (*types.LoginResponse, error) {
 	var reqBody, resBody LoginBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4929,12 +4930,12 @@ type LoginBySSPIBody struct {
 
 func (b *LoginBySSPIBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LoginBySSPI(r soap.RoundTripper, req *types.LoginBySSPI) (*types.LoginBySSPIResponse, error) {
+func LoginBySSPI(ctx context.Context, r soap.RoundTripper, req *types.LoginBySSPI) (*types.LoginBySSPIResponse, error) {
 	var reqBody, resBody LoginBySSPIBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4949,12 +4950,12 @@ type LoginByTokenBody struct {
 
 func (b *LoginByTokenBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LoginByToken(r soap.RoundTripper, req *types.LoginByToken) (*types.LoginByTokenResponse, error) {
+func LoginByToken(ctx context.Context, r soap.RoundTripper, req *types.LoginByToken) (*types.LoginByTokenResponse, error) {
 	var reqBody, resBody LoginByTokenBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4969,12 +4970,12 @@ type LoginExtensionByCertificateBody struct {
 
 func (b *LoginExtensionByCertificateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LoginExtensionByCertificate(r soap.RoundTripper, req *types.LoginExtensionByCertificate) (*types.LoginExtensionByCertificateResponse, error) {
+func LoginExtensionByCertificate(ctx context.Context, r soap.RoundTripper, req *types.LoginExtensionByCertificate) (*types.LoginExtensionByCertificateResponse, error) {
 	var reqBody, resBody LoginExtensionByCertificateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -4989,12 +4990,12 @@ type LoginExtensionBySubjectNameBody struct {
 
 func (b *LoginExtensionBySubjectNameBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LoginExtensionBySubjectName(r soap.RoundTripper, req *types.LoginExtensionBySubjectName) (*types.LoginExtensionBySubjectNameResponse, error) {
+func LoginExtensionBySubjectName(ctx context.Context, r soap.RoundTripper, req *types.LoginExtensionBySubjectName) (*types.LoginExtensionBySubjectNameResponse, error) {
 	var reqBody, resBody LoginExtensionBySubjectNameBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5009,12 +5010,12 @@ type LogoutBody struct {
 
 func (b *LogoutBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Logout(r soap.RoundTripper, req *types.Logout) (*types.LogoutResponse, error) {
+func Logout(ctx context.Context, r soap.RoundTripper, req *types.Logout) (*types.LogoutResponse, error) {
 	var reqBody, resBody LogoutBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5029,12 +5030,12 @@ type LookupDvPortGroupBody struct {
 
 func (b *LookupDvPortGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func LookupDvPortGroup(r soap.RoundTripper, req *types.LookupDvPortGroup) (*types.LookupDvPortGroupResponse, error) {
+func LookupDvPortGroup(ctx context.Context, r soap.RoundTripper, req *types.LookupDvPortGroup) (*types.LookupDvPortGroupResponse, error) {
 	var reqBody, resBody LookupDvPortGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5049,12 +5050,12 @@ type MakeDirectoryBody struct {
 
 func (b *MakeDirectoryBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MakeDirectory(r soap.RoundTripper, req *types.MakeDirectory) (*types.MakeDirectoryResponse, error) {
+func MakeDirectory(ctx context.Context, r soap.RoundTripper, req *types.MakeDirectory) (*types.MakeDirectoryResponse, error) {
 	var reqBody, resBody MakeDirectoryBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5069,12 +5070,12 @@ type MakeDirectoryInGuestBody struct {
 
 func (b *MakeDirectoryInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MakeDirectoryInGuest(r soap.RoundTripper, req *types.MakeDirectoryInGuest) (*types.MakeDirectoryInGuestResponse, error) {
+func MakeDirectoryInGuest(ctx context.Context, r soap.RoundTripper, req *types.MakeDirectoryInGuest) (*types.MakeDirectoryInGuestResponse, error) {
 	var reqBody, resBody MakeDirectoryInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5089,12 +5090,12 @@ type MakePrimaryVM_TaskBody struct {
 
 func (b *MakePrimaryVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MakePrimaryVM_Task(r soap.RoundTripper, req *types.MakePrimaryVM_Task) (*types.MakePrimaryVM_TaskResponse, error) {
+func MakePrimaryVM_Task(ctx context.Context, r soap.RoundTripper, req *types.MakePrimaryVM_Task) (*types.MakePrimaryVM_TaskResponse, error) {
 	var reqBody, resBody MakePrimaryVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5109,12 +5110,12 @@ type MarkAsTemplateBody struct {
 
 func (b *MarkAsTemplateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MarkAsTemplate(r soap.RoundTripper, req *types.MarkAsTemplate) (*types.MarkAsTemplateResponse, error) {
+func MarkAsTemplate(ctx context.Context, r soap.RoundTripper, req *types.MarkAsTemplate) (*types.MarkAsTemplateResponse, error) {
 	var reqBody, resBody MarkAsTemplateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5129,12 +5130,12 @@ type MarkAsVirtualMachineBody struct {
 
 func (b *MarkAsVirtualMachineBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MarkAsVirtualMachine(r soap.RoundTripper, req *types.MarkAsVirtualMachine) (*types.MarkAsVirtualMachineResponse, error) {
+func MarkAsVirtualMachine(ctx context.Context, r soap.RoundTripper, req *types.MarkAsVirtualMachine) (*types.MarkAsVirtualMachineResponse, error) {
 	var reqBody, resBody MarkAsVirtualMachineBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5149,12 +5150,12 @@ type MarkForRemovalBody struct {
 
 func (b *MarkForRemovalBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MarkForRemoval(r soap.RoundTripper, req *types.MarkForRemoval) (*types.MarkForRemovalResponse, error) {
+func MarkForRemoval(ctx context.Context, r soap.RoundTripper, req *types.MarkForRemoval) (*types.MarkForRemovalResponse, error) {
 	var reqBody, resBody MarkForRemovalBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5169,12 +5170,12 @@ type MergeDvs_TaskBody struct {
 
 func (b *MergeDvs_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MergeDvs_Task(r soap.RoundTripper, req *types.MergeDvs_Task) (*types.MergeDvs_TaskResponse, error) {
+func MergeDvs_Task(ctx context.Context, r soap.RoundTripper, req *types.MergeDvs_Task) (*types.MergeDvs_TaskResponse, error) {
 	var reqBody, resBody MergeDvs_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5189,12 +5190,12 @@ type MergePermissionsBody struct {
 
 func (b *MergePermissionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MergePermissions(r soap.RoundTripper, req *types.MergePermissions) (*types.MergePermissionsResponse, error) {
+func MergePermissions(ctx context.Context, r soap.RoundTripper, req *types.MergePermissions) (*types.MergePermissionsResponse, error) {
 	var reqBody, resBody MergePermissionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5209,12 +5210,12 @@ type MigrateVM_TaskBody struct {
 
 func (b *MigrateVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MigrateVM_Task(r soap.RoundTripper, req *types.MigrateVM_Task) (*types.MigrateVM_TaskResponse, error) {
+func MigrateVM_Task(ctx context.Context, r soap.RoundTripper, req *types.MigrateVM_Task) (*types.MigrateVM_TaskResponse, error) {
 	var reqBody, resBody MigrateVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5229,12 +5230,12 @@ type ModifyListViewBody struct {
 
 func (b *ModifyListViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ModifyListView(r soap.RoundTripper, req *types.ModifyListView) (*types.ModifyListViewResponse, error) {
+func ModifyListView(ctx context.Context, r soap.RoundTripper, req *types.ModifyListView) (*types.ModifyListViewResponse, error) {
 	var reqBody, resBody ModifyListViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5249,12 +5250,12 @@ type MountToolsInstallerBody struct {
 
 func (b *MountToolsInstallerBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MountToolsInstaller(r soap.RoundTripper, req *types.MountToolsInstaller) (*types.MountToolsInstallerResponse, error) {
+func MountToolsInstaller(ctx context.Context, r soap.RoundTripper, req *types.MountToolsInstaller) (*types.MountToolsInstallerResponse, error) {
 	var reqBody, resBody MountToolsInstallerBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5269,12 +5270,12 @@ type MountVffsVolumeBody struct {
 
 func (b *MountVffsVolumeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MountVffsVolume(r soap.RoundTripper, req *types.MountVffsVolume) (*types.MountVffsVolumeResponse, error) {
+func MountVffsVolume(ctx context.Context, r soap.RoundTripper, req *types.MountVffsVolume) (*types.MountVffsVolumeResponse, error) {
 	var reqBody, resBody MountVffsVolumeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5289,12 +5290,12 @@ type MountVmfsVolumeBody struct {
 
 func (b *MountVmfsVolumeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MountVmfsVolume(r soap.RoundTripper, req *types.MountVmfsVolume) (*types.MountVmfsVolumeResponse, error) {
+func MountVmfsVolume(ctx context.Context, r soap.RoundTripper, req *types.MountVmfsVolume) (*types.MountVmfsVolumeResponse, error) {
 	var reqBody, resBody MountVmfsVolumeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5309,12 +5310,12 @@ type MoveDVPort_TaskBody struct {
 
 func (b *MoveDVPort_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveDVPort_Task(r soap.RoundTripper, req *types.MoveDVPort_Task) (*types.MoveDVPort_TaskResponse, error) {
+func MoveDVPort_Task(ctx context.Context, r soap.RoundTripper, req *types.MoveDVPort_Task) (*types.MoveDVPort_TaskResponse, error) {
 	var reqBody, resBody MoveDVPort_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5329,12 +5330,12 @@ type MoveDatastoreFile_TaskBody struct {
 
 func (b *MoveDatastoreFile_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveDatastoreFile_Task(r soap.RoundTripper, req *types.MoveDatastoreFile_Task) (*types.MoveDatastoreFile_TaskResponse, error) {
+func MoveDatastoreFile_Task(ctx context.Context, r soap.RoundTripper, req *types.MoveDatastoreFile_Task) (*types.MoveDatastoreFile_TaskResponse, error) {
 	var reqBody, resBody MoveDatastoreFile_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5349,12 +5350,12 @@ type MoveDirectoryInGuestBody struct {
 
 func (b *MoveDirectoryInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveDirectoryInGuest(r soap.RoundTripper, req *types.MoveDirectoryInGuest) (*types.MoveDirectoryInGuestResponse, error) {
+func MoveDirectoryInGuest(ctx context.Context, r soap.RoundTripper, req *types.MoveDirectoryInGuest) (*types.MoveDirectoryInGuestResponse, error) {
 	var reqBody, resBody MoveDirectoryInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5369,12 +5370,12 @@ type MoveFileInGuestBody struct {
 
 func (b *MoveFileInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveFileInGuest(r soap.RoundTripper, req *types.MoveFileInGuest) (*types.MoveFileInGuestResponse, error) {
+func MoveFileInGuest(ctx context.Context, r soap.RoundTripper, req *types.MoveFileInGuest) (*types.MoveFileInGuestResponse, error) {
 	var reqBody, resBody MoveFileInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5389,12 +5390,12 @@ type MoveHostInto_TaskBody struct {
 
 func (b *MoveHostInto_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveHostInto_Task(r soap.RoundTripper, req *types.MoveHostInto_Task) (*types.MoveHostInto_TaskResponse, error) {
+func MoveHostInto_Task(ctx context.Context, r soap.RoundTripper, req *types.MoveHostInto_Task) (*types.MoveHostInto_TaskResponse, error) {
 	var reqBody, resBody MoveHostInto_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5409,12 +5410,12 @@ type MoveIntoFolder_TaskBody struct {
 
 func (b *MoveIntoFolder_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveIntoFolder_Task(r soap.RoundTripper, req *types.MoveIntoFolder_Task) (*types.MoveIntoFolder_TaskResponse, error) {
+func MoveIntoFolder_Task(ctx context.Context, r soap.RoundTripper, req *types.MoveIntoFolder_Task) (*types.MoveIntoFolder_TaskResponse, error) {
 	var reqBody, resBody MoveIntoFolder_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5429,12 +5430,12 @@ type MoveIntoResourcePoolBody struct {
 
 func (b *MoveIntoResourcePoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveIntoResourcePool(r soap.RoundTripper, req *types.MoveIntoResourcePool) (*types.MoveIntoResourcePoolResponse, error) {
+func MoveIntoResourcePool(ctx context.Context, r soap.RoundTripper, req *types.MoveIntoResourcePool) (*types.MoveIntoResourcePoolResponse, error) {
 	var reqBody, resBody MoveIntoResourcePoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5449,12 +5450,12 @@ type MoveInto_TaskBody struct {
 
 func (b *MoveInto_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveInto_Task(r soap.RoundTripper, req *types.MoveInto_Task) (*types.MoveInto_TaskResponse, error) {
+func MoveInto_Task(ctx context.Context, r soap.RoundTripper, req *types.MoveInto_Task) (*types.MoveInto_TaskResponse, error) {
 	var reqBody, resBody MoveInto_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5469,12 +5470,12 @@ type MoveVirtualDisk_TaskBody struct {
 
 func (b *MoveVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func MoveVirtualDisk_Task(r soap.RoundTripper, req *types.MoveVirtualDisk_Task) (*types.MoveVirtualDisk_TaskResponse, error) {
+func MoveVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.MoveVirtualDisk_Task) (*types.MoveVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody MoveVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5489,12 +5490,12 @@ type OpenInventoryViewFolderBody struct {
 
 func (b *OpenInventoryViewFolderBody) Fault() *soap.Fault { return b.Fault_ }
 
-func OpenInventoryViewFolder(r soap.RoundTripper, req *types.OpenInventoryViewFolder) (*types.OpenInventoryViewFolderResponse, error) {
+func OpenInventoryViewFolder(ctx context.Context, r soap.RoundTripper, req *types.OpenInventoryViewFolder) (*types.OpenInventoryViewFolderResponse, error) {
 	var reqBody, resBody OpenInventoryViewFolderBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5509,12 +5510,12 @@ type OverwriteCustomizationSpecBody struct {
 
 func (b *OverwriteCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func OverwriteCustomizationSpec(r soap.RoundTripper, req *types.OverwriteCustomizationSpec) (*types.OverwriteCustomizationSpecResponse, error) {
+func OverwriteCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.OverwriteCustomizationSpec) (*types.OverwriteCustomizationSpecResponse, error) {
 	var reqBody, resBody OverwriteCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5529,12 +5530,12 @@ type ParseDescriptorBody struct {
 
 func (b *ParseDescriptorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ParseDescriptor(r soap.RoundTripper, req *types.ParseDescriptor) (*types.ParseDescriptorResponse, error) {
+func ParseDescriptor(ctx context.Context, r soap.RoundTripper, req *types.ParseDescriptor) (*types.ParseDescriptorResponse, error) {
 	var reqBody, resBody ParseDescriptorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5549,12 +5550,12 @@ type PerformDvsProductSpecOperation_TaskBody struct {
 
 func (b *PerformDvsProductSpecOperation_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PerformDvsProductSpecOperation_Task(r soap.RoundTripper, req *types.PerformDvsProductSpecOperation_Task) (*types.PerformDvsProductSpecOperation_TaskResponse, error) {
+func PerformDvsProductSpecOperation_Task(ctx context.Context, r soap.RoundTripper, req *types.PerformDvsProductSpecOperation_Task) (*types.PerformDvsProductSpecOperation_TaskResponse, error) {
 	var reqBody, resBody PerformDvsProductSpecOperation_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5569,12 +5570,12 @@ type PostEventBody struct {
 
 func (b *PostEventBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PostEvent(r soap.RoundTripper, req *types.PostEvent) (*types.PostEventResponse, error) {
+func PostEvent(ctx context.Context, r soap.RoundTripper, req *types.PostEvent) (*types.PostEventResponse, error) {
 	var reqBody, resBody PostEventBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5589,12 +5590,12 @@ type PowerDownHostToStandBy_TaskBody struct {
 
 func (b *PowerDownHostToStandBy_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerDownHostToStandBy_Task(r soap.RoundTripper, req *types.PowerDownHostToStandBy_Task) (*types.PowerDownHostToStandBy_TaskResponse, error) {
+func PowerDownHostToStandBy_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerDownHostToStandBy_Task) (*types.PowerDownHostToStandBy_TaskResponse, error) {
 	var reqBody, resBody PowerDownHostToStandBy_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5609,12 +5610,12 @@ type PowerOffVApp_TaskBody struct {
 
 func (b *PowerOffVApp_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerOffVApp_Task(r soap.RoundTripper, req *types.PowerOffVApp_Task) (*types.PowerOffVApp_TaskResponse, error) {
+func PowerOffVApp_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerOffVApp_Task) (*types.PowerOffVApp_TaskResponse, error) {
 	var reqBody, resBody PowerOffVApp_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5629,12 +5630,12 @@ type PowerOffVM_TaskBody struct {
 
 func (b *PowerOffVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerOffVM_Task(r soap.RoundTripper, req *types.PowerOffVM_Task) (*types.PowerOffVM_TaskResponse, error) {
+func PowerOffVM_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerOffVM_Task) (*types.PowerOffVM_TaskResponse, error) {
 	var reqBody, resBody PowerOffVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5649,12 +5650,12 @@ type PowerOnMultiVM_TaskBody struct {
 
 func (b *PowerOnMultiVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerOnMultiVM_Task(r soap.RoundTripper, req *types.PowerOnMultiVM_Task) (*types.PowerOnMultiVM_TaskResponse, error) {
+func PowerOnMultiVM_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerOnMultiVM_Task) (*types.PowerOnMultiVM_TaskResponse, error) {
 	var reqBody, resBody PowerOnMultiVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5669,12 +5670,12 @@ type PowerOnVApp_TaskBody struct {
 
 func (b *PowerOnVApp_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerOnVApp_Task(r soap.RoundTripper, req *types.PowerOnVApp_Task) (*types.PowerOnVApp_TaskResponse, error) {
+func PowerOnVApp_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerOnVApp_Task) (*types.PowerOnVApp_TaskResponse, error) {
 	var reqBody, resBody PowerOnVApp_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5689,12 +5690,12 @@ type PowerOnVM_TaskBody struct {
 
 func (b *PowerOnVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerOnVM_Task(r soap.RoundTripper, req *types.PowerOnVM_Task) (*types.PowerOnVM_TaskResponse, error) {
+func PowerOnVM_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerOnVM_Task) (*types.PowerOnVM_TaskResponse, error) {
 	var reqBody, resBody PowerOnVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5709,12 +5710,12 @@ type PowerUpHostFromStandBy_TaskBody struct {
 
 func (b *PowerUpHostFromStandBy_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PowerUpHostFromStandBy_Task(r soap.RoundTripper, req *types.PowerUpHostFromStandBy_Task) (*types.PowerUpHostFromStandBy_TaskResponse, error) {
+func PowerUpHostFromStandBy_Task(ctx context.Context, r soap.RoundTripper, req *types.PowerUpHostFromStandBy_Task) (*types.PowerUpHostFromStandBy_TaskResponse, error) {
 	var reqBody, resBody PowerUpHostFromStandBy_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5729,12 +5730,12 @@ type PromoteDisks_TaskBody struct {
 
 func (b *PromoteDisks_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func PromoteDisks_Task(r soap.RoundTripper, req *types.PromoteDisks_Task) (*types.PromoteDisks_TaskResponse, error) {
+func PromoteDisks_Task(ctx context.Context, r soap.RoundTripper, req *types.PromoteDisks_Task) (*types.PromoteDisks_TaskResponse, error) {
 	var reqBody, resBody PromoteDisks_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5749,12 +5750,12 @@ type QueryAnswerFileStatusBody struct {
 
 func (b *QueryAnswerFileStatusBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAnswerFileStatus(r soap.RoundTripper, req *types.QueryAnswerFileStatus) (*types.QueryAnswerFileStatusResponse, error) {
+func QueryAnswerFileStatus(ctx context.Context, r soap.RoundTripper, req *types.QueryAnswerFileStatus) (*types.QueryAnswerFileStatusResponse, error) {
 	var reqBody, resBody QueryAnswerFileStatusBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5769,12 +5770,12 @@ type QueryAssignedLicensesBody struct {
 
 func (b *QueryAssignedLicensesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAssignedLicenses(r soap.RoundTripper, req *types.QueryAssignedLicenses) (*types.QueryAssignedLicensesResponse, error) {
+func QueryAssignedLicenses(ctx context.Context, r soap.RoundTripper, req *types.QueryAssignedLicenses) (*types.QueryAssignedLicensesResponse, error) {
 	var reqBody, resBody QueryAssignedLicensesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5789,12 +5790,12 @@ type QueryAvailableDisksForVmfsBody struct {
 
 func (b *QueryAvailableDisksForVmfsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAvailableDisksForVmfs(r soap.RoundTripper, req *types.QueryAvailableDisksForVmfs) (*types.QueryAvailableDisksForVmfsResponse, error) {
+func QueryAvailableDisksForVmfs(ctx context.Context, r soap.RoundTripper, req *types.QueryAvailableDisksForVmfs) (*types.QueryAvailableDisksForVmfsResponse, error) {
 	var reqBody, resBody QueryAvailableDisksForVmfsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5809,12 +5810,12 @@ type QueryAvailableDvsSpecBody struct {
 
 func (b *QueryAvailableDvsSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAvailableDvsSpec(r soap.RoundTripper, req *types.QueryAvailableDvsSpec) (*types.QueryAvailableDvsSpecResponse, error) {
+func QueryAvailableDvsSpec(ctx context.Context, r soap.RoundTripper, req *types.QueryAvailableDvsSpec) (*types.QueryAvailableDvsSpecResponse, error) {
 	var reqBody, resBody QueryAvailableDvsSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5829,12 +5830,12 @@ type QueryAvailablePartitionBody struct {
 
 func (b *QueryAvailablePartitionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAvailablePartition(r soap.RoundTripper, req *types.QueryAvailablePartition) (*types.QueryAvailablePartitionResponse, error) {
+func QueryAvailablePartition(ctx context.Context, r soap.RoundTripper, req *types.QueryAvailablePartition) (*types.QueryAvailablePartitionResponse, error) {
 	var reqBody, resBody QueryAvailablePartitionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5849,12 +5850,12 @@ type QueryAvailablePerfMetricBody struct {
 
 func (b *QueryAvailablePerfMetricBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAvailablePerfMetric(r soap.RoundTripper, req *types.QueryAvailablePerfMetric) (*types.QueryAvailablePerfMetricResponse, error) {
+func QueryAvailablePerfMetric(ctx context.Context, r soap.RoundTripper, req *types.QueryAvailablePerfMetric) (*types.QueryAvailablePerfMetricResponse, error) {
 	var reqBody, resBody QueryAvailablePerfMetricBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5869,12 +5870,12 @@ type QueryAvailableSsdsBody struct {
 
 func (b *QueryAvailableSsdsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAvailableSsds(r soap.RoundTripper, req *types.QueryAvailableSsds) (*types.QueryAvailableSsdsResponse, error) {
+func QueryAvailableSsds(ctx context.Context, r soap.RoundTripper, req *types.QueryAvailableSsds) (*types.QueryAvailableSsdsResponse, error) {
 	var reqBody, resBody QueryAvailableSsdsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5889,12 +5890,12 @@ type QueryAvailableTimeZonesBody struct {
 
 func (b *QueryAvailableTimeZonesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryAvailableTimeZones(r soap.RoundTripper, req *types.QueryAvailableTimeZones) (*types.QueryAvailableTimeZonesResponse, error) {
+func QueryAvailableTimeZones(ctx context.Context, r soap.RoundTripper, req *types.QueryAvailableTimeZones) (*types.QueryAvailableTimeZonesResponse, error) {
 	var reqBody, resBody QueryAvailableTimeZonesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5909,12 +5910,12 @@ type QueryBootDevicesBody struct {
 
 func (b *QueryBootDevicesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryBootDevices(r soap.RoundTripper, req *types.QueryBootDevices) (*types.QueryBootDevicesResponse, error) {
+func QueryBootDevices(ctx context.Context, r soap.RoundTripper, req *types.QueryBootDevices) (*types.QueryBootDevicesResponse, error) {
 	var reqBody, resBody QueryBootDevicesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5929,12 +5930,12 @@ type QueryBoundVnicsBody struct {
 
 func (b *QueryBoundVnicsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryBoundVnics(r soap.RoundTripper, req *types.QueryBoundVnics) (*types.QueryBoundVnicsResponse, error) {
+func QueryBoundVnics(ctx context.Context, r soap.RoundTripper, req *types.QueryBoundVnics) (*types.QueryBoundVnicsResponse, error) {
 	var reqBody, resBody QueryBoundVnicsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5949,12 +5950,12 @@ type QueryCandidateNicsBody struct {
 
 func (b *QueryCandidateNicsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryCandidateNics(r soap.RoundTripper, req *types.QueryCandidateNics) (*types.QueryCandidateNicsResponse, error) {
+func QueryCandidateNics(ctx context.Context, r soap.RoundTripper, req *types.QueryCandidateNics) (*types.QueryCandidateNicsResponse, error) {
 	var reqBody, resBody QueryCandidateNicsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5969,12 +5970,12 @@ type QueryChangedDiskAreasBody struct {
 
 func (b *QueryChangedDiskAreasBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryChangedDiskAreas(r soap.RoundTripper, req *types.QueryChangedDiskAreas) (*types.QueryChangedDiskAreasResponse, error) {
+func QueryChangedDiskAreas(ctx context.Context, r soap.RoundTripper, req *types.QueryChangedDiskAreas) (*types.QueryChangedDiskAreasResponse, error) {
 	var reqBody, resBody QueryChangedDiskAreasBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -5989,12 +5990,12 @@ type QueryCmmdsBody struct {
 
 func (b *QueryCmmdsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryCmmds(r soap.RoundTripper, req *types.QueryCmmds) (*types.QueryCmmdsResponse, error) {
+func QueryCmmds(ctx context.Context, r soap.RoundTripper, req *types.QueryCmmds) (*types.QueryCmmdsResponse, error) {
 	var reqBody, resBody QueryCmmdsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6009,12 +6010,12 @@ type QueryCompatibleHostForExistingDvsBody struct {
 
 func (b *QueryCompatibleHostForExistingDvsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryCompatibleHostForExistingDvs(r soap.RoundTripper, req *types.QueryCompatibleHostForExistingDvs) (*types.QueryCompatibleHostForExistingDvsResponse, error) {
+func QueryCompatibleHostForExistingDvs(ctx context.Context, r soap.RoundTripper, req *types.QueryCompatibleHostForExistingDvs) (*types.QueryCompatibleHostForExistingDvsResponse, error) {
 	var reqBody, resBody QueryCompatibleHostForExistingDvsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6029,12 +6030,12 @@ type QueryCompatibleHostForNewDvsBody struct {
 
 func (b *QueryCompatibleHostForNewDvsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryCompatibleHostForNewDvs(r soap.RoundTripper, req *types.QueryCompatibleHostForNewDvs) (*types.QueryCompatibleHostForNewDvsResponse, error) {
+func QueryCompatibleHostForNewDvs(ctx context.Context, r soap.RoundTripper, req *types.QueryCompatibleHostForNewDvs) (*types.QueryCompatibleHostForNewDvsResponse, error) {
 	var reqBody, resBody QueryCompatibleHostForNewDvsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6049,12 +6050,12 @@ type QueryComplianceStatusBody struct {
 
 func (b *QueryComplianceStatusBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryComplianceStatus(r soap.RoundTripper, req *types.QueryComplianceStatus) (*types.QueryComplianceStatusResponse, error) {
+func QueryComplianceStatus(ctx context.Context, r soap.RoundTripper, req *types.QueryComplianceStatus) (*types.QueryComplianceStatusResponse, error) {
 	var reqBody, resBody QueryComplianceStatusBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6069,12 +6070,12 @@ type QueryConfigOptionBody struct {
 
 func (b *QueryConfigOptionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryConfigOption(r soap.RoundTripper, req *types.QueryConfigOption) (*types.QueryConfigOptionResponse, error) {
+func QueryConfigOption(ctx context.Context, r soap.RoundTripper, req *types.QueryConfigOption) (*types.QueryConfigOptionResponse, error) {
 	var reqBody, resBody QueryConfigOptionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6089,12 +6090,12 @@ type QueryConfigOptionDescriptorBody struct {
 
 func (b *QueryConfigOptionDescriptorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryConfigOptionDescriptor(r soap.RoundTripper, req *types.QueryConfigOptionDescriptor) (*types.QueryConfigOptionDescriptorResponse, error) {
+func QueryConfigOptionDescriptor(ctx context.Context, r soap.RoundTripper, req *types.QueryConfigOptionDescriptor) (*types.QueryConfigOptionDescriptorResponse, error) {
 	var reqBody, resBody QueryConfigOptionDescriptorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6109,12 +6110,12 @@ type QueryConfigTargetBody struct {
 
 func (b *QueryConfigTargetBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryConfigTarget(r soap.RoundTripper, req *types.QueryConfigTarget) (*types.QueryConfigTargetResponse, error) {
+func QueryConfigTarget(ctx context.Context, r soap.RoundTripper, req *types.QueryConfigTarget) (*types.QueryConfigTargetResponse, error) {
 	var reqBody, resBody QueryConfigTargetBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6129,12 +6130,12 @@ type QueryConfiguredModuleOptionStringBody struct {
 
 func (b *QueryConfiguredModuleOptionStringBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryConfiguredModuleOptionString(r soap.RoundTripper, req *types.QueryConfiguredModuleOptionString) (*types.QueryConfiguredModuleOptionStringResponse, error) {
+func QueryConfiguredModuleOptionString(ctx context.Context, r soap.RoundTripper, req *types.QueryConfiguredModuleOptionString) (*types.QueryConfiguredModuleOptionStringResponse, error) {
 	var reqBody, resBody QueryConfiguredModuleOptionStringBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6149,12 +6150,12 @@ type QueryConnectionInfoBody struct {
 
 func (b *QueryConnectionInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryConnectionInfo(r soap.RoundTripper, req *types.QueryConnectionInfo) (*types.QueryConnectionInfoResponse, error) {
+func QueryConnectionInfo(ctx context.Context, r soap.RoundTripper, req *types.QueryConnectionInfo) (*types.QueryConnectionInfoResponse, error) {
 	var reqBody, resBody QueryConnectionInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6169,12 +6170,12 @@ type QueryDatastorePerformanceSummaryBody struct {
 
 func (b *QueryDatastorePerformanceSummaryBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDatastorePerformanceSummary(r soap.RoundTripper, req *types.QueryDatastorePerformanceSummary) (*types.QueryDatastorePerformanceSummaryResponse, error) {
+func QueryDatastorePerformanceSummary(ctx context.Context, r soap.RoundTripper, req *types.QueryDatastorePerformanceSummary) (*types.QueryDatastorePerformanceSummaryResponse, error) {
 	var reqBody, resBody QueryDatastorePerformanceSummaryBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6189,12 +6190,12 @@ type QueryDateTimeBody struct {
 
 func (b *QueryDateTimeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDateTime(r soap.RoundTripper, req *types.QueryDateTime) (*types.QueryDateTimeResponse, error) {
+func QueryDateTime(ctx context.Context, r soap.RoundTripper, req *types.QueryDateTime) (*types.QueryDateTimeResponse, error) {
 	var reqBody, resBody QueryDateTimeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6209,12 +6210,12 @@ type QueryDescriptionsBody struct {
 
 func (b *QueryDescriptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDescriptions(r soap.RoundTripper, req *types.QueryDescriptions) (*types.QueryDescriptionsResponse, error) {
+func QueryDescriptions(ctx context.Context, r soap.RoundTripper, req *types.QueryDescriptions) (*types.QueryDescriptionsResponse, error) {
 	var reqBody, resBody QueryDescriptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6229,12 +6230,12 @@ type QueryDisksForVsanBody struct {
 
 func (b *QueryDisksForVsanBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDisksForVsan(r soap.RoundTripper, req *types.QueryDisksForVsan) (*types.QueryDisksForVsanResponse, error) {
+func QueryDisksForVsan(ctx context.Context, r soap.RoundTripper, req *types.QueryDisksForVsan) (*types.QueryDisksForVsanResponse, error) {
 	var reqBody, resBody QueryDisksForVsanBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6249,12 +6250,12 @@ type QueryDvsByUuidBody struct {
 
 func (b *QueryDvsByUuidBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDvsByUuid(r soap.RoundTripper, req *types.QueryDvsByUuid) (*types.QueryDvsByUuidResponse, error) {
+func QueryDvsByUuid(ctx context.Context, r soap.RoundTripper, req *types.QueryDvsByUuid) (*types.QueryDvsByUuidResponse, error) {
 	var reqBody, resBody QueryDvsByUuidBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6269,12 +6270,12 @@ type QueryDvsCheckCompatibilityBody struct {
 
 func (b *QueryDvsCheckCompatibilityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDvsCheckCompatibility(r soap.RoundTripper, req *types.QueryDvsCheckCompatibility) (*types.QueryDvsCheckCompatibilityResponse, error) {
+func QueryDvsCheckCompatibility(ctx context.Context, r soap.RoundTripper, req *types.QueryDvsCheckCompatibility) (*types.QueryDvsCheckCompatibilityResponse, error) {
 	var reqBody, resBody QueryDvsCheckCompatibilityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6289,12 +6290,12 @@ type QueryDvsCompatibleHostSpecBody struct {
 
 func (b *QueryDvsCompatibleHostSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDvsCompatibleHostSpec(r soap.RoundTripper, req *types.QueryDvsCompatibleHostSpec) (*types.QueryDvsCompatibleHostSpecResponse, error) {
+func QueryDvsCompatibleHostSpec(ctx context.Context, r soap.RoundTripper, req *types.QueryDvsCompatibleHostSpec) (*types.QueryDvsCompatibleHostSpecResponse, error) {
 	var reqBody, resBody QueryDvsCompatibleHostSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6309,12 +6310,12 @@ type QueryDvsConfigTargetBody struct {
 
 func (b *QueryDvsConfigTargetBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDvsConfigTarget(r soap.RoundTripper, req *types.QueryDvsConfigTarget) (*types.QueryDvsConfigTargetResponse, error) {
+func QueryDvsConfigTarget(ctx context.Context, r soap.RoundTripper, req *types.QueryDvsConfigTarget) (*types.QueryDvsConfigTargetResponse, error) {
 	var reqBody, resBody QueryDvsConfigTargetBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6329,12 +6330,12 @@ type QueryDvsFeatureCapabilityBody struct {
 
 func (b *QueryDvsFeatureCapabilityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryDvsFeatureCapability(r soap.RoundTripper, req *types.QueryDvsFeatureCapability) (*types.QueryDvsFeatureCapabilityResponse, error) {
+func QueryDvsFeatureCapability(ctx context.Context, r soap.RoundTripper, req *types.QueryDvsFeatureCapability) (*types.QueryDvsFeatureCapabilityResponse, error) {
 	var reqBody, resBody QueryDvsFeatureCapabilityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6349,12 +6350,12 @@ type QueryEventsBody struct {
 
 func (b *QueryEventsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryEvents(r soap.RoundTripper, req *types.QueryEvents) (*types.QueryEventsResponse, error) {
+func QueryEvents(ctx context.Context, r soap.RoundTripper, req *types.QueryEvents) (*types.QueryEventsResponse, error) {
 	var reqBody, resBody QueryEventsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6369,12 +6370,12 @@ type QueryExpressionMetadataBody struct {
 
 func (b *QueryExpressionMetadataBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryExpressionMetadata(r soap.RoundTripper, req *types.QueryExpressionMetadata) (*types.QueryExpressionMetadataResponse, error) {
+func QueryExpressionMetadata(ctx context.Context, r soap.RoundTripper, req *types.QueryExpressionMetadata) (*types.QueryExpressionMetadataResponse, error) {
 	var reqBody, resBody QueryExpressionMetadataBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6389,12 +6390,12 @@ type QueryExtensionIpAllocationUsageBody struct {
 
 func (b *QueryExtensionIpAllocationUsageBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryExtensionIpAllocationUsage(r soap.RoundTripper, req *types.QueryExtensionIpAllocationUsage) (*types.QueryExtensionIpAllocationUsageResponse, error) {
+func QueryExtensionIpAllocationUsage(ctx context.Context, r soap.RoundTripper, req *types.QueryExtensionIpAllocationUsage) (*types.QueryExtensionIpAllocationUsageResponse, error) {
 	var reqBody, resBody QueryExtensionIpAllocationUsageBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6409,12 +6410,12 @@ type QueryFaultToleranceCompatibilityBody struct {
 
 func (b *QueryFaultToleranceCompatibilityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryFaultToleranceCompatibility(r soap.RoundTripper, req *types.QueryFaultToleranceCompatibility) (*types.QueryFaultToleranceCompatibilityResponse, error) {
+func QueryFaultToleranceCompatibility(ctx context.Context, r soap.RoundTripper, req *types.QueryFaultToleranceCompatibility) (*types.QueryFaultToleranceCompatibilityResponse, error) {
 	var reqBody, resBody QueryFaultToleranceCompatibilityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6429,12 +6430,12 @@ type QueryFirmwareConfigUploadURLBody struct {
 
 func (b *QueryFirmwareConfigUploadURLBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryFirmwareConfigUploadURL(r soap.RoundTripper, req *types.QueryFirmwareConfigUploadURL) (*types.QueryFirmwareConfigUploadURLResponse, error) {
+func QueryFirmwareConfigUploadURL(ctx context.Context, r soap.RoundTripper, req *types.QueryFirmwareConfigUploadURL) (*types.QueryFirmwareConfigUploadURLResponse, error) {
 	var reqBody, resBody QueryFirmwareConfigUploadURLBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6449,12 +6450,12 @@ type QueryHostConnectionInfoBody struct {
 
 func (b *QueryHostConnectionInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryHostConnectionInfo(r soap.RoundTripper, req *types.QueryHostConnectionInfo) (*types.QueryHostConnectionInfoResponse, error) {
+func QueryHostConnectionInfo(ctx context.Context, r soap.RoundTripper, req *types.QueryHostConnectionInfo) (*types.QueryHostConnectionInfoResponse, error) {
 	var reqBody, resBody QueryHostConnectionInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6469,12 +6470,12 @@ type QueryHostPatch_TaskBody struct {
 
 func (b *QueryHostPatch_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryHostPatch_Task(r soap.RoundTripper, req *types.QueryHostPatch_Task) (*types.QueryHostPatch_TaskResponse, error) {
+func QueryHostPatch_Task(ctx context.Context, r soap.RoundTripper, req *types.QueryHostPatch_Task) (*types.QueryHostPatch_TaskResponse, error) {
 	var reqBody, resBody QueryHostPatch_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6489,12 +6490,12 @@ type QueryHostProfileMetadataBody struct {
 
 func (b *QueryHostProfileMetadataBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryHostProfileMetadata(r soap.RoundTripper, req *types.QueryHostProfileMetadata) (*types.QueryHostProfileMetadataResponse, error) {
+func QueryHostProfileMetadata(ctx context.Context, r soap.RoundTripper, req *types.QueryHostProfileMetadata) (*types.QueryHostProfileMetadataResponse, error) {
 	var reqBody, resBody QueryHostProfileMetadataBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6509,12 +6510,12 @@ type QueryHostStatusBody struct {
 
 func (b *QueryHostStatusBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryHostStatus(r soap.RoundTripper, req *types.QueryHostStatus) (*types.QueryHostStatusResponse, error) {
+func QueryHostStatus(ctx context.Context, r soap.RoundTripper, req *types.QueryHostStatus) (*types.QueryHostStatusResponse, error) {
 	var reqBody, resBody QueryHostStatusBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6529,12 +6530,12 @@ type QueryIORMConfigOptionBody struct {
 
 func (b *QueryIORMConfigOptionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryIORMConfigOption(r soap.RoundTripper, req *types.QueryIORMConfigOption) (*types.QueryIORMConfigOptionResponse, error) {
+func QueryIORMConfigOption(ctx context.Context, r soap.RoundTripper, req *types.QueryIORMConfigOption) (*types.QueryIORMConfigOptionResponse, error) {
 	var reqBody, resBody QueryIORMConfigOptionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6549,12 +6550,12 @@ type QueryIPAllocationsBody struct {
 
 func (b *QueryIPAllocationsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryIPAllocations(r soap.RoundTripper, req *types.QueryIPAllocations) (*types.QueryIPAllocationsResponse, error) {
+func QueryIPAllocations(ctx context.Context, r soap.RoundTripper, req *types.QueryIPAllocations) (*types.QueryIPAllocationsResponse, error) {
 	var reqBody, resBody QueryIPAllocationsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6569,12 +6570,12 @@ type QueryIpPoolsBody struct {
 
 func (b *QueryIpPoolsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryIpPools(r soap.RoundTripper, req *types.QueryIpPools) (*types.QueryIpPoolsResponse, error) {
+func QueryIpPools(ctx context.Context, r soap.RoundTripper, req *types.QueryIpPools) (*types.QueryIpPoolsResponse, error) {
 	var reqBody, resBody QueryIpPoolsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6589,12 +6590,12 @@ type QueryLicenseSourceAvailabilityBody struct {
 
 func (b *QueryLicenseSourceAvailabilityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryLicenseSourceAvailability(r soap.RoundTripper, req *types.QueryLicenseSourceAvailability) (*types.QueryLicenseSourceAvailabilityResponse, error) {
+func QueryLicenseSourceAvailability(ctx context.Context, r soap.RoundTripper, req *types.QueryLicenseSourceAvailability) (*types.QueryLicenseSourceAvailabilityResponse, error) {
 	var reqBody, resBody QueryLicenseSourceAvailabilityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6609,12 +6610,12 @@ type QueryLicenseUsageBody struct {
 
 func (b *QueryLicenseUsageBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryLicenseUsage(r soap.RoundTripper, req *types.QueryLicenseUsage) (*types.QueryLicenseUsageResponse, error) {
+func QueryLicenseUsage(ctx context.Context, r soap.RoundTripper, req *types.QueryLicenseUsage) (*types.QueryLicenseUsageResponse, error) {
 	var reqBody, resBody QueryLicenseUsageBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6629,12 +6630,12 @@ type QueryManagedByBody struct {
 
 func (b *QueryManagedByBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryManagedBy(r soap.RoundTripper, req *types.QueryManagedBy) (*types.QueryManagedByResponse, error) {
+func QueryManagedBy(ctx context.Context, r soap.RoundTripper, req *types.QueryManagedBy) (*types.QueryManagedByResponse, error) {
 	var reqBody, resBody QueryManagedByBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6649,12 +6650,12 @@ type QueryMemoryOverheadBody struct {
 
 func (b *QueryMemoryOverheadBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryMemoryOverhead(r soap.RoundTripper, req *types.QueryMemoryOverhead) (*types.QueryMemoryOverheadResponse, error) {
+func QueryMemoryOverhead(ctx context.Context, r soap.RoundTripper, req *types.QueryMemoryOverhead) (*types.QueryMemoryOverheadResponse, error) {
 	var reqBody, resBody QueryMemoryOverheadBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6669,12 +6670,12 @@ type QueryMemoryOverheadExBody struct {
 
 func (b *QueryMemoryOverheadExBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryMemoryOverheadEx(r soap.RoundTripper, req *types.QueryMemoryOverheadEx) (*types.QueryMemoryOverheadExResponse, error) {
+func QueryMemoryOverheadEx(ctx context.Context, r soap.RoundTripper, req *types.QueryMemoryOverheadEx) (*types.QueryMemoryOverheadExResponse, error) {
 	var reqBody, resBody QueryMemoryOverheadExBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6689,12 +6690,12 @@ type QueryMigrationDependenciesBody struct {
 
 func (b *QueryMigrationDependenciesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryMigrationDependencies(r soap.RoundTripper, req *types.QueryMigrationDependencies) (*types.QueryMigrationDependenciesResponse, error) {
+func QueryMigrationDependencies(ctx context.Context, r soap.RoundTripper, req *types.QueryMigrationDependencies) (*types.QueryMigrationDependenciesResponse, error) {
 	var reqBody, resBody QueryMigrationDependenciesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6709,12 +6710,12 @@ type QueryModulesBody struct {
 
 func (b *QueryModulesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryModules(r soap.RoundTripper, req *types.QueryModules) (*types.QueryModulesResponse, error) {
+func QueryModules(ctx context.Context, r soap.RoundTripper, req *types.QueryModules) (*types.QueryModulesResponse, error) {
 	var reqBody, resBody QueryModulesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6729,12 +6730,12 @@ type QueryNetConfigBody struct {
 
 func (b *QueryNetConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryNetConfig(r soap.RoundTripper, req *types.QueryNetConfig) (*types.QueryNetConfigResponse, error) {
+func QueryNetConfig(ctx context.Context, r soap.RoundTripper, req *types.QueryNetConfig) (*types.QueryNetConfigResponse, error) {
 	var reqBody, resBody QueryNetConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6749,12 +6750,12 @@ type QueryNetworkHintBody struct {
 
 func (b *QueryNetworkHintBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryNetworkHint(r soap.RoundTripper, req *types.QueryNetworkHint) (*types.QueryNetworkHintResponse, error) {
+func QueryNetworkHint(ctx context.Context, r soap.RoundTripper, req *types.QueryNetworkHint) (*types.QueryNetworkHintResponse, error) {
 	var reqBody, resBody QueryNetworkHintBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6769,12 +6770,12 @@ type QueryObjectsOnPhysicalVsanDiskBody struct {
 
 func (b *QueryObjectsOnPhysicalVsanDiskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryObjectsOnPhysicalVsanDisk(r soap.RoundTripper, req *types.QueryObjectsOnPhysicalVsanDisk) (*types.QueryObjectsOnPhysicalVsanDiskResponse, error) {
+func QueryObjectsOnPhysicalVsanDisk(ctx context.Context, r soap.RoundTripper, req *types.QueryObjectsOnPhysicalVsanDisk) (*types.QueryObjectsOnPhysicalVsanDiskResponse, error) {
 	var reqBody, resBody QueryObjectsOnPhysicalVsanDiskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6789,12 +6790,12 @@ type QueryOptionsBody struct {
 
 func (b *QueryOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryOptions(r soap.RoundTripper, req *types.QueryOptions) (*types.QueryOptionsResponse, error) {
+func QueryOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryOptions) (*types.QueryOptionsResponse, error) {
 	var reqBody, resBody QueryOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6809,12 +6810,12 @@ type QueryPartitionCreateDescBody struct {
 
 func (b *QueryPartitionCreateDescBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPartitionCreateDesc(r soap.RoundTripper, req *types.QueryPartitionCreateDesc) (*types.QueryPartitionCreateDescResponse, error) {
+func QueryPartitionCreateDesc(ctx context.Context, r soap.RoundTripper, req *types.QueryPartitionCreateDesc) (*types.QueryPartitionCreateDescResponse, error) {
 	var reqBody, resBody QueryPartitionCreateDescBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6829,12 +6830,12 @@ type QueryPartitionCreateOptionsBody struct {
 
 func (b *QueryPartitionCreateOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPartitionCreateOptions(r soap.RoundTripper, req *types.QueryPartitionCreateOptions) (*types.QueryPartitionCreateOptionsResponse, error) {
+func QueryPartitionCreateOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryPartitionCreateOptions) (*types.QueryPartitionCreateOptionsResponse, error) {
 	var reqBody, resBody QueryPartitionCreateOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6849,12 +6850,12 @@ type QueryPathSelectionPolicyOptionsBody struct {
 
 func (b *QueryPathSelectionPolicyOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPathSelectionPolicyOptions(r soap.RoundTripper, req *types.QueryPathSelectionPolicyOptions) (*types.QueryPathSelectionPolicyOptionsResponse, error) {
+func QueryPathSelectionPolicyOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryPathSelectionPolicyOptions) (*types.QueryPathSelectionPolicyOptionsResponse, error) {
 	var reqBody, resBody QueryPathSelectionPolicyOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6869,12 +6870,12 @@ type QueryPerfBody struct {
 
 func (b *QueryPerfBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPerf(r soap.RoundTripper, req *types.QueryPerf) (*types.QueryPerfResponse, error) {
+func QueryPerf(ctx context.Context, r soap.RoundTripper, req *types.QueryPerf) (*types.QueryPerfResponse, error) {
 	var reqBody, resBody QueryPerfBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6889,12 +6890,12 @@ type QueryPerfCompositeBody struct {
 
 func (b *QueryPerfCompositeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPerfComposite(r soap.RoundTripper, req *types.QueryPerfComposite) (*types.QueryPerfCompositeResponse, error) {
+func QueryPerfComposite(ctx context.Context, r soap.RoundTripper, req *types.QueryPerfComposite) (*types.QueryPerfCompositeResponse, error) {
 	var reqBody, resBody QueryPerfCompositeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6909,12 +6910,12 @@ type QueryPerfCounterBody struct {
 
 func (b *QueryPerfCounterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPerfCounter(r soap.RoundTripper, req *types.QueryPerfCounter) (*types.QueryPerfCounterResponse, error) {
+func QueryPerfCounter(ctx context.Context, r soap.RoundTripper, req *types.QueryPerfCounter) (*types.QueryPerfCounterResponse, error) {
 	var reqBody, resBody QueryPerfCounterBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6929,12 +6930,12 @@ type QueryPerfCounterByLevelBody struct {
 
 func (b *QueryPerfCounterByLevelBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPerfCounterByLevel(r soap.RoundTripper, req *types.QueryPerfCounterByLevel) (*types.QueryPerfCounterByLevelResponse, error) {
+func QueryPerfCounterByLevel(ctx context.Context, r soap.RoundTripper, req *types.QueryPerfCounterByLevel) (*types.QueryPerfCounterByLevelResponse, error) {
 	var reqBody, resBody QueryPerfCounterByLevelBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6949,12 +6950,12 @@ type QueryPerfProviderSummaryBody struct {
 
 func (b *QueryPerfProviderSummaryBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPerfProviderSummary(r soap.RoundTripper, req *types.QueryPerfProviderSummary) (*types.QueryPerfProviderSummaryResponse, error) {
+func QueryPerfProviderSummary(ctx context.Context, r soap.RoundTripper, req *types.QueryPerfProviderSummary) (*types.QueryPerfProviderSummaryResponse, error) {
 	var reqBody, resBody QueryPerfProviderSummaryBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6969,12 +6970,12 @@ type QueryPhysicalVsanDisksBody struct {
 
 func (b *QueryPhysicalVsanDisksBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPhysicalVsanDisks(r soap.RoundTripper, req *types.QueryPhysicalVsanDisks) (*types.QueryPhysicalVsanDisksResponse, error) {
+func QueryPhysicalVsanDisks(ctx context.Context, r soap.RoundTripper, req *types.QueryPhysicalVsanDisks) (*types.QueryPhysicalVsanDisksResponse, error) {
 	var reqBody, resBody QueryPhysicalVsanDisksBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -6989,12 +6990,12 @@ type QueryPnicStatusBody struct {
 
 func (b *QueryPnicStatusBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPnicStatus(r soap.RoundTripper, req *types.QueryPnicStatus) (*types.QueryPnicStatusResponse, error) {
+func QueryPnicStatus(ctx context.Context, r soap.RoundTripper, req *types.QueryPnicStatus) (*types.QueryPnicStatusResponse, error) {
 	var reqBody, resBody QueryPnicStatusBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7009,12 +7010,12 @@ type QueryPolicyMetadataBody struct {
 
 func (b *QueryPolicyMetadataBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryPolicyMetadata(r soap.RoundTripper, req *types.QueryPolicyMetadata) (*types.QueryPolicyMetadataResponse, error) {
+func QueryPolicyMetadata(ctx context.Context, r soap.RoundTripper, req *types.QueryPolicyMetadata) (*types.QueryPolicyMetadataResponse, error) {
 	var reqBody, resBody QueryPolicyMetadataBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7029,12 +7030,12 @@ type QueryProfileStructureBody struct {
 
 func (b *QueryProfileStructureBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryProfileStructure(r soap.RoundTripper, req *types.QueryProfileStructure) (*types.QueryProfileStructureResponse, error) {
+func QueryProfileStructure(ctx context.Context, r soap.RoundTripper, req *types.QueryProfileStructure) (*types.QueryProfileStructureResponse, error) {
 	var reqBody, resBody QueryProfileStructureBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7049,12 +7050,12 @@ type QueryResourceConfigOptionBody struct {
 
 func (b *QueryResourceConfigOptionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryResourceConfigOption(r soap.RoundTripper, req *types.QueryResourceConfigOption) (*types.QueryResourceConfigOptionResponse, error) {
+func QueryResourceConfigOption(ctx context.Context, r soap.RoundTripper, req *types.QueryResourceConfigOption) (*types.QueryResourceConfigOptionResponse, error) {
 	var reqBody, resBody QueryResourceConfigOptionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7069,12 +7070,12 @@ type QueryServiceListBody struct {
 
 func (b *QueryServiceListBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryServiceList(r soap.RoundTripper, req *types.QueryServiceList) (*types.QueryServiceListResponse, error) {
+func QueryServiceList(ctx context.Context, r soap.RoundTripper, req *types.QueryServiceList) (*types.QueryServiceListResponse, error) {
 	var reqBody, resBody QueryServiceListBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7089,12 +7090,12 @@ type QueryStorageArrayTypePolicyOptionsBody struct {
 
 func (b *QueryStorageArrayTypePolicyOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryStorageArrayTypePolicyOptions(r soap.RoundTripper, req *types.QueryStorageArrayTypePolicyOptions) (*types.QueryStorageArrayTypePolicyOptionsResponse, error) {
+func QueryStorageArrayTypePolicyOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryStorageArrayTypePolicyOptions) (*types.QueryStorageArrayTypePolicyOptionsResponse, error) {
 	var reqBody, resBody QueryStorageArrayTypePolicyOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7109,12 +7110,12 @@ type QuerySupportedFeaturesBody struct {
 
 func (b *QuerySupportedFeaturesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QuerySupportedFeatures(r soap.RoundTripper, req *types.QuerySupportedFeatures) (*types.QuerySupportedFeaturesResponse, error) {
+func QuerySupportedFeatures(ctx context.Context, r soap.RoundTripper, req *types.QuerySupportedFeatures) (*types.QuerySupportedFeaturesResponse, error) {
 	var reqBody, resBody QuerySupportedFeaturesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7129,12 +7130,12 @@ type QueryTargetCapabilitiesBody struct {
 
 func (b *QueryTargetCapabilitiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryTargetCapabilities(r soap.RoundTripper, req *types.QueryTargetCapabilities) (*types.QueryTargetCapabilitiesResponse, error) {
+func QueryTargetCapabilities(ctx context.Context, r soap.RoundTripper, req *types.QueryTargetCapabilities) (*types.QueryTargetCapabilitiesResponse, error) {
 	var reqBody, resBody QueryTargetCapabilitiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7149,12 +7150,12 @@ type QueryTpmAttestationReportBody struct {
 
 func (b *QueryTpmAttestationReportBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryTpmAttestationReport(r soap.RoundTripper, req *types.QueryTpmAttestationReport) (*types.QueryTpmAttestationReportResponse, error) {
+func QueryTpmAttestationReport(ctx context.Context, r soap.RoundTripper, req *types.QueryTpmAttestationReport) (*types.QueryTpmAttestationReportResponse, error) {
 	var reqBody, resBody QueryTpmAttestationReportBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7169,12 +7170,12 @@ type QueryUnownedFilesBody struct {
 
 func (b *QueryUnownedFilesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryUnownedFiles(r soap.RoundTripper, req *types.QueryUnownedFiles) (*types.QueryUnownedFilesResponse, error) {
+func QueryUnownedFiles(ctx context.Context, r soap.RoundTripper, req *types.QueryUnownedFiles) (*types.QueryUnownedFilesResponse, error) {
 	var reqBody, resBody QueryUnownedFilesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7189,12 +7190,12 @@ type QueryUnresolvedVmfsVolumeBody struct {
 
 func (b *QueryUnresolvedVmfsVolumeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryUnresolvedVmfsVolume(r soap.RoundTripper, req *types.QueryUnresolvedVmfsVolume) (*types.QueryUnresolvedVmfsVolumeResponse, error) {
+func QueryUnresolvedVmfsVolume(ctx context.Context, r soap.RoundTripper, req *types.QueryUnresolvedVmfsVolume) (*types.QueryUnresolvedVmfsVolumeResponse, error) {
 	var reqBody, resBody QueryUnresolvedVmfsVolumeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7209,12 +7210,12 @@ type QueryUnresolvedVmfsVolumesBody struct {
 
 func (b *QueryUnresolvedVmfsVolumesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryUnresolvedVmfsVolumes(r soap.RoundTripper, req *types.QueryUnresolvedVmfsVolumes) (*types.QueryUnresolvedVmfsVolumesResponse, error) {
+func QueryUnresolvedVmfsVolumes(ctx context.Context, r soap.RoundTripper, req *types.QueryUnresolvedVmfsVolumes) (*types.QueryUnresolvedVmfsVolumesResponse, error) {
 	var reqBody, resBody QueryUnresolvedVmfsVolumesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7229,12 +7230,12 @@ type QueryUsedVlanIdInDvsBody struct {
 
 func (b *QueryUsedVlanIdInDvsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryUsedVlanIdInDvs(r soap.RoundTripper, req *types.QueryUsedVlanIdInDvs) (*types.QueryUsedVlanIdInDvsResponse, error) {
+func QueryUsedVlanIdInDvs(ctx context.Context, r soap.RoundTripper, req *types.QueryUsedVlanIdInDvs) (*types.QueryUsedVlanIdInDvsResponse, error) {
 	var reqBody, resBody QueryUsedVlanIdInDvsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7249,12 +7250,12 @@ type QueryVMotionCompatibilityBody struct {
 
 func (b *QueryVMotionCompatibilityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVMotionCompatibility(r soap.RoundTripper, req *types.QueryVMotionCompatibility) (*types.QueryVMotionCompatibilityResponse, error) {
+func QueryVMotionCompatibility(ctx context.Context, r soap.RoundTripper, req *types.QueryVMotionCompatibility) (*types.QueryVMotionCompatibilityResponse, error) {
 	var reqBody, resBody QueryVMotionCompatibilityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7269,12 +7270,12 @@ type QueryVMotionCompatibilityEx_TaskBody struct {
 
 func (b *QueryVMotionCompatibilityEx_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVMotionCompatibilityEx_Task(r soap.RoundTripper, req *types.QueryVMotionCompatibilityEx_Task) (*types.QueryVMotionCompatibilityEx_TaskResponse, error) {
+func QueryVMotionCompatibilityEx_Task(ctx context.Context, r soap.RoundTripper, req *types.QueryVMotionCompatibilityEx_Task) (*types.QueryVMotionCompatibilityEx_TaskResponse, error) {
 	var reqBody, resBody QueryVMotionCompatibilityEx_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7289,12 +7290,12 @@ type QueryVirtualDiskFragmentationBody struct {
 
 func (b *QueryVirtualDiskFragmentationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVirtualDiskFragmentation(r soap.RoundTripper, req *types.QueryVirtualDiskFragmentation) (*types.QueryVirtualDiskFragmentationResponse, error) {
+func QueryVirtualDiskFragmentation(ctx context.Context, r soap.RoundTripper, req *types.QueryVirtualDiskFragmentation) (*types.QueryVirtualDiskFragmentationResponse, error) {
 	var reqBody, resBody QueryVirtualDiskFragmentationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7309,12 +7310,12 @@ type QueryVirtualDiskGeometryBody struct {
 
 func (b *QueryVirtualDiskGeometryBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVirtualDiskGeometry(r soap.RoundTripper, req *types.QueryVirtualDiskGeometry) (*types.QueryVirtualDiskGeometryResponse, error) {
+func QueryVirtualDiskGeometry(ctx context.Context, r soap.RoundTripper, req *types.QueryVirtualDiskGeometry) (*types.QueryVirtualDiskGeometryResponse, error) {
 	var reqBody, resBody QueryVirtualDiskGeometryBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7329,12 +7330,12 @@ type QueryVirtualDiskUuidBody struct {
 
 func (b *QueryVirtualDiskUuidBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVirtualDiskUuid(r soap.RoundTripper, req *types.QueryVirtualDiskUuid) (*types.QueryVirtualDiskUuidResponse, error) {
+func QueryVirtualDiskUuid(ctx context.Context, r soap.RoundTripper, req *types.QueryVirtualDiskUuid) (*types.QueryVirtualDiskUuidResponse, error) {
 	var reqBody, resBody QueryVirtualDiskUuidBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7349,12 +7350,12 @@ type QueryVmfsDatastoreCreateOptionsBody struct {
 
 func (b *QueryVmfsDatastoreCreateOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVmfsDatastoreCreateOptions(r soap.RoundTripper, req *types.QueryVmfsDatastoreCreateOptions) (*types.QueryVmfsDatastoreCreateOptionsResponse, error) {
+func QueryVmfsDatastoreCreateOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryVmfsDatastoreCreateOptions) (*types.QueryVmfsDatastoreCreateOptionsResponse, error) {
 	var reqBody, resBody QueryVmfsDatastoreCreateOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7369,12 +7370,12 @@ type QueryVmfsDatastoreExpandOptionsBody struct {
 
 func (b *QueryVmfsDatastoreExpandOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVmfsDatastoreExpandOptions(r soap.RoundTripper, req *types.QueryVmfsDatastoreExpandOptions) (*types.QueryVmfsDatastoreExpandOptionsResponse, error) {
+func QueryVmfsDatastoreExpandOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryVmfsDatastoreExpandOptions) (*types.QueryVmfsDatastoreExpandOptionsResponse, error) {
 	var reqBody, resBody QueryVmfsDatastoreExpandOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7389,12 +7390,12 @@ type QueryVmfsDatastoreExtendOptionsBody struct {
 
 func (b *QueryVmfsDatastoreExtendOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVmfsDatastoreExtendOptions(r soap.RoundTripper, req *types.QueryVmfsDatastoreExtendOptions) (*types.QueryVmfsDatastoreExtendOptionsResponse, error) {
+func QueryVmfsDatastoreExtendOptions(ctx context.Context, r soap.RoundTripper, req *types.QueryVmfsDatastoreExtendOptions) (*types.QueryVmfsDatastoreExtendOptionsResponse, error) {
 	var reqBody, resBody QueryVmfsDatastoreExtendOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7409,12 +7410,12 @@ type QueryVnicStatusBody struct {
 
 func (b *QueryVnicStatusBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVnicStatus(r soap.RoundTripper, req *types.QueryVnicStatus) (*types.QueryVnicStatusResponse, error) {
+func QueryVnicStatus(ctx context.Context, r soap.RoundTripper, req *types.QueryVnicStatus) (*types.QueryVnicStatusResponse, error) {
 	var reqBody, resBody QueryVnicStatusBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7429,12 +7430,12 @@ type QueryVsanObjectsBody struct {
 
 func (b *QueryVsanObjectsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func QueryVsanObjects(r soap.RoundTripper, req *types.QueryVsanObjects) (*types.QueryVsanObjectsResponse, error) {
+func QueryVsanObjects(ctx context.Context, r soap.RoundTripper, req *types.QueryVsanObjects) (*types.QueryVsanObjectsResponse, error) {
 	var reqBody, resBody QueryVsanObjectsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7449,12 +7450,12 @@ type ReadEnvironmentVariableInGuestBody struct {
 
 func (b *ReadEnvironmentVariableInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReadEnvironmentVariableInGuest(r soap.RoundTripper, req *types.ReadEnvironmentVariableInGuest) (*types.ReadEnvironmentVariableInGuestResponse, error) {
+func ReadEnvironmentVariableInGuest(ctx context.Context, r soap.RoundTripper, req *types.ReadEnvironmentVariableInGuest) (*types.ReadEnvironmentVariableInGuestResponse, error) {
 	var reqBody, resBody ReadEnvironmentVariableInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7469,12 +7470,12 @@ type ReadNextEventsBody struct {
 
 func (b *ReadNextEventsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReadNextEvents(r soap.RoundTripper, req *types.ReadNextEvents) (*types.ReadNextEventsResponse, error) {
+func ReadNextEvents(ctx context.Context, r soap.RoundTripper, req *types.ReadNextEvents) (*types.ReadNextEventsResponse, error) {
 	var reqBody, resBody ReadNextEventsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7489,12 +7490,12 @@ type ReadNextTasksBody struct {
 
 func (b *ReadNextTasksBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReadNextTasks(r soap.RoundTripper, req *types.ReadNextTasks) (*types.ReadNextTasksResponse, error) {
+func ReadNextTasks(ctx context.Context, r soap.RoundTripper, req *types.ReadNextTasks) (*types.ReadNextTasksResponse, error) {
 	var reqBody, resBody ReadNextTasksBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7509,12 +7510,12 @@ type ReadPreviousEventsBody struct {
 
 func (b *ReadPreviousEventsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReadPreviousEvents(r soap.RoundTripper, req *types.ReadPreviousEvents) (*types.ReadPreviousEventsResponse, error) {
+func ReadPreviousEvents(ctx context.Context, r soap.RoundTripper, req *types.ReadPreviousEvents) (*types.ReadPreviousEventsResponse, error) {
 	var reqBody, resBody ReadPreviousEventsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7529,12 +7530,12 @@ type ReadPreviousTasksBody struct {
 
 func (b *ReadPreviousTasksBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReadPreviousTasks(r soap.RoundTripper, req *types.ReadPreviousTasks) (*types.ReadPreviousTasksResponse, error) {
+func ReadPreviousTasks(ctx context.Context, r soap.RoundTripper, req *types.ReadPreviousTasks) (*types.ReadPreviousTasksResponse, error) {
 	var reqBody, resBody ReadPreviousTasksBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7549,12 +7550,12 @@ type RebootGuestBody struct {
 
 func (b *RebootGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RebootGuest(r soap.RoundTripper, req *types.RebootGuest) (*types.RebootGuestResponse, error) {
+func RebootGuest(ctx context.Context, r soap.RoundTripper, req *types.RebootGuest) (*types.RebootGuestResponse, error) {
 	var reqBody, resBody RebootGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7569,12 +7570,12 @@ type RebootHost_TaskBody struct {
 
 func (b *RebootHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RebootHost_Task(r soap.RoundTripper, req *types.RebootHost_Task) (*types.RebootHost_TaskResponse, error) {
+func RebootHost_Task(ctx context.Context, r soap.RoundTripper, req *types.RebootHost_Task) (*types.RebootHost_TaskResponse, error) {
 	var reqBody, resBody RebootHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7589,12 +7590,12 @@ type RecommendDatastoresBody struct {
 
 func (b *RecommendDatastoresBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RecommendDatastores(r soap.RoundTripper, req *types.RecommendDatastores) (*types.RecommendDatastoresResponse, error) {
+func RecommendDatastores(ctx context.Context, r soap.RoundTripper, req *types.RecommendDatastores) (*types.RecommendDatastoresResponse, error) {
 	var reqBody, resBody RecommendDatastoresBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7609,12 +7610,12 @@ type RecommendHostsForVmBody struct {
 
 func (b *RecommendHostsForVmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RecommendHostsForVm(r soap.RoundTripper, req *types.RecommendHostsForVm) (*types.RecommendHostsForVmResponse, error) {
+func RecommendHostsForVm(ctx context.Context, r soap.RoundTripper, req *types.RecommendHostsForVm) (*types.RecommendHostsForVmResponse, error) {
 	var reqBody, resBody RecommendHostsForVmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7629,12 +7630,12 @@ type ReconfigVM_TaskBody struct {
 
 func (b *ReconfigVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigVM_Task(r soap.RoundTripper, req *types.ReconfigVM_Task) (*types.ReconfigVM_TaskResponse, error) {
+func ReconfigVM_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigVM_Task) (*types.ReconfigVM_TaskResponse, error) {
 	var reqBody, resBody ReconfigVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7649,12 +7650,12 @@ type ReconfigureAlarmBody struct {
 
 func (b *ReconfigureAlarmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureAlarm(r soap.RoundTripper, req *types.ReconfigureAlarm) (*types.ReconfigureAlarmResponse, error) {
+func ReconfigureAlarm(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureAlarm) (*types.ReconfigureAlarmResponse, error) {
 	var reqBody, resBody ReconfigureAlarmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7669,12 +7670,12 @@ type ReconfigureAutostartBody struct {
 
 func (b *ReconfigureAutostartBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureAutostart(r soap.RoundTripper, req *types.ReconfigureAutostart) (*types.ReconfigureAutostartResponse, error) {
+func ReconfigureAutostart(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureAutostart) (*types.ReconfigureAutostartResponse, error) {
 	var reqBody, resBody ReconfigureAutostartBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7689,12 +7690,12 @@ type ReconfigureCluster_TaskBody struct {
 
 func (b *ReconfigureCluster_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureCluster_Task(r soap.RoundTripper, req *types.ReconfigureCluster_Task) (*types.ReconfigureCluster_TaskResponse, error) {
+func ReconfigureCluster_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureCluster_Task) (*types.ReconfigureCluster_TaskResponse, error) {
 	var reqBody, resBody ReconfigureCluster_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7709,12 +7710,12 @@ type ReconfigureComputeResource_TaskBody struct {
 
 func (b *ReconfigureComputeResource_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureComputeResource_Task(r soap.RoundTripper, req *types.ReconfigureComputeResource_Task) (*types.ReconfigureComputeResource_TaskResponse, error) {
+func ReconfigureComputeResource_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureComputeResource_Task) (*types.ReconfigureComputeResource_TaskResponse, error) {
 	var reqBody, resBody ReconfigureComputeResource_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7729,12 +7730,12 @@ type ReconfigureDVPort_TaskBody struct {
 
 func (b *ReconfigureDVPort_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureDVPort_Task(r soap.RoundTripper, req *types.ReconfigureDVPort_Task) (*types.ReconfigureDVPort_TaskResponse, error) {
+func ReconfigureDVPort_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureDVPort_Task) (*types.ReconfigureDVPort_TaskResponse, error) {
 	var reqBody, resBody ReconfigureDVPort_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7749,12 +7750,12 @@ type ReconfigureDVPortgroup_TaskBody struct {
 
 func (b *ReconfigureDVPortgroup_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureDVPortgroup_Task(r soap.RoundTripper, req *types.ReconfigureDVPortgroup_Task) (*types.ReconfigureDVPortgroup_TaskResponse, error) {
+func ReconfigureDVPortgroup_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureDVPortgroup_Task) (*types.ReconfigureDVPortgroup_TaskResponse, error) {
 	var reqBody, resBody ReconfigureDVPortgroup_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7769,12 +7770,12 @@ type ReconfigureDatacenter_TaskBody struct {
 
 func (b *ReconfigureDatacenter_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureDatacenter_Task(r soap.RoundTripper, req *types.ReconfigureDatacenter_Task) (*types.ReconfigureDatacenter_TaskResponse, error) {
+func ReconfigureDatacenter_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureDatacenter_Task) (*types.ReconfigureDatacenter_TaskResponse, error) {
 	var reqBody, resBody ReconfigureDatacenter_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7789,12 +7790,12 @@ type ReconfigureDvs_TaskBody struct {
 
 func (b *ReconfigureDvs_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureDvs_Task(r soap.RoundTripper, req *types.ReconfigureDvs_Task) (*types.ReconfigureDvs_TaskResponse, error) {
+func ReconfigureDvs_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureDvs_Task) (*types.ReconfigureDvs_TaskResponse, error) {
 	var reqBody, resBody ReconfigureDvs_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7809,12 +7810,12 @@ type ReconfigureHostForDAS_TaskBody struct {
 
 func (b *ReconfigureHostForDAS_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureHostForDAS_Task(r soap.RoundTripper, req *types.ReconfigureHostForDAS_Task) (*types.ReconfigureHostForDAS_TaskResponse, error) {
+func ReconfigureHostForDAS_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureHostForDAS_Task) (*types.ReconfigureHostForDAS_TaskResponse, error) {
 	var reqBody, resBody ReconfigureHostForDAS_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7829,12 +7830,12 @@ type ReconfigureScheduledTaskBody struct {
 
 func (b *ReconfigureScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureScheduledTask(r soap.RoundTripper, req *types.ReconfigureScheduledTask) (*types.ReconfigureScheduledTaskResponse, error) {
+func ReconfigureScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureScheduledTask) (*types.ReconfigureScheduledTaskResponse, error) {
 	var reqBody, resBody ReconfigureScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7849,12 +7850,12 @@ type ReconfigureServiceConsoleReservationBody struct {
 
 func (b *ReconfigureServiceConsoleReservationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureServiceConsoleReservation(r soap.RoundTripper, req *types.ReconfigureServiceConsoleReservation) (*types.ReconfigureServiceConsoleReservationResponse, error) {
+func ReconfigureServiceConsoleReservation(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureServiceConsoleReservation) (*types.ReconfigureServiceConsoleReservationResponse, error) {
 	var reqBody, resBody ReconfigureServiceConsoleReservationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7869,12 +7870,12 @@ type ReconfigureSnmpAgentBody struct {
 
 func (b *ReconfigureSnmpAgentBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureSnmpAgent(r soap.RoundTripper, req *types.ReconfigureSnmpAgent) (*types.ReconfigureSnmpAgentResponse, error) {
+func ReconfigureSnmpAgent(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureSnmpAgent) (*types.ReconfigureSnmpAgentResponse, error) {
 	var reqBody, resBody ReconfigureSnmpAgentBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7889,12 +7890,12 @@ type ReconfigureVirtualMachineReservationBody struct {
 
 func (b *ReconfigureVirtualMachineReservationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconfigureVirtualMachineReservation(r soap.RoundTripper, req *types.ReconfigureVirtualMachineReservation) (*types.ReconfigureVirtualMachineReservationResponse, error) {
+func ReconfigureVirtualMachineReservation(ctx context.Context, r soap.RoundTripper, req *types.ReconfigureVirtualMachineReservation) (*types.ReconfigureVirtualMachineReservationResponse, error) {
 	var reqBody, resBody ReconfigureVirtualMachineReservationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7909,12 +7910,12 @@ type ReconnectHost_TaskBody struct {
 
 func (b *ReconnectHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReconnectHost_Task(r soap.RoundTripper, req *types.ReconnectHost_Task) (*types.ReconnectHost_TaskResponse, error) {
+func ReconnectHost_Task(ctx context.Context, r soap.RoundTripper, req *types.ReconnectHost_Task) (*types.ReconnectHost_TaskResponse, error) {
 	var reqBody, resBody ReconnectHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7929,12 +7930,12 @@ type RectifyDvsHost_TaskBody struct {
 
 func (b *RectifyDvsHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RectifyDvsHost_Task(r soap.RoundTripper, req *types.RectifyDvsHost_Task) (*types.RectifyDvsHost_TaskResponse, error) {
+func RectifyDvsHost_Task(ctx context.Context, r soap.RoundTripper, req *types.RectifyDvsHost_Task) (*types.RectifyDvsHost_TaskResponse, error) {
 	var reqBody, resBody RectifyDvsHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7949,12 +7950,12 @@ type RectifyDvsOnHost_TaskBody struct {
 
 func (b *RectifyDvsOnHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RectifyDvsOnHost_Task(r soap.RoundTripper, req *types.RectifyDvsOnHost_Task) (*types.RectifyDvsOnHost_TaskResponse, error) {
+func RectifyDvsOnHost_Task(ctx context.Context, r soap.RoundTripper, req *types.RectifyDvsOnHost_Task) (*types.RectifyDvsOnHost_TaskResponse, error) {
 	var reqBody, resBody RectifyDvsOnHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7969,12 +7970,12 @@ type RefreshBody struct {
 
 func (b *RefreshBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Refresh(r soap.RoundTripper, req *types.Refresh) (*types.RefreshResponse, error) {
+func Refresh(ctx context.Context, r soap.RoundTripper, req *types.Refresh) (*types.RefreshResponse, error) {
 	var reqBody, resBody RefreshBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -7989,12 +7990,12 @@ type RefreshDVPortStateBody struct {
 
 func (b *RefreshDVPortStateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshDVPortState(r soap.RoundTripper, req *types.RefreshDVPortState) (*types.RefreshDVPortStateResponse, error) {
+func RefreshDVPortState(ctx context.Context, r soap.RoundTripper, req *types.RefreshDVPortState) (*types.RefreshDVPortStateResponse, error) {
 	var reqBody, resBody RefreshDVPortStateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8009,12 +8010,12 @@ type RefreshDatastoreBody struct {
 
 func (b *RefreshDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshDatastore(r soap.RoundTripper, req *types.RefreshDatastore) (*types.RefreshDatastoreResponse, error) {
+func RefreshDatastore(ctx context.Context, r soap.RoundTripper, req *types.RefreshDatastore) (*types.RefreshDatastoreResponse, error) {
 	var reqBody, resBody RefreshDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8029,12 +8030,12 @@ type RefreshDatastoreStorageInfoBody struct {
 
 func (b *RefreshDatastoreStorageInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshDatastoreStorageInfo(r soap.RoundTripper, req *types.RefreshDatastoreStorageInfo) (*types.RefreshDatastoreStorageInfoResponse, error) {
+func RefreshDatastoreStorageInfo(ctx context.Context, r soap.RoundTripper, req *types.RefreshDatastoreStorageInfo) (*types.RefreshDatastoreStorageInfoResponse, error) {
 	var reqBody, resBody RefreshDatastoreStorageInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8049,12 +8050,12 @@ type RefreshDateTimeSystemBody struct {
 
 func (b *RefreshDateTimeSystemBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshDateTimeSystem(r soap.RoundTripper, req *types.RefreshDateTimeSystem) (*types.RefreshDateTimeSystemResponse, error) {
+func RefreshDateTimeSystem(ctx context.Context, r soap.RoundTripper, req *types.RefreshDateTimeSystem) (*types.RefreshDateTimeSystemResponse, error) {
 	var reqBody, resBody RefreshDateTimeSystemBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8069,12 +8070,12 @@ type RefreshFirewallBody struct {
 
 func (b *RefreshFirewallBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshFirewall(r soap.RoundTripper, req *types.RefreshFirewall) (*types.RefreshFirewallResponse, error) {
+func RefreshFirewall(ctx context.Context, r soap.RoundTripper, req *types.RefreshFirewall) (*types.RefreshFirewallResponse, error) {
 	var reqBody, resBody RefreshFirewallBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8089,12 +8090,12 @@ type RefreshGraphicsManagerBody struct {
 
 func (b *RefreshGraphicsManagerBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshGraphicsManager(r soap.RoundTripper, req *types.RefreshGraphicsManager) (*types.RefreshGraphicsManagerResponse, error) {
+func RefreshGraphicsManager(ctx context.Context, r soap.RoundTripper, req *types.RefreshGraphicsManager) (*types.RefreshGraphicsManagerResponse, error) {
 	var reqBody, resBody RefreshGraphicsManagerBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8109,12 +8110,12 @@ type RefreshHealthStatusSystemBody struct {
 
 func (b *RefreshHealthStatusSystemBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshHealthStatusSystem(r soap.RoundTripper, req *types.RefreshHealthStatusSystem) (*types.RefreshHealthStatusSystemResponse, error) {
+func RefreshHealthStatusSystem(ctx context.Context, r soap.RoundTripper, req *types.RefreshHealthStatusSystem) (*types.RefreshHealthStatusSystemResponse, error) {
 	var reqBody, resBody RefreshHealthStatusSystemBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8129,12 +8130,12 @@ type RefreshNetworkSystemBody struct {
 
 func (b *RefreshNetworkSystemBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshNetworkSystem(r soap.RoundTripper, req *types.RefreshNetworkSystem) (*types.RefreshNetworkSystemResponse, error) {
+func RefreshNetworkSystem(ctx context.Context, r soap.RoundTripper, req *types.RefreshNetworkSystem) (*types.RefreshNetworkSystemResponse, error) {
 	var reqBody, resBody RefreshNetworkSystemBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8149,12 +8150,12 @@ type RefreshRecommendationBody struct {
 
 func (b *RefreshRecommendationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshRecommendation(r soap.RoundTripper, req *types.RefreshRecommendation) (*types.RefreshRecommendationResponse, error) {
+func RefreshRecommendation(ctx context.Context, r soap.RoundTripper, req *types.RefreshRecommendation) (*types.RefreshRecommendationResponse, error) {
 	var reqBody, resBody RefreshRecommendationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8169,12 +8170,12 @@ type RefreshRuntimeBody struct {
 
 func (b *RefreshRuntimeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshRuntime(r soap.RoundTripper, req *types.RefreshRuntime) (*types.RefreshRuntimeResponse, error) {
+func RefreshRuntime(ctx context.Context, r soap.RoundTripper, req *types.RefreshRuntime) (*types.RefreshRuntimeResponse, error) {
 	var reqBody, resBody RefreshRuntimeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8189,12 +8190,12 @@ type RefreshServicesBody struct {
 
 func (b *RefreshServicesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshServices(r soap.RoundTripper, req *types.RefreshServices) (*types.RefreshServicesResponse, error) {
+func RefreshServices(ctx context.Context, r soap.RoundTripper, req *types.RefreshServices) (*types.RefreshServicesResponse, error) {
 	var reqBody, resBody RefreshServicesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8209,12 +8210,12 @@ type RefreshStorageDrsRecommendationBody struct {
 
 func (b *RefreshStorageDrsRecommendationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshStorageDrsRecommendation(r soap.RoundTripper, req *types.RefreshStorageDrsRecommendation) (*types.RefreshStorageDrsRecommendationResponse, error) {
+func RefreshStorageDrsRecommendation(ctx context.Context, r soap.RoundTripper, req *types.RefreshStorageDrsRecommendation) (*types.RefreshStorageDrsRecommendationResponse, error) {
 	var reqBody, resBody RefreshStorageDrsRecommendationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8229,12 +8230,12 @@ type RefreshStorageInfoBody struct {
 
 func (b *RefreshStorageInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshStorageInfo(r soap.RoundTripper, req *types.RefreshStorageInfo) (*types.RefreshStorageInfoResponse, error) {
+func RefreshStorageInfo(ctx context.Context, r soap.RoundTripper, req *types.RefreshStorageInfo) (*types.RefreshStorageInfoResponse, error) {
 	var reqBody, resBody RefreshStorageInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8249,12 +8250,12 @@ type RefreshStorageSystemBody struct {
 
 func (b *RefreshStorageSystemBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RefreshStorageSystem(r soap.RoundTripper, req *types.RefreshStorageSystem) (*types.RefreshStorageSystemResponse, error) {
+func RefreshStorageSystem(ctx context.Context, r soap.RoundTripper, req *types.RefreshStorageSystem) (*types.RefreshStorageSystemResponse, error) {
 	var reqBody, resBody RefreshStorageSystemBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8269,12 +8270,12 @@ type RegisterChildVM_TaskBody struct {
 
 func (b *RegisterChildVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RegisterChildVM_Task(r soap.RoundTripper, req *types.RegisterChildVM_Task) (*types.RegisterChildVM_TaskResponse, error) {
+func RegisterChildVM_Task(ctx context.Context, r soap.RoundTripper, req *types.RegisterChildVM_Task) (*types.RegisterChildVM_TaskResponse, error) {
 	var reqBody, resBody RegisterChildVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8289,12 +8290,12 @@ type RegisterExtensionBody struct {
 
 func (b *RegisterExtensionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RegisterExtension(r soap.RoundTripper, req *types.RegisterExtension) (*types.RegisterExtensionResponse, error) {
+func RegisterExtension(ctx context.Context, r soap.RoundTripper, req *types.RegisterExtension) (*types.RegisterExtensionResponse, error) {
 	var reqBody, resBody RegisterExtensionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8309,12 +8310,12 @@ type RegisterVM_TaskBody struct {
 
 func (b *RegisterVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RegisterVM_Task(r soap.RoundTripper, req *types.RegisterVM_Task) (*types.RegisterVM_TaskResponse, error) {
+func RegisterVM_Task(ctx context.Context, r soap.RoundTripper, req *types.RegisterVM_Task) (*types.RegisterVM_TaskResponse, error) {
 	var reqBody, resBody RegisterVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8329,12 +8330,12 @@ type ReleaseCredentialsInGuestBody struct {
 
 func (b *ReleaseCredentialsInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReleaseCredentialsInGuest(r soap.RoundTripper, req *types.ReleaseCredentialsInGuest) (*types.ReleaseCredentialsInGuestResponse, error) {
+func ReleaseCredentialsInGuest(ctx context.Context, r soap.RoundTripper, req *types.ReleaseCredentialsInGuest) (*types.ReleaseCredentialsInGuestResponse, error) {
 	var reqBody, resBody ReleaseCredentialsInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8349,12 +8350,12 @@ type ReleaseIpAllocationBody struct {
 
 func (b *ReleaseIpAllocationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ReleaseIpAllocation(r soap.RoundTripper, req *types.ReleaseIpAllocation) (*types.ReleaseIpAllocationResponse, error) {
+func ReleaseIpAllocation(ctx context.Context, r soap.RoundTripper, req *types.ReleaseIpAllocation) (*types.ReleaseIpAllocationResponse, error) {
 	var reqBody, resBody ReleaseIpAllocationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8369,12 +8370,12 @@ type ReloadBody struct {
 
 func (b *ReloadBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Reload(r soap.RoundTripper, req *types.Reload) (*types.ReloadResponse, error) {
+func Reload(ctx context.Context, r soap.RoundTripper, req *types.Reload) (*types.ReloadResponse, error) {
 	var reqBody, resBody ReloadBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8389,12 +8390,12 @@ type RelocateVM_TaskBody struct {
 
 func (b *RelocateVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RelocateVM_Task(r soap.RoundTripper, req *types.RelocateVM_Task) (*types.RelocateVM_TaskResponse, error) {
+func RelocateVM_Task(ctx context.Context, r soap.RoundTripper, req *types.RelocateVM_Task) (*types.RelocateVM_TaskResponse, error) {
 	var reqBody, resBody RelocateVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8409,12 +8410,12 @@ type RemoveAlarmBody struct {
 
 func (b *RemoveAlarmBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveAlarm(r soap.RoundTripper, req *types.RemoveAlarm) (*types.RemoveAlarmResponse, error) {
+func RemoveAlarm(ctx context.Context, r soap.RoundTripper, req *types.RemoveAlarm) (*types.RemoveAlarmResponse, error) {
 	var reqBody, resBody RemoveAlarmBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8429,12 +8430,12 @@ type RemoveAllSnapshots_TaskBody struct {
 
 func (b *RemoveAllSnapshots_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveAllSnapshots_Task(r soap.RoundTripper, req *types.RemoveAllSnapshots_Task) (*types.RemoveAllSnapshots_TaskResponse, error) {
+func RemoveAllSnapshots_Task(ctx context.Context, r soap.RoundTripper, req *types.RemoveAllSnapshots_Task) (*types.RemoveAllSnapshots_TaskResponse, error) {
 	var reqBody, resBody RemoveAllSnapshots_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8449,12 +8450,12 @@ type RemoveAssignedLicenseBody struct {
 
 func (b *RemoveAssignedLicenseBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveAssignedLicense(r soap.RoundTripper, req *types.RemoveAssignedLicense) (*types.RemoveAssignedLicenseResponse, error) {
+func RemoveAssignedLicense(ctx context.Context, r soap.RoundTripper, req *types.RemoveAssignedLicense) (*types.RemoveAssignedLicenseResponse, error) {
 	var reqBody, resBody RemoveAssignedLicenseBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8469,12 +8470,12 @@ type RemoveAuthorizationRoleBody struct {
 
 func (b *RemoveAuthorizationRoleBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveAuthorizationRole(r soap.RoundTripper, req *types.RemoveAuthorizationRole) (*types.RemoveAuthorizationRoleResponse, error) {
+func RemoveAuthorizationRole(ctx context.Context, r soap.RoundTripper, req *types.RemoveAuthorizationRole) (*types.RemoveAuthorizationRoleResponse, error) {
 	var reqBody, resBody RemoveAuthorizationRoleBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8489,12 +8490,12 @@ type RemoveCustomFieldDefBody struct {
 
 func (b *RemoveCustomFieldDefBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveCustomFieldDef(r soap.RoundTripper, req *types.RemoveCustomFieldDef) (*types.RemoveCustomFieldDefResponse, error) {
+func RemoveCustomFieldDef(ctx context.Context, r soap.RoundTripper, req *types.RemoveCustomFieldDef) (*types.RemoveCustomFieldDefResponse, error) {
 	var reqBody, resBody RemoveCustomFieldDefBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8509,12 +8510,12 @@ type RemoveDatastoreBody struct {
 
 func (b *RemoveDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveDatastore(r soap.RoundTripper, req *types.RemoveDatastore) (*types.RemoveDatastoreResponse, error) {
+func RemoveDatastore(ctx context.Context, r soap.RoundTripper, req *types.RemoveDatastore) (*types.RemoveDatastoreResponse, error) {
 	var reqBody, resBody RemoveDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8529,12 +8530,12 @@ type RemoveDiskMapping_TaskBody struct {
 
 func (b *RemoveDiskMapping_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveDiskMapping_Task(r soap.RoundTripper, req *types.RemoveDiskMapping_Task) (*types.RemoveDiskMapping_TaskResponse, error) {
+func RemoveDiskMapping_Task(ctx context.Context, r soap.RoundTripper, req *types.RemoveDiskMapping_Task) (*types.RemoveDiskMapping_TaskResponse, error) {
 	var reqBody, resBody RemoveDiskMapping_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8549,12 +8550,12 @@ type RemoveDisk_TaskBody struct {
 
 func (b *RemoveDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveDisk_Task(r soap.RoundTripper, req *types.RemoveDisk_Task) (*types.RemoveDisk_TaskResponse, error) {
+func RemoveDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.RemoveDisk_Task) (*types.RemoveDisk_TaskResponse, error) {
 	var reqBody, resBody RemoveDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8569,12 +8570,12 @@ type RemoveEntityPermissionBody struct {
 
 func (b *RemoveEntityPermissionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveEntityPermission(r soap.RoundTripper, req *types.RemoveEntityPermission) (*types.RemoveEntityPermissionResponse, error) {
+func RemoveEntityPermission(ctx context.Context, r soap.RoundTripper, req *types.RemoveEntityPermission) (*types.RemoveEntityPermissionResponse, error) {
 	var reqBody, resBody RemoveEntityPermissionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8589,12 +8590,12 @@ type RemoveGroupBody struct {
 
 func (b *RemoveGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveGroup(r soap.RoundTripper, req *types.RemoveGroup) (*types.RemoveGroupResponse, error) {
+func RemoveGroup(ctx context.Context, r soap.RoundTripper, req *types.RemoveGroup) (*types.RemoveGroupResponse, error) {
 	var reqBody, resBody RemoveGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8609,12 +8610,12 @@ type RemoveInternetScsiSendTargetsBody struct {
 
 func (b *RemoveInternetScsiSendTargetsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveInternetScsiSendTargets(r soap.RoundTripper, req *types.RemoveInternetScsiSendTargets) (*types.RemoveInternetScsiSendTargetsResponse, error) {
+func RemoveInternetScsiSendTargets(ctx context.Context, r soap.RoundTripper, req *types.RemoveInternetScsiSendTargets) (*types.RemoveInternetScsiSendTargetsResponse, error) {
 	var reqBody, resBody RemoveInternetScsiSendTargetsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8629,12 +8630,12 @@ type RemoveInternetScsiStaticTargetsBody struct {
 
 func (b *RemoveInternetScsiStaticTargetsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveInternetScsiStaticTargets(r soap.RoundTripper, req *types.RemoveInternetScsiStaticTargets) (*types.RemoveInternetScsiStaticTargetsResponse, error) {
+func RemoveInternetScsiStaticTargets(ctx context.Context, r soap.RoundTripper, req *types.RemoveInternetScsiStaticTargets) (*types.RemoveInternetScsiStaticTargetsResponse, error) {
 	var reqBody, resBody RemoveInternetScsiStaticTargetsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8649,12 +8650,12 @@ type RemoveLicenseBody struct {
 
 func (b *RemoveLicenseBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveLicense(r soap.RoundTripper, req *types.RemoveLicense) (*types.RemoveLicenseResponse, error) {
+func RemoveLicense(ctx context.Context, r soap.RoundTripper, req *types.RemoveLicense) (*types.RemoveLicenseResponse, error) {
 	var reqBody, resBody RemoveLicenseBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8669,12 +8670,12 @@ type RemoveLicenseLabelBody struct {
 
 func (b *RemoveLicenseLabelBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveLicenseLabel(r soap.RoundTripper, req *types.RemoveLicenseLabel) (*types.RemoveLicenseLabelResponse, error) {
+func RemoveLicenseLabel(ctx context.Context, r soap.RoundTripper, req *types.RemoveLicenseLabel) (*types.RemoveLicenseLabelResponse, error) {
 	var reqBody, resBody RemoveLicenseLabelBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8689,12 +8690,12 @@ type RemoveNetworkResourcePoolBody struct {
 
 func (b *RemoveNetworkResourcePoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveNetworkResourcePool(r soap.RoundTripper, req *types.RemoveNetworkResourcePool) (*types.RemoveNetworkResourcePoolResponse, error) {
+func RemoveNetworkResourcePool(ctx context.Context, r soap.RoundTripper, req *types.RemoveNetworkResourcePool) (*types.RemoveNetworkResourcePoolResponse, error) {
 	var reqBody, resBody RemoveNetworkResourcePoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8709,12 +8710,12 @@ type RemovePerfIntervalBody struct {
 
 func (b *RemovePerfIntervalBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemovePerfInterval(r soap.RoundTripper, req *types.RemovePerfInterval) (*types.RemovePerfIntervalResponse, error) {
+func RemovePerfInterval(ctx context.Context, r soap.RoundTripper, req *types.RemovePerfInterval) (*types.RemovePerfIntervalResponse, error) {
 	var reqBody, resBody RemovePerfIntervalBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8729,12 +8730,12 @@ type RemovePortGroupBody struct {
 
 func (b *RemovePortGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemovePortGroup(r soap.RoundTripper, req *types.RemovePortGroup) (*types.RemovePortGroupResponse, error) {
+func RemovePortGroup(ctx context.Context, r soap.RoundTripper, req *types.RemovePortGroup) (*types.RemovePortGroupResponse, error) {
 	var reqBody, resBody RemovePortGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8749,12 +8750,12 @@ type RemoveScheduledTaskBody struct {
 
 func (b *RemoveScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveScheduledTask(r soap.RoundTripper, req *types.RemoveScheduledTask) (*types.RemoveScheduledTaskResponse, error) {
+func RemoveScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.RemoveScheduledTask) (*types.RemoveScheduledTaskResponse, error) {
 	var reqBody, resBody RemoveScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8769,12 +8770,12 @@ type RemoveServiceConsoleVirtualNicBody struct {
 
 func (b *RemoveServiceConsoleVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveServiceConsoleVirtualNic(r soap.RoundTripper, req *types.RemoveServiceConsoleVirtualNic) (*types.RemoveServiceConsoleVirtualNicResponse, error) {
+func RemoveServiceConsoleVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.RemoveServiceConsoleVirtualNic) (*types.RemoveServiceConsoleVirtualNicResponse, error) {
 	var reqBody, resBody RemoveServiceConsoleVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8789,12 +8790,12 @@ type RemoveSnapshot_TaskBody struct {
 
 func (b *RemoveSnapshot_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveSnapshot_Task(r soap.RoundTripper, req *types.RemoveSnapshot_Task) (*types.RemoveSnapshot_TaskResponse, error) {
+func RemoveSnapshot_Task(ctx context.Context, r soap.RoundTripper, req *types.RemoveSnapshot_Task) (*types.RemoveSnapshot_TaskResponse, error) {
 	var reqBody, resBody RemoveSnapshot_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8809,12 +8810,12 @@ type RemoveUserBody struct {
 
 func (b *RemoveUserBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveUser(r soap.RoundTripper, req *types.RemoveUser) (*types.RemoveUserResponse, error) {
+func RemoveUser(ctx context.Context, r soap.RoundTripper, req *types.RemoveUser) (*types.RemoveUserResponse, error) {
 	var reqBody, resBody RemoveUserBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8829,12 +8830,12 @@ type RemoveVirtualNicBody struct {
 
 func (b *RemoveVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveVirtualNic(r soap.RoundTripper, req *types.RemoveVirtualNic) (*types.RemoveVirtualNicResponse, error) {
+func RemoveVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.RemoveVirtualNic) (*types.RemoveVirtualNicResponse, error) {
 	var reqBody, resBody RemoveVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8849,12 +8850,12 @@ type RemoveVirtualSwitchBody struct {
 
 func (b *RemoveVirtualSwitchBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RemoveVirtualSwitch(r soap.RoundTripper, req *types.RemoveVirtualSwitch) (*types.RemoveVirtualSwitchResponse, error) {
+func RemoveVirtualSwitch(ctx context.Context, r soap.RoundTripper, req *types.RemoveVirtualSwitch) (*types.RemoveVirtualSwitchResponse, error) {
 	var reqBody, resBody RemoveVirtualSwitchBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8869,12 +8870,12 @@ type RenameCustomFieldDefBody struct {
 
 func (b *RenameCustomFieldDefBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RenameCustomFieldDef(r soap.RoundTripper, req *types.RenameCustomFieldDef) (*types.RenameCustomFieldDefResponse, error) {
+func RenameCustomFieldDef(ctx context.Context, r soap.RoundTripper, req *types.RenameCustomFieldDef) (*types.RenameCustomFieldDefResponse, error) {
 	var reqBody, resBody RenameCustomFieldDefBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8889,12 +8890,12 @@ type RenameCustomizationSpecBody struct {
 
 func (b *RenameCustomizationSpecBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RenameCustomizationSpec(r soap.RoundTripper, req *types.RenameCustomizationSpec) (*types.RenameCustomizationSpecResponse, error) {
+func RenameCustomizationSpec(ctx context.Context, r soap.RoundTripper, req *types.RenameCustomizationSpec) (*types.RenameCustomizationSpecResponse, error) {
 	var reqBody, resBody RenameCustomizationSpecBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8909,12 +8910,12 @@ type RenameDatastoreBody struct {
 
 func (b *RenameDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RenameDatastore(r soap.RoundTripper, req *types.RenameDatastore) (*types.RenameDatastoreResponse, error) {
+func RenameDatastore(ctx context.Context, r soap.RoundTripper, req *types.RenameDatastore) (*types.RenameDatastoreResponse, error) {
 	var reqBody, resBody RenameDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8929,12 +8930,12 @@ type RenameSnapshotBody struct {
 
 func (b *RenameSnapshotBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RenameSnapshot(r soap.RoundTripper, req *types.RenameSnapshot) (*types.RenameSnapshotResponse, error) {
+func RenameSnapshot(ctx context.Context, r soap.RoundTripper, req *types.RenameSnapshot) (*types.RenameSnapshotResponse, error) {
 	var reqBody, resBody RenameSnapshotBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8949,12 +8950,12 @@ type Rename_TaskBody struct {
 
 func (b *Rename_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Rename_Task(r soap.RoundTripper, req *types.Rename_Task) (*types.Rename_TaskResponse, error) {
+func Rename_Task(ctx context.Context, r soap.RoundTripper, req *types.Rename_Task) (*types.Rename_TaskResponse, error) {
 	var reqBody, resBody Rename_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8969,12 +8970,12 @@ type RescanAllHbaBody struct {
 
 func (b *RescanAllHbaBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RescanAllHba(r soap.RoundTripper, req *types.RescanAllHba) (*types.RescanAllHbaResponse, error) {
+func RescanAllHba(ctx context.Context, r soap.RoundTripper, req *types.RescanAllHba) (*types.RescanAllHbaResponse, error) {
 	var reqBody, resBody RescanAllHbaBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -8989,12 +8990,12 @@ type RescanHbaBody struct {
 
 func (b *RescanHbaBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RescanHba(r soap.RoundTripper, req *types.RescanHba) (*types.RescanHbaResponse, error) {
+func RescanHba(ctx context.Context, r soap.RoundTripper, req *types.RescanHba) (*types.RescanHbaResponse, error) {
 	var reqBody, resBody RescanHbaBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9009,12 +9010,12 @@ type RescanVffsBody struct {
 
 func (b *RescanVffsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RescanVffs(r soap.RoundTripper, req *types.RescanVffs) (*types.RescanVffsResponse, error) {
+func RescanVffs(ctx context.Context, r soap.RoundTripper, req *types.RescanVffs) (*types.RescanVffsResponse, error) {
 	var reqBody, resBody RescanVffsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9029,12 +9030,12 @@ type RescanVmfsBody struct {
 
 func (b *RescanVmfsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RescanVmfs(r soap.RoundTripper, req *types.RescanVmfs) (*types.RescanVmfsResponse, error) {
+func RescanVmfs(ctx context.Context, r soap.RoundTripper, req *types.RescanVmfs) (*types.RescanVmfsResponse, error) {
 	var reqBody, resBody RescanVmfsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9049,12 +9050,12 @@ type ResetCollectorBody struct {
 
 func (b *ResetCollectorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetCollector(r soap.RoundTripper, req *types.ResetCollector) (*types.ResetCollectorResponse, error) {
+func ResetCollector(ctx context.Context, r soap.RoundTripper, req *types.ResetCollector) (*types.ResetCollectorResponse, error) {
 	var reqBody, resBody ResetCollectorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9069,12 +9070,12 @@ type ResetCounterLevelMappingBody struct {
 
 func (b *ResetCounterLevelMappingBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetCounterLevelMapping(r soap.RoundTripper, req *types.ResetCounterLevelMapping) (*types.ResetCounterLevelMappingResponse, error) {
+func ResetCounterLevelMapping(ctx context.Context, r soap.RoundTripper, req *types.ResetCounterLevelMapping) (*types.ResetCounterLevelMappingResponse, error) {
 	var reqBody, resBody ResetCounterLevelMappingBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9089,12 +9090,12 @@ type ResetEntityPermissionsBody struct {
 
 func (b *ResetEntityPermissionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetEntityPermissions(r soap.RoundTripper, req *types.ResetEntityPermissions) (*types.ResetEntityPermissionsResponse, error) {
+func ResetEntityPermissions(ctx context.Context, r soap.RoundTripper, req *types.ResetEntityPermissions) (*types.ResetEntityPermissionsResponse, error) {
 	var reqBody, resBody ResetEntityPermissionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9109,12 +9110,12 @@ type ResetFirmwareToFactoryDefaultsBody struct {
 
 func (b *ResetFirmwareToFactoryDefaultsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetFirmwareToFactoryDefaults(r soap.RoundTripper, req *types.ResetFirmwareToFactoryDefaults) (*types.ResetFirmwareToFactoryDefaultsResponse, error) {
+func ResetFirmwareToFactoryDefaults(ctx context.Context, r soap.RoundTripper, req *types.ResetFirmwareToFactoryDefaults) (*types.ResetFirmwareToFactoryDefaultsResponse, error) {
 	var reqBody, resBody ResetFirmwareToFactoryDefaultsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9129,12 +9130,12 @@ type ResetGuestInformationBody struct {
 
 func (b *ResetGuestInformationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetGuestInformation(r soap.RoundTripper, req *types.ResetGuestInformation) (*types.ResetGuestInformationResponse, error) {
+func ResetGuestInformation(ctx context.Context, r soap.RoundTripper, req *types.ResetGuestInformation) (*types.ResetGuestInformationResponse, error) {
 	var reqBody, resBody ResetGuestInformationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9149,12 +9150,12 @@ type ResetListViewBody struct {
 
 func (b *ResetListViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetListView(r soap.RoundTripper, req *types.ResetListView) (*types.ResetListViewResponse, error) {
+func ResetListView(ctx context.Context, r soap.RoundTripper, req *types.ResetListView) (*types.ResetListViewResponse, error) {
 	var reqBody, resBody ResetListViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9169,12 +9170,12 @@ type ResetListViewFromViewBody struct {
 
 func (b *ResetListViewFromViewBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetListViewFromView(r soap.RoundTripper, req *types.ResetListViewFromView) (*types.ResetListViewFromViewResponse, error) {
+func ResetListViewFromView(ctx context.Context, r soap.RoundTripper, req *types.ResetListViewFromView) (*types.ResetListViewFromViewResponse, error) {
 	var reqBody, resBody ResetListViewFromViewBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9189,12 +9190,12 @@ type ResetSystemHealthInfoBody struct {
 
 func (b *ResetSystemHealthInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetSystemHealthInfo(r soap.RoundTripper, req *types.ResetSystemHealthInfo) (*types.ResetSystemHealthInfoResponse, error) {
+func ResetSystemHealthInfo(ctx context.Context, r soap.RoundTripper, req *types.ResetSystemHealthInfo) (*types.ResetSystemHealthInfoResponse, error) {
 	var reqBody, resBody ResetSystemHealthInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9209,12 +9210,12 @@ type ResetVM_TaskBody struct {
 
 func (b *ResetVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResetVM_Task(r soap.RoundTripper, req *types.ResetVM_Task) (*types.ResetVM_TaskResponse, error) {
+func ResetVM_Task(ctx context.Context, r soap.RoundTripper, req *types.ResetVM_Task) (*types.ResetVM_TaskResponse, error) {
 	var reqBody, resBody ResetVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9229,12 +9230,12 @@ type ResignatureUnresolvedVmfsVolume_TaskBody struct {
 
 func (b *ResignatureUnresolvedVmfsVolume_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResignatureUnresolvedVmfsVolume_Task(r soap.RoundTripper, req *types.ResignatureUnresolvedVmfsVolume_Task) (*types.ResignatureUnresolvedVmfsVolume_TaskResponse, error) {
+func ResignatureUnresolvedVmfsVolume_Task(ctx context.Context, r soap.RoundTripper, req *types.ResignatureUnresolvedVmfsVolume_Task) (*types.ResignatureUnresolvedVmfsVolume_TaskResponse, error) {
 	var reqBody, resBody ResignatureUnresolvedVmfsVolume_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9249,12 +9250,12 @@ type ResolveMultipleUnresolvedVmfsVolumesBody struct {
 
 func (b *ResolveMultipleUnresolvedVmfsVolumesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResolveMultipleUnresolvedVmfsVolumes(r soap.RoundTripper, req *types.ResolveMultipleUnresolvedVmfsVolumes) (*types.ResolveMultipleUnresolvedVmfsVolumesResponse, error) {
+func ResolveMultipleUnresolvedVmfsVolumes(ctx context.Context, r soap.RoundTripper, req *types.ResolveMultipleUnresolvedVmfsVolumes) (*types.ResolveMultipleUnresolvedVmfsVolumesResponse, error) {
 	var reqBody, resBody ResolveMultipleUnresolvedVmfsVolumesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9269,12 +9270,12 @@ type ResolveMultipleUnresolvedVmfsVolumesEx_TaskBody struct {
 
 func (b *ResolveMultipleUnresolvedVmfsVolumesEx_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ResolveMultipleUnresolvedVmfsVolumesEx_Task(r soap.RoundTripper, req *types.ResolveMultipleUnresolvedVmfsVolumesEx_Task) (*types.ResolveMultipleUnresolvedVmfsVolumesEx_TaskResponse, error) {
+func ResolveMultipleUnresolvedVmfsVolumesEx_Task(ctx context.Context, r soap.RoundTripper, req *types.ResolveMultipleUnresolvedVmfsVolumesEx_Task) (*types.ResolveMultipleUnresolvedVmfsVolumesEx_TaskResponse, error) {
 	var reqBody, resBody ResolveMultipleUnresolvedVmfsVolumesEx_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9289,12 +9290,12 @@ type RestartServiceBody struct {
 
 func (b *RestartServiceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RestartService(r soap.RoundTripper, req *types.RestartService) (*types.RestartServiceResponse, error) {
+func RestartService(ctx context.Context, r soap.RoundTripper, req *types.RestartService) (*types.RestartServiceResponse, error) {
 	var reqBody, resBody RestartServiceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9309,12 +9310,12 @@ type RestartServiceConsoleVirtualNicBody struct {
 
 func (b *RestartServiceConsoleVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RestartServiceConsoleVirtualNic(r soap.RoundTripper, req *types.RestartServiceConsoleVirtualNic) (*types.RestartServiceConsoleVirtualNicResponse, error) {
+func RestartServiceConsoleVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.RestartServiceConsoleVirtualNic) (*types.RestartServiceConsoleVirtualNicResponse, error) {
 	var reqBody, resBody RestartServiceConsoleVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9329,12 +9330,12 @@ type RestoreFirmwareConfigurationBody struct {
 
 func (b *RestoreFirmwareConfigurationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RestoreFirmwareConfiguration(r soap.RoundTripper, req *types.RestoreFirmwareConfiguration) (*types.RestoreFirmwareConfigurationResponse, error) {
+func RestoreFirmwareConfiguration(ctx context.Context, r soap.RoundTripper, req *types.RestoreFirmwareConfiguration) (*types.RestoreFirmwareConfigurationResponse, error) {
 	var reqBody, resBody RestoreFirmwareConfigurationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9349,12 +9350,12 @@ type RetrieveAllPermissionsBody struct {
 
 func (b *RetrieveAllPermissionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveAllPermissions(r soap.RoundTripper, req *types.RetrieveAllPermissions) (*types.RetrieveAllPermissionsResponse, error) {
+func RetrieveAllPermissions(ctx context.Context, r soap.RoundTripper, req *types.RetrieveAllPermissions) (*types.RetrieveAllPermissionsResponse, error) {
 	var reqBody, resBody RetrieveAllPermissionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9369,12 +9370,12 @@ type RetrieveAnswerFileBody struct {
 
 func (b *RetrieveAnswerFileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveAnswerFile(r soap.RoundTripper, req *types.RetrieveAnswerFile) (*types.RetrieveAnswerFileResponse, error) {
+func RetrieveAnswerFile(ctx context.Context, r soap.RoundTripper, req *types.RetrieveAnswerFile) (*types.RetrieveAnswerFileResponse, error) {
 	var reqBody, resBody RetrieveAnswerFileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9389,12 +9390,12 @@ type RetrieveAnswerFileForProfileBody struct {
 
 func (b *RetrieveAnswerFileForProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveAnswerFileForProfile(r soap.RoundTripper, req *types.RetrieveAnswerFileForProfile) (*types.RetrieveAnswerFileForProfileResponse, error) {
+func RetrieveAnswerFileForProfile(ctx context.Context, r soap.RoundTripper, req *types.RetrieveAnswerFileForProfile) (*types.RetrieveAnswerFileForProfileResponse, error) {
 	var reqBody, resBody RetrieveAnswerFileForProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9409,12 +9410,12 @@ type RetrieveArgumentDescriptionBody struct {
 
 func (b *RetrieveArgumentDescriptionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveArgumentDescription(r soap.RoundTripper, req *types.RetrieveArgumentDescription) (*types.RetrieveArgumentDescriptionResponse, error) {
+func RetrieveArgumentDescription(ctx context.Context, r soap.RoundTripper, req *types.RetrieveArgumentDescription) (*types.RetrieveArgumentDescriptionResponse, error) {
 	var reqBody, resBody RetrieveArgumentDescriptionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9429,12 +9430,12 @@ type RetrieveDasAdvancedRuntimeInfoBody struct {
 
 func (b *RetrieveDasAdvancedRuntimeInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveDasAdvancedRuntimeInfo(r soap.RoundTripper, req *types.RetrieveDasAdvancedRuntimeInfo) (*types.RetrieveDasAdvancedRuntimeInfoResponse, error) {
+func RetrieveDasAdvancedRuntimeInfo(ctx context.Context, r soap.RoundTripper, req *types.RetrieveDasAdvancedRuntimeInfo) (*types.RetrieveDasAdvancedRuntimeInfoResponse, error) {
 	var reqBody, resBody RetrieveDasAdvancedRuntimeInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9449,12 +9450,12 @@ type RetrieveDescriptionBody struct {
 
 func (b *RetrieveDescriptionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveDescription(r soap.RoundTripper, req *types.RetrieveDescription) (*types.RetrieveDescriptionResponse, error) {
+func RetrieveDescription(ctx context.Context, r soap.RoundTripper, req *types.RetrieveDescription) (*types.RetrieveDescriptionResponse, error) {
 	var reqBody, resBody RetrieveDescriptionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9469,12 +9470,12 @@ type RetrieveDiskPartitionInfoBody struct {
 
 func (b *RetrieveDiskPartitionInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveDiskPartitionInfo(r soap.RoundTripper, req *types.RetrieveDiskPartitionInfo) (*types.RetrieveDiskPartitionInfoResponse, error) {
+func RetrieveDiskPartitionInfo(ctx context.Context, r soap.RoundTripper, req *types.RetrieveDiskPartitionInfo) (*types.RetrieveDiskPartitionInfoResponse, error) {
 	var reqBody, resBody RetrieveDiskPartitionInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9489,12 +9490,12 @@ type RetrieveEntityPermissionsBody struct {
 
 func (b *RetrieveEntityPermissionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveEntityPermissions(r soap.RoundTripper, req *types.RetrieveEntityPermissions) (*types.RetrieveEntityPermissionsResponse, error) {
+func RetrieveEntityPermissions(ctx context.Context, r soap.RoundTripper, req *types.RetrieveEntityPermissions) (*types.RetrieveEntityPermissionsResponse, error) {
 	var reqBody, resBody RetrieveEntityPermissionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9509,12 +9510,12 @@ type RetrieveEntityScheduledTaskBody struct {
 
 func (b *RetrieveEntityScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveEntityScheduledTask(r soap.RoundTripper, req *types.RetrieveEntityScheduledTask) (*types.RetrieveEntityScheduledTaskResponse, error) {
+func RetrieveEntityScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.RetrieveEntityScheduledTask) (*types.RetrieveEntityScheduledTaskResponse, error) {
 	var reqBody, resBody RetrieveEntityScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9529,12 +9530,12 @@ type RetrieveHardwareUptimeBody struct {
 
 func (b *RetrieveHardwareUptimeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveHardwareUptime(r soap.RoundTripper, req *types.RetrieveHardwareUptime) (*types.RetrieveHardwareUptimeResponse, error) {
+func RetrieveHardwareUptime(ctx context.Context, r soap.RoundTripper, req *types.RetrieveHardwareUptime) (*types.RetrieveHardwareUptimeResponse, error) {
 	var reqBody, resBody RetrieveHardwareUptimeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9549,12 +9550,12 @@ type RetrieveObjectScheduledTaskBody struct {
 
 func (b *RetrieveObjectScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveObjectScheduledTask(r soap.RoundTripper, req *types.RetrieveObjectScheduledTask) (*types.RetrieveObjectScheduledTaskResponse, error) {
+func RetrieveObjectScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.RetrieveObjectScheduledTask) (*types.RetrieveObjectScheduledTaskResponse, error) {
 	var reqBody, resBody RetrieveObjectScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9569,12 +9570,12 @@ type RetrieveProductComponentsBody struct {
 
 func (b *RetrieveProductComponentsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveProductComponents(r soap.RoundTripper, req *types.RetrieveProductComponents) (*types.RetrieveProductComponentsResponse, error) {
+func RetrieveProductComponents(ctx context.Context, r soap.RoundTripper, req *types.RetrieveProductComponents) (*types.RetrieveProductComponentsResponse, error) {
 	var reqBody, resBody RetrieveProductComponentsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9589,12 +9590,12 @@ type RetrievePropertiesBody struct {
 
 func (b *RetrievePropertiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveProperties(r soap.RoundTripper, req *types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
+func RetrieveProperties(ctx context.Context, r soap.RoundTripper, req *types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
 	var reqBody, resBody RetrievePropertiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9609,12 +9610,12 @@ type RetrievePropertiesExBody struct {
 
 func (b *RetrievePropertiesExBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrievePropertiesEx(r soap.RoundTripper, req *types.RetrievePropertiesEx) (*types.RetrievePropertiesExResponse, error) {
+func RetrievePropertiesEx(ctx context.Context, r soap.RoundTripper, req *types.RetrievePropertiesEx) (*types.RetrievePropertiesExResponse, error) {
 	var reqBody, resBody RetrievePropertiesExBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9629,12 +9630,12 @@ type RetrieveRolePermissionsBody struct {
 
 func (b *RetrieveRolePermissionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveRolePermissions(r soap.RoundTripper, req *types.RetrieveRolePermissions) (*types.RetrieveRolePermissionsResponse, error) {
+func RetrieveRolePermissions(ctx context.Context, r soap.RoundTripper, req *types.RetrieveRolePermissions) (*types.RetrieveRolePermissionsResponse, error) {
 	var reqBody, resBody RetrieveRolePermissionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9649,12 +9650,12 @@ type RetrieveServiceContentBody struct {
 
 func (b *RetrieveServiceContentBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveServiceContent(r soap.RoundTripper, req *types.RetrieveServiceContent) (*types.RetrieveServiceContentResponse, error) {
+func RetrieveServiceContent(ctx context.Context, r soap.RoundTripper, req *types.RetrieveServiceContent) (*types.RetrieveServiceContentResponse, error) {
 	var reqBody, resBody RetrieveServiceContentBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9669,12 +9670,12 @@ type RetrieveUserGroupsBody struct {
 
 func (b *RetrieveUserGroupsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveUserGroups(r soap.RoundTripper, req *types.RetrieveUserGroups) (*types.RetrieveUserGroupsResponse, error) {
+func RetrieveUserGroups(ctx context.Context, r soap.RoundTripper, req *types.RetrieveUserGroups) (*types.RetrieveUserGroupsResponse, error) {
 	var reqBody, resBody RetrieveUserGroupsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9689,12 +9690,12 @@ type RevertToCurrentSnapshot_TaskBody struct {
 
 func (b *RevertToCurrentSnapshot_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RevertToCurrentSnapshot_Task(r soap.RoundTripper, req *types.RevertToCurrentSnapshot_Task) (*types.RevertToCurrentSnapshot_TaskResponse, error) {
+func RevertToCurrentSnapshot_Task(ctx context.Context, r soap.RoundTripper, req *types.RevertToCurrentSnapshot_Task) (*types.RevertToCurrentSnapshot_TaskResponse, error) {
 	var reqBody, resBody RevertToCurrentSnapshot_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9709,12 +9710,12 @@ type RevertToSnapshot_TaskBody struct {
 
 func (b *RevertToSnapshot_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RevertToSnapshot_Task(r soap.RoundTripper, req *types.RevertToSnapshot_Task) (*types.RevertToSnapshot_TaskResponse, error) {
+func RevertToSnapshot_Task(ctx context.Context, r soap.RoundTripper, req *types.RevertToSnapshot_Task) (*types.RevertToSnapshot_TaskResponse, error) {
 	var reqBody, resBody RevertToSnapshot_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9729,12 +9730,12 @@ type RewindCollectorBody struct {
 
 func (b *RewindCollectorBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RewindCollector(r soap.RoundTripper, req *types.RewindCollector) (*types.RewindCollectorResponse, error) {
+func RewindCollector(ctx context.Context, r soap.RoundTripper, req *types.RewindCollector) (*types.RewindCollectorResponse, error) {
 	var reqBody, resBody RewindCollectorBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9749,12 +9750,12 @@ type RunScheduledTaskBody struct {
 
 func (b *RunScheduledTaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RunScheduledTask(r soap.RoundTripper, req *types.RunScheduledTask) (*types.RunScheduledTaskResponse, error) {
+func RunScheduledTask(ctx context.Context, r soap.RoundTripper, req *types.RunScheduledTask) (*types.RunScheduledTaskResponse, error) {
 	var reqBody, resBody RunScheduledTaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9769,12 +9770,12 @@ type ScanHostPatchV2_TaskBody struct {
 
 func (b *ScanHostPatchV2_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ScanHostPatchV2_Task(r soap.RoundTripper, req *types.ScanHostPatchV2_Task) (*types.ScanHostPatchV2_TaskResponse, error) {
+func ScanHostPatchV2_Task(ctx context.Context, r soap.RoundTripper, req *types.ScanHostPatchV2_Task) (*types.ScanHostPatchV2_TaskResponse, error) {
 	var reqBody, resBody ScanHostPatchV2_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9789,12 +9790,12 @@ type ScanHostPatch_TaskBody struct {
 
 func (b *ScanHostPatch_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ScanHostPatch_Task(r soap.RoundTripper, req *types.ScanHostPatch_Task) (*types.ScanHostPatch_TaskResponse, error) {
+func ScanHostPatch_Task(ctx context.Context, r soap.RoundTripper, req *types.ScanHostPatch_Task) (*types.ScanHostPatch_TaskResponse, error) {
 	var reqBody, resBody ScanHostPatch_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9809,12 +9810,12 @@ type SearchDatastoreSubFolders_TaskBody struct {
 
 func (b *SearchDatastoreSubFolders_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SearchDatastoreSubFolders_Task(r soap.RoundTripper, req *types.SearchDatastoreSubFolders_Task) (*types.SearchDatastoreSubFolders_TaskResponse, error) {
+func SearchDatastoreSubFolders_Task(ctx context.Context, r soap.RoundTripper, req *types.SearchDatastoreSubFolders_Task) (*types.SearchDatastoreSubFolders_TaskResponse, error) {
 	var reqBody, resBody SearchDatastoreSubFolders_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9829,12 +9830,12 @@ type SearchDatastore_TaskBody struct {
 
 func (b *SearchDatastore_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SearchDatastore_Task(r soap.RoundTripper, req *types.SearchDatastore_Task) (*types.SearchDatastore_TaskResponse, error) {
+func SearchDatastore_Task(ctx context.Context, r soap.RoundTripper, req *types.SearchDatastore_Task) (*types.SearchDatastore_TaskResponse, error) {
 	var reqBody, resBody SearchDatastore_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9849,12 +9850,12 @@ type SelectActivePartitionBody struct {
 
 func (b *SelectActivePartitionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SelectActivePartition(r soap.RoundTripper, req *types.SelectActivePartition) (*types.SelectActivePartitionResponse, error) {
+func SelectActivePartition(ctx context.Context, r soap.RoundTripper, req *types.SelectActivePartition) (*types.SelectActivePartitionResponse, error) {
 	var reqBody, resBody SelectActivePartitionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9869,12 +9870,12 @@ type SelectVnicBody struct {
 
 func (b *SelectVnicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SelectVnic(r soap.RoundTripper, req *types.SelectVnic) (*types.SelectVnicResponse, error) {
+func SelectVnic(ctx context.Context, r soap.RoundTripper, req *types.SelectVnic) (*types.SelectVnicResponse, error) {
 	var reqBody, resBody SelectVnicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9889,12 +9890,12 @@ type SelectVnicForNicTypeBody struct {
 
 func (b *SelectVnicForNicTypeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SelectVnicForNicType(r soap.RoundTripper, req *types.SelectVnicForNicType) (*types.SelectVnicForNicTypeResponse, error) {
+func SelectVnicForNicType(ctx context.Context, r soap.RoundTripper, req *types.SelectVnicForNicType) (*types.SelectVnicForNicTypeResponse, error) {
 	var reqBody, resBody SelectVnicForNicTypeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9909,12 +9910,12 @@ type SendTestNotificationBody struct {
 
 func (b *SendTestNotificationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SendTestNotification(r soap.RoundTripper, req *types.SendTestNotification) (*types.SendTestNotificationResponse, error) {
+func SendTestNotification(ctx context.Context, r soap.RoundTripper, req *types.SendTestNotification) (*types.SendTestNotificationResponse, error) {
 	var reqBody, resBody SendTestNotificationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9929,12 +9930,12 @@ type SessionIsActiveBody struct {
 
 func (b *SessionIsActiveBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SessionIsActive(r soap.RoundTripper, req *types.SessionIsActive) (*types.SessionIsActiveResponse, error) {
+func SessionIsActive(ctx context.Context, r soap.RoundTripper, req *types.SessionIsActive) (*types.SessionIsActiveResponse, error) {
 	var reqBody, resBody SessionIsActiveBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9949,12 +9950,12 @@ type SetCollectorPageSizeBody struct {
 
 func (b *SetCollectorPageSizeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetCollectorPageSize(r soap.RoundTripper, req *types.SetCollectorPageSize) (*types.SetCollectorPageSizeResponse, error) {
+func SetCollectorPageSize(ctx context.Context, r soap.RoundTripper, req *types.SetCollectorPageSize) (*types.SetCollectorPageSizeResponse, error) {
 	var reqBody, resBody SetCollectorPageSizeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9969,12 +9970,12 @@ type SetDisplayTopologyBody struct {
 
 func (b *SetDisplayTopologyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetDisplayTopology(r soap.RoundTripper, req *types.SetDisplayTopology) (*types.SetDisplayTopologyResponse, error) {
+func SetDisplayTopology(ctx context.Context, r soap.RoundTripper, req *types.SetDisplayTopology) (*types.SetDisplayTopologyResponse, error) {
 	var reqBody, resBody SetDisplayTopologyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -9989,12 +9990,12 @@ type SetEntityPermissionsBody struct {
 
 func (b *SetEntityPermissionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetEntityPermissions(r soap.RoundTripper, req *types.SetEntityPermissions) (*types.SetEntityPermissionsResponse, error) {
+func SetEntityPermissions(ctx context.Context, r soap.RoundTripper, req *types.SetEntityPermissions) (*types.SetEntityPermissionsResponse, error) {
 	var reqBody, resBody SetEntityPermissionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10009,12 +10010,12 @@ type SetExtensionCertificateBody struct {
 
 func (b *SetExtensionCertificateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetExtensionCertificate(r soap.RoundTripper, req *types.SetExtensionCertificate) (*types.SetExtensionCertificateResponse, error) {
+func SetExtensionCertificate(ctx context.Context, r soap.RoundTripper, req *types.SetExtensionCertificate) (*types.SetExtensionCertificateResponse, error) {
 	var reqBody, resBody SetExtensionCertificateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10029,12 +10030,12 @@ type SetFieldBody struct {
 
 func (b *SetFieldBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetField(r soap.RoundTripper, req *types.SetField) (*types.SetFieldResponse, error) {
+func SetField(ctx context.Context, r soap.RoundTripper, req *types.SetField) (*types.SetFieldResponse, error) {
 	var reqBody, resBody SetFieldBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10049,12 +10050,12 @@ type SetLicenseEditionBody struct {
 
 func (b *SetLicenseEditionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetLicenseEdition(r soap.RoundTripper, req *types.SetLicenseEdition) (*types.SetLicenseEditionResponse, error) {
+func SetLicenseEdition(ctx context.Context, r soap.RoundTripper, req *types.SetLicenseEdition) (*types.SetLicenseEditionResponse, error) {
 	var reqBody, resBody SetLicenseEditionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10069,12 +10070,12 @@ type SetLocaleBody struct {
 
 func (b *SetLocaleBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetLocale(r soap.RoundTripper, req *types.SetLocale) (*types.SetLocaleResponse, error) {
+func SetLocale(ctx context.Context, r soap.RoundTripper, req *types.SetLocale) (*types.SetLocaleResponse, error) {
 	var reqBody, resBody SetLocaleBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10089,12 +10090,12 @@ type SetMultipathLunPolicyBody struct {
 
 func (b *SetMultipathLunPolicyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetMultipathLunPolicy(r soap.RoundTripper, req *types.SetMultipathLunPolicy) (*types.SetMultipathLunPolicyResponse, error) {
+func SetMultipathLunPolicy(ctx context.Context, r soap.RoundTripper, req *types.SetMultipathLunPolicy) (*types.SetMultipathLunPolicyResponse, error) {
 	var reqBody, resBody SetMultipathLunPolicyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10109,12 +10110,12 @@ type SetPublicKeyBody struct {
 
 func (b *SetPublicKeyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetPublicKey(r soap.RoundTripper, req *types.SetPublicKey) (*types.SetPublicKeyResponse, error) {
+func SetPublicKey(ctx context.Context, r soap.RoundTripper, req *types.SetPublicKey) (*types.SetPublicKeyResponse, error) {
 	var reqBody, resBody SetPublicKeyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10129,12 +10130,12 @@ type SetScreenResolutionBody struct {
 
 func (b *SetScreenResolutionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetScreenResolution(r soap.RoundTripper, req *types.SetScreenResolution) (*types.SetScreenResolutionResponse, error) {
+func SetScreenResolution(ctx context.Context, r soap.RoundTripper, req *types.SetScreenResolution) (*types.SetScreenResolutionResponse, error) {
 	var reqBody, resBody SetScreenResolutionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10149,12 +10150,12 @@ type SetTaskDescriptionBody struct {
 
 func (b *SetTaskDescriptionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetTaskDescription(r soap.RoundTripper, req *types.SetTaskDescription) (*types.SetTaskDescriptionResponse, error) {
+func SetTaskDescription(ctx context.Context, r soap.RoundTripper, req *types.SetTaskDescription) (*types.SetTaskDescriptionResponse, error) {
 	var reqBody, resBody SetTaskDescriptionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10169,12 +10170,12 @@ type SetTaskStateBody struct {
 
 func (b *SetTaskStateBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetTaskState(r soap.RoundTripper, req *types.SetTaskState) (*types.SetTaskStateResponse, error) {
+func SetTaskState(ctx context.Context, r soap.RoundTripper, req *types.SetTaskState) (*types.SetTaskStateResponse, error) {
 	var reqBody, resBody SetTaskStateBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10189,12 +10190,12 @@ type SetVirtualDiskUuidBody struct {
 
 func (b *SetVirtualDiskUuidBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SetVirtualDiskUuid(r soap.RoundTripper, req *types.SetVirtualDiskUuid) (*types.SetVirtualDiskUuidResponse, error) {
+func SetVirtualDiskUuid(ctx context.Context, r soap.RoundTripper, req *types.SetVirtualDiskUuid) (*types.SetVirtualDiskUuidResponse, error) {
 	var reqBody, resBody SetVirtualDiskUuidBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10209,12 +10210,12 @@ type ShrinkVirtualDisk_TaskBody struct {
 
 func (b *ShrinkVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ShrinkVirtualDisk_Task(r soap.RoundTripper, req *types.ShrinkVirtualDisk_Task) (*types.ShrinkVirtualDisk_TaskResponse, error) {
+func ShrinkVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.ShrinkVirtualDisk_Task) (*types.ShrinkVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody ShrinkVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10229,12 +10230,12 @@ type ShutdownGuestBody struct {
 
 func (b *ShutdownGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ShutdownGuest(r soap.RoundTripper, req *types.ShutdownGuest) (*types.ShutdownGuestResponse, error) {
+func ShutdownGuest(ctx context.Context, r soap.RoundTripper, req *types.ShutdownGuest) (*types.ShutdownGuestResponse, error) {
 	var reqBody, resBody ShutdownGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10249,12 +10250,12 @@ type ShutdownHost_TaskBody struct {
 
 func (b *ShutdownHost_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ShutdownHost_Task(r soap.RoundTripper, req *types.ShutdownHost_Task) (*types.ShutdownHost_TaskResponse, error) {
+func ShutdownHost_Task(ctx context.Context, r soap.RoundTripper, req *types.ShutdownHost_Task) (*types.ShutdownHost_TaskResponse, error) {
 	var reqBody, resBody ShutdownHost_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10269,12 +10270,12 @@ type StageHostPatch_TaskBody struct {
 
 func (b *StageHostPatch_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StageHostPatch_Task(r soap.RoundTripper, req *types.StageHostPatch_Task) (*types.StageHostPatch_TaskResponse, error) {
+func StageHostPatch_Task(ctx context.Context, r soap.RoundTripper, req *types.StageHostPatch_Task) (*types.StageHostPatch_TaskResponse, error) {
 	var reqBody, resBody StageHostPatch_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10289,12 +10290,12 @@ type StandbyGuestBody struct {
 
 func (b *StandbyGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StandbyGuest(r soap.RoundTripper, req *types.StandbyGuest) (*types.StandbyGuestResponse, error) {
+func StandbyGuest(ctx context.Context, r soap.RoundTripper, req *types.StandbyGuest) (*types.StandbyGuestResponse, error) {
 	var reqBody, resBody StandbyGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10309,12 +10310,12 @@ type StartProgramInGuestBody struct {
 
 func (b *StartProgramInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StartProgramInGuest(r soap.RoundTripper, req *types.StartProgramInGuest) (*types.StartProgramInGuestResponse, error) {
+func StartProgramInGuest(ctx context.Context, r soap.RoundTripper, req *types.StartProgramInGuest) (*types.StartProgramInGuestResponse, error) {
 	var reqBody, resBody StartProgramInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10329,12 +10330,12 @@ type StartRecording_TaskBody struct {
 
 func (b *StartRecording_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StartRecording_Task(r soap.RoundTripper, req *types.StartRecording_Task) (*types.StartRecording_TaskResponse, error) {
+func StartRecording_Task(ctx context.Context, r soap.RoundTripper, req *types.StartRecording_Task) (*types.StartRecording_TaskResponse, error) {
 	var reqBody, resBody StartRecording_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10349,12 +10350,12 @@ type StartReplaying_TaskBody struct {
 
 func (b *StartReplaying_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StartReplaying_Task(r soap.RoundTripper, req *types.StartReplaying_Task) (*types.StartReplaying_TaskResponse, error) {
+func StartReplaying_Task(ctx context.Context, r soap.RoundTripper, req *types.StartReplaying_Task) (*types.StartReplaying_TaskResponse, error) {
 	var reqBody, resBody StartReplaying_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10369,12 +10370,12 @@ type StartServiceBody struct {
 
 func (b *StartServiceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StartService(r soap.RoundTripper, req *types.StartService) (*types.StartServiceResponse, error) {
+func StartService(ctx context.Context, r soap.RoundTripper, req *types.StartService) (*types.StartServiceResponse, error) {
 	var reqBody, resBody StartServiceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10389,12 +10390,12 @@ type StopRecording_TaskBody struct {
 
 func (b *StopRecording_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StopRecording_Task(r soap.RoundTripper, req *types.StopRecording_Task) (*types.StopRecording_TaskResponse, error) {
+func StopRecording_Task(ctx context.Context, r soap.RoundTripper, req *types.StopRecording_Task) (*types.StopRecording_TaskResponse, error) {
 	var reqBody, resBody StopRecording_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10409,12 +10410,12 @@ type StopReplaying_TaskBody struct {
 
 func (b *StopReplaying_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StopReplaying_Task(r soap.RoundTripper, req *types.StopReplaying_Task) (*types.StopReplaying_TaskResponse, error) {
+func StopReplaying_Task(ctx context.Context, r soap.RoundTripper, req *types.StopReplaying_Task) (*types.StopReplaying_TaskResponse, error) {
 	var reqBody, resBody StopReplaying_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10429,12 +10430,12 @@ type StopServiceBody struct {
 
 func (b *StopServiceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func StopService(r soap.RoundTripper, req *types.StopService) (*types.StopServiceResponse, error) {
+func StopService(ctx context.Context, r soap.RoundTripper, req *types.StopService) (*types.StopServiceResponse, error) {
 	var reqBody, resBody StopServiceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10449,12 +10450,12 @@ type SuspendVApp_TaskBody struct {
 
 func (b *SuspendVApp_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SuspendVApp_Task(r soap.RoundTripper, req *types.SuspendVApp_Task) (*types.SuspendVApp_TaskResponse, error) {
+func SuspendVApp_Task(ctx context.Context, r soap.RoundTripper, req *types.SuspendVApp_Task) (*types.SuspendVApp_TaskResponse, error) {
 	var reqBody, resBody SuspendVApp_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10469,12 +10470,12 @@ type SuspendVM_TaskBody struct {
 
 func (b *SuspendVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func SuspendVM_Task(r soap.RoundTripper, req *types.SuspendVM_Task) (*types.SuspendVM_TaskResponse, error) {
+func SuspendVM_Task(ctx context.Context, r soap.RoundTripper, req *types.SuspendVM_Task) (*types.SuspendVM_TaskResponse, error) {
 	var reqBody, resBody SuspendVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10489,12 +10490,12 @@ type TerminateFaultTolerantVM_TaskBody struct {
 
 func (b *TerminateFaultTolerantVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func TerminateFaultTolerantVM_Task(r soap.RoundTripper, req *types.TerminateFaultTolerantVM_Task) (*types.TerminateFaultTolerantVM_TaskResponse, error) {
+func TerminateFaultTolerantVM_Task(ctx context.Context, r soap.RoundTripper, req *types.TerminateFaultTolerantVM_Task) (*types.TerminateFaultTolerantVM_TaskResponse, error) {
 	var reqBody, resBody TerminateFaultTolerantVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10509,12 +10510,12 @@ type TerminateProcessInGuestBody struct {
 
 func (b *TerminateProcessInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func TerminateProcessInGuest(r soap.RoundTripper, req *types.TerminateProcessInGuest) (*types.TerminateProcessInGuestResponse, error) {
+func TerminateProcessInGuest(ctx context.Context, r soap.RoundTripper, req *types.TerminateProcessInGuest) (*types.TerminateProcessInGuestResponse, error) {
 	var reqBody, resBody TerminateProcessInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10529,12 +10530,12 @@ type TerminateSessionBody struct {
 
 func (b *TerminateSessionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func TerminateSession(r soap.RoundTripper, req *types.TerminateSession) (*types.TerminateSessionResponse, error) {
+func TerminateSession(ctx context.Context, r soap.RoundTripper, req *types.TerminateSession) (*types.TerminateSessionResponse, error) {
 	var reqBody, resBody TerminateSessionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10549,12 +10550,12 @@ type TerminateVMBody struct {
 
 func (b *TerminateVMBody) Fault() *soap.Fault { return b.Fault_ }
 
-func TerminateVM(r soap.RoundTripper, req *types.TerminateVM) (*types.TerminateVMResponse, error) {
+func TerminateVM(ctx context.Context, r soap.RoundTripper, req *types.TerminateVM) (*types.TerminateVMResponse, error) {
 	var reqBody, resBody TerminateVMBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10569,12 +10570,12 @@ type TurnOffFaultToleranceForVM_TaskBody struct {
 
 func (b *TurnOffFaultToleranceForVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func TurnOffFaultToleranceForVM_Task(r soap.RoundTripper, req *types.TurnOffFaultToleranceForVM_Task) (*types.TurnOffFaultToleranceForVM_TaskResponse, error) {
+func TurnOffFaultToleranceForVM_Task(ctx context.Context, r soap.RoundTripper, req *types.TurnOffFaultToleranceForVM_Task) (*types.TurnOffFaultToleranceForVM_TaskResponse, error) {
 	var reqBody, resBody TurnOffFaultToleranceForVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10589,12 +10590,12 @@ type UnassignUserFromGroupBody struct {
 
 func (b *UnassignUserFromGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnassignUserFromGroup(r soap.RoundTripper, req *types.UnassignUserFromGroup) (*types.UnassignUserFromGroupResponse, error) {
+func UnassignUserFromGroup(ctx context.Context, r soap.RoundTripper, req *types.UnassignUserFromGroup) (*types.UnassignUserFromGroupResponse, error) {
 	var reqBody, resBody UnassignUserFromGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10609,12 +10610,12 @@ type UnbindVnicBody struct {
 
 func (b *UnbindVnicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnbindVnic(r soap.RoundTripper, req *types.UnbindVnic) (*types.UnbindVnicResponse, error) {
+func UnbindVnic(ctx context.Context, r soap.RoundTripper, req *types.UnbindVnic) (*types.UnbindVnicResponse, error) {
 	var reqBody, resBody UnbindVnicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10629,12 +10630,12 @@ type UninstallHostPatch_TaskBody struct {
 
 func (b *UninstallHostPatch_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UninstallHostPatch_Task(r soap.RoundTripper, req *types.UninstallHostPatch_Task) (*types.UninstallHostPatch_TaskResponse, error) {
+func UninstallHostPatch_Task(ctx context.Context, r soap.RoundTripper, req *types.UninstallHostPatch_Task) (*types.UninstallHostPatch_TaskResponse, error) {
 	var reqBody, resBody UninstallHostPatch_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10649,12 +10650,12 @@ type UninstallServiceBody struct {
 
 func (b *UninstallServiceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UninstallService(r soap.RoundTripper, req *types.UninstallService) (*types.UninstallServiceResponse, error) {
+func UninstallService(ctx context.Context, r soap.RoundTripper, req *types.UninstallService) (*types.UninstallServiceResponse, error) {
 	var reqBody, resBody UninstallServiceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10669,12 +10670,12 @@ type UnmountForceMountedVmfsVolumeBody struct {
 
 func (b *UnmountForceMountedVmfsVolumeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnmountForceMountedVmfsVolume(r soap.RoundTripper, req *types.UnmountForceMountedVmfsVolume) (*types.UnmountForceMountedVmfsVolumeResponse, error) {
+func UnmountForceMountedVmfsVolume(ctx context.Context, r soap.RoundTripper, req *types.UnmountForceMountedVmfsVolume) (*types.UnmountForceMountedVmfsVolumeResponse, error) {
 	var reqBody, resBody UnmountForceMountedVmfsVolumeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10689,12 +10690,12 @@ type UnmountToolsInstallerBody struct {
 
 func (b *UnmountToolsInstallerBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnmountToolsInstaller(r soap.RoundTripper, req *types.UnmountToolsInstaller) (*types.UnmountToolsInstallerResponse, error) {
+func UnmountToolsInstaller(ctx context.Context, r soap.RoundTripper, req *types.UnmountToolsInstaller) (*types.UnmountToolsInstallerResponse, error) {
 	var reqBody, resBody UnmountToolsInstallerBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10709,12 +10710,12 @@ type UnmountVffsVolumeBody struct {
 
 func (b *UnmountVffsVolumeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnmountVffsVolume(r soap.RoundTripper, req *types.UnmountVffsVolume) (*types.UnmountVffsVolumeResponse, error) {
+func UnmountVffsVolume(ctx context.Context, r soap.RoundTripper, req *types.UnmountVffsVolume) (*types.UnmountVffsVolumeResponse, error) {
 	var reqBody, resBody UnmountVffsVolumeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10729,12 +10730,12 @@ type UnmountVmfsVolumeBody struct {
 
 func (b *UnmountVmfsVolumeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnmountVmfsVolume(r soap.RoundTripper, req *types.UnmountVmfsVolume) (*types.UnmountVmfsVolumeResponse, error) {
+func UnmountVmfsVolume(ctx context.Context, r soap.RoundTripper, req *types.UnmountVmfsVolume) (*types.UnmountVmfsVolumeResponse, error) {
 	var reqBody, resBody UnmountVmfsVolumeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10749,12 +10750,12 @@ type UnregisterAndDestroy_TaskBody struct {
 
 func (b *UnregisterAndDestroy_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnregisterAndDestroy_Task(r soap.RoundTripper, req *types.UnregisterAndDestroy_Task) (*types.UnregisterAndDestroy_TaskResponse, error) {
+func UnregisterAndDestroy_Task(ctx context.Context, r soap.RoundTripper, req *types.UnregisterAndDestroy_Task) (*types.UnregisterAndDestroy_TaskResponse, error) {
 	var reqBody, resBody UnregisterAndDestroy_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10769,12 +10770,12 @@ type UnregisterExtensionBody struct {
 
 func (b *UnregisterExtensionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnregisterExtension(r soap.RoundTripper, req *types.UnregisterExtension) (*types.UnregisterExtensionResponse, error) {
+func UnregisterExtension(ctx context.Context, r soap.RoundTripper, req *types.UnregisterExtension) (*types.UnregisterExtensionResponse, error) {
 	var reqBody, resBody UnregisterExtensionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10789,12 +10790,12 @@ type UnregisterVMBody struct {
 
 func (b *UnregisterVMBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UnregisterVM(r soap.RoundTripper, req *types.UnregisterVM) (*types.UnregisterVMResponse, error) {
+func UnregisterVM(ctx context.Context, r soap.RoundTripper, req *types.UnregisterVM) (*types.UnregisterVMResponse, error) {
 	var reqBody, resBody UnregisterVMBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10809,12 +10810,12 @@ type UpdateAnswerFile_TaskBody struct {
 
 func (b *UpdateAnswerFile_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateAnswerFile_Task(r soap.RoundTripper, req *types.UpdateAnswerFile_Task) (*types.UpdateAnswerFile_TaskResponse, error) {
+func UpdateAnswerFile_Task(ctx context.Context, r soap.RoundTripper, req *types.UpdateAnswerFile_Task) (*types.UpdateAnswerFile_TaskResponse, error) {
 	var reqBody, resBody UpdateAnswerFile_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10829,12 +10830,12 @@ type UpdateAssignedLicenseBody struct {
 
 func (b *UpdateAssignedLicenseBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateAssignedLicense(r soap.RoundTripper, req *types.UpdateAssignedLicense) (*types.UpdateAssignedLicenseResponse, error) {
+func UpdateAssignedLicense(ctx context.Context, r soap.RoundTripper, req *types.UpdateAssignedLicense) (*types.UpdateAssignedLicenseResponse, error) {
 	var reqBody, resBody UpdateAssignedLicenseBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10849,12 +10850,12 @@ type UpdateAuthorizationRoleBody struct {
 
 func (b *UpdateAuthorizationRoleBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateAuthorizationRole(r soap.RoundTripper, req *types.UpdateAuthorizationRole) (*types.UpdateAuthorizationRoleResponse, error) {
+func UpdateAuthorizationRole(ctx context.Context, r soap.RoundTripper, req *types.UpdateAuthorizationRole) (*types.UpdateAuthorizationRoleResponse, error) {
 	var reqBody, resBody UpdateAuthorizationRoleBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10869,12 +10870,12 @@ type UpdateBootDeviceBody struct {
 
 func (b *UpdateBootDeviceBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateBootDevice(r soap.RoundTripper, req *types.UpdateBootDevice) (*types.UpdateBootDeviceResponse, error) {
+func UpdateBootDevice(ctx context.Context, r soap.RoundTripper, req *types.UpdateBootDevice) (*types.UpdateBootDeviceResponse, error) {
 	var reqBody, resBody UpdateBootDeviceBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10889,12 +10890,12 @@ type UpdateChildResourceConfigurationBody struct {
 
 func (b *UpdateChildResourceConfigurationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateChildResourceConfiguration(r soap.RoundTripper, req *types.UpdateChildResourceConfiguration) (*types.UpdateChildResourceConfigurationResponse, error) {
+func UpdateChildResourceConfiguration(ctx context.Context, r soap.RoundTripper, req *types.UpdateChildResourceConfiguration) (*types.UpdateChildResourceConfigurationResponse, error) {
 	var reqBody, resBody UpdateChildResourceConfigurationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10909,12 +10910,12 @@ type UpdateClusterProfileBody struct {
 
 func (b *UpdateClusterProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateClusterProfile(r soap.RoundTripper, req *types.UpdateClusterProfile) (*types.UpdateClusterProfileResponse, error) {
+func UpdateClusterProfile(ctx context.Context, r soap.RoundTripper, req *types.UpdateClusterProfile) (*types.UpdateClusterProfileResponse, error) {
 	var reqBody, resBody UpdateClusterProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10929,12 +10930,12 @@ type UpdateConfigBody struct {
 
 func (b *UpdateConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateConfig(r soap.RoundTripper, req *types.UpdateConfig) (*types.UpdateConfigResponse, error) {
+func UpdateConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateConfig) (*types.UpdateConfigResponse, error) {
 	var reqBody, resBody UpdateConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10949,12 +10950,12 @@ type UpdateConsoleIpRouteConfigBody struct {
 
 func (b *UpdateConsoleIpRouteConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateConsoleIpRouteConfig(r soap.RoundTripper, req *types.UpdateConsoleIpRouteConfig) (*types.UpdateConsoleIpRouteConfigResponse, error) {
+func UpdateConsoleIpRouteConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateConsoleIpRouteConfig) (*types.UpdateConsoleIpRouteConfigResponse, error) {
 	var reqBody, resBody UpdateConsoleIpRouteConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10969,12 +10970,12 @@ type UpdateCounterLevelMappingBody struct {
 
 func (b *UpdateCounterLevelMappingBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateCounterLevelMapping(r soap.RoundTripper, req *types.UpdateCounterLevelMapping) (*types.UpdateCounterLevelMappingResponse, error) {
+func UpdateCounterLevelMapping(ctx context.Context, r soap.RoundTripper, req *types.UpdateCounterLevelMapping) (*types.UpdateCounterLevelMappingResponse, error) {
 	var reqBody, resBody UpdateCounterLevelMappingBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -10989,12 +10990,12 @@ type UpdateDVSHealthCheckConfig_TaskBody struct {
 
 func (b *UpdateDVSHealthCheckConfig_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDVSHealthCheckConfig_Task(r soap.RoundTripper, req *types.UpdateDVSHealthCheckConfig_Task) (*types.UpdateDVSHealthCheckConfig_TaskResponse, error) {
+func UpdateDVSHealthCheckConfig_Task(ctx context.Context, r soap.RoundTripper, req *types.UpdateDVSHealthCheckConfig_Task) (*types.UpdateDVSHealthCheckConfig_TaskResponse, error) {
 	var reqBody, resBody UpdateDVSHealthCheckConfig_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11009,12 +11010,12 @@ type UpdateDVSLacpGroupConfig_TaskBody struct {
 
 func (b *UpdateDVSLacpGroupConfig_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDVSLacpGroupConfig_Task(r soap.RoundTripper, req *types.UpdateDVSLacpGroupConfig_Task) (*types.UpdateDVSLacpGroupConfig_TaskResponse, error) {
+func UpdateDVSLacpGroupConfig_Task(ctx context.Context, r soap.RoundTripper, req *types.UpdateDVSLacpGroupConfig_Task) (*types.UpdateDVSLacpGroupConfig_TaskResponse, error) {
 	var reqBody, resBody UpdateDVSLacpGroupConfig_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11029,12 +11030,12 @@ type UpdateDateTimeBody struct {
 
 func (b *UpdateDateTimeBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDateTime(r soap.RoundTripper, req *types.UpdateDateTime) (*types.UpdateDateTimeResponse, error) {
+func UpdateDateTime(ctx context.Context, r soap.RoundTripper, req *types.UpdateDateTime) (*types.UpdateDateTimeResponse, error) {
 	var reqBody, resBody UpdateDateTimeBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11049,12 +11050,12 @@ type UpdateDateTimeConfigBody struct {
 
 func (b *UpdateDateTimeConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDateTimeConfig(r soap.RoundTripper, req *types.UpdateDateTimeConfig) (*types.UpdateDateTimeConfigResponse, error) {
+func UpdateDateTimeConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateDateTimeConfig) (*types.UpdateDateTimeConfigResponse, error) {
 	var reqBody, resBody UpdateDateTimeConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11069,12 +11070,12 @@ type UpdateDefaultPolicyBody struct {
 
 func (b *UpdateDefaultPolicyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDefaultPolicy(r soap.RoundTripper, req *types.UpdateDefaultPolicy) (*types.UpdateDefaultPolicyResponse, error) {
+func UpdateDefaultPolicy(ctx context.Context, r soap.RoundTripper, req *types.UpdateDefaultPolicy) (*types.UpdateDefaultPolicyResponse, error) {
 	var reqBody, resBody UpdateDefaultPolicyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11089,12 +11090,12 @@ type UpdateDiskPartitionsBody struct {
 
 func (b *UpdateDiskPartitionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDiskPartitions(r soap.RoundTripper, req *types.UpdateDiskPartitions) (*types.UpdateDiskPartitionsResponse, error) {
+func UpdateDiskPartitions(ctx context.Context, r soap.RoundTripper, req *types.UpdateDiskPartitions) (*types.UpdateDiskPartitionsResponse, error) {
 	var reqBody, resBody UpdateDiskPartitionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11109,12 +11110,12 @@ type UpdateDnsConfigBody struct {
 
 func (b *UpdateDnsConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDnsConfig(r soap.RoundTripper, req *types.UpdateDnsConfig) (*types.UpdateDnsConfigResponse, error) {
+func UpdateDnsConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateDnsConfig) (*types.UpdateDnsConfigResponse, error) {
 	var reqBody, resBody UpdateDnsConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11129,12 +11130,12 @@ type UpdateDvsCapabilityBody struct {
 
 func (b *UpdateDvsCapabilityBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateDvsCapability(r soap.RoundTripper, req *types.UpdateDvsCapability) (*types.UpdateDvsCapabilityResponse, error) {
+func UpdateDvsCapability(ctx context.Context, r soap.RoundTripper, req *types.UpdateDvsCapability) (*types.UpdateDvsCapabilityResponse, error) {
 	var reqBody, resBody UpdateDvsCapabilityBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11149,12 +11150,12 @@ type UpdateExtensionBody struct {
 
 func (b *UpdateExtensionBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateExtension(r soap.RoundTripper, req *types.UpdateExtension) (*types.UpdateExtensionResponse, error) {
+func UpdateExtension(ctx context.Context, r soap.RoundTripper, req *types.UpdateExtension) (*types.UpdateExtensionResponse, error) {
 	var reqBody, resBody UpdateExtensionBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11169,12 +11170,12 @@ type UpdateFlagsBody struct {
 
 func (b *UpdateFlagsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateFlags(r soap.RoundTripper, req *types.UpdateFlags) (*types.UpdateFlagsResponse, error) {
+func UpdateFlags(ctx context.Context, r soap.RoundTripper, req *types.UpdateFlags) (*types.UpdateFlagsResponse, error) {
 	var reqBody, resBody UpdateFlagsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11189,12 +11190,12 @@ type UpdateHostImageAcceptanceLevelBody struct {
 
 func (b *UpdateHostImageAcceptanceLevelBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateHostImageAcceptanceLevel(r soap.RoundTripper, req *types.UpdateHostImageAcceptanceLevel) (*types.UpdateHostImageAcceptanceLevelResponse, error) {
+func UpdateHostImageAcceptanceLevel(ctx context.Context, r soap.RoundTripper, req *types.UpdateHostImageAcceptanceLevel) (*types.UpdateHostImageAcceptanceLevelResponse, error) {
 	var reqBody, resBody UpdateHostImageAcceptanceLevelBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11209,12 +11210,12 @@ type UpdateHostProfileBody struct {
 
 func (b *UpdateHostProfileBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateHostProfile(r soap.RoundTripper, req *types.UpdateHostProfile) (*types.UpdateHostProfileResponse, error) {
+func UpdateHostProfile(ctx context.Context, r soap.RoundTripper, req *types.UpdateHostProfile) (*types.UpdateHostProfileResponse, error) {
 	var reqBody, resBody UpdateHostProfileBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11229,12 +11230,12 @@ type UpdateInternetScsiAdvancedOptionsBody struct {
 
 func (b *UpdateInternetScsiAdvancedOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiAdvancedOptions(r soap.RoundTripper, req *types.UpdateInternetScsiAdvancedOptions) (*types.UpdateInternetScsiAdvancedOptionsResponse, error) {
+func UpdateInternetScsiAdvancedOptions(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiAdvancedOptions) (*types.UpdateInternetScsiAdvancedOptionsResponse, error) {
 	var reqBody, resBody UpdateInternetScsiAdvancedOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11249,12 +11250,12 @@ type UpdateInternetScsiAliasBody struct {
 
 func (b *UpdateInternetScsiAliasBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiAlias(r soap.RoundTripper, req *types.UpdateInternetScsiAlias) (*types.UpdateInternetScsiAliasResponse, error) {
+func UpdateInternetScsiAlias(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiAlias) (*types.UpdateInternetScsiAliasResponse, error) {
 	var reqBody, resBody UpdateInternetScsiAliasBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11269,12 +11270,12 @@ type UpdateInternetScsiAuthenticationPropertiesBody struct {
 
 func (b *UpdateInternetScsiAuthenticationPropertiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiAuthenticationProperties(r soap.RoundTripper, req *types.UpdateInternetScsiAuthenticationProperties) (*types.UpdateInternetScsiAuthenticationPropertiesResponse, error) {
+func UpdateInternetScsiAuthenticationProperties(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiAuthenticationProperties) (*types.UpdateInternetScsiAuthenticationPropertiesResponse, error) {
 	var reqBody, resBody UpdateInternetScsiAuthenticationPropertiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11289,12 +11290,12 @@ type UpdateInternetScsiDigestPropertiesBody struct {
 
 func (b *UpdateInternetScsiDigestPropertiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiDigestProperties(r soap.RoundTripper, req *types.UpdateInternetScsiDigestProperties) (*types.UpdateInternetScsiDigestPropertiesResponse, error) {
+func UpdateInternetScsiDigestProperties(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiDigestProperties) (*types.UpdateInternetScsiDigestPropertiesResponse, error) {
 	var reqBody, resBody UpdateInternetScsiDigestPropertiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11309,12 +11310,12 @@ type UpdateInternetScsiDiscoveryPropertiesBody struct {
 
 func (b *UpdateInternetScsiDiscoveryPropertiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiDiscoveryProperties(r soap.RoundTripper, req *types.UpdateInternetScsiDiscoveryProperties) (*types.UpdateInternetScsiDiscoveryPropertiesResponse, error) {
+func UpdateInternetScsiDiscoveryProperties(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiDiscoveryProperties) (*types.UpdateInternetScsiDiscoveryPropertiesResponse, error) {
 	var reqBody, resBody UpdateInternetScsiDiscoveryPropertiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11329,12 +11330,12 @@ type UpdateInternetScsiIPPropertiesBody struct {
 
 func (b *UpdateInternetScsiIPPropertiesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiIPProperties(r soap.RoundTripper, req *types.UpdateInternetScsiIPProperties) (*types.UpdateInternetScsiIPPropertiesResponse, error) {
+func UpdateInternetScsiIPProperties(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiIPProperties) (*types.UpdateInternetScsiIPPropertiesResponse, error) {
 	var reqBody, resBody UpdateInternetScsiIPPropertiesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11349,12 +11350,12 @@ type UpdateInternetScsiNameBody struct {
 
 func (b *UpdateInternetScsiNameBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateInternetScsiName(r soap.RoundTripper, req *types.UpdateInternetScsiName) (*types.UpdateInternetScsiNameResponse, error) {
+func UpdateInternetScsiName(ctx context.Context, r soap.RoundTripper, req *types.UpdateInternetScsiName) (*types.UpdateInternetScsiNameResponse, error) {
 	var reqBody, resBody UpdateInternetScsiNameBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11369,12 +11370,12 @@ type UpdateIpConfigBody struct {
 
 func (b *UpdateIpConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateIpConfig(r soap.RoundTripper, req *types.UpdateIpConfig) (*types.UpdateIpConfigResponse, error) {
+func UpdateIpConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateIpConfig) (*types.UpdateIpConfigResponse, error) {
 	var reqBody, resBody UpdateIpConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11389,12 +11390,12 @@ type UpdateIpPoolBody struct {
 
 func (b *UpdateIpPoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateIpPool(r soap.RoundTripper, req *types.UpdateIpPool) (*types.UpdateIpPoolResponse, error) {
+func UpdateIpPool(ctx context.Context, r soap.RoundTripper, req *types.UpdateIpPool) (*types.UpdateIpPoolResponse, error) {
 	var reqBody, resBody UpdateIpPoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11409,12 +11410,12 @@ type UpdateIpRouteConfigBody struct {
 
 func (b *UpdateIpRouteConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateIpRouteConfig(r soap.RoundTripper, req *types.UpdateIpRouteConfig) (*types.UpdateIpRouteConfigResponse, error) {
+func UpdateIpRouteConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateIpRouteConfig) (*types.UpdateIpRouteConfigResponse, error) {
 	var reqBody, resBody UpdateIpRouteConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11429,12 +11430,12 @@ type UpdateIpRouteTableConfigBody struct {
 
 func (b *UpdateIpRouteTableConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateIpRouteTableConfig(r soap.RoundTripper, req *types.UpdateIpRouteTableConfig) (*types.UpdateIpRouteTableConfigResponse, error) {
+func UpdateIpRouteTableConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateIpRouteTableConfig) (*types.UpdateIpRouteTableConfigResponse, error) {
 	var reqBody, resBody UpdateIpRouteTableConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11449,12 +11450,12 @@ type UpdateIpmiBody struct {
 
 func (b *UpdateIpmiBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateIpmi(r soap.RoundTripper, req *types.UpdateIpmi) (*types.UpdateIpmiResponse, error) {
+func UpdateIpmi(ctx context.Context, r soap.RoundTripper, req *types.UpdateIpmi) (*types.UpdateIpmiResponse, error) {
 	var reqBody, resBody UpdateIpmiBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11469,12 +11470,12 @@ type UpdateLicenseBody struct {
 
 func (b *UpdateLicenseBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateLicense(r soap.RoundTripper, req *types.UpdateLicense) (*types.UpdateLicenseResponse, error) {
+func UpdateLicense(ctx context.Context, r soap.RoundTripper, req *types.UpdateLicense) (*types.UpdateLicenseResponse, error) {
 	var reqBody, resBody UpdateLicenseBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11489,12 +11490,12 @@ type UpdateLicenseLabelBody struct {
 
 func (b *UpdateLicenseLabelBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateLicenseLabel(r soap.RoundTripper, req *types.UpdateLicenseLabel) (*types.UpdateLicenseLabelResponse, error) {
+func UpdateLicenseLabel(ctx context.Context, r soap.RoundTripper, req *types.UpdateLicenseLabel) (*types.UpdateLicenseLabelResponse, error) {
 	var reqBody, resBody UpdateLicenseLabelBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11509,12 +11510,12 @@ type UpdateLinkedChildrenBody struct {
 
 func (b *UpdateLinkedChildrenBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateLinkedChildren(r soap.RoundTripper, req *types.UpdateLinkedChildren) (*types.UpdateLinkedChildrenResponse, error) {
+func UpdateLinkedChildren(ctx context.Context, r soap.RoundTripper, req *types.UpdateLinkedChildren) (*types.UpdateLinkedChildrenResponse, error) {
 	var reqBody, resBody UpdateLinkedChildrenBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11529,12 +11530,12 @@ type UpdateLocalSwapDatastoreBody struct {
 
 func (b *UpdateLocalSwapDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateLocalSwapDatastore(r soap.RoundTripper, req *types.UpdateLocalSwapDatastore) (*types.UpdateLocalSwapDatastoreResponse, error) {
+func UpdateLocalSwapDatastore(ctx context.Context, r soap.RoundTripper, req *types.UpdateLocalSwapDatastore) (*types.UpdateLocalSwapDatastoreResponse, error) {
 	var reqBody, resBody UpdateLocalSwapDatastoreBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11549,12 +11550,12 @@ type UpdateModuleOptionStringBody struct {
 
 func (b *UpdateModuleOptionStringBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateModuleOptionString(r soap.RoundTripper, req *types.UpdateModuleOptionString) (*types.UpdateModuleOptionStringResponse, error) {
+func UpdateModuleOptionString(ctx context.Context, r soap.RoundTripper, req *types.UpdateModuleOptionString) (*types.UpdateModuleOptionStringResponse, error) {
 	var reqBody, resBody UpdateModuleOptionStringBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11569,12 +11570,12 @@ type UpdateNetworkConfigBody struct {
 
 func (b *UpdateNetworkConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateNetworkConfig(r soap.RoundTripper, req *types.UpdateNetworkConfig) (*types.UpdateNetworkConfigResponse, error) {
+func UpdateNetworkConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateNetworkConfig) (*types.UpdateNetworkConfigResponse, error) {
 	var reqBody, resBody UpdateNetworkConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11589,12 +11590,12 @@ type UpdateNetworkResourcePoolBody struct {
 
 func (b *UpdateNetworkResourcePoolBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateNetworkResourcePool(r soap.RoundTripper, req *types.UpdateNetworkResourcePool) (*types.UpdateNetworkResourcePoolResponse, error) {
+func UpdateNetworkResourcePool(ctx context.Context, r soap.RoundTripper, req *types.UpdateNetworkResourcePool) (*types.UpdateNetworkResourcePoolResponse, error) {
 	var reqBody, resBody UpdateNetworkResourcePoolBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11609,12 +11610,12 @@ type UpdateOptionsBody struct {
 
 func (b *UpdateOptionsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateOptions(r soap.RoundTripper, req *types.UpdateOptions) (*types.UpdateOptionsResponse, error) {
+func UpdateOptions(ctx context.Context, r soap.RoundTripper, req *types.UpdateOptions) (*types.UpdateOptionsResponse, error) {
 	var reqBody, resBody UpdateOptionsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11629,12 +11630,12 @@ type UpdatePassthruConfigBody struct {
 
 func (b *UpdatePassthruConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdatePassthruConfig(r soap.RoundTripper, req *types.UpdatePassthruConfig) (*types.UpdatePassthruConfigResponse, error) {
+func UpdatePassthruConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdatePassthruConfig) (*types.UpdatePassthruConfigResponse, error) {
 	var reqBody, resBody UpdatePassthruConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11649,12 +11650,12 @@ type UpdatePerfIntervalBody struct {
 
 func (b *UpdatePerfIntervalBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdatePerfInterval(r soap.RoundTripper, req *types.UpdatePerfInterval) (*types.UpdatePerfIntervalResponse, error) {
+func UpdatePerfInterval(ctx context.Context, r soap.RoundTripper, req *types.UpdatePerfInterval) (*types.UpdatePerfIntervalResponse, error) {
 	var reqBody, resBody UpdatePerfIntervalBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11669,12 +11670,12 @@ type UpdatePhysicalNicLinkSpeedBody struct {
 
 func (b *UpdatePhysicalNicLinkSpeedBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdatePhysicalNicLinkSpeed(r soap.RoundTripper, req *types.UpdatePhysicalNicLinkSpeed) (*types.UpdatePhysicalNicLinkSpeedResponse, error) {
+func UpdatePhysicalNicLinkSpeed(ctx context.Context, r soap.RoundTripper, req *types.UpdatePhysicalNicLinkSpeed) (*types.UpdatePhysicalNicLinkSpeedResponse, error) {
 	var reqBody, resBody UpdatePhysicalNicLinkSpeedBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11689,12 +11690,12 @@ type UpdatePortGroupBody struct {
 
 func (b *UpdatePortGroupBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdatePortGroup(r soap.RoundTripper, req *types.UpdatePortGroup) (*types.UpdatePortGroupResponse, error) {
+func UpdatePortGroup(ctx context.Context, r soap.RoundTripper, req *types.UpdatePortGroup) (*types.UpdatePortGroupResponse, error) {
 	var reqBody, resBody UpdatePortGroupBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11709,12 +11710,12 @@ type UpdateProgressBody struct {
 
 func (b *UpdateProgressBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateProgress(r soap.RoundTripper, req *types.UpdateProgress) (*types.UpdateProgressResponse, error) {
+func UpdateProgress(ctx context.Context, r soap.RoundTripper, req *types.UpdateProgress) (*types.UpdateProgressResponse, error) {
 	var reqBody, resBody UpdateProgressBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11729,12 +11730,12 @@ type UpdateReferenceHostBody struct {
 
 func (b *UpdateReferenceHostBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateReferenceHost(r soap.RoundTripper, req *types.UpdateReferenceHost) (*types.UpdateReferenceHostResponse, error) {
+func UpdateReferenceHost(ctx context.Context, r soap.RoundTripper, req *types.UpdateReferenceHost) (*types.UpdateReferenceHostResponse, error) {
 	var reqBody, resBody UpdateReferenceHostBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11749,12 +11750,12 @@ type UpdateRulesetBody struct {
 
 func (b *UpdateRulesetBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateRuleset(r soap.RoundTripper, req *types.UpdateRuleset) (*types.UpdateRulesetResponse, error) {
+func UpdateRuleset(ctx context.Context, r soap.RoundTripper, req *types.UpdateRuleset) (*types.UpdateRulesetResponse, error) {
 	var reqBody, resBody UpdateRulesetBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11769,12 +11770,12 @@ type UpdateScsiLunDisplayNameBody struct {
 
 func (b *UpdateScsiLunDisplayNameBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateScsiLunDisplayName(r soap.RoundTripper, req *types.UpdateScsiLunDisplayName) (*types.UpdateScsiLunDisplayNameResponse, error) {
+func UpdateScsiLunDisplayName(ctx context.Context, r soap.RoundTripper, req *types.UpdateScsiLunDisplayName) (*types.UpdateScsiLunDisplayNameResponse, error) {
 	var reqBody, resBody UpdateScsiLunDisplayNameBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11789,12 +11790,12 @@ type UpdateServiceConsoleVirtualNicBody struct {
 
 func (b *UpdateServiceConsoleVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateServiceConsoleVirtualNic(r soap.RoundTripper, req *types.UpdateServiceConsoleVirtualNic) (*types.UpdateServiceConsoleVirtualNicResponse, error) {
+func UpdateServiceConsoleVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.UpdateServiceConsoleVirtualNic) (*types.UpdateServiceConsoleVirtualNicResponse, error) {
 	var reqBody, resBody UpdateServiceConsoleVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11809,12 +11810,12 @@ type UpdateServiceMessageBody struct {
 
 func (b *UpdateServiceMessageBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateServiceMessage(r soap.RoundTripper, req *types.UpdateServiceMessage) (*types.UpdateServiceMessageResponse, error) {
+func UpdateServiceMessage(ctx context.Context, r soap.RoundTripper, req *types.UpdateServiceMessage) (*types.UpdateServiceMessageResponse, error) {
 	var reqBody, resBody UpdateServiceMessageBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11829,12 +11830,12 @@ type UpdateServicePolicyBody struct {
 
 func (b *UpdateServicePolicyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateServicePolicy(r soap.RoundTripper, req *types.UpdateServicePolicy) (*types.UpdateServicePolicyResponse, error) {
+func UpdateServicePolicy(ctx context.Context, r soap.RoundTripper, req *types.UpdateServicePolicy) (*types.UpdateServicePolicyResponse, error) {
 	var reqBody, resBody UpdateServicePolicyBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11849,12 +11850,12 @@ type UpdateSoftwareInternetScsiEnabledBody struct {
 
 func (b *UpdateSoftwareInternetScsiEnabledBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateSoftwareInternetScsiEnabled(r soap.RoundTripper, req *types.UpdateSoftwareInternetScsiEnabled) (*types.UpdateSoftwareInternetScsiEnabledResponse, error) {
+func UpdateSoftwareInternetScsiEnabled(ctx context.Context, r soap.RoundTripper, req *types.UpdateSoftwareInternetScsiEnabled) (*types.UpdateSoftwareInternetScsiEnabledResponse, error) {
 	var reqBody, resBody UpdateSoftwareInternetScsiEnabledBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11869,12 +11870,12 @@ type UpdateSystemResourcesBody struct {
 
 func (b *UpdateSystemResourcesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateSystemResources(r soap.RoundTripper, req *types.UpdateSystemResources) (*types.UpdateSystemResourcesResponse, error) {
+func UpdateSystemResources(ctx context.Context, r soap.RoundTripper, req *types.UpdateSystemResources) (*types.UpdateSystemResourcesResponse, error) {
 	var reqBody, resBody UpdateSystemResourcesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11889,12 +11890,12 @@ type UpdateSystemSwapConfigurationBody struct {
 
 func (b *UpdateSystemSwapConfigurationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateSystemSwapConfiguration(r soap.RoundTripper, req *types.UpdateSystemSwapConfiguration) (*types.UpdateSystemSwapConfigurationResponse, error) {
+func UpdateSystemSwapConfiguration(ctx context.Context, r soap.RoundTripper, req *types.UpdateSystemSwapConfiguration) (*types.UpdateSystemSwapConfigurationResponse, error) {
 	var reqBody, resBody UpdateSystemSwapConfigurationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11909,12 +11910,12 @@ type UpdateUserBody struct {
 
 func (b *UpdateUserBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateUser(r soap.RoundTripper, req *types.UpdateUser) (*types.UpdateUserResponse, error) {
+func UpdateUser(ctx context.Context, r soap.RoundTripper, req *types.UpdateUser) (*types.UpdateUserResponse, error) {
 	var reqBody, resBody UpdateUserBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11929,12 +11930,12 @@ type UpdateVAppConfigBody struct {
 
 func (b *UpdateVAppConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateVAppConfig(r soap.RoundTripper, req *types.UpdateVAppConfig) (*types.UpdateVAppConfigResponse, error) {
+func UpdateVAppConfig(ctx context.Context, r soap.RoundTripper, req *types.UpdateVAppConfig) (*types.UpdateVAppConfigResponse, error) {
 	var reqBody, resBody UpdateVAppConfigBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11949,12 +11950,12 @@ type UpdateVirtualMachineFiles_TaskBody struct {
 
 func (b *UpdateVirtualMachineFiles_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateVirtualMachineFiles_Task(r soap.RoundTripper, req *types.UpdateVirtualMachineFiles_Task) (*types.UpdateVirtualMachineFiles_TaskResponse, error) {
+func UpdateVirtualMachineFiles_Task(ctx context.Context, r soap.RoundTripper, req *types.UpdateVirtualMachineFiles_Task) (*types.UpdateVirtualMachineFiles_TaskResponse, error) {
 	var reqBody, resBody UpdateVirtualMachineFiles_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11969,12 +11970,12 @@ type UpdateVirtualNicBody struct {
 
 func (b *UpdateVirtualNicBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateVirtualNic(r soap.RoundTripper, req *types.UpdateVirtualNic) (*types.UpdateVirtualNicResponse, error) {
+func UpdateVirtualNic(ctx context.Context, r soap.RoundTripper, req *types.UpdateVirtualNic) (*types.UpdateVirtualNicResponse, error) {
 	var reqBody, resBody UpdateVirtualNicBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -11989,12 +11990,12 @@ type UpdateVirtualSwitchBody struct {
 
 func (b *UpdateVirtualSwitchBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateVirtualSwitch(r soap.RoundTripper, req *types.UpdateVirtualSwitch) (*types.UpdateVirtualSwitchResponse, error) {
+func UpdateVirtualSwitch(ctx context.Context, r soap.RoundTripper, req *types.UpdateVirtualSwitch) (*types.UpdateVirtualSwitchResponse, error) {
 	var reqBody, resBody UpdateVirtualSwitchBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12009,12 +12010,12 @@ type UpdateVsan_TaskBody struct {
 
 func (b *UpdateVsan_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpdateVsan_Task(r soap.RoundTripper, req *types.UpdateVsan_Task) (*types.UpdateVsan_TaskResponse, error) {
+func UpdateVsan_Task(ctx context.Context, r soap.RoundTripper, req *types.UpdateVsan_Task) (*types.UpdateVsan_TaskResponse, error) {
 	var reqBody, resBody UpdateVsan_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12029,12 +12030,12 @@ type UpgradeTools_TaskBody struct {
 
 func (b *UpgradeTools_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpgradeTools_Task(r soap.RoundTripper, req *types.UpgradeTools_Task) (*types.UpgradeTools_TaskResponse, error) {
+func UpgradeTools_Task(ctx context.Context, r soap.RoundTripper, req *types.UpgradeTools_Task) (*types.UpgradeTools_TaskResponse, error) {
 	var reqBody, resBody UpgradeTools_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12049,12 +12050,12 @@ type UpgradeVM_TaskBody struct {
 
 func (b *UpgradeVM_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpgradeVM_Task(r soap.RoundTripper, req *types.UpgradeVM_Task) (*types.UpgradeVM_TaskResponse, error) {
+func UpgradeVM_Task(ctx context.Context, r soap.RoundTripper, req *types.UpgradeVM_Task) (*types.UpgradeVM_TaskResponse, error) {
 	var reqBody, resBody UpgradeVM_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12069,12 +12070,12 @@ type UpgradeVmLayoutBody struct {
 
 func (b *UpgradeVmLayoutBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpgradeVmLayout(r soap.RoundTripper, req *types.UpgradeVmLayout) (*types.UpgradeVmLayoutResponse, error) {
+func UpgradeVmLayout(ctx context.Context, r soap.RoundTripper, req *types.UpgradeVmLayout) (*types.UpgradeVmLayoutResponse, error) {
 	var reqBody, resBody UpgradeVmLayoutBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12089,12 +12090,12 @@ type UpgradeVmfsBody struct {
 
 func (b *UpgradeVmfsBody) Fault() *soap.Fault { return b.Fault_ }
 
-func UpgradeVmfs(r soap.RoundTripper, req *types.UpgradeVmfs) (*types.UpgradeVmfsResponse, error) {
+func UpgradeVmfs(ctx context.Context, r soap.RoundTripper, req *types.UpgradeVmfs) (*types.UpgradeVmfsResponse, error) {
 	var reqBody, resBody UpgradeVmfsBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12109,12 +12110,12 @@ type ValidateCredentialsInGuestBody struct {
 
 func (b *ValidateCredentialsInGuestBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ValidateCredentialsInGuest(r soap.RoundTripper, req *types.ValidateCredentialsInGuest) (*types.ValidateCredentialsInGuestResponse, error) {
+func ValidateCredentialsInGuest(ctx context.Context, r soap.RoundTripper, req *types.ValidateCredentialsInGuest) (*types.ValidateCredentialsInGuestResponse, error) {
 	var reqBody, resBody ValidateCredentialsInGuestBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12129,12 +12130,12 @@ type ValidateHostBody struct {
 
 func (b *ValidateHostBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ValidateHost(r soap.RoundTripper, req *types.ValidateHost) (*types.ValidateHostResponse, error) {
+func ValidateHost(ctx context.Context, r soap.RoundTripper, req *types.ValidateHost) (*types.ValidateHostResponse, error) {
 	var reqBody, resBody ValidateHostBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12149,12 +12150,12 @@ type ValidateMigrationBody struct {
 
 func (b *ValidateMigrationBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ValidateMigration(r soap.RoundTripper, req *types.ValidateMigration) (*types.ValidateMigrationResponse, error) {
+func ValidateMigration(ctx context.Context, r soap.RoundTripper, req *types.ValidateMigration) (*types.ValidateMigrationResponse, error) {
 	var reqBody, resBody ValidateMigrationBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12169,12 +12170,12 @@ type WaitForUpdatesBody struct {
 
 func (b *WaitForUpdatesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func WaitForUpdates(r soap.RoundTripper, req *types.WaitForUpdates) (*types.WaitForUpdatesResponse, error) {
+func WaitForUpdates(ctx context.Context, r soap.RoundTripper, req *types.WaitForUpdates) (*types.WaitForUpdatesResponse, error) {
 	var reqBody, resBody WaitForUpdatesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12189,12 +12190,12 @@ type WaitForUpdatesExBody struct {
 
 func (b *WaitForUpdatesExBody) Fault() *soap.Fault { return b.Fault_ }
 
-func WaitForUpdatesEx(r soap.RoundTripper, req *types.WaitForUpdatesEx) (*types.WaitForUpdatesExResponse, error) {
+func WaitForUpdatesEx(ctx context.Context, r soap.RoundTripper, req *types.WaitForUpdatesEx) (*types.WaitForUpdatesExResponse, error) {
 	var reqBody, resBody WaitForUpdatesExBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12209,12 +12210,12 @@ type XmlToCustomizationSpecItemBody struct {
 
 func (b *XmlToCustomizationSpecItemBody) Fault() *soap.Fault { return b.Fault_ }
 
-func XmlToCustomizationSpecItem(r soap.RoundTripper, req *types.XmlToCustomizationSpecItem) (*types.XmlToCustomizationSpecItemResponse, error) {
+func XmlToCustomizationSpecItem(ctx context.Context, r soap.RoundTripper, req *types.XmlToCustomizationSpecItem) (*types.XmlToCustomizationSpecItemResponse, error) {
 	var reqBody, resBody XmlToCustomizationSpecItemBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -12229,12 +12230,12 @@ type ZeroFillVirtualDisk_TaskBody struct {
 
 func (b *ZeroFillVirtualDisk_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ZeroFillVirtualDisk_Task(r soap.RoundTripper, req *types.ZeroFillVirtualDisk_Task) (*types.ZeroFillVirtualDisk_TaskResponse, error) {
+func ZeroFillVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.ZeroFillVirtualDisk_Task) (*types.ZeroFillVirtualDisk_TaskResponse, error) {
 	var reqBody, resBody ZeroFillVirtualDisk_TaskBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 

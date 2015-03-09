@@ -638,13 +638,13 @@ class Operation
 
 EOS
 
-    io.print "func %s(r soap.RoundTripper, req *%s) (*%s, error) {\n" % [name, go_input, go_output]
+    io.print "func %s(ctx context.Context, r soap.RoundTripper, req *%s) (*%s, error) {\n" % [name, go_input, go_output]
     io.print <<EOS
   var reqBody, resBody #{name}Body
 
   reqBody.Req = req
 
-  if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+  if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
     return nil, err
   }
 

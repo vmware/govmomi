@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type CustomizationSpecManager struct {
@@ -31,7 +32,7 @@ func (cs CustomizationSpecManager) DoesCustomizationSpecExist(name string) (bool
 		Name: name,
 	}
 
-	res, err := methods.DoesCustomizationSpecExist(cs.c, &req)
+	res, err := methods.DoesCustomizationSpecExist(context.TODO(), cs.c, &req)
 
 	if err != nil {
 		return false, err
@@ -46,7 +47,7 @@ func (cs CustomizationSpecManager) GetCustomizationSpec(name string) (*types.Cus
 		Name: name,
 	}
 
-	res, err := methods.GetCustomizationSpec(cs.c, &req)
+	res, err := methods.GetCustomizationSpec(context.TODO(), cs.c, &req)
 
 	if err != nil {
 		return nil, err
@@ -61,7 +62,7 @@ func (cs CustomizationSpecManager) CreateCustomizationSpec(item types.Customizat
 		Item: item,
 	}
 
-	_, err := methods.CreateCustomizationSpec(cs.c, &req)
+	_, err := methods.CreateCustomizationSpec(context.TODO(), cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -75,7 +76,7 @@ func (cs CustomizationSpecManager) OverwriteCustomizationSpec(item types.Customi
 		Item: item,
 	}
 
-	_, err := methods.OverwriteCustomizationSpec(cs.c, &req)
+	_, err := methods.OverwriteCustomizationSpec(context.TODO(), cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -89,7 +90,7 @@ func (cs CustomizationSpecManager) DeleteCustomizationSpec(name string) error {
 		Name: name,
 	}
 
-	_, err := methods.DeleteCustomizationSpec(cs.c, &req)
+	_, err := methods.DeleteCustomizationSpec(context.TODO(), cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -104,7 +105,7 @@ func (cs CustomizationSpecManager) DuplicateCustomizationSpec(name string, newNa
 		NewName: newName,
 	}
 
-	_, err := methods.DuplicateCustomizationSpec(cs.c, &req)
+	_, err := methods.DuplicateCustomizationSpec(context.TODO(), cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -119,7 +120,7 @@ func (cs CustomizationSpecManager) RenameCustomizationSpec(name string, newName 
 		NewName: newName,
 	}
 
-	_, err := methods.RenameCustomizationSpec(cs.c, &req)
+	_, err := methods.RenameCustomizationSpec(context.TODO(), cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -133,7 +134,7 @@ func (cs CustomizationSpecManager) CustomizationSpecItemToXml(item types.Customi
 		Item: item,
 	}
 
-	res, err := methods.CustomizationSpecItemToXml(cs.c, &req)
+	res, err := methods.CustomizationSpecItemToXml(context.TODO(), cs.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -147,7 +148,7 @@ func (cs CustomizationSpecManager) XmlToCustomizationSpecItem(xml string) (*type
 		SpecItemXml: xml,
 	}
 
-	res, err := methods.XmlToCustomizationSpecItem(cs.c, &req)
+	res, err := methods.XmlToCustomizationSpecItem(context.TODO(), cs.c, &req)
 	if err != nil {
 		return nil, err
 	}

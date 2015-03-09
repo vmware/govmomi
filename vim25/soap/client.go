@@ -21,21 +21,19 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/http/cookiejar"
-	"net/http/httputil"
 	"net/url"
 	"os"
 	"strings"
-	"sync/atomic"
 	"time"
 
-	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
+	"golang.org/x/net/context"
 )
 
 type HasFault interface {
@@ -43,47 +41,42 @@ type HasFault interface {
 }
 
 type RoundTripper interface {
-	RoundTrip(req, res HasFault) error
+	RoundTrip(ctx context.Context, req, res HasFault) error
 }
-
-var cn uint64 // Client counter
 
 type Client struct {
 	http.Client
 
-	u        url.URL
-	insecure bool
-	_        uint32 // for alignment: https://code.google.com/p/go/issues/detail?id=6404
-
-	cn  uint64         // Client counter
-	rn  uint64         // Request counter
-	log io.WriteCloser // Request log
+	u url.URL
+	k bool // Named after curl's -k flag
+	d *debugContainer
+	t *http.Transport
 }
 
 func NewClient(u url.URL, insecure bool) *Client {
 	c := Client{
-		u:        u,
-		insecure: insecure,
+		u: u,
+		k: insecure,
+		d: newDebug(),
+	}
 
-		cn: atomic.AddUint64(&cn, 1),
-		rn: 0,
+	// Initialize http.RoundTripper on client, so we can customize it below
+	c.t = &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		Dial: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+		}).Dial,
 	}
 
 	if c.u.Scheme == "https" {
-		c.Client.Transport = &http.Transport{
-			Proxy: http.ProxyFromEnvironment,
-			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: c.insecure,
-			},
-		}
+		c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k}
+		c.t.TLSHandshakeTimeout = 10 * time.Second
 	}
 
-	c.Jar, _ = cookiejar.New(nil)
+	c.Client.Transport = c.t
+	c.Client.Jar, _ = cookiejar.New(nil)
 	c.u.User = nil
-
-	if debug.Enabled() {
-		c.log = debug.NewFile(fmt.Sprintf("%d-client.log", c.cn))
-	}
 
 	return &c
 }
@@ -102,7 +95,7 @@ func (c *Client) MarshalJSON() ([]byte, error) {
 	m := marshaledClient{
 		Cookies:  c.Jar.Cookies(&c.u),
 		URL:      &c.u,
-		Insecure: c.insecure,
+		Insecure: c.k,
 	}
 
 	return json.Marshal(m)
@@ -122,72 +115,82 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
-	var httpreq *http.Request
-	var httpres *http.Response
+func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+	var resc = make(chan *http.Response, 1)
+	var errc = make(chan error, 1)
+
+	// Perform request from separate routine.
+	go func() {
+		res, err := c.Client.Do(req)
+		if err != nil {
+			errc <- err
+		} else {
+			resc <- res
+		}
+	}()
+
+	// Wait for request completion of context expiry.
+	select {
+	case <-ctx.Done():
+		c.t.CancelRequest(req)
+		return nil, ctx.Err()
+	case err := <-errc:
+		return nil, err
+	case res := <-resc:
+		return res, nil
+	}
+}
+
+func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error {
 	var err error
 
 	reqEnv := Envelope{Body: reqBody}
 	resEnv := Envelope{Body: resBody}
 
-	num := atomic.AddUint64(&c.rn, 1)
+	// Create debugging context for this round trip
+	d := c.d.newRoundTrip()
+	if d.enabled() {
+		defer d.done()
+	}
 
 	b, err := xml.Marshal(reqEnv)
 	if err != nil {
 		panic(err)
 	}
 
-	rawreqbody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
-	if debug.Enabled() {
-		f := debug.NewFile(fmt.Sprintf("%d-%04d.req.xml", c.cn, num))
-		rawreqbody = io.TeeReader(rawreqbody, f)
-	}
-
-	httpreq, err = http.NewRequest("POST", c.u.String(), rawreqbody)
+	rawReqBody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
+	req, err := http.NewRequest("POST", c.u.String(), rawReqBody)
 	if err != nil {
 		panic(err)
 	}
 
-	httpreq.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
-	httpreq.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
+	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
+	req.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
 
-	if debug.Enabled() {
-		b, _ := httputil.DumpRequest(httpreq, false)
-		wc := debug.NewFile(fmt.Sprintf("%d-%04d.req.headers", c.cn, num))
-		wc.Write(b)
-		wc.Close()
+	if d.enabled() {
+		d.debugRequest(req)
 	}
 
 	tstart := time.Now()
-	httpres, err = c.Client.Do(httpreq)
+	res, err := c.do(ctx, req)
 	tstop := time.Now()
 
-	if debug.Enabled() {
-		now := time.Now().Format("2006-01-02T15-04-05.999999999")
-		ms := tstop.Sub(tstart) / time.Millisecond
-		fmt.Fprintf(c.log, "%s: %4d took %6dms\n", now, num, ms)
+	if d.enabled() {
+		d.logf("%6dms (%T)", tstop.Sub(tstart)/time.Millisecond, resBody)
 	}
 
 	if err != nil {
 		return err
 	}
 
-	var rawresbody io.Reader = httpres.Body
-	defer httpres.Body.Close()
-
-	if debug.Enabled() {
-		f := debug.NewFile(fmt.Sprintf("%d-%04d.res.xml", c.cn, num))
-		rawresbody = io.TeeReader(rawresbody, f)
+	if d.enabled() {
+		d.debugResponse(res)
 	}
 
-	if debug.Enabled() {
-		b, _ := httputil.DumpResponse(httpres, false)
-		wc := debug.NewFile(fmt.Sprintf("%d-%04d.res.headers", c.cn, num))
-		wc.Write(b)
-		wc.Close()
-	}
+	// Close response regardless of what happens next
+	defer res.Body.Close()
 
-	dec := xml.NewDecoder(rawresbody)
+	dec := xml.NewDecoder(res.Body)
 	dec.TypeFunc = types.TypeFunc()
 	err = dec.Decode(&resEnv)
 	if err != nil {

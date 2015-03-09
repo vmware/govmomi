@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 var serviceInstance = types.ManagedObjectReference{
@@ -42,7 +43,7 @@ func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 		This: serviceInstance,
 	}
 
-	res, err := methods.RetrieveServiceContent(r, &req)
+	res, err := methods.RetrieveServiceContent(context.TODO(), r, &req)
 	if err != nil {
 		return types.ServiceContent{}, err
 	}
@@ -80,8 +81,8 @@ func (c *Client) Logout() error {
 }
 
 // RoundTrip dispatches to the client's SOAP client RoundTrip function.
-func (c *Client) RoundTrip(req, res soap.HasFault) error {
-	return c.Client.RoundTrip(req, res)
+func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	return c.Client.RoundTrip(ctx, req, res)
 }
 
 func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
@@ -129,7 +130,7 @@ func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, ds
 		},
 	}
 
-	return mo.RetrievePropertiesForRequest(c, req, dst)
+	return mo.RetrievePropertiesForRequest(context.TODO(), c, req, dst)
 }
 
 func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
@@ -217,7 +218,7 @@ func (c *Client) Ancestors(r Reference) ([]mo.ManagedEntity, error) {
 
 	var ifaces []interface{}
 
-	err := mo.RetrievePropertiesForRequest(c, req, &ifaces)
+	err := mo.RetrievePropertiesForRequest(context.TODO(), c, req, &ifaces)
 	if err != nil {
 		return nil, err
 	}
@@ -302,7 +303,7 @@ func (c *Client) NewPropertyCollector() (*PropertyCollector, error) {
 		This: c.ServiceContent.PropertyCollector,
 	}
 
-	res, err := methods.CreatePropertyCollector(c, &req)
+	res, err := methods.CreatePropertyCollector(context.TODO(), c, &req)
 	if err != nil {
 		return nil, err
 	}

@@ -20,6 +20,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type VirtualMachine struct {
@@ -46,7 +47,7 @@ func (v VirtualMachine) PowerOn() (*Task, error) {
 		This: v.Reference(),
 	}
 
-	res, err := methods.PowerOnVM_Task(v.c, &req)
+	res, err := methods.PowerOnVM_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -59,7 +60,7 @@ func (v VirtualMachine) PowerOff() (*Task, error) {
 		This: v.Reference(),
 	}
 
-	res, err := methods.PowerOffVM_Task(v.c, &req)
+	res, err := methods.PowerOffVM_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +73,7 @@ func (v VirtualMachine) Reset() (*Task, error) {
 		This: v.Reference(),
 	}
 
-	res, err := methods.ResetVM_Task(v.c, &req)
+	res, err := methods.ResetVM_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -85,7 +86,7 @@ func (v VirtualMachine) Suspend() (*Task, error) {
 		This: v.Reference(),
 	}
 
-	res, err := methods.SuspendVM_Task(v.c, &req)
+	res, err := methods.SuspendVM_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +99,7 @@ func (v VirtualMachine) ShutdownGuest() error {
 		This: v.Reference(),
 	}
 
-	_, err := methods.ShutdownGuest(v.c, &req)
+	_, err := methods.ShutdownGuest(context.TODO(), v.c, &req)
 	return err
 }
 
@@ -107,7 +108,7 @@ func (v VirtualMachine) RebootGuest() error {
 		This: v.Reference(),
 	}
 
-	_, err := methods.RebootGuest(v.c, &req)
+	_, err := methods.RebootGuest(context.TODO(), v.c, &req)
 	return err
 }
 
@@ -116,7 +117,7 @@ func (v VirtualMachine) Destroy() (*Task, error) {
 		This: v.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(v.c, &req)
+	res, err := methods.Destroy_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +133,7 @@ func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualM
 		Spec:   config,
 	}
 
-	res, err := methods.CloneVM_Task(v.c, &req)
+	res, err := methods.CloneVM_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +147,7 @@ func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*Tas
 		Spec: config,
 	}
 
-	res, err := methods.ReconfigVM_Task(v.c, &req)
+	res, err := methods.ReconfigVM_Task(context.TODO(), v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -280,7 +281,7 @@ func (v VirtualMachine) Answer(id, answer string) error {
 		AnswerChoice: answer,
 	}
 
-	_, err := methods.AnswerVM(v.c, &req)
+	_, err := methods.AnswerVM(context.TODO(), v.c, &req)
 	if err != nil {
 		return err
 	}
@@ -293,7 +294,7 @@ func (v VirtualMachine) MarkAsTemplate() error {
 		This: v.Reference(),
 	}
 
-	_, err := methods.MarkAsTemplate(v.c, &req)
+	_, err := methods.MarkAsTemplate(context.TODO(), v.c, &req)
 	if err != nil {
 		return err
 	}
@@ -312,7 +313,7 @@ func (v VirtualMachine) MarkAsVirtualMachine(pool ResourcePool, host *HostSystem
 		req.Host = &ref
 	}
 
-	_, err := methods.MarkAsVirtualMachine(v.c, &req)
+	_, err := methods.MarkAsVirtualMachine(context.TODO(), v.c, &req)
 	if err != nil {
 		return err
 	}

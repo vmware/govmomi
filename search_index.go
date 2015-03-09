@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type SearchIndex struct {
@@ -33,7 +34,7 @@ func (s SearchIndex) FindByDatastorePath(dc *Datacenter, path string) (Reference
 		Path:       path,
 	}
 
-	res, err := methods.FindByDatastorePath(s.c, &req)
+	res, err := methods.FindByDatastorePath(context.TODO(), s.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +57,7 @@ func (s SearchIndex) FindByDnsName(dc *Datacenter, dnsName string, vmSearch bool
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.FindByDnsName(s.c, &req)
+	res, err := methods.FindByDnsName(context.TODO(), s.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +75,7 @@ func (s SearchIndex) FindByInventoryPath(path string) (Reference, error) {
 		InventoryPath: path,
 	}
 
-	res, err := methods.FindByInventoryPath(s.c, &req)
+	res, err := methods.FindByInventoryPath(context.TODO(), s.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +98,7 @@ func (s SearchIndex) FindByIp(dc *Datacenter, ip string, vmSearch bool) (Referen
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.FindByIp(s.c, &req)
+	res, err := methods.FindByIp(context.TODO(), s.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +121,7 @@ func (s SearchIndex) FindByUuid(dc *Datacenter, uuid string, vmSearch bool) (Ref
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.FindByUuid(s.c, &req)
+	res, err := methods.FindByUuid(context.TODO(), s.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -139,7 +140,7 @@ func (s SearchIndex) FindChild(entity Reference, name string) (Reference, error)
 		Name:   name,
 	}
 
-	res, err := methods.FindChild(s.c, &req)
+	res, err := methods.FindChild(context.TODO(), s.c, &req)
 	if err != nil {
 		return nil, err
 	}

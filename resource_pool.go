@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ResourcePool struct {
@@ -56,7 +57,7 @@ func (p ResourcePool) ImportVApp(spec types.BaseImportSpec, folder *Folder, host
 		req.Host = &ref
 	}
 
-	res, err := methods.ImportVApp(p.c, &req)
+	res, err := methods.ImportVApp(context.TODO(), p.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func (p ResourcePool) Create(name string, spec types.ResourceConfigSpec) (*Resou
 		Spec: spec,
 	}
 
-	res, err := methods.CreateResourcePool(p.c, &req)
+	res, err := methods.CreateResourcePool(context.TODO(), p.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +96,7 @@ func (p ResourcePool) UpdateConfig(name string, config *types.ResourceConfigSpec
 		req.Config = &newConfig
 	}
 
-	_, err := methods.UpdateConfig(p.c, &req)
+	_, err := methods.UpdateConfig(context.TODO(), p.c, &req)
 	return err
 }
 
@@ -104,7 +105,7 @@ func (p ResourcePool) DestroyChildren() error {
 		This: p.Reference(),
 	}
 
-	_, err := methods.DestroyChildren(p.c, &req)
+	_, err := methods.DestroyChildren(context.TODO(), p.c, &req)
 	return err
 }
 
@@ -113,7 +114,7 @@ func (p ResourcePool) Destroy() (*Task, error) {
 		This: p.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(p.c, &req)
+	res, err := methods.Destroy_Task(context.TODO(), p.c, &req)
 	if err != nil {
 		return nil, err
 	}

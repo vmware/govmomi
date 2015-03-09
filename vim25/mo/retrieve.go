@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 // objectContentToType loads an ObjectContent value into the value it
@@ -95,8 +96,8 @@ func LoadRetrievePropertiesResponse(res *types.RetrievePropertiesResponse, dst i
 // RetrievePropertiesForRequest calls the RetrieveProperties method with the
 // specified request and decodes the response struct into the value pointed to
 // by dst.
-func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrieveProperties, dst interface{}) error {
-	res, err := methods.RetrieveProperties(r, &req)
+func RetrievePropertiesForRequest(ctx context.Context, r soap.RoundTripper, req types.RetrieveProperties, dst interface{}) error {
+	res, err := methods.RetrieveProperties(ctx, r, &req)
 	if err != nil {
 		return err
 	}
@@ -106,7 +107,7 @@ func RetrievePropertiesForRequest(r soap.RoundTripper, req types.RetrievePropert
 
 // RetrieveProperties retrieves the properties of the managed object specified
 // as obj and decodes the response struct into the value pointed to by dst.
-func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReference, dst interface{}) error {
+func RetrieveProperties(ctx context.Context, r soap.RoundTripper, pc, obj types.ManagedObjectReference, dst interface{}) error {
 	req := types.RetrieveProperties{
 		This: pc,
 		SpecSet: []types.PropertyFilterSpec{
@@ -127,5 +128,5 @@ func RetrieveProperties(r soap.RoundTripper, pc, obj types.ManagedObjectReferenc
 		},
 	}
 
-	return RetrievePropertiesForRequest(r, req, dst)
+	return RetrievePropertiesForRequest(ctx, r, req, dst)
 }

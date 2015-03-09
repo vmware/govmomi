@@ -20,6 +20,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type HostNetworkSystem struct {
@@ -43,7 +44,7 @@ func (o HostNetworkSystem) AddPortGroup(portgrp types.HostPortGroupSpec) error {
 		Portgrp: portgrp,
 	}
 
-	_, err := methods.AddPortGroup(o.c, &req)
+	_, err := methods.AddPortGroup(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -59,7 +60,7 @@ func (o HostNetworkSystem) AddServiceConsoleVirtualNic(portgroup string, nic typ
 		Nic:       nic,
 	}
 
-	res, err := methods.AddServiceConsoleVirtualNic(o.c, &req)
+	res, err := methods.AddServiceConsoleVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -75,7 +76,7 @@ func (o HostNetworkSystem) AddVirtualNic(portgroup string, nic types.HostVirtual
 		Nic:       nic,
 	}
 
-	res, err := methods.AddVirtualNic(o.c, &req)
+	res, err := methods.AddVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -91,7 +92,7 @@ func (o HostNetworkSystem) AddVirtualSwitch(vswitchName string, spec *types.Host
 		Spec:        spec,
 	}
 
-	_, err := methods.AddVirtualSwitch(o.c, &req)
+	_, err := methods.AddVirtualSwitch(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -106,7 +107,7 @@ func (o HostNetworkSystem) QueryNetworkHint(device []string) error {
 		Device: device,
 	}
 
-	_, err := methods.QueryNetworkHint(o.c, &req)
+	_, err := methods.QueryNetworkHint(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -120,7 +121,7 @@ func (o HostNetworkSystem) RefreshNetworkSystem() error {
 		This: o.Reference(),
 	}
 
-	_, err := methods.RefreshNetworkSystem(o.c, &req)
+	_, err := methods.RefreshNetworkSystem(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -135,7 +136,7 @@ func (o HostNetworkSystem) RemovePortGroup(pgName string) error {
 		PgName: pgName,
 	}
 
-	_, err := methods.RemovePortGroup(o.c, &req)
+	_, err := methods.RemovePortGroup(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -150,7 +151,7 @@ func (o HostNetworkSystem) RemoveServiceConsoleVirtualNic(device string) error {
 		Device: device,
 	}
 
-	_, err := methods.RemoveServiceConsoleVirtualNic(o.c, &req)
+	_, err := methods.RemoveServiceConsoleVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -165,7 +166,7 @@ func (o HostNetworkSystem) RemoveVirtualNic(device string) error {
 		Device: device,
 	}
 
-	_, err := methods.RemoveVirtualNic(o.c, &req)
+	_, err := methods.RemoveVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -180,7 +181,7 @@ func (o HostNetworkSystem) RemoveVirtualSwitch(vswitchName string) error {
 		VswitchName: vswitchName,
 	}
 
-	_, err := methods.RemoveVirtualSwitch(o.c, &req)
+	_, err := methods.RemoveVirtualSwitch(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -195,7 +196,7 @@ func (o HostNetworkSystem) RestartServiceConsoleVirtualNic(device string) error 
 		Device: device,
 	}
 
-	_, err := methods.RestartServiceConsoleVirtualNic(o.c, &req)
+	_, err := methods.RestartServiceConsoleVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -210,7 +211,7 @@ func (o HostNetworkSystem) UpdateConsoleIpRouteConfig(config types.BaseHostIpRou
 		Config: config,
 	}
 
-	_, err := methods.UpdateConsoleIpRouteConfig(o.c, &req)
+	_, err := methods.UpdateConsoleIpRouteConfig(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -225,7 +226,7 @@ func (o HostNetworkSystem) UpdateDnsConfig(config types.BaseHostDnsConfig) error
 		Config: config,
 	}
 
-	_, err := methods.UpdateDnsConfig(o.c, &req)
+	_, err := methods.UpdateDnsConfig(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -240,7 +241,7 @@ func (o HostNetworkSystem) UpdateIpRouteConfig(config types.BaseHostIpRouteConfi
 		Config: config,
 	}
 
-	_, err := methods.UpdateIpRouteConfig(o.c, &req)
+	_, err := methods.UpdateIpRouteConfig(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -255,7 +256,7 @@ func (o HostNetworkSystem) UpdateIpRouteTableConfig(config types.HostIpRouteTabl
 		Config: config,
 	}
 
-	_, err := methods.UpdateIpRouteTableConfig(o.c, &req)
+	_, err := methods.UpdateIpRouteTableConfig(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -271,7 +272,7 @@ func (o HostNetworkSystem) UpdateNetworkConfig(config types.HostNetworkConfig, c
 		ChangeMode: changeMode,
 	}
 
-	res, err := methods.UpdateNetworkConfig(o.c, &req)
+	res, err := methods.UpdateNetworkConfig(context.TODO(), o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -287,7 +288,7 @@ func (o HostNetworkSystem) UpdatePhysicalNicLinkSpeed(device string, linkSpeed *
 		LinkSpeed: linkSpeed,
 	}
 
-	_, err := methods.UpdatePhysicalNicLinkSpeed(o.c, &req)
+	_, err := methods.UpdatePhysicalNicLinkSpeed(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -303,7 +304,7 @@ func (o HostNetworkSystem) UpdatePortGroup(pgName string, portgrp types.HostPort
 		Portgrp: portgrp,
 	}
 
-	_, err := methods.UpdatePortGroup(o.c, &req)
+	_, err := methods.UpdatePortGroup(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -319,7 +320,7 @@ func (o HostNetworkSystem) UpdateServiceConsoleVirtualNic(device string, nic typ
 		Nic:    nic,
 	}
 
-	_, err := methods.UpdateServiceConsoleVirtualNic(o.c, &req)
+	_, err := methods.UpdateServiceConsoleVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -335,7 +336,7 @@ func (o HostNetworkSystem) UpdateVirtualNic(device string, nic types.HostVirtual
 		Nic:    nic,
 	}
 
-	_, err := methods.UpdateVirtualNic(o.c, &req)
+	_, err := methods.UpdateVirtualNic(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -351,7 +352,7 @@ func (o HostNetworkSystem) UpdateVirtualSwitch(vswitchName string, spec types.Ho
 		Spec:        spec,
 	}
 
-	_, err := methods.UpdateVirtualSwitch(o.c, &req)
+	_, err := methods.UpdateVirtualSwitch(context.TODO(), o.c, &req)
 	if err != nil {
 		return err
 	}
