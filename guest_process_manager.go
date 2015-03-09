@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type GuestProcessManager struct {
@@ -39,7 +40,7 @@ func (m GuestProcessManager) ListProcessesInGuest(vm *VirtualMachine, auth types
 		Pids: pids,
 	}
 
-	res, err := methods.ListProcessesInGuest(m.c, &req)
+	res, err := methods.ListProcessesInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +56,7 @@ func (m GuestProcessManager) ReadEnvironmentVariableInGuest(vm *VirtualMachine, 
 		Names: names,
 	}
 
-	res, err := methods.ReadEnvironmentVariableInGuest(m.c, &req)
+	res, err := methods.ReadEnvironmentVariableInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -71,7 +72,7 @@ func (m GuestProcessManager) StartProgramInGuest(vm *VirtualMachine, auth types.
 		Spec: spec,
 	}
 
-	res, err := methods.StartProgramInGuest(m.c, &req)
+	res, err := methods.StartProgramInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return 0, err
 	}
@@ -87,6 +88,6 @@ func (m GuestProcessManager) TerminateProcessInGuest(vm *VirtualMachine, auth ty
 		Pid:  pid,
 	}
 
-	_, err := methods.TerminateProcessInGuest(m.c, &req)
+	_, err := methods.TerminateProcessInGuest(context.TODO(), m.c, &req)
 	return err
 }

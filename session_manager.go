@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type SessionManager struct {
@@ -52,7 +53,7 @@ func (sm *SessionManager) Login(u url.Userinfo) error {
 		req.Password = pw
 	}
 
-	login, err := methods.Login(sm.c, &req)
+	login, err := methods.Login(context.TODO(), sm.c, &req)
 	sm.userSession = &login.Returnval
 	return err
 }
@@ -62,7 +63,7 @@ func (sm *SessionManager) Logout() error {
 		This: sm.Reference(),
 	}
 
-	_, err := methods.Logout(sm.c, &req)
+	_, err := methods.Logout(context.TODO(), sm.c, &req)
 	// we've logged out - lets close any idle connections
 	t := sm.c.Client.Transport.(*http.Transport)
 	t.CloseIdleConnections()
@@ -74,7 +75,7 @@ func (sm *SessionManager) UserSession() (*types.UserSession, error) {
 
 	if sm.userSession == nil {
 		var mgr mo.SessionManager
-		err := mo.RetrieveProperties(sm.c, sm.c.ServiceContent.PropertyCollector, sm.Reference(), &mgr)
+		err := mo.RetrieveProperties(context.TODO(), sm.c, sm.c.ServiceContent.PropertyCollector, sm.Reference(), &mgr)
 		if err != nil {
 			return nil, err
 		}
@@ -96,7 +97,7 @@ func (sm *SessionManager) SessionIsActive() (bool, error) {
 		UserName:  user.UserName,
 	}
 
-	active, err := methods.SessionIsActive(sm.c, &req)
+	active, err := methods.SessionIsActive(context.TODO(), sm.c, &req)
 	if err != nil {
 		return false, err
 	}

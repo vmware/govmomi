@@ -33,6 +33,7 @@ import (
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
+	"golang.org/x/net/context"
 )
 
 type HasFault interface {
@@ -40,7 +41,7 @@ type HasFault interface {
 }
 
 type RoundTripper interface {
-	RoundTrip(req, res HasFault) error
+	RoundTrip(ctx context.Context, req, res HasFault) error
 }
 
 type Client struct {
@@ -114,9 +115,33 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
-	var httpreq *http.Request
-	var httpres *http.Response
+func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+	var resc = make(chan *http.Response, 1)
+	var errc = make(chan error, 1)
+
+	// Perform request from separate routine.
+	go func() {
+		res, err := c.Client.Do(req)
+		if err != nil {
+			errc <- err
+		} else {
+			resc <- res
+		}
+	}()
+
+	// Wait for request completion of context expiry.
+	select {
+	case <-ctx.Done():
+		c.t.CancelRequest(req)
+		return nil, ctx.Err()
+	case err := <-errc:
+		return nil, err
+	case res := <-resc:
+		return res, nil
+	}
+}
+
+func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error {
 	var err error
 
 	reqEnv := Envelope{Body: reqBody}
@@ -134,20 +159,20 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	}
 
 	rawReqBody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
-	httpreq, err = http.NewRequest("POST", c.u.String(), rawReqBody)
+	req, err := http.NewRequest("POST", c.u.String(), rawReqBody)
 	if err != nil {
 		panic(err)
 	}
 
-	httpreq.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
-	httpreq.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
+	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
+	req.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
 
 	if d.enabled() {
-		d.debugRequest(httpreq)
+		d.debugRequest(req)
 	}
 
 	tstart := time.Now()
-	httpres, err = c.Client.Do(httpreq)
+	res, err := c.do(ctx, req)
 	tstop := time.Now()
 
 	if d.enabled() {
@@ -159,13 +184,13 @@ func (c *Client) RoundTrip(reqBody, resBody HasFault) error {
 	}
 
 	if d.enabled() {
-		d.debugResponse(httpres)
+		d.debugResponse(res)
 	}
 
 	// Close response regardless of what happens next
-	defer httpres.Body.Close()
+	defer res.Body.Close()
 
-	dec := xml.NewDecoder(httpres.Body)
+	dec := xml.NewDecoder(res.Body)
 	dec.TypeFunc = types.TypeFunc()
 	err = dec.Decode(&resEnv)
 	if err != nil {

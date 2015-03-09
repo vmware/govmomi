@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type HostDatastoreBrowser struct {
@@ -45,7 +46,7 @@ func (b HostDatastoreBrowser) SearchDatastore(datastorePath string, searchSpec *
 		SearchSpec:    searchSpec,
 	}
 
-	res, err := methods.SearchDatastore_Task(b.c, &req)
+	res, err := methods.SearchDatastore_Task(context.TODO(), b.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +61,7 @@ func (b HostDatastoreBrowser) SearchDatastoreSubFolders(datastorePath string, se
 		SearchSpec:    searchSpec,
 	}
 
-	res, err := methods.SearchDatastoreSubFolders_Task(b.c, &req)
+	res, err := methods.SearchDatastoreSubFolders_Task(context.TODO(), b.c, &req)
 	if err != nil {
 		return nil, err
 	}

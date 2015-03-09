@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 func TestNewClient(t *testing.T) {
@@ -41,7 +42,7 @@ func TestNewClient(t *testing.T) {
 
 	f := func() error {
 		var x mo.Folder
-		err = mo.RetrieveProperties(c, c.ServiceContent.PropertyCollector, c.ServiceContent.RootFolder, &x)
+		err = mo.RetrieveProperties(context.TODO(), c, c.ServiceContent.PropertyCollector, c.ServiceContent.RootFolder, &x)
 		if err != nil {
 			return err
 		}

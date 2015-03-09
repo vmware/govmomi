@@ -20,6 +20,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type DatacenterFolders struct {
@@ -70,7 +71,7 @@ func (d Datacenter) Destroy() (*Task, error) {
 		This: d.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(d.c, &req)
+	res, err := methods.Destroy_Task(context.TODO(), d.c, &req)
 	if err != nil {
 		return nil, err
 	}

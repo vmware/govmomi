@@ -19,6 +19,7 @@ package methods
 import (
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type RetrieveDynamicTypeManagerBody struct {
@@ -29,12 +30,12 @@ type RetrieveDynamicTypeManagerBody struct {
 
 func (b *RetrieveDynamicTypeManagerBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveDynamicTypeManager(r soap.RoundTripper, req *types.RetrieveDynamicTypeManager) (*types.RetrieveDynamicTypeManagerResponse, error) {
+func RetrieveDynamicTypeManager(ctx context.Context, r soap.RoundTripper, req *types.RetrieveDynamicTypeManager) (*types.RetrieveDynamicTypeManagerResponse, error) {
 	var reqBody, resBody RetrieveDynamicTypeManagerBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -49,12 +50,12 @@ type RetrieveManagedMethodExecuterBody struct {
 
 func (b *RetrieveManagedMethodExecuterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveManagedMethodExecuter(r soap.RoundTripper, req *types.RetrieveManagedMethodExecuter) (*types.RetrieveManagedMethodExecuterResponse, error) {
+func RetrieveManagedMethodExecuter(ctx context.Context, r soap.RoundTripper, req *types.RetrieveManagedMethodExecuter) (*types.RetrieveManagedMethodExecuterResponse, error) {
 	var reqBody, resBody RetrieveManagedMethodExecuterBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -69,12 +70,12 @@ type DynamicTypeMgrQueryMoInstancesBody struct {
 
 func (b *DynamicTypeMgrQueryMoInstancesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DynamicTypeMgrQueryMoInstances(r soap.RoundTripper, req *types.DynamicTypeMgrQueryMoInstances) (*types.DynamicTypeMgrQueryMoInstancesResponse, error) {
+func DynamicTypeMgrQueryMoInstances(ctx context.Context, r soap.RoundTripper, req *types.DynamicTypeMgrQueryMoInstances) (*types.DynamicTypeMgrQueryMoInstancesResponse, error) {
 	var reqBody, resBody DynamicTypeMgrQueryMoInstancesBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -89,12 +90,12 @@ type DynamicTypeMgrQueryTypeInfoBody struct {
 
 func (b *DynamicTypeMgrQueryTypeInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DynamicTypeMgrQueryTypeInfo(r soap.RoundTripper, req *types.DynamicTypeMgrQueryTypeInfo) (*types.DynamicTypeMgrQueryTypeInfoResponse, error) {
+func DynamicTypeMgrQueryTypeInfo(ctx context.Context, r soap.RoundTripper, req *types.DynamicTypeMgrQueryTypeInfo) (*types.DynamicTypeMgrQueryTypeInfoResponse, error) {
 	var reqBody, resBody DynamicTypeMgrQueryTypeInfoBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 
@@ -109,12 +110,12 @@ type ExecuteSoapBody struct {
 
 func (b *ExecuteSoapBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExecuteSoap(r soap.RoundTripper, req *types.ExecuteSoap) (*types.ExecuteSoapResponse, error) {
+func ExecuteSoap(ctx context.Context, r soap.RoundTripper, req *types.ExecuteSoap) (*types.ExecuteSoapResponse, error) {
 	var reqBody, resBody ExecuteSoapBody
 
 	reqBody.Req = req
 
-	if err := r.RoundTrip(&reqBody, &resBody); err != nil {
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
 		return nil, err
 	}
 

@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
+	"golang.org/x/net/context"
 )
 
 type Executor struct {
@@ -46,7 +47,7 @@ func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error)
 			This: host.Reference(),
 		}
 
-		res, err := methods.RetrieveManagedMethodExecuter(c, &req)
+		res, err := methods.RetrieveManagedMethodExecuter(context.TODO(), c, &req)
 		if err != nil {
 			return nil, err
 		}
@@ -59,7 +60,7 @@ func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error)
 			This: host.Reference(),
 		}
 
-		res, err := methods.RetrieveDynamicTypeManager(c, &req)
+		res, err := methods.RetrieveDynamicTypeManager(context.TODO(), c, &req)
 		if err != nil {
 			return nil, err
 		}
@@ -128,7 +129,7 @@ func (e *Executor) Execute(req *types.ExecuteSoap, res interface{}) error {
 	req.This = e.mme.ManagedObjectReference
 	req.Version = "urn:vim25/5.0"
 
-	x, err := methods.ExecuteSoap(e.c, req)
+	x, err := methods.ExecuteSoap(context.TODO(), e.c, req)
 	if err != nil {
 		return err
 	}

@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type OvfManager struct {
@@ -33,7 +34,7 @@ func (o OvfManager) CreateDescriptor(obj Reference, cdp types.OvfCreateDescripto
 		Cdp:  cdp,
 	}
 
-	res, err := methods.CreateDescriptor(o.c, &req)
+	res, err := methods.CreateDescriptor(context.TODO(), o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -51,7 +52,7 @@ func (o OvfManager) CreateImportSpec(ovfDescriptor string, resourcePool Referenc
 		Cisp:          cisp,
 	}
 
-	res, err := methods.CreateImportSpec(o.c, &req)
+	res, err := methods.CreateImportSpec(context.TODO(), o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +68,7 @@ func (o OvfManager) ParseDescriptor(ovfDescriptor string, pdp types.OvfParseDesc
 		Pdp:           pdp,
 	}
 
-	res, err := methods.ParseDescriptor(o.c, &req)
+	res, err := methods.ParseDescriptor(context.TODO(), o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (o OvfManager) ValidateHost(ovfDescriptor string, host Reference, vhp types
 		Vhp:           vhp,
 	}
 
-	res, err := methods.ValidateHost(o.c, &req)
+	res, err := methods.ValidateHost(context.TODO(), o.c, &req)
 	if err != nil {
 		return nil, err
 	}

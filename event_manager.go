@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type EventManager struct {
@@ -31,7 +32,7 @@ func (em EventManager) CreateCollectorForEvents(filter types.EventFilterSpec) (*
 		Filter: filter,
 	}
 
-	res, err := methods.CreateCollectorForEvents(em.c, &req)
+	res, err := methods.CreateCollectorForEvents(context.TODO(), em.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -45,7 +46,7 @@ func (em EventManager) LogUserEvent(entity types.ManagedObjectReference, msg str
 		Msg:    msg,
 	}
 
-	_, err := methods.LogUserEvent(em.c, &req)
+	_, err := methods.LogUserEvent(context.TODO(), em.c, &req)
 	if err != nil {
 		return err
 	}
@@ -60,7 +61,7 @@ func (em EventManager) PostEvent(eventToPost types.BaseEvent, taskInfo types.Tas
 		TaskInfo:    &taskInfo,
 	}
 
-	_, err := methods.PostEvent(em.c, &req)
+	_, err := methods.PostEvent(context.TODO(), em.c, &req)
 	if err != nil {
 		return err
 	}
@@ -74,7 +75,7 @@ func (em EventManager) QueryEvents(filter types.EventFilterSpec) ([]types.BaseEv
 		Filter: filter,
 	}
 
-	res, err := methods.QueryEvents(em.c, &req)
+	res, err := methods.QueryEvents(context.TODO(), em.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -87,7 +88,7 @@ func (em EventManager) RetrieveArgumentDescription(eventTypeID string) ([]types.
 		EventTypeId: eventTypeID,
 	}
 
-	res, err := methods.RetrieveArgumentDescription(em.c, &req)
+	res, err := methods.RetrieveArgumentDescription(context.TODO(), em.c, &req)
 	if err != nil {
 		return nil, err
 	}

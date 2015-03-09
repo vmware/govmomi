@@ -19,6 +19,7 @@ package govmomi
 import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type GuestAuthManager struct {
@@ -39,7 +40,7 @@ func (m GuestAuthManager) AcquireCredentialsInGuest(vm *VirtualMachine, requeste
 		SessionID:     sessionID,
 	}
 
-	res, err := methods.AcquireCredentialsInGuest(m.c, &req)
+	res, err := methods.AcquireCredentialsInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -54,7 +55,7 @@ func (m GuestAuthManager) ReleaseCredentialsInGuest(vm *VirtualMachine, auth typ
 		Auth: auth,
 	}
 
-	_, err := methods.ReleaseCredentialsInGuest(m.c, &req)
+	_, err := methods.ReleaseCredentialsInGuest(context.TODO(), m.c, &req)
 
 	return err
 }
@@ -66,7 +67,7 @@ func (m GuestAuthManager) ValidateCredentialsInGuest(vm *VirtualMachine, auth ty
 		Auth: auth,
 	}
 
-	_, err := methods.ValidateCredentialsInGuest(m.c, &req)
+	_, err := methods.ValidateCredentialsInGuest(context.TODO(), m.c, &req)
 	if err != nil {
 		return err
 	}

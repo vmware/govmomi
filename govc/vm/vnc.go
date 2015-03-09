@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type intRange struct {
@@ -347,7 +348,7 @@ func loadUsedPorts(c *govmomi.Client, host types.ManagedObjectReference) ([]int,
 	}
 
 	var vms []mo.VirtualMachine
-	err := mo.RetrievePropertiesForRequest(c, req, &vms)
+	err := mo.RetrievePropertiesForRequest(context.TODO(), c, req, &vms)
 	if err != nil {
 		return nil, err
 	}
