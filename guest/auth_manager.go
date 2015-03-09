@@ -14,25 +14,26 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
+package guest
 
 import (
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
-type GuestAuthManager struct {
+type AuthManager struct {
 	types.ManagedObjectReference
 
-	c *Client
+	c *govmomi.Client
 }
 
-func (m GuestAuthManager) Reference() types.ManagedObjectReference {
+func (m AuthManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
-func (m GuestAuthManager) AcquireCredentialsInGuest(vm *VirtualMachine, requestedAuth types.BaseGuestAuthentication, sessionID int64) (types.BaseGuestAuthentication, error) {
+func (m AuthManager) AcquireCredentials(ctx context.Context, vm govmomi.Reference, requestedAuth types.BaseGuestAuthentication, sessionID int64) (types.BaseGuestAuthentication, error) {
 	req := types.AcquireCredentialsInGuest{
 		This:          m.Reference(),
 		Vm:            vm.Reference(),
@@ -40,7 +41,7 @@ func (m GuestAuthManager) AcquireCredentialsInGuest(vm *VirtualMachine, requeste
 		SessionID:     sessionID,
 	}
 
-	res, err := methods.AcquireCredentialsInGuest(context.TODO(), m.c, &req)
+	res, err := methods.AcquireCredentialsInGuest(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -48,26 +49,26 @@ func (m GuestAuthManager) AcquireCredentialsInGuest(vm *VirtualMachine, requeste
 	return res.Returnval, nil
 }
 
-func (m GuestAuthManager) ReleaseCredentialsInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication) error {
+func (m AuthManager) ReleaseCredentials(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication) error {
 	req := types.ReleaseCredentialsInGuest{
 		This: m.Reference(),
 		Vm:   vm.Reference(),
 		Auth: auth,
 	}
 
-	_, err := methods.ReleaseCredentialsInGuest(context.TODO(), m.c, &req)
+	_, err := methods.ReleaseCredentialsInGuest(ctx, m.c, &req)
 
 	return err
 }
 
-func (m GuestAuthManager) ValidateCredentialsInGuest(vm *VirtualMachine, auth types.BaseGuestAuthentication) error {
+func (m AuthManager) ValidateCredentials(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication) error {
 	req := types.ValidateCredentialsInGuest{
 		This: m.Reference(),
 		Vm:   vm.Reference(),
 		Auth: auth,
 	}
 
-	_, err := methods.ValidateCredentialsInGuest(context.TODO(), m.c, &req)
+	_, err := methods.ValidateCredentialsInGuest(ctx, m.c, &req)
 	if err != nil {
 		return err
 	}

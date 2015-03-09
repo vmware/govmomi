@@ -255,10 +255,6 @@ func (c *Client) FileManager() FileManager {
 	return FileManager{c}
 }
 
-func (c *Client) GuestOperationsManager() GuestOperationsManager {
-	return GuestOperationsManager{c}
-}
-
 func (c *Client) OvfManager() OvfManager {
 	return OvfManager{c}
 }

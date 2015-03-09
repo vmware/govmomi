@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type start struct {
@@ -72,7 +73,7 @@ func (cmd *start) Run(f *flag.FlagSet) error {
 		EnvVariables:     cmd.vars,
 	}
 
-	pid, err := m.StartProgramInGuest(vm, cmd.Auth(), &spec)
+	pid, err := m.StartProgram(context.TODO(), vm, cmd.Auth(), &spec)
 	if err != nil {
 		return err
 	}

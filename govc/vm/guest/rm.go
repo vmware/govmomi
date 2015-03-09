@@ -20,6 +20,7 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type rm struct {
@@ -46,5 +47,5 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return m.DeleteFileInGuest(vm, cmd.Auth(), f.Arg(0))
+	return m.DeleteFile(context.TODO(), vm, cmd.Auth(), f.Arg(0))
 }

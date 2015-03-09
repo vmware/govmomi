@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type mktemp struct {
@@ -54,13 +55,12 @@ func (cmd *mktemp) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	mk := m.CreateTemporaryFileInGuest
-
+	mk := m.CreateTemporaryFile
 	if cmd.dir {
-		mk = m.CreateTemporaryDirectoryInGuest
+		mk = m.CreateTemporaryDirectory
 	}
 
-	name, err := mk(vm, cmd.Auth(), cmd.prefix, cmd.suffix)
+	name, err := mk(context.TODO(), vm, cmd.Auth(), cmd.prefix, cmd.suffix)
 	if err != nil {
 		return err
 	}

@@ -23,6 +23,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type ls struct {
@@ -52,7 +53,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
 
 	for {
-		info, err := m.ListFilesInGuest(vm, cmd.Auth(), f.Arg(0), offset, 0, f.Arg(1))
+		info, err := m.ListFiles(context.TODO(), vm, cmd.Auth(), f.Arg(0), offset, 0, f.Arg(1))
 		if err != nil {
 			return err
 		}

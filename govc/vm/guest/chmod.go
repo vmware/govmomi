@@ -20,6 +20,7 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type chmod struct {
@@ -46,5 +47,5 @@ func (cmd *chmod) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return m.ChangeFileAttributesInGuest(vm, cmd.Auth(), f.Arg(0), cmd.Attr())
+	return m.ChangeFileAttributes(context.TODO(), vm, cmd.Auth(), f.Arg(0), cmd.Attr())
 }

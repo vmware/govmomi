@@ -24,6 +24,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type ps struct {
@@ -89,7 +90,7 @@ func (cmd *ps) Run(f *flag.FlagSet) error {
 		cmd.uids[cmd.auth.Username] = true
 	}
 
-	procs, err := m.ListProcessesInGuest(vm, cmd.Auth(), cmd.pids)
+	procs, err := m.ListProcesses(context.TODO(), vm, cmd.Auth(), cmd.pids)
 	if err != nil {
 		return err
 	}

@@ -20,6 +20,7 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type rmdir struct {
@@ -49,5 +50,5 @@ func (cmd *rmdir) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return m.DeleteDirectoryInGuest(vm, cmd.Auth(), f.Arg(0), cmd.recursive)
+	return m.DeleteDirectory(context.TODO(), vm, cmd.Auth(), f.Arg(0), cmd.recursive)
 }

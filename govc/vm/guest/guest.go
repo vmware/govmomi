@@ -24,6 +24,8 @@ import (
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/guest"
+	"golang.org/x/net/context"
 )
 
 type GuestFlag struct {
@@ -37,20 +39,24 @@ func (flag *GuestFlag) Register(f *flag.FlagSet) {}
 
 func (flag *GuestFlag) Process() error { return nil }
 
-func (flag *GuestFlag) FileManager() (*govmomi.GuestFileManager, error) {
+func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
-	return c.GuestOperationsManager().FileManager()
+
+	o := guest.NewOperationsManager(c)
+	return o.FileManager(context.TODO())
 }
 
-func (flag *GuestFlag) ProcessManager() (*govmomi.GuestProcessManager, error) {
+func (flag *GuestFlag) ProcessManager() (*guest.ProcessManager, error) {
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
-	return c.GuestOperationsManager().ProcessManager()
+
+	o := guest.NewOperationsManager(c)
+	return o.ProcessManager(context.TODO())
 }
 
 func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {

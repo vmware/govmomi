@@ -22,6 +22,7 @@ import (
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type download struct {
@@ -61,7 +62,7 @@ func (cmd *download) Run(f *flag.FlagSet) error {
 		return os.ErrExist
 	}
 
-	info, err := m.InitiateFileTransferFromGuest(vm, cmd.Auth(), src)
+	info, err := m.InitiateFileTransferFromGuest(context.TODO(), vm, cmd.Auth(), src)
 	if err != nil {
 		return err
 	}

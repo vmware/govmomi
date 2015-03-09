@@ -14,15 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
+package guest
 
-import "github.com/vmware/govmomi/vim25/mo"
+import (
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
+)
 
-type GuestOperationsManager struct {
-	c *Client
+type OperationsManager struct {
+	c *govmomi.Client
 }
 
-func (m GuestOperationsManager) AuthManager() (*GuestAuthManager, error) {
+func NewOperationsManager(c *govmomi.Client) *OperationsManager {
+	return &OperationsManager{c}
+}
+
+func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error) {
 	var g mo.GuestOperationsManager
 
 	err := m.c.Properties(*m.c.ServiceContent.GuestOperationsManager, []string{"authManager"}, &g)
@@ -30,10 +38,10 @@ func (m GuestOperationsManager) AuthManager() (*GuestAuthManager, error) {
 		return nil, err
 	}
 
-	return &GuestAuthManager{*g.AuthManager, m.c}, nil
+	return &AuthManager{*g.AuthManager, m.c}, nil
 }
 
-func (m GuestOperationsManager) FileManager() (*GuestFileManager, error) {
+func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error) {
 	var g mo.GuestOperationsManager
 
 	err := m.c.Properties(*m.c.ServiceContent.GuestOperationsManager, []string{"fileManager"}, &g)
@@ -41,10 +49,10 @@ func (m GuestOperationsManager) FileManager() (*GuestFileManager, error) {
 		return nil, err
 	}
 
-	return &GuestFileManager{*g.FileManager, m.c}, nil
+	return &FileManager{*g.FileManager, m.c}, nil
 }
 
-func (m GuestOperationsManager) ProcessManager() (*GuestProcessManager, error) {
+func (m OperationsManager) ProcessManager(ctx context.Context) (*ProcessManager, error) {
 	var g mo.GuestOperationsManager
 
 	err := m.c.Properties(*m.c.ServiceContent.GuestOperationsManager, []string{"processManager"}, &g)
@@ -52,5 +60,5 @@ func (m GuestOperationsManager) ProcessManager() (*GuestProcessManager, error) {
 		return nil, err
 	}
 
-	return &GuestProcessManager{*g.ProcessManager, m.c}, nil
+	return &ProcessManager{*g.ProcessManager, m.c}, nil
 }

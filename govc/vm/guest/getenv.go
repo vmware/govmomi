@@ -21,6 +21,7 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"golang.org/x/net/context"
 )
 
 type getenv struct {
@@ -46,7 +47,7 @@ func (cmd *getenv) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vars, err := m.ReadEnvironmentVariableInGuest(vm, cmd.Auth(), f.Args())
+	vars, err := m.ReadEnvironmentVariable(context.TODO(), vm, cmd.Auth(), f.Args())
 	if err != nil {
 		return err
 	}
