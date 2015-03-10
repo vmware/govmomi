@@ -32,6 +32,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
+	"golang.org/x/net/context"
 )
 
 const (
@@ -181,7 +182,7 @@ func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
 	}
 
 	if u := flag.url; u.User != nil {
-		err = c.Session.Login(*u.User)
+		err = c.SessionManager.Login(context.TODO(), u.User)
 		if err != nil {
 			return nil, err
 		}

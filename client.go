@@ -20,6 +20,7 @@ import (
 	"errors"
 	"net/url"
 
+	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -41,7 +42,7 @@ type Client struct {
 	RoundTripper soap.RoundTripper
 
 	ServiceContent types.ServiceContent
-	Session        SessionManager
+	SessionManager *session.Manager
 }
 
 func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
@@ -72,8 +73,7 @@ func NewClientFromClient(soapClient *soap.Client) (*Client, error) {
 		ServiceContent: serviceContent,
 	}
 
-	// automatically create a new SessionManager
-	c.Session = NewSessionManager(&c, *c.ServiceContent.SessionManager)
+	c.SessionManager = session.NewManager(soapClient, c.ServiceContent)
 
 	return &c, nil
 }
@@ -89,7 +89,7 @@ func NewClient(u *url.URL, insecure bool) (*Client, error) {
 
 	// Only login if the URL contains user information.
 	if u.User != nil {
-		err = c.Session.Login(*u.User)
+		err = c.SessionManager.Login(context.TODO(), u.User)
 		if err != nil {
 			return nil, err
 		}
@@ -100,7 +100,12 @@ func NewClient(u *url.URL, insecure bool) (*Client, error) {
 
 // convience method for logout via SessionManager
 func (c *Client) Logout() error {
-	return c.Session.Logout()
+	err := c.SessionManager.Logout(context.TODO())
+
+	// We've logged out - let's close any idle connections
+	c.CloseIdleConnections()
+
+	return err
 }
 
 // RoundTrip dispatches to the RoundTripper field.

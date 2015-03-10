@@ -14,45 +14,50 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
+package session
 
 import (
 	"net/url"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
-type SessionManager struct {
-	types.ManagedObjectReference
-	c           *Client
-	userSession *types.UserSession
+type Manager struct {
+	roundTripper   soap.RoundTripper
+	serviceContent types.ServiceContent
+	userSession    *types.UserSession
 }
 
-func NewSessionManager(c *Client, ref types.ManagedObjectReference) SessionManager {
-	return SessionManager{
-		ManagedObjectReference: ref,
-		c: c,
+func NewManager(rt soap.RoundTripper, sc types.ServiceContent) *Manager {
+	m := Manager{
+		roundTripper:   rt,
+		serviceContent: sc,
 	}
+
+	return &m
 }
 
-func (sm SessionManager) Reference() types.ManagedObjectReference {
-	return sm.ManagedObjectReference
+func (sm Manager) Reference() types.ManagedObjectReference {
+	return *sm.serviceContent.SessionManager
 }
 
-func (sm *SessionManager) Login(u url.Userinfo) error {
+func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	req := types.Login{
 		This: sm.Reference(),
 	}
 
-	req.UserName = u.Username()
-	if pw, ok := u.Password(); ok {
-		req.Password = pw
+	if u != nil {
+		req.UserName = u.Username()
+		if pw, ok := u.Password(); ok {
+			req.Password = pw
+		}
 	}
 
-	login, err := methods.Login(context.TODO(), sm.c, &req)
+	login, err := methods.Login(ctx, sm.roundTripper, &req)
 	if err != nil {
 		return err
 	}
@@ -61,24 +66,19 @@ func (sm *SessionManager) Login(u url.Userinfo) error {
 	return err
 }
 
-func (sm *SessionManager) Logout() error {
+func (sm *Manager) Logout(ctx context.Context) error {
 	req := types.Logout{
 		This: sm.Reference(),
 	}
 
-	_, err := methods.Logout(context.TODO(), sm.c, &req)
-
-	// We've logged out - let's close any idle connections
-	sm.c.CloseIdleConnections()
-
+	_, err := methods.Logout(ctx, sm.roundTripper, &req)
 	return err
 }
 
-func (sm *SessionManager) UserSession() (*types.UserSession, error) {
-
+func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) {
 	if sm.userSession == nil {
 		var mgr mo.SessionManager
-		err := mo.RetrieveProperties(context.TODO(), sm.c, sm.c.ServiceContent.PropertyCollector, sm.Reference(), &mgr)
+		err := mo.RetrieveProperties(ctx, sm.roundTripper, sm.serviceContent.PropertyCollector, sm.Reference(), &mgr)
 		if err != nil {
 			return nil, err
 		}
@@ -88,8 +88,8 @@ func (sm *SessionManager) UserSession() (*types.UserSession, error) {
 	return sm.userSession, nil
 }
 
-func (sm *SessionManager) SessionIsActive() (bool, error) {
-	user, err := sm.UserSession()
+func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
+	user, err := sm.UserSession(ctx)
 	if err != nil {
 		return false, err
 	}
@@ -100,7 +100,7 @@ func (sm *SessionManager) SessionIsActive() (bool, error) {
 		UserName:  user.UserName,
 	}
 
-	active, err := methods.SessionIsActive(context.TODO(), sm.c, &req)
+	active, err := methods.SessionIsActive(ctx, sm.roundTripper, &req)
 	if err != nil {
 		return false, err
 	}
