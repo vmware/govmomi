@@ -35,7 +35,7 @@ func TestNewClient(t *testing.T) {
 		t.SkipNow()
 	}
 
-	c, err := NewClient(*u, true)
+	c, err := NewClient(u, true)
 	if err != nil {
 		t.Error(err)
 	}
@@ -77,7 +77,7 @@ func TestNewClient(t *testing.T) {
 	// invalid login
 	u.Path = "/sdk"
 	u.User = url.UserPassword("ENOENT", "EINVAL")
-	_, err = NewClient(*u, true)
+	_, err = NewClient(u, true)
 	if err == nil {
 		t.Error("should fail")
 	}
@@ -91,7 +91,7 @@ func TestInvalidSdk(t *testing.T) {
 
 	// a URL other than a valid /sdk should error, not panic
 	u.Path = "/mob"
-	_, err := NewClient(*u, true)
+	_, err := NewClient(u, true)
 	if err == nil {
 		t.Error("should fail")
 	}
@@ -103,7 +103,7 @@ func TestPropertiesN(t *testing.T) {
 		t.SkipNow()
 	}
 
-	c, err := NewClient(*u, true)
+	c, err := NewClient(u, true)
 	if err != nil {
 		t.Error(err)
 	}

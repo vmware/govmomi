@@ -51,7 +51,7 @@ func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 	return res.Returnval, nil
 }
 
-func NewClient(u url.URL, insecure bool) (*Client, error) {
+func NewClient(u *url.URL, insecure bool) (*Client, error) {
 	soapClient := soap.NewClient(u, insecure)
 	serviceContent, err := getServiceContent(soapClient)
 	if err != nil {

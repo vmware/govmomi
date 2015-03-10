@@ -24,7 +24,7 @@ import (
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
-func sessionClient(u url.URL, t *testing.T) SessionManager {
+func sessionClient(u *url.URL, t *testing.T) SessionManager {
 	soapClient := soap.NewClient(u, true)
 	serviceContent, err := getServiceContent(soapClient)
 	if err != nil {
@@ -44,7 +44,7 @@ func TestLogin(t *testing.T) {
 	if u == nil {
 		t.SkipNow()
 	}
-	session := sessionClient(*u, t)
+	session := sessionClient(u, t)
 	err := session.Login(*u.User)
 	if err != nil {
 		t.Errorf("Expected no error, got %v", err)
@@ -59,7 +59,7 @@ func TestLogout(t *testing.T) {
 		t.SkipNow()
 	}
 
-	session := sessionClient(*u, t)
+	session := sessionClient(u, t)
 	err := session.Login(*u.User)
 	if err != nil {
 		t.Error("Login Error: ", err)
@@ -84,7 +84,7 @@ func TestSessionIsActive(t *testing.T) {
 		t.SkipNow()
 	}
 
-	session := sessionClient(*u, t)
+	session := sessionClient(u, t)
 	err := session.Login(*u.User)
 	if err != nil {
 		t.Error("Login Error: ", err)

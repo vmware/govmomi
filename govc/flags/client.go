@@ -173,7 +173,7 @@ func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
 }
 
 func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
-	c, err := govmomi.NewClient(*flag.url, flag.insecure)
+	c, err := govmomi.NewClient(flag.url, flag.insecure)
 	if err != nil {
 		return nil, err
 	}
