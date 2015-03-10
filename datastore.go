@@ -70,7 +70,7 @@ func (d Datastore) URL(dc *Datacenter, path string) (*url.URL, error) {
 		return nil, err
 	}
 
-	u := d.c.Client.URL()
+	u := d.c.URL()
 
 	return &url.URL{
 		Scheme: u.Scheme,

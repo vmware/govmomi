@@ -17,7 +17,6 @@ limitations under the License.
 package govmomi
 
 import (
-	"net/http"
 	"net/url"
 
 	"github.com/vmware/govmomi/vim25/methods"
@@ -64,9 +63,9 @@ func (sm *SessionManager) Logout() error {
 	}
 
 	_, err := methods.Logout(context.TODO(), sm.c, &req)
-	// we've logged out - lets close any idle connections
-	t := sm.c.Client.Transport.(*http.Transport)
-	t.CloseIdleConnections()
+
+	// We've logged out - let's close any idle connections
+	sm.c.CloseIdleConnections()
 
 	return err
 }

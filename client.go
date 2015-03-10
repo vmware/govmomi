@@ -33,7 +33,13 @@ var serviceInstance = types.ManagedObjectReference{
 }
 
 type Client struct {
-	Client         *soap.Client
+	*soap.Client
+
+	// RoundTripper is a separate field such that the client's implementation of
+	// the RoundTripper interface can be wrapped by separate implementations for
+	// extra functionality (for example, reauthentication on session timeout).
+	RoundTripper soap.RoundTripper
+
 	ServiceContent types.ServiceContent
 	Session        SessionManager
 }
@@ -60,10 +66,13 @@ func NewClient(u *url.URL, insecure bool) (*Client, error) {
 
 	c := Client{
 		Client:         soapClient,
+		RoundTripper:   soapClient,
 		ServiceContent: serviceContent,
 	}
+
 	// automatically create a new SessionManager
 	c.Session = NewSessionManager(&c, *c.ServiceContent.SessionManager)
+
 	// Only login if the URL contains user information.
 	if u.User != nil {
 		err = c.Session.Login(*u.User)
@@ -80,9 +89,9 @@ func (c *Client) Logout() error {
 	return c.Session.Logout()
 }
 
-// RoundTrip dispatches to the client's SOAP client RoundTrip function.
+// RoundTrip dispatches to the RoundTripper field.
 func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
-	return c.Client.RoundTrip(ctx, req, res)
+	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
 func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {

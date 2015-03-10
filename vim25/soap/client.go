@@ -205,6 +205,10 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	return err
 }
 
+func (c *Client) CloseIdleConnections() {
+	c.t.CloseIdleConnections()
+}
+
 // ParseURL wraps url.Parse to rewrite the URL.Host field
 // In the case of VM guest uploads or NFC lease URLs, a Host
 // field with a value of "*" is rewritten to the Client's URL.Host.
