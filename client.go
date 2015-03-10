@@ -28,11 +28,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-var serviceInstance = types.ManagedObjectReference{
-	Type:  "ServiceInstance",
-	Value: "ServiceInstance",
-}
-
 type Client struct {
 	*soap.Client
 
@@ -45,24 +40,11 @@ type Client struct {
 	SessionManager *session.Manager
 }
 
-func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
-	req := types.RetrieveServiceContent{
-		This: serviceInstance,
-	}
-
-	res, err := methods.RetrieveServiceContent(context.TODO(), r, &req)
-	if err != nil {
-		return types.ServiceContent{}, err
-	}
-
-	return res.Returnval, nil
-}
-
 // NewClientFromClient creates and returns a new client structure from a
 // soap.Client instance. The remote ServiceContent object is retrieved and
 // populated in the Client structure before returning.
 func NewClientFromClient(soapClient *soap.Client) (*Client, error) {
-	serviceContent, err := getServiceContent(soapClient)
+	serviceContent, err := methods.GetServiceContent(context.TODO(), soapClient)
 	if err != nil {
 		return nil, err
 	}

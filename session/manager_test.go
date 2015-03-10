@@ -23,31 +23,12 @@ import (
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
-	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
-var serviceInstance = types.ManagedObjectReference{
-	Type:  "ServiceInstance",
-	Value: "ServiceInstance",
-}
-
-func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
-	req := types.RetrieveServiceContent{
-		This: serviceInstance,
-	}
-
-	res, err := methods.RetrieveServiceContent(context.TODO(), r, &req)
-	if err != nil {
-		return types.ServiceContent{}, err
-	}
-
-	return res.Returnval, nil
-}
-
 func sessionClient(u *url.URL, t *testing.T) *Manager {
 	soapClient := soap.NewClient(u, true)
-	serviceContent, err := getServiceContent(soapClient)
+	serviceContent, err := methods.GetServiceContent(context.Background(), soapClient)
 	if err != nil {
 		t.Error(err)
 	}
