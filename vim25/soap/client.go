@@ -76,6 +76,9 @@ func NewClient(u *url.URL, insecure bool) *Client {
 
 	c.Client.Transport = c.t
 	c.Client.Jar, _ = cookiejar.New(nil)
+
+	// Remove user information from a copy of the URL
+	c.u = c.URL()
 	c.u.User = nil
 
 	return &c
