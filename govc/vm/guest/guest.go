@@ -22,9 +22,9 @@ import (
 
 	"net/url"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/guest"
+	"github.com/vmware/govmomi/object"
 	"golang.org/x/net/context"
 )
 
@@ -68,7 +68,7 @@ func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {
 	return c.Client.ParseURL(urlStr)
 }
 
-func (flag *GuestFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
+func (flag *GuestFlag) VirtualMachine() (*object.VirtualMachine, error) {
 	vm, err := flag.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return nil, err

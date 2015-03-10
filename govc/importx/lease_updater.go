@@ -24,6 +24,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -40,7 +41,7 @@ func (o ovfFileItem) Sink() chan<- progress.Report {
 
 type leaseUpdater struct {
 	client *govmomi.Client
-	lease  *govmomi.HttpNfcLease
+	lease  *object.HttpNfcLease
 
 	pos   int64 // Number of bytes
 	total int64 // Total number of bytes
@@ -50,7 +51,7 @@ type leaseUpdater struct {
 	wg sync.WaitGroup // Track when update loop is done
 }
 
-func newLeaseUpdater(client *govmomi.Client, lease *govmomi.HttpNfcLease, items []ovfFileItem) *leaseUpdater {
+func newLeaseUpdater(client *govmomi.Client, lease *object.HttpNfcLease, items []ovfFileItem) *leaseUpdater {
 	l := leaseUpdater{
 		client: client,
 		lease:  lease,

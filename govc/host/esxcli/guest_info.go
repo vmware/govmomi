@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -47,7 +48,7 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 		return h, nil
 	}
 
-	host := govmomi.NewHostSystem(g.c, *ref)
+	host := object.NewHostSystem(g.c, *ref)
 
 	e, err := NewExecutor(g.c, host)
 	if err != nil {
@@ -79,7 +80,7 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 // ESX hosts must be configured with the /Net/GuestIPHack enabled.
 // For example:
 // $ govc host.esxcli -- system settings advanced set -o /Net/GuestIPHack -i 1
-func (g *GuestInfo) IpAddress(vm *govmomi.VirtualMachine) (string, error) {
+func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
 	var mvm mo.VirtualMachine
 	err := g.c.Properties(vm.ManagedObjectReference, []string{"runtime.host", "config.uuid"}, &mvm)
 	if err != nil {

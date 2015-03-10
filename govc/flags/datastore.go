@@ -25,7 +25,7 @@ import (
 	"path"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -39,7 +39,7 @@ type DatastoreFlag struct {
 
 	register sync.Once
 	name     string
-	ds       *govmomi.Datastore
+	ds       *object.Datastore
 }
 
 func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
@@ -55,7 +55,7 @@ func (flag *DatastoreFlag) Process() error {
 	return nil
 }
 
-func (flag *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
+func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	if flag.ds != nil {
 		return flag.ds, nil
 	}

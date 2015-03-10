@@ -22,7 +22,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 )
 
 type HostSystemFlag struct {
@@ -32,8 +32,8 @@ type HostSystemFlag struct {
 
 	register sync.Once
 	name     string
-	host     *govmomi.HostSystem
-	pool     *govmomi.ResourcePool
+	host     *object.HostSystem
+	pool     *object.ResourcePool
 }
 
 func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
@@ -51,7 +51,7 @@ func (flag *HostSystemFlag) Process() error {
 	return nil
 }
 
-func (flag *HostSystemFlag) HostSystemIfSpecified() (*govmomi.HostSystem, error) {
+func (flag *HostSystemFlag) HostSystemIfSpecified() (*object.HostSystem, error) {
 	if flag.host != nil {
 		return flag.host, nil
 	}
@@ -83,7 +83,7 @@ func (flag *HostSystemFlag) HostSystemIfSpecified() (*govmomi.HostSystem, error)
 	return flag.host, err
 }
 
-func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
+func (flag *HostSystemFlag) HostSystem() (*object.HostSystem, error) {
 	host, err := flag.HostSystemIfSpecified()
 	if err != nil {
 		return nil, err
@@ -102,7 +102,7 @@ func (flag *HostSystemFlag) HostSystem() (*govmomi.HostSystem, error) {
 	return flag.host, err
 }
 
-func (flag *HostSystemFlag) HostNetworkSystem() (*govmomi.HostNetworkSystem, error) {
+func (flag *HostSystemFlag) HostNetworkSystem() (*object.HostNetworkSystem, error) {
 	host, err := flag.HostSystem()
 	if err != nil {
 		return nil, err

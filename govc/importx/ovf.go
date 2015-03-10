@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
@@ -39,9 +40,9 @@ type ovf struct {
 	*flags.OutputFlag
 
 	Client       *govmomi.Client
-	Datacenter   *govmomi.Datacenter
-	Datastore    *govmomi.Datastore
-	ResourcePool *govmomi.ResourcePool
+	Datacenter   *object.Datacenter
+	Datastore    *object.Datastore
+	ResourcePool *object.ResourcePool
 
 	Archive
 }
@@ -137,7 +138,7 @@ func (cmd *ovf) Import(fpath string) error {
 		},
 	}
 
-	m := govmomi.NewOvfManager(c)
+	m := object.NewOvfManager(c)
 	spec, err := m.CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
 		return err
@@ -163,7 +164,7 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	var host *govmomi.HostSystem
+	var host *object.HostSystem
 	if cmd.SearchFlag.IsSet() {
 		if host, err = cmd.HostSystem(); err != nil {
 			return err
@@ -224,7 +225,7 @@ func (cmd *ovf) Import(fpath string) error {
 	return lease.HttpNfcLeaseComplete()
 }
 
-func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
+func (cmd *ovf) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
 	item := ofi.item
 	file := item.Path
 

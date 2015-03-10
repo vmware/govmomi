@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 )
 
 const (
@@ -111,11 +112,11 @@ func (flag *SearchFlag) IsSet() bool {
 	return flag.isset
 }
 
-func (flag *SearchFlag) searchIndex(c *govmomi.Client) *govmomi.SearchIndex {
-	return govmomi.NewSearchIndex(c)
+func (flag *SearchFlag) searchIndex(c *govmomi.Client) *object.SearchIndex {
+	return object.NewSearchIndex(c)
 }
 
-func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByDatastorePath(dc, flag.byDatastorePath)
@@ -124,7 +125,7 @@ func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Dat
 	}
 }
 
-func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByDnsName(dc, flag.byDNSName, true)
@@ -135,12 +136,12 @@ func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacente
 	}
 }
 
-func (flag *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+func (flag *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
 	// TODO(PN): The datacenter flag should not be set because it is ignored.
 	return flag.searchIndex(c).FindByInventoryPath(flag.byInventoryPath)
 }
 
-func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByIp(dc, flag.byIP, true)
@@ -151,7 +152,7 @@ func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (g
 	}
 }
 
-func (flag *SearchFlag) searchByUUID(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
+func (flag *SearchFlag) searchByUUID(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByUuid(dc, flag.byUUID, true)
@@ -162,8 +163,8 @@ func (flag *SearchFlag) searchByUUID(c *govmomi.Client, dc *govmomi.Datacenter) 
 	}
 }
 
-func (flag *SearchFlag) search() (govmomi.Reference, error) {
-	var ref govmomi.Reference
+func (flag *SearchFlag) search() (object.Reference, error) {
+	var ref object.Reference
 	var err error
 
 	c, err := flag.Client()
@@ -202,13 +203,13 @@ func (flag *SearchFlag) search() (govmomi.Reference, error) {
 	return ref, nil
 }
 
-func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
+func (flag *SearchFlag) VirtualMachine() (*object.VirtualMachine, error) {
 	ref, err := flag.search()
 	if err != nil {
 		return nil, err
 	}
 
-	vm, ok := ref.(*govmomi.VirtualMachine)
+	vm, ok := ref.(*object.VirtualMachine)
 	if !ok {
 		return nil, fmt.Errorf("expected VirtualMachine entity, got %s", ref.Reference().Type)
 	}
@@ -216,8 +217,8 @@ func (flag *SearchFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
 	return vm, nil
 }
 
-func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachine, error) {
-	var out []*govmomi.VirtualMachine
+func (flag *SearchFlag) VirtualMachines(args []string) ([]*object.VirtualMachine, error) {
+	var out []*object.VirtualMachine
 
 	if flag.IsSet() {
 		vm, err := flag.VirtualMachine()
@@ -242,13 +243,13 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*govmomi.VirtualMachin
 	return finder.VirtualMachineList(args...)
 }
 
-func (flag *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
+func (flag *SearchFlag) HostSystem() (*object.HostSystem, error) {
 	ref, err := flag.search()
 	if err != nil {
 		return nil, err
 	}
 
-	host, ok := ref.(*govmomi.HostSystem)
+	host, ok := ref.(*object.HostSystem)
 	if !ok {
 		return nil, fmt.Errorf("expected HostSystem entity, got %s", ref.Reference().Type)
 	}
@@ -256,8 +257,8 @@ func (flag *SearchFlag) HostSystem() (*govmomi.HostSystem, error) {
 	return host, nil
 }
 
-func (flag *SearchFlag) HostSystems(args []string) ([]*govmomi.HostSystem, error) {
-	var out []*govmomi.HostSystem
+func (flag *SearchFlag) HostSystems(args []string) ([]*object.HostSystem, error) {
+	var out []*object.HostSystem
 
 	if flag.IsSet() {
 		host, err := flag.HostSystem()

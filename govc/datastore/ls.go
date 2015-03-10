@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -112,7 +113,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 	return cmd.WriteResult(result)
 }
 
-func (cmd *ls) ListPath(b *govmomi.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
+func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
 	var res types.HostDatastoreBrowserSearchResults
 
 	path, err := cmd.DatastorePath(path)

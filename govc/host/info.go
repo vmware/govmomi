@@ -23,9 +23,9 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 )
 
@@ -49,7 +49,7 @@ func (c *info) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	var hosts []*govmomi.HostSystem
+	var hosts []*object.HostSystem
 
 	// We could do without the -host flag, leaving it for compat
 	host, err := c.HostSystemIfSpecified()

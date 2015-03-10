@@ -22,7 +22,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -31,7 +31,7 @@ type NetworkFlag struct {
 
 	register sync.Once
 	name     string
-	net      govmomi.NetworkReference
+	net      object.NetworkReference
 	adapter  string
 }
 
@@ -63,7 +63,7 @@ func (flag *NetworkFlag) Set(name string) error {
 	return nil
 }
 
-func (flag *NetworkFlag) Network() (govmomi.NetworkReference, error) {
+func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
 	if flag.net != nil {
 		return flag.net, nil
 	}
@@ -93,7 +93,7 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
-	device, err := govmomi.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
+	device, err := object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
 	if err != nil {
 		return nil, err
 	}

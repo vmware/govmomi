@@ -21,9 +21,9 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -41,7 +41,7 @@ func init() {
 
 func (cmd *add) Register(f *flag.FlagSet) {
 	var ctypes []string
-	ct := govmomi.SCSIControllerTypes()
+	ct := object.SCSIControllerTypes()
 	for _, t := range ct {
 		ctypes = append(ctypes, ct.Type(t))
 	}

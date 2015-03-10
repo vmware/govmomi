@@ -20,9 +20,9 @@ import (
 	"errors"
 	"flag"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 )
 
 type mv struct {
@@ -73,7 +73,7 @@ func (cmd *mv) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	m := govmomi.NewFileManager(c)
+	m := object.NewFileManager(c)
 	task, err := m.MoveDatastoreFile(src, dc, dst, dc, cmd.force)
 	if err != nil {
 		return err

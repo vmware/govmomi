@@ -22,7 +22,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 )
 
 type ResourcePoolFlag struct {
@@ -30,7 +30,7 @@ type ResourcePoolFlag struct {
 
 	register sync.Once
 	name     string
-	pool     *govmomi.ResourcePool
+	pool     *object.ResourcePool
 }
 
 func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
@@ -46,7 +46,7 @@ func (flag *ResourcePoolFlag) Process() error {
 	return nil
 }
 
-func (flag *ResourcePoolFlag) ResourcePool() (*govmomi.ResourcePool, error) {
+func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	if flag.pool != nil {
 		return flag.pool, nil
 	}

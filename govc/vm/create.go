@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -45,10 +46,10 @@ type create struct {
 	controller string
 
 	Client       *govmomi.Client
-	Datacenter   *govmomi.Datacenter
-	Datastore    *govmomi.Datastore
-	ResourcePool *govmomi.ResourcePool
-	HostSystem   *govmomi.HostSystem
+	Datacenter   *object.Datacenter
+	Datastore    *object.Datastore
+	ResourcePool *object.ResourcePool
+	HostSystem   *object.HostSystem
 }
 
 func init() {
@@ -126,7 +127,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm := govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
+	vm := object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
 
 	if err := cmd.addDevices(vm); err != nil {
 		return err
@@ -147,7 +148,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	return nil
 }
 
-func (cmd *create) addDevices(vm *govmomi.VirtualMachine) error {
+func (cmd *create) addDevices(vm *object.VirtualMachine) error {
 	devices, err := vm.Device()
 	if err != nil {
 		return err
@@ -214,7 +215,7 @@ func (cmd *create) createVM(name string) (*govmomi.Task, error) {
 	}
 
 	if cmd.controller != "ide" {
-		scsi, err := govmomi.SCSIControllerTypes().CreateSCSIController(cmd.controller)
+		scsi, err := object.SCSIControllerTypes().CreateSCSIController(cmd.controller)
 		if err != nil {
 			return nil, err
 		}

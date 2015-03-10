@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -163,7 +164,7 @@ func (cmd *vnc) loadVMs(args []string) ([]*vncVM, error) {
 			continue
 		}
 
-		hs := govmomi.NewHostSystem(c, vm.hostReference())
+		hs := object.NewHostSystem(c, vm.hostReference())
 		h, err := newVNCHost(c, hs, cmd.PortRange.low, cmd.PortRange.high)
 		if err != nil {
 			return nil, err
@@ -178,7 +179,7 @@ func (cmd *vnc) loadVMs(args []string) ([]*vncVM, error) {
 
 type vncVM struct {
 	c    *govmomi.Client
-	vm   *govmomi.VirtualMachine
+	vm   *object.VirtualMachine
 	mvm  mo.VirtualMachine
 	host *vncHost
 
@@ -186,7 +187,7 @@ type vncVM struct {
 	newOptions vncOptions
 }
 
-func newVNCVM(c *govmomi.Client, vm *govmomi.VirtualMachine) (*vncVM, error) {
+func newVNCVM(c *govmomi.Client, vm *object.VirtualMachine) (*vncVM, error) {
 	v := &vncVM{
 		c:  c,
 		vm: vm,
@@ -289,12 +290,12 @@ func (v *vncVM) write(w io.Writer) error {
 
 type vncHost struct {
 	c     *govmomi.Client
-	host  *govmomi.HostSystem
+	host  *object.HostSystem
 	ports map[int]struct{}
 	ip    string // This field is populated by `managementIP`
 }
 
-func newVNCHost(c *govmomi.Client, host *govmomi.HostSystem, low, high int) (*vncHost, error) {
+func newVNCHost(c *govmomi.Client, host *object.HostSystem, low, high int) (*vncHost, error) {
 	ports := make(map[int]struct{})
 	for i := low; i <= high; i++ {
 		ports[i] = struct{}{}
