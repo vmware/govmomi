@@ -36,6 +36,10 @@ func NewFolder(c *Client, ref types.ManagedObjectReference) *Folder {
 	}
 }
 
+func NewRootFolder(c *Client) *Folder {
+	return NewFolder(c, c.ServiceContent.RootFolder)
+}
+
 func (f Folder) Reference() types.ManagedObjectReference {
 	return f.ManagedObjectReference
 }

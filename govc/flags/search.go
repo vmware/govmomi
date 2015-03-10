@@ -111,10 +111,14 @@ func (flag *SearchFlag) IsSet() bool {
 	return flag.isset
 }
 
+func (flag *SearchFlag) searchIndex(c *govmomi.Client) *govmomi.SearchIndex {
+	return govmomi.NewSearchIndex(c)
+}
+
 func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByDatastorePath(dc, flag.byDatastorePath)
+		return flag.searchIndex(c).FindByDatastorePath(dc, flag.byDatastorePath)
 	default:
 		panic("unsupported type")
 	}
@@ -123,9 +127,9 @@ func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *govmomi.Dat
 func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByDnsName(dc, flag.byDNSName, true)
+		return flag.searchIndex(c).FindByDnsName(dc, flag.byDNSName, true)
 	case SearchHosts:
-		return c.SearchIndex().FindByDnsName(dc, flag.byDNSName, false)
+		return flag.searchIndex(c).FindByDnsName(dc, flag.byDNSName, false)
 	default:
 		panic("unsupported type")
 	}
@@ -133,15 +137,15 @@ func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *govmomi.Datacente
 
 func (flag *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	// TODO(PN): The datacenter flag should not be set because it is ignored.
-	return c.SearchIndex().FindByInventoryPath(flag.byInventoryPath)
+	return flag.searchIndex(c).FindByInventoryPath(flag.byInventoryPath)
 }
 
 func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByIp(dc, flag.byIP, true)
+		return flag.searchIndex(c).FindByIp(dc, flag.byIP, true)
 	case SearchHosts:
-		return c.SearchIndex().FindByIp(dc, flag.byIP, false)
+		return flag.searchIndex(c).FindByIp(dc, flag.byIP, false)
 	default:
 		panic("unsupported type")
 	}
@@ -150,9 +154,9 @@ func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *govmomi.Datacenter) (g
 func (flag *SearchFlag) searchByUUID(c *govmomi.Client, dc *govmomi.Datacenter) (govmomi.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return c.SearchIndex().FindByUuid(dc, flag.byUUID, true)
+		return flag.searchIndex(c).FindByUuid(dc, flag.byUUID, true)
 	case SearchHosts:
-		return c.SearchIndex().FindByUuid(dc, flag.byUUID, false)
+		return flag.searchIndex(c).FindByUuid(dc, flag.byUUID, false)
 	default:
 		panic("unsupported type")
 	}

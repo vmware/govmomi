@@ -66,7 +66,7 @@ func (f *Finder) find(fn findRelativeFunc, tl bool, path ...string) ([]list.Elem
 func (f *Finder) list(fn findRelativeFunc, tl bool, arg string) ([]list.Element, error) {
 	root := list.Element{
 		Path:   "/",
-		Object: f.Client.RootFolder(),
+		Object: govmomi.NewRootFolder(f.Client),
 	}
 
 	parts := list.ToParts(arg)
@@ -182,7 +182,7 @@ func (f *Finder) networkFolder() (govmomi.Reference, error) {
 }
 
 func (f *Finder) rootFolder() (govmomi.Reference, error) {
-	return f.Client.RootFolder(), nil
+	return govmomi.NewRootFolder(f.Client), nil
 }
 
 func (f *Finder) ManagedObjectList(path ...string) ([]list.Element, error) {

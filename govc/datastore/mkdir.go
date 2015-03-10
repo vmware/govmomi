@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -68,7 +69,8 @@ func (cmd *mkdir) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	err = c.FileManager().MakeDirectory(path, dc, cmd.createParents)
+	m := govmomi.NewFileManager(c)
+	err = m.MakeDirectory(path, dc, cmd.createParents)
 
 	// ignore EEXIST if -p flag is given
 	if err != nil && cmd.createParents {

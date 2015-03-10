@@ -26,6 +26,14 @@ type VirtualDiskManager struct {
 	c *Client
 }
 
+func NewVirtualDiskManager(c *Client) *VirtualDiskManager {
+	m := VirtualDiskManager{
+		c: c,
+	}
+
+	return &m
+}
+
 // CopyVirtualDisk copies a virtual disk, performing conversions as specified in the spec.
 func (m VirtualDiskManager) CopyVirtualDisk(
 	sourceName string, sourceDatacenter *Datacenter,

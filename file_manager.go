@@ -26,6 +26,14 @@ type FileManager struct {
 	c *Client
 }
 
+func NewFileManager(c *Client) *FileManager {
+	f := FileManager{
+		c: c,
+	}
+
+	return &f
+}
+
 func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.CopyDatastoreFile_Task{
 		This:            *f.c.ServiceContent.FileManager,

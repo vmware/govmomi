@@ -26,6 +26,14 @@ type SearchIndex struct {
 	c *Client
 }
 
+func NewSearchIndex(c *Client) *SearchIndex {
+	s := SearchIndex{
+		c: c,
+	}
+
+	return &s
+}
+
 // FindByDatastorePath finds a virtual machine by its location on a datastore.
 func (s SearchIndex) FindByDatastorePath(dc *Datacenter, path string) (Reference, error) {
 	req := types.FindByDatastorePath{

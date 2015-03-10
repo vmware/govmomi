@@ -279,38 +279,6 @@ func (c *Client) Ancestors(r Reference) ([]mo.ManagedEntity, error) {
 	return out, nil
 }
 
-func (c *Client) FileManager() FileManager {
-	return FileManager{c}
-}
-
-func (c *Client) OvfManager() OvfManager {
-	return OvfManager{c}
-}
-
-func (c *Client) RootFolder() *Folder {
-	return NewFolder(c, c.ServiceContent.RootFolder)
-}
-
-func (c *Client) SearchIndex() SearchIndex {
-	return SearchIndex{c}
-}
-
-func (c *Client) VirtualDiskManager() VirtualDiskManager {
-	return VirtualDiskManager{c}
-}
-
-func (c *Client) StorageResourceManager() StorageResourceManager {
-	return StorageResourceManager{c}
-}
-
-func (c *Client) CustomizationSpecManager() CustomizationSpecManager {
-	return CustomizationSpecManager{c}
-}
-
-// func (c *Client) SessionManager() SessionManager {
-// 	return NewSessionManager(c, *c.ServiceContent.SessionManager)
-// }
-
 // NewPropertyCollector creates a new property collector based on the
 // root property collector. It is the responsibility of the caller to
 // clean up the property collector when done.

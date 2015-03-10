@@ -137,7 +137,8 @@ func (cmd *ovf) Import(fpath string) error {
 		},
 	}
 
-	spec, err := c.OvfManager().CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
+	m := govmomi.NewOvfManager(c)
+	spec, err := m.CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
 		return err
 	}

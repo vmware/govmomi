@@ -20,6 +20,7 @@ import (
 	"errors"
 	"flag"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 )
@@ -72,7 +73,8 @@ func (cmd *mv) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	task, err := c.FileManager().MoveDatastoreFile(src, dc, dst, dc, cmd.force)
+	m := govmomi.NewFileManager(c)
+	task, err := m.MoveDatastoreFile(src, dc, dst, dc, cmd.force)
 	if err != nil {
 		return err
 	}

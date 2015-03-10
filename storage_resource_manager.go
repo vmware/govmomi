@@ -26,6 +26,14 @@ type StorageResourceManager struct {
 	c *Client
 }
 
+func NewStorageResourceManager(c *Client) *StorageResourceManager {
+	sr := StorageResourceManager{
+		c: c,
+	}
+
+	return &sr
+}
+
 func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendation_Task{
 		This: *sr.c.ServiceContent.StorageResourceManager,

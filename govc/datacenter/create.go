@@ -19,6 +19,7 @@ package datacenter
 import (
 	"flag"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -52,7 +53,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	finder := find.NewFinder(client, false)
-	rootFolder := client.RootFolder()
+	rootFolder := govmomi.NewRootFolder(client)
 	for _, datacenterToCreate := range datacenters {
 		foundDatacenters, err := finder.DatacenterList(datacenterToCreate)
 		if err != nil {

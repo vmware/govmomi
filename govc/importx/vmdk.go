@@ -132,7 +132,8 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 		case flags.ErrDatastoreDirNotExist:
 			// The base path doesn't exist. Create it.
 			dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
-			return cmd.Client.FileManager().MakeDirectory(dsPath, cmd.Datacenter, true)
+			m := govmomi.NewFileManager(cmd.Client)
+			return m.MakeDirectory(dsPath, cmd.Datacenter, true)
 		case flags.ErrDatastoreFileNotExist:
 			// Destination path doesn't exist; all good to continue with import.
 			return nil
@@ -227,7 +228,7 @@ func (cmd *vmdk) CopyHostAgent(i importable, s progress.Sinker) error {
 	dc := cmd.Datacenter
 	src := cmd.Datastore.Path(i.RemoteSrcVMDK())
 	dst := cmd.Datastore.Path(i.RemoteDstVMDK())
-	vdm := cmd.Client.VirtualDiskManager()
+	vdm := govmomi.NewVirtualDiskManager(cmd.Client)
 	task, err := vdm.CopyVirtualDisk(src, dc, dst, dc, spec, false)
 	if err != nil {
 		return err
@@ -294,7 +295,7 @@ func (cmd *vmdk) CopyVirtualCenter(i importable, s progress.Sinker) error {
 func (cmd *vmdk) MoveDisk(src, dst string) error {
 	dsSrc := cmd.Datastore.Path(src)
 	dsDst := cmd.Datastore.Path(dst)
-	vdm := cmd.Client.VirtualDiskManager()
+	vdm := govmomi.NewVirtualDiskManager(cmd.Client)
 	task, err := vdm.MoveVirtualDisk(dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
 	if err != nil {
 		return err
@@ -304,7 +305,7 @@ func (cmd *vmdk) MoveDisk(src, dst string) error {
 }
 
 func (cmd *vmdk) DeleteDisk(path string) error {
-	vdm := cmd.Client.VirtualDiskManager()
+	vdm := govmomi.NewVirtualDiskManager(cmd.Client)
 	task, err := vdm.DeleteVirtualDisk(cmd.Datastore.Path(path), cmd.Datacenter)
 	if err != nil {
 		return err

@@ -68,7 +68,8 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	task, err := c.FileManager().DeleteDatastoreFile(path, dc)
+	m := govmomi.NewFileManager(c)
+	task, err := m.DeleteDatastoreFile(path, dc)
 	if err != nil {
 		return err
 	}

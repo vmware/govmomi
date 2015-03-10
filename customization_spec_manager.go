@@ -26,6 +26,14 @@ type CustomizationSpecManager struct {
 	c *Client
 }
 
+func NewCustomizationSpecManager(c *Client) *CustomizationSpecManager {
+	cs := CustomizationSpecManager{
+		c: c,
+	}
+
+	return &cs
+}
+
 func (cs CustomizationSpecManager) DoesCustomizationSpecExist(name string) (bool, error) {
 	req := types.DoesCustomizationSpecExist{
 		This: *cs.c.ServiceContent.CustomizationSpecManager,
