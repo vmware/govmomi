@@ -31,6 +31,7 @@ import (
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 )
 
 const (
@@ -150,7 +151,7 @@ func (flag *ClientFlag) sessionFile() string {
 }
 
 func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
-	var c govmomi.Client
+	var c soap.Client
 
 	f, err := os.Open(flag.sessionFile())
 	if err != nil {
@@ -169,13 +170,21 @@ func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
 		return nil, err
 	}
 
-	return &c, nil
+	return govmomi.NewClientFromClient(&c)
 }
 
 func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
-	c, err := govmomi.NewClient(flag.url, flag.insecure)
+	soapClient := soap.NewClient(flag.url, flag.insecure)
+	c, err := govmomi.NewClientFromClient(soapClient)
 	if err != nil {
 		return nil, err
+	}
+
+	if u := flag.url; u.User != nil {
+		err = c.Session.Login(*u.User)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	p := flag.sessionFile()
@@ -192,7 +201,7 @@ func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
 	defer f.Close()
 
 	enc := json.NewEncoder(f)
-	err = enc.Encode(c)
+	err = enc.Encode(soapClient)
 	if err != nil {
 		return nil, err
 	}

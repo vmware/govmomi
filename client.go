@@ -57,8 +57,10 @@ func getServiceContent(r soap.RoundTripper) (types.ServiceContent, error) {
 	return res.Returnval, nil
 }
 
-func NewClient(u *url.URL, insecure bool) (*Client, error) {
-	soapClient := soap.NewClient(u, insecure)
+// NewClientFromClient creates and returns a new client structure from a
+// soap.Client instance. The remote ServiceContent object is retrieved and
+// populated in the Client structure before returning.
+func NewClientFromClient(soapClient *soap.Client) (*Client, error) {
 	serviceContent, err := getServiceContent(soapClient)
 	if err != nil {
 		return nil, err
@@ -73,6 +75,18 @@ func NewClient(u *url.URL, insecure bool) (*Client, error) {
 	// automatically create a new SessionManager
 	c.Session = NewSessionManager(&c, *c.ServiceContent.SessionManager)
 
+	return &c, nil
+}
+
+// NewClient creates a new client from a URL. The client authenticates with the
+// server before returning if the URL contains user information.
+func NewClient(u *url.URL, insecure bool) (*Client, error) {
+	soapClient := soap.NewClient(u, insecure)
+	c, err := NewClientFromClient(soapClient)
+	if err != nil {
+		return nil, err
+	}
+
 	// Only login if the URL contains user information.
 	if u.User != nil {
 		err = c.Session.Login(*u.User)
@@ -81,7 +95,7 @@ func NewClient(u *url.URL, insecure bool) (*Client, error) {
 		}
 	}
 
-	return &c, nil
+	return c, nil
 }
 
 // convience method for logout via SessionManager

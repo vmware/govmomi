@@ -25,18 +25,12 @@ import (
 )
 
 func sessionClient(u *url.URL, t *testing.T) SessionManager {
-	soapClient := soap.NewClient(u, true)
-	serviceContent, err := getServiceContent(soapClient)
+	c, err := NewClientFromClient(soap.NewClient(u, true))
 	if err != nil {
 		t.Error(err)
 	}
 
-	c := Client{
-		Client:         soapClient,
-		ServiceContent: serviceContent,
-	}
-
-	return NewSessionManager(&c, *c.ServiceContent.SessionManager)
+	return NewSessionManager(c, *c.ServiceContent.SessionManager)
 }
 
 func TestLogin(t *testing.T) {
