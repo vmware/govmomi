@@ -54,7 +54,10 @@ func (sm *SessionManager) Login(u url.Userinfo) error {
 	}
 
 	login, err := methods.Login(context.TODO(), sm.c, &req)
-	sm.userSession = &login.Returnval
+	if err == nil{
+		sm.userSession = &login.Returnval
+	}
+
 	return err
 }
 
