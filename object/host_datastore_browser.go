@@ -40,7 +40,7 @@ func (b HostDatastoreBrowser) Reference() types.ManagedObjectReference {
 	return b.ManagedObjectReference
 }
 
-func (b HostDatastoreBrowser) SearchDatastore(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*govmomi.Task, error) {
+func (b HostDatastoreBrowser) SearchDatastore(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastore_Task{
 		This:          b.Reference(),
 		DatastorePath: datastorePath,
@@ -52,10 +52,10 @@ func (b HostDatastoreBrowser) SearchDatastore(datastorePath string, searchSpec *
 		return nil, err
 	}
 
-	return govmomi.NewTask(b.c, res.Returnval), nil
+	return NewTask(b.c, res.Returnval), nil
 }
 
-func (b HostDatastoreBrowser) SearchDatastoreSubFolders(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*govmomi.Task, error) {
+func (b HostDatastoreBrowser) SearchDatastoreSubFolders(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastoreSubFolders_Task{
 		This:          b.Reference(),
 		DatastorePath: datastorePath,
@@ -67,5 +67,5 @@ func (b HostDatastoreBrowser) SearchDatastoreSubFolders(datastorePath string, se
 		return nil, err
 	}
 
-	return govmomi.NewTask(b.c, res.Returnval), nil
+	return NewTask(b.c, res.Returnval), nil
 }

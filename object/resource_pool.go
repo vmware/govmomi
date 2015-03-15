@@ -110,7 +110,7 @@ func (p ResourcePool) DestroyChildren() error {
 	return err
 }
 
-func (p ResourcePool) Destroy() (*govmomi.Task, error) {
+func (p ResourcePool) Destroy() (*Task, error) {
 	req := types.Destroy_Task{
 		This: p.Reference(),
 	}
@@ -120,5 +120,5 @@ func (p ResourcePool) Destroy() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(p.c, res.Returnval), nil
+	return NewTask(p.c, res.Returnval), nil
 }

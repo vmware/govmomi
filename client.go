@@ -152,43 +152,5 @@ func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string
 
 	defer p.Destroy(context.TODO())
 
-	req := types.CreateFilter{
-		Spec: types.PropertyFilterSpec{
-			ObjectSet: []types.ObjectSpec{
-				{
-					Obj: obj,
-				},
-			},
-			PropSet: []types.PropertySpec{
-				{
-					PathSet: ps,
-					Type:    obj.Type,
-				},
-			},
-		},
-	}
-
-	err = p.CreateFilter(context.TODO(), req)
-	if err != nil {
-		return err
-	}
-
-	for version := ""; ; {
-		res, err := p.WaitForUpdates(context.TODO(), version)
-		if err != nil {
-			return err
-		}
-
-		version = res.Version
-
-		for _, fs := range res.FilterSet {
-			for _, os := range fs.ObjectSet {
-				if os.Obj == obj {
-					if f(os.ChangeSet) {
-						return nil
-					}
-				}
-			}
-		}
-	}
+	return p.Wait(context.TODO(), obj, ps, f)
 }

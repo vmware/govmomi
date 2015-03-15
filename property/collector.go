@@ -90,3 +90,45 @@ func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.Update
 
 	return res.Returnval, nil
 }
+
+func (p *Collector) Wait(ctx context.Context, obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
+	req := types.CreateFilter{
+		Spec: types.PropertyFilterSpec{
+			ObjectSet: []types.ObjectSpec{
+				{
+					Obj: obj,
+				},
+			},
+			PropSet: []types.PropertySpec{
+				{
+					PathSet: ps,
+					Type:    obj.Type,
+				},
+			},
+		},
+	}
+
+	err := p.CreateFilter(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	for version := ""; ; {
+		res, err := p.WaitForUpdates(ctx, version)
+		if err != nil {
+			return err
+		}
+
+		version = res.Version
+
+		for _, fs := range res.FilterSet {
+			for _, os := range fs.ObjectSet {
+				if os.Obj == obj {
+					if f(os.ChangeSet) {
+						return nil
+					}
+				}
+			}
+		}
+	}
+}

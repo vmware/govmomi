@@ -35,7 +35,7 @@ func NewFileManager(c *govmomi.Client) *FileManager {
 	return &f
 }
 
-func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*govmomi.Task, error) {
+func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.CopyDatastoreFile_Task{
 		This:            *f.c.ServiceContent.FileManager,
 		SourceName:      sourceName,
@@ -58,11 +58,11 @@ func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Data
 		return nil, err
 	}
 
-	return govmomi.NewTask(f.c, res.Returnval), nil
+	return NewTask(f.c, res.Returnval), nil
 }
 
 // DeleteDatastoreFile deletes the specified file or folder from the datastore.
-func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*govmomi.Task, error) {
+func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteDatastoreFile_Task{
 		This: *f.c.ServiceContent.FileManager,
 		Name: name,
@@ -78,7 +78,7 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*govmomi.
 		return nil, err
 	}
 
-	return govmomi.NewTask(f.c, res.Returnval), nil
+	return NewTask(f.c, res.Returnval), nil
 }
 
 // MakeDirectory creates a folder using the specified name.
@@ -98,7 +98,7 @@ func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDire
 	return err
 }
 
-func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*govmomi.Task, error) {
+func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.MoveDatastoreFile_Task{
 		This:            *f.c.ServiceContent.FileManager,
 		SourceName:      sourceName,
@@ -121,5 +121,5 @@ func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Data
 		return nil, err
 	}
 
-	return govmomi.NewTask(f.c, res.Returnval), nil
+	return NewTask(f.c, res.Returnval), nil
 }

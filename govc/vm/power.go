@@ -20,9 +20,9 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 )
 
 type power struct {
@@ -81,7 +81,7 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		var task *govmomi.Task
+		var task *object.Task
 
 		switch {
 		case cmd.On:

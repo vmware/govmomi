@@ -1,0 +1,60 @@
+/*
+Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
+package object
+
+import (
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25/progress"
+	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
+)
+
+// Task is a convenience wrapper around task.Task that keeps a reference to
+// the client that was used to create it. This allows users to call the Wait()
+// function with only a context parameter, instead of a context parameter, a
+// soap.RoundTripper, and reference to the root property collector.
+type Task struct {
+	c   *govmomi.Client
+	ref types.ManagedObjectReference
+}
+
+func NewTask(c *govmomi.Client, ref types.ManagedObjectReference) *Task {
+	t := Task{
+		c:   c,
+		ref: ref,
+	}
+
+	return &t
+}
+
+func (t *Task) Wait() error {
+	_, err := t.WaitForResult(nil)
+	return err
+}
+
+func (t *Task) WaitForResult(s progress.Sinker) (*types.TaskInfo, error) {
+	p, err := property.NewCollector(context.TODO(), t.c, t.c.ServiceContent)
+	if err != nil {
+		return nil, err
+	}
+
+	defer p.Destroy(context.Background())
+
+	return task.Wait(context.TODO(), t.ref, p, s)
+}

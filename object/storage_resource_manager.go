@@ -35,7 +35,7 @@ func NewStorageResourceManager(c *govmomi.Client) *StorageResourceManager {
 	return &sr
 }
 
-func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*govmomi.Task, error) {
+func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendation_Task{
 		This: *sr.c.ServiceContent.StorageResourceManager,
 		Key:  key,
@@ -46,10 +46,10 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*g
 		return nil, err
 	}
 
-	return govmomi.NewTask(sr.c, res.Returnval), nil
+	return NewTask(sr.c, res.Returnval), nil
 }
 
-func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *StoragePod, key string) (*govmomi.Task, error) {
+func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *StoragePod, key string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendationToPod_Task{
 		This: *sr.c.ServiceContent.StorageResourceManager,
 		Key:  key,
@@ -64,7 +64,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *Storage
 		return nil, err
 	}
 
-	return govmomi.NewTask(sr.c, res.Returnval), nil
+	return NewTask(sr.c, res.Returnval), nil
 }
 
 func (sr StorageResourceManager) CancelStorageDrsRecommendation(key []string) error {
@@ -78,7 +78,7 @@ func (sr StorageResourceManager) CancelStorageDrsRecommendation(key []string) er
 	return err
 }
 
-func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, spec types.StorageIORMConfigSpec, key string) (*govmomi.Task, error) {
+func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, spec types.StorageIORMConfigSpec, key string) (*Task, error) {
 	req := types.ConfigureDatastoreIORM_Task{
 		This: *sr.c.ServiceContent.StorageResourceManager,
 		Spec: spec,
@@ -93,10 +93,10 @@ func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, sp
 		return nil, err
 	}
 
-	return govmomi.NewTask(sr.c, res.Returnval), nil
+	return NewTask(sr.c, res.Returnval), nil
 }
 
-func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec types.StorageDrsConfigSpec, modify bool) (*govmomi.Task, error) {
+func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec types.StorageDrsConfigSpec, modify bool) (*Task, error) {
 	req := types.ConfigureStorageDrsForPod_Task{
 		This:   *sr.c.ServiceContent.StorageResourceManager,
 		Spec:   spec,
@@ -112,7 +112,7 @@ func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec
 		return nil, err
 	}
 
-	return govmomi.NewTask(sr.c, res.Returnval), nil
+	return NewTask(sr.c, res.Returnval), nil
 }
 
 func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Datastore) ([]types.StoragePerformanceSummary, error) {

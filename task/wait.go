@@ -14,27 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
+package task
 
 import (
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
-
-// Task adds functionality for the Task managed object.
-type Task struct {
-	c   *Client
-	ref types.ManagedObjectReference
-}
-
-func NewTask(c *Client, ref types.ManagedObjectReference) *Task {
-	t := Task{
-		c:   c,
-		ref: ref,
-	}
-
-	return &t
-}
 
 type taskError struct {
 	*types.LocalizedMethodFault
@@ -118,12 +105,7 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 	}
 }
 
-func (t *Task) Wait() error {
-	_, err := t.WaitForResult(nil)
-	return err
-}
-
-func (t *Task) WaitForResult(s progress.Sinker) (*types.TaskInfo, error) {
+func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Collector, s progress.Sinker) (*types.TaskInfo, error) {
 	cb := &taskCallback{}
 
 	// Include progress sink if specified
@@ -132,7 +114,7 @@ func (t *Task) WaitForResult(s progress.Sinker) (*types.TaskInfo, error) {
 		defer close(cb.ch)
 	}
 
-	err := t.c.WaitForProperties(t.ref, []string{"info"}, cb.fn)
+	err := pc.Wait(ctx, ref, []string{"info"}, cb.fn)
 	if err != nil {
 		return nil, err
 	}

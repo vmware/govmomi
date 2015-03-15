@@ -39,7 +39,7 @@ func NewVirtualDiskManager(c *govmomi.Client) *VirtualDiskManager {
 func (m VirtualDiskManager) CopyVirtualDisk(
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
-	destSpec *types.VirtualDiskSpec, force bool) (*govmomi.Task, error) {
+	destSpec *types.VirtualDiskSpec, force bool) (*Task, error) {
 
 	req := types.CopyVirtualDisk_Task{
 		This:       *m.c.ServiceContent.VirtualDiskManager,
@@ -64,14 +64,14 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 		return nil, err
 	}
 
-	return govmomi.NewTask(m.c, res.Returnval), nil
+	return NewTask(m.c, res.Returnval), nil
 }
 
 // MoveVirtualDisk moves a virtual disk.
 func (m VirtualDiskManager) MoveVirtualDisk(
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
-	force bool) (*govmomi.Task, error) {
+	force bool) (*Task, error) {
 	req := types.MoveVirtualDisk_Task{
 		This:       *m.c.ServiceContent.VirtualDiskManager,
 		SourceName: sourceName,
@@ -94,11 +94,11 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 		return nil, err
 	}
 
-	return govmomi.NewTask(m.c, res.Returnval), nil
+	return NewTask(m.c, res.Returnval), nil
 }
 
 // DeleteVirtualDisk deletes a virtual disk.
-func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*govmomi.Task, error) {
+func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteVirtualDisk_Task{
 		This: *m.c.ServiceContent.VirtualDiskManager,
 		Name: name,
@@ -114,5 +114,5 @@ func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*gov
 		return nil, err
 	}
 
-	return govmomi.NewTask(m.c, res.Returnval), nil
+	return NewTask(m.c, res.Returnval), nil
 }

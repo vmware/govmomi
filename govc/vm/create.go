@@ -195,7 +195,7 @@ func (cmd *create) addDevices(vm *object.VirtualMachine) error {
 	return vm.AddDevice(add...)
 }
 
-func (cmd *create) createVM(name string) (*govmomi.Task, error) {
+func (cmd *create) createVM(name string) (*object.Task, error) {
 	spec := types.VirtualMachineConfigSpec{
 		Name:     name,
 		GuestId:  cmd.guestID,

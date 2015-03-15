@@ -97,7 +97,7 @@ func (f Folder) CreateFolder(name string) (*Folder, error) {
 	return NewFolder(f.c, res.Returnval), err
 }
 
-func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*govmomi.Task, error) {
+func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
 		Config: config,
@@ -114,10 +114,10 @@ func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePo
 		return nil, err
 	}
 
-	return govmomi.NewTask(f.c, res.Returnval), nil
+	return NewTask(f.c, res.Returnval), nil
 }
 
-func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *ResourcePool, host *HostSystem) (*govmomi.Task, error) {
+func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.RegisterVM_Task{
 		This:       f.Reference(),
 		Path:       path,
@@ -143,5 +143,5 @@ func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *Reso
 		return nil, err
 	}
 
-	return govmomi.NewTask(f.c, res.Returnval), nil
+	return NewTask(f.c, res.Returnval), nil
 }

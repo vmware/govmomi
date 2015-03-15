@@ -43,7 +43,7 @@ func (v VirtualMachine) Reference() types.ManagedObjectReference {
 	return v.ManagedObjectReference
 }
 
-func (v VirtualMachine) PowerOn() (*govmomi.Task, error) {
+func (v VirtualMachine) PowerOn() (*Task, error) {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
 	}
@@ -53,10 +53,10 @@ func (v VirtualMachine) PowerOn() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) PowerOff() (*govmomi.Task, error) {
+func (v VirtualMachine) PowerOff() (*Task, error) {
 	req := types.PowerOffVM_Task{
 		This: v.Reference(),
 	}
@@ -66,10 +66,10 @@ func (v VirtualMachine) PowerOff() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reset() (*govmomi.Task, error) {
+func (v VirtualMachine) Reset() (*Task, error) {
 	req := types.ResetVM_Task{
 		This: v.Reference(),
 	}
@@ -79,10 +79,10 @@ func (v VirtualMachine) Reset() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Suspend() (*govmomi.Task, error) {
+func (v VirtualMachine) Suspend() (*Task, error) {
 	req := types.SuspendVM_Task{
 		This: v.Reference(),
 	}
@@ -92,7 +92,7 @@ func (v VirtualMachine) Suspend() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
 func (v VirtualMachine) ShutdownGuest() error {
@@ -113,7 +113,7 @@ func (v VirtualMachine) RebootGuest() error {
 	return err
 }
 
-func (v VirtualMachine) Destroy() (*govmomi.Task, error) {
+func (v VirtualMachine) Destroy() (*Task, error) {
 	req := types.Destroy_Task{
 		This: v.Reference(),
 	}
@@ -123,10 +123,10 @@ func (v VirtualMachine) Destroy() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualMachineCloneSpec) (*govmomi.Task, error) {
+func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
 	req := types.CloneVM_Task{
 		This:   v.Reference(),
 		Folder: folder.Reference(),
@@ -139,10 +139,10 @@ func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualM
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*govmomi.Task, error) {
+func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*Task, error) {
 	req := types.ReconfigVM_Task{
 		This: v.Reference(),
 		Spec: config,
@@ -153,7 +153,7 @@ func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*gov
 		return nil, err
 	}
 
-	return govmomi.NewTask(v.c, res.Returnval), nil
+	return NewTask(v.c, res.Returnval), nil
 }
 
 func (v VirtualMachine) WaitForIP() (string, error) {

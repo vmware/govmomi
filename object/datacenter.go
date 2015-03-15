@@ -67,7 +67,7 @@ func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	return df, nil
 }
 
-func (d Datacenter) Destroy() (*govmomi.Task, error) {
+func (d Datacenter) Destroy() (*Task, error) {
 	req := types.Destroy_Task{
 		This: d.Reference(),
 	}
@@ -77,5 +77,5 @@ func (d Datacenter) Destroy() (*govmomi.Task, error) {
 		return nil, err
 	}
 
-	return govmomi.NewTask(d.c, res.Returnval), nil
+	return NewTask(d.c, res.Returnval), nil
 }
