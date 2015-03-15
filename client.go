@@ -20,6 +20,7 @@ import (
 	"errors"
 	"net/url"
 
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -144,12 +145,12 @@ func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, ds
 }
 
 func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
-	p, err := c.NewPropertyCollector()
+	p, err := property.NewCollector(context.TODO(), c, c.ServiceContent)
 	if err != nil {
 		return err
 	}
 
-	defer p.Destroy()
+	defer p.Destroy(context.TODO())
 
 	req := types.CreateFilter{
 		Spec: types.PropertyFilterSpec{
@@ -167,13 +168,13 @@ func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string
 		},
 	}
 
-	err = p.CreateFilter(req)
+	err = p.CreateFilter(context.TODO(), req)
 	if err != nil {
 		return err
 	}
 
 	for version := ""; ; {
-		res, err := p.WaitForUpdates(version)
+		res, err := p.WaitForUpdates(context.TODO(), version)
 		if err != nil {
 			return err
 		}
@@ -259,25 +260,4 @@ func (c *Client) Ancestors(obj types.ManagedObjectReference) ([]mo.ManagedEntity
 	}
 
 	return out, nil
-}
-
-// NewPropertyCollector creates a new property collector based on the
-// root property collector. It is the responsibility of the caller to
-// clean up the property collector when done.
-func (c *Client) NewPropertyCollector() (*PropertyCollector, error) {
-	req := types.CreatePropertyCollector{
-		This: c.ServiceContent.PropertyCollector,
-	}
-
-	res, err := methods.CreatePropertyCollector(context.TODO(), c, &req)
-	if err != nil {
-		return nil, err
-	}
-
-	p := PropertyCollector{
-		c: c,
-		r: res.Returnval,
-	}
-
-	return &p, nil
 }
