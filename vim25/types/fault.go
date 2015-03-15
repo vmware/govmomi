@@ -14,18 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package govmomi
-
-import "github.com/vmware/govmomi/vim25/types"
+package types
 
 type HasFault interface {
-	Fault() types.BaseMethodFault
+	Fault() BaseMethodFault
 }
 
 func IsFileNotFound(err error) bool {
 	if f, ok := err.(HasFault); ok {
 		switch f.Fault().(type) {
-		case *types.FileNotFound:
+		case *FileNotFound:
 			return true
 		}
 	}

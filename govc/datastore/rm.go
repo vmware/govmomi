@@ -20,10 +20,10 @@ import (
 	"errors"
 	"flag"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type rm struct {
@@ -77,7 +77,7 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 
 	err = task.Wait()
 	if err != nil {
-		if govmomi.IsFileNotFound(err) && cmd.force {
+		if types.IsFileNotFound(err) && cmd.force {
 			// Ignore error
 			return nil
 		}

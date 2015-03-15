@@ -24,7 +24,6 @@ import (
 	"path"
 	"text/tabwriter"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
@@ -91,7 +90,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 			r, err := cmd.ListPath(b, arg, spec)
 			if err != nil {
 				// Treat the argument as a match pattern if not found as directory
-				if i == 0 && govmomi.IsFileNotFound(err) {
+				if i == 0 && types.IsFileNotFound(err) {
 					spec.MatchPattern[0] = path.Base(arg)
 					arg = path.Dir(arg)
 					continue
