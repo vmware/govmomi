@@ -42,10 +42,5 @@ func (cmd *chmod) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
-	return m.ChangeFileAttributes(context.TODO(), vm, cmd.Auth(), f.Arg(0), cmd.Attr())
+	return m.ChangeFileAttributes(context.TODO(), cmd.Auth(), f.Arg(0), cmd.Attr())
 }

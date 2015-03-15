@@ -45,10 +45,5 @@ func (cmd *rmdir) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
-	return m.DeleteDirectory(context.TODO(), vm, cmd.Auth(), f.Arg(0), cmd.recursive)
+	return m.DeleteDirectory(context.TODO(), cmd.Auth(), f.Arg(0), cmd.recursive)
 }

@@ -44,16 +44,11 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
 	offset := 0
 	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
 
 	for {
-		info, err := m.ListFiles(context.TODO(), vm, cmd.Auth(), f.Arg(0), offset, 0, f.Arg(1))
+		info, err := m.ListFiles(context.TODO(), cmd.Auth(), f.Arg(0), offset, 0, f.Arg(1))
 		if err != nil {
 			return err
 		}

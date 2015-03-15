@@ -45,7 +45,12 @@ func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
 		return nil, err
 	}
 
-	o := guest.NewOperationsManager(c)
+	vm, err := flag.VirtualMachine()
+	if err != nil {
+		return nil, err
+	}
+
+	o := guest.NewOperationsManager(c, vm.Reference())
 	return o.FileManager(context.TODO())
 }
 
@@ -55,7 +60,12 @@ func (flag *GuestFlag) ProcessManager() (*guest.ProcessManager, error) {
 		return nil, err
 	}
 
-	o := guest.NewOperationsManager(c)
+	vm, err := flag.VirtualMachine()
+	if err != nil {
+		return nil, err
+	}
+
+	o := guest.NewOperationsManager(c, vm.Reference())
 	return o.ProcessManager(context.TODO())
 }
 

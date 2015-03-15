@@ -19,15 +19,17 @@ package guest
 import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type OperationsManager struct {
-	c *govmomi.Client
+	c  *govmomi.Client
+	vm types.ManagedObjectReference
 }
 
-func NewOperationsManager(c *govmomi.Client) *OperationsManager {
-	return &OperationsManager{c}
+func NewOperationsManager(c *govmomi.Client, vm types.ManagedObjectReference) *OperationsManager {
+	return &OperationsManager{c, vm}
 }
 
 func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error) {
@@ -38,7 +40,7 @@ func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error
 		return nil, err
 	}
 
-	return &AuthManager{*g.AuthManager, m.c}, nil
+	return &AuthManager{*g.AuthManager, m.vm, m.c}, nil
 }
 
 func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error) {
@@ -49,7 +51,7 @@ func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error
 		return nil, err
 	}
 
-	return &FileManager{*g.FileManager, m.c}, nil
+	return &FileManager{*g.FileManager, m.vm, m.c}, nil
 }
 
 func (m OperationsManager) ProcessManager(ctx context.Context) (*ProcessManager, error) {
@@ -60,5 +62,5 @@ func (m OperationsManager) ProcessManager(ctx context.Context) (*ProcessManager,
 		return nil, err
 	}
 
-	return &ProcessManager{*g.ProcessManager, m.c}, nil
+	return &ProcessManager{*g.ProcessManager, m.vm, m.c}, nil
 }

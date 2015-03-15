@@ -45,13 +45,8 @@ func (cmd *kill) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
 	for _, pid := range cmd.pids {
-		if err := m.TerminateProcess(context.TODO(), vm, cmd.Auth(), pid); err != nil {
+		if err := m.TerminateProcess(context.TODO(), cmd.Auth(), pid); err != nil {
 			return err
 		}
 	}

@@ -26,6 +26,8 @@ import (
 type ProcessManager struct {
 	types.ManagedObjectReference
 
+	vm types.ManagedObjectReference
+
 	c *govmomi.Client
 }
 
@@ -33,10 +35,10 @@ func (m ProcessManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
-func (m ProcessManager) ListProcesses(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, pids []int64) ([]types.GuestProcessInfo, error) {
+func (m ProcessManager) ListProcesses(ctx context.Context, auth types.BaseGuestAuthentication, pids []int64) ([]types.GuestProcessInfo, error) {
 	req := types.ListProcessesInGuest{
 		This: m.Reference(),
-		Vm:   vm.Reference(),
+		Vm:   m.vm,
 		Auth: auth,
 		Pids: pids,
 	}
@@ -49,10 +51,10 @@ func (m ProcessManager) ListProcesses(ctx context.Context, vm govmomi.Reference,
 	return res.Returnval, err
 }
 
-func (m ProcessManager) ReadEnvironmentVariable(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, names []string) ([]string, error) {
+func (m ProcessManager) ReadEnvironmentVariable(ctx context.Context, auth types.BaseGuestAuthentication, names []string) ([]string, error) {
 	req := types.ReadEnvironmentVariableInGuest{
 		This:  m.Reference(),
-		Vm:    vm.Reference(),
+		Vm:    m.vm,
 		Auth:  auth,
 		Names: names,
 	}
@@ -65,10 +67,10 @@ func (m ProcessManager) ReadEnvironmentVariable(ctx context.Context, vm govmomi.
 	return res.Returnval, err
 }
 
-func (m ProcessManager) StartProgram(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, spec types.BaseGuestProgramSpec) (int64, error) {
+func (m ProcessManager) StartProgram(ctx context.Context, auth types.BaseGuestAuthentication, spec types.BaseGuestProgramSpec) (int64, error) {
 	req := types.StartProgramInGuest{
 		This: m.Reference(),
-		Vm:   vm.Reference(),
+		Vm:   m.vm,
 		Auth: auth,
 		Spec: spec,
 	}
@@ -81,10 +83,10 @@ func (m ProcessManager) StartProgram(ctx context.Context, vm govmomi.Reference, 
 	return res.Returnval, err
 }
 
-func (m ProcessManager) TerminateProcess(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, pid int64) error {
+func (m ProcessManager) TerminateProcess(ctx context.Context, auth types.BaseGuestAuthentication, pid int64) error {
 	req := types.TerminateProcessInGuest{
 		This: m.Reference(),
-		Vm:   vm.Reference(),
+		Vm:   m.vm,
 		Auth: auth,
 		Pid:  pid,
 	}

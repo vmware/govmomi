@@ -50,17 +50,12 @@ func (cmd *mktemp) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
 	mk := m.CreateTemporaryFile
 	if cmd.dir {
 		mk = m.CreateTemporaryDirectory
 	}
 
-	name, err := mk(context.TODO(), vm, cmd.Auth(), cmd.prefix, cmd.suffix)
+	name, err := mk(context.TODO(), cmd.Auth(), cmd.prefix, cmd.suffix)
 	if err != nil {
 		return err
 	}

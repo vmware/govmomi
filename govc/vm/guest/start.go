@@ -61,11 +61,6 @@ func (cmd *start) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
 	spec := types.GuestProgramSpec{
 		ProgramPath:      f.Arg(0),
 		Arguments:        strings.Join(f.Args()[1:], " "),
@@ -73,7 +68,7 @@ func (cmd *start) Run(f *flag.FlagSet) error {
 		EnvVariables:     cmd.vars,
 	}
 
-	pid, err := m.StartProgram(context.TODO(), vm, cmd.Auth(), &spec)
+	pid, err := m.StartProgram(context.TODO(), cmd.Auth(), &spec)
 	if err != nil {
 		return err
 	}

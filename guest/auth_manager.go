@@ -26,6 +26,8 @@ import (
 type AuthManager struct {
 	types.ManagedObjectReference
 
+	vm types.ManagedObjectReference
+
 	c *govmomi.Client
 }
 
@@ -33,10 +35,10 @@ func (m AuthManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
-func (m AuthManager) AcquireCredentials(ctx context.Context, vm govmomi.Reference, requestedAuth types.BaseGuestAuthentication, sessionID int64) (types.BaseGuestAuthentication, error) {
+func (m AuthManager) AcquireCredentials(ctx context.Context, requestedAuth types.BaseGuestAuthentication, sessionID int64) (types.BaseGuestAuthentication, error) {
 	req := types.AcquireCredentialsInGuest{
 		This:          m.Reference(),
-		Vm:            vm.Reference(),
+		Vm:            m.vm,
 		RequestedAuth: requestedAuth,
 		SessionID:     sessionID,
 	}
@@ -49,10 +51,10 @@ func (m AuthManager) AcquireCredentials(ctx context.Context, vm govmomi.Referenc
 	return res.Returnval, nil
 }
 
-func (m AuthManager) ReleaseCredentials(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication) error {
+func (m AuthManager) ReleaseCredentials(ctx context.Context, auth types.BaseGuestAuthentication) error {
 	req := types.ReleaseCredentialsInGuest{
 		This: m.Reference(),
-		Vm:   vm.Reference(),
+		Vm:   m.vm,
 		Auth: auth,
 	}
 
@@ -61,10 +63,10 @@ func (m AuthManager) ReleaseCredentials(ctx context.Context, vm govmomi.Referenc
 	return err
 }
 
-func (m AuthManager) ValidateCredentials(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication) error {
+func (m AuthManager) ValidateCredentials(ctx context.Context, auth types.BaseGuestAuthentication) error {
 	req := types.ValidateCredentialsInGuest{
 		This: m.Reference(),
-		Vm:   vm.Reference(),
+		Vm:   m.vm,
 		Auth: auth,
 	}
 

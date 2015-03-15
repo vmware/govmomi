@@ -26,6 +26,8 @@ import (
 type FileManager struct {
 	types.ManagedObjectReference
 
+	vm types.ManagedObjectReference
+
 	c *govmomi.Client
 }
 
@@ -33,10 +35,10 @@ func (m FileManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
-func (m FileManager) ChangeFileAttributes(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes) error {
+func (m FileManager) ChangeFileAttributes(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes) error {
 	req := types.ChangeFileAttributesInGuest{
 		This:           m.Reference(),
-		Vm:             vm.Reference(),
+		Vm:             m.vm,
 		Auth:           auth,
 		GuestFilePath:  guestFilePath,
 		FileAttributes: fileAttributes,
@@ -46,10 +48,10 @@ func (m FileManager) ChangeFileAttributes(ctx context.Context, vm govmomi.Refere
 	return err
 }
 
-func (m FileManager) CreateTemporaryDirectory(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
+func (m FileManager) CreateTemporaryDirectory(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
 	req := types.CreateTemporaryDirectoryInGuest{
 		This:   m.Reference(),
-		Vm:     vm.Reference(),
+		Vm:     m.vm,
 		Auth:   auth,
 		Prefix: prefix,
 		Suffix: suffix,
@@ -63,10 +65,10 @@ func (m FileManager) CreateTemporaryDirectory(ctx context.Context, vm govmomi.Re
 	return res.Returnval, nil
 }
 
-func (m FileManager) CreateTemporaryFile(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
+func (m FileManager) CreateTemporaryFile(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
 	req := types.CreateTemporaryFileInGuest{
 		This:   m.Reference(),
-		Vm:     vm.Reference(),
+		Vm:     m.vm,
 		Auth:   auth,
 		Prefix: prefix,
 		Suffix: suffix,
@@ -80,10 +82,10 @@ func (m FileManager) CreateTemporaryFile(ctx context.Context, vm govmomi.Referen
 	return res.Returnval, nil
 }
 
-func (m FileManager) DeleteDirectory(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, directoryPath string, recursive bool) error {
+func (m FileManager) DeleteDirectory(ctx context.Context, auth types.BaseGuestAuthentication, directoryPath string, recursive bool) error {
 	req := types.DeleteDirectoryInGuest{
 		This:          m.Reference(),
-		Vm:            vm.Reference(),
+		Vm:            m.vm,
 		Auth:          auth,
 		DirectoryPath: directoryPath,
 		Recursive:     recursive,
@@ -93,10 +95,10 @@ func (m FileManager) DeleteDirectory(ctx context.Context, vm govmomi.Reference, 
 	return err
 }
 
-func (m FileManager) DeleteFile(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, filePath string) error {
+func (m FileManager) DeleteFile(ctx context.Context, auth types.BaseGuestAuthentication, filePath string) error {
 	req := types.DeleteFileInGuest{
 		This:     m.Reference(),
-		Vm:       vm.Reference(),
+		Vm:       m.vm,
 		Auth:     auth,
 		FilePath: filePath,
 	}
@@ -105,10 +107,10 @@ func (m FileManager) DeleteFile(ctx context.Context, vm govmomi.Reference, auth 
 	return err
 }
 
-func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, guestFilePath string) (*types.FileTransferInformation, error) {
+func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string) (*types.FileTransferInformation, error) {
 	req := types.InitiateFileTransferFromGuest{
 		This:          m.Reference(),
-		Vm:            vm.Reference(),
+		Vm:            m.vm,
 		Auth:          auth,
 		GuestFilePath: guestFilePath,
 	}
@@ -121,10 +123,10 @@ func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, vm govmo
 	return &res.Returnval, nil
 }
 
-func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes, fileSize int64, overwrite bool) (string, error) {
+func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes, fileSize int64, overwrite bool) (string, error) {
 	req := types.InitiateFileTransferToGuest{
 		This:           m.Reference(),
-		Vm:             vm.Reference(),
+		Vm:             m.vm,
 		Auth:           auth,
 		GuestFilePath:  guestFilePath,
 		FileAttributes: fileAttributes,
@@ -140,10 +142,10 @@ func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, vm govmomi
 	return res.Returnval, nil
 }
 
-func (m FileManager) ListFiles(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, filePath string, index int, maxResults int, matchPattern string) (*types.GuestListFileInfo, error) {
+func (m FileManager) ListFiles(ctx context.Context, auth types.BaseGuestAuthentication, filePath string, index int, maxResults int, matchPattern string) (*types.GuestListFileInfo, error) {
 	req := types.ListFilesInGuest{
 		This:         m.Reference(),
-		Vm:           vm.Reference(),
+		Vm:           m.vm,
 		Auth:         auth,
 		FilePath:     filePath,
 		Index:        index,
@@ -159,10 +161,10 @@ func (m FileManager) ListFiles(ctx context.Context, vm govmomi.Reference, auth t
 	return &res.Returnval, nil
 }
 
-func (m FileManager) MakeDirectory(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, directoryPath string, createParentDirectories bool) error {
+func (m FileManager) MakeDirectory(ctx context.Context, auth types.BaseGuestAuthentication, directoryPath string, createParentDirectories bool) error {
 	req := types.MakeDirectoryInGuest{
 		This:                    m.Reference(),
-		Vm:                      vm.Reference(),
+		Vm:                      m.vm,
 		Auth:                    auth,
 		DirectoryPath:           directoryPath,
 		CreateParentDirectories: createParentDirectories,
@@ -172,10 +174,10 @@ func (m FileManager) MakeDirectory(ctx context.Context, vm govmomi.Reference, au
 	return err
 }
 
-func (m FileManager) MoveDirectory(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, srcDirectoryPath string, dstDirectoryPath string) error {
+func (m FileManager) MoveDirectory(ctx context.Context, auth types.BaseGuestAuthentication, srcDirectoryPath string, dstDirectoryPath string) error {
 	req := types.MoveDirectoryInGuest{
 		This:             m.Reference(),
-		Vm:               vm.Reference(),
+		Vm:               m.vm,
 		Auth:             auth,
 		SrcDirectoryPath: srcDirectoryPath,
 		DstDirectoryPath: dstDirectoryPath,
@@ -185,10 +187,10 @@ func (m FileManager) MoveDirectory(ctx context.Context, vm govmomi.Reference, au
 	return err
 }
 
-func (m FileManager) MoveFile(ctx context.Context, vm govmomi.Reference, auth types.BaseGuestAuthentication, srcFilePath string, dstFilePath string, overwrite bool) error {
+func (m FileManager) MoveFile(ctx context.Context, auth types.BaseGuestAuthentication, srcFilePath string, dstFilePath string, overwrite bool) error {
 	req := types.MoveFileInGuest{
 		This:        m.Reference(),
-		Vm:          vm.Reference(),
+		Vm:          m.vm,
 		Auth:        auth,
 		SrcFilePath: srcFilePath,
 		DstFilePath: dstFilePath,

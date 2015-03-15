@@ -81,16 +81,11 @@ func (cmd *ps) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
 	if !cmd.every && len(cmd.uids) == 0 {
 		cmd.uids[cmd.auth.Username] = true
 	}
 
-	procs, err := m.ListProcesses(context.TODO(), vm, cmd.Auth(), cmd.pids)
+	procs, err := m.ListProcesses(context.TODO(), cmd.Auth(), cmd.pids)
 	if err != nil {
 		return err
 	}

@@ -42,12 +42,7 @@ func (cmd *getenv) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
-	vars, err := m.ReadEnvironmentVariable(context.TODO(), vm, cmd.Auth(), f.Args())
+	vars, err := m.ReadEnvironmentVariable(context.TODO(), cmd.Auth(), f.Args())
 	if err != nil {
 		return err
 	}

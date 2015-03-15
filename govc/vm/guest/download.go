@@ -49,11 +49,6 @@ func (cmd *download) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
 	src := f.Arg(0)
 	dst := f.Arg(1)
 
@@ -62,7 +57,7 @@ func (cmd *download) Run(f *flag.FlagSet) error {
 		return os.ErrExist
 	}
 
-	info, err := m.InitiateFileTransferFromGuest(context.TODO(), vm, cmd.Auth(), src)
+	info, err := m.InitiateFileTransferFromGuest(context.TODO(), cmd.Auth(), src)
 	if err != nil {
 		return err
 	}
