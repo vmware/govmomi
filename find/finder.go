@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
 )
 
 type Finder struct {
@@ -82,7 +83,7 @@ func (f *Finder) list(fn findRelativeFunc, tl bool, arg string) ([]list.Element,
 				return nil, err
 			}
 
-			mes, err := f.Client.Ancestors(pivot.Reference())
+			mes, err := mo.Ancestors(context.TODO(), f.Client, f.Client.ServiceContent.PropertyCollector, pivot.Reference())
 			if err != nil {
 				return nil, err
 			}
