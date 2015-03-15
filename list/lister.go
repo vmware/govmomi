@@ -29,10 +29,10 @@ import (
 
 type Element struct {
 	Path   string
-	Object govmomi.Reference
+	Object mo.Reference
 }
 
-func ToElement(r govmomi.Reference, prefix string) Element {
+func ToElement(r mo.Reference, prefix string) Element {
 	var name string
 
 	switch m := r.(type) {
@@ -173,7 +173,7 @@ func (l Lister) ListFolder() ([]Element, error) {
 
 	es := []Element{}
 	for _, v := range dst {
-		es = append(es, ToElement(v.(govmomi.Reference), l.Prefix))
+		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
 
 	return es, nil
@@ -232,7 +232,7 @@ func (l Lister) ListDatacenter() ([]Element, error) {
 
 	es := []Element{}
 	for _, v := range dst {
-		es = append(es, ToElement(v.(govmomi.Reference), l.Prefix))
+		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
 
 	return es, nil
@@ -298,7 +298,7 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 
 	es := []Element{}
 	for _, v := range dst {
-		es = append(es, ToElement(v.(govmomi.Reference), l.Prefix))
+		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
 
 	return es, nil
@@ -362,7 +362,7 @@ func (l Lister) ListResourcePool() ([]Element, error) {
 
 	es := []Element{}
 	for _, v := range dst {
-		es = append(es, ToElement(v.(govmomi.Reference), l.Prefix))
+		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
 	}
 
 	return es, nil

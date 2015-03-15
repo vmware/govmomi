@@ -194,9 +194,9 @@ func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string
 
 // Ancestors returns the entire ancestry tree of a specified managed object.
 // The return value includes the root node and the specified object itself.
-func (c *Client) Ancestors(r Reference) ([]mo.ManagedEntity, error) {
+func (c *Client) Ancestors(obj types.ManagedObjectReference) ([]mo.ManagedEntity, error) {
 	ospec := types.ObjectSpec{
-		Obj: r.Reference(),
+		Obj: obj,
 		SelectSet: []types.BaseSelectionSpec{
 			&types.TraversalSpec{
 				SelectionSpec: types.SelectionSpec{Name: "traverseParent"},

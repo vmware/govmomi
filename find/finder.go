@@ -82,7 +82,7 @@ func (f *Finder) list(fn findRelativeFunc, tl bool, arg string) ([]list.Element,
 				return nil, err
 			}
 
-			mes, err := f.Client.Ancestors(pivot)
+			mes, err := f.Client.Ancestors(pivot.Reference())
 			if err != nil {
 				return nil, err
 			}
