@@ -23,18 +23,6 @@ import (
 	"golang.org/x/net/context"
 )
 
-type taskError struct {
-	*types.LocalizedMethodFault
-}
-
-func (e taskError) Error() string {
-	return e.LocalizedMethodFault.LocalizedMessage
-}
-
-func (e taskError) Fault() types.BaseMethodFault {
-	return e.LocalizedMethodFault.Fault
-}
-
 type taskProgress struct {
 	info *types.TaskInfo
 }
@@ -49,7 +37,7 @@ func (t taskProgress) Detail() string {
 
 func (t taskProgress) Error() error {
 	if t.info.Error != nil {
-		return taskError{t.info.Error}
+		return Error{t.info.Error}
 	}
 
 	return nil
@@ -105,6 +93,21 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 	}
 }
 
+// Wait waits for a task to finish with either success or failure. It does so
+// by waiting for the "info" property of task managed object to change. The
+// function returns when it finds the task in the "success" or "error" state.
+// In the former case, the return value is nil. In the latter case the return
+// value is an instance of this package's Error struct.
+//
+// Any error returned while waiting for property changes causes the function to
+// return immediately and propagate the error.
+//
+// If the progress.Sinker argument is specified, any progress updates for the
+// task are sent here. The completion percentage is passed through directly.
+// The detail for the progress update is set to an empty string. If the task
+// finishes in the error state, the error instance is passed through as well.
+// Note that this error is the same error that is returned by this function.
+//
 func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Collector, s progress.Sinker) (*types.TaskInfo, error) {
 	cb := &taskCallback{}
 
