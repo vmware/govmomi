@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type destroy struct {
@@ -63,7 +64,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 				return err
 			}
 
-			if err := task.Wait(); err != nil {
+			if err := task.Wait(context.TODO()); err != nil {
 				return err
 			}
 		}

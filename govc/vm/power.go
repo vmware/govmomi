@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type power struct {
@@ -109,7 +110,7 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 		}
 
 		if task != nil {
-			err = task.Wait()
+			err = task.Wait(context.TODO())
 		}
 		if err == nil {
 			fmt.Fprintf(cmd, "OK\n")

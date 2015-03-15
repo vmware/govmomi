@@ -28,6 +28,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ls struct {
@@ -125,7 +126,7 @@ func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.
 		return res, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return res, err
 	}

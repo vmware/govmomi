@@ -43,18 +43,18 @@ func NewTask(c *govmomi.Client, ref types.ManagedObjectReference) *Task {
 	return &t
 }
 
-func (t *Task) Wait() error {
-	_, err := t.WaitForResult(nil)
+func (t *Task) Wait(ctx context.Context) error {
+	_, err := t.WaitForResult(ctx, nil)
 	return err
 }
 
-func (t *Task) WaitForResult(s progress.Sinker) (*types.TaskInfo, error) {
-	p, err := property.NewCollector(context.TODO(), t.c, t.c.ServiceContent)
+func (t *Task) WaitForResult(ctx context.Context, s progress.Sinker) (*types.TaskInfo, error) {
+	p, err := property.NewCollector(ctx, t.c, t.c.ServiceContent)
 	if err != nil {
 		return nil, err
 	}
 
 	defer p.Destroy(context.Background())
 
-	return task.Wait(context.TODO(), t.ref, p, s)
+	return task.Wait(ctx, t.ref, p, s)
 }

@@ -258,7 +258,7 @@ func (v *vncVM) reconfigure() error {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 func (v *vncVM) uri() (string, error) {

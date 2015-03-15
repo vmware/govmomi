@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type create struct {
@@ -122,7 +123,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return err
 	}
@@ -139,7 +140,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 			return err
 		}
 
-		_, err = task.WaitForResult(nil)
+		_, err = task.WaitForResult(context.TODO(), nil)
 		if err != nil {
 			return err
 		}

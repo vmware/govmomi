@@ -27,6 +27,7 @@ import (
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 var (
@@ -127,7 +128,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		if info != nil && info.Error != nil {
 			_, ok := info.Error.Fault.(*types.FileNotFound)

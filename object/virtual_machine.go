@@ -230,7 +230,7 @@ func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperatio
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 // AddDevice adds the given devices to the VirtualMachine
@@ -271,7 +271,7 @@ func (v VirtualMachine) SetBootOptions(options *types.VirtualMachineBootOptions)
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 // Answer answers a pending question.

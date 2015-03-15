@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type rm struct {
@@ -75,7 +76,7 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	err = task.Wait()
+	err = task.Wait(context.TODO())
 	if err != nil {
 		if types.IsFileNotFound(err) && cmd.force {
 			// Ignore error

@@ -32,6 +32,7 @@ import (
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type vmdk struct {
@@ -236,7 +237,7 @@ func (cmd *vmdk) CopyHostAgent(i importable, s progress.Sinker) error {
 	}
 
 	ps := progress.Prefix(s, "copying disk")
-	_, err = task.WaitForResult(ps)
+	_, err = task.WaitForResult(context.TODO(), ps)
 	if err != nil {
 		return err
 	}
@@ -302,7 +303,7 @@ func (cmd *vmdk) MoveDisk(src, dst string) error {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 func (cmd *vmdk) DeleteDisk(path string) error {
@@ -312,7 +313,7 @@ func (cmd *vmdk) DeleteDisk(path string) error {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 func (cmd *vmdk) DetachDisk(vm *object.VirtualMachine) (string, error) {
@@ -331,7 +332,7 @@ func (cmd *vmdk) DetachDisk(vm *object.VirtualMachine) (string, error) {
 		return "", err
 	}
 
-	err = task.Wait()
+	err = task.Wait(context.TODO())
 	if err != nil {
 		return "", err
 	}
@@ -350,7 +351,7 @@ func (cmd *vmdk) CreateVM(spec *configSpec) (*object.VirtualMachine, error) {
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -374,7 +375,7 @@ func (cmd *vmdk) CloneVM(vm *object.VirtualMachine, name string) (*object.Virtua
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -393,7 +394,7 @@ func (cmd *vmdk) DestroyVM(vm *object.VirtualMachine) error {
 		return err
 	}
 
-	err = task.Wait()
+	err = task.Wait(context.TODO())
 	if err != nil {
 		return err
 	}
