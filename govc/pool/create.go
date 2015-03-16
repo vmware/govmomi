@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type create struct {
@@ -66,7 +67,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	for _, arg := range f.Args() {
 		dir := path.Dir(arg)
 		base := path.Base(arg)
-		parents, err := finder.ResourcePoolList(dir)
+		parents, err := finder.ResourcePoolList(context.TODO(), dir)
 		if err != nil {
 			return err
 		}

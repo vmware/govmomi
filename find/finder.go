@@ -28,18 +28,23 @@ import (
 )
 
 type Finder struct {
-	list.Recurser
+	client   *govmomi.Client
+	recurser list.Recurser
+
 	dc      *object.Datacenter
 	folders *object.DatacenterFolders
 }
 
-func NewFinder(c *govmomi.Client, all bool) *Finder {
-	return &Finder{
-		Recurser: list.Recurser{
-			Client: c,
-			All:    all,
+func NewFinder(client *govmomi.Client, all bool) *Finder {
+	f := &Finder{
+		client: client,
+		recurser: list.Recurser{
+			Collector: client.PropertyCollector(),
+			All:       all,
 		},
 	}
+
+	return f
 }
 
 func (f *Finder) SetDatacenter(dc *object.Datacenter) *Finder {
@@ -50,11 +55,11 @@ func (f *Finder) SetDatacenter(dc *object.Datacenter) *Finder {
 
 type findRelativeFunc func() (object.Reference, error)
 
-func (f *Finder) find(fn findRelativeFunc, tl bool, path ...string) ([]list.Element, error) {
+func (f *Finder) find(ctx context.Context, fn findRelativeFunc, tl bool, path ...string) ([]list.Element, error) {
 	var out []list.Element
 
 	for _, arg := range path {
-		es, err := f.list(fn, tl, arg)
+		es, err := f.list(ctx, fn, tl, arg)
 		if err != nil {
 			return nil, err
 		}
@@ -65,10 +70,10 @@ func (f *Finder) find(fn findRelativeFunc, tl bool, path ...string) ([]list.Elem
 	return out, nil
 }
 
-func (f *Finder) list(fn findRelativeFunc, tl bool, arg string) ([]list.Element, error) {
+func (f *Finder) list(ctx context.Context, fn findRelativeFunc, tl bool, arg string) ([]list.Element, error) {
 	root := list.Element{
 		Path:   "/",
-		Object: object.NewRootFolder(f.Client),
+		Object: object.NewRootFolder(f.client),
 	}
 
 	parts := list.ToParts(arg)
@@ -83,7 +88,7 @@ func (f *Finder) list(fn findRelativeFunc, tl bool, arg string) ([]list.Element,
 				return nil, err
 			}
 
-			mes, err := mo.Ancestors(context.TODO(), f.Client, f.Client.ServiceContent.PropertyCollector, pivot.Reference())
+			mes, err := mo.Ancestors(ctx, f.client, f.client.ServiceContent.PropertyCollector, pivot.Reference())
 			if err != nil {
 				return nil, err
 			}
@@ -101,8 +106,8 @@ func (f *Finder) list(fn findRelativeFunc, tl bool, arg string) ([]list.Element,
 		}
 	}
 
-	f.TraverseLeafs = tl
-	es, err := f.Recurse(root, parts)
+	f.recurser.TraverseLeafs = tl
+	es, err := f.recurser.Recurse(ctx, root, parts)
 	if err != nil {
 		return nil, err
 	}
@@ -184,10 +189,10 @@ func (f *Finder) networkFolder() (object.Reference, error) {
 }
 
 func (f *Finder) rootFolder() (object.Reference, error) {
-	return object.NewRootFolder(f.Client), nil
+	return object.NewRootFolder(f.client), nil
 }
 
-func (f *Finder) ManagedObjectList(path ...string) ([]list.Element, error) {
+func (f *Finder) ManagedObjectList(ctx context.Context, path ...string) ([]list.Element, error) {
 	fn := f.rootFolder
 
 	if f.dc != nil {
@@ -198,11 +203,11 @@ func (f *Finder) ManagedObjectList(path ...string) ([]list.Element, error) {
 		path = []string{"."}
 	}
 
-	return f.find(fn, true, path...)
+	return f.find(ctx, fn, true, path...)
 }
 
-func (f *Finder) DatacenterList(path ...string) ([]*object.Datacenter, error) {
-	es, err := f.find(f.rootFolder, false, path...)
+func (f *Finder) DatacenterList(ctx context.Context, path ...string) ([]*object.Datacenter, error) {
+	es, err := f.find(ctx, f.rootFolder, false, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -211,15 +216,15 @@ func (f *Finder) DatacenterList(path ...string) ([]*object.Datacenter, error) {
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "Datacenter" {
-			dcs = append(dcs, object.NewDatacenter(f.Client, ref))
+			dcs = append(dcs, object.NewDatacenter(f.client, ref))
 		}
 	}
 
 	return dcs, nil
 }
 
-func (f *Finder) Datacenter(path string) (*object.Datacenter, error) {
-	dcs, err := f.DatacenterList(path)
+func (f *Finder) Datacenter(ctx context.Context, path string) (*object.Datacenter, error) {
+	dcs, err := f.DatacenterList(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -235,8 +240,8 @@ func (f *Finder) Datacenter(path string) (*object.Datacenter, error) {
 	return dcs[0], nil
 }
 
-func (f *Finder) DefaultDatacenter() (*object.Datacenter, error) {
-	dc, err := f.Datacenter("*")
+func (f *Finder) DefaultDatacenter(ctx context.Context) (*object.Datacenter, error) {
+	dc, err := f.Datacenter(ctx, "*")
 	if err != nil {
 		return nil, toDefaultError(err)
 	}
@@ -244,8 +249,8 @@ func (f *Finder) DefaultDatacenter() (*object.Datacenter, error) {
 	return dc, nil
 }
 
-func (f *Finder) DatastoreList(path ...string) ([]*object.Datastore, error) {
-	es, err := f.find(f.datastoreFolder, false, path...)
+func (f *Finder) DatastoreList(ctx context.Context, path ...string) ([]*object.Datastore, error) {
+	es, err := f.find(ctx, f.datastoreFolder, false, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -254,7 +259,7 @@ func (f *Finder) DatastoreList(path ...string) ([]*object.Datastore, error) {
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "Datastore" {
-			ds := object.NewDatastore(f.Client, ref)
+			ds := object.NewDatastore(f.client, ref)
 			ds.InventoryPath = e.Path
 
 			dss = append(dss, ds)
@@ -264,8 +269,8 @@ func (f *Finder) DatastoreList(path ...string) ([]*object.Datastore, error) {
 	return dss, nil
 }
 
-func (f *Finder) Datastore(path string) (*object.Datastore, error) {
-	dss, err := f.DatastoreList(path)
+func (f *Finder) Datastore(ctx context.Context, path string) (*object.Datastore, error) {
+	dss, err := f.DatastoreList(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -281,8 +286,8 @@ func (f *Finder) Datastore(path string) (*object.Datastore, error) {
 	return dss[0], nil
 }
 
-func (f *Finder) DefaultDatastore() (*object.Datastore, error) {
-	ds, err := f.Datastore("*")
+func (f *Finder) DefaultDatastore(ctx context.Context) (*object.Datastore, error) {
+	ds, err := f.Datastore(ctx, "*")
 	if err != nil {
 		return nil, toDefaultError(err)
 	}
@@ -290,8 +295,8 @@ func (f *Finder) DefaultDatastore() (*object.Datastore, error) {
 	return ds, nil
 }
 
-func (f *Finder) HostSystemList(path ...string) ([]*object.HostSystem, error) {
-	es, err := f.find(f.hostFolder, false, path...)
+func (f *Finder) HostSystemList(ctx context.Context, path ...string) ([]*object.HostSystem, error) {
+	es, err := f.find(ctx, f.hostFolder, false, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -302,14 +307,14 @@ func (f *Finder) HostSystemList(path ...string) ([]*object.HostSystem, error) {
 
 		switch o := e.Object.(type) {
 		case mo.HostSystem:
-			hs = object.NewHostSystem(f.Client, o.Reference())
+			hs = object.NewHostSystem(f.client, o.Reference())
 		case mo.ComputeResource:
-			cr := object.NewComputeResource(f.Client, o.Reference())
+			cr := object.NewComputeResource(f.client, o.Reference())
 			hosts, err := cr.Hosts()
 			if err != nil {
 				return nil, err
 			}
-			hs = object.NewHostSystem(f.Client, hosts[0])
+			hs = object.NewHostSystem(f.client, hosts[0])
 		default:
 			continue
 		}
@@ -321,8 +326,8 @@ func (f *Finder) HostSystemList(path ...string) ([]*object.HostSystem, error) {
 	return hss, nil
 }
 
-func (f *Finder) HostSystem(path string) (*object.HostSystem, error) {
-	hss, err := f.HostSystemList(path)
+func (f *Finder) HostSystem(ctx context.Context, path string) (*object.HostSystem, error) {
+	hss, err := f.HostSystemList(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -338,8 +343,8 @@ func (f *Finder) HostSystem(path string) (*object.HostSystem, error) {
 	return hss[0], nil
 }
 
-func (f *Finder) DefaultHostSystem() (*object.HostSystem, error) {
-	hs, err := f.HostSystem("*/*")
+func (f *Finder) DefaultHostSystem(ctx context.Context) (*object.HostSystem, error) {
+	hs, err := f.HostSystem(ctx, "*/*")
 	if err != nil {
 		return nil, toDefaultError(err)
 	}
@@ -347,8 +352,8 @@ func (f *Finder) DefaultHostSystem() (*object.HostSystem, error) {
 	return hs, nil
 }
 
-func (f *Finder) NetworkList(path ...string) ([]object.NetworkReference, error) {
-	es, err := f.find(f.networkFolder, false, path...)
+func (f *Finder) NetworkList(ctx context.Context, path ...string) ([]object.NetworkReference, error) {
+	es, err := f.find(ctx, f.networkFolder, false, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -358,11 +363,11 @@ func (f *Finder) NetworkList(path ...string) ([]object.NetworkReference, error) 
 		ref := e.Object.Reference()
 		switch ref.Type {
 		case "Network":
-			r := object.NewNetwork(f.Client, ref)
+			r := object.NewNetwork(f.client, ref)
 			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		case "DistributedVirtualPortgroup":
-			r := object.NewDistributedVirtualPortgroup(f.Client, ref)
+			r := object.NewDistributedVirtualPortgroup(f.client, ref)
 			r.InventoryPath = e.Path
 			ns = append(ns, r)
 		}
@@ -371,8 +376,8 @@ func (f *Finder) NetworkList(path ...string) ([]object.NetworkReference, error) 
 	return ns, nil
 }
 
-func (f *Finder) Network(path string) (object.NetworkReference, error) {
-	networks, err := f.NetworkList(path)
+func (f *Finder) Network(ctx context.Context, path string) (object.NetworkReference, error) {
+	networks, err := f.NetworkList(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -388,8 +393,8 @@ func (f *Finder) Network(path string) (object.NetworkReference, error) {
 	return networks[0], nil
 }
 
-func (f *Finder) DefaultNetwork() (object.NetworkReference, error) {
-	network, err := f.Network("*")
+func (f *Finder) DefaultNetwork(ctx context.Context) (object.NetworkReference, error) {
+	network, err := f.Network(ctx, "*")
 	if err != nil {
 		return nil, toDefaultError(err)
 	}
@@ -397,8 +402,8 @@ func (f *Finder) DefaultNetwork() (object.NetworkReference, error) {
 	return network, nil
 }
 
-func (f *Finder) ResourcePoolList(path ...string) ([]*object.ResourcePool, error) {
-	es, err := f.find(f.hostFolder, true, path...)
+func (f *Finder) ResourcePoolList(ctx context.Context, path ...string) ([]*object.ResourcePool, error) {
+	es, err := f.find(ctx, f.hostFolder, true, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -409,7 +414,7 @@ func (f *Finder) ResourcePoolList(path ...string) ([]*object.ResourcePool, error
 
 		switch o := e.Object.(type) {
 		case mo.ResourcePool:
-			rp = object.NewResourcePool(f.Client, o.Reference())
+			rp = object.NewResourcePool(f.client, o.Reference())
 			rp.InventoryPath = e.Path
 			rps = append(rps, rp)
 		}
@@ -418,8 +423,8 @@ func (f *Finder) ResourcePoolList(path ...string) ([]*object.ResourcePool, error
 	return rps, nil
 }
 
-func (f *Finder) ResourcePool(path string) (*object.ResourcePool, error) {
-	rps, err := f.ResourcePoolList(path)
+func (f *Finder) ResourcePool(ctx context.Context, path string) (*object.ResourcePool, error) {
+	rps, err := f.ResourcePoolList(ctx, path)
 	if err != nil {
 		return nil, err
 	}
@@ -435,8 +440,8 @@ func (f *Finder) ResourcePool(path string) (*object.ResourcePool, error) {
 	return rps[0], nil
 }
 
-func (f *Finder) DefaultResourcePool() (*object.ResourcePool, error) {
-	rp, err := f.ResourcePool("*/Resources")
+func (f *Finder) DefaultResourcePool(ctx context.Context) (*object.ResourcePool, error) {
+	rp, err := f.ResourcePool(ctx, "*/Resources")
 	if err != nil {
 		return nil, toDefaultError(err)
 	}
@@ -444,8 +449,8 @@ func (f *Finder) DefaultResourcePool() (*object.ResourcePool, error) {
 	return rp, nil
 }
 
-func (f *Finder) VirtualMachineList(path ...string) ([]*object.VirtualMachine, error) {
-	es, err := f.find(f.vmFolder, false, path...)
+func (f *Finder) VirtualMachineList(ctx context.Context, path ...string) ([]*object.VirtualMachine, error) {
+	es, err := f.find(ctx, f.vmFolder, false, path...)
 	if err != nil {
 		return nil, err
 	}
@@ -454,7 +459,7 @@ func (f *Finder) VirtualMachineList(path ...string) ([]*object.VirtualMachine, e
 	for _, e := range es {
 		switch o := e.Object.(type) {
 		case mo.VirtualMachine:
-			vm := object.NewVirtualMachine(f.Client, o.Reference())
+			vm := object.NewVirtualMachine(f.client, o.Reference())
 			vm.InventoryPath = e.Path
 			vms = append(vms, vm)
 		}
@@ -463,8 +468,8 @@ func (f *Finder) VirtualMachineList(path ...string) ([]*object.VirtualMachine, e
 	return vms, nil
 }
 
-func (f *Finder) VirtualMachine(path string) (*object.VirtualMachine, error) {
-	vms, err := f.VirtualMachineList(path)
+func (f *Finder) VirtualMachine(ctx context.Context, path string) (*object.VirtualMachine, error) {
+	vms, err := f.VirtualMachineList(ctx, path)
 	if err != nil {
 		return nil, err
 	}

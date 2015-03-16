@@ -106,3 +106,8 @@ func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.Update
 
 	return res.Returnval, nil
 }
+
+func (p *Collector) RetrieveProperties(ctx context.Context, req types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
+	req.This = p.Reference()
+	return methods.RetrieveProperties(ctx, p.roundTripper, &req)
+}

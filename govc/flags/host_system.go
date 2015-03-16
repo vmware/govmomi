@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type HostSystemFlag struct {
@@ -79,7 +80,7 @@ func (flag *HostSystemFlag) HostSystemIfSpecified() (*object.HostSystem, error) 
 		return nil, err
 	}
 
-	flag.host, err = finder.HostSystem(flag.name)
+	flag.host, err = finder.HostSystem(context.TODO(), flag.name)
 	return flag.host, err
 }
 
@@ -98,7 +99,7 @@ func (flag *HostSystemFlag) HostSystem() (*object.HostSystem, error) {
 		return nil, err
 	}
 
-	flag.host, err = finder.DefaultHostSystem()
+	flag.host, err = finder.DefaultHostSystem(context.TODO())
 	return flag.host, err
 }
 

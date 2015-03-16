@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type DatacenterFlag struct {
@@ -66,9 +67,9 @@ func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	// Set for relative func if dc flag is given or
 	// if there is a single (default) Datacenter
 	if flag.path == "" {
-		flag.dc, flag.err = finder.DefaultDatacenter()
+		flag.dc, flag.err = finder.DefaultDatacenter(context.TODO())
 	} else {
-		if flag.dc, err = finder.Datacenter(flag.path); err != nil {
+		if flag.dc, err = finder.Datacenter(context.TODO(), flag.path); err != nil {
 			return nil, err
 		}
 	}

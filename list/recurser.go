@@ -20,11 +20,12 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/property"
+	"golang.org/x/net/context"
 )
 
 type Recurser struct {
-	Client *govmomi.Client
+	Collector *property.Collector
 
 	// All configures the recurses to fetch complete objects for leaf nodes.
 	All bool
@@ -36,7 +37,7 @@ type Recurser struct {
 	TraverseLeafs bool
 }
 
-func (r Recurser) Recurse(root Element, parts []string) ([]Element, error) {
+func (r Recurser) Recurse(ctx context.Context, root Element, parts []string) ([]Element, error) {
 	if len(parts) == 0 {
 		// Include non-traversable leaf elements in result. For example, consider
 		// the pattern "./vm/my-vm-*", where the pattern should match the VMs and
@@ -51,7 +52,7 @@ func (r Recurser) Recurse(root Element, parts []string) ([]Element, error) {
 	}
 
 	k := Lister{
-		Client:    r.Client,
+		Collector: r.Collector,
 		Reference: root.Object.Reference(),
 		Prefix:    root.Path,
 	}
@@ -60,7 +61,7 @@ func (r Recurser) Recurse(root Element, parts []string) ([]Element, error) {
 		k.All = true
 	}
 
-	in, err := k.List()
+	in, err := k.List(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -84,7 +85,7 @@ func (r Recurser) Recurse(root Element, parts []string) ([]Element, error) {
 			continue
 		}
 
-		nres, err := r.Recurse(e, parts)
+		nres, err := r.Recurse(ctx, e, parts)
 		if err != nil {
 			return nil, err
 		}

@@ -67,9 +67,9 @@ func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	}
 
 	if flag.name == "" {
-		flag.ds, err = finder.DefaultDatastore()
+		flag.ds, err = finder.DefaultDatastore(context.TODO())
 	} else {
-		flag.ds, err = finder.Datastore(flag.name)
+		flag.ds, err = finder.Datastore(context.TODO(), flag.name)
 	}
 
 	return flag.ds, err

@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type NetworkFlag struct {
@@ -74,9 +75,9 @@ func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
 	}
 
 	if flag.name == "" {
-		flag.net, err = finder.DefaultNetwork()
+		flag.net, err = finder.DefaultNetwork(context.TODO())
 	} else {
-		flag.net, err = finder.Network(flag.name)
+		flag.net, err = finder.Network(context.TODO(), flag.name)
 	}
 
 	return flag.net, err

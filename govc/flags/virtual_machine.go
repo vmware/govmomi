@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type VirtualMachineFlag struct {
@@ -76,6 +77,6 @@ func (flag *VirtualMachineFlag) VirtualMachine() (*object.VirtualMachine, error)
 		return nil, err
 	}
 
-	flag.vm, err = finder.VirtualMachine(flag.name)
+	flag.vm, err = finder.VirtualMachine(context.TODO(), flag.name)
 	return flag.vm, err
 }

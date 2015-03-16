@@ -23,6 +23,7 @@ import (
 	"sync"
 
 	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type ResourcePoolFlag struct {
@@ -57,9 +58,9 @@ func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	}
 
 	if flag.name == "" {
-		flag.pool, err = finder.DefaultResourcePool()
+		flag.pool, err = finder.DefaultResourcePool(context.TODO())
 	} else {
-		flag.pool, err = finder.ResourcePool(flag.name)
+		flag.pool, err = finder.ResourcePool(context.TODO(), flag.name)
 	}
 
 	return flag.pool, err

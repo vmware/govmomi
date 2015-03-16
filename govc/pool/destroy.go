@@ -57,7 +57,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	pools, err := finder.ResourcePoolList(f.Args()...)
+	pools, err := finder.ResourcePoolList(context.TODO(), f.Args()...)
 	if err != nil {
 		return err
 	}

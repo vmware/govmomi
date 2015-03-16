@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
 )
 
 type ls struct {
@@ -53,7 +54,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	es, err := finder.ManagedObjectList(f.Args()...)
+	es, err := finder.ManagedObjectList(context.TODO(), f.Args()...)
 	if err != nil {
 		return err
 	}

@@ -21,7 +21,7 @@ import (
 	"path"
 	"reflect"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -71,7 +71,7 @@ func ToElement(r mo.Reference, prefix string) Element {
 }
 
 type Lister struct {
-	Client    *govmomi.Client
+	Collector *property.Collector
 	Reference types.ManagedObjectReference
 	Prefix    string
 	All       bool
@@ -91,24 +91,38 @@ func traversable(ref types.ManagedObjectReference) bool {
 	return true
 }
 
-func (l Lister) List() ([]Element, error) {
+func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProperties, dst interface{}) error {
+	res, err := l.Collector.RetrieveProperties(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	err = mo.LoadRetrievePropertiesResponse(res, dst)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (l Lister) List(ctx context.Context) ([]Element, error) {
 	switch l.Reference.Type {
 	case "Folder":
-		return l.ListFolder()
+		return l.ListFolder(ctx)
 	case "Datacenter":
-		return l.ListDatacenter()
+		return l.ListDatacenter(ctx)
 	case "ComputeResource", "ClusterComputeResource":
 		// Treat ComputeResource and ClusterComputeResource as one and the same.
 		// It doesn't matter from the perspective of the lister.
-		return l.ListComputeResource()
+		return l.ListComputeResource(ctx)
 	case "ResourcePool":
-		return l.ListResourcePool()
+		return l.ListResourcePool(ctx)
 	default:
 		return nil, fmt.Errorf("cannot traverse type " + l.Reference.Type)
 	}
 }
 
-func (l Lister) ListFolder() ([]Element, error) {
+func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 	spec := types.PropertyFilterSpec{
 		ObjectSet: []types.ObjectSpec{
 			{
@@ -160,13 +174,12 @@ func (l Lister) ListFolder() ([]Element, error) {
 	}
 
 	req := types.RetrieveProperties{
-		This:    l.Client.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{spec},
 	}
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
+	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
 		return nil, err
 	}
@@ -179,7 +192,7 @@ func (l Lister) ListFolder() ([]Element, error) {
 	return es, nil
 }
 
-func (l Lister) ListDatacenter() ([]Element, error) {
+func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
 		Skip: true,
@@ -214,7 +227,6 @@ func (l Lister) ListDatacenter() ([]Element, error) {
 	}
 
 	req := types.RetrieveProperties{
-		This: l.Client.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
 				ObjectSet: []types.ObjectSpec{ospec},
@@ -225,7 +237,7 @@ func (l Lister) ListDatacenter() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
+	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
 		return nil, err
 	}
@@ -238,7 +250,7 @@ func (l Lister) ListDatacenter() ([]Element, error) {
 	return es, nil
 }
 
-func (l Lister) ListComputeResource() ([]Element, error) {
+func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
 		Skip: true,
@@ -280,7 +292,6 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 	}
 
 	req := types.RetrieveProperties{
-		This: l.Client.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
 				ObjectSet: []types.ObjectSpec{ospec},
@@ -291,7 +302,7 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
+	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
 		return nil, err
 	}
@@ -304,7 +315,7 @@ func (l Lister) ListComputeResource() ([]Element, error) {
 	return es, nil
 }
 
-func (l Lister) ListResourcePool() ([]Element, error) {
+func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
 		Skip: true,
@@ -344,7 +355,6 @@ func (l Lister) ListResourcePool() ([]Element, error) {
 	}
 
 	req := types.RetrieveProperties{
-		This: l.Client.ServiceContent.PropertyCollector,
 		SpecSet: []types.PropertyFilterSpec{
 			{
 				ObjectSet: []types.ObjectSpec{ospec},
@@ -355,7 +365,7 @@ func (l Lister) ListResourcePool() ([]Element, error) {
 
 	var dst []interface{}
 
-	err := mo.RetrievePropertiesForRequest(context.TODO(), l.Client, req, &dst)
+	err := l.retrieveProperties(ctx, req, &dst)
 	if err != nil {
 		return nil, err
 	}

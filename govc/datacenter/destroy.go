@@ -54,7 +54,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 
 	finder := find.NewFinder(client, false)
 	for _, datacenterToDestroy := range datacentersToDestroy {
-		foundDatacenters, err := finder.DatacenterList(datacenterToDestroy)
+		foundDatacenters, err := finder.DatacenterList(context.TODO(), datacenterToDestroy)
 		if err != nil {
 			return err
 		}
