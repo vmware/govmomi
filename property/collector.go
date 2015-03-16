@@ -23,41 +23,57 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Collector models the PropertyCollector managed object.
+//
+// For more information, see:
+// http://pubs.vmware.com/vsphere-55/index.jsp#com.vmware.wssdk.apiref.doc/vmodl.query.PropertyCollector.html
+//
 type Collector struct {
 	roundTripper soap.RoundTripper
 	reference    types.ManagedObjectReference
 }
 
-// NewCollector creates a new property collector based on the root property
-// collector. It is the responsibility of the caller to destroy it when done.
-func NewCollector(ctx context.Context, rt soap.RoundTripper, sc types.ServiceContent) (*Collector, error) {
-	req := types.CreatePropertyCollector{
-		This: sc.PropertyCollector,
-	}
-
-	res, err := methods.CreatePropertyCollector(ctx, rt, &req)
-	if err != nil {
-		return nil, err
-	}
-
+// DefaultCollector returns the session's default property collector.
+func DefaultCollector(rt soap.RoundTripper, sc types.ServiceContent) *Collector {
 	p := Collector{
 		roundTripper: rt,
-		reference:    res.Returnval,
+		reference:    sc.PropertyCollector,
 	}
 
-	return &p, nil
+	return &p
 }
 
 func (p Collector) Reference() types.ManagedObjectReference {
 	return p.reference
 }
 
-func (p *Collector) Destroy(ctx context.Context) error {
-	req := types.DestroyCollector{
+// Create creates a new session-specific Collector that can be used to
+// retrieve property updates independent of any other Collector.
+func (p *Collector) Create(ctx context.Context) (*Collector, error) {
+	req := types.CreatePropertyCollector{
 		This: p.Reference(),
 	}
 
-	_, err := methods.DestroyCollector(ctx, p.roundTripper, &req)
+	res, err := methods.CreatePropertyCollector(ctx, p.roundTripper, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	newp := Collector{
+		roundTripper: p.roundTripper,
+		reference:    res.Returnval,
+	}
+
+	return &newp, nil
+}
+
+// Destroy destroys this Collector.
+func (p *Collector) Destroy(ctx context.Context) error {
+	req := types.DestroyPropertyCollector{
+		This: p.Reference(),
+	}
+
+	_, err := methods.DestroyPropertyCollector(ctx, p.roundTripper, &req)
 	if err != nil {
 		return err
 	}
@@ -89,46 +105,4 @@ func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.Update
 	}
 
 	return res.Returnval, nil
-}
-
-func (p *Collector) Wait(ctx context.Context, obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
-	req := types.CreateFilter{
-		Spec: types.PropertyFilterSpec{
-			ObjectSet: []types.ObjectSpec{
-				{
-					Obj: obj,
-				},
-			},
-			PropSet: []types.PropertySpec{
-				{
-					PathSet: ps,
-					Type:    obj.Type,
-				},
-			},
-		},
-	}
-
-	err := p.CreateFilter(ctx, req)
-	if err != nil {
-		return err
-	}
-
-	for version := ""; ; {
-		res, err := p.WaitForUpdates(ctx, version)
-		if err != nil {
-			return err
-		}
-
-		version = res.Version
-
-		for _, fs := range res.FilterSet {
-			for _, os := range fs.ObjectSet {
-				if os.Obj == obj {
-					if f(os.ChangeSet) {
-						return nil
-					}
-				}
-			}
-		}
-	}
 }

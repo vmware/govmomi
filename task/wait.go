@@ -117,7 +117,7 @@ func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Co
 		defer close(cb.ch)
 	}
 
-	err := pc.Wait(ctx, ref, []string{"info"}, cb.fn)
+	err := property.Wait(ctx, pc, ref, []string{"info"}, cb.fn)
 	if err != nil {
 		return nil, err
 	}

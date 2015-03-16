@@ -49,12 +49,6 @@ func (t *Task) Wait(ctx context.Context) error {
 }
 
 func (t *Task) WaitForResult(ctx context.Context, s progress.Sinker) (*types.TaskInfo, error) {
-	p, err := property.NewCollector(ctx, t.c, t.c.ServiceContent)
-	if err != nil {
-		return nil, err
-	}
-
-	defer p.Destroy(context.Background())
-
+	p := property.DefaultCollector(t.c, t.c.ServiceContent)
 	return task.Wait(ctx, t.ref, p, s)
 }

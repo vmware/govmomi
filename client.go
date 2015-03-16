@@ -144,13 +144,10 @@ func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, ds
 	return mo.RetrievePropertiesForRequest(context.TODO(), c, req, dst)
 }
 
+func (c *Client) PropertyCollector() *property.Collector {
+	return property.DefaultCollector(c, c.ServiceContent)
+}
+
 func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
-	p, err := property.NewCollector(context.TODO(), c, c.ServiceContent)
-	if err != nil {
-		return err
-	}
-
-	defer p.Destroy(context.TODO())
-
-	return p.Wait(context.TODO(), obj, ps, f)
+	return property.Wait(context.TODO(), c.PropertyCollector(), obj, ps, f)
 }
