@@ -63,7 +63,7 @@ func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	}
 
 	sm.userSession = &login.Returnval
-	return err
+	return nil
 }
 
 func (sm *Manager) Logout(ctx context.Context) error {
@@ -72,32 +72,46 @@ func (sm *Manager) Logout(ctx context.Context) error {
 	}
 
 	_, err := methods.Logout(ctx, sm.roundTripper, &req)
-	return err
-}
-
-func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) {
-	if sm.userSession == nil {
-		var mgr mo.SessionManager
-		err := mo.RetrieveProperties(ctx, sm.roundTripper, sm.serviceContent.PropertyCollector, sm.Reference(), &mgr)
-		if err != nil {
-			return nil, err
-		}
-		sm.userSession = mgr.CurrentSession
+	if err != nil {
+		return err
 	}
 
-	return sm.userSession, nil
+	sm.userSession = nil
+	return nil
 }
 
-func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
-	user, err := sm.UserSession(ctx)
+// UserSession retrieves and returns the SessionManager's CurrentSession field.
+// Nil is returned if the session is not authenticated.
+func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) {
+	var mgr mo.SessionManager
+
+	err := mo.RetrieveProperties(ctx, sm.roundTripper, sm.serviceContent.PropertyCollector, sm.Reference(), &mgr)
 	if err != nil {
-		return false, err
+		// It's OK if we can't retrieve properties because we're not authenticated
+		if f, ok := err.(types.HasFault); ok {
+			switch f.Fault().(type) {
+			case *types.NotAuthenticated:
+				return nil, nil
+			}
+		}
+
+		return nil, err
+	}
+
+	return mgr.CurrentSession, nil
+}
+
+// SessionIsActive checks whether the session that was created at login is
+// still valid. This function only works against vCenter.
+func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
+	if sm.userSession == nil {
+		return false, nil
 	}
 
 	req := types.SessionIsActive{
 		This:      sm.Reference(),
-		SessionID: user.Key,
-		UserName:  user.UserName,
+		SessionID: sm.userSession.Key,
+		UserName:  sm.userSession.UserName,
 	}
 
 	active, err := methods.SessionIsActive(ctx, sm.roundTripper, &req)
