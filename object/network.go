@@ -21,6 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type Network struct {
@@ -40,7 +41,7 @@ func (n Network) Name() string {
 }
 
 // EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this Network
-func (n Network) EthernetCardBackingInfo() (types.BaseVirtualDeviceBackingInfo, error) {
+func (n Network) EthernetCardBackingInfo(_ context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	name := n.Name()
 
 	backing := &types.VirtualEthernetCardNetworkBackingInfo{

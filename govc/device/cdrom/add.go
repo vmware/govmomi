@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type add struct {
@@ -50,7 +51,7 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -65,13 +66,13 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	err = vm.AddDevice(d)
+	err = vm.AddDevice(context.TODO(), d)
 	if err != nil {
 		return err
 	}
 
 	// output name of device we just created
-	devices, err = vm.Device()
+	devices, err = vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}

@@ -34,13 +34,13 @@ func NewHttpNfcLease(c *vim25.Client, ref types.ManagedObjectReference) *HttpNfc
 }
 
 // HttpNfcLeaseAbort wraps methods.HttpNfcLeaseAbort
-func (o HttpNfcLease) HttpNfcLeaseAbort(fault *types.LocalizedMethodFault) error {
+func (o HttpNfcLease) HttpNfcLeaseAbort(ctx context.Context, fault *types.LocalizedMethodFault) error {
 	req := types.HttpNfcLeaseAbort{
 		This:  o.Reference(),
 		Fault: fault,
 	}
 
-	_, err := methods.HttpNfcLeaseAbort(context.TODO(), o.c, &req)
+	_, err := methods.HttpNfcLeaseAbort(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -49,12 +49,12 @@ func (o HttpNfcLease) HttpNfcLeaseAbort(fault *types.LocalizedMethodFault) error
 }
 
 // HttpNfcLeaseComplete wraps methods.HttpNfcLeaseComplete
-func (o HttpNfcLease) HttpNfcLeaseComplete() error {
+func (o HttpNfcLease) HttpNfcLeaseComplete(ctx context.Context) error {
 	req := types.HttpNfcLeaseComplete{
 		This: o.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseComplete(context.TODO(), o.c, &req)
+	_, err := methods.HttpNfcLeaseComplete(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -63,12 +63,12 @@ func (o HttpNfcLease) HttpNfcLeaseComplete() error {
 }
 
 // HttpNfcLeaseGetManifest wraps methods.HttpNfcLeaseGetManifest
-func (o HttpNfcLease) HttpNfcLeaseGetManifest() error {
+func (o HttpNfcLease) HttpNfcLeaseGetManifest(ctx context.Context) error {
 	req := types.HttpNfcLeaseGetManifest{
 		This: o.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseGetManifest(context.TODO(), o.c, &req)
+	_, err := methods.HttpNfcLeaseGetManifest(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -77,13 +77,13 @@ func (o HttpNfcLease) HttpNfcLeaseGetManifest() error {
 }
 
 // HttpNfcLeaseProgress wraps methods.HttpNfcLeaseProgress
-func (o HttpNfcLease) HttpNfcLeaseProgress(percent int) error {
+func (o HttpNfcLease) HttpNfcLeaseProgress(ctx context.Context, percent int) error {
 	req := types.HttpNfcLeaseProgress{
 		This:    o.Reference(),
 		Percent: percent,
 	}
 
-	_, err := methods.HttpNfcLeaseProgress(context.TODO(), o.c, &req)
+	_, err := methods.HttpNfcLeaseProgress(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}

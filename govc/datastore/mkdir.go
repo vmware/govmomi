@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type mkdir struct {
@@ -70,7 +71,7 @@ func (cmd *mkdir) Run(f *flag.FlagSet) error {
 	}
 
 	m := object.NewFileManager(c)
-	err = m.MakeDirectory(path, dc, cmd.createParents)
+	err = m.MakeDirectory(context.TODO(), path, dc, cmd.createParents)
 
 	// ignore EEXIST if -p flag is given
 	if err != nil && cmd.createParents {

@@ -99,7 +99,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.HostSystem != nil {
-		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(); err != nil {
+		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(context.TODO()); err != nil {
 			return err
 		}
 	} else {
@@ -135,7 +135,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.on {
-		task, err := vm.PowerOn()
+		task, err := vm.PowerOn(context.TODO())
 		if err != nil {
 			return err
 		}
@@ -150,7 +150,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 }
 
 func (cmd *create) addDevices(vm *object.VirtualMachine) error {
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -193,7 +193,7 @@ func (cmd *create) addDevices(vm *object.VirtualMachine) error {
 
 	add = append(add, netdev)
 
-	return vm.AddDevice(add...)
+	return vm.AddDevice(context.TODO(), add...)
 }
 
 func (cmd *create) createVM(name string) (*object.Task, error) {
@@ -227,10 +227,10 @@ func (cmd *create) createVM(name string) (*object.Task, error) {
 		})
 	}
 
-	folders, err := cmd.Datacenter.Folders()
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(spec, cmd.ResourcePool, cmd.HostSystem)
+	return folders.VmFolder.CreateVM(context.TODO(), spec, cmd.ResourcePool, cmd.HostSystem)
 }

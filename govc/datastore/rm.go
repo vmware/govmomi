@@ -71,7 +71,7 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 	}
 
 	m := object.NewFileManager(c)
-	task, err := m.DeleteDatastoreFile(path, dc)
+	task, err := m.DeleteDatastoreFile(context.TODO(), path, dc)
 	if err != nil {
 		return err
 	}

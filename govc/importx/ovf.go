@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ovf struct {
@@ -139,7 +140,7 @@ func (cmd *ovf) Import(fpath string) error {
 	}
 
 	m := object.NewOvfManager(c)
-	spec, err := m.CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
+	spec, err := m.CreateImportSpec(context.TODO(), string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
 		return err
 	}
@@ -172,17 +173,17 @@ func (cmd *ovf) Import(fpath string) error {
 	}
 
 	// TODO: need a folder option
-	folders, err := cmd.Datacenter.Folders()
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return err
 	}
 
-	lease, err := cmd.ResourcePool.ImportVApp(spec.ImportSpec, folders.VmFolder, host)
+	lease, err := cmd.ResourcePool.ImportVApp(context.TODO(), spec.ImportSpec, folders.VmFolder, host)
 	if err != nil {
 		return err
 	}
 
-	info, err := lease.Wait()
+	info, err := lease.Wait(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -222,7 +223,7 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	return lease.HttpNfcLeaseComplete()
+	return lease.HttpNfcLeaseComplete(context.TODO())
 }
 
 func (cmd *ovf) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {

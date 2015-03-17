@@ -16,10 +16,13 @@ limitations under the License.
 
 package object
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
+)
 
 // The NetworkReference interface is implemented by managed objects
 // which can be used as the backing for a VirtualEthernetCard.
 type NetworkReference interface {
-	EthernetCardBackingInfo() (types.BaseVirtualDeviceBackingInfo, error)
+	EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error)
 }

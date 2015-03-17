@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type add struct {
@@ -59,5 +60,5 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	return ns.AddVirtualSwitch(f.Arg(0), &cmd.spec)
+	return ns.AddVirtualSwitch(context.TODO(), f.Arg(0), &cmd.spec)
 }

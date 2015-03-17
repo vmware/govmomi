@@ -54,7 +54,7 @@ func (f *Finder) SetDatacenter(dc *object.Datacenter) *Finder {
 	return f
 }
 
-type findRelativeFunc func() (object.Reference, error)
+type findRelativeFunc func(ctx context.Context) (object.Reference, error)
 
 func (f *Finder) find(ctx context.Context, fn findRelativeFunc, tl bool, path ...string) ([]list.Element, error) {
 	var out []list.Element
@@ -84,7 +84,7 @@ func (f *Finder) list(ctx context.Context, fn findRelativeFunc, tl bool, arg str
 		case "..": // Not supported; many edge case, little value
 			return nil, errors.New("cannot traverse up a tree")
 		case ".": // Relative to whatever
-			pivot, err := fn()
+			pivot, err := fn(ctx)
 			if err != nil {
 				return nil, err
 			}
@@ -124,7 +124,7 @@ func (f *Finder) datacenter() (*object.Datacenter, error) {
 	return f.dc, nil
 }
 
-func (f *Finder) dcFolders() (*object.DatacenterFolders, error) {
+func (f *Finder) dcFolders(ctx context.Context) (*object.DatacenterFolders, error) {
 	if f.folders != nil {
 		return f.folders, nil
 	}
@@ -134,7 +134,7 @@ func (f *Finder) dcFolders() (*object.DatacenterFolders, error) {
 		return nil, err
 	}
 
-	folders, err := dc.Folders()
+	folders, err := dc.Folders(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (f *Finder) dcFolders() (*object.DatacenterFolders, error) {
 	return f.folders, nil
 }
 
-func (f *Finder) dcReference() (object.Reference, error) {
+func (f *Finder) dcReference(_ context.Context) (object.Reference, error) {
 	dc, err := f.datacenter()
 	if err != nil {
 		return nil, err
@@ -153,8 +153,8 @@ func (f *Finder) dcReference() (object.Reference, error) {
 	return dc, nil
 }
 
-func (f *Finder) vmFolder() (object.Reference, error) {
-	folders, err := f.dcFolders()
+func (f *Finder) vmFolder(ctx context.Context) (object.Reference, error) {
+	folders, err := f.dcFolders(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -162,8 +162,8 @@ func (f *Finder) vmFolder() (object.Reference, error) {
 	return folders.VmFolder, nil
 }
 
-func (f *Finder) hostFolder() (object.Reference, error) {
-	folders, err := f.dcFolders()
+func (f *Finder) hostFolder(ctx context.Context) (object.Reference, error) {
+	folders, err := f.dcFolders(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -171,8 +171,8 @@ func (f *Finder) hostFolder() (object.Reference, error) {
 	return folders.HostFolder, nil
 }
 
-func (f *Finder) datastoreFolder() (object.Reference, error) {
-	folders, err := f.dcFolders()
+func (f *Finder) datastoreFolder(ctx context.Context) (object.Reference, error) {
+	folders, err := f.dcFolders(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -180,8 +180,8 @@ func (f *Finder) datastoreFolder() (object.Reference, error) {
 	return folders.DatastoreFolder, nil
 }
 
-func (f *Finder) networkFolder() (object.Reference, error) {
-	folders, err := f.dcFolders()
+func (f *Finder) networkFolder(ctx context.Context) (object.Reference, error) {
+	folders, err := f.dcFolders(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -189,7 +189,7 @@ func (f *Finder) networkFolder() (object.Reference, error) {
 	return folders.NetworkFolder, nil
 }
 
-func (f *Finder) rootFolder() (object.Reference, error) {
+func (f *Finder) rootFolder(_ context.Context) (object.Reference, error) {
 	return object.NewRootFolder(f.client), nil
 }
 
@@ -311,7 +311,7 @@ func (f *Finder) HostSystemList(ctx context.Context, path ...string) ([]*object.
 			hs = object.NewHostSystem(f.client, o.Reference())
 		case mo.ComputeResource:
 			cr := object.NewComputeResource(f.client, o.Reference())
-			hosts, err := cr.Hosts()
+			hosts, err := cr.Hosts(ctx)
 			if err != nil {
 				return nil, err
 			}

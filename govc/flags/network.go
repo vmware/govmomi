@@ -89,7 +89,7 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
-	backing, err := net.EthernetCardBackingInfo()
+	backing, err := net.EthernetCardBackingInfo(context.TODO())
 	if err != nil {
 		return nil, err
 	}

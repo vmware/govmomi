@@ -38,10 +38,10 @@ func NewRootFolder(c *vim25.Client) *Folder {
 	return NewFolder(c, c.ServiceContent.RootFolder)
 }
 
-func (f Folder) Children() ([]Reference, error) {
+func (f Folder) Children(ctx context.Context) ([]Reference, error) {
 	var mf mo.Folder
 
-	err := f.Properties(context.TODO(), f.Reference(), []string{"childEntity"}, &mf)
+	err := f.Properties(ctx, f.Reference(), []string{"childEntity"}, &mf)
 	if err != nil {
 		return nil, err
 	}
@@ -56,13 +56,13 @@ func (f Folder) Children() ([]Reference, error) {
 	return rs, nil
 }
 
-func (f Folder) CreateDatacenter(datacenter string) (*Datacenter, error) {
+func (f Folder) CreateDatacenter(ctx context.Context, datacenter string) (*Datacenter, error) {
 	req := types.CreateDatacenter{
 		This: f.Reference(),
 		Name: datacenter,
 	}
 
-	res, err := methods.CreateDatacenter(context.TODO(), f.c, &req)
+	res, err := methods.CreateDatacenter(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -75,13 +75,13 @@ func (f Folder) CreateDatacenter(datacenter string) (*Datacenter, error) {
 	return NewDatacenter(f.c, res.Returnval), nil
 }
 
-func (f Folder) CreateFolder(name string) (*Folder, error) {
+func (f Folder) CreateFolder(ctx context.Context, name string) (*Folder, error) {
 	req := types.CreateFolder{
 		This: f.Reference(),
 		Name: name,
 	}
 
-	res, err := methods.CreateFolder(context.TODO(), f.c, &req)
+	res, err := methods.CreateFolder(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +89,7 @@ func (f Folder) CreateFolder(name string) (*Folder, error) {
 	return NewFolder(f.c, res.Returnval), err
 }
 
-func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
+func (f Folder) CreateVM(ctx context.Context, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
 		Config: config,
@@ -101,7 +101,7 @@ func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePo
 		req.Host = &ref
 	}
 
-	res, err := methods.CreateVM_Task(context.TODO(), f.c, &req)
+	res, err := methods.CreateVM_Task(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (f Folder) CreateVM(config types.VirtualMachineConfigSpec, pool *ResourcePo
 	return NewTask(f.c, res.Returnval), nil
 }
 
-func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *ResourcePool, host *HostSystem) (*Task, error) {
+func (f Folder) RegisterVM(ctx context.Context, path string, name string, asTemplate bool, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.RegisterVM_Task{
 		This:       f.Reference(),
 		Path:       path,
@@ -130,7 +130,7 @@ func (f Folder) RegisterVM(path string, name string, asTemplate bool, pool *Reso
 		req.Pool = &ref
 	}
 
-	res, err := methods.RegisterVM_Task(context.TODO(), f.c, &req)
+	res, err := methods.RegisterVM_Task(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}

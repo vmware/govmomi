@@ -75,7 +75,7 @@ func (cmd *mv) Run(f *flag.FlagSet) error {
 	}
 
 	m := object.NewFileManager(c)
-	task, err := m.MoveDatastoreFile(src, dc, dst, dc, cmd.force)
+	task, err := m.MoveDatastoreFile(context.TODO(), src, dc, dst, dc, cmd.force)
 	if err != nil {
 		return err
 	}

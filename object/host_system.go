@@ -42,10 +42,10 @@ func (h HostSystem) ConfigManager() *HostConfigManager {
 	return NewHostConfigManager(h.c, h.Reference())
 }
 
-func (h HostSystem) ResourcePool() (*ResourcePool, error) {
+func (h HostSystem) ResourcePool(ctx context.Context) (*ResourcePool, error) {
 	var mh mo.HostSystem
 
-	err := h.Properties(context.TODO(), h.Reference(), []string{"parent"}, &mh)
+	err := h.Properties(ctx, h.Reference(), []string{"parent"}, &mh)
 	if err != nil {
 		return nil, err
 	}
@@ -65,7 +65,7 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 		return nil, fmt.Errorf("unknown host parent type: %s", mh.Parent.Type)
 	}
 
-	err = h.Properties(context.TODO(), *mh.Parent, []string{"resourcePool"}, parent)
+	err = h.Properties(ctx, *mh.Parent, []string{"resourcePool"}, parent)
 	if err != nil {
 		return nil, err
 	}
@@ -74,10 +74,10 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 	return pool, nil
 }
 
-func (h HostSystem) ManagementIPs() ([]net.IP, error) {
+func (h HostSystem) ManagementIPs(ctx context.Context) ([]net.IP, error) {
 	var mh mo.HostSystem
 
-	err := h.Properties(context.TODO(), h.Reference(), []string{"config.virtualNicManagerInfo.netConfig"}, &mh)
+	err := h.Properties(ctx, h.Reference(), []string{"config.virtualNicManagerInfo.netConfig"}, &mh)
 	if err != nil {
 		return nil, err
 	}

@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type add struct {
@@ -53,5 +54,5 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 
 	cmd.spec.Name = f.Arg(0)
 
-	return ns.AddPortGroup(cmd.spec)
+	return ns.AddPortGroup(context.TODO(), cmd.spec)
 }

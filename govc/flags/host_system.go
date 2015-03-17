@@ -109,5 +109,5 @@ func (flag *HostSystemFlag) HostNetworkSystem() (*object.HostNetworkSystem, erro
 		return nil, err
 	}
 
-	return host.ConfigManager().NetworkSystem()
+	return host.ConfigManager().NetworkSystem(context.TODO())
 }

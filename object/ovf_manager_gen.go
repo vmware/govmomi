@@ -27,14 +27,14 @@ type OvfManager struct {
 }
 
 // CreateDescriptor wraps methods.CreateDescriptor
-func (o OvfManager) CreateDescriptor(obj Reference, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+func (o OvfManager) CreateDescriptor(ctx context.Context, obj Reference, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
 	req := types.CreateDescriptor{
 		This: o.Reference(),
 		Obj:  obj.Reference(),
 		Cdp:  cdp,
 	}
 
-	res, err := methods.CreateDescriptor(context.TODO(), o.c, &req)
+	res, err := methods.CreateDescriptor(ctx, o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -43,7 +43,7 @@ func (o OvfManager) CreateDescriptor(obj Reference, cdp types.OvfCreateDescripto
 }
 
 // CreateImportSpec wraps methods.CreateImportSpec
-func (o OvfManager) CreateImportSpec(ovfDescriptor string, resourcePool Reference, datastore Reference, cisp types.OvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
+func (o OvfManager) CreateImportSpec(ctx context.Context, ovfDescriptor string, resourcePool Reference, datastore Reference, cisp types.OvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
 	req := types.CreateImportSpec{
 		This:          o.Reference(),
 		OvfDescriptor: ovfDescriptor,
@@ -52,7 +52,7 @@ func (o OvfManager) CreateImportSpec(ovfDescriptor string, resourcePool Referenc
 		Cisp:          cisp,
 	}
 
-	res, err := methods.CreateImportSpec(context.TODO(), o.c, &req)
+	res, err := methods.CreateImportSpec(ctx, o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -61,14 +61,14 @@ func (o OvfManager) CreateImportSpec(ovfDescriptor string, resourcePool Referenc
 }
 
 // ParseDescriptor wraps methods.ParseDescriptor
-func (o OvfManager) ParseDescriptor(ovfDescriptor string, pdp types.OvfParseDescriptorParams) (*types.OvfParseDescriptorResult, error) {
+func (o OvfManager) ParseDescriptor(ctx context.Context, ovfDescriptor string, pdp types.OvfParseDescriptorParams) (*types.OvfParseDescriptorResult, error) {
 	req := types.ParseDescriptor{
 		This:          o.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		Pdp:           pdp,
 	}
 
-	res, err := methods.ParseDescriptor(context.TODO(), o.c, &req)
+	res, err := methods.ParseDescriptor(ctx, o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (o OvfManager) ParseDescriptor(ovfDescriptor string, pdp types.OvfParseDesc
 }
 
 // ValidateHost wraps methods.ValidateHost
-func (o OvfManager) ValidateHost(ovfDescriptor string, host Reference, vhp types.OvfValidateHostParams) (*types.OvfValidateHostResult, error) {
+func (o OvfManager) ValidateHost(ctx context.Context, ovfDescriptor string, host Reference, vhp types.OvfValidateHostParams) (*types.OvfValidateHostResult, error) {
 	req := types.ValidateHost{
 		This:          o.Reference(),
 		OvfDescriptor: ovfDescriptor,
@@ -85,7 +85,7 @@ func (o OvfManager) ValidateHost(ovfDescriptor string, host Reference, vhp types
 		Vhp:           vhp,
 	}
 
-	res, err := methods.ValidateHost(context.TODO(), o.c, &req)
+	res, err := methods.ValidateHost(ctx, o.c, &req)
 	if err != nil {
 		return nil, err
 	}

@@ -58,7 +58,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	b, err := ds.Browser()
+	b, err := ds.Browser(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -121,7 +121,7 @@ func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.
 		return res, err
 	}
 
-	task, err := b.SearchDatastore(path, &spec)
+	task, err := b.SearchDatastore(context.TODO(), path, &spec)
 	if err != nil {
 		return res, err
 	}

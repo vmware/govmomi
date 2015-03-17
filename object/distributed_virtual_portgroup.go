@@ -41,15 +41,15 @@ func (p DistributedVirtualPortgroup) Name() string {
 }
 
 // EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this DistributedVirtualPortgroup
-func (p DistributedVirtualPortgroup) EthernetCardBackingInfo() (types.BaseVirtualDeviceBackingInfo, error) {
+func (p DistributedVirtualPortgroup) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	var dvp mo.DistributedVirtualPortgroup
 	var dvs mo.VmwareDistributedVirtualSwitch // TODO: should be mo.BaseDistributedVirtualSwitch
 
-	if err := p.Properties(context.TODO(), p.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
+	if err := p.Properties(ctx, p.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
 		return nil, err
 	}
 
-	if err := p.Properties(context.TODO(), *dvp.Config.DistributedVirtualSwitch, []string{"uuid"}, &dvs); err != nil {
+	if err := p.Properties(ctx, *dvp.Config.DistributedVirtualSwitch, []string{"uuid"}, &dvs); err != nil {
 		return nil, err
 	}
 

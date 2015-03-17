@@ -35,13 +35,13 @@ func NewStorageResourceManager(c *vim25.Client) *StorageResourceManager {
 	return &sr
 }
 
-func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*Task, error) {
+func (sr StorageResourceManager) ApplyStorageDrsRecommendation(ctx context.Context, key []string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendation_Task{
 		This: sr.Reference(),
 		Key:  key,
 	}
 
-	res, err := methods.ApplyStorageDrsRecommendation_Task(context.TODO(), sr.c, &req)
+	res, err := methods.ApplyStorageDrsRecommendation_Task(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*T
 	return NewTask(sr.c, res.Returnval), nil
 }
 
-func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *StoragePod, key string) (*Task, error) {
+func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(ctx context.Context, pod *StoragePod, key string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendationToPod_Task{
 		This: sr.Reference(),
 		Key:  key,
@@ -59,7 +59,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *Storage
 		req.Pod = pod.Reference()
 	}
 
-	res, err := methods.ApplyStorageDrsRecommendationToPod_Task(context.TODO(), sr.c, &req)
+	res, err := methods.ApplyStorageDrsRecommendationToPod_Task(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -67,18 +67,18 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *Storage
 	return NewTask(sr.c, res.Returnval), nil
 }
 
-func (sr StorageResourceManager) CancelStorageDrsRecommendation(key []string) error {
+func (sr StorageResourceManager) CancelStorageDrsRecommendation(ctx context.Context, key []string) error {
 	req := types.CancelStorageDrsRecommendation{
 		This: sr.Reference(),
 		Key:  key,
 	}
 
-	_, err := methods.CancelStorageDrsRecommendation(context.TODO(), sr.c, &req)
+	_, err := methods.CancelStorageDrsRecommendation(ctx, sr.c, &req)
 
 	return err
 }
 
-func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, spec types.StorageIORMConfigSpec, key string) (*Task, error) {
+func (sr StorageResourceManager) ConfigureDatastoreIORM(ctx context.Context, datastore *Datastore, spec types.StorageIORMConfigSpec, key string) (*Task, error) {
 	req := types.ConfigureDatastoreIORM_Task{
 		This: sr.Reference(),
 		Spec: spec,
@@ -88,7 +88,7 @@ func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, sp
 		req.Datastore = datastore.Reference()
 	}
 
-	res, err := methods.ConfigureDatastoreIORM_Task(context.TODO(), sr.c, &req)
+	res, err := methods.ConfigureDatastoreIORM_Task(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -96,7 +96,7 @@ func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, sp
 	return NewTask(sr.c, res.Returnval), nil
 }
 
-func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec types.StorageDrsConfigSpec, modify bool) (*Task, error) {
+func (sr StorageResourceManager) ConfigureStorageDrsForPod(ctx context.Context, pod *StoragePod, spec types.StorageDrsConfigSpec, modify bool) (*Task, error) {
 	req := types.ConfigureStorageDrsForPod_Task{
 		This:   sr.Reference(),
 		Spec:   spec,
@@ -107,7 +107,7 @@ func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec
 		req.Pod = pod.Reference()
 	}
 
-	res, err := methods.ConfigureStorageDrsForPod_Task(context.TODO(), sr.c, &req)
+	res, err := methods.ConfigureStorageDrsForPod_Task(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +115,7 @@ func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec
 	return NewTask(sr.c, res.Returnval), nil
 }
 
-func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Datastore) ([]types.StoragePerformanceSummary, error) {
+func (sr StorageResourceManager) QueryDatastorePerformanceSummary(ctx context.Context, datastore *Datastore) ([]types.StoragePerformanceSummary, error) {
 	req := types.QueryDatastorePerformanceSummary{
 		This: sr.Reference(),
 	}
@@ -124,7 +124,7 @@ func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Dat
 		req.Datastore = datastore.Reference()
 	}
 
-	res, err := methods.QueryDatastorePerformanceSummary(context.TODO(), sr.c, &req)
+	res, err := methods.QueryDatastorePerformanceSummary(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -132,7 +132,7 @@ func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Dat
 	return res.Returnval, nil
 }
 
-func (sr StorageResourceManager) QueryIORMConfigOption(host *HostSystem) (*types.StorageIORMConfigOption, error) {
+func (sr StorageResourceManager) QueryIORMConfigOption(ctx context.Context, host *HostSystem) (*types.StorageIORMConfigOption, error) {
 	req := types.QueryIORMConfigOption{
 		This: sr.Reference(),
 	}
@@ -141,7 +141,7 @@ func (sr StorageResourceManager) QueryIORMConfigOption(host *HostSystem) (*types
 		req.Host = host.Reference()
 	}
 
-	res, err := methods.QueryIORMConfigOption(context.TODO(), sr.c, &req)
+	res, err := methods.QueryIORMConfigOption(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -149,13 +149,13 @@ func (sr StorageResourceManager) QueryIORMConfigOption(host *HostSystem) (*types
 	return &res.Returnval, nil
 }
 
-func (sr StorageResourceManager) RecommendDatastores(storageSpec types.StoragePlacementSpec) (*types.StoragePlacementResult, error) {
+func (sr StorageResourceManager) RecommendDatastores(ctx context.Context, storageSpec types.StoragePlacementSpec) (*types.StoragePlacementResult, error) {
 	req := types.RecommendDatastores{
 		This:        sr.Reference(),
 		StorageSpec: storageSpec,
 	}
 
-	res, err := methods.RecommendDatastores(context.TODO(), sr.c, &req)
+	res, err := methods.RecommendDatastores(ctx, sr.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -163,7 +163,7 @@ func (sr StorageResourceManager) RecommendDatastores(storageSpec types.StoragePl
 	return &res.Returnval, nil
 }
 
-func (sr StorageResourceManager) RefreshStorageDrsRecommendation(pod *StoragePod) error {
+func (sr StorageResourceManager) RefreshStorageDrsRecommendation(ctx context.Context, pod *StoragePod) error {
 	req := types.RefreshStorageDrsRecommendation{
 		This: sr.Reference(),
 	}
@@ -172,7 +172,7 @@ func (sr StorageResourceManager) RefreshStorageDrsRecommendation(pod *StoragePod
 		req.Pod = pod.Reference()
 	}
 
-	_, err := methods.RefreshStorageDrsRecommendation(context.TODO(), sr.c, &req)
+	_, err := methods.RefreshStorageDrsRecommendation(ctx, sr.c, &req)
 
 	return err
 }

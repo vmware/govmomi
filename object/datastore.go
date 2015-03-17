@@ -54,14 +54,14 @@ func (d Datastore) Path(path string) string {
 }
 
 // URL for datastore access over HTTP
-func (d Datastore) URL(dc *Datacenter, path string) (*url.URL, error) {
+func (d Datastore) URL(ctx context.Context, dc *Datacenter, path string) (*url.URL, error) {
 	var mdc mo.Datacenter
-	if err := dc.Properties(context.TODO(), dc.Reference(), []string{"name"}, &mdc); err != nil {
+	if err := dc.Properties(ctx, dc.Reference(), []string{"name"}, &mdc); err != nil {
 		return nil, err
 	}
 
 	var mds mo.Datastore
-	if err := d.Properties(context.TODO(), d.Reference(), []string{"name"}, &mds); err != nil {
+	if err := d.Properties(ctx, d.Reference(), []string{"name"}, &mds); err != nil {
 		return nil, err
 	}
 
@@ -78,10 +78,10 @@ func (d Datastore) URL(dc *Datacenter, path string) (*url.URL, error) {
 	}, nil
 }
 
-func (d Datastore) Browser() (*HostDatastoreBrowser, error) {
+func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 	var do mo.Datastore
 
-	err := d.Properties(context.TODO(), d.Reference(), []string{"browser"}, &do)
+	err := d.Properties(ctx, d.Reference(), []string{"browser"}, &do)
 	if err != nil {
 		return nil, err
 	}

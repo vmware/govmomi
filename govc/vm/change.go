@@ -54,7 +54,7 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	task, err := vm.Reconfigure(cmd.VirtualMachineConfigSpec)
+	task, err := vm.Reconfigure(context.TODO(), cmd.VirtualMachineConfigSpec)
 	if err != nil {
 		return err
 	}

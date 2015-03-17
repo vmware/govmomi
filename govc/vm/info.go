@@ -81,7 +81,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 			}
 
 			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
-				_, err = vm.WaitForIP()
+				_, err = vm.WaitForIP(context.TODO())
 				if err != nil {
 					return err
 				}

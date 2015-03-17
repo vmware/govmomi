@@ -35,7 +35,7 @@ func NewFileManager(c *vim25.Client) *FileManager {
 	return &f
 }
 
-func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
+func (f FileManager) CopyDatastoreFile(ctx context.Context, sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.CopyDatastoreFile_Task{
 		This:            f.Reference(),
 		SourceName:      sourceName,
@@ -53,7 +53,7 @@ func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Data
 		req.DestinationDatacenter = &ref
 	}
 
-	res, err := methods.CopyDatastoreFile_Task(context.TODO(), f.c, &req)
+	res, err := methods.CopyDatastoreFile_Task(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -62,7 +62,7 @@ func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Data
 }
 
 // DeleteDatastoreFile deletes the specified file or folder from the datastore.
-func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, error) {
+func (f FileManager) DeleteDatastoreFile(ctx context.Context, name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteDatastoreFile_Task{
 		This: f.Reference(),
 		Name: name,
@@ -73,7 +73,7 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, er
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.DeleteDatastoreFile_Task(context.TODO(), f.c, &req)
+	res, err := methods.DeleteDatastoreFile_Task(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +82,7 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, er
 }
 
 // MakeDirectory creates a folder using the specified name.
-func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDirectories bool) error {
+func (f FileManager) MakeDirectory(ctx context.Context, name string, dc *Datacenter, createParentDirectories bool) error {
 	req := types.MakeDirectory{
 		This: f.Reference(),
 		Name: name,
@@ -94,11 +94,11 @@ func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDire
 		req.Datacenter = &ref
 	}
 
-	_, err := methods.MakeDirectory(context.TODO(), f.c, &req)
+	_, err := methods.MakeDirectory(ctx, f.c, &req)
 	return err
 }
 
-func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
+func (f FileManager) MoveDatastoreFile(ctx context.Context, sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.MoveDatastoreFile_Task{
 		This:            f.Reference(),
 		SourceName:      sourceName,
@@ -116,7 +116,7 @@ func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Data
 		req.DestinationDatacenter = &ref
 	}
 
-	res, err := methods.MoveDatastoreFile_Task(context.TODO(), f.c, &req)
+	res, err := methods.MoveDatastoreFile_Task(ctx, f.c, &req)
 	if err != nil {
 		return nil, err
 	}

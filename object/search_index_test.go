@@ -29,7 +29,7 @@ func TestSearch(t *testing.T) {
 	c := client.NewAuthenticatedClient(t)
 	s := NewSearchIndex(c)
 
-	ref, err := s.FindChild(NewRootFolder(c), "ha-datacenter")
+	ref, err := s.FindChild(context.Background(), NewRootFolder(c), "ha-datacenter")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -39,12 +39,12 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Datacenter: %#v", ref)
 	}
 
-	folders, err := dc.Folders()
+	folders, err := dc.Folders(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	ref, err = s.FindChild(folders.DatastoreFolder, "datastore1")
+	ref, err = s.FindChild(context.Background(), folders.DatastoreFolder, "datastore1")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Datastore: %#v", ref)
 	}
 
-	ref, err = s.FindByInventoryPath("/ha-datacenter/network/VM Network")
+	ref, err = s.FindByInventoryPath(context.Background(), "/ha-datacenter/network/VM Network")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -64,7 +64,7 @@ func TestSearch(t *testing.T) {
 		t.Errorf("Expected Network: %#v", ref)
 	}
 
-	crs, err := folders.HostFolder.Children()
+	crs, err := folders.HostFolder.Children(context.Background())
 	if err != nil {
 		if err != nil {
 			t.Fatal(err)
@@ -85,7 +85,7 @@ func TestSearch(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		shost, err := s.FindByDnsName(dc, host.Name, false) // TODO: get name/ip from nic manager
+		shost, err := s.FindByDnsName(context.Background(), dc, host.Name, false) // TODO: get name/ip from nic manager
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -93,7 +93,7 @@ func TestSearch(t *testing.T) {
 			t.Errorf("%#v != %#v\n", ref, shost)
 		}
 
-		shost, err = s.FindByUuid(dc, host.Hardware.SystemInfo.Uuid, false)
+		shost, err = s.FindByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -102,7 +102,7 @@ func TestSearch(t *testing.T) {
 		}
 	}
 
-	vms, err := folders.VmFolder.Children()
+	vms, err := folders.VmFolder.Children(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -113,7 +113,7 @@ func TestSearch(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
-		svm, err := s.FindByDatastorePath(dc, vm.Config.Files.VmPathName)
+		svm, err := s.FindByDatastorePath(context.Background(), dc, vm.Config.Files.VmPathName)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -121,7 +121,7 @@ func TestSearch(t *testing.T) {
 			t.Errorf("%#v != %#v\n", ref, svm)
 		}
 
-		svm, err = s.FindByUuid(dc, vm.Config.Uuid, true)
+		svm, err = s.FindByUuid(context.Background(), dc, vm.Config.Uuid, true)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -130,7 +130,7 @@ func TestSearch(t *testing.T) {
 		}
 
 		if vm.Guest.HostName != "" {
-			svm, err := s.FindByDnsName(dc, vm.Guest.HostName, true)
+			svm, err := s.FindByDnsName(context.Background(), dc, vm.Guest.HostName, true)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -140,7 +140,7 @@ func TestSearch(t *testing.T) {
 		}
 
 		if vm.Guest.IpAddress != "" {
-			svm, err := s.FindByIp(dc, vm.Guest.IpAddress, true)
+			svm, err := s.FindByIp(context.Background(), dc, vm.Guest.IpAddress, true)
 			if err != nil {
 				t.Fatal(err)
 			}

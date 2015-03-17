@@ -37,12 +37,12 @@ func NewVirtualMachine(c *vim25.Client, ref types.ManagedObjectReference) *Virtu
 	}
 }
 
-func (v VirtualMachine) PowerOn() (*Task, error) {
+func (v VirtualMachine) PowerOn(ctx context.Context) (*Task, error) {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.PowerOnVM_Task(context.TODO(), v.c, &req)
+	res, err := methods.PowerOnVM_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -50,12 +50,12 @@ func (v VirtualMachine) PowerOn() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) PowerOff() (*Task, error) {
+func (v VirtualMachine) PowerOff(ctx context.Context) (*Task, error) {
 	req := types.PowerOffVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.PowerOffVM_Task(context.TODO(), v.c, &req)
+	res, err := methods.PowerOffVM_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -63,12 +63,12 @@ func (v VirtualMachine) PowerOff() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reset() (*Task, error) {
+func (v VirtualMachine) Reset(ctx context.Context) (*Task, error) {
 	req := types.ResetVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.ResetVM_Task(context.TODO(), v.c, &req)
+	res, err := methods.ResetVM_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -76,12 +76,12 @@ func (v VirtualMachine) Reset() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Suspend() (*Task, error) {
+func (v VirtualMachine) Suspend(ctx context.Context) (*Task, error) {
 	req := types.SuspendVM_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.SuspendVM_Task(context.TODO(), v.c, &req)
+	res, err := methods.SuspendVM_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -89,30 +89,30 @@ func (v VirtualMachine) Suspend() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) ShutdownGuest() error {
+func (v VirtualMachine) ShutdownGuest(ctx context.Context) error {
 	req := types.ShutdownGuest{
 		This: v.Reference(),
 	}
 
-	_, err := methods.ShutdownGuest(context.TODO(), v.c, &req)
+	_, err := methods.ShutdownGuest(ctx, v.c, &req)
 	return err
 }
 
-func (v VirtualMachine) RebootGuest() error {
+func (v VirtualMachine) RebootGuest(ctx context.Context) error {
 	req := types.RebootGuest{
 		This: v.Reference(),
 	}
 
-	_, err := methods.RebootGuest(context.TODO(), v.c, &req)
+	_, err := methods.RebootGuest(ctx, v.c, &req)
 	return err
 }
 
-func (v VirtualMachine) Destroy() (*Task, error) {
+func (v VirtualMachine) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: v.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(context.TODO(), v.c, &req)
+	res, err := methods.Destroy_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (v VirtualMachine) Destroy() (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
+func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
 	req := types.CloneVM_Task{
 		This:   v.Reference(),
 		Folder: folder.Reference(),
@@ -128,7 +128,7 @@ func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualM
 		Spec:   config,
 	}
 
-	res, err := methods.CloneVM_Task(context.TODO(), v.c, &req)
+	res, err := methods.CloneVM_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -136,13 +136,13 @@ func (v VirtualMachine) Clone(folder *Folder, name string, config types.VirtualM
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*Task, error) {
+func (v VirtualMachine) Reconfigure(ctx context.Context, config types.VirtualMachineConfigSpec) (*Task, error) {
 	req := types.ReconfigVM_Task{
 		This: v.Reference(),
 		Spec: config,
 	}
 
-	res, err := methods.ReconfigVM_Task(context.TODO(), v.c, &req)
+	res, err := methods.ReconfigVM_Task(ctx, v.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -150,11 +150,11 @@ func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*Tas
 	return NewTask(v.c, res.Returnval), nil
 }
 
-func (v VirtualMachine) WaitForIP() (string, error) {
+func (v VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
 	var ip string
 
 	p := property.DefaultCollector(v.c)
-	err := property.Wait(context.TODO(), p, v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
+	err := property.Wait(ctx, p, v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
 		for _, c := range pc {
 			if c.Name != "guest.ipAddress" {
 				continue
@@ -181,10 +181,10 @@ func (v VirtualMachine) WaitForIP() (string, error) {
 }
 
 // Device returns the VirtualMachine's config.hardware.device property.
-func (v VirtualMachine) Device() (VirtualDeviceList, error) {
+func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 	var o mo.VirtualMachine
 
-	err := v.Properties(context.TODO(), v.Reference(), []string{"config.hardware.device"}, &o)
+	err := v.Properties(ctx, v.Reference(), []string{"config.hardware.device"}, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -192,7 +192,7 @@ func (v VirtualMachine) Device() (VirtualDeviceList, error) {
 	return VirtualDeviceList(o.Config.Hardware.Device), nil
 }
 
-func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, devices ...types.BaseVirtualDevice) error {
+func (v VirtualMachine) configureDevice(ctx context.Context, op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, devices ...types.BaseVirtualDevice) error {
 	spec := types.VirtualMachineConfigSpec{}
 
 	for _, device := range devices {
@@ -220,34 +220,34 @@ func (v VirtualMachine) configureDevice(op types.VirtualDeviceConfigSpecOperatio
 		spec.DeviceChange = append(spec.DeviceChange, config)
 	}
 
-	task, err := v.Reconfigure(spec)
+	task, err := v.Reconfigure(ctx, spec)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait(context.TODO())
+	return task.Wait(ctx)
 }
 
 // AddDevice adds the given devices to the VirtualMachine
-func (v VirtualMachine) AddDevice(device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(types.VirtualDeviceConfigSpecOperationAdd, types.VirtualDeviceConfigSpecFileOperationCreate, device...)
+func (v VirtualMachine) AddDevice(ctx context.Context, device ...types.BaseVirtualDevice) error {
+	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationAdd, types.VirtualDeviceConfigSpecFileOperationCreate, device...)
 }
 
 // EditDevice edits the given (existing) devices on the VirtualMachine
-func (v VirtualMachine) EditDevice(device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(types.VirtualDeviceConfigSpecOperationEdit, types.VirtualDeviceConfigSpecFileOperationReplace, device...)
+func (v VirtualMachine) EditDevice(ctx context.Context, device ...types.BaseVirtualDevice) error {
+	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationEdit, types.VirtualDeviceConfigSpecFileOperationReplace, device...)
 }
 
 // RemoveDevice removes the given devices on the VirtualMachine
-func (v VirtualMachine) RemoveDevice(device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(types.VirtualDeviceConfigSpecOperationRemove, types.VirtualDeviceConfigSpecFileOperationDestroy, device...)
+func (v VirtualMachine) RemoveDevice(ctx context.Context, device ...types.BaseVirtualDevice) error {
+	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationRemove, types.VirtualDeviceConfigSpecFileOperationDestroy, device...)
 }
 
 // BootOptions returns the VirtualMachine's config.bootOptions property.
-func (v VirtualMachine) BootOptions() (*types.VirtualMachineBootOptions, error) {
+func (v VirtualMachine) BootOptions(ctx context.Context) (*types.VirtualMachineBootOptions, error) {
 	var o mo.VirtualMachine
 
-	err := v.Properties(context.TODO(), v.Reference(), []string{"config.bootOptions"}, &o)
+	err := v.Properties(ctx, v.Reference(), []string{"config.bootOptions"}, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -256,28 +256,28 @@ func (v VirtualMachine) BootOptions() (*types.VirtualMachineBootOptions, error) 
 }
 
 // SetBootOptions reconfigures the VirtualMachine with the given options.
-func (v VirtualMachine) SetBootOptions(options *types.VirtualMachineBootOptions) error {
+func (v VirtualMachine) SetBootOptions(ctx context.Context, options *types.VirtualMachineBootOptions) error {
 	spec := types.VirtualMachineConfigSpec{}
 
 	spec.BootOptions = options
 
-	task, err := v.Reconfigure(spec)
+	task, err := v.Reconfigure(ctx, spec)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait(context.TODO())
+	return task.Wait(ctx)
 }
 
 // Answer answers a pending question.
-func (v VirtualMachine) Answer(id, answer string) error {
+func (v VirtualMachine) Answer(ctx context.Context, id, answer string) error {
 	req := types.AnswerVM{
 		This:         v.Reference(),
 		QuestionId:   id,
 		AnswerChoice: answer,
 	}
 
-	_, err := methods.AnswerVM(context.TODO(), v.c, &req)
+	_, err := methods.AnswerVM(ctx, v.c, &req)
 	if err != nil {
 		return err
 	}
@@ -285,12 +285,12 @@ func (v VirtualMachine) Answer(id, answer string) error {
 	return nil
 }
 
-func (v VirtualMachine) MarkAsTemplate() error {
+func (v VirtualMachine) MarkAsTemplate(ctx context.Context) error {
 	req := types.MarkAsTemplate{
 		This: v.Reference(),
 	}
 
-	_, err := methods.MarkAsTemplate(context.TODO(), v.c, &req)
+	_, err := methods.MarkAsTemplate(ctx, v.c, &req)
 	if err != nil {
 		return err
 	}
@@ -298,7 +298,7 @@ func (v VirtualMachine) MarkAsTemplate() error {
 	return nil
 }
 
-func (v VirtualMachine) MarkAsVirtualMachine(pool ResourcePool, host *HostSystem) error {
+func (v VirtualMachine) MarkAsVirtualMachine(ctx context.Context, pool ResourcePool, host *HostSystem) error {
 	req := types.MarkAsVirtualMachine{
 		This: v.Reference(),
 		Pool: pool.Reference(),
@@ -309,7 +309,7 @@ func (v VirtualMachine) MarkAsVirtualMachine(pool ResourcePool, host *HostSystem
 		req.Host = &ref
 	}
 
-	_, err := methods.MarkAsVirtualMachine(context.TODO(), v.c, &req)
+	_, err := methods.MarkAsVirtualMachine(ctx, v.c, &req)
 	if err != nil {
 		return err
 	}

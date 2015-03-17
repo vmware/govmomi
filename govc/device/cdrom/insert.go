@@ -21,6 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type insert struct {
@@ -60,7 +61,7 @@ func (cmd *insert) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -75,5 +76,5 @@ func (cmd *insert) Run(f *flag.FlagSet) error {
 		return nil
 	}
 
-	return vm.EditDevice(devices.InsertIso(c, iso))
+	return vm.EditDevice(context.TODO(), devices.InsertIso(c, iso))
 }

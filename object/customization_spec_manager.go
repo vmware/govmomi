@@ -35,13 +35,13 @@ func NewCustomizationSpecManager(c *vim25.Client) *CustomizationSpecManager {
 	return &cs
 }
 
-func (cs CustomizationSpecManager) DoesCustomizationSpecExist(name string) (bool, error) {
+func (cs CustomizationSpecManager) DoesCustomizationSpecExist(ctx context.Context, name string) (bool, error) {
 	req := types.DoesCustomizationSpecExist{
 		This: cs.Reference(),
 		Name: name,
 	}
 
-	res, err := methods.DoesCustomizationSpecExist(context.TODO(), cs.c, &req)
+	res, err := methods.DoesCustomizationSpecExist(ctx, cs.c, &req)
 
 	if err != nil {
 		return false, err
@@ -50,13 +50,13 @@ func (cs CustomizationSpecManager) DoesCustomizationSpecExist(name string) (bool
 	return res.Returnval, nil
 }
 
-func (cs CustomizationSpecManager) GetCustomizationSpec(name string) (*types.CustomizationSpecItem, error) {
+func (cs CustomizationSpecManager) GetCustomizationSpec(ctx context.Context, name string) (*types.CustomizationSpecItem, error) {
 	req := types.GetCustomizationSpec{
 		This: cs.Reference(),
 		Name: name,
 	}
 
-	res, err := methods.GetCustomizationSpec(context.TODO(), cs.c, &req)
+	res, err := methods.GetCustomizationSpec(ctx, cs.c, &req)
 
 	if err != nil {
 		return nil, err
@@ -65,13 +65,13 @@ func (cs CustomizationSpecManager) GetCustomizationSpec(name string) (*types.Cus
 	return &res.Returnval, nil
 }
 
-func (cs CustomizationSpecManager) CreateCustomizationSpec(item types.CustomizationSpecItem) error {
+func (cs CustomizationSpecManager) CreateCustomizationSpec(ctx context.Context, item types.CustomizationSpecItem) error {
 	req := types.CreateCustomizationSpec{
 		This: cs.Reference(),
 		Item: item,
 	}
 
-	_, err := methods.CreateCustomizationSpec(context.TODO(), cs.c, &req)
+	_, err := methods.CreateCustomizationSpec(ctx, cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -79,13 +79,13 @@ func (cs CustomizationSpecManager) CreateCustomizationSpec(item types.Customizat
 	return nil
 }
 
-func (cs CustomizationSpecManager) OverwriteCustomizationSpec(item types.CustomizationSpecItem) error {
+func (cs CustomizationSpecManager) OverwriteCustomizationSpec(ctx context.Context, item types.CustomizationSpecItem) error {
 	req := types.OverwriteCustomizationSpec{
 		This: cs.Reference(),
 		Item: item,
 	}
 
-	_, err := methods.OverwriteCustomizationSpec(context.TODO(), cs.c, &req)
+	_, err := methods.OverwriteCustomizationSpec(ctx, cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -93,13 +93,13 @@ func (cs CustomizationSpecManager) OverwriteCustomizationSpec(item types.Customi
 	return nil
 }
 
-func (cs CustomizationSpecManager) DeleteCustomizationSpec(name string) error {
+func (cs CustomizationSpecManager) DeleteCustomizationSpec(ctx context.Context, name string) error {
 	req := types.DeleteCustomizationSpec{
 		This: cs.Reference(),
 		Name: name,
 	}
 
-	_, err := methods.DeleteCustomizationSpec(context.TODO(), cs.c, &req)
+	_, err := methods.DeleteCustomizationSpec(ctx, cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -107,14 +107,14 @@ func (cs CustomizationSpecManager) DeleteCustomizationSpec(name string) error {
 	return nil
 }
 
-func (cs CustomizationSpecManager) DuplicateCustomizationSpec(name string, newName string) error {
+func (cs CustomizationSpecManager) DuplicateCustomizationSpec(ctx context.Context, name string, newName string) error {
 	req := types.DuplicateCustomizationSpec{
 		This:    cs.Reference(),
 		Name:    name,
 		NewName: newName,
 	}
 
-	_, err := methods.DuplicateCustomizationSpec(context.TODO(), cs.c, &req)
+	_, err := methods.DuplicateCustomizationSpec(ctx, cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -122,14 +122,14 @@ func (cs CustomizationSpecManager) DuplicateCustomizationSpec(name string, newNa
 	return nil
 }
 
-func (cs CustomizationSpecManager) RenameCustomizationSpec(name string, newName string) error {
+func (cs CustomizationSpecManager) RenameCustomizationSpec(ctx context.Context, name string, newName string) error {
 	req := types.RenameCustomizationSpec{
 		This:    cs.Reference(),
 		Name:    name,
 		NewName: newName,
 	}
 
-	_, err := methods.RenameCustomizationSpec(context.TODO(), cs.c, &req)
+	_, err := methods.RenameCustomizationSpec(ctx, cs.c, &req)
 	if err != nil {
 		return err
 	}
@@ -137,13 +137,13 @@ func (cs CustomizationSpecManager) RenameCustomizationSpec(name string, newName 
 	return nil
 }
 
-func (cs CustomizationSpecManager) CustomizationSpecItemToXml(item types.CustomizationSpecItem) (string, error) {
+func (cs CustomizationSpecManager) CustomizationSpecItemToXml(ctx context.Context, item types.CustomizationSpecItem) (string, error) {
 	req := types.CustomizationSpecItemToXml{
 		This: cs.Reference(),
 		Item: item,
 	}
 
-	res, err := methods.CustomizationSpecItemToXml(context.TODO(), cs.c, &req)
+	res, err := methods.CustomizationSpecItemToXml(ctx, cs.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -151,13 +151,13 @@ func (cs CustomizationSpecManager) CustomizationSpecItemToXml(item types.Customi
 	return res.Returnval, nil
 }
 
-func (cs CustomizationSpecManager) XmlToCustomizationSpecItem(xml string) (*types.CustomizationSpecItem, error) {
+func (cs CustomizationSpecManager) XmlToCustomizationSpecItem(ctx context.Context, xml string) (*types.CustomizationSpecItem, error) {
 	req := types.XmlToCustomizationSpecItem{
 		This:        cs.Reference(),
 		SpecItemXml: xml,
 	}
 
-	res, err := methods.XmlToCustomizationSpecItem(context.TODO(), cs.c, &req)
+	res, err := methods.XmlToCustomizationSpecItem(ctx, cs.c, &req)
 	if err != nil {
 		return nil, err
 	}

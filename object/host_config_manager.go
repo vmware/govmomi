@@ -33,10 +33,10 @@ func NewHostConfigManager(c *vim25.Client, ref types.ManagedObjectReference) *Ho
 	}
 }
 
-func (m HostConfigManager) NetworkSystem() (*HostNetworkSystem, error) {
+func (m HostConfigManager) NetworkSystem(ctx context.Context) (*HostNetworkSystem, error) {
 	var h mo.HostSystem
 
-	err := m.Properties(context.TODO(), m.Reference(), []string{"configManager.networkSystem"}, &h)
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.networkSystem"}, &h)
 	if err != nil {
 		return nil, err
 	}

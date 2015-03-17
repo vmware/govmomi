@@ -46,7 +46,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		task, err := vm.PowerOff()
+		task, err := vm.PowerOff(context.TODO())
 		if err != nil {
 			return err
 		}
@@ -55,7 +55,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		// vm.Destroy will fail if the VM is still powered on.
 		_ = task.Wait(context.TODO())
 
-		task, err = vm.Destroy()
+		task, err = vm.Destroy(context.TODO())
 		if err != nil {
 			return err
 		}

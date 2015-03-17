@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type create struct {
@@ -68,7 +69,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -87,7 +88,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 
 		disk.CapacityInKB = cmd.Bytes.Bytes / 1024
 
-		return vm.AddDevice(disk)
+		return vm.AddDevice(context.TODO(), disk)
 	} else {
 		cmd.Log("Disk already present\n")
 	}

@@ -64,13 +64,13 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 
 	for _, pool := range pools {
 		if cmd.recursive {
-			err = pool.DestroyChildren()
+			err = pool.DestroyChildren(context.TODO())
 			if err != nil {
 				return err
 			}
 		}
 
-		task, err := pool.Destroy()
+		task, err := pool.Destroy(context.TODO())
 		if err != nil {
 			return err
 		}

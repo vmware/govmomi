@@ -95,7 +95,7 @@ func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
 		return nil, err
 	}
 
-	u, err := ds.URL(dc, path)
+	u, err := ds.URL(context.TODO(), dc, path)
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +109,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 		return nil, err
 	}
 
-	b, err := ds.Browser()
+	b, err := ds.Browser(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +123,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 	}
 
 	dsPath := ds.Path(path.Dir(file))
-	task, err := b.SearchDatastore(dsPath, &spec)
+	task, err := b.SearchDatastore(context.TODO(), dsPath, &spec)
 	if err != nil {
 		return nil, err
 	}

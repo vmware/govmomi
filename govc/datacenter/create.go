@@ -62,7 +62,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		}
 
 		if foundDatacenters == nil {
-			_, err = rootFolder.CreateDatacenter(datacenterToCreate)
+			_, err = rootFolder.CreateDatacenter(context.TODO(), datacenterToCreate)
 			if err != nil {
 				return err
 			}

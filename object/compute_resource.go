@@ -33,10 +33,10 @@ func NewComputeResource(c *vim25.Client, ref types.ManagedObjectReference) *Comp
 	}
 }
 
-func (c ComputeResource) Hosts() ([]types.ManagedObjectReference, error) {
+func (c ComputeResource) Hosts(ctx context.Context) ([]types.ManagedObjectReference, error) {
 	var cr mo.ComputeResource
 
-	err := c.Properties(context.TODO(), c.Reference(), []string{"host"}, &cr)
+	err := c.Properties(ctx, c.Reference(), []string{"host"}, &cr)
 	if err != nil {
 		return nil, err
 	}

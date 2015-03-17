@@ -37,6 +37,7 @@ func NewVirtualDiskManager(c *vim25.Client) *VirtualDiskManager {
 
 // CopyVirtualDisk copies a virtual disk, performing conversions as specified in the spec.
 func (m VirtualDiskManager) CopyVirtualDisk(
+	ctx context.Context,
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
 	destSpec *types.VirtualDiskSpec, force bool) (*Task, error) {
@@ -59,7 +60,7 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 		req.DestDatacenter = &ref
 	}
 
-	res, err := methods.CopyVirtualDisk_Task(context.TODO(), m.c, &req)
+	res, err := methods.CopyVirtualDisk_Task(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -69,6 +70,7 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 
 // MoveVirtualDisk moves a virtual disk.
 func (m VirtualDiskManager) MoveVirtualDisk(
+	ctx context.Context,
 	sourceName string, sourceDatacenter *Datacenter,
 	destName string, destDatacenter *Datacenter,
 	force bool) (*Task, error) {
@@ -89,7 +91,7 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 		req.DestDatacenter = &ref
 	}
 
-	res, err := methods.MoveVirtualDisk_Task(context.TODO(), m.c, &req)
+	res, err := methods.MoveVirtualDisk_Task(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -98,7 +100,7 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 }
 
 // DeleteVirtualDisk deletes a virtual disk.
-func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Task, error) {
+func (m VirtualDiskManager) DeleteVirtualDisk(ctx context.Context, name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteVirtualDisk_Task{
 		This: m.Reference(),
 		Name: name,
@@ -109,7 +111,7 @@ func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Tas
 		req.Datacenter = &ref
 	}
 
-	res, err := methods.DeleteVirtualDisk_Task(context.TODO(), m.c, &req)
+	res, err := methods.DeleteVirtualDisk_Task(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}

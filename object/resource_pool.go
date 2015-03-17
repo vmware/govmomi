@@ -35,7 +35,7 @@ func NewResourcePool(c *vim25.Client, ref types.ManagedObjectReference) *Resourc
 	}
 }
 
-func (p ResourcePool) ImportVApp(spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
+func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
 	req := types.ImportVApp{
 		This: p.Reference(),
 		Spec: spec,
@@ -51,7 +51,7 @@ func (p ResourcePool) ImportVApp(spec types.BaseImportSpec, folder *Folder, host
 		req.Host = &ref
 	}
 
-	res, err := methods.ImportVApp(context.TODO(), p.c, &req)
+	res, err := methods.ImportVApp(ctx, p.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -59,14 +59,14 @@ func (p ResourcePool) ImportVApp(spec types.BaseImportSpec, folder *Folder, host
 	return NewHttpNfcLease(p.c, res.Returnval), nil
 }
 
-func (p ResourcePool) Create(name string, spec types.ResourceConfigSpec) (*ResourcePool, error) {
+func (p ResourcePool) Create(ctx context.Context, name string, spec types.ResourceConfigSpec) (*ResourcePool, error) {
 	req := types.CreateResourcePool{
 		This: p.Reference(),
 		Name: name,
 		Spec: spec,
 	}
 
-	res, err := methods.CreateResourcePool(context.TODO(), p.c, &req)
+	res, err := methods.CreateResourcePool(ctx, p.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -74,7 +74,7 @@ func (p ResourcePool) Create(name string, spec types.ResourceConfigSpec) (*Resou
 	return NewResourcePool(p.c, res.Returnval), nil
 }
 
-func (p ResourcePool) UpdateConfig(name string, config *types.ResourceConfigSpec) error {
+func (p ResourcePool) UpdateConfig(ctx context.Context, name string, config *types.ResourceConfigSpec) error {
 	req := types.UpdateConfig{
 		This:   p.Reference(),
 		Name:   name,
@@ -90,25 +90,25 @@ func (p ResourcePool) UpdateConfig(name string, config *types.ResourceConfigSpec
 		req.Config = &newConfig
 	}
 
-	_, err := methods.UpdateConfig(context.TODO(), p.c, &req)
+	_, err := methods.UpdateConfig(ctx, p.c, &req)
 	return err
 }
 
-func (p ResourcePool) DestroyChildren() error {
+func (p ResourcePool) DestroyChildren(ctx context.Context) error {
 	req := types.DestroyChildren{
 		This: p.Reference(),
 	}
 
-	_, err := methods.DestroyChildren(context.TODO(), p.c, &req)
+	_, err := methods.DestroyChildren(ctx, p.c, &req)
 	return err
 }
 
-func (p ResourcePool) Destroy() (*Task, error) {
+func (p ResourcePool) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: p.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(context.TODO(), p.c, &req)
+	res, err := methods.Destroy_Task(ctx, p.c, &req)
 	if err != nil {
 		return nil, err
 	}

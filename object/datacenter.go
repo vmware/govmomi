@@ -41,11 +41,11 @@ func NewDatacenter(c *vim25.Client, ref types.ManagedObjectReference) *Datacente
 	}
 }
 
-func (d *Datacenter) Folders() (*DatacenterFolders, error) {
+func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
 	ps := []string{"vmFolder", "hostFolder", "datastoreFolder", "networkFolder"}
-	err := d.Properties(context.TODO(), d.Reference(), ps, &md)
+	err := d.Properties(ctx, d.Reference(), ps, &md)
 	if err != nil {
 		return nil, err
 	}
@@ -60,12 +60,12 @@ func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	return df, nil
 }
 
-func (d Datacenter) Destroy() (*Task, error) {
+func (d Datacenter) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: d.Reference(),
 	}
 
-	res, err := methods.Destroy_Task(context.TODO(), d.c, &req)
+	res, err := methods.Destroy_Task(ctx, d.c, &req)
 	if err != nil {
 		return nil, err
 	}

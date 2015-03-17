@@ -26,11 +26,11 @@ import (
 	"golang.org/x/net/context"
 )
 
-func (o HttpNfcLease) Wait() (*types.HttpNfcLeaseInfo, error) {
+func (o HttpNfcLease) Wait(ctx context.Context) (*types.HttpNfcLeaseInfo, error) {
 	var lease mo.HttpNfcLease
 
 	pc := property.DefaultCollector(o.c)
-	err := property.Wait(context.TODO(), pc, o.Reference(), []string{"state", "info", "error"}, func(pc []types.PropertyChange) bool {
+	err := property.Wait(ctx, pc, o.Reference(), []string{"state", "info", "error"}, func(pc []types.PropertyChange) bool {
 		done := false
 
 		for _, c := range pc {

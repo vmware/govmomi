@@ -34,13 +34,13 @@ func NewHostNetworkSystem(c *vim25.Client, ref types.ManagedObjectReference) *Ho
 }
 
 // AddPortGroup wraps methods.AddPortGroup
-func (o HostNetworkSystem) AddPortGroup(portgrp types.HostPortGroupSpec) error {
+func (o HostNetworkSystem) AddPortGroup(ctx context.Context, portgrp types.HostPortGroupSpec) error {
 	req := types.AddPortGroup{
 		This:    o.Reference(),
 		Portgrp: portgrp,
 	}
 
-	_, err := methods.AddPortGroup(context.TODO(), o.c, &req)
+	_, err := methods.AddPortGroup(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -49,14 +49,14 @@ func (o HostNetworkSystem) AddPortGroup(portgrp types.HostPortGroupSpec) error {
 }
 
 // AddServiceConsoleVirtualNic wraps methods.AddServiceConsoleVirtualNic
-func (o HostNetworkSystem) AddServiceConsoleVirtualNic(portgroup string, nic types.HostVirtualNicSpec) (string, error) {
+func (o HostNetworkSystem) AddServiceConsoleVirtualNic(ctx context.Context, portgroup string, nic types.HostVirtualNicSpec) (string, error) {
 	req := types.AddServiceConsoleVirtualNic{
 		This:      o.Reference(),
 		Portgroup: portgroup,
 		Nic:       nic,
 	}
 
-	res, err := methods.AddServiceConsoleVirtualNic(context.TODO(), o.c, &req)
+	res, err := methods.AddServiceConsoleVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -65,14 +65,14 @@ func (o HostNetworkSystem) AddServiceConsoleVirtualNic(portgroup string, nic typ
 }
 
 // AddVirtualNic wraps methods.AddVirtualNic
-func (o HostNetworkSystem) AddVirtualNic(portgroup string, nic types.HostVirtualNicSpec) (string, error) {
+func (o HostNetworkSystem) AddVirtualNic(ctx context.Context, portgroup string, nic types.HostVirtualNicSpec) (string, error) {
 	req := types.AddVirtualNic{
 		This:      o.Reference(),
 		Portgroup: portgroup,
 		Nic:       nic,
 	}
 
-	res, err := methods.AddVirtualNic(context.TODO(), o.c, &req)
+	res, err := methods.AddVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return "", err
 	}
@@ -81,14 +81,14 @@ func (o HostNetworkSystem) AddVirtualNic(portgroup string, nic types.HostVirtual
 }
 
 // AddVirtualSwitch wraps methods.AddVirtualSwitch
-func (o HostNetworkSystem) AddVirtualSwitch(vswitchName string, spec *types.HostVirtualSwitchSpec) error {
+func (o HostNetworkSystem) AddVirtualSwitch(ctx context.Context, vswitchName string, spec *types.HostVirtualSwitchSpec) error {
 	req := types.AddVirtualSwitch{
 		This:        o.Reference(),
 		VswitchName: vswitchName,
 		Spec:        spec,
 	}
 
-	_, err := methods.AddVirtualSwitch(context.TODO(), o.c, &req)
+	_, err := methods.AddVirtualSwitch(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -97,13 +97,13 @@ func (o HostNetworkSystem) AddVirtualSwitch(vswitchName string, spec *types.Host
 }
 
 // QueryNetworkHint wraps methods.QueryNetworkHint
-func (o HostNetworkSystem) QueryNetworkHint(device []string) error {
+func (o HostNetworkSystem) QueryNetworkHint(ctx context.Context, device []string) error {
 	req := types.QueryNetworkHint{
 		This:   o.Reference(),
 		Device: device,
 	}
 
-	_, err := methods.QueryNetworkHint(context.TODO(), o.c, &req)
+	_, err := methods.QueryNetworkHint(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -112,12 +112,12 @@ func (o HostNetworkSystem) QueryNetworkHint(device []string) error {
 }
 
 // RefreshNetworkSystem wraps methods.RefreshNetworkSystem
-func (o HostNetworkSystem) RefreshNetworkSystem() error {
+func (o HostNetworkSystem) RefreshNetworkSystem(ctx context.Context) error {
 	req := types.RefreshNetworkSystem{
 		This: o.Reference(),
 	}
 
-	_, err := methods.RefreshNetworkSystem(context.TODO(), o.c, &req)
+	_, err := methods.RefreshNetworkSystem(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -126,13 +126,13 @@ func (o HostNetworkSystem) RefreshNetworkSystem() error {
 }
 
 // RemovePortGroup wraps methods.RemovePortGroup
-func (o HostNetworkSystem) RemovePortGroup(pgName string) error {
+func (o HostNetworkSystem) RemovePortGroup(ctx context.Context, pgName string) error {
 	req := types.RemovePortGroup{
 		This:   o.Reference(),
 		PgName: pgName,
 	}
 
-	_, err := methods.RemovePortGroup(context.TODO(), o.c, &req)
+	_, err := methods.RemovePortGroup(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -141,13 +141,13 @@ func (o HostNetworkSystem) RemovePortGroup(pgName string) error {
 }
 
 // RemoveServiceConsoleVirtualNic wraps methods.RemoveServiceConsoleVirtualNic
-func (o HostNetworkSystem) RemoveServiceConsoleVirtualNic(device string) error {
+func (o HostNetworkSystem) RemoveServiceConsoleVirtualNic(ctx context.Context, device string) error {
 	req := types.RemoveServiceConsoleVirtualNic{
 		This:   o.Reference(),
 		Device: device,
 	}
 
-	_, err := methods.RemoveServiceConsoleVirtualNic(context.TODO(), o.c, &req)
+	_, err := methods.RemoveServiceConsoleVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -156,13 +156,13 @@ func (o HostNetworkSystem) RemoveServiceConsoleVirtualNic(device string) error {
 }
 
 // RemoveVirtualNic wraps methods.RemoveVirtualNic
-func (o HostNetworkSystem) RemoveVirtualNic(device string) error {
+func (o HostNetworkSystem) RemoveVirtualNic(ctx context.Context, device string) error {
 	req := types.RemoveVirtualNic{
 		This:   o.Reference(),
 		Device: device,
 	}
 
-	_, err := methods.RemoveVirtualNic(context.TODO(), o.c, &req)
+	_, err := methods.RemoveVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -171,13 +171,13 @@ func (o HostNetworkSystem) RemoveVirtualNic(device string) error {
 }
 
 // RemoveVirtualSwitch wraps methods.RemoveVirtualSwitch
-func (o HostNetworkSystem) RemoveVirtualSwitch(vswitchName string) error {
+func (o HostNetworkSystem) RemoveVirtualSwitch(ctx context.Context, vswitchName string) error {
 	req := types.RemoveVirtualSwitch{
 		This:        o.Reference(),
 		VswitchName: vswitchName,
 	}
 
-	_, err := methods.RemoveVirtualSwitch(context.TODO(), o.c, &req)
+	_, err := methods.RemoveVirtualSwitch(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -186,13 +186,13 @@ func (o HostNetworkSystem) RemoveVirtualSwitch(vswitchName string) error {
 }
 
 // RestartServiceConsoleVirtualNic wraps methods.RestartServiceConsoleVirtualNic
-func (o HostNetworkSystem) RestartServiceConsoleVirtualNic(device string) error {
+func (o HostNetworkSystem) RestartServiceConsoleVirtualNic(ctx context.Context, device string) error {
 	req := types.RestartServiceConsoleVirtualNic{
 		This:   o.Reference(),
 		Device: device,
 	}
 
-	_, err := methods.RestartServiceConsoleVirtualNic(context.TODO(), o.c, &req)
+	_, err := methods.RestartServiceConsoleVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -201,13 +201,13 @@ func (o HostNetworkSystem) RestartServiceConsoleVirtualNic(device string) error 
 }
 
 // UpdateConsoleIpRouteConfig wraps methods.UpdateConsoleIpRouteConfig
-func (o HostNetworkSystem) UpdateConsoleIpRouteConfig(config types.BaseHostIpRouteConfig) error {
+func (o HostNetworkSystem) UpdateConsoleIpRouteConfig(ctx context.Context, config types.BaseHostIpRouteConfig) error {
 	req := types.UpdateConsoleIpRouteConfig{
 		This:   o.Reference(),
 		Config: config,
 	}
 
-	_, err := methods.UpdateConsoleIpRouteConfig(context.TODO(), o.c, &req)
+	_, err := methods.UpdateConsoleIpRouteConfig(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -216,13 +216,13 @@ func (o HostNetworkSystem) UpdateConsoleIpRouteConfig(config types.BaseHostIpRou
 }
 
 // UpdateDnsConfig wraps methods.UpdateDnsConfig
-func (o HostNetworkSystem) UpdateDnsConfig(config types.BaseHostDnsConfig) error {
+func (o HostNetworkSystem) UpdateDnsConfig(ctx context.Context, config types.BaseHostDnsConfig) error {
 	req := types.UpdateDnsConfig{
 		This:   o.Reference(),
 		Config: config,
 	}
 
-	_, err := methods.UpdateDnsConfig(context.TODO(), o.c, &req)
+	_, err := methods.UpdateDnsConfig(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -231,13 +231,13 @@ func (o HostNetworkSystem) UpdateDnsConfig(config types.BaseHostDnsConfig) error
 }
 
 // UpdateIpRouteConfig wraps methods.UpdateIpRouteConfig
-func (o HostNetworkSystem) UpdateIpRouteConfig(config types.BaseHostIpRouteConfig) error {
+func (o HostNetworkSystem) UpdateIpRouteConfig(ctx context.Context, config types.BaseHostIpRouteConfig) error {
 	req := types.UpdateIpRouteConfig{
 		This:   o.Reference(),
 		Config: config,
 	}
 
-	_, err := methods.UpdateIpRouteConfig(context.TODO(), o.c, &req)
+	_, err := methods.UpdateIpRouteConfig(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -246,13 +246,13 @@ func (o HostNetworkSystem) UpdateIpRouteConfig(config types.BaseHostIpRouteConfi
 }
 
 // UpdateIpRouteTableConfig wraps methods.UpdateIpRouteTableConfig
-func (o HostNetworkSystem) UpdateIpRouteTableConfig(config types.HostIpRouteTableConfig) error {
+func (o HostNetworkSystem) UpdateIpRouteTableConfig(ctx context.Context, config types.HostIpRouteTableConfig) error {
 	req := types.UpdateIpRouteTableConfig{
 		This:   o.Reference(),
 		Config: config,
 	}
 
-	_, err := methods.UpdateIpRouteTableConfig(context.TODO(), o.c, &req)
+	_, err := methods.UpdateIpRouteTableConfig(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -261,14 +261,14 @@ func (o HostNetworkSystem) UpdateIpRouteTableConfig(config types.HostIpRouteTabl
 }
 
 // UpdateNetworkConfig wraps methods.UpdateNetworkConfig
-func (o HostNetworkSystem) UpdateNetworkConfig(config types.HostNetworkConfig, changeMode string) (*types.HostNetworkConfigResult, error) {
+func (o HostNetworkSystem) UpdateNetworkConfig(ctx context.Context, config types.HostNetworkConfig, changeMode string) (*types.HostNetworkConfigResult, error) {
 	req := types.UpdateNetworkConfig{
 		This:       o.Reference(),
 		Config:     config,
 		ChangeMode: changeMode,
 	}
 
-	res, err := methods.UpdateNetworkConfig(context.TODO(), o.c, &req)
+	res, err := methods.UpdateNetworkConfig(ctx, o.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -277,14 +277,14 @@ func (o HostNetworkSystem) UpdateNetworkConfig(config types.HostNetworkConfig, c
 }
 
 // UpdatePhysicalNicLinkSpeed wraps methods.UpdatePhysicalNicLinkSpeed
-func (o HostNetworkSystem) UpdatePhysicalNicLinkSpeed(device string, linkSpeed *types.PhysicalNicLinkInfo) error {
+func (o HostNetworkSystem) UpdatePhysicalNicLinkSpeed(ctx context.Context, device string, linkSpeed *types.PhysicalNicLinkInfo) error {
 	req := types.UpdatePhysicalNicLinkSpeed{
 		This:      o.Reference(),
 		Device:    device,
 		LinkSpeed: linkSpeed,
 	}
 
-	_, err := methods.UpdatePhysicalNicLinkSpeed(context.TODO(), o.c, &req)
+	_, err := methods.UpdatePhysicalNicLinkSpeed(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -293,14 +293,14 @@ func (o HostNetworkSystem) UpdatePhysicalNicLinkSpeed(device string, linkSpeed *
 }
 
 // UpdatePortGroup wraps methods.UpdatePortGroup
-func (o HostNetworkSystem) UpdatePortGroup(pgName string, portgrp types.HostPortGroupSpec) error {
+func (o HostNetworkSystem) UpdatePortGroup(ctx context.Context, pgName string, portgrp types.HostPortGroupSpec) error {
 	req := types.UpdatePortGroup{
 		This:    o.Reference(),
 		PgName:  pgName,
 		Portgrp: portgrp,
 	}
 
-	_, err := methods.UpdatePortGroup(context.TODO(), o.c, &req)
+	_, err := methods.UpdatePortGroup(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -309,14 +309,14 @@ func (o HostNetworkSystem) UpdatePortGroup(pgName string, portgrp types.HostPort
 }
 
 // UpdateServiceConsoleVirtualNic wraps methods.UpdateServiceConsoleVirtualNic
-func (o HostNetworkSystem) UpdateServiceConsoleVirtualNic(device string, nic types.HostVirtualNicSpec) error {
+func (o HostNetworkSystem) UpdateServiceConsoleVirtualNic(ctx context.Context, device string, nic types.HostVirtualNicSpec) error {
 	req := types.UpdateServiceConsoleVirtualNic{
 		This:   o.Reference(),
 		Device: device,
 		Nic:    nic,
 	}
 
-	_, err := methods.UpdateServiceConsoleVirtualNic(context.TODO(), o.c, &req)
+	_, err := methods.UpdateServiceConsoleVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -325,14 +325,14 @@ func (o HostNetworkSystem) UpdateServiceConsoleVirtualNic(device string, nic typ
 }
 
 // UpdateVirtualNic wraps methods.UpdateVirtualNic
-func (o HostNetworkSystem) UpdateVirtualNic(device string, nic types.HostVirtualNicSpec) error {
+func (o HostNetworkSystem) UpdateVirtualNic(ctx context.Context, device string, nic types.HostVirtualNicSpec) error {
 	req := types.UpdateVirtualNic{
 		This:   o.Reference(),
 		Device: device,
 		Nic:    nic,
 	}
 
-	_, err := methods.UpdateVirtualNic(context.TODO(), o.c, &req)
+	_, err := methods.UpdateVirtualNic(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}
@@ -341,14 +341,14 @@ func (o HostNetworkSystem) UpdateVirtualNic(device string, nic types.HostVirtual
 }
 
 // UpdateVirtualSwitch wraps methods.UpdateVirtualSwitch
-func (o HostNetworkSystem) UpdateVirtualSwitch(vswitchName string, spec types.HostVirtualSwitchSpec) error {
+func (o HostNetworkSystem) UpdateVirtualSwitch(ctx context.Context, vswitchName string, spec types.HostVirtualSwitchSpec) error {
 	req := types.UpdateVirtualSwitch{
 		This:        o.Reference(),
 		VswitchName: vswitchName,
 		Spec:        spec,
 	}
 
-	_, err := methods.UpdateVirtualSwitch(context.TODO(), o.c, &req)
+	_, err := methods.UpdateVirtualSwitch(ctx, o.c, &req)
 	if err != nil {
 		return err
 	}

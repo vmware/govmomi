@@ -72,7 +72,7 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 	}
 
 	for _, pool := range pools {
-		err := pool.UpdateConfig(cmd.name, &cmd.ResourceConfigSpec)
+		err := pool.UpdateConfig(context.TODO(), cmd.name, &cmd.ResourceConfigSpec)
 		if err != nil {
 			return err
 		}

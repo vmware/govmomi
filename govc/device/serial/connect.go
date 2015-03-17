@@ -21,6 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type connect struct {
@@ -51,7 +52,7 @@ func (cmd *connect) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -61,5 +62,5 @@ func (cmd *connect) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	return vm.EditDevice(devices.ConnectSerialPort(d, f.Arg(0), cmd.client))
+	return vm.EditDevice(context.TODO(), devices.ConnectSerialPort(d, f.Arg(0), cmd.client))
 }

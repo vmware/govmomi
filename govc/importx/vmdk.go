@@ -136,7 +136,7 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 			// The base path doesn't exist. Create it.
 			dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
 			m := object.NewFileManager(cmd.Client)
-			return m.MakeDirectory(dsPath, cmd.Datacenter, true)
+			return m.MakeDirectory(context.TODO(), dsPath, cmd.Datacenter, true)
 		case flags.ErrDatastoreFileNotExist:
 			// Destination path doesn't exist; all good to continue with import.
 			return nil
@@ -170,7 +170,7 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 }
 
 func (cmd *vmdk) Upload(i importable) error {
-	u, err := cmd.Datastore.URL(cmd.Datacenter, i.RemoteSrcVMDK())
+	u, err := cmd.Datastore.URL(context.TODO(), cmd.Datacenter, i.RemoteSrcVMDK())
 	if err != nil {
 		return err
 	}
@@ -232,7 +232,7 @@ func (cmd *vmdk) CopyHostAgent(i importable, s progress.Sinker) error {
 	src := cmd.Datastore.Path(i.RemoteSrcVMDK())
 	dst := cmd.Datastore.Path(i.RemoteDstVMDK())
 	vdm := object.NewVirtualDiskManager(cmd.Client)
-	task, err := vdm.CopyVirtualDisk(src, dc, dst, dc, spec, false)
+	task, err := vdm.CopyVirtualDisk(context.TODO(), src, dc, dst, dc, spec, false)
 	if err != nil {
 		return err
 	}
@@ -299,7 +299,7 @@ func (cmd *vmdk) MoveDisk(src, dst string) error {
 	dsSrc := cmd.Datastore.Path(src)
 	dsDst := cmd.Datastore.Path(dst)
 	vdm := object.NewVirtualDiskManager(cmd.Client)
-	task, err := vdm.MoveVirtualDisk(dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
+	task, err := vdm.MoveVirtualDisk(context.TODO(), dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
 	if err != nil {
 		return err
 	}
@@ -309,7 +309,7 @@ func (cmd *vmdk) MoveDisk(src, dst string) error {
 
 func (cmd *vmdk) DeleteDisk(path string) error {
 	vdm := object.NewVirtualDiskManager(cmd.Client)
-	task, err := vdm.DeleteVirtualDisk(cmd.Datastore.Path(path), cmd.Datacenter)
+	task, err := vdm.DeleteVirtualDisk(context.TODO(), cmd.Datastore.Path(path), cmd.Datacenter)
 	if err != nil {
 		return err
 	}
@@ -329,7 +329,7 @@ func (cmd *vmdk) DetachDisk(vm *object.VirtualMachine) (string, error) {
 	spec := new(configSpec)
 	dsFile := spec.RemoveDisk(&mvm)
 
-	task, err := vm.Reconfigure(spec.ToSpec())
+	task, err := vm.Reconfigure(context.TODO(), spec.ToSpec())
 	if err != nil {
 		return "", err
 	}
@@ -343,12 +343,12 @@ func (cmd *vmdk) DetachDisk(vm *object.VirtualMachine) (string, error) {
 }
 
 func (cmd *vmdk) CreateVM(spec *configSpec) (*object.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders()
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	task, err := folders.VmFolder.CreateVM(spec.ToSpec(), cmd.ResourcePool, nil)
+	task, err := folders.VmFolder.CreateVM(context.TODO(), spec.ToSpec(), cmd.ResourcePool, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -362,7 +362,7 @@ func (cmd *vmdk) CreateVM(spec *configSpec) (*object.VirtualMachine, error) {
 }
 
 func (cmd *vmdk) CloneVM(vm *object.VirtualMachine, name string) (*object.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders()
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -372,7 +372,7 @@ func (cmd *vmdk) CloneVM(vm *object.VirtualMachine, name string) (*object.Virtua
 		Location: types.VirtualMachineRelocateSpec{},
 	}
 
-	task, err := vm.Clone(folders.VmFolder, name, spec)
+	task, err := vm.Clone(context.TODO(), folders.VmFolder, name, spec)
 	if err != nil {
 		return nil, err
 	}
@@ -391,7 +391,7 @@ func (cmd *vmdk) DestroyVM(vm *object.VirtualMachine) error {
 		return err
 	}
 
-	task, err := vm.Destroy()
+	task, err := vm.Destroy(context.TODO())
 	if err != nil {
 		return err
 	}

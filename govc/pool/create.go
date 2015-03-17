@@ -77,7 +77,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		}
 
 		for _, parent := range parents {
-			_, err = parent.Create(base, cmd.ResourceConfigSpec)
+			_, err = parent.Create(context.TODO(), base, cmd.ResourceConfigSpec)
 			if err != nil {
 				return err
 			}

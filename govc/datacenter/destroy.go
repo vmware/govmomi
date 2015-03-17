@@ -59,7 +59,7 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 			return err
 		}
 		for _, foundDatacenter := range foundDatacenters {
-			task, err := foundDatacenter.Destroy()
+			task, err := foundDatacenter.Destroy(context.TODO())
 			if err != nil {
 				return err
 			}

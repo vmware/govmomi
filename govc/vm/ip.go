@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/host/esxcli"
 	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type ip struct {
@@ -81,7 +82,7 @@ func (cmd *ip) Run(f *flag.FlagSet) error {
 		}
 	} else {
 		get = func(vm *object.VirtualMachine) (string, error) {
-			return vm.WaitForIP()
+			return vm.WaitForIP(context.TODO())
 		}
 	}
 

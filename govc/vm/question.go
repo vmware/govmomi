@@ -88,5 +88,5 @@ func (cmd *question) Run(f *flag.FlagSet) error {
 	}
 
 	// Answer question
-	return vm.Answer(q.Id, cmd.answer)
+	return vm.Answer(context.TODO(), q.Id, cmd.answer)
 }

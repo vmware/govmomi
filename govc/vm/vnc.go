@@ -255,7 +255,7 @@ func (v *vncVM) reconfigure() error {
 		ExtraConfig: v.newOptions.ToExtraConfig(),
 	}
 
-	task, err := v.vm.Reconfigure(spec)
+	task, err := v.vm.Reconfigure(context.TODO(), spec)
 	if err != nil {
 		return err
 	}
@@ -393,7 +393,7 @@ func (h *vncHost) managementIP() (string, error) {
 		return h.ip, nil
 	}
 
-	ips, err := h.host.ManagementIPs()
+	ips, err := h.host.ManagementIPs(context.TODO())
 	if err != nil {
 		return "", err
 	}
