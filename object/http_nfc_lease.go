@@ -21,10 +21,80 @@ import (
 	"fmt"
 
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
+
+type HttpNfcLease struct {
+	Common
+}
+
+func NewHttpNfcLease(c *vim25.Client, ref types.ManagedObjectReference) *HttpNfcLease {
+	return &HttpNfcLease{
+		Common: NewCommon(c, ref),
+	}
+}
+
+// HttpNfcLeaseAbort wraps methods.HttpNfcLeaseAbort
+func (o HttpNfcLease) HttpNfcLeaseAbort(ctx context.Context, fault *types.LocalizedMethodFault) error {
+	req := types.HttpNfcLeaseAbort{
+		This:  o.Reference(),
+		Fault: fault,
+	}
+
+	_, err := methods.HttpNfcLeaseAbort(ctx, o.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// HttpNfcLeaseComplete wraps methods.HttpNfcLeaseComplete
+func (o HttpNfcLease) HttpNfcLeaseComplete(ctx context.Context) error {
+	req := types.HttpNfcLeaseComplete{
+		This: o.Reference(),
+	}
+
+	_, err := methods.HttpNfcLeaseComplete(ctx, o.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// HttpNfcLeaseGetManifest wraps methods.HttpNfcLeaseGetManifest
+func (o HttpNfcLease) HttpNfcLeaseGetManifest(ctx context.Context) error {
+	req := types.HttpNfcLeaseGetManifest{
+		This: o.Reference(),
+	}
+
+	_, err := methods.HttpNfcLeaseGetManifest(ctx, o.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// HttpNfcLeaseProgress wraps methods.HttpNfcLeaseProgress
+func (o HttpNfcLease) HttpNfcLeaseProgress(ctx context.Context, percent int) error {
+	req := types.HttpNfcLeaseProgress{
+		This:    o.Reference(),
+		Percent: percent,
+	}
+
+	_, err := methods.HttpNfcLeaseProgress(ctx, o.c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func (o HttpNfcLease) Wait(ctx context.Context) (*types.HttpNfcLeaseInfo, error) {
 	var lease mo.HttpNfcLease
