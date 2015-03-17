@@ -17,19 +17,19 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type SearchIndex struct {
-	c *govmomi.Client
+	Common
 }
 
-func NewSearchIndex(c *govmomi.Client) *SearchIndex {
+func NewSearchIndex(c *vim25.Client) *SearchIndex {
 	s := SearchIndex{
-		c: c,
+		Common: NewCommon(c, *c.ServiceContent.SearchIndex),
 	}
 
 	return &s
@@ -38,7 +38,7 @@ func NewSearchIndex(c *govmomi.Client) *SearchIndex {
 // FindByDatastorePath finds a virtual machine by its location on a datastore.
 func (s SearchIndex) FindByDatastorePath(dc *Datacenter, path string) (Reference, error) {
 	req := types.FindByDatastorePath{
-		This:       *s.c.ServiceContent.SearchIndex,
+		This:       s.Reference(),
 		Datacenter: dc.Reference(),
 		Path:       path,
 	}
@@ -57,7 +57,7 @@ func (s SearchIndex) FindByDatastorePath(dc *Datacenter, path string) (Reference
 // FindByDnsName finds a virtual machine or host by DNS name.
 func (s SearchIndex) FindByDnsName(dc *Datacenter, dnsName string, vmSearch bool) (Reference, error) {
 	req := types.FindByDnsName{
-		This:     *s.c.ServiceContent.SearchIndex,
+		This:     s.Reference(),
 		DnsName:  dnsName,
 		VmSearch: vmSearch,
 	}
@@ -80,7 +80,7 @@ func (s SearchIndex) FindByDnsName(dc *Datacenter, dnsName string, vmSearch bool
 // FindByInventoryPath finds a managed entity based on its location in the inventory.
 func (s SearchIndex) FindByInventoryPath(path string) (Reference, error) {
 	req := types.FindByInventoryPath{
-		This:          *s.c.ServiceContent.SearchIndex,
+		This:          s.Reference(),
 		InventoryPath: path,
 	}
 
@@ -98,7 +98,7 @@ func (s SearchIndex) FindByInventoryPath(path string) (Reference, error) {
 // FindByIp finds a virtual machine or host by IP address.
 func (s SearchIndex) FindByIp(dc *Datacenter, ip string, vmSearch bool) (Reference, error) {
 	req := types.FindByIp{
-		This:     *s.c.ServiceContent.SearchIndex,
+		This:     s.Reference(),
 		Ip:       ip,
 		VmSearch: vmSearch,
 	}
@@ -121,7 +121,7 @@ func (s SearchIndex) FindByIp(dc *Datacenter, ip string, vmSearch bool) (Referen
 // FindByUuid finds a virtual machine or host by UUID.
 func (s SearchIndex) FindByUuid(dc *Datacenter, uuid string, vmSearch bool) (Reference, error) {
 	req := types.FindByUuid{
-		This:     *s.c.ServiceContent.SearchIndex,
+		This:     s.Reference(),
 		Uuid:     uuid,
 		VmSearch: vmSearch,
 	}
@@ -144,7 +144,7 @@ func (s SearchIndex) FindByUuid(dc *Datacenter, uuid string, vmSearch bool) (Ref
 // FindChild finds a particular child based on a managed entity name.
 func (s SearchIndex) FindChild(entity Reference, name string) (Reference, error) {
 	req := types.FindChild{
-		This:   *s.c.ServiceContent.SearchIndex,
+		This:   s.Reference(),
 		Entity: entity.Reference(),
 		Name:   name,
 	}

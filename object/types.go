@@ -17,7 +17,7 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -25,7 +25,7 @@ type Reference interface {
 	Reference() types.ManagedObjectReference
 }
 
-func NewReference(c *govmomi.Client, e types.ManagedObjectReference) Reference {
+func NewReference(c *vim25.Client, e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":
 		return NewFolder(c, e)
@@ -42,11 +42,9 @@ func NewReference(c *govmomi.Client, e types.ManagedObjectReference) Reference {
 			NewResourcePool(c, e),
 		}
 	case "ComputeResource":
-		return &ComputeResource{ManagedObjectReference: e}
+		return NewComputeResource(c, e)
 	case "ClusterComputeResource":
-		return &ClusterComputeResource{
-			ComputeResource{ManagedObjectReference: e},
-		}
+		return &ClusterComputeResource{*NewComputeResource(c, e)}
 	case "HostSystem":
 		return NewHostSystem(c, e)
 	case "Network":
@@ -54,11 +52,9 @@ func NewReference(c *govmomi.Client, e types.ManagedObjectReference) Reference {
 	case "ResourcePool":
 		return NewResourcePool(c, e)
 	case "DistributedVirtualSwitch":
-		return &DistributedVirtualSwitch{ManagedObjectReference: e}
+		return NewDistributedVirtualSwitch(c, e)
 	case "VmwareDistributedVirtualSwitch":
-		return &VmwareDistributedVirtualSwitch{
-			DistributedVirtualSwitch{ManagedObjectReference: e},
-		}
+		return &VmwareDistributedVirtualSwitch{*NewDistributedVirtualSwitch(c, e)}
 	case "DistributedVirtualPortgroup":
 		return NewDistributedVirtualPortgroup(c, e)
 	case "Datastore":

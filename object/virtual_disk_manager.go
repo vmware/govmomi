@@ -17,19 +17,19 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type VirtualDiskManager struct {
-	c *govmomi.Client
+	Common
 }
 
-func NewVirtualDiskManager(c *govmomi.Client) *VirtualDiskManager {
+func NewVirtualDiskManager(c *vim25.Client) *VirtualDiskManager {
 	m := VirtualDiskManager{
-		c: c,
+		Common: NewCommon(c, *c.ServiceContent.VirtualDiskManager),
 	}
 
 	return &m
@@ -42,7 +42,7 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 	destSpec *types.VirtualDiskSpec, force bool) (*Task, error) {
 
 	req := types.CopyVirtualDisk_Task{
-		This:       *m.c.ServiceContent.VirtualDiskManager,
+		This:       m.Reference(),
 		SourceName: sourceName,
 		DestName:   destName,
 		DestSpec:   destSpec,
@@ -73,7 +73,7 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 	destName string, destDatacenter *Datacenter,
 	force bool) (*Task, error) {
 	req := types.MoveVirtualDisk_Task{
-		This:       *m.c.ServiceContent.VirtualDiskManager,
+		This:       m.Reference(),
 		SourceName: sourceName,
 		DestName:   destName,
 		Force:      force,
@@ -100,7 +100,7 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 // DeleteVirtualDisk deletes a virtual disk.
 func (m VirtualDiskManager) DeleteVirtualDisk(name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteVirtualDisk_Task{
-		This: *m.c.ServiceContent.VirtualDiskManager,
+		This: m.Reference(),
 		Name: name,
 	}
 

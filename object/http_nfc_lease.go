@@ -20,14 +20,17 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 func (o HttpNfcLease) Wait() (*types.HttpNfcLeaseInfo, error) {
 	var lease mo.HttpNfcLease
 
-	err := o.c.WaitForProperties(o.Reference(), []string{"state", "info", "error"}, func(pc []types.PropertyChange) bool {
+	pc := property.DefaultCollector(o.c)
+	err := property.Wait(context.TODO(), pc, o.Reference(), []string{"state", "info", "error"}, func(pc []types.PropertyChange) bool {
 		done := false
 
 		for _, c := range pc {

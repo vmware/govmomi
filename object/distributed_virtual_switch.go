@@ -16,12 +16,17 @@ limitations under the License.
 
 package object
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type DistributedVirtualSwitch struct {
-	types.ManagedObjectReference
+	Common
 }
 
-func (s DistributedVirtualSwitch) Reference() types.ManagedObjectReference {
-	return s.ManagedObjectReference
+func NewDistributedVirtualSwitch(c *vim25.Client, ref types.ManagedObjectReference) *DistributedVirtualSwitch {
+	return &DistributedVirtualSwitch{
+		Common: NewCommon(c, ref),
+	}
 }

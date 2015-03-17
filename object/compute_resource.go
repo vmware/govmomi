@@ -17,35 +17,29 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ComputeResource struct {
-	types.ManagedObjectReference
-
-	c *govmomi.Client
+	Common
 }
 
-func NewComputeResource(c *govmomi.Client, ref types.ManagedObjectReference) *ComputeResource {
+func NewComputeResource(c *vim25.Client, ref types.ManagedObjectReference) *ComputeResource {
 	return &ComputeResource{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (c ComputeResource) Reference() types.ManagedObjectReference {
-	return c.ManagedObjectReference
 }
 
 func (c ComputeResource) Hosts() ([]types.ManagedObjectReference, error) {
 	var cr mo.ComputeResource
-	ps := []string{"host"}
 
-	err := c.c.Properties(c.Reference(), ps, &cr)
+	err := c.Properties(context.TODO(), c.Reference(), []string{"host"}, &cr)
 	if err != nil {
 		return nil, err
 	}
+
 	return cr.Host, nil
 }

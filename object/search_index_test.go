@@ -20,22 +20,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/test"
+	"github.com/vmware/govmomi/test/client"
 	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
 )
 
 func TestSearch(t *testing.T) {
-	u := test.URL()
-	if u == nil {
-		t.SkipNow()
-	}
-
-	c, err := govmomi.NewClient(u, true)
-	if err != nil {
-		t.Error(err)
-	}
-
+	c := client.NewAuthenticatedClient(t)
 	s := NewSearchIndex(c)
 
 	ref, err := s.FindChild(NewRootFolder(c), "ha-datacenter")
@@ -82,14 +73,14 @@ func TestSearch(t *testing.T) {
 	if len(crs) != 0 {
 		var cr mo.ComputeResource
 		ref = crs[0]
-		err = c.Properties(ref.Reference(), []string{"host"}, &cr)
+		err = s.Properties(context.Background(), ref.Reference(), []string{"host"}, &cr)
 		if err != nil {
 			t.Fatal(err)
 		}
 
 		var host mo.HostSystem
 		ref = NewHostSystem(c, cr.Host[0])
-		err = c.Properties(ref.Reference(), []string{"name", "hardware"}, &host)
+		err = s.Properties(context.Background(), ref.Reference(), []string{"name", "hardware"}, &host)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -118,7 +109,7 @@ func TestSearch(t *testing.T) {
 	if len(vms) != 0 {
 		var vm mo.VirtualMachine
 		ref = vms[0]
-		err = c.Properties(ref.Reference(), []string{"config", "guest"}, &vm)
+		err = s.Properties(context.Background(), ref.Reference(), []string{"config", "guest"}, &vm)
 		if err != nil {
 			t.Fatal(err)
 		}

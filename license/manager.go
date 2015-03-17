@@ -17,7 +17,8 @@ limitations under the License.
 package license
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -27,10 +28,10 @@ import (
 type Manager struct {
 	reference types.ManagedObjectReference
 
-	c *govmomi.Client
+	c *vim25.Client
 }
 
-func NewManager(c *govmomi.Client) *Manager {
+func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
 		reference: *c.ServiceContent.LicenseManager,
 
@@ -95,7 +96,7 @@ func (m Manager) Update(ctx context.Context, key string, labels map[string]strin
 func (m Manager) List(ctx context.Context) ([]types.LicenseManagerLicenseInfo, error) {
 	var mlm mo.LicenseManager
 
-	err := m.c.Properties(m.Reference(), []string{"licenses"}, &mlm)
+	err := property.DefaultCollector(m.c).RetrieveOne(ctx, m.Reference(), []string{"licenses"}, &mlm)
 	if err != nil {
 		return nil, err
 	}

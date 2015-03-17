@@ -17,7 +17,8 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -25,22 +26,15 @@ import (
 )
 
 type VirtualMachine struct {
-	types.ManagedObjectReference
+	Common
 
 	InventoryPath string
-
-	c *govmomi.Client
 }
 
-func NewVirtualMachine(c *govmomi.Client, ref types.ManagedObjectReference) *VirtualMachine {
+func NewVirtualMachine(c *vim25.Client, ref types.ManagedObjectReference) *VirtualMachine {
 	return &VirtualMachine{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (v VirtualMachine) Reference() types.ManagedObjectReference {
-	return v.ManagedObjectReference
 }
 
 func (v VirtualMachine) PowerOn() (*Task, error) {
@@ -159,7 +153,8 @@ func (v VirtualMachine) Reconfigure(config types.VirtualMachineConfigSpec) (*Tas
 func (v VirtualMachine) WaitForIP() (string, error) {
 	var ip string
 
-	err := v.c.WaitForProperties(v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
+	p := property.DefaultCollector(v.c)
+	err := property.Wait(context.TODO(), p, v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
 		for _, c := range pc {
 			if c.Name != "guest.ipAddress" {
 				continue
@@ -189,7 +184,7 @@ func (v VirtualMachine) WaitForIP() (string, error) {
 func (v VirtualMachine) Device() (VirtualDeviceList, error) {
 	var o mo.VirtualMachine
 
-	err := v.c.Properties(v.Reference(), []string{"config.hardware.device"}, &o)
+	err := v.Properties(context.TODO(), v.Reference(), []string{"config.hardware.device"}, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -252,7 +247,7 @@ func (v VirtualMachine) RemoveDevice(device ...types.BaseVirtualDevice) error {
 func (v VirtualMachine) BootOptions() (*types.VirtualMachineBootOptions, error) {
 	var o mo.VirtualMachine
 
-	err := v.c.Properties(v.Reference(), []string{"config.bootOptions"}, &o)
+	err := v.Properties(context.TODO(), v.Reference(), []string{"config.bootOptions"}, &o)
 	if err != nil {
 		return nil, err
 	}

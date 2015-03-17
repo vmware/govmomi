@@ -24,10 +24,11 @@ import (
 	"reflect"
 	"regexp"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -44,7 +45,7 @@ type vmdk struct {
 	force  bool
 	keep   bool
 
-	Client       *govmomi.Client
+	Client       *vim25.Client
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
 	ResourcePool *object.ResourcePool
@@ -319,7 +320,8 @@ func (cmd *vmdk) DeleteDisk(path string) error {
 func (cmd *vmdk) DetachDisk(vm *object.VirtualMachine) (string, error) {
 	var mvm mo.VirtualMachine
 
-	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
+	pc := property.DefaultCollector(cmd.Client)
+	err := pc.RetrieveOne(context.TODO(), vm.Reference(), []string{"config.hardware"}, &mvm)
 	if err != nil {
 		return "", err
 	}

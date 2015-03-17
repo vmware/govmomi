@@ -17,7 +17,7 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -32,27 +32,20 @@ type DatacenterFolders struct {
 }
 
 type Datacenter struct {
-	types.ManagedObjectReference
-
-	c *govmomi.Client
+	Common
 }
 
-func NewDatacenter(c *govmomi.Client, ref types.ManagedObjectReference) *Datacenter {
+func NewDatacenter(c *vim25.Client, ref types.ManagedObjectReference) *Datacenter {
 	return &Datacenter{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (d Datacenter) Reference() types.ManagedObjectReference {
-	return d.ManagedObjectReference
 }
 
 func (d *Datacenter) Folders() (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
 	ps := []string{"vmFolder", "hostFolder", "datastoreFolder", "networkFolder"}
-	err := d.c.Properties(d.Reference(), ps, &md)
+	err := d.Properties(context.TODO(), d.Reference(), ps, &md)
 	if err != nil {
 		return nil, err
 	}

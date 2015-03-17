@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -87,7 +88,9 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 
 	for _, pool := range pools {
 		var p mo.ResourcePool
-		err = c.Properties(pool.Reference(), props, &p)
+
+		pc := property.DefaultCollector(c)
+		err = pc.RetrieveOne(context.TODO(), pool.Reference(), props, &p)
 		if err != nil {
 			return err
 		}

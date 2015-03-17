@@ -17,25 +17,20 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type HostNetworkSystem struct {
-	types.ManagedObjectReference
-	mo.HostNetworkSystem
-	c *govmomi.Client
+	Common
 }
 
-func (o *HostNetworkSystem) Reference() types.ManagedObjectReference {
-	return o.ManagedObjectReference
-}
-
-func (o *HostNetworkSystem) Properties(props []string) error {
-	return o.c.Properties(o.Reference(), props, &o.HostNetworkSystem)
+func NewHostNetworkSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostNetworkSystem {
+	return &HostNetworkSystem{
+		Common: NewCommon(c, ref),
+	}
 }
 
 // AddPortGroup wraps methods.AddPortGroup

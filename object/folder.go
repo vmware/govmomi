@@ -17,7 +17,7 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -25,36 +25,28 @@ import (
 )
 
 type Folder struct {
-	types.ManagedObjectReference
-
-	c *govmomi.Client
+	Common
 }
 
-func NewFolder(c *govmomi.Client, ref types.ManagedObjectReference) *Folder {
+func NewFolder(c *vim25.Client, ref types.ManagedObjectReference) *Folder {
 	return &Folder{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
 }
 
-func NewRootFolder(c *govmomi.Client) *Folder {
+func NewRootFolder(c *vim25.Client) *Folder {
 	return NewFolder(c, c.ServiceContent.RootFolder)
-}
-
-func (f Folder) Reference() types.ManagedObjectReference {
-	return f.ManagedObjectReference
 }
 
 func (f Folder) Children() ([]Reference, error) {
 	var mf mo.Folder
 
-	err := f.c.Properties(f.Reference(), []string{"childEntity"}, &mf)
+	err := f.Properties(context.TODO(), f.Reference(), []string{"childEntity"}, &mf)
 	if err != nil {
 		return nil, err
 	}
 
 	var rs []Reference
-
 	for _, e := range mf.ChildEntity {
 		if r := NewReference(f.c, e); r != nil {
 			rs = append(rs, r)

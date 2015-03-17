@@ -17,7 +17,7 @@ limitations under the License.
 package guest
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -28,7 +28,7 @@ type ProcessManager struct {
 
 	vm types.ManagedObjectReference
 
-	c *govmomi.Client
+	c *vim25.Client
 }
 
 func (m ProcessManager) Reference() types.ManagedObjectReference {

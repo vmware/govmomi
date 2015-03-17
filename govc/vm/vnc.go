@@ -26,10 +26,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -178,7 +179,7 @@ func (cmd *vnc) loadVMs(args []string) ([]*vncVM, error) {
 }
 
 type vncVM struct {
-	c    *govmomi.Client
+	c    *vim25.Client
 	vm   *object.VirtualMachine
 	mvm  mo.VirtualMachine
 	host *vncHost
@@ -187,7 +188,7 @@ type vncVM struct {
 	newOptions vncOptions
 }
 
-func newVNCVM(c *govmomi.Client, vm *object.VirtualMachine) (*vncVM, error) {
+func newVNCVM(c *vim25.Client, vm *object.VirtualMachine) (*vncVM, error) {
 	v := &vncVM{
 		c:  c,
 		vm: vm,
@@ -199,7 +200,8 @@ func newVNCVM(c *govmomi.Client, vm *object.VirtualMachine) (*vncVM, error) {
 		"runtime.host",
 	}
 
-	err := c.Properties(vm.Reference(), virtualMachineProperties, &v.mvm)
+	pc := property.DefaultCollector(c)
+	err := pc.RetrieveOne(context.TODO(), vm.Reference(), virtualMachineProperties, &v.mvm)
 	if err != nil {
 		return nil, err
 	}
@@ -289,13 +291,13 @@ func (v *vncVM) write(w io.Writer) error {
 }
 
 type vncHost struct {
-	c     *govmomi.Client
+	c     *vim25.Client
 	host  *object.HostSystem
 	ports map[int]struct{}
 	ip    string // This field is populated by `managementIP`
 }
 
-func newVNCHost(c *govmomi.Client, host *object.HostSystem, low, high int) (*vncHost, error) {
+func newVNCHost(c *vim25.Client, host *object.HostSystem, low, high int) (*vncHost, error) {
 	ports := make(map[int]struct{})
 	for i := low; i <= high; i++ {
 		ports[i] = struct{}{}
@@ -320,7 +322,7 @@ func newVNCHost(c *govmomi.Client, host *object.HostSystem, low, high int) (*vnc
 	return h, nil
 }
 
-func loadUsedPorts(c *govmomi.Client, host types.ManagedObjectReference) ([]int, error) {
+func loadUsedPorts(c *vim25.Client, host types.ManagedObjectReference) ([]int, error) {
 	ospec := types.ObjectSpec{
 		Obj: host,
 		SelectSet: []types.BaseSelectionSpec{

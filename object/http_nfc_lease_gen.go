@@ -17,27 +17,20 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type HttpNfcLease struct {
-	types.ManagedObjectReference
-
-	c *govmomi.Client
+	Common
 }
 
-func NewHttpNfcLease(c *govmomi.Client, ref types.ManagedObjectReference) *HttpNfcLease {
+func NewHttpNfcLease(c *vim25.Client, ref types.ManagedObjectReference) *HttpNfcLease {
 	return &HttpNfcLease{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (o HttpNfcLease) Reference() types.ManagedObjectReference {
-	return o.ManagedObjectReference
 }
 
 // HttpNfcLeaseAbort wraps methods.HttpNfcLeaseAbort

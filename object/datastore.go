@@ -22,28 +22,22 @@ import (
 
 	"net/url"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type Datastore struct {
-	types.ManagedObjectReference
+	Common
 
 	InventoryPath string
-
-	c *govmomi.Client
 }
 
-func NewDatastore(c *govmomi.Client, ref types.ManagedObjectReference) *Datastore {
+func NewDatastore(c *vim25.Client, ref types.ManagedObjectReference) *Datastore {
 	return &Datastore{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (d Datastore) Reference() types.ManagedObjectReference {
-	return d.ManagedObjectReference
 }
 
 func (d Datastore) Name() string {
@@ -62,12 +56,12 @@ func (d Datastore) Path(path string) string {
 // URL for datastore access over HTTP
 func (d Datastore) URL(dc *Datacenter, path string) (*url.URL, error) {
 	var mdc mo.Datacenter
-	if err := d.c.Properties(dc.Reference(), []string{"name"}, &mdc); err != nil {
+	if err := dc.Properties(context.TODO(), dc.Reference(), []string{"name"}, &mdc); err != nil {
 		return nil, err
 	}
 
 	var mds mo.Datastore
-	if err := d.c.Properties(d.Reference(), []string{"name"}, &mds); err != nil {
+	if err := d.Properties(context.TODO(), d.Reference(), []string{"name"}, &mds); err != nil {
 		return nil, err
 	}
 
@@ -87,7 +81,7 @@ func (d Datastore) URL(dc *Datacenter, path string) (*url.URL, error) {
 func (d Datastore) Browser() (*HostDatastoreBrowser, error) {
 	var do mo.Datastore
 
-	err := d.c.Properties(d.Reference(), []string{"browser"}, &do)
+	err := d.Properties(context.TODO(), d.Reference(), []string{"browser"}, &do)
 	if err != nil {
 		return nil, err
 	}

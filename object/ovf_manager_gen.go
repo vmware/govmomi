@@ -17,20 +17,19 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type OvfManager struct {
-	c *govmomi.Client
+	Common
 }
 
 // CreateDescriptor wraps methods.CreateDescriptor
 func (o OvfManager) CreateDescriptor(obj Reference, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
 	req := types.CreateDescriptor{
-		This: *o.c.ServiceContent.OvfManager,
+		This: o.Reference(),
 		Obj:  obj.Reference(),
 		Cdp:  cdp,
 	}
@@ -46,7 +45,7 @@ func (o OvfManager) CreateDescriptor(obj Reference, cdp types.OvfCreateDescripto
 // CreateImportSpec wraps methods.CreateImportSpec
 func (o OvfManager) CreateImportSpec(ovfDescriptor string, resourcePool Reference, datastore Reference, cisp types.OvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
 	req := types.CreateImportSpec{
-		This:          *o.c.ServiceContent.OvfManager,
+		This:          o.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		ResourcePool:  resourcePool.Reference(),
 		Datastore:     datastore.Reference(),
@@ -64,7 +63,7 @@ func (o OvfManager) CreateImportSpec(ovfDescriptor string, resourcePool Referenc
 // ParseDescriptor wraps methods.ParseDescriptor
 func (o OvfManager) ParseDescriptor(ovfDescriptor string, pdp types.OvfParseDescriptorParams) (*types.OvfParseDescriptorResult, error) {
 	req := types.ParseDescriptor{
-		This:          *o.c.ServiceContent.OvfManager,
+		This:          o.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		Pdp:           pdp,
 	}
@@ -80,7 +79,7 @@ func (o OvfManager) ParseDescriptor(ovfDescriptor string, pdp types.OvfParseDesc
 // ValidateHost wraps methods.ValidateHost
 func (o OvfManager) ValidateHost(ovfDescriptor string, host Reference, vhp types.OvfValidateHostParams) (*types.OvfValidateHostResult, error) {
 	req := types.ValidateHost{
-		This:          *o.c.ServiceContent.OvfManager,
+		This:          o.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		Host:          host.Reference(),
 		Vhp:           vhp,

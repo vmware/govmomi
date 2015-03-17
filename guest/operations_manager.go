@@ -17,25 +17,31 @@ limitations under the License.
 package guest
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type OperationsManager struct {
-	c  *govmomi.Client
+	c  *vim25.Client
 	vm types.ManagedObjectReference
 }
 
-func NewOperationsManager(c *govmomi.Client, vm types.ManagedObjectReference) *OperationsManager {
+func NewOperationsManager(c *vim25.Client, vm types.ManagedObjectReference) *OperationsManager {
 	return &OperationsManager{c, vm}
+}
+
+func (m OperationsManager) retrieveOne(ctx context.Context, p string, dst *mo.GuestOperationsManager) error {
+	pc := property.DefaultCollector(m.c)
+	return pc.RetrieveOne(ctx, *m.c.ServiceContent.GuestOperationsManager, []string{p}, dst)
 }
 
 func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error) {
 	var g mo.GuestOperationsManager
 
-	err := m.c.Properties(*m.c.ServiceContent.GuestOperationsManager, []string{"authManager"}, &g)
+	err := m.retrieveOne(ctx, "authManager", &g)
 	if err != nil {
 		return nil, err
 	}
@@ -46,7 +52,7 @@ func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error
 func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error) {
 	var g mo.GuestOperationsManager
 
-	err := m.c.Properties(*m.c.ServiceContent.GuestOperationsManager, []string{"fileManager"}, &g)
+	err := m.retrieveOne(ctx, "fileManager", &g)
 	if err != nil {
 		return nil, err
 	}
@@ -57,7 +63,7 @@ func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error
 func (m OperationsManager) ProcessManager(ctx context.Context) (*ProcessManager, error) {
 	var g mo.GuestOperationsManager
 
-	err := m.c.Properties(*m.c.ServiceContent.GuestOperationsManager, []string{"processManager"}, &g)
+	err := m.retrieveOne(ctx, "processManager", &g)
 	if err != nil {
 		return nil, err
 	}

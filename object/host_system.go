@@ -20,37 +20,32 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type HostSystem struct {
-	types.ManagedObjectReference
+	Common
 
 	InventoryPath string
-
-	c *govmomi.Client
 }
 
-func NewHostSystem(c *govmomi.Client, ref types.ManagedObjectReference) *HostSystem {
+func NewHostSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostSystem {
 	return &HostSystem{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
 }
 
-func (h HostSystem) Reference() types.ManagedObjectReference {
-	return h.ManagedObjectReference
-}
-
 func (h HostSystem) ConfigManager() *HostConfigManager {
-	return &HostConfigManager{h.c, h}
+	return NewHostConfigManager(h.c, h.Reference())
 }
 
 func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 	var mh mo.HostSystem
-	err := h.c.Properties(h.Reference(), []string{"parent"}, &mh)
+
+	err := h.Properties(context.TODO(), h.Reference(), []string{"parent"}, &mh)
 	if err != nil {
 		return nil, err
 	}
@@ -70,7 +65,7 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 		return nil, fmt.Errorf("unknown host parent type: %s", mh.Parent.Type)
 	}
 
-	err = h.c.Properties(*mh.Parent, []string{"resourcePool"}, parent)
+	err = h.Properties(context.TODO(), *mh.Parent, []string{"resourcePool"}, parent)
 	if err != nil {
 		return nil, err
 	}
@@ -82,7 +77,7 @@ func (h HostSystem) ResourcePool() (*ResourcePool, error) {
 func (h HostSystem) ManagementIPs() ([]net.IP, error) {
 	var mh mo.HostSystem
 
-	err := h.c.Properties(h.Reference(), []string{"config.virtualNicManagerInfo.netConfig"}, &mh)
+	err := h.Properties(context.TODO(), h.Reference(), []string{"config.virtualNicManagerInfo.netConfig"}, &mh)
 	if err != nil {
 		return nil, err
 	}

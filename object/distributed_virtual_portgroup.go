@@ -19,30 +19,23 @@ package object
 import (
 	"path"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type DistributedVirtualPortgroup struct {
-	types.ManagedObjectReference
+	Common
 
 	InventoryPath string
-
-	c *govmomi.Client
 }
 
-func NewDistributedVirtualPortgroup(c *govmomi.Client, ref types.ManagedObjectReference) *DistributedVirtualPortgroup {
+func NewDistributedVirtualPortgroup(c *vim25.Client, ref types.ManagedObjectReference) *DistributedVirtualPortgroup {
 	return &DistributedVirtualPortgroup{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
 }
-
-func (p DistributedVirtualPortgroup) Reference() types.ManagedObjectReference {
-	return p.ManagedObjectReference
-}
-
 func (p DistributedVirtualPortgroup) Name() string {
 	return path.Base(p.InventoryPath)
 }
@@ -52,11 +45,11 @@ func (p DistributedVirtualPortgroup) EthernetCardBackingInfo() (types.BaseVirtua
 	var dvp mo.DistributedVirtualPortgroup
 	var dvs mo.VmwareDistributedVirtualSwitch // TODO: should be mo.BaseDistributedVirtualSwitch
 
-	if err := p.c.Properties(p.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
+	if err := p.Properties(context.TODO(), p.Reference(), []string{"key", "config.distributedVirtualSwitch"}, &dvp); err != nil {
 		return nil, err
 	}
 
-	if err := p.c.Properties(*dvp.Config.DistributedVirtualSwitch, []string{"uuid"}, &dvs); err != nil {
+	if err := p.Properties(context.TODO(), *dvp.Config.DistributedVirtualSwitch, []string{"uuid"}, &dvs); err != nil {
 		return nil, err
 	}
 

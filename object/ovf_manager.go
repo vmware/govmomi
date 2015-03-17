@@ -16,11 +16,11 @@ limitations under the License.
 
 package object
 
-import "github.com/vmware/govmomi"
+import "github.com/vmware/govmomi/vim25"
 
-func NewOvfManager(c *govmomi.Client) *OvfManager {
+func NewOvfManager(c *vim25.Client) *OvfManager {
 	o := OvfManager{
-		c: c,
+		Common: NewCommon(c, *c.ServiceContent.OvfManager),
 	}
 
 	return &o

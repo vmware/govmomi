@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"golang.org/x/net/context"
 )
 
@@ -113,11 +113,11 @@ func (flag *SearchFlag) IsSet() bool {
 	return flag.isset
 }
 
-func (flag *SearchFlag) searchIndex(c *govmomi.Client) *object.SearchIndex {
+func (flag *SearchFlag) searchIndex(c *vim25.Client) *object.SearchIndex {
 	return object.NewSearchIndex(c)
 }
 
-func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
+func (flag *SearchFlag) searchByDatastorePath(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByDatastorePath(dc, flag.byDatastorePath)
@@ -126,7 +126,7 @@ func (flag *SearchFlag) searchByDatastorePath(c *govmomi.Client, dc *object.Data
 	}
 }
 
-func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
+func (flag *SearchFlag) searchByDNSName(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByDnsName(dc, flag.byDNSName, true)
@@ -137,12 +137,12 @@ func (flag *SearchFlag) searchByDNSName(c *govmomi.Client, dc *object.Datacenter
 	}
 }
 
-func (flag *SearchFlag) searchByInventoryPath(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
+func (flag *SearchFlag) searchByInventoryPath(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	// TODO(PN): The datacenter flag should not be set because it is ignored.
 	return flag.searchIndex(c).FindByInventoryPath(flag.byInventoryPath)
 }
 
-func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
+func (flag *SearchFlag) searchByIP(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByIp(dc, flag.byIP, true)
@@ -153,7 +153,7 @@ func (flag *SearchFlag) searchByIP(c *govmomi.Client, dc *object.Datacenter) (ob
 	}
 }
 
-func (flag *SearchFlag) searchByUUID(c *govmomi.Client, dc *object.Datacenter) (object.Reference, error) {
+func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
 		return flag.searchIndex(c).FindByUuid(dc, flag.byUUID, true)

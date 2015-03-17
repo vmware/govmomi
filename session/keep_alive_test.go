@@ -25,7 +25,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/test"
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	"golang.org/x/net/context"
 )
@@ -43,12 +43,12 @@ func newManager(t *testing.T) (*Manager, *url.URL) {
 	}
 
 	soapClient := soap.NewClient(u, true)
-	serviceContent, err := methods.GetServiceContent(context.Background(), soapClient)
+	vimClient, err := vim25.NewClient(context.Background(), soapClient)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	return NewManager(soapClient, serviceContent), u
+	return NewManager(vimClient), u
 }
 
 func TestKeepAlive(t *testing.T) {
@@ -56,9 +56,9 @@ func TestKeepAlive(t *testing.T) {
 	var j int
 
 	m, u := newManager(t)
-	k := KeepAlive(m.roundTripper, time.Millisecond)
+	k := KeepAlive(m.client.RoundTripper, time.Millisecond)
 	k.(*keepAlive).keepAlive = i.Func
-	m.roundTripper = k
+	m.client.RoundTripper = k
 
 	// Expect keep alive to not have triggered yet
 	if i != 0 {
@@ -132,8 +132,8 @@ func TestRealKeepAlive(t *testing.T) {
 	m2, u2 := newManager(t)
 
 	// Enable keepalive on m2
-	k := KeepAlive(m2.roundTripper, 10*time.Minute)
-	m2.roundTripper = k
+	k := KeepAlive(m2.client.RoundTripper, 10*time.Minute)
+	m2.client.RoundTripper = k
 
 	// Expect both sessions to be invalid
 	testSessionOK(t, m1, false)

@@ -25,6 +25,9 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
 )
 
 type info struct {
@@ -42,18 +45,27 @@ func (cmd *info) Register(f *flag.FlagSet) {}
 func (cmd *info) Process() error { return nil }
 
 func (cmd *info) Run(f *flag.FlagSet) error {
+	client, err := cmd.Client()
+	if err != nil {
+		return err
+	}
+
 	ns, err := cmd.HostNetworkSystem()
 	if err != nil {
 		return err
 	}
 
-	if err = ns.Properties([]string{"networkInfo.vswitch"}); err != nil {
+	var mns mo.HostNetworkSystem
+
+	pc := property.DefaultCollector(client)
+	err = pc.RetrieveOne(context.TODO(), ns.Reference(), []string{"networkInfo.vswitch"}, &mns)
+	if err != nil {
 		return err
 	}
 
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for i, s := range ns.NetworkInfo.Vswitch {
+	for i, s := range mns.NetworkInfo.Vswitch {
 		if i > 0 {
 			fmt.Fprintln(tw)
 		}

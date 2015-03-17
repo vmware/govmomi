@@ -19,27 +19,20 @@ package object
 import (
 	"path"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type Network struct {
-	types.ManagedObjectReference
+	Common
 
 	InventoryPath string
-
-	c *govmomi.Client
 }
 
-func NewNetwork(c *govmomi.Client, ref types.ManagedObjectReference) *Network {
+func NewNetwork(c *vim25.Client, ref types.ManagedObjectReference) *Network {
 	return &Network{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (n Network) Reference() types.ManagedObjectReference {
-	return n.ManagedObjectReference
 }
 
 func (n Network) Name() string {

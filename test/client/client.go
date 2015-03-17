@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,32 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package object
+package client
 
 import (
+	"testing"
+
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/soap"
 	"golang.org/x/net/context"
 )
 
-type HostConfigManager struct {
-	Common
-}
-
-func NewHostConfigManager(c *vim25.Client, ref types.ManagedObjectReference) *HostConfigManager {
-	return &HostConfigManager{
-		Common: NewCommon(c, ref),
+func NewAuthenticatedClient(t *testing.T) *vim25.Client {
+	u := test.URL()
+	if u == nil {
+		t.SkipNow()
 	}
-}
 
-func (m HostConfigManager) NetworkSystem() (*HostNetworkSystem, error) {
-	var h mo.HostSystem
-
-	err := m.Properties(context.TODO(), m.Reference(), []string{"configManager.networkSystem"}, &h)
+	soapClient := soap.NewClient(u, true)
+	vimClient, err := vim25.NewClient(context.Background(), soapClient)
 	if err != nil {
-		return nil, err
+		t.Fatal(err)
 	}
 
-	return NewHostNetworkSystem(m.c, *h.ConfigManager.NetworkSystem), nil
+	m := session.NewManager(vimClient)
+	err = m.Login(context.Background(), u.User)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	return vimClient
 }

@@ -21,19 +21,19 @@ import (
 	"testing"
 
 	"github.com/vmware/govmomi/test"
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	"golang.org/x/net/context"
 )
 
 func sessionClient(u *url.URL, t *testing.T) *Manager {
 	soapClient := soap.NewClient(u, true)
-	serviceContent, err := methods.GetServiceContent(context.Background(), soapClient)
+	vimClient, err := vim25.NewClient(context.Background(), soapClient)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
-	return NewManager(soapClient, serviceContent)
+	return NewManager(vimClient)
 }
 
 func TestLogin(t *testing.T) {
@@ -81,8 +81,8 @@ func TestSessionIsActive(t *testing.T) {
 	session := sessionClient(u, t)
 
 	// Skip test against ESXi -- SessionIsActive is not implemented
-	if session.serviceContent.About.ApiType != "VirtualCenter" {
-		t.Skipf("Talking to %s instead of %s", session.serviceContent.About.ApiType, "VirtualCenter")
+	if session.client.ServiceContent.About.ApiType != "VirtualCenter" {
+		t.Skipf("Talking to %s instead of %s", session.client.ServiceContent.About.ApiType, "VirtualCenter")
 	}
 
 	err := session.Login(context.Background(), u.User)

@@ -17,19 +17,19 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type FileManager struct {
-	c *govmomi.Client
+	Common
 }
 
-func NewFileManager(c *govmomi.Client) *FileManager {
+func NewFileManager(c *vim25.Client) *FileManager {
 	f := FileManager{
-		c: c,
+		Common: NewCommon(c, *c.ServiceContent.FileManager),
 	}
 
 	return &f
@@ -37,7 +37,7 @@ func NewFileManager(c *govmomi.Client) *FileManager {
 
 func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.CopyDatastoreFile_Task{
-		This:            *f.c.ServiceContent.FileManager,
+		This:            f.Reference(),
 		SourceName:      sourceName,
 		DestinationName: destinationName,
 		Force:           force,
@@ -64,7 +64,7 @@ func (f FileManager) CopyDatastoreFile(sourceName string, sourceDatacenter *Data
 // DeleteDatastoreFile deletes the specified file or folder from the datastore.
 func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, error) {
 	req := types.DeleteDatastoreFile_Task{
-		This: *f.c.ServiceContent.FileManager,
+		This: f.Reference(),
 		Name: name,
 	}
 
@@ -84,7 +84,7 @@ func (f FileManager) DeleteDatastoreFile(name string, dc *Datacenter) (*Task, er
 // MakeDirectory creates a folder using the specified name.
 func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDirectories bool) error {
 	req := types.MakeDirectory{
-		This: *f.c.ServiceContent.FileManager,
+		This: f.Reference(),
 		Name: name,
 		CreateParentDirectories: createParentDirectories,
 	}
@@ -100,7 +100,7 @@ func (f FileManager) MakeDirectory(name string, dc *Datacenter, createParentDire
 
 func (f FileManager) MoveDatastoreFile(sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.MoveDatastoreFile_Task{
-		This:            *f.c.ServiceContent.FileManager,
+		This:            f.Reference(),
 		SourceName:      sourceName,
 		DestinationName: destinationName,
 		Force:           force,

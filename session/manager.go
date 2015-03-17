@@ -19,30 +19,28 @@ package session
 import (
 	"net/url"
 
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type Manager struct {
-	roundTripper   soap.RoundTripper
-	serviceContent types.ServiceContent
-	userSession    *types.UserSession
+	client      *vim25.Client
+	userSession *types.UserSession
 }
 
-func NewManager(rt soap.RoundTripper, sc types.ServiceContent) *Manager {
+func NewManager(client *vim25.Client) *Manager {
 	m := Manager{
-		roundTripper:   rt,
-		serviceContent: sc,
+		client: client,
 	}
 
 	return &m
 }
 
 func (sm Manager) Reference() types.ManagedObjectReference {
-	return *sm.serviceContent.SessionManager
+	return *sm.client.ServiceContent.SessionManager
 }
 
 func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
@@ -57,7 +55,7 @@ func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 		}
 	}
 
-	login, err := methods.Login(ctx, sm.roundTripper, &req)
+	login, err := methods.Login(ctx, sm.client, &req)
 	if err != nil {
 		return err
 	}
@@ -71,7 +69,7 @@ func (sm *Manager) Logout(ctx context.Context) error {
 		This: sm.Reference(),
 	}
 
-	_, err := methods.Logout(ctx, sm.roundTripper, &req)
+	_, err := methods.Logout(ctx, sm.client, &req)
 	if err != nil {
 		return err
 	}
@@ -85,7 +83,7 @@ func (sm *Manager) Logout(ctx context.Context) error {
 func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) {
 	var mgr mo.SessionManager
 
-	err := mo.RetrieveProperties(ctx, sm.roundTripper, sm.serviceContent.PropertyCollector, sm.Reference(), &mgr)
+	err := mo.RetrieveProperties(ctx, sm.client, sm.client.ServiceContent.PropertyCollector, sm.Reference(), &mgr)
 	if err != nil {
 		// It's OK if we can't retrieve properties because we're not authenticated
 		if f, ok := err.(types.HasFault); ok {
@@ -114,7 +112,7 @@ func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
 		UserName:  sm.userSession.UserName,
 	}
 
-	active, err := methods.SessionIsActive(ctx, sm.roundTripper, &req)
+	active, err := methods.SessionIsActive(ctx, sm.client, &req)
 	if err != nil {
 		return false, err
 	}

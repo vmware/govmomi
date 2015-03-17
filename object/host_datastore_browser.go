@@ -17,27 +17,20 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type HostDatastoreBrowser struct {
-	types.ManagedObjectReference
-
-	c *govmomi.Client
+	Common
 }
 
-func NewHostDatastoreBrowser(c *govmomi.Client, ref types.ManagedObjectReference) *HostDatastoreBrowser {
+func NewHostDatastoreBrowser(c *vim25.Client, ref types.ManagedObjectReference) *HostDatastoreBrowser {
 	return &HostDatastoreBrowser{
-		ManagedObjectReference: ref,
-		c: c,
+		Common: NewCommon(c, ref),
 	}
-}
-
-func (b HostDatastoreBrowser) Reference() types.ManagedObjectReference {
-	return b.ManagedObjectReference
 }
 
 func (b HostDatastoreBrowser) SearchDatastore(datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {

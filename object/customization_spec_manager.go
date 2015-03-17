@@ -17,19 +17,19 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type CustomizationSpecManager struct {
-	c *govmomi.Client
+	Common
 }
 
-func NewCustomizationSpecManager(c *govmomi.Client) *CustomizationSpecManager {
+func NewCustomizationSpecManager(c *vim25.Client) *CustomizationSpecManager {
 	cs := CustomizationSpecManager{
-		c: c,
+		Common: NewCommon(c, *c.ServiceContent.CustomizationSpecManager),
 	}
 
 	return &cs
@@ -37,7 +37,7 @@ func NewCustomizationSpecManager(c *govmomi.Client) *CustomizationSpecManager {
 
 func (cs CustomizationSpecManager) DoesCustomizationSpecExist(name string) (bool, error) {
 	req := types.DoesCustomizationSpecExist{
-		This: *cs.c.ServiceContent.CustomizationSpecManager,
+		This: cs.Reference(),
 		Name: name,
 	}
 
@@ -52,7 +52,7 @@ func (cs CustomizationSpecManager) DoesCustomizationSpecExist(name string) (bool
 
 func (cs CustomizationSpecManager) GetCustomizationSpec(name string) (*types.CustomizationSpecItem, error) {
 	req := types.GetCustomizationSpec{
-		This: *cs.c.ServiceContent.CustomizationSpecManager,
+		This: cs.Reference(),
 		Name: name,
 	}
 
@@ -67,7 +67,7 @@ func (cs CustomizationSpecManager) GetCustomizationSpec(name string) (*types.Cus
 
 func (cs CustomizationSpecManager) CreateCustomizationSpec(item types.CustomizationSpecItem) error {
 	req := types.CreateCustomizationSpec{
-		This: *cs.c.ServiceContent.CustomizationSpecManager,
+		This: cs.Reference(),
 		Item: item,
 	}
 
@@ -81,7 +81,7 @@ func (cs CustomizationSpecManager) CreateCustomizationSpec(item types.Customizat
 
 func (cs CustomizationSpecManager) OverwriteCustomizationSpec(item types.CustomizationSpecItem) error {
 	req := types.OverwriteCustomizationSpec{
-		This: *cs.c.ServiceContent.CustomizationSpecManager,
+		This: cs.Reference(),
 		Item: item,
 	}
 
@@ -95,7 +95,7 @@ func (cs CustomizationSpecManager) OverwriteCustomizationSpec(item types.Customi
 
 func (cs CustomizationSpecManager) DeleteCustomizationSpec(name string) error {
 	req := types.DeleteCustomizationSpec{
-		This: *cs.c.ServiceContent.CustomizationSpecManager,
+		This: cs.Reference(),
 		Name: name,
 	}
 
@@ -109,7 +109,7 @@ func (cs CustomizationSpecManager) DeleteCustomizationSpec(name string) error {
 
 func (cs CustomizationSpecManager) DuplicateCustomizationSpec(name string, newName string) error {
 	req := types.DuplicateCustomizationSpec{
-		This:    *cs.c.ServiceContent.CustomizationSpecManager,
+		This:    cs.Reference(),
 		Name:    name,
 		NewName: newName,
 	}
@@ -124,7 +124,7 @@ func (cs CustomizationSpecManager) DuplicateCustomizationSpec(name string, newNa
 
 func (cs CustomizationSpecManager) RenameCustomizationSpec(name string, newName string) error {
 	req := types.RenameCustomizationSpec{
-		This:    *cs.c.ServiceContent.CustomizationSpecManager,
+		This:    cs.Reference(),
 		Name:    name,
 		NewName: newName,
 	}
@@ -139,7 +139,7 @@ func (cs CustomizationSpecManager) RenameCustomizationSpec(name string, newName 
 
 func (cs CustomizationSpecManager) CustomizationSpecItemToXml(item types.CustomizationSpecItem) (string, error) {
 	req := types.CustomizationSpecItemToXml{
-		This: *cs.c.ServiceContent.CustomizationSpecManager,
+		This: cs.Reference(),
 		Item: item,
 	}
 
@@ -153,7 +153,7 @@ func (cs CustomizationSpecManager) CustomizationSpecItemToXml(item types.Customi
 
 func (cs CustomizationSpecManager) XmlToCustomizationSpecItem(xml string) (*types.CustomizationSpecItem, error) {
 	req := types.XmlToCustomizationSpecItem{
-		This:        *cs.c.ServiceContent.CustomizationSpecManager,
+		This:        cs.Reference(),
 		SpecItemXml: xml,
 	}
 

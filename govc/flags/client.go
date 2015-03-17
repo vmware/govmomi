@@ -29,8 +29,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	"golang.org/x/net/context"
 )
@@ -52,7 +52,7 @@ type ClientFlag struct {
 	insecure      bool
 	minAPIVersion string
 
-	client *govmomi.Client
+	client *vim25.Client
 }
 
 func (flag *ClientFlag) URLWithoutPassword() *url.URL {
@@ -151,58 +151,89 @@ func (flag *ClientFlag) sessionFile() string {
 	return filepath.Join(os.Getenv("HOME"), ".govmomi", "sessions", name)
 }
 
-func (flag *ClientFlag) loadClient() (*govmomi.Client, error) {
-	var c soap.Client
-
-	f, err := os.Open(flag.sessionFile())
-	if err != nil {
-		if os.IsNotExist(err) {
-			return nil, nil
-		}
-
-		return nil, err
-	}
-
-	defer f.Close()
-
-	dec := json.NewDecoder(f)
-	err = dec.Decode(&c)
-	if err != nil {
-		return nil, err
-	}
-
-	return govmomi.NewClientFromClient(&c)
-}
-
-func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
-	soapClient := soap.NewClient(flag.url, flag.insecure)
-	c, err := govmomi.NewClientFromClient(soapClient)
-	if err != nil {
-		return nil, err
-	}
-
-	if u := flag.url; u.User != nil {
-		err = c.SessionManager.Login(context.TODO(), u.User)
-		if err != nil {
-			return nil, err
-		}
-	}
-
+func (flag *ClientFlag) saveClient(c *vim25.Client) error {
 	p := flag.sessionFile()
-	err = os.MkdirAll(filepath.Dir(p), 0700)
+	err := os.MkdirAll(filepath.Dir(p), 0700)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	f, err := os.OpenFile(p, os.O_CREATE|os.O_WRONLY, 0600)
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	defer f.Close()
 
 	enc := json.NewEncoder(f)
-	err = enc.Encode(soapClient)
+	err = enc.Encode(c)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (flag *ClientFlag) restoreClient(c *vim25.Client) (bool, error) {
+	f, err := os.Open(flag.sessionFile())
+	if err != nil {
+		if os.IsNotExist(err) {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	defer f.Close()
+
+	dec := json.NewDecoder(f)
+	err = dec.Decode(c)
+	if err != nil {
+		return false, err
+	}
+
+	return true, nil
+}
+
+func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
+	c := new(vim25.Client)
+	ok, err := flag.restoreClient(c)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok || !c.Valid() {
+		return nil, nil
+	}
+
+	m := session.NewManager(c)
+	u, err := m.UserSession(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	// If the session is nil, the client is not authenticated
+	if u == nil {
+		return nil, nil
+	}
+
+	return c, nil
+}
+
+func (flag *ClientFlag) newClient() (*vim25.Client, error) {
+	sc := soap.NewClient(flag.url, flag.insecure)
+	c, err := vim25.NewClient(context.TODO(), sc)
+	if err != nil {
+		return nil, err
+	}
+
+	m := session.NewManager(c)
+	err = m.Login(context.TODO(), flag.url.User)
+	if err != nil {
+		return nil, err
+	}
+
+	err = flag.saveClient(c)
 	if err != nil {
 		return nil, err
 	}
@@ -210,28 +241,9 @@ func (flag *ClientFlag) newClient() (*govmomi.Client, error) {
 	return c, nil
 }
 
-// currentSessionValid returns whether or not the current session is valid. It
-// is valid if the "currentSession" field of the SessionManager managed object
-// can be retrieved. It is not valid it cannot be retrieved, but no error
-// occurs. An error is returned otherwise.
-func currentSessionValid(c *govmomi.Client) (bool, error) {
-	var sm mo.SessionManager
-
-	err := c.Properties(*c.ServiceContent.SessionManager, []string{"currentSession"}, &sm)
-	if err != nil {
-		return false, err
-	}
-
-	if sm.CurrentSession == nil {
-		return false, nil
-	}
-
-	return true, nil
-}
-
 // apiVersionValid returns whether or not the API version supported by the
 // server the client is connected to is not recent enough.
-func apiVersionValid(c *govmomi.Client, minVersionString string) error {
+func apiVersionValid(c *vim25.Client, minVersionString string) error {
 	realVersion, err := ParseVersion(c.ServiceContent.About.ApiVersion)
 	if err != nil {
 		return err
@@ -253,26 +265,18 @@ func apiVersionValid(c *govmomi.Client, minVersionString string) error {
 	return nil
 }
 
-func (flag *ClientFlag) Client() (*govmomi.Client, error) {
+func (flag *ClientFlag) Client() (*vim25.Client, error) {
 	if flag.client != nil {
 		return flag.client, nil
 	}
-
-	var ok = false
 
 	c, err := flag.loadClient()
 	if err != nil {
 		return nil, err
 	}
 
-	if c != nil {
-		ok, err = currentSessionValid(c)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	if !ok {
+	// loadClient returns nil if it was unable to load a session from disk
+	if c == nil {
 		c, err = flag.newClient()
 		if err != nil {
 			return nil, err

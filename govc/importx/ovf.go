@@ -24,10 +24,10 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
@@ -39,7 +39,7 @@ type ovf struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 
-	Client       *govmomi.Client
+	Client       *vim25.Client
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
 	ResourcePool *object.ResourcePool

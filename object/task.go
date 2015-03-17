@@ -17,9 +17,9 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -30,14 +30,12 @@ import (
 // function with only a context parameter, instead of a context parameter, a
 // soap.RoundTripper, and reference to the root property collector.
 type Task struct {
-	c   *govmomi.Client
-	ref types.ManagedObjectReference
+	Common
 }
 
-func NewTask(c *govmomi.Client, ref types.ManagedObjectReference) *Task {
+func NewTask(c *vim25.Client, ref types.ManagedObjectReference) *Task {
 	t := Task{
-		c:   c,
-		ref: ref,
+		Common: NewCommon(c, ref),
 	}
 
 	return &t
@@ -49,6 +47,6 @@ func (t *Task) Wait(ctx context.Context) error {
 }
 
 func (t *Task) WaitForResult(ctx context.Context, s progress.Sinker) (*types.TaskInfo, error) {
-	p := property.DefaultCollector(t.c, t.c.ServiceContent)
-	return task.Wait(ctx, t.ref, p, s)
+	p := property.DefaultCollector(t.c)
+	return task.Wait(ctx, t.Reference(), p, s)
 }

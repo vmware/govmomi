@@ -19,10 +19,12 @@ package esxcli
 import (
 	"strings"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type hostInfo struct {
@@ -31,11 +33,11 @@ type hostInfo struct {
 }
 
 type GuestInfo struct {
-	c     *govmomi.Client
+	c     *vim25.Client
 	hosts map[string]*hostInfo
 }
 
-func NewGuestInfo(c *govmomi.Client) *GuestInfo {
+func NewGuestInfo(c *vim25.Client) *GuestInfo {
 	return &GuestInfo{
 		c:     c,
 		hosts: make(map[string]*hostInfo),
@@ -82,7 +84,9 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 // $ govc host.esxcli -- system settings advanced set -o /Net/GuestIPHack -i 1
 func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
 	var mvm mo.VirtualMachine
-	err := g.c.Properties(vm.ManagedObjectReference, []string{"runtime.host", "config.uuid"}, &mvm)
+
+	pc := property.DefaultCollector(g.c)
+	err := pc.RetrieveOne(context.TODO(), vm.Reference(), []string{"runtime.host", "config.uuid"}, &mvm)
 	if err != nil {
 		return "", err
 	}

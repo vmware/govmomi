@@ -20,26 +20,27 @@ import (
 	"errors"
 	"path"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"golang.org/x/net/context"
 )
 
 type Finder struct {
-	client   *govmomi.Client
+	client   *vim25.Client
 	recurser list.Recurser
 
 	dc      *object.Datacenter
 	folders *object.DatacenterFolders
 }
 
-func NewFinder(client *govmomi.Client, all bool) *Finder {
+func NewFinder(client *vim25.Client, all bool) *Finder {
 	f := &Finder{
 		client: client,
 		recurser: list.Recurser{
-			Collector: client.PropertyCollector(),
+			Collector: property.DefaultCollector(client),
 			All:       all,
 		},
 	}

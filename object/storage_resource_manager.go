@@ -17,19 +17,19 @@ limitations under the License.
 package object
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type StorageResourceManager struct {
-	c *govmomi.Client
+	Common
 }
 
-func NewStorageResourceManager(c *govmomi.Client) *StorageResourceManager {
+func NewStorageResourceManager(c *vim25.Client) *StorageResourceManager {
 	sr := StorageResourceManager{
-		c: c,
+		Common: NewCommon(c, *c.ServiceContent.StorageResourceManager),
 	}
 
 	return &sr
@@ -37,7 +37,7 @@ func NewStorageResourceManager(c *govmomi.Client) *StorageResourceManager {
 
 func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendation_Task{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 		Key:  key,
 	}
 
@@ -51,7 +51,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendation(key []string) (*T
 
 func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *StoragePod, key string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendationToPod_Task{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 		Key:  key,
 	}
 
@@ -69,7 +69,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(pod *Storage
 
 func (sr StorageResourceManager) CancelStorageDrsRecommendation(key []string) error {
 	req := types.CancelStorageDrsRecommendation{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 		Key:  key,
 	}
 
@@ -80,7 +80,7 @@ func (sr StorageResourceManager) CancelStorageDrsRecommendation(key []string) er
 
 func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, spec types.StorageIORMConfigSpec, key string) (*Task, error) {
 	req := types.ConfigureDatastoreIORM_Task{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 		Spec: spec,
 	}
 
@@ -98,7 +98,7 @@ func (sr StorageResourceManager) ConfigureDatastoreIORM(datastore *Datastore, sp
 
 func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec types.StorageDrsConfigSpec, modify bool) (*Task, error) {
 	req := types.ConfigureStorageDrsForPod_Task{
-		This:   *sr.c.ServiceContent.StorageResourceManager,
+		This:   sr.Reference(),
 		Spec:   spec,
 		Modify: modify,
 	}
@@ -117,7 +117,7 @@ func (sr StorageResourceManager) ConfigureStorageDrsForPod(pod *StoragePod, spec
 
 func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Datastore) ([]types.StoragePerformanceSummary, error) {
 	req := types.QueryDatastorePerformanceSummary{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 	}
 
 	if datastore != nil {
@@ -134,7 +134,7 @@ func (sr StorageResourceManager) QueryDatastorePerformanceSummary(datastore *Dat
 
 func (sr StorageResourceManager) QueryIORMConfigOption(host *HostSystem) (*types.StorageIORMConfigOption, error) {
 	req := types.QueryIORMConfigOption{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 	}
 
 	if host != nil {
@@ -151,7 +151,7 @@ func (sr StorageResourceManager) QueryIORMConfigOption(host *HostSystem) (*types
 
 func (sr StorageResourceManager) RecommendDatastores(storageSpec types.StoragePlacementSpec) (*types.StoragePlacementResult, error) {
 	req := types.RecommendDatastores{
-		This:        *sr.c.ServiceContent.StorageResourceManager,
+		This:        sr.Reference(),
 		StorageSpec: storageSpec,
 	}
 
@@ -165,7 +165,7 @@ func (sr StorageResourceManager) RecommendDatastores(storageSpec types.StoragePl
 
 func (sr StorageResourceManager) RefreshStorageDrsRecommendation(pod *StoragePod) error {
 	req := types.RefreshStorageDrsRecommendation{
-		This: *sr.c.ServiceContent.StorageResourceManager,
+		This: sr.Reference(),
 	}
 
 	if pod != nil {

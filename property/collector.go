@@ -19,6 +19,7 @@ package property
 import (
 	"errors"
 
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -37,10 +38,10 @@ type Collector struct {
 }
 
 // DefaultCollector returns the session's default property collector.
-func DefaultCollector(rt soap.RoundTripper, sc types.ServiceContent) *Collector {
+func DefaultCollector(c *vim25.Client) *Collector {
 	p := Collector{
-		roundTripper: rt,
-		reference:    sc.PropertyCollector,
+		roundTripper: c,
+		reference:    c.ServiceContent.PropertyCollector,
 	}
 
 	return &p

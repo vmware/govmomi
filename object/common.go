@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,29 +17,26 @@ limitations under the License.
 package object
 
 import (
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
-type HostConfigManager struct {
-	Common
+// Common contains the fields and functions common to all objects.
+type Common struct {
+	c *vim25.Client
+	r types.ManagedObjectReference
 }
 
-func NewHostConfigManager(c *vim25.Client, ref types.ManagedObjectReference) *HostConfigManager {
-	return &HostConfigManager{
-		Common: NewCommon(c, ref),
-	}
+func NewCommon(c *vim25.Client, r types.ManagedObjectReference) Common {
+	return Common{c: c, r: r}
 }
 
-func (m HostConfigManager) NetworkSystem() (*HostNetworkSystem, error) {
-	var h mo.HostSystem
+func (c Common) Reference() types.ManagedObjectReference {
+	return c.r
+}
 
-	err := m.Properties(context.TODO(), m.Reference(), []string{"configManager.networkSystem"}, &h)
-	if err != nil {
-		return nil, err
-	}
-
-	return NewHostNetworkSystem(m.c, *h.ConfigManager.NetworkSystem), nil
+func (c Common) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst interface{}) error {
+	return property.DefaultCollector(c.c).RetrieveOne(ctx, r, ps, dst)
 }

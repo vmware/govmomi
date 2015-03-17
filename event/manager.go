@@ -17,7 +17,7 @@ limitations under the License.
 package event
 
 import (
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -26,10 +26,10 @@ import (
 type Manager struct {
 	reference types.ManagedObjectReference
 
-	c *govmomi.Client
+	c *vim25.Client
 }
 
-func NewManager(c *govmomi.Client) *Manager {
+func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
 		reference: *c.ServiceContent.EventManager,
 

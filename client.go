@@ -21,40 +21,26 @@ import (
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/session"
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type Client struct {
-	*soap.Client
+	*vim25.Client
 
-	// RoundTripper is a separate field such that the client's implementation of
-	// the RoundTripper interface can be wrapped by separate implementations for
-	// extra functionality (for example, reauthentication on session timeout).
-	RoundTripper soap.RoundTripper
-
-	ServiceContent types.ServiceContent
 	SessionManager *session.Manager
 }
 
 // NewClientFromClient creates and returns a new client structure from a
 // soap.Client instance. The remote ServiceContent object is retrieved and
 // populated in the Client structure before returning.
-func NewClientFromClient(soapClient *soap.Client) (*Client, error) {
-	serviceContent, err := methods.GetServiceContent(context.TODO(), soapClient)
-	if err != nil {
-		return nil, err
-	}
-
+func NewClientFromClient(vimClient *vim25.Client) (*Client, error) {
 	c := Client{
-		Client:         soapClient,
-		RoundTripper:   soapClient,
-		ServiceContent: serviceContent,
+		Client:         vimClient,
+		SessionManager: session.NewManager(vimClient),
 	}
-
-	c.SessionManager = session.NewManager(soapClient, c.ServiceContent)
 
 	return &c, nil
 }
@@ -63,7 +49,12 @@ func NewClientFromClient(soapClient *soap.Client) (*Client, error) {
 // server before returning if the URL contains user information.
 func NewClient(u *url.URL, insecure bool) (*Client, error) {
 	soapClient := soap.NewClient(u, insecure)
-	c, err := NewClientFromClient(soapClient)
+	vimClient, err := vim25.NewClient(context.TODO(), soapClient)
+	if err != nil {
+		return nil, err
+	}
+
+	c, err := NewClientFromClient(vimClient)
 	if err != nil {
 		return nil, err
 	}
@@ -95,7 +86,7 @@ func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
 }
 
 func (c *Client) PropertyCollector() *property.Collector {
-	return property.DefaultCollector(c, c.ServiceContent)
+	return property.DefaultCollector(c.Client)
 }
 
 func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {

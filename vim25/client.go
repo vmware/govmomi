@@ -92,3 +92,23 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 
 	return nil
 }
+
+// Valid returns whether or not the client is valid and ready for use.
+// This should be called after unmarshalling the client.
+func (c *Client) Valid() bool {
+	if c == nil {
+		return false
+	}
+
+	if c.Client == nil {
+		return false
+	}
+
+	// Use arbitrary pointer field in the service content.
+	// Doesn't matter which one, as long as it is populated by default.
+	if c.ServiceContent.SessionManager == nil {
+		return false
+	}
+
+	return true
+}
