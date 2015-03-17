@@ -30,24 +30,23 @@ import (
 
 func TestNewClient(t *testing.T) {
 	u := test.URL()
-
 	if u == nil {
 		t.SkipNow()
 	}
 
-	c, err := NewClient(u, true)
+	c, err := NewClient(context.Background(), u, true)
 	if err != nil {
 		t.Error(err)
 	}
 
 	f := func() error {
 		var x mo.Folder
-		err = mo.RetrieveProperties(context.TODO(), c, c.ServiceContent.PropertyCollector, c.ServiceContent.RootFolder, &x)
+		err = mo.RetrieveProperties(context.Background(), c, c.ServiceContent.PropertyCollector, c.ServiceContent.RootFolder, &x)
 		if err != nil {
 			return err
 		}
 		if len(x.Name) == 0 {
-			return errors.New("invalid response") // TODO: RetrieveProperties should propagate fault
+			return errors.New("empty response")
 		}
 		return nil
 	}
@@ -77,7 +76,7 @@ func TestNewClient(t *testing.T) {
 	// invalid login
 	u.Path = "/sdk"
 	u.User = url.UserPassword("ENOENT", "EINVAL")
-	_, err = NewClient(u, true)
+	_, err = NewClient(context.Background(), u, true)
 	if err == nil {
 		t.Error("should fail")
 	}
@@ -91,7 +90,7 @@ func TestInvalidSdk(t *testing.T) {
 
 	// a URL other than a valid /sdk should error, not panic
 	u.Path = "/mob"
-	_, err := NewClient(u, true)
+	_, err := NewClient(context.Background(), u, true)
 	if err == nil {
 		t.Error("should fail")
 	}
@@ -103,19 +102,19 @@ func TestPropertiesN(t *testing.T) {
 		t.SkipNow()
 	}
 
-	c, err := NewClient(u, true)
+	c, err := NewClient(context.Background(), u, true)
 	if err != nil {
 		t.Error(err)
 	}
 
 	var f mo.Folder
-	err = c.Properties(c.ServiceContent.RootFolder, nil, &f)
+	err = c.RetrieveOne(context.Background(), c.ServiceContent.RootFolder, nil, &f)
 	if err != nil {
 		t.Error(err)
 	}
 
 	var dc mo.Datacenter
-	err = c.Properties(f.ChildEntity[0], nil, &dc)
+	err = c.RetrieveOne(context.Background(), f.ChildEntity[0], nil, &dc)
 	if err != nil {
 		t.Error(err)
 	}
@@ -128,7 +127,7 @@ func TestPropertiesN(t *testing.T) {
 	}
 
 	var folders []mo.Folder
-	err = c.PropertiesN(folderReferences, []string{"name"}, &folders)
+	err = c.Retrieve(context.Background(), folderReferences, []string{"name"}, &folders)
 	if err != nil {
 		t.Error(err)
 	}

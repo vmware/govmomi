@@ -33,35 +33,23 @@ type Client struct {
 	SessionManager *session.Manager
 }
 
-// NewClientFromClient creates and returns a new client structure from a
-// soap.Client instance. The remote ServiceContent object is retrieved and
-// populated in the Client structure before returning.
-func NewClientFromClient(vimClient *vim25.Client) (*Client, error) {
-	c := Client{
+// NewClient creates a new client from a URL. The client authenticates with the
+// server before returning if the URL contains user information.
+func NewClient(ctx context.Context, u *url.URL, insecure bool) (*Client, error) {
+	soapClient := soap.NewClient(u, insecure)
+	vimClient, err := vim25.NewClient(ctx, soapClient)
+	if err != nil {
+		return nil, err
+	}
+
+	c := &Client{
 		Client:         vimClient,
 		SessionManager: session.NewManager(vimClient),
 	}
 
-	return &c, nil
-}
-
-// NewClient creates a new client from a URL. The client authenticates with the
-// server before returning if the URL contains user information.
-func NewClient(u *url.URL, insecure bool) (*Client, error) {
-	soapClient := soap.NewClient(u, insecure)
-	vimClient, err := vim25.NewClient(context.TODO(), soapClient)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := NewClientFromClient(vimClient)
-	if err != nil {
-		return nil, err
-	}
-
 	// Only login if the URL contains user information.
 	if u.User != nil {
-		err = c.SessionManager.Login(context.TODO(), u.User)
+		err = c.Login(ctx, u.User)
 		if err != nil {
 			return nil, err
 		}
@@ -70,33 +58,34 @@ func NewClient(u *url.URL, insecure bool) (*Client, error) {
 	return c, nil
 }
 
-// convience method for logout via SessionManager
-func (c *Client) Logout() error {
-	err := c.SessionManager.Logout(context.TODO())
-
-	// We've logged out - let's close any idle connections
-	c.CloseIdleConnections()
-
-	return err
+// Login dispatches to the SessionManager.
+func (c *Client) Login(ctx context.Context, u *url.Userinfo) error {
+	return c.SessionManager.Login(ctx, u)
 }
 
-// RoundTrip dispatches to the RoundTripper field.
-func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
-	return c.RoundTripper.RoundTrip(ctx, req, res)
+// Logout dispatches to the SessionManager.
+func (c *Client) Logout(ctx context.Context) error {
+	// Close any idle connections after logging out.
+	defer c.Client.CloseIdleConnections()
+	return c.SessionManager.Logout(ctx)
 }
 
+// PropertyCollector returns the session's default property collector.
 func (c *Client) PropertyCollector() *property.Collector {
 	return property.DefaultCollector(c.Client)
 }
 
-func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
-	return c.PropertyCollector().RetrieveOne(context.TODO(), obj, p, dst)
+// RetrieveOne dispatches to the Retrieve function on the default property collector.
+func (c *Client) RetrieveOne(ctx context.Context, obj types.ManagedObjectReference, p []string, dst interface{}) error {
+	return c.PropertyCollector().RetrieveOne(ctx, obj, p, dst)
 }
 
-func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, dst interface{}) error {
-	return c.PropertyCollector().Retrieve(context.TODO(), objs, p, dst)
+// Retrieve dispatches to the Retrieve function on the default property collector.
+func (c *Client) Retrieve(ctx context.Context, objs []types.ManagedObjectReference, p []string, dst interface{}) error {
+	return c.PropertyCollector().Retrieve(ctx, objs, p, dst)
 }
 
-func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
-	return property.Wait(context.TODO(), c.PropertyCollector(), obj, ps, f)
+// Wait dispatches to property.Wait.
+func (c *Client) Wait(ctx context.Context, obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
+	return property.Wait(ctx, c.PropertyCollector(), obj, ps, f)
 }
