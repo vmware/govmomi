@@ -22,8 +22,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type DatacenterFlag struct {
@@ -32,7 +33,7 @@ type DatacenterFlag struct {
 
 	register sync.Once
 	path     string
-	dc       *govmomi.Datacenter
+	dc       *object.Datacenter
 	finder   *find.Finder
 	err      error
 }
@@ -66,9 +67,9 @@ func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	// Set for relative func if dc flag is given or
 	// if there is a single (default) Datacenter
 	if flag.path == "" {
-		flag.dc, flag.err = finder.DefaultDatacenter()
+		flag.dc, flag.err = finder.DefaultDatacenter(context.TODO())
 	} else {
-		if flag.dc, err = finder.Datacenter(flag.path); err != nil {
+		if flag.dc, err = finder.Datacenter(context.TODO(), flag.path); err != nil {
 			return nil, err
 		}
 	}
@@ -80,7 +81,7 @@ func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	return flag.finder, nil
 }
 
-func (flag *DatacenterFlag) Datacenter() (*govmomi.Datacenter, error) {
+func (flag *DatacenterFlag) Datacenter() (*object.Datacenter, error) {
 	if flag.dc != nil {
 		return flag.dc, nil
 	}

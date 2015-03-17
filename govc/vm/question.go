@@ -23,8 +23,10 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type question struct {
@@ -61,7 +63,9 @@ func (cmd *question) Run(f *flag.FlagSet) error {
 	}
 
 	var mvm mo.VirtualMachine
-	err = c.Properties(vm.ManagedObjectReference, []string{"runtime.question"}, &mvm)
+
+	pc := property.DefaultCollector(c)
+	err = pc.RetrieveOne(context.TODO(), vm.Reference(), []string{"runtime.question"}, &mvm)
 	if err != nil {
 		return err
 	}
@@ -84,5 +88,5 @@ func (cmd *question) Run(f *flag.FlagSet) error {
 	}
 
 	// Answer question
-	return vm.Answer(q.Id, cmd.answer)
+	return vm.Answer(context.TODO(), q.Id, cmd.answer)
 }

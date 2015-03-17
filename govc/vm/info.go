@@ -25,7 +25,9 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
 )
 
 type info struct {
@@ -72,13 +74,14 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		for {
 			var mvm mo.VirtualMachine
 
-			err = c.Properties(vm.Reference(), props, &mvm)
+			pc := property.DefaultCollector(c)
+			err = pc.RetrieveOne(context.TODO(), vm.Reference(), props, &mvm)
 			if err != nil {
 				return err
 			}
 
 			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
-				_, err = vm.WaitForIP()
+				_, err = vm.WaitForIP(context.TODO())
 				if err != nil {
 					return err
 				}

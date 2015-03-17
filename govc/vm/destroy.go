@@ -21,6 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type destroy struct {
@@ -45,21 +46,21 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		task, err := vm.PowerOff()
+		task, err := vm.PowerOff(context.TODO())
 		if err != nil {
 			return err
 		}
 
 		// Ignore error since the VM may already been in powered off state.
 		// vm.Destroy will fail if the VM is still powered on.
-		_ = task.Wait()
+		_ = task.Wait(context.TODO())
 
-		task, err = vm.Destroy()
+		task, err = vm.Destroy(context.TODO())
 		if err != nil {
 			return err
 		}
 
-		err = task.Wait()
+		err = task.Wait(context.TODO())
 		if err != nil {
 			return err
 		}

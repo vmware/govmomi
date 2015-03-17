@@ -25,8 +25,9 @@ import (
 	"path"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 var (
@@ -39,7 +40,7 @@ type DatastoreFlag struct {
 
 	register sync.Once
 	name     string
-	ds       *govmomi.Datastore
+	ds       *object.Datastore
 }
 
 func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
@@ -55,7 +56,7 @@ func (flag *DatastoreFlag) Process() error {
 	return nil
 }
 
-func (flag *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
+func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	if flag.ds != nil {
 		return flag.ds, nil
 	}
@@ -66,9 +67,9 @@ func (flag *DatastoreFlag) Datastore() (*govmomi.Datastore, error) {
 	}
 
 	if flag.name == "" {
-		flag.ds, err = finder.DefaultDatastore()
+		flag.ds, err = finder.DefaultDatastore(context.TODO())
 	} else {
-		flag.ds, err = finder.Datastore(flag.name)
+		flag.ds, err = finder.Datastore(context.TODO(), flag.name)
 	}
 
 	return flag.ds, err
@@ -94,7 +95,7 @@ func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
 		return nil, err
 	}
 
-	u, err := ds.URL(dc, path)
+	u, err := ds.URL(context.TODO(), dc, path)
 	if err != nil {
 		return nil, err
 	}
@@ -108,7 +109,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 		return nil, err
 	}
 
-	b, err := ds.Browser()
+	b, err := ds.Browser(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -122,12 +123,12 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 	}
 
 	dsPath := ds.Path(path.Dir(file))
-	task, err := b.SearchDatastore(dsPath, &spec)
+	task, err := b.SearchDatastore(context.TODO(), dsPath, &spec)
 	if err != nil {
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		if info != nil && info.Error != nil {
 			_, ok := info.Error.Fault.(*types.FileNotFound)

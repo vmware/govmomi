@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type mkdir struct {
@@ -46,12 +47,7 @@ func (cmd *mkdir) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-
-	err = m.MakeDirectoryInGuest(vm, cmd.Auth(), f.Arg(0), cmd.createParents)
+	err = m.MakeDirectory(context.TODO(), cmd.Auth(), f.Arg(0), cmd.createParents)
 
 	// ignore EEXIST if -p flag is given
 	if err != nil && cmd.createParents {

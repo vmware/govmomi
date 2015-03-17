@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type destroy struct {
@@ -53,17 +54,17 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 
 	finder := find.NewFinder(client, false)
 	for _, datacenterToDestroy := range datacentersToDestroy {
-		foundDatacenters, err := finder.DatacenterList(datacenterToDestroy)
+		foundDatacenters, err := finder.DatacenterList(context.TODO(), datacenterToDestroy)
 		if err != nil {
 			return err
 		}
 		for _, foundDatacenter := range foundDatacenters {
-			task, err := foundDatacenter.Destroy()
+			task, err := foundDatacenter.Destroy(context.TODO())
 			if err != nil {
 				return err
 			}
 
-			if err := task.Wait(); err != nil {
+			if err := task.Wait(context.TODO()); err != nil {
 				return err
 			}
 		}

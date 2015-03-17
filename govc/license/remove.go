@@ -21,6 +21,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/license"
+	"golang.org/x/net/context"
 )
 
 type remove struct {
@@ -46,9 +48,9 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	m := client.LicenseManager()
+	m := license.NewManager(client)
 	for _, v := range f.Args() {
-		err = m.RemoveLicense(v)
+		err = m.Remove(context.TODO(), v)
 		if err != nil {
 			return err
 		}

@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type boot struct {
@@ -56,7 +57,7 @@ func (cmd *boot) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -66,5 +67,5 @@ func (cmd *boot) Run(f *flag.FlagSet) error {
 		cmd.BootOrder = devices.BootOrder(o)
 	}
 
-	return vm.SetBootOptions(&cmd.VirtualMachineBootOptions)
+	return vm.SetBootOptions(context.TODO(), &cmd.VirtualMachineBootOptions)
 }

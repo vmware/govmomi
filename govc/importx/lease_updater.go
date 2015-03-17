@@ -23,9 +23,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ovfFileItem struct {
@@ -39,8 +41,8 @@ func (o ovfFileItem) Sink() chan<- progress.Report {
 }
 
 type leaseUpdater struct {
-	client *govmomi.Client
-	lease  *govmomi.HttpNfcLease
+	client *vim25.Client
+	lease  *object.HttpNfcLease
 
 	pos   int64 // Number of bytes
 	total int64 // Total number of bytes
@@ -50,7 +52,7 @@ type leaseUpdater struct {
 	wg sync.WaitGroup // Track when update loop is done
 }
 
-func newLeaseUpdater(client *govmomi.Client, lease *govmomi.HttpNfcLease, items []ovfFileItem) *leaseUpdater {
+func newLeaseUpdater(client *vim25.Client, lease *object.HttpNfcLease, items []ovfFileItem) *leaseUpdater {
 	l := leaseUpdater{
 		client: client,
 		lease:  lease,
@@ -115,7 +117,7 @@ func (l *leaseUpdater) run() {
 			// Always report the current value of percent, as it will renew the
 			// lease even if the value hasn't changed or is 0.
 			percent := int(float32(100*atomic.LoadInt64(&l.pos)) / float32(l.total))
-			err := l.lease.HttpNfcLeaseProgress(percent)
+			err := l.lease.HttpNfcLeaseProgress(context.TODO(), percent)
 			if err != nil {
 				fmt.Printf("from lease updater: %s\n", err)
 			}

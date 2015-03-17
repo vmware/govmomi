@@ -24,13 +24,16 @@ import (
 	"reflect"
 	"regexp"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type vmdk struct {
@@ -42,10 +45,10 @@ type vmdk struct {
 	force  bool
 	keep   bool
 
-	Client       *govmomi.Client
-	Datacenter   *govmomi.Datacenter
-	Datastore    *govmomi.Datastore
-	ResourcePool *govmomi.ResourcePool
+	Client       *vim25.Client
+	Datacenter   *object.Datacenter
+	Datastore    *object.Datastore
+	ResourcePool *object.ResourcePool
 }
 
 func init() {
@@ -132,7 +135,8 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 		case flags.ErrDatastoreDirNotExist:
 			// The base path doesn't exist. Create it.
 			dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
-			return cmd.Client.FileManager().MakeDirectory(dsPath, cmd.Datacenter, true)
+			m := object.NewFileManager(cmd.Client)
+			return m.MakeDirectory(context.TODO(), dsPath, cmd.Datacenter, true)
 		case flags.ErrDatastoreFileNotExist:
 			// Destination path doesn't exist; all good to continue with import.
 			return nil
@@ -166,7 +170,7 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 }
 
 func (cmd *vmdk) Upload(i importable) error {
-	u, err := cmd.Datastore.URL(cmd.Datacenter, i.RemoteSrcVMDK())
+	u, err := cmd.Datastore.URL(context.TODO(), cmd.Datacenter, i.RemoteSrcVMDK())
 	if err != nil {
 		return err
 	}
@@ -227,14 +231,14 @@ func (cmd *vmdk) CopyHostAgent(i importable, s progress.Sinker) error {
 	dc := cmd.Datacenter
 	src := cmd.Datastore.Path(i.RemoteSrcVMDK())
 	dst := cmd.Datastore.Path(i.RemoteDstVMDK())
-	vdm := cmd.Client.VirtualDiskManager()
-	task, err := vdm.CopyVirtualDisk(src, dc, dst, dc, spec, false)
+	vdm := object.NewVirtualDiskManager(cmd.Client)
+	task, err := vdm.CopyVirtualDisk(context.TODO(), src, dc, dst, dc, spec, false)
 	if err != nil {
 		return err
 	}
 
 	ps := progress.Prefix(s, "copying disk")
-	_, err = task.WaitForResult(ps)
+	_, err = task.WaitForResult(context.TODO(), ps)
 	if err != nil {
 		return err
 	}
@@ -294,29 +298,30 @@ func (cmd *vmdk) CopyVirtualCenter(i importable, s progress.Sinker) error {
 func (cmd *vmdk) MoveDisk(src, dst string) error {
 	dsSrc := cmd.Datastore.Path(src)
 	dsDst := cmd.Datastore.Path(dst)
-	vdm := cmd.Client.VirtualDiskManager()
-	task, err := vdm.MoveVirtualDisk(dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
+	vdm := object.NewVirtualDiskManager(cmd.Client)
+	task, err := vdm.MoveVirtualDisk(context.TODO(), dsSrc, cmd.Datacenter, dsDst, cmd.Datacenter, true)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 func (cmd *vmdk) DeleteDisk(path string) error {
-	vdm := cmd.Client.VirtualDiskManager()
-	task, err := vdm.DeleteVirtualDisk(cmd.Datastore.Path(path), cmd.Datacenter)
+	vdm := object.NewVirtualDiskManager(cmd.Client)
+	task, err := vdm.DeleteVirtualDisk(context.TODO(), cmd.Datastore.Path(path), cmd.Datacenter)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
-func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
+func (cmd *vmdk) DetachDisk(vm *object.VirtualMachine) (string, error) {
 	var mvm mo.VirtualMachine
 
-	err := cmd.Client.Properties(vm.Reference(), []string{"config.hardware"}, &mvm)
+	pc := property.DefaultCollector(cmd.Client)
+	err := pc.RetrieveOne(context.TODO(), vm.Reference(), []string{"config.hardware"}, &mvm)
 	if err != nil {
 		return "", err
 	}
@@ -324,12 +329,12 @@ func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
 	spec := new(configSpec)
 	dsFile := spec.RemoveDisk(&mvm)
 
-	task, err := vm.Reconfigure(spec.ToSpec())
+	task, err := vm.Reconfigure(context.TODO(), spec.ToSpec())
 	if err != nil {
 		return "", err
 	}
 
-	err = task.Wait()
+	err = task.Wait(context.TODO())
 	if err != nil {
 		return "", err
 	}
@@ -337,27 +342,27 @@ func (cmd *vmdk) DetachDisk(vm *govmomi.VirtualMachine) (string, error) {
 	return dsFile, nil
 }
 
-func (cmd *vmdk) CreateVM(spec *configSpec) (*govmomi.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders()
+func (cmd *vmdk) CreateVM(spec *configSpec) (*object.VirtualMachine, error) {
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	task, err := folders.VmFolder.CreateVM(spec.ToSpec(), cmd.ResourcePool, nil)
+	task, err := folders.VmFolder.CreateVM(context.TODO(), spec.ToSpec(), cmd.ResourcePool, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
+	return object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
 
-func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.VirtualMachine, error) {
-	folders, err := cmd.Datacenter.Folders()
+func (cmd *vmdk) CloneVM(vm *object.VirtualMachine, name string) (*object.VirtualMachine, error) {
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return nil, err
 	}
@@ -367,31 +372,31 @@ func (cmd *vmdk) CloneVM(vm *govmomi.VirtualMachine, name string) (*govmomi.Virt
 		Location: types.VirtualMachineRelocateSpec{},
 	}
 
-	task, err := vm.Clone(folders.VmFolder, name, spec)
+	task, err := vm.Clone(context.TODO(), folders.VmFolder, name, spec)
 	if err != nil {
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return nil, err
 	}
 
-	return govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
+	return object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
 
-func (cmd *vmdk) DestroyVM(vm *govmomi.VirtualMachine) error {
+func (cmd *vmdk) DestroyVM(vm *object.VirtualMachine) error {
 	_, err := cmd.DetachDisk(vm)
 	if err != nil {
 		return err
 	}
 
-	task, err := vm.Destroy()
+	task, err := vm.Destroy(context.TODO())
 	if err != nil {
 		return err
 	}
 
-	err = task.Wait()
+	err = task.Wait(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -409,7 +414,7 @@ func (c *configSpec) AddChange(d types.BaseVirtualDeviceConfigSpec) {
 	c.DeviceChange = append(c.DeviceChange, d)
 }
 
-func (c *configSpec) AddDisk(ds *govmomi.Datastore, path string) {
+func (c *configSpec) AddDisk(ds *object.Datastore, path string) {
 	controller := &types.VirtualLsiLogicController{
 		VirtualSCSIController: types.VirtualSCSIController{
 			SharedBus: types.VirtualSCSISharingNoSharing,

@@ -47,13 +47,13 @@ type RoundTripper interface {
 type Client struct {
 	http.Client
 
-	u url.URL
+	u *url.URL
 	k bool // Named after curl's -k flag
 	d *debugContainer
 	t *http.Transport
 }
 
-func NewClient(u url.URL, insecure bool) *Client {
+func NewClient(u *url.URL, insecure bool) *Client {
 	c := Client{
 		u: u,
 		k: insecure,
@@ -76,13 +76,17 @@ func NewClient(u url.URL, insecure bool) *Client {
 
 	c.Client.Transport = c.t
 	c.Client.Jar, _ = cookiejar.New(nil)
+
+	// Remove user information from a copy of the URL
+	c.u = c.URL()
 	c.u.User = nil
 
 	return &c
 }
 
-func (c *Client) URL() url.URL {
-	return c.u
+func (c *Client) URL() *url.URL {
+	urlCopy := *c.u
+	return &urlCopy
 }
 
 type marshaledClient struct {
@@ -93,8 +97,8 @@ type marshaledClient struct {
 
 func (c *Client) MarshalJSON() ([]byte, error) {
 	m := marshaledClient{
-		Cookies:  c.Jar.Cookies(&c.u),
-		URL:      &c.u,
+		Cookies:  c.Jar.Cookies(c.u),
+		URL:      c.u,
 		Insecure: c.k,
 	}
 
@@ -109,7 +113,7 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 		return err
 	}
 
-	*c = *NewClient(*m.URL, m.Insecure)
+	*c = *NewClient(m.URL, m.Insecure)
 	c.Jar.SetCookies(m.URL, m.Cookies)
 
 	return nil
@@ -202,6 +206,10 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	}
 
 	return err
+}
+
+func (c *Client) CloseIdleConnections() {
+	c.t.CloseIdleConnections()
 }
 
 // ParseURL wraps url.Parse to rewrite the URL.Host field

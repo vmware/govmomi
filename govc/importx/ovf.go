@@ -24,12 +24,14 @@ import (
 	"io/ioutil"
 	"path"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ovf struct {
@@ -38,10 +40,10 @@ type ovf struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 
-	Client       *govmomi.Client
-	Datacenter   *govmomi.Datacenter
-	Datastore    *govmomi.Datastore
-	ResourcePool *govmomi.ResourcePool
+	Client       *vim25.Client
+	Datacenter   *object.Datacenter
+	Datastore    *object.Datastore
+	ResourcePool *object.ResourcePool
 
 	Archive
 }
@@ -137,7 +139,8 @@ func (cmd *ovf) Import(fpath string) error {
 		},
 	}
 
-	spec, err := c.OvfManager().CreateImportSpec(string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
+	m := object.NewOvfManager(c)
+	spec, err := m.CreateImportSpec(context.TODO(), string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
 		return err
 	}
@@ -162,7 +165,7 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	var host *govmomi.HostSystem
+	var host *object.HostSystem
 	if cmd.SearchFlag.IsSet() {
 		if host, err = cmd.HostSystem(); err != nil {
 			return err
@@ -170,17 +173,17 @@ func (cmd *ovf) Import(fpath string) error {
 	}
 
 	// TODO: need a folder option
-	folders, err := cmd.Datacenter.Folders()
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return err
 	}
 
-	lease, err := cmd.ResourcePool.ImportVApp(spec.ImportSpec, folders.VmFolder, host)
+	lease, err := cmd.ResourcePool.ImportVApp(context.TODO(), spec.ImportSpec, folders.VmFolder, host)
 	if err != nil {
 		return err
 	}
 
-	info, err := lease.Wait()
+	info, err := lease.Wait(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -220,10 +223,10 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	return lease.HttpNfcLeaseComplete()
+	return lease.HttpNfcLeaseComplete(context.TODO())
 }
 
-func (cmd *ovf) Upload(lease *govmomi.HttpNfcLease, ofi ovfFileItem) error {
+func (cmd *ovf) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
 	item := ofi.item
 	file := item.Path
 

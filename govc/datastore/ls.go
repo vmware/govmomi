@@ -24,10 +24,11 @@ import (
 	"path"
 	"text/tabwriter"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type ls struct {
@@ -57,7 +58,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	b, err := ds.Browser()
+	b, err := ds.Browser(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -90,7 +91,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 			r, err := cmd.ListPath(b, arg, spec)
 			if err != nil {
 				// Treat the argument as a match pattern if not found as directory
-				if i == 0 && govmomi.IsFileNotFound(err) {
+				if i == 0 && types.IsFileNotFound(err) {
 					spec.MatchPattern[0] = path.Base(arg)
 					arg = path.Dir(arg)
 					continue
@@ -112,7 +113,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 	return cmd.WriteResult(result)
 }
 
-func (cmd *ls) ListPath(b *govmomi.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
+func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
 	var res types.HostDatastoreBrowserSearchResults
 
 	path, err := cmd.DatastorePath(path)
@@ -120,12 +121,12 @@ func (cmd *ls) ListPath(b *govmomi.HostDatastoreBrowser, path string, spec types
 		return res, err
 	}
 
-	task, err := b.SearchDatastore(path, &spec)
+	task, err := b.SearchDatastore(context.TODO(), path, &spec)
 	if err != nil {
 		return res, err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return res, err
 	}

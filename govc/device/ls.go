@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type ls struct {
@@ -52,13 +53,13 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
 
 	if cmd.boot {
-		options, err := vm.BootOptions()
+		options, err := vm.BootOptions(context.TODO())
 		if err != nil {
 			return err
 		}

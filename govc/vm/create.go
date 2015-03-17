@@ -20,10 +20,12 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type create struct {
@@ -44,11 +46,11 @@ type create struct {
 	disk       string
 	controller string
 
-	Client       *govmomi.Client
-	Datacenter   *govmomi.Datacenter
-	Datastore    *govmomi.Datastore
-	ResourcePool *govmomi.ResourcePool
-	HostSystem   *govmomi.HostSystem
+	Client       *vim25.Client
+	Datacenter   *object.Datacenter
+	Datastore    *object.Datastore
+	ResourcePool *object.ResourcePool
+	HostSystem   *object.HostSystem
 }
 
 func init() {
@@ -97,7 +99,7 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.HostSystem != nil {
-		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(); err != nil {
+		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(context.TODO()); err != nil {
 			return err
 		}
 	} else {
@@ -121,24 +123,24 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	info, err := task.WaitForResult(nil)
+	info, err := task.WaitForResult(context.TODO(), nil)
 	if err != nil {
 		return err
 	}
 
-	vm := govmomi.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
+	vm := object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
 
 	if err := cmd.addDevices(vm); err != nil {
 		return err
 	}
 
 	if cmd.on {
-		task, err := vm.PowerOn()
+		task, err := vm.PowerOn(context.TODO())
 		if err != nil {
 			return err
 		}
 
-		_, err = task.WaitForResult(nil)
+		_, err = task.WaitForResult(context.TODO(), nil)
 		if err != nil {
 			return err
 		}
@@ -147,8 +149,8 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	return nil
 }
 
-func (cmd *create) addDevices(vm *govmomi.VirtualMachine) error {
-	devices, err := vm.Device()
+func (cmd *create) addDevices(vm *object.VirtualMachine) error {
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -191,10 +193,10 @@ func (cmd *create) addDevices(vm *govmomi.VirtualMachine) error {
 
 	add = append(add, netdev)
 
-	return vm.AddDevice(add...)
+	return vm.AddDevice(context.TODO(), add...)
 }
 
-func (cmd *create) createVM(name string) (*govmomi.Task, error) {
+func (cmd *create) createVM(name string) (*object.Task, error) {
 	spec := types.VirtualMachineConfigSpec{
 		Name:     name,
 		GuestId:  cmd.guestID,
@@ -214,7 +216,7 @@ func (cmd *create) createVM(name string) (*govmomi.Task, error) {
 	}
 
 	if cmd.controller != "ide" {
-		scsi, err := govmomi.SCSIControllerTypes().CreateSCSIController(cmd.controller)
+		scsi, err := object.SCSIControllerTypes().CreateSCSIController(cmd.controller)
 		if err != nil {
 			return nil, err
 		}
@@ -225,10 +227,10 @@ func (cmd *create) createVM(name string) (*govmomi.Task, error) {
 		})
 	}
 
-	folders, err := cmd.Datacenter.Folders()
+	folders, err := cmd.Datacenter.Folders(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(spec, cmd.ResourcePool, cmd.HostSystem)
+	return folders.VmFolder.CreateVM(context.TODO(), spec, cmd.ResourcePool, cmd.HostSystem)
 }

@@ -20,9 +20,11 @@ import (
 	"errors"
 	"flag"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type rm struct {
@@ -68,14 +70,15 @@ func (cmd *rm) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	task, err := c.FileManager().DeleteDatastoreFile(path, dc)
+	m := object.NewFileManager(c)
+	task, err := m.DeleteDatastoreFile(context.TODO(), path, dc)
 	if err != nil {
 		return err
 	}
 
-	err = task.Wait()
+	err = task.Wait(context.TODO())
 	if err != nil {
-		if govmomi.IsFileNotFound(err) && cmd.force {
+		if types.IsFileNotFound(err) && cmd.force {
 			// Ignore error
 			return nil
 		}

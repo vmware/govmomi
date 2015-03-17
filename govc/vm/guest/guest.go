@@ -22,8 +22,10 @@ import (
 
 	"net/url"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/guest"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type GuestFlag struct {
@@ -37,20 +39,34 @@ func (flag *GuestFlag) Register(f *flag.FlagSet) {}
 
 func (flag *GuestFlag) Process() error { return nil }
 
-func (flag *GuestFlag) FileManager() (*govmomi.GuestFileManager, error) {
+func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
-	return c.GuestOperationsManager().FileManager()
+
+	vm, err := flag.VirtualMachine()
+	if err != nil {
+		return nil, err
+	}
+
+	o := guest.NewOperationsManager(c, vm.Reference())
+	return o.FileManager(context.TODO())
 }
 
-func (flag *GuestFlag) ProcessManager() (*govmomi.GuestProcessManager, error) {
+func (flag *GuestFlag) ProcessManager() (*guest.ProcessManager, error) {
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
-	return c.GuestOperationsManager().ProcessManager()
+
+	vm, err := flag.VirtualMachine()
+	if err != nil {
+		return nil, err
+	}
+
+	o := guest.NewOperationsManager(c, vm.Reference())
+	return o.ProcessManager(context.TODO())
 }
 
 func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {
@@ -62,7 +78,7 @@ func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {
 	return c.Client.ParseURL(urlStr)
 }
 
-func (flag *GuestFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
+func (flag *GuestFlag) VirtualMachine() (*object.VirtualMachine, error) {
 	vm, err := flag.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return nil, err

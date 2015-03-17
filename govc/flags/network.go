@@ -22,8 +22,9 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type NetworkFlag struct {
@@ -31,7 +32,7 @@ type NetworkFlag struct {
 
 	register sync.Once
 	name     string
-	net      govmomi.NetworkReference
+	net      object.NetworkReference
 	adapter  string
 }
 
@@ -63,7 +64,7 @@ func (flag *NetworkFlag) Set(name string) error {
 	return nil
 }
 
-func (flag *NetworkFlag) Network() (govmomi.NetworkReference, error) {
+func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
 	if flag.net != nil {
 		return flag.net, nil
 	}
@@ -74,9 +75,9 @@ func (flag *NetworkFlag) Network() (govmomi.NetworkReference, error) {
 	}
 
 	if flag.name == "" {
-		flag.net, err = finder.DefaultNetwork()
+		flag.net, err = finder.DefaultNetwork(context.TODO())
 	} else {
-		flag.net, err = finder.Network(flag.name)
+		flag.net, err = finder.Network(context.TODO(), flag.name)
 	}
 
 	return flag.net, err
@@ -88,12 +89,12 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
-	backing, err := net.EthernetCardBackingInfo()
+	backing, err := net.EthernetCardBackingInfo(context.TODO())
 	if err != nil {
 		return nil, err
 	}
 
-	device, err := govmomi.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
+	device, err := object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
 	if err != nil {
 		return nil, err
 	}

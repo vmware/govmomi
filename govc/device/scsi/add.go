@@ -21,10 +21,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type add struct {
@@ -41,7 +42,7 @@ func init() {
 
 func (cmd *add) Register(f *flag.FlagSet) {
 	var ctypes []string
-	ct := govmomi.SCSIControllerTypes()
+	ct := object.SCSIControllerTypes()
 	for _, t := range ct {
 		ctypes = append(ctypes, ct.Type(t))
 	}
@@ -63,7 +64,7 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -77,13 +78,13 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 	c.HotAddRemove = cmd.hotAddRemove
 	c.SharedBus = types.VirtualSCSISharing(cmd.sharedBus)
 
-	err = vm.AddDevice(d)
+	err = vm.AddDevice(context.TODO(), d)
 	if err != nil {
 		return err
 	}
 
 	// output name of device we just created
-	devices, err = vm.Device()
+	devices, err = vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}

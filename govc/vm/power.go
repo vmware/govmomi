@@ -20,9 +20,10 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type power struct {
@@ -81,27 +82,27 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		var task *govmomi.Task
+		var task *object.Task
 
 		switch {
 		case cmd.On:
 			fmt.Fprintf(cmd, "Powering on %s... ", vm.Reference())
-			task, err = vm.PowerOn()
+			task, err = vm.PowerOn(context.TODO())
 		case cmd.Off:
 			fmt.Fprintf(cmd, "Powering off %s... ", vm.Reference())
-			task, err = vm.PowerOff()
+			task, err = vm.PowerOff(context.TODO())
 		case cmd.Reset:
 			fmt.Fprintf(cmd, "Reset %s... ", vm.Reference())
-			task, err = vm.Reset()
+			task, err = vm.Reset(context.TODO())
 		case cmd.Suspend:
 			fmt.Fprintf(cmd, "Suspend %s... ", vm.Reference())
-			task, err = vm.Suspend()
+			task, err = vm.Suspend(context.TODO())
 		case cmd.Reboot:
 			fmt.Fprintf(cmd, "Reboot guest %s... ", vm.Reference())
-			err = vm.RebootGuest()
+			err = vm.RebootGuest(context.TODO())
 		case cmd.Shutdown:
 			fmt.Fprintf(cmd, "Shutdown guest %s... ", vm.Reference())
-			err = vm.ShutdownGuest()
+			err = vm.ShutdownGuest(context.TODO())
 		}
 
 		if err != nil {
@@ -109,7 +110,7 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 		}
 
 		if task != nil {
-			err = task.Wait()
+			err = task.Wait(context.TODO())
 		}
 		if err == nil {
 			fmt.Fprintf(cmd, "OK\n")

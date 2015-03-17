@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type change struct {
@@ -59,7 +60,7 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		_ = cmd.NetworkFlag.Set(f.Arg(1))
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -77,5 +78,5 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 
 	net.GetVirtualDevice().Backing = backing.GetVirtualDevice().Backing
 
-	return vm.EditDevice(net)
+	return vm.EditDevice(context.TODO(), net)
 }

@@ -21,10 +21,11 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/host/esxcli"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type ip struct {
@@ -56,10 +57,10 @@ func (cmd *ip) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	var get func(*govmomi.VirtualMachine) (string, error)
+	var get func(*object.VirtualMachine) (string, error)
 
 	if cmd.esx {
-		get = func(vm *govmomi.VirtualMachine) (string, error) {
+		get = func(vm *object.VirtualMachine) (string, error) {
 			guest := esxcli.NewGuestInfo(c)
 
 			ticker := time.NewTicker(time.Millisecond * 500)
@@ -80,8 +81,8 @@ func (cmd *ip) Run(f *flag.FlagSet) error {
 			}
 		}
 	} else {
-		get = func(vm *govmomi.VirtualMachine) (string, error) {
-			return vm.WaitForIP()
+		get = func(vm *object.VirtualMachine) (string, error) {
+			return vm.WaitForIP(context.TODO())
 		}
 	}
 

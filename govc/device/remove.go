@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type remove struct {
@@ -50,7 +51,7 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -61,7 +62,7 @@ func (cmd *remove) Run(f *flag.FlagSet) error {
 			return fmt.Errorf("device '%s' not found", name)
 		}
 
-		if err = vm.RemoveDevice(device); err != nil {
+		if err = vm.RemoveDevice(context.TODO(), device); err != nil {
 			return err
 		}
 	}

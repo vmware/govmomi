@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type disconnect struct {
@@ -50,7 +51,7 @@ func (cmd *disconnect) Run(f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -65,7 +66,7 @@ func (cmd *disconnect) Run(f *flag.FlagSet) error {
 			return err
 		}
 
-		if err = vm.EditDevice(device); err != nil {
+		if err = vm.EditDevice(context.TODO(), device); err != nil {
 			return err
 		}
 	}

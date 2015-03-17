@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type attach struct {
@@ -62,7 +63,7 @@ func (cmd *attach) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	devices, err := vm.Device()
+	devices, err := vm.Device(context.TODO())
 	if err != nil {
 		return err
 	}
@@ -83,7 +84,7 @@ func (cmd *attach) Run(f *flag.FlagSet) error {
 		}
 
 		disk = devices.ChildDisk(disk)
-		return vm.AddDevice(disk)
+		return vm.AddDevice(context.TODO(), disk)
 	}
 
 	if cmd.persist {
@@ -92,5 +93,5 @@ func (cmd *attach) Run(f *flag.FlagSet) error {
 		backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
 	}
 
-	return vm.AddDevice(disk)
+	return vm.AddDevice(context.TODO(), disk)
 }

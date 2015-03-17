@@ -22,7 +22,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type ResourcePoolFlag struct {
@@ -30,7 +31,7 @@ type ResourcePoolFlag struct {
 
 	register sync.Once
 	name     string
-	pool     *govmomi.ResourcePool
+	pool     *object.ResourcePool
 }
 
 func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
@@ -46,7 +47,7 @@ func (flag *ResourcePoolFlag) Process() error {
 	return nil
 }
 
-func (flag *ResourcePoolFlag) ResourcePool() (*govmomi.ResourcePool, error) {
+func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	if flag.pool != nil {
 		return flag.pool, nil
 	}
@@ -57,9 +58,9 @@ func (flag *ResourcePoolFlag) ResourcePool() (*govmomi.ResourcePool, error) {
 	}
 
 	if flag.name == "" {
-		flag.pool, err = finder.DefaultResourcePool()
+		flag.pool, err = finder.DefaultResourcePool(context.TODO())
 	} else {
-		flag.pool, err = finder.ResourcePool(flag.name)
+		flag.pool, err = finder.ResourcePool(context.TODO(), flag.name)
 	}
 
 	return flag.pool, err

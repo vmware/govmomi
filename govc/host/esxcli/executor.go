@@ -20,7 +20,8 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -28,14 +29,14 @@ import (
 )
 
 type Executor struct {
-	c    *govmomi.Client
-	host *govmomi.HostSystem
+	c    *vim25.Client
+	host *object.HostSystem
 	mme  *types.ReflectManagedMethodExecuter
 	dtm  *types.InternalDynamicTypeManager
 	info map[string]*CommandInfo
 }
 
-func NewExecutor(c *govmomi.Client, host *govmomi.HostSystem) (*Executor, error) {
+func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
 	e := &Executor{
 		c:    c,
 		host: host,

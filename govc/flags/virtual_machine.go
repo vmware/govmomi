@@ -22,7 +22,8 @@ import (
 	"os"
 	"sync"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type VirtualMachineFlag struct {
@@ -32,7 +33,7 @@ type VirtualMachineFlag struct {
 
 	register sync.Once
 	name     string
-	vm       *govmomi.VirtualMachine
+	vm       *object.VirtualMachine
 }
 
 func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
@@ -50,7 +51,7 @@ func (flag *VirtualMachineFlag) Process() error {
 	return nil
 }
 
-func (flag *VirtualMachineFlag) VirtualMachine() (*govmomi.VirtualMachine, error) {
+func (flag *VirtualMachineFlag) VirtualMachine() (*object.VirtualMachine, error) {
 	if flag.vm != nil {
 		return flag.vm, nil
 	}
@@ -76,6 +77,6 @@ func (flag *VirtualMachineFlag) VirtualMachine() (*govmomi.VirtualMachine, error
 		return nil, err
 	}
 
-	flag.vm, err = finder.VirtualMachine(flag.name)
+	flag.vm, err = finder.VirtualMachine(context.TODO(), flag.name)
 	return flag.vm, err
 }

@@ -22,6 +22,8 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type create struct {
@@ -52,15 +54,15 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	}
 
 	finder := find.NewFinder(client, false)
-	rootFolder := client.RootFolder()
+	rootFolder := object.NewRootFolder(client)
 	for _, datacenterToCreate := range datacenters {
-		foundDatacenters, err := finder.DatacenterList(datacenterToCreate)
+		foundDatacenters, err := finder.DatacenterList(context.TODO(), datacenterToCreate)
 		if err != nil {
 			return err
 		}
 
 		if foundDatacenters == nil {
-			_, err = rootFolder.CreateDatacenter(datacenterToCreate)
+			_, err = rootFolder.CreateDatacenter(context.TODO(), datacenterToCreate)
 			if err != nil {
 				return err
 			}

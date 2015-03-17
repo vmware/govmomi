@@ -23,10 +23,12 @@ import (
 	"os"
 	"text/tabwriter"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
+	"golang.org/x/net/context"
 )
 
 type info struct {
@@ -49,7 +51,7 @@ func (c *info) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	var hosts []*govmomi.HostSystem
+	var hosts []*object.HostSystem
 
 	// We could do without the -host flag, leaving it for compat
 	host, err := c.HostSystemIfSpecified()
@@ -85,7 +87,9 @@ func (c *info) Run(f *flag.FlagSet) error {
 
 	for _, host := range hosts {
 		var h mo.HostSystem
-		err = client.Properties(host.Reference(), props, &h)
+
+		pc := property.DefaultCollector(client)
+		err = pc.RetrieveOne(context.TODO(), host.Reference(), props, &h)
 		if err != nil {
 			return err
 		}

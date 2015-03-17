@@ -26,9 +26,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -163,7 +165,7 @@ func (cmd *vnc) loadVMs(args []string) ([]*vncVM, error) {
 			continue
 		}
 
-		hs := govmomi.NewHostSystem(c, vm.hostReference())
+		hs := object.NewHostSystem(c, vm.hostReference())
 		h, err := newVNCHost(c, hs, cmd.PortRange.low, cmd.PortRange.high)
 		if err != nil {
 			return nil, err
@@ -177,8 +179,8 @@ func (cmd *vnc) loadVMs(args []string) ([]*vncVM, error) {
 }
 
 type vncVM struct {
-	c    *govmomi.Client
-	vm   *govmomi.VirtualMachine
+	c    *vim25.Client
+	vm   *object.VirtualMachine
 	mvm  mo.VirtualMachine
 	host *vncHost
 
@@ -186,7 +188,7 @@ type vncVM struct {
 	newOptions vncOptions
 }
 
-func newVNCVM(c *govmomi.Client, vm *govmomi.VirtualMachine) (*vncVM, error) {
+func newVNCVM(c *vim25.Client, vm *object.VirtualMachine) (*vncVM, error) {
 	v := &vncVM{
 		c:  c,
 		vm: vm,
@@ -198,7 +200,8 @@ func newVNCVM(c *govmomi.Client, vm *govmomi.VirtualMachine) (*vncVM, error) {
 		"runtime.host",
 	}
 
-	err := c.Properties(vm.Reference(), virtualMachineProperties, &v.mvm)
+	pc := property.DefaultCollector(c)
+	err := pc.RetrieveOne(context.TODO(), vm.Reference(), virtualMachineProperties, &v.mvm)
 	if err != nil {
 		return nil, err
 	}
@@ -252,12 +255,12 @@ func (v *vncVM) reconfigure() error {
 		ExtraConfig: v.newOptions.ToExtraConfig(),
 	}
 
-	task, err := v.vm.Reconfigure(spec)
+	task, err := v.vm.Reconfigure(context.TODO(), spec)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }
 
 func (v *vncVM) uri() (string, error) {
@@ -288,13 +291,13 @@ func (v *vncVM) write(w io.Writer) error {
 }
 
 type vncHost struct {
-	c     *govmomi.Client
-	host  *govmomi.HostSystem
+	c     *vim25.Client
+	host  *object.HostSystem
 	ports map[int]struct{}
 	ip    string // This field is populated by `managementIP`
 }
 
-func newVNCHost(c *govmomi.Client, host *govmomi.HostSystem, low, high int) (*vncHost, error) {
+func newVNCHost(c *vim25.Client, host *object.HostSystem, low, high int) (*vncHost, error) {
 	ports := make(map[int]struct{})
 	for i := low; i <= high; i++ {
 		ports[i] = struct{}{}
@@ -319,7 +322,7 @@ func newVNCHost(c *govmomi.Client, host *govmomi.HostSystem, low, high int) (*vn
 	return h, nil
 }
 
-func loadUsedPorts(c *govmomi.Client, host types.ManagedObjectReference) ([]int, error) {
+func loadUsedPorts(c *vim25.Client, host types.ManagedObjectReference) ([]int, error) {
 	ospec := types.ObjectSpec{
 		Obj: host,
 		SelectSet: []types.BaseSelectionSpec{
@@ -390,7 +393,7 @@ func (h *vncHost) managementIP() (string, error) {
 		return h.ip, nil
 	}
 
-	ips, err := h.host.ManagementIPs()
+	ips, err := h.host.ManagementIPs(context.TODO())
 	if err != nil {
 		return "", err
 	}

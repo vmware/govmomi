@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
+	"golang.org/x/net/context"
 )
 
 type change struct {
@@ -65,13 +66,13 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		}
 	})
 
-	pools, err := finder.ResourcePoolList(f.Args()...)
+	pools, err := finder.ResourcePoolList(context.TODO(), f.Args()...)
 	if err != nil {
 		return err
 	}
 
 	for _, pool := range pools {
-		err := pool.UpdateConfig(cmd.name, &cmd.ResourceConfigSpec)
+		err := pool.UpdateConfig(context.TODO(), cmd.name, &cmd.ResourceConfigSpec)
 		if err != nil {
 			return err
 		}

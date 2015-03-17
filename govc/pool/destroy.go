@@ -21,6 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"golang.org/x/net/context"
 )
 
 type destroy struct {
@@ -56,24 +57,24 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	pools, err := finder.ResourcePoolList(f.Args()...)
+	pools, err := finder.ResourcePoolList(context.TODO(), f.Args()...)
 	if err != nil {
 		return err
 	}
 
 	for _, pool := range pools {
 		if cmd.recursive {
-			err = pool.DestroyChildren()
+			err = pool.DestroyChildren(context.TODO())
 			if err != nil {
 				return err
 			}
 		}
 
-		task, err := pool.Destroy()
+		task, err := pool.Destroy(context.TODO())
 		if err != nil {
 			return err
 		}
-		err = task.Wait()
+		err = task.Wait(context.TODO())
 		if err != nil {
 			return err
 		}

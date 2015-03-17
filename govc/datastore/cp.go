@@ -22,6 +22,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"golang.org/x/net/context"
 )
 
 type cp struct {
@@ -73,10 +75,11 @@ func (cmd *cp) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	task, err := c.FileManager().CopyDatastoreFile(src, dc, dst, dc, cmd.force)
+	m := object.NewFileManager(c)
+	task, err := m.CopyDatastoreFile(context.TODO(), src, dc, dst, dc, cmd.force)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait()
+	return task.Wait(context.TODO())
 }

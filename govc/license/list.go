@@ -21,6 +21,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/license"
+	"golang.org/x/net/context"
 )
 
 type list struct {
@@ -42,8 +44,8 @@ func (cmd *list) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	m := client.LicenseManager()
-	result, err := m.ListLicenses()
+	m := license.NewManager(client)
+	result, err := m.List(context.TODO())
 	if err != nil {
 		return err
 	}
