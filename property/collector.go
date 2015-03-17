@@ -17,7 +17,10 @@ limitations under the License.
 package property
 
 import (
+	"errors"
+
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -110,4 +113,61 @@ func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.Update
 func (p *Collector) RetrieveProperties(ctx context.Context, req types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
 	req.This = p.Reference()
 	return methods.RetrieveProperties(ctx, p.roundTripper, &req)
+}
+
+// Retrieve loads properties for a slice of managed objects. The dst argument
+// must be a pointer to a []interface{}, which is populated with the instances
+// of the specified managed objects, with the relevant properties filled in. If
+// the properties slice is nil, all properties are loaded.
+func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectReference, ps []string, dst interface{}) error {
+	var propSpec *types.PropertySpec
+	var objectSet []types.ObjectSpec
+
+	for _, obj := range objs {
+		// Ensure that all object reference types are the same
+		if propSpec == nil {
+			propSpec = &types.PropertySpec{
+				Type: obj.Type,
+			}
+
+			if ps == nil {
+				propSpec.All = true
+			} else {
+				propSpec.PathSet = ps
+			}
+		} else {
+			if obj.Type != propSpec.Type {
+				return errors.New("object references must have the same type")
+			}
+		}
+
+		objectSpec := types.ObjectSpec{
+			Obj:  obj,
+			Skip: false,
+		}
+
+		objectSet = append(objectSet, objectSpec)
+	}
+
+	req := types.RetrieveProperties{
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				ObjectSet: objectSet,
+				PropSet:   []types.PropertySpec{*propSpec},
+			},
+		},
+	}
+
+	res, err := p.RetrieveProperties(ctx, req)
+	if err != nil {
+		return err
+	}
+
+	return mo.LoadRetrievePropertiesResponse(res, dst)
+}
+
+// RetrieveOne calls Retrieve with a single managed object reference.
+func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectReference, ps []string, dst interface{}) error {
+	var objs = []types.ManagedObjectReference{obj}
+	return p.Retrieve(ctx, objs, ps, dst)
 }

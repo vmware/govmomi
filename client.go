@@ -17,13 +17,11 @@ limitations under the License.
 package govmomi
 
 import (
-	"errors"
 	"net/url"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -96,56 +94,16 @@ func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
 	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
+func (c *Client) PropertyCollector() *property.Collector {
+	return property.DefaultCollector(c, c.ServiceContent)
+}
+
 func (c *Client) Properties(obj types.ManagedObjectReference, p []string, dst interface{}) error {
-	var objs = []types.ManagedObjectReference{obj}
-	return c.PropertiesN(objs, p, dst)
+	return c.PropertyCollector().RetrieveOne(context.TODO(), obj, p, dst)
 }
 
 func (c *Client) PropertiesN(objs []types.ManagedObjectReference, p []string, dst interface{}) error {
-	var propSpec *types.PropertySpec
-	var objectSet []types.ObjectSpec
-
-	for _, obj := range objs {
-		// Ensure that all object reference types are the same
-		if propSpec == nil {
-			propSpec = &types.PropertySpec{
-				Type: obj.Type,
-			}
-
-			if p == nil {
-				propSpec.All = true
-			} else {
-				propSpec.PathSet = p
-			}
-		} else {
-			if obj.Type != propSpec.Type {
-				return errors.New("object references must have the same type")
-			}
-		}
-
-		objectSpec := types.ObjectSpec{
-			Obj:  obj,
-			Skip: false,
-		}
-
-		objectSet = append(objectSet, objectSpec)
-	}
-
-	req := types.RetrieveProperties{
-		This: c.ServiceContent.PropertyCollector,
-		SpecSet: []types.PropertyFilterSpec{
-			{
-				ObjectSet: objectSet,
-				PropSet:   []types.PropertySpec{*propSpec},
-			},
-		},
-	}
-
-	return mo.RetrievePropertiesForRequest(context.TODO(), c, req, dst)
-}
-
-func (c *Client) PropertyCollector() *property.Collector {
-	return property.DefaultCollector(c, c.ServiceContent)
+	return c.PropertyCollector().Retrieve(context.TODO(), objs, p, dst)
 }
 
 func (c *Client) WaitForProperties(obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
