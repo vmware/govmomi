@@ -9,7 +9,9 @@ exposed by the CLI is in flux and may be changed without prior notice.
 
 ## Installation
 
-Install govc with `go install github.com/vmware/govmomi/govc`.
+If you don't have govmomi package yet, install govc directly with `go get github.com/vmware/govmomi/govc`.
+
+If you already have govmomi package, install govc with `go install github.com/vmware/govmomi/govc`.
 
 ## Usage
 
