@@ -17,6 +17,7 @@ limitations under the License.
 package object
 
 import (
+	"fmt"
 	"reflect"
 	"testing"
 
@@ -80,24 +81,22 @@ func TestSearch(t *testing.T) {
 
 		var host mo.HostSystem
 		ref = NewHostSystem(c, cr.Host[0])
-		err = s.Properties(context.Background(), ref.Reference(), []string{"name", "hardware"}, &host)
+		err = s.Properties(context.Background(), ref.Reference(), []string{"name", "hardware", "config"}, &host)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		// The test below doesn't work on a fresh esxbox (see govc/test/esxbox).
-		// This should use a different way to figure out the machine's hostname,
-		// such that FindByDnsName returns it.
-		//
-		//shost, err := s.FindByDnsName(context.Background(), dc, host.Name, false) // TODO: get name/ip from nic manager
-		//if err != nil {
-		//	t.Fatal(err)
-		//}
-		//if !reflect.DeepEqual(ref, shost) {
-		//	t.Errorf("%#v != %#v\n", ref, shost)
-		//}
+		dnsConfig := host.Config.Network.DnsConfig.GetHostDnsConfig()
+		dnsName := fmt.Sprintf("%s.%s", dnsConfig.HostName, dnsConfig.DomainName)
+		shost, err := s.FindByDnsName(context.Background(), dc, dnsName, false)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if !reflect.DeepEqual(ref, shost) {
+			t.Errorf("%#v != %#v\n", ref, shost)
+		}
 
-		shost, err := s.FindByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false)
+		shost, err = s.FindByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false)
 		if err != nil {
 			t.Fatal(err)
 		}
