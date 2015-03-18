@@ -27,12 +27,9 @@ See [godoc.org][godoc] for documentation.
 
 ## Status
 
-The API is a work in progress. Because the code in the `vim25` package is
-generated from the vSphere API description, you can safely use all types and
-functions in those packages without worrying about deprecation. The code in the
-the root `govmomi` package is what is a work in progress.
+Changes to the API are subject to [semantic versioning](http://semver.org).
 
-After the library reaches v1.0, changes to the API will be subject to [semantic versioning](http://semver.org).
+Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 ## License
 

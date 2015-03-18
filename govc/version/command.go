@@ -24,15 +24,21 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 )
 
+var gitVersion string
+
 type version struct {
 	*flags.EmptyFlag
 }
 
 func init() {
+	if gitVersion == "" {
+		gitVersion = "unknown"
+	}
+
 	cli.Register("version", &version{})
 }
 
 func (c *version) Run(f *flag.FlagSet) error {
-	fmt.Println("govc version 0.0.1-dev")
+	fmt.Printf("govc %s\n", gitVersion)
 	return nil
 }
