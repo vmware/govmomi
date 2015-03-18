@@ -1,15 +1,27 @@
 # govc
 
-govc is a CLI around govmomi. Its name is analogous to rvc for Ruby.
-
-## Status
-
-As of late August 2014, govc is considered to be an **alpha version**. The API
-exposed by the CLI is in flux and may be changed without prior notice.
+govc is a vSphere CLI built on top of govmomi.
 
 ## Installation
 
-Install govc with `go install github.com/vmware/govmomi/govc`.
+You can find prebuilt govc binaries on the [releases page](https://github.com/vmware/govmomi/releases).
+
+Download and install a binary locally like this:
+
+```sh
+curl $URL_TO_BINARY | gzip -d > /usr/local/bin/govc
+chmod +x /usr/local/bin/govc
+```
+
+### Source
+
+You can install the latest govc version from source if you have the Go toolchain installed.
+
+```sh
+go get github.com/vmware/govmomi/govc
+```
+
+(make sure `$GOPATH/bin` is in your `PATH`)
 
 ## Usage
 
