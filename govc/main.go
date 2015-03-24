@@ -30,6 +30,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/device/scsi"
 	_ "github.com/vmware/govmomi/govc/device/serial"
 	_ "github.com/vmware/govmomi/govc/host"
+	_ "github.com/vmware/govmomi/govc/host/autostart"
 	_ "github.com/vmware/govmomi/govc/host/esxcli"
 	_ "github.com/vmware/govmomi/govc/host/portgroup"
 	_ "github.com/vmware/govmomi/govc/host/vswitch"
