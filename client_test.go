@@ -36,7 +36,7 @@ func TestNewClient(t *testing.T) {
 
 	c, err := NewClient(context.Background(), u, true)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	f := func() error {
@@ -53,7 +53,7 @@ func TestNewClient(t *testing.T) {
 
 	// check cookie is valid with an sdk request
 	if err := f(); err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	// check cookie is valid with a non-sdk request
@@ -61,16 +61,16 @@ func TestNewClient(t *testing.T) {
 	u.Path = "/folder"
 	r, err := c.Client.Get(u.String())
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 	if r.StatusCode != http.StatusOK {
-		t.Error(r)
+		t.Fatal(r)
 	}
 
 	// sdk request should fail w/o a valid cookie
 	c.Client.Jar = nil
 	if err := f(); err == nil {
-		t.Error("should fail")
+		t.Fatal("should fail")
 	}
 
 	// invalid login
@@ -78,7 +78,7 @@ func TestNewClient(t *testing.T) {
 	u.User = url.UserPassword("ENOENT", "EINVAL")
 	_, err = NewClient(context.Background(), u, true)
 	if err == nil {
-		t.Error("should fail")
+		t.Fatal("should fail")
 	}
 }
 
@@ -92,7 +92,7 @@ func TestInvalidSdk(t *testing.T) {
 	u.Path = "/mob"
 	_, err := NewClient(context.Background(), u, true)
 	if err == nil {
-		t.Error("should fail")
+		t.Fatal("should fail")
 	}
 }
 
@@ -104,19 +104,19 @@ func TestPropertiesN(t *testing.T) {
 
 	c, err := NewClient(context.Background(), u, true)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	var f mo.Folder
 	err = c.RetrieveOne(context.Background(), c.ServiceContent.RootFolder, nil, &f)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	var dc mo.Datacenter
 	err = c.RetrieveOne(context.Background(), f.ChildEntity[0], nil, &dc)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	var folderReferences = []types.ManagedObjectReference{
@@ -129,10 +129,10 @@ func TestPropertiesN(t *testing.T) {
 	var folders []mo.Folder
 	err = c.Retrieve(context.Background(), folderReferences, []string{"name"}, &folders)
 	if err != nil {
-		t.Error(err)
+		t.Fatal(err)
 	}
 
 	if len(folders) != len(folderReferences) {
-		t.Errorf("Expected %d, got %d", len(folderReferences), len(folders))
+		t.Fatalf("Expected %d, got %d", len(folderReferences), len(folders))
 	}
 }
