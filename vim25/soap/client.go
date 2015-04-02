@@ -194,6 +194,15 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	// Close response regardless of what happens next
 	defer res.Body.Close()
 
+	switch res.StatusCode {
+	case http.StatusOK:
+		// OK
+	case http.StatusInternalServerError:
+		// Error, but typically includes a body explaining the error
+	default:
+		return errors.New(res.Status)
+	}
+
 	dec := xml.NewDecoder(res.Body)
 	dec.TypeFunc = types.TypeFunc()
 	err = dec.Decode(&resEnv)
