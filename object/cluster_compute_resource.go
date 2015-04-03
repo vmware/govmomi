@@ -19,6 +19,7 @@ package object
 import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -48,6 +49,18 @@ func (c ClusterComputeResource) ReconfigureCluster(ctx context.Context, spec typ
 	}
 
 	return NewTask(c.c, res.Returnval), nil
+}
+
+func (c ClusterComputeResource) Configuration(ctx context.Context) (*types.ClusterConfigInfo, error) {	
+	var mccr mo.ClusterComputeResource
+	
+	ps := []string{"configuration"}
+	err := c.Properties(ctx, c.Reference(), ps, &mccr)
+	if err != nil {
+		return nil, err
+	}
+	
+	return &mccr.Configuration, nil
 }
 
 func (c ClusterComputeResource) Destroy(ctx context.Context) (*Task, error) {
