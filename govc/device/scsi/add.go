@@ -75,7 +75,7 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 	}
 
 	c := d.(types.BaseVirtualSCSIController).GetVirtualSCSIController()
-	c.HotAddRemove = cmd.hotAddRemove
+	c.HotAddRemove = &cmd.hotAddRemove
 	c.SharedBus = types.VirtualSCSISharing(cmd.sharedBus)
 
 	err = vm.AddDevice(context.TODO(), d)

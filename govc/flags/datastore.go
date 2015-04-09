@@ -117,7 +117,7 @@ func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
 	spec := types.HostDatastoreBrowserSearchSpec{
 		Details: &types.FileQueryFlags{
 			FileType:  true,
-			FileOwner: true, // TODO: omitempty is generated, but seems to be required
+			FileOwner: types.NewBool(true), // TODO: omitempty is generated, but seems to be required
 		},
 		MatchPattern: []string{path.Base(file)},
 	}

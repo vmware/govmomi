@@ -32,13 +32,13 @@ func Ancestors(ctx context.Context, rt soap.RoundTripper, pc, obj types.ManagedO
 				SelectionSpec: types.SelectionSpec{Name: "traverseParent"},
 				Type:          "ManagedEntity",
 				Path:          "parent",
-				Skip:          false,
+				Skip:          types.NewBool(false),
 				SelectSet: []types.BaseSelectionSpec{
 					&types.SelectionSpec{Name: "traverseParent"},
 				},
 			},
 		},
-		Skip: false,
+		Skip: types.NewBool(false),
 	}
 
 	pspec := types.PropertySpec{

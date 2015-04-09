@@ -75,9 +75,14 @@ func (s *ResourceConfigSpecFlag) Register(f *flag.FlagSet) {
 		prefix := strings.ToLower(opt.name)[:3]
 		shares := (*sharesInfo)(opt.Shares)
 
+		expandableReservation := false
+		if v := opt.ExpandableReservation; v != nil {
+			expandableReservation = *v
+		}
+
 		f.Int64Var(&opt.Limit, prefix+".limit", 0, opt.name+" limit in "+opt.units)
 		f.Int64Var(&opt.Reservation, prefix+".reservation", 0, opt.name+" reservation in "+opt.units)
-		f.BoolVar(&opt.ExpandableReservation, prefix+".expandable", opt.ExpandableReservation, opt.name+" expandable reservation")
+		f.BoolVar(opt.ExpandableReservation, prefix+".expandable", expandableReservation, opt.name+" expandable reservation")
 		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
 	}
 }

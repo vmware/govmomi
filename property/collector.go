@@ -132,7 +132,7 @@ func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectRefe
 			}
 
 			if ps == nil {
-				propSpec.All = true
+				propSpec.All = types.NewBool(true)
 			} else {
 				propSpec.PathSet = ps
 			}
@@ -144,7 +144,7 @@ func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectRefe
 
 		objectSpec := types.ObjectSpec{
 			Obj:  obj,
-			Skip: false,
+			Skip: types.NewBool(false),
 		}
 
 		objectSet = append(objectSet, objectSpec)

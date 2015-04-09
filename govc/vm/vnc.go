@@ -329,10 +329,10 @@ func loadUsedPorts(c *vim25.Client, host types.ManagedObjectReference) ([]int, e
 			&types.TraversalSpec{
 				Type: "HostSystem",
 				Path: "vm",
-				Skip: false,
+				Skip: types.NewBool(false),
 			},
 		},
-		Skip: false,
+		Skip: types.NewBool(false),
 	}
 
 	pspec := types.PropertySpec{

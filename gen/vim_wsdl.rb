@@ -175,6 +175,7 @@ class Simple
       when "int"
       when "boolean"
         t = "bool"
+        prefix += "*" if !slice? && optional?
       when "long"
         t = "int64"
       when "dateTime"
