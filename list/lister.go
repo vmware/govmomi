@@ -130,11 +130,11 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 				SelectSet: []types.BaseSelectionSpec{
 					&types.TraversalSpec{
 						Path: "childEntity",
-						Skip: false,
+						Skip: types.NewBool(false),
 						Type: "Folder",
 					},
 				},
-				Skip: true,
+				Skip: types.NewBool(true),
 			},
 		},
 	}
@@ -156,7 +156,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 		}
 
 		if l.All {
-			pspec.All = true
+			pspec.All = types.NewBool(true)
 		} else {
 			pspec.PathSet = []string{"name"}
 
@@ -195,7 +195,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
-		Skip: true,
+		Skip: types.NewBool(true),
 	}
 
 	// Include every datastore folder in the select set
@@ -209,7 +209,7 @@ func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 	for _, f := range fields {
 		tspec := types.TraversalSpec{
 			Path: f,
-			Skip: false,
+			Skip: types.NewBool(false),
 			Type: "Datacenter",
 		}
 
@@ -221,7 +221,7 @@ func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 	}
 
 	if l.All {
-		pspec.All = true
+		pspec.All = types.NewBool(true)
 	} else {
 		pspec.PathSet = []string{"name"}
 	}
@@ -253,7 +253,7 @@ func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
-		Skip: true,
+		Skip: types.NewBool(true),
 	}
 
 	fields := []string{
@@ -264,7 +264,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 	for _, f := range fields {
 		tspec := types.TraversalSpec{
 			Path: f,
-			Skip: false,
+			Skip: types.NewBool(false),
 			Type: "ComputeResource",
 		}
 
@@ -283,7 +283,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 		}
 
 		if l.All {
-			pspec.All = true
+			pspec.All = types.NewBool(true)
 		} else {
 			pspec.PathSet = []string{"name"}
 		}
@@ -318,7 +318,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
-		Skip: true,
+		Skip: types.NewBool(true),
 	}
 
 	fields := []string{
@@ -328,7 +328,7 @@ func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 	for _, f := range fields {
 		tspec := types.TraversalSpec{
 			Path: f,
-			Skip: false,
+			Skip: types.NewBool(false),
 			Type: "ResourcePool",
 		}
 
@@ -346,7 +346,7 @@ func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 		}
 
 		if l.All {
-			pspec.All = true
+			pspec.All = types.NewBool(true)
 		} else {
 			pspec.PathSet = []string{"name"}
 		}

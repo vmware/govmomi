@@ -115,12 +115,12 @@ func RetrieveProperties(ctx context.Context, r soap.RoundTripper, pc, obj types.
 				ObjectSet: []types.ObjectSpec{
 					{
 						Obj:  obj,
-						Skip: false,
+						Skip: types.NewBool(false),
 					},
 				},
 				PropSet: []types.PropertySpec{
 					{
-						All:  true,
+						All:  types.NewBool(true),
 						Type: obj.Type,
 					},
 				},

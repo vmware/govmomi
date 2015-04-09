@@ -36,7 +36,7 @@ func init() {
 	spec := NewResourceConfigSpecFlag()
 	spec.SetAllocation(func(a *types.ResourceAllocationInfo) {
 		a.Shares.Level = types.SharesLevelNormal
-		a.ExpandableReservation = true
+		a.ExpandableReservation = types.NewBool(true)
 	})
 
 	cli.Register("pool.create", &create{ResourceConfigSpecFlag: spec})
