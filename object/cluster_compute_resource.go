@@ -63,6 +63,27 @@ func (c ClusterComputeResource) Configuration(ctx context.Context) (*types.Clust
 	return &mccr.Configuration, nil
 }
 
+func (c ClusterComputeResource) AddHost(ctx context.Context, spec types.HostConnectSpec, asConnected bool, 
+	license *string, resourcePool *types.ManagedObjectReference) (*Task, error) {
+	
+	req := types.AddHost_Task{
+		This: c.Reference(),
+		Spec: spec,
+		AsConnected: asConnected,
+		ResourcePool: resourcePool,
+	}
+	if license != nil {
+		req.License = *license
+	}
+				
+	res, err := methods.AddHost_Task(context.Background(), c.c, &req)
+	if err != nil {
+		return nil, err
+	}
+	
+	return NewTask(c.c, res.Returnval), nil
+}
+
 func (c ClusterComputeResource) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: c.Reference(),
