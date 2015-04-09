@@ -296,6 +296,43 @@ func (f *Finder) DefaultDatastore(ctx context.Context) (*object.Datastore, error
 	return ds, nil
 }
 
+func (f *Finder) ClusterList(ctx context.Context, path ...string) ([]*object.ClusterComputeResource, error) {
+	es, err := f.find(ctx, f.hostFolder, false, path...)
+	if err != nil {
+		return nil, err
+	}
+
+	var ccrs []*object.ClusterComputeResource
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "ClusterComputeResource" {
+			ccr := object.NewClusterComputeResource(f.client, ref)			
+			ccr.InventoryPath = e.Path
+
+			ccrs = append(ccrs, ccr)
+		}
+	}
+
+	return ccrs, nil
+}
+
+func (f *Finder) Cluster(ctx context.Context, path string) (*object.ClusterComputeResource, error) {
+	ccrs, err := f.ClusterList(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+	
+	if len(ccrs) == 0 {
+		return nil, &NotFoundError{"cluster", path}
+	}
+
+	if len(ccrs) > 1 {
+		return nil, &MultipleFoundError{"cluster", path}
+	}
+
+	return ccrs[0], nil
+}
+
 func (f *Finder) HostSystemList(ctx context.Context, path ...string) ([]*object.HostSystem, error) {
 	es, err := f.find(ctx, f.hostFolder, false, path...)
 	if err != nil {

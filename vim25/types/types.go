@@ -32709,9 +32709,9 @@ type ResolveMultipleUnresolvedVmfsVolumesResponse struct {
 type ResourceAllocationInfo struct {
 	DynamicData
 
-	Reservation           int64       `xml:"reservation,omitempty"`
-	ExpandableReservation bool        `xml:"expandableReservation,omitempty"`
-	Limit                 int64       `xml:"limit,omitempty"`
+	Reservation           int64       `xml:"reservation"`
+	ExpandableReservation bool        `xml:"expandableReservation"`
+	Limit                 int64       `xml:"limit"`
 	Shares                *SharesInfo `xml:"shares,omitempty"`
 	OverheadLimit         int64       `xml:"overheadLimit,omitempty"`
 }
