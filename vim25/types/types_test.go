@@ -52,7 +52,7 @@ func TestVirtualMachineConfigSpec(t *testing.T) {
 						UnitNumber:    0,
 						Backing: &VirtualDiskFlatVer2BackingInfo{
 							DiskMode:        string(VirtualDiskModePersistent),
-							ThinProvisioned: true,
+							ThinProvisioned: NewBool(true),
 							VirtualDeviceFileBackingInfo: VirtualDeviceFileBackingInfo{
 								FileName: "[datastore1]",
 							},

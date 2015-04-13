@@ -331,7 +331,7 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string
 		VirtualDevice: types.VirtualDevice{
 			Backing: &types.VirtualDiskFlatVer2BackingInfo{
 				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: true,
+				ThinProvisioned: types.NewBool(true),
 				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
 					FileName: name,
 				},
@@ -448,7 +448,7 @@ func (l VirtualDeviceList) setDefaultCdromBacking(device *types.VirtualCdrom) {
 	device.Backing = &types.VirtualCdromAtapiBackingInfo{
 		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
 			DeviceName:    fmt.Sprintf("%s-%d-%d", DeviceTypeCdrom, device.ControllerKey, device.UnitNumber),
-			UseAutoDetect: false,
+			UseAutoDetect: types.NewBool(false),
 		},
 	}
 }
@@ -517,7 +517,7 @@ func (l VirtualDeviceList) setDefaultFloppyBacking(device *types.VirtualFloppy) 
 	device.Backing = &types.VirtualFloppyDeviceBackingInfo{
 		VirtualDeviceDeviceBackingInfo: types.VirtualDeviceDeviceBackingInfo{
 			DeviceName:    fmt.Sprintf("%s-%d", DeviceTypeFloppy, device.UnitNumber),
-			UseAutoDetect: false,
+			UseAutoDetect: types.NewBool(false),
 		},
 	}
 }

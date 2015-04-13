@@ -34,11 +34,15 @@ func init() {
 }
 
 func (cmd *configure) Register(f *flag.FlagSet) {
-	f.BoolVar(&cmd.defaults.Enabled, "enabled", false, "")
+	cmd.defaults.Enabled = types.NewBool(false)
+	f.BoolVar(cmd.defaults.Enabled, "enabled", false, "")
+
 	f.IntVar(&cmd.defaults.StartDelay, "start-delay", 0, "")
 	f.StringVar(&cmd.defaults.StopAction, "stop-action", "", "")
 	f.IntVar(&cmd.defaults.StopDelay, "stop-delay", 0, "")
-	f.BoolVar(&cmd.defaults.WaitForHeartbeat, "wait-for-heartbeat", false, "")
+
+	cmd.defaults.WaitForHeartbeat = types.NewBool(false)
+	f.BoolVar(cmd.defaults.WaitForHeartbeat, "wait-for-heartbeat", false, "")
 }
 
 func (cmd *configure) Process() error { return nil }

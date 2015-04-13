@@ -47,7 +47,7 @@ func (m VirtualDiskManager) CopyVirtualDisk(
 		SourceName: sourceName,
 		DestName:   destName,
 		DestSpec:   destSpec,
-		Force:      force,
+		Force:      types.NewBool(force),
 	}
 
 	if sourceDatacenter != nil {
@@ -78,7 +78,7 @@ func (m VirtualDiskManager) MoveVirtualDisk(
 		This:       m.Reference(),
 		SourceName: sourceName,
 		DestName:   destName,
-		Force:      force,
+		Force:      types.NewBool(force),
 	}
 
 	if sourceDatacenter != nil {

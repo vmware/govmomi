@@ -41,8 +41,12 @@ func (cmd *boot) Register(f *flag.FlagSet) {
 	f.Int64Var(&cmd.BootDelay, "delay", 0, "Delay in ms before starting the boot sequence")
 	f.StringVar(&cmd.order, "order", "", "Boot device order")
 	f.Int64Var(&cmd.BootRetryDelay, "retry-delay", 0, "Delay in ms before a boot retry")
-	f.BoolVar(&cmd.BootRetryEnabled, "retry", false, "If true, retry boot after retry-delay")
-	f.BoolVar(&cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
+
+	cmd.BootRetryEnabled = types.NewBool(false)
+	f.BoolVar(cmd.BootRetryEnabled, "retry", false, "If true, retry boot after retry-delay")
+
+	cmd.EnterBIOSSetup = types.NewBool(false)
+	f.BoolVar(cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
 }
 
 func (cmd *boot) Process() error { return nil }

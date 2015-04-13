@@ -444,7 +444,7 @@ func (c *configSpec) AddDisk(ds *object.Datastore, path string) {
 					FileName: ds.Path(path),
 				},
 				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: true,
+				ThinProvisioned: types.NewBool(true),
 			},
 		},
 	}

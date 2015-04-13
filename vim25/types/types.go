@@ -854,7 +854,7 @@ type AlarmState struct {
 	Alarm              ManagedObjectReference `xml:"alarm"`
 	OverallStatus      ManagedEntityStatus    `xml:"overallStatus"`
 	Time               time.Time              `xml:"time"`
-	Acknowledged       bool                   `xml:"acknowledged,omitempty"`
+	Acknowledged       *bool                  `xml:"acknowledged,omitempty"`
 	AcknowledgedByUser string                 `xml:"acknowledgedByUser,omitempty"`
 	AcknowledgedTime   *time.Time             `xml:"acknowledgedTime,omitempty"`
 }
@@ -4796,10 +4796,10 @@ func init() {
 type AutoStartDefaults struct {
 	DynamicData
 
-	Enabled          bool   `xml:"enabled,omitempty"`
+	Enabled          *bool  `xml:"enabled,omitempty"`
 	StartDelay       int    `xml:"startDelay,omitempty"`
 	StopDelay        int    `xml:"stopDelay,omitempty"`
-	WaitForHeartbeat bool   `xml:"waitForHeartbeat,omitempty"`
+	WaitForHeartbeat *bool  `xml:"waitForHeartbeat,omitempty"`
 	StopAction       string `xml:"stopAction,omitempty"`
 }
 
@@ -4968,7 +4968,7 @@ func init() {
 type BoolPolicy struct {
 	InheritablePolicy
 
-	Value bool `xml:"value,omitempty"`
+	Value *bool `xml:"value,omitempty"`
 }
 
 func init() {
@@ -5564,7 +5564,7 @@ type Capability struct {
 	MultiHostSupported               bool      `xml:"multiHostSupported"`
 	UserShellAccessSupported         bool      `xml:"userShellAccessSupported"`
 	SupportedEVCMode                 []EVCMode `xml:"supportedEVCMode,omitempty"`
-	NetworkBackupAndRestoreSupported bool      `xml:"networkBackupAndRestoreSupported,omitempty"`
+	NetworkBackupAndRestoreSupported *bool     `xml:"networkBackupAndRestoreSupported,omitempty"`
 }
 
 func init() {
@@ -6192,12 +6192,12 @@ func init() {
 type ClusterDasConfigInfo struct {
 	DynamicData
 
-	Enabled                    bool                                 `xml:"enabled,omitempty"`
+	Enabled                    *bool                                `xml:"enabled,omitempty"`
 	VmMonitoring               string                               `xml:"vmMonitoring,omitempty"`
 	HostMonitoring             string                               `xml:"hostMonitoring,omitempty"`
 	FailoverLevel              int                                  `xml:"failoverLevel,omitempty"`
 	AdmissionControlPolicy     BaseClusterDasAdmissionControlPolicy `xml:"admissionControlPolicy,omitempty,typeattr"`
-	AdmissionControlEnabled    bool                                 `xml:"admissionControlEnabled,omitempty"`
+	AdmissionControlEnabled    *bool                                `xml:"admissionControlEnabled,omitempty"`
 	DefaultVmSettings          *ClusterDasVmSettings                `xml:"defaultVmSettings,omitempty"`
 	Option                     []BaseOptionValue                    `xml:"option,omitempty,typeattr"`
 	HeartbeatDatastore         []ManagedObjectReference             `xml:"heartbeatDatastore,omitempty"`
@@ -6315,7 +6315,7 @@ type ClusterDasVmConfigInfo struct {
 
 	Key                 ManagedObjectReference `xml:"key"`
 	RestartPriority     DasVmPriority          `xml:"restartPriority,omitempty"`
-	PowerOffOnIsolation bool                   `xml:"powerOffOnIsolation,omitempty"`
+	PowerOffOnIsolation *bool                  `xml:"powerOffOnIsolation,omitempty"`
 	DasSettings         *ClusterDasVmSettings  `xml:"dasSettings,omitempty"`
 }
 
@@ -6356,7 +6356,7 @@ func init() {
 type ClusterDpmConfigInfo struct {
 	DynamicData
 
-	Enabled             bool              `xml:"enabled,omitempty"`
+	Enabled             *bool             `xml:"enabled,omitempty"`
 	DefaultDpmBehavior  DpmBehavior       `xml:"defaultDpmBehavior,omitempty"`
 	HostPowerActionRate int               `xml:"hostPowerActionRate,omitempty"`
 	Option              []BaseOptionValue `xml:"option,omitempty,typeattr"`
@@ -6370,7 +6370,7 @@ type ClusterDpmHostConfigInfo struct {
 	DynamicData
 
 	Key      ManagedObjectReference `xml:"key"`
-	Enabled  bool                   `xml:"enabled,omitempty"`
+	Enabled  *bool                  `xml:"enabled,omitempty"`
 	Behavior DpmBehavior            `xml:"behavior,omitempty"`
 }
 
@@ -6391,8 +6391,8 @@ func init() {
 type ClusterDrsConfigInfo struct {
 	DynamicData
 
-	Enabled                   bool              `xml:"enabled,omitempty"`
-	EnableVmBehaviorOverrides bool              `xml:"enableVmBehaviorOverrides,omitempty"`
+	Enabled                   *bool             `xml:"enabled,omitempty"`
+	EnableVmBehaviorOverrides *bool             `xml:"enableVmBehaviorOverrides,omitempty"`
 	DefaultVmBehavior         DrsBehavior       `xml:"defaultVmBehavior,omitempty"`
 	VmotionRate               int               `xml:"vmotionRate,omitempty"`
 	Option                    []BaseOptionValue `xml:"option,omitempty,typeattr"`
@@ -6472,7 +6472,7 @@ type ClusterDrsVmConfigInfo struct {
 	DynamicData
 
 	Key      ManagedObjectReference `xml:"key"`
-	Enabled  bool                   `xml:"enabled,omitempty"`
+	Enabled  *bool                  `xml:"enabled,omitempty"`
 	Behavior DrsBehavior            `xml:"behavior,omitempty"`
 }
 
@@ -6618,7 +6618,7 @@ type ClusterGroupInfo struct {
 	DynamicData
 
 	Name        string `xml:"name"`
-	UserCreated bool   `xml:"userCreated,omitempty"`
+	UserCreated *bool  `xml:"userCreated,omitempty"`
 }
 
 func init() {
@@ -6798,11 +6798,11 @@ type ClusterRuleInfo struct {
 
 	Key          int                 `xml:"key,omitempty"`
 	Status       ManagedEntityStatus `xml:"status,omitempty"`
-	Enabled      bool                `xml:"enabled,omitempty"`
+	Enabled      *bool               `xml:"enabled,omitempty"`
 	Name         string              `xml:"name,omitempty"`
-	Mandatory    bool                `xml:"mandatory,omitempty"`
-	UserCreated  bool                `xml:"userCreated,omitempty"`
-	InCompliance bool                `xml:"inCompliance,omitempty"`
+	Mandatory    *bool               `xml:"mandatory,omitempty"`
+	UserCreated  *bool               `xml:"userCreated,omitempty"`
+	InCompliance *bool               `xml:"inCompliance,omitempty"`
 }
 
 func init() {
@@ -6863,9 +6863,9 @@ func init() {
 type ClusterVmToolsMonitoringSettings struct {
 	DynamicData
 
-	Enabled          bool   `xml:"enabled,omitempty"`
+	Enabled          *bool  `xml:"enabled,omitempty"`
 	VmMonitoring     string `xml:"vmMonitoring,omitempty"`
-	ClusterSettings  bool   `xml:"clusterSettings,omitempty"`
+	ClusterSettings  *bool  `xml:"clusterSettings,omitempty"`
 	FailureInterval  int    `xml:"failureInterval,omitempty"`
 	MinUpTime        int    `xml:"minUpTime,omitempty"`
 	MaxFailures      int    `xml:"maxFailures,omitempty"`
@@ -6994,7 +6994,7 @@ type ComputeResourceConfigInfo struct {
 	DynamicData
 
 	VmSwapPlacement           string `xml:"vmSwapPlacement"`
-	SpbmEnabled               bool   `xml:"spbmEnabled,omitempty"`
+	SpbmEnabled               *bool  `xml:"spbmEnabled,omitempty"`
 	DefaultHardwareVersionKey string `xml:"defaultHardwareVersionKey,omitempty"`
 }
 
@@ -7006,7 +7006,7 @@ type ComputeResourceConfigSpec struct {
 	DynamicData
 
 	VmSwapPlacement           string `xml:"vmSwapPlacement,omitempty"`
-	SpbmEnabled               bool   `xml:"spbmEnabled,omitempty"`
+	SpbmEnabled               *bool  `xml:"spbmEnabled,omitempty"`
 	DefaultHardwareVersionKey string `xml:"defaultHardwareVersionKey,omitempty"`
 }
 
@@ -7073,7 +7073,7 @@ type ConfigTarget struct {
 	NumCpus                     int                                     `xml:"numCpus"`
 	NumCpuCores                 int                                     `xml:"numCpuCores"`
 	NumNumaNodes                int                                     `xml:"numNumaNodes"`
-	SmcPresent                  bool                                    `xml:"smcPresent,omitempty"`
+	SmcPresent                  *bool                                   `xml:"smcPresent,omitempty"`
 	Datastore                   []VirtualMachineDatastoreInfo           `xml:"datastore,omitempty"`
 	Network                     []VirtualMachineNetworkInfo             `xml:"network,omitempty"`
 	OpaqueNetwork               []OpaqueNetworkTargetInfo               `xml:"opaqueNetwork,omitempty"`
@@ -7091,7 +7091,7 @@ type ConfigTarget struct {
 	IdeDisk                     []VirtualMachineIdeDiskDeviceInfo       `xml:"ideDisk,omitempty"`
 	MaxMemMBOptimalPerf         int                                     `xml:"maxMemMBOptimalPerf"`
 	ResourcePool                *ResourcePoolRuntimeInfo                `xml:"resourcePool,omitempty"`
-	AutoVmotion                 bool                                    `xml:"autoVmotion,omitempty"`
+	AutoVmotion                 *bool                                   `xml:"autoVmotion,omitempty"`
 	PciPassthrough              []BaseVirtualMachinePciPassthroughInfo  `xml:"pciPassthrough,omitempty,typeattr"`
 	Sriov                       []VirtualMachineSriovInfo               `xml:"sriov,omitempty"`
 	VFlashModule                []VirtualMachineVFlashModuleInfo        `xml:"vFlashModule,omitempty"`
@@ -7340,7 +7340,7 @@ type CopyDatastoreFileRequestType struct {
 	SourceDatacenter      *ManagedObjectReference `xml:"sourceDatacenter,omitempty"`
 	DestinationName       string                  `xml:"destinationName"`
 	DestinationDatacenter *ManagedObjectReference `xml:"destinationDatacenter,omitempty"`
-	Force                 bool                    `xml:"force,omitempty"`
+	Force                 *bool                   `xml:"force,omitempty"`
 }
 
 func init() {
@@ -7364,7 +7364,7 @@ type CopyVirtualDiskRequestType struct {
 	DestName         string                  `xml:"destName"`
 	DestDatacenter   *ManagedObjectReference `xml:"destDatacenter,omitempty"`
 	DestSpec         BaseVirtualDiskSpec     `xml:"destSpec,omitempty,typeattr"`
-	Force            bool                    `xml:"force,omitempty"`
+	Force            *bool                   `xml:"force,omitempty"`
 }
 
 func init() {
@@ -7426,14 +7426,14 @@ func init() {
 type CpuIncompatible1ECX struct {
 	CpuIncompatible
 
-	Sse3      bool `xml:"sse3"`
-	Pclmulqdq bool `xml:"pclmulqdq,omitempty"`
-	Ssse3     bool `xml:"ssse3"`
-	Sse41     bool `xml:"sse41"`
-	Sse42     bool `xml:"sse42"`
-	Aes       bool `xml:"aes,omitempty"`
-	Other     bool `xml:"other"`
-	OtherOnly bool `xml:"otherOnly"`
+	Sse3      bool  `xml:"sse3"`
+	Pclmulqdq *bool `xml:"pclmulqdq,omitempty"`
+	Ssse3     bool  `xml:"ssse3"`
+	Sse41     bool  `xml:"sse41"`
+	Sse42     bool  `xml:"sse42"`
+	Aes       *bool `xml:"aes,omitempty"`
+	Other     bool  `xml:"other"`
+	OtherOnly bool  `xml:"otherOnly"`
 }
 
 func init() {
@@ -8707,7 +8707,7 @@ type CustomizationLinuxPrep struct {
 	HostName   BaseCustomizationName `xml:"hostName,typeattr"`
 	Domain     string                `xml:"domain"`
 	TimeZone   string                `xml:"timeZone,omitempty"`
-	HwClockUTC bool                  `xml:"hwClockUTC,omitempty"`
+	HwClockUTC *bool                 `xml:"hwClockUTC,omitempty"`
 }
 
 func init() {
@@ -9052,12 +9052,12 @@ type DVPortStatus struct {
 	LinkUp                                 bool           `xml:"linkUp"`
 	Blocked                                bool           `xml:"blocked"`
 	VlanIds                                []NumericRange `xml:"vlanIds,omitempty"`
-	TrunkingMode                           bool           `xml:"trunkingMode,omitempty"`
+	TrunkingMode                           *bool          `xml:"trunkingMode,omitempty"`
 	Mtu                                    int            `xml:"mtu,omitempty"`
 	LinkPeer                               string         `xml:"linkPeer,omitempty"`
 	MacAddress                             string         `xml:"macAddress,omitempty"`
 	StatusDetail                           string         `xml:"statusDetail,omitempty"`
-	VmDirectPathGen2Active                 bool           `xml:"vmDirectPathGen2Active,omitempty"`
+	VmDirectPathGen2Active                 *bool          `xml:"vmDirectPathGen2Active,omitempty"`
 	VmDirectPathGen2InactiveReasonNetwork  []string       `xml:"vmDirectPathGen2InactiveReasonNetwork,omitempty"`
 	VmDirectPathGen2InactiveReasonOther    []string       `xml:"vmDirectPathGen2InactiveReasonOther,omitempty"`
 	VmDirectPathGen2InactiveReasonExtended string         `xml:"vmDirectPathGen2InactiveReasonExtended,omitempty"`
@@ -9082,7 +9082,7 @@ type DVPortgroupConfigInfo struct {
 	Scope                    []ManagedObjectReference                  `xml:"scope,omitempty"`
 	VendorSpecificConfig     []DistributedVirtualSwitchKeyedOpaqueBlob `xml:"vendorSpecificConfig,omitempty"`
 	ConfigVersion            string                                    `xml:"configVersion,omitempty"`
-	AutoExpand               bool                                      `xml:"autoExpand,omitempty"`
+	AutoExpand               *bool                                     `xml:"autoExpand,omitempty"`
 }
 
 func init() {
@@ -9102,7 +9102,7 @@ type DVPortgroupConfigSpec struct {
 	Scope                []ManagedObjectReference                  `xml:"scope,omitempty"`
 	Policy               BaseDVPortgroupPolicy                     `xml:"policy,omitempty,typeattr"`
 	VendorSpecificConfig []DistributedVirtualSwitchKeyedOpaqueBlob `xml:"vendorSpecificConfig,omitempty"`
-	AutoExpand           bool                                      `xml:"autoExpand,omitempty"`
+	AutoExpand           *bool                                     `xml:"autoExpand,omitempty"`
 }
 
 func init() {
@@ -9136,13 +9136,13 @@ func init() {
 type DVPortgroupPolicy struct {
 	DynamicData
 
-	BlockOverrideAllowed               bool `xml:"blockOverrideAllowed"`
-	ShapingOverrideAllowed             bool `xml:"shapingOverrideAllowed"`
-	VendorConfigOverrideAllowed        bool `xml:"vendorConfigOverrideAllowed"`
-	LivePortMovingAllowed              bool `xml:"livePortMovingAllowed"`
-	PortConfigResetAtDisconnect        bool `xml:"portConfigResetAtDisconnect"`
-	NetworkResourcePoolOverrideAllowed bool `xml:"networkResourcePoolOverrideAllowed,omitempty"`
-	TrafficFilterOverrideAllowed       bool `xml:"trafficFilterOverrideAllowed,omitempty"`
+	BlockOverrideAllowed               bool  `xml:"blockOverrideAllowed"`
+	ShapingOverrideAllowed             bool  `xml:"shapingOverrideAllowed"`
+	VendorConfigOverrideAllowed        bool  `xml:"vendorConfigOverrideAllowed"`
+	LivePortMovingAllowed              bool  `xml:"livePortMovingAllowed"`
+	PortConfigResetAtDisconnect        bool  `xml:"portConfigResetAtDisconnect"`
+	NetworkResourcePoolOverrideAllowed *bool `xml:"networkResourcePoolOverrideAllowed,omitempty"`
+	TrafficFilterOverrideAllowed       *bool `xml:"trafficFilterOverrideAllowed,omitempty"`
 }
 
 func init() {
@@ -9213,9 +9213,9 @@ func init() {
 type DVSCapability struct {
 	DynamicData
 
-	DvsOperationSupported              bool                                      `xml:"dvsOperationSupported,omitempty"`
-	DvPortGroupOperationSupported      bool                                      `xml:"dvPortGroupOperationSupported,omitempty"`
-	DvPortOperationSupported           bool                                      `xml:"dvPortOperationSupported,omitempty"`
+	DvsOperationSupported              *bool                                     `xml:"dvsOperationSupported,omitempty"`
+	DvPortGroupOperationSupported      *bool                                     `xml:"dvPortGroupOperationSupported,omitempty"`
+	DvPortOperationSupported           *bool                                     `xml:"dvPortOperationSupported,omitempty"`
 	CompatibleHostComponentProductInfo []DistributedVirtualSwitchHostProductSpec `xml:"compatibleHostComponentProductInfo,omitempty"`
 	FeaturesSupported                  BaseDVSFeatureCapability                  `xml:"featuresSupported,omitempty,typeattr"`
 }
@@ -9246,7 +9246,7 @@ type DVSConfigInfo struct {
 	Contact                          DVSContactInfo                            `xml:"contact"`
 	SwitchIpAddress                  string                                    `xml:"switchIpAddress,omitempty"`
 	CreateTime                       time.Time                                 `xml:"createTime"`
-	NetworkResourceManagementEnabled bool                                      `xml:"networkResourceManagementEnabled,omitempty"`
+	NetworkResourceManagementEnabled *bool                                     `xml:"networkResourceManagementEnabled,omitempty"`
 	DefaultProxySwitchMaxNumPorts    int                                       `xml:"defaultProxySwitchMaxNumPorts,omitempty"`
 	HealthCheckConfig                []BaseDVSHealthCheckConfig                `xml:"healthCheckConfig,omitempty,typeattr"`
 }
@@ -9329,7 +9329,7 @@ type DVSFeatureCapability struct {
 	HealthCheckCapability               BaseDVSHealthCheckCapability            `xml:"healthCheckCapability,omitempty,typeattr"`
 	RollbackCapability                  *DVSRollbackCapability                  `xml:"rollbackCapability,omitempty"`
 	BackupRestoreCapability             *DVSBackupRestoreCapability             `xml:"backupRestoreCapability,omitempty"`
-	NetworkFilterSupported              bool                                    `xml:"networkFilterSupported,omitempty"`
+	NetworkFilterSupported              *bool                                   `xml:"networkFilterSupported,omitempty"`
 }
 
 func init() {
@@ -9347,8 +9347,8 @@ func init() {
 type DVSHealthCheckConfig struct {
 	DynamicData
 
-	Enable   bool `xml:"enable,omitempty"`
-	Interval int  `xml:"interval,omitempty"`
+	Enable   *bool `xml:"enable,omitempty"`
+	Interval int   `xml:"interval,omitempty"`
 }
 
 func init() {
@@ -9504,9 +9504,9 @@ func init() {
 type DVSPolicy struct {
 	DynamicData
 
-	AutoPreInstallAllowed bool `xml:"autoPreInstallAllowed,omitempty"`
-	AutoUpgradeAllowed    bool `xml:"autoUpgradeAllowed,omitempty"`
-	PartialUpgradeAllowed bool `xml:"partialUpgradeAllowed,omitempty"`
+	AutoPreInstallAllowed *bool `xml:"autoPreInstallAllowed,omitempty"`
+	AutoUpgradeAllowed    *bool `xml:"autoUpgradeAllowed,omitempty"`
+	PartialUpgradeAllowed *bool `xml:"partialUpgradeAllowed,omitempty"`
 }
 
 func init() {
@@ -9865,13 +9865,13 @@ func init() {
 type DatastoreCapability struct {
 	DynamicData
 
-	DirectoryHierarchySupported      bool `xml:"directoryHierarchySupported"`
-	RawDiskMappingsSupported         bool `xml:"rawDiskMappingsSupported"`
-	PerFileThinProvisioningSupported bool `xml:"perFileThinProvisioningSupported"`
-	StorageIORMSupported             bool `xml:"storageIORMSupported,omitempty"`
-	NativeSnapshotSupported          bool `xml:"nativeSnapshotSupported,omitempty"`
-	TopLevelDirectoryCreateSupported bool `xml:"topLevelDirectoryCreateSupported,omitempty"`
-	SeSparseSupported                bool `xml:"seSparseSupported,omitempty"`
+	DirectoryHierarchySupported      bool  `xml:"directoryHierarchySupported"`
+	RawDiskMappingsSupported         bool  `xml:"rawDiskMappingsSupported"`
+	PerFileThinProvisioningSupported bool  `xml:"perFileThinProvisioningSupported"`
+	StorageIORMSupported             *bool `xml:"storageIORMSupported,omitempty"`
+	NativeSnapshotSupported          *bool `xml:"nativeSnapshotSupported,omitempty"`
+	TopLevelDirectoryCreateSupported *bool `xml:"topLevelDirectoryCreateSupported,omitempty"`
+	SeSparseSupported                *bool `xml:"seSparseSupported,omitempty"`
 }
 
 func init() {
@@ -10135,7 +10135,7 @@ type DatastoreSummary struct {
 	FreeSpace          int64                   `xml:"freeSpace"`
 	Uncommitted        int64                   `xml:"uncommitted,omitempty"`
 	Accessible         bool                    `xml:"accessible"`
-	MultipleHostAccess bool                    `xml:"multipleHostAccess,omitempty"`
+	MultipleHostAccess *bool                   `xml:"multipleHostAccess,omitempty"`
 	Type               string                  `xml:"type"`
 	MaintenanceMode    string                  `xml:"maintenanceMode,omitempty"`
 }
@@ -11233,7 +11233,7 @@ type DistributedVirtualPort struct {
 	State            *DVPortState                           `xml:"state,omitempty"`
 	ConnectionCookie int                                    `xml:"connectionCookie,omitempty"`
 	LastStatusChange time.Time                              `xml:"lastStatusChange"`
-	HostLocalPort    bool                                   `xml:"hostLocalPort,omitempty"`
+	HostLocalPort    *bool                                  `xml:"hostLocalPort,omitempty"`
 }
 
 func init() {
@@ -11487,12 +11487,12 @@ func init() {
 type DistributedVirtualSwitchPortCriteria struct {
 	DynamicData
 
-	Connected    bool                    `xml:"connected,omitempty"`
-	Active       bool                    `xml:"active,omitempty"`
-	UplinkPort   bool                    `xml:"uplinkPort,omitempty"`
+	Connected    *bool                   `xml:"connected,omitempty"`
+	Active       *bool                   `xml:"active,omitempty"`
+	UplinkPort   *bool                   `xml:"uplinkPort,omitempty"`
 	Scope        *ManagedObjectReference `xml:"scope,omitempty"`
 	PortgroupKey []string                `xml:"portgroupKey,omitempty"`
-	Inside       bool                    `xml:"inside,omitempty"`
+	Inside       *bool                   `xml:"inside,omitempty"`
 	PortKey      []string                `xml:"portKey,omitempty"`
 }
 
@@ -12520,7 +12520,7 @@ type DvsTrafficRuleset struct {
 	DynamicData
 
 	Key        string           `xml:"key,omitempty"`
-	Enabled    bool             `xml:"enabled,omitempty"`
+	Enabled    *bool            `xml:"enabled,omitempty"`
 	Precedence int              `xml:"precedence,omitempty"`
 	Rules      []DvsTrafficRule `xml:"rules,omitempty"`
 }
@@ -12977,7 +12977,7 @@ type EnterLockdownModeResponse struct {
 type EnterMaintenanceModeRequestType struct {
 	This                  ManagedObjectReference `xml:"_this"`
 	Timeout               int                    `xml:"timeout"`
-	EvacuatePoweredOffVms bool                   `xml:"evacuatePoweredOffVms,omitempty"`
+	EvacuatePoweredOffVms *bool                  `xml:"evacuatePoweredOffVms,omitempty"`
 	MaintenanceSpec       *HostMaintenanceSpec   `xml:"maintenanceSpec,omitempty"`
 }
 
@@ -13279,7 +13279,7 @@ type EventFilterSpec struct {
 	EventChainId       int                        `xml:"eventChainId,omitempty"`
 	Alarm              *ManagedObjectReference    `xml:"alarm,omitempty"`
 	ScheduledTask      *ManagedObjectReference    `xml:"scheduledTask,omitempty"`
-	DisableFullMessage bool                       `xml:"disableFullMessage,omitempty"`
+	DisableFullMessage *bool                      `xml:"disableFullMessage,omitempty"`
 	Category           []string                   `xml:"category,omitempty"`
 	Type               []string                   `xml:"type,omitempty"`
 	Tag                []string                   `xml:"tag,omitempty"`
@@ -13679,7 +13679,7 @@ type ExtendVirtualDiskRequestType struct {
 	Name          string                  `xml:"name"`
 	Datacenter    *ManagedObjectReference `xml:"datacenter,omitempty"`
 	NewCapacityKb int64                   `xml:"newCapacityKb"`
-	EagerZero     bool                    `xml:"eagerZero,omitempty"`
+	EagerZero     *bool                   `xml:"eagerZero,omitempty"`
 }
 
 func init() {
@@ -13799,7 +13799,7 @@ type Extension struct {
 	OvfConsumerInfo        *ExtensionOvfConsumerInfo `xml:"ovfConsumerInfo,omitempty"`
 	ExtendedProductInfo    *ExtExtendedProductInfo   `xml:"extendedProductInfo,omitempty"`
 	ManagedEntityInfo      []ExtManagedEntityInfo    `xml:"managedEntityInfo,omitempty"`
-	ShownInSolutionManager bool                      `xml:"shownInSolutionManager,omitempty"`
+	ShownInSolutionManager *bool                     `xml:"shownInSolutionManager,omitempty"`
 	SolutionManagerInfo    *ExtSolutionManagerInfo   `xml:"solutionManagerInfo,omitempty"`
 }
 
@@ -14433,10 +14433,10 @@ func init() {
 type FileQueryFlags struct {
 	DynamicData
 
-	FileType     bool `xml:"fileType"`
-	FileSize     bool `xml:"fileSize"`
-	Modification bool `xml:"modification"`
-	FileOwner    bool `xml:"fileOwner,omitempty"`
+	FileType     bool  `xml:"fileType"`
+	FileSize     bool  `xml:"fileSize"`
+	Modification bool  `xml:"modification"`
+	FileOwner    *bool `xml:"fileOwner,omitempty"`
 }
 
 func init() {
@@ -14540,7 +14540,7 @@ type FindAllByUuidRequestType struct {
 	Datacenter   *ManagedObjectReference `xml:"datacenter,omitempty"`
 	Uuid         string                  `xml:"uuid"`
 	VmSearch     bool                    `xml:"vmSearch"`
-	InstanceUuid bool                    `xml:"instanceUuid,omitempty"`
+	InstanceUuid *bool                   `xml:"instanceUuid,omitempty"`
 }
 
 func init() {
@@ -14662,7 +14662,7 @@ type FindByUuidRequestType struct {
 	Datacenter   *ManagedObjectReference `xml:"datacenter,omitempty"`
 	Uuid         string                  `xml:"uuid"`
 	VmSearch     bool                    `xml:"vmSearch"`
-	InstanceUuid bool                    `xml:"instanceUuid,omitempty"`
+	InstanceUuid *bool                   `xml:"instanceUuid,omitempty"`
 }
 
 func init() {
@@ -15229,8 +15229,8 @@ type GuestInfo struct {
 	GuestState                      string                             `xml:"guestState"`
 	AppHeartbeatStatus              string                             `xml:"appHeartbeatStatus,omitempty"`
 	AppState                        string                             `xml:"appState,omitempty"`
-	GuestOperationsReady            bool                               `xml:"guestOperationsReady,omitempty"`
-	InteractiveGuestOperationsReady bool                               `xml:"interactiveGuestOperationsReady,omitempty"`
+	GuestOperationsReady            *bool                              `xml:"guestOperationsReady,omitempty"`
+	InteractiveGuestOperationsReady *bool                              `xml:"interactiveGuestOperationsReady,omitempty"`
 	GenerationInfo                  []GuestInfoNamespaceGenerationInfo `xml:"generationInfo,omitempty"`
 }
 
@@ -15326,25 +15326,25 @@ type GuestOsDescriptor struct {
 	RecommendedCdromController  string          `xml:"recommendedCdromController,omitempty"`
 	SupportedEthernetCard       []string        `xml:"supportedEthernetCard"`
 	RecommendedEthernetCard     string          `xml:"recommendedEthernetCard,omitempty"`
-	SupportsSlaveDisk           bool            `xml:"supportsSlaveDisk,omitempty"`
+	SupportsSlaveDisk           *bool           `xml:"supportsSlaveDisk,omitempty"`
 	CpuFeatureMask              []HostCpuIdInfo `xml:"cpuFeatureMask,omitempty"`
-	SmcRequired                 bool            `xml:"smcRequired,omitempty"`
+	SmcRequired                 *bool           `xml:"smcRequired,omitempty"`
 	SupportsWakeOnLan           bool            `xml:"supportsWakeOnLan"`
-	SupportsVMI                 bool            `xml:"supportsVMI,omitempty"`
-	SupportsMemoryHotAdd        bool            `xml:"supportsMemoryHotAdd,omitempty"`
-	SupportsCpuHotAdd           bool            `xml:"supportsCpuHotAdd,omitempty"`
-	SupportsCpuHotRemove        bool            `xml:"supportsCpuHotRemove,omitempty"`
+	SupportsVMI                 *bool           `xml:"supportsVMI,omitempty"`
+	SupportsMemoryHotAdd        *bool           `xml:"supportsMemoryHotAdd,omitempty"`
+	SupportsCpuHotAdd           *bool           `xml:"supportsCpuHotAdd,omitempty"`
+	SupportsCpuHotRemove        *bool           `xml:"supportsCpuHotRemove,omitempty"`
 	SupportedFirmware           []string        `xml:"supportedFirmware,omitempty"`
 	RecommendedFirmware         string          `xml:"recommendedFirmware,omitempty"`
 	SupportedUSBControllerList  []string        `xml:"supportedUSBControllerList,omitempty"`
 	RecommendedUSBController    string          `xml:"recommendedUSBController,omitempty"`
-	Supports3D                  bool            `xml:"supports3D,omitempty"`
-	Recommended3D               bool            `xml:"recommended3D,omitempty"`
-	SmcRecommended              bool            `xml:"smcRecommended,omitempty"`
-	Ich7mRecommended            bool            `xml:"ich7mRecommended,omitempty"`
-	UsbRecommended              bool            `xml:"usbRecommended,omitempty"`
+	Supports3D                  *bool           `xml:"supports3D,omitempty"`
+	Recommended3D               *bool           `xml:"recommended3D,omitempty"`
+	SmcRecommended              *bool           `xml:"smcRecommended,omitempty"`
+	Ich7mRecommended            *bool           `xml:"ich7mRecommended,omitempty"`
+	UsbRecommended              *bool           `xml:"usbRecommended,omitempty"`
 	SupportLevel                string          `xml:"supportLevel,omitempty"`
-	SupportedForCreate          bool            `xml:"supportedForCreate,omitempty"`
+	SupportedForCreate          *bool           `xml:"supportedForCreate,omitempty"`
 	VRAMSizeInKB                *IntOption      `xml:"vRAMSizeInKB,omitempty"`
 }
 
@@ -15450,8 +15450,8 @@ func init() {
 type GuestWindowsFileAttributes struct {
 	GuestFileAttributes
 
-	Hidden     bool       `xml:"hidden,omitempty"`
-	ReadOnly   bool       `xml:"readOnly,omitempty"`
+	Hidden     *bool      `xml:"hidden,omitempty"`
+	ReadOnly   *bool      `xml:"readOnly,omitempty"`
 	CreateTime *time.Time `xml:"createTime,omitempty"`
 }
 
@@ -15792,7 +15792,7 @@ type HostCapability struct {
 	ShutdownSupported                         bool            `xml:"shutdownSupported"`
 	VmotionSupported                          bool            `xml:"vmotionSupported"`
 	StandbySupported                          bool            `xml:"standbySupported"`
-	IpmiSupported                             bool            `xml:"ipmiSupported,omitempty"`
+	IpmiSupported                             *bool           `xml:"ipmiSupported,omitempty"`
 	MaxSupportedVMs                           int             `xml:"maxSupportedVMs,omitempty"`
 	MaxRunningVMs                             int             `xml:"maxRunningVMs,omitempty"`
 	MaxSupportedVcpus                         int             `xml:"maxSupportedVcpus,omitempty"`
@@ -15814,47 +15814,47 @@ type HostCapability struct {
 	PreAssignedPCIUnitNumbersSupported        bool            `xml:"preAssignedPCIUnitNumbersSupported"`
 	ScreenshotSupported                       bool            `xml:"screenshotSupported"`
 	ScaledScreenshotSupported                 bool            `xml:"scaledScreenshotSupported"`
-	StorageVMotionSupported                   bool            `xml:"storageVMotionSupported,omitempty"`
-	VmotionWithStorageVMotionSupported        bool            `xml:"vmotionWithStorageVMotionSupported,omitempty"`
-	VmotionAcrossNetworkSupported             bool            `xml:"vmotionAcrossNetworkSupported,omitempty"`
-	HbrNicSelectionSupported                  bool            `xml:"hbrNicSelectionSupported,omitempty"`
-	RecordReplaySupported                     bool            `xml:"recordReplaySupported,omitempty"`
-	FtSupported                               bool            `xml:"ftSupported,omitempty"`
+	StorageVMotionSupported                   *bool           `xml:"storageVMotionSupported,omitempty"`
+	VmotionWithStorageVMotionSupported        *bool           `xml:"vmotionWithStorageVMotionSupported,omitempty"`
+	VmotionAcrossNetworkSupported             *bool           `xml:"vmotionAcrossNetworkSupported,omitempty"`
+	HbrNicSelectionSupported                  *bool           `xml:"hbrNicSelectionSupported,omitempty"`
+	RecordReplaySupported                     *bool           `xml:"recordReplaySupported,omitempty"`
+	FtSupported                               *bool           `xml:"ftSupported,omitempty"`
 	ReplayUnsupportedReason                   string          `xml:"replayUnsupportedReason,omitempty"`
 	ReplayCompatibilityIssues                 []string        `xml:"replayCompatibilityIssues,omitempty"`
 	FtCompatibilityIssues                     []string        `xml:"ftCompatibilityIssues,omitempty"`
-	LoginBySSLThumbprintSupported             bool            `xml:"loginBySSLThumbprintSupported,omitempty"`
-	CloneFromSnapshotSupported                bool            `xml:"cloneFromSnapshotSupported,omitempty"`
-	DeltaDiskBackingsSupported                bool            `xml:"deltaDiskBackingsSupported,omitempty"`
-	PerVMNetworkTrafficShapingSupported       bool            `xml:"perVMNetworkTrafficShapingSupported,omitempty"`
-	TpmSupported                              bool            `xml:"tpmSupported,omitempty"`
+	LoginBySSLThumbprintSupported             *bool           `xml:"loginBySSLThumbprintSupported,omitempty"`
+	CloneFromSnapshotSupported                *bool           `xml:"cloneFromSnapshotSupported,omitempty"`
+	DeltaDiskBackingsSupported                *bool           `xml:"deltaDiskBackingsSupported,omitempty"`
+	PerVMNetworkTrafficShapingSupported       *bool           `xml:"perVMNetworkTrafficShapingSupported,omitempty"`
+	TpmSupported                              *bool           `xml:"tpmSupported,omitempty"`
 	SupportedCpuFeature                       []HostCpuIdInfo `xml:"supportedCpuFeature,omitempty"`
-	VirtualExecUsageSupported                 bool            `xml:"virtualExecUsageSupported,omitempty"`
-	StorageIORMSupported                      bool            `xml:"storageIORMSupported,omitempty"`
-	VmDirectPathGen2Supported                 bool            `xml:"vmDirectPathGen2Supported,omitempty"`
+	VirtualExecUsageSupported                 *bool           `xml:"virtualExecUsageSupported,omitempty"`
+	StorageIORMSupported                      *bool           `xml:"storageIORMSupported,omitempty"`
+	VmDirectPathGen2Supported                 *bool           `xml:"vmDirectPathGen2Supported,omitempty"`
 	VmDirectPathGen2UnsupportedReason         []string        `xml:"vmDirectPathGen2UnsupportedReason,omitempty"`
 	VmDirectPathGen2UnsupportedReasonExtended string          `xml:"vmDirectPathGen2UnsupportedReasonExtended,omitempty"`
 	SupportedVmfsMajorVersion                 []int           `xml:"supportedVmfsMajorVersion,omitempty"`
-	VStorageCapable                           bool            `xml:"vStorageCapable,omitempty"`
-	SnapshotRelayoutSupported                 bool            `xml:"snapshotRelayoutSupported,omitempty"`
-	FirewallIpRulesSupported                  bool            `xml:"firewallIpRulesSupported,omitempty"`
-	ServicePackageInfoSupported               bool            `xml:"servicePackageInfoSupported,omitempty"`
+	VStorageCapable                           *bool           `xml:"vStorageCapable,omitempty"`
+	SnapshotRelayoutSupported                 *bool           `xml:"snapshotRelayoutSupported,omitempty"`
+	FirewallIpRulesSupported                  *bool           `xml:"firewallIpRulesSupported,omitempty"`
+	ServicePackageInfoSupported               *bool           `xml:"servicePackageInfoSupported,omitempty"`
 	MaxHostRunningVms                         int             `xml:"maxHostRunningVms,omitempty"`
 	MaxHostSupportedVcpus                     int             `xml:"maxHostSupportedVcpus,omitempty"`
-	VmfsDatastoreMountCapable                 bool            `xml:"vmfsDatastoreMountCapable,omitempty"`
-	EightPlusHostVmfsSharedAccessSupported    bool            `xml:"eightPlusHostVmfsSharedAccessSupported,omitempty"`
-	NestedHVSupported                         bool            `xml:"nestedHVSupported,omitempty"`
-	VPMCSupported                             bool            `xml:"vPMCSupported,omitempty"`
-	InterVMCommunicationThroughVMCISupported  bool            `xml:"interVMCommunicationThroughVMCISupported,omitempty"`
-	ScheduledHardwareUpgradeSupported         bool            `xml:"scheduledHardwareUpgradeSupported,omitempty"`
-	FeatureCapabilitiesSupported              bool            `xml:"featureCapabilitiesSupported,omitempty"`
-	LatencySensitivitySupported               bool            `xml:"latencySensitivitySupported,omitempty"`
-	StoragePolicySupported                    bool            `xml:"storagePolicySupported,omitempty"`
-	Accel3dSupported                          bool            `xml:"accel3dSupported,omitempty"`
-	ReliableMemoryAware                       bool            `xml:"reliableMemoryAware,omitempty"`
-	MultipleNetworkStackInstanceSupported     bool            `xml:"multipleNetworkStackInstanceSupported,omitempty"`
-	VsanSupported                             bool            `xml:"vsanSupported,omitempty"`
-	VFlashSupported                           bool            `xml:"vFlashSupported,omitempty"`
+	VmfsDatastoreMountCapable                 *bool           `xml:"vmfsDatastoreMountCapable,omitempty"`
+	EightPlusHostVmfsSharedAccessSupported    *bool           `xml:"eightPlusHostVmfsSharedAccessSupported,omitempty"`
+	NestedHVSupported                         *bool           `xml:"nestedHVSupported,omitempty"`
+	VPMCSupported                             *bool           `xml:"vPMCSupported,omitempty"`
+	InterVMCommunicationThroughVMCISupported  *bool           `xml:"interVMCommunicationThroughVMCISupported,omitempty"`
+	ScheduledHardwareUpgradeSupported         *bool           `xml:"scheduledHardwareUpgradeSupported,omitempty"`
+	FeatureCapabilitiesSupported              *bool           `xml:"featureCapabilitiesSupported,omitempty"`
+	LatencySensitivitySupported               *bool           `xml:"latencySensitivitySupported,omitempty"`
+	StoragePolicySupported                    *bool           `xml:"storagePolicySupported,omitempty"`
+	Accel3dSupported                          *bool           `xml:"accel3dSupported,omitempty"`
+	ReliableMemoryAware                       *bool           `xml:"reliableMemoryAware,omitempty"`
+	MultipleNetworkStackInstanceSupported     *bool           `xml:"multipleNetworkStackInstanceSupported,omitempty"`
+	VsanSupported                             *bool           `xml:"vsanSupported,omitempty"`
+	VFlashSupported                           *bool           `xml:"vFlashSupported,omitempty"`
 }
 
 func init() {
@@ -16075,7 +16075,7 @@ type HostConfigInfo struct {
 	SystemResources           *HostSystemResourceInfo              `xml:"systemResources,omitempty"`
 	DateTimeInfo              *HostDateTimeInfo                    `xml:"dateTimeInfo,omitempty"`
 	Flags                     *HostFlagInfo                        `xml:"flags,omitempty"`
-	AdminDisabled             bool                                 `xml:"adminDisabled,omitempty"`
+	AdminDisabled             *bool                                `xml:"adminDisabled,omitempty"`
 	Ipmi                      *HostIpmiInfo                        `xml:"ipmi,omitempty"`
 	SslThumbprintInfo         *HostSslThumbprintInfo               `xml:"sslThumbprintInfo,omitempty"`
 	SslThumbprintData         []HostSslThumbprintInfo              `xml:"sslThumbprintData,omitempty"`
@@ -16086,7 +16086,7 @@ type HostConfigInfo struct {
 	PowerSystemCapability     *PowerSystemCapability               `xml:"powerSystemCapability,omitempty"`
 	PowerSystemInfo           *PowerSystemInfo                     `xml:"powerSystemInfo,omitempty"`
 	CacheConfigurationInfo    []HostCacheConfigurationInfo         `xml:"cacheConfigurationInfo,omitempty"`
-	WakeOnLanCapable          bool                                 `xml:"wakeOnLanCapable,omitempty"`
+	WakeOnLanCapable          *bool                                `xml:"wakeOnLanCapable,omitempty"`
 	FeatureCapability         []HostFeatureCapability              `xml:"featureCapability,omitempty"`
 	MaskedFeatureCapability   []HostFeatureCapability              `xml:"maskedFeatureCapability,omitempty"`
 	VFlashConfigInfo          *HostVFlashManagerVFlashConfigInfo   `xml:"vFlashConfigInfo,omitempty"`
@@ -16172,7 +16172,7 @@ type HostConfigSummary struct {
 	SslThumbprint         string                   `xml:"sslThumbprint,omitempty"`
 	Product               *AboutInfo               `xml:"product,omitempty"`
 	VmotionEnabled        bool                     `xml:"vmotionEnabled"`
-	FaultToleranceEnabled bool                     `xml:"faultToleranceEnabled,omitempty"`
+	FaultToleranceEnabled *bool                    `xml:"faultToleranceEnabled,omitempty"`
 	FeatureVersion        []HostFeatureVersionInfo `xml:"featureVersion,omitempty"`
 	AgentVmDatastore      *ManagedObjectReference  `xml:"agentVmDatastore,omitempty"`
 	AgentVmNetwork        *ManagedObjectReference  `xml:"agentVmNetwork,omitempty"`
@@ -16236,11 +16236,11 @@ type HostConnectInfo struct {
 	DynamicData
 
 	ServerIp               string                           `xml:"serverIp,omitempty"`
-	InDasCluster           bool                             `xml:"inDasCluster,omitempty"`
+	InDasCluster           *bool                            `xml:"inDasCluster,omitempty"`
 	Host                   HostListSummary                  `xml:"host"`
 	Vm                     []VirtualMachineSummary          `xml:"vm,omitempty"`
-	VimAccountNameRequired bool                             `xml:"vimAccountNameRequired,omitempty"`
-	ClusterSupported       bool                             `xml:"clusterSupported,omitempty"`
+	VimAccountNameRequired *bool                            `xml:"vimAccountNameRequired,omitempty"`
+	ClusterSupported       *bool                            `xml:"clusterSupported,omitempty"`
 	Network                []BaseHostConnectInfoNetworkInfo `xml:"network,omitempty,typeattr"`
 	Datastore              []BaseHostDatastoreConnectInfo   `xml:"datastore,omitempty,typeattr"`
 	License                *HostLicenseConnectInfo          `xml:"license,omitempty"`
@@ -16426,9 +16426,9 @@ type HostDatastoreBrowserSearchSpec struct {
 
 	Query                 []BaseFileQuery `xml:"query,omitempty,typeattr"`
 	Details               *FileQueryFlags `xml:"details,omitempty"`
-	SearchCaseInsensitive bool            `xml:"searchCaseInsensitive,omitempty"`
+	SearchCaseInsensitive *bool           `xml:"searchCaseInsensitive,omitempty"`
 	MatchPattern          []string        `xml:"matchPattern,omitempty"`
-	SortFoldersFirst      bool            `xml:"sortFoldersFirst,omitempty"`
+	SortFoldersFirst      *bool           `xml:"sortFoldersFirst,omitempty"`
 }
 
 func init() {
@@ -16468,10 +16468,10 @@ func init() {
 type HostDatastoreSystemCapabilities struct {
 	DynamicData
 
-	NfsMountCreationRequired     bool `xml:"nfsMountCreationRequired"`
-	NfsMountCreationSupported    bool `xml:"nfsMountCreationSupported"`
-	LocalDatastoreSupported      bool `xml:"localDatastoreSupported"`
-	VmfsExtentExpansionSupported bool `xml:"vmfsExtentExpansionSupported,omitempty"`
+	NfsMountCreationRequired     bool  `xml:"nfsMountCreationRequired"`
+	NfsMountCreationSupported    bool  `xml:"nfsMountCreationSupported"`
+	LocalDatastoreSupported      bool  `xml:"localDatastoreSupported"`
+	VmfsExtentExpansionSupported *bool `xml:"vmfsExtentExpansionSupported,omitempty"`
 }
 
 func init() {
@@ -16608,7 +16608,7 @@ type HostDiagnosticPartitionCreateSpec struct {
 	DiagnosticType string                `xml:"diagnosticType"`
 	Id             HostScsiDiskPartition `xml:"id"`
 	Partition      HostDiskPartitionSpec `xml:"partition"`
-	Active         bool                  `xml:"active,omitempty"`
+	Active         *bool                 `xml:"active,omitempty"`
 }
 
 func init() {
@@ -16649,7 +16649,7 @@ type HostDiskConfigurationResult struct {
 	DynamicData
 
 	DevicePath string                `xml:"devicePath,omitempty"`
-	Success    bool                  `xml:"success,omitempty"`
+	Success    *bool                 `xml:"success,omitempty"`
 	Fault      *LocalizedMethodFault `xml:"fault,omitempty"`
 }
 
@@ -16693,7 +16693,7 @@ type HostDiskMappingInfo struct {
 
 	PhysicalPartition *HostDiskMappingPartitionInfo `xml:"physicalPartition,omitempty"`
 	Name              string                        `xml:"name"`
-	Exclusive         bool                          `xml:"exclusive,omitempty"`
+	Exclusive         *bool                         `xml:"exclusive,omitempty"`
 }
 
 func init() {
@@ -17043,8 +17043,8 @@ func init() {
 type HostFirewallDefaultPolicy struct {
 	DynamicData
 
-	IncomingBlocked bool `xml:"incomingBlocked,omitempty"`
-	OutgoingBlocked bool `xml:"outgoingBlocked,omitempty"`
+	IncomingBlocked *bool `xml:"incomingBlocked,omitempty"`
+	OutgoingBlocked *bool `xml:"outgoingBlocked,omitempty"`
 }
 
 func init() {
@@ -17128,7 +17128,7 @@ func init() {
 type HostFlagInfo struct {
 	DynamicData
 
-	BackgroundSnapshotsEnabled bool `xml:"backgroundSnapshotsEnabled,omitempty"`
+	BackgroundSnapshotsEnabled *bool `xml:"backgroundSnapshotsEnabled,omitempty"`
 }
 
 func init() {
@@ -17208,7 +17208,7 @@ type HostHardwareInfo struct {
 	CpuPkg                 []HostCpuPackage            `xml:"cpuPkg"`
 	MemorySize             int64                       `xml:"memorySize"`
 	NumaInfo               *HostNumaInfo               `xml:"numaInfo,omitempty"`
-	SmcPresent             bool                        `xml:"smcPresent,omitempty"`
+	SmcPresent             *bool                       `xml:"smcPresent,omitempty"`
 	PciDevice              []HostPciDevice             `xml:"pciDevice,omitempty"`
 	CpuFeature             []HostCpuIdInfo             `xml:"cpuFeature,omitempty"`
 	BiosInfo               *HostBIOSInfo               `xml:"biosInfo,omitempty"`
@@ -17387,7 +17387,7 @@ type HostInternetScsiHba struct {
 	HostHostBusAdapter
 
 	IsSoftwareBased            bool                                          `xml:"isSoftwareBased"`
-	CanBeDisabled              bool                                          `xml:"canBeDisabled,omitempty"`
+	CanBeDisabled              *bool                                         `xml:"canBeDisabled,omitempty"`
 	NetworkBindingSupport      HostInternetScsiHbaNetworkBindingSupportType  `xml:"networkBindingSupport,omitempty"`
 	DiscoveryCapabilities      HostInternetScsiHbaDiscoveryCapabilities      `xml:"discoveryCapabilities"`
 	DiscoveryProperties        HostInternetScsiHbaDiscoveryProperties        `xml:"discoveryProperties"`
@@ -17414,13 +17414,13 @@ func init() {
 type HostInternetScsiHbaAuthenticationCapabilities struct {
 	DynamicData
 
-	ChapAuthSettable         bool `xml:"chapAuthSettable"`
-	Krb5AuthSettable         bool `xml:"krb5AuthSettable"`
-	SrpAuthSettable          bool `xml:"srpAuthSettable"`
-	SpkmAuthSettable         bool `xml:"spkmAuthSettable"`
-	MutualChapSettable       bool `xml:"mutualChapSettable,omitempty"`
-	TargetChapSettable       bool `xml:"targetChapSettable,omitempty"`
-	TargetMutualChapSettable bool `xml:"targetMutualChapSettable,omitempty"`
+	ChapAuthSettable         bool  `xml:"chapAuthSettable"`
+	Krb5AuthSettable         bool  `xml:"krb5AuthSettable"`
+	SrpAuthSettable          bool  `xml:"srpAuthSettable"`
+	SpkmAuthSettable         bool  `xml:"spkmAuthSettable"`
+	MutualChapSettable       *bool `xml:"mutualChapSettable,omitempty"`
+	TargetChapSettable       *bool `xml:"targetChapSettable,omitempty"`
+	TargetMutualChapSettable *bool `xml:"targetMutualChapSettable,omitempty"`
 }
 
 func init() {
@@ -17434,11 +17434,11 @@ type HostInternetScsiHbaAuthenticationProperties struct {
 	ChapName                     string `xml:"chapName,omitempty"`
 	ChapSecret                   string `xml:"chapSecret,omitempty"`
 	ChapAuthenticationType       string `xml:"chapAuthenticationType,omitempty"`
-	ChapInherited                bool   `xml:"chapInherited,omitempty"`
+	ChapInherited                *bool  `xml:"chapInherited,omitempty"`
 	MutualChapName               string `xml:"mutualChapName,omitempty"`
 	MutualChapSecret             string `xml:"mutualChapSecret,omitempty"`
 	MutualChapAuthenticationType string `xml:"mutualChapAuthenticationType,omitempty"`
-	MutualChapInherited          bool   `xml:"mutualChapInherited,omitempty"`
+	MutualChapInherited          *bool  `xml:"mutualChapInherited,omitempty"`
 }
 
 func init() {
@@ -17448,10 +17448,10 @@ func init() {
 type HostInternetScsiHbaDigestCapabilities struct {
 	DynamicData
 
-	HeaderDigestSettable       bool `xml:"headerDigestSettable,omitempty"`
-	DataDigestSettable         bool `xml:"dataDigestSettable,omitempty"`
-	TargetHeaderDigestSettable bool `xml:"targetHeaderDigestSettable,omitempty"`
-	TargetDataDigestSettable   bool `xml:"targetDataDigestSettable,omitempty"`
+	HeaderDigestSettable       *bool `xml:"headerDigestSettable,omitempty"`
+	DataDigestSettable         *bool `xml:"dataDigestSettable,omitempty"`
+	TargetHeaderDigestSettable *bool `xml:"targetHeaderDigestSettable,omitempty"`
+	TargetDataDigestSettable   *bool `xml:"targetDataDigestSettable,omitempty"`
 }
 
 func init() {
@@ -17462,9 +17462,9 @@ type HostInternetScsiHbaDigestProperties struct {
 	DynamicData
 
 	HeaderDigestType      string `xml:"headerDigestType,omitempty"`
-	HeaderDigestInherited bool   `xml:"headerDigestInherited,omitempty"`
+	HeaderDigestInherited *bool  `xml:"headerDigestInherited,omitempty"`
 	DataDigestType        string `xml:"dataDigestType,omitempty"`
-	DataDigestInherited   bool   `xml:"dataDigestInherited,omitempty"`
+	DataDigestInherited   *bool  `xml:"dataDigestInherited,omitempty"`
 }
 
 func init() {
@@ -17504,17 +17504,17 @@ func init() {
 type HostInternetScsiHbaIPCapabilities struct {
 	DynamicData
 
-	AddressSettable                   bool `xml:"addressSettable"`
-	IpConfigurationMethodSettable     bool `xml:"ipConfigurationMethodSettable"`
-	SubnetMaskSettable                bool `xml:"subnetMaskSettable"`
-	DefaultGatewaySettable            bool `xml:"defaultGatewaySettable"`
-	PrimaryDnsServerAddressSettable   bool `xml:"primaryDnsServerAddressSettable"`
-	AlternateDnsServerAddressSettable bool `xml:"alternateDnsServerAddressSettable"`
-	Ipv6Supported                     bool `xml:"ipv6Supported,omitempty"`
-	ArpRedirectSettable               bool `xml:"arpRedirectSettable,omitempty"`
-	MtuSettable                       bool `xml:"mtuSettable,omitempty"`
-	HostNameAsTargetAddress           bool `xml:"hostNameAsTargetAddress,omitempty"`
-	NameAliasSettable                 bool `xml:"nameAliasSettable,omitempty"`
+	AddressSettable                   bool  `xml:"addressSettable"`
+	IpConfigurationMethodSettable     bool  `xml:"ipConfigurationMethodSettable"`
+	SubnetMaskSettable                bool  `xml:"subnetMaskSettable"`
+	DefaultGatewaySettable            bool  `xml:"defaultGatewaySettable"`
+	PrimaryDnsServerAddressSettable   bool  `xml:"primaryDnsServerAddressSettable"`
+	AlternateDnsServerAddressSettable bool  `xml:"alternateDnsServerAddressSettable"`
+	Ipv6Supported                     *bool `xml:"ipv6Supported,omitempty"`
+	ArpRedirectSettable               *bool `xml:"arpRedirectSettable,omitempty"`
+	MtuSettable                       *bool `xml:"mtuSettable,omitempty"`
+	HostNameAsTargetAddress           *bool `xml:"hostNameAsTargetAddress,omitempty"`
+	NameAliasSettable                 *bool `xml:"nameAliasSettable,omitempty"`
 }
 
 func init() {
@@ -17534,9 +17534,9 @@ type HostInternetScsiHbaIPProperties struct {
 	Ipv6Address               string `xml:"ipv6Address,omitempty"`
 	Ipv6SubnetMask            string `xml:"ipv6SubnetMask,omitempty"`
 	Ipv6DefaultGateway        string `xml:"ipv6DefaultGateway,omitempty"`
-	ArpRedirectEnabled        bool   `xml:"arpRedirectEnabled,omitempty"`
+	ArpRedirectEnabled        *bool  `xml:"arpRedirectEnabled,omitempty"`
 	Mtu                       int    `xml:"mtu,omitempty"`
-	JumboFramesEnabled        bool   `xml:"jumboFramesEnabled,omitempty"`
+	JumboFramesEnabled        *bool  `xml:"jumboFramesEnabled,omitempty"`
 }
 
 func init() {
@@ -17546,7 +17546,7 @@ func init() {
 type HostInternetScsiHbaParamValue struct {
 	OptionValue
 
-	IsInherited bool `xml:"isInherited,omitempty"`
+	IsInherited *bool `xml:"isInherited,omitempty"`
 }
 
 func init() {
@@ -17687,8 +17687,8 @@ type HostIpConfigIpV6AddressConfiguration struct {
 	DynamicData
 
 	IpV6Address              []HostIpConfigIpV6Address `xml:"ipV6Address,omitempty"`
-	AutoConfigurationEnabled bool                      `xml:"autoConfigurationEnabled,omitempty"`
-	DhcpV6Enabled            bool                      `xml:"dhcpV6Enabled,omitempty"`
+	AutoConfigurationEnabled *bool                     `xml:"autoConfigurationEnabled,omitempty"`
+	DhcpV6Enabled            *bool                     `xml:"dhcpV6Enabled,omitempty"`
 }
 
 func init() {
@@ -18062,8 +18062,8 @@ type HostMountInfo struct {
 
 	Path               string `xml:"path,omitempty"`
 	AccessMode         string `xml:"accessMode"`
-	Mounted            bool   `xml:"mounted,omitempty"`
-	Accessible         bool   `xml:"accessible,omitempty"`
+	Mounted            *bool  `xml:"mounted,omitempty"`
+	Accessible         *bool  `xml:"accessible,omitempty"`
 	InaccessibleReason string `xml:"inaccessibleReason,omitempty"`
 }
 
@@ -18133,7 +18133,7 @@ type HostMultipathInfoPath struct {
 	Name          string                  `xml:"name"`
 	PathState     string                  `xml:"pathState"`
 	State         string                  `xml:"state,omitempty"`
-	IsWorkingPath bool                    `xml:"isWorkingPath,omitempty"`
+	IsWorkingPath *bool                   `xml:"isWorkingPath,omitempty"`
 	Adapter       string                  `xml:"adapter"`
 	Lun           string                  `xml:"lun"`
 	Transport     BaseHostTargetTransport `xml:"transport,omitempty,typeattr"`
@@ -18289,7 +18289,7 @@ type HostNetCapabilities struct {
 	IpRouteConfigSupported     bool     `xml:"ipRouteConfigSupported"`
 	DnsConfigSupported         bool     `xml:"dnsConfigSupported"`
 	DhcpOnVnicSupported        bool     `xml:"dhcpOnVnicSupported"`
-	IpV6Supported              bool     `xml:"ipV6Supported,omitempty"`
+	IpV6Supported              *bool    `xml:"ipV6Supported,omitempty"`
 }
 
 func init() {
@@ -18299,9 +18299,9 @@ func init() {
 type HostNetOffloadCapabilities struct {
 	DynamicData
 
-	CsumOffload     bool `xml:"csumOffload,omitempty"`
-	TcpSegmentation bool `xml:"tcpSegmentation,omitempty"`
-	ZeroCopyXmit    bool `xml:"zeroCopyXmit,omitempty"`
+	CsumOffload     *bool `xml:"csumOffload,omitempty"`
+	TcpSegmentation *bool `xml:"tcpSegmentation,omitempty"`
+	ZeroCopyXmit    *bool `xml:"zeroCopyXmit,omitempty"`
 }
 
 func init() {
@@ -18317,7 +18317,7 @@ type HostNetStackInstance struct {
 	IpRouteConfig                   BaseHostIpRouteConfig   `xml:"ipRouteConfig,omitempty,typeattr"`
 	RequestedMaxNumberOfConnections int                     `xml:"requestedMaxNumberOfConnections,omitempty"`
 	CongestionControlAlgorithm      string                  `xml:"congestionControlAlgorithm,omitempty"`
-	IpV6Enabled                     bool                    `xml:"ipV6Enabled,omitempty"`
+	IpV6Enabled                     *bool                   `xml:"ipV6Enabled,omitempty"`
 	RouteTableConfig                *HostIpRouteTableConfig `xml:"routeTableConfig,omitempty"`
 }
 
@@ -18340,7 +18340,7 @@ type HostNetworkConfig struct {
 	RouteTableConfig     *HostIpRouteTableConfig         `xml:"routeTableConfig,omitempty"`
 	Dhcp                 []HostDhcpServiceConfig         `xml:"dhcp,omitempty"`
 	Nat                  []HostNatServiceConfig          `xml:"nat,omitempty"`
-	IpV6Enabled          bool                            `xml:"ipV6Enabled,omitempty"`
+	IpV6Enabled          *bool                           `xml:"ipV6Enabled,omitempty"`
 	NetStackSpec         []HostNetworkConfigNetStackSpec `xml:"netStackSpec,omitempty"`
 }
 
@@ -18385,8 +18385,8 @@ type HostNetworkInfo struct {
 	RouteTableInfo       *HostIpRouteTableInfo   `xml:"routeTableInfo,omitempty"`
 	Dhcp                 []HostDhcpService       `xml:"dhcp,omitempty"`
 	Nat                  []HostNatService        `xml:"nat,omitempty"`
-	IpV6Enabled          bool                    `xml:"ipV6Enabled,omitempty"`
-	AtBootIpV6Enabled    bool                    `xml:"atBootIpV6Enabled,omitempty"`
+	IpV6Enabled          *bool                   `xml:"ipV6Enabled,omitempty"`
+	AtBootIpV6Enabled    *bool                   `xml:"atBootIpV6Enabled,omitempty"`
 	NetStackInstance     []HostNetStackInstance  `xml:"netStackInstance,omitempty"`
 	OpaqueSwitch         []HostOpaqueSwitch      `xml:"opaqueSwitch,omitempty"`
 	OpaqueNetwork        []HostOpaqueNetworkInfo `xml:"opaqueNetwork,omitempty"`
@@ -18412,9 +18412,9 @@ func init() {
 type HostNetworkSecurityPolicy struct {
 	DynamicData
 
-	AllowPromiscuous bool `xml:"allowPromiscuous,omitempty"`
-	MacChanges       bool `xml:"macChanges,omitempty"`
-	ForgedTransmits  bool `xml:"forgedTransmits,omitempty"`
+	AllowPromiscuous *bool `xml:"allowPromiscuous,omitempty"`
+	MacChanges       *bool `xml:"macChanges,omitempty"`
+	ForgedTransmits  *bool `xml:"forgedTransmits,omitempty"`
 }
 
 func init() {
@@ -18424,7 +18424,7 @@ func init() {
 type HostNetworkTrafficShapingPolicy struct {
 	DynamicData
 
-	Enabled          bool  `xml:"enabled,omitempty"`
+	Enabled          *bool `xml:"enabled,omitempty"`
 	AverageBandwidth int64 `xml:"averageBandwidth,omitempty"`
 	PeakBandwidth    int64 `xml:"peakBandwidth,omitempty"`
 	BurstSize        int64 `xml:"burstSize,omitempty"`
@@ -18447,11 +18447,11 @@ type HostNicFailureCriteria struct {
 
 	CheckSpeed        string `xml:"checkSpeed,omitempty"`
 	Speed             int    `xml:"speed,omitempty"`
-	CheckDuplex       bool   `xml:"checkDuplex,omitempty"`
-	FullDuplex        bool   `xml:"fullDuplex,omitempty"`
-	CheckErrorPercent bool   `xml:"checkErrorPercent,omitempty"`
+	CheckDuplex       *bool  `xml:"checkDuplex,omitempty"`
+	FullDuplex        *bool  `xml:"fullDuplex,omitempty"`
+	CheckErrorPercent *bool  `xml:"checkErrorPercent,omitempty"`
 	Percentage        int    `xml:"percentage,omitempty"`
-	CheckBeacon       bool   `xml:"checkBeacon,omitempty"`
+	CheckBeacon       *bool  `xml:"checkBeacon,omitempty"`
 }
 
 func init() {
@@ -18473,9 +18473,9 @@ type HostNicTeamingPolicy struct {
 	DynamicData
 
 	Policy          string                  `xml:"policy,omitempty"`
-	ReversePolicy   bool                    `xml:"reversePolicy,omitempty"`
-	NotifySwitches  bool                    `xml:"notifySwitches,omitempty"`
-	RollingOrder    bool                    `xml:"rollingOrder,omitempty"`
+	ReversePolicy   *bool                   `xml:"reversePolicy,omitempty"`
+	NotifySwitches  *bool                   `xml:"notifySwitches,omitempty"`
+	RollingOrder    *bool                   `xml:"rollingOrder,omitempty"`
 	FailureCriteria *HostNicFailureCriteria `xml:"failureCriteria,omitempty"`
 	NicOrder        *HostNicOrderPolicy     `xml:"nicOrder,omitempty"`
 }
@@ -18919,8 +18919,8 @@ func init() {
 type HostPosixAccountSpec struct {
 	HostAccountSpec
 
-	PosixId     int  `xml:"posixId,omitempty"`
-	ShellAccess bool `xml:"shellAccess,omitempty"`
+	PosixId     int   `xml:"posixId,omitempty"`
+	ShellAccess *bool `xml:"shellAccess,omitempty"`
 }
 
 func init() {
@@ -19014,7 +19014,7 @@ type HostProfileHostBasedConfigSpec struct {
 	HostProfileConfigSpec
 
 	Host                 ManagedObjectReference `xml:"host"`
-	UseHostProfileEngine bool                   `xml:"useHostProfileEngine,omitempty"`
+	UseHostProfileEngine *bool                  `xml:"useHostProfileEngine,omitempty"`
 }
 
 func init() {
@@ -19056,7 +19056,7 @@ type HostProxySwitch struct {
 	Pnic                        []string                       `xml:"pnic,omitempty"`
 	Spec                        HostProxySwitchSpec            `xml:"spec"`
 	HostLag                     []HostProxySwitchHostLagConfig `xml:"hostLag,omitempty"`
-	NetworkReservationSupported bool                           `xml:"networkReservationSupported,omitempty"`
+	NetworkReservationSupported *bool                          `xml:"networkReservationSupported,omitempty"`
 }
 
 func init() {
@@ -19179,7 +19179,7 @@ type HostRuntimeInfoNetStackInstanceRuntimeInfo struct {
 	State                  string   `xml:"state,omitempty"`
 	VmknicKeys             []string `xml:"vmknicKeys,omitempty"`
 	MaxNumberOfConnections int      `xml:"maxNumberOfConnections,omitempty"`
-	CurrentIpV6Enabled     bool     `xml:"currentIpV6Enabled,omitempty"`
+	CurrentIpV6Enabled     *bool    `xml:"currentIpV6Enabled,omitempty"`
 }
 
 func init() {
@@ -19201,7 +19201,7 @@ type HostScsiDisk struct {
 
 	Capacity   HostDiskDimensionsLba `xml:"capacity"`
 	DevicePath string                `xml:"devicePath"`
-	Ssd        bool                  `xml:"ssd,omitempty"`
+	Ssd        *bool                 `xml:"ssd,omitempty"`
 }
 
 func init() {
@@ -19376,7 +19376,7 @@ func init() {
 type HostSnmpConfigSpec struct {
 	DynamicData
 
-	Enabled             bool                  `xml:"enabled,omitempty"`
+	Enabled             *bool                 `xml:"enabled,omitempty"`
 	Port                int                   `xml:"port,omitempty"`
 	ReadOnlyCommunities []string              `xml:"readOnlyCommunities,omitempty"`
 	TrapTargets         []HostSnmpDestination `xml:"trapTargets,omitempty"`
@@ -19552,7 +19552,7 @@ func init() {
 type HostSystemReconnectSpec struct {
 	DynamicData
 
-	SyncState bool `xml:"syncState,omitempty"`
+	SyncState *bool `xml:"syncState,omitempty"`
 }
 
 func init() {
@@ -19787,9 +19787,9 @@ func init() {
 type HostUnresolvedVmfsVolumeResolveStatus struct {
 	DynamicData
 
-	Resolvable        bool `xml:"resolvable"`
-	IncompleteExtents bool `xml:"incompleteExtents,omitempty"`
-	MultipleCopies    bool `xml:"multipleCopies,omitempty"`
+	Resolvable        bool  `xml:"resolvable"`
+	IncompleteExtents *bool `xml:"incompleteExtents,omitempty"`
+	MultipleCopies    *bool `xml:"multipleCopies,omitempty"`
 }
 
 func init() {
@@ -20055,7 +20055,7 @@ type HostVirtualNicSpec struct {
 	DistributedVirtualPort *DistributedVirtualSwitchPortConnection `xml:"distributedVirtualPort,omitempty"`
 	Portgroup              string                                  `xml:"portgroup,omitempty"`
 	Mtu                    int                                     `xml:"mtu,omitempty"`
-	TsoEnabled             bool                                    `xml:"tsoEnabled,omitempty"`
+	TsoEnabled             *bool                                   `xml:"tsoEnabled,omitempty"`
 	NetStackInstanceKey    string                                  `xml:"netStackInstanceKey,omitempty"`
 }
 
@@ -20202,8 +20202,8 @@ type HostVmfsVolume struct {
 	Extent           []HostScsiDiskPartition `xml:"extent"`
 	VmfsUpgradable   bool                    `xml:"vmfsUpgradable"`
 	ForceMountedInfo *HostForceMountedInfo   `xml:"forceMountedInfo,omitempty"`
-	Ssd              bool                    `xml:"ssd,omitempty"`
-	Local            bool                    `xml:"local,omitempty"`
+	Ssd              *bool                   `xml:"ssd,omitempty"`
+	Local            *bool                   `xml:"local,omitempty"`
 }
 
 func init() {
@@ -20334,7 +20334,7 @@ type HttpNfcLeaseDeviceUrl struct {
 	ImportKey     string `xml:"importKey"`
 	Url           string `xml:"url"`
 	SslThumbprint string `xml:"sslThumbprint"`
-	Disk          bool   `xml:"disk,omitempty"`
+	Disk          *bool  `xml:"disk,omitempty"`
 	TargetId      string `xml:"targetId,omitempty"`
 	DatastoreKey  string `xml:"datastoreKey,omitempty"`
 	FileSize      int64  `xml:"fileSize,omitempty"`
@@ -20828,7 +20828,7 @@ type InstallHostPatchRequestType struct {
 	This       ManagedObjectReference  `xml:"_this"`
 	Repository HostPatchManagerLocator `xml:"repository"`
 	UpdateID   string                  `xml:"updateID"`
-	Force      bool                    `xml:"force,omitempty"`
+	Force      *bool                   `xml:"force,omitempty"`
 }
 
 func init() {
@@ -22041,8 +22041,8 @@ type IpPoolIpPoolConfigInfo struct {
 	Gateway             string   `xml:"gateway,omitempty"`
 	Range               string   `xml:"range,omitempty"`
 	Dns                 []string `xml:"dns,omitempty"`
-	DhcpServerAvailable bool     `xml:"dhcpServerAvailable,omitempty"`
-	IpPoolEnabled       bool     `xml:"ipPoolEnabled,omitempty"`
+	DhcpServerAvailable *bool    `xml:"dhcpServerAvailable,omitempty"`
+	IpPoolEnabled       *bool    `xml:"ipPoolEnabled,omitempty"`
 }
 
 func init() {
@@ -22671,7 +22671,7 @@ type LicenseFeatureInfo struct {
 	CostUnit           string                  `xml:"costUnit"`
 	SourceRestriction  string                  `xml:"sourceRestriction,omitempty"`
 	DependentKey       []string                `xml:"dependentKey,omitempty"`
-	Edition            bool                    `xml:"edition,omitempty"`
+	Edition            *bool                   `xml:"edition,omitempty"`
 	ExpiresOn          *time.Time              `xml:"expiresOn,omitempty"`
 }
 
@@ -23308,7 +23308,7 @@ type MakeDirectoryRequestType struct {
 	This                    ManagedObjectReference  `xml:"_this"`
 	Name                    string                  `xml:"name"`
 	Datacenter              *ManagedObjectReference `xml:"datacenter,omitempty"`
-	CreateParentDirectories bool                    `xml:"createParentDirectories,omitempty"`
+	CreateParentDirectories *bool                   `xml:"createParentDirectories,omitempty"`
 }
 
 func init() {
@@ -24187,7 +24187,7 @@ type MoveDatastoreFileRequestType struct {
 	SourceDatacenter      *ManagedObjectReference `xml:"sourceDatacenter,omitempty"`
 	DestinationName       string                  `xml:"destinationName"`
 	DestinationDatacenter *ManagedObjectReference `xml:"destinationDatacenter,omitempty"`
-	Force                 bool                    `xml:"force,omitempty"`
+	Force                 *bool                   `xml:"force,omitempty"`
 }
 
 func init() {
@@ -24329,7 +24329,7 @@ type MoveVirtualDiskRequestType struct {
 	SourceDatacenter *ManagedObjectReference         `xml:"sourceDatacenter,omitempty"`
 	DestName         string                          `xml:"destName"`
 	DestDatacenter   *ManagedObjectReference         `xml:"destDatacenter,omitempty"`
-	Force            bool                            `xml:"force,omitempty"`
+	Force            *bool                           `xml:"force,omitempty"`
 	Profile          []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
 }
 
@@ -24566,7 +24566,7 @@ func init() {
 type NegatableExpression struct {
 	DynamicData
 
-	Negate bool `xml:"negate,omitempty"`
+	Negate *bool `xml:"negate,omitempty"`
 }
 
 func init() {
@@ -24619,7 +24619,7 @@ func init() {
 type NetDhcpConfigSpecDhcpOptionsSpec struct {
 	DynamicData
 
-	Enable    bool       `xml:"enable,omitempty"`
+	Enable    *bool      `xml:"enable,omitempty"`
 	Config    []KeyValue `xml:"config"`
 	Operation string     `xml:"operation"`
 }
@@ -24645,7 +24645,7 @@ func init() {
 type NetDnsConfigSpec struct {
 	DynamicData
 
-	Dhcp         bool     `xml:"dhcp,omitempty"`
+	Dhcp         *bool    `xml:"dhcp,omitempty"`
 	HostName     string   `xml:"hostName,omitempty"`
 	DomainName   string   `xml:"domainName,omitempty"`
 	IpAddress    []string `xml:"ipAddress,omitempty"`
@@ -24661,7 +24661,7 @@ type NetIpConfigInfo struct {
 
 	IpAddress                []NetIpConfigInfoIpAddress `xml:"ipAddress,omitempty"`
 	Dhcp                     *NetDhcpConfigInfo         `xml:"dhcp,omitempty"`
-	AutoConfigurationEnabled bool                       `xml:"autoConfigurationEnabled,omitempty"`
+	AutoConfigurationEnabled *bool                      `xml:"autoConfigurationEnabled,omitempty"`
 }
 
 func init() {
@@ -24687,7 +24687,7 @@ type NetIpConfigSpec struct {
 
 	IpAddress                []NetIpConfigSpecIpAddressSpec `xml:"ipAddress,omitempty"`
 	Dhcp                     *NetDhcpConfigSpec             `xml:"dhcp,omitempty"`
-	AutoConfigurationEnabled bool                           `xml:"autoConfigurationEnabled,omitempty"`
+	AutoConfigurationEnabled *bool                          `xml:"autoConfigurationEnabled,omitempty"`
 }
 
 func init() {
@@ -25834,7 +25834,7 @@ type ObjectSpec struct {
 	DynamicData
 
 	Obj       ManagedObjectReference `xml:"obj"`
-	Skip      bool                   `xml:"skip,omitempty"`
+	Skip      *bool                  `xml:"skip,omitempty"`
 	SelectSet []BaseSelectionSpec    `xml:"selectSet,omitempty,typeattr"`
 }
 
@@ -25970,7 +25970,7 @@ func init() {
 type OptionType struct {
 	DynamicData
 
-	ValueIsReadonly bool `xml:"valueIsReadonly,omitempty"`
+	ValueIsReadonly *bool `xml:"valueIsReadonly,omitempty"`
 }
 
 func init() {
@@ -26321,7 +26321,7 @@ type OvfCreateDescriptorParams struct {
 	OvfFiles          []OvfFile               `xml:"ovfFiles,omitempty"`
 	Name              string                  `xml:"name,omitempty"`
 	Description       string                  `xml:"description,omitempty"`
-	IncludeImageFiles bool                    `xml:"includeImageFiles,omitempty"`
+	IncludeImageFiles *bool                   `xml:"includeImageFiles,omitempty"`
 	ExportOption      []string                `xml:"exportOption,omitempty"`
 	Snapshot          *ManagedObjectReference `xml:"snapshot,omitempty"`
 }
@@ -26336,7 +26336,7 @@ type OvfCreateDescriptorResult struct {
 	OvfDescriptor     string                 `xml:"ovfDescriptor"`
 	Error             []LocalizedMethodFault `xml:"error,omitempty"`
 	Warning           []LocalizedMethodFault `xml:"warning,omitempty"`
-	IncludeImageFiles bool                   `xml:"includeImageFiles,omitempty"`
+	IncludeImageFiles *bool                  `xml:"includeImageFiles,omitempty"`
 }
 
 func init() {
@@ -28051,11 +28051,11 @@ type PhysicalNic struct {
 	WakeOnLanSupported                    bool                  `xml:"wakeOnLanSupported"`
 	Mac                                   string                `xml:"mac"`
 	FcoeConfiguration                     *FcoeConfig           `xml:"fcoeConfiguration,omitempty"`
-	VmDirectPathGen2Supported             bool                  `xml:"vmDirectPathGen2Supported,omitempty"`
+	VmDirectPathGen2Supported             *bool                 `xml:"vmDirectPathGen2Supported,omitempty"`
 	VmDirectPathGen2SupportedMode         string                `xml:"vmDirectPathGen2SupportedMode,omitempty"`
-	ResourcePoolSchedulerAllowed          bool                  `xml:"resourcePoolSchedulerAllowed,omitempty"`
+	ResourcePoolSchedulerAllowed          *bool                 `xml:"resourcePoolSchedulerAllowed,omitempty"`
 	ResourcePoolSchedulerDisallowedReason []string              `xml:"resourcePoolSchedulerDisallowedReason,omitempty"`
-	AutoNegotiateSupported                bool                  `xml:"autoNegotiateSupported,omitempty"`
+	AutoNegotiateSupported                *bool                 `xml:"autoNegotiateSupported,omitempty"`
 }
 
 func init() {
@@ -28094,7 +28094,7 @@ type PhysicalNicCdpInfo struct {
 	IpPrefix         string                          `xml:"ipPrefix,omitempty"`
 	IpPrefixLen      int                             `xml:"ipPrefixLen,omitempty"`
 	Vlan             int                             `xml:"vlan,omitempty"`
-	FullDuplex       bool                            `xml:"fullDuplex,omitempty"`
+	FullDuplex       *bool                           `xml:"fullDuplex,omitempty"`
 	Mtu              int                             `xml:"mtu,omitempty"`
 	SystemName       string                          `xml:"systemName,omitempty"`
 	SystemOID        string                          `xml:"systemOID,omitempty"`
@@ -28273,8 +28273,8 @@ func init() {
 type PosixUserSearchResult struct {
 	UserSearchResult
 
-	Id          int  `xml:"id"`
-	ShellAccess bool `xml:"shellAccess,omitempty"`
+	Id          int   `xml:"id"`
+	ShellAccess *bool `xml:"shellAccess,omitempty"`
 }
 
 func init() {
@@ -28303,7 +28303,7 @@ type PostEventResponse struct {
 type PowerDownHostToStandByRequestType struct {
 	This                  ManagedObjectReference `xml:"_this"`
 	TimeoutSec            int                    `xml:"timeoutSec"`
-	EvacuatePoweredOffVms bool                   `xml:"evacuatePoweredOffVms,omitempty"`
+	EvacuatePoweredOffVms *bool                  `xml:"evacuatePoweredOffVms,omitempty"`
 }
 
 func init() {
@@ -28604,7 +28604,7 @@ type ProfileCreateSpec struct {
 
 	Name       string `xml:"name,omitempty"`
 	Annotation string `xml:"annotation,omitempty"`
-	Enabled    bool   `xml:"enabled,omitempty"`
+	Enabled    *bool  `xml:"enabled,omitempty"`
 }
 
 func init() {
@@ -28938,7 +28938,7 @@ type PropertyFilterSpec struct {
 
 	PropSet                       []PropertySpec `xml:"propSet"`
 	ObjectSet                     []ObjectSpec   `xml:"objectSet"`
-	ReportMissingObjectsInResults bool           `xml:"reportMissingObjectsInResults,omitempty"`
+	ReportMissingObjectsInResults *bool          `xml:"reportMissingObjectsInResults,omitempty"`
 }
 
 func init() {
@@ -28961,7 +28961,7 @@ type PropertySpec struct {
 	DynamicData
 
 	Type    string   `xml:"type"`
-	All     bool     `xml:"all,omitempty"`
+	All     *bool    `xml:"all,omitempty"`
 	PathSet []string `xml:"pathSet,omitempty"`
 }
 
@@ -30554,7 +30554,7 @@ type QueryVmfsDatastoreExtendOptionsRequestType struct {
 	This                     ManagedObjectReference `xml:"_this"`
 	Datastore                ManagedObjectReference `xml:"datastore"`
 	DevicePath               string                 `xml:"devicePath"`
-	SuppressExpandCandidates bool                   `xml:"suppressExpandCandidates,omitempty"`
+	SuppressExpandCandidates *bool                  `xml:"suppressExpandCandidates,omitempty"`
 }
 
 func init() {
@@ -31742,7 +31742,7 @@ type RemoveAlarmResponse struct {
 
 type RemoveAllSnapshotsRequestType struct {
 	This        ManagedObjectReference `xml:"_this"`
-	Consolidate bool                   `xml:"consolidate,omitempty"`
+	Consolidate *bool                  `xml:"consolidate,omitempty"`
 }
 
 func init() {
@@ -32089,7 +32089,7 @@ type RemoveServiceConsoleVirtualNicResponse struct {
 type RemoveSnapshotRequestType struct {
 	This           ManagedObjectReference `xml:"_this"`
 	RemoveChildren bool                   `xml:"removeChildren"`
-	Consolidate    bool                   `xml:"consolidate,omitempty"`
+	Consolidate    *bool                  `xml:"consolidate,omitempty"`
 }
 
 func init() {
@@ -32710,7 +32710,7 @@ type ResourceAllocationInfo struct {
 	DynamicData
 
 	Reservation           int64       `xml:"reservation,omitempty"`
-	ExpandableReservation bool        `xml:"expandableReservation,omitempty"`
+	ExpandableReservation *bool       `xml:"expandableReservation,omitempty"`
 	Limit                 int64       `xml:"limit,omitempty"`
 	Shares                *SharesInfo `xml:"shares,omitempty"`
 	OverheadLimit         int64       `xml:"overheadLimit,omitempty"`
@@ -33338,7 +33338,7 @@ type RetrieveUserGroupsResponse struct {
 type RevertToCurrentSnapshotRequestType struct {
 	This            ManagedObjectReference  `xml:"_this"`
 	Host            *ManagedObjectReference `xml:"host,omitempty"`
-	SuppressPowerOn bool                    `xml:"suppressPowerOn,omitempty"`
+	SuppressPowerOn *bool                   `xml:"suppressPowerOn,omitempty"`
 }
 
 func init() {
@@ -33358,7 +33358,7 @@ type RevertToCurrentSnapshot_TaskResponse struct {
 type RevertToSnapshotRequestType struct {
 	This            ManagedObjectReference  `xml:"_this"`
 	Host            *ManagedObjectReference `xml:"host,omitempty"`
-	SuppressPowerOn bool                    `xml:"suppressPowerOn,omitempty"`
+	SuppressPowerOn *bool                   `xml:"suppressPowerOn,omitempty"`
 }
 
 func init() {
@@ -34601,7 +34601,7 @@ type ShrinkVirtualDiskRequestType struct {
 	This       ManagedObjectReference  `xml:"_this"`
 	Name       string                  `xml:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty"`
-	Copy       bool                    `xml:"copy,omitempty"`
+	Copy       *bool                   `xml:"copy,omitempty"`
 }
 
 func init() {
@@ -35309,7 +35309,7 @@ type StorageDrsPodConfigInfo struct {
 	IoLoadBalanceEnabled   bool                              `xml:"ioLoadBalanceEnabled"`
 	DefaultVmBehavior      string                            `xml:"defaultVmBehavior"`
 	LoadBalanceInterval    int                               `xml:"loadBalanceInterval,omitempty"`
-	DefaultIntraVmAffinity bool                              `xml:"defaultIntraVmAffinity,omitempty"`
+	DefaultIntraVmAffinity *bool                             `xml:"defaultIntraVmAffinity,omitempty"`
 	SpaceLoadBalanceConfig *StorageDrsSpaceLoadBalanceConfig `xml:"spaceLoadBalanceConfig,omitempty"`
 	IoLoadBalanceConfig    *StorageDrsIoLoadBalanceConfig    `xml:"ioLoadBalanceConfig,omitempty"`
 	Rule                   []BaseClusterRuleInfo             `xml:"rule,omitempty,typeattr"`
@@ -35323,11 +35323,11 @@ func init() {
 type StorageDrsPodConfigSpec struct {
 	DynamicData
 
-	Enabled                bool                              `xml:"enabled,omitempty"`
-	IoLoadBalanceEnabled   bool                              `xml:"ioLoadBalanceEnabled,omitempty"`
+	Enabled                *bool                             `xml:"enabled,omitempty"`
+	IoLoadBalanceEnabled   *bool                             `xml:"ioLoadBalanceEnabled,omitempty"`
 	DefaultVmBehavior      string                            `xml:"defaultVmBehavior,omitempty"`
 	LoadBalanceInterval    int                               `xml:"loadBalanceInterval,omitempty"`
-	DefaultIntraVmAffinity bool                              `xml:"defaultIntraVmAffinity,omitempty"`
+	DefaultIntraVmAffinity *bool                             `xml:"defaultIntraVmAffinity,omitempty"`
 	SpaceLoadBalanceConfig *StorageDrsSpaceLoadBalanceConfig `xml:"spaceLoadBalanceConfig,omitempty"`
 	IoLoadBalanceConfig    *StorageDrsIoLoadBalanceConfig    `xml:"ioLoadBalanceConfig,omitempty"`
 	Rule                   []ClusterRuleSpec                 `xml:"rule,omitempty"`
@@ -35378,9 +35378,9 @@ type StorageDrsVmConfigInfo struct {
 	DynamicData
 
 	Vm                  *ManagedObjectReference          `xml:"vm,omitempty"`
-	Enabled             bool                             `xml:"enabled,omitempty"`
+	Enabled             *bool                            `xml:"enabled,omitempty"`
 	Behavior            string                           `xml:"behavior,omitempty"`
-	IntraVmAffinity     bool                             `xml:"intraVmAffinity,omitempty"`
+	IntraVmAffinity     *bool                            `xml:"intraVmAffinity,omitempty"`
 	IntraVmAntiAffinity *VirtualDiskAntiAffinityRuleSpec `xml:"intraVmAntiAffinity,omitempty"`
 }
 
@@ -35436,12 +35436,12 @@ func init() {
 type StorageIORMConfigSpec struct {
 	DynamicData
 
-	Enabled                  bool   `xml:"enabled,omitempty"`
+	Enabled                  *bool  `xml:"enabled,omitempty"`
 	CongestionThresholdMode  string `xml:"congestionThresholdMode,omitempty"`
 	CongestionThreshold      int    `xml:"congestionThreshold,omitempty"`
 	PercentOfPeakThroughput  int    `xml:"percentOfPeakThroughput,omitempty"`
-	StatsCollectionEnabled   bool   `xml:"statsCollectionEnabled,omitempty"`
-	StatsAggregationDisabled bool   `xml:"statsAggregationDisabled,omitempty"`
+	StatsCollectionEnabled   *bool  `xml:"statsCollectionEnabled,omitempty"`
+	StatsAggregationDisabled *bool  `xml:"statsAggregationDisabled,omitempty"`
 }
 
 func init() {
@@ -35455,8 +35455,8 @@ type StorageIORMInfo struct {
 	CongestionThresholdMode  string `xml:"congestionThresholdMode,omitempty"`
 	CongestionThreshold      int    `xml:"congestionThreshold"`
 	PercentOfPeakThroughput  int    `xml:"percentOfPeakThroughput,omitempty"`
-	StatsCollectionEnabled   bool   `xml:"statsCollectionEnabled,omitempty"`
-	StatsAggregationDisabled bool   `xml:"statsAggregationDisabled,omitempty"`
+	StatsCollectionEnabled   *bool  `xml:"statsCollectionEnabled,omitempty"`
+	StatsAggregationDisabled *bool  `xml:"statsAggregationDisabled,omitempty"`
 }
 
 func init() {
@@ -35541,7 +35541,7 @@ type StoragePlacementSpec struct {
 	ResourcePool              *ManagedObjectReference     `xml:"resourcePool,omitempty"`
 	Host                      *ManagedObjectReference     `xml:"host,omitempty"`
 	Folder                    *ManagedObjectReference     `xml:"folder,omitempty"`
-	DisallowPrerequisiteMoves bool                        `xml:"disallowPrerequisiteMoves,omitempty"`
+	DisallowPrerequisiteMoves *bool                       `xml:"disallowPrerequisiteMoves,omitempty"`
 	ResourceLeaseDurationSec  int                         `xml:"resourceLeaseDurationSec,omitempty"`
 }
 
@@ -36333,14 +36333,14 @@ type ToolsConfigInfo struct {
 	DynamicData
 
 	ToolsVersion         int                                  `xml:"toolsVersion,omitempty"`
-	AfterPowerOn         bool                                 `xml:"afterPowerOn,omitempty"`
-	AfterResume          bool                                 `xml:"afterResume,omitempty"`
-	BeforeGuestStandby   bool                                 `xml:"beforeGuestStandby,omitempty"`
-	BeforeGuestShutdown  bool                                 `xml:"beforeGuestShutdown,omitempty"`
-	BeforeGuestReboot    bool                                 `xml:"beforeGuestReboot,omitempty"`
+	AfterPowerOn         *bool                                `xml:"afterPowerOn,omitempty"`
+	AfterResume          *bool                                `xml:"afterResume,omitempty"`
+	BeforeGuestStandby   *bool                                `xml:"beforeGuestStandby,omitempty"`
+	BeforeGuestShutdown  *bool                                `xml:"beforeGuestShutdown,omitempty"`
+	BeforeGuestReboot    *bool                                `xml:"beforeGuestReboot,omitempty"`
 	ToolsUpgradePolicy   string                               `xml:"toolsUpgradePolicy,omitempty"`
 	PendingCustomization string                               `xml:"pendingCustomization,omitempty"`
-	SyncTimeWithHost     bool                                 `xml:"syncTimeWithHost,omitempty"`
+	SyncTimeWithHost     *bool                                `xml:"syncTimeWithHost,omitempty"`
 	LastInstallInfo      *ToolsConfigInfoToolsLastInstallInfo `xml:"lastInstallInfo,omitempty"`
 }
 
@@ -36448,7 +36448,7 @@ type TraversalSpec struct {
 
 	Type      string              `xml:"type"`
 	Path      string              `xml:"path"`
-	Skip      bool                `xml:"skip,omitempty"`
+	Skip      *bool               `xml:"skip,omitempty"`
 	SelectSet []BaseSelectionSpec `xml:"selectSet,omitempty,typeattr"`
 }
 
@@ -37881,7 +37881,7 @@ type UpdateSet struct {
 
 	Version   string                 `xml:"version"`
 	FilterSet []PropertyFilterUpdate `xml:"filterSet,omitempty"`
-	Truncated bool                   `xml:"truncated,omitempty"`
+	Truncated *bool                  `xml:"truncated,omitempty"`
 }
 
 func init() {
@@ -38315,7 +38315,7 @@ type UserSession struct {
 	LastActiveTime   time.Time `xml:"lastActiveTime"`
 	Locale           string    `xml:"locale"`
 	MessageLocale    string    `xml:"messageLocale"`
-	ExtensionSession bool      `xml:"extensionSession,omitempty"`
+	ExtensionSession *bool     `xml:"extensionSession,omitempty"`
 	IpAddress        string    `xml:"ipAddress,omitempty"`
 	UserAgent        string    `xml:"userAgent,omitempty"`
 	CallCount        int64     `xml:"callCount,omitempty"`
@@ -38432,11 +38432,11 @@ type VAppEntityConfigInfo struct {
 	Tag               string                  `xml:"tag,omitempty"`
 	StartOrder        int                     `xml:"startOrder,omitempty"`
 	StartDelay        int                     `xml:"startDelay,omitempty"`
-	WaitingForGuest   bool                    `xml:"waitingForGuest,omitempty"`
+	WaitingForGuest   *bool                   `xml:"waitingForGuest,omitempty"`
 	StartAction       string                  `xml:"startAction,omitempty"`
 	StopDelay         int                     `xml:"stopDelay,omitempty"`
 	StopAction        string                  `xml:"stopAction,omitempty"`
-	DestroyWithParent bool                    `xml:"destroyWithParent,omitempty"`
+	DestroyWithParent *bool                   `xml:"destroyWithParent,omitempty"`
 }
 
 func init() {
@@ -38490,7 +38490,7 @@ type VAppOvfSectionInfo struct {
 	Key             int    `xml:"key,omitempty"`
 	Namespace       string `xml:"namespace,omitempty"`
 	Type            string `xml:"type,omitempty"`
-	AtEnvelopeLevel bool   `xml:"atEnvelopeLevel,omitempty"`
+	AtEnvelopeLevel *bool  `xml:"atEnvelopeLevel,omitempty"`
 	Contents        string `xml:"contents,omitempty"`
 }
 
@@ -38568,7 +38568,7 @@ type VAppPropertyInfo struct {
 	Label            string `xml:"label,omitempty"`
 	Type             string `xml:"type,omitempty"`
 	TypeReference    string `xml:"typeReference,omitempty"`
-	UserConfigurable bool   `xml:"userConfigurable,omitempty"`
+	UserConfigurable *bool  `xml:"userConfigurable,omitempty"`
 	DefaultValue     string `xml:"defaultValue,omitempty"`
 	Value            string `xml:"value,omitempty"`
 	Description      string `xml:"description,omitempty"`
@@ -38874,9 +38874,9 @@ func init() {
 type VMwareDVSFeatureCapability struct {
 	DVSFeatureCapability
 
-	VspanSupported  bool                      `xml:"vspanSupported,omitempty"`
-	LldpSupported   bool                      `xml:"lldpSupported,omitempty"`
-	IpfixSupported  bool                      `xml:"ipfixSupported,omitempty"`
+	VspanSupported  *bool                     `xml:"vspanSupported,omitempty"`
+	LldpSupported   *bool                     `xml:"lldpSupported,omitempty"`
+	IpfixSupported  *bool                     `xml:"ipfixSupported,omitempty"`
 	VspanCapability *VMwareDVSVspanCapability `xml:"vspanCapability,omitempty"`
 	LacpCapability  *VMwareDvsLacpCapability  `xml:"lacpCapability,omitempty"`
 }
@@ -38935,10 +38935,10 @@ func init() {
 type VMwareDVSPortgroupPolicy struct {
 	DVPortgroupPolicy
 
-	VlanOverrideAllowed           bool `xml:"vlanOverrideAllowed"`
-	UplinkTeamingOverrideAllowed  bool `xml:"uplinkTeamingOverrideAllowed"`
-	SecurityPolicyOverrideAllowed bool `xml:"securityPolicyOverrideAllowed"`
-	IpfixOverrideAllowed          bool `xml:"ipfixOverrideAllowed,omitempty"`
+	VlanOverrideAllowed           bool  `xml:"vlanOverrideAllowed"`
+	UplinkTeamingOverrideAllowed  bool  `xml:"uplinkTeamingOverrideAllowed"`
+	SecurityPolicyOverrideAllowed bool  `xml:"securityPolicyOverrideAllowed"`
+	IpfixOverrideAllowed          *bool `xml:"ipfixOverrideAllowed,omitempty"`
 }
 
 func init() {
@@ -39033,8 +39033,8 @@ func init() {
 type VMwareDvsLacpCapability struct {
 	DynamicData
 
-	LacpSupported           bool `xml:"lacpSupported,omitempty"`
-	MultiLacpGroupSupported bool `xml:"multiLacpGroupSupported,omitempty"`
+	LacpSupported           *bool `xml:"lacpSupported,omitempty"`
+	MultiLacpGroupSupported *bool `xml:"multiLacpGroupSupported,omitempty"`
 }
 
 func init() {
@@ -39073,7 +39073,7 @@ func init() {
 type VMwareDvsLagIpfixConfig struct {
 	DynamicData
 
-	IpfixEnabled bool `xml:"ipfixEnabled,omitempty"`
+	IpfixEnabled *bool `xml:"ipfixEnabled,omitempty"`
 }
 
 func init() {
@@ -39317,7 +39317,7 @@ type VirtualAppLinkInfo struct {
 	DynamicData
 
 	Key               ManagedObjectReference `xml:"key"`
-	DestroyWithParent bool                   `xml:"destroyWithParent,omitempty"`
+	DestroyWithParent *bool                  `xml:"destroyWithParent,omitempty"`
 }
 
 func init() {
@@ -39329,8 +39329,8 @@ type VirtualAppSummary struct {
 
 	Product             *VAppProductInfo    `xml:"product,omitempty"`
 	VAppState           VirtualAppVAppState `xml:"vAppState,omitempty"`
-	Suspended           bool                `xml:"suspended,omitempty"`
-	InstallBootRequired bool                `xml:"installBootRequired,omitempty"`
+	Suspended           *bool               `xml:"suspended,omitempty"`
+	InstallBootRequired *bool               `xml:"installBootRequired,omitempty"`
 	InstanceUuid        string              `xml:"instanceUuid,omitempty"`
 }
 
@@ -39573,7 +39573,7 @@ type VirtualDeviceDeviceBackingInfo struct {
 	VirtualDeviceBackingInfo
 
 	DeviceName    string `xml:"deviceName"`
-	UseAutoDetect bool   `xml:"useAutoDetect,omitempty"`
+	UseAutoDetect *bool  `xml:"useAutoDetect,omitempty"`
 }
 
 func init() {
@@ -39625,7 +39625,7 @@ type VirtualDeviceOption struct {
 	LicensingLimit            []string                         `xml:"licensingLimit,omitempty"`
 	Deprecated                bool                             `xml:"deprecated"`
 	PlugAndPlay               bool                             `xml:"plugAndPlay"`
-	HotRemoveSupported        bool                             `xml:"hotRemoveSupported,omitempty"`
+	HotRemoveSupported        *bool                            `xml:"hotRemoveSupported,omitempty"`
 }
 
 func init() {
@@ -39664,7 +39664,7 @@ type VirtualDeviceRemoteDeviceBackingInfo struct {
 	VirtualDeviceBackingInfo
 
 	DeviceName    string `xml:"deviceName"`
-	UseAutoDetect bool   `xml:"useAutoDetect,omitempty"`
+	UseAutoDetect *bool  `xml:"useAutoDetect,omitempty"`
 }
 
 func init() {
@@ -39745,7 +39745,7 @@ func init() {
 type VirtualDiskConfigSpec struct {
 	VirtualDeviceConfigSpec
 
-	MigrateCache bool `xml:"migrateCache,omitempty"`
+	MigrateCache *bool `xml:"migrateCache,omitempty"`
 }
 
 func init() {
@@ -39767,8 +39767,8 @@ type VirtualDiskFlatVer1BackingInfo struct {
 	VirtualDeviceFileBackingInfo
 
 	DiskMode     string                          `xml:"diskMode"`
-	Split        bool                            `xml:"split,omitempty"`
-	WriteThrough bool                            `xml:"writeThrough,omitempty"`
+	Split        *bool                           `xml:"split,omitempty"`
+	WriteThrough *bool                           `xml:"writeThrough,omitempty"`
 	ContentId    string                          `xml:"contentId,omitempty"`
 	Parent       *VirtualDiskFlatVer1BackingInfo `xml:"parent,omitempty"`
 }
@@ -39794,16 +39794,16 @@ type VirtualDiskFlatVer2BackingInfo struct {
 	VirtualDeviceFileBackingInfo
 
 	DiskMode        string                          `xml:"diskMode"`
-	Split           bool                            `xml:"split,omitempty"`
-	WriteThrough    bool                            `xml:"writeThrough,omitempty"`
-	ThinProvisioned bool                            `xml:"thinProvisioned,omitempty"`
-	EagerlyScrub    bool                            `xml:"eagerlyScrub,omitempty"`
+	Split           *bool                           `xml:"split,omitempty"`
+	WriteThrough    *bool                           `xml:"writeThrough,omitempty"`
+	ThinProvisioned *bool                           `xml:"thinProvisioned,omitempty"`
+	EagerlyScrub    *bool                           `xml:"eagerlyScrub,omitempty"`
 	Uuid            string                          `xml:"uuid,omitempty"`
 	ContentId       string                          `xml:"contentId,omitempty"`
 	ChangeId        string                          `xml:"changeId,omitempty"`
 	Parent          *VirtualDiskFlatVer2BackingInfo `xml:"parent,omitempty"`
 	DeltaDiskFormat string                          `xml:"deltaDiskFormat,omitempty"`
-	DigestEnabled   bool                            `xml:"digestEnabled,omitempty"`
+	DigestEnabled   *bool                           `xml:"digestEnabled,omitempty"`
 	DeltaGrainSize  int                             `xml:"deltaGrainSize,omitempty"`
 }
 
@@ -39957,13 +39957,13 @@ type VirtualDiskSeSparseBackingInfo struct {
 	VirtualDeviceFileBackingInfo
 
 	DiskMode        string                          `xml:"diskMode"`
-	WriteThrough    bool                            `xml:"writeThrough,omitempty"`
+	WriteThrough    *bool                           `xml:"writeThrough,omitempty"`
 	Uuid            string                          `xml:"uuid,omitempty"`
 	ContentId       string                          `xml:"contentId,omitempty"`
 	ChangeId        string                          `xml:"changeId,omitempty"`
 	Parent          *VirtualDiskSeSparseBackingInfo `xml:"parent,omitempty"`
 	DeltaDiskFormat string                          `xml:"deltaDiskFormat,omitempty"`
-	DigestEnabled   bool                            `xml:"digestEnabled,omitempty"`
+	DigestEnabled   *bool                           `xml:"digestEnabled,omitempty"`
 	GrainSize       int                             `xml:"grainSize,omitempty"`
 }
 
@@ -39990,8 +39990,8 @@ type VirtualDiskSparseVer1BackingInfo struct {
 	VirtualDeviceFileBackingInfo
 
 	DiskMode      string                            `xml:"diskMode"`
-	Split         bool                              `xml:"split,omitempty"`
-	WriteThrough  bool                              `xml:"writeThrough,omitempty"`
+	Split         *bool                             `xml:"split,omitempty"`
+	WriteThrough  *bool                             `xml:"writeThrough,omitempty"`
 	SpaceUsedInKB int64                             `xml:"spaceUsedInKB,omitempty"`
 	ContentId     string                            `xml:"contentId,omitempty"`
 	Parent        *VirtualDiskSparseVer1BackingInfo `xml:"parent,omitempty"`
@@ -40018,8 +40018,8 @@ type VirtualDiskSparseVer2BackingInfo struct {
 	VirtualDeviceFileBackingInfo
 
 	DiskMode      string                            `xml:"diskMode"`
-	Split         bool                              `xml:"split,omitempty"`
-	WriteThrough  bool                              `xml:"writeThrough,omitempty"`
+	Split         *bool                             `xml:"split,omitempty"`
+	WriteThrough  *bool                             `xml:"writeThrough,omitempty"`
 	SpaceUsedInKB int64                             `xml:"spaceUsedInKB,omitempty"`
 	Uuid          string                            `xml:"uuid,omitempty"`
 	ContentId     string                            `xml:"contentId,omitempty"`
@@ -40124,7 +40124,7 @@ type VirtualEthernetCard struct {
 
 	AddressType      string `xml:"addressType,omitempty"`
 	MacAddress       string `xml:"macAddress,omitempty"`
-	WakeOnLanEnabled bool   `xml:"wakeOnLanEnabled,omitempty"`
+	WakeOnLanEnabled *bool  `xml:"wakeOnLanEnabled,omitempty"`
 }
 
 func init() {
@@ -40169,7 +40169,7 @@ type VirtualEthernetCardNetworkBackingInfo struct {
 	VirtualDeviceDeviceBackingInfo
 
 	Network           *ManagedObjectReference `xml:"network,omitempty"`
-	InPassthroughMode bool                    `xml:"inPassthroughMode,omitempty"`
+	InPassthroughMode *bool                   `xml:"inPassthroughMode,omitempty"`
 }
 
 func init() {
@@ -40223,7 +40223,7 @@ type VirtualEthernetCardOption struct {
 	SupportedOUI              ChoiceOption `xml:"supportedOUI"`
 	MacType                   ChoiceOption `xml:"macType"`
 	WakeOnLanEnabled          BoolOption   `xml:"wakeOnLanEnabled"`
-	VmDirectPathGen2Supported bool         `xml:"vmDirectPathGen2Supported,omitempty"`
+	VmDirectPathGen2Supported *bool        `xml:"vmDirectPathGen2Supported,omitempty"`
 }
 
 func init() {
@@ -40300,8 +40300,8 @@ type VirtualHardware struct {
 	NumCPU              int                 `xml:"numCPU"`
 	NumCoresPerSocket   int                 `xml:"numCoresPerSocket,omitempty"`
 	MemoryMB            int                 `xml:"memoryMB"`
-	VirtualICH7MPresent bool                `xml:"virtualICH7MPresent,omitempty"`
-	VirtualSMCPresent   bool                `xml:"virtualSMCPresent,omitempty"`
+	VirtualICH7MPresent *bool               `xml:"virtualICH7MPresent,omitempty"`
+	VirtualSMCPresent   *bool               `xml:"virtualSMCPresent,omitempty"`
 	Device              []BaseVirtualDevice `xml:"device,omitempty,typeattr"`
 }
 
@@ -40463,8 +40463,8 @@ type VirtualMachineBootOptions struct {
 	DynamicData
 
 	BootDelay        int64                                         `xml:"bootDelay,omitempty"`
-	EnterBIOSSetup   bool                                          `xml:"enterBIOSSetup,omitempty"`
-	BootRetryEnabled bool                                          `xml:"bootRetryEnabled,omitempty"`
+	EnterBIOSSetup   *bool                                         `xml:"enterBIOSSetup,omitempty"`
+	BootRetryEnabled *bool                                         `xml:"bootRetryEnabled,omitempty"`
 	BootRetryDelay   int64                                         `xml:"bootRetryDelay,omitempty"`
 	BootOrder        []BaseVirtualMachineBootOptionsBootableDevice `xml:"bootOrder,omitempty,typeattr"`
 }
@@ -40520,43 +40520,43 @@ func init() {
 type VirtualMachineCapability struct {
 	DynamicData
 
-	SnapshotOperationsSupported         bool `xml:"snapshotOperationsSupported"`
-	MultipleSnapshotsSupported          bool `xml:"multipleSnapshotsSupported"`
-	SnapshotConfigSupported             bool `xml:"snapshotConfigSupported"`
-	PoweredOffSnapshotsSupported        bool `xml:"poweredOffSnapshotsSupported"`
-	MemorySnapshotsSupported            bool `xml:"memorySnapshotsSupported"`
-	RevertToSnapshotSupported           bool `xml:"revertToSnapshotSupported"`
-	QuiescedSnapshotsSupported          bool `xml:"quiescedSnapshotsSupported"`
-	DisableSnapshotsSupported           bool `xml:"disableSnapshotsSupported"`
-	LockSnapshotsSupported              bool `xml:"lockSnapshotsSupported"`
-	ConsolePreferencesSupported         bool `xml:"consolePreferencesSupported"`
-	CpuFeatureMaskSupported             bool `xml:"cpuFeatureMaskSupported"`
-	S1AcpiManagementSupported           bool `xml:"s1AcpiManagementSupported"`
-	SettingScreenResolutionSupported    bool `xml:"settingScreenResolutionSupported"`
-	ToolsAutoUpdateSupported            bool `xml:"toolsAutoUpdateSupported"`
-	VmNpivWwnSupported                  bool `xml:"vmNpivWwnSupported"`
-	NpivWwnOnNonRdmVmSupported          bool `xml:"npivWwnOnNonRdmVmSupported"`
-	VmNpivWwnDisableSupported           bool `xml:"vmNpivWwnDisableSupported,omitempty"`
-	VmNpivWwnUpdateSupported            bool `xml:"vmNpivWwnUpdateSupported,omitempty"`
-	SwapPlacementSupported              bool `xml:"swapPlacementSupported"`
-	ToolsSyncTimeSupported              bool `xml:"toolsSyncTimeSupported"`
-	VirtualMmuUsageSupported            bool `xml:"virtualMmuUsageSupported"`
-	DiskSharesSupported                 bool `xml:"diskSharesSupported"`
-	BootOptionsSupported                bool `xml:"bootOptionsSupported"`
-	BootRetryOptionsSupported           bool `xml:"bootRetryOptionsSupported,omitempty"`
-	SettingVideoRamSizeSupported        bool `xml:"settingVideoRamSizeSupported"`
-	SettingDisplayTopologySupported     bool `xml:"settingDisplayTopologySupported,omitempty"`
-	RecordReplaySupported               bool `xml:"recordReplaySupported,omitempty"`
-	ChangeTrackingSupported             bool `xml:"changeTrackingSupported,omitempty"`
-	MultipleCoresPerSocketSupported     bool `xml:"multipleCoresPerSocketSupported,omitempty"`
-	HostBasedReplicationSupported       bool `xml:"hostBasedReplicationSupported,omitempty"`
-	GuestAutoLockSupported              bool `xml:"guestAutoLockSupported,omitempty"`
-	MemoryReservationLockSupported      bool `xml:"memoryReservationLockSupported,omitempty"`
-	FeatureRequirementSupported         bool `xml:"featureRequirementSupported,omitempty"`
-	PoweredOnMonitorTypeChangeSupported bool `xml:"poweredOnMonitorTypeChangeSupported,omitempty"`
-	SeSparseDiskSupported               bool `xml:"seSparseDiskSupported,omitempty"`
-	NestedHVSupported                   bool `xml:"nestedHVSupported,omitempty"`
-	VPMCSupported                       bool `xml:"vPMCSupported,omitempty"`
+	SnapshotOperationsSupported         bool  `xml:"snapshotOperationsSupported"`
+	MultipleSnapshotsSupported          bool  `xml:"multipleSnapshotsSupported"`
+	SnapshotConfigSupported             bool  `xml:"snapshotConfigSupported"`
+	PoweredOffSnapshotsSupported        bool  `xml:"poweredOffSnapshotsSupported"`
+	MemorySnapshotsSupported            bool  `xml:"memorySnapshotsSupported"`
+	RevertToSnapshotSupported           bool  `xml:"revertToSnapshotSupported"`
+	QuiescedSnapshotsSupported          bool  `xml:"quiescedSnapshotsSupported"`
+	DisableSnapshotsSupported           bool  `xml:"disableSnapshotsSupported"`
+	LockSnapshotsSupported              bool  `xml:"lockSnapshotsSupported"`
+	ConsolePreferencesSupported         bool  `xml:"consolePreferencesSupported"`
+	CpuFeatureMaskSupported             bool  `xml:"cpuFeatureMaskSupported"`
+	S1AcpiManagementSupported           bool  `xml:"s1AcpiManagementSupported"`
+	SettingScreenResolutionSupported    bool  `xml:"settingScreenResolutionSupported"`
+	ToolsAutoUpdateSupported            bool  `xml:"toolsAutoUpdateSupported"`
+	VmNpivWwnSupported                  bool  `xml:"vmNpivWwnSupported"`
+	NpivWwnOnNonRdmVmSupported          bool  `xml:"npivWwnOnNonRdmVmSupported"`
+	VmNpivWwnDisableSupported           *bool `xml:"vmNpivWwnDisableSupported,omitempty"`
+	VmNpivWwnUpdateSupported            *bool `xml:"vmNpivWwnUpdateSupported,omitempty"`
+	SwapPlacementSupported              bool  `xml:"swapPlacementSupported"`
+	ToolsSyncTimeSupported              bool  `xml:"toolsSyncTimeSupported"`
+	VirtualMmuUsageSupported            bool  `xml:"virtualMmuUsageSupported"`
+	DiskSharesSupported                 bool  `xml:"diskSharesSupported"`
+	BootOptionsSupported                bool  `xml:"bootOptionsSupported"`
+	BootRetryOptionsSupported           *bool `xml:"bootRetryOptionsSupported,omitempty"`
+	SettingVideoRamSizeSupported        bool  `xml:"settingVideoRamSizeSupported"`
+	SettingDisplayTopologySupported     *bool `xml:"settingDisplayTopologySupported,omitempty"`
+	RecordReplaySupported               *bool `xml:"recordReplaySupported,omitempty"`
+	ChangeTrackingSupported             *bool `xml:"changeTrackingSupported,omitempty"`
+	MultipleCoresPerSocketSupported     *bool `xml:"multipleCoresPerSocketSupported,omitempty"`
+	HostBasedReplicationSupported       *bool `xml:"hostBasedReplicationSupported,omitempty"`
+	GuestAutoLockSupported              *bool `xml:"guestAutoLockSupported,omitempty"`
+	MemoryReservationLockSupported      *bool `xml:"memoryReservationLockSupported,omitempty"`
+	FeatureRequirementSupported         *bool `xml:"featureRequirementSupported,omitempty"`
+	PoweredOnMonitorTypeChangeSupported *bool `xml:"poweredOnMonitorTypeChangeSupported,omitempty"`
+	SeSparseDiskSupported               *bool `xml:"seSparseDiskSupported,omitempty"`
+	NestedHVSupported                   *bool `xml:"nestedHVSupported,omitempty"`
+	VPMCSupported                       *bool `xml:"vPMCSupported,omitempty"`
 }
 
 func init() {
@@ -40580,7 +40580,7 @@ type VirtualMachineCloneSpec struct {
 	Customization *CustomizationSpec         `xml:"customization,omitempty"`
 	PowerOn       bool                       `xml:"powerOn"`
 	Snapshot      *ManagedObjectReference    `xml:"snapshot,omitempty"`
-	Memory        bool                       `xml:"memory,omitempty"`
+	Memory        *bool                      `xml:"memory,omitempty"`
 }
 
 func init() {
@@ -40602,8 +40602,8 @@ type VirtualMachineConfigInfo struct {
 	NpivWorldWideNameType        string                                     `xml:"npivWorldWideNameType,omitempty"`
 	NpivDesiredNodeWwns          int16                                      `xml:"npivDesiredNodeWwns,omitempty"`
 	NpivDesiredPortWwns          int16                                      `xml:"npivDesiredPortWwns,omitempty"`
-	NpivTemporaryDisabled        bool                                       `xml:"npivTemporaryDisabled,omitempty"`
-	NpivOnNonRdmDisks            bool                                       `xml:"npivOnNonRdmDisks,omitempty"`
+	NpivTemporaryDisabled        *bool                                      `xml:"npivTemporaryDisabled,omitempty"`
+	NpivOnNonRdmDisks            *bool                                      `xml:"npivOnNonRdmDisks,omitempty"`
 	LocationId                   string                                     `xml:"locationId,omitempty"`
 	Template                     bool                                       `xml:"template"`
 	GuestId                      string                                     `xml:"guestId"`
@@ -40618,9 +40618,9 @@ type VirtualMachineConfigInfo struct {
 	CpuAllocation                *ResourceAllocationInfo                    `xml:"cpuAllocation,omitempty"`
 	MemoryAllocation             *ResourceAllocationInfo                    `xml:"memoryAllocation,omitempty"`
 	LatencySensitivity           *LatencySensitivity                        `xml:"latencySensitivity,omitempty"`
-	MemoryHotAddEnabled          bool                                       `xml:"memoryHotAddEnabled,omitempty"`
-	CpuHotAddEnabled             bool                                       `xml:"cpuHotAddEnabled,omitempty"`
-	CpuHotRemoveEnabled          bool                                       `xml:"cpuHotRemoveEnabled,omitempty"`
+	MemoryHotAddEnabled          *bool                                      `xml:"memoryHotAddEnabled,omitempty"`
+	CpuHotAddEnabled             *bool                                      `xml:"cpuHotAddEnabled,omitempty"`
+	CpuHotRemoveEnabled          *bool                                      `xml:"cpuHotRemoveEnabled,omitempty"`
 	HotPlugMemoryLimit           int64                                      `xml:"hotPlugMemoryLimit,omitempty"`
 	HotPlugMemoryIncrementSize   int64                                      `xml:"hotPlugMemoryIncrementSize,omitempty"`
 	CpuAffinity                  *VirtualMachineAffinityInfo                `xml:"cpuAffinity,omitempty"`
@@ -40633,16 +40633,16 @@ type VirtualMachineConfigInfo struct {
 	BootOptions                  *VirtualMachineBootOptions                 `xml:"bootOptions,omitempty"`
 	FtInfo                       BaseFaultToleranceConfigInfo               `xml:"ftInfo,omitempty,typeattr"`
 	VAppConfig                   BaseVmConfigInfo                           `xml:"vAppConfig,omitempty,typeattr"`
-	VAssertsEnabled              bool                                       `xml:"vAssertsEnabled,omitempty"`
-	ChangeTrackingEnabled        bool                                       `xml:"changeTrackingEnabled,omitempty"`
+	VAssertsEnabled              *bool                                      `xml:"vAssertsEnabled,omitempty"`
+	ChangeTrackingEnabled        *bool                                      `xml:"changeTrackingEnabled,omitempty"`
 	Firmware                     string                                     `xml:"firmware,omitempty"`
 	MaxMksConnections            int                                        `xml:"maxMksConnections,omitempty"`
-	GuestAutoLockEnabled         bool                                       `xml:"guestAutoLockEnabled,omitempty"`
+	GuestAutoLockEnabled         *bool                                      `xml:"guestAutoLockEnabled,omitempty"`
 	ManagedBy                    *ManagedByInfo                             `xml:"managedBy,omitempty"`
-	MemoryReservationLockedToMax bool                                       `xml:"memoryReservationLockedToMax,omitempty"`
+	MemoryReservationLockedToMax *bool                                      `xml:"memoryReservationLockedToMax,omitempty"`
 	InitialOverhead              *VirtualMachineConfigInfoOverheadInfo      `xml:"initialOverhead,omitempty"`
-	NestedHVEnabled              bool                                       `xml:"nestedHVEnabled,omitempty"`
-	VPMCEnabled                  bool                                       `xml:"vPMCEnabled,omitempty"`
+	NestedHVEnabled              *bool                                      `xml:"nestedHVEnabled,omitempty"`
+	VPMCEnabled                  *bool                                      `xml:"vPMCEnabled,omitempty"`
 	ScheduledHardwareUpgradeInfo *ScheduledHardwareUpgradeInfo              `xml:"scheduledHardwareUpgradeInfo,omitempty"`
 	VFlashCacheReservation       int64                                      `xml:"vFlashCacheReservation,omitempty"`
 }
@@ -40699,10 +40699,10 @@ type VirtualMachineConfigOptionDescriptor struct {
 	Key                 string                   `xml:"key"`
 	Description         string                   `xml:"description,omitempty"`
 	Host                []ManagedObjectReference `xml:"host,omitempty"`
-	CreateSupported     bool                     `xml:"createSupported,omitempty"`
-	DefaultConfigOption bool                     `xml:"defaultConfigOption,omitempty"`
-	RunSupported        bool                     `xml:"runSupported,omitempty"`
-	UpgradeSupported    bool                     `xml:"upgradeSupported,omitempty"`
+	CreateSupported     *bool                    `xml:"createSupported,omitempty"`
+	DefaultConfigOption *bool                    `xml:"defaultConfigOption,omitempty"`
+	RunSupported        *bool                    `xml:"runSupported,omitempty"`
+	UpgradeSupported    *bool                    `xml:"upgradeSupported,omitempty"`
 }
 
 func init() {
@@ -40722,8 +40722,8 @@ type VirtualMachineConfigSpec struct {
 	NpivWorldWideNameType        string                            `xml:"npivWorldWideNameType,omitempty"`
 	NpivDesiredNodeWwns          int16                             `xml:"npivDesiredNodeWwns,omitempty"`
 	NpivDesiredPortWwns          int16                             `xml:"npivDesiredPortWwns,omitempty"`
-	NpivTemporaryDisabled        bool                              `xml:"npivTemporaryDisabled,omitempty"`
-	NpivOnNonRdmDisks            bool                              `xml:"npivOnNonRdmDisks,omitempty"`
+	NpivTemporaryDisabled        *bool                             `xml:"npivTemporaryDisabled,omitempty"`
+	NpivOnNonRdmDisks            *bool                             `xml:"npivOnNonRdmDisks,omitempty"`
 	NpivWorldWideNameOp          string                            `xml:"npivWorldWideNameOp,omitempty"`
 	LocationId                   string                            `xml:"locationId,omitempty"`
 	GuestId                      string                            `xml:"guestId,omitempty"`
@@ -40737,11 +40737,11 @@ type VirtualMachineConfigSpec struct {
 	NumCPUs                      int                               `xml:"numCPUs,omitempty"`
 	NumCoresPerSocket            int                               `xml:"numCoresPerSocket,omitempty"`
 	MemoryMB                     int64                             `xml:"memoryMB,omitempty"`
-	MemoryHotAddEnabled          bool                              `xml:"memoryHotAddEnabled,omitempty"`
-	CpuHotAddEnabled             bool                              `xml:"cpuHotAddEnabled,omitempty"`
-	CpuHotRemoveEnabled          bool                              `xml:"cpuHotRemoveEnabled,omitempty"`
-	VirtualICH7MPresent          bool                              `xml:"virtualICH7MPresent,omitempty"`
-	VirtualSMCPresent            bool                              `xml:"virtualSMCPresent,omitempty"`
+	MemoryHotAddEnabled          *bool                             `xml:"memoryHotAddEnabled,omitempty"`
+	CpuHotAddEnabled             *bool                             `xml:"cpuHotAddEnabled,omitempty"`
+	CpuHotRemoveEnabled          *bool                             `xml:"cpuHotRemoveEnabled,omitempty"`
+	VirtualICH7MPresent          *bool                             `xml:"virtualICH7MPresent,omitempty"`
+	VirtualSMCPresent            *bool                             `xml:"virtualSMCPresent,omitempty"`
 	DeviceChange                 []BaseVirtualDeviceConfigSpec     `xml:"deviceChange,omitempty,typeattr"`
 	CpuAllocation                *ResourceAllocationInfo           `xml:"cpuAllocation,omitempty"`
 	MemoryAllocation             *ResourceAllocationInfo           `xml:"memoryAllocation,omitempty"`
@@ -40755,16 +40755,16 @@ type VirtualMachineConfigSpec struct {
 	BootOptions                  *VirtualMachineBootOptions        `xml:"bootOptions,omitempty"`
 	VAppConfig                   BaseVmConfigSpec                  `xml:"vAppConfig,omitempty,typeattr"`
 	FtInfo                       BaseFaultToleranceConfigInfo      `xml:"ftInfo,omitempty,typeattr"`
-	VAppConfigRemoved            bool                              `xml:"vAppConfigRemoved,omitempty"`
-	VAssertsEnabled              bool                              `xml:"vAssertsEnabled,omitempty"`
-	ChangeTrackingEnabled        bool                              `xml:"changeTrackingEnabled,omitempty"`
+	VAppConfigRemoved            *bool                             `xml:"vAppConfigRemoved,omitempty"`
+	VAssertsEnabled              *bool                             `xml:"vAssertsEnabled,omitempty"`
+	ChangeTrackingEnabled        *bool                             `xml:"changeTrackingEnabled,omitempty"`
 	Firmware                     string                            `xml:"firmware,omitempty"`
 	MaxMksConnections            int                               `xml:"maxMksConnections,omitempty"`
-	GuestAutoLockEnabled         bool                              `xml:"guestAutoLockEnabled,omitempty"`
+	GuestAutoLockEnabled         *bool                             `xml:"guestAutoLockEnabled,omitempty"`
 	ManagedBy                    *ManagedByInfo                    `xml:"managedBy,omitempty"`
-	MemoryReservationLockedToMax bool                              `xml:"memoryReservationLockedToMax,omitempty"`
-	NestedHVEnabled              bool                              `xml:"nestedHVEnabled,omitempty"`
-	VPMCEnabled                  bool                              `xml:"vPMCEnabled,omitempty"`
+	MemoryReservationLockedToMax *bool                             `xml:"memoryReservationLockedToMax,omitempty"`
+	NestedHVEnabled              *bool                             `xml:"nestedHVEnabled,omitempty"`
+	VPMCEnabled                  *bool                             `xml:"vPMCEnabled,omitempty"`
 	ScheduledHardwareUpgradeInfo *ScheduledHardwareUpgradeInfo     `xml:"scheduledHardwareUpgradeInfo,omitempty"`
 	VmProfile                    []BaseVirtualMachineProfileSpec   `xml:"vmProfile,omitempty,typeattr"`
 }
@@ -40791,7 +40791,7 @@ type VirtualMachineConfigSummary struct {
 	GuestFullName       string                       `xml:"guestFullName,omitempty"`
 	Annotation          string                       `xml:"annotation,omitempty"`
 	Product             *VAppProductInfo             `xml:"product,omitempty"`
-	InstallBootRequired bool                         `xml:"installBootRequired,omitempty"`
+	InstallBootRequired *bool                        `xml:"installBootRequired,omitempty"`
 	FtInfo              BaseFaultToleranceConfigInfo `xml:"ftInfo,omitempty,typeattr"`
 	ManagedBy           *ManagedByInfo               `xml:"managedBy,omitempty"`
 }
@@ -40803,9 +40803,9 @@ func init() {
 type VirtualMachineConsolePreferences struct {
 	DynamicData
 
-	PowerOnWhenOpened        bool `xml:"powerOnWhenOpened,omitempty"`
-	EnterFullScreenOnPowerOn bool `xml:"enterFullScreenOnPowerOn,omitempty"`
-	CloseOnPowerOffOrSuspend bool `xml:"closeOnPowerOffOrSuspend,omitempty"`
+	PowerOnWhenOpened        *bool `xml:"powerOnWhenOpened,omitempty"`
+	EnterFullScreenOnPowerOn *bool `xml:"enterFullScreenOnPowerOn,omitempty"`
+	CloseOnPowerOffOrSuspend *bool `xml:"closeOnPowerOffOrSuspend,omitempty"`
 }
 
 func init() {
@@ -41064,19 +41064,19 @@ func init() {
 type VirtualMachineFlagInfo struct {
 	DynamicData
 
-	DisableAcceleration      bool   `xml:"disableAcceleration,omitempty"`
-	EnableLogging            bool   `xml:"enableLogging,omitempty"`
-	UseToe                   bool   `xml:"useToe,omitempty"`
-	RunWithDebugInfo         bool   `xml:"runWithDebugInfo,omitempty"`
+	DisableAcceleration      *bool  `xml:"disableAcceleration,omitempty"`
+	EnableLogging            *bool  `xml:"enableLogging,omitempty"`
+	UseToe                   *bool  `xml:"useToe,omitempty"`
+	RunWithDebugInfo         *bool  `xml:"runWithDebugInfo,omitempty"`
 	MonitorType              string `xml:"monitorType,omitempty"`
 	HtSharing                string `xml:"htSharing,omitempty"`
-	SnapshotDisabled         bool   `xml:"snapshotDisabled,omitempty"`
-	SnapshotLocked           bool   `xml:"snapshotLocked,omitempty"`
-	DiskUuidEnabled          bool   `xml:"diskUuidEnabled,omitempty"`
+	SnapshotDisabled         *bool  `xml:"snapshotDisabled,omitempty"`
+	SnapshotLocked           *bool  `xml:"snapshotLocked,omitempty"`
+	DiskUuidEnabled          *bool  `xml:"diskUuidEnabled,omitempty"`
 	VirtualMmuUsage          string `xml:"virtualMmuUsage,omitempty"`
 	VirtualExecUsage         string `xml:"virtualExecUsage,omitempty"`
 	SnapshotPowerOffBehavior string `xml:"snapshotPowerOffBehavior,omitempty"`
-	RecordReplayEnabled      bool   `xml:"recordReplayEnabled,omitempty"`
+	RecordReplayEnabled      *bool  `xml:"recordReplayEnabled,omitempty"`
 }
 
 func init() {
@@ -41256,7 +41256,7 @@ func init() {
 type VirtualMachineNetworkShaperInfo struct {
 	DynamicData
 
-	Enabled    bool  `xml:"enabled,omitempty"`
+	Enabled    *bool `xml:"enabled,omitempty"`
 	PeakBps    int64 `xml:"peakBps,omitempty"`
 	AverageBps int64 `xml:"averageBps,omitempty"`
 	BurstSize  int64 `xml:"burstSize,omitempty"`
@@ -41396,11 +41396,11 @@ type VirtualMachineRuntimeInfo struct {
 	MaxMemoryUsage            int                                          `xml:"maxMemoryUsage,omitempty"`
 	NumMksConnections         int                                          `xml:"numMksConnections"`
 	RecordReplayState         VirtualMachineRecordReplayState              `xml:"recordReplayState,omitempty"`
-	CleanPowerOff             bool                                         `xml:"cleanPowerOff,omitempty"`
+	CleanPowerOff             *bool                                        `xml:"cleanPowerOff,omitempty"`
 	NeedSecondaryReason       string                                       `xml:"needSecondaryReason,omitempty"`
-	OnlineStandby             bool                                         `xml:"onlineStandby,omitempty"`
+	OnlineStandby             *bool                                        `xml:"onlineStandby,omitempty"`
 	MinRequiredEVCModeKey     string                                       `xml:"minRequiredEVCModeKey,omitempty"`
-	ConsolidationNeeded       bool                                         `xml:"consolidationNeeded,omitempty"`
+	ConsolidationNeeded       *bool                                        `xml:"consolidationNeeded,omitempty"`
 	OfflineFeatureRequirement []VirtualMachineFeatureRequirement           `xml:"offlineFeatureRequirement,omitempty"`
 	FeatureRequirement        []VirtualMachineFeatureRequirement           `xml:"featureRequirement,omitempty"`
 	FeatureMask               []HostFeatureMask                            `xml:"featureMask,omitempty"`
@@ -41477,7 +41477,7 @@ type VirtualMachineSnapshotTree struct {
 	Quiesced          bool                         `xml:"quiesced"`
 	BackupManifest    string                       `xml:"backupManifest,omitempty"`
 	ChildSnapshotList []VirtualMachineSnapshotTree `xml:"childSnapshotList,omitempty"`
-	ReplaySupported   bool                         `xml:"replaySupported,omitempty"`
+	ReplaySupported   *bool                        `xml:"replaySupported,omitempty"`
 }
 
 func init() {
@@ -41612,7 +41612,7 @@ type VirtualMachineVMCIDevice struct {
 	VirtualDevice
 
 	Id                             int64 `xml:"id,omitempty"`
-	AllowUnrestrictedCommunication bool  `xml:"allowUnrestrictedCommunication,omitempty"`
+	AllowUnrestrictedCommunication *bool `xml:"allowUnrestrictedCommunication,omitempty"`
 }
 
 func init() {
@@ -41642,8 +41642,8 @@ type VirtualMachineVideoCard struct {
 
 	VideoRamSizeInKB int64  `xml:"videoRamSizeInKB,omitempty"`
 	NumDisplays      int    `xml:"numDisplays,omitempty"`
-	UseAutoDetect    bool   `xml:"useAutoDetect,omitempty"`
-	Enable3DSupport  bool   `xml:"enable3DSupport,omitempty"`
+	UseAutoDetect    *bool  `xml:"useAutoDetect,omitempty"`
+	Enable3DSupport  *bool  `xml:"enable3DSupport,omitempty"`
 	Use3dRenderer    string `xml:"use3dRenderer,omitempty"`
 }
 
@@ -41883,7 +41883,7 @@ func init() {
 type VirtualSCSIController struct {
 	VirtualController
 
-	HotAddRemove       bool               `xml:"hotAddRemove,omitempty"`
+	HotAddRemove       *bool              `xml:"hotAddRemove,omitempty"`
 	SharedBus          VirtualSCSISharing `xml:"sharedBus"`
 	ScsiCtlrUnitNumber int                `xml:"scsiCtlrUnitNumber,omitempty"`
 }
@@ -42016,7 +42016,7 @@ type VirtualSerialPortPipeBackingInfo struct {
 	VirtualDevicePipeBackingInfo
 
 	Endpoint string `xml:"endpoint"`
-	NoRxLoss bool   `xml:"noRxLoss,omitempty"`
+	NoRxLoss *bool  `xml:"noRxLoss,omitempty"`
 }
 
 func init() {
@@ -42117,7 +42117,7 @@ func init() {
 type VirtualSriovEthernetCard struct {
 	VirtualEthernetCard
 
-	AllowGuestOSMtuChange bool                                      `xml:"allowGuestOSMtuChange,omitempty"`
+	AllowGuestOSMtuChange *bool                                     `xml:"allowGuestOSMtuChange,omitempty"`
 	SriovBacking          *VirtualSriovEthernetCardSriovBackingInfo `xml:"sriovBacking,omitempty"`
 }
 
@@ -42192,8 +42192,8 @@ func init() {
 type VirtualUSBController struct {
 	VirtualController
 
-	AutoConnectDevices bool `xml:"autoConnectDevices,omitempty"`
-	EhciEnabled        bool `xml:"ehciEnabled,omitempty"`
+	AutoConnectDevices *bool `xml:"autoConnectDevices,omitempty"`
+	EhciEnabled        *bool `xml:"ehciEnabled,omitempty"`
 }
 
 func init() {
@@ -42285,7 +42285,7 @@ func init() {
 type VirtualUSBXHCIController struct {
 	VirtualController
 
-	AutoConnectDevices bool `xml:"autoConnectDevices,omitempty"`
+	AutoConnectDevices *bool `xml:"autoConnectDevices,omitempty"`
 }
 
 func init() {
@@ -42659,7 +42659,7 @@ type VmConfigSpec struct {
 	Eula                    []string              `xml:"eula,omitempty"`
 	OvfSection              []VAppOvfSectionSpec  `xml:"ovfSection,omitempty"`
 	OvfEnvironmentTransport []string              `xml:"ovfEnvironmentTransport,omitempty"`
-	InstallBootRequired     bool                  `xml:"installBootRequired,omitempty"`
+	InstallBootRequired     *bool                 `xml:"installBootRequired,omitempty"`
 	InstallBootStopDelay    int                   `xml:"installBootStopDelay,omitempty"`
 }
 
@@ -42791,7 +42791,7 @@ type VmDiskFileInfo struct {
 	HardwareVersion int      `xml:"hardwareVersion,omitempty"`
 	ControllerType  string   `xml:"controllerType,omitempty"`
 	DiskExtents     []string `xml:"diskExtents,omitempty"`
-	Thin            bool     `xml:"thin,omitempty"`
+	Thin            *bool    `xml:"thin,omitempty"`
 }
 
 func init() {
@@ -42815,7 +42815,7 @@ type VmDiskFileQueryFilter struct {
 	DiskType             []string `xml:"diskType,omitempty"`
 	MatchHardwareVersion []int    `xml:"matchHardwareVersion,omitempty"`
 	ControllerType       []string `xml:"controllerType,omitempty"`
-	Thin                 bool     `xml:"thin,omitempty"`
+	Thin                 *bool    `xml:"thin,omitempty"`
 }
 
 func init() {
@@ -42825,12 +42825,12 @@ func init() {
 type VmDiskFileQueryFlags struct {
 	DynamicData
 
-	DiskType        bool `xml:"diskType"`
-	CapacityKb      bool `xml:"capacityKb"`
-	HardwareVersion bool `xml:"hardwareVersion"`
-	ControllerType  bool `xml:"controllerType,omitempty"`
-	DiskExtents     bool `xml:"diskExtents,omitempty"`
-	Thin            bool `xml:"thin,omitempty"`
+	DiskType        bool  `xml:"diskType"`
+	CapacityKb      bool  `xml:"capacityKb"`
+	HardwareVersion bool  `xml:"hardwareVersion"`
+	ControllerType  *bool `xml:"controllerType,omitempty"`
+	DiskExtents     *bool `xml:"diskExtents,omitempty"`
+	Thin            *bool `xml:"thin,omitempty"`
 }
 
 func init() {
@@ -44019,7 +44019,7 @@ type VmfsDatastoreBaseOption struct {
 	DynamicData
 
 	Layout                HostDiskPartitionLayout `xml:"layout"`
-	PartitionFormatChange bool                    `xml:"partitionFormatChange,omitempty"`
+	PartitionFormatChange *bool                   `xml:"partitionFormatChange,omitempty"`
 }
 
 func init() {
@@ -44240,7 +44240,7 @@ func init() {
 type VsanClusterConfigInfo struct {
 	DynamicData
 
-	Enabled       bool                                  `xml:"enabled,omitempty"`
+	Enabled       *bool                                 `xml:"enabled,omitempty"`
 	DefaultConfig *VsanClusterConfigInfoHostDefaultInfo `xml:"defaultConfig,omitempty"`
 }
 
@@ -44252,7 +44252,7 @@ type VsanClusterConfigInfoHostDefaultInfo struct {
 	DynamicData
 
 	Uuid             string `xml:"uuid,omitempty"`
-	AutoClaimStorage bool   `xml:"autoClaimStorage,omitempty"`
+	AutoClaimStorage *bool  `xml:"autoClaimStorage,omitempty"`
 }
 
 func init() {
@@ -44345,7 +44345,7 @@ func init() {
 type VsanHostConfigInfo struct {
 	DynamicData
 
-	Enabled     bool                           `xml:"enabled,omitempty"`
+	Enabled     *bool                          `xml:"enabled,omitempty"`
 	HostSystem  *ManagedObjectReference        `xml:"hostSystem,omitempty"`
 	ClusterInfo *VsanHostConfigInfoClusterInfo `xml:"clusterInfo,omitempty"`
 	StorageInfo *VsanHostConfigInfoStorageInfo `xml:"storageInfo,omitempty"`
@@ -44391,7 +44391,7 @@ func init() {
 type VsanHostConfigInfoStorageInfo struct {
 	DynamicData
 
-	AutoClaimStorage bool                  `xml:"autoClaimStorage,omitempty"`
+	AutoClaimStorage *bool                 `xml:"autoClaimStorage,omitempty"`
 	DiskMapping      []VsanHostDiskMapping `xml:"diskMapping,omitempty"`
 }
 

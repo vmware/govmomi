@@ -40,7 +40,7 @@ func (f FileManager) CopyDatastoreFile(ctx context.Context, sourceName string, s
 		This:            f.Reference(),
 		SourceName:      sourceName,
 		DestinationName: destinationName,
-		Force:           force,
+		Force:           types.NewBool(force),
 	}
 
 	if sourceDatacenter != nil {
@@ -86,7 +86,7 @@ func (f FileManager) MakeDirectory(ctx context.Context, name string, dc *Datacen
 	req := types.MakeDirectory{
 		This: f.Reference(),
 		Name: name,
-		CreateParentDirectories: createParentDirectories,
+		CreateParentDirectories: types.NewBool(createParentDirectories),
 	}
 
 	if dc != nil {
@@ -103,7 +103,7 @@ func (f FileManager) MoveDatastoreFile(ctx context.Context, sourceName string, s
 		This:            f.Reference(),
 		SourceName:      sourceName,
 		DestinationName: destinationName,
-		Force:           force,
+		Force:           types.NewBool(force),
 	}
 
 	if sourceDatacenter != nil {
