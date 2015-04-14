@@ -306,7 +306,7 @@ func (f *Finder) ClusterList(ctx context.Context, path ...string) ([]*object.Clu
 	for _, e := range es {
 		ref := e.Object.Reference()
 		if ref.Type == "ClusterComputeResource" {
-			ccr := object.NewClusterComputeResource(f.client, ref)			
+			ccr := object.NewClusterComputeResource(f.client, ref)
 			ccr.InventoryPath = e.Path
 
 			ccrs = append(ccrs, ccr)
@@ -321,7 +321,7 @@ func (f *Finder) Cluster(ctx context.Context, path string) (*object.ClusterCompu
 	if err != nil {
 		return nil, err
 	}
-	
+
 	if len(ccrs) == 0 {
 		return nil, &NotFoundError{"cluster", path}
 	}

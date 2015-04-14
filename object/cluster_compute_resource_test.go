@@ -18,4 +18,3 @@ package object
 
 // ComputeResource should implement the Reference interface.
 var _ Reference = ClusterComputeResource{}
-
