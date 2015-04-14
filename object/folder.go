@@ -109,6 +109,29 @@ func (f Folder) CreateFolder(ctx context.Context, name string) (*Folder, error) 
 	return NewFolder(f.c, res.Returnval), err
 }
 
+func (f Folder) AddStandaloneHost(ctx context.Context, spec types.HostConnectSpec, addConnected bool,
+	license *string, compResSpec *types.BaseComputeResourceConfigSpec) (*Task, error) {
+
+	req := types.AddStandaloneHost_Task{
+		This:         f.Reference(),
+		Spec:         spec,
+		AddConnected: addConnected,
+	}
+	if license != nil {
+		req.License = *license
+	}
+	if compResSpec != nil {
+		req.CompResSpec = *compResSpec
+	}
+
+	res, err := methods.AddStandaloneHost_Task(ctx, f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(f.c, res.Returnval), nil
+}
+
 func (f Folder) CreateVM(ctx context.Context, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),

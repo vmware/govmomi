@@ -25,7 +25,7 @@ import (
 
 type ClusterComputeResource struct {
 	ComputeResource
-	
+
 	InventoryPath string
 }
 
@@ -37,12 +37,35 @@ func NewClusterComputeResource(c *vim25.Client, ref types.ManagedObjectReference
 
 func (c ClusterComputeResource) ReconfigureCluster(ctx context.Context, spec types.ClusterConfigSpec) (*Task, error) {
 	req := types.ReconfigureCluster_Task{
-		This: c.Reference(),
-		Spec: spec,
+		This:   c.Reference(),
+		Spec:   spec,
 		Modify: true,
 	}
 
 	res, err := methods.ReconfigureCluster_Task(ctx, c.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(c.c, res.Returnval), nil
+}
+
+func (c ClusterComputeResource) AddHost(ctx context.Context, spec types.HostConnectSpec, asConnected bool,
+	license *string, resourcePool *types.ManagedObjectReference) (*Task, error) {
+
+	req := types.AddHost_Task{
+		This:        c.Reference(),
+		Spec:        spec,
+		AsConnected: asConnected,
+	}
+	if license != nil {
+		req.License = *license
+	}
+	if resourcePool != nil {
+		req.ResourcePool = resourcePool
+	}
+
+	res, err := methods.AddHost_Task(ctx, c.c, &req)
 	if err != nil {
 		return nil, err
 	}
