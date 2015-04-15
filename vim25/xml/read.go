@@ -631,9 +631,30 @@ func copyValue(dst reflect.Value, src []byte) (err error) {
 		}
 		dst.SetInt(itmp)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		utmp, err := strconv.ParseUint(string(src), 10, dst.Type().Bits())
-		if err != nil {
-			return err
+		var utmp uint64
+		if len(src) > 0 && src[0] == '-' {
+			// Negative value for unsigned field.
+			// Assume it was serialized following two's complement.
+			itmp, err := strconv.ParseInt(string(src), 10, dst.Type().Bits())
+			if err != nil {
+				return err
+			}
+			// Reinterpret value based on type width.
+			switch dst.Type().Bits() {
+			case 8:
+				utmp = uint64(uint8(itmp))
+			case 16:
+				utmp = uint64(uint16(itmp))
+			case 32:
+				utmp = uint64(uint32(itmp))
+			case 64:
+				utmp = uint64(uint64(itmp))
+			}
+		} else {
+			utmp, err = strconv.ParseUint(string(src), 10, dst.Type().Bits())
+			if err != nil {
+				return err
+			}
 		}
 		dst.SetUint(utmp)
 	case reflect.Float32, reflect.Float64:
