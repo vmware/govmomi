@@ -175,12 +175,18 @@ class Simple
       when "int"
       when "boolean"
         t = "bool"
-        prefix += "*" if !slice? && optional?
+        if !slice? && optional?
+          prefix += "*"
+          self.need_omitempty = false
+        end
       when "long"
         t = "int64"
       when "dateTime"
         t = "time.Time"
-        prefix += "*" if !slice? && optional?
+        if !slice? && optional?
+          prefix += "*"
+          self.need_omitempty = false
+        end
       when "anyType"
         t = "AnyType"
       when "byte"
@@ -213,6 +219,19 @@ class Simple
 
   def optional?
     test_attr("minOccurs", "0")
+  end
+
+  def need_omitempty=(v)
+    @need_omitempty = v
+  end
+
+  def need_omitempty?
+    var_type # HACK: trigger setting need_omitempty if necessary
+    if @need_omitempty.nil?
+      @need_omitempty = optional?
+    else
+      @need_omitempty
+    end
   end
 
   def need_typeattr?
@@ -273,7 +292,7 @@ class Element < Simple
 
   def dump_field(io)
     tag = name
-    tag += ",omitempty" if optional?
+    tag += ",omitempty" if need_omitempty?
     tag += ",typeattr" if need_typeattr?
     io.print "%s %s `xml:\"%s\"`\n" % [var_name, var_type, tag]
   end
@@ -292,7 +311,7 @@ end
 class Attribute < Simple
   def dump_field(io)
     tag = name
-    tag += ",omitempty" if optional?
+    tag += ",omitempty" if need_omitempty?
     tag += ",attr"
     io.print "%s %s `xml:\"%s\"`\n" % [var_name, var_type, tag]
   end
