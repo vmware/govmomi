@@ -33,7 +33,11 @@ import (
 func objectContentToType(o types.ObjectContent) (*reflect.Value, error) {
 	// Expect no properties in the missing set
 	for _, p := range o.MissingSet {
-		return nil, soap.WrapVimFault(p.Fault.Fault)
+		if p.Path == "environmentBrowser" {
+			continue
+		} else {
+			return nil, soap.WrapVimFault(p.Fault.Fault)
+		}
 	}
 
 	ti := typeInfoForType(o.Obj.Type)
