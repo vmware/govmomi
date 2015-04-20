@@ -21,13 +21,13 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/vmware/govmomi/test/client"
+	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/mo"
 	"golang.org/x/net/context"
 )
 
 func TestSearch(t *testing.T) {
-	c := client.NewAuthenticatedClient(t)
+	c := test.NewAuthenticatedClient(t)
 	s := NewSearchIndex(c)
 
 	ref, err := s.FindChild(context.Background(), NewRootFolder(c), "ha-datacenter")
