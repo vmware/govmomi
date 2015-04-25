@@ -107,7 +107,7 @@ func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProper
 
 func (l Lister) List(ctx context.Context) ([]Element, error) {
 	switch l.Reference.Type {
-	case "Folder":
+	case "Folder", "StoragePod":
 		return l.ListFolder(ctx)
 	case "Datacenter":
 		return l.ListDatacenter(ctx)
