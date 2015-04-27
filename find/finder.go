@@ -296,6 +296,56 @@ func (f *Finder) DefaultDatastore(ctx context.Context) (*object.Datastore, error
 	return ds, nil
 }
 
+func (f *Finder) ComputeResourceList(ctx context.Context, path ...string) ([]*object.ComputeResource, error) {
+	es, err := f.find(ctx, f.hostFolder, false, path...)
+	if err != nil {
+		return nil, err
+	}
+
+	var crs []*object.ComputeResource
+	for _, e := range es {
+		var cr *object.ComputeResource
+
+		switch o := e.Object.(type) {
+		case mo.ComputeResource, mo.ClusterComputeResource:
+			cr = object.NewComputeResource(f.client, o.Reference())
+		default:
+			continue
+		}
+
+		cr.InventoryPath = e.Path
+		crs = append(crs, cr)
+	}
+
+	return crs, nil
+}
+
+func (f *Finder) ComputeResource(ctx context.Context, path string) (*object.ComputeResource, error) {
+	crs, err := f.ComputeResourceList(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(crs) == 0 {
+		return nil, &NotFoundError{"compute resource", path}
+	}
+
+	if len(crs) > 1 {
+		return nil, &MultipleFoundError{"compute resource", path}
+	}
+
+	return crs[0], nil
+}
+
+func (f *Finder) DefaultComputeResource(ctx context.Context) (*object.ComputeResource, error) {
+	cr, err := f.ComputeResource(ctx, "*")
+	if err != nil {
+		return nil, toDefaultError(err)
+	}
+
+	return cr, nil
+}
+
 func (f *Finder) HostSystemList(ctx context.Context, path ...string) ([]*object.HostSystem, error) {
 	es, err := f.find(ctx, f.hostFolder, false, path...)
 	if err != nil {
