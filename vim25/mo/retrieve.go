@@ -25,6 +25,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+func ignoreMissingProperty(ref types.ManagedObjectReference, p types.MissingProperty) bool {
+	switch ref.Type {
+	case "VirtualMachine":
+		switch p.Path {
+		case "environmentBrowser":
+			// See https://github.com/vmware/govmomi/pull/242
+			return true
+		}
+	}
+
+	return false
+}
+
 // objectContentToType loads an ObjectContent value into the value it
 // represents. If the ObjectContent value has a non-empty 'MissingSet' field,
 // it returns the first fault it finds there as error. If the 'MissingSet'
@@ -33,6 +46,10 @@ import (
 func objectContentToType(o types.ObjectContent) (*reflect.Value, error) {
 	// Expect no properties in the missing set
 	for _, p := range o.MissingSet {
+		if ignoreMissingProperty(o.Obj, p) {
+			continue
+		}
+
 		return nil, soap.WrapVimFault(p.Fault.Fault)
 	}
 

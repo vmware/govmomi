@@ -45,3 +45,31 @@ func (c ComputeResource) Hosts(ctx context.Context) ([]types.ManagedObjectRefere
 
 	return cr.Host, nil
 }
+
+func (c ComputeResource) Datastores(ctx context.Context) ([]*Datastore, error) {
+	var cr mo.ComputeResource
+
+	err := c.Properties(ctx, c.Reference(), []string{"datastore"}, &cr)
+	if err != nil {
+		return nil, err
+	}
+
+	var dss []*Datastore
+	for _, ref := range cr.Datastore {
+		ds := NewDatastore(c.c, ref)
+		dss = append(dss, ds)
+	}
+
+	return dss, nil
+}
+
+func (c ComputeResource) ResourcePool(ctx context.Context) (*ResourcePool, error) {
+	var cr mo.ComputeResource
+
+	err := c.Properties(ctx, c.Reference(), []string{"resourcePool"}, &cr)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewResourcePool(c.c, *cr.ResourcePool), nil
+}
