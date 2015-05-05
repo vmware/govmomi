@@ -38,6 +38,7 @@ import (
 const (
 	envURL           = "GOVC_URL"
 	envInsecure      = "GOVC_INSECURE"
+	envPersist       = "GOVC_PERSIST_SESSION"
 	envMinAPIVersion = "GOVC_MIN_API_VERSION"
 )
 
@@ -50,6 +51,7 @@ type ClientFlag struct {
 
 	url           *url.URL
 	insecure      bool
+	persist       bool
 	minAPIVersion string
 
 	client *vim25.Client
@@ -123,6 +125,17 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 		}
 
 		{
+			persist := true
+			switch env := strings.ToLower(os.Getenv(envPersist)); env {
+			case "0", "false":
+				persist = false
+			}
+
+			usage := fmt.Sprintf("Persist session to disk [%s]", envPersist)
+			f.BoolVar(&flag.persist, "persist", persist, usage)
+		}
+
+		{
 			env := os.Getenv(envMinAPIVersion)
 			if env == "" {
 				env = "5.5"
@@ -152,6 +165,10 @@ func (flag *ClientFlag) sessionFile() string {
 }
 
 func (flag *ClientFlag) saveClient(c *vim25.Client) error {
+	if !flag.persist {
+		return nil
+	}
+
 	p := flag.sessionFile()
 	err := os.MkdirAll(filepath.Dir(p), 0700)
 	if err != nil {
@@ -175,6 +192,10 @@ func (flag *ClientFlag) saveClient(c *vim25.Client) error {
 }
 
 func (flag *ClientFlag) restoreClient(c *vim25.Client) (bool, error) {
+	if !flag.persist {
+		return false, nil
+	}
+
 	f, err := os.Open(flag.sessionFile())
 	if err != nil {
 		if os.IsNotExist(err) {
