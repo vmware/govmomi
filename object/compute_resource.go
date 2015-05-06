@@ -26,6 +26,8 @@ import (
 
 type ComputeResource struct {
 	Common
+
+	InventoryPath string
 }
 
 func NewComputeResource(c *vim25.Client, ref types.ManagedObjectReference) *ComputeResource {
@@ -45,15 +47,43 @@ func (c ComputeResource) Hosts(ctx context.Context) ([]types.ManagedObjectRefere
 	return cr.Host, nil
 }
 
-func (c ComputeResource) Destroy(ctx context.Context) (*Task, error) {
-	req := types.Destroy_Task{
-		This: c.Reference(),
-	}
+func (c ComputeResource) Datastores(ctx context.Context) ([]*Datastore, error) {
+	var cr mo.ComputeResource
 
-	res, err := methods.Destroy_Task(ctx, c.c, &req)
+	err := c.Properties(ctx, c.Reference(), []string{"datastore"}, &cr)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewTask(c.c, res.Returnval), nil
+	var dss []*Datastore
+	for _, ref := range cr.Datastore {
+		ds := NewDatastore(c.c, ref)
+		dss = append(dss, ds)
+	}
+
+	return dss, nil
+}
+
+func (c ComputeResource) ResourcePool(ctx context.Context) (*ResourcePool, error) {
+	var cr mo.ComputeResource
+
+	err := c.Properties(ctx, c.Reference(), []string{"resourcePool"}, &cr)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewResourcePool(c.c, *cr.ResourcePool), nil
+}
+
+func (c ComputeResource) Destroy(ctx context.Context) (*Task, error) {
+    req := types.Destroy_Task{
+        This: c.Reference(),
+    }
+
+    res, err := methods.Destroy_Task(ctx, c.c, &req)
+    if err != nil {
+        return nil, err
+    }
+
+    return NewTask(c.c, res.Returnval), nil
 }
