@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+	http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -297,40 +297,40 @@ func (f *Finder) DefaultDatastore(ctx context.Context) (*object.Datastore, error
 }
 
 func (f *Finder) ClusterComputeResourceList(ctx context.Context, path ...string) ([]*object.ClusterComputeResource, error) {
-    es, err := f.find(ctx, f.hostFolder, false, path...)
-    if err != nil {
-        return nil, err
-    }
+	es, err := f.find(ctx, f.hostFolder, false, path...)
+	if err != nil {
+		return nil, err
+	}
 
-    var ccrs []*object.ClusterComputeResource
-    for _, e := range es {
-        ref := e.Object.Reference()
-        if ref.Type == "ClusterComputeResource" {
-            ccr := object.NewClusterComputeResource(f.client, ref)
-            ccr.InventoryPath = e.Path
+	var ccrs []*object.ClusterComputeResource
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "ClusterComputeResource" {
+			ccr := object.NewClusterComputeResource(f.client, ref)
+			ccr.InventoryPath = e.Path
 
-            ccrs = append(ccrs, ccr)
-        }
-    }
+			ccrs = append(ccrs, ccr)
+		}
+	}
 
-    return ccrs, nil
+	return ccrs, nil
 }
 
 func (f *Finder) ClusterComputeResource(ctx context.Context, path string) (*object.ClusterComputeResource, error) {
-    ccrs, err := f.ClusterComputeResourceList(ctx, path)
-    if err != nil {
-        return nil, err
-    }
+	ccrs, err := f.ClusterComputeResourceList(ctx, path)
+	if err != nil {
+		return nil, err
+	}
 
-    if len(ccrs) == 0 {
-        return nil, &NotFoundError{"cluster compute resource", path}
-    }
+	if len(ccrs) == 0 {
+		return nil, &NotFoundError{"cluster compute resource", path}
+	}
 
-    if len(ccrs) > 1 {
-        return nil, &MultipleFoundError{"cluster compute resource", path}
-    }
+	if len(ccrs) > 1 {
+		return nil, &MultipleFoundError{"cluster compute resource", path}
+	}
 
-    return ccrs[0], nil
+	return ccrs[0], nil
 }
 
 func (f *Finder) ComputeResourceList(ctx context.Context, path ...string) ([]*object.ComputeResource, error) {
