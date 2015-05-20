@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -91,15 +92,34 @@ func traversable(ref types.ManagedObjectReference) bool {
 	return true
 }
 
-func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProperties, dst interface{}) error {
+func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProperties, dst *[]interface{}) error {
 	res, err := l.Collector.RetrieveProperties(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	err = mo.LoadRetrievePropertiesResponse(res, dst)
-	if err != nil {
-		return err
+	// Instead of using mo.LoadRetrievePropertiesResponse, use a custom loop to
+	// iterate over the results and ignore entries that have properties that
+	// could not be retrieved (a non-empty `missingSet` property). Since the
+	// returned objects are enumerated by vSphere in the first place, any object
+	// that has a non-empty `missingSet` property is indicative of a race
+	// condition in vSphere where the object was enumerated initially, but was
+	// removed before its properties could be collected.
+	for _, p := range res.Returnval {
+		v, err := mo.ObjectContentToType(p)
+		if err != nil {
+			// Ignore fault if it is ManagedObjectNotFound
+			if soap.IsVimFault(err) {
+				switch soap.ToVimFault(err).(type) {
+				case *types.ManagedObjectNotFound:
+					continue
+				}
+			}
+
+			return err
+		}
+
+		*dst = append(*dst, v)
 	}
 
 	return nil
