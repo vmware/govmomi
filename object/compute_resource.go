@@ -18,6 +18,7 @@ package object
 
 import (
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -72,4 +73,17 @@ func (c ComputeResource) ResourcePool(ctx context.Context) (*ResourcePool, error
 	}
 
 	return NewResourcePool(c.c, *cr.ResourcePool), nil
+}
+
+func (c ComputeResource) Destroy(ctx context.Context) (*Task, error) {
+	req := types.Destroy_Task{
+		This: c.Reference(),
+	}
+
+	res, err := methods.Destroy_Task(ctx, c.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(c.c, res.Returnval), nil
 }

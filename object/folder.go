@@ -75,6 +75,26 @@ func (f Folder) CreateDatacenter(ctx context.Context, datacenter string) (*Datac
 	return NewDatacenter(f.c, res.Returnval), nil
 }
 
+func (f Folder) CreateCluster(ctx context.Context, cluster string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, error) {
+	req := types.CreateClusterEx{
+		This: f.Reference(),
+		Name: cluster,
+		Spec: spec,
+	}
+
+	res, err := methods.CreateClusterEx(ctx, f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	// Response will be nil if this is an ESX host that does not belong to a vCenter
+	if res == nil {
+		return nil, nil
+	}
+
+	return NewClusterComputeResource(f.c, res.Returnval), nil
+}
+
 func (f Folder) CreateFolder(ctx context.Context, name string) (*Folder, error) {
 	req := types.CreateFolder{
 		This: f.Reference(),
@@ -87,6 +107,29 @@ func (f Folder) CreateFolder(ctx context.Context, name string) (*Folder, error) 
 	}
 
 	return NewFolder(f.c, res.Returnval), err
+}
+
+func (f Folder) AddStandaloneHost(ctx context.Context, spec types.HostConnectSpec, addConnected bool,
+	license *string, compResSpec *types.BaseComputeResourceConfigSpec) (*Task, error) {
+
+	req := types.AddStandaloneHost_Task{
+		This:         f.Reference(),
+		Spec:         spec,
+		AddConnected: addConnected,
+	}
+	if license != nil {
+		req.License = *license
+	}
+	if compResSpec != nil {
+		req.CompResSpec = *compResSpec
+	}
+
+	res, err := methods.AddStandaloneHost_Task(ctx, f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(f.c, res.Returnval), nil
 }
 
 func (f Folder) CreateVM(ctx context.Context, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
