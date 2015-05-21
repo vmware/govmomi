@@ -132,7 +132,7 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 			}
 
 			usage := fmt.Sprintf("Persist session to disk [%s]", envPersist)
-			f.BoolVar(&flag.persist, "persist", persist, usage)
+			f.BoolVar(&flag.persist, "persist-session", persist, usage)
 		}
 
 		{

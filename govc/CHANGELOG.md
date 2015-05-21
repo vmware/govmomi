@@ -4,8 +4,8 @@
 
 * Add `host.autostart` commands to manage VM autostart.
 
-* Add `-persist` flag to control whether or not the session is persisted to
-  disk (defaults to true).
+* Add `-persist-session` flag to control whether or not the session is
+  persisted to disk (defaults to true).
 
 ### 0.1.0 (2015-03-17)
 
