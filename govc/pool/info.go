@@ -133,6 +133,6 @@ func writeInfo(w io.Writer, name string, units string, ru *types.ResourcePoolRes
 
 	fmt.Fprintf(w, "  %s Usage:\t%d%s (%0.1f%%)\n", name, ru.OverallUsage, units, usage)
 	fmt.Fprintf(w, "  %s Shares:\t%s%s\n", name, ra.Shares.Level, shares)
-	fmt.Fprintf(w, "  %s Reservation:\t%d%s (expandable=%v)\n", name, ra.Reservation, units, ra.ExpandableReservation)
+	fmt.Fprintf(w, "  %s Reservation:\t%d%s (expandable=%v)\n", name, ra.Reservation, units, *ra.ExpandableReservation)
 	fmt.Fprintf(w, "  %s Limit:\t%s\n", name, limit)
 }
