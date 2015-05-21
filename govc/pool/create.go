@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
@@ -69,11 +70,10 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 		base := path.Base(arg)
 		parents, err := finder.ResourcePoolList(context.TODO(), dir)
 		if err != nil {
+			if _, ok := err.(*find.NotFoundError); ok {
+				return fmt.Errorf("cannot create resource pool '%s': parent not found", base)
+			}
 			return err
-		}
-
-		if len(parents) == 0 {
-			return fmt.Errorf("cannot create resource pool '%s': parent not found", base)
 		}
 
 		for _, parent := range parents {
