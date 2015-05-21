@@ -38,12 +38,12 @@ func ignoreMissingProperty(ref types.ManagedObjectReference, p types.MissingProp
 	return false
 }
 
-// objectContentToType loads an ObjectContent value into the value it
+// ObjectContentToType loads an ObjectContent value into the value it
 // represents. If the ObjectContent value has a non-empty 'MissingSet' field,
 // it returns the first fault it finds there as error. If the 'MissingSet'
 // field is empty, it returns a pointer to a reflect.Value. It handles contain
 // nested properties, such as 'guest.ipAddress' or 'config.hardware'.
-func objectContentToType(o types.ObjectContent) (*reflect.Value, error) {
+func ObjectContentToType(o types.ObjectContent) (interface{}, error) {
 	// Expect no properties in the missing set
 	for _, p := range o.MissingSet {
 		if ignoreMissingProperty(o.Obj, p) {
@@ -59,7 +59,7 @@ func objectContentToType(o types.ObjectContent) (*reflect.Value, error) {
 		return nil, err
 	}
 
-	return &v, nil
+	return v.Elem().Interface(), nil
 }
 
 // LoadRetrievePropertiesResponse converts the response of a call to
@@ -86,21 +86,21 @@ func LoadRetrievePropertiesResponse(res *types.RetrievePropertiesResponse, dst i
 
 	if isSlice {
 		for _, p := range res.Returnval {
-			v, err := objectContentToType(p)
+			v, err := ObjectContentToType(p)
 			if err != nil {
 				return err
 			}
-			rv.Set(reflect.Append(rv, v.Elem()))
+			rv.Set(reflect.Append(rv, reflect.ValueOf(v)))
 		}
 	} else {
 		switch len(res.Returnval) {
 		case 0:
 		case 1:
-			v, err := objectContentToType(res.Returnval[0])
+			v, err := ObjectContentToType(res.Returnval[0])
 			if err != nil {
 				return err
 			}
-			rv.Set(v.Elem())
+			rv.Set(reflect.ValueOf(v))
 		default:
 			// If dst is not a slice, expect to receive 0 or 1 results
 			panic("more than 1 result")
