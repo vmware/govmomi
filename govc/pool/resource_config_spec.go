@@ -80,6 +80,9 @@ func (s *ResourceConfigSpecFlag) Register(f *flag.FlagSet) {
 			expandableReservation = *v
 		}
 
+		// Initialize bool pointer
+		opt.ExpandableReservation = types.NewBool(false)
+
 		f.Int64Var(&opt.Limit, prefix+".limit", 0, opt.name+" limit in "+opt.units)
 		f.Int64Var(&opt.Reservation, prefix+".reservation", 0, opt.name+" reservation in "+opt.units)
 		f.BoolVar(opt.ExpandableReservation, prefix+".expandable", expandableReservation, opt.name+" expandable reservation")
