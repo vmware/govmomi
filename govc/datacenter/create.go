@@ -56,16 +56,20 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 	finder := find.NewFinder(client, false)
 	rootFolder := object.NewRootFolder(client)
 	for _, datacenterToCreate := range datacenters {
-		foundDatacenters, err := finder.DatacenterList(context.TODO(), datacenterToCreate)
-		if err != nil {
-			return err
+		_, err := finder.Datacenter(context.TODO(), datacenterToCreate)
+		if err == nil {
+			// The datacenter was found, no need to create it
+			continue
 		}
 
-		if foundDatacenters == nil {
+		switch err.(type) {
+		case *find.NotFoundError:
 			_, err = rootFolder.CreateDatacenter(context.TODO(), datacenterToCreate)
 			if err != nil {
 				return err
 			}
+		default:
+			return err
 		}
 	}
 

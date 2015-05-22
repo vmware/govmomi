@@ -4,6 +4,19 @@
 
 ...
 
+* Change finder functions to no longer take varargs
+
+    The `find` package had functions to return a list of objects, given a
+    variable number of patterns. This makes it impossible to distinguish which
+    patterns produced results and which ones didn't.
+
+    In particular for govc, where multiple arguments can be passed from the
+    command line, it is useful to let the user know which ones produce results
+    and which ones don't.
+
+    To evaluate multiple patterns, the user should call the find functions
+    multiple times (either serially or in parallel).
+
 * Make optional boolean fields pointers (`vim25/types`).
 
     False is the zero value of a boolean field, which means they are not serialized

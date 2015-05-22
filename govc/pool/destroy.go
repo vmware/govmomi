@@ -19,6 +19,7 @@ package pool
 import (
 	"flag"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"golang.org/x/net/context"
@@ -57,26 +58,33 @@ func (cmd *destroy) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	pools, err := finder.ResourcePoolList(context.TODO(), f.Args()...)
-	if err != nil {
-		return err
-	}
+	for _, arg := range f.Args() {
+		pools, err := finder.ResourcePoolList(context.TODO(), arg)
+		if err != nil {
+			if _, ok := err.(*find.NotFoundError); ok {
+				// Ignore if pool cannot be found
+				continue
+			}
 
-	for _, pool := range pools {
-		if cmd.recursive {
-			err = pool.DestroyChildren(context.TODO())
+			return err
+		}
+
+		for _, pool := range pools {
+			if cmd.recursive {
+				err = pool.DestroyChildren(context.TODO())
+				if err != nil {
+					return err
+				}
+			}
+
+			task, err := pool.Destroy(context.TODO())
 			if err != nil {
 				return err
 			}
-		}
-
-		task, err := pool.Destroy(context.TODO())
-		if err != nil {
-			return err
-		}
-		err = task.Wait(context.TODO())
-		if err != nil {
-			return err
+			err = task.Wait(context.TODO())
+			if err != nil {
+				return err
+			}
 		}
 	}
 

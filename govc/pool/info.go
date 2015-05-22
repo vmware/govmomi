@@ -66,11 +66,6 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	pools, err := finder.ResourcePoolList(context.TODO(), f.Args()...)
-	if err != nil {
-		return err
-	}
-
 	var res infoResult
 	var props []string
 
@@ -86,16 +81,23 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	for _, pool := range pools {
-		var p mo.ResourcePool
-
-		pc := property.DefaultCollector(c)
-		err = pc.RetrieveOne(context.TODO(), pool.Reference(), props, &p)
+	for _, arg := range f.Args() {
+		pools, err := finder.ResourcePoolList(context.TODO(), arg)
 		if err != nil {
 			return err
 		}
 
-		res.ResourcePools = append(res.ResourcePools, p)
+		for _, pool := range pools {
+			var p mo.ResourcePool
+
+			pc := property.DefaultCollector(c)
+			err = pc.RetrieveOne(context.TODO(), pool.Reference(), props, &p)
+			if err != nil {
+				return err
+			}
+
+			res.ResourcePools = append(res.ResourcePools, p)
+		}
 	}
 
 	return cmd.WriteResult(&res)

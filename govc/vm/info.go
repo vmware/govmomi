@@ -23,6 +23,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/property"
@@ -58,7 +59,11 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
-		return err
+		if _, ok := err.(*find.NotFoundError); ok {
+			// Continue with empty VM slice
+		} else {
+			return err
+		}
 	}
 
 	var res infoResult

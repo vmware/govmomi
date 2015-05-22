@@ -241,7 +241,17 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 		return nil, err
 	}
 
-	return finder.VirtualMachineList(context.TODO(), args...)
+	// List virtual machines for every argument
+	for _, arg := range args {
+		vms, err := finder.VirtualMachineList(context.TODO(), arg)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, vms...)
+	}
+
+	return out, nil
 }
 
 func (flag *SearchFlag) HostSystem() (*object.HostSystem, error) {
@@ -281,5 +291,15 @@ func (flag *SearchFlag) HostSystems(args []string) ([]*object.HostSystem, error)
 		return nil, err
 	}
 
-	return finder.HostSystemList(context.TODO(), args...)
+	// List host systems for every argument
+	for _, arg := range args {
+		vms, err := finder.HostSystemList(context.TODO(), arg)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, vms...)
+	}
+
+	return out, nil
 }

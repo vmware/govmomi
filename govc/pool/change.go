@@ -66,15 +66,17 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		}
 	})
 
-	pools, err := finder.ResourcePoolList(context.TODO(), f.Args()...)
-	if err != nil {
-		return err
-	}
-
-	for _, pool := range pools {
-		err := pool.UpdateConfig(context.TODO(), cmd.name, &cmd.ResourceConfigSpec)
+	for _, arg := range f.Args() {
+		pools, err := finder.ResourcePoolList(context.TODO(), arg)
 		if err != nil {
 			return err
+		}
+
+		for _, pool := range pools {
+			err := pool.UpdateConfig(context.TODO(), cmd.name, &cmd.ResourceConfigSpec)
+			if err != nil {
+				return err
+			}
 		}
 	}
 

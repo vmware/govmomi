@@ -54,14 +54,23 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	es, err := finder.ManagedObjectList(context.TODO(), f.Args()...)
-	if err != nil {
-		return err
+	lr := listResult{
+		Elements: nil,
+		Long:     cmd.Long,
 	}
 
-	lr := listResult{
-		Elements: es,
-		Long:     cmd.Long,
+	args := f.Args()
+	if len(args) == 0 {
+		args = []string{"."}
+	}
+
+	for _, arg := range args {
+		es, err := finder.ManagedObjectList(context.TODO(), arg)
+		if err != nil {
+			return err
+		}
+
+		lr.Elements = append(lr.Elements, es...)
 	}
 
 	return cmd.WriteResult(lr)

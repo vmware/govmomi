@@ -52,7 +52,17 @@ func (f *AutostartFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 		return nil, err
 	}
 
-	return finder.VirtualMachineList(context.TODO(), args...)
+	var out []*object.VirtualMachine
+	for _, arg := range args {
+		vms, err := finder.VirtualMachineList(context.TODO(), arg)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, vms...)
+	}
+
+	return out, nil
 }
 
 func (f *AutostartFlag) HostAutoStartManager() (*mo.HostAutoStartManager, error) {
