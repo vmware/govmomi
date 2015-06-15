@@ -42,16 +42,20 @@ type Client struct {
 
 // NewClient creates and returns a new client wirh the ServiceContent field
 // filled in.
-func NewClient(ctx context.Context, soapClient *soap.Client) (*Client, error) {
-	serviceContent, err := methods.GetServiceContent(ctx, soapClient)
+func NewClient(ctx context.Context, rt soap.RoundTripper) (*Client, error) {
+	serviceContent, err := methods.GetServiceContent(ctx, rt)
 	if err != nil {
 		return nil, err
 	}
 
 	c := Client{
-		Client:         soapClient,
 		ServiceContent: serviceContent,
-		RoundTripper:   soapClient,
+		RoundTripper:   rt,
+	}
+
+	// Set client if it happens to be a soap.Client
+	if sc, ok := rt.(*soap.Client); ok {
+		c.Client = sc
 	}
 
 	return &c, nil

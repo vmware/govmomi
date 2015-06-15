@@ -154,6 +154,12 @@ func (flag *ClientFlag) Process() error {
 	return nil
 }
 
+// Retry twice when a temporary I/O error occurs.
+// This means a maximum of 3 attempts.
+func attachRetries(rt soap.RoundTripper) soap.RoundTripper {
+	return vim25.Retry(rt, vim25.TemporaryNetworkError(3))
+}
+
 func (flag *ClientFlag) sessionFile() string {
 	url := flag.URLWithoutPassword()
 
@@ -227,6 +233,9 @@ func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
 		return nil, nil
 	}
 
+	// Add retry functionality before making any calls
+	c.RoundTripper = attachRetries(c.RoundTripper)
+
 	m := session.NewManager(c)
 	u, err := m.UserSession(context.TODO())
 	if err != nil {
@@ -243,10 +252,16 @@ func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
 
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	sc := soap.NewClient(flag.url, flag.insecure)
-	c, err := vim25.NewClient(context.TODO(), sc)
+
+	// Add retry functionality before making any calls
+	rt := attachRetries(sc)
+	c, err := vim25.NewClient(context.TODO(), rt)
 	if err != nil {
 		return nil, err
 	}
+
+	// Set client, since we didn't pass it in the constructor
+	c.Client = sc
 
 	m := session.NewManager(c)
 	err = m.Login(context.TODO(), flag.url.User)

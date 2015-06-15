@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Retry twice on temporary network errors.
+
 * Add `host.autostart` commands to manage VM autostart.
 
 * Add `-persist-session` flag to control whether or not the session is
