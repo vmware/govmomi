@@ -5,18 +5,18 @@ if ! which gox > /dev/null; then
   exit 1
 fi
 
-git_version=$(git describe --tags)
+git_version=$(git describe)
 if git_status=$(git status --porcelain 2>/dev/null) && [ -z "${git_status}" ]; then
   git_version="${git_version}-dirty"
 fi
 
 ldflags="-X github.com/vmware/govmomi/govc/version.gitVersion ${git_version}"
-os="darwin linux windows freebsd"
-arch="386 amd64"
+BUILD_OS=${BUILD_OS:-darwin linux windows freebsd}
+BUILD_ARCH=${BUILD_ARCH:-386 amd64}
 
 gox \
   -parallel=1 \
   -ldflags="${ldflags}" \
-  -os="${os}" \
-  -arch="${arch}" \
+  -os="${BUILD_OS}" \
+  -arch="${BUILD_ARCH}" \
   github.com/vmware/govmomi/govc
