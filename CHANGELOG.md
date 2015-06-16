@@ -4,6 +4,8 @@
 
 ...
 
+* Add retry functionality to vim25 package
+
 * Change finder functions to no longer take varargs
 
     The `find` package had functions to return a list of objects, given a
