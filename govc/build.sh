@@ -6,7 +6,7 @@ if ! which gox > /dev/null; then
 fi
 
 git_version=$(git describe)
-if git_status=$(git status --porcelain 2>/dev/null) && [ -z "${git_status}" ]; then
+if git_status=$(git status --porcelain 2>/dev/null) && [ -n "${git_status}" ]; then
   git_version="${git_version}-dirty"
 fi
 
