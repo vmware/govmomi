@@ -36,7 +36,8 @@ type info struct {
 	*flags.OutputFlag
 	*flags.SearchFlag
 
-	WaitForIP bool
+	WaitForIP   bool
+	ExtraConfig bool
 }
 
 func init() {
@@ -47,6 +48,7 @@ func (cmd *info) Register(f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 
 	f.BoolVar(&cmd.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
+	f.BoolVar(&cmd.ExtraConfig, "e", false, "Show ExtraConfig")
 }
 
 func (cmd *info) Process() error { return nil }
@@ -73,6 +75,9 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		props = nil // Load everything
 	} else {
 		props = []string{"summary", "guest.ipAddress"} // Load summary
+		if cmd.ExtraConfig {
+			props = append(props, "config.extraConfig")
+		}
 	}
 
 	for _, vm := range vms {
@@ -121,6 +126,12 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  Power state:\t%s\n", s.Runtime.PowerState)
 		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
 		fmt.Fprintf(tw, "  IP address:\t%s\n", s.Guest.IpAddress)
+		if vm.Config != nil && vm.Config.ExtraConfig != nil {
+			fmt.Fprintf(tw, "  ExtraConfig:\n")
+			for _, v := range vm.Config.ExtraConfig {
+				fmt.Fprintf(tw, "    %s:\t%s\n", v.GetOptionValue().Key, v.GetOptionValue().Value)
+			}
+		}
 	}
 
 	return tw.Flush()
