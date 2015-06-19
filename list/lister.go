@@ -36,29 +36,59 @@ type Element struct {
 func ToElement(r mo.Reference, prefix string) Element {
 	var name string
 
+	// Comments about types to be expected in folders copied from the
+	// documentation of the Folder managed object:
+	// http://pubs.vmware.com/vsphere-55/topic/com.vmware.wssdk.apiref.doc/vim.Folder.html
 	switch m := r.(type) {
 	case mo.Folder:
 		name = m.Name
+	case mo.StoragePod:
+		name = m.Name
+
+	// { "vim.Datacenter" } - Identifies the root folder and its descendant
+	// folders. Data center folders can contain child data center folders and
+	// Datacenter managed objects. Datacenter objects contain virtual machine,
+	// compute resource, network entity, and datastore folders.
 	case mo.Datacenter:
 		name = m.Name
+
+	// { "vim.Virtualmachine", "vim.VirtualApp" } - Identifies a virtual machine
+	// folder. A virtual machine folder may contain child virtual machine
+	// folders. It also can contain VirtualMachine managed objects, templates,
+	// and VirtualApp managed objects.
 	case mo.VirtualMachine:
 		name = m.Name
-	case mo.Network:
+	case mo.VirtualApp:
 		name = m.Name
+
+	// { "vim.ComputeResource" } - Identifies a compute resource
+	// folder, which contains child compute resource folders and ComputeResource
+	// hierarchies.
 	case mo.ComputeResource:
 		name = m.Name
-	case mo.Datastore:
-		name = m.Name
-	case mo.StoragePod:
+	case mo.ClusterComputeResource:
 		name = m.Name
 	case mo.HostSystem:
 		name = m.Name
 	case mo.ResourcePool:
 		name = m.Name
-	case mo.ClusterComputeResource:
+
+	// { "vim.Network" } - Identifies a network entity folder.
+	// Network entity folders on a vCenter Server can contain Network,
+	// DistributedVirtualSwitch, and DistributedVirtualPortgroup managed objects.
+	// Network entity folders on an ESXi host can contain only Network objects.
+	case mo.Network:
+		name = m.Name
+	case mo.DistributedVirtualSwitch:
 		name = m.Name
 	case mo.DistributedVirtualPortgroup:
 		name = m.Name
+
+	// { "vim.Datastore" } - Identifies a datastore folder. Datastore folders can
+	// contain child datastore folders and Datastore managed objects.
+	case mo.Datastore:
+		name = m.Name
+
 	default:
 		panic("not implemented for type " + reflect.TypeOf(r).String())
 	}
