@@ -21,6 +21,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"path"
 )
 
 type Archive interface {
@@ -55,7 +56,7 @@ func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
 			break
 		}
 
-		matched, err := filepath.Match(name, h.Name)
+		matched, err := filepath.Match(name, path.Base(h.Name))
 		if err != nil {
 			return nil, 0, err
 		}
