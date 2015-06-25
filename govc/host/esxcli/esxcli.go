@@ -36,6 +36,10 @@ func init() {
 	cli.Register("host.esxcli", &esxcli{})
 }
 
+func (cmd *esxcli) Usage() string {
+  return "COMMAND [ARG]..."
+}
+
 func (cmd *esxcli) Register(f *flag.FlagSet) {}
 
 func (cmd *esxcli) Process() error { return nil }
