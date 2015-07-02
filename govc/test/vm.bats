@@ -55,6 +55,14 @@ load test_helper
   assert_line "Memory: 1024MB"
   assert_line "CPU: 2 vCPU(s)"
 
+  run govc vm.change -e "guestinfo.a=1" -e "guestinfo.b=2" -vm $id
+  assert_success
+
+  run govc vm.info -e $id
+  assert_success
+  assert_line "guestinfo.a: 1"
+  assert_line "guestinfo.b: 2"
+
   nid=$(new_id)
   run govc vm.change -name $nid -vm $id
   assert_success
@@ -136,6 +144,13 @@ load test_helper
   # test find slice
   local found=$(govc vm.info ${prefix}-* | grep Name: | wc -l)
   [ "$found" -eq $num ]
+
+  # test extraConfig
+  run govc vm.change -e "guestinfo.a=2" -vm $id
+  assert_success
+  run govc vm.info -e $id
+  assert_success
+  assert_line "guestinfo.a: 2"
 }
 
 @test "vm.create linked ide disk" {

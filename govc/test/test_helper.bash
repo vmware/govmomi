@@ -120,7 +120,7 @@ open_vnc() {
 collapse_ws() {
   local line
   if [ $# -eq 0 ]; then line="$(cat -)"
-  else line="$1"
+  else line="$@"
   fi
   echo "$line" | tr -s ' ' | sed -e 's/^ //'
 }
