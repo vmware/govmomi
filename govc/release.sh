@@ -13,8 +13,8 @@ if [ -z "${GITHUB_TOKEN}" ]; then
   exit 1
 fi
 
-GITHUB_USER="${GITHUB_USER:-vmware}"
-GITHUB_REPO="${GITHUB_REPO:-govmomi}"
+export GITHUB_USER="${GITHUB_USER:-vmware}"
+export GITHUB_REPO="${GITHUB_REPO:-govmomi}"
 
 name="$(git describe)"
 tag="prerelease-${name}"
