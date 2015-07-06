@@ -2,6 +2,13 @@
 
 load test_helper
 
+# These tests should only run against a server running an evaluation license.
+verify_evaluation() {
+  if [ "$(govc license.list -json | jq -r .[0].EditionKey)" != "eval" ]; then
+    skip "requires evaluation license"
+  fi
+}
+
 get_key() {
   jq ".[] | select(.LicenseKey == \"$1\")"
 }
@@ -11,6 +18,8 @@ get_property() {
 }
 
 @test "license.add" {
+  verify_evaluation
+
   run govc license.add -json 00000-00000-00000-00000-00001 00000-00000-00000-00000-00002
   assert_success
 
@@ -20,11 +29,15 @@ get_property() {
 }
 
 @test "license.remove" {
+  verify_evaluation
+
   run govc license.remove -json 00000-00000-00000-00000-00001
   assert_success
 }
 
 @test "license.list" {
+  verify_evaluation
+
   run govc license.list -json
   assert_success
 

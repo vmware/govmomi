@@ -37,6 +37,8 @@ import (
 
 const (
 	envURL           = "GOVC_URL"
+	envUsername      = "GOVC_USERNAME"
+	envPassword      = "GOVC_PASSWORD"
 	envInsecure      = "GOVC_INSECURE"
 	envPersist       = "GOVC_PERSIST_SESSION"
 	envMinAPIVersion = "GOVC_MIN_API_VERSION"
@@ -50,6 +52,8 @@ type ClientFlag struct {
 	register sync.Once
 
 	url           *url.URL
+	username      string
+	password      string
 	insecure      bool
 	persist       bool
 	minAPIVersion string
@@ -114,6 +118,16 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 		}
 
 		{
+			usage := fmt.Sprintf("Override username [%s]", envUsername)
+			f.StringVar(&flag.username, "username", os.Getenv(envUsername), usage)
+		}
+
+		{
+			usage := fmt.Sprintf("Override password [%s]", envPassword)
+			f.StringVar(&flag.password, "password", os.Getenv(envPassword), usage)
+		}
+
+		{
 			insecure := false
 			switch env := strings.ToLower(os.Getenv(envInsecure)); env {
 			case "1", "true":
@@ -149,6 +163,33 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 func (flag *ClientFlag) Process() error {
 	if flag.url == nil {
 		return errors.New("specify an " + cDescr)
+	}
+
+	// Override username if set
+	if flag.username != "" {
+		var password string
+		var ok bool
+
+		if flag.url.User != nil {
+			password, ok = flag.url.User.Password()
+		}
+
+		if ok {
+			flag.url.User = url.UserPassword(flag.username, password)
+		} else {
+			flag.url.User = url.User(flag.username)
+		}
+	}
+
+	// Override password if set
+	if flag.password != "" {
+		var username string
+
+		if flag.url.User != nil {
+			username = flag.url.User.Username()
+		}
+
+		flag.url.User = url.UserPassword(username, flag.password)
 	}
 
 	return nil
