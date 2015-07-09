@@ -53,12 +53,19 @@ Besides specifying managed entities as arguments, they can also be specified
 using environment variables. The following environment variables are used by govc
 to set defaults:
 
+* `GOVC_USERNAME`: USERNAME to use.
+
+* `GOVC_PASSWORD`: PASSWORD to use.
+
 * `GOVC_URL`: URL of ESXi or vCenter instance to connect to.
 
   > The URL scheme defaults to `https` and the URL path defaults to `/sdk`.
   > This means that specifying `user:pass@host` is equivalent to
   > `https://user:pass@host/sdk`.
-
+  
+  > If password include special characters like `#` or `:` you can use
+  > `GOVC_USERNAME` and `GOVC_PASSWORD` to have a simple `GOVC_URL`
+  
 * `GOVC_INSECURE`: Allow establishing insecure connections.
 
   > Use this option when the host you're connecting is using self-signed
@@ -77,6 +84,24 @@ to set defaults:
 * `GOVC_GUEST_LOGIN`: Guest credentials for guest operations
 
 ## Examples
+
+* About
+  ```
+  $ export GOVC_URL="192.168.1.20"
+  $ export GOVC_USERNAME="domain\administrator"
+  $ export GOVC_PASSWORD="Password123#"
+  $ govc about
+  
+  Name:         VMware vCenter Server
+  Vendor:       VMware, Inc.
+  Version:      6.0.0
+  Build:        2656761
+  OS type:      linux-x64
+  API type:     VirtualCenter
+  API version:  6.0
+  Product ID:   vpx
+  UUID:         c9f0242f-10e3-4e10-85d7-5eea7c855188
+  ```
 
 * [Upload ssh public key to a VM](examples/lib/ssh.sh)
 
