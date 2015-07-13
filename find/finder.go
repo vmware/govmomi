@@ -178,7 +178,7 @@ func (f *Finder) rootFolder(_ context.Context) (object.Reference, error) {
 	return object.NewRootFolder(f.client), nil
 }
 
-func (f *Finder) ManagedObjectList(ctx context.Context, path string) ([]list.Element, error) {
+func (f *Finder) managedObjectList(ctx context.Context, path string, tl bool) ([]list.Element, error) {
 	fn := f.rootFolder
 
 	if f.dc != nil {
@@ -189,7 +189,15 @@ func (f *Finder) ManagedObjectList(ctx context.Context, path string) ([]list.Ele
 		path = "."
 	}
 
-	return f.find(ctx, fn, true, path)
+	return f.find(ctx, fn, tl, path)
+}
+
+func (f *Finder) ManagedObjectList(ctx context.Context, path string) ([]list.Element, error) {
+	return f.managedObjectList(ctx, path, false)
+}
+
+func (f *Finder) ManagedObjectListChildren(ctx context.Context, path string) ([]list.Element, error) {
+	return f.managedObjectList(ctx, path, true)
 }
 
 func (f *Finder) DatacenterList(ctx context.Context, path string) ([]*object.Datacenter, error) {
