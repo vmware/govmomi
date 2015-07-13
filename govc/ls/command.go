@@ -65,7 +65,7 @@ func (cmd *ls) Run(f *flag.FlagSet) error {
 	}
 
 	for _, arg := range args {
-		es, err := finder.ManagedObjectList(context.TODO(), arg)
+		es, err := finder.ManagedObjectListChildren(context.TODO(), arg)
 		if err != nil {
 			return err
 		}

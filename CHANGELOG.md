@@ -4,6 +4,13 @@
 
 ...
 
+* Stop returning children from `ManagedObjectList`
+
+    Change the `ManagedObjectList` function in the `find` package to only
+    return the managed objects specified by the path argument and not their
+    children. The original behavior was used by govc's `ls` command and is
+    now available in the newly added function `ManagedObjectListChildren`.
+
 * Add retry functionality to vim25 package
 
 * Change finder functions to no longer take varargs
