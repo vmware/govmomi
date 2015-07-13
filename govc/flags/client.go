@@ -118,13 +118,8 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 		}
 
 		{
-			usage := fmt.Sprintf("Override username [%s]", envUsername)
-			f.StringVar(&flag.username, "username", os.Getenv(envUsername), usage)
-		}
-
-		{
-			usage := fmt.Sprintf("Override password [%s]", envPassword)
-			f.StringVar(&flag.password, "password", os.Getenv(envPassword), usage)
+			flag.username = os.Getenv(envUsername)
+			flag.password = os.Getenv(envPassword)
 		}
 
 		{
