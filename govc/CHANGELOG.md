@@ -2,6 +2,10 @@
 
 ### (unreleased)
 
+* Add `GOVC_USERNAME` and `GOVC_PASSWORD` to allow overriding username and/or
+  password (used when they contain special characters that prevent them from
+  being embedded in the URL).
+
 * Retry twice on temporary network errors.
 
 * Add `host.autostart` commands to manage VM autostart.
