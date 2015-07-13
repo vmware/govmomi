@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add `host.add` command to add host to datacenter.
+
 * Add `GOVC_USERNAME` and `GOVC_PASSWORD` to allow overriding username and/or
   password (used when they contain special characters that prevent them from
   being embedded in the URL).
