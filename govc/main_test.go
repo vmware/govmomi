@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,20 +14,20 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cli
+package main
 
-var commands = map[string]Command{}
+import (
+	"flag"
+	"testing"
 
-var aliases = map[string]string{}
+	"github.com/vmware/govmomi/govc/cli"
+)
 
-func Register(name string, c Command) {
-	commands[name] = c
-}
-
-func Alias(name string, alias string) {
-	aliases[alias] = name
-}
-
-func Commands() map[string]Command {
-	return commands
+func TestMain(t *testing.T) {
+	// Execute flag registration for every command to verify there are no
+	// commands with flag name collisions
+	for _, cmd := range cli.Commands() {
+		fs := flag.NewFlagSet("", flag.ContinueOnError)
+		cli.RegisterCommand(cmd, fs)
+	}
 }
