@@ -35,9 +35,10 @@ type create struct {
 
 func init() {
 	spec := NewResourceConfigSpecFlag()
-	spec.SetAllocation(func(a *types.ResourceAllocationInfo) {
-		a.Shares.Level = types.SharesLevelNormal
-		a.ExpandableReservation = types.NewBool(true)
+	spec.SetAllocation(func(a types.BaseResourceAllocationInfo) {
+		ra := a.GetResourceAllocationInfo()
+		ra.Shares.Level = types.SharesLevelNormal
+		ra.ExpandableReservation = types.NewBool(true)
 	})
 
 	cli.Register("pool.create", &create{ResourceConfigSpecFlag: spec})

@@ -198,6 +198,8 @@ class Simple
         t = "int16"
       when "base64Binary"
         t = "[]byte"
+      when "anyURI"
+        t = "url.URL"
       else
         raise "unknown type: %s" % t
       end
@@ -540,9 +542,9 @@ class Schema
         assert_equal 1, cc.size
         assert_equal "extension", cc.first.name
 
-        # extension has 1 "attribute" element
+        # extension has 1 or more "attribute" elements
         ec = cc.first.element_children
-        assert_equal 1, ec.size
+        assert_not_equal 0, ec.size
         assert_equal "attribute", ec.first.name
       when "sequence"
         # sequence has N "element" elements

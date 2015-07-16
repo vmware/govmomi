@@ -169,7 +169,7 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	}
 
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
-	req.Header.Set(`SOAPAction`, `urn:vim25/5.5`)
+	req.Header.Set(`SOAPAction`, `urn:vim25/6.0`)
 
 	if d.enabled() {
 		d.debugRequest(req)
