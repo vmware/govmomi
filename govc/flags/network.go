@@ -34,6 +34,7 @@ type NetworkFlag struct {
 	name     string
 	net      object.NetworkReference
 	adapter  string
+	address  string
 }
 
 func NewNetworkFlag() *NetworkFlag {
@@ -48,6 +49,7 @@ func (flag *NetworkFlag) Register(f *flag.FlagSet) {
 		usage := fmt.Sprintf("Network [%s]", env)
 		f.Var(flag, "net", usage)
 		f.StringVar(&flag.adapter, "net.adapter", "e1000", "Network adapter type")
+		f.StringVar(&flag.address, "net.address", "", "Network hardware address")
 	})
 }
 
@@ -97,6 +99,12 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 	device, err := object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
 	if err != nil {
 		return nil, err
+	}
+
+	if flag.address != "" {
+		card := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+		card.AddressType = string(types.VirtualEthernetCardMacTypeManual)
+		card.MacAddress = flag.address
 	}
 
 	return device, nil

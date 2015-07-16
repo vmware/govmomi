@@ -60,10 +60,20 @@ load test_helper
 
   unset GOVC_NETWORK
   run govc vm.network.change -vm $vm $eth0
-  assert_failure "Error: please specify a network"
+  assert_failure "Error: default network resolves to multiple instances, please specify"
 
+  run govc vm.power -on $vm
+  assert_success
+  run govc vm.power -off $vm
+
+  mac=$(vm_mac $vm)
   run govc vm.network.change -vm $vm -net "VM Network" $eth0
   assert_success
+
+  # verify we didn't change the mac address
+  run govc vm.power -on $vm
+  assert_success
+  assert_equal $mac $(vm_mac $vm)
 }
 
 @test "network standard backing" {
@@ -115,5 +125,20 @@ load test_helper
   # -net flag is required when there are multiple networks
   unset GOVC_NETWORK
   run govc vm.create -on=false $(new_id)
-  assert_failure "Error: please specify a network"
+  assert_failure "Error: default network resolves to multiple instances, please specify"
+}
+
+@test "network change hardware address" {
+  mac="00:00:0f$(dd bs=1 count=3 if=/dev/random 2>/dev/null | hexdump -v -e '/1 ":%02x"')"
+  vm=$(new_id)
+  run govc vm.create -on=false $vm
+  assert_success
+
+  run govc vm.network.change -vm $vm -net.address $mac ethernet-0
+  assert_success
+
+  run govc vm.power -on $vm
+  assert_success
+
+  assert_equal $mac $(vm_mac $vm)
 }

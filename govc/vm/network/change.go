@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -71,12 +72,23 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		return fmt.Errorf("device '%s' not found", name)
 	}
 
-	backing, err := cmd.NetworkFlag.Device()
+	dev, err := cmd.NetworkFlag.Device()
 	if err != nil {
 		return err
 	}
 
-	net.GetVirtualDevice().Backing = backing.GetVirtualDevice().Backing
+	current := net.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+	changed := dev.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+
+	current.Backing = changed.Backing
+
+	if changed.MacAddress != "" {
+		current.MacAddress = changed.MacAddress
+	}
+
+	if changed.AddressType != "" {
+		current.AddressType = changed.AddressType
+	}
 
 	return vm.EditDevice(context.TODO(), net)
 }
