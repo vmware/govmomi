@@ -17,6 +17,8 @@ limitations under the License.
 package object
 
 import (
+	"errors"
+
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -224,6 +226,38 @@ func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 	}
 
 	return VirtualDeviceList(o.Config.Hardware.Device), nil
+}
+
+func (v VirtualMachine) HostSystem(ctx context.Context) (*HostSystem, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"summary"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	host := o.Summary.Runtime.Host
+	if host == nil {
+		return nil, errors.New("VM doesn't have a HostSystem")
+	}
+
+	return NewHostSystem(v.c, *host), nil
+}
+
+func (v VirtualMachine) ResourcePool(ctx context.Context) (*ResourcePool, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"resourcePool"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	rp := o.ResourcePool
+	if rp == nil {
+		return nil, errors.New("VM doesn't have a resourcePool")
+	}
+
+	return NewResourcePool(v.c, *rp), nil
 }
 
 func (v VirtualMachine) configureDevice(ctx context.Context, op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, devices ...types.BaseVirtualDevice) error {
