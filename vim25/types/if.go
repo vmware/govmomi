@@ -820,6 +820,16 @@ func init() {
 	t["BaseEVCAdmissionFailed"] = reflect.TypeOf((*EVCAdmissionFailed)(nil)).Elem()
 }
 
+func (b *EVCConfigFault) GetEVCConfigFault() *EVCConfigFault { return b }
+
+type BaseEVCConfigFault interface {
+	GetEVCConfigFault() *EVCConfigFault
+}
+
+func init() {
+	t["BaseEVCConfigFault"] = reflect.TypeOf((*EVCConfigFault)(nil)).Elem()
+}
+
 func (b *ElementDescription) GetElementDescription() *ElementDescription { return b }
 
 type BaseElementDescription interface {
@@ -984,6 +994,28 @@ func init() {
 	t["BaseFileQuery"] = reflect.TypeOf((*FileQuery)(nil)).Elem()
 }
 
+func (b *GatewayConnectFault) GetGatewayConnectFault() *GatewayConnectFault { return b }
+
+type BaseGatewayConnectFault interface {
+	GetGatewayConnectFault() *GatewayConnectFault
+}
+
+func init() {
+	t["BaseGatewayConnectFault"] = reflect.TypeOf((*GatewayConnectFault)(nil)).Elem()
+}
+
+func (b *GatewayToHostConnectFault) GetGatewayToHostConnectFault() *GatewayToHostConnectFault {
+	return b
+}
+
+type BaseGatewayToHostConnectFault interface {
+	GetGatewayToHostConnectFault() *GatewayToHostConnectFault
+}
+
+func init() {
+	t["BaseGatewayToHostConnectFault"] = reflect.TypeOf((*GatewayToHostConnectFault)(nil)).Elem()
+}
+
 func (b *GeneralEvent) GetGeneralEvent() *GeneralEvent { return b }
 
 type BaseGeneralEvent interface {
@@ -992,6 +1024,16 @@ type BaseGeneralEvent interface {
 
 func init() {
 	t["BaseGeneralEvent"] = reflect.TypeOf((*GeneralEvent)(nil)).Elem()
+}
+
+func (b *GuestAuthSubject) GetGuestAuthSubject() *GuestAuthSubject { return b }
+
+type BaseGuestAuthSubject interface {
+	GetGuestAuthSubject() *GuestAuthSubject
+}
+
+func init() {
+	t["BaseGuestAuthSubject"] = reflect.TypeOf((*GuestAuthSubject)(nil)).Elem()
 }
 
 func (b *GuestAuthentication) GetGuestAuthentication() *GuestAuthentication { return b }
@@ -1032,6 +1074,46 @@ type BaseGuestProgramSpec interface {
 
 func init() {
 	t["BaseGuestProgramSpec"] = reflect.TypeOf((*GuestProgramSpec)(nil)).Elem()
+}
+
+func (b *GuestRegValueDataSpec) GetGuestRegValueDataSpec() *GuestRegValueDataSpec { return b }
+
+type BaseGuestRegValueDataSpec interface {
+	GetGuestRegValueDataSpec() *GuestRegValueDataSpec
+}
+
+func init() {
+	t["BaseGuestRegValueDataSpec"] = reflect.TypeOf((*GuestRegValueDataSpec)(nil)).Elem()
+}
+
+func (b *GuestRegistryFault) GetGuestRegistryFault() *GuestRegistryFault { return b }
+
+type BaseGuestRegistryFault interface {
+	GetGuestRegistryFault() *GuestRegistryFault
+}
+
+func init() {
+	t["BaseGuestRegistryFault"] = reflect.TypeOf((*GuestRegistryFault)(nil)).Elem()
+}
+
+func (b *GuestRegistryKeyFault) GetGuestRegistryKeyFault() *GuestRegistryKeyFault { return b }
+
+type BaseGuestRegistryKeyFault interface {
+	GetGuestRegistryKeyFault() *GuestRegistryKeyFault
+}
+
+func init() {
+	t["BaseGuestRegistryKeyFault"] = reflect.TypeOf((*GuestRegistryKeyFault)(nil)).Elem()
+}
+
+func (b *GuestRegistryValueFault) GetGuestRegistryValueFault() *GuestRegistryValueFault { return b }
+
+type BaseGuestRegistryValueFault interface {
+	GetGuestRegistryValueFault() *GuestRegistryValueFault
+}
+
+func init() {
+	t["BaseGuestRegistryValueFault"] = reflect.TypeOf((*GuestRegistryValueFault)(nil)).Elem()
 }
 
 func (b *HostAccountSpec) GetHostAccountSpec() *HostAccountSpec { return b }
@@ -1368,6 +1450,16 @@ func init() {
 	t["BaseImportSpec"] = reflect.TypeOf((*ImportSpec)(nil)).Elem()
 }
 
+func (b *InaccessibleDatastore) GetInaccessibleDatastore() *InaccessibleDatastore { return b }
+
+type BaseInaccessibleDatastore interface {
+	GetInaccessibleDatastore() *InaccessibleDatastore
+}
+
+func init() {
+	t["BaseInaccessibleDatastore"] = reflect.TypeOf((*InaccessibleDatastore)(nil)).Elem()
+}
+
 func (b *InheritablePolicy) GetInheritablePolicy() *InheritablePolicy { return b }
 
 type BaseInheritablePolicy interface {
@@ -1532,6 +1624,16 @@ type BaseInvalidVmConfig interface {
 
 func init() {
 	t["BaseInvalidVmConfig"] = reflect.TypeOf((*InvalidVmConfig)(nil)).Elem()
+}
+
+func (b *IoFilterInfo) GetIoFilterInfo() *IoFilterInfo { return b }
+
+type BaseIoFilterInfo interface {
+	GetIoFilterInfo() *IoFilterInfo
+}
+
+func init() {
+	t["BaseIoFilterInfo"] = reflect.TypeOf((*IoFilterInfo)(nil)).Elem()
 }
 
 func (b *IpAddress) GetIpAddress() *IpAddress { return b }
@@ -2142,6 +2244,26 @@ func init() {
 	t["BaseReplicationFault"] = reflect.TypeOf((*ReplicationFault)(nil)).Elem()
 }
 
+func (b *ReplicationVmFault) GetReplicationVmFault() *ReplicationVmFault { return b }
+
+type BaseReplicationVmFault interface {
+	GetReplicationVmFault() *ReplicationVmFault
+}
+
+func init() {
+	t["BaseReplicationVmFault"] = reflect.TypeOf((*ReplicationVmFault)(nil)).Elem()
+}
+
+func (b *ResourceAllocationInfo) GetResourceAllocationInfo() *ResourceAllocationInfo { return b }
+
+type BaseResourceAllocationInfo interface {
+	GetResourceAllocationInfo() *ResourceAllocationInfo
+}
+
+func init() {
+	t["BaseResourceAllocationInfo"] = reflect.TypeOf((*ResourceAllocationInfo)(nil)).Elem()
+}
+
 func (b *ResourceInUse) GetResourceInUse() *ResourceInUse { return b }
 
 type BaseResourceInUse interface {
@@ -2250,6 +2372,16 @@ type BaseSelectionSpec interface {
 
 func init() {
 	t["BaseSelectionSpec"] = reflect.TypeOf((*SelectionSpec)(nil)).Elem()
+}
+
+func (b *ServiceLocatorCredential) GetServiceLocatorCredential() *ServiceLocatorCredential { return b }
+
+type BaseServiceLocatorCredential interface {
+	GetServiceLocatorCredential() *ServiceLocatorCredential
+}
+
+func init() {
+	t["BaseServiceLocatorCredential"] = reflect.TypeOf((*ServiceLocatorCredential)(nil)).Elem()
 }
 
 func (b *SessionEvent) GetSessionEvent() *SessionEvent { return b }
@@ -2798,6 +2930,30 @@ func init() {
 	t["BaseVirtualMachineTargetInfo"] = reflect.TypeOf((*VirtualMachineTargetInfo)(nil)).Elem()
 }
 
+func (b *VirtualPCIPassthroughPluginBackingInfo) GetVirtualPCIPassthroughPluginBackingInfo() *VirtualPCIPassthroughPluginBackingInfo {
+	return b
+}
+
+type BaseVirtualPCIPassthroughPluginBackingInfo interface {
+	GetVirtualPCIPassthroughPluginBackingInfo() *VirtualPCIPassthroughPluginBackingInfo
+}
+
+func init() {
+	t["BaseVirtualPCIPassthroughPluginBackingInfo"] = reflect.TypeOf((*VirtualPCIPassthroughPluginBackingInfo)(nil)).Elem()
+}
+
+func (b *VirtualPCIPassthroughPluginBackingOption) GetVirtualPCIPassthroughPluginBackingOption() *VirtualPCIPassthroughPluginBackingOption {
+	return b
+}
+
+type BaseVirtualPCIPassthroughPluginBackingOption interface {
+	GetVirtualPCIPassthroughPluginBackingOption() *VirtualPCIPassthroughPluginBackingOption
+}
+
+func init() {
+	t["BaseVirtualPCIPassthroughPluginBackingOption"] = reflect.TypeOf((*VirtualPCIPassthroughPluginBackingOption)(nil)).Elem()
+}
+
 func (b *VirtualSATAController) GetVirtualSATAController() *VirtualSATAController { return b }
 
 type BaseVirtualSATAController interface {
@@ -3104,4 +3260,28 @@ type BaseVsanFault interface {
 
 func init() {
 	t["BaseVsanFault"] = reflect.TypeOf((*VsanFault)(nil)).Elem()
+}
+
+func (b *VsanUpgradeSystemPreflightCheckIssue) GetVsanUpgradeSystemPreflightCheckIssue() *VsanUpgradeSystemPreflightCheckIssue {
+	return b
+}
+
+type BaseVsanUpgradeSystemPreflightCheckIssue interface {
+	GetVsanUpgradeSystemPreflightCheckIssue() *VsanUpgradeSystemPreflightCheckIssue
+}
+
+func init() {
+	t["BaseVsanUpgradeSystemPreflightCheckIssue"] = reflect.TypeOf((*VsanUpgradeSystemPreflightCheckIssue)(nil)).Elem()
+}
+
+func (b *VsanUpgradeSystemUpgradeHistoryItem) GetVsanUpgradeSystemUpgradeHistoryItem() *VsanUpgradeSystemUpgradeHistoryItem {
+	return b
+}
+
+type BaseVsanUpgradeSystemUpgradeHistoryItem interface {
+	GetVsanUpgradeSystemUpgradeHistoryItem() *VsanUpgradeSystemUpgradeHistoryItem
+}
+
+func init() {
+	t["BaseVsanUpgradeSystemUpgradeHistoryItem"] = reflect.TypeOf((*VsanUpgradeSystemUpgradeHistoryItem)(nil)).Elem()
 }

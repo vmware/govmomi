@@ -49,8 +49,12 @@ func (s *sharesInfo) Set(val string) error {
 
 func NewResourceConfigSpecFlag() *ResourceConfigSpecFlag {
 	f := new(ResourceConfigSpecFlag)
-	f.SetAllocation(func(a *types.ResourceAllocationInfo) {
-		a.Shares = new(types.SharesInfo)
+	f.MemoryAllocation = new(types.ResourceAllocationInfo)
+	f.CpuAllocation = new(types.ResourceAllocationInfo)
+
+	f.SetAllocation(func(a types.BaseResourceAllocationInfo) {
+		a.GetResourceAllocationInfo().Shares = new(types.SharesInfo)
+		a.GetResourceAllocationInfo().ExpandableReservation = types.NewBool(false)
 	})
 	return f
 }
@@ -65,33 +69,31 @@ func (s *ResourceConfigSpecFlag) Register(f *flag.FlagSet) {
 	opts := []struct {
 		name  string
 		units string
-		*types.ResourceAllocationInfo
+		types.BaseResourceAllocationInfo
 	}{
-		{"CPU", "MHz", &s.CpuAllocation},
-		{"Memory", "MB", &s.MemoryAllocation},
+		{"CPU", "MHz", s.CpuAllocation},
+		{"Memory", "MB", s.MemoryAllocation},
 	}
 
 	for _, opt := range opts {
 		prefix := strings.ToLower(opt.name)[:3]
-		shares := (*sharesInfo)(opt.Shares)
+		ra := opt.GetResourceAllocationInfo()
+		shares := (*sharesInfo)(ra.Shares)
 
 		expandableReservation := false
-		if v := opt.ExpandableReservation; v != nil {
+		if v := ra.ExpandableReservation; v != nil {
 			expandableReservation = *v
 		}
 
-		// Initialize bool pointer
-		opt.ExpandableReservation = types.NewBool(false)
-
-		f.Int64Var(&opt.Limit, prefix+".limit", 0, opt.name+" limit in "+opt.units)
-		f.Int64Var(&opt.Reservation, prefix+".reservation", 0, opt.name+" reservation in "+opt.units)
-		f.BoolVar(opt.ExpandableReservation, prefix+".expandable", expandableReservation, opt.name+" expandable reservation")
+		f.Int64Var(&ra.Limit, prefix+".limit", 0, opt.name+" limit in "+opt.units)
+		f.Int64Var(&ra.Reservation, prefix+".reservation", 0, opt.name+" reservation in "+opt.units)
+		f.BoolVar(ra.ExpandableReservation, prefix+".expandable", expandableReservation, opt.name+" expandable reservation")
 		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
 	}
 }
 
-func (s *ResourceConfigSpecFlag) SetAllocation(f func(*types.ResourceAllocationInfo)) {
-	for _, a := range []*types.ResourceAllocationInfo{&s.CpuAllocation, &s.MemoryAllocation} {
+func (s *ResourceConfigSpecFlag) SetAllocation(f func(types.BaseResourceAllocationInfo)) {
+	for _, a := range []types.BaseResourceAllocationInfo{s.CpuAllocation, s.MemoryAllocation} {
 		f(a)
 	}
 }

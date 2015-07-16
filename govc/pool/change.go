@@ -60,9 +60,10 @@ func (cmd *change) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.SetAllocation(func(a *types.ResourceAllocationInfo) {
-		if a.Shares.Level == "" {
-			a.Shares = nil
+	cmd.SetAllocation(func(a types.BaseResourceAllocationInfo) {
+		ra := a.GetResourceAllocationInfo()
+		if ra.Shares.Level == "" {
+			ra.Shares = nil
 		}
 	})
 

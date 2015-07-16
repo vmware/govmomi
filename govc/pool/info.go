@@ -113,14 +113,15 @@ func (r *infoResult) Write(w io.Writer) error {
 	for _, pool := range r.ResourcePools {
 		fmt.Fprintf(tw, "Name:\t%s\n", pool.Name)
 
-		writeInfo(tw, "CPU", "MHz", &pool.Runtime.Cpu, &pool.Config.CpuAllocation)
-		writeInfo(tw, "Mem", "MB", &pool.Runtime.Memory, &pool.Config.MemoryAllocation)
+		writeInfo(tw, "CPU", "MHz", &pool.Runtime.Cpu, pool.Config.CpuAllocation)
+		writeInfo(tw, "Mem", "MB", &pool.Runtime.Memory, pool.Config.MemoryAllocation)
 	}
 
 	return tw.Flush()
 }
 
-func writeInfo(w io.Writer, name string, units string, ru *types.ResourcePoolResourceUsage, ra *types.ResourceAllocationInfo) {
+func writeInfo(w io.Writer, name string, units string, ru *types.ResourcePoolResourceUsage, b types.BaseResourceAllocationInfo) {
+	ra := b.GetResourceAllocationInfo()
 	usage := 100.0 * float64(ru.OverallUsage) / float64(ru.MaxUsage)
 	shares := ""
 	limit := "unlimited"
