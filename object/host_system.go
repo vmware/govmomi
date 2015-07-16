@@ -32,10 +32,29 @@ type HostSystem struct {
 	InventoryPath string
 }
 
+func (h HostSystem) String() string {
+	name, err := h.Name(context.TODO())
+	if err != nil {
+		return "<" + err.Error() + ">"
+	}
+	return name
+}
+
 func NewHostSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostSystem {
 	return &HostSystem{
 		Common: NewCommon(c, ref),
 	}
+}
+
+func (h HostSystem) Name(ctx context.Context) (string, error) {
+	var mh mo.HostSystem
+
+	err := h.Properties(ctx, h.Reference(), []string{"name"}, &mh)
+	if err != nil {
+		return "", err
+	}
+
+	return mh.Name, nil
 }
 
 func (h HostSystem) ConfigManager() *HostConfigManager {
