@@ -17,8 +17,13 @@ limitations under the License.
 package event
 
 import (
+	"reflect"
+	"sync"
+
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -27,6 +32,9 @@ type Manager struct {
 	reference types.ManagedObjectReference
 
 	c *vim25.Client
+
+	eventCategory   map[string]string
+	eventCategoryMu *sync.Mutex
 }
 
 func NewManager(c *vim25.Client) *Manager {
@@ -34,12 +42,14 @@ func NewManager(c *vim25.Client) *Manager {
 		reference: *c.ServiceContent.EventManager,
 
 		c: c,
+
+		eventCategoryMu: new(sync.Mutex),
 	}
 
 	return &m
 }
 
-func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.EventFilterSpec) (*types.ManagedObjectReference, error) {
+func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.EventFilterSpec) (*HistoryCollector, error) {
 	req := types.CreateCollectorForEvents{
 		This:   m.reference,
 		Filter: filter,
@@ -50,7 +60,7 @@ func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.Even
 		return nil, err
 	}
 
-	return &res.Returnval, nil
+	return NewHistoryCollector(m.c, res.Returnval), nil
 }
 
 func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectReference, msg string) error {
@@ -109,4 +119,44 @@ func (m Manager) RetrieveArgumentDescription(ctx context.Context, eventTypeID st
 	}
 
 	return res.Returnval, nil
+}
+
+func (m Manager) eventCategoryMap(ctx context.Context) (map[string]string, error) {
+	m.eventCategoryMu.Lock()
+	defer m.eventCategoryMu.Unlock()
+
+	if m.eventCategory != nil {
+		return m.eventCategory, nil
+	}
+
+	var o mo.EventManager
+
+	ps := []string{"description.eventInfo"}
+	err := property.DefaultCollector(m.c).RetrieveOne(ctx, m.reference, ps, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	m.eventCategory = make(map[string]string, len(o.Description.EventInfo))
+
+	for _, info := range o.Description.EventInfo {
+		m.eventCategory[info.Key] = info.Category
+	}
+
+	return m.eventCategory, nil
+}
+
+// EventCategory returns the category for an event, such as "info" or "error" for example.
+func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (string, error) {
+	// Most of the event details are included in the Event.FullFormattedMessage, but the category
+	// is only available via the EventManager description.eventInfo property.  The value of this
+	// property is static, so we fetch and once and cache.
+	eventCategory, err := m.eventCategoryMap(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	class := reflect.TypeOf(event).Elem().Name()
+
+	return eventCategory[class], nil
 }

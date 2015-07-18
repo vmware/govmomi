@@ -37,6 +37,10 @@ func (c Common) Reference() types.ManagedObjectReference {
 	return c.r
 }
 
+func (c Common) Client() *vim25.Client {
+	return c.c
+}
+
 func (c Common) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst interface{}) error {
 	return property.DefaultCollector(c.c).RetrieveOne(ctx, r, ps, dst)
 }
