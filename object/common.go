@@ -17,6 +17,8 @@ limitations under the License.
 package object
 
 import (
+	"fmt"
+
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
@@ -27,6 +29,10 @@ import (
 type Common struct {
 	c *vim25.Client
 	r types.ManagedObjectReference
+}
+
+func (c Common) String() string {
+	return fmt.Sprintf("%v", c.Reference())
 }
 
 func NewCommon(c *vim25.Client, r types.ManagedObjectReference) Common {

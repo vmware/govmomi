@@ -18,6 +18,7 @@ package object
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
@@ -34,11 +35,10 @@ type VirtualMachine struct {
 }
 
 func (v VirtualMachine) String() string {
-	name, err := v.Name(context.TODO())
-	if err != nil {
-		return "<" + err.Error() + ">"
+	if v.InventoryPath == "" {
+		return v.Common.String()
 	}
-	return name
+	return fmt.Sprintf("%v @ %v", v.Common, v.InventoryPath)
 }
 
 func NewVirtualMachine(c *vim25.Client, ref types.ManagedObjectReference) *VirtualMachine {

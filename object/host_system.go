@@ -33,11 +33,10 @@ type HostSystem struct {
 }
 
 func (h HostSystem) String() string {
-	name, err := h.Name(context.TODO())
-	if err != nil {
-		return "<" + err.Error() + ">"
+	if h.InventoryPath == "" {
+		return h.Common.String()
 	}
-	return name
+	return fmt.Sprintf("%v @ %v", h.Common, h.InventoryPath)
 }
 
 func NewHostSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostSystem {
