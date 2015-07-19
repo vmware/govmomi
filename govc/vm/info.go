@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"golang.org/x/net/context"
@@ -102,13 +103,16 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 				continue
 			}
 
-			host, err := vm.HostSystem(ctx)
-			if err != nil {
-				return err
-			}
-			hostName, err := host.Name(ctx)
-			if err != nil {
-				return err
+			var hostName string
+			hostRef := mvm.Summary.Runtime.Host
+			if hostRef == nil {
+				hostName = "<unavailable>"
+			} else {
+				host := object.NewHostSystem(c, *hostRef)
+				hostName, err = host.Name(ctx)
+				if err != nil {
+					return err
+				}
 			}
 
 			res.VmInfos = append(res.VmInfos, vmInfo{mvm, hostName})
