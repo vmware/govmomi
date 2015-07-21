@@ -17,6 +17,8 @@ limitations under the License.
 package object
 
 import (
+	"fmt"
+
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -31,11 +33,10 @@ type ResourcePool struct {
 }
 
 func (p ResourcePool) String() string {
-	name, err := p.Name(context.TODO())
-	if err != nil {
-		return "<" + err.Error() + ">"
+	if p.InventoryPath == "" {
+		return p.Common.String()
 	}
-	return name
+	return fmt.Sprintf("%v @ %v", p.Common, p.InventoryPath)
 }
 
 func NewResourcePool(c *vim25.Client, ref types.ManagedObjectReference) *ResourcePool {
