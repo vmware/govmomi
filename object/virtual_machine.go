@@ -17,6 +17,9 @@ limitations under the License.
 package object
 
 import (
+	"errors"
+	"fmt"
+
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -31,10 +34,28 @@ type VirtualMachine struct {
 	InventoryPath string
 }
 
+func (v VirtualMachine) String() string {
+	if v.InventoryPath == "" {
+		return v.Common.String()
+	}
+	return fmt.Sprintf("%v @ %v", v.Common, v.InventoryPath)
+}
+
 func NewVirtualMachine(c *vim25.Client, ref types.ManagedObjectReference) *VirtualMachine {
 	return &VirtualMachine{
 		Common: NewCommon(c, ref),
 	}
+}
+
+func (v VirtualMachine) Name(ctx context.Context) (string, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"name"}, &o)
+	if err != nil {
+		return "", err
+	}
+
+	return o.Name, nil
 }
 
 func (v VirtualMachine) PowerOn(ctx context.Context) (*Task, error) {
@@ -136,6 +157,21 @@ func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, 
 	return NewTask(v.c, res.Returnval), nil
 }
 
+func (v VirtualMachine) Relocate(ctx context.Context, config types.VirtualMachineRelocateSpec, priority types.VirtualMachineMovePriority) (*Task, error) {
+	req := types.RelocateVM_Task{
+		This:     v.Reference(),
+		Spec:     config,
+		Priority: priority,
+	}
+
+	res, err := methods.RelocateVM_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
 func (v VirtualMachine) Reconfigure(ctx context.Context, config types.VirtualMachineConfigSpec) (*Task, error) {
 	req := types.ReconfigVM_Task{
 		This: v.Reference(),
@@ -190,6 +226,38 @@ func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 	}
 
 	return VirtualDeviceList(o.Config.Hardware.Device), nil
+}
+
+func (v VirtualMachine) HostSystem(ctx context.Context) (*HostSystem, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"summary"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	host := o.Summary.Runtime.Host
+	if host == nil {
+		return nil, errors.New("VM doesn't have a HostSystem")
+	}
+
+	return NewHostSystem(v.c, *host), nil
+}
+
+func (v VirtualMachine) ResourcePool(ctx context.Context) (*ResourcePool, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"resourcePool"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	rp := o.ResourcePool
+	if rp == nil {
+		return nil, errors.New("VM doesn't have a resourcePool")
+	}
+
+	return NewResourcePool(v.c, *rp), nil
 }
 
 func (v VirtualMachine) configureDevice(ctx context.Context, op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, devices ...types.BaseVirtualDevice) error {
