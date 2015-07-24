@@ -101,6 +101,7 @@ func (l VirtualDeviceList) SelectByType(deviceType types.BaseVirtualDevice) Virt
 }
 
 // SelectByBackingInfo returns a new list with devices matching the given backing info.
+// If the value of backing is nil, any device with a backing of the same type will be returned.
 func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBackingInfo) VirtualDeviceList {
 	t := reflect.TypeOf(backing)
 
@@ -112,6 +113,11 @@ func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBa
 
 		if reflect.TypeOf(db) != t {
 			return false
+		}
+
+		if reflect.ValueOf(backing).IsNil() {
+			// selecting by backing type
+			return true
 		}
 
 		switch a := db.(type) {
@@ -127,6 +133,9 @@ func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBa
 				return a.Parent.FileName == b.Parent.FileName
 			}
 			return a.FileName == b.FileName
+		case *types.VirtualSerialPortURIBackingInfo:
+			b := backing.(*types.VirtualSerialPortURIBackingInfo)
+			return a.ServiceURI == b.ServiceURI
 		case types.BaseVirtualDeviceFileBackingInfo:
 			b := backing.(types.BaseVirtualDeviceFileBackingInfo)
 			return a.GetVirtualDeviceFileBackingInfo().FileName == b.GetVirtualDeviceFileBackingInfo().FileName

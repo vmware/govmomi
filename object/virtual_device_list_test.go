@@ -526,6 +526,16 @@ func TestSelectByBackingInfo(t *testing.T) {
 				FileName:                 "[datastore1] foo.iso",
 			},
 		},
+		(*types.VirtualCdromIsoBackingInfo)(nil),
+		&types.VirtualSerialPortURIBackingInfo{
+			VirtualDeviceURIBackingInfo: types.VirtualDeviceURIBackingInfo{
+				VirtualDeviceBackingInfo: types.VirtualDeviceBackingInfo{},
+				ServiceURI:               "localhost:0",
+				Direction:                "client",
+				ProxyURI:                 "",
+			},
+		},
+		(*types.VirtualSerialPortURIBackingInfo)(nil),
 	}
 
 	for _, test := range tests {
@@ -533,6 +543,19 @@ func TestSelectByBackingInfo(t *testing.T) {
 
 		if len(l) != 1 {
 			t.Errorf("Expected 1, got %d: %#v", len(l), test)
+		}
+	}
+
+	// test selecting by backing type
+	tests = []types.BaseVirtualDeviceBackingInfo{
+		(*types.VirtualDiskFlatVer2BackingInfo)(nil),
+	}
+
+	for _, test := range tests {
+		l := devices.SelectByBackingInfo(test)
+
+		if len(l) != 2 {
+			t.Errorf("Expected 2, got %d: %#v", len(l), test)
 		}
 	}
 }
