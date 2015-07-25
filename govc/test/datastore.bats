@@ -64,3 +64,12 @@ upload_file() {
   run govc datastore.ls "${name}"
   assert_failure
 }
+
+@test "datastore.info" {
+  run govc datastore.info enoent
+  assert_failure
+
+  run govc datastore.info
+  assert_success
+  [ ${#lines[@]} -gt 1 ]
+}
