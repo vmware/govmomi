@@ -108,6 +108,10 @@ func (l listResult) Write(w io.Writer) error {
 			if _, err = fmt.Fprintf(w, "%s (Network)\n", e.Path); err != nil {
 				return err
 			}
+		case mo.DistributedVirtualPortgroup:
+			if _, err = fmt.Fprintf(w, "%s (DistributedVirtualPortgroup)\n", e.Path); err != nil {
+				return err
+			}
 		case mo.ComputeResource:
 			if _, err = fmt.Fprintf(w, "%s (ComputeResource)\n", e.Path); err != nil {
 				return err
@@ -118,6 +122,14 @@ func (l listResult) Write(w io.Writer) error {
 			}
 		case mo.ResourcePool:
 			if _, err = fmt.Fprintf(w, "%s (ResourcePool)\n", e.Path); err != nil {
+				return err
+			}
+		case mo.HostSystem:
+			if _, err = fmt.Fprintf(w, "%s (HostSystem)\n", e.Path); err != nil {
+				return err
+			}
+		case mo.ClusterComputeResource:
+			if _, err = fmt.Fprintf(w, "%s (ClusterComputeResource)\n", e.Path); err != nil {
 				return err
 			}
 		}
