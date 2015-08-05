@@ -20,8 +20,8 @@ import (
 	"archive/tar"
 	"io"
 	"os"
-	"path/filepath"
 	"path"
+	"path/filepath"
 )
 
 type Archive interface {
