@@ -37,7 +37,7 @@ func init() {
 }
 
 func (cmd *esxcli) Usage() string {
-  return "COMMAND [ARG]..."
+	return "COMMAND [ARG]..."
 }
 
 func (cmd *esxcli) Register(f *flag.FlagSet) {}
