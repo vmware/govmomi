@@ -86,13 +86,50 @@ func Humanize(v int64) string {
 	}
 }
 
-var urlVar = "GOVMOMI_URL"
-var urlDescription = fmt.Sprintf("ESX or vCenter URL [%s]", urlVar)
-var urlFlag = flag.String("url", GetEnvString(urlVar, "https://username:password@host/sdk"), urlDescription)
+const (
+	envURL      = "GOVMOMI_URL"
+	envUserName = "GOVMOMI_USERNAME"
+	envPassword = "GOVMOMI_PASSWORD"
+	envInsecure = "GOVMOMI_INSECURE"
+)
 
-var insecureVar = "GOVMOMI_INSECURE"
-var insecureDescription = fmt.Sprintf("Don't verify the server's certificate chain [%s]", insecureVar)
-var insecureFlag = flag.Bool("insecure", GetEnvBool(insecureVar, false), insecureDescription)
+var urlDescription = fmt.Sprintf("ESX or vCenter URL [%s]", envURL)
+var urlFlag = flag.String("url", GetEnvString(envURL, "https://username:password@host/sdk"), urlDescription)
+
+var insecureDescription = fmt.Sprintf("Don't verify the server's certificate chain [%s]", envInsecure)
+var insecureFlag = flag.Bool("insecure", GetEnvBool(envInsecure, false), insecureDescription)
+
+func processOverride(u *url.URL) {
+	envUsername := os.Getenv(envUserName)
+	envPassword := os.Getenv(envPassword)
+
+	// Override username if provided
+	if envUsername != "" {
+		var password string
+		var ok bool
+
+		if u.User != nil {
+			password, ok = u.User.Password()
+		}
+
+		if ok {
+			u.User = url.UserPassword(envUsername, password)
+		} else {
+			u.User = url.User(envUsername)
+		}
+	}
+
+	// Override password if provided
+	if envPassword != "" {
+		var username string
+
+		if u.User != nil {
+			username = u.User.Username()
+		}
+
+		u.User = url.UserPassword(username, envPassword)
+	}
+}
 
 func exit(err error) {
 	fmt.Fprintf(os.Stderr, "Error: %s\n", err)
@@ -110,6 +147,9 @@ func main() {
 	if err != nil {
 		exit(err)
 	}
+
+	// Override username and/or password as required
+	processOverride(u)
 
 	// Connect and log in to ESX or vCenter
 	c, err := govmomi.NewClient(ctx, u, *insecureFlag)
