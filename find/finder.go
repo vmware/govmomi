@@ -569,3 +569,39 @@ func (f *Finder) VirtualMachine(ctx context.Context, path string) (*object.Virtu
 
 	return vms[0], nil
 }
+
+func (f *Finder) VirtualAppList(ctx context.Context, path string) ([]*object.VirtualApp, error) {
+	es, err := f.find(ctx, f.vmFolder, false, path)
+	if err != nil {
+		return nil, err
+	}
+
+	var apps []*object.VirtualApp
+	for _, e := range es {
+		switch o := e.Object.(type) {
+		case mo.VirtualApp:
+			app := object.NewVirtualApp(f.client, o.Reference())
+			app.InventoryPath = e.Path
+			apps = append(apps, app)
+		}
+	}
+
+	if len(apps) == 0 {
+		return nil, &NotFoundError{"app", path}
+	}
+
+	return apps, nil
+}
+
+func (f *Finder) VirtualApp(ctx context.Context, path string) (*object.VirtualApp, error) {
+	apps, err := f.VirtualAppList(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(apps) > 1 {
+		return nil, &MultipleFoundError{"app", path}
+	}
+
+	return apps[0], nil
+}
