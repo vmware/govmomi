@@ -22,6 +22,7 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -52,4 +53,23 @@ func (p VirtualApp) Name(ctx context.Context) (string, error) {
 	}
 
 	return o.Name, nil
+}
+
+func (p VirtualApp) CreateChildVM_Task(ctx context.Context, config types.VirtualMachineConfigSpec, host *HostSystem) (*Task, error) {
+	req := types.CreateChildVM_Task{
+		This:   p.Reference(),
+		Config: config,
+	}
+
+	if host != nil {
+		ref := host.Reference()
+		req.Host = &ref
+	}
+
+	res, err := methods.CreateChildVM_Task(ctx, p.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(p.c, res.Returnval), nil
 }
