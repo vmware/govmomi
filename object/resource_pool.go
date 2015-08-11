@@ -95,6 +95,27 @@ func (p ResourcePool) Create(ctx context.Context, name string, spec types.Resour
 	return NewResourcePool(p.c, res.Returnval), nil
 }
 
+func (p ResourcePool) CreateVApp(ctx context.Context, name string, resSpec types.ResourceConfigSpec, configSpec types.VAppConfigSpec, folder *Folder) (*VirtualApp, error) {
+	req := types.CreateVApp{
+		This:       p.Reference(),
+		Name:       name,
+		ResSpec:    resSpec,
+		ConfigSpec: configSpec,
+	}
+
+	if folder != nil {
+		ref := folder.Reference()
+		req.VmFolder = &ref
+	}
+
+	res, err := methods.CreateVApp(ctx, p.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewVirtualApp(p.c, res.Returnval), nil
+}
+
 func (p ResourcePool) UpdateConfig(ctx context.Context, name string, config *types.ResourceConfigSpec) error {
 	req := types.UpdateConfig{
 		This:   p.Reference(),
