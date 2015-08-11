@@ -96,32 +96,8 @@ func (l listResult) Write(w io.Writer) error {
 			if _, err = fmt.Fprintf(w, "%s/\n", e.Path); err != nil {
 				return err
 			}
-		case mo.Datacenter:
-			if _, err = fmt.Fprintf(w, "%s (Datacenter)\n", e.Path); err != nil {
-				return err
-			}
-		case mo.VirtualMachine:
-			if _, err = fmt.Fprintf(w, "%s (VirtualMachine)\n", e.Path); err != nil {
-				return err
-			}
-		case mo.Network:
-			if _, err = fmt.Fprintf(w, "%s (Network)\n", e.Path); err != nil {
-				return err
-			}
-		case mo.ComputeResource:
-			if _, err = fmt.Fprintf(w, "%s (ComputeResource)\n", e.Path); err != nil {
-				return err
-			}
-		case mo.Datastore:
-			if _, err = fmt.Fprintf(w, "%s (Datastore)\n", e.Path); err != nil {
-				return err
-			}
-		case mo.ResourcePool:
-			if _, err = fmt.Fprintf(w, "%s (ResourcePool)\n", e.Path); err != nil {
-				return err
-			}
-		case mo.VirtualApp:
-			if _, err = fmt.Fprintf(w, "%s (VirtualApp)\n", e.Path); err != nil {
+		default:
+			if _, err = fmt.Fprintf(w, "%s (%s)\n", e.Path, e.Object.Reference().Type); err != nil {
 				return err
 			}
 		}
