@@ -120,6 +120,10 @@ func (l listResult) Write(w io.Writer) error {
 			if _, err = fmt.Fprintf(w, "%s (ResourcePool)\n", e.Path); err != nil {
 				return err
 			}
+		case mo.VirtualApp:
+			if _, err = fmt.Fprintf(w, "%s (VirtualApp)\n", e.Path); err != nil {
+				return err
+			}
 		}
 	}
 
