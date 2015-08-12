@@ -16,6 +16,10 @@
 
 set -e
 
+if [ ! -f rbvmomi/vmodl.db ]; then
+  git clone https://github.com/vmware/rbvmomi
+fi
+
 dst=../vim25
 
 pkgs=$(echo $dst/{types,methods,mo})
