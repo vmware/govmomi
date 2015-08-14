@@ -51,9 +51,11 @@ func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
 
 	for {
 		h, err := r.Next()
-
 		if err == io.EOF {
 			break
+		}
+		if err != nil {
+			return nil, 0, err
 		}
 
 		matched, err := filepath.Match(name, path.Base(h.Name))
