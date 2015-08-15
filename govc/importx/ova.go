@@ -36,6 +36,8 @@ func (cmd *ova) Usage() string {
 	return "PATH_TO_OVA"
 }
 
+func (cmd *ova) Register(f *flag.FlagSet) {}
+
 func (cmd *ova) Run(f *flag.FlagSet) error {
 	file, err := cmd.Prepare(f)
 

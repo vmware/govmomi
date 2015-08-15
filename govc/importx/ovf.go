@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"path"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
@@ -40,6 +41,8 @@ type ovf struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 
+	folder string
+
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
@@ -52,7 +55,9 @@ func init() {
 	cli.Register("import.ovf", &ovf{})
 }
 
-func (cmd *ovf) Register(f *flag.FlagSet) {}
+func (cmd *ovf) Register(f *flag.FlagSet) {
+	f.StringVar(&cmd.folder, "folder", "", "Path to folder to add the vm to")
+}
 
 func (cmd *ovf) Process() error { return nil }
 
@@ -113,6 +118,36 @@ func (cmd *ovf) ReadAll(name string) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
+func (cmd *ovf) Folder() (*object.Folder, error) {
+	if len(cmd.folder) == 0 {
+		folders, err := cmd.Datacenter.Folders(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+		return folders.VmFolder, nil
+	} else {
+		finder := find.NewFinder(cmd.Client, false)
+
+		mo, err := finder.ManagedObjectList(context.TODO(), cmd.folder)
+		if err != nil {
+			return nil, err
+		}
+		if len(mo) == 0 {
+			return nil, errors.New("folder does not resolve to object")
+		}
+		if len(mo) > 1 {
+			return nil, errors.New("folder resolves to more than one object")
+		}
+
+		ref := mo[0].Object.Reference()
+		if ref.Type != "Folder" {
+			return nil, errors.New("folder does not resolve to folder")
+		}
+
+		return object.NewFolder(cmd.Client, ref), nil
+	}
+}
+
 func (cmd *ovf) Import(fpath string) error {
 	c := cmd.Client
 
@@ -144,11 +179,9 @@ func (cmd *ovf) Import(fpath string) error {
 	if err != nil {
 		return err
 	}
-
 	if spec.Error != nil {
 		return errors.New(spec.Error[0].LocalizedMessage)
 	}
-
 	if spec.Warning != nil {
 		for _, w := range spec.Warning {
 			_, _ = cmd.Log(fmt.Sprintf("Warning: %s\n", w.LocalizedMessage))
@@ -172,13 +205,12 @@ func (cmd *ovf) Import(fpath string) error {
 		}
 	}
 
-	// TODO: need a folder option
-	folders, err := cmd.Datacenter.Folders(context.TODO())
+	folder, err := cmd.Folder()
 	if err != nil {
 		return err
 	}
 
-	lease, err := cmd.ResourcePool.ImportVApp(context.TODO(), spec.ImportSpec, folders.VmFolder, host)
+	lease, err := cmd.ResourcePool.ImportVApp(context.TODO(), spec.ImportSpec, folder, host)
 	if err != nil {
 		return err
 	}
