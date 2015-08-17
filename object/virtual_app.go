@@ -73,3 +73,41 @@ func (p VirtualApp) CreateChildVM_Task(ctx context.Context, config types.Virtual
 
 	return NewTask(p.c, res.Returnval), nil
 }
+
+func (p VirtualApp) UpdateVAppConfig(ctx context.Context, spec types.VAppConfigSpec) error {
+	req := types.UpdateVAppConfig{
+		This: p.Reference(),
+		Spec: spec,
+	}
+
+	_, err := methods.UpdateVAppConfig(ctx, p.c, &req)
+	return err
+}
+
+func (p VirtualApp) PowerOnVApp_Task(ctx context.Context) error {
+	req := types.PowerOnVApp_Task{
+		This: p.Reference(),
+	}
+
+	_, err := methods.PowerOnVApp_Task(ctx, p.c, &req)
+	return err
+}
+
+func (p VirtualApp) PowerOffVApp_Task(ctx context.Context, force bool) error {
+	req := types.PowerOffVApp_Task{
+		This:  p.Reference(),
+		Force: force,
+	}
+
+	_, err := methods.PowerOffVApp_Task(ctx, p.c, &req)
+	return err
+}
+
+func (p VirtualApp) SuspendVApp_Task(ctx context.Context) error {
+	req := types.SuspendVApp_Task{
+		This: p.Reference(),
+	}
+
+	_, err := methods.SuspendVApp_Task(ctx, p.c, &req)
+	return err
+}
