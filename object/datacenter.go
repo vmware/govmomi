@@ -41,6 +41,17 @@ func NewDatacenter(c *vim25.Client, ref types.ManagedObjectReference) *Datacente
 	}
 }
 
+func (d Datacenter) Name(ctx context.Context) (string, error) {
+	var dc mo.Datacenter
+
+	err := d.Properties(ctx, d.Reference(), []string{"name"}, &dc)
+	if err != nil {
+		return "", err
+	}
+
+	return dc.Name, nil
+}
+
 func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
