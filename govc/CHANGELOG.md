@@ -2,6 +2,12 @@
 
 ### (unreleased)
 
+* Add `import.spec` to produce an example json document
+
+* Add `-options` to `import.ovf` and `import.ova`
+
+* Add `-folder` to `import.ovf` and `import.ova`
+
 * Add `host.add` command to add host to datacenter.
 
 * Add `GOVC_USERNAME` and `GOVC_PASSWORD` to allow overriding username and/or

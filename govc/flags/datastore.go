@@ -52,9 +52,7 @@ func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *DatastoreFlag) Process() error {
-	return nil
-}
+func (flag *DatastoreFlag) Process() error { return nil }
 
 func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	if flag.ds != nil {

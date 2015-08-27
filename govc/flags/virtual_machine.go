@@ -47,9 +47,7 @@ func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *VirtualMachineFlag) Process() error {
-	return nil
-}
+func (flag *VirtualMachineFlag) Process() error { return nil }
 
 func (flag *VirtualMachineFlag) VirtualMachine() (*object.VirtualMachine, error) {
 	if flag.vm != nil {

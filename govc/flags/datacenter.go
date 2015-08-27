@@ -47,16 +47,14 @@ func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *DatacenterFlag) Process() error {
-	return nil
-}
+func (flag *DatacenterFlag) Process() error { return nil }
 
 func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	if flag.finder != nil {
 		return flag.finder, nil
 	}
 
-	c, err := flag.ClientFlag.Client()
+	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}

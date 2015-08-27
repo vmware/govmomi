@@ -17,17 +17,16 @@ limitations under the License.
 package importx
 
 import (
-	"encoding/xml"
 	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"path"
 
-	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -35,13 +34,12 @@ import (
 	"golang.org/x/net/context"
 )
 
-type ovf struct {
+type ovfx struct {
+	*ImportFlag
 	*flags.DatastoreFlag
-	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.OutputFlag
-
-	folder string
+	*flags.ResourcePoolFlag
 
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
@@ -52,37 +50,34 @@ type ovf struct {
 }
 
 func init() {
-	cli.Register("import.ovf", &ovf{})
+	cli.Register("import.ovf", &ovfx{})
 }
 
-func (cmd *ovf) Register(f *flag.FlagSet) {
-	f.StringVar(&cmd.folder, "folder", "", "Path to folder to add the vm to")
-}
+func (cmd *ovfx) Register(f *flag.FlagSet) {}
 
-func (cmd *ovf) Process() error { return nil }
+func (cmd *ovfx) Process() error { return nil }
 
-func (cmd *ovf) Usage() string {
+func (cmd *ovfx) Usage() string {
 	return "PATH_TO_OVF"
 }
 
-func (cmd *ovf) Run(f *flag.FlagSet) error {
-	file, err := cmd.Prepare(f)
-
+func (cmd *ovfx) Run(f *flag.FlagSet) error {
+	fpath, err := cmd.Prepare(f)
 	if err != nil {
 		return err
 	}
 
-	cmd.Archive = &FileArchive{file}
+	cmd.Archive = &FileArchive{fpath}
 
-	return cmd.Import(file)
+	return cmd.Import(fpath)
 }
 
-func (cmd *ovf) Prepare(f *flag.FlagSet) (string, error) {
+func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 	var err error
 
 	args := f.Args()
 	if len(args) != 1 {
-		return "", errors.New("no file to import")
+		return "", errors.New("no file specified")
 	}
 
 	cmd.Client, err = cmd.DatastoreFlag.Client()
@@ -108,8 +103,8 @@ func (cmd *ovf) Prepare(f *flag.FlagSet) (string, error) {
 	return f.Arg(0), nil
 }
 
-func (cmd *ovf) ReadAll(name string) ([]byte, error) {
-	f, _, err := cmd.Open(name)
+func (cmd *ovfx) ReadOvf(fpath string) ([]byte, error) {
+	f, _, err := cmd.Open(fpath)
 	if err != nil {
 		return nil, err
 	}
@@ -118,64 +113,56 @@ func (cmd *ovf) ReadAll(name string) ([]byte, error) {
 	return ioutil.ReadAll(f)
 }
 
-func (cmd *ovf) Folder() (*object.Folder, error) {
-	if len(cmd.folder) == 0 {
-		folders, err := cmd.Datacenter.Folders(context.TODO())
-		if err != nil {
-			return nil, err
-		}
-		return folders.VmFolder, nil
-	} else {
-		finder := find.NewFinder(cmd.Client, false)
-
-		mo, err := finder.ManagedObjectList(context.TODO(), cmd.folder)
-		if err != nil {
-			return nil, err
-		}
-		if len(mo) == 0 {
-			return nil, errors.New("folder does not resolve to object")
-		}
-		if len(mo) > 1 {
-			return nil, errors.New("folder resolves to more than one object")
-		}
-
-		ref := mo[0].Object.Reference()
-		if ref.Type != "Folder" {
-			return nil, errors.New("folder does not resolve to folder")
-		}
-
-		return object.NewFolder(cmd.Client, ref), nil
+func (cmd *ovfx) ReadEnvelope(fpath string) (*ovf.Envelope, error) {
+	if fpath == "" {
+		return nil, nil
 	}
+
+	f, _, err := cmd.Open(fpath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	e, err := ovf.Unmarshal(f)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse ovf: %s", err.Error())
+	}
+
+	return e, nil
 }
 
-func (cmd *ovf) Import(fpath string) error {
+func (cmd *ovfx) Import(fpath string) error {
 	c := cmd.Client
 
-	desc, err := cmd.ReadAll(fpath)
+	o, err := cmd.ReadOvf(fpath)
 	if err != nil {
 		return err
 	}
 
-	// extract name from .ovf for use as VM name
-	ovf := struct {
-		VirtualSystem struct {
-			Name string
-		}
-	}{}
-
-	if err := xml.Unmarshal(desc, &ovf); err != nil {
+	e, err := cmd.ReadEnvelope(fpath)
+	if err != nil {
 		return fmt.Errorf("failed to parse ovf: %s", err.Error())
 	}
 
+	name := "Govc Virtual Appliance"
+	if e.VirtualSystem != nil {
+		name = e.VirtualSystem.ID
+	}
+
 	cisp := types.OvfCreateImportSpecParams{
-		EntityName: ovf.VirtualSystem.Name,
+		DiskProvisioning:   cmd.Options.DiskProvisioning,
+		EntityName:         name,
+		IpAllocationPolicy: cmd.Options.IpAllocationPolicy,
+		IpProtocol:         cmd.Options.IpProtocol,
 		OvfManagerCommonParams: types.OvfManagerCommonParams{
-			Locale: "US",
-		},
+			DeploymentOption: cmd.Options.Deployment,
+			Locale:           "US"},
+		PropertyMapping: cmd.Options.PropertyMapping,
 	}
 
 	m := object.NewOvfManager(c)
-	spec, err := m.CreateImportSpec(context.TODO(), string(desc), cmd.ResourcePool, cmd.Datastore, cisp)
+	spec, err := m.CreateImportSpec(context.TODO(), string(o), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
 		return err
 	}
@@ -258,7 +245,7 @@ func (cmd *ovf) Import(fpath string) error {
 	return lease.HttpNfcLeaseComplete(context.TODO())
 }
 
-func (cmd *ovf) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
+func (cmd *ovfx) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
 	item := ofi.item
 	file := item.Path
 
