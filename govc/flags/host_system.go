@@ -48,9 +48,7 @@ func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *HostSystemFlag) Process() error {
-	return nil
-}
+func (flag *HostSystemFlag) Process() error { return nil }
 
 func (flag *HostSystemFlag) HostSystemIfSpecified() (*object.HostSystem, error) {
 	if flag.host != nil {

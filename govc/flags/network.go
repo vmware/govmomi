@@ -53,9 +53,7 @@ func (flag *NetworkFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *NetworkFlag) Process() error {
-	return nil
-}
+func (flag *NetworkFlag) Process() error { return nil }
 
 func (flag *NetworkFlag) String() string {
 	return flag.name

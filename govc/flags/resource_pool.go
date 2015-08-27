@@ -43,9 +43,7 @@ func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *ResourcePoolFlag) Process() error {
-	return nil
-}
+func (flag *ResourcePoolFlag) Process() error { return nil }
 
 func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	if flag.pool != nil {

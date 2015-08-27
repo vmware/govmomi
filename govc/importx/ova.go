@@ -25,11 +25,11 @@ import (
 )
 
 type ova struct {
-	*ovf
+	*ovfx
 }
 
 func init() {
-	cli.Register("import.ova", &ova{&ovf{}})
+	cli.Register("import.ova", &ova{&ovfx{}})
 }
 
 func (cmd *ova) Usage() string {
@@ -39,20 +39,19 @@ func (cmd *ova) Usage() string {
 func (cmd *ova) Register(f *flag.FlagSet) {}
 
 func (cmd *ova) Run(f *flag.FlagSet) error {
-	file, err := cmd.Prepare(f)
-
+	fpath, err := cmd.Prepare(f)
 	if err != nil {
 		return err
 	}
 
-	cmd.Archive = &TapeArchive{file}
+	cmd.Archive = &TapeArchive{fpath}
 
-	return cmd.Import(file)
+	return cmd.Import(fpath)
 }
 
 func (cmd *ova) Import(fpath string) error {
 	// basename i | sed -e s/\.ova$/*.ovf/
-	ovf := strings.TrimSuffix(path.Base(fpath), path.Ext(fpath)) + "*.ovf"
+	ovf := strings.TrimSuffix(path.Base(fpath), path.Ext(fpath)) + ".ovf"
 
-	return cmd.ovf.Import(ovf)
+	return cmd.ovfx.Import(ovf)
 }
