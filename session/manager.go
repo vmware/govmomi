@@ -19,6 +19,7 @@ package session
 import (
 	"net/url"
 
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -83,7 +84,8 @@ func (sm *Manager) Logout(ctx context.Context) error {
 func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) {
 	var mgr mo.SessionManager
 
-	err := mo.RetrieveProperties(ctx, sm.client, sm.client.ServiceContent.PropertyCollector, sm.Reference(), &mgr)
+	pc := property.DefaultCollector(sm.client)
+	err := pc.RetrieveOne(ctx, sm.Reference(), []string{"currentSession"}, &mgr)
 	if err != nil {
 		// It's OK if we can't retrieve properties because we're not authenticated
 		if f, ok := err.(types.HasFault); ok {
