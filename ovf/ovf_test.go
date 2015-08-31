@@ -83,3 +83,42 @@ func TestDeploymentOptions(t *testing.T) {
 	tw.Flush()
 	t.Log(b.String())
 }
+
+func testEnv() Env {
+	return Env{
+		EsxID: "vm moref",
+		Platform: &PlatformSection{
+			Kind:    "VMware vCenter Server",
+			Version: "5.5.0",
+			Vendor:  "VMware, Inc.",
+			Locale:  "US",
+		},
+		Property: &PropertySection{
+			Properties: []EnvProperty{
+				EnvProperty{"foo", "bar"},
+				EnvProperty{"ham", "eggs"}}},
+	}
+}
+
+func TestMarshalEnv(t *testing.T) {
+	env := testEnv()
+
+	xenv, err := Marshal(env)
+	if err != nil {
+		t.Fatal("Error marshalling environment")
+	}
+	if len(xenv) < 1 {
+		t.Fatal("Marshalled document is empty")
+	}
+	t.Log(xenv)
+}
+
+func TestMarshalManualEnv(t *testing.T) {
+	env := testEnv()
+
+	xenv := MarshalManual(env)
+	if len(xenv) < 1 {
+		t.Fatal("Marshalled document is empty")
+	}
+	t.Log(xenv)
+}

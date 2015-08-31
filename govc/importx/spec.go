@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -34,8 +34,8 @@ var (
 
 	allDeploymentOptions         = []string{"small", "medium", "large"}
 	allDiskProvisioningOptions   = []string{"thin", "monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "seSparse", "eagerZeroedThick", "thick", "sparse", "flat"}
-	allIpAllocationPolicyOptions = []string{"dhcpPolicy", "transientPolicy", "fixedPolicy", "fixedAllocatedPolicy"}
-	allIpProtocolOptions         = []string{"IPv4", "IPv6"}
+	allIPAllocationPolicyOptions = []string{"dhcpPolicy", "transientPolicy", "fixedPolicy", "fixedAllocatedPolicy"}
+	allIPProtocolOptions         = []string{"IPv4", "IPv6"}
 )
 
 type spec struct {
@@ -122,10 +122,13 @@ func (cmd *spec) Spec(fpath string) error {
 		Deployment:                   deploymentOptions[0],
 		AllDiskProvisioningOptions:   allDiskProvisioningOptions,
 		DiskProvisioning:             allDiskProvisioningOptions[0],
-		AllIpAllocationPolicyOptions: allIpAllocationPolicyOptions,
-		IpAllocationPolicy:           allIpAllocationPolicyOptions[0],
-		AllIpProtocolOptions:         allIpProtocolOptions,
-		IpProtocol:                   allIpProtocolOptions[0],
+		AllIPAllocationPolicyOptions: allIPAllocationPolicyOptions,
+		IPAllocationPolicy:           allIPAllocationPolicyOptions[0],
+		AllIPProtocolOptions:         allIPProtocolOptions,
+		IPProtocol:                   allIPProtocolOptions[0],
+		PowerOn:                      false,
+		WaitForIP:                    false,
+		InjectOvfEnv:                 false,
 		PropertyMapping:              cmd.Map(e)}
 
 	j, err := json.Marshal(&o)
