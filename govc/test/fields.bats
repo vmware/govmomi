@@ -25,7 +25,7 @@ load test_helper
   run govc fields.set $field $val vm/$vm_id
   assert_success
 
-  info=$(govc vm.info -json $vm_id | jq .VmInfos[0].CustomValue[0])
+  info=$(govc vm.info -json $vm_id | jq .VirtualMachines[0].CustomValue[0])
 
   ikey=$(jq -r .Key <<<"$info")
   assert_equal $key $ikey
