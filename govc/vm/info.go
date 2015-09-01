@@ -28,6 +28,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -68,6 +69,11 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
+	refs := make([]types.ManagedObjectReference, 0, len(vms))
+	for _, vm := range vms {
+		refs = append(refs, vm.Reference())
+	}
+
 	var res infoResult
 	var props []string
 
@@ -80,28 +86,26 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	for _, vm := range vms {
-		for {
-			var mvm mo.VirtualMachine
+	ctx := context.TODO()
+	pc := property.DefaultCollector(c)
+	err = pc.Retrieve(ctx, refs, props, &res.VirtualMachines)
+	if err != nil {
+		return err
+	}
 
-			pc := property.DefaultCollector(c)
-			err = pc.RetrieveOne(context.TODO(), vm.Reference(), props, &mvm)
-			if err != nil {
-				return err
-			}
-
-			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
-				_, err = vm.WaitForIP(context.TODO())
+	if cmd.WaitForIP {
+		for i, vm := range res.VirtualMachines {
+			if vm.Guest == nil || vm.Guest.IpAddress == "" {
+				_, err = vms[i].WaitForIP(ctx)
 				if err != nil {
 					return err
 				}
-
 				// Reload virtual machine object
-				continue
+				err = pc.RetrieveOne(ctx, vms[i].Reference(), props, &res.VirtualMachines[i])
+				if err != nil {
+					return err
+				}
 			}
-
-			res.VirtualMachines = append(res.VirtualMachines, mvm)
-			break
 		}
 	}
 
