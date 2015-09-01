@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add `PowerOn, InjectOvfEnv, WaitForIP` options to `import.ovf` and `import.ova` option spec file
+
 * Add `import.spec` to produce an example json document
 
 * Add `-options` to `import.ovf` and `import.ova`

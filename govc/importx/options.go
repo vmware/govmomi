@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -36,13 +36,17 @@ type Options struct {
 	AllDiskProvisioningOptions []string
 	DiskProvisioning           string
 
-	AllIpAllocationPolicyOptions []string
-	IpAllocationPolicy           string
+	AllIPAllocationPolicyOptions []string
+	IPAllocationPolicy           string
 
-	AllIpProtocolOptions []string
-	IpProtocol           string
+	AllIPProtocolOptions []string
+	IPProtocol           string
 
 	PropertyMapping []types.KeyValue
+
+	PowerOn      bool
+	InjectOvfEnv bool
+	WaitForIP    bool
 }
 
 type ImportFlag struct {
@@ -90,32 +94,32 @@ func (flag *ImportFlag) Folder() (*object.Folder, error) {
 			return nil, err
 		}
 		return folders.VmFolder, nil
-	} else {
-		finder, err := flag.Finder()
-		if err != nil {
-			return nil, err
-		}
-
-		mo, err := finder.ManagedObjectList(context.TODO(), flag.folder)
-		if err != nil {
-			return nil, err
-		}
-		if len(mo) == 0 {
-			return nil, errors.New("folder argument does not resolve to object")
-		}
-		if len(mo) > 1 {
-			return nil, errors.New("folder argument resolves to more than one object")
-		}
-
-		ref := mo[0].Object.Reference()
-		if ref.Type != "Folder" {
-			return nil, errors.New("folder argument does not resolve to folder")
-		}
-
-		c, err := flag.Client()
-		if err != nil {
-			return nil, err
-		}
-		return object.NewFolder(c, ref), nil
 	}
+
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	mo, err := finder.ManagedObjectList(context.TODO(), flag.folder)
+	if err != nil {
+		return nil, err
+	}
+	if len(mo) == 0 {
+		return nil, errors.New("folder argument does not resolve to object")
+	}
+	if len(mo) > 1 {
+		return nil, errors.New("folder argument resolves to more than one object")
+	}
+
+	ref := mo[0].Object.Reference()
+	if ref.Type != "Folder" {
+		return nil, errors.New("folder argument does not resolve to folder")
+	}
+
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+	return object.NewFolder(c, ref), nil
 }
