@@ -30,6 +30,8 @@ import (
 
 type esxcli struct {
 	*flags.HostSystemFlag
+
+	hints bool
 }
 
 func init() {
@@ -40,7 +42,9 @@ func (cmd *esxcli) Usage() string {
 	return "COMMAND [ARG]..."
 }
 
-func (cmd *esxcli) Register(f *flag.FlagSet) {}
+func (cmd *esxcli) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.hints, "hints", true, "Use command info hints when formatting output")
+}
 
 func (cmd *esxcli) Process() error { return nil }
 
@@ -69,8 +73,13 @@ func (cmd *esxcli) Run(f *flag.FlagSet) error {
 		return nil
 	}
 
+	var formatType string
+	if cmd.hints {
+		formatType = res.Info.Hints.Formatter()
+	}
+
 	// TODO: OutputFlag / format options
-	switch res.Info.Hints.Formatter() {
+	switch formatType {
 	case "table":
 		cmd.formatTable(res)
 	default:
