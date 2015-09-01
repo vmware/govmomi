@@ -26,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"golang.org/x/net/context"
@@ -81,20 +80,18 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	ctx := context.TODO()
-
 	for _, vm := range vms {
 		for {
 			var mvm mo.VirtualMachine
 
 			pc := property.DefaultCollector(c)
-			err = pc.RetrieveOne(ctx, vm.Reference(), props, &mvm)
+			err = pc.RetrieveOne(context.TODO(), vm.Reference(), props, &mvm)
 			if err != nil {
 				return err
 			}
 
 			if cmd.WaitForIP && mvm.Guest.IpAddress == "" {
-				_, err = vm.WaitForIP(ctx)
+				_, err = vm.WaitForIP(context.TODO())
 				if err != nil {
 					return err
 				}
@@ -103,19 +100,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 				continue
 			}
 
-			var hostName string
-			hostRef := mvm.Summary.Runtime.Host
-			if hostRef == nil {
-				hostName = "<unavailable>"
-			} else {
-				host := object.NewHostSystem(c, *hostRef)
-				hostName, err = host.Name(ctx)
-				if err != nil {
-					return err
-				}
-			}
-
-			res.VmInfos = append(res.VmInfos, vmInfo{mvm, hostName})
+			res.VirtualMachines = append(res.VirtualMachines, mvm)
 			break
 		}
 	}
@@ -123,20 +108,14 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 	return cmd.WriteResult(&res)
 }
 
-type vmInfo struct {
-	mo.VirtualMachine
-	hostName string
-}
-
 type infoResult struct {
-	VmInfos []vmInfo
+	VirtualMachines []mo.VirtualMachine
 }
 
 func (r *infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for _, vmInfo := range r.VmInfos {
-		vm := vmInfo.VirtualMachine
+	for _, vm := range r.VirtualMachines {
 		s := vm.Summary
 
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
@@ -147,7 +126,6 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  Power state:\t%s\n", s.Runtime.PowerState)
 		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
 		fmt.Fprintf(tw, "  IP address:\t%s\n", s.Guest.IpAddress)
-		fmt.Fprintf(tw, "  Host:\t%s\n", vmInfo.hostName)
 		if vm.Config != nil && vm.Config.ExtraConfig != nil {
 			fmt.Fprintf(tw, "  ExtraConfig:\n")
 			for _, v := range vm.Config.ExtraConfig {
