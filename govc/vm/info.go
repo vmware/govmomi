@@ -109,11 +109,40 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
+	// Build a list of host system references and fetch host properties for all hosts in one call
+	xrefs := make(map[string]bool)
+	refs = nil
+	var hosts []mo.HostSystem
+
+	for _, vm := range res.VirtualMachines {
+		href := vm.Summary.Runtime.Host
+		if href == nil {
+			continue
+		}
+		if _, exists := xrefs[href.Value]; exists {
+			continue
+		}
+		xrefs[href.Value] = true
+		refs = append(refs, *href)
+	}
+
+	err = pc.Retrieve(ctx, refs, []string{"name"}, &hosts)
+	if err != nil {
+		return err
+	}
+
+	res.hostSystems = make(map[string]*mo.HostSystem)
+
+	for i, ref := range refs {
+		res.hostSystems[ref.Value] = &hosts[i]
+	}
+
 	return cmd.WriteResult(&res)
 }
 
 type infoResult struct {
 	VirtualMachines []mo.VirtualMachine
+	hostSystems     map[string]*mo.HostSystem
 }
 
 func (r *infoResult) Write(w io.Writer) error {
@@ -121,6 +150,13 @@ func (r *infoResult) Write(w io.Writer) error {
 
 	for _, vm := range r.VirtualMachines {
 		s := vm.Summary
+		hostName := "<unavailable>"
+
+		if href := vm.Summary.Runtime.Host; href != nil {
+			if h, ok := r.hostSystems[href.Value]; ok {
+				hostName = h.Name
+			}
+		}
 
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
 		fmt.Fprintf(tw, "  UUID:\t%s\n", s.Config.Uuid)
@@ -130,6 +166,8 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  Power state:\t%s\n", s.Runtime.PowerState)
 		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
 		fmt.Fprintf(tw, "  IP address:\t%s\n", s.Guest.IpAddress)
+		fmt.Fprintf(tw, "  Host:\t%s\n", hostName)
+
 		if vm.Config != nil && vm.Config.ExtraConfig != nil {
 			fmt.Fprintf(tw, "  ExtraConfig:\n")
 			for _, v := range vm.Config.ExtraConfig {
