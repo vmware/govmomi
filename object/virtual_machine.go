@@ -353,6 +353,18 @@ func (v VirtualMachine) Answer(ctx context.Context, id, answer string) error {
 	return nil
 }
 
+// IsToolsRunning returns true if VMware Tools is currently running in the guest OS, and false otherwise.
+func (v VirtualMachine) IsToolsRunning(ctx context.Context) (bool, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"guest.toolsRunningStatus"}, &o)
+	if err != nil {
+		return false, err
+	}
+
+	return o.Guest.ToolsRunningStatus == string(types.VirtualMachineToolsRunningStatusGuestToolsRunning), nil
+}
+
 func (v VirtualMachine) MarkAsTemplate(ctx context.Context) error {
 	req := types.MarkAsTemplate{
 		This: v.Reference(),
