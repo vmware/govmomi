@@ -32,6 +32,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
@@ -60,34 +61,6 @@ func GetEnvBool(v string, def bool) bool {
 	}
 
 	return false
-}
-
-// Humanize converts a number in bytes to a more readable format.
-func Humanize(v int64) string {
-
-	const (
-		_  = iota
-		KB = 1 << (10 * iota)
-		MB
-		GB
-		TB
-		PB
-	)
-
-	switch {
-	case v < KB:
-		return fmt.Sprintf("%dB", v)
-	case v < MB:
-		return fmt.Sprintf("%.1fKB", float32(v)/KB)
-	case v < GB:
-		return fmt.Sprintf("%.1fMB", float32(v)/MB)
-	case v < TB:
-		return fmt.Sprintf("%.1fGB", float32(v)/GB)
-	case v < PB:
-		return fmt.Sprintf("%.1fTB", float32(v)/TB)
-	default:
-		return "a lot"
-	}
 }
 
 const (
@@ -199,8 +172,8 @@ func main() {
 	for _, ds := range dst {
 		fmt.Fprintf(tw, "%s\t", ds.Summary.Name)
 		fmt.Fprintf(tw, "%s\t", ds.Summary.Type)
-		fmt.Fprintf(tw, "%s\t", Humanize(ds.Summary.Capacity))
-		fmt.Fprintf(tw, "%s\t", Humanize(ds.Summary.FreeSpace))
+		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.Capacity))
+		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.FreeSpace))
 		fmt.Fprintf(tw, "\n")
 	}
 	tw.Flush()

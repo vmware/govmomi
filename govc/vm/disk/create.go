@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/units"
 	"golang.org/x/net/context"
 )
 
@@ -32,7 +33,7 @@ type create struct {
 
 	controller string
 	Name       string
-	Bytes      ByteValue
+	Bytes      units.ByteSize
 }
 
 func init() {
@@ -53,13 +54,14 @@ func (cmd *create) Register(f *flag.FlagSet) {
 func (cmd *create) Process() error { return nil }
 
 func (cmd *create) Run(f *flag.FlagSet) error {
-	var err error
+	if len(cmd.Name) == 0 {
+		return errors.New("please specify a disk name")
+	}
 
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
-
 	if vm == nil {
 		return errors.New("please specify a vm")
 	}
@@ -83,15 +85,12 @@ func (cmd *create) Run(f *flag.FlagSet) error {
 
 	existing := devices.SelectByBackingInfo(disk.Backing)
 
-	if len(existing) == 0 {
-		cmd.Log("Creating disk\n")
-
-		disk.CapacityInKB = cmd.Bytes.Bytes / 1024
-
-		return vm.AddDevice(context.TODO(), disk)
-	} else {
+	if len(existing) > 0 {
 		cmd.Log("Disk already present\n")
+		return nil
 	}
 
-	return nil
+	cmd.Log("Creating disk\n")
+	disk.CapacityInKB = int64(cmd.Bytes) / 1024
+	return vm.AddDevice(context.TODO(), disk)
 }

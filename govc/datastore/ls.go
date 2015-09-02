@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -185,7 +186,7 @@ func (o *listOutput) Write(w io.Writer) error {
 		for _, file := range r.File {
 			info := file.GetFileInfo()
 			if o.long {
-				fmt.Fprintf(tw, "%d\t%s\t%s\n", info.FileSize, info.Modification.Format("Mon Jan 2 15:04:05 2006"), info.Path)
+				fmt.Fprintf(tw, "%s\t%s\t%s\n", units.ByteSize(info.FileSize), info.Modification.Format("Mon Jan 2 15:04:05 2006"), info.Path)
 			} else {
 				fmt.Fprintf(tw, "%s\n", info.Path)
 			}
