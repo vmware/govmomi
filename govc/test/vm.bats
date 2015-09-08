@@ -134,6 +134,17 @@ load test_helper
   for x in $(seq $num)
   do
     local id="${prefix}-${x}"
+
+    # If VM is not found: No output, exit code==0
+    run govc vm.info $id
+    assert_success
+    [ ${#lines[@]} -eq 0 ]
+
+    # If VM is not found (using -json flag): Valid json output, exit code==0
+    run govc vm.info -json $id
+    assert_success
+    assert_line "{\"VirtualMachines\":null}"
+
     run govc vm.create -on=false $id
     assert_success
 
@@ -142,7 +153,19 @@ load test_helper
   done
 
   # test find slice
-  local found=$(govc vm.info ${prefix}-* | grep Name: | wc -l)
+  local slice=$(govc vm.info ${prefix}-*)
+  local found=$(grep Name: <<<"$slice" | wc -l)
+  [ "$found" -eq $num ]
+
+  # test -r
+  found=$(grep Storage: <<<"$slice" | wc -l)
+  [ "$found" -eq 0 ]
+  found=$(grep Network: <<<"$slice" | wc -l)
+  [ "$found" -eq 0 ]
+  slice=$(govc vm.info -r ${prefix}-*)
+  found=$(grep Storage: <<<"$slice" | wc -l)
+  [ "$found" -eq $num ]
+  found=$(grep Network: <<<"$slice" | wc -l)
   [ "$found" -eq $num ]
 
   # test extraConfig
