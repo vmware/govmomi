@@ -28,6 +28,10 @@ import (
 	"golang.org/x/net/context"
 )
 
+const (
+	PropRuntimePowerState = "summary.runtime.powerState"
+)
+
 type VirtualMachine struct {
 	Common
 
@@ -363,6 +367,29 @@ func (v VirtualMachine) IsToolsRunning(ctx context.Context) (bool, error) {
 	}
 
 	return o.Guest.ToolsRunningStatus == string(types.VirtualMachineToolsRunningStatusGuestToolsRunning), nil
+}
+
+// Wait for the VirtualMachine to change to the desired power state.
+func (v VirtualMachine) WaitForPowerState(ctx context.Context, state types.VirtualMachinePowerState) error {
+	p := property.DefaultCollector(v.c)
+	err := property.Wait(ctx, p, v.Reference(), []string{PropRuntimePowerState}, func(pc []types.PropertyChange) bool {
+		for _, c := range pc {
+			if c.Name != PropRuntimePowerState {
+				continue
+			}
+			if c.Val == nil {
+				continue
+			}
+
+			ps := c.Val.(types.VirtualMachinePowerState)
+			if ps == state {
+				return true
+			}
+		}
+		return false
+	})
+
+	return err
 }
 
 func (v VirtualMachine) MarkAsTemplate(ctx context.Context) error {
