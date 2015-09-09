@@ -133,6 +133,12 @@ func (r *infoResult) Write(w io.Writer) error {
 			if b, ok := md.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok && b.Parent != nil {
 				fmt.Fprintf(tw, "  Parent:\t%s\n", b.Parent.GetVirtualDeviceFileBackingInfo().FileName)
 			}
+		case *types.VirtualSerialPort:
+			if b, ok := md.Backing.(*types.VirtualSerialPortURIBackingInfo); ok {
+				fmt.Fprintf(tw, "  Direction:\t%s\n", b.Direction)
+				fmt.Fprintf(tw, "  Service URI:\t%s\n", b.ServiceURI)
+				fmt.Fprintf(tw, "  Proxy URI:\t%s\n", b.ProxyURI)
+			}
 		}
 	}
 
