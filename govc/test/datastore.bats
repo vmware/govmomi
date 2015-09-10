@@ -3,7 +3,7 @@
 load test_helper
 
 upload_file() {
-  file=$(mktemp --tmpdir govc-test-XXXXX)
+  file=$($mktemp --tmpdir govc-test-XXXXX)
   name=$(basename ${file})
   echo "Hello world!" > ${file}
 

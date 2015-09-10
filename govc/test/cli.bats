@@ -15,12 +15,14 @@ load test_helper
 
 @test "login attempt with GOVC_URL, GOVC_USERNAME, and GOVC_PASSWORD" {
   local url
+  local userpass
   local username
   local password
 
   url=$(echo $GOVC_URL | awk -F@ '{print $2}')
-  username=$(echo $GOVC_URL | awk -F@ '{print $1}' | awk -F: '{print $1}')
-  password=$(echo $GOVC_URL | awk -F@ '{print $1}' | awk -F: '{print $2}')
+  userpass=$(echo $GOVC_URL | awk -F// '{print $2}' | awk -F@ '{print $1}')
+  username=$(echo $userpass | awk -F: '{print $1}')
+  password=$(echo $userpass | awk -F: '{print $2}')
 
   run env GOVC_URL="${url}" GOVC_USERNAME="${username}" GOVC_PASSWORD="${password}" govc about
   assert_success
