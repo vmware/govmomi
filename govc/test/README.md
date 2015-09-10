@@ -4,6 +4,14 @@
 
 Install [Bats](https://github.com/sstephenson/bats/)
 
+## coreutils
+
+Install greadlink and gmktemp on Darwin
+
+```
+brew install coreutils
+```
+
 ## Download test images
 
 Some tests depend on [ttylinux](http://ttylinux.net) images, these can be downloaded by running:
