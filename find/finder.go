@@ -19,12 +19,13 @@ package find
 import (
 	"errors"
 	"path"
-
+	
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -534,6 +535,28 @@ func (f *Finder) DefaultResourcePool(ctx context.Context) (*object.ResourcePool,
 	return rp, nil
 }
 
+//foreach all Folder
+func (f *Finder) findVirtualMachineListForFolder(ctx context.Context, fobj types.ManagedObjectReference, vms *[]*object.VirtualMachine) {
+	// if string(fobj.Type) != "Folder" {
+	// 	return
+	// }
+	folder := object.NewFolder(f.client, fobj)
+	childs, err := folder.Children(ctx)
+	if err != nil {
+		return
+	}
+	for _, chie := range childs {
+		switch chie.Reference().Type {
+		case "VirtualMachine":
+			vm := object.NewVirtualMachine(f.client, chie.Reference())
+			//vm.InventoryPath?
+			*vms = append(*vms, vm)
+		case "Folder":
+			f.findVirtualMachineListForFolder(ctx, chie.Reference(), vms)
+		}
+
+	}
+}
 func (f *Finder) VirtualMachineList(ctx context.Context, path string) ([]*object.VirtualMachine, error) {
 	es, err := f.find(ctx, f.vmFolder, false, path)
 	if err != nil {
@@ -547,9 +570,10 @@ func (f *Finder) VirtualMachineList(ctx context.Context, path string) ([]*object
 			vm := object.NewVirtualMachine(f.client, o.Reference())
 			vm.InventoryPath = e.Path
 			vms = append(vms, vm)
+		case mo.Folder:
+			f.findVirtualMachineListForFolder(ctx, e.Object.Reference(), &vms)
 		}
 	}
-
 	if len(vms) == 0 {
 		return nil, &NotFoundError{"vm", path}
 	}
