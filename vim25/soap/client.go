@@ -51,6 +51,7 @@ type Client struct {
 	k bool // Named after curl's -k flag
 	d *debugContainer
 	t *http.Transport
+	NotThread bool
 }
 
 func NewClient(u *url.URL, insecure bool) *Client {
@@ -120,6 +121,9 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 }
 
 func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+	if c.NotThread {
+		return c.Client.Do(req)
+	}
 	var resc = make(chan *http.Response, 1)
 	var errc = make(chan error, 1)
 
