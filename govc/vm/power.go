@@ -23,6 +23,8 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -52,7 +54,7 @@ func (cmd *power) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.Suspend, "suspend", false, "Power suspend")
 	f.BoolVar(&cmd.Reboot, "r", false, "Reboot guest")
 	f.BoolVar(&cmd.Shutdown, "s", false, "Shutdown guest")
-	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error)")
+	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error and hard shutdown/reboot if tools unavailable)")
 }
 
 func (cmd *power) Process() error {
@@ -73,6 +75,17 @@ func (cmd *power) Process() error {
 	}
 
 	return nil
+}
+
+func isToolsUnavailable(err error) bool {
+	if soap.IsSoapFault(err) {
+		soapFault := soap.ToSoapFault(err)
+		if _, ok := soapFault.VimFault().(types.ToolsUnavailable); ok {
+			return ok
+		}
+	}
+
+	return false
 }
 
 func (cmd *power) Run(f *flag.FlagSet) error {
@@ -100,9 +113,17 @@ func (cmd *power) Run(f *flag.FlagSet) error {
 		case cmd.Reboot:
 			fmt.Fprintf(cmd, "Reboot guest %s... ", vm.Reference())
 			err = vm.RebootGuest(context.TODO())
+
+			if err != nil && cmd.Force && isToolsUnavailable(err) {
+				task, err = vm.Reset(context.TODO())
+			}
 		case cmd.Shutdown:
 			fmt.Fprintf(cmd, "Shutdown guest %s... ", vm.Reference())
 			err = vm.ShutdownGuest(context.TODO())
+
+			if err != nil && cmd.Force && isToolsUnavailable(err) {
+				task, err = vm.PowerOff(context.TODO())
+			}
 		}
 
 		if err != nil {

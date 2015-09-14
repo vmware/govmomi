@@ -102,6 +102,38 @@ load test_helper
   assert_success "poweredOn"
 }
 
+@test "vm.power -force" {
+  vm=$(new_id)
+  govc vm.create $vm
+
+  run govc vm.power -r $vm
+  assert_failure
+
+  run govc vm.power -r -force $vm
+  assert_success
+
+  run govc vm.power -s $vm
+  assert_failure
+
+  run govc vm.power -s -force $vm
+  assert_success
+
+  run govc vm.power -off $vm
+  assert_failure
+
+  run govc vm.power -off -force $vm
+  assert_success
+
+  run govc vm.destroy $vm
+  assert_success
+
+  run govc vm.power -off $vm
+  assert_failure
+
+  run govc vm.power -off -force $vm
+  assert_failure
+}
+
 @test "vm.create pvscsi" {
   vm=$(new_id)
   govc vm.create -on=false -disk.controller pvscsi $vm
