@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"os"
 	"strings"
-	"text/tabwriter"
 	"time"
 
 	"github.com/vmware/govmomi/event"
@@ -114,8 +113,6 @@ func (cmd *events) Run(f *flag.FlagSet) error {
 
 	event.Sort(events)
 
-	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
-
 	for _, e := range events {
 		cat, err := m.EventCategory(ctx, e)
 		if err != nil {
@@ -129,10 +126,10 @@ func (cmd *events) Run(f *flag.FlagSet) error {
 			msg = fmt.Sprintf("%s (target=%s %s)", msg, t.Info.Entity.Type, t.Info.EntityName)
 		}
 
-		fmt.Fprintf(tw, "[%s]\t[%s]\t%s\n",
+		fmt.Fprintf(os.Stdout, "[%s] [%s] %s\n",
 			event.CreatedTime.Local().Format(time.ANSIC),
 			cat, msg)
 	}
 
-	return tw.Flush()
+	return nil
 }
