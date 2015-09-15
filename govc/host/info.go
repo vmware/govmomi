@@ -23,12 +23,14 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
-	"golang.org/x/net/context"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type info struct {
@@ -41,67 +43,69 @@ func init() {
 	cli.Register("host.info", &info{})
 }
 
-func (c *info) Register(f *flag.FlagSet) {}
+func (cmd *info) Register(f *flag.FlagSet) {}
 
-func (c *info) Process() error { return nil }
+func (cmd *info) Process() error { return nil }
 
-func (c *info) Run(f *flag.FlagSet) error {
-	client, err := c.Client()
+func (cmd *info) Run(f *flag.FlagSet) error {
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	var hosts []*object.HostSystem
+	ctx := context.TODO()
+
+	var res infoResult
+	var props []string
+
+	if cmd.OutputFlag.JSON {
+		props = nil // Load everything
+	} else {
+		props = []string{"summary"} // Load summary
+	}
 
 	// We could do without the -host flag, leaving it for compat
-	host, err := c.HostSystemIfSpecified()
+	host, err := cmd.HostSystemIfSpecified()
 	if err != nil {
 		return err
 	}
 
 	// Default only if there is a single host
 	if host == nil && f.NArg() == 0 {
-		host, err = c.HostSystem()
+		host, err = cmd.HostSystem()
 		if err != nil {
 			return err
 		}
 	}
 
 	if host != nil {
-		hosts = append(hosts, host)
+		res.objects = append(res.objects, host)
 	} else {
-		hosts, err = c.HostSystems(f.Args())
+		res.objects, err = cmd.HostSystems(f.Args())
 		if err != nil {
 			return err
 		}
 	}
 
-	var res infoResult
-	var props []string
+	if len(res.objects) != 0 {
+		refs := make([]types.ManagedObjectReference, 0, len(res.objects))
+		for _, o := range res.objects {
+			refs = append(refs, o.Reference())
+		}
 
-	if c.OutputFlag.JSON {
-		props = nil // Load everything
-	} else {
-		props = []string{"summary"} // Load summary
-	}
-
-	for _, host := range hosts {
-		var h mo.HostSystem
-
-		pc := property.DefaultCollector(client)
-		err = pc.RetrieveOne(context.TODO(), host.Reference(), props, &h)
+		pc := property.DefaultCollector(c)
+		err = pc.Retrieve(ctx, refs, props, &res.HostSystems)
 		if err != nil {
 			return err
 		}
-
-		res.HostSystems = append(res.HostSystems, h)
 	}
 
-	return c.WriteResult(&res)
+	return cmd.WriteResult(&res)
 }
 
 type infoResult struct {
 	HostSystems []mo.HostSystem
+	objects     []*object.HostSystem
 }
 
 func (r *infoResult) Write(w io.Writer) error {

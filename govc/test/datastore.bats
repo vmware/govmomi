@@ -35,7 +35,7 @@ upload_file() {
   # Long listing
   run govc datastore.ls -l "./govc-test-*"
   assert_success
-  assert_equal "13" $(awk '{ print $1 }' <<<${output})
+  assert_equal "13B" $(awk '{ print $1 }' <<<${output})
 }
 
 @test "datastore.rm" {
