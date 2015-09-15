@@ -4,6 +4,8 @@
 
 ...
 
+* Update to vim25/6.0 API
+
 * Stop returning children from `ManagedObjectList`
 
     Change the `ManagedObjectList` function in the `find` package to only
