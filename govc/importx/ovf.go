@@ -20,7 +20,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"path"
 	"strings"
 
@@ -36,18 +35,19 @@ import (
 )
 
 type ovfx struct {
-	*ImportFlag
 	*flags.DatastoreFlag
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 	*flags.ResourcePoolFlag
 
+	*ArchiveFlag
+	*OptionsFlag
+	*FolderFlag
+
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
 	ResourcePool *object.ResourcePool
-
-	Archive
 }
 
 func init() {
@@ -76,7 +76,6 @@ func (cmd *ovfx) Run(f *flag.FlagSet) error {
 	}
 
 	vm := object.NewVirtualMachine(cmd.Client, *moref)
-
 	return cmd.Deploy(vm)
 }
 
@@ -125,35 +124,6 @@ func (cmd *ovfx) Deploy(vm *object.VirtualMachine) error {
 	}
 
 	return nil
-}
-
-func (cmd *ovfx) ReadOvf(fpath string) ([]byte, error) {
-	f, _, err := cmd.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	return ioutil.ReadAll(f)
-}
-
-func (cmd *ovfx) ReadEnvelope(fpath string) (*ovf.Envelope, error) {
-	if fpath == "" {
-		return nil, nil
-	}
-
-	f, _, err := cmd.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	e, err := ovf.Unmarshal(f)
-	if err != nil {
-		return nil, fmt.Errorf("failed to parse ovf: %s", err.Error())
-	}
-
-	return e, nil
 }
 
 func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
@@ -313,7 +283,7 @@ func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
 		return nil
 	}
 
-	cmd.Log("Powering on vm...\n")
+	cmd.Log("Powering on VM...\n")
 
 	task, err := vm.PowerOn(context.TODO())
 	if err != nil {
@@ -334,7 +304,7 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 
 	a := cmd.Client.ServiceContent.About
 	if strings.EqualFold(a.ProductLineId, "esx") || strings.EqualFold(a.ProductLineId, "embeddedEsx") {
-		cmd.Log("Injecting ovf env...\n")
+		cmd.Log("Injecting OVF environment...\n")
 
 		// build up Environment in order to marshal to xml
 		var epa []ovf.EnvProperty
@@ -378,13 +348,12 @@ func (cmd *ovfx) WaitForIP(vm *object.VirtualMachine) error {
 		return nil
 	}
 
-	cmd.Log("Waiting for ip...\n")
-
+	cmd.Log("Waiting for IP address...\n")
 	ip, err := vm.WaitForIP(context.TODO())
 	if err != nil {
 		return err
 	}
-	cmd.Log(fmt.Sprintf("Received IP address: %s\n", ip))
 
+	cmd.Log(fmt.Sprintf("Received IP address: %s\n", ip))
 	return nil
 }
