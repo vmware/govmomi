@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* The `vm.power` guest `-s` and `-r` options will fallback to hard `-off` / `-reset` if tools is unavailable and `-force` flag is given
+
 * Add `PowerOn, InjectOvfEnv, WaitForIP` options to `import.ovf` and `import.ova` option spec file
 
 * Add `import.spec` to produce an example json document
@@ -10,11 +12,21 @@
 
 * Add `-folder` to `import.ovf` and `import.ova`
 
+* Add `fields` command to manage custom fields
+
+* Add `datastore.info` command
+
+* Add `events` command
+
+* Add `-net.address` (Hardware Address) option to `vm.change` and `vm.create`
+
 * Add `host.add` command to add host to datacenter.
 
 * Add `GOVC_USERNAME` and `GOVC_PASSWORD` to allow overriding username and/or
   password (used when they contain special characters that prevent them from
   being embedded in the URL).
+
+* Add `-e' (ExtraConfig) option to `vm.change` and `vm.info`
 
 * Retry twice on temporary network errors.
 
