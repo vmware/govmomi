@@ -39,7 +39,7 @@ var (
 )
 
 type spec struct {
-	*ovfx
+	*ArchiveFlag
 }
 
 func init() {
@@ -51,7 +51,7 @@ func (cmd *spec) Register(f *flag.FlagSet) {}
 func (cmd *spec) Process() error { return nil }
 
 func (cmd *spec) Usage() string {
-	return "PATH_TO_OVF or PATH_TO_OVA"
+	return "PATH_TO_OVF_OR_OVA"
 }
 
 func (cmd *spec) Run(f *flag.FlagSet) error {
@@ -134,7 +134,7 @@ func (cmd *spec) Spec(fpath string) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(j))
 
+	fmt.Println(string(j))
 	return nil
 }

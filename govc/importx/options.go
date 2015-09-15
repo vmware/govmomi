@@ -18,16 +18,12 @@ package importx
 
 import (
 	"encoding/json"
-	"errors"
 	"flag"
 	"io/ioutil"
 	"os"
 
-	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type Property struct {
@@ -55,22 +51,19 @@ type Options struct {
 	WaitForIP    bool
 }
 
-type ImportFlag struct {
-	*flags.DatacenterFlag
+type OptionsFlag struct {
+	Options Options
 
-	folder       string
-	optionsFpath string
-	Options      Options
+	path string
 }
 
-func (flag *ImportFlag) Register(f *flag.FlagSet) {
-	f.StringVar(&flag.folder, "folder", "", "Path to folder to add the vm to")
-	f.StringVar(&flag.optionsFpath, "options", "", "Options spec file path for vm deployment")
+func (flag *OptionsFlag) Register(f *flag.FlagSet) {
+	f.StringVar(&flag.path, "options", "", "Options spec file path for VM deployment")
 }
 
-func (flag *ImportFlag) Process() error {
-	if len(flag.optionsFpath) > 0 {
-		f, err := os.Open(flag.optionsFpath)
+func (flag *OptionsFlag) Process() error {
+	if len(flag.path) > 0 {
+		f, err := os.Open(flag.path)
 		if err != nil {
 			return err
 		}
@@ -87,45 +80,4 @@ func (flag *ImportFlag) Process() error {
 	}
 
 	return nil
-}
-
-func (flag *ImportFlag) Folder() (*object.Folder, error) {
-	if len(flag.folder) == 0 {
-		dc, err := flag.Datacenter()
-		if err != nil {
-			return nil, err
-		}
-		folders, err := dc.Folders(context.TODO())
-		if err != nil {
-			return nil, err
-		}
-		return folders.VmFolder, nil
-	}
-
-	finder, err := flag.Finder()
-	if err != nil {
-		return nil, err
-	}
-
-	mo, err := finder.ManagedObjectList(context.TODO(), flag.folder)
-	if err != nil {
-		return nil, err
-	}
-	if len(mo) == 0 {
-		return nil, errors.New("folder argument does not resolve to object")
-	}
-	if len(mo) > 1 {
-		return nil, errors.New("folder argument resolves to more than one object")
-	}
-
-	ref := mo[0].Object.Reference()
-	if ref.Type != "Folder" {
-		return nil, errors.New("folder argument does not resolve to folder")
-	}
-
-	c, err := flag.Client()
-	if err != nil {
-		return nil, err
-	}
-	return object.NewFolder(c, ref), nil
 }
