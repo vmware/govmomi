@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -124,6 +125,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 	}
 
 	if !cmd.OutputFlag.JSON {
+		res.objects = vms
 		res.cmd = cmd
 		if err = res.collectReferences(pc, ctx); err != nil {
 			return err
@@ -135,6 +137,7 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 
 type infoResult struct {
 	VirtualMachines []mo.VirtualMachine
+	objects         []*object.VirtualMachine
 	entities        map[types.ManagedObjectReference]string
 	cmd             *info
 }
@@ -226,9 +229,16 @@ func (r *infoResult) entityNames(refs []types.ManagedObjectReference) string {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+	// Maintain order via r.objects as Property collector does not always return results in order.
+	objects := make(map[types.ManagedObjectReference]mo.VirtualMachine, len(r.VirtualMachines))
+	for _, o := range r.VirtualMachines {
+		objects[o.Reference()] = o
+	}
+
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for _, vm := range r.VirtualMachines {
+	for _, o := range r.objects {
+		vm := objects[o.Reference()]
 		s := vm.Summary
 
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
@@ -242,6 +252,7 @@ func (r *infoResult) Write(w io.Writer) error {
 				}
 			}
 
+			fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 			fmt.Fprintf(tw, "  UUID:\t%s\n", s.Config.Uuid)
 			fmt.Fprintf(tw, "  Guest name:\t%s\n", s.Config.GuestFullName)
 			fmt.Fprintf(tw, "  Memory:\t%dMB\n", s.Config.MemorySizeMB)

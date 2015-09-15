@@ -107,11 +107,19 @@ type infoResult struct {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+	// Maintain order via r.objects as Property collector does not always return results in order.
+	objects := make(map[types.ManagedObjectReference]mo.Datastore, len(r.Datastores))
+	for _, o := range r.Datastores {
+		objects[o.Reference()] = o
+	}
+
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for _, ds := range r.Datastores {
+	for _, o := range r.objects {
+		ds := objects[o.Reference()]
 		s := ds.Summary
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Name)
+		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 		fmt.Fprintf(tw, "  Type:\t%s\n", s.Type)
 		fmt.Fprintf(tw, "  URL:\t%s\n", s.Url)
 		fmt.Fprintf(tw, "  Capacity:\t%.1f GB\n", float64(s.Capacity)/(1<<30))

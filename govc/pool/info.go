@@ -114,10 +114,18 @@ type infoResult struct {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+	// Maintain order via r.objects as Property collector does not always return results in order.
+	objects := make(map[types.ManagedObjectReference]mo.ResourcePool, len(r.ResourcePools))
+	for _, o := range r.ResourcePools {
+		objects[o.Reference()] = o
+	}
+
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
-	for _, pool := range r.ResourcePools {
+	for _, o := range r.objects {
+		pool := objects[o.Reference()]
 		fmt.Fprintf(tw, "Name:\t%s\n", pool.Name)
+		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 
 		writeInfo(tw, "CPU", "MHz", &pool.Runtime.Cpu, pool.Config.CpuAllocation)
 		writeInfo(tw, "Mem", "MB", &pool.Runtime.Memory, pool.Config.MemoryAllocation)

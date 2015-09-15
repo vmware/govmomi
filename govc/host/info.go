@@ -109,9 +109,16 @@ type infoResult struct {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+	// Maintain order via r.objects as Property collector does not always return results in order.
+	objects := make(map[types.ManagedObjectReference]mo.HostSystem, len(r.HostSystems))
+	for _, o := range r.HostSystems {
+		objects[o.Reference()] = o
+	}
+
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for _, host := range r.HostSystems {
+	for _, o := range r.objects {
+		host := objects[o.Reference()]
 		s := host.Summary
 		h := s.Hardware
 		z := s.QuickStats
@@ -120,6 +127,7 @@ func (r *infoResult) Write(w io.Writer) error {
 		memUsage := 100 * float64(z.OverallMemoryUsage<<20) / float64(h.MemorySize)
 
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
+		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 		fmt.Fprintf(tw, "  Manufacturer:\t%s\n", h.Vendor)
 		fmt.Fprintf(tw, "  Logical CPUs:\t%d CPUs @ %dMHz\n", ncpu, h.CpuMhz)
 		fmt.Fprintf(tw, "  Processor type:\t%s\n", h.CpuModel)
