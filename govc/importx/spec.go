@@ -75,24 +75,23 @@ func (cmd *spec) Run(f *flag.FlagSet) error {
 	return cmd.Spec(fpath)
 }
 
-func (cmd *spec) Map(e *ovf.Envelope) []types.KeyValue {
+func (cmd *spec) Map(e *ovf.Envelope) (p []Property) {
 	if e == nil {
 		return nil
 	}
 
-	var p []types.KeyValue
 	for _, v := range e.VirtualSystem.Product.Property {
 		d := ""
 		if v.Default != nil {
 			d = *v.Default
 		}
 
-		p = append(p, types.KeyValue{
-			Key:   v.Key,
-			Value: d})
+		p = append(p, Property{
+			KeyValue: types.KeyValue{Key: v.Key, Value: d},
+			Spec:     v})
 	}
 
-	return p
+	return
 }
 
 func (cmd *spec) Spec(fpath string) error {

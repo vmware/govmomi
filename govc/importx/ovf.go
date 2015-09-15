@@ -156,6 +156,14 @@ func (cmd *ovfx) ReadEnvelope(fpath string) (*ovf.Envelope, error) {
 	return e, nil
 }
 
+func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
+	for _, v := range op {
+		p = append(p, v.KeyValue)
+	}
+
+	return
+}
+
 func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 	o, err := cmd.ReadOvf(fpath)
 	if err != nil {
@@ -180,7 +188,7 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		OvfManagerCommonParams: types.OvfManagerCommonParams{
 			DeploymentOption: cmd.Options.Deployment,
 			Locale:           "US"},
-		PropertyMapping: cmd.Options.PropertyMapping,
+		PropertyMapping: cmd.Map(cmd.Options.PropertyMapping),
 	}
 
 	m := object.NewOvfManager(cmd.Client)

@@ -25,9 +25,15 @@ import (
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
+
+type Property struct {
+	types.KeyValue
+	Spec ovf.Property
+}
 
 type Options struct {
 	AllDeploymentOptions []string
@@ -42,7 +48,7 @@ type Options struct {
 	AllIPProtocolOptions []string
 	IPProtocol           string
 
-	PropertyMapping []types.KeyValue
+	PropertyMapping []Property
 
 	PowerOn      bool
 	InjectOvfEnv bool
