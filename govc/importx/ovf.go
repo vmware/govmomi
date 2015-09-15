@@ -283,7 +283,7 @@ func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
 		return nil
 	}
 
-	cmd.Log("Powering on vm...\n")
+	cmd.Log("Powering on VM...\n")
 
 	task, err := vm.PowerOn(context.TODO())
 	if err != nil {
@@ -304,7 +304,7 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 
 	a := cmd.Client.ServiceContent.About
 	if strings.EqualFold(a.ProductLineId, "esx") || strings.EqualFold(a.ProductLineId, "embeddedEsx") {
-		cmd.Log("Injecting ovf env...\n")
+		cmd.Log("Injecting OVF environment...\n")
 
 		// build up Environment in order to marshal to xml
 		var epa []ovf.EnvProperty
@@ -348,13 +348,12 @@ func (cmd *ovfx) WaitForIP(vm *object.VirtualMachine) error {
 		return nil
 	}
 
-	cmd.Log("Waiting for ip...\n")
-
+	cmd.Log("Waiting for IP address...\n")
 	ip, err := vm.WaitForIP(context.TODO())
 	if err != nil {
 		return err
 	}
-	cmd.Log(fmt.Sprintf("Received IP address: %s\n", ip))
 
+	cmd.Log(fmt.Sprintf("Received IP address: %s\n", ip))
 	return nil
 }
