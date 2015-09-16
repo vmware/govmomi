@@ -2,6 +2,10 @@
 
 ### (unreleased)
 
+...
+
+### 0.2.0 (2015-09-15)
+
 * The `vm.power` guest `-s` and `-r` options will fallback to hard `-off` / `-reset` if tools is unavailable and `-force` flag is given
 
 * Add `PowerOn, InjectOvfEnv, WaitForIP` options to `import.ovf` and `import.ova` option spec file

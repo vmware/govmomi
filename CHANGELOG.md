@@ -4,6 +4,8 @@
 
 ...
 
+### 0.2.0 (2015-09-15)
+
 * Update to vim25/6.0 API
 
 * Stop returning children from `ManagedObjectList`
