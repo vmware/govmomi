@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/ovf"
@@ -62,12 +61,11 @@ func (cmd *spec) Run(f *flag.FlagSet) error {
 	}
 
 	switch path.Ext(fpath) {
-	case "":
 	case ".ovf":
 		cmd.Archive = &FileArchive{fpath}
-	case ".ova":
+	case "", ".ova":
 		cmd.Archive = &TapeArchive{fpath}
-		fpath = strings.TrimSuffix(path.Base(fpath), path.Ext(fpath)) + ".ovf"
+		fpath = "*.ovf"
 	default:
 		return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
 	}
