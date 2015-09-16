@@ -18,8 +18,6 @@ package importx
 
 import (
 	"flag"
-	"path"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/object"
@@ -59,8 +57,6 @@ func (cmd *ova) Run(f *flag.FlagSet) error {
 }
 
 func (cmd *ova) Import(fpath string) (*types.ManagedObjectReference, error) {
-	// basename i | sed -e s/\.ova$/*.ovf/
-	ovf := strings.TrimSuffix(path.Base(fpath), path.Ext(fpath)) + ".ovf"
-
+	ovf := "*.ovf"
 	return cmd.ovfx.Import(ovf)
 }
