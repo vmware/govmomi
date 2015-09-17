@@ -60,14 +60,16 @@ func (cmd *spec) Run(f *flag.FlagSet) error {
 		fpath = f.Arg(0)
 	}
 
-	switch path.Ext(fpath) {
-	case ".ovf":
-		cmd.Archive = &FileArchive{fpath}
-	case "", ".ova":
-		cmd.Archive = &TapeArchive{fpath}
-		fpath = "*.ovf"
-	default:
-		return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
+	if len(fpath) > 0 {
+		switch path.Ext(fpath) {
+		case ".ovf":
+			cmd.Archive = &FileArchive{fpath}
+		case "", ".ova":
+			cmd.Archive = &TapeArchive{fpath}
+			fpath = "*.ovf"
+		default:
+			return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
+		}
 	}
 
 	return cmd.Spec(fpath)
