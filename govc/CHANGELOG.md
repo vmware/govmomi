@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Introduce govc vapp.{info|destroy|power} subcommands
+
 ...
 
 ### 0.2.0 (2015-09-15)
