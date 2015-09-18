@@ -325,7 +325,7 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 				Properties: epa},
 		}
 
-		xenv := ovf.MarshalManual(env)
+		xenv := env.MarshalManual()
 		vmConfigSpec := types.VirtualMachineConfigSpec{
 			ExtraConfig: []types.BaseOptionValue{&types.OptionValue{
 				Key:   "guestinfo.ovfEnv",

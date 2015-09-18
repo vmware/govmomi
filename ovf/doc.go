@@ -14,21 +14,12 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
+/*
+Package ovf provides functionality to unmarshal and inspect the structure
+of an OVF file. It is not a complete implementation of the specification and
+is intended to be used to import virtual infrastructure into vSphere.
+
+For a complete specification of the OVF standard, refer to:
+https://www.dmtf.org/sites/default/files/standards/documents/DSP0243_2.1.0.pdf
+*/
 package ovf
-
-import (
-	"encoding/xml"
-	"io"
-)
-
-func Unmarshal(r io.Reader) (*Envelope, error) {
-	var e Envelope
-
-	dec := xml.NewDecoder(r)
-	err := dec.Decode(&e)
-	if err != nil {
-		return nil, err
-	}
-
-	return &e, nil
-}

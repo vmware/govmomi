@@ -77,24 +77,35 @@ func (cmd *spec) Run(f *flag.FlagSet) error {
 	return cmd.Spec(fpath)
 }
 
-func (cmd *spec) Map(e *ovf.Envelope) (p []Property) {
+func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
 	if e == nil {
 		return nil
 	}
 
-	for k, v := range e.VirtualSystem.Product.Property {
-		d := ""
-		if v.Default != nil {
-			d = *v.Default
-		}
+	for _, p := range e.VirtualSystem.Product {
+		for i, v := range p.Property {
+			d := ""
+			if v.Default != nil {
+				d = *v.Default
+			}
 
-		np := Property{
-			KeyValue: types.KeyValue{Key: v.Key, Value: d}}
-		if cmd.verbose {
-			np.Spec = &e.VirtualSystem.Product.Property[k]
-		}
+			// From OVF spec, section 9.5.1:
+			// key-value-env = [class-value "."] key-value-prod ["." instance-value]
+			k := v.Key
+			if p.Class != nil {
+				k = fmt.Sprintf("%s.%s", *p.Class, k)
+			}
+			if p.Instance != nil {
+				k = fmt.Sprintf("%s.%s", k, *p.Instance)
+			}
 
-		p = append(p, np)
+			np := Property{KeyValue: types.KeyValue{Key: k, Value: d}}
+			if cmd.verbose {
+				np.Spec = &p.Property[i]
+			}
+
+			res = append(res, np)
+		}
 	}
 
 	return
