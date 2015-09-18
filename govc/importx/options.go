@@ -28,23 +28,23 @@ import (
 
 type Property struct {
 	types.KeyValue
-	Spec ovf.Property
+	Spec *ovf.Property `json:",omitempty"`
 }
 
 type Options struct {
-	AllDeploymentOptions []string
+	AllDeploymentOptions []string `json:",omitempty"`
 	Deployment           string
 
-	AllDiskProvisioningOptions []string
+	AllDiskProvisioningOptions []string `json:",omitempty"`
 	DiskProvisioning           string
 
-	AllIPAllocationPolicyOptions []string
+	AllIPAllocationPolicyOptions []string `json:",omitempty"`
 	IPAllocationPolicy           string
 
-	AllIPProtocolOptions []string
+	AllIPProtocolOptions []string `json:",omitempty"`
 	IPProtocol           string
 
-	PropertyMapping []Property
+	PropertyMapping []Property `json:",omitempty"`
 
 	PowerOn      bool
 	InjectOvfEnv bool

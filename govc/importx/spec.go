@@ -30,7 +30,6 @@ import (
 var (
 	// all possible ovf property values
 	// the first element being the default value
-
 	allDeploymentOptions         = []string{"small", "medium", "large"}
 	allDiskProvisioningOptions   = []string{"thin", "monolithicSparse", "monolithicFlat", "twoGbMaxExtentSparse", "twoGbMaxExtentFlat", "seSparse", "eagerZeroedThick", "thick", "sparse", "flat"}
 	allIPAllocationPolicyOptions = []string{"dhcpPolicy", "transientPolicy", "fixedPolicy", "fixedAllocatedPolicy"}
@@ -39,13 +38,16 @@ var (
 
 type spec struct {
 	*ArchiveFlag
+	verbose bool
 }
 
 func init() {
 	cli.Register("import.spec", &spec{})
 }
 
-func (cmd *spec) Register(f *flag.FlagSet) {}
+func (cmd *spec) Register(f *flag.FlagSet) {
+	f.BoolVar(&cmd.verbose, "verbose", false, "Verbose spec output")
+}
 
 func (cmd *spec) Process() error { return nil }
 
@@ -80,15 +82,19 @@ func (cmd *spec) Map(e *ovf.Envelope) (p []Property) {
 		return nil
 	}
 
-	for _, v := range e.VirtualSystem.Product.Property {
+	for k, v := range e.VirtualSystem.Product.Property {
 		d := ""
 		if v.Default != nil {
 			d = *v.Default
 		}
 
-		p = append(p, Property{
-			KeyValue: types.KeyValue{Key: v.Key, Value: d},
-			Spec:     v})
+		np := Property{
+			KeyValue: types.KeyValue{Key: v.Key, Value: d}}
+		if cmd.verbose {
+			np.Spec = &e.VirtualSystem.Product.Property[k]
+		}
+
+		p = append(p, np)
 	}
 
 	return
@@ -103,12 +109,14 @@ func (cmd *spec) Spec(fpath string) error {
 	var deploymentOptions = allDeploymentOptions
 	if e != nil && e.DeploymentOption.Configuration != nil {
 		deploymentOptions = nil
+
 		// add default first
 		for _, c := range e.DeploymentOption.Configuration {
 			if c.Default != nil && *c.Default {
 				deploymentOptions = append(deploymentOptions, c.ID)
 			}
 		}
+
 		for _, c := range e.DeploymentOption.Configuration {
 			if c.Default == nil || !*c.Default {
 				deploymentOptions = append(deploymentOptions, c.ID)
@@ -117,18 +125,20 @@ func (cmd *spec) Spec(fpath string) error {
 	}
 
 	o := Options{
-		AllDeploymentOptions:         deploymentOptions,
-		Deployment:                   deploymentOptions[0],
-		AllDiskProvisioningOptions:   allDiskProvisioningOptions,
-		DiskProvisioning:             allDiskProvisioningOptions[0],
-		AllIPAllocationPolicyOptions: allIPAllocationPolicyOptions,
-		IPAllocationPolicy:           allIPAllocationPolicyOptions[0],
-		AllIPProtocolOptions:         allIPProtocolOptions,
-		IPProtocol:                   allIPProtocolOptions[0],
-		PowerOn:                      false,
-		WaitForIP:                    false,
-		InjectOvfEnv:                 false,
-		PropertyMapping:              cmd.Map(e)}
+		Deployment:         deploymentOptions[0],
+		DiskProvisioning:   allDiskProvisioningOptions[0],
+		IPAllocationPolicy: allIPAllocationPolicyOptions[0],
+		IPProtocol:         allIPProtocolOptions[0],
+		PowerOn:            false,
+		WaitForIP:          false,
+		InjectOvfEnv:       false,
+		PropertyMapping:    cmd.Map(e)}
+	if cmd.verbose {
+		o.AllDeploymentOptions = deploymentOptions
+		o.AllDiskProvisioningOptions = allDiskProvisioningOptions
+		o.AllIPAllocationPolicyOptions = allIPAllocationPolicyOptions
+		o.AllIPProtocolOptions = allIPProtocolOptions
+	}
 
 	j, err := json.Marshal(&o)
 	if err != nil {
