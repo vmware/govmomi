@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import (
 const (
 	SearchVirtualMachines = iota + 1
 	SearchHosts
+	SearchVirtualApps
 )
 
 type SearchFlag struct {
@@ -58,6 +59,8 @@ func NewSearchFlag(t int) *SearchFlag {
 		s.entity = "VM"
 	case SearchHosts:
 		s.entity = "host"
+	case SearchVirtualApps:
+		s.entity = "vapp"
 	default:
 		panic("invalid search type")
 	}
@@ -249,6 +252,56 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 		}
 
 		out = append(out, vms...)
+	}
+
+	return out, nil
+}
+
+func (flag *SearchFlag) VirtualApp() (*object.VirtualApp, error) {
+	ref, err := flag.search()
+	if err != nil {
+		return nil, err
+	}
+
+	app, ok := ref.(*object.VirtualApp)
+	if !ok {
+		return nil, fmt.Errorf("expected VirtualApp entity, got %s", ref.Reference().Type)
+	}
+
+	return app, nil
+}
+
+func (flag *SearchFlag) VirtualApps(args []string) ([]*object.VirtualApp, error) {
+	var out []*object.VirtualApp
+
+	if flag.IsSet() {
+		app, err := flag.VirtualApp()
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, app)
+		return out, nil
+	}
+
+	// List virtual apps
+	if len(args) == 0 {
+		return nil, errors.New("no argument")
+	}
+
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	// List virtual apps for every argument
+	for _, arg := range args {
+		apps, err := finder.VirtualAppList(context.TODO(), arg)
+		if err != nil {
+			return nil, err
+		}
+
+		out = append(out, apps...)
 	}
 
 	return out, nil
