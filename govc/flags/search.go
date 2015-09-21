@@ -159,9 +159,9 @@ func (flag *SearchFlag) searchByIP(c *vim25.Client, dc *object.Datacenter) (obje
 func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, true)
+		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, true, nil)
 	case SearchHosts:
-		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, false)
+		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, false, nil)
 	default:
 		panic("unsupported type")
 	}

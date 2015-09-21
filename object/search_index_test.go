@@ -96,7 +96,7 @@ func TestSearch(t *testing.T) {
 			t.Errorf("%#v != %#v\n", ref, shost)
 		}
 
-		shost, err = s.FindByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false)
+		shost, err = s.FindByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -124,7 +124,7 @@ func TestSearch(t *testing.T) {
 			t.Errorf("%#v != %#v\n", ref, svm)
 		}
 
-		svm, err = s.FindByUuid(context.Background(), dc, vm.Config.Uuid, true)
+		svm, err = s.FindByUuid(context.Background(), dc, vm.Config.Uuid, true, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
