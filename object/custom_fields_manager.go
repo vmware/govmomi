@@ -29,7 +29,6 @@ import (
 
 var (
 	ErrKeyNameNotFound = errors.New("key name not found")
-	ErrNotSupported    = errors.New("custom fields not supported") // VC only
 )
 
 type CustomFieldsManager struct {

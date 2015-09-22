@@ -2,7 +2,9 @@
 
 ### (unreleased)
 
-* Introduce govc vapp.{info|destroy|power} subcommands
+* Add govc extension.{info,register,unregister,setcert} commands
+
+* Add govc vapp.{info,destroy,power} commands
 
 ...
 

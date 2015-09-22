@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add object.ExtensionManager
+
 ...
 
 ### 0.2.0 (2015-09-15)
