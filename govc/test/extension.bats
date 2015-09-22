@@ -51,6 +51,19 @@ EOS
   run govc extension.setcert -cert-pem '+' $id
   assert_success
 
+  # test client certificate authentication
+  (
+    # remove password from env, set user to extension id and turn of session cache
+    govc_url_to_vars
+    unset GOVC_PASSWORD
+    GOVC_USERNAME=$id
+    export GOVC_PERSIST_SESSION=false
+    # vagrant port forwards to VC's port 80
+    export GOVC_TUNNEL_PROXY_PORT=16080
+    run govc about -cert "${id}.crt" -key "${id}.key"
+    assert_success
+  )
+
   # remove generated cert and key
   rm ${id}.{crt,key}
 

@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add support for LoginExtensionByCertificate with new `-cert` and `-key` flags
+
 * Add govc extension.{info,register,unregister,setcert} commands
 
 * Add govc vapp.{info,destroy,power} commands

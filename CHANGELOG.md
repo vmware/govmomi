@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add LoginExtensionByCertificate support
+
 * Add object.ExtensionManager
 
 ...
