@@ -25,6 +25,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -67,16 +68,6 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		args = []string{"*"}
 	}
 
-	datastores, err := finder.DatastoreList(ctx, args[0])
-	if err != nil {
-		return err
-	}
-
-	refs := make([]types.ManagedObjectReference, 0, len(datastores))
-	for _, ds := range datastores {
-		refs = append(refs, ds.Reference())
-	}
-
 	var res infoResult
 	var props []string
 
@@ -86,10 +77,25 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		props = []string{"info", "summary"} // Load summary
 	}
 
-	pc := property.DefaultCollector(c)
-	err = pc.Retrieve(ctx, refs, props, &res.Datastores)
-	if err != nil {
-		return err
+	for _, arg := range args {
+		objects, err := finder.DatastoreList(ctx, arg)
+		if err != nil {
+			return err
+		}
+		res.objects = append(res.objects, objects...)
+	}
+
+	if len(res.objects) != 0 {
+		refs := make([]types.ManagedObjectReference, 0, len(res.objects))
+		for _, o := range res.objects {
+			refs = append(refs, o.Reference())
+		}
+
+		pc := property.DefaultCollector(c)
+		err = pc.Retrieve(ctx, refs, props, &res.Datastores)
+		if err != nil {
+			return err
+		}
 	}
 
 	return cmd.WriteResult(&res)
@@ -97,14 +103,23 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 
 type infoResult struct {
 	Datastores []mo.Datastore
+	objects    []*object.Datastore
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+	// Maintain order via r.objects as Property collector does not always return results in order.
+	objects := make(map[types.ManagedObjectReference]mo.Datastore, len(r.Datastores))
+	for _, o := range r.Datastores {
+		objects[o.Reference()] = o
+	}
+
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for _, ds := range r.Datastores {
+	for _, o := range r.objects {
+		ds := objects[o.Reference()]
 		s := ds.Summary
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Name)
+		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 		fmt.Fprintf(tw, "  Type:\t%s\n", s.Type)
 		fmt.Fprintf(tw, "  URL:\t%s\n", s.Url)
 		fmt.Fprintf(tw, "  Capacity:\t%.1f GB\n", float64(s.Capacity)/(1<<30))

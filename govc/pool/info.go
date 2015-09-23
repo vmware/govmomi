@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -61,6 +62,8 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		return err
 	}
 
+	ctx := context.TODO()
+
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err
@@ -82,21 +85,23 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 	}
 
 	for _, arg := range f.Args() {
-		pools, err := finder.ResourcePoolList(context.TODO(), arg)
+		objects, err := finder.ResourcePoolList(ctx, arg)
 		if err != nil {
 			return err
 		}
+		res.objects = append(res.objects, objects...)
+	}
 
-		for _, pool := range pools {
-			var p mo.ResourcePool
+	if len(res.objects) != 0 {
+		refs := make([]types.ManagedObjectReference, 0, len(res.objects))
+		for _, o := range res.objects {
+			refs = append(refs, o.Reference())
+		}
 
-			pc := property.DefaultCollector(c)
-			err = pc.RetrieveOne(context.TODO(), pool.Reference(), props, &p)
-			if err != nil {
-				return err
-			}
-
-			res.ResourcePools = append(res.ResourcePools, p)
+		pc := property.DefaultCollector(c)
+		err = pc.Retrieve(ctx, refs, props, &res.ResourcePools)
+		if err != nil {
+			return err
 		}
 	}
 
@@ -105,13 +110,22 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 
 type infoResult struct {
 	ResourcePools []mo.ResourcePool
+	objects       []*object.ResourcePool
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+	// Maintain order via r.objects as Property collector does not always return results in order.
+	objects := make(map[types.ManagedObjectReference]mo.ResourcePool, len(r.ResourcePools))
+	for _, o := range r.ResourcePools {
+		objects[o.Reference()] = o
+	}
+
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
-	for _, pool := range r.ResourcePools {
+	for _, o := range r.objects {
+		pool := objects[o.Reference()]
 		fmt.Fprintf(tw, "Name:\t%s\n", pool.Name)
+		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 
 		writeInfo(tw, "CPU", "MHz", &pool.Runtime.Cpu, pool.Config.CpuAllocation)
 		writeInfo(tw, "Mem", "MB", &pool.Runtime.Memory, pool.Config.MemoryAllocation)
