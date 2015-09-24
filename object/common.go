@@ -17,12 +17,17 @@ limitations under the License.
 package object
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
+)
+
+var (
+	ErrNotSupported = errors.New("not supported (vCenter only)")
 )
 
 // Common contains the fields and functions common to all objects.

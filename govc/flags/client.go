@@ -18,6 +18,7 @@ package flags
 
 import (
 	"crypto/sha1"
+	"crypto/tls"
 	"encoding/json"
 	"errors"
 	"flag"
@@ -39,6 +40,8 @@ const (
 	envURL           = "GOVC_URL"
 	envUsername      = "GOVC_USERNAME"
 	envPassword      = "GOVC_PASSWORD"
+	envCertificate   = "GOVC_CERTIFICATE"
+	envPrivateKey    = "GOVC_PRIVATE_KEY"
 	envInsecure      = "GOVC_INSECURE"
 	envPersist       = "GOVC_PERSIST_SESSION"
 	envMinAPIVersion = "GOVC_MIN_API_VERSION"
@@ -54,6 +57,8 @@ type ClientFlag struct {
 	url           *url.URL
 	username      string
 	password      string
+	cert          string
+	key           string
 	insecure      bool
 	persist       bool
 	minAPIVersion string
@@ -120,6 +125,18 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 		{
 			flag.username = os.Getenv(envUsername)
 			flag.password = os.Getenv(envPassword)
+		}
+
+		{
+			value := os.Getenv(envCertificate)
+			usage := fmt.Sprintf("Certificate [%s]", envCertificate)
+			f.StringVar(&flag.cert, "cert", value, usage)
+		}
+
+		{
+			value := os.Getenv(envPrivateKey)
+			usage := fmt.Sprintf("Private key [%s]", envPrivateKey)
+			f.StringVar(&flag.key, "key", value, usage)
 		}
 
 		{
@@ -288,6 +305,17 @@ func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
 
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	sc := soap.NewClient(flag.url, flag.insecure)
+	isTunnel := false
+
+	if flag.cert != "" {
+		isTunnel = true
+		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
+		if err != nil {
+			return nil, err
+		}
+
+		sc.SetCertificate(cert)
+	}
 
 	// Add retry functionality before making any calls
 	rt := attachRetries(sc)
@@ -300,9 +328,17 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	c.Client = sc
 
 	m := session.NewManager(c)
-	err = m.Login(context.TODO(), flag.url.User)
-	if err != nil {
-		return nil, err
+	u := flag.url.User
+	if isTunnel {
+		err = m.LoginExtensionByCertificate(context.TODO(), u.Username(), "")
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		err = m.Login(context.TODO(), u)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	err = flag.saveClient(c)

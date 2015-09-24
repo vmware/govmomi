@@ -51,6 +51,7 @@ type Client struct {
 	k bool // Named after curl's -k flag
 	d *debugContainer
 	t *http.Transport
+	p *url.URL
 }
 
 func NewClient(u *url.URL, insecure bool) *Client {
@@ -82,6 +83,51 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	c.u.User = nil
 
 	return &c
+}
+
+// splitHostPort is similar to net.SplitHostPort,
+// but rather than return error if there isn't a ':port',
+// return an empty string for the port.
+func splitHostPort(host string) (string, string) {
+	ix := strings.LastIndex(host, ":")
+
+	if ix <= strings.LastIndex(host, "]") {
+		return host, ""
+	}
+
+	name := host[:ix]
+	port := host[ix+1:]
+
+	return name, port
+}
+
+const sdkTunnel = "sdkTunnel:8089"
+
+func (c *Client) SetCertificate(cert tls.Certificate) {
+	t := c.Client.Transport.(*http.Transport)
+
+	// Extension certificate
+	t.TLSClientConfig.Certificates = []tls.Certificate{cert}
+
+	// Proxy to vCenter host on port 80
+	host, _ := splitHostPort(c.u.Host)
+
+	// Should be no reason to change the default port other than testing
+	port := os.Getenv("GOVC_TUNNEL_PROXY_PORT")
+	if port != "" {
+		host += ":" + port
+	}
+
+	c.p = &url.URL{
+		Scheme: "http",
+		Host:   host,
+	}
+	t.Proxy = func(r *http.Request) (*url.URL, error) {
+		return c.p, nil
+	}
+
+	// Rewrite url Host to use the sdk tunnel, required for a certificate request.
+	c.u.Host = sdkTunnel
 }
 
 func (c *Client) URL() *url.URL {
@@ -230,8 +276,8 @@ func (c *Client) ParseURL(urlStr string) (*url.URL, error) {
 		return nil, err
 	}
 
-	host := strings.Split(u.Host, ":")
-	if host[0] == "*" {
+	host, _ := splitHostPort(u.Host)
+	if host == "*" {
 		// Also use Client's port, to support port forwarding
 		u.Host = c.URL().Host
 	}
