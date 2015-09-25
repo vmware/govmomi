@@ -71,6 +71,11 @@ func Wait(ctx context.Context, c *Collector, obj types.ManagedObjectReference, p
 			return err
 		}
 
+		// Retry if the result came back empty
+		if res == nil {
+			continue
+		}
+
 		version = res.Version
 
 		for _, fs := range res.FilterSet {
