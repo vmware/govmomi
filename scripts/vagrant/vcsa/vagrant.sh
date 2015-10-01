@@ -15,7 +15,7 @@ chmod -R go-rwsx ~vagrant/.ssh
 sed -i -e 's/^#UseDNS yes/UseDNS no/' /etc/ssh/sshd_config
 sed -i -e 's/^AllowTcpForwarding no//' /etc/ssh/sshd_config
 sed -i -e 's/^PermitTunnel no//' /etc/ssh/sshd_config
-sed -i -e 's/^MaxSessions \d+//' /etc/ssh/sshd_config
+sed -i -e 's/^MaxSessions 1//' /etc/ssh/sshd_config
 
 # disable password expiration
 for uid in root vagrant; do
