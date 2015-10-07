@@ -20,6 +20,8 @@ import (
 	"errors"
 	"flag"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -48,12 +50,7 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 		return errors.New("invalid arguments")
 	}
 
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
-	u, err := cmd.DatastoreURL(args[1])
+	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
 	}
@@ -65,5 +62,5 @@ func (cmd *upload) Run(f *flag.FlagSet) error {
 		defer logger.Wait()
 	}
 
-	return c.Client.UploadFile(args[0], u, &p)
+	return ds.UploadFile(context.TODO(), args[0], args[1], &p)
 }

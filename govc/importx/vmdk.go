@@ -170,11 +170,6 @@ func (cmd *vmdk) PrepareDestination(i importable) error {
 }
 
 func (cmd *vmdk) Upload(i importable) error {
-	u, err := cmd.Datastore.URL(context.TODO(), cmd.Datacenter, i.RemoteSrcVMDK())
-	if err != nil {
-		return err
-	}
-
 	p := soap.DefaultUpload
 	if cmd.OutputFlag.TTY {
 		logger := cmd.ProgressLogger("Uploading... ")
@@ -182,7 +177,7 @@ func (cmd *vmdk) Upload(i importable) error {
 		defer logger.Wait()
 	}
 
-	return cmd.Client.Client.UploadFile(i.localPath, u, &p)
+	return cmd.Datastore.UploadFile(context.TODO(), i.localPath, i.RemoteSrcVMDK(), &p)
 }
 
 func (cmd *vmdk) Import(i importable) error {

@@ -123,7 +123,11 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 		Host:   host,
 	}
 	t.Proxy = func(r *http.Request) (*url.URL, error) {
-		return c.p, nil
+		// Only sdk requests should be proxied
+		if r.URL.Path == "/sdk" {
+			return c.p, nil
+		}
+		return http.ProxyFromEnvironment(r)
 	}
 
 	// Rewrite url Host to use the sdk tunnel, required for a certificate request.
@@ -290,6 +294,7 @@ type Upload struct {
 	Method        string
 	ContentLength int64
 	Headers       map[string]string
+	Ticket        *http.Cookie
 	Progress      progress.Sinker
 }
 
@@ -322,6 +327,10 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 
 	for k, v := range param.Headers {
 		req.Header.Add(k, v)
+	}
+
+	if param.Ticket != nil {
+		req.AddCookie(param.Ticket)
 	}
 
 	res, err := c.Client.Do(req)
@@ -364,6 +373,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 
 type Download struct {
 	Method   string
+	Ticket   *http.Cookie
 	Progress progress.Sinker
 }
 
@@ -388,6 +398,10 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 	req, err := http.NewRequest(param.Method, u.String(), nil)
 	if err != nil {
 		return err
+	}
+
+	if param.Ticket != nil {
+		req.AddCookie(param.Ticket)
 	}
 
 	res, err := c.Client.Do(req)
