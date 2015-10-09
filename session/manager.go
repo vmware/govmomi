@@ -137,3 +137,17 @@ func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
 
 	return active.Returnval, err
 }
+
+func (sm *Manager) AcquireGenericServiceTicket(ctx context.Context, spec types.BaseSessionManagerServiceRequestSpec) (*types.SessionManagerGenericServiceTicket, error) {
+	req := types.AcquireGenericServiceTicket{
+		This: sm.Reference(),
+		Spec: spec,
+	}
+
+	res, err := methods.AcquireGenericServiceTicket(ctx, sm.client, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
+}

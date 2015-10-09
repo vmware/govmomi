@@ -18,12 +18,19 @@ package object
 
 import (
 	"fmt"
+	"io"
+	"math/rand"
 	"path"
+	"strings"
 
+	"net/http"
 	"net/url"
 
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -87,4 +94,137 @@ func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 	}
 
 	return NewHostDatastoreBrowser(d.c, do.Browser), nil
+}
+
+func (d Datastore) httpTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
+	// We are uploading to an ESX host, dcPath must be set to ha-datacenter otherwise 404.
+	u := &url.URL{
+		Scheme: d.c.URL().Scheme,
+		Host:   d.c.URL().Host,
+		Path:   fmt.Sprintf("/folder/%s", path),
+		RawQuery: url.Values{
+			"dcPath": []string{"ha-datacenter"},
+			"dsName": []string{d.Name()},
+		}.Encode(),
+	}
+
+	// If connected to VC, the ticket request must be for an ESX host.
+	if d.c.ServiceContent.About.ApiType == "VirtualCenter" {
+		hosts, err := d.AttachedHosts(ctx)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		if len(hosts) == 0 {
+			return nil, nil, fmt.Errorf("no hosts attached to datastore %#v", d.Reference())
+		}
+
+		// Pick a random attached host
+		host := hosts[rand.Intn(len(hosts))]
+		name, err := host.Name(ctx)
+		if err != nil {
+			return nil, nil, err
+		}
+		u.Host = name
+	}
+
+	spec := types.SessionManagerHttpServiceRequestSpec{
+		Url: u.String(),
+		// See SessionManagerHttpServiceRequestSpecMethod enum
+		Method: fmt.Sprintf("http%s%s", method[0:1], strings.ToLower(method[1:])),
+	}
+
+	sm := session.NewManager(d.Client())
+
+	ticket, err := sm.AcquireGenericServiceTicket(ctx, &spec)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	cookie := &http.Cookie{
+		Name:  "vmware_cgi_ticket",
+		Value: ticket.Id,
+	}
+
+	return u, cookie, nil
+}
+
+func (d Datastore) uploadTicket(ctx context.Context, path string, param *soap.Upload) (*url.URL, *soap.Upload, error) {
+	p := soap.DefaultUpload
+	if param != nil {
+		p = *param // copy
+	}
+
+	u, ticket, err := d.httpTicket(ctx, path, p.Method)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	p.Ticket = ticket
+
+	return u, &p, nil
+}
+
+func (d Datastore) downloadTicket(ctx context.Context, path string, param *soap.Download) (*url.URL, *soap.Download, error) {
+	p := soap.DefaultDownload
+	if param != nil {
+		p = *param // copy
+	}
+
+	u, ticket, err := d.httpTicket(ctx, path, p.Method)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	p.Ticket = ticket
+
+	return u, &p, nil
+}
+
+// Upload via soap.Upload with an http service ticket
+func (d Datastore) Upload(ctx context.Context, f io.Reader, path string, param *soap.Upload) error {
+	u, p, err := d.uploadTicket(ctx, path, param)
+	if err != nil {
+		return err
+	}
+	return d.Client().Upload(f, u, p)
+}
+
+// UploadFile via soap.Upload with an http service ticket
+func (d Datastore) UploadFile(ctx context.Context, file string, path string, param *soap.Upload) error {
+	u, p, err := d.uploadTicket(ctx, path, param)
+	if err != nil {
+		return err
+	}
+	return d.Client().UploadFile(file, u, p)
+}
+
+// DownloadFile via soap.Upload with an http service ticket
+func (d Datastore) DownloadFile(ctx context.Context, path string, file string, param *soap.Download) error {
+	u, p, err := d.downloadTicket(ctx, path, param)
+	if err != nil {
+		return err
+	}
+	return d.Client().DownloadFile(file, u, p)
+}
+
+// AttachedHosts returns hosts that have this Datastore attached, accessible and writable.
+func (d Datastore) AttachedHosts(ctx context.Context) ([]*HostSystem, error) {
+	var ds mo.Datastore
+	var hosts []*HostSystem
+
+	pc := property.DefaultCollector(d.Client())
+	err := pc.RetrieveOne(ctx, d.Reference(), []string{"host"}, &ds)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, host := range ds.Host {
+		info := host.MountInfo
+		if *info.Mounted && *info.Accessible && info.AccessMode == string(types.HostMountModeReadWrite) {
+			hosts = append(hosts, NewHostSystem(d.Client(), host.Key))
+		}
+	}
+
+	return hosts, nil
 }
