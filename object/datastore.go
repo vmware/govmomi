@@ -96,7 +96,9 @@ func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 	return NewHostDatastoreBrowser(d.c, do.Browser), nil
 }
 
-func (d Datastore) httpTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
+// ServiceTicket obtains a ticket via AcquireGenericServiceTicket and returns it an http.Cookie with the url.URL
+// that can be used along with the ticket cookie to access the given path.
+func (d Datastore) ServiceTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
 	// We are uploading to an ESX host, dcPath must be set to ha-datacenter otherwise 404.
 	u := &url.URL{
 		Scheme: d.c.URL().Scheme,
@@ -155,7 +157,7 @@ func (d Datastore) uploadTicket(ctx context.Context, path string, param *soap.Up
 		p = *param // copy
 	}
 
-	u, ticket, err := d.httpTicket(ctx, path, p.Method)
+	u, ticket, err := d.ServiceTicket(ctx, path, p.Method)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -171,7 +173,7 @@ func (d Datastore) downloadTicket(ctx context.Context, path string, param *soap.
 		p = *param // copy
 	}
 
-	u, ticket, err := d.httpTicket(ctx, path, p.Method)
+	u, ticket, err := d.ServiceTicket(ctx, path, p.Method)
 	if err != nil {
 		return nil, nil, err
 	}
