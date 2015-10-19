@@ -357,6 +357,24 @@ func (v VirtualMachine) Answer(ctx context.Context, id, answer string) error {
 	return nil
 }
 
+// CreateSnapshot creates a new snapshot of a virtual machine.
+func (v VirtualMachine) CreateSnapshot(ctx context.Context, name string, description string, memory bool, quiesce bool) (*Task, error) {
+	req := types.CreateSnapshot_Task{
+		This:        v.Reference(),
+		Name:        name,
+		Description: description,
+		Memory:      memory,
+		Quiesce:     quiesce,
+	}
+
+	res, err := methods.CreateSnapshot_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
 // IsToolsRunning returns true if VMware Tools is currently running in the guest OS, and false otherwise.
 func (v VirtualMachine) IsToolsRunning(ctx context.Context) (bool, error) {
 	var o mo.VirtualMachine
