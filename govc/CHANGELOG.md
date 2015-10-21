@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add logs, logs.ls and logs.download commands
+
 * Add support for LoginExtensionByCertificate with new `-cert` and `-key` flags
 
 * Add govc extension.{info,register,unregister,setcert} commands
