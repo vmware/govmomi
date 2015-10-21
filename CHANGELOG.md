@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add object.DiagnosticManager wrapper
+
 * Add LoginExtensionByCertificate support
 
 * Add object.ExtensionManager
