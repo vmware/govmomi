@@ -170,6 +170,10 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 }
 
 func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
+	if nil == ctx || nil == ctx.Done() { // ctx.Done() is for context.TODO()
+		return c.Client.Do(req)
+	}
+
 	var resc = make(chan *http.Response, 1)
 	var errc = make(chan error, 1)
 
