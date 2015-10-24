@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add object.HostFirewallSystem wrapper
+
 * Add object.DiagnosticManager wrapper
 
 * Add LoginExtensionByCertificate support

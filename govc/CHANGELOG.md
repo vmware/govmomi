@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add firewall.ruleset.find command
+
 * Add logs, logs.ls and logs.download commands
 
 * Add support for LoginExtensionByCertificate with new `-cert` and `-key` flags

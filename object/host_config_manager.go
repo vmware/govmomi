@@ -43,3 +43,14 @@ func (m HostConfigManager) NetworkSystem(ctx context.Context) (*HostNetworkSyste
 
 	return NewHostNetworkSystem(m.c, *h.ConfigManager.NetworkSystem), nil
 }
+
+func (m HostConfigManager) FirewallSystem(ctx context.Context) (*HostFirewallSystem, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.firewallSystem"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostFirewallSystem(m.c, *h.ConfigManager.FirewallSystem, m.Reference()), nil
+}
