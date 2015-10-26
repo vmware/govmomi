@@ -35,6 +35,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host"
 	_ "github.com/vmware/govmomi/govc/host/autostart"
 	_ "github.com/vmware/govmomi/govc/host/esxcli"
+	_ "github.com/vmware/govmomi/govc/host/firewall"
 	_ "github.com/vmware/govmomi/govc/host/portgroup"
 	_ "github.com/vmware/govmomi/govc/host/vswitch"
 	_ "github.com/vmware/govmomi/govc/importx"
