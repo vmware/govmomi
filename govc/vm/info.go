@@ -149,6 +149,7 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 
 	var host []mo.HostSystem
 	var network []mo.Network
+	var dvp []mo.DistributedVirtualPortgroup
 	var datastore []mo.Datastore
 	// Table to drive inflating refs to their mo.* counterparts (dest)
 	// and save() the Name to r.entities w/o using reflection here.
@@ -167,6 +168,13 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 		"network": {
 			&network, nil, func() {
 				for _, e := range network {
+					r.entities[e.Reference()] = e.Name
+				}
+			},
+		},
+		"dvp": {
+			&dvp, nil, func() {
+				for _, e := range dvp {
 					r.entities[e.Reference()] = e.Name
 				}
 			},
@@ -202,7 +210,15 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 
 		if r.cmd.Resources {
 			addRef("datastore", vm.Datastore...)
-			addRef("network", vm.Network...)
+
+			for _, net := range vm.Network {
+				switch net.Type {
+				case "Network":
+					addRef("network", net)
+				case "DistributedVirtualPortgroup":
+					addRef("dvp", net)
+				}
+			}
 		}
 	}
 
