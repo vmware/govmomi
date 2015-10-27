@@ -68,6 +68,20 @@ func (m Manager) Add(ctx context.Context, key string, labels map[string]string) 
 	return res.Returnval, nil
 }
 
+func (m Manager) Decode(ctx context.Context, key string) (types.LicenseManagerLicenseInfo, error) {
+	req := types.DecodeLicense{
+		This:       m.Reference(),
+		LicenseKey: key,
+	}
+
+	res, err := methods.DecodeLicense(ctx, m.c, &req)
+	if err != nil {
+		return types.LicenseManagerLicenseInfo{}, err
+	}
+
+	return res.Returnval, nil
+}
+
 func (m Manager) Remove(ctx context.Context, key string) error {
 	req := types.RemoveLicense{
 		This:       m.Reference(),
