@@ -109,3 +109,22 @@ func (m Manager) List(ctx context.Context) ([]types.LicenseManagerLicenseInfo, e
 
 	return mlm.Licenses, nil
 }
+
+func (m Manager) AssignmentManager(ctx context.Context) (*AssignmentManager, error) {
+	var mlm mo.LicenseManager
+
+	err := m.Properties(ctx, m.Reference(), []string{"licenseAssignmentManager"}, &mlm)
+	if err != nil {
+		return nil, err
+	}
+
+	if mlm.LicenseAssignmentManager == nil {
+		return nil, object.ErrNotSupported
+	}
+
+	am := AssignmentManager{
+		object.NewCommon(m.Client(), *mlm.LicenseAssignmentManager),
+	}
+
+	return &am, nil
+}

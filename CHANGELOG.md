@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add license.AssignmentManager wrapper
+
 * Add object.HostFirewallSystem wrapper
 
 * Add object.DiagnosticManager wrapper
