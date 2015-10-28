@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add license.decode command
+
 * Add firewall.ruleset.find command
 
 * Add logs, logs.ls and logs.download commands
