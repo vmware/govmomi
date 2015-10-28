@@ -2,7 +2,7 @@
 
 ### (unreleased)
 
-* Add license.decode command
+* Add license.decode, license.assigned.list and license.assign commands
 
 * Add firewall.ruleset.find command
 
