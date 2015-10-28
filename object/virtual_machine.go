@@ -161,6 +161,20 @@ func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, 
 	return NewTask(v.c, res.Returnval), nil
 }
 
+func (v VirtualMachine) Customize(ctx context.Context, spec types.CustomizationSpec) (*Task, error) {
+	req := types.CustomizeVM_Task{
+		This: v.Reference(),
+		Spec: spec,
+	}
+
+	res, err := methods.CustomizeVM_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
 func (v VirtualMachine) Relocate(ctx context.Context, config types.VirtualMachineRelocateSpec, priority types.VirtualMachineMovePriority) (*Task, error) {
 	req := types.RelocateVM_Task{
 		This:     v.Reference(),
