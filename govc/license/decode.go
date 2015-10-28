@@ -28,13 +28,17 @@ import (
 type decode struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	feature string
 }
 
 func init() {
 	cli.Register("license.decode", &decode{})
 }
 
-func (cmd *decode) Register(f *flag.FlagSet) {}
+func (cmd *decode) Register(f *flag.FlagSet) {
+	f.StringVar(&cmd.feature, "feature", "", featureUsage)
+}
 
 func (cmd *decode) Process() error { return nil }
 
@@ -48,14 +52,19 @@ func (cmd *decode) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	result := make(licenseOutput, 0)
+	var result license.InfoList
 	m := license.NewManager(client)
 	for _, v := range f.Args() {
 		license, err := m.Decode(context.TODO(), v)
 		if err != nil {
 			return err
 		}
+
 		result = append(result, license)
+	}
+
+	if cmd.feature != "" {
+		result = result.WithFeature(cmd.feature)
 	}
 
 	return cmd.WriteResult(licenseOutput(result))
