@@ -17,6 +17,9 @@ limitations under the License.
 package license
 
 import (
+	"strconv"
+	"strings"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -99,7 +102,7 @@ func (m Manager) Update(ctx context.Context, key string, labels map[string]strin
 	return res.Returnval, nil
 }
 
-func (m Manager) List(ctx context.Context) ([]types.LicenseManagerLicenseInfo, error) {
+func (m Manager) List(ctx context.Context) (InfoList, error) {
 	var mlm mo.LicenseManager
 
 	err := m.Properties(ctx, m.Reference(), []string{"licenses"}, &mlm)
@@ -107,7 +110,7 @@ func (m Manager) List(ctx context.Context) ([]types.LicenseManagerLicenseInfo, e
 		return nil, err
 	}
 
-	return mlm.Licenses, nil
+	return InfoList(mlm.Licenses), nil
 }
 
 func (m Manager) AssignmentManager(ctx context.Context) (*AssignmentManager, error) {
@@ -127,4 +130,66 @@ func (m Manager) AssignmentManager(ctx context.Context) (*AssignmentManager, err
 	}
 
 	return &am, nil
+}
+
+type licenseFeature struct {
+	name  string
+	level int
+}
+
+func parseLicenseFeature(feature string) *licenseFeature {
+	lf := new(licenseFeature)
+
+	f := strings.Split(feature, ":")
+
+	lf.name = f[0]
+
+	if len(f) > 1 {
+		var err error
+		lf.level, err = strconv.Atoi(f[1])
+		if err != nil {
+			lf.name = feature
+		}
+	}
+
+	return lf
+}
+
+func HasFeature(license types.LicenseManagerLicenseInfo, key string) bool {
+	feature := parseLicenseFeature(key)
+
+	for _, p := range license.Properties {
+		if p.Key != "feature" {
+			continue
+		}
+
+		kv, ok := p.Value.(types.KeyValue)
+
+		if !ok {
+			continue
+		}
+
+		lf := parseLicenseFeature(kv.Key)
+
+		if lf.name == feature.name && lf.level >= feature.level {
+			return true
+		}
+	}
+
+	return false
+}
+
+// InfoList provides helper methods for []types.LicenseManagerLicenseInfo
+type InfoList []types.LicenseManagerLicenseInfo
+
+func (l InfoList) WithFeature(key string) InfoList {
+	var result InfoList
+
+	for _, license := range l {
+		if HasFeature(license, key) {
+			result = append(result, license)
+		}
+	}
+
+	return result
 }
