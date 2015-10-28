@@ -123,6 +123,7 @@ func (r *reader) Done(err error) {
 		t:    time.Now(),
 		pos:  r.pos,
 		size: r.size,
+		bps:  &r.bps,
 		err:  err,
 	}
 
