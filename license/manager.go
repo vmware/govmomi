@@ -17,7 +17,7 @@ limitations under the License.
 package license
 
 import (
-	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -26,23 +26,15 @@ import (
 )
 
 type Manager struct {
-	reference types.ManagedObjectReference
-
-	c *vim25.Client
+	object.Common
 }
 
 func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
-		reference: *c.ServiceContent.LicenseManager,
-
-		c: c,
+		object.NewCommon(c, *c.ServiceContent.LicenseManager),
 	}
 
 	return &m
-}
-
-func (m Manager) Reference() types.ManagedObjectReference {
-	return m.reference
 }
 
 func mapToKeyValueSlice(m map[string]string) []types.KeyValue {
@@ -60,7 +52,7 @@ func (m Manager) Add(ctx context.Context, key string, labels map[string]string) 
 		Labels:     mapToKeyValueSlice(labels),
 	}
 
-	res, err := methods.AddLicense(ctx, m.c, &req)
+	res, err := methods.AddLicense(ctx, m.Client(), &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}
@@ -74,7 +66,7 @@ func (m Manager) Decode(ctx context.Context, key string) (types.LicenseManagerLi
 		LicenseKey: key,
 	}
 
-	res, err := methods.DecodeLicense(ctx, m.c, &req)
+	res, err := methods.DecodeLicense(ctx, m.Client(), &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}
@@ -88,7 +80,7 @@ func (m Manager) Remove(ctx context.Context, key string) error {
 		LicenseKey: key,
 	}
 
-	_, err := methods.RemoveLicense(ctx, m.c, &req)
+	_, err := methods.RemoveLicense(ctx, m.Client(), &req)
 	return err
 }
 
@@ -99,7 +91,7 @@ func (m Manager) Update(ctx context.Context, key string, labels map[string]strin
 		Labels:     mapToKeyValueSlice(labels),
 	}
 
-	res, err := methods.UpdateLicense(ctx, m.c, &req)
+	res, err := methods.UpdateLicense(ctx, m.Client(), &req)
 	if err != nil {
 		return types.LicenseManagerLicenseInfo{}, err
 	}
@@ -110,7 +102,7 @@ func (m Manager) Update(ctx context.Context, key string, labels map[string]strin
 func (m Manager) List(ctx context.Context) ([]types.LicenseManagerLicenseInfo, error) {
 	var mlm mo.LicenseManager
 
-	err := property.DefaultCollector(m.c).RetrieveOne(ctx, m.Reference(), []string{"licenses"}, &mlm)
+	err := m.Properties(ctx, m.Reference(), []string{"licenses"}, &mlm)
 	if err != nil {
 		return nil, err
 	}
