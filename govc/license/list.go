@@ -25,16 +25,22 @@ import (
 	"golang.org/x/net/context"
 )
 
+var featureUsage = "List licenses with given feature"
+
 type list struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	feature string
 }
 
 func init() {
 	cli.Register("license.list", &list{})
 }
 
-func (cmd *list) Register(f *flag.FlagSet) {}
+func (cmd *list) Register(f *flag.FlagSet) {
+	f.StringVar(&cmd.feature, "feature", "", featureUsage)
+}
 
 func (cmd *list) Process() error { return nil }
 
@@ -48,6 +54,10 @@ func (cmd *list) Run(f *flag.FlagSet) error {
 	result, err := m.List(context.TODO())
 	if err != nil {
 		return err
+	}
+
+	if cmd.feature != "" {
+		result = result.WithFeature(cmd.feature)
 	}
 
 	return cmd.WriteResult(licenseOutput(result))

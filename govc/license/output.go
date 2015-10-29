@@ -28,7 +28,7 @@ import (
 type licenseOutput []types.LicenseManagerLicenseInfo
 
 func (res licenseOutput) Write(w io.Writer) error {
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(os.Stdout, 4, 0, 2, ' ', 0)
 	fmt.Fprintf(tw, "Key:\tEdition:\tUsed:\tTotal:\n")
 	for _, v := range res {
 		fmt.Fprintf(tw, "%s\t", v.LicenseKey)
