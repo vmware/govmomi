@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add object.ComputeResource.Reconfigure method
+
 * Add license.AssignmentManager wrapper
 
 * Add object.HostFirewallSystem wrapper
