@@ -26,6 +26,8 @@ import (
 
 type Folder struct {
 	Common
+
+	InventoryPath string
 }
 
 func NewFolder(c *vim25.Client, ref types.ManagedObjectReference) *Folder {
