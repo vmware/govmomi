@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add host.{disconnect,reconnect,remove,maintenance.enter,maintenance.exit} commands
+
 * Add license.decode, license.assigned.list and license.assign commands
 
 * Add firewall.ruleset.find command
