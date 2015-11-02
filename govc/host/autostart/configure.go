@@ -20,13 +20,14 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type configure struct {
 	*AutostartFlag
 
-	defaults types.AutoStartDefaults
+	types.AutoStartDefaults
 }
 
 func init() {
@@ -34,15 +35,12 @@ func init() {
 }
 
 func (cmd *configure) Register(f *flag.FlagSet) {
-	cmd.defaults.Enabled = types.NewBool(false)
-	f.BoolVar(cmd.defaults.Enabled, "enabled", false, "")
+	f.Var(flags.NewOptionalBool(&cmd.Enabled), "enabled", "")
+	f.IntVar(&cmd.StartDelay, "start-delay", 0, "")
+	f.StringVar(&cmd.StopAction, "stop-action", "", "")
+	f.IntVar(&cmd.StopDelay, "stop-delay", 0, "")
 
-	f.IntVar(&cmd.defaults.StartDelay, "start-delay", 0, "")
-	f.StringVar(&cmd.defaults.StopAction, "stop-action", "", "")
-	f.IntVar(&cmd.defaults.StopDelay, "stop-delay", 0, "")
-
-	cmd.defaults.WaitForHeartbeat = types.NewBool(false)
-	f.BoolVar(cmd.defaults.WaitForHeartbeat, "wait-for-heartbeat", false, "")
+	f.Var(flags.NewOptionalBool(&cmd.WaitForHeartbeat), "wait-for-heartbeat", "")
 }
 
 func (cmd *configure) Process() error { return nil }
@@ -52,8 +50,5 @@ func (cmd *configure) Usage() string {
 }
 
 func (cmd *configure) Run(f *flag.FlagSet) error {
-	// Note: this command cannot DISABLE autostart because the "Enabled" field is
-	// marked "omitempty", which means that it is not included when it is false.
-	// Also see: https://github.com/vmware/govmomi/issues/240
-	return cmd.ReconfigureDefaults(cmd.defaults)
+	return cmd.ReconfigureDefaults(cmd.AutoStartDefaults)
 }
