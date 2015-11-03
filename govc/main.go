@@ -22,6 +22,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 
 	_ "github.com/vmware/govmomi/govc/about"
+	_ "github.com/vmware/govmomi/govc/cluster"
 	_ "github.com/vmware/govmomi/govc/datacenter"
 	_ "github.com/vmware/govmomi/govc/datastore"
 	_ "github.com/vmware/govmomi/govc/device"
@@ -36,6 +37,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host/autostart"
 	_ "github.com/vmware/govmomi/govc/host/esxcli"
 	_ "github.com/vmware/govmomi/govc/host/firewall"
+	_ "github.com/vmware/govmomi/govc/host/maintenance"
 	_ "github.com/vmware/govmomi/govc/host/portgroup"
 	_ "github.com/vmware/govmomi/govc/host/vswitch"
 	_ "github.com/vmware/govmomi/govc/importx"

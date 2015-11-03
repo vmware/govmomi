@@ -2,6 +2,10 @@
 
 ### (unreleased)
 
+* Add cluster.{create,change,add} commands
+
+* Add host.{disconnect,reconnect,remove,maintenance.enter,maintenance.exit} commands
+
 * Add license.decode, license.assigned.list and license.assign commands
 
 * Add firewall.ruleset.find command

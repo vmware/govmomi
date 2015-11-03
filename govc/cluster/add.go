@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package host
+package cluster
 
 import (
 	"flag"
@@ -23,26 +23,25 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type add struct {
-	*flags.ClientFlag
 	*flags.DatacenterFlag
 	*flags.HostConnectFlag
 
-	parent  string
+	cluster string
 	connect bool
+	license string
 }
 
 func init() {
-	cli.Register("host.add", &add{})
+	cli.Register("cluster.add", &add{})
 }
 
 func (cmd *add) Register(f *flag.FlagSet) {
-	f.StringVar(&cmd.parent, "parent", "", "Path to folder to add the host to")
+	f.StringVar(&cmd.cluster, "cluster", "*", "Path to cluster")
+
 	f.BoolVar(&cmd.connect, "connect", true, "Immediately connect to host")
 }
 
@@ -60,67 +59,50 @@ func (cmd *add) Process() error {
 }
 
 func (cmd *add) Description() string {
-	return `Add host to datacenter.
+	return `Add host to cluster.
 
-The host is added to the folder specified by the 'parent' flag. If not given,
-this defaults to the hosts folder in the specified or default datacenter.`
+The host is added to the cluster specified by the 'cluster' flag.`
 }
 
-func (cmd *add) Add(ctx context.Context, parent *object.Folder) error {
+func (cmd *add) Add(ctx context.Context, cluster *object.ClusterComputeResource) error {
 	spec := cmd.HostConnectSpec
 
-	req := types.AddStandaloneHost_Task{
-		This:         parent.Reference(),
-		Spec:         spec,
-		AddConnected: cmd.connect,
+	var license *string
+	if cmd.license != "" {
+		license = &cmd.license
 	}
 
-	res, err := methods.AddStandaloneHost_Task(ctx, parent.Client(), &req)
+	task, err := cluster.AddHost(ctx, spec, cmd.connect, license, nil)
 	if err != nil {
 		return err
 	}
 
-	logger := cmd.ProgressLogger(fmt.Sprintf("adding %s to folder %s... ", spec.HostName, parent.InventoryPath))
+	logger := cmd.ProgressLogger(fmt.Sprintf("adding %s to cluster %s... ", spec.HostName, cluster.InventoryPath))
 	defer logger.Wait()
 
-	task := object.NewTask(parent.Client(), res.Returnval)
 	_, err = task.WaitForResult(ctx, logger)
 	return err
 }
 
 func (cmd *add) Run(f *flag.FlagSet) error {
 	var ctx = context.Background()
-	var parent *object.Folder
 
 	if f.NArg() != 0 {
 		return flag.ErrHelp
 	}
 
-	if cmd.parent == "" {
-		dc, err := cmd.Datacenter()
-		if err != nil {
-			return err
-		}
-
-		folders, err := dc.Folders(ctx)
-		if err != nil {
-			return err
-		}
-
-		parent = folders.HostFolder
-	} else {
-		finder, err := cmd.Finder()
-		if err != nil {
-			return err
-		}
-
-		parent, err = finder.Folder(ctx, cmd.parent)
-		if err != nil {
-			return err
-		}
+	finder, err := cmd.Finder()
+	if err != nil {
+		return err
 	}
 
-	err := cmd.Add(ctx, parent)
+	cluster, err := finder.ClusterComputeResource(ctx, cmd.cluster)
+	if err != nil {
+		return nil
+	}
+
+	err = cmd.Add(ctx, cluster)
+
 	if err == nil {
 		return nil
 	}
@@ -131,5 +113,5 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 	}
 
 	// Accepted unverified thumbprint, try again
-	return cmd.Add(ctx, parent)
+	return cmd.Add(ctx, cluster)
 }

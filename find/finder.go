@@ -605,3 +605,29 @@ func (f *Finder) VirtualApp(ctx context.Context, path string) (*object.VirtualAp
 
 	return apps[0], nil
 }
+
+func (f *Finder) Folder(ctx context.Context, path string) (*object.Folder, error) {
+	mo, err := f.ManagedObjectList(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(mo) == 0 {
+		return nil, &NotFoundError{"folder", path}
+	}
+
+	if len(mo) > 1 {
+		return nil, &MultipleFoundError{"folder", path}
+	}
+
+	ref := mo[0].Object.Reference()
+	if ref.Type != "Folder" {
+		return nil, &NotFoundError{"folder", path}
+	}
+
+	folder := object.NewFolder(f.client, ref)
+
+	folder.InventoryPath = mo[0].Path
+
+	return folder, nil
+}

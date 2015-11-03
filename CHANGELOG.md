@@ -2,6 +2,14 @@
 
 ### (unreleased)
 
+* Add object.HostSystem methods: EnterMaintenanceMode, ExitMaintenanceMode, Disconnect, Reconnect
+
+* Add finder.Folder method
+
+* Add object.Common.Destroy method
+
+* Add object.ComputeResource.Reconfigure method
+
 * Add license.AssignmentManager wrapper
 
 * Add object.HostFirewallSystem wrapper

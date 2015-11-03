@@ -75,6 +75,21 @@ func (c ComputeResource) ResourcePool(ctx context.Context) (*ResourcePool, error
 	return NewResourcePool(c.c, *cr.ResourcePool), nil
 }
 
+func (c ComputeResource) Reconfigure(ctx context.Context, spec types.BaseComputeResourceConfigSpec, modify bool) (*Task, error) {
+	req := types.ReconfigureComputeResource_Task{
+		This:   c.Reference(),
+		Spec:   spec,
+		Modify: modify,
+	}
+
+	res, err := methods.ReconfigureComputeResource_Task(ctx, c.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(c.c, res.Returnval), nil
+}
+
 func (c ComputeResource) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: c.Reference(),
