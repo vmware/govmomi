@@ -17,7 +17,6 @@ limitations under the License.
 package host
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 
@@ -32,14 +31,10 @@ import (
 type add struct {
 	*flags.ClientFlag
 	*flags.DatacenterFlag
+	*flags.HostConnectFlag
 
-	parent string
-
-	host        string
-	username    string
-	password    string
-	connect     bool
-	fingerprint string
+	parent  string
+	connect bool
 }
 
 func init() {
@@ -48,45 +43,57 @@ func init() {
 
 func (cmd *add) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.parent, "parent", "", "Path to folder to add the host to")
-
-	f.StringVar(&cmd.host, "host", "", "Hostname or IP address of the host")
-	f.StringVar(&cmd.username, "username", "", "Username of administration account on the host")
-	f.StringVar(&cmd.password, "password", "", "Password of administration account on the host")
 	f.BoolVar(&cmd.connect, "connect", true, "Immediately connect to host")
-	f.StringVar(&cmd.fingerprint, "fingerprint", "", "Fingerprint of the host's SSL certificate")
 }
 
 func (cmd *add) Process() error {
-	if cmd.host == "" {
+	if cmd.HostName == "" {
 		return flag.ErrHelp
 	}
-	if cmd.username == "" {
+	if cmd.UserName == "" {
 		return flag.ErrHelp
 	}
-	if cmd.password == "" {
+	if cmd.Password == "" {
 		return flag.ErrHelp
 	}
 	return nil
 }
 
-func (cmd *add) Usage() string {
-	return "HOST"
-}
-
 func (cmd *add) Description() string {
-	return `Add HOST to datacenter.
+	return `Add host to datacenter.
 
 The host is added to the folder specified by the 'parent' flag. If not given,
 this defaults to the hosts folder in the specified or default datacenter.`
+}
+
+func (cmd *add) Add(ctx context.Context, parent *object.Folder) error {
+	spec := cmd.HostConnectSpec
+
+	req := types.AddStandaloneHost_Task{
+		This:         parent.Reference(),
+		Spec:         spec,
+		AddConnected: cmd.connect,
+	}
+
+	res, err := methods.AddStandaloneHost_Task(ctx, parent.Client(), &req)
+	if err != nil {
+		return err
+	}
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("adding %s to folder %s... ", spec.HostName, parent.InventoryPath))
+	defer logger.Wait()
+
+	task := object.NewTask(parent.Client(), res.Returnval)
+	_, err = task.WaitForResult(ctx, logger)
+	return err
 }
 
 func (cmd *add) Run(f *flag.FlagSet) error {
 	var ctx = context.Background()
 	var parent *object.Folder
 
-	client, err := cmd.Client()
-	if err != nil {
-		return err
+	if f.NArg() != 0 {
+		return flag.ErrHelp
 	}
 
 	if cmd.parent == "" {
@@ -107,59 +114,22 @@ func (cmd *add) Run(f *flag.FlagSet) error {
 			return err
 		}
 
-		mo, err := finder.ManagedObjectList(ctx, cmd.parent)
+		parent, err = finder.Folder(ctx, cmd.parent)
 		if err != nil {
 			return err
 		}
-
-		if len(mo) == 0 {
-			return errors.New("parent does not resolve to object")
-		}
-
-		if len(mo) > 1 {
-			return errors.New("parent resolves to more than one object")
-		}
-
-		ref := mo[0].Object.Reference()
-		if ref.Type != "Folder" {
-			return errors.New("parent does not resolve to folder")
-		}
-
-		parent = object.NewFolder(client, ref)
 	}
 
-	req := types.AddStandaloneHost_Task{
-		This: parent.Reference(),
-		Spec: types.HostConnectSpec{
-			HostName:      cmd.host,
-			UserName:      cmd.username,
-			Password:      cmd.password,
-			SslThumbprint: cmd.fingerprint,
-		},
-		AddConnected: cmd.connect,
+	err := cmd.Add(ctx, parent)
+	if err == nil {
+		return nil
 	}
 
-	res, err := methods.AddStandaloneHost_Task(ctx, client, &req)
-	if err != nil {
+	// Check if we failed due to SSLVerifyFault and -noverify is set
+	if err := cmd.AcceptThumbprint(err); err != nil {
 		return err
 	}
 
-	task := object.NewTask(client, res.Returnval)
-	_, err = task.WaitForResult(ctx, nil)
-	if err != nil {
-		f, ok := err.(types.HasFault)
-		if !ok {
-			return err
-		}
-
-		switch fault := f.Fault().(type) {
-		case *types.SSLVerifyFault:
-			// Add fingerprint to error message
-			return fmt.Errorf("%s Fingerprint is %s.", err.Error(), fault.Thumbprint)
-		default:
-			return err
-		}
-	}
-
-	return nil
+	// Accepted unverified thumbprint, try again
+	return cmd.Add(ctx, parent)
 }
