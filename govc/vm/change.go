@@ -61,6 +61,14 @@ func (cmd *change) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.GuestId, "g", "", "Guest OS")
 	f.StringVar(&cmd.Name, "name", "", "Display name")
 	f.Var(&cmd.extraConfig, "e", "ExtraConfig. <key>=<value>")
+
+	cmd.VirtualMachineConfigSpec.Flags = new(types.VirtualMachineFlagInfo)
+
+	// See types.VirtualMachineFlagInfoVirtualExecUsage
+	f.StringVar(&cmd.Flags.VirtualExecUsage, "virtual-exec-usage", "", "Use HV support for instruction virtualization")
+
+	// See types.VirtualMachineFlagInfoVirtualMmuUsage
+	f.StringVar(&cmd.Flags.VirtualMmuUsage, "virtual-mmu-usage", "", "Use nested page table hardware support")
 }
 
 func (cmd *change) Process() error { return nil }
