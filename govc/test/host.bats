@@ -74,3 +74,8 @@ load test_helper
   run govc host.info -host.uuid $uuid
   assert_success
 }
+
+@test "host.vnic.info" {
+  run govc host.vnic.info
+  assert_success
+}
