@@ -54,3 +54,25 @@ func (m HostConfigManager) FirewallSystem(ctx context.Context) (*HostFirewallSys
 
 	return NewHostFirewallSystem(m.c, *h.ConfigManager.FirewallSystem, m.Reference()), nil
 }
+
+func (m HostConfigManager) VirtualNicManager(ctx context.Context) (*HostVirtualNicManager, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.virtualNicManager"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostVirtualNicManager(m.c, *h.ConfigManager.VirtualNicManager, m.Reference()), nil
+}
+
+func (m HostConfigManager) VsanSystem(ctx context.Context) (*HostVsanSystem, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.vsanSystem"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostVsanSystem(m.c, *h.ConfigManager.VsanSystem), nil
+}
