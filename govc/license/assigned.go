@@ -33,13 +33,17 @@ import (
 type assigned struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	id string
 }
 
 func init() {
 	cli.Register("license.assigned.list", &assigned{})
 }
 
-func (cmd *assigned) Register(f *flag.FlagSet) {}
+func (cmd *assigned) Register(f *flag.FlagSet) {
+	f.StringVar(&cmd.id, "id", "", "Entity ID")
+}
 
 func (cmd *assigned) Process() error { return nil }
 
@@ -54,7 +58,7 @@ func (cmd *assigned) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	assigned, err := m.QueryAssigned(context.TODO(), "")
+	assigned, err := m.QueryAssigned(context.TODO(), cmd.id)
 	if err != nil {
 		return err
 	}
