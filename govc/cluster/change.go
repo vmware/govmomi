@@ -40,6 +40,8 @@ func init() {
 func (cmd *change) Register(f *flag.FlagSet) {
 	cmd.DrsConfig = new(types.ClusterDrsConfigInfo)
 	cmd.DasConfig = new(types.ClusterDasConfigInfo)
+	cmd.VsanConfig = new(types.VsanClusterConfigInfo)
+	cmd.VsanConfig.DefaultConfig = new(types.VsanClusterConfigInfoHostDefaultInfo)
 
 	// DRS
 	f.Var(flags.NewOptionalBool(&cmd.DrsConfig.Enabled), "drs-enabled", "Enable DRS")
@@ -54,6 +56,10 @@ func (cmd *change) Register(f *flag.FlagSet) {
 
 	// HA
 	f.Var(flags.NewOptionalBool(&cmd.DasConfig.Enabled), "ha-enabled", "Enable HA")
+
+	// vSAN
+	f.Var(flags.NewOptionalBool(&cmd.VsanConfig.Enabled), "vsan-enabled", "Enable vSAN")
+	f.Var(flags.NewOptionalBool(&cmd.VsanConfig.DefaultConfig.AutoClaimStorage), "vsan-autoclaim", "")
 }
 
 func (cmd *change) Process() error { return nil }
