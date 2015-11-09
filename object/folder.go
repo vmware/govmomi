@@ -182,3 +182,17 @@ func (f Folder) RegisterVM(ctx context.Context, path string, name string, asTemp
 
 	return NewTask(f.c, res.Returnval), nil
 }
+
+func (f Folder) CreateDVS(ctx context.Context, spec types.DVSCreateSpec) (*Task, error) {
+	req := types.CreateDVS_Task{
+		This: f.Reference(),
+		Spec: spec,
+	}
+
+	res, err := methods.CreateDVS_Task(ctx, f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(f.c, res.Returnval), nil
+}
