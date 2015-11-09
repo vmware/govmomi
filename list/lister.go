@@ -83,6 +83,8 @@ func ToElement(r mo.Reference, prefix string) Element {
 		name = m.Name
 	case mo.DistributedVirtualPortgroup:
 		name = m.Name
+	case mo.VmwareDistributedVirtualSwitch:
+		name = m.Name
 
 	// { "vim.Datastore" } - Identifies a datastore folder. Datastore folders can
 	// contain child datastore folders and Datastore managed objects.
@@ -198,6 +200,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 		"ComputeResource",
 		"ClusterComputeResource",
 		"Datastore",
+		"DistributedVirtualSwitch",
 	}
 
 	for _, t := range childTypes {
