@@ -30,6 +30,8 @@ import (
 	_ "github.com/vmware/govmomi/govc/device/floppy"
 	_ "github.com/vmware/govmomi/govc/device/scsi"
 	_ "github.com/vmware/govmomi/govc/device/serial"
+	_ "github.com/vmware/govmomi/govc/dvs"
+	_ "github.com/vmware/govmomi/govc/dvs/portgroup"
 	_ "github.com/vmware/govmomi/govc/events"
 	_ "github.com/vmware/govmomi/govc/extension"
 	_ "github.com/vmware/govmomi/govc/fields"
