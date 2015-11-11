@@ -2,6 +2,10 @@
 
 ### (unreleased)
 
+* Add dvs.{create,add} and dvs.portgroup.add commands
+
+* Add host.vnic.{service,info} commands
+
 * Add cluster.{create,change,add} commands
 
 * Add host.{disconnect,reconnect,remove,maintenance.enter,maintenance.exit} commands

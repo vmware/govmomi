@@ -2,6 +2,10 @@
 
 ### (unreleased)
 
+* Add object.VirtualNicManager wrapper
+
+* Add object.HostVsanSystem wrapper
+
 * Add object.HostSystem methods: EnterMaintenanceMode, ExitMaintenanceMode, Disconnect, Reconnect
 
 * Add finder.Folder method

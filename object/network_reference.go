@@ -24,5 +24,7 @@ import (
 // The NetworkReference interface is implemented by managed objects
 // which can be used as the backing for a VirtualEthernetCard.
 type NetworkReference interface {
+	Reference
+
 	EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error)
 }

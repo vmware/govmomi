@@ -455,6 +455,10 @@ func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.Network
 			r := object.NewDistributedVirtualPortgroup(f.client, ref)
 			r.InventoryPath = e.Path
 			ns = append(ns, r)
+		case "DistributedVirtualSwitch", "VmwareDistributedVirtualSwitch":
+			r := object.NewDistributedVirtualSwitch(f.client, ref)
+			r.InventoryPath = e.Path
+			ns = append(ns, r)
 		}
 	}
 

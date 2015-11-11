@@ -42,6 +42,8 @@ func init() {
 func (cmd *add) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.cluster, "cluster", "*", "Path to cluster")
 
+	f.StringVar(&cmd.license, "license", "", "Assign license key")
+
 	f.BoolVar(&cmd.connect, "connect", true, "Immediately connect to host")
 }
 
