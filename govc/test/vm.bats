@@ -180,8 +180,17 @@ load test_helper
     run govc vm.create -on=false $id
     assert_success
 
-    local found=$(govc vm.info $id | grep Name: | wc -l)
+    local info=$(govc vm.info -r $id)
+    local found=$(grep Name: <<<"$info" | wc -l)
     [ "$found" -eq 1 ]
+
+    # test that mo names are printed
+    found=$(grep Host: <<<"$info" | awk '{print $2}')
+    [ -n "$found" ]
+    found=$(grep Storage: <<<"$info" | awk '{print $2}')
+    [ -n "$found" ]
+    found=$(grep Network: <<<"$info" | awk '{print $2}')
+    [ -n "$found" ]
   done
 
   # test find slice
