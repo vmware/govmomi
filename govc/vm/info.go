@@ -153,33 +153,35 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 	var datastore []mo.Datastore
 	// Table to drive inflating refs to their mo.* counterparts (dest)
 	// and save() the Name to r.entities w/o using reflection here.
+	// Note that we cannot use a []mo.ManagedEntity here, since mo.Network has its own 'Name' field,
+	// the mo.Network.ManagedEntity.Name field will not be set.
 	vrefs := map[string]*struct {
 		dest interface{}
 		refs []types.ManagedObjectReference
 		save func()
 	}{
-		"host": {
+		"HostSystem": {
 			&host, nil, func() {
 				for _, e := range host {
 					r.entities[e.Reference()] = e.Name
 				}
 			},
 		},
-		"network": {
+		"Network": {
 			&network, nil, func() {
 				for _, e := range network {
 					r.entities[e.Reference()] = e.Name
 				}
 			},
 		},
-		"dvp": {
+		"DistributedVirtualPortgroup": {
 			&dvp, nil, func() {
 				for _, e := range dvp {
 					r.entities[e.Reference()] = e.Name
 				}
 			},
 		},
-		"datastore": {
+		"Datastore": {
 			&datastore, nil, func() {
 				for _, e := range datastore {
 					r.entities[e.Reference()] = e.Name
@@ -190,13 +192,13 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 
 	xrefs := make(map[types.ManagedObjectReference]bool)
 	// Add MOR to vrefs[kind].refs avoiding any duplicates.
-	addRef := func(kind string, refs ...types.ManagedObjectReference) {
+	addRef := func(refs ...types.ManagedObjectReference) {
 		for _, ref := range refs {
 			if _, exists := xrefs[ref]; exists {
 				return
 			}
 			xrefs[ref] = true
-			vref := vrefs[kind]
+			vref := vrefs[ref.Type]
 			vref.refs = append(vref.refs, ref)
 		}
 	}
@@ -204,21 +206,13 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 	for _, vm := range r.VirtualMachines {
 		if r.cmd.General {
 			if ref := vm.Summary.Runtime.Host; ref != nil {
-				addRef("host", *ref)
+				addRef(*ref)
 			}
 		}
 
 		if r.cmd.Resources {
-			addRef("datastore", vm.Datastore...)
-
-			for _, net := range vm.Network {
-				switch net.Type {
-				case "Network":
-					addRef("network", net)
-				case "DistributedVirtualPortgroup":
-					addRef("dvp", net)
-				}
-			}
+			addRef(vm.Datastore...)
+			addRef(vm.Network...)
 		}
 	}
 

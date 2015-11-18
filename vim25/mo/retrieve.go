@@ -90,6 +90,17 @@ func LoadRetrievePropertiesResponse(res *types.RetrievePropertiesResponse, dst i
 			if err != nil {
 				return err
 			}
+
+			vt := reflect.TypeOf(v)
+
+			if !rv.Type().AssignableTo(vt) {
+				// For example: dst is []ManagedEntity, res is []HostSystem
+				if field, ok := vt.FieldByName(rt.Elem().Elem().Name()); ok && field.Anonymous {
+					rv.Set(reflect.Append(rv, reflect.ValueOf(v).FieldByIndex(field.Index)))
+					continue
+				}
+			}
+
 			rv.Set(reflect.Append(rv, reflect.ValueOf(v)))
 		}
 	} else {
@@ -100,6 +111,17 @@ func LoadRetrievePropertiesResponse(res *types.RetrievePropertiesResponse, dst i
 			if err != nil {
 				return err
 			}
+
+			vt := reflect.TypeOf(v)
+
+			if !rv.Type().AssignableTo(vt) {
+				// For example: dst is ComputeResource, res is ClusterComputeResource
+				if field, ok := vt.FieldByName(rt.Elem().Name()); ok && field.Anonymous {
+					rv.Set(reflect.ValueOf(v).FieldByIndex(field.Index))
+					return nil
+				}
+			}
+
 			rv.Set(reflect.ValueOf(v))
 		default:
 			// If dst is not a slice, expect to receive 0 or 1 results

@@ -393,19 +393,21 @@ func (f *Finder) HostSystemList(ctx context.Context, path string) ([]*object.Hos
 		switch o := e.Object.(type) {
 		case mo.HostSystem:
 			hs = object.NewHostSystem(f.client, o.Reference())
-		case mo.ComputeResource:
+
+			hs.InventoryPath = e.Path
+			hss = append(hss, hs)
+		case mo.ComputeResource, mo.ClusterComputeResource:
 			cr := object.NewComputeResource(f.client, o.Reference())
+
+			cr.InventoryPath = e.Path
+
 			hosts, err := cr.Hosts(ctx)
 			if err != nil {
 				return nil, err
 			}
-			hs = object.NewHostSystem(f.client, hosts[0])
-		default:
-			continue
-		}
 
-		hs.InventoryPath = e.Path
-		hss = append(hss, hs)
+			hss = append(hss, hosts...)
+		}
 	}
 
 	if len(hss) == 0 {
