@@ -104,3 +104,41 @@ func TestPointerProperty(t *testing.T) {
 		t.Fatalf("Expected vm.Config.BootOptions to be set")
 	}
 }
+
+func TestEmbeddedTypeProperty(t *testing.T) {
+	// Test that we avoid in this case:
+	// panic: reflect.Set: value of type mo.ClusterComputeResource is not assignable to type mo.ComputeResource
+	var cr ComputeResource
+
+	err := LoadRetrievePropertiesResponse(load("fixtures/cluster_host_property.xml"), &cr)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %s", err)
+	}
+
+	if len(cr.Host) != 4 {
+		t.Fatalf("Expected cr.Host to be set")
+	}
+}
+
+func TestEmbeddedTypePropertySlice(t *testing.T) {
+	var me []ManagedEntity
+
+	err := LoadRetrievePropertiesResponse(load("fixtures/hostsystem_list_name_property.xml"), &me)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %s", err)
+	}
+
+	if len(me) != 2 {
+		t.Fatalf("Expected 2 elements")
+	}
+
+	for _, m := range me {
+		if m.Name == "" {
+			t.Fatal("Expected Name field to be set")
+		}
+	}
+
+	if me[0].Name == me[1].Name {
+		t.Fatal("Name fields should not be the same")
+	}
+}
