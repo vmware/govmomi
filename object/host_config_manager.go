@@ -33,6 +33,17 @@ func NewHostConfigManager(c *vim25.Client, ref types.ManagedObjectReference) *Ho
 	}
 }
 
+func (m HostConfigManager) DatastoreSystem(ctx context.Context) (*HostDatastoreSystem, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.datastoreSystem"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostDatastoreSystem(m.c, *h.ConfigManager.DatastoreSystem), nil
+}
+
 func (m HostConfigManager) NetworkSystem(ctx context.Context) (*HostNetworkSystem, error) {
 	var h mo.HostSystem
 

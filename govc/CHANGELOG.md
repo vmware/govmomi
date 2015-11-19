@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add datastore.remove and datastore.nas.create commands
+
 * Add dvs.{create,add} and dvs.portgroup.add commands
 
 * Add host.vnic.{service,info} commands
