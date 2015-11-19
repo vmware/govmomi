@@ -221,10 +221,29 @@ func (d Datastore) AttachedHosts(ctx context.Context) ([]*HostSystem, error) {
 		return nil, err
 	}
 
+	mounts := make(map[types.ManagedObjectReference]types.DatastoreHostMount)
+	var refs []types.ManagedObjectReference
 	for _, host := range ds.Host {
-		info := host.MountInfo
-		if *info.Mounted && *info.Accessible && info.AccessMode == string(types.HostMountModeReadWrite) {
-			hosts = append(hosts, NewHostSystem(d.Client(), host.Key))
+		refs = append(refs, host.Key)
+		mounts[host.Key] = host
+	}
+
+	var hs []mo.HostSystem
+	err = pc.Retrieve(ctx, refs, []string{"runtime.connectionState", "runtime.powerState"}, &hs)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, host := range hs {
+		if host.Runtime.ConnectionState == types.HostSystemConnectionStateConnected &&
+			host.Runtime.PowerState == types.HostSystemPowerStatePoweredOn {
+
+			mount := mounts[host.Reference()]
+			info := mount.MountInfo
+
+			if *info.Mounted && *info.Accessible && info.AccessMode == string(types.HostMountModeReadWrite) {
+				hosts = append(hosts, NewHostSystem(d.Client(), mount.Key))
+			}
 		}
 	}
 
