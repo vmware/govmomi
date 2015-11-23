@@ -99,13 +99,12 @@ func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 // ServiceTicket obtains a ticket via AcquireGenericServiceTicket and returns it an http.Cookie with the url.URL
 // that can be used along with the ticket cookie to access the given path.
 func (d Datastore) ServiceTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
-	// We are uploading to an ESX host, dcPath must be set to ha-datacenter otherwise 404.
+	// We are uploading to an ESX host
 	u := &url.URL{
 		Scheme: d.c.URL().Scheme,
 		Host:   d.c.URL().Host,
 		Path:   fmt.Sprintf("/folder/%s", path),
 		RawQuery: url.Values{
-			"dcPath": []string{"ha-datacenter"},
 			"dsName": []string{d.Name()},
 		}.Encode(),
 	}
