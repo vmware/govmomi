@@ -26,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/event"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -54,11 +53,6 @@ func (cmd *events) Usage() string {
 func (cmd *events) Run(f *flag.FlagSet) error {
 	ctx := context.TODO()
 
-	finder, err := cmd.Finder()
-	if err != nil {
-		return err
-	}
-
 	c, err := cmd.Client()
 	if err != nil {
 		return err
@@ -66,20 +60,9 @@ func (cmd *events) Run(f *flag.FlagSet) error {
 
 	m := event.NewManager(c)
 
-	var objs []list.Element
-
-	args := f.Args()
-	if len(args) == 0 {
-		args = []string{"."}
-	}
-
-	for _, arg := range args {
-		es, err := finder.ManagedObjectList(ctx, arg)
-		if err != nil {
-			return err
-		}
-
-		objs = append(objs, es...)
+	objs, err := cmd.ManagedObjects(ctx, f.Args())
+	if err != nil {
+		return err
 	}
 
 	var events []types.BaseEvent
@@ -87,14 +70,14 @@ func (cmd *events) Run(f *flag.FlagSet) error {
 	for _, o := range objs {
 		filter := types.EventFilterSpec{
 			Entity: &types.EventFilterSpecByEntity{
-				Entity:    o.Object.Reference(),
+				Entity:    o,
 				Recursion: types.EventFilterSpecRecursionOptionAll,
 			},
 		}
 
 		collector, err := m.CreateCollectorForEvents(ctx, filter)
 		if err != nil {
-			return fmt.Errorf("[%s] %s", o.Path, err)
+			return fmt.Errorf("[%#v] %s", o, err)
 		}
 		defer collector.Destroy(ctx)
 

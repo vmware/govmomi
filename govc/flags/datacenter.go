@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -95,4 +96,36 @@ func (flag *DatacenterFlag) Datacenter() (*object.Datacenter, error) {
 	}
 
 	return flag.dc, err
+}
+
+func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) ([]types.ManagedObjectReference, error) {
+	var refs []types.ManagedObjectReference
+
+	c, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+
+	if len(args) == 0 {
+		refs = append(refs, c.ServiceContent.RootFolder)
+		return refs, nil
+	}
+
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+
+	for _, arg := range args {
+		elements, err := finder.ManagedObjectList(ctx, arg)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, e := range elements {
+			refs = append(refs, e.Object.Reference())
+		}
+	}
+
+	return refs, nil
 }

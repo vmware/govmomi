@@ -21,7 +21,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
 	"golang.org/x/net/context"
 )
@@ -49,11 +48,6 @@ func (cmd *set) Run(f *flag.FlagSet) error {
 
 	ctx := context.TODO()
 
-	finder, err := cmd.Finder()
-	if err != nil {
-		return err
-	}
-
 	c, err := cmd.Client()
 	if err != nil {
 		return err
@@ -64,8 +58,6 @@ func (cmd *set) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	var objs []list.Element
-
 	args := f.Args()
 
 	key, err := m.FindKey(ctx, args[0])
@@ -75,17 +67,13 @@ func (cmd *set) Run(f *flag.FlagSet) error {
 
 	val := args[1]
 
-	for _, arg := range args[2:] {
-		es, err := finder.ManagedObjectList(ctx, arg)
-		if err != nil {
-			return err
-		}
-
-		objs = append(objs, es...)
+	objs, err := cmd.ManagedObjects(ctx, args[2:])
+	if err != nil {
+		return err
 	}
 
 	for _, ref := range objs {
-		err := m.Set(ctx, ref.Object.Reference(), key, val)
+		err := m.Set(ctx, ref, key, val)
 		if err != nil {
 			return err
 		}
