@@ -105,7 +105,6 @@ func (d Datastore) ServiceTicket(ctx context.Context, path string, method string
 		Host:   d.c.URL().Host,
 		Path:   fmt.Sprintf("/folder/%s", path),
 		RawQuery: url.Values{
-			"dcPath": []string{"ha-datacenter"},
 			"dsName": []string{d.Name()},
 		}.Encode(),
 	}
