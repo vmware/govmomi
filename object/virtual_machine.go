@@ -62,6 +62,17 @@ func (v VirtualMachine) Name(ctx context.Context) (string, error) {
 	return o.Name, nil
 }
 
+func (v VirtualMachine) PowerState(ctx context.Context) (types.VirtualMachinePowerState, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{PropRuntimePowerState}, &o)
+	if err != nil {
+		return "", err
+	}
+
+	return o.Summary.Runtime.PowerState, nil
+}
+
 func (v VirtualMachine) PowerOn(ctx context.Context) (*Task, error) {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
