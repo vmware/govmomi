@@ -352,7 +352,18 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 // apiVersionValid returns whether or not the API version supported by the
 // server the client is connected to is not recent enough.
 func apiVersionValid(c *vim25.Client, minVersionString string) error {
-	realVersion, err := ParseVersion(c.ServiceContent.About.ApiVersion)
+	if minVersionString == "-" {
+		// Disable version check
+		return nil
+	}
+
+	apiVersion := c.ServiceContent.About.ApiVersion
+	if strings.HasSuffix(apiVersion, ".x") {
+		// Skip version check for development builds
+		return nil
+	}
+
+	realVersion, err := ParseVersion(apiVersion)
 	if err != nil {
 		return err
 	}
