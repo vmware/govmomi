@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package fields
+package cluster
 
 import (
 	"flag"
@@ -22,30 +22,38 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
-type set struct {
+type remove struct {
 	*flags.DatacenterFlag
+
+	types.Permission
+
+	role string
 }
 
 func init() {
-	cli.Register("fields.set", &set{})
+	cli.Register("permissions.remove", &remove{})
 }
 
-func (cmd *set) Register(f *flag.FlagSet) {}
-
-func (cmd *set) Process() error { return nil }
-
-func (cmd *set) Usage() string {
-	return "KEY VALUE PATH..."
+func (cmd *remove) Register(f *flag.FlagSet) {
+	f.StringVar(&cmd.Principal, "principal", "", "User or group for which the permission is defined")
+	f.BoolVar(&cmd.Group, "group", false, "True, if principal refers to a group name; false, for a user name")
 }
 
-func (cmd *set) Run(f *flag.FlagSet) error {
-	if f.NArg() < 3 {
-		return flag.ErrHelp
-	}
+func (cmd *remove) Process() error { return nil }
 
+func (cmd *remove) Usage() string {
+	return "[PATH]..."
+}
+
+func (cmd *remove) Description() string {
+	return `Removes a permission rule from managed entities.`
+}
+
+func (cmd *remove) Run(f *flag.FlagSet) error {
 	ctx := context.TODO()
 
 	c, err := cmd.Client()
@@ -53,27 +61,15 @@ func (cmd *set) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	m, err := object.GetCustomFieldsManager(c)
+	refs, err := cmd.ManagedObjects(ctx, f.Args())
 	if err != nil {
 		return err
 	}
 
-	args := f.Args()
+	m := object.NewAuthorizationManager(c)
 
-	key, err := m.FindKey(ctx, args[0])
-	if err != nil {
-		return err
-	}
-
-	val := args[1]
-
-	objs, err := cmd.ManagedObjects(ctx, args[2:])
-	if err != nil {
-		return err
-	}
-
-	for _, ref := range objs {
-		err := m.Set(ctx, ref, key, val)
+	for _, ref := range refs {
+		err = m.RemoveEntityPermission(ctx, ref, cmd.Principal, cmd.Group)
 		if err != nil {
 			return err
 		}

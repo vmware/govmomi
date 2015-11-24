@@ -2,6 +2,8 @@
 
 ### (unreleased)
 
+* Add permissions.{ls,set,remove} commands
+
 * Add datastore.remove and datastore.nas.create commands
 
 * Add dvs.{create,add} and dvs.portgroup.add commands

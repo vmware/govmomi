@@ -14,10 +14,13 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package fields
+package cluster
 
 import (
 	"flag"
+	"fmt"
+	"os"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -25,27 +28,29 @@ import (
 	"golang.org/x/net/context"
 )
 
-type set struct {
+type ls struct {
 	*flags.DatacenterFlag
+	*flags.OutputFlag
 }
 
 func init() {
-	cli.Register("fields.set", &set{})
+	cli.Register("permissions.ls", &ls{})
 }
 
-func (cmd *set) Register(f *flag.FlagSet) {}
-
-func (cmd *set) Process() error { return nil }
-
-func (cmd *set) Usage() string {
-	return "KEY VALUE PATH..."
+func (cmd *ls) Register(f *flag.FlagSet) {
 }
 
-func (cmd *set) Run(f *flag.FlagSet) error {
-	if f.NArg() < 3 {
-		return flag.ErrHelp
-	}
+func (cmd *ls) Process() error { return nil }
 
+func (cmd *ls) Usage() string {
+	return "[PATH]..."
+}
+
+func (cmd *ls) Description() string {
+	return `List the permissions defined on or effective on managed entities.`
+}
+
+func (cmd *ls) Run(f *flag.FlagSet) error {
 	ctx := context.TODO()
 
 	c, err := cmd.Client()
@@ -53,31 +58,29 @@ func (cmd *set) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	m, err := object.GetCustomFieldsManager(c)
+	refs, err := cmd.ManagedObjects(ctx, f.Args())
 	if err != nil {
 		return err
 	}
 
-	args := f.Args()
-
-	key, err := m.FindKey(ctx, args[0])
+	m := object.NewAuthorizationManager(c)
+	rl, err := m.RoleList(ctx)
 	if err != nil {
 		return err
 	}
 
-	val := args[1]
+	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	objs, err := cmd.ManagedObjects(ctx, args[2:])
-	if err != nil {
-		return err
-	}
-
-	for _, ref := range objs {
-		err := m.Set(ctx, ref, key, val)
+	for _, ref := range refs {
+		perms, err := m.RetrieveEntityPermissions(ctx, ref, true)
 		if err != nil {
 			return err
 		}
+
+		for _, perm := range perms {
+			fmt.Fprintf(tw, "%s\t%s\n", perm.Principal, rl.ById(perm.RoleId).Name)
+		}
 	}
 
-	return nil
+	return tw.Flush()
 }
