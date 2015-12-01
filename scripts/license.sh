@@ -10,13 +10,18 @@ trap "rm -f ${tmpfile}" EXIT
 git ls-files | while read file; do
   years=( $(git log --format='%ai' $file | cut -d- -f1 | sort -u) )
   num_years=${#years[@]}
-  yearA=${years[0]}
-  yearB=${years[$((${num_years}-1))]}
 
-  if [ ${yearA} == ${yearB} ]; then
-    export YEARS="${yearA}"
+  if [ "${num_years}" == 0 ]; then
+    export YEARS="$(date +%Y)"
   else
-    export YEARS="${yearA}-${yearB}"
+    yearA=${years[0]}
+    yearB=${years[$((${num_years}-1))]}
+
+    if [ ${yearA} == ${yearB} ]; then
+      export YEARS="${yearA}"
+    else
+      export YEARS="${yearA}-${yearB}"
+    fi
   fi
 
   case "$file" in
