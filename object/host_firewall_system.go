@@ -30,13 +30,11 @@ import (
 
 type HostFirewallSystem struct {
 	Common
-	Host *HostSystem
 }
 
-func NewHostFirewallSystem(c *vim25.Client, ref types.ManagedObjectReference, host types.ManagedObjectReference) *HostFirewallSystem {
+func NewHostFirewallSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostFirewallSystem {
 	return &HostFirewallSystem{
 		Common: NewCommon(c, ref),
-		Host:   NewHostSystem(c, host),
 	}
 }
 

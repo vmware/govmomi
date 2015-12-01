@@ -77,7 +77,7 @@ func (cmd *find) Run(f *flag.FlagSet) error {
 	}
 
 	if cmd.check {
-		esxfw, err := esxcli.GetFirewallInfo(fs)
+		esxfw, err := esxcli.GetFirewallInfo(host)
 		if err != nil {
 			return err
 		}

@@ -63,7 +63,7 @@ func (m HostConfigManager) FirewallSystem(ctx context.Context) (*HostFirewallSys
 		return nil, err
 	}
 
-	return NewHostFirewallSystem(m.c, *h.ConfigManager.FirewallSystem, m.Reference()), nil
+	return NewHostFirewallSystem(m.c, *h.ConfigManager.FirewallSystem), nil
 }
 
 func (m HostConfigManager) VirtualNicManager(ctx context.Context) (*HostVirtualNicManager, error) {
