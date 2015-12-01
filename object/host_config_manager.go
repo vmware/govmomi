@@ -66,6 +66,17 @@ func (m HostConfigManager) FirewallSystem(ctx context.Context) (*HostFirewallSys
 	return NewHostFirewallSystem(m.c, *h.ConfigManager.FirewallSystem, m.Reference()), nil
 }
 
+func (m HostConfigManager) StorageSystem(ctx context.Context) (*HostStorageSystem, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.storageSystem"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostStorageSystem(m.c, *h.ConfigManager.StorageSystem), nil
+}
+
 func (m HostConfigManager) VirtualNicManager(ctx context.Context) (*HostVirtualNicManager, error) {
 	var h mo.HostSystem
 
