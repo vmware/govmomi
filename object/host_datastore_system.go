@@ -47,6 +47,20 @@ func (s HostDatastoreSystem) CreateNasDatastore(ctx context.Context, spec types.
 	return NewDatastore(s.Client(), res.Returnval), nil
 }
 
+func (s HostDatastoreSystem) CreateVmfsDatastore(ctx context.Context, spec types.VmfsDatastoreCreateSpec) (*Datastore, error) {
+	req := types.CreateVmfsDatastore{
+		This: s.Reference(),
+		Spec: spec,
+	}
+
+	res, err := methods.CreateVmfsDatastore(ctx, s.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewDatastore(s.Client(), res.Returnval), nil
+}
+
 func (s HostDatastoreSystem) Remove(ctx context.Context, ds *Datastore) error {
 	req := types.RemoveDatastore{
 		This:      s.Reference(),
@@ -59,4 +73,31 @@ func (s HostDatastoreSystem) Remove(ctx context.Context, ds *Datastore) error {
 	}
 
 	return nil
+}
+
+func (s HostDatastoreSystem) QueryAvailableDisksForVmfs(ctx context.Context) ([]types.HostScsiDisk, error) {
+	req := types.QueryAvailableDisksForVmfs{
+		This: s.Reference(),
+	}
+
+	res, err := methods.QueryAvailableDisksForVmfs(ctx, s.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (s HostDatastoreSystem) QueryVmfsDatastoreCreateOptions(ctx context.Context, devicePath string) ([]types.VmfsDatastoreOption, error) {
+	req := types.QueryVmfsDatastoreCreateOptions{
+		This:       s.Reference(),
+		DevicePath: devicePath,
+	}
+
+	res, err := methods.QueryVmfsDatastoreCreateOptions(ctx, s.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
 }
