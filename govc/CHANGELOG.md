@@ -4,7 +4,8 @@
 
 * Add permissions.{ls,set,remove} commands
 
-* Add datastore.remove and datastore.nas.create commands
+* Add datastore.{create,remove} commands.
+  The new create command supports both creating NAS and VMFS datastores.
 
 * Add dvs.{create,add} and dvs.portgroup.add commands
 
@@ -25,8 +26,6 @@
 * Add govc extension.{info,register,unregister,setcert} commands
 
 * Add govc vapp.{info,destroy,power} commands
-
-...
 
 ### 0.2.0 (2015-09-15)
 

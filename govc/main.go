@@ -25,7 +25,6 @@ import (
 	_ "github.com/vmware/govmomi/govc/cluster"
 	_ "github.com/vmware/govmomi/govc/datacenter"
 	_ "github.com/vmware/govmomi/govc/datastore"
-	_ "github.com/vmware/govmomi/govc/datastore/nas"
 	_ "github.com/vmware/govmomi/govc/device"
 	_ "github.com/vmware/govmomi/govc/device/cdrom"
 	_ "github.com/vmware/govmomi/govc/device/floppy"
