@@ -20,11 +20,13 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -32,6 +34,7 @@ type ls struct {
 	*flags.DatacenterFlag
 
 	Long bool
+	Type string
 }
 
 func init() {
@@ -43,6 +46,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.Long, "l", false, "Long listing format")
+	f.StringVar(&cmd.Type, "t", "", "Object type")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -54,6 +58,14 @@ func (cmd *ls) Process(ctx context.Context) error {
 
 func (cmd *ls) Usage() string {
 	return "[PATH]..."
+}
+
+func (cmd *ls) typeMatch(ref types.ManagedObjectReference) bool {
+	if cmd.Type == "" {
+		return true
+	}
+
+	return strings.ToLower(cmd.Type) == strings.ToLower(ref.Type)
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -78,7 +90,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		lr.Elements = append(lr.Elements, es...)
+		for _, e := range es {
+			if cmd.typeMatch(e.Object.Reference()) {
+				lr.Elements = append(lr.Elements, e)
+			}
+		}
 	}
 
 	return cmd.WriteResult(lr)
