@@ -238,11 +238,9 @@ func (flag *ClientFlag) saveClient(c *vim25.Client) error {
 	if err != nil {
 		return err
 	}
-
 	defer f.Close()
 
-	enc := json.NewEncoder(f)
-	err = enc.Encode(c)
+	err = json.NewEncoder(f).Encode(c)
 	if err != nil {
 		return err
 	}
