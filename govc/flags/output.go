@@ -81,8 +81,7 @@ func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 	var out = os.Stdout
 
 	if flag.JSON {
-		enc := json.NewEncoder(out)
-		err = enc.Encode(result)
+		err = json.NewEncoder(out).Encode(result)
 	} else {
 		err = result.Write(out)
 	}

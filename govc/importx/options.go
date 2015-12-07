@@ -19,7 +19,6 @@ package importx
 import (
 	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"os"
 
 	"github.com/vmware/govmomi/ovf"
@@ -69,12 +68,7 @@ func (flag *OptionsFlag) Process() error {
 		}
 		defer f.Close()
 
-		o, err := ioutil.ReadAll(f)
-		if err != nil {
-			return err
-		}
-
-		if err := json.Unmarshal(o, &flag.Options); err != nil {
+		if err := json.NewDecoder(f).Decode(&flag.Options); err != nil {
 			return err
 		}
 	}

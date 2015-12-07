@@ -19,7 +19,6 @@ package extension
 import (
 	"encoding/json"
 	"flag"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -59,15 +58,10 @@ func (cmd *register) Run(f *flag.FlagSet) error {
 		return err
 	}
 
-	b, err := ioutil.ReadAll(os.Stdin)
-	if err != nil {
-		return err
-	}
-
 	var e types.Extension
 	e.Description = new(types.Description)
 
-	if err = json.Unmarshal(b, &e); err != nil {
+	if err = json.NewDecoder(os.Stdin).Decode(&e); err != nil {
 		return err
 	}
 
