@@ -26,6 +26,8 @@ import (
 	"path"
 	"path/filepath"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/ovf"
 )
 
@@ -37,7 +39,7 @@ type ArchiveFlag struct {
 
 func (f *ArchiveFlag) Register(fs *flag.FlagSet) { return }
 
-func (f *ArchiveFlag) Process() error { return nil }
+func (f *ArchiveFlag) Process(ctx context.Context) error { return nil }
 
 func (f *ArchiveFlag) ReadOvf(fpath string) ([]byte, error) {
 	r, _, err := f.Archive.Open(fpath)

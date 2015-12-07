@@ -37,7 +37,7 @@ type HostSystemFlag struct {
 	pool     *object.ResourcePool
 }
 
-func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
+func (flag *HostSystemFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchHosts)
 
 	flag.register.Do(func() {
@@ -48,7 +48,7 @@ func (flag *HostSystemFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *HostSystemFlag) Process() error { return nil }
+func (flag *HostSystemFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *HostSystemFlag) HostSystemIfSpecified() (*object.HostSystem, error) {
 	if flag.host != nil {

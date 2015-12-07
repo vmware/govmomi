@@ -35,9 +35,9 @@ type GuestFlag struct {
 	*AuthFlag
 }
 
-func (flag *GuestFlag) Register(f *flag.FlagSet) {}
+func (flag *GuestFlag) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (flag *GuestFlag) Process() error { return nil }
+func (flag *GuestFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
 	c, err := flag.Client()

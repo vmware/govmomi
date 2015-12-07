@@ -20,6 +20,8 @@ import (
 	"flag"
 	"fmt"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -29,7 +31,7 @@ type HostConnectFlag struct {
 	noverify bool
 }
 
-func (flag *HostConnectFlag) Register(f *flag.FlagSet) {
+func (flag *HostConnectFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&flag.HostName, "hostname", "", "Hostname or IP address of the host")
 	f.StringVar(&flag.UserName, "username", "", "Username of administration account on the host")
 	f.StringVar(&flag.Password, "password", "", "Password of administration account on the host")
@@ -39,7 +41,7 @@ func (flag *HostConnectFlag) Register(f *flag.FlagSet) {
 	f.BoolVar(&flag.noverify, "noverify", false, "When true, ignore host SSL certificate verification error")
 }
 
-func (flag *HostConnectFlag) Process() error { return nil }
+func (flag *HostConnectFlag) Process(ctx context.Context) error { return nil }
 
 // AcceptThumbprint returns nil if the given error is an SSLVerifyFault and -noverify is true.
 // In which case, flag.SslThumbprint is set to fault.Thumbprint and the caller should retry the task.

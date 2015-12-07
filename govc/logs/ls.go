@@ -37,13 +37,11 @@ func init() {
 	cli.Register("logs.ls", &ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {}
+func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *ls) Process() error { return nil }
+func (cmd *ls) Process(ctx context.Context) error { return nil }
 
-func (cmd *ls) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

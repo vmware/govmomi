@@ -34,9 +34,9 @@ func init() {
 	cli.Register("datastore.remove", &remove{})
 }
 
-func (cmd *remove) Register(f *flag.FlagSet) {}
+func (cmd *remove) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *remove) Process() error { return nil }
+func (cmd *remove) Process(ctx context.Context) error { return nil }
 
 func (cmd *remove) Usage() string {
 	return "HOST..."
@@ -49,9 +49,7 @@ govc datastore.remove -ds nfsDatastore cluster1
 `
 }
 
-func (cmd *remove) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 	ds, err := cmd.Datastore()
 	if err != nil {
 		return err

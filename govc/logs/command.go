@@ -39,12 +39,12 @@ func init() {
 	cli.Register("logs", &logs{})
 }
 
-func (cmd *logs) Register(f *flag.FlagSet) {
+func (cmd *logs) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.Max, "n", 25, "Output the last N logs")
 	f.StringVar(&cmd.Key, "log", "", "Log file key")
 }
 
-func (cmd *logs) Process() error { return nil }
+func (cmd *logs) Process(ctx context.Context) error { return nil }
 
 func (cmd *logs) Description() string {
 	return `
@@ -55,9 +55,7 @@ when connected directly to host.
 See 'govc logs.ls' for other '-log' options.`
 }
 
-func (cmd *logs) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *logs) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

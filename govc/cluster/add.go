@@ -39,7 +39,7 @@ func init() {
 	cli.Register("cluster.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.cluster, "cluster", "*", "Path to cluster")
 
 	f.StringVar(&cmd.license, "license", "", "Assign license key")
@@ -47,7 +47,7 @@ func (cmd *add) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.connect, "connect", true, "Immediately connect to host")
 }
 
-func (cmd *add) Process() error {
+func (cmd *add) Process(ctx context.Context) error {
 	if cmd.HostName == "" {
 		return flag.ErrHelp
 	}
@@ -86,9 +86,7 @@ func (cmd *add) Add(ctx context.Context, cluster *object.ClusterComputeResource)
 	return err
 }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
-	var ctx = context.Background()
-
+func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 0 {
 		return flag.ErrHelp
 	}

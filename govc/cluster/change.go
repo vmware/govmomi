@@ -37,7 +37,7 @@ func init() {
 	cli.Register("cluster.change", &change{})
 }
 
-func (cmd *change) Register(f *flag.FlagSet) {
+func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DrsConfig = new(types.ClusterDrsConfigInfo)
 	cmd.DasConfig = new(types.ClusterDasConfigInfo)
 	cmd.VsanConfig = new(types.VsanClusterConfigInfo)
@@ -62,7 +62,7 @@ func (cmd *change) Register(f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.VsanConfig.DefaultConfig.AutoClaimStorage), "vsan-autoclaim", "")
 }
 
-func (cmd *change) Process() error { return nil }
+func (cmd *change) Process(ctx context.Context) error { return nil }
 
 func (cmd *change) Usage() string {
 	return "CLUSTER..."
@@ -72,9 +72,7 @@ func (cmd *change) Description() string {
 	return `Change configuration of the given clusters.`
 }
 
-func (cmd *change) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err

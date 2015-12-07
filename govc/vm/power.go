@@ -45,7 +45,7 @@ func init() {
 	cli.Register("vm.power", &power{})
 }
 
-func (cmd *power) Register(f *flag.FlagSet) {
+func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 
 	f.BoolVar(&cmd.On, "on", false, "Power on")
@@ -57,7 +57,7 @@ func (cmd *power) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error and hard shutdown/reboot if tools unavailable)")
 }
 
-func (cmd *power) Process() error {
+func (cmd *power) Process(ctx context.Context) error {
 	opts := []bool{cmd.On, cmd.Off, cmd.Reset, cmd.Suspend, cmd.Reboot, cmd.Shutdown}
 	selected := false
 
@@ -88,7 +88,7 @@ func isToolsUnavailable(err error) bool {
 	return false
 }
 
-func (cmd *power) Run(f *flag.FlagSet) error {
+func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err

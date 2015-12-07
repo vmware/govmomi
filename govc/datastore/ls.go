@@ -43,17 +43,17 @@ func init() {
 	cli.Register("datastore.ls", &ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {
+func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 }
 
-func (cmd *ls) Process() error { return nil }
+func (cmd *ls) Process(ctx context.Context) error { return nil }
 
 func (cmd *ls) Usage() string {
 	return "[FILE]..."
 }
 
-func (cmd *ls) Run(f *flag.FlagSet) error {
+func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	ds, err := cmd.Datastore()
 	if err != nil {
 		return err

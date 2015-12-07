@@ -41,7 +41,7 @@ func NewNetworkFlag() *NetworkFlag {
 	return &NetworkFlag{}
 }
 
-func (flag *NetworkFlag) Register(f *flag.FlagSet) {
+func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.register.Do(func() {
 		env := "GOVC_NETWORK"
 		value := os.Getenv(env)
@@ -53,7 +53,7 @@ func (flag *NetworkFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *NetworkFlag) Process() error { return nil }
+func (flag *NetworkFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *NetworkFlag) String() string {
 	return flag.name

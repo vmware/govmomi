@@ -33,13 +33,11 @@ func init() {
 	cli.Register("extension.unregister", &unregister{})
 }
 
-func (cmd *unregister) Register(f *flag.FlagSet) {}
+func (cmd *unregister) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *unregister) Process() error { return nil }
+func (cmd *unregister) Process(ctx context.Context) error { return nil }
 
-func (cmd *unregister) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *unregister) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

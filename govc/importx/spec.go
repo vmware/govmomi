@@ -22,6 +22,8 @@ import (
 	"fmt"
 	"path"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25/types"
@@ -45,17 +47,17 @@ func init() {
 	cli.Register("import.spec", &spec{})
 }
 
-func (cmd *spec) Register(f *flag.FlagSet) {
+func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.verbose, "verbose", false, "Verbose spec output")
 }
 
-func (cmd *spec) Process() error { return nil }
+func (cmd *spec) Process(ctx context.Context) error { return nil }
 
 func (cmd *spec) Usage() string {
 	return "PATH_TO_OVF_OR_OVA"
 }
 
-func (cmd *spec) Run(f *flag.FlagSet) error {
+func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 	fpath := ""
 	args := f.Args()
 	if len(args) == 1 {

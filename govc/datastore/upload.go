@@ -36,15 +36,15 @@ func init() {
 	cli.Register("datastore.upload", &upload{})
 }
 
-func (cmd *upload) Register(f *flag.FlagSet) {}
+func (cmd *upload) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *upload) Process() error { return nil }
+func (cmd *upload) Process(ctx context.Context) error { return nil }
 
 func (cmd *upload) Usage() string {
 	return "LOCAL REMOTE"
 }
 
-func (cmd *upload) Run(f *flag.FlagSet) error {
+func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) != 2 {
 		return errors.New("invalid arguments")

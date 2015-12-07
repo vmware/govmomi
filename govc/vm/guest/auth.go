@@ -22,6 +22,8 @@ import (
 	"os"
 	"strings"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -45,7 +47,7 @@ func (flag *AuthFlag) Set(s string) error {
 	return nil
 }
 
-func (flag *AuthFlag) Register(f *flag.FlagSet) {
+func (flag *AuthFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	env := "GOVC_GUEST_LOGIN"
 	value := os.Getenv(env)
 	flag.Set(value)
@@ -53,7 +55,7 @@ func (flag *AuthFlag) Register(f *flag.FlagSet) {
 	f.Var(flag, "l", usage)
 }
 
-func (flag *AuthFlag) Process() error {
+func (flag *AuthFlag) Process(ctx context.Context) error {
 	return nil
 }
 

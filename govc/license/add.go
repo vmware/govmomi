@@ -36,15 +36,15 @@ func init() {
 	cli.Register("license.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {}
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *add) Process() error { return nil }
+func (cmd *add) Process(ctx context.Context) error { return nil }
 
 func (cmd *add) Usage() string {
 	return "KEY..."
 }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
+func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
 		return err

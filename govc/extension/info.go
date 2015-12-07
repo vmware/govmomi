@@ -40,17 +40,15 @@ func init() {
 	cli.Register("extension.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {}
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *info) Process() error { return nil }
+func (cmd *info) Process(ctx context.Context) error { return nil }
 
 func (cmd *info) Usage() string {
 	return "[KEY]..."
 }
 
-func (cmd *info) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

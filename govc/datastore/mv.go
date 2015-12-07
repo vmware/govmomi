@@ -36,17 +36,17 @@ func init() {
 	cli.Register("datastore.mv", &mv{})
 }
 
-func (cmd *mv) Register(f *flag.FlagSet) {
+func (cmd *mv) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.force, "f", false, "If true, overwrite any identically named file at the destination")
 }
 
-func (cmd *mv) Process() error { return nil }
+func (cmd *mv) Process(ctx context.Context) error { return nil }
 
 func (cmd *mv) Usage() string {
 	return "SRC DST"
 }
 
-func (cmd *mv) Run(f *flag.FlagSet) error {
+func (cmd *mv) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) != 2 {
 		return errors.New("SRC and DST arguments are required")

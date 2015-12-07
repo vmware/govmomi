@@ -48,14 +48,14 @@ func init() {
 	cli.Register("guest.start", &start{})
 }
 
-func (cmd *start) Register(f *flag.FlagSet) {
+func (cmd *start) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.dir, "C", "", "The absolute path of the working directory for the program to start")
 	f.Var(&cmd.vars, "e", "Set environment variable (key=val)")
 }
 
-func (cmd *start) Process() error { return nil }
+func (cmd *start) Process(ctx context.Context) error { return nil }
 
-func (cmd *start) Run(f *flag.FlagSet) error {
+func (cmd *start) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.ProcessManager()
 	if err != nil {
 		return err

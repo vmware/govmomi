@@ -37,7 +37,7 @@ func init() {
 	cli.Register("device.boot", &boot{})
 }
 
-func (cmd *boot) Register(f *flag.FlagSet) {
+func (cmd *boot) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Int64Var(&cmd.BootDelay, "delay", 0, "Delay in ms before starting the boot sequence")
 	f.StringVar(&cmd.order, "order", "", "Boot device order")
 	f.Int64Var(&cmd.BootRetryDelay, "retry-delay", 0, "Delay in ms before a boot retry")
@@ -49,9 +49,9 @@ func (cmd *boot) Register(f *flag.FlagSet) {
 	f.BoolVar(cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
 }
 
-func (cmd *boot) Process() error { return nil }
+func (cmd *boot) Process(ctx context.Context) error { return nil }
 
-func (cmd *boot) Run(f *flag.FlagSet) error {
+func (cmd *boot) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

@@ -39,20 +39,18 @@ func init() {
 	cli.Register("license.assign", &assign{})
 }
 
-func (cmd *assign) Register(f *flag.FlagSet) {
+func (cmd *assign) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.name, "name", "", "Display name")
 	f.BoolVar(&cmd.remove, "remove", false, "Remove assignment")
 }
 
-func (cmd *assign) Process() error { return nil }
+func (cmd *assign) Process(ctx context.Context) error { return nil }
 
 func (cmd *assign) Usage() string {
 	return "KEY"
 }
 
-func (cmd *assign) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *assign) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}

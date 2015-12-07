@@ -35,11 +35,11 @@ func init() {
 	cli.Register("device.floppy.insert", &insert{})
 }
 
-func (cmd *insert) Register(f *flag.FlagSet) {
+func (cmd *insert) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.device, "device", "", "Floppy device name")
 }
 
-func (cmd *insert) Process() error { return nil }
+func (cmd *insert) Process(ctx context.Context) error { return nil }
 
 func (cmd *insert) Usage() string {
 	return "IMG"
@@ -51,7 +51,7 @@ func (cmd *insert) Description() string {
 If device is not specified, the first floppy device is used.`
 }
 
-func (cmd *insert) Run(f *flag.FlagSet) error {
+func (cmd *insert) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

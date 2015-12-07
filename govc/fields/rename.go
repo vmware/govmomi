@@ -33,20 +33,18 @@ func init() {
 	cli.Register("fields.rename", &rename{})
 }
 
-func (cmd *rename) Register(f *flag.FlagSet) {}
+func (cmd *rename) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *rename) Process() error { return nil }
+func (cmd *rename) Process(ctx context.Context) error { return nil }
 
 func (cmd *rename) Usage() string {
 	return "KEY NAME"
 }
 
-func (cmd *rename) Run(f *flag.FlagSet) error {
+func (cmd *rename) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 2 {
 		return flag.ErrHelp
 	}
-
-	ctx := context.TODO()
 
 	c, err := cmd.Client()
 	if err != nil {

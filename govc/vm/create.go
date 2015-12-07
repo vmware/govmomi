@@ -57,7 +57,7 @@ func init() {
 	cli.Register("vm.create", &create{})
 }
 
-func (cmd *create) Register(f *flag.FlagSet) {
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.memory, "m", 1024, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
@@ -69,9 +69,9 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
 }
 
-func (cmd *create) Process() error { return nil }
+func (cmd *create) Process(ctx context.Context) error { return nil }
 
-func (cmd *create) Run(f *flag.FlagSet) error {
+func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	var err error
 
 	if len(f.Args()) != 1 {

@@ -79,7 +79,7 @@ func init() {
 	cli.Register("vm.vnc", cmd)
 }
 
-func (cmd *vnc) Register(f *flag.FlagSet) {
+func (cmd *vnc) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 
 	f.BoolVar(&cmd.Enable, "enable", false, "Enable VNC")
@@ -89,7 +89,7 @@ func (cmd *vnc) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.Password, "password", "", "VNC password")
 }
 
-func (cmd *vnc) Process() error {
+func (cmd *vnc) Process(ctx context.Context) error {
 	// Either may be true or none may be true.
 	if cmd.Enable && cmd.Disable {
 		return flag.ErrHelp
@@ -110,7 +110,7 @@ Port numbers are automatically chosen from a range if not specified.
 If neither -enable or -disable is specified, the current state is returned.`
 }
 
-func (cmd *vnc) Run(f *flag.FlagSet) error {
+func (cmd *vnc) Run(ctx context.Context, f *flag.FlagSet) error {
 	vms, err := cmd.loadVMs(f.Args())
 	if err != nil {
 		return err

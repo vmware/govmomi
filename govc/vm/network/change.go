@@ -36,11 +36,11 @@ func init() {
 	cli.Register("vm.network.change", &change{})
 }
 
-func (cmd *change) Register(f *flag.FlagSet) {}
+func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *change) Process() error { return nil }
+func (cmd *change) Process(ctx context.Context) error { return nil }
 
-func (cmd *change) Run(f *flag.FlagSet) error {
+func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return err

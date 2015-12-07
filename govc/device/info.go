@@ -40,15 +40,15 @@ func init() {
 	cli.Register("device.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {}
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *info) Process() error { return nil }
+func (cmd *info) Process(ctx context.Context) error { return nil }
 
 func (cmd *info) Usage() string {
 	return "[DEVICE]..."
 }
 
-func (cmd *info) Run(f *flag.FlagSet) error {
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

@@ -35,9 +35,9 @@ func init() {
 	cli.Register("host.disconnect", &disconnect{})
 }
 
-func (cmd *disconnect) Register(f *flag.FlagSet) {}
+func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *disconnect) Process() error { return nil }
+func (cmd *disconnect) Process(ctx context.Context) error { return nil }
 
 func (cmd *disconnect) Description() string {
 	return `Disconnect host from vCenter and instruct the host to stop sending heartbeats.`
@@ -56,9 +56,7 @@ func (cmd *disconnect) Disconnect(ctx context.Context, host *object.HostSystem) 
 	return err
 }
 
-func (cmd *disconnect) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 	hosts, err := cmd.HostSystems(f.Args())
 	if err != nil {
 		return err

@@ -56,19 +56,19 @@ func init() {
 	cli.Alias("import.vmdk", "datastore.import")
 }
 
-func (cmd *vmdk) Register(f *flag.FlagSet) {
+func (cmd *vmdk) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.upload, "upload", true, "Upload specified disk")
 	f.BoolVar(&cmd.force, "force", false, "Overwrite existing disk")
 	f.BoolVar(&cmd.keep, "keep", false, "Keep uploaded disk after import")
 }
 
-func (cmd *vmdk) Process() error { return nil }
+func (cmd *vmdk) Process(ctx context.Context) error { return nil }
 
 func (cmd *vmdk) Usage() string {
 	return "PATH_TO_VMDK [REMOTE_DIRECTORY]"
 }
 
-func (cmd *vmdk) Run(f *flag.FlagSet) error {
+func (cmd *vmdk) Run(ctx context.Context, f *flag.FlagSet) error {
 	var err error
 
 	args := f.Args()

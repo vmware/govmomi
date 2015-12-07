@@ -19,6 +19,8 @@ package guest
 import (
 	"flag"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -26,13 +28,13 @@ type FileAttrFlag struct {
 	types.GuestPosixFileAttributes
 }
 
-func (flag *FileAttrFlag) Register(f *flag.FlagSet) {
+func (flag *FileAttrFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&flag.OwnerId, "uid", 0, "User ID")
 	f.IntVar(&flag.GroupId, "gid", 0, "Group ID")
 	f.Int64Var(&flag.Permissions, "perm", 0, "File permissions")
 }
 
-func (flag *FileAttrFlag) Process() error {
+func (flag *FileAttrFlag) Process(ctx context.Context) error {
 	return nil
 }
 

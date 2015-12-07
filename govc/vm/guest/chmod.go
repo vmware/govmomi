@@ -32,11 +32,11 @@ func init() {
 	cli.Register("guest.chmod", &chmod{})
 }
 
-func (cmd *chmod) Register(f *flag.FlagSet) {}
+func (cmd *chmod) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *chmod) Process() error { return nil }
+func (cmd *chmod) Process(ctx context.Context) error { return nil }
 
-func (cmd *chmod) Run(f *flag.FlagSet) error {
+func (cmd *chmod) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()
 	if err != nil {
 		return err

@@ -43,7 +43,7 @@ type DatastoreFlag struct {
 	ds       *object.Datastore
 }
 
-func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
+func (flag *DatastoreFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.register.Do(func() {
 		env := "GOVC_DATASTORE"
 		value := os.Getenv(env)
@@ -52,7 +52,7 @@ func (flag *DatastoreFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *DatastoreFlag) Process() error { return nil }
+func (flag *DatastoreFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	if flag.ds != nil {

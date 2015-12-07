@@ -50,7 +50,7 @@ func init() {
 	cli.Register("vm.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 
 	f.BoolVar(&cmd.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
@@ -59,9 +59,9 @@ func (cmd *info) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.Resources, "r", false, "Show resource summary")
 }
 
-func (cmd *info) Process() error { return nil }
+func (cmd *info) Process(ctx context.Context) error { return nil }
 
-func (cmd *info) Run(f *flag.FlagSet) error {
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err
@@ -99,7 +99,6 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	ctx := context.TODO()
 	pc := property.DefaultCollector(c)
 	if len(refs) != 0 {
 		err = pc.Retrieve(ctx, refs, props, &res.VirtualMachines)

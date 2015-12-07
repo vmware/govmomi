@@ -44,9 +44,9 @@ func init() {
 	cli.Register("pool.create", &create{ResourceConfigSpecFlag: spec})
 }
 
-func (cmd *create) Register(f *flag.FlagSet) {}
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *create) Process() error { return nil }
+func (cmd *create) Process(ctx context.Context) error { return nil }
 
 func (cmd *create) Usage() string {
 	return "POOL..."
@@ -56,7 +56,7 @@ func (cmd *create) Description() string {
 	return "Create one or more resource POOLs.\n" + poolCreateHelp
 }
 
-func (cmd *create) Run(f *flag.FlagSet) error {
+func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}

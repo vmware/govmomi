@@ -40,7 +40,7 @@ func init() {
 	cli.Register("vm.disk.create", &create{})
 }
 
-func (cmd *create) Register(f *flag.FlagSet) {
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	err := (&cmd.Bytes).Set("10G")
 	if err != nil {
 		panic(err)
@@ -51,9 +51,9 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.Var(&cmd.Bytes, "size", "Size of new disk")
 }
 
-func (cmd *create) Process() error { return nil }
+func (cmd *create) Process(ctx context.Context) error { return nil }
 
-func (cmd *create) Run(f *flag.FlagSet) error {
+func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	if len(cmd.Name) == 0 {
 		return errors.New("please specify a disk name")
 	}

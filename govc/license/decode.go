@@ -36,17 +36,17 @@ func init() {
 	cli.Register("license.decode", &decode{})
 }
 
-func (cmd *decode) Register(f *flag.FlagSet) {
+func (cmd *decode) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.feature, "feature", "", featureUsage)
 }
 
-func (cmd *decode) Process() error { return nil }
+func (cmd *decode) Process(ctx context.Context) error { return nil }
 
 func (cmd *decode) Usage() string {
 	return "KEY..."
 }
 
-func (cmd *decode) Run(f *flag.FlagSet) error {
+func (cmd *decode) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
 		return err

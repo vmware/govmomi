@@ -31,12 +31,12 @@ func init() {
 	cli.Register("guest.rm", &rm{})
 }
 
-func (cmd *rm) Register(f *flag.FlagSet) {
+func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
-func (cmd *rm) Process() error { return nil }
+func (cmd *rm) Process(ctx context.Context) error { return nil }
 
-func (cmd *rm) Run(f *flag.FlagSet) error {
+func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()
 	if err != nil {
 		return err

@@ -36,11 +36,11 @@ func init() {
 	cli.Register("pool.change", &change{ResourceConfigSpecFlag: spec})
 }
 
-func (cmd *change) Register(f *flag.FlagSet) {
+func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.name, "name", "", "Resource pool name")
 }
 
-func (cmd *change) Process() error { return nil }
+func (cmd *change) Process(ctx context.Context) error { return nil }
 
 func (cmd *change) Usage() string {
 	return "POOL..."
@@ -50,7 +50,7 @@ func (cmd *change) Description() string {
 	return "Change the configuration of one or more resource POOLs.\n" + poolNameHelp
 }
 
-func (cmd *change) Run(f *flag.FlagSet) error {
+func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}

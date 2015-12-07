@@ -37,11 +37,11 @@ func init() {
 	cli.Register("host.maintenance.exit", &exit{})
 }
 
-func (cmd *exit) Register(f *flag.FlagSet) {
+func (cmd *exit) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.timeout, "timeout", 0, "Timeout")
 }
 
-func (cmd *exit) Process() error { return nil }
+func (cmd *exit) Process(ctx context.Context) error { return nil }
 
 func (cmd *exit) Usage() string {
 	return "HOST..."
@@ -70,9 +70,7 @@ func (cmd *exit) ExitMaintenanceMode(ctx context.Context, host *object.HostSyste
 	return err
 }
 
-func (cmd *exit) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *exit) Run(ctx context.Context, f *flag.FlagSet) error {
 	hosts, err := cmd.HostSystems(f.Args())
 	if err != nil {
 		return err

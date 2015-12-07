@@ -40,7 +40,7 @@ func init() {
 	cli.Register("device.scsi.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	var ctypes []string
 	ct := object.SCSIControllerTypes()
 	for _, t := range ct {
@@ -52,9 +52,9 @@ func (cmd *add) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.hotAddRemove, "hot", false, "Enable hot-add/remove")
 }
 
-func (cmd *add) Process() error { return nil }
+func (cmd *add) Process(ctx context.Context) error { return nil }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
+func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

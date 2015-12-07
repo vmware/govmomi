@@ -34,11 +34,11 @@ func init() {
 	cli.Register("pool.destroy", &destroy{})
 }
 
-func (cmd *destroy) Register(f *flag.FlagSet) {
+func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.recursive, "r", false, "Remove all child resource pools recursively")
 }
 
-func (cmd *destroy) Process() error { return nil }
+func (cmd *destroy) Process(ctx context.Context) error { return nil }
 
 func (cmd *destroy) Usage() string {
 	return "POOL..."
@@ -48,7 +48,7 @@ func (cmd *destroy) Description() string {
 	return "Destroy one or more resource POOLs.\n" + poolNameHelp
 }
 
-func (cmd *destroy) Run(f *flag.FlagSet) error {
+func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}

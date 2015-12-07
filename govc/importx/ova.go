@@ -19,6 +19,8 @@ package importx
 import (
 	"flag"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
@@ -36,9 +38,9 @@ func (cmd *ova) Usage() string {
 	return "PATH_TO_OVA"
 }
 
-func (cmd *ova) Register(f *flag.FlagSet) {}
+func (cmd *ova) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *ova) Run(f *flag.FlagSet) error {
+func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 	fpath, err := cmd.Prepare(f)
 	if err != nil {
 		return err

@@ -41,7 +41,7 @@ func init() {
 	cli.Register("dvs.portgroup.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.path, "dvs", "", "DVS path")
 
 	ptypes := []string{
@@ -56,15 +56,13 @@ func (cmd *add) Register(f *flag.FlagSet) {
 	f.IntVar(&cmd.DVPortgroupConfigSpec.NumPorts, "nports", 128, "Number of ports")
 }
 
-func (cmd *add) Process() error { return nil }
+func (cmd *add) Process(ctx context.Context) error { return nil }
 
 func (cmd *add) Usage() string {
 	return "NAME"
 }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}

@@ -35,14 +35,14 @@ func init() {
 	cli.Register("device.serial.connect", &connect{})
 }
 
-func (cmd *connect) Register(f *flag.FlagSet) {
+func (cmd *connect) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.device, "device", "", "serial port device name")
 	f.BoolVar(&cmd.client, "client", false, "Use client direction")
 }
 
-func (cmd *connect) Process() error { return nil }
+func (cmd *connect) Process(ctx context.Context) error { return nil }
 
-func (cmd *connect) Run(f *flag.FlagSet) error {
+func (cmd *connect) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

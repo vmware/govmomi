@@ -24,44 +24,46 @@ import (
 	"reflect"
 	"sort"
 	"text/tabwriter"
+
+	"golang.org/x/net/context"
 )
 
 type HasFlags interface {
 	// Register may be called more than once and should be idempotent.
-	Register(f *flag.FlagSet)
+	Register(ctx context.Context, f *flag.FlagSet)
 
 	// Process may be called more than once and should be idempotent.
-	Process() error
+	Process(ctx context.Context) error
 }
 
 type Command interface {
 	HasFlags
 
-	Run(f *flag.FlagSet) error
+	Run(ctx context.Context, f *flag.FlagSet) error
 }
 
 var hasFlagsType = reflect.TypeOf((*HasFlags)(nil)).Elem()
 
-func RegisterCommand(h HasFlags, f *flag.FlagSet) {
+func RegisterCommand(ctx context.Context, h HasFlags, f *flag.FlagSet) {
 	visited := make(map[interface{}]struct{})
 	Walk(h, hasFlagsType, func(v interface{}) error {
 		if _, ok := visited[v]; ok {
 			return nil
 		}
 		visited[v] = struct{}{}
-		v.(HasFlags).Register(f)
+		v.(HasFlags).Register(ctx, f)
 		return nil
 	})
 }
 
-func ProcessCommand(h HasFlags) error {
+func ProcessCommand(ctx context.Context, h HasFlags) error {
 	visited := make(map[interface{}]struct{})
 	err := Walk(h, hasFlagsType, func(v interface{}) error {
 		if _, ok := visited[v]; ok {
 			return nil
 		}
 		visited[v] = struct{}{}
-		err := v.(HasFlags).Process()
+		err := v.(HasFlags).Process(ctx)
 		return err
 	})
 	return err
@@ -134,10 +136,11 @@ func Run(args []string) int {
 		return 1
 	}
 
+	ctx := context.Background()
 	f := flag.NewFlagSet("", flag.ContinueOnError)
 	f.SetOutput(ioutil.Discard)
 
-	RegisterCommand(cmd, f)
+	RegisterCommand(ctx, cmd, f)
 
 	if err := f.Parse(args[1:]); err != nil {
 		if err == flag.ErrHelp {
@@ -148,7 +151,7 @@ func Run(args []string) int {
 		return 1
 	}
 
-	if err := ProcessCommand(cmd); err != nil {
+	if err := ProcessCommand(ctx, cmd); err != nil {
 		if err == flag.ErrHelp {
 			commandHelp(args[0], cmd, f)
 		} else {
@@ -157,7 +160,7 @@ func Run(args []string) int {
 		return 1
 	}
 
-	if err := cmd.Run(f); err != nil {
+	if err := cmd.Run(ctx, f); err != nil {
 		if err == flag.ErrHelp {
 			commandHelp(args[0], cmd, f)
 		} else {

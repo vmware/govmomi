@@ -39,15 +39,15 @@ func init() {
 	cli.Register("vm.question", &question{})
 }
 
-func (cmd *question) Register(f *flag.FlagSet) {
+func (cmd *question) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.answer, "answer", "", "Answer to question")
 }
 
-func (cmd *question) Process() error {
+func (cmd *question) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *question) Run(f *flag.FlagSet) error {
+func (cmd *question) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

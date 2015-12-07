@@ -35,15 +35,15 @@ func init() {
 	cli.Register("datastore.download", &download{})
 }
 
-func (cmd *download) Register(f *flag.FlagSet) {}
+func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *download) Process() error { return nil }
+func (cmd *download) Process(ctx context.Context) error { return nil }
 
 func (cmd *download) Usage() string {
 	return "REMOTE LOCAL"
 }
 
-func (cmd *download) Run(f *flag.FlagSet) error {
+func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) != 2 {
 		return errors.New("invalid arguments")

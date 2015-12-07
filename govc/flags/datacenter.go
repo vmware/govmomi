@@ -39,7 +39,7 @@ type DatacenterFlag struct {
 	err      error
 }
 
-func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
+func (flag *DatacenterFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.register.Do(func() {
 		env := "GOVC_DATACENTER"
 		value := os.Getenv(env)
@@ -48,7 +48,7 @@ func (flag *DatacenterFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *DatacenterFlag) Process() error { return nil }
+func (flag *DatacenterFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	if flag.finder != nil {

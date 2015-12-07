@@ -35,7 +35,7 @@ type VirtualAppFlag struct {
 	app      *object.VirtualApp
 }
 
-func (flag *VirtualAppFlag) Register(f *flag.FlagSet) {
+func (flag *VirtualAppFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchVirtualApps)
 
 	flag.register.Do(func() {
@@ -46,7 +46,7 @@ func (flag *VirtualAppFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *VirtualAppFlag) Process() error { return nil }
+func (flag *VirtualAppFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *VirtualAppFlag) VirtualApp() (*object.VirtualApp, error) {
 	if flag.app != nil {

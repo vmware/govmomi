@@ -36,7 +36,7 @@ type VirtualMachineFlag struct {
 	vm       *object.VirtualMachine
 }
 
-func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
+func (flag *VirtualMachineFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.SearchFlag = NewSearchFlag(SearchVirtualMachines)
 
 	flag.register.Do(func() {
@@ -47,7 +47,7 @@ func (flag *VirtualMachineFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *VirtualMachineFlag) Process() error { return nil }
+func (flag *VirtualMachineFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *VirtualMachineFlag) VirtualMachine() (*object.VirtualMachine, error) {
 	if flag.vm != nil {

@@ -114,7 +114,7 @@ func (flag *ClientFlag) Set(s string) error {
 	return nil
 }
 
-func (flag *ClientFlag) Register(f *flag.FlagSet) {
+func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.register.Do(func() {
 		{
 			flag.Set(os.Getenv(envURL))
@@ -172,7 +172,7 @@ func (flag *ClientFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *ClientFlag) Process() error {
+func (flag *ClientFlag) Process(ctx context.Context) error {
 	if flag.url == nil {
 		return errors.New("specify an " + cDescr)
 	}

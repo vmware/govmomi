@@ -34,7 +34,7 @@ type ResourcePoolFlag struct {
 	pool     *object.ResourcePool
 }
 
-func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
+func (flag *ResourcePoolFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.register.Do(func() {
 		env := "GOVC_RESOURCE_POOL"
 		value := os.Getenv(env)
@@ -43,7 +43,7 @@ func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *ResourcePoolFlag) Process() error { return nil }
+func (flag *ResourcePoolFlag) Process(ctx context.Context) error { return nil }
 
 func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	if flag.pool != nil {

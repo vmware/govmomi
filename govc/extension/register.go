@@ -39,15 +39,13 @@ func init() {
 	cli.Register("extension.register", &register{})
 }
 
-func (cmd *register) Register(f *flag.FlagSet) {
+func (cmd *register) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.update, "update", false, "Update extension")
 }
 
-func (cmd *register) Process() error { return nil }
+func (cmd *register) Process(ctx context.Context) error { return nil }
 
-func (cmd *register) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *register) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

@@ -24,6 +24,8 @@ import (
 	"strings"
 	"time"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/vim25/debug"
 )
 
@@ -31,7 +33,7 @@ type DebugFlag struct {
 	enable bool
 }
 
-func (flag *DebugFlag) Register(f *flag.FlagSet) {
+func (flag *DebugFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	env := "GOVC_DEBUG"
 	enable := false
 	switch env := strings.ToLower(os.Getenv(env)); env {
@@ -43,7 +45,7 @@ func (flag *DebugFlag) Register(f *flag.FlagSet) {
 	f.BoolVar(&flag.enable, "debug", enable, usage)
 }
 
-func (flag *DebugFlag) Process() error {
+func (flag *DebugFlag) Process(ctx context.Context) error {
 	if flag.enable {
 		// Base path for storing debug logs.
 		r := os.Getenv("GOVC_DEBUG_PATH")

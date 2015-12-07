@@ -34,11 +34,11 @@ func init() {
 	cli.Register("device.cdrom.eject", &eject{})
 }
 
-func (cmd *eject) Register(f *flag.FlagSet) {
+func (cmd *eject) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.device, "device", "", "CD-ROM device name")
 }
 
-func (cmd *eject) Process() error { return nil }
+func (cmd *eject) Process(ctx context.Context) error { return nil }
 
 func (cmd *eject) Description() string {
 	return `Eject media from CD-ROM device.
@@ -46,7 +46,7 @@ func (cmd *eject) Description() string {
 If device is not specified, the first CD-ROM device is used.`
 }
 
-func (cmd *eject) Run(f *flag.FlagSet) error {
+func (cmd *eject) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

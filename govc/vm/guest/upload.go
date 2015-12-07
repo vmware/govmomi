@@ -35,13 +35,13 @@ func init() {
 	cli.Register("guest.upload", &upload{})
 }
 
-func (cmd *upload) Register(f *flag.FlagSet) {
+func (cmd *upload) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.overwrite, "f", false, "If set, the guest destination file is clobbered")
 }
 
-func (cmd *upload) Process() error { return nil }
+func (cmd *upload) Process(ctx context.Context) error { return nil }
 
-func (cmd *upload) Run(f *flag.FlagSet) error {
+func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()
 	if err != nil {
 		return err

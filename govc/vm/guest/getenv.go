@@ -32,11 +32,11 @@ func init() {
 	cli.Register("guest.getenv", &getenv{})
 }
 
-func (cmd *getenv) Register(f *flag.FlagSet) {}
+func (cmd *getenv) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *getenv) Process() error { return nil }
+func (cmd *getenv) Process(ctx context.Context) error { return nil }
 
-func (cmd *getenv) Run(f *flag.FlagSet) error {
+func (cmd *getenv) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.ProcessManager()
 	if err != nil {
 		return err

@@ -33,13 +33,13 @@ func init() {
 	cli.Register("vm.destroy", &destroy{})
 }
 
-func (cmd *destroy) Register(f *flag.FlagSet) {
+func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
 }
 
-func (cmd *destroy) Process() error { return nil }
+func (cmd *destroy) Process(ctx context.Context) error { return nil }
 
-func (cmd *destroy) Run(f *flag.FlagSet) error {
+func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err

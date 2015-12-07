@@ -35,15 +35,15 @@ func init() {
 	cli.Register("guest.download", &download{})
 }
 
-func (cmd *download) Register(f *flag.FlagSet) {
+func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.overwrite, "f", false, "If set, the local destination file is clobbered")
 }
 
-func (cmd *download) Process() error {
+func (cmd *download) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *download) Run(f *flag.FlagSet) error {
+func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()
 	if err != nil {
 		return err

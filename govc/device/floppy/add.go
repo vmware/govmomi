@@ -33,11 +33,11 @@ func init() {
 	cli.Register("device.floppy.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {}
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *add) Process() error { return nil }
+func (cmd *add) Process(ctx context.Context) error { return nil }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
+func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

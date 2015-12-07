@@ -36,7 +36,7 @@ type AutostartFlag struct {
 
 func (f *AutostartFlag) Register(fs *flag.FlagSet) {}
 
-func (f *AutostartFlag) Process() error { return nil }
+func (f *AutostartFlag) Process(ctx context.Context) error { return nil }
 
 // VirtualMachines returns list of virtual machine objects based on the
 // arguments specified on the command line. This helper is defined in

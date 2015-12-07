@@ -54,15 +54,15 @@ func init() {
 	cli.Register("import.ovf", &ovfx{})
 }
 
-func (cmd *ovfx) Register(f *flag.FlagSet) {}
+func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {}
 
-func (cmd *ovfx) Process() error { return nil }
+func (cmd *ovfx) Process(ctx context.Context) error { return nil }
 
 func (cmd *ovfx) Usage() string {
 	return "PATH_TO_OVF"
 }
 
-func (cmd *ovfx) Run(f *flag.FlagSet) error {
+func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 	fpath, err := cmd.Prepare(f)
 	if err != nil {
 		return err

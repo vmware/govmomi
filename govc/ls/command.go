@@ -38,17 +38,17 @@ func init() {
 	cli.Register("ls", &ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {
+func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.Long, "l", false, "Long listing format")
 }
 
-func (cmd *ls) Process() error { return nil }
+func (cmd *ls) Process(ctx context.Context) error { return nil }
 
 func (cmd *ls) Usage() string {
 	return "[PATH]..."
 }
 
-func (cmd *ls) Run(f *flag.FlagSet) error {
+func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err

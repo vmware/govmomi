@@ -32,7 +32,7 @@ type FolderFlag struct {
 	folder string
 }
 
-func (flag *FolderFlag) Register(f *flag.FlagSet) {
+func (flag *FolderFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&flag.folder, "folder", "", "Path to folder to add the VM to")
 }
 

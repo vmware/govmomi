@@ -90,7 +90,7 @@ func (flag *SearchFlag) Register(fs *flag.FlagSet) {
 	register(&flag.byInventoryPath, "ipath", "Find %s by inventory path")
 }
 
-func (flag *SearchFlag) Process() error {
+func (flag *SearchFlag) Process(ctx context.Context) error {
 	flags := []string{
 		flag.byDatastorePath,
 		flag.byDNSName,

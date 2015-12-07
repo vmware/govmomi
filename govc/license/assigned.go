@@ -41,13 +41,13 @@ func init() {
 	cli.Register("license.assigned.list", &assigned{})
 }
 
-func (cmd *assigned) Register(f *flag.FlagSet) {
+func (cmd *assigned) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.id, "id", "", "Entity ID")
 }
 
-func (cmd *assigned) Process() error { return nil }
+func (cmd *assigned) Process(ctx context.Context) error { return nil }
 
-func (cmd *assigned) Run(f *flag.FlagSet) error {
+func (cmd *assigned) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
 		return err

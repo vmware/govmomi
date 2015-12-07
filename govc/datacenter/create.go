@@ -34,15 +34,15 @@ func init() {
 	cli.Register("datacenter.create", &create{})
 }
 
-func (cmd *create) Register(f *flag.FlagSet) {}
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {}
 
 func (cmd *create) Usage() string {
 	return "[DATACENTER NAME]..."
 }
 
-func (cmd *create) Process() error { return nil }
+func (cmd *create) Process(ctx context.Context) error { return nil }
 
-func (cmd *create) Run(f *flag.FlagSet) error {
+func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	datacenters := f.Args()
 	if len(datacenters) < 1 {
 		return flag.ErrHelp

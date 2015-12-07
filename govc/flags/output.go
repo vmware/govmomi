@@ -25,6 +25,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/vim25/progress"
 )
 
@@ -37,11 +39,11 @@ type OutputFlag struct {
 	TTY  bool
 }
 
-func (flag *OutputFlag) Register(f *flag.FlagSet) {
+func (flag *OutputFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
 }
 
-func (flag *OutputFlag) Process() error {
+func (flag *OutputFlag) Process(ctx context.Context) error {
 	if !flag.JSON {
 		// Assume we have a tty if not outputting JSON
 		flag.TTY = true
