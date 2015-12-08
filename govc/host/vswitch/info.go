@@ -40,9 +40,27 @@ func init() {
 	cli.Register("host.vswitch.info", &info{})
 }
 
-func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+}
 
-func (cmd *info) Process(ctx context.Context) error { return nil }
+func (cmd *info) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()

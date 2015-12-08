@@ -34,9 +34,17 @@ func init() {
 	cli.Register("guest.ls", &ls{})
 }
 
-func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag.Register(ctx, f)
+}
 
-func (cmd *ls) Process(ctx context.Context) error { return nil }
+func (cmd *ls) Process(ctx context.Context) error {
+	if err := cmd.GuestFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

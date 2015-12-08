@@ -40,11 +40,19 @@ func init() {
 }
 
 func (cmd *logs) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.IntVar(&cmd.Max, "n", 25, "Output the last N logs")
 	f.StringVar(&cmd.Key, "log", "", "Log file key")
 }
 
-func (cmd *logs) Process(ctx context.Context) error { return nil }
+func (cmd *logs) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *logs) Description() string {
 	return `

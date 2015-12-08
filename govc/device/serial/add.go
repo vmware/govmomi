@@ -33,9 +33,17 @@ func init() {
 	cli.Register("device.serial.add", &add{})
 }
 
-func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+}
 
-func (cmd *add) Process(ctx context.Context) error { return nil }
+func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()

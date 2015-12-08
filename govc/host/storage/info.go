@@ -75,6 +75,11 @@ func init() {
 }
 
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
 	err := cmd.typ.Set("lun")
 	if err != nil {
 		panic(err)
@@ -84,6 +89,12 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *info) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -29,18 +28,36 @@ import (
 )
 
 type DatacenterFlag struct {
+	common
+
 	*ClientFlag
 	*OutputFlag
 
-	register sync.Once
-	path     string
-	dc       *object.Datacenter
-	finder   *find.Finder
-	err      error
+	path   string
+	dc     *object.Datacenter
+	finder *find.Finder
+	err    error
+}
+
+var datacenterFlagKey = flagKey("datacenter")
+
+func NewDatacenterFlag(ctx context.Context) (*DatacenterFlag, context.Context) {
+	if v := ctx.Value(datacenterFlagKey); v != nil {
+		return v.(*DatacenterFlag), ctx
+	}
+
+	v := &DatacenterFlag{}
+	v.ClientFlag, ctx = NewClientFlag(ctx)
+	v.OutputFlag, ctx = NewOutputFlag(ctx)
+	ctx = context.WithValue(ctx, datacenterFlagKey, v)
+	return v, ctx
 }
 
 func (flag *DatacenterFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	flag.register.Do(func() {
+	flag.RegisterOnce(func() {
+		flag.ClientFlag.Register(ctx, f)
+		flag.OutputFlag.Register(ctx, f)
+
 		env := "GOVC_DATACENTER"
 		value := os.Getenv(env)
 		usage := fmt.Sprintf("Datacenter [%s]", env)
@@ -48,7 +65,17 @@ func (flag *DatacenterFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	})
 }
 
-func (flag *DatacenterFlag) Process(ctx context.Context) error { return nil }
+func (flag *DatacenterFlag) Process(ctx context.Context) error {
+	return flag.ProcessOnce(func() error {
+		if err := flag.ClientFlag.Process(ctx); err != nil {
+			return err
+		}
+		if err := flag.OutputFlag.Process(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
+}
 
 func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	if flag.finder != nil {

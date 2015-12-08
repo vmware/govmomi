@@ -24,6 +24,9 @@ import (
 
 type EmptyFlag struct{}
 
-func (flag *EmptyFlag) Register(ctx context.Context, f *flag.FlagSet) {}
+func (flag *EmptyFlag) Register(ctx context.Context, f *flag.FlagSet) {
+}
 
-func (flag *EmptyFlag) Process(ctx context.Context) error { return nil }
+func (flag *EmptyFlag) Process(ctx context.Context) error {
+	return nil
+}

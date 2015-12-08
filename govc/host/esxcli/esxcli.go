@@ -45,10 +45,18 @@ func (cmd *esxcli) Usage() string {
 }
 
 func (cmd *esxcli) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.hints, "hints", true, "Use command info hints when formatting output")
 }
 
-func (cmd *esxcli) Process(ctx context.Context) error { return nil }
+func (cmd *esxcli) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()

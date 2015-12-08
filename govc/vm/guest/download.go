@@ -36,10 +36,16 @@ func init() {
 }
 
 func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.overwrite, "f", false, "If set, the local destination file is clobbered")
 }
 
 func (cmd *download) Process(ctx context.Context) error {
+	if err := cmd.GuestFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 

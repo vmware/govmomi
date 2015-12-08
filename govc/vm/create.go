@@ -58,6 +58,24 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+
+	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
+	cmd.ResourcePoolFlag.Register(ctx, f)
+
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
+	cmd.NetworkFlag, ctx = flags.NewNetworkFlag(ctx)
+	cmd.NetworkFlag.Register(ctx, f)
+
 	f.IntVar(&cmd.memory, "m", 1024, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
@@ -69,7 +87,27 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
 }
 
-func (cmd *create) Process(ctx context.Context) error { return nil }
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.NetworkFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	var err error

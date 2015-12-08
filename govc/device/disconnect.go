@@ -33,9 +33,17 @@ func init() {
 	cli.Register("device.disconnect", &disconnect{})
 }
 
-func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+}
 
-func (cmd *disconnect) Process(ctx context.Context) error { return nil }
+func (cmd *disconnect) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *disconnect) Usage() string {
 	return "DEVICE..."

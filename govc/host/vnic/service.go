@@ -39,11 +39,17 @@ func init() {
 }
 
 func (cmd *service) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.Enable, "enable", false, "Enable service")
 	f.BoolVar(&cmd.Disable, "disable", false, "Disable service")
 }
 
 func (cmd *service) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
 	// Either may be true or none may be true.
 	if cmd.Enable && cmd.Disable {
 		return flag.ErrHelp

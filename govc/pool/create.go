@@ -34,19 +34,31 @@ type create struct {
 }
 
 func init() {
-	spec := NewResourceConfigSpecFlag()
-	spec.SetAllocation(func(a types.BaseResourceAllocationInfo) {
+	cli.Register("pool.create", &create{})
+}
+
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
+	cmd.ResourceConfigSpecFlag = NewResourceConfigSpecFlag()
+	cmd.ResourceConfigSpecFlag.SetAllocation(func(a types.BaseResourceAllocationInfo) {
 		ra := a.GetResourceAllocationInfo()
 		ra.Shares.Level = types.SharesLevelNormal
 		ra.ExpandableReservation = types.NewBool(true)
 	})
-
-	cli.Register("pool.create", &create{ResourceConfigSpecFlag: spec})
+	cmd.ResourceConfigSpecFlag.Register(ctx, f)
 }
 
-func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {}
-
-func (cmd *create) Process(ctx context.Context) error { return nil }
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ResourceConfigSpecFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *create) Usage() string {
 	return "POOL..."

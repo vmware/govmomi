@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
-	"reflect"
 	"sort"
 	"text/tabwriter"
 
@@ -40,33 +39,6 @@ type Command interface {
 	HasFlags
 
 	Run(ctx context.Context, f *flag.FlagSet) error
-}
-
-var hasFlagsType = reflect.TypeOf((*HasFlags)(nil)).Elem()
-
-func RegisterCommand(ctx context.Context, h HasFlags, f *flag.FlagSet) {
-	visited := make(map[interface{}]struct{})
-	Walk(h, hasFlagsType, func(v interface{}) error {
-		if _, ok := visited[v]; ok {
-			return nil
-		}
-		visited[v] = struct{}{}
-		v.(HasFlags).Register(ctx, f)
-		return nil
-	})
-}
-
-func ProcessCommand(ctx context.Context, h HasFlags) error {
-	visited := make(map[interface{}]struct{})
-	err := Walk(h, hasFlagsType, func(v interface{}) error {
-		if _, ok := visited[v]; ok {
-			return nil
-		}
-		visited[v] = struct{}{}
-		err := v.(HasFlags).Process(ctx)
-		return err
-	})
-	return err
 }
 
 func generalHelp() {
@@ -136,33 +108,33 @@ func Run(args []string) int {
 		return 1
 	}
 
+	fs := flag.NewFlagSet("", flag.ContinueOnError)
+	fs.SetOutput(ioutil.Discard)
+
 	ctx := context.Background()
-	f := flag.NewFlagSet("", flag.ContinueOnError)
-	f.SetOutput(ioutil.Discard)
+	cmd.Register(ctx, fs)
 
-	RegisterCommand(ctx, cmd, f)
-
-	if err := f.Parse(args[1:]); err != nil {
+	if err := fs.Parse(args[1:]); err != nil {
 		if err == flag.ErrHelp {
-			commandHelp(args[0], cmd, f)
+			commandHelp(args[0], cmd, fs)
 		} else {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}
 		return 1
 	}
 
-	if err := ProcessCommand(ctx, cmd); err != nil {
+	if err := cmd.Process(ctx); err != nil {
 		if err == flag.ErrHelp {
-			commandHelp(args[0], cmd, f)
+			commandHelp(args[0], cmd, fs)
 		} else {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}
 		return 1
 	}
 
-	if err := cmd.Run(ctx, f); err != nil {
+	if err := cmd.Run(ctx, fs); err != nil {
 		if err == flag.ErrHelp {
-			commandHelp(args[0], cmd, f)
+			commandHelp(args[0], cmd, fs)
 		} else {
 			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
 		}

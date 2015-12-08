@@ -27,6 +27,7 @@ import (
 
 type destroy struct {
 	*flags.DatacenterFlag
+
 	recursive bool
 }
 
@@ -35,10 +36,18 @@ func init() {
 }
 
 func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.recursive, "r", false, "Remove all child resource pools recursively")
 }
 
-func (cmd *destroy) Process(ctx context.Context) error { return nil }
+func (cmd *destroy) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *destroy) Usage() string {
 	return "POOL..."

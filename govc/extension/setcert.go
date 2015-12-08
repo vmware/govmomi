@@ -50,11 +50,19 @@ func init() {
 }
 
 func (cmd *setcert) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.cert, "cert-pem", "-", "PEM encoded certificate")
 	f.StringVar(&cmd.org, "org", "VMware", "Organization for generated certificate")
 }
 
-func (cmd *setcert) Process(ctx context.Context) error { return nil }
+func (cmd *setcert) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *setcert) Usage() string {
 	return "ID"

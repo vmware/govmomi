@@ -38,6 +38,9 @@ func init() {
 }
 
 func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	cmd.DrsConfig = new(types.ClusterDrsConfigInfo)
 	cmd.DasConfig = new(types.ClusterDasConfigInfo)
 	cmd.VsanConfig = new(types.VsanClusterConfigInfo)
@@ -62,7 +65,12 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.VsanConfig.DefaultConfig.AutoClaimStorage), "vsan-autoclaim", "")
 }
 
-func (cmd *change) Process(ctx context.Context) error { return nil }
+func (cmd *change) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *change) Usage() string {
 	return "CLUSTER..."

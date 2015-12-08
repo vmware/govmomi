@@ -36,10 +36,18 @@ func init() {
 }
 
 func (cmd *mkdir) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.createParents, "p", false, "Create intermediate directories as needed")
 }
 
-func (cmd *mkdir) Process(ctx context.Context) error { return nil }
+func (cmd *mkdir) Process(ctx context.Context) error {
+	if err := cmd.GuestFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *mkdir) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

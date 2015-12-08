@@ -38,8 +38,6 @@ func (cmd *ova) Usage() string {
 	return "PATH_TO_OVA"
 }
 
-func (cmd *ova) Register(ctx context.Context, f *flag.FlagSet) {}
-
 func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 	fpath, err := cmd.Prepare(f)
 	if err != nil {

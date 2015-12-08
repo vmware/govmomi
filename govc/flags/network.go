@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
@@ -28,21 +27,33 @@ import (
 )
 
 type NetworkFlag struct {
+	common
+
 	*DatacenterFlag
 
-	register sync.Once
-	name     string
-	net      object.NetworkReference
-	adapter  string
-	address  string
+	name    string
+	net     object.NetworkReference
+	adapter string
+	address string
 }
 
-func NewNetworkFlag() *NetworkFlag {
-	return &NetworkFlag{}
+var networkFlagKey = flagKey("network")
+
+func NewNetworkFlag(ctx context.Context) (*NetworkFlag, context.Context) {
+	if v := ctx.Value(networkFlagKey); v != nil {
+		return v.(*NetworkFlag), ctx
+	}
+
+	v := &NetworkFlag{}
+	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+	ctx = context.WithValue(ctx, networkFlagKey, v)
+	return v, ctx
 }
 
 func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	flag.register.Do(func() {
+	flag.RegisterOnce(func() {
+		flag.DatacenterFlag.Register(ctx, f)
+
 		env := "GOVC_NETWORK"
 		value := os.Getenv(env)
 		flag.Set(value)
@@ -53,7 +64,14 @@ func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	})
 }
 
-func (flag *NetworkFlag) Process(ctx context.Context) error { return nil }
+func (flag *NetworkFlag) Process(ctx context.Context) error {
+	return flag.ProcessOnce(func() error {
+		if err := flag.DatacenterFlag.Process(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
+}
 
 func (flag *NetworkFlag) String() string {
 	return flag.name

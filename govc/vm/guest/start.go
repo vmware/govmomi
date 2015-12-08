@@ -49,11 +49,19 @@ func init() {
 }
 
 func (cmd *start) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.dir, "C", "", "The absolute path of the working directory for the program to start")
 	f.Var(&cmd.vars, "e", "Set environment variable (key=val)")
 }
 
-func (cmd *start) Process(ctx context.Context) error { return nil }
+func (cmd *start) Process(ctx context.Context) error {
+	if err := cmd.GuestFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *start) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.ProcessManager()

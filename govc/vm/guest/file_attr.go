@@ -28,6 +28,10 @@ type FileAttrFlag struct {
 	types.GuestPosixFileAttributes
 }
 
+func newFileAttrFlag(ctx context.Context) (*FileAttrFlag, context.Context) {
+	return &FileAttrFlag{}, ctx
+}
+
 func (flag *FileAttrFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&flag.OwnerId, "uid", 0, "User ID")
 	f.IntVar(&flag.GroupId, "gid", 0, "Group ID")

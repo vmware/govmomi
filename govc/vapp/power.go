@@ -40,7 +40,8 @@ func init() {
 }
 
 func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualApps)
+	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualApps)
+	cmd.SearchFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.On, "on", false, "Power on")
 	f.BoolVar(&cmd.Off, "off", false, "Power off")
@@ -49,6 +50,9 @@ func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *power) Process(ctx context.Context) error {
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
+		return err
+	}
 	opts := []bool{cmd.On, cmd.Off, cmd.Suspend}
 	selected := false
 

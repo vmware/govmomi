@@ -23,7 +23,6 @@ import (
 	"net/url"
 	"os"
 	"path"
-	"sync"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
@@ -36,15 +35,31 @@ var (
 )
 
 type DatastoreFlag struct {
+	common
+
 	*DatacenterFlag
 
-	register sync.Once
-	name     string
-	ds       *object.Datastore
+	name string
+	ds   *object.Datastore
+}
+
+var datastoreFlagKey = flagKey("datastore")
+
+func NewDatastoreFlag(ctx context.Context) (*DatastoreFlag, context.Context) {
+	if v := ctx.Value(datastoreFlagKey); v != nil {
+		return v.(*DatastoreFlag), ctx
+	}
+
+	v := &DatastoreFlag{}
+	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+	ctx = context.WithValue(ctx, datastoreFlagKey, v)
+	return v, ctx
 }
 
 func (flag *DatastoreFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	flag.register.Do(func() {
+	flag.RegisterOnce(func() {
+		flag.DatacenterFlag.Register(ctx, f)
+
 		env := "GOVC_DATASTORE"
 		value := os.Getenv(env)
 		usage := fmt.Sprintf("Datastore [%s]", env)
@@ -52,7 +67,14 @@ func (flag *DatastoreFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	})
 }
 
-func (flag *DatastoreFlag) Process(ctx context.Context) error { return nil }
+func (flag *DatastoreFlag) Process(ctx context.Context) error {
+	return flag.ProcessOnce(func() error {
+		if err := flag.DatacenterFlag.Process(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
+}
 
 func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	if flag.ds != nil {

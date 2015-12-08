@@ -35,9 +35,17 @@ func init() {
 	cli.Register("datastore.download", &download{})
 }
 
-func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+}
 
-func (cmd *download) Process(ctx context.Context) error { return nil }
+func (cmd *download) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *download) Usage() string {
 	return "REMOTE LOCAL"

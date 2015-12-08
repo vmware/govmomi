@@ -37,15 +37,22 @@ func init() {
 }
 
 func (cmd *configure) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.AutostartFlag, ctx = newAutostartFlag(ctx)
+	cmd.AutostartFlag.Register(ctx, f)
+
 	f.Var(flags.NewOptionalBool(&cmd.Enabled), "enabled", "")
 	f.IntVar(&cmd.StartDelay, "start-delay", 0, "")
 	f.StringVar(&cmd.StopAction, "stop-action", "", "")
 	f.IntVar(&cmd.StopDelay, "stop-delay", 0, "")
-
 	f.Var(flags.NewOptionalBool(&cmd.WaitForHeartbeat), "wait-for-heartbeat", "")
 }
 
-func (cmd *configure) Process(ctx context.Context) error { return nil }
+func (cmd *configure) Process(ctx context.Context) error {
+	if err := cmd.AutostartFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *configure) Usage() string {
 	return ""

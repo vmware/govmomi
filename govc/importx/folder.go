@@ -32,8 +32,20 @@ type FolderFlag struct {
 	folder string
 }
 
+func newFolderFlag(ctx context.Context) (*FolderFlag, context.Context) {
+	f := &FolderFlag{}
+	f.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	return f, ctx
+}
+
 func (flag *FolderFlag) Register(ctx context.Context, f *flag.FlagSet) {
+	flag.DatacenterFlag.Register(ctx, f)
+
 	f.StringVar(&flag.folder, "folder", "", "Path to folder to add the VM to")
+}
+
+func (flag *FolderFlag) Process(ctx context.Context) error {
+	return flag.DatacenterFlag.Process(ctx)
 }
 
 func (flag *FolderFlag) Folder() (*object.Folder, error) {

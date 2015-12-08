@@ -41,6 +41,9 @@ func init() {
 }
 
 func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+
 	var ctypes []string
 	ct := object.SCSIControllerTypes()
 	for _, t := range ct {
@@ -52,7 +55,12 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.hotAddRemove, "hot", false, "Enable hot-add/remove")
 }
 
-func (cmd *add) Process(ctx context.Context) error { return nil }
+func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()

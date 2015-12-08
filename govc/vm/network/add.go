@@ -34,9 +34,22 @@ func init() {
 	cli.Register("vm.network.add", &add{})
 }
 
-func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+	cmd.NetworkFlag, ctx = flags.NewNetworkFlag(ctx)
+	cmd.NetworkFlag.Register(ctx, f)
+}
 
-func (cmd *add) Process(ctx context.Context) error { return nil }
+func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.NetworkFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()

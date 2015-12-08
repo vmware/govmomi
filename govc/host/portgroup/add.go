@@ -36,11 +36,19 @@ func init() {
 }
 
 func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.spec.VswitchName, "vswitch", "", "vSwitch Name")
 	f.IntVar(&cmd.spec.VlanId, "vlan", 0, "VLAN ID")
 }
 
-func (cmd *add) Process(ctx context.Context) error { return nil }
+func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *add) Usage() string {
 	return "NAME"

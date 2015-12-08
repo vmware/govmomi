@@ -40,6 +40,7 @@ var (
 
 type spec struct {
 	*ArchiveFlag
+
 	verbose bool
 }
 
@@ -48,10 +49,18 @@ func init() {
 }
 
 func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ArchiveFlag, ctx = newArchiveFlag(ctx)
+	cmd.ArchiveFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.verbose, "verbose", false, "Verbose spec output")
 }
 
-func (cmd *spec) Process(ctx context.Context) error { return nil }
+func (cmd *spec) Process(ctx context.Context) error {
+	if err := cmd.ArchiveFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *spec) Usage() string {
 	return "PATH_TO_OVF_OR_OVA"

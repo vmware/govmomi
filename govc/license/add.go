@@ -36,9 +36,23 @@ func init() {
 	cli.Register("license.add", &add{})
 }
 
-func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
 
-func (cmd *add) Process(ctx context.Context) error { return nil }
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+}
+
+func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *add) Usage() string {
 	return "KEY..."

@@ -36,9 +36,23 @@ func init() {
 	cli.Register("datastore.upload", &upload{})
 }
 
-func (cmd *upload) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *upload) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 
-func (cmd *upload) Process(ctx context.Context) error { return nil }
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+}
+
+func (cmd *upload) Process(ctx context.Context) error {
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *upload) Usage() string {
 	return "LOCAL REMOTE"

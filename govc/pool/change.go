@@ -28,19 +28,32 @@ import (
 type change struct {
 	*flags.DatacenterFlag
 	*ResourceConfigSpecFlag
+
 	name string
 }
 
 func init() {
-	spec := NewResourceConfigSpecFlag()
-	cli.Register("pool.change", &change{ResourceConfigSpecFlag: spec})
+	cli.Register("pool.change", &change{})
 }
 
 func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+	cmd.ResourceConfigSpecFlag = NewResourceConfigSpecFlag()
+	cmd.ResourceConfigSpecFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.name, "name", "", "Resource pool name")
 }
 
-func (cmd *change) Process(ctx context.Context) error { return nil }
+func (cmd *change) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ResourceConfigSpecFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *change) Usage() string {
 	return "POOL..."

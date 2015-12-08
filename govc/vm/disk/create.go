@@ -41,6 +41,13 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+
 	err := (&cmd.Bytes).Set("10G")
 	if err != nil {
 		panic(err)
@@ -51,7 +58,18 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(&cmd.Bytes, "size", "Size of new disk")
 }
 
-func (cmd *create) Process(ctx context.Context) error { return nil }
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	if len(cmd.Name) == 0 {

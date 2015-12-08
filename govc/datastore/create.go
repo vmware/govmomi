@@ -107,6 +107,9 @@ func (t *typeFlag) IsVmfsType() bool {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	modes := []string{
 		string(types.HostMountModeReadOnly),
 		string(types.HostMountModeReadWrite),
@@ -129,6 +132,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 

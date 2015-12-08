@@ -35,9 +35,17 @@ func init() {
 	cli.Register("host.disconnect", &disconnect{})
 }
 
-func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+}
 
-func (cmd *disconnect) Process(ctx context.Context) error { return nil }
+func (cmd *disconnect) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *disconnect) Description() string {
 	return `Disconnect host from vCenter and instruct the host to stop sending heartbeats.`

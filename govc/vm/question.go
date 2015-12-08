@@ -40,10 +40,16 @@ func init() {
 }
 
 func (cmd *question) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.answer, "answer", "", "Answer to question")
 }
 
 func (cmd *question) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 

@@ -58,6 +58,10 @@ type OptionsFlag struct {
 	path string
 }
 
+func newOptionsFlag(ctx context.Context) (*OptionsFlag, context.Context) {
+	return &OptionsFlag{}, ctx
+}
+
 func (flag *OptionsFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&flag.path, "options", "", "Options spec file path for VM deployment")
 }

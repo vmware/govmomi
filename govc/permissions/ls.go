@@ -38,9 +38,22 @@ func init() {
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 }
 
-func (cmd *ls) Process(ctx context.Context) error { return nil }
+func (cmd *ls) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *ls) Usage() string {
 	return "[PATH]..."

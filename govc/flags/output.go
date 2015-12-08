@@ -35,21 +35,39 @@ type OutputWriter interface {
 }
 
 type OutputFlag struct {
+	common
+
 	JSON bool
 	TTY  bool
 }
 
+var outputFlagKey = flagKey("output")
+
+func NewOutputFlag(ctx context.Context) (*OutputFlag, context.Context) {
+	if v := ctx.Value(outputFlagKey); v != nil {
+		return v.(*OutputFlag), ctx
+	}
+
+	v := &OutputFlag{}
+	ctx = context.WithValue(ctx, outputFlagKey, v)
+	return v, ctx
+}
+
 func (flag *OutputFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
+	flag.RegisterOnce(func() {
+		f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
+	})
 }
 
 func (flag *OutputFlag) Process(ctx context.Context) error {
-	if !flag.JSON {
-		// Assume we have a tty if not outputting JSON
-		flag.TTY = true
-	}
+	return flag.ProcessOnce(func() error {
+		if !flag.JSON {
+			// Assume we have a tty if not outputting JSON
+			flag.TTY = true
+		}
 
-	return nil
+		return nil
+	})
 }
 
 // Log outputs the specified string, prefixed with the current time.

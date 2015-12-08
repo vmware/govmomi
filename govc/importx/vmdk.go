@@ -57,12 +57,30 @@ func init() {
 }
 
 func (cmd *vmdk) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
+	cmd.ResourcePoolFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.upload, "upload", true, "Upload specified disk")
 	f.BoolVar(&cmd.force, "force", false, "Overwrite existing disk")
 	f.BoolVar(&cmd.keep, "keep", false, "Keep uploaded disk after import")
 }
 
-func (cmd *vmdk) Process(ctx context.Context) error { return nil }
+func (cmd *vmdk) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *vmdk) Usage() string {
 	return "PATH_TO_VMDK [REMOTE_DIRECTORY]"

@@ -7,6 +7,7 @@ You may obtain a copy of the License at
 
     http://www.apache.org/licenses/LICENSE-2.0
 
+
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -46,7 +47,11 @@ func init() {
 }
 
 func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
+	cmd.SearchFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.On, "on", false, "Power on")
 	f.BoolVar(&cmd.Off, "off", false, "Power off")
@@ -58,6 +63,12 @@ func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *power) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
+		return err
+	}
 	opts := []bool{cmd.On, cmd.Off, cmd.Reset, cmd.Suspend, cmd.Reboot, cmd.Shutdown}
 	selected := false
 

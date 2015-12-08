@@ -31,6 +31,10 @@ type AuthFlag struct {
 	auth types.NamePasswordAuthentication
 }
 
+func newAuthFlag(ctx context.Context) (*AuthFlag, context.Context) {
+	return &AuthFlag{}, ctx
+}
+
 func (flag *AuthFlag) String() string {
 	return fmt.Sprintf("%s:%s", flag.auth.Username, strings.Repeat("x", len(flag.auth.Password)))
 }

@@ -80,7 +80,8 @@ func init() {
 }
 
 func (cmd *vnc) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
+	cmd.SearchFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.Enable, "enable", false, "Enable VNC")
 	f.BoolVar(&cmd.Disable, "disable", false, "Disable VNC")
@@ -90,6 +91,9 @@ func (cmd *vnc) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *vnc) Process(ctx context.Context) error {
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
+		return err
+	}
 	// Either may be true or none may be true.
 	if cmd.Enable && cmd.Disable {
 		return flag.ErrHelp

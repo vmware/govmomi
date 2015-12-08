@@ -43,6 +43,9 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	cmd.configSpec = new(types.VMwareDVSConfigSpec)
 
 	cmd.DVSCreateSpec.ConfigSpec = cmd.configSpec
@@ -61,7 +64,12 @@ The dvs is added to the folder specified by the 'parent' flag. If not given,
 this defaults to the network folder in the specified or default datacenter.`
 }
 
-func (cmd *create) Process(ctx context.Context) error { return nil }
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	var parent *object.Folder

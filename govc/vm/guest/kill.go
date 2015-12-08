@@ -34,10 +34,18 @@ func init() {
 }
 
 func (cmd *kill) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag.Register(ctx, f)
+
 	f.Var(&cmd.pids, "p", "Process ID")
 }
 
-func (cmd *kill) Process(ctx context.Context) error { return nil }
+func (cmd *kill) Process(ctx context.Context) error {
+	if err := cmd.GuestFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *kill) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.ProcessManager()

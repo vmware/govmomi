@@ -37,12 +37,20 @@ func init() {
 }
 
 func (cmd *mktemp) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.dir, "d", false, "Make a directory instead of a file")
 	f.StringVar(&cmd.prefix, "t", "", "Prefix")
 	f.StringVar(&cmd.suffix, "s", "", "Suffix")
 }
 
-func (cmd *mktemp) Process(ctx context.Context) error { return nil }
+func (cmd *mktemp) Process(ctx context.Context) error {
+	if err := cmd.GuestFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *mktemp) Run(ctx context.Context, f *flag.FlagSet) error {
 	m, err := cmd.FileManager()

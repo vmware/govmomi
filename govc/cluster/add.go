@@ -40,6 +40,12 @@ func init() {
 }
 
 func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
+	cmd.HostConnectFlag, ctx = flags.NewHostConnectFlag(ctx)
+	cmd.HostConnectFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.cluster, "cluster", "*", "Path to cluster")
 
 	f.StringVar(&cmd.license, "license", "", "Assign license key")
@@ -48,6 +54,12 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostConnectFlag.Process(ctx); err != nil {
+		return err
+	}
 	if cmd.HostName == "" {
 		return flag.ErrHelp
 	}

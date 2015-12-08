@@ -38,10 +38,18 @@ func init() {
 }
 
 func (cmd *exit) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.IntVar(&cmd.timeout, "timeout", 0, "Timeout")
 }
 
-func (cmd *exit) Process(ctx context.Context) error { return nil }
+func (cmd *exit) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *exit) Usage() string {
 	return "HOST..."

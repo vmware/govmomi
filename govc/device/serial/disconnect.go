@@ -35,10 +35,18 @@ func init() {
 }
 
 func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.device, "device", "", "serial port device name")
 }
 
-func (cmd *disconnect) Process(ctx context.Context) error { return nil }
+func (cmd *disconnect) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()

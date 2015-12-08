@@ -37,9 +37,16 @@ type ArchiveFlag struct {
 	Archive
 }
 
-func (f *ArchiveFlag) Register(fs *flag.FlagSet) { return }
+func newArchiveFlag(ctx context.Context) (*ArchiveFlag, context.Context) {
+	return &ArchiveFlag{}, ctx
+}
 
-func (f *ArchiveFlag) Process(ctx context.Context) error { return nil }
+func (f *ArchiveFlag) Register(ctx context.Context, fs *flag.FlagSet) {
+}
+
+func (f *ArchiveFlag) Process(ctx context.Context) error {
+	return nil
+}
 
 func (f *ArchiveFlag) ReadOvf(fpath string) ([]byte, error) {
 	r, _, err := f.Archive.Open(fpath)

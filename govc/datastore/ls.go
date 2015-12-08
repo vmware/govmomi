@@ -44,10 +44,24 @@ func init() {
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 }
 
-func (cmd *ls) Process(ctx context.Context) error { return nil }
+func (cmd *ls) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *ls) Usage() string {
 	return "[FILE]..."

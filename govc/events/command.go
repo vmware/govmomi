@@ -41,10 +41,18 @@ func init() {
 }
 
 func (cmd *events) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	f.IntVar(&cmd.Max, "n", 25, "Output the last N events")
 }
 
-func (cmd *events) Process(ctx context.Context) error { return nil }
+func (cmd *events) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *events) Usage() string {
 	return "[PATH]..."

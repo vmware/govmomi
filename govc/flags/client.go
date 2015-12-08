@@ -28,7 +28,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25"
@@ -50,9 +49,9 @@ const (
 const cDescr = "ESX or vCenter URL"
 
 type ClientFlag struct {
-	*DebugFlag
+	common
 
-	register sync.Once
+	*DebugFlag
 
 	url           *url.URL
 	username      string
@@ -64,6 +63,19 @@ type ClientFlag struct {
 	minAPIVersion string
 
 	client *vim25.Client
+}
+
+var clientFlagKey = flagKey("client")
+
+func NewClientFlag(ctx context.Context) (*ClientFlag, context.Context) {
+	if v := ctx.Value(clientFlagKey); v != nil {
+		return v.(*ClientFlag), ctx
+	}
+
+	v := &ClientFlag{}
+	v.DebugFlag, ctx = NewDebugFlag(ctx)
+	ctx = context.WithValue(ctx, clientFlagKey, v)
+	return v, ctx
 }
 
 func (flag *ClientFlag) URLWithoutPassword() *url.URL {
@@ -115,7 +127,9 @@ func (flag *ClientFlag) Set(s string) error {
 }
 
 func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	flag.register.Do(func() {
+	flag.RegisterOnce(func() {
+		flag.DebugFlag.Register(ctx, f)
+
 		{
 			flag.Set(os.Getenv(envURL))
 			usage := fmt.Sprintf("%s [%s]", cDescr, envURL)
@@ -173,38 +187,44 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (flag *ClientFlag) Process(ctx context.Context) error {
-	if flag.url == nil {
-		return errors.New("specify an " + cDescr)
-	}
-
-	// Override username if set
-	if flag.username != "" {
-		var password string
-		var ok bool
-
-		if flag.url.User != nil {
-			password, ok = flag.url.User.Password()
+	return flag.ProcessOnce(func() error {
+		if err := flag.DebugFlag.Process(ctx); err != nil {
+			return err
 		}
 
-		if ok {
-			flag.url.User = url.UserPassword(flag.username, password)
-		} else {
-			flag.url.User = url.User(flag.username)
-		}
-	}
-
-	// Override password if set
-	if flag.password != "" {
-		var username string
-
-		if flag.url.User != nil {
-			username = flag.url.User.Username()
+		if flag.url == nil {
+			return errors.New("specify an " + cDescr)
 		}
 
-		flag.url.User = url.UserPassword(username, flag.password)
-	}
+		// Override username if set
+		if flag.username != "" {
+			var password string
+			var ok bool
 
-	return nil
+			if flag.url.User != nil {
+				password, ok = flag.url.User.Password()
+			}
+
+			if ok {
+				flag.url.User = url.UserPassword(flag.username, password)
+			} else {
+				flag.url.User = url.User(flag.username)
+			}
+		}
+
+		// Override password if set
+		if flag.password != "" {
+			var username string
+
+			if flag.url.User != nil {
+				username = flag.url.User.Username()
+			}
+
+			flag.url.User = url.UserPassword(username, flag.password)
+		}
+
+		return nil
+	})
 }
 
 // Retry twice when a temporary I/O error occurs.

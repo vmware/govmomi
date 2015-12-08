@@ -35,10 +35,18 @@ func init() {
 }
 
 func (cmd *eject) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.device, "device", "", "CD-ROM device name")
 }
 
-func (cmd *eject) Process(ctx context.Context) error { return nil }
+func (cmd *eject) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *eject) Description() string {
 	return `Eject media from CD-ROM device.

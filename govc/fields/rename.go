@@ -33,9 +33,17 @@ func init() {
 	cli.Register("fields.rename", &rename{})
 }
 
-func (cmd *rename) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *rename) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+}
 
-func (cmd *rename) Process(ctx context.Context) error { return nil }
+func (cmd *rename) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *rename) Usage() string {
 	return "KEY NAME"

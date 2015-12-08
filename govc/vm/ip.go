@@ -40,11 +40,24 @@ func init() {
 }
 
 func (cmd *ip) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
+	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
+	cmd.SearchFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.esx, "esxcli", false, "Use esxcli instead of guest tools")
 }
 
-func (cmd *ip) Process(ctx context.Context) error { return nil }
+func (cmd *ip) Process(ctx context.Context) error {
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()

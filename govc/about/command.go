@@ -36,9 +36,17 @@ func init() {
 	cli.Register("about", &about{})
 }
 
-func (cmd *about) Register(ctx context.Context, f *flag.FlagSet) {}
+func (cmd *about) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+}
 
-func (cmd *about) Process(ctx context.Context) error { return nil }
+func (cmd *about) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *about) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()

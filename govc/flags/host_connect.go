@@ -26,22 +26,40 @@ import (
 )
 
 type HostConnectFlag struct {
+	common
+
 	types.HostConnectSpec
 
 	noverify bool
 }
 
-func (flag *HostConnectFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	f.StringVar(&flag.HostName, "hostname", "", "Hostname or IP address of the host")
-	f.StringVar(&flag.UserName, "username", "", "Username of administration account on the host")
-	f.StringVar(&flag.Password, "password", "", "Password of administration account on the host")
-	f.StringVar(&flag.SslThumbprint, "fingerprint", "", "Fingerprint of the host's SSL certificate")
-	f.BoolVar(&flag.Force, "force", false, "Force when host is managed by another VC")
+var hostConnectFlagKey = flagKey("hostConnect")
 
-	f.BoolVar(&flag.noverify, "noverify", false, "When true, ignore host SSL certificate verification error")
+func NewHostConnectFlag(ctx context.Context) (*HostConnectFlag, context.Context) {
+	if v := ctx.Value(hostConnectFlagKey); v != nil {
+		return v.(*HostConnectFlag), ctx
+	}
+
+	v := &HostConnectFlag{}
+	ctx = context.WithValue(ctx, hostConnectFlagKey, v)
+	return v, ctx
 }
 
-func (flag *HostConnectFlag) Process(ctx context.Context) error { return nil }
+func (flag *HostConnectFlag) Register(ctx context.Context, f *flag.FlagSet) {
+	flag.RegisterOnce(func() {
+		f.StringVar(&flag.HostName, "hostname", "", "Hostname or IP address of the host")
+		f.StringVar(&flag.UserName, "username", "", "Username of administration account on the host")
+		f.StringVar(&flag.Password, "password", "", "Password of administration account on the host")
+		f.StringVar(&flag.SslThumbprint, "fingerprint", "", "Fingerprint of the host's SSL certificate")
+		f.BoolVar(&flag.Force, "force", false, "Force when host is managed by another VC")
+
+		f.BoolVar(&flag.noverify, "noverify", false, "When true, ignore host SSL certificate verification error")
+	})
+}
+
+func (flag *HostConnectFlag) Process(ctx context.Context) error {
+	return nil
+}
 
 // AcceptThumbprint returns nil if the given error is an SSLVerifyFault and -noverify is true.
 // In which case, flag.SslThumbprint is set to fault.Thumbprint and the caller should retry the task.
