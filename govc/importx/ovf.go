@@ -44,6 +44,8 @@ type ovfx struct {
 	*OptionsFlag
 	*FolderFlag
 
+	Name string
+
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
@@ -70,6 +72,8 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OptionsFlag.Register(ctx, f)
 	cmd.FolderFlag, ctx = newFolderFlag(ctx)
 	cmd.FolderFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.Name, "name", "", "Name to use for new entity")
 }
 
 func (cmd *ovfx) Process(ctx context.Context) error {
@@ -83,6 +87,15 @@ func (cmd *ovfx) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ArchiveFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OptionsFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.FolderFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -178,6 +191,19 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 	name := "Govc Virtual Appliance"
 	if e.VirtualSystem != nil {
 		name = e.VirtualSystem.ID
+		if e.VirtualSystem.Name != nil {
+			name = *e.VirtualSystem.Name
+		}
+	}
+
+	// Override name from options if specified
+	if cmd.Options.Name != nil {
+		name = *cmd.Options.Name
+	}
+
+	// Override name from arguments if specified
+	if cmd.Name != "" {
+		name = cmd.Name
 	}
 
 	cisp := types.OvfCreateImportSpecParams{
