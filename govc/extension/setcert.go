@@ -49,12 +49,20 @@ func init() {
 	cli.Register("extension.setcert", &setcert{})
 }
 
-func (cmd *setcert) Register(f *flag.FlagSet) {
+func (cmd *setcert) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.cert, "cert-pem", "-", "PEM encoded certificate")
 	f.StringVar(&cmd.org, "org", "VMware", "Organization for generated certificate")
 }
 
-func (cmd *setcert) Process() error { return nil }
+func (cmd *setcert) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *setcert) Usage() string {
 	return "ID"
@@ -129,9 +137,7 @@ func (cmd *setcert) create(id string) error {
 	return nil
 }
 
-func (cmd *setcert) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *setcert) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

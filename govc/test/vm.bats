@@ -239,8 +239,8 @@ load test_helper
   run govc device.info -vm $vm disk-1000-0
   assert_success
   assert_line "Controller: lsilogic-1000"
-  assert_line "Parent: [datastore1] $GOVC_TEST_VMDK"
-  assert_line "File: [datastore1] $vm/${vm}.vmdk"
+  assert_line "Parent: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
+  assert_line "File: [${GOVC_DATASTORE}] $vm/${vm}.vmdk"
 }
 
 @test "vm.create scsi disk" {
@@ -255,8 +255,8 @@ load test_helper
   run govc device.info -vm $vm disk-1000-0
   assert_success
   assert_line "Controller: lsilogic-1000"
-  refute_line "Parent: [datastore1] $GOVC_TEST_VMDK"
-  assert_line "File: [datastore1] $GOVC_TEST_VMDK"
+  refute_line "Parent: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
+  assert_line "File: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
 }
 
 @test "vm.create iso" {
@@ -273,7 +273,7 @@ load test_helper
   run govc device.info -vm $vm cdrom-3000
   assert_success
   assert_line "Controller: ide-200"
-  assert_line "Summary: ISO [datastore1] $GOVC_TEST_ISO"
+  assert_line "Summary: ISO [${GOVC_DATASTORE}] $GOVC_TEST_ISO"
 }
 
 @test "vm.disk.create empty vm" {
@@ -327,7 +327,7 @@ load test_helper
   assert_success
 
   run govc vm.disk.attach -vm $vm -link=false -disk enoent.vmdk
-  assert_failure "Error: File [datastore1] enoent.vmdk was not found"
+  assert_failure "Error: File [${GOVC_DATASTORE}] enoent.vmdk was not found"
 
   run govc vm.disk.attach -vm $vm -disk enoent.vmdk
   assert_failure "Error: Invalid configuration for device '0'."

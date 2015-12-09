@@ -38,12 +38,18 @@ func init() {
 	cli.Register("host.vnic.service", &service{})
 }
 
-func (cmd *service) Register(f *flag.FlagSet) {
+func (cmd *service) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.Enable, "enable", false, "Enable service")
 	f.BoolVar(&cmd.Disable, "disable", false, "Disable service")
 }
 
-func (cmd *service) Process() error {
+func (cmd *service) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
 	// Either may be true or none may be true.
 	if cmd.Enable && cmd.Disable {
 		return flag.ErrHelp
@@ -72,9 +78,7 @@ Enable or disable service on a virtual nic device.  Example:
 SERVICE [%s] DEVICE [%s]`, strings.Join(nicTypes, "|"), strings.Join([]string{"vmk0", "vmk1", "..."}, "|"))
 }
 
-func (cmd *service) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *service) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 2 {
 		return flag.ErrHelp
 	}

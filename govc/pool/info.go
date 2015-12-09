@@ -40,9 +40,22 @@ func init() {
 	cli.Register("pool.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {}
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+}
 
-func (cmd *info) Process() error { return nil }
+func (cmd *info) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *info) Usage() string {
 	return "POOL..."
@@ -52,7 +65,7 @@ func (cmd *info) Description() string {
 	return "Retrieve information about one or more resource POOLs.\n" + poolNameHelp
 }
 
-func (cmd *info) Run(f *flag.FlagSet) error {
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}
@@ -61,8 +74,6 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-
-	ctx := context.TODO()
 
 	finder, err := cmd.Finder()
 	if err != nil {

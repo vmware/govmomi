@@ -39,14 +39,22 @@ func init() {
 	cli.Register("permissions.set", &set{})
 }
 
-func (cmd *set) Register(f *flag.FlagSet) {
+func (cmd *set) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.Principal, "principal", "", "User or group for which the permission is defined")
 	f.BoolVar(&cmd.Group, "group", false, "True, if principal refers to a group name; false, for a user name")
 	f.BoolVar(&cmd.Propagate, "propagate", true, "Whether or not this permission propagates down the hierarchy to sub-entities")
 	f.StringVar(&cmd.role, "role", "Admin", "Permission role name")
 }
 
-func (cmd *set) Process() error { return nil }
+func (cmd *set) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *set) Usage() string {
 	return "[PATH]..."
@@ -59,9 +67,7 @@ govc permissions.set -principal root -role Admin
 `
 }
 
-func (cmd *set) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

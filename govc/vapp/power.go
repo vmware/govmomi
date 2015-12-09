@@ -39,8 +39,9 @@ func init() {
 	cli.Register("vapp.power", &power{})
 }
 
-func (cmd *power) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualApps)
+func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualApps)
+	cmd.SearchFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.On, "on", false, "Power on")
 	f.BoolVar(&cmd.Off, "off", false, "Power off")
@@ -48,7 +49,10 @@ func (cmd *power) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.Force, "force", false, "Force (If force is false, the shutdown order in the vApp is executed. If force is true, all virtual machines are powered-off (regardless of shutdown order))")
 }
 
-func (cmd *power) Process() error {
+func (cmd *power) Process(ctx context.Context) error {
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
+		return err
+	}
 	opts := []bool{cmd.On, cmd.Off, cmd.Suspend}
 	selected := false
 
@@ -68,7 +72,7 @@ func (cmd *power) Process() error {
 	return nil
 }
 
-func (cmd *power) Run(f *flag.FlagSet) error {
+func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 	vapps, err := cmd.VirtualApps(f.Args())
 	if err != nil {
 		return err

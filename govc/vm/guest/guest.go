@@ -35,9 +35,32 @@ type GuestFlag struct {
 	*AuthFlag
 }
 
-func (flag *GuestFlag) Register(f *flag.FlagSet) {}
+func newGuestFlag(ctx context.Context) (*GuestFlag, context.Context) {
+	f := &GuestFlag{}
+	f.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	f.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	f.AuthFlag, ctx = newAuthFlag(ctx)
+	return f, ctx
+}
 
-func (flag *GuestFlag) Process() error { return nil }
+func (flag *GuestFlag) Register(ctx context.Context, f *flag.FlagSet) {
+	flag.ClientFlag.Register(ctx, f)
+	flag.VirtualMachineFlag.Register(ctx, f)
+	flag.AuthFlag.Register(ctx, f)
+}
+
+func (flag *GuestFlag) Process(ctx context.Context) error {
+	if err := flag.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := flag.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := flag.AuthFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
 	c, err := flag.Client()

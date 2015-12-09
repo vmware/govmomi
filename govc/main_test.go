@@ -20,6 +20,8 @@ import (
 	"flag"
 	"testing"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/govc/cli"
 )
 
@@ -28,6 +30,9 @@ func TestMain(t *testing.T) {
 	// commands with flag name collisions
 	for _, cmd := range cli.Commands() {
 		fs := flag.NewFlagSet("", flag.ContinueOnError)
-		cli.RegisterCommand(cmd, fs)
+
+		// Use fresh context for every command
+		ctx, _ := context.WithCancel(context.Background())
+		cmd.Register(ctx, fs)
 	}
 }

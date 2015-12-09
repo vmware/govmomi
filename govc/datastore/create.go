@@ -106,7 +106,10 @@ func (t *typeFlag) IsVmfsType() bool {
 	return t.partOf(vmfsTypes)
 }
 
-func (cmd *create) Register(f *flag.FlagSet) {
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	modes := []string{
 		string(types.HostMountModeReadOnly),
 		string(types.HostMountModeReadWrite),
@@ -128,7 +131,10 @@ func (cmd *create) Register(f *flag.FlagSet) {
 	f.StringVar(&cmd.DiskCanonicalName, "disk", "", "Canonical name of disk (VMFS only)")
 }
 
-func (cmd *create) Process() error {
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -144,9 +150,7 @@ Examples:
   govc datastore.create -type vmfs -name localDatastore -disk=mpx.vmhba0:C0:T0:L0 cluster1`
 }
 
-func (cmd *create) Run(f *flag.FlagSet) error {
-	var ctx = context.Background()
-
+func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	hosts, err := cmd.HostSystems(f.Args())
 	if err != nil {
 		return err

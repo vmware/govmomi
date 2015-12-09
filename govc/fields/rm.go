@@ -33,17 +33,23 @@ func init() {
 	cli.Register("fields.rm", &rm{})
 }
 
-func (cmd *rm) Register(f *flag.FlagSet) {}
+func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+}
 
-func (cmd *rm) Process() error { return nil }
+func (cmd *rm) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *rm) Usage() string {
 	return "KEY..."
 }
 
-func (cmd *rm) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

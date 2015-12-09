@@ -74,7 +74,12 @@ func init() {
 	cli.Register("host.storage.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
 	err := cmd.typ.Set("lun")
 	if err != nil {
 		panic(err)
@@ -83,7 +88,13 @@ func (cmd *info) Register(f *flag.FlagSet) {
 	f.Var(&cmd.typ, "t", fmt.Sprintf("Type (%s)", strings.Join(infoTypes, ",")))
 }
 
-func (cmd *info) Process() error {
+func (cmd *info) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -95,9 +106,7 @@ func (cmd *info) Description() string {
 	return `Show information about a host's storage system.`
 }
 
-func (cmd *info) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	host, err := cmd.HostSystem()
 	if err != nil {
 		return err

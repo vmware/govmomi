@@ -38,13 +38,27 @@ func init() {
 	cli.Register("license.list", &list{})
 }
 
-func (cmd *list) Register(f *flag.FlagSet) {
+func (cmd *list) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.feature, "feature", "", featureUsage)
 }
 
-func (cmd *list) Process() error { return nil }
+func (cmd *list) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
-func (cmd *list) Run(f *flag.FlagSet) error {
+func (cmd *list) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
 		return err

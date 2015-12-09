@@ -33,20 +33,26 @@ func init() {
 	cli.Register("fields.set", &set{})
 }
 
-func (cmd *set) Register(f *flag.FlagSet) {}
+func (cmd *set) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+}
 
-func (cmd *set) Process() error { return nil }
+func (cmd *set) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *set) Usage() string {
 	return "KEY VALUE PATH..."
 }
 
-func (cmd *set) Run(f *flag.FlagSet) error {
+func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() < 3 {
 		return flag.ErrHelp
 	}
-
-	ctx := context.TODO()
 
 	c, err := cmd.Client()
 	if err != nil {

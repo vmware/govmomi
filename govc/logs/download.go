@@ -41,11 +41,19 @@ func init() {
 	cli.Register("logs.download", &download{})
 }
 
-func (cmd *download) Register(f *flag.FlagSet) {
+func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.IncludeDefault, "default", true, "Specifies if the bundle should include the default server")
 }
 
-func (cmd *download) Process() error { return nil }
+func (cmd *download) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *download) Usage() string {
 	return "[PATH]..."
@@ -85,7 +93,7 @@ func (cmd *download) GenerateLogBundles(m *object.DiagnosticManager, host []*obj
 	return r.Result.(types.ArrayOfDiagnosticManagerBundleInfo).DiagnosticManagerBundleInfo, nil
 }
 
-func (cmd *download) Run(f *flag.FlagSet) error {
+func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err

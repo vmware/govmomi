@@ -33,15 +33,23 @@ func init() {
 	cli.Register("vapp.destroy", &destroy{})
 }
 
-func (cmd *destroy) Register(f *flag.FlagSet) {}
+func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+}
 
-func (cmd *destroy) Process() error { return nil }
+func (cmd *destroy) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *destroy) Usage() string {
 	return "VAPP..."
 }
 
-func (cmd *destroy) Run(f *flag.FlagSet) error {
+func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}

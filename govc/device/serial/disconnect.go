@@ -34,13 +34,21 @@ func init() {
 	cli.Register("device.serial.disconnect", &disconnect{})
 }
 
-func (cmd *disconnect) Register(f *flag.FlagSet) {
+func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.device, "device", "", "serial port device name")
 }
 
-func (cmd *disconnect) Process() error { return nil }
+func (cmd *disconnect) Process(ctx context.Context) error {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
-func (cmd *disconnect) Run(f *flag.FlagSet) error {
+func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err

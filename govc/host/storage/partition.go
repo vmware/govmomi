@@ -40,11 +40,20 @@ func init() {
 	cli.Register("host.storage.partition", &partition{})
 }
 
-func (cmd *partition) Register(f *flag.FlagSet) {
-	return
+func (cmd *partition) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 }
 
-func (cmd *partition) Process() error {
+func (cmd *partition) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -56,9 +65,7 @@ func (cmd *partition) Description() string {
 	return `Show partition table for device at DEVICE_PATH.`
 }
 
-func (cmd *partition) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *partition) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return fmt.Errorf("specify device path")
 	}

@@ -38,12 +38,20 @@ func init() {
 	cli.Register("host.maintenance.enter", &enter{})
 }
 
-func (cmd *enter) Register(f *flag.FlagSet) {
+func (cmd *enter) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.IntVar(&cmd.timeout, "timeout", 0, "Timeout")
 	f.BoolVar(&cmd.evacuate, "evacuate", false, "Evacuate powered off VMs")
 }
 
-func (cmd *enter) Process() error { return nil }
+func (cmd *enter) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *enter) Usage() string {
 	return "HOST..."
@@ -69,9 +77,7 @@ func (cmd *enter) EnterMaintenanceMode(ctx context.Context, host *object.HostSys
 	return err
 }
 
-func (cmd *enter) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *enter) Run(ctx context.Context, f *flag.FlagSet) error {
 	hosts, err := cmd.HostSystems(f.Args())
 	if err != nil {
 		return err

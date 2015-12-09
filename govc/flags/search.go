@@ -34,6 +34,8 @@ const (
 )
 
 type SearchFlag struct {
+	common
+
 	*ClientFlag
 	*DatacenterFlag
 
@@ -49,67 +51,91 @@ type SearchFlag struct {
 	isset bool
 }
 
-func NewSearchFlag(t int) *SearchFlag {
-	s := SearchFlag{
+var searchFlagKey = flagKey("search")
+
+func NewSearchFlag(ctx context.Context, t int) (*SearchFlag, context.Context) {
+	if v := ctx.Value(searchFlagKey); v != nil {
+		return v.(*SearchFlag), ctx
+	}
+
+	v := &SearchFlag{
 		t: t,
 	}
 
+	v.ClientFlag, ctx = NewClientFlag(ctx)
+	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+
 	switch t {
 	case SearchVirtualMachines:
-		s.entity = "VM"
+		v.entity = "VM"
 	case SearchHosts:
-		s.entity = "host"
+		v.entity = "host"
 	case SearchVirtualApps:
-		s.entity = "vapp"
+		v.entity = "vapp"
 	default:
 		panic("invalid search type")
 	}
 
-	return &s
+	ctx = context.WithValue(ctx, searchFlagKey, v)
+	return v, ctx
 }
 
-func (flag *SearchFlag) Register(fs *flag.FlagSet) {
-	register := func(v *string, f string, d string) {
-		f = fmt.Sprintf("%s.%s", strings.ToLower(flag.entity), f)
-		d = fmt.Sprintf(d, flag.entity)
-		fs.StringVar(v, f, "", d)
-	}
+func (flag *SearchFlag) Register(ctx context.Context, fs *flag.FlagSet) {
+	flag.RegisterOnce(func() {
+		flag.ClientFlag.Register(ctx, fs)
+		flag.DatacenterFlag.Register(ctx, fs)
 
-	switch flag.t {
-	case SearchVirtualMachines:
-		register(&flag.byDatastorePath, "path", "Find %s by path to .vmx file")
-	}
-
-	switch flag.t {
-	case SearchVirtualMachines, SearchHosts:
-		register(&flag.byDNSName, "dns", "Find %s by FQDN")
-		register(&flag.byIP, "ip", "Find %s by IP address")
-		register(&flag.byUUID, "uuid", "Find %s by instance UUID")
-	}
-
-	register(&flag.byInventoryPath, "ipath", "Find %s by inventory path")
-}
-
-func (flag *SearchFlag) Process() error {
-	flags := []string{
-		flag.byDatastorePath,
-		flag.byDNSName,
-		flag.byInventoryPath,
-		flag.byIP,
-		flag.byUUID,
-	}
-
-	flag.isset = false
-	for _, f := range flags {
-		if f != "" {
-			if flag.isset {
-				return errors.New("cannot use more than one search flag")
-			}
-			flag.isset = true
+		register := func(v *string, f string, d string) {
+			f = fmt.Sprintf("%s.%s", strings.ToLower(flag.entity), f)
+			d = fmt.Sprintf(d, flag.entity)
+			fs.StringVar(v, f, "", d)
 		}
-	}
 
-	return nil
+		switch flag.t {
+		case SearchVirtualMachines:
+			register(&flag.byDatastorePath, "path", "Find %s by path to .vmx file")
+		}
+
+		switch flag.t {
+		case SearchVirtualMachines, SearchHosts:
+			register(&flag.byDNSName, "dns", "Find %s by FQDN")
+			register(&flag.byIP, "ip", "Find %s by IP address")
+			register(&flag.byUUID, "uuid", "Find %s by instance UUID")
+		}
+
+		register(&flag.byInventoryPath, "ipath", "Find %s by inventory path")
+	})
+}
+
+func (flag *SearchFlag) Process(ctx context.Context) error {
+	return flag.ProcessOnce(func() error {
+		if err := flag.ClientFlag.Process(ctx); err != nil {
+			return err
+		}
+		if err := flag.DatacenterFlag.Process(ctx); err != nil {
+			return err
+		}
+
+		flags := []string{
+			flag.byDatastorePath,
+			flag.byDNSName,
+			flag.byInventoryPath,
+			flag.byIP,
+			flag.byUUID,
+		}
+
+		flag.isset = false
+		for _, f := range flags {
+			if f != "" {
+				if flag.isset {
+					return errors.New("cannot use more than one search flag")
+				}
+				flag.isset = true
+			}
+		}
+
+		return nil
+	})
 }
 
 func (flag *SearchFlag) IsSet() bool {

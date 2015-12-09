@@ -40,19 +40,25 @@ func init() {
 	cli.Register("events", &events{})
 }
 
-func (cmd *events) Register(f *flag.FlagSet) {
+func (cmd *events) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	f.IntVar(&cmd.Max, "n", 25, "Output the last N events")
 }
 
-func (cmd *events) Process() error { return nil }
+func (cmd *events) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *events) Usage() string {
 	return "[PATH]..."
 }
 
-func (cmd *events) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

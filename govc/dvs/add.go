@@ -42,12 +42,20 @@ func init() {
 	cli.Register("dvs.add", &add{})
 }
 
-func (cmd *add) Register(f *flag.FlagSet) {
+func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.path, "dvs", "", "DVS path")
 	f.StringVar(&cmd.pnic, "pnic", "vmnic0", "Name of the host physical NIC")
 }
 
-func (cmd *add) Process() error { return nil }
+func (cmd *add) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *add) Usage() string {
 	return "HOST..."
@@ -57,9 +65,7 @@ func (cmd *add) Description() string {
 	return `Add hosts to DVS.`
 }
 
-func (cmd *add) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}

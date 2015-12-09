@@ -38,12 +38,20 @@ func init() {
 	cli.Register("permissions.remove", &remove{})
 }
 
-func (cmd *remove) Register(f *flag.FlagSet) {
+func (cmd *remove) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.Principal, "principal", "", "User or group for which the permission is defined")
 	f.BoolVar(&cmd.Group, "group", false, "True, if principal refers to a group name; false, for a user name")
 }
 
-func (cmd *remove) Process() error { return nil }
+func (cmd *remove) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *remove) Usage() string {
 	return "[PATH]..."
@@ -53,9 +61,7 @@ func (cmd *remove) Description() string {
 	return `Removes a permission rule from managed entities.`
 }
 
-func (cmd *remove) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

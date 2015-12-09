@@ -39,12 +39,26 @@ func init() {
 	cli.Register("host.reconnect", &reconnect{})
 }
 
-func (cmd *reconnect) Register(f *flag.FlagSet) {
+func (cmd *reconnect) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
+	cmd.HostConnectFlag, ctx = flags.NewHostConnectFlag(ctx)
+	cmd.HostConnectFlag.Register(ctx, f)
+
 	cmd.HostSystemReconnectSpec.SyncState = types.NewBool(false)
 	f.BoolVar(cmd.HostSystemReconnectSpec.SyncState, "sync-state", false, "Sync state")
 }
 
-func (cmd *reconnect) Process() error { return nil }
+func (cmd *reconnect) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostConnectFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *reconnect) Description() string {
 	return `Reconnect host to vCenter.
@@ -66,9 +80,7 @@ func (cmd *reconnect) Reconnect(ctx context.Context, host *object.HostSystem) er
 	return err
 }
 
-func (cmd *reconnect) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *reconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 	hosts, err := cmd.HostSystems(f.Args())
 	if err != nil {
 		return err

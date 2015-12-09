@@ -21,6 +21,8 @@ import (
 	"flag"
 	"os"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -56,11 +58,15 @@ type OptionsFlag struct {
 	path string
 }
 
-func (flag *OptionsFlag) Register(f *flag.FlagSet) {
+func newOptionsFlag(ctx context.Context) (*OptionsFlag, context.Context) {
+	return &OptionsFlag{}, ctx
+}
+
+func (flag *OptionsFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&flag.path, "options", "", "Options spec file path for VM deployment")
 }
 
-func (flag *OptionsFlag) Process() error {
+func (flag *OptionsFlag) Process(ctx context.Context) error {
 	if len(flag.path) > 0 {
 		f, err := os.Open(flag.path)
 		if err != nil {

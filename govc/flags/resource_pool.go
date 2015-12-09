@@ -20,22 +20,37 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"sync"
 
 	"github.com/vmware/govmomi/object"
 	"golang.org/x/net/context"
 )
 
 type ResourcePoolFlag struct {
+	common
+
 	*DatacenterFlag
 
-	register sync.Once
-	name     string
-	pool     *object.ResourcePool
+	name string
+	pool *object.ResourcePool
 }
 
-func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
-	flag.register.Do(func() {
+var resourcePoolFlagKey = flagKey("resourcePool")
+
+func NewResourcePoolFlag(ctx context.Context) (*ResourcePoolFlag, context.Context) {
+	if v := ctx.Value(resourcePoolFlagKey); v != nil {
+		return v.(*ResourcePoolFlag), ctx
+	}
+
+	v := &ResourcePoolFlag{}
+	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+	ctx = context.WithValue(ctx, resourcePoolFlagKey, v)
+	return v, ctx
+}
+
+func (flag *ResourcePoolFlag) Register(ctx context.Context, f *flag.FlagSet) {
+	flag.RegisterOnce(func() {
+		flag.DatacenterFlag.Register(ctx, f)
+
 		env := "GOVC_RESOURCE_POOL"
 		value := os.Getenv(env)
 		usage := fmt.Sprintf("Resource pool [%s]", env)
@@ -43,7 +58,14 @@ func (flag *ResourcePoolFlag) Register(f *flag.FlagSet) {
 	})
 }
 
-func (flag *ResourcePoolFlag) Process() error { return nil }
+func (flag *ResourcePoolFlag) Process(ctx context.Context) error {
+	return flag.ProcessOnce(func() error {
+		if err := flag.DatacenterFlag.Process(ctx); err != nil {
+			return err
+		}
+		return nil
+	})
+}
 
 func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	if flag.pool != nil {

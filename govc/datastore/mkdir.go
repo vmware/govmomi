@@ -38,17 +38,25 @@ func init() {
 	cli.Register("datastore.mkdir", &mkdir{})
 }
 
-func (cmd *mkdir) Register(f *flag.FlagSet) {
+func (cmd *mkdir) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+
 	f.BoolVar(&cmd.createParents, "p", false, "Create intermediate directories as needed")
 }
 
-func (cmd *mkdir) Process() error { return nil }
+func (cmd *mkdir) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *mkdir) Usage() string {
 	return "DIRECTORY"
 }
 
-func (cmd *mkdir) Run(f *flag.FlagSet) error {
+func (cmd *mkdir) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) == 0 {
 		return errors.New("missing operand")

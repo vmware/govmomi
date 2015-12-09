@@ -39,13 +39,19 @@ func init() {
 	cli.Register("host.vnic.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {}
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+}
 
-func (cmd *info) Process() error { return nil }
+func (cmd *info) Process(ctx context.Context) error {
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
-func (cmd *info) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	host, err := cmd.HostSystem()
 	if err != nil {
 		return err

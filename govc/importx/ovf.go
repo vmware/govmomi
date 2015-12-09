@@ -54,15 +54,45 @@ func init() {
 	cli.Register("import.ovf", &ovfx{})
 }
 
-func (cmd *ovfx) Register(f *flag.FlagSet) {}
+func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
+	cmd.ResourcePoolFlag.Register(ctx, f)
 
-func (cmd *ovfx) Process() error { return nil }
+	cmd.ArchiveFlag, ctx = newArchiveFlag(ctx)
+	cmd.ArchiveFlag.Register(ctx, f)
+	cmd.OptionsFlag, ctx = newOptionsFlag(ctx)
+	cmd.OptionsFlag.Register(ctx, f)
+	cmd.FolderFlag, ctx = newFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
+}
+
+func (cmd *ovfx) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *ovfx) Usage() string {
 	return "PATH_TO_OVF"
 }
 
-func (cmd *ovfx) Run(f *flag.FlagSet) error {
+func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 	fpath, err := cmd.Prepare(f)
 	if err != nil {
 		return err

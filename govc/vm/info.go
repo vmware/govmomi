@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
+
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -50,8 +51,15 @@ func init() {
 	cli.Register("vm.info", &info{})
 }
 
-func (cmd *info) Register(f *flag.FlagSet) {
-	cmd.SearchFlag = flags.NewSearchFlag(flags.SearchVirtualMachines)
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
+	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
+	cmd.SearchFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.WaitForIP, "waitip", false, "Wait for VM to acquire IP address")
 	f.BoolVar(&cmd.General, "g", true, "Show general summary")
@@ -59,9 +67,20 @@ func (cmd *info) Register(f *flag.FlagSet) {
 	f.BoolVar(&cmd.Resources, "r", false, "Show resource summary")
 }
 
-func (cmd *info) Process() error { return nil }
+func (cmd *info) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
-func (cmd *info) Run(f *flag.FlagSet) error {
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err
@@ -99,7 +118,6 @@ func (cmd *info) Run(f *flag.FlagSet) error {
 		}
 	}
 
-	ctx := context.TODO()
 	pc := property.DefaultCollector(c)
 	if len(refs) != 0 {
 		err = pc.Retrieve(ctx, refs, props, &res.VirtualMachines)

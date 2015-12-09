@@ -21,6 +21,8 @@ import (
 	"strconv"
 	"strings"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -63,9 +65,7 @@ type ResourceConfigSpecFlag struct {
 	types.ResourceConfigSpec
 }
 
-func (s *ResourceConfigSpecFlag) Process() error { return nil }
-
-func (s *ResourceConfigSpecFlag) Register(f *flag.FlagSet) {
+func (s *ResourceConfigSpecFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	opts := []struct {
 		name  string
 		units string
@@ -90,6 +90,10 @@ func (s *ResourceConfigSpecFlag) Register(f *flag.FlagSet) {
 		f.BoolVar(ra.ExpandableReservation, prefix+".expandable", expandableReservation, opt.name+" expandable reservation")
 		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
 	}
+}
+
+func (s *ResourceConfigSpecFlag) Process(ctx context.Context) error {
+	return nil
 }
 
 func (s *ResourceConfigSpecFlag) SetAllocation(f func(types.BaseResourceAllocationInfo)) {

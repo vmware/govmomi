@@ -37,10 +37,23 @@ func init() {
 	cli.Register("permissions.ls", &ls{})
 }
 
-func (cmd *ls) Register(f *flag.FlagSet) {
+func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 }
 
-func (cmd *ls) Process() error { return nil }
+func (cmd *ls) Process(ctx context.Context) error {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *ls) Usage() string {
 	return "[PATH]..."
@@ -50,9 +63,7 @@ func (cmd *ls) Description() string {
 	return `List the permissions defined on or effective on managed entities.`
 }
 
-func (cmd *ls) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err

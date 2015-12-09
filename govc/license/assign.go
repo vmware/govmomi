@@ -39,20 +39,38 @@ func init() {
 	cli.Register("license.assign", &assign{})
 }
 
-func (cmd *assign) Register(f *flag.FlagSet) {
+func (cmd *assign) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.name, "name", "", "Display name")
 	f.BoolVar(&cmd.remove, "remove", false, "Remove assignment")
 }
 
-func (cmd *assign) Process() error { return nil }
+func (cmd *assign) Process(ctx context.Context) error {
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *assign) Usage() string {
 	return "KEY"
 }
 
-func (cmd *assign) Run(f *flag.FlagSet) error {
-	ctx := context.TODO()
-
+func (cmd *assign) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}

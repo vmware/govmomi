@@ -19,6 +19,8 @@ package autostart
 import (
 	"flag"
 
+	"golang.org/x/net/context"
+
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
@@ -34,21 +36,28 @@ func init() {
 	cli.Register("host.autostart.configure", &configure{})
 }
 
-func (cmd *configure) Register(f *flag.FlagSet) {
+func (cmd *configure) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.AutostartFlag, ctx = newAutostartFlag(ctx)
+	cmd.AutostartFlag.Register(ctx, f)
+
 	f.Var(flags.NewOptionalBool(&cmd.Enabled), "enabled", "")
 	f.IntVar(&cmd.StartDelay, "start-delay", 0, "")
 	f.StringVar(&cmd.StopAction, "stop-action", "", "")
 	f.IntVar(&cmd.StopDelay, "stop-delay", 0, "")
-
 	f.Var(flags.NewOptionalBool(&cmd.WaitForHeartbeat), "wait-for-heartbeat", "")
 }
 
-func (cmd *configure) Process() error { return nil }
+func (cmd *configure) Process(ctx context.Context) error {
+	if err := cmd.AutostartFlag.Process(ctx); err != nil {
+		return err
+	}
+	return nil
+}
 
 func (cmd *configure) Usage() string {
 	return ""
 }
 
-func (cmd *configure) Run(f *flag.FlagSet) error {
+func (cmd *configure) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.ReconfigureDefaults(cmd.AutoStartDefaults)
 }
