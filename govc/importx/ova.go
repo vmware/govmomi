@@ -52,7 +52,6 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	vm := object.NewVirtualMachine(cmd.Client, *moref)
-
 	return cmd.Deploy(vm)
 }
 

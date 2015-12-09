@@ -50,6 +50,7 @@ type Options struct {
 	PowerOn      bool
 	InjectOvfEnv bool
 	WaitForIP    bool
+	Name         *string
 }
 
 type OptionsFlag struct {
