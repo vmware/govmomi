@@ -35,7 +35,7 @@ func testURL(t *testing.T) *url.URL {
 	if s == "" {
 		t.SkipNow()
 	}
-	u, err := url.Parse(s)
+	u, err := soap.ParseURL(s)
 	if err != nil {
 		panic(err)
 	}
