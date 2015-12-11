@@ -3,6 +3,7 @@ export GOVC_URL=$GOVC_TEST_URL
 export GOVC_DATASTORE=datastore1
 export GOVC_NETWORK="VM Network"
 export GOVC_INSECURE=true
+unset GOVC_DATACENTER
 unset GOVC_USERNAME
 unset GOVC_PASSWORD
 

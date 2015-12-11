@@ -27,6 +27,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"regexp"
 	"strings"
 	"time"
 
@@ -52,6 +53,37 @@ type Client struct {
 	d *debugContainer
 	t *http.Transport
 	p *url.URL
+}
+
+var schemeMatch = regexp.MustCompile(`^\w+://`)
+
+// ParseURL is wrapper around url.Parse, where Scheme defaults to "https" and Path defaults to "/sdk"
+func ParseURL(s string) (*url.URL, error) {
+	var err error
+	var u *url.URL
+
+	if s != "" {
+		// Default the scheme to https
+		if !schemeMatch.MatchString(s) {
+			s = "https://" + s
+		}
+
+		u, err = url.Parse(s)
+		if err != nil {
+			return nil, err
+		}
+
+		// Default the path to /sdk
+		if u.Path == "" {
+			u.Path = "/sdk"
+		}
+
+		if u.User == nil {
+			u.User = url.UserPassword("", "")
+		}
+	}
+
+	return u, nil
 }
 
 func NewClient(u *url.URL, insecure bool) *Client {

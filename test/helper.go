@@ -34,7 +34,7 @@ func URL() *url.URL {
 	if s == "" {
 		return nil
 	}
-	u, err := url.Parse(s)
+	u, err := soap.ParseURL(s)
 	if err != nil {
 		panic(err)
 	}

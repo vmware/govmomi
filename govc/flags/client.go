@@ -26,7 +26,6 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/vmware/govmomi/session"
@@ -97,33 +96,12 @@ func (flag *ClientFlag) String() string {
 	return url.String()
 }
 
-var schemeMatch = regexp.MustCompile(`^\w+://`)
-
 func (flag *ClientFlag) Set(s string) error {
 	var err error
 
-	if s != "" {
-		// Default the scheme to https
-		if !schemeMatch.MatchString(s) {
-			s = "https://" + s
-		}
+	flag.url, err = soap.ParseURL(s)
 
-		flag.url, err = url.Parse(s)
-		if err != nil {
-			return err
-		}
-
-		// Default the path to /sdk
-		if flag.url.Path == "" {
-			flag.url.Path = "/sdk"
-		}
-
-		if flag.url.User == nil {
-			flag.url.User = url.UserPassword("", "")
-		}
-	}
-
-	return nil
+	return err
 }
 
 func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
