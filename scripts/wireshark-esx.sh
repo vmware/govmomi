@@ -1,6 +1,6 @@
 #!/bin/bash -e
 #
-# Capture ESXi traffic and decrypt SOAP traffic on port 433 via wireshark
+# Capture ESXi traffic and decrypt SOAP traffic on port 443 via wireshark
 
 # Device to capture
 dev="${1-vmk0}"
