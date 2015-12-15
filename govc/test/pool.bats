@@ -186,9 +186,18 @@ load test_helper
 
   for path in $parent_path $child_path $grand_child_path
   do
-    run govc vm.create -on=false -pool $path $(new_id)
+    run govc vm.create -pool $path $(new_id)
     assert_success
   done
+
+  run govc pool.change -debug -mem.limit 100 -mem.expandable=false $child_path
+  assert_failure
+
+  run govc pool.change -debug -mem.limit 100 $child_path
+  assert_success
+
+  run govc pool.change -debug -mem.limit 120 -mem.expandable $child_path
+  assert_success
 
   # test with glob inventory path to pools
   parent_path="*/$parent_name"

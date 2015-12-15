@@ -23,6 +23,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -56,7 +57,6 @@ func NewResourceConfigSpecFlag() *ResourceConfigSpecFlag {
 
 	f.SetAllocation(func(a types.BaseResourceAllocationInfo) {
 		a.GetResourceAllocationInfo().Shares = new(types.SharesInfo)
-		a.GetResourceAllocationInfo().ExpandableReservation = types.NewBool(false)
 	})
 	return f
 }
@@ -80,14 +80,9 @@ func (s *ResourceConfigSpecFlag) Register(ctx context.Context, f *flag.FlagSet) 
 		ra := opt.GetResourceAllocationInfo()
 		shares := (*sharesInfo)(ra.Shares)
 
-		expandableReservation := false
-		if v := ra.ExpandableReservation; v != nil {
-			expandableReservation = *v
-		}
-
 		f.Int64Var(&ra.Limit, prefix+".limit", 0, opt.name+" limit in "+opt.units)
 		f.Int64Var(&ra.Reservation, prefix+".reservation", 0, opt.name+" reservation in "+opt.units)
-		f.BoolVar(ra.ExpandableReservation, prefix+".expandable", expandableReservation, opt.name+" expandable reservation")
+		f.Var(flags.NewOptionalBool(&ra.ExpandableReservation), prefix+".expandable", opt.name+" expandable reservation")
 		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
 	}
 }
