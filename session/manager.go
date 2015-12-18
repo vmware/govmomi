@@ -117,6 +117,16 @@ func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) 
 	return mgr.CurrentSession, nil
 }
 
+func (sm *Manager) TerminateSession(ctx context.Context, sessionId []string) error {
+	req := types.TerminateSession{
+		This:      sm.Reference(),
+		SessionId: sessionId,
+	}
+
+	_, err := methods.TerminateSession(ctx, sm.client, &req)
+	return err
+}
+
 // SessionIsActive checks whether the session that was created at login is
 // still valid. This function only works against vCenter.
 func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
