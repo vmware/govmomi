@@ -118,6 +118,7 @@ func traversable(ref types.ManagedObjectReference) bool {
 		// Treat ComputeResource and ClusterComputeResource as one and the same.
 		// It doesn't matter from the perspective of the lister.
 	case "HostSystem":
+	case "VirtualApp":
 	default:
 		return false
 	}
@@ -172,6 +173,8 @@ func (l Lister) List(ctx context.Context) ([]Element, error) {
 		return l.ListResourcePool(ctx)
 	case "HostSystem":
 		return l.ListHostSystem(ctx)
+	case "VirtualApp":
+		return l.ListVirtualApp(ctx)
 	default:
 		return nil, fmt.Errorf("cannot traverse type " + l.Reference.Type)
 	}
@@ -198,6 +201,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 	childTypes := []string{
 		"Folder",
 		"Datacenter",
+		"VirtualApp",
 		"VirtualMachine",
 		"Network",
 		"ComputeResource",
@@ -459,6 +463,71 @@ func (l Lister) ListHostSystem(ctx context.Context) ([]Element, error) {
 	childTypes := []string{
 		"Datastore",
 		"Network",
+		"VirtualMachine",
+	}
+
+	var pspecs []types.PropertySpec
+	for _, t := range childTypes {
+		pspec := types.PropertySpec{
+			Type: t,
+		}
+
+		if l.All {
+			pspec.All = types.NewBool(true)
+		} else {
+			pspec.PathSet = []string{"name"}
+		}
+
+		pspecs = append(pspecs, pspec)
+	}
+
+	req := types.RetrieveProperties{
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				ObjectSet: []types.ObjectSpec{ospec},
+				PropSet:   pspecs,
+			},
+		},
+	}
+
+	var dst []interface{}
+
+	err := l.retrieveProperties(ctx, req, &dst)
+	if err != nil {
+		return nil, err
+	}
+
+	es := []Element{}
+	for _, v := range dst {
+		es = append(es, ToElement(v.(mo.Reference), l.Prefix))
+	}
+
+	return es, nil
+}
+
+func (l Lister) ListVirtualApp(ctx context.Context) ([]Element, error) {
+	ospec := types.ObjectSpec{
+		Obj:  l.Reference,
+		Skip: types.NewBool(true),
+	}
+
+	fields := []string{
+		"resourcePool",
+		"vm",
+	}
+
+	for _, f := range fields {
+		tspec := types.TraversalSpec{
+			Path: f,
+			Skip: types.NewBool(false),
+			Type: "VirtualApp",
+		}
+
+		ospec.SelectSet = append(ospec.SelectSet, &tspec)
+	}
+
+	childTypes := []string{
+		"ResourcePool",
 		"VirtualMachine",
 	}
 
