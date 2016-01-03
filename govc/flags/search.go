@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
 	"golang.org/x/net/context"
@@ -270,17 +271,24 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 		return nil, err
 	}
 
+	var nfe error
+
 	// List virtual machines for every argument
 	for _, arg := range args {
 		vms, err := finder.VirtualMachineList(context.TODO(), arg)
 		if err != nil {
+			if _, ok := err.(*find.NotFoundError); ok {
+				// Let caller decide how to handle NotFoundError
+				nfe = err
+				continue
+			}
 			return nil, err
 		}
 
 		out = append(out, vms...)
 	}
 
-	return out, nil
+	return out, nfe
 }
 
 func (flag *SearchFlag) VirtualApp() (*object.VirtualApp, error) {
