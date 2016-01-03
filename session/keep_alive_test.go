@@ -26,14 +26,17 @@ import (
 
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
 type testKeepAlive int
 
-func (t *testKeepAlive) Func(soap.RoundTripper) {
+func (t *testKeepAlive) Func(soap.RoundTripper) error {
 	*t++
+	return nil
 }
 
 func newManager(t *testing.T) (*Manager, *url.URL) {
@@ -159,4 +162,119 @@ func TestRealKeepAlive(t *testing.T) {
 	// Expect m1's session to be invalid, m2's session to be valid
 	testSessionOK(t, m1, false)
 	testSessionOK(t, m2, true)
+}
+
+func isNotAuthenticated(err error) bool {
+	if soap.IsSoapFault(err) {
+		switch soap.ToSoapFault(err).VimFault().(type) {
+		case types.NotAuthenticated:
+			return true
+		}
+	}
+	return false
+}
+
+func isInvalidLogin(err error) bool {
+	if soap.IsSoapFault(err) {
+		switch soap.ToSoapFault(err).VimFault().(type) {
+		case types.InvalidLogin:
+			return true
+		}
+	}
+	return false
+}
+
+func TestKeepAliveHandler(t *testing.T) {
+	u := test.URL()
+	if u == nil {
+		t.SkipNow()
+	}
+
+	m1, u1 := newManager(t)
+	m2, u2 := newManager(t)
+
+	reauth := make(chan bool)
+
+	// Keep alive handler that will re-login.
+	// Real-world case: connectivity to ESX/VC is down long enough for the session to expire
+	// Test-world case: we call TerminateSession below
+	k := KeepAliveHandler(m2.client.RoundTripper, 2*time.Second, func(roundTripper soap.RoundTripper) error {
+		_, err := methods.GetCurrentTime(context.Background(), roundTripper)
+		if err != nil {
+			if isNotAuthenticated(err) {
+				err = m2.Login(context.Background(), u2.User)
+
+				if err != nil {
+					if isInvalidLogin(err) {
+						reauth <- false
+						t.Log("failed to re-authenticate, quitting keep alive handler")
+						return err
+					}
+				} else {
+					reauth <- true
+				}
+			}
+		}
+
+		return nil
+	})
+
+	m2.client.RoundTripper = k
+
+	// Logging in starts keep alive
+	if err := m1.Login(context.Background(), u1.User); err != nil {
+		t.Error(err)
+	}
+	if err := m2.Login(context.Background(), u2.User); err != nil {
+		t.Error(err)
+	}
+
+	// Terminate session for m2.  Note that self terminate fails, so we need 2 sessions for this test.
+	s, err := m2.UserSession(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = m1.TerminateSession(context.Background(), []string{s.Key})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = methods.GetCurrentTime(context.Background(), m2.client)
+	if err == nil {
+		t.Error("expected to fail")
+	}
+
+	// Wait for keepalive to re-authenticate
+	<-reauth
+
+	_, err = methods.GetCurrentTime(context.Background(), m2.client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Clear credentials to test re-authentication failure
+	u2.User = nil
+
+	s, err = m2.UserSession(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = m1.TerminateSession(context.Background(), []string{s.Key})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// Wait for keepalive re-authenticate attempt
+	result := <-reauth
+
+	_, err = methods.GetCurrentTime(context.Background(), m2.client)
+	if err == nil {
+		t.Error("expected to fail")
+	}
+
+	if result {
+		t.Errorf("expected reauth to fail")
+	}
 }
