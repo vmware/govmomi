@@ -106,6 +106,7 @@ type listResult struct {
 	Long bool `json:"-"`
 }
 
+
 func (l listResult) Write(w io.Writer) error {
 	var err error
 
