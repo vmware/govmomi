@@ -21,10 +21,12 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// Reference wraps a managed object reference
 type Reference interface {
 	Reference() types.ManagedObjectReference
 }
 
+// NewReference wraps the given managed object reference in the appropriate client
 func NewReference(c *vim25.Client, e types.ManagedObjectReference) Reference {
 	switch e.Type {
 	case "Folder":

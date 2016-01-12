@@ -25,16 +25,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HistoryCollector collects event history
 type HistoryCollector struct {
 	*object.HistoryCollector
 }
 
+// NewHistoryCollector creates a new event history collector
 func NewHistoryCollector(c *vim25.Client, ref types.ManagedObjectReference) *HistoryCollector {
 	return &HistoryCollector{
 		HistoryCollector: object.NewHistoryCollector(c, ref),
 	}
 }
 
+// LatestPage gets the latest history page
 func (h HistoryCollector) LatestPage(ctx context.Context) ([]types.BaseEvent, error) {
 	var o mo.EventHistoryCollector
 
@@ -46,6 +49,7 @@ func (h HistoryCollector) LatestPage(ctx context.Context) ([]types.BaseEvent, er
 	return o.LatestPage, nil
 }
 
+// ReadNextEvents reads the next events
 func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int) ([]types.BaseEvent, error) {
 	req := types.ReadNextEvents{
 		This:     h.Reference(),
@@ -60,6 +64,7 @@ func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int) ([]t
 	return res.Returnval, nil
 }
 
+// ReadPreviousEvents reads the previous event up to maxCount
 func (h HistoryCollector) ReadPreviousEvents(ctx context.Context, maxCount int) ([]types.BaseEvent, error) {
 	req := types.ReadPreviousEvents{
 		This:     h.Reference(),

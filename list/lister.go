@@ -28,11 +28,13 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Element represents an element at a path
 type Element struct {
 	Path   string
 	Object mo.Reference
 }
 
+// ToElement converts a reference to an element
 func ToElement(r mo.Reference, prefix string) Element {
 	var name string
 
@@ -103,6 +105,7 @@ func ToElement(r mo.Reference, prefix string) Element {
 	return e
 }
 
+// Lister lists references
 type Lister struct {
 	Collector *property.Collector
 	Reference types.ManagedObjectReference
@@ -159,6 +162,7 @@ func (l Lister) retrieveProperties(ctx context.Context, req types.RetrieveProper
 	return nil
 }
 
+// List sub paths for the reference type
 func (l Lister) List(ctx context.Context) ([]Element, error) {
 	switch l.Reference.Type {
 	case "Folder", "StoragePod":
@@ -180,6 +184,7 @@ func (l Lister) List(ctx context.Context) ([]Element, error) {
 	}
 }
 
+// ListFolder lists the folder paths
 func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 	spec := types.PropertyFilterSpec{
 		ObjectSet: []types.ObjectSpec{
@@ -252,6 +257,7 @@ func (l Lister) ListFolder(ctx context.Context) ([]Element, error) {
 	return es, nil
 }
 
+// ListDatacenter lists the datacenter paths
 func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
@@ -310,6 +316,7 @@ func (l Lister) ListDatacenter(ctx context.Context) ([]Element, error) {
 	return es, nil
 }
 
+// ListComputeResource lists the compute resource paths
 func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
@@ -375,6 +382,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 	return es, nil
 }
 
+// ListResourcePool lists the resource pool paths
 func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
@@ -438,6 +446,7 @@ func (l Lister) ListResourcePool(ctx context.Context) ([]Element, error) {
 	return es, nil
 }
 
+// ListHostSystem lists the host sytem paths
 func (l Lister) ListHostSystem(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,
@@ -505,6 +514,7 @@ func (l Lister) ListHostSystem(ctx context.Context) ([]Element, error) {
 	return es, nil
 }
 
+// ListVirtualApp lists the vapp paths
 func (l Lister) ListVirtualApp(ctx context.Context) ([]Element, error) {
 	ospec := types.ObjectSpec{
 		Obj:  l.Reference,

@@ -24,10 +24,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// AuthorizationManager represents an authorization manager
 type AuthorizationManager struct {
 	Common
 }
 
+// NewAuthorizationManager creates an authorization manager
 func NewAuthorizationManager(c *vim25.Client) *AuthorizationManager {
 	m := AuthorizationManager{
 		Common: NewCommon(c, *c.ServiceContent.AuthorizationManager),
@@ -36,8 +38,10 @@ func NewAuthorizationManager(c *vim25.Client) *AuthorizationManager {
 	return &m
 }
 
+// AuthorizationRoleList respresents a list of authorization roles
 type AuthorizationRoleList []types.AuthorizationRole
 
+// ById finds the role by id
 func (l AuthorizationRoleList) ById(id int) *types.AuthorizationRole {
 	for _, role := range l {
 		if role.RoleId == id {
@@ -48,6 +52,7 @@ func (l AuthorizationRoleList) ById(id int) *types.AuthorizationRole {
 	return nil
 }
 
+// ByName finds the role by name
 func (l AuthorizationRoleList) ByName(name string) *types.AuthorizationRole {
 	for _, role := range l {
 		if role.Name == name {
@@ -58,6 +63,7 @@ func (l AuthorizationRoleList) ByName(name string) *types.AuthorizationRole {
 	return nil
 }
 
+// RoleList lists the known roles
 func (m AuthorizationManager) RoleList(ctx context.Context) (AuthorizationRoleList, error) {
 	var am mo.AuthorizationManager
 
@@ -69,6 +75,7 @@ func (m AuthorizationManager) RoleList(ctx context.Context) (AuthorizationRoleLi
 	return AuthorizationRoleList(am.RoleList), nil
 }
 
+// RetrieveEntityPermissions retrieves entity permissions
 func (m AuthorizationManager) RetrieveEntityPermissions(ctx context.Context, entity types.ManagedObjectReference, inherited bool) ([]types.Permission, error) {
 	req := types.RetrieveEntityPermissions{
 		This:      m.Reference(),
@@ -84,6 +91,7 @@ func (m AuthorizationManager) RetrieveEntityPermissions(ctx context.Context, ent
 	return res.Returnval, nil
 }
 
+// RemoveEntityPermission removes an entity permission
 func (m AuthorizationManager) RemoveEntityPermission(ctx context.Context, entity types.ManagedObjectReference, user string, isGroup bool) error {
 	req := types.RemoveEntityPermission{
 		This:    m.Reference(),
@@ -96,6 +104,7 @@ func (m AuthorizationManager) RemoveEntityPermission(ctx context.Context, entity
 	return err
 }
 
+// SetEntityPermissions set entity permissions
 func (m AuthorizationManager) SetEntityPermissions(ctx context.Context, entity types.ManagedObjectReference, permission []types.Permission) error {
 	req := types.SetEntityPermissions{
 		This:       m.Reference(),

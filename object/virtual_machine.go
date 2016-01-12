@@ -29,9 +29,11 @@ import (
 )
 
 const (
+	// PropRuntimePowerState constant
 	PropRuntimePowerState = "summary.runtime.powerState"
 )
 
+// A VirtualMachine client
 type VirtualMachine struct {
 	Common
 
@@ -45,12 +47,14 @@ func (v VirtualMachine) String() string {
 	return fmt.Sprintf("%v @ %v", v.Common, v.InventoryPath)
 }
 
+// NewVirtualMachine creates a new virtual machine client
 func NewVirtualMachine(c *vim25.Client, ref types.ManagedObjectReference) *VirtualMachine {
 	return &VirtualMachine{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Name for this virtual machine
 func (v VirtualMachine) Name(ctx context.Context) (string, error) {
 	var o mo.VirtualMachine
 
@@ -62,6 +66,7 @@ func (v VirtualMachine) Name(ctx context.Context) (string, error) {
 	return o.Name, nil
 }
 
+// PowerState the powerstate for this virtual machine
 func (v VirtualMachine) PowerState(ctx context.Context) (types.VirtualMachinePowerState, error) {
 	var o mo.VirtualMachine
 
@@ -73,6 +78,7 @@ func (v VirtualMachine) PowerState(ctx context.Context) (types.VirtualMachinePow
 	return o.Summary.Runtime.PowerState, nil
 }
 
+// PowerOn powers this virtual machine on
 func (v VirtualMachine) PowerOn(ctx context.Context) (*Task, error) {
 	req := types.PowerOnVM_Task{
 		This: v.Reference(),
@@ -86,6 +92,7 @@ func (v VirtualMachine) PowerOn(ctx context.Context) (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// PowerOff powers this virtual machine off
 func (v VirtualMachine) PowerOff(ctx context.Context) (*Task, error) {
 	req := types.PowerOffVM_Task{
 		This: v.Reference(),
@@ -99,6 +106,7 @@ func (v VirtualMachine) PowerOff(ctx context.Context) (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// Reset the virtual machine
 func (v VirtualMachine) Reset(ctx context.Context) (*Task, error) {
 	req := types.ResetVM_Task{
 		This: v.Reference(),
@@ -112,6 +120,7 @@ func (v VirtualMachine) Reset(ctx context.Context) (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// Suspend this virtual machine
 func (v VirtualMachine) Suspend(ctx context.Context) (*Task, error) {
 	req := types.SuspendVM_Task{
 		This: v.Reference(),
@@ -125,6 +134,7 @@ func (v VirtualMachine) Suspend(ctx context.Context) (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// ShutdownGuest for this virtual machine
 func (v VirtualMachine) ShutdownGuest(ctx context.Context) error {
 	req := types.ShutdownGuest{
 		This: v.Reference(),
@@ -134,6 +144,7 @@ func (v VirtualMachine) ShutdownGuest(ctx context.Context) error {
 	return err
 }
 
+// RebootGuest for this virtual machine
 func (v VirtualMachine) RebootGuest(ctx context.Context) error {
 	req := types.RebootGuest{
 		This: v.Reference(),
@@ -143,6 +154,7 @@ func (v VirtualMachine) RebootGuest(ctx context.Context) error {
 	return err
 }
 
+// Destroy this virtual machine
 func (v VirtualMachine) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: v.Reference(),
@@ -156,6 +168,7 @@ func (v VirtualMachine) Destroy(ctx context.Context) (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// Clone this virtual machine to the specified folder
 func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, config types.VirtualMachineCloneSpec) (*Task, error) {
 	req := types.CloneVM_Task{
 		This:   v.Reference(),
@@ -172,6 +185,7 @@ func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, 
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// Customize this virtual machine with the specified spec
 func (v VirtualMachine) Customize(ctx context.Context, spec types.CustomizationSpec) (*Task, error) {
 	req := types.CustomizeVM_Task{
 		This: v.Reference(),
@@ -186,6 +200,7 @@ func (v VirtualMachine) Customize(ctx context.Context, spec types.CustomizationS
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// Relocate this virtual machine
 func (v VirtualMachine) Relocate(ctx context.Context, config types.VirtualMachineRelocateSpec, priority types.VirtualMachineMovePriority) (*Task, error) {
 	req := types.RelocateVM_Task{
 		This:     v.Reference(),
@@ -201,6 +216,7 @@ func (v VirtualMachine) Relocate(ctx context.Context, config types.VirtualMachin
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// Reconfigure this virtual machine
 func (v VirtualMachine) Reconfigure(ctx context.Context, config types.VirtualMachineConfigSpec) (*Task, error) {
 	req := types.ReconfigVM_Task{
 		This: v.Reference(),
@@ -215,6 +231,7 @@ func (v VirtualMachine) Reconfigure(ctx context.Context, config types.VirtualMac
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// WaitForIP with this virtual machine
 func (v VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
 	var ip string
 
@@ -257,6 +274,7 @@ func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 	return VirtualDeviceList(o.Config.Hardware.Device), nil
 }
 
+// HostSystem gets the host system client for this virtual machine
 func (v VirtualMachine) HostSystem(ctx context.Context) (*HostSystem, error) {
 	var o mo.VirtualMachine
 
@@ -273,6 +291,7 @@ func (v VirtualMachine) HostSystem(ctx context.Context) (*HostSystem, error) {
 	return NewHostSystem(v.c, *host), nil
 }
 
+// ResourcePool creates the resource pool client for this virtual machine
 func (v VirtualMachine) ResourcePool(ctx context.Context) (*ResourcePool, error) {
 	var o mo.VirtualMachine
 
@@ -412,7 +431,7 @@ func (v VirtualMachine) IsToolsRunning(ctx context.Context) (bool, error) {
 	return o.Guest.ToolsRunningStatus == string(types.VirtualMachineToolsRunningStatusGuestToolsRunning), nil
 }
 
-// Wait for the VirtualMachine to change to the desired power state.
+// WaitForPowerState of the VirtualMachine to change to the desired power state.
 func (v VirtualMachine) WaitForPowerState(ctx context.Context, state types.VirtualMachinePowerState) error {
 	p := property.DefaultCollector(v.c)
 	err := property.Wait(ctx, p, v.Reference(), []string{PropRuntimePowerState}, func(pc []types.PropertyChange) bool {
@@ -435,6 +454,7 @@ func (v VirtualMachine) WaitForPowerState(ctx context.Context, state types.Virtu
 	return err
 }
 
+// MarkAsTemplate marks this virtual machine as a template
 func (v VirtualMachine) MarkAsTemplate(ctx context.Context) error {
 	req := types.MarkAsTemplate{
 		This: v.Reference(),
@@ -448,6 +468,7 @@ func (v VirtualMachine) MarkAsTemplate(ctx context.Context) error {
 	return nil
 }
 
+// MarkAsVirtualMachine marks this virtual machine as a virtual machine
 func (v VirtualMachine) MarkAsVirtualMachine(ctx context.Context, pool ResourcePool, host *HostSystem) error {
 	req := types.MarkAsVirtualMachine{
 		This: v.Reference(),

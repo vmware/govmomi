@@ -27,12 +27,14 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostSystem represents a host system config client
 type HostSystem struct {
 	Common
 
 	InventoryPath string
 }
 
+// String a string representation for this host system
 func (h HostSystem) String() string {
 	if h.InventoryPath == "" {
 		return h.Common.String()
@@ -40,12 +42,14 @@ func (h HostSystem) String() string {
 	return fmt.Sprintf("%v @ %v", h.Common, h.InventoryPath)
 }
 
+// NewHostSystem creates a new host system config client
 func NewHostSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostSystem {
 	return &HostSystem{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Name for this host system
 func (h HostSystem) Name(ctx context.Context) (string, error) {
 	var mh mo.HostSystem
 
@@ -57,10 +61,12 @@ func (h HostSystem) Name(ctx context.Context) (string, error) {
 	return mh.Name, nil
 }
 
+// ConfigManager for this host system
 func (h HostSystem) ConfigManager() *HostConfigManager {
 	return NewHostConfigManager(h.c, h.Reference())
 }
 
+// ResourcePool for this host system
 func (h HostSystem) ResourcePool(ctx context.Context) (*ResourcePool, error) {
 	var mh mo.HostSystem
 
@@ -93,6 +99,7 @@ func (h HostSystem) ResourcePool(ctx context.Context) (*ResourcePool, error) {
 	return pool, nil
 }
 
+// ManagementIPs for this host system
 func (h HostSystem) ManagementIPs(ctx context.Context) ([]net.IP, error) {
 	var mh mo.HostSystem
 
@@ -114,6 +121,7 @@ func (h HostSystem) ManagementIPs(ctx context.Context) ([]net.IP, error) {
 	return ips, nil
 }
 
+// Disconnect this host system
 func (h HostSystem) Disconnect(ctx context.Context) (*Task, error) {
 	req := types.DisconnectHost_Task{
 		This: h.Reference(),
@@ -127,6 +135,7 @@ func (h HostSystem) Disconnect(ctx context.Context) (*Task, error) {
 	return NewTask(h.c, res.Returnval), nil
 }
 
+// Reconnect this host system
 func (h HostSystem) Reconnect(ctx context.Context, cnxSpec *types.HostConnectSpec, reconnectSpec *types.HostSystemReconnectSpec) (*Task, error) {
 	req := types.ReconnectHost_Task{
 		This:          h.Reference(),
@@ -142,6 +151,7 @@ func (h HostSystem) Reconnect(ctx context.Context, cnxSpec *types.HostConnectSpe
 	return NewTask(h.c, res.Returnval), nil
 }
 
+// EnterMaintenanceMode for this host system
 func (h HostSystem) EnterMaintenanceMode(ctx context.Context, timeout int, evacuate bool, spec *types.HostMaintenanceSpec) (*Task, error) {
 	req := types.EnterMaintenanceMode_Task{
 		This:                  h.Reference(),
@@ -158,6 +168,7 @@ func (h HostSystem) EnterMaintenanceMode(ctx context.Context, timeout int, evacu
 	return NewTask(h.c, res.Returnval), nil
 }
 
+// ExitMaintenanceMode for this host system
 func (h HostSystem) ExitMaintenanceMode(ctx context.Context, timeout int) (*Task, error) {
 	req := types.ExitMaintenanceMode_Task{
 		This:    h.Reference(),

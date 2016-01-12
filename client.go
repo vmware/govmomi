@@ -14,8 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-/*
-This package is the root package of the govmomi library.
+/*Package govmomi implements the vmware monitoring interface.
 
 The library is structured as follows:
 
@@ -68,6 +67,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Client represents a govmomi client
 type Client struct {
 	*vim25.Client
 
@@ -129,7 +129,7 @@ func (c *Client) Login(ctx context.Context, u *url.Userinfo) error {
 	return c.SessionManager.Login(ctx, u)
 }
 
-// Login dispatches to the SessionManager.
+// LoginExtensionByCertificate dispatches to the SessionManager.
 func (c *Client) LoginExtensionByCertificate(ctx context.Context, key string, locale string) error {
 	return c.SessionManager.LoginExtensionByCertificate(ctx, key, locale)
 }

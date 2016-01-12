@@ -18,36 +18,44 @@ package find
 
 import "fmt"
 
+// NotFoundError is returned when something can't be found
 type NotFoundError struct {
 	kind string
 	path string
 }
 
+// Error returns the formatted error string
 func (e *NotFoundError) Error() string {
 	return fmt.Sprintf("%s '%s' not found", e.kind, e.path)
 }
 
+// MultipleFoundError is returned when there are multiple results found
 type MultipleFoundError struct {
 	kind string
 	path string
 }
 
+// Error returns the formatted error string
 func (e *MultipleFoundError) Error() string {
 	return fmt.Sprintf("path '%s' resolves to multiple %ss", e.path, e.kind)
 }
 
+// DefaultNotFoundError the default not found error
 type DefaultNotFoundError struct {
 	kind string
 }
 
+// Error returns the formatted error string
 func (e *DefaultNotFoundError) Error() string {
 	return fmt.Sprintf("no default %s found", e.kind)
 }
 
+// DefaultMultipleFoundError the default multiple not found error
 type DefaultMultipleFoundError struct {
 	kind string
 }
 
+// Error returns the formatted error string
 func (e DefaultMultipleFoundError) Error() string {
 	return fmt.Sprintf("default %s resolves to multiple instances, please specify", e.kind)
 }

@@ -25,16 +25,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostStorageSystem client
 type HostStorageSystem struct {
 	Common
 }
 
+// NewHostStorageSystem creates a new host storage system client
 func NewHostStorageSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostStorageSystem {
 	return &HostStorageSystem{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// RetrieveDiskPartitionInfo for this host storage system
 func (s HostStorageSystem) RetrieveDiskPartitionInfo(ctx context.Context, devicePath string) (*types.HostDiskPartitionInfo, error) {
 	req := types.RetrieveDiskPartitionInfo{
 		This:       s.Reference(),
@@ -53,6 +56,7 @@ func (s HostStorageSystem) RetrieveDiskPartitionInfo(ctx context.Context, device
 	return &res.Returnval[0], nil
 }
 
+// ComputeDiskPartitionInfo for this host storage system
 func (s HostStorageSystem) ComputeDiskPartitionInfo(ctx context.Context, devicePath string, layout types.HostDiskPartitionLayout) (*types.HostDiskPartitionInfo, error) {
 	req := types.ComputeDiskPartitionInfo{
 		This:       s.Reference(),
@@ -68,6 +72,7 @@ func (s HostStorageSystem) ComputeDiskPartitionInfo(ctx context.Context, deviceP
 	return &res.Returnval, nil
 }
 
+// UpdateDiskPartitionInfo on this host storage system
 func (s HostStorageSystem) UpdateDiskPartitionInfo(ctx context.Context, devicePath string, spec types.HostDiskPartitionSpec) error {
 	req := types.UpdateDiskPartitions{
 		This:       s.Reference(),

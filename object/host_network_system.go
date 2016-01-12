@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostNetworkSystem represents a host network system client
 type HostNetworkSystem struct {
 	Common
 }
 
+// NewHostNetworkSystem creates a new host network system client
 func NewHostNetworkSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostNetworkSystem {
 	return &HostNetworkSystem{
 		Common: NewCommon(c, ref),

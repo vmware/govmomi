@@ -16,6 +16,7 @@ limitations under the License.
 
 package object
 
+// A VmwareDistributedVirtualSwitch client
 type VmwareDistributedVirtualSwitch struct {
 	DistributedVirtualSwitch
 }

@@ -24,16 +24,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostVsanSystem represents a client to manage VSAN on a host system
 type HostVsanSystem struct {
 	Common
 }
 
+// NewHostVsanSystem creates a new VSAN manager client
 func NewHostVsanSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostVsanSystem {
 	return &HostVsanSystem{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Update the VSAN configuration on a host system
 func (s HostVsanSystem) Update(ctx context.Context, config types.VsanHostConfigInfo) (*Task, error) {
 	req := types.UpdateVsan_Task{
 		This:   s.Reference(),

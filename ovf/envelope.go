@@ -16,6 +16,7 @@ limitations under the License.
 
 package ovf
 
+// Envelope represents and OVF envelope
 type Envelope struct {
 	References []File `xml:"References>File"`
 
@@ -34,6 +35,7 @@ type Envelope struct {
 	VirtualSystem *VirtualSystem `xml:"VirtualSystem"`
 }
 
+// VirtualSystem represents a virtual system
 type VirtualSystem struct {
 	Content
 
@@ -44,6 +46,7 @@ type VirtualSystem struct {
 	VirtualHardware []VirtualHardwareSection `xml:"VirtualHardwareSection"`
 }
 
+// File represents a file
 type File struct {
 	ID          string  `xml:"id,attr"`
 	Href        string  `xml:"href,attr"`
@@ -52,23 +55,27 @@ type File struct {
 	ChunkSize   *int    `xml:"chunkSize,attr"`
 }
 
+// Content represents content
 type Content struct {
 	ID   string  `xml:"id,attr"`
 	Info string  `xml:"Info"`
 	Name *string `xml:"Name"`
 }
 
+// Section represents a section
 type Section struct {
 	Required *bool  `xml:"required,attr"`
 	Info     string `xml:"Info"`
 }
 
+// AnnotationSection represents an annotation section
 type AnnotationSection struct {
 	Section
 
 	Annotation string `xml:"Annotation"`
 }
 
+// ProductSection represents a product section
 type ProductSection struct {
 	Section
 
@@ -85,6 +92,7 @@ type ProductSection struct {
 	Property    []Property `xml:"Property"`
 }
 
+// Property represents a property
 type Property struct {
 	Key              string  `xml:"key,attr"`
 	Type             string  `xml:"type,attr"`
@@ -99,29 +107,34 @@ type Property struct {
 	Values []PropertyConfigurationValue `xml:"Value"`
 }
 
+// PropertyConfigurationValue represetns a property configuration value
 type PropertyConfigurationValue struct {
 	Value         string  `xml:"value,attr"`
 	Configuration *string `xml:"configuration,attr"`
 }
 
+// NetworkSection describes the network configuration
 type NetworkSection struct {
 	Section
 
 	Networks []Network `xml:"Network"`
 }
 
+// Network represents a network definition in an OVF
 type Network struct {
 	Name string `xml:"name,attr"`
 
 	Description string `xml:"Description"`
 }
 
+// DiskSection represents the disk definition in an OVF
 type DiskSection struct {
 	Section
 
 	Disks []VirtualDiskDesc `xml:"Disk"`
 }
 
+// VirtualDiskDesc describes an individual virtual disk configuration
 type VirtualDiskDesc struct {
 	DiskID                  string  `xml:"diskId,attr"`
 	FileRef                 *string `xml:"fileRef,attr"`
@@ -132,6 +145,7 @@ type VirtualDiskDesc struct {
 	ParentRef               *string `xml:"parentRef,attr"`
 }
 
+// OperatingSystemSection descritbes the operation system in an OVF
 type OperatingSystemSection struct {
 	Section
 
@@ -142,12 +156,14 @@ type OperatingSystemSection struct {
 	Description *string `xml:"Description"`
 }
 
+// EulaSection describes the License for an OVF
 type EulaSection struct {
 	Section
 
 	License string `xml:"License"`
 }
 
+// VirtualHardwareSection describes the virtual hardware in an OVF
 type VirtualHardwareSection struct {
 	Section
 
@@ -158,10 +174,12 @@ type VirtualHardwareSection struct {
 	Item   []ResourceAllocationSettingData `xml:"Item"`
 }
 
+// VirtualSystemSettingData describes the virtual system settings
 type VirtualSystemSettingData struct {
 	CIMVirtualSystemSettingData
 }
 
+// ResourceAllocationSettingData describes the resource allocation settings
 type ResourceAllocationSettingData struct {
 	CIMResourceAllocationSettingData
 
@@ -170,18 +188,21 @@ type ResourceAllocationSettingData struct {
 	Bound         *string `xml:"bound,attr"`
 }
 
+// ResourceAllocationSection describes the resource allocation section in an OVF
 type ResourceAllocationSection struct {
 	Section
 
 	Item []ResourceAllocationSettingData `xml:"Item"`
 }
 
+// DeploymentOptionSection describes the deployment options
 type DeploymentOptionSection struct {
 	Section
 
 	Configuration []DeploymentOptionConfiguration `xml:"Configuration"`
 }
 
+// DeploymentOptionConfiguration describes a deployment option
 type DeploymentOptionConfiguration struct {
 	ID      string `xml:"id,attr"`
 	Default *bool  `xml:"default,attr"`
