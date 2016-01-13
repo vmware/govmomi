@@ -361,7 +361,7 @@ func (cmd *vmdk) CreateVM(spec *configSpec) (*object.VirtualMachine, error) {
 		return nil, err
 	}
 
-	task, err := folders.VmFolder.CreateVM(context.TODO(), spec.ToSpec(), cmd.ResourcePool, nil)
+	task, err := folders.VMFolder.CreateVM(context.TODO(), spec.ToSpec(), cmd.ResourcePool, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -385,7 +385,7 @@ func (cmd *vmdk) CloneVM(vm *object.VirtualMachine, name string) (*object.Virtua
 		Location: types.VirtualMachineRelocateSpec{},
 	}
 
-	task, err := vm.Clone(context.TODO(), folders.VmFolder, name, spec)
+	task, err := vm.Clone(context.TODO(), folders.VMFolder, name, spec)
 	if err != nil {
 		return nil, err
 	}

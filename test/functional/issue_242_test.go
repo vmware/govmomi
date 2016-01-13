@@ -67,7 +67,7 @@ func TestIssue242(t *testing.T) {
 	}
 
 	// Create new VM
-	task, err := df.VmFolder.CreateVM(context.Background(), spec, rp, nil)
+	task, err := df.VMFolder.CreateVM(context.Background(), spec, rp, nil)
 	if err != nil {
 		t.Fatal(err)
 	}

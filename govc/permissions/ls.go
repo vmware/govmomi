@@ -89,7 +89,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		for _, perm := range perms {
-			fmt.Fprintf(tw, "%s\t%s\n", perm.Principal, rl.ById(perm.RoleId).Name)
+			fmt.Fprintf(tw, "%s\t%s\n", perm.Principal, rl.ByID(perm.RoleId).Name)
 		}
 	}
 

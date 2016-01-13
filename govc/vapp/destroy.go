@@ -71,7 +71,7 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		for _, vapp := range vapps {
-			task, err := vapp.PowerOffVApp_Task(context.TODO(), false)
+			task, err := vapp.PowerOffVAppTask(context.TODO(), false)
 			if err != nil {
 				return err
 			}

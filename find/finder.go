@@ -147,7 +147,7 @@ func (f *Finder) vmFolder(ctx context.Context) (object.Reference, error) {
 		return nil, err
 	}
 
-	return folders.VmFolder, nil
+	return folders.VMFolder, nil
 }
 
 func (f *Finder) hostFolder(ctx context.Context) (object.Reference, error) {

@@ -159,9 +159,9 @@ func (flag *SearchFlag) searchByDatastorePath(c *vim25.Client, dc *object.Datace
 func (flag *SearchFlag) searchByDNSName(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByDnsName(context.TODO(), dc, flag.byDNSName, true)
+		return flag.searchIndex(c).FindByDNSName(context.TODO(), dc, flag.byDNSName, true)
 	case SearchHosts:
-		return flag.searchIndex(c).FindByDnsName(context.TODO(), dc, flag.byDNSName, false)
+		return flag.searchIndex(c).FindByDNSName(context.TODO(), dc, flag.byDNSName, false)
 	default:
 		panic("unsupported type")
 	}
@@ -175,9 +175,9 @@ func (flag *SearchFlag) searchByInventoryPath(c *vim25.Client, dc *object.Datace
 func (flag *SearchFlag) searchByIP(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByIp(context.TODO(), dc, flag.byIP, true)
+		return flag.searchIndex(c).FindByIP(context.TODO(), dc, flag.byIP, true)
 	case SearchHosts:
-		return flag.searchIndex(c).FindByIp(context.TODO(), dc, flag.byIP, false)
+		return flag.searchIndex(c).FindByIP(context.TODO(), dc, flag.byIP, false)
 	default:
 		panic("unsupported type")
 	}
@@ -186,9 +186,9 @@ func (flag *SearchFlag) searchByIP(c *vim25.Client, dc *object.Datacenter) (obje
 func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, true, nil)
+		return flag.searchIndex(c).FindByUUID(context.TODO(), dc, flag.byUUID, true, nil)
 	case SearchHosts:
-		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, false, nil)
+		return flag.searchIndex(c).FindByUUID(context.TODO(), dc, flag.byUUID, false, nil)
 	default:
 		panic("unsupported type")
 	}

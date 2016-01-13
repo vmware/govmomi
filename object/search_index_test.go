@@ -88,7 +88,7 @@ func TestSearch(t *testing.T) {
 
 		dnsConfig := host.Config.Network.DnsConfig.GetHostDnsConfig()
 		dnsName := fmt.Sprintf("%s.%s", dnsConfig.HostName, dnsConfig.DomainName)
-		shost, err := s.FindByDnsName(context.Background(), dc, dnsName, false)
+		shost, err := s.FindByDNSName(context.Background(), dc, dnsName, false)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -96,7 +96,7 @@ func TestSearch(t *testing.T) {
 			t.Errorf("%#v != %#v\n", ref, shost)
 		}
 
-		shost, err = s.FindByUuid(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false, nil)
+		shost, err = s.FindByUUID(context.Background(), dc, host.Hardware.SystemInfo.Uuid, false, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -105,7 +105,7 @@ func TestSearch(t *testing.T) {
 		}
 	}
 
-	vms, err := folders.VmFolder.Children(context.Background())
+	vms, err := folders.VMFolder.Children(context.Background())
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -124,7 +124,7 @@ func TestSearch(t *testing.T) {
 			t.Errorf("%#v != %#v\n", ref, svm)
 		}
 
-		svm, err = s.FindByUuid(context.Background(), dc, vm.Config.Uuid, true, nil)
+		svm, err = s.FindByUUID(context.Background(), dc, vm.Config.Uuid, true, nil)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -133,7 +133,7 @@ func TestSearch(t *testing.T) {
 		}
 
 		if vm.Guest.HostName != "" {
-			svm, err := s.FindByDnsName(context.Background(), dc, vm.Guest.HostName, true)
+			svm, err := s.FindByDNSName(context.Background(), dc, vm.Guest.HostName, true)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -143,7 +143,7 @@ func TestSearch(t *testing.T) {
 		}
 
 		if vm.Guest.IpAddress != "" {
-			svm, err := s.FindByIp(context.Background(), dc, vm.Guest.IpAddress, true)
+			svm, err := s.FindByIP(context.Background(), dc, vm.Guest.IpAddress, true)
 			if err != nil {
 				t.Fatal(err)
 			}
