@@ -17,21 +17,13 @@ limitations under the License.
 package flags
 
 import (
-	"errors"
 	"flag"
 	"fmt"
 	"net/url"
 	"os"
-	"path"
 
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
-)
-
-var (
-	ErrDatastoreDirNotExist  = errors.New("datastore directory does not exist")
-	ErrDatastoreFileNotExist = errors.New("datastore file does not exist")
 )
 
 type DatastoreFlag struct {
@@ -121,51 +113,4 @@ func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
 	}
 
 	return u, nil
-}
-
-func (flag *DatastoreFlag) Stat(file string) (types.BaseFileInfo, error) {
-	ds, err := flag.Datastore()
-	if err != nil {
-		return nil, err
-	}
-
-	b, err := ds.Browser(context.TODO())
-	if err != nil {
-		return nil, err
-	}
-
-	spec := types.HostDatastoreBrowserSearchSpec{
-		Details: &types.FileQueryFlags{
-			FileType:  true,
-			FileOwner: types.NewBool(true), // TODO: omitempty is generated, but seems to be required
-		},
-		MatchPattern: []string{path.Base(file)},
-	}
-
-	dsPath := ds.Path(path.Dir(file))
-	task, err := b.SearchDatastore(context.TODO(), dsPath, &spec)
-	if err != nil {
-		return nil, err
-	}
-
-	info, err := task.WaitForResult(context.TODO(), nil)
-	if err != nil {
-		if info != nil && info.Error != nil {
-			_, ok := info.Error.Fault.(*types.FileNotFound)
-			if ok {
-				// FileNotFound means the base path doesn't exist.
-				return nil, ErrDatastoreDirNotExist
-			}
-		}
-
-		return nil, err
-	}
-
-	res := info.Result.(types.HostDatastoreBrowserSearchResults)
-	if len(res.File) == 0 {
-		// File doesn't exist
-		return nil, ErrDatastoreFileNotExist
-	}
-
-	return res.File[0], nil
 }

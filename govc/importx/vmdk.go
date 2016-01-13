@@ -147,15 +147,15 @@ func (cmd *vmdk) Run(ctx context.Context, f *flag.FlagSet) error {
 //
 func (cmd *vmdk) PrepareDestination(i importable) error {
 	vmdkPath := i.RemoteDstVMDK()
-	res, err := cmd.Stat(vmdkPath)
+	res, err := cmd.Datastore.Stat(context.TODO(), vmdkPath)
 	if err != nil {
-		switch err {
-		case flags.ErrDatastoreDirNotExist:
+		switch err.(type) {
+		case object.DatastoreNoSuchDirectoryError:
 			// The base path doesn't exist. Create it.
 			dsPath := cmd.Datastore.Path(path.Dir(vmdkPath))
 			m := object.NewFileManager(cmd.Client)
 			return m.MakeDirectory(context.TODO(), dsPath, cmd.Datacenter, true)
-		case flags.ErrDatastoreFileNotExist:
+		case object.DatastoreNoSuchFileError:
 			// Destination path doesn't exist; all good to continue with import.
 			return nil
 		}

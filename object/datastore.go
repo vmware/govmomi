@@ -35,6 +35,26 @@ import (
 	"golang.org/x/net/context"
 )
 
+// DatastoreNoSuchDirectoryError is returned when a directory could not be found.
+type DatastoreNoSuchDirectoryError struct {
+	verb    string
+	subject string
+}
+
+func (e DatastoreNoSuchDirectoryError) Error() string {
+	return fmt.Sprintf("cannot %s '%s': No such directory", e.verb, e.subject)
+}
+
+// DatastoreNoSuchFileError is returned when a file could not be found.
+type DatastoreNoSuchFileError struct {
+	verb    string
+	subject string
+}
+
+func (e DatastoreNoSuchFileError) Error() string {
+	return fmt.Sprintf("cannot %s '%s': No such file", e.verb, e.subject)
+}
+
 type Datastore struct {
 	Common
 
@@ -247,4 +267,47 @@ func (d Datastore) AttachedHosts(ctx context.Context) ([]*HostSystem, error) {
 	}
 
 	return hosts, nil
+}
+
+func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, error) {
+	b, err := d.Browser(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	spec := types.HostDatastoreBrowserSearchSpec{
+		Details: &types.FileQueryFlags{
+			FileType:  true,
+			FileOwner: types.NewBool(true), // TODO: omitempty is generated, but seems to be required
+		},
+		MatchPattern: []string{path.Base(file)},
+	}
+
+	dsPath := d.Path(path.Dir(file))
+	task, err := b.SearchDatastore(context.TODO(), dsPath, &spec)
+	if err != nil {
+		return nil, err
+	}
+
+	info, err := task.WaitForResult(context.TODO(), nil)
+	if err != nil {
+		if info == nil || info.Error != nil {
+			_, ok := info.Error.Fault.(*types.FileNotFound)
+			if ok {
+				// FileNotFound means the base path doesn't exist.
+				return nil, DatastoreNoSuchDirectoryError{"stat", dsPath}
+			}
+		}
+
+		return nil, err
+	}
+
+	res := info.Result.(types.HostDatastoreBrowserSearchResults)
+	if len(res.File) == 0 {
+		// File doesn't exist
+		return nil, DatastoreNoSuchFileError{"stat", d.Path(file)}
+	}
+
+	return res.File[0], nil
+
 }
