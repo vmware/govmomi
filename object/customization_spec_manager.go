@@ -146,8 +146,8 @@ func (cs CustomizationSpecManager) RenameCustomizationSpec(ctx context.Context, 
 	return nil
 }
 
-// CustomizationSpecItemToXml converts the given spec to xml
-func (cs CustomizationSpecManager) CustomizationSpecItemToXml(ctx context.Context, item types.CustomizationSpecItem) (string, error) {
+// CustomizationSpecItemToXML converts the given spec to xml
+func (cs CustomizationSpecManager) CustomizationSpecItemToXML(ctx context.Context, item types.CustomizationSpecItem) (string, error) {
 	req := types.CustomizationSpecItemToXml{
 		This: cs.Reference(),
 		Item: item,
@@ -161,8 +161,8 @@ func (cs CustomizationSpecManager) CustomizationSpecItemToXml(ctx context.Contex
 	return res.Returnval, nil
 }
 
-// XmlToCustomizationSpecItem converts xml to a customization spec item
-func (cs CustomizationSpecManager) XmlToCustomizationSpecItem(ctx context.Context, xml string) (*types.CustomizationSpecItem, error) {
+// XMLToCustomizationSpecItem converts xml to a customization spec item
+func (cs CustomizationSpecManager) XMLToCustomizationSpecItem(ctx context.Context, xml string) (*types.CustomizationSpecItem, error) {
 	req := types.XmlToCustomizationSpecItem{
 		This:        cs.Reference(),
 		SpecItemXml: xml,

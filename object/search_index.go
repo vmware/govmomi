@@ -56,8 +56,8 @@ func (s SearchIndex) FindByDatastorePath(ctx context.Context, dc *Datacenter, pa
 	return NewReference(s.c, *res.Returnval), nil
 }
 
-// FindByDnsName finds a virtual machine or host by DNS name.
-func (s SearchIndex) FindByDnsName(ctx context.Context, dc *Datacenter, dnsName string, vmSearch bool) (Reference, error) {
+// FindByDNSName finds a virtual machine or host by DNS name.
+func (s SearchIndex) FindByDNSName(ctx context.Context, dc *Datacenter, dnsName string, vmSearch bool) (Reference, error) {
 	req := types.FindByDnsName{
 		This:     s.Reference(),
 		DnsName:  dnsName,
@@ -97,8 +97,8 @@ func (s SearchIndex) FindByInventoryPath(ctx context.Context, path string) (Refe
 	return NewReference(s.c, *res.Returnval), nil
 }
 
-// FindByIp finds a virtual machine or host by IP address.
-func (s SearchIndex) FindByIp(ctx context.Context, dc *Datacenter, ip string, vmSearch bool) (Reference, error) {
+// FindByIP finds a virtual machine or host by IP address.
+func (s SearchIndex) FindByIP(ctx context.Context, dc *Datacenter, ip string, vmSearch bool) (Reference, error) {
 	req := types.FindByIp{
 		This:     s.Reference(),
 		Ip:       ip,
@@ -120,13 +120,13 @@ func (s SearchIndex) FindByIp(ctx context.Context, dc *Datacenter, ip string, vm
 	return NewReference(s.c, *res.Returnval), nil
 }
 
-// FindByUuid finds a virtual machine or host by UUID.
-func (s SearchIndex) FindByUuid(ctx context.Context, dc *Datacenter, uuid string, vmSearch bool, instanceUuid *bool) (Reference, error) {
+// FindByUUID finds a virtual machine or host by UUID.
+func (s SearchIndex) FindByUUID(ctx context.Context, dc *Datacenter, uuid string, vmSearch bool, instanceUUID *bool) (Reference, error) {
 	req := types.FindByUuid{
 		This:         s.Reference(),
 		Uuid:         uuid,
 		VmSearch:     vmSearch,
-		InstanceUuid: instanceUuid,
+		InstanceUuid: instanceUUID,
 	}
 	if dc != nil {
 		ref := dc.Reference()

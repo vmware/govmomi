@@ -41,8 +41,8 @@ func NewAuthorizationManager(c *vim25.Client) *AuthorizationManager {
 // AuthorizationRoleList respresents a list of authorization roles
 type AuthorizationRoleList []types.AuthorizationRole
 
-// ById finds the role by id
-func (l AuthorizationRoleList) ById(id int) *types.AuthorizationRole {
+// ByID finds the role by id
+func (l AuthorizationRoleList) ByID(id int) *types.AuthorizationRole {
 	for _, role := range l {
 		if role.RoleId == id {
 			return &role

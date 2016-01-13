@@ -58,8 +58,8 @@ func (p VirtualApp) Name(ctx context.Context) (string, error) {
 	return o.Name, nil
 }
 
-// CreateChildVM_Task creates a child vm task
-func (p VirtualApp) CreateChildVM_Task(ctx context.Context, config types.VirtualMachineConfigSpec, host *HostSystem) (*Task, error) {
+// CreateChildVMTask creates a child vm task
+func (p VirtualApp) CreateChildVMTask(ctx context.Context, config types.VirtualMachineConfigSpec, host *HostSystem) (*Task, error) {
 	req := types.CreateChildVM_Task{
 		This:   p.Reference(),
 		Config: config,
@@ -89,8 +89,8 @@ func (p VirtualApp) UpdateVAppConfig(ctx context.Context, spec types.VAppConfigS
 	return err
 }
 
-// PowerOnVApp_Task power this vApp on
-func (p VirtualApp) PowerOnVApp_Task(ctx context.Context) (*Task, error) {
+// PowerOnVAppTask power this vApp on
+func (p VirtualApp) PowerOnVAppTask(ctx context.Context) (*Task, error) {
 	req := types.PowerOnVApp_Task{
 		This: p.Reference(),
 	}
@@ -103,8 +103,8 @@ func (p VirtualApp) PowerOnVApp_Task(ctx context.Context) (*Task, error) {
 	return NewTask(p.c, res.Returnval), nil
 }
 
-// PowerOffVApp_Task power this vApp off
-func (p VirtualApp) PowerOffVApp_Task(ctx context.Context, force bool) (*Task, error) {
+// PowerOffVAppTask power this vApp off
+func (p VirtualApp) PowerOffVAppTask(ctx context.Context, force bool) (*Task, error) {
 	req := types.PowerOffVApp_Task{
 		This:  p.Reference(),
 		Force: force,
@@ -119,8 +119,8 @@ func (p VirtualApp) PowerOffVApp_Task(ctx context.Context, force bool) (*Task, e
 
 }
 
-// SuspendVApp_Task suspends a VApp task
-func (p VirtualApp) SuspendVApp_Task(ctx context.Context) (*Task, error) {
+// SuspendVAppTask suspends a VApp task
+func (p VirtualApp) SuspendVAppTask(ctx context.Context) (*Task, error) {
 	req := types.SuspendVApp_Task{
 		This: p.Reference(),
 	}

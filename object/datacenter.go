@@ -28,7 +28,7 @@ import (
 
 // DatacenterFolders represents the datacenter folder paths
 type DatacenterFolders struct {
-	VmFolder        *Folder
+	VMFolder        *Folder
 	HostFolder      *Folder
 	DatastoreFolder *Folder
 	NetworkFolder   *Folder
@@ -57,7 +57,7 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	}
 
 	df := &DatacenterFolders{
-		VmFolder:        NewFolder(d.c, md.VmFolder),
+		VMFolder:        NewFolder(d.c, md.VmFolder),
 		HostFolder:      NewFolder(d.c, md.HostFolder),
 		DatastoreFolder: NewFolder(d.c, md.DatastoreFolder),
 		NetworkFolder:   NewFolder(d.c, md.NetworkFolder),
@@ -67,7 +67,7 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 		name string
 		path *string
 	}{
-		{"vm", &df.VmFolder.InventoryPath},
+		{"vm", &df.VMFolder.InventoryPath},
 		{"host", &df.HostFolder.InventoryPath},
 		{"datastore", &df.DatastoreFolder.InventoryPath},
 		{"network", &df.NetworkFolder.InventoryPath},

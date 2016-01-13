@@ -28,20 +28,20 @@ import (
 	"golang.org/x/net/context"
 )
 
-// HttpNfcLease is a client to manage http nfc leases
-type HttpNfcLease struct {
+// HTTPNfcLease is a client to manage http nfc leases
+type HTTPNfcLease struct {
 	Common
 }
 
-// NewHttpNfcLease creates a new client o manage http nfc leases
-func NewHttpNfcLease(c *vim25.Client, ref types.ManagedObjectReference) *HttpNfcLease {
-	return &HttpNfcLease{
+// NewHTTPNfcLease creates a new client o manage http nfc leases
+func NewHTTPNfcLease(c *vim25.Client, ref types.ManagedObjectReference) *HTTPNfcLease {
+	return &HTTPNfcLease{
 		Common: NewCommon(c, ref),
 	}
 }
 
-// HttpNfcLeaseAbort wraps methods.HttpNfcLeaseAbort
-func (o HttpNfcLease) HttpNfcLeaseAbort(ctx context.Context, fault *types.LocalizedMethodFault) error {
+// HTTPNfcLeaseAbort wraps methods.HttpNfcLeaseAbort
+func (o HTTPNfcLease) HTTPNfcLeaseAbort(ctx context.Context, fault *types.LocalizedMethodFault) error {
 	req := types.HttpNfcLeaseAbort{
 		This:  o.Reference(),
 		Fault: fault,
@@ -55,8 +55,8 @@ func (o HttpNfcLease) HttpNfcLeaseAbort(ctx context.Context, fault *types.Locali
 	return nil
 }
 
-// HttpNfcLeaseComplete wraps methods.HttpNfcLeaseComplete
-func (o HttpNfcLease) HttpNfcLeaseComplete(ctx context.Context) error {
+// HTTPNfcLeaseComplete wraps methods.HttpNfcLeaseComplete
+func (o HTTPNfcLease) HTTPNfcLeaseComplete(ctx context.Context) error {
 	req := types.HttpNfcLeaseComplete{
 		This: o.Reference(),
 	}
@@ -69,8 +69,8 @@ func (o HttpNfcLease) HttpNfcLeaseComplete(ctx context.Context) error {
 	return nil
 }
 
-// HttpNfcLeaseGetManifest wraps methods.HttpNfcLeaseGetManifest
-func (o HttpNfcLease) HttpNfcLeaseGetManifest(ctx context.Context) error {
+// HTTPNfcLeaseGetManifest wraps methods.HttpNfcLeaseGetManifest
+func (o HTTPNfcLease) HTTPNfcLeaseGetManifest(ctx context.Context) error {
 	req := types.HttpNfcLeaseGetManifest{
 		This: o.Reference(),
 	}
@@ -83,8 +83,8 @@ func (o HttpNfcLease) HttpNfcLeaseGetManifest(ctx context.Context) error {
 	return nil
 }
 
-// HttpNfcLeaseProgress wraps methods.HttpNfcLeaseProgress
-func (o HttpNfcLease) HttpNfcLeaseProgress(ctx context.Context, percent int) error {
+// HTTPNfcLeaseProgress wraps methods.HttpNfcLeaseProgress
+func (o HTTPNfcLease) HTTPNfcLeaseProgress(ctx context.Context, percent int) error {
 	req := types.HttpNfcLeaseProgress{
 		This:    o.Reference(),
 		Percent: percent,
@@ -99,7 +99,7 @@ func (o HttpNfcLease) HttpNfcLeaseProgress(ctx context.Context, percent int) err
 }
 
 // Wait for the http nfc lease info to be collected
-func (o HttpNfcLease) Wait(ctx context.Context) (*types.HttpNfcLeaseInfo, error) {
+func (o HTTPNfcLease) Wait(ctx context.Context) (*types.HttpNfcLeaseInfo, error) {
 	var lease mo.HttpNfcLease
 
 	pc := property.DefaultCollector(o.c)

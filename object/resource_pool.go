@@ -61,7 +61,7 @@ func (p ResourcePool) Name(ctx context.Context) (string, error) {
 }
 
 // ImportVApp imports a vApp into the resource pool
-func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
+func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HTTPNfcLease, error) {
 	req := types.ImportVApp{
 		This: p.Reference(),
 		Spec: spec,
@@ -82,7 +82,7 @@ func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec,
 		return nil, err
 	}
 
-	return NewHttpNfcLease(p.c, res.Returnval), nil
+	return NewHTTPNfcLease(p.c, res.Returnval), nil
 }
 
 // Create a resource pool
