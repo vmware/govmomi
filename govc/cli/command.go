@@ -91,6 +91,8 @@ func commandHelp(name string, cmd Command, f *flag.FlagSet) {
 }
 
 func Run(args []string) int {
+	var err error
+
 	if len(args) == 0 {
 		generalHelp()
 		return 1
@@ -114,32 +116,27 @@ func Run(args []string) int {
 	ctx := context.Background()
 	cmd.Register(ctx, fs)
 
-	if err := fs.Parse(args[1:]); err != nil {
-		if err == flag.ErrHelp {
-			commandHelp(args[0], cmd, fs)
-		} else {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		}
-		return 1
+	if err = fs.Parse(args[1:]); err != nil {
+		goto error
 	}
 
-	if err := cmd.Process(ctx); err != nil {
-		if err == flag.ErrHelp {
-			commandHelp(args[0], cmd, fs)
-		} else {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		}
-		return 1
+	if err = cmd.Process(ctx); err != nil {
+		goto error
 	}
 
-	if err := cmd.Run(ctx, fs); err != nil {
-		if err == flag.ErrHelp {
-			commandHelp(args[0], cmd, fs)
-		} else {
-			fmt.Fprintf(os.Stderr, "Error: %s\n", err)
-		}
-		return 1
+	if err = cmd.Run(ctx, fs); err != nil {
+		goto error
 	}
 
 	return 0
+
+error:
+	if err == flag.ErrHelp {
+		commandHelp(args[0], cmd, fs)
+	} else {
+		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
+	}
+
+	return 1
+
 }
