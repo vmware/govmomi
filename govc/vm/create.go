@@ -149,7 +149,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	for _, file := range []*string{&cmd.iso, &cmd.disk} {
 		if *file != "" {
-			_, err = cmd.Stat(*file)
+			_, err = cmd.Datastore.Stat(context.TODO(), *file)
 			if err != nil {
 				return err
 			}
@@ -246,7 +246,7 @@ func (cmd *create) createVM(name string) (*object.Task, error) {
 	if !cmd.force {
 		vmxPath := fmt.Sprintf("%s/%s.vmx", name, name)
 
-		_, err := cmd.Stat(vmxPath)
+		_, err := cmd.Datastore.Stat(context.TODO(), vmxPath)
 		if err == nil {
 			dsPath := cmd.Datastore.Path(vmxPath)
 			return nil, fmt.Errorf("File %s already exists", dsPath)
