@@ -1,6 +1,6 @@
 # changelog
 
-### (unreleased)
+### 0.3.0 (2016-01-16)
 
 * Add object.VirtualNicManager wrapper
 
