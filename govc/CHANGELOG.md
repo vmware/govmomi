@@ -1,5 +1,9 @@
 # changelog
 
+### (unreleased)
+
+* Add `-p` and `-a` options to govc datastore.ls command
+
 ### 0.3.0 (2016-01-16)
 
 * Add permissions.{ls,set,remove} commands

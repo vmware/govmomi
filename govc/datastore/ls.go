@@ -36,7 +36,9 @@ type ls struct {
 	*flags.DatastoreFlag
 	*flags.OutputFlag
 
-	long bool
+	long  bool
+	slash bool
+	all   bool
 }
 
 func init() {
@@ -51,6 +53,8 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
+	f.BoolVar(&cmd.slash, "p", false, "Write a slash (`/') after each filename if that file is a directory")
+	f.BoolVar(&cmd.all, "a", false, "Include entries whose names begin with a dot (.)")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -84,8 +88,8 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	result := &listOutput{
-		rs:   make([]types.HostDatastoreBrowserSearchResults, 0),
-		long: cmd.long,
+		rs:  make([]types.HostDatastoreBrowserSearchResults, 0),
+		cmd: cmd,
 	}
 
 	for _, arg := range args {
@@ -151,12 +155,29 @@ func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.
 }
 
 type listOutput struct {
-	rs   []types.HostDatastoreBrowserSearchResults
-	long bool
+	rs  []types.HostDatastoreBrowserSearchResults
+	cmd *ls
 }
 
 func (o *listOutput) add(r types.HostDatastoreBrowserSearchResults) {
-	o.rs = append(o.rs, r)
+	res := r
+	res.File = nil
+
+	for _, f := range r.File {
+		if f.GetFileInfo().Path[0] == '.' && !o.cmd.all {
+			continue
+		}
+
+		if o.cmd.slash {
+			if d, ok := f.(*types.FolderFileInfo); ok {
+				d.Path += "/"
+			}
+		}
+
+		res.File = append(res.File, f)
+	}
+
+	o.rs = append(o.rs, res)
 }
 
 // hasMultiplePaths returns whether or not the slice of search results contains
@@ -199,7 +220,7 @@ func (o *listOutput) Write(w io.Writer) error {
 		}
 		for _, file := range r.File {
 			info := file.GetFileInfo()
-			if o.long {
+			if o.cmd.long {
 				fmt.Fprintf(tw, "%s\t%s\t%s\n", units.ByteSize(info.FileSize), info.Modification.Format("Mon Jan 2 15:04:05 2006"), info.Path)
 			} else {
 				fmt.Fprintf(tw, "%s\n", info.Path)
