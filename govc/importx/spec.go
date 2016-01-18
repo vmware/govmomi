@@ -129,7 +129,7 @@ func (cmd *spec) Spec(fpath string) error {
 	}
 
 	var deploymentOptions = allDeploymentOptions
-	if e != nil && e.DeploymentOption.Configuration != nil {
+	if e != nil && e.DeploymentOption != nil && e.DeploymentOption.Configuration != nil {
 		deploymentOptions = nil
 
 		// add default first
