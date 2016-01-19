@@ -44,7 +44,7 @@ upload_file() {
   # Not found is a failure
   run govc datastore.rm "${name}.notfound"
   assert_failure
-  assert_matches "Error: File .* was not found" "${output}"
+  assert_matches "govc: File .* was not found" "${output}"
 
   # Not found is NOT a failure with the force flag
   run govc datastore.rm -f "${name}.notfound"

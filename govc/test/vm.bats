@@ -231,7 +231,7 @@ load test_helper
   vm=$(new_id)
 
   run govc vm.create -disk enoent -on=false $vm
-  assert_failure "Error: datastore file does not exist"
+  assert_failure "govc: cannot stat '[${GOVC_DATASTORE}] enoent': No such file"
 
   run govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
   assert_success
@@ -247,7 +247,7 @@ load test_helper
   vm=$(new_id)
 
   run govc vm.create -disk enoent -on=false $vm
-  assert_failure "Error: datastore file does not exist"
+  assert_failure "govc: cannot stat '[${GOVC_DATASTORE}] enoent': No such file"
 
   run govc vm.create -disk $GOVC_TEST_VMDK -on=false -link=false $vm
   assert_success
@@ -265,7 +265,7 @@ load test_helper
   vm=$(new_id)
 
   run govc vm.create -iso enoent -on=false $vm
-  assert_failure "Error: datastore file does not exist"
+  assert_failure "govc: cannot stat '[${GOVC_DATASTORE}] enoent': No such file"
 
   run govc vm.create -iso $GOVC_TEST_ISO -on=false $vm
   assert_success
@@ -327,10 +327,10 @@ load test_helper
   assert_success
 
   run govc vm.disk.attach -vm $vm -link=false -disk enoent.vmdk
-  assert_failure "Error: File [${GOVC_DATASTORE}] enoent.vmdk was not found"
+  assert_failure "govc: File [${GOVC_DATASTORE}] enoent.vmdk was not found"
 
   run govc vm.disk.attach -vm $vm -disk enoent.vmdk
-  assert_failure "Error: Invalid configuration for device '0'."
+  assert_failure "govc: Invalid configuration for device '0'."
 
   run govc vm.disk.attach -vm $vm -disk $vm/$GOVC_TEST_VMDK -controller lsilogic-1000
   assert_success
