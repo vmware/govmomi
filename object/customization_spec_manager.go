@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// CustomizationSpecManager a customization spec client
 type CustomizationSpecManager struct {
 	Common
 }
 
+// NewCustomizationSpecManager creates a new customization spec client
 func NewCustomizationSpecManager(c *vim25.Client) *CustomizationSpecManager {
 	cs := CustomizationSpecManager{
 		Common: NewCommon(c, *c.ServiceContent.CustomizationSpecManager),
@@ -35,6 +37,7 @@ func NewCustomizationSpecManager(c *vim25.Client) *CustomizationSpecManager {
 	return &cs
 }
 
+// DoesCustomizationSpecExist returns true when the customization spec exists
 func (cs CustomizationSpecManager) DoesCustomizationSpecExist(ctx context.Context, name string) (bool, error) {
 	req := types.DoesCustomizationSpecExist{
 		This: cs.Reference(),
@@ -50,6 +53,7 @@ func (cs CustomizationSpecManager) DoesCustomizationSpecExist(ctx context.Contex
 	return res.Returnval, nil
 }
 
+// GetCustomizationSpec gets a customization spec by name
 func (cs CustomizationSpecManager) GetCustomizationSpec(ctx context.Context, name string) (*types.CustomizationSpecItem, error) {
 	req := types.GetCustomizationSpec{
 		This: cs.Reference(),
@@ -65,6 +69,7 @@ func (cs CustomizationSpecManager) GetCustomizationSpec(ctx context.Context, nam
 	return &res.Returnval, nil
 }
 
+// CreateCustomizationSpec creates a customization spec
 func (cs CustomizationSpecManager) CreateCustomizationSpec(ctx context.Context, item types.CustomizationSpecItem) error {
 	req := types.CreateCustomizationSpec{
 		This: cs.Reference(),
@@ -79,6 +84,7 @@ func (cs CustomizationSpecManager) CreateCustomizationSpec(ctx context.Context, 
 	return nil
 }
 
+// OverwriteCustomizationSpec overwrites a customization spec
 func (cs CustomizationSpecManager) OverwriteCustomizationSpec(ctx context.Context, item types.CustomizationSpecItem) error {
 	req := types.OverwriteCustomizationSpec{
 		This: cs.Reference(),
@@ -93,6 +99,7 @@ func (cs CustomizationSpecManager) OverwriteCustomizationSpec(ctx context.Contex
 	return nil
 }
 
+// DeleteCustomizationSpec deletes a customization spec
 func (cs CustomizationSpecManager) DeleteCustomizationSpec(ctx context.Context, name string) error {
 	req := types.DeleteCustomizationSpec{
 		This: cs.Reference(),
@@ -107,6 +114,7 @@ func (cs CustomizationSpecManager) DeleteCustomizationSpec(ctx context.Context, 
 	return nil
 }
 
+// DuplicateCustomizationSpec duplicates a customization spec
 func (cs CustomizationSpecManager) DuplicateCustomizationSpec(ctx context.Context, name string, newName string) error {
 	req := types.DuplicateCustomizationSpec{
 		This:    cs.Reference(),
@@ -122,6 +130,7 @@ func (cs CustomizationSpecManager) DuplicateCustomizationSpec(ctx context.Contex
 	return nil
 }
 
+// RenameCustomizationSpec renames a customization spec
 func (cs CustomizationSpecManager) RenameCustomizationSpec(ctx context.Context, name string, newName string) error {
 	req := types.RenameCustomizationSpec{
 		This:    cs.Reference(),
@@ -137,7 +146,8 @@ func (cs CustomizationSpecManager) RenameCustomizationSpec(ctx context.Context, 
 	return nil
 }
 
-func (cs CustomizationSpecManager) CustomizationSpecItemToXml(ctx context.Context, item types.CustomizationSpecItem) (string, error) {
+// CustomizationSpecItemToXML converts the given spec to xml
+func (cs CustomizationSpecManager) CustomizationSpecItemToXML(ctx context.Context, item types.CustomizationSpecItem) (string, error) {
 	req := types.CustomizationSpecItemToXml{
 		This: cs.Reference(),
 		Item: item,
@@ -151,7 +161,8 @@ func (cs CustomizationSpecManager) CustomizationSpecItemToXml(ctx context.Contex
 	return res.Returnval, nil
 }
 
-func (cs CustomizationSpecManager) XmlToCustomizationSpecItem(ctx context.Context, xml string) (*types.CustomizationSpecItem, error) {
+// XMLToCustomizationSpecItem converts xml to a customization spec item
+func (cs CustomizationSpecManager) XMLToCustomizationSpecItem(ctx context.Context, xml string) (*types.CustomizationSpecItem, error) {
 	req := types.XmlToCustomizationSpecItem{
 		This:        cs.Reference(),
 		SpecItemXml: xml,

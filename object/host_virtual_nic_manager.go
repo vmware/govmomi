@@ -24,11 +24,13 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostVirtualNicManager represents a virtual NIC manager client
 type HostVirtualNicManager struct {
 	Common
 	Host *HostSystem
 }
 
+// NewHostVirtualNicManager creates a new virtual NIC manager client
 func NewHostVirtualNicManager(c *vim25.Client, ref types.ManagedObjectReference, host types.ManagedObjectReference) *HostVirtualNicManager {
 	return &HostVirtualNicManager{
 		Common: NewCommon(c, ref),
@@ -36,6 +38,7 @@ func NewHostVirtualNicManager(c *vim25.Client, ref types.ManagedObjectReference,
 	}
 }
 
+// Info about the virtual NICs on a host
 func (m HostVirtualNicManager) Info(ctx context.Context) (*types.HostVirtualNicManagerInfo, error) {
 	var vnm mo.HostVirtualNicManager
 
@@ -47,6 +50,7 @@ func (m HostVirtualNicManager) Info(ctx context.Context) (*types.HostVirtualNicM
 	return &vnm.Info, nil
 }
 
+// DeselectVnic on the host
 func (m HostVirtualNicManager) DeselectVnic(ctx context.Context, nicType string, device string) error {
 	if nicType == string(types.HostVirtualNicManagerNicTypeVsan) {
 		// Avoid fault.NotSupported:
@@ -69,6 +73,7 @@ func (m HostVirtualNicManager) DeselectVnic(ctx context.Context, nicType string,
 	return err
 }
 
+// SelectVnic selects a vNIC
 func (m HostVirtualNicManager) SelectVnic(ctx context.Context, nicType string, device string) error {
 	if nicType == string(types.HostVirtualNicManagerNicTypeVsan) {
 		// Avoid fault.NotSupported:

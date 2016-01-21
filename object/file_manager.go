@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// FileManager client
 type FileManager struct {
 	Common
 }
 
+// NewFileManager client instance
 func NewFileManager(c *vim25.Client) *FileManager {
 	f := FileManager{
 		Common: NewCommon(c, *c.ServiceContent.FileManager),
@@ -35,6 +37,7 @@ func NewFileManager(c *vim25.Client) *FileManager {
 	return &f
 }
 
+// CopyDatastoreFile copies a file in a datastore
 func (f FileManager) CopyDatastoreFile(ctx context.Context, sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.CopyDatastoreFile_Task{
 		This:            f.Reference(),
@@ -98,6 +101,7 @@ func (f FileManager) MakeDirectory(ctx context.Context, name string, dc *Datacen
 	return err
 }
 
+// MoveDatastoreFile moves a file in a datastore
 func (f FileManager) MoveDatastoreFile(ctx context.Context, sourceName string, sourceDatacenter *Datacenter, destinationName string, destinationDatacenter *Datacenter, force bool) (*Task, error) {
 	req := types.MoveDatastoreFile_Task{
 		This:            f.Reference(),

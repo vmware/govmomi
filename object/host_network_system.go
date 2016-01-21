@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostNetworkSystem represents a host network system client
 type HostNetworkSystem struct {
 	Common
 }
 
+// NewHostNetworkSystem creates a new host network system client
 func NewHostNetworkSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostNetworkSystem {
 	return &HostNetworkSystem{
 		Common: NewCommon(c, ref),
@@ -200,8 +202,8 @@ func (o HostNetworkSystem) RestartServiceConsoleVirtualNic(ctx context.Context, 
 	return nil
 }
 
-// UpdateConsoleIpRouteConfig wraps methods.UpdateConsoleIpRouteConfig
-func (o HostNetworkSystem) UpdateConsoleIpRouteConfig(ctx context.Context, config types.BaseHostIpRouteConfig) error {
+// UpdateConsoleIPRouteConfig wraps methods.UpdateConsoleIpRouteConfig
+func (o HostNetworkSystem) UpdateConsoleIPRouteConfig(ctx context.Context, config types.BaseHostIpRouteConfig) error {
 	req := types.UpdateConsoleIpRouteConfig{
 		This:   o.Reference(),
 		Config: config,
@@ -215,8 +217,8 @@ func (o HostNetworkSystem) UpdateConsoleIpRouteConfig(ctx context.Context, confi
 	return nil
 }
 
-// UpdateDnsConfig wraps methods.UpdateDnsConfig
-func (o HostNetworkSystem) UpdateDnsConfig(ctx context.Context, config types.BaseHostDnsConfig) error {
+// UpdateDNSConfig wraps methods.UpdateDnsConfig
+func (o HostNetworkSystem) UpdateDNSConfig(ctx context.Context, config types.BaseHostDnsConfig) error {
 	req := types.UpdateDnsConfig{
 		This:   o.Reference(),
 		Config: config,
@@ -230,8 +232,8 @@ func (o HostNetworkSystem) UpdateDnsConfig(ctx context.Context, config types.Bas
 	return nil
 }
 
-// UpdateIpRouteConfig wraps methods.UpdateIpRouteConfig
-func (o HostNetworkSystem) UpdateIpRouteConfig(ctx context.Context, config types.BaseHostIpRouteConfig) error {
+// UpdateIPRouteConfig wraps methods.UpdateIpRouteConfig
+func (o HostNetworkSystem) UpdateIPRouteConfig(ctx context.Context, config types.BaseHostIpRouteConfig) error {
 	req := types.UpdateIpRouteConfig{
 		This:   o.Reference(),
 		Config: config,
@@ -245,8 +247,8 @@ func (o HostNetworkSystem) UpdateIpRouteConfig(ctx context.Context, config types
 	return nil
 }
 
-// UpdateIpRouteTableConfig wraps methods.UpdateIpRouteTableConfig
-func (o HostNetworkSystem) UpdateIpRouteTableConfig(ctx context.Context, config types.HostIpRouteTableConfig) error {
+// UpdateIPRouteTableConfig wraps methods.UpdateIpRouteTableConfig
+func (o HostNetworkSystem) UpdateIPRouteTableConfig(ctx context.Context, config types.HostIpRouteTableConfig) error {
 	req := types.UpdateIpRouteTableConfig{
 		This:   o.Reference(),
 		Config: config,

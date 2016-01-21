@@ -28,9 +28,11 @@ import (
 )
 
 var (
+	// ErrKeyNameNotFound returned when a key by the specified name can't be found
 	ErrKeyNameNotFound = errors.New("key name not found")
 )
 
+// CustomFieldsManager represents a client for custom fields
 type CustomFieldsManager struct {
 	Common
 }
@@ -44,6 +46,7 @@ func GetCustomFieldsManager(c *vim25.Client) (*CustomFieldsManager, error) {
 	return NewCustomFieldsManager(c), nil
 }
 
+// NewCustomFieldsManager creates a new custom fields client
 func NewCustomFieldsManager(c *vim25.Client) *CustomFieldsManager {
 	m := CustomFieldsManager{
 		Common: NewCommon(c, *c.ServiceContent.CustomFieldsManager),
@@ -52,6 +55,7 @@ func NewCustomFieldsManager(c *vim25.Client) *CustomFieldsManager {
 	return &m
 }
 
+// Add a custom field
 func (m CustomFieldsManager) Add(ctx context.Context, name string, moType string, fieldDefPolicy *types.PrivilegePolicyDef, fieldPolicy *types.PrivilegePolicyDef) (*types.CustomFieldDef, error) {
 	req := types.AddCustomFieldDef{
 		This:           m.Reference(),
@@ -69,6 +73,7 @@ func (m CustomFieldsManager) Add(ctx context.Context, name string, moType string
 	return &res.Returnval, nil
 }
 
+// Remove a custom field
 func (m CustomFieldsManager) Remove(ctx context.Context, key int) error {
 	req := types.RemoveCustomFieldDef{
 		This: m.Reference(),
@@ -79,6 +84,7 @@ func (m CustomFieldsManager) Remove(ctx context.Context, key int) error {
 	return err
 }
 
+// Rename a custom field
 func (m CustomFieldsManager) Rename(ctx context.Context, key int, name string) error {
 	req := types.RenameCustomFieldDef{
 		This: m.Reference(),
@@ -90,6 +96,7 @@ func (m CustomFieldsManager) Rename(ctx context.Context, key int, name string) e
 	return err
 }
 
+// Set a custom field value
 func (m CustomFieldsManager) Set(ctx context.Context, entity types.ManagedObjectReference, key int, value string) error {
 	req := types.SetField{
 		This:   m.Reference(),
@@ -102,6 +109,7 @@ func (m CustomFieldsManager) Set(ctx context.Context, entity types.ManagedObject
 	return err
 }
 
+// Field gets a custom field definition
 func (m CustomFieldsManager) Field(ctx context.Context) ([]types.CustomFieldDef, error) {
 	var fm mo.CustomFieldsManager
 
@@ -113,6 +121,7 @@ func (m CustomFieldsManager) Field(ctx context.Context) ([]types.CustomFieldDef,
 	return fm.Field, nil
 }
 
+// FindKey finds a key id by key name
 func (m CustomFieldsManager) FindKey(ctx context.Context, key string) (int, error) {
 	field, err := m.Field(ctx)
 	if err != nil {

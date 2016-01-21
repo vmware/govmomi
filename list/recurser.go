@@ -24,6 +24,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Recurser recurses a graph
 type Recurser struct {
 	Collector *property.Collector
 
@@ -37,6 +38,7 @@ type Recurser struct {
 	TraverseLeafs bool
 }
 
+// Recurse a given root for the given parts
 func (r Recurser) Recurse(ctx context.Context, root Element, parts []string) ([]Element, error) {
 	if len(parts) == 0 {
 		// Include non-traversable leaf elements in result. For example, consider

@@ -28,16 +28,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostFirewallSystem represents the host firewall system config client
 type HostFirewallSystem struct {
 	Common
 }
 
+// NewHostFirewallSystem creates a new host firewall config client
 func NewHostFirewallSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostFirewallSystem {
 	return &HostFirewallSystem{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// DisableRuleset disables the specified ruleset
 func (s HostFirewallSystem) DisableRuleset(ctx context.Context, id string) error {
 	req := types.DisableRuleset{
 		This: s.Reference(),
@@ -48,6 +51,7 @@ func (s HostFirewallSystem) DisableRuleset(ctx context.Context, id string) error
 	return err
 }
 
+// EnableRuleset enables the specified ruleset
 func (s HostFirewallSystem) EnableRuleset(ctx context.Context, id string) error {
 	req := types.EnableRuleset{
 		This: s.Reference(),
@@ -58,6 +62,7 @@ func (s HostFirewallSystem) EnableRuleset(ctx context.Context, id string) error 
 	return err
 }
 
+// Refresh this firewall system config
 func (s HostFirewallSystem) Refresh(ctx context.Context) error {
 	req := types.RefreshFirewall{
 		This: s.Reference(),
@@ -67,6 +72,7 @@ func (s HostFirewallSystem) Refresh(ctx context.Context) error {
 	return err
 }
 
+// Info for this host firewall system
 func (s HostFirewallSystem) Info(ctx context.Context) (*types.HostFirewallInfo, error) {
 	var fs mo.HostFirewallSystem
 

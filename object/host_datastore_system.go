@@ -23,16 +23,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostDatastoreSystem creates a host datastore config client
 type HostDatastoreSystem struct {
 	Common
 }
 
+// NewHostDatastoreSystem creates a new host datastore config client instance
 func NewHostDatastoreSystem(c *vim25.Client, ref types.ManagedObjectReference) *HostDatastoreSystem {
 	return &HostDatastoreSystem{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// CreateNasDatastore creates a nas datastore client
 func (s HostDatastoreSystem) CreateNasDatastore(ctx context.Context, spec types.HostNasVolumeSpec) (*Datastore, error) {
 	req := types.CreateNasDatastore{
 		This: s.Reference(),
@@ -47,6 +50,7 @@ func (s HostDatastoreSystem) CreateNasDatastore(ctx context.Context, spec types.
 	return NewDatastore(s.Client(), res.Returnval), nil
 }
 
+// CreateVmfsDatastore creates a VMFS datastore
 func (s HostDatastoreSystem) CreateVmfsDatastore(ctx context.Context, spec types.VmfsDatastoreCreateSpec) (*Datastore, error) {
 	req := types.CreateVmfsDatastore{
 		This: s.Reference(),
@@ -61,6 +65,7 @@ func (s HostDatastoreSystem) CreateVmfsDatastore(ctx context.Context, spec types
 	return NewDatastore(s.Client(), res.Returnval), nil
 }
 
+// Remove a host datastore system
 func (s HostDatastoreSystem) Remove(ctx context.Context, ds *Datastore) error {
 	req := types.RemoveDatastore{
 		This:      s.Reference(),
@@ -75,6 +80,7 @@ func (s HostDatastoreSystem) Remove(ctx context.Context, ds *Datastore) error {
 	return nil
 }
 
+// QueryAvailableDisksForVmfs query the available disks for vmfs
 func (s HostDatastoreSystem) QueryAvailableDisksForVmfs(ctx context.Context) ([]types.HostScsiDisk, error) {
 	req := types.QueryAvailableDisksForVmfs{
 		This: s.Reference(),
@@ -88,6 +94,7 @@ func (s HostDatastoreSystem) QueryAvailableDisksForVmfs(ctx context.Context) ([]
 	return res.Returnval, nil
 }
 
+// QueryVmfsDatastoreCreateOptions query the vmfs datastore creation options for the specified device
 func (s HostDatastoreSystem) QueryVmfsDatastoreCreateOptions(ctx context.Context, devicePath string) ([]types.VmfsDatastoreOption, error) {
 	req := types.QueryVmfsDatastoreCreateOptions{
 		This:       s.Reference(),

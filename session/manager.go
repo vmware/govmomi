@@ -27,11 +27,13 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Manager manages sessions
 type Manager struct {
 	client      *vim25.Client
 	userSession *types.UserSession
 }
 
+// NewManager creates a new manager
 func NewManager(client *vim25.Client) *Manager {
 	m := Manager{
 		client: client,
@@ -40,10 +42,12 @@ func NewManager(client *vim25.Client) *Manager {
 	return &m
 }
 
+// Reference returns the managed object reference
 func (sm Manager) Reference() types.ManagedObjectReference {
 	return *sm.client.ServiceContent.SessionManager
 }
 
+// Login logs in
 func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	req := types.Login{
 		This: sm.Reference(),
@@ -65,6 +69,7 @@ func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	return nil
 }
 
+// LoginExtensionByCertificate log in with a certificate
 func (sm *Manager) LoginExtensionByCertificate(ctx context.Context, key string, locale string) error {
 	req := types.LoginExtensionByCertificate{
 		This:         sm.Reference(),
@@ -81,6 +86,7 @@ func (sm *Manager) LoginExtensionByCertificate(ctx context.Context, key string, 
 	return nil
 }
 
+// Logout logs a session out
 func (sm *Manager) Logout(ctx context.Context) error {
 	req := types.Logout{
 		This: sm.Reference(),
@@ -117,10 +123,11 @@ func (sm *Manager) UserSession(ctx context.Context) (*types.UserSession, error) 
 	return mgr.CurrentSession, nil
 }
 
-func (sm *Manager) TerminateSession(ctx context.Context, sessionId []string) error {
+// TerminateSession terminates a session
+func (sm *Manager) TerminateSession(ctx context.Context, sessionID []string) error {
 	req := types.TerminateSession{
 		This:      sm.Reference(),
-		SessionId: sessionId,
+		SessionId: sessionID,
 	}
 
 	_, err := methods.TerminateSession(ctx, sm.client, &req)
@@ -148,6 +155,7 @@ func (sm *Manager) SessionIsActive(ctx context.Context) (bool, error) {
 	return active.Returnval, err
 }
 
+// AcquireGenericServiceTicket acquires a generic service ticket
 func (sm *Manager) AcquireGenericServiceTicket(ctx context.Context, spec types.BaseSessionManagerServiceRequestSpec) (*types.SessionManagerGenericServiceTicket, error) {
 	req := types.AcquireGenericServiceTicket{
 		This: sm.Reference(),

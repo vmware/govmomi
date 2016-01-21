@@ -58,7 +58,7 @@ func (flag *FolderFlag) Folder() (*object.Folder, error) {
 		if err != nil {
 			return nil, err
 		}
-		return folders.VmFolder, nil
+		return folders.VMFolder, nil
 	}
 
 	finder, err := flag.Finder()

@@ -26,23 +26,27 @@ import (
 	"golang.org/x/net/context"
 )
 
+// DatacenterFolders represents the datacenter folder paths
 type DatacenterFolders struct {
-	VmFolder        *Folder
+	VMFolder        *Folder
 	HostFolder      *Folder
 	DatastoreFolder *Folder
 	NetworkFolder   *Folder
 }
 
+// Datacenter a datacenter client
 type Datacenter struct {
 	Common
 }
 
+// NewDatacenter creates a new datacenter client
 func NewDatacenter(c *vim25.Client, ref types.ManagedObjectReference) *Datacenter {
 	return &Datacenter{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Folders gets the folders for the datacenter
 func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
@@ -53,7 +57,7 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	}
 
 	df := &DatacenterFolders{
-		VmFolder:        NewFolder(d.c, md.VmFolder),
+		VMFolder:        NewFolder(d.c, md.VmFolder),
 		HostFolder:      NewFolder(d.c, md.HostFolder),
 		DatastoreFolder: NewFolder(d.c, md.DatastoreFolder),
 		NetworkFolder:   NewFolder(d.c, md.NetworkFolder),
@@ -63,7 +67,7 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 		name string
 		path *string
 	}{
-		{"vm", &df.VmFolder.InventoryPath},
+		{"vm", &df.VMFolder.InventoryPath},
 		{"host", &df.HostFolder.InventoryPath},
 		{"datastore", &df.DatastoreFolder.InventoryPath},
 		{"network", &df.NetworkFolder.InventoryPath},
@@ -76,6 +80,7 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	return df, nil
 }
 
+// Destroy the datacenter
 func (d Datacenter) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: d.Reference(),

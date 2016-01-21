@@ -55,22 +55,26 @@ func (e DatastoreNoSuchFileError) Error() string {
 	return fmt.Sprintf("cannot %s '%s': No such file", e.verb, e.subject)
 }
 
+// Datastore a datastore client
 type Datastore struct {
 	Common
 
 	InventoryPath string
 }
 
+// NewDatastore creates a new datastore client
 func NewDatastore(c *vim25.Client, ref types.ManagedObjectReference) *Datastore {
 	return &Datastore{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Name returns the name of the datastore
 func (d Datastore) Name() string {
 	return path.Base(d.InventoryPath)
 }
 
+// Path for the datestore
 func (d Datastore) Path(path string) string {
 	name := d.Name()
 	if name == "" {
@@ -105,6 +109,7 @@ func (d Datastore) URL(ctx context.Context, dc *Datacenter, path string) (*url.U
 	}, nil
 }
 
+// Browser gets a browser for the datastore
 func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 	var do mo.Datastore
 
@@ -269,6 +274,7 @@ func (d Datastore) AttachedHosts(ctx context.Context) ([]*HostSystem, error) {
 	return hosts, nil
 }
 
+// Stat gets the file base info
 func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, error) {
 	b, err := d.Browser(ctx)
 	if err != nil {

@@ -24,6 +24,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// ExtensionManager represents an extension manager client
 type ExtensionManager struct {
 	Common
 }
@@ -37,6 +38,7 @@ func GetExtensionManager(c *vim25.Client) (*ExtensionManager, error) {
 	return NewExtensionManager(c), nil
 }
 
+// NewExtensionManager creates a new extension manager client
 func NewExtensionManager(c *vim25.Client) *ExtensionManager {
 	o := ExtensionManager{
 		Common: NewCommon(c, *c.ServiceContent.ExtensionManager),
@@ -45,6 +47,7 @@ func NewExtensionManager(c *vim25.Client) *ExtensionManager {
 	return &o
 }
 
+// List the known extensions
 func (m ExtensionManager) List(ctx context.Context) ([]types.Extension, error) {
 	var em mo.ExtensionManager
 
@@ -56,6 +59,7 @@ func (m ExtensionManager) List(ctx context.Context) ([]types.Extension, error) {
 	return em.ExtensionList, nil
 }
 
+// Find the extension by key
 func (m ExtensionManager) Find(ctx context.Context, key string) (*types.Extension, error) {
 	req := types.FindExtension{
 		This:         m.Reference(),
@@ -70,6 +74,7 @@ func (m ExtensionManager) Find(ctx context.Context, key string) (*types.Extensio
 	return res.Returnval, nil
 }
 
+// Register the extension
 func (m ExtensionManager) Register(ctx context.Context, extension types.Extension) error {
 	req := types.RegisterExtension{
 		This:      m.Reference(),
@@ -80,6 +85,7 @@ func (m ExtensionManager) Register(ctx context.Context, extension types.Extensio
 	return err
 }
 
+// SetCertificate for the extension
 func (m ExtensionManager) SetCertificate(ctx context.Context, key string, certificatePem string) error {
 	req := types.SetExtensionCertificate{
 		This:           m.Reference(),
@@ -91,6 +97,7 @@ func (m ExtensionManager) SetCertificate(ctx context.Context, key string, certif
 	return err
 }
 
+// Unregister the extension by name
 func (m ExtensionManager) Unregister(ctx context.Context, key string) error {
 	req := types.UnregisterExtension{
 		This:         m.Reference(),
@@ -101,6 +108,7 @@ func (m ExtensionManager) Unregister(ctx context.Context, key string) error {
 	return err
 }
 
+// Update the extension
 func (m ExtensionManager) Update(ctx context.Context, extension types.Extension) error {
 	req := types.UpdateExtension{
 		This:      m.Reference(),

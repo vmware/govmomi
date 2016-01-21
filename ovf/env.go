@@ -42,6 +42,7 @@ const (
 	ovfEnvFooter         = `</Environment>`
 )
 
+// Env represents the environment settings
 type Env struct {
 	XMLName xml.Name `xml:"http://schemas.dmtf.org/ovf/environment/1 Environment"`
 	ID      string   `xml:"id,attr"`
@@ -51,6 +52,7 @@ type Env struct {
 	Property *PropertySection `xml:"PropertySection"`
 }
 
+// PlatformSection represents the platform section
 type PlatformSection struct {
 	Kind    string `xml:"Kind"`
 	Version string `xml:"Version"`
@@ -58,10 +60,12 @@ type PlatformSection struct {
 	Locale  string `xml:"Locale"`
 }
 
+// PropertySection represents the env property section
 type PropertySection struct {
 	Properties []EnvProperty `xml:"Property"`
 }
 
+// EnvProperty represents an EnvProperty
 type EnvProperty struct {
 	Key   string `xml:"key,attr"`
 	Value string `xml:"value,attr"`

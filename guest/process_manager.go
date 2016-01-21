@@ -23,6 +23,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// ProcessManager a guest process manager
 type ProcessManager struct {
 	types.ManagedObjectReference
 
@@ -31,10 +32,12 @@ type ProcessManager struct {
 	c *vim25.Client
 }
 
+// Reference returns the managed object reference
 func (m ProcessManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
+// ListProcesses lists the processes in the guest
 func (m ProcessManager) ListProcesses(ctx context.Context, auth types.BaseGuestAuthentication, pids []int64) ([]types.GuestProcessInfo, error) {
 	req := types.ListProcessesInGuest{
 		This: m.Reference(),
@@ -51,6 +54,7 @@ func (m ProcessManager) ListProcesses(ctx context.Context, auth types.BaseGuestA
 	return res.Returnval, err
 }
 
+// ReadEnvironmentVariable reads a guest environment variable
 func (m ProcessManager) ReadEnvironmentVariable(ctx context.Context, auth types.BaseGuestAuthentication, names []string) ([]string, error) {
 	req := types.ReadEnvironmentVariableInGuest{
 		This:  m.Reference(),
@@ -67,6 +71,7 @@ func (m ProcessManager) ReadEnvironmentVariable(ctx context.Context, auth types.
 	return res.Returnval, err
 }
 
+// StartProgram starts a program in the guest
 func (m ProcessManager) StartProgram(ctx context.Context, auth types.BaseGuestAuthentication, spec types.BaseGuestProgramSpec) (int64, error) {
 	req := types.StartProgramInGuest{
 		This: m.Reference(),
@@ -83,6 +88,7 @@ func (m ProcessManager) StartProgram(ctx context.Context, auth types.BaseGuestAu
 	return res.Returnval, err
 }
 
+// TerminateProcess terminates a process in a guest
 func (m ProcessManager) TerminateProcess(ctx context.Context, auth types.BaseGuestAuthentication, pid int64) error {
 	req := types.TerminateProcessInGuest{
 		This: m.Reference(),

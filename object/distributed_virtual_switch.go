@@ -23,22 +23,26 @@ import (
 	"golang.org/x/net/context"
 )
 
+// DistributedVirtualSwitch represents a distributed virtual switch client
 type DistributedVirtualSwitch struct {
 	Common
 
 	InventoryPath string
 }
 
+// NewDistributedVirtualSwitch creates a distributed virtual switch
 func NewDistributedVirtualSwitch(c *vim25.Client, ref types.ManagedObjectReference) *DistributedVirtualSwitch {
 	return &DistributedVirtualSwitch{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// EthernetCardBackingInfo satisfies the network reference interface for the finder
 func (s DistributedVirtualSwitch) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	return nil, ErrNotSupported // TODO: just to satisfy NetworkReference interface for the finder
 }
 
+// Reconfigure a distributed virtual switch
 func (s DistributedVirtualSwitch) Reconfigure(ctx context.Context, spec types.BaseDVSConfigSpec) (*Task, error) {
 	req := types.ReconfigureDvs_Task{
 		This: s.Reference(),
@@ -53,6 +57,7 @@ func (s DistributedVirtualSwitch) Reconfigure(ctx context.Context, spec types.Ba
 	return NewTask(s.Client(), res.Returnval), nil
 }
 
+// AddPortgroup to this distributed vswitch
 func (s DistributedVirtualSwitch) AddPortgroup(ctx context.Context, spec []types.DVPortgroupConfigSpec) (*Task, error) {
 	req := types.AddDVPortgroup_Task{
 		This: s.Reference(),

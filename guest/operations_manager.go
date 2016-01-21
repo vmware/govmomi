@@ -24,11 +24,13 @@ import (
 	"golang.org/x/net/context"
 )
 
+// OperationsManager is a facade for guest operations
 type OperationsManager struct {
 	c  *vim25.Client
 	vm types.ManagedObjectReference
 }
 
+// NewOperationsManager creates a new operations manager
 func NewOperationsManager(c *vim25.Client, vm types.ManagedObjectReference) *OperationsManager {
 	return &OperationsManager{c, vm}
 }
@@ -38,6 +40,7 @@ func (m OperationsManager) retrieveOne(ctx context.Context, p string, dst *mo.Gu
 	return pc.RetrieveOne(ctx, *m.c.ServiceContent.GuestOperationsManager, []string{p}, dst)
 }
 
+// AuthManager returns the auth manager
 func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error) {
 	var g mo.GuestOperationsManager
 
@@ -49,6 +52,7 @@ func (m OperationsManager) AuthManager(ctx context.Context) (*AuthManager, error
 	return &AuthManager{*g.AuthManager, m.vm, m.c}, nil
 }
 
+// FileManager returns the file manager
 func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error) {
 	var g mo.GuestOperationsManager
 
@@ -60,6 +64,7 @@ func (m OperationsManager) FileManager(ctx context.Context) (*FileManager, error
 	return &FileManager{*g.FileManager, m.vm, m.c}, nil
 }
 
+// ProcessManager manages the processes for the given context
 func (m OperationsManager) ProcessManager(ctx context.Context) (*ProcessManager, error) {
 	var g mo.GuestOperationsManager
 

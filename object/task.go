@@ -33,6 +33,7 @@ type Task struct {
 	Common
 }
 
+// NewTask creates a new task wrapper
 func NewTask(c *vim25.Client, ref types.ManagedObjectReference) *Task {
 	t := Task{
 		Common: NewCommon(c, ref),
@@ -41,11 +42,13 @@ func NewTask(c *vim25.Client, ref types.ManagedObjectReference) *Task {
 	return &t
 }
 
+// Wait for the result of a task, only error is returned
 func (t *Task) Wait(ctx context.Context) error {
 	_, err := t.WaitForResult(ctx, nil)
 	return err
 }
 
+// WaitForResult of a task, returns the task info or an error
 func (t *Task) WaitForResult(ctx context.Context, s progress.Sinker) (*types.TaskInfo, error) {
 	p := property.DefaultCollector(t.c)
 	return task.Wait(ctx, t.Reference(), p, s)

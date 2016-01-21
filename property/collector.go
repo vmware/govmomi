@@ -47,6 +47,7 @@ func DefaultCollector(c *vim25.Client) *Collector {
 	return &p
 }
 
+// Reference returns the managed reference
 func (p Collector) Reference() types.ManagedObjectReference {
 	return p.reference
 }
@@ -86,6 +87,7 @@ func (p *Collector) Destroy(ctx context.Context) error {
 	return nil
 }
 
+// CreateFilter creates a filter
 func (p *Collector) CreateFilter(ctx context.Context, req types.CreateFilter) error {
 	req.This = p.Reference()
 
@@ -97,6 +99,7 @@ func (p *Collector) CreateFilter(ctx context.Context, req types.CreateFilter) er
 	return nil
 }
 
+// WaitForUpdates waits for updates
 func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.UpdateSet, error) {
 	req := types.WaitForUpdatesEx{
 		This:    p.Reference(),
@@ -111,6 +114,7 @@ func (p *Collector) WaitForUpdates(ctx context.Context, v string) (*types.Update
 	return res.Returnval, nil
 }
 
+// RetrieveProperties retrieves the properties
 func (p *Collector) RetrieveProperties(ctx context.Context, req types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
 	req.This = p.Reference()
 	return methods.RetrieveProperties(ctx, p.roundTripper, &req)

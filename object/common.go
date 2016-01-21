@@ -28,6 +28,7 @@ import (
 )
 
 var (
+	// ErrNotSupported returned when something isn't supported by esx
 	ErrNotSupported = errors.New("not supported (vCenter only)")
 )
 
@@ -37,26 +38,32 @@ type Common struct {
 	r types.ManagedObjectReference
 }
 
+// String returns a string version of the reference
 func (c Common) String() string {
 	return fmt.Sprintf("%v", c.Reference())
 }
 
+// NewCommon returns a new instance of common
 func NewCommon(c *vim25.Client, r types.ManagedObjectReference) Common {
 	return Common{c: c, r: r}
 }
 
+// Reference returns the managed object reference
 func (c Common) Reference() types.ManagedObjectReference {
 	return c.r
 }
 
+// Client returns the client for this object
 func (c Common) Client() *vim25.Client {
 	return c.c
 }
 
+// Properties retrieves the properties for a given reference
 func (c Common) Properties(ctx context.Context, r types.ManagedObjectReference, ps []string, dst interface{}) error {
 	return property.DefaultCollector(c.c).RetrieveOne(ctx, r, ps, dst)
 }
 
+// Destroy the referenced object
 func (c Common) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: c.Reference(),

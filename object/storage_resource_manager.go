@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// StorageResourceManager represents a storage resource manager client
 type StorageResourceManager struct {
 	Common
 }
 
+// NewStorageResourceManager creates a new storage resource manager client
 func NewStorageResourceManager(c *vim25.Client) *StorageResourceManager {
 	sr := StorageResourceManager{
 		Common: NewCommon(c, *c.ServiceContent.StorageResourceManager),
@@ -35,6 +37,7 @@ func NewStorageResourceManager(c *vim25.Client) *StorageResourceManager {
 	return &sr
 }
 
+// ApplyStorageDrsRecommendation applies the storage drs recommendation
 func (sr StorageResourceManager) ApplyStorageDrsRecommendation(ctx context.Context, key []string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendation_Task{
 		This: sr.Reference(),
@@ -49,6 +52,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendation(ctx context.Conte
 	return NewTask(sr.c, res.Returnval), nil
 }
 
+// ApplyStorageDrsRecommendationToPod for storage pod specific recommendations
 func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(ctx context.Context, pod *StoragePod, key string) (*Task, error) {
 	req := types.ApplyStorageDrsRecommendationToPod_Task{
 		This: sr.Reference(),
@@ -67,6 +71,7 @@ func (sr StorageResourceManager) ApplyStorageDrsRecommendationToPod(ctx context.
 	return NewTask(sr.c, res.Returnval), nil
 }
 
+// CancelStorageDrsRecommendation cancels a recommendation application
 func (sr StorageResourceManager) CancelStorageDrsRecommendation(ctx context.Context, key []string) error {
 	req := types.CancelStorageDrsRecommendation{
 		This: sr.Reference(),
@@ -78,6 +83,7 @@ func (sr StorageResourceManager) CancelStorageDrsRecommendation(ctx context.Cont
 	return err
 }
 
+// ConfigureDatastoreIORM configure datastore for IORM
 func (sr StorageResourceManager) ConfigureDatastoreIORM(ctx context.Context, datastore *Datastore, spec types.StorageIORMConfigSpec, key string) (*Task, error) {
 	req := types.ConfigureDatastoreIORM_Task{
 		This: sr.Reference(),
@@ -96,6 +102,7 @@ func (sr StorageResourceManager) ConfigureDatastoreIORM(ctx context.Context, dat
 	return NewTask(sr.c, res.Returnval), nil
 }
 
+// ConfigureStorageDrsForPod configure the storage drs for a storage pod
 func (sr StorageResourceManager) ConfigureStorageDrsForPod(ctx context.Context, pod *StoragePod, spec types.StorageDrsConfigSpec, modify bool) (*Task, error) {
 	req := types.ConfigureStorageDrsForPod_Task{
 		This:   sr.Reference(),
@@ -115,6 +122,7 @@ func (sr StorageResourceManager) ConfigureStorageDrsForPod(ctx context.Context, 
 	return NewTask(sr.c, res.Returnval), nil
 }
 
+// QueryDatastorePerformanceSummary queries the datastore performance summary
 func (sr StorageResourceManager) QueryDatastorePerformanceSummary(ctx context.Context, datastore *Datastore) ([]types.StoragePerformanceSummary, error) {
 	req := types.QueryDatastorePerformanceSummary{
 		This: sr.Reference(),
@@ -132,6 +140,7 @@ func (sr StorageResourceManager) QueryDatastorePerformanceSummary(ctx context.Co
 	return res.Returnval, nil
 }
 
+// QueryIORMConfigOption queries the IORM config options
 func (sr StorageResourceManager) QueryIORMConfigOption(ctx context.Context, host *HostSystem) (*types.StorageIORMConfigOption, error) {
 	req := types.QueryIORMConfigOption{
 		This: sr.Reference(),
@@ -149,6 +158,7 @@ func (sr StorageResourceManager) QueryIORMConfigOption(ctx context.Context, host
 	return &res.Returnval, nil
 }
 
+// RecommendDatastores for this storage resource manager
 func (sr StorageResourceManager) RecommendDatastores(ctx context.Context, storageSpec types.StoragePlacementSpec) (*types.StoragePlacementResult, error) {
 	req := types.RecommendDatastores{
 		This:        sr.Reference(),
@@ -163,6 +173,7 @@ func (sr StorageResourceManager) RecommendDatastores(ctx context.Context, storag
 	return &res.Returnval, nil
 }
 
+// RefreshStorageDrsRecommendation refresh the storage DRS recommencation
 func (sr StorageResourceManager) RefreshStorageDrsRecommendation(ctx context.Context, pod *StoragePod) error {
 	req := types.RefreshStorageDrsRecommendation{
 		This: sr.Reference(),

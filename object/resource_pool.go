@@ -26,12 +26,14 @@ import (
 	"golang.org/x/net/context"
 )
 
+// ResourcePool represents a client to manage a resource pool
 type ResourcePool struct {
 	Common
 
 	InventoryPath string
 }
 
+// String has a string representation of the resource pool
 func (p ResourcePool) String() string {
 	if p.InventoryPath == "" {
 		return p.Common.String()
@@ -39,12 +41,14 @@ func (p ResourcePool) String() string {
 	return fmt.Sprintf("%v @ %v", p.Common, p.InventoryPath)
 }
 
+// NewResourcePool creates a new resource pool client
 func NewResourcePool(c *vim25.Client, ref types.ManagedObjectReference) *ResourcePool {
 	return &ResourcePool{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Name returns the name of the resource poool
 func (p ResourcePool) Name(ctx context.Context) (string, error) {
 	var o mo.ResourcePool
 
@@ -56,7 +60,8 @@ func (p ResourcePool) Name(ctx context.Context) (string, error) {
 	return o.Name, nil
 }
 
-func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HttpNfcLease, error) {
+// ImportVApp imports a vApp into the resource pool
+func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec, folder *Folder, host *HostSystem) (*HTTPNfcLease, error) {
 	req := types.ImportVApp{
 		This: p.Reference(),
 		Spec: spec,
@@ -77,9 +82,10 @@ func (p ResourcePool) ImportVApp(ctx context.Context, spec types.BaseImportSpec,
 		return nil, err
 	}
 
-	return NewHttpNfcLease(p.c, res.Returnval), nil
+	return NewHTTPNfcLease(p.c, res.Returnval), nil
 }
 
+// Create a resource pool
 func (p ResourcePool) Create(ctx context.Context, name string, spec types.ResourceConfigSpec) (*ResourcePool, error) {
 	req := types.CreateResourcePool{
 		This: p.Reference(),
@@ -95,6 +101,7 @@ func (p ResourcePool) Create(ctx context.Context, name string, spec types.Resour
 	return NewResourcePool(p.c, res.Returnval), nil
 }
 
+// CreateVApp in this resource pool
 func (p ResourcePool) CreateVApp(ctx context.Context, name string, resSpec types.ResourceConfigSpec, configSpec types.VAppConfigSpec, folder *Folder) (*VirtualApp, error) {
 	req := types.CreateVApp{
 		This:       p.Reference(),
@@ -116,6 +123,7 @@ func (p ResourcePool) CreateVApp(ctx context.Context, name string, resSpec types
 	return NewVirtualApp(p.c, res.Returnval), nil
 }
 
+// UpdateConfig updates the config for this resource pool
 func (p ResourcePool) UpdateConfig(ctx context.Context, name string, config *types.ResourceConfigSpec) error {
 	req := types.UpdateConfig{
 		This:   p.Reference(),
@@ -136,6 +144,7 @@ func (p ResourcePool) UpdateConfig(ctx context.Context, name string, config *typ
 	return err
 }
 
+// DestroyChildren destroys the children for this resource pool
 func (p ResourcePool) DestroyChildren(ctx context.Context) error {
 	req := types.DestroyChildren{
 		This: p.Reference(),
@@ -145,6 +154,7 @@ func (p ResourcePool) DestroyChildren(ctx context.Context) error {
 	return err
 }
 
+// Destroy this resource pool
 func (p ResourcePool) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: p.Reference(),

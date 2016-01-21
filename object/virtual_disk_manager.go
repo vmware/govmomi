@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// A VirtualDiskManager client
 type VirtualDiskManager struct {
 	Common
 }
 
+// NewVirtualDiskManager creates a new virtual disk manager
 func NewVirtualDiskManager(c *vim25.Client) *VirtualDiskManager {
 	m := VirtualDiskManager{
 		Common: NewCommon(c, *c.ServiceContent.VirtualDiskManager),

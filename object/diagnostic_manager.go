@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// DiagnosticManager represents a client for diagnostic information
 type DiagnosticManager struct {
 	Common
 }
 
+// NewDiagnosticManager creates a new diagnostic information client
 func NewDiagnosticManager(c *vim25.Client) *DiagnosticManager {
 	m := DiagnosticManager{
 		Common: NewCommon(c, *c.ServiceContent.DiagnosticManager),
@@ -35,6 +37,7 @@ func NewDiagnosticManager(c *vim25.Client) *DiagnosticManager {
 	return &m
 }
 
+// BrowseLog browse the log
 func (m DiagnosticManager) BrowseLog(ctx context.Context, host *HostSystem, key string, start, lines int) (*types.DiagnosticManagerLogHeader, error) {
 	req := types.BrowseDiagnosticLog{
 		This:  m.Reference(),
@@ -56,6 +59,7 @@ func (m DiagnosticManager) BrowseLog(ctx context.Context, host *HostSystem, key 
 	return &res.Returnval, nil
 }
 
+// GenerateLogBundles generates log bundles
 func (m DiagnosticManager) GenerateLogBundles(ctx context.Context, includeDefault bool, host []*HostSystem) (*Task, error) {
 	req := types.GenerateLogBundles_Task{
 		This:           m.Reference(),
@@ -76,6 +80,7 @@ func (m DiagnosticManager) GenerateLogBundles(ctx context.Context, includeDefaul
 	return NewTask(m.c, res.Returnval), nil
 }
 
+// QueryDescriptions queries the descriptions
 func (m DiagnosticManager) QueryDescriptions(ctx context.Context, host *HostSystem) ([]types.DiagnosticManagerLogDescriptor, error) {
 	req := types.QueryDescriptions{
 		This: m.Reference(),

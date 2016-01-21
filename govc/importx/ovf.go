@@ -298,10 +298,10 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
-	return &info.Entity, lease.HttpNfcLeaseComplete(context.TODO())
+	return &info.Entity, lease.HTTPNfcLeaseComplete(context.TODO())
 }
 
-func (cmd *ovfx) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
+func (cmd *ovfx) Upload(lease *object.HTTPNfcLease, ofi ovfFileItem) error {
 	item := ofi.item
 	file := item.Path
 

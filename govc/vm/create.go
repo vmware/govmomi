@@ -270,5 +270,5 @@ func (cmd *create) createVM(name string) (*object.Task, error) {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(context.TODO(), spec, cmd.ResourcePool, cmd.HostSystem)
+	return folders.VMFolder.CreateVM(context.TODO(), spec, cmd.ResourcePool, cmd.HostSystem)
 }
