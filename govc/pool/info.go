@@ -22,6 +22,7 @@ import (
 	"io"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
@@ -34,6 +35,9 @@ import (
 type info struct {
 	*flags.DatacenterFlag
 	*flags.OutputFlag
+
+	pools bool
+	apps  bool
 }
 
 func init() {
@@ -45,6 +49,9 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.pools, "p", true, "List resource pools")
+	f.BoolVar(&cmd.apps, "a", false, "List virtual app resource pools")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -95,12 +102,28 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
+	var vapps []*object.VirtualApp
+
 	for _, arg := range f.Args() {
-		objects, err := finder.ResourcePoolList(ctx, arg)
-		if err != nil {
-			return err
+		if cmd.pools {
+			objects, err := finder.ResourcePoolList(ctx, arg)
+			if err != nil {
+				if _, ok := err.(*find.NotFoundError); !ok {
+					return err
+				}
+			}
+			res.objects = append(res.objects, objects...)
 		}
-		res.objects = append(res.objects, objects...)
+
+		if cmd.apps {
+			apps, err := finder.VirtualAppList(ctx, arg)
+			if err != nil {
+				if _, ok := err.(*find.NotFoundError); !ok {
+					return err
+				}
+			}
+			vapps = append(vapps, apps...)
+		}
 	}
 
 	if len(res.objects) != 0 {
@@ -113,6 +136,27 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		err = pc.Retrieve(ctx, refs, props, &res.ResourcePools)
 		if err != nil {
 			return err
+		}
+	}
+
+	if len(vapps) != 0 {
+		var apps []mo.VirtualApp
+		refs := make([]types.ManagedObjectReference, 0, len(vapps))
+		for _, o := range vapps {
+			refs = append(refs, o.Reference())
+			p := object.NewResourcePool(c, o.Reference())
+			p.InventoryPath = o.InventoryPath
+			res.objects = append(res.objects, p)
+		}
+
+		pc := property.DefaultCollector(c)
+		err = pc.Retrieve(ctx, refs, props, &apps)
+		if err != nil {
+			return err
+		}
+
+		for _, app := range apps {
+			res.ResourcePools = append(res.ResourcePools, app.ResourcePool)
 		}
 	}
 
@@ -139,6 +183,8 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 
 		writeInfo(tw, "CPU", "MHz", &pool.Runtime.Cpu, pool.Config.CpuAllocation)
+		pool.Runtime.Memory.MaxUsage >>= 20
+		pool.Runtime.Memory.OverallUsage >>= 20
 		writeInfo(tw, "Mem", "MB", &pool.Runtime.Memory, pool.Config.MemoryAllocation)
 	}
 
