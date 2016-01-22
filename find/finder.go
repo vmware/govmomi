@@ -243,6 +243,18 @@ func (f *Finder) DefaultDatacenter(ctx context.Context) (*object.Datacenter, err
 	return dc, nil
 }
 
+func (f *Finder) DatacenterOrDefault(ctx context.Context, path string) (*object.Datacenter, error) {
+	if path != "" {
+		dc, err := f.Datacenter(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return dc, nil
+	}
+
+	return f.DefaultDatacenter(ctx)
+}
+
 func (f *Finder) DatastoreList(ctx context.Context, path string) ([]*object.Datastore, error) {
 	es, err := f.find(ctx, f.datastoreFolder, false, path)
 	if err != nil {
@@ -287,6 +299,18 @@ func (f *Finder) DefaultDatastore(ctx context.Context) (*object.Datastore, error
 	}
 
 	return ds, nil
+}
+
+func (f *Finder) DatastoreOrDefault(ctx context.Context, path string) (*object.Datastore, error) {
+	if path != "" {
+		ds, err := f.Datastore(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return ds, nil
+	}
+
+	return f.DefaultDatastore(ctx)
 }
 
 func (f *Finder) ComputeResourceList(ctx context.Context, path string) ([]*object.ComputeResource, error) {
@@ -337,6 +361,18 @@ func (f *Finder) DefaultComputeResource(ctx context.Context) (*object.ComputeRes
 	}
 
 	return cr, nil
+}
+
+func (f *Finder) ComputeResourceOrDefault(ctx context.Context, path string) (*object.ComputeResource, error) {
+	if path != "" {
+		cr, err := f.ComputeResource(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return cr, nil
+	}
+
+	return f.DefaultComputeResource(ctx)
 }
 
 func (f *Finder) ClusterComputeResourceList(ctx context.Context, path string) ([]*object.ClusterComputeResource, error) {
@@ -439,6 +475,18 @@ func (f *Finder) DefaultHostSystem(ctx context.Context) (*object.HostSystem, err
 	return hs, nil
 }
 
+func (f *Finder) HostSystemOrDefault(ctx context.Context, path string) (*object.HostSystem, error) {
+	if path != "" {
+		hs, err := f.HostSystem(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return hs, nil
+	}
+
+	return f.DefaultHostSystem(ctx)
+}
+
 func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.NetworkReference, error) {
 	es, err := f.find(ctx, f.networkFolder, false, path)
 	if err != nil {
@@ -493,6 +541,18 @@ func (f *Finder) DefaultNetwork(ctx context.Context) (object.NetworkReference, e
 	return network, nil
 }
 
+func (f *Finder) NetworkOrDefault(ctx context.Context, path string) (object.NetworkReference, error) {
+	if path != "" {
+		network, err := f.Network(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return network, nil
+	}
+
+	return f.DefaultNetwork(ctx)
+}
+
 func (f *Finder) ResourcePoolList(ctx context.Context, path string) ([]*object.ResourcePool, error) {
 	es, err := f.find(ctx, f.hostFolder, true, path)
 	if err != nil {
@@ -538,6 +598,18 @@ func (f *Finder) DefaultResourcePool(ctx context.Context) (*object.ResourcePool,
 	}
 
 	return rp, nil
+}
+
+func (f *Finder) ResourcePoolOrDefault(ctx context.Context, path string) (*object.ResourcePool, error) {
+	if path != "" {
+		rp, err := f.ResourcePool(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return rp, nil
+	}
+
+	return f.DefaultResourcePool(ctx)
 }
 
 func (f *Finder) VirtualMachineList(ctx context.Context, path string) ([]*object.VirtualMachine, error) {
