@@ -28,10 +28,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HttpNfcLease is a client to manage http nfc leases
 type HttpNfcLease struct {
 	Common
 }
 
+// NewHttpNfcLease creates a new client o manage http nfc leases
 func NewHttpNfcLease(c *vim25.Client, ref types.ManagedObjectReference) *HttpNfcLease {
 	return &HttpNfcLease{
 		Common: NewCommon(c, ref),
@@ -96,6 +98,7 @@ func (o HttpNfcLease) HttpNfcLeaseProgress(ctx context.Context, percent int) err
 	return nil
 }
 
+// Wait for the http nfc lease info to be collected
 func (o HttpNfcLease) Wait(ctx context.Context) (*types.HttpNfcLeaseInfo, error) {
 	var lease mo.HttpNfcLease
 

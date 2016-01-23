@@ -23,6 +23,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// AuthManager is a manager for authentication
 type AuthManager struct {
 	types.ManagedObjectReference
 
@@ -31,10 +32,12 @@ type AuthManager struct {
 	c *vim25.Client
 }
 
+// Reference returns the managed object reference
 func (m AuthManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
+// AcquireCredentials acquires the credentisls for this session
 func (m AuthManager) AcquireCredentials(ctx context.Context, requestedAuth types.BaseGuestAuthentication, sessionID int64) (types.BaseGuestAuthentication, error) {
 	req := types.AcquireCredentialsInGuest{
 		This:          m.Reference(),
@@ -51,6 +54,7 @@ func (m AuthManager) AcquireCredentials(ctx context.Context, requestedAuth types
 	return res.Returnval, nil
 }
 
+// ReleaseCredentials release the credentials in the guest
 func (m AuthManager) ReleaseCredentials(ctx context.Context, auth types.BaseGuestAuthentication) error {
 	req := types.ReleaseCredentialsInGuest{
 		This: m.Reference(),
@@ -63,6 +67,7 @@ func (m AuthManager) ReleaseCredentials(ctx context.Context, auth types.BaseGues
 	return err
 }
 
+// ValidateCredentials validates the basic auth credentials
 func (m AuthManager) ValidateCredentials(ctx context.Context, auth types.BaseGuestAuthentication) error {
 	req := types.ValidateCredentialsInGuest{
 		This: m.Reference(),

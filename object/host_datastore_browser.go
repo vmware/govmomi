@@ -23,16 +23,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HostDatastoreBrowser represents a host datastore browser
 type HostDatastoreBrowser struct {
 	Common
 }
 
+// NewHostDatastoreBrowser creates a new host datastore browser client
 func NewHostDatastoreBrowser(c *vim25.Client, ref types.ManagedObjectReference) *HostDatastoreBrowser {
 	return &HostDatastoreBrowser{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// SearchDatastore searches a datastore
 func (b HostDatastoreBrowser) SearchDatastore(ctx context.Context, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastore_Task{
 		This:          b.Reference(),
@@ -48,6 +51,7 @@ func (b HostDatastoreBrowser) SearchDatastore(ctx context.Context, datastorePath
 	return NewTask(b.c, res.Returnval), nil
 }
 
+// SearchDatastoreSubFolders search the datastore subfolders
 func (b HostDatastoreBrowser) SearchDatastoreSubFolders(ctx context.Context, datastorePath string, searchSpec *types.HostDatastoreBrowserSearchSpec) (*Task, error) {
 	req := types.SearchDatastoreSubFolders_Task{
 		This:          b.Reference(),

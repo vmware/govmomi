@@ -27,10 +27,12 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// VirtualApp represents a virtual app
 type VirtualApp struct {
 	*ResourcePool
 }
 
+// NewVirtualApp creates a new virtual app client
 func NewVirtualApp(c *vim25.Client, ref types.ManagedObjectReference) *VirtualApp {
 	return &VirtualApp{
 		ResourcePool: NewResourcePool(c, ref),
@@ -44,6 +46,7 @@ func (p VirtualApp) String() string {
 	return fmt.Sprintf("%v @ %v", p.Common, p.InventoryPath)
 }
 
+// Name returns the name of this virtual app
 func (p VirtualApp) Name(ctx context.Context) (string, error) {
 	var o mo.VirtualApp
 
@@ -55,6 +58,7 @@ func (p VirtualApp) Name(ctx context.Context) (string, error) {
 	return o.Name, nil
 }
 
+// CreateChildVM_Task creates a child vm task
 func (p VirtualApp) CreateChildVM_Task(ctx context.Context, config types.VirtualMachineConfigSpec, host *HostSystem) (*Task, error) {
 	req := types.CreateChildVM_Task{
 		This:   p.Reference(),
@@ -74,6 +78,7 @@ func (p VirtualApp) CreateChildVM_Task(ctx context.Context, config types.Virtual
 	return NewTask(p.c, res.Returnval), nil
 }
 
+// UpdateVAppConfig updates the vapp config
 func (p VirtualApp) UpdateVAppConfig(ctx context.Context, spec types.VAppConfigSpec) error {
 	req := types.UpdateVAppConfig{
 		This: p.Reference(),
@@ -84,6 +89,7 @@ func (p VirtualApp) UpdateVAppConfig(ctx context.Context, spec types.VAppConfigS
 	return err
 }
 
+// PowerOnVApp_Task power this vApp on
 func (p VirtualApp) PowerOnVApp_Task(ctx context.Context) (*Task, error) {
 	req := types.PowerOnVApp_Task{
 		This: p.Reference(),
@@ -97,6 +103,7 @@ func (p VirtualApp) PowerOnVApp_Task(ctx context.Context) (*Task, error) {
 	return NewTask(p.c, res.Returnval), nil
 }
 
+// PowerOffVApp_Task power this vApp off
 func (p VirtualApp) PowerOffVApp_Task(ctx context.Context, force bool) (*Task, error) {
 	req := types.PowerOffVApp_Task{
 		This:  p.Reference(),
@@ -112,6 +119,7 @@ func (p VirtualApp) PowerOffVApp_Task(ctx context.Context, force bool) (*Task, e
 
 }
 
+// SuspendVApp_Task suspends a VApp task
 func (p VirtualApp) SuspendVApp_Task(ctx context.Context) (*Task, error) {
 	req := types.SuspendVApp_Task{
 		This: p.Reference(),

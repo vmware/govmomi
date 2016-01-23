@@ -16,6 +16,7 @@ limitations under the License.
 
 package object
 
+// StoragePod represents a storage pod
 type StoragePod struct {
 	*Folder
 }

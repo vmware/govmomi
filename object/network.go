@@ -24,18 +24,21 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Network represents a network management client
 type Network struct {
 	Common
 
 	InventoryPath string
 }
 
+// NewNetwork creates a new network management client
 func NewNetwork(c *vim25.Client, ref types.ManagedObjectReference) *Network {
 	return &Network{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Name returns the name of this network client
 func (n Network) Name() string {
 	return path.Base(n.InventoryPath)
 }

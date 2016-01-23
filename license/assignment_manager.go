@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// AssignmentManager manages assignments
 type AssignmentManager struct {
 	object.Common
 }
 
+// QueryAssigned queries the assigned licenses
 func (m AssignmentManager) QueryAssigned(ctx context.Context, id string) ([]types.LicenseAssignmentManagerLicenseAssignment, error) {
 	req := types.QueryAssignedLicenses{
 		This:     m.Reference(),
@@ -41,6 +43,7 @@ func (m AssignmentManager) QueryAssigned(ctx context.Context, id string) ([]type
 	return res.Returnval, nil
 }
 
+// Remove removes a license assignment
 func (m AssignmentManager) Remove(ctx context.Context, id string) error {
 	req := types.RemoveAssignedLicense{
 		This:     m.Reference(),
@@ -52,6 +55,7 @@ func (m AssignmentManager) Remove(ctx context.Context, id string) error {
 	return err
 }
 
+// Update updates a license assignment
 func (m AssignmentManager) Update(ctx context.Context, id string, key string, name string) (*types.LicenseManagerLicenseInfo, error) {
 	req := types.UpdateAssignedLicense{
 		This:              m.Reference(),

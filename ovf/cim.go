@@ -16,10 +16,7 @@ limitations under the License.
 
 package ovf
 
-/*
-Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_VirtualSystemSettingData.xsd
-*/
-
+// CIMVirtualSystemSettingData Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_VirtualSystemSettingData.xsd
 type CIMVirtualSystemSettingData struct {
 	ElementName string `xml:"ElementName"`
 	InstanceID  string `xml:"InstanceID"`
@@ -45,10 +42,7 @@ type CIMVirtualSystemSettingData struct {
 	VirtualSystemType                    *string  `xml:"VirtualSystemType"`
 }
 
-/*
-Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_ResourceAllocationSettingData.xsd
-*/
-
+// CIMResourceAllocationSettingData Source: http://schemas.dmtf.org/wbem/wscim/1/cim-schema/2.24.0/CIM_ResourceAllocationSettingData.xsd
 type CIMResourceAllocationSettingData struct {
 	ElementName string `xml:"ElementName"`
 	InstanceID  string `xml:"InstanceID"`

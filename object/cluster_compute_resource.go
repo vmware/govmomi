@@ -23,18 +23,21 @@ import (
 	"golang.org/x/net/context"
 )
 
+// ClusterComputeResource represents a compute resource in a cluster
 type ClusterComputeResource struct {
 	ComputeResource
 
 	InventoryPath string
 }
 
+// NewClusterComputeResource creates a new instance of a cluster compute resource
 func NewClusterComputeResource(c *vim25.Client, ref types.ManagedObjectReference) *ClusterComputeResource {
 	return &ClusterComputeResource{
 		ComputeResource: *NewComputeResource(c, ref),
 	}
 }
 
+// ReconfigureCluster reconfigures a cluster with the given spec
 func (c ClusterComputeResource) ReconfigureCluster(ctx context.Context, spec types.ClusterConfigSpec) (*Task, error) {
 	req := types.ReconfigureCluster_Task{
 		This:   c.Reference(),
@@ -50,6 +53,7 @@ func (c ClusterComputeResource) ReconfigureCluster(ctx context.Context, spec typ
 	return NewTask(c.c, res.Returnval), nil
 }
 
+// AddHost adds a host to this cluster compute resource
 func (c ClusterComputeResource) AddHost(ctx context.Context, spec types.HostConnectSpec, asConnected bool, license *string, resourcePool *types.ManagedObjectReference) (*Task, error) {
 	req := types.AddHost_Task{
 		This:        c.Reference(),
@@ -73,6 +77,7 @@ func (c ClusterComputeResource) AddHost(ctx context.Context, spec types.HostConn
 	return NewTask(c.c, res.Returnval), nil
 }
 
+// Destroy a cluster compute resource
 func (c ClusterComputeResource) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: c.Reference(),

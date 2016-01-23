@@ -18,6 +18,7 @@ package task
 
 import "github.com/vmware/govmomi/vim25/types"
 
+// Error reprents a task error
 type Error struct {
 	*types.LocalizedMethodFault
 }
@@ -27,6 +28,7 @@ func (e Error) Error() string {
 	return e.LocalizedMethodFault.LocalizedMessage
 }
 
+// Fault returns the tasks's base method fault
 func (e Error) Fault() types.BaseMethodFault {
 	return e.LocalizedMethodFault.Fault
 }

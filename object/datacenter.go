@@ -26,6 +26,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// DatacenterFolders represents the datacenter folder paths
 type DatacenterFolders struct {
 	VmFolder        *Folder
 	HostFolder      *Folder
@@ -33,16 +34,19 @@ type DatacenterFolders struct {
 	NetworkFolder   *Folder
 }
 
+// Datacenter a datacenter client
 type Datacenter struct {
 	Common
 }
 
+// NewDatacenter creates a new datacenter client
 func NewDatacenter(c *vim25.Client, ref types.ManagedObjectReference) *Datacenter {
 	return &Datacenter{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Folders gets the folders for the datacenter
 func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	var md mo.Datacenter
 
@@ -76,6 +80,7 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 	return df, nil
 }
 
+// Destroy the datacenter
 func (d Datacenter) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: d.Reference(),

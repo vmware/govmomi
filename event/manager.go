@@ -28,6 +28,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Manager is an event manager
 type Manager struct {
 	reference types.ManagedObjectReference
 
@@ -37,6 +38,7 @@ type Manager struct {
 	eventCategoryMu *sync.Mutex
 }
 
+// NewManager creates a new event manager
 func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
 		reference: *c.ServiceContent.EventManager,
@@ -50,6 +52,7 @@ func NewManager(c *vim25.Client) *Manager {
 	return &m
 }
 
+// CreateCollectorForEvents creates a collector for an event filter
 func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.EventFilterSpec) (*HistoryCollector, error) {
 	req := types.CreateCollectorForEvents{
 		This:   m.reference,
@@ -64,6 +67,7 @@ func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.Even
 	return NewHistoryCollector(m.c, res.Returnval), nil
 }
 
+// LogUserEvent logs a user event
 func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectReference, msg string) error {
 	req := types.LogUserEvent{
 		This:   m.reference,
@@ -79,6 +83,7 @@ func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectRef
 	return nil
 }
 
+// PostEvent posts an event to vsphere
 func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, taskInfo types.TaskInfo) error {
 	req := types.PostEvent{
 		This:        m.reference,
@@ -94,6 +99,7 @@ func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, tas
 	return nil
 }
 
+// QueryEvents queries the events in vsphere with a filter
 func (m Manager) QueryEvents(ctx context.Context, filter types.EventFilterSpec) ([]types.BaseEvent, error) {
 	req := types.QueryEvents{
 		This:   m.reference,
@@ -108,6 +114,7 @@ func (m Manager) QueryEvents(ctx context.Context, filter types.EventFilterSpec) 
 	return res.Returnval, nil
 }
 
+// RetrieveArgumentDescription retrieves an argument description
 func (m Manager) RetrieveArgumentDescription(ctx context.Context, eventTypeID string) ([]types.EventArgDesc, error) {
 	req := types.RetrieveArgumentDescription{
 		This:        m.reference,

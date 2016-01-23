@@ -21,6 +21,7 @@ import (
 	"strings"
 )
 
+// ToParts splits a path into parts
 func ToParts(p string) []string {
 	p = path.Clean(p)
 	if p == "/" {

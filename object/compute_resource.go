@@ -27,18 +27,21 @@ import (
 	"golang.org/x/net/context"
 )
 
+// ComputeResource represents a compute resource client
 type ComputeResource struct {
 	Common
 
 	InventoryPath string
 }
 
+// NewComputeResource creates a new compute resource client
 func NewComputeResource(c *vim25.Client, ref types.ManagedObjectReference) *ComputeResource {
 	return &ComputeResource{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Hosts lists the hosts in this compute resource
 func (c ComputeResource) Hosts(ctx context.Context) ([]*HostSystem, error) {
 	var cr mo.ComputeResource
 
@@ -69,6 +72,7 @@ func (c ComputeResource) Hosts(ctx context.Context) ([]*HostSystem, error) {
 	return hosts, nil
 }
 
+// Datastores lists the datastores for this compute resource
 func (c ComputeResource) Datastores(ctx context.Context) ([]*Datastore, error) {
 	var cr mo.ComputeResource
 
@@ -86,6 +90,7 @@ func (c ComputeResource) Datastores(ctx context.Context) ([]*Datastore, error) {
 	return dss, nil
 }
 
+// ResourcePool gets the resource pool for this compute resource
 func (c ComputeResource) ResourcePool(ctx context.Context) (*ResourcePool, error) {
 	var cr mo.ComputeResource
 
@@ -97,6 +102,7 @@ func (c ComputeResource) ResourcePool(ctx context.Context) (*ResourcePool, error
 	return NewResourcePool(c.c, *cr.ResourcePool), nil
 }
 
+// Reconfigure this compute resource
 func (c ComputeResource) Reconfigure(ctx context.Context, spec types.BaseComputeResourceConfigSpec, modify bool) (*Task, error) {
 	req := types.ReconfigureComputeResource_Task{
 		This:   c.Reference(),
@@ -112,6 +118,7 @@ func (c ComputeResource) Reconfigure(ctx context.Context, spec types.BaseCompute
 	return NewTask(c.c, res.Returnval), nil
 }
 
+// Destroy the compute resource
 func (c ComputeResource) Destroy(ctx context.Context) (*Task, error) {
 	req := types.Destroy_Task{
 		This: c.Reference(),

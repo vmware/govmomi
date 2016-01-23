@@ -24,22 +24,26 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Folder represents a folder client
 type Folder struct {
 	Common
 
 	InventoryPath string
 }
 
+// NewFolder creates a new folder client
 func NewFolder(c *vim25.Client, ref types.ManagedObjectReference) *Folder {
 	return &Folder{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// NewRootFolder creates a new root folder client
 func NewRootFolder(c *vim25.Client) *Folder {
 	return NewFolder(c, c.ServiceContent.RootFolder)
 }
 
+// Children lists the immediate children of the root
 func (f Folder) Children(ctx context.Context) ([]Reference, error) {
 	var mf mo.Folder
 
@@ -58,6 +62,7 @@ func (f Folder) Children(ctx context.Context) ([]Reference, error) {
 	return rs, nil
 }
 
+// CreateDatacenter creates a datacenter
 func (f Folder) CreateDatacenter(ctx context.Context, datacenter string) (*Datacenter, error) {
 	req := types.CreateDatacenter{
 		This: f.Reference(),
@@ -77,6 +82,7 @@ func (f Folder) CreateDatacenter(ctx context.Context, datacenter string) (*Datac
 	return NewDatacenter(f.c, res.Returnval), nil
 }
 
+// CreateCluster for the given cluster config spec
 func (f Folder) CreateCluster(ctx context.Context, cluster string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, error) {
 	req := types.CreateClusterEx{
 		This: f.Reference(),
@@ -97,6 +103,7 @@ func (f Folder) CreateCluster(ctx context.Context, cluster string, spec types.Cl
 	return NewClusterComputeResource(f.c, res.Returnval), nil
 }
 
+// CreateFolder creates a folder under the root
 func (f Folder) CreateFolder(ctx context.Context, name string) (*Folder, error) {
 	req := types.CreateFolder{
 		This: f.Reference(),
@@ -111,6 +118,7 @@ func (f Folder) CreateFolder(ctx context.Context, name string) (*Folder, error) 
 	return NewFolder(f.c, res.Returnval), err
 }
 
+// AddStandaloneHost adds a standalone host
 func (f Folder) AddStandaloneHost(ctx context.Context, spec types.HostConnectSpec, addConnected bool, license *string, compResSpec *types.BaseComputeResourceConfigSpec) (*Task, error) {
 	req := types.AddStandaloneHost_Task{
 		This:         f.Reference(),
@@ -134,6 +142,7 @@ func (f Folder) AddStandaloneHost(ctx context.Context, spec types.HostConnectSpe
 	return NewTask(f.c, res.Returnval), nil
 }
 
+// CreateVM creates a vm for the given spec in the given pool on the specified host
 func (f Folder) CreateVM(ctx context.Context, config types.VirtualMachineConfigSpec, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.CreateVM_Task{
 		This:   f.Reference(),
@@ -154,6 +163,7 @@ func (f Folder) CreateVM(ctx context.Context, config types.VirtualMachineConfigS
 	return NewTask(f.c, res.Returnval), nil
 }
 
+// RegisterVM registers a vm for the given path by the given name
 func (f Folder) RegisterVM(ctx context.Context, path string, name string, asTemplate bool, pool *ResourcePool, host *HostSystem) (*Task, error) {
 	req := types.RegisterVM_Task{
 		This:       f.Reference(),
@@ -183,6 +193,7 @@ func (f Folder) RegisterVM(ctx context.Context, path string, name string, asTemp
 	return NewTask(f.c, res.Returnval), nil
 }
 
+// CreateDVS creates a distributed virtual switch
 func (f Folder) CreateDVS(ctx context.Context, spec types.DVSCreateSpec) (*Task, error) {
 	req := types.CreateDVS_Task{
 		This: f.Reference(),

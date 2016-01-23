@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// SearchIndex represents a search index client
 type SearchIndex struct {
 	Common
 }
 
+// NewSearchIndex creates a new search index client
 func NewSearchIndex(c *vim25.Client) *SearchIndex {
 	s := SearchIndex{
 		Common: NewCommon(c, *c.ServiceContent.SearchIndex),

@@ -28,10 +28,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// Manager represents a license manager
 type Manager struct {
 	object.Common
 }
 
+// NewManager creates a new manager
 func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
 		object.NewCommon(c, *c.ServiceContent.LicenseManager),
@@ -48,6 +50,7 @@ func mapToKeyValueSlice(m map[string]string) []types.KeyValue {
 	return r
 }
 
+// Add a license
 func (m Manager) Add(ctx context.Context, key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error) {
 	req := types.AddLicense{
 		This:       m.Reference(),
@@ -63,6 +66,7 @@ func (m Manager) Add(ctx context.Context, key string, labels map[string]string) 
 	return res.Returnval, nil
 }
 
+// Decode decode a license
 func (m Manager) Decode(ctx context.Context, key string) (types.LicenseManagerLicenseInfo, error) {
 	req := types.DecodeLicense{
 		This:       m.Reference(),
@@ -77,6 +81,7 @@ func (m Manager) Decode(ctx context.Context, key string) (types.LicenseManagerLi
 	return res.Returnval, nil
 }
 
+// Remove removes a license
 func (m Manager) Remove(ctx context.Context, key string) error {
 	req := types.RemoveLicense{
 		This:       m.Reference(),
@@ -87,6 +92,7 @@ func (m Manager) Remove(ctx context.Context, key string) error {
 	return err
 }
 
+// Update updates a license
 func (m Manager) Update(ctx context.Context, key string, labels map[string]string) (types.LicenseManagerLicenseInfo, error) {
 	req := types.UpdateLicense{
 		This:       m.Reference(),
@@ -102,6 +108,7 @@ func (m Manager) Update(ctx context.Context, key string, labels map[string]strin
 	return res.Returnval, nil
 }
 
+// List the license infos
 func (m Manager) List(ctx context.Context) (InfoList, error) {
 	var mlm mo.LicenseManager
 
@@ -113,6 +120,7 @@ func (m Manager) List(ctx context.Context) (InfoList, error) {
 	return InfoList(mlm.Licenses), nil
 }
 
+// AssignmentManager create an assignment manager for the given context
 func (m Manager) AssignmentManager(ctx context.Context) (*AssignmentManager, error) {
 	var mlm mo.LicenseManager
 
@@ -155,6 +163,7 @@ func parseLicenseFeature(feature string) *licenseFeature {
 	return lf
 }
 
+// HasFeature checks if a license has a given feature
 func HasFeature(license types.LicenseManagerLicenseInfo, key string) bool {
 	feature := parseLicenseFeature(key)
 
@@ -182,6 +191,7 @@ func HasFeature(license types.LicenseManagerLicenseInfo, key string) bool {
 // InfoList provides helper methods for []types.LicenseManagerLicenseInfo
 type InfoList []types.LicenseManagerLicenseInfo
 
+// WithFeature filters a list of licenses for a particular feature
 func (l InfoList) WithFeature(key string) InfoList {
 	var result InfoList
 

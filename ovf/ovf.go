@@ -21,6 +21,7 @@ import (
 	"io"
 )
 
+// Unmarshal unmarshals an envelope from a reader
 func Unmarshal(r io.Reader) (*Envelope, error) {
 	var e Envelope
 

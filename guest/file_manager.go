@@ -23,6 +23,7 @@ import (
 	"golang.org/x/net/context"
 )
 
+// FileManager managed files in a guest
 type FileManager struct {
 	types.ManagedObjectReference
 
@@ -31,10 +32,12 @@ type FileManager struct {
 	c *vim25.Client
 }
 
+// Reference implements a referencable interface
 func (m FileManager) Reference() types.ManagedObjectReference {
 	return m.ManagedObjectReference
 }
 
+// ChangeFileAttributes changes the attributes on a file
 func (m FileManager) ChangeFileAttributes(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes) error {
 	req := types.ChangeFileAttributesInGuest{
 		This:           m.Reference(),
@@ -48,6 +51,7 @@ func (m FileManager) ChangeFileAttributes(ctx context.Context, auth types.BaseGu
 	return err
 }
 
+// CreateTemporaryDirectory creates a temporary directory
 func (m FileManager) CreateTemporaryDirectory(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
 	req := types.CreateTemporaryDirectoryInGuest{
 		This:   m.Reference(),
@@ -65,6 +69,7 @@ func (m FileManager) CreateTemporaryDirectory(ctx context.Context, auth types.Ba
 	return res.Returnval, nil
 }
 
+// CreateTemporaryFile creates a temporary file
 func (m FileManager) CreateTemporaryFile(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
 	req := types.CreateTemporaryFileInGuest{
 		This:   m.Reference(),
@@ -82,6 +87,7 @@ func (m FileManager) CreateTemporaryFile(ctx context.Context, auth types.BaseGue
 	return res.Returnval, nil
 }
 
+// DeleteDirectory deletes a directory, this can be a recursive delete
 func (m FileManager) DeleteDirectory(ctx context.Context, auth types.BaseGuestAuthentication, directoryPath string, recursive bool) error {
 	req := types.DeleteDirectoryInGuest{
 		This:          m.Reference(),
@@ -95,6 +101,7 @@ func (m FileManager) DeleteDirectory(ctx context.Context, auth types.BaseGuestAu
 	return err
 }
 
+// DeleteFile deletes a file
 func (m FileManager) DeleteFile(ctx context.Context, auth types.BaseGuestAuthentication, filePath string) error {
 	req := types.DeleteFileInGuest{
 		This:     m.Reference(),
@@ -107,6 +114,7 @@ func (m FileManager) DeleteFile(ctx context.Context, auth types.BaseGuestAuthent
 	return err
 }
 
+// InitiateFileTransferFromGuest initiates a file transfer from guest
 func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string) (*types.FileTransferInformation, error) {
 	req := types.InitiateFileTransferFromGuest{
 		This:          m.Reference(),
@@ -123,6 +131,7 @@ func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth typ
 	return &res.Returnval, nil
 }
 
+// InitiateFileTransferToGuest iniates a file tranfer to a guest
 func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes, fileSize int64, overwrite bool) (string, error) {
 	req := types.InitiateFileTransferToGuest{
 		This:           m.Reference(),
@@ -142,6 +151,7 @@ func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, auth types
 	return res.Returnval, nil
 }
 
+// ListFiles lists filtered files in a guest
 func (m FileManager) ListFiles(ctx context.Context, auth types.BaseGuestAuthentication, filePath string, index int, maxResults int, matchPattern string) (*types.GuestListFileInfo, error) {
 	req := types.ListFilesInGuest{
 		This:         m.Reference(),
@@ -161,6 +171,7 @@ func (m FileManager) ListFiles(ctx context.Context, auth types.BaseGuestAuthenti
 	return &res.Returnval, nil
 }
 
+// MakeDirectory makes a directory
 func (m FileManager) MakeDirectory(ctx context.Context, auth types.BaseGuestAuthentication, directoryPath string, createParentDirectories bool) error {
 	req := types.MakeDirectoryInGuest{
 		This:                    m.Reference(),
@@ -174,6 +185,7 @@ func (m FileManager) MakeDirectory(ctx context.Context, auth types.BaseGuestAuth
 	return err
 }
 
+// MoveDirectory a moves a directory in guest
 func (m FileManager) MoveDirectory(ctx context.Context, auth types.BaseGuestAuthentication, srcDirectoryPath string, dstDirectoryPath string) error {
 	req := types.MoveDirectoryInGuest{
 		This:             m.Reference(),
@@ -187,6 +199,7 @@ func (m FileManager) MoveDirectory(ctx context.Context, auth types.BaseGuestAuth
 	return err
 }
 
+// MoveFile files a file in a guest
 func (m FileManager) MoveFile(ctx context.Context, auth types.BaseGuestAuthentication, srcFilePath string, dstFilePath string, overwrite bool) error {
 	req := types.MoveFileInGuest{
 		This:        m.Reference(),

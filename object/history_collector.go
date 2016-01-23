@@ -23,16 +23,19 @@ import (
 	"golang.org/x/net/context"
 )
 
+// HistoryCollector represents a history collector client
 type HistoryCollector struct {
 	Common
 }
 
+// NewHistoryCollector creates a new history collector client instance
 func NewHistoryCollector(c *vim25.Client, ref types.ManagedObjectReference) *HistoryCollector {
 	return &HistoryCollector{
 		Common: NewCommon(c, ref),
 	}
 }
 
+// Destroy this history collector
 func (h HistoryCollector) Destroy(ctx context.Context) error {
 	req := types.DestroyCollector{
 		This: h.Reference(),
@@ -42,6 +45,7 @@ func (h HistoryCollector) Destroy(ctx context.Context) error {
 	return err
 }
 
+// Reset this history collector
 func (h HistoryCollector) Reset(ctx context.Context) error {
 	req := types.ResetCollector{
 		This: h.Reference(),
@@ -51,6 +55,7 @@ func (h HistoryCollector) Reset(ctx context.Context) error {
 	return err
 }
 
+// Rewind this history collector
 func (h HistoryCollector) Rewind(ctx context.Context) error {
 	req := types.RewindCollector{
 		This: h.Reference(),
@@ -60,6 +65,7 @@ func (h HistoryCollector) Rewind(ctx context.Context) error {
 	return err
 }
 
+// SetPageSize for this history collector
 func (h HistoryCollector) SetPageSize(ctx context.Context, maxCount int) error {
 	req := types.SetCollectorPageSize{
 		This:     h.Reference(),

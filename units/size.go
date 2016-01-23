@@ -23,15 +23,22 @@ import (
 	"strconv"
 )
 
+// ByteSize represents a byte size
 type ByteSize int64
 
 const (
-	_  = iota
+	_ = iota
+	// KB KiloByte
 	KB = 1 << (10 * iota)
+	// MB MegaByte
 	MB
+	// GB GigaByte
 	GB
+	// TB TerraByte
 	TB
+	// PB PetaByte
 	PB
+	// EB ExaByte
 	EB
 )
 
@@ -55,6 +62,7 @@ func (b ByteSize) String() string {
 
 var bytesRegexp = regexp.MustCompile(`^(?i)(\d+)([BKMGTPE]?)(ib|b)?$`)
 
+// Set the bytesize from a string
 func (b *ByteSize) Set(s string) error {
 	m := bytesRegexp.FindStringSubmatch(s)
 	if len(m) == 0 {

@@ -23,10 +23,12 @@ import (
 	"golang.org/x/net/context"
 )
 
+// OvfManager represents an ovf manager client
 type OvfManager struct {
 	Common
 }
 
+// NewOvfManager creates a new ovf manager client
 func NewOvfManager(c *vim25.Client) *OvfManager {
 	o := OvfManager{
 		Common: NewCommon(c, *c.ServiceContent.OvfManager),

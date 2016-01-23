@@ -25,17 +25,21 @@ import (
 	"golang.org/x/net/context"
 )
 
+// DistributedVirtualPortgroup represents a distributed virtual port group client
 type DistributedVirtualPortgroup struct {
 	Common
 
 	InventoryPath string
 }
 
+// NewDistributedVirtualPortgroup creates a new distributed virtual port group client
 func NewDistributedVirtualPortgroup(c *vim25.Client, ref types.ManagedObjectReference) *DistributedVirtualPortgroup {
 	return &DistributedVirtualPortgroup{
 		Common: NewCommon(c, ref),
 	}
 }
+
+// Name of the distributed virtual port group
 func (p DistributedVirtualPortgroup) Name() string {
 	return path.Base(p.InventoryPath)
 }
