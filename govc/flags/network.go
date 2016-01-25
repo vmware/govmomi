@@ -92,13 +92,11 @@ func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
 		return nil, err
 	}
 
-	if flag.name == "" {
-		flag.net, err = finder.DefaultNetwork(context.TODO())
-	} else {
-		flag.net, err = finder.Network(context.TODO(), flag.name)
+	if flag.net, err = finder.NetworkOrDefault(context.TODO(), flag.name); err != nil {
+		return nil, err
 	}
 
-	return flag.net, err
+	return flag.net, nil
 }
 
 func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {

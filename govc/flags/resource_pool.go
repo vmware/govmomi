@@ -77,11 +77,9 @@ func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 		return nil, err
 	}
 
-	if flag.name == "" {
-		flag.pool, err = finder.DefaultResourcePool(context.TODO())
-	} else {
-		flag.pool, err = finder.ResourcePool(context.TODO(), flag.name)
+	if flag.pool, err = finder.ResourcePoolOrDefault(context.TODO(), flag.name); err != nil {
+		return nil, err
 	}
 
-	return flag.pool, err
+	return flag.pool, nil
 }
