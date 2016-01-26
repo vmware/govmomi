@@ -1,10 +1,10 @@
 sudo: false
 language: go
-go: 1.4
+go: 1.5
 
 before_install:
   - go get golang.org/x/tools/cmd/vet
   - go get golang.org/x/tools/cmd/goimports
 
 script:
-  - make check test
+  - make check gvt dependencies test
