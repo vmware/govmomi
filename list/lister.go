@@ -119,6 +119,7 @@ func traversable(ref types.ManagedObjectReference) bool {
 		// It doesn't matter from the perspective of the lister.
 	case "HostSystem":
 	case "VirtualApp":
+	case "StoragePod":
 	default:
 		return false
 	}
