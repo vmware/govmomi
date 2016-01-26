@@ -1,6 +1,8 @@
 .PHONY: test
 
-all: check test
+$(shell export GO15VENDOREXPERIMENT=1)
+
+all: check gvt dependencies test
 
 check: goimports govet
 
@@ -12,8 +14,15 @@ govet:
 	@echo checking go vet...
 	@go tool vet -structtags=false -methods=false .
 
+gvt:
+	@echo getting gvt
+	go get -u github.com/FiloSottile/gvt
+
+dependencies:
+	@echo restoring dependencies
+	$(GOPATH)/bin/gvt restore
+
 test:
-	go get
 	go test -v $(TEST_OPTS) ./...
 
 install:
