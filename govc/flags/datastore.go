@@ -78,13 +78,11 @@ func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
 		return nil, err
 	}
 
-	if flag.name == "" {
-		flag.ds, err = finder.DefaultDatastore(context.TODO())
-	} else {
-		flag.ds, err = finder.Datastore(context.TODO(), flag.name)
+	if flag.ds, err = finder.DatastoreOrDefault(context.TODO(), flag.name); err != nil {
+		return nil, err
 	}
 
-	return flag.ds, err
+	return flag.ds, nil
 }
 
 func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
