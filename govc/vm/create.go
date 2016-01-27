@@ -42,9 +42,15 @@ type create struct {
 	link       bool
 	on         bool
 	force      bool
-	iso        string
-	disk       string
 	controller string
+
+	iso              string
+	isoDatastoreFlag *flags.DatastoreFlag
+	isoDatastore     *object.Datastore
+
+	disk              string
+	diskDatastoreFlag *flags.DatastoreFlag
+	diskDatastore     *object.Datastore
 
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
@@ -82,9 +88,15 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
 	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
-	f.StringVar(&cmd.iso, "iso", "", "Path to ISO")
 	f.StringVar(&cmd.controller, "disk.controller", "scsi", "Disk controller type")
-	f.StringVar(&cmd.disk, "disk", "", "Disk path name")
+
+	f.StringVar(&cmd.iso, "iso", "", "ISO path")
+	cmd.isoDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
+	f.StringVar(&cmd.isoDatastoreFlag.Name, "iso-datastore", "", "Datastore for ISO file")
+
+	f.StringVar(&cmd.disk, "disk", "", "Disk path")
+	cmd.diskDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
+	f.StringVar(&cmd.diskDatastoreFlag.Name, "disk-datastore", "", "Datastore for disk file")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -106,6 +118,15 @@ func (cmd *create) Process(ctx context.Context) error {
 	if err := cmd.NetworkFlag.Process(ctx); err != nil {
 		return err
 	}
+
+	// Default iso/disk datastores to the VM's datastore
+	if cmd.isoDatastoreFlag.Name == "" {
+		cmd.isoDatastoreFlag = cmd.DatastoreFlag
+	}
+	if cmd.diskDatastoreFlag.Name == "" {
+		cmd.diskDatastoreFlag = cmd.DatastoreFlag
+	}
+
 	return nil
 }
 
@@ -147,12 +168,19 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	for _, file := range []*string{&cmd.iso, &cmd.disk} {
-		if *file != "" {
-			_, err = cmd.Datastore.Stat(context.TODO(), *file)
-			if err != nil {
-				return err
-			}
+	// Verify ISO exists
+	if cmd.iso != "" {
+		_, err = cmd.isoDatastoreFlag.Stat(context.TODO(), cmd.iso)
+		if err != nil {
+			return err
+		}
+	}
+
+	// Verify disk exists
+	if cmd.disk != "" {
+		_, err = cmd.diskDatastoreFlag.Stat(context.TODO(), cmd.disk)
+		if err != nil {
+			return err
 		}
 	}
 

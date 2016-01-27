@@ -259,6 +259,17 @@ load test_helper
   assert_line "File: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
 }
 
+@test "vm.create scsi disk with datastore argument" {
+  vm=$(new_id)
+
+  run govc vm.create -disk="${GOVC_TEST_VMDK}" -disk-datastore="${GOVC_DATASTORE}" -on=false -link=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-1000-0
+  assert_success
+  assert_line "File: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
+}
+
 @test "vm.create iso" {
   upload_iso
 
@@ -273,6 +284,19 @@ load test_helper
   run govc device.info -vm $vm cdrom-3000
   assert_success
   assert_line "Controller: ide-200"
+  assert_line "Summary: ISO [${GOVC_DATASTORE}] $GOVC_TEST_ISO"
+}
+
+@test "vm.create iso with datastore argument" {
+  upload_iso
+
+  vm=$(new_id)
+
+  run govc vm.create -iso="${GOVC_TEST_ISO}" -iso-datastore="${GOVC_DATASTORE}" -on=false $vm
+  assert_success
+
+  run govc device.info -vm $vm cdrom-3000
+  assert_success
   assert_line "Summary: ISO [${GOVC_DATASTORE}] $GOVC_TEST_ISO"
 }
 
