@@ -269,6 +269,34 @@ func (d Datastore) AttachedHosts(ctx context.Context) ([]*HostSystem, error) {
 	return hosts, nil
 }
 
+// AttachedHosts returns hosts that have this Datastore attached, accessible and writable and are members of the given cluster.
+func (d Datastore) AttachedClusterHosts(ctx context.Context, cluster *ComputeResource) ([]*HostSystem, error) {
+	var hosts []*HostSystem
+
+	clusterHosts, err := cluster.Hosts(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	attachedHosts, err := d.AttachedHosts(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	refs := make(map[types.ManagedObjectReference]bool)
+	for _, host := range attachedHosts {
+		refs[host.Reference()] = true
+	}
+
+	for _, host := range clusterHosts {
+		if refs[host.Reference()] {
+			hosts = append(hosts, host)
+		}
+	}
+
+	return hosts, nil
+}
+
 func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, error) {
 	b, err := d.Browser(ctx)
 	if err != nil {
