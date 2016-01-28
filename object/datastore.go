@@ -130,7 +130,7 @@ func (d Datastore) ServiceTicket(ctx context.Context, path string, method string
 	}
 
 	// If connected to VC, the ticket request must be for an ESX host.
-	if d.c.ServiceContent.About.ApiType == "VirtualCenter" {
+	if d.c.IsVC() {
 		hosts, err := d.AttachedHosts(ctx)
 		if err != nil {
 			return nil, nil, err

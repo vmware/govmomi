@@ -160,3 +160,8 @@ func (c *Client) Retrieve(ctx context.Context, objs []types.ManagedObjectReferen
 func (c *Client) Wait(ctx context.Context, obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
 	return property.Wait(ctx, c.PropertyCollector(), obj, ps, f)
 }
+
+// IsVC returns true if we are connected to a vCenter
+func (c *Client) IsVC() bool {
+	return c.Client.IsVC()
+}
