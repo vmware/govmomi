@@ -57,7 +57,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var host *object.HostSystem
 
-	if c.ServiceContent.About.ApiType == "VirtualCenter" {
+	if c.IsVC() {
 		host, err = cmd.HostSystemIfSpecified()
 		if err != nil {
 			return err

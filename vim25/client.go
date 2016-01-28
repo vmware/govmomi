@@ -116,3 +116,8 @@ func (c *Client) Valid() bool {
 
 	return true
 }
+
+// IsVC returns true if we are connected to a vCenter
+func (c *Client) IsVC() bool {
+	return c.ServiceContent.About.ApiType == "VirtualCenter"
+}

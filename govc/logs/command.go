@@ -72,7 +72,7 @@ func (cmd *logs) Run(ctx context.Context, f *flag.FlagSet) error {
 	defaultKey := "hostd"
 	var host *object.HostSystem
 
-	if c.ServiceContent.About.ApiType == "VirtualCenter" {
+	if c.IsVC() {
 		host, err = cmd.HostSystemIfSpecified()
 		if err != nil {
 			return err
