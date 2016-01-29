@@ -106,8 +106,11 @@ vcsim_env() {
 govc_url_to_vars() {
   local url=$(awk -F@ '{print $2}' <<<"$GOVC_URL")
   local userpass=$(awk -F// '{print $2}' <<<"$GOVC_URL" | awk -F@ '{print $1}')
-  local username=$(awk -F:  '{print $1}' <<<"$userpass")
-  local password=$(awk -F:  '{print $2}' <<<"$userpass")
+  if ! grep -q "//" <<<"$GOVC_URL"; then
+    userpass=$(awk -F@ '{print $1}' <<<"$GOVC_URL")
+  fi
+  local username=$(awk -F: '{print $1}' <<<"$userpass")
+  local password=$(awk -F: '{print $2}' <<<"$userpass")
 
   export GOVC_URL="$url" GOVC_USERNAME="$username" GOVC_PASSWORD="$password"
 
