@@ -61,7 +61,7 @@ var nasTypes = []string{
 }
 
 var vmfsTypes = []string{
-	"VMFS",
+	string(types.HostFileSystemVolumeFileSystemTypeVMFS),
 }
 
 var allTypes = []string{}

@@ -339,3 +339,13 @@ func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, e
 	return res.File[0], nil
 
 }
+
+// Type returns the type of file system volume.
+func (d Datastore) Type(ctx context.Context) (types.HostFileSystemVolumeFileSystemType, error) {
+	var mds mo.Datastore
+
+	if err := d.Properties(ctx, d.Reference(), []string{"summary.type"}, &mds); err != nil {
+		return types.HostFileSystemVolumeFileSystemType(""), err
+	}
+	return types.HostFileSystemVolumeFileSystemType(mds.Summary.Type), nil
+}
