@@ -1,6 +1,7 @@
 # govc.el
 
-Emacs interface to govc for managing VMware ESXi and vCenter.
+Interface to govc for managing VMware ESXi and vCenter.
+
 
 The goal of this package is to provide a simple interface for commonly used
 govc commands within Emacs.  This includes table based inventory/state modes
@@ -16,16 +17,16 @@ The recommended way to install govc.el is via MELPA (http://melpa.org/).
 ## govc-mode
 
 Running `govc-global-mode` creates key bindings to the various govc modes.
-The default prefix is `C-c v` and can be changed by setting `govc-keymap-prefix`.
+The default prefix is `C-c ;` and can be changed by setting `govc-keymap-prefix`.
 
 ### govc-command-map
 
 Keybinding     | Description
 ---------------|------------------------------------------------------------
-<kbd>H</kbd>   | Host info via govc
-<kbd>P</kbd>   | Pool info via govc
-<kbd>V</kbd>   | VM info via govc
-<kbd>S</kbd>   | Datastore info via govc
+<kbd>h</kbd>   | Host info via govc
+<kbd>p</kbd>   | Pool info via govc
+<kbd>v</kbd>   | VM info via govc
+<kbd>s</kbd>   | Datastore info via govc
 
 ### govc-urls
 
@@ -194,6 +195,7 @@ Keybinding     | Description
 <kbd>J</kbd>   | JSON via govc vm
 <kbd>X</kbd>   | ExtraConfig via `govc-vm-extra-config` on the current selection
 <kbd>RET</kbd> | Devices via `govc-device` on the current selection
+<kbd>C</kbd>   | Console screenshot via `govc-vm-screen` on the current selection
 <kbd>V</kbd>   | VNC via `govc-vm-vnc` on the current selection
 <kbd>D</kbd>   | Destroy via `govc-vm-destroy` on the current selection
 <kbd>^</kbd>   | Start via `govc-vm-start` on the current selection

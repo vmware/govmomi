@@ -57,10 +57,10 @@
 
 (defvar govc-command-map
   (let ((map (make-sparse-keymap)))
-    (define-key map "H" 'govc-host)
-    (define-key map "P" 'govc-pool)
-    (define-key map "V" 'govc-vm)
-    (define-key map "S" 'govc-datastore)
+    (define-key map "h" 'govc-host)
+    (define-key map "p" 'govc-pool)
+    (define-key map "v" 'govc-vm)
+    (define-key map "s" 'govc-datastore)
     (define-key map "?" 'govc-popup)
     map)
   "Keymap for `govc-mode' after `govc-keymap-prefix' was pressed.")

@@ -2,6 +2,8 @@
 
 pushd $(dirname $0)
 
+# Sadly, the ttylinux project was abandoned in late 2015.
+# But this release still serves us well.
 base_url=http://dl.bintray.com/dougm/ttylinux
 ttylinux="ttylinux-pc_i486-16.1"
 files="${ttylinux}.iso ${ttylinux}-live.ova ${ttylinux}.ova"

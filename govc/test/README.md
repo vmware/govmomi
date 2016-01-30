@@ -15,7 +15,7 @@ brew install findutils
 
 ## Download test images
 
-Some tests depend on [ttylinux](http://ttylinux.net) images, these can be downloaded by running:
+Some tests depend on ttylinux images, these can be downloaded by running:
 
 ```
 ./images/update.sh
