@@ -1,10 +1,10 @@
-;;; govc.el --- Emacs interface to govc for managing VMware ESXi and vCenter
+;;; govc.el --- Interface to govc for managing VMware ESXi and vCenter
 
 ;; Author: The govc developers
 ;; URL: https://github.com/vmware/govmomi
 ;; Keywords: convenience
 ;; Version: 0.1.0
-;; Package-Requires: ((dash "1.5.0") (s "1.9.0") (magit-popup "2.0.50") (json-mode "1.6.0"))
+;; Package-Requires: ((emacs "24.3") (dash "1.5.0") (s "1.9.0") (magit-popup "2.0.50") (json-mode "1.6.0"))
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -24,6 +24,7 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
+
 ;; The goal of this package is to provide a simple interface for commonly used
 ;; govc commands within Emacs.  This includes table based inventory/state modes
 ;; for vms, hosts, datastores and pools.  The keymap for each mode provides
@@ -50,7 +51,7 @@
   "Emacs customization group for govc."
   :group 'convenience)
 
-(defcustom govc-keymap-prefix "C-c v"
+(defcustom govc-keymap-prefix "C-c ;"
   "Prefix for `govc-mode'."
   :group 'govc)
 
@@ -73,7 +74,7 @@
 ;;;###autoload
 (define-minor-mode govc-mode
   "Running `govc-global-mode' creates key bindings to the various govc modes.
-The default prefix is `C-c v' and can be changed by setting `govc-keymap-prefix'.
+The default prefix is `C-c ;' and can be changed by setting `govc-keymap-prefix'.
 
 \\{govc-mode-map\}"
   nil govc-mode-line govc-mode-map
