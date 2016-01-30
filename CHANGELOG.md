@@ -1,5 +1,13 @@
 # changelog
 
+### (unreleased)
+
+* Add Drone CI check
+
+* Add object.Datastore Type and AttachedClusterHosts methods
+
+* Add finder.*OrDefault methods
+
 ### 0.3.0 (2016-01-16)
 
 * Add object.VirtualNicManager wrapper

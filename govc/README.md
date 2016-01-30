@@ -62,10 +62,10 @@ to set defaults:
   > The URL scheme defaults to `https` and the URL path defaults to `/sdk`.
   > This means that specifying `user:pass@host` is equivalent to
   > `https://user:pass@host/sdk`.
-  
+
   > If password include special characters like `#` or `:` you can use
   > `GOVC_USERNAME` and `GOVC_PASSWORD` to have a simple `GOVC_URL`
-  
+
 * `GOVC_INSECURE`: Allow establishing insecure connections.
 
   > Use this option when the host you're connecting is using self-signed
@@ -91,7 +91,7 @@ to set defaults:
   $ export GOVC_USERNAME="domain\administrator"
   $ export GOVC_PASSWORD="Password123#"
   $ govc about
-  
+
   Name:         VMware vCenter Server
   Vendor:       VMware, Inc.
   Version:      6.0.0
@@ -110,6 +110,8 @@ to set defaults:
 ## Projects using govc
 
 * [Kubernetes vSphere Provider](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/cluster/vsphere)
+
+* [Emacs govc package](./emacs)
 
 ## License
 

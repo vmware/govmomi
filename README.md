@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/vmware/govmomi.png?branch=master)](https://travis-ci.org/vmware/govmomi)  
+[![Build Status](https://travis-ci.org/vmware/govmomi.png?branch=master)](https://travis-ci.org/vmware/govmomi)
 [![Build Status](https://ci.vmware.run/api/badges/vmware/govmomi/status.svg)](https://ci.vmware.run/vmware/govmomi)
 
 # govmomi
@@ -42,6 +42,12 @@ To build locally with Drone:
 Changes to the API are subject to [semantic versioning](http://semver.org).
 
 Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
+
+## Projects using govmomi
+
+* [Docker Machine](https://github.com/docker/machine/tree/master/drivers/vmwarevsphere)
+
+* [Terraform](https://github.com/hashicorp/terraform/tree/master/builtin/providers/vsphere)
 
 ## License
 
