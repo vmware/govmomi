@@ -188,6 +188,13 @@ func (l VirtualDeviceList) FindIDEController(name string) (*types.VirtualIDECont
 	return c.(*types.VirtualIDEController), nil
 }
 
+// CreateIDEController creates a new IDE controller.
+func (l VirtualDeviceList) CreateIDEController() (types.BaseVirtualDevice, error) {
+	ide := &types.VirtualIDEController{}
+	ide.Key = l.newKey()
+	return ide, nil
+}
+
 // FindSCSIController will find the named SCSI controller if given, otherwise will pick an available controller.
 // An error is returned if the named controller is not found or not an SCSI controller.  Or, if name is not
 // given and no available controller can be found.
@@ -233,9 +240,8 @@ func (l VirtualDeviceList) CreateSCSIController(name string) (types.BaseVirtualD
 	}
 
 	scsi := c.GetVirtualSCSIController()
-
 	scsi.BusNumber = l.newSCSIBusNumber()
-
+	scsi.Key = l.newKey()
 	return c.(types.BaseVirtualDevice), nil
 }
 
@@ -320,6 +326,24 @@ func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int {
 	return max + 1
 }
 
+// newKey returns the key to use for adding a new device to the device list.
+// The device list we're working with here may not be complete (e.g. when
+// we're only adding new devices), so any positive keys could conflict with device keys
+// that are already in use. To avoid this type of conflict, we can use negative keys
+// here, which will be resolved to positive keys by vSphere as the reconfiguration is done.
+func (l VirtualDeviceList) newKey() int {
+	key := -200
+
+	for _, device := range l {
+		d := device.GetVirtualDevice()
+		if d.Key < key {
+			key = d.Key
+		}
+	}
+
+	return key - 1
+}
+
 // AssignController assigns a device to a controller.
 func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c types.BaseVirtualController) {
 	d := device.GetVirtualDevice()
@@ -354,6 +378,7 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string
 		device.UnitNumber = -1 // TODO: this field is annotated as omitempty
 	}
 
+	device.Key = l.newKey()
 	return device
 }
 
@@ -751,4 +776,49 @@ func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
 	}
 
 	return fmt.Sprintf("%s-%s", dtype, key)
+}
+
+// ConfigSpec creates a virtual machine configuration spec for
+// the specified operation, for the list of devices in the device list.
+func (l VirtualDeviceList) ConfigSpec(op types.VirtualDeviceConfigSpecOperation) ([]types.BaseVirtualDeviceConfigSpec, error) {
+	var fop types.VirtualDeviceConfigSpecFileOperation
+	switch op {
+	case types.VirtualDeviceConfigSpecOperationAdd:
+		fop = types.VirtualDeviceConfigSpecFileOperationCreate
+	case types.VirtualDeviceConfigSpecOperationEdit:
+		fop = types.VirtualDeviceConfigSpecFileOperationReplace
+	case types.VirtualDeviceConfigSpecOperationRemove:
+		fop = types.VirtualDeviceConfigSpecFileOperationDestroy
+	default:
+		panic("unknown op")
+	}
+
+	var res []types.BaseVirtualDeviceConfigSpec
+	for _, device := range l {
+		config := &types.VirtualDeviceConfigSpec{
+			Device:    device,
+			Operation: op,
+		}
+
+		if disk, ok := device.(*types.VirtualDisk); ok {
+			config.FileOperation = fop
+
+			// Special case to attach an existing disk
+			if op == types.VirtualDeviceConfigSpecOperationAdd && disk.CapacityInKB == 0 {
+				childDisk := false
+				if b, ok := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+					childDisk = b.Parent != nil
+				}
+
+				if !childDisk {
+					// Existing disk, clear file operation
+					config.FileOperation = ""
+				}
+			}
+		}
+
+		res = append(res, config)
+	}
+
+	return res, nil
 }
