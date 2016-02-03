@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -555,6 +555,10 @@ class Schema
       end
     end
 
+    imports.each do |i|
+      i.validate_assumptions!
+    end
+
     includes.each do |i|
       i.validate_assumptions!
     end
@@ -589,6 +593,12 @@ class Schema
       else
         raise "unknown type: %s" % n.class
       end
+    end
+  end
+
+  def imports
+    @imports ||= @xml.root.xpath(".//xmlns:import").map do |n|
+      Schema.new(WSDL.read n["schemaLocation"])
     end
   end
 
