@@ -180,11 +180,21 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+
+		cmd.isoDatastore, err = cmd.isoDatastoreFlag.Datastore()
+		if err != nil {
+			return err
+		}
 	}
 
 	// Verify disk exists
 	if cmd.disk != "" {
 		_, err = cmd.diskDatastoreFlag.Stat(context.TODO(), cmd.disk)
+		if err != nil {
+			return err
+		}
+
+		cmd.diskDatastore, err = cmd.diskDatastoreFlag.Datastore()
 		if err != nil {
 			return err
 		}
@@ -290,7 +300,7 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 			return nil, err
 		}
 
-		disk := devices.CreateDisk(controller, cmd.Datastore.Path(cmd.disk))
+		disk := devices.CreateDisk(controller, cmd.diskDatastore.Path(cmd.disk))
 
 		if cmd.link {
 			disk = devices.ChildDisk(disk)
@@ -310,7 +320,7 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 			return nil, err
 		}
 
-		cdrom = devices.InsertIso(cdrom, cmd.Datastore.Path(cmd.iso))
+		cdrom = devices.InsertIso(cdrom, cmd.isoDatastore.Path(cmd.iso))
 		devices = append(devices, cdrom)
 	}
 
