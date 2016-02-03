@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -13,7 +13,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-
 package types
 
 import (
@@ -9225,25 +9224,6 @@ type CreateVM_TaskResponse struct {
 	Returnval ManagedObjectReference `xml:"returnval"`
 }
 
-type CreateVRP CreateVRPRequestType
-
-func init() {
-	t["CreateVRP"] = reflect.TypeOf((*CreateVRP)(nil)).Elem()
-}
-
-type CreateVRPRequestType struct {
-	This ManagedObjectReference  `xml:"_this"`
-	Spec VirtualResourcePoolSpec `xml:"spec"`
-}
-
-func init() {
-	t["CreateVRPRequestType"] = reflect.TypeOf((*CreateVRPRequestType)(nil)).Elem()
-}
-
-type CreateVRPResponse struct {
-	Returnval string `xml:"returnval"`
-}
-
 type CreateVirtualDiskRequestType struct {
 	This       ManagedObjectReference  `xml:"_this"`
 	Name       string                  `xml:"name"`
@@ -11376,24 +11356,6 @@ func init() {
 type DeleteScsiLunStateResponse struct {
 }
 
-type DeleteVRP DeleteVRPRequestType
-
-func init() {
-	t["DeleteVRP"] = reflect.TypeOf((*DeleteVRP)(nil)).Elem()
-}
-
-type DeleteVRPRequestType struct {
-	This  ManagedObjectReference `xml:"_this"`
-	VrpId string                 `xml:"vrpId"`
-}
-
-func init() {
-	t["DeleteVRPRequestType"] = reflect.TypeOf((*DeleteVRPRequestType)(nil)).Elem()
-}
-
-type DeleteVRPResponse struct {
-}
-
 type DeleteVffsVolumeState DeleteVffsVolumeStateRequestType
 
 func init() {
@@ -11485,26 +11447,6 @@ type DeltaDiskFormatNotSupportedFault DeltaDiskFormatNotSupported
 
 func init() {
 	t["DeltaDiskFormatNotSupportedFault"] = reflect.TypeOf((*DeltaDiskFormatNotSupportedFault)(nil)).Elem()
-}
-
-type DeployVM DeployVMRequestType
-
-func init() {
-	t["DeployVM"] = reflect.TypeOf((*DeployVM)(nil)).Elem()
-}
-
-type DeployVMRequestType struct {
-	This    ManagedObjectReference `xml:"_this"`
-	VrpId   string                 `xml:"vrpId"`
-	Vm      ManagedObjectReference `xml:"vm"`
-	Cluster ManagedObjectReference `xml:"cluster"`
-}
-
-func init() {
-	t["DeployVMRequestType"] = reflect.TypeOf((*DeployVMRequestType)(nil)).Elem()
-}
-
-type DeployVMResponse struct {
 }
 
 type Description struct {
@@ -16740,44 +16682,6 @@ type GetAlarmStateResponse struct {
 	Returnval []AlarmState `xml:"returnval,omitempty"`
 }
 
-type GetAllVRPIds GetAllVRPIdsRequestType
-
-func init() {
-	t["GetAllVRPIds"] = reflect.TypeOf((*GetAllVRPIds)(nil)).Elem()
-}
-
-type GetAllVRPIdsRequestType struct {
-	This ManagedObjectReference `xml:"_this"`
-}
-
-func init() {
-	t["GetAllVRPIdsRequestType"] = reflect.TypeOf((*GetAllVRPIdsRequestType)(nil)).Elem()
-}
-
-type GetAllVRPIdsResponse struct {
-	Returnval []string `xml:"returnval,omitempty"`
-}
-
-type GetChildRPforHub GetChildRPforHubRequestType
-
-func init() {
-	t["GetChildRPforHub"] = reflect.TypeOf((*GetChildRPforHub)(nil)).Elem()
-}
-
-type GetChildRPforHubRequestType struct {
-	This  ManagedObjectReference `xml:"_this"`
-	VrpId string                 `xml:"vrpId"`
-	Hub   ManagedObjectReference `xml:"hub"`
-}
-
-func init() {
-	t["GetChildRPforHubRequestType"] = reflect.TypeOf((*GetChildRPforHubRequestType)(nil)).Elem()
-}
-
-type GetChildRPforHubResponse struct {
-	Returnval *ManagedObjectReference `xml:"returnval,omitempty"`
-}
-
 type GetCustomizationSpec GetCustomizationSpecRequestType
 
 func init() {
@@ -16815,25 +16719,6 @@ type GetPublicKeyResponse struct {
 	Returnval string `xml:"returnval"`
 }
 
-type GetRPSettings GetRPSettingsRequestType
-
-func init() {
-	t["GetRPSettings"] = reflect.TypeOf((*GetRPSettings)(nil)).Elem()
-}
-
-type GetRPSettingsRequestType struct {
-	This         ManagedObjectReference `xml:"_this"`
-	ResourcePool ManagedObjectReference `xml:"resourcePool"`
-}
-
-func init() {
-	t["GetRPSettingsRequestType"] = reflect.TypeOf((*GetRPSettingsRequestType)(nil)).Elem()
-}
-
-type GetRPSettingsResponse struct {
-	Returnval *ResourceConfigSpec `xml:"returnval,omitempty"`
-}
-
 type GetResourceUsage GetResourceUsageRequestType
 
 func init() {
@@ -16850,63 +16735,6 @@ func init() {
 
 type GetResourceUsageResponse struct {
 	Returnval ClusterResourceUsageSummary `xml:"returnval"`
-}
-
-type GetVRPSettings GetVRPSettingsRequestType
-
-func init() {
-	t["GetVRPSettings"] = reflect.TypeOf((*GetVRPSettings)(nil)).Elem()
-}
-
-type GetVRPSettingsRequestType struct {
-	This  ManagedObjectReference `xml:"_this"`
-	VrpId string                 `xml:"vrpId"`
-}
-
-func init() {
-	t["GetVRPSettingsRequestType"] = reflect.TypeOf((*GetVRPSettingsRequestType)(nil)).Elem()
-}
-
-type GetVRPSettingsResponse struct {
-	Returnval VirtualResourcePoolSpec `xml:"returnval"`
-}
-
-type GetVRPUsage GetVRPUsageRequestType
-
-func init() {
-	t["GetVRPUsage"] = reflect.TypeOf((*GetVRPUsage)(nil)).Elem()
-}
-
-type GetVRPUsageRequestType struct {
-	This  ManagedObjectReference `xml:"_this"`
-	VrpId string                 `xml:"vrpId"`
-}
-
-func init() {
-	t["GetVRPUsageRequestType"] = reflect.TypeOf((*GetVRPUsageRequestType)(nil)).Elem()
-}
-
-type GetVRPUsageResponse struct {
-	Returnval VirtualResourcePoolUsage `xml:"returnval"`
-}
-
-type GetVRPofVM GetVRPofVMRequestType
-
-func init() {
-	t["GetVRPofVM"] = reflect.TypeOf((*GetVRPofVM)(nil)).Elem()
-}
-
-type GetVRPofVMRequestType struct {
-	This ManagedObjectReference `xml:"_this"`
-	Vm   ManagedObjectReference `xml:"vm"`
-}
-
-func init() {
-	t["GetVRPofVMRequestType"] = reflect.TypeOf((*GetVRPofVMRequestType)(nil)).Elem()
-}
-
-type GetVRPofVMResponse struct {
-	Returnval string `xml:"returnval,omitempty"`
 }
 
 type GetVsanObjExtAttrs GetVsanObjExtAttrsRequestType
@@ -38417,25 +38245,6 @@ func init() {
 type SetLocaleResponse struct {
 }
 
-type SetManagedByVDC SetManagedByVDCRequestType
-
-func init() {
-	t["SetManagedByVDC"] = reflect.TypeOf((*SetManagedByVDC)(nil)).Elem()
-}
-
-type SetManagedByVDCRequestType struct {
-	This    ManagedObjectReference `xml:"_this"`
-	Cluster ManagedObjectReference `xml:"cluster"`
-	Status  bool                   `xml:"status"`
-}
-
-func init() {
-	t["SetManagedByVDCRequestType"] = reflect.TypeOf((*SetManagedByVDCRequestType)(nil)).Elem()
-}
-
-type SetManagedByVDCResponse struct {
-}
-
 type SetMultipathLunPolicy SetMultipathLunPolicyRequestType
 
 func init() {
@@ -40810,26 +40619,6 @@ func init() {
 	t["UncustomizableGuestFault"] = reflect.TypeOf((*UncustomizableGuestFault)(nil)).Elem()
 }
 
-type UndeployVM UndeployVMRequestType
-
-func init() {
-	t["UndeployVM"] = reflect.TypeOf((*UndeployVM)(nil)).Elem()
-}
-
-type UndeployVMRequestType struct {
-	This    ManagedObjectReference `xml:"_this"`
-	VrpId   string                 `xml:"vrpId"`
-	Vm      ManagedObjectReference `xml:"vm"`
-	Cluster ManagedObjectReference `xml:"cluster"`
-}
-
-func init() {
-	t["UndeployVMRequestType"] = reflect.TypeOf((*UndeployVMRequestType)(nil)).Elem()
-}
-
-type UndeployVMResponse struct {
-}
-
 type UnexpectedCustomizationFault struct {
 	CustomizationFault
 }
@@ -42335,24 +42124,6 @@ func init() {
 }
 
 type UpdateVAppConfigResponse struct {
-}
-
-type UpdateVRP UpdateVRPRequestType
-
-func init() {
-	t["UpdateVRP"] = reflect.TypeOf((*UpdateVRP)(nil)).Elem()
-}
-
-type UpdateVRPRequestType struct {
-	This ManagedObjectReference `xml:"_this"`
-	Spec VRPEditSpec            `xml:"spec"`
-}
-
-func init() {
-	t["UpdateVRPRequestType"] = reflect.TypeOf((*UpdateVRPRequestType)(nil)).Elem()
-}
-
-type UpdateVRPResponse struct {
 }
 
 type UpdateVirtualMachineFilesRequestType struct {
