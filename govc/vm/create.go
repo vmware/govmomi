@@ -300,7 +300,9 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 			return nil, err
 		}
 
-		disk := devices.CreateDisk(controller, cmd.diskDatastore.Path(cmd.disk))
+		ds := cmd.diskDatastore.Reference()
+		path := cmd.diskDatastore.Path(cmd.disk)
+		disk := devices.CreateDisk(controller, ds, path)
 
 		if cmd.link {
 			disk = devices.ChildDisk(disk)

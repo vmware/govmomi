@@ -99,7 +99,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	disk := devices.CreateDisk(controller, ds.Path(cmd.Name))
+	disk := devices.CreateDisk(controller, ds.Reference(), ds.Path(cmd.Name))
 
 	existing := devices.SelectByBackingInfo(disk.Backing)
 

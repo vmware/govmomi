@@ -353,7 +353,7 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 }
 
 // CreateDisk creates a new VirtualDisk device which can be added to a VM.
-func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string) *types.VirtualDisk {
+func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, ds types.ManagedObjectReference, name string) *types.VirtualDisk {
 	// If name is not specified, one will be chosen for you.
 	// But if when given, make sure it ends in .vmdk, otherwise it will be treated as a directory.
 	if len(name) > 0 && filepath.Ext(name) != ".vmdk" {
@@ -366,7 +366,8 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string
 				DiskMode:        string(types.VirtualDiskModePersistent),
 				ThinProvisioned: types.NewBool(true),
 				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: name,
+					FileName:  name,
+					Datastore: &ds,
 				},
 			},
 		},
@@ -391,7 +392,8 @@ func (l VirtualDeviceList) ChildDisk(parent *types.VirtualDisk) *types.VirtualDi
 	// Use specified disk as parent backing to a new disk.
 	disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
 		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-			FileName: fmt.Sprintf("[%s]", ds[0]),
+			FileName:  fmt.Sprintf("[%s]", ds[0]),
+			Datastore: backing.Datastore,
 		},
 		Parent:          backing,
 		DiskMode:        backing.DiskMode,

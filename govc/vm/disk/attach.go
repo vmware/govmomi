@@ -86,7 +86,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	disk := devices.CreateDisk(controller, ds.Path(cmd.disk))
+	disk := devices.CreateDisk(controller, ds.Reference(), ds.Path(cmd.disk))
 	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
 
 	if cmd.link {
