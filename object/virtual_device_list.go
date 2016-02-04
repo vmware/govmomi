@@ -191,7 +191,7 @@ func (l VirtualDeviceList) FindIDEController(name string) (*types.VirtualIDECont
 // CreateIDEController creates a new IDE controller.
 func (l VirtualDeviceList) CreateIDEController() (types.BaseVirtualDevice, error) {
 	ide := &types.VirtualIDEController{}
-	ide.Key = l.newKey()
+	ide.Key = l.NewKey()
 	return ide, nil
 }
 
@@ -241,7 +241,7 @@ func (l VirtualDeviceList) CreateSCSIController(name string) (types.BaseVirtualD
 
 	scsi := c.GetVirtualSCSIController()
 	scsi.BusNumber = l.newSCSIBusNumber()
-	scsi.Key = l.newKey()
+	scsi.Key = l.NewKey()
 	return c.(types.BaseVirtualDevice), nil
 }
 
@@ -326,12 +326,12 @@ func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int {
 	return max + 1
 }
 
-// newKey returns the key to use for adding a new device to the device list.
+// NewKey returns the key to use for adding a new device to the device list.
 // The device list we're working with here may not be complete (e.g. when
 // we're only adding new devices), so any positive keys could conflict with device keys
 // that are already in use. To avoid this type of conflict, we can use negative keys
 // here, which will be resolved to positive keys by vSphere as the reconfiguration is done.
-func (l VirtualDeviceList) newKey() int {
+func (l VirtualDeviceList) NewKey() int {
 	key := -200
 
 	for _, device := range l {
@@ -378,7 +378,7 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, name string
 		device.UnitNumber = -1 // TODO: this field is annotated as omitempty
 	}
 
-	device.Key = l.newKey()
+	device.Key = l.NewKey()
 	return device
 }
 
