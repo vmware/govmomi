@@ -231,16 +231,6 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
-	// TODO: ImportSpec may have unitNumber==0, but this field is optional in the wsdl
-	// and hence omitempty in the struct tag; but unitNumber is required for certain devices.
-	s := &spec.ImportSpec.(*types.VirtualMachineImportSpec).ConfigSpec
-	for _, d := range s.DeviceChange {
-		n := &d.GetVirtualDeviceConfigSpec().Device.GetVirtualDevice().UnitNumber
-		if *n == 0 {
-			*n = -1
-		}
-	}
-
 	var host *object.HostSystem
 	if cmd.SearchFlag.IsSet() {
 		if host, err = cmd.HostSystem(); err != nil {
