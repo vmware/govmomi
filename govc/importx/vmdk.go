@@ -451,7 +451,6 @@ func (c *configSpec) AddDisk(ds *object.Datastore, path string) {
 		VirtualDevice: types.VirtualDevice{
 			Key:           -1,
 			ControllerKey: -1,
-			UnitNumber:    -1,
 			Backing: &types.VirtualDiskFlatVer2BackingInfo{
 				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
 					FileName: ds.Path(path),
