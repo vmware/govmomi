@@ -1,5 +1,6 @@
 clone:
   tags: true
+  path: github.com/vmware/govmomi
 build:
   image: golang:1.5
   pull: true
