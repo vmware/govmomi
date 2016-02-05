@@ -569,6 +569,12 @@ class Schema
   def types
     return to_enum(:types) unless block_given?
 
+    imports.each do |i|
+      i.types do |t|
+        yield t
+      end
+    end
+
     includes.each do |i|
       i.types do |t|
         yield t
