@@ -49,7 +49,7 @@ func TestVirtualMachineConfigSpec(t *testing.T) {
 					VirtualDevice: VirtualDevice{
 						Key:           0,
 						ControllerKey: 1000,
-						UnitNumber:    0,
+						UnitNumber:    new(int),	// zero default value
 						Backing: &VirtualDiskFlatVer2BackingInfo{
 							DiskMode:        string(VirtualDiskModePersistent),
 							ThinProvisioned: NewBool(true),

@@ -24,6 +24,10 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+func intPtrValue(val int) *int {
+	return &val
+}
+
 var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 	&types.VirtualIDEController{
 		VirtualController: types.VirtualController{
@@ -39,7 +43,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 				SlotInfo:      nil,
 				ControllerKey: 0,
-				UnitNumber:    0,
+				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
 			Device:    []int{3001, 3000},
@@ -59,7 +63,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 				SlotInfo:      nil,
 				ControllerKey: 0,
-				UnitNumber:    0,
+				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 1,
 			Device:    []int{3002},
@@ -79,7 +83,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 				SlotInfo:      nil,
 				ControllerKey: 0,
-				UnitNumber:    0,
+				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
 			Device:    []int{600, 700},
@@ -99,7 +103,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 				SlotInfo:      nil,
 				ControllerKey: 0,
-				UnitNumber:    0,
+				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
 			Device:    []int{500, 12000, 1000, 4000},
@@ -119,7 +123,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 				SlotInfo:      nil,
 				ControllerKey: 0,
-				UnitNumber:    0,
+				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
 			Device:    []int{9000},
@@ -138,7 +142,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 			SlotInfo:      nil,
 			ControllerKey: 300,
-			UnitNumber:    0,
+			UnitNumber:    intPtrValue(0),
 		},
 	},
 	&types.VirtualPointingDevice{
@@ -157,7 +161,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 			SlotInfo:      nil,
 			ControllerKey: 300,
-			UnitNumber:    1,
+			UnitNumber:    intPtrValue(1),
 		},
 	},
 	&types.VirtualMachineVideoCard{
@@ -173,7 +177,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 			SlotInfo:      nil,
 			ControllerKey: 100,
-			UnitNumber:    0,
+			UnitNumber:    intPtrValue(0),
 		},
 		VideoRamSizeInKB: 4096,
 		NumDisplays:      1,
@@ -197,7 +201,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				PciSlotNumber:            33,
 			},
 			ControllerKey: 100,
-			UnitNumber:    17,
+			UnitNumber:    intPtrValue(17),
 		},
 		Id: 1754519335,
 		AllowUnrestrictedCommunication: types.NewBool(false),
@@ -217,7 +221,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 					Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 					SlotInfo:      nil,
 					ControllerKey: 100,
-					UnitNumber:    3,
+					UnitNumber:    intPtrValue(3),
 				},
 				BusNumber: 0,
 				Device:    nil,
@@ -253,7 +257,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			},
 			SlotInfo:      nil,
 			ControllerKey: 200,
-			UnitNumber:    1,
+			UnitNumber:    intPtrValue(1),
 		},
 	},
 	&types.VirtualDisk{
@@ -307,7 +311,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 			SlotInfo:      nil,
 			ControllerKey: 200,
-			UnitNumber:    0,
+			UnitNumber:    intPtrValue(0),
 		},
 		CapacityInKB:    30720,
 		CapacityInBytes: 31457280,
@@ -361,7 +365,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			Connectable:   (*types.VirtualDeviceConnectInfo)(nil),
 			SlotInfo:      nil,
 			ControllerKey: 201,
-			UnitNumber:    0,
+			UnitNumber:    intPtrValue(0),
 		},
 		CapacityInKB:    10000000,
 		CapacityInBytes: 10240000000,
@@ -414,7 +418,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 					PciSlotNumber:            32,
 				},
 				ControllerKey: 100,
-				UnitNumber:    7,
+				UnitNumber:    intPtrValue(7),
 			},
 			AddressType:      "generated",
 			MacAddress:       "00:0c:29:93:d7:27",
@@ -447,7 +451,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 			},
 			SlotInfo:      nil,
 			ControllerKey: 400,
-			UnitNumber:    0,
+			UnitNumber:    intPtrValue(0),
 		},
 		YieldOnPoll: true,
 	},
@@ -643,9 +647,10 @@ func TestPickController(t *testing.T) {
 
 		dev := &types.VirtualDevice{
 			Key:           rand.Int(),
-			UnitNumber:    unit,
+			UnitNumber:    new(int),
 			ControllerKey: key,
 		}
+		*dev.UnitNumber = unit
 
 		list = append(list, dev)
 		c.Device = append(c.Device, dev.Key)
@@ -831,7 +836,7 @@ func TestName(t *testing.T) {
 			&types.VirtualE1000{
 				VirtualEthernetCard: types.VirtualEthernetCard{
 					VirtualDevice: types.VirtualDevice{
-						UnitNumber: 7,
+						UnitNumber: intPtrValue(7),
 					},
 				},
 			},
