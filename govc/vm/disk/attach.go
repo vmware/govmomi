@@ -90,11 +90,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
 
 	if cmd.link {
-		if cmd.persist {
-			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
-		} else {
-			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
-		}
+		backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
 
 		disk = devices.ChildDisk(disk)
 		return vm.AddDevice(context.TODO(), disk)
