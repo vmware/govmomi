@@ -23,7 +23,10 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -32,6 +35,7 @@ type create struct {
 	*flags.ClientFlag
 	*flags.DatacenterFlag
 	*flags.DatastoreFlag
+	*flags.StoragePodFlag
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.NetworkFlag
@@ -53,9 +57,14 @@ type create struct {
 	diskDatastoreFlag *flags.DatastoreFlag
 	diskDatastore     *object.Datastore
 
+	// Only set if the disk argument is a byte size, which means the disk
+	// doesn't exist yet and should be created
+	diskByteSize int64
+
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
+	StoragePod   *object.StoragePod
 	ResourcePool *object.ResourcePool
 	HostSystem   *object.HostSystem
 }
@@ -73,6 +82,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
+
+	cmd.StoragePodFlag, ctx = flags.NewStoragePodFlag(ctx)
+	cmd.StoragePodFlag.Register(ctx, f)
 
 	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
 	cmd.ResourcePoolFlag.Register(ctx, f)
@@ -95,7 +107,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.isoDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
 	f.StringVar(&cmd.isoDatastoreFlag.Name, "iso-datastore", "", "Datastore for ISO file")
 
-	f.StringVar(&cmd.disk, "disk", "", "Disk path")
+	f.StringVar(&cmd.disk, "disk", "", "Disk path (to use existing) OR size (to create new, e.g. 20GB)")
 	cmd.diskDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
 	f.StringVar(&cmd.diskDatastoreFlag.Name, "disk-datastore", "", "Datastore for disk file")
 }
@@ -108,6 +120,9 @@ func (cmd *create) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StoragePodFlag.Process(ctx); err != nil {
 		return err
 	}
 	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
@@ -153,9 +168,16 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.Datastore, err = cmd.DatastoreFlag.Datastore()
-	if err != nil {
-		return err
+	if cmd.StoragePodFlag.Isset() {
+		cmd.StoragePod, err = cmd.StoragePodFlag.StoragePod()
+		if err != nil {
+			return err
+		}
+	} else {
+		cmd.Datastore, err = cmd.DatastoreFlag.Datastore()
+		if err != nil {
+			return err
+		}
 	}
 
 	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystemIfSpecified()
@@ -189,14 +211,22 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// Verify disk exists
 	if cmd.disk != "" {
-		_, err = cmd.diskDatastoreFlag.Stat(context.TODO(), cmd.disk)
-		if err != nil {
-			return err
-		}
+		var b units.ByteSize
 
-		cmd.diskDatastore, err = cmd.diskDatastoreFlag.Datastore()
-		if err != nil {
-			return err
+		// If disk can be parsed as byte units, don't stat
+		err = b.Set(cmd.disk)
+		if err == nil {
+			cmd.diskByteSize = int64(b)
+		} else {
+			_, err = cmd.diskDatastoreFlag.Stat(context.TODO(), cmd.disk)
+			if err != nil {
+				return err
+			}
+
+			cmd.diskDatastore, err = cmd.diskDatastoreFlag.Datastore()
+			if err != nil {
+				return err
+			}
 		}
 	}
 
@@ -231,10 +261,9 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 	var devices object.VirtualDeviceList
 	var err error
 
-	spec := types.VirtualMachineConfigSpec{
+	spec := &types.VirtualMachineConfigSpec{
 		Name:     cmd.name,
 		GuestId:  cmd.guestID,
-		Files:    &types.VirtualMachineFileInfo{VmPathName: fmt.Sprintf("[%s]", cmd.Datastore.Name())},
 		NumCPUs:  cmd.cpus,
 		MemoryMB: int64(cmd.memory),
 	}
@@ -256,10 +285,22 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 
 	spec.DeviceChange = deviceChange
 
+	var datastore *object.Datastore
+
+	// If storage pod is specified, collect placement recommendations
+	if cmd.StoragePod != nil {
+		datastore, err = cmd.recommendDatastore(ctx, spec)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		datastore = cmd.Datastore
+	}
+
 	if !cmd.force {
 		vmxPath := fmt.Sprintf("%s/%s.vmx", cmd.name, cmd.name)
 
-		_, err := cmd.Datastore.Stat(ctx, vmxPath)
+		_, err := datastore.Stat(ctx, vmxPath)
 		if err == nil {
 			dsPath := cmd.Datastore.Path(vmxPath)
 			return nil, fmt.Errorf("File %s already exists", dsPath)
@@ -271,7 +312,11 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		return nil, err
 	}
 
-	return folders.VmFolder.CreateVM(ctx, spec, cmd.ResourcePool, cmd.HostSystem)
+	spec.Files = &types.VirtualMachineFileInfo{
+		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
+	}
+
+	return folders.VmFolder.CreateVM(ctx, *spec, cmd.ResourcePool, cmd.HostSystem)
 }
 
 func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
@@ -294,7 +339,26 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 		devices = append(devices, ide)
 	}
 
-	if cmd.disk != "" {
+	if cmd.diskByteSize != 0 {
+		controller, err := devices.FindDiskController(cmd.controller)
+		if err != nil {
+			return nil, err
+		}
+
+		disk := &types.VirtualDisk{
+			VirtualDevice: types.VirtualDevice{
+				Key: devices.NewKey(),
+				Backing: &types.VirtualDiskFlatVer2BackingInfo{
+					DiskMode:        string(types.VirtualDiskModePersistent),
+					ThinProvisioned: types.NewBool(true),
+				},
+			},
+			CapacityInKB: cmd.diskByteSize / 1024,
+		}
+
+		devices.AssignController(disk, controller)
+		devices = append(devices, disk)
+	} else if cmd.disk != "" {
 		controller, err := devices.FindDiskController(cmd.controller)
 		if err != nil {
 			return nil, err
@@ -337,4 +401,84 @@ func (cmd *create) addNetwork(devices object.VirtualDeviceList) (object.VirtualD
 
 	devices = append(devices, netdev)
 	return devices, nil
+}
+
+func (cmd *create) recommendDatastore(ctx context.Context, spec *types.VirtualMachineConfigSpec) (*object.Datastore, error) {
+	sp := cmd.StoragePod.Reference()
+
+	// Build pod selection spec from config spec
+	podSelectionSpec := types.StorageDrsPodSelectionSpec{
+		StoragePod: &sp,
+	}
+
+	// Keep list of disks that need to be placed
+	var disks []*types.VirtualDisk
+
+	// Collect disks eligible for placement
+	for _, deviceConfigSpec := range spec.DeviceChange {
+		s := deviceConfigSpec.GetVirtualDeviceConfigSpec()
+		if s.Operation != types.VirtualDeviceConfigSpecOperationAdd {
+			continue
+		}
+
+		if s.FileOperation != types.VirtualDeviceConfigSpecFileOperationCreate {
+			continue
+		}
+
+		d, ok := s.Device.(*types.VirtualDisk)
+		if !ok {
+			continue
+		}
+
+		podConfigForPlacement := types.VmPodConfigForPlacement{
+			StoragePod: sp,
+			Disk: []types.PodDiskLocator{
+				{
+					DiskId:          d.Key,
+					DiskBackingInfo: d.Backing,
+				},
+			},
+		}
+
+		podSelectionSpec.InitialVmConfig = append(podSelectionSpec.InitialVmConfig, podConfigForPlacement)
+		disks = append(disks, d)
+	}
+
+	sps := types.StoragePlacementSpec{
+		Type:             string(types.StoragePlacementSpecPlacementTypeCreate),
+		ResourcePool:     types.NewReference(cmd.ResourcePool.Reference()),
+		PodSelectionSpec: podSelectionSpec,
+		ConfigSpec:       spec,
+	}
+
+	srm := object.NewStorageResourceManager(cmd.Client)
+	result, err := srm.RecommendDatastores(ctx, sps)
+	if err != nil {
+		return nil, err
+	}
+
+	// Use result to pin disks to recommended datastores
+	recs := result.Recommendations
+	if len(recs) == 0 {
+		return nil, fmt.Errorf("no recommendations")
+	}
+
+	ds := recs[0].Action[0].(*types.StoragePlacementAction).Destination
+
+	var mds mo.Datastore
+	err = property.DefaultCollector(cmd.Client).RetrieveOne(ctx, ds, []string{"name"}, &mds)
+	if err != nil {
+		return nil, err
+	}
+
+	datastore := object.NewDatastore(cmd.Client, ds)
+	datastore.InventoryPath = mds.Name
+
+	// Apply recommendation to eligible disks
+	for _, disk := range disks {
+		backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		backing.Datastore = &ds
+	}
+
+	return datastore, nil
 }

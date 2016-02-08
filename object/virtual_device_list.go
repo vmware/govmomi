@@ -349,7 +349,12 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	d := device.GetVirtualDevice()
 	d.ControllerKey = c.GetVirtualController().Key
 	d.UnitNumber = l.newUnitNumber(c)
-	d.Key = -1
+	if d.UnitNumber == 0 {
+		d.UnitNumber = -1 // TODO: this field is annotated as omitempty
+	}
+	if d.Key == 0 {
+		d.Key = -1
+	}
 }
 
 // CreateDisk creates a new VirtualDisk device which can be added to a VM.
@@ -374,12 +379,6 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, ds types.Ma
 	}
 
 	l.AssignController(device, c)
-
-	if device.UnitNumber == 0 {
-		device.UnitNumber = -1 // TODO: this field is annotated as omitempty
-	}
-
-	device.Key = l.NewKey()
 	return device
 }
 

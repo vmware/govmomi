@@ -2,6 +2,10 @@
 
 ### (unreleased)
 
+* Add support for placement in datastore cluster to vm.create command
+
+* Add support for creating new disks in vm.create command
+
 * Add `-p` and `-a` options to govc datastore.ls command
 
 ### 0.3.0 (2016-01-16)
