@@ -218,7 +218,10 @@ load test_helper
 }
 
 @test "vm.create linked ide disk" {
+  import_ttylinux_vmdk
+
   vm=$(new_id)
+
   run govc vm.create -disk $GOVC_TEST_VMDK -disk.controller ide -on=false $vm
   assert_success
 
@@ -228,10 +231,12 @@ load test_helper
 }
 
 @test "vm.create linked scsi disk" {
+  import_ttylinux_vmdk
+
   vm=$(new_id)
 
   run govc vm.create -disk enoent -on=false $vm
-  assert_failure "govc: cannot stat '[${GOVC_DATASTORE}] enoent': No such file"
+  assert_failure "govc: cannot stat '[${GOVC_DATASTORE##*/}] enoent': No such file"
 
   run govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
   assert_success
@@ -239,15 +244,18 @@ load test_helper
   run govc device.info -vm $vm disk-1000-0
   assert_success
   assert_line "Controller: lsilogic-1000"
-  assert_line "Parent: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
-  assert_line "File: [${GOVC_DATASTORE}] $vm/${vm}.vmdk"
+  assert_line "Parent: [${GOVC_DATASTORE##*/}] $GOVC_TEST_VMDK"
+  assert_line "File: [${GOVC_DATASTORE##*/}] $vm/${vm}.vmdk"
 }
 
 @test "vm.create scsi disk" {
+  import_ttylinux_vmdk
+
   vm=$(new_id)
 
   run govc vm.create -disk enoent -on=false $vm
-  assert_failure "govc: cannot stat '[${GOVC_DATASTORE}] enoent': No such file"
+  assert_failure "govc: cannot stat '[${GOVC_DATASTORE##*/}] enoent': No such file"
+
 
   run govc vm.create -disk $GOVC_TEST_VMDK -on=false -link=false $vm
   assert_success
@@ -255,8 +263,21 @@ load test_helper
   run govc device.info -vm $vm disk-1000-0
   assert_success
   assert_line "Controller: lsilogic-1000"
-  refute_line "Parent: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
-  assert_line "File: [${GOVC_DATASTORE}] $GOVC_TEST_VMDK"
+  refute_line "Parent: [${GOVC_DATASTORE##*/}] $GOVC_TEST_VMDK"
+  assert_line "File: [${GOVC_DATASTORE##*/}] $GOVC_TEST_VMDK"
+}
+
+@test "vm.create scsi disk with datastore argument" {
+  import_ttylinux_vmdk
+
+  vm=$(new_id)
+
+  run govc vm.create -disk="${GOVC_TEST_VMDK}" -disk-datastore="${GOVC_DATASTORE}" -on=false -link=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-1000-0
+  assert_success
+  assert_line "File: [${GOVC_DATASTORE##*/}] $GOVC_TEST_VMDK"
 }
 
 @test "vm.create iso" {
@@ -265,7 +286,7 @@ load test_helper
   vm=$(new_id)
 
   run govc vm.create -iso enoent -on=false $vm
-  assert_failure "govc: cannot stat '[${GOVC_DATASTORE}] enoent': No such file"
+  assert_failure "govc: cannot stat '[${GOVC_DATASTORE##*/}] enoent': No such file"
 
   run govc vm.create -iso $GOVC_TEST_ISO -on=false $vm
   assert_success
@@ -273,7 +294,20 @@ load test_helper
   run govc device.info -vm $vm cdrom-3000
   assert_success
   assert_line "Controller: ide-200"
-  assert_line "Summary: ISO [${GOVC_DATASTORE}] $GOVC_TEST_ISO"
+  assert_line "Summary: ISO [${GOVC_DATASTORE##*/}] $GOVC_TEST_ISO"
+}
+
+@test "vm.create iso with datastore argument" {
+  upload_iso
+
+  vm=$(new_id)
+
+  run govc vm.create -iso="${GOVC_TEST_ISO}" -iso-datastore="${GOVC_DATASTORE}" -on=false $vm
+  assert_success
+
+  run govc device.info -vm $vm cdrom-3000
+  assert_success
+  assert_line "Summary: ISO [${GOVC_DATASTORE##*/}] $GOVC_TEST_ISO"
 }
 
 @test "vm.disk.create empty vm" {
@@ -296,6 +330,7 @@ load test_helper
 
 @test "vm.disk.create" {
   import_ttylinux_vmdk
+
   vm=$(new_id)
 
   govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
@@ -317,6 +352,7 @@ load test_helper
 
 @test "vm.disk.attach" {
   import_ttylinux_vmdk
+
   vm=$(new_id)
 
   govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
@@ -327,7 +363,7 @@ load test_helper
   assert_success
 
   run govc vm.disk.attach -vm $vm -link=false -disk enoent.vmdk
-  assert_failure "govc: File [${GOVC_DATASTORE}] enoent.vmdk was not found"
+  assert_failure "govc: File [${GOVC_DATASTORE##*/}] enoent.vmdk was not found"
 
   run govc vm.disk.attach -vm $vm -disk enoent.vmdk
   assert_failure "govc: Invalid configuration for device '0'."
@@ -336,4 +372,29 @@ load test_helper
   assert_success
   result=$(govc device.ls -vm $vm | grep disk- | wc -l)
   [ $result -eq 2 ]
+}
+
+@test "vm.create new disk with datastore argument" {
+  vm=$(new_id)
+
+  run govc vm.create -disk="1GiB" -ds="${GOVC_DATASTORE}" -on=false -link=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-1000-0
+  assert_success
+  assert_line "File: [${GOVC_DATASTORE##*/}] ${vm}/${vm}.vmdk"
+}
+
+@test "vm.create new disk with datastore cluster argument" {
+  if [ -z "${GOVC_DATASTORE_CLUSTER}" ]; then
+    skip "requires datastore cluster"
+  fi
+
+  vm=$(new_id)
+
+  run govc vm.create -disk="1GiB" -datastore-cluster="${GOVC_DATASTORE_CLUSTER}" -on=false -link=false $vm
+  assert_success
+
+  run govc device.info -vm $vm disk-1000-0
+  assert_success
 }

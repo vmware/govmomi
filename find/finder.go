@@ -313,6 +313,63 @@ func (f *Finder) DatastoreOrDefault(ctx context.Context, path string) (*object.D
 	return f.DefaultDatastore(ctx)
 }
 
+func (f *Finder) DatastoreClusterList(ctx context.Context, path string) ([]*object.StoragePod, error) {
+	es, err := f.find(ctx, f.datastoreFolder, false, path)
+	if err != nil {
+		return nil, err
+	}
+
+	var sps []*object.StoragePod
+	for _, e := range es {
+		ref := e.Object.Reference()
+		if ref.Type == "StoragePod" {
+			sp := object.NewStoragePod(f.client, ref)
+			sp.InventoryPath = e.Path
+			sps = append(sps, sp)
+		}
+	}
+
+	if len(sps) == 0 {
+		return nil, &NotFoundError{"datastore cluster", path}
+	}
+
+	return sps, nil
+}
+
+func (f *Finder) DatastoreCluster(ctx context.Context, path string) (*object.StoragePod, error) {
+	sps, err := f.DatastoreClusterList(ctx, path)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(sps) > 1 {
+		return nil, &MultipleFoundError{"datastore cluster", path}
+	}
+
+	return sps[0], nil
+}
+
+func (f *Finder) DefaultDatastoreCluster(ctx context.Context) (*object.StoragePod, error) {
+	sp, err := f.DatastoreCluster(ctx, "*")
+	if err != nil {
+		return nil, toDefaultError(err)
+	}
+
+	return sp, nil
+}
+
+func (f *Finder) DatastoreClusterOrDefault(ctx context.Context, path string) (*object.StoragePod, error) {
+	if path != "" {
+		sp, err := f.DatastoreCluster(ctx, path)
+		if err != nil {
+			return nil, err
+		}
+		return sp, nil
+	}
+
+	return f.DefaultDatastoreCluster(ctx)
+}
+
 func (f *Finder) ComputeResourceList(ctx context.Context, path string) ([]*object.ComputeResource, error) {
 	es, err := f.find(ctx, f.hostFolder, false, path)
 	if err != nil {

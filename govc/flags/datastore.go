@@ -23,6 +23,7 @@ import (
 	"os"
 
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -31,62 +32,70 @@ type DatastoreFlag struct {
 
 	*DatacenterFlag
 
-	name string
-	ds   *object.Datastore
+	Name string
+
+	ds *object.Datastore
 }
 
 var datastoreFlagKey = flagKey("datastore")
+
+// NewCustomDatastoreFlag creates and returns a new DatastoreFlag without
+// trying to retrieve an existing one from the specified context.
+func NewCustomDatastoreFlag(ctx context.Context) (*DatastoreFlag, context.Context) {
+	v := &DatastoreFlag{}
+	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+	return v, ctx
+}
 
 func NewDatastoreFlag(ctx context.Context) (*DatastoreFlag, context.Context) {
 	if v := ctx.Value(datastoreFlagKey); v != nil {
 		return v.(*DatastoreFlag), ctx
 	}
 
-	v := &DatastoreFlag{}
-	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+	v, ctx := NewCustomDatastoreFlag(ctx)
 	ctx = context.WithValue(ctx, datastoreFlagKey, v)
 	return v, ctx
 }
 
-func (flag *DatastoreFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	flag.RegisterOnce(func() {
-		flag.DatacenterFlag.Register(ctx, f)
+func (f *DatastoreFlag) Register(ctx context.Context, fs *flag.FlagSet) {
+	f.RegisterOnce(func() {
+		f.DatacenterFlag.Register(ctx, fs)
 
 		env := "GOVC_DATASTORE"
 		value := os.Getenv(env)
 		usage := fmt.Sprintf("Datastore [%s]", env)
-		f.StringVar(&flag.name, "ds", value, usage)
+		fs.StringVar(&f.Name, "ds", value, usage)
 	})
 }
 
-func (flag *DatastoreFlag) Process(ctx context.Context) error {
-	return flag.ProcessOnce(func() error {
-		if err := flag.DatacenterFlag.Process(ctx); err != nil {
+func (f *DatastoreFlag) Process(ctx context.Context) error {
+	return f.ProcessOnce(func() error {
+		if err := f.DatacenterFlag.Process(ctx); err != nil {
 			return err
 		}
 		return nil
 	})
 }
 
-func (flag *DatastoreFlag) Datastore() (*object.Datastore, error) {
-	if flag.ds != nil {
-		return flag.ds, nil
+func (f *DatastoreFlag) Datastore() (*object.Datastore, error) {
+	if f.ds != nil {
+		return f.ds, nil
 	}
 
-	finder, err := flag.Finder()
+	finder, err := f.Finder()
 	if err != nil {
 		return nil, err
 	}
 
-	if flag.ds, err = finder.DatastoreOrDefault(context.TODO(), flag.name); err != nil {
+	if f.ds, err = finder.DatastoreOrDefault(context.TODO(), f.Name); err != nil {
 		return nil, err
 	}
 
-	return flag.ds, nil
+	return f.ds, nil
 }
 
-func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
-	ds, err := flag.Datastore()
+func (f *DatastoreFlag) DatastorePath(name string) (string, error) {
+	ds, err := f.Datastore()
 	if err != nil {
 		return "", err
 	}
@@ -94,13 +103,13 @@ func (flag *DatastoreFlag) DatastorePath(name string) (string, error) {
 	return ds.Path(name), nil
 }
 
-func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
-	dc, err := flag.Datacenter()
+func (f *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
+	dc, err := f.Datacenter()
 	if err != nil {
 		return nil, err
 	}
 
-	ds, err := flag.Datastore()
+	ds, err := f.Datastore()
 	if err != nil {
 		return nil, err
 	}
@@ -111,4 +120,14 @@ func (flag *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
 	}
 
 	return u, nil
+}
+
+func (f *DatastoreFlag) Stat(ctx context.Context, file string) (types.BaseFileInfo, error) {
+	ds, err := f.Datastore()
+	if err != nil {
+		return nil, err
+	}
+
+	return ds.Stat(ctx, file)
+
 }
