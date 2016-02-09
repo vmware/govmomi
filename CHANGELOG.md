@@ -2,6 +2,13 @@
 
 ### (unreleased)
 
+* Add method to convert virtual device list to array with virtual device
+  changes that can be used in the VirtualMachineConfigSpec.
+
+* Make datastore cluster traversable in lister
+
+* Add finder.DatastoreCluster methods (also known as storage pods)
+
 * Add Drone CI check
 
 * Add object.Datastore Type and AttachedClusterHosts methods
