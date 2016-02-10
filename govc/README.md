@@ -83,6 +83,10 @@ to set defaults:
 
 * `GOVC_GUEST_LOGIN`: Guest credentials for guest operations
 
+* `GOVC_VIM_NAMESPACE`: Vim namespace defaults to `urn:vim25`
+
+* `GOVC_VIM_VERSION`: Vim version defaults to `6.0`
+
 ## Examples
 
 * About

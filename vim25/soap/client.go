@@ -21,6 +21,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net"
 	"net/http"
@@ -45,6 +46,9 @@ type RoundTripper interface {
 	RoundTrip(ctx context.Context, req, res HasFault) error
 }
 
+var DefaultVimNamespace = "urn:vim25"
+var DefaultVimVersion = "6.0"
+
 type Client struct {
 	http.Client
 
@@ -53,6 +57,9 @@ type Client struct {
 	d *debugContainer
 	t *http.Transport
 	p *url.URL
+
+	Namespace string // Vim namespace
+	Version   string // Vim version
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
@@ -113,6 +120,9 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	// Remove user information from a copy of the URL
 	c.u = c.URL()
 	c.u.User = nil
+
+	c.Namespace = DefaultVimNamespace
+	c.Version = DefaultVimVersion
 
 	return &c
 }
@@ -255,7 +265,8 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	}
 
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
-	req.Header.Set(`SOAPAction`, `urn:vim25/6.0`)
+	soapAction := fmt.Sprintf("%s/%s", c.Namespace, c.Version)
+	req.Header.Set(`SOAPAction`, soapAction)
 
 	if d.enabled() {
 		d.debugRequest(req)
