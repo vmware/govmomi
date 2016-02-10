@@ -41,6 +41,7 @@
 (eval-when-compile
   (require 'cl))
 (require 'dash)
+(require 'diff)
 (require 'dired)
 (require 'json-mode)
 (require 'magit-popup)
@@ -540,21 +541,38 @@ Also fixes the case where user contains an '@'."
           tabulated-list-entries entries)
     (tabulated-list-print)))
 
-(defun govc-json-info (command &optional selection)
+(defun govc-json-info-selection (command)
+  "Run govc COMMAND -json on `govc-selection'."
+  (if current-prefix-arg
+      (--each (govc-selection) (govc-json-info command it))
+    (govc-json-info command (govc-selection))))
+
+(defun govc-json-diff ()
+  "Diff two *govc-json* buffers in view."
+  (let ((buffers))
+    (-each (window-list-1)
+      (lambda (w)
+        (with-current-buffer (window-buffer w)
+          (if (and (eq major-mode 'json-mode)
+                   (s-starts-with? "*govc-json*" (buffer-name)))
+              (push (current-buffer) buffers)))) )
+    (if (= (length buffers) 2)
+        (pop-to-buffer
+         (diff-no-select (car buffers) (cadr buffers))))))
+
+(defun govc-json-info (command selection)
   "Run govc COMMAND -json on SELECTION."
-  (interactive)
-  (govc-process (govc-command command (append (cons "-json" govc-args)
-                                              (or selection (govc-selection))))
+  (govc-process (govc-command command "-json" govc-args selection)
                 (lambda ()
-                  (let ((buffer (get-buffer-create "*govc-json*")))
-                    (with-current-buffer buffer
-                      (erase-buffer))
+                  (let ((buffer (get-buffer-create (concat "*govc-json*" (if current-prefix-arg selection)))))
                     (copy-to-buffer buffer (point-min) (point-max))
-                    (pop-to-buffer buffer)
-                    (json-mode)
-                    ;; We use `json-mode-beautify' as `json-pretty-print-buffer' does not work for `govc-host-json-info'
-                    (json-mode-beautify)
-                    (goto-char (point-min))))))
+                    (with-current-buffer buffer
+                      (json-mode)
+                      ;; We use `json-mode-beautify' as `json-pretty-print-buffer' does not work for `govc-host-json-info'
+                      (json-mode-beautify))
+                    (display-buffer buffer))))
+  (if current-prefix-arg
+      (govc-json-diff)))
 
 (defun govc-mode-new-session ()
   "Connect new session for the current govc mode."
@@ -628,7 +646,7 @@ Also fixes the case where user contains an '@'."
 (defun govc-host-json-info ()
   "JSON via govc host.info -json on current selection."
   (interactive)
-  (govc-json-info "host.info" (govc-selection)))
+  (govc-json-info-selection "host.info"))
 
 (defvar govc-host-mode-map
   (let ((map (make-sparse-keymap)))
@@ -709,7 +727,7 @@ Optionally filter by FILTER and inherit SESSION."
 (defun govc-pool-json-info ()
   "JSON via govc pool.info -json on current selection."
   (interactive)
-  (govc-json-info "pool.info" (govc-selection)))
+  (govc-json-info-selection "pool.info"))
 
 (defvar govc-pool-mode-map
   (let ((map (make-sparse-keymap)))
@@ -823,7 +841,7 @@ Optionally filter by FILTER and inherit SESSION."
   "JSON via govc datastore.ls -json on current selection."
   (interactive)
   (let ((govc-args '("-l" "-p")))
-    (govc-json-info "datastore.ls" (govc-selection))))
+    (govc-json-info-selection "datastore.ls")))
 
 (defun govc-datastore-mkdir (name)
   "Mkdir via govc datastore.mkdir with given NAME."
@@ -897,7 +915,7 @@ Optionally filter by FILTER and inherit SESSION."
 (defun govc-datastore-json-info ()
   "JSON via govc datastore.info -json on current selection."
   (interactive)
-  (govc-json-info "datastore.info"))
+  (govc-json-info-selection "datastore.info"))
 
 (defun govc-datastore-info ()
   "Wrapper for govc datastore.info."
@@ -1113,7 +1131,7 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
 (defun govc-vm-json-info ()
   "JSON via govc vm.info -json on current selection."
   (interactive)
-  (govc-json-info "vm.info"))
+  (govc-json-info-selection "vm.info"))
 
 (defvar govc-vm-mode-map
   (let ((map (make-sparse-keymap)))
@@ -1216,7 +1234,7 @@ Optionally filter by FILTER and inherit SESSION."
 (defun govc-device-json-info ()
   "JSON via govc device.info -json on current selection."
   (interactive)
-  (govc-json-info "device.info"))
+  (govc-json-info-selection "device.info"))
 
 (defvar govc-device-mode-map
   (let ((map (make-sparse-keymap)))
