@@ -9,7 +9,7 @@ ttylinux="ttylinux-pc_i486-16.1"
 files="${ttylinux}.iso ${ttylinux}-live.ova ${ttylinux}.ova"
 
 for name in $files ; do
-  wget -N $base_url/$name
+  wget -O $name $base_url/$name
 done
 
 wget -N https://github.com/icebreaker/floppybird/raw/master/build/floppybird.img

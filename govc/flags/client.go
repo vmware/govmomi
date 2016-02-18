@@ -43,6 +43,8 @@ const (
 	envInsecure      = "GOVC_INSECURE"
 	envPersist       = "GOVC_PERSIST_SESSION"
 	envMinAPIVersion = "GOVC_MIN_API_VERSION"
+	envVimNamespace  = "GOVC_VIM_NAMESPACE"
+	envVimVersion    = "GOVC_VIM_VERSION"
 )
 
 const cDescr = "ESX or vCenter URL"
@@ -60,6 +62,8 @@ type ClientFlag struct {
 	insecure      bool
 	persist       bool
 	minAPIVersion string
+	vimNamespace  string
+	vimVersion    string
 
 	client *vim25.Client
 }
@@ -160,6 +164,24 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 			}
 
 			flag.minAPIVersion = env
+		}
+
+		{
+			value := os.Getenv(envVimNamespace)
+			if value == "" {
+				value = soap.DefaultVimNamespace
+			}
+			usage := fmt.Sprintf("Vim namespace [%s]", envVimNamespace)
+			f.StringVar(&flag.vimNamespace, "vim-namespace", value, usage)
+		}
+
+		{
+			value := os.Getenv(envVimVersion)
+			if value == "" {
+				value = soap.DefaultVimVersion
+			}
+			usage := fmt.Sprintf("Vim version [%s]", envVimVersion)
+			f.StringVar(&flag.vimVersion, "vim-version", value, usage)
 		}
 	})
 }
@@ -312,6 +334,10 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 
 		sc.SetCertificate(cert)
 	}
+
+	// Set namespace and version
+	sc.Namespace = flag.vimNamespace
+	sc.Version = flag.vimVersion
 
 	// Add retry functionality before making any calls
 	rt := attachRetries(sc)

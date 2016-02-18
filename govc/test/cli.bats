@@ -23,3 +23,8 @@ load test_helper
   run env GOVC_MIN_API_VERSION=24.4 govc about
   assert grep -q "^govc: Require API version 24.4," <<<${output}
 }
+
+@test "connect to an endpoint with user provided Vim namespace and Vim version" {
+  run govc about -vim-namespace urn:vim25 -vim-version 6.0
+  assert_success
+}
