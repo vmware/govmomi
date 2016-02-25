@@ -34,7 +34,7 @@ func (e *extraConfig) String() string {
 }
 
 func (e *extraConfig) Set(v string) error {
-	r := strings.Split(v, "=")
+	r := strings.SplitN(v, "=", 2)
 	if len(r) < 2 {
 		return fmt.Errorf("failed to parse extraConfig: %s", v)
 	} else if r[1] == "" {
