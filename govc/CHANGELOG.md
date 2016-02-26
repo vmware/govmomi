@@ -1,6 +1,6 @@
 # changelog
 
-### (unreleased)
+### 0.4.0 (2016-02-26)
 
 * Add support for placement in datastore cluster to vm.create command
 

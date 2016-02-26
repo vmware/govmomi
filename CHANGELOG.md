@@ -1,6 +1,6 @@
 # changelog
 
-### (unreleased)
+### 0.4.0 (2016-02-26)
 
 * Add method to convert virtual device list to array with virtual device
   changes that can be used in the VirtualMachineConfigSpec.
