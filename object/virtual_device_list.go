@@ -317,8 +317,8 @@ func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int {
 		d := device.GetVirtualDevice()
 
 		if d.ControllerKey == key {
-			if d.UnitNumber > max {
-				max = d.UnitNumber
+			if d.UnitNumber != nil && *d.UnitNumber > max {
+				max = *d.UnitNumber
 			}
 		}
 	}
@@ -348,9 +348,10 @@ func (l VirtualDeviceList) NewKey() int {
 func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c types.BaseVirtualController) {
 	d := device.GetVirtualDevice()
 	d.ControllerKey = c.GetVirtualController().Key
-	d.UnitNumber = l.newUnitNumber(c)
-	if d.UnitNumber == 0 {
-		d.UnitNumber = -1 // TODO: this field is annotated as omitempty
+	d.UnitNumber = new(int)
+	*d.UnitNumber = l.newUnitNumber(c)
+	if *d.UnitNumber == 0 {
+		*d.UnitNumber = -1
 	}
 	if d.Key == 0 {
 		d.Key = -1
@@ -764,14 +765,18 @@ func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 // Name returns a stable, human-readable name for the given device
 func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
 	var key string
+	var UnitNumber int
 	d := device.GetVirtualDevice()
-	dtype := l.Type(device)
+	if d.UnitNumber != nil {
+		UnitNumber = *d.UnitNumber
+	}
 
+	dtype := l.Type(device)
 	switch dtype {
 	case DeviceTypeEthernet:
-		key = fmt.Sprintf("%d", d.UnitNumber-7)
+		key = fmt.Sprintf("%d", UnitNumber-7)
 	case DeviceTypeDisk:
-		key = fmt.Sprintf("%d-%d", d.ControllerKey, d.UnitNumber)
+		key = fmt.Sprintf("%d-%d", d.ControllerKey, UnitNumber)
 	default:
 		key = fmt.Sprintf("%d", d.Key)
 	}

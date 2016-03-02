@@ -43796,7 +43796,7 @@ type VirtualDevice struct {
 	Connectable   *VirtualDeviceConnectInfo    `xml:"connectable,omitempty"`
 	SlotInfo      BaseVirtualDeviceBusSlotInfo `xml:"slotInfo,omitempty,typeattr"`
 	ControllerKey int                          `xml:"controllerKey,omitempty"`
-	UnitNumber    int                          `xml:"unitNumber,omitempty"`
+	UnitNumber    *int                         `xml:"unitNumber"`
 }
 
 func init() {

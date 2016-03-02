@@ -125,7 +125,11 @@ func (r *infoResult) Write(w io.Writer) error {
 		} else {
 			if c := r.list.FindByKey(d.ControllerKey); c != nil {
 				fmt.Fprintf(tw, "  Controller:\t%s\n", r.Devices.Name(c))
-				fmt.Fprintf(tw, "  Unit number:\t%d\n", d.UnitNumber)
+				if d.UnitNumber != nil {
+					fmt.Fprintf(tw, "  Unit number:\t%d\n", *d.UnitNumber)
+				} else {
+					fmt.Fprintf(tw, "  Unit number:\t<nil>\n")
+				}
 			}
 		}
 
