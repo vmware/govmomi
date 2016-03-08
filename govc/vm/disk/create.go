@@ -23,7 +23,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/units"
-        "github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -35,8 +35,8 @@ type create struct {
 	controller string
 	Name       string
 	Bytes      units.ByteSize
-        Thick      bool
-        Eager      bool
+	Thick      bool
+	Eager      bool
 }
 
 func init() {
@@ -59,8 +59,8 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.controller, "controller", "", "Disk controller")
 	f.StringVar(&cmd.Name, "name", "", "Name for new disk")
 	f.Var(&cmd.Bytes, "size", "Size of new disk")
-        f.BoolVar(&cmd.Thick, "thick", false, "Thick provision new disk")
-        f.BoolVar(&cmd.Eager, "eager", false, "Eagerly scrub new disk")
+	f.BoolVar(&cmd.Thick, "thick", false, "Thick provision new disk")
+	f.BoolVar(&cmd.Eager, "eager", false, "Eagerly scrub new disk")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -113,11 +113,11 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return nil
 	}
 
-        if (cmd.Thick) {
-          backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
-          backing.ThinProvisioned = types.NewBool(false)
-          backing.EagerlyScrub = types.NewBool(cmd.Eager)
-        }
+	if cmd.Thick {
+		backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+		backing.ThinProvisioned = types.NewBool(false)
+		backing.EagerlyScrub = types.NewBool(cmd.Eager)
+	}
 
 	cmd.Log("Creating disk\n")
 	disk.CapacityInKB = int64(cmd.Bytes) / 1024
