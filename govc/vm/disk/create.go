@@ -37,6 +37,7 @@ type create struct {
 	Bytes      units.ByteSize
 	Thick      bool
 	Eager      bool
+	DiskMode   string
 }
 
 func init() {
@@ -61,6 +62,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(&cmd.Bytes, "size", "Size of new disk")
 	f.BoolVar(&cmd.Thick, "thick", false, "Thick provision new disk")
 	f.BoolVar(&cmd.Eager, "eager", false, "Eagerly scrub new disk")
+	f.StringVar(&cmd.DiskMode, "mode", "dependent", "One of: dependent (also known as persistent), persistent, nonpersistent, undoable, independent_persistent, independent_nonpersistent, append")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -113,10 +115,31 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return nil
 	}
 
+	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+
 	if cmd.Thick {
-		backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
 		backing.ThinProvisioned = types.NewBool(false)
-		backing.EagerlyScrub = types.NewBool(cmd.Eager)
+	}
+
+	backing.EagerlyScrub = types.NewBool(cmd.Eager)
+
+	switch cmd.DiskMode {
+	// NOTE: testing via the vSphere web UI has confirmed that Dependent is saved as "persistent"
+	case "dependent":
+	case "persistent":
+		backing.DiskMode = string(types.VirtualDiskModePersistent)
+	case "nonpersistent":
+		backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
+	case "undoable":
+		backing.DiskMode = string(types.VirtualDiskModeUndoable)
+	case "independent_persistent":
+		backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
+	case "independent_nonpersistent":
+		backing.DiskMode = string(types.VirtualDiskModeIndependent_nonpersistent)
+	case "append":
+		backing.DiskMode = string(types.VirtualDiskModeAppend)
+	default:
+		return errors.New("please specify a valid mode")
 	}
 
 	cmd.Log("Creating disk\n")
