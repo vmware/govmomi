@@ -34,6 +34,7 @@ import (
 type info struct {
 	*flags.VirtualMachineFlag
 	*flags.OutputFlag
+	*flags.NetworkFlag
 }
 
 func init() {
@@ -46,6 +47,9 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	cmd.NetworkFlag, ctx = flags.NewNetworkFlag(ctx)
+	cmd.NetworkFlag.Register(ctx, f)
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -53,6 +57,9 @@ func (cmd *info) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.NetworkFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -79,6 +86,20 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	res := infoResult{
 		list: devices,
+	}
+
+	if cmd.NetworkFlag.IsSet() {
+		net, err := cmd.Network()
+		if err != nil {
+			return err
+		}
+
+		backing, err := net.EthernetCardBackingInfo(context.TODO())
+		if err != nil {
+			return err
+		}
+
+		devices = devices.SelectByBackingInfo(backing)
 	}
 
 	if f.NArg() == 0 {

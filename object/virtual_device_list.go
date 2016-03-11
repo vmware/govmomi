@@ -126,7 +126,8 @@ func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBa
 			return a.DeviceName == b.DeviceName
 		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
 			b := backing.(*types.VirtualEthernetCardDistributedVirtualPortBackingInfo)
-			return a.Port.SwitchUuid == b.Port.SwitchUuid
+			return a.Port.SwitchUuid == b.Port.SwitchUuid &&
+				a.Port.PortgroupKey == b.Port.PortgroupKey
 		case *types.VirtualDiskFlatVer2BackingInfo:
 			b := backing.(*types.VirtualDiskFlatVer2BackingInfo)
 			if a.Parent != nil && b.Parent != nil {
