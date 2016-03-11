@@ -17,9 +17,11 @@ limitations under the License.
 package event
 
 import (
+	"fmt"
 	"reflect"
 	"sync"
 
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -29,22 +31,20 @@ import (
 )
 
 type Manager struct {
-	reference types.ManagedObjectReference
-
-	c *vim25.Client
+	object.Common
 
 	eventCategory   map[string]string
 	eventCategoryMu *sync.Mutex
+	maxObjects      int
 }
 
 func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
-		reference: *c.ServiceContent.EventManager,
-
-		c: c,
+		Common: object.NewCommon(c, *c.ServiceContent.EventManager),
 
 		eventCategory:   make(map[string]string),
 		eventCategoryMu: new(sync.Mutex),
+		maxObjects:      10,
 	}
 
 	return &m
@@ -52,26 +52,26 @@ func NewManager(c *vim25.Client) *Manager {
 
 func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.EventFilterSpec) (*HistoryCollector, error) {
 	req := types.CreateCollectorForEvents{
-		This:   m.reference,
+		This:   m.Common.Reference(),
 		Filter: filter,
 	}
 
-	res, err := methods.CreateCollectorForEvents(ctx, m.c, &req)
+	res, err := methods.CreateCollectorForEvents(ctx, m.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewHistoryCollector(m.c, res.Returnval), nil
+	return NewHistoryCollector(m.Client(), res.Returnval), nil
 }
 
 func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectReference, msg string) error {
 	req := types.LogUserEvent{
-		This:   m.reference,
+		This:   m.Common.Reference(),
 		Entity: entity,
 		Msg:    msg,
 	}
 
-	_, err := methods.LogUserEvent(ctx, m.c, &req)
+	_, err := methods.LogUserEvent(ctx, m.Client(), &req)
 	if err != nil {
 		return err
 	}
@@ -81,12 +81,12 @@ func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectRef
 
 func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, taskInfo types.TaskInfo) error {
 	req := types.PostEvent{
-		This:        m.reference,
+		This:        m.Common.Reference(),
 		EventToPost: eventToPost,
 		TaskInfo:    &taskInfo,
 	}
 
-	_, err := methods.PostEvent(ctx, m.c, &req)
+	_, err := methods.PostEvent(ctx, m.Client(), &req)
 	if err != nil {
 		return err
 	}
@@ -96,11 +96,11 @@ func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, tas
 
 func (m Manager) QueryEvents(ctx context.Context, filter types.EventFilterSpec) ([]types.BaseEvent, error) {
 	req := types.QueryEvents{
-		This:   m.reference,
+		This:   m.Common.Reference(),
 		Filter: filter,
 	}
 
-	res, err := methods.QueryEvents(ctx, m.c, &req)
+	res, err := methods.QueryEvents(ctx, m.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
@@ -110,11 +110,11 @@ func (m Manager) QueryEvents(ctx context.Context, filter types.EventFilterSpec) 
 
 func (m Manager) RetrieveArgumentDescription(ctx context.Context, eventTypeID string) ([]types.EventArgDesc, error) {
 	req := types.RetrieveArgumentDescription{
-		This:        m.reference,
+		This:        m.Common.Reference(),
 		EventTypeId: eventTypeID,
 	}
 
-	res, err := methods.RetrieveArgumentDescription(ctx, m.c, &req)
+	res, err := methods.RetrieveArgumentDescription(ctx, m.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +133,7 @@ func (m Manager) eventCategoryMap(ctx context.Context) (map[string]string, error
 	var o mo.EventManager
 
 	ps := []string{"description.eventInfo"}
-	err := property.DefaultCollector(m.c).RetrieveOne(ctx, m.reference, ps, &o)
+	err := property.DefaultCollector(m.Client()).RetrieveOne(ctx, m.Common.Reference(), ps, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -158,4 +158,23 @@ func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (stri
 	class := reflect.TypeOf(event).Elem().Name()
 
 	return eventCategory[class], nil
+}
+
+// Get the events from the specified object(s) and optionanlly tail the event stream
+func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int, tail bool, force bool, f func([]types.BaseEvent) error) error {
+
+	if len(objects) >= m.maxObjects && !force {
+		return fmt.Errorf("Maximum number of objects to monitor (%d) exceeded, refine search \n", m.maxObjects)
+	}
+
+	// property that will be monitored
+	prop := []string{"latestPage"}
+
+	// call to helper functions to reduce the number of temporary objects
+	if len(objects) > 1 {
+		return multipleObjectEvents(ctx, m, objects, pageSize, tail, force, prop, f)
+	}
+
+	return singleObjectEvents(ctx, m, objects[0], pageSize, tail, force, prop, f)
+
 }
