@@ -350,9 +350,6 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	d.ControllerKey = c.GetVirtualController().Key
 	d.UnitNumber = new(int)
 	*d.UnitNumber = l.newUnitNumber(c)
-	if *d.UnitNumber == 0 {
-		*d.UnitNumber = -1
-	}
 	if d.Key == 0 {
 		d.Key = -1
 	}
