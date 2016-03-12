@@ -17,6 +17,15 @@ load test_helper
 
   run govc device.info -vm $vm ide-20000
   assert_failure
+
+  run govc device.info -vm $vm -net enoent
+  assert_failure
+
+  run govc device.info -vm $vm -net "VM Network" ide-200
+  assert_failure
+
+  result=$(govc device.info -vm $vm -net "VM Network" | grep "MAC Address" | wc -l)
+  [ $result -eq 1 ]
 }
 
 @test "device.boot" {

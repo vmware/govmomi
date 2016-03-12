@@ -35,6 +35,7 @@ type NetworkFlag struct {
 	net     object.NetworkReference
 	adapter string
 	address string
+	isset   bool
 }
 
 var networkFlagKey = flagKey("network")
@@ -56,7 +57,7 @@ func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 
 		env := "GOVC_NETWORK"
 		value := os.Getenv(env)
-		flag.Set(value)
+		flag.name = value
 		usage := fmt.Sprintf("Network [%s]", env)
 		f.Var(flag, "net", usage)
 		f.StringVar(&flag.adapter, "net.adapter", "e1000", "Network adapter type")
@@ -79,7 +80,12 @@ func (flag *NetworkFlag) String() string {
 
 func (flag *NetworkFlag) Set(name string) error {
 	flag.name = name
+	flag.isset = true
 	return nil
+}
+
+func (flag *NetworkFlag) IsSet() bool {
+	return flag.isset
 }
 
 func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
