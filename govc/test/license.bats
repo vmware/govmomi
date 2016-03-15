@@ -18,6 +18,7 @@ get_property() {
 }
 
 @test "license.add" {
+  skip_if_vca
   verify_evaluation
 
   run govc license.add -json 00000-00000-00000-00000-00001 00000-00000-00000-00000-00002
@@ -36,6 +37,7 @@ get_property() {
 }
 
 @test "license.list" {
+  skip_if_vca
   verify_evaluation
 
   run govc license.list -json
