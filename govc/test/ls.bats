@@ -39,15 +39,15 @@ load test_helper
   [ ${#lines[@]} -ge 1 ]
 
   local path=${lines[0]}
-  run govc ls $path
+  run govc ls "$path"
   assert_success
   [ ${#lines[@]} -eq 1 ]
 
-  run govc ls network/$(basename $path)
+  run govc ls "network/$(basename "$path")"
   assert_success
   [ ${#lines[@]} -eq 1 ]
 
-  run govc ls /*/network/$(basename $path)
+  run govc ls "/*/network/$(basename "$path")"
   assert_success
   [ ${#lines[@]} -eq 1 ]
 }
