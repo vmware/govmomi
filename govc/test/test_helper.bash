@@ -1,7 +1,10 @@
+
+# set the following variables only if they've not been set
 GOVC_TEST_URL=${GOVC_TEST_URL-"https://root:vagrant@localhost:18443/sdk"}
 export GOVC_URL=$GOVC_TEST_URL
-export GOVC_DATASTORE=datastore1
-export GOVC_NETWORK="VM Network"
+export GOVC_DATASTORE=${GOVC_DATASTORE-datastore1}
+export GOVC_NETWORK=${GOVC_NETWORK-"VM Network"}
+
 export GOVC_INSECURE=true
 unset GOVC_DATACENTER
 unset GOVC_USERNAME
