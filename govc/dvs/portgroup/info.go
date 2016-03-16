@@ -117,11 +117,9 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	matchedDvPorts := res.Returnval
-
 	var returnedPorts uint = 0
 
-	for _, port := range matchedDvPorts {
+	for _, port := range res.Returnval {
 
 		portConfigSetting := *(port.Config.Setting.(*types.VMwareDVSPortSetting))
 		portVlan := *(portConfigSetting.Vlan.(*types.VmwareDistributedVirtualSwitchVlanIdSpec))
