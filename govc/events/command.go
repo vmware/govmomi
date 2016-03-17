@@ -33,10 +33,13 @@ import (
 type events struct {
 	*flags.DatacenterFlag
 
-	Max int
+	Max   int
+	Tail  bool
+	Force bool
 }
 
 func init() {
+	// initialize with the maximum allowed objects set
 	cli.Register("events", &events{})
 }
 
@@ -45,6 +48,8 @@ func (cmd *events) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 
 	f.IntVar(&cmd.Max, "n", 25, "Output the last N events")
+	f.BoolVar(&cmd.Tail, "f", false, "Tail event stream")
+	f.BoolVar(&cmd.Force, "force", false, "Force event collection: use with CAUTION ")
 }
 
 func (cmd *events) Process(ctx context.Context) error {
@@ -54,55 +59,9 @@ func (cmd *events) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *events) Usage() string {
-	return "[PATH]..."
-}
-
-func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
-	m := event.NewManager(c)
-
-	objs, err := cmd.ManagedObjects(ctx, f.Args())
-	if err != nil {
-		return err
-	}
-
-	var events []types.BaseEvent
-
-	for _, o := range objs {
-		filter := types.EventFilterSpec{
-			Entity: &types.EventFilterSpecByEntity{
-				Entity:    o,
-				Recursion: types.EventFilterSpecRecursionOptionAll,
-			},
-		}
-
-		collector, err := m.CreateCollectorForEvents(ctx, filter)
-		if err != nil {
-			return fmt.Errorf("[%#v] %s", o, err)
-		}
-		defer collector.Destroy(ctx)
-
-		err = collector.SetPageSize(ctx, cmd.Max)
-		if err != nil {
-			return err
-		}
-
-		page, err := collector.LatestPage(ctx)
-		if err != nil {
-			return err
-		}
-
-		events = append(events, page...)
-	}
-
-	event.Sort(events)
-
-	for _, e := range events {
+func (cmd *events) printEvents(ctx context.Context, page []types.BaseEvent, m *event.Manager) error {
+	event.Sort(page)
+	for _, e := range page {
 		cat, err := m.EventCategory(ctx, e)
 		if err != nil {
 			return err
@@ -118,6 +77,42 @@ func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
 		fmt.Fprintf(os.Stdout, "[%s] [%s] %s\n",
 			event.CreatedTime.Local().Format(time.ANSIC),
 			cat, msg)
+	}
+	return nil
+}
+
+func (cmd *events) Usage() string {
+	return "[PATH]..."
+}
+
+func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
+	c, err := cmd.Client()
+	if err != nil {
+		return err
+	}
+
+	objs, err := cmd.ManagedObjects(ctx, f.Args())
+	if err != nil {
+		return err
+	}
+
+	if len(objs) > 0 {
+		// need an event manager
+		m := event.NewManager(c)
+
+		// get the event stream
+		err := m.Events(ctx, objs, cmd.Max, cmd.Tail, cmd.Force, func(ee []types.BaseEvent) error {
+			err = cmd.printEvents(ctx, ee, m)
+			if err != nil {
+				return err
+			}
+			return nil
+		})
+
+		if err != nil {
+			return err
+		}
+
 	}
 
 	return nil
