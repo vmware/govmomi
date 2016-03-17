@@ -20,7 +20,6 @@ import (
 	"flag"
 	"fmt"
 
-	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
@@ -81,21 +80,17 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	// Find the DVS
-	dvsFinder, err := cmd.Finder()
+	// Retrieve DVS object by inventory path
+	dvsInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), cmd.dvsPath)
 	if err != nil {
 		return err
 	}
-
-	dvsNet, err := dvsFinder.Network(ctx, cmd.dvsPath)
-	if err != nil {
-		return err
+	if dvsInv == nil {
+		return fmt.Errorf("DistributedVirtualSwitch was not found at %s", cmd.dvsPath)
 	}
 
-	dvs, ok := dvsNet.(*object.DistributedVirtualSwitch)
-	if !ok {
-		return fmt.Errorf("%s (%T) is not of type %T", cmd.dvsPath, dvsNet, dvs)
-	}
+	// Convert DVS object type
+	dvs := (*dvsInv.(*object.VmwareDistributedVirtualSwitch))
 
 	// Set base search criteria
 	criteria := types.DistributedVirtualSwitchPortCriteria{
@@ -107,16 +102,27 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// If a distributed virtual portgroup path is set, then add its portgroup key to the base criteria
 	if len(cmd.dvpgPath) > 0 {
-		// This creates a new recursive finder to populate the properties of the managed object
-		dvpgFinder := find.NewFinder(client, true)
 
-		es, err := dvpgFinder.ManagedObjectListChildren(context.TODO(), cmd.dvpgPath)
+		// Retrieve distributed virtual portgroup object by inventory path
+		dvpgInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), cmd.dvpgPath)
 		if err != nil {
 			return err
 		}
+		if dvpgInv == nil {
+			return fmt.Errorf("DistributedVirtualPortgroup was not found at %s", cmd.dvpgPath)
+		}
 
-		dvpgObj := es[0].Object.(mo.DistributedVirtualPortgroup)
-		criteria.PortgroupKey = []string{dvpgObj.Config.Key}
+		// Convert distributed virtual portgroup object type
+		dvpg := (*dvpgInv.(*object.DistributedVirtualPortgroup))
+
+		// Obtain portgroup key property
+		var dvp mo.DistributedVirtualPortgroup
+		if err := dvpg.Properties(ctx, dvpg.Reference(), []string{"key"}, &dvp); err != nil {
+			return err
+		}
+
+		// Add portgroup key to port search criteria
+		criteria.PortgroupKey = []string{dvp.Key}
 	}
 
 	// Prepare request
@@ -133,12 +139,14 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var returnedPorts uint = 0
 
+	// Iterate over returned ports
 	for _, port := range res.Returnval {
 
 		portConfigSetting := *(port.Config.Setting.(*types.VMwareDVSPortSetting))
 		portVlan := *(portConfigSetting.Vlan.(*types.VmwareDistributedVirtualSwitchVlanIdSpec))
 		portVlanId := portVlan.VlanId
 
+		// Show port info if: VLAN ID is not defined, or VLAN ID matches requested VLAN
 		if cmd.vlanId == 0 || portVlanId == cmd.vlanId {
 
 			returnedPorts++
@@ -148,7 +156,8 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			fmt.Printf("VlanId:       %d\n", portVlanId)
 			fmt.Printf("PortKey:      %s\n\n", port.Key)
 
-			if returnedPorts == cmd.count {
+			// If we are limiting the count and have reached the count, then stop returning output
+			if cmd.count > 0 && returnedPorts == cmd.count {
 				break
 			}
 		}
