@@ -51,8 +51,8 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.dvsPath, "dvs", "", "Distributed Virtual Switch path (required)")
-	f.StringVar(&cmd.dvpgPath, "dvpg", "", "Distributed Virtual Portgroup path")
+	f.StringVar(&cmd.dvsPath, "dvs", "", "Distributed Virtual Switch inventory path (required)")
+	f.StringVar(&cmd.dvpgPath, "dvpg", "", "Distributed Virtual Portgroup inventory path")
 
 	f.BoolVar(&cmd.active, "active", false, "Filter by port active or inactive status")
 	f.BoolVar(&cmd.connected, "connected", false, "Filter by port connected or disconnected status")
