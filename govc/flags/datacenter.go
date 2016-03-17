@@ -87,7 +87,7 @@ func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 		return nil, err
 	}
 
-	finder := find.NewFinder(c, flag.JSON)
+	finder := find.NewFinder(c, flag.JSON || flag.Dump)
 
 	// Datacenter is not required (ls command for example).
 	// Set for relative func if dc flag is given or
