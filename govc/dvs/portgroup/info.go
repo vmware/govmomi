@@ -23,21 +23,24 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/mo"
 	"golang.org/x/net/context"
+
+//	"github.com/davecgh/go-spew/spew"
 )
 
 type info struct {
 	*flags.DatacenterFlag
 
-	path string
+	dvsPath      string
+	dvpgPath     string
 
 	active       bool
 	connected    bool
 	inside       bool
-	portgroupKey string
-	portKey      string
 	uplinkPort   bool
 	vlanId       int
 	count        uint
@@ -48,21 +51,17 @@ func init() {
 }
 
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
-	//	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	//	cmd.ClientFlag.Register(ctx, f)
-
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.path, "dvs", "", "DVS path")
+	f.StringVar(&cmd.dvsPath, "dvs", "", "Distributed Virtual Switch path (required)")
+	f.StringVar(&cmd.dvpgPath, "dvpg", "", "Distributed Virtual Portgroup path")
 
-	f.BoolVar(&cmd.active, "active", false, "If set, only the active ports are qualified")
-	f.BoolVar(&cmd.connected, "connected", false, "If set, only the connected ports are qualified")
-	f.BoolVar(&cmd.inside, "inside", false, "If unset, all ports in the switch are qualified. If set to true, only ports inside portgroupKey or any portgroup, if not set, are qualified. If set to false, only ports outside portgroupKey or any portgroup, if not set, are qualified")
-	f.StringVar(&cmd.portgroupKey, "portgroupKey", "", "The keys of the portgroup that is used for the scope of inside. If this property is unset, it means any portgroup. If inside is unset, this property is ignored")
-	f.StringVar(&cmd.portKey, "portKey", "", "If set, only the ports of which the key is in the array are qualified")
-	f.BoolVar(&cmd.uplinkPort, "uplinkPort", false, "If set to true, only the uplink ports are qualified. If set to false, only non-uplink ports are qualified")
-	f.IntVar(&cmd.vlanId, "vlanId", 0, "VLAN ID to filter")
+	f.BoolVar(&cmd.active, "active", false, "Filter by port active or inactive status")
+	f.BoolVar(&cmd.connected, "connected", false, "Filter by port connected or disconnected status")
+	f.BoolVar(&cmd.inside, "inside", true, "Filter by port inside or outside status")
+	f.BoolVar(&cmd.uplinkPort, "uplinkPort", false, "Filter for uplink ports")
+	f.IntVar(&cmd.vlanId, "vlanId", 0, "Filter by VLAN ID (0 = unfiltered)")
 	f.UintVar(&cmd.count, "count", 0, "Number of matches to return (0 = unlimited)")
 }
 
@@ -75,16 +74,8 @@ func (cmd *info) Process(ctx context.Context) error {
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	portgroupKeySlice := []string{cmd.portgroupKey}
-	portKeySlice := []string{cmd.portKey}
-
-	criteria := types.DistributedVirtualSwitchPortCriteria{
-		Connected:    types.NewBool(cmd.connected),
-		Active:       types.NewBool(cmd.active),
-		UplinkPort:   types.NewBool(cmd.uplinkPort),
-		PortgroupKey: portgroupKeySlice,
-		Inside:       types.NewBool(cmd.inside),
-		PortKey:      portKeySlice,
+	if len(cmd.dvsPath) == 0 {
+		return flag.ErrHelp
 	}
 
 	client, err := cmd.Client()
@@ -92,26 +83,51 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	finder, err := cmd.Finder()
+	// Find the DVS
+	dvsFinder, err := cmd.Finder()
 	if err != nil {
 		return err
 	}
 
-	net, err := finder.Network(ctx, cmd.path)
+	dvsNet, err := dvsFinder.Network(ctx, cmd.dvsPath)
 	if err != nil {
 		return err
 	}
 
-	dvs, ok := net.(*object.DistributedVirtualSwitch)
+	dvs, ok := dvsNet.(*object.DistributedVirtualSwitch)
 	if !ok {
-		return fmt.Errorf("%s (%T) is not of type %T", cmd.path, net, dvs)
+		return fmt.Errorf("%s (%T) is not of type %T", cmd.dvsPath, dvsNet, dvs)
 	}
 
+	// Set base search criteria
+	criteria := types.DistributedVirtualSwitchPortCriteria{
+		Connected:    types.NewBool(cmd.connected),
+		Active:       types.NewBool(cmd.active),
+		UplinkPort:   types.NewBool(cmd.uplinkPort),
+		Inside:       types.NewBool(cmd.inside),
+	}
+
+	// If a distributed virtual portgroup path is set, then add its portgroup key to the base criteria
+	if len(cmd.dvpgPath) > 0 {
+		// This creates a new recursive finder to populate the properties of the managed object
+		dvpgFinder := find.NewFinder(client, true)
+
+                es, err := dvpgFinder.ManagedObjectListChildren(context.TODO(), cmd.dvpgPath)
+                if err != nil {
+                	return err
+                }
+
+		dvpgObj := es[0].Object.(mo.DistributedVirtualPortgroup)
+		criteria.PortgroupKey = []string{dvpgObj.Config.Key}
+	}
+
+	// Prepare request
 	req := types.FetchDVPorts{
 		This:     dvs.Reference(),
 		Criteria: &criteria,
 	}
 
+	// Fetch ports
 	res, err := methods.FetchDVPorts(ctx, client, &req)
 	if err != nil {
 		return err
