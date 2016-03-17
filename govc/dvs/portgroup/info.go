@@ -20,30 +20,29 @@ import (
 	"flag"
 	"fmt"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
-
-//	"github.com/davecgh/go-spew/spew"
+	//	"github.com/davecgh/go-spew/spew"
 )
 
 type info struct {
 	*flags.DatacenterFlag
 
-	dvsPath      string
-	dvpgPath     string
+	dvsPath  string
+	dvpgPath string
 
-	active       bool
-	connected    bool
-	inside       bool
-	uplinkPort   bool
-	vlanId       int
-	count        uint
+	active     bool
+	connected  bool
+	inside     bool
+	uplinkPort bool
+	vlanId     int
+	count      uint
 }
 
 func init() {
@@ -101,10 +100,10 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// Set base search criteria
 	criteria := types.DistributedVirtualSwitchPortCriteria{
-		Connected:    types.NewBool(cmd.connected),
-		Active:       types.NewBool(cmd.active),
-		UplinkPort:   types.NewBool(cmd.uplinkPort),
-		Inside:       types.NewBool(cmd.inside),
+		Connected:  types.NewBool(cmd.connected),
+		Active:     types.NewBool(cmd.active),
+		UplinkPort: types.NewBool(cmd.uplinkPort),
+		Inside:     types.NewBool(cmd.inside),
 	}
 
 	// If a distributed virtual portgroup path is set, then add its portgroup key to the base criteria
@@ -112,10 +111,10 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		// This creates a new recursive finder to populate the properties of the managed object
 		dvpgFinder := find.NewFinder(client, true)
 
-                es, err := dvpgFinder.ManagedObjectListChildren(context.TODO(), cmd.dvpgPath)
-                if err != nil {
-                	return err
-                }
+		es, err := dvpgFinder.ManagedObjectListChildren(context.TODO(), cmd.dvpgPath)
+		if err != nil {
+			return err
+		}
 
 		dvpgObj := es[0].Object.(mo.DistributedVirtualPortgroup)
 		criteria.PortgroupKey = []string{dvpgObj.Config.Key}
