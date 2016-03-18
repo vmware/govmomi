@@ -71,7 +71,7 @@ func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		f.StringVar(&flag.adapter, "net.adapter", "e1000", "Network adapter type")
 		f.StringVar(&flag.address, "net.address", "", "Network hardware address")
 
-		f.StringVar(&flag.dvpgPath, "dvpg", "", "Distributed Virtual Portgroup inventory path")
+		f.StringVar(&flag.dvpgPath, "net.dvpg", "", "Distributed Virtual Portgroup inventory path")
 	})
 }
 
