@@ -22,8 +22,6 @@ import (
 	"os"
 
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
@@ -40,9 +38,7 @@ type NetworkFlag struct {
 	address string
 	isset   bool
 
-	dvsPath       string
-	dvpgPath      string
-	dvsAndDvpgSet bool
+	dvpgPath string
 }
 
 var networkFlagKey = flagKey("network")
@@ -75,8 +71,7 @@ func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		f.StringVar(&flag.adapter, "net.adapter", "e1000", "Network adapter type")
 		f.StringVar(&flag.address, "net.address", "", "Network hardware address")
 
-		f.StringVar(&flag.dvsPath, "port.dvs", "", "Distributed Virtual Switch inventory path")
-		f.StringVar(&flag.dvpgPath, "port.dvpg", "", "Distributed Virtual Portgroup inventory path")
+		f.StringVar(&flag.dvpgPath, "dvpg", "", "Distributed Virtual Portgroup inventory path")
 	})
 }
 
@@ -87,20 +82,6 @@ func (flag *NetworkFlag) Process(ctx context.Context) error {
 		}
 		if err := flag.ClientFlag.Process(ctx); err != nil {
 			return err
-		}
-
-		dvsPathSet := len(flag.dvsPath) > 0
-		dvpgPathSet := len(flag.dvpgPath) > 0
-		dvsOrDvpgSet := dvsPathSet || dvpgPathSet
-		flag.dvsAndDvpgSet = dvsPathSet && dvpgPathSet
-
-		if dvsOrDvpgSet && !flag.dvsAndDvpgSet {
-			if !dvsPathSet {
-				return fmt.Errorf("Please also specify -port.dvs")
-			}
-			if !dvpgPathSet {
-				return fmt.Errorf("Please also specify -port.dvpg")
-			}
 		}
 
 		return nil
@@ -147,81 +128,26 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 
 	var device types.BaseVirtualDevice
 
-	if flag.dvsAndDvpgSet {
+	if len(flag.dvpgPath) > 0 {
 
 		client, err := flag.Client()
 		if err != nil {
 			return nil, err
 		}
 
-		// Retrieve DVS object by inventory path
-		dvsInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), flag.dvsPath)
+		dvpgInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), flag.dvpgPath)
 		if err != nil {
 			return nil, err
 		}
-		if dvsInv == nil {
-			return nil, fmt.Errorf("DistributedVirtualSwitch was not found at %s", flag.dvsPath)
+		if dvpgInv == nil {
+			return nil, fmt.Errorf("DistributedVirtualPortgroup was not found at %s", flag.dvpgPath)
 		}
 
-		// Convert DVS object type
-		dvs := (*dvsInv.(*object.VmwareDistributedVirtualSwitch))
+		dvpg := (*dvpgInv.(*object.DistributedVirtualPortgroup))
 
-		// Set base search criteria
-		criteria := types.DistributedVirtualSwitchPortCriteria{
-			Connected:  types.NewBool(false),
-			Active:     types.NewBool(false),
-			UplinkPort: types.NewBool(false),
-			Inside:     types.NewBool(true),
-		}
-
-		// If a distributed virtual portgroup path is set, then add its portgroup key to the base criteria
-		if len(flag.dvpgPath) > 0 {
-
-			// Retrieve distributed virtual portgroup object by inventory path
-			dvpgInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), flag.dvpgPath)
-			if err != nil {
-				return nil, err
-			}
-			if dvpgInv == nil {
-				return nil, fmt.Errorf("DistributedVirtualPortgroup was not found at %s", flag.dvpgPath)
-			}
-
-			// Convert distributed virtual portgroup object type
-			dvpg := (*dvpgInv.(*object.DistributedVirtualPortgroup))
-
-			// Obtain portgroup key property
-			var dvp mo.DistributedVirtualPortgroup
-			if err := dvpg.Properties(context.TODO(), dvpg.Reference(), []string{"key"}, &dvp); err != nil {
-				return nil, err
-			}
-
-			// Add portgroup key to port search criteria
-			criteria.PortgroupKey = []string{dvp.Key}
-		}
-
-		// Prepare request
-		req := types.FetchDVPorts{
-			This:     dvs.Reference(),
-			Criteria: &criteria,
-		}
-
-		// Fetch ports
-		res, err := methods.FetchDVPorts(context.TODO(), client, &req)
+		backing, err := dvpg.EthernetCardBackingInfo(context.TODO())
 		if err != nil {
 			return nil, err
-		}
-
-		if len(res.Returnval) == 0 {
-			return nil, fmt.Errorf("No available ports were found")
-		}
-		matchedDvPort := res.Returnval[0]
-
-		backing := &types.VirtualEthernetCardDistributedVirtualPortBackingInfo{
-			Port: types.DistributedVirtualSwitchPortConnection{
-				PortgroupKey: matchedDvPort.PortgroupKey,
-				SwitchUuid:   matchedDvPort.DvsUuid,
-				PortKey:      matchedDvPort.Key,
-			},
 		}
 
 		device, err = object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
