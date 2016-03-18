@@ -40,8 +40,9 @@ type NetworkFlag struct {
 	address string
 	isset   bool
 
-	dvsPath  string
-	dvpgPath string
+	dvsPath       string
+	dvpgPath      string
+	dvsAndDvpgSet bool
 }
 
 var networkFlagKey = flagKey("network")
@@ -87,6 +88,21 @@ func (flag *NetworkFlag) Process(ctx context.Context) error {
 		if err := flag.ClientFlag.Process(ctx); err != nil {
 			return err
 		}
+
+		dvsPathSet := len(flag.dvsPath) > 0
+		dvpgPathSet := len(flag.dvpgPath) > 0
+		dvsOrDvpgSet := dvsPathSet || dvpgPathSet
+		flag.dvsAndDvpgSet = dvsPathSet && dvpgPathSet
+
+		if dvsOrDvpgSet && !flag.dvsAndDvpgSet {
+			if !dvsPathSet {
+				return fmt.Errorf("Please also specify -port.dvs")
+			}
+			if !dvpgPathSet {
+				return fmt.Errorf("Please also specify -port.dvpg")
+			}
+		}
+
 		return nil
 	})
 }
@@ -123,15 +139,15 @@ func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
 }
 
 func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
+
 	net, err := flag.Network()
 	if err != nil {
 		return nil, err
 	}
 
-	//	var backing types.VirtualDeviceBackingInfo
 	var device types.BaseVirtualDevice
 
-	if len(flag.dvsPath) > 0 {
+	if flag.dvsAndDvpgSet {
 
 		client, err := flag.Client()
 		if err != nil {
@@ -178,7 +194,6 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 			if err := dvpg.Properties(context.TODO(), dvpg.Reference(), []string{"key"}, &dvp); err != nil {
 				return nil, err
 			}
-			spew.Dump(dvp.Config.DistributedVirtualSwitch.Value)
 
 			// Add portgroup key to port search criteria
 			criteria.PortgroupKey = []string{dvp.Key}
