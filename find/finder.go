@@ -669,7 +669,7 @@ func (f *Finder) ResourcePoolOrDefault(ctx context.Context, path string) (*objec
 	return f.DefaultResourcePool(ctx)
 }
 
-func (f *Finder) FolderOrDefault(ctx context.Context, path string) (*object.ResourcePool, error) {
+func (f *Finder) FolderOrDefault(ctx context.Context, path string) (*object.Folder, error) {
 	if path != "" {
 		folder, err := f.Folder(ctx, path)
 		if err != nil {
