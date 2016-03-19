@@ -67,6 +67,7 @@ type create struct {
 	StoragePod   *object.StoragePod
 	ResourcePool *object.ResourcePool
 	HostSystem   *object.HostSystem
+        Folder       *object.Folder
 }
 
 func init() {
@@ -95,6 +96,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.NetworkFlag, ctx = flags.NewNetworkFlag(ctx)
 	cmd.NetworkFlag.Register(ctx, f)
 
+        cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+        cmd.FolderFlag.Register(ctx, f)
+        
 	f.IntVar(&cmd.memory, "m", 1024, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS")
@@ -134,6 +138,9 @@ func (cmd *create) Process(ctx context.Context) error {
 	if err := cmd.NetworkFlag.Process(ctx); err != nil {
 		return err
 	}
+        if err := cmd.FolderFlag.Process(ctx); err != nil {
+                return err
+        }
 
 	// Default iso/disk datastores to the VM's datastore
 	if cmd.isoDatastoreFlag.Name == "" {
@@ -307,16 +314,21 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		}
 	}
 
-	folders, err := cmd.Datacenter.Folders(ctx)
-	if err != nil {
-		return nil, err
+        folder := cmd.Folder
+        
+        if !folder {
+		folders, err := cmd.Datacenter.Folders(ctx)
+	        if err != nil {
+	  		return nil, err
+		}
+		folder = folders.VmFolder
 	}
 
 	spec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
 	}
 
-	return folders.VmFolder.CreateVM(ctx, *spec, cmd.ResourcePool, cmd.HostSystem)
+	return folder.CreateVM(ctx, *spec, cmd.ResourcePool, cmd.HostSystem)
 }
 
 func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
