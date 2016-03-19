@@ -39,6 +39,7 @@ type create struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.NetworkFlag
+	*flags.FolderFlag
 
 	name       string
 	memory     int
@@ -67,6 +68,7 @@ type create struct {
 	StoragePod   *object.StoragePod
 	ResourcePool *object.ResourcePool
 	HostSystem   *object.HostSystem
+	Folder       *object.Folder
 }
 
 func init() {
@@ -94,6 +96,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.NetworkFlag, ctx = flags.NewNetworkFlag(ctx)
 	cmd.NetworkFlag.Register(ctx, f)
+
+	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
 
 	f.IntVar(&cmd.memory, "m", 1024, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
@@ -132,6 +137,9 @@ func (cmd *create) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.NetworkFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.FolderFlag.Process(ctx); err != nil {
 		return err
 	}
 
@@ -194,6 +202,10 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
 			return err
 		}
+	}
+
+	if cmd.Folder, err = cmd.FolderFlag.Folder(); err != nil {
+		return err
 	}
 
 	// Verify ISO exists
@@ -307,16 +319,13 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		}
 	}
 
-	folders, err := cmd.Datacenter.Folders(ctx)
-	if err != nil {
-		return nil, err
-	}
+	folder := cmd.Folder
 
 	spec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
 	}
 
-	return folders.VmFolder.CreateVM(ctx, *spec, cmd.ResourcePool, cmd.HostSystem)
+	return folder.CreateVM(ctx, *spec, cmd.ResourcePool, cmd.HostSystem)
 }
 
 func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
