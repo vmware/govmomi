@@ -321,14 +321,6 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 
 	folder := cmd.Folder
 
-	//if folder == nil {
-	//	folders, err := cmd.Datacenter.Folders(ctx)
-	//        if err != nil {
-	//  		return nil, err
-	//	}
-	//	folder = folders.VmFolder
-	//}
-
 	spec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
 	}
