@@ -670,13 +670,13 @@ func (f *Finder) ResourcePoolOrDefault(ctx context.Context, path string) (*objec
 }
 
 func (f *Finder) DefaultFolder(ctx context.Context) (*object.Folder, error) {
-        ref, err := f.vmFolder(ctx)
-        if err != nil {
-        	return nil, toDefaultError(err)
-        }
-        folder := object.NewFolder(f.client, ref.Reference())
+	ref, err := f.vmFolder(ctx)
+	if err != nil {
+		return nil, toDefaultError(err)
+	}
+	folder := object.NewFolder(f.client, ref.Reference())
 
-        return folder, nil
+	return folder, nil
 }
 
 func (f *Finder) FolderOrDefault(ctx context.Context, path string) (*object.Folder, error) {

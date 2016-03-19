@@ -30,7 +30,7 @@ type FolderFlag struct {
 
 	*DatacenterFlag
 
-	name string
+	name   string
 	folder *object.Folder
 }
 
