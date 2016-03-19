@@ -39,6 +39,7 @@ type create struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.NetworkFlag
+        *flags.FolderFlag
 
 	name       string
 	memory     int
@@ -203,6 +204,11 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
+        if cmd.Folder, err = cmd.FolderFlag.Folder(); err != nil {
+                return err
+        }
+
+
 	// Verify ISO exists
 	if cmd.iso != "" {
 		_, err = cmd.isoDatastoreFlag.Stat(context.TODO(), cmd.iso)
@@ -315,14 +321,14 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 	}
 
         folder := cmd.Folder
-        
-        if !folder {
-		folders, err := cmd.Datacenter.Folders(ctx)
-	        if err != nil {
-	  		return nil, err
-		}
-		folder = folders.VmFolder
-	}
+
+        //if folder == nil {
+	//	folders, err := cmd.Datacenter.Folders(ctx)
+	//        if err != nil {
+	//  		return nil, err
+	//	}
+	//	folder = folders.VmFolder
+	//}
 
 	spec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),

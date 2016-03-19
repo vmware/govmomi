@@ -669,6 +669,16 @@ func (f *Finder) ResourcePoolOrDefault(ctx context.Context, path string) (*objec
 	return f.DefaultResourcePool(ctx)
 }
 
+func (f *Finder) DefaultFolder(ctx context.Context) (*object.Folder, error) {
+        ref, err := f.vmFolder(ctx)
+        if err != nil {
+        	return nil, toDefaultError(err)
+        }
+        folder := object.NewFolder(f.client, ref.Reference())
+
+        return folder, nil
+}
+
 func (f *Finder) FolderOrDefault(ctx context.Context, path string) (*object.Folder, error) {
 	if path != "" {
 		folder, err := f.Folder(ctx, path)
@@ -677,8 +687,7 @@ func (f *Finder) FolderOrDefault(ctx context.Context, path string) (*object.Fold
 		}
 		return folder, nil
 	}
-
-	return f.Folder(ctx)
+	return f.DefaultFolder(ctx)
 }
 
 func (f *Finder) VirtualMachineList(ctx context.Context, path string) ([]*object.VirtualMachine, error) {

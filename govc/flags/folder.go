@@ -31,17 +31,17 @@ type FolderFlag struct {
 	*DatacenterFlag
 
 	name string
-	pool *object.Folder
+	folder *object.Folder
 }
 
 var folderFlagKey = flagKey("folder")
 
 func NewFolderFlag(ctx context.Context) (*FolderFlag, context.Context) {
-	if v := ctx.Value(FolderFlagKey); v != nil {
+	if v := ctx.Value(folderFlagKey); v != nil {
 		return v.(*FolderFlag), ctx
 	}
 
-	v := FolderFlag{}
+	v := &FolderFlag{}
 	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
 	ctx = context.WithValue(ctx, folderFlagKey, v)
 	return v, ctx
@@ -77,7 +77,7 @@ func (flag *FolderFlag) Folder() (*object.Folder, error) {
 		return nil, err
 	}
 
-	if flag.pool, err = finder.FolderOrDefault(context.TODO(), flag.name); err != nil {
+	if flag.folder, err = finder.FolderOrDefault(context.TODO(), flag.name); err != nil {
 		return nil, err
 	}
 
