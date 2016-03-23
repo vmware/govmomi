@@ -9,10 +9,10 @@ ttylinux="ttylinux-pc_i486-16.1"
 files="${ttylinux}.iso ${ttylinux}-live.ova ${ttylinux}.ova"
 
 for name in $files ; do
-  wget -O $name $base_url/$name
+  wget -qO $name $base_url/$name
 done
 
-wget -N https://github.com/icebreaker/floppybird/raw/master/build/floppybird.img
+wget -qN https://github.com/icebreaker/floppybird/raw/master/build/floppybird.img
 
 # extract ova so we can also use the .vmdk and .ovf files directly
 tar -xvf ${ttylinux}.ova

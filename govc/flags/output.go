@@ -28,6 +28,8 @@ import (
 	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/vim25/progress"
+
+	"github.com/davecgh/go-spew/spew"
 )
 
 type OutputWriter interface {
@@ -39,6 +41,7 @@ type OutputFlag struct {
 
 	JSON bool
 	TTY  bool
+	Dump bool
 }
 
 var outputFlagKey = flagKey("output")
@@ -56,6 +59,7 @@ func NewOutputFlag(ctx context.Context) (*OutputFlag, context.Context) {
 func (flag *OutputFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.RegisterOnce(func() {
 		f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
+		f.BoolVar(&flag.Dump, "dump", false, "Enable output dump")
 	})
 }
 
@@ -102,6 +106,9 @@ func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 
 	if flag.JSON {
 		err = json.NewEncoder(out).Encode(result)
+	} else if flag.Dump {
+		scs := spew.ConfigState{Indent: "    "}
+		scs.Fdump(out, result)
 	} else {
 		err = result.Write(out)
 	}
