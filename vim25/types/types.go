@@ -44626,9 +44626,9 @@ func init() {
 type VirtualHardware struct {
 	DynamicData
 
-	NumCPU              int                 `xml:"numCPU"`
-	NumCoresPerSocket   int                 `xml:"numCoresPerSocket,omitempty"`
-	MemoryMB            int                 `xml:"memoryMB"`
+	NumCPU              int32               `xml:"numCPU"`
+	NumCoresPerSocket   int32               `xml:"numCoresPerSocket,omitempty"`
+	MemoryMB            int32               `xml:"memoryMB"`
 	VirtualICH7MPresent *bool               `xml:"virtualICH7MPresent"`
 	VirtualSMCPresent   *bool               `xml:"virtualSMCPresent"`
 	Device              []BaseVirtualDevice `xml:"device,omitempty,typeattr"`
