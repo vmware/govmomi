@@ -36,6 +36,7 @@ GOVC_TEST_IMG=$(basename $GOVC_TEST_IMG_SRC)
 PATH="$(dirname $BATS_TEST_DIRNAME):$PATH"
 
 teardown() {
+  govc ls vm | grep govc-test- | $xargs -r govc vm.power -off=true -force=true
   govc ls vm | grep govc-test- | $xargs -r govc vm.destroy
   govc datastore.ls | grep govc-test- | awk '{print ($NF)}' | $xargs -n1 -r govc datastore.rm
 }
