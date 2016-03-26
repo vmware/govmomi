@@ -139,7 +139,7 @@ load test_helper
   assert_success
   
   # no more parent pool
-  result=$(govc ls "host/$path" | wc -l)
+  result=$(govc ls "host/$path" | wc -l)
   [ $result -eq 0 ]
 
   # the child pools are not present anymore
