@@ -85,6 +85,8 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	
+	// Error if DVS not found
 	if dvsInv == nil {
 		return fmt.Errorf("DistributedVirtualSwitch was not found at %s", cmd.dvsPath)
 	}
