@@ -132,7 +132,7 @@ load test_helper
   [ $result -eq 2 ]
 
   # 1 parent pool
-  result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
+  result=$(govc ls "host/$path" | wc -l)
   [ $result -eq 1 ]
 
   run govc pool.destroy $path
