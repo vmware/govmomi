@@ -110,10 +110,6 @@ load test_helper
 @test "pool.destroy" {
   id=$(new_id)
 
-  # should not be any existing test pools
-  result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
-  [ $result -eq 0 ]
-
   # parent pool
   path="*/Resources/$id"
   run govc pool.create $path
@@ -123,10 +119,12 @@ load test_helper
   [ $result -eq 0 ]
 
   # child pools
-  run govc pool.create $path/$(new_id)
+  id1=$(new_id)
+  run govc pool.create $path/$id1
   assert_success
 
-  run govc pool.create $path/$(new_id)
+  id2=$(new_id)
+  run govc pool.create $path/$id2
   assert_success
 
   # 2 child pools
@@ -134,14 +132,25 @@ load test_helper
   [ $result -eq 2 ]
 
   # 1 parent pool
-  result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
+  result=$(govc ls "host/$path" | wc -l)
   [ $result -eq 1 ]
 
-  run govc pool.destroy -r $path
+  run govc pool.destroy $path
   assert_success
 
-  # if we didn't -r, the child pools would end up here
-  result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
+  # no more parent pool
+  result=$(govc ls "host/$path" | wc -l)
+  [ $result -eq 0 ]
+
+  # the child pools are not present anymore
+  # the only place they could pop into is the parent pool
+
+  # first child pool
+  result=$(govc ls "host/*/Resources/$id1" | wc -l)
+  [ $result -eq 0 ]
+
+  # second child pool
+  result=$(govc ls "host/*/Resources/$id2" | wc -l)
   [ $result -eq 0 ]
 }
 
