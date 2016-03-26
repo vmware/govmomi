@@ -123,7 +123,7 @@ load test_helper
   run govc pool.create $path/$id1
   assert_success
 
-  id1=$(new_id)
+  id2=$(new_id)
   run govc pool.create $path/$id2
   assert_success
 
