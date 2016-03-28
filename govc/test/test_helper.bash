@@ -1,4 +1,3 @@
-
 # set the following variables only if they've not been set
 GOVC_TEST_URL=${GOVC_TEST_URL-"https://root:vagrant@localhost:18443/sdk"}
 export GOVC_URL=$GOVC_TEST_URL
@@ -38,6 +37,7 @@ PATH="$(dirname $BATS_TEST_DIRNAME):$PATH"
 teardown() {
   govc ls vm | grep govc-test- | $xargs -r govc vm.destroy
   govc datastore.ls | grep govc-test- | awk '{print ($NF)}' | $xargs -n1 -r govc datastore.rm
+  govc ls "host/*/Resources/govc-test-*" | $xargs -r govc pool.destroy
 }
 
 new_id() {
