@@ -1,5 +1,9 @@
 # changelog
 
+### 0.5.0 (unreleased)
+
+VirtualDevice.UnitNumber field changed to pointer type
+
 ### 0.4.0 (2016-02-26)
 
 * Add method to convert virtual device list to array with virtual device
