@@ -141,12 +141,14 @@ class Simple
 
   def vim_type?
     ns, _ = self.type.split(":", 2)
-    ns == "vim25"
+    ns == "vim25" or ns == "internalvim25" or ns == "internalreflect"
   end
 
   def vim_type(t = self.type)
     ns, t = t.split(":", 2)
-    raise if ns != "vim25"
+    if ns != "vim25" and ns != "internalvim25" and ns != "internalreflect"
+        raise
+    end
     t
   end
 
@@ -567,6 +569,12 @@ class Schema
   def types
     return to_enum(:types) unless block_given?
 
+    imports.each do |i|
+      i.types do |t|
+        yield t
+      end
+    end
+
     includes.each do |i|
       i.types do |t|
         yield t
@@ -622,10 +630,25 @@ class Operation
     @operation_node["name"]
   end
 
+  def namespace
+    type = @operation_node.at_xpath("./xmlns:input").attr("message")
+    keep_ns(type)
+  end
+
   def remove_ns(x)
     ns, x = x.split(":", 2)
-    assert_equal "vim25", ns
+    if ns != "vim25" and ns != "internalvim25" and ns != "internalreflect"
+        raise
+    end
     x
+  end
+
+  def keep_ns(x)
+    ns, x = x.split(":", 2)
+    if ns != "vim25" and ns != "internalvim25" and ns != "internalreflect"
+        raise
+    end
+    ns
   end
 
   def find_type_for(type)
@@ -661,8 +684,8 @@ class Operation
   def dump(io)
     io.print <<EOS
   type #{name}Body struct{
-    Req *#{go_input} `xml:"urn:vim25 #{input},omitempty"`
-    Res *#{go_output} `xml:"urn:vim25 #{output},omitempty"`
+    Req *#{go_input} `xml:"urn:#{namespace} #{input},omitempty"`
+    Res *#{go_output} `xml:"urn:#{namespace} #{output},omitempty"`
     Fault_ *soap.Fault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
   }
 
