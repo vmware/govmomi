@@ -2,6 +2,8 @@
 
 ### 0.5.0 (unreleased)
 
+Generated fields using xsd type 'int' change to Go type 'int32'
+
 VirtualDevice.UnitNumber field changed to pointer type
 
 ### 0.4.0 (2016-02-26)

@@ -58,7 +58,7 @@ func (cmd *find) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar((*string)(&cmd.Direction), "direction", string(types.HostFirewallRuleDirectionOutbound), "Direction")
 	f.StringVar((*string)(&cmd.PortType), "type", string(types.HostFirewallRulePortTypeDst), "Port type")
 	f.StringVar((*string)(&cmd.Protocol), "proto", string(types.HostFirewallRuleProtocolTcp), "Protocol")
-	f.IntVar(&cmd.Port, "port", 0, "Port")
+	f.Var(flags.NewInt32(&cmd.Port), "port", "Port")
 }
 
 func (cmd *find) Process(ctx context.Context) error {

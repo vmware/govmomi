@@ -116,7 +116,7 @@ func (l *leaseUpdater) run() {
 			// "Completion status represented as an integer in the 0-100 range."
 			// Always report the current value of percent, as it will renew the
 			// lease even if the value hasn't changed or is 0.
-			percent := int(float32(100*atomic.LoadInt64(&l.pos)) / float32(l.total))
+			percent := int32(float32(100*atomic.LoadInt64(&l.pos)) / float32(l.total))
 			err := l.lease.HttpNfcLeaseProgress(context.TODO(), percent)
 			if err != nil {
 				fmt.Printf("from lease updater: %s\n", err)

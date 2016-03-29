@@ -30,7 +30,7 @@ import (
 type enter struct {
 	*flags.HostSystemFlag
 
-	timeout  int
+	timeout  int32
 	evacuate bool
 }
 
@@ -42,7 +42,7 @@ func (cmd *enter) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 
-	f.IntVar(&cmd.timeout, "timeout", 0, "Timeout")
+	f.Var(flags.NewInt32(&cmd.timeout), "timeout", "Timeout")
 	f.BoolVar(&cmd.evacuate, "evacuate", false, "Evacuate powered off VMs")
 }
 

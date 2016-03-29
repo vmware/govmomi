@@ -33,7 +33,7 @@ import (
 type events struct {
 	*flags.DatacenterFlag
 
-	Max   int
+	Max   int32
 	Tail  bool
 	Force bool
 }
@@ -47,7 +47,8 @@ func (cmd *events) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 
-	f.IntVar(&cmd.Max, "n", 25, "Output the last N events")
+	cmd.Max = 25 // default
+	f.Var(flags.NewInt32(&cmd.Max), "n", "Output the last N events")
 	f.BoolVar(&cmd.Tail, "f", false, "Tail event stream")
 	f.BoolVar(&cmd.Force, "force", false, "Force event collection: use with CAUTION ")
 }

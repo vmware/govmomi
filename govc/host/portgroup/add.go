@@ -40,7 +40,7 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.spec.VswitchName, "vswitch", "", "vSwitch Name")
-	f.IntVar(&cmd.spec.VlanId, "vlan", 0, "VLAN ID")
+	f.Var(flags.NewInt32(&cmd.spec.VlanId), "vlan", "VLAN ID")
 }
 
 func (cmd *add) Process(ctx context.Context) error {

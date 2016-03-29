@@ -80,6 +80,7 @@ class Prop
       case type
       when "string"
       when "int"
+        type = "int32"
       when "boolean"
         type ="bool"
       when "long"

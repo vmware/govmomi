@@ -21,6 +21,7 @@ import (
 
 	"golang.org/x/net/context"
 
+	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,8 +34,8 @@ func newFileAttrFlag(ctx context.Context) (*FileAttrFlag, context.Context) {
 }
 
 func (flag *FileAttrFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	f.IntVar(&flag.OwnerId, "uid", 0, "User ID")
-	f.IntVar(&flag.GroupId, "gid", 0, "Group ID")
+	f.Var(flags.NewInt32(&flag.OwnerId), "uid", "User ID")
+	f.Var(flags.NewInt32(&flag.GroupId), "gid", "Group ID")
 	f.Int64Var(&flag.Permissions, "perm", 0, "File permissions")
 }
 

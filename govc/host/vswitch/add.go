@@ -40,8 +40,9 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 
-	f.IntVar(&cmd.spec.NumPorts, "ports", 128, "Number of ports")
-	f.IntVar(&cmd.spec.Mtu, "mtu", 0, "MTU")
+	cmd.spec.NumPorts = 128 // default
+	f.Var(flags.NewInt32(&cmd.spec.NumPorts), "ports", "Number of ports")
+	f.Var(flags.NewInt32(&cmd.spec.Mtu), "mtu", "MTU")
 	f.StringVar(&cmd.nic, "nic", "", "Bridge nic device")
 }
 

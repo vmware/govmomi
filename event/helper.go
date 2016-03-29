@@ -26,7 +26,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func multipleObjectEvents(ctx context.Context, m Manager, objects []types.ManagedObjectReference, pageSize int, tail bool, force bool, prop []string, f func([]types.BaseEvent) error) error {
+func multipleObjectEvents(ctx context.Context, m Manager, objects []types.ManagedObjectReference, pageSize int32, tail bool, force bool, prop []string, f func([]types.BaseEvent) error) error {
 	// create an EventHistoryCollector for each object
 	var collectors []types.ManagedObjectReference
 	for _, o := range objects {
@@ -78,7 +78,7 @@ func multipleObjectEvents(ctx context.Context, m Manager, objects []types.Manage
 
 }
 
-func singleObjectEvents(ctx context.Context, m Manager, object types.ManagedObjectReference, pageSize int, tail bool, force bool, prop []string, f func([]types.BaseEvent) error) error {
+func singleObjectEvents(ctx context.Context, m Manager, object types.ManagedObjectReference, pageSize int32, tail bool, force bool, prop []string, f func([]types.BaseEvent) error) error {
 	filter := types.EventFilterSpec{
 		Entity: &types.EventFilterSpecByEntity{
 			Entity:    object,

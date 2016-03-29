@@ -44,7 +44,7 @@ func (s *sharesInfo) Set(val string) error {
 		}
 
 		s.Level = types.SharesLevelCustom
-		s.Shares = n
+		s.Shares = int32(n)
 	}
 
 	return nil

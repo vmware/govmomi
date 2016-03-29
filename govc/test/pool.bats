@@ -187,14 +187,14 @@ load test_helper
   # no more child pools
   result=$(govc ls "host/$path/*" | wc -l)
   [ $result -eq 0 ]
-  
-  # cleanup 
+
+  # cleanup
   run govc pool.destroy $path
   assert_success
-  
+
   # cleanup check
   result=$(govc ls "host/$path" | wc -l)
-  [ $result -eq 0 ]  
+  [ $result -eq 0 ]
 }
 
 @test "pool.destroy multiple" {
@@ -242,13 +242,13 @@ load test_helper
     assert_success
   done
 
-  run govc pool.change -debug -mem.limit 100 -mem.expandable=false $child_path
+  run govc pool.change -mem.limit 100 -mem.expandable=false $child_path
   assert_failure
 
-  run govc pool.change -debug -mem.limit 100 $child_path
+  run govc pool.change -mem.limit 100 $child_path
   assert_success
 
-  run govc pool.change -debug -mem.limit 120 -mem.expandable $child_path
+  run govc pool.change -mem.limit 120 -mem.expandable $child_path
   assert_success
 
   # test with glob inventory path to pools

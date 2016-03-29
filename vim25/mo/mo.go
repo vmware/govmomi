@@ -13,6 +13,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
+
 package mo
 
 import (
@@ -299,7 +300,7 @@ type EventManager struct {
 
 	Description  types.EventDescription `mo:"description"`
 	LatestEvent  types.BaseEvent        `mo:"latestEvent"`
-	MaxCollector int                    `mo:"maxCollector"`
+	MaxCollector int32                  `mo:"maxCollector"`
 }
 
 func (m EventManager) Reference() types.ManagedObjectReference {
@@ -945,7 +946,7 @@ func init() {
 type HttpNfcLease struct {
 	Self types.ManagedObjectReference
 
-	InitializeProgress int                         `mo:"initializeProgress"`
+	InitializeProgress int32                       `mo:"initializeProgress"`
 	Info               *types.HttpNfcLeaseInfo     `mo:"info"`
 	State              types.HttpNfcLeaseState     `mo:"state"`
 	Error              *types.LocalizedMethodFault `mo:"error"`
@@ -1066,7 +1067,7 @@ type ManagedEntity struct {
 	OverallStatus       types.ManagedEntityStatus      `mo:"overallStatus"`
 	ConfigStatus        types.ManagedEntityStatus      `mo:"configStatus"`
 	ConfigIssue         []types.BaseEvent              `mo:"configIssue"`
-	EffectiveRole       []int                          `mo:"effectiveRole"`
+	EffectiveRole       []int32                        `mo:"effectiveRole"`
 	Permission          []types.Permission             `mo:"permission"`
 	Name                string                         `mo:"name"`
 	DisabledMethod      []string                       `mo:"disabledMethod"`
@@ -1438,7 +1439,7 @@ type TaskManager struct {
 
 	RecentTask   []types.ManagedObjectReference `mo:"recentTask"`
 	Description  types.TaskDescription          `mo:"description"`
-	MaxCollector int                            `mo:"maxCollector"`
+	MaxCollector int32                          `mo:"maxCollector"`
 }
 
 func (m TaskManager) Reference() types.ManagedObjectReference {
@@ -1461,6 +1462,18 @@ func (m UserDirectory) Reference() types.ManagedObjectReference {
 
 func init() {
 	t["UserDirectory"] = reflect.TypeOf((*UserDirectory)(nil)).Elem()
+}
+
+type VRPResourceManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VRPResourceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["VRPResourceManager"] = reflect.TypeOf((*VRPResourceManager)(nil)).Elem()
 }
 
 type View struct {

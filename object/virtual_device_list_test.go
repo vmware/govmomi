@@ -24,7 +24,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func intPtrValue(val int) *int {
+func intPtrValue(val int32) *int32 {
 	return &val
 }
 
@@ -46,7 +46,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
-			Device:    []int{3001, 3000},
+			Device:    []int32{3001, 3000},
 		},
 	},
 	&types.VirtualIDEController{
@@ -66,7 +66,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 1,
-			Device:    []int{3002},
+			Device:    []int32{3002},
 		},
 	},
 	&types.VirtualPS2Controller{
@@ -86,7 +86,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
-			Device:    []int{600, 700},
+			Device:    []int32{600, 700},
 		},
 	},
 	&types.VirtualPCIController{
@@ -106,7 +106,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
-			Device:    []int{500, 12000, 1000, 4000},
+			Device:    []int32{500, 12000, 1000, 4000},
 		},
 	},
 	&types.VirtualSIOController{
@@ -126,7 +126,7 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 				UnitNumber:    intPtrValue(0),
 			},
 			BusNumber: 0,
-			Device:    []int{9000},
+			Device:    []int32{9000},
 		},
 	},
 	&types.VirtualKeyboard{
@@ -618,8 +618,8 @@ func TestPickController(t *testing.T) {
 
 	tests := []struct {
 		ctype types.BaseVirtualController
-		key   int
-		unit  int
+		key   int32
+		unit  int32
 	}{
 		{
 			(*types.VirtualIDEController)(nil), 201, 1,
@@ -646,8 +646,8 @@ func TestPickController(t *testing.T) {
 		}
 
 		dev := &types.VirtualDevice{
-			Key:           rand.Int(),
-			UnitNumber:    new(int),
+			Key:           int32(rand.Int()),
+			UnitNumber:    new(int32),
 			ControllerKey: key,
 		}
 		*dev.UnitNumber = unit
