@@ -2,6 +2,8 @@
 
 ### 0.5.0 (unreleased)
 
+* Add dvs.portgroup.info command
+
 * Add `-folder` flag to vm.create command
 
 * Add `-dump` flag to OutputFlag
