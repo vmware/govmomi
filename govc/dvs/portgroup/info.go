@@ -32,14 +32,12 @@ import (
 type info struct {
 	*flags.DatacenterFlag
 
-	dvsPath  string
-	dvpgPath string
-
+	pg         string
 	active     bool
 	connected  bool
 	inside     bool
 	uplinkPort bool
-	vlanId     int
+	vlanID     int
 	count      uint
 }
 
@@ -51,14 +49,12 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.dvsPath, "dvs", "", "Distributed Virtual Switch inventory path (required)")
-	f.StringVar(&cmd.dvpgPath, "dvpg", "", "Distributed Virtual Portgroup inventory path")
-
+	f.StringVar(&cmd.pg, "pg", "", "Distributed Virtual Portgroup")
 	f.BoolVar(&cmd.active, "active", false, "Filter by port active or inactive status")
 	f.BoolVar(&cmd.connected, "connected", false, "Filter by port connected or disconnected status")
 	f.BoolVar(&cmd.inside, "inside", true, "Filter by port inside or outside status")
 	f.BoolVar(&cmd.uplinkPort, "uplinkPort", false, "Filter for uplink ports")
-	f.IntVar(&cmd.vlanId, "vlanId", 0, "Filter by VLAN ID (0 = unfiltered)")
+	f.IntVar(&cmd.vlanID, "vlan", 0, "Filter by VLAN ID (0 = unfiltered)")
 	f.UintVar(&cmd.count, "count", 0, "Number of matches to return (0 = unlimited)")
 }
 
@@ -71,7 +67,7 @@ func (cmd *info) Process(ctx context.Context) error {
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	if len(cmd.dvsPath) == 0 {
+	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
@@ -80,19 +76,22 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	// Retrieve DVS object by inventory path
-	dvsInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), cmd.dvsPath)
+	finder, err := cmd.Finder()
 	if err != nil {
 		return err
 	}
 
-	// Error if DVS not found
-	if dvsInv == nil {
-		return fmt.Errorf("DistributedVirtualSwitch was not found at %s", cmd.dvsPath)
+	// Retrieve DVS reference
+	net, err := finder.Network(ctx, f.Arg(0))
+	if err != nil {
+		return err
 	}
 
-	// Convert DVS object type
-	dvs := (*dvsInv.(*object.VmwareDistributedVirtualSwitch))
+	// Convert to DVS object type
+	dvs, ok := net.(*object.DistributedVirtualSwitch)
+	if !ok {
+		return fmt.Errorf("%s (%s) is not a DVS", f.Arg(0), net.Reference().Type)
+	}
 
 	// Set base search criteria
 	criteria := types.DistributedVirtualSwitchPortCriteria{
@@ -103,19 +102,18 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	// If a distributed virtual portgroup path is set, then add its portgroup key to the base criteria
-	if len(cmd.dvpgPath) > 0 {
-
-		// Retrieve distributed virtual portgroup object by inventory path
-		dvpgInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), cmd.dvpgPath)
+	if len(cmd.pg) > 0 {
+		// Retrieve distributed virtual portgroup reference
+		net, err = finder.Network(ctx, cmd.pg)
 		if err != nil {
 			return err
 		}
-		if dvpgInv == nil {
-			return fmt.Errorf("DistributedVirtualPortgroup was not found at %s", cmd.dvpgPath)
-		}
 
 		// Convert distributed virtual portgroup object type
-		dvpg := (*dvpgInv.(*object.DistributedVirtualPortgroup))
+		dvpg, ok := net.(*object.DistributedVirtualPortgroup)
+		if !ok {
+			return fmt.Errorf("%s (%s) is not a DVPG", cmd.pg, net.Reference().Type)
+		}
 
 		// Obtain portgroup key property
 		var dvp mo.DistributedVirtualPortgroup
@@ -139,23 +137,21 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	var returnedPorts uint = 0
+	var returnedPorts uint
 
 	// Iterate over returned ports
 	for _, port := range res.Returnval {
-
-		portConfigSetting := *(port.Config.Setting.(*types.VMwareDVSPortSetting))
-		portVlan := *(portConfigSetting.Vlan.(*types.VmwareDistributedVirtualSwitchVlanIdSpec))
-		portVlanId := portVlan.VlanId
+		portConfigSetting := port.Config.Setting.(*types.VMwareDVSPortSetting)
+		portVlan := portConfigSetting.Vlan.(*types.VmwareDistributedVirtualSwitchVlanIdSpec)
+		portVlanID := portVlan.VlanId
 
 		// Show port info if: VLAN ID is not defined, or VLAN ID matches requested VLAN
-		if cmd.vlanId == 0 || portVlanId == cmd.vlanId {
-
+		if cmd.vlanID == 0 || portVlanID == cmd.vlanID {
 			returnedPorts++
 
 			fmt.Printf("PortgroupKey: %s\n", port.PortgroupKey)
 			fmt.Printf("DvsUuid:      %s\n", port.DvsUuid)
-			fmt.Printf("VlanId:       %d\n", portVlanId)
+			fmt.Printf("VlanId:       %d\n", portVlanID)
 			fmt.Printf("PortKey:      %s\n\n", port.Key)
 
 			// If we are limiting the count and have reached the count, then stop returning output
