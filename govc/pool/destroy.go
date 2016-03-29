@@ -28,7 +28,7 @@ import (
 type destroy struct {
 	*flags.DatacenterFlag
 
-	recursive bool
+	children bool
 }
 
 func init() {
@@ -39,7 +39,7 @@ func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.recursive, "r", false, "Remove all child resource pools recursively")
+	f.BoolVar(&cmd.children, "children", false, "Remove all children pools")
 }
 
 func (cmd *destroy) Process(ctx context.Context) error {
@@ -79,20 +79,20 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		for _, pool := range pools {
-			if cmd.recursive {
+			if cmd.children {
 				err = pool.DestroyChildren(context.TODO())
 				if err != nil {
 					return err
 				}
-			}
-
-			task, err := pool.Destroy(context.TODO())
-			if err != nil {
-				return err
-			}
-			err = task.Wait(context.TODO())
-			if err != nil {
-				return err
+			} else {
+				task, err := pool.Destroy(context.TODO())
+				if err != nil {
+					return err
+				}
+				err = task.Wait(context.TODO())
+				if err != nil {
+					return err
+				}
 			}
 		}
 	}
