@@ -56,7 +56,8 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.DVPortgroupConfigSpec.Type, "type", ptypes[0],
 		fmt.Sprintf("Portgroup type (%s)", strings.Join(ptypes, "|")))
 
-	f.IntVar(&cmd.DVPortgroupConfigSpec.NumPorts, "nports", 128, "Number of ports")
+	cmd.DVPortgroupConfigSpec.NumPorts = 128 // default
+	f.Var(flags.NewInt32(&cmd.DVPortgroupConfigSpec.NumPorts), "nports", "Number of ports")
 }
 
 func (cmd *add) Process(ctx context.Context) error {

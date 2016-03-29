@@ -157,7 +157,7 @@ func (l VirtualDeviceList) Find(name string) types.BaseVirtualDevice {
 }
 
 // FindByKey returns the device matching the given key.
-func (l VirtualDeviceList) FindByKey(key int) types.BaseVirtualDevice {
+func (l VirtualDeviceList) FindByKey(key int32) types.BaseVirtualDevice {
 	for _, device := range l {
 		if device.GetVirtualDevice().Key == key {
 			return device
@@ -250,13 +250,13 @@ var scsiBusNumbers = []int{0, 1, 2, 3}
 
 // newSCSIBusNumber returns the bus number to use for adding a new SCSI bus device.
 // -1 is returned if there are no bus numbers available.
-func (l VirtualDeviceList) newSCSIBusNumber() int {
+func (l VirtualDeviceList) newSCSIBusNumber() int32 {
 	var used []int
 
 	for _, d := range l.SelectByType((*types.VirtualSCSIController)(nil)) {
 		num := d.(types.BaseVirtualSCSIController).GetVirtualSCSIController().BusNumber
 		if num >= 0 {
-			used = append(used, num)
+			used = append(used, int(num))
 		} // else caller is creating a new vm using SCSIControllerTypes
 	}
 
@@ -264,7 +264,7 @@ func (l VirtualDeviceList) newSCSIBusNumber() int {
 
 	for i, n := range scsiBusNumbers {
 		if i == len(used) || n != used[i] {
-			return n
+			return int32(n)
 		}
 	}
 
@@ -310,9 +310,9 @@ func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) type
 }
 
 // newUnitNumber returns the unit number to use for attaching a new device to the given controller.
-func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int {
+func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int32 {
 	key := c.GetVirtualController().Key
-	max := -1
+	var max int32 = -1
 
 	for _, device := range l {
 		d := device.GetVirtualDevice()
@@ -332,8 +332,8 @@ func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int {
 // we're only adding new devices), so any positive keys could conflict with device keys
 // that are already in use. To avoid this type of conflict, we can use negative keys
 // here, which will be resolved to positive keys by vSphere as the reconfiguration is done.
-func (l VirtualDeviceList) NewKey() int {
-	key := -200
+func (l VirtualDeviceList) NewKey() int32 {
+	var key int32 = -200
 
 	for _, device := range l {
 		d := device.GetVirtualDevice()
@@ -349,7 +349,7 @@ func (l VirtualDeviceList) NewKey() int {
 func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c types.BaseVirtualController) {
 	d := device.GetVirtualDevice()
 	d.ControllerKey = c.GetVirtualController().Key
-	d.UnitNumber = new(int)
+	d.UnitNumber = new(int32)
 	*d.UnitNumber = l.newUnitNumber(c)
 	if d.Key == 0 {
 		d.Key = -1
@@ -763,7 +763,7 @@ func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 // Name returns a stable, human-readable name for the given device
 func (l VirtualDeviceList) Name(device types.BaseVirtualDevice) string {
 	var key string
-	var UnitNumber int
+	var UnitNumber int32
 	d := device.GetVirtualDevice()
 	if d.UnitNumber != nil {
 		UnitNumber = *d.UnitNumber

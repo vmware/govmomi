@@ -52,7 +52,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	offset := 0
+	var offset int32
 	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
 
 	for {
@@ -71,7 +71,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		if info.Remaining == 0 {
 			break
 		}
-		offset += len(info.Files)
+		offset += int32(len(info.Files))
 	}
 
 	return nil

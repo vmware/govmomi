@@ -31,7 +31,7 @@ import (
 type logs struct {
 	*flags.HostSystemFlag
 
-	Max int
+	Max int32
 	Key string
 }
 
@@ -43,7 +43,8 @@ func (cmd *logs) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 
-	f.IntVar(&cmd.Max, "n", 25, "Output the last N logs")
+	cmd.Max = 25 // default
+	f.Var(flags.NewInt32(&cmd.Max), "n", "Output the last N logs")
 	f.StringVar(&cmd.Key, "log", "", "Log file key")
 }
 

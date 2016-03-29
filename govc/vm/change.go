@@ -60,7 +60,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
 	f.Int64Var(&cmd.MemoryMB, "m", 0, "Size in MB of memory")
-	f.IntVar(&cmd.NumCPUs, "c", 0, "Number of CPUs")
+	f.Var(flags.NewInt32(&cmd.NumCPUs), "c", "Number of CPUs")
 	f.StringVar(&cmd.GuestId, "g", "", "Guest OS")
 	f.StringVar(&cmd.Name, "name", "", "Display name")
 	f.Var(&cmd.extraConfig, "e", "ExtraConfig. <key>=<value>")

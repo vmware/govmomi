@@ -276,7 +276,7 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 	spec := &types.VirtualMachineConfigSpec{
 		Name:     cmd.name,
 		GuestId:  cmd.guestID,
-		NumCPUs:  cmd.cpus,
+		NumCPUs:  int32(cmd.cpus),
 		MemoryMB: int64(cmd.memory),
 	}
 

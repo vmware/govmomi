@@ -183,6 +183,7 @@ class Simple
           prefix += "*"
           self.need_omitempty = false
         end
+        t = "int32"
       when "boolean"
         t = "bool"
         if !slice? && optional?

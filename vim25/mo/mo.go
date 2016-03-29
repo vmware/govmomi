@@ -300,7 +300,7 @@ type EventManager struct {
 
 	Description  types.EventDescription `mo:"description"`
 	LatestEvent  types.BaseEvent        `mo:"latestEvent"`
-	MaxCollector int                    `mo:"maxCollector"`
+	MaxCollector int32                  `mo:"maxCollector"`
 }
 
 func (m EventManager) Reference() types.ManagedObjectReference {
@@ -946,7 +946,7 @@ func init() {
 type HttpNfcLease struct {
 	Self types.ManagedObjectReference
 
-	InitializeProgress int                         `mo:"initializeProgress"`
+	InitializeProgress int32                       `mo:"initializeProgress"`
 	Info               *types.HttpNfcLeaseInfo     `mo:"info"`
 	State              types.HttpNfcLeaseState     `mo:"state"`
 	Error              *types.LocalizedMethodFault `mo:"error"`
@@ -1067,7 +1067,7 @@ type ManagedEntity struct {
 	OverallStatus       types.ManagedEntityStatus      `mo:"overallStatus"`
 	ConfigStatus        types.ManagedEntityStatus      `mo:"configStatus"`
 	ConfigIssue         []types.BaseEvent              `mo:"configIssue"`
-	EffectiveRole       []int                          `mo:"effectiveRole"`
+	EffectiveRole       []int32                        `mo:"effectiveRole"`
 	Permission          []types.Permission             `mo:"permission"`
 	Name                string                         `mo:"name"`
 	DisabledMethod      []string                       `mo:"disabledMethod"`
@@ -1439,7 +1439,7 @@ type TaskManager struct {
 
 	RecentTask   []types.ManagedObjectReference `mo:"recentTask"`
 	Description  types.TaskDescription          `mo:"description"`
-	MaxCollector int                            `mo:"maxCollector"`
+	MaxCollector int32                          `mo:"maxCollector"`
 }
 
 func (m TaskManager) Reference() types.ManagedObjectReference {

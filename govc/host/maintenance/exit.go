@@ -30,7 +30,7 @@ import (
 type exit struct {
 	*flags.HostSystemFlag
 
-	timeout int
+	timeout int32
 }
 
 func init() {
@@ -41,7 +41,7 @@ func (cmd *exit) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 
-	f.IntVar(&cmd.timeout, "timeout", 0, "Timeout")
+	f.Var(flags.NewInt32(&cmd.timeout), "timeout", "Timeout")
 }
 
 func (cmd *exit) Process(ctx context.Context) error {

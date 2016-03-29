@@ -146,7 +146,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		portVlanID := portVlan.VlanId
 
 		// Show port info if: VLAN ID is not defined, or VLAN ID matches requested VLAN
-		if cmd.vlanID == 0 || portVlanID == cmd.vlanID {
+		if cmd.vlanID == 0 || portVlanID == int32(cmd.vlanID) {
 			returnedPorts++
 
 			fmt.Printf("PortgroupKey: %s\n", port.PortgroupKey)

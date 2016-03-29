@@ -161,7 +161,7 @@ func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (stri
 }
 
 // Get the events from the specified object(s) and optionanlly tail the event stream
-func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int, tail bool, force bool, f func([]types.BaseEvent) error) error {
+func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int32, tail bool, force bool, f func([]types.BaseEvent) error) error {
 
 	if len(objects) >= m.maxObjects && !force {
 		return fmt.Errorf("Maximum number of objects to monitor (%d) exceeded, refine search \n", m.maxObjects)

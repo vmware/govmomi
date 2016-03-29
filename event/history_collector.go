@@ -46,7 +46,7 @@ func (h HistoryCollector) LatestPage(ctx context.Context) ([]types.BaseEvent, er
 	return o.LatestPage, nil
 }
 
-func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int) ([]types.BaseEvent, error) {
+func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int32) ([]types.BaseEvent, error) {
 	req := types.ReadNextEvents{
 		This:     h.Reference(),
 		MaxCount: maxCount,
@@ -60,7 +60,7 @@ func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int) ([]t
 	return res.Returnval, nil
 }
 
-func (h HistoryCollector) ReadPreviousEvents(ctx context.Context, maxCount int) ([]types.BaseEvent, error) {
+func (h HistoryCollector) ReadPreviousEvents(ctx context.Context, maxCount int32) ([]types.BaseEvent, error) {
 	req := types.ReadPreviousEvents{
 		This:     h.Reference(),
 		MaxCount: maxCount,

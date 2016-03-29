@@ -41,9 +41,9 @@ func (cmd *configure) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.AutostartFlag.Register(ctx, f)
 
 	f.Var(flags.NewOptionalBool(&cmd.Enabled), "enabled", "")
-	f.IntVar(&cmd.StartDelay, "start-delay", 0, "")
+	f.Var(flags.NewInt32(&cmd.StartDelay), "start-delay", "")
 	f.StringVar(&cmd.StopAction, "stop-action", "", "")
-	f.IntVar(&cmd.StopDelay, "stop-delay", 0, "")
+	f.Var(flags.NewInt32(&cmd.StopDelay), "stop-delay", "")
 	f.Var(flags.NewOptionalBool(&cmd.WaitForHeartbeat), "wait-for-heartbeat", "")
 }
 
