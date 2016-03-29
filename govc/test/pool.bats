@@ -154,6 +154,49 @@ load test_helper
   [ $result -eq 0 ]
 }
 
+@test "pool.destroy children" {
+  id=$(new_id)
+
+  # parent pool
+  path="*/Resources/$id"
+  run govc pool.create $path
+  assert_success
+
+  result=$(govc ls "host/$path/*" | wc -l)
+  [ $result -eq 0 ]
+
+  # child pools
+  run govc pool.create $path/$(new_id)
+  assert_success
+
+  run govc pool.create $path/$(new_id)
+  assert_success
+
+  # 2 child pools
+  result=$(govc ls "host/$path/*" | wc -l)
+  [ $result -eq 2 ]
+
+  # 1 parent pool
+  result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
+  [ $result -eq 1 ]
+
+  # delete childs
+  run govc pool.destroy -children $path
+  assert_success
+
+  # no more child pools
+  result=$(govc ls "host/$path/*" | wc -l)
+  [ $result -eq 0 ]
+  
+  # cleanup 
+  run govc pool.destroy $path
+  assert_success
+  
+  # cleanup check
+  result=$(govc ls "host/$path" | wc -l)
+  [ $result -eq 0 ]  
+}
+
 @test "pool.destroy multiple" {
   id=$(new_id)
   path="*/Resources/$id"
