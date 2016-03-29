@@ -1464,6 +1464,18 @@ func init() {
 	t["UserDirectory"] = reflect.TypeOf((*UserDirectory)(nil)).Elem()
 }
 
+type VRPResourceManager struct {
+	Self types.ManagedObjectReference
+}
+
+func (m VRPResourceManager) Reference() types.ManagedObjectReference {
+	return m.Self
+}
+
+func init() {
+	t["VRPResourceManager"] = reflect.TypeOf((*VRPResourceManager)(nil)).Elem()
+}
+
 type View struct {
 	Self types.ManagedObjectReference
 }
