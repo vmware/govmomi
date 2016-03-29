@@ -20150,7 +20150,7 @@ type HostLowLevelProvisioningManagerDiskLayoutSpec struct {
 
 	ControllerType string `xml:"controllerType"`
 	BusNumber      int    `xml:"busNumber"`
-	UnitNumber     int    `xml:"unitNumber"`
+	UnitNumber     *int   `xml:"unitNumber"`
 	SrcFilename    string `xml:"srcFilename"`
 	DstFilename    string `xml:"dstFilename"`
 }

@@ -164,6 +164,10 @@ class Simple
     self.type == "xsd:anyType"
   end
 
+  def pointer_type?
+    ["UnitNumber"].include?(var_name)
+  end
+
   def var_type
     t = self.type
     prefix = ""
@@ -175,6 +179,10 @@ class Simple
       case t
       when "string"
       when "int"
+        if pointer_type?
+          prefix += "*"
+          self.need_omitempty = false
+        end
       when "boolean"
         t = "bool"
         if !slice? && optional?
