@@ -428,45 +428,23 @@ func (c *configSpec) AddChange(d types.BaseVirtualDeviceConfigSpec) {
 }
 
 func (c *configSpec) AddDisk(ds *object.Datastore, path string) {
-	controller := &types.VirtualLsiLogicController{
-		VirtualSCSIController: types.VirtualSCSIController{
-			SharedBus: types.VirtualSCSISharingNoSharing,
-			VirtualController: types.VirtualController{
-				BusNumber: 0,
-				VirtualDevice: types.VirtualDevice{
-					Key: -1,
-				},
-			},
-		},
+	var devices object.VirtualDeviceList
+
+	controller, err := devices.CreateSCSIController("")
+	if err != nil {
+		panic(err)
+	}
+	devices = append(devices, controller)
+
+	disk := devices.CreateDisk(controller.(types.BaseVirtualController), ds.Reference(), ds.Path(path))
+	devices = append(devices, disk)
+
+	spec, err := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	if err != nil {
+		panic(err)
 	}
 
-	controllerSpec := &types.VirtualDeviceConfigSpec{
-		Device:    controller,
-		Operation: types.VirtualDeviceConfigSpecOperationAdd,
-	}
-
-	c.AddChange(controllerSpec)
-
-	disk := &types.VirtualDisk{
-		VirtualDevice: types.VirtualDevice{
-			Key:           -1,
-			ControllerKey: -1,
-			Backing: &types.VirtualDiskFlatVer2BackingInfo{
-				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-					FileName: ds.Path(path),
-				},
-				DiskMode:        string(types.VirtualDiskModePersistent),
-				ThinProvisioned: types.NewBool(true),
-			},
-		},
-	}
-
-	diskSpec := &types.VirtualDeviceConfigSpec{
-		Device:    disk,
-		Operation: types.VirtualDeviceConfigSpecOperationAdd,
-	}
-
-	c.AddChange(diskSpec)
+	c.DeviceChange = append(c.DeviceChange, spec...)
 }
 
 var dsPathRegexp = regexp.MustCompile(`^\[.*\] (.*)$`)
