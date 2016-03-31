@@ -1,6 +1,6 @@
 # changelog
 
-### 0.5.0 (unreleased)
+### 0.5.0 (2016-03-30)
 
 Generated fields using xsd type 'int' change to Go type 'int32'
 
