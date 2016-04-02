@@ -27,6 +27,7 @@ import (
 
 type remove struct {
 	*flags.VirtualMachineFlag
+	keepFiles bool
 }
 
 func init() {
@@ -36,6 +37,7 @@ func init() {
 func (cmd *remove) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
+	f.BoolVar(&cmd.keepFiles, "keep", false, "Keep files in datastore")
 }
 
 func (cmd *remove) Process(ctx context.Context) error {
@@ -70,7 +72,7 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 			return fmt.Errorf("device '%s' not found", name)
 		}
 
-		if err = vm.RemoveDevice(context.TODO(), device); err != nil {
+		if err = vm.RemoveDevice(context.TODO(), cmd.keepFiles, device); err != nil {
 			return err
 		}
 	}

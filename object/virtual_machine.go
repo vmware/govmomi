@@ -336,8 +336,12 @@ func (v VirtualMachine) EditDevice(ctx context.Context, device ...types.BaseVirt
 }
 
 // RemoveDevice removes the given devices on the VirtualMachine
-func (v VirtualMachine) RemoveDevice(ctx context.Context, device ...types.BaseVirtualDevice) error {
-	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationRemove, types.VirtualDeviceConfigSpecFileOperationDestroy, device...)
+func (v VirtualMachine) RemoveDevice(ctx context.Context, keepFiles bool, device ...types.BaseVirtualDevice) error {
+	fop := types.VirtualDeviceConfigSpecFileOperationDestroy
+	if keepFiles {
+		fop = ""
+	}
+	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationRemove, fop, device...)
 }
 
 // BootOptions returns the VirtualMachine's config.bootOptions property.
