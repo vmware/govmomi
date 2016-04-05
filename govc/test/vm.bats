@@ -400,3 +400,32 @@ load test_helper
   run govc device.info -vm $vm disk-1000-0
   assert_success
 }
+
+@test "vm.clone" {
+  vcsim_env
+  vm=$(new_ttylinux_vm)
+  clone=$(new_id)
+  
+  run govc vm.clone -vm $vm $clone
+  assert_success
+
+  result=$(govc device.ls -vm $clone | grep disk- | wc -l)
+  [ $result -eq 0 ]
+
+  result=$(govc device.ls -vm $clone | grep cdrom- | wc -l)
+  [ $result -eq 0 ]
+}
+
+@test "vm.clone change resources" {
+  vcsim_env
+  vm=$(new_ttylinux_vm)
+  clone=$(new_id)
+  
+  run govc vm.clone -m 1024 -c 2 -vm $vm $clone
+  assert_success
+
+  run govc vm.info $clone
+  assert_success
+  assert_line "Memory: 1024MB"
+  assert_line "CPU: 2 vCPU(s)"
+}
