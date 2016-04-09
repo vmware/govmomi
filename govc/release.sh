@@ -55,7 +55,7 @@ Instructions:
 * Download the file relevant to your operating system
 * Decompress (i.e. `gzip -d govc_linux_amd64.gz`)
 * Set the executable bit (i.e. `chmod +x govc_linux_amd64`)
-* Move the file to a directory in your `$PATH` (i.e. `mv govc_linux_amd64 /usr/local/bin`)
+* Move the file to a directory in your `$PATH` (i.e. `mv govc_linux_amd64 /usr/local/bin/govc`)
 '
 
 echo '```'
