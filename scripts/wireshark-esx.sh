@@ -28,16 +28,12 @@ fi
 
 # Otherwise, use default ssh opts + sshpass if available
 if [ ${#ssh_opts[@]} -eq 0 ] ; then
-  userpass=$(awk -F// '{print $NF}' <<<"$GOVC_URL" | awk -F@ '{print $1}')
-  username=$(awk -F:  '{print $1}'  <<<"$userpass")
-  password=$(awk -F:  '{print $2}'  <<<"$userpass")
+  eval "$(govc env)"
 
-  ssh_opts=(-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=FATAL -o User=${username})
+  ssh_opts=(-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=FATAL -o User=${GOVC_USERNAME})
 
   if [ -x "$(which sshpass)" ] ; then
-    if [ -z "$password" ] ; then
-      password="$GOVC_PASSWORD"
-    fi
+    password="$GOVC_PASSWORD"
     scp=(sshpass -p $password scp)
     ssh=(sshpass -p $password ssh)
   fi

@@ -35,8 +35,8 @@ scp=(scp)
 ssh=(ssh)
 
 # Extract host from GOVC_URL
-userpasshost=$(awk -F/ '{print $(NF-1)}' <<<"$GOVC_URL")
-host=$(awk -F@ '{print $NF}' <<<"$userpasshost")
+eval "$(govc env -x)"
+host="$GOVC_URL_HOST"
 username=root
 password="$GOVC_PASSWORD"
 

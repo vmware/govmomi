@@ -113,15 +113,8 @@ skip_if_vca() {
 
 # remove username/password from $GOVC_URL and set $GOVC_{USERNAME,PASSWORD}
 govc_url_to_vars() {
-  local url=$(awk -F@ '{print $2}' <<<"$GOVC_URL")
-  local userpass=$(awk -F// '{print $2}' <<<"$GOVC_URL" | awk -F@ '{print $1}')
-  if ! grep -q "//" <<<"$GOVC_URL"; then
-    userpass=$(awk -F@ '{print $1}' <<<"$GOVC_URL")
-  fi
-  local username=$(awk -F: '{print $1}' <<<"$userpass")
-  local password=$(awk -F: '{print $2}' <<<"$userpass")
-
-  export GOVC_URL="$url" GOVC_USERNAME="$username" GOVC_PASSWORD="$password"
+  eval "$(govc env)"
+  export GOVC_URL GOVC_USERNAME GOVC_PASSWORD
 
   # double check that we removed user/pass
   grep -q -v @ <<<"$GOVC_URL"

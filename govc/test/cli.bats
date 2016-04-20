@@ -28,3 +28,17 @@ load test_helper
   run govc about -vim-namespace urn:vim25 -vim-version 6.0
   assert_success
 }
+
+@test "govc env" {
+  output="$(govc env -x -u 'user:pass@enoent:99999?key=val#anchor')"
+  assert grep -q GOVC_URL=enoent:99999 <<<${output}
+  assert grep -q GOVC_USERNAME=user <<<${output}
+  assert grep -q GOVC_PASSWORD=pass <<<${output}
+
+  assert grep -q GOVC_URL_SCHEME=https <<<${output}
+  assert grep -q GOVC_URL_HOST=enoent <<<${output}
+  assert grep -q GOVC_URL_PORT=99999 <<<${output}
+  assert grep -q GOVC_URL_PATH=/sdk <<<${output}
+  assert grep -q GOVC_URL_QUERY=key=val <<<${output}
+  assert grep -q GOVC_URL_FRAGMENT=anchor <<<${output}
+}
