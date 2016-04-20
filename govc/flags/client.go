@@ -433,3 +433,73 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 	flag.client = c
 	return flag.client, nil
 }
+
+// Environ returns the govc environment variables for this connection
+func (flag *ClientFlag) Environ(extra bool) []string {
+	var env []string
+	add := func(k, v string) {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+
+	u := *flag.url
+	if u.User != nil {
+		add(envUsername, u.User.Username())
+
+		if p, ok := u.User.Password(); ok {
+			add(envPassword, p)
+		}
+
+		u.User = nil
+	}
+
+	if u.Path == "/sdk" {
+		u.Path = ""
+	}
+	u.Fragment = ""
+	u.RawQuery = ""
+
+	val := u.String()
+	prefix := "https://"
+	if strings.HasPrefix(val, prefix) {
+		val = val[len(prefix):]
+	}
+	add(envURL, val)
+
+	keys := []string{
+		envCertificate,
+		envPrivateKey,
+		envInsecure,
+		envPersist,
+		envMinAPIVersion,
+		envVimNamespace,
+		envVimVersion,
+	}
+
+	for _, k := range keys {
+		if v := os.Getenv(k); v != "" {
+			add(k, v)
+		}
+	}
+
+	if extra {
+		add("GOVC_URL_SCHEME", flag.url.Scheme)
+
+		v := strings.SplitN(u.Host, ":", 2)
+		add("GOVC_URL_HOST", v[0])
+		if len(v) == 2 {
+			add("GOVC_URL_PORT", v[1])
+		}
+
+		add("GOVC_URL_PATH", flag.url.Path)
+
+		if f := flag.url.Fragment; f != "" {
+			add("GOVC_URL_FRAGMENT", f)
+		}
+
+		if q := flag.url.RawQuery; q != "" {
+			add("GOVC_URL_QUERY", q)
+		}
+	}
+
+	return env
+}
