@@ -405,7 +405,7 @@ load test_helper
   vcsim_env
   vm=$(new_ttylinux_vm)
   clone=$(new_id)
-  
+
   run govc vm.clone -vm $vm $clone
   assert_success
 
@@ -420,7 +420,7 @@ load test_helper
   vcsim_env
   vm=$(new_ttylinux_vm)
   clone=$(new_id)
-  
+
   run govc vm.clone -m 1024 -c 2 -vm $vm $clone
   assert_success
 
