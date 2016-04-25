@@ -19,6 +19,7 @@ package vm
 import (
 	"flag"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -33,6 +34,8 @@ type ip struct {
 	*flags.SearchFlag
 
 	esx bool
+	all bool
+	v4  bool
 }
 
 func init() {
@@ -47,6 +50,8 @@ func (cmd *ip) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.SearchFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.esx, "esxcli", false, "Use esxcli instead of guest tools")
+	f.BoolVar(&cmd.all, "a", false, "Wait for an IP address on all NICs")
+	f.BoolVar(&cmd.v4, "v4", false, "Only report IPv4 addresses")
 }
 
 func (cmd *ip) Process(ctx context.Context) error {
@@ -95,6 +100,20 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	} else {
 		get = func(vm *object.VirtualMachine) (string, error) {
+			if cmd.all {
+				macs, err := vm.WaitForNetIP(context.TODO(), cmd.v4)
+				if err != nil {
+					return "", err
+				}
+
+				var ips []string
+				for _, addrs := range macs {
+					for _, ip := range addrs {
+						ips = append(ips, ip)
+					}
+				}
+				return strings.Join(ips, ","), nil
+			}
 			return vm.WaitForIP(context.TODO())
 		}
 	}
