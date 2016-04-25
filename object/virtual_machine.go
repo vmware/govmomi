@@ -404,6 +404,61 @@ func (v VirtualMachine) CreateSnapshot(ctx context.Context, name string, descrip
 	return NewTask(v.c, res.Returnval), nil
 }
 
+// RevertToSnapshot reverts to a named snapshot
+func (v VirtualMachine) RevertToSnapshot(ctx context.Context, name string, suppressPowerOn bool) (*Task, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"snapshot"}, &o)
+
+	snapshotTree := o.Snapshot.RootSnapshotList
+	if len(snapshotTree) < 1 {
+		return nil, errors.New("No snapshots for this VM")
+	}
+
+	snapshot, err := traverseSnapshotInTree(snapshotTree, name)
+	if err != nil {
+		return nil, err
+	}
+
+	req := types.RevertToSnapshot_Task{
+		This:            snapshot,
+		SuppressPowerOn: types.NewBool(suppressPowerOn),
+	}
+
+	res, err := methods.RevertToSnapshot_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
+// traverseSnapshotInTree is a recursive function that will traverse a snapshot tree to find a given snapshot
+func traverseSnapshotInTree(tree []types.VirtualMachineSnapshotTree, name string) (types.ManagedObjectReference, error) {
+	var o types.ManagedObjectReference
+	if tree == nil {
+		return o, errors.New("Snapshot tree is empty")
+	}
+	for _, s := range tree {
+		if s.Name == name {
+			o = s.Snapshot
+			break
+		} else {
+			childTree := s.ChildSnapshotList
+			var err error
+			o, err = traverseSnapshotInTree(childTree, name)
+			if err != nil {
+				return o, err
+			}
+		}
+	}
+	if o.Value == "" {
+		return o, errors.New("Snapshot not found")
+	}
+
+	return o, nil
+}
+
 // IsToolsRunning returns true if VMware Tools is currently running in the guest OS, and false otherwise.
 func (v VirtualMachine) IsToolsRunning(ctx context.Context) (bool, error) {
 	var o mo.VirtualMachine
