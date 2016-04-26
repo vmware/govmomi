@@ -37,7 +37,9 @@ func NewFolder(c *vim25.Client, ref types.ManagedObjectReference) *Folder {
 }
 
 func NewRootFolder(c *vim25.Client) *Folder {
-	return NewFolder(c, c.ServiceContent.RootFolder)
+	f := NewFolder(c, c.ServiceContent.RootFolder)
+	f.InventoryPath = "/"
+	return f
 }
 
 func (f Folder) Children(ctx context.Context) ([]Reference, error) {

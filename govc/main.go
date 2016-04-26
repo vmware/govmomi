@@ -36,6 +36,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/events"
 	_ "github.com/vmware/govmomi/govc/extension"
 	_ "github.com/vmware/govmomi/govc/fields"
+	_ "github.com/vmware/govmomi/govc/folder"
 	_ "github.com/vmware/govmomi/govc/host"
 	_ "github.com/vmware/govmomi/govc/host/account"
 	_ "github.com/vmware/govmomi/govc/host/autostart"
