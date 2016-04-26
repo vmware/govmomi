@@ -139,6 +139,7 @@ class Managed
 
   def dump(io)
     include_ref_getter = false
+    include_ent_getter = false
 
     io.print "type %s struct {\n" % name
 
@@ -148,6 +149,9 @@ class Managed
       io.print "Self types.ManagedObjectReference\n\n"
     else
       io.print "%s\n\n" % @data["wsdl_base"]
+      if @data["wsdl_base"] == "ManagedEntity"
+        include_ent_getter = true
+      end
     end
 
     props.each do |p|
@@ -158,6 +162,12 @@ class Managed
     if include_ref_getter
       io.print "func (m %s) Reference() types.ManagedObjectReference {\n" % [name]
       io.print "return m.Self\n"
+      io.print "}\n\n"
+    end
+
+    if include_ent_getter
+      io.print "func (m *%s) Entity() *ManagedEntity {\n" % [name]
+      io.print "return &m.ManagedEntity\n"
       io.print "}\n\n"
     end
   end
