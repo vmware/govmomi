@@ -2,6 +2,14 @@
 
 load test_helper
 
+@test "datastore.info" {
+    run govc datastore.info
+    assert_success
+
+    run govc datastore.info /enoent
+    assert_failure
+}
+
 @test "create and destroy datacenters" {
   vcsim_env
   dcs=(`uuidgen` `uuidgen`)
