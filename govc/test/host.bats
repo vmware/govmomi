@@ -79,3 +79,17 @@ load test_helper
   run govc host.vnic.info
   assert_success
 }
+
+@test "host.options" {
+    run govc host.option.ls Config.HostAgent.plugins.solo.enableMob
+    assert_success
+
+    run govc host.option.ls Config.HostAgent.plugins.
+    assert_success
+
+    run govc host.option.ls -json Config.HostAgent.plugins.
+    assert_success
+
+    run govc host.option.ls Config.HostAgent.plugins.solo.ENOENT
+    assert_failure
+}
