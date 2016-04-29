@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add `-a` and `-v4` flags to vm.ip command
+
 * Add host.account.{create,update,remove} commands
 
 ### 0.5.0 (2016-03-30)

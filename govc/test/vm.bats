@@ -3,7 +3,7 @@
 load test_helper
 
 @test "vm.ip" {
-  skip
+  skip_if_vca
   id=$(new_ttylinux_vm)
 
   run govc vm.power -on $id
@@ -11,10 +11,13 @@ load test_helper
 
   run govc vm.ip $id
   assert_success
+
+  run govc vm.ip -a -v4 $id
+  assert_success
 }
 
 @test "vm.ip -esxcli" {
-  skip
+  skip_if_vca
   id=$(new_ttylinux_vm)
 
   run govc vm.power -on $id

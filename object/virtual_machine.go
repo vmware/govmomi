@@ -19,6 +19,7 @@ package object
 import (
 	"errors"
 	"fmt"
+	"net"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
@@ -243,6 +244,77 @@ func (v VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
 	}
 
 	return ip, nil
+}
+
+// WaitForNetIP waits for the VM guest.net property to report an IP address for all VM NICs.
+// Only consider IPv4 addresses if the v4 param is true.
+// Returns a map with MAC address as the key and IP address list as the value.
+func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool) (map[string][]string, error) {
+	macs := make(map[string][]string)
+
+	p := property.DefaultCollector(v.c)
+
+	// Wait for all NICs to have a MacAddress, which may not be generated yet.
+	err := property.Wait(ctx, p, v.Reference(), []string{"config.hardware.device"}, func(pc []types.PropertyChange) bool {
+		for _, c := range pc {
+			if c.Op != types.PropertyChangeOpAssign {
+				continue
+			}
+
+			devices := c.Val.(types.ArrayOfVirtualDevice).VirtualDevice
+			for _, device := range devices {
+				if nic, ok := device.(types.BaseVirtualEthernetCard); ok {
+					mac := nic.GetVirtualEthernetCard().MacAddress
+					if mac == "" {
+						return false
+					}
+					macs[mac] = nil
+				}
+			}
+		}
+
+		return true
+	})
+
+	err = property.Wait(ctx, p, v.Reference(), []string{"guest.net"}, func(pc []types.PropertyChange) bool {
+		for _, c := range pc {
+			if c.Op != types.PropertyChangeOpAssign {
+				continue
+			}
+
+			nics := c.Val.(types.ArrayOfGuestNicInfo).GuestNicInfo
+			for _, nic := range nics {
+				mac := nic.MacAddress
+				if mac == "" || nic.IpConfig == nil {
+					continue
+				}
+
+				for _, ip := range nic.IpConfig.IpAddress {
+					if _, ok := macs[mac]; !ok {
+						continue // Ignore any that don't correspond to a VM device
+					}
+					if v4 && net.ParseIP(ip.IpAddress).To4() == nil {
+						continue // Ignore non IPv4 address
+					}
+					macs[mac] = append(macs[mac], ip.IpAddress)
+				}
+			}
+		}
+
+		for _, ips := range macs {
+			if len(ips) == 0 {
+				return false
+			}
+		}
+
+		return true
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return macs, nil
 }
 
 // Device returns the VirtualMachine's config.hardware.device property.
