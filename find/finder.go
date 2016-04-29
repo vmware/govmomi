@@ -768,10 +768,6 @@ func (f *Finder) FolderList(ctx context.Context, path string) ([]*object.Folder,
 		return nil, err
 	}
 
-	if len(es) == 0 {
-		return nil, &NotFoundError{"folder", path}
-	}
-
 	var folders []*object.Folder
 
 	for _, e := range es {
@@ -784,6 +780,10 @@ func (f *Finder) FolderList(ctx context.Context, path string) ([]*object.Folder,
 			// RootFolder
 			folders = append(folders, o)
 		}
+	}
+
+	if len(folders) == 0 {
+		return nil, &NotFoundError{"folder", path}
 	}
 
 	return folders, nil
