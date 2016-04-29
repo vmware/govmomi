@@ -198,3 +198,17 @@ func (f Folder) CreateDVS(ctx context.Context, spec types.DVSCreateSpec) (*Task,
 
 	return NewTask(f.c, res.Returnval), nil
 }
+
+func (f Folder) MoveInto(ctx context.Context, list []types.ManagedObjectReference) (*Task, error) {
+	req := types.MoveIntoFolder_Task{
+		This: f.Reference(),
+		List: list,
+	}
+
+	res, err := methods.MoveIntoFolder_Task(ctx, f.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(f.c, res.Returnval), nil
+}

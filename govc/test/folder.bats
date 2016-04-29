@@ -48,6 +48,19 @@ load test_helper
     run govc folder.info /$name
     assert_success
 
+    child=$(new_id)
+    run govc folder.create $child
+    assert_success
+
+    run govc folder.info /$name/$child
+    assert_failure
+
+    run govc folder.moveinto -folder /$name $child
+    assert_success
+
+    run govc folder.info /$name/$child
+    assert_success
+
     new=$(new_id)
     run govc folder.rename -folder /$name $new
     assert_success
