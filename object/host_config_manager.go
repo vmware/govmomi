@@ -109,3 +109,14 @@ func (m HostConfigManager) AccountManager(ctx context.Context) (*HostAccountMana
 
 	return NewHostAccountManager(m.c, *h.ConfigManager.AccountManager), nil
 }
+
+func (m HostConfigManager) OptionManager(ctx context.Context) (*OptionManager, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.advancedOption"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewOptionManager(m.c, *h.ConfigManager.AdvancedOption), nil
+}

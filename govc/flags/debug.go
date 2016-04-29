@@ -75,8 +75,15 @@ func (flag *DebugFlag) Process(ctx context.Context) error {
 		r = filepath.Join(r, "debug")
 
 		// Path for this particular run.
-		now := time.Now().Format("2006-01-02T15-04-05.999999999")
-		r = filepath.Join(r, now)
+		run := os.Getenv("GOVC_DEBUG_PATH_RUN")
+		if run == "" {
+			now := time.Now().Format("2006-01-02T15-04-05.999999999")
+			r = filepath.Join(r, now)
+		} else {
+			// reuse the same path
+			r = filepath.Join(r, run)
+			_ = os.RemoveAll(r)
+		}
 
 		err := os.MkdirAll(r, 0700)
 		if err != nil {

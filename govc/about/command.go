@@ -19,17 +19,21 @@ package about
 import (
 	"flag"
 	"fmt"
-	"os"
+	"io"
 	"text/tabwriter"
 
 	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type about struct {
 	*flags.ClientFlag
+	*flags.OutputFlag
+
+	Long bool
 }
 
 func init() {
@@ -39,10 +43,18 @@ func init() {
 func (cmd *about) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.Long, "l", false, "Include service content")
 }
 
 func (cmd *about) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -53,17 +65,36 @@ func (cmd *about) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-	a := c.ServiceContent.About
 
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Name:\t%s\n", a.Name)
-	fmt.Fprintf(tw, "Vendor:\t%s\n", a.Vendor)
-	fmt.Fprintf(tw, "Version:\t%s\n", a.Version)
-	fmt.Fprintf(tw, "Build:\t%s\n", a.Build)
-	fmt.Fprintf(tw, "OS type:\t%s\n", a.OsType)
-	fmt.Fprintf(tw, "API type:\t%s\n", a.ApiType)
-	fmt.Fprintf(tw, "API version:\t%s\n", a.ApiVersion)
-	fmt.Fprintf(tw, "Product ID:\t%s\n", a.ProductLineId)
-	fmt.Fprintf(tw, "UUID:\t%s\n", a.InstanceUuid)
+	res := infoResult{
+		a: &c.ServiceContent.About,
+	}
+
+	if cmd.Long {
+		res.Content = &c.ServiceContent
+	} else {
+		res.About = res.a
+	}
+
+	return cmd.WriteResult(&res)
+}
+
+type infoResult struct {
+	Content *types.ServiceContent `json:",omitempty"`
+	About   *types.AboutInfo      `json:",omitempty"`
+	a       *types.AboutInfo
+}
+
+func (r *infoResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	fmt.Fprintf(tw, "Name:\t%s\n", r.a.Name)
+	fmt.Fprintf(tw, "Vendor:\t%s\n", r.a.Vendor)
+	fmt.Fprintf(tw, "Version:\t%s\n", r.a.Version)
+	fmt.Fprintf(tw, "Build:\t%s\n", r.a.Build)
+	fmt.Fprintf(tw, "OS type:\t%s\n", r.a.OsType)
+	fmt.Fprintf(tw, "API type:\t%s\n", r.a.ApiType)
+	fmt.Fprintf(tw, "API version:\t%s\n", r.a.ApiVersion)
+	fmt.Fprintf(tw, "Product ID:\t%s\n", r.a.ProductLineId)
+	fmt.Fprintf(tw, "UUID:\t%s\n", r.a.InstanceUuid)
 	return tw.Flush()
 }
