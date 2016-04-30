@@ -1,5 +1,9 @@
 # changelog
 
+### 0.6.1 (2016-04-30)
+
+* Fix mo.Entity interface
+
 ### 0.6.0 (2016-04-29)
 
 * Add Common.Rename method
