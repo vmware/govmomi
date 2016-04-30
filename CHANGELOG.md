@@ -1,8 +1,20 @@
 # changelog
 
-### unreleased
+### 0.6.0 (2016-04-29)
 
-* Add VirtualMachine.WaitForNetIP helper
+* Add Common.Rename method
+
+* Add mo.Entity interface
+
+* Add OptionManager
+
+* Add Finder.FolderList method
+
+* Add VirtualMachine.WaitForNetIP method
+
+* Add VirtualMachine.RevertToSnapshot method
+
+* Add Datastore.Download method
 
 ### 0.5.0 (2016-03-30)
 

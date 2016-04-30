@@ -1,10 +1,18 @@
 # changelog
 
-### unreleased
+### 0.6.0 (2016-04-29)
+
+* Add folder commands: info, create, destroy, rename, moveinto
+
+* Add datastore.info command
 
 * Add `-a` and `-v4` flags to vm.ip command
 
 * Add host.account.{create,update,remove} commands
+
+* Add env command
+
+* Add vm.clone command
 
 ### 0.5.0 (2016-03-30)
 
