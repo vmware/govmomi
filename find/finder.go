@@ -703,6 +703,8 @@ func (f *Finder) VirtualMachineList(ctx context.Context, path string) ([]*object
 			vm := object.NewVirtualMachine(f.client, o.Reference())
 			vm.InventoryPath = e.Path
 			vms = append(vms, vm)
+		case mo.Folder:
+			f.findVirtualMachineListForFolder(ctx, e.Object, &vms)
 		}
 	}
 
@@ -711,6 +713,29 @@ func (f *Finder) VirtualMachineList(ctx context.Context, path string) ([]*object
 	}
 
 	return vms, nil
+}
+
+//foreach all Folder
+func (f *Finder) findVirtualMachineListForFolder(ctx context.Context, fobj object.Reference, vms *[]*object.VirtualMachine) {
+	if string(fobj.Reference().Type) != "Folder" {
+		return
+	}
+	folder := object.NewFolder(f.client, fobj.Reference())
+	childs, err := folder.Children(ctx)
+	if err != nil {
+		return
+	}
+	for _, chie := range childs {
+		switch chie.Reference().Type {
+		case "VirtualMachine":
+			vm := object.NewVirtualMachine(f.client, chie.Reference())
+			//vm.InventoryPath?
+			*vms = append(*vms, vm)
+		case "Folder":
+			f.findVirtualMachineListForFolder(ctx, chie, vms)
+		}
+
+	}
 }
 
 func (f *Finder) VirtualMachine(ctx context.Context, path string) (*object.VirtualMachine, error) {
