@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add HostStorageSystem.RescanAllHba method
+
 ### 0.6.2 (2016-05-11)
 
 * Get complete file details in Datastore.Stat

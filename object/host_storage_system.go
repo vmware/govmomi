@@ -78,3 +78,12 @@ func (s HostStorageSystem) UpdateDiskPartitionInfo(ctx context.Context, devicePa
 	_, err := methods.UpdateDiskPartitions(ctx, s.c, &req)
 	return err
 }
+
+func (s HostStorageSystem) RescanAllHba(ctx context.Context) error {
+	req := types.RescanAllHba{
+		This: s.Reference(),
+	}
+
+	_, err := methods.RescanAllHba(ctx, s.c, &req)
+	return err
+}

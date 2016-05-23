@@ -67,7 +67,8 @@ type info struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 
-	typ infoType
+	typ    infoType
+	rescan bool
 }
 
 func init() {
@@ -86,6 +87,8 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	}
 
 	f.Var(&cmd.typ, "t", fmt.Sprintf("Type (%s)", strings.Join(infoTypes, ",")))
+
+	f.BoolVar(&cmd.rescan, "rescan", false, "Rescan for new storage devices")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -115,6 +118,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	ss, err := host.ConfigManager().StorageSystem(ctx)
 	if err != nil {
 		return err
+	}
+
+	if cmd.rescan {
+		err = ss.RescanAllHba(ctx)
+		if err != nil {
+			return err
+		}
 	}
 
 	var hss mo.HostStorageSystem
