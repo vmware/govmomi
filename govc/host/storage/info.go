@@ -67,7 +67,8 @@ type info struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 
-	typ infoType
+	typ    infoType
+	rescan bool
 }
 
 func init() {
@@ -86,6 +87,8 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	}
 
 	f.Var(&cmd.typ, "t", fmt.Sprintf("Type (%s)", strings.Join(infoTypes, ",")))
+
+	f.BoolVar(&cmd.rescan, "rescan", false, "Rescan for new storage devices")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -115,6 +118,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	ss, err := host.ConfigManager().StorageSystem(ctx)
 	if err != nil {
 		return err
+	}
+
+	if cmd.rescan {
+		err = ss.RescanAllHba(ctx)
+		if err != nil {
+			return err
+		}
 	}
 
 	var hss mo.HostStorageSystem
@@ -164,11 +174,18 @@ func (r lunResult) Write(w io.Writer) error {
 	fmt.Fprintf(tw, "\n")
 
 	for _, e := range r.StorageDeviceInfo.ScsiLun {
+		var tags []string
 		var capacity int64
 
 		lun := e.GetScsiLun()
 		if disk, ok := e.(*types.HostScsiDisk); ok {
 			capacity = int64(disk.Capacity.Block) * int64(disk.Capacity.BlockSize)
+			if disk.LocalDisk != nil && *disk.LocalDisk {
+				tags = append(tags, "local")
+			}
+			if disk.Ssd != nil && *disk.Ssd {
+				tags = append(tags, "sdd")
+			}
 		}
 
 		fmt.Fprintf(tw, "%s\t", lun.DeviceName)
@@ -180,7 +197,10 @@ func (r lunResult) Write(w io.Writer) error {
 			fmt.Fprintf(tw, "%s\t", units.ByteSize(capacity))
 		}
 
-		fmt.Fprintf(tw, "%s\t", lun.Model)
+		fmt.Fprintf(tw, "%s", lun.Model)
+		if len(tags) > 0 {
+			fmt.Fprintf(tw, " (%s)", strings.Join(tags, ","))
+		}
 		fmt.Fprintf(tw, "\n")
 	}
 
