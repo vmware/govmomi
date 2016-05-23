@@ -174,11 +174,18 @@ func (r lunResult) Write(w io.Writer) error {
 	fmt.Fprintf(tw, "\n")
 
 	for _, e := range r.StorageDeviceInfo.ScsiLun {
+		var tags []string
 		var capacity int64
 
 		lun := e.GetScsiLun()
 		if disk, ok := e.(*types.HostScsiDisk); ok {
 			capacity = int64(disk.Capacity.Block) * int64(disk.Capacity.BlockSize)
+			if disk.LocalDisk != nil && *disk.LocalDisk {
+				tags = append(tags, "local")
+			}
+			if disk.Ssd != nil && *disk.Ssd {
+				tags = append(tags, "sdd")
+			}
 		}
 
 		fmt.Fprintf(tw, "%s\t", lun.DeviceName)
@@ -190,7 +197,10 @@ func (r lunResult) Write(w io.Writer) error {
 			fmt.Fprintf(tw, "%s\t", units.ByteSize(capacity))
 		}
 
-		fmt.Fprintf(tw, "%s\t", lun.Model)
+		fmt.Fprintf(tw, "%s", lun.Model)
+		if len(tags) > 0 {
+			fmt.Fprintf(tw, " (%s)", strings.Join(tags, ","))
+		}
 		fmt.Fprintf(tw, "\n")
 	}
 

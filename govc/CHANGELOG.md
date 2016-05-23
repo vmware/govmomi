@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add host.storage.mark command
+
 * Add `-rescan` option to host.storage.info command
 
 ### 0.6.0 (2016-04-29)

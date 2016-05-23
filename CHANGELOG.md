@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add HostStorageSystem methods: MarkAsSdd, MarkAsNonSdd, MarkAsLocal, MarkAsNonLocal
+
 * Add HostStorageSystem.RescanAllHba method
 
 ### 0.6.2 (2016-05-11)
