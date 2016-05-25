@@ -45,6 +45,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host/maintenance"
 	_ "github.com/vmware/govmomi/govc/host/option"
 	_ "github.com/vmware/govmomi/govc/host/portgroup"
+	_ "github.com/vmware/govmomi/govc/host/service"
 	_ "github.com/vmware/govmomi/govc/host/storage"
 	_ "github.com/vmware/govmomi/govc/host/vnic"
 	_ "github.com/vmware/govmomi/govc/host/vswitch"

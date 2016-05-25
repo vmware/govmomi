@@ -93,3 +93,14 @@ load test_helper
     run govc host.option.ls Config.HostAgent.plugins.solo.ENOENT
     assert_failure
 }
+
+@test "host.service" {
+    run govc host.service.ls
+    assert_success
+
+    run govc host.service.ls -json
+    assert_success
+
+    run govc host.service status TSM-SSH
+    assert_success
+}
