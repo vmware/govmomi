@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add host.service command
+
 * Add host.storage.mark command
 
 * Add `-rescan` option to host.storage.info command
