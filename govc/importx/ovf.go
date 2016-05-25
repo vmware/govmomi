@@ -349,7 +349,7 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 	}
 
 	a := cmd.Client.ServiceContent.About
-	if strings.EqualFold(a.ProductLineId, "esx") || strings.EqualFold(a.ProductLineId, "embeddedEsx") {
+	if strings.EqualFold(a.ProductLineId, "esx") || strings.EqualFold(a.ProductLineId, "embeddedEsx") || strings.EqualFold(a.ProductLineId, "vpx") {
 		cmd.Log("Injecting OVF environment...\n")
 
 		// build up Environment in order to marshal to xml
