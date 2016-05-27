@@ -73,3 +73,35 @@ upload_file() {
   assert_success
   [ ${#lines[@]} -gt 1 ]
 }
+
+
+@test "datastore.mkdir" {
+  name=$(new_id)
+
+  # Not supported datastore type is a failure
+  run govc datastore.mkdir -namespace "notfound"
+  assert_failure
+  assert_matches "govc: ServerFaultCode: .*" "${output}"
+
+  run govc datastore.mkdir "${name}"
+  assert_success
+  assert_empty "${output}"
+
+  # Verify the dir is present
+  run govc datastore.ls "${name}"
+  assert_success
+
+  # Delete the dir on an unsupported datastore type is a failure
+  run govc datastore.rm -namespace "${name}"
+  assert_failure
+  assert_matches "govc: ServerFaultCode: .*" "${output}"
+
+  # Delete the dir
+  run govc datastore.rm "${name}"
+  assert_success
+  assert_empty "${output}"
+
+  # Verify the dir is gone
+  run govc datastore.ls "${name}"
+  assert_failure
+}
