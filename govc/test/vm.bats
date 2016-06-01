@@ -148,6 +148,9 @@ load test_helper
 
   result=$(govc device.ls -vm $vm | grep lsilogic- | wc -l)
   [ $result -eq 0 ]
+
+  vm=$(new_id)
+  govc vm.create -on=false -disk.controller pvscsi -disk=1GB $vm
 }
 
 @test "vm.create in cluster" {

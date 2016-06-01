@@ -336,6 +336,7 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 		}
 
 		devices = append(devices, scsi)
+		cmd.controller = devices.Name(scsi)
 	}
 
 	// If controller is specified to be IDE or if an ISO is specified, add IDE controller.
