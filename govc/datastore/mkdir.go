@@ -19,6 +19,7 @@ package datastore
 import (
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -32,6 +33,7 @@ type mkdir struct {
 	*flags.DatastoreFlag
 
 	createParents bool
+	isNamespace   bool
 }
 
 func init() {
@@ -43,6 +45,7 @@ func (cmd *mkdir) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.createParents, "p", false, "Create intermediate directories as needed")
+	f.BoolVar(&cmd.isNamespace, "namespace", false, "Return uuid of namespace created on vsan datastore")
 }
 
 func (cmd *mkdir) Process(ctx context.Context) error {
@@ -67,26 +70,46 @@ func (cmd *mkdir) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	dc, err := cmd.Datacenter()
-	if err != nil {
-		return err
-	}
+	if cmd.isNamespace {
+		var uuid string
+		var ds *object.Datastore
 
-	// TODO(PN): Accept multiple args
-	path, err := cmd.DatastorePath(args[0])
-	if err != nil {
-		return err
-	}
+		if ds, err = cmd.Datastore(); err != nil {
+			return err
+		}
 
-	m := object.NewFileManager(c)
-	err = m.MakeDirectory(context.TODO(), path, dc, cmd.createParents)
+		path := args[0]
 
-	// ignore EEXIST if -p flag is given
-	if err != nil && cmd.createParents {
-		if soap.IsSoapFault(err) {
-			soapFault := soap.ToSoapFault(err)
-			if _, ok := soapFault.VimFault().(types.FileAlreadyExists); ok {
-				return nil
+		nm := object.NewDatastoreNamespaceManager(c)
+		if uuid, err = nm.CreateDirectory(ctx, ds, path, ""); err != nil {
+			return err
+		}
+
+		fmt.Println(uuid)
+	} else {
+		var dc *object.Datacenter
+		var path string
+
+		dc, err = cmd.Datacenter()
+		if err != nil {
+			return err
+		}
+
+		path, err = cmd.DatastorePath(args[0])
+		if err != nil {
+			return err
+		}
+
+		m := object.NewFileManager(c)
+		err = m.MakeDirectory(ctx, path, dc, cmd.createParents)
+
+		// ignore EEXIST if -p flag is given
+		if err != nil && cmd.createParents {
+			if soap.IsSoapFault(err) {
+				soapFault := soap.ToSoapFault(err)
+				if _, ok := soapFault.VimFault().(types.FileAlreadyExists); ok {
+					return nil
+				}
 			}
 		}
 	}

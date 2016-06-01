@@ -30,7 +30,8 @@ import (
 type rm struct {
 	*flags.DatastoreFlag
 
-	force bool
+	force       bool
+	isNamespace bool
 }
 
 func init() {
@@ -43,6 +44,7 @@ func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.force, "f", false, "Force; ignore nonexistent files and arguments")
+	f.BoolVar(&cmd.isNamespace, "namespace", false, "Path is uuid of namespace on vsan datastore")
 }
 
 func (cmd *rm) Process(ctx context.Context) error {
@@ -67,24 +69,36 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	dc, err := cmd.Datacenter()
+	var dc *object.Datacenter
+	dc, err = cmd.Datacenter()
 	if err != nil {
 		return err
 	}
 
-	// TODO(PN): Accept multiple args
-	path, err := cmd.DatastorePath(args[0])
-	if err != nil {
-		return err
+	if cmd.isNamespace {
+		path := args[0]
+
+		nm := object.NewDatastoreNamespaceManager(c)
+		err = nm.DeleteDirectory(ctx, dc, path)
+	} else {
+		var path string
+		var task *object.Task
+
+		// TODO(PN): Accept multiple args
+		path, err = cmd.DatastorePath(args[0])
+		if err != nil {
+			return err
+		}
+
+		m := object.NewFileManager(c)
+		task, err = m.DeleteDatastoreFile(ctx, path, dc)
+		if err != nil {
+			return err
+		}
+
+		err = task.Wait(ctx)
 	}
 
-	m := object.NewFileManager(c)
-	task, err := m.DeleteDatastoreFile(context.TODO(), path, dc)
-	if err != nil {
-		return err
-	}
-
-	err = task.Wait(context.TODO())
 	if err != nil {
 		if types.IsFileNotFound(err) && cmd.force {
 			// Ignore error

@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add `-namespace` option to datastore.mkdir and datastore.rm to create/remove namespaces on VSANs
+
 * Add host.service command
 
 * Add host.storage.mark command
