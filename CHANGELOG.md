@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add DatastoreNamespaceManager methods: CreateDirectory, DeleteDirectory
+
 * Add HostServiceSystem
 
 * Add HostStorageSystem methods: MarkAsSdd, MarkAsNonSdd, MarkAsLocal, MarkAsNonLocal
