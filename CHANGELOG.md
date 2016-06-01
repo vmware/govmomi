@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add HostDatastoreSystem.CreateLocalDatastore method
+
 * Add DatastoreNamespaceManager methods: CreateDirectory, DeleteDirectory
 
 * Add HostServiceSystem
