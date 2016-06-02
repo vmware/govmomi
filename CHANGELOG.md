@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Move InventoryPath field to object.Common
+
 * Add HostDatastoreSystem.CreateLocalDatastore method
 
 * Add DatastoreNamespaceManager methods: CreateDirectory, DeleteDirectory
