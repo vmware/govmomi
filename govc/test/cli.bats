@@ -14,6 +14,21 @@ load test_helper
   assert_success
 }
 
+@test "version" {
+    run govc version
+    assert_success
+
+    v=$(govc version | awk '{print $NF}')
+    run govc version -require "$v"
+    assert_success
+
+    run govc version -require "not-a-version-string"
+    assert_failure
+
+    run govc version -require 100.0.0
+    assert_failure
+}
+
 @test "login attempt without credentials" {
   run govc about -u $(echo $GOVC_URL | awk -F@ '{print $2}')
   assert_failure "govc: ServerFaultCode: Cannot complete login due to an incorrect user name or password."

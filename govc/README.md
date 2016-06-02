@@ -111,6 +111,19 @@ to set defaults:
 
 * [Create and configure a vCenter VM](examples/vcsa.sh)
 
+## Status
+
+Changes to the cli are subject to [semantic versioning](http://semver.org).
+
+Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
+
+When new govc commands or flags are added, the PATCH version will be incremented.  This enables you to require a minimum
+version from within a script, for example:
+
+```
+govc version -require 0.7.1
+```
+
 ## Projects using govc
 
 * [Kubernetes vSphere Provider](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/cluster/vsphere)
