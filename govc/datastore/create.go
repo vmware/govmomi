@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -48,6 +49,9 @@ type create struct {
 
 	// Options for VMFS
 	DiskCanonicalName string
+
+	// Options for local
+	Path string
 }
 
 func init() {
@@ -64,11 +68,16 @@ var vmfsTypes = []string{
 	string(types.HostFileSystemVolumeFileSystemTypeVMFS),
 }
 
+var localTypes = []string{
+	"local",
+}
+
 var allTypes = []string{}
 
 func init() {
 	allTypes = append(allTypes, nasTypes...)
 	allTypes = append(allTypes, vmfsTypes...)
+	allTypes = append(allTypes, localTypes...)
 }
 
 type typeFlag string
@@ -106,6 +115,10 @@ func (t *typeFlag) IsVmfsType() bool {
 	return t.partOf(vmfsTypes)
 }
 
+func (t *typeFlag) IsLocalType() bool {
+	return t.partOf(localTypes)
+}
+
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
@@ -129,6 +142,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 
 	// Options for VMFS
 	f.StringVar(&cmd.DiskCanonicalName, "disk", "", "Canonical name of disk (VMFS only)")
+
+	// Options for Local
+	f.StringVar(&cmd.Path, "path", "", "Local directory path for the datastore (local only)")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -146,8 +162,9 @@ func (cmd *create) Description() string {
 	return `Create datastore on HOST.
 
 Examples:
-  govc datastore.create -type nfs -name nfsDatastore -remote-host 10.143.2.232 -remote-path /share  cluster1
-  govc datastore.create -type vmfs -name localDatastore -disk=mpx.vmhba0:C0:T0:L0 cluster1`
+  govc datastore.create -type nfs -name nfsDatastore -remote-host 10.143.2.232 -remote-path /share cluster1
+  govc datastore.create -type vmfs -name vmfsDatastore -disk=mpx.vmhba0:C0:T0:L0 cluster1
+  govc datastore.create -type local -name localDatastore -path /var/datastore host1`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -161,14 +178,21 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return cmd.CreateNasDatastore(ctx, hosts)
 	case cmd.Type.IsVmfsType():
 		return cmd.CreateVmfsDatastore(ctx, hosts)
+	case cmd.Type.IsLocalType():
+		return cmd.CreateLocalDatastore(ctx, hosts)
 	default:
 		return fmt.Errorf("unhandled type %#v", cmd.Type)
 	}
 }
 
 func (cmd *create) GetHostNasVolumeSpec() types.HostNasVolumeSpec {
+	localPath := cmd.Path
+	if localPath == "" {
+		localPath = cmd.Name
+	}
+
 	s := types.HostNasVolumeSpec{
-		LocalPath:  cmd.Name,
+		LocalPath:  localPath,
 		Type:       cmd.Type.String(),
 		RemoteHost: cmd.RemoteHost,
 		RemotePath: cmd.RemotePath,
@@ -264,6 +288,30 @@ func (cmd *create) CreateVmfsDatastore(ctx context.Context, hosts []*object.Host
 		spec := *option.Spec.(*types.VmfsDatastoreCreateSpec)
 		spec.Vmfs.VolumeName = cmd.Name
 		_, err = ds.CreateVmfsDatastore(ctx, spec)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (cmd *create) CreateLocalDatastore(ctx context.Context, hosts []*object.HostSystem) error {
+	for _, host := range hosts {
+		ds, err := host.ConfigManager().DatastoreSystem(ctx)
+		if err != nil {
+			return err
+		}
+
+		if cmd.Path == "" {
+			cmd.Path = cmd.Name
+		}
+
+		if cmd.Name == "" {
+			cmd.Name = filepath.Base(cmd.Path)
+		}
+
+		_, err = ds.CreateLocalDatastore(ctx, cmd.Name, cmd.Path)
 		if err != nil {
 			return err
 		}
