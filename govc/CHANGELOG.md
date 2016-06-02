@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add `-require` flag to version command
+
 * Add support for local type in the datastore.create command
 
 * Add `-namespace` option to datastore.mkdir and datastore.rm to create/remove namespaces on VSANs
