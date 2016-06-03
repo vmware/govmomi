@@ -65,6 +65,9 @@ func (c Common) Client() *vim25.Client {
 
 // Name returns the base name of the InventoryPath field
 func (c Common) Name() string {
+	if c.InventoryPath == "" {
+		return ""
+	}
 	return path.Base(c.InventoryPath)
 }
 

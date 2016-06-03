@@ -1,5 +1,9 @@
 # changelog
 
+### 0.7.1 (2016-06-03)
+
+* Fix datastore.{upload,download} against VirtualCenter
+
 ### 0.7.0 (2016-06-02)
 
 * Add `-require` flag to version command

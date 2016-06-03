@@ -1,5 +1,9 @@
 # changelog
 
+### 0.7.1 (2016-06-03)
+
+* Fix object.ObjectName method
+
 ### 0.7.0 (2016-06-02)
 
 * Move InventoryPath field to object.Common
