@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.7.0 (2016-06-02)
 
 * Move InventoryPath field to object.Common
 
