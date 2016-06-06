@@ -23,6 +23,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -360,6 +361,15 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 
 	m := session.NewManager(c)
 	u := flag.url.User
+
+	if u.Username() == "" {
+		// Assume we are running on an ESX or Workstation host if no username is provided
+		u, err = flag.localTicket(context.TODO(), m)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if isTunnel {
 		err = m.LoginExtensionByCertificate(context.TODO(), u.Username(), "")
 		if err != nil {
@@ -378,6 +388,20 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	}
 
 	return c, nil
+}
+
+func (flag *ClientFlag) localTicket(ctx context.Context, m *session.Manager) (*url.Userinfo, error) {
+	ticket, err := m.AcquireLocalTicket(ctx, os.Getenv("USER"))
+	if err != nil {
+		return nil, err
+	}
+
+	password, err := ioutil.ReadFile(ticket.PasswordFilePath)
+	if err != nil {
+		return nil, err
+	}
+
+	return url.UserPassword(ticket.UserName, string(password)), nil
 }
 
 // apiVersionValid returns whether or not the API version supported by the
