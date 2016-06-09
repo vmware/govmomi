@@ -91,3 +91,26 @@ load test_helper
   assert_success
   [ ${#lines[@]} -gt 0 ]
 }
+
+@test "ls moref" {
+    # ensure the vm folder isn't empty
+    run govc vm.create -on=false "$(new_id)"
+    assert_success
+
+    # list dc folder paths
+    folders1=$(govc ls)
+    # list dc folder refs | govc ls -L ; should output the same paths
+    folders2=$(govc ls -i | xargs govc ls -L)
+
+    assert_equal "$folders1" "$folders2"
+
+    for folder in $folders1
+    do
+        # list paths in $folder
+        items1=$(govc ls "$folder")
+        # list refs in $folder | govc ls -L ; should output the same paths
+        items2=$(govc ls -i "$folder" | xargs -d '\n' govc ls -L)
+
+        assert_equal "$items1" "$items2"
+    done
+}

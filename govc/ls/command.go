@@ -33,8 +33,10 @@ import (
 type ls struct {
 	*flags.DatacenterFlag
 
-	Long bool
-	Type string
+	Long  bool
+	Type  string
+	ToRef bool
+	DeRef bool
 }
 
 func init() {
@@ -46,6 +48,8 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.Long, "l", false, "Long listing format")
+	f.BoolVar(&cmd.ToRef, "i", false, "Print the managed object reference")
+	f.BoolVar(&cmd.DeRef, "L", false, "Follow managed object references")
 	f.StringVar(&cmd.Type, "t", "", "Object type")
 }
 
@@ -75,8 +79,8 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	lr := listResult{
+		ls:       cmd,
 		Elements: nil,
-		Long:     cmd.Long,
 	}
 
 	args := f.Args()
@@ -84,7 +88,19 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		args = []string{"."}
 	}
 
+	var ref = new(types.ManagedObjectReference)
+
 	for _, arg := range args {
+		if cmd.DeRef && ref.FromString(arg) {
+			e, err := finder.Element(ctx, *ref)
+			if err == nil {
+				if cmd.typeMatch(*ref) {
+					lr.Elements = append(lr.Elements, *e)
+				}
+				continue
+			}
+		}
+
 		es, err := finder.ManagedObjectListChildren(context.TODO(), arg)
 		if err != nil {
 			return err
@@ -101,15 +117,23 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 type listResult struct {
+	*ls
 	Elements []list.Element `json:"elements"`
-
-	Long bool `json:"-"`
 }
 
 func (l listResult) Write(w io.Writer) error {
 	var err error
 
 	for _, e := range l.Elements {
+		if l.ToRef {
+			fmt.Fprint(w, e.Object.Reference().String())
+			if l.Long {
+				fmt.Fprintf(w, " %s", e.Path)
+			}
+			fmt.Fprintln(w)
+			continue
+		}
+
 		if !l.Long {
 			fmt.Fprintf(w, "%s\n", e.Path)
 			continue

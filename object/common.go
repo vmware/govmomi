@@ -71,6 +71,10 @@ func (c Common) Name() string {
 	return path.Base(c.InventoryPath)
 }
 
+func (c *Common) SetInventoryPath(p string) {
+	c.InventoryPath = p
+}
+
 // ObjectName returns the base name of the InventoryPath field if set,
 // otherwise fetches the mo.ManagedEntity.Name field via the property collector.
 func (c Common) ObjectName(ctx context.Context) (string, error) {
