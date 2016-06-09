@@ -161,6 +161,10 @@ func (d Datastore) ServiceTicket(ctx context.Context, path string, method string
 		Value: ticket.Id,
 	}
 
+	if d.c.IsVC() && ticket.HostName != "" {
+		u.Host = ticket.HostName
+	}
+
 	return u, cookie, nil
 }
 
