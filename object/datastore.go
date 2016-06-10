@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"math/rand"
+	"os"
 	"path"
 	"strings"
 
@@ -110,6 +111,36 @@ func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 	return NewHostDatastoreBrowser(d.c, do.Browser), nil
 }
 
+func (d Datastore) useServiceTicketHostName(name string) bool {
+	// No need if talking directly to ESX.
+	if !d.c.IsVC() {
+		return false
+	}
+
+	// If version happens to be < 5.1
+	if name == "" {
+		return false
+	}
+
+	// If the HostSystem is using DHCP on a network without dynamic DNS,
+	// HostSystem.Config.Network.DnsConfig.HostName is set to "localhost" by default.
+	// This resolves to "localhost.localdomain" by default via /etc/hosts on ESX.
+	// In that case, we will stick with the HostSystem.Name which is the IP address that
+	// was used to connect the host to VC.
+	if name == "localhost.localdomain" {
+		return false
+	}
+
+	// An escape hatch, as it is still possible to have HostName that doesn't resolve via DNS,
+	// or resolves to an address that isn't reachable.
+	env := os.Getenv("GOVMOMI_USE_SERVICE_TICKET_HOSTNAME")
+	if env == "0" || env == "false" {
+		return false
+	}
+
+	return true
+}
+
 // ServiceTicket obtains a ticket via AcquireGenericServiceTicket and returns it an http.Cookie with the url.URL
 // that can be used along with the ticket cookie to access the given path.
 func (d Datastore) ServiceTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
@@ -161,7 +192,7 @@ func (d Datastore) ServiceTicket(ctx context.Context, path string, method string
 		Value: ticket.Id,
 	}
 
-	if d.c.IsVC() && ticket.HostName != "" {
+	if d.useServiceTicketHostName(ticket.HostName) {
 		u.Host = ticket.HostName
 	}
 
