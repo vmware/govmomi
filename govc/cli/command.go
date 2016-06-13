@@ -90,6 +90,18 @@ func commandHelp(name string, cmd Command, f *flag.FlagSet) {
 	}
 }
 
+func clientLogout(ctx context.Context, cmd Command) error {
+	type logout interface {
+		Logout(context.Context) error
+	}
+
+	if l, ok := cmd.(logout); ok {
+		return l.Logout(ctx)
+	}
+
+	return nil
+}
+
 func Run(args []string) int {
 	var err error
 
@@ -128,6 +140,10 @@ func Run(args []string) int {
 		goto error
 	}
 
+	if err = clientLogout(ctx, cmd); err != nil {
+		goto error
+	}
+
 	return 0
 
 error:
@@ -137,6 +153,7 @@ error:
 		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
 	}
 
-	return 1
+	_ = clientLogout(ctx, cmd)
 
+	return 1
 }
