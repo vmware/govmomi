@@ -1,5 +1,11 @@
 # changelog
 
+### Unreleased
+
+* Add govc/vm.markasvm command
+
+* Add govc/vm.markastemplate command
+
 ### 0.7.1 (2016-06-03)
 
 * Fix object.ObjectName method
