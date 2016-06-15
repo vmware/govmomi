@@ -83,3 +83,17 @@ func (flag *FolderFlag) Folder() (*object.Folder, error) {
 
 	return flag.folder, nil
 }
+
+func (flag *FolderFlag) FolderOrRoot() (*object.Folder, error) {
+	if flag.name == "" {
+		client, err := flag.Client()
+		if err != nil {
+			return nil, err
+		}
+
+		flag.folder = object.NewRootFolder(client)
+		return flag.folder, nil
+	}
+
+	return flag.Folder()
+}
