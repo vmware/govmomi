@@ -28,12 +28,11 @@ fi
 
 # Otherwise, use default ssh opts + sshpass if available
 if [ ${#ssh_opts[@]} -eq 0 ] ; then
-  eval "$(govc env)"
-
-  ssh_opts=(-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=FATAL -o User=${GOVC_USERNAME})
+  user="$(govc env GOVC_USERNAME)"
+  ssh_opts=(-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=FATAL -o User=$user)
 
   if [ -x "$(which sshpass)" ] ; then
-    password="$GOVC_PASSWORD"
+      password="$(govc env GOVC_PASSWORD)"
     scp=(sshpass -p $password scp)
     ssh=(sshpass -p $password ssh)
   fi

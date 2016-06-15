@@ -35,10 +35,9 @@ scp=(scp)
 ssh=(ssh)
 
 # Extract host from GOVC_URL
-eval "$(govc env -x)"
-host="$GOVC_URL_HOST"
+host="$(govc env -x GOVC_HOST)"
 username=root
-password="$GOVC_PASSWORD"
+password="$(govc env GOVC_PASSWORD)"
 
 if [ -x "$(which sshpass)" ] ; then
   scp=(sshpass -p "$password" scp)
