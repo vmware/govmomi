@@ -817,7 +817,7 @@ func (f *Finder) FolderList(ctx context.Context, path string) ([]*object.Folder,
 
 	for _, e := range es {
 		switch o := e.Object.(type) {
-		case mo.Folder:
+		case mo.Folder, mo.StoragePod:
 			folder := object.NewFolder(f.client, o.Reference())
 			folder.InventoryPath = e.Path
 			folders = append(folders, folder)

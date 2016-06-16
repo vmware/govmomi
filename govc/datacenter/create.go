@@ -19,15 +19,13 @@ package datacenter
 import (
 	"flag"
 
-	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 	"golang.org/x/net/context"
 )
 
 type create struct {
-	*flags.ClientFlag
+	*flags.FolderFlag
 }
 
 func init() {
@@ -35,48 +33,34 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
+	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
 }
 
 func (cmd *create) Usage() string {
-	return "[DATACENTER NAME]..."
+	return "NAME..."
 }
 
 func (cmd *create) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
+	if err := cmd.FolderFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	datacenters := f.Args()
-	if len(datacenters) < 1 {
-		return flag.ErrHelp
-	}
-
-	client, err := cmd.ClientFlag.Client()
+	folder, err := cmd.FolderOrRoot()
 	if err != nil {
 		return err
 	}
 
-	finder := find.NewFinder(client, false)
-	rootFolder := object.NewRootFolder(client)
-	for _, datacenterToCreate := range datacenters {
-		_, err := finder.Datacenter(context.TODO(), datacenterToCreate)
-		if err == nil {
-			// The datacenter was found, no need to create it
-			continue
-		}
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
 
-		switch err.(type) {
-		case *find.NotFoundError:
-			_, err = rootFolder.CreateDatacenter(context.TODO(), datacenterToCreate)
-			if err != nil {
-				return err
-			}
-		default:
+	for _, name := range f.Args() {
+		_, err := folder.CreateDatacenter(ctx, name)
+		if err != nil {
 			return err
 		}
 	}

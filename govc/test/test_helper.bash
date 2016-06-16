@@ -113,7 +113,9 @@ skip_if_vca() {
 
 # remove username/password from $GOVC_URL and set $GOVC_{USERNAME,PASSWORD}
 govc_url_to_vars() {
-  eval "$(govc env)"
+  GOVC_USERNAME="$(govc env GOVC_USERNAME)"
+  GOVC_PASSWORD="$(govc env GOVC_PASSWORD)"
+  GOVC_URL="$(govc env GOVC_URL)"
   export GOVC_URL GOVC_USERNAME GOVC_PASSWORD
 
   # double check that we removed user/pass

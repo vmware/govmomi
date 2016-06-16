@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -310,6 +311,14 @@ func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
 	m := session.NewManager(c)
 	u, err := m.UserSession(context.TODO())
 	if err != nil {
+		if soap.IsSoapFault(err) {
+			fault := soap.ToSoapFault(err).VimFault()
+			// If the PropertyCollector is not found, the saved session for this URL is not valid
+			if _, ok := fault.(types.ManagedObjectNotFound); ok {
+				return nil, nil
+			}
+		}
+
 		return nil, err
 	}
 
@@ -432,6 +441,16 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 
 	flag.client = c
 	return flag.client, nil
+}
+
+func (flag *ClientFlag) Logout(ctx context.Context) error {
+	if flag.persist || flag.client == nil {
+		return nil
+	}
+
+	m := session.NewManager(flag.client)
+
+	return m.Logout(ctx)
 }
 
 // Environ returns the govc environment variables for this connection

@@ -39,7 +39,7 @@ func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *destroy) Usage() string {
-	return "[DATACENTER NAME]..."
+	return "PATH..."
 }
 
 func (cmd *destroy) Process(ctx context.Context) error {
@@ -50,10 +50,9 @@ func (cmd *destroy) Process(ctx context.Context) error {
 }
 
 func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
-	if len(f.Args()) < 1 {
+	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}
-	datacentersToDestroy := f.Args()
 
 	client, err := cmd.ClientFlag.Client()
 	if err != nil {
@@ -61,21 +60,24 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	finder := find.NewFinder(client, false)
-	for _, datacenterToDestroy := range datacentersToDestroy {
-		foundDatacenters, err := finder.DatacenterList(context.TODO(), datacenterToDestroy)
+
+	for _, path := range f.Args() {
+		dcs, err := finder.DatacenterList(ctx, path)
 		if err != nil {
 			return err
 		}
-		for _, foundDatacenter := range foundDatacenters {
-			task, err := foundDatacenter.Destroy(context.TODO())
+
+		for _, dc := range dcs {
+			task, err := dc.Destroy(ctx)
 			if err != nil {
 				return err
 			}
 
-			if err := task.Wait(context.TODO()); err != nil {
+			if err := task.Wait(ctx); err != nil {
 				return err
 			}
 		}
 	}
+
 	return nil
 }

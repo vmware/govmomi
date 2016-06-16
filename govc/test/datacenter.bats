@@ -2,32 +2,40 @@
 
 load test_helper
 
-@test "datastore.info" {
-    run govc datastore.info
+@test "datacenter.info" {
+    dc=$(govc ls -t Datacenter / | head -n1)
+    run govc datacenter.info "$dc"
     assert_success
 
-    run govc datastore.info /enoent
+    run govc datacenter.info -json "$dc"
+    assert_success
+
+    run govc datacenter.info /enoent
     assert_failure
 }
 
 @test "create and destroy datacenters" {
   vcsim_env
-  dcs=(`uuidgen` `uuidgen`)
-  run govc datacenter.create ${dcs[0]} ${dcs[1]}
+
+  dcs=($(new_id) $(new_id))
+  run govc datacenter.create "${dcs[@]}"
   assert_success
 
   for dc in ${dcs[*]}; do
-    run govc ls /$dc
+    run govc ls "/$dc"
     assert_success
     # /<datacenter>/{vm,network,host,datastore}
     [ ${#lines[@]} -eq 4 ]
+
+    run govc datacenter.info "/$dc"
+    assert_success
   done
 
-  run govc datacenter.destroy ${dcs[0]} ${dcs[1]}
+  run govc datacenter.destroy "${dcs[@]}"
   assert_success
 
   for dc in ${dcs[*]}; do
-    run govc ls /$dc
+    run govc ls "/$dc"
     assert_success
     [ ${#lines[@]} -eq 0 ]
   done
@@ -35,41 +43,35 @@ load test_helper
 
 @test "destroy datacenter using glob" {
   vcsim_env
-  prefix=test-dc
-  dcs=(${prefix}-`uuidgen` ${prefix}-`uuidgen`)
-  run govc datacenter.create ${dcs[0]} ${dcs[1]}
+  unset GOVC_DATACENTER GOVC_DATASTORE
+
+  folder=$(new_id)
+  dcs=($(new_id) $(new_id))
+
+  run govc folder.create "$folder"
   assert_success
 
-  run govc datacenter.destroy ${prefix}-*
+  run govc datacenter.create -folder "$folder" "${dcs[@]}"
+  assert_success
+
+  run govc datacenter.destroy "$folder/*"
   assert_success
 
   for dc in ${dcs[*]}; do
-    run govc ls /$dc
+    run govc ls "/$dc"
     assert_success
     [ ${#lines[@]} -eq 0 ]
   done
-}
 
-@test "destroy datacenter that doesn't exist" {
-  vcsim_env
-  dc=$(uuidgen)
-
-  run govc datacenter.destroy $dc
+  run govc folder.destroy "$folder"
   assert_success
 }
 
-@test "create datacenter that already exists" {
+@test "destroy datacenter that does not exist" {
   vcsim_env
-  dc=$(uuidgen)
 
-  run govc datacenter.create $dc
-  assert_success
-
-  run govc datacenter.create $dc
-  assert_success
-
-  run govc datacenter.destroy $dc
-  assert_success
+  run govc datacenter.destroy "/enoent"
+  assert_failure
 }
 
 @test "fails when datacenter name not specified" {
@@ -80,13 +82,11 @@ load test_helper
   assert_failure
 }
 
-@test "fails when operation attempted on standalone ESX host" {
+@test "datacenter commands fail against ESX" {
   run govc datacenter.create something
   assert_failure
   assert_output "govc: ServerFaultCode: The operation is not supported on the object."
-}
 
-@test "fails when attempting to destroy ha-datacenter" {
   run govc datacenter.destroy ha-datacenter
   assert_failure
   assert_output "govc: The operation is not supported on the object."

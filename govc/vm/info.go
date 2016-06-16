@@ -292,6 +292,9 @@ func (r *infoResult) Write(w io.Writer) error {
 		}
 
 		if r.cmd.Resources {
+			if s.Storage == nil {
+				s.Storage = new(types.VirtualMachineStorageSummary)
+			}
 			fmt.Fprintf(tw, "  CPU usage:\t%dMHz\n", s.QuickStats.OverallCpuUsage)
 			fmt.Fprintf(tw, "  Host memory usage:\t%dMB\n", s.QuickStats.HostMemoryUsage)
 			fmt.Fprintf(tw, "  Guest memory usage:\t%dMB\n", s.QuickStats.GuestMemoryUsage)
