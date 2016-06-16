@@ -27,6 +27,8 @@ import (
 
 type create struct {
 	*flags.DatacenterFlag
+
+	pod bool
 }
 
 func init() {
@@ -36,6 +38,8 @@ func init() {
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.pod, "pod", false, "Create folder(s) of type StoragePod (DatastoreCluster)")
 }
 
 func (cmd *create) Usage() string {
@@ -75,7 +79,20 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		_, err = folder.CreateFolder(ctx, name)
+		var create func() error
+		if cmd.pod {
+			create = func() error {
+				_, err = folder.CreateStoragePod(ctx, name)
+				return err
+			}
+		} else {
+			create = func() error {
+				_, err = folder.CreateFolder(ctx, name)
+				return err
+			}
+		}
+
+		err = create()
 		if err != nil {
 			return err
 		}
