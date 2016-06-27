@@ -131,14 +131,20 @@ func (d Datastore) useServiceTicketHostName(name string) bool {
 		return false
 	}
 
-	// An escape hatch, as it is still possible to have HostName that doesn't resolve via DNS,
-	// or resolves to an address that isn't reachable.
-	env := os.Getenv("GOVMOMI_USE_SERVICE_TICKET_HOSTNAME")
-	if env == "0" || env == "false" {
-		return false
+	// Still possible to have HostName that don't resolve via DNS,
+	// so we default to false.
+	key := "GOVMOMI_USE_SERVICE_TICKET_HOSTNAME"
+
+	val := d.c.URL().Query().Get(key)
+	if val == "" {
+		val = os.Getenv(key)
 	}
 
-	return true
+	if val == "1" || val == "true" {
+		return true
+	}
+
+	return false
 }
 
 // ServiceTicket obtains a ticket via AcquireGenericServiceTicket and returns it an http.Cookie with the url.URL
