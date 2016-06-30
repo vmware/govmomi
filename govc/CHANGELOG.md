@@ -1,5 +1,23 @@
 # changelog
 
+### 0.8.0 (2016-06-30)
+
+* If username (`-u` / GOVC_USERNAME) is empty, attempt login via local ticket (Workstation)
+
+* Add StoragePod support to govc folder.create
+
+* Add `-folder` flag to datacenter.create command
+
+* Logout when session persistence is disabled
+
+* Add `-L` flag to ls command for resolving by managed object reference
+
+* Add `-i` flag to ls command for listing the managed object reference
+
+* Add vm.markasvm command
+
+* Add vm.markastemplate command
+
 ### 0.7.1 (2016-06-03)
 
 * Fix datastore.{upload,download} against VirtualCenter

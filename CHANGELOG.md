@@ -1,10 +1,16 @@
 # changelog
 
-### Unreleased
+### 0.8.0 (2016-06-30)
 
-* Add govc/vm.markasvm command
+* Add session.Manager.AcquireLocalTicket
 
-* Add govc/vm.markastemplate command
+* Include StoragePod in Finder.FolderList
+
+* Add Finder methods for finding by ManagedObjectReference: Element, ObjectReference
+
+* Add mo.ManagedObjectReference methods: Reference, String, FromString
+
+* Add support using SessionManagerGenericServiceTicket.HostName for Datastore HTTP access
 
 ### 0.7.1 (2016-06-03)
 
