@@ -16,6 +16,10 @@ load test_helper
 }
 
 @test "vm.ip -esxcli" {
+  ok=$(govc host.esxcli system settings advanced list -o /Net/GuestIPHack | grep ^IntValue: | awk '{print $2}')
+  if [ "$ok" != "1" ] ; then
+    skip "/Net/GuestIPHack=0"
+  fi
   id=$(new_ttylinux_vm)
 
   run govc vm.power -on $id
