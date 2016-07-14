@@ -71,8 +71,12 @@ func (cmd *events) printEvents(ctx context.Context, page []types.BaseEvent, m *e
 		event := e.GetEvent()
 		msg := strings.TrimSpace(event.FullFormattedMessage)
 
+		// if this is a TaskEvent gather a little more information
 		if t, ok := e.(*types.TaskEvent); ok {
-			msg = fmt.Sprintf("%s (target=%s %s)", msg, t.Info.Entity.Type, t.Info.EntityName)
+			// some tasks won't have this information, so just use the event message
+			if t.Info.Entity != nil {
+				msg = fmt.Sprintf("%s (target=%s %s)", msg, t.Info.Entity.Type, t.Info.EntityName)
+			}
 		}
 
 		fmt.Fprintf(os.Stdout, "[%s] [%s] %s\n",
