@@ -145,7 +145,7 @@ func (m VirtualDiskManager) DeleteVirtualDisk(ctx context.Context, name string, 
 }
 
 // Queries virtual disk uuid
-func (m VirtualDiskManager) QueryVirtualDiskUuid(ctx context.Context, dc *Datacenter, name string) (string, error) {
+func (m VirtualDiskManager) QueryVirtualDiskUuid(ctx context.Context, name string, dc *Datacenter) (string, error) {
 	req := types.QueryVirtualDiskUuid{
 		This: m.Reference(),
 		Name: name,
