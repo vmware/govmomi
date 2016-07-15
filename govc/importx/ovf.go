@@ -217,6 +217,22 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		PropertyMapping: cmd.Map(cmd.Options.PropertyMapping),
 	}
 
+	if e.Network != nil {
+		finder, err := cmd.DatastoreFlag.Finder()
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range e.Network.Networks {
+			if net, err := finder.Network(context.TODO(), n.Name); err == nil {
+				cisp.NetworkMapping = append(cisp.NetworkMapping,
+					types.OvfNetworkMapping{
+						Name:    n.Name,
+						Network: net.Reference(),
+					})
+			}
+		}
+	}
+
 	m := object.NewOvfManager(cmd.Client)
 	spec, err := m.CreateImportSpec(context.TODO(), string(o), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
