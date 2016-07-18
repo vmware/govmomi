@@ -157,6 +157,13 @@ func (m VirtualDiskManager) QueryVirtualDiskUuid(ctx context.Context, name strin
 	}
 
 	res, err := methods.QueryVirtualDiskUuid(ctx, m.c, &req)
+	if err != nil {
+		return "", err
+	}
 
-	return res.Returnval, err
+	if res == nil {
+		return "", nil
+	}
+
+	return res.Returnval, nil
 }
