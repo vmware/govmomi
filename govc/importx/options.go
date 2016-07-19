@@ -32,6 +32,11 @@ type Property struct {
 	Spec *ovf.Property `json:",omitempty"`
 }
 
+type Network struct {
+	Name    string
+	Network string
+}
+
 type Options struct {
 	AllDeploymentOptions []string `json:",omitempty"`
 	Deployment           string
@@ -46,6 +51,8 @@ type Options struct {
 	IPProtocol           string
 
 	PropertyMapping []Property `json:",omitempty"`
+
+	NetworkMapping []Network `json:",omitempty"`
 
 	PowerOn      bool
 	InjectOvfEnv bool

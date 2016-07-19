@@ -177,6 +177,35 @@ func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
 	return
 }
 
+func (cmd *ovfx) NetworkMap(e *ovf.Envelope) (p []types.OvfNetworkMapping) {
+	finder, err := cmd.DatastoreFlag.Finder()
+	if err != nil {
+		return
+	}
+
+	networks := map[string]string{}
+
+	if e.Network != nil {
+		for _, net := range e.Network.Networks {
+			networks[net.Name] = net.Name
+		}
+	}
+
+	for _, net := range cmd.Options.NetworkMapping {
+		networks[net.Name] = net.Network
+	}
+
+	for src, dst := range networks {
+		if net, err := finder.Network(context.TODO(), dst); err == nil {
+			p = append(p, types.OvfNetworkMapping{
+				Name:    src,
+				Network: net.Reference(),
+			})
+		}
+	}
+	return
+}
+
 func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 	o, err := cmd.ReadOvf(fpath)
 	if err != nil {
@@ -215,22 +244,7 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 			DeploymentOption: cmd.Options.Deployment,
 			Locale:           "US"},
 		PropertyMapping: cmd.Map(cmd.Options.PropertyMapping),
-	}
-
-	if e.Network != nil {
-		finder, err := cmd.DatastoreFlag.Finder()
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range e.Network.Networks {
-			if net, err := finder.Network(context.TODO(), n.Name); err == nil {
-				cisp.NetworkMapping = append(cisp.NetworkMapping,
-					types.OvfNetworkMapping{
-						Name:    n.Name,
-						Network: net.Reference(),
-					})
-			}
-		}
+		NetworkMapping:  cmd.NetworkMap(e),
 	}
 
 	m := object.NewOvfManager(cmd.Client)
