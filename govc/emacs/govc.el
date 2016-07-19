@@ -282,6 +282,9 @@ query string.  For example:
   (setq govc-urls '(\"root:password@hostname?datastore=vsanDatastore\"))
 ```")
 
+(defvar-local govc-session-network nil
+  "Network to use for the current `govc-session'.")
+
 (defvar-local govc-filter nil
   "Resource path filter.")
 
@@ -305,7 +308,7 @@ Return value is the url anchor if set, otherwise the hostname is returned."
 
 (defconst govc-environment-map (--map (cons (concat "GOVC_" (upcase it))
                                             (intern (concat "govc-session-" it)))
-                                      '("url" "insecure" "datacenter" "datastore"))
+                                      '("url" "insecure" "datacenter" "datastore" "network"))
 
   "Map of `GOVC_*' environment variable names to `govc-session-*' symbol names.")
 
@@ -398,6 +401,9 @@ Also fixes the case where user contains an '@'."
                    (setf (url-target url) nil))
           (progn (setf (url-host url) (govc-table-column-value "IP address"))
                  (setf (url-target url) (govc-table-column-value "Name"))))
+        (setf (url-filename url) "") ; erase query string
+        (if (string-empty-p (url-user url))
+            (setf (url-user url) "root")) ; local workstation url has no user set
         (url-recreate-url url))))
 
 (defun govc-urls-completing-read ()
@@ -431,6 +437,7 @@ Also fixes the case where user contains an '@'."
     ;; event of `keyboard-quit' in `read-string'.
     (setq govc-session-datacenter nil
           govc-session-datastore nil
+          govc-session-network nil
           govc-filter nil)
     (govc-session-set-url url))
   (unless govc-session-insecure
