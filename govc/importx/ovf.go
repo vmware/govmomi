@@ -261,6 +261,15 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
+	if cmd.Options.Annotation != "" {
+		switch s := spec.ImportSpec.(type) {
+		case *types.VirtualMachineImportSpec:
+			s.ConfigSpec.Annotation = cmd.Options.Annotation
+		case *types.VirtualAppImportSpec:
+			s.VAppConfigSpec.Annotation = cmd.Options.Annotation
+		}
+	}
+
 	var host *object.HostSystem
 	if cmd.SearchFlag.IsSet() {
 		if host, err = cmd.HostSystem(); err != nil {

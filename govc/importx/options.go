@@ -54,6 +54,8 @@ type Options struct {
 
 	NetworkMapping []Network `json:",omitempty"`
 
+	Annotation string `json:",omitempty"`
+
 	PowerOn      bool
 	InjectOvfEnv bool
 	WaitForIP    bool
