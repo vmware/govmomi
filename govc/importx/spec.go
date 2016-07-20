@@ -155,6 +155,19 @@ func (cmd *spec) Spec(fpath string) error {
 		WaitForIP:          false,
 		InjectOvfEnv:       false,
 		PropertyMapping:    cmd.Map(e)}
+
+	if e.VirtualSystem.Annotation != nil {
+		for _, a := range e.VirtualSystem.Annotation {
+			o.Annotation += a.Annotation
+		}
+	}
+
+	if e.Network != nil {
+		for _, net := range e.Network.Networks {
+			o.NetworkMapping = append(o.NetworkMapping, Network{net.Name, ""})
+		}
+	}
+
 	if cmd.verbose {
 		o.AllDeploymentOptions = deploymentOptions
 		o.AllDiskProvisioningOptions = allDiskProvisioningOptions
