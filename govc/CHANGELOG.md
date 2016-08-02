@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add `-unclaimed` flag to host.storage.info command
+
 ### 0.8.0 (2016-06-30)
 
 * If username (`-u` / GOVC_USERNAME) is empty, attempt login via local ticket (Workstation)
