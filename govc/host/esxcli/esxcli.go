@@ -19,7 +19,7 @@ package esxcli
 import (
 	"flag"
 	"fmt"
-	"os"
+	"io"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -83,30 +83,38 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 		return nil
 	}
 
+	return cmd.WriteResult(&result{res, cmd})
+}
+
+type result struct {
+	*Response
+	cmd *esxcli
+}
+
+func (r *result) Write(w io.Writer) error {
 	var formatType string
-	if cmd.hints {
-		formatType = res.Info.Hints.Formatter()
+	if r.cmd.hints {
+		formatType = r.Info.Hints.Formatter()
 	}
 
-	// TODO: OutputFlag / format options
 	switch formatType {
 	case "table":
-		cmd.formatTable(res)
+		r.cmd.formatTable(w, r.Response)
 	default:
-		cmd.formatSimple(res)
+		r.cmd.formatSimple(w, r.Response)
 	}
 
 	return nil
 }
 
-func (cmd *esxcli) formatSimple(res *Response) {
+func (cmd *esxcli) formatSimple(w io.Writer, res *Response) {
 	var keys []string
 	for key := range res.Values[0] {
 		keys = append(keys, key)
 	}
 	sort.Strings(keys)
 
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
 	for i, rv := range res.Values {
 		if i > 0 {
@@ -121,10 +129,10 @@ func (cmd *esxcli) formatSimple(res *Response) {
 	_ = tw.Flush()
 }
 
-func (cmd *esxcli) formatTable(res *Response) {
+func (cmd *esxcli) formatTable(w io.Writer, res *Response) {
 	fields := res.Info.Hints.Fields()
 
-	tw := tabwriter.NewWriter(os.Stdout, len(fields), 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(w, len(fields), 0, 2, ' ', 0)
 
 	var hr []string
 	for _, name := range fields {
