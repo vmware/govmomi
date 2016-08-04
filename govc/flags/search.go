@@ -231,6 +231,16 @@ func (flag *SearchFlag) search() (object.Reference, error) {
 		return nil, fmt.Errorf("no such %s", flag.entity)
 	}
 
+	// set the InventoryPath field
+	finder, err := flag.Finder()
+	if err != nil {
+		return nil, err
+	}
+	ref, err = finder.ObjectReference(context.TODO(), ref.Reference())
+	if err != nil {
+		return nil, err
+	}
+
 	return ref, nil
 }
 
