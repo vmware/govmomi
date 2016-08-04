@@ -25,6 +25,8 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	"golang.org/x/net/context"
 )
 
@@ -101,7 +103,7 @@ func (flag *SearchFlag) Register(ctx context.Context, fs *flag.FlagSet) {
 		case SearchVirtualMachines, SearchHosts:
 			register(&flag.byDNSName, "dns", "Find %s by FQDN")
 			register(&flag.byIP, "ip", "Find %s by IP address")
-			register(&flag.byUUID, "uuid", "Find %s by instance UUID")
+			register(&flag.byUUID, "uuid", "Find %s by UUID")
 		}
 
 		register(&flag.byInventoryPath, "ipath", "Find %s by inventory path")
@@ -184,14 +186,35 @@ func (flag *SearchFlag) searchByIP(c *vim25.Client, dc *object.Datacenter) (obje
 }
 
 func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
+	isVM := false
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, true, nil)
+		isVM = true
 	case SearchHosts:
-		return flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, false, nil)
 	default:
 		panic("unsupported type")
 	}
+
+	var ref object.Reference
+	var err error
+
+	for _, iu := range []*bool{nil, types.NewBool(true)} {
+		ref, err = flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, isVM, iu)
+		if err != nil {
+			if soap.IsSoapFault(err) {
+				fault := soap.ToSoapFault(err).VimFault()
+				if _, ok := fault.(types.InvalidArgument); ok {
+					continue
+				}
+			}
+			return nil, err
+		}
+		if ref != nil {
+			break
+		}
+	}
+
+	return ref, nil
 }
 
 func (flag *SearchFlag) search() (object.Reference, error) {
