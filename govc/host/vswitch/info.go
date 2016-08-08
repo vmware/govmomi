@@ -104,6 +104,7 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "MTU:\t%d\n", s.Mtu)
 		fmt.Fprintf(tw, "Ports:\t%d\n", s.NumPorts)
 		fmt.Fprintf(tw, "Ports Available:\t%d\n", s.NumPortsAvailable)
+		HostNetworkPolicy(tw, s.Spec.Policy)
 	}
 
 	return tw.Flush()
@@ -114,4 +115,20 @@ func keys(key string, vals []string) string {
 		vals[i] = strings.TrimPrefix(val, key)
 	}
 	return strings.Join(vals, ", ")
+}
+
+func enabled(b *bool) string {
+	if b != nil && *b {
+		return "Yes"
+	}
+	return "No"
+}
+
+func HostNetworkPolicy(w io.Writer, p *types.HostNetworkPolicy) {
+	if p == nil || p.Security == nil {
+		return // e.g. Workstation
+	}
+	fmt.Fprintf(w, "Allow promiscuous mode:\t%s\n", enabled(p.Security.AllowPromiscuous))
+	fmt.Fprintf(w, "Allow forged transmits:\t%s\n", enabled(p.Security.ForgedTransmits))
+	fmt.Fprintf(w, "Allow MAC changes:\t%s\n", enabled(p.Security.MacChanges))
 }
