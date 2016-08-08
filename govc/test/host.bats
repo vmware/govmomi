@@ -88,6 +88,14 @@ load test_helper
   assert_success
 }
 
+@test "host.portgroup.info" {
+  run govc host.portgroup.info
+  assert_success
+
+  run govc host.portgroup.info -json
+  assert_success
+}
+
 @test "host.options" {
     run govc host.option.ls Config.HostAgent.plugins.solo.enableMob
     assert_success
