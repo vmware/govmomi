@@ -57,7 +57,12 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		return errors.New("invalid arguments")
 	}
 
-	ds, err := cmd.Datastore()
+	dsurl, err := cmd.DatastoreURL(args[0])
+	if err != nil {
+		return err
+	}
+
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
@@ -69,5 +74,5 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		defer logger.Wait()
 	}
 
-	return ds.DownloadFile(context.TODO(), args[0], args[1], &p)
+	return c.DownloadFile(args[1], dsurl, &p)
 }

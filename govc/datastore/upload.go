@@ -64,7 +64,11 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		return errors.New("invalid arguments")
 	}
 
-	ds, err := cmd.Datastore()
+	dsurl, err := cmd.DatastoreURL(args[1])
+	if err != nil {
+		return err
+	}
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
@@ -76,5 +80,5 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		defer logger.Wait()
 	}
 
-	return ds.UploadFile(context.TODO(), args[0], args[1], &p)
+	return c.UploadFile(args[0], dsurl, &p)
 }
