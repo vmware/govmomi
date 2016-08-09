@@ -19,6 +19,8 @@ package datastore
 import (
 	"errors"
 	"flag"
+	"io"
+	"os"
 
 	"golang.org/x/net/context"
 
@@ -63,11 +65,24 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	p := soap.DefaultDownload
+
+	src := args[0]
+	dst := args[1]
+
+	if dst == "-" {
+		f, _, err := ds.Download(ctx, src, &p)
+		if err != nil {
+			return err
+		}
+		_, err = io.Copy(os.Stdout, f)
+		return err
+	}
+
 	if cmd.OutputFlag.TTY {
 		logger := cmd.ProgressLogger("Downloading... ")
 		p.Progress = logger
 		defer logger.Wait()
 	}
 
-	return ds.DownloadFile(context.TODO(), args[0], args[1], &p)
+	return ds.DownloadFile(ctx, src, dst, &p)
 }

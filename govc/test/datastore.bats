@@ -5,7 +5,7 @@ load test_helper
 upload_file() {
   file=$($mktemp --tmpdir govc-test-XXXXX)
   name=$(basename ${file})
-  echo "Hello world!" > ${file}
+  echo "Hello world" > ${file}
 
   run govc datastore.upload "${file}" "${name}"
   assert_success
@@ -35,7 +35,7 @@ upload_file() {
   # Long listing
   run govc datastore.ls -l "./govc-test-*"
   assert_success
-  assert_equal "13B" $(awk '{ print $1 }' <<<${output})
+  assert_equal "12B" $(awk '{ print $1 }' <<<${output})
 }
 
 @test "datastore.rm" {
@@ -104,4 +104,26 @@ upload_file() {
   # Verify the dir is gone
   run govc datastore.ls "${name}"
   assert_failure
+}
+
+@test "datastore.download" {
+  name=$(upload_file)
+  run govc datastore.download "$name" -
+  assert_success
+  assert_output "Hello world"
+
+  run govc datastore.download "$name" "$TMPDIR/$name"
+  assert_success
+  run cat "$TMPDIR/$name"
+  assert_output "Hello world"
+  rm "$TMPDIR/$name"
+}
+
+@test "datastore.upload" {
+  name=$(new_id)
+  echo -n "Hello world" | govc datastore.upload - "$name"
+
+  run govc datastore.download "$name" -
+  assert_success
+  assert_output "Hello world"
 }

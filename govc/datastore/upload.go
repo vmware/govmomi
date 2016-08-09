@@ -19,6 +19,7 @@ package datastore
 import (
 	"errors"
 	"flag"
+	"os"
 
 	"golang.org/x/net/context"
 
@@ -70,11 +71,19 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	p := soap.DefaultUpload
+
+	src := args[0]
+	dst := args[1]
+
+	if src == "-" {
+		return ds.Upload(ctx, os.Stdin, dst, &p)
+	}
+
 	if cmd.OutputFlag.TTY {
 		logger := cmd.ProgressLogger("Uploading... ")
 		p.Progress = logger
 		defer logger.Wait()
 	}
 
-	return ds.UploadFile(context.TODO(), args[0], args[1], &p)
+	return ds.UploadFile(ctx, src, dst, &p)
 }
