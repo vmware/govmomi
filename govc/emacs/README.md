@@ -82,6 +82,10 @@ query string.  For example:
   (setq govc-urls `("root:password@hostname?datastore=vsanDatastore"))
 ```
 
+### govc-session-network
+
+Network to use for the current `govc-session`.
+
 ## govc-tabulated-list-mode
 
 Generic table bindings to mark/unmark rows.

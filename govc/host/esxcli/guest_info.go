@@ -83,6 +83,7 @@ func (g *GuestInfo) hostInfo(ref *types.ManagedObjectReference) (*hostInfo, erro
 // For example:
 // $ govc host.esxcli -- system settings advanced set -o /Net/GuestIPHack -i 1
 func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
+	const any = "0.0.0.0"
 	var mvm mo.VirtualMachine
 
 	pc := property.DefaultCollector(g.c)
@@ -105,12 +106,14 @@ func (g *GuestInfo) IpAddress(vm *object.VirtualMachine) (string, error) {
 			return "", err
 		}
 
-		if len(res.Values) == 1 {
-			if ip, ok := res.Values[0]["IPAddress"]; ok {
-				return ip[0], nil
+		for _, val := range res.Values {
+			if ip, ok := val["IPAddress"]; ok {
+				if ip[0] != any {
+					return ip[0], nil
+				}
 			}
 		}
 	}
 
-	return "", nil
+	return any, nil
 }

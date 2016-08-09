@@ -27,7 +27,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-const Version = "0.8.0"
+const Version = "0.8.1"
 
 var gitVersion string
 

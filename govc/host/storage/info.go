@@ -67,8 +67,9 @@ type info struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
 
-	typ    infoType
-	rescan bool
+	typ       infoType
+	rescan    bool
+	unclaimed bool
 }
 
 func init() {
@@ -89,6 +90,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(&cmd.typ, "t", fmt.Sprintf("Type (%s)", strings.Join(infoTypes, ",")))
 
 	f.BoolVar(&cmd.rescan, "rescan", false, "Rescan for new storage devices")
+	f.BoolVar(&cmd.unclaimed, "unclaimed", false, "Only show disks that can be used as new VMFS datastores")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -131,6 +133,24 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	err = ss.Properties(ctx, ss.Reference(), nil, &hss)
 	if err != nil {
 		return nil
+	}
+
+	if cmd.unclaimed {
+		ds, err := host.ConfigManager().DatastoreSystem(ctx)
+		if err != nil {
+			return err
+		}
+
+		disks, err := ds.QueryAvailableDisksForVmfs(ctx)
+		if err != nil {
+			return err
+		}
+
+		var luns []types.BaseScsiLun
+		for i := range disks {
+			luns = append(luns, &disks[i])
+		}
+		hss.StorageDeviceInfo.ScsiLun = luns
 	}
 
 	return cmd.WriteResult(cmd.typ.Result(hss))
@@ -184,7 +204,7 @@ func (r lunResult) Write(w io.Writer) error {
 				tags = append(tags, "local")
 			}
 			if disk.Ssd != nil && *disk.Ssd {
-				tags = append(tags, "sdd")
+				tags = append(tags, "ssd")
 			}
 		}
 

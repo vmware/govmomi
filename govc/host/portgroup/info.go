@@ -14,17 +14,17 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package vswitch
+package portgroup
 
 import (
 	"flag"
 	"fmt"
 	"io"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/govc/host/vswitch"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -38,7 +38,7 @@ type info struct {
 }
 
 func init() {
-	cli.Register("host.vswitch.info", &info{})
+	cli.Register("host.portgroup.info", &info{})
 }
 
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
@@ -63,72 +63,56 @@ func (cmd *info) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	client, err := cmd.Client()
+func networkInfoPortgroup(ctx context.Context, c *flags.ClientFlag, h *flags.HostSystemFlag) ([]types.HostPortGroup, error) {
+	client, err := c.Client()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	ns, err := cmd.HostNetworkSystem()
+	ns, err := h.HostNetworkSystem()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	var mns mo.HostNetworkSystem
 
 	pc := property.DefaultCollector(client)
-	err = pc.RetrieveOne(context.TODO(), ns.Reference(), []string{"networkInfo.vswitch"}, &mns)
+	err = pc.RetrieveOne(ctx, ns.Reference(), []string{"networkInfo.portgroup"}, &mns)
+	if err != nil {
+		return nil, err
+	}
+
+	return mns.NetworkInfo.Portgroup, nil
+}
+
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
+	pg, err := networkInfoPortgroup(ctx, cmd.ClientFlag, cmd.HostSystemFlag)
 	if err != nil {
 		return err
 	}
 
-	r := &infoResult{mns.NetworkInfo.Vswitch}
+	r := &infoResult{pg}
 
 	return cmd.WriteResult(r)
 }
 
 type infoResult struct {
-	Vswitch []types.HostVirtualSwitch
+	Portgroup []types.HostPortGroup
 }
 
 func (r *infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
-	for i, s := range r.Vswitch {
+	for i, s := range r.Portgroup {
 		if i > 0 {
 			fmt.Fprintln(tw)
 		}
-		fmt.Fprintf(tw, "Name:\t%s\n", s.Name)
-		fmt.Fprintf(tw, "Portgroup:\t%s\n", keys("key-vim.host.PortGroup-", s.Portgroup))
-		fmt.Fprintf(tw, "Pnic:\t%s\n", keys("key-vim.host.PhysicalNic-", s.Pnic))
-		fmt.Fprintf(tw, "MTU:\t%d\n", s.Mtu)
-		fmt.Fprintf(tw, "Ports:\t%d\n", s.NumPorts)
-		fmt.Fprintf(tw, "Ports Available:\t%d\n", s.NumPortsAvailable)
-		HostNetworkPolicy(tw, s.Spec.Policy)
+		fmt.Fprintf(tw, "Name:\t%s\n", s.Spec.Name)
+		fmt.Fprintf(tw, "Virtual switch:\t%s\n", s.Spec.VswitchName)
+		fmt.Fprintf(tw, "VLAN ID:\t%d\n", s.Spec.VlanId)
+		fmt.Fprintf(tw, "Active ports:\t%d\n", len(s.Port))
+		vswitch.HostNetworkPolicy(tw, &s.ComputedPolicy)
 	}
 
 	return tw.Flush()
-}
-
-func keys(key string, vals []string) string {
-	for i, val := range vals {
-		vals[i] = strings.TrimPrefix(val, key)
-	}
-	return strings.Join(vals, ", ")
-}
-
-func enabled(b *bool) string {
-	if b != nil && *b {
-		return "Yes"
-	}
-	return "No"
-}
-
-func HostNetworkPolicy(w io.Writer, p *types.HostNetworkPolicy) {
-	if p == nil || p.Security == nil {
-		return // e.g. Workstation
-	}
-	fmt.Fprintf(w, "Allow promiscuous mode:\t%s\n", enabled(p.Security.AllowPromiscuous))
-	fmt.Fprintf(w, "Allow forged transmits:\t%s\n", enabled(p.Security.ForgedTransmits))
-	fmt.Fprintf(w, "Allow MAC changes:\t%s\n", enabled(p.Security.MacChanges))
 }
