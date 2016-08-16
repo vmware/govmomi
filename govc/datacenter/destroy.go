@@ -17,12 +17,12 @@ limitations under the License.
 package datacenter
 
 import (
+	"context"
 	"flag"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"golang.org/x/net/context"
 )
 
 type destroy struct {

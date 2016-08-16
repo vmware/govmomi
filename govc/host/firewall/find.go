@@ -17,11 +17,10 @@ limitations under the License.
 package firewall
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

@@ -17,11 +17,11 @@ limitations under the License.
 package guest
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"golang.org/x/net/context"
 )
 
 type mktemp struct {

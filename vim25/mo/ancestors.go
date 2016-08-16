@@ -17,11 +17,11 @@ limitations under the License.
 package mo
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 // Ancestors returns the entire ancestry tree of a specified managed object.

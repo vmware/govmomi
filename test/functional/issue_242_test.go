@@ -17,6 +17,7 @@ limitations under the License.
 package functional
 
 import (
+	"context"
 	"fmt"
 	"testing"
 	"time"
@@ -25,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 func TestIssue242(t *testing.T) {

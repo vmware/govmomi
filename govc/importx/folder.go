@@ -17,10 +17,9 @@ limitations under the License.
 package importx
 
 import (
+	"context"
 	"errors"
 	"flag"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"

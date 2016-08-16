@@ -17,13 +17,12 @@ limitations under the License.
 package option
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
 	"os"
 	"text/tabwriter"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

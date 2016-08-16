@@ -17,6 +17,7 @@ limitations under the License.
 package vim25
 
 import (
+	"context"
 	"encoding/json"
 	"net/url"
 	"os"
@@ -26,7 +27,6 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 // Duplicated to prevent cyclic dependency...

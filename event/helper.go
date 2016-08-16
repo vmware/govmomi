@@ -17,9 +17,8 @@ limitations under the License.
 package event
 
 import (
+	"context"
 	"fmt"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"

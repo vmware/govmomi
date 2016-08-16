@@ -17,12 +17,11 @@ limitations under the License.
 package dvs
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

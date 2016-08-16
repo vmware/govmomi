@@ -17,10 +17,10 @@ limitations under the License.
 package vim25
 
 import (
+	"context"
 	"testing"
 
 	"github.com/vmware/govmomi/vim25/soap"
-	"golang.org/x/net/context"
 )
 
 type tempError struct{}

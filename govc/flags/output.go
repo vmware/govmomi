@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -24,8 +25,6 @@ import (
 	"os"
 	"sync"
 	"time"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/vim25/progress"
 

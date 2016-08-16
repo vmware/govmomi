@@ -17,6 +17,7 @@ limitations under the License.
 package pool
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"path"
@@ -25,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type create struct {

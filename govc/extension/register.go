@@ -17,6 +17,7 @@ limitations under the License.
 package extension
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"os"
@@ -26,7 +27,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type register struct {

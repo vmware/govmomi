@@ -17,10 +17,9 @@ limitations under the License.
 package flags
 
 import (
+	"context"
 	"flag"
 	"fmt"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/vim25/types"
 )

@@ -17,6 +17,7 @@ limitations under the License.
 package network
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -24,7 +25,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type change struct {

@@ -22,6 +22,7 @@ be used to navigate a vSphere inventory structure using govmomi.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/url"
@@ -35,7 +36,6 @@ import (
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 // GetEnvString returns string from environment variable.

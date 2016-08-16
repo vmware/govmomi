@@ -17,9 +17,8 @@ limitations under the License.
 package guest
 
 import (
+	"context"
 	"flag"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"

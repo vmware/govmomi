@@ -17,9 +17,8 @@ limitations under the License.
 package datastore
 
 import (
+	"context"
 	"flag"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

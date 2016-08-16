@@ -17,12 +17,12 @@ limitations under the License.
 package license
 
 import (
+	"context"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/license"
-	"golang.org/x/net/context"
 )
 
 var featureUsage = "List licenses with given feature"

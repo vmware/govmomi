@@ -17,12 +17,11 @@ limitations under the License.
 package guest
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/vim25/types"
 )

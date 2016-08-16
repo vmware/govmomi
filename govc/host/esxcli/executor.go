@@ -17,6 +17,7 @@ limitations under the License.
 package esxcli
 
 import (
+	"context"
 	"errors"
 	"fmt"
 
@@ -25,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
-	"golang.org/x/net/context"
 )
 
 type Executor struct {

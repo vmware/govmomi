@@ -17,13 +17,13 @@ limitations under the License.
 package object
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/mo"
-	"golang.org/x/net/context"
 )
 
 func TestSearch(t *testing.T) {
