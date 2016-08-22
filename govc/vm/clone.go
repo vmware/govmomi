@@ -24,7 +24,9 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -92,7 +94,7 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.IntVar(&cmd.memory, "m", 0, "Size in MB of memory")
 	f.IntVar(&cmd.cpus, "c", 0, "Number of CPUs")
-	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
+	f.BoolVar(&cmd.on, "on", true, "Power on VM")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
 	f.BoolVar(&cmd.template, "template", false, "Create a Template")
 	f.StringVar(&cmd.customization, "customization", "", "Customization Specification Name")
@@ -347,7 +349,14 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 	if !cmd.force {
 		vmxPath := fmt.Sprintf("%s/%s.vmx", cmd.name, cmd.name)
 
+		var mds mo.Datastore
+		err = property.DefaultCollector(cmd.Client).RetrieveOne(ctx, datastoreref, []string{"name"}, &mds)
+		if err != nil {
+			return nil, err
+		}
+
 		datastore := object.NewDatastore(cmd.Client, datastoreref)
+		datastore.InventoryPath = mds.Name
 
 		_, err := datastore.Stat(ctx, vmxPath)
 		if err == nil {
