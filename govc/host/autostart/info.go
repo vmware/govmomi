@@ -17,6 +17,7 @@ limitations under the License.
 package autostart
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -28,7 +29,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
-	"golang.org/x/net/context"
 )
 
 type info struct {

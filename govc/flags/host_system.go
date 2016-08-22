@@ -17,12 +17,12 @@ limitations under the License.
 package flags
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
 
 	"github.com/vmware/govmomi/object"
-	"golang.org/x/net/context"
 )
 
 type HostSystemFlag struct {

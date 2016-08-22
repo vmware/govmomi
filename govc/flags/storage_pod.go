@@ -1,11 +1,10 @@
 package flags
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/object"
 )

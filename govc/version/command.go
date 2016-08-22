@@ -17,11 +17,10 @@ limitations under the License.
 package version
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

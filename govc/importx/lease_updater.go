@@ -17,6 +17,7 @@ limitations under the License.
 package importx
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"sync"
@@ -27,7 +28,6 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type ovfFileItem struct {

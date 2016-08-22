@@ -17,6 +17,7 @@ limitations under the License.
 package functional
 
 import (
+	"context"
 	"testing"
 
 	"github.com/vmware/govmomi/find"
@@ -26,7 +27,6 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type Helper struct {

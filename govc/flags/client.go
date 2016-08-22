@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"context"
 	"crypto/sha1"
 	"crypto/tls"
 	"encoding/json"
@@ -33,7 +34,6 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 const (

@@ -17,10 +17,9 @@ limitations under the License.
 package host
 
 import (
+	"context"
 	"flag"
 	"fmt"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

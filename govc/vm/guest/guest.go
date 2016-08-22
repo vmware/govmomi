@@ -20,12 +20,12 @@ import (
 	"errors"
 	"flag"
 
+	"context"
 	"net/url"
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/guest"
 	"github.com/vmware/govmomi/object"
-	"golang.org/x/net/context"
 )
 
 type GuestFlag struct {

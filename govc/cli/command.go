@@ -17,14 +17,13 @@ limitations under the License.
 package cli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
 	"sort"
 	"text/tabwriter"
-
-	"golang.org/x/net/context"
 )
 
 type HasFlags interface {

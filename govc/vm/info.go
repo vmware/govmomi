@@ -24,6 +24,8 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"context"
+
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -33,7 +35,6 @@ import (
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type info struct {

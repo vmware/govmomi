@@ -17,13 +17,13 @@ limitations under the License.
 package device
 
 import (
+	"context"
 	"flag"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type boot struct {

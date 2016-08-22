@@ -17,12 +17,12 @@ limitations under the License.
 package fields
 
 import (
+	"context"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"golang.org/x/net/context"
 )
 
 type rename struct {

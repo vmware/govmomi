@@ -17,12 +17,12 @@ limitations under the License.
 package floppy
 
 import (
+	"context"
 	"flag"
 	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"golang.org/x/net/context"
 )
 
 type add struct {

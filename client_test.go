@@ -17,6 +17,7 @@ limitations under the License.
 package govmomi
 
 import (
+	"context"
 	"errors"
 	"net/http"
 	"net/url"
@@ -25,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 func TestNewClient(t *testing.T) {

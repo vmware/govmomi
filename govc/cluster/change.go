@@ -17,10 +17,9 @@ limitations under the License.
 package cluster
 
 import (
+	"context"
 	"flag"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

@@ -17,6 +17,7 @@ limitations under the License.
 package esxcli
 
 import (
+	"context"
 	"strings"
 
 	"github.com/vmware/govmomi/object"
@@ -24,7 +25,6 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type hostInfo struct {

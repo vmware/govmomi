@@ -19,10 +19,10 @@ package guest
 import (
 	"flag"
 
+	"context"
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"golang.org/x/net/context"
 )
 
 type download struct {

@@ -17,11 +17,10 @@ limitations under the License.
 package pool
 
 import (
+	"context"
 	"flag"
 	"strconv"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"

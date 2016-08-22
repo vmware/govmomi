@@ -17,9 +17,8 @@ limitations under the License.
 package flags
 
 import (
+	"context"
 	"flag"
-
-	"golang.org/x/net/context"
 )
 
 type EmptyFlag struct{}

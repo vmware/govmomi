@@ -17,12 +17,12 @@ limitations under the License.
 package network
 
 import (
+	"context"
 	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"golang.org/x/net/context"
 )
 
 type add struct {

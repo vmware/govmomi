@@ -17,6 +17,7 @@ limitations under the License.
 package event
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"sync"
@@ -27,7 +28,6 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type Manager struct {

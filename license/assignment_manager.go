@@ -17,10 +17,11 @@ limitations under the License.
 package license
 
 import (
+	"context"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type AssignmentManager struct {

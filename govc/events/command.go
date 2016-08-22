@@ -17,6 +17,7 @@ limitations under the License.
 package events
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -27,7 +28,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type events struct {

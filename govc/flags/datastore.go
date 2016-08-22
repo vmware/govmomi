@@ -17,6 +17,7 @@ limitations under the License.
 package flags
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"net/url"
@@ -24,7 +25,6 @@ import (
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type DatastoreFlag struct {

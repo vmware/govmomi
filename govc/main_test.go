@@ -17,10 +17,9 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"testing"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 )
@@ -32,7 +31,8 @@ func TestMain(t *testing.T) {
 		fs := flag.NewFlagSet("", flag.ContinueOnError)
 
 		// Use fresh context for every command
-		ctx, _ := context.WithCancel(context.Background())
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
 		cmd.Register(ctx, fs)
 	}
 }

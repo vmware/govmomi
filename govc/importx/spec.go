@@ -17,12 +17,11 @@ limitations under the License.
 package importx
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"path"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/ovf"

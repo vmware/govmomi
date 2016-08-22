@@ -24,6 +24,7 @@ import (
 	"path"
 	"strings"
 
+	"context"
 	"net/http"
 	"net/url"
 
@@ -33,7 +34,6 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 // DatastoreNoSuchDirectoryError is returned when a directory could not be found.

@@ -17,6 +17,7 @@ limitations under the License.
 package session
 
 import (
+	"context"
 	"fmt"
 	"net/url"
 	"os"
@@ -29,7 +30,6 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type testKeepAlive int

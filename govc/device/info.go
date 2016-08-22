@@ -17,6 +17,7 @@ limitations under the License.
 package device
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -28,7 +29,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type info struct {

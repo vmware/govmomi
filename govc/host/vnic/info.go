@@ -17,6 +17,7 @@ limitations under the License.
 package vnic
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -28,7 +29,6 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type info struct {

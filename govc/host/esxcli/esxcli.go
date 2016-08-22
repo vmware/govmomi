@@ -17,14 +17,13 @@ limitations under the License.
 package esxcli
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"io"
 	"sort"
 	"strings"
 	"text/tabwriter"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

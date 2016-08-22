@@ -17,13 +17,13 @@ limitations under the License.
 package session
 
 import (
+	"context"
 	"net/url"
 	"testing"
 
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
-	"golang.org/x/net/context"
 )
 
 func sessionClient(u *url.URL, t *testing.T) *Manager {

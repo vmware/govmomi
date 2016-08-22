@@ -18,6 +18,7 @@ package soap
 
 import (
 	"bytes"
+	"context"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -35,7 +36,6 @@ import (
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
-	"golang.org/x/net/context"
 )
 
 type HasFault interface {

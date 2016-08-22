@@ -17,11 +17,10 @@ limitations under the License.
 package importx
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"os"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25/types"

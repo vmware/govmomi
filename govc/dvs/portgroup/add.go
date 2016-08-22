@@ -17,11 +17,10 @@ limitations under the License.
 package portgroup
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"strings"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"

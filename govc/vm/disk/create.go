@@ -17,6 +17,7 @@ limitations under the License.
 package disk
 
 import (
+	"context"
 	"errors"
 	"flag"
 	"fmt"
@@ -26,7 +27,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 type create struct {

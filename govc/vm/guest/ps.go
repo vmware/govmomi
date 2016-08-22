@@ -17,6 +17,7 @@ limitations under the License.
 package guest
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -24,7 +25,6 @@ import (
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"golang.org/x/net/context"
 )
 
 type ps struct {

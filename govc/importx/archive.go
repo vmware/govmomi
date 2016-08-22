@@ -18,6 +18,7 @@ package importx
 
 import (
 	"archive/tar"
+	"context"
 	"flag"
 	"fmt"
 	"io"
@@ -25,8 +26,6 @@ import (
 	"os"
 	"path"
 	"path/filepath"
-
-	"golang.org/x/net/context"
 
 	"github.com/vmware/govmomi/ovf"
 )

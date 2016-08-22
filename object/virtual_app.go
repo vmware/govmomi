@@ -17,7 +17,7 @@ limitations under the License.
 package object
 
 import (
-	"golang.org/x/net/context"
+	"context"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"

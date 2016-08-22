@@ -17,8 +17,9 @@ limitations under the License.
 package property
 
 import (
+	"context"
+
 	"github.com/vmware/govmomi/vim25/types"
-	"golang.org/x/net/context"
 )
 
 // Wait waits for any of the specified properties of the specified managed
