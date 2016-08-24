@@ -337,7 +337,7 @@ func (d Datastore) AttachedHosts(ctx context.Context) ([]*HostSystem, error) {
 	return hosts, nil
 }
 
-// AttachedHosts returns hosts that have this Datastore attached, accessible and writable and are members of the given cluster.
+// AttachedClusterHosts returns hosts that have this Datastore attached, accessible and writable and are members of the given cluster.
 func (d Datastore) AttachedClusterHosts(ctx context.Context, cluster *ComputeResource) ([]*HostSystem, error) {
 	var hosts []*HostSystem
 
