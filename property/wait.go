@@ -65,7 +65,9 @@ func Wait(ctx context.Context, c *Collector, obj types.ManagedObjectReference, p
 	if err != nil {
 		return err
 	}
-	return waitLoop(ctx, p, f)
+	return waitLoop(ctx, p, func(_ types.ManagedObjectReference, pc []types.PropertyChange) bool {
+		return f(pc)
+	})
 }
 
 // WaitForView waits for any of the specified properties of the managed
@@ -82,7 +84,7 @@ func Wait(ctx context.Context, c *Collector, obj types.ManagedObjectReference, p
 // in case of success or error).
 //
 // The code assumes that all objects in the View are the same type
-func WaitForView(ctx context.Context, c *Collector, view types.ManagedObjectReference, obj types.ManagedObjectReference, ps []string, f func([]types.PropertyChange) bool) error {
+func WaitForView(ctx context.Context, c *Collector, view types.ManagedObjectReference, obj types.ManagedObjectReference, ps []string, f func(types.ManagedObjectReference, []types.PropertyChange) bool) error {
 	p, err := c.Create(ctx)
 	if err != nil {
 		return err
@@ -93,7 +95,6 @@ func WaitForView(ctx context.Context, c *Collector, view types.ManagedObjectRefe
 	defer p.Destroy(context.Background())
 
 	req := types.CreateFilter{
-
 		Spec: types.PropertyFilterSpec{
 			ObjectSet: []types.ObjectSpec{
 				{
@@ -122,7 +123,7 @@ func WaitForView(ctx context.Context, c *Collector, view types.ManagedObjectRefe
 	return waitLoop(ctx, p, f)
 }
 
-func waitLoop(ctx context.Context, c *Collector, f func([]types.PropertyChange) bool) error {
+func waitLoop(ctx context.Context, c *Collector, f func(types.ManagedObjectReference, []types.PropertyChange) bool) error {
 	for version := ""; ; {
 		res, err := c.WaitForUpdates(ctx, version)
 		if err != nil {
@@ -138,7 +139,7 @@ func waitLoop(ctx context.Context, c *Collector, f func([]types.PropertyChange) 
 
 		for _, fs := range res.FilterSet {
 			for _, os := range fs.ObjectSet {
-				if f(os.ChangeSet) {
+				if f(os.Obj, os.ChangeSet) {
 					return nil
 				}
 			}

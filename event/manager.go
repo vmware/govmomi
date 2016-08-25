@@ -161,20 +161,16 @@ func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (stri
 }
 
 // Get the events from the specified object(s) and optionanlly tail the event stream
-func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int32, tail bool, force bool, f func([]types.BaseEvent) error) error {
+func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int32, tail bool, force bool, f func(types.ManagedObjectReference, []types.BaseEvent) error) error {
 
 	if len(objects) >= m.maxObjects && !force {
 		return fmt.Errorf("Maximum number of objects to monitor (%d) exceeded, refine search \n", m.maxObjects)
 	}
 
-	// property that will be monitored
-	prop := []string{"latestPage"}
-
-	// call to helper functions to reduce the number of temporary objects
-	if len(objects) > 1 {
-		return multipleObjectEvents(ctx, m, objects, pageSize, tail, force, prop, f)
+	proc := newEventProcessor(m, pageSize, f)
+	for _, o := range objects {
+		proc.addObject(ctx, o)
 	}
 
-	return singleObjectEvents(ctx, m, objects[0], pageSize, tail, force, prop, f)
-
+	return proc.run(ctx, tail)
 }
