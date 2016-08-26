@@ -101,7 +101,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 		}
 
-		es, err := finder.ManagedObjectListChildren(context.TODO(), arg)
+		es, err := finder.ManagedObjectListChildren(ctx, arg)
 		if err != nil {
 			return err
 		}

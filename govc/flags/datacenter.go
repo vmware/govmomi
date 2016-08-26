@@ -92,10 +92,11 @@ func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 	// Datacenter is not required (ls command for example).
 	// Set for relative func if dc flag is given or
 	// if there is a single (default) Datacenter
+	ctx := context.TODO()
 	if flag.path == "" {
-		flag.dc, flag.err = finder.DefaultDatacenter(context.TODO())
+		flag.dc, flag.err = finder.DefaultDatacenter(ctx)
 	} else {
-		if flag.dc, err = finder.Datacenter(context.TODO(), flag.path); err != nil {
+		if flag.dc, err = finder.Datacenter(ctx, flag.path); err != nil {
 			return nil, err
 		}
 	}

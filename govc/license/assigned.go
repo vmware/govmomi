@@ -67,12 +67,12 @@ func (cmd *assigned) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	m, err := license.NewManager(client).AssignmentManager(context.TODO())
+	m, err := license.NewManager(client).AssignmentManager(ctx)
 	if err != nil {
 		return err
 	}
 
-	assigned, err := m.QueryAssigned(context.TODO(), cmd.id)
+	assigned, err := m.QueryAssigned(ctx, cmd.id)
 	if err != nil {
 		return err
 	}

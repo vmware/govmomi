@@ -76,7 +76,7 @@ func (cmd *start) Run(ctx context.Context, f *flag.FlagSet) error {
 		EnvVariables:     cmd.vars,
 	}
 
-	pid, err := m.StartProgram(context.TODO(), cmd.Auth(), &spec)
+	pid, err := m.StartProgram(ctx, cmd.Auth(), &spec)
 	if err != nil {
 		return err
 	}

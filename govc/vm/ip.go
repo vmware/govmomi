@@ -101,7 +101,7 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 	} else {
 		get = func(vm *object.VirtualMachine) (string, error) {
 			if cmd.all {
-				macs, err := vm.WaitForNetIP(context.TODO(), cmd.v4)
+				macs, err := vm.WaitForNetIP(ctx, cmd.v4)
 				if err != nil {
 					return "", err
 				}
@@ -114,7 +114,7 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 				}
 				return strings.Join(ips, ","), nil
 			}
-			return vm.WaitForIP(context.TODO())
+			return vm.WaitForIP(ctx)
 		}
 	}
 

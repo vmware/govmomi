@@ -64,7 +64,7 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	m := license.NewManager(client)
 	for _, v := range f.Args() {
-		err = m.Remove(context.TODO(), v)
+		err = m.Remove(ctx, v)
 		if err != nil {
 			return err
 		}

@@ -48,12 +48,13 @@ func (flag *FolderFlag) Process(ctx context.Context) error {
 }
 
 func (flag *FolderFlag) Folder() (*object.Folder, error) {
+	ctx := context.TODO()
 	if len(flag.folder) == 0 {
 		dc, err := flag.Datacenter()
 		if err != nil {
 			return nil, err
 		}
-		folders, err := dc.Folders(context.TODO())
+		folders, err := dc.Folders(ctx)
 		if err != nil {
 			return nil, err
 		}
@@ -65,7 +66,7 @@ func (flag *FolderFlag) Folder() (*object.Folder, error) {
 		return nil, err
 	}
 
-	mo, err := finder.ManagedObjectList(context.TODO(), flag.folder)
+	mo, err := finder.ManagedObjectList(ctx, flag.folder)
 	if err != nil {
 		return nil, err
 	}

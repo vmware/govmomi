@@ -63,6 +63,7 @@ func (flag *GuestFlag) Process(ctx context.Context) error {
 }
 
 func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
+	ctx := context.TODO()
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
@@ -74,10 +75,11 @@ func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {
 	}
 
 	o := guest.NewOperationsManager(c, vm.Reference())
-	return o.FileManager(context.TODO())
+	return o.FileManager(ctx)
 }
 
 func (flag *GuestFlag) ProcessManager() (*guest.ProcessManager, error) {
+	ctx := context.TODO()
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
@@ -89,7 +91,7 @@ func (flag *GuestFlag) ProcessManager() (*guest.ProcessManager, error) {
 	}
 
 	o := guest.NewOperationsManager(c, vm.Reference())
-	return o.ProcessManager(context.TODO())
+	return o.ProcessManager(ctx)
 }
 
 func (flag *GuestFlag) ParseURL(urlStr string) (*url.URL, error) {

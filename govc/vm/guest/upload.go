@@ -68,7 +68,7 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	url, err := m.InitiateFileTransferToGuest(context.TODO(), cmd.Auth(), dst, cmd.Attr(), s.Size(), cmd.overwrite)
+	url, err := m.InitiateFileTransferToGuest(ctx, cmd.Auth(), dst, cmd.Attr(), s.Size(), cmd.overwrite)
 	if err != nil {
 		return err
 	}

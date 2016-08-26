@@ -194,7 +194,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.HostSystem != nil {
-		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(context.TODO()); err != nil {
+		if cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(ctx); err != nil {
 			return err
 		}
 	} else {
@@ -210,7 +210,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// Verify ISO exists
 	if cmd.iso != "" {
-		_, err = cmd.isoDatastoreFlag.Stat(context.TODO(), cmd.iso)
+		_, err = cmd.isoDatastoreFlag.Stat(ctx, cmd.iso)
 		if err != nil {
 			return err
 		}
@@ -230,7 +230,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err == nil {
 			cmd.diskByteSize = int64(b)
 		} else {
-			_, err = cmd.diskDatastoreFlag.Stat(context.TODO(), cmd.disk)
+			_, err = cmd.diskDatastoreFlag.Stat(ctx, cmd.disk)
 			if err != nil {
 				return err
 			}
@@ -242,12 +242,12 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	task, err := cmd.createVM(context.TODO())
+	task, err := cmd.createVM(ctx)
 	if err != nil {
 		return err
 	}
 
-	info, err := task.WaitForResult(context.TODO(), nil)
+	info, err := task.WaitForResult(ctx, nil)
 	if err != nil {
 		return err
 	}
@@ -255,12 +255,12 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm := object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
 
 	if cmd.on {
-		task, err := vm.PowerOn(context.TODO())
+		task, err := vm.PowerOn(ctx)
 		if err != nil {
 			return err
 		}
 
-		_, err = task.WaitForResult(context.TODO(), nil)
+		_, err = task.WaitForResult(ctx, nil)
 		if err != nil {
 			return err
 		}

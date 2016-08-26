@@ -49,5 +49,5 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return m.DeleteFile(context.TODO(), cmd.Auth(), f.Arg(0))
+	return m.DeleteFile(ctx, cmd.Auth(), f.Arg(0))
 }

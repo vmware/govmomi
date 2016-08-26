@@ -59,7 +59,7 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,13 +74,13 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	err = vm.AddDevice(context.TODO(), d)
+	err = vm.AddDevice(ctx, d)
 	if err != nil {
 		return err
 	}
 
 	// output name of device we just created
-	devices, err = vm.Device(context.TODO())
+	devices, err = vm.Device(ctx)
 	if err != nil {
 		return err
 	}

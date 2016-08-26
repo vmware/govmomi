@@ -71,7 +71,7 @@ func (cmd *question) Run(ctx context.Context, f *flag.FlagSet) error {
 	var mvm mo.VirtualMachine
 
 	pc := property.DefaultCollector(c)
-	err = pc.RetrieveOne(context.TODO(), vm.Reference(), []string{"runtime.question"}, &mvm)
+	err = pc.RetrieveOne(ctx, vm.Reference(), []string{"runtime.question"}, &mvm)
 	if err != nil {
 		return err
 	}
@@ -94,5 +94,5 @@ func (cmd *question) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	// Answer question
-	return vm.Answer(context.TODO(), q.Id, cmd.answer)
+	return vm.Answer(ctx, q.Id, cmd.answer)
 }

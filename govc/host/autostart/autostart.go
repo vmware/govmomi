@@ -66,6 +66,7 @@ func (f *AutostartFlag) Process(ctx context.Context) error {
 // flags.SearchFlag as well, but that pulls in other virtual machine flags that
 // are not relevant here.
 func (f *AutostartFlag) VirtualMachines(args []string) ([]*object.VirtualMachine, error) {
+	ctx := context.TODO()
 	if len(args) == 0 {
 		return nil, errors.New("no argument")
 	}
@@ -77,7 +78,7 @@ func (f *AutostartFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 
 	var out []*object.VirtualMachine
 	for _, arg := range args {
-		vms, err := finder.VirtualMachineList(context.TODO(), arg)
+		vms, err := finder.VirtualMachineList(ctx, arg)
 		if err != nil {
 			return nil, err
 		}
@@ -89,19 +90,20 @@ func (f *AutostartFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 }
 
 func (f *AutostartFlag) HostAutoStartManager() (*mo.HostAutoStartManager, error) {
+	ctx := context.TODO()
 	h, err := f.HostSystem()
 	if err != nil {
 		return nil, err
 	}
 
 	var mhs mo.HostSystem
-	err = h.Properties(context.TODO(), h.Reference(), []string{"configManager.autoStartManager"}, &mhs)
+	err = h.Properties(ctx, h.Reference(), []string{"configManager.autoStartManager"}, &mhs)
 	if err != nil {
 		return nil, err
 	}
 
 	var mhas mo.HostAutoStartManager
-	err = h.Properties(context.TODO(), *mhs.ConfigManager.AutoStartManager, nil, &mhas)
+	err = h.Properties(ctx, *mhs.ConfigManager.AutoStartManager, nil, &mhas)
 	if err != nil {
 		return nil, err
 	}
@@ -110,6 +112,7 @@ func (f *AutostartFlag) HostAutoStartManager() (*mo.HostAutoStartManager, error)
 }
 
 func (f *AutostartFlag) ReconfigureDefaults(template types.AutoStartDefaults) error {
+	ctx := context.TODO()
 	c, err := f.Client()
 	if err != nil {
 		return err
@@ -127,7 +130,7 @@ func (f *AutostartFlag) ReconfigureDefaults(template types.AutoStartDefaults) er
 		},
 	}
 
-	_, err = methods.ReconfigureAutostart(context.TODO(), c, &req)
+	_, err = methods.ReconfigureAutostart(ctx, c, &req)
 	if err != nil {
 		return err
 	}
@@ -136,6 +139,7 @@ func (f *AutostartFlag) ReconfigureDefaults(template types.AutoStartDefaults) er
 }
 
 func (f *AutostartFlag) ReconfigureVMs(args []string, template types.AutoStartPowerInfo) error {
+	ctx := context.TODO()
 	c, err := f.Client()
 	if err != nil {
 		return err
@@ -164,7 +168,7 @@ func (f *AutostartFlag) ReconfigureVMs(args []string, template types.AutoStartPo
 		req.Spec.PowerInfo = append(req.Spec.PowerInfo, pi)
 	}
 
-	_, err = methods.ReconfigureAutostart(context.TODO(), c, &req)
+	_, err = methods.ReconfigureAutostart(ctx, c, &req)
 	if err != nil {
 		return err
 	}

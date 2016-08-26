@@ -77,7 +77,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	b, err := ds.Browser(context.TODO())
+	b, err := ds.Browser(ctx)
 	if err != nil {
 		return err
 	}
@@ -133,6 +133,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
+	ctx := context.TODO()
 	var res types.HostDatastoreBrowserSearchResults
 
 	path, err := cmd.DatastorePath(path)
@@ -140,12 +141,12 @@ func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.
 		return res, err
 	}
 
-	task, err := b.SearchDatastore(context.TODO(), path, &spec)
+	task, err := b.SearchDatastore(ctx, path, &spec)
 	if err != nil {
 		return res, err
 	}
 
-	info, err := task.WaitForResult(context.TODO(), nil)
+	info, err := task.WaitForResult(ctx, nil)
 	if err != nil {
 		return res, err
 	}

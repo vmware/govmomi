@@ -58,7 +58,7 @@ func (cmd *markastemplate) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		err := vm.MarkAsTemplate(context.TODO())
+		err := vm.MarkAsTemplate(ctx)
 		if err != nil {
 			return err
 		}

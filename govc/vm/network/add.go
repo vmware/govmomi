@@ -71,5 +71,5 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return vm.AddDevice(context.TODO(), net)
+	return vm.AddDevice(ctx, net)
 }

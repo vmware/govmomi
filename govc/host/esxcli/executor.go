@@ -37,6 +37,7 @@ type Executor struct {
 }
 
 func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
+	ctx := context.TODO()
 	e := &Executor{
 		c:    c,
 		host: host,
@@ -48,7 +49,7 @@ func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
 			This: host.Reference(),
 		}
 
-		res, err := methods.RetrieveManagedMethodExecuter(context.TODO(), c, &req)
+		res, err := methods.RetrieveManagedMethodExecuter(ctx, c, &req)
 		if err != nil {
 			return nil, err
 		}
@@ -61,7 +62,7 @@ func NewExecutor(c *vim25.Client, host *object.HostSystem) (*Executor, error) {
 			This: host.Reference(),
 		}
 
-		res, err := methods.RetrieveDynamicTypeManager(context.TODO(), c, &req)
+		res, err := methods.RetrieveDynamicTypeManager(ctx, c, &req)
 		if err != nil {
 			return nil, err
 		}
@@ -127,10 +128,11 @@ func (e *Executor) NewRequest(args []string) (*types.ExecuteSoap, *CommandInfoMe
 }
 
 func (e *Executor) Execute(req *types.ExecuteSoap, res interface{}) error {
+	ctx := context.TODO()
 	req.This = e.mme.ManagedObjectReference
 	req.Version = "urn:vim25/5.0"
 
-	x, err := methods.ExecuteSoap(context.TODO(), e.c, req)
+	x, err := methods.ExecuteSoap(ctx, e.c, req)
 	if err != nil {
 		return err
 	}

@@ -107,7 +107,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -148,5 +148,5 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cmd.Log("Creating disk\n")
 	disk.CapacityInKB = int64(cmd.Bytes) / 1024
-	return vm.AddDevice(context.TODO(), disk)
+	return vm.AddDevice(ctx, disk)
 }

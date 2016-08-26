@@ -61,13 +61,13 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
 
 	if cmd.boot {
-		options, err := vm.BootOptions(context.TODO())
+		options, err := vm.BootOptions(ctx)
 		if err != nil {
 			return err
 		}

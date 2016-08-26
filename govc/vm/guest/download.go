@@ -63,7 +63,7 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		return os.ErrExist
 	}
 
-	info, err := m.InitiateFileTransferFromGuest(context.TODO(), cmd.Auth(), src)
+	info, err := m.InitiateFileTransferFromGuest(ctx, cmd.Auth(), src)
 	if err != nil {
 		return err
 	}

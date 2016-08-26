@@ -332,6 +332,7 @@ func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
 }
 
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {
+	ctx := context.TODO()
 	sc := soap.NewClient(flag.url, flag.insecure)
 	isTunnel := false
 
@@ -351,7 +352,7 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 
 	// Add retry functionality before making any calls
 	rt := attachRetries(sc)
-	c, err := vim25.NewClient(context.TODO(), rt)
+	c, err := vim25.NewClient(ctx, rt)
 	if err != nil {
 		return nil, err
 	}
@@ -364,19 +365,19 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 
 	if u.Username() == "" {
 		// Assume we are running on an ESX or Workstation host if no username is provided
-		u, err = flag.localTicket(context.TODO(), m)
+		u, err = flag.localTicket(ctx, m)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	if isTunnel {
-		err = m.LoginExtensionByCertificate(context.TODO(), u.Username(), "")
+		err = m.LoginExtensionByCertificate(ctx, u.Username(), "")
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		err = m.Login(context.TODO(), u)
+		err = m.Login(ctx, u)
 		if err != nil {
 			return nil, err
 		}

@@ -89,10 +89,10 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.VirtualMachineConfigSpec.ExtraConfig = cmd.extraConfig
 	}
 
-	task, err := vm.Reconfigure(context.TODO(), cmd.VirtualMachineConfigSpec)
+	task, err := vm.Reconfigure(ctx, cmd.VirtualMachineConfigSpec)
 	if err != nil {
 		return err
 	}
 
-	return task.Wait(context.TODO())
+	return task.Wait(ctx)
 }

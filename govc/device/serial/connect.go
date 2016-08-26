@@ -60,7 +60,7 @@ func (cmd *connect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -70,5 +70,5 @@ func (cmd *connect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return vm.EditDevice(context.TODO(), devices.ConnectSerialPort(d, f.Arg(0), cmd.client))
+	return vm.EditDevice(ctx, devices.ConnectSerialPort(d, f.Arg(0), cmd.client))
 }

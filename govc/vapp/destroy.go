@@ -61,7 +61,7 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	for _, arg := range f.Args() {
-		vapps, err := finder.VirtualAppList(context.TODO(), arg)
+		vapps, err := finder.VirtualAppList(ctx, arg)
 		if err != nil {
 			if _, ok := err.(*find.NotFoundError); ok {
 				// Ignore if vapp cannot be found
@@ -73,11 +73,11 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		for _, vapp := range vapps {
 			powerOff := func() error {
-				task, err := vapp.PowerOffVApp_Task(context.TODO(), false)
+				task, err := vapp.PowerOffVApp_Task(ctx, false)
 				if err != nil {
 					return err
 				}
-				err = task.Wait(context.TODO())
+				err = task.Wait(ctx)
 				if err != nil {
 					// it's safe to ignore if the vapp is already powered off
 					if f, ok := err.(types.HasFault); ok {
@@ -95,11 +95,11 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 
 			destroy := func() error {
-				task, err := vapp.Destroy(context.TODO())
+				task, err := vapp.Destroy(ctx)
 				if err != nil {
 					return err
 				}
-				err = task.Wait(context.TODO())
+				err = task.Wait(ctx)
 				if err != nil {
 					return err
 				}

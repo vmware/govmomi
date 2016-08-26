@@ -110,29 +110,29 @@ func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 		switch {
 		case cmd.On:
 			fmt.Fprintf(cmd, "Powering on %s... ", vm.Reference())
-			task, err = vm.PowerOn(context.TODO())
+			task, err = vm.PowerOn(ctx)
 		case cmd.Off:
 			fmt.Fprintf(cmd, "Powering off %s... ", vm.Reference())
-			task, err = vm.PowerOff(context.TODO())
+			task, err = vm.PowerOff(ctx)
 		case cmd.Reset:
 			fmt.Fprintf(cmd, "Reset %s... ", vm.Reference())
-			task, err = vm.Reset(context.TODO())
+			task, err = vm.Reset(ctx)
 		case cmd.Suspend:
 			fmt.Fprintf(cmd, "Suspend %s... ", vm.Reference())
-			task, err = vm.Suspend(context.TODO())
+			task, err = vm.Suspend(ctx)
 		case cmd.Reboot:
 			fmt.Fprintf(cmd, "Reboot guest %s... ", vm.Reference())
-			err = vm.RebootGuest(context.TODO())
+			err = vm.RebootGuest(ctx)
 
 			if err != nil && cmd.Force && isToolsUnavailable(err) {
-				task, err = vm.Reset(context.TODO())
+				task, err = vm.Reset(ctx)
 			}
 		case cmd.Shutdown:
 			fmt.Fprintf(cmd, "Shutdown guest %s... ", vm.Reference())
-			err = vm.ShutdownGuest(context.TODO())
+			err = vm.ShutdownGuest(ctx)
 
 			if err != nil && cmd.Force && isToolsUnavailable(err) {
-				task, err = vm.PowerOff(context.TODO())
+				task, err = vm.PowerOff(ctx)
 			}
 		}
 
@@ -141,7 +141,7 @@ func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		if task != nil {
-			err = task.Wait(context.TODO())
+			err = task.Wait(ctx)
 		}
 		if err == nil {
 			fmt.Fprintf(cmd, "OK\n")

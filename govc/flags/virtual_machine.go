@@ -80,6 +80,8 @@ func (flag *VirtualMachineFlag) Process(ctx context.Context) error {
 }
 
 func (flag *VirtualMachineFlag) VirtualMachine() (*object.VirtualMachine, error) {
+	ctx := context.TODO()
+
 	if flag.vm != nil {
 		return flag.vm, nil
 	}
@@ -105,6 +107,6 @@ func (flag *VirtualMachineFlag) VirtualMachine() (*object.VirtualMachine, error)
 		return nil, err
 	}
 
-	flag.vm, err = finder.VirtualMachine(context.TODO(), flag.name)
+	flag.vm, err = finder.VirtualMachine(ctx, flag.name)
 	return flag.vm, err
 }
