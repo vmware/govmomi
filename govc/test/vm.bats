@@ -435,3 +435,9 @@ load test_helper
   assert_line "Memory: 1024MB"
   assert_line "CPU: 2 vCPU(s)"
 }
+
+@test "vm.clone usage" {
+  # validate we require -vm flag
+  run govc vm.clone enoent
+  assert_failure
+}
