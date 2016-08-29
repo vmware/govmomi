@@ -93,7 +93,7 @@ func (cmd *ps) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.uids[cmd.auth.Username] = true
 	}
 
-	procs, err := m.ListProcesses(context.TODO(), cmd.Auth(), cmd.pids)
+	procs, err := m.ListProcesses(ctx, cmd.Auth(), cmd.pids)
 	if err != nil {
 		return err
 	}

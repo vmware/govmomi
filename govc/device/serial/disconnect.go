@@ -58,7 +58,7 @@ func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -68,5 +68,5 @@ func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return vm.EditDevice(context.TODO(), devices.DisconnectSerialPort(d))
+	return vm.EditDevice(ctx, devices.DisconnectSerialPort(d))
 }

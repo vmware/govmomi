@@ -81,13 +81,13 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	})
 
 	for _, arg := range f.Args() {
-		pools, err := finder.ResourcePoolList(context.TODO(), arg)
+		pools, err := finder.ResourcePoolList(ctx, arg)
 		if err != nil {
 			return err
 		}
 
 		for _, pool := range pools {
-			err := pool.UpdateConfig(context.TODO(), cmd.name, &cmd.ResourceConfigSpec)
+			err := pool.UpdateConfig(ctx, cmd.name, &cmd.ResourceConfigSpec)
 			if err != nil {
 				return err
 			}

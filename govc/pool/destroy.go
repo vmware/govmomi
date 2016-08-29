@@ -68,7 +68,7 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	for _, arg := range f.Args() {
-		pools, err := finder.ResourcePoolList(context.TODO(), arg)
+		pools, err := finder.ResourcePoolList(ctx, arg)
 		if err != nil {
 			if _, ok := err.(*find.NotFoundError); ok {
 				// Ignore if pool cannot be found
@@ -80,16 +80,16 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		for _, pool := range pools {
 			if cmd.children {
-				err = pool.DestroyChildren(context.TODO())
+				err = pool.DestroyChildren(ctx)
 				if err != nil {
 					return err
 				}
 			} else {
-				task, err := pool.Destroy(context.TODO())
+				task, err := pool.Destroy(ctx)
 				if err != nil {
 					return err
 				}
-				err = task.Wait(context.TODO())
+				err = task.Wait(ctx)
 				if err != nil {
 					return err
 				}

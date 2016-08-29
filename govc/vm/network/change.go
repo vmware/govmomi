@@ -74,7 +74,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		_ = cmd.NetworkFlag.Set(f.Arg(1))
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -103,5 +103,5 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		current.AddressType = changed.AddressType
 	}
 
-	return vm.EditDevice(context.TODO(), net)
+	return vm.EditDevice(ctx, net)
 }

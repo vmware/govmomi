@@ -62,5 +62,5 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cmd.spec.Name = f.Arg(0)
 
-	return ns.AddPortGroup(context.TODO(), cmd.spec)
+	return ns.AddPortGroup(ctx, cmd.spec)
 }

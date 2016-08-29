@@ -79,7 +79,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -94,7 +94,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		backing, err := net.EthernetCardBackingInfo(context.TODO())
+		backing, err := net.EthernetCardBackingInfo(ctx)
 		if err != nil {
 			return err
 		}

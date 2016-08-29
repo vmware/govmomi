@@ -54,5 +54,5 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return ns.RemoveVirtualSwitch(context.TODO(), f.Arg(0))
+	return ns.RemoveVirtualSwitch(ctx, f.Arg(0))
 }

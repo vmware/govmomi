@@ -84,7 +84,7 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	result := make(licenseOutput, 0)
 	for _, v := range f.Args() {
-		license, err := addFunc(context.TODO(), v, nil)
+		license, err := addFunc(ctx, v, nil)
 		if err != nil {
 			return err
 		}

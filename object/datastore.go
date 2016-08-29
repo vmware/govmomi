@@ -358,12 +358,12 @@ func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, e
 	}
 
 	dsPath := d.Path(path.Dir(file))
-	task, err := b.SearchDatastore(context.TODO(), dsPath, &spec)
+	task, err := b.SearchDatastore(ctx, dsPath, &spec)
 	if err != nil {
 		return nil, err
 	}
 
-	info, err := task.WaitForResult(context.TODO(), nil)
+	info, err := task.WaitForResult(ctx, nil)
 	if err != nil {
 		if info == nil || info.Error != nil {
 			_, ok := info.Error.Fault.(*types.FileNotFound)

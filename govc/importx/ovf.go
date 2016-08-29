@@ -178,6 +178,7 @@ func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
 }
 
 func (cmd *ovfx) NetworkMap(e *ovf.Envelope) (p []types.OvfNetworkMapping) {
+	ctx := context.TODO()
 	finder, err := cmd.DatastoreFlag.Finder()
 	if err != nil {
 		return
@@ -196,7 +197,7 @@ func (cmd *ovfx) NetworkMap(e *ovf.Envelope) (p []types.OvfNetworkMapping) {
 	}
 
 	for src, dst := range networks {
-		if net, err := finder.Network(context.TODO(), dst); err == nil {
+		if net, err := finder.Network(ctx, dst); err == nil {
 			p = append(p, types.OvfNetworkMapping{
 				Name:    src,
 				Network: net.Reference(),
@@ -207,6 +208,7 @@ func (cmd *ovfx) NetworkMap(e *ovf.Envelope) (p []types.OvfNetworkMapping) {
 }
 
 func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
+	ctx := context.TODO()
 	o, err := cmd.ReadOvf(fpath)
 	if err != nil {
 		return nil, err
@@ -248,7 +250,7 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 	}
 
 	m := object.NewOvfManager(cmd.Client)
-	spec, err := m.CreateImportSpec(context.TODO(), string(o), cmd.ResourcePool, cmd.Datastore, cisp)
+	spec, err := m.CreateImportSpec(ctx, string(o), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
 		return nil, err
 	}
@@ -282,12 +284,12 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		return nil, err
 	}
 
-	lease, err := cmd.ResourcePool.ImportVApp(context.TODO(), spec.ImportSpec, folder, host)
+	lease, err := cmd.ResourcePool.ImportVApp(ctx, spec.ImportSpec, folder, host)
 	if err != nil {
 		return nil, err
 	}
 
-	info, err := lease.Wait(context.TODO())
+	info, err := lease.Wait(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -327,7 +329,7 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
-	return &info.Entity, lease.HttpNfcLeaseComplete(context.TODO())
+	return &info.Entity, lease.HttpNfcLeaseComplete(ctx)
 }
 
 func (cmd *ovfx) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
@@ -364,18 +366,19 @@ func (cmd *ovfx) Upload(lease *object.HttpNfcLease, ofi ovfFileItem) error {
 }
 
 func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
+	ctx := context.TODO()
 	if !cmd.Options.PowerOn {
 		return nil
 	}
 
 	cmd.Log("Powering on VM...\n")
 
-	task, err := vm.PowerOn(context.TODO())
+	task, err := vm.PowerOn(ctx)
 	if err != nil {
 		return err
 	}
 
-	if _, err = task.WaitForResult(context.TODO(), nil); err != nil {
+	if _, err = task.WaitForResult(ctx, nil); err != nil {
 		return err
 	}
 
@@ -383,6 +386,7 @@ func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
 }
 
 func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
+	ctx := context.TODO()
 	if !cmd.Options.PowerOn || !cmd.Options.InjectOvfEnv {
 		return nil
 	}
@@ -416,11 +420,11 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 				Key:   "guestinfo.ovfEnv",
 				Value: xenv}}}
 
-		task, err := vm.Reconfigure(context.TODO(), vmConfigSpec)
+		task, err := vm.Reconfigure(ctx, vmConfigSpec)
 		if err != nil {
 			return err
 		}
-		if err := task.Wait(context.TODO()); err != nil {
+		if err := task.Wait(ctx); err != nil {
 			return err
 		}
 	}
@@ -429,12 +433,13 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 }
 
 func (cmd *ovfx) WaitForIP(vm *object.VirtualMachine) error {
+	ctx := context.TODO()
 	if !cmd.Options.PowerOn || !cmd.Options.WaitForIP {
 		return nil
 	}
 
 	cmd.Log("Waiting for IP address...\n")
-	ip, err := vm.WaitForIP(context.TODO())
+	ip, err := vm.WaitForIP(ctx)
 	if err != nil {
 		return err
 	}

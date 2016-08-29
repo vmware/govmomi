@@ -50,7 +50,7 @@ func (cmd *getenv) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	vars, err := m.ReadEnvironmentVariable(context.TODO(), cmd.Auth(), f.Args())
+	vars, err := m.ReadEnvironmentVariable(ctx, cmd.Auth(), f.Args())
 	if err != nil {
 		return err
 	}

@@ -59,7 +59,7 @@ func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func (cmd *disconnect) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		if err = vm.EditDevice(context.TODO(), device); err != nil {
+		if err = vm.EditDevice(ctx, device); err != nil {
 			return err
 		}
 	}

@@ -53,5 +53,5 @@ func (cmd *rmdir) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return m.DeleteDirectory(context.TODO(), cmd.Auth(), f.Arg(0), cmd.recursive)
+	return m.DeleteDirectory(ctx, cmd.Auth(), f.Arg(0), cmd.recursive)
 }

@@ -77,7 +77,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	var mns mo.HostNetworkSystem
 
 	pc := property.DefaultCollector(client)
-	err = pc.RetrieveOne(context.TODO(), ns.Reference(), []string{"networkInfo.vswitch"}, &mns)
+	err = pc.RetrieveOne(ctx, ns.Reference(), []string{"networkInfo.vswitch"}, &mns)
 	if err != nil {
 		return err
 	}

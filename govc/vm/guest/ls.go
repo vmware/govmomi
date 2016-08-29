@@ -56,7 +56,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	tw := tabwriter.NewWriter(os.Stdout, 3, 0, 2, ' ', 0)
 
 	for {
-		info, err := m.ListFiles(context.TODO(), cmd.Auth(), f.Arg(0), offset, 0, f.Arg(1))
+		info, err := m.ListFiles(ctx, cmd.Auth(), f.Arg(0), offset, 0, f.Arg(1))
 		if err != nil {
 			return err
 		}

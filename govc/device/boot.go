@@ -69,7 +69,7 @@ func (cmd *boot) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	devices, err := vm.Device(context.TODO())
+	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
 	}
@@ -79,5 +79,5 @@ func (cmd *boot) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.BootOrder = devices.BootOrder(o)
 	}
 
-	return vm.SetBootOptions(context.TODO(), &cmd.VirtualMachineBootOptions)
+	return vm.SetBootOptions(ctx, &cmd.VirtualMachineBootOptions)
 }

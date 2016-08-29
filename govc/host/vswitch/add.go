@@ -69,5 +69,5 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	return ns.AddVirtualSwitch(context.TODO(), f.Arg(0), &cmd.spec)
+	return ns.AddVirtualSwitch(ctx, f.Arg(0), &cmd.spec)
 }

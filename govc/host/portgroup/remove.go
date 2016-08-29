@@ -54,5 +54,5 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return ns.RemovePortGroup(context.TODO(), f.Arg(0))
+	return ns.RemovePortGroup(ctx, f.Arg(0))
 }

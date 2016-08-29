@@ -150,20 +150,22 @@ func (flag *SearchFlag) searchIndex(c *vim25.Client) *object.SearchIndex {
 }
 
 func (flag *SearchFlag) searchByDatastorePath(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
+	ctx := context.TODO()
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByDatastorePath(context.TODO(), dc, flag.byDatastorePath)
+		return flag.searchIndex(c).FindByDatastorePath(ctx, dc, flag.byDatastorePath)
 	default:
 		panic("unsupported type")
 	}
 }
 
 func (flag *SearchFlag) searchByDNSName(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
+	ctx := context.TODO()
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByDnsName(context.TODO(), dc, flag.byDNSName, true)
+		return flag.searchIndex(c).FindByDnsName(ctx, dc, flag.byDNSName, true)
 	case SearchHosts:
-		return flag.searchIndex(c).FindByDnsName(context.TODO(), dc, flag.byDNSName, false)
+		return flag.searchIndex(c).FindByDnsName(ctx, dc, flag.byDNSName, false)
 	default:
 		panic("unsupported type")
 	}
@@ -171,21 +173,24 @@ func (flag *SearchFlag) searchByDNSName(c *vim25.Client, dc *object.Datacenter) 
 
 func (flag *SearchFlag) searchByInventoryPath(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
 	// TODO(PN): The datacenter flag should not be set because it is ignored.
-	return flag.searchIndex(c).FindByInventoryPath(context.TODO(), flag.byInventoryPath)
+	ctx := context.TODO()
+	return flag.searchIndex(c).FindByInventoryPath(ctx, flag.byInventoryPath)
 }
 
 func (flag *SearchFlag) searchByIP(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
+	ctx := context.TODO()
 	switch flag.t {
 	case SearchVirtualMachines:
-		return flag.searchIndex(c).FindByIp(context.TODO(), dc, flag.byIP, true)
+		return flag.searchIndex(c).FindByIp(ctx, dc, flag.byIP, true)
 	case SearchHosts:
-		return flag.searchIndex(c).FindByIp(context.TODO(), dc, flag.byIP, false)
+		return flag.searchIndex(c).FindByIp(ctx, dc, flag.byIP, false)
 	default:
 		panic("unsupported type")
 	}
 }
 
 func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
+	ctx := context.TODO()
 	isVM := false
 	switch flag.t {
 	case SearchVirtualMachines:
@@ -199,7 +204,7 @@ func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (ob
 	var err error
 
 	for _, iu := range []*bool{nil, types.NewBool(true)} {
-		ref, err = flag.searchIndex(c).FindByUuid(context.TODO(), dc, flag.byUUID, isVM, iu)
+		ref, err = flag.searchIndex(c).FindByUuid(ctx, dc, flag.byUUID, isVM, iu)
 		if err != nil {
 			if soap.IsSoapFault(err) {
 				fault := soap.ToSoapFault(err).VimFault()
@@ -218,6 +223,7 @@ func (flag *SearchFlag) searchByUUID(c *vim25.Client, dc *object.Datacenter) (ob
 }
 
 func (flag *SearchFlag) search() (object.Reference, error) {
+	ctx := context.TODO()
 	var ref object.Reference
 	var err error
 
@@ -259,7 +265,7 @@ func (flag *SearchFlag) search() (object.Reference, error) {
 	if err != nil {
 		return nil, err
 	}
-	ref, err = finder.ObjectReference(context.TODO(), ref.Reference())
+	ref, err = finder.ObjectReference(ctx, ref.Reference())
 	if err != nil {
 		return nil, err
 	}
@@ -282,6 +288,7 @@ func (flag *SearchFlag) VirtualMachine() (*object.VirtualMachine, error) {
 }
 
 func (flag *SearchFlag) VirtualMachines(args []string) ([]*object.VirtualMachine, error) {
+	ctx := context.TODO()
 	var out []*object.VirtualMachine
 
 	if flag.IsSet() {
@@ -308,7 +315,7 @@ func (flag *SearchFlag) VirtualMachines(args []string) ([]*object.VirtualMachine
 
 	// List virtual machines for every argument
 	for _, arg := range args {
-		vms, err := finder.VirtualMachineList(context.TODO(), arg)
+		vms, err := finder.VirtualMachineList(ctx, arg)
 		if err != nil {
 			if _, ok := err.(*find.NotFoundError); ok {
 				// Let caller decide how to handle NotFoundError
@@ -339,6 +346,7 @@ func (flag *SearchFlag) VirtualApp() (*object.VirtualApp, error) {
 }
 
 func (flag *SearchFlag) VirtualApps(args []string) ([]*object.VirtualApp, error) {
+	ctx := context.TODO()
 	var out []*object.VirtualApp
 
 	if flag.IsSet() {
@@ -363,7 +371,7 @@ func (flag *SearchFlag) VirtualApps(args []string) ([]*object.VirtualApp, error)
 
 	// List virtual apps for every argument
 	for _, arg := range args {
-		apps, err := finder.VirtualAppList(context.TODO(), arg)
+		apps, err := finder.VirtualAppList(ctx, arg)
 		if err != nil {
 			return nil, err
 		}
@@ -389,6 +397,7 @@ func (flag *SearchFlag) HostSystem() (*object.HostSystem, error) {
 }
 
 func (flag *SearchFlag) HostSystems(args []string) ([]*object.HostSystem, error) {
+	ctx := context.TODO()
 	var out []*object.HostSystem
 
 	if flag.IsSet() {
@@ -413,7 +422,7 @@ func (flag *SearchFlag) HostSystems(args []string) ([]*object.HostSystem, error)
 
 	// List host systems for every argument
 	for _, arg := range args {
-		vms, err := finder.HostSystemList(context.TODO(), arg)
+		vms, err := finder.HostSystemList(ctx, arg)
 		if err != nil {
 			return nil, err
 		}

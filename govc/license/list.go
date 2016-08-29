@@ -65,7 +65,7 @@ func (cmd *list) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := license.NewManager(client)
-	result, err := m.List(context.TODO())
+	result, err := m.List(ctx)
 	if err != nil {
 		return err
 	}

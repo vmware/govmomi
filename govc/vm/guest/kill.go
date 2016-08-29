@@ -54,7 +54,7 @@ func (cmd *kill) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	for _, pid := range cmd.pids {
-		if err := m.TerminateProcess(context.TODO(), cmd.Auth(), pid); err != nil {
+		if err := m.TerminateProcess(ctx, cmd.Auth(), pid); err != nil {
 			return err
 		}
 	}

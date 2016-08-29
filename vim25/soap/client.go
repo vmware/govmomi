@@ -212,7 +212,7 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 }
 
 func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, error) {
-	if nil == ctx || nil == ctx.Done() { // ctx.Done() is for context.TODO()
+	if nil == ctx || nil == ctx.Done() { // ctx.Done() is for ctx
 		return c.Client.Do(req)
 	}
 

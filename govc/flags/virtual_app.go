@@ -74,6 +74,8 @@ func (flag *VirtualAppFlag) Process(ctx context.Context) error {
 }
 
 func (flag *VirtualAppFlag) VirtualApp() (*object.VirtualApp, error) {
+	ctx := context.TODO()
+
 	if flag.app != nil {
 		return flag.app, nil
 	}
@@ -99,6 +101,6 @@ func (flag *VirtualAppFlag) VirtualApp() (*object.VirtualApp, error) {
 		return nil, err
 	}
 
-	flag.app, err = finder.VirtualApp(context.TODO(), flag.name)
+	flag.app, err = finder.VirtualApp(ctx, flag.name)
 	return flag.app, err
 }
