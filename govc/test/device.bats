@@ -206,3 +206,33 @@ load test_helper
   result=$(govc device.ls -vm $vm | grep $id | wc -l)
   [ $result -eq 1 ]
 }
+
+@test "device.usb" {
+  vm=$(new_empty_vm)
+
+  result=$(govc device.ls -vm $vm | grep usb | wc -l)
+  [ $result -eq 0 ]
+
+  run govc device.usb.add -type enoent -vm $vm
+  assert_failure
+
+  run govc device.usb.add -vm $vm
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm $vm | grep $id | wc -l)
+  [ $result -eq 1 ]
+
+  run govc device.usb.add -vm $vm
+  assert_failure # 1 per vm max
+
+  run govc device.usb.add -type xhci -vm $vm
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm $vm | grep $id | wc -l)
+  [ $result -eq 1 ]
+
+  run govc device.usb.add -type xhci -vm $vm
+  assert_failure # 1 per vm max
+}
