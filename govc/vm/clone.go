@@ -101,6 +101,17 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.waitForIP, "waitip", false, "Wait for VM to acquire IP address")
 }
 
+func (cmd *clone) Usage() string {
+	return "NAME"
+}
+
+func (cmd *clone) Description() string {
+	return `Clone VM to NAME.
+Example:
+govc vm.clone -vm template-vm new-vm
+`
+}
+
 func (cmd *clone) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
@@ -189,6 +200,10 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	if cmd.VirtualMachine, err = cmd.VirtualMachineFlag.VirtualMachine(); err != nil {
 		return err
+	}
+
+	if cmd.VirtualMachine == nil {
+		return flag.ErrHelp
 	}
 
 	task, err := cmd.cloneVM(ctx)
