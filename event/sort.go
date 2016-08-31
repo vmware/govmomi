@@ -22,7 +22,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-// Sort events in accending order base on Key
+// Sort events in ascending order base on Key
 // From the EventHistoryCollector.latestPage sdk docs:
 //   The "oldest event" is the one with the smallest key (event ID).
 //   The events in the returned page are unordered.

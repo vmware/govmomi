@@ -388,7 +388,7 @@ func (h *vncHost) popUnusedPort() (int, error) {
 
 	// Return first port we get when iterating
 	var port int
-	for port, _ = range h.ports {
+	for port = range h.ports {
 		break
 	}
 	delete(h.ports, port)

@@ -28,8 +28,8 @@ func testEnv() Env {
 		},
 		Property: &PropertySection{
 			Properties: []EnvProperty{
-				EnvProperty{"foo", "bar"},
-				EnvProperty{"ham", "eggs"}}},
+				{"foo", "bar"},
+				{"ham", "eggs"}}},
 	}
 }
 
