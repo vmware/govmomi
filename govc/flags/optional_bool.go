@@ -23,27 +23,27 @@ import (
 )
 
 type optionalBool struct {
-	val **bool
+	val *bool
 }
 
 func (b *optionalBool) Set(s string) error {
 	v, err := strconv.ParseBool(s)
-	*b.val = &v
+	b.val = &v
 	return err
 }
 
 func (b *optionalBool) Get() interface{} {
-	if *b.val == nil {
+	if b.val == nil {
 		return nil
 	}
-	return **b.val
+	return *b.val
 }
 
 func (b *optionalBool) String() string {
-	if *b.val == nil {
+	if b.val == nil {
 		return "<nil>"
 	}
-	return fmt.Sprintf("%v", **b.val)
+	return fmt.Sprintf("%v", *b.val)
 }
 
 func (b *optionalBool) IsBoolFlag() bool { return true }
@@ -51,5 +51,5 @@ func (b *optionalBool) IsBoolFlag() bool { return true }
 // NewOptionalBool returns a flag.Value implementation where there is no default value.
 // This avoids sending a default value over the wire as using flag.BoolVar() would.
 func NewOptionalBool(v **bool) flag.Value {
-	return &optionalBool{v}
+	return &optionalBool{*v}
 }
