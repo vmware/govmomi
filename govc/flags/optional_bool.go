@@ -40,7 +40,7 @@ func (b *optionalBool) Get() interface{} {
 }
 
 func (b *optionalBool) String() string {
-	if *b.val == nil {
+	if b.val == nil || *b.val == nil {
 		return "<nil>"
 	}
 	return fmt.Sprintf("%v", **b.val)
