@@ -113,7 +113,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.isoDatastoreFlag.Name, "iso-datastore", "", "Datastore for ISO file")
 
 	f.StringVar(&cmd.disk, "disk", "", "Disk path (to use existing) OR size (to create new, e.g. 20GB)")
-	cmd.diskDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
+	cmd.diskDatastoreFlag, _ = flags.NewCustomDatastoreFlag(ctx)
 	f.StringVar(&cmd.diskDatastoreFlag.Name, "disk-datastore", "", "Datastore for disk file")
 }
 
