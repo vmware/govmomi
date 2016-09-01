@@ -51,6 +51,10 @@ func TestOptionalBool(t *testing.T) {
 		t.Fail()
 	}
 
+	if val == nil || *val != true {
+		t.Fail()
+	}
+
 	b.Value.Set("false")
 
 	if b.Value.String() != "false" {
@@ -58,6 +62,10 @@ func TestOptionalBool(t *testing.T) {
 	}
 
 	if b.Value.(flag.Getter).Get() != false {
+		t.Fail()
+	}
+
+	if val == nil || *val != false {
 		t.Fail()
 	}
 }
