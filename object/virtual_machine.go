@@ -645,3 +645,12 @@ func (v VirtualMachine) MarkAsVirtualMachine(ctx context.Context, pool ResourceP
 
 	return nil
 }
+
+func (v VirtualMachine) Unregister(ctx context.Context) error {
+	req := types.UnregisterVM{
+		This: v.Reference(),
+	}
+
+	_, err := methods.UnregisterVM(ctx, v.Client(), &req)
+	return err
+}
