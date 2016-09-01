@@ -93,7 +93,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.persist {
 			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
 		} else {
-			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
+			backing.DiskMode = string(types.VirtualDiskModeIndependent_nonpersistent)
 		}
 
 		disk = devices.ChildDisk(disk)
