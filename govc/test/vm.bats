@@ -407,6 +407,28 @@ load test_helper
   assert_success
 }
 
+@test "vm.register" {
+  run govc vm.unregister enoent
+  assert_failure
+
+  vm=$(new_empty_vm)
+
+  run govc vm.change -vm "$vm" -e foo=bar
+  assert_success
+
+  run govc vm.unregister "$vm"
+  assert_success
+
+  run govc vm.change -vm "$vm" -e foo=bar
+  assert_failure
+
+  run govc vm.register "$vm/${vm}.vmx"
+  assert_success
+
+  run govc vm.change -vm "$vm" -e foo=bar
+  assert_success
+}
+
 @test "vm.clone" {
   vcsim_env
   vm=$(new_ttylinux_vm)
