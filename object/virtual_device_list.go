@@ -84,6 +84,9 @@ func (l VirtualDeviceList) Select(f func(device types.BaseVirtualDevice) bool) V
 // SelectByType returns a new list with devices that are equal to or extend the given type.
 func (l VirtualDeviceList) SelectByType(deviceType types.BaseVirtualDevice) VirtualDeviceList {
 	dtype := reflect.TypeOf(deviceType)
+	if dtype == nil {
+		return nil
+	}
 	dname := dtype.Elem().Name()
 
 	return l.Select(func(device types.BaseVirtualDevice) bool {
@@ -728,7 +731,11 @@ func (l VirtualDeviceList) SelectBootOrder(order []types.BaseVirtualMachineBootO
 
 // TypeName returns the vmodl type name of the device
 func (l VirtualDeviceList) TypeName(device types.BaseVirtualDevice) string {
-	return reflect.TypeOf(device).Elem().Name()
+	dtype := reflect.TypeOf(device)
+	if dtype == nil {
+		return ""
+	}
+	return dtype.Elem().Name()
 }
 
 var deviceNameRegexp = regexp.MustCompile(`(?:Virtual)?(?:Machine)?(\w+?)(?:Card|Device|Controller)?$`)
