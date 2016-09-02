@@ -17,11 +17,14 @@ limitations under the License.
 package guest
 
 import (
+	"bytes"
 	"context"
 	"flag"
+	"io"
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/vim25/soap"
 )
 
 type upload struct {
@@ -44,6 +47,17 @@ func (cmd *upload) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.overwrite, "f", false, "If set, the guest destination file is clobbered")
 }
 
+func (cmd *upload) Usage() string {
+	return "SOURCE DEST"
+}
+
+func (cmd *upload) Description() string {
+	return `Copy SOURCE from the local system to DEST in the guest VM.
+
+If SOURCE name is "-", read source from stdin.
+`
+}
+
 func (cmd *upload) Process(ctx context.Context) error {
 	if err := cmd.GuestFlag.Process(ctx); err != nil {
 		return err
@@ -55,6 +69,10 @@ func (cmd *upload) Process(ctx context.Context) error {
 }
 
 func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() != 2 {
+		return flag.ErrHelp
+	}
+
 	m, err := cmd.FileManager()
 	if err != nil {
 		return err
@@ -63,12 +81,24 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 	src := f.Arg(0)
 	dst := f.Arg(1)
 
-	s, err := os.Stat(src)
-	if err != nil {
-		return err
+	var size int64
+	var buf *bytes.Buffer
+
+	if src == "-" {
+		buf = new(bytes.Buffer)
+		size, err = io.Copy(buf, os.Stdin)
+		if err != nil {
+			return err
+		}
+	} else {
+		s, err := os.Stat(src)
+		if err != nil {
+			return err
+		}
+		size = s.Size()
 	}
 
-	url, err := m.InitiateFileTransferToGuest(ctx, cmd.Auth(), dst, cmd.Attr(), s.Size(), cmd.overwrite)
+	url, err := m.InitiateFileTransferToGuest(ctx, cmd.Auth(), dst, cmd.Attr(), size, cmd.overwrite)
 	if err != nil {
 		return err
 	}
@@ -81,6 +111,19 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return nil
+	}
+
+	p := soap.DefaultUpload
+
+	if buf != nil {
+		p.ContentLength = size
+		return c.Client.Upload(buf, u, &p)
+	}
+
+	if cmd.OutputFlag.TTY {
+		logger := cmd.ProgressLogger("Uploading... ")
+		p.Progress = logger
+		defer logger.Wait()
 	}
 
 	return c.Client.UploadFile(src, u, nil)

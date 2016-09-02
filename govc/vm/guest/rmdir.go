@@ -37,7 +37,7 @@ func (cmd *rmdir) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.GuestFlag, ctx = newGuestFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.recursive, "p", false, "Recursive removal")
+	f.BoolVar(&cmd.recursive, "r", false, "Recursive removal")
 }
 
 func (cmd *rmdir) Process(ctx context.Context) error {

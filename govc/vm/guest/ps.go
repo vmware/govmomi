@@ -20,17 +20,23 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strconv"
 	"text/tabwriter"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ps struct {
+	*flags.OutputFlag
 	*GuestFlag
 
 	every bool
+	wait  bool
 
 	pids pidSelector
 	uids uidSelector
@@ -67,43 +73,88 @@ func init() {
 }
 
 func (cmd *ps) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
+
 	cmd.GuestFlag, ctx = newGuestFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 
 	cmd.uids = make(map[string]bool)
 	f.BoolVar(&cmd.every, "e", false, "Select all processes")
+	f.BoolVar(&cmd.wait, "X", false, "Wait for process to exit")
 	f.Var(&cmd.pids, "p", "Select by process ID")
 	f.Var(&cmd.uids, "U", "Select by process UID")
 }
 
 func (cmd *ps) Process(ctx context.Context) error {
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
+		return err
+	}
 	if err := cmd.GuestFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cmd *ps) Run(ctx context.Context, f *flag.FlagSet) error {
+func running(procs []types.GuestProcessInfo) bool {
+	for _, p := range procs {
+		if p.EndTime == nil {
+			return true
+		}
+	}
+	return false
+}
+
+func (cmd *ps) list(ctx context.Context) ([]types.GuestProcessInfo, error) {
 	m, err := cmd.ProcessManager()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	if !cmd.every && len(cmd.uids) == 0 {
-		cmd.uids[cmd.auth.Username] = true
-	}
+	auth := cmd.Auth()
 
-	procs, err := m.ListProcesses(ctx, cmd.Auth(), cmd.pids)
+	for {
+		procs, err := m.ListProcesses(ctx, auth, cmd.pids)
+		if err != nil {
+			return nil, err
+		}
+
+		if cmd.wait && running(procs) {
+			<-time.After(time.Millisecond * 250)
+			continue
+		}
+
+		return procs, nil
+	}
+}
+
+func (cmd *ps) Run(ctx context.Context, f *flag.FlagSet) error {
+	procs, err := cmd.list(ctx)
 	if err != nil {
 		return err
 	}
 
+	r := &psResult{cmd, procs}
+
+	return cmd.WriteResult(r)
+}
+
+type psResult struct {
+	cmd         *ps
+	ProcessInfo []types.GuestProcessInfo
+}
+
+func (r *psResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(os.Stdout, 4, 0, 2, ' ', 0)
 
 	fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", "UID", "PID", "STIME", "CMD")
 
-	for _, p := range procs {
-		if cmd.every || cmd.uids[p.Owner] {
+	if !r.cmd.every && len(r.cmd.uids) == 0 {
+		r.cmd.uids[r.cmd.auth.Username] = true
+	}
+
+	for _, p := range r.ProcessInfo {
+		if r.cmd.every || r.cmd.uids[p.Owner] {
 			fmt.Fprintf(tw, "%s\t%d\t%s\t%s\n", p.Owner, p.Pid, p.StartTime.Format("15:04"), p.CmdLine)
 		}
 	}
