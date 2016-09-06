@@ -83,3 +83,10 @@ func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 
 	return flag.pool, nil
 }
+
+func (flag *ResourcePoolFlag) ResourcePoolIfSpecified() (*object.ResourcePool, error) {
+	if flag.name == "" {
+		return nil, nil
+	}
+	return flag.ResourcePool()
+}

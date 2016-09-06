@@ -646,6 +646,31 @@ func (v VirtualMachine) MarkAsVirtualMachine(ctx context.Context, pool ResourceP
 	return nil
 }
 
+func (v VirtualMachine) Migrate(ctx context.Context, pool *ResourcePool, host *HostSystem, priority types.VirtualMachineMovePriority, state types.VirtualMachinePowerState) (*Task, error) {
+	req := types.MigrateVM_Task{
+		This:     v.Reference(),
+		Priority: priority,
+		State:    state,
+	}
+
+	if pool != nil {
+		ref := pool.Reference()
+		req.Pool = &ref
+	}
+
+	if host != nil {
+		ref := host.Reference()
+		req.Host = &ref
+	}
+
+	res, err := methods.MigrateVM_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
 func (v VirtualMachine) Unregister(ctx context.Context) error {
 	req := types.UnregisterVM{
 		This: v.Reference(),

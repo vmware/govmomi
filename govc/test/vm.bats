@@ -431,7 +431,7 @@ load test_helper
 
 @test "vm.clone" {
   vcsim_env
-  vm=$(new_ttylinux_vm)
+  vm=$(new_empty_vm)
   clone=$(new_id)
 
   run govc vm.clone -vm $vm $clone
@@ -462,6 +462,19 @@ load test_helper
   # validate we require -vm flag
   run govc vm.clone enoent
   assert_failure
+}
+
+@test "vm.migrate" {
+  vcsim_env
+  vm=$(new_empty_vm)
+
+  # migrate from H0 to H1
+  run govc vm.migrate -host DC0_C0/DC0_C0_H1 "$vm"
+  assert_success
+
+  # migrate from C0 to C1
+  run govc vm.migrate -pool DC0_C1/Resources "$vm"
+  assert_success
 }
 
 @test "vm.snapshot" {
