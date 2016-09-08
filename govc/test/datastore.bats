@@ -127,3 +127,29 @@ upload_file() {
   assert_success
   assert_output "Hello world"
 }
+
+@test "datastore.tail" {
+  run govc datastore.tail "enoent/enoent.log"
+  assert_failure
+
+  id=$(new_id)
+  govc vm.create "$id"
+  govc vm.power -off "$id"
+
+  # test with .log (> bufSize) and .vmx (< bufSize)
+  for file in "$id/vmware.log" "$id/$id.vmx" ; do
+    log=$(govc datastore.download "$file" -)
+
+    for n in 0 1 5 10 123 456 7890 ; do
+      expect=$(tail -n $n <<<"$log")
+
+      run govc datastore.tail -n $n "$file"
+      assert_output "$expect"
+
+      expect=$(tail -c $n <<<"$log")
+
+      run govc datastore.tail -c $n "$file"
+      assert_output "$expect"
+    done
+  done
+}

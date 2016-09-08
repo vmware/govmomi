@@ -478,7 +478,7 @@ Also fixes the case where user contains an '@'."
   (interactive)
   (govc-shell-command
    (govc-command "events"
-                 (list "-n" govc-max-events (govc-selection)))))
+                 (list "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)))))
 
 (defun govc-parse-info (output)
   "Parse govc info command OUTPUT."
@@ -844,6 +844,13 @@ Optionally filter by FILTER and inherit SESSION."
                                          (with-demoted-errors
                                              (govc "datastore.upload" tmpfile srcfile)))) t t)))))
 
+(defun govc-datastore-tail ()
+  "Tail datastore file."
+  (interactive)
+  (govc-shell-command
+   (govc-command "datastore.tail"
+                 (list "-n" govc-max-events (if current-prefix-arg "-f")) (govc-selection))))
+
 (defun govc-datastore-ls-json ()
   "JSON via govc datastore.ls -json on current selection."
   (interactive)
@@ -870,6 +877,7 @@ Optionally filter by FILTER and inherit SESSION."
   (let ((map (make-sparse-keymap)))
     (define-key map "J" 'govc-datastore-ls-json)
     (define-key map "D" 'govc-datastore-rm-selection)
+    (define-key map "T" 'govc-datastore-tail)
     (define-key map "+" 'govc-datastore-mkdir)
     (define-key map (kbd "DEL") 'govc-datastore-ls-parent)
     (define-key map (kbd "RET") 'govc-datastore-ls-child)
@@ -877,8 +885,8 @@ Optionally filter by FILTER and inherit SESSION."
     map)
   "Keymap for `govc-datastore-ls-mode'.")
 
-(defun govc-datastore-ls (&optional datastore session)
-  "List govc datastore.  Optionally specify DATASTORE and SESSION."
+(defun govc-datastore-ls (&optional datastore session filter)
+  "List govc datastore.  Optionally specify DATASTORE, SESSION and FILTER."
   (interactive)
   (let ((buffer (get-buffer-create "*govc-datastore*")))
     (pop-to-buffer buffer)
@@ -887,6 +895,7 @@ Optionally filter by FILTER and inherit SESSION."
         (govc-session-clone session)
       (call-interactively 'govc-session))
     (setq govc-session-datastore (or datastore (govc-object-prompt "govc datastore: " 'govc-ls-datastore)))
+    (setq govc-filter filter)
     (tabulated-list-print)))
 
 (define-derived-mode govc-datastore-ls-mode govc-tabulated-list-mode "Datastore"
@@ -1096,8 +1105,14 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
 (defun govc-vm-datastore ()
   "Datastore via `govc-datastore-ls' with datastore of current selection."
   (interactive)
-  (govc-datastore (s-split ", " (govc-table-column-value "Storage") t)
-                  (govc-current-session)))
+  (if current-prefix-arg
+      (govc-datastore (s-split ", " (govc-table-column-value "Storage") t)
+                      (govc-current-session))
+    (let* ((data (govc-json "vm.info" (tabulated-list-get-id)))
+           (vm (elt (plist-get data :VirtualMachines) 0))
+           (dir (plist-get (plist-get (plist-get vm :Config) :Files) :LogDirectory))
+           (args (s-split "\\[\\|\\]" dir t)))
+      (govc-datastore-ls (first args) (govc-current-session) (concat (s-trim (second args)) "/")))))
 
 (defun govc-vm-ping ()
   "Ping VM."
