@@ -236,3 +236,27 @@ load test_helper
   run govc device.usb.add -type xhci -vm $vm
   assert_failure # 1 per vm max
 }
+
+@test "device.scsi slots" {
+  vm=$(new_empty_vm)
+
+  for i in $(seq 1 15) ; do
+    name="disk-${i}"
+    run govc vm.disk.create -vm "$vm" -name "$name" -size 1K
+    assert_success
+    result=$(govc device.ls -vm "$vm" | grep disk- | wc -l)
+    [ "$result" -eq "$i" ]
+  done
+
+  # We're at the max, so this will fail
+  run govc vm.disk.create -vm "$vm" -name disk-16 -size 1K
+  assert_failure
+
+  # Remove disk #2
+  run govc device.remove -vm "$vm" disk-1000-2
+  assert_success
+
+  # No longer at the max, this should use the UnitNumber released by the remove above
+  run govc vm.disk.create -vm "$vm" -name disk-16 -size 1K
+  assert_success
+}

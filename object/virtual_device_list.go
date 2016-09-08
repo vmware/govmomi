@@ -313,20 +313,31 @@ func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) type
 
 // newUnitNumber returns the unit number to use for attaching a new device to the given controller.
 func (l VirtualDeviceList) newUnitNumber(c types.BaseVirtualController) int32 {
+	units := make([]bool, 30)
+
+	switch sc := c.(type) {
+	case types.BaseVirtualSCSIController:
+		//  The SCSI controller sits on its own bus
+		units[sc.GetVirtualSCSIController().ScsiCtlrUnitNumber] = true
+	}
+
 	key := c.GetVirtualController().Key
-	var max int32 = -1
 
 	for _, device := range l {
 		d := device.GetVirtualDevice()
 
-		if d.ControllerKey == key {
-			if d.UnitNumber != nil && *d.UnitNumber > max {
-				max = *d.UnitNumber
-			}
+		if d.ControllerKey == key && d.UnitNumber != nil {
+			units[int(*d.UnitNumber)] = true
 		}
 	}
 
-	return max + 1
+	for unit, used := range units {
+		if !used {
+			return int32(unit)
+		}
+	}
+
+	return -1
 }
 
 // NewKey returns the key to use for adding a new device to the device list.
