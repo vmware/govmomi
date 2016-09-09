@@ -3,15 +3,12 @@
 load test_helper
 
 upload_file() {
-  file=$($mktemp --tmpdir govc-test-XXXXX)
-  name=$(basename ${file})
-  echo "Hello world" > ${file}
+  name=$(new_id)
 
-  run govc datastore.upload "${file}" "${name}"
+  echo "Hello world" | govc datastore.upload - "$name"
   assert_success
 
-  rm -f "${file}"
-  echo "${name}"
+  echo "$name"
 }
 
 @test "datastore.ls" {
@@ -36,6 +33,47 @@ upload_file() {
   run govc datastore.ls -l "./govc-test-*"
   assert_success
   assert_equal "12B" $(awk '{ print $1 }' <<<${output})
+}
+
+@test "datastore.ls-R" {
+  dir=$(new_id)
+
+  run govc datastore.mkdir "$dir"
+  assert_success
+
+  for name in one two three ; do
+    echo "$name world" | govc datastore.upload - "$dir/file-$name"
+    run govc datastore.mkdir -p "$dir/dir-$name/subdir-$name"
+    run govc datastore.mkdir -p "$dir/dir-$name/.hidden"
+    assert_success
+    echo "$name world" | govc datastore.upload - "$dir/dir-$name/.hidden/other-$name"
+    echo "$name world" | govc datastore.upload - "$dir/dir-$name/other-$name"
+    echo "$name world" | govc datastore.upload - "$dir/dir-$name/subdir-$name/last-$name"
+  done
+
+  # without -R
+  json=$(govc datastore.ls -json -l -p "$dir")
+  result=$(jq -r .[].File[].Path <<<"$json" | wc -l)
+  [ "$result" -eq 6 ]
+
+  result=$(jq -r .[].FolderPath <<<"$json" | wc -l)
+  [ "$result" -eq 1 ]
+
+  # with -R
+  json=$(govc datastore.ls -json -l -p -R "$dir")
+  result=$(jq -r .[].File[].Path <<<"$json" | wc -l)
+  [ "$result" -eq 15 ]
+
+  result=$(jq -r .[].FolderPath <<<"$json" | wc -l)
+  [ "$result" -eq 7 ]
+
+  # with -R -a
+  json=$(govc datastore.ls -json -l -p -R -a "$dir")
+  result=$(jq -r .[].File[].Path <<<"$json" | wc -l)
+  [ "$result" -eq 21 ]
+
+  result=$(jq -r .[].FolderPath <<<"$json" | wc -l)
+  [ "$result" -eq 10 ]
 }
 
 @test "datastore.rm" {

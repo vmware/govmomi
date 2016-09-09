@@ -857,6 +857,12 @@ Optionally filter by FILTER and inherit SESSION."
   (let ((govc-args '("-l" "-p")))
     (govc-json-info-selection "datastore.ls")))
 
+(defun govc-datastore-ls-r-json ()
+  "Search via govc datastore.ls -json -R on current selection."
+  (interactive)
+  (let ((govc-args '("-l" "-p" "-R")))
+    (govc-json-info-selection "datastore.ls")))
+
 (defun govc-datastore-mkdir (name)
   "Mkdir via govc datastore.mkdir with given NAME."
   (interactive (list (read-from-minibuffer "Create directory: " govc-filter)))
@@ -876,6 +882,7 @@ Optionally filter by FILTER and inherit SESSION."
 (defvar govc-datastore-ls-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "J" 'govc-datastore-ls-json)
+    (define-key map "S" 'govc-datastore-ls-r-json)
     (define-key map "D" 'govc-datastore-rm-selection)
     (define-key map "T" 'govc-datastore-tail)
     (define-key map "+" 'govc-datastore-mkdir)

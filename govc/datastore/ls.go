@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"path"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -36,9 +37,10 @@ type ls struct {
 	*flags.DatastoreFlag
 	*flags.OutputFlag
 
-	long  bool
-	slash bool
-	all   bool
+	long    bool
+	slash   bool
+	all     bool
+	recurse bool
 }
 
 func init() {
@@ -55,6 +57,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.slash, "p", false, "Write a slash (`/') after each filename if that file is a directory")
 	f.BoolVar(&cmd.all, "a", false, "Include entries whose names begin with a dot (.)")
+	f.BoolVar(&cmd.recurse, "R", false, "List subdirectories recursively")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -120,11 +123,14 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 
 			// Treat an empty result against match pattern as file not found
-			if i == 1 && len(r.File) == 0 {
-				return fmt.Errorf("File %s/%s was not found", r.FolderPath, spec.MatchPattern[0])
+			if i == 1 && len(r) == 1 && len(r[0].File) == 0 {
+				return fmt.Errorf("File %s/%s was not found", r[0].FolderPath, spec.MatchPattern[0])
 			}
 
-			result.add(r)
+			for n := range r {
+				result.add(r[n])
+			}
+
 			break
 		}
 	}
@@ -132,27 +138,37 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WriteResult(result)
 }
 
-func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) (types.HostDatastoreBrowserSearchResults, error) {
+func (cmd *ls) ListPath(b *object.HostDatastoreBrowser, path string, spec types.HostDatastoreBrowserSearchSpec) ([]types.HostDatastoreBrowserSearchResults, error) {
 	ctx := context.TODO()
-	var res types.HostDatastoreBrowserSearchResults
 
 	path, err := cmd.DatastorePath(path)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
-	task, err := b.SearchDatastore(ctx, path, &spec)
+	search := b.SearchDatastore
+	if cmd.recurse {
+		search = b.SearchDatastoreSubFolders
+	}
+
+	task, err := search(ctx, path, &spec)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
 	info, err := task.WaitForResult(ctx, nil)
 	if err != nil {
-		return res, err
+		return nil, err
 	}
 
-	res = info.Result.(types.HostDatastoreBrowserSearchResults)
-	return res, nil
+	switch r := info.Result.(type) {
+	case types.HostDatastoreBrowserSearchResults:
+		return []types.HostDatastoreBrowserSearchResults{r}, nil
+	case types.ArrayOfHostDatastoreBrowserSearchResults:
+		return r.HostDatastoreBrowserSearchResults, nil
+	default:
+		panic(fmt.Sprintf("unknown result type: %T", r))
+	}
 }
 
 type listOutput struct {
@@ -161,6 +177,23 @@ type listOutput struct {
 }
 
 func (o *listOutput) add(r types.HostDatastoreBrowserSearchResults) {
+	if o.cmd.recurse && !o.cmd.all {
+		// filter out ".hidden" directories
+		path := strings.SplitN(r.FolderPath, " ", 2)
+		if len(path) == 2 {
+			path = strings.Split(path[1], "/")
+			if path[0] == "." {
+				path = path[1:]
+			}
+
+			for _, p := range path {
+				if p[0] == '.' {
+					return
+				}
+			}
+		}
+	}
+
 	res := r
 	res.File = nil
 
