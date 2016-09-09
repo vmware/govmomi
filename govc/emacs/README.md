@@ -178,6 +178,7 @@ during initialization.
 Keybinding     | Description
 ---------------|------------------------------------------------------------
 <kbd>J</kbd>   | JSON via govc datastore
+<kbd>S</kbd>   | Search via govc datastore
 <kbd>D</kbd>   | Delete selected datastore paths
 <kbd>T</kbd>   | Tail datastore file
 <kbd>+</kbd>   | Mkdir via govc datastore
