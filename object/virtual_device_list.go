@@ -245,6 +245,7 @@ func (l VirtualDeviceList) CreateSCSIController(name string) (types.BaseVirtualD
 	scsi := c.GetVirtualSCSIController()
 	scsi.BusNumber = l.newSCSIBusNumber()
 	scsi.Key = l.NewKey()
+	scsi.ScsiCtlrUnitNumber = 7
 	return c.(types.BaseVirtualDevice), nil
 }
 
