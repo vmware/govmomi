@@ -9,7 +9,7 @@ You can find prebuilt govc binaries on the [releases page](https://github.com/vm
 Download and install a binary locally like this:
 
 ```sh
-curl $URL_TO_BINARY | gzip -d > /usr/local/bin/govc
+curl -L $URL_TO_BINARY | gunzip > /usr/local/bin/govc
 chmod +x /usr/local/bin/govc
 ```
 
