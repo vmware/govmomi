@@ -67,3 +67,23 @@ load test_helper
   run govc env -u "user:${password}@enoent:99999" GOVC_PASSWORD
   assert_output "$password"
 }
+
+@test "govc help" {
+  run govc
+  assert_failure
+
+  run govc -h
+  assert_success
+
+  run govc -enoent
+  assert_failure
+
+  run govc vm.create
+  assert_failure
+
+  run govc vm.create -h
+  assert_success
+
+  run govc vm.create -enoent
+  assert_failure
+}
