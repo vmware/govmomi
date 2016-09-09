@@ -126,7 +126,7 @@ govc version -require 0.7.1
 
 ## Projects using govc
 
-* [Kubernetes vSphere Provider](https://github.com/GoogleCloudPlatform/kubernetes/tree/master/cluster/vsphere)
+* [Kubernetes vSphere Provider](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
 
 * [Emacs govc package](./emacs)
 

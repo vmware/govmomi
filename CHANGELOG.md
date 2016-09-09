@@ -1,5 +1,15 @@
 # changelog
 
+### 0.9.0 (2016-09-09)
+
+* Add object.DatastoreFile helpers for streaming and tailing datastore files
+
+* Add object VirtualMachine.Unregister method
+
+* Add object.ListView methods: Add, Remove, Reset
+
+* Update to Go 1.7 - using stdlib's context package
+
 ### 0.8.0 (2016-06-30)
 
 * Add session.Manager.AcquireLocalTicket

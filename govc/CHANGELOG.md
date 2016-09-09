@@ -1,8 +1,36 @@
 # changelog
 
-### unreleased
+### 0.9.0 (2016-09-09)
+
+* Add `-R` option to datastore.ls
+
+* Add datastore.tail command
+
+* Add vm.migrate command
+
+* Add govc vm.register and vm.unregister commands
+
+* Add govc vm snapshot commands: create, remove, revert, tree
+
+* Add device.usb.add command
+
+* Support stdin/stdout in datastore upload/download
+
+* Add host.portgroup.change command
+
+* Add host.portgroup.info command
+
+* Add HostNetworkPolicy to host.vswitch.info
+
+* Add `-json` support to host.vswitch.info command
+
+* Support instance uuid in SearchFlag
+
+* Add `-json` support to esxcli command
 
 * Add `-unclaimed` flag to host.storage.info command
+
+* Support Network mapping in import.{ova,ovf} commands
 
 ### 0.8.0 (2016-06-30)
 
