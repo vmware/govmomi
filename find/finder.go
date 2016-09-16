@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"path"
+	"strings"
 
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
@@ -139,6 +140,50 @@ func (f *Finder) dcReference(_ context.Context) (object.Reference, error) {
 	return dc, nil
 }
 
+// Implementation of DatacenterList which provides recursion.
+// Since it might be recursive, don't want to return a NotFoundError
+// if some random leaf folder doesn't contain a Datacenter
+func (f *Finder) datacenterList(
+	ctx context.Context,
+	dcs []*object.Datacenter,
+	path string, recurse bool) ([]*object.Datacenter, error) {
+
+	es, err := f.find(ctx, f.rootFolder, false, path)
+	if err != nil {
+		return dcs, err
+	}
+
+	for _, e := range es {
+		ref := e.Object.Reference()
+		switch ref.Type {
+		case "Datacenter":
+			dc := object.NewDatacenter(f.client, ref)
+			dc.InventoryPath = e.Path
+			dcs = append(dcs, dc)
+		case "Folder":
+			if !recurse {
+				continue
+			}
+			ndcs, err := f.datacenterList(ctx, dcs, insertFolder(path, e.Path), recurse)
+			if err != nil {
+				return dcs, err
+			}
+			dcs = append(dcs, ndcs...)
+		default:
+			continue
+		}
+	}
+	return dcs, nil
+}
+
+func insertFolder(path, fldr string) string {
+	parts := list.ToParts(path)
+	i := len(parts) - 1
+	parts = append(parts[:i], append([]string{strings.Trim(fldr, "/")}, parts[i:]...)...)
+
+	return strings.Join(parts, "/")
+}
+
 func (f *Finder) vmFolder(ctx context.Context) (object.Reference, error) {
 	folders, err := f.dcFolders(ctx)
 	if err != nil {
@@ -244,19 +289,15 @@ func (f *Finder) ManagedObjectListChildren(ctx context.Context, path string) ([]
 }
 
 func (f *Finder) DatacenterList(ctx context.Context, path string) ([]*object.Datacenter, error) {
-	es, err := f.find(ctx, f.rootFolder, false, path)
-	if err != nil {
-		return nil, err
-	}
 
 	var dcs []*object.Datacenter
-	for _, e := range es {
-		ref := e.Object.Reference()
-		if ref.Type == "Datacenter" {
-			dc := object.NewDatacenter(f.client, ref)
-			dc.InventoryPath = e.Path
-			dcs = append(dcs, dc)
-		}
+	recurse := false
+	if strings.HasSuffix(path, "*") {
+		recurse = true
+	}
+	dcs, err := f.datacenterList(ctx, dcs, path, recurse)
+	if err != nil {
+		return nil, err
 	}
 
 	if len(dcs) == 0 {
