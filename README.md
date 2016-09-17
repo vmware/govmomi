@@ -1,5 +1,4 @@
 [![Build Status](https://travis-ci.org/vmware/govmomi.png?branch=master)](https://travis-ci.org/vmware/govmomi)
-[![Build Status](https://ci.vmware.run/api/badges/vmware/govmomi/status.svg)](https://ci.vmware.run/vmware/govmomi)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vmware/govmomi)](https://goreportcard.com/report/github.com/vmware/govmomi)
 
 # govmomi

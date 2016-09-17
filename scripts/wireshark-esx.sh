@@ -32,7 +32,7 @@ if [ ${#ssh_opts[@]} -eq 0 ] ; then
   ssh_opts=(-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -o LogLevel=FATAL -o User=$user)
 
   if [ -x "$(which sshpass)" ] ; then
-      password="$(govc env GOVC_PASSWORD)"
+    password="$(govc env GOVC_PASSWORD)"
     scp=(sshpass -p $password scp)
     ssh=(sshpass -p $password ssh)
   fi

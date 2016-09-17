@@ -68,10 +68,9 @@ func (cmd *ls) Usage() string {
 }
 
 func (cmd *ls) Description() string {
-	return `
-List option with the given NAME.
-If NAME ends with a dot, all options for that subtree are listed.
-`
+	return `List option with the given NAME.
+
+If NAME ends with a dot, all options for that subtree are listed.`
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {

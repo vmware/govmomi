@@ -52,6 +52,13 @@ func (cmd *boot) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
 }
 
+func (cmd *boot) Description() string {
+	return `Configure VM boot settings.
+
+Examples:
+  govc device.boot -vm $vm -delay 1000 -order floppy,cdrom,ethernet,disk`
+}
+
 func (cmd *boot) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

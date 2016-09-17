@@ -61,7 +61,10 @@ func (cmd *add) Usage() string {
 }
 
 func (cmd *add) Description() string {
-	return `Add hosts to DVS.`
+	return `Add hosts to DVS.
+
+Examples:
+  govc dvs.add -dvs dvsName -pnic vmnic1 hostA hostB hostC`
 }
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {

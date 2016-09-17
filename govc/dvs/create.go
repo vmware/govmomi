@@ -23,18 +23,15 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type create struct {
-	*flags.DatacenterFlag
+	*flags.FolderFlag
 
 	types.DVSCreateSpec
 
 	configSpec *types.VMwareDVSConfigSpec
-
-	parent string
 }
 
 func init() {
@@ -42,14 +39,12 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
-	cmd.DatacenterFlag.Register(ctx, f)
+	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
 
 	cmd.configSpec = new(types.VMwareDVSConfigSpec)
 
 	cmd.DVSCreateSpec.ConfigSpec = cmd.configSpec
-
-	f.StringVar(&cmd.parent, "parent", "", "Path to parent folder for the new dvs")
 }
 
 func (cmd *create) Usage() string {
@@ -59,58 +54,37 @@ func (cmd *create) Usage() string {
 func (cmd *create) Description() string {
 	return `Create DVS (DistributedVirtualSwitch) in datacenter.
 
-The dvs is added to the folder specified by the 'parent' flag. If not given,
+The dvs is added to the folder specified by the 'folder' flag. If not given,
 this defaults to the network folder in the specified or default datacenter.`
 }
 
 func (cmd *create) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+	if err := cmd.FolderFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	var parent *object.Folder
-
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
 	name := f.Arg(0)
 
-	if cmd.parent == "" {
-		dc, err := cmd.Datacenter()
-		if err != nil {
-			return err
-		}
-
-		folders, err := dc.Folders(ctx)
-		if err != nil {
-			return err
-		}
-
-		parent = folders.NetworkFolder
-	} else {
-		finder, err := cmd.Finder()
-		if err != nil {
-			return err
-		}
-
-		parent, err = finder.Folder(ctx, cmd.parent)
-		if err != nil {
-			return err
-		}
-	}
-
 	cmd.configSpec.Name = name
 
-	task, err := parent.CreateDVS(ctx, cmd.DVSCreateSpec)
+	folder, err := cmd.FolderOrDefault("network")
 	if err != nil {
 		return err
 	}
 
-	logger := cmd.ProgressLogger(fmt.Sprintf("adding %s to folder %s... ", name, parent.InventoryPath))
+	task, err := folder.CreateDVS(ctx, cmd.DVSCreateSpec)
+	if err != nil {
+		return err
+	}
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("adding %s to folder %s... ", name, folder.InventoryPath))
 	defer logger.Wait()
 
 	_, err = task.WaitForResult(ctx, logger)

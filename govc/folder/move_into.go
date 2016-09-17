@@ -47,9 +47,9 @@ func (cmd *move) Usage() string {
 
 func (cmd *move) Description() string {
 	return `Move managed entities into this folder.
-Example:
-govc folder.moveinto -folder /dc1/folder-foo /dc2/folder-bar/*
-`
+
+Examples:
+  govc folder.moveinto -folder /dc1/folder-foo /dc2/folder-bar/*`
 }
 
 func (cmd *move) Process(ctx context.Context) error {

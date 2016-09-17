@@ -73,9 +73,14 @@ func (cmd *add) Process(ctx context.Context) error {
 }
 
 func (cmd *add) Description() string {
-	return `Add host to cluster.
+	return `Add HOST to CLUSTER.
 
-The host is added to the cluster specified by the 'cluster' flag.`
+The host is added to the cluster specified by the 'cluster' flag.
+
+Examples:
+  thumbprint=$(govc about.cert -k -u host.example.com -thumbprint | awk '{print $2}')
+  govc cluster.add -cluster ClusterA -hostname host.example.com -username root -password pass -thumbprint $thumbprint
+  govc cluster.add -cluster ClusterB -hostname 10.0.6.1 -username root -password pass -noverify`
 }
 
 func (cmd *add) Add(ctx context.Context, cluster *object.ClusterComputeResource) error {
@@ -110,7 +115,7 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cluster, err := finder.ClusterComputeResource(ctx, cmd.cluster)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return cmd.Fault(cmd.Add(ctx, cluster))

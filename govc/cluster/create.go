@@ -22,14 +22,11 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type create struct {
-	*flags.DatacenterFlag
-
-	parent string
+	*flags.FolderFlag
 
 	types.ClusterConfigSpecEx
 }
@@ -39,10 +36,8 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
-	cmd.DatacenterFlag.Register(ctx, f)
-
-	f.StringVar(&cmd.parent, "parent", "", "Path to parent folder for the new cluster")
+	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
 }
 
 func (cmd *create) Usage() string {
@@ -52,52 +47,32 @@ func (cmd *create) Usage() string {
 func (cmd *create) Description() string {
 	return `Create CLUSTER in datacenter.
 
-The cluster is added to the folder specified by the 'parent' flag. If not given,
-this defaults to the hosts folder in the specified or default datacenter.`
+The cluster is added to the folder specified by the 'folder' flag. If not given,
+this defaults to the host folder in the specified or default datacenter.
+
+Examples:
+  govc cluster.create ClusterA
+  govc cluster.create -folder /dc2/test-folder ClusterB`
 }
 
 func (cmd *create) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+	if err := cmd.FolderFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	var parent *object.Folder
-
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
-	if cmd.parent == "" {
-		dc, err := cmd.Datacenter()
-		if err != nil {
-			return err
-		}
-
-		folders, err := dc.Folders(ctx)
-		if err != nil {
-			return err
-		}
-
-		parent = folders.HostFolder
-	} else {
-		finder, err := cmd.Finder()
-		if err != nil {
-			return err
-		}
-
-		parent, err = finder.Folder(ctx, cmd.parent)
-		if err != nil {
-			return err
-		}
-	}
-
-	_, err := parent.CreateCluster(ctx, f.Arg(0), cmd.ClusterConfigSpecEx)
+	folder, err := cmd.FolderOrDefault("host")
 	if err != nil {
 		return err
 	}
 
-	return nil
+	_, err = folder.CreateCluster(ctx, f.Arg(0), cmd.ClusterConfigSpecEx)
+
+	return err
 }

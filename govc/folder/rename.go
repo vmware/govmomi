@@ -47,9 +47,9 @@ func (cmd *rename) Usage() string {
 
 func (cmd *rename) Description() string {
 	return `Rename an existing folder with NAME.
-Example:
-govc folder.rename -folder /dc1/vm/folder-foo folder-bar
-`
+
+Examples:
+  govc folder.rename -folder /dc1/vm/folder-foo folder-bar`
 }
 
 func (cmd *rename) Process(ctx context.Context) error {

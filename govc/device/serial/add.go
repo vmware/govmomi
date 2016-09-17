@@ -38,6 +38,14 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 }
 
+func (cmd *add) Description() string {
+	return `Add serial port to VM.
+
+Examples:
+  govc device.serial.add -vm $vm
+  govc device.info -vm $vm serialport-*`
+}
+
 func (cmd *add) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

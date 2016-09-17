@@ -59,9 +59,12 @@ func (cmd *insert) Usage() string {
 }
 
 func (cmd *insert) Description() string {
-	return `Insert image on datastore into floppy device.
+	return `Insert IMG on datastore into floppy device.
 
-If device is not specified, the first floppy device is used.`
+If device is not specified, the first floppy device is used.
+
+Examples:
+  govc device.floppy.insert -vm vm-1 vm-1/config.img`
 }
 
 func (cmd *insert) Run(ctx context.Context, f *flag.FlagSet) error {

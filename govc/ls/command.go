@@ -53,6 +53,15 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.Type, "t", "", "Object type")
 }
 
+func (cmd *ls) Description() string {
+	return `List inventory items.
+
+Examples:
+  govc ls -l '*'
+  govc ls -t ClusterComputeResource host
+  govc ls -t Datastore host/ClusterA/* | grep -v local | xargs -n1 basename | sort | uniq`
+}
+
 func (cmd *ls) Process(ctx context.Context) error {
 	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
 		return err

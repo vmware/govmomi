@@ -48,12 +48,12 @@ func (cmd *revert) Usage() string {
 
 func (cmd *revert) Description() string {
 	return `Revert to snapshot of VM with given NAME.
+
 If NAME is not provided, revert to the current snapshot.
 Otherwise, NAME can be the snapshot name, tree path or moid.
 
-Example:
-govc snapshot.revert -vm my-vm happy-vm-state
-`
+Examples:
+  govc snapshot.revert -vm my-vm happy-vm-state`
 }
 
 func (cmd *revert) Process(ctx context.Context) error {

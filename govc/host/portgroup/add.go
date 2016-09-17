@@ -43,15 +43,22 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewInt32(&cmd.spec.VlanId), "vlan", "VLAN ID")
 }
 
+func (cmd *add) Description() string {
+	return `Add portgroup to HOST.
+
+Examples:
+  govc host.portgroup.add -vswitch vSwitch0 -vlan 3201 bridge`
+}
+
+func (cmd *add) Usage() string {
+	return "NAME"
+}
+
 func (cmd *add) Process(ctx context.Context) error {
 	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
-}
-
-func (cmd *add) Usage() string {
-	return "NAME"
 }
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {

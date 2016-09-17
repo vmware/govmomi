@@ -51,7 +51,11 @@ func (cmd *eject) Process(ctx context.Context) error {
 func (cmd *eject) Description() string {
 	return `Eject media from CD-ROM device.
 
-If device is not specified, the first CD-ROM device is used.`
+If device is not specified, the first CD-ROM device is used.
+
+Examples:
+  govc device.floppy.eject -vm vm-1
+  govc device.floppy.eject -vm vm-1 -device floppy-1`
 }
 
 func (cmd *eject) Run(ctx context.Context, f *flag.FlagSet) error {

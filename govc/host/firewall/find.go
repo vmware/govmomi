@@ -77,7 +77,11 @@ func (cmd *find) Description() string {
 	return `Find firewall rulesets matching the given rule.
 
 For a complete list of rulesets: govc host.esxcli network firewall ruleset list
-For a complete list of rules:    govc host.esxcli network firewall ruleset rule list`
+For a complete list of rules:    govc host.esxcli network firewall ruleset rule list
+
+Examples:
+  govc firewall.ruleset.find -direction inbound -port 22
+  govc firewall.ruleset.find -direction outbound -port 2377`
 }
 
 func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {

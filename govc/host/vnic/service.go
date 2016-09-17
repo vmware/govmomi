@@ -74,8 +74,16 @@ func (cmd *service) Description() string {
 	}
 
 	return fmt.Sprintf(`
-Enable or disable service on a virtual nic device.  Example:
-SERVICE [%s] DEVICE [%s]`, strings.Join(nicTypes, "|"), strings.Join([]string{"vmk0", "vmk1", "..."}, "|"))
+Enable or disable service on a virtual nic device.
+
+Where SERVICE is one of: %s
+Where DEVICE is one of: %s
+
+Examples:
+  govc host.vnic.service -host hostname -enable vsan vmk0
+`,
+		strings.Join(nicTypes, "|"),
+		strings.Join([]string{"vmk0", "vmk1", "..."}, "|"))
 }
 
 func (cmd *service) Run(ctx context.Context, f *flag.FlagSet) error {

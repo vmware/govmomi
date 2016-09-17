@@ -55,7 +55,7 @@ func (cmd *exit) Usage() string {
 }
 
 func (cmd *exit) Description() string {
-	return `Take hosts out of maintenance mode.
+	return `Take HOST out of maintenance mode.
 
 This blocks if any concurrent running maintenance-only host configurations operations are being performed.
 For example, if VMFS volumes are being upgraded.

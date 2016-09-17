@@ -62,9 +62,9 @@ func (cmd *set) Usage() string {
 
 func (cmd *set) Description() string {
 	return `Set the permissions managed entities.
-Example:
-govc permissions.set -principal root -role Admin
-`
+
+Examples:
+  govc permissions.set -principal root -role Admin`
 }
 
 func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {

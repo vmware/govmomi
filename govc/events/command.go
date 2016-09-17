@@ -49,8 +49,20 @@ func (cmd *events) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.Max = 25 // default
 	f.Var(flags.NewInt32(&cmd.Max), "n", "Output the last N events")
-	f.BoolVar(&cmd.Tail, "f", false, "Tail event stream")
-	f.BoolVar(&cmd.Force, "force", false, "Force event collection: use with CAUTION ")
+	f.BoolVar(&cmd.Tail, "f", false, "Follow event stream")
+	f.BoolVar(&cmd.Force, "force", false, "Disable number objects to monitor limit")
+}
+
+func (cmd *events) Description() string {
+	return `Display events.
+
+Examples:
+  govc events vm1 vm2
+  govc ls -t HostSystem host/* | xargs govc events | grep -i vsan`
+}
+
+func (cmd *events) Usage() string {
+	return "[PATH]..."
 }
 
 func (cmd *events) Process(ctx context.Context) error {
@@ -91,10 +103,6 @@ func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectRefe
 	return nil
 }
 
-func (cmd *events) Usage() string {
-	return "[PATH]..."
-}
-
 func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
@@ -111,7 +119,7 @@ func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
 		m := event.NewManager(c)
 
 		// get the event stream
-		err := m.Events(ctx, objs, cmd.Max, cmd.Tail, cmd.Force, func(obj types.ManagedObjectReference, ee []types.BaseEvent) error {
+		err = m.Events(ctx, objs, cmd.Max, cmd.Tail, cmd.Force, func(obj types.ManagedObjectReference, ee []types.BaseEvent) error {
 			var o *types.ManagedObjectReference
 			if len(objs) > 1 {
 				o = &obj

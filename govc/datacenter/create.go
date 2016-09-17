@@ -49,7 +49,7 @@ func (cmd *create) Process(ctx context.Context) error {
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	folder, err := cmd.FolderOrRoot()
+	folder, err := cmd.FolderOrDefault("/")
 	if err != nil {
 		return err
 	}

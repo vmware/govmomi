@@ -48,9 +48,9 @@ func (cmd *create) Usage() string {
 
 func (cmd *create) Description() string {
 	return `Create folder with PATH.
-Example:
-govc folder.create /dc1/vm/folder-foo
-`
+
+Examples:
+  govc folder.create /dc1/vm/folder-foo`
 }
 
 func (cmd *create) Process(ctx context.Context) error {

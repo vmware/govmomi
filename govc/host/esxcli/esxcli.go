@@ -50,6 +50,18 @@ func (cmd *esxcli) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.hints, "hints", true, "Use command info hints when formatting output")
 }
 
+func (cmd *esxcli) Description() string {
+	return `Invoke esxcli command on HOST.
+
+Output is rendered in table form when possible, unless disabled with '-hints=false'.
+
+Examples:
+  govc host.esxcli network ip connection list
+  govc host.esxcli system settings advanced set -o /Net/GuestIPHack -i 1
+  govc host.esxcli network firewall ruleset set -r remoteSerialPort -e true
+  govc host.esxcli network firewall set -e false`
+}
+
 func (cmd *esxcli) Process(ctx context.Context) error {
 	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
 		return err

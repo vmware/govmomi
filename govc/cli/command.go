@@ -72,7 +72,7 @@ func commandHelp(w io.Writer, name string, cmd Command, f *flag.FlagSet) {
 	}
 
 	if u, ok := cmd.(HasDescription); ok {
-		fmt.Fprintf(w, "%s\n", u.Description())
+		fmt.Fprintf(w, "\n%s\n", u.Description())
 	}
 
 	n := 0

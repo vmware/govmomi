@@ -55,7 +55,8 @@ func (cmd *logs) Process(ctx context.Context) error {
 }
 
 func (cmd *logs) Description() string {
-	return `
+	return `View VPX and ESX logs.
+
 The '-log' option defaults to "hostd" when connected directly to a host or
 when connected to VirtualCenter and a '-host' option is given.  Otherwise,
 the '-log' option defaults to "vpxd:vpxd.log".  The '-host' option is ignored

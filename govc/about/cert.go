@@ -55,11 +55,11 @@ func (cmd *cert) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *cert) Description() string {
-	return `Display SSL certificate info for HOST.
+	return `Display TLS certificate info for HOST.
 
 If the HOST certificate cannot be verified, about.cert will return with exit code 60 (as curl does).
 If the '-k' flag is provided, about.cert will return with exit code 0 in this case.
-Output of the first example below can be used as '-thumbprint' for the 'host.add' and 'cluster.add' commands.
+The SHA1 thumbprint can also be used as '-thumbprint' for the 'host.add' and 'cluster.add' commands.
 
 Examples:
   govc about.cert -k -json | jq -r .ThumbprintSHA1

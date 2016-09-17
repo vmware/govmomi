@@ -52,7 +52,10 @@ func (cmd *download) Description() string {
 	return `Copy SOURCE from the guest VM to DEST on the local system.
 
 If DEST name is "-", source is written to stdout.
-`
+
+Examples:
+  govc guest.download -l user:pass -vm=my-vm /var/log/my.log ./local.log
+  govc guest.download -l user:pass -vm=my-vm /etc/motd -`
 }
 
 func (cmd *download) Process(ctx context.Context) error {

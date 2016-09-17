@@ -27,7 +27,7 @@ import (
 
 var featureUsage = "List licenses with given feature"
 
-type list struct {
+type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 
@@ -35,10 +35,10 @@ type list struct {
 }
 
 func init() {
-	cli.Register("license.list", &list{})
+	cli.Register("license.ls", &ls{})
 }
 
-func (cmd *list) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
@@ -48,7 +48,7 @@ func (cmd *list) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.feature, "feature", "", featureUsage)
 }
 
-func (cmd *list) Process(ctx context.Context) error {
+func (cmd *ls) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (cmd *list) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *list) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
 		return err

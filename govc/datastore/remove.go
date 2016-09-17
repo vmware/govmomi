@@ -57,9 +57,10 @@ func (cmd *remove) Usage() string {
 
 func (cmd *remove) Description() string {
 	return `Remove datastore from HOST.
-Example:
-govc datastore.remove -ds nfsDatastore cluster1
-`
+
+Examples:
+  govc datastore.remove -ds nfsDatastore cluster1
+  govc datastore.remove -ds nasDatastore host1 host2 host3`
 }
 
 func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {

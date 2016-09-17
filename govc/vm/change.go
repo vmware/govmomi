@@ -68,6 +68,13 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.NestedHVEnabled), "nested-hv-enabled", "Enable nested hardware-assisted virtualization")
 }
 
+func (cmd *change) Description() string {
+	return `Change VM configuration.
+
+Examples:
+  govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE`
+}
+
 func (cmd *change) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

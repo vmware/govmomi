@@ -164,7 +164,7 @@ func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (stri
 func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int32, tail bool, force bool, f func(types.ManagedObjectReference, []types.BaseEvent) error) error {
 
 	if len(objects) >= m.maxObjects && !force {
-		return fmt.Errorf("Maximum number of objects to monitor (%d) exceeded, refine search \n", m.maxObjects)
+		return fmt.Errorf("Maximum number of objects to monitor (%d) exceeded, refine search", m.maxObjects)
 	}
 
 	proc := newEventProcessor(m, pageSize, f)

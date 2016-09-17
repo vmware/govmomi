@@ -41,6 +41,14 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.NetworkFlag.Register(ctx, f)
 }
 
+func (cmd *add) Description() string {
+	return `Add network adapter to VM.
+
+Examples:
+  govc vm.network.add -vm $vm -net "VM Network" -net.adapter e1000e
+  govc device.info -vm $vm ethernet-*`
+}
+
 func (cmd *add) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err
