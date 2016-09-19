@@ -610,7 +610,7 @@ func (l VirtualDeviceList) CreateSerialPort() (*types.VirtualSerialPort, error) 
 }
 
 // ConnectSerialPort connects a serial port to a server or client uri.
-func (l VirtualDeviceList) ConnectSerialPort(device *types.VirtualSerialPort, uri string, client bool) *types.VirtualSerialPort {
+func (l VirtualDeviceList) ConnectSerialPort(device *types.VirtualSerialPort, uri string, client bool, proxyuri string) *types.VirtualSerialPort {
 	direction := types.VirtualDeviceURIBackingOptionDirectionServer
 	if client {
 		direction = types.VirtualDeviceURIBackingOptionDirectionClient
@@ -620,6 +620,7 @@ func (l VirtualDeviceList) ConnectSerialPort(device *types.VirtualSerialPort, ur
 		VirtualDeviceURIBackingInfo: types.VirtualDeviceURIBackingInfo{
 			Direction:  string(direction),
 			ServiceURI: uri,
+			ProxyURI:   proxyuri,
 		},
 	}
 
