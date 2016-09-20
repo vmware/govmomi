@@ -105,12 +105,6 @@ vcsim_env() {
   fi
 }
 
-skip_if_vca() {
-    if [ -n "$VCA" ]; then
-        skip "disabled in vCA"
-    fi
-}
-
 # remove username/password from $GOVC_URL and set $GOVC_{USERNAME,PASSWORD}
 govc_url_to_vars() {
   GOVC_USERNAME="$(govc env GOVC_USERNAME)"

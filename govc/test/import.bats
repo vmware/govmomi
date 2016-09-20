@@ -50,7 +50,6 @@ load test_helper
 }
 
 @test "import.ovf with name as argument" {
-  skip_if_vca
   name=$(new_id)
 
   run govc import.ova -name="${name}" $GOVC_IMAGES/${TTYLINUX_NAME}.ova
