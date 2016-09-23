@@ -335,6 +335,9 @@ type followDatastoreFile struct {
 // This method will block until data is read, an error other than io.EOF is returned or Close() is called.
 func (f *followDatastoreFile) Read(p []byte) (int, error) {
 	offset := f.r.offset.seek
+	stop := false
+
+	defer f.r.Close()
 
 	for {
 		n, err := f.r.Read(p)
@@ -342,13 +345,19 @@ func (f *followDatastoreFile) Read(p []byte) (int, error) {
 			err = nil
 			_ = f.r.Close() // GET request body has been drained.
 		}
+
+		if stop {
+			return n, io.EOF
+		}
+
 		if n > 0 {
 			return n, err
 		}
 
 		select {
 		case <-f.c:
-			return 0, io.EOF
+			// Wake up and return io.EOF after 1 final Read()
+			stop = true
 		case <-time.After(f.i):
 		}
 
@@ -363,7 +372,6 @@ func (f *followDatastoreFile) Read(p []byte) (int, error) {
 			if err != nil {
 				return 0, err
 			}
-			continue
 		}
 	}
 }
@@ -371,7 +379,7 @@ func (f *followDatastoreFile) Read(p []byte) (int, error) {
 // Close will stop Follow polling and close the underlying DatastoreFile.
 func (f *followDatastoreFile) Close() error {
 	close(f.c)
-	return f.r.Close()
+	return nil
 }
 
 // Follow returns an io.ReadCloser to stream the file contents as data is appended.
