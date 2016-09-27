@@ -41,6 +41,7 @@ type OutputFlag struct {
 	JSON bool
 	TTY  bool
 	Dump bool
+	Out  io.Writer
 }
 
 var outputFlagKey = flagKey("output")
@@ -50,7 +51,7 @@ func NewOutputFlag(ctx context.Context) (*OutputFlag, context.Context) {
 		return v.(*OutputFlag), ctx
 	}
 
-	v := &OutputFlag{}
+	v := &OutputFlag{Out: os.Stdout}
 	ctx = context.WithValue(ctx, outputFlagKey, v)
 	return v, ctx
 }
@@ -101,15 +102,14 @@ func (flag *OutputFlag) WriteString(s string) (int, error) {
 
 func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 	var err error
-	var out = os.Stdout
 
 	if flag.JSON {
-		err = json.NewEncoder(out).Encode(result)
+		err = json.NewEncoder(flag.Out).Encode(result)
 	} else if flag.Dump {
 		scs := spew.ConfigState{Indent: "    "}
-		scs.Fdump(out, result)
+		scs.Fdump(flag.Out, result)
 	} else {
-		err = result.Write(out)
+		err = result.Write(flag.Out)
 	}
 
 	return err

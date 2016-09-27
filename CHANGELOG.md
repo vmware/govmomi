@@ -1,5 +1,13 @@
 # changelog
 
+### unreleased
+
+* Add object.HostCertificateInfo (types.HostCertificateManagerCertificateInfo helpers)
+
+* Add object.HostCertificateManager type and HostConfigManager.CertificateManager method
+
+* Add soap.Client SetRootCAs and SetDialTLS methods
+
 ### 0.9.0 (2016-09-09)
 
 * Add object.DatastoreFile helpers for streaming and tailing datastore files

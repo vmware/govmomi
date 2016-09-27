@@ -120,3 +120,59 @@ load test_helper
     run govc host.service status TSM-SSH
     assert_success
 }
+
+@test "host.cert.info" {
+  run govc host.cert.info
+  assert_success
+
+  run govc host.cert.info -json
+  assert_success
+
+  expires=$(govc host.cert.info -json | jq -r .NotAfter)
+  about_expires=$(govc about.cert -json | jq -r .NotAfter)
+  assert_equal "$expires" "$about_expires"
+}
+
+@test "host.cert.csr" {
+  #   Requested Extensions:
+  #       X509v3 Subject Alternative Name:
+  #       IP Address:...
+  result=$(govc host.cert.csr -ip | openssl req -text -noout)
+  assert_matches "IP Address:" "$result"
+  ! assert_matches "DNS:" "$result"
+
+  #   Requested Extensions:
+  #       X509v3 Subject Alternative Name:
+  #       DNS:...
+  result=$(govc host.cert.csr | openssl req -text -noout)
+  ! assert_matches "IP Address:" "$result"
+  assert_matches "DNS:" "$result"
+}
+
+@test "host.cert.import" {
+  issuer=$(govc host.cert.info -json | jq -r .Issuer)
+  expires=$(govc host.cert.info -json | jq -r .NotAfter)
+
+  # only mess with the cert if its already been signed by our test CA
+  if [[ "$issuer" != CN=govc-ca,* ]] ; then
+    skip "host cert not signed by govc-ca"
+  fi
+
+  govc host.cert.csr -ip | ./host_cert_sign.sh | govc host.cert.import
+  expires2=$(govc host.cert.info -json | jq -r .NotAfter)
+
+  # cert expiration should have changed
+  [ "$expires" != "$expires2" ]
+
+  # verify hostd is using the new cert too
+  expires=$(govc about.cert -json | jq -r .NotAfter)
+  assert_equal "$expires" "$expires2"
+
+  # our cert is not trusted against the system CA list
+  status=$(govc about.cert | grep Status:)
+  assert_matches ERROR "$status"
+
+  # with our CA trusted, the cert should be too
+  status=$(govc about.cert -tls-ca-certs ./govc_ca.pem | grep Status:)
+  assert_matches good "$status"
+}

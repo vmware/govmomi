@@ -14,6 +14,36 @@ load test_helper
   assert_success
 }
 
+@test "about.cert" {
+  run govc about.cert
+  assert_success
+
+  run govc about.cert -json
+  assert_success
+
+  run govc about.cert -show
+  assert_success
+
+  # with -k=true we get thumbprint output and exit 0
+  thumbprint=$(govc about.cert -k=true -thumbprint)
+
+  # with -k=true we get thumbprint output and exit 60
+  run govc about.cert -k=false -thumbprint
+  if [ "$status" -ne 60 ]; then
+    flunk $(printf "expected failed exit status=60, got status=%d" $status)
+  fi
+  assert_output "$thumbprint"
+
+  run govc about -k=false
+  assert_failure
+
+  run govc about -k=false -tls-known-hosts <(echo "$thumbprint")
+  assert_success
+
+  run govc about -k=false -tls-known-hosts <(echo "nope nope")
+  assert_failure
+}
+
 @test "version" {
     run govc version
     assert_success
