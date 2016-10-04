@@ -132,3 +132,14 @@ func (m HostConfigManager) ServiceSystem(ctx context.Context) (*HostServiceSyste
 
 	return NewHostServiceSystem(m.c, *h.ConfigManager.ServiceSystem), nil
 }
+
+func (m HostConfigManager) CertificateManager(ctx context.Context) (*HostCertificateManager, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.certificateManager"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostCertificateManager(m.c, *h.ConfigManager.CertificateManager, m.Reference()), nil
+}

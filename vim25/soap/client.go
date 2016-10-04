@@ -20,15 +20,18 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -125,6 +128,73 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	c.Version = DefaultVimVersion
 
 	return &c
+}
+
+// SetRootCAs defines the set of root certificate authorities
+// that clients use when verifying server certificates.
+// By default TLS uses the host's root CA set.
+//
+// See: http.Client.Transport.TLSClientConfig.RootCAs
+func (c *Client) SetRootCAs(file string) error {
+	pool := x509.NewCertPool()
+
+	for _, name := range filepath.SplitList(file) {
+		pem, err := ioutil.ReadFile(name)
+		if err != nil {
+			return err
+		}
+
+		pool.AppendCertsFromPEM(pem)
+	}
+
+	c.t.TLSClientConfig.RootCAs = pool
+
+	return nil
+}
+
+// SetDialTLS configures a custom DialTLS function where the given func will be used to verify the peer certificate.
+// The error passed to verify will be nil if the peer certificate passed hostname verification and was verified against the current tls.Config.RootCAs.
+// If one of those verification step fails, the error passed to verify will be of type x509.HostnameError or x509.UnknownAuthorityError
+//
+// See: http.Client.Transport.DialTLS
+func (c *Client) SetDialTLS(verify func(error, tls.ConnectionState) error) {
+	t := c.Client.Transport.(*http.Transport)
+
+	// Would be nice if there was a tls.Config.Verify func,
+	// see tls.clientHandshakeState.doFullHandshake
+	t.DialTLS = func(network string, addr string) (net.Conn, error) {
+		conn, err := tls.Dial(network, addr, t.TLSClientConfig)
+
+		if err == nil {
+			// Allow for additional verification / info gathering
+			if err = verify(nil, conn.ConnectionState()); err != nil {
+				_ = conn.Close()
+				return nil, err
+			}
+			return conn, nil
+		}
+
+		switch err.(type) {
+		case x509.UnknownAuthorityError:
+		case x509.HostnameError:
+		default:
+			return nil, err
+		}
+
+		verr := err
+		config := &tls.Config{InsecureSkipVerify: true}
+		conn, err = tls.Dial(network, addr, config)
+		if err != nil {
+			return nil, err
+		}
+
+		if err = verify(verr, conn.ConnectionState()); err != nil {
+			_ = conn.Close()
+			return nil, err
+		}
+
+		return conn, nil
+	}
 }
 
 // splitHostPort is similar to net.SplitHostPort,

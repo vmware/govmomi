@@ -1,5 +1,13 @@
 # changelog
 
+### unreleased
+
+* Add `-tls-known-hosts` and `-tls-ca-certs` flags
+
+* Add host.cert commands : info, csr, import
+
+* Add about.cert command (similar to the Chrome Certificate Viewer)
+
 ### 0.9.0 (2016-09-09)
 
 * Add `-R` option to datastore.ls
