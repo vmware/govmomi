@@ -46,7 +46,8 @@ func (sm Manager) Reference() types.ManagedObjectReference {
 
 func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	req := types.Login{
-		This: sm.Reference(),
+		This:   sm.Reference(),
+		Locale: "en_US",
 	}
 
 	if u != nil {
