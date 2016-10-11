@@ -17,7 +17,6 @@ limitations under the License.
 package flags
 
 import (
-	"bufio"
 	"context"
 	"crypto/sha1"
 	"crypto/tls"
@@ -31,7 +30,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -258,9 +256,8 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 		return nil, err
 	}
 
-	if flag.tlsKnownHosts != "" {
-		flag.tlsHostHash = fmt.Sprintf("%x", sha1.Sum([]byte(sc.URL().Host)))
-		sc.SetDialTLS(flag.knownHosts)
+	if err := sc.LoadThumbprints(flag.tlsKnownHosts); err != nil {
+		return nil, err
 	}
 
 	// Retry twice when a temporary I/O error occurs.
@@ -371,48 +368,6 @@ func (flag *ClientFlag) SetRootCAs(c *soap.Client) error {
 		return c.SetRootCAs(flag.tlsCaCerts)
 	}
 	return nil
-}
-
-func (flag *ClientFlag) knownHosts(verr error, state tls.ConnectionState) error {
-	if verr == nil {
-		return nil
-	}
-
-	f, err := os.Open(flag.tlsKnownHosts)
-	if err != nil {
-		if os.IsNotExist(err) {
-			return verr
-		}
-		return err
-	}
-	defer f.Close()
-
-	name := flag.url.Host
-	w := new(object.HostCertificateInfo).FromCertificate(state.PeerCertificates[0])
-
-	scanner := bufio.NewScanner(f)
-	line := 0
-
-	for scanner.Scan() {
-		line++
-		e := strings.SplitN(scanner.Text(), " ", 2)
-
-		if len(e) != 2 || e[0] != flag.tlsHostHash {
-			continue
-		}
-
-		if w.ThumbprintSHA1 == e[1] {
-			return nil
-		}
-
-		return fmt.Errorf("Host %q thumbprint does not match %s:%d", name, flag.tlsKnownHosts, line)
-	}
-
-	if err := scanner.Err(); err != nil {
-		return err
-	}
-
-	return verr
 }
 
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {

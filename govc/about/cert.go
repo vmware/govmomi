@@ -18,21 +18,17 @@ package about
 
 import (
 	"context"
-	"crypto/sha1"
-	"crypto/tls"
-	"crypto/x509"
 	"encoding/pem"
 	"flag"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type cert struct {
@@ -61,6 +57,10 @@ func (cmd *cert) Register(ctx context.Context, f *flag.FlagSet) {
 func (cmd *cert) Description() string {
 	return `Display SSL certificate info for HOST.
 
+If the HOST certificate cannot be verified, about.cert will return with exit code 60 (as curl does).
+If the '-k' flag is provided, about.cert will return with exit code 0 in this case.
+Output of the first example below can be used as '-thumbprint' for the 'host.add' and 'cluster.add' commands.
+
 Examples:
   govc about.cert -k -json | jq -r .ThumbprintSHA1
   govc about.cert -k -show | sudo tee /usr/local/share/ca-certificates/host.crt
@@ -79,53 +79,38 @@ func (cmd *cert) Process(ctx context.Context) error {
 
 type certResult struct {
 	cmd  *cert
-	err  error
-	peer *x509.Certificate
+	info object.HostCertificateInfo
 }
 
 func (r *certResult) Write(w io.Writer) error {
 	if r.cmd.show {
-		return pem.Encode(w, &pem.Block{Type: "CERTIFICATE", Bytes: r.peer.Raw})
+		return pem.Encode(w, &pem.Block{Type: "CERTIFICATE", Bytes: r.info.Certificate.Raw})
 	}
-
-	info := new(object.HostCertificateInfo).FromCertificate(r.peer)
 
 	if r.cmd.thumbprint {
 		u := r.cmd.URLWithoutPassword()
-		_, err := fmt.Fprintf(w, "%x %s\n", sha1.Sum([]byte(u.Host)), info.ThumbprintSHA1)
+		_, err := fmt.Fprintf(w, "%s %s\n", u.Host, r.info.ThumbprintSHA1)
 		return err
 	}
 
-	info.Status = string(types.HostCertificateManagerCertificateInfoCertificateStatusGood)
-	if r.err != nil {
-		info.Status = fmt.Sprintf("ERROR %s", r.err)
-	}
-
-	return r.cmd.WriteResult(info)
+	return r.cmd.WriteResult(&r.info)
 }
 
 func (cmd *cert) Run(ctx context.Context, f *flag.FlagSet) error {
 	u := cmd.URLWithoutPassword()
 	c := soap.NewClient(u, false)
+	t := c.Client.Transport.(*http.Transport)
+	r := certResult{cmd: cmd}
 
 	if err := cmd.SetRootCAs(c); err != nil {
 		return err
 	}
 
-	r := certResult{cmd: cmd}
-
-	c.SetDialTLS(func(err error, state tls.ConnectionState) error {
-		r.peer = state.PeerCertificates[0]
-		r.err = err
-		return nil
-	})
-
-	_, err := vim25.NewClient(ctx, c) // invoke DialTLS()
-	if err != nil && err != r.err {
+	if err := r.info.FromURL(u, t.TLSClientConfig); err != nil {
 		return err
 	}
 
-	if r.err != nil && r.cmd.IsSecure() {
+	if r.info.Err != nil && r.cmd.IsSecure() {
 		cmd.Out = os.Stderr
 		// using same exit code as curl:
 		defer os.Exit(60)

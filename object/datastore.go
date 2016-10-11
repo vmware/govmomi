@@ -226,6 +226,8 @@ func (d Datastore) ServiceTicket(ctx context.Context, path string, method string
 		u.Host = ticket.HostName
 	}
 
+	d.Client().SetThumbprint(u.Host, ticket.SslThumbprint)
+
 	return u, cookie, nil
 }
 

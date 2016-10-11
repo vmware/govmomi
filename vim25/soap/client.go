@@ -17,8 +17,10 @@ limitations under the License.
 package soap
 
 import (
+	"bufio"
 	"bytes"
 	"context"
+	"crypto/sha1"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -34,6 +36,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/vmware/govmomi/vim25/progress"
@@ -60,6 +63,9 @@ type Client struct {
 	d *debugContainer
 	t *http.Transport
 	p *url.URL
+
+	hostsMu sync.Mutex
+	hosts   map[string]string
 
 	Namespace string // Vim namespace
 	Version   string // Vim version
@@ -104,17 +110,24 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	}
 
 	// Initialize http.RoundTripper on client, so we can customize it below
-	c.t = &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		Dial: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).Dial,
+	if t, ok := http.DefaultTransport.(*http.Transport); ok {
+		c.t = &http.Transport{
+			Proxy:                 t.Proxy,
+			DialContext:           t.DialContext,
+			MaxIdleConns:          t.MaxIdleConns,
+			IdleConnTimeout:       t.IdleConnTimeout,
+			TLSHandshakeTimeout:   t.TLSHandshakeTimeout,
+			ExpectContinueTimeout: t.ExpectContinueTimeout,
+		}
+	} else {
+		c.t = new(http.Transport)
 	}
 
-	if c.u.Scheme == "https" {
-		c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k}
-		c.t.TLSHandshakeTimeout = 10 * time.Second
+	c.hosts = make(map[string]string)
+	c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k}
+	// Don't bother setting DialTLS if InsecureSkipVerify=true
+	if !c.k {
+		c.t.DialTLS = c.dialTLS
 	}
 
 	c.Client.Transport = c.t
@@ -152,49 +165,121 @@ func (c *Client) SetRootCAs(file string) error {
 	return nil
 }
 
-// SetDialTLS configures a custom DialTLS function where the given func will be used to verify the peer certificate.
-// The error passed to verify will be nil if the peer certificate passed hostname verification and was verified against the current tls.Config.RootCAs.
-// If one of those verification step fails, the error passed to verify will be of type x509.HostnameError or x509.UnknownAuthorityError
+// Add default https port if missing
+func hostAddr(addr string) string {
+	_, port := splitHostPort(addr)
+	if port == "" {
+		return addr + ":443"
+	}
+	return addr
+}
+
+// SetThumbprint sets the known certificate thumbprint for the given host.
+// A custom DialTLS function is used to support thumbprint based verification.
+// We first try tls.Dial with the default tls.Config, only falling back to thumbprint verification
+// if it fails with an x509.UnknownAuthorityError or x509.HostnameError
 //
 // See: http.Client.Transport.DialTLS
-func (c *Client) SetDialTLS(verify func(error, tls.ConnectionState) error) {
-	t := c.Client.Transport.(*http.Transport)
+func (c *Client) SetThumbprint(host string, thumbprint string) {
+	host = hostAddr(host)
 
+	c.hostsMu.Lock()
+	if thumbprint == "" {
+		delete(c.hosts, host)
+	} else {
+		c.hosts[host] = thumbprint
+	}
+	c.hostsMu.Unlock()
+}
+
+// Thumbprint returns the certificate thumbprint for the given host if known to this client.
+func (c *Client) Thumbprint(host string) string {
+	host = hostAddr(host)
+	c.hostsMu.Lock()
+	defer c.hostsMu.Unlock()
+	return c.hosts[host]
+}
+
+// LoadThumbprints from file with the give name.
+// If name is empty or name does not exist this function will return nil.
+func (c *Client) LoadThumbprints(name string) error {
+	if name == "" {
+		return nil
+	}
+
+	f, err := os.Open(name)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	scanner := bufio.NewScanner(f)
+
+	for scanner.Scan() {
+		e := strings.SplitN(scanner.Text(), " ", 2)
+		if len(e) != 2 {
+			continue
+		}
+
+		c.SetThumbprint(e[0], e[1])
+	}
+
+	_ = f.Close()
+
+	return scanner.Err()
+}
+
+// ThumbprintSHA1 returns the thumbprint of the given cert in the same format used by the SDK and Client.SetThumbprint.
+//
+// See: SSLVerifyFault.Thumbprint, SessionManagerGenericServiceTicket.Thumbprint, HostConnectSpec.SslThumbprint
+func ThumbprintSHA1(cert *x509.Certificate) string {
+	sum := sha1.Sum(cert.Raw)
+	hex := make([]string, len(sum))
+	for i, b := range sum {
+		hex[i] = fmt.Sprintf("%02X", b)
+	}
+	return strings.Join(hex, ":")
+}
+
+func (c *Client) dialTLS(network string, addr string) (net.Conn, error) {
 	// Would be nice if there was a tls.Config.Verify func,
 	// see tls.clientHandshakeState.doFullHandshake
-	t.DialTLS = func(network string, addr string) (net.Conn, error) {
-		conn, err := tls.Dial(network, addr, t.TLSClientConfig)
 
-		if err == nil {
-			// Allow for additional verification / info gathering
-			if err = verify(nil, conn.ConnectionState()); err != nil {
-				_ = conn.Close()
-				return nil, err
-			}
-			return conn, nil
-		}
+	conn, err := tls.Dial(network, addr, c.t.TLSClientConfig)
 
-		switch err.(type) {
-		case x509.UnknownAuthorityError:
-		case x509.HostnameError:
-		default:
-			return nil, err
-		}
-
-		verr := err
-		config := &tls.Config{InsecureSkipVerify: true}
-		conn, err = tls.Dial(network, addr, config)
-		if err != nil {
-			return nil, err
-		}
-
-		if err = verify(verr, conn.ConnectionState()); err != nil {
-			_ = conn.Close()
-			return nil, err
-		}
-
+	if err == nil {
 		return conn, nil
 	}
+
+	switch err.(type) {
+	case x509.UnknownAuthorityError:
+	case x509.HostnameError:
+	default:
+		return nil, err
+	}
+
+	thumbprint := c.Thumbprint(addr)
+	if thumbprint == "" {
+		return nil, err
+	}
+
+	config := &tls.Config{InsecureSkipVerify: true}
+	conn, err = tls.Dial(network, addr, config)
+	if err != nil {
+		return nil, err
+	}
+
+	cert := conn.ConnectionState().PeerCertificates[0]
+	peer := ThumbprintSHA1(cert)
+	if thumbprint != peer {
+		_ = conn.Close()
+
+		return nil, fmt.Errorf("Host %q thumbprint does not match %q", addr, thumbprint)
+	}
+
+	return conn, nil
 }
 
 // splitHostPort is similar to net.SplitHostPort,
@@ -225,7 +310,13 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 	host, _ := splitHostPort(c.u.Host)
 
 	// Should be no reason to change the default port other than testing
-	port := os.Getenv("GOVC_TUNNEL_PROXY_PORT")
+	key := "GOVMOMI_TUNNEL_PROXY_PORT"
+
+	port := c.URL().Query().Get(key)
+	if port == "" {
+		port = os.Getenv(key)
+	}
+
 	if port != "" {
 		host += ":" + port
 	}
