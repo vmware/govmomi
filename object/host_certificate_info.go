@@ -17,16 +17,18 @@ limitations under the License.
 package object
 
 import (
-	"crypto/sha1"
 	"crypto/sha256"
+	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
 	"encoding/asn1"
 	"fmt"
 	"io"
+	"net/url"
 	"strings"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -37,12 +39,16 @@ type HostCertificateInfo struct {
 	ThumbprintSHA1   string
 	ThumbprintSHA256 string
 
+	Err         error
+	Certificate *x509.Certificate `json:"-"`
+
 	subjectName *pkix.Name
 	issuerName  *pkix.Name
 }
 
 // FromCertificate converts x509.Certificate to HostCertificateInfo
 func (info *HostCertificateInfo) FromCertificate(cert *x509.Certificate) *HostCertificateInfo {
+	info.Certificate = cert
 	info.subjectName = &cert.Subject
 	info.issuerName = &cert.Issuer
 
@@ -50,27 +56,58 @@ func (info *HostCertificateInfo) FromCertificate(cert *x509.Certificate) *HostCe
 	info.NotBefore = &cert.NotBefore
 	info.NotAfter = &cert.NotAfter
 	info.Subject = info.fromName(info.subjectName)
-	info.Status = string(types.HostCertificateManagerCertificateInfoCertificateStatusUnknown)
 
-	{
-		sum := sha1.Sum(cert.Raw)
-		hex := make([]string, len(sum))
-		for i, b := range sum {
-			hex[i] = fmt.Sprintf("%02X", b)
-		}
-		info.ThumbprintSHA1 = strings.Join(hex, ":")
+	info.ThumbprintSHA1 = soap.ThumbprintSHA1(cert)
+
+	// SHA-256 for info purposes only, API fields all use SHA-1
+	sum := sha256.Sum256(cert.Raw)
+	hex := make([]string, len(sum))
+	for i, b := range sum {
+		hex[i] = fmt.Sprintf("%02X", b)
 	}
+	info.ThumbprintSHA256 = strings.Join(hex, ":")
 
-	{
-		sum := sha256.Sum256(cert.Raw)
-		hex := make([]string, len(sum))
-		for i, b := range sum {
-			hex[i] = fmt.Sprintf("%02X", b)
-		}
-		info.ThumbprintSHA256 = strings.Join(hex, ":")
+	if info.Status == "" {
+		info.Status = string(types.HostCertificateManagerCertificateInfoCertificateStatusUnknown)
 	}
 
 	return info
+}
+
+// FromURL connects to the given URL.Host via tls.Dial with the given tls.Config and populates the HostCertificateInfo
+// via tls.ConnectionState.  If the certificate was verified with the given tls.Config, the Err field will be nil.
+// Otherwise, Err will be set to the x509.UnknownAuthorityError or x509.HostnameError.
+// If tls.Dial returns an error of any other type, that error is returned.
+func (info *HostCertificateInfo) FromURL(u *url.URL, config *tls.Config) error {
+	addr := u.Host
+	if !(strings.LastIndex(addr, ":") > strings.LastIndex(addr, "]")) {
+		addr += ":443"
+	}
+
+	conn, err := tls.Dial("tcp", addr, config)
+	if err != nil {
+		switch err.(type) {
+		case x509.UnknownAuthorityError:
+		case x509.HostnameError:
+		default:
+			return err
+		}
+
+		info.Err = err
+
+		conn, err = tls.Dial("tcp", addr, &tls.Config{InsecureSkipVerify: true})
+		if err != nil {
+			return err
+		}
+	} else {
+		info.Status = string(types.HostCertificateManagerCertificateInfoCertificateStatusGood)
+	}
+
+	state := conn.ConnectionState()
+	_ = conn.Close()
+	info.FromCertificate(state.PeerCertificates[0])
+
+	return nil
 }
 
 var emailAddressOID = asn1.ObjectIdentifier{1, 2, 840, 113549, 1, 9, 1}
@@ -185,7 +222,11 @@ func (info *HostCertificateInfo) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  Organizational Unit (OU):\t%s\n", ss(n.OrganizationalUnit))
 	}
 
-	fmt.Fprintf(tw, "Certificate Status:\t%s\n", info.Status)
+	status := info.Status
+	if info.Err != nil {
+		status = fmt.Sprintf("ERROR %s", info.Err)
+	}
+	fmt.Fprintf(tw, "Certificate Status:\t%s\n", status)
 
 	fmt.Fprintln(tw, "Issued To:\t")
 	name(info.SubjectName())
