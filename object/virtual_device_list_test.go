@@ -731,7 +731,7 @@ func TestSerialPort(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	devices.ConnectSerialPort(device, "telnet://:33233", false)
+	devices.ConnectSerialPort(device, "telnet://:33233", false, "")
 }
 
 func TestPrimaryMacAddress(t *testing.T) {
