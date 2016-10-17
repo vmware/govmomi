@@ -20,7 +20,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/http"
+	"net/url"
 
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -52,7 +56,7 @@ func (flag *HostConnectFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		f.StringVar(&flag.SslThumbprint, "thumbprint", "", "SHA-1 thumbprint of the host's SSL certificate")
 		f.BoolVar(&flag.Force, "force", false, "Force when host is managed by another VC")
 
-		f.BoolVar(&flag.noverify, "noverify", false, "When true, ignore host SSL certificate verification error")
+		f.BoolVar(&flag.noverify, "noverify", false, "Accept host thumbprint without verification")
 	})
 }
 
@@ -60,16 +64,35 @@ func (flag *HostConnectFlag) Process(ctx context.Context) error {
 	return nil
 }
 
-// AcceptThumbprint returns nil if the given error is an SSLVerifyFault and -noverify is true.
-// In which case, flag.SslThumbprint is set to fault.Thumbprint and the caller should retry the task.
-func (flag *HostConnectFlag) AcceptThumbprint(err error) error {
+// Spec attempts to fill in SslThumbprint if empty.
+// First checks GOVC_TLS_KNOWN_HOSTS, if not found and noverify=true then
+// use object.HostCertificateInfo to get the thumbprint.
+func (flag *HostConnectFlag) Spec(c *vim25.Client) types.HostConnectSpec {
+	spec := flag.HostConnectSpec
+
+	if spec.SslThumbprint == "" {
+		spec.SslThumbprint = c.Thumbprint(spec.HostName)
+
+		if spec.SslThumbprint == "" && flag.noverify {
+			var info object.HostCertificateInfo
+			t := c.Transport.(*http.Transport)
+			_ = info.FromURL(&url.URL{Host: spec.HostName}, t.TLSClientConfig)
+			spec.SslThumbprint = info.ThumbprintSHA1
+		}
+	}
+
+	return spec
+}
+
+// Fault checks if error is SSLVerifyFault, including the thumbprint if so
+func (flag *HostConnectFlag) Fault(err error) error {
+	if err == nil {
+		return nil
+	}
+
 	if f, ok := err.(types.HasFault); ok {
 		switch fault := f.Fault().(type) {
 		case *types.SSLVerifyFault:
-			if flag.noverify {
-				flag.SslThumbprint = fault.Thumbprint
-				return nil
-			}
 			return fmt.Errorf("%s thumbprint=%s", err, fault.Thumbprint)
 		}
 	}

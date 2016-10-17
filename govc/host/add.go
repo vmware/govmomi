@@ -85,7 +85,7 @@ this defaults to the hosts folder in the specified or default datacenter.`
 }
 
 func (cmd *add) Add(ctx context.Context, parent *object.Folder) error {
-	spec := cmd.HostConnectSpec
+	spec := cmd.Spec(parent.Client())
 
 	req := types.AddStandaloneHost_Task{
 		This:         parent.Reference(),
@@ -137,16 +137,5 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	err := cmd.Add(ctx, parent)
-	if err == nil {
-		return nil
-	}
-
-	// Check if we failed due to SSLVerifyFault and -noverify is set
-	if err := cmd.AcceptThumbprint(err); err != nil {
-		return err
-	}
-
-	// Accepted unverified thumbprint, try again
-	return cmd.Add(ctx, parent)
+	return cmd.Fault(cmd.Add(ctx, parent))
 }
