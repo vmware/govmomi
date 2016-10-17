@@ -86,7 +86,7 @@ func (cmd *add) Add(ctx context.Context, cluster *object.ClusterComputeResource)
 		license = &cmd.license
 	}
 
-	task, err := cluster.AddHost(ctx, spec, cmd.connect, license, nil)
+	task, err := cluster.AddHost(ctx, cmd.Spec(cluster.Client()), cmd.connect, license, nil)
 	if err != nil {
 		return err
 	}
@@ -113,17 +113,5 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		return nil
 	}
 
-	err = cmd.Add(ctx, cluster)
-
-	if err == nil {
-		return nil
-	}
-
-	// Check if we failed due to SSLVerifyFault and -noverify is set
-	if err := cmd.AcceptThumbprint(err); err != nil {
-		return err
-	}
-
-	// Accepted unverified thumbprint, try again
-	return cmd.Add(ctx, cluster)
+	return cmd.Fault(cmd.Add(ctx, cluster))
 }
