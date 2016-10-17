@@ -19,6 +19,7 @@ package session
 import (
 	"context"
 	"net/url"
+	"os"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
@@ -26,6 +27,18 @@ import (
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+// Locale defaults to "en_US" and can be overridden via this var or the GOVMOMI_LOCALE env var.
+// A value of "_" uses the server locale setting.
+var Locale = os.Getenv("GOVMOMI_LOCALE")
+
+func init() {
+	if Locale == "_" {
+		Locale = ""
+	} else if Locale == "" {
+		Locale = "en_US"
+	}
+}
 
 type Manager struct {
 	client      *vim25.Client
@@ -47,7 +60,7 @@ func (sm Manager) Reference() types.ManagedObjectReference {
 func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	req := types.Login{
 		This:   sm.Reference(),
-		Locale: "en_US",
+		Locale: Locale,
 	}
 
 	if u != nil {
