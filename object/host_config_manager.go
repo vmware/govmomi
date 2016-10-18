@@ -97,6 +97,11 @@ func (m HostConfigManager) VsanSystem(ctx context.Context) (*HostVsanSystem, err
 		return nil, err
 	}
 
+	// Added in 5.5
+	if h.ConfigManager.VsanSystem == nil {
+		return nil, ErrNotSupported
+	}
+
 	return NewHostVsanSystem(m.c, *h.ConfigManager.VsanSystem), nil
 }
 
@@ -106,6 +111,11 @@ func (m HostConfigManager) AccountManager(ctx context.Context) (*HostAccountMana
 	err := m.Properties(ctx, m.Reference(), []string{"configManager.accountManager"}, &h)
 	if err != nil {
 		return nil, err
+	}
+
+	// Added in 6.0
+	if h.ConfigManager.AccountManager == nil {
+		return nil, ErrNotSupported
 	}
 
 	return NewHostAccountManager(m.c, *h.ConfigManager.AccountManager), nil
@@ -139,6 +149,11 @@ func (m HostConfigManager) CertificateManager(ctx context.Context) (*HostCertifi
 	err := m.Properties(ctx, m.Reference(), []string{"configManager.certificateManager"}, &h)
 	if err != nil {
 		return nil, err
+	}
+
+	// Added in 6.0
+	if h.ConfigManager.CertificateManager == nil {
+		return nil, ErrNotSupported
 	}
 
 	return NewHostCertificateManager(m.c, *h.ConfigManager.CertificateManager, m.Reference()), nil

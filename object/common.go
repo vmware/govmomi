@@ -30,7 +30,7 @@ import (
 )
 
 var (
-	ErrNotSupported = errors.New("not supported (vCenter only)")
+	ErrNotSupported = errors.New("product/version specific feature not supported by target")
 )
 
 // Common contains the fields and functions common to all objects.
