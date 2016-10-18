@@ -26,8 +26,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-const Version = "0.9.1"
-
 var gitVersion string
 
 type version struct {
@@ -38,8 +36,8 @@ type version struct {
 
 func init() {
 	// Check that git tag in the release builds match the hardcoded version
-	if gitVersion != "" && gitVersion[1:] != Version {
-		log.Panicf("version mismatch: git=%s vs govc=%s", gitVersion, Version)
+	if gitVersion != "" && gitVersion[1:] != flags.Version {
+		log.Panicf("version mismatch: git=%s vs govc=%s", gitVersion, flags.Version)
 	}
 
 	cli.Register("version", &version{})
@@ -51,7 +49,7 @@ func (cmd *version) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (cmd *version) Run(ctx context.Context, f *flag.FlagSet) error {
 	if cmd.require != "" {
-		v, err := flags.ParseVersion(Version)
+		v, err := flags.ParseVersion(flags.Version)
 		if err != nil {
 			panic(err)
 		}
@@ -62,10 +60,10 @@ func (cmd *version) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		if !rv.Lte(v) {
-			return fmt.Errorf("version %s or higher is required, this is version %s", cmd.require, Version)
+			return fmt.Errorf("version %s or higher is required, this is version %s", cmd.require, flags.Version)
 		}
 	}
 
-	fmt.Printf("govc %s\n", Version)
+	fmt.Printf("govc %s\n", flags.Version)
 	return nil
 }
