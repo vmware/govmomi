@@ -66,11 +66,24 @@ func (cmd *ls) Description() string {
 	return `List host services.`
 }
 
-func status(s types.HostService) string {
+func Status(s types.HostService) string {
 	if s.Running {
 		return "Running"
 	}
 	return "Stopped"
+}
+
+func Policy(s types.HostService) string {
+	switch types.HostServicePolicy(s.Policy) {
+	case types.HostServicePolicyOff:
+		return "Disabled"
+	case types.HostServicePolicyOn:
+		return "Enabled"
+	case types.HostServicePolicyAutomatic:
+		return "Automatic"
+	default:
+		return s.Policy
+	}
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -100,7 +113,7 @@ func (services optionResult) Write(w io.Writer) error {
 	fmt.Fprintf(tw, "%s\t%s\t%v\t%s\n", "Key", "Policy", "Status", "Label")
 
 	for _, s := range services {
-		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", s.Key, s.Policy, status(s), s.Label)
+		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", s.Key, s.Policy, Status(s), s.Label)
 	}
 
 	return tw.Flush()

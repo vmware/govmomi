@@ -75,7 +75,7 @@ func (cmd *service) status(ctx context.Context, s *object.HostServiceSystem, id 
 
 	for _, service := range services {
 		if id == service.Key {
-			return status(service), nil
+			return Status(service), nil
 		}
 	}
 
