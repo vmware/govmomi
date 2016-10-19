@@ -176,3 +176,11 @@ load test_helper
   status=$(govc about.cert -tls-ca-certs ./govc_ca.pem | grep Status:)
   assert_matches good "$status"
 }
+
+@test "host.date.info" {
+  run govc host.date.info
+  assert_success
+
+  run govc host.date.info -json
+  assert_success
+}

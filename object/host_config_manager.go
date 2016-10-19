@@ -158,3 +158,14 @@ func (m HostConfigManager) CertificateManager(ctx context.Context) (*HostCertifi
 
 	return NewHostCertificateManager(m.c, *h.ConfigManager.CertificateManager, m.Reference()), nil
 }
+
+func (m HostConfigManager) DateTimeSystem(ctx context.Context) (*HostDateTimeSystem, error) {
+	var h mo.HostSystem
+
+	err := m.Properties(ctx, m.Reference(), []string{"configManager.dateTimeSystem"}, &h)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewHostDateTimeSystem(m.c, *h.ConfigManager.DateTimeSystem), nil
+}
