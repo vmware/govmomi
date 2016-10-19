@@ -58,7 +58,7 @@ load test_helper
 
   unset GOVC_HOST
   run govc host.info
-  assert_failure "govc: please specify a host"
+  assert_failure "govc: default host resolves to multiple instances, please specify"
 
   run govc host.info -host $name
   assert_success

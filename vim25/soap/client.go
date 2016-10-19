@@ -69,6 +69,7 @@ type Client struct {
 
 	Namespace string // Vim namespace
 	Version   string // Vim version
+	UserAgent string
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
@@ -428,6 +429,9 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
 	soapAction := fmt.Sprintf("%s/%s", c.Namespace, c.Version)
 	req.Header.Set(`SOAPAction`, soapAction)
+	if c.UserAgent != "" {
+		req.Header.Set(`User-Agent`, c.UserAgent)
+	}
 
 	if d.enabled() {
 		d.debugRequest(req)

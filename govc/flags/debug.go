@@ -69,7 +69,7 @@ func (flag *DebugFlag) Process(ctx context.Context) error {
 		// Base path for storing debug logs.
 		r := os.Getenv("GOVC_DEBUG_PATH")
 		if r == "" {
-			r = filepath.Join(os.Getenv("HOME"), ".govmomi")
+			r = home
 		}
 		r = filepath.Join(r, "debug")
 

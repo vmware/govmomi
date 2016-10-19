@@ -75,7 +75,16 @@ type ClientFlag struct {
 	client *vim25.Client
 }
 
-var clientFlagKey = flagKey("client")
+var (
+	home          = os.Getenv("GOVMOMI_HOME")
+	clientFlagKey = flagKey("client")
+)
+
+func init() {
+	if home == "" {
+		home = filepath.Join(os.Getenv("HOME"), ".govmomi")
+	}
+}
 
 func NewClientFlag(ctx context.Context) (*ClientFlag, context.Context) {
 	if v := ctx.Value(clientFlagKey); v != nil {
@@ -252,6 +261,8 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 
 // configure TLS and retry settings before making any connections
 func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
+	sc.UserAgent = fmt.Sprintf("govc/%s", Version)
+
 	if err := flag.SetRootCAs(sc); err != nil {
 		return nil, err
 	}
@@ -272,7 +283,7 @@ func (flag *ClientFlag) sessionFile() string {
 	// Hash key to get a predictable, canonical format.
 	key := fmt.Sprintf("%s#insecure=%t", url.String(), flag.insecure)
 	name := fmt.Sprintf("%040x", sha1.Sum([]byte(key)))
-	return filepath.Join(os.Getenv("HOME"), ".govmomi", "sessions", name)
+	return filepath.Join(home, "sessions", name)
 }
 
 func (flag *ClientFlag) saveClient(c *vim25.Client) error {

@@ -57,6 +57,16 @@ func (sm Manager) Reference() types.ManagedObjectReference {
 	return *sm.client.ServiceContent.SessionManager
 }
 
+func (sm *Manager) SetLocale(ctx context.Context, locale string) error {
+	req := types.SetLocale{
+		This:   sm.Reference(),
+		Locale: locale,
+	}
+
+	_, err := methods.SetLocale(ctx, sm.client, &req)
+	return err
+}
+
 func (sm *Manager) Login(ctx context.Context, u *url.Userinfo) error {
 	req := types.Login{
 		This:   sm.Reference(),
