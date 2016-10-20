@@ -26,7 +26,9 @@ for os in ${BUILD_OS}; do
       -pkgdir="./_pkg" \
       -compiler='gc' \
       -ldflags="${ldflags}" \
-      github.com/vmware/govmomi/govc
+      github.com/vmware/govmomi/govc &
     set +x
   done
 done
+
+wait
