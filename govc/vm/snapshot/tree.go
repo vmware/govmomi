@@ -54,6 +54,16 @@ func (cmd *tree) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.id, "i", false, "Print the snapshot id")
 }
 
+func (cmd *tree) Description() string {
+	return `List VM snapshots in a tree-like format.
+
+The command will exit 0 with no output if VM does not have any snapshots.
+
+Examples:
+  govc snapshot.tree -vm my-vm
+  govc snapshot.tree -vm my-vm -D -i`
+}
+
 func (cmd *tree) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err
@@ -117,6 +127,10 @@ func (cmd *tree) Run(ctx context.Context, f *flag.FlagSet) error {
 	err = vm.Properties(ctx, vm.Reference(), []string{"snapshot"}, &o)
 	if err != nil {
 		return err
+	}
+
+	if o.Snapshot == nil {
+		return nil
 	}
 
 	if cmd.current && o.Snapshot.CurrentSnapshot == nil {

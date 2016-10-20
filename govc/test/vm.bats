@@ -483,6 +483,10 @@ load test_helper
   vm=$(new_ttylinux_vm)
   id=$(new_id)
 
+  # No snapshots == no output
+  run govc snapshot.tree -vm "$vm"
+  assert_success ""
+
   run govc snapshot.remove -vm "$vm" '*'
   assert_success
 
