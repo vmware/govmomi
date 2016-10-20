@@ -1,12 +1,22 @@
 # changelog
 
-### unreleased
+### 0.10.0 (2016-10-20)
+
+* Add generated govc/USAGE.md
+
+* Add host.date info and change commands
+
+* Add session ls and rm commands
 
 * Add `-tls-known-hosts` and `-tls-ca-certs` flags
 
 * Add host.cert commands : info, csr, import
 
 * Add about.cert command (similar to the Chrome Certificate Viewer)
+
+* Add `-vspc-proxy` flag to device.serial.connect command
+
+* Rename license.list -> license.ls, license.assigned.list -> license.assigned.ls
 
 ### 0.9.0 (2016-09-09)
 

@@ -1,6 +1,14 @@
 # changelog
 
-### unreleased
+### 0.10.0 (2016-10-20)
+
+* Add option to set soap.Client.UserAgent
+
+* Add service ticket thumbprint validation
+
+* Update use of http.DefaultTransport fields to 1.7
+
+* Set default locale to en_US (override with GOVMOMI_LOCALE env var)
 
 * Add object.HostCertificateInfo (types.HostCertificateManagerCertificateInfo helpers)
 
