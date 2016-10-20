@@ -49,7 +49,17 @@ func (cmd *download) Process(ctx context.Context) error {
 }
 
 func (cmd *download) Usage() string {
-	return "REMOTE LOCAL"
+	return "SOURCE DEST"
+}
+
+func (cmd *download) Description() string {
+	return `Copy SOURCE from DS to DEST on the local system.
+
+If DEST name is "-", source is written to stdout.
+
+Examples:
+  govc datastore.download vm-name/vmware.log ./local.log
+  govc datastore.download vm-name/vmware.log - | grep -i error`
 }
 
 func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {

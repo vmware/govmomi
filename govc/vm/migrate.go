@@ -69,9 +69,9 @@ func (cmd *migrate) Usage() string {
 
 func (cmd *migrate) Description() string {
 	return `Migrates VM execution to a specific resource pool or host.
-Example:
-govc vm.migrate -host another-host vm-1 vm-2 vm-3
-`
+
+Examples:
+  govc vm.migrate -host another-host vm-1 vm-2 vm-3`
 }
 
 func (cmd *migrate) Run(ctx context.Context, f *flag.FlagSet) error {

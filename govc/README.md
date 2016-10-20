@@ -25,8 +25,7 @@ go get github.com/vmware/govmomi/govc
 
 ## Usage
 
-govc exposes its functionality through subcommands. Option flags
-to these subcommands are often shared.
+For the complete list of commands and flags, refer to the [USAGE](USAGE.md) document.
 
 Common flags include:
 
@@ -53,10 +52,6 @@ Besides specifying managed entities as arguments, they can also be specified
 using environment variables. The following environment variables are used by govc
 to set defaults:
 
-* `GOVC_USERNAME`: USERNAME to use.
-
-* `GOVC_PASSWORD`: PASSWORD to use.
-
 * `GOVC_URL`: URL of ESXi or vCenter instance to connect to.
 
   > The URL scheme defaults to `https` and the URL path defaults to `/sdk`.
@@ -66,10 +61,37 @@ to set defaults:
   > If password include special characters like `#` or `:` you can use
   > `GOVC_USERNAME` and `GOVC_PASSWORD` to have a simple `GOVC_URL`
 
-* `GOVC_INSECURE`: Allow establishing insecure connections.
+  > When using govc against VMware Workstation, GOVC_URL can be set to "localhost"
+  > without a user or pass, in which case local ticket based authentication is used.
 
-  > Use this option when the host you're connecting is using self-signed
-  > certificates, or is otherwise trusted. Set this option to `1` to enable.
+* `GOVC_USERNAME`: USERNAME to use if not specified in GOVC_URL.
+
+* `GOVC_PASSWORD`: PASSWORD to use if not specified in GOVC_URL.
+
+* `GOVC_TLS_CA_CERTS`: Override system root certificate authorities.
+
+  > export GOVC_TLS_CA_CERTS=~/.govc_ca.crt
+  > Use path separator to specify multiple files:
+  > export GOVC_TLS_CA_CERTS=~/ca-certificates/bar.crt:~/ca-certificates/foo.crt
+
+* `GOVC_TLS_KNOWN_HOSTS`: File(s) for thumbprint based certificate verification.
+
+  > Thumbprint based verification can be used in addition to or as an alternative to
+  > GOVC_TLS_CA_CERTS for self-signed certificates.  Example:
+  > export GOVC_TLS_KNOWN_HOSTS=~/.govc_known_hosts
+  > govc about.cert -u host -k -thumbprint | tee -a $GOVC_TLS_KNOWN_HOSTS
+  > govc about -u user:pass@host
+
+* `GOVC_INSECURE`: Disable certificate verification.
+
+  > This option sets Go's tls.Config.InsecureSkipVerify flag and is false by default.
+  > Quoting https://golang.org/pkg/crypto/tls/#Config:
+  > > InsecureSkipVerify controls whether a client verifies the
+  > > server's certificate chain and host name.
+  > > If InsecureSkipVerify is true, TLS accepts any certificate
+  > > presented by the server and any host name in that certificate.
+  > > In this mode, TLS is susceptible to man-in-the-middle attacks.
+  > > This should be used only for testing.
 
 * `GOVC_DATACENTER`
 
@@ -89,27 +111,23 @@ to set defaults:
 
 ## Examples
 
-* About
-  ```
-  $ export GOVC_URL="192.168.1.20"
-  $ export GOVC_USERNAME="domain\administrator"
-  $ export GOVC_PASSWORD="Password123#"
-  $ govc about
-
-  Name:         VMware vCenter Server
-  Vendor:       VMware, Inc.
-  Version:      6.0.0
-  Build:        2656761
-  OS type:      linux-x64
-  API type:     VirtualCenter
-  API version:  6.0
-  Product ID:   vpx
-  UUID:         c9f0242f-10e3-4e10-85d7-5eea7c855188
-  ```
+Several examples are embedded in the govc command [help](USAGE.md)
 
 * [Upload ssh public key to a VM](examples/lib/ssh.sh)
 
 * [Create and configure a vCenter VM](examples/vcsa.sh)
+
+* [Create a CoreOS VM](https://github.com/vmware/vic/blob/master/pkg/vsphere/toolbox/toolbox-test.sh)
+
+* [Create a Debian VM](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
+
+* [Create a Windows VM](https://github.com/dougm/govc-windows-box/blob/master/provision-esx.sh)
+
+* [Create an ESX VM](https://github.com/vmware/vic/blob/master/infra/machines/vcsa/create-esxi-vm.sh)
+
+* [Create a vCenter VM](https://github.com/vmware/vic/blob/master/infra/machines/vcsa/create-vcsa-vm.sh)
+
+* [Create a Cluster](https://github.com/vmware/vic/blob/master/infra/machines/vcsa/create-cluster.sh)
 
 ## Status
 
@@ -126,9 +144,11 @@ govc version -require 0.7.1
 
 ## Projects using govc
 
+* [Emacs govc package](./emacs)
+
 * [Kubernetes vSphere Provider](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
 
-* [Emacs govc package](./emacs)
+* [VMware VIC Engine](https://github.com/vmware/vic)
 
 ## License
 

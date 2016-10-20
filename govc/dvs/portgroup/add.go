@@ -59,6 +59,15 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewInt32(&cmd.DVPortgroupConfigSpec.NumPorts), "nports", "Number of ports")
 }
 
+func (cmd *add) Description() string {
+	return `Add portgroup to DVS.
+
+Examples:
+  govc dvs.create DSwitch
+  govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork
+  govc dvs.portgroup.add -dvs DSwitch -type ephemeral InternalNetwork`
+}
+
 func (cmd *add) Process(ctx context.Context) error {
 	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
 		return err

@@ -60,7 +60,7 @@ func (cmd *reconnect) Process(ctx context.Context) error {
 }
 
 func (cmd *reconnect) Description() string {
-	return `Reconnect host to vCenter.
+	return `Reconnect HOST to vCenter.
 
 This command can also be used to change connection properties (hostname, fingerprint, username, password),
 without disconnecting the host.`

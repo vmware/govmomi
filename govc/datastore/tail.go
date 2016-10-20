@@ -48,6 +48,14 @@ func (cmd *tail) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.follow, "f", false, "Output appended data as the file grows")
 }
 
+func (cmd *tail) Description() string {
+	return `Output the last part of datastore files.
+
+Examples:
+  govc datastore.tail -n 100 vm-name/vmware.log
+  govc datastore.tail -n 0 -f vm-name/vmware.log`
+}
+
 func (cmd *tail) Process(ctx context.Context) error {
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
 		return err

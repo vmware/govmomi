@@ -203,11 +203,22 @@ func (c *Client) Thumbprint(host string) string {
 
 // LoadThumbprints from file with the give name.
 // If name is empty or name does not exist this function will return nil.
-func (c *Client) LoadThumbprints(name string) error {
-	if name == "" {
+func (c *Client) LoadThumbprints(file string) error {
+	if file == "" {
 		return nil
 	}
 
+	for _, name := range filepath.SplitList(file) {
+		err := c.loadThumbprints(name)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) loadThumbprints(name string) error {
 	f, err := os.Open(name)
 	if err != nil {
 		if os.IsNotExist(err) {

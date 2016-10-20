@@ -55,7 +55,17 @@ func (cmd *upload) Process(ctx context.Context) error {
 }
 
 func (cmd *upload) Usage() string {
-	return "LOCAL REMOTE"
+	return "SOURCE DEST"
+}
+
+func (cmd *upload) Description() string {
+	return `Copy SOURCE from the local system to DEST on DS.
+
+If SOURCE name is "-", read source from stdin.
+
+Examples:
+  govc datasore.upload -ds datastore1 ./config.iso vm-name/config.iso
+  genisoimage ... | govc datasore.upload -ds datastore1 - vm-name/config.iso`
 }
 
 func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {

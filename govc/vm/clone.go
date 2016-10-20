@@ -107,9 +107,9 @@ func (cmd *clone) Usage() string {
 
 func (cmd *clone) Description() string {
 	return `Clone VM to NAME.
-Example:
-govc vm.clone -vm template-vm new-vm
-`
+
+Examples:
+  govc vm.clone -vm template-vm new-vm`
 }
 
 func (cmd *clone) Process(ctx context.Context) error {

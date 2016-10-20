@@ -53,6 +53,19 @@ func (cmd *change) Process(ctx context.Context) error {
 	return nil
 }
 
+func (cmd *change) Usage() string {
+	return "DEVICE"
+}
+
+func (cmd *change) Description() string {
+	return `Change network DEVICE configuration.
+
+Examples:
+  govc vm.network.change -vm $vm -net PG2 ethernet-0
+  govc vm.network.change -vm $vm -net.address 00:00:0f:2e:5d:69 ethernet-0
+  govc device.info -vm $vm ethernet-*`
+}
+
 func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()
 	if err != nil {

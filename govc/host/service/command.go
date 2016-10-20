@@ -60,11 +60,12 @@ func (cmd *service) Usage() string {
 
 func (cmd *service) Description() string {
 	return `Apply host service ACTION to service ID.
+
 Where ACTION is one of: start, stop, restart, status, enable, disable
-Example:
-govc host.service enable TSM-SSH
-govc host.service start TSM-SSH
-`
+
+Examples:
+  govc host.service enable TSM-SSH
+  govc host.service start TSM-SSH`
 }
 
 func (cmd *service) status(ctx context.Context, s *object.HostServiceSystem, id string) (string, error) {

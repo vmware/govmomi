@@ -63,7 +63,7 @@ func (cmd *ls) Process(ctx context.Context) error {
 }
 
 func (cmd *ls) Description() string {
-	return `List host services.`
+	return `List HOST services.`
 }
 
 func Status(s types.HostService) string {

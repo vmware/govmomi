@@ -52,7 +52,7 @@ func (cmd *remove) Usage() string {
 }
 
 func (cmd *remove) Description() string {
-	return `Remove hosts from vCenter.`
+	return `Remove HOST from vCenter.`
 }
 
 func (cmd *remove) Remove(ctx context.Context, host *object.HostSystem) error {

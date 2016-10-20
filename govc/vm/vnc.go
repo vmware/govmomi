@@ -107,11 +107,14 @@ func (cmd *vnc) Usage() string {
 }
 
 func (cmd *vnc) Description() string {
-	return `VNC controls for VM(s).
+	return `Enable or disable VNC for VM.
 
-Port numbers are automatically chosen from a range if not specified.
+Port numbers are automatically chosen if not specified.
 
-If neither -enable or -disable is specified, the current state is returned.`
+If neither -enable or -disable is specified, the current state is returned.
+
+Examples:
+  govc vm.vnc -enable -password 1234 $vm | awk '{print $2}' | xargs open`
 }
 
 func (cmd *vnc) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -284,7 +287,7 @@ func (v *vncVM) uri() (string, error) {
 }
 
 func (v *vncVM) write(w io.Writer) error {
-	if v.newOptions["enabled"] == "true" {
+	if strings.EqualFold(v.newOptions["enabled"], "true") {
 		uri, err := v.uri()
 		if err != nil {
 			return err

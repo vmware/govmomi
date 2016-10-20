@@ -38,6 +38,14 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 }
 
+func (cmd *add) Description() string {
+	return `Add floppy device to VM.
+
+Examples:
+  govc device.floppy.add -vm $vm
+  govc device.info floppy-*`
+}
+
 func (cmd *add) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

@@ -53,7 +53,7 @@ func (flag *FolderFlag) Register(ctx context.Context, f *flag.FlagSet) {
 
 		env := "GOVC_FOLDER"
 		value := os.Getenv(env)
-		usage := fmt.Sprintf("Folder [%s]", env)
+		usage := fmt.Sprintf("Inventory folder [%s]", env)
 		f.StringVar(&flag.name, "folder", value, usage)
 	})
 }
@@ -84,8 +84,17 @@ func (flag *FolderFlag) Folder() (*object.Folder, error) {
 	return flag.folder, nil
 }
 
-func (flag *FolderFlag) FolderOrRoot() (*object.Folder, error) {
-	if flag.name == "" {
+func (flag *FolderFlag) FolderOrDefault(kind string) (*object.Folder, error) {
+	if flag.folder != nil {
+		return flag.folder, nil
+	}
+
+	if flag.name != "" {
+		return flag.Folder()
+	}
+
+	// RootFolder, no dc required
+	if kind == "/" {
 		client, err := flag.Client()
 		if err != nil {
 			return nil, err
@@ -95,5 +104,28 @@ func (flag *FolderFlag) FolderOrRoot() (*object.Folder, error) {
 		return flag.folder, nil
 	}
 
-	return flag.Folder()
+	dc, err := flag.Datacenter()
+	if err != nil {
+		return nil, err
+	}
+
+	folders, err := dc.Folders(context.TODO())
+	if err != nil {
+		return nil, err
+	}
+
+	switch kind {
+	case "vm":
+		flag.folder = folders.VmFolder
+	case "host":
+		flag.folder = folders.HostFolder
+	case "datastore":
+		flag.folder = folders.DatastoreFolder
+	case "network":
+		flag.folder = folders.NetworkFolder
+	default:
+		panic(kind)
+	}
+
+	return flag.folder, nil
 }

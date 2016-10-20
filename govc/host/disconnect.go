@@ -47,7 +47,7 @@ func (cmd *disconnect) Process(ctx context.Context) error {
 }
 
 func (cmd *disconnect) Description() string {
-	return `Disconnect host from vCenter and instruct the host to stop sending heartbeats.`
+	return `Disconnect HOST from vCenter.`
 }
 
 func (cmd *disconnect) Disconnect(ctx context.Context, host *object.HostSystem) error {

@@ -38,7 +38,7 @@ type assigned struct {
 }
 
 func init() {
-	cli.Register("license.assigned.list", &assigned{})
+	cli.Register("license.assigned.ls", &assigned{})
 }
 
 func (cmd *assigned) Register(ctx context.Context, f *flag.FlagSet) {

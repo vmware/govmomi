@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"text/tabwriter"
 
@@ -69,6 +70,27 @@ func (cmd *info) Usage() string {
 	return "[DEVICE]..."
 }
 
+func (cmd *info) match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList {
+	var matches object.VirtualDeviceList
+	match := func(name string) bool {
+		matched, _ := filepath.Match(p, name)
+		return matched
+	}
+
+	for _, device := range devices {
+		name := devices.Name(device)
+		eq := name == p
+		if eq || match(name) {
+			matches = append(matches, device)
+		}
+		if eq {
+			break
+		}
+	}
+
+	return matches
+}
+
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
@@ -106,12 +128,12 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		res.Devices = devices
 	} else {
 		for _, name := range f.Args() {
-			device := devices.Find(name)
-			if device == nil {
+			matches := cmd.match(name, devices)
+			if len(matches) == 0 {
 				return fmt.Errorf("device '%s' not found", name)
 			}
 
-			res.Devices = append(res.Devices, device)
+			res.Devices = append(res.Devices, matches...)
 		}
 	}
 

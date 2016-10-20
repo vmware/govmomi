@@ -51,6 +51,15 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.ehciEnabled, "ehci", true, "Enable enhanced host controller interface (USB 2.0)")
 }
 
+func (cmd *add) Description() string {
+	return `Add USB device to VM.
+
+Examples:
+  govc device.usb.add -vm $vm
+  govc device.usb.add -type xhci -vm $vm
+  govc device.info usb*`
+}
+
 func (cmd *add) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

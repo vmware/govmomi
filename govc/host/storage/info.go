@@ -93,6 +93,13 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.unclaimed, "unclaimed", false, "Only show disks that can be used as new VMFS datastores")
 }
 
+func (cmd *info) Description() string {
+	return `Show HOST storage system information.
+
+Examples:
+  govc ls -t HostSystem host/* | xargs -n1 govc host.storage.info -unclaimed -host`
+}
+
 func (cmd *info) Process(ctx context.Context) error {
 	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
 		return err
@@ -101,14 +108,6 @@ func (cmd *info) Process(ctx context.Context) error {
 		return err
 	}
 	return nil
-}
-
-func (cmd *info) Usage() string {
-	return "[-t TYPE]"
-}
-
-func (cmd *info) Description() string {
-	return `Show information about a host's storage system.`
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {

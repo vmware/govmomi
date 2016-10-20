@@ -51,9 +51,9 @@ func (cmd *create) Usage() string {
 
 func (cmd *create) Description() string {
 	return `Create snapshot of VM with NAME.
-Example:
-govc snapshot.create -vm my-vm happy-vm-state
-`
+
+Examples:
+  govc snapshot.create -vm my-vm happy-vm-state`
 }
 
 func (cmd *create) Process(ctx context.Context) error {

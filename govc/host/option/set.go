@@ -60,9 +60,10 @@ func (cmd *set) Usage() string {
 
 func (cmd *set) Description() string {
 	return `Set host option NAME to VALUE.
-Example:
-govc host.option.set Config.HostAgent.plugins.solo.enableMob true
-`
+
+Examples:
+  govc host.option.set Config.HostAgent.plugins.solo.enableMob true
+  govc host.option.set Config.HostAgent.log.level verbose`
 }
 
 func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {

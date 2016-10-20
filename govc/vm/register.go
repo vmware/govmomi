@@ -101,10 +101,11 @@ func (cmd *register) Usage() string {
 
 func (cmd *register) Description() string {
 	return `Add an existing VM to the inventory.
+
 VMX is a path to the vm config file, relative to DATASTORE.
-Example:
-govc vm.register path/name.vmx
-`
+
+Examples:
+  govc vm.register path/name.vmx`
 }
 
 func (cmd *register) Run(ctx context.Context, f *flag.FlagSet) error {

@@ -61,7 +61,10 @@ func (cmd *insert) Usage() string {
 func (cmd *insert) Description() string {
 	return `Insert media on datastore into CD-ROM device.
 
-If device is not specified, the first CD-ROM device is used.`
+If device is not specified, the first CD-ROM device is used.
+
+Examples:
+  govc device.cdrom.insert -vm vm-1 -device cdrom-3000 images/boot.iso`
 }
 
 func (cmd *insert) Run(ctx context.Context, f *flag.FlagSet) error {

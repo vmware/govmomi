@@ -55,8 +55,8 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
-	f.BoolVar(&cmd.slash, "p", false, "Write a slash (`/') after each filename if that file is a directory")
-	f.BoolVar(&cmd.all, "a", false, "Include entries whose names begin with a dot (.)")
+	f.BoolVar(&cmd.slash, "p", false, "Append / indicator to directories")
+	f.BoolVar(&cmd.all, "a", false, "Do not ignore entries starting with .")
 	f.BoolVar(&cmd.recurse, "R", false, "List subdirectories recursively")
 }
 

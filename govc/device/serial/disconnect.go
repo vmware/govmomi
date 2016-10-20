@@ -41,6 +41,15 @@ func (cmd *disconnect) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.device, "device", "", "serial port device name")
 }
 
+func (cmd *disconnect) Description() string {
+	return `Disconnect service URI from serial port.
+
+Examples:
+  govc device.ls | grep serialport-
+  govc device.serial.disconnect -vm $vm -device serialport-8000
+  govc device.info -vm $vm serialport-*`
+}
+
 func (cmd *disconnect) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

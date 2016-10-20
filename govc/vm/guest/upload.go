@@ -55,7 +55,10 @@ func (cmd *upload) Description() string {
 	return `Copy SOURCE from the local system to DEST in the guest VM.
 
 If SOURCE name is "-", read source from stdin.
-`
+
+Examples:
+  govc guest.upload -l user:pass -vm=my-vm ~/.ssh/id_rsa.pub /home/$USER/.ssh/authorized_keys
+  cowsay "have a great day" | govc guest.upload -l user:pass -vm=my-vm - /etc/motd`
 }
 
 func (cmd *upload) Process(ctx context.Context) error {

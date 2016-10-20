@@ -51,7 +51,10 @@ func (cmd *eject) Process(ctx context.Context) error {
 func (cmd *eject) Description() string {
 	return `Eject image from floppy device.
 
-If device is not specified, the first floppy device is used.`
+If device is not specified, the first floppy device is used.
+
+Examples:
+  govc device.floppy.eject -vm vm-1`
 }
 
 func (cmd *eject) Run(ctx context.Context, f *flag.FlagSet) error {

@@ -50,11 +50,11 @@ func (cmd *remove) Usage() string {
 
 func (cmd *remove) Description() string {
 	return `Remove snapshot of VM with given NAME.
+
 NAME can be the snapshot name, tree path, moid or '*' to remove all snapshots.
 
-Example:
-govc snapshot.remove -vm my-vm happy-vm-state
-`
+Examples:
+  govc snapshot.remove -vm my-vm happy-vm-state`
 }
 
 func (cmd *remove) Process(ctx context.Context) error {

@@ -45,6 +45,15 @@ func (cmd *connect) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.client, "client", false, "Use client direction")
 }
 
+func (cmd *connect) Description() string {
+	return `Connect service URI to serial port.
+
+Examples:
+  govc device.ls | grep serialport-
+  govc device.serial.connect -vm $vm -device serialport-8000 telnet://:33233
+  govc device.info -vm $vm serialport-*`
+}
+
 func (cmd *connect) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err

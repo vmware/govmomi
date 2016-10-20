@@ -38,6 +38,18 @@ func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 }
 
+func (cmd *rm) Usage() string {
+	return "KEY..."
+}
+
+func (cmd *rm) Description() string {
+	return `Remove active sessions.
+
+Examples:
+  govc session.ls | grep root
+  govc session.rm 5279e245-e6f1-4533-4455-eb94353b213a`
+}
+
 func (cmd *rm) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
