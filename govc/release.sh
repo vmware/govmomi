@@ -49,8 +49,8 @@ wait
 
 if [ -n "$tag" ] ; then
   echo "Pushing tag ${tag}..."
-  echo git tag -f "${tag}"
-  echo git push origin "refs/tags/${tag}"
+  git tag -f "${tag}"
+  git push origin "refs/tags/${tag}"
 fi
 
 # Generate description

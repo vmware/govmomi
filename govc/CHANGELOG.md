@@ -1,6 +1,14 @@
 # changelog
 
-### unreleased
+### 0.10.1 (2016-10-25)
+
+* Add object.destroy and object.rename commands
+
+* Remove datacenter.destroy command (use object.destroy instead)
+
+* Remove folder.destroy command (use object.destroy instead)
+
+* Rename folder.move_into -> object.mv
 
 * Add dvs.portgroup.change command
 

@@ -31,7 +31,7 @@ load test_helper
     assert_success
   done
 
-  run govc datacenter.destroy "${dcs[@]}"
+  run govc object.destroy "${dcs[@]}"
   assert_success
 
   for dc in ${dcs[*]}; do
@@ -54,7 +54,7 @@ load test_helper
   run govc datacenter.create -folder "$folder" "${dcs[@]}"
   assert_success
 
-  run govc datacenter.destroy "$folder/*"
+  run govc object.destroy "$folder/*"
   assert_success
 
   for dc in ${dcs[*]}; do
@@ -67,27 +67,15 @@ load test_helper
   assert_success
 }
 
-@test "destroy datacenter that does not exist" {
-  vcsim_env
-
-  run govc datacenter.destroy "/enoent"
-  assert_failure
-}
-
 @test "fails when datacenter name not specified" {
   run govc datacenter.create
-  assert_failure
-
-  run govc datacenter.destroy
   assert_failure
 }
 
 @test "datacenter commands fail against ESX" {
   run govc datacenter.create something
-  assert_failure
-  assert_output "govc: ServerFaultCode: The operation is not supported on the object."
+  assert_failure "govc: ServerFaultCode: The operation is not supported on the object."
 
-  run govc datacenter.destroy ha-datacenter
+  run govc object.destroy /ha-datacenter
   assert_failure
-  assert_output "govc: The operation is not supported on the object."
 }

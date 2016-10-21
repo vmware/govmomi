@@ -140,14 +140,6 @@ Options:
   -folder=                  Inventory folder [GOVC_FOLDER]
 ```
 
-## datacenter.destroy
-
-```
-Usage: govc datacenter.destroy [OPTIONS] PATH...
-
-Options:
-```
-
 ## datacenter.info
 
 ```
@@ -306,8 +298,8 @@ Copy SOURCE from the local system to DEST on DS.
 If SOURCE name is "-", read source from stdin.
 
 Examples:
-  govc datasore.upload -ds datastore1 ./config.iso vm-name/config.iso
-  genisoimage ... | govc datasore.upload -ds datastore1 - vm-name/config.iso
+  govc datastore.upload -ds datastore1 ./config.iso vm-name/config.iso
+  genisoimage ... | govc datastore.upload -ds datastore1 - vm-name/config.iso
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
@@ -360,8 +352,8 @@ Eject media from CD-ROM device.
 If device is not specified, the first CD-ROM device is used.
 
 Examples:
-  govc device.floppy.eject -vm vm-1
-  govc device.floppy.eject -vm vm-1 -device floppy-1
+  govc device.cdrom.eject -vm vm-1
+  govc device.cdrom.eject -vm vm-1 -device floppy-1
 
 Options:
   -device=                  CD-ROM device name
@@ -678,7 +670,8 @@ Usage: govc events [OPTIONS] [PATH]...
 Display events.
 
 Examples:
-  govc events vm1 vm2
+  govc events vm/my-vm1 vm/my-vm2
+  govc events /dc1/vm/* /dc2/vm/*
   govc ls -t HostSystem host/* | xargs govc events | grep -i vsan
 
 Options:
@@ -807,50 +800,12 @@ Options:
   -pod=false                Create folder(s) of type StoragePod (DatastoreCluster)
 ```
 
-## folder.destroy
-
-```
-Usage: govc folder.destroy [OPTIONS] FOLDER...
-
-Destroy one or more FOLDERs.
-
-Options:
-```
-
 ## folder.info
 
 ```
 Usage: govc folder.info [OPTIONS] [PATH]...
 
 Options:
-```
-
-## folder.moveinto
-
-```
-Usage: govc folder.moveinto [OPTIONS] PATH...
-
-Move managed entities into this folder.
-
-Examples:
-  govc folder.moveinto -folder /dc1/folder-foo /dc2/folder-bar/*
-
-Options:
-  -folder=                  Inventory folder [GOVC_FOLDER]
-```
-
-## folder.rename
-
-```
-Usage: govc folder.rename [OPTIONS] NAME
-
-Rename an existing folder with NAME.
-
-Examples:
-  govc folder.rename -folder /dc1/vm/folder-foo folder-bar
-
-Options:
-  -folder=                  Inventory folder [GOVC_FOLDER]
 ```
 
 ## guest.chmod
@@ -1654,6 +1609,46 @@ Options:
   -i=false                  Print the managed object reference
   -l=false                  Long listing format
   -t=                       Object type
+```
+
+## object.destroy
+
+```
+Usage: govc object.destroy [OPTIONS] PATH...
+
+Destroy managed objects.
+
+Examples:
+  govc object.destroy /dc1/network/dvs /dc1/host/cluster
+
+Options:
+```
+
+## object.mv
+
+```
+Usage: govc object.mv [OPTIONS] PATH... FOLDER
+
+Move managed entities to FOLDER.
+
+Examples:
+  govc folder.create /dc1/host/example
+  govc object.mv /dc2/host/*.example.com /dc1/host/example
+
+Options:
+```
+
+## object.rename
+
+```
+Usage: govc object.rename [OPTIONS] PATH NAME
+
+Rename managed objects.
+
+Examples:
+  govc object.rename /dc1/network/dvs1 Switch1
+
+Options:
 ```
 
 ## permissions.ls

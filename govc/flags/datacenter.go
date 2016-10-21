@@ -150,6 +150,10 @@ func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) (
 			return nil, err
 		}
 
+		if len(elements) == 0 {
+			return nil, fmt.Errorf("object '%s' not found", arg)
+		}
+
 		for _, e := range elements {
 			refs = append(refs, e.Object.Reference())
 		}

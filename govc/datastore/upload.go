@@ -64,8 +64,8 @@ func (cmd *upload) Description() string {
 If SOURCE name is "-", read source from stdin.
 
 Examples:
-  govc datasore.upload -ds datastore1 ./config.iso vm-name/config.iso
-  genisoimage ... | govc datasore.upload -ds datastore1 - vm-name/config.iso`
+  govc datastore.upload -ds datastore1 ./config.iso vm-name/config.iso
+  genisoimage ... | govc datastore.upload -ds datastore1 - vm-name/config.iso`
 }
 
 func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
