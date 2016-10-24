@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add object.DistributedVirtualPortgroup.Reconfigure method
+
 ### 0.10.0 (2016-10-20)
 
 * Add option to set soap.Client.UserAgent

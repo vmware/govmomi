@@ -621,6 +621,24 @@ Options:
   -dvs=                     DVS path
   -nports=128               Number of ports
   -type=earlyBinding        Portgroup type (earlyBinding|lateBinding|ephemeral)
+  -vlan=0                   VLAN ID
+```
+
+## dvs.portgroup.change
+
+```
+Usage: govc dvs.portgroup.change [OPTIONS] PATH
+
+Change DVS portgroup configuration.
+
+Examples:
+  govc dvs.portgroup.change -nports 26 ExternalNetwork
+  govc dvs.portgroup.change -vlan 3214 ExternalNetwork
+
+Options:
+  -nports=0                 Number of ports
+  -type=earlyBinding        Portgroup type (earlyBinding|lateBinding|ephemeral)
+  -vlan=0                   VLAN ID
 ```
 
 ## dvs.portgroup.info

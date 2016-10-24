@@ -21,7 +21,7 @@ import (
 	"strings"
 )
 
-const Version = "0.10.0"
+const Version = "0.10.1"
 
 type version []int
 
