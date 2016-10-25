@@ -36,7 +36,7 @@ load test_helper
     run govc folder.info /$GOVC_DATACENTER/vm/$name
     assert_success
 
-    run govc folder.destroy vm/$name
+    run govc object.destroy vm/$name
     assert_success
 
     unset GOVC_DATACENTER
@@ -55,20 +55,20 @@ load test_helper
     run govc folder.info /$name/$child
     assert_failure
 
-    run govc folder.moveinto -folder /$name $child
+    run govc object.mv $child /$name
     assert_success
 
     run govc folder.info /$name/$child
     assert_success
 
     new=$(new_id)
-    run govc folder.rename -folder /$name $new
+    run govc object.rename /$name $new
     assert_success
     name=$new
 
     run govc folder.info /$name
     assert_success
 
-    run govc folder.destroy $name
+    run govc object.destroy $name
     assert_success
 }

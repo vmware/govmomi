@@ -56,6 +56,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/license"
 	_ "github.com/vmware/govmomi/govc/logs"
 	_ "github.com/vmware/govmomi/govc/ls"
+	_ "github.com/vmware/govmomi/govc/object"
 	_ "github.com/vmware/govmomi/govc/permissions"
 	_ "github.com/vmware/govmomi/govc/pool"
 	_ "github.com/vmware/govmomi/govc/session"

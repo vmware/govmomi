@@ -150,18 +150,21 @@ load test_helper
   run govc dvs.create "$id"
   assert_success
 
-  run govc dvs.portgroup.add -dvs "$id" -type earlyBinding -nports 16 ExternalNetwork
+  run govc dvs.portgroup.add -dvs "$id" -type earlyBinding -nports 16 "${id}-ExternalNetwork"
   assert_success
 
-  run govc dvs.portgroup.add -dvs "$id" -type ephemeral -vlan 3122 InternalNetwork
+  run govc dvs.portgroup.add -dvs "$id" -type ephemeral -vlan 3122 "${id}-InternalNetwork"
   assert_success
 
   info=$(govc dvs.portgroup.info "$id" | grep VlanId: | uniq | grep 3122)
   [ -n "$info" ]
 
-  run govc dvs.portgroup.change -vlan 3123 InternalNetwork
+  run govc dvs.portgroup.change -vlan 3123 "${id}-InternalNetwork"
   assert_success
 
   info=$(govc dvs.portgroup.info "$id" | grep VlanId: | uniq | grep 3123)
   [ -n "$info" ]
+
+  run govc object.destroy "network/${id}-ExternalNetwork" "network/${id}-InternalNetwork" "network/${id}"
+  assert_success
 }

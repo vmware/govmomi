@@ -5,7 +5,7 @@
 
 A Go library for interacting with VMware vSphere APIs (ESXi and/or vCenter).
 
-For `govc`, a CLI built on top of govmomi, check out the [govc](./govc) directory.
+For `govc`, a CLI built on top of govmomi, check out the [govc](./govc) directory and [USAGE](./govc/USAGE.md) document.
 
 ## Compatibility
 

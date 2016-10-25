@@ -23,9 +23,6 @@ load test_helper
 
 @test "events vm" {
   vm=$(new_id)
-  run govc events vm/$vm
-  assert_success
-  [ ${#lines[@]} -eq 0 ]
 
   run govc vm.create -on=false $vm
   assert_success

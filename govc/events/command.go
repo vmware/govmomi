@@ -57,7 +57,8 @@ func (cmd *events) Description() string {
 	return `Display events.
 
 Examples:
-  govc events vm1 vm2
+  govc events vm/my-vm1 vm/my-vm2
+  govc events /dc1/vm/* /dc2/vm/*
   govc ls -t HostSystem host/* | xargs govc events | grep -i vsan`
 }
 

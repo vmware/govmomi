@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.10.1 (2016-10-25)
 
 * Add object.DistributedVirtualPortgroup.Reconfigure method
 

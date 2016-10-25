@@ -14,68 +14,72 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package folder
+package object
 
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 )
 
 type rename struct {
-	*flags.ClientFlag
-	*flags.FolderFlag
+	*flags.DatacenterFlag
 }
 
 func init() {
-	cli.Register("folder.rename", &rename{})
+	cli.Register("object.rename", &rename{})
 }
 
 func (cmd *rename) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
-
-	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
-	cmd.FolderFlag.Register(ctx, f)
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
 }
 
 func (cmd *rename) Usage() string {
-	return "NAME"
+	return "PATH NAME"
 }
 
 func (cmd *rename) Description() string {
-	return `Rename an existing folder with NAME.
+	return `Rename managed objects.
 
 Examples:
-  govc folder.rename -folder /dc1/vm/folder-foo folder-bar`
+  govc object.rename /dc1/network/dvs1 Switch1`
 }
 
 func (cmd *rename) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	if err := cmd.FolderFlag.Process(ctx); err != nil {
+	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (cmd *rename) Run(ctx context.Context, f *flag.FlagSet) error {
-	folder, err := cmd.Folder()
-	if err != nil {
-		return err
-	}
-
-	if f.NArg() != 1 {
+	if f.NArg() != 2 {
 		return flag.ErrHelp
 	}
 
-	task, err := folder.Rename(ctx, f.Arg(0))
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	return task.Wait(ctx)
+	objs, err := cmd.ManagedObjects(ctx, f.Args()[:1])
+	if err != nil {
+		return err
+	}
+
+	task, err := object.NewCommon(c, objs[0]).Rename(ctx, f.Arg(1))
+	if err != nil {
+		return err
+	}
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("renaming %s... ", objs[0]))
+	_, err = task.WaitForResult(ctx, logger)
+	logger.Wait()
+
+	return err
 }

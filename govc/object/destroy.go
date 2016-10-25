@@ -14,14 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package folder
+package object
 
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 )
 
 type destroy struct {
@@ -29,12 +31,23 @@ type destroy struct {
 }
 
 func init() {
-	cli.Register("folder.destroy", &destroy{})
+	cli.Register("object.destroy", &destroy{})
 }
 
 func (cmd *destroy) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
+}
+
+func (cmd *destroy) Usage() string {
+	return "PATH..."
+}
+
+func (cmd *destroy) Description() string {
+	return `Destroy managed objects.
+
+Examples:
+  govc object.destroy /dc1/network/dvs /dc1/host/cluster`
 }
 
 func (cmd *destroy) Process(ctx context.Context) error {
@@ -44,40 +57,32 @@ func (cmd *destroy) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *destroy) Usage() string {
-	return "FOLDER..."
-}
-
-func (cmd *destroy) Description() string {
-	return "Destroy one or more FOLDERs."
-}
-
 func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() == 0 {
 		return flag.ErrHelp
 	}
 
-	finder, err := cmd.Finder()
+	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
 
-	for _, arg := range f.Args() {
-		folders, err := finder.FolderList(ctx, arg)
+	objs, err := cmd.ManagedObjects(ctx, f.Args())
+	if err != nil {
+		return err
+	}
+
+	for _, obj := range objs {
+		task, err := object.NewCommon(c, obj).Destroy(ctx)
 		if err != nil {
 			return err
 		}
 
-		for _, folder := range folders {
-			task, err := folder.Destroy(ctx)
-			if err != nil {
-				return err
-			}
-
-			err = task.Wait(ctx)
-			if err != nil {
-				return err
-			}
+		logger := cmd.ProgressLogger(fmt.Sprintf("destroying %s... ", obj))
+		_, err = task.WaitForResult(ctx, logger)
+		logger.Wait()
+		if err != nil {
+			return err
 		}
 	}
 
