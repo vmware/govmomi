@@ -1,6 +1,6 @@
 # changelog
 
-### 0.10.1 (2016-10-25)
+### 0.11.0 (2016-10-25)
 
 * Add object.destroy and object.rename commands
 
