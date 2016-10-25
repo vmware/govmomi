@@ -142,3 +142,26 @@ load test_helper
 
   assert_equal $mac $(vm_mac $vm)
 }
+
+@test "dvs.portgroup" {
+  vcsim_env
+  id=$(new_id)
+
+  run govc dvs.create "$id"
+  assert_success
+
+  run govc dvs.portgroup.add -dvs "$id" -type earlyBinding -nports 16 ExternalNetwork
+  assert_success
+
+  run govc dvs.portgroup.add -dvs "$id" -type ephemeral -vlan 3122 InternalNetwork
+  assert_success
+
+  info=$(govc dvs.portgroup.info "$id" | grep VlanId: | uniq | grep 3122)
+  [ -n "$info" ]
+
+  run govc dvs.portgroup.change -vlan 3123 InternalNetwork
+  assert_success
+
+  info=$(govc dvs.portgroup.info "$id" | grep VlanId: | uniq | grep 3123)
+  [ -n "$info" ]
+}

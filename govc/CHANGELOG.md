@@ -1,5 +1,11 @@
 # changelog
 
+### unreleased
+
+* Add dvs.portgroup.change command
+
+* Add vlan flag to dvs.portgroup.add command
+
 ### 0.10.0 (2016-10-20)
 
 * Add generated govc/USAGE.md

@@ -24,82 +24,82 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
-type add struct {
+type change struct {
 	*flags.DatacenterFlag
 
 	DVPortgroupConfigSpec
-
-	path string
 }
 
 func init() {
-	cli.Register("dvs.portgroup.add", &add{})
+	cli.Register("dvs.portgroup.change", &change{})
 }
 
-func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
-
-	f.StringVar(&cmd.path, "dvs", "", "DVS path")
-
-	cmd.DVPortgroupConfigSpec.NumPorts = 128 // default
 
 	cmd.DVPortgroupConfigSpec.Register(ctx, f)
 }
 
-func (cmd *add) Description() string {
-	return `Add portgroup to DVS.
+func (cmd *change) Description() string {
+	return `Change DVS portgroup configuration.
 
 Examples:
-  govc dvs.create DSwitch
-  govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork
-  govc dvs.portgroup.add -dvs DSwitch -type ephemeral InternalNetwork`
+  govc dvs.portgroup.change -nports 26 ExternalNetwork
+  govc dvs.portgroup.change -vlan 3214 ExternalNetwork`
 }
 
-func (cmd *add) Process(ctx context.Context) error {
+func (cmd *change) Process(ctx context.Context) error {
 	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cmd *add) Usage() string {
-	return "NAME"
+func (cmd *change) Usage() string {
+	return "PATH"
 }
 
-func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
-	if f.NArg() == 0 {
+func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
-	name := f.Arg(0)
+	path := f.Arg(0)
 
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err
 	}
 
-	net, err := finder.Network(ctx, cmd.path)
+	net, err := finder.Network(ctx, path)
 	if err != nil {
 		return err
 	}
 
-	dvs, ok := net.(*object.DistributedVirtualSwitch)
+	pg, ok := net.(*object.DistributedVirtualPortgroup)
 	if !ok {
-		return fmt.Errorf("%s (%T) is not of type %T", cmd.path, net, dvs)
+		return fmt.Errorf("%s (%T) is not of type %T", path, net, pg)
 	}
 
-	cmd.DVPortgroupConfigSpec.Name = name
-
-	task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{cmd.Spec()})
+	var s mo.DistributedVirtualPortgroup
+	err = pg.Properties(ctx, pg.Reference(), []string{"config.configVersion"}, &s)
 	if err != nil {
 		return err
 	}
 
-	logger := cmd.ProgressLogger(fmt.Sprintf("adding %s portgroup to dvs %s... ", name, dvs.InventoryPath))
+	spec := cmd.Spec()
+	spec.ConfigVersion = s.Config.ConfigVersion
+
+	task, err := pg.Reconfigure(ctx, spec)
+	if err != nil {
+		return err
+	}
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("changing %s portgroup configuration %s... ", pg.Name(), pg.InventoryPath))
 	defer logger.Wait()
 
 	_, err = task.WaitForResult(ctx, logger)
