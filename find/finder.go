@@ -714,6 +714,29 @@ func (f *Finder) ResourcePoolOrDefault(ctx context.Context, path string) (*objec
 	return f.DefaultResourcePool(ctx)
 }
 
+// ResourcePoolListAll combines ResourcePoolList and VirtualAppList
+// VirtualAppList is only called if ResourcePoolList does not find any pools with the given path.
+func (f *Finder) ResourcePoolListAll(ctx context.Context, path string) ([]*object.ResourcePool, error) {
+	pools, err := f.ResourcePoolList(ctx, path)
+	if err != nil {
+		if _, ok := err.(*NotFoundError); !ok {
+			return nil, err
+		}
+
+		vapps, _ := f.VirtualAppList(ctx, path)
+
+		if len(vapps) == 0 {
+			return nil, err
+		}
+
+		for _, vapp := range vapps {
+			pools = append(pools, vapp.ResourcePool)
+		}
+	}
+
+	return pools, nil
+}
+
 func (f *Finder) DefaultFolder(ctx context.Context) (*object.Folder, error) {
 	ref, err := f.vmFolder(ctx)
 	if err != nil {
