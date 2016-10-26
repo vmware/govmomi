@@ -81,7 +81,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	})
 
 	for _, arg := range f.Args() {
-		pools, err := finder.ResourcePoolList(ctx, arg)
+		pools, err := finder.ResourcePoolListAll(ctx, arg)
 		if err != nil {
 			return err
 		}
