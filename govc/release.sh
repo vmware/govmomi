@@ -17,6 +17,7 @@ export GITHUB_USER="${GITHUB_USER:-vmware}"
 export GITHUB_REPO="${GITHUB_REPO:-govmomi}"
 
 name="$(git describe)"
+release=(github-release release --draft --name "${name}")
 
 case "$1" in
   release)
@@ -24,6 +25,7 @@ case "$1" in
     ;;
   prerelease)
     tag="prerelease-${name}"
+    release+=(--pre-release)
     ;;
   dryrun)
     ;;
@@ -87,11 +89,13 @@ sha1sum govc_*.zip
 echo '```'
 )
 
+release+=(--tag "${tag}" --description "${description}")
+
 if [ -n "$tag" ] ; then
   echo "Creating release..."
-  github-release release --tag "${tag}" --name "${name}" --description "${description}" --draft --pre-release
+  "${release[@]}"
 else
-  echo "$description"
+  echo "${release[@]}"
 fi
 
 # Upload build artifacts
