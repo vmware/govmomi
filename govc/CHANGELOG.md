@@ -1,5 +1,9 @@
 # changelog
 
+### 0.11.1 (2016-10-27)
+
+* Add support for VirtualApp in pool.change command
+
 ### 0.11.0 (2016-10-25)
 
 * Add object.destroy and object.rename commands
