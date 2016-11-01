@@ -599,7 +599,7 @@ func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.Network
 	for _, e := range es {
 		ref := e.Object.Reference()
 		switch ref.Type {
-		case "Network":
+		case "Network", "OpaqueNetwork":
 			r := object.NewNetwork(f.client, ref)
 			r.InventoryPath = e.Path
 			ns = append(ns, r)
