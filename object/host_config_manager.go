@@ -113,12 +113,21 @@ func (m HostConfigManager) AccountManager(ctx context.Context) (*HostAccountMana
 		return nil, err
 	}
 
-	// Added in 6.0
-	if h.ConfigManager.AccountManager == nil {
-		return nil, ErrNotSupported
+	ref := h.ConfigManager.AccountManager // Added in 6.0
+	if ref == nil {
+		// Versions < 5.5 can use the ServiceContent ref,
+		// but we can only use it when connected directly to ESX.
+		c := m.Client()
+		if !c.IsVC() {
+			ref = c.ServiceContent.AccountManager
+		}
+
+		if ref == nil {
+			return nil, ErrNotSupported
+		}
 	}
 
-	return NewHostAccountManager(m.c, *h.ConfigManager.AccountManager), nil
+	return NewHostAccountManager(m.c, *ref), nil
 }
 
 func (m HostConfigManager) OptionManager(ctx context.Context) (*OptionManager, error) {
