@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add HostConfigManager.AccountManager support for ESX 5.5
+
 ### 0.11.1 (2016-10-27)
 
 * Add Finder.ResourcePoolListAll method

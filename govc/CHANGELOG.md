@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add ESX 5.5 support to host.account commands
+
 ### 0.11.1 (2016-10-27)
 
 * Add support for VirtualApp in pool.change command
