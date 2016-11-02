@@ -1638,6 +1638,20 @@ Examples:
 Options:
 ```
 
+## object.reload
+
+```
+Usage: govc object.reload [OPTIONS] PATH...
+
+Reload managed object state.
+
+Examples:
+  govc datastore.upload $vm.vmx $vm/$vm.vmx
+  govc object.reload /dc1/vm/$vm
+
+Options:
+```
+
 ## object.rename
 
 ```

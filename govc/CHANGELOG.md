@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### ### 0.11.2 (2016-11-01)
 
 * Add object.reload command
 
