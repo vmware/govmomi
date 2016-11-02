@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add support for OpaqueNetwork type to Finder
+
 * Add HostConfigManager.AccountManager support for ESX 5.5
 
 ### 0.11.1 (2016-10-27)

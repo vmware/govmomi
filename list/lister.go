@@ -79,6 +79,8 @@ func ToElement(r mo.Reference, prefix string) Element {
 	// Network entity folders on an ESXi host can contain only Network objects.
 	case mo.Network:
 		name = m.Name
+	case mo.OpaqueNetwork:
+		name = m.Name
 	case mo.DistributedVirtualSwitch:
 		name = m.Name
 	case mo.DistributedVirtualPortgroup:

@@ -168,6 +168,7 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 
 	var host []mo.HostSystem
 	var network []mo.Network
+	var opaque []mo.OpaqueNetwork
 	var dvp []mo.DistributedVirtualPortgroup
 	var datastore []mo.Datastore
 	// Table to drive inflating refs to their mo.* counterparts (dest)
@@ -189,6 +190,13 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 		"Network": {
 			&network, nil, func() {
 				for _, e := range network {
+					r.entities[e.Reference()] = e.Name
+				}
+			},
+		},
+		"OpaqueNetwork": {
+			&opaque, nil, func() {
+				for _, e := range opaque {
 					r.entities[e.Reference()] = e.Name
 				}
 			},
