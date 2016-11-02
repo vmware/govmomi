@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add object.reload command
+
 * Add ESX 5.5 support to host.account commands
 
 ### 0.11.1 (2016-10-27)

@@ -302,9 +302,19 @@ func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool) (map[string][
 func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 	var o mo.VirtualMachine
 
-	err := v.Properties(ctx, v.Reference(), []string{"config.hardware.device"}, &o)
+	err := v.Properties(ctx, v.Reference(), []string{"config.hardware.device", "summary.runtime.connectionState"}, &o)
 	if err != nil {
 		return nil, err
+	}
+
+	// Quoting the SDK doc:
+	//   The virtual machine configuration is not guaranteed to be available.
+	//   For example, the configuration information would be unavailable if the server
+	//   is unable to access the virtual machine files on disk, and is often also unavailable
+	//   during the initial phases of virtual machine creation.
+	if o.Config == nil {
+		return nil, fmt.Errorf("%s Config is not available, connectionState=%s",
+			v.Reference(), o.Summary.Runtime.ConnectionState)
 	}
 
 	return VirtualDeviceList(o.Config.Hardware.Device), nil

@@ -260,3 +260,23 @@ load test_helper
   run govc vm.disk.create -vm "$vm" -name disk-16 -size 1K
   assert_success
 }
+
+
+@test "device nil config" {
+  vm=$(new_empty_vm)
+
+  run govc device.ls -vm "$vm"
+  assert_success
+
+  run govc datastore.rm "$vm"
+  assert_success
+
+  run govc object.reload "vm/$vm"
+  assert_success
+
+  run govc device.ls -vm "$vm"
+  assert_failure
+
+  run govc vm.unregister "$vm"
+  assert_success
+}

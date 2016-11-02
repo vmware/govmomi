@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Avoid possible NPE in VirtualMachine.Device method
+
 * Add support for OpaqueNetwork type to Finder
 
 * Add HostConfigManager.AccountManager support for ESX 5.5
