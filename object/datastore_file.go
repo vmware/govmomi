@@ -156,6 +156,13 @@ func (s *fileStat) Sys() interface{} {
 	return s.header
 }
 
+func statusError(res *http.Response) error {
+	if res.StatusCode == http.StatusNotFound {
+		return os.ErrNotExist
+	}
+	return errors.New(res.Status)
+}
+
 // Stat returns the os.FileInfo interface describing file.
 func (f *DatastoreFile) Stat() (os.FileInfo, error) {
 	// TODO: consider using Datastore.Stat() instead
@@ -170,7 +177,7 @@ func (f *DatastoreFile) Stat() (os.FileInfo, error) {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return nil, errors.New(res.Status)
+		return nil, statusError(res)
 	}
 
 	f.length = res.ContentLength
@@ -212,7 +219,7 @@ func (f *DatastoreFile) get() (io.Reader, error) {
 	case http.StatusRequestedRangeNotSatisfiable:
 		// ok: Read() will return io.EOF
 	default:
-		return nil, errors.New(res.Status)
+		return nil, statusError(res)
 	}
 
 	if f.length < 0 {
@@ -342,12 +349,11 @@ func (f *followDatastoreFile) Read(p []byte) (int, error) {
 	for {
 		n, err := f.r.Read(p)
 		if err != nil && err == io.EOF {
-			err = nil
 			_ = f.r.Close() // GET request body has been drained.
-		}
-
-		if stop {
-			return n, io.EOF
+			if stop {
+				return n, err
+			}
+			err = nil
 		}
 
 		if n > 0 {
@@ -356,13 +362,18 @@ func (f *followDatastoreFile) Read(p []byte) (int, error) {
 
 		select {
 		case <-f.c:
-			// Wake up and return io.EOF after 1 final Read()
+			// Wake up and stop polling once the body has been drained
 			stop = true
 		case <-time.After(f.i):
 		}
 
 		info, serr := f.r.Stat()
 		if serr != nil {
+			// Return EOF rather than 404 if the file goes away
+			if serr == os.ErrNotExist {
+				_ = f.r.Close()
+				return 0, io.EOF
+			}
 			return 0, serr
 		}
 
