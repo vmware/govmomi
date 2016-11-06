@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Allow DatastoreFile.Follow reader to drain current body after stopping
+
 ### 0.11.2 (2016-11-01)
 
 * Avoid possible NPE in VirtualMachine.Device method

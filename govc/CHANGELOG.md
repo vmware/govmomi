@@ -1,6 +1,10 @@
 # changelog
 
-### ### 0.11.2 (2016-11-01)
+### unreleased
+
+* datastore.tail -f will exit without error if the file no longer exists
+
+### 0.11.2 (2016-11-01)
 
 * Add object.reload command
 
