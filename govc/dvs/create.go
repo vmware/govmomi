@@ -45,6 +45,9 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.configSpec = new(types.VMwareDVSConfigSpec)
 
 	cmd.DVSCreateSpec.ConfigSpec = cmd.configSpec
+	cmd.DVSCreateSpec.ProductInfo = new(types.DistributedVirtualSwitchProductSpec)
+
+	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
 }
 
 func (cmd *create) Usage() string {
@@ -55,7 +58,11 @@ func (cmd *create) Description() string {
 	return `Create DVS (DistributedVirtualSwitch) in datacenter.
 
 The dvs is added to the folder specified by the 'folder' flag. If not given,
-this defaults to the network folder in the specified or default datacenter.`
+this defaults to the network folder in the specified or default datacenter.
+
+Examples:
+  govc dvs.create DSwitch
+  govc dvs.create -product-version 5.5.0 DSwitch`
 }
 
 func (cmd *create) Process(ctx context.Context) error {
