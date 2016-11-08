@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.11.3 (2016-11-08)
 
 * Add `-product-version` flag to dvs.create
 

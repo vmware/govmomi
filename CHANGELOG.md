@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.11.3 (2016-11-08)
 
 * Allow DatastoreFile.Follow reader to drain current body after stopping
 
