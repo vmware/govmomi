@@ -593,8 +593,13 @@ Create DVS (DistributedVirtualSwitch) in datacenter.
 The dvs is added to the folder specified by the 'folder' flag. If not given,
 this defaults to the network folder in the specified or default datacenter.
 
+Examples:
+  govc dvs.create DSwitch
+  govc dvs.create -product-version 5.5.0 DSwitch
+
 Options:
   -folder=                  Inventory folder [GOVC_FOLDER]
+  -product-version=         DVS product version
 ```
 
 ## dvs.portgroup.add

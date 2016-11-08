@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add `-product-version` flag to dvs.create
+
 * datastore.tail -f will exit without error if the file no longer exists
 
 ### 0.11.2 (2016-11-01)
