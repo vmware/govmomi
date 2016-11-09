@@ -974,6 +974,11 @@ Options:
 ```
 Usage: govc host.account.create [OPTIONS]
 
+Create local account on HOST.
+
+Examples:
+  govc host.account.create -id $USER -password password-for-esx60
+
 Options:
   -description=             The description of the specified account
   -host=                    Host system [GOVC_HOST]
@@ -986,6 +991,11 @@ Options:
 ```
 Usage: govc host.account.remove [OPTIONS]
 
+Remove local account on HOST.
+
+Examples:
+  govc host.account.remove -id $USER
+
 Options:
   -description=             The description of the specified account
   -host=                    Host system [GOVC_HOST]
@@ -997,6 +1007,11 @@ Options:
 
 ```
 Usage: govc host.account.update [OPTIONS]
+
+Update local account on HOST.
+
+Examples:
+  govc host.account.update -id root -password password-for-esx60
 
 Options:
   -description=             The description of the specified account

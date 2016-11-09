@@ -36,6 +36,13 @@ func (cmd *remove) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.AccountFlag.Register(ctx, f)
 }
 
+func (cmd *remove) Description() string {
+	return `Remove local account on HOST.
+
+Examples:
+  govc host.account.remove -id $USER`
+}
+
 func (cmd *remove) Process(ctx context.Context) error {
 	if err := cmd.AccountFlag.Process(ctx); err != nil {
 		return err
