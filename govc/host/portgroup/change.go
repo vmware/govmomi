@@ -53,6 +53,18 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.MacChanges), "mac-changes", "Allow MAC changes")
 }
 
+func (cmd *change) Description() string {
+	return `Change configuration of HOST portgroup NAME.
+
+Examples:
+  govc host.portgroup.change -allow-promiscuous -forged-transmits -mac-changes "VM Network"
+  govc host.portgroup.change -vswitch-name vSwitch1 "Management Network"`
+}
+
+func (cmd *change) Usage() string {
+	return "NAME"
+}
+
 func (cmd *change) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err

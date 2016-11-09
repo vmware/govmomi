@@ -1260,7 +1260,13 @@ Options:
 ## host.portgroup.change
 
 ```
-Usage: govc host.portgroup.change [OPTIONS]
+Usage: govc host.portgroup.change [OPTIONS] NAME
+
+Change configuration of HOST portgroup NAME.
+
+Examples:
+  govc host.portgroup.change -allow-promiscuous -forged-transmits -mac-changes "VM Network"
+  govc host.portgroup.change -vswitch-name vSwitch1 "Management Network"
 
 Options:
   -allow-promiscuous=<nil>  Allow promiscuous mode
