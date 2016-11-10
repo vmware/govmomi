@@ -14,21 +14,18 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package cluster
+package permissions
 
 import (
 	"context"
 	"flag"
-	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type set struct {
-	*flags.DatacenterFlag
+	*PermissionFlag
 
 	types.Permission
 
@@ -40,8 +37,8 @@ func init() {
 }
 
 func (cmd *set) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
-	cmd.DatacenterFlag.Register(ctx, f)
+	cmd.PermissionFlag, ctx = NewPermissionFlag(ctx)
+	cmd.PermissionFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.Principal, "principal", "", "User or group for which the permission is defined")
 	f.BoolVar(&cmd.Group, "group", false, "True, if principal refers to a group name; false, for a user name")
@@ -50,7 +47,7 @@ func (cmd *set) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *set) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+	if err := cmd.PermissionFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -64,30 +61,26 @@ func (cmd *set) Description() string {
 	return `Set the permissions managed entities.
 
 Examples:
-  govc permissions.set -principal root -role Admin`
+  govc permissions.set -principal root -role Admin
+  govc permissions.set -principal $USER@vsphere.local -role Admin /dc1/host/cluster1`
 }
 
 func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
 	refs, err := cmd.ManagedObjects(ctx, f.Args())
 	if err != nil {
 		return err
 	}
 
-	m := object.NewAuthorizationManager(c)
-	rl, err := m.RoleList(ctx)
+	m, err := cmd.Manager(ctx)
 	if err != nil {
 		return err
 	}
 
-	role := rl.ByName(cmd.role)
-	if role == nil {
-		return fmt.Errorf("role '%s' not found", cmd.role)
+	role, err := cmd.Role(cmd.role)
+	if err != nil {
+		return err
 	}
+
 	cmd.Permission.RoleId = role.RoleId
 
 	perms := []types.Permission{cmd.Permission}

@@ -60,7 +60,8 @@ load test_helper
 }
 
 @test "login attempt without credentials" {
-  run govc about -u $(echo $GOVC_URL | awk -F@ '{print $2}')
+  host=$(govc env -x GOVC_URL_HOST)
+  run govc about -u "enoent@$host"
   assert_failure "govc: ServerFaultCode: Cannot complete login due to an incorrect user name or password."
 }
 

@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add role create, remove, update, ls and usage commands
+
 ### 0.11.3 (2016-11-08)
 
 * Add `-product-version` flag to dvs.create
