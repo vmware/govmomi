@@ -800,6 +800,9 @@ Create folder with PATH.
 
 Examples:
   govc folder.create /dc1/vm/folder-foo
+  govc object.mv /dc1/vm/vm-foo-* /dc1/vm/folder-foo
+  govc folder.create -pod /dc1/datastore/sdrs
+  govc object.mv /dc1/datastore/iscsi-* /dc1/datastore/sdrs
 
 Options:
   -pod=false                Create folder(s) of type StoragePod (DatastoreCluster)
