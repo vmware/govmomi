@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.11.4 (2016-11-15)
 
 * Add object.AuthorizationManager methods: RetrieveRolePermissions, RetrieveAllPermissions, AddRole, RemoveRole, UpdateRole
 

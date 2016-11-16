@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.11.4 (2016-11-15)
 
 * Add role create, remove, update, ls and usage commands
 
