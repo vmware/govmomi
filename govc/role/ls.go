@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,30 +14,32 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package permissions
+package role
 
 import (
 	"context"
 	"flag"
+	"fmt"
+	"io"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/permissions"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ls struct {
-	*PermissionFlag
-
-	inherited bool
+	*permissions.PermissionFlag
 }
 
 func init() {
-	cli.Register("permissions.ls", &ls{})
+	cli.Register("role.ls", &ls{})
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.PermissionFlag, ctx = NewPermissionFlag(ctx)
+	cmd.PermissionFlag, ctx = permissions.NewPermissionFlag(ctx)
 	cmd.PermissionFlag.Register(ctx, f)
-
-	f.BoolVar(&cmd.inherited, "a", true, "Include inherited permissions defined by parent entities")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -48,36 +50,58 @@ func (cmd *ls) Process(ctx context.Context) error {
 }
 
 func (cmd *ls) Usage() string {
-	return "[PATH]..."
+	return "[NAME]"
 }
 
 func (cmd *ls) Description() string {
-	return `List the permissions defined on or effective on managed entities.
+	return `List authorization roles.
+
+If NAME is provided, list privileges for the role.
 
 Examples:
-  govc permissions.ls
-  govc permissions.ls /dc1/host/cluster1`
+  govc role.ls
+  govc role.ls Admin`
+}
+
+type lsRoleList object.AuthorizationRoleList
+
+func (rl lsRoleList) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	for _, role := range rl {
+		fmt.Fprintf(tw, "%s\t%s\n", role.Name, role.Info.GetDescription().Summary)
+	}
+
+	return tw.Flush()
+}
+
+type lsRole types.AuthorizationRole
+
+func (r lsRole) Write(w io.Writer) error {
+	for _, p := range r.Privilege {
+		fmt.Println(p)
+	}
+	return nil
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	refs, err := cmd.ManagedObjects(ctx, f.Args())
+	if f.NArg() > 1 {
+		return flag.ErrHelp
+	}
+
+	_, err := cmd.Manager(ctx)
 	if err != nil {
 		return err
 	}
 
-	m, err := cmd.Manager(ctx)
-	if err != nil {
-		return err
-	}
-
-	for _, ref := range refs {
-		perms, err := m.RetrieveEntityPermissions(ctx, ref, cmd.inherited)
+	if f.NArg() == 1 {
+		role, err := cmd.Role(f.Arg(0))
 		if err != nil {
 			return err
 		}
 
-		cmd.List.Add(perms)
+		return cmd.WriteResult(lsRole(*role))
 	}
 
-	return cmd.WriteResult(&cmd.List)
+	return cmd.WriteResult(lsRoleList(cmd.Roles))
 }

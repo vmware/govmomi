@@ -59,6 +59,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/object"
 	_ "github.com/vmware/govmomi/govc/permissions"
 	_ "github.com/vmware/govmomi/govc/pool"
+	_ "github.com/vmware/govmomi/govc/role"
 	_ "github.com/vmware/govmomi/govc/session"
 	_ "github.com/vmware/govmomi/govc/vapp"
 	_ "github.com/vmware/govmomi/govc/version"

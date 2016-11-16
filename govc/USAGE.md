@@ -1701,7 +1701,13 @@ Usage: govc permissions.ls [OPTIONS] [PATH]...
 
 List the permissions defined on or effective on managed entities.
 
+Examples:
+  govc permissions.ls
+  govc permissions.ls /dc1/host/cluster1
+
 Options:
+  -a=true                   Include inherited permissions defined by parent entities
+  -i=false                  Use moref instead of inventory path
 ```
 
 ## permissions.remove
@@ -1711,8 +1717,13 @@ Usage: govc permissions.remove [OPTIONS] [PATH]...
 
 Removes a permission rule from managed entities.
 
+Examples:
+  govc permissions.remove -principal root
+  govc permissions.remove -principal $USER@vsphere.local -role Admin /dc1/host/cluster1
+
 Options:
   -group=false              True, if principal refers to a group name; false, for a user name
+  -i=false                  Use moref instead of inventory path
   -principal=               User or group for which the permission is defined
 ```
 
@@ -1725,9 +1736,11 @@ Set the permissions managed entities.
 
 Examples:
   govc permissions.set -principal root -role Admin
+  govc permissions.set -principal $USER@vsphere.local -role Admin /dc1/host/cluster1
 
 Options:
   -group=false              True, if principal refers to a group name; false, for a user name
+  -i=false                  Use moref instead of inventory path
   -principal=               User or group for which the permission is defined
   -propagate=true           Whether or not this permission propagates down the hierarchy to sub-entities
   -role=Admin               Permission role name
@@ -1848,6 +1861,93 @@ hosts in the current datacenter.
 Options:
   -a=false                  List virtual app resource pools
   -p=true                   List resource pools
+```
+
+## role.create
+
+```
+Usage: govc role.create [OPTIONS] NAME [PRIVILEGE]...
+
+Create authorization role.
+
+Optionally populate the role with the given PRIVILEGE(s).
+
+Examples:
+  govc role.create MyRole
+  govc role.create NoDC $(govc role.ls Admin | grep -v Datacenter.)
+
+Options:
+  -i=false                  Use moref instead of inventory path
+```
+
+## role.ls
+
+```
+Usage: govc role.ls [OPTIONS] [NAME]
+
+List authorization roles.
+
+If NAME is provided, list privileges for the role.
+
+Examples:
+  govc role.ls
+  govc role.ls Admin
+
+Options:
+  -i=false                  Use moref instead of inventory path
+```
+
+## role.remove
+
+```
+Usage: govc role.remove [OPTIONS] NAME
+
+Remove authorization role.
+
+Examples:
+  govc role.remove MyRole
+  govc role.remove MyRole -force
+
+Options:
+  -force=false              Force removal if role is in use
+  -i=false                  Use moref instead of inventory path
+```
+
+## role.update
+
+```
+Usage: govc role.update [OPTIONS] NAME [PRIVILEGE]...
+
+Update authorization role.
+
+Set, Add or Remove role PRIVILEGE(s).
+
+Examples:
+  govc role.update MyRole $(govc role.ls Admin | grep VirtualMachine.)
+  govc role.update -r MyRole $(govc role.ls Admin | grep VirtualMachine.GuestOperations.)
+  govc role.update -a MyRole $(govc role.ls Admin | grep Datastore.)
+  govc role.update -name RockNRole MyRole
+
+Options:
+  -a=false                  Remove given PRIVILEGE(s)
+  -i=false                  Use moref instead of inventory path
+  -name=                    Change role name
+  -r=false                  Remove given PRIVILEGE(s)
+```
+
+## role.usage
+
+```
+Usage: govc role.usage [OPTIONS] NAME...
+
+List usage for role NAME.
+
+Examples:
+  govc role.usage
+  govc role.usage Admin
+
+Options:
+  -i=false                  Use moref instead of inventory path
 ```
 
 ## session.ls
