@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"path"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -154,11 +153,11 @@ func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 }
 
 func (cmd *ovfx) Deploy(vm *object.VirtualMachine) error {
-	if err := cmd.PowerOn(vm); err != nil {
+	if err := cmd.InjectOvfEnv(vm); err != nil {
 		return err
 	}
 
-	if err := cmd.InjectOvfEnv(vm); err != nil {
+	if err := cmd.PowerOn(vm); err != nil {
 		return err
 	}
 
@@ -386,50 +385,54 @@ func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
 }
 
 func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
-	ctx := context.TODO()
-	if !cmd.Options.PowerOn || !cmd.Options.InjectOvfEnv {
+	if !cmd.Options.InjectOvfEnv {
 		return nil
 	}
 
+	cmd.Log("Injecting OVF environment...\n")
+
+	var opts []types.BaseOptionValue
+
 	a := cmd.Client.ServiceContent.About
-	if strings.EqualFold(a.ProductLineId, "esx") || strings.EqualFold(a.ProductLineId, "embeddedEsx") || strings.EqualFold(a.ProductLineId, "vpx") {
-		cmd.Log("Injecting OVF environment...\n")
 
-		// build up Environment in order to marshal to xml
-		var epa []ovf.EnvProperty
-		for _, p := range cmd.Options.PropertyMapping {
-			epa = append(epa, ovf.EnvProperty{
-				Key:   p.Key,
-				Value: p.Value})
-		}
-		env := ovf.Env{
-			EsxID: vm.Reference().Value,
-			Platform: &ovf.PlatformSection{
-				Kind:    a.Name,
-				Version: a.Version,
-				Vendor:  a.Vendor,
-				Locale:  "US",
-			},
-			Property: &ovf.PropertySection{
-				Properties: epa},
-		}
-
-		xenv := env.MarshalManual()
-		vmConfigSpec := types.VirtualMachineConfigSpec{
-			ExtraConfig: []types.BaseOptionValue{&types.OptionValue{
-				Key:   "guestinfo.ovfEnv",
-				Value: xenv}}}
-
-		task, err := vm.Reconfigure(ctx, vmConfigSpec)
-		if err != nil {
-			return err
-		}
-		if err := task.Wait(ctx); err != nil {
-			return err
-		}
+	// build up Environment in order to marshal to xml
+	var props []ovf.EnvProperty
+	for _, p := range cmd.Options.PropertyMapping {
+		props = append(props, ovf.EnvProperty{
+			Key:   p.Key,
+			Value: p.Value,
+		})
 	}
 
-	return nil
+	env := ovf.Env{
+		EsxID: vm.Reference().Value,
+		Platform: &ovf.PlatformSection{
+			Kind:    a.Name,
+			Version: a.Version,
+			Vendor:  a.Vendor,
+			Locale:  "US",
+		},
+		Property: &ovf.PropertySection{
+			Properties: props,
+		},
+	}
+
+	opts = append(opts, &types.OptionValue{
+		Key:   "guestinfo.ovfEnv",
+		Value: env.MarshalManual(),
+	})
+
+	ctx := context.Background()
+
+	task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+		ExtraConfig: opts,
+	})
+
+	if err != nil {
+		return err
+	}
+
+	return task.Wait(ctx)
 }
 
 func (cmd *ovfx) WaitForIP(vm *object.VirtualMachine) error {
