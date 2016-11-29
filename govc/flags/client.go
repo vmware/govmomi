@@ -180,7 +180,7 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		{
 			env := os.Getenv(envMinAPIVersion)
 			if env == "" {
-				env = "5.5"
+				env = soap.DefaultMinVimVersion
 			}
 
 			flag.minAPIVersion = env
@@ -261,6 +261,10 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 
 // configure TLS and retry settings before making any connections
 func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
+	// Set namespace and version
+	sc.Namespace = flag.vimNamespace
+	sc.Version = flag.vimVersion
+
 	sc.UserAgent = fmt.Sprintf("govc/%s", Version)
 
 	if err := flag.SetRootCAs(sc); err != nil {
@@ -395,10 +399,6 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 
 		sc.SetCertificate(cert)
 	}
-
-	// Set namespace and version
-	sc.Namespace = flag.vimNamespace
-	sc.Version = flag.vimVersion
 
 	rt, err := flag.configure(sc)
 	if err != nil {

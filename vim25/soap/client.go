@@ -52,8 +52,11 @@ type RoundTripper interface {
 	RoundTrip(ctx context.Context, req, res HasFault) error
 }
 
-var DefaultVimNamespace = "urn:vim25"
-var DefaultVimVersion = "6.0"
+const (
+	DefaultVimNamespace  = "urn:vim25"
+	DefaultVimVersion    = "6.5"
+	DefaultMinVimVersion = "5.5"
+)
 
 type Client struct {
 	http.Client
