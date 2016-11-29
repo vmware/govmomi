@@ -330,13 +330,23 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 
 func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualDeviceList, error) {
 	if cmd.controller != "ide" {
-		scsi, err := devices.CreateSCSIController(cmd.controller)
-		if err != nil {
-			return nil, err
-		}
+		if cmd.controller == "nvme" {
+			nvme, err := devices.CreateNVMEController()
+			if err != nil {
+				return nil, err
+			}
 
-		devices = append(devices, scsi)
-		cmd.controller = devices.Name(scsi)
+			devices = append(devices, nvme)
+			cmd.controller = devices.Name(nvme)
+		} else {
+			scsi, err := devices.CreateSCSIController(cmd.controller)
+			if err != nil {
+				return nil, err
+			}
+
+			devices = append(devices, scsi)
+			cmd.controller = devices.Name(scsi)
+		}
 	}
 
 	// If controller is specified to be IDE or if an ISO is specified, add IDE controller.
