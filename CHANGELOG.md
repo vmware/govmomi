@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased (N/A
+
+* Update to vim25/6.5 API
+
 ### 0.11.4 (2016-11-15)
 
 * Add object.AuthorizationManager methods: RetrieveRolePermissions, RetrieveAllPermissions, AddRole, RemoveRole, UpdateRole
