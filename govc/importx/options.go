@@ -76,17 +76,20 @@ func (flag *OptionsFlag) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (flag *OptionsFlag) Process(ctx context.Context) error {
-	if len(flag.path) > 0 {
-		f, err := os.Open(flag.path)
+	if len(flag.path) == 0 {
+		return nil
+	}
+
+	var err error
+	in := os.Stdin
+
+	if flag.path != "-" {
+		in, err = os.Open(flag.path)
 		if err != nil {
 			return err
 		}
-		defer f.Close()
-
-		if err := json.NewDecoder(f).Decode(&flag.Options); err != nil {
-			return err
-		}
+		defer in.Close()
 	}
 
-	return nil
+	return json.NewDecoder(in).Decode(&flag.Options)
 }
