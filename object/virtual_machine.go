@@ -323,7 +323,7 @@ func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 func (v VirtualMachine) HostSystem(ctx context.Context) (*HostSystem, error) {
 	var o mo.VirtualMachine
 
-	err := v.Properties(ctx, v.Reference(), []string{"summary"}, &o)
+	err := v.Properties(ctx, v.Reference(), []string{"summary.runtime.host"}, &o)
 	if err != nil {
 		return nil, err
 	}

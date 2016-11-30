@@ -29,6 +29,7 @@ import (
 
 type tail struct {
 	*flags.DatastoreFlag
+	*flags.HostSystemFlag
 
 	count  int64
 	lines  int
@@ -42,6 +43,9 @@ func init() {
 func (cmd *tail) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
+
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
 
 	f.Int64Var(&cmd.count, "c", -1, "Output the last NUM bytes")
 	f.IntVar(&cmd.lines, "n", 10, "Output the last NUM lines")
@@ -60,6 +64,9 @@ func (cmd *tail) Process(ctx context.Context) error {
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
 		return err
 	}
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -75,6 +82,15 @@ func (cmd *tail) Run(ctx context.Context, f *flag.FlagSet) error {
 	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
+	}
+
+	h, err := cmd.HostSystemIfSpecified()
+	if err != nil {
+		return err
+	}
+
+	if h != nil {
+		ctx = ds.HostContext(ctx, h)
 	}
 
 	file, err := ds.Open(ctx, f.Arg(0))

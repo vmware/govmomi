@@ -232,6 +232,12 @@ func (f *Finder) ObjectReference(ctx context.Context, ref types.ManagedObjectRef
 
 	r.(common).SetInventoryPath(e.Path)
 
+	if f.dc != nil {
+		if ds, ok := r.(*object.Datastore); ok {
+			ds.DatacenterPath = f.dc.InventoryPath
+		}
+	}
+
 	return r, nil
 }
 
@@ -312,6 +318,7 @@ func (f *Finder) DatastoreList(ctx context.Context, path string) ([]*object.Data
 		if ref.Type == "Datastore" {
 			ds := object.NewDatastore(f.client, ref)
 			ds.InventoryPath = e.Path
+			ds.DatacenterPath = f.dc.InventoryPath
 
 			dss = append(dss, ds)
 		}
