@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 	"io"
 	"os"
 
@@ -30,6 +31,7 @@ import (
 
 type download struct {
 	*flags.DatastoreFlag
+	*flags.HostSystemFlag
 }
 
 func init() {
@@ -39,10 +41,16 @@ func init() {
 func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
+
+	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
+	cmd.HostSystemFlag.Register(ctx, f)
 }
 
 func (cmd *download) Process(ctx context.Context) error {
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -73,6 +81,18 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
+	h, err := cmd.HostSystemIfSpecified()
+	if err != nil {
+		return err
+	}
+
+	var via string
+
+	if h != nil {
+		via = fmt.Sprintf(" via %s", h.InventoryPath)
+		ctx = ds.HostContext(ctx, h)
+	}
+
 	p := soap.DefaultDownload
 
 	src := args[0]
@@ -87,8 +107,8 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.OutputFlag.TTY {
-		logger := cmd.ProgressLogger("Downloading... ")
+	if cmd.DatastoreFlag.OutputFlag.TTY {
+		logger := cmd.DatastoreFlag.ProgressLogger(fmt.Sprintf("Downloading%s... ", via))
 		p.Progress = logger
 		defer logger.Wait()
 	}

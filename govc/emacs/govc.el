@@ -365,8 +365,7 @@ Return value is `json-read'."
 
 (defun govc-ls-datacenter ()
   "List datacenters."
-  (delete-dups (--map (nth 1 (split-string it "/"))
-                      (govc "ls"))))
+  (govc "ls" "-t" "Datacenter" "/" "/*"))
 
 (defun govc-object-prompt (prompt ls)
   "PROMPT for object name via LS function.  Return object without PROMPT if there is just one instance."
@@ -1188,7 +1187,7 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
 (defun govc-vm-filter ()
   "Default `govc-filter' for `vm-info'."
   (--map (concat it "/*")
-         (append (govc-ls-folder (list (concat "/" govc-session-datacenter "/vm")))
+         (append (govc-ls-folder (list (concat govc-session-datacenter "/vm")))
                  (govc "ls" "-t" "VirtualApp" "vm"))))
 
 (defun govc-ls-folder (folders)

@@ -58,6 +58,8 @@ func (e DatastoreNoSuchFileError) Error() string {
 
 type Datastore struct {
 	Common
+
+	DatacenterPath string
 }
 
 func NewDatastore(c *vim25.Client, ref types.ManagedObjectReference) *Datastore {
@@ -75,18 +77,8 @@ func (d Datastore) Path(path string) string {
 	return fmt.Sprintf("[%s] %s", name, path)
 }
 
-// URL for datastore access over HTTP
-func (d Datastore) URL(ctx context.Context, dc *Datacenter, path string) (*url.URL, error) {
-	var mdc mo.Datacenter
-	if err := dc.Properties(ctx, dc.Reference(), []string{"name"}, &mdc); err != nil {
-		return nil, err
-	}
-
-	var mds mo.Datastore
-	if err := d.Properties(ctx, d.Reference(), []string{"name"}, &mds); err != nil {
-		return nil, err
-	}
-
+// NewURL constructs a url.URL with the given file path for datastore access over HTTP.
+func (d Datastore) NewURL(path string) *url.URL {
 	u := d.c.URL()
 
 	return &url.URL{
@@ -94,10 +86,15 @@ func (d Datastore) URL(ctx context.Context, dc *Datacenter, path string) (*url.U
 		Host:   u.Host,
 		Path:   fmt.Sprintf("/folder/%s", path),
 		RawQuery: url.Values{
-			"dcPath": []string{mdc.Name},
-			"dsName": []string{mds.Name},
+			"dcPath": []string{d.DatacenterPath},
+			"dsName": []string{d.Name()},
 		}.Encode(),
-	}, nil
+	}
+}
+
+// URL is deprecated, use NewURL instead.
+func (d Datastore) URL(ctx context.Context, dc *Datacenter, path string) (*url.URL, error) {
+	return d.NewURL(path), nil
 }
 
 func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
@@ -113,7 +110,8 @@ func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
 
 func (d Datastore) useServiceTicket() bool {
 	// If connected to workstation, service ticketing not supported
-	if d.c.ServiceContent.About.ProductLineId == "ws" {
+	// If connected to ESX, service ticketing not needed
+	if !d.c.IsVC() {
 		return false
 	}
 
@@ -124,11 +122,11 @@ func (d Datastore) useServiceTicket() bool {
 		val = os.Getenv(key)
 	}
 
-	if val == "0" || val == "false" {
-		return false
+	if val == "1" || val == "true" {
+		return true
 	}
 
-	return true
+	return false
 }
 
 func (d Datastore) useServiceTicketHostName(name string) bool {
@@ -167,42 +165,61 @@ func (d Datastore) useServiceTicketHostName(name string) bool {
 	return false
 }
 
+type datastoreServiceTicketHostKey struct{}
+
+// HostContext returns a Context where the given host will be used for datastore HTTP access
+// via the ServiceTicket method.
+func (d Datastore) HostContext(ctx context.Context, host *HostSystem) context.Context {
+	return context.WithValue(ctx, datastoreServiceTicketHostKey{}, host)
+}
+
 // ServiceTicket obtains a ticket via AcquireGenericServiceTicket and returns it an http.Cookie with the url.URL
-// that can be used along with the ticket cookie to access the given path.
+// that can be used along with the ticket cookie to access the given path.  An host is chosen at random unless the
+// the given Context was created with a specific host via the HostContext method.
 func (d Datastore) ServiceTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
-	// We are uploading to an ESX host
-	u := &url.URL{
-		Scheme: d.c.URL().Scheme,
-		Host:   d.c.URL().Host,
-		Path:   fmt.Sprintf("/folder/%s", path),
-		RawQuery: url.Values{
-			"dsName": []string{d.Name()},
-		}.Encode(),
-	}
+	u := d.NewURL(path)
 
-	if !d.useServiceTicket() {
-		return u, nil, nil
-	}
+	host, ok := ctx.Value(datastoreServiceTicketHostKey{}).(*HostSystem)
 
-	// If connected to VC, the ticket request must be for an ESX host.
-	if d.c.IsVC() {
+	if !ok {
+		if !d.useServiceTicket() {
+			return u, nil, nil
+		}
+
 		hosts, err := d.AttachedHosts(ctx)
 		if err != nil {
 			return nil, nil, err
 		}
 
 		if len(hosts) == 0 {
-			return nil, nil, fmt.Errorf("no hosts attached to datastore %#v", d.Reference())
+			// Fallback to letting vCenter choose a host
+			return u, nil, nil
 		}
 
 		// Pick a random attached host
-		host := hosts[rand.Intn(len(hosts))]
-		name, err := host.ObjectName(ctx)
+		host = hosts[rand.Intn(len(hosts))]
+	}
+
+	ips, err := host.ManagementIPs(ctx)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	if len(ips) > 0 {
+		// prefer a ManagementIP
+		u.Host = ips[0].String()
+	} else {
+		// fallback to inventory name
+		u.Host, err = host.ObjectName(ctx)
 		if err != nil {
 			return nil, nil, err
 		}
-		u.Host = name
 	}
+
+	// VC datacenter path will not be valid against ESX
+	q := u.Query()
+	delete(q, "dcPath")
+	u.RawQuery = q.Encode()
 
 	spec := types.SessionManagerHttpServiceRequestSpec{
 		Url: u.String(),

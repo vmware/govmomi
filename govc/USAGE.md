@@ -199,6 +199,7 @@ Examples:
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
+  -host=                    Host system [GOVC_HOST]
 ```
 
 ## datastore.info
@@ -285,6 +286,7 @@ Options:
   -c=-1                     Output the last NUM bytes
   -ds=                      Datastore [GOVC_DATASTORE]
   -f=false                  Output appended data as the file grows
+  -host=                    Host system [GOVC_HOST]
   -n=10                     Output the last NUM lines
 ```
 

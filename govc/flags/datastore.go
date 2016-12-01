@@ -20,7 +20,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"net/url"
 	"os"
 
 	"github.com/vmware/govmomi/object"
@@ -101,25 +100,6 @@ func (f *DatastoreFlag) DatastorePath(name string) (string, error) {
 	}
 
 	return ds.Path(name), nil
-}
-
-func (f *DatastoreFlag) DatastoreURL(path string) (*url.URL, error) {
-	dc, err := f.Datacenter()
-	if err != nil {
-		return nil, err
-	}
-
-	ds, err := f.Datastore()
-	if err != nil {
-		return nil, err
-	}
-
-	u, err := ds.URL(context.TODO(), dc, path)
-	if err != nil {
-		return nil, err
-	}
-
-	return u, nil
 }
 
 func (f *DatastoreFlag) Stat(ctx context.Context, file string) (types.BaseFileInfo, error) {
