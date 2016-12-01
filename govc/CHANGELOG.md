@@ -1,6 +1,12 @@
 # changelog
 
-### unreleased (N/A)
+### 0.12.0 (2016-12-01)
+
+* Add optional '-host' flag to datastore download/tail commands
+
+* Support InjectOvfEnv without PowerOn when importing
+
+* Support stdin as import options source
 
 * Add basic NVME controller support
 

@@ -1,6 +1,10 @@
 # changelog
 
-### unreleased (N/A
+### 0.12.0 (2016-12-01)
+
+* Disable use of service ticket for datastore HTTP access by default
+
+* Attach context to HTTP requests for cancellations
 
 * Update to vim25/6.5 API
 
