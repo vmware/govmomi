@@ -165,14 +165,12 @@ func (d Datastore) useServiceTicketHostName(name string) bool {
 	return false
 }
 
-type datastoreServiceTicketHost struct{}
-
-var datastoreServiceTicketHostKey = datastoreServiceTicketHost{}
+type datastoreServiceTicketHostKey struct{}
 
 // HostContext returns a Context where the given host will be used for datastore HTTP access
 // via the ServiceTicket method.
 func (d Datastore) HostContext(ctx context.Context, host *HostSystem) context.Context {
-	return context.WithValue(ctx, datastoreServiceTicketHostKey, host)
+	return context.WithValue(ctx, datastoreServiceTicketHostKey{}, host)
 }
 
 // ServiceTicket obtains a ticket via AcquireGenericServiceTicket and returns it an http.Cookie with the url.URL
@@ -181,11 +179,9 @@ func (d Datastore) HostContext(ctx context.Context, host *HostSystem) context.Co
 func (d Datastore) ServiceTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
 	u := d.NewURL(path)
 
-	var host *HostSystem
+	host, ok := ctx.Value(datastoreServiceTicketHostKey{}).(*HostSystem)
 
-	h := ctx.Value(datastoreServiceTicketHostKey)
-
-	if h == nil {
+	if !ok {
 		if !d.useServiceTicket() {
 			return u, nil, nil
 		}
@@ -196,13 +192,12 @@ func (d Datastore) ServiceTicket(ctx context.Context, path string, method string
 		}
 
 		if len(hosts) == 0 {
+			// Fallback to letting vCenter choose a host
 			return u, nil, nil
 		}
 
 		// Pick a random attached host
 		host = hosts[rand.Intn(len(hosts))]
-	} else {
-		host = h.(*HostSystem)
 	}
 
 	ips, err := host.ManagementIPs(ctx)

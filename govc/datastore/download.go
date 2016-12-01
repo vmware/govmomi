@@ -81,12 +81,12 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	var via string
-
 	h, err := cmd.HostSystemIfSpecified()
 	if err != nil {
 		return err
 	}
+
+	var via string
 
 	if h != nil {
 		via = fmt.Sprintf(" via %s", h.InventoryPath)
