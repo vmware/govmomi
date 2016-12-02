@@ -2213,7 +2213,33 @@ Options:
 ## vm.ip
 
 ```
-Usage: govc vm.ip [OPTIONS]
+Usage: govc vm.ip [OPTIONS] VM...
+
+List IPs for VM.
+
+By default the vm.ip command depends on vmware-tools to report the 'guest.ipAddress' field and will
+wait until it has done so.  This value can also be obtained using:
+
+  govc vm.info -json $vm | jq -r .VirtualMachines[].Guest.IpAddress
+
+When given the '-a' flag, only IP addresses for which there is a corresponding virtual nic are listed.
+If there are multiple nics, the listed addresses will be comma delimited.  The '-a' flag depends on
+vmware-tools to report the 'guest.net' field and will wait until it has done so for all nics.
+Note that this list includes IPv6 addresses if any, use '-v4' to filter them out.  IP addresses reported
+by tools for which there is no virtual nic are not included, for example that of the 'docker0' interface.
+
+These values can also be obtained using:
+
+  govc vm.info -json $vm | jq -r .VirtualMachines[].Guest.Net[].IpConfig.IpAddress[].IpAddress
+
+The 'esxcli' flag does not require vmware-tools to be installed, but does require the ESX host to
+have the /Net/GuestIPHack setting enabled.
+
+Examples:
+  govc vm.ip $vm
+  govc vm.ip -a -v4 $vm
+  govc host.esxcli system settings advanced set -o /Net/GuestIPHack -i 1
+  govc vm.ip -esxcli $vm
 
 Options:
   -a=false                  Wait for an IP address on all NICs
