@@ -517,14 +517,22 @@ Options:
 ## device.serial.connect
 
 ```
-Usage: govc device.serial.connect [OPTIONS]
+Usage: govc device.serial.connect [OPTIONS] URI
 
 Connect service URI to serial port.
+
+If "-" is given as URI, connects file backed device with file name of
+device name + .log suffix in the VM Config.Files.LogDirectory.
+
+Defaults to the first serial port if no DEVICE is given.
 
 Examples:
   govc device.ls | grep serialport-
   govc device.serial.connect -vm $vm -device serialport-8000 telnet://:33233
   govc device.info -vm $vm serialport-*
+  govc device.serial.connect -vm $vm "[datastore1] $vm/console.log"
+  govc device.serial.connect -vm $vm -
+  govc datastore.tail -f $vm/serialport-8000.log
 
 Options:
   -client=false             Use client direction

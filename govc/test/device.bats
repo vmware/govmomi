@@ -151,6 +151,12 @@ load test_helper
   run govc device.info -vm $vm $id
   assert_success
 
+  run govc device.serial.connect -vm $vm -
+  assert_success
+
+  run govc device.info -vm $vm $id
+  assert_line "Summary: File [$GOVC_DATASTORE] $vm/${id}.log"
+
   uri=telnet://:33233
   run govc device.serial.connect -vm $vm -device $id $uri
   assert_success

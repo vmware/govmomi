@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add support for file backed serialport devices
+
 ### 0.12.0 (2016-12-01)
 
 * Add optional '-host' flag to datastore download/tail commands
