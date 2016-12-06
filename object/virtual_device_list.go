@@ -460,12 +460,14 @@ func (l VirtualDeviceList) CreateDisk(c types.BaseVirtualController, ds types.Ma
 func (l VirtualDeviceList) ChildDisk(parent *types.VirtualDisk) *types.VirtualDisk {
 	disk := *parent
 	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
-	ds := strings.SplitN(backing.FileName[1:], "]", 2)
+	p := new(DatastorePath)
+	p.FromString(backing.FileName)
+	p.Path = ""
 
 	// Use specified disk as parent backing to a new disk.
 	disk.Backing = &types.VirtualDiskFlatVer2BackingInfo{
 		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
-			FileName:  fmt.Sprintf("[%s]", ds[0]),
+			FileName:  p.String(),
 			Datastore: backing.Datastore,
 		},
 		Parent:          backing,
