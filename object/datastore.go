@@ -69,12 +69,10 @@ func NewDatastore(c *vim25.Client, ref types.ManagedObjectReference) *Datastore 
 }
 
 func (d Datastore) Path(path string) string {
-	name := d.Name()
-	if name == "" {
-		panic("expected non-empty name")
-	}
-
-	return fmt.Sprintf("[%s] %s", name, path)
+	return (&DatastorePath{
+		Datastore: d.Name(),
+		Path:      path,
+	}).String()
 }
 
 // NewURL constructs a url.URL with the given file path for datastore access over HTTP.

@@ -1,5 +1,9 @@
 # changelog
 
+### unreleased
+
+* Add DatastorePath helper
+
 ### 0.12.0 (2016-12-01)
 
 * Disable use of service ticket for datastore HTTP access by default

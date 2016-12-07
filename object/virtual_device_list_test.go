@@ -851,3 +851,23 @@ func TestName(t *testing.T) {
 		}
 	}
 }
+
+func TestChildDisk(t *testing.T) {
+	disks := devices.SelectByType((*types.VirtualDisk)(nil))
+
+	for _, disk := range disks {
+		child := disks.ChildDisk(disk.(*types.VirtualDisk))
+		name := child.Backing.(*types.VirtualDiskFlatVer2BackingInfo).VirtualDeviceFileBackingInfo.FileName
+
+		p := new(DatastorePath)
+		p.FromString(name)
+
+		if p.Datastore != "datastore1" {
+			t.Fatal(p.Datastore)
+		}
+
+		if p.Path != "" {
+			t.Fatal(p.Path)
+		}
+	}
+}
