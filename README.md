@@ -37,6 +37,12 @@ To build locally with Drone:
 - Install the [Drone command line tools][dronecli].
 - Run `drone exec` from within the root directory of the govmomi repository.
 
+## Discussion
+
+Contributors and users are encouraged to collaborate using GitHub issues and/or
+[Slack](https://vmwarecode.slack.com/messages/govmomi).
+Access to Slack requires a [VMware {code} membership](https://code.vmware.com/join/).
+
 ## Status
 
 Changes to the API are subject to [semantic versioning](http://semver.org).
