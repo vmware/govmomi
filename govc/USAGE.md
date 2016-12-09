@@ -2277,16 +2277,17 @@ Options:
 ```
 Usage: govc vm.migrate [OPTIONS] VM...
 
-Migrates VM execution to a specific resource pool or host.
+Migrates VM to a specific resource pool, host or datastore.
 
 Examples:
   govc vm.migrate -host another-host vm-1 vm-2 vm-3
+  govc vm.migrate -ds another-ds vm-1 vm-2 vm-3
 
 Options:
+  -ds=                       Datastore [GOVC_DATASTORE]
   -host=                     Host system [GOVC_HOST]
   -pool=                     Resource pool [GOVC_RESOURCE_POOL]
   -priority=defaultPriority  The task priority
-  -state=                    If specified, the VM migrates only if its state matches
 ```
 
 ## vm.network.add

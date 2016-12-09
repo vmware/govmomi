@@ -93,6 +93,13 @@ func (f *DatastoreFlag) Datastore() (*object.Datastore, error) {
 	return f.ds, nil
 }
 
+func (flag *DatastoreFlag) DatastoreIfSpecified() (*object.Datastore, error) {
+	if flag.Name == "" {
+		return nil, nil
+	}
+	return flag.Datastore()
+}
+
 func (f *DatastoreFlag) DatastorePath(name string) (string, error) {
 	ds, err := f.Datastore()
 	if err != nil {
