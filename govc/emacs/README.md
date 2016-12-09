@@ -119,6 +119,7 @@ during initialization.
 Keybinding     | Description
 ---------------|------------------------------------------------------------
 <kbd>E</kbd>   | Events via govc events -n `govc-max-events`
+<kbd>L</kbd>   | Logs via govc logs -n `govc-max-events`
 <kbd>J</kbd>   | JSON via govc host
 <kbd>N</kbd>   | Netstat via `govc-esxcli-netstat-info` with current host id
 <kbd>c</kbd>   | Connect new session for the current govc mode

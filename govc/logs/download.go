@@ -58,6 +58,18 @@ func (cmd *download) Usage() string {
 	return "[PATH]..."
 }
 
+func (cmd *download) Description() string {
+	return `Generate diagnostic bundles.
+
+A diagnostic bundle includes log files and other configuration information.
+
+Use PATH to include a specific set of hosts to include.
+
+Examples:
+  govc logs.download
+  govc logs.download host-a host-b`
+}
+
 func (cmd *download) DownloadFile(c *vim25.Client, b string) error {
 	u, err := c.Client.ParseURL(b)
 	if err != nil {

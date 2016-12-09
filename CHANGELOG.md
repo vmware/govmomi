@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add DiagnosticLog helper
+
 * Add DatastorePath helper
 
 ### 0.12.0 (2016-12-01)

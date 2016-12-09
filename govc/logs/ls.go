@@ -48,6 +48,14 @@ func (cmd *ls) Process(ctx context.Context) error {
 	return nil
 }
 
+func (cmd *ls) Description() string {
+	return `List diagnostic log keys.
+
+Examples:
+  govc logs.ls
+  govc logs.ls -host host-a`
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {

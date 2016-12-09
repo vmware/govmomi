@@ -19,8 +19,7 @@ package logs
 import (
 	"context"
 	"flag"
-	"fmt"
-	"math"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -32,6 +31,8 @@ type logs struct {
 
 	Max int32
 	Key string
+
+	follow bool
 }
 
 func init() {
@@ -43,8 +44,9 @@ func (cmd *logs) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag.Register(ctx, f)
 
 	cmd.Max = 25 // default
-	f.Var(flags.NewInt32(&cmd.Max), "n", "Output the last N logs")
+	f.Var(flags.NewInt32(&cmd.Max), "n", "Output the last N log lines")
 	f.StringVar(&cmd.Key, "log", "", "Log file key")
+	f.BoolVar(&cmd.follow, "f", false, "Follow log file changes")
 }
 
 func (cmd *logs) Process(ctx context.Context) error {
@@ -60,8 +62,12 @@ func (cmd *logs) Description() string {
 The '-log' option defaults to "hostd" when connected directly to a host or
 when connected to VirtualCenter and a '-host' option is given.  Otherwise,
 the '-log' option defaults to "vpxd:vpxd.log".  The '-host' option is ignored
-when connected directly to host.
-See 'govc logs.ls' for other '-log' options.`
+when connected directly to a host.  See 'govc logs.ls' for other '-log' options.
+
+Examples:
+  govc logs -n 1000 -f
+  govc logs -host esx1
+  govc logs -host esx1 -log vmkernel`
 }
 
 func (cmd *logs) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -91,20 +97,24 @@ func (cmd *logs) Run(ctx context.Context, f *flag.FlagSet) error {
 		key = defaultKey
 	}
 
-	// get LineEnd without any LineText
-	h, err := m.BrowseLog(ctx, host, key, math.MaxInt32, 0)
+	l := m.Log(ctx, host, key)
+
+	err = l.Seek(ctx, cmd.Max)
 	if err != nil {
 		return err
 	}
 
-	start := h.LineEnd - cmd.Max
-	h, err = m.BrowseLog(ctx, host, key, start, 0)
-	if err != nil {
-		return err
-	}
+	for {
+		_, err = l.Copy(ctx, cmd.Out)
+		if err != nil {
+			return nil
+		}
 
-	for _, line := range h.LineText {
-		fmt.Println(line)
+		if !cmd.follow {
+			break
+		}
+
+		<-time.After(time.Second)
 	}
 
 	return nil
