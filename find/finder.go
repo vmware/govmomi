@@ -110,6 +110,35 @@ func (f *Finder) datacenter() (*object.Datacenter, error) {
 	return f.dc, nil
 }
 
+// datacenterPath returns the absolute path to the Datacenter containing the given ref
+func (f *Finder) datacenterPath(ctx context.Context, ref types.ManagedObjectReference) (string, error) {
+	mes, err := mo.Ancestors(ctx, f.client, f.client.ServiceContent.PropertyCollector, ref)
+	if err != nil {
+		return "", err
+	}
+
+	// Chop leaves under the Datacenter
+	for i := len(mes) - 1; i > 0; i-- {
+		if mes[i].Self.Type == "Datacenter" {
+			break
+		}
+		mes = mes[:i]
+	}
+
+	var p string
+
+	for _, me := range mes {
+		// Skip root entity in building inventory path.
+		if me.Parent == nil {
+			continue
+		}
+
+		p = p + "/" + me.Name
+	}
+
+	return p, nil
+}
+
 func (f *Finder) dcFolders(ctx context.Context) (*object.DatacenterFolders, error) {
 	if f.folders != nil {
 		return f.folders, nil
@@ -318,7 +347,16 @@ func (f *Finder) DatastoreList(ctx context.Context, path string) ([]*object.Data
 		if ref.Type == "Datastore" {
 			ds := object.NewDatastore(f.client, ref)
 			ds.InventoryPath = e.Path
-			ds.DatacenterPath = f.dc.InventoryPath
+
+			if f.dc == nil {
+				// In this case SetDatacenter was not called and path is absolute
+				ds.DatacenterPath, err = f.datacenterPath(ctx, ref)
+				if err != nil {
+					return nil, err
+				}
+			} else {
+				ds.DatacenterPath = f.dc.InventoryPath
+			}
 
 			dss = append(dss, ds)
 		}
