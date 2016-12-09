@@ -37,7 +37,7 @@ type version struct {
 func init() {
 	// Check that git tag in the release builds match the hardcoded version
 	if gitVersion != "" && gitVersion[1:] != flags.Version {
-		log.Panicf("version mismatch: git=%s vs govc=%s", gitVersion, flags.Version)
+		log.Panicf("version mismatch: git=%s vs govc=%s", gitVersion[1:], flags.Version)
 	}
 
 	cli.Register("version", &version{})
