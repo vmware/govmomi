@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add storage support to vm.migrate
+
 * Add support for file backed serialport devices
 
 ### 0.12.0 (2016-12-01)

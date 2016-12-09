@@ -19,19 +19,22 @@ package vm
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type migrate struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
+	*flags.DatastoreFlag
 	*flags.SearchFlag
 
 	priority types.VirtualMachineMovePriority
-	state    types.VirtualMachinePowerState
+	spec     types.VirtualMachineRelocateSpec
 }
 
 func init() {
@@ -48,8 +51,10 @@ func (cmd *migrate) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+
 	f.StringVar((*string)(&cmd.priority), "priority", string(types.VirtualMachineMovePriorityDefaultPriority), "The task priority")
-	f.StringVar((*string)(&cmd.state), "state", "", "If specified, the VM migrates only if its state matches")
 }
 
 func (cmd *migrate) Process(ctx context.Context) error {
@@ -57,6 +62,9 @@ func (cmd *migrate) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
 		return err
 	}
 
@@ -68,10 +76,28 @@ func (cmd *migrate) Usage() string {
 }
 
 func (cmd *migrate) Description() string {
-	return `Migrates VM execution to a specific resource pool or host.
+	return `Migrates VM to a specific resource pool, host or datastore.
 
 Examples:
-  govc vm.migrate -host another-host vm-1 vm-2 vm-3`
+  govc vm.migrate -host another-host vm-1 vm-2 vm-3
+  govc vm.migrate -ds another-ds vm-1 vm-2 vm-3`
+}
+
+func (cmd *migrate) relocate(ctx context.Context, vm *object.VirtualMachine) error {
+	task, err := vm.Relocate(ctx, cmd.spec, cmd.priority)
+	if err != nil {
+		return err
+	}
+
+	logger := cmd.DatastoreFlag.ProgressLogger(fmt.Sprintf("migrating %s... ", vm.Reference()))
+	_, err = task.WaitForResult(ctx, logger)
+	if err != nil {
+		return err
+	}
+
+	logger.Wait()
+
+	return nil
 }
 
 func (cmd *migrate) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -85,18 +111,33 @@ func (cmd *migrate) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
+	if host != nil {
+		ref := host.Reference()
+		cmd.spec.Host = &ref
+	}
+
 	pool, err := cmd.ResourcePoolFlag.ResourcePoolIfSpecified()
 	if err != nil {
 		return err
 	}
 
-	for _, vm := range vms {
-		task, err := vm.Migrate(ctx, pool, host, cmd.priority, cmd.state)
-		if err != nil {
-			return err
-		}
+	if pool != nil {
+		ref := pool.Reference()
+		cmd.spec.Pool = &ref
+	}
 
-		err = task.Wait(ctx)
+	ds, err := cmd.DatastoreFlag.DatastoreIfSpecified()
+	if err != nil {
+		return err
+	}
+
+	if ds != nil {
+		ref := ds.Reference()
+		cmd.spec.Datastore = &ref
+	}
+
+	for _, vm := range vms {
+		err = cmd.relocate(ctx, vm)
 		if err != nil {
 			return err
 		}
