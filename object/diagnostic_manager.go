@@ -36,6 +36,14 @@ func NewDiagnosticManager(c *vim25.Client) *DiagnosticManager {
 	return &m
 }
 
+func (m DiagnosticManager) Log(ctx context.Context, host *HostSystem, key string) *DiagnosticLog {
+	return &DiagnosticLog{
+		m:    m,
+		Key:  key,
+		Host: host,
+	}
+}
+
 func (m DiagnosticManager) BrowseLog(ctx context.Context, host *HostSystem, key string, start, lines int32) (*types.DiagnosticManagerLogHeader, error) {
 	req := types.BrowseDiagnosticLog{
 		This:  m.Reference(),

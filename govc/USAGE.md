@@ -1604,19 +1604,34 @@ View VPX and ESX logs.
 The '-log' option defaults to "hostd" when connected directly to a host or
 when connected to VirtualCenter and a '-host' option is given.  Otherwise,
 the '-log' option defaults to "vpxd:vpxd.log".  The '-host' option is ignored
-when connected directly to host.
-See 'govc logs.ls' for other '-log' options.
+when connected directly to a host.  See 'govc logs.ls' for other '-log' options.
+
+Examples:
+  govc logs -n 1000 -f
+  govc logs -host esx1
+  govc logs -host esx1 -log vmkernel
 
 Options:
+  -f=false                  Follow log file changes
   -host=                    Host system [GOVC_HOST]
   -log=                     Log file key
-  -n=25                     Output the last N logs
+  -n=25                     Output the last N log lines
 ```
 
 ## logs.download
 
 ```
 Usage: govc logs.download [OPTIONS] [PATH]...
+
+Generate diagnostic bundles.
+
+A diagnostic bundle includes log files and other configuration information.
+
+Use PATH to include a specific set of hosts to include.
+
+Examples:
+  govc logs.download
+  govc logs.download host-a host-b
 
 Options:
   -default=true             Specifies if the bundle should include the default server
@@ -1626,6 +1641,12 @@ Options:
 
 ```
 Usage: govc logs.ls [OPTIONS]
+
+List diagnostic log keys.
+
+Examples:
+  govc logs.ls
+  govc logs.ls -host host-a
 
 Options:
   -host=                    Host system [GOVC_HOST]

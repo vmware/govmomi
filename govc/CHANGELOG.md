@@ -2,6 +2,8 @@
 
 ### unreleased
 
+* Add '-f' flag to logs command
+
 * Add storage support to vm.migrate
 
 * Add support for file backed serialport devices

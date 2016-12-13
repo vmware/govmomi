@@ -10,7 +10,7 @@ load test_helper
   [ $nlogs -ge 1 ]
 
   # test -n flag
-  run govc logs -n $((nlogs - 1))
+  run govc logs -n $((nlogs - 10))
   assert_success
   [ ${#lines[@]} -le $nlogs ]
 
@@ -19,6 +19,10 @@ load test_helper
   nlogs=${#lines[@]}
   # there should be plenty more than 1 line of vmkernel logs
   [ $nlogs -ge 1 ]
+
+  # test > 1 call to BrowseLog()
+  run govc logs -n 2002
+  assert_success
 
   # -host ignored against ESX
   run govc logs -host enoent

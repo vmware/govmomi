@@ -518,7 +518,7 @@ returned, assuming that's what the user wanted."
     (with-current-buffer (get-buffer current-prefix-arg)
       (setq govc-session-url url))))
 
-(defcustom govc-max-events 50
+(defcustom govc-max-events 100
   "Limit events output to the last N events."
   :type 'integer
   :group 'govc)
@@ -529,6 +529,14 @@ returned, assuming that's what the user wanted."
   (govc-shell-command
    (govc-format-command "events"
                         (list "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)))))
+
+(defun govc-logs ()
+  "Logs via govc logs -n `govc-max-events'."
+  (interactive)
+  (govc-shell-command
+   (let ((host (govc-selection)))
+     (govc-format-command "logs"
+                          (list "-n" govc-max-events (if current-prefix-arg "-f") (if host (list "-host" host)))))))
 
 (defun govc-parse-info (output)
   "Parse govc info command OUTPUT."
@@ -708,6 +716,7 @@ returned, assuming that's what the user wanted."
 (defvar govc-host-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "E" 'govc-events)
+    (define-key map "L" 'govc-logs)
     (define-key map "J" 'govc-host-json-info)
     (define-key map "N" 'govc-host-esxcli-netstat)
     (define-key map "c" 'govc-mode-new-session)
