@@ -55,6 +55,11 @@
   "Prefix for `govc-mode'."
   :group 'govc)
 
+(defcustom govc-command "govc"
+  "Executable path to the govc utility."
+  :type 'string
+  :group 'govc)
+
 (defvar govc-command-map
   (let ((map (make-sparse-keymap)))
     (define-key map "h" 'govc-host)
@@ -299,9 +304,9 @@ Return value is the url anchor if set, otherwise the hostname is returned."
     (if url
         (or (url-target url) (url-host url)))))
 
-(defun govc-command (command &rest args)
+(defun govc-format-command (command &rest args)
   "Format govc COMMAND ARGS."
-  (format "govc %s %s" command
+  (format "%s %s %s" govc-command command
           (s-join " " (--map (format "'%s'" it)
                              (-flatten (-non-nil args))))))
 
@@ -350,14 +355,14 @@ Optionally set `GOVC_*' vars in `process-environment' using prefix
 (defun govc (command &rest args)
   "Execute govc COMMAND with ARGS.
 Return value is `buffer-string' split on newlines."
-  (govc-process (govc-command command args)
+  (govc-process (govc-format-command command args)
                 (lambda ()
                   (split-string (buffer-string) "\n" t))))
 
 (defun govc-json (command &rest args)
   "Execute govc COMMAND passing arguments ARGS.
 Return value is `json-read'."
-  (govc-process (govc-command command (cons "-json" args))
+  (govc-process (govc-format-command command (cons "-json" args))
                 (lambda ()
                   (goto-char (point-min))
                   (let ((json-object-type 'plist))
@@ -475,8 +480,8 @@ Also fixes the case where user contains an '@'."
   "Events via govc events -n `govc-max-events'."
   (interactive)
   (govc-shell-command
-   (govc-command "events"
-                 (list "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)))))
+   (govc-format-command "events"
+                        (list "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)))))
 
 (defun govc-parse-info (output)
   "Parse govc info command OUTPUT."
@@ -567,7 +572,7 @@ Also fixes the case where user contains an '@'."
 
 (defun govc-json-info (command selection)
   "Run govc COMMAND -json on SELECTION."
-  (govc-process (govc-command command "-json" govc-args selection)
+  (govc-process (govc-format-command command "-json" govc-args selection)
                 (lambda ()
                   (let ((buffer (get-buffer-create (concat "*govc-json*" (if current-prefix-arg selection)))))
                     (copy-to-buffer buffer (point-min) (point-max))
@@ -846,8 +851,8 @@ Optionally filter by FILTER and inherit SESSION."
   "Tail datastore file."
   (interactive)
   (govc-shell-command
-   (govc-command "datastore.tail"
-                 (list "-n" govc-max-events (if current-prefix-arg "-f")) (govc-selection))))
+   (govc-format-command "datastore.tail"
+                        (list "-n" govc-max-events (if current-prefix-arg "-f")) (govc-selection))))
 
 (defun govc-datastore-ls-json ()
   "JSON via govc datastore.ls -json on current selection."
