@@ -47,6 +47,8 @@
 (require 'url-parse)
 (require 's)
 
+(autoload 'auth-source-search "auth-source")
+
 (defgroup govc nil
   "Emacs customization group for govc."
   :group 'convenience)
@@ -237,7 +239,7 @@ Keys in the ASCII range of 32-97 are mapped to popup commands, all others are li
 
 
 ;;; govc process helpers
-(defvar govc-urls nil
+(defcustom govc-urls nil
   "List of URLs for use with `govc-session'.
 The `govc-session-name' displayed by `govc-mode-line' uses `url-target' (anchor)
 if set, otherwise `url-host' is used.
@@ -252,10 +254,27 @@ To enter a URL that is not in the list, prefix `universal-argument', for example
 
   `\\[universal-argument] \\[govc-vm]'
 
+To avoid putting your credentials in a variable, you can use the
+auth-source search integration.
+
+```
+  (setq govc-urls '(\"myserver-vmware-2\"))
+```
+
+And then put this line in your `auth-sources' (e.g. `~/.authinfo.gpg'):
+```
+    machine myserver-vmware-2 login tzz password mypass url \"myserver-vmware-2.some.domain.here:443?insecure=true\"
+```
+
+Which will result in the URL \"tzz:mypass@myserver-vmware-2.some.domain.here:443?insecure=true\".
+For more details on `auth-sources', see Info node `(auth) Help for users'.
+
 When in `govc-vm' or `govc-host' mode, a default URL is composed with the
 current session credentials and the IP address of the current vm/host and
 the vm/host name as the session name.  This makes it easier to connect to
-nested ESX/vCenter VMs or directly to an ESX host.")
+nested ESX/vCenter VMs or directly to an ESX host."
+  :group 'govc
+  :type '(repeat (string :tag "vcenter URL or auth-source machine reference")))
 
 (defvar-local govc-session-url nil
   "ESX or vCenter URL set by `govc-session' via `govc-urls' selection.")
@@ -419,8 +438,36 @@ Also fixes the case where user contains an '@'."
     (let ((u (completing-read "govc url: " (-map 'car alist))))
       (cdr (assoc u alist)))))
 
+(defun govc-session-url-lookup-auth-source (url-or-address)
+  "Check if URL-OR-ADDRESS is a logical name in the authinfo file.
+Given URL-OR-ADDRESS `myserver-vmware-2' this function will find
+a line like
+    machine myserver-vmware-2 login tzz password mypass url \"myserver-vmware-2.some.domain.here:443?insecure=true\"
+
+and will return the URL \"tzz:mypass@myserver-vmware-2.some.domain.here:443?insecure=true\".
+
+If the line is not found, the original URL-OR-ADDRESS is
+returned, assuming that's what the user wanted."
+  (let ((found (nth 0 (auth-source-search :max 1
+                                          :host url-or-address
+                                          :require '(:user :secret :url)
+                                          :create nil))))
+    (if found
+        (format "%s:%s@%s"
+                (plist-get found :user)
+                (let ((secret (plist-get found :secret)))
+                  (if (functionp secret)
+                      (funcall secret)
+                    secret))
+                (plist-get found :url))
+      url-or-address)))
+
 (defun govc-session-set-url (url)
   "Set `govc-session-url' to URL and optionally set other govc-session-* variables via URL query."
+  ;; Replace the original URL with the auth-source lookup if there is no user.
+  (unless (url-user (govc-url-parse url))
+    (setq url (govc-session-url-lookup-auth-source url)))
+
   (let ((q (cdr (url-path-and-query (govc-url-parse url)))))
     (dolist (opt (if q (url-parse-query-string q)))
       (let ((var (intern (concat "govc-session-" (car opt)))))
