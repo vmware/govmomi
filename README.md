@@ -9,7 +9,7 @@ For `govc`, a CLI built on top of govmomi, check out the [govc](./govc) director
 
 ## Compatibility
 
-This library is built for and tested against ESXi and vCenter 5.5 and 6.0.
+This library is built for and tested against ESXi and vCenter 5.5, 6.0 and 6.5.
 
 If you're able to use it against older versions of ESXi and/or vCenter, please
 leave a note and we'll include it in this compatibility list.
@@ -58,6 +58,10 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 * [Terraform](https://github.com/hashicorp/terraform/tree/master/builtin/providers/vsphere)
 
 * [VMware VIC Engine](https://github.com/vmware/vic)
+
+* [Travis CI](https://github.com/travis-ci/jupiter-brain)
+
+* [Gru](https://github.com/dnaeon/gru)
 
 ## License
 
