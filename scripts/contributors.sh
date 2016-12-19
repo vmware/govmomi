@@ -6,7 +6,8 @@ set -e
 dups=(abathla@promb-1s-dhcp216.eng.vmware.com
       cedric.blomart@minfin.fed.be
       david.stark@bskyb.com
-      egorovv@gmail.com)
+      egorovv@gmail.com
+      henrik@hodne.io)
 
 outfile="CONTRIBUTORS"
 tmpfile="CONTRIBUTORS.tmp"

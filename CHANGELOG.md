@@ -1,6 +1,6 @@
 # changelog
 
-### unreleased
+### 0.12.1 (2016-12-19)
 
 * Add DiagnosticLog helper
 
