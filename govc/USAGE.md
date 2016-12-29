@@ -1671,6 +1671,30 @@ Options:
   -t=                       Object type
 ```
 
+## object.collect
+
+```
+Usage: govc object.collect [OPTIONS] [MOID] [PROPERTY]...
+
+Collect managed object properties.
+
+MOID can be an inventory path or ManagedObjectReference.
+MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance'.
+
+By default only the current property value(s) are collected.  Use the '-n' flag to wait for updates.
+
+Examples:
+  govc object.collect - content
+  govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
+  govc object.collect -s /ha-datacenter/vm/foo overallStatus
+  govc object.collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
+  govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .
+
+Options:
+  -n=0                      Wait for N property updates
+  -s=false                  Output property value only
+```
+
 ## object.destroy
 
 ```

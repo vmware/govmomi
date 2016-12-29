@@ -113,4 +113,11 @@ load test_helper
 
         assert_equal "$items1" "$items2"
     done
+
+    ref=ViewManager:ViewManager
+    path=$(govc ls -L $ref)
+    assert_equal "$ref" "$path"
+
+    path=$(govc ls -L Folder:ha-folder-root)
+    assert_equal "/" "$path"
 }

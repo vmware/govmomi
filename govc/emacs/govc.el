@@ -162,7 +162,9 @@ The default prefix is `C-c ;' and can be changed by setting `govc-keymap-prefix'
 
 (defvar govc-font-lock-keywords
   (list
-   (list dired-re-mark '(0 dired-mark-face))))
+   (list dired-re-mark '(0 dired-mark-face))
+   (list "types.ManagedObjectReference\\(.*\\)" '(1 dired-directory-face))
+   (list "\\.\\.\\.$" '(0 dired-symlink-face))))
 
 (defvar govc-tabulated-list-mode-map
   (let ((map (make-sparse-keymap)))
@@ -279,6 +281,8 @@ nested ESX/vCenter VMs or directly to an ESX host."
 (defvar-local govc-session-url nil
   "ESX or vCenter URL set by `govc-session' via `govc-urls' selection.")
 
+(defvar-local govc-session-path nil)
+
 (defvar-local govc-session-insecure nil
   "Skip verification of server certificate when true.
 This variable is set to the value of the `GOVC_INSECURE' env var by default.
@@ -321,7 +325,7 @@ Return value is the url anchor if set, otherwise the hostname is returned."
   (let* ((u (or govc-session-url (getenv "GOVC_URL")))
          (url (if u (govc-url-parse u))))
     (if url
-        (or (url-target url) (url-host url)))))
+        (concat (or (url-target url) (url-host url)) govc-session-path))))
 
 (defun govc-format-command (command &rest args)
   "Format govc COMMAND ARGS."
@@ -393,7 +397,7 @@ Return value is `json-read'."
 
 (defun govc-object-prompt (prompt ls)
   "PROMPT for object name via LS function.  Return object without PROMPT if there is just one instance."
-  (let ((objs (funcall ls)))
+  (let ((objs (if (listp ls) ls (funcall ls))))
     (if (eq 1 (length objs))
         (car objs)
       (completing-read prompt objs))))
@@ -606,6 +610,16 @@ returned, assuming that's what the user wanted."
           tabulated-list-entries entries)
     (tabulated-list-print)))
 
+(defun govc-type-list-entries (command)
+  "Convert govc COMMAND type table output to `tabulated-list-entries'."
+  (-map (lambda (line)
+          (let* ((entry (s-split-up-to " " (s-collapse-whitespace line) 2))
+                 (name (car entry))
+                 (type (nth 1 entry))
+                 (value (car (last entry))))
+            (list name (vector name type value))))
+        (govc command govc-args)))
+
 (defun govc-json-info-selection (command)
   "Run govc COMMAND -json on `govc-selection'."
   (if current-prefix-arg
@@ -666,6 +680,118 @@ returned, assuming that's what the user wanted."
   (govc-pool nil (govc-current-session)))
 
 
+;;; govc object mode
+(defvar-local govc-object-history '("-")
+  "History list of visited objects.")
+
+(defun govc-object-collect ()
+  "Wrapper for govc object.collect."
+  (interactive)
+  (let ((id (car govc-args)))
+    (add-to-list 'govc-object-history id)
+    (setq govc-session-path id))
+  (govc-type-list-entries "object.collect"))
+
+(defun govc-object-collect-selection (&optional json)
+  "Expand object selection via govc object.collect.
+Optionally specify JSON encoding."
+  (interactive)
+  (let* ((entry (or (tabulated-list-get-entry) (error "No entry")))
+         (name (elt entry 0))
+         (type (elt entry 1))
+         (val (elt entry 2)))
+
+    (setq govc-args (list (car govc-args) name))
+
+    (cond
+     ((s-blank? val))
+     ((s-ends-with? "types.ManagedObjectReference" type)
+      (let ((ids (govc "ls" "-L" (split-string val ","))))
+        (setq govc-args (list (govc-object-prompt "moid: " ids)))))
+     ((string= val "...")
+      (if (s-starts-with? "[]" type) (setq json t))))
+
+    (if json
+        (govc-json-info "object.collect" nil)
+      (tabulated-list-revert))))
+
+(defun govc-object-collect-selection-json ()
+  "JSON object selection via govc object.collect."
+  (interactive)
+  (govc-object-collect-selection t))
+
+(defun govc-object-next ()
+  "Next managed object reference."
+  (interactive)
+  (if (search-forward "types.ManagedObjectReference" nil t)
+      (progn (govc-tabulated-list-unmark-all)
+             (tabulated-list-put-tag (char-to-string dired-marker-char)))
+    (goto-char (point-min))))
+
+(defun govc-object-collect-parent ()
+  "Parent object selection if reachable, otherwise prompt with `govc-object-history'."
+  (interactive)
+  (if (cadr govc-args)
+      (let ((prop (butlast (split-string (cadr govc-args) "\\."))))
+        (setq govc-args (list (car govc-args) (if prop (s-join "." prop)))))
+    (save-excursion
+      (goto-char (point-min))
+      (if (re-search-forward "^[[:space:]]*parent" nil t)
+          (govc-object-collect-selection)
+        (let ((id (govc-object-prompt "moid: " govc-object-history)))
+          (setq govc-args (list id (if (string= id "-") "content")))))))
+  (tabulated-list-revert))
+
+(defun govc-object (&optional moid property session)
+  "Object browser aka MOB (Managed Object Browser).
+Optionally starting at MOID and PROPERTY if given.
+Inherit SESSION if given."
+  (interactive)
+  (let ((buffer (get-buffer-create "*govc-object*")))
+    (if (called-interactively-p 'interactive)
+        (switch-to-buffer buffer)
+      (pop-to-buffer buffer))
+    (govc-object-mode)
+    (if session
+        (govc-session-clone session)
+      (call-interactively 'govc-session))
+    (setq govc-args (list (or moid "-") property))
+    (tabulated-list-print)))
+
+(defun govc-object-info ()
+  "Object browser via govc object.collect on `govc-selection'."
+  (interactive)
+  (if (equal major-mode 'govc-object-mode)
+      (progn
+        (setq govc-args (list (govc-object-prompt "moid: " govc-object-history)))
+        (tabulated-list-revert))
+    (govc-object (tabulated-list-get-id) nil (govc-current-session))))
+
+(defvar govc-object-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map "J" 'govc-object-collect-selection-json)
+    (define-key map "N" 'govc-object-next)
+    (define-key map "O" 'govc-object-info)
+    (define-key map (kbd "DEL") 'govc-object-collect-parent)
+    (define-key map (kbd "RET") 'govc-object-collect-selection)
+    (define-key map "?" 'govc-object-popup)
+    map)
+  "Keymap for `govc-object-mode'.")
+
+(define-derived-mode govc-object-mode govc-tabulated-list-mode "Object"
+  "Major mode for handling a govc object."
+  (setq tabulated-list-format [("Name" 40 t)
+                               ("Type" 40 t)
+                               ("Value" 40 t)]
+        tabulated-list-padding 2
+        tabulated-list-entries #'govc-object-collect)
+  (tabulated-list-init-header))
+
+(magit-define-popup govc-object-popup
+  "Object popup."
+  :actions (govc-keymap-popup govc-object-mode-map))
+
+
 ;;; govc host mode
 (defun govc-ls-host ()
   "List hosts."
@@ -719,6 +845,7 @@ returned, assuming that's what the user wanted."
     (define-key map "L" 'govc-logs)
     (define-key map "J" 'govc-host-json-info)
     (define-key map "N" 'govc-host-esxcli-netstat)
+    (define-key map "O" 'govc-object-info)
     (define-key map "c" 'govc-mode-new-session)
     (define-key map "p" 'govc-pool-with-session)
     (define-key map "s" 'govc-datastore-with-session)
@@ -799,6 +926,7 @@ Optionally filter by FILTER and inherit SESSION."
   (let ((map (make-sparse-keymap)))
     (define-key map "E" 'govc-events)
     (define-key map "J" 'govc-pool-json-info)
+    (define-key map "O" 'govc-object-info)
     (define-key map "D" 'govc-pool-destroy-selection)
     (define-key map "c" 'govc-mode-new-session)
     (define-key map "h" 'govc-host-with-session)
@@ -985,6 +1113,7 @@ Optionally filter by FILTER and inherit SESSION."
 (defvar govc-datastore-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "J" 'govc-datastore-json-info)
+    (define-key map "O" 'govc-object-info)
     (define-key map (kbd "RET") 'govc-datastore-ls-selection)
     (define-key map "c" 'govc-mode-new-session)
     (define-key map "h" 'govc-host-with-session)
@@ -1225,6 +1354,7 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
   (let ((map (make-sparse-keymap)))
     (define-key map "E" 'govc-events)
     (define-key map "J" 'govc-vm-json-info)
+    (define-key map "O" 'govc-object-info)
     (define-key map "X" 'govc-vm-extra-config-table)
     (define-key map (kbd "RET") 'govc-vm-device-ls)
     (define-key map "C" 'govc-vm-screen-selection)
@@ -1302,13 +1432,7 @@ Optionally filter by FILTER and inherit SESSION."
 ;;; govc device mode
 (defun govc-device-ls ()
   "Wrapper for govc device.ls -vm VM."
-  (-map (lambda (line)
-          (let* ((entry (s-split-up-to " " (s-collapse-whitespace line) 2))
-                 (name (car entry))
-                 (type (nth 1 entry))
-                 (summary (car (last entry))))
-            (list name (vector name type summary))))
-        (govc "device.ls" govc-args)))
+  (govc-type-list-entries "device.ls"))
 
 (defun govc-device-info ()
   "Populate table with govc device.info output."
