@@ -104,6 +104,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			e, err := finder.Element(ctx, *ref)
 			if err == nil {
 				if cmd.typeMatch(*ref) {
+					if e.Path == "/" && ref.Type != "Folder" {
+						// Special case: when given a moref with no ancestors,
+						// just echo the moref.
+						e.Path = ref.String()
+					}
 					lr.Elements = append(lr.Elements, *e)
 				}
 				continue

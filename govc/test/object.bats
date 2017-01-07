@@ -71,3 +71,58 @@ load test_helper
   result=$(govc ls "vm/$folder" | wc -l)
   [ "$result" -eq "0" ]
 }
+
+@test "object.collect" {
+  run govc object.collect
+  assert_success
+
+  run govc object.collect -json
+  assert_success
+
+  run govc object.collect -
+  assert_success
+
+  run govc object.collect -json -
+  assert_success
+
+  run govc object.collect - content
+  assert_success
+
+  run govc object.collect -json - content
+  assert_success
+
+  root=$(govc object.collect - content | grep content.rootFolder | awk '{print $3}')
+
+  dc=$(govc object.collect "$root" childEntity | awk '{print $3}' | cut -d, -f1)
+
+  hostFolder=$(govc object.collect "$dc" hostFolder | awk '{print $3}')
+
+  cr=$(govc object.collect "$hostFolder" childEntity | awk '{print $3}' | cut -d, -f1)
+
+  host=$(govc object.collect "$cr" host | awk '{print $3}' | cut -d, -f1)
+
+  run govc object.collect "$host"
+  assert_success
+
+  run govc object.collect "$host" hardware
+  assert_success
+
+  run govc object.collect "$host" hardware.systemInfo
+  assert_success
+
+  uuid=$(govc object.collect "$host" hardware.systemInfo.uuid | awk '{print $3}')
+  uuid_s=$(govc object.collect -s "$host" hardware.systemInfo.uuid)
+  assert_equal "$uuid" "$uuid_s"
+
+  run govc object.collect "$(govc ls host | head -n1)"
+  assert_success
+
+  # test against slice of interface
+  perfman=$(govc object.collect -s - content.perfManager)
+  result=$(govc object.collect -s "$perfman" description.counterType)
+  assert_equal "..." "$result"
+
+  # test against an interface field
+  run govc object.collect '/ha-datacenter/network/VM Network' summary
+  assert_success
+}
