@@ -369,6 +369,7 @@ Optionally set `GOVC_*' vars in `process-environment' using prefix
   (message command)
   (let ((process-environment (govc-environment))
         (exit-code))
+    (add-to-list 'govc-command-history command)
     (with-temp-buffer
       (setq exit-code (call-process-shell-command command nil (current-buffer)))
       (if (zerop exit-code)
@@ -510,15 +511,20 @@ returned, assuming that's what the user wanted."
       (when (s-starts-with? "govc-session-" (symbol-name s))
         (set s (assoc-default s session))))))
 
+(defvar govc-command-history nil
+  "History list for govc commands used by `govc-shell-command'.")
+
 (defun govc-shell-command (&optional cmd)
   "Shell CMD with current `govc-session' exported as GOVC_ env vars."
   (interactive)
   (let ((process-environment (govc-environment))
         (current-prefix-arg "*govc*")
-        (url govc-session-url))
+        (url govc-session-url)
+        (shell-command-history govc-command-history))
     (if cmd
         (async-shell-command cmd current-prefix-arg)
       (call-interactively 'async-shell-command))
+    (setq govc-command-history shell-command-history)
     (with-current-buffer (get-buffer current-prefix-arg)
       (setq govc-session-url url))))
 
