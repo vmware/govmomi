@@ -91,7 +91,7 @@ vm_mac() {
   govc device.info -vm "$1" ethernet-0 | grep "MAC Address" | awk '{print $NF}'
 }
 
-# exports an enviroment for using vcsim if running, otherwise skips the calling test.
+# exports an environment for using vcsim if running, otherwise skips the calling test.
 vcsim_env() {
   if [ "$(uname)" == "Darwin" ]; then
     PATH="/Applications/VMware Fusion.app/Contents/Library:$PATH"

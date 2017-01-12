@@ -73,7 +73,7 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		for _, vapp := range vapps {
 			powerOff := func() error {
-				task, err := vapp.PowerOffVApp_Task(ctx, false)
+				task, err := vapp.PowerOff(ctx, false)
 				if err != nil {
 					return err
 				}
