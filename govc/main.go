@@ -21,6 +21,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 
+	_ "github.com/bastienbc/govmomi/govc/vm/rdm"
 	_ "github.com/vmware/govmomi/govc/about"
 	_ "github.com/vmware/govmomi/govc/cluster"
 	_ "github.com/vmware/govmomi/govc/datacenter"
