@@ -42,10 +42,11 @@ type info struct {
 	*flags.OutputFlag
 	*flags.SearchFlag
 
-	WaitForIP   bool
-	General     bool
-	ExtraConfig bool
-	Resources   bool
+	WaitForIP       bool
+	General         bool
+	ExtraConfig     bool
+	Resources       bool
+	ToolsConfigInfo bool
 }
 
 func init() {
@@ -66,6 +67,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.General, "g", true, "Show general summary")
 	f.BoolVar(&cmd.ExtraConfig, "e", false, "Show ExtraConfig")
 	f.BoolVar(&cmd.Resources, "r", false, "Show resource summary")
+	f.BoolVar(&cmd.ToolsConfigInfo, "t", false, "Show ToolsConfigInfo")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -116,6 +118,9 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		if cmd.Resources {
 			props = append(props, "datastore", "network")
+		}
+		if cmd.ToolsConfigInfo {
+			props = append(props, "config.tools")
 		}
 	}
 
@@ -319,6 +324,20 @@ func (r *infoResult) Write(w io.Writer) error {
 			for _, v := range vm.Config.ExtraConfig {
 				fmt.Fprintf(tw, "    %s:\t%s\n", v.GetOptionValue().Key, v.GetOptionValue().Value)
 			}
+		}
+
+		if r.cmd.ToolsConfigInfo {
+			t := vm.Config.Tools
+			fmt.Fprintf(tw, "  ToolsConfigInfo:\n")
+			fmt.Fprintf(tw, "    ToolsVersion:\t%d\n", t.ToolsVersion)
+			fmt.Fprintf(tw, "    AfterPowerOn:\t%s\n", flags.NewOptionalBool(&t.AfterPowerOn).String())
+			fmt.Fprintf(tw, "    AfterResume:\t%s\n", flags.NewOptionalBool(&t.AfterResume).String())
+			fmt.Fprintf(tw, "    BeforeGuestStandby:\t%s\n", flags.NewOptionalBool(&t.BeforeGuestStandby).String())
+			fmt.Fprintf(tw, "    BeforeGuestShutdown:\t%s\n", flags.NewOptionalBool(&t.BeforeGuestShutdown).String())
+			fmt.Fprintf(tw, "    BeforeGuestReboot:\t%s\n", flags.NewOptionalBool(&t.BeforeGuestReboot).String())
+			fmt.Fprintf(tw, "    ToolsUpgradePolicy:\t%s\n", t.ToolsUpgradePolicy)
+			fmt.Fprintf(tw, "    PendingCustomization:\t%s\n", t.PendingCustomization)
+			fmt.Fprintf(tw, "    SyncTimeWithHost:\t%s\n", flags.NewOptionalBool(&t.SyncTimeWithHost).String())
 		}
 	}
 

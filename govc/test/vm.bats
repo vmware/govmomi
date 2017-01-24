@@ -70,6 +70,20 @@ load test_helper
   assert_line "guestinfo.a: 1"
   assert_line "guestinfo.b: 2"
 
+  run govc vm.change -sync-time-with-host-enabled=false -vm $id
+  assert_success
+
+  run govc vm.info -t $id
+  assert_success
+  assert_line "SyncTimeWithHost: false"
+
+  run govc vm.change -sync-time-with-host-enabled=true -vm $id
+  assert_success
+
+  run govc vm.info -t $id
+  assert_success
+  assert_line "SyncTimeWithHost: true"
+
   nid=$(new_id)
   run govc vm.change -name $nid -vm $id
   assert_success
