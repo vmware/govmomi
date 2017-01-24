@@ -2169,6 +2169,7 @@ Examples:
   govc vm.clone -vm template-vm new-vm
 
 Options:
+  -annotation=              VM description
   -c=0                      Number of CPUs
   -customization=           Customization Specification Name
   -datastore-cluster=       Datastore cluster [GOVC_DATASTORE_CLUSTER]
@@ -2193,6 +2194,7 @@ Options:
 Usage: govc vm.create [OPTIONS]
 
 Options:
+  -annotation=              VM description
   -c=1                      Number of CPUs
   -datastore-cluster=       Datastore cluster [GOVC_DATASTORE_CLUSTER]
   -disk=                    Disk path (to use existing) OR size (to create new, e.g. 20GB)
@@ -2287,18 +2289,23 @@ These values can also be obtained using:
 
   govc vm.info -json $vm | jq -r .VirtualMachines[].Guest.Net[].IpConfig.IpAddress[].IpAddress
 
+When given the '-n' flag, filters '-a' behavior to the nic specified by MAC address or device name.
+
 The 'esxcli' flag does not require vmware-tools to be installed, but does require the ESX host to
 have the /Net/GuestIPHack setting enabled.
 
 Examples:
   govc vm.ip $vm
   govc vm.ip -a -v4 $vm
+  govc vm.ip -n 00:0c:29:57:7b:c3 $vm
+  govc vm.ip -n ethernet-0 $vm
   govc host.esxcli system settings advanced set -o /Net/GuestIPHack -i 1
   govc vm.ip -esxcli $vm
 
 Options:
   -a=false                  Wait for an IP address on all NICs
   -esxcli=false             Use esxcli instead of guest tools
+  -n=                       Wait for IP address on NIC, specified by device name or MAC
   -v4=false                 Only report IPv4 addresses
 ```
 
