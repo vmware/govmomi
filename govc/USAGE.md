@@ -2148,13 +2148,14 @@ Examples:
   govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE
 
 Options:
-  -c=0                      Number of CPUs
-  -e=[]                     ExtraConfig. <key>=<value>
-  -g=                       Guest OS
-  -m=0                      Size in MB of memory
-  -name=                    Display name
-  -nested-hv-enabled=<nil>  Enable nested hardware-assisted virtualization
-  -vm=                      Virtual machine [GOVC_VM]
+  -c=0                        Number of CPUs
+  -e=[]                       ExtraConfig. <key>=<value>
+  -g=                         Guest OS
+  -m=0                        Size in MB of memory
+  -name=                      Display name
+  -nested-hv-enabled=<nil>    Enable nested hardware-assisted virtualization
+  -sync-time-with-host=<nil>  Enable SyncTimeWithHost
+  -vm=                        Virtual machine [GOVC_VM]
 ```
 
 ## vm.clone
@@ -2260,6 +2261,7 @@ Options:
   -e=false                  Show ExtraConfig
   -g=true                   Show general summary
   -r=false                  Show resource summary
+  -t=false                  Show ToolsConfigInfo
   -waitip=false             Wait for VM to acquire IP address
 ```
 

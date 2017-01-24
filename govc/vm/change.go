@@ -67,7 +67,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.Var(flags.NewOptionalBool(&cmd.NestedHVEnabled), "nested-hv-enabled", "Enable nested hardware-assisted virtualization")
 	cmd.Tools = &types.ToolsConfigInfo{}
-	f.Var(flags.NewOptionalBool(&cmd.Tools.SyncTimeWithHost), "sync-time-with-host-enabled", "Enable SyncTimeWithHost")
+	f.Var(flags.NewOptionalBool(&cmd.Tools.SyncTimeWithHost), "sync-time-with-host", "Enable SyncTimeWithHost")
 }
 
 func (cmd *change) Description() string {
