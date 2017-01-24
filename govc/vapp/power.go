@@ -84,13 +84,13 @@ func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 		switch {
 		case cmd.On:
 			fmt.Fprintf(cmd, "Powering on %s... ", vapp.Reference())
-			task, err = vapp.PowerOnVApp_Task(ctx)
+			task, err = vapp.PowerOn(ctx)
 		case cmd.Off:
 			fmt.Fprintf(cmd, "Powering off %s... ", vapp.Reference())
-			task, err = vapp.PowerOffVApp_Task(ctx, cmd.Force)
+			task, err = vapp.PowerOff(ctx, cmd.Force)
 		case cmd.Suspend:
 			fmt.Fprintf(cmd, "Suspend %s... ", vapp.Reference())
-			task, err = vapp.SuspendVApp_Task(ctx)
+			task, err = vapp.Suspend(ctx)
 		}
 
 		if err != nil {
