@@ -46,6 +46,18 @@ func init() {
 	cli.Register("vm.disk.change", &change{})
 }
 
+func (cmd *change) Description() string {
+	return `Change some properties of a VM's DISK
+
+In particular, you can change the DISK mode, and the size (as long as it is bigger)
+
+Examples:
+  govc vm.disk.change -vm VM -disk.key 2001 -size 10G
+  govc vm.disk.change -vm VM -disk.label "BDD disk" -size 10G
+  govc vm.disk.change -vm VM -disk.name "hard-1000-0" -size 12G
+  govc vm.disk.change -vm VM -disk.filePath "[DS] VM/VM-1.vmdk" -mode nonpersistent`
+}
+
 func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
@@ -73,52 +85,39 @@ func (cmd *change) FindDisk(ctx context.Context, list object.VirtualDeviceList) 
 	for _, device := range list {
 		switch md := device.(type) {
 		case *types.VirtualDisk:
-			switch {
-			case cmd.key != 0 && md.Key == int32(cmd.key):
-				fallthrough
-			case cmd.name != "" && list.Name(device) == cmd.name:
-				fallthrough
-			case cmd.label != "" && md.DeviceInfo.GetDescription().Label == cmd.label:
+			if cmd.CheckDiskProperties(ctx, list.Name(device), md) {
 				disks = append(disks, md)
-			case cmd.filePath != "":
-				if b, ok := md.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
-					if b.GetVirtualDeviceFileBackingInfo().FileName == cmd.filePath {
-						disks = append(disks, md)
-					}
-				}
 			}
 		default:
 			continue
 		}
 	}
 
-	switch {
-	case len(disks) == 1:
-		return disks[0], nil
-	case len(disks) == 0:
+	switch len(disks) {
+	case 0:
 		return nil, errors.New("No disk found using the given values")
-	case len(disks) > 1:
-		return nil, errors.New("The given disk values match multiple disks")
+	case 1:
+		return disks[0], nil
 	}
-	return nil, nil
+	return nil, errors.New("The given disk values match multiple disks")
 }
 
-func (cmd *change) CheckDiskProperties(ctx context.Context, name string, disk *types.VirtualDisk) error {
+func (cmd *change) CheckDiskProperties(ctx context.Context, name string, disk *types.VirtualDisk) bool {
 	switch {
 	case cmd.key != 0 && disk.Key != int32(cmd.key):
 		fallthrough
 	case cmd.name != "" && name != cmd.name:
 		fallthrough
 	case cmd.label != "" && disk.DeviceInfo.GetDescription().Label != cmd.label:
-		return errors.New("No disk found using the given values")
+		return false
 	case cmd.filePath != "":
 		if b, ok := disk.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
 			if b.GetVirtualDeviceFileBackingInfo().FileName != cmd.filePath {
-				return errors.New("No disk found using the given values")
+				return false
 			}
 		}
 	}
-	return nil
+	return true
 }
 
 func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -141,10 +140,6 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	err = cmd.CheckDiskProperties(ctx, devices.Name(editdisk), editdisk)
-	if err != nil {
-		return err
-	}
 	if int64(cmd.bytes) != 0 {
 		editdisk.CapacityInKB = int64(cmd.bytes) / 1024
 	}
@@ -173,7 +168,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	err = task.Wait(ctx)
 	if err != nil {
-		return errors.New(fmt.Sprintf("Error resizing main disk\nLogged Item:  %s", err))
+		return fmt.Errorf("Error resizing main disk\nLogged Item:  %s", err)
 	}
 	return nil
 }
