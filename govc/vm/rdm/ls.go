@@ -47,6 +47,13 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag.Register(ctx, f)
 }
 
+func (cmd *ls) Description() string {
+	return `List available devices that could be attach to VM with RDM.
+
+Examples:
+  govc vm.rdm.ls -vm VM`
+}
+
 func (cmd *ls) Process(ctx context.Context) error {
 
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {

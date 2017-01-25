@@ -45,6 +45,13 @@ func (cmd *attach) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.device, "deviceName", "", "Device Name")
 }
 
+func (cmd *attach) Description() string {
+	return `Attach DEVICE to VM with RDM.
+
+Examples:
+  govc vm.rdm.attach -vm VM -deviceName DEVICE`
+}
+
 func (cmd *attach) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err
