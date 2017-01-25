@@ -27,8 +27,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -70,21 +68,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	var VM_withProp mo.VirtualMachine
-	err = vm.Properties(ctx, vm.Reference(), []string{"environmentBrowser"}, &VM_withProp)
+	vmConfigOptions, err := vm.QueryEnvironmentBrowser(ctx)
 	if err != nil {
 		return err
 	}
 
-	//Query VM To Find Devices available
-	var queryConfigRequest types.QueryConfigTarget
-	queryConfigRequest.This = VM_withProp.EnvironmentBrowser
-	cl, err := cmd.Client()
-	queryConfigResp, err := methods.QueryConfigTarget(ctx, cl, &queryConfigRequest)
-	if err != nil {
-		return err
-	}
-	vmConfigOptions := *queryConfigResp.Returnval
 	res := infoResult{
 		Disks: vmConfigOptions.ScsiDisk,
 	}
@@ -99,16 +87,16 @@ func (r *infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 	for _, disk := range r.Disks {
 		fmt.Fprintf(tw, "Name:\t%s\n", disk.Name)
-		fmt.Fprintf(tw, "	Device name:\t%s\n", disk.Disk.DeviceName)
-		fmt.Fprintf(tw, "	Device path:\t%s\n", disk.Disk.DevicePath)
-		fmt.Fprintf(tw, "	Canonical Name:\t%s\n", disk.Disk.CanonicalName)
+		fmt.Fprintf(tw, "  Device name:\t%s\n", disk.Disk.DeviceName)
+		fmt.Fprintf(tw, "  Device path:\t%s\n", disk.Disk.DevicePath)
+		fmt.Fprintf(tw, "  Canonical Name:\t%s\n", disk.Disk.CanonicalName)
 
 		var uids []string
 		for _, descriptor := range disk.Disk.Descriptor {
 			uids = append(uids, descriptor.Id)
 		}
 
-		fmt.Fprintf(tw, "	UIDS:\t%s\n", strings.Join(uids, " ,"))
+		fmt.Fprintf(tw, "  UIDS:\t%s\n", strings.Join(uids, " ,"))
 	}
 	return tw.Flush()
 }

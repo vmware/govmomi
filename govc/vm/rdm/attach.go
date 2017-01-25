@@ -18,15 +18,12 @@ package rdm
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -55,6 +52,8 @@ func (cmd *attach) Process(ctx context.Context) error {
 	return nil
 }
 
+//This piece of code was developped mainly thanks to the project govmax on github.com
+//This file in particular https://github.com/codedellemc/govmax/blob/master/api/v1/vmomi.go
 func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
@@ -74,21 +73,12 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-	var VM_withProp mo.VirtualMachine
-	err = vm.Properties(ctx, vm.Reference(), []string{"environmentBrowser"}, &VM_withProp)
+
+	vmConfigOptions, err := vm.QueryEnvironmentBrowser(ctx)
 	if err != nil {
 		return err
 	}
 
-	//Query VM To Find Devices avilable for attaching to VM
-	var queryConfigRequest types.QueryConfigTarget
-	queryConfigRequest.This = VM_withProp.EnvironmentBrowser
-	cl, err := cmd.Client()
-	queryConfigResp, err := methods.QueryConfigTarget(ctx, cl, &queryConfigRequest)
-	if err != nil {
-		return err
-	}
-	vmConfigOptions := *queryConfigResp.Returnval
 	for _, ScsiDisk := range vmConfigOptions.ScsiDisk {
 		if !strings.Contains(ScsiDisk.Disk.CanonicalName, cmd.device) {
 			continue
@@ -97,7 +87,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		backing.CompatibilityMode = "physicalMode"
 		backing.DeviceName = ScsiDisk.Disk.DeviceName
 		for _, descriptor := range ScsiDisk.Disk.Descriptor {
-			if string([]rune(descriptor.Id)[:4]) == "vml." {
+			if strings.HasPrefix(descriptor.Id, "vml.") {
 				backing.LunUuid = descriptor.Id
 				break
 			}
@@ -111,9 +101,9 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		var u int32
 		for u = 0; u < 16; u++ {
 			free := true
-			for _, device := range devices {
-				if device.GetVirtualDevice().ControllerKey == device.GetVirtualDevice().ControllerKey {
-					if u == *(device.GetVirtualDevice().UnitNumber) || u == *scsiCtrlUnitNumber {
+			for _, d := range devices {
+				if d.GetVirtualDevice().ControllerKey == d.GetVirtualDevice().ControllerKey {
+					if u == *(d.GetVirtualDevice().UnitNumber) || u == *scsiCtrlUnitNumber {
 						free = false
 					}
 				}
@@ -143,10 +133,10 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		err = task.Wait(ctx)
 		if err != nil {
-			return errors.New(fmt.Sprintf("Error adding device %+v \n with backing %+v \nLogged Item:  %s", device, backing, err))
+			return fmt.Errorf("Error adding device %+v \n with backing %+v \nLogged Item:  %s", device, backing, err)
 		}
 		return nil
 
 	}
-	return errors.New(fmt.Sprintf("Error: No LUN with device name containing %s found.", cmd.device))
+	return fmt.Errorf("Error: No LUN with device name containing %s found", cmd.device)
 }
