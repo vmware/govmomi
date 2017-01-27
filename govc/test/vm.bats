@@ -13,6 +13,21 @@ load test_helper
 
   run govc vm.ip -a -v4 $id
   assert_success
+
+  run govc vm.ip -n $(vm_mac $id) $id
+  assert_success
+
+  run govc vm.ip -n ethernet-0 $id
+  assert_success
+
+  ip=$(govc vm.ip $id)
+
+  # add a second nic
+  run govc vm.network.add -vm $id "VM Network"
+  assert_success
+
+  res=$(govc vm.ip -n ethernet-0 $id)
+  assert_equal $ip $res
 }
 
 @test "vm.ip -esxcli" {

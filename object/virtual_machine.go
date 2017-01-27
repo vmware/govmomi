@@ -229,9 +229,12 @@ func (v VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
 
 // WaitForNetIP waits for the VM guest.net property to report an IP address for all VM NICs.
 // Only consider IPv4 addresses if the v4 param is true.
+// By default, wait for all NICs to get an IP address, unless 1 or more device is given.
+// A device can be specified by the MAC address or the device name, e.g. "ethernet-0".
 // Returns a map with MAC address as the key and IP address list as the value.
-func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool) (map[string][]string, error) {
+func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool, device ...string) (map[string][]string, error) {
 	macs := make(map[string][]string)
+	eths := make(map[string]string)
 
 	p := property.DefaultCollector(v.c)
 
@@ -242,20 +245,32 @@ func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool) (map[string][
 				continue
 			}
 
-			devices := c.Val.(types.ArrayOfVirtualDevice).VirtualDevice
-			for _, device := range devices {
-				if nic, ok := device.(types.BaseVirtualEthernetCard); ok {
+			devices := VirtualDeviceList(c.Val.(types.ArrayOfVirtualDevice).VirtualDevice)
+			for _, d := range devices {
+				if nic, ok := d.(types.BaseVirtualEthernetCard); ok {
 					mac := nic.GetVirtualEthernetCard().MacAddress
 					if mac == "" {
 						return false
 					}
 					macs[mac] = nil
+					eths[devices.Name(d)] = mac
 				}
 			}
 		}
 
 		return true
 	})
+
+	if len(device) != 0 {
+		// Only wait for specific NIC(s)
+		macs = make(map[string][]string)
+		for _, mac := range device {
+			if eth, ok := eths[mac]; ok {
+				mac = eth // device name, e.g. "ethernet-0"
+			}
+			macs[mac] = nil
+		}
+	}
 
 	err = property.Wait(ctx, p, v.Reference(), []string{"guest.net"}, func(pc []types.PropertyChange) bool {
 		for _, c := range pc {
