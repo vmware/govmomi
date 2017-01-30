@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -42,14 +42,14 @@ func (cmd *attach) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.device, "deviceName", "", "Device Name")
+	f.StringVar(&cmd.device, "device", "", "Device Name")
 }
 
 func (cmd *attach) Description() string {
 	return `Attach DEVICE to VM with RDM.
 
 Examples:
-  govc vm.rdm.attach -vm VM -deviceName DEVICE`
+  govc vm.rdm.attach -vm VM -device /vmfs/devices/disks/naa.000000000000000000000000000000000`
 }
 
 func (cmd *attach) Process(ctx context.Context) error {
@@ -81,19 +81,19 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	vmConfigOptions, err := vm.QueryEnvironmentBrowser(ctx)
+	vmConfigOptions, err := vm.QueryConfigTarget(ctx)
 	if err != nil {
 		return err
 	}
 
-	for _, ScsiDisk := range vmConfigOptions.ScsiDisk {
-		if !strings.Contains(ScsiDisk.Disk.CanonicalName, cmd.device) {
+	for _, scsiDisk := range vmConfigOptions.ScsiDisk {
+		if !strings.Contains(scsiDisk.Disk.CanonicalName, cmd.device) {
 			continue
 		}
 		var backing types.VirtualDiskRawDiskMappingVer1BackingInfo
-		backing.CompatibilityMode = "physicalMode"
-		backing.DeviceName = ScsiDisk.Disk.DeviceName
-		for _, descriptor := range ScsiDisk.Disk.Descriptor {
+		backing.CompatibilityMode = string(types.VirtualDiskCompatibilityModePhysicalMode)
+		backing.DeviceName = scsiDisk.Disk.DeviceName
+		for _, descriptor := range scsiDisk.Disk.Descriptor {
 			if strings.HasPrefix(descriptor.Id, "vml.") {
 				backing.LunUuid = descriptor.Id
 				break
@@ -109,7 +109,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		for u = 0; u < 16; u++ {
 			free := true
 			for _, d := range devices {
-				if d.GetVirtualDevice().ControllerKey == d.GetVirtualDevice().ControllerKey {
+				if d.GetVirtualDevice().ControllerKey == device.GetVirtualDevice().ControllerKey {
 					if u == *(d.GetVirtualDevice().UnitNumber) || u == *scsiCtrlUnitNumber {
 						free = false
 					}

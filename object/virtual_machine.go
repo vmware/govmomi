@@ -691,7 +691,7 @@ func (v VirtualMachine) Unregister(ctx context.Context) error {
 }
 
 // QueryEnvironmentBrowser is a helper to get the environmentBrowser property.
-func (v VirtualMachine) QueryEnvironmentBrowser(ctx context.Context) (*types.ConfigTarget, error) {
+func (v VirtualMachine) QueryConfigTarget(ctx context.Context) (*types.ConfigTarget, error) {
 	var vm mo.VirtualMachine
 
 	err := v.Properties(ctx, v.Reference(), []string{"environmentBrowser"}, &vm)
