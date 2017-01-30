@@ -67,6 +67,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/vm/disk"
 	_ "github.com/vmware/govmomi/govc/vm/guest"
 	_ "github.com/vmware/govmomi/govc/vm/network"
+	_ "github.com/vmware/govmomi/govc/vm/rdm"
 	_ "github.com/vmware/govmomi/govc/vm/snapshot"
 )
 
