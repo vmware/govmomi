@@ -29,6 +29,14 @@ load test_helper
   path="*/Resources/$id"
   govc pool.create $path
 
+  # Finder.List($path)
+  run govc pool.info "$path"
+  assert_success
+
+  # Finder.Find($name)
+  run govc pool.info "$id"
+  assert_success
+
   # Create multiple parent pools with multiple arguments (without globbing)
   run govc pool.create $path/a $path/b
   assert_success
