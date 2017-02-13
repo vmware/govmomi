@@ -36,6 +36,9 @@ load test_helper
   uuid=$(govc host.info -json | jq -r .HostSystems[].Hardware.SystemInfo.Uuid)
   run govc host.info -host.uuid $uuid
   assert_success
+
+  run govc host.info "*"
+  assert_success
 }
 
 @test "host info vc" {

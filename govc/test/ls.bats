@@ -6,7 +6,22 @@ load test_helper
   run govc ls
   assert_success
   # /dc/{vm,network,host,datastore}
-  [ ${#lines[@]} -ge 4 ]
+  n=${#lines[@]}
+  [ $n -ge 4 ]
+
+  # list entire inventory
+  run govc ls '/**'
+  assert_success
+  [ ${#lines[@]} -ge $n ]
+
+  run govc ls -t HostSystem '*'
+  assert_success
+  [ ${#lines[@]} -eq 0 ]
+
+  # search entire inventory
+  run govc ls -t HostSystem '/**'
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
 
   run govc ls host
   assert_success

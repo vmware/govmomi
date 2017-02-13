@@ -394,7 +394,7 @@ Return value is `json-read'."
 
 (defun govc-ls-datacenter ()
   "List datacenters."
-  (govc "ls" "-t" "Datacenter" "/" "/*"))
+  (govc "ls" "-t" "Datacenter" "/**"))
 
 (defun govc-object-prompt (prompt ls)
   "PROMPT for object name via LS function.  Return object without PROMPT if there is just one instance."
@@ -815,7 +815,7 @@ Inherit SESSION if given."
         (buffer (get-buffer-create "*govc-esxcli*")))
     (pop-to-buffer buffer)
     (tabulated-list-mode)
-    (setq govc-args (list "-host.ipath" host))
+    (setq govc-args (list "-host" host))
     (govc-session-clone session)
     (setq tabulated-list-format [("CCAlgo" 10 t)
                                  ("ForeignAddress" 20 t)
@@ -838,7 +838,7 @@ Inherit SESSION if given."
 
 (defun govc-host-info ()
   "Wrapper for govc host.info."
-  (govc-table-info "host.info" (or govc-filter "*/*")))
+  (govc-table-info "host.info" (or govc-filter "*")))
 
 (defun govc-host-json-info ()
   "JSON via govc host.info -json on current selection."
@@ -897,20 +897,9 @@ Optionally filter by FILTER and inherit SESSION."
 
 
 ;;; govc pool mode
-(defun govc-ls-pool (&optional pools)
-  "List resource POOLS recursively."
-  (let ((subpools (govc "ls" "-t" "ResourcePool" (--map (concat it "/*") (or pools '("host"))))))
-    (append pools
-            (if subpools
-                (govc-ls-pool subpools)))))
-
-(defun govc-ls-vapp ()
-  "List virtual apps."
-  (govc "ls" "-t" "VirtualApp" "vm"))
-
 (defun govc-pool-destroy (name)
   "Destroy pool with given NAME."
-  (interactive (list (completing-read "Destroy pool: " (govc-ls-pool))))
+  (interactive (list (completing-read "Destroy pool: " (govc "ls" "-t" "ResourcePool" "host/*"))))
   (govc "pool.destroy" name))
 
 (defun govc-pool-destroy-selection ()
@@ -921,7 +910,7 @@ Optionally filter by FILTER and inherit SESSION."
 
 (defun govc-pool-info ()
   "Wrapper for govc pool.info."
-  (govc-table-info "pool.info" (or govc-filter (append (govc-ls-pool) (govc-ls-vapp)))))
+  (govc-table-info "pool.info" (list "-a" (or govc-filter (setq govc-filter "*")))))
 
 (defun govc-pool-json-info ()
   "JSON via govc pool.info -json on current selection."
@@ -1295,7 +1284,7 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
 
 (defun govc-vm-info ()
   "Wrapper for govc vm.info."
-  (govc-table-info "vm.info" (list "-r" (or govc-filter (setq govc-filter (govc-vm-filter))))))
+  (govc-table-info "vm.info" (list "-r" (or govc-filter (setq govc-filter "*")))))
 
 (defun govc-vm-host ()
   "Host info via `govc-host' with host(s) of current selection."
@@ -1380,19 +1369,6 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
     (define-key map "?" 'govc-vm-popup)
     map)
   "Keymap for `govc-vm-mode'.")
-
-(defun govc-vm-filter ()
-  "Default `govc-filter' for `vm-info'."
-  (--map (concat it "/*")
-         (append (govc-ls-folder (list (concat govc-session-datacenter "/vm")))
-                 (govc "ls" "-t" "VirtualApp" "vm"))))
-
-(defun govc-ls-folder (folders)
-  "List FOLDERS recursively."
-  (let ((subfolders (govc "ls" "-t" "Folder" folders)))
-    (append folders
-            (if subfolders
-                (govc-ls-folder subfolders)))))
 
 (defun govc-vm (&optional filter session)
   "VM info via govc.
