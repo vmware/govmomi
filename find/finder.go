@@ -226,7 +226,7 @@ func (f *Finder) managedObjectList(ctx context.Context, path string, tl bool, in
 	}
 
 	if tl {
-		if path == "/**" {
+		if path == "/**" || path == "./..." {
 			// TODO: support switching to find mode for any path, not just relative to f.rootFolder or f.dcReference
 			path = "*"
 		} else {

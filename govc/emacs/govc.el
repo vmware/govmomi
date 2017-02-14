@@ -394,7 +394,7 @@ Return value is `json-read'."
 
 (defun govc-ls-datacenter ()
   "List datacenters."
-  (govc "ls" "-t" "Datacenter" "/**"))
+  (govc "ls" "-t" "Datacenter" "./..."))
 
 (defun govc-object-prompt (prompt ls)
   "PROMPT for object name via LS function.  Return object without PROMPT if there is just one instance."
