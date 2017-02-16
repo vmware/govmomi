@@ -37,7 +37,7 @@ func (t taskProgress) Detail() string {
 }
 
 func (t taskProgress) Error() error {
-	if t.info.Error != nil {
+	if t.info != nil && t.info.Error != nil {
 		return Error{t.info.Error}
 	}
 
