@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,38 +14,35 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package datastore
+package vsan
 
 import (
 	"context"
 	"flag"
+	"fmt"
+	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type rm struct {
 	*flags.DatastoreFlag
 
-	kind        bool
-	force       bool
-	isNamespace bool
+	force   bool
+	verbose bool
 }
 
 func init() {
-	cli.Register("datastore.rm", &rm{})
-	cli.Alias("datastore.rm", "datastore.delete")
+	cli.Register("datastore.vsan.dom.rm", &rm{})
 }
 
 func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.kind, "t", true, "Use file type to choose disk or file manager")
-	f.BoolVar(&cmd.force, "f", false, "Force; ignore nonexistent files and arguments")
-	f.BoolVar(&cmd.isNamespace, "namespace", false, "Path is uuid of namespace on vsan datastore")
+	f.BoolVar(&cmd.force, "f", false, "Force delete")
+	f.BoolVar(&cmd.verbose, "v", false, "Print deleted UUIDs to stdout, failed to stderr")
 }
 
 func (cmd *rm) Process(ctx context.Context) error {
@@ -56,33 +53,21 @@ func (cmd *rm) Process(ctx context.Context) error {
 }
 
 func (cmd *rm) Usage() string {
-	return "FILE"
+	return "UUID..."
 }
 
 func (cmd *rm) Description() string {
-	return `Remove FILE from DATASTORE.
+	return `Remove vSAN DOM objects in DS.
 
 Examples:
-  govc datastore.rm vm/vmware.log
-  govc datastore.rm vm
-  govc datastore.rm -f images/base.vmdk`
+  govc datastore.vsan.dom.rm d85aa758-63f5-500a-3150-0200308e589c
+  govc datastore.vsan.dom.rm -f d85aa758-63f5-500a-3150-0200308e589c
+  govc datastore.vsan.dom.ls -o | xargs govc datastore.vsan.dom.rm`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
-	args := f.Args()
-	if len(args) == 0 {
+	if f.NArg() == 0 {
 		return flag.ErrHelp
-	}
-
-	c, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
-	var dc *object.Datacenter
-	dc, err = cmd.Datacenter()
-	if err != nil {
-		return err
 	}
 
 	ds, err := cmd.Datastore()
@@ -90,28 +75,34 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.isNamespace {
-		path := args[0]
-
-		nm := object.NewDatastoreNamespaceManager(c)
-		err = nm.DeleteDirectory(ctx, dc, path)
-	} else {
-		fm := ds.NewFileManager(dc, cmd.force)
-
-		remove := fm.DeleteFile // File delete
-		if cmd.kind {
-			remove = fm.Delete // VirtualDisk or File delete
-		}
-
-		err = remove(ctx, args[0])
-	}
-
+	hosts, err := ds.AttachedHosts(ctx)
 	if err != nil {
-		if types.IsFileNotFound(err) && cmd.force {
-			// Ignore error
-			return nil
+		return err
+	}
+
+	if len(hosts) == 0 {
+		return flag.ErrHelp
+	}
+
+	m, err := hosts[0].ConfigManager().VsanInternalSystem(ctx)
+	if err != nil {
+		return err
+	}
+
+	res, err := m.DeleteVsanObjects(ctx, f.Args(), &cmd.force)
+	if err != nil {
+		return err
+	}
+
+	if cmd.verbose {
+		for _, r := range res {
+			if r.Success {
+				fmt.Fprintln(cmd.Out, r.Uuid)
+			} else {
+				fmt.Fprintf(os.Stderr, "%s %s\n", r.Uuid, r.FailureReason[0].Message)
+			}
 		}
 	}
 
-	return err
+	return nil
 }
