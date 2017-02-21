@@ -50,3 +50,20 @@ func (m Manager) CreateListView(ctx context.Context, objects []types.ManagedObje
 
 	return NewListView(m.Client(), res.Returnval), nil
 }
+
+func (m Manager) CreateContainerView(ctx context.Context, container types.ManagedObjectReference, managedObjectTypes []string, recursive bool) (*ContainerView, error) {
+
+	req := types.CreateContainerView{
+		This:      m.Common.Reference(),
+		Container: container,
+		Recursive: recursive,
+		Type:      managedObjectTypes,
+	}
+
+	res, err := methods.CreateContainerView(ctx, m.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewContainerView(m.Client(), res.Returnval), nil
+}
