@@ -17,17 +17,55 @@ limitations under the License.
 package view
 
 import (
+	"context"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ListView struct {
-	*object.ListView
+	object.Common
 }
 
 func NewListView(c *vim25.Client, ref types.ManagedObjectReference) *ListView {
 	return &ListView{
-		ListView: object.NewListView(c, ref),
+		Common: object.NewCommon(c, ref),
 	}
+}
+
+func (v ListView) Destroy(ctx context.Context) error {
+	req := types.DestroyView{
+		This: v.Reference(),
+	}
+	_, err := methods.DestroyView(ctx, v.Client(), &req)
+	return err
+}
+
+func (v ListView) Add(ctx context.Context, refs []types.ManagedObjectReference) error {
+	req := types.ModifyListView{
+		This: v.Reference(),
+		Add:  refs,
+	}
+	_, err := methods.ModifyListView(ctx, v.Client(), &req)
+	return err
+}
+
+func (v ListView) Remove(ctx context.Context, refs []types.ManagedObjectReference) error {
+	req := types.ModifyListView{
+		This:   v.Reference(),
+		Remove: refs,
+	}
+	_, err := methods.ModifyListView(ctx, v.Client(), &req)
+	return err
+}
+
+func (v ListView) Reset(ctx context.Context, refs []types.ManagedObjectReference) error {
+	req := types.ResetListView{
+		This: v.Reference(),
+		Obj:  refs,
+	}
+	_, err := methods.ResetListView(ctx, v.Client(), &req)
+	return err
 }
