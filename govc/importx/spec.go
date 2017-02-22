@@ -88,7 +88,7 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
-	if e == nil {
+	if e == nil || e.VirtualSystem == nil {
 		return nil
 	}
 
