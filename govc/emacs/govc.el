@@ -164,6 +164,7 @@ The default prefix is `C-c ;' and can be changed by setting `govc-keymap-prefix'
   (list
    (list dired-re-mark '(0 dired-mark-face))
    (list "types.ManagedObjectReference\\(.*\\)" '(1 dired-directory-face))
+   (list "[^ ]*/$" '(0 dired-directory-face))
    (list "\\.\\.\\.$" '(0 dired-symlink-face))))
 
 (defvar govc-tabulated-list-mode-map
@@ -711,7 +712,7 @@ Optionally specify JSON encoding."
 
     (cond
      ((s-blank? val))
-     ((s-ends-with? "types.ManagedObjectReference" type)
+     ((and (not json) (s-ends-with? "types.ManagedObjectReference" type))
       (let ((ids (govc "ls" "-L" (split-string val ","))))
         (setq govc-args (list (govc-object-prompt "moid: " ids)))))
      ((string= val "...")
@@ -1002,10 +1003,12 @@ Optionally filter by FILTER and inherit SESSION."
   "Open datastore folder or file."
   (interactive)
   (let ((id (tabulated-list-get-id)))
-    (if (s-ends-with? "/" id)
-        (progn (setq govc-filter id)
-               (tabulated-list-revert))
-      (govc-datastore-open))))
+    (if current-prefix-arg
+        (govc-shell-command (govc-format-command "datastore.ls" "-l" "-p" "-R" id))
+      (if (s-ends-with? "/" id)
+          (progn (setq govc-filter id)
+                 (tabulated-list-revert))
+        (govc-datastore-open)))))
 
 (defun govc-datastore-open ()
   "Open datastore file."
@@ -1053,7 +1056,7 @@ Optionally filter by FILTER and inherit SESSION."
 
 (defun govc-datastore-rm (paths)
   "Delete datastore PATHS."
-  (--each paths (govc "datastore.rm" it)))
+  (--each paths (govc "datastore.rm" (if current-prefix-arg "-f") it)))
 
 (defun govc-datastore-rm-selection ()
   "Delete selected datastore paths."
@@ -1143,7 +1146,9 @@ Optionally filter by FILTER and inherit SESSION."
         (govc-session-clone session)
       (call-interactively 'govc-session))
     (setq govc-filter filter)
-    (tabulated-list-print)))
+    (tabulated-list-print)
+    (if (and govc-session-datastore (search-forward govc-session-datastore nil t))
+        (beginning-of-line))))
 
 (define-derived-mode govc-datastore-mode tabulated-list-mode "Datastore"
   "Major mode for govc datastore.info."

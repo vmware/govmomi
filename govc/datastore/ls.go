@@ -74,6 +74,17 @@ func (cmd *ls) Usage() string {
 	return "[FILE]..."
 }
 
+func isInvalid(err error) bool {
+	if f, ok := err.(types.HasFault); ok {
+		switch f.Fault().(type) {
+		case *types.InvalidArgument:
+			return true
+		}
+	}
+
+	return false
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	ds, err := cmd.Datastore()
 	if err != nil {
@@ -113,7 +124,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			r, err := cmd.ListPath(b, arg, spec)
 			if err != nil {
 				// Treat the argument as a match pattern if not found as directory
-				if i == 0 && types.IsFileNotFound(err) {
+				if i == 0 && types.IsFileNotFound(err) || isInvalid(err) {
 					spec.MatchPattern[0] = path.Base(arg)
 					arg = path.Dir(arg)
 					continue
@@ -187,7 +198,7 @@ func (o *listOutput) add(r types.HostDatastoreBrowserSearchResults) {
 			}
 
 			for _, p := range path {
-				if p[0] == '.' {
+				if len(p) != 0 && p[0] == '.' {
 					return
 				}
 			}

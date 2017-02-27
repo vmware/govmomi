@@ -54,6 +54,14 @@ func (cmd *mv) Usage() string {
 	return "SRC DST"
 }
 
+func (cmd *mv) Description() string {
+	return `Move SRC to DST on DATASTORE.
+
+Examples:
+  govc datastore.mv foo/foo.vmx foo/foo.vmx.old
+  govc datastore.mv -f my.vmx foo/foo.vmx`
+}
+
 func (cmd *mv) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) != 2 {

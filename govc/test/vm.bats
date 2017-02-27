@@ -407,7 +407,7 @@ load test_helper
   run govc vm.disk.attach -vm $vm -disk enoent.vmdk
   assert_failure "govc: Invalid configuration for device '0'."
 
-  run govc vm.disk.attach -vm $vm -disk $vm/$GOVC_TEST_VMDK -controller lsilogic-1000
+  run govc vm.disk.attach -vm $vm -disk $vm/$(basename $GOVC_TEST_VMDK) -controller lsilogic-1000
   assert_success
   result=$(govc device.ls -vm $vm | grep disk- | wc -l)
   [ $result -eq 2 ]

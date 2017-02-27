@@ -191,3 +191,48 @@ upload_file() {
     done
   done
 }
+
+@test "datastore.disk" {
+  id=$(new_id)
+  vmdk="$id/$id.vmdk"
+
+  run govc datastore.mkdir "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  run govc datastore.rm "$vmdk"
+  assert_success
+
+  run govc datastore.mkdir -p "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  id=$(new_id)
+  run govc vm.create -on=false -link -disk "$vmdk" "$id"
+  assert_success
+
+  # should fail due to: ddb.deletable=false
+  run govc datastore.rm "$vmdk"
+  assert_failure
+
+  run govc datastore.rm -f "$vmdk"
+  assert_success
+
+  # one more time, but rm the directory w/o -f
+  run govc datastore.mkdir -p "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  id=$(new_id)
+  run govc vm.create -on=false -link -disk "$vmdk" "$id"
+  assert_success
+
+  run govc datastore.rm "$(dirname "$vmdk")"
+  assert_success
+}
