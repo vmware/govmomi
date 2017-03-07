@@ -59,7 +59,7 @@ func (f *ArchiveFlag) ReadOvf(fpath string) ([]byte, error) {
 
 func (f *ArchiveFlag) ReadEnvelope(fpath string) (*ovf.Envelope, error) {
 	if fpath == "" {
-		return nil, nil
+		return &ovf.Envelope{}, nil
 	}
 
 	r, _, err := f.Open(fpath)
