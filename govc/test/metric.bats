@@ -15,6 +15,9 @@ load test_helper
   run govc metric.ls "$host"
   assert_success
 
+  run govc metric.ls -json "$host"
+  assert_success
+
   run govc metric.ls "$pool"
   assert_success
 }
@@ -27,6 +30,9 @@ load test_helper
   assert_failure
 
   run govc metric.sample "$host" "${metrics[@]}"
+  assert_success
+
+  run govc metric.sample -json "$host" "${metrics[@]}"
   assert_success
 
   vm=$(new_ttylinux_vm)
@@ -43,6 +49,9 @@ load test_helper
   metrics=($(govc metric.ls "$vm"))
 
   run govc metric.sample "$vm" "${metrics[@]}"
+  assert_success
+
+  run govc metric.sample -json "$vm" "${metrics[@]}"
   assert_success
 
   run govc metric.sample "govc-test-*" "${metrics[@]}"

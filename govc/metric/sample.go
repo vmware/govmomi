@@ -20,9 +20,11 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/performance"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -32,6 +34,7 @@ type sample struct {
 
 	d        int
 	n        int
+	t        bool
 	instance string
 }
 
@@ -45,6 +48,8 @@ func (cmd *sample) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.IntVar(&cmd.d, "d", 30, "Limit object display name to D chars")
 	f.IntVar(&cmd.n, "n", 6, "Max number of samples")
+	f.BoolVar(&cmd.t, "t", false, "Include sample times")
+	f.StringVar(&cmd.instance, "instance", "*", "Instance")
 }
 
 func (cmd *sample) Usage() string {
@@ -66,6 +71,55 @@ func (cmd *sample) Process(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+type sampleResult struct {
+	cmd    *sample
+	m      *performance.Manager
+	Sample []performance.EntityMetric
+}
+
+func (r *sampleResult) Write(w io.Writer) error {
+	ctx := context.Background()
+	cmd := r.cmd
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	counters, err := r.m.CounterInfoByName(ctx)
+	if err != nil {
+		return err
+	}
+
+	for i := range r.Sample {
+		metric := r.Sample[i]
+
+		var me mo.ManagedEntity
+		_ = r.m.Properties(ctx, metric.Entity, []string{"name"}, &me)
+
+		name := me.Name
+		if cmd.d > 0 && len(name) > cmd.d {
+			name = name[:cmd.d] + "*"
+		}
+
+		for _, v := range metric.Value {
+			counter := counters[v.Name]
+			units := counter.UnitInfo.GetElementDescription().Label
+
+			instance := v.Instance
+			if instance == "" {
+				instance = "-"
+			}
+
+			t := ""
+			if cmd.t {
+				t = metric.SampleInfoCSV()
+			}
+
+			fmt.Fprintf(tw, "%s\t%s\t%s\t%v\t%s\t%s\n",
+				name, instance, v.Name, t, v.ValueCSV(), units)
+		}
+	}
+
+	return tw.Flush()
 }
 
 func (cmd *sample) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -94,11 +148,6 @@ func (cmd *sample) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	counters, err := m.CounterInfoByKey(ctx)
-	if err != nil {
-		return err
-	}
-
 	objs, err := cmd.ManagedObjects(ctx, paths)
 	if err != nil {
 		return err
@@ -110,7 +159,7 @@ func (cmd *sample) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	spec := types.PerfQuerySpec{
-		Format:     string(types.PerfFormatCsv),
+		Format:     string(types.PerfFormatNormal),
 		MaxSample:  int32(cmd.n),
 		MetricId:   []types.PerfMetricId{{Instance: cmd.instance}},
 		IntervalId: cmd.Interval(s.RefreshRate),
@@ -121,28 +170,10 @@ func (cmd *sample) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	tw := tabwriter.NewWriter(cmd.Out, 2, 0, 2, ' ', 0)
-	cmd.Out = tw
-
-	for _, s := range sample {
-		metric := s.(*types.PerfEntityMetricCSV)
-
-		var me mo.ManagedEntity
-		_ = m.Properties(ctx, metric.Entity, []string{"name"}, &me)
-
-		name := me.Name
-		if cmd.d > 0 && len(name) > cmd.d {
-			name = name[:cmd.d] + "*"
-		}
-
-		for _, v := range metric.Value {
-			counter := counters[v.Id.CounterId]
-			units := counter.UnitInfo.GetElementDescription().Label
-
-			fmt.Fprintf(cmd.Out, "%s\t%s\t%s\t%s\t%s\n",
-				name, v.Id.Instance, counter.Name(), v.Value, units)
-		}
+	result, err := m.ToMetricSeries(ctx, sample)
+	if err != nil {
+		return err
 	}
 
-	return tw.Flush()
+	return cmd.WriteResult(&sampleResult{cmd, m, result})
 }

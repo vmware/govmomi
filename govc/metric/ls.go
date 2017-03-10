@@ -18,11 +18,15 @@ package metric
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/performance"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ls struct {
@@ -62,6 +66,46 @@ func (cmd *ls) Process(ctx context.Context) error {
 	return nil
 }
 
+type lsResult struct {
+	cmd      *ls
+	counters map[int32]*types.PerfCounterInfo
+	performance.MetricList
+}
+
+func (r *lsResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	for _, id := range r.MetricList {
+		if id.Instance != "" {
+			continue
+		}
+
+		info := r.counters[id.CounterId]
+
+		if r.cmd.long {
+			fmt.Fprintf(w, "%s\t%s\n", info.Name(),
+				info.NameInfo.GetElementDescription().Label)
+			continue
+		}
+
+		fmt.Fprintln(w, info.Name())
+	}
+
+	return tw.Flush()
+}
+
+func (r *lsResult) MarshalJSON() ([]byte, error) {
+	m := make(map[string]*types.PerfCounterInfo)
+
+	for _, id := range r.MetricList {
+		info := r.counters[id.CounterId]
+
+		m[info.Name()] = info
+	}
+
+	return json.Marshal(m)
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
@@ -82,34 +126,15 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	counters, err := m.CounterInfoByKey(ctx)
-	if err != nil {
-		return err
-	}
-
 	mids, err := m.AvailableMetric(ctx, objs[0], cmd.Interval(s.RefreshRate))
 	if err != nil {
 		return err
 	}
 
-	tw := tabwriter.NewWriter(cmd.Out, 2, 0, 2, ' ', 0)
-	cmd.Out = tw
-
-	for _, id := range mids {
-		if id.Instance != "" {
-			continue
-		}
-
-		info := counters[id.CounterId]
-
-		if cmd.long {
-			fmt.Fprintf(cmd.Out, "%s\t%s\n", info.Name(),
-				info.NameInfo.GetElementDescription().Label)
-			continue
-		}
-
-		fmt.Fprintln(cmd.Out, info.Name())
+	counters, err := m.CounterInfoByKey(ctx)
+	if err != nil {
+		return err
 	}
 
-	return tw.Flush()
+	return cmd.WriteResult(&lsResult{cmd, counters, mids})
 }

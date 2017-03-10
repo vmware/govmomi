@@ -1861,7 +1861,9 @@ Examples:
 Options:
   -d=30                     Limit object display name to D chars
   -i=0                      Interval ID
+  -instance=*               Instance
   -n=6                      Max number of samples
+  -t=false                  Include sample times
 ```
 
 ## object.collect

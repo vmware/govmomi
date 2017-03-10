@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -338,4 +339,82 @@ func (m *Manager) SampleByName(ctx context.Context, spec types.PerfQuerySpec, me
 	}
 
 	return m.Query(ctx, query)
+}
+
+// MetricSeries contains the same data as types.PerfMetricIntSeries, but with the CounterId converted to Name.
+type MetricSeries struct {
+	Name     string
+	Instance string
+	Value    []int64
+}
+
+// ValueCSV converts the Value field to a CSV string
+func (s *MetricSeries) ValueCSV() string {
+	vals := make([]string, len(s.Value))
+
+	for i := range s.Value {
+		vals[i] = strconv.FormatInt(s.Value[i], 10)
+	}
+
+	return strings.Join(vals, ",")
+}
+
+// EntityMetric contains the same data as types.PerfEntityMetric, but with MetricSeries type for the Value field.
+type EntityMetric struct {
+	Entity types.ManagedObjectReference
+
+	SampleInfo []types.PerfSampleInfo
+	Value      []MetricSeries
+}
+
+// SampleInfoCSV converts the SampleInfo field to a CSV string
+func (m *EntityMetric) SampleInfoCSV() string {
+	vals := make([]string, len(m.SampleInfo)*2)
+
+	i := 0
+
+	for _, s := range m.SampleInfo {
+		vals[i] = s.Timestamp.Format(time.RFC3339)
+		i++
+		vals[i] = strconv.Itoa(int(s.Interval))
+		i++
+	}
+
+	return strings.Join(vals, ",")
+}
+
+// ToMetricSeries converts []BasePerfEntityMetricBase to []EntityMetric
+func (m *Manager) ToMetricSeries(ctx context.Context, series []types.BasePerfEntityMetricBase) ([]EntityMetric, error) {
+	counters, err := m.CounterInfoByKey(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []EntityMetric
+
+	for i := range series {
+		var values []MetricSeries
+		s, ok := series[i].(*types.PerfEntityMetric)
+		if !ok {
+			panic(fmt.Errorf("expected type %T, got: %T", s, series[i]))
+		}
+
+		for j := range s.Value {
+			v := s.Value[j].(*types.PerfMetricIntSeries)
+
+			values = append(values, MetricSeries{
+				Name:     counters[v.Id.CounterId].Name(),
+				Instance: v.Id.Instance,
+				Value:    v.Value,
+			})
+		}
+
+		result = append(result, EntityMetric{
+			Entity:     s.Entity,
+			SampleInfo: s.SampleInfo,
+			Value:      values,
+		})
+	}
+
+	return result, nil
 }
