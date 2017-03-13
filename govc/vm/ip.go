@@ -33,10 +33,11 @@ type ip struct {
 	*flags.OutputFlag
 	*flags.SearchFlag
 
-	esx bool
-	all bool
-	v4  bool
-	nic string
+	esx  bool
+	all  bool
+	v4   bool
+	wait bool
+	nic  string
 }
 
 func init() {
@@ -54,6 +55,7 @@ func (cmd *ip) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.all, "a", false, "Wait for an IP address on all NICs")
 	f.StringVar(&cmd.nic, "n", "", "Wait for IP address on NIC, specified by device name or MAC")
 	f.BoolVar(&cmd.v4, "v4", false, "Only report IPv4 addresses")
+	f.BoolVar(&cmd.wait, "wait", true, "Exit only when the VM obtain an IP address")
 }
 
 func (cmd *ip) Usage() string {
@@ -130,7 +132,7 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 						return "", err
 					}
 
-					if ip != "0.0.0.0" {
+					if ip != "0.0.0.0" || !cmd.wait {
 						return ip, nil
 					}
 				}
