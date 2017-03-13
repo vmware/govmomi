@@ -74,8 +74,8 @@ func NewManager(client *vim25.Client) *Manager {
 type IntervalList []types.PerfInterval
 
 // Enabled returns a map with Level as the key and enabled PerfInterval.Name(s) as the value.
-func (l IntervalList) Enabled() map[int32]string {
-	enabled := make(map[int32]string)
+func (l IntervalList) Enabled() map[int32][]string {
+	enabled := make(map[int32][]string)
 
 	for level := int32(0); level <= 4; level++ {
 		var names []string
@@ -86,7 +86,7 @@ func (l IntervalList) Enabled() map[int32]string {
 			}
 		}
 
-		enabled[level] = strings.Join(names, ",")
+		enabled[level] = names
 	}
 
 	return enabled
@@ -344,8 +344,18 @@ func (m *Manager) SampleByName(ctx context.Context, spec types.PerfQuerySpec, me
 // MetricSeries contains the same data as types.PerfMetricIntSeries, but with the CounterId converted to Name.
 type MetricSeries struct {
 	Name     string
+	unit     string
 	Instance string
 	Value    []int64
+}
+
+func (s *MetricSeries) Format(val int64) string {
+	switch types.PerformanceManagerUnit(s.unit) {
+	case types.PerformanceManagerUnitPercent:
+		return strconv.FormatFloat(float64(val)/100.0, 'f', 2, 64)
+	default:
+		return strconv.FormatInt(val, 10)
+	}
 }
 
 // ValueCSV converts the Value field to a CSV string
@@ -353,7 +363,7 @@ func (s *MetricSeries) ValueCSV() string {
 	vals := make([]string, len(s.Value))
 
 	for i := range s.Value {
-		vals[i] = strconv.FormatInt(s.Value[i], 10)
+		vals[i] = s.Format(s.Value[i])
 	}
 
 	return strings.Join(vals, ",")
@@ -404,6 +414,7 @@ func (m *Manager) ToMetricSeries(ctx context.Context, series []types.BasePerfEnt
 
 			values = append(values, MetricSeries{
 				Name:     counters[v.Id.CounterId].Name(),
+				unit:     counters[v.Id.CounterId].UnitInfo.GetElementDescription().Key,
 				Instance: v.Id.Instance,
 				Value:    v.Value,
 			})

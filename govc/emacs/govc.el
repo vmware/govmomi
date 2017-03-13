@@ -805,6 +805,29 @@ Inherit SESSION if given."
   (interactive)
   (govc-shell-command (govc-format-command "metric.sample" govc-args govc-filter (govc-selection))))
 
+(defun govc-metric-sample-plot ()
+  "Plot metric sample."
+  (interactive)
+  (let* ((type (if (and (display-images-p) (not (eq current-prefix-arg '-))) 'png 'dumb))
+         (max (if (member "-i" govc-args) "60" "180"))
+         (args (append govc-args (list "-n" max "-plot" type govc-filter)))
+         (session (govc-current-session))
+         (metrics (govc-selection)))
+    (with-current-buffer (get-buffer-create "*govc*")
+      (govc-session-clone session)
+      (erase-buffer)
+      (delete-other-windows)
+      (if (eq type 'dumb)
+          (split-window-right)
+        (split-window-below))
+      (display-buffer-use-some-window (current-buffer) '((inhibit-same-window . t)))
+      (--each metrics
+        (let* ((cmd (govc-format-command "metric.sample" args it))
+               (data (govc-process cmd 'buffer-string)))
+          (if (eq type 'dumb)
+              (insert data)
+            (insert-image (create-image (string-as-unibyte data) type t))))))))
+
 (defun govc-metric-info ()
   "Wrapper for govc metric.info."
   (govc-table-info "metric.info" (list govc-args (car govc-filter))))
@@ -812,6 +835,7 @@ Inherit SESSION if given."
 (defvar govc-metric-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "RET") 'govc-metric-sample)
+    (define-key map (kbd "P") 'govc-metric-sample-plot)
     map)
   "Keymap for `govc-metric-mode'.")
 
@@ -819,7 +843,7 @@ Inherit SESSION if given."
   "Metrics info."
   (interactive)
   (let ((session (govc-current-session))
-        (filter (govc-selection))
+        (filter (or (govc-selection) (list govc-session-path)))
         (buffer (get-buffer-create "*govc-metric*")))
     (pop-to-buffer buffer)
     (govc-metric-mode)
@@ -832,6 +856,7 @@ Inherit SESSION if given."
   "Major mode for handling a govc metric."
   (setq tabulated-list-format [("Name" 35 t)
                                ("Group" 15 t)
+                               ("Unit" 4 t)
                                ("Level" 5 t)
                                ("Summary" 50)]
         tabulated-list-sort-key (cons "Name" nil)

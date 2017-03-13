@@ -18,8 +18,10 @@ package metric
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 	"text/tabwriter"
 
@@ -65,6 +67,65 @@ func (cmd *info) Process(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+type EntityDetail struct {
+	Realtime   bool
+	Historical bool
+	Instance   []string
+}
+
+type MetricInfo struct {
+	Counter          *types.PerfCounterInfo
+	Enabled          []string
+	PerDeviceEnabled []string
+	Detail           *EntityDetail
+}
+
+type infoResult struct {
+	cmd  *info
+	Info []*MetricInfo
+}
+
+func (r *infoResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	for _, info := range r.Info {
+		counter := info.Counter
+
+		fmt.Fprintf(tw, "Name:\t%s\n", counter.Name())
+		fmt.Fprintf(tw, "  Label:\t%s\n", counter.NameInfo.GetElementDescription().Label)
+		fmt.Fprintf(tw, "  Summary:\t%s\n", counter.NameInfo.GetElementDescription().Summary)
+		fmt.Fprintf(tw, "  Group:\t%s\n", counter.GroupInfo.GetElementDescription().Label)
+		fmt.Fprintf(tw, "  Unit:\t%s\n", counter.UnitInfo.GetElementDescription().Label)
+		fmt.Fprintf(tw, "  Rollup type:\t%s\n", counter.RollupType)
+		fmt.Fprintf(tw, "  Stats type:\t%s\n", counter.StatsType)
+		fmt.Fprintf(tw, "  Level:\t%d\n", counter.Level)
+		fmt.Fprintf(tw, "    Intervals:\t%s\n", strings.Join(info.Enabled, ","))
+		fmt.Fprintf(tw, "  Per-device level:\t%d\n", counter.PerDeviceLevel)
+		fmt.Fprintf(tw, "    Intervals:\t%s\n", strings.Join(info.PerDeviceEnabled, ","))
+
+		summary := info.Detail
+		if summary == nil {
+			continue
+		}
+
+		fmt.Fprintf(tw, "  Realtime:\t%t\n", summary.Realtime)
+		fmt.Fprintf(tw, "  Historical:\t%t\n", summary.Historical)
+		fmt.Fprintf(tw, "  Instances:\t%s\n", strings.Join(summary.Instance, ","))
+	}
+
+	return tw.Flush()
+}
+
+func (r *infoResult) MarshalJSON() ([]byte, error) {
+	m := make(map[string]*MetricInfo)
+
+	for _, info := range r.Info {
+		m[info.Counter.Name()] = info
+	}
+
+	return json.Marshal(m)
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -129,8 +190,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	tw := tabwriter.NewWriter(cmd.Out, 2, 0, 2, ' ', 0)
-	cmd.Out = tw
+	var metrics []*MetricInfo
 
 	for _, name := range names {
 		counter, ok := counters[name]
@@ -138,33 +198,33 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			return cmd.ErrNotFound(name)
 		}
 
-		fmt.Fprintf(cmd.Out, "Name:\t%s\n", name)
-		fmt.Fprintf(cmd.Out, "  Label:\t%s\n", counter.NameInfo.GetElementDescription().Label)
-		fmt.Fprintf(cmd.Out, "  Summary:\t%s\n", counter.NameInfo.GetElementDescription().Summary)
-		fmt.Fprintf(cmd.Out, "  Group:\t%s\n", counter.GroupInfo.GetElementDescription().Label)
-		fmt.Fprintf(cmd.Out, "  Unit:\t%s\n", counter.UnitInfo.GetElementDescription().Label)
-		fmt.Fprintf(cmd.Out, "  Rollup type:\t%s\n", counter.RollupType)
-		fmt.Fprintf(cmd.Out, "  Stats type:\t%s\n", counter.StatsType)
-		fmt.Fprintf(cmd.Out, "  Level:\t%d\n", counter.Level)
-		fmt.Fprintf(cmd.Out, "    Intervals:\t%s\n", enabled[counter.Level])
-		fmt.Fprintf(cmd.Out, "  Per-device level:\t%d\n", counter.PerDeviceLevel)
-		fmt.Fprintf(cmd.Out, "    Intervals:\t%s\n", enabled[counter.PerDeviceLevel])
-
-		if summary != nil {
-			fmt.Fprintf(cmd.Out, "  Realtime:\t%t\n", summary.CurrentSupported)
-			fmt.Fprintf(cmd.Out, "  Historical:\t%t\n", summary.SummarySupported)
-
-			var instances []string
-
-			for _, id := range mids[counter.Key] {
-				if id.Instance != "" {
-					instances = append(instances, id.Instance)
-				}
-			}
-
-			fmt.Fprintf(cmd.Out, "  Instances:\t%s\n", strings.Join(instances, ","))
+		info := &MetricInfo{
+			Counter:          counter,
+			Enabled:          enabled[counter.Level],
+			PerDeviceEnabled: enabled[counter.PerDeviceLevel],
 		}
+
+		metrics = append(metrics, info)
+
+		if summary == nil {
+			continue
+		}
+
+		var instances []string
+
+		for _, id := range mids[counter.Key] {
+			if id.Instance != "" {
+				instances = append(instances, id.Instance)
+			}
+		}
+
+		info.Detail = &EntityDetail{
+			Realtime:   summary.CurrentSupported,
+			Historical: summary.SummarySupported,
+			Instance:   instances,
+		}
+
 	}
 
-	return tw.Flush()
+	return cmd.WriteResult(&infoResult{cmd, metrics})
 }

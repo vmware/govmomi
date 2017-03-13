@@ -1854,8 +1854,14 @@ Sample for object PATH of metric NAME.
 
 Interval ID defaults to 20 (realtime) if supported, otherwise 300 (5m interval).
 
+If PLOT value is set to '-', output a gnuplot script.  If non-empty with another
+value, PLOT will pipe the script to gnuplot for you.  The value is also used to set
+the gnuplot 'terminal' variable, unless the value is that of the DISPLAY env var.
+Only 1 metric NAME can be specified when the PLOT flag is set.
+
 Examples:
   govc metric.sample host/cluster1/* cpu.usage.average
+  govc metric.sample -plot .png host/cluster1/* cpu.usage.average | xargs open
   govc metric.sample vm/* net.bytesTx.average net.bytesTx.average
 
 Options:
@@ -1863,6 +1869,7 @@ Options:
   -i=0                      Interval ID
   -instance=*               Instance
   -n=6                      Max number of samples
+  -plot=                    Plot data using gnuplot
   -t=false                  Include sample times
 ```
 
