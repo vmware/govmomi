@@ -206,6 +206,23 @@ Options:
   -size=10.0GB              Size of new disk
 ```
 
+## datastore.disk.info
+
+```
+Usage: govc datastore.disk.info [OPTIONS] VMDK
+
+Query VMDK info on DS.
+
+Examples:
+  govc datastore.disk.info disks/disk1.vmdk
+
+Options:
+  -c=false                  Chain format
+  -d=false                  Include datastore in output
+  -ds=                      Datastore [GOVC_DATASTORE]
+  -p=true                   Include parents
+```
+
 ## datastore.download
 
 ```

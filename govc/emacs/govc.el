@@ -1115,6 +1115,13 @@ Optionally filter by FILTER and inherit SESSION."
    (govc-format-command "datastore.tail"
                         (list "-n" govc-max-events (if current-prefix-arg "-f")) (govc-selection))))
 
+(defun govc-datastore-disk-info ()
+  "Info datastore disk."
+  (interactive)
+  (delete-other-windows)
+  (govc-shell-command
+   (govc-format-command "datastore.disk.info" (if current-prefix-arg "-c") (govc-selection))))
+
 (defun govc-datastore-ls-json ()
   "JSON via govc datastore.ls -json on current selection."
   (interactive)
@@ -1145,6 +1152,7 @@ Optionally filter by FILTER and inherit SESSION."
 
 (defvar govc-datastore-ls-mode-map
   (let ((map (make-sparse-keymap)))
+    (define-key map "I" 'govc-datastore-disk-info)
     (define-key map "J" 'govc-datastore-ls-json)
     (define-key map "S" 'govc-datastore-ls-r-json)
     (define-key map "D" 'govc-datastore-rm-selection)
