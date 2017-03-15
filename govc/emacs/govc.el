@@ -828,6 +828,16 @@ Inherit SESSION if given."
               (insert data)
             (insert-image (create-image (string-as-unibyte data) type t))))))))
 
+(defun govc-metric-select (metrics)
+  "Select metric names.  METRICS is a regexp."
+  (interactive (list (read-regexp "Select metrics" (regexp-quote ".usage."))))
+  (save-excursion
+    (goto-char (point-min))
+    (while (not (eobp))
+      (if (string-match-p metrics (tabulated-list-get-id))
+          (govc-tabulated-list-mark)
+        (govc-tabulated-list-unmark)))))
+
 (defun govc-metric-info ()
   "Wrapper for govc metric.info."
   (govc-table-info "metric.info" (list govc-args (car govc-filter))))
@@ -836,6 +846,7 @@ Inherit SESSION if given."
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "RET") 'govc-metric-sample)
     (define-key map (kbd "P") 'govc-metric-sample-plot)
+    (define-key map (kbd "s") 'govc-metric-select)
     map)
   "Keymap for `govc-metric-mode'.")
 
