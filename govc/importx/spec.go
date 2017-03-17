@@ -88,7 +88,7 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
-	if e == nil {
+	if e == nil || e.VirtualSystem == nil {
 		return nil
 	}
 
@@ -128,7 +128,7 @@ func (cmd *spec) Spec(fpath string) error {
 	}
 
 	var deploymentOptions = allDeploymentOptions
-	if e != nil && e.DeploymentOption != nil && e.DeploymentOption.Configuration != nil {
+	if e.DeploymentOption != nil && e.DeploymentOption.Configuration != nil {
 		deploymentOptions = nil
 
 		// add default first
@@ -155,7 +155,7 @@ func (cmd *spec) Spec(fpath string) error {
 		InjectOvfEnv:       false,
 		PropertyMapping:    cmd.Map(e)}
 
-	if e.VirtualSystem.Annotation != nil {
+	if e.VirtualSystem != nil && e.VirtualSystem.Annotation != nil {
 		for _, a := range e.VirtualSystem.Annotation {
 			o.Annotation += a.Annotation
 		}

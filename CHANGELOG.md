@@ -1,5 +1,21 @@
 # changelog
 
+### 0.13.0 (2017-03-02)
+
+* Add DatastoreFileManager API wrapper
+
+* Add HostVsanInternalSystem API wrappers
+
+* Add Container support to view package
+
+* Finder supports Folder recursion without specifying a path
+
+* Add VirtualMachine.QueryConfigTarget method
+
+* Add device option to VirtualMachine.WaitForNetIP
+
+* Remove _Task suffix from vapp methods
+
 ### 0.12.1 (2016-12-19)
 
 * Add DiagnosticLog helper

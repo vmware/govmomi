@@ -16,6 +16,7 @@ datastore_rm $GOVC_TEST_IMG
 datastore_rm $GOVC_TEST_ISO
 datastore_rm $GOVC_TEST_VMDK
 datastore_rm $(echo $GOVC_TEST_VMDK | sed 's/.vmdk/-flat.vmdk/')
+datastore_rm $(dirname $GOVC_TEST_VMDK)
 
 # Recursively destroy all resource pools created by the test suite
 govc ls host/*/Resources/govc-test-* | \

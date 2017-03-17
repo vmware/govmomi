@@ -18,7 +18,6 @@ package datastore
 
 import (
 	"context"
-	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -30,6 +29,7 @@ import (
 type rm struct {
 	*flags.DatastoreFlag
 
+	kind        bool
 	force       bool
 	isNamespace bool
 }
@@ -43,6 +43,7 @@ func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
+	f.BoolVar(&cmd.kind, "t", true, "Use file type to choose disk or file manager")
 	f.BoolVar(&cmd.force, "f", false, "Force; ignore nonexistent files and arguments")
 	f.BoolVar(&cmd.isNamespace, "namespace", false, "Path is uuid of namespace on vsan datastore")
 }
@@ -58,10 +59,19 @@ func (cmd *rm) Usage() string {
 	return "FILE"
 }
 
+func (cmd *rm) Description() string {
+	return `Remove FILE from DATASTORE.
+
+Examples:
+  govc datastore.rm vm/vmware.log
+  govc datastore.rm vm
+  govc datastore.rm -f images/base.vmdk`
+}
+
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) == 0 {
-		return errors.New("missing operand")
+		return flag.ErrHelp
 	}
 
 	c, err := cmd.Client()
@@ -75,28 +85,25 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
+	ds, err := cmd.Datastore()
+	if err != nil {
+		return err
+	}
+
 	if cmd.isNamespace {
 		path := args[0]
 
 		nm := object.NewDatastoreNamespaceManager(c)
 		err = nm.DeleteDirectory(ctx, dc, path)
 	} else {
-		var path string
-		var task *object.Task
+		fm := ds.NewFileManager(dc, cmd.force)
 
-		// TODO(PN): Accept multiple args
-		path, err = cmd.DatastorePath(args[0])
-		if err != nil {
-			return err
+		remove := fm.DeleteFile // File delete
+		if cmd.kind {
+			remove = fm.Delete // VirtualDisk or File delete
 		}
 
-		m := object.NewFileManager(c)
-		task, err = m.DeleteDatastoreFile(ctx, path, dc)
-		if err != nil {
-			return err
-		}
-
-		err = task.Wait(ctx)
+		err = remove(ctx, args[0])
 	}
 
 	if err != nil {

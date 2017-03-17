@@ -28,13 +28,13 @@ GOVC_IMAGES=$BATS_TEST_DIRNAME/images
 TTYLINUX_NAME=ttylinux-pc_i486-16.1
 
 GOVC_TEST_VMDK_SRC=$GOVC_IMAGES/${TTYLINUX_NAME}-disk1.vmdk
-GOVC_TEST_VMDK=$(basename $GOVC_TEST_VMDK_SRC)
+GOVC_TEST_VMDK=govc-images/$(basename $GOVC_TEST_VMDK_SRC)
 
 GOVC_TEST_ISO_SRC=$GOVC_IMAGES/${TTYLINUX_NAME}.iso
-GOVC_TEST_ISO=$(basename $GOVC_TEST_ISO_SRC)
+GOVC_TEST_ISO=govc-images/$(basename $GOVC_TEST_ISO_SRC)
 
 GOVC_TEST_IMG_SRC=$GOVC_IMAGES/floppybird.img
-GOVC_TEST_IMG=$(basename $GOVC_TEST_IMG_SRC)
+GOVC_TEST_IMG=govc-images/$(basename $GOVC_TEST_IMG_SRC)
 
 PATH="$(dirname $BATS_TEST_DIRNAME):$PATH"
 
@@ -49,17 +49,18 @@ new_id() {
 }
 
 import_ttylinux_vmdk() {
-  # TODO: fix datastore.ls do we don't need grep
-  govc datastore.ls | grep -q $GOVC_TEST_VMDK || \
-    govc import.vmdk $GOVC_TEST_VMDK_SRC > /dev/null
+  govc datastore.mkdir -p govc-images
+  govc datastore.ls "$GOVC_TEST_VMDK" >/dev/null 2>&1 || \
+    govc import.vmdk "$GOVC_TEST_VMDK_SRC" govc-images > /dev/null
 }
 
 datastore_upload() {
   src=$1
-  dst=$(basename $src)
-  # TODO: fix datastore.ls do we don't need grep
-  govc datastore.ls | grep -q $dst || \
-    govc datastore.upload $src $dst > /dev/null
+  dst=govc-images/$(basename $src)
+
+  govc datastore.mkdir -p govc-images
+  govc datastore.ls "$dst" >/dev/null 2>&1 || \
+    govc datastore.upload "$src" "$dst" > /dev/null
 }
 
 upload_img() {

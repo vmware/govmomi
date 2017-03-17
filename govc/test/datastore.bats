@@ -191,3 +191,82 @@ upload_file() {
     done
   done
 }
+
+@test "datastore.disk" {
+  id=$(new_id)
+  vmdk="$id/$id.vmdk"
+
+  run govc datastore.mkdir "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  run govc datastore.disk.info "$vmdk"
+  assert_success
+
+  run govc datastore.rm "$vmdk"
+  assert_success
+
+  run govc datastore.mkdir -p "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  id=$(new_id)
+  run govc vm.create -on=false -link -disk "$vmdk" "$id"
+  assert_success
+
+  run govc datastore.disk.info -d "$vmdk"
+  assert_success
+
+  run govc datastore.disk.info -p=false "$vmdk"
+  assert_success
+
+  run govc datastore.disk.info -c "$vmdk"
+  assert_success
+
+  run govc datastore.disk.info -json "$vmdk"
+  assert_success
+
+  # should fail due to: ddb.deletable=false
+  run govc datastore.rm "$vmdk"
+  assert_failure
+
+  run govc datastore.rm -f "$vmdk"
+  assert_success
+
+  # one more time, but rm the directory w/o -f
+  run govc datastore.mkdir -p "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  id=$(new_id)
+  run govc vm.create -on=false -link -disk "$vmdk" "$id"
+  assert_success
+
+  run govc datastore.rm "$(dirname "$vmdk")"
+  assert_success
+}
+
+@test "datastore.disk.info" {
+  import_ttylinux_vmdk
+
+  run govc datastore.disk.info
+  assert_failure
+
+  run govc datastore.disk.info enoent
+  assert_failure
+
+  run govc datastore.disk.info "$GOVC_TEST_VMDK"
+  assert_success
+
+  run govc datastore.disk.info -d "$GOVC_TEST_VMDK"
+  assert_success
+
+  run govc datastore.disk.info -c "$GOVC_TEST_VMDK"
+  assert_success
+}

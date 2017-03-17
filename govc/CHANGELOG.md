@@ -1,5 +1,25 @@
 # changelog
 
+### 0.13.0 (2017-03-02)
+
+* Add vm.guest.tools command
+
+* Add datastore.disk.create command
+
+* Add datastore.vsan.dom.ls and datastore.vsan.dom.rm commands
+
+* Add vm.disk.change command
+
+* Add vm.rdm attach and ls commands
+
+* Add '-n' option to vm.ip to wait for a specific NIC
+
+* Add '-annotation' option to vm.create and vm.clone commands
+
+* Add '-sync-time-with-host-' flag to vm.change command
+
+* Add object.collect command (MOB for cli + Emacs)
+
 ### 0.12.1 (2016-12-19)
 
 * Add '-f' flag to logs command

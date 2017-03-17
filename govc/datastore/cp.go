@@ -61,6 +61,14 @@ func (cmd *cp) Usage() string {
 	return "SRC DST"
 }
 
+func (cmd *cp) Description() string {
+	return `Copy SRC to DST on DATASTORE.
+
+Examples:
+  govc datastore.cp foo/foo.vmx foo/foo.vmx.old
+  govc datastore.cp -f my.vmx foo/foo.vmx`
+}
+
 func (cmd *cp) Run(ctx context.Context, f *flag.FlagSet) error {
 	args := f.Args()
 	if len(args) != 2 {

@@ -153,6 +153,12 @@ Options:
 ```
 Usage: govc datastore.cp [OPTIONS] SRC DST
 
+Copy SRC to DST on DATASTORE.
+
+Examples:
+  govc datastore.cp foo/foo.vmx foo/foo.vmx.old
+  govc datastore.cp -f my.vmx foo/foo.vmx
+
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
   -f=false                  If true, overwrite any identically named file at the destination
@@ -182,6 +188,39 @@ Options:
   -remote-path=             Remote path of the NFS mount point
   -type=                    Datastore type (NFS|NFS41|CIFS|VMFS|local)
   -username=                Username to use when connecting (CIFS only)
+```
+
+## datastore.disk.create
+
+```
+Usage: govc datastore.disk.create [OPTIONS] VMDK
+
+Create VMDK on DS.
+
+Examples:
+  govc datastore.mkdir disks
+  govc datastore.disk.create -size 24G disks/disk1.vmdk
+
+Options:
+  -ds=                      Datastore [GOVC_DATASTORE]
+  -size=10.0GB              Size of new disk
+```
+
+## datastore.disk.info
+
+```
+Usage: govc datastore.disk.info [OPTIONS] VMDK
+
+Query VMDK info on DS.
+
+Examples:
+  govc datastore.disk.info disks/disk1.vmdk
+
+Options:
+  -c=false                  Chain format
+  -d=false                  Include datastore in output
+  -ds=                      Datastore [GOVC_DATASTORE]
+  -p=true                   Include parents
 ```
 
 ## datastore.download
@@ -239,6 +278,12 @@ Options:
 ```
 Usage: govc datastore.mv [OPTIONS] SRC DST
 
+Move SRC to DST on DATASTORE.
+
+Examples:
+  govc datastore.mv foo/foo.vmx foo/foo.vmx.old
+  govc datastore.mv -f my.vmx foo/foo.vmx
+
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
   -f=false                  If true, overwrite any identically named file at the destination
@@ -265,10 +310,18 @@ Options:
 ```
 Usage: govc datastore.rm [OPTIONS] FILE
 
+Remove FILE from DATASTORE.
+
+Examples:
+  govc datastore.rm vm/vmware.log
+  govc datastore.rm vm
+  govc datastore.rm -f images/base.vmdk
+
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
   -f=false                  Force; ignore nonexistent files and arguments
   -namespace=false          Path is uuid of namespace on vsan datastore
+  -t=true                   Use file type to choose disk or file manager
 ```
 
 ## datastore.tail
@@ -305,6 +358,42 @@ Examples:
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
+```
+
+## datastore.vsan.dom.ls
+
+```
+Usage: govc datastore.vsan.dom.ls [OPTIONS] [UUID]...
+
+List vSAN DOM objects in DS.
+
+Examples:
+  govc datastore.vsan.dom.ls
+  govc datastore.vsan.dom.ls -ds vsanDatastore -l
+  govc datastore.vsan.dom.ls -l d85aa758-63f5-500a-3150-0200308e589c
+
+Options:
+  -ds=                      Datastore [GOVC_DATASTORE]
+  -l=false                  Long listing
+  -o=false                  List orphan objects
+```
+
+## datastore.vsan.dom.rm
+
+```
+Usage: govc datastore.vsan.dom.rm [OPTIONS] UUID...
+
+Remove vSAN DOM objects in DS.
+
+Examples:
+  govc datastore.vsan.dom.rm d85aa758-63f5-500a-3150-0200308e589c
+  govc datastore.vsan.dom.rm -f d85aa758-63f5-500a-3150-0200308e589c
+  govc datastore.vsan.dom.ls -o | xargs govc datastore.vsan.dom.rm
+
+Options:
+  -ds=                      Datastore [GOVC_DATASTORE]
+  -f=false                  Force delete
+  -v=false                  Print deleted UUIDs to stdout, failed to stderr
 ```
 
 ## device.boot
@@ -1671,6 +1760,136 @@ Options:
   -t=                       Object type
 ```
 
+## metric.change
+
+```
+Usage: govc metric.change [OPTIONS] NAME...
+
+Change counter NAME levels.
+
+Examples:
+  govc metric.change -level 1 net.bytesRx.average net.bytesTx.average
+
+Options:
+  -device-level=0           Level for the per device counter
+  -i=0                      Interval ID
+  -level=0                  Level for the aggregate counter
+```
+
+## metric.info
+
+```
+Usage: govc metric.info [OPTIONS] PATH [NAME]...
+
+Metric info for NAME.
+
+If PATH is a value other than '-', provider summary and instance list are included
+for the given object type.
+
+If NAME is not specified, all available metrics for the given INTERVAL are listed.
+An object PATH must be provided in this case.
+
+Examples:
+  govc metric.info vm/my-vm
+  govc metric.info -i 300 vm/my-vm
+  govc metric.info - cpu.usage.average
+  govc metric.info /dc1/host/cluster cpu.usage.average
+
+Options:
+  -i=0                      Interval ID
+```
+
+## metric.interval.change
+
+```
+Usage: govc metric.interval.change [OPTIONS]
+
+Change historical metric intervals.
+
+Examples:
+  govc metric.interval.change -i 300 -level 2
+  govc metric.interval.change -i 86400 -enabled=false
+
+Options:
+  -enabled=<nil>            Enable or disable
+  -i=0                      Interval ID
+  -level=0                  Level
+```
+
+## metric.interval.info
+
+```
+Usage: govc metric.interval.info [OPTIONS]
+
+List historical metric intervals.
+
+Examples:
+  govc metric.interval.info
+  govc metric.interval.info -i 300
+
+Options:
+  -i=0                      Interval ID
+```
+
+## metric.ls
+
+```
+Usage: govc metric.ls [OPTIONS] PATH
+
+List available metrics for PATH.
+
+Examples:
+  govc metric.ls /dc1/host/cluster1
+  govc metric.ls datastore/*
+  govc metric.ls vm/* | grep mem. | xargs govc metric.sample vm/*
+
+Options:
+  -i=0                      Interval ID
+  -l=false                  Long listing format
+```
+
+## metric.reset
+
+```
+Usage: govc metric.reset [OPTIONS] NAME...
+
+Reset counter NAME to the default level of data collection.
+
+Examples:
+  govc metric.reset net.bytesRx.average net.bytesTx.average
+
+Options:
+  -i=0                      Interval ID
+```
+
+## metric.sample
+
+```
+Usage: govc metric.sample [OPTIONS] PATH... NAME...
+
+Sample for object PATH of metric NAME.
+
+Interval ID defaults to 20 (realtime) if supported, otherwise 300 (5m interval).
+
+If PLOT value is set to '-', output a gnuplot script.  If non-empty with another
+value, PLOT will pipe the script to gnuplot for you.  The value is also used to set
+the gnuplot 'terminal' variable, unless the value is that of the DISPLAY env var.
+Only 1 metric NAME can be specified when the PLOT flag is set.
+
+Examples:
+  govc metric.sample host/cluster1/* cpu.usage.average
+  govc metric.sample -plot .png host/cluster1/* cpu.usage.average | xargs open
+  govc metric.sample vm/* net.bytesTx.average net.bytesTx.average
+
+Options:
+  -d=30                     Limit object display name to D chars
+  -i=0                      Interval ID
+  -instance=*               Instance
+  -n=6                      Max number of samples
+  -plot=                    Plot data using gnuplot
+  -t=false                  Include sample times
+```
+
 ## object.collect
 
 ```
@@ -2238,10 +2457,40 @@ Options:
   -vm=                      Virtual machine [GOVC_VM]
 ```
 
+## vm.disk.change
+
+```
+Usage: govc vm.disk.change [OPTIONS]
+
+Change some properties of a VM's DISK
+
+In particular, you can change the DISK mode, and the size (as long as it is bigger)
+
+Examples:
+  govc vm.disk.change -vm VM -disk.key 2001 -size 10G
+  govc vm.disk.change -vm VM -disk.label "BDD disk" -size 10G
+  govc vm.disk.change -vm VM -disk.name "hard-1000-0" -size 12G
+  govc vm.disk.change -vm VM -disk.filePath "[DS] VM/VM-1.vmdk" -mode nonpersistent
+
+Options:
+  -disk.filePath=           Disk file name
+  -disk.key=0               Disk unique key
+  -disk.label=              Disk label
+  -disk.name=               Disk name
+  -mode=                    Disk mode (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
+  -size=0B                  New disk size
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
 ## vm.disk.create
 
 ```
 Usage: govc vm.disk.create [OPTIONS]
+
+Create disk and attach to VM.
+
+Examples:
+  govc vm.disk.create -vm $name -name $name/disk1 -size 10G
 
 Options:
   -controller=              Disk controller
@@ -2252,6 +2501,25 @@ Options:
   -size=10.0GB              Size of new disk
   -thick=false              Thick provision new disk
   -vm=                      Virtual machine [GOVC_VM]
+```
+
+## vm.guest.tools
+
+```
+Usage: govc vm.guest.tools [OPTIONS] VM...
+
+Manage guest tools in VM.
+
+Examples:
+  govc vm.guest.tools -mount VM
+  govc vm.guest.tools -unmount VM
+  govc vm.guest.tools -upgrade -options "opt1 opt2" VM
+
+Options:
+  -mount=false              Mount tools CD installer in the guest
+  -options=                 Installer options
+  -unmount=false            Unmount tools CD installer in the guest
+  -upgrade=false            Upgrade tools in the guest
 ```
 
 ## vm.info
@@ -2312,7 +2580,12 @@ Options:
 ## vm.markastemplate
 
 ```
-Usage: govc vm.markastemplate [OPTIONS]
+Usage: govc vm.markastemplate [OPTIONS] VM...
+
+Mark VM as a virtual machine template.
+
+Examples:
+  govc vm.markastemplate $name
 
 Options:
 ```
@@ -2320,10 +2593,17 @@ Options:
 ## vm.markasvm
 
 ```
-Usage: govc vm.markasvm [OPTIONS]
+Usage: govc vm.markasvm [OPTIONS] VM...
+
+Mark VM template as a virtual machine.
+
+Examples:
+  govc vm.markasvm $name -host host1
+  govc vm.markasvm $name -pool cluster1/Resources
 
 Options:
   -host=                    Host system [GOVC_HOST]
+  -pool=                    Resource pool [GOVC_RESOURCE_POOL]
 ```
 
 ## vm.migrate
@@ -2403,6 +2683,35 @@ Usage: govc vm.question [OPTIONS]
 
 Options:
   -answer=                  Answer to question
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
+## vm.rdm.attach
+
+```
+Usage: govc vm.rdm.attach [OPTIONS]
+
+Attach DEVICE to VM with RDM.
+
+Examples:
+  govc vm.rdm.attach -vm VM -device /vmfs/devices/disks/naa.000000000000000000000000000000000
+
+Options:
+  -device=                  Device Name
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
+## vm.rdm.ls
+
+```
+Usage: govc vm.rdm.ls [OPTIONS]
+
+List available devices that could be attach to VM with RDM.
+
+Examples:
+  govc vm.rdm.ls -vm VM
+
+Options:
   -vm=                      Virtual machine [GOVC_VM]
 ```
 

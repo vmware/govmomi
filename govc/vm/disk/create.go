@@ -89,6 +89,13 @@ func (cmd *create) Process(ctx context.Context) error {
 	return nil
 }
 
+func (cmd *create) Description() string {
+	return `Create disk and attach to VM.
+
+Examples:
+  govc vm.disk.create -vm $name -name $name/disk1 -size 10G`
+}
+
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	if len(cmd.Name) == 0 {
 		return errors.New("please specify a disk name")

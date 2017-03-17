@@ -22,16 +22,12 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/object"
 )
 
 type markasvm struct {
-	*flags.ClientFlag
 	*flags.SearchFlag
-	*flags.HostSystemFlag
 	*flags.ResourcePoolFlag
-	HostSystem   *object.HostSystem
-	ResourcePool *object.ResourcePool
+	*flags.HostSystemFlag
 }
 
 func init() {
@@ -39,19 +35,19 @@ func init() {
 }
 
 func (cmd *markasvm) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
 	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
 	cmd.SearchFlag.Register(ctx, f)
+	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
+	cmd.ResourcePoolFlag.Register(ctx, f)
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 }
 
 func (cmd *markasvm) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
+	if err := cmd.SearchFlag.Process(ctx); err != nil {
 		return err
 	}
-	if err := cmd.SearchFlag.Process(ctx); err != nil {
+	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
 		return err
 	}
 	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
@@ -60,24 +56,51 @@ func (cmd *markasvm) Process(ctx context.Context) error {
 	return nil
 }
 
+func (cmd *markasvm) Usage() string {
+	return "VM..."
+}
+
+func (cmd *markasvm) Description() string {
+	return `Mark VM template as a virtual machine.
+
+Examples:
+  govc vm.markasvm $name -host host1
+  govc vm.markasvm $name -pool cluster1/Resources`
+}
+
 func (cmd *markasvm) Run(ctx context.Context, f *flag.FlagSet) error {
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err
 	}
-	cmd.HostSystem, err = cmd.HostSystemFlag.HostSystem()
+
+	pool, err := cmd.ResourcePoolIfSpecified()
 	if err != nil {
 		return err
 	}
-	cmd.ResourcePool, err = cmd.HostSystem.ResourcePool(ctx)
+
+	host, err := cmd.HostSystemFlag.HostSystemIfSpecified()
 	if err != nil {
 		return err
 	}
-	for _, vm := range vms {
-		err := vm.MarkAsVirtualMachine(ctx, *cmd.ResourcePool, cmd.HostSystem)
+
+	if pool == nil {
+		if host == nil {
+			return flag.ErrHelp
+		}
+
+		pool, err = host.ResourcePool(ctx)
 		if err != nil {
 			return err
 		}
 	}
+
+	for _, vm := range vms {
+		err := vm.MarkAsVirtualMachine(ctx, *pool, host)
+		if err != nil {
+			return err
+		}
+	}
+
 	return nil
 }
