@@ -19,7 +19,7 @@ Package find implements inventory listing and searching.
 
 The Finder is an alternative to the object.SearchIndex FindByInventoryPath() and FindChild() methods.
 SearchIndex.FindByInventoryPath requires an absolute path, whereas the Finder also supports relative paths
-and patterns via filepath.Match.
+and patterns via path.Match.
 SearchIndex.FindChild requires a parent to find the child, whereas the Finder also supports an ancestor via
 recursive object traversal.
 
