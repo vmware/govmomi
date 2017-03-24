@@ -1,12 +1,9 @@
 /*
 Copyright (c) 2015 VMware, Inc. All Rights Reserved.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -28,6 +25,7 @@ import (
 	"net/url"
 	"os"
 	"strings"
+	"strconv"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi"
@@ -113,6 +111,15 @@ func exit(err error) {
 	os.Exit(1)
 }
 
+// Verify if the capability value is of type integer.
+func verifyCapabilityValueIsInteger(capabilityValue string) (int, bool) {
+	i, err := strconv.Atoi(capabilityValue)
+	if err != nil {
+		return -1, false
+	}
+	return i, true
+}
+
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -145,6 +152,9 @@ func main() {
 	// Make future calls local to this datacenter
 	f.SetDatacenter(dc)
 
+	ds1, err := f.Datastore(ctx, "vsanDatastore")
+        
+	
 	// Find datastores in datacenter
 	dss, err := f.DatastoreList(ctx, "*")
 	if err != nil {
@@ -176,5 +186,12 @@ func main() {
 		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.FreeSpace))
 		fmt.Fprintf(tw, "\n")
 	}
+	
+	fmt.Fprintf(tw, "%+v\n", ds1)
+	capabilityIntVal, ok := verifyCapabilityValueIsInteger("balu")
+	if !ok || (capabilityIntVal < 0 || capabilityIntVal > 3) {
+		fmt.Fprintf(tw, "%False\n");
+	}
+        fmt.Fprintf(tw, "%q\n", capabilityIntVal);
 	tw.Flush()
 }

@@ -1,12 +1,9 @@
 /*
 Copyright (c) 2015 VMware, Inc. All Rights Reserved.
-
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -145,23 +142,27 @@ func main() {
 	// Make future calls local to this datacenter
 	f.SetDatacenter(dc)
 
-	// Find datastores in datacenter
-	dss, err := f.DatastoreList(ctx, "*")
-	if err != nil {
-		exit(err)
-	}
-
+	ds1, err := f.Datastore(ctx, "vsanDatastore")
+	vm1, err := f.VirtualMachine(ctx, "hello")
+        
 	pc := property.DefaultCollector(c.Client)
 
 	// Convert datastores into list of references
 	var refs []types.ManagedObjectReference
-	for _, ds := range dss {
-		refs = append(refs, ds.Reference())
-	}
+	refs = append(refs, ds1.Reference())
+
+	var refsvm []types.ManagedObjectReference
+	refsvm = append(refsvm, vm1.Reference())
 
 	// Retrieve summary property for all datastores
 	var dst []mo.Datastore
 	err = pc.Retrieve(ctx, refs, []string{"summary"}, &dst)
+	if err != nil {
+		exit(err)
+	}
+
+	var vmt []mo.VirtualMachine
+	err = pc.Retrieve(ctx, refsvm, []string{"layoutEx.file"}, &vmt)
 	if err != nil {
 		exit(err)
 	}
@@ -176,5 +177,14 @@ func main() {
 		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.FreeSpace))
 		fmt.Fprintf(tw, "\n")
 	}
+
+	for _, vm := range vmt {
+		fileLayoutInfo := vm.LayoutEx.File
+		for _, fileInfo := range fileLayoutInfo {
+			if strings.HasSuffix(fileInfo.Name, "hello.vmdk") {
+				fmt.Fprintf(tw, "%q\n", fileInfo.Name)
+			}
+		}
+        }
 	tw.Flush()
 }
