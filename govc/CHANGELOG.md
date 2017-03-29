@@ -1,5 +1,7 @@
 # changelog
 
+* Add '-wait' option to vm.ip to allow a non-waiting query
+
 ### 0.13.0 (2017-03-02)
 
 * Add vm.guest.tools command
