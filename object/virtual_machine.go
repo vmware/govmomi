@@ -766,7 +766,7 @@ func (v VirtualMachine) UpgradeTools(ctx context.Context, options string) (*Task
 // 1) snapshot ManagedObjectReference.Value (unique)
 // 2) snapshot name (may not be unique)
 // 3) snapshot tree path (may not be unique)
-func (v VirtualMachine) findSnapshot(ctx context.Context, name string) (Reference, error) {
+func (v VirtualMachine) SearchSnapshot(ctx context.Context, name string) (Reference, error) {
 	var o mo.VirtualMachine
 
 	err := v.Properties(ctx, v.Reference(), []string{"snapshot"}, &o)
