@@ -29,6 +29,9 @@ the immediate path.  The "find" mode behaves like the "find" command, with the s
 also recursing into sub Folders relative to the Datacenter.  The default mode is "list" if the given path contains a "/",
 otherwise "find" mode is used.
 
+The exception is to use a "..." wildcard with a path to find all objects recursively underneath any root object.
+For example: VirtualMachineList("/DC1/...")
+
 See also: https://github.com/vmware/govmomi/blob/master/govc/README.md#usage
 */
 package find

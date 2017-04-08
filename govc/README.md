@@ -150,6 +150,14 @@ govc version -require 0.7.1
 
 * [VMware VIC Engine](https://github.com/vmware/vic)
 
+* [vSphere Docker Volume Service](https://github.com/vmware/docker-volume-vsphere)
+
+* [golang/build](https://github.com/golang/build)
+
+## Related projects
+
+* [rvc](https://github.com/vmware/rvc)
+
 ## License
 
 govc is available under the [Apache 2 license](../LICENSE).
