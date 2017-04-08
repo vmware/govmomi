@@ -139,7 +139,7 @@ When new govc commands or flags are added, the PATCH version will be incremented
 version from within a script, for example:
 
 ```
-govc version -require 0.7.1
+govc version -require 0.14
 ```
 
 ## Projects using govc
