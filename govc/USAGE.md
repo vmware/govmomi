@@ -866,6 +866,51 @@ Usage: govc fields.set [OPTIONS] KEY VALUE PATH...
 Options:
 ```
 
+## find
+
+```
+Usage: govc find [OPTIONS] [ROOT] [KEY VAL]...
+
+Find managed objects.
+
+ROOT can be an inventory path or ManagedObjectReference.
+ROOT defaults to '.', an alias for the root folder or DC if set.
+
+Optional KEY VAL pairs can be used to filter results against object instance properties.
+
+The '-type' flag value can be a managed entity type or one of the following aliases:
+
+  a    VirtualApp
+  c    ClusterComputeResource
+  d    Datacenter
+  f    Folder
+  g    DistributedVirtualPortgroup
+  h    HostSystem
+  m    VirtualMachine
+  n    Network
+  o    OpaqueNetwork
+  p    ResourcePool
+  r    ComputeResource
+  s    Datastore
+  w    DistributedVirtualSwitch
+
+Examples:
+  govc find
+  govc find /dc1 -type c
+  govc find vm -name my-vm-*
+  govc find . -type n
+  govc find . -type m -runtime.powerState poweredOn
+  govc find . -type m -datastore $(govc find -i datastore -name vsanDatastore)
+  govc find . -type s -summary.type vsan
+  govc find . -type h -hardware.cpuInfo.numCpuCores 16
+
+Options:
+  -i=false                  Print the managed object reference
+  -maxdepth=-1              Max depth
+  -name=*                   Resource name
+  -type=[]                  Resource type
+```
+
 ## firewall.ruleset.find
 
 ```
@@ -2562,8 +2607,12 @@ When given the '-n' flag, filters '-a' behavior to the nic specified by MAC addr
 The 'esxcli' flag does not require vmware-tools to be installed, but does require the ESX host to
 have the /Net/GuestIPHack setting enabled.
 
+The 'wait' flag default to 1hr (original default was infinite).  If a VM does not obtain an IP within
+the wait time, the command will still exit with status 0.
+
 Examples:
   govc vm.ip $vm
+  govc vm.ip -wait 5m $vm
   govc vm.ip -a -v4 $vm
   govc vm.ip -n 00:0c:29:57:7b:c3 $vm
   govc vm.ip -n ethernet-0 $vm
@@ -2575,6 +2624,7 @@ Options:
   -esxcli=false             Use esxcli instead of guest tools
   -n=                       Wait for IP address on NIC, specified by device name or MAC
   -v4=false                 Only report IPv4 addresses
+  -wait=1h0m0s              Wait time for the VM obtain an IP address
 ```
 
 ## vm.markastemplate
