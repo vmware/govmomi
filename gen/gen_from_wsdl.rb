@@ -20,7 +20,7 @@ if !File.directory?(ARGV.first)
   raise "first argument not a directory"
 end
 
-wsdl = WSDL.new(WSDL.read "vim.wsdl")
+wsdl = WSDL.new(WSDL.read "pbm.wsdl")
 wsdl.validate_assumptions!
 wsdl.peek()
 

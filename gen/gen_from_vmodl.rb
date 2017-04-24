@@ -198,7 +198,7 @@ class Vmodl
     @data.map do |k,v|
       next if !v.is_a?(Hash)
       next if v["kind"] != "managed"
-      next if k =~ /^pbm/i
+      # next if k =~ /^pbm/i
 
       Managed.new(self, k, v)
     end.compact
@@ -209,7 +209,7 @@ if !File.directory?(ARGV.first)
   raise "first argument not a directory"
 end
 
-wsdl = WSDL.new(WSDL.read "vim.wsdl")
+wsdl = WSDL.new(WSDL.read "pbm.wsdl")
 wsdl.validate_assumptions!
 wsdl.peek()
 

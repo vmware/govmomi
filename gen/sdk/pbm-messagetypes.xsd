@@ -1,0 +1,223 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Copyright 2005-2016 VMware, Inc.  All rights reserved.
+-->
+<schema
+   targetNamespace="urn:pbm"
+   xmlns="http://www.w3.org/2001/XMLSchema"
+   xmlns:pbm="urn:pbm"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:vim25="urn:vim25"
+   xmlns:reflect="urn:reflect"
+   elementFormDefault="qualified"
+>
+   <import namespace="urn:vim25" schemaLocation="query-types.xsd" />
+   <import namespace="urn:vim25" schemaLocation="vim-types.xsd" />
+   <import namespace="urn:vim25" schemaLocation="core-types.xsd" />
+   <import namespace="urn:reflect" schemaLocation="reflect-types.xsd" />
+   <include schemaLocation="pbm-types.xsd" />
+   <complexType name="PbmRetrieveServiceContentRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCheckComplianceRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entities" type="pbm:PbmServerObjectRef" maxOccurs="unbounded" />
+         <element name="profile" type="pbm:PbmProfileId" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFetchComplianceResultRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entities" type="pbm:PbmServerObjectRef" maxOccurs="unbounded" />
+         <element name="profile" type="pbm:PbmProfileId" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCheckRollupComplianceRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entity" type="pbm:PbmServerObjectRef" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFetchRollupComplianceResultRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entity" type="pbm:PbmServerObjectRef" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryByRollupComplianceStatusRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="status" type="xsd:string" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryMatchingHubRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hubsToSearch" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
+         <element name="profile" type="pbm:PbmProfileId" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryMatchingHubWithSpecRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hubsToSearch" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
+         <element name="createSpec" type="pbm:PbmCapabilityProfileCreateSpec" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCheckCompatibilityRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hubsToSearch" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
+         <element name="profile" type="pbm:PbmProfileId" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCheckCompatibilityWithSpecRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hubsToSearch" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
+         <element name="profileSpec" type="pbm:PbmCapabilityProfileCreateSpec" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCheckRequirementsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hubsToSearch" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
+         <element name="placementSubjectRef" type="pbm:PbmServerObjectRef" minOccurs="0" />
+         <element name="placementSubjectRequirement" type="pbm:PbmPlacementRequirement" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFetchResourceTypeRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFetchVendorInfoRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="resourceType" type="pbm:PbmProfileResourceType" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFetchCapabilityMetadataRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="resourceType" type="pbm:PbmProfileResourceType" minOccurs="0" />
+         <element name="vendorUuid" type="xsd:string" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFetchCapabilitySchemaRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="vendorUuid" type="xsd:string" minOccurs="0" />
+         <element name="lineOfService" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCreateRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="createSpec" type="pbm:PbmCapabilityProfileCreateSpec" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmUpdateRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profileId" type="pbm:PbmProfileId" />
+         <element name="updateSpec" type="pbm:PbmCapabilityProfileUpdateSpec" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmDeleteRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profileId" type="pbm:PbmProfileId" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="resourceType" type="pbm:PbmProfileResourceType" />
+         <element name="profileCategory" type="xsd:string" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmRetrieveContentRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profileIds" type="pbm:PbmProfileId" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryAssociatedProfilesRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entities" type="pbm:PbmServerObjectRef" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryAssociatedProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entity" type="pbm:PbmServerObjectRef" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryAssociatedEntityRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profile" type="pbm:PbmProfileId" />
+         <element name="entityType" type="xsd:string" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryDefaultRequirementProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="hub" type="pbm:PbmPlacementHub" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmResetDefaultRequirementProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profile" type="pbm:PbmProfileId" minOccurs="0" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmAssignDefaultRequirementProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profile" type="pbm:PbmProfileId" />
+         <element name="datastores" type="pbm:PbmPlacementHub" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmFindApplicableDefaultProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="datastores" type="pbm:PbmPlacementHub" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryDefaultRequirementProfilesRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="datastores" type="pbm:PbmPlacementHub" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmResetVSanDefaultProfileRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQuerySpaceStatsForStorageContainerRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="datastore" type="pbm:PbmServerObjectRef" />
+         <element name="capabilityProfileId" type="pbm:PbmProfileId" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryAssociatedEntitiesRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="profiles" type="pbm:PbmProfileId" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryReplicationGroupsRequestType">
+      <sequence>
+         <element name="_this" type="vim25:ManagedObjectReference" />
+         <element name="entities" type="pbm:PbmServerObjectRef" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+</schema>

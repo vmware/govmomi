@@ -141,12 +141,12 @@ class Simple
 
   def vim_type?
     ns, _ = self.type.split(":", 2)
-    ns == "vim25" or ns == "internalvim25" or ns == "internalreflect"
+    ns == "vim25" or ns == "pbm" or ns == "internalvim25" or ns == "internalreflect"
   end
 
   def vim_type(t = self.type)
     ns, t = t.split(":", 2)
-    if ns != "vim25" and ns != "internalvim25" and ns != "internalreflect"
+    if ns != "vim25" and ns != "pbm" and ns != "internalvim25" and ns != "internalreflect"
         raise
     end
     t
@@ -646,7 +646,7 @@ class Operation
 
   def remove_ns(x)
     ns, x = x.split(":", 2)
-    if ns != "vim25" and ns != "internalvim25" and ns != "internalreflect"
+    if ns != "vim25" and ns != "pbm" and ns != "internalvim25" and ns != "internalreflect"
         raise
     end
     x
@@ -654,7 +654,7 @@ class Operation
 
   def keep_ns(x)
     ns, x = x.split(":", 2)
-    if ns != "vim25" and ns != "internalvim25" and ns != "internalreflect"
+    if ns != "vim25" and ns != "pbm" and ns != "internalvim25" and ns != "internalreflect"
         raise
     end
     ns

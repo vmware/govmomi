@@ -1,0 +1,988 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Copyright 2005-2016 VMware, Inc.  All rights reserved.
+-->
+<schema
+   targetNamespace="urn:pbm"
+   xmlns="http://www.w3.org/2001/XMLSchema"
+   xmlns:pbm="urn:pbm"
+   xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+   xmlns:vim25="urn:vim25"
+   xmlns:reflect="urn:reflect"
+   elementFormDefault="qualified"
+>
+   <import namespace="urn:vim25" schemaLocation="query-types.xsd" />
+   <import namespace="urn:vim25" schemaLocation="vim-types.xsd" />
+   <import namespace="urn:vim25" schemaLocation="core-types.xsd" />
+   <import namespace="urn:reflect" schemaLocation="reflect-types.xsd" />
+   <complexType name="PbmAboutInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="xsd:string" />
+               <element name="version" type="xsd:string" />
+               <element name="instanceUuid" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmExtendedElementDescription">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="label" type="xsd:string" />
+               <element name="summary" type="xsd:string" />
+               <element name="key" type="xsd:string" />
+               <element name="messageCatalogKeyPrefix" type="xsd:string" />
+               <element name="messageArg" type="vim25:KeyAnyValue" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="PbmVvolType">
+      <restriction base="xsd:string">
+         <enumeration value="Config" />
+         <enumeration value="Data" />
+         <enumeration value="Swap" />
+      </restriction>
+   </simpleType>
+   <simpleType name="PbmObjectType">
+      <restriction base="xsd:string">
+         <enumeration value="virtualMachine" />
+         <enumeration value="virtualMachineAndDisks" />
+         <enumeration value="virtualDiskId" />
+         <enumeration value="virtualDiskUUID" />
+         <enumeration value="datastore" />
+         <enumeration value="unknown" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmServerObjectRef">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="objectType" type="xsd:string" />
+               <element name="key" type="xsd:string" />
+               <element name="serverUuid" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmServerObjectRef">
+      <sequence>
+         <element name="PbmServerObjectRef" type="pbm:PbmServerObjectRef" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmServiceInstanceContent">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="aboutInfo" type="pbm:PbmAboutInfo" />
+               <element name="sessionManager" type="vim25:ManagedObjectReference" />
+               <element name="capabilityMetadataManager" type="vim25:ManagedObjectReference" />
+               <element name="profileManager" type="vim25:ManagedObjectReference" />
+               <element name="complianceManager" type="vim25:ManagedObjectReference" />
+               <element name="placementSolver" type="vim25:ManagedObjectReference" />
+               <element name="replicationManager" type="vim25:ManagedObjectReference" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityInstance">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="id" type="pbm:PbmCapabilityMetadataUniqueId" />
+               <element name="constraint" type="pbm:PbmCapabilityConstraintInstance" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityInstance">
+      <sequence>
+         <element name="PbmCapabilityInstance" type="pbm:PbmCapabilityInstance" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilityMetadataUniqueId">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="namespace" type="xsd:string" />
+               <element name="id" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityMetadata">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="id" type="pbm:PbmCapabilityMetadataUniqueId" />
+               <element name="summary" type="pbm:PbmExtendedElementDescription" />
+               <element name="mandatory" type="xsd:boolean" minOccurs="0" />
+               <element name="hint" type="xsd:boolean" minOccurs="0" />
+               <element name="keyId" type="xsd:string" minOccurs="0" />
+               <element name="allowMultipleConstraints" type="xsd:boolean" minOccurs="0" />
+               <element name="propertyMetadata" type="pbm:PbmCapabilityPropertyMetadata" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityMetadata">
+      <sequence>
+         <element name="PbmCapabilityMetadata" type="pbm:PbmCapabilityMetadata" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilityConstraintInstance">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="propertyInstance" type="pbm:PbmCapabilityPropertyInstance" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityConstraintInstance">
+      <sequence>
+         <element name="PbmCapabilityConstraintInstance" type="pbm:PbmCapabilityConstraintInstance" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilityGenericTypeInfo">
+      <complexContent>
+         <extension base="pbm:PbmCapabilityTypeInfo">
+            <sequence>
+               <element name="genericTypeName" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="PbmCapabilityOperator">
+      <restriction base="xsd:string">
+         <enumeration value="NOT" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmCapabilityPropertyInstance">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="id" type="xsd:string" />
+               <element name="operator" type="xsd:string" minOccurs="0" />
+               <element name="value" type="xsd:anyType" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityPropertyInstance">
+      <sequence>
+         <element name="PbmCapabilityPropertyInstance" type="pbm:PbmCapabilityPropertyInstance" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilityPropertyMetadata">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="id" type="xsd:string" />
+               <element name="summary" type="pbm:PbmExtendedElementDescription" />
+               <element name="mandatory" type="xsd:boolean" />
+               <element name="type" type="pbm:PbmCapabilityTypeInfo" minOccurs="0" />
+               <element name="defaultValue" type="xsd:anyType" minOccurs="0" />
+               <element name="allowedValue" type="xsd:anyType" minOccurs="0" />
+               <element name="requirementsTypeHint" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityPropertyMetadata">
+      <sequence>
+         <element name="PbmCapabilityPropertyMetadata" type="pbm:PbmCapabilityPropertyMetadata" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilityTypeInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="typeName" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityMetadataPerCategory">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="subCategory" type="xsd:string" />
+               <element name="capabilityMetadata" type="pbm:PbmCapabilityMetadata" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityMetadataPerCategory">
+      <sequence>
+         <element name="PbmCapabilityMetadataPerCategory" type="pbm:PbmCapabilityMetadataPerCategory" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilitySchemaVendorInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vendorUuid" type="xsd:string" />
+               <element name="info" type="pbm:PbmExtendedElementDescription" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityNamespaceInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="version" type="xsd:string" />
+               <element name="namespace" type="xsd:string" />
+               <element name="info" type="pbm:PbmExtendedElementDescription" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityVendorResourceTypeInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="resourceType" type="xsd:string" />
+               <element name="vendorNamespaceInfo" type="pbm:PbmCapabilityVendorNamespaceInfo" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityVendorResourceTypeInfo">
+      <sequence>
+         <element name="PbmCapabilityVendorResourceTypeInfo" type="pbm:PbmCapabilityVendorResourceTypeInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilityVendorNamespaceInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vendorInfo" type="pbm:PbmCapabilitySchemaVendorInfo" />
+               <element name="namespaceInfo" type="pbm:PbmCapabilityNamespaceInfo" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilityVendorNamespaceInfo">
+      <sequence>
+         <element name="PbmCapabilityVendorNamespaceInfo" type="pbm:PbmCapabilityVendorNamespaceInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilitySchema">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="vendorInfo" type="pbm:PbmCapabilitySchemaVendorInfo" />
+               <element name="namespaceInfo" type="pbm:PbmCapabilityNamespaceInfo" />
+               <element name="lineOfService" type="pbm:PbmLineOfServiceInfo" minOccurs="0" />
+               <element name="capabilityMetadataPerCategory" type="pbm:PbmCapabilityMetadataPerCategory" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilitySchema">
+      <sequence>
+         <element name="PbmCapabilitySchema" type="pbm:PbmCapabilitySchema" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="PbmLineOfServiceInfoLineOfServiceEnum">
+      <restriction base="xsd:string">
+         <enumeration value="INSPECTION" />
+         <enumeration value="COMPRESSION" />
+         <enumeration value="ENCRYPTION" />
+         <enumeration value="REPLICATION" />
+         <enumeration value="CACHING" />
+         <enumeration value="PERSISTENCE" />
+         <enumeration value="DATA_PROVIDER" />
+         <enumeration value="DATASTORE_IO_CONTROL" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmLineOfServiceInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="lineOfService" type="xsd:string" />
+               <element name="name" type="pbm:PbmExtendedElementDescription" />
+               <element name="description" type="pbm:PbmExtendedElementDescription" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmPersistenceBasedDataServiceInfo">
+      <complexContent>
+         <extension base="pbm:PbmLineOfServiceInfo">
+            <sequence>
+               <element name="compatiblePersistenceSchemaNamespace" type="xsd:string" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmVaioDataServiceInfo">
+      <complexContent>
+         <extension base="pbm:PbmLineOfServiceInfo">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="PbmBuiltinGenericType">
+      <restriction base="xsd:string">
+         <enumeration value="VMW_RANGE" />
+         <enumeration value="VMW_SET" />
+      </restriction>
+   </simpleType>
+   <simpleType name="PbmBuiltinType">
+      <restriction base="xsd:string">
+         <enumeration value="XSD_LONG" />
+         <enumeration value="XSD_SHORT" />
+         <enumeration value="XSD_INTEGER" />
+         <enumeration value="XSD_INT" />
+         <enumeration value="XSD_STRING" />
+         <enumeration value="XSD_BOOLEAN" />
+         <enumeration value="XSD_DOUBLE" />
+         <enumeration value="XSD_DATETIME" />
+         <enumeration value="VMW_TIMESPAN" />
+         <enumeration value="VMW_POLICY" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmCapabilityDescription">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="description" type="pbm:PbmExtendedElementDescription" />
+               <element name="value" type="xsd:anyType" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityDiscreteSet">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="values" type="xsd:anyType" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityRange">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="min" type="xsd:anyType" />
+               <element name="max" type="xsd:anyType" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityTimeSpan">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="value" type="xsd:int" />
+               <element name="unit" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="PbmCapabilityTimeUnitType">
+      <restriction base="xsd:string">
+         <enumeration value="SECONDS" />
+         <enumeration value="MINUTES" />
+         <enumeration value="HOURS" />
+         <enumeration value="DAYS" />
+         <enumeration value="WEEKS" />
+         <enumeration value="MONTHS" />
+         <enumeration value="YEARS" />
+      </restriction>
+   </simpleType>
+   <simpleType name="PbmComplianceStatus">
+      <restriction base="xsd:string">
+         <enumeration value="compliant" />
+         <enumeration value="nonCompliant" />
+         <enumeration value="unknown" />
+         <enumeration value="notApplicable" />
+         <enumeration value="outOfDate" />
+      </restriction>
+   </simpleType>
+   <simpleType name="PbmComplianceResultComplianceTaskStatus">
+      <restriction base="xsd:string">
+         <enumeration value="inProgress" />
+         <enumeration value="success" />
+         <enumeration value="failed" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmComplianceResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="checkTime" type="xsd:dateTime" />
+               <element name="entity" type="pbm:PbmServerObjectRef" />
+               <element name="profile" type="pbm:PbmProfileId" minOccurs="0" />
+               <element name="complianceTaskStatus" type="xsd:string" minOccurs="0" />
+               <element name="complianceStatus" type="xsd:string" />
+               <element name="mismatch" type="xsd:boolean" />
+               <element name="violatedPolicies" type="pbm:PbmCompliancePolicyStatus" minOccurs="0" maxOccurs="unbounded" />
+               <element name="errorCause" type="vim25:LocalizedMethodFault" minOccurs="0" maxOccurs="unbounded" />
+               <element name="operationalStatus" type="pbm:PbmComplianceOperationalStatus" minOccurs="0" />
+               <element name="info" type="pbm:PbmExtendedElementDescription" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmComplianceResult">
+      <sequence>
+         <element name="PbmComplianceResult" type="pbm:PbmComplianceResult" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmComplianceOperationalStatus">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="healthy" type="xsd:boolean" minOccurs="0" />
+               <element name="operationETA" type="xsd:dateTime" minOccurs="0" />
+               <element name="operationProgress" type="xsd:long" minOccurs="0" />
+               <element name="transitional" type="xsd:boolean" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCompliancePolicyStatus">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="expectedValue" type="pbm:PbmCapabilityInstance" />
+               <element name="currentValue" type="pbm:PbmCapabilityInstance" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCompliancePolicyStatus">
+      <sequence>
+         <element name="PbmCompliancePolicyStatus" type="pbm:PbmCompliancePolicyStatus" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmRollupComplianceResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="oldestCheckTime" type="xsd:dateTime" />
+               <element name="entity" type="pbm:PbmServerObjectRef" />
+               <element name="overallComplianceStatus" type="xsd:string" />
+               <element name="overallComplianceTaskStatus" type="xsd:string" minOccurs="0" />
+               <element name="result" type="pbm:PbmComplianceResult" minOccurs="0" maxOccurs="unbounded" />
+               <element name="errorCause" type="vim25:LocalizedMethodFault" minOccurs="0" maxOccurs="unbounded" />
+               <element name="profileMismatch" type="xsd:boolean" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmRollupComplianceResult">
+      <sequence>
+         <element name="PbmRollupComplianceResult" type="pbm:PbmRollupComplianceResult" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmAlreadyExists">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+               <element name="name" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityProfilePropertyMismatchFault">
+      <complexContent>
+         <extension base="pbm:PbmPropertyMismatchFault">
+            <sequence>
+               <element name="resourcePropertyInstance" type="pbm:PbmCapabilityPropertyInstance" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCompatibilityCheckFault">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+               <element name="hub" type="pbm:PbmPlacementHub" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmDefaultProfileAppliesFault">
+      <complexContent>
+         <extension base="pbm:PbmCompatibilityCheckFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmDuplicateName">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+               <element name="name" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmIncompatibleVendorSpecificRuleSet">
+      <complexContent>
+         <extension base="pbm:PbmCapabilityProfilePropertyMismatchFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmFaultInvalidLogin">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmLegacyHubsNotSupported">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+               <element name="hubs" type="pbm:PbmPlacementHub" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmNonExistentHubs">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+               <element name="hubs" type="pbm:PbmPlacementHub" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmFaultNotFound">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmFault">
+      <complexContent>
+         <extension base="vim25:MethodFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmFaultProfileStorageFault">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmPropertyMismatchFault">
+      <complexContent>
+         <extension base="pbm:PbmCompatibilityCheckFault">
+            <sequence>
+               <element name="capabilityInstanceId" type="pbm:PbmCapabilityMetadataUniqueId" />
+               <element name="requirementPropertyInstance" type="pbm:PbmCapabilityPropertyInstance" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmResourceInUse">
+      <complexContent>
+         <extension base="pbm:PbmFault">
+            <sequence>
+               <element name="type" type="xsd:string" minOccurs="0" />
+               <element name="name" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmPlacementCapabilityConstraintsRequirement">
+      <complexContent>
+         <extension base="pbm:PbmPlacementRequirement">
+            <sequence>
+               <element name="constraints" type="pbm:PbmCapabilityConstraints" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmPlacementCapabilityProfileRequirement">
+      <complexContent>
+         <extension base="pbm:PbmPlacementRequirement">
+            <sequence>
+               <element name="profileId" type="pbm:PbmProfileId" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmPlacementCompatibilityResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="hub" type="pbm:PbmPlacementHub" />
+               <element name="matchingResources" type="pbm:PbmPlacementMatchingResources" minOccurs="0" maxOccurs="unbounded" />
+               <element name="howMany" type="xsd:long" minOccurs="0" />
+               <element name="utilization" type="pbm:PbmPlacementResourceUtilization" minOccurs="0" maxOccurs="unbounded" />
+               <element name="warning" type="vim25:LocalizedMethodFault" minOccurs="0" maxOccurs="unbounded" />
+               <element name="error" type="vim25:LocalizedMethodFault" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmPlacementCompatibilityResult">
+      <sequence>
+         <element name="PbmPlacementCompatibilityResult" type="pbm:PbmPlacementCompatibilityResult" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmPlacementMatchingReplicationResources">
+      <complexContent>
+         <extension base="pbm:PbmPlacementMatchingResources">
+            <sequence>
+               <element name="replicationGroup" type="vim25:ReplicationGroupId" minOccurs="0" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmPlacementMatchingResources">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmPlacementMatchingResources">
+      <sequence>
+         <element name="PbmPlacementMatchingResources" type="pbm:PbmPlacementMatchingResources" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmPlacementHub">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="hubType" type="xsd:string" />
+               <element name="hubId" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmPlacementHub">
+      <sequence>
+         <element name="PbmPlacementHub" type="pbm:PbmPlacementHub" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmPlacementRequirement">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmPlacementRequirement">
+      <sequence>
+         <element name="PbmPlacementRequirement" type="pbm:PbmPlacementRequirement" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmPlacementResourceUtilization">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="pbm:PbmExtendedElementDescription" />
+               <element name="description" type="pbm:PbmExtendedElementDescription" />
+               <element name="availableBefore" type="xsd:long" minOccurs="0" />
+               <element name="availableAfter" type="xsd:long" minOccurs="0" />
+               <element name="total" type="xsd:long" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmPlacementResourceUtilization">
+      <sequence>
+         <element name="PbmPlacementResourceUtilization" type="pbm:PbmPlacementResourceUtilization" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="PbmProfileCategoryEnum">
+      <restriction base="xsd:string">
+         <enumeration value="REQUIREMENT" />
+         <enumeration value="RESOURCE" />
+         <enumeration value="DATA_SERVICE_POLICY" />
+      </restriction>
+   </simpleType>
+   <simpleType name="PbmSystemCreatedProfileType">
+      <restriction base="xsd:string">
+         <enumeration value="VsanDefaultProfile" />
+         <enumeration value="VVolDefaultProfile" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmCapabilityProfile">
+      <complexContent>
+         <extension base="pbm:PbmProfile">
+            <sequence>
+               <element name="profileCategory" type="xsd:string" />
+               <element name="resourceType" type="pbm:PbmProfileResourceType" />
+               <element name="constraints" type="pbm:PbmCapabilityConstraints" />
+               <element name="generationId" type="xsd:long" minOccurs="0" />
+               <element name="isDefault" type="xsd:boolean" />
+               <element name="systemCreatedProfileType" type="xsd:string" minOccurs="0" />
+               <element name="lineOfService" type="xsd:string" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityProfileCreateSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="xsd:string" />
+               <element name="description" type="xsd:string" minOccurs="0" />
+               <element name="category" type="xsd:string" minOccurs="0" />
+               <element name="resourceType" type="pbm:PbmProfileResourceType" />
+               <element name="constraints" type="pbm:PbmCapabilityConstraints" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityProfileUpdateSpec">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="xsd:string" minOccurs="0" />
+               <element name="description" type="xsd:string" minOccurs="0" />
+               <element name="constraints" type="pbm:PbmCapabilityConstraints" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmCapabilityConstraints">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmDataServiceToPoliciesMap">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="dataServicePolicy" type="pbm:PbmProfileId" />
+               <element name="parentStoragePolicies" type="pbm:PbmProfileId" minOccurs="0" maxOccurs="unbounded" />
+               <element name="fault" type="vim25:LocalizedMethodFault" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmDefaultCapabilityProfile">
+      <complexContent>
+         <extension base="pbm:PbmCapabilityProfile">
+            <sequence>
+               <element name="vvolType" type="xsd:string" maxOccurs="unbounded" />
+               <element name="containerId" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="PbmDefaultProfileInfo">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="datastores" type="pbm:PbmPlacementHub" maxOccurs="unbounded" />
+               <element name="defaultProfile" type="pbm:PbmProfile" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmDefaultProfileInfo">
+      <sequence>
+         <element name="PbmDefaultProfileInfo" type="pbm:PbmDefaultProfileInfo" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="PbmIofilterInfoFilterType">
+      <restriction base="xsd:string">
+         <enumeration value="INSPECTION" />
+         <enumeration value="COMPRESSION" />
+         <enumeration value="ENCRYPTION" />
+         <enumeration value="REPLICATION" />
+         <enumeration value="CACHE" />
+         <enumeration value="DATAPROVIDER" />
+         <enumeration value="DATASTOREIOCONTROL" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmProfile">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="profileId" type="pbm:PbmProfileId" />
+               <element name="name" type="xsd:string" />
+               <element name="description" type="xsd:string" minOccurs="0" />
+               <element name="creationTime" type="xsd:dateTime" />
+               <element name="createdBy" type="xsd:string" />
+               <element name="lastUpdatedTime" type="xsd:dateTime" />
+               <element name="lastUpdatedBy" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmProfile">
+      <sequence>
+         <element name="PbmProfile" type="pbm:PbmProfile" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmProfileId">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="uniqueId" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmProfileId">
+      <sequence>
+         <element name="PbmProfileId" type="pbm:PbmProfileId" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmProfileOperationOutcome">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="profileId" type="pbm:PbmProfileId" />
+               <element name="fault" type="vim25:LocalizedMethodFault" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmProfileOperationOutcome">
+      <sequence>
+         <element name="PbmProfileOperationOutcome" type="pbm:PbmProfileOperationOutcome" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmProfileType">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="uniqueId" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmProfileType">
+      <sequence>
+         <element name="PbmProfileType" type="pbm:PbmProfileType" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryProfileResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="object" type="pbm:PbmServerObjectRef" />
+               <element name="profileId" type="pbm:PbmProfileId" minOccurs="0" maxOccurs="unbounded" />
+               <element name="fault" type="vim25:LocalizedMethodFault" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmQueryProfileResult">
+      <sequence>
+         <element name="PbmQueryProfileResult" type="pbm:PbmQueryProfileResult" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmProfileResourceType">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="resourceType" type="xsd:string" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmProfileResourceType">
+      <sequence>
+         <element name="PbmProfileResourceType" type="pbm:PbmProfileResourceType" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <simpleType name="PbmProfileResourceTypeEnum">
+      <restriction base="xsd:string">
+         <enumeration value="STORAGE" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmCapabilitySubProfile">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="name" type="xsd:string" />
+               <element name="capability" type="pbm:PbmCapabilityInstance" maxOccurs="unbounded" />
+               <element name="forceProvision" type="xsd:boolean" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmCapabilitySubProfile">
+      <sequence>
+         <element name="PbmCapabilitySubProfile" type="pbm:PbmCapabilitySubProfile" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmCapabilitySubProfileConstraints">
+      <complexContent>
+         <extension base="pbm:PbmCapabilityConstraints">
+            <sequence>
+               <element name="subProfiles" type="pbm:PbmCapabilitySubProfile" maxOccurs="unbounded" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <simpleType name="PbmVmOperation">
+      <restriction base="xsd:string">
+         <enumeration value="CREATE" />
+         <enumeration value="RECONFIGURE" />
+         <enumeration value="MIGRATE" />
+         <enumeration value="CLONE" />
+      </restriction>
+   </simpleType>
+   <complexType name="PbmDatastoreSpaceStatistics">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="profileId" type="xsd:string" minOccurs="0" />
+               <element name="physicalTotalInMB" type="xsd:long" />
+               <element name="physicalFreeInMB" type="xsd:long" />
+               <element name="physicalUsedInMB" type="xsd:long" />
+               <element name="logicalLimitInMB" type="xsd:long" minOccurs="0" />
+               <element name="logicalFreeInMB" type="xsd:long" />
+               <element name="logicalUsedInMB" type="xsd:long" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmDatastoreSpaceStatistics">
+      <sequence>
+         <element name="PbmDatastoreSpaceStatistics" type="pbm:PbmDatastoreSpaceStatistics" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+   <complexType name="PbmQueryReplicationGroupResult">
+      <complexContent>
+         <extension base="vim25:DynamicData">
+            <sequence>
+               <element name="object" type="pbm:PbmServerObjectRef" />
+               <element name="replicationGroupId" type="vim25:ReplicationGroupId" minOccurs="0" />
+               <element name="fault" type="vim25:LocalizedMethodFault" minOccurs="0" />
+            </sequence>
+         </extension>
+      </complexContent>
+   </complexType>
+   <complexType name="ArrayOfPbmQueryReplicationGroupResult">
+      <sequence>
+         <element name="PbmQueryReplicationGroupResult" type="pbm:PbmQueryReplicationGroupResult" minOccurs="0" maxOccurs="unbounded" />
+      </sequence>
+   </complexType>
+</schema>
