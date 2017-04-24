@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!--
+   Copyright 2005-2016 VMware, Inc.  All rights reserved.
+-->
+<definitions targetNamespace="urn:pbmService"
+   xmlns="http://schemas.xmlsoap.org/wsdl/"
+   xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+   xmlns:interface="urn:pbm"
+>
+   <import location="pbm.wsdl" namespace="urn:pbm" />
+   <service name="PbmService">
+      <port binding="interface:PbmBinding" name="PbmPort">
+         <soap:address location="https://localhost/sdk/pbmService" />
+      </port>
+   </service>
+</definitions>
