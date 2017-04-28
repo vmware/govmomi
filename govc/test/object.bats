@@ -207,5 +207,31 @@ load test_helper
   assert_output "$folder/$vm"
 
   run govc find "$folder" -name "$vm"
-  assert_output "$folder/$vm"
+}
+
+@test "object.method" {
+  vcsim_env
+
+  vm=$(govc find vm -type m | head -1)
+
+  run govc object.method -enable=false -name NoSuchMethod "$vm"
+  assert_failure
+
+  run govc object.method -enable=false -name Destroy_Task enoent
+  assert_failure
+
+  run govc object.collect -s "$vm" disabledMethod
+  ! assert_matches "Destroy_Task" "$output"
+
+  run govc object.method -enable=false -name Destroy_Task "$vm"
+  assert_success
+
+  run govc object.collect -s "$vm" disabledMethod
+  assert_matches "Destroy_Task" "$output"
+
+  run govc object.method -enable -name Destroy_Task "$vm"
+  assert_success
+
+  run govc object.collect -s "$vm" disabledMethod
+  ! assert_matches "Destroy_Task" "$output"
 }
