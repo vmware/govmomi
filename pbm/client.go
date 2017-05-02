@@ -18,6 +18,7 @@ package pbm
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/vmware/govmomi/pbm/methods"
 	"github.com/vmware/govmomi/pbm/types"
@@ -79,7 +80,9 @@ func (c *Client) RetrieveContent(ctx context.Context, ids []types.PbmProfileId) 
 	return res.Returnval, nil
 }
 
-func (c *Client) CheckRequirements(ctx context.Context, hubs []types.PbmPlacementHub, ref *types.PbmServerObjectRef, preq []types.BasePbmPlacementRequirement) ([]types.PbmPlacementCompatibilityResult, error) {
+type PlacementCompatibilityResult []types.PbmPlacementCompatibilityResult
+
+func (c *Client) CheckRequirements(ctx context.Context, hubs []types.PbmPlacementHub, ref *types.PbmServerObjectRef, preq []types.BasePbmPlacementRequirement) (PlacementCompatibilityResult, error) {
 	req := types.PbmCheckRequirements{
 		This:                        c.ServiceContent.PlacementSolver,
 		HubsToSearch:                hubs,
@@ -93,4 +96,122 @@ func (c *Client) CheckRequirements(ctx context.Context, hubs []types.PbmPlacemen
 	}
 
 	return res.Returnval, nil
+}
+
+func (l PlacementCompatibilityResult) CompatibleDatastores() []types.PbmPlacementHub {
+	var compatibleDatastores []types.PbmPlacementHub
+
+	for _, res := range l {
+		if len(res.Error) == 0 {
+			compatibleDatastores = append(compatibleDatastores, res.Hub)
+		}
+	}
+	return compatibleDatastores
+}
+
+func (l PlacementCompatibilityResult) NonCompatibleDatastores() []types.PbmPlacementHub {
+	var nonCompatibleDatastores []types.PbmPlacementHub
+
+	for _, res := range l {
+		if len(res.Error) > 0 {
+			nonCompatibleDatastores = append(nonCompatibleDatastores, res.Hub)
+		}
+	}
+	return nonCompatibleDatastores
+}
+
+func (c *Client) CreateProfile(ctx context.Context, capabilityProfileCreateSpec types.PbmCapabilityProfileCreateSpec) (*types.PbmProfileId, error) {
+	req := types.PbmCreate{
+		This:       c.ServiceContent.ProfileManager,
+		CreateSpec: capabilityProfileCreateSpec,
+	}
+
+	res, err := methods.PbmCreate(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
+}
+
+func (c *Client) UpdateProfile(ctx context.Context, id types.PbmProfileId, updateSpec types.PbmCapabilityProfileUpdateSpec) error {
+	req := types.PbmUpdate{
+		This:       c.ServiceContent.ProfileManager,
+		ProfileId:  id,
+		UpdateSpec: updateSpec,
+	}
+
+	_, err := methods.PbmUpdate(ctx, c, &req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (c *Client) DeleteProfile(ctx context.Context, ids []types.PbmProfileId) ([]types.PbmProfileOperationOutcome, error) {
+	req := types.PbmDelete{
+		This:      c.ServiceContent.ProfileManager,
+		ProfileId: ids,
+	}
+
+	res, err := methods.PbmDelete(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) QueryAssociatedEntity(ctx context.Context, id types.PbmProfileId, entityType string) ([]types.PbmServerObjectRef, error) {
+	req := types.PbmQueryAssociatedEntity{
+		This:       c.ServiceContent.ProfileManager,
+		Profile:    id,
+		EntityType: entityType,
+	}
+
+	res, err := methods.PbmQueryAssociatedEntity(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) QueryAssociatedEntities(ctx context.Context, ids []types.PbmProfileId) ([]types.PbmQueryProfileResult, error) {
+	req := types.PbmQueryAssociatedEntities{
+		This:     c.ServiceContent.ProfileManager,
+		Profiles: ids,
+	}
+
+	res, err := methods.PbmQueryAssociatedEntities(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) ProfileIDByName(ctx context.Context, profileName string) (string, error) {
+	resourceType := types.PbmProfileResourceType{
+		ResourceType: string(types.PbmProfileResourceTypeEnumSTORAGE),
+	}
+	category := types.PbmProfileCategoryEnumREQUIREMENT
+	ids, err := c.QueryProfile(ctx, resourceType, string(category))
+	if err != nil {
+		return "", err
+	}
+
+	profiles, err := c.RetrieveContent(ctx, ids)
+	if err != nil {
+		return "", err
+	}
+
+	for i := range profiles {
+		profile := profiles[i].GetPbmProfile()
+		if profile.Name == profileName {
+			return profile.ProfileId.UniqueId, nil
+		}
+	}
+	return "", fmt.Errorf("no pbm profile found with name: %q", profileName)
 }
