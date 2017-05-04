@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -15,7 +15,7 @@ limitations under the License.
 */
 
 /*
-This example program shows how the `finder` and `property` packages can
+This example program shows how the `view` package can
 be used to navigate a vSphere inventory structure using govmomi.
 */
 
@@ -28,10 +28,8 @@ import (
 	"net/url"
 	"os"
 	"strings"
-	"text/tabwriter"
 
 	"github.com/vmware/govmomi"
-	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/mo"
 )
@@ -132,30 +130,26 @@ func main() {
 		exit(err)
 	}
 
-	// Get view of Datastore
+	// Get view of VirtualMachine
 	m := view.NewManager(c.Client)
 
-	v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, []string{"Datastore"}, true)
+	v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, []string{"VirtualMachine"}, true)
 	if err != nil {
 		exit(err)
 	}
 
-	// Retrieve summary property for all datastores
-	var dss []mo.Datastore
-	err = v.Retrieve(ctx, []string{"Datastore"}, []string{"summary"}, &dss)
+	// Get summary property (VirtualMachineSummary)
+	// Reference for this data object:
+	// https://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/vim.vm.Summary.html
+
+	var vms []mo.VirtualMachine
+	err = v.Retrieve(ctx, []string{"VirtualMachine"}, []string{"summary"}, &vms)
 	if err != nil {
 		exit(err)
 	}
 
-	// Print summary per datastore
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Name:\tType:\tCapacity:\tFree:\n")
-	for _, ds := range dss {
-		fmt.Fprintf(tw, "%s\t", ds.Summary.Name)
-		fmt.Fprintf(tw, "%s\t", ds.Summary.Type)
-		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.Capacity))
-		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.FreeSpace))
-		fmt.Fprintf(tw, "\n")
+	for _, vm := range vms {
+		fmt.Printf("%s \n", vm.Summary.Config.Name)
 	}
-	tw.Flush()
+
 }

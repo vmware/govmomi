@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -132,29 +132,36 @@ func main() {
 		exit(err)
 	}
 
-	// Get view of Datastore
+	// Get view of HostSystem
 	m := view.NewManager(c.Client)
 
-	v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, []string{"Datastore"}, true)
+	v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, []string{"HostSystem"}, true)
 	if err != nil {
 		exit(err)
 	}
 
-	// Retrieve summary property for all datastores
-	var dss []mo.Datastore
-	err = v.Retrieve(ctx, []string{"Datastore"}, []string{"summary"}, &dss)
+	// Reference for this data object:
+	// https://www.vmware.com/support/developer/vc-sdk/visdk25pubs/ReferenceGuide/vim.host.Summary.html
+	var hss []mo.HostSystem
+	err = v.Retrieve(ctx, []string{"HostSystem"}, []string{"summary"}, &hss)
 	if err != nil {
 		exit(err)
 	}
 
-	// Print summary per datastore
+	// Print summary per host
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Name:\tType:\tCapacity:\tFree:\n")
-	for _, ds := range dss {
-		fmt.Fprintf(tw, "%s\t", ds.Summary.Name)
-		fmt.Fprintf(tw, "%s\t", ds.Summary.Type)
-		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.Capacity))
-		fmt.Fprintf(tw, "%s\t", units.ByteSize(ds.Summary.FreeSpace))
+	fmt.Fprintf(tw, "Name:\tUsed CPU:\tTotal CPU:\tFree CPU:\tUsed Memory:\tTotal Memory:\tFree Memory\t:\n")
+	for _, hs := range hss {
+		totalCpu := int64(hs.Summary.Hardware.CpuMhz) * int64(hs.Summary.Hardware.NumCpuCores)
+		freeCpu := int64(totalCpu) - int64(hs.Summary.QuickStats.OverallCpuUsage)
+		freeMemory := int64(hs.Summary.Hardware.MemorySize) - (int64(hs.Summary.QuickStats.OverallMemoryUsage) * 1024 * 1024)
+		fmt.Fprintf(tw, "%s\t", hs.Summary.Config.Name)
+		fmt.Fprintf(tw, "%d\t", hs.Summary.QuickStats.OverallCpuUsage)
+		fmt.Fprintf(tw, "%d\t", totalCpu)
+		fmt.Fprintf(tw, "%d\t", freeCpu)
+		fmt.Fprintf(tw, "%s\t", units.ByteSize(hs.Summary.QuickStats.OverallMemoryUsage))
+		fmt.Fprintf(tw, "%s\t", units.ByteSize(hs.Summary.Hardware.MemorySize))
+		fmt.Fprintf(tw, "%d\t", freeMemory)
 		fmt.Fprintf(tw, "\n")
 	}
 	tw.Flush()
