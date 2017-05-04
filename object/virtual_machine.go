@@ -518,11 +518,11 @@ func (m snapshotMap) add(parent string, tree []types.VirtualMachineSnapshotTree)
 	}
 }
 
-// FindSnapshpt supports snapshot lookup by name, where name can be:
+// FindSnapshot supports snapshot lookup by name, where name can be:
 // 1) snapshot ManagedObjectReference.Value (unique)
 // 2) snapshot name (may not be unique)
 // 3) snapshot tree path (may not be unique)
-func (v VirtualMachine) FindSnapshpt(ctx context.Context, name string) (Reference, error) {
+func (v VirtualMachine) FindSnapshot(ctx context.Context, name string) (Reference, error) {
 	var o mo.VirtualMachine
 
 	err := v.Properties(ctx, v.Reference(), []string{"snapshot"}, &o)
@@ -550,7 +550,7 @@ func (v VirtualMachine) FindSnapshpt(ctx context.Context, name string) (Referenc
 
 // RemoveSnapshot removes a named snapshot
 func (v VirtualMachine) RemoveSnapshot(ctx context.Context, name string, removeChildren bool, consolidate *bool) (*Task, error) {
-	snapshot, err := v.FindSnapshpt(ctx, name)
+	snapshot, err := v.FindSnapshot(ctx, name)
 	if err != nil {
 		return nil, err
 	}
@@ -586,7 +586,7 @@ func (v VirtualMachine) RevertToCurrentSnapshot(ctx context.Context, suppressPow
 
 // RevertToSnapshot reverts to a named snapshot
 func (v VirtualMachine) RevertToSnapshot(ctx context.Context, name string, suppressPowerOn bool) (*Task, error) {
-	snapshot, err := v.FindSnapshpt(ctx, name)
+	snapshot, err := v.FindSnapshot(ctx, name)
 	if err != nil {
 		return nil, err
 	}
