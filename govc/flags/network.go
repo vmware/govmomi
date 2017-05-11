@@ -30,12 +30,15 @@ type NetworkFlag struct {
 	common
 
 	*DatacenterFlag
+	*ClientFlag
 
 	name    string
 	net     object.NetworkReference
 	adapter string
 	address string
 	isset   bool
+
+	dvpgPath string
 }
 
 var networkFlagKey = flagKey("network")
@@ -47,6 +50,9 @@ func NewNetworkFlag(ctx context.Context) (*NetworkFlag, context.Context) {
 
 	v := &NetworkFlag{}
 	v.DatacenterFlag, ctx = NewDatacenterFlag(ctx)
+
+	v.ClientFlag, ctx = NewClientFlag(ctx)
+
 	ctx = context.WithValue(ctx, networkFlagKey, v)
 	return v, ctx
 }
@@ -55,6 +61,8 @@ func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.RegisterOnce(func() {
 		flag.DatacenterFlag.Register(ctx, f)
 
+		flag.ClientFlag.Register(ctx, f)
+
 		env := "GOVC_NETWORK"
 		value := os.Getenv(env)
 		flag.name = value
@@ -62,6 +70,8 @@ func (flag *NetworkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		f.Var(flag, "net", usage)
 		f.StringVar(&flag.adapter, "net.adapter", "e1000", "Network adapter type")
 		f.StringVar(&flag.address, "net.address", "", "Network hardware address")
+
+		f.StringVar(&flag.dvpgPath, "net.dvpg", "", "Distributed Virtual Portgroup inventory path")
 	})
 }
 
@@ -70,6 +80,10 @@ func (flag *NetworkFlag) Process(ctx context.Context) error {
 		if err := flag.DatacenterFlag.Process(ctx); err != nil {
 			return err
 		}
+		if err := flag.ClientFlag.Process(ctx); err != nil {
+			return err
+		}
+
 		return nil
 	})
 }
@@ -106,19 +120,53 @@ func (flag *NetworkFlag) Network() (object.NetworkReference, error) {
 }
 
 func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
+
 	net, err := flag.Network()
 	if err != nil {
 		return nil, err
 	}
 
-	backing, err := net.EthernetCardBackingInfo(context.TODO())
-	if err != nil {
-		return nil, err
-	}
+	var device types.BaseVirtualDevice
 
-	device, err := object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
-	if err != nil {
-		return nil, err
+	if len(flag.dvpgPath) > 0 {
+
+		client, err := flag.Client()
+		if err != nil {
+			return nil, err
+		}
+
+		dvpgInv, err := object.NewSearchIndex(client).FindByInventoryPath(context.TODO(), flag.dvpgPath)
+		if err != nil {
+			return nil, err
+		}
+		if dvpgInv == nil {
+			return nil, fmt.Errorf("DistributedVirtualPortgroup was not found at %s", flag.dvpgPath)
+		}
+
+		dvpg := (*dvpgInv.(*object.DistributedVirtualPortgroup))
+
+		backing, err := dvpg.EthernetCardBackingInfo(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+
+		device, err = object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
+		if err != nil {
+			return nil, err
+		}
+
+	} else {
+
+		backing, err := net.EthernetCardBackingInfo(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+
+		device, err = object.EthernetCardTypes().CreateEthernetCard(flag.adapter, backing)
+		if err != nil {
+			return nil, err
+		}
+
 	}
 
 	if flag.address != "" {
