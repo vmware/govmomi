@@ -256,18 +256,22 @@ func lastIndexLines(s []byte, line *int, include func(l int, m string) bool) (in
 
 // Tail seeks to the position of the last N lines of the file.
 func (f *DatastoreFile) Tail(n int) error {
-	return f.TailFunc(func(line int, _ string) bool { return n > line })
+	return f.TailFunc(n, func(line int, _ string) bool { return n > line })
 }
 
 // TailFunc will seek backwards in the datastore file until it hits a line that does
 // not satisfy the supplied `include` function.
-func (f *DatastoreFile) TailFunc(include func(line int, message string) bool) error {
+func (f *DatastoreFile) TailFunc(lines int, include func(line int, message string) bool) error {
 	// Read the file in reverse using bsize chunks
 	const bsize = int64(1024 * 16)
 
 	fsize, err := f.Seek(0, io.SeekEnd)
 	if err != nil {
 		return err
+	}
+
+	if lines == 0 {
+		return nil
 	}
 
 	chunk := int64(-1)
