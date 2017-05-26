@@ -32,6 +32,9 @@ load test_helper
   run govc metric.sample "$host" "${metrics[@]}"
   assert_success
 
+  run govc metric.sample -instance - "$host" "${metrics[@]}"
+  assert_success
+
   run govc metric.sample -json "$host" "${metrics[@]}"
   assert_success
 
