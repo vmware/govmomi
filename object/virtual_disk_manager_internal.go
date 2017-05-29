@@ -71,7 +71,7 @@ type VirtualDiskInfo struct {
 	Parent   string `xml:"parent,omitempty"`
 }
 
-func (m VirtualDiskManager) QueryVirtualDiskInfo(ctx context.Context, name string, dc *Datacenter, includeParents bool) ([]VirtualDiskInfo, error) {
+func (m VirtualDiskManager) QueryVirtualDiskInfo_Task(ctx context.Context, name string, dc *Datacenter, includeParents bool) (*Task, error) {
 	req := queryVirtualDiskInfoTaskRequest{
 		This:           m.Reference(),
 		Name:           name,
@@ -88,10 +88,23 @@ func (m VirtualDiskManager) QueryVirtualDiskInfo(ctx context.Context, name strin
 		return nil, err
 	}
 
-	info, err := NewTask(m.Client(), res.Returnval).WaitForResult(ctx, nil)
+	return NewTask(m.Client(), res.Returnval), nil
+}
+
+func ResultToVirtualDiskInfo(i *types.TaskInfo) []VirtualDiskInfo {
+	return i.Result.(arrayOfVirtualDiskInfo).VirtualDiskInfo
+}
+
+func (m VirtualDiskManager) QueryVirtualDiskInfo(ctx context.Context, name string, dc *Datacenter, includeParents bool) ([]VirtualDiskInfo, error) {
+	t, err := m.QueryVirtualDiskInfo_Task(ctx, name, dc, includeParents)
 	if err != nil {
 		return nil, err
 	}
 
-	return info.Result.(arrayOfVirtualDiskInfo).VirtualDiskInfo, nil
+	info, err := t.WaitForResult(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return ResultToVirtualDiskInfo(info), nil
 }
