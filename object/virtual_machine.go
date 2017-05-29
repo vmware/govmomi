@@ -757,3 +757,37 @@ func (v VirtualMachine) UpgradeTools(ctx context.Context, options string) (*Task
 
 	return NewTask(v.c, res.Returnval), nil
 }
+
+// SearchSnapshot is the simple clone of the findSnapshot().
+// The intention behind cloning this function is to have a functionality for Searching the snapshot
+// which can be used in other packages as well.
+// without breaking the current functionality of this library as some of the functions are dependent on finSnapshot()
+// SearchSnapshot supports snapshot lookup by name, where name can be:
+// 1) snapshot ManagedObjectReference.Value (unique)
+// 2) snapshot name (may not be unique)
+// 3) snapshot tree path (may not be unique)
+func (v VirtualMachine) SearchSnapshot(ctx context.Context, name string) (Reference, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"snapshot"}, &o)
+	if err != nil {
+		return nil, err
+	}
+
+	if o.Snapshot == nil || len(o.Snapshot.RootSnapshotList) == 0 {
+		return nil, errors.New("No snapshots for this VM")
+	}
+
+	m := make(snapshotMap)
+	m.add("", o.Snapshot.RootSnapshotList)
+
+	s := m[name]
+	switch len(s) {
+	case 0:
+		return nil, fmt.Errorf("snapshot %q not found", name)
+	case 1:
+		return s[0], nil
+	default:
+		return nil, fmt.Errorf("%q resolves to %d snapshots", name, len(s))
+	}
+}
