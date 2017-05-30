@@ -242,12 +242,13 @@ func lastIndexLines(s []byte, line *int, include func(l int, m string) bool) (in
 			break
 		}
 
-		msg := string(s[o:i])
-		i = o
-		*line++
+		msg := string(s[o+1 : i+1])
 		if !include(*line, msg) {
 			done = true
 			break
+		} else {
+			i = o
+			*line++
 		}
 	}
 
