@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package maintenance
+package host
 
 import (
 	"context"
@@ -24,66 +24,65 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
-type enter struct {
+type shutdown struct {
 	*flags.HostSystemFlag
-
-	timeout  int32
-	evacuate bool
+	force bool
 }
 
 func init() {
-	cli.Register("host.maintenance.enter", &enter{})
+	cli.Register("host.shutdown", &shutdown{})
 }
 
-func (cmd *enter) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *shutdown) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
 	cmd.HostSystemFlag.Register(ctx, f)
 
-	f.Var(flags.NewInt32(&cmd.timeout), "timeout", "Timeout")
-	f.BoolVar(&cmd.evacuate, "evacuate", false, "Evacuate powered off VMs")
+	f.BoolVar(&cmd.force, "f", false, "Force shutdown when host is not in maintenance mode")
 }
 
-func (cmd *enter) Process(ctx context.Context) error {
+func (cmd *shutdown) Process(ctx context.Context) error {
 	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cmd *enter) Usage() string {
-	return "HOST..."
+func (cmd *shutdown) Description() string {
+	return `Shutdown HOST.`
 }
 
-func (cmd *enter) Description() string {
-	return `Put HOST in maintenance mode.
+func (cmd *shutdown) Shutdown(ctx context.Context, host *object.HostSystem) error {
+	req := types.ShutdownHost_Task{
+		This:  host.Reference(),
+		Force: cmd.force,
+	}
 
-While this task is running and when the host is in maintenance mode,
-no VMs can be powered on and no provisioning operations can be performed on the host.`
-}
-
-func (cmd *enter) EnterMaintenanceMode(ctx context.Context, host *object.HostSystem) error {
-	task, err := host.EnterMaintenanceMode(ctx, cmd.timeout, cmd.evacuate, nil) // TODO: spec param
+	res, err := methods.ShutdownHost_Task(ctx, host.Client(), &req)
 	if err != nil {
 		return err
 	}
 
-	logger := cmd.ProgressLogger(fmt.Sprintf("%s entering maintenance mode... ", host.InventoryPath))
+	task := object.NewTask(host.Client(), res.Returnval)
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("%s shutdown... ", host.InventoryPath))
 	defer logger.Wait()
 
 	_, err = task.WaitForResult(ctx, logger)
 	return err
 }
 
-func (cmd *enter) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *shutdown) Run(ctx context.Context, f *flag.FlagSet) error {
 	hosts, err := cmd.HostSystems(f.Args())
 	if err != nil {
 		return err
 	}
 
 	for _, host := range hosts {
-		err = cmd.EnterMaintenanceMode(ctx, host)
+		err = cmd.Shutdown(ctx, host)
 		if err != nil {
 			return err
 		}
