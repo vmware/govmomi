@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ type chmod struct {
 
 func init() {
 	cli.Register("guest.chmod", &chmod{})
+	cli.Alias("guest.chmod", "guest.chown")
 }
 
 func (cmd *chmod) Register(ctx context.Context, f *flag.FlagSet) {
@@ -47,6 +48,18 @@ func (cmd *chmod) Process(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (cmd *chmod) Usage() string {
+	return "FILE"
+}
+
+func (cmd *chmod) Description() string {
+	return `Change FILE attributes on VM.
+
+Examples:
+  govc guest.chmod -vm $name -perm 0644 /var/log/foo.log
+  govc guest.chown -vm $name -uid 1000 -gid -1000 /var/log/foo.log`
 }
 
 func (cmd *chmod) Run(ctx context.Context, f *flag.FlagSet) error {

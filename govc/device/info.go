@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -68,6 +68,15 @@ func (cmd *info) Process(ctx context.Context) error {
 
 func (cmd *info) Usage() string {
 	return "[DEVICE]..."
+}
+
+func (cmd *info) Description() string {
+	return `Device info for VM.
+
+Examples:
+  govc device.info -vm $name
+  govc device.info -vm $name disk-*
+  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].MacAddress`
 }
 
 func (cmd *info) match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList {

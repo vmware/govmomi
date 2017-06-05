@@ -18,7 +18,7 @@ chmod +x /usr/local/bin/govc
 You can install the latest govc version from source if you have the Go toolchain installed.
 
 ```sh
-go get github.com/vmware/govmomi/govc
+go get -u github.com/vmware/govmomi/govc
 ```
 
 (make sure `$GOPATH/bin` is in your `PATH`)
@@ -108,6 +108,13 @@ to set defaults:
 * `GOVC_VIM_NAMESPACE`: Vim namespace defaults to `urn:vim25`
 
 * `GOVC_VIM_VERSION`: Vim version defaults to `6.0`
+
+## Platform specific notes
+
+### MSYS2 (Windows)
+
+Inventory path arguments with a leading '/' are subject
+to [Posix path conversion](http://www.mingw.org/wiki/Posix_path_conversion).
 
 ## Examples
 
