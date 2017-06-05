@@ -5,8 +5,8 @@
 			"importpath": "github.com/davecgh/go-spew/spew",
 			"repository": "https://github.com/davecgh/go-spew",
 			"vcs": "git",
-			"revision": "5215b55f46b2b919f50a1df0eaa5886afe4e3b3d",
-			"branch": "master",
+			"revision": "04cdfd42973bb9c8589fd6a731800cf222fde1a9",
+			"branch": "HEAD",
 			"path": "/spew",
 			"notests": true
 		}
