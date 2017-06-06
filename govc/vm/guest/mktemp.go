@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,6 +50,15 @@ func (cmd *mktemp) Process(ctx context.Context) error {
 		return err
 	}
 	return nil
+}
+
+func (cmd *mktemp) Description() string {
+	return `Create a temporary file or directory in VM.
+
+Examples:
+  govc guest.mktemp -vm $name
+  govc guest.mktemp -vm $name -d
+  govc guest.mktemp -vm $name -t myprefix`
 }
 
 func (cmd *mktemp) Run(ctx context.Context, f *flag.FlagSet) error {

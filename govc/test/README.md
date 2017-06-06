@@ -63,11 +63,13 @@ The tests can be run from any directory, as *govc* is found related to
 The entire suite can be run with the following command:
 
 ```
-bats .
+cd $GOPATH/github.com/vmware/govmomi/govc
+go build -v .
+bats test
 ```
 
 Or individually, for example:
 
 ```
-./cli.bats
+./test/cli.bats
 ```

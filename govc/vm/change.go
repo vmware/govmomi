@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,8 +73,13 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 func (cmd *change) Description() string {
 	return `Change VM configuration.
 
+To add ExtraConfig variables that can read within the guest, use the 'guestinfo.' prefix.
+
 Examples:
-  govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE`
+  govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE
+  govc vm.change -vm $vm -e guestinfo.vmname $vm
+  # Read the variable set above inside the guest:
+  vmware-rpctool "info-get guestinfo.vmname"`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
