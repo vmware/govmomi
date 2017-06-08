@@ -191,7 +191,7 @@ class Simple
   end
 
   def pointer_type?
-    ["UnitNumber"].include?(var_name)
+    ["UnitNumber", "OwnerId", "GroupId"].include?(var_name)
   end
 
   def var_type

@@ -49,13 +49,14 @@ func (m FileManager) ChangeFileAttributes(ctx context.Context, auth types.BaseGu
 	return err
 }
 
-func (m FileManager) CreateTemporaryDirectory(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
+func (m FileManager) CreateTemporaryDirectory(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string, path string) (string, error) {
 	req := types.CreateTemporaryDirectoryInGuest{
-		This:   m.Reference(),
-		Vm:     m.vm,
-		Auth:   auth,
-		Prefix: prefix,
-		Suffix: suffix,
+		This:          m.Reference(),
+		Vm:            m.vm,
+		Auth:          auth,
+		Prefix:        prefix,
+		Suffix:        suffix,
+		DirectoryPath: path,
 	}
 
 	res, err := methods.CreateTemporaryDirectoryInGuest(ctx, m.c, &req)
@@ -66,13 +67,14 @@ func (m FileManager) CreateTemporaryDirectory(ctx context.Context, auth types.Ba
 	return res.Returnval, nil
 }
 
-func (m FileManager) CreateTemporaryFile(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string) (string, error) {
+func (m FileManager) CreateTemporaryFile(ctx context.Context, auth types.BaseGuestAuthentication, prefix, suffix string, path string) (string, error) {
 	req := types.CreateTemporaryFileInGuest{
-		This:   m.Reference(),
-		Vm:     m.vm,
-		Auth:   auth,
-		Prefix: prefix,
-		Suffix: suffix,
+		This:          m.Reference(),
+		Vm:            m.vm,
+		Auth:          auth,
+		Prefix:        prefix,
+		Suffix:        suffix,
+		DirectoryPath: path,
 	}
 
 	res, err := methods.CreateTemporaryFileInGuest(ctx, m.c, &req)
