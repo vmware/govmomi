@@ -18341,9 +18341,9 @@ func init() {
 type GuestPosixFileAttributes struct {
 	GuestFileAttributes
 
-	OwnerId     int32 `xml:"ownerId,omitempty"`
-	GroupId     int32 `xml:"groupId,omitempty"`
-	Permissions int64 `xml:"permissions,omitempty"`
+	OwnerId     *int32 `xml:"ownerId"`
+	GroupId     *int32 `xml:"groupId"`
+	Permissions int64  `xml:"permissions,omitempty"`
 }
 
 func init() {

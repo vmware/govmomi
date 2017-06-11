@@ -991,19 +991,30 @@ Options:
 ## guest.chmod
 
 ```
-Usage: govc guest.chmod [OPTIONS] FILE
+Usage: govc guest.chmod [OPTIONS] MODE FILE
 
-Change FILE attributes on VM.
+Change FILE MODE on VM.
 
 Examples:
-  govc guest.chmod -vm $name -perm 0644 /var/log/foo.log
-  govc guest.chown -vm $name -uid 1000 -gid -1000 /var/log/foo.log
+  govc guest.chmod -vm $name 0644 /var/log/foo.log
 
 Options:
-  -gid=0                    Group ID
   -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
-  -perm=0                   File permissions
-  -uid=0                    User ID
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
+## guest.chown
+
+```
+Usage: govc guest.chown [OPTIONS] UID[:GID] FILE
+
+Change FILE UID and GID on VM.
+
+Examples:
+  govc guest.chown -vm $name UID[:GID] /var/log/foo.log
+
+Options:
+  -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
   -vm=                      Virtual machine [GOVC_VM]
 ```
 
@@ -1102,12 +1113,31 @@ Examples:
   govc guest.mktemp -vm $name
   govc guest.mktemp -vm $name -d
   govc guest.mktemp -vm $name -t myprefix
+  govc guest.mktemp -vm $name -p /var/tmp/$USER
 
 Options:
   -d=false                  Make a directory instead of a file
   -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
+  -p=                       If specified, create relative to this directory
   -s=                       Suffix
   -t=                       Prefix
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
+## guest.mv
+
+```
+Usage: govc guest.mv [OPTIONS] SOURCE DEST
+
+Move (rename) files in VM.
+
+Examples:
+  govc guest.mv -vm $name /tmp/foo.sh /tmp/bar.sh
+  govc guest.mv -vm $name -n /tmp/baz.sh /tmp/bar.sh
+
+Options:
+  -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
+  -n=false                  Do not overwrite an existing file
   -vm=                      Virtual machine [GOVC_VM]
 ```
 
@@ -1194,6 +1224,25 @@ Options:
   -vm=                      Virtual machine [GOVC_VM]
 ```
 
+## guest.touch
+
+```
+Usage: govc guest.touch [OPTIONS] FILE
+
+Change FILE times on VM.
+
+Examples:
+  govc guest.touch -vm $name /var/log/foo.log
+  govc guest.touch -vm $name -d "$(date -d '1 day ago')" /var/log/foo.log
+
+Options:
+  -a=false                  Change only the access time
+  -c=false                  Do not create any files
+  -d=                       Use DATE instead of current time
+  -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
 ## guest.upload
 
 ```
@@ -1209,10 +1258,10 @@ Examples:
 
 Options:
   -f=false                  If set, the guest destination file is clobbered
-  -gid=0                    Group ID
+  -gid=<nil>                Group ID
   -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
   -perm=0                   File permissions
-  -uid=0                    User ID
+  -uid=<nil>                User ID
   -vm=                      Virtual machine [GOVC_VM]
 ```
 

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,43 +20,44 @@ import (
 	"context"
 	"flag"
 	"strconv"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type chmod struct {
+type chown struct {
 	*GuestFlag
 }
 
 func init() {
-	cli.Register("guest.chmod", &chmod{})
+	cli.Register("guest.chown", &chown{})
 }
 
-func (cmd *chmod) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *chown) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.GuestFlag, ctx = newGuestFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 }
 
-func (cmd *chmod) Process(ctx context.Context) error {
+func (cmd *chown) Process(ctx context.Context) error {
 	if err := cmd.GuestFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cmd *chmod) Usage() string {
-	return "MODE FILE"
+func (cmd *chown) Usage() string {
+	return "UID[:GID] FILE"
 }
 
-func (cmd *chmod) Description() string {
-	return `Change FILE MODE on VM.
+func (cmd *chown) Description() string {
+	return `Change FILE UID and GID on VM.
 
 Examples:
-  govc guest.chmod -vm $name 0644 /var/log/foo.log`
+  govc guest.chown -vm $name UID[:GID] /var/log/foo.log`
 }
 
-func (cmd *chmod) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *chown) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 2 {
 		return flag.ErrHelp
 	}
@@ -68,9 +69,27 @@ func (cmd *chmod) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var attr types.GuestPosixFileAttributes
 
-	attr.Permissions, err = strconv.ParseInt(f.Arg(0), 0, 64)
+	ids := strings.SplitN(f.Arg(0), ":", 2)
+	if len(ids) == 0 {
+		return flag.ErrHelp
+	}
+
+	id, err := strconv.Atoi(ids[0])
 	if err != nil {
 		return err
+	}
+
+	attr.OwnerId = new(int32)
+	*attr.OwnerId = int32(id)
+
+	if len(ids) == 2 {
+		id, err = strconv.Atoi(ids[1])
+		if err != nil {
+			return err
+		}
+
+		attr.GroupId = new(int32)
+		*attr.GroupId = int32(id)
 	}
 
 	return m.ChangeFileAttributes(ctx, cmd.Auth(), f.Arg(1), &attr)

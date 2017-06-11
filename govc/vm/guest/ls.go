@@ -101,7 +101,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			switch x := f.Attributes.(type) {
 			case *types.GuestPosixFileAttributes:
 				perm := os.FileMode(x.Permissions).Perm().String()[1:]
-				fmt.Fprintf(tw, "%c%s\t%d\t%d\t", kind, perm, x.OwnerId, x.GroupId)
+				fmt.Fprintf(tw, "%c%s\t%d\t%d\t", kind, perm, *x.OwnerId, *x.GroupId)
 			}
 
 			attr := f.Attributes.GetGuestFileAttributes()
