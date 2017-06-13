@@ -31074,7 +31074,7 @@ type OptionValue struct {
 	DynamicData
 
 	Key   string  `xml:"key"`
-	Value AnyType `xml:"value,omitempty,typeattr"`
+	Value AnyType `xml:"value,typeattr"` // TODO: update wsdl generator to skip omitempty for this field
 }
 
 func init() {

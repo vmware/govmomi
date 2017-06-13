@@ -37,8 +37,6 @@ func (e *extraConfig) Set(v string) error {
 	r := strings.SplitN(v, "=", 2)
 	if len(r) < 2 {
 		return fmt.Errorf("failed to parse extraConfig: %s", v)
-	} else if r[1] == "" {
-		return fmt.Errorf("empty value: %s", v)
 	}
 	*e = append(*e, &types.OptionValue{Key: r[0], Value: r[1]})
 	return nil

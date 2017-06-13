@@ -254,6 +254,9 @@ load test_helper
   run govc vm.info -e $id
   assert_success
   assert_line "guestinfo.a: 2"
+  run govc vm.change -e "guestinfo.a=" -vm $id
+  assert_success
+  refute_line "guestinfo.a: 2"
 }
 
 @test "vm.create linked ide disk" {
