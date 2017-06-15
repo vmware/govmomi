@@ -53154,8 +53154,8 @@ type WaitForUpdatesResponse struct {
 type WaitOptions struct {
 	DynamicData
 
-	MaxWaitSeconds   int32 `xml:"maxWaitSeconds,omitempty"`
-	MaxObjectUpdates int32 `xml:"maxObjectUpdates,omitempty"`
+	MaxWaitSeconds   *int32 `xml:"maxWaitSeconds"`
+	MaxObjectUpdates int32  `xml:"maxObjectUpdates,omitempty"`
 }
 
 func init() {
