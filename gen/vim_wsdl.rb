@@ -191,7 +191,7 @@ class Simple
   end
 
   def pointer_type?
-    ["UnitNumber", "OwnerId", "GroupId"].include?(var_name)
+    ["UnitNumber", "OwnerId", "GroupId", "MaxWaitSeconds"].include?(var_name)
   end
 
   def var_type
@@ -230,6 +230,9 @@ class Simple
           pkg = "types."
         end
         t = "#{pkg}AnyType"
+        if ["Value"].include?(var_name)
+          self.need_omitempty = false
+        end
       when "byte"
       when "double"
         t = "float64"
