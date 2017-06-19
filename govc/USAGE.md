@@ -768,7 +768,13 @@ Options:
 ## dvs.portgroup.info
 
 ```
-Usage: govc dvs.portgroup.info [OPTIONS]
+Usage: govc dvs.portgroup.info [OPTIONS] DVS
+
+Portgroup info for DVS.
+
+Examples:
+  govc dvs.portgroup.info DSwitch
+  govc find / -type DistributedVirtualSwitch | xargs -n1 govc dvs.portgroup.info
 
 Options:
   -active=false             Filter by port active or inactive status
