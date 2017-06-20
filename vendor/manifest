@@ -9,6 +9,14 @@
 			"branch": "HEAD",
 			"path": "/spew",
 			"notests": true
+		},
+		{
+			"importpath": "github.com/google/uuid",
+			"repository": "https://github.com/google/uuid",
+			"vcs": "git",
+			"revision": "6a5e28554805e78ea6141142aba763936c4761c0",
+			"branch": "master",
+			"notests": true
 		}
 	]
 }
