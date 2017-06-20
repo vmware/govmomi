@@ -279,8 +279,10 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// VM should have the default list of devices + 1 NIC created by the Model
-	if len(device) != len(esx.VirtualDevice)+1 {
+	// default list of devices + 1 NIC + 1 SCSI controller + 1 CDROM created by the Model
+	mdevices := len(esx.VirtualDevice) + 3
+
+	if len(device) != mdevices {
 		t.Error("device list mismatch")
 	}
 
@@ -301,7 +303,7 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(device) != len(esx.VirtualDevice) {
+	if len(device) != mdevices-1 {
 		t.Error("device list mismatch")
 	}
 
@@ -320,7 +322,7 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(device) != len(esx.VirtualDevice)+1 {
+	if len(device) != mdevices {
 		t.Error("device list mismatch")
 	}
 }
