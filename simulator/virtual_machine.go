@@ -60,9 +60,6 @@ func NewVirtualMachine(spec *types.VirtualMachineConfigSpec) (*VirtualMachine, t
 	vm.Summary.Guest = &types.VirtualMachineGuestSummary{}
 	vm.Summary.Storage = &types.VirtualMachineStorageSummary{}
 
-	// Add the default devices
-	devices, _ := object.VirtualDeviceList(esx.VirtualDevice).ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
-
 	// Append VM Name as the directory name if not specified
 	if strings.HasSuffix(spec.Files.VmPathName, "]") { // e.g. "[datastore1]"
 		spec.Files.VmPathName += " " + spec.Name
@@ -85,7 +82,11 @@ func NewVirtualMachine(spec *types.VirtualMachineConfigSpec) (*VirtualMachine, t
 			SuspendDirectory:  dsPath,
 			LogDirectory:      dsPath,
 		},
-		DeviceChange: devices,
+	}
+
+	if spec.DeviceChange == nil {
+		// Add the default devices
+		defaults.DeviceChange, _ = object.VirtualDeviceList(esx.VirtualDevice).ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 	}
 
 	err := vm.configure(&defaults)
@@ -283,6 +284,22 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
 
+	if d.Key < 0 {
+		// Choose a unique key
+		if d.Key == -1 {
+			d.Key = devices.NewKey()
+		}
+
+		d.Key *= -1
+
+		for {
+			if devices.FindByKey(d.Key) == nil {
+				break
+			}
+			d.Key++
+		}
+	}
+
 	label := devices.Name(device)
 	summary := label
 
@@ -313,10 +330,6 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 
 	if d.UnitNumber == nil && controller != nil {
 		devices.AssignController(device, controller)
-	}
-
-	if d.Key == -1 {
-		d.Key = devices.NewKey()
 	}
 
 	if d.DeviceInfo == nil {
