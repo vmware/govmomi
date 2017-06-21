@@ -11,10 +11,27 @@
 			"notests": true
 		},
 		{
+			"importpath": "github.com/davecgh/go-xdr/xdr2",
+			"repository": "https://github.com/rasky/go-xdr",
+			"vcs": "git",
+			"revision": "4930550ba2e22f87187498acfd78348b15f4e7a8",
+			"branch": "improvements",
+			"path": "/xdr2",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/google/uuid",
 			"repository": "https://github.com/google/uuid",
 			"vcs": "git",
 			"revision": "6a5e28554805e78ea6141142aba763936c4761c0",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/vmware/vmw-guestinfo",
+			"repository": "https://github.com/vmware/vmw-guestinfo",
+			"vcs": "git",
+			"revision": "ab8497750719fafd687e56e0a732d2cb58f16952",
 			"branch": "master",
 			"notests": true
 		}
