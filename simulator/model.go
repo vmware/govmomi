@@ -219,11 +219,11 @@ func (m *Model) Create() error {
 					pool, _ = host.ResourcePool(ctx)
 				}
 
-				devices := object.VirtualDeviceList(esx.VirtualDevice)
+				var devices object.VirtualDeviceList
 
 				scsi, _ := devices.CreateSCSIController("pvscsi")
-				ide, _ := devices.FindIDEController("")
-				cdrom, _ := devices.CreateCdrom(ide)
+				ide, _ := devices.CreateIDEController()
+				cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
 
 				devices = append(devices, scsi, cdrom, &nic)
 

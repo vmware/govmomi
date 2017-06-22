@@ -17,7 +17,8 @@ test:
 	go test -v $(TEST_OPTS) ./...
 
 install:
-	go install github.com/vmware/govmomi/govc
+	go install -v github.com/vmware/govmomi/govc
+	go install -v github.com/vmware/govmomi/vcsim
 
 doc: install
 	./govc/usage.sh > ./govc/USAGE.md
