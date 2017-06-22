@@ -124,7 +124,7 @@ Several examples are embedded in the govc command [help](USAGE.md)
 
 * [Create and configure a vCenter VM](examples/vcsa.sh)
 
-* [Create a CoreOS VM](https://github.com/vmware/vic/blob/master/pkg/vsphere/toolbox/toolbox-test.sh)
+* [Create a CoreOS VM](https://github.com/vmware/govmomi/blob/master/toolbox/toolbox-test.sh)
 
 * [Create a Debian VM](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
 

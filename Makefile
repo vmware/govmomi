@@ -11,7 +11,7 @@ goimports:
 
 govet:
 	@echo checking go vet...
-	@go tool vet -structtags=false -methods=false .
+	@go tool vet -structtags=false -methods=false $$(find . -mindepth 1 -maxdepth 1 -type d -not -name vendor)
 
 test:
 	go test -v $(TEST_OPTS) ./...
