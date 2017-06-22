@@ -283,7 +283,7 @@ func TestReconfigVm(t *testing.T) {
 	mdevices := len(esx.VirtualDevice) + 3
 
 	if len(device) != mdevices {
-		t.Error("device list mismatch")
+		t.Errorf("expected %d devices, got %d", mdevices, len(device))
 	}
 
 	d := device.FindByKey(esx.EthernetCard.Key)
@@ -324,6 +324,58 @@ func TestReconfigVm(t *testing.T) {
 
 	if len(device) != mdevices {
 		t.Error("device list mismatch")
+	}
+}
+
+func TestCreateVmWithDevices(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c := m.Service.client
+
+	folder := object.NewFolder(c, esx.Datacenter.VmFolder)
+	pool := object.NewResourcePool(c, esx.ResourcePool.Self)
+
+	// different set of devices from Model.Create's
+	var devices object.VirtualDeviceList
+	ide, _ := devices.CreateIDEController()
+	cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
+
+	devices = append(devices, ide, cdrom)
+	create, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+
+	spec := types.VirtualMachineConfigSpec{
+		Name:         "foo",
+		GuestId:      string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+		DeviceChange: create,
+		Files: &types.VirtualMachineFileInfo{
+			VmPathName: "[LocalDS_0] foo/foo.vmx",
+		},
+	}
+
+	ctask, _ := folder.CreateVM(ctx, spec, pool, nil)
+	info, err := ctask.WaitForResult(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vm := Map.Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
+
+	expect := len(esx.VirtualDevice) + len(devices)
+	ndevice := len(vm.Config.Hardware.Device)
+
+	if expect != ndevice {
+		t.Errorf("expected %d, got %d", expect, ndevice)
 	}
 }
 
