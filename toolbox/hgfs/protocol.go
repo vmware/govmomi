@@ -148,6 +148,8 @@ const (
 // HeaderVersion for HGFS protocol version 4
 const HeaderVersion = 0x1
 
+const largePacketMax = 0xf800 // HGFS_LARGE_PACKET_MAX
+
 // Packet flags
 const (
 	PacketFlagRequest = 1 << iota
