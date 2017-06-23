@@ -184,6 +184,11 @@ if [ -n "$test" ] ; then
     govc guest.ls /tmp/toolbox-src
   fi
 
+  echo "Testing we can download /proc files..."
+  for name in uptime diskstats net/dev ; do
+    test -n "$(govc guest.download /proc/$name -)"
+  done
+
   echo "Waiting for tests to complete..."
   wait
 fi

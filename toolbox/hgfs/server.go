@@ -26,6 +26,7 @@ import (
 	"math/rand"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 	"sync/atomic"
 )
@@ -153,6 +154,19 @@ func (s *Server) OpenFile(name string, mode int32) (File, error) {
 	return file, err
 }
 
+type procFileInfo struct {
+	os.FileInfo
+}
+
+// Size returns largePacketMax such that InitiateFileTransferFromGuest can download a /proc/ file from the guest.
+// If we were to return the size '0' here, then a 'Content-Length: 0' header is returned by VC/ESX.
+// If /proc/ file data fits in largePacketMax: the Content-Length will be correct.
+// If /proc/ file data exceeds largePacketMax: the Content-Length will largePacketMax. (and client side will truncate)
+// Note that standard vmware-tools does not special case /proc files and always returns Content-Length: 0.
+func (p procFileInfo) Size() int64 {
+	return largePacketMax // Remember, Sully, when I promised to kill you last?  I lied.
+}
+
 // Stat wraps os.Stat such that we can report directory types as regular files to support archive streaming.
 // In the case of standard vmware-tools or hgfs.Server.Archive == false, attempts to transfer directories result
 // with a VIX_E_NOT_A_FILE (see InitiateFileTransfer{To,From}Guest).
@@ -173,6 +187,10 @@ func (s *Server) Stat(name string) (os.FileInfo, error) {
 			name: name,
 			size: math.MaxInt64,
 		}, nil
+	}
+
+	if info.Size() == 0 && strings.HasPrefix(name, "/proc/") {
+		return &procFileInfo{info}, nil
 	}
 
 	return info, nil
@@ -244,7 +262,7 @@ func (s *Server) CreateSessionV4(p *Packet) (interface{}, error) {
 	res := &ReplyCreateSessionV4{
 		SessionID:       uint64(rand.Int63()),
 		NumCapabilities: uint32(len(s.Capabilities)),
-		MaxPacketSize:   0xf800, // HGFS_LARGE_PACKET_MAX
+		MaxPacketSize:   largePacketMax,
 		Flags:           SessionMaxPacketSizeValid,
 		Capabilities:    s.Capabilities,
 	}
