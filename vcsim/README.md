@@ -22,7 +22,7 @@ Example using the default settings:
 
 ```
 % export GOVC_URL=https://user:pass@127.0.0.1:8989
-% $GOPATH/vcsim
+% $GOPATH/bin/vcsim
 % govc find
 /
 /DC0
