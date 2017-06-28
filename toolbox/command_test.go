@@ -260,11 +260,12 @@ func TestVixInitiateDirTransfer(t *testing.T) {
 	dir := os.TempDir()
 
 	for _, enable := range []bool{true, false} {
-		// validate we behave as open-vm-tools does when the directory archive feature is disabled
-		c.Service.Command.FileServer.Archive = enable
 		expect := vix.NotAFile
 		if enable {
 			expect = vix.OK
+		} else {
+			// validate we behave as open-vm-tools does when the directory archive feature is disabled
+			c.Service.Command.FileServer.RegisterFileHandler(hgfs.ArchiveScheme, nil)
 		}
 
 		fromGuest := &vix.ListFilesRequest{GuestPathName: dir}

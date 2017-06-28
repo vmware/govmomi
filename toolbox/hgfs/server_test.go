@@ -31,7 +31,6 @@ type Client struct {
 
 func NewClient() *Client {
 	s := NewServer()
-	s.Archive = false
 
 	return &Client{
 		s: s,

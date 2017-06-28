@@ -27,11 +27,13 @@ import (
 	"net"
 	"net/http"
 	"net/http/httptest"
+	"net/url"
 	"os"
 	"sync"
 	"testing"
 	"time"
 
+	"github.com/vmware/govmomi/toolbox/hgfs"
 	"github.com/vmware/govmomi/toolbox/vix"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -286,6 +288,30 @@ var (
 	testOn  = flag.String("toolbox.powerState", "", "Power state of VM prior to starting the test")
 )
 
+// echoHandler for testing hgfs.FileHandler
+type echoHandler struct{}
+
+func (e *echoHandler) Stat(u *url.URL) (os.FileInfo, error) {
+	if u.RawQuery == "" {
+		return nil, errors.New("no query")
+	}
+
+	if u.Query().Get("foo") != "bar" {
+		return nil, errors.New("invalid query")
+	}
+
+	return os.Stat(u.Path)
+}
+
+func (e *echoHandler) Open(u *url.URL, mode int32) (hgfs.File, error) {
+	_, err := e.Stat(u)
+	if err != nil {
+		return nil, err
+	}
+
+	return os.Open(u.Path)
+}
+
 func TestServiceRunESX(t *testing.T) {
 	if *testESX == false {
 		t.SkipNow()
@@ -306,6 +332,7 @@ func TestServiceRunESX(t *testing.T) {
 	out := NewBackdoorChannelOut()
 
 	service := NewService(in, out)
+	service.Command.FileServer.RegisterFileHandler("echo", new(echoHandler))
 
 	ping := sync.NewCond(new(sync.Mutex))
 

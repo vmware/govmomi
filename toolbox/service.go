@@ -87,6 +87,7 @@ func NewService(rpcIn Channel, rpcOut Channel) *Service {
 	s.Command = registerCommandServer(s)
 	s.Command.FileServer = hgfs.NewServer()
 	s.Command.FileServer.RegisterFileHandler("proc", s.Command.ProcessManager)
+	s.Command.FileServer.RegisterFileHandler(hgfs.ArchiveScheme, hgfs.NewArchiveHandler())
 
 	s.Power = registerPowerCommandHandler(s)
 
