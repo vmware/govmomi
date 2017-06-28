@@ -106,7 +106,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 			attr := f.Attributes.GetGuestFileAttributes()
 
-			fmt.Fprintf(tw, "%s\t%s\t%s\n", units.FileSize(f.Size), attr.ModificationTime.Format("Jan 2 15:04 2006"), f.Path)
+			fmt.Fprintf(tw, "%s\t%s\t%s", units.FileSize(f.Size), attr.ModificationTime.Format("Jan 2 15:04 2006"), f.Path)
+			if attr.SymlinkTarget != "" {
+				fmt.Fprintf(tw, " -> %s", attr.SymlinkTarget)
+			}
+			fmt.Fprintln(tw)
 		}
 
 		_ = tw.Flush()
