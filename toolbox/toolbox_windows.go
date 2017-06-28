@@ -21,7 +21,7 @@ import (
 	"os"
 )
 
-func fileExtendedInfoFormat(info os.FileInfo) string {
+func fileExtendedInfoFormat(dir string, info os.FileInfo) string {
 	const format = "<fxi>" +
 		"<Name>%s</Name>" +
 		"<ft>%d</ft>" +

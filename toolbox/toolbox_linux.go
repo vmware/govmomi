@@ -19,13 +19,14 @@ package toolbox
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"syscall"
 	"time"
 
 	"github.com/vmware/govmomi/toolbox/vix"
 )
 
-func fileExtendedInfoFormat(info os.FileInfo) string {
+func fileExtendedInfoFormat(dir string, info os.FileInfo) string {
 	const format = "<fxi>" +
 		"<Name>%s</Name>" +
 		"<ft>%d</ft>" +
@@ -39,6 +40,7 @@ func fileExtendedInfoFormat(info os.FileInfo) string {
 		"</fxi>"
 
 	props := 0
+	targ := ""
 
 	if info.IsDir() {
 		props |= vix.FileAttributesDirectory
@@ -46,6 +48,7 @@ func fileExtendedInfoFormat(info os.FileInfo) string {
 
 	if info.Mode()&os.ModeSymlink == os.ModeSymlink {
 		props |= vix.FileAttributesSymlink
+		targ, _ = os.Readlink(filepath.Join(dir, info.Name()))
 	}
 
 	size := info.Size()
@@ -61,8 +64,6 @@ func fileExtendedInfoFormat(info os.FileInfo) string {
 		uid = int(sys.Uid)
 		gid = int(sys.Gid)
 	}
-
-	targ := ""
 
 	return fmt.Sprintf(format, info.Name(), props, size, mtime, atime, uid, gid, perm, targ)
 }

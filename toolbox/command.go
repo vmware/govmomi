@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"time"
 
@@ -472,19 +473,22 @@ func (c *CommandServer) ListFiles(header vix.CommandRequestHeader, data []byte) 
 		return nil, err
 	}
 
-	info, err := os.Stat(r.GuestPathName)
+	info, err := os.Lstat(r.GuestPathName)
 	if err != nil {
 		return nil, err
 	}
 
+	var dir string
 	var files []os.FileInfo
 
 	if info.IsDir() {
+		dir = r.GuestPathName
 		files, err = ioutil.ReadDir(r.GuestPathName)
 		if err != nil {
 			return nil, err
 		}
 	} else {
+		dir = filepath.Dir(r.GuestPathName)
 		files = append(files, info)
 	}
 
@@ -504,7 +508,7 @@ func (c *CommandServer) ListFiles(header vix.CommandRequestHeader, data []byte) 
 	buf.WriteString(fmt.Sprintf("<rem>%d</rem>", remaining))
 
 	for _, info = range files {
-		buf.WriteString(fileExtendedInfoFormat(info))
+		buf.WriteString(fileExtendedInfoFormat(dir, info))
 	}
 
 	return buf.Bytes(), nil
@@ -615,7 +619,7 @@ func (c *CommandServer) InitiateFileTransferFromGuest(header vix.CommandRequestH
 		return nil, vix.Error(vix.NotAFile)
 	}
 
-	return []byte(fileExtendedInfoFormat(info)), nil
+	return []byte(fileExtendedInfoFormat("", info)), nil
 }
 
 func (c *CommandServer) InitiateFileTransferToGuest(header vix.CommandRequestHeader, data []byte) ([]byte, error) {

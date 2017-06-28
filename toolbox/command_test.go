@@ -25,6 +25,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"testing"
@@ -672,27 +673,52 @@ func TestVixFiles(t *testing.T) {
 
 	// name of the last file temp file we created, we'll mess around with it then delete it
 	name := strings.TrimSuffix(string(reply[4:]), "\x00")
-
-	// test ls of a single file
-	ls := &vix.ListFilesRequest{
-		GuestPathName: name,
+	// for testing symlinks
+	link := filepath.Join(dir, "a-link")
+	err := os.Symlink(name, link)
+	if err != nil {
+		t.Fatal(err)
 	}
 
-	reply = c.Request(vix.CommandListFiles, ls)
+	for _, fpath := range []string{name, link} {
+		// test ls of a single file
+		ls := &vix.ListFilesRequest{
+			GuestPathName: fpath,
+		}
 
-	rc = vixRC(reply)
-	if rc != vix.OK {
-		t.Fatalf("rc: %d", rc)
-	}
+		reply = c.Request(vix.CommandListFiles, ls)
 
-	num := bytes.Count(reply, []byte("<fxi>"))
-	if num != 1 {
-		t.Errorf("ls %s: %d", name, num)
-	}
+		rc = vixRC(reply)
+		if rc != vix.OK {
+			t.Fatalf("rc: %d", rc)
+		}
 
-	num = bytes.Count(reply, []byte("<rem>0</rem>"))
-	if num != 1 {
-		t.Errorf("ls %s: %d", name, num)
+		num := bytes.Count(reply, []byte("<fxi>"))
+		if num != 1 {
+			t.Errorf("ls %s: %d", name, num)
+		}
+
+		num = bytes.Count(reply, []byte("<rem>0</rem>"))
+		if num != 1 {
+			t.Errorf("ls %s: %d", name, num)
+		}
+
+		ft := 0
+		target := ""
+		if fpath == link {
+			target = name
+			ft = vix.FileAttributesSymlink
+		}
+
+		num = bytes.Count(reply, []byte(fmt.Sprintf("<slt>%s</slt>", target)))
+		if num != 1 {
+			t.Errorf("ls %s: %d", name, num)
+		}
+
+		num = bytes.Count(reply, []byte(fmt.Sprintf("<ft>%d</ft>", ft)))
+		if num != 1 {
+			t.Errorf("ls %s: %d", name, num)
+		}
 	}
 
 	mv := &vix.RenameFileRequest{
@@ -753,7 +779,9 @@ func TestVixFiles(t *testing.T) {
 	}
 
 	// ls again now that file is gone
-	reply = c.Request(vix.CommandListFiles, ls)
+	reply = c.Request(vix.CommandListFiles, &vix.ListFilesRequest{
+		GuestPathName: name,
+	})
 
 	rc = vixRC(reply)
 	if rc != vix.FileNotFound {
@@ -761,7 +789,7 @@ func TestVixFiles(t *testing.T) {
 	}
 
 	// ls
-	ls = &vix.ListFilesRequest{
+	ls := &vix.ListFilesRequest{
 		GuestPathName: dir,
 	}
 	ls.Body.MaxResults = 5 // default is 50
@@ -788,7 +816,7 @@ func TestVixFiles(t *testing.T) {
 		}
 	}
 
-	if total != max {
+	if total != max+1 {
 		t.Errorf("expected %d, got %d", max, total)
 	}
 
