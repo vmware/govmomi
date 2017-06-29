@@ -367,7 +367,7 @@ Optionally set `GOVC_*' vars in `process-environment' using prefix
 
 (defun govc-process (command handler)
   "Run COMMAND, calling HANDLER upon successful exit of the process."
-  (message command)
+  (message "%s" command)
   (let ((process-environment (govc-environment))
         (exit-code))
     (add-to-list 'govc-command-history command)

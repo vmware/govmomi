@@ -592,3 +592,45 @@ load test_helper
   run govc snapshot.remove -vm "$vm" root/child
   assert_success
 }
+
+@test "object name with slash" {
+  vm=$(new_empty_vm)
+
+  name="$vm/with-slash"
+
+  # rename VM to include a '/'
+  run govc vm.change -vm "$vm" -name "$name"
+  assert_success
+
+  path=$(govc ls "vm/$name")
+
+  run govc vm.info "$name"
+  assert_success
+  assert_line "Name: $name"
+  assert_line "Path: $path"
+
+  run govc vm.info "$path"
+  assert_success
+  assert_line "Name: $name"
+  assert_line "Path: $path"
+
+  run govc find vm -name "$name"
+  assert_success "vm/$name"
+
+  # create a portgroup where name includes a '/'
+  net=$(new_id)/with-slash
+
+  run govc host.portgroup.add -vswitch vSwitch0 "$net"
+  assert_success
+
+  run govc vm.network.change -vm "$name" -net "$net" ethernet-0
+  assert_success
+
+  # change VM eth0 to use network that includes a '/' in the name
+  run govc device.info -vm "$name" ethernet-0
+  assert_success
+  assert_line "Summary: $net"
+
+  run govc host.portgroup.remove "$net"
+  assert_success
+}
