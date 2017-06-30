@@ -24,6 +24,7 @@ import (
 	"log"
 	"math"
 	"math/rand"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -44,6 +45,7 @@ type Server struct {
 	Archive      bool
 
 	handlers map[int32]func(*Packet) (interface{}, error)
+	schemes  map[string]FileHandler
 	sessions map[uint64]*session
 	mu       sync.Mutex
 	handle   uint32
@@ -61,6 +63,7 @@ func NewServer() *Server {
 	s := &Server{
 		Archive:  true,
 		sessions: make(map[uint64]*session),
+		schemes:  make(map[string]FileHandler),
 		chmod:    os.Chmod,
 		chown:    os.Chown,
 	}
@@ -82,6 +85,11 @@ func NewServer() *Server {
 	}
 
 	return s
+}
+
+// RegisterFileHandler enables dispatch to handler for the given scheme.
+func (s *Server) RegisterFileHandler(scheme string, handler FileHandler) {
+	s.schemes[scheme] = handler
 }
 
 // Dispatch unpacks the given request packet and dispatches to the appropriate handler
@@ -116,13 +124,29 @@ func (s *Server) Dispatch(packet []byte) ([]byte, error) {
 // of regular files and archives of directories.
 type File interface {
 	io.Reader
-	io.WriteCloser
+	io.Writer
+	io.Closer
 
 	Name() string
 }
 
+// FileHandler is the plugin interface for hgfs file transport.
+type FileHandler interface {
+	Stat(*url.URL) (os.FileInfo, error)
+	Open(*url.URL, int32) (File, error)
+}
+
 // OpenFile selects the File implementation based on file type and mode.
 func (s *Server) OpenFile(name string, mode int32) (File, error) {
+	u := urlParse(name)
+
+	if h, ok := s.schemes[u.Scheme]; ok {
+		f, err := h.Open(u, mode)
+		if err != os.ErrNotExist {
+			return f, err
+		}
+	}
+
 	var err error
 	var file File
 
@@ -167,6 +191,23 @@ func (p procFileInfo) Size() int64 {
 	return largePacketMax // Remember, Sully, when I promised to kill you last?  I lied.
 }
 
+func urlParse(name string) *url.URL {
+	u, err := url.Parse(strings.TrimPrefix(name, "/")) // must appear to be an absolute path or hgfs errors
+	if err != nil {
+		u = &url.URL{Path: name}
+	}
+
+	if u.Scheme == "" {
+		ix := strings.Index(u.Path, "/")
+		if ix > 0 {
+			u.Scheme = u.Path[:ix]
+			u.Path = u.Path[ix:]
+		}
+	}
+
+	return u
+}
+
 // Stat wraps os.Stat such that we can report directory types as regular files to support archive streaming.
 // In the case of standard vmware-tools or hgfs.Server.Archive == false, attempts to transfer directories result
 // with a VIX_E_NOT_A_FILE (see InitiateFileTransfer{To,From}Guest).
@@ -177,6 +218,15 @@ func (p procFileInfo) Size() int64 {
 //   + sent to as Content-Length header in response to GET of FileTransferInformation.Url,
 //     if the first ReadV3 size is > HGFS_LARGE_PACKET_MAX
 func (s *Server) Stat(name string) (os.FileInfo, error) {
+	u := urlParse(name)
+
+	if h, ok := s.schemes[u.Scheme]; ok {
+		info, err := h.Stat(u)
+		if err != os.ErrNotExist {
+			return info, err
+		}
+	}
+
 	info, err := os.Stat(name)
 	if err != nil {
 		return info, err
@@ -337,6 +387,12 @@ func (s *Server) SetattrV2(p *Packet) (interface{}, error) {
 	}
 
 	name := req.FileName.Path()
+
+	_, err = os.Stat(name)
+	if err != nil && os.IsNotExist(err) {
+		// assuming this is a virtual file
+		return res, nil
+	}
 
 	uid := -1
 	if req.Attr.Mask&AttrValidUserID == AttrValidUserID {

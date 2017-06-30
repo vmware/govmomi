@@ -20,16 +20,22 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"io"
+	"io/ioutil"
+	"net"
 	"net/url"
 	"os"
 	"os/exec"
+	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"syscall"
 	"time"
 
+	"github.com/vmware/govmomi/toolbox/hgfs"
 	"github.com/vmware/govmomi/toolbox/vix"
 )
 
@@ -73,6 +79,19 @@ func init() {
 	}
 }
 
+// ProcessIO encapsulates IO for Go functions and OS commands such that they can interact via the OperationsManager
+// without file system disk IO.
+type ProcessIO struct {
+	In struct {
+		io.Writer
+		io.Reader
+		io.Closer // Closer for the write side of the pipe, can be closed via hgfs ops (FileTranfserToGuest)
+	}
+
+	Out *bytes.Buffer
+	Err *bytes.Buffer
+}
+
 // ProcessState is the toolbox representation of the GuestProcessInfo type
 type ProcessState struct {
 	Name      string
@@ -82,6 +101,61 @@ type ProcessState struct {
 	ExitCode  int32
 	StartTime int64
 	EndTime   int64
+
+	IO *ProcessIO
+}
+
+// WithIO enables toolbox Process IO without file system disk IO.
+func (p *Process) WithIO() *Process {
+	p.IO = &ProcessIO{
+		Out: new(bytes.Buffer),
+		Err: new(bytes.Buffer),
+	}
+
+	return p
+}
+
+// ProcessFile implements the os.FileInfo interface to enable toolbox interaction with virtual files.
+type ProcessFile struct {
+	io.Reader
+	io.Writer
+	io.Closer
+
+	name string
+	size int
+}
+
+// Name implementation of the os.FileInfo interface method.
+func (a *ProcessFile) Name() string {
+	return a.name
+}
+
+// Size implementation of the os.FileInfo interface method.
+func (a *ProcessFile) Size() int64 {
+	return int64(a.size)
+}
+
+// Mode implementation of the os.FileInfo interface method.
+func (a *ProcessFile) Mode() os.FileMode {
+	if strings.HasSuffix(a.name, "stdin") {
+		return 0200
+	}
+	return 0400
+}
+
+// ModTime implementation of the os.FileInfo interface method.
+func (a *ProcessFile) ModTime() time.Time {
+	return time.Now()
+}
+
+// IsDir implementation of the os.FileInfo interface method.
+func (a *ProcessFile) IsDir() bool {
+	return false
+}
+
+// Sys implementation of the os.FileInfo interface method.
+func (a *ProcessFile) Sys() interface{} {
+	return nil
 }
 
 func (s *ProcessState) toXML() string {
@@ -115,7 +189,7 @@ func (s *ProcessState) toXML() string {
 type Process struct {
 	ProcessState
 
-	Start func(context.Context, *vix.StartProgramRequest) (int64, error)
+	Start func(*Process, *vix.StartProgramRequest) (int64, error)
 	Wait  func() error
 	Kill  context.CancelFunc
 
@@ -177,7 +251,7 @@ func (m *ProcessManager) Start(r *vix.StartProgramRequest, p *Process) (int64, e
 
 	p.ctx, p.Kill = context.WithCancel(context.Background())
 
-	pid, err := p.Start(p.ctx, r)
+	pid, err := p.Start(p, r)
 	if err != nil {
 		return -1, err
 	}
@@ -208,6 +282,7 @@ func (m *ProcessManager) Start(r *vix.StartProgramRequest, p *Process) (int64, e
 		}
 
 		m.wg.Done()
+		p.Kill() // cancel context for those waiting on p.ctx.Done()
 
 		// See: http://pubs.vmware.com/vsphere-65/topic/com.vmware.wssdk.apiref.doc/vim.vm.guest.ProcessManager.ProcessInfo.html
 		// "If the process was started using StartProgramInGuest then the process completion time
@@ -269,6 +344,68 @@ func (m *ProcessManager) ListProcesses(pids []int64) []byte {
 	return w.Bytes()
 }
 
+// Stat implements hgfs.FileHandler.Stat
+func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
+	dir, file := path.Split(u.Path)
+
+	pid, err := strconv.ParseInt(path.Base(dir), 10, 64)
+	if err != nil {
+		return nil, os.ErrNotExist
+	}
+
+	m.mu.Lock()
+	p := m.entries[pid]
+	m.mu.Unlock()
+
+	if p == nil || p.IO == nil {
+		return nil, os.ErrNotExist
+	}
+
+	pf := &ProcessFile{
+		name:   u.String(),
+		Closer: ioutil.NopCloser(nil), // via hgfs, nop for stdout and stderr
+	}
+
+	switch file {
+	case "stdin":
+		pf.Writer = p.IO.In.Writer
+		pf.Closer = p.IO.In.Closer
+	case "stdout":
+		<-p.ctx.Done()
+		pf.Reader = p.IO.Out
+		pf.size = p.IO.Out.Len()
+	case "stderr":
+		<-p.ctx.Done()
+		pf.Reader = p.IO.Err
+		pf.size = p.IO.Err.Len()
+	default:
+		return nil, os.ErrNotExist
+	}
+
+	return pf, nil
+}
+
+// Open implements hgfs.FileHandler.Open
+func (m *ProcessManager) Open(u *url.URL, mode int32) (hgfs.File, error) {
+	info, err := m.Stat(u)
+	if err != nil {
+		return nil, err
+	}
+
+	switch path.Base(u.Path) {
+	case "stdin":
+		if mode != hgfs.OpenModeWriteOnly {
+			return nil, vix.Error(vix.InvalidArg)
+		}
+	case "stdout", "stderr":
+		if mode != hgfs.OpenModeReadOnly {
+			return nil, vix.Error(vix.InvalidArg)
+		}
+	}
+
+	return info.(*ProcessFile), nil
+}
+
 type processFunc struct {
 	wg sync.WaitGroup
 
@@ -290,11 +427,35 @@ func NewProcessFunc(run func(ctx context.Context, args string) error) *Process {
 	}
 }
 
-func (f *processFunc) start(ctx context.Context, r *vix.StartProgramRequest) (int64, error) {
+// ProcessFuncIO is the Context key to access optional ProcessIO
+var ProcessFuncIO = struct {
+	key int
+}{vix.CommandMagicWord}
+
+func (f *processFunc) start(p *Process, r *vix.StartProgramRequest) (int64, error) {
 	f.wg.Add(1)
 
+	var c io.Closer
+
+	if p.IO != nil {
+		pr, pw := io.Pipe()
+
+		p.IO.In.Reader, p.IO.In.Writer = pr, pw
+		c, p.IO.In.Closer = pr, pw
+
+		p.ctx = context.WithValue(p.ctx, ProcessFuncIO, p.IO)
+	}
+
 	go func() {
-		f.err = f.run(ctx, r.Arguments)
+		f.err = f.run(p.ctx, r.Arguments)
+
+		if p.IO != nil {
+			_ = c.Close()
+
+			if f.err != nil && p.IO.Err.Len() == 0 {
+				p.IO.Err.WriteString(f.err.Error())
+			}
+		}
 
 		f.wg.Done()
 	}()
@@ -326,16 +487,35 @@ func NewProcess() *Process {
 	}
 }
 
-func (c *processCmd) start(ctx context.Context, r *vix.StartProgramRequest) (int64, error) {
+func (c *processCmd) start(p *Process, r *vix.StartProgramRequest) (int64, error) {
 	name, err := exec.LookPath(r.ProgramPath)
 	if err != nil {
 		return -1, err
 	}
 	// #nosec: Subprocess launching with variable
 	// Note that processCmd is currently used only for testing.
-	c.cmd = exec.CommandContext(ctx, shell, "-c", fmt.Sprintf("%s %s", name, r.Arguments))
+	c.cmd = exec.CommandContext(p.ctx, shell, "-c", fmt.Sprintf("%s %s", name, r.Arguments))
 	c.cmd.Dir = r.WorkingDir
 	c.cmd.Env = r.EnvVars
+
+	if p.IO != nil {
+		in, perr := c.cmd.StdinPipe()
+		if perr != nil {
+			return -1, perr
+		}
+
+		p.IO.In.Writer = in
+		p.IO.In.Closer = in
+
+		// Note we currently use a Buffer in addition to the os.Pipe so that:
+		// - Stat() can provide a size
+		// - FileTransferFromGuest won't block
+		// - Can't use the exec.Cmd.Std{out,err}Pipe methods since Wait() closes the pipes.
+		//   We could use os.Pipe directly, but toolbox needs to take care of closing both ends,
+		//   but also need to prevent FileTransferFromGuest from blocking.
+		c.cmd.Stdout = p.IO.Out
+		c.cmd.Stderr = p.IO.Err
+	}
 
 	err = c.cmd.Start()
 	if err != nil {
@@ -363,4 +543,49 @@ func (c *processCmd) wait() error {
 	}
 
 	return nil
+}
+
+// NewProcessRoundTrip starts a Go function to implement a toolbox backed http.RoundTripper
+func NewProcessRoundTrip() *Process {
+	return NewProcessFunc(func(ctx context.Context, host string) error {
+		p, _ := ctx.Value(ProcessFuncIO).(*ProcessIO)
+
+		// we can't block for long
+		ctx, cancel := context.WithTimeout(ctx, time.Second)
+		defer cancel()
+
+		closers := []io.Closer{p.In.Closer}
+
+		defer func() {
+			for _, c := range closers {
+				_ = c.Close()
+			}
+		}()
+
+		c, err := new(net.Dialer).DialContext(ctx, "tcp", host)
+		if err != nil {
+			return err
+		}
+
+		closers = append(closers, c)
+
+		go func() {
+			<-ctx.Done()
+			if ctx.Err() == context.DeadlineExceeded {
+				_ = c.Close()
+			}
+		}()
+
+		_, err = io.Copy(c, p.In.Reader)
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(p.Out, c)
+		if err != nil {
+			return err
+		}
+
+		return nil
+	}).WithIO()
 }

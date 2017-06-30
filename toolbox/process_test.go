@@ -17,10 +17,15 @@ limitations under the License.
 package toolbox
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"errors"
 	"fmt"
+	"io"
+	"net/http"
+	"net/http/httptest"
+	"net/url"
 	"strconv"
 	"testing"
 	"time"
@@ -227,5 +232,79 @@ func TestProcessError(t *testing.T) {
 
 	if err.Error() != fault.Error() {
 		t.Fatal()
+	}
+}
+
+func TestProcessIO(t *testing.T) {
+	m := NewProcessManager()
+
+	r := &vix.StartProgramRequest{
+		ProgramPath: "/bin/date",
+	}
+
+	p := NewProcess().WithIO()
+
+	_, err := m.Start(r, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	m.wg.Wait()
+
+	var buf bytes.Buffer
+
+	_, _ = io.Copy(&buf, p.IO.Out)
+
+	if buf.Len() == 0 {
+		t.Error("no data")
+	}
+}
+
+type testRoundTripper struct {
+	*Process
+}
+
+func (c *testRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	err := req.Write(c.IO.In.Writer)
+	if err != nil {
+		return nil, err
+	}
+
+	_ = c.IO.In.Close()
+
+	<-c.ctx.Done()
+
+	return http.ReadResponse(bufio.NewReader(c.IO.Out), req)
+}
+
+func TestProcessRoundTripper(t *testing.T) {
+	echo := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = r.Write(w)
+	}))
+
+	u, _ := url.Parse(echo.URL)
+
+	m := NewProcessManager()
+
+	r := &vix.StartProgramRequest{
+		ProgramPath: "http.RoundTrip",
+		Arguments:   u.Host,
+	}
+
+	p := NewProcessRoundTrip()
+
+	_, err := m.Start(r, p)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := (&http.Client{Transport: &testRoundTripper{p}}).Get(echo.URL)
+	if err != nil {
+		t.Logf("Err: %s", p.IO.Err.String())
+		t.Fatal(err)
+	}
+
+	if res.ContentLength == 0 {
+		t.Errorf("len=%d", res.ContentLength)
 	}
 }

@@ -26,6 +26,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/vmware/govmomi/toolbox/hgfs"
@@ -228,7 +229,20 @@ func (c *CommandServer) StartCommand(header vix.CommandRequestHeader, data []byt
 }
 
 func (c *CommandServer) ExecCommandStart(m *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
-	return m.Start(r, NewProcess())
+	p := NewProcess()
+
+	switch r.ProgramPath {
+	case "http.RoundTrip":
+		p = NewProcessRoundTrip()
+	default:
+		// Standard vmware-tools requires an absolute path,
+		// we'll enable IO redirection by default without an absolute path.
+		if !strings.Contains(r.ProgramPath, "/") {
+			p = p.WithIO()
+		}
+	}
+
+	return m.Start(r, p)
 }
 
 func (c *CommandServer) KillProcess(header vix.CommandRequestHeader, data []byte) ([]byte, error) {
