@@ -50,6 +50,8 @@ type clone struct {
 	customization string
 	waitForIP     bool
 	annotation    string
+	snapshot      string
+	link          string
 
 	Client         *vim25.Client
 	Datacenter     *object.Datacenter
@@ -101,6 +103,8 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.customization, "customization", "", "Customization Specification Name")
 	f.BoolVar(&cmd.waitForIP, "waitip", false, "Wait for VM to acquire IP address")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
+	f.StringVar(&cmd.snapshot, "snapshot", "", "Snapshot name in the source VM for linked clones, to be used with -link=snapshot")
+	f.StringVar(&cmd.link, "link", "", "Creates a linked clone from snapshot or source VM, values: snapshot | machine")
 }
 
 func (cmd *clone) Usage() string {
@@ -316,6 +320,49 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 		Template: cmd.template,
 	}
 
+	if cmd.link == "snapshot" {
+		relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsCreateNewChildDiskBacking)
+		cloneSpec.Location = relocateSpec
+		//get snapshots:
+		var o mo.VirtualMachine
+		vm := cmd.VirtualMachine
+		err = vm.Properties(ctx, vm.Reference(), []string{"snapshot"}, &o)
+		if err != nil {
+			return nil, err
+		}
+
+		if o.Snapshot == nil {
+			return nil, fmt.Errorf("Given VM does not have a snapshot to clone from. Create one, or use -link=machine to create a machine linked clone")
+		}
+
+		//make sure we have a snapshot, and set current snapshot as link source
+		if o.Snapshot.CurrentSnapshot == nil {
+			if cmd.snapshot == "" {
+				return nil, fmt.Errorf("Given VM does not have a current snapshot to clone from, specify a snapshot name using -snapshot=")
+			}
+		} else {
+			//default to current snapshot
+			cloneSpec.Snapshot = o.Snapshot.CurrentSnapshot
+		}
+
+		//if we should use a specific snapshot
+		if cmd.snapshot != "" && cmd.snapshot != "current" {
+			snap, err := vm.FindSnapshot(ctx, cmd.snapshot)
+			if err != nil {
+				return nil, err
+			}
+
+			if snap == nil {
+				return nil, fmt.Errorf("Specified snapshot doesn't exist, check your spelling (case sensitive)")
+			}
+			snapRef := snap.Reference()
+			cloneSpec.Snapshot = &snapRef
+		}
+
+	} else if cmd.link == "machine" {
+		relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsMoveChildMostDiskBacking)
+		cloneSpec.Location = relocateSpec
+	}
 	// clone to storage pod
 	datastoreref := types.ManagedObjectReference{}
 	if cmd.StoragePod != nil && cmd.Datastore == nil {
