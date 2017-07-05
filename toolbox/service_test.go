@@ -25,6 +25,9 @@ import (
 	"io/ioutil"
 	"log"
 	"net"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"sync"
 	"testing"
 	"time"
@@ -290,6 +293,13 @@ func TestServiceRunESX(t *testing.T) {
 
 	Trace = testing.Verbose()
 
+	// A server that echos HTTP requests, for testing toolbox's http.RoundTripper
+	echo := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		_ = r.Write(w)
+	}))
+	// Client side can use 'govc guest.getenv' to get the URL w/ random port
+	_ = os.Setenv("TOOLBOX_ECHO_SERVER", echo.URL)
+
 	var wg sync.WaitGroup
 
 	in := NewBackdoorChannelIn()
@@ -355,7 +365,7 @@ func TestServiceRunESX(t *testing.T) {
 				})
 				return m.Start(r, p)
 			default:
-				return m.Start(r, NewProcess())
+				return service.Command.ExecCommandStart(m, r)
 			}
 		}
 	}

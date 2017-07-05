@@ -91,21 +91,11 @@ EOF
   rm -rf "$dir"
 fi
 
-destroy() {
-  echo "Destroying VM ${vm}..."
-  govc vm.destroy "$vm"
-  govc datastore.rm -f "$vm"
-}
-
 govc datastore.mkdir -p "$vm"
 
 if ! govc datastore.ls "$vm" | grep -q "${vm}.vmx" ; then
   echo "Creating VM ${vm}..."
   govc vm.create -g otherGuest64 -m 1024 -on=false "$vm"
-
-  if [ -n "$destroy" ] ; then
-    trap destroy EXIT
-  fi
 
   device=$(govc device.cdrom.add -vm "$vm")
   govc device.cdrom.insert -vm "$vm" -device "$device" images/$iso
@@ -125,6 +115,18 @@ echo -n "Waiting for ${vm} ip..."
 ip=$(govc vm.ip -esxcli "$vm")
 
 opts=(-o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -o "LogLevel error" -o "BatchMode yes")
+
+destroy() {
+  if [ -n "$destroy" ] ; then
+    echo "Destroying VM ${vm}..."
+    govc vm.destroy "$vm"
+    govc datastore.rm -f "$vm"
+  else
+    ssh "${opts[@]}" "core@${ip}" pkill toolbox || true
+  fi
+}
+
+trap destroy EXIT
 
 scp "${opts[@]}" "$GOPATH"/bin/toolbox{,.test} "core@${ip}:"
 
@@ -188,6 +190,19 @@ if [ -n "$test" ] ; then
   for name in uptime diskstats net/dev ; do
     test -n "$(govc guest.download /proc/$name -)"
   done
+
+  addr=$(govc guest.getenv TOOLBOX_ECHO_SERVER | cut -d= -f2)
+
+  echo "Testing http.RoundTrip via $addr..."
+  govc guest.run GET "$addr/$vm" | grep "$vm"
+  echo "$vm" | govc guest.run -e Content-Type:text/plain -d - POST "$addr" | grep "$vm"
+
+  echo "Testing commands with IO..."
+  # Note that we don't use a pipe here, as guest.ps transitions the vm to VM_STATE_GUEST_OPERATION,
+  # which prevents guest.run from invoking guest operations.  By letting guest.ps complete before
+  # guest.run, the vm will have transitioned back to VM_STATE_POWERED_ON.
+  data=$(govc guest.ps -json)
+  govc guest.run -d "$data" jq .
 
   echo "Waiting for tests to complete..."
   wait
