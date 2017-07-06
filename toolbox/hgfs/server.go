@@ -138,16 +138,19 @@ type FileHandler interface {
 }
 
 // urlParse attempts to convert the given name to a URL with scheme for use as FileHandler dispatch.
-func urlParse(info os.FileInfo, name string) *url.URL {
-	if info != nil && info.IsDir() {
-		u, err := url.Parse(name)
-		if err == nil {
+func urlParse(name string) *url.URL {
+	var info os.FileInfo
+
+	u, err := url.Parse(name)
+	if err == nil && u.Scheme == "" {
+		info, err = os.Stat(u.Path)
+		if err == nil && info.IsDir() {
 			u.Scheme = ArchiveScheme // special case for IsDir()
 			return u
 		}
 	}
 
-	u, err := url.Parse(strings.TrimPrefix(name, "/")) // must appear to be an absolute path or hgfs errors
+	u, err = url.Parse(strings.TrimPrefix(name, "/")) // must appear to be an absolute path or hgfs errors
 	if err != nil {
 		u = &url.URL{Path: name}
 	}
@@ -165,9 +168,7 @@ func urlParse(info os.FileInfo, name string) *url.URL {
 
 // OpenFile selects the File implementation based on file type and mode.
 func (s *Server) OpenFile(name string, mode int32) (File, error) {
-	info, _ := os.Stat(name)
-
-	u := urlParse(info, name)
+	u := urlParse(name)
 
 	if h, ok := s.schemes[u.Scheme]; ok {
 		f, serr := h.Open(u, mode)
@@ -200,9 +201,7 @@ func (s *Server) OpenFile(name string, mode int32) (File, error) {
 //   + sent to as Content-Length header in response to GET of FileTransferInformation.Url,
 //     if the first ReadV3 size is > HGFS_LARGE_PACKET_MAX
 func (s *Server) Stat(name string) (os.FileInfo, error) {
-	info, err := os.Stat(name)
-
-	u := urlParse(info, name)
+	u := urlParse(name)
 
 	if h, ok := s.schemes[u.Scheme]; ok {
 		sinfo, serr := h.Stat(u)
@@ -211,7 +210,7 @@ func (s *Server) Stat(name string) (os.FileInfo, error) {
 		}
 	}
 
-	return info, err
+	return os.Stat(name)
 }
 
 type session struct {
