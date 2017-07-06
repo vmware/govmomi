@@ -344,8 +344,26 @@ func (m *ProcessManager) ListProcesses(pids []int64) []byte {
 	return w.Bytes()
 }
 
+type procFileInfo struct {
+	os.FileInfo
+}
+
+// Size returns hgfs.LargePacketMax such that InitiateFileTransferFromGuest can download a /proc/ file from the guest.
+// If we were to return the size '0' here, then a 'Content-Length: 0' header is returned by VC/ESX.
+func (p procFileInfo) Size() int64 {
+	return hgfs.LargePacketMax // Remember, Sully, when I promised to kill you last?  I lied.
+}
+
 // Stat implements hgfs.FileHandler.Stat
 func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
+	name := path.Join("/proc", u.Path)
+
+	info, err := os.Stat(name)
+	if err == nil && info.Size() == 0 {
+		// This is a real /proc file
+		return &procFileInfo{info}, nil
+	}
+
 	dir, file := path.Split(u.Path)
 
 	pid, err := strconv.ParseInt(path.Base(dir), 10, 64)
@@ -362,7 +380,7 @@ func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
 	}
 
 	pf := &ProcessFile{
-		name:   u.String(),
+		name:   name,
 		Closer: ioutil.NopCloser(nil), // via hgfs, nop for stdout and stderr
 	}
 
@@ -392,6 +410,12 @@ func (m *ProcessManager) Open(u *url.URL, mode int32) (hgfs.File, error) {
 		return nil, err
 	}
 
+	pinfo, ok := info.(*ProcessFile)
+
+	if !ok {
+		return nil, os.ErrNotExist // fall through to default os.Open
+	}
+
 	switch path.Base(u.Path) {
 	case "stdin":
 		if mode != hgfs.OpenModeWriteOnly {
@@ -403,7 +427,7 @@ func (m *ProcessManager) Open(u *url.URL, mode int32) (hgfs.File, error) {
 		}
 	}
 
-	return info.(*ProcessFile), nil
+	return pinfo, nil
 }
 
 type processFunc struct {

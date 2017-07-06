@@ -70,7 +70,7 @@ func TestReadArchive(t *testing.T) {
 	}
 
 	c := NewClient()
-	c.s.Archive = true
+	c.s.RegisterFileHandler(ArchiveScheme, NewArchiveHandler())
 
 	status := c.CreateSession()
 	if status != StatusSuccess {
@@ -224,7 +224,7 @@ func TestWriteArchive(t *testing.T) {
 	_ = gz.Close()
 
 	c := NewClient()
-	c.s.Archive = true
+	c.s.RegisterFileHandler(ArchiveScheme, NewArchiveHandler())
 
 	status := c.CreateSession()
 	if status != StatusSuccess {

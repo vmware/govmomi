@@ -138,8 +138,8 @@ func (cmd *run) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		return cmd.do(hc, req)
-	case "POST":
-		req, err := http.NewRequest("POST", f.Arg(1), os.Stdin)
+	case "POST", "PUT":
+		req, err := http.NewRequest(name, f.Arg(1), os.Stdin)
 		if err != nil {
 			return err
 		}

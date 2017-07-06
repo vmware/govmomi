@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -148,7 +149,8 @@ const (
 // HeaderVersion for HGFS protocol version 4
 const HeaderVersion = 0x1
 
-const largePacketMax = 0xf800 // HGFS_LARGE_PACKET_MAX
+// LargePacketMax is maximum size of an hgfs packet
+const LargePacketMax = 0xf800 // HGFS_LARGE_PACKET_MAX
 
 // Packet flags
 const (
@@ -169,7 +171,7 @@ func (s *Status) Error() string {
 		return s.Err.Error()
 	}
 
-	return fmt.Sprintf("status=%d", s.Code)
+	return fmt.Sprintf("hgfs.Status=%d", s.Code)
 }
 
 // errorStatus maps the given error type to a status code
@@ -291,6 +293,8 @@ func (r *Packet) Reply(payload interface{}, err error) ([]byte, error) {
 			rc = err.Error()
 		}
 		fmt.Fprintf(os.Stderr, "[hgfs] response %#v [%s]\n", p.Header, rc)
+	} else if err != nil {
+		log.Printf("[hgfs] op=%d error: %s", r.Op, err)
 	}
 
 	return p.MarshalBinary()

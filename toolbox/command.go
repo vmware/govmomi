@@ -23,6 +23,7 @@ import (
 	"encoding/hex"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -91,6 +92,8 @@ func commandResult(header vix.CommandRequestHeader, rc int, err error, response 
 		// TODO: inspect err for system error, setting errno
 
 		response = []byte(err.Error())
+
+		log.Printf("[vix] op=%d error: %s", header.OpCode, err)
 	}
 
 	buf := bytes.NewBufferString(fmt.Sprintf("%d %d ", rc, errno))

@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"math"
 	"math/rand"
 	"net/url"
 	"os"
@@ -42,7 +41,6 @@ var (
 // Server provides an HGFS protocol implementation to support guest tools VmxiHgfsSendPacketCommand
 type Server struct {
 	Capabilities []Capability
-	Archive      bool
 
 	handlers map[int32]func(*Packet) (interface{}, error)
 	schemes  map[string]FileHandler
@@ -61,7 +59,6 @@ func NewServer() *Server {
 	}
 
 	s := &Server{
-		Archive:  true,
 		sessions: make(map[uint64]*session),
 		schemes:  make(map[string]FileHandler),
 		chmod:    os.Chmod,
@@ -89,6 +86,10 @@ func NewServer() *Server {
 
 // RegisterFileHandler enables dispatch to handler for the given scheme.
 func (s *Server) RegisterFileHandler(scheme string, handler FileHandler) {
+	if handler == nil {
+		delete(s.schemes, scheme)
+		return
+	}
 	s.schemes[scheme] = handler
 }
 
@@ -136,62 +137,16 @@ type FileHandler interface {
 	Open(*url.URL, int32) (File, error)
 }
 
-// OpenFile selects the File implementation based on file type and mode.
-func (s *Server) OpenFile(name string, mode int32) (File, error) {
-	u := urlParse(name)
-
-	if h, ok := s.schemes[u.Scheme]; ok {
-		f, err := h.Open(u, mode)
-		if err != os.ErrNotExist {
-			return f, err
+// urlParse attempts to convert the given name to a URL with scheme for use as FileHandler dispatch.
+func urlParse(info os.FileInfo, name string) *url.URL {
+	if info != nil && info.IsDir() {
+		u, err := url.Parse(name)
+		if err == nil {
+			u.Scheme = ArchiveScheme // special case for IsDir()
+			return u
 		}
 	}
 
-	var err error
-	var file File
-
-	info, err := s.Stat(name)
-	if err == nil {
-		if _, ok := info.(*archive); ok {
-			switch mode {
-			case OpenModeReadOnly:
-				return newArchiveFromGuest(name)
-			case OpenModeWriteOnly:
-				return newArchiveToGuest(name)
-			}
-		}
-	}
-
-	switch mode {
-	case OpenModeReadOnly:
-		file, err = os.Open(name)
-	case OpenModeWriteOnly:
-		flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
-		file, err = os.OpenFile(name, flag, 0600)
-	default:
-		return nil, &Status{
-			Err:  fmt.Errorf("open mode(%d) not supported for file %q", mode, name),
-			Code: StatusAccessDenied,
-		}
-	}
-
-	return file, err
-}
-
-type procFileInfo struct {
-	os.FileInfo
-}
-
-// Size returns largePacketMax such that InitiateFileTransferFromGuest can download a /proc/ file from the guest.
-// If we were to return the size '0' here, then a 'Content-Length: 0' header is returned by VC/ESX.
-// If /proc/ file data fits in largePacketMax: the Content-Length will be correct.
-// If /proc/ file data exceeds largePacketMax: the Content-Length will largePacketMax. (and client side will truncate)
-// Note that standard vmware-tools does not special case /proc files and always returns Content-Length: 0.
-func (p procFileInfo) Size() int64 {
-	return largePacketMax // Remember, Sully, when I promised to kill you last?  I lied.
-}
-
-func urlParse(name string) *url.URL {
 	u, err := url.Parse(strings.TrimPrefix(name, "/")) // must appear to be an absolute path or hgfs errors
 	if err != nil {
 		u = &url.URL{Path: name}
@@ -208,8 +163,35 @@ func urlParse(name string) *url.URL {
 	return u
 }
 
+// OpenFile selects the File implementation based on file type and mode.
+func (s *Server) OpenFile(name string, mode int32) (File, error) {
+	info, _ := os.Stat(name)
+
+	u := urlParse(info, name)
+
+	if h, ok := s.schemes[u.Scheme]; ok {
+		f, serr := h.Open(u, mode)
+		if serr != os.ErrNotExist {
+			return f, serr
+		}
+	}
+
+	switch mode {
+	case OpenModeReadOnly:
+		return os.Open(name)
+	case OpenModeWriteOnly:
+		flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
+		return os.OpenFile(name, flag, 0600)
+	default:
+		return nil, &Status{
+			Err:  fmt.Errorf("open mode(%d) not supported for file %q", mode, name),
+			Code: StatusAccessDenied,
+		}
+	}
+}
+
 // Stat wraps os.Stat such that we can report directory types as regular files to support archive streaming.
-// In the case of standard vmware-tools or hgfs.Server.Archive == false, attempts to transfer directories result
+// In the case of standard vmware-tools, attempts to transfer directories result
 // with a VIX_E_NOT_A_FILE (see InitiateFileTransfer{To,From}Guest).
 // Note that callers on the VMX side that reach this path are only concerned with:
 // - does the file exist?
@@ -218,32 +200,18 @@ func urlParse(name string) *url.URL {
 //   + sent to as Content-Length header in response to GET of FileTransferInformation.Url,
 //     if the first ReadV3 size is > HGFS_LARGE_PACKET_MAX
 func (s *Server) Stat(name string) (os.FileInfo, error) {
-	u := urlParse(name)
+	info, err := os.Stat(name)
+
+	u := urlParse(info, name)
 
 	if h, ok := s.schemes[u.Scheme]; ok {
-		info, err := h.Stat(u)
-		if err != os.ErrNotExist {
-			return info, err
+		sinfo, serr := h.Stat(u)
+		if serr != os.ErrNotExist {
+			return sinfo, serr
 		}
 	}
 
-	info, err := os.Stat(name)
-	if err != nil {
-		return info, err
-	}
-
-	if s.Archive && info.IsDir() {
-		return &archive{
-			name: name,
-			size: math.MaxInt64,
-		}, nil
-	}
-
-	if info.Size() == 0 && strings.HasPrefix(name, "/proc/") {
-		return &procFileInfo{info}, nil
-	}
-
-	return info, nil
+	return info, err
 }
 
 type session struct {
@@ -312,7 +280,7 @@ func (s *Server) CreateSessionV4(p *Packet) (interface{}, error) {
 	res := &ReplyCreateSessionV4{
 		SessionID:       uint64(rand.Int63()),
 		NumCapabilities: uint32(len(s.Capabilities)),
-		MaxPacketSize:   largePacketMax,
+		MaxPacketSize:   LargePacketMax,
 		Flags:           SessionMaxPacketSizeValid,
 		Capabilities:    s.Capabilities,
 	}

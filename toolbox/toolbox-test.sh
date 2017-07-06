@@ -174,7 +174,17 @@ if [ -n "$test" ] ; then
   govc guest.chmod 0755 "$dest"
   govc guest.ls "$dest" | grep rwxr-xr-x
 
+  echo "Testing custom hgfs.FileHandler..."
+  if ! govc guest.download "/echo:$dest" - 2>/dev/null ; then
+      govc guest.download "/echo:$dest?foo=bar" - >/dev/null
+  fi
+
   home=$(govc guest.getenv HOME | cut -d= -f2)
+
+  if date | govc guest.upload -f - /tmp 2>/dev/null ; then
+    echo "guest.upload to directory should fail without .tgz source" 1>&2
+    exit 1
+  fi
 
   if [ "$verbose" = "false" ] ; then # else you don't want to see this noise
     # Download the $HOME directory, includes toolbox binaries (~30M total)
