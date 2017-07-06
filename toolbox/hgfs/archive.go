@@ -34,8 +34,8 @@ var ArchiveScheme = "archive"
 
 // ArchiveHandler implements a FileHandler for transferring directories.
 type ArchiveHandler struct {
-	Read  func(string, *tar.Reader) error
-	Write func(string, *tar.Writer) error
+	Read  func(*url.URL, *tar.Reader) error
+	Write func(*url.URL, *tar.Writer) error
 }
 
 // NewArchiveHandler returns a FileHandler implementation for transferring directories using gzip'd tar files.
@@ -58,9 +58,9 @@ func (*ArchiveHandler) Stat(u *url.URL) (os.FileInfo, error) {
 func (h *ArchiveHandler) Open(u *url.URL, mode int32) (File, error) {
 	switch mode {
 	case OpenModeReadOnly:
-		return h.newArchiveFromGuest(u.Path)
+		return h.newArchiveFromGuest(u)
 	case OpenModeWriteOnly:
-		return h.newArchiveToGuest(u.Path)
+		return h.newArchiveToGuest(u)
 	default:
 		return nil, os.ErrNotExist
 	}
@@ -112,11 +112,11 @@ func (a *archive) Sys() interface{} {
 var gzipHeader = []byte{0x1f, 0x8b, 0x08} // rfc1952 {ID1, ID2, CM}
 
 // newArchiveFromGuest returns an hgfs.File implementation to read a directory as a gzip'd tar.
-func (h *ArchiveHandler) newArchiveFromGuest(dir string) (File, error) {
+func (h *ArchiveHandler) newArchiveFromGuest(u *url.URL) (File, error) {
 	r, w := io.Pipe()
 
 	a := &archive{
-		name:   dir,
+		name:   u.Path,
 		Reader: r,
 		Writer: w,
 	}
@@ -126,7 +126,7 @@ func (h *ArchiveHandler) newArchiveFromGuest(dir string) (File, error) {
 	a.done = r.Close
 
 	go func() {
-		err := h.Write(dir, tw)
+		err := h.Write(u, tw)
 
 		_ = tw.Close()
 		_ = gz.Close()
@@ -138,11 +138,11 @@ func (h *ArchiveHandler) newArchiveFromGuest(dir string) (File, error) {
 }
 
 // newArchiveToGuest returns an hgfs.File implementation to expand a gzip'd tar into a directory.
-func (h *ArchiveHandler) newArchiveToGuest(dir string) (File, error) {
+func (h *ArchiveHandler) newArchiveToGuest(u *url.URL) (File, error) {
 	r, w := io.Pipe()
 
 	a := &archive{
-		name:   dir,
+		name:   u.Path,
 		Reader: r,
 		Writer: w,
 	}
@@ -171,7 +171,7 @@ func (h *ArchiveHandler) newArchiveToGuest(dir string) (File, error) {
 
 		tr := tar.NewReader(gz)
 
-		cerr = h.Read(dir, tr)
+		cerr = h.Read(u, tr)
 		_ = gz.Close()
 		_ = r.CloseWithError(cerr)
 	}()
@@ -184,7 +184,7 @@ func (a *archive) Close() error {
 }
 
 // archiveRead writes the contents of the given tar.Reader to the given directory.
-func archiveRead(dir string, tr *tar.Reader) error {
+func archiveRead(u *url.URL, tr *tar.Reader) error {
 	for {
 		header, err := tr.Next()
 		if err != nil {
@@ -194,7 +194,7 @@ func archiveRead(dir string, tr *tar.Reader) error {
 			return err
 		}
 
-		name := filepath.Join(dir, header.Name)
+		name := filepath.Join(u.Path, header.Name)
 		mode := os.FileMode(header.Mode)
 
 		switch header.Typeflag {
@@ -228,10 +228,10 @@ func archiveRead(dir string, tr *tar.Reader) error {
 }
 
 // archiveWrite writes the contents of the given source directory to the given tar.Writer.
-func archiveWrite(name string, tw *tar.Writer) error {
-	dir := filepath.Dir(name)
+func archiveWrite(u *url.URL, tw *tar.Writer) error {
+	dir := filepath.Dir(u.Path)
 
-	return filepath.Walk(name, func(file string, fi os.FileInfo, err error) error {
+	return filepath.Walk(u.Path, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return filepath.SkipDir
 		}

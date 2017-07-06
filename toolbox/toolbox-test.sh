@@ -191,9 +191,11 @@ if [ -n "$test" ] ; then
     # Note: trailing slash is required
     govc guest.download "$home/" - | tar -tvzf - | grep "$(basename "$home")"/toolbox
 
+    # Upload source files from this directory
+    # and validate that query string is not used as the file/dir name (see hgfs.ArchiveHandler)
     govc guest.mkdir -p /tmp/toolbox-src
-    git ls-files | xargs tar -cvzf - | govc guest.upload -f - /tmp/toolbox-src
-    govc guest.ls /tmp/toolbox-src
+    git archive --format tar.gz HEAD | govc guest.upload -f - /tmp/toolbox-src?skip=stuff
+    govc guest.rmdir -r /tmp/toolbox-src
   fi
 
   echo "Testing we can download /proc files..."
