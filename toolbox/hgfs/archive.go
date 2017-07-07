@@ -229,25 +229,21 @@ func archiveRead(u *url.URL, tr *tar.Reader) error {
 
 // archiveWrite writes the contents of the given source directory to the given tar.Writer.
 func archiveWrite(u *url.URL, tw *tar.Writer) error {
-	dir := filepath.Dir(u.Path)
 
 	return filepath.Walk(u.Path, func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return filepath.SkipDir
 		}
 
-		name := strings.TrimPrefix(file, dir)[1:]
-
-		header, _ := tar.FileInfoHeader(fi, name)
-
-		header.Name = name
-
-		if header.Typeflag == tar.TypeDir {
-			header.Name += "/"
+		header, err := tar.FileInfoHeader(fi, fi.Name())
+		if err != nil {
+			return err
 		}
+		header.Name = strings.TrimPrefix(
+			strings.Replace(file, filepath.Dir(u.Path), "", -1),
+			string(filepath.Separator))
 
 		var f *os.File
-
 		if header.Typeflag == tar.TypeReg && fi.Size() != 0 {
 			f, err = os.Open(file)
 			if err != nil {
@@ -258,7 +254,9 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 			}
 		}
 
-		_ = tw.WriteHeader(header)
+		if err := tw.WriteHeader(header); err != nil {
+			return err
+		}
 
 		if f != nil {
 			_, err = io.Copy(tw, f)
@@ -266,5 +264,6 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 		}
 
 		return err
+
 	})
 }
