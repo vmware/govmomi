@@ -184,7 +184,7 @@ func TestVixRelayedCommandHandler(t *testing.T) {
 	buf = append(marshal(request), creds...)
 	reply, _ = cmd.Dispatch(buf)
 	rc = vixRC(reply)
-	if rc != vix.Fail {
+	if rc != vix.FileNotFound {
 		t.Fatalf("%q", reply)
 	}
 

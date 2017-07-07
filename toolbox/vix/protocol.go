@@ -22,6 +22,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"os"
+	"os/exec"
 	"syscall"
 )
 
@@ -97,16 +98,19 @@ func (err Error) Error() string {
 // ErrorCode does its best to map the given error to a VIX error code.
 // See also: Vix_TranslateErrno
 func ErrorCode(err error) int {
-	if xerr, ok := err.(Error); ok {
-		return int(xerr)
-	}
-
-	if xerr, ok := err.(*os.PathError); ok {
-		if errno, ok := xerr.Err.(syscall.Errno); ok {
+	switch t := err.(type) {
+	case Error:
+		return int(t)
+	case *os.PathError:
+		if errno, ok := t.Err.(syscall.Errno); ok {
 			switch errno {
 			case syscall.ENOTEMPTY:
 				return DirectoryNotEmpty
 			}
+		}
+	case *exec.Error:
+		if t.Err == exec.ErrNotFound {
+			return FileNotFound
 		}
 	}
 
