@@ -12,6 +12,8 @@ upload_file() {
 }
 
 @test "datastore.ls" {
+  vcsim_env -esx
+
   name=$(upload_file)
 
   # Single argument
@@ -36,6 +38,8 @@ upload_file() {
 }
 
 @test "datastore.ls-R" {
+  esx_env
+
   dir=$(new_id)
 
   run govc datastore.mkdir "$dir"
@@ -77,12 +81,13 @@ upload_file() {
 }
 
 @test "datastore.rm" {
+  vcsim_env -esx
+
   name=$(upload_file)
 
   # Not found is a failure
   run govc datastore.rm "${name}.notfound"
   assert_failure
-  assert_matches "govc: File .* was not found" "${output}"
 
   # Not found is NOT a failure with the force flag
   run govc datastore.rm -f "${name}.notfound"
@@ -104,6 +109,8 @@ upload_file() {
 }
 
 @test "datastore.info" {
+  vcsim_env -esx
+
   run govc datastore.info enoent
   assert_failure
 
@@ -114,6 +121,8 @@ upload_file() {
 
 
 @test "datastore.mkdir" {
+  vcsim_env -esx
+
   name=$(new_id)
 
   # Not supported datastore type is a failure
@@ -145,19 +154,23 @@ upload_file() {
 }
 
 @test "datastore.download" {
+  vcsim_env -esx
+
   name=$(upload_file)
   run govc datastore.download "$name" -
   assert_success
   assert_output "Hello world"
 
-  run govc datastore.download "$name" "$TMPDIR/$name"
+  run govc datastore.download "$name" "$BATS_TMPDIR/$name"
   assert_success
-  run cat "$TMPDIR/$name"
+  run cat "$BATS_TMPDIR/$name"
   assert_output "Hello world"
-  rm "$TMPDIR/$name"
+  rm "$BATS_TMPDIR/$name"
 }
 
 @test "datastore.upload" {
+  esx_env
+
   name=$(new_id)
   echo -n "Hello world" | govc datastore.upload - "$name"
 
@@ -167,6 +180,8 @@ upload_file() {
 }
 
 @test "datastore.tail" {
+  esx_env
+
   run govc datastore.tail "enoent/enoent.log"
   assert_failure
 
@@ -193,6 +208,8 @@ upload_file() {
 }
 
 @test "datastore.disk" {
+  esx_env
+
   id=$(new_id)
   vmdk="$id/$id.vmdk"
 
@@ -253,6 +270,8 @@ upload_file() {
 }
 
 @test "datastore.disk.info" {
+  esx_env
+
   import_ttylinux_vmdk
 
   run govc datastore.disk.info

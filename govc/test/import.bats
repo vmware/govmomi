@@ -3,6 +3,8 @@
 load test_helper
 
 @test "import.ova" {
+  esx_env
+
   run govc import.ova $GOVC_IMAGES/${TTYLINUX_NAME}.ova
   assert_success
 
@@ -11,6 +13,8 @@ load test_helper
 }
 
 @test "import.ova with iso" {
+  esx_env
+
   run govc import.ova $GOVC_IMAGES/${TTYLINUX_NAME}-live.ova
   assert_success
 
@@ -19,6 +23,8 @@ load test_helper
 }
 
 @test "import.ovf" {
+  esx_env
+
   run govc import.ovf $GOVC_IMAGES/${TTYLINUX_NAME}.ovf
   assert_success
 
@@ -36,6 +42,8 @@ load test_helper
 }
 
 @test "import.ovf with name in options" {
+  esx_env
+
   name=$(new_id)
   file=$($mktemp --tmpdir govc-test-XXXXX)
   echo "{ \"Name\": \"${name}\"}" > ${file}
@@ -50,6 +58,8 @@ load test_helper
 }
 
 @test "import.ovf with name as argument" {
+  esx_env
+
   name=$(new_id)
 
   run govc import.ova -name="${name}" $GOVC_IMAGES/${TTYLINUX_NAME}.ova

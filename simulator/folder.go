@@ -40,8 +40,13 @@ type Folder struct {
 func (f *Folder) update(o mo.Reference, u func(types.ManagedObjectReference, []types.ManagedObjectReference) []types.ManagedObjectReference) {
 	ref := o.Reference()
 
-	if f.Parent == nil || ref.Type == "Datacenter" {
-		return // don't bother with Datacenter or the root folder
+	if f.Parent == nil {
+		return // this is the root folder
+	}
+
+	switch ref.Type {
+	case "Datacenter", "Folder":
+		return // nothing to update
 	}
 
 	dc := Map.getEntityDatacenter(f)
@@ -427,4 +432,8 @@ func (f *Folder) CreateDVSTask(c *types.CreateDVS_Task) soap.HasFault {
 			Returnval: task.Self,
 		},
 	}
+}
+
+func (f *Folder) RenameTask(r *types.Rename_Task) soap.HasFault {
+	return RenameTask(f, r)
 }

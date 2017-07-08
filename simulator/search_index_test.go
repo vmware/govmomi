@@ -80,6 +80,35 @@ func TestSearchIndex(t *testing.T) {
 		if ref != nil {
 			t.Errorf("ref=%s", ref)
 		}
+
+		ref, err = si.FindByUuid(ctx, dc, vm.Config.Uuid, true, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if ref.Reference() != vm.Reference() {
+			t.Errorf("moref mismatch %s != %s", ref, vm.Reference())
+		}
+
+		ref, err = si.FindByUuid(ctx, dc, vm.Config.Uuid, false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if ref != nil {
+			t.Error("expected nil")
+		}
+
+		host := Map.Any("HostSystem").(*HostSystem)
+
+		ref, err = si.FindByUuid(ctx, dc, host.Summary.Hardware.Uuid, false, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if ref.Reference() != host.Reference() {
+			t.Errorf("moref mismatch %s != %s", ref, host.Reference())
+		}
 	}
 }
 

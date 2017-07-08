@@ -3,6 +3,8 @@
 load test_helper
 
 @test "about" {
+  vcsim_env -esx
+
   run govc about
   assert_success
   assert_line "Vendor: VMware, Inc."
@@ -15,6 +17,8 @@ load test_helper
 }
 
 @test "about.cert" {
+  vcsim_env -esx
+
   run govc about.cert
   assert_success
 
@@ -45,38 +49,49 @@ load test_helper
 }
 
 @test "version" {
-    run govc version
-    assert_success
+  vcsim_env -esx
 
-    v=$(govc version | awk '{print $NF}')
-    run govc version -require "$v"
-    assert_success
+  run govc version
+  assert_success
 
-    run govc version -require "not-a-version-string"
-    assert_failure
+  v=$(govc version | awk '{print $NF}')
+  run govc version -require "$v"
+  assert_success
 
-    run govc version -require 100.0.0
-    assert_failure
+  run govc version -require "not-a-version-string"
+  assert_failure
+
+  run govc version -require 100.0.0
+  assert_failure
 }
 
 @test "login attempt without credentials" {
+  vcsim_env -esx
+
   host=$(govc env -x GOVC_URL_HOST)
-  run govc about -u "enoent@$host"
-  assert_failure "govc: ServerFaultCode: Cannot complete login due to an incorrect user name or password."
+  port=$(govc env -x GOVC_URL_PORT)
+  run govc about -u "enoent@$host:$port"
+  assert_failure "govc: ServerFaultCode: Login failure"
 }
 
 @test "login attempt with GOVC_URL, GOVC_USERNAME, and GOVC_PASSWORD" {
+  vcsim_env -esx
+
   govc_url_to_vars
   run govc about
   assert_success
 }
 
 @test "connect to an endpoint with a non-supported API version" {
+  vcsim_env -esx
+
   run env GOVC_MIN_API_VERSION=24.4 govc about
   assert grep -q "^govc: Require API version 24.4," <<<${output}
 }
 
 @test "connect to an endpoint with user provided Vim namespace and Vim version" {
+  vcsim_env -esx
+
   run govc about -vim-namespace urn:vim25 -vim-version 6.0
   assert_success
 }

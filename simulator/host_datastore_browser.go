@@ -55,7 +55,7 @@ func (s *searchDatastore) addFile(file os.FileInfo, res *types.HostDatastoreBrow
 		Path: name,
 	}
 
-	var finfo types.BaseFileInfo
+	var finfo types.BaseFileInfo = &info
 
 	if details.FileSize {
 		info.FileSize = file.Size()
@@ -90,8 +90,6 @@ func (s *searchDatastore) addFile(file os.FileInfo, res *types.HostDatastoreBrow
 			finfo = &types.VmDiskFileInfo{FileInfo: info}
 		case ".vmx":
 			finfo = &types.VmConfigFileInfo{FileInfo: info}
-		default:
-			finfo = &info
 		}
 	}
 
@@ -150,11 +148,12 @@ func (s *searchDatastore) Run(Task *Task) (types.AnyType, types.BaseMethodFault)
 		ff := types.FileFault{
 			File: p.Path,
 		}
+
 		if os.IsNotExist(err) {
 			return nil, &types.FileNotFound{FileFault: ff}
 		}
 
-		return nil, &ff
+		return nil, &types.InvalidArgument{InvalidProperty: p.Path}
 	}
 
 	if s.recurse {

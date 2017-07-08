@@ -3,6 +3,8 @@
 load test_helper
 
 @test "logs" {
+  esx_env
+
   run govc logs
   assert_success
   nlogs=${#lines[@]}
@@ -33,6 +35,8 @@ load test_helper
 }
 
 @test "logs.ls" {
+  esx_env
+
   run govc logs.ls
   assert_success
 

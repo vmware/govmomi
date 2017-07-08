@@ -26,6 +26,7 @@ import (
 	"runtime"
 	"syscall"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
 )
@@ -49,9 +50,26 @@ func main() {
 	isTLS := flag.Bool("tls", true, "Enable TLS")
 	cert := flag.String("tlscert", "", "Path to TLS certificate file")
 	key := flag.String("tlskey", "", "Path to TLS key file")
+	env := flag.String("E", "-", "Output vcsim variables to the given fifo or stdout")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
 
 	flag.Parse()
+
+	switch flag.Arg(0) {
+	case "uuidgen": // util-linux not installed on Travis CI
+		fmt.Println(uuid.New().String())
+		return
+	}
+
+	var err error
+	out := os.Stdout
+
+	if *env != "-" {
+		out, err = os.OpenFile(*env, os.O_WRONLY, 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	f := flag.Lookup("httptest.serve")
 	if f.Value.String() == "" {
@@ -73,7 +91,7 @@ func main() {
 
 	esx.HostSystem.Summary.Hardware.Vendor += tag
 
-	err := model.Create()
+	err = model.Create()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -92,7 +110,10 @@ func main() {
 
 	s := model.Service.NewServer()
 
-	fmt.Printf("GOVC_URL=%s\n", s.URL)
+	fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
+	if out != os.Stdout {
+		_ = out.Close()
+	}
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)

@@ -533,6 +533,78 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 	return r
 }
 
+func (vm *VirtualMachine) CloneVMTask(req *types.CloneVM_Task) soap.HasFault {
+	task := CreateTask(vm, "cloneVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		folder := Map.Get(req.Folder).(*Folder)
+
+		config := types.VirtualMachineConfigSpec{
+			Name:    req.Name,
+			GuestId: vm.Config.GuestId,
+			Files: &types.VirtualMachineFileInfo{
+				VmPathName: strings.Replace(vm.Config.Files.VmPathName, vm.Name, req.Name, -1),
+			},
+		}
+
+		res := folder.CreateVMTask(&types.CreateVM_Task{
+			This:   folder.Self,
+			Config: config,
+			Pool:   *vm.ResourcePool,
+		})
+
+		ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
+		if ctask.Info.Error != nil {
+			return nil, ctask.Info.Error.Fault
+		}
+
+		return ctask.Info.Result.(types.ManagedObjectReference), nil
+	})
+
+	task.Run()
+
+	return &methods.CloneVM_TaskBody{
+		Res: &types.CloneVM_TaskResponse{
+			Returnval: task.Self,
+		},
+	}
+}
+
+func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFault {
+	task := CreateTask(vm, "relocateVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if ref := req.Spec.Datastore; ref != nil {
+			ds := Map.Get(*ref).(*Datastore)
+			ds.Vm = RemoveReference(*ref, ds.Vm)
+
+			vm.Datastore = []types.ManagedObjectReference{*ref}
+
+			// TODO: migrate vm.Config.Files (and vm.Summary.Config.VmPathName)
+		}
+
+		if ref := req.Spec.Pool; ref != nil {
+			pool := Map.Get(*ref).(*ResourcePool)
+			pool.Vm = RemoveReference(*ref, pool.Vm)
+
+			vm.ResourcePool = ref
+		}
+
+		if ref := req.Spec.Host; ref != nil {
+			host := Map.Get(*ref).(*HostSystem)
+			host.Vm = RemoveReference(*ref, host.Vm)
+
+			vm.Runtime.Host = ref
+		}
+
+		return nil, nil
+	})
+
+	task.Run()
+
+	return &methods.RelocateVM_TaskBody{
+		Res: &types.RelocateVM_TaskResponse{
+			Returnval: task.Self,
+		},
+	}
+}
+
 func (vm *VirtualMachine) ShutdownGuest(c *types.ShutdownGuest) soap.HasFault {
 	r := &methods.ShutdownGuestBody{}
 	// should be poweron

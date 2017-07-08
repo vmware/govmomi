@@ -3,28 +3,32 @@
 load test_helper
 
 @test "object.destroy" {
-    run govc object.destroy "/enoent"
-    assert_failure
+  vcsim_env
 
-    run govc object.destroy
-    assert_failure
+  run govc object.destroy "/enoent"
+  assert_failure
 
-    vm=$(new_id)
-    run govc vm.create "$vm"
-    assert_success
+  run govc object.destroy
+  assert_failure
 
-    # fails when powered on
-    run govc object.destroy "vm/$vm"
-    assert_failure
+  vm=$(new_id)
+  run govc vm.create "$vm"
+  assert_success
 
-    run govc vm.power -off "$vm"
-    assert_success
+  # fails when powered on
+  run govc object.destroy "vm/$vm"
+  assert_failure
 
-    run govc object.destroy "vm/$vm"
-    assert_success
+  run govc vm.power -off "$vm"
+  assert_success
+
+  run govc object.destroy "vm/$vm"
+  assert_success
 }
 
 @test "object.rename" {
+  esx_env
+
   run govc object.rename "/enoent" "nope"
   assert_failure
 
@@ -73,6 +77,8 @@ load test_helper
 }
 
 @test "object.collect" {
+  esx_env
+
   run govc object.collect
   assert_success
 
@@ -128,6 +134,8 @@ load test_helper
 }
 
 @test "object.find" {
+  esx_env
+
   unset GOVC_DATACENTER
 
   run govc find "/enoent"
@@ -210,7 +218,7 @@ load test_helper
 }
 
 @test "object.method" {
-  vcsim_env
+  vcsim_env_todo
 
   vm=$(govc find vm -type m | head -1)
 
