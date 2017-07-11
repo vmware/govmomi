@@ -117,6 +117,10 @@ ip=$(govc vm.ip -esxcli "$vm")
 opts=(-o "UserKnownHostsFile /dev/null" -o "StrictHostKeyChecking no" -o "LogLevel error" -o "BatchMode yes")
 
 destroy() {
+  if [ -n "$test" ] ; then
+    rm -f "$GOVC_TLS_KNOWN_HOSTS"
+  fi
+
   if [ -n "$destroy" ] ; then
     echo "Destroying VM ${vm}..."
     govc vm.destroy "$vm"
@@ -131,7 +135,12 @@ trap destroy EXIT
 scp "${opts[@]}" "$GOPATH"/bin/toolbox{,.test} "core@${ip}:"
 
 if [ -n "$test" ] ; then
-  export GOVC_GUEST_LOGIN=user:pass
+  # validate guest.FileManager adds the host thumbprint when transferring files
+  unset GOVC_INSECURE
+  GOVC_TLS_KNOWN_HOSTS=$(mktemp --tmpdir toolbox.XXXXXX)
+  govc about.cert -k -thumbprint > "$GOVC_TLS_KNOWN_HOSTS"
+
+  export GOVC_TLS_KNOWN_HOSTS GOVC_GUEST_LOGIN=user:pass
 
   echo "Running toolbox tests..."
   ssh "${opts[@]}" "core@${ip}" ./toolbox.test -test.v=$verbose -test.run TestServiceRunESX -toolbox.testesx \
