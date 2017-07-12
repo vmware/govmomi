@@ -18,11 +18,14 @@ package guest
 
 import (
 	"context"
+	"net/http"
 	"net/url"
 	"strings"
 
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -112,6 +115,48 @@ func (m FileManager) DeleteFile(ctx context.Context, auth types.BaseGuestAuthent
 	return err
 }
 
+// addThumbprint checks that we have a thumbprint for the host, if not fetch from the VM's host config.
+// The InitiateFileTransfer{From,To}Guest methods return a URL with the host set to "*" when connected directly to ESX,
+// but return the address of VM's runtime host when connected to vCenter.
+func (m FileManager) addThumbprint(ctx context.Context, u string) error {
+	p, err := m.c.ParseURL(u)
+	if err != nil {
+		return nil // thumbprint won't matter if url isn't valid
+	}
+
+	if m.c.Thumbprint(p.Host) != "" {
+		return nil // we already have the thumbprint for this host
+	}
+
+	if t, ok := m.c.Transport.(*http.Transport); ok {
+		if t.TLSClientConfig.InsecureSkipVerify {
+			return nil // no need to lookup thumbprint if insecure=true
+		}
+	}
+
+	c := property.DefaultCollector(m.c)
+
+	var vm mo.VirtualMachine
+	err = c.RetrieveOne(ctx, m.vm, []string{"runtime.host"}, &vm)
+	if err != nil {
+		return err
+	}
+
+	if vm.Runtime.Host == nil {
+		return nil // thumbprint won't matter if the VM was powered off since the call to InitiateFileTransfer
+	}
+
+	var host mo.HostSystem
+	err = c.RetrieveOne(ctx, *vm.Runtime.Host, []string{"summary.config.sslThumbprint"}, &host)
+	if err != nil {
+		return err
+	}
+
+	m.c.SetThumbprint(p.Host, host.Summary.Config.SslThumbprint)
+
+	return nil
+}
+
 func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string) (*types.FileTransferInformation, error) {
 	req := types.InitiateFileTransferFromGuest{
 		This:          m.Reference(),
@@ -134,7 +179,7 @@ func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth typ
 		}
 	}
 
-	return &res.Returnval, nil
+	return &res.Returnval, m.addThumbprint(ctx, res.Returnval.Url)
 }
 
 func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string, fileAttributes types.BaseGuestFileAttributes, fileSize int64, overwrite bool) (string, error) {
@@ -153,7 +198,7 @@ func (m FileManager) InitiateFileTransferToGuest(ctx context.Context, auth types
 		return "", err
 	}
 
-	return res.Returnval, nil
+	return res.Returnval, m.addThumbprint(ctx, res.Returnval)
 }
 
 func (m FileManager) ListFiles(ctx context.Context, auth types.BaseGuestAuthentication, filePath string, index int32, maxResults int32, matchPattern string) (*types.GuestListFileInfo, error) {
