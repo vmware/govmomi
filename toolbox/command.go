@@ -76,7 +76,7 @@ func registerCommandServer(service *Service) *CommandServer {
 		vix.HgfsSendPacketCommand:                server.ProcessHgfsPacket,
 	}
 
-	server.ProcessStartCommand = server.ExecCommandStart
+	server.ProcessStartCommand = DefaultStartCommand
 
 	service.RegisterHandler("Vix_1_Relayed_Command", server.Dispatch)
 
@@ -231,7 +231,7 @@ func (c *CommandServer) StartCommand(header vix.CommandRequestHeader, data []byt
 	return append([]byte(fmt.Sprintf("%d", pid)), 0), nil
 }
 
-func (c *CommandServer) ExecCommandStart(m *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
+func DefaultStartCommand(m *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
 	p := NewProcess()
 
 	switch r.ProgramPath {
