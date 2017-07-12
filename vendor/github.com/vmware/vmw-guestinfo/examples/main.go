@@ -15,6 +15,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 
@@ -22,25 +23,53 @@ import (
 	"github.com/vmware/vmw-guestinfo/vmcheck"
 )
 
+var (
+	set bool
+	get bool
+)
+
+func init() {
+
+	flag.BoolVar(&set, "set", false, "Sets the guestinfo.KEY with the string VALUE")
+	flag.BoolVar(&get, "get", false, "Returns the config string in the guestinfo.* namespace")
+
+	flag.Parse()
+}
+
 func main() {
+
 	isVM, err := vmcheck.IsVirtualWorld()
 	if err != nil {
-		log.Fatalf("error: %s", err.Error())
+		log.Fatalf("Error: %s", err)
 	}
 
 	if !isVM {
-		log.Fatal("not in a virtual world... :(")
+		log.Fatalf("ERROR: not in a virtual world.")
+	}
+
+	if !set && !get {
+		flag.Usage()
 	}
 
 	config := rpcvmx.NewConfig()
+	if set {
+		if flag.NArg() != 2 {
+			log.Fatalf("ERROR: Please provide guestinfo key / value pair (eg; -set foo bar")
+		}
+		if err := config.SetString(flag.Arg(0), flag.Arg(1)); err != nil {
+			log.Fatalf("ERROR: SetString failed with %s", err)
+		}
+	}
 
-	fmt.Println(config.SetString("foo", "bar"))
-	fmt.Println(config.String("foo", "foo"))
-
-	fmt.Println(config.SetInt("foo", 3))
-	fmt.Println(config.Int("foo", 0))
-
-	fmt.Println(config.SetBool("foo", false))
-	fmt.Println(config.Bool("foo", true))
+	if get {
+		if flag.NArg() != 1 {
+			log.Fatalf("ERROR: Please provide guestinfo key (eg; -get foo)")
+		}
+		if out, err := config.String(flag.Arg(0), ""); err != nil {
+			log.Fatalf("ERROR: String failed with %s", err)
+		} else {
+			fmt.Printf("%s\n", out)
+		}
+	}
 
 }

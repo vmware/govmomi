@@ -12,11 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+// +build !linux
+
 package vmcheck
 
-import "syscall"
-
+// probably not gonna work. Instead, implement a platform-specific variant, and
+// add the platform to above build flags
 func openPortsAccess() error {
-	// Privilege level 3 to access all ports above 0x3ff
-	return syscall.Iopl(3)
+	return nil
 }
