@@ -392,7 +392,7 @@ func TestServiceRunESX(t *testing.T) {
 				})
 				return m.Start(r, p)
 			default:
-				return service.Command.ExecCommandStart(m, r)
+				return DefaultStartCommand(m, r)
 			}
 		}
 	}
