@@ -146,6 +146,7 @@ func TestServiceRun(t *testing.T) {
 	}
 
 	out.reply = append(out.reply,
+		rpciOK, // reply to SendGuestInfo call in Reset()
 		rpciOK, // reply to IP broadcast
 	)
 

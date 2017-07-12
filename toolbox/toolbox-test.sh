@@ -230,6 +230,11 @@ if [ -n "$test" ] ; then
 fi
 
 if [ -n "$start" ] ; then
+  (
+    govc object.collect -n 1 "$(govc find / -type m -name "$vm")" guest.toolsStatus # wait for tools state to transition
+    /usr/bin/time -f "Waiting for VM ip from toolbox...%e" govc vm.ip -v4 -n ethernet-0 "$vm"
+  ) &
+
   echo "Starting toolbox..."
   ssh "${opts[@]}" "core@${ip}" ./toolbox -toolbox.trace=$verbose
 fi

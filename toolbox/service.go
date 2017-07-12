@@ -211,6 +211,8 @@ func (s *Service) Dispatch(request []byte) []byte {
 
 // Reset is the default Handler for reset requests
 func (s *Service) Reset([]byte) ([]byte, error) {
+	s.SendGuestInfo() // Send the IP info ASAP
+
 	return []byte("ATR " + s.name), nil
 }
 
