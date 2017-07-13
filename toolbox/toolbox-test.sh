@@ -176,7 +176,8 @@ if [ -n "$test" ] ; then
   govc guest.ps -e -p "$pid" -X | grep "$pid"
 
   echo "Testing file copy to and from guest via govc..."
-  dest="/tmp/$(basename "$0")"
+  base="$(basename "$0")"
+  dest="/tmp/$base"
 
   govc guest.upload -f -perm 0640 -gid 10 "$0" "$dest"
   govc guest.download "$dest" - | md5sum --quiet -c <(<"$0" md5sum)
@@ -200,10 +201,12 @@ if [ -n "$test" ] ; then
     # Note: trailing slash is required
     govc guest.download "$home/" - | tar -tvzf - | grep "$(basename "$home")"/toolbox
 
+    govc guest.mkdir -p /tmp/toolbox-src
     # Upload source files from this directory
     # and validate that query string is not used as the file/dir name (see hgfs.ArchiveHandler)
-    govc guest.mkdir -p /tmp/toolbox-src
     git archive --format tar.gz HEAD | govc guest.upload -f - /tmp/toolbox-src?skip=stuff
+    # Download a single file as a .tar.gz (note: /archive: prefix is required)
+    govc guest.download "/archive:/tmp/toolbox-src/$base" - | tar -tvzf - | grep -v README.md
     govc guest.rmdir -r /tmp/toolbox-src
   fi
 

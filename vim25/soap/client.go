@@ -638,36 +638,6 @@ func (c *Client) DownloadRequest(u *url.URL, param *Download) (*http.Response, e
 	return c.Client.Do(req)
 }
 
-// directoryReader wraps an io.ReadCloser to support streaming download
-// of a guest directory, stops reading once it sees the stream trailer.
-// This is only useful when guest tools is the Go toolbox.
-// The trailer is required since TransferFromGuest requires a Content-Length,
-// which toolbox doesn't know ahead of time as the gzip'd tarball never touches the disk.
-// We opted to wrap this here for now rather than guest.FileManager so
-// DownloadFile can be also be used as-is to handle this use case.
-type directoryReader struct {
-	io.ReadCloser
-}
-
-var (
-	gzipHeader    = []byte{0x1f, 0x8b, 0x08} // rfc1952 {ID1, ID2, CM}
-	gzipHeaderLen = len(gzipHeader)
-)
-
-func (r *directoryReader) Read(buf []byte) (int, error) {
-	nr, err := r.ReadCloser.Read(buf)
-
-	// Stop reading if the last N bytes are the gzipTrailer
-	if nr >= gzipHeaderLen {
-		if bytes.Equal(buf[nr-gzipHeaderLen:nr], gzipHeader) {
-			nr -= gzipHeaderLen
-			err = io.EOF
-		}
-	}
-
-	return nr, err
-}
-
 // Download GETs the remote file from the given URL
 func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, error) {
 	res, err := c.DownloadRequest(u, param)
@@ -687,11 +657,38 @@ func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, er
 
 	r := res.Body
 
-	if strings.HasSuffix(u.Path, "/") {
-		r = &directoryReader{ReadCloser: r}
+	return r, res.ContentLength, nil
+}
+
+func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Sinker) error {
+	var err error
+
+	r := src
+
+	fh, err := os.Create(file)
+	if err != nil {
+		return err
 	}
 
-	return r, res.ContentLength, nil
+	if s != nil {
+		pr := progress.NewReader(s, src, size)
+		src = pr
+
+		// Mark progress reader as done when returning from this function.
+		defer func() {
+			pr.Done(err)
+		}()
+	}
+
+	_, err = io.Copy(fh, r)
+
+	cerr := fh.Close()
+
+	if err == nil {
+		err = cerr
+	}
+
+	return err
 }
 
 // DownloadFile GETs the given URL to a local file
@@ -705,37 +702,6 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 	if err != nil {
 		return err
 	}
-	defer rc.Close()
 
-	var r io.Reader = rc
-
-	fh, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-	defer fh.Close()
-
-	if param.Progress != nil {
-		pr := progress.NewReader(param.Progress, r, contentLength)
-		r = pr
-
-		// Mark progress reader as done when returning from this function.
-		defer func() {
-			pr.Done(err)
-		}()
-	}
-
-	_, err = io.Copy(fh, r)
-	if err != nil {
-		return err
-	}
-
-	// Assign error before returning so that it gets picked up by the deferred
-	// function marking the progress reader as done.
-	err = fh.Close()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return c.WriteFile(file, rc, contentLength, param.Progress)
 }

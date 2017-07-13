@@ -6,6 +6,8 @@
 
 . "$(dirname "$0")"/test_helper.bash
 
+esx_env
+
 import_ttylinux_vmdk
 
 export GOVC_GUEST_LOGIN=root:password
