@@ -391,7 +391,7 @@ func TestDatastoreHTTP(t *testing.T) {
 		for _, r := range res {
 			n += len(r.File)
 		}
-		if n != 5 {
+		if n != 6 {
 			t.Errorf("ls -R foo==%d", n)
 		}
 

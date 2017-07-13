@@ -3,7 +3,7 @@
 load test_helper
 
 @test "fields" {
-  vcsim_env
+  vcsim_env_todo
 
   vm_id=$(new_id)
   run govc vm.create $vm_id

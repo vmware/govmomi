@@ -3,6 +3,8 @@
 load test_helper
 
 @test "device.ls" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   result=$(govc device.ls -vm $vm | grep ethernet-0 | wc -l)
@@ -10,6 +12,8 @@ load test_helper
 }
 
 @test "device.info" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   run govc device.info -vm $vm ide-200
@@ -29,6 +33,8 @@ load test_helper
 }
 
 @test "device.boot" {
+  esx_env
+
   vm=$(new_ttylinux_vm)
 
   result=$(govc device.ls -vm $vm -boot | wc -l)
@@ -54,6 +60,8 @@ load test_helper
 }
 
 @test "device.cdrom" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   result=$(govc device.ls -vm $vm | grep cdrom- | wc -l)
@@ -95,6 +103,8 @@ load test_helper
 }
 
 @test "device.floppy" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   result=$(govc device.ls -vm $vm | grep floppy- | wc -l)
@@ -136,6 +146,8 @@ load test_helper
 }
 
 @test "device.serial" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   result=$(govc device.ls -vm $vm | grep serial- | wc -l)
@@ -190,6 +202,8 @@ load test_helper
 }
 
 @test "device.scsi" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   result=$(govc device.ls -vm $vm | grep lsilogic- | wc -l)
@@ -214,6 +228,8 @@ load test_helper
 }
 
 @test "device.usb" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   result=$(govc device.ls -vm $vm | grep usb | wc -l)
@@ -244,6 +260,8 @@ load test_helper
 }
 
 @test "device.scsi slots" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   for i in $(seq 1 15) ; do
@@ -269,6 +287,8 @@ load test_helper
 
 
 @test "device nil config" {
+  esx_env
+
   vm=$(new_empty_vm)
 
   run govc device.ls -vm "$vm"

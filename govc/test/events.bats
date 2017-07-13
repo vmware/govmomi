@@ -3,6 +3,8 @@
 load test_helper
 
 @test "events dc" {
+  esx_env
+
   run govc events
   assert_success
   nevents=${#lines[@]}
@@ -16,12 +18,16 @@ load test_helper
 }
 
 @test "events host" {
+  esx_env
+
   run govc events 'host/*'
   assert_success
   [ ${#lines[@]} -ge 1 ]
 }
 
 @test "events vm" {
+  esx_env
+
   vm=$(new_id)
 
   run govc vm.create -on=false $vm

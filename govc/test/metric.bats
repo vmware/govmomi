@@ -3,6 +3,8 @@
 load test_helper
 
 @test "metric.ls" {
+  esx_env
+
   run govc metric.ls
   assert_failure
 
@@ -23,6 +25,8 @@ load test_helper
 }
 
 @test "metric.sample" {
+  esx_env
+
   host=$(govc ls -t HostSystem ./... | head -n 1)
   metrics=($(govc metric.ls "$host"))
 
@@ -62,6 +66,8 @@ load test_helper
 }
 
 @test "metric.info" {
+  esx_env
+
   host=$(govc ls -t HostSystem ./... | head -n 1)
   metrics=($(govc metric.ls "$host"))
 

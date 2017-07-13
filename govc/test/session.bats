@@ -3,6 +3,8 @@
 load test_helper
 
 @test "session.ls" {
+  esx_env
+
   run govc session.ls
   assert_success
 
@@ -14,6 +16,8 @@ load test_helper
 }
 
 @test "session.rm" {
+  esx_env
+
   run govc session.rm enoent
   assert_failure
   assert_output "govc: ServerFaultCode: The object or item referred to could not be found."

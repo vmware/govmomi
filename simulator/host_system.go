@@ -19,6 +19,7 @@ package simulator
 import (
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -34,6 +35,10 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	host.Name = host.Summary.Config.Name
 	host.Summary.Runtime = &host.Runtime
 	host.Summary.Runtime.BootTime = &now
+
+	hw := *host.Summary.Hardware // shallow copy
+	hw.Uuid = uuid.New().String()
+	host.Summary.Hardware = &hw
 
 	hs := &HostSystem{
 		HostSystem: host,

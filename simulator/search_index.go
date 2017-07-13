@@ -124,6 +124,7 @@ func (s *SearchIndex) FindChild(req *types.FindChild) soap.HasFault {
 
 func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 	body := &methods.FindByUuidBody{Res: new(types.FindByUuidResponse)}
+
 	if req.VmSearch {
 		// Find Virtual Machine using UUID
 		for ref, obj := range Map.objects {
@@ -132,6 +133,18 @@ func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 				continue
 			}
 			if vm.Config.Uuid == req.Uuid {
+				body.Res.Returnval = &ref
+				break
+			}
+		}
+	} else {
+		// Find Host System using UUID
+		for ref, obj := range Map.objects {
+			host, ok := obj.(*HostSystem)
+			if !ok {
+				continue
+			}
+			if host.Summary.Hardware.Uuid == req.Uuid {
 				body.Res.Returnval = &ref
 				break
 			}

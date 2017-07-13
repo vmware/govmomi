@@ -3,6 +3,8 @@
 load test_helper
 
 @test "pool.create" {
+  vcsim_env -esx
+
   path="*/Resources/$(new_id)/$(new_id)"
   run govc pool.create $path
   assert_failure
@@ -25,6 +27,8 @@ load test_helper
 }
 
 @test "pool.create multiple" {
+  vcsim_env -esx
+
   id=$(new_id)
   path="*/Resources/$id"
   govc pool.create $path
@@ -55,6 +59,8 @@ load test_helper
 }
 
 @test "pool.change" {
+  esx_env
+
   id=$(new_id)
   path="*/Resources/$id"
   govc pool.create $path
@@ -80,6 +86,8 @@ load test_helper
 }
 
 @test "pool.change multiple" {
+  esx_env
+
   id=$(new_id)
   path="*/Resources/$id"
   govc pool.create $path
@@ -116,6 +124,8 @@ load test_helper
 }
 
 @test "pool.destroy" {
+  esx_env
+
   id=$(new_id)
 
   # parent pool
@@ -163,6 +173,8 @@ load test_helper
 }
 
 @test "pool.destroy children" {
+  esx_env
+
   id=$(new_id)
 
   # parent pool
@@ -206,6 +218,8 @@ load test_helper
 }
 
 @test "pool.destroy multiple" {
+  vcsim_env -esx
+
   id=$(new_id)
   path="*/Resources/$id"
   govc pool.create $path
@@ -230,6 +244,8 @@ load test_helper
 }
 
 @test "vm.create -pool" {
+  esx_env
+
   # test with full inventory path to pools
   parent_path=$(govc ls 'host/*/Resources')
   parent_name=$(basename $parent_path)
@@ -272,6 +288,8 @@ load test_helper
 }
 
 @test "vm.create -pool host" {
+  vcsim_env -esx
+
   id=$(new_id)
 
   path=$(govc ls host)

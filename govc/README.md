@@ -122,19 +122,17 @@ Several examples are embedded in the govc command [help](USAGE.md)
 
 * [Upload ssh public key to a VM](examples/lib/ssh.sh)
 
-* [Create and configure a vCenter VM](examples/vcsa.sh)
-
 * [Create a CoreOS VM](https://github.com/vmware/govmomi/blob/master/toolbox/toolbox-test.sh)
 
 * [Create a Debian VM](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
 
 * [Create a Windows VM](https://github.com/dougm/govc-windows-box/blob/master/provision-esx.sh)
 
-* [Create an ESX VM](https://github.com/vmware/vic/blob/master/infra/machines/vcsa/create-esxi-vm.sh)
+* [Create an ESX VM](../scripts/vcsa/create-esxi-vm.sh)
 
-* [Create a vCenter VM](https://github.com/vmware/vic/blob/master/infra/machines/vcsa/create-vcsa-vm.sh)
+* [Create a vCenter VM](../scripts/vcsa/create-vcsa-vm.sh)
 
-* [Create a Cluster](https://github.com/vmware/vic/blob/master/infra/machines/vcsa/create-cluster.sh)
+* [Create a Cluster](../scripts/vcsa/create-cluster.sh)
 
 ## Status
 
