@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 	"os/exec"
 	"strings"
 
@@ -201,4 +202,110 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 	}
 
 	return nil
+}
+
+// archiveReader wraps an io.ReadCloser to support streaming download
+// of a guest directory, stops reading once it sees the stream trailer.
+// This is only useful when guest tools is the Go toolbox.
+// The trailer is required since TransferFromGuest requires a Content-Length,
+// which toolbox doesn't know ahead of time as the gzip'd tarball never touches the disk.
+// We opted to wrap this here for now rather than guest.FileManager so
+// DownloadFile can be also be used as-is to handle this use case.
+type archiveReader struct {
+	io.ReadCloser
+}
+
+var (
+	gzipHeader    = []byte{0x1f, 0x8b, 0x08} // rfc1952 {ID1, ID2, CM}
+	gzipHeaderLen = len(gzipHeader)
+)
+
+func (r *archiveReader) Read(buf []byte) (int, error) {
+	nr, err := r.ReadCloser.Read(buf)
+
+	// Stop reading if the last N bytes are the gzipTrailer
+	if nr >= gzipHeaderLen {
+		if bytes.Equal(buf[nr-gzipHeaderLen:nr], gzipHeader) {
+			nr -= gzipHeaderLen
+			err = io.EOF
+		}
+	}
+
+	return nr, err
+}
+
+// Download initiates a file transfer from the guest
+func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64, error) {
+	vc := c.ProcessManager.Client()
+
+	info, err := c.FileManager.InitiateFileTransferFromGuest(ctx, c.Authentication, src)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	u, err := vc.ParseURL(info.Url)
+	if err != nil {
+		return nil, 0, err
+	}
+
+	p := soap.DefaultDownload
+
+	f, n, err := vc.Download(u, &p)
+	if err != nil {
+		return nil, n, err
+	}
+
+	if strings.HasSuffix(src, "/") || strings.HasPrefix(src, "/archive:/") {
+		f = &archiveReader{ReadCloser: f} // look for the gzip trailer
+	}
+
+	return f, n, nil
+}
+
+// Upload transfers a file to the guest
+func (c *Client) Upload(ctx context.Context, src io.Reader, dst string, p soap.Upload, attr types.BaseGuestFileAttributes, force bool) error {
+	vc := c.ProcessManager.Client()
+
+	var err error
+
+	if p.ContentLength == 0 { // Content-Length is required
+		switch r := src.(type) {
+		case *bytes.Buffer:
+			p.ContentLength = int64(r.Len())
+		case *bytes.Reader:
+			p.ContentLength = int64(r.Len())
+		case *strings.Reader:
+			p.ContentLength = int64(r.Len())
+		case *os.File:
+			info, serr := r.Stat()
+			if serr != nil {
+				return serr
+			}
+
+			p.ContentLength = info.Size()
+		}
+
+		if p.ContentLength == 0 { // os.File for example could be a device (stdin)
+			buf := new(bytes.Buffer)
+
+			p.ContentLength, err = io.Copy(buf, src)
+			if err != nil {
+				return err
+			}
+
+			src = buf
+		}
+	}
+
+	url, err := c.FileManager.InitiateFileTransferToGuest(ctx, c.Authentication, dst, attr, p.ContentLength, force)
+	if err != nil {
+		return err
+	}
+
+	u, err := vc.ParseURL(url)
+	if err != nil {
+		return err
+	}
+
+	return vc.Client.Upload(src, u, &p)
 }

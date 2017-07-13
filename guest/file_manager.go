@@ -19,8 +19,6 @@ package guest
 import (
 	"context"
 	"net/http"
-	"net/url"
-	"strings"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
@@ -168,15 +166,6 @@ func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth typ
 	res, err := methods.InitiateFileTransferFromGuest(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
-	}
-
-	if strings.HasSuffix(guestFilePath, "/") {
-		// Propagate the trailing '/' for directory download support, see soap.directoryReader
-		u, err := url.Parse(res.Returnval.Url)
-		if err == nil {
-			u.Path += "/"
-			res.Returnval.Url = u.String()
-		}
 	}
 
 	return &res.Returnval, m.addThumbprint(ctx, res.Returnval.Url)

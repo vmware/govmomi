@@ -28,7 +28,6 @@ import (
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/guest/toolbox"
 )
 
 type run struct {
@@ -110,20 +109,9 @@ func (cmd *run) do(c *http.Client, req *http.Request) error {
 func (cmd *run) Run(ctx context.Context, f *flag.FlagSet) error {
 	name := f.Arg(0)
 
-	pm, err := cmd.ProcessManager()
+	tc, err := cmd.Toolbox()
 	if err != nil {
 		return err
-	}
-
-	fm, err := cmd.FileManager()
-	if err != nil {
-		return err
-	}
-
-	tc := &toolbox.Client{
-		ProcessManager: pm,
-		FileManager:    fm,
-		Authentication: cmd.Auth(),
 	}
 
 	hc := &http.Client{
