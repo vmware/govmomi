@@ -229,14 +229,20 @@ func archiveRead(u *url.URL, tr *tar.Reader) error {
 
 // archiveWrite writes the contents of the given source directory to the given tar.Writer.
 func archiveWrite(u *url.URL, tw *tar.Writer) error {
+	info, err := os.Stat(u.Path)
+	if err != nil {
+		return err
+	}
+
 	dir := filepath.Dir(u.Path)
 
-	return filepath.Walk(u.Path, func(file string, fi os.FileInfo, err error) error {
+	f := func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
 			return filepath.SkipDir
 		}
 
-		name := strings.TrimPrefix(file, dir)[1:]
+		name := strings.TrimPrefix(file, dir)
+		name = strings.TrimPrefix(name, "/")
 
 		header, _ := tar.FileInfoHeader(fi, name)
 
@@ -266,5 +272,13 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 		}
 
 		return err
-	})
+	}
+
+	if info.IsDir() {
+		return filepath.Walk(u.Path, f)
+	}
+
+	dir = filepath.Dir(dir)
+
+	return f(u.Path, info, nil)
 }

@@ -638,14 +638,14 @@ func (c *Client) DownloadRequest(u *url.URL, param *Download) (*http.Response, e
 	return c.Client.Do(req)
 }
 
-// directoryReader wraps an io.ReadCloser to support streaming download
+// archiveReader wraps an io.ReadCloser to support streaming download
 // of a guest directory, stops reading once it sees the stream trailer.
 // This is only useful when guest tools is the Go toolbox.
 // The trailer is required since TransferFromGuest requires a Content-Length,
 // which toolbox doesn't know ahead of time as the gzip'd tarball never touches the disk.
 // We opted to wrap this here for now rather than guest.FileManager so
 // DownloadFile can be also be used as-is to handle this use case.
-type directoryReader struct {
+type archiveReader struct {
 	io.ReadCloser
 }
 
@@ -654,7 +654,7 @@ var (
 	gzipHeaderLen = len(gzipHeader)
 )
 
-func (r *directoryReader) Read(buf []byte) (int, error) {
+func (r *archiveReader) Read(buf []byte) (int, error) {
 	nr, err := r.ReadCloser.Read(buf)
 
 	// Stop reading if the last N bytes are the gzipTrailer
@@ -686,10 +686,8 @@ func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, er
 	}
 
 	r := res.Body
-
-	if strings.HasSuffix(u.Path, "/") {
-		r = &directoryReader{ReadCloser: r}
-	}
+	// TODO: we should only do this to handle the toolbox "/archive:" case
+	r = &archiveReader{ReadCloser: r}
 
 	return r, res.ContentLength, nil
 }
