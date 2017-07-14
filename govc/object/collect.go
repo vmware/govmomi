@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -39,6 +40,10 @@ type collect struct {
 	single bool
 	simple bool
 	n      int
+	kind   kinds
+
+	filter property.Filter
+	obj    string
 }
 
 func init() {
@@ -51,6 +56,7 @@ func (cmd *collect) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.simple, "s", false, "Output property value only")
 	f.IntVar(&cmd.n, "n", 0, "Wait for N property updates")
+	f.Var(&cmd.kind, "type", "Resource type.  If specified, MOID is used for a container view root")
 }
 
 func (cmd *collect) Usage() string {
@@ -61,14 +67,20 @@ func (cmd *collect) Description() string {
 	return `Collect managed object properties.
 
 MOID can be an inventory path or ManagedObjectReference.
-MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance'.
+MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance' or the root folder if a '-type' flag is given.
 
-By default only the current property value(s) are collected.  Use the '-n' flag to wait for updates.
+If a '-type' flag is given, properties are collected using a ContainerView object where MOID is the root of the view.
+
+By default only the current property value(s) are collected.  To wait for updates, use the '-n' flag or
+specify a property filter.  A property filter can be specified by prefixing the property name with a '-',
+followed by the value to match.
 
 Examples:
   govc object.collect - content
   govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
   govc object.collect -s /ha-datacenter/vm/foo overallStatus
+  govc object.collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
+  govc object.collect -type m / name runtime.powerState # collect properties for multiple objects
   govc object.collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
   govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .`
 }
@@ -83,12 +95,16 @@ func (cmd *collect) Process(ctx context.Context) error {
 var stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
 
 type change struct {
-	cmd            *collect
-	PropertyChange []types.PropertyChange
+	cmd    *collect
+	Update types.ObjectUpdate
 }
 
 func (pc *change) MarshalJSON() ([]byte, error) {
-	return json.Marshal(pc.PropertyChange)
+	if len(pc.cmd.kind) == 0 {
+		return json.Marshal(pc.Update.ChangeSet)
+	}
+
+	return json.Marshal(pc.Update)
 }
 
 func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
@@ -145,6 +161,10 @@ func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
 		return
 	}
 
+	if pc.cmd.obj != "" {
+		fmt.Fprintf(pc.cmd.Out, "%s\t", pc.cmd.obj)
+	}
+
 	fmt.Fprintf(pc.cmd.Out, "%s\t%s\t%s\n", name, rtype, s)
 }
 
@@ -167,7 +187,7 @@ func (pc *change) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(pc.cmd.Out, 4, 0, 2, ' ', 0)
 	pc.cmd.Out = tw
 
-	for _, c := range pc.PropertyChange {
+	for _, c := range pc.Update.ChangeSet {
 		if c.Val == nil {
 			// type is unknown in this case, as xsi:type was not provided - just skip for now
 			continue
@@ -181,6 +201,10 @@ func (pc *change) Write(w io.Writer) error {
 			rtype = rval.Type()
 		}
 
+		if len(pc.cmd.kind) != 0 {
+			pc.cmd.obj = pc.Update.Obj.String()
+		}
+
 		if pc.cmd.single && rtype.Kind() == reflect.Struct && !rtype.Implements(stringer) {
 			pc.writeStruct(c.Name, rval, rtype)
 			continue
@@ -190,6 +214,33 @@ func (pc *change) Write(w io.Writer) error {
 	}
 
 	return tw.Flush()
+}
+
+func (cmd *collect) match(update types.ObjectUpdate) bool {
+	if len(cmd.filter) == 0 {
+		return false
+	}
+
+	for _, c := range update.ChangeSet {
+		if cmd.filter.MatchProperty(types.DynamicProperty{Name: c.Name, Val: c.Val}) {
+			return true
+		}
+	}
+
+	return false
+}
+
+func (cmd *collect) toFilter(f *flag.FlagSet, props []string) ([]string, error) {
+	// TODO: Only supporting 1 filter prop for now.  More than one would require some
+	// accounting / accumulating of multiple updates.  And need to consider objects
+	// then enter/leave a container view.
+	if len(props) != 2 || !strings.HasPrefix(props[0], "-") {
+		return props, nil
+	}
+
+	cmd.filter = property.Filter{props[0][1:]: props[1]}
+
+	return cmd.filter.Keys(), nil
 }
 
 func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -205,6 +256,10 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	ref := methods.ServiceInstance
 	arg := f.Arg(0)
+
+	if len(cmd.kind) != 0 {
+		ref = client.ServiceContent.RootFolder
+	}
 
 	switch arg {
 	case "", "-":
@@ -227,6 +282,7 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	p := property.DefaultCollector(client)
+	filter := new(property.WaitFilter)
 
 	var props []string
 	if f.NArg() > 1 {
@@ -234,8 +290,63 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.single = len(props) == 1
 	}
 
-	return property.Wait(ctx, p, ref, props, func(pc []types.PropertyChange) bool {
-		_ = cmd.WriteResult(&change{cmd, pc})
+	props, err = cmd.toFilter(f, props)
+	if err != nil {
+		return err
+	}
+
+	if len(cmd.kind) == 0 {
+		filter.Add(ref, ref.Type, props)
+	} else {
+		m := view.NewManager(client)
+
+		v, err := m.CreateContainerView(ctx, ref, cmd.kind, true)
+		if err != nil {
+			return err
+		}
+
+		defer v.Destroy(ctx)
+
+		for _, kind := range cmd.kind {
+			filter.Add(v.Reference(), kind, props, v.TraversalSpec())
+		}
+	}
+
+	entered := false
+	hasFilter := len(cmd.filter) != 0
+
+	return property.WaitForUpdates(ctx, p, filter, func(updates []types.ObjectUpdate) bool {
+		matches := 0
+
+		for _, update := range updates {
+			if entered && update.Kind == types.ObjectUpdateKindEnter {
+				// on the first update we only get kind "enter"
+				// if a new object is added, the next update with have both "enter" and "modify".
+				continue
+			}
+
+			c := &change{cmd, update}
+
+			if hasFilter {
+				if cmd.match(update) {
+					matches++
+				} else {
+					continue
+				}
+			}
+
+			_ = cmd.WriteResult(c)
+		}
+
+		entered = true
+
+		if hasFilter {
+			if matches > 0 {
+				return true
+			}
+
+			return false
+		}
 
 		cmd.n--
 

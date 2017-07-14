@@ -133,6 +133,31 @@ load test_helper
   assert_success
 }
 
+@test "object.collect view" {
+  vcsim_env -dc 2 -folder 1
+
+  run govc object.collect -type m
+  assert_success
+
+  run govc object.collect -type m / -name '*C0*'
+  assert_success
+
+  run govc object.collect -type m / -name
+  assert_success
+
+  run govc object.collect -type m / name runtime.powerState
+  assert_success
+
+  run govc object.collect -type m -type h /F0 name
+  assert_success
+
+  run govc object.collect -type n / name
+  assert_success
+
+  run govc object.collect -type enoent / name
+  assert_failure
+}
+
 @test "object.find" {
   esx_env
 
