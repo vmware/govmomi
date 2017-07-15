@@ -93,7 +93,7 @@ fi
 
 govc datastore.mkdir -p "$vm"
 
-if ! govc datastore.ls "$vm" | grep -q "${vm}.vmx" ; then
+if [ -z "$(govc find / -type m -name "$vm")" ] ; then
   echo "Creating VM ${vm}..."
   govc vm.create -g otherGuest64 -m 1024 -on=false "$vm"
 

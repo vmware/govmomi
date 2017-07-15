@@ -81,7 +81,7 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 
 	vc := c.ProcessManager.Client()
 
-	u, err := vc.ParseURL(url)
+	u, err := c.FileManager.TransferURL(ctx, url)
 	if err != nil {
 		return nil, err
 	}
@@ -99,7 +99,7 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	u, err = vc.ParseURL(info.Url)
+	u, err = c.FileManager.TransferURL(ctx, info.Url)
 	if err != nil {
 		return nil, err
 	}
@@ -144,7 +144,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 			return err
 		}
 
-		u, err := vc.ParseURL(url)
+		u, err := c.FileManager.TransferURL(ctx, url)
 		if err != nil {
 			return err
 		}
@@ -172,7 +172,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 			return err
 		}
 
-		u, err := vc.ParseURL(info.Url)
+		u, err := c.FileManager.TransferURL(ctx, info.Url)
 		if err != nil {
 			return err
 		}
@@ -243,7 +243,7 @@ func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64
 		return nil, 0, err
 	}
 
-	u, err := vc.ParseURL(info.Url)
+	u, err := c.FileManager.TransferURL(ctx, info.Url)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -302,7 +302,7 @@ func (c *Client) Upload(ctx context.Context, src io.Reader, dst string, p soap.U
 		return err
 	}
 
-	u, err := vc.ParseURL(url)
+	u, err := c.FileManager.TransferURL(ctx, url)
 	if err != nil {
 		return err
 	}
