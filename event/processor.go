@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,8 +24,6 @@ import (
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/types"
 )
-
-const latestPageProp = "latestPage"
 
 type tailInfo struct {
 	t         *eventTailer
@@ -81,53 +79,47 @@ func (p *eventProcessor) run(ctx context.Context, tail bool) error {
 		return nil
 	}
 
-	var err error
 	var collectors []types.ManagedObjectReference
 	for _, t := range p.tailers {
 		collectors = append(collectors, t.collector)
 	}
 
-	if len(p.tailers) > 1 {
-		// create and populate a ListView
-		viewMgr := view.NewManager(p.mgr.Client())
-		var listView *view.ListView
-		listView, err = viewMgr.CreateListView(ctx, collectors)
-		if err != nil {
-			return err
-		}
+	c := property.DefaultCollector(p.mgr.Client())
+	props := []string{"latestPage"}
 
-		count := 0
-		// Retrieve the property from the objects in the ListView
-		err = property.WaitForView(ctx, property.DefaultCollector(p.mgr.Client()), listView.Reference(), collectors[0], []string{latestPageProp}, func(c types.ManagedObjectReference, pc []types.PropertyChange) bool {
-			if err = p.process(c, pc); err != nil {
+	if len(collectors) == 1 {
+		// only one object to follow, don't bother creating a view
+		return property.Wait(ctx, c, collectors[0], props, func(pc []types.PropertyChange) bool {
+			if err := p.process(collectors[0], pc); err != nil {
 				return false
 			}
 
-			count++
-			if count == len(collectors) && !tail {
-				return true
-			}
-
-			return false
+			return !tail
 		})
+	}
 
+	// create and populate a ListView
+	m := view.NewManager(p.mgr.Client())
+
+	list, err := m.CreateListView(ctx, collectors)
+	if err != nil {
 		return err
 	}
 
-	// only one object to follow
-	err = property.Wait(ctx, property.DefaultCollector(p.mgr.Client()), collectors[0], []string{latestPageProp}, func(pc []types.PropertyChange) bool {
-		if err = p.process(collectors[0], pc); err != nil {
-			return false
+	defer list.Destroy(context.Background())
+
+	ref := list.Reference()
+	filter := new(property.WaitFilter).Add(ref, collectors[0].Type, props, list.TraversalSpec())
+
+	return property.WaitForUpdates(ctx, c, filter, func(updates []types.ObjectUpdate) bool {
+		for _, update := range updates {
+			if err := p.process(update.Obj, update.ChangeSet); err != nil {
+				return false
+			}
 		}
 
-		if !tail {
-			return true
-		}
-
-		return false
+		return !tail
 	})
-
-	return err
 }
 
 func (p *eventProcessor) process(c types.ManagedObjectReference, pc []types.PropertyChange) error {
@@ -137,10 +129,6 @@ func (p *eventProcessor) process(c types.ManagedObjectReference, pc []types.Prop
 	}
 
 	for _, u := range pc {
-		if u.Name != latestPageProp {
-			continue
-		}
-
 		evs := t.t.newEvents(u.Val.(types.ArrayOfEvent).Event)
 		if len(evs) == 0 {
 			continue

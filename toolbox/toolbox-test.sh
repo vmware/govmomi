@@ -93,7 +93,9 @@ fi
 
 govc datastore.mkdir -p "$vm"
 
-if [ -z "$(govc find / -type m -name "$vm")" ] ; then
+vm_path="$(govc find / -type m -name "$vm")"
+
+if [ -z "$vm_path" ] ; then
   echo "Creating VM ${vm}..."
   govc vm.create -g otherGuest64 -m 1024 -on=false "$vm"
 
@@ -103,9 +105,13 @@ if [ -z "$(govc find / -type m -name "$vm")" ] ; then
   govc datastore.upload config.iso "$vm/config.iso" >/dev/null
   device=$(govc device.cdrom.add -vm "$vm")
   govc device.cdrom.insert -vm "$vm" -device "$device" "$vm/config.iso"
+
+  vm_path="$(govc find / -type m -name "$vm")"
+else
+  govc object.collect -s "$vm_path" -guest.toolsStatus toolsNot* # wait for previous toolbox to unregister
 fi
 
-state=$(govc vm.info -json "$vm" | jq -r .VirtualMachines[].Runtime.PowerState)
+state=$(govc object.collect -s "$vm_path" runtime.powerState)
 
 if [ "$state" != "poweredOn" ] ; then
   govc vm.power -on "$vm"
@@ -234,7 +240,7 @@ fi
 
 if [ -n "$start" ] ; then
   (
-    govc object.collect -n 1 "$(govc find / -type m -name "$vm")" guest.toolsStatus # wait for tools state to transition
+    govc object.collect -s "$vm_path" -guest.toolsStatus toolsOk # wait for toolbox to register
     /usr/bin/time -f "Waiting for VM ip from toolbox...%e" govc vm.ip -v4 -n ethernet-0 "$vm"
   ) &
 
