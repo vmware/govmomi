@@ -384,21 +384,40 @@ func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
 		Closer: ioutil.NopCloser(nil), // via hgfs, nop for stdout and stderr
 	}
 
+	var r *bytes.Buffer
+
 	switch file {
 	case "stdin":
 		pf.Writer = p.IO.In.Writer
 		pf.Closer = p.IO.In.Closer
+		return pf, nil
 	case "stdout":
-		<-p.ctx.Done()
-		pf.Reader = p.IO.Out
-		pf.size = p.IO.Out.Len()
+		r = p.IO.Out
 	case "stderr":
-		<-p.ctx.Done()
-		pf.Reader = p.IO.Err
-		pf.size = p.IO.Err.Len()
+		r = p.IO.Err
 	default:
 		return nil, os.ErrNotExist
 	}
+
+	select {
+	case <-p.ctx.Done():
+	case <-time.After(time.Second):
+		// The vmx guest RPC calls are queue based, serialized on the vmx side.
+		// There are 5 seconds between "ping" RPC calls and after a few misses,
+		// the vmx considers tools as not running.  In this case, the vmx would timeout
+		// a file transfer after 60 seconds.
+		//
+		// vix.FileAccessError is converted to a CannotAccessFile fault,
+		// so the client can choose to retry the transfer in this case.
+		// Would have preferred vix.ObjectIsBusy (EBUSY), but VC/ESX converts that
+		// to a general SystemErrorFault with nothing but a localized string message
+		// to check against: "<reason>vix error codes = (5, 0).</reason>"
+		// Is standard vmware-tools, EACCES is converted to a CannotAccessFile fault.
+		return nil, vix.Error(vix.FileAccessError)
+	}
+
+	pf.Reader = r
+	pf.size = r.Len()
 
 	return pf, nil
 }
@@ -573,10 +592,6 @@ func (c *processCmd) wait() error {
 func NewProcessRoundTrip() *Process {
 	return NewProcessFunc(func(ctx context.Context, host string) error {
 		p, _ := ctx.Value(ProcessFuncIO).(*ProcessIO)
-
-		// we can't block for long
-		ctx, cancel := context.WithTimeout(ctx, time.Second)
-		defer cancel()
 
 		closers := []io.Closer{p.In.Closer}
 

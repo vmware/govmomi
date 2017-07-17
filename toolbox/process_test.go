@@ -265,6 +265,8 @@ type testRoundTripper struct {
 }
 
 func (c *testRoundTripper) RoundTrip(req *http.Request) (*http.Response, error) {
+	req.Header.Set("Connection", "close") // we need the server to close the connection after 1 request
+
 	err := req.Write(c.IO.In.Writer)
 	if err != nil {
 		return nil, err
