@@ -211,8 +211,14 @@ if [ -n "$test" ] ; then
     # Upload source files from this directory
     # and validate that query string is not used as the file/dir name (see hgfs.ArchiveHandler)
     git archive --format tar.gz HEAD | govc guest.upload -f - /tmp/toolbox-src?skip=stuff
+    # Upload .tar
+    git archive --format tar HEAD | govc guest.upload -f - /tmp/toolbox-src
+    # Download .tar
+    govc guest.download "/tmp/toolbox-src?format=tar" - | tar -tvf - | grep "$base"
     # Download a single file as a .tar.gz (note: /archive: prefix is required)
     govc guest.download "/archive:/tmp/toolbox-src/$base" - | tar -tvzf - | grep -v README.md
+    # Download a single file as a .tar (note: /archive: prefix is required)
+    govc guest.download "/archive:/tmp/toolbox-src/$base?format=tar" - | tar -tvf - | grep -v README.md
     govc guest.rmdir -r /tmp/toolbox-src
   fi
 

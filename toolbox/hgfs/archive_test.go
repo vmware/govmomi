@@ -23,7 +23,10 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
+	"net/url"
 	"os"
+	"os/exec"
 	"path"
 	"strings"
 	"testing"
@@ -290,5 +293,145 @@ func TestWriteArchive(t *testing.T) {
 	err = os.RemoveAll(dir)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func cpTar(tr *tar.Reader, tw *tar.Writer) error {
+	for {
+		header, err := tr.Next()
+		if err != nil {
+			if err == io.EOF {
+				return nil
+			}
+
+			return err
+		}
+
+		if header.Typeflag != tar.TypeReg {
+			continue
+		}
+
+		if err = tw.WriteHeader(header); err != nil {
+			return err
+		}
+
+		_, err = io.Copy(tw, tr)
+		if err != nil {
+			log.Print(err)
+			return err
+		}
+	}
+}
+
+func TestArchiveFormat(t *testing.T) {
+	gzipTrailer = false
+
+	var buf bytes.Buffer
+
+	h := &ArchiveHandler{
+		Read: func(_ *url.URL, tr *tar.Reader) error {
+			tw := tar.NewWriter(&buf)
+			if err := cpTar(tr, tw); err != nil {
+				return err
+			}
+			return tw.Close()
+		},
+		Write: func(u *url.URL, tw *tar.Writer) error {
+			tr := tar.NewReader(&buf)
+
+			return cpTar(tr, tw)
+		},
+	}
+
+	for _, format := range []string{"tar", "tgz"} {
+		u := &url.URL{
+			Scheme:   ArchiveScheme,
+			Path:     ".",
+			RawQuery: "format=" + format,
+		}
+
+		_, err := h.Stat(u)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// ToGuest: git archive | h.Read (to buf)
+		f, err := h.Open(u, OpenModeWriteOnly)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		cmd := exec.Command("git", "archive", "--format", format, "HEAD")
+
+		stdout, err := cmd.StdoutPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = cmd.Start()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		n, err := io.Copy(f, stdout)
+		if err != nil {
+			t.Errorf("copy %d: %s", n, err)
+		}
+
+		err = f.Close()
+		if err != nil {
+			t.Error(err)
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			t.Error(err)
+		}
+
+		// FromGuest: h.Write (from buf) | tar -tvf-
+		f, err = h.Open(u, OpenModeReadOnly)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		cmd = exec.Command("tar", "-tvf-")
+
+		if format == "tgz" {
+			cmd.Args = append(cmd.Args, "-z")
+		}
+
+		stdin, err := cmd.StdinPipe()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if testing.Verbose() {
+			cmd.Stderr = os.Stderr
+			cmd.Stdout = os.Stderr
+		}
+
+		err = cmd.Start()
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		n, err = io.Copy(stdin, f)
+		if err != nil {
+			t.Errorf("copy %d: %s", n, err)
+		}
+
+		_ = stdin.Close()
+
+		err = f.Close()
+		if err != nil {
+			t.Error(err)
+		}
+
+		err = cmd.Wait()
+		if err != nil {
+			t.Error(err)
+		}
+
+		buf.Reset()
 	}
 }
