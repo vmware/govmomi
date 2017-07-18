@@ -39,6 +39,30 @@ type Client struct {
 	Authentication types.BaseGuestAuthentication
 }
 
+// procReader retries InitiateFileTransferFromGuest calls if toolbox is still running the process.
+// See also: ProcessManager.Stat
+func (c *Client) procReader(ctx context.Context, src string) (*types.FileTransferInformation, error) {
+	for {
+		info, err := c.FileManager.InitiateFileTransferFromGuest(ctx, c.Authentication, src)
+		if err != nil {
+			if soap.IsSoapFault(err) {
+				if _, ok := soap.ToSoapFault(err).VimFault().(types.CannotAccessFile); ok {
+					// We're not waiting in between retries since ProcessManager.Stat
+					// has already waited.  In the case that this client was pointed at
+					// standard vmware-tools, the types.NotFound fault would have been
+					// returned since the file "/proc/$pid/stdout" does not exist - in
+					// which case, we won't retry at all.
+					continue
+				}
+			}
+
+			return nil, err
+		}
+
+		return info, err
+	}
+}
+
 // RoundTrip implements http.RoundTripper over vmx guest RPC.
 // This transport depends on govmomi/toolbox running in the VM guest and does not work with standard VMware tools.
 // Using this transport makes it is possible to connect to HTTP endpoints that are bound to the VM's loopback address.
@@ -94,7 +118,7 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	info, err := c.FileManager.InitiateFileTransferFromGuest(ctx, c.Authentication, src)
+	info, err := c.procReader(ctx, src)
 	if err != nil {
 		return nil, err
 	}
@@ -167,7 +191,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 
 		src := fmt.Sprintf("/proc/%d/std%s", pid, names[i])
 
-		info, err := c.FileManager.InitiateFileTransferFromGuest(ctx, c.Authentication, src)
+		info, err := c.procReader(ctx, src)
 		if err != nil {
 			return err
 		}
