@@ -55,8 +55,8 @@ func NewArchiveHandler() FileHandler {
 // Stat implements FileHandler.Stat
 func (*ArchiveHandler) Stat(u *url.URL) (os.FileInfo, error) {
 	switch u.Query().Get("format") {
-	case "tar":
-	case "", "tgz":
+	case "", "tar", "tgz":
+		// ok
 	default:
 		log.Printf("unknown archive format: %q", u)
 		return nil, vix.Error(vix.InvalidArg)
@@ -142,7 +142,7 @@ func (h *ArchiveHandler) newArchiveFromGuest(u *url.URL) (File, error) {
 	var c io.Closer = ioutil.NopCloser(nil)
 
 	switch u.Query().Get("format") {
-	case "", "tgz":
+	case "tgz":
 		gz := gzip.NewWriter(w)
 		z = gz
 		c = gz
@@ -279,7 +279,12 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 		return err
 	}
 
-	dir := filepath.Dir(u.Path)
+	// Note that the VMX will trim any trailing slash.  For example:
+	// "/foo/bar/?prefix=bar/" will end up here as "/foo/bar/?prefix=bar"
+	// Escape to avoid this: "/for/bar/?prefix=bar%2F"
+	prefix := u.Query().Get("prefix")
+
+	dir := u.Path
 
 	f := func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
@@ -288,6 +293,14 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 
 		name := strings.TrimPrefix(file, dir)
 		name = strings.TrimPrefix(name, "/")
+
+		if name == "" {
+			return nil // this is u.Path itself (which may or may not have a trailing "/")
+		}
+
+		if prefix != "" {
+			name = prefix + name
+		}
 
 		header, _ := tar.FileInfoHeader(fi, name)
 

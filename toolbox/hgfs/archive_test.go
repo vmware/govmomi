@@ -85,7 +85,7 @@ func TestReadArchive(t *testing.T) {
 		t.Errorf("status=%d", status)
 	}
 
-	handle, status := c.Open(dir)
+	handle, status := c.Open(dir + "?format=tgz")
 	if status != StatusSuccess {
 		t.Fatalf("status=%d", status)
 	}
@@ -155,7 +155,7 @@ func TestReadArchive(t *testing.T) {
 	}
 
 	nfiles++ // symlink
-	expect := nfiles*len(dirs) + len(dirs)
+	expect := nfiles*len(dirs) + len(dirs) - 1
 	if len(files) != expect {
 		t.Errorf("expected %d, files=%d", expect, len(files))
 	}
