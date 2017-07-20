@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
 	"strings"
@@ -258,6 +259,15 @@ func (r *archiveReader) Read(buf []byte) (int, error) {
 	return nr, err
 }
 
+func isDir(src string) bool {
+	u, err := url.Parse(src)
+	if err != nil {
+		return false
+	}
+
+	return strings.HasSuffix(u.Path, "/")
+}
+
 // Download initiates a file transfer from the guest
 func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64, error) {
 	vc := c.ProcessManager.Client()
@@ -279,7 +289,7 @@ func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64
 		return nil, n, err
 	}
 
-	if strings.HasSuffix(src, "/") || strings.HasPrefix(src, "/archive:/") {
+	if strings.HasPrefix(src, "/archive:/") || isDir(src) {
 		f = &archiveReader{ReadCloser: f} // look for the gzip trailer
 	}
 

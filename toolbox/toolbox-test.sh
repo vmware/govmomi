@@ -205,14 +205,21 @@ if [ -n "$test" ] ; then
   if [ "$verbose" = "false" ] ; then # else you don't want to see this noise
     # Download the $HOME directory, includes toolbox binaries (~30M total)
     # Note: trailing slash is required
-    govc guest.download "$home/" - | tar -tvzf - | grep "$(basename "$home")"/toolbox
+    prefix=$(basename "$home")
+    govc guest.download "$home/?prefix=$prefix/&format=tgz" - | tar -tzvf - | grep "$prefix"/toolbox
 
     govc guest.mkdir -p /tmp/toolbox-src
     # Upload source files from this directory
     # and validate that query string is not used as the file/dir name (see hgfs.ArchiveHandler)
-    git archive --format tar.gz HEAD | govc guest.upload -f - /tmp/toolbox-src?skip=stuff
+    git archive --format tgz HEAD | govc guest.upload -f - /tmp/toolbox-src?skip=stuff
+    # Upload .tar
+    git archive --format tar HEAD | govc guest.upload -f - /tmp/toolbox-src
+    # Download .tar
+    govc guest.download "/tmp/toolbox-src/" - | tar -tvf - | grep "$base"
     # Download a single file as a .tar.gz (note: /archive: prefix is required)
-    govc guest.download "/archive:/tmp/toolbox-src/$base" - | tar -tvzf - | grep -v README.md
+    govc guest.download "/archive:/tmp/toolbox-src/$base?format=tgz" - | tar -tvzf - | grep -v README.md
+    # Download a single file as a .tar (note: /archive: prefix is required)
+    govc guest.download "/archive:/tmp/toolbox-src/$base" - | tar -tvf - | grep -v README.md
     govc guest.rmdir -r /tmp/toolbox-src
   fi
 

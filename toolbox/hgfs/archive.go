@@ -18,8 +18,12 @@ package hgfs
 
 import (
 	"archive/tar"
+	"bufio"
+	"bytes"
 	"compress/gzip"
 	"io"
+	"io/ioutil"
+	"log"
 	"math"
 	"net/url"
 	"os"
@@ -27,6 +31,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/vmware/govmomi/toolbox/vix"
 )
 
 // ArchiveScheme is the default scheme used to register the archive FileHandler
@@ -48,6 +54,14 @@ func NewArchiveHandler() FileHandler {
 
 // Stat implements FileHandler.Stat
 func (*ArchiveHandler) Stat(u *url.URL) (os.FileInfo, error) {
+	switch u.Query().Get("format") {
+	case "", "tar", "tgz":
+		// ok
+	default:
+		log.Printf("unknown archive format: %q", u)
+		return nil, vix.Error(vix.InvalidArg)
+	}
+
 	return &archive{
 		name: u.Path,
 		size: math.MaxInt64,
@@ -111,26 +125,39 @@ func (a *archive) Sys() interface{} {
 // HTTP clients need to be aware of this and stop reading when they see the 2nd gzip header.
 var gzipHeader = []byte{0x1f, 0x8b, 0x08} // rfc1952 {ID1, ID2, CM}
 
+var gzipTrailer = true
+
 // newArchiveFromGuest returns an hgfs.File implementation to read a directory as a gzip'd tar.
 func (h *ArchiveHandler) newArchiveFromGuest(u *url.URL) (File, error) {
 	r, w := io.Pipe()
 
 	a := &archive{
 		name:   u.Path,
+		done:   r.Close,
 		Reader: r,
 		Writer: w,
 	}
 
-	gz := gzip.NewWriter(a.Writer)
-	tw := tar.NewWriter(gz)
-	a.done = r.Close
+	var z io.Writer = w
+	var c io.Closer = ioutil.NopCloser(nil)
+
+	switch u.Query().Get("format") {
+	case "tgz":
+		gz := gzip.NewWriter(w)
+		z = gz
+		c = gz
+	}
+
+	tw := tar.NewWriter(z)
 
 	go func() {
 		err := h.Write(u, tw)
 
 		_ = tw.Close()
-		_ = gz.Close()
-		_, _ = w.Write(gzipHeader)
+		_ = c.Close()
+		if gzipTrailer {
+			_, _ = w.Write(gzipHeader)
+		}
 		_ = w.CloseWithError(err)
 	}()
 
@@ -141,9 +168,11 @@ func (h *ArchiveHandler) newArchiveFromGuest(u *url.URL) (File, error) {
 func (h *ArchiveHandler) newArchiveToGuest(u *url.URL) (File, error) {
 	r, w := io.Pipe()
 
+	buf := bufio.NewReader(r)
+
 	a := &archive{
 		name:   u.Path,
-		Reader: r,
+		Reader: buf,
 		Writer: w,
 	}
 
@@ -162,17 +191,33 @@ func (h *ArchiveHandler) newArchiveToGuest(u *url.URL) (File, error) {
 	go func() {
 		defer wg.Done()
 
-		gz, err := gzip.NewReader(a.Reader)
-		if err != nil {
-			_ = r.CloseWithError(err)
-			cerr = err
-			return
+		c := func() error {
+			// Drain the pipe of tar trailer data (two null blocks)
+			if cerr == nil {
+				_, _ = io.Copy(ioutil.Discard, a.Reader)
+			}
+			return nil
 		}
 
-		tr := tar.NewReader(gz)
+		header, _ := buf.Peek(len(gzipHeader))
+
+		if bytes.Equal(header, gzipHeader) {
+			gz, err := gzip.NewReader(a.Reader)
+			if err != nil {
+				_ = r.CloseWithError(err)
+				cerr = err
+				return
+			}
+
+			c = gz.Close
+			a.Reader = gz
+		}
+
+		tr := tar.NewReader(a.Reader)
 
 		cerr = h.Read(u, tr)
-		_ = gz.Close()
+
+		_ = c()
 		_ = r.CloseWithError(cerr)
 	}()
 
@@ -234,7 +279,12 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 		return err
 	}
 
-	dir := filepath.Dir(u.Path)
+	// Note that the VMX will trim any trailing slash.  For example:
+	// "/foo/bar/?prefix=bar/" will end up here as "/foo/bar/?prefix=bar"
+	// Escape to avoid this: "/for/bar/?prefix=bar%2F"
+	prefix := u.Query().Get("prefix")
+
+	dir := u.Path
 
 	f := func(file string, fi os.FileInfo, err error) error {
 		if err != nil {
@@ -243,6 +293,14 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 
 		name := strings.TrimPrefix(file, dir)
 		name = strings.TrimPrefix(name, "/")
+
+		if name == "" {
+			return nil // this is u.Path itself (which may or may not have a trailing "/")
+		}
+
+		if prefix != "" {
+			name = prefix + name
+		}
 
 		header, _ := tar.FileInfoHeader(fi, name)
 
