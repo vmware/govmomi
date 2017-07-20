@@ -199,9 +199,11 @@ func (r *infoResult) Write(w io.Writer) error {
 		case *types.VirtualDisk:
 			if b, ok := md.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
 				fmt.Fprintf(tw, "  File:\t%s\n", b.GetVirtualDeviceFileBackingInfo().FileName)
+				fmt.Fprintf(tw, "  Datastore:\t%s\n", b.GetVirtualDeviceFileBackingInfo().Datastore)
 			}
 			if b, ok := md.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok && b.Parent != nil {
 				fmt.Fprintf(tw, "  Parent:\t%s\n", b.Parent.GetVirtualDeviceFileBackingInfo().FileName)
+				fmt.Fprintf(tw, "  Datastore:\t%s\n", b.Parent.GetVirtualDeviceFileBackingInfo().Datastore)
 			}
 		case *types.VirtualSerialPort:
 			if b, ok := md.Backing.(*types.VirtualSerialPortURIBackingInfo); ok {
