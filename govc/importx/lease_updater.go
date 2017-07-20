@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -119,7 +120,8 @@ func (l *leaseUpdater) run() {
 			percent := int32(float32(100*atomic.LoadInt64(&l.pos)) / float32(l.total))
 			err := l.lease.HttpNfcLeaseProgress(context.TODO(), percent)
 			if err != nil {
-				fmt.Printf("from lease updater: %s\n", err)
+				fmt.Fprintf(os.Stderr, "NFC lease progress: %s", err)
+				return
 			}
 		}
 	}
