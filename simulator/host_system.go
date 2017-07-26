@@ -40,6 +40,10 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	hw.Uuid = uuid.New().String()
 	host.Summary.Hardware = &hw
 
+	info := *esx.HostHardwareInfo
+	info.SystemInfo.Uuid = hw.Uuid
+	host.Hardware = &info
+
 	hs := &HostSystem{
 		HostSystem: host,
 	}
