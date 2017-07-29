@@ -152,6 +152,11 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  Memory:\t%dMB\n", h.MemorySize/(1024*1024))
 		fmt.Fprintf(tw, "  Memory usage:\t%d MB (%.1f%%)\n", z.OverallMemoryUsage, memUsage)
 		fmt.Fprintf(tw, "  Boot time:\t%s\n", s.Runtime.BootTime)
+		if s.Runtime.InMaintenanceMode {
+			fmt.Fprint(tw, "  State: Maintenance Mode")
+		} else {
+			fmt.Fprintf(tw, "  State:\t%s\n", s.Runtime.ConnectionState)
+		}
 	}
 
 	return tw.Flush()
