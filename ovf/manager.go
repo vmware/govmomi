@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,37 +14,36 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package object
+package ovf
 
 import (
 	"context"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type OvfManager struct {
-	Common
+type Manager struct {
+	types.ManagedObjectReference
+
+	c *vim25.Client
 }
 
-func NewOvfManager(c *vim25.Client) *OvfManager {
-	o := OvfManager{
-		Common: NewCommon(c, *c.ServiceContent.OvfManager),
-	}
-
-	return &o
+func NewManager(c *vim25.Client) *Manager {
+	return &Manager{*c.ServiceContent.OvfManager, c}
 }
 
 // CreateDescriptor wraps methods.CreateDescriptor
-func (o OvfManager) CreateDescriptor(ctx context.Context, obj Reference, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
+func (m *Manager) CreateDescriptor(ctx context.Context, obj mo.Reference, cdp types.OvfCreateDescriptorParams) (*types.OvfCreateDescriptorResult, error) {
 	req := types.CreateDescriptor{
-		This: o.Reference(),
+		This: m.Reference(),
 		Obj:  obj.Reference(),
 		Cdp:  cdp,
 	}
 
-	res, err := methods.CreateDescriptor(ctx, o.c, &req)
+	res, err := methods.CreateDescriptor(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -53,16 +52,16 @@ func (o OvfManager) CreateDescriptor(ctx context.Context, obj Reference, cdp typ
 }
 
 // CreateImportSpec wraps methods.CreateImportSpec
-func (o OvfManager) CreateImportSpec(ctx context.Context, ovfDescriptor string, resourcePool Reference, datastore Reference, cisp types.OvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
+func (m *Manager) CreateImportSpec(ctx context.Context, ovfDescriptor string, resourcePool mo.Reference, datastore mo.Reference, cisp types.OvfCreateImportSpecParams) (*types.OvfCreateImportSpecResult, error) {
 	req := types.CreateImportSpec{
-		This:          o.Reference(),
+		This:          m.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		ResourcePool:  resourcePool.Reference(),
 		Datastore:     datastore.Reference(),
 		Cisp:          cisp,
 	}
 
-	res, err := methods.CreateImportSpec(ctx, o.c, &req)
+	res, err := methods.CreateImportSpec(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -71,14 +70,14 @@ func (o OvfManager) CreateImportSpec(ctx context.Context, ovfDescriptor string, 
 }
 
 // ParseDescriptor wraps methods.ParseDescriptor
-func (o OvfManager) ParseDescriptor(ctx context.Context, ovfDescriptor string, pdp types.OvfParseDescriptorParams) (*types.OvfParseDescriptorResult, error) {
+func (m *Manager) ParseDescriptor(ctx context.Context, ovfDescriptor string, pdp types.OvfParseDescriptorParams) (*types.OvfParseDescriptorResult, error) {
 	req := types.ParseDescriptor{
-		This:          o.Reference(),
+		This:          m.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		Pdp:           pdp,
 	}
 
-	res, err := methods.ParseDescriptor(ctx, o.c, &req)
+	res, err := methods.ParseDescriptor(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -87,15 +86,15 @@ func (o OvfManager) ParseDescriptor(ctx context.Context, ovfDescriptor string, p
 }
 
 // ValidateHost wraps methods.ValidateHost
-func (o OvfManager) ValidateHost(ctx context.Context, ovfDescriptor string, host Reference, vhp types.OvfValidateHostParams) (*types.OvfValidateHostResult, error) {
+func (m *Manager) ValidateHost(ctx context.Context, ovfDescriptor string, host mo.Reference, vhp types.OvfValidateHostParams) (*types.OvfValidateHostResult, error) {
 	req := types.ValidateHost{
-		This:          o.Reference(),
+		This:          m.Reference(),
 		OvfDescriptor: ovfDescriptor,
 		Host:          host.Reference(),
 		Vhp:           vhp,
 	}
 
-	res, err := methods.ValidateHost(ctx, o.c, &req)
+	res, err := methods.ValidateHost(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}

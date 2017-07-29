@@ -150,11 +150,14 @@ func (p *progressLogger) loopA() {
 	tick := time.NewTicker(100 * time.Millisecond)
 	defer tick.Stop()
 
+	called := false
+
 	for stop := false; !stop; {
 		select {
 		case ch := <-p.sink:
 			err = p.loopB(tick, ch)
 			stop = true
+			called = true
 		case <-p.done:
 			stop = true
 		case <-tick.C:
@@ -165,7 +168,7 @@ func (p *progressLogger) loopA() {
 
 	if err != nil && err != io.EOF {
 		p.flag.Log(fmt.Sprintf("\r%sError: %s\n", p.prefix, err))
-	} else {
+	} else if called {
 		p.flag.Log(fmt.Sprintf("\r%sOK\n", p.prefix))
 	}
 }

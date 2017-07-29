@@ -14,36 +14,41 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package importx
+package nfc
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"net/url"
-	"os"
 	"sync"
 	"sync/atomic"
 	"time"
 
-	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type ovfFileItem struct {
-	url  *url.URL
-	item types.OvfFileItem
-	ch   chan progress.Report
+type FileItem struct {
+	types.OvfFileItem
+	URL *url.URL
+
+	ch chan progress.Report
 }
 
-func (o ovfFileItem) Sink() chan<- progress.Report {
+func NewFileItem(u *url.URL, item types.OvfFileItem) FileItem {
+	return FileItem{
+		OvfFileItem: item,
+		URL:         u,
+		ch:          make(chan progress.Report),
+	}
+}
+
+func (o FileItem) Sink() chan<- progress.Report {
 	return o.ch
 }
 
-type leaseUpdater struct {
-	client *vim25.Client
-	lease  *object.HttpNfcLease
+type LeaseUpdater struct {
+	lease *Lease
 
 	pos   int64 // Number of bytes
 	total int64 // Total number of bytes
@@ -53,16 +58,15 @@ type leaseUpdater struct {
 	wg sync.WaitGroup // Track when update loop is done
 }
 
-func newLeaseUpdater(client *vim25.Client, lease *object.HttpNfcLease, items []ovfFileItem) *leaseUpdater {
-	l := leaseUpdater{
-		client: client,
-		lease:  lease,
+func newLeaseUpdater(ctx context.Context, lease *Lease, info *LeaseInfo) *LeaseUpdater {
+	l := LeaseUpdater{
+		lease: lease,
 
 		done: make(chan struct{}),
 	}
 
-	for _, item := range items {
-		l.total += item.item.Size
+	for _, item := range info.Items {
+		l.total += item.Size
 		go l.waitForProgress(item)
 	}
 
@@ -73,10 +77,10 @@ func newLeaseUpdater(client *vim25.Client, lease *object.HttpNfcLease, items []o
 	return &l
 }
 
-func (l *leaseUpdater) waitForProgress(item ovfFileItem) {
+func (l *LeaseUpdater) waitForProgress(item FileItem) {
 	var pos, total int64
 
-	total = item.item.Size
+	total = item.Size
 
 	for {
 		select {
@@ -102,7 +106,7 @@ func (l *leaseUpdater) waitForProgress(item ovfFileItem) {
 	}
 }
 
-func (l *leaseUpdater) run() {
+func (l *LeaseUpdater) run() {
 	defer l.wg.Done()
 
 	tick := time.NewTicker(2 * time.Second)
@@ -118,16 +122,16 @@ func (l *leaseUpdater) run() {
 			// Always report the current value of percent, as it will renew the
 			// lease even if the value hasn't changed or is 0.
 			percent := int32(float32(100*atomic.LoadInt64(&l.pos)) / float32(l.total))
-			err := l.lease.HttpNfcLeaseProgress(context.TODO(), percent)
+			err := l.lease.Progress(context.TODO(), percent)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "NFC lease progress: %s", err)
+				log.Printf("NFC lease progress: %s", err)
 				return
 			}
 		}
 	}
 }
 
-func (l *leaseUpdater) Done() {
+func (l *LeaseUpdater) Done() {
 	close(l.done)
 	l.wg.Wait()
 }
