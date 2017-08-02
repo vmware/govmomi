@@ -2,6 +2,14 @@
 	"version": 0,
 	"dependencies": [
 		{
+			"importpath": "github.com/cloudfoundry/gosigar",
+			"repository": "https://github.com/cloudfoundry/gosigar",
+			"vcs": "git",
+			"revision": "d9ee2f6269aeeed93de1cb3ed3ea03b80e82221e",
+			"branch": "master",
+			"notests": true
+		},
+		{
 			"importpath": "github.com/davecgh/go-spew/spew",
 			"repository": "https://github.com/davecgh/go-spew",
 			"vcs": "git",

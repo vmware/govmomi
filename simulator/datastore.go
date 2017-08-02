@@ -17,11 +17,10 @@ limitations under the License.
 package simulator
 
 import (
-	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
+	sigar "github.com/cloudfoundry/gosigar"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -67,25 +66,18 @@ func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {
 
 	info := ds.Info.GetDatastoreInfo()
 
-	// #nosec: Subprocess launching with variable
-	buf, err := exec.Command("df", "-k", info.Url).Output()
+	usage := new(sigar.FileSystemUsage)
+	err := usage.Get(info.Url)
 
 	if err != nil {
 		r.Fault_ = Fault(err.Error(), &types.HostConfigFault{})
 		return r
 	}
 
-	lines := strings.Split(string(buf), "\n")
-	columns := strings.Fields(lines[1])
-
-	used, _ := strconv.ParseInt(columns[2], 10, 64)
-	info.FreeSpace, _ = strconv.ParseInt(columns[3], 10, 64)
-
-	info.FreeSpace *= 1024
-	used *= 1024
+	info.FreeSpace = int64(usage.Free)
 
 	ds.Summary.FreeSpace = info.FreeSpace
-	ds.Summary.Capacity = info.FreeSpace + used
+	ds.Summary.Capacity = int64(usage.Total)
 
 	now := time.Now()
 

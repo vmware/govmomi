@@ -7,7 +7,7 @@ check: goimports govet
 goimports:
 	@echo checking go imports...
 	@go get golang.org/x/tools/cmd/goimports
-	@! goimports -d . 2>&1 | egrep -v '^$$'
+	@! goimports -d $$(find . -type f -name '*.go' -not -path "./vendor/*") 2>&1 | egrep -v '^$$'
 
 govet:
 	@echo checking go vet...
