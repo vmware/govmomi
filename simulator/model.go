@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -202,6 +203,7 @@ func (m *Model) Create() error {
 	addMachine := func(prefix string, host *object.HostSystem, pool *object.ResourcePool, folders *object.DatacenterFolders) {
 		nic := esx.EthernetCard
 		nic.Backing = vmnet
+		ds := types.ManagedObjectReference{}
 
 		f := func() error {
 			for i := 0; i < m.Machine; i++ {
@@ -224,8 +226,10 @@ func (m *Model) Create() error {
 				scsi, _ := devices.CreateSCSIController("pvscsi")
 				ide, _ := devices.CreateIDEController()
 				cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
+				disk := devices.CreateDisk(scsi.(types.BaseVirtualController), ds,
+					config.Files.VmPathName+" "+path.Join(name, "disk1.vmdk"))
 
-				devices = append(devices, scsi, cdrom, &nic)
+				devices = append(devices, scsi, cdrom, disk, &nic)
 
 				config.DeviceChange, _ = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 

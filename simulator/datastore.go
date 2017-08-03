@@ -22,6 +22,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -32,34 +33,14 @@ type Datastore struct {
 	mo.Datastore
 }
 
-type datastorePath struct {
-	Datastore string
-	Path      string
-}
+func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodFault) {
+	var p object.DatastorePath
 
-func parseDatastorePath(dsPath string) (*datastorePath, types.BaseMethodFault) {
-	invalid := func() (*datastorePath, types.BaseMethodFault) {
-		return nil, &types.InvalidDatastorePath{DatastorePath: dsPath}
+	if p.FromString(dsPath) {
+		return &p, nil
 	}
 
-	if len(dsPath) == 0 {
-		return invalid()
-	}
-
-	if !strings.HasPrefix(dsPath, "[") {
-		return invalid()
-	}
-	dsPath = dsPath[1:]
-
-	ix := strings.Index(dsPath, "]")
-	if ix < 0 {
-		return invalid()
-	}
-
-	return &datastorePath{
-		Datastore: dsPath[:ix],
-		Path:      strings.TrimSpace(dsPath[ix+1:]),
-	}, nil
+	return nil, &types.InvalidDatastorePath{DatastorePath: dsPath}
 }
 
 func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {

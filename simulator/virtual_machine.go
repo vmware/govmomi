@@ -43,8 +43,9 @@ type VirtualMachine struct {
 	out io.Closer
 }
 
-func NewVirtualMachine(spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
+func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
+	vm.Parent = &parent
 
 	if spec.Name == "" {
 		return nil, &types.InvalidVmConfig{Property: "configSpec.name"}
@@ -103,12 +104,7 @@ func NewVirtualMachine(spec *types.VirtualMachineConfigSpec) (*VirtualMachine, t
 	return vm, nil
 }
 
-func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
-	err := vm.configureDevices(spec)
-	if err != nil {
-		return err
-	}
-
+func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	if spec.Files == nil {
 		spec.Files = new(types.VirtualMachineFileInfo)
 	}
@@ -154,8 +150,12 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 	vm.Config.Modified = time.Now()
 
 	vm.Summary.Config.Uuid = vm.Config.Uuid
+}
 
-	return nil
+func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+	vm.apply(spec)
+
+	return vm.configureDevices(spec)
 }
 
 func (vm *VirtualMachine) useDatastore(name string) *Datastore {
@@ -229,10 +229,7 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 }
 
 func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
-	err := vm.configure(spec)
-	if err != nil {
-		return err
-	}
+	vm.apply(spec)
 
 	files := []struct {
 		spec string
@@ -259,7 +256,7 @@ func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register 
 
 	vm.log.Print("created")
 
-	return nil
+	return vm.configureDevices(spec)
 }
 
 var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
@@ -278,7 +275,7 @@ func (vm *VirtualMachine) generateMAC() string {
 	return mac.String()
 }
 
-func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, device types.BaseVirtualDevice) {
+func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, device types.BaseVirtualDevice) types.BaseMethodFault {
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
 
@@ -300,6 +297,8 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 
 	label := devices.Name(device)
 	summary := label
+	dc := Map.getEntityDatacenter(Map.Get(*vm.Parent).(mo.Entity))
+	dm := Map.VirtualDiskManager()
 
 	switch x := device.(type) {
 	case types.BaseVirtualEthernetCard:
@@ -309,7 +308,6 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 		switch b := d.Backing.(type) {
 		case *types.VirtualEthernetCardNetworkBackingInfo:
 			summary = b.DeviceName
-			dc := Map.getEntityDatacenter(vm)
 			net = Map.FindByName(b.DeviceName, dc.Network).Reference()
 			b.Network = &net
 		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
@@ -324,6 +322,18 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 		if c.MacAddress == "" {
 			c.MacAddress = vm.generateMAC()
 		}
+	case *types.VirtualDisk:
+		switch b := d.Backing.(type) {
+		case types.BaseVirtualDeviceFileBackingInfo:
+			err := dm.createVirtualDisk(&types.CreateVirtualDisk_Task{
+				Datacenter: &dc.Self,
+				Name:       b.GetVirtualDeviceFileBackingInfo().FileName,
+			})
+
+			if err != nil {
+				return err
+			}
+		}
 	}
 
 	if d.UnitNumber == nil && controller != nil {
@@ -336,6 +346,8 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 			Summary: summary,
 		}
 	}
+
+	return nil
 }
 
 func removeDevice(devices object.VirtualDeviceList, device types.BaseVirtualDevice) object.VirtualDeviceList {
@@ -372,7 +384,10 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 				devices = removeDevice(devices, device)
 			}
 
-			vm.configureDevice(devices, dspec.Device)
+			err := vm.configureDevice(devices, dspec.Device)
+			if err != nil {
+				return err
+			}
 
 			devices = append(devices, dspec.Device)
 		case types.VirtualDeviceConfigSpecOperationRemove:
