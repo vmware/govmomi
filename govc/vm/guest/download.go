@@ -101,5 +101,5 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		defer logger.Wait()
 	}
 
-	return c.ProcessManager.Client().WriteFile(dst, s, n, p)
+	return c.ProcessManager.Client().WriteFile(dst, s, n, p, nil)
 }

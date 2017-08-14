@@ -23,6 +23,7 @@ import (
 	"net"
 	"path"
 
+	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -756,4 +757,17 @@ func (v VirtualMachine) UpgradeTools(ctx context.Context, options string) (*Task
 	}
 
 	return NewTask(v.c, res.Returnval), nil
+}
+
+func (v VirtualMachine) Export(ctx context.Context) (*nfc.Lease, error) {
+	req := types.ExportVm{
+		This: v.Reference(),
+	}
+
+	res, err := methods.ExportVm(ctx, v.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return nfc.NewLease(v.c, res.Returnval), nil
 }
