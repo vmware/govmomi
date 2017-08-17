@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/vmware/govmomi"
@@ -295,9 +296,10 @@ func TestDatastoreHTTP(t *testing.T) {
 			return info.Result.(types.HostDatastoreBrowserSearchResults).File
 		}
 
-		lsr := func(name string, fail bool) []types.HostDatastoreBrowserSearchResults {
+		lsr := func(name string, fail bool, query ...types.BaseFileQuery) []types.HostDatastoreBrowserSearchResults {
 			spec := types.HostDatastoreBrowserSearchSpec{
 				MatchPattern: []string{"*"},
+				Query:        query,
 			}
 
 			task, err := browser.SearchDatastoreSubFolders(ctx, dsPath(name), &spec)
@@ -387,12 +389,39 @@ func TestDatastoreHTTP(t *testing.T) {
 
 		// ls -R = ok
 		res := lsr("foo", false)
-		n := len(res)
-		for _, r := range res {
-			n += len(r.File)
+
+		count := func(s string) int {
+			n := 0
+			for _, dir := range res {
+				for _, f := range dir.File {
+					if strings.HasSuffix(f.GetFileInfo().Path, s) {
+						n++
+					}
+				}
+			}
+			return n
 		}
+
+		n := len(res) + count("")
+
 		if n != 6 {
 			t.Errorf("ls -R foo==%d", n)
+		}
+
+		// test FileQuery
+		res = lsr("", false)
+		all := count(".vmdk") // foo-flat.vmdk + foo.vmdk
+
+		res = lsr("", false, new(types.VmDiskFileQuery))
+		allq := count(".vmdk") // foo.vmdk only
+		if allq*2 != all {
+			t.Errorf("ls -R *.vmdk: %d vs %d", all, allq)
+		}
+
+		res = lsr("", false, new(types.VmLogFileQuery), new(types.VmConfigFileQuery))
+		all = count("")
+		if all != model.Count().Machine*2 {
+			t.Errorf("ls -R vmware.log+.vmx: %d", all)
 		}
 
 		invalid := []string{

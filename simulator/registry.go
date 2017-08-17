@@ -226,10 +226,10 @@ func (r *Registry) getEntityComputeResource(item mo.Entity) mo.Entity {
 // a HostStorageSystem or HostSystem within a ClusterComputeResource.
 func (r *Registry) FindByName(name string, refs []types.ManagedObjectReference) mo.Entity {
 	for _, ref := range refs {
-		e := r.Get(ref).(mo.Entity)
-
-		if name == e.Entity().Name {
-			return e
+		if e, ok := r.Get(ref).(mo.Entity); ok {
+			if name == e.Entity().Name {
+				return e
+			}
 		}
 	}
 
@@ -296,6 +296,11 @@ func (r *Registry) SearchIndex() *SearchIndex {
 // FileManager returns the FileManager singleton
 func (r *Registry) FileManager() *FileManager {
 	return r.Get(r.content().FileManager.Reference()).(*FileManager)
+}
+
+// VirtualDiskManager returns the VirtualDiskManager singleton
+func (r *Registry) VirtualDiskManager() *VirtualDiskManager {
+	return r.Get(r.content().VirtualDiskManager.Reference()).(*VirtualDiskManager)
 }
 
 // ViewManager returns the ViewManager singleton

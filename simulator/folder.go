@@ -233,7 +233,7 @@ type createVM struct {
 }
 
 func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
-	vm, err := NewVirtualMachine(&c.req.Config)
+	vm, err := NewVirtualMachine(c.Folder.Self, &c.req.Config)
 	if err != nil {
 		return nil, err
 	}
@@ -261,7 +261,6 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 
 	vm.Summary.Config.VmPathName = vm.Config.Files.VmPathName
 	vm.Summary.Runtime.Host = vm.Runtime.Host
-	vm.Parent = &c.Folder.Self
 
 	err = vm.create(&c.req.Config, c.register)
 	if err != nil {

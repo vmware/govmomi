@@ -279,8 +279,8 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	// default list of devices + 1 NIC + 1 SCSI controller + 1 CDROM created by the Model
-	mdevices := len(esx.VirtualDevice) + 3
+	// default list of devices + 1 NIC + 1 SCSI controller + 1 CDROM + 1 disk created by the Model
+	mdevices := len(esx.VirtualDevice) + 4
 
 	if len(device) != mdevices {
 		t.Errorf("expected %d devices, got %d", mdevices, len(device))
