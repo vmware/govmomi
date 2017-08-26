@@ -30,6 +30,8 @@ load test_helper
 
   result=$(govc device.info -vm $vm -net "VM Network" | grep "MAC Address" | wc -l)
   [ $result -eq 1 ]
+
+  govc device.info -vm $vm -json | assert_matches ethernet-0
 }
 
 @test "device.boot" {

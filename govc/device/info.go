@@ -18,6 +18,7 @@ package device
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -134,7 +135,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if f.NArg() == 0 {
-		res.Devices = devices
+		res.Devices = toInfoList(devices)
 	} else {
 		for _, name := range f.Args() {
 			matches := cmd.match(name, devices)
@@ -142,15 +143,41 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 				return fmt.Errorf("device '%s' not found", name)
 			}
 
-			res.Devices = append(res.Devices, matches...)
+			res.Devices = append(res.Devices, toInfoList(matches)...)
 		}
 	}
 
 	return cmd.WriteResult(&res)
 }
 
+func toInfoList(devices object.VirtualDeviceList) []infoDevice {
+	var res []infoDevice
+
+	for _, device := range devices {
+		res = append(res, infoDevice{devices.Name(device), device})
+	}
+
+	return res
+}
+
+type infoDevice struct {
+	Name string
+	types.BaseVirtualDevice
+}
+
+func (d *infoDevice) MarshalJSON() ([]byte, error) {
+	b, err := json.Marshal(d.BaseVirtualDevice)
+	if err != nil {
+		return b, err
+	}
+
+	// TODO: make use of "inline" tag if it comes to be: https://github.com/golang/go/issues/6213
+
+	return append([]byte(fmt.Sprintf(`{"Name":"%s",`, d.Name)), b[1:]...), err
+}
+
 type infoResult struct {
-	Devices object.VirtualDeviceList
+	Devices []infoDevice
 	// need the full list of devices to lookup attached devices and controllers
 	list object.VirtualDeviceList
 }
@@ -158,12 +185,13 @@ type infoResult struct {
 func (r *infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
 
-	for _, device := range r.Devices {
+	for i := range r.Devices {
+		device := r.Devices[i].BaseVirtualDevice
 		d := device.GetVirtualDevice()
 		info := d.DeviceInfo.GetDescription()
 
-		fmt.Fprintf(tw, "Name:\t%s\n", r.Devices.Name(device))
-		fmt.Fprintf(tw, "  Type:\t%s\n", r.Devices.TypeName(device))
+		fmt.Fprintf(tw, "Name:\t%s\n", r.Devices[i].Name)
+		fmt.Fprintf(tw, "  Type:\t%s\n", r.list.TypeName(device))
 		fmt.Fprintf(tw, "  Label:\t%s\n", info.Label)
 		fmt.Fprintf(tw, "  Summary:\t%s\n", info.Summary)
 		fmt.Fprintf(tw, "  Key:\t%d\n", d.Key)
@@ -171,12 +199,12 @@ func (r *infoResult) Write(w io.Writer) error {
 		if c, ok := device.(types.BaseVirtualController); ok {
 			var attached []string
 			for _, key := range c.GetVirtualController().Device {
-				attached = append(attached, r.Devices.Name(r.list.FindByKey(key)))
+				attached = append(attached, r.list.Name(r.list.FindByKey(key)))
 			}
 			fmt.Fprintf(tw, "  Devices:\t%s\n", strings.Join(attached, ", "))
 		} else {
 			if c := r.list.FindByKey(d.ControllerKey); c != nil {
-				fmt.Fprintf(tw, "  Controller:\t%s\n", r.Devices.Name(c))
+				fmt.Fprintf(tw, "  Controller:\t%s\n", r.list.Name(c))
 				if d.UnitNumber != nil {
 					fmt.Fprintf(tw, "  Unit number:\t%d\n", *d.UnitNumber)
 				} else {
