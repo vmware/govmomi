@@ -48,6 +48,10 @@ var (
 	}
 
 	netInterfaceAddrs = net.InterfaceAddrs
+
+	// If we have an RPCI send error, the channels will be reset.
+	// open-vm-tools/lib/rpcChannel/rpcChannel.c:RpcChannelCheckReset also backs off in this case
+	resetDelay = time.Duration(500) // 500 * 10ms == 5s
 )
 
 // Service receives and dispatches incoming RPC requests from the vmx
@@ -59,6 +63,7 @@ type Service struct {
 	stop     chan struct{}
 	wg       *sync.WaitGroup
 	delay    time.Duration
+	rpcError bool
 
 	Command *CommandServer
 	Power   *PowerCommandHandler
@@ -110,14 +115,37 @@ func (s *Service) backoff() {
 	}
 }
 
-// Start initializes the RPC channels and starts a goroutine to listen for incoming RPC requests
-func (s *Service) Start() error {
+func (s *Service) stopChannel() {
+	_ = s.in.Stop()
+	_ = s.out.Stop()
+}
+
+func (s *Service) startChannel() error {
 	err := s.in.Start()
 	if err != nil {
 		return err
 	}
 
-	err = s.out.Start()
+	return s.out.Start()
+}
+
+func (s *Service) checkReset() error {
+	if s.rpcError {
+		s.stopChannel()
+		err := s.startChannel()
+		if err != nil {
+			s.delay = resetDelay
+			return err
+		}
+		s.rpcError = false
+	}
+
+	return nil
+}
+
+// Start initializes the RPC channels and starts a goroutine to listen for incoming RPC requests
+func (s *Service) Start() error {
+	err := s.startChannel()
 	if err != nil {
 		return err
 	}
@@ -135,9 +163,20 @@ func (s *Service) Start() error {
 
 		for {
 			select {
+			case <-s.stop:
+				return
 			case <-time.After(time.Millisecond * 10 * s.delay):
-				_ = s.in.Send(response)
+				if err = s.checkReset(); err != nil {
+					continue
+				}
+
+				err = s.in.Send(response)
 				response = nil
+				if err != nil {
+					s.delay = resetDelay
+					s.rpcError = true
+					continue
+				}
 
 				request, _ := s.in.Receive()
 
@@ -148,8 +187,6 @@ func (s *Service) Start() error {
 				} else {
 					s.backoff()
 				}
-			case <-s.stop:
-				return
 			}
 		}
 	}()
@@ -161,8 +198,7 @@ func (s *Service) Start() error {
 func (s *Service) Stop() {
 	close(s.stop)
 
-	_ = s.in.Stop()
-	_ = s.out.Stop()
+	s.stopChannel()
 }
 
 // Wait blocks until Start returns, allowing any current RPC in progress to complete.

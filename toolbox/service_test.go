@@ -56,13 +56,21 @@ type mockChannelIn struct {
 	rpc     []*testRPC
 	wg      sync.WaitGroup
 	start   error
+	sendErr int
+	count   struct {
+		send  int
+		stop  int
+		start int
+	}
 }
 
 func (c *mockChannelIn) Start() error {
+	c.count.start++
 	return c.start
 }
 
 func (c *mockChannelIn) Stop() error {
+	c.count.stop++
 	return nil
 }
 
@@ -80,6 +88,14 @@ func (c *mockChannelIn) Receive() ([]byte, error) {
 }
 
 func (c *mockChannelIn) Send(buf []byte) error {
+	if c.sendErr > 0 {
+		c.count.send++
+		if c.count.send%c.sendErr == 0 {
+			c.wg.Done()
+			return errors.New("rpci send error")
+		}
+	}
+
 	if buf == nil {
 		return nil
 	}
@@ -280,6 +296,34 @@ func TestServiceErrors(t *testing.T) {
 	err = service.Start()
 	if err != start {
 		t.Error("expected error")
+	}
+}
+
+func TestServiceResetChannel(t *testing.T) {
+	in := new(mockChannelIn)
+	out := new(mockChannelOut)
+
+	service := NewService(in, out)
+
+	resetDelay = maxDelay
+
+	fails := 2
+	in.wg.Add(fails)
+	in.sendErr = 10
+
+	err := service.Start()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	in.wg.Wait()
+
+	service.Stop()
+	service.Wait()
+
+	expect := fails
+	if in.count.start != expect || in.count.stop != expect {
+		t.Errorf("count=%#v", in.count)
 	}
 }
 
