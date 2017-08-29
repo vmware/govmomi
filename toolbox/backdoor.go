@@ -54,7 +54,14 @@ func (b *backdoorChannel) Start() error {
 }
 
 func (b *backdoorChannel) Stop() error {
+	if b.Channel == nil {
+		return nil
+	}
+
 	err := b.Channel.Close()
+
+	b.Channel = nil
+
 	return err
 }
 
