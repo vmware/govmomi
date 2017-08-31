@@ -141,7 +141,7 @@ func (r *infoResult) Write(w io.Writer) error {
 		z := s.QuickStats
 		ncpu := int32(h.NumCpuPkgs * h.NumCpuCores)
 		cpuUsage := 100 * float64(z.OverallCpuUsage) / float64(ncpu*h.CpuMhz)
-		memUsage := 100 * float64(z.OverallMemoryUsage<<20) / float64(h.MemorySize)
+		memUsage := 100 * float64(z.OverallMemoryUsage) / float64(h.MemorySize>>20)
 
 		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
 		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
