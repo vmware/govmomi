@@ -50,7 +50,7 @@ done
 echo "Building toolbox binaries..."
 pushd "$(git rev-parse --show-toplevel)" >/dev/null
 GOOS=linux GOARCH=amd64 go build -o "$GOPATH/bin/toolbox" -v ./toolbox/toolbox
-GOOS=linux GOARCH=amd64 go test -i -c ./toolbox -o "$GOPATH/bin/toolbox.test"
+GOOS=linux GOARCH=amd64 go test -race -i -c ./toolbox -o "$GOPATH/bin/toolbox.test"
 popd >/dev/null
 
 iso=coreos_production_iso_image.iso

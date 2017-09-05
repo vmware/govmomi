@@ -164,6 +164,7 @@ func (s *Service) Start() error {
 		for {
 			select {
 			case <-s.stop:
+				s.stopChannel()
 				return
 			case <-time.After(time.Millisecond * 10 * s.delay):
 				if err = s.checkReset(); err != nil {
@@ -197,8 +198,6 @@ func (s *Service) Start() error {
 // Stop cancels the RPC listener routine created via Start
 func (s *Service) Stop() {
 	close(s.stop)
-
-	s.stopChannel()
 }
 
 // Wait blocks until Start returns, allowing any current RPC in progress to complete.
