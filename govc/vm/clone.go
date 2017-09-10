@@ -103,8 +103,8 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.customization, "customization", "", "Customization Specification Name")
 	f.BoolVar(&cmd.waitForIP, "waitip", false, "Wait for VM to acquire IP address")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
-	f.StringVar(&cmd.snapshot, "snapshot", "current", "Snapshot name in the source VM for linked clones, to be used with -link=snapshot")
-	f.StringVar(&cmd.link, "link", "none", "Creates a linked clone from snapshot or source VM, values: snapshot | machine | none")
+	f.StringVar(&cmd.snapshot, "snapshot", "", "Snapshot name in the source VM for linked clones, to be used with -link=snapshot")
+	f.StringVar(&cmd.link, "link", "", "Creates a linked clone from snapshot or source VM, values: snapshot | machine")
 }
 
 func (cmd *clone) Usage() string {
@@ -116,16 +116,6 @@ func (cmd *clone) Description() string {
 
 Examples:
   govc vm.clone -vm template-vm new-vm`
-}
-
-func (cmd *clone) searchForSnapshot(snapshotList []types.VirtualMachineSnapshotTree, snapNameToFind string) *types.ManagedObjectReference {
-	for _, sn := range snapshotList {
-		if sn.Name == snapNameToFind {
-			return &sn.Snapshot
-		}
-		return cmd.searchForSnapshot(sn.ChildSnapshotList, snapNameToFind)
-	}
-	return nil
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
@@ -329,7 +319,6 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 		PowerOn:  false,
 		Template: cmd.template,
 	}
-	//datastoreref := cmd.Datastore.Reference()
 
 	if cmd.link == "snapshot" {
 		relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsCreateNewChildDiskBacking)
@@ -343,12 +332,12 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 		}
 
 		if o.Snapshot == nil {
-			return nil, fmt.Errorf("Given VM does not have a snapshot to clone from. Create one, or use -link=machine to create a macine linked clone")
+			return nil, fmt.Errorf("Given VM does not have a snapshot to clone from. Create one, or use -link=machine to create a machine linked clone")
 		}
 
 		//make sure we have a snapshot, and set current snapshot as link source
 		if o.Snapshot.CurrentSnapshot == nil {
-			if cmd.snapshot == "current" {
+			if cmd.snapshot == "" {
 				return nil, fmt.Errorf("Given VM does not have a current snapshot to clone from, specify a snapshot name using -snapshot=")
 			}
 		} else {
@@ -358,11 +347,16 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 
 		//if we should use a specific snapshot
 		if cmd.snapshot != "" && cmd.snapshot != "current" {
-			snap := cmd.searchForSnapshot(o.Snapshot.RootSnapshotList, cmd.snapshot)
+			snap, err := vm.FindSnapshot(ctx, cmd.snapshot)
+			if err != nil {
+				return nil, err
+			}
+
 			if snap == nil {
 				return nil, fmt.Errorf("Specified snapshot doesn't exist, check your spelling (case sensitive)")
 			}
-			cloneSpec.Snapshot = snap
+			snapRef := snap.Reference()
+			cloneSpec.Snapshot = &snapRef
 		}
 
 	} else if cmd.link == "machine" {
