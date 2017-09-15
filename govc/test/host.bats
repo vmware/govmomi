@@ -107,6 +107,13 @@ load test_helper
   assert_success
 }
 
+@test "host.storage.info" {
+    esx_env
+
+    run govc host.storage.info -rescan -refresh
+    assert_success
+}
+
 @test "host.options" {
   esx_env
 
