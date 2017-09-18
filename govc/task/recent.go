@@ -24,7 +24,9 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,6 +35,7 @@ type recent struct {
 
 	max    int
 	follow bool
+	long   bool
 }
 
 func init() {
@@ -45,6 +48,7 @@ func (cmd *recent) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.IntVar(&cmd.max, "n", 25, "Output the last N tasks")
 	f.BoolVar(&cmd.follow, "f", false, "Follow recent task updates")
+	f.BoolVar(&cmd.long, "l", false, "Use long task description")
 }
 
 func (cmd *recent) Description() string {
@@ -83,6 +87,19 @@ func chop(s string) string {
 	return s[:29] + "*"
 }
 
+// taskName describes the tasks similar to the ESX ui
+func taskName(info *types.TaskInfo) string {
+	name := strings.TrimSuffix(info.Name, "_Task")
+	switch name {
+	case "":
+		return info.DescriptionId
+	case "Destroy", "Rename":
+		return info.Entity.Type + "." + name
+	default:
+		return name
+	}
+}
+
 func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
@@ -90,6 +107,31 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := c.ServiceContent.TaskManager
+
+	tn := taskName
+
+	if cmd.long {
+		var o mo.TaskManager
+		err = property.DefaultCollector(c).RetrieveOne(ctx, *m, []string{"description.methodInfo"}, &o)
+		if err != nil {
+			return err
+		}
+
+		desc := make(map[string]string, len(o.Description.MethodInfo))
+
+		for _, entry := range o.Description.MethodInfo {
+			info := entry.GetElementDescription()
+			desc[info.Key] = info.Label
+		}
+
+		tn = func(info *types.TaskInfo) string {
+			if name, ok := desc[info.DescriptionId]; ok {
+				return name
+			}
+
+			return taskName(info)
+		}
+	}
 
 	watch := *m
 
@@ -111,7 +153,7 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 	v.Follow = cmd.follow
 
 	stamp := "15:04:05"
-	tmpl := "%-30s %-30s %13s %9s %9s %9s %s\n"
+	tmpl := "%-40s %-30s %15s %9s %9s %9s %s\n"
 	fmt.Fprintf(cmd.Out, tmpl, "Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result")
 
 	var last string
@@ -138,6 +180,8 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 			ruser := strings.SplitN(user, "\\", 2)
 			if len(ruser) == 2 {
 				user = ruser[1] // discard domain
+			} else {
+				user = strings.TrimPrefix(user, "com.vmware.") // e.g. com.vmware.vsan.health
 			}
 
 			queued := info.QueueTime.Format(stamp)
@@ -148,25 +192,21 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 				start = info.StartTime.Format(stamp)
 			}
 
-			result := fmt.Sprintf("%2d%% %s", info.Progress, info.Task)
+			msg := fmt.Sprintf("%2d%% %s", info.Progress, info.Task)
 
 			if info.CompleteTime != nil {
+				msg = info.CompleteTime.Sub(*info.StartTime).String()
+
 				if info.State == types.TaskInfoStateError {
-					result = info.Error.LocalizedMessage
-				} else {
-					result = fmt.Sprintf("%s (%s)", info.State, info.CompleteTime.Sub(*info.StartTime).String())
+					msg = strings.TrimSuffix(info.Error.LocalizedMessage, ".")
 				}
 
 				end = info.CompleteTime.Format(stamp)
 			}
 
-			name := strings.TrimSuffix(info.Name, "_Task")
-			switch name {
-			case "Destroy", "Rename":
-				name = info.Entity.Type + "." + name
-			}
+			result := fmt.Sprintf("%-7s [%s]", info.State, msg)
 
-			item := fmt.Sprintf(tmpl, name, chop(info.EntityName), user, queued, start, end, result)
+			item := fmt.Sprintf(tmpl, tn(&info), chop(info.EntityName), user, queued, start, end, result)
 
 			if item == last {
 				continue // task info was updated, but the fields we display were not

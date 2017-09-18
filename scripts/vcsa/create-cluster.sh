@@ -20,8 +20,7 @@ export GOVC_INSECURE=1
 export GOVC_USERNAME=${GOVC_USERNAME:-"Administrator@vsphere.local"}
 if [ -z "$GOVC_PASSWORD" ] ; then
   # extract password from $GOVC_URL
-  password=$(govc env | grep GOVC_PASSWORD= | cut -d= -f 2-)
-  export GOVC_PASSWORD="$password"
+  GOVC_PASSWORD=$(govc env GOVC_PASSWORD)
 fi
 
 usage() {
@@ -69,6 +68,8 @@ if [ -z "$(govc ls "/$dc_name")" ] ; then
   echo "Creating datacenter ${dc_name}..."
   govc datacenter.create "$dc_name"
 fi
+
+export GOVC_DATACENTER="$dc_name"
 
 if [ -z "$(govc ls "$cluster_path")" ] ; then
   echo "Creating cluster ${cluster_path}..."

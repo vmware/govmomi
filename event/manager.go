@@ -155,6 +155,14 @@ func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (stri
 		return "", err
 	}
 
+	switch e := event.(type) {
+	case *types.EventEx:
+		if e.Severity == "" {
+			return "info", nil
+		}
+		return e.Severity, nil
+	}
+
 	class := reflect.TypeOf(event).Elem().Name()
 
 	return eventCategory[class], nil

@@ -158,14 +158,32 @@ The default prefix is `C-c ;' and can be changed by setting `govc-keymap-prefix'
   (interactive)
   (if (region-active-p)
       (copy-region-as-kill (mark) (point) 'region)
-    (kill-new (message "%s" (s-join " " (--map (format "'%s'" it) (govc-selection)))))))
+    (kill-new (message "%s" (s-join " " (--map (format "\"%s\"" it) (govc-selection)))))))
 
 (defvar govc-font-lock-keywords
-  (list
-   (list dired-re-mark '(0 dired-mark-face))
-   (list "types.ManagedObjectReference\\(.*\\)" '(1 dired-directory-face))
-   (list "[^ ]*/$" '(0 dired-directory-face))
-   (list "\\.\\.\\.$" '(0 dired-symlink-face))))
+  `(("\"[^\"]*\"" . (0 font-lock-string-face))
+    ("'[^']*'" . (0 font-lock-string-face))
+    ("[.0-9]+%" . (0 font-lock-type-face))
+    (,(mapconcat 'identity (make-list 4 "[0-9]+") "\\.") ;; IP address
+     . (0 font-lock-variable-name-face))
+    (,(let ((host-expression "[-A-Za-z0-9]+")) ;; Hostname
+        (concat
+         (mapconcat 'identity (make-list 3 host-expression) "\\.")
+         "\\(\\." host-expression "\\)*")) .
+         (0 font-lock-variable-name-face))
+    ("\\<\\(success\\|poweredOn\\)\\>" . (1 font-lock-doc-face))
+    ("\\<\\(error\\|poweredOff\\)\\>" . (1 font-lock-warning-face))
+    ("\\<\\(running\\|info\\)\\>" . (1 font-lock-variable-name-face))
+    ("\\<\\(warning\\|suspended\\)\\>" . (1 font-lock-keyword-face))
+    ("\\<\\(verbose\\|trivia\\)\\>" . (1 whitespace-line))
+    (,dired-re-maybe-mark . (0 dired-mark-face))
+    ("types.ManagedObjectReference\\(.*\\)" . (1 dired-directory-face))
+    ("[^ ]*/$" . (0 dired-directory-face))
+    ("\\.\\.\\.$" . (0 dired-symlink-face))
+    ("^\\([ A-Za-z0-9_]+: \\).*" . (1 font-lock-comment-face))
+    ("<[^>]*>" . (0 font-lock-comment-face))
+    ("\\[[^]]*\\]" . (0 font-lock-comment-face))
+    ("([^)]*)" . (0 font-lock-comment-face))))
 
 (defvar govc-tabulated-list-mode-map
   (let ((map (make-sparse-keymap)))
@@ -515,19 +533,82 @@ returned, assuming that's what the user wanted."
 (defvar govc-command-history nil
   "History list for govc commands used by `govc-shell-command'.")
 
-(defun govc-shell-command (&optional cmd)
-  "Shell CMD with current `govc-session' exported as GOVC_ env vars."
+(defvar govc-shell--revert-cmd nil)
+
+(defun govc-shell--revert-function (&optional _ _)
+  "Re-run the buffer's most recent govc-shell-run command."
+  (apply (car govc-shell--revert-cmd) (cdr govc-shell--revert-cmd)))
+
+(defun govc-shell-filter (proc string)
+  "Process filter for govc-shell PROC, append STRING."
+  (when (buffer-live-p (process-buffer proc))
+    (with-current-buffer (process-buffer proc)
+      (let ((moving (= (point) (process-mark proc))))
+        (save-excursion
+          (let ((inhibit-read-only t))
+            (goto-char (process-mark proc))
+            (insert string)
+            (set-marker (process-mark proc) (point))))
+        (display-buffer (process-buffer proc))
+        (if moving
+            (with-selected-window (get-buffer-window (current-buffer))
+              (goto-char (point-max))))))))
+
+(defun govc-shell-run (name args buffer)
+  "Run NAME command with ARGS in BUFFER."
+  (with-current-buffer (if (stringp buffer) (get-buffer-create buffer) buffer)
+    (let ((proc (get-buffer-process (current-buffer)))
+          (process-environment (govc-environment))
+          (session (govc-current-session))
+          (inhibit-read-only t))
+      (when proc
+        (set-process-filter proc nil)
+        (delete-process proc))
+      (erase-buffer)
+      (if (--any? (member (file-name-extension it) '("vmx" "vmdk")) args)
+          (conf-mode)
+        (govc-shell-mode))
+      (govc-session-clone session)
+      (setq-local govc-shell--revert-cmd `(govc-shell-run ,name ,args ,(current-buffer)))
+      (setq mode-line-process '(:propertize ":run" face compilation-mode-line-run))
+      (setq proc (apply 'start-process name (current-buffer) name args))
+      (set-process-sentinel proc 'govc-shell-process-sentinel)
+      (set-process-filter proc 'govc-shell-filter))))
+
+(defun govc-shell-kill ()
+  "Kill the process started by \\[govc-shell-command]."
   (interactive)
-  (let ((process-environment (govc-environment))
-        (current-prefix-arg "*govc*")
-        (url govc-session-url)
-        (shell-command-history govc-command-history))
-    (if cmd
-        (async-shell-command cmd current-prefix-arg)
-      (call-interactively 'async-shell-command))
-    (setq govc-command-history shell-command-history)
-    (with-current-buffer (get-buffer current-prefix-arg)
-      (setq govc-session-url url))))
+  (let ((buffer (current-buffer)))
+    (if (get-buffer-process buffer)
+        (interrupt-process (get-buffer-process buffer))
+      (error "The %s process is not running" (downcase mode-name)))))
+
+(defun govc-shell-process-sentinel (process event)
+  "Process sentinel used by `govc-shell-run'.  When PROCESS exits EVENT is logged."
+  (when (memq (process-status process) '(exit signal))
+    (with-current-buffer (process-buffer process)
+      (setq mode-line-process nil)
+      (message "%s %s" (process-name process) (substring event 0 -1)))))
+
+(defvar govc-shell-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "C-c C-k") 'govc-shell-kill)
+    map))
+
+(define-derived-mode govc-shell-mode special-mode "govc-shell"
+  "Mode for running govc commands."
+  (setq-local font-lock-defaults '(govc-font-lock-keywords))
+  (setq-local revert-buffer-function #'govc-shell--revert-function))
+
+(defun govc-shell-command (&optional cmd buffer)
+  "Shell CMD in BUFFER with current `govc-session' exported as GOVC_ env vars."
+  (interactive)
+  (let* ((session (govc-current-session))
+         (args (if cmd (--map (format "%s" it) (-flatten (-non-nil (list govc-command cmd))))
+                 (split-string-and-unquote (read-shell-command "command: " nil 'govc-command-history)))))
+    (with-current-buffer (get-buffer-create (or buffer "*govc*"))
+      (govc-session-clone session)
+      (govc-shell-run (car args) (cdr args) (current-buffer)))))
 
 (defcustom govc-max-events 100
   "Limit events output to the last N events."
@@ -538,23 +619,20 @@ returned, assuming that's what the user wanted."
   "Events via govc events -n `govc-max-events'."
   (interactive)
   (govc-shell-command
-   (govc-format-command "events"
-                        (list "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)))))
+   (list "events" "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)) "*govc-event*"))
 
 (defun govc-tasks ()
   "Tasks via govc tasks."
   (interactive)
   (govc-shell-command
-   (govc-format-command "tasks"
-                        (list "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)))))
+   (list "tasks" "-l" "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)) "*govc-task*"))
 
 (defun govc-logs ()
   "Logs via govc logs -n `govc-max-events'."
   (interactive)
   (govc-shell-command
    (let ((host (govc-selection)))
-     (govc-format-command "logs"
-                          (list "-n" govc-max-events (if current-prefix-arg "-f") (if host (list "-host" host)))))))
+     (list "logs" "-n" govc-max-events (if current-prefix-arg "-f") (if host (list "-host" host)))) "*govc-log*"))
 
 (defun govc-parse-info (output)
   "Parse govc info command OUTPUT."
@@ -810,7 +888,7 @@ Inherit SESSION if given."
 (defun govc-metric-sample ()
   "Sample metrics."
   (interactive)
-  (govc-shell-command (govc-format-command "metric.sample" govc-args govc-filter (govc-selection))))
+  (govc-shell-command (list "metric.sample" govc-args govc-filter (govc-selection))))
 
 (defun govc-metric-sample-plot ()
   "Plot metric sample."
@@ -819,7 +897,8 @@ Inherit SESSION if given."
          (max (if (member "-i" govc-args) "60" "180"))
          (args (append govc-args (list "-n" max "-plot" type govc-filter)))
          (session (govc-current-session))
-         (metrics (govc-selection)))
+         (metrics (govc-selection))
+         (inhibit-read-only t))
     (with-current-buffer (get-buffer-create "*govc*")
       (govc-session-clone session)
       (erase-buffer)
@@ -1092,7 +1171,7 @@ Optionally filter by FILTER and inherit SESSION."
   (interactive)
   (let ((id (tabulated-list-get-id)))
     (if current-prefix-arg
-        (govc-shell-command (govc-format-command "datastore.ls" "-l" "-p" "-R" id))
+        (govc-shell-command (list "datastore.ls" "-l" "-p" "-R" id))
       (if (s-ends-with? "/" id)
           (progn (setq govc-filter id)
                  (tabulated-list-revert))
@@ -1117,19 +1196,18 @@ Optionally filter by FILTER and inherit SESSION."
                                          (with-demoted-errors
                                              (govc "datastore.upload" tmpfile srcfile)))) t t)))))
 
-(defun govc-datastore-tail ()
-  "Tail datastore file."
+(defun govc-datastore-tail (&optional file)
+  "Tail datastore FILE."
   (interactive)
   (govc-shell-command
-   (govc-format-command "datastore.tail"
-                        (list "-n" govc-max-events (if current-prefix-arg "-f")) (govc-selection))))
+   (list "datastore.tail" "-n" govc-max-events (if current-prefix-arg "-f") (or file (govc-selection)))))
 
 (defun govc-datastore-disk-info ()
   "Info datastore disk."
   (interactive)
   (delete-other-windows)
   (govc-shell-command
-   (govc-format-command "datastore.disk.info" (if current-prefix-arg "-c") (govc-selection))))
+   (list "datastore.disk.info" (if current-prefix-arg "-c") (govc-selection))))
 
 (defun govc-datastore-ls-json ()
   "JSON via govc datastore.ls -json on current selection."
@@ -1394,17 +1472,23 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
   (govc-host (concat "*/" (govc-table-column-value "Host"))
              (govc-current-session)))
 
+(defun govc-vm-log-directory ()
+  "VM log directory of current selection."
+  (car (govc "object.collect" "-s" (tabulated-list-get-id) "config.files.logDirectory")))
+
 (defun govc-vm-datastore ()
   "Datastore via `govc-datastore-ls' with datastore of current selection."
   (interactive)
   (if current-prefix-arg
       (govc-datastore (s-split ", " (govc-table-column-value "Storage") t)
                       (govc-current-session))
-    (let* ((data (govc-json "vm.info" (tabulated-list-get-id)))
-           (vm (elt (plist-get data :VirtualMachines) 0))
-           (dir (plist-get (plist-get (plist-get vm :Config) :Files) :LogDirectory))
-           (args (s-split "\\[\\|\\]" dir t)))
-      (govc-datastore-ls (first args) (govc-current-session) (concat (s-trim (second args)) "/")))))
+    (let ((dir (govc-vm-log-directory)))
+      (govc-datastore-ls dir (govc-current-session) (concat dir "/")))))
+
+(defun govc-vm-logs ()
+  "Logs via `govc-datastore-tail' with logDirectory of current selection."
+  (interactive)
+  (govc-datastore-tail (concat (govc-vm-log-directory) "/vmware.log")))
 
 (defun govc-vm-ping ()
   "Ping VM."
@@ -1450,6 +1534,7 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
 (defvar govc-vm-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map "E" 'govc-events)
+    (define-key map "L" 'govc-vm-logs)
     (define-key map "J" 'govc-vm-json-info)
     (define-key map "O" 'govc-object-info)
     (define-key map "T" 'govc-tasks)

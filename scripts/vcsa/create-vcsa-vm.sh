@@ -25,8 +25,8 @@ export GOVC_INSECURE=1
 
 name=vcsa
 
-# 6.5.0e - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-vcenter-server-650e-release-notes.html
-ova=VMware-vCenter-Server-Appliance-6.5.0.5600-5705665_OVF10.ova
+# 6.5.0U1 - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-vcenter-server-651-release-notes.html
+ova=VMware-vCenter-Server-Appliance-6.5.0.10000-5973321_OVF10.ova
 
 while getopts a:i:n: flag
 do
@@ -83,7 +83,7 @@ opts=(
 
 if [ -z "$ip" ] ; then
   mode=dhcp
-  ntp=time.vmware.com
+  ntp=0.pool.ntp.org
 else
   mode=static
 

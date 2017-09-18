@@ -30,8 +30,8 @@ EOF
 
 disk=48
 mem=16
-# 6.5.0d - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-esxi-650d-release-notes.html
-iso=VMware-VMvisor-6.5.0-5310538.x86_64.iso
+# 6.5.0U1 - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-esxi-651-release-notes.html
+iso=VMware-VMvisor-6.5.0-5969303.x86_64.iso
 
 while getopts d:hi:m:s flag
 do
@@ -82,7 +82,7 @@ guest=${GUEST:-"vmkernel6Guest"}
 
 if [ -z "$password" ] ; then
   # extract password from $GOVC_URL
-  password=$(govc env | grep GOVC_PASSWORD= | cut -d= -f 2-)
+  password=$(govc env GOVC_PASSWORD)
 fi
 
 shift
@@ -91,7 +91,7 @@ name=$1
 shift
 
 echo -n "Checking govc version..."
-govc version -require 0.11.3
+govc version -require 0.15.0
 
 if [ "$(govc env -x GOVC_URL_HOST)" = "." ] ; then
   if [ "$(uname -s)" = "Darwin" ]; then
@@ -236,7 +236,7 @@ echo "Enabling MOB for ${name}..."
 govc host.option.set Config.HostAgent.plugins.solo.enableMob true
 
 echo "Configuring NTP for ${name}..."
-govc host.date.change -server time.vmware.com
+govc host.date.change -server 0.pool.ntp.org
 
 for id in TSM TSM-SSH ntpd ; do
   printf "Enabling service %s for ${name}...\n" $id
