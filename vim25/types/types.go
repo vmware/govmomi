@@ -11331,7 +11331,7 @@ func init() {
 type DVSNetworkResourcePoolAllocationInfo struct {
 	DynamicData
 
-	Limit       int64       `xml:"limit,omitempty"`
+	Limit       *int64      `xml:"limit"`
 	Shares      *SharesInfo `xml:"shares,omitempty"`
 	PriorityTag int32       `xml:"priorityTag,omitempty"`
 }
@@ -14165,9 +14165,9 @@ func init() {
 type DvsHostInfrastructureTrafficResourceAllocation struct {
 	DynamicData
 
-	Limit       int64       `xml:"limit,omitempty"`
+	Limit       *int64      `xml:"limit"`
 	Shares      *SharesInfo `xml:"shares,omitempty"`
-	Reservation int64       `xml:"reservation,omitempty"`
+	Reservation *int64      `xml:"reservation"`
 }
 
 func init() {
@@ -14846,7 +14846,7 @@ type DvsVnicAllocatedResource struct {
 
 	Vm          ManagedObjectReference `xml:"vm"`
 	VnicKey     string                 `xml:"vnicKey"`
-	Reservation int64                  `xml:"reservation,omitempty"`
+	Reservation *int64                 `xml:"reservation"`
 }
 
 func init() {
@@ -22589,7 +22589,7 @@ type HostPlacedVirtualNicIdentifier struct {
 
 	Vm          ManagedObjectReference `xml:"vm"`
 	VnicKey     string                 `xml:"vnicKey"`
-	Reservation int32                  `xml:"reservation,omitempty"`
+	Reservation *int32                 `xml:"reservation"`
 }
 
 func init() {
@@ -27456,7 +27456,7 @@ type LimitExceeded struct {
 	VimFault
 
 	Property string `xml:"property,omitempty"`
-	Limit    int32  `xml:"limit,omitempty"`
+	Limit    *int32 `xml:"limit"`
 }
 
 func init() {
@@ -27624,7 +27624,7 @@ func init() {
 
 type ListKeysRequestType struct {
 	This  ManagedObjectReference `xml:"_this"`
-	Limit int32                  `xml:"limit,omitempty"`
+	Limit *int32                 `xml:"limit"`
 }
 
 func init() {
@@ -27643,7 +27643,7 @@ func init() {
 
 type ListKmipServersRequestType struct {
 	This  ManagedObjectReference `xml:"_this"`
-	Limit int32                  `xml:"limit,omitempty"`
+	Limit *int32                 `xml:"limit"`
 }
 
 func init() {
@@ -29452,7 +29452,7 @@ func init() {
 type NamespaceLimitReached struct {
 	VimFault
 
-	Limit int32 `xml:"limit,omitempty"`
+	Limit *int32 `xml:"limit"`
 }
 
 func init() {
@@ -34231,7 +34231,7 @@ type PropertyChange struct {
 
 	Name string           `xml:"name"`
 	Op   PropertyChangeOp `xml:"op"`
-	Val  AnyType          `xml:"val,omitempty,typeattr"`
+	Val  AnyType          `xml:"val,typeattr"`
 }
 
 func init() {
@@ -36332,7 +36332,7 @@ func init() {
 type QueryVsanObjectUuidsByFilterRequestType struct {
 	This    ManagedObjectReference `xml:"_this"`
 	Uuids   []string               `xml:"uuids,omitempty"`
-	Limit   int32                  `xml:"limit,omitempty"`
+	Limit   *int32                 `xml:"limit"`
 	Version int32                  `xml:"version,omitempty"`
 }
 
@@ -39065,11 +39065,11 @@ type ResolveMultipleUnresolvedVmfsVolumesResponse struct {
 type ResourceAllocationInfo struct {
 	DynamicData
 
-	Reservation           int64       `xml:"reservation,omitempty"`
+	Reservation           *int64      `xml:"reservation"`
 	ExpandableReservation *bool       `xml:"expandableReservation"`
-	Limit                 int64       `xml:"limit,omitempty"`
+	Limit                 *int64      `xml:"limit"`
 	Shares                *SharesInfo `xml:"shares,omitempty"`
-	OverheadLimit         int64       `xml:"overheadLimit,omitempty"`
+	OverheadLimit         *int64      `xml:"overheadLimit"`
 }
 
 func init() {
@@ -42322,9 +42322,9 @@ func init() {
 type StorageIOAllocationInfo struct {
 	DynamicData
 
-	Limit       int64       `xml:"limit,omitempty"`
+	Limit       *int64      `xml:"limit"`
 	Shares      *SharesInfo `xml:"shares,omitempty"`
-	Reservation int32       `xml:"reservation,omitempty"`
+	Reservation *int32      `xml:"reservation"`
 }
 
 func init() {
@@ -47957,9 +47957,9 @@ func init() {
 type VirtualEthernetCardResourceAllocation struct {
 	DynamicData
 
-	Reservation int64      `xml:"reservation,omitempty"`
+	Reservation *int64     `xml:"reservation"`
 	Share       SharesInfo `xml:"share"`
-	Limit       int64      `xml:"limit,omitempty"`
+	Limit       *int64     `xml:"limit"`
 }
 
 func init() {

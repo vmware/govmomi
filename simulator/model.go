@@ -381,7 +381,7 @@ func (m *Model) Create() error {
 			addMachine(prefix+"0", nil, pool, folders)
 
 			for npool := 1; npool <= m.Pool; npool++ {
-				spec := NewResourceConfigSpec()
+				spec := types.DefaultResourceConfigSpec()
 
 				_, err = pool.Create(ctx, m.fmtName(prefix, npool), spec)
 				if err != nil {
@@ -392,7 +392,7 @@ func (m *Model) Create() error {
 			prefix = clusterName + "_APP"
 
 			for napp := 0; napp < m.App; napp++ {
-				rspec := NewResourceConfigSpec()
+				rspec := types.DefaultResourceConfigSpec()
 				vspec := NewVAppConfigSpec()
 				name := m.fmtName(prefix, napp)
 

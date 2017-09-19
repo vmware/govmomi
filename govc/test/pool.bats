@@ -59,18 +59,26 @@ load test_helper
 }
 
 @test "pool.change" {
-  esx_env
+  vcsim_env -esx
 
   id=$(new_id)
-  path="*/Resources/$id"
-  govc pool.create $path
+  root=$(govc find /ha-datacenter/host -type p -name Resources)
+  path="$root/$id"
 
-  run govc pool.change -mem.shares high $path
+  run govc pool.create -cpu.reservation 100 $path
+  assert_success
+
+  run govc object.collect -s $path config.cpuAllocation.reservation
+  assert_success "100"
+
+  run govc pool.change -cpu.reservation 0 -mem.shares high $path
   assert_success
   run govc pool.info $path
   assert_success
   assert_line "Mem Shares: high"
   assert_line "CPU Shares: normal"
+  run govc object.collect -s $path config.cpuAllocation.reservation
+  assert_success "0"
 
   nid=$(new_id)
   run govc pool.change -name $nid $path

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,14 +50,7 @@ func (s *sharesInfo) Set(val string) error {
 }
 
 func NewResourceConfigSpecFlag() *ResourceConfigSpecFlag {
-	f := new(ResourceConfigSpecFlag)
-	f.MemoryAllocation = new(types.ResourceAllocationInfo)
-	f.CpuAllocation = new(types.ResourceAllocationInfo)
-
-	f.SetAllocation(func(a types.BaseResourceAllocationInfo) {
-		a.GetResourceAllocationInfo().Shares = new(types.SharesInfo)
-	})
-	return f
+	return &ResourceConfigSpecFlag{types.DefaultResourceConfigSpec()}
 }
 
 type ResourceConfigSpecFlag struct {
@@ -79,8 +72,8 @@ func (s *ResourceConfigSpecFlag) Register(ctx context.Context, f *flag.FlagSet) 
 		ra := opt.GetResourceAllocationInfo()
 		shares := (*sharesInfo)(ra.Shares)
 
-		f.Int64Var(&ra.Limit, prefix+".limit", 0, opt.name+" limit in "+opt.units)
-		f.Int64Var(&ra.Reservation, prefix+".reservation", 0, opt.name+" reservation in "+opt.units)
+		f.Var(flags.NewOptionalInt64(&ra.Limit), prefix+".limit", opt.name+" limit in "+opt.units)
+		f.Var(flags.NewOptionalInt64(&ra.Reservation), prefix+".reservation", opt.name+" reservation in "+opt.units)
 		f.Var(flags.NewOptionalBool(&ra.ExpandableReservation), prefix+".expandable", opt.name+" expandable reservation")
 		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
 	}
@@ -88,10 +81,4 @@ func (s *ResourceConfigSpecFlag) Register(ctx context.Context, f *flag.FlagSet) 
 
 func (s *ResourceConfigSpecFlag) Process(ctx context.Context) error {
 	return nil
-}
-
-func (s *ResourceConfigSpecFlag) SetAllocation(f func(types.BaseResourceAllocationInfo)) {
-	for _, a := range []types.BaseResourceAllocationInfo{s.CpuAllocation, s.MemoryAllocation} {
-		f(a)
-	}
 }
