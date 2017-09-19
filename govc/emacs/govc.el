@@ -1396,31 +1396,21 @@ With prefix \\[universal-argument] ARG, VNC will be enabled but not opened."
       (unless arg
         (-each (-flatten urls) 'browse-url)))))
 
-(defun govc-vm-screen (name &optional arg)
-  "Console screenshot of vm NAME console.
-Open via `eww' by default, via `browse-url' if ARG is non-nil."
-  (interactive (list (govc-vm-prompt "Console screenshot vm: ")
+(defun govc-vm-console (name &optional arg)
+  "Console for vm with given NAME.
+By default, displays a console screen capture.
+With prefix \\[universal-argument] ARG, launches an interactive console (VMRC)."
+  (interactive (list (govc-vm-prompt "Console vm: ")
                      current-prefix-arg))
-  (let* ((data (govc-json "vm.info" name))
-         (vms (plist-get data :VirtualMachines))
-         (url (govc-url-parse govc-session-url)))
-    (mapc
-     (lambda (vm)
-       (let* ((moid (plist-get (plist-get vm :Self) :Value))
-              (on (string= "poweredOn" (plist-get (plist-get vm :Runtime) :PowerState)))
-              (host (format "%s:%d" (url-host url) (or (url-port url) 443)))
-              (path (concat "/screen?id=" moid))
-              (auth (concat (url-user url) ":" (url-password url))))
-         (if current-prefix-arg
-             (browse-url (concat "https://" auth "@" host path))
-           (let ((creds `((,host ("VMware HTTP server" . ,(base64-encode-string auth)))))
-                 (url-basic-auth-storage 'creds)
-                 (u (concat "https://" host path)))
-             (require 'eww)
-             (if on
-                 (url-retrieve u 'eww-render (list u))
-               (kill-new (message u)))))))
-     vms)))
+  (if arg
+      (browse-url (car (govc "vm.console" name)))
+    (let* ((data (govc-process (govc-format-command "vm.console" "-capture" "-" name) 'buffer-string))
+           (inhibit-read-only t))
+      (with-current-buffer (get-buffer-create "*govc*")
+        (erase-buffer)
+        (insert-image (create-image (string-as-unibyte data) 'png t))
+        (read-only-mode)
+        (display-buffer (current-buffer))))))
 
 (defun govc-vm-start-selection ()
   "Start via `govc-vm-start' on the current selection."
@@ -1457,10 +1447,10 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
   (interactive)
   (govc-vm-vnc (govc-selection) current-prefix-arg))
 
-(defun govc-vm-screen-selection ()
-  "Console screenshot via `govc-vm-screen' on the current selection."
+(defun govc-vm-console-selection ()
+  "Console via `govc-vm-console' on the current selection."
   (interactive)
-  (govc-vm-screen (govc-selection) current-prefix-arg))
+  (govc-vm-console (tabulated-list-get-id) current-prefix-arg))
 
 (defun govc-vm-info ()
   "Wrapper for govc vm.info."
@@ -1540,7 +1530,7 @@ Open via `eww' by default, via `browse-url' if ARG is non-nil."
     (define-key map "T" 'govc-tasks)
     (define-key map "X" 'govc-vm-extra-config-table)
     (define-key map (kbd "RET") 'govc-vm-device-ls)
-    (define-key map "C" 'govc-vm-screen-selection)
+    (define-key map "C" 'govc-vm-console-selection)
     (define-key map "V" 'govc-vm-vnc-selection)
     (define-key map "D" 'govc-vm-destroy-selection)
     (define-key map "^" 'govc-vm-start-selection)
