@@ -409,7 +409,7 @@ func (f *Folder) MoveIntoFolderTask(c *types.MoveIntoFolder_Task) soap.HasFault 
 
 func (f *Folder) CreateDVSTask(c *types.CreateDVS_Task) soap.HasFault {
 	task := CreateTask(f, "createDVS", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		dvs := &VmwareDistributedVirtualSwitch{}
+		dvs := &DistributedVirtualSwitch{}
 		dvs.Name = c.Spec.ConfigSpec.GetDVSConfigSpec().Name
 		dvs.Entity().Name = dvs.Name
 

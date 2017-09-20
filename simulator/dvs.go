@@ -23,11 +23,11 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type VmwareDistributedVirtualSwitch struct {
-	mo.VmwareDistributedVirtualSwitch
+type DistributedVirtualSwitch struct {
+	mo.DistributedVirtualSwitch
 }
 
-func (s *VmwareDistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := Map.getEntityParent(s, "Folder").(*Folder)
 
@@ -70,7 +70,7 @@ func (s *VmwareDistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgr
 	}
 }
 
-func (s *VmwareDistributedVirtualSwitch) ReconfigureDvsTask(req *types.ReconfigureDvs_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) ReconfigureDvsTask(req *types.ReconfigureDvs_Task) soap.HasFault {
 	task := CreateTask(s, "reconfigureDvs", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		spec := req.Spec.GetDVSConfigSpec()
 
