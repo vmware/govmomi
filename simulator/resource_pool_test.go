@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -48,9 +49,17 @@ func TestResourcePool(t *testing.T) {
 	finder := find.NewFinder(c, false)
 	finder.SetDatacenter(object.NewDatacenter(c, esx.Datacenter.Reference()))
 
-	spec := NewResourceConfigSpec()
+	spec := types.DefaultResourceConfigSpec()
 
 	parent := object.NewResourcePool(c, esx.ResourcePool.Self)
+
+	spec.CpuAllocation.GetResourceAllocationInfo().Reservation = nil
+	// missing required field (Reservation) for create
+	_, err = parent.Create(ctx, "fail", spec)
+	if err == nil {
+		t.Error("expected error")
+	}
+	spec = types.DefaultResourceConfigSpec()
 
 	// can't destroy a root pool
 	task, err := parent.Destroy(ctx)
@@ -73,6 +82,31 @@ func TestResourcePool(t *testing.T) {
 		t.Error("expected new pool Self reference")
 	}
 
+	*spec.CpuAllocation.GetResourceAllocationInfo().Reservation = -1
+	// invalid field value (Reservation) for update
+	err = child.UpdateConfig(ctx, "", &spec)
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	// valid config update
+	*spec.CpuAllocation.GetResourceAllocationInfo().Reservation = 10
+	err = child.UpdateConfig(ctx, "", &spec)
+	if err != nil {
+		t.Error(err)
+	}
+
+	var p mo.ResourcePool
+	err = child.Properties(ctx, child.Reference(), []string{"config.cpuAllocation"}, &p)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if *p.Config.CpuAllocation.GetResourceAllocationInfo().Reservation != 10 {
+		t.Error("config not updated")
+	}
+
+	// duplicate name
 	_, err = parent.Create(ctx, childName, spec)
 	if err == nil {
 		t.Error("expected error")
@@ -144,7 +178,7 @@ func TestCreateVAppESX(t *testing.T) {
 
 	parent := object.NewResourcePool(c, esx.ResourcePool.Self)
 
-	rspec := NewResourceConfigSpec()
+	rspec := types.DefaultResourceConfigSpec()
 	vspec := NewVAppConfigSpec()
 
 	_, err = parent.CreateVApp(ctx, "myapp", rspec, vspec, nil)
@@ -175,7 +209,7 @@ func TestCreateVAppVPX(t *testing.T) {
 
 	parent := object.NewResourcePool(c, Map.Any("ResourcePool").Reference())
 
-	rspec := NewResourceConfigSpec()
+	rspec := types.DefaultResourceConfigSpec()
 	vspec := NewVAppConfigSpec()
 
 	vapp, err := parent.CreateVApp(ctx, "myapp", rspec, vspec, nil)
@@ -233,5 +267,63 @@ func TestCreateVAppVPX(t *testing.T) {
 	err = task.Wait(ctx)
 	if err != nil {
 		t.Fatal(err)
+	}
+}
+
+func TestResourcePoolValidation(t *testing.T) {
+	var pool ResourcePool
+
+	tests := []func() bool{
+		func() bool {
+			return pool.allFieldsSet(nil)
+		},
+		func() bool {
+			r := new(types.ResourceAllocationInfo)
+			return pool.allFieldsSet(r)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			spec.CpuAllocation.GetResourceAllocationInfo().Limit = nil
+			return pool.allFieldsSet(spec.CpuAllocation)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			spec.CpuAllocation.GetResourceAllocationInfo().Reservation = nil
+			return pool.allFieldsSet(spec.CpuAllocation)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			spec.CpuAllocation.GetResourceAllocationInfo().ExpandableReservation = nil
+			return pool.allFieldsSet(spec.CpuAllocation)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			spec.CpuAllocation.GetResourceAllocationInfo().Shares = nil
+			return pool.allFieldsSet(spec.CpuAllocation)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			spec.CpuAllocation.GetResourceAllocationInfo().Reservation = types.NewInt64(-1)
+			return pool.allFieldsValid(spec.CpuAllocation)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			spec.CpuAllocation.GetResourceAllocationInfo().Limit = types.NewInt64(-100)
+			return pool.allFieldsValid(spec.CpuAllocation)
+		},
+		func() bool {
+			spec := types.DefaultResourceConfigSpec()
+			shares := spec.CpuAllocation.GetResourceAllocationInfo().Shares
+			shares.Level = types.SharesLevelCustom
+			shares.Shares = -1
+			return pool.allFieldsValid(spec.CpuAllocation)
+		},
+	}
+
+	for i, test := range tests {
+		ok := test()
+		if ok {
+			t.Errorf("%d: expected false", i)
+		}
 	}
 }

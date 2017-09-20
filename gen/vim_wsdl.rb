@@ -191,7 +191,8 @@ class Simple
   end
 
   def pointer_type?
-    ["UnitNumber", "OwnerId", "GroupId", "MaxWaitSeconds"].include?(var_name)
+    ["UnitNumber"].include?(var_name) or
+      optional? && ["OwnerId", "GroupId", "MaxWaitSeconds", "Reservation", "Limit", "OverheadLimit"].include?(var_name)
   end
 
   def var_type
@@ -217,6 +218,10 @@ class Simple
           self.need_omitempty = false
         end
       when "long"
+        if pointer_type?
+          prefix += "*"
+          self.need_omitempty = false
+        end
         t = "int64"
       when "dateTime"
         t = "time.Time"
@@ -230,7 +235,7 @@ class Simple
           pkg = "types."
         end
         t = "#{pkg}AnyType"
-        if ["Value"].include?(var_name)
+        if ["Value", "Val"].include?(var_name)
           self.need_omitempty = false
         end
       when "byte"
