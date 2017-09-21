@@ -458,6 +458,11 @@ func (flag *ClientFlag) localTicket(ctx context.Context, m *session.Manager) (*u
 	return url.UserPassword(ticket.UserName, string(password)), nil
 }
 
+func isDevelopmentVersion(apiVersion string) bool {
+	// Skip version check for development builds which can be in the form of "r4A70F" or "6.5.x"
+	return strings.Count(apiVersion, ".") == 0 || strings.HasSuffix(apiVersion, ".x")
+}
+
 // apiVersionValid returns whether or not the API version supported by the
 // server the client is connected to is not recent enough.
 func apiVersionValid(c *vim25.Client, minVersionString string) error {
@@ -467,23 +472,22 @@ func apiVersionValid(c *vim25.Client, minVersionString string) error {
 	}
 
 	apiVersion := c.ServiceContent.About.ApiVersion
-	if strings.HasSuffix(apiVersion, ".x") {
-		// Skip version check for development builds
+	if isDevelopmentVersion(apiVersion) {
 		return nil
 	}
 
 	realVersion, err := ParseVersion(apiVersion)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error parsing API version %q: %s", apiVersion, err)
 	}
 
 	minVersion, err := ParseVersion(minVersionString)
 	if err != nil {
-		return err
+		return fmt.Errorf("Error parsing %s=%q: %s", envMinAPIVersion, minVersionString, err)
 	}
 
 	if !minVersion.Lte(realVersion) {
-		err = fmt.Errorf("Require API version %s, connected to API version %s (set %s to override)",
+		err = fmt.Errorf("Require API version %q, connected to API version %q (set %s to override)",
 			minVersionString,
 			c.ServiceContent.About.ApiVersion,
 			envMinAPIVersion)
