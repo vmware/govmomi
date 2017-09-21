@@ -69,6 +69,10 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 		NewOptionManager(s.Content.Setting, setting),
 	}
 
+	if s.Content.CustomFieldsManager != nil {
+		objects = append(objects, NewCustomFieldsManager(*s.Content.CustomFieldsManager))
+	}
+
 	for _, o := range objects {
 		Map.Put(o)
 	}
