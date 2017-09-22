@@ -128,4 +128,22 @@ func TestDVS(t *testing.T) {
 			t.Errorf("expected %T fault in test %d", test.err, x)
 		}
 	}
+
+	ports, err := dvs.FetchDVPorts(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ports) != 1 {
+		t.Fatalf("expected 1 ports in DVPorts; got %d", len(ports))
+	}
+
+	dtask, err = dvs.Destroy(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = dtask.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
