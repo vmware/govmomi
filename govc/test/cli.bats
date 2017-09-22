@@ -82,15 +82,20 @@ load test_helper
   assert_success
 }
 
-@test "connect to an endpoint with a non-supported API version" {
+@test "API version check" {
   vcsim_env -esx
 
   run env GOVC_MIN_API_VERSION=24.4 govc about
-  assert grep -q "^govc: Require API version 24.4," <<<${output}
-}
+  assert grep -q "^govc: Require API version \"24.4\"," <<<"${output}"
 
-@test "connect to an endpoint with user provided Vim namespace and Vim version" {
-  vcsim_env -esx
+  run env GOVC_MIN_API_VERSION=no.no govc about
+  assert_failure
+
+  run env GOVC_MIN_API_VERSION=- govc about
+  assert_success
+
+  run env GOVC_MIN_API_VERSION=5.0 govc about
+  assert_success
 
   run govc about -vim-namespace urn:vim25 -vim-version 6.0
   assert_success
