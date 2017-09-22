@@ -17,9 +17,6 @@ limitations under the License.
 package simulator
 
 import (
-	"os/exec"
-	"strconv"
-	"strings"
 	"time"
 
 	"github.com/vmware/govmomi/object"
@@ -46,27 +43,13 @@ func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodF
 func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {
 	r := &methods.RefreshDatastoreBody{}
 
-	info := ds.Info.GetDatastoreInfo()
-
-	// #nosec: Subprocess launching with variable
-	buf, err := exec.Command("df", "-k", info.Url).Output()
-
+	err := ds.stat()
 	if err != nil {
 		r.Fault_ = Fault(err.Error(), &types.HostConfigFault{})
 		return r
 	}
 
-	lines := strings.Split(string(buf), "\n")
-	columns := strings.Fields(lines[1])
-
-	used, _ := strconv.ParseInt(columns[2], 10, 64)
-	info.FreeSpace, _ = strconv.ParseInt(columns[3], 10, 64)
-
-	info.FreeSpace *= 1024
-	used *= 1024
-
-	ds.Summary.FreeSpace = info.FreeSpace
-	ds.Summary.Capacity = info.FreeSpace + used
+	info := ds.Info.GetDatastoreInfo()
 
 	now := time.Now()
 
