@@ -51,7 +51,7 @@ type clone struct {
 	waitForIP     bool
 	annotation    string
 	snapshot      string
-	link          string
+	link          bool
 
 	Client         *vim25.Client
 	Datacenter     *object.Datacenter
@@ -103,8 +103,8 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.customization, "customization", "", "Customization Specification Name")
 	f.BoolVar(&cmd.waitForIP, "waitip", false, "Wait for VM to acquire IP address")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
-	f.StringVar(&cmd.snapshot, "snapshot", "", "Snapshot name in the source VM for linked clones, to be used with -link=snapshot")
-	f.StringVar(&cmd.link, "link", "", "Creates a linked clone from snapshot or source VM, values: snapshot | machine")
+	f.StringVar(&cmd.snapshot, "snapshot", "", "Snapshot name to clone from")
+	f.BoolVar(&cmd.link, "link", false, "Creates a linked clone from snapshot or source VM")
 }
 
 func (cmd *clone) Usage() string {
@@ -115,7 +115,11 @@ func (cmd *clone) Description() string {
 	return `Clone VM to NAME.
 
 Examples:
-  govc vm.clone -vm template-vm new-vm`
+  govc vm.clone -vm template-vm new-vm
+  govc vm.clone -vm template-vm -link new-vm
+  govc vm.clone -vm template-vm -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -link -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm`
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
@@ -315,54 +319,29 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 	}
 
 	cloneSpec := &types.VirtualMachineCloneSpec{
-		Location: relocateSpec,
 		PowerOn:  false,
 		Template: cmd.template,
 	}
 
-	if cmd.link == "snapshot" {
-		relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsCreateNewChildDiskBacking)
-		cloneSpec.Location = relocateSpec
-		//get snapshots:
-		var o mo.VirtualMachine
-		vm := cmd.VirtualMachine
-		err = vm.Properties(ctx, vm.Reference(), []string{"snapshot"}, &o)
-		if err != nil {
-			return nil, err
+	if cmd.snapshot == "" {
+		if cmd.link {
+			relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndAllowSharing)
+		}
+	} else {
+		if cmd.link {
+			relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsCreateNewChildDiskBacking)
 		}
 
-		if o.Snapshot == nil {
-			return nil, fmt.Errorf("Given VM does not have a snapshot to clone from. Create one, or use -link=machine to create a machine linked clone")
+		ref, ferr := cmd.VirtualMachine.FindSnapshot(ctx, cmd.snapshot)
+		if ferr != nil {
+			return nil, ferr
 		}
 
-		//make sure we have a snapshot, and set current snapshot as link source
-		if o.Snapshot.CurrentSnapshot == nil {
-			if cmd.snapshot == "" {
-				return nil, fmt.Errorf("Given VM does not have a current snapshot to clone from, specify a snapshot name using -snapshot=")
-			}
-		} else {
-			//default to current snapshot
-			cloneSpec.Snapshot = o.Snapshot.CurrentSnapshot
-		}
-
-		//if we should use a specific snapshot
-		if cmd.snapshot != "" && cmd.snapshot != "current" {
-			snap, err := vm.FindSnapshot(ctx, cmd.snapshot)
-			if err != nil {
-				return nil, err
-			}
-
-			if snap == nil {
-				return nil, fmt.Errorf("Specified snapshot doesn't exist, check your spelling (case sensitive)")
-			}
-			snapRef := snap.Reference()
-			cloneSpec.Snapshot = &snapRef
-		}
-
-	} else if cmd.link == "machine" {
-		relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsMoveChildMostDiskBacking)
-		cloneSpec.Location = relocateSpec
+		cloneSpec.Snapshot = ref
 	}
+
+	cloneSpec.Location = relocateSpec
+
 	// clone to storage pod
 	datastoreref := types.ManagedObjectReference{}
 	if cmd.StoragePod != nil && cmd.Datastore == nil {

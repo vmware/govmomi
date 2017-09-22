@@ -31,8 +31,14 @@ test_vm_snapshot() {
   run govc snapshot.create -vm "$vm" root
   assert_success
 
+  run govc snapshot.tree -C -vm "$vm"
+  assert_success "root"
+
   run govc snapshot.create -vm "$vm" child
   assert_success
+
+  run govc snapshot.tree -C -vm "$vm"
+  assert_success "child"
 
   run govc snapshot.create -vm "$vm" grand
   assert_success

@@ -528,14 +528,18 @@ load test_helper
   vm=$(new_empty_vm)
   clone=$(new_id)
 
-  run govc vm.clone -vm $vm $clone
+  run govc vm.clone -vm "$vm" "$clone"
   assert_success
 
-  result=$(govc device.ls -vm $clone | grep disk- | wc -l)
-  [ $result -eq 0 ]
+  clone=$(new_id)
+  run govc vm.clone -vm "$vm" -snapshot X "$clone"
+  assert_failure
 
-  result=$(govc device.ls -vm $clone | grep cdrom- | wc -l)
-  [ $result -eq 0 ]
+  run govc snapshot.create -vm "$vm" X
+  assert_success
+
+  run govc vm.clone -vm "$vm" -snapshot X "$clone"
+  assert_success
 }
 
 @test "vm.clone change resources" {
