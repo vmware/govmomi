@@ -14,24 +14,23 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package methods
+package internal
 
 import (
 	"context"
 
 	"github.com/vmware/govmomi/vim25/soap"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type RetrieveDynamicTypeManagerBody struct {
-	Req    *types.RetrieveDynamicTypeManager         `xml:"urn:vim25 RetrieveDynamicTypeManager"`
-	Res    *types.RetrieveDynamicTypeManagerResponse `xml:"urn:vim25 RetrieveDynamicTypeManagerResponse"`
+	Req    *RetrieveDynamicTypeManagerRequest  `xml:"urn:vim25 RetrieveDynamicTypeManager"`
+	Res    *RetrieveDynamicTypeManagerResponse `xml:"urn:vim25 RetrieveDynamicTypeManagerResponse"`
 	Fault_ *soap.Fault
 }
 
 func (b *RetrieveDynamicTypeManagerBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveDynamicTypeManager(ctx context.Context, r soap.RoundTripper, req *types.RetrieveDynamicTypeManager) (*types.RetrieveDynamicTypeManagerResponse, error) {
+func RetrieveDynamicTypeManager(ctx context.Context, r soap.RoundTripper, req *RetrieveDynamicTypeManagerRequest) (*RetrieveDynamicTypeManagerResponse, error) {
 	var reqBody, resBody RetrieveDynamicTypeManagerBody
 
 	reqBody.Req = req
@@ -44,14 +43,14 @@ func RetrieveDynamicTypeManager(ctx context.Context, r soap.RoundTripper, req *t
 }
 
 type RetrieveManagedMethodExecuterBody struct {
-	Req    *types.RetrieveManagedMethodExecuter         `xml:"urn:vim25 RetrieveManagedMethodExecuter"`
-	Res    *types.RetrieveManagedMethodExecuterResponse `xml:"urn:vim25 RetrieveManagedMethodExecuterResponse"`
+	Req    *RetrieveManagedMethodExecuterRequest  `xml:"urn:vim25 RetrieveManagedMethodExecuter"`
+	Res    *RetrieveManagedMethodExecuterResponse `xml:"urn:vim25 RetrieveManagedMethodExecuterResponse"`
 	Fault_ *soap.Fault
 }
 
 func (b *RetrieveManagedMethodExecuterBody) Fault() *soap.Fault { return b.Fault_ }
 
-func RetrieveManagedMethodExecuter(ctx context.Context, r soap.RoundTripper, req *types.RetrieveManagedMethodExecuter) (*types.RetrieveManagedMethodExecuterResponse, error) {
+func RetrieveManagedMethodExecuter(ctx context.Context, r soap.RoundTripper, req *RetrieveManagedMethodExecuterRequest) (*RetrieveManagedMethodExecuterResponse, error) {
 	var reqBody, resBody RetrieveManagedMethodExecuterBody
 
 	reqBody.Req = req
@@ -64,14 +63,14 @@ func RetrieveManagedMethodExecuter(ctx context.Context, r soap.RoundTripper, req
 }
 
 type DynamicTypeMgrQueryMoInstancesBody struct {
-	Req    *types.DynamicTypeMgrQueryMoInstances         `xml:"urn:vim25 DynamicTypeMgrQueryMoInstances"`
-	Res    *types.DynamicTypeMgrQueryMoInstancesResponse `xml:"urn:vim25 DynamicTypeMgrQueryMoInstancesResponse"`
+	Req    *DynamicTypeMgrQueryMoInstancesRequest  `xml:"urn:vim25 DynamicTypeMgrQueryMoInstances"`
+	Res    *DynamicTypeMgrQueryMoInstancesResponse `xml:"urn:vim25 DynamicTypeMgrQueryMoInstancesResponse"`
 	Fault_ *soap.Fault
 }
 
 func (b *DynamicTypeMgrQueryMoInstancesBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DynamicTypeMgrQueryMoInstances(ctx context.Context, r soap.RoundTripper, req *types.DynamicTypeMgrQueryMoInstances) (*types.DynamicTypeMgrQueryMoInstancesResponse, error) {
+func DynamicTypeMgrQueryMoInstances(ctx context.Context, r soap.RoundTripper, req *DynamicTypeMgrQueryMoInstancesRequest) (*DynamicTypeMgrQueryMoInstancesResponse, error) {
 	var reqBody, resBody DynamicTypeMgrQueryMoInstancesBody
 
 	reqBody.Req = req
@@ -84,14 +83,14 @@ func DynamicTypeMgrQueryMoInstances(ctx context.Context, r soap.RoundTripper, re
 }
 
 type DynamicTypeMgrQueryTypeInfoBody struct {
-	Req    *types.DynamicTypeMgrQueryTypeInfo         `xml:"urn:vim25 DynamicTypeMgrQueryTypeInfo"`
-	Res    *types.DynamicTypeMgrQueryTypeInfoResponse `xml:"urn:vim25 DynamicTypeMgrQueryTypeInfoResponse"`
+	Req    *DynamicTypeMgrQueryTypeInfoRequest  `xml:"urn:vim25 DynamicTypeMgrQueryTypeInfo"`
+	Res    *DynamicTypeMgrQueryTypeInfoResponse `xml:"urn:vim25 DynamicTypeMgrQueryTypeInfoResponse"`
 	Fault_ *soap.Fault
 }
 
 func (b *DynamicTypeMgrQueryTypeInfoBody) Fault() *soap.Fault { return b.Fault_ }
 
-func DynamicTypeMgrQueryTypeInfo(ctx context.Context, r soap.RoundTripper, req *types.DynamicTypeMgrQueryTypeInfo) (*types.DynamicTypeMgrQueryTypeInfoResponse, error) {
+func DynamicTypeMgrQueryTypeInfo(ctx context.Context, r soap.RoundTripper, req *DynamicTypeMgrQueryTypeInfoRequest) (*DynamicTypeMgrQueryTypeInfoResponse, error) {
 	var reqBody, resBody DynamicTypeMgrQueryTypeInfoBody
 
 	reqBody.Req = req
@@ -104,14 +103,14 @@ func DynamicTypeMgrQueryTypeInfo(ctx context.Context, r soap.RoundTripper, req *
 }
 
 type ExecuteSoapBody struct {
-	Req    *types.ExecuteSoap         `xml:"urn:vim25 ExecuteSoap"`
-	Res    *types.ExecuteSoapResponse `xml:"urn:vim25 ExecuteSoapResponse"`
+	Req    *ExecuteSoapRequest  `xml:"urn:vim25 ExecuteSoap"`
+	Res    *ExecuteSoapResponse `xml:"urn:vim25 ExecuteSoapResponse"`
 	Fault_ *soap.Fault
 }
 
 func (b *ExecuteSoapBody) Fault() *soap.Fault { return b.Fault_ }
 
-func ExecuteSoap(ctx context.Context, r soap.RoundTripper, req *types.ExecuteSoap) (*types.ExecuteSoapResponse, error) {
+func ExecuteSoap(ctx context.Context, r soap.RoundTripper, req *ExecuteSoapRequest) (*ExecuteSoapResponse, error) {
 	var reqBody, resBody ExecuteSoapBody
 
 	reqBody.Req = req

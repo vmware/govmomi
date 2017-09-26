@@ -14,12 +14,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package types
+package internal
 
-import "reflect"
+import (
+	"reflect"
 
-type DynamicTypeMgrQueryMoInstances struct {
-	This       ManagedObjectReference       `xml:"_this"`
+	"github.com/vmware/govmomi/vim25/types"
+)
+
+type DynamicTypeMgrQueryMoInstancesRequest struct {
+	This       types.ManagedObjectReference `xml:"_this"`
 	FilterSpec BaseDynamicTypeMgrFilterSpec `xml:"filterSpec,omitempty,typeattr"`
 }
 
@@ -28,7 +32,7 @@ type DynamicTypeMgrQueryMoInstancesResponse struct {
 }
 
 type DynamicTypeEnumTypeInfo struct {
-	DynamicData
+	types.DynamicData
 
 	Name       string                     `xml:"name"`
 	WsdlName   string                     `xml:"wsdlName"`
@@ -38,11 +42,11 @@ type DynamicTypeEnumTypeInfo struct {
 }
 
 func init() {
-	t["DynamicTypeEnumTypeInfo"] = reflect.TypeOf((*DynamicTypeEnumTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeEnumTypeInfo", reflect.TypeOf((*DynamicTypeEnumTypeInfo)(nil)).Elem())
 }
 
-type DynamicTypeMgrAllTypeInfo struct {
-	DynamicData
+type DynamicTypeMgrAllTypeInfoRequest struct {
+	types.DynamicData
 
 	ManagedTypeInfo []DynamicTypeMgrManagedTypeInfo `xml:"managedTypeInfo,omitempty"`
 	EnumTypeInfo    []DynamicTypeEnumTypeInfo       `xml:"enumTypeInfo,omitempty"`
@@ -50,22 +54,22 @@ type DynamicTypeMgrAllTypeInfo struct {
 }
 
 func init() {
-	t["DynamicTypeMgrAllTypeInfo"] = reflect.TypeOf((*DynamicTypeMgrAllTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeMgrAllTypeInfo", reflect.TypeOf((*DynamicTypeMgrAllTypeInfoRequest)(nil)).Elem())
 }
 
 type DynamicTypeMgrAnnotation struct {
-	DynamicData
+	types.DynamicData
 
 	Name      string   `xml:"name"`
 	Parameter []string `xml:"parameter,omitempty"`
 }
 
 func init() {
-	t["DynamicTypeMgrAnnotation"] = reflect.TypeOf((*DynamicTypeMgrAnnotation)(nil)).Elem()
+	types.Add("DynamicTypeMgrAnnotation", reflect.TypeOf((*DynamicTypeMgrAnnotation)(nil)).Elem())
 }
 
 type DynamicTypeMgrDataTypeInfo struct {
-	DynamicData
+	types.DynamicData
 
 	Name       string                           `xml:"name"`
 	WsdlName   string                           `xml:"wsdlName"`
@@ -76,7 +80,7 @@ type DynamicTypeMgrDataTypeInfo struct {
 }
 
 func init() {
-	t["DynamicTypeMgrDataTypeInfo"] = reflect.TypeOf((*DynamicTypeMgrDataTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeMgrDataTypeInfo", reflect.TypeOf((*DynamicTypeMgrDataTypeInfo)(nil)).Elem())
 }
 
 func (b *DynamicTypeMgrFilterSpec) GetDynamicTypeMgrFilterSpec() *DynamicTypeMgrFilterSpec { return b }
@@ -86,15 +90,15 @@ type BaseDynamicTypeMgrFilterSpec interface {
 }
 
 type DynamicTypeMgrFilterSpec struct {
-	DynamicData
+	types.DynamicData
 }
 
 func init() {
-	t["DynamicTypeMgrFilterSpec"] = reflect.TypeOf((*DynamicTypeMgrFilterSpec)(nil)).Elem()
+	types.Add("DynamicTypeMgrFilterSpec", reflect.TypeOf((*DynamicTypeMgrFilterSpec)(nil)).Elem())
 }
 
 type DynamicTypeMgrManagedTypeInfo struct {
-	DynamicData
+	types.DynamicData
 
 	Name       string                           `xml:"name"`
 	WsdlName   string                           `xml:"wsdlName"`
@@ -106,11 +110,11 @@ type DynamicTypeMgrManagedTypeInfo struct {
 }
 
 func init() {
-	t["DynamicTypeMgrManagedTypeInfo"] = reflect.TypeOf((*DynamicTypeMgrManagedTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeMgrManagedTypeInfo", reflect.TypeOf((*DynamicTypeMgrManagedTypeInfo)(nil)).Elem())
 }
 
 type DynamicTypeMgrMethodTypeInfo struct {
-	DynamicData
+	types.DynamicData
 
 	Name           string                        `xml:"name"`
 	WsdlName       string                        `xml:"wsdlName"`
@@ -123,7 +127,7 @@ type DynamicTypeMgrMethodTypeInfo struct {
 }
 
 func init() {
-	t["DynamicTypeMgrMethodTypeInfo"] = reflect.TypeOf((*DynamicTypeMgrMethodTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeMgrMethodTypeInfo", reflect.TypeOf((*DynamicTypeMgrMethodTypeInfo)(nil)).Elem())
 }
 
 type DynamicTypeMgrMoFilterSpec struct {
@@ -134,22 +138,22 @@ type DynamicTypeMgrMoFilterSpec struct {
 }
 
 func init() {
-	t["DynamicTypeMgrMoFilterSpec"] = reflect.TypeOf((*DynamicTypeMgrMoFilterSpec)(nil)).Elem()
+	types.Add("DynamicTypeMgrMoFilterSpec", reflect.TypeOf((*DynamicTypeMgrMoFilterSpec)(nil)).Elem())
 }
 
 type DynamicTypeMgrMoInstance struct {
-	DynamicData
+	types.DynamicData
 
 	Id     string `xml:"id"`
 	MoType string `xml:"moType"`
 }
 
 func init() {
-	t["DynamicTypeMgrMoInstance"] = reflect.TypeOf((*DynamicTypeMgrMoInstance)(nil)).Elem()
+	types.Add("DynamicTypeMgrMoInstance", reflect.TypeOf((*DynamicTypeMgrMoInstance)(nil)).Elem())
 }
 
 type DynamicTypeMgrParamTypeInfo struct {
-	DynamicData
+	types.DynamicData
 
 	Name       string                     `xml:"name"`
 	Version    string                     `xml:"version"`
@@ -159,11 +163,11 @@ type DynamicTypeMgrParamTypeInfo struct {
 }
 
 func init() {
-	t["DynamicTypeMgrParamTypeInfo"] = reflect.TypeOf((*DynamicTypeMgrParamTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeMgrParamTypeInfo", reflect.TypeOf((*DynamicTypeMgrParamTypeInfo)(nil)).Elem())
 }
 
 type DynamicTypeMgrPropertyTypeInfo struct {
-	DynamicData
+	types.DynamicData
 
 	Name        string                     `xml:"name"`
 	Version     string                     `xml:"version"`
@@ -173,17 +177,17 @@ type DynamicTypeMgrPropertyTypeInfo struct {
 	Annotation  []DynamicTypeMgrAnnotation `xml:"annotation,omitempty"`
 }
 
-type DynamicTypeMgrQueryTypeInfo struct {
-	This       ManagedObjectReference       `xml:"_this"`
+type DynamicTypeMgrQueryTypeInfoRequest struct {
+	This       types.ManagedObjectReference `xml:"_this"`
 	FilterSpec BaseDynamicTypeMgrFilterSpec `xml:"filterSpec,omitempty,typeattr"`
 }
 
 type DynamicTypeMgrQueryTypeInfoResponse struct {
-	Returnval DynamicTypeMgrAllTypeInfo `xml:"urn:vim25 returnval"`
+	Returnval DynamicTypeMgrAllTypeInfoRequest `xml:"urn:vim25 returnval"`
 }
 
 func init() {
-	t["DynamicTypeMgrPropertyTypeInfo"] = reflect.TypeOf((*DynamicTypeMgrPropertyTypeInfo)(nil)).Elem()
+	types.Add("DynamicTypeMgrPropertyTypeInfo", reflect.TypeOf((*DynamicTypeMgrPropertyTypeInfo)(nil)).Elem())
 }
 
 type DynamicTypeMgrTypeFilterSpec struct {
@@ -193,52 +197,52 @@ type DynamicTypeMgrTypeFilterSpec struct {
 }
 
 func init() {
-	t["DynamicTypeMgrTypeFilterSpec"] = reflect.TypeOf((*DynamicTypeMgrTypeFilterSpec)(nil)).Elem()
+	types.Add("DynamicTypeMgrTypeFilterSpec", reflect.TypeOf((*DynamicTypeMgrTypeFilterSpec)(nil)).Elem())
 }
 
 type ReflectManagedMethodExecuterSoapArgument struct {
-	DynamicData
+	types.DynamicData
 
 	Name string `xml:"name"`
 	Val  string `xml:"val"`
 }
 
 func init() {
-	t["ReflectManagedMethodExecuterSoapArgument"] = reflect.TypeOf((*ReflectManagedMethodExecuterSoapArgument)(nil)).Elem()
+	types.Add("ReflectManagedMethodExecuterSoapArgument", reflect.TypeOf((*ReflectManagedMethodExecuterSoapArgument)(nil)).Elem())
 }
 
 type ReflectManagedMethodExecuterSoapFault struct {
-	DynamicData
+	types.DynamicData
 
 	FaultMsg    string `xml:"faultMsg"`
 	FaultDetail string `xml:"faultDetail,omitempty"`
 }
 
 func init() {
-	t["ReflectManagedMethodExecuterSoapFault"] = reflect.TypeOf((*ReflectManagedMethodExecuterSoapFault)(nil)).Elem()
+	types.Add("ReflectManagedMethodExecuterSoapFault", reflect.TypeOf((*ReflectManagedMethodExecuterSoapFault)(nil)).Elem())
 }
 
 type ReflectManagedMethodExecuterSoapResult struct {
-	DynamicData
+	types.DynamicData
 
 	Response string                                 `xml:"response,omitempty"`
 	Fault    *ReflectManagedMethodExecuterSoapFault `xml:"fault,omitempty"`
 }
 
-type RetrieveDynamicTypeManager struct {
-	This ManagedObjectReference `xml:"_this"`
+type RetrieveDynamicTypeManagerRequest struct {
+	This types.ManagedObjectReference `xml:"_this"`
 }
 
 type RetrieveDynamicTypeManagerResponse struct {
 	Returnval *InternalDynamicTypeManager `xml:"urn:vim25 returnval"`
 }
 
-type RetrieveManagedMethodExecuter struct {
-	This ManagedObjectReference `xml:"_this"`
+type RetrieveManagedMethodExecuterRequest struct {
+	This types.ManagedObjectReference `xml:"_this"`
 }
 
 func init() {
-	t["RetrieveManagedMethodExecuter"] = reflect.TypeOf((*RetrieveManagedMethodExecuter)(nil)).Elem()
+	types.Add("RetrieveManagedMethodExecuter", reflect.TypeOf((*RetrieveManagedMethodExecuterRequest)(nil)).Elem())
 }
 
 type RetrieveManagedMethodExecuterResponse struct {
@@ -246,15 +250,15 @@ type RetrieveManagedMethodExecuterResponse struct {
 }
 
 type InternalDynamicTypeManager struct {
-	ManagedObjectReference
+	types.ManagedObjectReference
 }
 
 type ReflectManagedMethodExecuter struct {
-	ManagedObjectReference
+	types.ManagedObjectReference
 }
 
-type ExecuteSoap struct {
-	This     ManagedObjectReference                     `xml:"_this"`
+type ExecuteSoapRequest struct {
+	This     types.ManagedObjectReference               `xml:"_this"`
 	Moid     string                                     `xml:"moid"`
 	Version  string                                     `xml:"version"`
 	Method   string                                     `xml:"method"`
