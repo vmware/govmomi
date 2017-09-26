@@ -60,6 +60,7 @@ const (
 
 type header struct {
 	Cookie string `xml:"vcSessionCookie,omitempty"`
+	ID     string `xml:"operationID,omitempty"`
 }
 
 type Client struct {
@@ -78,7 +79,7 @@ type Client struct {
 	Version   string // Vim version
 	UserAgent string
 
-	header *header
+	cookie string
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
@@ -168,10 +169,7 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	// Set SOAP Header cookie
 	for _, cookie := range client.Jar.Cookies(u) {
 		if cookie.Name == "vmware_soap_session" {
-			client.header = &header{
-				Cookie: cookie.Value,
-			}
-
+			client.cookie = cookie.Value
 			break
 		}
 	}
@@ -433,7 +431,15 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	reqEnv := Envelope{Body: reqBody}
 	resEnv := Envelope{Body: resBody}
 
-	reqEnv.Header = c.header
+	h := &header{
+		Cookie: c.cookie,
+	}
+
+	if id, ok := ctx.Value(types.ID{}).(string); ok {
+		h.ID = id
+	}
+
+	reqEnv.Header = h
 
 	// Create debugging context for this round trip
 	d := c.d.newRoundTrip()
