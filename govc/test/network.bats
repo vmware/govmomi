@@ -150,7 +150,7 @@ load test_helper
 }
 
 @test "dvs.portgroup" {
-  vcsim_env_todo
+  vcsim_env
   id=$(new_id)
 
   run govc dvs.create "$id"
