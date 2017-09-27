@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 )
 
@@ -63,5 +64,69 @@ func TestDefaultESX(t *testing.T) {
 
 	if pool.Name() != "Resources" {
 		t.Fail()
+	}
+}
+
+func TestMaintenanceMode(t *testing.T) {
+	ctx := context.Background()
+	m := ESX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c := m.Service.client
+
+	hs := Map.Get(esx.HostSystem.Reference()).(*HostSystem)
+	host := object.NewHostSystem(c, hs.Self)
+
+	task, err := host.EnterMaintenanceMode(ctx, 1, false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if hs.Runtime.InMaintenanceMode != true {
+		t.Fatal("expect InMaintenanceMode is true; got false")
+	}
+
+	task, err = host.ExitMaintenanceMode(ctx, 1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if hs.Runtime.InMaintenanceMode != false {
+		t.Fatal("expect InMaintenanceMode is false; got true")
+	}
+}
+
+func TestNewHostSystem(t *testing.T) {
+	m := ESX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	hs := NewHostSystem(esx.HostSystem)
+	if hs.Summary.Runtime != &hs.Runtime {
+		t.Fatal("expected hs.Summary.Runtime == &hs.Runtime; got !=")
 	}
 }
