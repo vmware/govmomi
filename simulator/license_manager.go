@@ -77,6 +77,42 @@ func NewLicenseManager(ref types.ManagedObjectReference) object.Reference {
 	return m
 }
 
+func (m *LicenseManager) AddLicense(req *types.AddLicense) soap.HasFault {
+	body := &methods.AddLicenseBody{
+		Res: &types.AddLicenseResponse{},
+	}
+
+	for _, license := range m.Licenses {
+		if license.LicenseKey == req.LicenseKey {
+			body.Res.Returnval = licenseInfo(license.LicenseKey, license.Labels)
+			return body
+		}
+	}
+
+	m.Licenses = append(m.Licenses, types.LicenseManagerLicenseInfo{
+		LicenseKey: req.LicenseKey,
+		Labels:     req.Labels,
+	})
+
+	body.Res.Returnval = licenseInfo(req.LicenseKey, req.Labels)
+
+	return body
+}
+
+func (m *LicenseManager) RemoveLicense(req *types.RemoveLicense) soap.HasFault {
+	body := &methods.RemoveLicenseBody{
+		Res: &types.RemoveLicenseResponse{},
+	}
+
+	for i, license := range m.Licenses {
+		if req.LicenseKey == license.LicenseKey {
+			m.Licenses = append(m.Licenses[:i], m.Licenses[i+1:]...)
+			return body
+		}
+	}
+	return body
+}
+
 type LicenseAssignmentManager struct {
 	mo.LicenseAssignmentManager
 }
@@ -108,4 +144,13 @@ func (m *LicenseAssignmentManager) QueryAssignedLicenses(req *types.QueryAssigne
 	}
 
 	return body
+}
+
+func licenseInfo(key string, labels []types.KeyValue) types.LicenseManagerLicenseInfo {
+	info := EvalLicense
+
+	info.LicenseKey = key
+	info.Labels = labels
+
+	return info
 }

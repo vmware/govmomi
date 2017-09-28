@@ -123,3 +123,84 @@ func TestLicenseManagerESX(t *testing.T) {
 		t.Fatal("invalid license")
 	}
 }
+
+func TestAddRemoveLicense(t *testing.T) {
+	ctx := context.Background()
+	m := ESX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	lm := license.NewManager(c.Client)
+	key := "00000-00000-00000-00000-11111"
+	labels := map[string]string{"key": "value"}
+
+	info, err := lm.Add(ctx, key, labels)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if info.LicenseKey != key {
+		t.Fatalf("expect info.LicenseKey equal to %q; got %q", key, info.LicenseKey)
+	}
+
+	if len(info.Labels) != len(labels) {
+		t.Fatalf("expect len(info.Labels) eqaul to %d; got %d",
+			len(labels), len(info.Labels))
+	}
+
+	if info.Labels[0].Key != "key" || info.Labels[0].Value != "value" {
+		t.Fatalf("expect label to be {key:value}; got {%s:%s}",
+			info.Labels[0].Key, info.Labels[0].Value)
+	}
+
+	la, err := lm.List(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(la) != 2 {
+		t.Fatal("no licenses")
+	}
+
+	if la[1].LicenseKey != key {
+		t.Fatalf("expect info.LicenseKey equal to %q; got %q",
+			key, la[1].LicenseKey)
+	}
+
+	if len(la[1].Labels) != len(labels) {
+		t.Fatalf("expect len(info.Labels) eqaul to %d; got %d",
+			len(labels), len(la[1].Labels))
+	}
+
+	if la[1].Labels[0].Key != "key" || la[1].Labels[0].Value != "value" {
+		t.Fatalf("expect label to be {key:value}; got {%s:%s}",
+			la[1].Labels[0].Key, la[1].Labels[0].Value)
+	}
+
+	err = lm.Remove(ctx, key)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	la, err = lm.List(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(la) != 1 {
+		t.Fatal("no licenses")
+	}
+}
