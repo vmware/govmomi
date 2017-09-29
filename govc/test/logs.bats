@@ -44,3 +44,14 @@ load test_helper
   run govc logs.ls -host enoent
   assert_success
 }
+
+@test "logs opid" {
+  esx_env
+
+  id=$(new_id)
+
+  run env GOVC_OPERATION_ID="$id" govc events
+  assert_success
+
+  govc logs | grep "$id"
+}
