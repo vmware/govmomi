@@ -21,7 +21,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -32,21 +34,23 @@ type HostSystem struct {
 func NewHostSystem(host mo.HostSystem) *HostSystem {
 	now := time.Now()
 
-	host.Name = host.Summary.Config.Name
-	host.Summary.Runtime = &host.Runtime
-	host.Summary.Runtime.BootTime = &now
-
-	hw := *host.Summary.Hardware // shallow copy
-	hw.Uuid = uuid.New().String()
-	host.Summary.Hardware = &hw
-
-	info := *esx.HostHardwareInfo
-	info.SystemInfo.Uuid = hw.Uuid
-	host.Hardware = &info
-
 	hs := &HostSystem{
 		HostSystem: host,
 	}
+
+	hs.Name = hs.Summary.Config.Name
+	hs.Summary.Runtime = &hs.Runtime
+	hs.Summary.Runtime.BootTime = &now
+
+	id := uuid.New().String()
+
+	hardware := *host.Summary.Hardware
+	hs.Summary.Hardware = &hardware
+	hs.Summary.Hardware.Uuid = id
+
+	info := *esx.HostHardwareInfo
+	info.SystemInfo.Uuid = id
+	hs.Hardware = &info
 
 	config := []struct {
 		ref **types.ManagedObjectReference
@@ -129,4 +133,34 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 	pool.Owner = cr.Self
 
 	return host, nil
+}
+
+func (h *HostSystem) EnterMaintenanceModeTask(spec *types.EnterMaintenanceMode_Task) soap.HasFault {
+	task := CreateTask(h, "enterMaintenanceMode", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		h.Runtime.InMaintenanceMode = true
+		return nil, nil
+	})
+
+	task.Run()
+
+	return &methods.EnterMaintenanceMode_TaskBody{
+		Res: &types.EnterMaintenanceMode_TaskResponse{
+			Returnval: task.Self,
+		},
+	}
+}
+
+func (h *HostSystem) ExitMaintenanceModeTask(spec *types.ExitMaintenanceMode_Task) soap.HasFault {
+	task := CreateTask(h, "exitMaintenanceMode", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		h.Runtime.InMaintenanceMode = false
+		return nil, nil
+	})
+
+	task.Run()
+
+	return &methods.ExitMaintenanceMode_TaskBody{
+		Res: &types.ExitMaintenanceMode_TaskResponse{
+			Returnval: task.Self,
+		},
+	}
 }
