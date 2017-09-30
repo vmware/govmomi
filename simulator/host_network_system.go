@@ -159,3 +159,13 @@ func (s *HostNetworkSystem) RemovePortGroup(c *types.RemovePortGroup) soap.HasFa
 
 	return r
 }
+
+func (s *HostNetworkSystem) UpdateNetworkConfig(req *types.UpdateNetworkConfig) soap.HasFault {
+	s.NetworkConfig = &req.Config
+
+	return &methods.UpdateNetworkConfigBody{
+		Res: &types.UpdateNetworkConfigResponse{
+			Returnval: types.HostNetworkConfigResult{},
+		},
+	}
+}
