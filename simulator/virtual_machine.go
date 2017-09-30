@@ -625,6 +625,101 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 	}
 }
 
+func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soap.HasFault {
+	task := CreateTask(vm, "createSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if vm.Snapshot == nil {
+			vm.Snapshot = &types.VirtualMachineSnapshotInfo{}
+		}
+
+		snapshot := &VirtualMachineSnapshot{}
+		snapshot.Vm = vm.Reference()
+		snapshot.Config = *vm.Config
+
+		Map.Put(snapshot)
+
+		ref := snapshot.Reference()
+		treeItem := types.VirtualMachineSnapshotTree{
+			Vm:          vm.Reference(),
+			Name:        req.Name,
+			Description: req.Description,
+			Snapshot:    ref,
+		}
+
+		cur := vm.Snapshot.CurrentSnapshot
+		if cur != nil {
+			parent := Map.Get(*cur).(*VirtualMachineSnapshot)
+			parent.ChildSnapshot = append(parent.ChildSnapshot, snapshot.Reference())
+
+			ss := findSnapshotInTree(vm.Snapshot.RootSnapshotList, *cur)
+			ss.ChildSnapshotList = append(ss.ChildSnapshotList, treeItem)
+		} else {
+			vm.Snapshot.CurrentSnapshot = &ref
+			vm.Snapshot.RootSnapshotList = append(vm.Snapshot.RootSnapshotList, treeItem)
+		}
+
+		vm.Snapshot.CurrentSnapshot = &ref
+
+		return nil, nil
+	})
+
+	task.Run()
+
+	return &methods.CreateSnapshot_TaskBody{
+		Res: &types.CreateSnapshot_TaskResponse{
+			Returnval: task.Self,
+		},
+	}
+}
+
+func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrentSnapshot_Task) soap.HasFault {
+	body := &methods.RevertToCurrentSnapshot_TaskBody{}
+
+	if vm.Snapshot == nil || vm.Snapshot.CurrentSnapshot == nil {
+		body.Fault_ = Fault("snapshot not found", &types.NotFound{})
+
+		return body
+	}
+
+	task := CreateTask(vm, "revertSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		return nil, nil
+	})
+
+	task.Run()
+
+	body.Res = &types.RevertToCurrentSnapshot_TaskResponse{
+		Returnval: task.Self,
+	}
+
+	return body
+}
+
+func (vm *VirtualMachine) RemoveAllSnapshotsTask(req *types.RemoveAllSnapshots_Task) soap.HasFault {
+	task := CreateTask(vm, "RemoveAllSnapshots", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if vm.Snapshot == nil {
+			return nil, nil
+		}
+
+		refs := allSnapshotsInTree(vm.Snapshot.RootSnapshotList)
+
+		vm.Snapshot.CurrentSnapshot = nil
+		vm.Snapshot.RootSnapshotList = nil
+
+		for _, ref := range refs {
+			Map.Remove(ref)
+		}
+
+		return nil, nil
+	})
+
+	task.Run()
+
+	return &methods.RemoveAllSnapshots_TaskBody{
+		Res: &types.RemoveAllSnapshots_TaskResponse{
+			Returnval: task.Self,
+		},
+	}
+}
+
 func (vm *VirtualMachine) ShutdownGuest(c *types.ShutdownGuest) soap.HasFault {
 	r := &methods.ShutdownGuestBody{}
 	// should be poweron
@@ -643,4 +738,89 @@ func (vm *VirtualMachine) ShutdownGuest(c *types.ShutdownGuest) soap.HasFault {
 	r.Res = new(types.ShutdownGuestResponse)
 
 	return r
+}
+
+func findSnapshotInTree(tree []types.VirtualMachineSnapshotTree, ref types.ManagedObjectReference) *types.VirtualMachineSnapshotTree {
+	if tree == nil {
+		return nil
+	}
+
+	for i, ss := range tree {
+		if ss.Snapshot == ref {
+			return &tree[i]
+		}
+
+		target := findSnapshotInTree(ss.ChildSnapshotList, ref)
+		if target != nil {
+			return target
+		}
+	}
+
+	return nil
+}
+
+func findParentSnapshot(tree types.VirtualMachineSnapshotTree, ref types.ManagedObjectReference) *types.ManagedObjectReference {
+	for _, ss := range tree.ChildSnapshotList {
+		if ss.Snapshot == ref {
+			return &tree.Snapshot
+		}
+
+		res := findParentSnapshot(ss, ref)
+		if res != nil {
+			return res
+		}
+	}
+
+	return nil
+}
+
+func findParentSnapshotInTree(tree []types.VirtualMachineSnapshotTree, ref types.ManagedObjectReference) *types.ManagedObjectReference {
+	if tree == nil {
+		return nil
+	}
+
+	for _, ss := range tree {
+		res := findParentSnapshot(ss, ref)
+		if res != nil {
+			return res
+		}
+	}
+
+	return nil
+}
+
+func removeSnapshotInTree(tree []types.VirtualMachineSnapshotTree, ref types.ManagedObjectReference, removeChildren bool) []types.VirtualMachineSnapshotTree {
+	if tree == nil {
+		return tree
+	}
+
+	var result []types.VirtualMachineSnapshotTree
+
+	for _, ss := range tree {
+		if ss.Snapshot == ref {
+			if !removeChildren {
+				result = append(result, ss.ChildSnapshotList...)
+			}
+		} else {
+			ss.ChildSnapshotList = removeSnapshotInTree(ss.ChildSnapshotList, ref, removeChildren)
+			result = append(result, ss)
+		}
+	}
+
+	return result
+}
+
+func allSnapshotsInTree(tree []types.VirtualMachineSnapshotTree) []types.ManagedObjectReference {
+	var result []types.ManagedObjectReference
+
+	if tree == nil {
+		return result
+	}
+
+	for _, ss := range tree {
+		result = append(result, ss.Snapshot)
+		result = append(result, allSnapshotsInTree(ss.ChildSnapshotList)...)
+	}
+
+	return result
 }
