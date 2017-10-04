@@ -325,6 +325,14 @@ func TestReconfigVm(t *testing.T) {
 	if len(device) != mdevices {
 		t.Error("device list mismatch")
 	}
+
+	for _, d := range device.SelectByType((*types.VirtualDisk)(nil)) {
+		info := d.(*types.VirtualDisk).Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+
+		if info.Datastore.Type == "" || info.Datastore.Value == "" {
+			t.Errorf("invalid datastore for %s", device.Name(d))
+		}
+	}
 }
 
 func TestCreateVmWithDevices(t *testing.T) {

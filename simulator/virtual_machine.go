@@ -325,14 +325,19 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 	case *types.VirtualDisk:
 		switch b := d.Backing.(type) {
 		case types.BaseVirtualDeviceFileBackingInfo:
+			info := b.GetVirtualDeviceFileBackingInfo()
 			err := dm.createVirtualDisk(&types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
-				Name:       b.GetVirtualDeviceFileBackingInfo().FileName,
+				Name:       info.FileName,
 			})
 
 			if err != nil {
 				return err
 			}
+
+			path, _ := parseDatastorePath(info.FileName)
+			info.Datastore.Type = "Datastore"
+			info.Datastore.Value = path.Datastore
 		}
 	}
 
