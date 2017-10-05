@@ -59,6 +59,7 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 
 	objects := []object.Reference{
 		NewSessionManager(*s.Content.SessionManager),
+		NewAuthorizationManager(*s.Content.AuthorizationManager),
 		NewPropertyCollector(s.Content.PropertyCollector),
 		NewFileManager(*s.Content.FileManager),
 		NewVirtualDiskManager(*s.Content.VirtualDiskManager),

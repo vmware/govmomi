@@ -3,7 +3,7 @@
 load test_helper
 
 @test "permissions.ls" {
-  esx_env
+  vcsim_env
 
   run govc permissions.ls
   assert_success
@@ -13,7 +13,7 @@ load test_helper
 }
 
 @test "role.ls" {
-  esx_env
+  vcsim_env
 
   run govc role.ls
   assert_success
@@ -32,7 +32,7 @@ load test_helper
 }
 
 @test "role.usage" {
-  esx_env
+  vcsim_env
 
   run govc role.usage
   assert_success
