@@ -24,6 +24,7 @@ import (
 	"os"
 	"path"
 	"strings"
+	"sync/atomic"
 	"time"
 
 	"github.com/google/uuid"
@@ -41,6 +42,7 @@ type VirtualMachine struct {
 
 	log *log.Logger
 	out io.Closer
+	sid int32
 }
 
 func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
@@ -637,27 +639,31 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 
 		Map.Put(snapshot)
 
-		ref := snapshot.Reference()
 		treeItem := types.VirtualMachineSnapshotTree{
-			Vm:          vm.Reference(),
-			Name:        req.Name,
-			Description: req.Description,
-			Snapshot:    ref,
+			Snapshot:        snapshot.Self,
+			Vm:              snapshot.Vm,
+			Name:            req.Name,
+			Description:     req.Description,
+			Id:              atomic.AddInt32(&vm.sid, 1),
+			CreateTime:      time.Now(),
+			State:           vm.Runtime.PowerState,
+			Quiesced:        req.Quiesce,
+			BackupManifest:  "",
+			ReplaySupported: types.NewBool(false),
 		}
 
 		cur := vm.Snapshot.CurrentSnapshot
 		if cur != nil {
 			parent := Map.Get(*cur).(*VirtualMachineSnapshot)
-			parent.ChildSnapshot = append(parent.ChildSnapshot, snapshot.Reference())
+			parent.ChildSnapshot = append(parent.ChildSnapshot, snapshot.Self)
 
 			ss := findSnapshotInTree(vm.Snapshot.RootSnapshotList, *cur)
 			ss.ChildSnapshotList = append(ss.ChildSnapshotList, treeItem)
 		} else {
-			vm.Snapshot.CurrentSnapshot = &ref
 			vm.Snapshot.RootSnapshotList = append(vm.Snapshot.RootSnapshotList, treeItem)
 		}
 
-		vm.Snapshot.CurrentSnapshot = &ref
+		vm.Snapshot.CurrentSnapshot = &snapshot.Self
 
 		return nil, nil
 	})
