@@ -102,7 +102,9 @@ func (m CustomFieldsManager) Set(ctx context.Context, entity types.ManagedObject
 	return err
 }
 
-func (m CustomFieldsManager) Field(ctx context.Context) ([]types.CustomFieldDef, error) {
+type CustomFieldDefList []types.CustomFieldDef
+
+func (m CustomFieldsManager) Field(ctx context.Context) (CustomFieldDefList, error) {
 	var fm mo.CustomFieldsManager
 
 	err := m.Properties(ctx, m.Reference(), []string{"field"}, &fm)
@@ -132,4 +134,13 @@ func (m CustomFieldsManager) FindKey(ctx context.Context, key string) (int32, er
 	}
 
 	return -1, ErrKeyNameNotFound
+}
+
+func (l CustomFieldDefList) ByKey(key int32) *types.CustomFieldDef {
+	for _, def := range l {
+		if def.Key == key {
+			return &def
+		}
+	}
+	return nil
 }
