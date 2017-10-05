@@ -66,6 +66,7 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 		NewSearchIndex(*s.Content.SearchIndex),
 		NewViewManager(*s.Content.ViewManager),
 		NewTaskManager(*s.Content.TaskManager),
+		NewUserDirectory(*s.Content.UserDirectory),
 		NewOptionManager(s.Content.Setting, setting),
 	}
 

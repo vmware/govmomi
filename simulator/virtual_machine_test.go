@@ -454,3 +454,81 @@ func TestShutdownGuest(t *testing.T) {
 
 	}
 }
+
+func TestVmSnapshot(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+
+	task, err := vm.CreateSnapshot(ctx, "root", "description", true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	task, err = vm.CreateSnapshot(ctx, "child", "description", true, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	_, err = vm.FindSnapshot(ctx, "child")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task, err = vm.RevertToCurrentSnapshot(ctx, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	task, err = vm.RevertToSnapshot(ctx, "root", true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	task, err = vm.RemoveSnapshot(ctx, "child", false, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	_, err = vm.FindSnapshot(ctx, "child")
+	if err == nil {
+		t.Fatal("child should be removed")
+	}
+
+	task, err = vm.RemoveAllSnapshot(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	_, err = vm.FindSnapshot(ctx, "root")
+	if err == nil {
+		t.Fatal("all snapshots should be removed")
+	}
+}
