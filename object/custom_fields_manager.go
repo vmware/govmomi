@@ -115,19 +115,19 @@ func (m CustomFieldsManager) Field(ctx context.Context) (CustomFieldDefList, err
 	return fm.Field, nil
 }
 
-func (m CustomFieldsManager) FindKey(ctx context.Context, key string) (int32, error) {
+func (m CustomFieldsManager) FindKey(ctx context.Context, name string) (int32, error) {
 	field, err := m.Field(ctx)
 	if err != nil {
 		return -1, err
 	}
 
 	for _, def := range field {
-		if def.Name == key {
+		if def.Name == name {
 			return def.Key, nil
 		}
 	}
 
-	k, err := strconv.Atoi(key)
+	k, err := strconv.Atoi(name)
 	if err == nil {
 		// assume literal int key
 		return int32(k), nil
