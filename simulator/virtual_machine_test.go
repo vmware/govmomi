@@ -351,6 +351,14 @@ func TestCreateVmWithDevices(t *testing.T) {
 
 	c := m.Service.client
 
+	finder := find.NewFinder(c, false)
+	finder.SetDatacenter(object.NewDatacenter(c, esx.Datacenter.Reference()))
+
+	ds, err := finder.DefaultDatastore(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	folder := object.NewFolder(c, esx.Datacenter.VmFolder)
 	pool := object.NewResourcePool(c, esx.ResourcePool.Self)
 
@@ -358,8 +366,15 @@ func TestCreateVmWithDevices(t *testing.T) {
 	var devices object.VirtualDeviceList
 	ide, _ := devices.CreateIDEController()
 	cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
+	scsi, _ := devices.CreateSCSIController("scsi")
+	disk := devices.CreateDisk(
+		scsi.(*types.VirtualLsiLogicController),
+		ds.Reference(),
+		// Empty filename should also work because in esx server it will assign a
+		// name like '[LocalDS_0] foo/foo_1.vmdk' if it's empty.
+		"")
 
-	devices = append(devices, ide, cdrom)
+	devices = append(devices, ide, cdrom, scsi, disk)
 	create, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 
 	spec := types.VirtualMachineConfigSpec{
