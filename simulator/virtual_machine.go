@@ -328,11 +328,20 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 		switch b := d.Backing.(type) {
 		case types.BaseVirtualDeviceFileBackingInfo:
 			info := b.GetVirtualDeviceFileBackingInfo()
+
+			if info.FileName == "" {
+				filename, err := vm.genVmdkPath()
+				if err != nil {
+					return err
+				}
+
+				info.FileName = filename
+			}
+
 			err := dm.createVirtualDisk(&types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
 				Name:       info.FileName,
 			})
-
 			if err != nil {
 				return err
 			}
@@ -370,6 +379,36 @@ func removeDevice(devices object.VirtualDeviceList, device types.BaseVirtualDevi
 	}
 
 	return result
+}
+
+func (vm *VirtualMachine) genVmdkPath() (string, types.BaseMethodFault) {
+	vmdir := path.Dir(vm.Config.Files.VmPathName)
+
+	index := 0
+	for {
+		var filename string
+		if index == 0 {
+			filename = fmt.Sprintf("%s.vmdk", vm.Config.Name)
+		} else {
+			filename = fmt.Sprintf("%s_%d.vmdk", vm.Config.Name, index)
+		}
+
+		f, err := vm.createFile(vmdir, filename, false)
+		if err != nil {
+			switch err.(type) {
+			case *types.FileAlreadyExists:
+				index++
+				continue
+			default:
+				return "", err
+			}
+		}
+
+		f.Close()
+		os.Remove(f.Name())
+
+		return path.Join(vmdir, filename), nil
+	}
 }
 
 func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
