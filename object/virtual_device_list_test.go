@@ -793,6 +793,10 @@ func TestBootOrder(t *testing.T) {
 	if len(list.BootOrder([]string{DeviceTypeDisk})) != 0 {
 		t.Error("expected 0 disks")
 	}
+
+	if len(list.BootOrder([]string{DeviceTypeNone})) != 1 {
+		t.Error("expected 1")
+	}
 }
 
 func TestName(t *testing.T) {

@@ -59,6 +59,12 @@ load test_helper
 
   result=$(govc device.ls -vm $vm -boot | wc -l)
   [ $result -eq 4 ]
+
+  run govc device.boot -vm $vm -order -
+  assert_success
+
+  result=$(govc device.ls -vm $vm -boot | wc -l)
+  [ $result -eq 0 ]
 }
 
 @test "device.cdrom" {
