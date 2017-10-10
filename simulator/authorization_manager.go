@@ -25,8 +25,16 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+var systemPrivileges = []string{
+	"System.Anonymous",
+	"System.View",
+	"System.Read",
+}
+
 type AuthorizationManager struct {
 	mo.AuthorizationManager
+
+	nextId int32
 }
 
 func NewAuthorizationManager(ref types.ManagedObjectReference) object.Reference {
@@ -95,4 +103,90 @@ func (m *AuthorizationManager) RetrieveRolePermissions(req *types.RetrieveRolePe
 			Returnval: p,
 		},
 	}
+}
+
+func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationRole) soap.HasFault {
+	body := &methods.AddAuthorizationRoleBody{}
+
+	for _, role := range m.RoleList {
+		if role.Name == req.Name {
+			body.Fault_ = Fault("", &types.AlreadyExists{})
+			return body
+		}
+	}
+
+	m.RoleList = append(m.RoleList, types.AuthorizationRole{
+		Info: &types.Description{
+			Label:   req.Name,
+			Summary: req.Name,
+		},
+		RoleId:    m.nextId,
+		Privilege: updateSystemPrivileges(req.PrivIds),
+		Name:      req.Name,
+		System:    false,
+	})
+
+	m.nextId++
+
+	body.Res = &types.AddAuthorizationRoleResponse{}
+
+	return body
+}
+
+func (m *AuthorizationManager) UpdateAuthorizationRole(req *types.UpdateAuthorizationRole) soap.HasFault {
+	body := &methods.UpdateAuthorizationRoleBody{}
+
+	for _, role := range m.RoleList {
+		if role.Name == req.NewName && role.RoleId != req.RoleId {
+			body.Fault_ = Fault("", &types.AlreadyExists{})
+			return body
+		}
+	}
+
+	for i, role := range m.RoleList {
+		if role.RoleId == req.RoleId {
+			m.RoleList[i].Name = req.NewName
+
+			if req.PrivIds != nil {
+				m.RoleList[i].Privilege = updateSystemPrivileges(req.PrivIds)
+			}
+
+			body.Res = &types.UpdateAuthorizationRoleResponse{}
+			return body
+		}
+	}
+
+	body.Fault_ = Fault("", &types.NotFound{})
+
+	return body
+}
+
+func (m *AuthorizationManager) RemoveAuthorizationRole(req *types.RemoveAuthorizationRole) soap.HasFault {
+	body := &methods.RemoveAuthorizationRoleBody{}
+
+	for i, role := range m.RoleList {
+		if role.RoleId == req.RoleId {
+			m.RoleList = append(m.RoleList[:i], m.RoleList[i+1:]...)
+
+			body.Res = &types.RemoveAuthorizationRoleResponse{}
+			return body
+		}
+	}
+
+	body.Fault_ = Fault("", &types.NotFound{})
+
+	return body
+}
+
+func updateSystemPrivileges(privileges []string) []string {
+OUT:
+	for _, spr := range systemPrivileges {
+		for _, pr := range privileges {
+			if spr == pr {
+				continue OUT
+			}
+		}
+		privileges = append(privileges, spr)
+	}
+	return privileges
 }
