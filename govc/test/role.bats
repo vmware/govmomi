@@ -51,7 +51,7 @@ load test_helper
 }
 
 @test "role.create" {
-  esx_env
+  vcsim_env
 
   id=$(new_id)
   run govc role.create "$id"
@@ -61,6 +61,8 @@ load test_helper
   assert_success
 
   priv=$(govc role.ls "$id" | wc -l)
+  [ "$priv" -eq 3 ]
+
   vm_priv=($(govc role.ls Admin | grep VirtualMachine.))
 
   # Test set
