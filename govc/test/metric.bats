@@ -89,3 +89,11 @@ load test_helper
   run govc metric.info - "${metrics[@]}"
   assert_success
 }
+
+@test "metric manager" {
+  vcsim_env
+
+  moid=$(govc object.collect -s - content.perfManager)
+
+  govc object.collect -json "$moid" | jq .
+}
