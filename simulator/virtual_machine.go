@@ -346,9 +346,12 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 				return err
 			}
 
-			path, _ := parseDatastorePath(info.FileName)
-			info.Datastore.Type = "Datastore"
-			info.Datastore.Value = path.Datastore
+			p, _ := parseDatastorePath(info.FileName)
+
+			info.Datastore = &types.ManagedObjectReference{
+				Type:  "Datastore",
+				Value: p.Datastore,
+			}
 		}
 	}
 
@@ -404,8 +407,8 @@ func (vm *VirtualMachine) genVmdkPath() (string, types.BaseMethodFault) {
 			}
 		}
 
-		f.Close()
-		os.Remove(f.Name())
+		_ = f.Close()
+		_ = os.Remove(f.Name())
 
 		return path.Join(vmdir, filename), nil
 	}
