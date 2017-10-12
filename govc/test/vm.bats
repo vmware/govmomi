@@ -435,7 +435,8 @@ load test_helper
   result=$(govc device.ls -vm $vm | grep disk- | wc -l)
   [ $result -eq 1 ]
 
-  run govc import.vmdk $GOVC_TEST_VMDK_SRC $vm
+  id=$(new_id)
+  run govc import.vmdk $GOVC_TEST_VMDK_SRC $id
   assert_success
 
   run govc vm.disk.attach -vm $vm -link=false -disk enoent.vmdk
@@ -444,7 +445,7 @@ load test_helper
   run govc vm.disk.attach -vm $vm -disk enoent.vmdk
   assert_failure "govc: Invalid configuration for device '0'."
 
-  run govc vm.disk.attach -vm $vm -disk $vm/$(basename $GOVC_TEST_VMDK) -controller lsilogic-1000
+  run govc vm.disk.attach -vm $vm -disk $id/$(basename $GOVC_TEST_VMDK) -controller lsilogic-1000
   assert_success
   result=$(govc device.ls -vm $vm | grep disk- | wc -l)
   [ $result -eq 2 ]
@@ -478,26 +479,46 @@ load test_helper
 }
 
 @test "vm.register" {
-  vcsim_env -esx
+  esx_env
 
   run govc vm.unregister enoent
   assert_failure
 
   vm=$(new_empty_vm)
 
-  run govc vm.change -vm "$vm" -e foo=bar
-  assert_success
-
   run govc vm.unregister "$vm"
   assert_success
 
-  run govc vm.change -vm "$vm" -e foo=bar
-  assert_failure
-
   run govc vm.register "$vm/${vm}.vmx"
   assert_success
+}
 
-  run govc vm.change -vm "$vm" -e foo=bar
+@test "vm.register vcsim" {
+  vcsim_env
+
+  host=$GOVC_HOST
+  pool=$GOVC_RESOURCE_POOL
+
+  unset GOVC_HOST GOVC_RESOURCE_POOL
+
+  vm=DC0_H0_VM0
+
+  run govc vm.unregister $vm
+  assert_success
+
+  run govc vm.register "$vm/${vm}.vmx"
+  assert_failure # -pool is required
+
+  run govc vm.register -pool "$pool" "$vm/${vm}.vmx"
+  assert_success
+
+  run govc vm.unregister $vm
+  assert_success
+
+  run govc vm.register -template -pool "$pool" "$vm/${vm}.vmx"
+  assert_failure # -pool is not allowed w/ template
+
+  run govc vm.register -template -host "$host" "$vm/${vm}.vmx"
   assert_success
 }
 
