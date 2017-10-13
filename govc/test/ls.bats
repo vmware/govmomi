@@ -174,3 +174,19 @@ load test_helper
   path=$(govc ls -L Folder:ha-folder-root)
   assert_equal "/" "$path"
 }
+
+@test "ls substr" {
+  # Test fix for issue #815, introduced by b35abbc
+
+  vcsim_env
+
+  id=$(new_id)
+
+  run govc vm.create -on=false "${id}"
+  assert_success
+
+  run govc vm.create -on=false "bar${id}"
+  assert_success
+
+  assert [ "$(govc ls "vm/$id" | wc -l)" -eq 1 ]
+}
