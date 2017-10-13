@@ -620,6 +620,7 @@ type Download struct {
 	Headers  map[string]string
 	Ticket   *http.Cookie
 	Progress progress.Sinker
+	Writer   io.Writer
 }
 
 var DefaultDownload = Download{
@@ -666,7 +667,7 @@ func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, er
 	return r, res.ContentLength, nil
 }
 
-func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Sinker) error {
+func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Sinker, w io.Writer) error {
 	var err error
 
 	r := src
@@ -686,7 +687,13 @@ func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Si
 		}()
 	}
 
-	_, err = io.Copy(fh, r)
+	if w == nil {
+		w = fh
+	} else {
+		w = io.MultiWriter(w, fh)
+	}
+
+	_, err = io.Copy(w, r)
 
 	cerr := fh.Close()
 
@@ -709,5 +716,5 @@ func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
 		return err
 	}
 
-	return c.WriteFile(file, rc, contentLength, param.Progress)
+	return c.WriteFile(file, rc, contentLength, param.Progress, param.Writer)
 }

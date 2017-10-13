@@ -47,6 +47,15 @@ func (o FileItem) Sink() chan<- progress.Report {
 	return o.ch
 }
 
+// File converts the FileItem.OvfFileItem to an OvfFile
+func (o FileItem) File() types.OvfFile {
+	return types.OvfFile{
+		DeviceId: o.DeviceId,
+		Path:     o.Path,
+		Size:     o.Size,
+	}
+}
+
 type LeaseUpdater struct {
 	lease *Lease
 

@@ -37,6 +37,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/dvs/portgroup"
 	_ "github.com/vmware/govmomi/govc/env"
 	_ "github.com/vmware/govmomi/govc/events"
+	_ "github.com/vmware/govmomi/govc/export"
 	_ "github.com/vmware/govmomi/govc/extension"
 	_ "github.com/vmware/govmomi/govc/fields"
 	_ "github.com/vmware/govmomi/govc/folder"
