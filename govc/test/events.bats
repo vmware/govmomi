@@ -55,3 +55,19 @@ load test_helper
   assert_success
   [ ${#lines[@]} -ge $nevents ]
 }
+
+@test "events json" {
+  esx_env
+
+  # make sure we fmt.Printf properly
+  govc events | grep -v '%!s(MISSING)'
+
+  govc events -json | jq .
+
+  # test multiple objects
+  govc vm.create "$(new_id)"
+  govc vm.create "$(new_id)"
+
+  govc events 'vm/*'
+  govc events -json 'vm/*' | jq .
+}
