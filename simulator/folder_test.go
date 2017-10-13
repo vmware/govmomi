@@ -279,7 +279,7 @@ func TestRegisterVm(t *testing.T) {
 			f func()
 		}{
 			{
-				new(types.NotSupported), func() { req.AsTemplate = false },
+				new(types.InvalidArgument), func() { req.AsTemplate = false },
 			},
 			{
 				new(types.InvalidArgument), func() { req.Pool = vm.ResourcePool },

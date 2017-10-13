@@ -308,24 +308,32 @@ type registerVM struct {
 }
 
 func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
-	if c.req.AsTemplate {
-		return nil, &types.NotSupported{}
-	}
+	host := c.req.Host
+	pool := c.req.Pool
 
-	if c.req.Pool == nil {
-		return nil, &types.InvalidArgument{InvalidProperty: "pool"}
+	if c.req.AsTemplate {
+		if host == nil {
+			return nil, &types.InvalidArgument{InvalidProperty: "host"}
+		} else if pool != nil {
+			return nil, &types.InvalidArgument{InvalidProperty: "pool"}
+		}
+
+		pool = hostParent(&Map.Get(*host).(*HostSystem).HostSystem).ResourcePool
+	} else {
+		if pool == nil {
+			return nil, &types.InvalidArgument{InvalidProperty: "pool"}
+		}
 	}
 
 	if c.req.Path == "" {
 		return nil, &types.InvalidArgument{InvalidProperty: "path"}
 	}
 
-	p := Map.Get(*c.req.Pool).(mo.Entity)
 	s := Map.SearchIndex()
 	r := s.FindByDatastorePath(&types.FindByDatastorePath{
 		This:       s.Reference(),
 		Path:       c.req.Path,
-		Datacenter: Map.getEntityDatacenter(p).Reference(),
+		Datacenter: Map.getEntityDatacenter(c.Folder).Reference(),
 	})
 
 	if ref := r.(*methods.FindByDatastorePathBody).Res.Returnval; ref != nil {
@@ -352,8 +360,8 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 					VmPathName: c.req.Path,
 				},
 			},
-			Pool: *c.req.Pool,
-			Host: c.req.Host,
+			Pool: *pool,
+			Host: host,
 		},
 	})
 
