@@ -50,6 +50,8 @@ type clone struct {
 	customization string
 	waitForIP     bool
 	annotation    string
+	snapshot      string
+	link          bool
 
 	Client         *vim25.Client
 	Datacenter     *object.Datacenter
@@ -101,6 +103,8 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.customization, "customization", "", "Customization Specification Name")
 	f.BoolVar(&cmd.waitForIP, "waitip", false, "Wait for VM to acquire IP address")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
+	f.StringVar(&cmd.snapshot, "snapshot", "", "Snapshot name to clone from")
+	f.BoolVar(&cmd.link, "link", false, "Creates a linked clone from snapshot or source VM")
 }
 
 func (cmd *clone) Usage() string {
@@ -111,7 +115,11 @@ func (cmd *clone) Description() string {
 	return `Clone VM to NAME.
 
 Examples:
-  govc vm.clone -vm template-vm new-vm`
+  govc vm.clone -vm template-vm new-vm
+  govc vm.clone -vm template-vm -link new-vm
+  govc vm.clone -vm template-vm -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -link -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm`
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
@@ -311,10 +319,28 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 	}
 
 	cloneSpec := &types.VirtualMachineCloneSpec{
-		Location: relocateSpec,
 		PowerOn:  false,
 		Template: cmd.template,
 	}
+
+	if cmd.snapshot == "" {
+		if cmd.link {
+			relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndAllowSharing)
+		}
+	} else {
+		if cmd.link {
+			relocateSpec.DiskMoveType = string(types.VirtualMachineRelocateDiskMoveOptionsCreateNewChildDiskBacking)
+		}
+
+		ref, ferr := cmd.VirtualMachine.FindSnapshot(ctx, cmd.snapshot)
+		if ferr != nil {
+			return nil, ferr
+		}
+
+		cloneSpec.Snapshot = ref
+	}
+
+	cloneSpec.Location = relocateSpec
 
 	// clone to storage pod
 	datastoreref := types.ManagedObjectReference{}
