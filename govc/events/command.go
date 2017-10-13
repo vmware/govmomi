@@ -18,8 +18,10 @@ package events
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"time"
@@ -96,12 +98,32 @@ func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectRefe
 			}
 		}
 
-		fmt.Fprintf(os.Stdout, "[%s] [%s] %s\n",
-			event.CreatedTime.Local().Format(time.ANSIC),
-			cat,
-			msg)
+		when := event.CreatedTime.Local().Format(time.ANSIC)
+		if cmd.DatacenterFlag.OutputFlag.JSON {
+			err := printEventAsJson(os.Stdout, when, cat, msg)
+			if err != nil {
+				return err
+			}
+		} else {
+			printEventAsStdout(os.Stdout, "[%s] [%s] %s\n", when, cat, msg)
+		}
 	}
 	return nil
+}
+
+type ev struct {
+	CreatedAt string `json:"createdAt"`
+	Category  string `json:"category"`
+	Message   string `json:"message"`
+}
+
+func printEventAsJson(w io.Writer, when, cat, msg string) error {
+	e := json.NewEncoder(w)
+	return e.Encode(ev{when, cat, msg})
+}
+
+func printEventAsStdout(w io.Writer, format string, args ...string) {
+	fmt.Fprintf(w, format, args)
 }
 
 func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
