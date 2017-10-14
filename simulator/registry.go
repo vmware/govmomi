@@ -22,6 +22,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -303,7 +304,7 @@ func AddReference(ref types.ManagedObjectReference, refs []types.ManagedObjectRe
 }
 
 func (r *Registry) content() types.ServiceContent {
-	return r.Get(serviceInstance).(*ServiceInstance).Content
+	return r.Get(methods.ServiceInstance).(*ServiceInstance).Content
 }
 
 // IsESX returns true if this Registry maps an ESX model

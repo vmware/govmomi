@@ -30,8 +30,8 @@ EOF
 
 disk=48
 mem=16
-# 6.5.0U1 - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-esxi-651-release-notes.html
-iso=VMware-VMvisor-6.5.0-5969303.x86_64.iso
+# 6.5U1 (EP4) - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-esxi-651-release-notes.html
+iso=VMware-VMvisor-6.5.0-6765664.x86_64.iso
 
 while getopts d:hi:m:s flag
 do

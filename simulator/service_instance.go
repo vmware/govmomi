@@ -31,17 +31,12 @@ type ServiceInstance struct {
 	mo.ServiceInstance
 }
 
-var serviceInstance = types.ManagedObjectReference{
-	Type:  "ServiceInstance",
-	Value: "ServiceInstance",
-}
-
 func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *ServiceInstance {
 	Map = NewRegistry()
 
 	s := &ServiceInstance{}
 
-	s.Self = serviceInstance
+	s.Self = methods.ServiceInstance
 	s.Content = content
 
 	Map.Put(s)

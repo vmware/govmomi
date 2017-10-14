@@ -57,10 +57,10 @@ func (i *int64ptrValue) Set(s string) error {
 }
 
 func (i *int64ptrValue) Get() interface{} {
-	if i.val == nil {
-		return -1
+	if i.val == nil || *i.val == nil {
+		return nil
 	}
-	return *i.val
+	return **i.val
 }
 
 func (i *int64ptrValue) String() string {

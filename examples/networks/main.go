@@ -27,8 +27,7 @@ import (
 )
 
 func main() {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
+	ctx := context.Background()
 
 	// Connect and login to ESX or vCenter
 	c, err := examples.NewClient(ctx)

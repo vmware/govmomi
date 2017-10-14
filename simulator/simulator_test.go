@@ -443,21 +443,21 @@ func TestServeHTTPErrors(t *testing.T) {
 	typeFunc = types.TypeFunc() // reset
 
 	// cover the does not implement method error path
-	Map.objects[serviceInstance] = &errorNoSuchMethod{}
+	Map.objects[methods.ServiceInstance] = &errorNoSuchMethod{}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the xml encode error path
-	Map.objects[serviceInstance] = &errorMarshal{}
+	Map.objects[methods.ServiceInstance] = &errorMarshal{}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the no such object path
-	Map.Remove(serviceInstance)
+	Map.Remove(methods.ServiceInstance)
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
@@ -469,7 +469,7 @@ func TestServeHTTPErrors(t *testing.T) {
 	if !ok {
 		t.Fatalf("fault=%#v", fault)
 	}
-	if f.Obj != serviceInstance.Reference() {
+	if f.Obj != methods.ServiceInstance {
 		t.Errorf("obj=%#v", f.Obj)
 	}
 

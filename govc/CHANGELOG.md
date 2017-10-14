@@ -1,5 +1,23 @@
 # changelog
 
+### 0.16.0 (2017-11-08)
+
+* Add export.ovf command
+
+* Add '-snapshot' and '-link' options to vm.clone
+
+* Add vm.console command
+
+* Add '-refresh' option to host.storage.info
+
+* Add tasks and task.cancel commands
+
+* The import.vmdk command now requires streamOptimized format
+
+* Add view and filter support to object.collect command
+
+* Add reboot option to host.shutdown
+
 ### 0.15.0 (2017-06-19)
 
 * Remove FileAttr flags from guest.chmod command,

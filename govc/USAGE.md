@@ -405,10 +405,11 @@ Configure VM boot settings.
 
 Examples:
   govc device.boot -vm $vm -delay 1000 -order floppy,cdrom,ethernet,disk
+  govc device.boot -vm $vm -order - # reset boot order
 
 Options:
   -delay=0                  Delay in ms before starting the boot sequence
-  -order=                   Boot device order
+  -order=                   Boot device order [-,floppy,cdrom,ethernet,disk]
   -retry=false              If true, retry boot after retry-delay
   -retry-delay=0            Delay in ms before a boot retry
   -setup=false              If true, enter BIOS setup on next boot
@@ -818,6 +819,24 @@ Options:
   -n=25                     Output the last N events
 ```
 
+## export.ovf
+
+```
+Usage: govc export.ovf [OPTIONS] DIR
+
+Export VM.
+
+Examples:
+  govc export.ovf -vm $vm DIR
+
+Options:
+  -f=false                  Overwrite existing
+  -i=false                  Include image files (*.{iso,img})
+  -name=                    Specifies target name (defaults to source name)
+  -sha=0                    Generate manifest using SHA 1, 256, 512 or 0 to skip
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
 ## extension.info
 
 ```
@@ -1208,6 +1227,34 @@ Options:
   -vm=                      Virtual machine [GOVC_VM]
 ```
 
+## guest.run
+
+```
+Usage: govc guest.run [OPTIONS] NAME [ARG]...
+
+Run program NAME in VM and display output.
+
+This command depends on govmomi/toolbox running in the VM guest and does not work with standard VMware tools.
+
+If the program NAME is an HTTP verb, the toolbox's http.RoundTripper will be used as the HTTP transport.
+
+Examples:
+  govc guest.run -vm $name kubectl get pods
+  govc guest.run -vm $name -d - kubectl create -f - <svc.json
+  govc guest.run -vm $name kubectl delete pod,service my-service
+  govc guest.run -vm $name GET http://localhost:8080/api/v1/nodes
+  govc guest.run -vm $name -e Content-Type:application/json -d - POST http://localhost:8080/api/v1/namespaces/default/pods <svc.json
+  govc guest.run -vm $name DELETE http://localhost:8080/api/v1/namespaces/default/services/my-service
+
+Options:
+  -C=                       The absolute path of the working directory for the program to start
+  -d=                       Input data
+  -e=[]                     Set environment variable or HTTP header
+  -l=:                      Guest VM credentials [GOVC_GUEST_LOGIN]
+  -v=false                  Verbose
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
 ## guest.start
 
 ```
@@ -1366,21 +1413,21 @@ Options:
 ## host.autostart.configure
 
 ```
-Usage: govc host.autostart.configure [OPTIONS] 
+Usage: govc host.autostart.configure [OPTIONS]
 
 Options:
-  -enabled=<nil>             
+  -enabled=<nil>             Enable autostart
   -host=                     Host system [GOVC_HOST]
-  -start-delay=0             
-  -stop-action=              
-  -stop-delay=0              
-  -wait-for-heartbeat=<nil>  
+  -start-delay=0             Start delay
+  -stop-action=              Stop action
+  -stop-delay=0              Stop delay
+  -wait-for-heartbeat=<nil>  Wait for hearbeat
 ```
 
 ## host.autostart.info
 
 ```
-Usage: govc host.autostart.info [OPTIONS] 
+Usage: govc host.autostart.info [OPTIONS]
 
 Options:
   -host=                    Host system [GOVC_HOST]
@@ -1699,6 +1746,7 @@ Shutdown HOST.
 Options:
   -f=false                  Force shutdown when host is not in maintenance mode
   -host=                    Host system [GOVC_HOST]
+  -r=false                  Reboot host
 ```
 
 ## host.storage.info
@@ -1709,11 +1757,12 @@ Usage: govc host.storage.info [OPTIONS]
 Show HOST storage system information.
 
 Examples:
-  govc ls -t HostSystem host/* | xargs -n1 govc host.storage.info -unclaimed -host
+  govc find / -type h | xargs -n1 govc host.storage.info -unclaimed -host
 
 Options:
   -host=                    Host system [GOVC_HOST]
-  -rescan=false             Rescan for new storage devices
+  -refresh=false            Refresh the storage system provider
+  -rescan=false             Rescan all host bus adapters
   -t=lun                    Type (hba,lun)
   -unclaimed=false          Only show disks that can be used as new VMFS datastores
 ```
@@ -1808,7 +1857,7 @@ Usage: govc import.ova [OPTIONS] PATH_TO_OVA
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
-  -folder=                  Path to folder to add the VM to
+  -folder=                  Inventory folder [GOVC_FOLDER]
   -host=                    Host system [GOVC_HOST]
   -name=                    Name to use for new entity
   -options=                 Options spec file path for VM deployment
@@ -1822,7 +1871,7 @@ Usage: govc import.ovf [OPTIONS] PATH_TO_OVF
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
-  -folder=                  Path to folder to add the VM to
+  -folder=                  Inventory folder [GOVC_FOLDER]
   -host=                    Host system [GOVC_HOST]
   -name=                    Name to use for new entity
   -options=                 Options spec file path for VM deployment
@@ -1845,10 +1894,9 @@ Usage: govc import.vmdk [OPTIONS] PATH_TO_VMDK [REMOTE_DIRECTORY]
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
+  -folder=                  Inventory folder [GOVC_FOLDER]
   -force=false              Overwrite existing disk
-  -keep=false               Keep uploaded disk after import
   -pool=                    Resource pool [GOVC_RESOURCE_POOL]
-  -upload=true              Upload specified disk
 ```
 
 ## license.add
@@ -2126,20 +2174,27 @@ Usage: govc object.collect [OPTIONS] [MOID] [PROPERTY]...
 Collect managed object properties.
 
 MOID can be an inventory path or ManagedObjectReference.
-MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance'.
+MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance' or the root folder if a '-type' flag is given.
 
-By default only the current property value(s) are collected.  Use the '-n' flag to wait for updates.
+If a '-type' flag is given, properties are collected using a ContainerView object where MOID is the root of the view.
+
+By default only the current property value(s) are collected.  To wait for updates, use the '-n' flag or
+specify a property filter.  A property filter can be specified by prefixing the property name with a '-',
+followed by the value to match.
 
 Examples:
   govc object.collect - content
   govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
   govc object.collect -s /ha-datacenter/vm/foo overallStatus
+  govc object.collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
+  govc object.collect -type m / name runtime.powerState # collect properties for multiple objects
   govc object.collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
   govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .
 
 Options:
   -n=0                      Wait for N property updates
   -s=false                  Output property value only
+  -type=[]                  Resource type.  If specified, MOID is used for a container view root
 ```
 
 ## object.destroy
@@ -2271,7 +2326,7 @@ Removes a permission rule from managed entities.
 
 Examples:
   govc permissions.remove -principal root
-  govc permissions.remove -principal $USER@vsphere.local -role Admin /dc1/host/cluster1
+  govc permissions.remove -principal $USER@vsphere.local /dc1/host/cluster1
 
 Options:
   -group=false              True, if principal refers to a group name; false, for a user name
@@ -2320,12 +2375,12 @@ hosts in the current datacenter.
 
 Options:
   -cpu.expandable=<nil>     CPU expandable reservation
-  -cpu.limit=0              CPU limit in MHz
-  -cpu.reservation=0        CPU reservation in MHz
+  -cpu.limit=<nil>          CPU limit in MHz
+  -cpu.reservation=<nil>    CPU reservation in MHz
   -cpu.shares=              CPU shares level or number
   -mem.expandable=<nil>     Memory expandable reservation
-  -mem.limit=0              Memory limit in MB
-  -mem.reservation=0        Memory reservation in MB
+  -mem.limit=<nil>          Memory limit in MB
+  -mem.reservation=<nil>    Memory reservation in MB
   -mem.shares=              Memory shares level or number
   -name=                    Resource pool name
 ```
@@ -2357,11 +2412,11 @@ For example:
 
 Options:
   -cpu.expandable=true      CPU expandable reservation
-  -cpu.limit=0              CPU limit in MHz
+  -cpu.limit=-1             CPU limit in MHz
   -cpu.reservation=0        CPU reservation in MHz
   -cpu.shares=normal        CPU shares level or number
   -mem.expandable=true      Memory expandable reservation
-  -mem.limit=0              Memory limit in MB
+  -mem.limit=-1             Memory limit in MB
   -mem.reservation=0        Memory reservation in MB
   -mem.shares=normal        Memory shares level or number
 ```
@@ -2597,11 +2652,51 @@ Examples:
   govc snapshot.tree -vm my-vm -D -i
 
 Options:
+  -C=false                  Print the current snapshot name only
   -D=false                  Print the snapshot creation date
   -c=true                   Print the current snapshot
   -f=false                  Print the full path prefix for snapshot
   -i=false                  Print the snapshot id
   -vm=                      Virtual machine [GOVC_VM]
+```
+
+## task.cancel
+
+```
+Usage: govc task.cancel [OPTIONS] ID...
+
+Cancel tasks.
+
+Examples:
+  govc task.cancel task-759
+
+Options:
+```
+
+## tasks
+
+```
+Usage: govc tasks [OPTIONS] [PATH]
+
+Display info for recent tasks.
+
+When a task has completed, the result column includes the task duration on success or
+error message on failure.  If a task is still in progress, the result column displays
+the completion percentage and the task ID.  The task ID can be used as an argument to
+the 'task.cancel' command.
+
+By default, all recent tasks are included (via TaskManager), but can be limited by PATH
+to a specific inventory object.
+
+Examples:
+  govc tasks
+  govc tasks -f
+  govc tasks -f /dc1/host/cluster1
+
+Options:
+  -f=false                  Follow recent task updates
+  -l=false                  Use long task description
+  -n=25                     Output the last N tasks
 ```
 
 ## vapp.destroy
@@ -2669,6 +2764,10 @@ Clone VM to NAME.
 
 Examples:
   govc vm.clone -vm template-vm new-vm
+  govc vm.clone -vm template-vm -link new-vm
+  govc vm.clone -vm template-vm -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -link -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
 
 Options:
   -annotation=              VM description
@@ -2679,21 +2778,57 @@ Options:
   -folder=                  Inventory folder [GOVC_FOLDER]
   -force=false              Create VM if vmx already exists
   -host=                    Host system [GOVC_HOST]
+  -link=false               Creates a linked clone from snapshot or source VM
   -m=0                      Size in MB of memory
   -net=                     Network [GOVC_NETWORK]
   -net.adapter=e1000        Network adapter type
   -net.address=             Network hardware address
   -on=true                  Power on VM
   -pool=                    Resource pool [GOVC_RESOURCE_POOL]
+  -snapshot=                Snapshot name to clone from
   -template=false           Create a Template
   -vm=                      Virtual machine [GOVC_VM]
   -waitip=false             Wait for VM to acquire IP address
 ```
 
+## vm.console
+
+```
+Usage: govc vm.console [OPTIONS] VM
+
+Generate console URL or screen capture for VM.
+
+One of VMRC, VMware Player, VMware Fusion or VMware Workstation must be installed to
+open VMRC console URLs.
+
+Examples:
+  govc vm.console my-vm
+  govc vm.console -capture screen.png my-vm  # screen capture
+  govc vm.console -capture - my-vm | display # screen capture to stdout
+  open $(govc vm.console my-vm)              # MacOSX VMRC
+  open $(govc vm.console -h5 my-vm)          # MacOSX H5
+  xdg-open $(govc vm.console my-vm)          # Linux VMRC
+  xdg-open $(govc vm.console -h5 my-vm)      # Linux H5
+
+Options:
+  -capture=                 Capture console screen shot to file
+  -h5=false                 Generate HTML5 UI console link
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
 ## vm.create
 
 ```
-Usage: govc vm.create [OPTIONS]
+Usage: govc vm.create [OPTIONS] NAME
+
+Create VM.
+
+For a list of possible '-g' IDs, see:
+http://pubs.vmware.com/vsphere-6-5/topic/com.vmware.wssdk.apiref.doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
+
+Examples:
+  govc vm.create vm-name
+  govc vm.create -m 2048 -c 2 -g freebsd64Guest -net.adapter vmxnet3 -disk.controller pvscsi vm-name
 
 Options:
   -annotation=              VM description
@@ -2705,7 +2840,7 @@ Options:
   -ds=                      Datastore [GOVC_DATASTORE]
   -folder=                  Inventory folder [GOVC_FOLDER]
   -force=false              Create VM if vmx already exists
-  -g=otherGuest             Guest OS
+  -g=otherGuest             Guest OS ID
   -host=                    Host system [GOVC_HOST]
   -iso=                     ISO path
   -iso-datastore=           Datastore for ISO file
@@ -2903,6 +3038,7 @@ Migrates VM to a specific resource pool, host or datastore.
 
 Examples:
   govc vm.migrate -host another-host vm-1 vm-2 vm-3
+  govc vm.migrate -pool another-pool vm-1 vm-2 vm-3
   govc vm.migrate -ds another-ds vm-1 vm-2 vm-3
 
 Options:
@@ -3014,14 +3150,15 @@ VMX is a path to the vm config file, relative to DATASTORE.
 
 Examples:
   govc vm.register path/name.vmx
+  govc vm.register -template -host $host path/name.vmx
 
 Options:
-  -as-template=false        Mark VM as template
   -ds=                      Datastore [GOVC_DATASTORE]
   -folder=                  Inventory folder [GOVC_FOLDER]
   -host=                    Host system [GOVC_HOST]
   -name=                    Name of the VM
   -pool=                    Resource pool [GOVC_RESOURCE_POOL]
+  -template=false           Mark VM as template
 ```
 
 ## vm.unregister

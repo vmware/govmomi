@@ -1,11 +1,12 @@
-# govcsim - A vCenter and ESXi API based simulator
+# vcsim - A vCenter and ESXi API based simulator
 
 This package implements a vSphere Web Services (SOAP) SDK endpoint intended for testing consumers of the API.
-While the package is written in the Go language, it can be used by any language that can talk to the vSphere API.
+While the mock framework is written in the Go language, it can be used by any language that can talk to the vSphere
+API.
 
 ## Installation
 
-```
+```sh
 % export GOPATH=$HOME/gopath
 % go get -u github.com/vmware/govmomi/vcsim
 % $GOPATH/bin/vcsim -h
@@ -89,14 +90,13 @@ The default vcsim listen address is `127.0.0.1:8989`.  Use the `-httptest.serve`
 ``` shell
 vcsim -httptest.serve=10.118.69.224:8989 # specific address
 
-vcsim -httptest.serve=:8989 #any address
+vcsim -httptest.serve=:8989 # any address
 ```
-
 
 When given a port value of '0', an unused port will be chosen.  You can then source the GOVC_URL from another
 process, for example:
 
-``` shell
+```sh
 govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
 
 mkfifo $govc_sim_env
@@ -111,4 +111,15 @@ kill $GOVC_SIM_PID
 rm -f $govc_sim_env
 ```
 
-Tests written in Go can also use the simulator package directly, rather than the vcsim binary.
+Tests written in Go can also use the [simulator package](https://godoc.org/github.com/vmware/govmomi/simulator)
+directly, rather than the vcsim binary.
+
+## Project using vcsim
+
+* [VMware VIC Engine](https://github.com/vmware/vic)
+
+* [Ansible](https://github.com/ansible/ansible/tree/devel/test/utils/docker/vcenter-simulator)
+
+## Related projects
+
+[LocalStack](https://github.com/localstack/localstack/blob/master/README.md#why-localstack)
