@@ -27,7 +27,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -127,16 +127,11 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 		return c.DownloadFile(cmd.capture, u, &param)
 	}
 
-	req := types.AcquireCloneTicket{
-		This: *c.ServiceContent.SessionManager,
-	}
-
-	res, err := methods.AcquireCloneTicket(ctx, c, &req)
+	m := session.NewManager(c)
+	ticket, err := m.AcquireCloneTicket(ctx)
 	if err != nil {
 		return err
 	}
-
-	ticket := res.Returnval
 
 	var link string
 
