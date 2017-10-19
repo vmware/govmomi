@@ -80,6 +80,10 @@ load test_helper
   run govc role.update "$id" "${vm_priv[@]}"
   assert_success
 
+  # invalid priv id
+  run govc role.update "$id" enoent
+  assert_failure
+
   npriv=$(govc role.ls "$id" | wc -l)
   [ "$npriv" -gt "$priv" ]
   priv=$npriv
