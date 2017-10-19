@@ -2,14 +2,25 @@
 
 load test_helper
 
-@test "permissions.ls" {
+@test "permissions" {
   vcsim_env
 
-  run govc permissions.ls
-  assert_success
+  perm=$(govc permissions.ls /DC0)
 
   run govc permissions.ls -json
   assert_success
+
+  run govc permissions.set -principal root -role Admin /DC0
+  assert_success
+
+  run govc permissions.ls /DC0
+  refute_line "$perm"
+
+  run govc permissions.remove -principal root /DC0
+  assert_success
+
+  run govc permissions.ls /DC0
+  assert_success "$perm"
 }
 
 @test "role.ls" {
