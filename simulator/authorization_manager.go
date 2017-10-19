@@ -34,26 +34,48 @@ var systemPrivileges = []string{
 type AuthorizationManager struct {
 	mo.AuthorizationManager
 
-	nextId int32
+	permissions map[types.ManagedObjectReference][]types.Permission
+
+	nextID int32
 }
 
 func NewAuthorizationManager(ref types.ManagedObjectReference) object.Reference {
-	s := &AuthorizationManager{}
-	s.Self = ref
-	s.RoleList = esx.RoleList
-	return s
-}
+	m := &AuthorizationManager{}
+	m.Self = ref
+	m.RoleList = esx.RoleList
+	m.permissions = make(map[types.ManagedObjectReference][]types.Permission)
 
-func (m *AuthorizationManager) RetrieveEntityPermissions(req *types.RetrieveEntityPermissions) soap.HasFault {
-	var p []types.Permission
+	root := Map.content().RootFolder
 
 	for _, u := range DefaultUserGroup {
-		p = append(p, types.Permission{
-			Entity:    &req.Entity,
+		m.permissions[root] = append(m.permissions[root], types.Permission{
+			Entity:    &root,
 			Principal: u.Principal,
 			Group:     u.Group,
 			RoleId:    -1, // "Admin"
+			Propagate: true,
 		})
+	}
+
+	return m
+}
+
+func (m *AuthorizationManager) RetrieveEntityPermissions(req *types.RetrieveEntityPermissions) soap.HasFault {
+	e := Map.Get(req.Entity).(mo.Entity)
+
+	p := m.permissions[e.Reference()]
+
+	if req.Inherited {
+		for {
+			parent := e.Entity().Parent
+			if parent == nil {
+				break
+			}
+
+			e = Map.Get(parent.Reference()).(mo.Entity)
+
+			p = append(p, m.permissions[e.Reference()]...)
+		}
 	}
 
 	return &methods.RetrieveEntityPermissionsBody{
@@ -66,15 +88,8 @@ func (m *AuthorizationManager) RetrieveEntityPermissions(req *types.RetrieveEnti
 func (m *AuthorizationManager) RetrieveAllPermissions(req *types.RetrieveAllPermissions) soap.HasFault {
 	var p []types.Permission
 
-	root := Map.content().RootFolder
-
-	for _, u := range DefaultUserGroup {
-		p = append(p, types.Permission{
-			Entity:    &root,
-			Principal: u.Principal,
-			Group:     u.Group,
-			RoleId:    -1, // "Admin"
-		})
+	for _, v := range m.permissions {
+		p = append(p, v...)
 	}
 
 	return &methods.RetrieveAllPermissionsBody{
@@ -84,18 +99,40 @@ func (m *AuthorizationManager) RetrieveAllPermissions(req *types.RetrieveAllPerm
 	}
 }
 
+func (m *AuthorizationManager) RemoveEntityPermission(req *types.RemoveEntityPermission) soap.HasFault {
+	var p []types.Permission
+
+	for _, v := range m.permissions[req.Entity] {
+		if v.Group == req.IsGroup && v.Principal == req.User {
+			continue
+		}
+		p = append(p, v)
+	}
+
+	m.permissions[req.Entity] = p
+
+	return &methods.RemoveEntityPermissionBody{
+		Res: &types.RemoveEntityPermissionResponse{},
+	}
+}
+
+func (m *AuthorizationManager) SetEntityPermissions(req *types.SetEntityPermissions) soap.HasFault {
+	m.permissions[req.Entity] = req.Permission
+
+	return &methods.SetEntityPermissionsBody{
+		Res: &types.SetEntityPermissionsResponse{},
+	}
+}
+
 func (m *AuthorizationManager) RetrieveRolePermissions(req *types.RetrieveRolePermissions) soap.HasFault {
 	var p []types.Permission
 
-	root := Map.content().RootFolder
-
-	for _, u := range DefaultUserGroup {
-		p = append(p, types.Permission{
-			Entity:    &root,
-			Principal: u.Principal,
-			Group:     u.Group,
-			RoleId:    req.RoleId,
-		})
+	for _, set := range m.permissions {
+		for _, v := range set {
+			if v.RoleId == req.RoleId {
+				p = append(p, v)
+			}
+		}
 	}
 
 	return &methods.RetrieveRolePermissionsBody{
@@ -120,13 +157,13 @@ func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationR
 			Label:   req.Name,
 			Summary: req.Name,
 		},
-		RoleId:    m.nextId,
+		RoleId:    m.nextID,
 		Privilege: updateSystemPrivileges(req.PrivIds),
 		Name:      req.Name,
 		System:    false,
 	})
 
-	m.nextId++
+	m.nextID++
 
 	body.Res = &types.AddAuthorizationRoleResponse{}
 
