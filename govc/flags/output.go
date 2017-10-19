@@ -173,7 +173,7 @@ func (p *progressLogger) loopA() {
 	}
 }
 
-// loopA runs after Sink() has been called.
+// loopB runs after Sink() has been called.
 func (p *progressLogger) loopB(tick *time.Ticker, ch <-chan progress.Report) error {
 	var r progress.Report
 	var ok bool

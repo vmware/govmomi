@@ -23,11 +23,15 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 
 	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/vim25/progress"
 )
 
 // ArchiveFlag doesn't register any flags;
@@ -82,6 +86,7 @@ type Archive interface {
 
 type TapeArchive struct {
 	path string
+	Downloader
 }
 
 type TapeArchiveEntry struct {
@@ -94,7 +99,7 @@ func (t *TapeArchiveEntry) Close() error {
 }
 
 func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
-	f, err := os.Open(t.path)
+	f, err := t.OpenFile(t.path)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -127,23 +132,109 @@ func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
 
 type FileArchive struct {
 	path string
+	Downloader
 }
 
 func (t *FileArchive) Open(name string) (io.ReadCloser, int64, error) {
 	fpath := name
 	if name != t.path {
-		fpath = filepath.Join(filepath.Dir(t.path), name)
+		index := strings.LastIndex(t.path, "/")
+		if index != -1 {
+			fpath = t.path[:index] + "/" + name
+		}
 	}
 
-	s, err := os.Stat(fpath)
+	f, err := t.OpenFile(fpath)
 	if err != nil {
 		return nil, 0, err
 	}
 
-	f, err := os.Open(fpath)
+	s, err := f.Stat()
 	if err != nil {
 		return nil, 0, err
 	}
 
 	return f, s.Size(), nil
+}
+
+type Downloader struct {
+	sinkFunc func(string) progress.Sinker
+	nocache  bool
+}
+
+func (d Downloader) OpenFile(fpath string) (*os.File, error) {
+	fpath, _, err := d.Ensure(fpath)
+	if err != nil {
+		return nil, err
+	}
+
+	return os.Open(fpath)
+}
+
+func (d Downloader) Ensure(fpath string) (string, bool, error) {
+	if !isRemotePath(fpath) {
+		return fpath, false, nil
+	}
+
+	cache := cachePath(fpath)
+	_, err := os.Stat(cache)
+	if err == nil && !d.nocache {
+		return cache, true, nil
+	}
+
+	return cache, false, d.download(fpath, cache)
+}
+
+func (d Downloader) download(remote, local string) error {
+	resp, err := http.Get(remote)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode >= 300 {
+		return fmt.Errorf("http error %s", resp.Status)
+	}
+
+	f, err := os.OpenFile(local, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	_ = f.Truncate(0)
+
+	r := resp.Body.(io.Reader)
+
+	if d.sinkFunc != nil {
+		sinker := d.sinkFunc(remote)
+		r = progress.NewReader(sinker, resp.Body, resp.ContentLength)
+		defer func() {
+			r.(*progress.Reader).Done(err)
+			sinker.(progress.Waiter).Wait()
+		}()
+	}
+
+	_, err = io.Copy(f, r)
+
+	return err
+}
+
+var cacheDir = "/tmp/govc-cache/"
+
+func init() {
+	_ = os.MkdirAll(cacheDir, 0755)
+}
+
+func cachePath(path string) string {
+	path = url.PathEscape(path)
+	return filepath.Join(cacheDir, path)
+}
+
+func isRemotePath(path string) bool {
+	if strings.HasPrefix(path, "http://") || strings.HasPrefix(path, "https://") {
+		return true
+	}
+
+	return false
 }
