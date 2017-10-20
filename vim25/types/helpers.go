@@ -61,8 +61,8 @@ func (c *PerfCounterInfo) Name() string {
 	return c.GroupInfo.GetElementDescription().Key + "." + c.NameInfo.GetElementDescription().Key + "." + string(c.RollupType)
 }
 
-func defaultResourceAllocationInfo() *ResourceAllocationInfo {
-	return &ResourceAllocationInfo{
+func defaultResourceAllocationInfo() ResourceAllocationInfo {
+	return ResourceAllocationInfo{
 		Reservation:           NewInt64(0),
 		ExpandableReservation: NewBool(true),
 		Limit: NewInt64(-1),

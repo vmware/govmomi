@@ -61,20 +61,19 @@ func (s *ResourceConfigSpecFlag) Register(ctx context.Context, f *flag.FlagSet) 
 	opts := []struct {
 		name  string
 		units string
-		types.BaseResourceAllocationInfo
+		*types.ResourceAllocationInfo
 	}{
-		{"CPU", "MHz", s.CpuAllocation},
-		{"Memory", "MB", s.MemoryAllocation},
+		{"CPU", "MHz", &s.CpuAllocation},
+		{"Memory", "MB", &s.MemoryAllocation},
 	}
 
 	for _, opt := range opts {
 		prefix := strings.ToLower(opt.name)[:3]
-		ra := opt.GetResourceAllocationInfo()
-		shares := (*sharesInfo)(ra.Shares)
+		shares := (*sharesInfo)(opt.Shares)
 
-		f.Var(flags.NewOptionalInt64(&ra.Limit), prefix+".limit", opt.name+" limit in "+opt.units)
-		f.Var(flags.NewOptionalInt64(&ra.Reservation), prefix+".reservation", opt.name+" reservation in "+opt.units)
-		f.Var(flags.NewOptionalBool(&ra.ExpandableReservation), prefix+".expandable", opt.name+" expandable reservation")
+		f.Var(flags.NewOptionalInt64(&opt.Limit), prefix+".limit", opt.name+" limit in "+opt.units)
+		f.Var(flags.NewOptionalInt64(&opt.Reservation), prefix+".reservation", opt.name+" reservation in "+opt.units)
+		f.Var(flags.NewOptionalBool(&opt.ExpandableReservation), prefix+".expandable", opt.name+" expandable reservation")
 		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
 	}
 }
