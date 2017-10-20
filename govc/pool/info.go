@@ -191,8 +191,7 @@ func (r *infoResult) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func writeInfo(w io.Writer, name string, units string, ru *types.ResourcePoolResourceUsage, b types.BaseResourceAllocationInfo) {
-	ra := b.GetResourceAllocationInfo()
+func writeInfo(w io.Writer, name string, units string, ru *types.ResourcePoolResourceUsage, ra types.ResourceAllocationInfo) {
 	usage := 100.0 * float64(ru.OverallUsage) / float64(ru.MaxUsage)
 	shares := ""
 	limit := "unlimited"

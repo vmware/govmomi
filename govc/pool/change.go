@@ -41,10 +41,10 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 	cmd.ResourceConfigSpecFlag = &ResourceConfigSpecFlag{
 		ResourceConfigSpec: types.ResourceConfigSpec{
-			CpuAllocation: &types.ResourceAllocationInfo{
+			CpuAllocation: types.ResourceAllocationInfo{
 				Shares: new(types.SharesInfo),
 			},
-			MemoryAllocation: &types.ResourceAllocationInfo{
+			MemoryAllocation: types.ResourceAllocationInfo{
 				Shares: new(types.SharesInfo),
 			},
 		},
@@ -82,8 +82,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	for _, a := range []types.BaseResourceAllocationInfo{cmd.CpuAllocation, cmd.MemoryAllocation} {
-		ra := a.GetResourceAllocationInfo()
+	for _, ra := range []*types.ResourceAllocationInfo{&cmd.CpuAllocation, &cmd.MemoryAllocation} {
 		if ra.Shares.Level == "" {
 			ra.Shares = nil
 		}

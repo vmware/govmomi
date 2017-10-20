@@ -43,26 +43,14 @@ func NewResourcePool() *ResourcePool {
 	return pool
 }
 
-func (p *ResourcePool) allFieldsSet(spec types.BaseResourceAllocationInfo) bool {
-	if spec == nil {
-		return false
-	}
-
-	info := spec.GetResourceAllocationInfo()
-
+func (p *ResourcePool) allFieldsSet(info types.ResourceAllocationInfo) bool {
 	return info.Reservation != nil &&
 		info.Limit != nil &&
 		info.ExpandableReservation != nil &&
 		info.Shares != nil
 }
 
-func (p *ResourcePool) allFieldsValid(spec types.BaseResourceAllocationInfo) bool {
-	if spec == nil {
-		return false
-	}
-
-	info := spec.GetResourceAllocationInfo()
-
+func (p *ResourcePool) allFieldsValid(info types.ResourceAllocationInfo) bool {
 	if info.Reservation != nil {
 		if *info.Reservation < 0 {
 			return false
@@ -142,14 +130,7 @@ func (p *ResourcePool) CreateResourcePool(c *types.CreateResourcePool) soap.HasF
 	return body
 }
 
-func (p *ResourcePool) updateAllocation(kind string, spec types.BaseResourceAllocationInfo, cfg types.BaseResourceAllocationInfo) *soap.Fault {
-	if spec == nil {
-		return nil
-	}
-
-	src := spec.GetResourceAllocationInfo()
-	dst := cfg.GetResourceAllocationInfo()
-
+func (p *ResourcePool) updateAllocation(kind string, src types.ResourceAllocationInfo, dst *types.ResourceAllocationInfo) *soap.Fault {
 	if !p.allFieldsValid(src) {
 		return Fault("", &types.InvalidArgument{
 			InvalidProperty: fmt.Sprintf("spec.%sAllocation", kind),
@@ -189,12 +170,12 @@ func (p *ResourcePool) UpdateConfig(c *types.UpdateConfig) soap.HasFault {
 	spec := c.Config
 
 	if spec != nil {
-		if err := p.updateAllocation("memory", spec.MemoryAllocation, p.Config.MemoryAllocation); err != nil {
+		if err := p.updateAllocation("memory", spec.MemoryAllocation, &p.Config.MemoryAllocation); err != nil {
 			body.Fault_ = err
 			return body
 		}
 
-		if err := p.updateAllocation("cpu", spec.CpuAllocation, p.Config.CpuAllocation); err != nil {
+		if err := p.updateAllocation("cpu", spec.CpuAllocation, &p.Config.CpuAllocation); err != nil {
 			body.Fault_ = err
 			return body
 		}

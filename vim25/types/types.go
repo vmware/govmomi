@@ -39100,11 +39100,11 @@ func init() {
 type ResourceConfigSpec struct {
 	DynamicData
 
-	Entity           *ManagedObjectReference    `xml:"entity,omitempty"`
-	ChangeVersion    string                     `xml:"changeVersion,omitempty"`
-	LastModified     *time.Time                 `xml:"lastModified"`
-	CpuAllocation    BaseResourceAllocationInfo `xml:"cpuAllocation,typeattr"`
-	MemoryAllocation BaseResourceAllocationInfo `xml:"memoryAllocation,typeattr"`
+	Entity           *ManagedObjectReference `xml:"entity,omitempty"`
+	ChangeVersion    string                  `xml:"changeVersion,omitempty"`
+	LastModified     *time.Time              `xml:"lastModified"`
+	CpuAllocation    ResourceAllocationInfo  `xml:"cpuAllocation"`
+	MemoryAllocation ResourceAllocationInfo  `xml:"memoryAllocation"`
 }
 
 func init() {
@@ -48356,8 +48356,8 @@ type VirtualMachineConfigInfo struct {
 	ConsolePreferences           *VirtualMachineConsolePreferences          `xml:"consolePreferences,omitempty"`
 	DefaultPowerOps              VirtualMachineDefaultPowerOpInfo           `xml:"defaultPowerOps"`
 	Hardware                     VirtualHardware                            `xml:"hardware"`
-	CpuAllocation                BaseResourceAllocationInfo                 `xml:"cpuAllocation,omitempty,typeattr"`
-	MemoryAllocation             BaseResourceAllocationInfo                 `xml:"memoryAllocation,omitempty,typeattr"`
+	CpuAllocation                *ResourceAllocationInfo                    `xml:"cpuAllocation,omitempty"`
+	MemoryAllocation             *ResourceAllocationInfo                    `xml:"memoryAllocation,omitempty"`
 	LatencySensitivity           *LatencySensitivity                        `xml:"latencySensitivity,omitempty"`
 	MemoryHotAddEnabled          *bool                                      `xml:"memoryHotAddEnabled"`
 	CpuHotAddEnabled             *bool                                      `xml:"cpuHotAddEnabled"`
@@ -48493,8 +48493,8 @@ type VirtualMachineConfigSpec struct {
 	VirtualICH7MPresent          *bool                             `xml:"virtualICH7MPresent"`
 	VirtualSMCPresent            *bool                             `xml:"virtualSMCPresent"`
 	DeviceChange                 []BaseVirtualDeviceConfigSpec     `xml:"deviceChange,omitempty,typeattr"`
-	CpuAllocation                BaseResourceAllocationInfo        `xml:"cpuAllocation,omitempty,typeattr"`
-	MemoryAllocation             BaseResourceAllocationInfo        `xml:"memoryAllocation,omitempty,typeattr"`
+	CpuAllocation                *ResourceAllocationInfo           `xml:"cpuAllocation,omitempty"`
+	MemoryAllocation             *ResourceAllocationInfo           `xml:"memoryAllocation,omitempty"`
 	LatencySensitivity           *LatencySensitivity               `xml:"latencySensitivity,omitempty"`
 	CpuAffinity                  *VirtualMachineAffinityInfo       `xml:"cpuAffinity,omitempty"`
 	MemoryAffinity               *VirtualMachineAffinityInfo       `xml:"memoryAffinity,omitempty"`

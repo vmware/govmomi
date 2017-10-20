@@ -53,7 +53,7 @@ var ResourcePool = mo.ResourcePool{
 			Entity:        &types.ManagedObjectReference{Type: "ResourcePool", Value: "ha-root-pool"},
 			ChangeVersion: "",
 			LastModified:  (*time.Time)(nil),
-			CpuAllocation: &types.ResourceAllocationInfo{
+			CpuAllocation: types.ResourceAllocationInfo{
 				DynamicData:           types.DynamicData{},
 				Reservation:           types.NewInt64(4121),
 				ExpandableReservation: types.NewBool(false),
@@ -65,7 +65,7 @@ var ResourcePool = mo.ResourcePool{
 				},
 				OverheadLimit: nil,
 			},
-			MemoryAllocation: &types.ResourceAllocationInfo{
+			MemoryAllocation: types.ResourceAllocationInfo{
 				DynamicData:           types.DynamicData{},
 				Reservation:           types.NewInt64(961),
 				ExpandableReservation: types.NewBool(false),
@@ -133,7 +133,7 @@ var ResourcePool = mo.ResourcePool{
 		Entity:        &types.ManagedObjectReference{Type: "ResourcePool", Value: "ha-root-pool"},
 		ChangeVersion: "",
 		LastModified:  (*time.Time)(nil),
-		CpuAllocation: &types.ResourceAllocationInfo{
+		CpuAllocation: types.ResourceAllocationInfo{
 			DynamicData:           types.DynamicData{},
 			Reservation:           types.NewInt64(4121),
 			ExpandableReservation: types.NewBool(false),
@@ -145,7 +145,7 @@ var ResourcePool = mo.ResourcePool{
 			},
 			OverheadLimit: nil,
 		},
-		MemoryAllocation: &types.ResourceAllocationInfo{
+		MemoryAllocation: types.ResourceAllocationInfo{
 			DynamicData:           types.DynamicData{},
 			Reservation:           types.NewInt64(961),
 			ExpandableReservation: types.NewBool(false),
