@@ -110,7 +110,10 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.Archive = &FileArchive{fpath}
+	archive := &FileArchive{path: fpath}
+	archive.Client = cmd.Client
+
+	cmd.Archive = archive
 
 	moref, err := cmd.Import(fpath)
 	if err != nil {
@@ -213,7 +216,7 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		return nil, err
 	}
 
-	e, err := cmd.ReadEnvelope(fpath)
+	e, err := cmd.ReadEnvelope(o)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse ovf: %s", err.Error())
 	}
