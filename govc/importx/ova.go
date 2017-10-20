@@ -19,9 +19,11 @@ package importx
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -43,7 +45,12 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.Archive = &TapeArchive{fpath}
+	archive := &TapeArchive{path: fpath}
+	archive.sinkFunc = func(remote string) progress.Sinker {
+		return cmd.ProgressLogger(fmt.Sprintf("Downloading %s ...", remote))
+	}
+
+	cmd.Archive = archive
 
 	moref, err := cmd.Import(fpath)
 	if err != nil {

@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -110,7 +111,12 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	cmd.Archive = &FileArchive{fpath}
+	archive := &FileArchive{path: fpath}
+	archive.sinkFunc = func(remote string) progress.Sinker {
+		return cmd.ProgressLogger(fmt.Sprintf("Downloading %s ...", remote))
+	}
+
+	cmd.Archive = archive
 
 	moref, err := cmd.Import(fpath)
 	if err != nil {

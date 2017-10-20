@@ -68,9 +68,9 @@ func (p readerReport) Error() error {
 	return p.err
 }
 
-// reader wraps an io.Reader and sends a progress report over a channel for
+// Reader wraps an io.Reader and sends a progress report over a channel for
 // every read it handles.
-type reader struct {
+type Reader struct {
 	r io.Reader
 
 	pos  int64
@@ -81,8 +81,8 @@ type reader struct {
 	ch chan<- Report
 }
 
-func NewReader(s Sinker, r io.Reader, size int64) *reader {
-	pr := reader{
+func NewReader(s Sinker, r io.Reader, size int64) *Reader {
+	pr := Reader{
 		r: r,
 
 		size: size,
@@ -97,7 +97,7 @@ func NewReader(s Sinker, r io.Reader, size int64) *reader {
 // Read calls the Read function on the underlying io.Reader. Additionally,
 // every read causes a progress report to be sent to the progress reader's
 // underlying channel.
-func (r *reader) Read(b []byte) (int, error) {
+func (r *Reader) Read(b []byte) (int, error) {
 	n, err := r.r.Read(b)
 	if err != nil {
 		return n, err
@@ -118,7 +118,7 @@ func (r *reader) Read(b []byte) (int, error) {
 
 // Done marks the progress reader as done, optionally including an error in the
 // progress report. After sending it, the underlying channel is closed.
-func (r *reader) Done(err error) {
+func (r *Reader) Done(err error) {
 	q := readerReport{
 		t:    time.Now(),
 		pos:  r.pos,
