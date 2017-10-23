@@ -25,10 +25,12 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25"
@@ -37,18 +39,19 @@ import (
 )
 
 const (
-	envURL           = "GOVC_URL"
-	envUsername      = "GOVC_USERNAME"
-	envPassword      = "GOVC_PASSWORD"
-	envCertificate   = "GOVC_CERTIFICATE"
-	envPrivateKey    = "GOVC_PRIVATE_KEY"
-	envInsecure      = "GOVC_INSECURE"
-	envPersist       = "GOVC_PERSIST_SESSION"
-	envMinAPIVersion = "GOVC_MIN_API_VERSION"
-	envVimNamespace  = "GOVC_VIM_NAMESPACE"
-	envVimVersion    = "GOVC_VIM_VERSION"
-	envTLSCaCerts    = "GOVC_TLS_CA_CERTS"
-	envTLSKnownHosts = "GOVC_TLS_KNOWN_HOSTS"
+	envURL                 = "GOVC_URL"
+	envUsername            = "GOVC_USERNAME"
+	envPassword            = "GOVC_PASSWORD"
+	envCertificate         = "GOVC_CERTIFICATE"
+	envPrivateKey          = "GOVC_PRIVATE_KEY"
+	envInsecure            = "GOVC_INSECURE"
+	envPersist             = "GOVC_PERSIST_SESSION"
+	envMinAPIVersion       = "GOVC_MIN_API_VERSION"
+	envVimNamespace        = "GOVC_VIM_NAMESPACE"
+	envVimVersion          = "GOVC_VIM_VERSION"
+	envTLSCaCerts          = "GOVC_TLS_CA_CERTS"
+	envTLSKnownHosts       = "GOVC_TLS_KNOWN_HOSTS"
+	envTLSHandshakeTimeout = "GOVC_TLS_HANDSHAKE_TIMEOUT"
 )
 
 const cDescr = "ESX or vCenter URL"
@@ -58,21 +61,21 @@ type ClientFlag struct {
 
 	*DebugFlag
 
-	url           *url.URL
-	username      string
-	password      string
-	cert          string
-	key           string
-	insecure      bool
-	persist       bool
-	minAPIVersion string
-	vimNamespace  string
-	vimVersion    string
-	tlsCaCerts    string
-	tlsKnownHosts string
-	tlsHostHash   string
-
-	client *vim25.Client
+	url                 *url.URL
+	username            string
+	password            string
+	cert                string
+	key                 string
+	insecure            bool
+	persist             bool
+	minAPIVersion       string
+	vimNamespace        string
+	vimVersion          string
+	tlsCaCerts          string
+	tlsKnownHosts       string
+	tlsHostHash         string
+	tlsHandshakeTimeout time.Duration
+	client              *vim25.Client
 }
 
 var (
@@ -215,6 +218,16 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 			usage := fmt.Sprintf("TLS known hosts file [%s]", envTLSKnownHosts)
 			f.StringVar(&flag.tlsKnownHosts, "tls-known-hosts", value, usage)
 		}
+
+		{
+			value, err := time.ParseDuration(os.Getenv(envTLSHandshakeTimeout))
+			if err != nil {
+				value = 10 * time.Second
+			}
+			usage := fmt.Sprintf("TLS handshake timeout [%s]", envTLSHandshakeTimeout)
+			f.DurationVar(&flag.tlsHandshakeTimeout, "tls-handshake-timeout", value, usage)
+		}
+
 	})
 }
 
@@ -273,6 +286,10 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 
 	if err := sc.LoadThumbprints(flag.tlsKnownHosts); err != nil {
 		return nil, err
+	}
+
+	if t, ok := sc.Transport.(*http.Transport); ok {
+		t.TLSHandshakeTimeout = flag.tlsHandshakeTimeout
 	}
 
 	// Retry twice when a temporary I/O error occurs.
