@@ -82,6 +82,8 @@ to set defaults:
   > govc about.cert -u host -k -thumbprint | tee -a $GOVC_TLS_KNOWN_HOSTS
   > govc about -u user:pass@host
 
+* `GOVC_TLS_HANDSHAKE_TIMEOUT`: Limits the time spent performing the TLS handshake.
+
 * `GOVC_INSECURE`: Disable certificate verification.
 
   > This option sets Go's tls.Config.InsecureSkipVerify flag and is false by default.
