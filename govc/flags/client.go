@@ -227,7 +227,6 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 			usage := fmt.Sprintf("TLS handshake timeout [%s]", envTLSHandshakeTimeout)
 			f.DurationVar(&flag.tlsHandshakeTimeout, "tls-handshake-timeout", value, usage)
 		}
-
 	})
 }
 
