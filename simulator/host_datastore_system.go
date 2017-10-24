@@ -59,7 +59,7 @@ func (dss *HostDatastoreSystem) add(ds *Datastore) *soap.Fault {
 	}
 
 	folder := Map.getEntityFolder(dss.Host, "datastore")
-	ds.Self.Type = TypeName(ds)
+	ds.Self.Type = typeName(ds)
 	// Datastore is the only type where create methods do not include the parent (Folder in this case),
 	// but we need the moref to be unique per DC/datastoreFolder, but not per-HostSystem.
 	ds.Self.Value += "@" + folder.Self.Value
