@@ -62,6 +62,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	}
 	vm.Summary.Guest = &types.VirtualMachineGuestSummary{}
 	vm.Summary.Storage = &types.VirtualMachineStorageSummary{}
+	vm.Summary.Vm = &vm.Self
 
 	// Append VM Name as the directory name if not specified
 	if strings.HasSuffix(spec.Files.VmPathName, "]") { // e.g. "[datastore1]"
