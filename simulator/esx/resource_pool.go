@@ -23,6 +23,9 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// ResourcePool is the default template for ResourcePool properties.
+// Capture method:
+//   govc pool.info "*" -dump
 var ResourcePool = mo.ResourcePool{
 	ManagedEntity: mo.ManagedEntity{
 		ExtensibleManagedObject: mo.ExtensibleManagedObject{

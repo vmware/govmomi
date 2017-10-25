@@ -18,6 +18,9 @@ package esx
 
 import "github.com/vmware/govmomi/vim25/types"
 
+// PerfCounter is the default template for the PerformanceManager perfCounter property.
+// Capture method:
+//   govc object.collect -s -dump PerformanceManager:ha-perfmgr perfCounter
 var PerfCounter = []types.PerfCounterInfo{
 	{
 		Key: 0,

@@ -106,7 +106,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	var res infoResult
 	var props []string
 
-	if cmd.OutputFlag.JSON {
+	if cmd.OutputFlag.All() {
 		props = nil // Load everything
 	} else {
 		props = []string{"summary"} // Load summary
@@ -148,7 +148,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	if !cmd.OutputFlag.JSON {
+	if !cmd.OutputFlag.All() {
 		res.objects = vms
 		res.cmd = cmd
 		if err = res.collectReferences(pc, ctx); err != nil {

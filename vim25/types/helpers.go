@@ -18,6 +18,7 @@ package types
 
 import (
 	"strings"
+	"time"
 )
 
 func NewBool(v bool) *bool {
@@ -29,6 +30,10 @@ func NewInt32(v int32) *int32 {
 }
 
 func NewInt64(v int64) *int64 {
+	return &v
+}
+
+func NewTime(v time.Time) *time.Time {
 	return &v
 }
 

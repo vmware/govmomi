@@ -23,6 +23,9 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// HostSystem is the default template for HostSystem properties.
+// Capture method:
+//   govc host.info -dump
 var HostSystem = mo.HostSystem{
 	ManagedEntity: mo.ManagedEntity{
 		ExtensibleManagedObject: mo.ExtensibleManagedObject{

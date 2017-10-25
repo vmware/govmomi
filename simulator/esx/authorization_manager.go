@@ -18,6 +18,9 @@ package esx
 
 import "github.com/vmware/govmomi/vim25/types"
 
+// RoleList is the default template for the AuthorizationManager roleList property.
+// Capture method:
+//   govc object.collect -s -dump AuthorizationManager:ha-authmgr roleList
 var RoleList = []types.AuthorizationRole{
 	{
 		RoleId: -6,

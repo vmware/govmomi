@@ -32,6 +32,12 @@ load test_helper
 
   run govc about -json -l
   assert_success
+
+  run govc about -dump
+  assert_success
+
+  run govc about -dump -l
+  assert_success
 }
 
 @test "about.cert" {

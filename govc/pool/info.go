@@ -90,7 +90,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	var res infoResult
 	var props []string
 
-	if cmd.OutputFlag.JSON {
+	if cmd.OutputFlag.All() {
 		props = nil
 	} else {
 		props = []string{

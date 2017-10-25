@@ -232,6 +232,9 @@ load test_helper
     assert_success
     assert_line "{\"VirtualMachines\":null}"
 
+    run govc vm.info -dump $id
+    assert_success
+
     run govc vm.create -on=false $id
     assert_success
 

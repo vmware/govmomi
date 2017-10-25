@@ -2,15 +2,6 @@
 	"version": 0,
 	"dependencies": [
 		{
-			"importpath": "github.com/davecgh/go-spew/spew",
-			"repository": "https://github.com/davecgh/go-spew",
-			"vcs": "git",
-			"revision": "04cdfd42973bb9c8589fd6a731800cf222fde1a9",
-			"branch": "HEAD",
-			"path": "/spew",
-			"notests": true
-		},
-		{
 			"importpath": "github.com/davecgh/go-xdr/xdr2",
 			"repository": "https://github.com/rasky/go-xdr",
 			"vcs": "git",
@@ -24,6 +15,22 @@
 			"repository": "https://github.com/google/uuid",
 			"vcs": "git",
 			"revision": "6a5e28554805e78ea6141142aba763936c4761c0",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/kr/pretty",
+			"repository": "https://github.com/dougm/pretty",
+			"vcs": "git",
+			"revision": "2ee9d7453c02ef7fa518a83ae23644eb8872186a",
+			"branch": "govmomi",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/kr/pty",
+			"repository": "https://github.com/kr/pty",
+			"vcs": "git",
+			"revision": "95d05c1eef33a45bd58676b6ce28d105839b8d0b",
 			"branch": "master",
 			"notests": true
 		},

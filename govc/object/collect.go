@@ -216,6 +216,23 @@ func (pc *change) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
+func (pc *change) Dump() interface{} {
+	if pc.cmd.simple && len(pc.Update.ChangeSet) == 1 {
+		val := pc.Update.ChangeSet[0].Val
+
+		rval := reflect.ValueOf(val)
+		rtype := rval.Type()
+
+		if strings.HasPrefix(rtype.Name(), "ArrayOf") {
+			return rval.Field(0).Interface()
+		}
+
+		return val
+	}
+
+	return pc.Update
+}
+
 func (cmd *collect) match(update types.ObjectUpdate) bool {
 	if len(cmd.filter) == 0 {
 		return false
