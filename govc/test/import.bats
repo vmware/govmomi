@@ -57,6 +57,21 @@ load test_helper
   rm -f ${file}
 }
 
+@test "import.ovf with import.spec result" {
+  esx_env
+
+  file=$($mktemp --tmpdir govc-test-XXXXX)
+  name=$(new_id)
+  
+  govc import.spec $GOVC_IMAGES/${TTYLINUX_NAME}.ovf > ${file}
+  
+  run govc import.ovf -name="${name}" -options="${file}" $GOVC_IMAGES/${TTYLINUX_NAME}.ovf
+  assert_success
+
+  run govc vm.destroy "${name}"
+  assert_success
+}
+
 @test "import.ovf with name as argument" {
   esx_env
 

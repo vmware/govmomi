@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/ovf"
@@ -91,9 +92,18 @@ func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
 
 	for _, p := range e.VirtualSystem.Product {
 		for i, v := range p.Property {
+			if v.UserConfigurable == nil || !*v.UserConfigurable {
+				continue
+			}
+
 			d := ""
 			if v.Default != nil {
 				d = *v.Default
+			}
+
+			// vSphere only accept True/False as boolean values for some reason
+			if v.Type == "boolean" {
+				d = strings.Title(d)
 			}
 
 			// From OVF spec, section 9.5.1:
