@@ -34,7 +34,6 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 		for _, spec := range c.Spec {
 			pg := &DistributedVirtualPortgroup{}
 			pg.Name = spec.Name
-			pg.Config.DefaultPortConfig = spec.DefaultPortConfig
 			pg.Entity().Name = pg.Name
 
 			if obj := Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
@@ -47,7 +46,22 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 			f.putChild(pg)
 
 			pg.Key = pg.Self.Value
-			pg.Config.DistributedVirtualSwitch = &s.Self
+			pg.Config = types.DVPortgroupConfigInfo{
+				Key:                          pg.Key,
+				Name:                         pg.Name,
+				NumPorts:                     spec.NumPorts,
+				DistributedVirtualSwitch:     &s.Self,
+				DefaultPortConfig:            spec.DefaultPortConfig,
+				Description:                  spec.Description,
+				Type:                         spec.Type,
+				Policy:                       spec.Policy,
+				PortNameFormat:               spec.PortNameFormat,
+				Scope:                        spec.Scope,
+				VendorSpecificConfig:         spec.VendorSpecificConfig,
+				ConfigVersion:                spec.ConfigVersion,
+				AutoExpand:                   spec.AutoExpand,
+				VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
+			}
 
 			s.Portgroup = append(s.Portgroup, pg.Self)
 			s.Summary.PortgroupName = append(s.Summary.PortgroupName, pg.Name)

@@ -59,6 +59,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 
 	vm.Config = &types.VirtualMachineConfigInfo{
 		ExtraConfig: []types.BaseOptionValue{&types.OptionValue{Key: "govcsim", Value: "TRUE"}},
+		Tools:       &types.ToolsConfigInfo{},
 	}
 	vm.Summary.Guest = &types.VirtualMachineGuestSummary{}
 	vm.Summary.Storage = &types.VirtualMachineStorageSummary{}

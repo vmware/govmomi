@@ -133,6 +133,168 @@ load test_helper
   assert_success
 }
 
+@test "object.collect vcsim" {
+  vcsim_env -app 1 -pool 1
+
+  run govc object.collect -s -type ClusterComputeResource / configStatus
+  assert_success green
+
+  run govc object.collect -s -type ClusterComputeResource / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / configStatus
+  assert_success "$(printf "green\ngreen")"
+
+  run govc object.collect -s -type ComputeResource / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type Datacenter / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type Datastore / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type DistributedVirtualPortgroup / config.key
+  assert_matches dvportgroup-
+
+  run govc object.collect -s -type DistributedVirtualPortgroup / config.name
+  assert_success DC0_DVPG0
+
+  run govc object.collect -s -type DistributedVirtualPortgroup / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type DistributedVirtualSwitch / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type DistributedVirtualSwitch / summary.name
+  assert_success DVS0
+
+  run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.name
+  assert_success DVS
+
+  run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.vendor
+  assert_success "VMware, Inc."
+
+  run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.version
+  assert_success 6.0.0
+
+  run govc object.collect -s -type DistributedVirtualSwitch / summary.uuid
+  assert_matches "-"
+
+  run govc object.collect -s -type Folder / effectiveRole
+  assert_number
+
+  run govc object.collect -json -type HostSystem / config.storageDevice.scsiLun
+  assert_matches /vmfs/devices
+
+  run govc object.collect -json -type HostSystem / config.storageDevice.scsiTopology
+  assert_matches host.ScsiTopology
+
+  run govc object.collect -s -type HostSystem / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type Network / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type ResourcePool / resourcePool
+  # DC0_C0/Resources has 1 child ResourcePool and 1 child VirtualApp
+  assert_matches "ResourcePool:"
+  assert_matches "VirtualApp:"
+
+  run govc object.collect -s -type VirtualApp / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type VirtualApp / name
+  assert_success DC0_C0_APP0
+
+  run govc object.collect -s -type VirtualApp / owner
+  assert_matches ":"
+
+  run govc object.collect -s -type VirtualApp / parent
+  assert_matches ":"
+
+  run govc object.collect -s -type VirtualApp / resourcePool
+  assert_success "" # no VirtualApp children
+
+  run govc object.collect -s -type VirtualApp / summary.config.cpuAllocation.limit
+  assert_number
+
+  run govc object.collect -s -type VirtualApp / summary.config.cpuAllocation.reservation
+  assert_number
+
+  run govc object.collect -s -type VirtualApp / summary.config.memoryAllocation.limit
+  assert_number
+
+  run govc object.collect -s -type VirtualApp / summary.config.memoryAllocation.reservation
+  assert_number
+
+  run govc object.collect -s -type VirtualApp / vm
+  assert_matches "VirtualMachine:"
+
+  run govc object.collect -s -type VirtualMachine / config.tools.toolsVersion
+  assert_number
+
+  run govc object.collect -s -type VirtualMachine / effectiveRole
+  assert_number
+
+  run govc object.collect -s -type VirtualMachine / summary.guest.toolsStatus
+  assert_matches toolsNotInstalled
+
+  run govc object.collect -s -type ClusterComputeResource / summary.effectiveCpu
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.effectiveMemory
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.numCpuCores
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.numCpuThreads
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.numEffectiveHosts
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.numHosts
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.totalCpu
+  assert_number
+
+  run govc object.collect -s -type ClusterComputeResource / summary.totalMemory
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.effectiveCpu
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.effectiveMemory
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.numCpuCores
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.numCpuThreads
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.numEffectiveHosts
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.numHosts
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.totalCpu
+  assert_number
+
+  run govc object.collect -s -type ComputeResource / summary.totalMemory
+  assert_number
+
+  run govc object.collect -s -type Network / summary.accessible
+  assert_success "$(printf "true\ntrue")"
+
+  run govc object.collect -s -type Network / summary.ipPoolName
+  assert_success ""
+}
+
 @test "object.collect view" {
   vcsim_env -dc 2 -folder 1
 

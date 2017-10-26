@@ -82,6 +82,18 @@ func hostParent(host *mo.HostSystem) *mo.ComputeResource {
 	}
 }
 
+func addComputeResource(s *types.ComputeResourceSummary, h *HostSystem) {
+	s.TotalCpu += h.Summary.Hardware.CpuMhz
+	s.TotalMemory += h.Summary.Hardware.MemorySize
+	s.NumCpuCores += h.Summary.Hardware.NumCpuCores
+	s.NumCpuThreads += h.Summary.Hardware.NumCpuThreads
+	s.EffectiveCpu += h.Summary.Hardware.CpuMhz
+	s.EffectiveMemory += h.Summary.Hardware.MemorySize
+	s.NumHosts++
+	s.NumEffectiveHosts++
+	s.OverallStatus = types.ManagedEntityStatusGreen
+}
+
 // CreateDefaultESX creates a standalone ESX
 // Adds objects of type: Datacenter, Network, ComputeResource, ResourcePool and HostSystem
 func CreateDefaultESX(f *Folder) {
@@ -91,7 +103,10 @@ func CreateDefaultESX(f *Folder) {
 
 	host := NewHostSystem(esx.HostSystem)
 
-	cr := &mo.ComputeResource{}
+	summary := new(types.ComputeResourceSummary)
+	addComputeResource(summary, host)
+
+	cr := &mo.ComputeResource{Summary: summary}
 	cr.Self = *host.Parent
 	cr.Name = host.Name
 	cr.Host = append(cr.Host, host.Reference())
@@ -119,7 +134,10 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 	host.Name = host.Summary.Config.Name
 	host.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
 
-	cr := &mo.ComputeResource{}
+	summary := new(types.ComputeResourceSummary)
+	addComputeResource(summary, host)
+
+	cr := &mo.ComputeResource{Summary: summary}
 
 	Map.PutEntity(cr, Map.NewEntity(host))
 

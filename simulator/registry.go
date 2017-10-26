@@ -159,6 +159,12 @@ func (r *Registry) Put(item mo.Reference) mo.Reference {
 		reflect.ValueOf(item).Elem().FieldByName("Self").Set(reflect.ValueOf(ref))
 	}
 
+	if me, ok := item.(mo.Entity); ok {
+		me.Entity().ConfigStatus = types.ManagedEntityStatusGreen
+		me.Entity().OverallStatus = types.ManagedEntityStatusGreen
+		me.Entity().EffectiveRole = []int32{-1} // Admin
+	}
+
 	r.objects[ref] = item
 
 	for _, h := range r.handlers {

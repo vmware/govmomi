@@ -215,14 +215,18 @@ assert_matches() {
   local actual="${2}"
 
   if [ $# -eq 1 ]; then
-    actual="$(cat -)"
+    actual="$output"
   fi
 
-  if ! grep -q "${pattern}" <<<"${actual}"; then
+  if ! grep -E -q "${pattern}" <<<"${actual}"; then
     { echo "pattern: ${pattern}"
       echo "actual:  ${actual}"
     } | flunk
   fi
+}
+
+assert_number() {
+  assert_matches "^-?[0-9]+$" "$output"
 }
 
 assert_empty() {
