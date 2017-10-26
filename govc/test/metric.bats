@@ -80,6 +80,9 @@ load test_helper
   run govc metric.info -json "$host"
   assert_success
 
+  run govc metric.info -dump "$host"
+  assert_success
+
   run govc metric.sample "$host" "${metrics[@]}"
   assert_success
 

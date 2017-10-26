@@ -18,6 +18,9 @@ package esx
 
 import "github.com/vmware/govmomi/vim25/types"
 
+// ServiceContent is the default template for the ServiceInstance content property.
+// Capture method:
+//   govc object.collect -s -dump - content
 var ServiceContent = types.ServiceContent{
 	DynamicData:       types.DynamicData{},
 	RootFolder:        types.ManagedObjectReference{Type: "Folder", Value: "ha-folder-root"},
