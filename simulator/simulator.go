@@ -188,6 +188,16 @@ type soapEnvelope struct {
 	Body    interface{} `xml:"soapenv:Body"`
 }
 
+// soapFault is a copy of soap.Fault, with the same changes as soapEnvelope
+type soapFault struct {
+	XMLName xml.Name `xml:"soapenv:Fault"`
+	Code    string   `xml:"faultcode"`
+	String  string   `xml:"faultstring"`
+	Detail  struct {
+		Fault types.AnyType `xml:",any,typeattr"`
+	} `xml:"detail"`
+}
+
 // About generates some info about the simulator.
 func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 	var about struct {
@@ -253,6 +263,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var res soap.HasFault
+	var soapBody interface{}
 
 	method, err := UnmarshalBody(body)
 	if err != nil {
@@ -261,10 +272,24 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		res = s.call(method)
 	}
 
-	if res.Fault() == nil {
-		w.WriteHeader(http.StatusOK)
-	} else {
+	if f := res.Fault(); f != nil {
 		w.WriteHeader(http.StatusInternalServerError)
+
+		// the generated method/*Body structs use the '*soap.Fault' type,
+		// so we need our own Body type to use the modified '*soapFault' type.
+		soapBody = struct {
+			Fault *soapFault
+		}{
+			&soapFault{
+				Code:   f.Code,
+				String: f.String,
+				Detail: f.Detail,
+			},
+		}
+	} else {
+		w.WriteHeader(http.StatusOK)
+
+		soapBody = res
 	}
 
 	var out bytes.Buffer
@@ -276,7 +301,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		Env:  "http://schemas.xmlsoap.org/soap/envelope/",
 		XSD:  "http://www.w3.org/2001/XMLSchema",
 		XSI:  "http://www.w3.org/2001/XMLSchema-instance",
-		Body: res,
+		Body: soapBody,
 	})
 	if err == nil {
 		err = e.Flush()
