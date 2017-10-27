@@ -48,6 +48,7 @@ type VirtualMachine struct {
 func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
+	now := time.Now()
 
 	if spec.Name == "" {
 		return nil, &types.InvalidVmConfig{Property: "configSpec.name"}
@@ -99,6 +100,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 
 	vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 	vm.Runtime.ConnectionState = types.VirtualMachineConnectionStateConnected
+	vm.Runtime.BootTime = &now
 	vm.Summary.Runtime = vm.Runtime
 
 	vm.Summary.QuickStats.GuestHeartbeatStatus = types.ManagedEntityStatusGray
