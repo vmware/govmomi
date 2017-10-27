@@ -68,7 +68,7 @@ func (s *SessionManager) Login(login *types.Login) soap.HasFault {
 }
 
 func (s *SessionManager) Logout(*types.Logout) soap.HasFault {
-	return &methods.LogoutBody{}
+	return &methods.LogoutBody{Res: new(types.LogoutResponse)}
 }
 
 func (s *SessionManager) AcquireGenericServiceTicket(ticket *types.AcquireGenericServiceTicket) soap.HasFault {
