@@ -219,12 +219,13 @@ func (pc *change) Write(w io.Writer) error {
 func (pc *change) Dump() interface{} {
 	if pc.cmd.simple && len(pc.Update.ChangeSet) == 1 {
 		val := pc.Update.ChangeSet[0].Val
+		if val != nil {
+			rval := reflect.ValueOf(val)
+			rtype := rval.Type()
 
-		rval := reflect.ValueOf(val)
-		rtype := rval.Type()
-
-		if strings.HasPrefix(rtype.Name(), "ArrayOf") {
-			return rval.Field(0).Interface()
+			if strings.HasPrefix(rtype.Name(), "ArrayOf") {
+				return rval.Field(0).Interface()
+			}
 		}
 
 		return val

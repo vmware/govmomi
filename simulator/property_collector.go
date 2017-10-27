@@ -117,6 +117,9 @@ func fieldValue(rval reflect.Value, p string) (interface{}, error) {
 		kind := rval.Type().Kind()
 
 		if kind == reflect.Interface {
+			if rval.IsNil() {
+				continue
+			}
 			rval = rval.Elem()
 			kind = rval.Type().Kind()
 		}

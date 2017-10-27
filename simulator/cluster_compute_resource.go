@@ -55,6 +55,8 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		host.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
 	}
 
+	addComputeResource(add.ClusterComputeResource.Summary.GetComputeResourceSummary(), host)
+
 	return host.Reference(), nil
 }
 
@@ -82,6 +84,9 @@ func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConf
 
 	cluster := &ClusterComputeResource{}
 	cluster.Name = name
+	cluster.Summary = &types.ClusterComputeResourceSummary{
+		UsageSummary: new(types.ClusterUsageSummary),
+	}
 
 	config := &types.ClusterConfigInfoEx{}
 	cluster.ConfigurationEx = config
