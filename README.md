@@ -39,7 +39,7 @@ To build locally with Drone:
 
 ## Installation
 
-`go get github.com/vmware/govmomi`
+`go get -u github.com/vmware/govmomi`
 
 ## Discussion
 
