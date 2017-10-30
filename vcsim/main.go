@@ -45,6 +45,7 @@ func main() {
 	flag.IntVar(&model.Pod, "pod", model.Pod, "Number of storage pods per datacenter")
 	flag.IntVar(&model.Portgroup, "pg", model.Portgroup, "Number of port groups")
 	flag.IntVar(&model.Folder, "folder", model.Folder, "Number of folders")
+	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
 
 	isESX := flag.Bool("esx", false, "Simulate standalone ESX")
 	isTLS := flag.Bool("tls", true, "Enable TLS")

@@ -412,52 +412,27 @@ func TestShutdownGuest(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		finder := find.NewFinder(c.Client, false)
-
-		dc, err := finder.DefaultDatacenter(ctx)
+		vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+		// shutdown the vm
+		err = vm.ShutdownGuest(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		// state should be poweroff
+		state, err := vm.PowerState(ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		finder.SetDatacenter(dc)
-
-		vms, err := finder.VirtualMachineList(ctx, "*")
-		// use the default first vm for test
-		if len(vms) > 0 {
-			vmm := vms[0]
-			// powon first
-			task, err := vmm.PowerOn(ctx)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			err = task.Wait(ctx)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			// shutdown the vm
-			err = vmm.ShutdownGuest(ctx)
-			if err != nil {
-				t.Fatal(err)
-			}
-			// state should be poweroff
-			state, err := vmm.PowerState(ctx)
-			if err != nil {
-				t.Fatal(err)
-			}
-
-			if state != types.VirtualMachinePowerStatePoweredOff {
-				t.Errorf("state=%s", state)
-			}
-
-			// shutdown a poweroff vm should fail
-			err = vmm.ShutdownGuest(ctx)
-			if err == nil {
-				t.Error("expected error: InvalidPowerState")
-			}
+		if state != types.VirtualMachinePowerStatePoweredOff {
+			t.Errorf("state=%s", state)
 		}
 
+		// shutdown a poweroff vm should fail
+		err = vm.ShutdownGuest(ctx)
+		if err == nil {
+			t.Error("expected error: InvalidPowerState")
+		}
 	}
 }
 

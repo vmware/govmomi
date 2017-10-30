@@ -39,6 +39,9 @@ type Model struct {
 	ServiceContent types.ServiceContent
 	RootFolder     mo.Folder
 
+	// Autostart will power on Model created VMs when true
+	Autostart bool
+
 	// Datacenter specifies the number of Datacenter entities to create
 	Datacenter int
 
@@ -87,6 +90,7 @@ func ESX() *Model {
 	return &Model{
 		ServiceContent: esx.ServiceContent,
 		RootFolder:     esx.RootFolder,
+		Autostart:      true,
 		Datastore:      1,
 		Machine:        2,
 	}
@@ -97,6 +101,7 @@ func VPX() *Model {
 	return &Model{
 		ServiceContent: vpx.ServiceContent,
 		RootFolder:     vpx.RootFolder,
+		Autostart:      true,
 		Datacenter:     1,
 		Portgroup:      1,
 		Host:           1,
@@ -238,9 +243,15 @@ func (m *Model) Create() error {
 					return err
 				}
 
-				err = task.Wait(ctx)
+				info, err := task.WaitForResult(ctx, nil)
 				if err != nil {
 					return err
+				}
+
+				vm := object.NewVirtualMachine(client, info.Result.(types.ManagedObjectReference))
+
+				if m.Autostart {
+					_, _ = vm.PowerOn(ctx)
 				}
 			}
 

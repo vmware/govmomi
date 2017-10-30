@@ -497,7 +497,7 @@ load test_helper
 }
 
 @test "vm.register vcsim" {
-  vcsim_env
+  vcsim_env -autostart=false
 
   host=$GOVC_HOST
   pool=$GOVC_RESOURCE_POOL
