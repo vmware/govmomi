@@ -216,17 +216,10 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	task, err := cmd.cloneVM(ctx)
+	vm, err := cmd.cloneVM(ctx)
 	if err != nil {
 		return err
 	}
-
-	info, err := task.WaitForResult(ctx, nil)
-	if err != nil {
-		return err
-	}
-
-	vm := object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference))
 
 	if cmd.cpus > 0 || cmd.memory > 0 {
 		vmConfigSpec := types.VirtualMachineConfigSpec{}
@@ -269,7 +262,7 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 	return nil
 }
 
-func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
+func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 	// search for the first network card of the source
 	devices, err := cmd.VirtualMachine.Device(ctx)
 	if err != nil {
@@ -430,6 +423,18 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.Task, error) {
 		cloneSpec.Customization = &customSpec
 	}
 
-	// clone virtualmachine
-	return cmd.VirtualMachine.Clone(ctx, cmd.Folder, cmd.name, *cloneSpec)
+	task, err := cmd.VirtualMachine.Clone(ctx, cmd.Folder, cmd.name, *cloneSpec)
+	if err != nil {
+		return nil, err
+	}
+
+	logger := cmd.ProgressLogger(fmt.Sprintf("Cloning %s to %s...", cmd.VirtualMachine.InventoryPath, cmd.name))
+	defer logger.Wait()
+
+	info, err := task.WaitForResult(ctx, logger)
+	if err != nil {
+		return nil, err
+	}
+
+	return object.NewVirtualMachine(cmd.Client, info.Result.(types.ManagedObjectReference)), nil
 }
