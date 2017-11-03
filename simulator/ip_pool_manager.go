@@ -50,6 +50,8 @@ var ipPool = MustNewIpPool(&types.IpPool{
 	},
 })
 
+// IpPoolManager implements a simple IP Pool manager in which all pools are shared
+// across different datacenters.
 type IpPoolManager struct {
 	mo.IpPoolManager
 
@@ -70,27 +72,73 @@ func NewIpPoolManager(ref types.ManagedObjectReference) *IpPoolManager {
 }
 
 func (m *IpPoolManager) CreateIpPool(req *types.CreateIpPool) soap.HasFault {
-	return &methods.CreateIpPoolBody{
-		Fault_: Fault("not implemented", &types.RuntimeFault{}),
+	body := &methods.CreateIpPoolBody{}
+	id := m.nextPoolId
+
+	var err error
+	m.pools[id], err = NewIpPool(&req.Pool)
+	if err != nil {
+		body.Fault_ = Fault("", &types.RuntimeFault{})
+		return body
 	}
+
+	m.nextPoolId++
+
+	body.Res = &types.CreateIpPoolResponse{
+		Returnval: id,
+	}
+
+	return body
 }
 
 func (m *IpPoolManager) DestroyIpPool(req *types.DestroyIpPool) soap.HasFault {
+	delete(m.pools, req.Id)
+
 	return &methods.DestroyIpPoolBody{
-		Fault_: Fault("not implemented", &types.RuntimeFault{}),
+		Res: &types.DestroyIpPoolResponse{},
 	}
 }
 
 func (m *IpPoolManager) QueryIpPools(req *types.QueryIpPools) soap.HasFault {
+	pools := []types.IpPool{}
+
+	for _, pool := range m.pools {
+		pools = append(pools, *pool.config)
+	}
+
 	return &methods.QueryIpPoolsBody{
-		Fault_: Fault("not implemented", &types.RuntimeFault{}),
+		Res: &types.QueryIpPoolsResponse{
+			Returnval: pools,
+		},
 	}
 }
 
 func (m *IpPoolManager) UpdateIpPool(req *types.UpdateIpPool) soap.HasFault {
-	return &methods.UpdateIpPoolBody{
-		Fault_: Fault("not implemented", &types.RuntimeFault{}),
+	body := &methods.UpdateIpPoolBody{}
+
+	var pool *IpPool
+	var err error
+	var ok bool
+
+	if pool, ok = m.pools[req.Pool.Id]; !ok {
+		body.Fault_ = Fault("", &types.NotFoundFault{})
+		return body
 	}
+
+	if pool.config.AllocatedIpv4Addresses+pool.config.AllocatedIpv6Addresses != 0 {
+		body.Fault_ = Fault("update a pool has been used is not supported", &types.RuntimeFault{})
+		return body
+	}
+
+	m.pools[req.Pool.Id], err = NewIpPool(&req.Pool)
+	if err != nil {
+		body.Fault_ = Fault(err.Error(), &types.RuntimeFault{})
+		return body
+	}
+
+	body.Res = &types.UpdateIpPoolResponse{}
+
+	return body
 }
 
 func (m *IpPoolManager) AllocateIpv4Address(req *types.AllocateIpv4Address) soap.HasFault {
@@ -124,7 +172,7 @@ func (m *IpPoolManager) AllocateIpv6Address(req *types.AllocateIpv6Address) soap
 		return body
 	}
 
-	ip, err := pool.AllocateIPv6(req.AllocationId)
+	ip, err := pool.AllocateIpv6(req.AllocationId)
 	if err != nil {
 		body.Fault_ = Fault(err.Error(), &types.RuntimeFault{})
 		return body
@@ -286,6 +334,7 @@ func (p *IpPool) AllocateIPv4(allocation string) (string, error) {
 	ip := p.ipv4Pool[l-1]
 
 	p.config.AvailableIpv4Addresses--
+	p.config.AllocatedIpv4Addresses++
 	p.ipv4Pool = p.ipv4Pool[:l-1]
 	p.ipv4Allocation[allocation] = ip
 
@@ -300,12 +349,13 @@ func (p *IpPool) ReleaseIpv4(allocation string) error {
 
 	delete(p.ipv4Allocation, allocation)
 	p.config.AvailableIpv4Addresses++
+	p.config.AllocatedIpv4Addresses--
 	p.ipv4Pool = append(p.ipv4Pool, ip)
 
 	return nil
 }
 
-func (p *IpPool) AllocateIPv6(allocation string) (string, error) {
+func (p *IpPool) AllocateIpv6(allocation string) (string, error) {
 	if ip, ok := p.ipv6Allocation[allocation]; ok {
 		return ip, nil
 	}
@@ -318,6 +368,7 @@ func (p *IpPool) AllocateIPv6(allocation string) (string, error) {
 	ip := p.ipv6Pool[l-1]
 
 	p.config.AvailableIpv6Addresses--
+	p.config.AllocatedIpv6Addresses++
 	p.ipv6Pool = p.ipv6Pool[:l-1]
 	p.ipv6Allocation[allocation] = ip
 
@@ -332,6 +383,7 @@ func (p *IpPool) ReleaseIpv6(allocation string) error {
 
 	delete(p.ipv6Allocation, allocation)
 	p.config.AvailableIpv6Addresses++
+	p.config.AllocatedIpv6Addresses--
 	p.ipv6Pool = append(p.ipv6Pool, ip)
 
 	return nil
