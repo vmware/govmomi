@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi"
@@ -136,12 +137,12 @@ func TestIpPoolv6(t *testing.T) {
 			t.Fatalf("expect length to be %d; got %d", test.length, len(ipPool.ipv4Pool))
 		}
 
-		ip, err := ipPool.AllocateIPv6("alloc")
+		ip, err := ipPool.AllocateIpv6("alloc")
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		ip2, err := ipPool.AllocateIPv6("alloc")
+		ip2, err := ipPool.AllocateIpv6("alloc")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -169,7 +170,7 @@ func TestIpPoolv6(t *testing.T) {
 
 		allocated := map[string]bool{}
 		for i := 0; i < int(test.length); i++ {
-			ip, err := ipPool.AllocateIPv6(fmt.Sprintf("alloc-%d", i))
+			ip, err := ipPool.AllocateIpv6(fmt.Sprintf("alloc-%d", i))
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -180,14 +181,122 @@ func TestIpPoolv6(t *testing.T) {
 			allocated[ip] = true
 		}
 
-		_, err = ipPool.AllocateIPv6("last-allocation")
+		_, err = ipPool.AllocateIpv6("last-allocation")
 		if err != errNoIpAvailable {
 			t.Fatalf("expect errNoIpAvailable; got %s", err)
 		}
 	}
 }
 
-func TestIpPoolManager(t *testing.T) {
+func TestIpPoolManagerLifecycle(t *testing.T) {
+	ctx := context.Background()
+	m := VPX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ref := types.ManagedObjectReference{Type: "IpPoolManager", Value: "IpPoolManager"}
+
+	var ipPool = &types.IpPool{
+		Name: "ip-pool",
+		AvailableIpv4Addresses: 250,
+		AvailableIpv6Addresses: 250,
+		AllocatedIpv4Addresses: 0,
+		AllocatedIpv6Addresses: 0,
+		Ipv4Config: &types.IpPoolIpPoolConfigInfo{
+			Netmask:       "10.10.10.255",
+			Gateway:       "10.10.10.1",
+			SubnetAddress: "10.10.10.0",
+			Range:         "10.10.10.2#250",
+		},
+		Ipv6Config: &types.IpPoolIpPoolConfigInfo{
+			Netmask:       "2001:4860:0:2001::ff",
+			Gateway:       "2001:4860:0:2001::1",
+			SubnetAddress: "2001:4860:0:2001::0",
+			Range:         "2001:4860:0:2001::2#250",
+		},
+	}
+
+	createReq := &types.CreateIpPool{
+		This: ref,
+		Pool: *ipPool,
+	}
+
+	createResp, err := methods.CreateIpPool(ctx, c.Client, createReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if createResp.Returnval != 2 {
+		t.Fatalf("expect pool id to be 2; got %d", createResp.Returnval)
+	}
+
+	ipPool.Id = 2
+	ipPool.Ipv4Config = &types.IpPoolIpPoolConfigInfo{
+		Netmask:       "10.20.10.255",
+		Gateway:       "10.20.10.1",
+		SubnetAddress: "10.20.10.0",
+		Range:         "10.20.10.2#250",
+	}
+
+	updateReq := &types.UpdateIpPool{
+		This: ref,
+		Pool: *ipPool,
+	}
+
+	_, err = methods.UpdateIpPool(ctx, c.Client, updateReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	queryReq := &types.QueryIpPools{
+		This: ref,
+	}
+
+	queryResp, err := methods.QueryIpPools(ctx, c.Client, queryReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(queryResp.Returnval) != 2 {
+		t.Fatalf("expect length of ip pools is 2; got %d", len(queryResp.Returnval))
+	}
+	if !reflect.DeepEqual(queryResp.Returnval[1].Ipv4Config, ipPool.Ipv4Config) {
+		t.Fatalf("expect query result equal to %+v; got %+v",
+			ipPool.Ipv4Config, queryResp.Returnval[1].Ipv4Config)
+	}
+
+	destroyReq := &types.DestroyIpPool{
+		This: ref,
+		Id:   2,
+	}
+
+	_, err = methods.DestroyIpPool(ctx, c.Client, destroyReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	queryResp, err = methods.QueryIpPools(ctx, c.Client, queryReq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(queryResp.Returnval) != 1 {
+		t.Fatalf("expect length of ip pools is 1 (1 deleted); got %d", len(queryResp.Returnval))
+	}
+}
+
+func TestIpPoolManagerAllocate(t *testing.T) {
 	ctx := context.Background()
 	m := VPX()
 
