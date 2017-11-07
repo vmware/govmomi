@@ -76,7 +76,7 @@ type TaskRunner interface {
 	Run(*Task) (types.AnyType, types.BaseMethodFault)
 }
 
-func (t *Task) Run() {
+func (t *Task) Run() types.ManagedObjectReference {
 	now := time.Now()
 	t.Info.StartTime = &now
 
@@ -97,4 +97,6 @@ func (t *Task) Run() {
 		t.Info.Result = res
 		t.Info.State = types.TaskInfoStateSuccess
 	}
+
+	return t.Self
 }

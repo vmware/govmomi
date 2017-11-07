@@ -134,13 +134,9 @@ func (f *Folder) AddStandaloneHostTask(a *types.AddStandaloneHost_Task) soap.Has
 	r := &methods.AddStandaloneHost_TaskBody{}
 
 	if f.hasChildType("ComputeResource") && f.hasChildType("Folder") {
-		task := NewTask(&addStandaloneHost{f, a})
-
 		r.Res = &types.AddStandaloneHost_TaskResponse{
-			Returnval: task.Self,
+			Returnval: NewTask(&addStandaloneHost{f, a}).Run(),
 		}
-
-		task.Run()
 	} else {
 		r.Fault_ = f.typeNotSupported()
 	}
@@ -313,17 +309,11 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 }
 
 func (f *Folder) CreateVMTask(c *types.CreateVM_Task) soap.HasFault {
-	r := &methods.CreateVM_TaskBody{}
-
-	task := NewTask(&createVM{f, c, false})
-
-	r.Res = &types.CreateVM_TaskResponse{
-		Returnval: task.Self,
+	return &methods.CreateVM_TaskBody{
+		Res: &types.CreateVM_TaskResponse{
+			Returnval: NewTask(&createVM{f, c, false}).Run(),
+		},
 	}
-
-	task.Run()
-
-	return r
 }
 
 type registerVM struct {
@@ -400,17 +390,11 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 }
 
 func (f *Folder) RegisterVMTask(c *types.RegisterVM_Task) soap.HasFault {
-	r := &methods.RegisterVM_TaskBody{}
-
-	task := NewTask(&registerVM{f, c})
-
-	r.Res = &types.RegisterVM_TaskResponse{
-		Returnval: task.Self,
+	return &methods.RegisterVM_TaskBody{
+		Res: &types.RegisterVM_TaskResponse{
+			Returnval: NewTask(&registerVM{f, c}).Run(),
+		},
 	}
-
-	task.Run()
-
-	return r
 }
 
 func (f *Folder) MoveIntoFolderTask(c *types.MoveIntoFolder_Task) soap.HasFault {
@@ -431,11 +415,9 @@ func (f *Folder) MoveIntoFolderTask(c *types.MoveIntoFolder_Task) soap.HasFault 
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.MoveIntoFolder_TaskBody{
 		Res: &types.MoveIntoFolder_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -477,11 +459,9 @@ func (f *Folder) CreateDVSTask(req *types.CreateDVS_Task) soap.HasFault {
 		return dvs.Reference(), nil
 	})
 
-	task.Run()
-
 	return &methods.CreateDVS_TaskBody{
 		Res: &types.CreateDVS_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

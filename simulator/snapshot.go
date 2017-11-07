@@ -43,11 +43,9 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(req *types.RemoveSnapshot_Ta
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.RemoveSnapshot_TaskBody{
 		Res: &types.RemoveSnapshot_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -62,11 +60,9 @@ func (v *VirtualMachineSnapshot) RevertToSnapshotTask(req *types.RevertToSnapsho
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.RevertToSnapshot_TaskBody{
 		Res: &types.RevertToSnapshot_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

@@ -231,11 +231,9 @@ func (b *HostDatastoreBrowser) SearchDatastoreTask(s *types.SearchDatastore_Task
 		SearchSpec:           s.SearchSpec,
 	})
 
-	task.Run()
-
 	return &methods.SearchDatastore_TaskBody{
 		Res: &types.SearchDatastore_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -248,11 +246,9 @@ func (b *HostDatastoreBrowser) SearchDatastoreSubFoldersTask(s *types.SearchData
 		recurse:              true,
 	})
 
-	task.Run()
-
 	return &methods.SearchDatastoreSubFolders_TaskBody{
 		Res: &types.SearchDatastoreSubFolders_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

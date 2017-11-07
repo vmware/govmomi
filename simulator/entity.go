@@ -38,11 +38,9 @@ func RenameTask(e mo.Entity, r *types.Rename_Task) soap.HasFault {
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.Rename_TaskBody{
 		Res: &types.Rename_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

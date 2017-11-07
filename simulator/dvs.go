@@ -76,11 +76,9 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.AddDVPortgroup_TaskBody{
 		Res: &types.AddDVPortgroup_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -129,11 +127,9 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(req *types.ReconfigureDvs_
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.ReconfigureDvs_TaskBody{
 		Res: &types.ReconfigureDvs_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -153,11 +149,9 @@ func (s *DistributedVirtualSwitch) DestroyTask(req *types.Destroy_Task) soap.Has
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

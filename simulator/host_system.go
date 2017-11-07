@@ -159,11 +159,9 @@ func (h *HostSystem) EnterMaintenanceModeTask(spec *types.EnterMaintenanceMode_T
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.EnterMaintenanceMode_TaskBody{
 		Res: &types.EnterMaintenanceMode_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -174,11 +172,9 @@ func (h *HostSystem) ExitMaintenanceModeTask(spec *types.ExitMaintenanceMode_Tas
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.ExitMaintenanceMode_TaskBody{
 		Res: &types.ExitMaintenanceMode_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
