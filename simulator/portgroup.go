@@ -43,11 +43,9 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(req *types.Reco
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.ReconfigureDVPortgroup_TaskBody{
 		Res: &types.ReconfigureDVPortgroup_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -75,11 +73,9 @@ func (s *DistributedVirtualPortgroup) DestroyTask(req *types.Destroy_Task) soap.
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 

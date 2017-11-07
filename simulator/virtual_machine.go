@@ -483,33 +483,25 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 }
 
 func (vm *VirtualMachine) PowerOnVMTask(c *types.PowerOnVM_Task) soap.HasFault {
-	r := &methods.PowerOnVM_TaskBody{}
-
 	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOn}
 	task := CreateTask(runner.Reference(), "powerOn", runner.Run)
 
-	r.Res = &types.PowerOnVM_TaskResponse{
-		Returnval: task.Self,
+	return &methods.PowerOnVM_TaskBody{
+		Res: &types.PowerOnVM_TaskResponse{
+			Returnval: task.Run(),
+		},
 	}
-
-	task.Run()
-
-	return r
 }
 
 func (vm *VirtualMachine) PowerOffVMTask(c *types.PowerOffVM_Task) soap.HasFault {
-	r := &methods.PowerOffVM_TaskBody{}
-
 	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOff}
 	task := CreateTask(runner.Reference(), "powerOff", runner.Run)
 
-	r.Res = &types.PowerOffVM_TaskResponse{
-		Returnval: task.Self,
+	return &methods.PowerOffVM_TaskBody{
+		Res: &types.PowerOffVM_TaskResponse{
+			Returnval: task.Run(),
+		},
 	}
-
-	task.Run()
-
-	return r
 }
 
 func (vm *VirtualMachine) ReconfigVMTask(req *types.ReconfigVM_Task) soap.HasFault {
@@ -522,11 +514,9 @@ func (vm *VirtualMachine) ReconfigVMTask(req *types.ReconfigVM_Task) soap.HasFau
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.ReconfigVM_TaskBody{
 		Res: &types.ReconfigVM_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -554,11 +544,9 @@ func (vm *VirtualMachine) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -625,11 +613,9 @@ func (vm *VirtualMachine) CloneVMTask(req *types.CloneVM_Task) soap.HasFault {
 		return ctask.Info.Result.(types.ManagedObjectReference), nil
 	})
 
-	task.Run()
-
 	return &methods.CloneVM_TaskBody{
 		Res: &types.CloneVM_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -662,11 +648,9 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.RelocateVM_TaskBody{
 		Res: &types.RelocateVM_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -712,11 +696,9 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.CreateSnapshot_TaskBody{
 		Res: &types.CreateSnapshot_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -734,10 +716,8 @@ func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrent
 		return nil, nil
 	})
 
-	task.Run()
-
 	body.Res = &types.RevertToCurrentSnapshot_TaskResponse{
-		Returnval: task.Self,
+		Returnval: task.Run(),
 	}
 
 	return body
@@ -761,11 +741,9 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(req *types.RemoveAllSnapshots_T
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.RemoveAllSnapshots_TaskBody{
 		Res: &types.RemoveAllSnapshots_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

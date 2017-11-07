@@ -131,11 +131,9 @@ func (f *FileManager) DeleteDatastoreFileTask(req *types.DeleteDatastoreFile_Tas
 		return nil, f.deleteDatastoreFile(req)
 	})
 
-	task.Run()
-
 	return &methods.DeleteDatastoreFile_TaskBody{
 		Res: &types.DeleteDatastoreFile_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -196,11 +194,9 @@ func (f *FileManager) MoveDatastoreFileTask(req *types.MoveDatastoreFile_Task) s
 		return nil, f.moveDatastoreFile(req)
 	})
 
-	task.Run()
-
 	return &methods.MoveDatastoreFile_TaskBody{
 		Res: &types.MoveDatastoreFile_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -247,11 +243,9 @@ func (f *FileManager) CopyDatastoreFileTask(req *types.CopyDatastoreFile_Task) s
 		return nil, f.copyDatastoreFile(req)
 	})
 
-	task.Run()
-
 	return &methods.CopyDatastoreFile_TaskBody{
 		Res: &types.CopyDatastoreFile_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

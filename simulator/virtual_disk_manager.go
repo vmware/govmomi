@@ -74,11 +74,9 @@ func (m *VirtualDiskManager) CreateVirtualDiskTask(req *types.CreateVirtualDisk_
 		return nil, m.createVirtualDisk(req)
 	})
 
-	task.Run()
-
 	return &methods.CreateVirtualDisk_TaskBody{
 		Res: &types.CreateVirtualDisk_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -101,11 +99,9 @@ func (m *VirtualDiskManager) DeleteVirtualDiskTask(req *types.DeleteVirtualDisk_
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.DeleteVirtualDisk_TaskBody{
 		Res: &types.DeleteVirtualDisk_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -133,11 +129,9 @@ func (m *VirtualDiskManager) MoveVirtualDiskTask(req *types.MoveVirtualDisk_Task
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.MoveVirtualDisk_TaskBody{
 		Res: &types.MoveVirtualDisk_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
@@ -165,11 +159,9 @@ func (m *VirtualDiskManager) CopyVirtualDiskTask(req *types.CopyVirtualDisk_Task
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.CopyVirtualDisk_TaskBody{
 		Res: &types.CopyVirtualDisk_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }

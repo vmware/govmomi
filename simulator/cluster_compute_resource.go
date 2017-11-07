@@ -61,17 +61,11 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 }
 
 func (c *ClusterComputeResource) AddHostTask(add *types.AddHost_Task) soap.HasFault {
-	r := &methods.AddHost_TaskBody{}
-
-	task := NewTask(&addHost{c, add})
-
-	r.Res = &types.AddHost_TaskResponse{
-		Returnval: task.Self,
+	return &methods.AddHost_TaskBody{
+		Res: &types.AddHost_TaskResponse{
+			Returnval: NewTask(&addHost{c, add}).Run(),
+		},
 	}
-
-	task.Run()
-
-	return r
 }
 
 func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {

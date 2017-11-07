@@ -304,11 +304,9 @@ func (p *ResourcePool) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 		return nil, nil
 	})
 
-	task.Run()
-
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Self,
+			Returnval: task.Run(),
 		},
 	}
 }
