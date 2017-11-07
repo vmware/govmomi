@@ -102,8 +102,10 @@ func (m *IpPoolManager) DestroyIpPool(req *types.DestroyIpPool) soap.HasFault {
 func (m *IpPoolManager) QueryIpPools(req *types.QueryIpPools) soap.HasFault {
 	pools := []types.IpPool{}
 
-	for _, pool := range m.pools {
-		pools = append(pools, *pool.config)
+	for i := int32(1); i < m.nextPoolId; i++ {
+		if p, ok := m.pools[i]; ok {
+			pools = append(pools, *p.config)
+		}
 	}
 
 	return &methods.QueryIpPoolsBody{
