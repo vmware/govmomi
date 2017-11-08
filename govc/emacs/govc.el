@@ -3,7 +3,7 @@
 ;; Author: The govc developers
 ;; URL: https://github.com/vmware/govmomi/tree/master/govc/emacs
 ;; Keywords: convenience
-;; Version: 0.14.0
+;; Version: 0.16.0
 ;; Package-Requires: ((emacs "24.3") (dash "1.5.0") (s "1.9.0") (magit-popup "2.0.50") (json-mode "1.6.0"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -161,16 +161,16 @@ The default prefix is `C-c ;' and can be changed by setting `govc-keymap-prefix'
     (kill-new (message "%s" (s-join " " (--map (format "\"%s\"" it) (govc-selection)))))))
 
 (defvar govc-font-lock-keywords
-  `(("\"[^\"]*\"" . (0 font-lock-string-face))
-    ("'[^']*'" . (0 font-lock-string-face))
-    ("[.0-9]+%" . (0 font-lock-type-face))
-    (,(mapconcat 'identity (make-list 4 "[0-9]+") "\\.") ;; IP address
-     . (0 font-lock-variable-name-face))
-    (,(let ((host-expression "[-A-Za-z0-9]+")) ;; Hostname
+  `((,(let ((host-expression "\\b[-a-z0-9]+\\b")) ;; Hostname
         (concat
          (mapconcat 'identity (make-list 3 host-expression) "\\.")
          "\\(\\." host-expression "\\)*")) .
          (0 font-lock-variable-name-face))
+    (,(mapconcat 'identity (make-list 4 "[0-9]+") "\\.") ;; IP address
+     . (0 font-lock-variable-name-face))
+    ("\"[^\"]*\"" . (0 font-lock-string-face))
+    ("'[^']*'" . (0 font-lock-string-face))
+    ("[.0-9]+%" . (0 font-lock-type-face))
     ("\\<\\(success\\|poweredOn\\)\\>" . (1 font-lock-doc-face))
     ("\\<\\(error\\|poweredOff\\)\\>" . (1 font-lock-warning-face))
     ("\\<\\(running\\|info\\)\\>" . (1 font-lock-variable-name-face))
@@ -180,6 +180,7 @@ The default prefix is `C-c ;' and can be changed by setting `govc-keymap-prefix'
     ("types.ManagedObjectReference\\(.*\\)" . (1 dired-directory-face))
     ("[^ ]*/$" . (0 dired-directory-face))
     ("\\.\\.\\.$" . (0 dired-symlink-face))
+    ("^[0-9][0-9][0-9][0-9]-[0-9][0-9]-[0-9][0-9][A-Z][0-9][0-9]:[0-9][0-9]:[0-9][0-9].[0-9][0-9][0-9][A-Z]|" . (0 font-lock-comment-face))
     ("^\\([ A-Za-z0-9_]+: \\).*" . (1 font-lock-comment-face))
     ("<[^>]*>" . (0 font-lock-comment-face))
     ("\\[[^]]*\\]" . (0 font-lock-comment-face))
@@ -349,7 +350,7 @@ Return value is the url anchor if set, otherwise the hostname is returned."
 (defun govc-format-command (command &rest args)
   "Format govc COMMAND ARGS."
   (format "%s %s %s" govc-command command
-          (s-join " " (--map (format "'%s'" it)
+          (s-join " " (--map (format "\"%s\"" it)
                              (-flatten (-non-nil args))))))
 
 (defconst govc-environment-map (--map (cons (concat "GOVC_" (upcase it))
@@ -1266,6 +1267,7 @@ Optionally filter by FILTER and inherit SESSION."
 
 (define-derived-mode govc-datastore-ls-mode govc-tabulated-list-mode "Datastore"
   "Major mode govc datastore.ls."
+  (setq-local font-lock-defaults `(,(cdr govc-font-lock-keywords)))
   (setq tabulated-list-format [("Size" 10 t)
                                ("Modification time" 25 t)
                                ("Name" 40 t)]
@@ -1472,13 +1474,16 @@ With prefix \\[universal-argument] ARG, launches an interactive console (VMRC)."
   (if current-prefix-arg
       (govc-datastore (s-split ", " (govc-table-column-value "Storage") t)
                       (govc-current-session))
-    (let ((dir (govc-vm-log-directory)))
-      (govc-datastore-ls dir (govc-current-session) (concat dir "/")))))
+    (let* ((dir (govc-vm-log-directory))
+           (args (s-split "\\[\\|\\]" dir t)))
+      (govc-datastore-ls (first args) (govc-current-session) (concat (s-trim (second args)) "/")))))
 
 (defun govc-vm-logs ()
   "Logs via `govc-datastore-tail' with logDirectory of current selection."
   (interactive)
-  (govc-datastore-tail (concat (govc-vm-log-directory) "/vmware.log")))
+  (if (tabulated-list-get-id)
+      (govc-datastore-tail (concat (govc-vm-log-directory) "/vmware.log"))
+    (govc-logs)))
 
 (defun govc-vm-ping ()
   "Ping VM."

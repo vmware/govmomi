@@ -57,8 +57,8 @@ func (i *int32ptrValue) Set(s string) error {
 }
 
 func (i *int32ptrValue) Get() interface{} {
-	if i.val == nil {
-		return -1
+	if i.val == nil || *i.val == nil {
+		return nil
 	}
 	return *i.val
 }
