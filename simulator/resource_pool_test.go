@@ -271,48 +271,46 @@ func TestCreateVAppVPX(t *testing.T) {
 }
 
 func TestResourcePoolValidation(t *testing.T) {
-	var pool ResourcePool
-
 	tests := []func() bool{
 		func() bool {
-			return pool.allFieldsSet(types.ResourceAllocationInfo{})
+			return allResourceFieldsSet(&types.ResourceAllocationInfo{})
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			spec.CpuAllocation.Limit = nil
-			return pool.allFieldsSet(spec.CpuAllocation)
+			return allResourceFieldsSet(&spec.CpuAllocation)
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			spec.CpuAllocation.Reservation = nil
-			return pool.allFieldsSet(spec.CpuAllocation)
+			return allResourceFieldsSet(&spec.CpuAllocation)
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			spec.CpuAllocation.ExpandableReservation = nil
-			return pool.allFieldsSet(spec.CpuAllocation)
+			return allResourceFieldsSet(&spec.CpuAllocation)
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			spec.CpuAllocation.Shares = nil
-			return pool.allFieldsSet(spec.CpuAllocation)
+			return allResourceFieldsSet(&spec.CpuAllocation)
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			spec.CpuAllocation.Reservation = types.NewInt64(-1)
-			return pool.allFieldsValid(spec.CpuAllocation)
+			return allResourceFieldsValid(&spec.CpuAllocation)
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			spec.CpuAllocation.Limit = types.NewInt64(-100)
-			return pool.allFieldsValid(spec.CpuAllocation)
+			return allResourceFieldsValid(&spec.CpuAllocation)
 		},
 		func() bool {
 			spec := types.DefaultResourceConfigSpec()
 			shares := spec.CpuAllocation.Shares
 			shares.Level = types.SharesLevelCustom
 			shares.Shares = -1
-			return pool.allFieldsValid(spec.CpuAllocation)
+			return allResourceFieldsValid(&spec.CpuAllocation)
 		},
 	}
 

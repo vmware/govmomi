@@ -241,7 +241,7 @@ func TestCreateVm(t *testing.T) {
 	}
 }
 
-func TestReconfigVm(t *testing.T) {
+func TestReconfigVmDevice(t *testing.T) {
 	ctx := context.Background()
 
 	m := ESX()
@@ -331,6 +331,58 @@ func TestReconfigVm(t *testing.T) {
 
 		if info.Datastore.Type == "" || info.Datastore.Value == "" {
 			t.Errorf("invalid datastore for %s", device.Name(d))
+		}
+	}
+}
+
+func TestReconfigVm(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+
+	tests := []struct {
+		fail bool
+		spec types.VirtualMachineConfigSpec
+	}{
+		{
+			true, types.VirtualMachineConfigSpec{
+				CpuAllocation: &types.ResourceAllocationInfo{Reservation: types.NewInt64(-1)},
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				CpuAllocation: &types.ResourceAllocationInfo{Reservation: types.NewInt64(100)},
+			},
+		},
+	}
+
+	for i, test := range tests {
+		rtask, _ := vm.Reconfigure(ctx, test.spec)
+
+		err := rtask.Wait(ctx)
+		if test.fail {
+			if err == nil {
+				t.Errorf("%d: expected failure", i)
+			}
+		} else {
+			if err != nil {
+				t.Errorf("unexpected failure: %s", err)
+			}
 		}
 	}
 }

@@ -19,63 +19,23 @@ package pool
 import (
 	"context"
 	"flag"
-	"strconv"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type sharesInfo types.SharesInfo
-
-func (s *sharesInfo) String() string {
-	return string(s.Level)
-}
-
-func (s *sharesInfo) Set(val string) error {
-	switch val {
-	case string(types.SharesLevelNormal), string(types.SharesLevelLow), string(types.SharesLevelHigh):
-		s.Level = types.SharesLevel(val)
-	default:
-		n, err := strconv.Atoi(val)
-		if err != nil {
-			return err
-		}
-
-		s.Level = types.SharesLevelCustom
-		s.Shares = int32(n)
-	}
-
-	return nil
-}
-
 func NewResourceConfigSpecFlag() *ResourceConfigSpecFlag {
-	return &ResourceConfigSpecFlag{types.DefaultResourceConfigSpec()}
+	return &ResourceConfigSpecFlag{types.DefaultResourceConfigSpec(), nil}
 }
 
 type ResourceConfigSpecFlag struct {
 	types.ResourceConfigSpec
+	*flags.ResourceAllocationFlag
 }
 
 func (s *ResourceConfigSpecFlag) Register(ctx context.Context, f *flag.FlagSet) {
-	opts := []struct {
-		name  string
-		units string
-		*types.ResourceAllocationInfo
-	}{
-		{"CPU", "MHz", &s.CpuAllocation},
-		{"Memory", "MB", &s.MemoryAllocation},
-	}
-
-	for _, opt := range opts {
-		prefix := strings.ToLower(opt.name)[:3]
-		shares := (*sharesInfo)(opt.Shares)
-
-		f.Var(flags.NewOptionalInt64(&opt.Limit), prefix+".limit", opt.name+" limit in "+opt.units)
-		f.Var(flags.NewOptionalInt64(&opt.Reservation), prefix+".reservation", opt.name+" reservation in "+opt.units)
-		f.Var(flags.NewOptionalBool(&opt.ExpandableReservation), prefix+".expandable", opt.name+" expandable reservation")
-		f.Var(shares, prefix+".shares", opt.name+" shares level or number")
-	}
+	s.ResourceAllocationFlag = flags.NewResourceAllocationFlag(&s.CpuAllocation, &s.MemoryAllocation)
+	s.ResourceAllocationFlag.Register(ctx, f)
 }
 
 func (s *ResourceConfigSpecFlag) Process(ctx context.Context) error {

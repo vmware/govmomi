@@ -2739,6 +2739,7 @@ Change VM configuration.
 To add ExtraConfig variables that can read within the guest, use the 'guestinfo.' prefix.
 
 Examples:
+  govc vm.change -vm $vm -mem.reservation 2048
   govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
@@ -2746,9 +2747,15 @@ Examples:
 
 Options:
   -c=0                        Number of CPUs
+  -cpu.limit=<nil>            CPU limit in MHz
+  -cpu.reservation=<nil>      CPU reservation in MHz
+  -cpu.shares=                CPU shares level or number
   -e=[]                       ExtraConfig. <key>=<value>
   -g=                         Guest OS
   -m=0                        Size in MB of memory
+  -mem.limit=<nil>            Memory limit in MB
+  -mem.reservation=<nil>      Memory reservation in MB
+  -mem.shares=                Memory shares level or number
   -name=                      Display name
   -nested-hv-enabled=<nil>    Enable nested hardware-assisted virtualization
   -sync-time-with-host=<nil>  Enable SyncTimeWithHost
