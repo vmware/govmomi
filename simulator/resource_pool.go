@@ -43,14 +43,14 @@ func NewResourcePool() *ResourcePool {
 	return pool
 }
 
-func (p *ResourcePool) allFieldsSet(info types.ResourceAllocationInfo) bool {
+func allResourceFieldsSet(info *types.ResourceAllocationInfo) bool {
 	return info.Reservation != nil &&
 		info.Limit != nil &&
 		info.ExpandableReservation != nil &&
 		info.Shares != nil
 }
 
-func (p *ResourcePool) allFieldsValid(info types.ResourceAllocationInfo) bool {
+func allResourceFieldsValid(info *types.ResourceAllocationInfo) bool {
 	if info.Reservation != nil {
 		if *info.Reservation < 0 {
 			return false
@@ -86,13 +86,13 @@ func (p *ResourcePool) createChild(name string, spec types.ResourceConfigSpec) (
 		})
 	}
 
-	if !(p.allFieldsSet(spec.CpuAllocation) && p.allFieldsValid(spec.CpuAllocation)) {
+	if !(allResourceFieldsSet(&spec.CpuAllocation) && allResourceFieldsValid(&spec.CpuAllocation)) {
 		return nil, Fault("", &types.InvalidArgument{
 			InvalidProperty: "spec.cpuAllocation",
 		})
 	}
 
-	if !(p.allFieldsSet(spec.MemoryAllocation) && p.allFieldsValid(spec.MemoryAllocation)) {
+	if !(allResourceFieldsSet(&spec.MemoryAllocation) && allResourceFieldsValid(&spec.MemoryAllocation)) {
 		return nil, Fault("", &types.InvalidArgument{
 			InvalidProperty: "spec.memoryAllocation",
 		})
@@ -130,11 +130,11 @@ func (p *ResourcePool) CreateResourcePool(c *types.CreateResourcePool) soap.HasF
 	return body
 }
 
-func (p *ResourcePool) updateAllocation(kind string, src types.ResourceAllocationInfo, dst *types.ResourceAllocationInfo) *soap.Fault {
-	if !p.allFieldsValid(src) {
-		return Fault("", &types.InvalidArgument{
+func updateResourceAllocation(kind string, src, dst *types.ResourceAllocationInfo) types.BaseMethodFault {
+	if !allResourceFieldsValid(src) {
+		return &types.InvalidArgument{
 			InvalidProperty: fmt.Sprintf("spec.%sAllocation", kind),
-		})
+		}
 	}
 
 	if src.Reservation != nil {
@@ -170,13 +170,13 @@ func (p *ResourcePool) UpdateConfig(c *types.UpdateConfig) soap.HasFault {
 	spec := c.Config
 
 	if spec != nil {
-		if err := p.updateAllocation("memory", spec.MemoryAllocation, &p.Config.MemoryAllocation); err != nil {
-			body.Fault_ = err
+		if err := updateResourceAllocation("memory", &spec.MemoryAllocation, &p.Config.MemoryAllocation); err != nil {
+			body.Fault_ = Fault("", err)
 			return body
 		}
 
-		if err := p.updateAllocation("cpu", spec.CpuAllocation, &p.Config.CpuAllocation); err != nil {
-			body.Fault_ = err
+		if err := updateResourceAllocation("cpu", &spec.CpuAllocation, &p.Config.CpuAllocation); err != nil {
+			body.Fault_ = Fault("", err)
 			return body
 		}
 	}

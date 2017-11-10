@@ -57,9 +57,12 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		return nil, &types.InvalidVmConfig{Property: "configSpec.files.vmPathName"}
 	}
 
+	rspec := types.DefaultResourceConfigSpec()
 	vm.Config = &types.VirtualMachineConfigInfo{
-		ExtraConfig: []types.BaseOptionValue{&types.OptionValue{Key: "govcsim", Value: "TRUE"}},
-		Tools:       &types.ToolsConfigInfo{},
+		ExtraConfig:      []types.BaseOptionValue{&types.OptionValue{Key: "govcsim", Value: "TRUE"}},
+		Tools:            &types.ToolsConfigInfo{},
+		MemoryAllocation: &rspec.MemoryAllocation,
+		CpuAllocation:    &rspec.CpuAllocation,
 	}
 	vm.Summary.Guest = &types.VirtualMachineGuestSummary{}
 	vm.Summary.Storage = &types.VirtualMachineStorageSummary{}
@@ -158,6 +161,18 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 
 func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	vm.apply(spec)
+
+	if spec.MemoryAllocation != nil {
+		if err := updateResourceAllocation("memory", spec.MemoryAllocation, vm.Config.MemoryAllocation); err != nil {
+			return err
+		}
+	}
+
+	if spec.CpuAllocation != nil {
+		if err := updateResourceAllocation("cpu", spec.CpuAllocation, vm.Config.CpuAllocation); err != nil {
+			return err
+		}
+	}
 
 	return vm.configureDevices(spec)
 }
