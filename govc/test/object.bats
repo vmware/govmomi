@@ -176,7 +176,7 @@ load test_helper
   assert_success "VMware, Inc."
 
   run govc object.collect -s -type DistributedVirtualSwitch / summary.productInfo.version
-  assert_success 6.0.0
+  assert_success 6.5.0
 
   run govc object.collect -s -type DistributedVirtualSwitch / summary.uuid
   assert_matches "-"
