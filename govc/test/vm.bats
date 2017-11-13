@@ -649,3 +649,13 @@ load test_helper
   run govc vm.console -capture - "$vm"
   assert_success
 }
+
+@test "vm.upgrade" {
+  esx_env
+
+  vm=$(new_empty_vm)
+
+  govc vm.upgrade -vm "$vm"
+  assert_success
+
+}
