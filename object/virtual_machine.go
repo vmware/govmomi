@@ -785,3 +785,17 @@ func (v VirtualMachine) Export(ctx context.Context) (*nfc.Lease, error) {
 
 	return nfc.NewLease(v.c, res.Returnval), nil
 }
+
+func (v VirtualMachine) UpgradeVM(ctx context.Context, version string) (*Task, error) {
+	req := types.UpgradeVM_Task{
+		This:    v.Reference(),
+		Version: version,
+	}
+
+	res, err := methods.UpgradeVM_Task(ctx, v.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
