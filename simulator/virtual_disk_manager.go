@@ -20,6 +20,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -164,4 +165,29 @@ func (m *VirtualDiskManager) CopyVirtualDiskTask(req *types.CopyVirtualDisk_Task
 			Returnval: task.Run(),
 		},
 	}
+}
+
+func (m *VirtualDiskManager) QueryVirtualDiskUuid(req *types.QueryVirtualDiskUuid) soap.HasFault {
+	body := new(methods.QueryVirtualDiskUuidBody)
+
+	fm := Map.FileManager()
+
+	file, fault := fm.resolve(req.Datacenter, req.Name)
+	if fault != nil {
+		body.Fault_ = Fault("", fault)
+		return body
+	}
+
+	_, err := os.Stat(file)
+	if err != nil {
+		fault = fm.fault(file, err, new(types.CannotAccessFile))
+		body.Fault_ = Fault("", fault)
+		return body
+	}
+
+	body.Res = &types.QueryVirtualDiskUuidResponse{
+		Returnval: uuid.NewSHA1(uuid.NameSpaceOID, []byte(file)).String(),
+	}
+
+	return body
 }
