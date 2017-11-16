@@ -22,6 +22,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
@@ -81,6 +82,26 @@ func TestVirtualDiskManager(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
+	}
+
+	qname := name
+	for _, fail := range []bool{false, true} {
+		id, err := dm.QueryVirtualDiskUuid(ctx, qname, nil)
+		if fail {
+			if err == nil {
+				t.Error("expected error")
+			}
+		} else {
+			if err != nil {
+				t.Error(err)
+			}
+
+			_, err = uuid.Parse(id)
+			if err != nil {
+				t.Error(err)
+			}
+		}
+		qname += "-enoent"
 	}
 
 	old := name
