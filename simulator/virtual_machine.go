@@ -159,6 +159,16 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	vm.Summary.Config.Uuid = vm.Config.Uuid
 }
 
+func validateGuestID(id string) types.BaseMethodFault {
+	for _, x := range GuestID {
+		if id == string(x) {
+			return nil
+		}
+	}
+
+	return &types.InvalidArgument{InvalidProperty: "configSpec.guestId"}
+}
+
 func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	vm.apply(spec)
 
@@ -170,6 +180,12 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 
 	if spec.CpuAllocation != nil {
 		if err := updateResourceAllocation("cpu", spec.CpuAllocation, vm.Config.CpuAllocation); err != nil {
+			return err
+		}
+	}
+
+	if spec.GuestId != "" {
+		if err := validateGuestID(spec.GuestId); err != nil {
 			return err
 		}
 	}
