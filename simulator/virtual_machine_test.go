@@ -369,6 +369,16 @@ func TestReconfigVm(t *testing.T) {
 				CpuAllocation: &types.ResourceAllocationInfo{Reservation: types.NewInt64(100)},
 			},
 		},
+		{
+			true, types.VirtualMachineConfigSpec{
+				GuestId: "enoent",
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				GuestId: string(GuestID[0]),
+			},
+		},
 	}
 
 	for i, test := range tests {
