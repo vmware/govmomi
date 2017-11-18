@@ -110,9 +110,10 @@ type createChildDiskTaskResponse struct {
 }
 
 type createChildDiskTaskBody struct {
-	Req *createChildDiskTaskRequest  `xml:"urn:internalvim25 CreateChildDisk_Task,omitempty"`
-	Res *createChildDiskTaskResponse `xml:"urn:vim25 CreateChildDisk_TaskResponse,omitempty"`
-	Err *soap.Fault                  `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+	Req         *createChildDiskTaskRequest  `xml:"urn:internalvim25 CreateChildDisk_Task,omitempty"`
+	Res         *createChildDiskTaskResponse `xml:"urn:vim25 CreateChildDisk_TaskResponse,omitempty"`
+	InternalRes *createChildDiskTaskResponse `xml:"urn:internalvim25 CreateChildDisk_TaskResponse,omitempty"`
+	Err         *soap.Fault                  `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 
 func (b *createChildDiskTaskBody) Fault() *soap.Fault { return b.Err }
@@ -126,7 +127,11 @@ func createChildDiskTask(ctx context.Context, r soap.RoundTripper, req *createCh
 		return nil, err
 	}
 
-	return resBody.Res, nil
+	if resBody.Res != nil {
+		return resBody.Res, nil // vim-version <= 6.5
+	}
+
+	return resBody.InternalRes, nil // vim-version >= 6.7
 }
 
 func (m VirtualDiskManager) CreateChildDisk(ctx context.Context, parent string, pdc *Datacenter, name string, dc *Datacenter, linked bool) (*Task, error) {
