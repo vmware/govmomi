@@ -61,7 +61,8 @@ func (cmd *create) Description() string {
 
 Examples:
   govc datastore.mkdir disks
-  govc datastore.disk.create -size 24G disks/disk1.vmdk`
+  govc datastore.disk.create -size 24G disks/disk1.vmdk
+  govc datastore.disk.create disks/parent.vmdk disk/child.vmdk`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -81,6 +82,8 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	m := object.NewVirtualDiskManager(ds.Client())
 
+	var task *object.Task
+
 	spec := &types.FileBackedVirtualDiskSpec{
 		VirtualDiskSpec: types.VirtualDiskSpec{
 			AdapterType: string(types.VirtualDiskAdapterTypeLsiLogic),
@@ -89,7 +92,12 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		CapacityKb: int64(cmd.Bytes) / 1024,
 	}
 
-	task, err := m.CreateVirtualDisk(ctx, ds.Path(f.Arg(0)), dc, spec)
+	if f.NArg() == 1 {
+		task, err = m.CreateVirtualDisk(ctx, ds.Path(f.Arg(0)), dc, spec)
+	} else {
+		task, err = m.CreateChildDisk(ctx, ds.Path(f.Arg(0)), dc, ds.Path(f.Arg(1)), dc, true)
+	}
+
 	if err != nil {
 		return err
 	}
