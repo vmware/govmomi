@@ -17,6 +17,9 @@ limitations under the License.
 package simulator
 
 import (
+	"sync/atomic"
+
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -26,6 +29,8 @@ import (
 
 type ClusterComputeResource struct {
 	mo.ClusterComputeResource
+
+	ruleKey int32
 }
 
 type addHost struct {
@@ -68,6 +73,125 @@ func (c *ClusterComputeResource) AddHostTask(add *types.AddHost_Task) soap.HasFa
 	}
 }
 
+func (c *ClusterComputeResource) updateRules(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
+	for _, spec := range cspec.RulesSpec {
+		var i int
+		exists := false
+
+		match := func(info types.BaseClusterRuleInfo) bool {
+			return info.GetClusterRuleInfo().Name == spec.Info.GetClusterRuleInfo().Name
+		}
+
+		if spec.Operation == types.ArrayUpdateOperationRemove {
+			match = func(rule types.BaseClusterRuleInfo) bool {
+				return rule.GetClusterRuleInfo().Key == spec.ArrayUpdateSpec.RemoveKey.(int32)
+			}
+		}
+
+		for i = range cfg.Rule {
+			if match(cfg.Rule[i].GetClusterRuleInfo()) {
+				exists = true
+				break
+			}
+		}
+
+		switch spec.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if exists {
+				return new(types.InvalidArgument)
+			}
+			info := spec.Info.GetClusterRuleInfo()
+			info.Key = atomic.AddInt32(&c.ruleKey, 1)
+			info.RuleUuid = uuid.New().String()
+			cfg.Rule = append(cfg.Rule, spec.Info)
+		case types.ArrayUpdateOperationEdit:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.Rule[i] = spec.Info
+		case types.ArrayUpdateOperationRemove:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.Rule = append(cfg.Rule[:i], cfg.Rule[i+1:]...)
+		}
+	}
+
+	return nil
+}
+
+func (c *ClusterComputeResource) updateGroups(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
+	for _, spec := range cspec.GroupSpec {
+		var i int
+		exists := false
+
+		match := func(info types.BaseClusterGroupInfo) bool {
+			return info.GetClusterGroupInfo().Name == spec.Info.GetClusterGroupInfo().Name
+		}
+
+		if spec.Operation == types.ArrayUpdateOperationRemove {
+			match = func(info types.BaseClusterGroupInfo) bool {
+				return info.GetClusterGroupInfo().Name == spec.ArrayUpdateSpec.RemoveKey.(string)
+			}
+		}
+
+		for i = range cfg.Group {
+			if match(cfg.Group[i].GetClusterGroupInfo()) {
+				exists = true
+				break
+			}
+		}
+
+		switch spec.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.Group = append(cfg.Group, spec.Info)
+		case types.ArrayUpdateOperationEdit:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.Group[i] = spec.Info
+		case types.ArrayUpdateOperationRemove:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.Group = append(cfg.Group[:i], cfg.Group[i+1:]...)
+		}
+	}
+
+	return nil
+}
+
+func (c *ClusterComputeResource) ReconfigureComputeResourceTask(req *types.ReconfigureComputeResource_Task) soap.HasFault {
+	task := CreateTask(c, "reconfigureCluster", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		spec, ok := req.Spec.(*types.ClusterConfigSpecEx)
+		if !ok {
+			return nil, new(types.InvalidArgument)
+		}
+
+		updates := []func(*types.ClusterConfigInfoEx, *types.ClusterConfigSpecEx) types.BaseMethodFault{
+			c.updateRules,
+			c.updateGroups,
+		}
+
+		for _, update := range updates {
+			if err := update(c.ConfigurationEx.(*types.ClusterConfigInfoEx), spec); err != nil {
+				return nil, err
+			}
+		}
+
+		return nil, nil
+	})
+
+	return &methods.ReconfigureComputeResource_TaskBody{
+		Res: &types.ReconfigureComputeResource_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
+
 func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {
 	if e := Map.FindByName(name, f.ChildEntity); e != nil {
 		return nil, &types.DuplicateName{
@@ -85,6 +209,7 @@ func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConf
 	config := &types.ClusterConfigInfoEx{}
 	cluster.ConfigurationEx = config
 
+	config.VmSwapPlacement = string(types.VirtualMachineConfigInfoSwapPlacementTypeVmDirectory)
 	config.DrsConfig.Enabled = types.NewBool(true)
 
 	pool := NewResourcePool()

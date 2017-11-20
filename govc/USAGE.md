@@ -83,7 +83,7 @@ Examples:
   govc cluster.add -cluster ClusterB -hostname 10.0.6.1 -username root -password pass -noverify
 
 Options:
-  -cluster=*                Path to cluster
+  -cluster=                 Cluster [GOVC_CLUSTER]
   -connect=true             Immediately connect to host
   -force=false              Force when host is managed by another VC
   -hostname=                Hostname or IP address of the host
@@ -129,6 +129,158 @@ Examples:
 
 Options:
   -folder=                  Inventory folder [GOVC_FOLDER]
+```
+
+## cluster.group.change
+
+```
+Usage: govc cluster.group.change [OPTIONS] NAME...
+
+Set cluster group members.
+
+Examples:
+  govc cluster.group.change -name my_group vm_a vm_b vm_c # set
+  govc cluster.group.change -name my_group vm_a vm_b vm_c $(govc cluster.group.ls -name my_group) vm_d # add
+  govc cluster.group.ls -name my_group | grep -v vm_b | xargs govc cluster.group.change -name my_group vm_a vm_b vm_c # remove
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -name=                    Cluster group name
+```
+
+## cluster.group.create
+
+```
+Usage: govc cluster.group.create [OPTIONS]
+
+Create cluster group.
+
+One of '-vm' or '-host' must be provided to specify the group type.
+
+Examples:
+  govc cluster.group.create -name my_vm_group -vm vm_a vm_b vm_c
+  govc cluster.group.create -name my_host_group -host host_a host_b host_c
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -host=false               Create cluster Host group
+  -name=                    Cluster group name
+  -vm=false                 Create cluster VM group
+```
+
+## cluster.group.ls
+
+```
+Usage: govc cluster.group.ls [OPTIONS]
+
+List cluster groups and group members.
+
+Examples:
+  govc cluster.group.ls -cluster my_cluster
+  govc cluster.group.ls -cluster my_cluster -name my_group
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -name=                    Cluster group name
+```
+
+## cluster.group.remove
+
+```
+Usage: govc cluster.group.remove [OPTIONS]
+
+Remove cluster group.
+
+Examples:
+  govc cluster.group.remove -cluster my_cluster -name my_group
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -name=                    Cluster group name
+```
+
+## cluster.rule.change
+
+```
+Usage: govc cluster.rule.change [OPTIONS] NAME...
+
+Change cluster rule.
+
+Examples:
+  govc cluster.rule.change -cluster my_cluster -name my_rule -enable=false
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -enable=<nil>             Enable rule
+  -host-affine-group=       Host affine group name
+  -host-anti-affine-group=  Host anti-affine group name
+  -mandatory=<nil>          Enforce rule compliance
+  -name=                    Cluster rule name
+  -vm-group=                VM group name
+```
+
+## cluster.rule.create
+
+```
+Usage: govc cluster.rule.create [OPTIONS] NAME...
+
+Create cluster rule.
+
+Rules are not enabled by default, use the 'enable' flag to enable upon creation or cluster.rule.change after creation.
+
+One of '-affinity', '-anti-affinity' or '-vm-host' must be provided to specify the rule type.
+
+With '-affinity' or '-anti-affinity', at least 2 vm NAME arguments must be specified.
+
+With '-vm-host', use the '-vm-group' flag combined with the '-host-affine-group' and/or '-host-anti-affine-group' flags.
+
+Examples:
+  govc cluster.rule.create -name pod1 -enable -affinity vm_a vm_b vm_c
+  govc cluster.rule.create -name pod2 -enable -anti-affinity vm_d vm_e vm_f
+  govc cluster.rule.create -name pod3 -enable -mandatory -vm-host -vm-group my_vms -host-affine-group my_hosts
+
+Options:
+  -affinity=false           Keep Virtual Machines Together
+  -anti-affinity=false      Separate Virtual Machines
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -enable=<nil>             Enable rule
+  -host-affine-group=       Host affine group name
+  -host-anti-affine-group=  Host anti-affine group name
+  -mandatory=<nil>          Enforce rule compliance
+  -name=                    Cluster rule name
+  -vm-group=                VM group name
+  -vm-host=false            Virtual Machines to Hosts
+```
+
+## cluster.rule.ls
+
+```
+Usage: govc cluster.rule.ls [OPTIONS]
+
+List cluster rules and rule members.
+
+Examples:
+  govc cluster.rule.ls -cluster my_cluster
+  govc cluster.rule.ls -cluster my_cluster -name my_rule
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -name=                    Cluster rule name
+```
+
+## cluster.rule.remove
+
+```
+Usage: govc cluster.rule.remove [OPTIONS]
+
+Remove cluster rule.
+
+Examples:
+  govc cluster.group.remove -cluster my_cluster -name my_rule
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -name=                    Cluster rule name
 ```
 
 ## datacenter.create
@@ -200,6 +352,7 @@ Create VMDK on DS.
 Examples:
   govc datastore.mkdir disks
   govc datastore.disk.create -size 24G disks/disk1.vmdk
+  govc datastore.disk.create disks/parent.vmdk disk/child.vmdk
 
 Options:
   -ds=                      Datastore [GOVC_DATASTORE]
@@ -3176,6 +3329,23 @@ Usage: govc vm.unregister [OPTIONS] VM...
 Remove VM from inventory without removing any of the VM files on disk.
 
 Options:
+```
+
+## vm.upgrade
+
+```
+Usage: govc vm.upgrade [OPTIONS]
+
+Upgrade VMs to latest hardware version
+
+Examples:
+  govc vm.upgrade -vm $vm_name
+  govc vm.upgrade -version=$version -vm $vm_name
+  govc vm.upgrade -version=$version -vm.uuid $vm_uuid
+
+Options:
+  -version=0                Target vm hardware version, by default -- latest available
+  -vm=                      Virtual machine [GOVC_VM]
 ```
 
 ## vm.vnc
