@@ -445,6 +445,33 @@ func (f *Folder) CreateDVSTask(req *types.CreateDVS_Task) soap.HasFault {
 			Description: spec.Description,
 		}
 
+		configInfo := &types.VMwareDVSConfigInfo{
+			DVSConfigInfo: types.DVSConfigInfo{
+				Uuid:                                dvs.Uuid,
+				Name:                                spec.Name,
+				ConfigVersion:                       spec.ConfigVersion,
+				NumStandalonePorts:                  spec.NumStandalonePorts,
+				MaxPorts:                            spec.MaxPorts,
+				UplinkPortPolicy:                    spec.UplinkPortPolicy,
+				UplinkPortgroup:                     spec.UplinkPortgroup,
+				DefaultPortConfig:                   spec.DefaultPortConfig,
+				ExtensionKey:                        spec.ExtensionKey,
+				Description:                         spec.Description,
+				Policy:                              spec.Policy,
+				VendorSpecificConfig:                spec.VendorSpecificConfig,
+				SwitchIpAddress:                     spec.SwitchIpAddress,
+				DefaultProxySwitchMaxNumPorts:       spec.DefaultProxySwitchMaxNumPorts,
+				InfrastructureTrafficResourceConfig: spec.InfrastructureTrafficResourceConfig,
+				NetworkResourceControlVersion:       spec.NetworkResourceControlVersion,
+			},
+		}
+
+		if spec.Contact != nil {
+			configInfo.Contact = *spec.Contact
+		}
+
+		dvs.Config = configInfo
+
 		if dvs.Summary.ProductInfo == nil {
 			product := Map.content().About
 			dvs.Summary.ProductInfo = &types.DistributedVirtualSwitchProductSpec{

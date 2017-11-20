@@ -156,6 +156,11 @@ load test_helper
   run govc dvs.create "$id"
   assert_success
 
+  local host=$GOVC_HOST
+
+  run govc dvs.add -dvs "$id" "$host"
+  assert_success
+
   run govc dvs.portgroup.add -dvs "$id" -type earlyBinding -nports 16 "${id}-ExternalNetwork"
   assert_success
 
