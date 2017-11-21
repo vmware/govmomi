@@ -23,6 +23,8 @@ import (
 
 	_ "github.com/vmware/govmomi/govc/about"
 	_ "github.com/vmware/govmomi/govc/cluster"
+	_ "github.com/vmware/govmomi/govc/cluster/group"
+	_ "github.com/vmware/govmomi/govc/cluster/rule"
 	_ "github.com/vmware/govmomi/govc/datacenter"
 	_ "github.com/vmware/govmomi/govc/datastore"
 	_ "github.com/vmware/govmomi/govc/datastore/disk"

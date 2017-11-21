@@ -137,7 +137,12 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 	summary := new(types.ComputeResourceSummary)
 	addComputeResource(summary, host)
 
-	cr := &mo.ComputeResource{Summary: summary}
+	cr := &mo.ComputeResource{
+		ConfigurationEx: &types.ComputeResourceConfigInfo{
+			VmSwapPlacement: string(types.VirtualMachineConfigInfoSwapPlacementTypeVmDirectory),
+		},
+		Summary: summary,
+	}
 
 	Map.PutEntity(cr, Map.NewEntity(host))
 
