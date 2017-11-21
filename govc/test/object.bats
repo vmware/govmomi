@@ -240,6 +240,9 @@ load test_helper
   run govc object.collect -s -type VirtualMachine / summary.guest.toolsStatus
   assert_matches toolsNotInstalled
 
+  run govc object.collect -s /DC0/vm/DC0_H0_VM0 config.hardware.numCoresPerSocket
+  assert_success 1
+
   run govc object.collect -s -type ClusterComputeResource / summary.effectiveCpu
   assert_number
 
