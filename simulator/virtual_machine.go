@@ -152,6 +152,10 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Summary.Config.NumCpu = vm.Config.Hardware.NumCPU
 	}
 
+	if spec.NumCoresPerSocket != 0 {
+		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
+	}
+
 	vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, spec.ExtraConfig...)
 
 	vm.Config.Modified = time.Now()
