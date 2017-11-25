@@ -1881,7 +1881,7 @@ Options:
 ## host.service.ls
 
 ```
-Usage: govc host.service.ls [OPTIONS]
+Usage: govc host.service.ls [OPTIONS] HOST...
 
 List HOST services.
 
