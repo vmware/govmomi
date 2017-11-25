@@ -1881,7 +1881,7 @@ Options:
 ## host.service.ls
 
 ```
-Usage: govc host.service.ls [OPTIONS] HOST...
+Usage: govc host.service.ls [OPTIONS]
 
 List HOST services.
 
@@ -1892,7 +1892,7 @@ Options:
 ## host.shutdown
 
 ```
-Usage: govc host.shutdown [OPTIONS]
+Usage: govc host.shutdown [OPTIONS] HOST...
 
 Shutdown HOST.
 
