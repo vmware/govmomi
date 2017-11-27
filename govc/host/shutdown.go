@@ -53,6 +53,10 @@ func (cmd *shutdown) Process(ctx context.Context) error {
 	return nil
 }
 
+func (cmd *shutdown) Usage() string {
+	return `HOST...`
+}
+
 func (cmd *shutdown) Description() string {
 	return `Shutdown HOST.`
 }
