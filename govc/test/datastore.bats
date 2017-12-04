@@ -289,3 +289,34 @@ upload_file() {
   run govc datastore.disk.info -c "$GOVC_TEST_VMDK"
   assert_success
 }
+
+@test "datastore.disk.inflate" {
+  esx_env
+
+  id=$(new_id)
+  vmdk="$id/$id.vmdk"
+
+  run govc datastore.mkdir "$id"
+  assert_success
+
+  run govc datastore.disk.create -size 10MB "$vmdk"
+  assert_success
+
+  type=$(govc datastore.disk.info -json "$vmdk" | jq -r .[].DiskType)
+  [ "$type" = "thin" ]
+
+  run govc datastore.disk.inflate "$vmdk"
+  assert_success
+
+  type=$(govc datastore.disk.info -json "$vmdk" | jq -r .[].DiskType)
+  [ "$type" = "eagerZeroedThick" ]
+
+  run govc datastore.disk.shrink "$vmdk"
+  assert_success
+
+  run govc datastore.disk.shrink -copy "$vmdk"
+  assert_success
+
+  run govc datastore.disk.shrink -copy=false "$vmdk"
+  assert_success
+}
