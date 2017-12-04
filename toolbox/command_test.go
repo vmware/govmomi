@@ -821,6 +821,10 @@ func TestVixFiles(t *testing.T) {
 		t.Errorf("expected %d, got %d", max, total)
 	}
 
+	// Test invalid offset, making sure it doesn't cause panic (issue #934)
+	ls.Body.Offset += 10
+	_ = c.Request(vix.CommandListFiles, ls)
+
 	// mv $dir ${dir}-old
 	mv = &vix.RenameFileRequest{
 		OldPathName: dir,

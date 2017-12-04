@@ -511,8 +511,11 @@ func (c *CommandServer) ListFiles(header vix.CommandRequestHeader, data []byte) 
 
 	offset := r.Body.Offset + uint64(r.Body.Index)
 	total := uint64(len(files)) - offset
-
-	files = files[offset:]
+	if int(offset) < len(files) {
+		files = files[offset:]
+	} else {
+		total = 0 // offset is not valid (open-vm-tools behaves the same in this case)
+	}
 
 	var remaining uint64
 
