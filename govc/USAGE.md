@@ -3103,7 +3103,14 @@ Options:
 ## vm.info
 
 ```
-Usage: govc vm.info [OPTIONS]
+Usage: govc vm.info [OPTIONS] VM...
+
+Display info for VM.
+
+Examples:
+  govc vm.info $vm
+  govc vm.info -json $vm
+  govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 
 Options:
   -e=false                  Show ExtraConfig
