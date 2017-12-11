@@ -428,11 +428,15 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	m := session.NewManager(c)
 	u := flag.url.User
 
-	if u.Username() == "" {
-		// Assume we are running on an ESX or Workstation host if no username is provided
-		u, err = flag.localTicket(ctx, m)
-		if err != nil {
-			return nil, err
+	if u.Username() == "" && !c.IsVC() {
+		// If no username is provided, try to acquire a local ticket.
+		// When invoked remotely, ESX returns an InvalidRequestFault.
+		// So, rather than return an error here, fallthrough to Login() with the original User to
+		// to avoid what would be a confusing error message.
+		luser, lerr := flag.localTicket(ctx, m)
+		if lerr == nil {
+			// We are running directly on an ESX or Workstation host and can use the ticket with Login()
+			u = luser
 		}
 	}
 
