@@ -359,6 +359,20 @@ Options:
   -size=10.0GB              Size of new disk
 ```
 
+## datastore.disk.inflate
+
+```
+Usage: govc datastore.disk.inflate [OPTIONS] VMDK
+
+Inflate VMDK on DS.
+
+Examples:
+  govc datastore.disk.inflate disks/disk1.vmdk
+
+Options:
+  -ds=                      Datastore [GOVC_DATASTORE]
+```
+
 ## datastore.disk.info
 
 ```
@@ -374,6 +388,21 @@ Options:
   -d=false                  Include datastore in output
   -ds=                      Datastore [GOVC_DATASTORE]
   -p=true                   Include parents
+```
+
+## datastore.disk.shrink
+
+```
+Usage: govc datastore.disk.shrink [OPTIONS] VMDK
+
+Shrink VMDK on DS.
+
+Examples:
+  govc datastore.disk.shrink disks/disk1.vmdk
+
+Options:
+  -copy=<nil>               Perform shrink in-place mode if false, copy-shrink mode otherwise
+  -ds=                      Datastore [GOVC_DATASTORE]
 ```
 
 ## datastore.download
