@@ -491,7 +491,23 @@ func (s *Server) Close() {
 	}
 }
 
-var typeFunc = types.TypeFunc()
+var (
+	vim25MapType = types.TypeFunc()
+	typeFunc     = defaultMapType
+)
+
+func defaultMapType(name string) (reflect.Type, bool) {
+	typ, ok := vim25MapType(name)
+	if !ok {
+		// See TestIssue945, in which case Go does not resolve the namespace and name == "ns1:TraversalSpec"
+		// Without this hack, the SelectSet would be all nil's
+		kind := strings.SplitN(name, ":", 2)
+		if len(kind) == 2 {
+			typ, ok = vim25MapType(kind[1])
+		}
+	}
+	return typ, ok
+}
 
 // UnmarshalBody extracts the Body from a soap.Envelope and unmarshals to the corresponding govmomi type
 func UnmarshalBody(data []byte) (*Method, error) {

@@ -197,7 +197,7 @@ func TestUnmarshalError(t *testing.T) {
 	}
 
 	defer func() {
-		typeFunc = types.TypeFunc() // reset
+		typeFunc = defaultMapType // reset
 	}()
 
 	ttypes := map[string]reflect.Type{
