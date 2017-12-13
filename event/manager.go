@@ -180,5 +180,7 @@ func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectRefere
 		proc.addObject(ctx, o)
 	}
 
+	defer proc.destroy()
+
 	return proc.run(ctx, tail)
 }
