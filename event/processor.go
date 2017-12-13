@@ -28,7 +28,7 @@ import (
 type tailInfo struct {
 	t         *eventTailer
 	obj       types.ManagedObjectReference
-	collector types.ManagedObjectReference
+	collector *HistoryCollector
 }
 
 type eventProcessor struct {
@@ -68,10 +68,16 @@ func (p *eventProcessor) addObject(ctx context.Context, obj types.ManagedObjectR
 	p.tailers[collector.Reference()] = &tailInfo{
 		t:         newEventTailer(),
 		obj:       obj,
-		collector: collector.Reference(),
+		collector: collector,
 	}
 
 	return nil
+}
+
+func (p *eventProcessor) destroy() {
+	for _, info := range p.tailers {
+		_ = info.collector.Destroy(context.Background())
+	}
 }
 
 func (p *eventProcessor) run(ctx context.Context, tail bool) error {
@@ -80,8 +86,8 @@ func (p *eventProcessor) run(ctx context.Context, tail bool) error {
 	}
 
 	var collectors []types.ManagedObjectReference
-	for _, t := range p.tailers {
-		collectors = append(collectors, t.collector)
+	for ref := range p.tailers {
+		collectors = append(collectors, ref)
 	}
 
 	c := property.DefaultCollector(p.mgr.Client())
