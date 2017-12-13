@@ -336,3 +336,8 @@ func (r *Registry) VirtualDiskManager() *VirtualDiskManager {
 func (r *Registry) ViewManager() *ViewManager {
 	return r.Get(r.content().ViewManager.Reference()).(*ViewManager)
 }
+
+// UserDirectory returns the UserDirectory singleton
+func (r *Registry) UserDirectory() *UserDirectory {
+	return r.Get(r.content().UserDirectory.Reference()).(*UserDirectory)
+}

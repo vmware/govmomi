@@ -28,26 +28,27 @@ import (
 
 type HostLocalAccountManager struct {
 	mo.HostLocalAccountManager
-
-	users map[string]*types.HostAccountSpec
 }
 
 func NewHostLocalAccountManager(ref types.ManagedObjectReference) object.Reference {
 	m := &HostLocalAccountManager{}
 	m.Self = ref
-	m.users = make(map[string]*types.HostAccountSpec)
+
 	return m
 }
 
 func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFault {
 	spec := req.User.GetHostAccountSpec()
-	if _, ok := h.users[spec.Id]; ok {
+	userDirectory := Map.UserDirectory()
+
+	found := userDirectory.search(true, false, compareFunc(spec.Id, true))
+	if len(found) > 0 {
 		return &methods.CreateUserBody{
 			Fault_: Fault("", &types.AlreadyExists{}),
 		}
 	}
 
-	h.users[spec.Id] = spec
+	userDirectory.addUser(spec.Id)
 
 	return &methods.CreateUserBody{
 		Res: &types.CreateUserResponse{},
@@ -55,13 +56,17 @@ func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFaul
 }
 
 func (h *HostLocalAccountManager) RemoveUser(req *types.RemoveUser) soap.HasFault {
-	if _, ok := h.users[req.UserName]; !ok {
+	userDirectory := Map.UserDirectory()
+
+	found := userDirectory.search(true, false, compareFunc(req.UserName, true))
+
+	if len(found) == 0 {
 		return &methods.RemoveUserBody{
 			Fault_: Fault("", &types.UserNotFound{}),
 		}
 	}
 
-	delete(h.users, req.UserName)
+	userDirectory.removeUser(req.UserName)
 
 	return &methods.RemoveUserBody{
 		Res: &types.RemoveUserResponse{},
@@ -69,9 +74,6 @@ func (h *HostLocalAccountManager) RemoveUser(req *types.RemoveUser) soap.HasFaul
 }
 
 func (h *HostLocalAccountManager) UpdateUser(req *types.UpdateUser) soap.HasFault {
-	spec := req.User.GetHostAccountSpec()
-	h.users[spec.Id] = spec
-
 	return &methods.CreateUserBody{
 		Res: &types.CreateUserResponse{},
 	}
