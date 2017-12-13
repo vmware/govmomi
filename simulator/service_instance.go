@@ -75,6 +75,10 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 		objects = append(objects, NewIpPoolManager(*s.Content.IpPoolManager))
 	}
 
+	if s.Content.AccountManager != nil {
+		objects = append(objects, NewHostLocalAccountManager(*s.Content.AccountManager))
+	}
+
 	for _, o := range objects {
 		Map.Put(o)
 	}
