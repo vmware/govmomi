@@ -131,7 +131,7 @@ load test_helper
 @test "host.storage.info" {
     esx_env
 
-    run govc host.storage.info -rescan -refresh
+    run govc host.storage.info -rescan -refresh -rescan-vmfs
     assert_success
 }
 
