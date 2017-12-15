@@ -353,7 +353,8 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	tests := []struct {
 		fail bool
@@ -379,6 +380,93 @@ func TestReconfigVm(t *testing.T) {
 				GuestId: string(GuestID[0]),
 			},
 		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				NestedHVEnabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				CpuHotAddEnabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				CpuHotRemoveEnabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				GuestAutoLockEnabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				MemoryHotAddEnabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				MemoryReservationLockedToMax: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				MessageBusTunnelEnabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				NpivTemporaryDisabled: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				NpivOnNonRdmDisks: types.NewBool(true),
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				ConsolePreferences: &types.VirtualMachineConsolePreferences{
+					PowerOnWhenOpened: types.NewBool(true),
+				},
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				CpuAffinity: &types.VirtualMachineAffinityInfo{
+					AffinitySet: []int32{1},
+				},
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				CpuAllocation: &types.ResourceAllocationInfo{
+					Reservation: types.NewInt64(100),
+				},
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				MemoryAffinity: &types.VirtualMachineAffinityInfo{
+					AffinitySet: []int32{1},
+				},
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				MemoryAllocation: &types.ResourceAllocationInfo{
+					Reservation: types.NewInt64(100),
+				},
+			},
+		},
+		{
+			false, types.VirtualMachineConfigSpec{
+				LatencySensitivity: &types.LatencySensitivity{
+					Sensitivity: 1,
+				},
+			},
+		},
 	}
 
 	for i, test := range tests {
@@ -394,6 +482,58 @@ func TestReconfigVm(t *testing.T) {
 				t.Errorf("unexpected failure: %s", err)
 			}
 		}
+	}
+
+	// Verify ReConfig actually works
+	if *vmm.Config.NestedHVEnabled != true {
+		t.Errorf("vm.Config.NestedHVEnabled expected true; got false")
+	}
+	if *vmm.Config.CpuHotAddEnabled != true {
+		t.Errorf("vm.Config.CpuHotAddEnabled expected true; got false")
+	}
+	if *vmm.Config.CpuHotRemoveEnabled != true {
+		t.Errorf("vm.Config.CpuHotRemoveEnabled expected true; got false")
+	}
+	if *vmm.Config.GuestAutoLockEnabled != true {
+		t.Errorf("vm.Config.GuestAutoLockEnabled expected true; got false")
+	}
+	if *vmm.Config.MemoryHotAddEnabled != true {
+		t.Errorf("vm.Config.MemoryHotAddEnabled expected true; got false")
+	}
+	if *vmm.Config.MemoryReservationLockedToMax != true {
+		t.Errorf("vm.Config.MemoryReservationLockedToMax expected true; got false")
+	}
+	if *vmm.Config.MessageBusTunnelEnabled != true {
+		t.Errorf("vm.Config.MessageBusTunnelEnabled expected true; got false")
+	}
+	if *vmm.Config.NpivTemporaryDisabled != true {
+		t.Errorf("vm.Config.NpivTemporaryDisabled expected true; got false")
+	}
+	if *vmm.Config.NpivOnNonRdmDisks != true {
+		t.Errorf("vm.Config.NpivOnNonRdmDisks expected true; got false")
+	}
+	if *vmm.Config.ConsolePreferences.PowerOnWhenOpened != true {
+		t.Errorf("vm.Config.ConsolePreferences.PowerOnWhenOpened expected true; got false")
+	}
+	if vmm.Config.CpuAffinity.AffinitySet[0] != int32(1) {
+		t.Errorf("vm.Config.CpuAffinity.AffinitySet[0] expected %d; got %d",
+			1, vmm.Config.CpuAffinity.AffinitySet[0])
+	}
+	if vmm.Config.MemoryAffinity.AffinitySet[0] != int32(1) {
+		t.Errorf("vm.Config.CpuAffinity.AffinitySet[0] expected %d; got %d",
+			1, vmm.Config.CpuAffinity.AffinitySet[0])
+	}
+	if *vmm.Config.CpuAllocation.Reservation != 100 {
+		t.Errorf("vm.Config.CpuAllocation.Reservation expected %d; got %d",
+			100, *vmm.Config.CpuAllocation.Reservation)
+	}
+	if *vmm.Config.MemoryAllocation.Reservation != 100 {
+		t.Errorf("vm.Config.MemoryAllocation.Reservation expected %d; got %d",
+			100, *vmm.Config.MemoryAllocation.Reservation)
+	}
+	if vmm.Config.LatencySensitivity.Sensitivity != int32(1) {
+		t.Errorf("vmm.Config.LatencySensitivity.Sensitivity expected %d; got %d",
+			1, vmm.Config.LatencySensitivity.Sensitivity)
 	}
 }
 
