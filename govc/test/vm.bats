@@ -107,6 +107,12 @@ load test_helper
   assert_success
   assert_line "SyncTimeWithHost: true"
 
+  run govc vm.change -nested-hv-enabled=true -vm $id
+  assert_success
+
+  hv=$(govc vm.info -json DC0_H0_VM0 | jq '.[][0].Config.NestedHVEnabled')
+  assert_equal "$hv" "true"
+
   run govc object.collect -s "vm/$id" config.memoryAllocation.reservation
   assert_success 0
 

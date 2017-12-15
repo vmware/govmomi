@@ -142,6 +142,52 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		}
 	}
 
+	applyb := []struct {
+		src *bool
+		dst **bool
+	}{
+		{spec.NestedHVEnabled, &vm.Config.NestedHVEnabled},
+		{spec.CpuHotAddEnabled, &vm.Config.CpuHotAddEnabled},
+		{spec.CpuHotRemoveEnabled, &vm.Config.CpuHotRemoveEnabled},
+		{spec.GuestAutoLockEnabled, &vm.Config.GuestAutoLockEnabled},
+		{spec.MemoryHotAddEnabled, &vm.Config.MemoryHotAddEnabled},
+		{spec.MemoryReservationLockedToMax, &vm.Config.MemoryReservationLockedToMax},
+		{spec.MessageBusTunnelEnabled, &vm.Config.MessageBusTunnelEnabled},
+		{spec.NpivTemporaryDisabled, &vm.Config.NpivTemporaryDisabled},
+		{spec.NpivOnNonRdmDisks, &vm.Config.NpivOnNonRdmDisks},
+		{spec.ChangeTrackingEnabled, &vm.Config.ChangeTrackingEnabled},
+	}
+
+	for _, f := range applyb {
+		if f.src != nil {
+			*f.dst = f.src
+		}
+	}
+
+	if spec.ConsolePreferences != nil {
+		vm.Config.ConsolePreferences = spec.ConsolePreferences
+	}
+
+	if spec.CpuAffinity != nil {
+		vm.Config.CpuAffinity = spec.CpuAffinity
+	}
+
+	if spec.CpuAllocation != nil {
+		vm.Config.CpuAllocation = spec.CpuAllocation
+	}
+
+	if spec.MemoryAffinity != nil {
+		vm.Config.MemoryAffinity = spec.MemoryAffinity
+	}
+
+	if spec.MemoryAllocation != nil {
+		vm.Config.MemoryAllocation = spec.MemoryAllocation
+	}
+
+	if spec.LatencySensitivity != nil {
+		vm.Config.LatencySensitivity = spec.LatencySensitivity
+	}
+
 	if spec.MemoryMB != 0 {
 		vm.Config.Hardware.MemoryMB = int32(spec.MemoryMB)
 		vm.Summary.Config.MemorySizeMB = vm.Config.Hardware.MemoryMB
