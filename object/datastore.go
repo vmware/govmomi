@@ -406,12 +406,9 @@ func (d Datastore) Stat(ctx context.Context, file string) (types.BaseFileInfo, e
 
 	info, err := task.WaitForResult(ctx, nil)
 	if err != nil {
-		if info == nil || info.Error != nil {
-			_, ok := info.Error.Fault.(*types.FileNotFound)
-			if ok {
-				// FileNotFound means the base path doesn't exist.
-				return nil, DatastoreNoSuchDirectoryError{"stat", dsPath}
-			}
+		if types.IsFileNotFound(err) {
+			// FileNotFound means the base path doesn't exist.
+			return nil, DatastoreNoSuchDirectoryError{"stat", dsPath}
 		}
 
 		return nil, err
