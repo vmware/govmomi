@@ -97,6 +97,15 @@ func (s HostStorageSystem) Refresh(ctx context.Context) error {
 	return err
 }
 
+func (s HostStorageSystem) RescanVmfs(ctx context.Context) error {
+	req := types.RescanVmfs{
+		This: s.Reference(),
+	}
+
+	_, err := methods.RescanVmfs(ctx, s.c, &req)
+	return err
+}
+
 func (s HostStorageSystem) MarkAsSsd(ctx context.Context, uuid string) (*Task, error) {
 	req := types.MarkAsSsd_Task{
 		This:         s.Reference(),
