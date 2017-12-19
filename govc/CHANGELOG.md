@@ -1,5 +1,9 @@
 # changelog
 
+### 0.17.0 (undef)
+
+* Allow columns in password for guest login.
+
 ### 0.16.0 (2017-11-08)
 
 * Add export.ovf command
