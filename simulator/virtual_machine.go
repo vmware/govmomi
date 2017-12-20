@@ -120,6 +120,12 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		src string
 		dst *string
 	}{
+		{spec.AlternateGuestName, &vm.Config.AlternateGuestName},
+		{spec.Annotation, &vm.Config.Annotation},
+		{spec.Firmware, &vm.Config.Firmware},
+		{spec.InstanceUuid, &vm.Config.InstanceUuid},
+		{spec.LocationId, &vm.Config.LocationId},
+		{spec.NpivWorldWideNameType, &vm.Config.NpivWorldWideNameType},
 		{spec.Name, &vm.Name},
 		{spec.Name, &vm.Config.Name},
 		{spec.Name, &vm.Summary.Config.Name},
@@ -162,6 +168,30 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		if f.src != nil {
 			*f.dst = f.src
 		}
+	}
+
+	if spec.Flags != nil {
+		vm.Config.Flags = *spec.Flags
+	}
+
+	if spec.LatencySensitivity != nil {
+		vm.Config.LatencySensitivity = spec.LatencySensitivity
+	}
+
+	if spec.ManagedBy != nil {
+		vm.Config.ManagedBy = spec.ManagedBy
+	}
+
+	if spec.BootOptions != nil {
+		vm.Config.BootOptions = spec.BootOptions
+	}
+
+	if spec.RepConfig != nil {
+		vm.Config.RepConfig = spec.RepConfig
+	}
+
+	if spec.Tools != nil {
+		vm.Config.Tools = spec.Tools
 	}
 
 	if spec.ConsolePreferences != nil {
