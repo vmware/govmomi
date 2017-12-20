@@ -58,15 +58,22 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	}
 
 	rspec := types.DefaultResourceConfigSpec()
+	vm.Guest = &types.GuestInfo{}
 	vm.Config = &types.VirtualMachineConfigInfo{
 		ExtraConfig:      []types.BaseOptionValue{&types.OptionValue{Key: "govcsim", Value: "TRUE"}},
 		Tools:            &types.ToolsConfigInfo{},
 		MemoryAllocation: &rspec.MemoryAllocation,
 		CpuAllocation:    &rspec.CpuAllocation,
 	}
+	vm.Snapshot = &types.VirtualMachineSnapshotInfo{}
+	vm.Storage = &types.VirtualMachineStorageInfo{
+		Timestamp: time.Now(),
+	}
 	vm.Summary.Guest = &types.VirtualMachineGuestSummary{}
-	vm.Summary.Storage = &types.VirtualMachineStorageSummary{}
 	vm.Summary.Vm = &vm.Self
+	vm.Summary.Storage = &types.VirtualMachineStorageSummary{
+		Timestamp: time.Now(),
+	}
 
 	// Append VM Name as the directory name if not specified
 	if strings.HasSuffix(spec.Files.VmPathName, "]") { // e.g. "[datastore1]"
