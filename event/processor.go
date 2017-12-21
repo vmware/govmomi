@@ -34,16 +34,18 @@ type tailInfo struct {
 type eventProcessor struct {
 	mgr      Manager
 	pageSize int32
+	kind     []string
 	tailers  map[types.ManagedObjectReference]*tailInfo // tailers by collector ref
 	callback func(types.ManagedObjectReference, []types.BaseEvent) error
 }
 
-func newEventProcessor(mgr Manager, pageSize int32, callback func(types.ManagedObjectReference, []types.BaseEvent) error) *eventProcessor {
+func newEventProcessor(mgr Manager, pageSize int32, callback func(types.ManagedObjectReference, []types.BaseEvent) error, kind []string) *eventProcessor {
 	return &eventProcessor{
 		mgr:      mgr,
 		tailers:  make(map[types.ManagedObjectReference]*tailInfo),
 		callback: callback,
 		pageSize: pageSize,
+		kind:     kind,
 	}
 }
 
@@ -53,6 +55,7 @@ func (p *eventProcessor) addObject(ctx context.Context, obj types.ManagedObjectR
 			Entity:    obj,
 			Recursion: types.EventFilterSpecRecursionOptionAll,
 		},
+		EventTypeId: p.kind,
 	}
 
 	collector, err := p.mgr.CreateCollectorForEvents(ctx, filter)
