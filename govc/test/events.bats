@@ -54,6 +54,21 @@ load test_helper
   run govc events vm
   assert_success
   [ ${#lines[@]} -ge $nevents ]
+
+  run govc events -type VmPoweredOffEvent -type VmPoweredOnEvent "vm/$vm"
+  [ ${#lines[@]} -eq 0 ]
+
+  run govc vm.power -on "$vm"
+  assert_success
+
+  run govc events -type VmPoweredOffEvent -type VmPoweredOnEvent "vm/$vm"
+  [ ${#lines[@]} -eq 1 ]
+
+  run govc vm.power -off "$vm"
+  assert_success
+
+  run govc events -type VmPoweredOffEvent -type VmPoweredOnEvent "vm/$vm"
+  [ ${#lines[@]} -eq 2 ]
 }
 
 @test "events json" {
