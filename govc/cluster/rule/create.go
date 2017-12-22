@@ -31,6 +31,7 @@ type create struct {
 	vmhost       bool
 	affinity     bool
 	antiaffinity bool
+	depends      bool
 }
 
 func init() {
@@ -47,6 +48,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.vmhost, "vm-host", false, "Virtual Machines to Hosts")
 	f.BoolVar(&cmd.affinity, "affinity", false, "Keep Virtual Machines Together")
 	f.BoolVar(&cmd.antiaffinity, "anti-affinity", false, "Separate Virtual Machines")
+	f.BoolVar(&cmd.depends, "depends", false, "Virtual Machines to Virtual Machines")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -65,16 +67,19 @@ func (cmd *create) Description() string {
 
 Rules are not enabled by default, use the 'enable' flag to enable upon creation or cluster.rule.change after creation.
 
-One of '-affinity', '-anti-affinity' or '-vm-host' must be provided to specify the rule type.
+One of '-affinity', '-anti-affinity', '-depends' or '-vm-host' must be provided to specify the rule type.
 
 With '-affinity' or '-anti-affinity', at least 2 vm NAME arguments must be specified.
+
+With '-depends', vm group NAME and vm group dependency NAME arguments must be specified.
 
 With '-vm-host', use the '-vm-group' flag combined with the '-host-affine-group' and/or '-host-anti-affine-group' flags.
 
 Examples:
   govc cluster.rule.create -name pod1 -enable -affinity vm_a vm_b vm_c
   govc cluster.rule.create -name pod2 -enable -anti-affinity vm_d vm_e vm_f
-  govc cluster.rule.create -name pod3 -enable -mandatory -vm-host -vm-group my_vms -host-affine-group my_hosts`
+  govc cluster.rule.create -name pod3 -enable -mandatory -vm-host -vm-group my_vms -host-affine-group my_hosts
+  govc cluster.rule.create -name pod4 -depends vm_group_app vm_group_db`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -104,8 +109,21 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+	case cmd.depends:
+		if len(args) != 2 {
+			return flag.ErrHelp
+		}
+		rule = &types.ClusterDependencyRuleInfo{
+			VmGroup:          args[0],
+			DependsOnVmGroup: args[1],
+		}
 	default:
 		return flag.ErrHelp
+	}
+
+	if cmd.Enabled == nil {
+		// ClusterDependencyRuleInfo throws InvalidArgument if Enabled == nil
+		cmd.Enabled = types.NewBool(false)
 	}
 
 	info := rule.GetClusterRuleInfo()

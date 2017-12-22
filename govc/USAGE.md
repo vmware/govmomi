@@ -199,6 +199,56 @@ Options:
   -name=                    Cluster group name
 ```
 
+## cluster.override.change
+
+```
+Usage: govc cluster.override.change [OPTIONS]
+
+Change cluster VM overrides.
+
+Examples:
+  govc cluster.override.change -cluster cluster_1 -vm vm_1 -ha-restart-priority high
+  govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled=false
+  govc cluster.override.change -cluster cluster_1 -vm vm_3 -drs-enabled -drs-mode fullyAutomated
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -drs-enabled=<nil>        Enable DRS
+  -drs-mode=                DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
+  -ha-restart-priority=     HA restart priority: disabled, low, medium, high
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
+## cluster.override.info
+
+```
+Usage: govc cluster.override.info [OPTIONS]
+
+Cluster VM overrides info.
+
+Examples:
+  govc cluster.override.info
+  govc cluster.override.info -json
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+```
+
+## cluster.override.remove
+
+```
+Usage: govc cluster.override.remove [OPTIONS]
+
+Remove cluster VM overrides.
+
+Examples:
+  govc cluster.override.remove -cluster cluster_1 -vm vm_1
+
+Options:
+  -cluster=                 Cluster [GOVC_CLUSTER]
+  -vm=                      Virtual machine [GOVC_VM]
+```
+
 ## cluster.rule.change
 
 ```
@@ -228,9 +278,11 @@ Create cluster rule.
 
 Rules are not enabled by default, use the 'enable' flag to enable upon creation or cluster.rule.change after creation.
 
-One of '-affinity', '-anti-affinity' or '-vm-host' must be provided to specify the rule type.
+One of '-affinity', '-anti-affinity', '-depends' or '-vm-host' must be provided to specify the rule type.
 
 With '-affinity' or '-anti-affinity', at least 2 vm NAME arguments must be specified.
+
+With '-depends', vm group NAME and vm group dependency NAME arguments must be specified.
 
 With '-vm-host', use the '-vm-group' flag combined with the '-host-affine-group' and/or '-host-anti-affine-group' flags.
 
@@ -238,11 +290,13 @@ Examples:
   govc cluster.rule.create -name pod1 -enable -affinity vm_a vm_b vm_c
   govc cluster.rule.create -name pod2 -enable -anti-affinity vm_d vm_e vm_f
   govc cluster.rule.create -name pod3 -enable -mandatory -vm-host -vm-group my_vms -host-affine-group my_hosts
+  govc cluster.rule.create -name pod4 -depends vm_group_app vm_group_db
 
 Options:
   -affinity=false           Keep Virtual Machines Together
   -anti-affinity=false      Separate Virtual Machines
   -cluster=                 Cluster [GOVC_CLUSTER]
+  -depends=false            Virtual Machines to Virtual Machines
   -enable=<nil>             Enable rule
   -host-affine-group=       Host affine group name
   -host-anti-affine-group=  Host anti-affine group name
@@ -993,12 +1047,15 @@ Display events.
 Examples:
   govc events vm/my-vm1 vm/my-vm2
   govc events /dc1/vm/* /dc2/vm/*
+  govc events -type VmPoweredOffEvent -type VmPoweredOnEvent
   govc ls -t HostSystem host/* | xargs govc events | grep -i vsan
 
 Options:
   -f=false                  Follow event stream
   -force=false              Disable number objects to monitor limit
+  -l=false                  Long listing format
   -n=25                     Output the last N events
+  -type=[]                  Include only the specified event types
 ```
 
 ## export.ovf
@@ -1945,6 +2002,7 @@ Options:
   -host=                    Host system [GOVC_HOST]
   -refresh=false            Refresh the storage system provider
   -rescan=false             Rescan all host bus adapters
+  -rescan-vmfs=false        Rescan for new VMFSs
   -t=lun                    Type (hba,lun)
   -unclaimed=false          Only show disks that can be used as new VMFS datastores
 ```

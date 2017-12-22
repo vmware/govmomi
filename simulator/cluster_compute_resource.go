@@ -164,6 +164,103 @@ func (c *ClusterComputeResource) updateGroups(cfg *types.ClusterConfigInfoEx, cs
 	return nil
 }
 
+func (c *ClusterComputeResource) updateOverridesDAS(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
+	for _, spec := range cspec.DasVmConfigSpec {
+		var i int
+		var key types.ManagedObjectReference
+		exists := false
+
+		if spec.Operation == types.ArrayUpdateOperationRemove {
+			key = spec.RemoveKey.(types.ManagedObjectReference)
+		} else {
+			key = spec.Info.Key
+		}
+
+		for i = range cfg.DasVmConfig {
+			if cfg.DasVmConfig[i].Key == key {
+				exists = true
+				break
+			}
+		}
+
+		switch spec.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.DasVmConfig = append(cfg.DasVmConfig, *spec.Info)
+		case types.ArrayUpdateOperationEdit:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			src := spec.Info.DasSettings
+			if src == nil {
+				return new(types.InvalidArgument)
+			}
+			dst := cfg.DasVmConfig[i].DasSettings
+			if src.RestartPriority != "" {
+				dst.RestartPriority = src.RestartPriority
+			}
+			if src.RestartPriorityTimeout != 0 {
+				dst.RestartPriorityTimeout = src.RestartPriorityTimeout
+			}
+		case types.ArrayUpdateOperationRemove:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.DasVmConfig = append(cfg.DasVmConfig[:i], cfg.DasVmConfig[i+1:]...)
+		}
+	}
+
+	return nil
+}
+
+func (c *ClusterComputeResource) updateOverridesDRS(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
+	for _, spec := range cspec.DrsVmConfigSpec {
+		var i int
+		var key types.ManagedObjectReference
+		exists := false
+
+		if spec.Operation == types.ArrayUpdateOperationRemove {
+			key = spec.RemoveKey.(types.ManagedObjectReference)
+		} else {
+			key = spec.Info.Key
+		}
+
+		for i = range cfg.DrsVmConfig {
+			if cfg.DrsVmConfig[i].Key == key {
+				exists = true
+				break
+			}
+		}
+
+		switch spec.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.DrsVmConfig = append(cfg.DrsVmConfig, *spec.Info)
+		case types.ArrayUpdateOperationEdit:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			if spec.Info.Enabled != nil {
+				cfg.DrsVmConfig[i].Enabled = spec.Info.Enabled
+			}
+			if spec.Info.Behavior != "" {
+				cfg.DrsVmConfig[i].Behavior = spec.Info.Behavior
+			}
+		case types.ArrayUpdateOperationRemove:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			cfg.DrsVmConfig = append(cfg.DrsVmConfig[:i], cfg.DrsVmConfig[i+1:]...)
+		}
+	}
+
+	return nil
+}
+
 func (c *ClusterComputeResource) ReconfigureComputeResourceTask(req *types.ReconfigureComputeResource_Task) soap.HasFault {
 	task := CreateTask(c, "reconfigureCluster", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		spec, ok := req.Spec.(*types.ClusterConfigSpecEx)
@@ -174,6 +271,8 @@ func (c *ClusterComputeResource) ReconfigureComputeResourceTask(req *types.Recon
 		updates := []func(*types.ClusterConfigInfoEx, *types.ClusterConfigSpecEx) types.BaseMethodFault{
 			c.updateRules,
 			c.updateGroups,
+			c.updateOverridesDAS,
+			c.updateOverridesDRS,
 		}
 
 		for _, update := range updates {
