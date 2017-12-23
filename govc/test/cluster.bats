@@ -99,6 +99,62 @@ load test_helper
   run govc cluster.rule.remove -cluster DC0_C0 -name pod1
   assert_success
 
-  run govc cluster.rule.remove -cluster DC0_C0 -name pod1
+  run govc cluster.rule.remove -cluster DC0_C0 -name pod1 -depends
   assert_failure # rule does not exist
+
+  run govc cluster.rule.create -cluster DC0_C0 -name my_deps -depends
+  assert_failure # requires 2 groups
+
+  run govc cluster.group.create -cluster DC0_C0 -name my_app -vm DC0_C0_RP0_VM{4,5}
+  assert_success
+
+  run govc cluster.group.create -cluster DC0_C0 -name my_db -vm DC0_C0_RP0_VM{6,7}
+  assert_success
+
+  run govc cluster.rule.create -cluster DC0_C0 -name my_deps -depends my_app my_db
+  assert_success
+}
+
+@test "cluster.vm" {
+  vcsim_env -host 4 -vm 8
+
+  run govc cluster.override.info
+  assert_success "" # no overrides == empty output
+
+  run govc cluster.override.change
+  assert_failure # -vm required
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0
+  assert_failure # no changes specified
+
+  # DRS override
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DRS.Enabled"
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-enabled=false
+  assert_success
+  [ "$(govc cluster.override.info -json | jq "$query")" == "false" ]
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-enabled=true
+  assert_success
+  [ "$(govc cluster.override.info -json | jq "$query")" == "true" ]
+
+  # DAS override
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DAS.DasSettings.RestartPriority"
+
+  [ "$(govc cluster.override.info -json | jq -r "$query")" != "high" ]
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-restart-priority high
+  assert_success
+  [ "$(govc cluster.override.info -json | jq -r "$query")" == "high" ]
+
+  run govc cluster.override.remove -vm DC0_C0_RP0_VM0
+  assert_success
+  run govc cluster.override.info
+  assert_success "" # no overrides == empty output
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-mode=manual
+  assert_success
+
+  run govc cluster.override.remove -vm DC0_C0_RP0_VM0
+  assert_success
 }
