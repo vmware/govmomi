@@ -601,6 +601,12 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 }
 
 func (vm *VirtualMachine) PowerOnVMTask(c *types.PowerOnVM_Task) soap.HasFault {
+	if vm.Config.Template {
+		return &methods.PowerOnVM_TaskBody{
+			Fault_: Fault("cannot powerOn a template", &types.InvalidState{}),
+		}
+	}
+
 	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOn}
 	task := CreateTask(runner.Reference(), "powerOn", runner.Run)
 
@@ -882,6 +888,24 @@ func (vm *VirtualMachine) ShutdownGuest(c *types.ShutdownGuest) soap.HasFault {
 	vm.Summary.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 
 	r.Res = new(types.ShutdownGuestResponse)
+
+	return r
+}
+
+func (vm *VirtualMachine) MarkAsTemplate(req *types.MarkAsTemplate) soap.HasFault {
+	r := &methods.MarkAsTemplateBody{}
+
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOff {
+		r.Fault_ = Fault("", &types.InvalidPowerState{
+			RequestedState: types.VirtualMachinePowerStatePoweredOff,
+			ExistingState:  vm.Runtime.PowerState,
+		})
+		return r
+	}
+
+	vm.Config.Template = true
+
+	r.Res = &types.MarkAsTemplateResponse{}
 
 	return r
 }

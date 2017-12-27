@@ -715,3 +715,46 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal("all snapshots should be removed")
 	}
 }
+
+func TestVmMarkAsTemplate(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+
+	err = vm.MarkAsTemplate(ctx)
+	if err == nil {
+		t.Fatal("cannot create template for a powered on vm")
+	}
+
+	task, err := vm.PowerOff(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	task.Wait(ctx)
+
+	err = vm.MarkAsTemplate(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = vm.PowerOn(ctx)
+	if err == nil {
+		t.Fatal("cannot PowerOn a template")
+	}
+}
