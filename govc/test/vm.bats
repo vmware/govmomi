@@ -665,3 +665,24 @@ load test_helper
   assert_success
 
 }
+
+@test "vm.markastemplate" {
+  vcsim_env
+
+  id=$(new_id)
+
+  run govc vm.create -on=true "$id"
+  assert_success
+
+  run govc vm.markastemplate "$id"
+  assert_failure
+
+  run govc vm.power -off "$id"
+  assert_success
+
+  run govc vm.markastemplate "$id"
+  assert_success
+
+  run govc vm.power -on "$id"
+  assert_failure
+}
