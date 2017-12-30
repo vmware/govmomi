@@ -107,12 +107,6 @@ load test_helper
   assert_success
   assert_line "SyncTimeWithHost: true"
 
-  run govc vm.change -nested-hv-enabled=true -vm $id
-  assert_success
-
-  hv=$(govc vm.info -json DC0_H0_VM0 | jq '.[][0].Config.NestedHVEnabled')
-  assert_equal "$hv" "true"
-
   run govc object.collect -s "vm/$id" config.memoryAllocation.reservation
   assert_success 0
 
@@ -290,6 +284,13 @@ load test_helper
   run govc vm.change -e "guestinfo.a=" -vm $id
   assert_success
   refute_line "guestinfo.a: 2"
+
+  # test optional bool Config
+  run govc vm.change -nested-hv-enabled=true -vm "$id"
+  assert_success
+
+  hv=$(govc vm.info -json "$id" | jq '.[][0].Config.NestedHVEnabled')
+  assert_equal "$hv" "true"
 }
 
 @test "vm.create linked ide disk" {

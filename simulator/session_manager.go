@@ -17,6 +17,11 @@ limitations under the License.
 package simulator
 
 import (
+	"context"
+	"fmt"
+	"net/http"
+	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -33,26 +38,30 @@ type SessionManager struct {
 	mo.SessionManager
 
 	ServiceHostName string
+
+	*sessionMap
 }
 
 func NewSessionManager(ref types.ManagedObjectReference) object.Reference {
-	s := &SessionManager{}
+	s := &SessionManager{
+		sessionMap: &sessionMap{sessions: make(map[string]Session)},
+	}
 	s.Self = ref
 	return s
 }
 
-func (s *SessionManager) Login(login *types.Login) soap.HasFault {
+func (s *SessionManager) Login(ctx *Context, login *types.Login) soap.HasFault {
 	body := &methods.LoginBody{}
 
 	if login.Locale == "" {
 		login.Locale = session.Locale
 	}
 
-	if login.UserName == "" || login.Password == "" {
+	if login.UserName == "" || login.Password == "" || ctx.Session != nil {
 		body.Fault_ = Fault("Login failure", &types.InvalidLogin{})
 	} else {
-		body.Res = &types.LoginResponse{
-			Returnval: types.UserSession{
+		session := Session{
+			UserSession: types.UserSession{
 				Key:            uuid.New().String(),
 				UserName:       login.UserName,
 				FullName:       login.UserName,
@@ -61,14 +70,33 @@ func (s *SessionManager) Login(login *types.Login) soap.HasFault {
 				Locale:         login.Locale,
 				MessageLocale:  login.Locale,
 			},
+			Registry: NewRegistry(),
+		}
+
+		ctx.SetSession(session, true)
+
+		body.Res = &types.LoginResponse{
+			Returnval: session.UserSession,
 		}
 	}
 
 	return body
 }
 
-func (s *SessionManager) Logout(*types.Logout) soap.HasFault {
+func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
+	s.remove(ctx.Session.Key)
 	return &methods.LogoutBody{Res: new(types.LogoutResponse)}
+}
+
+func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSession) soap.HasFault {
+	for _, id := range req.SessionId {
+		if id == ctx.Session.Key {
+			return &methods.TerminateSessionBody{Fault_: Fault("", &types.InvalidArgument{})}
+		}
+		s.remove(id)
+	}
+
+	return &methods.TerminateSessionBody{Res: new(types.TerminateSessionResponse)}
 }
 
 func (s *SessionManager) AcquireGenericServiceTicket(ticket *types.AcquireGenericServiceTicket) soap.HasFault {
@@ -80,4 +108,123 @@ func (s *SessionManager) AcquireGenericServiceTicket(ticket *types.AcquireGeneri
 			},
 		},
 	}
+}
+
+// sessionMap allows Session.Get to clone SessionManager, copying the mo.SessionManager field, but sharing the sessionMap fields.
+type sessionMap struct {
+	mu       sync.Mutex
+	sessions map[string]Session
+}
+
+func (s *sessionMap) remove(key string) {
+	s.mu.Lock()
+	delete(s.sessions, key)
+	s.mu.Unlock()
+}
+
+func (s *sessionMap) load(key string) (Session, bool) {
+	s.mu.Lock()
+	session, ok := s.sessions[key]
+	s.mu.Unlock()
+	return session, ok
+}
+
+func (s *sessionMap) save(session Session) {
+	s.mu.Lock()
+	s.sessions[session.Key] = session
+	s.mu.Unlock()
+}
+
+// internalContext is the session for use by the in-memory client (Service.RoundTrip)
+var internalContext = &Context{
+	Context: context.Background(),
+	Session: &Session{
+		UserSession: types.UserSession{
+			Key: uuid.New().String(),
+		},
+		Registry: NewRegistry(),
+	},
+}
+
+// Context provides per-request Session management.
+type Context struct {
+	req *http.Request
+	res http.ResponseWriter
+	m   *SessionManager
+
+	context.Context
+	Session *Session
+}
+
+// mapSession maps an HTTP cookie to a Session.
+func (c *Context) mapSession() {
+	if cookie, err := c.req.Cookie("vmware_soap_session"); err == nil {
+		if val, ok := c.m.load(cookie.Value); ok {
+			c.SetSession(val, false)
+		}
+	}
+}
+
+// SetSession should be called after successful authentication.
+func (c *Context) SetSession(session Session, login bool) {
+	session.UserAgent = c.req.UserAgent()
+	session.IpAddress = strings.Split(c.req.RemoteAddr, ":")[0]
+	session.LastActiveTime = time.Now()
+
+	c.m.save(session)
+
+	c.Session = &session
+
+	if login {
+		http.SetCookie(c.res, &http.Cookie{
+			Name:  "vmware_soap_session",
+			Value: session.Key,
+		})
+	}
+}
+
+// Session combines a UserSession and a Registry for per-session managed objects.
+type Session struct {
+	types.UserSession
+	*Registry
+}
+
+// Put wraps Registry.Put, setting the moref value to include the session key.
+func (s *Session) Put(item mo.Reference) mo.Reference {
+	ref := item.Reference()
+	if ref.Value == "" {
+		ref.Value = fmt.Sprintf("session[%s]%s", s.Key, uuid.New())
+	}
+	s.Registry.setReference(item, ref)
+	return s.Registry.Put(item)
+}
+
+// Get wraps Registry.Get, session-izing singleton objects such as SessionManager and the root PropertyCollector.
+func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
+	obj := s.Registry.Get(ref)
+	if obj != nil {
+		return obj
+	}
+
+	switch ref.Type {
+	case "SessionManager":
+		// Clone SessionManager so the PropertyCollector can properly report CurrentSession
+		m := *Map.SessionManager()
+		m.CurrentSession = &s.UserSession
+
+		// TODO: we could maintain SessionList as part of the SessionManager singleton
+		m.mu.Lock()
+		for _, session := range m.sessions {
+			m.SessionList = append(m.SessionList, session.UserSession)
+		}
+		m.mu.Unlock()
+
+		return &m
+	case "PropertyCollector":
+		if ref == Map.content().PropertyCollector {
+			return s.Put(NewPropertyCollector(ref))
+		}
+	}
+
+	return Map.Get(ref)
 }

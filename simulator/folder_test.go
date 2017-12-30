@@ -369,12 +369,7 @@ func TestRegisterVm(t *testing.T) {
 }
 
 func TestFolderMoveInto(t *testing.T) {
-	content := vpx.ServiceContent
-	s := New(NewServiceInstance(content, vpx.RootFolder))
-
-	ts := s.NewServer()
-	defer ts.Close()
-
+	ctx := context.Background()
 	model := VPX()
 	defer model.Remove()
 	err := model.Create()
@@ -382,8 +377,10 @@ func TestFolderMoveInto(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx := context.Background()
-	c, err := govmomi.NewClient(ctx, ts.URL, true)
+	s := model.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -451,12 +448,7 @@ func TestFolderMoveInto(t *testing.T) {
 }
 
 func TestFolderCreateDVS(t *testing.T) {
-	content := vpx.ServiceContent
-	s := New(NewServiceInstance(content, vpx.RootFolder))
-
-	ts := s.NewServer()
-	defer ts.Close()
-
+	ctx := context.Background()
 	model := VPX()
 	defer model.Remove()
 	err := model.Create()
@@ -464,8 +456,10 @@ func TestFolderCreateDVS(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	ctx := context.Background()
-	c, err := govmomi.NewClient(ctx, ts.URL, true)
+	s := model.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
 	if err != nil {
 		t.Fatal(err)
 	}

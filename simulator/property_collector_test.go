@@ -335,7 +335,7 @@ func TestExtractEmbeddedField(t *testing.T) {
 
 	Map.Put(x)
 
-	obj, ok := getObject(x.Reference())
+	obj, ok := getObject(internalContext, x.Reference())
 	if !ok {
 		t.Error("expected obj")
 	}
@@ -355,7 +355,7 @@ func TestExtractEmbeddedField(t *testing.T) {
 	n.ManagedObjectReference = types.ManagedObjectReference{Type: "NoMo", Value: "no-mo"}
 	Map.Put(n)
 
-	_, ok = getObject(n.Reference())
+	_, ok = getObject(internalContext, n.Reference())
 	if ok {
 		t.Error("expected not ok")
 	}
@@ -480,7 +480,7 @@ func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 		},
 	}
 
-	_, err := pc.collect(&req)
+	_, err := pc.collect(internalContext, &req)
 	if err == nil {
 		t.Fatal("expected error")
 	}
@@ -1053,5 +1053,59 @@ func TestIssue945(t *testing.T) {
 
 	if len(content) != count.Machine {
 		t.Fatalf("len(content)=%d", len(content))
+	}
+}
+
+func TestPropertyCollectorSession(t *testing.T) { // aka issue-923
+	ctx := context.Background()
+
+	m := VPX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	u := s.URL.User
+	s.URL.User = nil // skip Login()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	for i := 0; i < 2; i++ {
+		if err = c.Login(ctx, u); err != nil {
+			t.Fatal(err)
+		}
+
+		if err = c.Login(ctx, u); err == nil {
+			t.Error("expected Login failure") // Login fails if we already have a session
+		}
+
+		pc := property.DefaultCollector(c.Client)
+		filter := new(property.WaitFilter).Add(c.ServiceContent.RootFolder, "Folder", []string{"name"})
+
+		if err = pc.CreateFilter(ctx, filter.CreateFilter); err != nil {
+			t.Fatal(err)
+		}
+
+		res, err := pc.WaitForUpdates(ctx, "")
+		if err != nil {
+			t.Error(err)
+		}
+
+		if len(res.FilterSet) != 1 {
+			t.Errorf("len FilterSet=%d", len(res.FilterSet))
+		}
+
+		if err = c.Logout(ctx); err != nil {
+			t.Fatal(err)
+		}
 	}
 }

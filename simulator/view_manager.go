@@ -78,7 +78,7 @@ func destroyView(ref types.ManagedObjectReference) soap.HasFault {
 	}
 }
 
-func (m *ViewManager) CreateContainerView(req *types.CreateContainerView) soap.HasFault {
+func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContainerView) soap.HasFault {
 	body := &methods.CreateContainerViewBody{}
 
 	root := Map.Get(req.Container)
@@ -117,7 +117,7 @@ func (m *ViewManager) CreateContainerView(req *types.CreateContainerView) soap.H
 		}
 	}
 
-	Map.Put(container)
+	ctx.Session.Put(container)
 
 	m.ViewList = append(m.ViewList, container.Reference())
 
