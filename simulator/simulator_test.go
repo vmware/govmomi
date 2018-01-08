@@ -232,6 +232,9 @@ func TestServeHTTP(t *testing.T) {
 		ts := s.NewServer()
 		defer ts.Close()
 
+		u := ts.URL.User
+		ts.URL.User = nil
+
 		ctx := context.Background()
 		client, err := govmomi.NewClient(ctx, ts.URL, true)
 		if err != nil {
@@ -243,7 +246,7 @@ func TestServeHTTP(t *testing.T) {
 			t.Fatal("expected invalid login error")
 		}
 
-		err = client.Login(ctx, ts.URL.User)
+		err = client.Login(ctx, u)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -323,12 +326,7 @@ func TestServeHTTPS(t *testing.T) {
 	ctx := context.Background()
 
 	// insecure=true OK
-	client, err := govmomi.NewClient(ctx, ts.URL, true)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = client.Login(ctx, ts.URL.User)
+	_, err := govmomi.NewClient(ctx, ts.URL, true)
 	if err != nil {
 		t.Fatal(err)
 	}

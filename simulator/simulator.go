@@ -59,6 +59,7 @@ type Method struct {
 // Service decodes incoming requests and dispatches to a Handler
 type Service struct {
 	client *vim25.Client
+	sm     *SessionManager
 
 	readAll func(io.Reader) ([]byte, error)
 
@@ -77,6 +78,7 @@ type Server struct {
 func New(instance *ServiceInstance) *Service {
 	s := &Service{
 		readAll: ioutil.ReadAll,
+		sm:      Map.SessionManager(),
 	}
 
 	s.client, _ = vim25.NewClient(context.Background(), s)
@@ -106,8 +108,29 @@ func Fault(msg string, fault types.BaseMethodFault) *soap.Fault {
 	return f
 }
 
-func (s *Service) call(method *Method) soap.HasFault {
+func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	handler := Map.Get(method.This)
+	session := ctx.Session
+
+	if session == nil {
+		switch method.Name {
+		case "RetrieveServiceContent", "Login", "RetrieveProperties", "RetrievePropertiesEx":
+			// ok for now, TODO: authz
+		default:
+			fault := &types.NotAuthenticated{
+				NoPermission: types.NoPermission{
+					Object:      method.This,
+					PrivilegeId: "System.View",
+				},
+			}
+			return &serverFaultBody{Reason: Fault("", fault)}
+		}
+	} else {
+		// Prefer the Session.Registry, ServiceContent.PropertyCollector filter field for example is per-session
+		if h := session.Get(method.This); h != nil {
+			handler = h
+		}
+	}
 
 	if handler == nil {
 		msg := fmt.Sprintf("managed object not found: %s", method.This)
@@ -141,7 +164,12 @@ func (s *Service) call(method *Method) soap.HasFault {
 		}
 	}
 
-	res := m.Call([]reflect.Value{reflect.ValueOf(method.Body)})
+	var args []reflect.Value
+	if m.Type().NumIn() == 2 {
+		args = append(args, reflect.ValueOf(ctx))
+	}
+	args = append(args, reflect.ValueOf(method.Body))
+	res := m.Call(args)
 
 	return res[0].Interface().(soap.HasFault)
 }
@@ -165,7 +193,10 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 		Body: req.Interface(),
 	}
 
-	res := s.call(method)
+	res := s.call(&Context{
+		Context: ctx,
+		Session: internalContext.Session,
+	}, method)
 
 	if err := res.Fault(); err != nil {
 		return soap.WrapSoapFault(err)
@@ -262,6 +293,15 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(os.Stderr, "Request: %s\n", string(body))
 	}
 
+	ctx := &Context{
+		req: r,
+		res: w,
+		m:   s.sm,
+
+		Context: context.Background(),
+	}
+	ctx.mapSession()
+
 	var res soap.HasFault
 	var soapBody interface{}
 
@@ -269,7 +309,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		res = serverFault(err.Error())
 	} else {
-		res = s.call(method)
+		res = s.call(ctx, method)
 	}
 
 	if f := res.Fault(); f != nil {
@@ -428,7 +468,7 @@ func (s *Service) NewServer() *Server {
 	}
 
 	// Redirect clients to this http server, rather than HostSystem.Name
-	Map.Get(*s.client.ServiceContent.SessionManager).(*SessionManager).ServiceHostName = u.Host
+	Map.SessionManager().ServiceHostName = u.Host
 
 	if f := flag.Lookup("httptest.serve"); f != nil {
 		// Avoid the blocking behaviour of httptest.Server.Start() when this flag is set

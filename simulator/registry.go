@@ -99,6 +99,11 @@ func (r *Registry) newReference(item mo.Reference) types.ManagedObjectReference 
 	return ref
 }
 
+func (r *Registry) setReference(item mo.Reference, ref types.ManagedObjectReference) {
+	// mo.Reference() returns a value, not a pointer so use reflect to set the Self field
+	reflect.ValueOf(item).Elem().FieldByName("Self").Set(reflect.ValueOf(ref))
+}
+
 // AddHandler adds a RegisterObject handler to the Registry.
 func (r *Registry) AddHandler(h RegisterObject) {
 	r.handlers[h.Reference()] = h
@@ -156,8 +161,7 @@ func (r *Registry) Put(item mo.Reference) mo.Reference {
 	ref := item.Reference()
 	if ref.Type == "" || ref.Value == "" {
 		ref = r.newReference(item)
-		// mo.Reference() returns a value, not a pointer so use reflect to set the Self field
-		reflect.ValueOf(item).Elem().FieldByName("Self").Set(reflect.ValueOf(ref))
+		r.setReference(item, ref)
 	}
 
 	if me, ok := item.(mo.Entity); ok {
@@ -340,4 +344,9 @@ func (r *Registry) ViewManager() *ViewManager {
 // UserDirectory returns the UserDirectory singleton
 func (r *Registry) UserDirectory() *UserDirectory {
 	return r.Get(r.content().UserDirectory.Reference()).(*UserDirectory)
+}
+
+// SessionManager returns the SessionManager singleton
+func (r *Registry) SessionManager() *SessionManager {
+	return r.Get(r.content().SessionManager.Reference()).(*SessionManager)
 }
