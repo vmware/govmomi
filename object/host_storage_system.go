@@ -162,13 +162,13 @@ func (s HostStorageSystem) MarkAsNonLocal(ctx context.Context, uuid string) (*Ta
 	return NewTask(s.c, res.Returnval), nil
 }
 
-func (s HostStorageSystem) AttachScsiLun(ctx context.Context, uuid string) (*types.AttachScsiLunResponse, error) {
+func (s HostStorageSystem) AttachScsiLun(ctx context.Context, uuid string) error {
 	req := types.AttachScsiLun{
 		This:    s.Reference(),
 		LunUuid: uuid,
 	}
 
-	res, err := methods.AttachScsiLun(ctx, s.c, &req)
+	_, err := methods.AttachScsiLun(ctx, s.c, &req)
 
-	return res, err
+	return err
 }
