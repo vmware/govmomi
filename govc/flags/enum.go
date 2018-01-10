@@ -6,13 +6,15 @@ import (
 	"strings"
 )
 
-// enum is a value store that validates against a set of strings. The validation is performed at set-time.
+// enum is a value store that validates against a set of strings. The
+// validation is performed at set-time.
 type enum struct {
 	value   *string
 	allowed []string
 }
 
-// NewEnum returns a enum as a flag.Value for the string pointed at by p, and the validations supplied in allowed.
+// NewEnum returns a enum as a flag.Value for the string pointed at by p, and
+// the validations supplied in allowed.
 func NewEnum(p *string, allowed []string) flag.Value {
 	return &enum{value: p, allowed: allowed}
 }
@@ -40,7 +42,8 @@ func (e *enum) String() string {
 	return s
 }
 
-// enumSlice is a value store that validates against a set of strings. The validation is performed at set-time.
+// enumSlice is a value store that validates against a set of strings. The
+// validation is performed at set-time.
 type enumSlice struct {
 	value   *[]string
 	allowed []string
