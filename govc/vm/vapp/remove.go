@@ -7,10 +7,12 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-const cmdDescription = `Remove vApp configuration from a virtual machine.
+const removeCmdUsage = "VM..."
+const removeCmdDescription = `Remove vApp configuration from a virtual machine.
 
 WARNING: Removal is permanent. Any vApp configuration will need to be
 reconstructed from scratch after this operation.`
@@ -28,8 +30,12 @@ func (cmd *remove) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 }
 
+func (cmd *remove) Usage() string {
+	return removeCmdUsage
+}
+
 func (cmd *remove) Description() string {
-	return cmdDescription
+	return infoCmdDescription
 }
 
 func (cmd *remove) Process(ctx context.Context) error {
@@ -37,9 +43,27 @@ func (cmd *remove) Process(ctx context.Context) error {
 }
 
 func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
-	vm, err := cmd.VirtualMachine()
+	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err
+	}
+
+	for _, vm := range vms {
+		if err := cmd.removeVAppConfig(ctx, vm); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (cmd *remove) removeVAppConfig(ctx context.Context, vm *object.VirtualMachine) error {
+	hasConfig, err := hasVAppConfig(ctx, vm)
+	switch {
+	case err != nil:
+		return err
+	case !hasConfig:
+		fmt.Fprintf(cmd, "Virtual machine %s has no vApp configuration.\n", vm.Name())
+		return nil
 	}
 
 	t := true
@@ -56,6 +80,6 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	fmt.Printf("vApp properties removed successfully for %s.\n", vm.InventoryPath)
+	fmt.Fprintf(cmd, "vApp configuration successfully removed for virtual machine %s.\n", vm.Name())
 	return nil
 }
