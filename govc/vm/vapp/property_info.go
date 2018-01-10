@@ -48,6 +48,7 @@ func writePropertyResult(r propertyResult, tw *tabwriter.Writer) error {
 	fmt.Fprintf(tw, "  Type:\t%s\n", r.Type)
 	fmt.Fprintf(tw, "  Type Reference:\t%s\n", r.TypeReference)
 	fmt.Fprintf(tw, "  User Configurable:\t%t\n", configurable)
+	fmt.Fprintf(tw, "  Default Value:\t%s\n\n", r.DefaultValue)
 	fmt.Fprintf(tw, "  Current Value:\t%s\n\n", r.Value)
 
 	return nil
@@ -116,4 +117,13 @@ func findProperty(ps []types.VAppPropertyInfo, key string) (types.VAppPropertyIn
 		}
 	}
 	return types.VAppPropertyInfo{}, fmt.Errorf("property not found: %s", key)
+}
+
+func hasProperty(ps []types.VAppPropertyInfo, key string) bool {
+	// The only error that is returned from findProperty at the moment is one
+	// indicating that the key was not found.
+	if _, err := findProperty(ps, key); err != nil {
+		return false
+	}
+	return true
 }
