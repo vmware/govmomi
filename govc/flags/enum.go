@@ -19,12 +19,12 @@ func NewEnum(p *string, allowed []string) flag.Value {
 	return &enum{value: p, allowed: allowed}
 }
 
-// Get implements Getter for stringSliceValue.
+// Get implements Getter for enum.
 func (e *enum) Get() interface{} {
 	return *e.value
 }
 
-// Set implements Value for stringSliceValue.
+// Set implements Value for enum.
 func (e *enum) Set(s string) error {
 	if err := validateEnum(s, e.allowed); err != nil {
 		return err
@@ -49,18 +49,18 @@ type enumSlice struct {
 	allowed []string
 }
 
-// NewEnumSlice returns a enumSlice as a flag.Value for the
-// string pointed at by p, validated by the values in allowed.
+// NewEnumSlice returns a enumSlice as a flag.Value for the string pointed at
+// by p, validated by the values in allowed.
 func NewEnumSlice(p *[]string, allowed []string) flag.Value {
 	return &enumSlice{value: p, allowed: allowed}
 }
 
-// Get implements Getter for stringSliceValue.
+// Get implements Getter for enumSlice.
 func (e *enumSlice) Get() interface{} {
 	return *e.value
 }
 
-// Set implements Value for stringSliceValue.
+// Set implements Value for enumSlice.
 func (e *enumSlice) Set(s string) error {
 	vs := strings.Split(s, ",")
 	for _, v := range vs {

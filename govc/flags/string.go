@@ -19,18 +19,18 @@ func newStringPtr(p **string) flag.Value {
 	return &stringPtr{value: p}
 }
 
-// Get implements Getter for stringValue.
+// Get implements Getter for stringPtr.
 func (v *stringPtr) Get() interface{} {
 	return *v.value
 }
 
-// Set implements Value for stringValue.
+// Set implements Value for stringPtr.
 func (v *stringPtr) Set(s string) error {
 	**v.value = s
 	return nil
 }
 
-// String implements Value for stringValue.
+// String implements Value for stringPtr.
 func (v *stringPtr) String() string {
 	return fmt.Sprintf("%v", *v.value)
 }
@@ -49,21 +49,18 @@ func NewStringSlice(p *[]string) flag.Value {
 	return &stringSlice{value: p}
 }
 
-// Get implements Getter for stringSliceValue.
+// Get implements Getter for stringSlice.
 func (v *stringSlice) Get() interface{} {
 	return *v.value
 }
 
-// Set implements Value for stringSliceValue.
+// Set implements Value for stringSlice.
 func (v *stringSlice) Set(s string) error {
 	*v.value = strings.Split(s, ",")
 	return nil
 }
 
-// String implements Value for stringSliceValue.
-//
-// This only serves to satisfy the interface, it should not be used directly as
-// it will not distinguish between nil and an empty slice.
+// String implements Value for stringSlice.
 func (v *stringSlice) String() string {
 	var s string
 	if v.value != nil && *v.value != nil {
