@@ -43,7 +43,7 @@ properties added at the same time are ignored.
 
 Examples:
 
-govc vm.vapp.configure -vm=foobar -ip.protocols.supported="ipv4,ipv6"
+govc vm.vapp.configure -vm=foobar -ip.protocols.supported="IPv4,IPv6"
 govc vm.vapp.configure -vm=foobar -product.remove=true
 govc vm.vapp.configure -vm=foobar -product.name="Foo Bar"
 govc vm.vapp.configure -vm=foobar -product.name="Foo Bar" -product.version="1.0.0"
