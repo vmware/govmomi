@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright 2017 VMware, Inc. All Rights Reserved.
+# Copyright 2017-2018 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -30,8 +30,8 @@ EOF
 
 disk=48
 mem=16
-# 6.5U1 (EP4) - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-esxi-651-release-notes.html
-iso=VMware-VMvisor-6.5.0-6765664.x86_64.iso
+# 6.5U1 (EP5) - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-esxi-651-release-notes.html
+iso=VMware-VMvisor-6.5.0-7526137.x86_64.iso
 
 while getopts d:hi:m:s flag
 do
