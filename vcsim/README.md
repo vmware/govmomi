@@ -79,7 +79,7 @@ code includes all types and methods defined in the vmodl, which can be used to i
 To see the list of supported methods:
 
 ```
-curl -k https://user:pass@127.0.0.1:8989/about
+curl -sk https://user:pass@127.0.0.1:8989/about
 ```
 
 ## Listen address

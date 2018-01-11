@@ -21,3 +21,11 @@ load test_helper
     assert_success
   done
 }
+
+@test "vcsim about" {
+  vcsim_env
+
+  run curl -sk https://"$(govc env GOVC_URL)"/about
+  assert_matches "CurrentTime" # 1 param (without Context)
+  assert_matches "TerminateSession" # 2 params (with Context)
+}

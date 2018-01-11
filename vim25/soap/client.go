@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -56,6 +56,7 @@ const (
 	DefaultVimNamespace  = "urn:vim25"
 	DefaultVimVersion    = "6.5"
 	DefaultMinVimVersion = "5.5"
+	SessionCookieName    = "vmware_soap_session"
 )
 
 type header struct {
@@ -168,7 +169,7 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 
 	// Set SOAP Header cookie
 	for _, cookie := range client.Jar.Cookies(u) {
-		if cookie.Name == "vmware_soap_session" {
+		if cookie.Name == SessionCookieName {
 			client.cookie = cookie.Value
 			break
 		}

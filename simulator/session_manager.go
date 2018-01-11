@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -58,7 +58,7 @@ func (s *SessionManager) Login(ctx *Context, login *types.Login) soap.HasFault {
 	}
 
 	if login.UserName == "" || login.Password == "" || ctx.Session != nil {
-		body.Fault_ = Fault("Login failure", &types.InvalidLogin{})
+		body.Fault_ = invalidLogin
 	} else {
 		session := Session{
 			UserSession: types.UserSession{
@@ -89,14 +89,52 @@ func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
 }
 
 func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSession) soap.HasFault {
+	body := new(methods.TerminateSessionBody)
+
 	for _, id := range req.SessionId {
 		if id == ctx.Session.Key {
-			return &methods.TerminateSessionBody{Fault_: Fault("", &types.InvalidArgument{})}
+			body.Fault_ = Fault("", new(types.InvalidArgument))
+			return body
 		}
 		s.remove(id)
 	}
 
-	return &methods.TerminateSessionBody{Res: new(types.TerminateSessionResponse)}
+	body.Res = new(types.TerminateSessionResponse)
+	return body
+}
+
+func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneTicket) soap.HasFault {
+	session := *ctx.Session
+	session.Key = uuid.New().String()
+	s.save(session)
+
+	return &methods.AcquireCloneTicketBody{
+		Res: &types.AcquireCloneTicketResponse{
+			Returnval: session.Key,
+		},
+	}
+}
+
+func (s *SessionManager) CloneSession(ctx *Context, ticket *types.CloneSession) soap.HasFault {
+	body := new(methods.CloneSessionBody)
+
+	s.mu.Lock()
+	session, exists := s.sessions[ticket.CloneTicket]
+	s.mu.Unlock()
+
+	if exists {
+		s.remove(ticket.CloneTicket) // A clone ticket can only be used once
+		session.Key = uuid.New().String()
+		ctx.SetSession(session, true)
+
+		body.Res = &types.CloneSessionResponse{
+			Returnval: session.UserSession,
+		}
+	} else {
+		body.Fault_ = invalidLogin
+	}
+
+	return body
 }
 
 func (s *SessionManager) AcquireGenericServiceTicket(ticket *types.AcquireGenericServiceTicket) soap.HasFault {
@@ -146,6 +184,8 @@ var internalContext = &Context{
 	},
 }
 
+var invalidLogin = Fault("Login failure", new(types.InvalidLogin))
+
 // Context provides per-request Session management.
 type Context struct {
 	req *http.Request
@@ -158,7 +198,7 @@ type Context struct {
 
 // mapSession maps an HTTP cookie to a Session.
 func (c *Context) mapSession() {
-	if cookie, err := c.req.Cookie("vmware_soap_session"); err == nil {
+	if cookie, err := c.req.Cookie(soap.SessionCookieName); err == nil {
 		if val, ok := c.m.load(cookie.Value); ok {
 			c.SetSession(val, false)
 		}
@@ -177,7 +217,7 @@ func (c *Context) SetSession(session Session, login bool) {
 
 	if login {
 		http.SetCookie(c.res, &http.Cookie{
-			Name:  "vmware_soap_session",
+			Name:  soap.SessionCookieName,
 			Value: session.Key,
 		})
 	}

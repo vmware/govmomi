@@ -38,3 +38,24 @@ load test_helper
   run govc session.rm "$id"
   assert_success
 }
+
+@test "session.login" {
+    esx_env
+
+    # Remove username/password
+    host=$(govc env GOVC_URL)
+
+    # Validate auth is not required for service content
+    run govc about -u "$host"
+    assert_success
+
+    # Auth is required here
+    run govc ls -u "$host"
+    assert_failure
+
+    cookie=$(govc session.login -l)
+    ticket=$(govc session.login -cookie "$cookie" -clone)
+
+    run govc session.login -u "$host" -ticket "$ticket"
+    assert_success
+}

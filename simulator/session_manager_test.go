@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -157,5 +157,30 @@ func TestSessionManagerAuth(t *testing.T) {
 
 	if !strings.Contains(pc.Reference().Value, session.Key) {
 		t.Errorf("invalid ref=%s", pc.Reference())
+	}
+
+	ticket, err := c.SessionManager.AcquireCloneTicket(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	c, err = govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.SessionManager.CloneSession(ctx, ticket)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = c.SessionManager.CloneSession(ctx, ticket)
+	if err == nil {
+		t.Error("expected error")
+	}
+
+	_, err = methods.GetCurrentTime(ctx, c)
+	if err != nil {
+		t.Error(err)
 	}
 }
