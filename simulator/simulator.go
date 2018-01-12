@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -114,7 +114,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "Login", "RetrieveProperties", "RetrievePropertiesEx":
+		case "RetrieveServiceContent", "Login", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
@@ -257,7 +257,11 @@ func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 			}
 			seen[m.Name] = true
 
-			if m.Type.NumIn() != 2 || m.Type.NumOut() != 1 || m.Type.Out(0) != f {
+			in := m.Type.NumIn()
+			if in < 2 || in > 3 { // at least 2 params (receiver and request), optionally a 3rd param (context)
+				continue
+			}
+			if m.Type.NumOut() != 1 || m.Type.Out(0) != f { // all methods return soap.HasFault
 				continue
 			}
 

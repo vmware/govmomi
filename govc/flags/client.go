@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -73,6 +73,8 @@ type ClientFlag struct {
 	tlsCaCerts    string
 	tlsKnownHosts string
 	client        *vim25.Client
+
+	Login func(context.Context, *vim25.Client) error
 }
 
 var (
@@ -92,6 +94,7 @@ func NewClientFlag(ctx context.Context) (*ClientFlag, context.Context) {
 	}
 
 	v := &ClientFlag{}
+	v.Login = v.login
 	v.DebugFlag, ctx = NewDebugFlag(ctx)
 	ctx = context.WithValue(ctx, clientFlagKey, v)
 	return v, ctx
@@ -397,13 +400,46 @@ func (flag *ClientFlag) SetRootCAs(c *soap.Client) error {
 	return nil
 }
 
+func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
+	m := session.NewManager(c)
+	u := flag.url.User
+
+	if u.Username() == "" {
+		if !c.IsVC() {
+			// If no username is provided, try to acquire a local ticket.
+			// When invoked remotely, ESX returns an InvalidRequestFault.
+			// So, rather than return an error here, fallthrough to Login() with the original User to
+			// to avoid what would be a confusing error message.
+			luser, lerr := flag.localTicket(ctx, m)
+			if lerr == nil {
+				// We are running directly on an ESX or Workstation host and can use the ticket with Login()
+				u = luser
+			} else {
+				flag.persist = true // Not persisting, but this avoids the call to Logout()
+				return nil          // Avoid SaveSession for non-authenticated session
+			}
+		}
+	}
+
+	if flag.cert != "" {
+		err := m.LoginExtensionByCertificate(ctx, u.Username(), "")
+		if err != nil {
+			return err
+		}
+	}
+
+	if err := m.Login(ctx, u); err != nil {
+		return err
+	}
+
+	return flag.saveClient(c)
+}
+
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	ctx := context.TODO()
 	sc := soap.NewClient(flag.url, flag.insecure)
-	isTunnel := false
 
 	if flag.cert != "" {
-		isTunnel = true
 		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
 		if err != nil {
 			return nil, err
@@ -425,39 +461,7 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	// Set client, since we didn't pass it in the constructor
 	c.Client = sc
 
-	m := session.NewManager(c)
-	u := flag.url.User
-
-	if u.Username() == "" && !c.IsVC() {
-		// If no username is provided, try to acquire a local ticket.
-		// When invoked remotely, ESX returns an InvalidRequestFault.
-		// So, rather than return an error here, fallthrough to Login() with the original User to
-		// to avoid what would be a confusing error message.
-		luser, lerr := flag.localTicket(ctx, m)
-		if lerr == nil {
-			// We are running directly on an ESX or Workstation host and can use the ticket with Login()
-			u = luser
-		}
-	}
-
-	if isTunnel {
-		err = m.LoginExtensionByCertificate(ctx, u.Username(), "")
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		err = m.Login(ctx, u)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	err = flag.saveClient(c)
-	if err != nil {
-		return nil, err
-	}
-
-	return c, nil
+	return c, flag.Login(ctx, c)
 }
 
 func (flag *ClientFlag) localTicket(ctx context.Context, m *session.Manager) (*url.Userinfo, error) {
