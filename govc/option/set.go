@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -62,14 +63,35 @@ Examples:
   govc option.set logger.Vsan verbose`
 }
 
+func isInvalidName(err error) bool {
+	if soap.IsSoapFault(err) {
+		soapFault := soap.ToSoapFault(err)
+		if _, ok := soapFault.VimFault().(types.InvalidName); ok {
+			return ok
+		}
+	}
+
+	return false
+}
+
 func (cmd *Set) Update(ctx context.Context, f *flag.FlagSet, m *object.OptionManager) error {
 	if f.NArg() != 2 {
 		return flag.ErrHelp
 	}
 
 	name := f.Arg(0)
+	val := f.Arg(1)
+
 	opts, err := m.Query(ctx, name)
 	if err != nil {
+		if isInvalidName(err) {
+			// If the option doesn't exist, creating one can only have a string Value.
+			// The Key prefix is limited in this case too, it seems to the config.* namespace.
+			return m.Update(ctx, []types.BaseOptionValue{&types.OptionValue{
+				Key:   name,
+				Value: val,
+			}})
+		}
 		return err
 	}
 
@@ -77,7 +99,6 @@ func (cmd *Set) Update(ctx context.Context, f *flag.FlagSet, m *object.OptionMan
 		return flag.ErrHelp
 	}
 
-	val := f.Arg(1)
 	var set types.AnyType
 
 	switch x := opts[0].GetOptionValue().Value.(type) {
