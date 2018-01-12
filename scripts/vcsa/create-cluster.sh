@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright 2017 VMware, Inc. All Rights Reserved.
+# Copyright 2017-2018 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -57,6 +57,7 @@ fi
 vc_ip=$1
 shift
 
+unset GOVC_DATACENTER
 export GOVC_URL="${GOVC_USERNAME}:${GOVC_PASSWORD}@${vc_ip}"
 
 cluster_path="/$dc_name/host/$cluster_name"
@@ -121,6 +122,9 @@ if [ ${#vsan_hosts[@]} -ge 3 ] ; then
   echo "Enabling vSAN for ${cluster_path}..."
   govc cluster.change -vsan-enabled -vsan-autoclaim "$cluster_path"
 fi
+
+echo "Enabling HA for ${cluster_path}..."
+govc cluster.change -ha-enabled "$cluster_path"
 
 echo "Granting Admin permissions for user root..."
 govc permissions.set -principal root -role Admin

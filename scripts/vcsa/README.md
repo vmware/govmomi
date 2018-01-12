@@ -99,7 +99,7 @@ export GOVC_URL="root:password@some-esx-host"
 
 ./create-vcsa-vm.sh -n "${USER}-vcsa" $GOVC_URL
 
-seq 1 3 | xargs printf "${USER}-esxi-%03d\n" | xargs -P3 -n1 ./create-esxi-vm.sh $GOVC_URL
+printf "${USER}-esxi-%03d\n" {1..3} | xargs -P3 -n1 ./create-esxi-vm.sh $GOVC_URL
 
 govc vm.ip -k "${USER}-vcsa" "${USER}-esxi-*" | xargs ./create-cluster.sh
 ```

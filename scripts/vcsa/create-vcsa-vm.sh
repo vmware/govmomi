@@ -1,6 +1,6 @@
 #!/bin/bash -e
 
-# Copyright 2017 VMware, Inc. All Rights Reserved.
+# Copyright 2017-2018 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,8 +25,8 @@ export GOVC_INSECURE=1
 
 name=vcsa
 
-# 6.5.0U1b - https://docs.vmware.com/en/VMware-vSphere/65/rn/vsphere-vcenter-server-65u1b-release-notes.html
-ova=VMware-vCenter-Server-Appliance-6.5.0.11000-6816762_OVF10.ova
+# 6.5 U1e (EP5) - https://docs.vmware.com/en/VMware-vSphere/6.5/rn/vsphere-vcenter-server-65u1e-release-notes.html
+ova=VMware-vCenter-Server-Appliance-6.5.0.14000-7515524_OVF10.ova
 
 while getopts a:i:n: flag
 do
