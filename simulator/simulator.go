@@ -63,7 +63,8 @@ type Service struct {
 
 	readAll func(io.Reader) ([]byte, error)
 
-	TLS *tls.Config
+	TLS      *tls.Config
+	ServeMux *http.ServeMux
 }
 
 // Server provides a simulator Service over HTTP
@@ -164,12 +165,14 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		}
 	}
 
-	var args []reflect.Value
+	var args, res []reflect.Value
 	if m.Type().NumIn() == 2 {
 		args = append(args, reflect.ValueOf(ctx))
 	}
 	args = append(args, reflect.ValueOf(method.Body))
-	res := m.Call(args)
+	Map.WithLock(handler, func() {
+		res = m.Call(args)
+	})
 
 	return res[0].Interface().(soap.HasFault)
 }
@@ -304,7 +307,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 
 		Context: context.Background(),
 	}
-	ctx.mapSession()
+	Map.WithLock(s.sm, ctx.mapSession)
 
 	var res soap.HasFault
 	var soapBody interface{}
@@ -444,7 +447,11 @@ func (*Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
 
 // NewServer returns an http Server instance for the given service
 func (s *Service) NewServer() *Server {
-	mux := http.NewServeMux()
+	mux := s.ServeMux
+	if mux == nil {
+		mux = http.NewServeMux()
+	}
+
 	path := "/sdk"
 
 	mux.HandleFunc(path, s.ServeSDK)

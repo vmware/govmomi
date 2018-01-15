@@ -61,9 +61,9 @@ func TestRemoveReference(t *testing.T) {
 
 	n := len(refs)
 
-	nr := RemoveReference(refs[2], refs)
+	RemoveReference(&refs, refs[2])
 
-	if len(nr) != n-1 {
-		t.Errorf("%d", len(nr))
+	if len(refs) != n-1 {
+		t.Errorf("%d", len(refs))
 	}
 }

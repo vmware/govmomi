@@ -21,7 +21,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -39,12 +38,12 @@ type SessionManager struct {
 
 	ServiceHostName string
 
-	*sessionMap
+	sessions map[string]Session
 }
 
 func NewSessionManager(ref types.ManagedObjectReference) object.Reference {
 	s := &SessionManager{
-		sessionMap: &sessionMap{sessions: make(map[string]Session)},
+		sessions: make(map[string]Session),
 	}
 	s.Self = ref
 	return s
@@ -84,7 +83,7 @@ func (s *SessionManager) Login(ctx *Context, login *types.Login) soap.HasFault {
 }
 
 func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
-	s.remove(ctx.Session.Key)
+	delete(s.sessions, ctx.Session.Key)
 	return &methods.LogoutBody{Res: new(types.LogoutResponse)}
 }
 
@@ -96,7 +95,7 @@ func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSess
 			body.Fault_ = Fault("", new(types.InvalidArgument))
 			return body
 		}
-		s.remove(id)
+		delete(s.sessions, id)
 	}
 
 	body.Res = new(types.TerminateSessionResponse)
@@ -106,7 +105,7 @@ func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSess
 func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneTicket) soap.HasFault {
 	session := *ctx.Session
 	session.Key = uuid.New().String()
-	s.save(session)
+	s.sessions[session.Key] = session
 
 	return &methods.AcquireCloneTicketBody{
 		Res: &types.AcquireCloneTicketResponse{
@@ -118,12 +117,10 @@ func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneT
 func (s *SessionManager) CloneSession(ctx *Context, ticket *types.CloneSession) soap.HasFault {
 	body := new(methods.CloneSessionBody)
 
-	s.mu.Lock()
 	session, exists := s.sessions[ticket.CloneTicket]
-	s.mu.Unlock()
 
 	if exists {
-		s.remove(ticket.CloneTicket) // A clone ticket can only be used once
+		delete(s.sessions, ticket.CloneTicket) // A clone ticket can only be used once
 		session.Key = uuid.New().String()
 		ctx.SetSession(session, true)
 
@@ -148,31 +145,6 @@ func (s *SessionManager) AcquireGenericServiceTicket(ticket *types.AcquireGeneri
 	}
 }
 
-// sessionMap allows Session.Get to clone SessionManager, copying the mo.SessionManager field, but sharing the sessionMap fields.
-type sessionMap struct {
-	mu       sync.Mutex
-	sessions map[string]Session
-}
-
-func (s *sessionMap) remove(key string) {
-	s.mu.Lock()
-	delete(s.sessions, key)
-	s.mu.Unlock()
-}
-
-func (s *sessionMap) load(key string) (Session, bool) {
-	s.mu.Lock()
-	session, ok := s.sessions[key]
-	s.mu.Unlock()
-	return session, ok
-}
-
-func (s *sessionMap) save(session Session) {
-	s.mu.Lock()
-	s.sessions[session.Key] = session
-	s.mu.Unlock()
-}
-
 // internalContext is the session for use by the in-memory client (Service.RoundTrip)
 var internalContext = &Context{
 	Context: context.Background(),
@@ -194,12 +166,13 @@ type Context struct {
 
 	context.Context
 	Session *Session
+	Caller  *types.ManagedObjectReference
 }
 
 // mapSession maps an HTTP cookie to a Session.
 func (c *Context) mapSession() {
 	if cookie, err := c.req.Cookie(soap.SessionCookieName); err == nil {
-		if val, ok := c.m.load(cookie.Value); ok {
+		if val, ok := c.m.sessions[cookie.Value]; ok {
 			c.SetSession(val, false)
 		}
 	}
@@ -211,8 +184,7 @@ func (c *Context) SetSession(session Session, login bool) {
 	session.IpAddress = strings.Split(c.req.RemoteAddr, ":")[0]
 	session.LastActiveTime = time.Now()
 
-	c.m.save(session)
-
+	c.m.sessions[session.Key] = session
 	c.Session = &session
 
 	if login {
@@ -221,6 +193,17 @@ func (c *Context) SetSession(session Session, login bool) {
 			Value: session.Key,
 		})
 	}
+}
+
+// WithLock holds a lock for the given object while then given function is run.
+func (c *Context) WithLock(obj mo.Reference, f func()) {
+	ref := obj.Reference()
+	if c.Caller != nil && *c.Caller == ref {
+		// Internal method invocation, obj is already locked
+		f()
+		return
+	}
+	Map.WithLock(obj, f)
 }
 
 // Session combines a UserSession and a Registry for per-session managed objects.
@@ -253,11 +236,9 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 		m.CurrentSession = &s.UserSession
 
 		// TODO: we could maintain SessionList as part of the SessionManager singleton
-		m.mu.Lock()
 		for _, session := range m.sessions {
 			m.SessionList = append(m.SessionList, session.UserSession)
 		}
-		m.mu.Unlock()
 
 		return &m
 	case "PropertyCollector":

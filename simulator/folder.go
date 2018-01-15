@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"math/rand"
 	"path"
-	"sync"
 
 	"github.com/google/uuid"
 
@@ -32,12 +31,10 @@ import (
 
 type Folder struct {
 	mo.Folder
-
-	m sync.Mutex
 }
 
 // update references when objects are added/removed from a Folder
-func (f *Folder) update(o mo.Reference, u func(types.ManagedObjectReference, []types.ManagedObjectReference) []types.ManagedObjectReference) {
+func (f *Folder) update(o mo.Reference, u func(mo.Reference, *[]types.ManagedObjectReference, types.ManagedObjectReference)) {
 	ref := o.Reference()
 
 	if f.Parent == nil {
@@ -53,9 +50,9 @@ func (f *Folder) update(o mo.Reference, u func(types.ManagedObjectReference, []t
 
 	switch ref.Type {
 	case "Network", "DistributedVirtualSwitch", "DistributedVirtualPortgroup":
-		dc.Network = u(ref, dc.Network)
+		u(dc, &dc.Network, ref)
 	case "Datastore":
-		dc.Datastore = u(ref, dc.Datastore)
+		u(dc, &dc.Datastore, ref)
 	}
 }
 
@@ -70,12 +67,9 @@ func networkSummary(n *mo.Network) *types.NetworkSummary {
 func (f *Folder) putChild(o mo.Entity) {
 	Map.PutEntity(f, o)
 
-	f.m.Lock()
-	defer f.m.Unlock()
+	f.ChildEntity = append(f.ChildEntity, o.Reference())
 
-	f.ChildEntity = AddReference(o.Reference(), f.ChildEntity)
-
-	f.update(o, AddReference)
+	f.update(o, Map.AddReference)
 
 	switch e := o.(type) {
 	case *mo.Network:
@@ -90,12 +84,9 @@ func (f *Folder) putChild(o mo.Entity) {
 func (f *Folder) removeChild(o mo.Reference) {
 	Map.Remove(o.Reference())
 
-	f.m.Lock()
-	defer f.m.Unlock()
+	RemoveReference(&f.ChildEntity, o.Reference())
 
-	f.ChildEntity = RemoveReference(o.Reference(), f.ChildEntity)
-
-	f.update(o, RemoveReference)
+	f.update(o, Map.RemoveReference)
 }
 
 func (f *Folder) hasChildType(kind string) bool {
@@ -240,6 +231,7 @@ func (f *Folder) CreateClusterEx(c *types.CreateClusterEx) soap.HasFault {
 type createVM struct {
 	*Folder
 
+	ctx *Context
 	req *types.CreateVM_Task
 
 	register bool
@@ -291,27 +283,31 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	c.Folder.putChild(vm)
 
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
-	host.Vm = append(host.Vm, vm.Self)
+	Map.AppendReference(host, &host.Vm, vm.Self)
 
 	for i := range vm.Datastore {
 		ds := Map.Get(vm.Datastore[i]).(*Datastore)
-		ds.Vm = append(ds.Vm, vm.Self)
+		Map.AppendReference(ds, &ds.Vm, vm.Self)
 	}
 
-	switch rp := Map.Get(*vm.ResourcePool).(type) {
-	case *ResourcePool:
-		rp.Vm = append(rp.Vm, vm.Self)
-	case *VirtualApp:
-		rp.Vm = append(rp.Vm, vm.Self)
-	}
+	pool := Map.Get(*vm.ResourcePool)
+	// This can be an internal call from VirtualApp.CreateChildVMTask, where pool is already locked.
+	c.ctx.WithLock(pool, func() {
+		switch rp := pool.(type) {
+		case *ResourcePool:
+			rp.Vm = append(rp.Vm, vm.Self)
+		case *VirtualApp:
+			rp.Vm = append(rp.Vm, vm.Self)
+		}
+	})
 
 	return vm.Reference(), nil
 }
 
-func (f *Folder) CreateVMTask(c *types.CreateVM_Task) soap.HasFault {
+func (f *Folder) CreateVMTask(ctx *Context, c *types.CreateVM_Task) soap.HasFault {
 	return &methods.CreateVM_TaskBody{
 		Res: &types.CreateVM_TaskResponse{
-			Returnval: NewTask(&createVM{f, c, false}).Run(),
+			Returnval: NewTask(&createVM{f, ctx, c, false}).Run(),
 		},
 	}
 }
@@ -319,6 +315,7 @@ func (f *Folder) CreateVMTask(c *types.CreateVM_Task) soap.HasFault {
 type registerVM struct {
 	*Folder
 
+	ctx *Context
 	req *types.RegisterVM_Task
 }
 
@@ -367,6 +364,7 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	create := NewTask(&createVM{
 		Folder:   c.Folder,
 		register: true,
+		ctx:      c.ctx,
 		req: &types.CreateVM_Task{
 			This: c.Folder.Reference(),
 			Config: types.VirtualMachineConfigSpec{
@@ -389,10 +387,12 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	return create.Info.Result, nil
 }
 
-func (f *Folder) RegisterVMTask(c *types.RegisterVM_Task) soap.HasFault {
+func (f *Folder) RegisterVMTask(ctx *Context, c *types.RegisterVM_Task) soap.HasFault {
+	ctx.Caller = &f.Self
+
 	return &methods.RegisterVM_TaskBody{
 		Res: &types.RegisterVM_TaskResponse{
-			Returnval: NewTask(&registerVM{f, c}).Run(),
+			Returnval: NewTask(&registerVM{f, ctx, c}).Run(),
 		},
 	}
 }

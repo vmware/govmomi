@@ -34,50 +34,50 @@ import (
 // This is a simple helper for tests running against a simulator, to populate an inventory
 // with commonly used models.
 type Model struct {
-	Service *Service
+	Service *Service `json:"-"`
 
-	ServiceContent types.ServiceContent
-	RootFolder     mo.Folder
+	ServiceContent types.ServiceContent `json:"-"`
+	RootFolder     mo.Folder            `json:"-"`
 
 	// Autostart will power on Model created VMs when true
-	Autostart bool
+	Autostart bool `json:"-"`
 
 	// Datacenter specifies the number of Datacenter entities to create
-	Datacenter int
+	Datacenter int `json:",omitempty"`
 
 	// Portgroup specifies the number of DistributedVirtualPortgroup entities to create per Datacenter
-	Portgroup int
+	Portgroup int `json:",omitempty"`
 
 	// Host specifies the number of standalone HostSystems entities to create per Datacenter
-	Host int
+	Host int `json:",omitempty"`
 
 	// Cluster specifies the number of ClusterComputeResource entities to create per Datacenter
-	Cluster int
+	Cluster int `json:",omitempty"`
 
 	// ClusterHost specifies the number of HostSystems entities to create within a Cluster
-	ClusterHost int
+	ClusterHost int `json:",omitempty"`
 
 	// Pool specifies the number of ResourcePool entities to create per Cluster
-	Pool int
+	Pool int `json:",omitempty"`
 
 	// Datastore specifies the number of Datastore entities to create
 	// Each Datastore will have temporary local file storage and will be mounted
 	// on every HostSystem created by the ModelConfig
-	Datastore int
+	Datastore int `json:",omitempty"`
 
 	// Machine specifies the number of VirtualMachine entities to create per ResourcePool
-	Machine int
+	Machine int `json:",omitempty"`
 
 	// Folder specifies the number of Datacenter to place within a Folder.
 	// This includes a folder for the Datacenter itself and its host, vm, network and datastore folders.
 	// All resources for the Datacenter are placed within these folders, rather than the top-level folders.
-	Folder int
+	Folder int `json:",omitempty"`
 
 	// App specifies the number of VirtualApp to create per Cluster
-	App int
+	App int `json:",omitempty"`
 
 	// Pod specifies the number of StoragePod to create per Cluster
-	Pod int
+	Pod int `json:",omitempty"`
 
 	// total number of inventory objects, set by Count()
 	total int
