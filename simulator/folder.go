@@ -33,6 +33,13 @@ type Folder struct {
 	mo.Folder
 }
 
+func (f *Folder) eventArgument() types.FolderEventArgument {
+	return types.FolderEventArgument{
+		Folder:              f.Self,
+		EntityEventArgument: types.EntityEventArgument{Name: f.Name},
+	}
+}
+
 // update references when objects are added/removed from a Folder
 func (f *Folder) update(o mo.Reference, u func(mo.Reference, *[]types.ManagedObjectReference, types.ManagedObjectReference)) {
 	ref := o.Reference()
@@ -186,7 +193,7 @@ func (p *StoragePod) MoveIntoFolderTask(c *types.MoveIntoFolder_Task) soap.HasFa
 	return (&Folder{Folder: p.Folder}).MoveIntoFolderTask(c)
 }
 
-func (f *Folder) CreateDatacenter(c *types.CreateDatacenter) soap.HasFault {
+func (f *Folder) CreateDatacenter(ctx *Context, c *types.CreateDatacenter) soap.HasFault {
 	r := &methods.CreateDatacenterBody{}
 
 	if f.hasChildType("Datacenter") && f.hasChildType("Folder") {
@@ -201,6 +208,15 @@ func (f *Folder) CreateDatacenter(c *types.CreateDatacenter) soap.HasFault {
 		r.Res = &types.CreateDatacenterResponse{
 			Returnval: dc.Self,
 		}
+
+		ctx.postEvent(&types.DatacenterCreatedEvent{
+			DatacenterEvent: types.DatacenterEvent{
+				Event: types.Event{
+					Datacenter: datacenterEventArgument(dc),
+				},
+			},
+			Parent: f.eventArgument(),
+		})
 	} else {
 		r.Fault_ = f.typeNotSupported()
 	}
@@ -300,6 +316,25 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			rp.Vm = append(rp.Vm, vm.Self)
 		}
 	})
+
+	event := vm.event()
+	c.ctx.postEvent(
+		&types.VmBeingCreatedEvent{
+			VmEvent:    event,
+			ConfigSpec: &c.req.Config,
+		},
+		&types.VmInstanceUuidAssignedEvent{
+			VmEvent:      event,
+			InstanceUuid: vm.Config.InstanceUuid,
+		},
+		&types.VmUuidAssignedEvent{
+			VmEvent: event,
+			Uuid:    vm.Config.Uuid,
+		},
+		&types.VmCreatedEvent{
+			VmEvent: event,
+		},
+	)
 
 	return vm.Reference(), nil
 }

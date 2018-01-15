@@ -71,6 +71,22 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	return hs
 }
 
+func (h *HostSystem) eventArgument() *types.HostEventArgument {
+	return &types.HostEventArgument{
+		Host:                h.Self,
+		EntityEventArgument: types.EntityEventArgument{Name: h.Name},
+	}
+}
+
+func (h *HostSystem) eventArgumentParent() *types.ComputeResourceEventArgument {
+	parent := hostParent(&h.HostSystem)
+
+	return &types.ComputeResourceEventArgument{
+		ComputeResource:     parent.Self,
+		EntityEventArgument: types.EntityEventArgument{Name: parent.Name},
+	}
+}
+
 func hostParent(host *mo.HostSystem) *mo.ComputeResource {
 	switch parent := Map.Get(*host.Parent).(type) {
 	case *mo.ComputeResource:

@@ -127,7 +127,7 @@ load test_helper
   assert grep -q GOVC_URL_QUERY=key=val <<<${output}
   assert grep -q GOVC_URL_FRAGMENT=anchor <<<${output}
 
-  password="pa\$sword\!ok"
+  password="pa\$sword!ok"
   run govc env -u "user:${password}@enoent:99999" GOVC_PASSWORD
   assert_output "$password"
 }

@@ -63,6 +63,15 @@ func getObject(ctx *Context, ref types.ManagedObjectReference) (reflect.Value, b
 		obj = &mo.SessionManager{Self: ref}
 	}
 
+	// For objects that use internal types that differ from that of the vim25/mo field types.
+	// See EventHistoryCollector for example.
+	type get interface {
+		Get() mo.Reference
+	}
+	if o, ok := obj.(get); ok {
+		obj = o.Get()
+	}
+
 	rval := reflect.ValueOf(obj).Elem()
 	rtype := rval.Type()
 
@@ -183,7 +192,7 @@ func isEmpty(rval reflect.Value) bool {
 	switch rval.Kind() {
 	case reflect.Ptr:
 		return rval.IsNil()
-	case reflect.String, reflect.Slice:
+	case reflect.String:
 		return rval.Len() == 0
 	}
 

@@ -18,7 +18,6 @@ package events
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -35,8 +34,6 @@ import (
 
 type events struct {
 	*flags.DatacenterFlag
-
-	write func(io.Writer, *record) error
 
 	Max   int32
 	Tail  bool
@@ -87,13 +84,6 @@ func (cmd *events) Usage() string {
 	return "[PATH]..."
 }
 
-func (cmd *events) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectReference, page []types.BaseEvent, m *event.Manager) error {
 	event.Sort(page)
 	source := ""
@@ -116,6 +106,7 @@ func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectRefe
 			CreatedTime: event.CreatedTime,
 			Category:    cat,
 			Message:     strings.TrimSpace(event.FullFormattedMessage),
+			event:       e,
 		}
 
 		if cmd.Long {
@@ -130,7 +121,7 @@ func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectRefe
 			}
 		}
 
-		if err = cmd.write(os.Stdout, r); err != nil {
+		if err = cmd.WriteResult(r); err != nil {
 			return err
 		}
 	}
@@ -143,13 +134,16 @@ type record struct {
 	CreatedTime time.Time
 	Category    string
 	Message     string
+
+	event types.BaseEvent
 }
 
-func writeEventAsJSON(w io.Writer, r *record) error {
-	return json.NewEncoder(w).Encode(r)
+// Dump the raw Event rather than the record struct.
+func (r *record) Dump() interface{} {
+	return r.event
 }
 
-func writeEvent(w io.Writer, r *record) error {
+func (r *record) Write(w io.Writer) error {
 	when := r.CreatedTime.Local().Format(time.ANSIC)
 	var kind string
 	if r.Type != "" {
@@ -170,12 +164,6 @@ func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if cmd.JSON {
-		cmd.write = writeEventAsJSON
-	} else {
-		cmd.write = writeEvent
-	}
-
 	if len(objs) > 0 {
 		// need an event manager
 		m := event.NewManager(c)
@@ -186,17 +174,13 @@ func (cmd *events) Run(ctx context.Context, f *flag.FlagSet) error {
 			if len(objs) > 1 {
 				o = &obj
 			}
-			err = cmd.printEvents(ctx, o, ee, m)
-			if err != nil {
-				return err
-			}
-			return nil
+
+			return cmd.printEvents(ctx, o, ee, m)
 		}, cmd.Kind...)
 
 		if err != nil {
 			return err
 		}
-
 	}
 
 	return nil

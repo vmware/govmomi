@@ -149,7 +149,7 @@ func (v *ContainerView) include(o types.ManagedObjectReference) bool {
 	return v.types[o.Type]
 }
 
-func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectReference]bool) {
+func walk(root mo.Reference, f func(child types.ManagedObjectReference)) {
 	var children []types.ManagedObjectReference
 
 	switch e := root.(type) {
@@ -174,6 +174,12 @@ func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectRefer
 	}
 
 	for _, child := range children {
+		f(child)
+	}
+}
+
+func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectReference]bool) {
+	walk(root, func(child types.ManagedObjectReference) {
 		if v.include(child) {
 			if seen[child] == false {
 				seen[child] = true
@@ -184,5 +190,5 @@ func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectRefer
 		if v.Recursive {
 			v.add(Map.Get(child), seen)
 		}
-	}
+	})
 }
