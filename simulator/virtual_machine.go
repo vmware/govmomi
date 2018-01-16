@@ -388,19 +388,22 @@ func (vm *VirtualMachine) applyVAppPropertySpecAdd(info *types.VAppPropertyInfo)
 	// Force the Key to be the length of the current set.
 	info.Key = int32(len(ps))
 	ps = append(ps, *info)
+	vm.Config.VAppConfig.GetVmConfigInfo().Property = ps
 }
 
 // applyVAppPropertySpecEdit edits a key in the simulator's vApp property
 // configuration for a virtual machine.
 func (vm *VirtualMachine) applyVAppPropertySpecEdit(info *types.VAppPropertyInfo) {
 	ps := vm.Config.VAppConfig.GetVmConfigInfo().Property
-	var target *types.VAppPropertyInfo
-	for _, p := range ps {
+	var target types.VAppPropertyInfo
+	idx := -1
+	for i, p := range ps {
 		if p.Key == info.Key {
-			target = &p
+			target = p
+			idx = i
 		}
 	}
-	if target == nil {
+	if idx < 0 {
 		vm.log.Printf("property key number %d not found", info.Key)
 		return
 	}
@@ -423,21 +426,32 @@ func (vm *VirtualMachine) applyVAppPropertySpecEdit(info *types.VAppPropertyInfo
 
 	for _, f := range apply {
 		if f.src != "" {
-			*f.dst = f.src
+			*f.dst = strings.TrimSpace(f.src)
 		}
 	}
+	if info.UserConfigurable != nil {
+		*target.UserConfigurable = *info.UserConfigurable
+	}
+	vm.Config.VAppConfig.GetVmConfigInfo().Property[idx] = target
 }
 
 // applyVAppPropertySpecRemove removes the specific property from the the vApp
 // property configuration.
 func (vm *VirtualMachine) applyVAppPropertySpecRemove(key int32) {
 	ps := vm.Config.VAppConfig.GetVmConfigInfo().Property
+	idx := -1
 	for i, p := range ps {
 		if p.Key == key {
-			ps = append(ps[:i], ps[i+1:]...)
-			return
+			idx = i
+			break
 		}
 	}
+	if idx < 0 {
+		vm.log.Printf("invalid property key for removal - removal key %d not found", key)
+		return
+	}
+	ps = append(ps[:idx], ps[idx+1:]...)
+	vm.Config.VAppConfig.GetVmConfigInfo().Property = ps
 }
 
 func validateGuestID(id string) types.BaseMethodFault {

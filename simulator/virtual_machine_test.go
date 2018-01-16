@@ -17,8 +17,10 @@ limitations under the License.
 package simulator
 
 import (
+	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"math/rand"
 	"reflect"
 	"testing"
@@ -29,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -854,4 +857,390 @@ func TestVmMarkAsTemplate(t *testing.T) {
 	if err == nil {
 		t.Fatal("cannot PowerOn a template")
 	}
+}
+
+func TestVmApplyVAppPropertySpec(t *testing.T) {
+	cases := []struct {
+		name     string
+		initial  []types.VAppPropertyInfo
+		spec     []types.VAppPropertySpec
+		expected []types.VAppPropertyInfo
+	}{
+		{
+			name: "add",
+			spec: []types.VAppPropertySpec{
+				{
+					ArrayUpdateSpec: types.ArrayUpdateSpec{
+						Operation: types.ArrayUpdateOperationAdd,
+					},
+					Info: &types.VAppPropertyInfo{
+						ClassId:          "foo",
+						InstanceId:       "foo",
+						Id:               "foo.bar",
+						Category:         "foobarbazqux",
+						Label:            "Foo",
+						Type:             "string",
+						TypeReference:    "VirtualMachine",
+						UserConfigurable: testBoolPtr(true),
+						DefaultValue:     "foo",
+						Value:            "foo",
+						Description:      "foo",
+					},
+				},
+			},
+			expected: []types.VAppPropertyInfo{
+				{
+					Key:              0,
+					ClassId:          "foo",
+					InstanceId:       "foo",
+					Id:               "foo.bar",
+					Category:         "foobarbazqux",
+					Label:            "Foo",
+					Type:             "string",
+					TypeReference:    "VirtualMachine",
+					UserConfigurable: testBoolPtr(true),
+					DefaultValue:     "foo",
+					Value:            "foo",
+					Description:      "foo",
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						VAppConfig: &types.VmConfigInfo{
+							Property: tc.initial,
+						},
+					},
+				},
+			}
+
+			vm.applyVAppPropertySpec(tc.spec)
+			actual := vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Property
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestVmApplyVAppPropertySpecAdd(t *testing.T) {
+	vm := &VirtualMachine{
+		VirtualMachine: mo.VirtualMachine{
+			Config: &types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{},
+			},
+		},
+	}
+
+	expectedInfo := &types.VAppPropertyInfo{
+		Id:               "foo.bar",
+		Label:            "foobar",
+		Type:             "string",
+		UserConfigurable: testBoolPtr(true),
+	}
+
+	vm.applyVAppPropertySpecAdd(expectedInfo)
+
+	actualInfo := &vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Property[0]
+	if !reflect.DeepEqual(expectedInfo, actualInfo) {
+		t.Fatalf("expected %+v, got %+v", expectedInfo, actualInfo)
+	}
+}
+
+func TestVmApplyVAppPropertySpecAddAlreadyExists(t *testing.T) {
+	info := types.VAppPropertyInfo{
+		Id:               "foo.bar",
+		Label:            "foobar",
+		Type:             "string",
+		UserConfigurable: testBoolPtr(true),
+	}
+
+	var buf bytes.Buffer
+	logger := log.New(&buf, "", 0)
+	vm := &VirtualMachine{
+		VirtualMachine: mo.VirtualMachine{
+			Config: &types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					Property: []types.VAppPropertyInfo{
+						info,
+					},
+				},
+			},
+		},
+		log: logger,
+	}
+
+	vm.applyVAppPropertySpecAdd(&info)
+	expected := "invalid property ID for adding new property - foo.bar already exists\n"
+	actual := buf.String()
+	if expected != actual {
+		t.Fatalf("expected %q, got %q", expected, actual)
+	}
+}
+
+func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
+	cases := []struct {
+		name        string
+		spec        types.VAppPropertyInfo
+		expected    types.VAppPropertyInfo
+		expectedErr string
+	}{
+		{
+			name: "basic",
+			spec: types.VAppPropertyInfo{
+				Key: 1,
+				Id:  "foo.bar",
+			},
+			expected: types.VAppPropertyInfo{
+				Key:              1,
+				ClassId:          "foo",
+				InstanceId:       "foo",
+				Id:               "foo.bar",
+				Category:         "foobarbazqux",
+				Label:            "Foo",
+				Type:             "string",
+				TypeReference:    "VirtualMachine",
+				UserConfigurable: testBoolPtr(true),
+				DefaultValue:     "foo",
+				Value:            "foo",
+				Description:      "foo",
+			},
+		},
+		{
+			name: "zero out value",
+			spec: types.VAppPropertyInfo{
+				Key:     1,
+				ClassId: " ",
+			},
+			expected: types.VAppPropertyInfo{
+				Key:              1,
+				ClassId:          "",
+				InstanceId:       "foo",
+				Id:               "foo.foo",
+				Category:         "foobarbazqux",
+				Label:            "Foo",
+				Type:             "string",
+				TypeReference:    "VirtualMachine",
+				UserConfigurable: testBoolPtr(true),
+				DefaultValue:     "foo",
+				Value:            "foo",
+				Description:      "foo",
+			},
+		},
+		{
+			name: "change all fields",
+			spec: types.VAppPropertyInfo{
+				Key:              1,
+				ClassId:          "bar",
+				InstanceId:       "bar",
+				Id:               "bar.bar",
+				Category:         "justbar",
+				Label:            "Bar",
+				Type:             "int",
+				TypeReference:    "Datastore",
+				UserConfigurable: testBoolPtr(false),
+				DefaultValue:     "1",
+				Value:            "1",
+				Description:      "bar",
+			},
+			expected: types.VAppPropertyInfo{
+				Key:              1,
+				ClassId:          "bar",
+				InstanceId:       "bar",
+				Id:               "bar.bar",
+				Category:         "justbar",
+				Label:            "Bar",
+				Type:             "int",
+				TypeReference:    "Datastore",
+				UserConfigurable: testBoolPtr(false),
+				DefaultValue:     "1",
+				Value:            "1",
+				Description:      "bar",
+			},
+		},
+		{
+			name: "key not found",
+			spec: types.VAppPropertyInfo{
+				Key: 2,
+				Id:  "foo.bar",
+			},
+			expectedErr: "property key number 2 not found\n",
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			logger := log.New(&buf, "", 0)
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						VAppConfig: &types.VmConfigInfo{
+							Property: []types.VAppPropertyInfo{
+								{
+									Key:              0,
+									ClassId:          "one",
+									InstanceId:       "one",
+									Id:               "one.one",
+									Category:         "numbers",
+									Label:            "One",
+									Type:             "string",
+									TypeReference:    "VirtualMachine",
+									UserConfigurable: testBoolPtr(true),
+									DefaultValue:     "one",
+									Value:            "one",
+									Description:      "one",
+								},
+								{
+									Key:              1,
+									ClassId:          "foo",
+									InstanceId:       "foo",
+									Id:               "foo.foo",
+									Category:         "foobarbazqux",
+									Label:            "Foo",
+									Type:             "string",
+									TypeReference:    "VirtualMachine",
+									UserConfigurable: testBoolPtr(true),
+									DefaultValue:     "foo",
+									Value:            "foo",
+									Description:      "foo",
+								},
+							},
+						},
+					},
+				},
+				log: logger,
+			}
+
+			vm.applyVAppPropertySpecEdit(&tc.spec)
+			if tc.expectedErr != "" {
+				actualErr := buf.String()
+				if actualErr == "" {
+					t.Fatal("expected error, got none")
+				}
+				if tc.expectedErr != actualErr {
+					t.Fatalf("expected logged error to be %q, got %q", tc.expectedErr, actualErr)
+				}
+				return
+			}
+			var actual types.VAppPropertyInfo
+			for _, p := range vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Property {
+				if p.Key == tc.expected.Key {
+					actual = p
+				}
+			}
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestVmApplyVAppPropertySpecRemove(t *testing.T) {
+	vm := &VirtualMachine{
+		VirtualMachine: mo.VirtualMachine{
+			Config: &types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					Property: []types.VAppPropertyInfo{
+						{
+							Key:              0,
+							ClassId:          "one",
+							InstanceId:       "one",
+							Id:               "one.one",
+							Category:         "numbers",
+							Label:            "One",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: testBoolPtr(true),
+							DefaultValue:     "one",
+							Value:            "one",
+							Description:      "one",
+						},
+						{
+							Key:              1,
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.foo",
+							Category:         "foobarbazqux",
+							Label:            "Foo",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: testBoolPtr(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	expected := vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Property[:1]
+
+	vm.applyVAppPropertySpecRemove(1)
+	actual := vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Property
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("expected %#v, got %#v", expected, actual)
+	}
+}
+
+func TestVmApplyVAppPropertySpecRemoveMissingKey(t *testing.T) {
+	var buf bytes.Buffer
+	logger := log.New(&buf, "", 0)
+	vm := &VirtualMachine{
+		VirtualMachine: mo.VirtualMachine{
+			Config: &types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					Property: []types.VAppPropertyInfo{
+						{
+							Key:              0,
+							ClassId:          "one",
+							InstanceId:       "one",
+							Id:               "one.one",
+							Category:         "numbers",
+							Label:            "One",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: testBoolPtr(true),
+							DefaultValue:     "one",
+							Value:            "one",
+							Description:      "one",
+						},
+						{
+							Key:              1,
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.foo",
+							Category:         "foobarbazqux",
+							Label:            "Foo",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: testBoolPtr(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+		},
+		log: logger,
+	}
+
+	vm.applyVAppPropertySpecRemove(2)
+	expected := "invalid property key for removal - removal key 2 not found\n"
+	actual := buf.String()
+	if expected != actual {
+		t.Fatalf("expected %q, got %q", expected, actual)
+	}
+}
+
+func testBoolPtr(b bool) *bool {
+	return &b
 }
