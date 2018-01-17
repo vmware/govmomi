@@ -231,6 +231,13 @@ upload_file() {
   run govc datastore.disk.create "$vmdk"
   assert_success
 
+  clone="$id/$id-2.vmdk"
+  run govc datastore.disk.cp "$vmdk" "$clone"
+  assert_success
+
+  run govc datastore.disk.info -d "$clone"
+  assert_success
+
   id=$(new_id)
   run govc vm.create -on=false -link -disk "$vmdk" "$id"
   assert_success
