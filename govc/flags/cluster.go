@@ -92,6 +92,13 @@ func (f *ClusterFlag) Cluster() (*object.ClusterComputeResource, error) {
 	return f.cluster, nil
 }
 
+func (f *ClusterFlag) ClusterIfSpecified() (*object.ClusterComputeResource, error) {
+	if f.Name == "" {
+		return nil, nil
+	}
+	return f.Cluster()
+}
+
 func (f *ClusterFlag) Reconfigure(ctx context.Context, spec types.BaseComputeResourceConfigSpec) error {
 	cluster, err := f.Cluster()
 	if err != nil {
