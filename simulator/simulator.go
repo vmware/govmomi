@@ -393,20 +393,10 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	file := strings.TrimPrefix(r.URL.Path, folderPrefix)
-	p := path.Join(ds.Info.GetDatastoreInfo().Url, file)
+	r.URL.Path = strings.TrimPrefix(r.URL.Path, folderPrefix)
+	p := path.Join(ds.Info.GetDatastoreInfo().Url, r.URL.Path)
 
 	switch r.Method {
-	case "GET":
-		f, err := os.Open(p)
-		if err != nil {
-			log.Printf("failed to %s '%s': %s", r.Method, p, err)
-			w.WriteHeader(http.StatusNotFound)
-			return
-		}
-		defer f.Close()
-
-		_, _ = io.Copy(w, f)
 	case "POST":
 		_, err := os.Stat(p)
 		if err == nil {
@@ -428,7 +418,9 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 
 		_, _ = io.Copy(f, r.Body)
 	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
+		fs := http.FileServer(http.Dir(ds.Info.GetDatastoreInfo().Url))
+
+		fs.ServeHTTP(w, r)
 	}
 }
 
