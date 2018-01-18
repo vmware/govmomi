@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,7 +18,6 @@ package simulator
 
 import (
 	"fmt"
-	"io"
 	"log"
 	"net"
 	"os"
@@ -40,8 +39,7 @@ import (
 type VirtualMachine struct {
 	mo.VirtualMachine
 
-	log *log.Logger
-	out io.Closer
+	log string
 	sid int32
 }
 
@@ -290,11 +288,6 @@ func (vm *VirtualMachine) useDatastore(name string) *Datastore {
 	return ds
 }
 
-func (vm *VirtualMachine) setLog(w io.WriteCloser) {
-	vm.out = w
-	vm.log = log.New(w, "vmx ", log.Flags())
-}
-
 func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*os.File, types.BaseMethodFault) {
 	p, fault := parseDatastorePath(spec)
 	if fault != nil {
@@ -350,17 +343,29 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 	return f, nil
 }
 
+// Rather than keep an fd open for each VM, open/close the log for each messages.
+// This is ok for now as we do not do any heavy VM logging.
+func (vm *VirtualMachine) logPrintf(format string, v ...interface{}) {
+	f, err := os.OpenFile(vm.log, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	log.New(f, "vmx ", log.Flags()).Printf(format, v...)
+	_ = f.Close()
+}
+
 func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
 	vm.apply(spec)
 
 	files := []struct {
 		spec string
 		name string
-		use  func(w io.WriteCloser)
+		use  *string
 	}{
 		{vm.Config.Files.VmPathName, "", nil},
 		{vm.Config.Files.VmPathName, fmt.Sprintf("%s.nvram", vm.Name), nil},
-		{vm.Config.Files.LogDirectory, "vmware.log", vm.setLog},
+		{vm.Config.Files.LogDirectory, "vmware.log", &vm.log},
 	}
 
 	for _, file := range files {
@@ -368,15 +373,13 @@ func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register 
 		if err != nil {
 			return err
 		}
-
 		if file.use != nil {
-			file.use(f)
-		} else {
-			_ = f.Close()
+			*file.use = f.Name()
 		}
+		_ = f.Close()
 	}
 
-	vm.log.Print("created")
+	vm.logPrintf("created")
 
 	return vm.configureDevices(spec)
 }
@@ -576,7 +579,7 @@ type powerVMTask struct {
 }
 
 func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
-	c.log.Printf("running power task: requesting %s, existing %s",
+	c.logPrintf("running power task: requesting %s, existing %s",
 		c.state, c.VirtualMachine.Runtime.PowerState)
 
 	if c.VirtualMachine.Runtime.PowerState == c.state {
@@ -686,8 +689,6 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 
 		return r
 	}
-
-	_ = vm.out.Close() // Close log fd
 
 	Map.getEntityParent(vm, "Folder").(*Folder).removeChild(c.This)
 
