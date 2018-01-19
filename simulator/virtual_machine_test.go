@@ -326,11 +326,38 @@ func TestReconfigVmDevice(t *testing.T) {
 		t.Error("device list mismatch")
 	}
 
-	for _, d := range device.SelectByType((*types.VirtualDisk)(nil)) {
-		info := d.(*types.VirtualDisk).Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+	disks := device.SelectByType((*types.VirtualDisk)(nil))
+
+	for _, d := range disks {
+		disk := d.(*types.VirtualDisk)
+		info := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
 
 		if info.Datastore.Type == "" || info.Datastore.Value == "" {
 			t.Errorf("invalid datastore for %s", device.Name(d))
+		}
+
+		// RemoveDevice and keep the file backing
+		if err = vm.RemoveDevice(ctx, true, d); err != nil {
+			t.Error(err)
+		}
+
+		if err = vm.AddDevice(ctx, d); err == nil {
+			t.Error("expected FileExists error")
+		}
+
+		// Need FileOperation=="" to add an existing disk, see object.VirtualMachine.configureDevice
+		disk.CapacityInKB = 0
+		if err = vm.AddDevice(ctx, d); err != nil {
+			t.Error(err)
+		}
+
+		// RemoveDevice and delete the file backing
+		if err = vm.RemoveDevice(ctx, false, d); err != nil {
+			t.Error(err)
+		}
+
+		if err = vm.AddDevice(ctx, d); err == nil {
+			t.Error("expected FileNotFound error")
 		}
 	}
 }
@@ -562,6 +589,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 	cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
 	scsi, _ := devices.CreateSCSIController("scsi")
 	disk := &types.VirtualDisk{
+		CapacityInKB: 1024,
 		VirtualDevice: types.VirtualDevice{
 			Backing: new(types.VirtualDiskFlatVer2BackingInfo), // Leave fields empty to test defaults
 		},
