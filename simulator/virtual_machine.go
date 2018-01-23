@@ -283,7 +283,9 @@ func (vm *VirtualMachine) useDatastore(name string) *Datastore {
 
 	ds := Map.FindByName(name, host.Datastore).(*Datastore)
 
-	vm.Datastore = AddReference(ds.Self, vm.Datastore)
+	if FindReference(vm.Datastore, ds.Self) == nil {
+		vm.Datastore = append(vm.Datastore, ds.Self)
+	}
 
 	return ds
 }
@@ -714,18 +716,18 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 	Map.getEntityParent(vm, "Folder").(*Folder).removeChild(c.This)
 
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
-	host.Vm = RemoveReference(vm.Self, host.Vm)
+	Map.RemoveReference(host, &host.Vm, vm.Self)
 
 	switch pool := Map.Get(*vm.ResourcePool).(type) {
 	case *ResourcePool:
-		pool.Vm = RemoveReference(vm.Self, pool.Vm)
+		Map.RemoveReference(pool, &pool.Vm, vm.Self)
 	case *VirtualApp:
-		pool.Vm = RemoveReference(vm.Self, pool.Vm)
+		Map.RemoveReference(pool, &pool.Vm, vm.Self)
 	}
 
 	for i := range vm.Datastore {
 		ds := Map.Get(vm.Datastore[i]).(*Datastore)
-		ds.Vm = RemoveReference(vm.Self, ds.Vm)
+		Map.RemoveReference(ds, &ds.Vm, vm.Self)
 	}
 
 	r.Res = new(types.UnregisterVMResponse)
@@ -733,7 +735,8 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 	return r
 }
 
-func (vm *VirtualMachine) CloneVMTask(req *types.CloneVM_Task) soap.HasFault {
+func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
+	ctx.Caller = &vm.Self
 	task := CreateTask(vm, "cloneVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		folder := Map.Get(req.Folder).(*Folder)
 
@@ -745,7 +748,7 @@ func (vm *VirtualMachine) CloneVMTask(req *types.CloneVM_Task) soap.HasFault {
 			},
 		}
 
-		res := folder.CreateVMTask(&types.CreateVM_Task{
+		res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
 			This:   folder.Self,
 			Config: config,
 			Pool:   *vm.ResourcePool,
@@ -770,7 +773,7 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 	task := CreateTask(vm, "relocateVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if ref := req.Spec.Datastore; ref != nil {
 			ds := Map.Get(*ref).(*Datastore)
-			ds.Vm = RemoveReference(*ref, ds.Vm)
+			Map.RemoveReference(ds, &ds.Vm, *ref)
 
 			vm.Datastore = []types.ManagedObjectReference{*ref}
 
@@ -779,14 +782,14 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 
 		if ref := req.Spec.Pool; ref != nil {
 			pool := Map.Get(*ref).(*ResourcePool)
-			pool.Vm = RemoveReference(*ref, pool.Vm)
+			Map.RemoveReference(pool, &pool.Vm, *ref)
 
 			vm.ResourcePool = ref
 		}
 
 		if ref := req.Spec.Host; ref != nil {
 			host := Map.Get(*ref).(*HostSystem)
-			host.Vm = RemoveReference(*ref, host.Vm)
+			Map.RemoveReference(host, &host.Vm, *ref)
 
 			vm.Runtime.Host = ref
 		}

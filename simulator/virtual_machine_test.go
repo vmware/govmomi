@@ -691,14 +691,20 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	task.Wait(ctx)
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	task, err = vm.CreateSnapshot(ctx, "child", "description", true, true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	task.Wait(ctx)
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, err = vm.FindSnapshot(ctx, "child")
 	if err != nil {
@@ -710,21 +716,30 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	task.Wait(ctx)
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	task, err = vm.RevertToSnapshot(ctx, "root", true)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	task.Wait(ctx)
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	task, err = vm.RemoveSnapshot(ctx, "child", false, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	task.Wait(ctx)
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, err = vm.FindSnapshot(ctx, "child")
 	if err == nil {
@@ -736,7 +751,10 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	task.Wait(ctx)
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 
 	_, err = vm.FindSnapshot(ctx, "root")
 	if err == nil {

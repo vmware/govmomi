@@ -18,9 +18,11 @@ package main
 
 import (
 	"crypto/tls"
+	"expvar"
 	"flag"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"runtime"
@@ -108,6 +110,18 @@ func main() {
 			model.Service.TLS.Certificates = []tls.Certificate{c}
 		}
 	}
+
+	expvar.Publish("/debug/vcsim/vars", expvar.Func(func() interface{} {
+		return struct {
+			Registry *simulator.Registry
+			Model    *simulator.Model
+		}{
+			simulator.Map,
+			model,
+		}
+	}))
+
+	model.Service.ServeMux = http.DefaultServeMux // expvar.init registers "/debug/vars" with the DefaultServeMux
 
 	s := model.Service.NewServer()
 

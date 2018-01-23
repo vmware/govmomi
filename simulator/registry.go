@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -17,7 +17,9 @@ limitations under the License.
 package simulator
 
 import (
+	"encoding/json"
 	"fmt"
+	"os"
 	"reflect"
 	"strings"
 	"sync"
@@ -55,6 +57,7 @@ type Registry struct {
 	m        sync.Mutex
 	objects  map[types.ManagedObjectReference]mo.Reference
 	handlers map[types.ManagedObjectReference]RegisterObject
+	locks    map[types.ManagedObjectReference]sync.Locker
 	counter  int
 }
 
@@ -63,6 +66,7 @@ func NewRegistry() *Registry {
 	r := &Registry{
 		objects:  make(map[types.ManagedObjectReference]mo.Reference),
 		handlers: make(map[types.ManagedObjectReference]RegisterObject),
+		locks:    make(map[types.ManagedObjectReference]sync.Locker),
 	}
 
 	return r
@@ -190,6 +194,7 @@ func (r *Registry) Remove(item types.ManagedObjectReference) {
 
 	delete(r.objects, item)
 	delete(r.handlers, item)
+	delete(r.locks, item)
 }
 
 // getEntityParent traverses up the inventory and returns the first object of type kind.
@@ -282,29 +287,48 @@ func FindReference(refs []types.ManagedObjectReference, match ...types.ManagedOb
 	return nil
 }
 
-// RemoveReference returns a slice with ref removed from refs
-func RemoveReference(ref types.ManagedObjectReference, refs []types.ManagedObjectReference) []types.ManagedObjectReference {
-	var result []types.ManagedObjectReference
-
-	for i, r := range refs {
-		if r == ref {
-			result = append(result, refs[i+1:]...)
-			break
-		}
-
-		result = append(result, r)
-	}
-
-	return result
+// AppendReference appends the given refs to field.
+func (r *Registry) AppendReference(obj mo.Reference, field *[]types.ManagedObjectReference, ref ...types.ManagedObjectReference) {
+	r.WithLock(obj, func() {
+		*field = append(*field, ref...)
+	})
 }
 
-// AddReference returns a slice with ref appended if not already in refs.
-func AddReference(ref types.ManagedObjectReference, refs []types.ManagedObjectReference) []types.ManagedObjectReference {
-	if FindReference(refs, ref) == nil {
-		return append(refs, ref)
-	}
+// AddReference appends ref to field if not already in the given field.
+func (r *Registry) AddReference(obj mo.Reference, field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
+	r.WithLock(obj, func() {
+		if FindReference(*field, ref) == nil {
+			*field = append(*field, ref)
+		}
+	})
+}
 
-	return refs
+// RemoveReference removes ref from the given field.
+func RemoveReference(field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
+	for i, r := range *field {
+		if r == ref {
+			*field = append((*field)[:i], (*field)[i+1:]...)
+			break
+		}
+	}
+}
+
+// RemoveReference removes ref from the given field.
+func (r *Registry) RemoveReference(obj mo.Reference, field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
+	r.WithLock(obj, func() {
+		RemoveReference(field, ref)
+	})
+}
+
+func (r *Registry) removeString(obj mo.Reference, field *[]string, val string) {
+	r.WithLock(obj, func() {
+		for i, name := range *field {
+			if name == val {
+				*field = append((*field)[:i], (*field)[i+1:]...)
+				break
+			}
+		}
+	})
 }
 
 func (r *Registry) content() types.ServiceContent {
@@ -349,4 +373,48 @@ func (r *Registry) UserDirectory() *UserDirectory {
 // SessionManager returns the SessionManager singleton
 func (r *Registry) SessionManager() *SessionManager {
 	return r.Get(r.content().SessionManager.Reference()).(*SessionManager)
+}
+
+func (r *Registry) MarshalJSON() ([]byte, error) {
+	r.m.Lock()
+	defer r.m.Unlock()
+
+	vars := struct {
+		Objects int
+		Locks   int
+	}{
+		len(r.objects),
+		len(r.locks),
+	}
+
+	return json.Marshal(vars)
+}
+
+func (r *Registry) locker(obj mo.Reference) sync.Locker {
+	if mu, ok := obj.(sync.Locker); ok {
+		return mu
+	}
+
+	ref := obj.Reference()
+	r.m.Lock()
+	mu, ok := r.locks[ref]
+	if !ok {
+		mu = new(sync.Mutex)
+		r.locks[ref] = mu
+	}
+	r.m.Unlock()
+
+	return mu
+}
+
+var enableLocker = os.Getenv("VCSIM_LOCKER") != "false"
+
+// WithLock holds a lock for the given object while then given function is run.
+func (r *Registry) WithLock(obj mo.Reference, f func()) {
+	if enableLocker {
+		mu := r.locker(obj)
+		mu.Lock()
+		defer mu.Unlock()
+	}
+	f()
 }

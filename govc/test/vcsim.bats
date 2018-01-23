@@ -25,7 +25,15 @@ load test_helper
 @test "vcsim about" {
   vcsim_env
 
-  run curl -sk https://"$(govc env GOVC_URL)"/about
+  url="https://$(govc env GOVC_URL)"
+
+  run curl -sk "$url/about"
   assert_matches "CurrentTime" # 1 param (without Context)
   assert_matches "TerminateSession" # 2 params (with Context)
+
+  run curl -sk "$url/debug/vars"
+  assert_success
+
+  run curl -sk "$url/debug/vcsim/vars"
+  assert_success
 }
