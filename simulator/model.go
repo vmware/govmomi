@@ -233,6 +233,7 @@ func (m *Model) Create() error {
 				cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
 				disk := devices.CreateDisk(scsi.(types.BaseVirtualController), ds,
 					config.Files.VmPathName+" "+path.Join(name, "disk1.vmdk"))
+				disk.CapacityInKB = 1024
 
 				devices = append(devices, scsi, cdrom, disk, &nic)
 

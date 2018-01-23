@@ -400,7 +400,8 @@ func (vm *VirtualMachine) generateMAC() string {
 	return mac.String()
 }
 
-func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, device types.BaseVirtualDevice) types.BaseMethodFault {
+func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
+	device := spec.Device
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
 
@@ -461,7 +462,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, devi
 				info.FileName = filename
 			}
 
-			err := dm.createVirtualDisk(&types.CreateVirtualDisk_Task{
+			err := dm.createVirtualDisk(spec.FileOperation, &types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
 				Name:       info.FileName,
 			})
@@ -538,6 +539,9 @@ func (vm *VirtualMachine) genVmdkPath() (string, types.BaseMethodFault) {
 }
 
 func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+	dc := Map.getEntityDatacenter(Map.Get(*vm.Parent).(mo.Entity))
+	dm := Map.VirtualDiskManager()
+
 	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 
 	for i, change := range spec.DeviceChange {
@@ -556,7 +560,7 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 				devices = removeDevice(devices, device)
 			}
 
-			err := vm.configureDevice(devices, dspec.Device)
+			err := vm.configureDevice(devices, dspec)
 			if err != nil {
 				return err
 			}
@@ -564,6 +568,23 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 			devices = append(devices, dspec.Device)
 		case types.VirtualDeviceConfigSpecOperationRemove:
 			devices = removeDevice(devices, dspec.Device)
+
+			disk, ok := dspec.Device.(*types.VirtualDisk)
+			if ok && dspec.FileOperation == types.VirtualDeviceConfigSpecFileOperationDestroy {
+				var file string
+
+				switch b := disk.Backing.(type) {
+				case types.BaseVirtualDeviceFileBackingInfo:
+					file = b.GetVirtualDeviceFileBackingInfo().FileName
+				}
+
+				if file != "" {
+					dm.DeleteVirtualDiskTask(&types.DeleteVirtualDisk_Task{
+						Name:       file,
+						Datacenter: &dc.Self,
+					})
+				}
+			}
 		}
 	}
 
