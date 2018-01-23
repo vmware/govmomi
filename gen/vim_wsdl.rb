@@ -202,7 +202,12 @@ class Simple
     t = self.type
     prefix = ""
 
-    prefix += "[]" if slice?
+    if slice?
+      prefix += "[]"
+      if ["AffinitySet"].include?(var_name)
+        self.need_omitempty = false
+      end
+    end
 
     if t =~ /^xsd:(.*)$/
       t = $1
