@@ -129,7 +129,7 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 		return nil, err
 	}
 
-	f, _, err := vc.Client.Download(u, &soap.DefaultDownload)
+	f, _, err := vc.Client.Download(ctx, u, &soap.DefaultDownload)
 	if err != nil {
 		return nil, err
 	}
@@ -202,7 +202,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 			return err
 		}
 
-		f, _, err := vc.Client.Download(u, &soap.DefaultDownload)
+		f, _, err := vc.Client.Download(ctx, u, &soap.DefaultDownload)
 		if err != nil {
 			return err
 		}
@@ -284,7 +284,7 @@ func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64
 
 	p := soap.DefaultDownload
 
-	f, n, err := vc.Download(u, &p)
+	f, n, err := vc.Download(ctx, u, &p)
 	if err != nil {
 		return nil, n, err
 	}

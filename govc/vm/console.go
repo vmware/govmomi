@@ -111,7 +111,7 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 		param := soap.DefaultDownload
 
 		if cmd.capture == "-" {
-			w, _, derr := c.Download(u, &param)
+			w, _, derr := c.Download(ctx, u, &param)
 			if derr != nil {
 				return derr
 			}
@@ -124,7 +124,7 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 			return w.Close()
 		}
 
-		return c.DownloadFile(cmd.capture, u, &param)
+		return c.DownloadFile(ctx, cmd.capture, u, &param)
 	}
 
 	m := session.NewManager(c)

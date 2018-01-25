@@ -182,5 +182,5 @@ func (o Opener) OpenRemote(link string) (io.ReadCloser, int64, error) {
 		return nil, 0, err
 	}
 
-	return o.Download(u, &soap.DefaultDownload)
+	return o.Download(context.Background(), u, &soap.DefaultDownload)
 }

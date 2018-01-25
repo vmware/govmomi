@@ -234,5 +234,5 @@ func (l *Lease) DownloadFile(ctx context.Context, file string, item FileItem, op
 		opts.Progress = progress.Tee(item, opts.Progress)
 	}
 
-	return l.c.DownloadFile(file, item.URL, &opts)
+	return l.c.DownloadFile(ctx, file, item.URL, &opts)
 }

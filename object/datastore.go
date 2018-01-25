@@ -302,7 +302,7 @@ func (d Datastore) Download(ctx context.Context, path string, param *soap.Downlo
 	if err != nil {
 		return nil, 0, err
 	}
-	return d.Client().Download(u, p)
+	return d.Client().Download(ctx, u, p)
 }
 
 // DownloadFile via soap.Download with an http service ticket
@@ -311,7 +311,7 @@ func (d Datastore) DownloadFile(ctx context.Context, path string, file string, p
 	if err != nil {
 		return err
 	}
-	return d.Client().DownloadFile(file, u, p)
+	return d.Client().DownloadFile(ctx, file, u, p)
 }
 
 // AttachedHosts returns hosts that have this Datastore attached, accessible and writable.
