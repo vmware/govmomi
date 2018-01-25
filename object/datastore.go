@@ -284,7 +284,7 @@ func (d Datastore) Upload(ctx context.Context, f io.Reader, path string, param *
 	if err != nil {
 		return err
 	}
-	return d.Client().Upload(f, u, p)
+	return d.Client().Upload(ctx, f, u, p)
 }
 
 // UploadFile via soap.Upload with an http service ticket
@@ -293,7 +293,7 @@ func (d Datastore) UploadFile(ctx context.Context, file string, path string, par
 	if err != nil {
 		return err
 	}
-	return d.Client().UploadFile(file, u, p)
+	return d.Client().UploadFile(ctx, file, u, p)
 }
 
 // Download via soap.Download with an http service ticket

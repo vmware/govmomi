@@ -459,6 +459,8 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 		panic(err)
 	}
 
+	req = req.WithContext(ctx)
+
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
 	soapAction := fmt.Sprintf("%s/%s", c.Namespace, c.Version)
 	req.Header.Set(`SOAPAction`, soapAction)
@@ -549,7 +551,7 @@ var DefaultUpload = Upload{
 }
 
 // Upload PUTs the local file to the given URL
-func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
+func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *Upload) error {
 	var err error
 
 	if param.Progress != nil {
@@ -566,6 +568,8 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 	if err != nil {
 		return err
 	}
+
+	req = req.WithContext(ctx)
 
 	req.ContentLength = param.ContentLength
 	req.Header.Set("Content-Type", param.Type)
@@ -594,7 +598,7 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 }
 
 // UploadFile PUTs the local file to the given URL
-func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
+func (c *Client) UploadFile(ctx context.Context, file string, u *url.URL, param *Upload) error {
 	if param == nil {
 		p := DefaultUpload // Copy since we set ContentLength
 		param = &p
@@ -613,7 +617,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 
 	param.ContentLength = s.Size()
 
-	return c.Upload(f, u, param)
+	return c.Upload(ctx, f, u, param)
 }
 
 type Download struct {

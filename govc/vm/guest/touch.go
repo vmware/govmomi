@@ -115,7 +115,7 @@ func (cmd *touch) Run(ctx context.Context, f *flag.FlagSet) error {
 				return cerr
 			}
 
-			err = c.Client.Upload(new(bytes.Buffer), u, &soap.DefaultUpload)
+			err = c.Client.Upload(ctx, new(bytes.Buffer), u, &soap.DefaultUpload)
 			if err == nil && cmd.date != "" {
 				err = m.ChangeFileAttributes(ctx, cmd.Auth(), name, &attr)
 			}

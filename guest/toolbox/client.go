@@ -114,7 +114,7 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 	p := soap.DefaultUpload
 	p.ContentLength = size
 
-	err = vc.Client.Upload(&buf, u, &p)
+	err = vc.Client.Upload(ctx, &buf, u, &p)
 	if err != nil {
 		return nil, err
 	}
@@ -177,7 +177,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		p := soap.DefaultUpload
 		p.ContentLength = size
 
-		err = vc.Client.Upload(&buf, u, &p)
+		err = vc.Client.Upload(ctx, &buf, u, &p)
 		if err != nil {
 			return err
 		}
@@ -341,5 +341,5 @@ func (c *Client) Upload(ctx context.Context, src io.Reader, dst string, p soap.U
 		return err
 	}
 
-	return vc.Client.Upload(src, u, &p)
+	return vc.Client.Upload(ctx, src, u, &p)
 }
