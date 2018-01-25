@@ -459,6 +459,8 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 		panic(err)
 	}
 
+	req = req.WithContext(ctx)
+
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
 	soapAction := fmt.Sprintf("%s/%s", c.Namespace, c.Version)
 	req.Header.Set(`SOAPAction`, soapAction)
@@ -549,11 +551,11 @@ var DefaultUpload = Upload{
 }
 
 // Upload PUTs the local file to the given URL
-func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
+func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *Upload) error {
 	var err error
 
 	if param.Progress != nil {
-		pr := progress.NewReader(param.Progress, f, param.ContentLength)
+		pr := progress.NewReader(ctx, param.Progress, f, param.ContentLength)
 		f = pr
 
 		// Mark progress reader as done when returning from this function.
@@ -566,6 +568,8 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 	if err != nil {
 		return err
 	}
+
+	req = req.WithContext(ctx)
 
 	req.ContentLength = param.ContentLength
 	req.Header.Set("Content-Type", param.Type)
@@ -594,7 +598,7 @@ func (c *Client) Upload(f io.Reader, u *url.URL, param *Upload) error {
 }
 
 // UploadFile PUTs the local file to the given URL
-func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
+func (c *Client) UploadFile(ctx context.Context, file string, u *url.URL, param *Upload) error {
 	if param == nil {
 		p := DefaultUpload // Copy since we set ContentLength
 		param = &p
@@ -613,7 +617,7 @@ func (c *Client) UploadFile(file string, u *url.URL, param *Upload) error {
 
 	param.ContentLength = s.Size()
 
-	return c.Upload(f, u, param)
+	return c.Upload(ctx, f, u, param)
 }
 
 type Download struct {
@@ -629,11 +633,13 @@ var DefaultDownload = Download{
 }
 
 // DownloadRequest wraps http.Client.Do, returning the http.Response without checking its StatusCode
-func (c *Client) DownloadRequest(u *url.URL, param *Download) (*http.Response, error) {
+func (c *Client) DownloadRequest(ctx context.Context, u *url.URL, param *Download) (*http.Response, error) {
 	req, err := http.NewRequest(param.Method, u.String(), nil)
 	if err != nil {
 		return nil, err
 	}
+
+	req = req.WithContext(ctx)
 
 	for k, v := range param.Headers {
 		req.Header.Add(k, v)
@@ -647,8 +653,8 @@ func (c *Client) DownloadRequest(u *url.URL, param *Download) (*http.Response, e
 }
 
 // Download GETs the remote file from the given URL
-func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, error) {
-	res, err := c.DownloadRequest(u, param)
+func (c *Client) Download(ctx context.Context, u *url.URL, param *Download) (io.ReadCloser, int64, error) {
+	res, err := c.DownloadRequest(ctx, u, param)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -668,7 +674,7 @@ func (c *Client) Download(u *url.URL, param *Download) (io.ReadCloser, int64, er
 	return r, res.ContentLength, nil
 }
 
-func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Sinker, w io.Writer) error {
+func (c *Client) WriteFile(ctx context.Context, file string, src io.Reader, size int64, s progress.Sinker, w io.Writer) error {
 	var err error
 
 	r := src
@@ -679,7 +685,7 @@ func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Si
 	}
 
 	if s != nil {
-		pr := progress.NewReader(s, src, size)
+		pr := progress.NewReader(ctx, s, src, size)
 		src = pr
 
 		// Mark progress reader as done when returning from this function.
@@ -706,16 +712,16 @@ func (c *Client) WriteFile(file string, src io.Reader, size int64, s progress.Si
 }
 
 // DownloadFile GETs the given URL to a local file
-func (c *Client) DownloadFile(file string, u *url.URL, param *Download) error {
+func (c *Client) DownloadFile(ctx context.Context, file string, u *url.URL, param *Download) error {
 	var err error
 	if param == nil {
 		param = &DefaultDownload
 	}
 
-	rc, contentLength, err := c.Download(u, param)
+	rc, contentLength, err := c.Download(ctx, u, param)
 	if err != nil {
 		return err
 	}
 
-	return c.WriteFile(file, rc, contentLength, param.Progress, param.Writer)
+	return c.WriteFile(ctx, file, rc, contentLength, param.Progress, param.Writer)
 }
