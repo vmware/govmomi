@@ -474,10 +474,10 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 
 			p, _ := parseDatastorePath(info.FileName)
 
-			info.Datastore = &types.ManagedObjectReference{
-				Type:  "Datastore",
-				Value: p.Datastore,
-			}
+			host := Map.Get(*vm.Runtime.Host).(*HostSystem)
+			ds := Map.FindByName(p.Datastore, host.Datastore).Reference()
+
+			info.Datastore = &ds
 		}
 	}
 
