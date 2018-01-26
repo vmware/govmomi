@@ -23,17 +23,20 @@ load test_helper
 }
 
 @test "vcsim about" {
-  vcsim_env
+  vcsim_env -dc 2 -cluster 3 -vm 0 -ds 0
 
   url="https://$(govc env GOVC_URL)"
 
-  run curl -sk "$url/about"
+  run curl -skf "$url/about"
   assert_matches "CurrentTime" # 1 param (without Context)
   assert_matches "TerminateSession" # 2 params (with Context)
 
-  run curl -sk "$url/debug/vars"
+  run curl -skf "$url/debug/vars"
   assert_success
 
-  run curl -sk "$url/debug/vcsim/vars"
-  assert_success
+  model=$(curl -sfk "$url/debug/vars" | jq .vcsim.Model)
+  [ "$(jq .Datacenter <<<"$model")" == "2" ]
+  [ "$(jq .Cluster <<<"$model")" == "6" ]
+  [ "$(jq .Machine <<<"$model")" == "0" ]
+  [ "$(jq .Datastore <<<"$model")" == "0" ]
 }

@@ -43,41 +43,41 @@ type Model struct {
 	Autostart bool `json:"-"`
 
 	// Datacenter specifies the number of Datacenter entities to create
-	Datacenter int `json:",omitempty"`
+	Datacenter int
 
 	// Portgroup specifies the number of DistributedVirtualPortgroup entities to create per Datacenter
-	Portgroup int `json:",omitempty"`
+	Portgroup int
 
 	// Host specifies the number of standalone HostSystems entities to create per Datacenter
 	Host int `json:",omitempty"`
 
 	// Cluster specifies the number of ClusterComputeResource entities to create per Datacenter
-	Cluster int `json:",omitempty"`
+	Cluster int
 
 	// ClusterHost specifies the number of HostSystems entities to create within a Cluster
 	ClusterHost int `json:",omitempty"`
 
 	// Pool specifies the number of ResourcePool entities to create per Cluster
-	Pool int `json:",omitempty"`
+	Pool int
 
 	// Datastore specifies the number of Datastore entities to create
 	// Each Datastore will have temporary local file storage and will be mounted
 	// on every HostSystem created by the ModelConfig
-	Datastore int `json:",omitempty"`
+	Datastore int
 
 	// Machine specifies the number of VirtualMachine entities to create per ResourcePool
-	Machine int `json:",omitempty"`
+	Machine int
 
 	// Folder specifies the number of Datacenter to place within a Folder.
 	// This includes a folder for the Datacenter itself and its host, vm, network and datastore folders.
 	// All resources for the Datacenter are placed within these folders, rather than the top-level folders.
-	Folder int `json:",omitempty"`
+	Folder int
 
 	// App specifies the number of VirtualApp to create per Cluster
-	App int `json:",omitempty"`
+	App int
 
 	// Pod specifies the number of StoragePod to create per Cluster
-	Pod int `json:",omitempty"`
+	Pod int
 
 	// total number of inventory objects, set by Count()
 	total int
