@@ -323,6 +323,34 @@ load test_helper
   assert_failure
 }
 
+@test "object.collect raw" {
+  vcsim_env
+
+  govc object.collect -R - <<EOF | grep serverClock
+<?xml version="1.0" encoding="UTF-8"?>
+<Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
+ <Body>
+  <CreateFilter xmlns="urn:vim25">
+   <_this type="PropertyCollector">PropertyCollector</_this>
+   <spec>
+    <propSet>
+     <type>ServiceInstance</type>
+     <all>true</all>
+    </propSet>
+    <objectSet>
+     <obj type="ServiceInstance">ServiceInstance</obj>
+    </objectSet>
+   </spec>
+   <partialUpdates>false</partialUpdates>
+  </CreateFilter>
+ </Body>
+</Envelope>
+EOF
+
+  govc object.collect -O | grep types.CreateFilter
+  govc object.collect -O -json | jq .
+}
+
 @test "object.find" {
   esx_env
 
