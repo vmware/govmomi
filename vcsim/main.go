@@ -111,13 +111,15 @@ func main() {
 		}
 	}
 
-	expvar.Publish("/debug/vcsim/vars", expvar.Func(func() interface{} {
+	expvar.Publish("vcsim", expvar.Func(func() interface{} {
+		count := model.Count()
+
 		return struct {
 			Registry *simulator.Registry
 			Model    *simulator.Model
 		}{
 			simulator.Map,
-			model,
+			&count,
 		}
 	}))
 
