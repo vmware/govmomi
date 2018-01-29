@@ -77,6 +77,9 @@ load test_helper
   uuid=$(govc host.info -host "$name" -json | jq -r .HostSystems[].Summary.Hardware.Uuid)
   run govc host.info -host.uuid "$uuid"
   assert_success
+
+  # summary.host should have a reference to the generated moid, not the template esx.HostSystem.Self (ha-host)
+  govc object.collect -s -type h / summary.host | grep -v ha-host
 }
 
 @test "host maintenance vc" {
