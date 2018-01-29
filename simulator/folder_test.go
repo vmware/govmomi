@@ -198,6 +198,9 @@ func TestFolderVC(t *testing.T) {
 			if ref == esx.HostSystem.Self {
 				t.Error("expected new host Self reference")
 			}
+			if *host.Summary.Host == esx.HostSystem.Self {
+				t.Error("expected new host summary Self reference")
+			}
 
 			pool := Map.Get(*host.Parent).(*mo.ComputeResource).ResourcePool
 			if *pool == esx.ResourcePool.Self {

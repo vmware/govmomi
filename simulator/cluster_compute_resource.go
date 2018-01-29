@@ -57,6 +57,7 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 
 	cr := add.ClusterComputeResource
 	Map.PutEntity(cr, Map.NewEntity(host))
+	host.Summary.Host = &host.Self
 
 	cr.Host = append(cr.Host, host.Reference())
 	addComputeResource(cr.Summary.GetComputeResourceSummary(), host)
