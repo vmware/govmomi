@@ -89,6 +89,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		NumCoresPerSocket: 1,
 		MemoryMB:          32,
 		Uuid:              uuid.New().String(),
+		InstanceUuid:      uuid.New().String(),
 		Version:           "vmx-11",
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
@@ -114,6 +115,22 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	vm.ConfigStatus = types.ManagedEntityStatusGreen
 
 	return vm, nil
+}
+
+func (vm *VirtualMachine) event() types.VmEvent {
+	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
+
+	return types.VmEvent{
+		Event: types.Event{
+			Datacenter:      datacenterEventArgument(host),
+			ComputeResource: host.eventArgumentParent(),
+			Host:            host.eventArgument(),
+			Vm: &types.VmEventArgument{
+				EntityEventArgument: types.EntityEventArgument{Name: vm.Name},
+				Vm:                  vm.Self,
+			},
+		},
+	}
 }
 
 func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
@@ -599,6 +616,7 @@ type powerVMTask struct {
 	*VirtualMachine
 
 	state types.VirtualMachinePowerState
+	ctx   *Context
 }
 
 func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
@@ -623,17 +641,28 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		*bt = nil
 	}
 
+	event := c.event()
+	switch c.state {
+	case types.VirtualMachinePowerStatePoweredOn:
+		c.ctx.postEvent(
+			&types.VmStartingEvent{VmEvent: event},
+			&types.VmPoweredOnEvent{VmEvent: event},
+		)
+	case types.VirtualMachinePowerStatePoweredOff:
+		c.ctx.postEvent(&types.VmPoweredOffEvent{VmEvent: event})
+	}
+
 	return nil, nil
 }
 
-func (vm *VirtualMachine) PowerOnVMTask(c *types.PowerOnVM_Task) soap.HasFault {
+func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) soap.HasFault {
 	if vm.Config.Template {
 		return &methods.PowerOnVM_TaskBody{
 			Fault_: Fault("cannot powerOn a template", &types.InvalidState{}),
 		}
 	}
 
-	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOn}
+	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOn, ctx}
 	task := CreateTask(runner.Reference(), "powerOn", runner.Run)
 
 	return &methods.PowerOnVM_TaskBody{
@@ -643,8 +672,8 @@ func (vm *VirtualMachine) PowerOnVMTask(c *types.PowerOnVM_Task) soap.HasFault {
 	}
 }
 
-func (vm *VirtualMachine) PowerOffVMTask(c *types.PowerOffVM_Task) soap.HasFault {
-	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOff}
+func (vm *VirtualMachine) PowerOffVMTask(ctx *Context, c *types.PowerOffVM_Task) soap.HasFault {
+	runner := &powerVMTask{vm, types.VirtualMachinePowerStatePoweredOff, ctx}
 	task := CreateTask(runner.Reference(), "powerOff", runner.Run)
 
 	return &methods.PowerOffVM_TaskBody{
@@ -654,12 +683,17 @@ func (vm *VirtualMachine) PowerOffVMTask(c *types.PowerOffVM_Task) soap.HasFault
 	}
 }
 
-func (vm *VirtualMachine) ReconfigVMTask(req *types.ReconfigVM_Task) soap.HasFault {
+func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Task) soap.HasFault {
 	task := CreateTask(vm, "reconfigVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		err := vm.configure(&req.Spec)
 		if err != nil {
 			return nil, err
 		}
+
+		ctx.postEvent(&types.VmReconfiguredEvent{
+			VmEvent:    vm.event(),
+			ConfigSpec: req.Spec,
+		})
 
 		return nil, nil
 	})
@@ -671,9 +705,9 @@ func (vm *VirtualMachine) ReconfigVMTask(req *types.ReconfigVM_Task) soap.HasFau
 	}
 }
 
-func (vm *VirtualMachine) DestroyTask(req *types.Destroy_Task) soap.HasFault {
+func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(vm, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		r := vm.UnregisterVM(&types.UnregisterVM{
+		r := vm.UnregisterVM(ctx, &types.UnregisterVM{
 			This: req.This,
 		})
 
@@ -701,7 +735,7 @@ func (vm *VirtualMachine) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 	}
 }
 
-func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
+func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap.HasFault {
 	r := &methods.UnregisterVMBody{}
 
 	if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
@@ -712,8 +746,6 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 
 		return r
 	}
-
-	Map.getEntityParent(vm, "Folder").(*Folder).removeChild(c.This)
 
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	Map.RemoveReference(host, &host.Vm, vm.Self)
@@ -730,6 +762,9 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 		Map.RemoveReference(ds, &ds.Vm, vm.Self)
 	}
 
+	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event()})
+	Map.getEntityParent(vm, "Folder").(*Folder).removeChild(c.This)
+
 	r.Res = new(types.UnregisterVMResponse)
 
 	return r
@@ -737,9 +772,20 @@ func (vm *VirtualMachine) UnregisterVM(c *types.UnregisterVM) soap.HasFault {
 
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
 	ctx.Caller = &vm.Self
-	task := CreateTask(vm, "cloneVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		folder := Map.Get(req.Folder).(*Folder)
+	folder := Map.Get(req.Folder).(*Folder)
+	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
+	event := vm.event()
 
+	ctx.postEvent(&types.VmBeingClonedEvent{
+		VmCloneEvent: types.VmCloneEvent{
+			VmEvent: event,
+		},
+		DestFolder: folder.eventArgument(),
+		DestName:   req.Name,
+		DestHost:   *host.eventArgument(),
+	})
+
+	task := CreateTask(vm, "cloneVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		config := types.VirtualMachineConfigSpec{
 			Name:    req.Name,
 			GuestId: vm.Config.GuestId,
@@ -752,6 +798,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			This:   folder.Self,
 			Config: config,
 			Pool:   *vm.ResourcePool,
+			Host:   vm.Runtime.Host,
 		})
 
 		ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
@@ -759,7 +806,15 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			return nil, ctask.Info.Error.Fault
 		}
 
-		return ctask.Info.Result.(types.ManagedObjectReference), nil
+		ref := ctask.Info.Result.(types.ManagedObjectReference)
+		clone := Map.Get(ref).(*VirtualMachine)
+
+		ctx.postEvent(&types.VmClonedEvent{
+			VmCloneEvent: types.VmCloneEvent{VmEvent: clone.event()},
+			SourceVm:     *event.Vm,
+		})
+
+		return ref, nil
 	})
 
 	return &methods.CloneVM_TaskBody{

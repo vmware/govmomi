@@ -620,7 +620,7 @@ returned, assuming that's what the user wanted."
   "Events via govc events -n `govc-max-events'."
   (interactive)
   (govc-shell-command
-   (list "events" "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)) "*govc-event*"))
+   (list "events" "-l" "-n" govc-max-events (if current-prefix-arg "-f") (govc-selection)) "*govc-event*"))
 
 (defun govc-tasks ()
   "Tasks via govc tasks."

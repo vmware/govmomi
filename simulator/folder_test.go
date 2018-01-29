@@ -219,7 +219,7 @@ func TestFolderFaults(t *testing.T) {
 		t.Error("expected fault")
 	}
 
-	if f.CreateDatacenter(nil).Fault() == nil {
+	if f.CreateDatacenter(nil, nil).Fault() == nil {
 		t.Error("expected fault")
 	}
 }

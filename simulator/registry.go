@@ -350,6 +350,11 @@ func (r *Registry) SearchIndex() *SearchIndex {
 	return r.Get(r.content().SearchIndex.Reference()).(*SearchIndex)
 }
 
+// EventManager returns the EventManager singleton
+func (r *Registry) EventManager() *EventManager {
+	return r.Get(r.content().EventManager.Reference()).(*EventManager)
+}
+
 // FileManager returns the FileManager singleton
 func (r *Registry) FileManager() *FileManager {
 	return r.Get(r.content().FileManager.Reference()).(*FileManager)

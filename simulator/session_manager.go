@@ -83,7 +83,16 @@ func (s *SessionManager) Login(ctx *Context, login *types.Login) soap.HasFault {
 }
 
 func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
-	delete(s.sessions, ctx.Session.Key)
+	session := ctx.Session
+	delete(s.sessions, session.Key)
+
+	ctx.postEvent(&types.UserLogoutSessionEvent{
+		IpAddress: session.IpAddress,
+		UserAgent: session.UserAgent,
+		SessionId: session.Key,
+		LoginTime: &session.LoginTime,
+	})
+
 	return &methods.LogoutBody{Res: new(types.LogoutResponse)}
 }
 
@@ -192,18 +201,34 @@ func (c *Context) SetSession(session Session, login bool) {
 			Name:  soap.SessionCookieName,
 			Value: session.Key,
 		})
+
+		c.postEvent(&types.UserLoginSessionEvent{
+			SessionId: session.Key,
+			IpAddress: session.IpAddress,
+			UserAgent: session.UserAgent,
+			Locale:    session.Locale,
+		})
 	}
 }
 
 // WithLock holds a lock for the given object while then given function is run.
 func (c *Context) WithLock(obj mo.Reference, f func()) {
-	ref := obj.Reference()
-	if c.Caller != nil && *c.Caller == ref {
+	if c.Caller != nil && *c.Caller == obj.Reference() {
 		// Internal method invocation, obj is already locked
 		f()
 		return
 	}
 	Map.WithLock(obj, f)
+}
+
+// postEvent wraps EventManager.PostEvent for internal use, with a lock on the EventManager.
+func (c *Context) postEvent(events ...types.BaseEvent) {
+	m := Map.EventManager()
+	c.WithLock(m, func() {
+		for _, event := range events {
+			m.PostEvent(c, &types.PostEvent{EventToPost: event})
+		}
+	})
 }
 
 // Session combines a UserSession and a Registry for per-session managed objects.
@@ -229,6 +254,7 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 		return obj
 	}
 
+	// Return a session "view" of certain singleton objects
 	switch ref.Type {
 	case "SessionManager":
 		// Clone SessionManager so the PropertyCollector can properly report CurrentSession
