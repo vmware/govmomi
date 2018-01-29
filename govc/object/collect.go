@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
 	"reflect"
 	"strings"
 	"text/tabwriter"
@@ -31,7 +32,9 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 type collect struct {
@@ -39,6 +42,8 @@ type collect struct {
 
 	single bool
 	simple bool
+	raw    string
+	dump   bool
 	n      int
 	kind   kinds
 
@@ -55,6 +60,8 @@ func (cmd *collect) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.simple, "s", false, "Output property value only")
+	f.BoolVar(&cmd.dump, "O", false, "Output the CreateFilter request itself")
+	f.StringVar(&cmd.raw, "R", "", "Raw XML encoded CreateFilter request")
 	f.IntVar(&cmd.n, "n", 0, "Wait for N property updates")
 	f.Var(&cmd.kind, "type", "Resource type.  If specified, MOID is used for a container view root")
 }
@@ -75,6 +82,9 @@ By default only the current property value(s) are collected.  To wait for update
 specify a property filter.  A property filter can be specified by prefixing the property name with a '-',
 followed by the value to match.
 
+The '-R' flag sets the Filter using the given XML encoded request, which can be captured by 'vcsim -trace' for example.
+It can be useful for replaying property filters created by other clients and converting filters to Go code via '-O -dump'.
+
 Examples:
   govc object.collect - content
   govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
@@ -82,14 +92,9 @@ Examples:
   govc object.collect -s /ha-datacenter/vm/foo -guest.guestOperationsReady true # property filter
   govc object.collect -type m / name runtime.powerState # collect properties for multiple objects
   govc object.collect -json -n=-1 EventManager:ha-eventmgr latestEvent | jq .
-  govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .`
-}
-
-func (cmd *collect) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
+  govc object.collect -json -s $(govc object.collect -s - content.perfManager) description.counterType | jq .
+  govc object.collect -R create-filter-request.xml # replay filter
+  govc object.collect -R create-filter-request.xml -O # convert filter to Go code`
 }
 
 var stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
@@ -261,6 +266,42 @@ func (cmd *collect) toFilter(f *flag.FlagSet, props []string) ([]string, error) 
 	return cmd.filter.Keys(), nil
 }
 
+type dumpFilter struct {
+	types.CreateFilter
+}
+
+func (f *dumpFilter) Dump() interface{} {
+	return f.CreateFilter
+}
+
+// Write satisfies the flags.OutputWriter interface, but is not used with dumpFilter.
+func (f *dumpFilter) Write(w io.Writer) error {
+	return nil
+}
+
+func (cmd *collect) decodeFilter(filter *property.WaitFilter) error {
+	var r io.Reader
+
+	if cmd.raw == "-" {
+		r = os.Stdin
+	} else {
+		f, err := os.Open(cmd.raw)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+		r = f
+	}
+
+	env := soap.Envelope{
+		Body: &methods.CreateFilterBody{Req: &filter.CreateFilter},
+	}
+
+	dec := xml.NewDecoder(r)
+	dec.TypeFunc = types.TypeFunc()
+	return dec.Decode(&env)
+}
+
 func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
@@ -272,62 +313,75 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	ref := methods.ServiceInstance
-	arg := f.Arg(0)
-
-	if len(cmd.kind) != 0 {
-		ref = client.ServiceContent.RootFolder
-	}
-
-	switch arg {
-	case "", "-":
-	default:
-		if !ref.FromString(arg) {
-			l, ferr := finder.ManagedObjectList(ctx, arg)
-			if ferr != nil {
-				return err
-			}
-
-			switch len(l) {
-			case 0:
-				return fmt.Errorf("%s not found", arg)
-			case 1:
-				ref = l[0].Object.Reference()
-			default:
-				return flag.ErrHelp
-			}
-		}
-	}
-
 	p := property.DefaultCollector(client)
 	filter := new(property.WaitFilter)
 
-	var props []string
-	if f.NArg() > 1 {
-		props = f.Args()[1:]
-		cmd.single = len(props) == 1
-	}
+	if cmd.raw == "" {
+		ref := methods.ServiceInstance
+		arg := f.Arg(0)
 
-	props, err = cmd.toFilter(f, props)
-	if err != nil {
-		return err
-	}
+		if len(cmd.kind) != 0 {
+			ref = client.ServiceContent.RootFolder
+		}
 
-	if len(cmd.kind) == 0 {
-		filter.Add(ref, ref.Type, props)
-	} else {
-		m := view.NewManager(client)
+		switch arg {
+		case "", "-":
+		default:
+			if !ref.FromString(arg) {
+				l, ferr := finder.ManagedObjectList(ctx, arg)
+				if ferr != nil {
+					return err
+				}
 
-		v, err := m.CreateContainerView(ctx, ref, cmd.kind, true)
+				switch len(l) {
+				case 0:
+					return fmt.Errorf("%s not found", arg)
+				case 1:
+					ref = l[0].Object.Reference()
+				default:
+					return flag.ErrHelp
+				}
+			}
+		}
+
+		var props []string
+		if f.NArg() > 1 {
+			props = f.Args()[1:]
+			cmd.single = len(props) == 1
+		}
+
+		props, err = cmd.toFilter(f, props)
 		if err != nil {
 			return err
 		}
 
-		defer v.Destroy(ctx)
+		if len(cmd.kind) == 0 {
+			filter.Add(ref, ref.Type, props)
+		} else {
+			m := view.NewManager(client)
 
-		for _, kind := range cmd.kind {
-			filter.Add(v.Reference(), kind, props, v.TraversalSpec())
+			v, cerr := m.CreateContainerView(ctx, ref, cmd.kind, true)
+			if cerr != nil {
+				return cerr
+			}
+
+			defer v.Destroy(ctx)
+
+			for _, kind := range cmd.kind {
+				filter.Add(v.Reference(), kind, props, v.TraversalSpec())
+			}
 		}
+	} else {
+		if err = cmd.decodeFilter(filter); err != nil {
+			return err
+		}
+	}
+
+	if cmd.dump {
+		if !cmd.JSON {
+			cmd.Dump = true
+		}
+		return cmd.WriteResult(&dumpFilter{filter.CreateFilter})
 	}
 
 	entered := false
