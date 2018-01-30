@@ -296,6 +296,16 @@ load test_helper
 
   run govc object.collect -s -type Network / summary.ipPoolName
   assert_success ""
+
+  # check that uuid and instanceUuid are set under both config and summary.config
+  for prop in config summary.config ; do
+    uuids=$(govc object.collect -s -type m / "$prop.uuid" | sort)
+    [ -n "$uuids" ]
+    iuuids=$(govc object.collect -s -type m / "$prop.instanceUuid" | sort)
+    [ -n "$iuuids" ]
+
+    [ "$uuids" != "$iuuids" ]
+  done
 }
 
 @test "object.collect view" {
