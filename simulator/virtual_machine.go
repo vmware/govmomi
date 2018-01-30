@@ -157,6 +157,9 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		{spec.GuestId, &vm.Summary.Config.GuestId},
 		{spec.GuestId, &vm.Summary.Config.GuestFullName},
 		{spec.Uuid, &vm.Config.Uuid},
+		{spec.Uuid, &vm.Summary.Config.Uuid},
+		{spec.InstanceUuid, &vm.Config.InstanceUuid},
+		{spec.InstanceUuid, &vm.Summary.Config.InstanceUuid},
 		{spec.Version, &vm.Config.Version},
 		{spec.Files.VmPathName, &vm.Config.Files.VmPathName},
 		{spec.Files.VmPathName, &vm.Summary.Config.VmPathName},
@@ -257,8 +260,6 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, spec.ExtraConfig...)
 
 	vm.Config.Modified = time.Now()
-
-	vm.Summary.Config.Uuid = vm.Config.Uuid
 }
 
 func validateGuestID(id string) types.BaseMethodFault {
