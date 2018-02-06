@@ -591,13 +591,36 @@ load test_helper
   vm=$(new_empty_vm)
   clone=$(new_id)
 
-  run govc vm.clone -m 1024 -c 2 -vm $vm $clone
+  run govc vm.info -r "$vm"
+  assert_success
+  assert_line "Network: $(basename "$GOVC_NETWORK")" # DVPG0
+
+  run govc vm.clone -m 1024 -c 2 -net "VM Network" -vm "$vm" "$clone"
   assert_success
 
-  run govc vm.info $clone
+  run govc vm.info -r "$clone"
   assert_success
   assert_line "Memory: 1024MB"
   assert_line "CPU: 2 vCPU(s)"
+  assert_line "Network: VM Network"
+
+  # Remove all NICs from source vm
+  run govc device.remove -vm "$vm" "$(govc device.ls -vm "$vm" | grep ethernet- | awk '{print $1}')"
+  assert_success
+
+  clone=$(new_id)
+
+  mac=00:00:0f:a7:a0:f1
+  run govc vm.clone -net "VM Network" -net.address $mac -vm "$vm" "$clone"
+  assert_success
+
+  run govc vm.info -r "$clone"
+  assert_success
+  assert_line "Network: VM Network"
+
+  run govc device.info -vm "$clone"
+  assert_success
+  assert_line "MAC Address: $mac"
 }
 
 @test "vm.clone usage" {

@@ -263,35 +263,33 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
-	// search for the first network card of the source
 	devices, err := cmd.VirtualMachine.Device(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	var card *types.VirtualEthernetCard
-	for _, device := range devices {
-		if c, ok := device.(types.BaseVirtualEthernetCard); ok {
-			card = c.GetVirtualEthernetCard()
-			break
-		}
-	}
-
 	// prepare virtual device config spec for network card
 	configSpecs := []types.BaseVirtualDeviceConfigSpec{}
 
-	if card != nil {
-		// get the new backing information
-		dev, err := cmd.NetworkFlag.Device()
-		if err != nil {
-			return nil, err
+	if cmd.NetworkFlag.IsSet() {
+		op := types.VirtualDeviceConfigSpecOperationAdd
+		card, derr := cmd.NetworkFlag.Device()
+		if derr != nil {
+			return nil, derr
+		}
+		// search for the first network card of the source
+		for _, device := range devices {
+			if _, ok := device.(types.BaseVirtualEthernetCard); ok {
+				op = types.VirtualDeviceConfigSpecOperationEdit
+				// set new backing info
+				cmd.NetworkFlag.Change(device, card)
+				card = device
+				break
+			}
 		}
 
-		// set backing info
-		card.Backing = dev.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard().Backing
-
 		configSpecs = append(configSpecs, &types.VirtualDeviceConfigSpec{
-			Operation: types.VirtualDeviceConfigSpecOperationEdit,
+			Operation: op,
 			Device:    card,
 		})
 	}
