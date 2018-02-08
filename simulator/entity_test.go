@@ -20,7 +20,6 @@ import (
 	"testing"
 
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -39,7 +38,7 @@ func TestRename(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	dc := Map.Any("Datacenter").(*mo.Datacenter)
+	dc := Map.Any("Datacenter").(*Datacenter)
 	vmFolder := Map.Get(dc.VmFolder).(*Folder)
 
 	f1 := Map.Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"

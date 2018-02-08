@@ -24,11 +24,34 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type Datacenter struct {
+	mo.Datacenter
+
+	isESX bool
+}
+
+// NewDatacenter creates a Datacenter and its child folders.
+func NewDatacenter(f *Folder) *Datacenter {
+	dc := &Datacenter{
+		isESX: f.Self == esx.RootFolder.Self,
+	}
+
+	if dc.isESX {
+		dc.Datacenter = esx.Datacenter
+	}
+
+	f.putChild(dc)
+
+	dc.createFolders()
+
+	return dc
+}
+
 // Create Datacenter Folders.
 // Every Datacenter has 4 inventory Folders: Vm, Host, Datastore and Network.
 // The ESX folder child types are limited to 1 type.
 // The VC folders have additional child types, including nested folders.
-func createDatacenterFolders(dc *mo.Datacenter, isVC bool) {
+func (dc *Datacenter) createFolders() {
 	folders := []struct {
 		ref   *types.ManagedObjectReference
 		name  string
@@ -44,7 +67,11 @@ func createDatacenterFolders(dc *mo.Datacenter, isVC bool) {
 		folder := &Folder{}
 		folder.Name = f.name
 
-		if isVC {
+		if dc.isESX {
+			folder.ChildType = f.types[:1]
+			folder.Self = *f.ref
+			Map.PutEntity(dc, folder)
+		} else {
 			folder.ChildType = f.types
 			e := Map.PutEntity(dc, folder)
 
@@ -52,10 +79,6 @@ func createDatacenterFolders(dc *mo.Datacenter, isVC bool) {
 			ref := e.Reference()
 			f.ref.Type = ref.Type
 			f.ref.Value = ref.Value
-		} else {
-			folder.ChildType = f.types[:1]
-			folder.Self = *f.ref
-			Map.PutEntity(dc, folder)
 		}
 	}
 
@@ -67,7 +90,7 @@ func createDatacenterFolders(dc *mo.Datacenter, isVC bool) {
 		network.Self = ref
 		network.Name = strings.Split(ref.Value, "-")[1]
 		network.Entity().Name = network.Name
-		if isVC {
+		if !dc.isESX {
 			network.Self.Value = "" // we want a different moid per-DC
 		}
 
@@ -76,7 +99,7 @@ func createDatacenterFolders(dc *mo.Datacenter, isVC bool) {
 }
 
 func datacenterEventArgument(obj mo.Entity) *types.DatacenterEventArgument {
-	dc, ok := obj.(*mo.Datacenter)
+	dc, ok := obj.(*Datacenter)
 	if !ok {
 		dc = Map.getEntityDatacenter(obj)
 	}
