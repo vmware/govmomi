@@ -20,7 +20,9 @@ import (
 	"strings"
 
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -106,5 +108,28 @@ func datacenterEventArgument(obj mo.Entity) *types.DatacenterEventArgument {
 	return &types.DatacenterEventArgument{
 		Datacenter:          dc.Self,
 		EntityEventArgument: types.EntityEventArgument{Name: dc.Name},
+	}
+}
+
+func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM_Task) soap.HasFault {
+	task := CreateTask(dc, "powerOnMultiVM", func(_ *Task) (types.AnyType, types.BaseMethodFault) {
+		if dc.isESX {
+			return nil, new(types.NotImplemented)
+		}
+
+		for _, ref := range req.Vm {
+			vm := Map.Get(ref).(*VirtualMachine)
+			Map.WithLock(vm, func() {
+				vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{})
+			})
+		}
+
+		return nil, nil
+	})
+
+	return &methods.PowerOnMultiVM_TaskBody{
+		Res: &types.PowerOnMultiVM_TaskResponse{
+			Returnval: task.Run(),
+		},
 	}
 }
