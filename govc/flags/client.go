@@ -428,11 +428,7 @@ func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
 		}
 	}
 
-	if err := m.Login(ctx, u); err != nil {
-		return err
-	}
-
-	return flag.saveClient(c)
+	return m.Login(ctx, u)
 }
 
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {
@@ -461,7 +457,11 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	// Set client, since we didn't pass it in the constructor
 	c.Client = sc
 
-	return c, flag.Login(ctx, c)
+	if err := flag.Login(ctx, c); err != nil {
+		return nil, err
+	}
+
+	return c, flag.saveClient(c)
 }
 
 func (flag *ClientFlag) localTicket(ctx context.Context, m *session.Manager) (*url.Userinfo, error) {
