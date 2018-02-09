@@ -86,6 +86,7 @@ func main() {
 		// Preserve options that also apply to ESX
 		model.Datastore = opts.Datastore
 		model.Machine = opts.Machine
+		model.Autostart = opts.Autostart
 	}
 
 	tag := " (govmomi simulator)"

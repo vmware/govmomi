@@ -38,10 +38,15 @@ GOVC_TEST_IMG=govc-images/$(basename $GOVC_TEST_IMG_SRC)
 
 PATH="$GOPATH/bin:$PATH"
 
+vcsim_stop() {
+  kill "$GOVC_SIM_PID"
+  rm -f "$GOVC_SIM_ENV"
+  unset GOVC_SIM_PID
+}
+
 teardown() {
   if [ -n "$GOVC_SIM_PID" ] ; then
-    kill "$GOVC_SIM_PID"
-    rm -f "$GOVC_SIM_ENV"
+    vcsim_stop
   else
     govc ls vm | grep govc-test- | $xargs -r govc vm.destroy
     govc datastore.ls | grep govc-test- | awk '{print ($NF)}' | $xargs -n1 -r govc datastore.rm
@@ -121,7 +126,7 @@ vcsim_env() {
 
   export GOVC_DATASTORE=LocalDS_0
 
-  if [ "$1" != "-esx" ] ; then
+  if [ "$1" != "-esx" ] && [ "$1" != "-esx=true" ]; then
     export GOVC_DATACENTER=DC0 \
            GOVC_HOST=/DC0/host/DC0_C0/DC0_C0_H0 \
            GOVC_RESOURCE_POOL=/DC0/host/DC0_C0/Resources \

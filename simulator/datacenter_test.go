@@ -20,29 +20,35 @@ import (
 	"testing"
 
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestDatacenterCreateFolders(t *testing.T) {
-	tests := []struct {
-		isVC bool
-		dc   mo.Datacenter
-	}{
-		{false, esx.Datacenter},
-		{true, mo.Datacenter{}},
+	// For this test we only want the RootFolder, 1 Datacenter and its child folders
+	models := []Model{
+		Model{
+			ServiceContent: esx.ServiceContent,
+			RootFolder:     esx.RootFolder,
+		},
+		Model{
+			ServiceContent: vpx.ServiceContent,
+			RootFolder:     vpx.RootFolder,
+			Datacenter:     1,
+		},
 	}
 
-	for _, test := range tests {
-		Map.PutEntity(nil, &test.dc)
+	for _, model := range models {
+		_ = model.Create()
 
-		createDatacenterFolders(&test.dc, test.isVC)
+		dc := Map.Any("Datacenter").(*Datacenter)
 
 		folders := []types.ManagedObjectReference{
-			test.dc.VmFolder,
-			test.dc.HostFolder,
-			test.dc.DatastoreFolder,
-			test.dc.NetworkFolder,
+			dc.VmFolder,
+			dc.HostFolder,
+			dc.DatastoreFolder,
+			dc.NetworkFolder,
 		}
 
 		for _, ref := range folders {
@@ -56,7 +62,7 @@ func TestDatacenterCreateFolders(t *testing.T) {
 				t.Error("empty name")
 			}
 
-			if *e.Entity().Parent != test.dc.Self {
+			if *e.Entity().Parent != dc.Self {
 				t.Fail()
 			}
 
@@ -65,7 +71,7 @@ func TestDatacenterCreateFolders(t *testing.T) {
 				t.Fatalf("unexpected type (%T) for %#v", e, ref)
 			}
 
-			if test.isVC {
+			if Map.IsVPX() {
 				if len(f.ChildType) < 2 {
 					t.Fail()
 				}

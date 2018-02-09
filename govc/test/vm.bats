@@ -156,6 +156,31 @@ load test_helper
   assert_success "poweredOn"
 }
 
+@test "vm.power -on -M" {
+  for esx in true false ; do
+    vcsim_env -esx=$esx -autostart=false
+
+    vms=($(govc find / -type m | sort))
+
+    # All VMs are off with -autostart=false
+    off=($(govc find / -type m -runtime.powerState poweredOff | sort))
+    assert_equal "${vms[*]}" "${off[*]}"
+
+    # Power on 1 VM to test that -M is idempotent
+    run govc vm.power -on "${vms[0]}"
+    assert_success
+
+    run govc vm.power -on -M "${vms[@]}"
+    assert_success
+
+    # All VMs should be powered on now
+    on=($(govc find / -type m -runtime.powerState poweredOn | sort))
+    assert_equal "${vms[*]}" "${on[*]}"
+
+    vcsim_stop
+  done
+}
+
 @test "vm.power -force" {
   esx_env
 

@@ -197,7 +197,7 @@ func TestRetrieveProperties(t *testing.T) {
 		}
 
 		// Retrieve a nested property
-		Map.Get(dc.Reference()).(*mo.Datacenter).Configuration.DefaultHardwareVersionKey = "foo"
+		Map.Get(dc.Reference()).(*Datacenter).Configuration.DefaultHardwareVersionKey = "foo"
 		mdc = mo.Datacenter{}
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"configuration.defaultHardwareVersionKey"}, &mdc)
 		if err != nil {
