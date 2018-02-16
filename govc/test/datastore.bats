@@ -231,13 +231,6 @@ upload_file() {
   run govc datastore.disk.create "$vmdk"
   assert_success
 
-  clone="$id/$id-2.vmdk"
-  run govc datastore.disk.cp "$vmdk" "$clone"
-  assert_success
-
-  run govc datastore.disk.info -d "$clone"
-  assert_success
-
   id=$(new_id)
   run govc vm.create -on=false -link -disk "$vmdk" "$id"
   assert_success
@@ -274,6 +267,54 @@ upload_file() {
 
   run govc datastore.rm "$(dirname "$vmdk")"
   assert_success
+}
+
+@test "datastore.cp" {
+  vcsim_env -dc 2 -ds 2
+
+  id=$(new_id)
+  vmdk="$id/$id.vmdk"
+
+  # GOVC_DATACENTER and GOVC_DATACENTER are set during these tests
+  run govc datastore.mkdir "$id"
+  assert_success
+
+  run govc datastore.disk.create "$vmdk"
+  assert_success
+
+  clone="$id/$id-2.vmdk"
+  run govc datastore.cp "$vmdk" "$clone"
+  assert_success
+
+  # Specifying -dc and -ds flags in the tests below
+  unset GOVC_DATASTORE GOVC_DATACENTER
+
+  run govc datastore.ls -dc DC0 -ds LocalDS_0 "$clone"
+  assert_success # created this file above
+
+  run govc datastore.ls -dc DC0 -ds LocalDS_1 "$clone"
+  assert_failure # should not exist in DS_1
+
+  run govc datastore.ls -dc DC1 -ds LocalDS_1 "$clone"
+  assert_failure # should not exist in DC1 DS_1
+
+  run govc datastore.mkdir -dc DC1 -ds LocalDS_1 "$id"
+  assert_success
+
+  for op in cp mv ; do
+    run govc datastore.ls -dc DC1 -ds LocalDS_0 "$clone"
+    assert_failure # should not exist in DC1 DS_0
+
+    # From DC0 DS_0 to DC1 DS_1
+    run govc datastore.$op -dc DC0 -ds LocalDS_0 -dc-target DC1 -ds-target LocalDS_1 "$clone" "$clone"
+    assert_success
+
+    run govc datastore.ls -dc DC1 -ds LocalDS_1 "$clone"
+    assert_success # now the file exists
+
+    run govc datastore.rm -dc DC1 -ds LocalDS_1 "$clone"
+    assert_success
+  done
 }
 
 @test "datastore.disk.info" {
