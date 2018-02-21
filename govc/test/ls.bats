@@ -11,6 +11,9 @@ load test_helper
   n=${#lines[@]}
   [ $n -ge 4 ]
 
+  run govc ls -json
+  assert_success
+
   # list entire inventory
   run govc ls '/**'
   assert_success
