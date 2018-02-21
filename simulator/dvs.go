@@ -63,6 +63,8 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 				VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
 			}
 
+			pg.PortKeys = []string{}
+
 			s.Portgroup = append(s.Portgroup, pg.Self)
 			s.Summary.PortgroupName = append(s.Summary.PortgroupName, pg.Name)
 
