@@ -29,7 +29,6 @@ import (
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -187,13 +186,6 @@ func TestRetrieveProperties(t *testing.T) {
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"enoent"}, &mdc)
 		if err == nil {
 			t.Error("expected error")
-		} else {
-			switch fault := soap.ToVimFault(err).(type) {
-			case *types.InvalidProperty:
-				// ok
-			default:
-				t.Errorf("unexpected fault: %#v", fault)
-			}
 		}
 
 		// Retrieve a nested property
@@ -212,13 +204,6 @@ func TestRetrieveProperties(t *testing.T) {
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"configuration.enoent"}, &mdc)
 		if err == nil {
 			t.Error("expected error")
-		} else {
-			switch fault := soap.ToVimFault(err).(type) {
-			case *types.InvalidProperty:
-				// ok
-			default:
-				t.Errorf("unexpected fault: %#v", fault)
-			}
 		}
 
 		// Retrieve an empty property

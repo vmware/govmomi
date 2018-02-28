@@ -19,6 +19,7 @@ package property
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -35,13 +36,19 @@ import (
 type Collector struct {
 	roundTripper soap.RoundTripper
 	reference    types.ManagedObjectReference
+
+	// Verify all requested PropSet appears in the response PropSet
+	verifyAllPropSetNotNil bool
 }
+
+type responseVerifier func(objs []types.ManagedObjectReference, ps []string, res *types.RetrievePropertiesResponse) error
 
 // DefaultCollector returns the session's default property collector.
 func DefaultCollector(c *vim25.Client) *Collector {
 	p := Collector{
-		roundTripper: c,
-		reference:    c.ServiceContent.PropertyCollector,
+		roundTripper:           c,
+		reference:              c.ServiceContent.PropertyCollector,
+		verifyAllPropSetNotNil: true,
 	}
 
 	return &p
@@ -173,6 +180,12 @@ func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectRefe
 		return nil
 	}
 
+	if p.verifyAllPropSetNotNil {
+		if err := verifyAllPropSetNotNil(ps, res); err != nil {
+			return err
+		}
+	}
+
 	return mo.LoadRetrievePropertiesResponse(res, dst)
 }
 
@@ -202,4 +215,31 @@ func (p *Collector) RetrieveWithFilter(ctx context.Context, objs []types.Managed
 func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectReference, ps []string, dst interface{}) error {
 	var objs = []types.ManagedObjectReference{obj}
 	return p.Retrieve(ctx, objs, ps, dst)
+}
+
+// Verify that all the requested propsets appear in the response propsets.
+func verifyAllPropSetNotNil(ps []string, res *types.RetrievePropertiesResponse) error {
+	m := map[string]map[string]struct{}{} // object=>prop=>struct{}
+
+	for _, content := range res.Returnval {
+		obj := content.Obj.String()
+		if _, ok := m[obj]; !ok {
+			m[obj] = map[string]struct{}{}
+		}
+
+		pm := m[obj]
+		for _, propset := range content.PropSet {
+			pm[propset.Name] = struct{}{}
+		}
+	}
+
+	for obj, pm := range m {
+		for _, p := range ps {
+			if _, ok := pm[p]; !ok {
+				return fmt.Errorf("missing property %q in object %q", p, obj)
+			}
+		}
+	}
+
+	return nil
 }
