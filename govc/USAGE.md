@@ -1390,6 +1390,7 @@ ROOT can be an inventory path or ManagedObjectReference.
 ROOT defaults to '.', an alias for the root folder or DC if set.
 
 Optional KEY VAL pairs can be used to filter results against object instance properties.
+Use the govc 'object.collect' command to view possible object property keys.
 
 The '-type' flag value can be a managed entity type or one of the following aliases:
 
@@ -3623,7 +3624,7 @@ Options:
 Usage: govc vm.power [OPTIONS]
 
 Options:
-  -M=false                  Use Datacenter.PowerOnVM
+  -M=false                  Use Datacenter.PowerOnMultiVM method instead of VirtualMachine.PowerOnVM
   -force=false              Force (ignore state error and hard shutdown/reboot if tools unavailable)
   -off=false                Power off
   -on=false                 Power on
