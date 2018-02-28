@@ -1,5 +1,15 @@
 # changelog
 
+### 0.17.0 (2018-02-28)
+
+* Add HostStorageSystem.AttachScsiLun method
+
+* Avoid possible panic in Datastore.Stat (#969)
+
+* Destroy event history collectors (#962)
+
+* Add VirtualDiskManager.CreateChildDisk method
+
 ### 0.16.0 (2017-11-08)
 
 * Add support for SOAP request operation ID header

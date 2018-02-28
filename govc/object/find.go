@@ -136,6 +136,7 @@ ROOT can be an inventory path or ManagedObjectReference.
 ROOT defaults to '.', an alias for the root folder or DC if set.
 
 Optional KEY VAL pairs can be used to filter results against object instance properties.
+Use the govc 'object.collect' command to view possible object property keys.
 
 The '-type' flag value can be a managed entity type or one of the following aliases:
 
@@ -149,13 +150,6 @@ Examples:
   govc find . -type m -datastore $(govc find -i datastore -name vsanDatastore)
   govc find . -type s -summary.type vsan
   govc find . -type h -hardware.cpuInfo.numCpuCores 16`, atable)
-}
-
-func (cmd *find) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
 }
 
 // rootMatch returns true if the root object path should be printed
