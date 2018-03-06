@@ -1,5 +1,7 @@
 # changelog
 
+* In progress.Reader emit final report on EOF.
+
 ### 0.17.0 (2018-02-28)
 
 * Add HostStorageSystem.AttachScsiLun method
