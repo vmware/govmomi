@@ -158,7 +158,8 @@ load test_helper
   assert_matches dvportgroup-
 
   run govc object.collect -s -type DistributedVirtualPortgroup / config.name
-  assert_success DC0_DVPG0
+  assert_matches DC0_DVPG0
+  assert_matches DVS0-DVUplinks-
 
   run govc object.collect -s -type DistributedVirtualPortgroup / effectiveRole
   assert_number
@@ -292,7 +293,7 @@ load test_helper
   assert_number
 
   run govc object.collect -s -type Network / summary.accessible
-  assert_success "$(printf "true\ntrue")"
+  assert_success "$(printf "true\ntrue\ntrue")"
 
   run govc object.collect -s -type Network / summary.ipPoolName
   assert_success ""

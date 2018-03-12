@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"math/rand"
 	"path"
+	"strings"
 
 	"github.com/google/uuid"
 
@@ -513,6 +514,17 @@ func (f *Folder) CreateDVSTask(req *types.CreateDVS_Task) soap.HasFault {
 				ForwardingClass: "etherswitch",
 			}
 		}
+
+		dvs.AddDVPortgroupTask(&types.AddDVPortgroup_Task{
+			Spec: []types.DVPortgroupConfigSpec{{
+				Name: dvs.Name + "-DVUplinks" + strings.TrimPrefix(dvs.Self.Value, "dvs"),
+				DefaultPortConfig: &types.VMwareDVSPortSetting{
+					Vlan: &types.VmwareDistributedVirtualSwitchTrunkVlanSpec{
+						VlanId: []types.NumericRange{{Start: 0, End: 4094}},
+					},
+				},
+			}},
+		})
 
 		return dvs.Reference(), nil
 	})

@@ -67,8 +67,8 @@ func TestFinderVPX(t *testing.T) {
 		{"ManagedObjectList", "/DC0", 1},
 		{"ManagedObjectList", "/F[01]", 2},
 		{"ManagedObjectListChildren", "/*", m.Datacenter + 3},
-		{"ManagedObjectListChildren", "/*/*", 18},
-		{"ManagedObjectListChildren", "/*/*/*", 24},
+		{"ManagedObjectListChildren", "/*/*", 19},
+		{"ManagedObjectListChildren", "/*/*/*", 25},
 		{"FolderList", "/*", m.Folder},
 		{"DatacenterList", "/F0/*", 1},
 		{"DatacenterList", "/DC0", 1},
@@ -91,13 +91,13 @@ func TestFinderVPX(t *testing.T) {
 		{"ClusterComputeResourceList", "/DC0/host/*", m.Cluster},
 		{"HostSystemList", "/DC0/host/*", m.Host + m.ClusterHost},
 		{"HostSystemList", "/F0/DC1/host/F0/*", m.Host + m.ClusterHost},
-		{"HostSystemList", "DC1_H0", 1},             // find . -type HostSystem -name DC1_H0
-		{"ComputeResourceList", "DC1_H0", 1},        // find . -type ComputeResource -name DC1_H0
-		{"ClusterComputeResourceList", "DC1_C0", 1}, // find . -type ClusterComputeResource -name DC1_H0
-		{"NetworkList", "/DC0/network/*", 2 + m.Portgroup},
+		{"HostSystemList", "DC1_H0", 1},                    // find . -type HostSystem -name DC1_H0
+		{"ComputeResourceList", "DC1_H0", 1},               // find . -type ComputeResource -name DC1_H0
+		{"ClusterComputeResourceList", "DC1_C0", 1},        // find . -type ClusterComputeResource -name DC1_H0
+		{"NetworkList", "/DC0/network/*", 3 + m.Portgroup}, // VM Network + DSwitch + DSwitch-Uplinks + m.Portgroup
 		{"NetworkList", "./*", 1},
 		{"NetworkList", "/F0/DC1/network/VM Network", 1},
-		{"NetworkList", "/F0/DC1/network/F0/*", 1 + m.Portgroup},
+		{"NetworkList", "/F0/DC1/network/F0/*", 2 + m.Portgroup},
 		{"NetworkList", "./F0/DC1_DVPG0", 1},
 		{"NetworkList", "./F0/DC1_DVPG0", 1},
 		{"NetworkList", "DC1_DVPG0", 1}, // find . -type Network -name DC1_DVPG0
