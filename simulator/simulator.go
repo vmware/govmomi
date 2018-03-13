@@ -51,9 +51,10 @@ var Trace = false
 
 // Method encapsulates a decoded SOAP client request
 type Method struct {
-	Name string
-	This types.ManagedObjectReference
-	Body types.AnyType
+	Name   string
+	This   types.ManagedObjectReference
+	Header soap.Header
+	Body   types.AnyType
 }
 
 // Service decodes incoming requests and dispatches to a Handler
@@ -115,7 +116,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "Login", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
+		case "RetrieveServiceContent", "Login", "LoginByToken", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
@@ -316,6 +317,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		res = serverFault(err.Error())
 	} else {
+		ctx.Header = method.Header
 		res = s.call(ctx, method)
 	}
 
@@ -552,14 +554,38 @@ func defaultMapType(name string) (reflect.Type, bool) {
 	return typ, ok
 }
 
+// Element can be used to defer decoding of an XML node.
+type Element struct {
+	start xml.StartElement
+	inner struct {
+		Content string `xml:",innerxml"`
+	}
+}
+
+func (e *Element) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	e.start = start
+
+	return d.DecodeElement(&e.inner, &start)
+}
+
+func (e *Element) decoder() *xml.Decoder {
+	decoder := xml.NewDecoder(strings.NewReader(e.inner.Content))
+	decoder.TypeFunc = typeFunc // required to decode interface types
+	return decoder
+}
+
+func (e *Element) Decode(val interface{}) error {
+	return e.decoder().DecodeElement(val, &e.start)
+}
+
 // UnmarshalBody extracts the Body from a soap.Envelope and unmarshals to the corresponding govmomi type
 func UnmarshalBody(data []byte) (*Method, error) {
-	body := struct {
-		Content string `xml:",innerxml"`
-	}{}
-
+	body := new(Element)
 	req := soap.Envelope{
-		Body: &body,
+		Header: &soap.Header{
+			Security: new(Element),
+		},
+		Body: body,
 	}
 
 	err := xml.Unmarshal(data, &req)
@@ -567,40 +593,38 @@ func UnmarshalBody(data []byte) (*Method, error) {
 		return nil, fmt.Errorf("xml.Unmarshal: %s", err)
 	}
 
-	decoder := xml.NewDecoder(bytes.NewReader([]byte(body.Content)))
-	decoder.TypeFunc = typeFunc // required to decode interface types
-
-	var start *xml.StartElement
+	var start xml.StartElement
+	var ok bool
+	decoder := body.decoder()
 
 	for {
 		tok, derr := decoder.Token()
 		if derr != nil {
-			return nil, fmt.Errorf("decoding body: %s", err)
+			return nil, fmt.Errorf("decoding: %s", derr)
 		}
-		if t, ok := tok.(xml.StartElement); ok {
-			start = &t
+		if start, ok = tok.(xml.StartElement); ok {
 			break
 		}
 	}
 
-	kind := start.Name.Local
+	if !ok {
+		return nil, fmt.Errorf("decoding: method token not found")
+	}
 
+	kind := start.Name.Local
 	rtype, ok := typeFunc(kind)
 	if !ok {
 		return nil, fmt.Errorf("no vmomi type defined for '%s'", kind)
 	}
 
-	var val interface{}
-	if rtype != nil {
-		val = reflect.New(rtype).Interface()
-	}
+	val := reflect.New(rtype).Interface()
 
-	err = decoder.DecodeElement(val, start)
+	err = decoder.DecodeElement(val, &start)
 	if err != nil {
 		return nil, fmt.Errorf("decoding %s: %s", kind, err)
 	}
 
-	method := &Method{Name: kind, Body: val}
+	method := &Method{Name: kind, Header: *req.Header, Body: val}
 
 	field := reflect.ValueOf(val).Elem().FieldByName("This")
 

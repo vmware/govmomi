@@ -110,6 +110,10 @@ func (flag *ClientFlag) URLWithoutPassword() *url.URL {
 	return &withoutCredentials
 }
 
+func (flag *ClientFlag) Userinfo() *url.Userinfo {
+	return flag.url.User
+}
+
 func (flag *ClientFlag) IsSecure() bool {
 	return !flag.insecure
 }
@@ -264,6 +268,15 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 
 // configure TLS and retry settings before making any connections
 func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
+	if flag.cert != "" {
+		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
+		if err != nil {
+			return nil, err
+		}
+
+		sc.SetCertificate(cert)
+	}
+
 	// Set namespace and version
 	sc.Namespace = flag.vimNamespace
 	sc.Version = flag.vimVersion
@@ -419,9 +432,9 @@ func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
 				return nil          // Avoid SaveSession for non-authenticated session
 			}
 		}
-	}
-
-	if flag.cert != "" {
+	} else if flag.cert != "" {
+		// LoginExtensionByCertificate requires extension name as the ExtensionKey parameter.
+		// LoginByToken does not have such a parameter, it only uses the -cert and -key.
 		err := m.LoginExtensionByCertificate(ctx, u.Username(), "")
 		if err != nil {
 			return err
@@ -434,15 +447,6 @@ func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
 func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	ctx := context.TODO()
 	sc := soap.NewClient(flag.url, flag.insecure)
-
-	if flag.cert != "" {
-		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
-		if err != nil {
-			return nil, err
-		}
-
-		sc.SetCertificate(cert)
-	}
 
 	rt, err := flag.configure(sc)
 	if err != nil {

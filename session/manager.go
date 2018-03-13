@@ -105,6 +105,21 @@ func (sm *Manager) LoginExtensionByCertificate(ctx context.Context, key string, 
 	return nil
 }
 
+func (sm *Manager) LoginByToken(ctx context.Context) error {
+	req := types.LoginByToken{
+		This:   sm.Reference(),
+		Locale: Locale,
+	}
+
+	login, err := methods.LoginByToken(ctx, sm.client, &req)
+	if err != nil {
+		return err
+	}
+
+	sm.userSession = &login.Returnval
+	return nil
+}
+
 func (sm *Manager) Logout(ctx context.Context) error {
 	req := types.Logout{
 		This: sm.Reference(),

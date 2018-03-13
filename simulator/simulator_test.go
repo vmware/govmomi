@@ -189,24 +189,11 @@ func TestUnmarshalError(t *testing.T) {
 		`<?xml version="1.0" encoding="UTF-8"?>
                  <Envelope xmlns="http://schemas.xmlsoap.org/soap/envelope/">
                    <Body>
-                     <RetrieveServiceContent xmlns="urn:vim25">
+                     <NoSuchMethod xmlns="urn:vim25">
                        <_this type="ServiceInstance">ServiceInstance</_this>
-                     </RetrieveServiceContent>
+                     </NoSuchMethod>
                    </Body>
                  </Envelope>`,
-	}
-
-	defer func() {
-		typeFunc = defaultMapType // reset
-	}()
-
-	ttypes := map[string]reflect.Type{
-		// triggers xml.Decoder.DecodeElement error
-		"RetrieveServiceContent": reflect.TypeOf(nil),
-	}
-	typeFunc = func(name string) (reflect.Type, bool) {
-		typ, ok := ttypes[name]
-		return typ, ok
 	}
 
 	for i, data := range requests {
