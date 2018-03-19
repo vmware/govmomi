@@ -1,5 +1,13 @@
 # changelog
 
+### 0.17.1 (2018-03-19)
+
+* Avoid possible panic in QueryVirtualDiskInfo
+
+* Add goreleaser to automate release process
+
+* Fix dvs.portgroup.info filtering
+
 ### 0.17.0 (2018-02-28)
 
 * The datastore cp and mv commands can target a different Datacenter and/or Datastore

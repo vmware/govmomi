@@ -1,6 +1,12 @@
 # changelog
 
+### 0.17.1 (2018-03-19)
+
+* vcsim: add Destroy method for Folder and Datacenter types
+
 * In progress.Reader emit final report on EOF.
+
+* vcsim: add EventManager.QueryEvents
 
 ### 0.17.0 (2018-02-28)
 

@@ -1232,6 +1232,7 @@ Portgroup info for DVS.
 
 Examples:
   govc dvs.portgroup.info DSwitch
+  govc dvs.portgroup.info -pg InternalNetwork DSwitch
   govc find / -type DistributedVirtualSwitch | xargs -n1 govc dvs.portgroup.info
 
 Options:
