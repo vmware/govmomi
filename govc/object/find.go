@@ -21,6 +21,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -172,6 +173,19 @@ func (cmd *find) rootMatch(ctx context.Context, root object.Reference, client *v
 	return content != nil
 }
 
+type findResult []string
+
+func (r findResult) Write(w io.Writer) error {
+	for i := range r {
+		fmt.Fprintln(w, r[i])
+	}
+	return nil
+}
+
+func (r findResult) Dump() interface{} {
+	return []string(r)
+}
+
 func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	client, err := cmd.Client()
 	if err != nil {
@@ -256,15 +270,16 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	filter["name"] = cmd.name
+	var paths findResult
 
 	printPath := func(o types.ManagedObjectReference, p string) {
 		if cmd.ref {
-			fmt.Fprintln(cmd.Out, o)
+			paths = append(paths, o.String())
 			return
 		}
 
 		path := strings.Replace(p, rootPath, arg, 1)
-		fmt.Fprintln(cmd.Out, path)
+		paths = append(paths, path)
 	}
 
 	recurse := false
@@ -283,7 +298,7 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.maxdepth == 0 {
-		return nil
+		return cmd.WriteResult(paths)
 	}
 
 	m := view.NewManager(client)
@@ -314,5 +329,5 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		printPath(o, path)
 	}
 
-	return nil
+	return cmd.WriteResult(paths)
 }
