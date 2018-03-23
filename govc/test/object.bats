@@ -379,6 +379,8 @@ EOF
   run govc find /
   assert_success
 
+  govc find -json / | jq .
+
   run govc find . -type HostSystem
   assert_success
 
