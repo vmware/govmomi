@@ -9,6 +9,8 @@ go:
 go_import_path: github.com/vmware/govmomi
 
 before_install:
+  - sudo apt-get -qq update
+  - sudo apt-get install -y xmlstarlet
   - make vendor
 
 script:

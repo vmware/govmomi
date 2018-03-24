@@ -59,3 +59,20 @@ load test_helper
     run govc session.login -u "$host" -ticket "$ticket"
     assert_success
 }
+
+@test "session.loginbytoken" {
+  vcsim_env
+
+  # Remove username/password
+  host=$(govc env GOVC_URL)
+  # Token template, vcsim just checks Assertion.Subject.NameID
+  token="<Assertion><Subject><NameID>%s</NameID></Subject></Assertion>"
+
+  # shellcheck disable=2059
+  run govc session.login -l -token "$(printf $token "")"
+  assert_failure # empty NameID is a InvalidLogin fault
+
+  # shellcheck disable=2059
+  run govc session.login -l -token "$(printf $token root@localos)"
+  assert_success # non-empty NameID is enough to login
+}

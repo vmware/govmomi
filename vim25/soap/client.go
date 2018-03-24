@@ -59,11 +59,6 @@ const (
 	SessionCookieName    = "vmware_soap_session"
 )
 
-type header struct {
-	Cookie string `xml:"vcSessionCookie,omitempty"`
-	ID     string `xml:"operationID,omitempty"`
-}
-
 type Client struct {
 	http.Client
 
@@ -161,7 +156,9 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	u.Path = path
 
 	client := NewClient(u, c.k)
-
+	if cert := c.Certificate(); cert != nil {
+		client.SetCertificate(*cert)
+	}
 	client.Namespace = namespace
 
 	// Copy the cookies
@@ -346,11 +343,23 @@ func splitHostPort(host string) (string, string) {
 
 const sdkTunnel = "sdkTunnel:8089"
 
+func (c *Client) Certificate() *tls.Certificate {
+	certs := c.t.TLSClientConfig.Certificates
+	if len(certs) == 0 {
+		return nil
+	}
+	return &certs[0]
+}
+
 func (c *Client) SetCertificate(cert tls.Certificate) {
 	t := c.Client.Transport.(*http.Transport)
 
-	// Extension certificate
+	// Extension or HoK certificate
 	t.TLSClientConfig.Certificates = []tls.Certificate{cert}
+
+	if c.u.User.Username() == "" {
+		return // HoK does not specify a username
+	}
 
 	// Proxy to vCenter host on port 80
 	host, _ := splitHostPort(c.u.Host)
@@ -426,21 +435,41 @@ func (c *Client) do(ctx context.Context, req *http.Request) (*http.Response, err
 	return c.Client.Do(req.WithContext(ctx))
 }
 
+// Signer can be implemented by soap.Header.Security to sign requests.
+// If the soap.Header.Security field is set to an implementation of Signer via WithHeader(),
+// then Client.RoundTrip will call Sign() to marshal the SOAP request.
+type Signer interface {
+	Sign(Envelope) ([]byte, error)
+}
+
+type headerContext struct{}
+
+// WithHeader can be used to modify the outgoing request soap.Header fields.
+func (c *Client) WithHeader(ctx context.Context, header Header) context.Context {
+	return context.WithValue(ctx, headerContext{}, header)
+}
+
 func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error {
 	var err error
+	var b []byte
 
 	reqEnv := Envelope{Body: reqBody}
 	resEnv := Envelope{Body: resBody}
 
-	h := &header{
-		Cookie: c.cookie,
+	h, ok := ctx.Value(headerContext{}).(Header)
+	if !ok {
+		h = Header{}
 	}
 
+	// We added support for OperationID before soap.Header was exported.
 	if id, ok := ctx.Value(types.ID{}).(string); ok {
 		h.ID = id
 	}
 
-	reqEnv.Header = h
+	h.Cookie = c.cookie
+	if h.Cookie != "" || h.ID != "" || h.Security != nil {
+		reqEnv.Header = &h // XML marshal header only if a field is set
+	}
 
 	// Create debugging context for this round trip
 	d := c.d.newRoundTrip()
@@ -448,9 +477,16 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 		defer d.done()
 	}
 
-	b, err := xml.Marshal(reqEnv)
-	if err != nil {
-		panic(err)
+	if signer, ok := h.Security.(Signer); ok {
+		b, err = signer.Sign(reqEnv)
+		if err != nil {
+			return err
+		}
+	} else {
+		b, err = xml.Marshal(reqEnv)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	rawReqBody := io.MultiReader(strings.NewReader(xml.Header), bytes.NewReader(b))
@@ -462,8 +498,13 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 	req = req.WithContext(ctx)
 
 	req.Header.Set(`Content-Type`, `text/xml; charset="utf-8"`)
-	soapAction := fmt.Sprintf("%s/%s", c.Namespace, c.Version)
-	req.Header.Set(`SOAPAction`, soapAction)
+
+	action := h.Action
+	if action == "" {
+		action = fmt.Sprintf("%s/%s", c.Namespace, c.Version)
+	}
+	req.Header.Set(`SOAPAction`, action)
+
 	if c.UserAgent != "" {
 		req.Header.Set(`User-Agent`, c.UserAgent)
 	}
