@@ -278,14 +278,10 @@ func (rr *retrieveResult) collectFields(ctx *Context, rval reflect.Value, fields
 		seen[name] = true
 
 		val, err := fieldValue(rval, name)
-		if err == nil {
-			rr.add(ctx, name, val, content)
-			continue
-		}
 
 		switch err {
-		case errEmptyField:
-			// ok
+		case nil, errEmptyField:
+			rr.add(ctx, name, val, content)
 		case errMissingField:
 			content.MissingSet = append(content.MissingSet, types.MissingProperty{
 				Path: name,
@@ -469,6 +465,19 @@ func (pc *PropertyCollector) RetrievePropertiesEx(ctx *Context, r *types.Retriev
 	if fault != nil {
 		body.Fault_ = Fault("", fault)
 	} else {
+		objects := res.Objects[:0]
+		for _, o := range res.Objects {
+			propSet := o.PropSet[:0]
+			for _, p := range o.PropSet {
+				if p.Val != nil {
+					propSet = append(propSet, p)
+				}
+			}
+			o.PropSet = propSet
+
+			objects = append(objects, o)
+		}
+		res.Objects = objects
 		body.Res = &types.RetrievePropertiesExResponse{
 			Returnval: res,
 		}
