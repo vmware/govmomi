@@ -51,6 +51,8 @@ const (
 	envVimVersion    = "GOVC_VIM_VERSION"
 	envTLSCaCerts    = "GOVC_TLS_CA_CERTS"
 	envTLSKnownHosts = "GOVC_TLS_KNOWN_HOSTS"
+
+	defaultMinVimVersion = "5.5"
 )
 
 const cDescr = "ESX or vCenter URL"
@@ -187,7 +189,7 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		{
 			env := os.Getenv(envMinAPIVersion)
 			if env == "" {
-				env = soap.DefaultMinVimVersion
+				env = defaultMinVimVersion
 			}
 
 			flag.minAPIVersion = env
@@ -196,7 +198,7 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		{
 			value := os.Getenv(envVimNamespace)
 			if value == "" {
-				value = soap.DefaultVimNamespace
+				value = vim25.Namespace
 			}
 			usage := fmt.Sprintf("Vim namespace [%s]", envVimNamespace)
 			f.StringVar(&flag.vimNamespace, "vim-namespace", value, usage)
@@ -205,7 +207,7 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		{
 			value := os.Getenv(envVimVersion)
 			if value == "" {
-				value = soap.DefaultVimVersion
+				value = vim25.Version
 			}
 			usage := fmt.Sprintf("Vim version [%s]", envVimVersion)
 			f.StringVar(&flag.vimVersion, "vim-version", value, usage)
@@ -577,7 +579,7 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 		u.User = nil
 	}
 
-	if u.Path == "/sdk" {
+	if u.Path == vim25.Path {
 		u.Path = ""
 	}
 	u.Fragment = ""

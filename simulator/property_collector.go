@@ -121,7 +121,7 @@ func fieldValueInterface(f reflect.StructField, rval reflect.Value) interface{} 
 			if strings.HasPrefix(kind, "Base") {
 				kind = kind[4:]
 			}
-			akind, _ := typeFunc("ArrayOf" + kind)
+			akind, _ := defaultMapType("ArrayOf" + kind)
 			a := reflect.New(akind)
 			a.Elem().FieldByName(kind).Set(rval)
 			pval = a.Interface()

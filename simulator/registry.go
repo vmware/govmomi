@@ -24,7 +24,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -60,6 +60,9 @@ type Registry struct {
 	handlers map[types.ManagedObjectReference]RegisterObject
 	locks    map[types.ManagedObjectReference]sync.Locker
 	counter  int
+
+	Namespace string
+	Path      string
 }
 
 // NewRegistry creates a new instances of Registry
@@ -68,9 +71,21 @@ func NewRegistry() *Registry {
 		objects:  make(map[types.ManagedObjectReference]mo.Reference),
 		handlers: make(map[types.ManagedObjectReference]RegisterObject),
 		locks:    make(map[types.ManagedObjectReference]sync.Locker),
+
+		Namespace: vim25.Namespace,
+		Path:      vim25.Path,
 	}
 
 	return r
+}
+
+func (r *Registry) typeFunc(name string) (reflect.Type, bool) {
+	if r.Namespace != "" && r.Namespace != vim25.Namespace {
+		if kind, ok := defaultMapType(r.Namespace + ":" + name); ok {
+			return kind, ok
+		}
+	}
+	return defaultMapType(name)
 }
 
 // typeName returns the type of the given object.
@@ -333,7 +348,7 @@ func (r *Registry) removeString(obj mo.Reference, field *[]string, val string) {
 }
 
 func (r *Registry) content() types.ServiceContent {
-	return r.Get(methods.ServiceInstance).(*ServiceInstance).Content
+	return r.Get(vim25.ServiceInstance).(*ServiceInstance).Content
 }
 
 // IsESX returns true if this Registry maps an ESX model
@@ -379,6 +394,11 @@ func (r *Registry) UserDirectory() *UserDirectory {
 // SessionManager returns the SessionManager singleton
 func (r *Registry) SessionManager() *SessionManager {
 	return r.Get(r.content().SessionManager.Reference()).(*SessionManager)
+}
+
+// OptionManager returns the OptionManager singleton
+func (r *Registry) OptionManager() *OptionManager {
+	return r.Get(r.content().Setting.Reference()).(*OptionManager)
 }
 
 func (r *Registry) MarshalJSON() ([]byte, error) {

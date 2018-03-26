@@ -29,6 +29,7 @@ import (
 	"syscall"
 
 	"github.com/google/uuid"
+	lookup "github.com/vmware/govmomi/lookup/simulator"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
 )
@@ -127,6 +128,10 @@ func main() {
 	model.Service.ServeMux = http.DefaultServeMux // expvar.init registers "/debug/vars" with the DefaultServeMux
 
 	s := model.Service.NewServer()
+
+	if !*isESX {
+		model.Service.RegisterSDK(lookup.New())
+	}
 
 	fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
 	if out != os.Stdout {

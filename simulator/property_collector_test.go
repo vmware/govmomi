@@ -1138,7 +1138,7 @@ func TestIssue945(t *testing.T) {
    </SOAP-ENV:Body>
 </SOAP-ENV:Envelope>`
 
-	method, err := UnmarshalBody([]byte(xml))
+	method, err := UnmarshalBody(defaultMapType, []byte(xml))
 	if err != nil {
 		t.Fatal(err)
 	}

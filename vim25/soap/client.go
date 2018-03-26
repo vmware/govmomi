@@ -28,6 +28,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"net/http/cookiejar"
@@ -53,10 +54,7 @@ type RoundTripper interface {
 }
 
 const (
-	DefaultVimNamespace  = "urn:vim25"
-	DefaultVimVersion    = "6.5"
-	DefaultMinVimVersion = "5.5"
-	SessionCookieName    = "vmware_soap_session"
+	SessionCookieName = "vmware_soap_session"
 )
 
 type Client struct {
@@ -144,22 +142,33 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	c.u = c.URL()
 	c.u.User = nil
 
-	c.Namespace = DefaultVimNamespace
-	c.Version = DefaultVimVersion
-
 	return &c
 }
 
 // NewServiceClient creates a NewClient with the given URL.Path and namespace.
 func (c *Client) NewServiceClient(path string, namespace string) *Client {
-	u := c.URL()
-	u.Path = path
+	vc := c.URL()
+	u, err := url.Parse(path)
+	if err != nil {
+		log.Panicf("url.Parse(%q): %s", path, err)
+	}
+	if u.Host == "" {
+		u.Scheme = vc.Scheme
+		u.Host = vc.Host
+	}
 
 	client := NewClient(u, c.k)
+	client.Namespace = "urn:" + namespace
 	if cert := c.Certificate(); cert != nil {
 		client.SetCertificate(*cert)
 	}
-	client.Namespace = namespace
+
+	// Copy the trusted thumbprints
+	c.hostsMu.Lock()
+	for k, v := range c.hosts {
+		client.hosts[k] = v
+	}
+	c.hostsMu.Unlock()
 
 	// Copy the cookies
 	client.Client.Jar.SetCookies(u, c.Client.Jar.Cookies(u))

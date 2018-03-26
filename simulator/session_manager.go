@@ -196,6 +196,7 @@ var internalContext = &Context{
 		},
 		Registry: NewRegistry(),
 	},
+	Map: Map,
 }
 
 var invalidLogin = Fault("Login failure", new(types.InvalidLogin))
@@ -210,6 +211,7 @@ type Context struct {
 	Session *Session
 	Header  soap.Header
 	Caller  *types.ManagedObjectReference
+	Map     *Registry
 }
 
 // mapSession maps an HTTP cookie to a Session.

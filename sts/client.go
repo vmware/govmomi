@@ -23,9 +23,16 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/vmware/govmomi/lookup"
+	"github.com/vmware/govmomi/lookup/types"
 	"github.com/vmware/govmomi/sts/internal"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
+)
+
+const (
+	Namespace = "oasis:names:tc:SAML:2.0:assertion"
+	Path      = "/sts/STSService"
 )
 
 // Client is a soap.Client targeting the STS (Secure Token Service) API endpoint.
@@ -34,8 +41,23 @@ type Client struct {
 }
 
 // NewClient returns a client targeting the STS API endpoint.
+// The Client.URL will be set to that of the Lookup Service's endpoint registration,
+// as the SSO endpoint can be external to vCenter.  If the Lookup Service is not available,
+// URL defaults to Path on the vim25.Client.URL.Host.
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
-	sc := c.Client.NewServiceClient("/sts/STSService", "urn:oasis:names:tc:SAML:2.0:assertion")
+	filter := &types.LookupServiceRegistrationFilter{
+		ServiceType: &types.LookupServiceRegistrationServiceType{
+			Product: "com.vmware.cis",
+			Type:    "sso:sts",
+		},
+		EndpointType: &types.LookupServiceRegistrationEndpointType{
+			Protocol: "wsTrust",
+			Type:     "com.vmware.cis.cs.identity.sso",
+		},
+	}
+
+	url := lookup.EndpointURL(ctx, c, Path, filter)
+	sc := c.Client.NewServiceClient(url, Namespace)
 
 	return &Client{sc}, nil
 }
