@@ -21,6 +21,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
 	"flag"
@@ -61,6 +62,7 @@ type Method struct {
 type Service struct {
 	client *vim25.Client
 	sm     *SessionManager
+	sdk    map[string]*Registry
 
 	readAll func(io.Reader) ([]byte, error)
 
@@ -81,6 +83,7 @@ func New(instance *ServiceInstance) *Service {
 	s := &Service{
 		readAll: ioutil.ReadAll,
 		sm:      Map.SessionManager(),
+		sdk:     make(map[string]*Registry),
 	}
 
 	s.client, _ = vim25.NewClient(context.Background(), s)
@@ -111,12 +114,12 @@ func Fault(msg string, fault types.BaseMethodFault) *soap.Fault {
 }
 
 func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
-	handler := Map.Get(method.This)
+	handler := ctx.Map.Get(method.This)
 	session := ctx.Session
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "Login", "LoginByToken", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
+		case "RetrieveServiceContent", "List", "Login", "LoginByToken", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
@@ -171,7 +174,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		args = append(args, reflect.ValueOf(ctx))
 	}
 	args = append(args, reflect.ValueOf(method.Body))
-	Map.WithLock(handler, func() {
+	ctx.Map.WithLock(handler, func() {
 		res = m.Call(args)
 	})
 
@@ -198,6 +201,7 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 	}
 
 	res := s.call(&Context{
+		Map:     Map,
 		Context: ctx,
 		Session: internalContext.Session,
 	}, method)
@@ -282,6 +286,16 @@ func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 	_ = enc.Encode(&about)
 }
 
+// RegisterSDK adds an HTTP handler for the Registry's Path and Namespace.
+func (s *Service) RegisterSDK(r *Registry) {
+	if s.ServeMux == nil {
+		s.ServeMux = http.NewServeMux()
+	}
+
+	s.sdk[r.Path] = r
+	s.ServeMux.HandleFunc(r.Path, s.ServeSDK)
+}
+
 // ServeSDK implements the http.Handler interface
 func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "POST" {
@@ -306,14 +320,15 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		res: w,
 		m:   s.sm,
 
+		Map:     s.sdk[r.URL.Path],
 		Context: context.Background(),
 	}
-	Map.WithLock(s.sm, ctx.mapSession)
+	ctx.Map.WithLock(s.sm, ctx.mapSession)
 
 	var res soap.HasFault
 	var soapBody interface{}
 
-	method, err := UnmarshalBody(body)
+	method, err := UnmarshalBody(ctx.Map.typeFunc, body)
 	if err != nil {
 		res = serverFault(err.Error())
 	} else {
@@ -449,15 +464,10 @@ func (*Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
 
 // NewServer returns an http Server instance for the given service
 func (s *Service) NewServer() *Server {
+	s.RegisterSDK(Map)
+
 	mux := s.ServeMux
-	if mux == nil {
-		mux = http.NewServeMux()
-	}
-
-	path := "/sdk"
-
-	mux.HandleFunc(path, s.ServeSDK)
-	mux.HandleFunc(path+"/vimServiceVersions.xml", s.ServiceVersions)
+	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
 	mux.HandleFunc("/about", s.About)
 
@@ -468,7 +478,7 @@ func (s *Service) NewServer() *Server {
 	u := &url.URL{
 		Scheme: "http",
 		Host:   ts.Listener.Addr().String(),
-		Path:   path,
+		Path:   Map.Path,
 		User:   url.UserPassword("user", "pass"),
 	}
 
@@ -480,13 +490,29 @@ func (s *Service) NewServer() *Server {
 		_ = f.Value.Set("")
 	}
 
+	cert := ""
 	if s.TLS == nil {
 		ts.Start()
 	} else {
 		ts.TLS = s.TLS
 		ts.StartTLS()
 		u.Scheme += "s"
+
+		cert = base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
 	}
+
+	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
+	m := Map.OptionManager()
+	m.Setting = append(m.Setting,
+		&types.OptionValue{
+			Key:   "vcsim.server.url",
+			Value: ts.URL,
+		},
+		&types.OptionValue{
+			Key:   "vcsim.server.cert",
+			Value: cert,
+		},
+	)
 
 	return &Server{
 		Server: ts,
@@ -538,7 +564,6 @@ func (s *Server) Close() {
 
 var (
 	vim25MapType = types.TypeFunc()
-	typeFunc     = defaultMapType
 )
 
 func defaultMapType(name string) (reflect.Type, bool) {
@@ -560,6 +585,7 @@ type Element struct {
 	inner struct {
 		Content string `xml:",innerxml"`
 	}
+	typeFunc func(string) (reflect.Type, bool)
 }
 
 func (e *Element) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -570,7 +596,7 @@ func (e *Element) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 
 func (e *Element) decoder() *xml.Decoder {
 	decoder := xml.NewDecoder(strings.NewReader(e.inner.Content))
-	decoder.TypeFunc = typeFunc // required to decode interface types
+	decoder.TypeFunc = e.typeFunc // required to decode interface types
 	return decoder
 }
 
@@ -579,8 +605,8 @@ func (e *Element) Decode(val interface{}) error {
 }
 
 // UnmarshalBody extracts the Body from a soap.Envelope and unmarshals to the corresponding govmomi type
-func UnmarshalBody(data []byte) (*Method, error) {
-	body := new(Element)
+func UnmarshalBody(typeFunc func(string) (reflect.Type, bool), data []byte) (*Method, error) {
+	body := &Element{typeFunc: typeFunc}
 	req := soap.Envelope{
 		Header: &soap.Header{
 			Security: new(Element),

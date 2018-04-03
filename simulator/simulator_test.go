@@ -154,7 +154,7 @@ func TestUnmarshal(t *testing.T) {
 	}
 
 	for i, req := range requests {
-		method, err := UnmarshalBody([]byte(req.data))
+		method, err := UnmarshalBody(vim25MapType, []byte(req.data))
 		if err != nil {
 			t.Errorf("failed to decode %d (%s): %s", i, req, err)
 		}
@@ -197,8 +197,7 @@ func TestUnmarshalError(t *testing.T) {
 	}
 
 	for i, data := range requests {
-		_, err := UnmarshalBody([]byte(data))
-		if err != nil {
+		if _, err := UnmarshalBody(vim25MapType, []byte(data)); err != nil {
 			continue
 		}
 		t.Errorf("expected %d (%s) to return an error", i, data)
@@ -415,34 +414,22 @@ func TestServeHTTPErrors(t *testing.T) {
 		t.Error("expected MethodNotFound fault")
 	}
 
-	// unregister type, covering the ServeHTTP UnmarshalBody error path
-	typeFunc = func(name string) (reflect.Type, bool) {
-		return nil, false
-	}
-
-	_, err = methods.GetCurrentTime(ctx, client)
-	if err == nil {
-		t.Error("expected error")
-	}
-
-	typeFunc = types.TypeFunc() // reset
-
 	// cover the does not implement method error path
-	Map.objects[methods.ServiceInstance] = &errorNoSuchMethod{}
+	Map.objects[vim25.ServiceInstance] = &errorNoSuchMethod{}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the xml encode error path
-	Map.objects[methods.ServiceInstance] = &errorMarshal{}
+	Map.objects[vim25.ServiceInstance] = &errorMarshal{}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the no such object path
-	Map.Remove(methods.ServiceInstance)
+	Map.Remove(vim25.ServiceInstance)
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
@@ -454,7 +441,7 @@ func TestServeHTTPErrors(t *testing.T) {
 	if !ok {
 		t.Fatalf("fault=%#v", fault)
 	}
-	if f.Obj != methods.ServiceInstance {
+	if f.Obj != vim25.ServiceInstance {
 		t.Errorf("obj=%#v", f.Obj)
 	}
 
