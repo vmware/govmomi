@@ -56,6 +56,27 @@ func newID() string {
 	return "_" + uuid.New().String()
 }
 
+func (s *Signer) setTokenReference(info *internal.KeyInfo) error {
+	var token struct {
+		ID       string `xml:",attr"`     // parse saml2:Assertion ID attribute
+		InnerXML string `xml:",innerxml"` // no need to parse the entire token
+	}
+	if err := xml.Unmarshal([]byte(s.Token), &token); err != nil {
+		return err
+	}
+
+	info.SecurityTokenReference = &internal.SecurityTokenReference{
+		WSSE11:    "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd",
+		TokenType: "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0",
+		KeyIdentifier: &internal.KeyIdentifier{
+			ID:        token.ID,
+			ValueType: "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLID",
+		},
+	}
+
+	return nil
+}
+
 // Sign is a soap.Signer implementation which can be used to sign RequestSecurityToken and LoginByTokenBody requests.
 func (s *Signer) Sign(env soap.Envelope) ([]byte, error) {
 	var key *rsa.PrivateKey
@@ -115,30 +136,24 @@ func (s *Signer) Sign(env soap.Envelope) ([]byte, error) {
 		header.Assertion = s.Token
 
 		if hasKey {
-			c14n = internal.Marshal(x.Req)
-			var token struct {
-				ID       string `xml:",attr"`     // parse saml2:Assertion ID attribute
-				InnerXML string `xml:",innerxml"` // no need to parse the entire token
-			}
-			if err := xml.Unmarshal([]byte(s.Token), &token); err != nil {
+			if err := s.setTokenReference(&info); err != nil {
 				return nil, err
 			}
 
-			info.SecurityTokenReference = &internal.SecurityTokenReference{
-				WSSE11:    "http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd",
-				TokenType: "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV2.0",
-				KeyIdentifier: &internal.KeyIdentifier{
-					ID:        token.ID,
-					ValueType: "http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLID",
-				},
-			}
+			c14n = internal.Marshal(x.Req)
 		}
 	default:
 		// We can end up here via ssoadmin.SessionManager.Login().
 		// No other known cases where a signed request is needed.
 		header.Assertion = s.Token
 		if hasKey {
-			c14n = internal.Marshal(env.Body)
+			if err := s.setTokenReference(&info); err != nil {
+				return nil, err
+			}
+			type Req interface {
+				C14N() string
+			}
+			c14n = env.Body.(Req).C14N()
 		}
 	}
 

@@ -19,17 +19,80 @@ package sts
 import (
 	"context"
 	"crypto/tls"
+	"encoding/base64"
+	"encoding/pem"
 	"log"
+	"net/url"
 	"os"
 	"testing"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/ssoadmin"
+	"github.com/vmware/govmomi/ssoadmin/types"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
+// solutionUserCreate ensures that solution user "govmomi-test" exists for uses with the tests that follow.
+func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client) error {
+	s, err := sts.Issue(ctx, TokenRequest{Userinfo: info})
+	if err != nil {
+		return err
+	}
+
+	admin, err := ssoadmin.NewClient(ctx, &vim25.Client{Client: sts.Client})
+	if err != nil {
+		return err
+	}
+
+	header := soap.Header{Security: s}
+	if err = admin.Login(sts.WithHeader(ctx, header)); err != nil {
+		return err
+	}
+
+	defer admin.Logout(ctx)
+
+	id := types.PrincipalId{
+		Name:   "govmomi-test",
+		Domain: admin.Domain,
+	}
+
+	user, err := admin.FindSolutionUser(ctx, id.Name)
+	if err != nil {
+		return err
+	}
+
+	if user == nil {
+		block, _ := pem.Decode([]byte(LocalhostCert))
+		details := types.AdminSolutionDetails{
+			Certificate: base64.StdEncoding.EncodeToString(block.Bytes),
+			Description: "govmomi test solution user",
+		}
+
+		if err = admin.CreateSolutionUser(ctx, id.Name, details); err != nil {
+			return err
+		}
+	}
+
+	if _, err = admin.GrantWSTrustRole(ctx, id, types.RoleActAsUser); err != nil {
+		return err
+	}
+
+	_, err = admin.SetRole(ctx, id, types.RoleAdministrator)
+	return err
+}
+
+func solutionUserCert() *tls.Certificate {
+	cert, err := tls.X509KeyPair(LocalhostCert, LocalhostKey)
+	if err != nil {
+		panic(err)
+	}
+	return &cert
+}
+
 func TestIssueHOK(t *testing.T) {
+	ctx := context.Background()
 	url := os.Getenv("GOVC_TEST_URL")
 	if url == "" {
 		t.SkipNow()
@@ -39,33 +102,27 @@ func TestIssueHOK(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	u.User = nil // avoid govmomi.NewClient Login() call
 
-	// solution user must exist, for example run on vCenter VM:
-	// % /usr/lib/vmware-vmafd/bin/dir-cli service create --name govmomi --cert /etc/vmware-vpx/ssl/govmomi.crt --ssoadminrole Administrator --ssogroups SolutionUsers
-	cert, err := tls.LoadX509KeyPair("govmomi.crt", "govmomi.key")
+	c, err := vim25.NewClient(ctx, soap.NewClient(u, true))
 	if err != nil {
-		t.Skip(err.Error())
-	}
-
-	ctx := context.Background()
-
-	c, err := govmomi.NewClient(ctx, u, true)
-	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
 
 	if !c.IsVC() {
 		t.SkipNow()
 	}
 
-	sts, err := NewClient(ctx, c.Client)
+	sts, err := NewClient(ctx, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
+	if err = solutionUserCreate(ctx, u.User, sts); err != nil {
+		t.Fatal(err)
+	}
+
 	req := TokenRequest{
-		Certificate: &cert,
+		Certificate: solutionUserCert(),
 		Delegatable: true,
 	}
 
@@ -74,13 +131,9 @@ func TestIssueHOK(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := session.NewManager(c.Client)
+	header := soap.Header{Security: s}
 
-	header := soap.Header{
-		Security: s,
-	}
-
-	err = m.LoginByToken(c.WithHeader(ctx, header))
+	err = session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -94,6 +147,7 @@ func TestIssueHOK(t *testing.T) {
 }
 
 func TestIssueBearer(t *testing.T) {
+	ctx := context.Background()
 	url := os.Getenv("GOVC_TEST_URL")
 	if url == "" {
 		t.SkipNow()
@@ -103,21 +157,17 @@ func TestIssueBearer(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	user := u.User
-	u.User = nil // avoid govmomi.NewClient Login() call
 
-	ctx := context.Background()
-
-	c, err := govmomi.NewClient(ctx, u, true)
+	c, err := vim25.NewClient(ctx, soap.NewClient(u, true))
 	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
 
 	if !c.IsVC() {
 		t.SkipNow()
 	}
 
-	sts, err := NewClient(ctx, c.Client)
+	sts, err := NewClient(ctx, c)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -129,7 +179,7 @@ func TestIssueBearer(t *testing.T) {
 	}
 
 	req := TokenRequest{
-		Userinfo: user,
+		Userinfo: u.User,
 	}
 
 	s, err := sts.Issue(ctx, req)
@@ -137,13 +187,9 @@ func TestIssueBearer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := session.NewManager(c.Client)
+	header := soap.Header{Security: s}
 
-	header := soap.Header{
-		Security: s,
-	}
-
-	err = m.LoginByToken(c.WithHeader(ctx, header))
+	err = session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -157,6 +203,7 @@ func TestIssueBearer(t *testing.T) {
 }
 
 func TestIssueActAs(t *testing.T) {
+	ctx := context.Background()
 	url := os.Getenv("GOVC_TEST_URL")
 	if url == "" {
 		t.SkipNow()
@@ -166,35 +213,28 @@ func TestIssueActAs(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	user := u.User
-	u.User = nil // avoid govmomi.NewClient Login() call
 
-	// solution user must exist, for example run on vCenter VM:
-	// % /usr/lib/vmware-vmafd/bin/dir-cli service create --name govmomi --cert /etc/vmware-vpx/ssl/govmomi.crt --ssoadminrole Administrator --ssogroups SolutionUsers
-	cert, err := tls.LoadX509KeyPair("govmomi.crt", "govmomi.key")
+	c, err := vim25.NewClient(ctx, soap.NewClient(u, true))
 	if err != nil {
-		t.Skip(err.Error())
-	}
-
-	ctx := context.Background()
-
-	c, err := govmomi.NewClient(ctx, u, true)
-	if err != nil {
-		t.Fatal(err)
+		log.Fatal(err)
 	}
 
 	if !c.IsVC() {
 		t.SkipNow()
 	}
 
-	sts, err := NewClient(ctx, c.Client)
+	sts, err := NewClient(ctx, c)
 	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = solutionUserCreate(ctx, u.User, sts); err != nil {
 		t.Fatal(err)
 	}
 
 	req := TokenRequest{
 		Delegatable: true,
-		Userinfo:    user,
+		Userinfo:    u.User,
 	}
 
 	s, err := sts.Issue(ctx, req)
@@ -204,7 +244,7 @@ func TestIssueActAs(t *testing.T) {
 
 	req = TokenRequest{
 		ActAs:       s.Token,
-		Certificate: &cert,
+		Certificate: solutionUserCert(),
 	}
 
 	s, err = sts.Issue(ctx, req)
@@ -212,13 +252,9 @@ func TestIssueActAs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	m := session.NewManager(c.Client)
+	header := soap.Header{Security: s}
 
-	header := soap.Header{
-		Security: s,
-	}
-
-	err = m.LoginByToken(c.WithHeader(ctx, header))
+	err = session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
 	if err != nil {
 		t.Fatal(err)
 	}

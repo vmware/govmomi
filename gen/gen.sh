@@ -53,3 +53,5 @@ generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@
 generate "../pbm" "pbm"
 # originally generated, then manually pruned as there are several vim25 types that are duplicated.
 # generate "../lookup" "lookup" # lookup.wsdl from build 4571810
+# originally generated, then manually pruned.
+# generate "../ssoadmin" "ssoadmin" # ssoadmin.wsdl from PSC

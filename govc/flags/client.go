@@ -280,7 +280,7 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 	}
 
 	// Set namespace and version
-	sc.Namespace = flag.vimNamespace
+	sc.Namespace = "urn:" + flag.vimNamespace
 	sc.Version = flag.vimVersion
 
 	sc.UserAgent = fmt.Sprintf("govc/%s", Version)
