@@ -64,7 +64,6 @@ type Client struct {
 	k bool // Named after curl's -k flag
 	d *debugContainer
 	t *http.Transport
-	p *url.URL
 
 	hostsMu sync.Mutex
 	hosts   map[string]string
@@ -180,6 +179,9 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 			break
 		}
 	}
+
+	// Copy any query params (e.g. GOVMOMI_TUNNEL_PROXY_PORT used in testing)
+	client.u.RawQuery = vc.RawQuery
 
 	return client
 }
@@ -365,18 +367,20 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 
 	// Extension or HoK certificate
 	t.TLSClientConfig.Certificates = []tls.Certificate{cert}
+}
 
-	if c.u.User.Username() == "" {
-		return // HoK does not specify a username
-	}
-
+// Tunnel returns a Client configured to proxy requests through vCenter's http port 80,
+// to the SDK tunnel virtual host.  Use of the SDK tunnel is required by LoginExtensionByCertificate()
+// and optional for other methods.
+func (c *Client) Tunnel() *Client {
+	tunnel := c.NewServiceClient(c.u.Path, c.Namespace)
+	t := tunnel.Client.Transport.(*http.Transport)
 	// Proxy to vCenter host on port 80
-	host, _ := splitHostPort(c.u.Host)
-
+	host := tunnel.u.Hostname()
 	// Should be no reason to change the default port other than testing
 	key := "GOVMOMI_TUNNEL_PROXY_PORT"
 
-	port := c.URL().Query().Get(key)
+	port := tunnel.URL().Query().Get(key)
 	if port == "" {
 		port = os.Getenv(key)
 	}
@@ -385,20 +389,14 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 		host += ":" + port
 	}
 
-	c.p = &url.URL{
+	t.Proxy = http.ProxyURL(&url.URL{
 		Scheme: "http",
 		Host:   host,
-	}
-	t.Proxy = func(r *http.Request) (*url.URL, error) {
-		// Only sdk requests should be proxied
-		if r.URL.Path == "/sdk" {
-			return c.p, nil
-		}
-		return http.ProxyFromEnvironment(r)
-	}
+	})
 
 	// Rewrite url Host to use the sdk tunnel, required for a certificate request.
-	c.u.Host = sdkTunnel
+	tunnel.u.Host = sdkTunnel
+	return tunnel
 }
 
 func (c *Client) URL() *url.URL {

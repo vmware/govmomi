@@ -434,13 +434,6 @@ func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
 				return nil          // Avoid SaveSession for non-authenticated session
 			}
 		}
-	} else if flag.cert != "" {
-		// LoginExtensionByCertificate requires extension name as the ExtensionKey parameter.
-		// LoginByToken does not have such a parameter, it only uses the -cert and -key.
-		err := m.LoginExtensionByCertificate(ctx, u.Username(), "")
-		if err != nil {
-			return err
-		}
 	}
 
 	return m.Login(ctx, u)

@@ -29,6 +29,7 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"net"
 	"net/http"
 	"net/http/httptest"
 	"net/url"
@@ -36,6 +37,7 @@ import (
 	"path"
 	"reflect"
 	"sort"
+	"strconv"
 	"strings"
 
 	"github.com/vmware/govmomi/find"
@@ -73,7 +75,8 @@ type Service struct {
 // Server provides a simulator Service over HTTP
 type Server struct {
 	*httptest.Server
-	URL *url.URL
+	URL    *url.URL
+	Tunnel int
 
 	caFile string
 }
@@ -119,7 +122,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "List", "Login", "LoginByToken", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
+		case "RetrieveServiceContent", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
@@ -495,6 +498,7 @@ func (s *Service) NewServer() *Server {
 		ts.Start()
 	} else {
 		ts.TLS = s.TLS
+		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
 		ts.StartTLS()
 		u.Scheme += "s"
 
@@ -551,6 +555,60 @@ func (s *Server) CertificateFile() (string, error) {
 	s.caFile = f.Name()
 	cert := s.Certificate()
 	return s.caFile, pem.Encode(f, &pem.Block{Type: "CERTIFICATE", Bytes: cert.Raw})
+}
+
+// proxy tunnels SDK requests
+func (s *Server) proxy(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodConnect {
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+
+	dst, err := net.Dial("tcp", s.URL.Host)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadGateway)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+
+	src, _, err := w.(http.Hijacker).Hijack()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	go io.Copy(src, dst)
+	go func() {
+		_, _ = io.Copy(dst, src)
+		_ = dst.Close()
+		_ = src.Close()
+	}()
+}
+
+// StartTunnel runs an HTTP proxy for tunneling SDK requests that require TLS client certificate authentication.
+func (s *Server) StartTunnel() error {
+	tunnel := &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", s.URL.Hostname(), s.Tunnel),
+		Handler: http.HandlerFunc(s.proxy),
+	}
+
+	l, err := net.Listen("tcp", tunnel.Addr)
+	if err != nil {
+		return err
+	}
+
+	if s.Tunnel == 0 {
+		s.Tunnel = l.Addr().(*net.TCPAddr).Port
+	}
+
+	// Set client proxy port (defaults to vCenter host port 80 in real life)
+	q := s.URL.Query()
+	q.Set("GOVMOMI_TUNNEL_PROXY_PORT", strconv.Itoa(s.Tunnel))
+	s.URL.RawQuery = q.Encode()
+
+	go tunnel.Serve(l)
+
+	return nil
 }
 
 // Close shuts down the server and blocks until all outstanding

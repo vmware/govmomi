@@ -55,6 +55,7 @@ func main() {
 	cert := flag.String("tlscert", "", "Path to TLS certificate file")
 	key := flag.String("tlskey", "", "Path to TLS key file")
 	env := flag.String("E", "-", "Output vcsim variables to the given fifo or stdout")
+	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
 
 	flag.Parse()
@@ -128,6 +129,13 @@ func main() {
 	model.Service.ServeMux = http.DefaultServeMux // expvar.init registers "/debug/vars" with the DefaultServeMux
 
 	s := model.Service.NewServer()
+
+	if *tunnel >= 0 {
+		s.Tunnel = *tunnel
+		if err := s.StartTunnel(); err != nil {
+			log.Fatal(err)
+		}
+	}
 
 	if !*isESX {
 		model.Service.RegisterSDK(lookup.New())
