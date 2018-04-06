@@ -76,3 +76,21 @@ load test_helper
   run govc session.login -l -token "$(printf $token root@localos)"
   assert_success # non-empty NameID is enough to login
 }
+
+@test "session.loginextension" {
+  vcsim_env -tunnel 0
+
+  run govc session.login -extension com.vmware.vsan.health
+  assert_failure # no certificate
+
+  id=$(new_id)
+  run govc extension.setcert -cert-pem ++ "$id" # generate a cert for testing
+  assert_success
+
+  # vcsim will login if any certificate is provided
+  run govc session.login -extension com.vmware.vsan.health -cert "$id.crt" -key "$id.key"
+  assert_success
+
+  # remove generated cert and key
+  rm "$id".{crt,key}
+}

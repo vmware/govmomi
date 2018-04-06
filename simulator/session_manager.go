@@ -88,6 +88,25 @@ func (s *SessionManager) Login(ctx *Context, req *types.Login) soap.HasFault {
 	return body
 }
 
+func (s *SessionManager) LoginExtensionByCertificate(ctx *Context, req *types.LoginExtensionByCertificate) soap.HasFault {
+	body := new(methods.LoginExtensionByCertificateBody)
+
+	if ctx.req.TLS == nil || len(ctx.req.TLS.PeerCertificates) == 0 {
+		body.Fault_ = Fault("", new(types.NoClientCertificate))
+		return body
+	}
+
+	if req.ExtensionKey == "" || ctx.Session != nil {
+		body.Fault_ = invalidLogin
+	} else {
+		body.Res = &types.LoginExtensionByCertificateResponse{
+			Returnval: createSession(ctx, req.ExtensionKey, req.Locale),
+		}
+	}
+
+	return body
+}
+
 func (s *SessionManager) LoginByToken(ctx *Context, req *types.LoginByToken) soap.HasFault {
 	body := new(methods.LoginByTokenBody)
 

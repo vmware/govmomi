@@ -44,6 +44,7 @@ type login struct {
 	cookie string
 	token  string
 	actas  string
+	ext    string
 }
 
 func init() {
@@ -63,6 +64,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.cookie, "cookie", "", "Set HTTP cookie for an existing session")
 	f.StringVar(&cmd.token, "token", "", "Use SAML token for login")
 	f.StringVar(&cmd.actas, "actas", "", "Issue SAML token with this token's identity")
+	f.StringVar(&cmd.ext, "extension", "", "Extension name")
 }
 
 func (cmd *login) Process(ctx context.Context) error {
@@ -80,6 +82,7 @@ The session.login command can be used to:
 - Persist a session without writing to disk via the '-cookie' flag
 - Acquire a clone ticket
 - Login using a clone ticket
+- Login using a vCenter Extension certificate
 - Issue a SAML token
 - Login using a SAML token
 - Avoid passing credentials to other govc commands
@@ -88,6 +91,7 @@ Examples:
   govc session.login -u root:password@host
   ticket=$(govc session.login -u root@host -clone)
   govc session.login -u root@host -ticket $ticket
+  govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key
   token=$(govc session.login -u host -cert user.crt -key user.key -issue) # HoK token
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -actas "$bearer")
@@ -165,6 +169,10 @@ func (cmd *login) loginByToken(ctx context.Context, c *vim25.Client) error {
 	return session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
 }
 
+func (cmd *login) loginByExtension(ctx context.Context, c *vim25.Client) error {
+	return session.NewManager(c).LoginExtensionByCertificate(ctx, cmd.ext)
+}
+
 func (cmd *login) setCookie(ctx context.Context, c *vim25.Client) error {
 	url := c.URL()
 	jar := c.Client.Jar
@@ -212,6 +220,8 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.Login = cmd.setCookie
 	case cmd.token != "":
 		cmd.Login = cmd.loginByToken
+	case cmd.ext != "":
+		cmd.Login = cmd.loginByExtension
 	case cmd.issue:
 		cmd.Login = func(_ context.Context, _ *vim25.Client) error {
 			return nil
