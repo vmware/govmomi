@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi"
@@ -684,7 +685,13 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+	simVm := Map.Any("VirtualMachine")
+	vm := object.NewVirtualMachine(c.Client, simVm.Reference())
+
+	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+	if err != errEmptyField {
+		t.Fatal("snapshot property should be 'nil' if there are no snapshots")
+	}
 
 	task, err := vm.CreateSnapshot(ctx, "root", "description", true, true)
 	if err != nil {
@@ -694,6 +701,11 @@ func TestVmSnapshot(t *testing.T) {
 	err = task.Wait(ctx)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+	if err == errEmptyField {
+		t.Fatal("snapshot property should not be 'nil' if there are snapshots")
 	}
 
 	task, err = vm.CreateSnapshot(ctx, "child", "description", true, true)
@@ -741,6 +753,11 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+	if err == errEmptyField {
+		t.Fatal("snapshot property should not be 'nil' if there are snapshots")
+	}
+
 	_, err = vm.FindSnapshot(ctx, "child")
 	if err == nil {
 		t.Fatal("child should be removed")
@@ -754,6 +771,11 @@ func TestVmSnapshot(t *testing.T) {
 	err = task.Wait(ctx)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
+	if err != errEmptyField {
+		t.Fatal("snapshot property should be 'nil' if there are no snapshots")
 	}
 
 	_, err = vm.FindSnapshot(ctx, "root")
