@@ -63,7 +63,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		MemoryAllocation: &rspec.MemoryAllocation,
 		CpuAllocation:    &rspec.CpuAllocation,
 	}
-	vm.Snapshot = &types.VirtualMachineSnapshotInfo{}
+	vm.Snapshot = nil // intentionally set to nil until a snapshot is created
 	vm.Storage = &types.VirtualMachineStorageInfo{
 		Timestamp: time.Now(),
 	}
@@ -991,8 +991,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(req *types.RemoveAllSnapshots_T
 
 		refs := allSnapshotsInTree(vm.Snapshot.RootSnapshotList)
 
-		vm.Snapshot.CurrentSnapshot = nil
-		vm.Snapshot.RootSnapshotList = nil
+		vm.Snapshot = nil
 
 		for _, ref := range refs {
 			Map.Remove(ref)
