@@ -60,6 +60,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 		{&hs.ConfigManager.NetworkSystem, NewHostNetworkSystem(&hs.HostSystem)},
 		{&hs.ConfigManager.AdvancedOption, NewOptionManager(nil, esx.Setting)},
 		{&hs.ConfigManager.FirewallSystem, NewHostFirewallSystem(&hs.HostSystem)},
+                {&hs.ConfigManager.VirtualNicManager, NewHostVirtualNicManager(&hs.HostSystem)},
 	}
 
 	for _, c := range config {
