@@ -23,6 +23,7 @@ import (
 	"io"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -41,6 +42,7 @@ type login struct {
 	issue  bool
 	long   bool
 	ticket string
+	life   time.Duration
 	cookie string
 	token  string
 	actas  string
@@ -59,6 +61,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.clone, "clone", false, "Acquire clone ticket")
 	f.BoolVar(&cmd.issue, "issue", false, "Issue SAML token")
+	f.DurationVar(&cmd.life, "lifetime", time.Minute*10, "SAML token lifetime")
 	f.BoolVar(&cmd.long, "l", false, "Output session cookie")
 	f.StringVar(&cmd.ticket, "ticket", "", "Use clone ticket for login")
 	f.StringVar(&cmd.cookie, "cookie", "", "Set HTTP cookie for an existing session")
@@ -148,6 +151,7 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 		Userinfo:    cmd.Userinfo(),
 		Delegatable: true,
 		ActAs:       cmd.actas,
+		Lifetime:    cmd.life,
 	}
 
 	s, err := c.Issue(ctx, req)
