@@ -259,7 +259,7 @@ func (f *Finder) managedObjectList(ctx context.Context, path string, tl bool, in
 
 	s := &spec{
 		Relative: fn,
-		Parents:  []string{"ComputeResource", "ClusterComputeResource", "HostSystem", "VirtualApp", "StoragePod"},
+		Parents:  []string{"ComputeResource", "ClusterComputeResource", "HostSystem", "ResourcePool", "VirtualApp", "StoragePod"},
 		Include:  include,
 	}
 
