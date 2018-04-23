@@ -446,6 +446,11 @@ EOF
   assert_output "$folder/$vm"
 
   run govc find "$folder" -name "$vm"
+  assert_output "$folder/$vm"
+
+  # Make sure property filter doesn't match when guest is unset for $vm (issue 1089)
+  run govc find "$folder" -type m -guest.ipAddress 0.0.0.0
+  assert_output ""
 }
 
 @test "object.method" {
