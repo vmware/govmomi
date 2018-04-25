@@ -111,9 +111,21 @@ func fieldValueInterface(f reflect.StructField, rval reflect.Value) interface{} 
 			pval = &types.ArrayOfString{
 				String: v,
 			}
+		case []uint8:
+			pval = &types.ArrayOfByte{
+				Byte: v,
+			}
+		case []int16:
+			pval = &types.ArrayOfShort{
+				Short: v,
+			}
 		case []int32:
 			pval = &types.ArrayOfInt{
 				Int: v,
+			}
+		case []int64:
+			pval = &types.ArrayOfLong{
+				Long: v,
 			}
 		default:
 			kind := f.Type.Elem().Name()
