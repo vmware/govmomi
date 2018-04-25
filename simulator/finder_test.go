@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestFinderVPX(t *testing.T) {
@@ -216,5 +217,59 @@ func TestFinderESX(t *testing.T) {
 		if o.Object.Reference() != ref {
 			t.Errorf("%s", ref)
 		}
+	}
+}
+
+func TestFinderDefaultHostVPX(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	m.Folder = 1
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	client, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	finder := find.NewFinder(client.Client, false)
+	dc, _ := finder.Datacenter(ctx, "/F0/DC0")
+	finder.SetDatacenter(dc)
+
+	hostf, _ := finder.Folder(ctx, dc.InventoryPath+"/host/F0")
+
+	folders, err := dc.Folders(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f, err := folders.HostFolder.CreateFolder(ctx, "MyHosts")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// 2-levels (MyHosts/F0) deep under the DC host folder: /F0/DC0/host/MyHosts/F0/DC0_C0/DC0_C0_H0
+	task, _ := f.MoveInto(ctx, []types.ManagedObjectReference{hostf.Reference()})
+	if err = task.Wait(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err = finder.HostSystemOrDefault(ctx, "")
+	if err == nil {
+		t.Fatal("expected error")
+	}
+
+	_, ok := err.(*find.DefaultMultipleFoundError)
+	if !ok {
+		t.Errorf("unexpected error type=%T", err)
 	}
 }
