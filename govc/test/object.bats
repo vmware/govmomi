@@ -139,7 +139,7 @@ load test_helper
   run govc object.collect -s -type ClusterComputeResource / configStatus
   assert_success green
 
-  run govc object.collect -s -type ClusterComputeResource / effectiveRole
+  run govc object.collect -s -type ClusterComputeResource / effectiveRole # []int32 -> ArrayOfInt
   assert_number
 
   run govc object.collect -s -type ComputeResource / configStatus
@@ -240,6 +240,12 @@ load test_helper
 
   run govc object.collect -s -type VirtualMachine / summary.guest.toolsStatus
   assert_matches toolsNotInstalled
+
+  run govc object.collect -s -type VirtualMachine / config.npivPortWorldWideName # []int64 -> ArrayOfLong
+  assert_success
+
+  run govc object.collect -s -type VirtualMachine / config.vmxConfigChecksum # []uint8 -> ArrayOfByte
+  assert_success
 
   run govc object.collect -s /DC0/vm/DC0_H0_VM0 config.hardware.numCoresPerSocket
   assert_success 1
