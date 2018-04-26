@@ -67,10 +67,57 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 type TokenRequest struct {
 	Userinfo    *url.Userinfo    // Userinfo when set issues a Bearer token
 	Certificate *tls.Certificate // Certificate when set issues a HoK token
-	ActAs       string           // ActAs identity when set is delegated to the caller
 	Lifetime    time.Duration    // Lifetime is the token's lifetime, defaults to 10m
 	Renewable   bool             // Renewable allows the issued token to be renewed
 	Delegatable bool             // Delegatable allows the issued token to be delegated (e.g. for use with ActAs)
+	Token       string           // Token for Renew request or Issue request ActAs identity
+}
+
+func (c *Client) newRequest(req TokenRequest, kind string, s *Signer) internal.RequestSecurityToken {
+	if req.Lifetime == 0 {
+		req.Lifetime = 5 * time.Minute
+	}
+
+	created := time.Now().UTC()
+	rst := internal.RequestSecurityToken{
+		TokenType:          c.Namespace,
+		RequestType:        "http://docs.oasis-open.org/ws-sx/ws-trust/200512/" + kind,
+		SignatureAlgorithm: internal.SHA256,
+		Lifetime: &internal.Lifetime{
+			Created: created.Format(internal.Time),
+			Expires: created.Add(req.Lifetime).Format(internal.Time),
+		},
+		Renewing: &internal.Renewing{
+			Allow: req.Renewable,
+			// /wst:RequestSecurityToken/wst:Renewing/@OK
+			// "It NOT RECOMMENDED to use this as it can leave you open to certain types of security attacks.
+			// Issuers MAY restrict the period after expiration during which time the token can be renewed.
+			// This window is governed by the issuer's policy."
+			OK: false,
+		},
+		Delegatable: req.Delegatable,
+	}
+
+	if req.Certificate == nil {
+		rst.KeyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer"
+	} else {
+		rst.KeyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey"
+		rst.UseKey = &internal.UseKey{Sig: newID()}
+		s.keyID = rst.UseKey.Sig
+	}
+
+	return rst
+}
+
+func (s *Signer) setLifetime(lifetime *internal.Lifetime) error {
+	var err error
+	if lifetime != nil {
+		s.Lifetime.Created, err = time.Parse(internal.Time, lifetime.Created)
+		if err == nil {
+			s.Lifetime.Expires, err = time.Parse(internal.Time, lifetime.Expires)
+		}
+	}
+	return err
 }
 
 // Issue is used to request a security token.
@@ -88,43 +135,12 @@ func (c *Client) Issue(ctx context.Context, req TokenRequest) (*Signer, error) {
 		user:        req.Userinfo,
 	}
 
-	if req.Lifetime == 0 {
-		req.Lifetime = time.Minute * 10
-	}
+	rst := c.newRequest(req, "Issue", s)
 
-	created := time.Now().UTC()
-	rst := internal.RequestSecurityToken{
-		TokenType:          c.Namespace,
-		RequestType:        "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Issue",
-		SignatureAlgorithm: internal.SHA256,
-		Lifetime: &internal.Lifetime{
-			Created: internal.Time{Time: created},
-			Expires: internal.Time{Time: created.Add(req.Lifetime)},
-		},
-		Renewing: &internal.Renewing{
-			Allow: req.Renewable,
-			// /wst:RequestSecurityToken/wst:Renewing/@OK
-			// "It NOT RECOMMENDED to use this as it can leave you open to certain types of security attacks.
-			// Issuers MAY restrict the period after expiration during which time the token can be renewed.
-			// This window is governed by the issuer's policy."
-			OK: false,
-		},
-		Delegatable: req.Delegatable,
-	}
-
-	if req.ActAs != "" {
-		rst.ActAs = &internal.ActAs{
-			Assertion: req.ActAs,
+	if req.Token != "" {
+		rst.ActAs = &internal.Target{
+			Token: req.Token,
 		}
-	}
-
-	if s.Certificate == nil {
-		rst.KeyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer"
-	} else {
-		rst.KeyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey"
-
-		s.keyID = newID()
-		rst.UseKey = &internal.UseKey{Sig: s.keyID}
 	}
 
 	header := soap.Header{
@@ -137,13 +153,31 @@ func (c *Client) Issue(ctx context.Context, req TokenRequest) (*Signer, error) {
 		return nil, err
 	}
 
-	// TODO: consider checking res.RequestSecurityTokenResponse.Lifetime
-	// /wst:RequestSecurityToken/wst:Lifetime
-	// "The issuer is not obligated to honor this range – they MAY return a more (or less) restrictive interval.
-	// It is RECOMMENDED that the issuer return this element with issued tokens (in the RSTR) so the requestor
-	// knows the actual validity period without having to parse the returned token."
-
 	s.Token = res.RequestSecurityTokenResponse.RequestedSecurityToken.Assertion
 
-	return s, nil
+	return s, s.setLifetime(res.RequestSecurityTokenResponse.Lifetime)
+}
+
+func (c *Client) Renew(ctx context.Context, req TokenRequest) (*Signer, error) {
+	s := &Signer{
+		Certificate: req.Certificate,
+	}
+
+	rst := c.newRequest(req, "Renew", s)
+
+	rst.RenewTarget = &internal.Target{Token: req.Token}
+
+	header := soap.Header{
+		Security: s,
+		Action:   rst.Action(),
+	}
+
+	res, err := internal.Renew(c.WithHeader(ctx, header), c, &rst)
+	if err != nil {
+		return nil, err
+	}
+
+	s.Token = res.RequestedSecurityToken.Assertion
+
+	return s, s.setLifetime(res.Lifetime)
 }

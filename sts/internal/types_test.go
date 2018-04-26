@@ -56,8 +56,8 @@ func TestTimestamp(t *testing.T) {
 	timestamp := Timestamp{
 		NS:      WSU,
 		ID:      "_id",
-		Created: Time{created},
-		Expires: Time{created.Add(time.Hour)},
+		Created: created.Format(Time),
+		Expires: created.Add(time.Hour).Format(Time),
 	}
 
 	if !isC14N(timestamp.C14N()) {

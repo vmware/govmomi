@@ -25,6 +25,7 @@ import (
 	"net/url"
 	"os"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/ssoadmin"
@@ -33,6 +34,16 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 )
+
+// The following can help debug signature mismatch:
+// % vi /usr/lib/vmware-sso/vmware-sts/conf/logging.properties
+// # turn up logging for dsig:
+// org.jcp.xml.dsig.internal.level = FINE
+// com.sun.org.apache.xml.internal.security.level = FINE
+// # restart the STS service:
+// % service-control --stop vmware-stsd
+// % service-control --start vmware-stsd
+// % tail -f /var/log/vmware/sso/catalina.$(date +%Y-%m-%d).log
 
 // solutionUserCreate ensures that solution user "govmomi-test" exists for uses with the tests that follow.
 func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client) error {
@@ -234,6 +245,7 @@ func TestIssueActAs(t *testing.T) {
 
 	req := TokenRequest{
 		Delegatable: true,
+		Renewable:   true,
 		Userinfo:    u.User,
 	}
 
@@ -243,7 +255,9 @@ func TestIssueActAs(t *testing.T) {
 	}
 
 	req = TokenRequest{
-		ActAs:       s.Token,
+		Lifetime:    24 * time.Hour,
+		Token:       s.Token,
+		Renewable:   true,
 		Certificate: solutionUserCert(),
 	}
 
@@ -264,5 +278,20 @@ func TestIssueActAs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	log.Printf("current time=%s", now)
+	t.Logf("current time=%s", now)
+
+	duration := s.Lifetime.Expires.Sub(s.Lifetime.Created)
+	if duration < req.Lifetime {
+		req.Lifetime = 24 * time.Hour
+		req.Token = s.Token
+		log.Printf("extending lifetime from %s", s.Lifetime.Expires.Sub(s.Lifetime.Created))
+		s, err = sts.Renew(ctx, req)
+		if err != nil {
+			t.Fatal(err)
+		}
+	} else {
+		t.Errorf("duration=%s", duration)
+	}
+
+	t.Logf("expires in %s", s.Lifetime.Expires.Sub(s.Lifetime.Created))
 }

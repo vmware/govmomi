@@ -39,8 +39,12 @@ import (
 type Signer struct {
 	Token       string           // Token is a SAML token
 	Certificate *tls.Certificate // Certificate is used to sign requests
-	user        *url.Userinfo    // user contains the credentials for bearer token request
-	keyID       string           // keyID is the Signature UseKey ID, which is referenced in both the soap body and header
+	Lifetime    struct {
+		Created time.Time
+		Expires time.Time
+	}
+	user  *url.Userinfo // user contains the credentials for bearer token request
+	keyID string        // keyID is the Signature UseKey ID, which is referenced in both the soap body and header
 }
 
 // signedEnvelope is similar to soap.Envelope, but with namespace and Body as innerxml
@@ -95,22 +99,26 @@ func (s *Signer) Sign(env soap.Envelope) ([]byte, error) {
 		Timestamp: internal.Timestamp{
 			NS:      internal.WSU,
 			ID:      newID(),
-			Created: internal.Time{Time: created},
-			Expires: internal.Time{Time: created.Add(time.Minute)}, // If STS receives this request after this, it is assumed to have expired.
+			Created: created.Format(internal.Time),
+			Expires: created.Add(time.Minute).Format(internal.Time), // If STS receives this request after this, it is assumed to have expired.
 		},
 	}
 	env.Header.Security = header
 
 	info := internal.KeyInfo{XMLName: xml.Name{Local: "ds:KeyInfo"}}
 	var c14n, body string
+	type requestToken interface {
+		RequestSecurityToken() *internal.RequestSecurityToken
+	}
 
 	switch x := env.Body.(type) {
-	case *internal.RequestSecurityTokenBody:
+	case requestToken:
 		if hasKey {
 			// We need c14n for all requests, as its digest is included in the signature and must match on the server side.
-			// We need the body in original form when using an ActAs token, where the bearer token and its signature are embedded in the body.
-			c14n = x.Req.C14N()
-			body = x.Req.String()
+			// We need the body in original form when using an ActAs or RenewTarget token, where the token and its signature are embedded in the body.
+			req := x.RequestSecurityToken()
+			c14n = req.C14N()
+			body = req.String()
 			id := newID()
 
 			info.SecurityTokenReference = &internal.SecurityTokenReference{
