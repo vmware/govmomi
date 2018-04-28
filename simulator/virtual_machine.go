@@ -469,6 +469,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			c.MacAddress = vm.generateMAC()
 		}
 	case *types.VirtualDisk:
+		summary = fmt.Sprintf("%d KB", x.CapacityInKB)
 		switch b := d.Backing.(type) {
 		case types.BaseVirtualDeviceFileBackingInfo:
 			info := b.GetVirtualDeviceFileBackingInfo()
