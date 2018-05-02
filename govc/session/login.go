@@ -45,7 +45,6 @@ type login struct {
 	life   time.Duration
 	cookie string
 	token  string
-	actas  string
 	ext    string
 }
 
@@ -65,8 +64,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.long, "l", false, "Output session cookie")
 	f.StringVar(&cmd.ticket, "ticket", "", "Use clone ticket for login")
 	f.StringVar(&cmd.cookie, "cookie", "", "Set HTTP cookie for an existing session")
-	f.StringVar(&cmd.token, "token", "", "Use SAML token for login")
-	f.StringVar(&cmd.actas, "actas", "", "Issue SAML token with this token's identity")
+	f.StringVar(&cmd.token, "token", "", "Use SAML token for login or as issue identity")
 	f.StringVar(&cmd.ext, "extension", "", "Extension name")
 }
 
@@ -97,7 +95,7 @@ Examples:
   govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key
   token=$(govc session.login -u host -cert user.crt -key user.key -issue) # HoK token
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
-  token=$(govc session.login -u host -cert user.crt -key user.key -issue -actas "$bearer")
+  token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"`
 }
 
@@ -149,14 +147,30 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 	req := sts.TokenRequest{
 		Certificate: c.Certificate(),
 		Userinfo:    cmd.Userinfo(),
-		Delegatable: true,
-		ActAs:       cmd.actas,
+		Renewable:   true,
+		Token:       cmd.token,
 		Lifetime:    cmd.life,
+	}
+
+	if req.Certificate == nil {
+		req.Delegatable = true // Bearer token request
 	}
 
 	s, err := c.Issue(ctx, req)
 	if err != nil {
 		return "", err
+	}
+
+	if req.Token != "" {
+		duration := s.Lifetime.Expires.Sub(s.Lifetime.Created)
+		if duration < req.Lifetime {
+			// The granted lifetime is that of the bearer token, which is 5min max.
+			// Extend the lifetime via Renew.
+			req.Token = s.Token
+			if s, err = c.Renew(ctx, req); err != nil {
+				return "", err
+			}
+		}
 	}
 
 	return s.Token, nil

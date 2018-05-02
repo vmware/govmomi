@@ -29,22 +29,27 @@ package internal
 // but have since been modified by hand.
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"log"
+	"path"
+	"reflect"
 	"strings"
-	"time"
 
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
 const (
+	XSI    = "http://www.w3.org/2001/XMLSchema-instance"
 	WSU    = "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
 	DSIG   = "http://www.w3.org/2000/09/xmldsig#"
 	SHA256 = "http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"
+	Time   = "2006-01-02T15:04:05.000Z"
 )
 
 // Security is used as soap.Envelope.Header.Security when signing requests.
@@ -63,24 +68,12 @@ type Timestamp struct {
 	XMLName xml.Name `xml:"wsu:Timestamp"`
 	NS      string   `xml:"xmlns:wsu,attr"`
 	ID      string   `xml:"wsu:Id,attr"`
-	Created Time     `xml:"wsu:Created"`
-	Expires Time     `xml:"wsu:Expires"`
+	Created string   `xml:"wsu:Created"`
+	Expires string   `xml:"wsu:Expires"`
 }
 
 func (t *Timestamp) C14N() string {
 	return Marshal(t)
-}
-
-type Time struct {
-	time.Time
-}
-
-func (t Time) String() string {
-	return t.Format("2006-01-02T15:04:05.000Z")
-}
-
-func (t Time) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
-	return e.EncodeElement(t.String(), start)
 }
 
 type BinarySecurityToken struct {
@@ -242,6 +235,7 @@ type X509Data struct {
 
 type KeyInfo struct {
 	XMLName                xml.Name
+	NS                     string                  `xml:"xmlns:ds,attr,omitempty"`
 	SecurityTokenReference *SecurityTokenReference `xml:",omitempty"`
 	X509Data               *X509Data               `xml:",omitempty"`
 }
@@ -294,7 +288,7 @@ func (i *Issuer) C14N() string {
 type Assertion struct {
 	XMLName            xml.Name
 	ID                 string `xml:",attr"`
-	IssueInstant       Time   `xml:",attr"`
+	IssueInstant       string `xml:",attr"`
 	Version            string `xml:",attr"`
 	Issuer             Issuer
 	Signature          Signature
@@ -333,28 +327,65 @@ type Subject struct {
 }
 
 func (s *Subject) C14N() string {
-	return mkns("saml2", s,
+	data := &s.SubjectConfirmation.SubjectConfirmationData
+	names := []*xml.Name{
 		&s.XMLName,
 		&s.NameID.XMLName,
 		&s.SubjectConfirmation.XMLName,
-		&s.SubjectConfirmation.SubjectConfirmationData.XMLName)
+		&data.XMLName,
+	}
+	if s.SubjectConfirmation.NameID != nil {
+		names = append(names, &s.SubjectConfirmation.NameID.XMLName)
+	}
+	if data.KeyInfo != nil {
+		data.NS = XSI
+		data.Type = "saml2:KeyInfoConfirmationDataType"
+		data.KeyInfo.XMLName = xml.Name{Local: "ds:KeyInfo"}
+		data.KeyInfo.X509Data.XMLName = xml.Name{Local: "ds:X509Data"}
+		data.KeyInfo.NS = DSIG
+	}
+	return mkns("saml2", s, names...)
+}
+
+type SubjectConfirmationData struct {
+	XMLName      xml.Name
+	NS           string `xml:"xmlns:xsi,attr,omitempty"`
+	Type         string `xml:"xsi:type,attr,omitempty"`
+	NotOnOrAfter string `xml:",attr,omitempty"`
+	KeyInfo      *KeyInfo
 }
 
 type SubjectConfirmation struct {
 	XMLName                 xml.Name
 	Method                  string `xml:",attr"`
-	SubjectConfirmationData struct {
-		XMLName      xml.Name
-		NotOnOrAfter Time `xml:",attr"`
-	}
+	NameID                  *NameID
+	SubjectConfirmationData SubjectConfirmationData
+}
+
+type Condition struct {
+	Type string `xml:"xsi:type,attr,omitempty"`
+}
+
+func (c *Condition) GetCondition() *Condition {
+	return c
+}
+
+type BaseCondition interface {
+	GetCondition() *Condition
+}
+
+func init() {
+	types.Add("BaseCondition", reflect.TypeOf((*Condition)(nil)).Elem())
+	types.Add("del:DelegationRestrictionType", reflect.TypeOf((*DelegateRestriction)(nil)).Elem())
+	types.Add("rsa:RenewRestrictionType", reflect.TypeOf((*RenewRestriction)(nil)).Elem())
 }
 
 type Conditions struct {
-	XMLName              xml.Name
-	NotBefore            Time              `xml:",attr"`
-	NotOnOrAfter         Time              `xml:",attr"`
-	ProxyRestriction     *ProxyRestriction `xml:",omitempty"`
-	RenewRestrictionType *RenewRestriction `xml:",omitempty"`
+	XMLName          xml.Name
+	NotBefore        string            `xml:",attr"`
+	NotOnOrAfter     string            `xml:",attr"`
+	ProxyRestriction *ProxyRestriction `xml:",omitempty"`
+	Condition        []BaseCondition   `xml:",omitempty"`
 }
 
 func (c *Conditions) C14N() string {
@@ -365,31 +396,54 @@ func (c *Conditions) C14N() string {
 	if c.ProxyRestriction != nil {
 		names = append(names, &c.ProxyRestriction.XMLName)
 	}
-	if c.RenewRestrictionType != nil {
-		names = append(names, &c.RenewRestrictionType.XMLName)
+
+	for i := range c.Condition {
+		switch r := c.Condition[i].(type) {
+		case *DelegateRestriction:
+			names = append(names, &r.XMLName, &r.Delegate.NameID.XMLName)
+			r.NS = XSI
+			r.Type = "del:DelegationRestrictionType"
+			r.Delegate.NS = r.Delegate.XMLName.Space
+			r.Delegate.XMLName = xml.Name{Local: "del:Delegate"}
+		case *RenewRestriction:
+			names = append(names, &r.XMLName)
+			r.NS = XSI
+			r.Type = "rsa:RenewRestrictionType"
+		}
 	}
 
 	return mkns("saml2", c, names...)
 }
 
-type ConditionAbstract struct {
+type ProxyRestriction struct {
 	XMLName xml.Name
 	Count   int32 `xml:",attr"`
 }
 
-type ProxyRestriction struct {
-	XMLName xml.Name
-	ConditionAbstract
-}
-
 type RenewRestriction struct {
 	XMLName xml.Name
-	ConditionAbstract
+	NS      string `xml:"xmlns:xsi,attr,omitempty"`
+	Count   int32  `xml:",attr"`
+	Condition
+}
+
+type Delegate struct {
+	XMLName           xml.Name
+	NS                string `xml:"xmlns:del,attr,omitempty"`
+	DelegationInstant string `xml:",attr"`
+	NameID            NameID
+}
+
+type DelegateRestriction struct {
+	XMLName xml.Name
+	NS      string `xml:"xmlns:xsi,attr,omitempty"`
+	Condition
+	Delegate Delegate
 }
 
 type AuthnStatement struct {
 	XMLName      xml.Name
-	AuthnInstant Time `xml:",attr"`
+	AuthnInstant string `xml:",attr"`
 	AuthnContext struct {
 		XMLName              xml.Name
 		AuthnContextClassRef struct {
@@ -424,7 +478,7 @@ type AttributeValue struct {
 }
 
 func (a *AttributeValue) C14N() string {
-	return fmt.Sprintf(`<saml2:AttributeValue xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="xs:string">%s</saml2:AttributeValue>`, a.Value)
+	return fmt.Sprintf(`<saml2:AttributeValue xmlns:xsi="%s" xsi:type="xs:string">%s</saml2:AttributeValue>`, XSI, a.Value)
 }
 
 type Attribute struct {
@@ -450,8 +504,8 @@ func (a *Attribute) C14N() string {
 }
 
 type Lifetime struct {
-	Created Time `xml:"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd Created"`
-	Expires Time `xml:"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd Expires"`
+	Created string `xml:"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd Created"`
+	Expires string `xml:"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd Expires"`
 }
 
 func (t *Lifetime) C14N() string {
@@ -467,8 +521,8 @@ type UseKey struct {
 	Sig string `xml:",attr"`
 }
 
-type ActAs struct {
-	Assertion string `xml:",innerxml"`
+type Target struct {
+	Token string `xml:",innerxml"`
 }
 
 type RequestSecurityToken struct {
@@ -480,7 +534,15 @@ type RequestSecurityToken struct {
 	KeyType            string    `xml:",omitempty"`
 	SignatureAlgorithm string    `xml:",omitempty"`
 	UseKey             *UseKey   `xml:",omitempty"`
-	ActAs              *ActAs    `xml:",omitempty"`
+	ActAs              *Target   `xml:",omitempty"`
+	ValidateTarget     *Target   `xml:",omitempty"`
+	RenewTarget        *Target   `xml:",omitempty"`
+}
+
+func Unmarshal(data []byte, v interface{}) error {
+	dec := xml.NewDecoder(bytes.NewReader(data))
+	dec.TypeFunc = types.TypeFunc()
+	return dec.Decode(v)
 }
 
 // toString returns an XML encoded RequestSecurityToken.
@@ -490,10 +552,10 @@ type RequestSecurityToken struct {
 func (r *RequestSecurityToken) toString(c14n bool) string {
 	actas := ""
 	if r.ActAs != nil {
-		token := r.ActAs.Assertion
+		token := r.ActAs.Token
 		if c14n {
 			var a Assertion
-			err := xml.Unmarshal([]byte(r.ActAs.Assertion), &a)
+			err := Unmarshal([]byte(r.ActAs.Token), &a)
 			if err != nil {
 				log.Printf("decode ActAs: %s", err)
 			}
@@ -508,16 +570,33 @@ func (r *RequestSecurityToken) toString(c14n bool) string {
 		fmt.Sprintf(`<TokenType>%s</TokenType>`, r.TokenType),
 		fmt.Sprintf(`<RequestType>%s</RequestType>`, r.RequestType),
 		r.Lifetime.C14N(),
-		fmt.Sprintf(`<Renewing Allow="%t" OK="%t"></Renewing>`, r.Renewing.Allow, r.Renewing.OK),
-		fmt.Sprintf(`<Delegatable>%t</Delegatable>`, r.Delegatable),
-		actas,
-		fmt.Sprintf(`<KeyType>%s</KeyType>`, r.KeyType),
-		fmt.Sprintf(`<SignatureAlgorithm>%s</SignatureAlgorithm>`, r.SignatureAlgorithm),
-		fmt.Sprintf(`<UseKey Sig="%s"></UseKey>`, r.UseKey.Sig),
-		`</RequestSecurityToken>`,
 	}
 
-	return strings.Join(body, "")
+	if r.RenewTarget == nil {
+		body = append(body,
+			fmt.Sprintf(`<Renewing Allow="%t" OK="%t"></Renewing>`, r.Renewing.Allow, r.Renewing.OK),
+			fmt.Sprintf(`<Delegatable>%t</Delegatable>`, r.Delegatable),
+			actas,
+			fmt.Sprintf(`<KeyType>%s</KeyType>`, r.KeyType),
+			fmt.Sprintf(`<SignatureAlgorithm>%s</SignatureAlgorithm>`, r.SignatureAlgorithm),
+			fmt.Sprintf(`<UseKey Sig="%s"></UseKey>`, r.UseKey.Sig))
+	} else {
+		token := r.RenewTarget.Token
+		if c14n {
+			var a Assertion
+			err := Unmarshal([]byte(r.RenewTarget.Token), &a)
+			if err != nil {
+				log.Printf("decode Renew: %s", err)
+			}
+			token = a.C14N()
+		}
+
+		body = append(body,
+			fmt.Sprintf(`<UseKey Sig="%s"></UseKey>`, r.UseKey.Sig),
+			fmt.Sprintf(`<RenewTarget>%s</RenewTarget>`, token))
+	}
+
+	return strings.Join(append(body, `</RequestSecurityToken>`), "")
 }
 
 func (r *RequestSecurityToken) C14N() string {
@@ -549,12 +628,37 @@ type RequestSecurityTokenBody struct {
 
 func (b *RequestSecurityTokenBody) Fault() *soap.Fault { return b.Fault_ }
 
+func (b *RequestSecurityTokenBody) RequestSecurityToken() *RequestSecurityToken { return b.Req }
+
 func (r *RequestSecurityToken) Action() string {
-	return "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/Issue"
+	kind := path.Base(r.RequestType)
+	return "http://docs.oasis-open.org/ws-sx/ws-trust/200512/RST/" + kind
 }
 
 func Issue(ctx context.Context, r soap.RoundTripper, req *RequestSecurityToken) (*RequestSecurityTokenResponseCollection, error) {
 	var reqBody, resBody RequestSecurityTokenBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type RenewSecurityTokenBody struct {
+	Req    *RequestSecurityToken         `xml:"http://docs.oasis-open.org/ws-sx/ws-trust/200512 RequestSecurityToken,omitempty"`
+	Res    *RequestSecurityTokenResponse `xml:"http://docs.oasis-open.org/ws-sx/ws-trust/200512 RequestSecurityTokenResponse,omitempty"`
+	Fault_ *soap.Fault                   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *RenewSecurityTokenBody) Fault() *soap.Fault { return b.Fault_ }
+
+func (b *RenewSecurityTokenBody) RequestSecurityToken() *RequestSecurityToken { return b.Req }
+
+func Renew(ctx context.Context, r soap.RoundTripper, req *RequestSecurityToken) (*RequestSecurityTokenResponse, error) {
+	var reqBody, resBody RenewSecurityTokenBody
 
 	reqBody.Req = req
 
