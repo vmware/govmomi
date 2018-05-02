@@ -622,6 +622,22 @@ func TestCreateVmWithDevices(t *testing.T) {
 	if expect != ndevice {
 		t.Errorf("expected %d, got %d", expect, ndevice)
 	}
+
+	// check number of disk and disk summary
+	ndisk := 0
+	for _, device := range vm.Config.Hardware.Device {
+		disk, ok := device.(*types.VirtualDisk)
+		if ok {
+			ndisk++
+			summary := disk.DeviceInfo.GetDescription().Summary
+			if "1,024 KB" != summary {
+				t.Errorf("expected '1,1024 KB', got %s", summary)
+			}
+		}
+	}
+	if 1 != ndisk {
+		t.Errorf("expected 1 disk, got %d", ndisk)
+	}
 }
 
 func TestShutdownGuest(t *testing.T) {
