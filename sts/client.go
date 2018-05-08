@@ -73,7 +73,7 @@ type TokenRequest struct {
 	Token       string           // Token for Renew request or Issue request ActAs identity
 }
 
-func (c *Client) newRequest(req TokenRequest, kind string, s *Signer) internal.RequestSecurityToken {
+func (c *Client) newRequest(req TokenRequest, kind string, s *Signer) (internal.RequestSecurityToken, error) {
 	if req.Lifetime == 0 {
 		req.Lifetime = 5 * time.Minute
 	}
@@ -99,6 +99,9 @@ func (c *Client) newRequest(req TokenRequest, kind string, s *Signer) internal.R
 	}
 
 	if req.Certificate == nil {
+		if req.Userinfo == nil {
+			return rst, errors.New("one of TokenRequest Certificate or Userinfo is required")
+		}
 		rst.KeyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/Bearer"
 	} else {
 		rst.KeyType = "http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey"
@@ -106,7 +109,7 @@ func (c *Client) newRequest(req TokenRequest, kind string, s *Signer) internal.R
 		s.keyID = rst.UseKey.Sig
 	}
 
-	return rst
+	return rst, nil
 }
 
 func (s *Signer) setLifetime(lifetime *internal.Lifetime) error {
@@ -126,16 +129,15 @@ func (s *Signer) setLifetime(lifetime *internal.Lifetime) error {
 // When Certificate is set, a Holder-of-Key token will be requested.  Otherwise, a Bearer token is requested with the Userinfo credentials.
 // See: http://docs.oasis-open.org/ws-sx/ws-trust/v1.4/errata01/os/ws-trust-1.4-errata01-os-complete.html#_Toc325658937
 func (c *Client) Issue(ctx context.Context, req TokenRequest) (*Signer, error) {
-	if req.Certificate == nil && req.Userinfo == nil {
-		return nil, errors.New("one of TokenRequest Certificate or Userinfo is required")
-	}
-
 	s := &Signer{
 		Certificate: req.Certificate,
 		user:        req.Userinfo,
 	}
 
-	rst := c.newRequest(req, "Issue", s)
+	rst, err := c.newRequest(req, "Issue", s)
+	if err != nil {
+		return nil, err
+	}
 
 	if req.Token != "" {
 		rst.ActAs = &internal.Target{
@@ -158,12 +160,20 @@ func (c *Client) Issue(ctx context.Context, req TokenRequest) (*Signer, error) {
 	return s, s.setLifetime(res.RequestSecurityTokenResponse.Lifetime)
 }
 
+// Renew is used to request a security token renewal.
 func (c *Client) Renew(ctx context.Context, req TokenRequest) (*Signer, error) {
 	s := &Signer{
 		Certificate: req.Certificate,
 	}
 
-	rst := c.newRequest(req, "Renew", s)
+	rst, err := c.newRequest(req, "Renew", s)
+	if err != nil {
+		return nil, err
+	}
+
+	if req.Token == "" {
+		return nil, errors.New("TokenRequest Token is required")
+	}
 
 	rst.RenewTarget = &internal.Target{Token: req.Token}
 
