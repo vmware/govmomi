@@ -40,6 +40,7 @@ type login struct {
 
 	clone  bool
 	issue  bool
+	renew  bool
 	long   bool
 	ticket string
 	life   time.Duration
@@ -60,6 +61,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.clone, "clone", false, "Acquire clone ticket")
 	f.BoolVar(&cmd.issue, "issue", false, "Issue SAML token")
+	f.BoolVar(&cmd.renew, "renew", false, "Renew SAML token")
 	f.DurationVar(&cmd.life, "lifetime", time.Minute*10, "SAML token lifetime")
 	f.BoolVar(&cmd.long, "l", false, "Output session cookie")
 	f.StringVar(&cmd.ticket, "ticket", "", "Use clone ticket for login")
@@ -85,6 +87,7 @@ The session.login command can be used to:
 - Login using a clone ticket
 - Login using a vCenter Extension certificate
 - Issue a SAML token
+- Renew a SAML token
 - Login using a SAML token
 - Avoid passing credentials to other govc commands
 
@@ -96,7 +99,8 @@ Examples:
   token=$(govc session.login -u host -cert user.crt -key user.key -issue) # HoK token
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
-  govc session.login -u host -cert user.crt -key user.key -token "$token"`
+  govc session.login -u host -cert user.crt -key user.key -token "$token"
+  token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")`
 }
 
 type ticketResult struct {
@@ -156,7 +160,12 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 		req.Delegatable = true // Bearer token request
 	}
 
-	s, err := c.Issue(ctx, req)
+	issue := c.Issue
+	if cmd.renew {
+		issue = c.Renew
+	}
+
+	s, err := issue(ctx, req)
 	if err != nil {
 		return "", err
 	}
@@ -231,6 +240,9 @@ func (cmd *login) setCookie(ctx context.Context, c *vim25.Client) error {
 }
 
 func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
+	if cmd.renew {
+		cmd.issue = true
+	}
 	switch {
 	case cmd.ticket != "":
 		cmd.Login = cmd.cloneSession
