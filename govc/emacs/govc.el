@@ -447,7 +447,10 @@ Also fixes the case where user contains an '@'."
             (progn (setf (url-host url) (govc-table-column-value "Name"))
                    (setf (url-target url) nil))
           (progn (setf (url-host url) (govc-table-column-value "IP address"))
-                 (setf (url-target url) (govc-table-column-value "Name"))))
+                 (setf (url-target url) (govc-table-column-value "Name"))
+                 ;; default url-user to Administrator@$domain when connecting to a vCenter VM
+                 (let ((sts (ignore-errors (govc "sso.service.ls" "-t" "sso:sts" "-U" "-u" (url-host url)))))
+                   (if sts (setf (url-user url) (concat "Administrator@" (file-name-nondirectory (car sts))))))))
         (setf (url-filename url) "") ; erase query string
         (if (string-empty-p (url-user url))
             (setf (url-user url) "root")) ; local workstation url has no user set
