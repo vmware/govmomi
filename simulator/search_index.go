@@ -135,9 +135,16 @@ func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 			if !ok {
 				continue
 			}
-			if vm.Config.Uuid == req.Uuid {
-				body.Res.Returnval = &ref
-				break
+			if req.InstanceUuid != nil && *req.InstanceUuid {
+				if vm.Config.InstanceUuid == req.Uuid {
+					body.Res.Returnval = &ref
+					break
+				}
+			} else {
+				if vm.Config.Uuid == req.Uuid {
+					body.Res.Returnval = &ref
+					break
+				}
 			}
 		}
 	} else {
