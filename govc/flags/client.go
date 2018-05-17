@@ -418,22 +418,24 @@ func (flag *ClientFlag) SetRootCAs(c *soap.Client) error {
 func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
 	m := session.NewManager(c)
 	u := flag.url.User
+	name := u.Username()
 
-	if u.Username() == "" {
-		if !c.IsVC() {
-			// If no username is provided, try to acquire a local ticket.
-			// When invoked remotely, ESX returns an InvalidRequestFault.
-			// So, rather than return an error here, fallthrough to Login() with the original User to
-			// to avoid what would be a confusing error message.
-			luser, lerr := flag.localTicket(ctx, m)
-			if lerr == nil {
-				// We are running directly on an ESX or Workstation host and can use the ticket with Login()
-				u = luser
-			} else {
-				flag.persist = true // Not persisting, but this avoids the call to Logout()
-				return nil          // Avoid SaveSession for non-authenticated session
-			}
+	if name == "" && !c.IsVC() {
+		// If no username is provided, try to acquire a local ticket.
+		// When invoked remotely, ESX returns an InvalidRequestFault.
+		// So, rather than return an error here, fallthrough to Login() with the original User to
+		// to avoid what would be a confusing error message.
+		luser, lerr := flag.localTicket(ctx, m)
+		if lerr == nil {
+			// We are running directly on an ESX or Workstation host and can use the ticket with Login()
+			u = luser
+			name = u.Username()
 		}
+	}
+	if name == "" {
+		// Skip auto-login if we don't have a username
+		flag.persist = true // Not persisting, but this avoids the call to Logout()
+		return nil          // Avoid SaveSession for non-authenticated session
 	}
 
 	return m.Login(ctx, u)
