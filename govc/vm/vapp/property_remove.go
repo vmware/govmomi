@@ -86,10 +86,10 @@ func (cmd *propertyRemove) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if err := task.Wait(ctx); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(cmd, "Keys successfully removed on virtual machine %s: %s\n", vm.Name(), strings.Join(keys, ","))
-	return nil
+	return waitLog(
+		ctx,
+		cmd.VirtualMachineFlag.DatacenterFlag.OutputFlag,
+		task,
+		fmt.Sprintf(fmt.Sprintf("Removing keys on virtual machine %s: [%s]...\n", vm.Name(), strings.Join(keys, ","))),
+	)
 }

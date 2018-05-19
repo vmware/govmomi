@@ -3,6 +3,7 @@ package vapp
 import (
 	"context"
 
+	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -29,4 +30,12 @@ func hasVAppConfig(ctx context.Context, vm *object.VirtualMachine) (bool, error)
 		return false, nil
 	}
 	return true, nil
+}
+
+func waitLog(ctx context.Context, cmd *flags.OutputFlag, task *object.Task, msg string) error {
+	logger := cmd.ProgressLogger(msg)
+	defer logger.Wait()
+
+	_, err := task.WaitForResult(ctx, logger)
+	return err
 }

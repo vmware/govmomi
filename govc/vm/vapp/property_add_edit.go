@@ -29,10 +29,9 @@ values set.
 
 Examples:
 
-vm.vapp.property.add -vm=foobar -label=Hostname -type=string -userconfigurable=true guestinfo.hostname
+vm.vapp.property.add  -vm=foobar -label=Hostname -type=string -userconfigurable=true guestinfo.hostname
 vm.vapp.property.edit -vm=foobar -userconfigurable=false -default=foobar.local guestinfo.hostname
-vm.vapp.property.edit -vm=foobar -userconfigurable=true -value=foobar.local guestinfo.hostname
-`
+vm.vapp.property.edit -vm=foobar -userconfigurable=true -value=foobar.local guestinfo.hostname`
 
 func init() {
 	cli.Register("vm.vapp.property.add", &propertyAddEdit{
@@ -90,7 +89,7 @@ func (cmd *propertyAddEdit) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 	if cfg == nil {
-		return fmt.Errorf("%s has no vApp configuration, please set one first with vm.vapp.configure", vm.Name())
+		return fmt.Errorf("%s has no vApp configuration, please set one first with vm.vapp.change", vm.Name())
 	}
 
 	op := types.VAppPropertySpec{
@@ -124,12 +123,12 @@ func (cmd *propertyAddEdit) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if err := task.Wait(ctx); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(cmd, "Key successfully %sed on virtual machine %s: %s\n", cmd.operation, vm.Name(), propertyID)
-	return nil
+	return waitLog(
+		ctx,
+		cmd.VirtualMachineFlag.DatacenterFlag.OutputFlag,
+		task,
+		fmt.Sprintf("%sing key %q on virtual machine %s...\n", cmd.operation, propertyID, vm.Name()),
+	)
 }
 
 func validatePropertyForAdd(ps []types.VAppPropertyInfo, key string) (int32, error) {

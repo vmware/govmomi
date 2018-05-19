@@ -76,10 +76,10 @@ func (cmd *remove) removeVAppConfig(ctx context.Context, vm *object.VirtualMachi
 		return err
 	}
 
-	if err := task.Wait(ctx); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(cmd, "vApp configuration successfully removed for virtual machine %s.\n", vm.Name())
-	return nil
+	return waitLog(
+		ctx,
+		cmd.VirtualMachineFlag.DatacenterFlag.OutputFlag,
+		task,
+		fmt.Sprintf("Removing vApp configuration on virtual machine %s...", vm.Name()),
+	)
 }

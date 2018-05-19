@@ -33,7 +33,7 @@ var allowedOVFTransports = []string{
 	"com.vmware.guestInfo",
 }
 
-const configureCmdDescription = `Configures general vApp options on a virtual machine.
+const changeCmdDescription = `Changes general vApp options on a virtual machine.
 
 List values are separated by commas.
 
@@ -43,14 +43,12 @@ properties added at the same time are ignored.
 
 Examples:
 
-govc vm.vapp.configure -vm=foobar -ip.protocols.supported="IPv4,IPv6"
-govc vm.vapp.configure -vm=foobar -product.remove=true
-govc vm.vapp.configure -vm=foobar -product.name="Foo Bar"
-govc vm.vapp.configure -vm=foobar -product.name="Foo Bar" -product.version="1.0.0"
+govc vm.vapp.change -vm=foobar -ip.protocols.supported="IPv4,IPv6"
+govc vm.vapp.change -vm=foobar -product.remove=true
+govc vm.vapp.change -vm=foobar -product.name="Foo Bar"
+govc vm.vapp.change -vm=foobar -product.name="Foo Bar" -product.version="1.0.0"`
 
-`
-
-type configure struct {
+type change struct {
 	*flags.VirtualMachineFlag
 
 	types.VmConfigSpec
@@ -59,10 +57,10 @@ type configure struct {
 }
 
 func init() {
-	cli.Register("vm.vapp.configure", &configure{})
+	cli.Register("vm.vapp.change", &change{})
 }
 
-func (cmd *configure) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
@@ -109,15 +107,15 @@ func (cmd *configure) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewInt32(&cmd.VmConfigSpec.InstallBootStopDelay), "ovf.boot.delay", "Install boot delay")
 }
 
-func (cmd *configure) Description() string {
-	return configureCmdDescription
+func (cmd *change) Description() string {
+	return changeCmdDescription
 }
 
-func (cmd *configure) Process(ctx context.Context) error {
+func (cmd *change) Process(ctx context.Context) error {
 	return cmd.VirtualMachineFlag.Process(ctx)
 }
 
-func (cmd *configure) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
@@ -140,15 +138,15 @@ func (cmd *configure) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if err := task.Wait(ctx); err != nil {
-		return err
-	}
-
-	fmt.Fprintf(cmd, "vApp configuration successfully updated for virtual machine %s.\n", vm.Name())
-	return nil
+	return waitLog(
+		ctx,
+		cmd.VirtualMachineFlag.DatacenterFlag.OutputFlag,
+		task,
+		fmt.Sprintf("Applying vApp configuration to virtual machine %s...", vm.Name()),
+	)
 }
 
-func (cmd *configure) flagProductRemove() {
+func (cmd *change) flagProductRemove() {
 	zero := int32(0)
 	op := types.VAppProductSpec{
 		ArrayUpdateSpec: types.ArrayUpdateSpec{

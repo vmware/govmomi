@@ -881,7 +881,7 @@ func TestVmApplyVAppPropertySpec(t *testing.T) {
 						Label:            "Foo",
 						Type:             "string",
 						TypeReference:    "VirtualMachine",
-						UserConfigurable: testBoolPtr(true),
+						UserConfigurable: types.NewBool(true),
 						DefaultValue:     "foo",
 						Value:            "foo",
 						Description:      "foo",
@@ -898,7 +898,7 @@ func TestVmApplyVAppPropertySpec(t *testing.T) {
 					Label:            "Foo",
 					Type:             "string",
 					TypeReference:    "VirtualMachine",
-					UserConfigurable: testBoolPtr(true),
+					UserConfigurable: types.NewBool(true),
 					DefaultValue:     "foo",
 					Value:            "foo",
 					Description:      "foo",
@@ -941,7 +941,7 @@ func TestVmApplyVAppPropertySpecAdd(t *testing.T) {
 		Id:               "foo.bar",
 		Label:            "foobar",
 		Type:             "string",
-		UserConfigurable: testBoolPtr(true),
+		UserConfigurable: types.NewBool(true),
 	}
 
 	vm.applyVAppPropertySpecAdd(expectedInfo)
@@ -957,7 +957,7 @@ func TestVmApplyVAppPropertySpecAddAlreadyExists(t *testing.T) {
 		Id:               "foo.bar",
 		Label:            "foobar",
 		Type:             "string",
-		UserConfigurable: testBoolPtr(true),
+		UserConfigurable: types.NewBool(true),
 	}
 
 	var buf bytes.Buffer
@@ -1005,7 +1005,7 @@ func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
 				Label:            "Foo",
 				Type:             "string",
 				TypeReference:    "VirtualMachine",
-				UserConfigurable: testBoolPtr(true),
+				UserConfigurable: types.NewBool(true),
 				DefaultValue:     "foo",
 				Value:            "foo",
 				Description:      "foo",
@@ -1026,7 +1026,7 @@ func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
 				Label:            "Foo",
 				Type:             "string",
 				TypeReference:    "VirtualMachine",
-				UserConfigurable: testBoolPtr(true),
+				UserConfigurable: types.NewBool(true),
 				DefaultValue:     "foo",
 				Value:            "foo",
 				Description:      "foo",
@@ -1043,7 +1043,7 @@ func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
 				Label:            "Bar",
 				Type:             "int",
 				TypeReference:    "Datastore",
-				UserConfigurable: testBoolPtr(false),
+				UserConfigurable: types.NewBool(false),
 				DefaultValue:     "1",
 				Value:            "1",
 				Description:      "bar",
@@ -1057,7 +1057,7 @@ func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
 				Label:            "Bar",
 				Type:             "int",
 				TypeReference:    "Datastore",
-				UserConfigurable: testBoolPtr(false),
+				UserConfigurable: types.NewBool(false),
 				DefaultValue:     "1",
 				Value:            "1",
 				Description:      "bar",
@@ -1091,7 +1091,7 @@ func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
 									Label:            "One",
 									Type:             "string",
 									TypeReference:    "VirtualMachine",
-									UserConfigurable: testBoolPtr(true),
+									UserConfigurable: types.NewBool(true),
 									DefaultValue:     "one",
 									Value:            "one",
 									Description:      "one",
@@ -1105,7 +1105,7 @@ func TestVmApplyVAppPropertySpecEdit(t *testing.T) {
 									Label:            "Foo",
 									Type:             "string",
 									TypeReference:    "VirtualMachine",
-									UserConfigurable: testBoolPtr(true),
+									UserConfigurable: types.NewBool(true),
 									DefaultValue:     "foo",
 									Value:            "foo",
 									Description:      "foo",
@@ -1156,7 +1156,7 @@ func TestVmApplyVAppPropertySpecRemove(t *testing.T) {
 							Label:            "One",
 							Type:             "string",
 							TypeReference:    "VirtualMachine",
-							UserConfigurable: testBoolPtr(true),
+							UserConfigurable: types.NewBool(true),
 							DefaultValue:     "one",
 							Value:            "one",
 							Description:      "one",
@@ -1170,7 +1170,7 @@ func TestVmApplyVAppPropertySpecRemove(t *testing.T) {
 							Label:            "Foo",
 							Type:             "string",
 							TypeReference:    "VirtualMachine",
-							UserConfigurable: testBoolPtr(true),
+							UserConfigurable: types.NewBool(true),
 							DefaultValue:     "foo",
 							Value:            "foo",
 							Description:      "foo",
@@ -1207,7 +1207,7 @@ func TestVmApplyVAppPropertySpecRemoveMissingKey(t *testing.T) {
 							Label:            "One",
 							Type:             "string",
 							TypeReference:    "VirtualMachine",
-							UserConfigurable: testBoolPtr(true),
+							UserConfigurable: types.NewBool(true),
 							DefaultValue:     "one",
 							Value:            "one",
 							Description:      "one",
@@ -1221,7 +1221,7 @@ func TestVmApplyVAppPropertySpecRemoveMissingKey(t *testing.T) {
 							Label:            "Foo",
 							Type:             "string",
 							TypeReference:    "VirtualMachine",
-							UserConfigurable: testBoolPtr(true),
+							UserConfigurable: types.NewBool(true),
 							DefaultValue:     "foo",
 							Value:            "foo",
 							Description:      "foo",
@@ -1239,8 +1239,4 @@ func TestVmApplyVAppPropertySpecRemoveMissingKey(t *testing.T) {
 	if expected != actual {
 		t.Fatalf("expected %q, got %q", expected, actual)
 	}
-}
-
-func testBoolPtr(b bool) *bool {
-	return &b
 }
