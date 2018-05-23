@@ -147,7 +147,7 @@ func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 		return "", err
 	}
 
-	cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool()
+	cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePoolIfSpecified()
 	if err != nil {
 		return "", err
 	}
@@ -251,6 +251,22 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		NetworkMapping:  cmd.NetworkMap(e),
 	}
 
+	host, err := cmd.HostSystemIfSpecified()
+	if err != nil {
+		return nil, err
+	}
+
+	if cmd.ResourcePool == nil {
+		if host == nil {
+			cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool()
+		} else {
+			cmd.ResourcePool, err = host.ResourcePool(ctx)
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	m := ovf.NewManager(cmd.Client)
 	spec, err := m.CreateImportSpec(ctx, string(o), cmd.ResourcePool, cmd.Datastore, cisp)
 	if err != nil {
@@ -271,13 +287,6 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 			s.ConfigSpec.Annotation = cmd.Options.Annotation
 		case *types.VirtualAppImportSpec:
 			s.VAppConfigSpec.Annotation = cmd.Options.Annotation
-		}
-	}
-
-	var host *object.HostSystem
-	if cmd.SearchFlag.IsSet() {
-		if host, err = cmd.HostSystem(); err != nil {
-			return nil, err
 		}
 	}
 
