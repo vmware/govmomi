@@ -1211,7 +1211,7 @@ Optionally filter by FILTER and inherit SESSION."
   (interactive)
   (delete-other-windows)
   (govc-shell-command
-   (list "datastore.disk.info" (if current-prefix-arg "-c") (govc-selection))))
+   (list "datastore.disk.info" "-uuid" (if current-prefix-arg "-c") (govc-selection))))
 
 (defun govc-datastore-ls-json ()
   "JSON via govc datastore.ls -json on current selection."
