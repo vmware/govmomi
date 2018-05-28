@@ -102,6 +102,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 		"Supported IP protocols",
 	)
 
+	f.Var(flags.NewStringSlice(&cmd.VmConfigSpec.Eula), "eula", "EULAs")
 	f.Var(flags.NewEnumSlice(&cmd.VmConfigSpec.OvfEnvironmentTransport, allowedOVFTransports), "ovf.transports", "Supported OVF transports")
 	f.Var(flags.NewOptionalBool(&cmd.VmConfigSpec.InstallBootRequired), "ovf.boot.required", "Install boot required")
 	f.Var(flags.NewInt32(&cmd.VmConfigSpec.InstallBootStopDelay), "ovf.boot.delay", "Install boot delay")

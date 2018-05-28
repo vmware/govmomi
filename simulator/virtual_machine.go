@@ -259,6 +259,13 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
+	switch {
+	case spec.VAppConfigRemoved != nil && *spec.VAppConfigRemoved:
+		vm.Config.VAppConfig = nil
+	case spec.VAppConfig != nil:
+		vm.applyVmConfigSpec(*spec.VAppConfig.GetVmConfigSpec())
+	}
+
 	vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, spec.ExtraConfig...)
 
 	vm.Config.Modified = time.Now()
@@ -272,21 +279,20 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 // * Product property data is handled separately but called from this function.
 //
 // Not all fields are currently implemented here - this comprises any field not
-// implemented by govc (namely EULA and the OVF sections).
+// implemented by govc (namely the OVF unknown config section).
 func (vm *VirtualMachine) applyVmConfigSpec(spec types.VmConfigSpec) {
+	if vm.Config.VAppConfig == nil {
+		vm.Config.VAppConfig = new(types.VmConfigInfo)
+	}
+
 	cfg := vm.Config.VAppConfig.GetVmConfigInfo()
 
-	if len(spec.IpAssignment.SupportedAllocationScheme) > 0 {
-		cfg.IpAssignment.SupportedAllocationScheme = spec.IpAssignment.SupportedAllocationScheme
+	if spec.IpAssignment != nil {
+		vm.applyVAppIPAssignmentInfo(spec.IpAssignment)
 	}
-	if spec.IpAssignment.IpAllocationPolicy != "" {
-		cfg.IpAssignment.IpAllocationPolicy = spec.IpAssignment.IpAllocationPolicy
-	}
-	if len(spec.IpAssignment.SupportedIpProtocol) > 0 {
-		cfg.IpAssignment.SupportedIpProtocol = spec.IpAssignment.SupportedIpProtocol
-	}
-	if spec.IpAssignment.IpProtocol != "" {
-		cfg.IpAssignment.IpProtocol = spec.IpAssignment.IpProtocol
+
+	if len(spec.Eula) > 0 {
+		vm.applyVAppEula(spec.Eula)
 	}
 
 	if len(spec.OvfEnvironmentTransport) > 0 {
@@ -301,8 +307,46 @@ func (vm *VirtualMachine) applyVmConfigSpec(spec types.VmConfigSpec) {
 		cfg.InstallBootStopDelay = spec.InstallBootStopDelay
 	}
 
-	vm.applyVAppProductSpec(spec.Product[0])
+	if len(spec.Product) > 0 {
+		vm.applyVAppProductSpec(spec.Product[0])
+	}
 	vm.applyVAppPropertySpec(spec.Property)
+}
+
+// applyVAppIPAssignmentInfo applies vApp IP assignment details.
+func (vm *VirtualMachine) applyVAppIPAssignmentInfo(info *types.VAppIPAssignmentInfo) {
+	cfg := vm.Config.VAppConfig.GetVmConfigInfo()
+
+	if len(info.SupportedAllocationScheme) > 0 {
+		cfg.IpAssignment.SupportedAllocationScheme = info.SupportedAllocationScheme
+	}
+	if info.IpAllocationPolicy != "" {
+		cfg.IpAssignment.IpAllocationPolicy = info.IpAllocationPolicy
+	}
+	if len(info.SupportedIpProtocol) > 0 {
+		cfg.IpAssignment.SupportedIpProtocol = info.SupportedIpProtocol
+	}
+	if info.IpProtocol != "" {
+		cfg.IpAssignment.IpProtocol = info.IpProtocol
+	}
+}
+
+// applyVAppEula applies any EULAs. These are consolidated so that any empty
+// supplied EULAs are removed.
+//
+// By design, this has the intended side-effect that if either a single empty
+// string or nothing but empty strings are sent as EULAs, this field is cleared
+// and set to nil. This matches the API behavior.
+func (vm *VirtualMachine) applyVAppEula(eulas []string) {
+	var newEulas []string
+
+	for _, eula := range eulas {
+		if eula != "" {
+			newEulas = append(newEulas, eula)
+		}
+	}
+
+	vm.Config.VAppConfig.GetVmConfigInfo().Eula = newEulas
 }
 
 // applyVAppProductSpec takes a single VAppProductSpec and applies it to the
@@ -349,6 +393,7 @@ func (vm *VirtualMachine) applyVAppProductSpecEdit(info *types.VAppProductInfo) 
 			*f.dst = f.src
 		}
 	}
+	vm.Config.VAppConfig.GetVmConfigInfo().Product[0] = cfg
 }
 
 // applyVAppProductSpecRemove resets the vApp product configuration (what would

@@ -24,6 +24,7 @@ import (
 	"math/rand"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
@@ -1369,5 +1370,701 @@ func TestVmApplyVAppPropertySpecRemoveMissingKey(t *testing.T) {
 	actual := buf.String()
 	if expected != actual {
 		t.Fatalf("expected %q, got %q", expected, actual)
+	}
+}
+
+func TestVmApplyVAppProductSpecEdit(t *testing.T) {
+	cases := []struct {
+		name     string
+		spec     types.VAppProductInfo
+		expected types.VAppProductInfo
+	}{
+		{
+			name: "single field",
+			spec: types.VAppProductInfo{
+				Key:  0,
+				Name: "Bar",
+			},
+			expected: types.VAppProductInfo{
+				Key:         0,
+				ClassId:     "one",
+				InstanceId:  "one",
+				Name:        "Bar",
+				Vendor:      "Foo Inc.",
+				Version:     "One",
+				FullVersion: "1.2.3",
+				VendorUrl:   "https://www.vmware.com/",
+				ProductUrl:  "https://github.com/vmware/govmomi/",
+				AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+			},
+		},
+		{
+			name: "multi-field",
+			spec: types.VAppProductInfo{
+				Key:    0,
+				Name:   "Bar",
+				Vendor: "Bar Inc.",
+			},
+			expected: types.VAppProductInfo{
+				Key:         0,
+				ClassId:     "one",
+				InstanceId:  "one",
+				Name:        "Bar",
+				Vendor:      "Bar Inc.",
+				Version:     "One",
+				FullVersion: "1.2.3",
+				VendorUrl:   "https://www.vmware.com/",
+				ProductUrl:  "https://github.com/vmware/govmomi/",
+				AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+			},
+		},
+		{
+			name: "change all fields",
+			spec: types.VAppProductInfo{
+				Key:         0,
+				ClassId:     "two",
+				InstanceId:  "two",
+				Name:        "Bar",
+				Vendor:      "Bar Inc.",
+				Version:     "Two",
+				FullVersion: "4.5.6",
+				VendorUrl:   "foo",
+				ProductUrl:  "bar",
+				AppUrl:      "baz",
+			},
+			expected: types.VAppProductInfo{
+				Key:         0,
+				ClassId:     "two",
+				InstanceId:  "two",
+				Name:        "Bar",
+				Vendor:      "Bar Inc.",
+				Version:     "Two",
+				FullVersion: "4.5.6",
+				VendorUrl:   "foo",
+				ProductUrl:  "bar",
+				AppUrl:      "baz",
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			var buf bytes.Buffer
+			logger := log.New(&buf, "", 0)
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						VAppConfig: &types.VmConfigInfo{
+							Product: []types.VAppProductInfo{
+								{
+									Key:         0,
+									ClassId:     "one",
+									InstanceId:  "one",
+									Name:        "Foo",
+									Vendor:      "Foo Inc.",
+									Version:     "One",
+									FullVersion: "1.2.3",
+									VendorUrl:   "https://www.vmware.com/",
+									ProductUrl:  "https://github.com/vmware/govmomi/",
+									AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+								},
+							},
+						},
+					},
+				},
+				log: logger,
+			}
+
+			vm.applyVAppProductSpecEdit(&tc.spec)
+			var actual types.VAppProductInfo
+			for _, p := range vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Product {
+				if p.Key == tc.expected.Key {
+					actual = p
+				}
+			}
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestVmApplyVAppProductSpecRemove(t *testing.T) {
+	var buf bytes.Buffer
+	logger := log.New(&buf, "", 0)
+	vm := &VirtualMachine{
+		VirtualMachine: mo.VirtualMachine{
+			Config: &types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					Product: []types.VAppProductInfo{
+						{
+							Key:         0,
+							ClassId:     "one",
+							InstanceId:  "one",
+							Name:        "Foo",
+							Vendor:      "Foo Inc.",
+							Version:     "One",
+							FullVersion: "1.2.3",
+							VendorUrl:   "https://www.vmware.com/",
+							ProductUrl:  "https://github.com/vmware/govmomi/",
+							AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+						},
+					},
+				},
+			},
+		},
+		log: logger,
+	}
+
+	vm.applyVAppProductSpecRemove()
+	actual := vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Product[0]
+	expected := types.VAppProductInfo{}
+	if !reflect.DeepEqual(expected, actual) {
+		t.Fatalf("expected %#v, got %#v", expected, actual)
+	}
+}
+
+func TestVmApplyVAppProductSpec(t *testing.T) {
+	cases := []struct {
+		name     string
+		initial  []types.VAppProductInfo
+		spec     []types.VAppProductSpec
+		expected []types.VAppProductInfo
+	}{
+		{
+			name: "edit",
+			initial: []types.VAppProductInfo{
+				{
+					Key:         0,
+					ClassId:     "one",
+					InstanceId:  "one",
+					Name:        "Foo",
+					Vendor:      "Foo Inc.",
+					Version:     "One",
+					FullVersion: "1.2.3",
+					VendorUrl:   "https://www.vmware.com/",
+					ProductUrl:  "https://github.com/vmware/govmomi/",
+					AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+				},
+			},
+			spec: []types.VAppProductSpec{
+				{
+					ArrayUpdateSpec: types.ArrayUpdateSpec{
+						Operation: types.ArrayUpdateOperationEdit,
+					},
+					Info: &types.VAppProductInfo{
+						Key:    0,
+						Name:   "Bar",
+						Vendor: "Bar Inc.",
+					},
+				},
+			},
+			expected: []types.VAppProductInfo{
+				{
+					Key:         0,
+					ClassId:     "one",
+					InstanceId:  "one",
+					Name:        "Bar",
+					Vendor:      "Bar Inc.",
+					Version:     "One",
+					FullVersion: "1.2.3",
+					VendorUrl:   "https://www.vmware.com/",
+					ProductUrl:  "https://github.com/vmware/govmomi/",
+					AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+				},
+			},
+		},
+		{
+			name: "remove",
+			initial: []types.VAppProductInfo{
+				{
+					Key:         0,
+					ClassId:     "one",
+					InstanceId:  "one",
+					Name:        "Foo",
+					Vendor:      "Foo Inc.",
+					Version:     "One",
+					FullVersion: "1.2.3",
+					VendorUrl:   "https://www.vmware.com/",
+					ProductUrl:  "https://github.com/vmware/govmomi/",
+					AppUrl:      "https://github.com/vmware/govmomi/tree/master/govc",
+				},
+			},
+			spec: []types.VAppProductSpec{
+				{
+					ArrayUpdateSpec: types.ArrayUpdateSpec{
+						Operation: types.ArrayUpdateOperationRemove,
+						RemoveKey: int32(0),
+					},
+				},
+			},
+			expected: []types.VAppProductInfo{{}},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						VAppConfig: &types.VmConfigInfo{
+							Product: tc.initial,
+						},
+					},
+				},
+			}
+
+			vm.applyVAppProductSpec(tc.spec[0])
+			actual := vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Product
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestApplyVmConfigSpec(t *testing.T) {
+	cases := []struct {
+		name     string
+		initial  types.VmConfigInfo
+		spec     types.VmConfigSpec
+		expected types.VmConfigInfo
+	}{
+		{
+			name:    "set initial basic fields",
+			initial: types.VmConfigInfo{},
+			spec: types.VmConfigSpec{
+				IpAssignment: &types.VAppIPAssignmentInfo{
+					SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+					IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+					SupportedIpProtocol: []string{
+						string(types.VAppIPAssignmentInfoProtocolsIPv4),
+						string(types.VAppIPAssignmentInfoProtocolsIPv6),
+					},
+					IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+				},
+				Eula: []string{"all rights reserved"},
+				OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+				InstallBootRequired:     types.NewBool(true),
+				InstallBootStopDelay:    int32(10),
+			},
+			expected: types.VmConfigInfo{
+				IpAssignment: types.VAppIPAssignmentInfo{
+					SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+					IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+					SupportedIpProtocol: []string{
+						string(types.VAppIPAssignmentInfoProtocolsIPv4),
+						string(types.VAppIPAssignmentInfoProtocolsIPv6),
+					},
+					IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+				},
+				Eula: []string{"all rights reserved"},
+				OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+				InstallBootRequired:     true,
+				InstallBootStopDelay:    int32(10),
+			},
+		},
+		{
+			name: "set one field only",
+			initial: types.VmConfigInfo{
+				Eula: []string{"all rights reserved"},
+			},
+			spec: types.VmConfigSpec{
+				OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+			},
+			expected: types.VmConfigInfo{
+				Eula: []string{"all rights reserved"},
+				OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+			},
+		},
+		{
+			name: "clear EULA",
+			initial: types.VmConfigInfo{
+				Eula: []string{"all rights reserved"},
+			},
+			spec: types.VmConfigSpec{
+				Eula: []string{""},
+			},
+			expected: types.VmConfigInfo{},
+		},
+		{
+			name:    "set a property",
+			initial: types.VmConfigInfo{},
+			spec: types.VmConfigSpec{
+				Property: []types.VAppPropertySpec{
+					{
+						ArrayUpdateSpec: types.ArrayUpdateSpec{
+							Operation: types.ArrayUpdateOperationAdd,
+						},
+						Info: &types.VAppPropertyInfo{
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.bar",
+							Category:         "foobarbazqux",
+							Label:            "Foo",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: types.NewBool(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+			expected: types.VmConfigInfo{
+				Property: []types.VAppPropertyInfo{
+					{
+						ClassId:          "foo",
+						InstanceId:       "foo",
+						Id:               "foo.bar",
+						Category:         "foobarbazqux",
+						Label:            "Foo",
+						Type:             "string",
+						TypeReference:    "VirtualMachine",
+						UserConfigurable: types.NewBool(true),
+						DefaultValue:     "foo",
+						Value:            "foo",
+						Description:      "foo",
+					},
+				},
+			},
+		},
+		{
+			name: "set some product info",
+			initial: types.VmConfigInfo{
+				Product: []types.VAppProductInfo{{}},
+			},
+			spec: types.VmConfigSpec{
+				Product: []types.VAppProductSpec{
+					{
+						ArrayUpdateSpec: types.ArrayUpdateSpec{
+							Operation: types.ArrayUpdateOperationEdit,
+						},
+						Info: &types.VAppProductInfo{
+							Key:    0,
+							Name:   "Bar",
+							Vendor: "Bar Inc.",
+						},
+					},
+				},
+			},
+			expected: types.VmConfigInfo{
+				Product: []types.VAppProductInfo{
+					{
+						Key:    0,
+						Name:   "Bar",
+						Vendor: "Bar Inc.",
+					},
+				},
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						VAppConfig: types.BaseVmConfigInfo(&tc.initial),
+					},
+				},
+			}
+
+			vm.applyVmConfigSpec(tc.spec)
+			actual := *vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo)
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestApplyVAppEula(t *testing.T) {
+	cases := []struct {
+		name     string
+		initial  []string
+		spec     []string
+		expected []string
+	}{
+		{
+			name:     "add one",
+			initial:  nil,
+			spec:     []string{"foo"},
+			expected: []string{"foo"},
+		},
+		{
+			name:     "append",
+			initial:  []string{"foo"},
+			spec:     []string{"foo", "bar"},
+			expected: []string{"foo", "bar"},
+		},
+		{
+			name:     "consolidate empty",
+			initial:  nil,
+			spec:     []string{"foo", "", "bar"},
+			expected: []string{"foo", "bar"},
+		},
+		{
+			name:     "clear",
+			initial:  []string{"foo", "bar"},
+			spec:     []string{""},
+			expected: nil,
+		},
+		{
+			name:     "all empty clears",
+			initial:  []string{"foo", "bar"},
+			spec:     []string{"", ""},
+			expected: nil,
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Config: &types.VirtualMachineConfigInfo{
+						VAppConfig: &types.VmConfigInfo{
+							Eula: tc.initial,
+						},
+					},
+				},
+			}
+
+			vm.applyVAppEula(tc.spec)
+			actual := vm.VirtualMachine.Config.VAppConfig.(*types.VmConfigInfo).Eula
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
+	}
+}
+
+func TestVmApplyVApp(t *testing.T) {
+	cases := []struct {
+		name     string
+		initial  types.VirtualMachineConfigInfo
+		spec     types.VirtualMachineConfigSpec
+		expected types.VirtualMachineConfigInfo
+	}{
+		{
+			name:    "set",
+			initial: types.VirtualMachineConfigInfo{},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					IpAssignment: &types.VAppIPAssignmentInfo{
+						SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+						IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+						SupportedIpProtocol: []string{
+							string(types.VAppIPAssignmentInfoProtocolsIPv4),
+							string(types.VAppIPAssignmentInfoProtocolsIPv6),
+						},
+						IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+					},
+					Eula: []string{"all rights reserved"},
+					OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+					InstallBootRequired:     types.NewBool(true),
+					InstallBootStopDelay:    int32(10),
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								ClassId:          "foo",
+								InstanceId:       "foo",
+								Id:               "foo.bar",
+								Category:         "foobarbazqux",
+								Label:            "Foo",
+								Type:             "string",
+								TypeReference:    "VirtualMachine",
+								UserConfigurable: types.NewBool(true),
+								DefaultValue:     "foo",
+								Value:            "foo",
+								Description:      "foo",
+							},
+						},
+					},
+				},
+			},
+			expected: types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					IpAssignment: types.VAppIPAssignmentInfo{
+						SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+						IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+						SupportedIpProtocol: []string{
+							string(types.VAppIPAssignmentInfoProtocolsIPv4),
+							string(types.VAppIPAssignmentInfoProtocolsIPv6),
+						},
+						IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+					},
+					Eula: []string{"all rights reserved"},
+					OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+					InstallBootRequired:     true,
+					InstallBootStopDelay:    int32(10),
+					Property: []types.VAppPropertyInfo{
+						{
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.bar",
+							Category:         "foobarbazqux",
+							Label:            "Foo",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: types.NewBool(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "edit",
+			initial: types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					IpAssignment: types.VAppIPAssignmentInfo{
+						SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+						IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+						SupportedIpProtocol: []string{
+							string(types.VAppIPAssignmentInfoProtocolsIPv4),
+							string(types.VAppIPAssignmentInfoProtocolsIPv6),
+						},
+						IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+					},
+					Eula: []string{"all rights reserved"},
+					OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+					InstallBootRequired:     true,
+					InstallBootStopDelay:    int32(10),
+					Property: []types.VAppPropertyInfo{
+						{
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.bar",
+							Category:         "foobarbazqux",
+							Label:            "Foo",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: types.NewBool(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Eula: []string{"all rights NOT reserved"},
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationEdit,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key:   0,
+								Label: "Bar",
+							},
+						},
+					},
+				},
+			},
+			expected: types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					IpAssignment: types.VAppIPAssignmentInfo{
+						SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+						IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+						SupportedIpProtocol: []string{
+							string(types.VAppIPAssignmentInfoProtocolsIPv4),
+							string(types.VAppIPAssignmentInfoProtocolsIPv6),
+						},
+						IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+					},
+					Eula: []string{"all rights NOT reserved"},
+					OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+					InstallBootRequired:     true,
+					InstallBootStopDelay:    int32(10),
+					Property: []types.VAppPropertyInfo{
+						{
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.bar",
+							Category:         "foobarbazqux",
+							Label:            "Bar",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: types.NewBool(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+		},
+		{
+			name: "delete",
+			initial: types.VirtualMachineConfigInfo{
+				VAppConfig: &types.VmConfigInfo{
+					IpAssignment: types.VAppIPAssignmentInfo{
+						SupportedAllocationScheme: []string{string(types.VAppIPAssignmentInfoAllocationSchemesDhcp)},
+						IpAllocationPolicy:        string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+						SupportedIpProtocol: []string{
+							string(types.VAppIPAssignmentInfoProtocolsIPv4),
+							string(types.VAppIPAssignmentInfoProtocolsIPv6),
+						},
+						IpProtocol: string(types.VAppIPAssignmentInfoProtocolsIPv4),
+					},
+					Eula: []string{"all rights reserved"},
+					OvfEnvironmentTransport: []string{"com.vmware.guestInfo"},
+					InstallBootRequired:     true,
+					InstallBootStopDelay:    int32(10),
+					Property: []types.VAppPropertyInfo{
+						{
+							ClassId:          "foo",
+							InstanceId:       "foo",
+							Id:               "foo.bar",
+							Category:         "foobarbazqux",
+							Label:            "Foo",
+							Type:             "string",
+							TypeReference:    "VirtualMachine",
+							UserConfigurable: types.NewBool(true),
+							DefaultValue:     "foo",
+							Value:            "foo",
+							Description:      "foo",
+						},
+					},
+				},
+			},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfigRemoved: types.NewBool(true),
+			},
+			expected: types.VirtualMachineConfigInfo{
+				VAppConfig: nil,
+			},
+		},
+	}
+
+	for _, tc := range cases {
+		t.Run(tc.name, func(t *testing.T) {
+			vm := &VirtualMachine{
+				VirtualMachine: mo.VirtualMachine{
+					Summary: types.VirtualMachineSummary{
+						Guest: &types.VirtualMachineGuestSummary{},
+					},
+					Config: &tc.initial,
+				},
+			}
+
+			vm.apply(&tc.spec)
+			actual := *vm.VirtualMachine.Config
+			// Zero out the modified time as we don't really care about it here. This
+			// allows an equal comparison.
+			actual.Modified = time.Time{}
+			if !reflect.DeepEqual(tc.expected, actual) {
+				t.Fatalf("expected %#v, got %#v", tc.expected, actual)
+			}
+		})
 	}
 }
