@@ -372,6 +372,9 @@ func (vm *VirtualMachine) applyVAppProductSpec(spec types.VAppProductSpec) {
 // Note that we don't edit key, as product data always seems to be in key #0
 // only.
 func (vm *VirtualMachine) applyVAppProductSpecEdit(info *types.VAppProductInfo) {
+	if len(vm.Config.VAppConfig.GetVmConfigInfo().Product) < 1 {
+		vm.Config.VAppConfig.GetVmConfigInfo().Product = make([]types.VAppProductInfo, 1)
+	}
 	cfg := vm.Config.VAppConfig.GetVmConfigInfo().Product[0]
 	apply := []struct {
 		src string

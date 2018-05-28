@@ -805,3 +805,41 @@ load test_helper
   run govc vm.power -on "$id"
   assert_failure
 }
+
+@test "vm.vapp.change" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  run govc vm.vapp.change -vm="$vm" -product.name "Foo"
+  assert_success
+
+  result=$(govc vm.vapp.info $vm | grep '  Product Name:.*Foo' | wc -l)
+  [ $result -eq 1 ]
+}
+
+@test "vm.vapp.change" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  run govc vm.vapp.change -vm="$vm" -product.name "Foo"
+  assert_success
+
+  result=$(govc vm.vapp.info $vm | grep '  Product Name:.*Foo' | wc -l)
+  [ $result -eq 1 ]
+}
+
+@test "vm.vapp.property.add" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  run govc vm.vapp.property.add  -vm="$vm" -label="Hostname" -type=string -userconfigurable=true "guestinfo.hostname"
+  assert_success
+
+  result=$(govc vm.vapp.property.info -vm="$vm" guestinfo.hostname | grep 'Property: guestinfo.hostname' | wc -l)
+  [ $result -eq 1 ]
+  result=$(govc vm.vapp.property.info -vm="$vm" guestinfo.hostname | grep '  Label:.*Hostname' | wc -l)
+  [ $result -eq 1 ]
+}
