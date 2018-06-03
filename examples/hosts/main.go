@@ -76,7 +76,7 @@ func main() {
 		fmt.Fprintf(tw, "%d\t", hs.Summary.QuickStats.OverallCpuUsage)
 		fmt.Fprintf(tw, "%d\t", totalCPU)
 		fmt.Fprintf(tw, "%d\t", freeCPU)
-		fmt.Fprintf(tw, "%s\t", units.ByteSize(hs.Summary.QuickStats.OverallMemoryUsage))
+		fmt.Fprintf(tw, "%s\t", (units.ByteSize(hs.Summary.QuickStats.OverallMemoryUsage))*1024*1024)
 		fmt.Fprintf(tw, "%s\t", units.ByteSize(hs.Summary.Hardware.MemorySize))
 		fmt.Fprintf(tw, "%d\t", freeMemory)
 		fmt.Fprintf(tw, "\n")
