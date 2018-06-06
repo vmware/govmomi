@@ -20,6 +20,8 @@ import (
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
+	_ "github.com/vmware/govmomi/govc/tags/categories"
+	_ "github.com/vmware/govmomi/govc/tags/tags_helper"
 
 	_ "github.com/vmware/govmomi/govc/about"
 	_ "github.com/vmware/govmomi/govc/cluster"
