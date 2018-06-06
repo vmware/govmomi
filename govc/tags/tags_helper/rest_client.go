@@ -26,7 +26,6 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/pkg/errors"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
@@ -99,7 +98,7 @@ func (c *RestClient) call(ctx context.Context, method, path string, data interfa
 	//	Logger.Debugf("%s: %s, headers: %+v", method, path, headers)
 	params, err := c.encodeData(data)
 	if err != nil {
-		return nil, nil, -1, errors.Wrap(err, "call failed")
+		return nil, nil, -1, err
 	}
 
 	if data != nil {
@@ -126,7 +125,7 @@ func (c *RestClient) clientRequest(ctx context.Context, method, path string, in 
 
 	req, err := c.newRequest(method, path, in)
 	if err != nil {
-		return nil, nil, -1, errors.Wrap(err, "failed to create request")
+		return nil, nil, -1, err
 	}
 
 	req = req.WithContext(ctx)
@@ -158,19 +157,19 @@ func (c *RestClient) handleResponse(resp *http.Response, err error) (io.ReadClos
 	}
 	if err != nil {
 		if strings.Contains(err.Error(), "connection refused") {
-			return nil, nil, statusCode, errors.Errorf("Cannot connect to endpoint %s. Is vCloud Suite API running on this server?", c.host)
+			return nil, nil, statusCode, err
 		}
-		return nil, nil, statusCode, errors.Wrap(err, "error occurred trying to connect")
+		return nil, nil, statusCode, err
 	}
 
 	if statusCode < http.StatusOK || statusCode >= http.StatusBadRequest {
 		body, err := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		if err != nil {
-			return nil, nil, statusCode, errors.Wrap(err, "error reading response")
+			return nil, nil, statusCode, err
 		}
 		if len(body) == 0 {
-			return nil, nil, statusCode, errors.Errorf("Error: request returned %s", http.StatusText(statusCode))
+			return nil, nil, statusCode, err
 		}
 		fmt.Printf("Error response: %s", bytes.TrimSpace(body))
 		return nil, nil, statusCode, err
