@@ -122,7 +122,7 @@ func (c *RestClient) GetCategory(ctx context.Context, id string) (*Category, err
 	stream, _, status, err := c.call(ctx, "GET", fmt.Sprintf("%s/id:%s", CategoryURL, id), nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Get category failed with status code: %s, error message: %s", status, err)
+		fmt.Printf("Get category failed with status code: %d, error message: %s", status, err)
 		return nil, err
 	}
 
@@ -154,7 +154,7 @@ func (c *RestClient) DeleteCategory(ctx context.Context, id string) error {
 	_, _, status, err := c.call(ctx, "DELETE", fmt.Sprintf("%s/id:%s", CategoryURL, id), nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Delete category failed with status code: %s, error message: %s", status, err)
+		fmt.Printf("Delete category failed with status code: %d, error message: %s", status, err)
 		return err
 	}
 	return nil
@@ -165,7 +165,7 @@ func (c *RestClient) ListCategories(ctx context.Context) ([]string, error) {
 	stream, _, status, err := c.call(ctx, "GET", CategoryURL, nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Get categories failed with status code: %s, error message: %s", status, err)
+		fmt.Printf("Get categories failed with status code: %d, error message: %s", status, err)
 		return nil, err
 	}
 
