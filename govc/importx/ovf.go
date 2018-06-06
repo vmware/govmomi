@@ -160,6 +160,10 @@ func (cmd *ovfx) Deploy(vm *object.VirtualMachine) error {
 		return err
 	}
 
+	if err := cmd.MarkAsTemplate(vm); err != nil {
+		return err
+	}
+
 	if err := cmd.PowerOn(vm); err != nil {
 		return err
 	}
@@ -340,7 +344,7 @@ func (cmd *ovfx) Upload(ctx context.Context, lease *nfc.Lease, item nfc.FileItem
 
 func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
 	ctx := context.TODO()
-	if !cmd.Options.PowerOn {
+	if !cmd.Options.PowerOn || cmd.Options.MarkAsTemplate {
 		return nil
 	}
 
@@ -352,6 +356,22 @@ func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
 	}
 
 	if _, err = task.WaitForResult(ctx, nil); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (cmd *ovfx) MarkAsTemplate(vm *object.VirtualMachine) error {
+	ctx := context.TODO()
+	if !cmd.Options.MarkAsTemplate {
+		return nil
+	}
+
+	cmd.Log("Marking VM as template...\n")
+
+	err := vm.MarkAsTemplate(ctx)
+	if err != nil {
 		return err
 	}
 
@@ -411,7 +431,7 @@ func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
 
 func (cmd *ovfx) WaitForIP(vm *object.VirtualMachine) error {
 	ctx := context.TODO()
-	if !cmd.Options.PowerOn || !cmd.Options.WaitForIP {
+	if !cmd.Options.PowerOn || !cmd.Options.WaitForIP || cmd.Options.MarkAsTemplate {
 		return nil
 	}
 
