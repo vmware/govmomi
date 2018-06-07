@@ -16,7 +16,11 @@ limitations under the License.
 
 package soap
 
-import "testing"
+import (
+	"net/url"
+	"os"
+	"testing"
+)
 
 func TestSplitHostPort(t *testing.T) {
 	tests := []struct {
@@ -40,4 +44,107 @@ func TestSplitHostPort(t *testing.T) {
 			t.Errorf("(%s) %s != %s", test.url, port, test.port)
 		}
 	}
+}
+
+func TestMultipleCAPaths(t *testing.T) {
+	rootCaPath := "fixtures/invalid-cert.pem:fixtures/valid-cert.pem"
+
+	t.Run("When client.ValidateRootCAs is not set (left to default)", func(t *testing.T) {
+		client := getTestClient()
+		err := client.SetRootCAs(rootCaPath)
+		if err != nil {
+			t.Fatalf("Err should not have occured: %#v", err)
+		}
+	})
+
+	t.Run("When client.ValidateRootCAs is set to true", func(t *testing.T) {
+		client := getTestClient()
+		client.ValidateRootCAs = true
+		err := client.SetRootCAs(rootCaPath)
+		if certErr, ok := err.(ErrInvalidCACertificate); !ok {
+			t.Fatalf("Expected ErrInvalidCertificate to occur")
+		} else {
+			if certErr.File != "fixtures/invalid-cert.pem" {
+				t.Fatalf("Expected Err to show invalid file")
+			}
+		}
+	})
+}
+
+func TestInvalidRootCAPath(t *testing.T) {
+	rootCaPath := "fixtures/there-is-no-such-file"
+
+	t.Run("When client.ValidateRootCAs is not set (left to default)", func(t *testing.T) {
+		client := getTestClient()
+		err := client.SetRootCAs(rootCaPath)
+		if _, ok := err.(*os.PathError); !ok {
+			t.Fatalf("os.PathError should have occured: %#v", err)
+		}
+	})
+
+	t.Run("When client.ValidateRootCAs is set to true", func(t *testing.T) {
+		client := getTestClient()
+		client.ValidateRootCAs = true
+		err := client.SetRootCAs(rootCaPath)
+		if _, ok := err.(*os.PathError); !ok {
+			t.Fatalf("os.PathError should have occured: %#v", err)
+		}
+	})
+}
+
+func TestValidRootCAs(t *testing.T) {
+	rootCaPath := "fixtures/valid-cert.pem"
+
+	t.Run("When client.ValidateRootCAs is not set (left to default)", func(t *testing.T) {
+		client := getTestClient()
+		err := client.SetRootCAs(rootCaPath)
+		if err != nil {
+			t.Fatalf("Err should not have occured: %#v", err)
+		}
+	})
+
+	t.Run("When client.ValidateRootCAs is set to true", func(t *testing.T) {
+		client := getTestClient()
+		client.ValidateRootCAs = true
+		err := client.SetRootCAs(rootCaPath)
+		if err != nil {
+			t.Fatalf("Err should not have occured: %#v", err)
+		}
+	})
+}
+
+func TestInvalidRootCAs(t *testing.T) {
+	rootCaPath := "fixtures/invalid-cert.pem"
+
+	t.Run("When client.ValidateRootCAs is not set (left to default)", func(t *testing.T) {
+		client := getTestClient()
+		err := client.SetRootCAs(rootCaPath)
+		if err != nil {
+			t.Fatalf("Err should not have occoured: %#v", err)
+		}
+	})
+
+	t.Run("When client.ValidateRootCAs is set to true", func(t *testing.T) {
+		client := getTestClient()
+		client.ValidateRootCAs = true
+		err := client.SetRootCAs(rootCaPath)
+
+		if certErr, ok := err.(ErrInvalidCACertificate); !ok {
+			t.Fatalf("Expected ErrInvalidCertificate to occur")
+		} else {
+			if certErr.File != "fixtures/invalid-cert.pem" {
+				t.Fatalf("Expected Err to show invalid file")
+			}
+		}
+	})
+}
+
+func getTestClient() *Client {
+	url := &url.URL{
+		Scheme: "https",
+		Host:   "some.host.tld:8080",
+	}
+	insecure := false
+
+	return NewClient(url, insecure)
 }

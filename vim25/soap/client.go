@@ -72,10 +72,28 @@ type Client struct {
 	Version   string // Vim version
 	UserAgent string
 
+	// ValidateRootCAs: if set to true, the soap client will ensure the root CA
+	// certificates are valid in SetRootCAs. If at least one of the certs is
+	// invalid, SetRootCAs will return an error.
+	// Defaults to false; which means that the client will silently ignore any
+	// cert validation errors during SetRootCAs.
+	ValidateRootCAs bool
+
 	cookie string
 }
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
+
+type ErrInvalidCACertificate struct {
+	File string
+}
+
+func (e ErrInvalidCACertificate) Error() string {
+	return fmt.Sprintf(
+		"Invalid certificate '%s', cannot be used as a trusted CA certfificate",
+		e.File,
+	)
+}
 
 // ParseURL is wrapper around url.Parse, where Scheme defaults to "https" and Path defaults to "/sdk"
 func ParseURL(s string) (*url.URL, error) {
@@ -200,7 +218,12 @@ func (c *Client) SetRootCAs(file string) error {
 			return err
 		}
 
-		pool.AppendCertsFromPEM(pem)
+		ok := pool.AppendCertsFromPEM(pem)
+		if c.ValidateRootCAs && !ok {
+			return ErrInvalidCACertificate{
+				File: name,
+			}
+		}
 	}
 
 	c.t.TLSClientConfig.RootCAs = pool
