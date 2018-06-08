@@ -1,30 +1,50 @@
+/*
+Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package tags
 
 import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"net/url"
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/govc/tags/tags_helper"
 	"github.com/vmware/govmomi/sts"
+	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
 type ls struct {
 	*flags.ClientFlag
+	*flags.OutputFlag
 }
 
 func init() {
-	cli.Register("tags.categories.ls", &ls{})
+	cli.Register("tags.category.ls", &ls{})
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
+	cmd.OutputFlag.Register(ctx, f)
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -35,9 +55,9 @@ func (cmd *ls) Process(ctx context.Context) error {
 }
 
 func (cmd *ls) Usage() string {
-	return `
-	Examples:
-	  govc tags.categories.ls`
+	return `List all categories
+Examples:
+  govc tags.category.ls`
 }
 
 func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
@@ -45,8 +65,12 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 	if err != nil {
 		return err
 	}
+	usrDecode, err := url.QueryUnescape(cmd.Userinfo().String())
+	if err != nil {
+		return err
+	}
 
-	govcUrl := "https://" + os.Getenv("GOVC_URL")
+	govcUrl := "https://" + usrDecode + "@" + vc.URL().Hostname()
 
 	URL, err := url.Parse(govcUrl)
 	if err != nil {
@@ -58,9 +82,6 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 		return err
 	}
 
-	// SSO admin server has its own session manager, so the govc persisted session cookies cannot
-	// be used to authenticate.  There is no SSO token persistence in govc yet, so just use an env
-	// var for now.  If no GOVC_LOGIN_TOKEN is set, issue a new token.
 	token := os.Getenv("GOVC_LOGIN_TOKEN")
 	header := soap.Header{
 		Security: &sts.Signer{
@@ -86,11 +107,20 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 		}
 	}
 
-	if err = c.Login(context.TODO()); err != nil {
+	if err = c.Login(ctx); err != nil {
 		return err
 	}
 
 	return f(c)
+}
+
+type getResult []string
+
+func (r getResult) Write(w io.Writer) error {
+	for i := range r {
+		fmt.Fprintln(w, r[i])
+	}
+	return nil
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -98,11 +128,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
 		categories, err := c.ListCategories(ctx)
 		if err != nil {
-			fmt.Printf(err.Error())
 			return err
 		}
 
-		fmt.Println(categories)
+		result := getResult(categories)
+		cmd.WriteResult(result)
 		return nil
 
 	})

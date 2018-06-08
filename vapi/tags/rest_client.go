@@ -171,8 +171,8 @@ func (c *RestClient) handleResponse(resp *http.Response, err error) (io.ReadClos
 		if len(body) == 0 {
 			return nil, nil, statusCode, err
 		}
-		fmt.Printf("Error response: %s", bytes.TrimSpace(body))
-		return nil, nil, statusCode, err
+		return nil, nil, statusCode, fmt.Errorf("Error response: %s", bytes.TrimSpace(body))
+
 	}
 
 	return resp.Body, resp.Header, statusCode, nil
@@ -253,19 +253,13 @@ func (c *RestClient) SetSessionID(sessionID string) {
 // This should be used when restoring a session to determine if a new login is
 // necessary.
 func (c *RestClient) Valid(ctx context.Context) bool {
-	sessionID := c.SessionID()
-	fmt.Printf("Checking if session ID %q is still valid", sessionID)
-
 	_, _, statusCode, err := c.clientRequest(ctx, "POST", loginURL+"?~action=get", nil, nil)
 	if err != nil {
-		fmt.Printf("Error getting current session information for ID %q - session is invalid (%d - %s)", sessionID, statusCode, err)
+		return false
 	}
 
 	if statusCode == http.StatusOK {
-		fmt.Printf("Session ID %q is valid", sessionID)
 		return true
 	}
-
-	fmt.Printf("Session is invalid for %v (%d)", sessionID, statusCode)
 	return false
 }

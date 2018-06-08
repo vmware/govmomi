@@ -32,7 +32,7 @@ type CategoryCreateSpec struct {
 }
 
 type CategoryUpdateSpec struct {
-	UpdateSpec CategoryUpdate `json:"update_spec"`
+	UpdateSpec CategoryUpdate `json:"update_spec,omitempty"`
 }
 
 type CategoryCreate struct {
@@ -43,10 +43,10 @@ type CategoryCreate struct {
 }
 
 type CategoryUpdate struct {
-	AssociableTypes []string `json:"associable_types"`
-	Cardinality     string   `json:"cardinality"`
-	Description     string   `json:"description"`
-	Name            string   `json:"name"`
+	AssociableTypes []string `json:"associable_types,omitempty"`
+	Cardinality     string   `json:"cardinality,omitempty"`
+	Description     string   `json:"description,omitempty"`
+	Name            string   `json:"name,omitempty"`
 }
 
 type Category struct {
@@ -78,12 +78,12 @@ func (c *RestClient) CreateCategoryIfNotExist(ctx context.Context, name string, 
 			// in case there are two docker daemon try to create inventory category, query the category once again
 			if strings.Contains(err.Error(), "ErrAlreadyExists") {
 				if categories, err = c.GetCategoriesByName(ctx, name); err != nil {
-					fmt.Printf("Failed to get inventory category for %s", err)
-					return nil, err
+					return nil, fmt.Errorf("Failed to get inventory category for %s", err)
+
 				}
 			} else {
-				fmt.Printf("Failed to create inventory category for %s", err)
-				return nil, err
+				return nil, fmt.Errorf("Failed to create inventory category for %s", err)
+
 			}
 		} else {
 			return id, nil
@@ -93,16 +93,16 @@ func (c *RestClient) CreateCategoryIfNotExist(ctx context.Context, name string, 
 		return &categories[0].ID, nil
 	}
 	// should not happen
-	fmt.Printf("Failed to create inventory for it's existed, but could not query back. Please check system")
-	return nil, err
+	return nil, fmt.Errorf("Failed to create inventory for it's existed, but could not query back. Please check system")
+
 }
 
 func (c *RestClient) CreateCategory(ctx context.Context, spec *CategoryCreateSpec) (*string, error) {
 	stream, _, status, err := c.call(ctx, "POST", CategoryURL, spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Create category failed with status code: %d, error message: %s", status, err)
-		return nil, err
+		return nil, fmt.Errorf("Create category failed with status code: %d, error message: %s", status, err)
+
 	}
 
 	type RespValue struct {
@@ -111,8 +111,8 @@ func (c *RestClient) CreateCategory(ctx context.Context, spec *CategoryCreateSpe
 
 	var pID RespValue
 	if err := json.NewDecoder(stream).Decode(&pID); err != nil {
-		fmt.Printf("Decode response body failed for: %s", err)
-		return nil, err
+		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+
 	}
 	return &(pID.Value), nil
 }
@@ -122,8 +122,8 @@ func (c *RestClient) GetCategory(ctx context.Context, id string) (*Category, err
 	stream, _, status, err := c.call(ctx, "GET", fmt.Sprintf("%s/id:%s", CategoryURL, id), nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Get category failed with status code: %d, error message: %s", status, err)
-		return nil, err
+		return nil, fmt.Errorf("Get category failed with status code: %d, error message: %s", status, err)
+
 	}
 
 	type RespValue struct {
@@ -132,8 +132,8 @@ func (c *RestClient) GetCategory(ctx context.Context, id string) (*Category, err
 
 	var pCategory RespValue
 	if err := json.NewDecoder(stream).Decode(&pCategory); err != nil {
-		fmt.Printf("Decode response body failed for: %s", err)
-		return nil, err
+		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+
 	}
 	return &(pCategory.Value), nil
 }
@@ -142,8 +142,7 @@ func (c *RestClient) UpdateCategory(ctx context.Context, id string, spec *Catego
 	_, _, status, err := c.call(ctx, "PATCH", fmt.Sprintf("%s/id:%s", CategoryURL, id), spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Update category failed with status code: %d, error message: %s", status, err)
-		return err
+		return fmt.Errorf("Update category failed with status code: %d, error message: %s", status, err)
 	}
 
 	return nil
@@ -154,8 +153,8 @@ func (c *RestClient) DeleteCategory(ctx context.Context, id string) error {
 	_, _, status, err := c.call(ctx, "DELETE", fmt.Sprintf("%s/id:%s", CategoryURL, id), nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Delete category failed with status code: %d, error message: %s", status, err)
-		return err
+		return fmt.Errorf("Delete category failed with status code: %d, error message: %s", status, err)
+
 	}
 	return nil
 }
@@ -165,8 +164,8 @@ func (c *RestClient) ListCategories(ctx context.Context) ([]string, error) {
 	stream, _, status, err := c.call(ctx, "GET", CategoryURL, nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		fmt.Printf("Get categories failed with status code: %d, error message: %s", status, err)
-		return nil, err
+		return nil, fmt.Errorf("Get categories failed with status code: %d, error message: %s", status, err)
+
 	}
 
 	type Categories struct {
@@ -175,8 +174,8 @@ func (c *RestClient) ListCategories(ctx context.Context) ([]string, error) {
 
 	var pCategories Categories
 	if err := json.NewDecoder(stream).Decode(&pCategories); err != nil {
-		fmt.Printf("Decode response body failed for: %s", err)
-		return nil, err
+		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+
 	}
 	return pCategories.Value, nil
 }
@@ -184,15 +183,15 @@ func (c *RestClient) ListCategories(ctx context.Context) ([]string, error) {
 func (c *RestClient) GetCategoriesByName(ctx context.Context, name string) ([]Category, error) {
 	categoryIds, err := c.ListCategories(ctx)
 	if err != nil {
-		fmt.Printf("Get category failed for: %s", err)
-		return nil, err
+		return nil, fmt.Errorf("Get category failed for: %s", err)
+
 	}
 
 	var categories []Category
 	for _, cID := range categoryIds {
 		category, err := c.GetCategory(ctx, cID)
 		if err != nil {
-			fmt.Printf("Get category %s failed for %s", cID, err)
+			return nil, fmt.Errorf("Get category %s failed for %s", cID, err)
 		}
 		if category.Name == name {
 			categories = append(categories, *category)
