@@ -72,13 +72,6 @@ type Client struct {
 	Version   string // Vim version
 	UserAgent string
 
-	// ValidateRootCAs: if set to true, the soap client will ensure the root CA
-	// certificates are valid in SetRootCAs. If at least one of the certs is
-	// invalid, SetRootCAs will return an error.
-	// Defaults to false; which means that the client will silently ignore any
-	// cert validation errors during SetRootCAs.
-	ValidateRootCAs bool
-
 	cookie string
 }
 
@@ -90,7 +83,7 @@ type ErrInvalidCACertificate struct {
 
 func (e ErrInvalidCACertificate) Error() string {
 	return fmt.Sprintf(
-		"Invalid certificate '%s', cannot be used as a trusted CA certfificate",
+		"invalid certificate '%s', cannot be used as a trusted CA certificate",
 		e.File,
 	)
 }
@@ -218,8 +211,7 @@ func (c *Client) SetRootCAs(file string) error {
 			return err
 		}
 
-		ok := pool.AppendCertsFromPEM(pem)
-		if c.ValidateRootCAs && !ok {
+		if ok := pool.AppendCertsFromPEM(pem); !ok {
 			return ErrInvalidCACertificate{
 				File: name,
 			}
