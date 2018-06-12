@@ -72,7 +72,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/session"
 	_ "github.com/vmware/govmomi/govc/sso/service"
 	_ "github.com/vmware/govmomi/govc/sso/user"
-	_ "github.com/vmware/govmomi/govc/tags/categories"
+	_ "github.com/vmware/govmomi/govc/tags/category"
 	_ "github.com/vmware/govmomi/govc/task"
 	_ "github.com/vmware/govmomi/govc/vapp"
 	_ "github.com/vmware/govmomi/govc/version"

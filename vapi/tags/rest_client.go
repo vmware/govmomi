@@ -179,8 +179,6 @@ func (c *RestClient) handleResponse(resp *http.Response, err error) (io.ReadClos
 }
 
 func (c *RestClient) Login(ctx context.Context) error {
-	c.mu.Lock()
-	defer c.mu.Unlock()
 
 	request, err := c.newRequest("POST", loginURL, nil)
 	if err != nil {
@@ -198,14 +196,21 @@ func (c *RestClient) Login(ctx context.Context) error {
 		return err
 	}
 	if resp.StatusCode != http.StatusOK {
-		// #nosec: Errors unhandled.
-		// body, _ := ioutil.ReadAll(resp.Body)
 		resp.Body.Close()
 		return err
 	}
 
 	c.cookies = resp.Cookies()
 
+	return nil
+}
+
+func (c *RestClient) Logout(ctx context.Context) error {
+	_, _, status, err := c.call(ctx, "DELETE", loginURL, nil, nil)
+	if status != http.StatusOK || err != nil {
+		return err
+	}
+	c.SetSessionID("")
 	return nil
 }
 
