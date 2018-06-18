@@ -77,11 +77,11 @@ type Client struct {
 
 var schemeMatch = regexp.MustCompile(`^\w+://`)
 
-type ErrInvalidCACertificate struct {
+type errInvalidCACertificate struct {
 	File string
 }
 
-func (e ErrInvalidCACertificate) Error() string {
+func (e errInvalidCACertificate) Error() string {
 	return fmt.Sprintf(
 		"invalid certificate '%s', cannot be used as a trusted CA certificate",
 		e.File,
@@ -212,7 +212,7 @@ func (c *Client) SetRootCAs(file string) error {
 		}
 
 		if ok := pool.AppendCertsFromPEM(pem); !ok {
-			return ErrInvalidCACertificate{
+			return errInvalidCACertificate{
 				File: name,
 			}
 		}

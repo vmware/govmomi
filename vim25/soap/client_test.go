@@ -49,9 +49,9 @@ func TestSplitHostPort(t *testing.T) {
 func TestMultipleCAPaths(t *testing.T) {
 	err := setCAsOnClient("fixtures/invalid-cert.pem:fixtures/valid-cert.pem")
 
-	certErr, ok := err.(ErrInvalidCACertificate)
+	certErr, ok := err.(errInvalidCACertificate)
 	if !ok {
-		t.Fatalf("Expected ErrInvalidCertificate to occur")
+		t.Fatalf("Expected errInvalidCertificate to occur")
 	}
 	if certErr.File != "fixtures/invalid-cert.pem" {
 		t.Fatalf("Expected Err to show invalid file")
@@ -77,9 +77,9 @@ func TestValidRootCAs(t *testing.T) {
 func TestInvalidRootCAs(t *testing.T) {
 	err := setCAsOnClient("fixtures/invalid-cert.pem")
 
-	certErr, ok := err.(ErrInvalidCACertificate)
+	certErr, ok := err.(errInvalidCACertificate)
 	if !ok {
-		t.Fatalf("Expected ErrInvalidCertificate to occur")
+		t.Fatalf("Expected errInvalidCertificate to occur")
 	}
 	if certErr.File != "fixtures/invalid-cert.pem" {
 		t.Fatalf("Expected Err to show invalid file")
