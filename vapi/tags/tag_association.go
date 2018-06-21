@@ -19,6 +19,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 const (
@@ -35,19 +37,19 @@ type TagAssociationSpec struct {
 	TagID    *string           `json:"tag_id,omitempty"`
 }
 
-func (c *RestClient) getAssociatedObject(objID string, objType string) *AssociatedObject {
-	if objID == "" && objType == "" {
+func (c *RestClient) getAssociatedObject(ref *types.ManagedObjectReference) *AssociatedObject {
+	if ref == nil {
 		return nil
 	}
 	object := AssociatedObject{
-		ID:   objID,
-		Type: objType,
+		ID:   ref.Value,
+		Type: ref.Type,
 	}
 	return &object
 }
 
-func (c *RestClient) getAssociationSpec(tagID *string, objID string, objType string) *TagAssociationSpec {
-	object := c.getAssociatedObject(objID, objType)
+func (c *RestClient) getAssociationSpec(tagID *string, ref *types.ManagedObjectReference) *TagAssociationSpec {
+	object := c.getAssociatedObject(ref)
 	spec := TagAssociationSpec{
 		TagID:    tagID,
 		ObjectID: object,
@@ -55,32 +57,32 @@ func (c *RestClient) getAssociationSpec(tagID *string, objID string, objType str
 	return &spec
 }
 
-func (c *RestClient) AttachTagToObject(ctx context.Context, tagID string, objID string, objType string) error {
-	spec := c.getAssociationSpec(&tagID, objID, objType)
-	_, _, status, err := c.call(ctx, "POST", fmt.Sprintf("%s?~action=attach", TagAssociationURL), *spec, nil)
+func (c *RestClient) AttachTagToObject(ctx context.Context, tagID string, ref *types.ManagedObjectReference) error {
+	spec := c.getAssociationSpec(&tagID, ref)
+	_, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=attach", TagAssociationURL), *spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		return fmt.Errorf("Attach tag failed with status code: %d, error message: %s", status, err)
+		return fmt.Errorf("attach tag failed with status code: %d, error message: %s", status, err)
 	}
 	return nil
 }
 
-func (c *RestClient) DetachTagFromObject(ctx context.Context, tagID string, objID string, objType string) error {
-	spec := c.getAssociationSpec(&tagID, objID, objType)
-	_, _, status, err := c.call(ctx, "POST", fmt.Sprintf("%s?~action=detach", TagAssociationURL), *spec, nil)
+func (c *RestClient) DetachTagFromObject(ctx context.Context, tagID string, ref *types.ManagedObjectReference) error {
+	spec := c.getAssociationSpec(&tagID, ref)
+	_, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=detach", TagAssociationURL), *spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		return fmt.Errorf("Detach tag failed with status code: %d, error message: %s", status, err)
+		return fmt.Errorf("detach tag failed with status code: %d, error message: %s", status, err)
 	}
 	return nil
 }
 
-func (c *RestClient) ListAttachedTags(ctx context.Context, objID string, objType string) ([]string, error) {
-	spec := c.getAssociationSpec(nil, objID, objType)
-	stream, _, status, err := c.call(ctx, "POST", fmt.Sprintf("%s?~action=list-attached-tags", TagAssociationURL), *spec, nil)
+func (c *RestClient) ListAttachedTags(ctx context.Context, ref *types.ManagedObjectReference) ([]string, error) {
+	spec := c.getAssociationSpec(nil, ref)
+	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=list-attached-tags", TagAssociationURL), *spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		return nil, fmt.Errorf("Detach tag failed with status code: %d, error message: %s", status, err)
+		return nil, fmt.Errorf("detach tag failed with status code: %d, error message: %s", status, err)
 	}
 
 	type RespValue struct {
@@ -89,16 +91,16 @@ func (c *RestClient) ListAttachedTags(ctx context.Context, objID string, objType
 
 	var pTag RespValue
 	if err := json.NewDecoder(stream).Decode(&pTag); err != nil {
-		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+		return nil, fmt.Errorf("decode response body failed for: %s", err)
 	}
 	return pTag.Value, nil
 }
 
 func (c *RestClient) ListAttachedObjects(ctx context.Context, tagID string) ([]AssociatedObject, error) {
-	spec := c.getAssociationSpec(&tagID, "", "")
-	stream, _, status, err := c.call(ctx, "POST", fmt.Sprintf("%s?~action=list-attached-objects", TagAssociationURL), *spec, nil)
+	spec := c.getAssociationSpec(&tagID, nil)
+	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=list-attached-objects", TagAssociationURL), *spec, nil)
 	if status != http.StatusOK || err != nil {
-		return nil, fmt.Errorf("List object failed with status code: %d, error message: %s", status, err)
+		return nil, fmt.Errorf("list object failed with status code: %d, error message: %s", status, err)
 	}
 
 	type RespValue struct {
@@ -107,7 +109,7 @@ func (c *RestClient) ListAttachedObjects(ctx context.Context, tagID string) ([]A
 
 	var pTag RespValue
 	if err := json.NewDecoder(stream).Decode(&pTag); err != nil {
-		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+		return nil, fmt.Errorf("decode response body failed for: %s", err)
 	}
 
 	return pTag.Value, nil

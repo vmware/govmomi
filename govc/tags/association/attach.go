@@ -20,15 +20,14 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/tags"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type attach struct {
-	*flags.ClientFlag
 	*flags.DatacenterFlag
 }
 
@@ -37,41 +36,29 @@ func init() {
 }
 
 func (cmd *attach) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 }
 
-func (cmd *attach) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (cmd *attach) Usage() string {
-	return "ID MANAGEDOBJECTREFERENCE"
+	return "ID PATH"
 }
 
 func (cmd *attach) Description() string {
-	return ` Attach tag to object.
+	return `Attach tag to object.
 
 Examples:
-  govc tags.attach ID MANAGEDOBJECTREFERENCE`
+  govc tags.attach ID PATH`
 }
 
-func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj string) (string, string, error) {
-	var objType string
-	var objID string
-
+func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj string) (*types.ManagedObjectReference, error) {
 	client, err := cmd.ClientFlag.Client()
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 	finder, err := cmd.Finder()
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	ref := client.ServiceContent.RootFolder
@@ -82,29 +69,20 @@ func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj stri
 		if !ref.FromString(managedObj) {
 			l, ferr := finder.ManagedObjectList(ctx, managedObj)
 			if ferr != nil {
-				return "", "", ferr
+				return nil, ferr
 			}
 
 			switch len(l) {
 			case 0:
-				return "", "", fmt.Errorf("%s not found", managedObj)
+				return nil, fmt.Errorf("%s not found", managedObj)
 			case 1:
 				ref = l[0].Object.Reference()
-				s := strings.Split(ref.String(), ":")
-				objType = s[0]
-				objID = s[1]
-
 			default:
-				return "", "", flag.ErrHelp
+				return nil, flag.ErrHelp
 			}
-		} else {
-			s := strings.Split(managedObj, ":")
-			objType = s[0]
-			objID = s[1]
-
 		}
 	}
-	return objType, objID, nil
+	return &ref, nil
 }
 
 func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -116,11 +94,11 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	managedObj := f.Arg(1)
 
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-		objType, objID, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
+		ref, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
 		if err != nil {
 			return err
 		}
-		return c.AttachTagToObject(ctx, tagID, objID, objType)
+		return c.AttachTagToObject(ctx, tagID, ref)
 
 	})
 }

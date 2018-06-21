@@ -29,8 +29,6 @@ import (
 )
 
 type ls struct {
-	*flags.ClientFlag
-	*flags.OutputFlag
 	*flags.DatacenterFlag
 }
 
@@ -39,23 +37,12 @@ func init() {
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
-	cmd.ClientFlag.Register(ctx, f)
-	cmd.OutputFlag.Register(ctx, f)
-}
-
-func (cmd *ls) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (cmd *ls) Usage() string {
-	return "ID or MANAGEDOBJECTREFERENCE"
+	return "ID or PATH"
 }
 
 func (cmd *ls) Description() string {
@@ -63,7 +50,7 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc tags.association.ls ID
-  govc tags.association.ls MANAGEDOBJECTREFERENCE`
+  govc tags.association.ls PATH`
 }
 
 func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
@@ -131,12 +118,12 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return nil
 		}
 
-		objType, objID, err := convertPath(ctx, cmd.DatacenterFlag, arg)
+		ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
 		if err != nil {
 			return err
 		}
 
-		tagsAssociated, err := c.ListAttachedTags(ctx, objID, objType)
+		tagsAssociated, err := c.ListAttachedTags(ctx, ref)
 		if err != nil {
 			return err
 		}

@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -65,11 +66,15 @@ Examples:
 
 type getTagName []tags.Tag
 
-func (r getTagName) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i])
+func (t getTagName) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	for _, item := range t {
+		fmt.Fprintf(tw, "Name: %s\nID: %s\nDescription: %s\nCategoryID: %s\nUsedBy: %s\n",
+			item.Name, item.ID, item.Description, item.CategoryID, item.UsedBy)
 	}
-	return nil
+
+	return tw.Flush()
 }
 
 func (cmd *get) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -86,7 +91,8 @@ func (cmd *get) Run(ctx context.Context, f *flag.FlagSet) error {
 			if err != nil {
 				return err
 			}
-			fmt.Println(*tag)
+			fmt.Printf("Name: %s\nID: %s\nDescription: %s\nCategoryID: %s\nUsedBy: %s\n",
+				tag.Name, tag.ID, tag.Description, tag.CategoryID, tag.UsedBy)
 		} else {
 			tagSlice, err := c.GetTagByNameForCategory(ctx, cmd.name, id)
 			if err != nil {

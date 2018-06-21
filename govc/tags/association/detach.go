@@ -26,7 +26,6 @@ import (
 )
 
 type detach struct {
-	*flags.ClientFlag
 	*flags.DatacenterFlag
 }
 
@@ -35,28 +34,19 @@ func init() {
 }
 
 func (cmd *detach) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 }
 
-func (cmd *detach) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (cmd *detach) Usage() string {
-	return "ID MANAGEDOBJECTREFERENCE"
+	return "ID PATH"
 }
 
 func (cmd *detach) Description() string {
 	return `Detach tag from object.
 
 Examples:
-  govc tags.detach ID MANAGEDOBJECTREFERENCE`
+  govc tags.detach ID PATH`
 }
 
 func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -69,11 +59,11 @@ func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
 
-		objType, objID, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
+		ref, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
 		if err != nil {
 			return err
 		}
-		return c.DetachTagFromObject(ctx, tagID, objID, objType)
+		return c.DetachTagFromObject(ctx, tagID, ref)
 
 	})
 

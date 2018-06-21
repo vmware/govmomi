@@ -20,7 +20,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"regexp"
 	"strings"
 )
 
@@ -73,10 +72,10 @@ func (c *RestClient) CreateTagIfNotExist(ctx context.Context, name string, descr
 		}
 
 		// should not happen
-		return nil, fmt.Errorf("Failed to create tag for it's existed, but could not query back. Please check system")
+		return nil, fmt.Errorf("failed to create tag for it's existed, but could not query back. Please check system")
 	}
 
-	return nil, fmt.Errorf("Created tag failed for %s", err)
+	return nil, fmt.Errorf("created tag failed for %s", err)
 }
 
 func (c *RestClient) DeleteTagIfNoObjectAttached(ctx context.Context, id string) error {
@@ -84,17 +83,17 @@ func (c *RestClient) DeleteTagIfNoObjectAttached(ctx context.Context, id string)
 	if err != nil {
 		return err
 	}
-	if objs != nil && len(objs) > 0 {
+	if len(objs) > 0 {
 		return fmt.Errorf("tag %s related objects is not empty, do not delete it", id)
 	}
 	return c.DeleteTag(ctx, id)
 }
 
 func (c *RestClient) CreateTag(ctx context.Context, spec *TagCreateSpec) (*string, error) {
-	stream, _, status, err := c.call(ctx, "POST", TagURL, spec, nil)
+	stream, _, status, err := c.call(ctx, http.MethodPost, TagURL, spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		return nil, fmt.Errorf("Create tag failed with status code: %d, error message: %s", status, err)
+		return nil, fmt.Errorf("create tag failed with status code: %d, error message: %s", status, err)
 	}
 
 	type RespValue struct {
@@ -103,16 +102,16 @@ func (c *RestClient) CreateTag(ctx context.Context, spec *TagCreateSpec) (*strin
 
 	var pID RespValue
 	if err := json.NewDecoder(stream).Decode(&pID); err != nil {
-		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+		return nil, fmt.Errorf("decode response body failed for: %s", err)
 	}
 	return &pID.Value, nil
 }
 
 func (c *RestClient) GetTag(ctx context.Context, id string) (*Tag, error) {
-	stream, _, status, err := c.call(ctx, "GET", fmt.Sprintf("%s/id:%s", TagURL, id), nil, nil)
+	stream, _, status, err := c.call(ctx, http.MethodGet, fmt.Sprintf("%s/id:%s", TagURL, id), nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		return nil, fmt.Errorf("Get tag failed with status code: %d, error message: %s", status, err)
+		return nil, fmt.Errorf("get tag failed with status code: %d, error message: %s", status, err)
 	}
 
 	type RespValue struct {
@@ -121,35 +120,35 @@ func (c *RestClient) GetTag(ctx context.Context, id string) (*Tag, error) {
 
 	var pTag RespValue
 	if err := json.NewDecoder(stream).Decode(&pTag); err != nil {
-		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+		return nil, fmt.Errorf("decode response body failed for: %s", err)
 	}
 	return &(pTag.Value), nil
 }
 
 func (c *RestClient) UpdateTag(ctx context.Context, id string, spec *TagUpdateSpec) error {
-	_, _, status, err := c.call(ctx, "PATCH", fmt.Sprintf("%s/id:%s", TagURL, id), spec, nil)
+	_, _, status, err := c.call(ctx, http.MethodPatch, fmt.Sprintf("%s/id:%s", TagURL, id), spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		return fmt.Errorf("Update tag failed with status code: %d, error message: %s", status, err)
+		return fmt.Errorf("update tag failed with status code: %d, error message: %s", status, err)
 	}
 
 	return nil
 }
 
 func (c *RestClient) DeleteTag(ctx context.Context, id string) error {
-	_, _, status, err := c.call(ctx, "DELETE", fmt.Sprintf("%s/id:%s", TagURL, id), nil, nil)
+	_, _, status, err := c.call(ctx, http.MethodDelete, fmt.Sprintf("%s/id:%s", TagURL, id), nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		return fmt.Errorf("Delete tag failed with status code: %d, error message: %s", status, err)
+		return fmt.Errorf("delete tag failed with status code: %d, error message: %s", status, err)
 	}
 	return nil
 }
 
 func (c *RestClient) ListTags(ctx context.Context) ([]string, error) {
-	stream, _, status, err := c.call(ctx, "GET", TagURL, nil, nil)
+	stream, _, status, err := c.call(ctx, http.MethodGet, TagURL, nil, nil)
 
 	if status != http.StatusOK || err != nil {
-		return nil, fmt.Errorf("Get tags failed with status code: %d, error message: %s", status, err)
+		return nil, fmt.Errorf("get tags failed with status code: %d, error message: %s", status, err)
 	}
 
 	return c.handleTagIDList(stream)
@@ -161,10 +160,10 @@ func (c *RestClient) ListTagsForCategory(ctx context.Context, id string) ([]stri
 		CId string `json:"category_id"`
 	}
 	spec := PostCategory{id}
-	stream, _, status, err := c.call(ctx, "POST", fmt.Sprintf("%s/id:%s?~action=list-tags-for-category", TagURL, id), spec, nil)
+	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s/id:%s?~action=list-tags-for-category", TagURL, id), spec, nil)
 
 	if status != http.StatusOK || err != nil {
-		return nil, fmt.Errorf("List tags for category failed with status code: %d, error message: %s", status, err)
+		return nil, fmt.Errorf("list tags for category failed with status code: %d, error message: %s", status, err)
 	}
 
 	return c.handleTagIDList(stream)
@@ -177,7 +176,7 @@ func (c *RestClient) handleTagIDList(stream io.ReadCloser) ([]string, error) {
 
 	var pTags Tags
 	if err := json.NewDecoder(stream).Decode(&pTags); err != nil {
-		return nil, fmt.Errorf("Decode response body failed for: %s", err)
+		return nil, fmt.Errorf("decode response body failed for: %s", err)
 	}
 	return pTags.Value, nil
 }
@@ -186,37 +185,16 @@ func (c *RestClient) handleTagIDList(stream io.ReadCloser) ([]string, error) {
 func (c *RestClient) GetTagByNameForCategory(ctx context.Context, name string, id string) ([]Tag, error) {
 	tagIds, err := c.ListTagsForCategory(ctx, id)
 	if err != nil {
-		return nil, fmt.Errorf("Get tag failed for %s", err)
+		return nil, fmt.Errorf("get tag failed for %s", err)
 	}
 
 	var tags []Tag
 	for _, tID := range tagIds {
 		tag, err := c.GetTag(ctx, tID)
 		if err != nil {
-			return nil, fmt.Errorf("Get tag %s failed for %s", tID, err)
+			return nil, fmt.Errorf("get tag %s failed for %s", tID, err)
 		}
 		if tag.Name == name {
-			tags = append(tags, *tag)
-		}
-	}
-	return tags, nil
-}
-
-// Get attached tags through tag name pattern
-func (c *RestClient) GetAttachedTagsByNamePattern(ctx context.Context, namePattern string, objID string, objType string) ([]Tag, error) {
-	tagIds, err := c.ListAttachedTags(ctx, objID, objType)
-	if err != nil {
-		return nil, fmt.Errorf("Get attached tags failed for %s", err)
-	}
-
-	var validName = regexp.MustCompile(namePattern)
-	var tags []Tag
-	for _, tID := range tagIds {
-		tag, err := c.GetTag(ctx, tID)
-		if err != nil {
-			return nil, fmt.Errorf("Get tag %s failed for %s", tID, err)
-		}
-		if validName.MatchString(tag.Name) {
 			tags = append(tags, *tag)
 		}
 	}
