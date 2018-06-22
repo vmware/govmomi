@@ -73,22 +73,20 @@ func (r getResult) Write(w io.Writer) error {
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
+		var result getResult
+		var err error
 
 		if cmd.id == "" {
-			tagSlice, err := c.ListTags(ctx)
+			result, err = c.ListTags(ctx)
 			if err != nil {
 				return err
 			}
-			result := getResult(tagSlice)
-			cmd.WriteResult(result)
 		} else {
-			tagSlice, err := c.ListTagsForCategory(ctx, cmd.id)
+			result, err = c.ListTagsForCategory(ctx, cmd.id)
 			if err != nil {
 				return err
 			}
-			result := getResult(tagSlice)
-			cmd.WriteResult(result)
 		}
-		return nil
+		return cmd.WriteResult(result)
 	})
 }

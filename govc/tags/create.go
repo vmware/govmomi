@@ -53,7 +53,9 @@ func (cmd *create) Usage() string {
 }
 
 func (cmd *create) Description() string {
-	return ` Create tag. This command will output the ID you just created.
+	return `Create tag. 
+	
+This command will output the ID you just created.
 
 Examples:
   govc tags.create -d "description" NAME CATEGORYID`
@@ -96,6 +98,5 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		fmt.Println(*id)
 		return nil
-
 	})
 }

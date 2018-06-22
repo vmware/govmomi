@@ -50,7 +50,8 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc tags.association.ls ID
-  govc tags.association.ls PATH`
+  govc tags.association.ls /dc1/host/cluster1/hostname
+  govc tags.association.ls HostSystem:host`
 }
 
 func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
@@ -128,9 +129,6 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		result := getResult(tagsAssociated)
-		cmd.WriteResult(result)
-		return nil
-
+		return cmd.WriteResult(result)
 	})
-
 }

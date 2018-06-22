@@ -46,7 +46,8 @@ func (cmd *detach) Description() string {
 	return `Detach tag from object.
 
 Examples:
-  govc tags.detach ID PATH`
+  govc tags.detach ID /dc1/host/cluster1/hostname
+  govc tags.detach ID HostSystem:host`
 }
 
 func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -64,7 +65,5 @@ func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		return c.DetachTagFromObject(ctx, tagID, ref)
-
 	})
-
 }

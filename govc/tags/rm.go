@@ -71,9 +71,6 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.force == false {
 			return c.DeleteTagIfNoObjectAttached(ctx, tagID)
 		}
-
 		return c.DeleteTag(ctx, tagID)
-
 	})
-
 }

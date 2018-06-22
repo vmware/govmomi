@@ -48,7 +48,8 @@ func (cmd *attach) Description() string {
 	return `Attach tag to object.
 
 Examples:
-  govc tags.attach ID PATH`
+  govc tags.attach ID /dc1/host/cluster1/hostname
+  govc tags.attach ID HostSystem:host`
 }
 
 func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj string) (*types.ManagedObjectReference, error) {
@@ -99,6 +100,5 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		return c.AttachTagToObject(ctx, tagID, ref)
-
 	})
 }
