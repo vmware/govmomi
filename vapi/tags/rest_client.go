@@ -49,6 +49,8 @@ func NewClient(u *url.URL, insecure bool, thumbprint string) *RestClient {
 	endpoint := &url.URL{}
 	*endpoint = *u
 	endpoint.Path = RestPrefix
+	// Ignore "#" anchor
+	endpoint.Fragment = ""
 
 	sc := soap.NewClient(endpoint, insecure)
 	if thumbprint != "" {
@@ -118,7 +120,7 @@ func (c *RestClient) call(ctx context.Context, method, path string, data interfa
 }
 
 func (c *RestClient) clientRequest(ctx context.Context, method, path string, in io.Reader, headers map[string][]string) (io.ReadCloser, http.Header, int, error) {
-	expectedPayload := (method == "POST" || method == "PUT")
+	expectedPayload := (method == http.MethodPost || method == http.MethodPut)
 	if expectedPayload && in == nil {
 		in = bytes.NewReader([]byte{})
 	}
@@ -171,7 +173,7 @@ func (c *RestClient) handleResponse(resp *http.Response, err error) (io.ReadClos
 		if len(body) == 0 {
 			return nil, nil, statusCode, err
 		}
-		return nil, nil, statusCode, fmt.Errorf("Error response: %s", bytes.TrimSpace(body))
+		return nil, nil, statusCode, fmt.Errorf("error response: %s", bytes.TrimSpace(body))
 
 	}
 
@@ -180,7 +182,7 @@ func (c *RestClient) handleResponse(resp *http.Response, err error) (io.ReadClos
 
 func (c *RestClient) Login(ctx context.Context) error {
 
-	request, err := c.newRequest("POST", loginURL, nil)
+	request, err := c.newRequest(http.MethodPost, loginURL, nil)
 	if err != nil {
 		return err
 	}
@@ -206,7 +208,7 @@ func (c *RestClient) Login(ctx context.Context) error {
 }
 
 func (c *RestClient) Logout(ctx context.Context) error {
-	_, _, status, err := c.call(ctx, "DELETE", loginURL, nil, nil)
+	_, _, status, err := c.call(ctx, http.MethodDelete, loginURL, nil, nil)
 	if status != http.StatusOK || err != nil {
 		return err
 	}
@@ -258,7 +260,7 @@ func (c *RestClient) SetSessionID(sessionID string) {
 // This should be used when restoring a session to determine if a new login is
 // necessary.
 func (c *RestClient) Valid(ctx context.Context) bool {
-	_, _, statusCode, err := c.clientRequest(ctx, "POST", loginURL+"?~action=get", nil, nil)
+	_, _, statusCode, err := c.clientRequest(ctx, http.MethodPost, loginURL+"?~action=get", nil, nil)
 	if err != nil {
 		return false
 	}

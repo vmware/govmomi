@@ -54,7 +54,8 @@ func (cmd *ls) Description() string {
 	return `List all categories.
 
 Examples:
-  govc tags.category.ls`
+  govc tags.category.ls
+  govc tags.category.ls -json | jq .`
 }
 
 func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
@@ -87,18 +88,35 @@ func (r getResult) Write(w io.Writer) error {
 	return nil
 }
 
+type getCategoryNameID []tags.CategoryInfo
+
+func (r getCategoryNameID) Write(w io.Writer) error {
+	for i := range r {
+		fmt.Fprintln(w, r[i])
+	}
+	return nil
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-		categories, err := c.ListCategories(ctx)
+
+		var result getResult
+		var categoryNameID getCategoryNameID
+		var err error
+
+		categoryNameID, err = c.ListCategoriesByName(ctx)
 		if err != nil {
 			return err
 		}
 
-		result := getResult(categories)
-		cmd.WriteResult(result)
-		return nil
+		if cmd.JSON {
+			return cmd.WriteResult(categoryNameID)
+		}
 
+		for _, item := range categoryNameID {
+			result = append(result, item.Name)
+		}
+		return cmd.WriteResult(result)
 	})
-
 }
