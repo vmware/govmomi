@@ -800,7 +800,8 @@ func (v VirtualMachine) UpgradeVM(ctx context.Context, version string) (*Task, e
 	return NewTask(v.c, res.Returnval), nil
 }
 
-// UUID is a helper to get the UUID of the virtual machine object.
+// UUID is a helper to get the UUID of the VirtualMachine managed object.
+// This method returns an empty string if an error occurs when retrieving UUID from the VirtualMachine object.
 func (v VirtualMachine) UUID(ctx context.Context) string {
 	var o mo.VirtualMachine
 
