@@ -28,8 +28,10 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"strings"
+	"syscall"
 	"time"
 
 	"github.com/vmware/govmomi/session"
@@ -624,4 +626,30 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 	}
 
 	return env
+}
+
+// WithCancel calls the given function, returning when complete or canceled via SIGINT.
+func (flag *ClientFlag) WithCancel(ctx context.Context, f func(context.Context) error) error {
+	sig := make(chan os.Signal, 1)
+	signal.Notify(sig, syscall.SIGINT)
+
+	wctx, cancel := context.WithCancel(ctx)
+	defer cancel()
+
+	done := make(chan bool)
+	var werr error
+
+	go func() {
+		defer close(done)
+		werr = f(wctx)
+	}()
+
+	select {
+	case <-sig:
+		cancel()
+		<-done // Wait for f() to complete
+	case <-done:
+	}
+
+	return werr
 }

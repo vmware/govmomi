@@ -229,8 +229,11 @@ func TestCreateVm(t *testing.T) {
 						}
 
 					}
-					return false
+					return true
 				})
+				if err != nil {
+					t.Error(err)
+				}
 			}
 		}
 
