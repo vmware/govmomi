@@ -37,6 +37,11 @@ type TagAssociationSpec struct {
 	TagID    *string           `json:"tag_id,omitempty"`
 }
 
+type AttachedTagsInfo struct {
+	Name  string
+	TagID string
+}
+
 func (c *RestClient) getAssociatedObject(ref *types.ManagedObjectReference) *AssociatedObject {
 	if ref == nil {
 		return nil
@@ -94,6 +99,24 @@ func (c *RestClient) ListAttachedTags(ctx context.Context, ref *types.ManagedObj
 		return nil, fmt.Errorf("decode response body failed for: %s", err)
 	}
 	return pTag.Value, nil
+}
+
+func (c *RestClient) ListAttachedTagsByName(ctx context.Context, ref *types.ManagedObjectReference) ([]AttachedTagsInfo, error) {
+	tagIds, err := c.ListAttachedTags(ctx, ref)
+	if err != nil {
+		return nil, fmt.Errorf("get attached tag failed for: %s", err)
+	}
+
+	var attachedTagsInfoSlice []AttachedTagsInfo
+	for _, cID := range tagIds {
+		tag, err := c.GetTag(ctx, cID)
+		if err != nil {
+			return nil, fmt.Errorf("get tag %s failed for %s", cID, err)
+		}
+		attachedTagsCreate := &AttachedTagsInfo{Name: tag.Name, TagID: tag.ID}
+		attachedTagsInfoSlice = append(attachedTagsInfoSlice, *attachedTagsCreate)
+	}
+	return attachedTagsInfoSlice, nil
 }
 
 func (c *RestClient) ListAttachedObjects(ctx context.Context, tagID string) ([]AssociatedObject, error) {

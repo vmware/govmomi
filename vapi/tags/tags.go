@@ -154,10 +154,35 @@ func (c *RestClient) ListTags(ctx context.Context) ([]string, error) {
 	return c.handleTagIDList(stream)
 }
 
+type TagsInfo struct {
+	Name  string
+	TagID string
+}
+
+func (c *RestClient) ListTagsByName(ctx context.Context) ([]TagsInfo, error) {
+	tagIds, err := c.ListTags(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("get tags failed for: %s", err)
+	}
+
+	var tagsInfoSlice []TagsInfo
+	for _, cID := range tagIds {
+		tag, err := c.GetTag(ctx, cID)
+		if err != nil {
+			return nil, fmt.Errorf("get category %s failed for %s", cID, err)
+		}
+		tagsCreate := &TagsInfo{Name: tag.Name, TagID: tag.ID}
+
+		tagsInfoSlice = append(tagsInfoSlice, *tagsCreate)
+
+	}
+	return tagsInfoSlice, nil
+}
+
 func (c *RestClient) ListTagsForCategory(ctx context.Context, id string) ([]string, error) {
 
 	type PostCategory struct {
-		CId string `json:"category_id"`
+		ID string `json:"category_id"`
 	}
 	spec := PostCategory{id}
 	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s/id:%s?~action=list-tags-for-category", TagURL, id), spec, nil)
@@ -167,6 +192,31 @@ func (c *RestClient) ListTagsForCategory(ctx context.Context, id string) ([]stri
 	}
 
 	return c.handleTagIDList(stream)
+}
+
+func (c *RestClient) ListTagsInfoForCategory(ctx context.Context, id string) ([]TagsInfo, error) {
+
+	type PostCategory struct {
+		ID string `json:"category_id"`
+	}
+	spec := PostCategory{id}
+	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s/id:%s?~action=list-tags-for-category", TagURL, id), spec, nil)
+
+	if status != http.StatusOK || err != nil {
+		return nil, fmt.Errorf("list tags for category failed with status code: %d, error message: %s", status, err)
+	}
+	var tagsInfoSlice []TagsInfo
+	tmp, err := c.handleTagIDList(stream)
+	for _, item := range tmp {
+		tag, err := c.GetTag(ctx, item)
+		if err != nil {
+			return nil, fmt.Errorf("get category %s failed for %s", item, err)
+		}
+		tagsCreate := &TagsInfo{Name: tag.Name, TagID: tag.ID}
+
+		tagsInfoSlice = append(tagsInfoSlice, *tagsCreate)
+	}
+	return tagsInfoSlice, nil
 }
 
 func (c *RestClient) handleTagIDList(stream io.ReadCloser) ([]string, error) {

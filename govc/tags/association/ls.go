@@ -50,6 +50,7 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc tags.association.ls ID
+  govc tags.association.ls -json /dc1/host/cluster1/hostname | jq .
   govc tags.association.ls /dc1/host/cluster1/hostname
   govc tags.association.ls HostSystem:host`
 }
@@ -83,9 +84,9 @@ func isTagID(arg string) bool {
 	return false
 }
 
-type getAssociated []tags.AssociatedObject
+type getAssociatedObj []tags.AssociatedObject
 
-func (r getAssociated) Write(w io.Writer) error {
+func (r getAssociatedObj) Write(w io.Writer) error {
 	for i := range r {
 		fmt.Fprintln(w, r[i])
 	}
@@ -95,6 +96,15 @@ func (r getAssociated) Write(w io.Writer) error {
 type getResult []string
 
 func (r getResult) Write(w io.Writer) error {
+	for i := range r {
+		fmt.Fprintln(w, r[i])
+	}
+	return nil
+}
+
+type getAssociatedTags []tags.AttachedTagsInfo
+
+func (r getAssociatedTags) Write(w io.Writer) error {
 	for i := range r {
 		fmt.Fprintln(w, r[i])
 	}
@@ -113,10 +123,8 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			if err != nil {
 				return err
 			}
-
-			result := getAssociated(objAssociated)
-			cmd.WriteResult(result)
-			return nil
+			result := getAssociatedObj(objAssociated)
+			return cmd.WriteResult(result)
 		}
 
 		ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
@@ -124,11 +132,20 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		tagsAssociated, err := c.ListAttachedTags(ctx, ref)
+		tagsAssociated, err := c.ListAttachedTagsByName(ctx, ref)
 		if err != nil {
 			return err
 		}
-		result := getResult(tagsAssociated)
+		if cmd.JSON {
+			associatedResult := getAssociatedTags(tagsAssociated)
+			return cmd.WriteResult(associatedResult)
+		}
+
+		var result getResult
+		for _, item := range tagsAssociated {
+			result = append(result, item.Name)
+		}
 		return cmd.WriteResult(result)
+
 	})
 }

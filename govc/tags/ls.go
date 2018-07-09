@@ -30,7 +30,7 @@ import (
 type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
-	id string
+	c string
 }
 
 func init() {
@@ -42,8 +42,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 	cmd.OutputFlag.Register(ctx, f)
-	f.StringVar(&cmd.id, "i", "", "ID for category")
-
+	f.StringVar(&cmd.c, "c", "", "ID for category")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -58,7 +57,9 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc tags.ls
-  govc tags.ls -i CATEGORYID`
+  govc tags.ls -json | jq .
+  govc tags.ls -c CATEGORYID -json | jq .
+  govc tags.ls -c CATEGORYID`
 }
 
 type getResult []string
@@ -70,23 +71,52 @@ func (r getResult) Write(w io.Writer) error {
 	return nil
 }
 
+type getTagNameID []tags.TagsInfo
+
+func (r getTagNameID) Write(w io.Writer) error {
+	for i := range r {
+		fmt.Fprintln(w, r[i])
+	}
+	return nil
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
 		var result getResult
+		var tagInfo getTagNameID
 		var err error
 
-		if cmd.id == "" {
-			result, err = c.ListTags(ctx)
+		switch {
+		case cmd.c != "":
+			tagInfo, err = c.ListTagsInfoForCategory(ctx, cmd.c)
 			if err != nil {
 				return err
 			}
-		} else {
-			result, err = c.ListTagsForCategory(ctx, cmd.id)
+			if cmd.JSON {
+				return cmd.WriteResult(tagInfo)
+			}
+			for _, item := range tagInfo {
+				result = append(result, item.Name)
+			}
+			return cmd.WriteResult(result)
+
+		case cmd.JSON:
+			tagInfo, err = c.ListTagsByName(ctx)
 			if err != nil {
 				return err
 			}
+			return cmd.WriteResult(tagInfo)
+
+		default:
+			tagInfo, err = c.ListTagsByName(ctx)
+			if err != nil {
+				return err
+			}
+			for _, item := range tagInfo {
+				result = append(result, item.Name)
+			}
+			return cmd.WriteResult(result)
 		}
-		return cmd.WriteResult(result)
 	})
 }
