@@ -72,9 +72,17 @@ func (f *InfoFlag) Rules(ctx context.Context) ([]types.BaseClusterRuleInfo, erro
 type ClusterRuleInfo struct {
 	info types.BaseClusterRuleInfo
 
+	ruleType string
+
+	// only ClusterAffinityRuleSpec and ClusterAntiAffinityRuleSpec
 	refs *[]types.ManagedObjectReference
 
 	kind string
+
+	// only ClusterVmHostRuleInfo
+	vmGroupName             string
+	affineHostGroupName     string
+	antiAffineHostGroupName string
 }
 
 func (f *InfoFlag) Rule(ctx context.Context) (*ClusterRuleInfo, error) {
@@ -92,13 +100,19 @@ func (f *InfoFlag) Rule(ctx context.Context) (*ClusterRuleInfo, error) {
 
 		switch info := rule.(type) {
 		case *types.ClusterAffinityRuleSpec:
+			r.ruleType = "ClusterAffinityRuleSpec"
 			r.refs = &info.Vm
 			r.kind = "VirtualMachine"
 		case *types.ClusterAntiAffinityRuleSpec:
+			r.ruleType = "ClusterAntiAffinityRuleSpec"
 			r.refs = &info.Vm
 			r.kind = "VirtualMachine"
+		case *types.ClusterVmHostRuleInfo:
+			r.ruleType = "ClusterVmHostRuleInfo"
+			r.vmGroupName = info.VmGroupName
+			r.affineHostGroupName = info.AffineHostGroupName
+			r.antiAffineHostGroupName = info.AntiAffineHostGroupName
 		}
-
 		return r, nil
 	}
 
