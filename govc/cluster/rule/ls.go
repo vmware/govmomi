@@ -78,18 +78,26 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		if rule.refs == nil {
-			return nil
+		res = append(res, rule.ruleType+":")
+		switch rule.ruleType {
+		case "ClusterAffinityRuleSpec", "ClusterAntiAffinityRuleSpec":
+			names, err := cmd.Names(ctx, *rule.refs)
+			if err != nil {
+				cmd.WriteResult(res)
+				return err
+			}
+
+			for _, ref := range *rule.refs {
+				res = append(res, names[ref])
+			}
+		case "ClusterVmHostRuleInfo":
+			res = append(res, "VmGroupName="+rule.vmGroupName)
+			res = append(res, "AffineHostGroupName="+rule.affineHostGroupName)
+			res = append(res, "AntiAffineHostGroupName="+rule.antiAffineHostGroupName)
+		default:
+			res = append(res, "unknown rule type, no further rule details known")
 		}
 
-		names, err := cmd.Names(ctx, *rule.refs)
-		if err != nil {
-			return err
-		}
-
-		for _, ref := range *rule.refs {
-			res = append(res, names[ref])
-		}
 	}
 
 	return cmd.WriteResult(res)
