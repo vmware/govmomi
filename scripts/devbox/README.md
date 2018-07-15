@@ -32,12 +32,6 @@ Powering on VirtualMachine:7... OK
 # For SSH access:
 % ssh-add ~/.vagrant.d/insecure_private_key
 % ssh vagrant@10.118.66.252
-# To NFS export $GOPATH on this host:
-% echo "$GOPATH 10.118.66.252(rw,no_subtree_check,sync,all_squash,anonuid=$UID,anongid=$UID)" | sudo tee -a /etc/exports
-% sudo service nfs-kernel-server restart
-# To NFS mount $GOPATH in the VM:
-% ssh vagrant@10.118.66.252 sudo mkdir -p $GOPATH
-% ssh vagrant@10.118.66.252 sudo mount 10.118.67.103:$GOPATH $GOPATH
 ```
 
 ## Use Case Examples

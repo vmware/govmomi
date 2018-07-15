@@ -24,7 +24,7 @@ pushd "$(dirname "$0")" >/dev/null
 
 if ! govc datastore.ls "${name}/${disk}" 1>/dev/null 2>&1 ; then
   if [ ! -e "$disk" ] ; then
-    src=$(echo ~/.vagrant.d/boxes/"${provider}"-*-"${name}"/*.*.*/vmware_desktop/disk.vmdk)
+    src=$(echo ~/.vagrant.d/boxes/"${provider}"-*-"${name}"/*/vmware_desktop/disk.vmdk)
 
     if [ ! -e "$src" ] ; then
       echo "$box not found, install via: vagrant box add --provider vmware_desktop $box"
@@ -55,28 +55,29 @@ if [ -z "$(govc ls "vm/$vm_name")" ] ; then
 fi
 
 ip=$(govc vm.ip -a -v4 "$vm_name")
-me=$(ip route get "$ip" | head -1 | awk '{print $NF}')
 
 ssh-keygen -R "$ip"  1>/dev/null 2>&1
 ssh-keyscan -H "$ip" 2>/dev/null >> ~/.ssh/known_hosts
+ssh-add ~/.vagrant.d/insecure_private_key
 
 echo "Installing dependencies..."
-ssh -i ~/.vagrant.d/insecure_private_key "vagrant@$ip" sudo bash -s - < ./provision.sh
+ssh "vagrant@$ip" sudo bash -s - < ./provision.sh
 
 if [ -n "$reboot" ] ; then
   govc vm.power -r "$vm_name"
   ip=$(govc vm.ip -a -v4 "$vm_name")
+
+  while ! ssh "vagrant@$ip" uname -a 2>/dev/null ; do
+    echo -n "."
+    sleep .1
+  done
 fi
+
+GOPATH=${GOPATH-"$HOME"}
+
+ssh "vagrant@$ip" sudo mkdir -p "$GOPATH"
+ssh "vagrant@$ip" sudo chown vagrant "$GOPATH"
 
 echo "# For SSH access:"
 echo % ssh-add \~/.vagrant.d/insecure_private_key
 echo % ssh "vagrant@$ip"
-
-GOPATH=${GOPATH-"$HOME"}
-echo "# To NFS export \$GOPATH on this host:"
-echo "% echo \"\$GOPATH $ip(rw,no_subtree_check,sync,all_squash,anonuid=\$UID,anongid=\$UID)\" | sudo tee -a /etc/exports"
-echo "% sudo service nfs-kernel-server restart"
-
-echo "# To NFS mount \$GOPATH in the VM:"
-echo % ssh "vagrant@$ip" sudo mkdir -p "\$GOPATH"
-echo % ssh "vagrant@$ip" sudo mount "$me:\$GOPATH" "\$GOPATH"

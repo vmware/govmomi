@@ -43,11 +43,16 @@ cat <<EOF | tee vcp.conf
 EOF
 
 k8s="$GOPATH/src/k8s.io/kubernetes"
-make -C "$k8s" WHAT="cmd/kubectl cmd/hyperkube"
 
 ip=$(govc vm.ip -a -v4 "$USER-ubuntu-16.04")
 
+ssh-add ~/.vagrant.d/insecure_private_key
+ssh "vagrant@$ip" mkdir -p "$k8s"
+rsync -auvz "$k8s" "vagrant@$ip:$(dirname "$k8s")"
+rsync -auvz "$PWD/vcp.conf" "vagrant@$ip:$k8s"
+ssh "vagrant@$ip" "GOPATH=$GOPATH" "$k8s/hack/install-etcd.sh"
+
 # shellcheck disable=2029
-ssh -tt </dev/null -i ~/.vagrant.d/insecure_private_key -L 8080:127.0.0.1:8080 "vagrant@$ip" \
-    CLOUD_PROVIDER=vsphere CLOUD_CONFIG="$PWD/vcp.conf" LOG_DIR="$LOG_DIR" \
-    PATH="$PATH:$k8s/third_party/etcd" "$k8s/hack/local-up-cluster.sh" -O
+ssh -tt </dev/null -L 8080:127.0.0.1:8080 "vagrant@$ip" \
+    CLOUD_PROVIDER=vsphere CLOUD_CONFIG="$k8s/vcp.conf" \
+    PATH="$PATH:$k8s/third_party/etcd" "$k8s/hack/local-up-cluster.sh"
