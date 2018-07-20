@@ -68,3 +68,17 @@ func (c ClusterComputeResource) AddHost(ctx context.Context, spec types.HostConn
 
 	return NewTask(c.c, res.Returnval), nil
 }
+
+func (c ClusterComputeResource) MoveInto(ctx context.Context, host *HostSystem) (*Task, error) {
+	req := types.MoveInto_Task{
+		This: c.Reference(),
+		Host: []types.ManagedObjectReference{host.Reference()},
+	}
+
+	res, err := methods.MoveInto_Task(ctx, c.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(c.c, res.Returnval), nil
+}
