@@ -681,10 +681,31 @@ load test_helper
 @test "vm.migrate" {
   vcsim_env -cluster 2
 
-  vm=$(new_empty_vm)
+  host0=/DC0/host/DC0_C0/DC0_C0_H0
+  host1=/DC0/host/DC0_C0/DC0_C0_H1
+  moid0=$(govc find -maxdepth 0 -i $host0)
+  moid1=$(govc find -maxdepth 0 -i $host1)
+
+  vm=$(new_id)
+  run govc vm.create -on=false -host $host0 "$vm"
+  assert_success
+
+  # assert VM is on H0
+  run govc object.collect "vm/$vm" -runtime.host "$moid0"
+  assert_success
+
+  # WaitForUpdates until the VM runtime.host changes to H1
+  govc object.collect "vm/$vm" -runtime.host "$moid1" &
+  pid=$!
 
   # migrate from H0 to H1
-  run govc vm.migrate -host DC0_C0/DC0_C0_H1 "$vm"
+  run govc vm.migrate -host $host1 "$vm"
+  assert_success
+
+  wait $pid
+
+  # (re-)assert VM is now on H1
+  run govc object.collect "vm/$vm" -runtime.host "$moid1"
   assert_success
 
   # migrate from C0 to C1
