@@ -4,6 +4,8 @@
 
 * SetRootCAs on the soap.Client returns an error for invalid certificates
 
+* Add ClusterComputeResource.MoveInto method
+
 ### 0.18.0 (2018-05-24)
 
 * Add VirtualDiskManager wrapper to set UUID
