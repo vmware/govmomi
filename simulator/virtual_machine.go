@@ -722,7 +722,15 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
 	case types.VirtualMachinePowerStatePoweredOff:
-		c.ctx.postEvent(&types.VmPoweredOffEvent{VmEvent: event})
+		c.ctx.postEvent(
+			&types.VmStoppingEvent{VmEvent: event},
+			&types.VmPoweredOffEvent{VmEvent: event},
+		)
+	case types.VirtualMachinePowerStateSuspended:
+		c.ctx.postEvent(
+			&types.VmSuspendingEvent{VmEvent: event},
+			&types.VmSuspendedEvent{VmEvent: event},
+		)
 	}
 
 	Map.Update(c.VirtualMachine, []types.PropertyChange{
@@ -757,6 +765,37 @@ func (vm *VirtualMachine) PowerOffVMTask(ctx *Context, c *types.PowerOffVM_Task)
 
 	return &methods.PowerOffVM_TaskBody{
 		Res: &types.PowerOffVM_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
+
+func (vm *VirtualMachine) SuspendVMTask(ctx *Context, req *types.SuspendVM_Task) soap.HasFault {
+	runner := &powerVMTask{vm, types.VirtualMachinePowerStateSuspended, ctx}
+	task := CreateTask(runner.Reference(), "suspend", runner.Run)
+
+	return &methods.SuspendVM_TaskBody{
+		Res: &types.SuspendVM_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
+
+func (vm *VirtualMachine) ResetVMTask(ctx *Context, req *types.ResetVM_Task) soap.HasFault {
+	task := CreateTask(vm, "reset", func(task *Task) (types.AnyType, types.BaseMethodFault) {
+		res := vm.PowerOffVMTask(ctx, &types.PowerOffVM_Task{This: vm.Self})
+		ctask := Map.Get(res.(*methods.PowerOffVM_TaskBody).Res.Returnval).(*Task)
+		if ctask.Info.Error != nil {
+			return nil, ctask.Info.Error.Fault
+		}
+
+		_ = vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: vm.Self})
+
+		return nil, nil
+	})
+
+	return &methods.ResetVM_TaskBody{
+		Res: &types.ResetVM_TaskResponse{
 			Returnval: task.Run(),
 		},
 	}
