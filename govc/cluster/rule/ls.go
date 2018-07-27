@@ -47,7 +47,9 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc cluster.rule.ls -cluster my_cluster
-  govc cluster.rule.ls -cluster my_cluster -name my_rule`
+  govc cluster.rule.ls -cluster my_cluster -name my_rule
+  govc cluster.rule.ls -cluster my_cluster -l
+  govc cluster.rule.ls -cluster my_cluster -name my_rule -l`
 }
 
 type ruleResult []string
@@ -70,7 +72,13 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		for _, g := range rules {
-			res = append(res, g.GetClusterRuleInfo().Name)
+			ruleName := g.GetClusterRuleInfo().Name
+			if cmd.Long {
+				ruleTypeInfo := GetExtendedClusterRuleInfo(g).ruleType
+				res = append(res, fmt.Sprintf("%s (%s)", ruleName, ruleTypeInfo))
+			} else {
+				res = append(res, fmt.Sprintf("%s", ruleName))
+			}
 		}
 	} else {
 		rule, err := cmd.Rule(ctx)
@@ -78,7 +86,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		res = append(res, rule.ruleType+":")
+		//res = append(res, rule.ruleType+":")
 		switch rule.ruleType {
 		case "ClusterAffinityRuleSpec", "ClusterAntiAffinityRuleSpec":
 			names, err := cmd.Names(ctx, *rule.refs)
@@ -88,12 +96,15 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 
 			for _, ref := range *rule.refs {
-				res = append(res, names[ref])
+				res = extendedAppend(res, cmd.Long, names[ref], "VM")
 			}
 		case "ClusterVmHostRuleInfo":
-			res = append(res, "VmGroupName="+rule.vmGroupName)
-			res = append(res, "AffineHostGroupName="+rule.affineHostGroupName)
-			res = append(res, "AntiAffineHostGroupName="+rule.antiAffineHostGroupName)
+			res = extendedAppend(res, cmd.Long, rule.vmGroupName, "vmGroupName")
+			res = extendedAppend(res, cmd.Long, rule.affineHostGroupName, "affineHostGroupName")
+			res = extendedAppend(res, cmd.Long, rule.antiAffineHostGroupName, "antiAffineHostGroupName")
+		case "ClusterDependencyRuleInfo":
+			res = extendedAppend(res, cmd.Long, rule.VmGroup, "VmGroup")
+			res = extendedAppend(res, cmd.Long, rule.DependsOnVmGroup, "DependsOnVmGroup")
 		default:
 			res = append(res, "unknown rule type, no further rule details known")
 		}
@@ -101,4 +112,14 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	return cmd.WriteResult(res)
+}
+
+func extendedAppend(res ruleResult, Long bool, entryValue string, entryType string) ruleResult {
+	var newres ruleResult
+	if Long {
+		newres = append(res, fmt.Sprintf("%s (%s)", entryValue, entryType))
+	} else {
+		newres = append(res, entryValue)
+	}
+	return newres
 }
