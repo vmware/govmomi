@@ -84,6 +84,17 @@ load test_helper
   run govc cluster.rule.ls -cluster DC0_C0 -name pod1 -l=true
   assert_success "$(printf "%s (VM)\n" DC0_C0_RP0_VM{0,1,2,3})"
 
+  run govc cluster.rule.info -cluster DC0_C0
+  assert_success "$(cat <<_EOF_
+Name: pod1
+  Type: ClusterAffinityRuleSpec
+  VM: DC0_C0_RP0_VM0
+  VM: DC0_C0_RP0_VM1
+  VM: DC0_C0_RP0_VM2
+  VM: DC0_C0_RP0_VM3
+_EOF_
+)"
+
   run govc cluster.rule.change -cluster DC0_C0 -name pod1 DC0_C0_RP0_VM{2,3,4}
   assert_success
 
@@ -140,6 +151,20 @@ load test_helper
 
   run govc cluster.rule.ls -cluster DC0_C0 -name my_deps -l
   assert_success "$(printf "%s\n" {'my_app (VmGroup)','my_db (DependsOnVmGroup)'})"
+
+  run govc cluster.rule.info -cluster DC0_C0
+  assert_success "$(cat <<_EOF_
+Name: pod2
+  Type: ClusterVmHostRuleInfo
+  vmGroupName: my_vms
+  affineHostGroupName even_hosts
+  antiAffineHostGroupName odd_hosts
+Name: my_deps
+  Type: ClusterDependencyRuleInfo
+  VmGroup my_app
+  DependsOnVmGroup my_db
+_EOF_
+)"
 
 }
 
