@@ -86,7 +86,7 @@ load test_helper
 
   run govc cluster.rule.info -cluster DC0_C0
   assert_success "$(cat <<_EOF_
-Name: pod1
+Rule: pod1
   Type: ClusterAffinityRuleSpec
   VM: DC0_C0_RP0_VM0
   VM: DC0_C0_RP0_VM1
@@ -154,12 +154,12 @@ _EOF_
 
   run govc cluster.rule.info -cluster DC0_C0
   assert_success "$(cat <<_EOF_
-Name: pod2
+Rule: pod2
   Type: ClusterVmHostRuleInfo
   vmGroupName: my_vms
   affineHostGroupName even_hosts
   antiAffineHostGroupName odd_hosts
-Name: my_deps
+Rule: my_deps
   Type: ClusterDependencyRuleInfo
   VmGroup my_app
   DependsOnVmGroup my_db
