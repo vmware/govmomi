@@ -532,14 +532,14 @@ func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {
 			for _, fs := range set.FilterSet {
 				// We expect the enter of VM first
 				if fs.ObjectSet[0].Kind == types.ObjectUpdateKindEnter {
-					wait<-true
+					wait <- true
 					// Keep going
 					continue
 				}
 
 				// We also expect a modify due to the power state change
 				if fs.ObjectSet[0].Kind == types.ObjectUpdateKindModify {
-					wait<-true
+					wait <- true
 					// Now we can return to stop the routine
 					return
 				}
