@@ -429,7 +429,7 @@ func (vm *VirtualMachine) applyVAppPropertySpecAdd(info *types.VAppPropertyInfo)
 	ps := vm.Config.VAppConfig.GetVmConfigInfo().Property
 	for _, p := range ps {
 		if p.Id == info.Id {
-			vm.log.Printf("invalid property ID for adding new property - %s already exists", info.Id)
+			log.Printf("invalid property ID for adding new property - %s already exists", info.Id)
 			return
 		}
 	}
@@ -452,7 +452,7 @@ func (vm *VirtualMachine) applyVAppPropertySpecEdit(info *types.VAppPropertyInfo
 		}
 	}
 	if idx < 0 {
-		vm.log.Printf("property key number %d not found", info.Key)
+		log.Printf("property key number %d not found", info.Key)
 		return
 	}
 
@@ -495,7 +495,7 @@ func (vm *VirtualMachine) applyVAppPropertySpecRemove(key int32) {
 		}
 	}
 	if idx < 0 {
-		vm.log.Printf("invalid property key for removal - removal key %d not found", key)
+		log.Printf("invalid property key for removal - removal key %d not found", key)
 		return
 	}
 	ps = append(ps[:idx], ps[idx+1:]...)
