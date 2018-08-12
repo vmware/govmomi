@@ -53,8 +53,8 @@ func (cmd *create) Usage() string {
 }
 
 func (cmd *create) Description() string {
-	return `Create tag. 
-	
+	return `Create tag.
+
 This command will output the ID you just created.
 
 Examples:

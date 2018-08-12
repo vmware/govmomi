@@ -56,8 +56,8 @@ func (cmd *update) Usage() string {
 }
 
 func (cmd *update) Description() string {
-	return `Update tag. 
-	
+	return `Update tag.
+
 Examples:
   govc tags.update -n NAME -d DESCRIPTION ID`
 }
@@ -71,7 +71,7 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
 
 		tag := new(tags.TagUpdateSpec)
-		tagTemp := new(tags.TagUpdate)
+		tagTemp := new(tags.Tag)
 		if cmd.name != "" {
 			tagTemp.Name = cmd.name
 		}
