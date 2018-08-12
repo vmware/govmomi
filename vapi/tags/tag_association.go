@@ -34,7 +34,7 @@ type AssociatedObject struct {
 
 type TagAssociationSpec struct {
 	ObjectID *AssociatedObject `json:"object_id,omitempty"`
-	TagID    *string           `json:"tag_id,omitempty"`
+	TagID    string            `json:"tag_id,omitempty"`
 }
 
 type AttachedTagsInfo struct {
@@ -53,7 +53,7 @@ func (c *RestClient) getAssociatedObject(ref *types.ManagedObjectReference) *Ass
 	return &object
 }
 
-func (c *RestClient) getAssociationSpec(tagID *string, ref *types.ManagedObjectReference) *TagAssociationSpec {
+func (c *RestClient) getAssociationSpec(tagID string, ref *types.ManagedObjectReference) *TagAssociationSpec {
 	object := c.getAssociatedObject(ref)
 	spec := TagAssociationSpec{
 		TagID:    tagID,
@@ -63,7 +63,7 @@ func (c *RestClient) getAssociationSpec(tagID *string, ref *types.ManagedObjectR
 }
 
 func (c *RestClient) AttachTagToObject(ctx context.Context, tagID string, ref *types.ManagedObjectReference) error {
-	spec := c.getAssociationSpec(&tagID, ref)
+	spec := c.getAssociationSpec(tagID, ref)
 	_, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=attach", TagAssociationURL), *spec, nil)
 
 	if status != http.StatusOK || err != nil {
@@ -73,7 +73,7 @@ func (c *RestClient) AttachTagToObject(ctx context.Context, tagID string, ref *t
 }
 
 func (c *RestClient) DetachTagFromObject(ctx context.Context, tagID string, ref *types.ManagedObjectReference) error {
-	spec := c.getAssociationSpec(&tagID, ref)
+	spec := c.getAssociationSpec(tagID, ref)
 	_, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=detach", TagAssociationURL), *spec, nil)
 
 	if status != http.StatusOK || err != nil {
@@ -83,7 +83,7 @@ func (c *RestClient) DetachTagFromObject(ctx context.Context, tagID string, ref 
 }
 
 func (c *RestClient) ListAttachedTags(ctx context.Context, ref *types.ManagedObjectReference) ([]string, error) {
-	spec := c.getAssociationSpec(nil, ref)
+	spec := c.getAssociationSpec("", ref)
 	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=list-attached-tags", TagAssociationURL), *spec, nil)
 
 	if status != http.StatusOK || err != nil {
@@ -120,7 +120,7 @@ func (c *RestClient) ListAttachedTagsByName(ctx context.Context, ref *types.Mana
 }
 
 func (c *RestClient) ListAttachedObjects(ctx context.Context, tagID string) ([]AssociatedObject, error) {
-	spec := c.getAssociationSpec(&tagID, nil)
+	spec := c.getAssociationSpec(tagID, nil)
 	stream, _, status, err := c.call(ctx, http.MethodPost, fmt.Sprintf("%s?~action=list-attached-objects", TagAssociationURL), *spec, nil)
 	if status != http.StatusOK || err != nil {
 		return nil, fmt.Errorf("list object failed with status code: %d, error message: %s", status, err)

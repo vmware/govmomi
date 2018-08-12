@@ -42,9 +42,9 @@ func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 	f.StringVar(&cmd.name, "n", "", "Name of category")
-	f.StringVar(&cmd.description, "d", "", "Description of category")
-	f.StringVar(&cmd.types, "t", "", "Associable_types of category")
-	f.StringVar(&cmd.multi, "m", "", "Cardinality of category")
+	f.StringVar(&cmd.description, "d", "", "Description")
+	f.StringVar(&cmd.types, "t", "", "Associable object types")
+	f.StringVar(&cmd.multi, "m", "", "Allow multiple tags per object")
 }
 
 func (cmd *update) Process(ctx context.Context) error {
@@ -59,8 +59,8 @@ func (cmd *update) Usage() string {
 }
 
 func (cmd *update) Description() string {
-	return `Update category. 
-	
+	return `Update category.
+
 Cardinality can be either "SINGLE" or "MULTIPLE."
 
 Examples:
@@ -76,7 +76,7 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
 
 		category := new(tags.CategoryUpdateSpec)
-		categoryTemp := new(tags.CategoryUpdate)
+		categoryTemp := new(tags.Category)
 		if cmd.name != "" {
 			categoryTemp.Name = cmd.name
 		}
