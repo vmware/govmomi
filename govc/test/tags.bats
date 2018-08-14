@@ -2,10 +2,8 @@
 
 load test_helper
 
-#testing tags.category.* commands
-@test "tags.category.*" {
-  esx_env
-  export GOVC_DATASTORE=vsanDatastore
+@test "tags.category" {
+  vcsim_env
 
   category_name=$(new_id)
   des="new_des"
@@ -15,7 +13,7 @@ load test_helper
 
   category_id=${output}
   run govc tags.category.ls
-  
+
   ls_result=$(govc tags.category.ls | grep ${category_name} | wc -l)
   [ ${ls_result} -eq 1 ]
 
@@ -35,16 +33,17 @@ load test_helper
   [ ${info_des} -eq 1 ]
 }
 
-#testing tags.* commands
-@test "tags.*" {
-  esx_env
-  export GOVC_DATASTORE=vsanDatastore
+@test "tags" {
+  vcsim_env
 
-  category=$(govc tags.category.ls -json | jq -r '.[].CategoryID')
+  run govc tags.category.create -d "desc" -m "$(new_id)"
+  assert_success
+
+  category="$output"
   test_name="test_name"
   des_tag="update_des_tag"
 
-  run govc tags.create ${test_name} ${category}
+  run govc tags.create -d "desc" ${test_name} ${category}
   assert_success
 
   tag_id=${output}
@@ -66,14 +65,18 @@ load test_helper
   [ ${des_result} -eq 1 ]
 }
 
-#testing tags.association.* commands
-@test "tags.association.*" {
-  esx_env
-  export GOVC_DATASTORE=vsanDatastore
+@test "tags.association" {
+  vcsim_env
 
-  category=$(govc tags.category.ls -json | jq -r '.[].CategoryID')
-  tag=$(govc tags.ls -json | jq -r '.[].TagID')
-  tag_name=$(govc tags.ls -json | jq -r '.[].Name')
+  run govc tags.category.create -d "desc" -m "$(new_id)"
+  assert_success
+  category="$output"
+
+  run govc tags.create -d "desc" "$(new_id)" "$category"
+  assert_success
+  tag=$output
+
+  tag_name=$(govc tags.ls -json | jq -r ".[] | select(.TagID == \"$tag\") | .Name")
   run govc find . -type h
   object=${lines[0]}
 

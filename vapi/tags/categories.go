@@ -28,39 +28,40 @@ const (
 )
 
 type CategoryCreateSpec struct {
-	CreateSpec CategoryCreate `json:"create_spec"`
+	CreateSpec Category `json:"create_spec"`
 }
 
 type CategoryUpdateSpec struct {
-	UpdateSpec CategoryUpdate `json:"update_spec,omitempty"`
-}
-
-type CategoryCreate struct {
-	AssociableTypes []string `json:"associable_types"`
-	Cardinality     string   `json:"cardinality"`
-	Description     string   `json:"description"`
-	Name            string   `json:"name"`
-}
-
-type CategoryUpdate struct {
-	AssociableTypes []string `json:"associable_types,omitempty"`
-	Cardinality     string   `json:"cardinality,omitempty"`
-	Description     string   `json:"description,omitempty"`
-	Name            string   `json:"name,omitempty"`
+	UpdateSpec Category `json:"update_spec,omitempty"`
 }
 
 type Category struct {
-	ID              string   `json:"id"`
-	Description     string   `json:"description"`
-	Name            string   `json:"name"`
-	Cardinality     string   `json:"cardinality"`
-	AssociableTypes []string `json:"associable_types"`
-	UsedBy          []string `json:"used_by"`
+	ID              string   `json:"id,omitempty"`
+	Name            string   `json:"name,omitempty"`
+	Description     string   `json:"description,omitempty"`
+	Cardinality     string   `json:"cardinality,omitempty"`
+	AssociableTypes []string `json:"associable_types,omitempty"`
+	UsedBy          []string `json:"used_by,omitempty"`
 }
 
 type CategoryInfo struct {
 	Name       string
 	CategoryID string
+}
+
+func (c *Category) Update(src *Category) {
+	if src.Name != "" {
+		c.Name = src.Name
+	}
+	if src.Description != "" {
+		c.Description = src.Description
+	}
+	if src.Cardinality != "" {
+		c.Cardinality = src.Cardinality
+	}
+	if src.AssociableTypes != nil {
+		c.AssociableTypes = src.AssociableTypes
+	}
 }
 
 func (c *RestClient) CreateCategoryIfNotExist(ctx context.Context, name string, description string, categoryType string, multiValue bool) (*string, error) {
@@ -76,7 +77,12 @@ func (c *RestClient) CreateCategoryIfNotExist(ctx context.Context, name string, 
 		} else {
 			multiValueStr = "SINGLE"
 		}
-		categoryCreate := CategoryCreate{[]string{categoryType}, multiValueStr, description, name}
+		categoryCreate := Category{
+			AssociableTypes: []string{categoryType},
+			Cardinality:     multiValueStr,
+			Description:     description,
+			Name:            name,
+		}
 		spec := CategoryCreateSpec{categoryCreate}
 		id, err := c.CreateCategory(ctx, &spec)
 		if err != nil {

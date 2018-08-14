@@ -40,9 +40,9 @@ func init() {
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
-	f.StringVar(&cmd.description, "d", "", "Description of category")
-	f.StringVar(&cmd.types, "t", "", "Associable_types of category")
-	f.BoolVar(&cmd.multi, "m", false, "Cardinality of category")
+	f.StringVar(&cmd.description, "d", "", "Description")
+	f.StringVar(&cmd.types, "t", "", "Associable object types")
+	f.BoolVar(&cmd.multi, "m", false, "Allow multiple tags per object")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -57,12 +57,13 @@ func (cmd *create) Usage() string {
 }
 
 func (cmd *create) Description() string {
-	return ` Create tag category. 
+	return `Create tag category.
 
 This command will output the ID you just created.
 
 Examples:
-  govc tags.category.create -d "description" -t "categoryType" -m(if set, the cardinality will be true) NAME`
+  govc tags.category.create -d "Host category" -t HostSystem NAME
+  govc tags.category.create -d "Any object category" -m NAME`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -82,5 +83,4 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		fmt.Println(*id)
 		return nil
 	})
-
 }

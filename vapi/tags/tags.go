@@ -28,34 +28,39 @@ const (
 )
 
 type TagCreateSpec struct {
-	CreateSpec TagCreate `json:"create_spec"`
-}
-
-type TagCreate struct {
-	CategoryID  string `json:"category_id"`
-	Description string `json:"description"`
-	Name        string `json:"name"`
+	CreateSpec Tag `json:"create_spec"`
 }
 
 type TagUpdateSpec struct {
-	UpdateSpec TagUpdate `json:"update_spec,omitempty"`
-}
-
-type TagUpdate struct {
-	Description string `json:"description,omitempty"`
-	Name        string `json:"name,omitempty"`
+	UpdateSpec Tag `json:"update_spec"`
 }
 
 type Tag struct {
-	ID          string   `json:"id"`
-	Description string   `json:"description"`
-	Name        string   `json:"name"`
-	CategoryID  string   `json:"category_id"`
-	UsedBy      []string `json:"used_by"`
+	ID          string   `json:"id,omitempty"`
+	Description string   `json:"description,omitempty"`
+	Name        string   `json:"name,omitempty"`
+	CategoryID  string   `json:"category_id,omitempty"`
+	UsedBy      []string `json:"used_by,omitempty"`
+}
+
+func (t *Tag) Update(src *Tag) {
+	if src.Name != "" {
+		t.Name = src.Name
+	}
+	if src.Description != "" {
+		t.Description = src.Description
+	}
+	if src.CategoryID != "" {
+		t.CategoryID = src.CategoryID
+	}
 }
 
 func (c *RestClient) CreateTagIfNotExist(ctx context.Context, name string, description string, categoryID string) (*string, error) {
-	tagCreate := TagCreate{categoryID, description, name}
+	tagCreate := Tag{
+		Name:        name,
+		Description: description,
+		CategoryID:  categoryID,
+	}
 	spec := TagCreateSpec{tagCreate}
 	id, err := c.CreateTag(ctx, &spec)
 	if err == nil {
