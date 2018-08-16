@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -39,15 +40,15 @@ func (cmd *detach) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *detach) Usage() string {
-	return "ID PATH"
+	return "NAME PATH"
 }
 
 func (cmd *detach) Description() string {
-	return `Detach tag from object.
+	return `Detach tag NAME from object PATH.
 
 Examples:
-  govc tags.detach ID /dc1/host/cluster1/hostname
-  govc tags.detach ID HostSystem:host`
+  govc tags.detach k8s-region-us /dc1
+  govc tags.detach k8s-zone-us-ca1 /dc1/host/cluster1`
 }
 
 func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -58,12 +59,12 @@ func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
 	tagID := f.Arg(0)
 	managedObj := f.Arg(1)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
 		ref, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
 		if err != nil {
 			return err
 		}
-		return c.DetachTagFromObject(ctx, tagID, ref)
+		m := tags.NewManager(c)
+		return m.DetachTag(ctx, tagID, ref)
 	})
 }

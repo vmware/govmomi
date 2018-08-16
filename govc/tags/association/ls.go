@@ -21,41 +21,43 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type ls struct {
 	*flags.DatacenterFlag
+	r bool
 }
 
 func init() {
-	cli.Register("tags.association.ls", &ls{})
+	cli.Register("tags.attached.ls", &ls{})
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
+	f.BoolVar(&cmd.r, "r", false, "List tags attached to resource")
 }
 
 func (cmd *ls) Usage() string {
-	return "ID or PATH"
+	return "NAME"
 }
 
 func (cmd *ls) Description() string {
-	return `List all attached tags or objects.
+	return `List attached tags or objects.
 
 Examples:
-  govc tags.association.ls ID
-  govc tags.association.ls -json /dc1/host/cluster1/hostname | jq .
-  govc tags.association.ls /dc1/host/cluster1/hostname
-  govc tags.association.ls HostSystem:host`
+  govc tags.attached.ls k8s-region-us
+  govc tags.attached.ls -json k8s-zone-us-ca1 | jq .
+  govc tags.attached.ls -r /dc1/host/cluster1
+  govc tags.attached.ls -json -r /dc1 | jq .`
 }
 
-func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
+func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*rest.Client) error) error {
 	vc, err := cmd.Client()
 	if err != nil {
 		return err
@@ -63,12 +65,12 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 	tagsURL := vc.URL()
 	tagsURL.User = cmd.Userinfo()
 
-	c := tags.NewClient(tagsURL, !cmd.IsSecure(), "")
+	c := rest.NewClient(vc)
 	if err != nil {
 		return err
 	}
 
-	if err = c.Login(ctx); err != nil {
+	if err = c.Login(ctx, tagsURL.User); err != nil {
 		return err
 	}
 	defer c.Logout(ctx)
@@ -76,35 +78,9 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 	return f(c)
 }
 
-func isTagID(arg string) bool {
-	s := strings.Split(arg, ":")
-	if len(s) > 2 {
-		return true
-	}
-	return false
-}
+type lsResult []string
 
-type getAssociatedObj []tags.AssociatedObject
-
-func (r getAssociatedObj) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i])
-	}
-	return nil
-}
-
-type getResult []string
-
-func (r getResult) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i])
-	}
-	return nil
-}
-
-type getAssociatedTags []tags.AttachedTagsInfo
-
-func (r getAssociatedTags) Write(w io.Writer) error {
+func (r lsResult) Write(w io.Writer) error {
 	for i := range r {
 		fmt.Fprintln(w, r[i])
 	}
@@ -117,35 +93,32 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	arg := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-		if isTagID(arg) {
-			objAssociated, err := c.ListAttachedObjects(ctx, arg)
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		var res lsResult
+		m := tags.NewManager(c)
+
+		if cmd.r {
+			ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
 			if err != nil {
 				return err
 			}
-			result := getAssociatedObj(objAssociated)
-			return cmd.WriteResult(result)
+			attached, err := m.GetAttachedTags(ctx, ref)
+			if err != nil {
+				return err
+			}
+			for i := range attached {
+				res = append(res, attached[i].Name)
+			}
+		} else {
+			attached, err := m.ListAttachedObjects(ctx, arg)
+			if err != nil {
+				return err
+			}
+			for i := range attached {
+				res = append(res, attached[i].Reference().String())
+			}
 		}
 
-		ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
-		if err != nil {
-			return err
-		}
-
-		tagsAssociated, err := c.ListAttachedTagsByName(ctx, ref)
-		if err != nil {
-			return err
-		}
-		if cmd.JSON {
-			associatedResult := getAssociatedTags(tagsAssociated)
-			return cmd.WriteResult(associatedResult)
-		}
-
-		var result getResult
-		for _, item := range tagsAssociated {
-			result = append(result, item.Name)
-		}
-		return cmd.WriteResult(result)
-
+		return cmd.WriteResult(res)
 	})
 }
