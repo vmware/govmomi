@@ -16798,7 +16798,7 @@ var VmMetrics = []types.PerfMetricId{
 
 // ************************* Host metrics ************************************
 
-MetricList: performance.MetricList{
+var HostMetrics = []types.PerfMetricId{
     {
         CounterId: 386,
         Instance:  "",
@@ -21123,5 +21123,596 @@ MetricList: performance.MetricList{
     {
         CounterId: 541,
         Instance:  "vfc",
+    },
+}
+
+// ************************************** Cluster Metrics **************************************
+var ClusterMetrics = []types.PerfMetricId{
+    {
+        CounterId: 22,
+        Instance:  "",
+    },
+    {
+        CounterId: 2,
+        Instance:  "",
+    },
+    {
+        CounterId: 9,
+        Instance:  "",
+    },
+    {
+        CounterId: 7,
+        Instance:  "",
+    },
+    {
+        CounterId: 8,
+        Instance:  "",
+    },
+    {
+        CounterId: 3,
+        Instance:  "",
+    },
+    {
+        CounterId: 4,
+        Instance:  "",
+    },
+    {
+        CounterId: 15,
+        Instance:  "",
+    },
+    {
+        CounterId: 17,
+        Instance:  "",
+    },
+    {
+        CounterId: 18,
+        Instance:  "",
+    },
+    {
+        CounterId: 19,
+        Instance:  "",
+    },
+    {
+        CounterId: 20,
+        Instance:  "",
+    },
+    {
+        CounterId: 21,
+        Instance:  "",
+    },
+    {
+        CounterId: 6,
+        Instance:  "",
+    },
+    {
+        CounterId: 139,
+        Instance:  "",
+    },
+    {
+        CounterId: 138,
+        Instance:  "",
+    },
+    {
+        CounterId: 107,
+        Instance:  "",
+    },
+    {
+        CounterId: 29,
+        Instance:  "",
+    },
+    {
+        CounterId: 33,
+        Instance:  "",
+    },
+    {
+        CounterId: 37,
+        Instance:  "",
+    },
+    {
+        CounterId: 41,
+        Instance:  "",
+    },
+    {
+        CounterId: 49,
+        Instance:  "",
+    },
+    {
+        CounterId: 90,
+        Instance:  "",
+    },
+    {
+        CounterId: 105,
+        Instance:  "",
+    },
+    {
+        CounterId: 106,
+        Instance:  "",
+    },
+    {
+        CounterId: 27,
+        Instance:  "",
+    },
+    {
+        CounterId: 108,
+        Instance:  "",
+    },
+    {
+        CounterId: 110,
+        Instance:  "",
+    },
+    {
+        CounterId: 111,
+        Instance:  "",
+    },
+    {
+        CounterId: 109,
+        Instance:  "",
+    },
+    {
+        CounterId: 112,
+        Instance:  "",
+    },
+    {
+        CounterId: 25,
+        Instance:  "",
+    },
+    {
+        CounterId: 103,
+        Instance:  "",
+    },
+    {
+        CounterId: 99,
+        Instance:  "",
+    },
+    {
+        CounterId: 30,
+        Instance:  "",
+    },
+    {
+        CounterId: 34,
+        Instance:  "",
+    },
+    {
+        CounterId: 38,
+        Instance:  "",
+    },
+    {
+        CounterId: 42,
+        Instance:  "",
+    },
+    {
+        CounterId: 50,
+        Instance:  "",
+    },
+    {
+        CounterId: 98,
+        Instance:  "",
+    },
+    {
+        CounterId: 26,
+        Instance:  "",
+    },
+    {
+        CounterId: 104,
+        Instance:  "",
+    },
+    {
+        CounterId: 100,
+        Instance:  "",
+    },
+    {
+        CounterId: 31,
+        Instance:  "",
+    },
+    {
+        CounterId: 102,
+        Instance:  "",
+    },
+    {
+        CounterId: 39,
+        Instance:  "",
+    },
+    {
+        CounterId: 43,
+        Instance:  "",
+    },
+    {
+        CounterId: 51,
+        Instance:  "",
+    },
+    {
+        CounterId: 92,
+        Instance:  "",
+    },
+    {
+        CounterId: 24,
+        Instance:  "",
+    },
+    {
+        CounterId: 35,
+        Instance:  "",
+    },
+    {
+        CounterId: 91,
+        Instance:  "",
+    },
+    {
+        CounterId: 153,
+        Instance:  "",
+    },
+    {
+        CounterId: 152,
+        Instance:  "",
+    },
+    {
+        CounterId: 151,
+        Instance:  "",
+    },
+    {
+        CounterId: 150,
+        Instance:  "",
+    },
+    {
+        CounterId: 157,
+        Instance:  "",
+    },
+    {
+        CounterId: 158,
+        Instance:  "",
+    },
+    {
+        CounterId: 159,
+        Instance:  "",
+    },
+    {
+        CounterId: 262,
+        Instance:  "",
+    },
+    {
+        CounterId: 257,
+        Instance:  "",
+    },
+    {
+        CounterId: 258,
+        Instance:  "",
+    },
+    {
+        CounterId: 259,
+        Instance:  "",
+    },
+    {
+        CounterId: 260,
+        Instance:  "",
+    },
+    {
+        CounterId: 261,
+        Instance:  "",
+    },
+    {
+        CounterId: 256,
+        Instance:  "",
+    },
+    {
+        CounterId: 263,
+        Instance:  "",
+    },
+    {
+        CounterId: 264,
+        Instance:  "",
+    },
+    {
+        CounterId: 265,
+        Instance:  "",
+    },
+    {
+        CounterId: 266,
+        Instance:  "",
+    },
+    {
+        CounterId: 267,
+        Instance:  "",
+    },
+    {
+        CounterId: 268,
+        Instance:  "",
+    },
+    {
+        CounterId: 269,
+        Instance:  "",
+    },
+    {
+        CounterId: 270,
+        Instance:  "",
+    },
+    {
+        CounterId: 271,
+        Instance:  "",
+    },
+    {
+        CounterId: 272,
+        Instance:  "",
+    },
+    {
+        CounterId: 273,
+        Instance:  "",
+    },
+    {
+        CounterId: 274,
+        Instance:  "",
+    },
+    {
+        CounterId: 275,
+        Instance:  "",
+    },
+}
+
+
+// *************************************** Datastore metrics ****************************************
+var DatastoreMetrics = []types.PerfMetricId{
+    {
+        CounterId: 178,
+        Instance:  "",
+    },
+    {
+        CounterId: 188,
+        Instance:  "",
+    },
+    {
+        CounterId: 187,
+        Instance:  "",
+    },
+    {
+        CounterId: 181,
+        Instance:  "",
+    },
+    {
+        CounterId: 180,
+        Instance:  "",
+    },
+    {
+        CounterId: 179,
+        Instance:  "",
+    },
+    {
+        CounterId: 281,
+        Instance:  "",
+    },
+    {
+        CounterId: 281,
+        Instance:  "$file",
+    },
+
+    {
+        CounterId: 282,
+        Instance:  "",
+    },
+    {
+        CounterId: 282,
+        Instance:  "$file",
+    },
+    {
+        CounterId: 283,
+        Instance:  "",
+    },
+    {
+        CounterId: 284,
+        Instance:  "",
+    },
+    {
+        CounterId: 284,
+        Instance:  "$file",
+    },
+    
+    {
+        CounterId: 288,
+        Instance:  "",
+    },
+    {
+        CounterId: 286,
+        Instance:  "",
+    },
+    {
+        CounterId: 287,
+        Instance:  "",
+    },
+    {
+        CounterId: 287,
+        Instance:  "$file",
+    },
+}
+
+// ********************************************* Resource pool metrics ***********************************
+var ResourcePoolMetrics = []types.PerfMetricId{
+    {
+        CounterId: 6,
+        Instance:  "",
+    },
+    {
+        CounterId: 213,
+        Instance:  "",
+    },
+    {
+        CounterId: 7,
+        Instance:  "",
+    },
+    {
+        CounterId: 8,
+        Instance:  "",
+    },
+    {
+        CounterId: 16,
+        Instance:  "",
+    },
+    {
+        CounterId: 17,
+        Instance:  "",
+    },
+    {
+        CounterId: 18,
+        Instance:  "",
+    },
+    {
+        CounterId: 19,
+        Instance:  "",
+    },
+    {
+        CounterId: 20,
+        Instance:  "",
+    },
+    {
+        CounterId: 22,
+        Instance:  "",
+    },
+    {
+        CounterId: 138,
+        Instance:  "",
+    },
+    {
+        CounterId: 139,
+        Instance:  "",
+    },
+    {
+        CounterId: 112,
+        Instance:  "",
+    },
+    {
+        CounterId: 102,
+        Instance:  "",
+    },
+    {
+        CounterId: 98,
+        Instance:  "",
+    },
+    {
+        CounterId: 29,
+        Instance:  "",
+    },
+    {
+        CounterId: 33,
+        Instance:  "",
+    },
+    {
+        CounterId: 37,
+        Instance:  "",
+    },
+    {
+        CounterId: 41,
+        Instance:  "",
+    },
+    {
+        CounterId: 70,
+        Instance:  "",
+    },
+    {
+        CounterId: 90,
+        Instance:  "",
+    },
+    {
+        CounterId: 108,
+        Instance:  "",
+    },
+    {
+        CounterId: 109,
+        Instance:  "",
+    },
+    {
+        CounterId: 111,
+        Instance:  "",
+    },
+    {
+        CounterId: 214,
+        Instance:  "",
+    },
+    {
+        CounterId: 105,
+        Instance:  "",
+    },
+    {
+        CounterId: 106,
+        Instance:  "",
+    },
+    {
+        CounterId: 107,
+        Instance:  "",
+    },
+    {
+        CounterId: 103,
+        Instance:  "",
+    },
+    {
+        CounterId: 99,
+        Instance:  "",
+    },
+    {
+        CounterId: 30,
+        Instance:  "",
+    },
+    {
+        CounterId: 34,
+        Instance:  "",
+    },
+    {
+        CounterId: 38,
+        Instance:  "",
+    },
+    {
+        CounterId: 42,
+        Instance:  "",
+    },
+    {
+        CounterId: 71,
+        Instance:  "",
+    },
+    {
+        CounterId: 92,
+        Instance:  "",
+    },
+    {
+        CounterId: 104,
+        Instance:  "",
+    },
+    {
+        CounterId: 100,
+        Instance:  "",
+    },
+    {
+        CounterId: 31,
+        Instance:  "",
+    },
+    {
+        CounterId: 35,
+        Instance:  "",
+    },
+    {
+        CounterId: 39,
+        Instance:  "",
+    },
+    {
+        CounterId: 43,
+        Instance:  "",
+    },
+    {
+        CounterId: 72,
+        Instance:  "",
+    },
+    {
+        CounterId: 91,
+        Instance:  "",
+    },
+    {
+        CounterId: 152,
+        Instance:  "",
+    },
+    {
+        CounterId: 153,
+        Instance:  "",
+    },
+    {
+        CounterId: 157,
+        Instance:  "",
+    },
+    {
+        CounterId: 159,
+        Instance:  "",
     },
 }

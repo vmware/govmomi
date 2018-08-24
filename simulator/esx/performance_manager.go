@@ -15019,3 +15019,39 @@ var HostMetrics = []types.PerfMetricId{
 		Instance:  "vfc",
 	},
 }
+
+// ********************************* Resource pool metrics **********************************
+var ResourcePoolMetrics = []types.PerfMetricId{
+	{
+		CounterId: 5,
+		Instance:  "",
+	},
+	{
+		CounterId: 65586,
+		Instance:  "",
+	},
+	{
+		CounterId: 65591,
+		Instance:  "",
+	},
+	{
+		CounterId: 65545,
+		Instance:  "",
+	},
+	{
+		CounterId: 65553,
+		Instance:  "",
+	},
+	{
+		CounterId: 65541,
+		Instance:  "",
+	},
+	{
+		CounterId: 65549,
+		Instance:  "",
+	},
+	{
+		CounterId: 65582,
+		Instance:  "",
+	},
+}
