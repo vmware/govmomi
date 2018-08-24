@@ -77,7 +77,7 @@ func (flag *DatacenterFlag) Process(ctx context.Context) error {
 	})
 }
 
-func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
+func (flag *DatacenterFlag) Finder(all ...bool) (*find.Finder, error) {
 	if flag.finder != nil {
 		return flag.finder, nil
 	}
@@ -87,7 +87,11 @@ func (flag *DatacenterFlag) Finder() (*find.Finder, error) {
 		return nil, err
 	}
 
-	finder := find.NewFinder(c, flag.JSON || flag.Dump)
+	allFlag := false
+	if len(all) == 1 {
+		allFlag = all[0]
+	}
+	finder := find.NewFinder(c, allFlag)
 
 	// Datacenter is not required (ls command for example).
 	// Set for relative func if dc flag is given or
