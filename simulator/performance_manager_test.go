@@ -236,3 +236,48 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 }
+
+func TestQueryPerf(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer m.Remove()
+
+	c := m.Service.client
+
+	p := performance.NewManager(c)
+
+	// Single metric, single entity
+	//
+	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	qs := []types.PerfQuerySpec{
+		types.PerfQuerySpec{
+			MaxSample:  4,
+			IntervalId: 20,
+			MetricId:   []types.PerfMetricId{types.PerfMetricId{CounterId: 1, Instance: ""}},
+			Entity:     vm.Reference(),
+		},
+	}
+	result, err := p.Query(ctx, qs)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(result) == 0 {
+		t.Fatal("Empty result set")
+	}
+	ms, err := p.ToMetricSeries(ctx, result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(ms) == 0 {
+		t.Fatal("Empty metric series")
+	}
+	csv := ms[0].Value[0].ValueCSV()
+	fmt.Println(csv)
+}

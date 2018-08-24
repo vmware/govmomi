@@ -138,7 +138,6 @@ func (p *PerformanceManager) buildAvailablePerfMetricsQueryResponse(ids []types.
 }
 
 func (p *PerformanceManager) queryAvailablePerfMetric(entity types.ManagedObjectReference, interval int32) *types.QueryAvailablePerfMetricResponse {
-	var res *types.QueryAvailablePerfMetricResponse
 	switch entity.Type {
 	case "VirtualMachine":
 		vm := Map.Get(entity).(*VirtualMachine)
@@ -150,7 +149,7 @@ func (p *PerformanceManager) queryAvailablePerfMetric(entity types.ManagedObject
 		return p.buildAvailablePerfMetricsQueryResponse(p.rpMetrics, 0, "")
 	case "ClusterComputeResource":
 		if interval != 20 {
-			res = p.buildAvailablePerfMetricsQueryResponse(p.clusterMetrics, 0, "")
+			return p.buildAvailablePerfMetricsQueryResponse(p.clusterMetrics, 0, "")
 		}
 	case "Datastore":
 		if interval != 20 {
@@ -180,37 +179,47 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 	for i, qs := range req.QuerySpec {
 		metrics := new(types.PerfEntityMetric)
 		metrics.Entity = qs.Entity
+		var start, end time.Time
+		if qs.StartTime == nil {
+			start = time.Now().Add(time.Duration(-365*24) * time.Hour) // Assume we have data for a year
+		} else {
+			start = *qs.StartTime
+		}
+		if qs.EndTime == nil {
+			end = time.Now()
+		} else {
+			end = *qs.EndTime
+		}
 
 		// Generate metric series. Divide into n buckets of interval seconds
 		interval := qs.IntervalId
 		if interval == -1 || interval == 0 {
 			interval = 20 // TODO: Determine from entity type
 		}
-		n := int32(qs.EndTime.Sub(*qs.StartTime).Seconds()) / interval
+		n := 1 + int32(end.Sub(start).Seconds())/interval
 		if n > qs.MaxSample {
 			n = qs.MaxSample
 		}
 
 		// Loop through each interval "tick"
 		metrics.SampleInfo = make([]types.PerfSampleInfo, n)
-		metrics.Value = make([]types.BasePerfMetricSeries, n)
-		ts := *qs.StartTime
+		metrics.Value = make([]types.BasePerfMetricSeries, len(qs.MetricId))
 		for tick := int32(0); tick < n; tick++ {
+			metrics.SampleInfo[tick] = types.PerfSampleInfo{Timestamp: end.Add(time.Duration(-interval*tick) * time.Second), Interval: interval}
+		}
 
-			// Create sample metadata
-			metrics.SampleInfo[tick] = types.PerfSampleInfo{Timestamp: ts, Interval: interval}
-
+		for j, mid := range qs.MetricId {
 			// Create list of metrics for this tick
-			series := &types.PerfMetricIntSeries{Value: make([]int64, len(qs.MetricId))}
-			for j, id := range qs.MetricId {
-				series.Value[j] = int64(0)
+			series := &types.PerfMetricIntSeries{Value: make([]int64, n)}
+			series.Id = mid
+
+			for tick := int32(0); tick < n; tick++ {
+				series.Value[tick] = int64(1)
 			}
-			metrics.Value[tick] = series
-
-			// Advance to next interval tick
-			ts := ts.Add(time.Duration(interval) * time.Second)
-
+			metrics.Value[j] = series
 		}
 		body.Res.Returnval[i] = metrics
 	}
+	spew.Dump(body)
+	return body
 }
