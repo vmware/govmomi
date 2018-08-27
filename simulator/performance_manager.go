@@ -17,6 +17,7 @@ limitations under the License.
 package simulator
 
 import (
+	"math/rand"
 	"strconv"
 	"time"
 
@@ -50,6 +51,7 @@ type PerformanceManager struct {
 	clusterMetrics   []types.PerfMetricId
 	datastoreMetrics []types.PerfMetricId
 	perfCounterIndex map[int32]types.PerfCounterInfo
+	metricData       map[string]map[int32][]int64
 }
 
 func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
@@ -60,6 +62,7 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 		m.hostMetrics = esx.HostMetrics[:]
 		m.vmMetrics = esx.VmMetrics[:]
 		m.rpMetrics = esx.ResourcePoolMetrics[:]
+		m.metricData = esx.MetricData
 	} else {
 		m.PerfCounter = vpx.PerfCounter[:]
 		m.hostMetrics = vpx.HostMetrics[:]
@@ -67,6 +70,7 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 		m.rpMetrics = vpx.ResourcePoolMetrics[:]
 		m.clusterMetrics = vpx.ClusterMetrics[:]
 		m.datastoreMetrics = vpx.DatastoreMetrics[:]
+		m.metricData = vpx.MetricData
 	}
 	m.perfCounterIndex = make(map[int32]types.PerfCounterInfo, len(m.PerfCounter))
 	for _, p := range m.PerfCounter {
@@ -179,6 +183,14 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 	for i, qs := range req.QuerySpec {
 		metrics := new(types.PerfEntityMetric)
 		metrics.Entity = qs.Entity
+
+		// Get metric data for this entity type
+		metricData, ok := p.metricData[qs.Entity.Type]
+		if !ok {
+			body.Fault_ = Fault("", &types.InvalidArgument{
+				InvalidProperty: "Entity",
+			})
+		}
 		var start, end time.Time
 		if qs.StartTime == nil {
 			start = time.Now().Add(time.Duration(-365*24) * time.Hour) // Assume we have data for a year
@@ -212,9 +224,21 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 			// Create list of metrics for this tick
 			series := &types.PerfMetricIntSeries{Value: make([]int64, n)}
 			series.Id = mid
+			points := metricData[mid.CounterId]
 
 			for tick := int32(0); tick < n; tick++ {
-				series.Value[tick] = int64(1)
+				var p int64
+
+				// Use sample data if we have it. Otherwise, just send 0.
+				if len(points) > 0 {
+					p = points[(int64(start.Second())/int64(interval)+int64(tick))%int64(len(points))]
+					if p > 0 {
+						p = p + (rand.Int63n(p / 10)) // Add some random jitter
+					}
+				} else {
+					p = 0
+				}
+				series.Value[tick] = p
 			}
 			metrics.Value[j] = series
 		}
