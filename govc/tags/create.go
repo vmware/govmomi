@@ -23,12 +23,13 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type create struct {
 	*flags.ClientFlag
-	description string
+	tag tags.Tag
 }
 
 func init() {
@@ -38,7 +39,8 @@ func init() {
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
-	f.StringVar(&cmd.description, "d", "", "Description of tag")
+	f.StringVar(&cmd.tag.CategoryID, "c", "", "Category name")
+	f.StringVar(&cmd.tag.Description, "d", "", "Description of tag")
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -49,19 +51,20 @@ func (cmd *create) Process(ctx context.Context) error {
 }
 
 func (cmd *create) Usage() string {
-	return "NAME CATEGORYID"
+	return "NAME"
 }
 
 func (cmd *create) Description() string {
 	return `Create tag.
 
-This command will output the ID you just created.
+The '-c' option to specify a tag category is required.
+This command will output the ID of the new tag.
 
 Examples:
-  govc tags.create -d "description" NAME CATEGORYID`
+  govc tags.create -d "Kubernetes Zone US CA1" -c k8s-zone k8s-zone-us-ca1`
 }
 
-func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
+func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*rest.Client) error) error {
 	vc, err := cmd.Client()
 	if err != nil {
 		return err
@@ -69,12 +72,12 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 	tagsURL := vc.URL()
 	tagsURL.User = cmd.Userinfo()
 
-	c := tags.NewClient(tagsURL, !cmd.IsSecure(), "")
+	c := rest.NewClient(vc)
 	if err != nil {
 		return err
 	}
 
-	if err = c.Login(ctx); err != nil {
+	if err = c.Login(ctx, tagsURL.User); err != nil {
 		return err
 	}
 	defer c.Logout(ctx)
@@ -83,20 +86,19 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	if f.NArg() != 2 {
+	if f.NArg() != 1 || cmd.tag.CategoryID == "" {
 		return flag.ErrHelp
 	}
 
-	name := f.Arg(0)
-	id := f.Arg(1)
+	cmd.tag.Name = f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-
-		id, err := c.CreateTagIfNotExist(ctx, name, cmd.description, id)
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		id, err := tags.NewManager(c).CreateTag(ctx, &cmd.tag)
 		if err != nil {
 			return err
 		}
-		fmt.Println(*id)
+
+		fmt.Println(id)
 		return nil
 	})
 }

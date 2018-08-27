@@ -17,10 +17,10 @@ limitations under the License.
 package simulator
 
 import (
+	"math/rand"
 	"strconv"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
@@ -50,6 +50,7 @@ type PerformanceManager struct {
 	clusterMetrics   []types.PerfMetricId
 	datastoreMetrics []types.PerfMetricId
 	perfCounterIndex map[int32]types.PerfCounterInfo
+	metricData       map[string]map[int32][]int64
 }
 
 func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
@@ -60,6 +61,7 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 		m.hostMetrics = esx.HostMetrics[:]
 		m.vmMetrics = esx.VmMetrics[:]
 		m.rpMetrics = esx.ResourcePoolMetrics[:]
+		m.metricData = esx.MetricData
 	} else {
 		m.PerfCounter = vpx.PerfCounter[:]
 		m.hostMetrics = vpx.HostMetrics[:]
@@ -67,6 +69,7 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 		m.rpMetrics = vpx.ResourcePoolMetrics[:]
 		m.clusterMetrics = vpx.ClusterMetrics[:]
 		m.datastoreMetrics = vpx.DatastoreMetrics[:]
+		m.metricData = vpx.MetricData
 	}
 	m.perfCounterIndex = make(map[int32]types.PerfCounterInfo, len(m.PerfCounter))
 	for _, p := range m.PerfCounter {
@@ -130,6 +133,11 @@ func (p *PerformanceManager) buildAvailablePerfMetricsQueryResponse(ids []types.
 			}
 		case "$physDisk":
 			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: datastoreURL})
+		case "$file":
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "DISKFILE"})
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "DELTAFILE"})
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "SWAPFILE"})
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "OTHERFILE"})
 		default:
 			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: id.Instance})
 		}
@@ -166,7 +174,6 @@ func (p *PerformanceManager) QueryAvailablePerfMetric(ctx *Context, req *types.Q
 	body.Req = req
 	body.Res = p.queryAvailablePerfMetric(req.Entity, req.IntervalId)
 
-	spew.Dump(body)
 	return body
 }
 
@@ -179,6 +186,14 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 	for i, qs := range req.QuerySpec {
 		metrics := new(types.PerfEntityMetric)
 		metrics.Entity = qs.Entity
+
+		// Get metric data for this entity type
+		metricData, ok := p.metricData[qs.Entity.Type]
+		if !ok {
+			body.Fault_ = Fault("", &types.InvalidArgument{
+				InvalidProperty: "Entity",
+			})
+		}
 		var start, end time.Time
 		if qs.StartTime == nil {
 			start = time.Now().Add(time.Duration(-365*24) * time.Hour) // Assume we have data for a year
@@ -212,14 +227,31 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 			// Create list of metrics for this tick
 			series := &types.PerfMetricIntSeries{Value: make([]int64, n)}
 			series.Id = mid
+			points := metricData[mid.CounterId]
+			offset := int64(start.Unix()) / int64(interval)
 
 			for tick := int32(0); tick < n; tick++ {
-				series.Value[tick] = int64(1)
+				var p int64
+
+				// Use sample data if we have it. Otherwise, just send 0.
+				if len(points) > 0 {
+					p = points[(offset+int64(tick))%int64(len(points))]
+					scale := p / 5
+					if scale > 0 {
+						// Add some gaussian noise to make the data look more "real"
+						p += int64(rand.NormFloat64() * float64(scale))
+						if p < 0 {
+							p = 0
+						}
+					}
+				} else {
+					p = 0
+				}
+				series.Value[tick] = p
 			}
 			metrics.Value[j] = series
 		}
 		body.Res.Returnval[i] = metrics
 	}
-	spew.Dump(body)
 	return body
 }

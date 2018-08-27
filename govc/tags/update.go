@@ -22,15 +22,13 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type update struct {
 	*flags.ClientFlag
-	name        string
-	description string
-	types       string
-	multi       string
+	tag tags.Tag
 }
 
 func init() {
@@ -40,46 +38,34 @@ func init() {
 func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
-	f.StringVar(&cmd.name, "n", "", "Name of tag")
-	f.StringVar(&cmd.description, "d", "", "Description of tag")
-}
-
-func (cmd *update) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
+	f.StringVar(&cmd.tag.Name, "n", "", "Name of tag")
+	f.StringVar(&cmd.tag.Description, "d", "", "Description of tag")
 }
 
 func (cmd *update) Usage() string {
-	return "ID"
+	return "NAME"
 }
 
 func (cmd *update) Description() string {
 	return `Update tag.
 
 Examples:
-  govc tags.update -n NAME -d DESCRIPTION ID`
+  govc tags.update -d "K8s zone US-CA1" k8s-zone-us-ca1`
 }
 
 func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
-	id := f.Arg(0)
+	arg := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-
-		tag := new(tags.TagUpdateSpec)
-		tagTemp := new(tags.Tag)
-		if cmd.name != "" {
-			tagTemp.Name = cmd.name
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
+		tag, err := m.GetTag(ctx, arg)
+		if err != nil {
+			return err
 		}
-		if cmd.description != "" {
-			tagTemp.Description = cmd.description
-		}
-
-		tag.UpdateSpec = *tagTemp
-		return c.UpdateTag(ctx, id, tag)
+		tag.Patch(&cmd.tag)
+		return m.UpdateTag(ctx, tag)
 	})
 }

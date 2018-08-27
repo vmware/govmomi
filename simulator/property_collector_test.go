@@ -476,9 +476,9 @@ func TestPropertyCollectorWithUnsetValues(t *testing.T) {
 	vmRef := vm.Reference()
 
 	propSets := [][]string{
-		{"parentVApp"},                                                         // unset string by default (not returned by RetrievePropertiesEx)
-		{"rootSnapshot"},                                                       // unset VirtualMachineSnapshot[] by default (returned by RetrievePropertiesEx)
-		{"config.networkShaper.enabled"},                                       // unset at config.networkShaper level by default (not returned by RetrievePropertiesEx)
+		{"parentVApp"},                   // unset string by default (not returned by RetrievePropertiesEx)
+		{"rootSnapshot"},                 // unset VirtualMachineSnapshot[] by default (returned by RetrievePropertiesEx)
+		{"config.networkShaper.enabled"}, // unset at config.networkShaper level by default (not returned by RetrievePropertiesEx)
 		{"parentVApp", "rootSnapshot", "config.networkShaper.enabled"},         // (not returned by RetrievePropertiesEx)
 		{"name", "parentVApp", "rootSnapshot", "config.networkShaper.enabled"}, // (only name returned by RetrievePropertiesEx)
 		{"name", "config.guestFullName"},                                       // both set (and returned by RetrievePropertiesEx))
