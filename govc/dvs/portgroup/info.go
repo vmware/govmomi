@@ -56,6 +56,7 @@ var protocols = map[int32]string{
 type trafficRule struct {
 	Description        string
 	Direction          string
+	Action             string
 	Protocol           string
 	SourceAddress      string
 	SourceIpPort       string
@@ -123,6 +124,18 @@ func printAddress(address types.BaseIpAddress) string {
 	return "Any"
 }
 
+func printAction(action types.BaseDvsNetworkRuleAction) string {
+	if action != nil {
+		switch (action).(type) {
+		case *types.DvsAcceptNetworkRuleAction:
+			return fmt.Sprintf("Accept")
+		case *types.DvsDropNetworkRuleAction:
+			return fmt.Sprintf("Drop")
+		}
+	}
+	return "n/a"
+}
+
 func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 	if len(trafficRuleSet[portID]) == 0 {
 		return
@@ -135,9 +148,10 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 	sort.Ints(keys)
 	tabWidthInt := 22
 	tabWidth := fmt.Sprintf("%d", tabWidthInt)
-	headLen := tabWidthInt*8 + 8*2 - 1
+	headLen := 9*(tabWidthInt+2) - 1
 	fmt.Printf("+" + strings.Repeat("-", headLen) + "+\n")
 	format := "| %-" + tabWidth +
+		"s| %-" + tabWidth +
 		"s| %-" + tabWidth +
 		"s| %-" + tabWidth +
 		"s| %-" + tabWidth +
@@ -150,6 +164,7 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 		"Sequence",
 		"Description",
 		"Direction",
+		"Action",
 		"Protocol",
 		"SourceAddress",
 		"SourceIpPort",
@@ -161,6 +176,7 @@ func printTable(trafficRuleSet map[int]map[int]trafficRule, portID int) {
 			fmt.Sprintf("%d", id),
 			trafficRuleSet[portID][id].Description,
 			trafficRuleSet[portID][id].Direction,
+			trafficRuleSet[portID][id].Action,
 			trafficRuleSet[portID][id].Protocol,
 			trafficRuleSet[portID][id].SourceAddress,
 			trafficRuleSet[portID][id].SourceIpPort,
@@ -211,6 +227,7 @@ func (r *infoResult) Write(w io.Writer) error {
 							trafficRuleSet[portID][int(rule.Sequence)] = trafficRule{
 								Description:        rule.Description,
 								Direction:          rule.Direction,
+								Action:             printAction(rule.Action),
 								Protocol:           protocol,
 								SourceAddress:      printAddress(q.GetDvsIpNetworkRuleQualifier().SourceAddress),
 								SourceIpPort:       printPort(q.GetDvsIpNetworkRuleQualifier().SourceIpPort),
