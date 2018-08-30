@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -42,7 +43,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 	cmd.OutputFlag.Register(ctx, f)
-	f.StringVar(&cmd.c, "c", "", "ID for category")
+	f.StringVar(&cmd.c, "c", "", "Category name")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -53,70 +54,39 @@ func (cmd *ls) Process(ctx context.Context) error {
 }
 
 func (cmd *ls) Description() string {
-	return `List all tags, or list tags for category.
+	return `List tags.
 
 Examples:
   govc tags.ls
+  govc tags.ls -c k8s-zone
   govc tags.ls -json | jq .
-  govc tags.ls -c CATEGORYID -json | jq .
-  govc tags.ls -c CATEGORYID`
+  govc tags.ls -c k8s-region -json | jq .`
 }
 
-type getResult []string
+type lsResult []tags.Tag
 
-func (r getResult) Write(w io.Writer) error {
+func (r lsResult) Write(w io.Writer) error {
 	for i := range r {
-		fmt.Fprintln(w, r[i])
-	}
-	return nil
-}
-
-type getTagNameID []tags.TagsInfo
-
-func (r getTagNameID) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i])
+		fmt.Fprintln(w, r[i].Name)
 	}
 	return nil
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-		var result getResult
-		var tagInfo getTagNameID
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
+		var res lsResult
 		var err error
 
-		switch {
-		case cmd.c != "":
-			tagInfo, err = c.ListTagsInfoForCategory(ctx, cmd.c)
-			if err != nil {
-				return err
-			}
-			if cmd.JSON {
-				return cmd.WriteResult(tagInfo)
-			}
-			for _, item := range tagInfo {
-				result = append(result, item.Name)
-			}
-			return cmd.WriteResult(result)
-
-		case cmd.JSON:
-			tagInfo, err = c.ListTagsByName(ctx)
-			if err != nil {
-				return err
-			}
-			return cmd.WriteResult(tagInfo)
-
-		default:
-			tagInfo, err = c.ListTagsByName(ctx)
-			if err != nil {
-				return err
-			}
-			for _, item := range tagInfo {
-				result = append(result, item.Name)
-			}
-			return cmd.WriteResult(result)
+		if cmd.c == "" {
+			res, err = m.GetTags(ctx)
+		} else {
+			res, err = m.GetTagsForCategory(ctx, cmd.c)
 		}
+
+		if err != nil {
+			return err
+		}
+		return cmd.WriteResult(res)
 	})
 }

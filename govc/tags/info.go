@@ -25,13 +25,14 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
-	id bool
+	c string
 }
 
 func init() {
@@ -43,30 +44,34 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 	cmd.OutputFlag.Register(ctx, f)
-	f.BoolVar(&cmd.id, "i", false, "ID of category")
+	f.StringVar(&cmd.c, "c", "", "Category name")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
-	return nil
+	return cmd.OutputFlag.Process(ctx)
 }
+
 func (cmd *info) Usage() string {
-	return "TAGNAME CATEGORYID or TAGID"
+	return "NAME"
 }
 
 func (cmd *info) Description() string {
-	return `Get tags info by tags' ID, or Get tags info for category by tag name and category ID. 
+	return `Display tags info.
+
+If NAME is provided, display info for only that tag.  Otherwise display info for all tags.
 
 Examples:
-  govc tags.info -i TAGID
-  govc tags.info TAGNAME CATEGORYID `
+  govc tags.info
+  govc tags.info k8s-zone-us-ca1
+  govc tags.info -c k8s-zone`
 }
 
-type getTagInfo []tags.Tag
+type infoResult []tags.Tag
 
-func (t getTagInfo) Write(w io.Writer) error {
+func (t infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
 	for _, item := range t {
@@ -81,31 +86,35 @@ func (t getTagInfo) Write(w io.Writer) error {
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
+		var res lsResult
+		var err error
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-		var result getTagInfo
-		if cmd.id {
-			if f.NArg() != 1 {
-				return flag.ErrHelp
-			}
-			id := f.Arg(0)
-			tag, err := c.GetTag(ctx, id)
-			if err != nil {
-				return err
-			}
-			result = append(result, *tag)
+		if cmd.c == "" {
+			res, err = m.GetTags(ctx)
 		} else {
-			if f.NArg() != 2 {
-				return flag.ErrHelp
+			res, err = m.GetTagsForCategory(ctx, cmd.c)
+		}
+		if err != nil {
+			return err
+		}
+
+		if f.NArg() == 1 {
+			arg := f.Arg(0)
+			src := res
+			res = nil
+			for i := range src {
+				if src[i].Name == arg || src[i].ID == arg {
+					res = append(res, src[i])
+					break
+				}
 			}
-			name := f.Arg(0)
-			id := f.Arg(1)
-			var err error
-			result, err = c.GetTagByNameForCategory(ctx, name, id)
-			if err != nil {
-				return err
+			if len(res) == 0 {
+				return fmt.Errorf("tag %q not found", arg)
 			}
 		}
-		return cmd.WriteResult(result)
+
+		return cmd.WriteResult(infoResult(res))
 	})
 }

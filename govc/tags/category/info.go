@@ -25,13 +25,13 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
-	id bool
 }
 
 func init() {
@@ -43,33 +43,33 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 	cmd.OutputFlag.Register(ctx, f)
-	f.BoolVar(&cmd.id, "i", false, "Get category info by ID")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
-	return nil
+	return cmd.OutputFlag.Process(ctx)
 }
 
 func (cmd *info) Usage() string {
-	return "NAME or ID"
+	return "[NAME]"
 }
 
 func (cmd *info) Description() string {
-	return `Get category info by ID or name. 
-	
-Will return error if category ID doesn't exist. Will return empty if category name doesn't exist.
+	return `Display category info.
+
+If NAME is provided, display info for only that category.
+Otherwise display info for all categories.
 
 Examples:
-  govc tags.category.info NAME  
-  govc tags.category.info -i ID`
+  govc tags.category.info
+  govc tags.category.info k8s-zone`
 }
 
-type getCategoryInfo []tags.Category
+type infoResult []tags.Category
 
-func (t getCategoryInfo) Write(w io.Writer) error {
+func (t infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
 	for _, item := range t {
@@ -85,28 +85,26 @@ func (t getCategoryInfo) Write(w io.Writer) error {
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	if f.NArg() != 1 {
-		return flag.ErrHelp
-	}
 	arg := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
+		var res infoResult
+		var err error
 
-		var result getCategoryInfo
-		if cmd.id {
-			category, err := c.GetCategory(ctx, arg)
+		if f.NArg() == 1 {
+			cat, cerr := m.GetCategory(ctx, arg)
+			if cerr != nil {
+				return cerr
+			}
+			res = append(res, *cat)
+		} else {
+			res, err = m.GetCategories(ctx)
 			if err != nil {
 				return err
 			}
-			result = append(result, *category)
-			return cmd.WriteResult(result)
 		}
 
-		var err error
-		result, err = c.GetCategoriesByName(ctx, arg)
-		if err != nil {
-			return err
-		}
-		return cmd.WriteResult(result)
+		return cmd.WriteResult(res)
 	})
 }

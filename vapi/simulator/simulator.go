@@ -23,17 +23,14 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"reflect"
 	"strings"
 	"sync"
 
 	"github.com/google/uuid"
+	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/tags"
 	vim "github.com/vmware/govmomi/vim25/types"
-)
-
-const (
-	Path              = "/rest/com/vmware"
-	SessionCookieName = "vmware-api-session-id"
 )
 
 type handler struct {
@@ -41,7 +38,7 @@ type handler struct {
 	sync.Mutex
 	Category    map[string]*tags.Category
 	Tag         map[string]*tags.Tag
-	Association map[string]map[tags.AssociatedObject]bool
+	Association map[string]map[internal.AssociatedObject]bool
 }
 
 // New creates a vAPI simulator.
@@ -50,24 +47,24 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		ServeMux:    http.NewServeMux(),
 		Category:    make(map[string]*tags.Category),
 		Tag:         make(map[string]*tags.Tag),
-		Association: make(map[string]map[tags.AssociatedObject]bool),
+		Association: make(map[string]map[internal.AssociatedObject]bool),
 	}
 
 	handlers := []struct {
 		p string
 		m http.HandlerFunc
 	}{
-		{"cis/session", s.session},
-		{"cis/tagging/category", s.category},
-		{"cis/tagging/category/", s.categoryID},
-		{"cis/tagging/tag", s.tag},
-		{"cis/tagging/tag/", s.tagID},
-		{"cis/tagging/tag-association", s.association},
+		{internal.SessionPath, s.session},
+		{internal.CategoryPath, s.category},
+		{internal.CategoryPath + "/", s.categoryID},
+		{internal.TagPath, s.tag},
+		{internal.TagPath + "/", s.tagID},
+		{internal.AssociationPath, s.association},
 	}
 
 	for i := range handlers {
 		h := handlers[i]
-		s.HandleFunc(Path+"/"+h.p, func(w http.ResponseWriter, r *http.Request) {
+		s.HandleFunc(internal.Path+h.p, func(w http.ResponseWriter, r *http.Request) {
 			s.Lock()
 			defer s.Unlock()
 
@@ -75,7 +72,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		})
 	}
 
-	return Path + "/", s
+	return internal.Path + "/", s
 }
 
 // ok responds with http.StatusOK and json encodes val if given.
@@ -146,7 +143,7 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		id = uuid.New().String()
 		// TODO: save session
 		http.SetCookie(w, &http.Cookie{
-			Name:  SessionCookieName,
+			Name:  internal.SessionCookieName,
 			Value: id,
 		})
 		s.ok(w)
@@ -175,17 +172,19 @@ func newID(kind string) string {
 func (s *handler) category(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		var spec tags.CategoryCreateSpec
+		var spec struct {
+			Category tags.Category `json:"create_spec"`
+		}
 		if s.decode(r, w, &spec) {
 			for _, category := range s.Category {
-				if category.Name == spec.CreateSpec.Name {
+				if category.Name == spec.Category.Name {
 					s.fail(w, "com.vmware.vapi.std.errors.already_exists")
 					return
 				}
 			}
 			id := newID("Category")
-			spec.CreateSpec.ID = id
-			s.Category[id] = &spec.CreateSpec
+			spec.Category.ID = id
+			s.Category[id] = &spec.Category
 			s.ok(w, id)
 		}
 	case http.MethodGet:
@@ -210,11 +209,32 @@ func (s *handler) categoryID(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodDelete:
 		delete(s.Category, id)
+		for ix, tag := range s.Tag {
+			if tag.CategoryID == id {
+				delete(s.Tag, ix)
+				delete(s.Association, ix)
+			}
+		}
 		s.ok(w)
 	case http.MethodPatch:
-		var spec tags.CategoryUpdateSpec
+		var spec struct {
+			Category tags.Category `json:"update_spec"`
+		}
 		if s.decode(r, w, &spec) {
-			o.Update(&spec.UpdateSpec)
+			ntypes := len(spec.Category.AssociableTypes)
+			if ntypes != 0 {
+				// Validate that AssociableTypes is only appended to.
+				etypes := len(o.AssociableTypes)
+				fail := ntypes < etypes
+				if !fail {
+					fail = !reflect.DeepEqual(o.AssociableTypes, spec.Category.AssociableTypes[:etypes])
+				}
+				if fail {
+					s.fail(w, "com.vmware.vapi.std.errors.invalid_argument")
+					return
+				}
+			}
+			o.Patch(&spec.Category)
 			s.ok(w)
 		}
 	case http.MethodGet:
@@ -225,18 +245,20 @@ func (s *handler) categoryID(w http.ResponseWriter, r *http.Request) {
 func (s *handler) tag(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
-		var spec tags.TagCreateSpec
+		var spec struct {
+			Tag tags.Tag `json:"create_spec"`
+		}
 		if s.decode(r, w, &spec) {
 			for _, tag := range s.Tag {
-				if tag.Name == spec.CreateSpec.Name {
+				if tag.Name == spec.Tag.Name {
 					s.fail(w, "com.vmware.vapi.std.errors.already_exists")
 					return
 				}
 			}
 			id := newID("Tag")
-			spec.CreateSpec.ID = id
-			s.Tag[id] = &spec.CreateSpec
-			s.Association[id] = make(map[tags.AssociatedObject]bool)
+			spec.Tag.ID = id
+			s.Tag[id] = &spec.Tag
+			s.Association[id] = make(map[internal.AssociatedObject]bool)
 			s.ok(w, id)
 		}
 	case http.MethodGet:
@@ -276,9 +298,11 @@ func (s *handler) tagID(w http.ResponseWriter, r *http.Request) {
 		delete(s.Association, id)
 		s.ok(w)
 	case http.MethodPatch:
-		var spec tags.TagUpdateSpec
+		var spec struct {
+			Tag tags.Tag `json:"update_spec"`
+		}
 		if s.decode(r, w, &spec) {
-			o.Update(&spec.UpdateSpec)
+			o.Patch(&spec.Tag)
 			s.ok(w)
 		}
 	case http.MethodGet:
@@ -292,7 +316,7 @@ func (s *handler) association(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var spec tags.TagAssociationSpec
+	var spec internal.Association
 	if !s.decode(r, w, &spec) {
 		return
 	}
@@ -321,7 +345,7 @@ func (s *handler) association(w http.ResponseWriter, r *http.Request) {
 		}
 		s.ok(w, ids)
 	case "list-attached-objects":
-		var ids []tags.AssociatedObject
+		var ids []internal.AssociatedObject
 		for id := range s.Association[spec.TagID] {
 			ids = append(ids, id)
 		}

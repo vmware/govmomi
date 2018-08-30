@@ -4,100 +4,184 @@ load test_helper
 
 @test "tags.category" {
   vcsim_env
+  local output
+
+  run govc tags.category.ls
+  assert_success # no categories defined yet
+
+  run govc tags.category.info
+  assert_success # no categories defined yet
+
+  run govc tags.category.info enoent
+  assert_failure # category does not exist
 
   category_name=$(new_id)
-  des="new_des"
 
-  run govc tags.category.create -d ${des} -m ${category_name}
+  run govc tags.category.create -d "Cat in the hat" -m "$category_name"
   assert_success
 
-  category_id=${output}
+  category_id="$output"
   run govc tags.category.ls
-
-  ls_result=$(govc tags.category.ls | grep ${category_name} | wc -l)
-  [ ${ls_result} -eq 1 ]
-
-  id_res=$(govc tags.category.ls -json | jq -r '.[].CategoryID')
-  assert_matches ${id_res} ${category_id}
-
-  run govc tags.category.info ${category_name}
   assert_success
 
-  update_des="update_des"
-  update_n="update_d_n"
+  run govc tags.category.create -m "$category_name"
+  assert_failure # already exists
 
-  run govc tags.category.update -n ${update_n} -d ${update_des} ${category_id}
+  run govc tags.category.ls
+  assert_line "$category_name"
+
+  id=$(govc tags.category.ls -json | jq -r '.[].id')
+  assert_matches "$id" "$category_id"
+
+  run govc tags.category.info "$category_name"
   assert_success
 
-  info_des=$(govc tags.category.info ${update_n} | grep ${update_des} | wc -l)
-  [ ${info_des} -eq 1 ]
+  update_name="${category_name}-update"
+
+  run govc tags.category.update -n "$update_name" -d "Green eggs and ham" "$category_id"
+  assert_success
+
+  govc tags.category.info "$update_name" | grep -c eggs
+
+  run govc tags.category.info "$category_name"
+  assert_failure # does not exist
+
+  run govc tags.category.rm "$category_name"
+  assert_failure # should fail with old name
+
+  run govc tags.category.rm "$update_name"
+  assert_success
 }
 
 @test "tags" {
   vcsim_env
+  local output
 
-  run govc tags.category.create -d "desc" -m "$(new_id)"
+  run govc tags.ls
+  assert_success # no tags defined yet
+
+  run govc tags.info
+  assert_success # no tags defined yet
+
+  run govc tags.info enoent
+  assert_failure # specific tag does not exist
+
+  category_name=$(new_id)
+  run govc tags.category.create -m "$category_name"
   assert_success
 
   category="$output"
   test_name="test_name"
-  des_tag="update_des_tag"
 
-  run govc tags.create -d "desc" ${test_name} ${category}
+  run govc tags.create -c "$category" $test_name
+  assert_success
+  tag_id="$output"
+
+  govc tags.ls | grep $test_name
+
+  id=$(govc tags.ls -json | jq -r '.[].id')
+  assert_matches "$id" "$tag_id"
+
+  update_name="${test_name}-update"
+  run govc tags.update -d "Updated tag" -n "$update_name" "$tag_id"
   assert_success
 
-  tag_id=${output}
+  govc tags.info "$update_name" | grep Updated
 
-  ls_result=$(govc tags.ls | grep ${test_name} | wc -l)
-  [ ${ls_result} -eq 1 ]
-
-  id_res=$(govc tags.ls -json | jq -r '.[].TagID')
-  assert_matches ${id_res} ${tag_id}
-
-  update_tag_name="update_name"
-  run govc tags.update -d ${des_tag} -n ${update_tag_name} ${tag_id}
+  run govc tags.create -c "$category_name" "$(new_id)"
   assert_success
 
-  des_result=$(govc tags.info ${update_tag_name} ${category} | grep ${des_tag} | wc -l)
-  [ ${des_result} -eq 1 ]
+  run govc tags.create -c enoent "$(new_id)"
+  assert_failure # category name does not exist
 
-  des_result=$(govc tags.info -i ${tag_id} | grep ${des_tag} | wc -l)
-  [ ${des_result} -eq 1 ]
+  run govc tags.info enoent
+  assert_failure # does not exist
 }
 
 @test "tags.association" {
   vcsim_env
+  local lines
 
-  run govc tags.category.create -d "desc" -m "$(new_id)"
+  run govc tags.category.create -m "$(new_id)"
   assert_success
   category="$output"
 
-  run govc tags.create -d "desc" "$(new_id)" "$category"
+  run govc tags.create -c "$category" "$(new_id)"
   assert_success
   tag=$output
 
-  tag_name=$(govc tags.ls -json | jq -r ".[] | select(.TagID == \"$tag\") | .Name")
+  tag_name=$(govc tags.ls -json | jq -r ".[] | select(.id == \"$tag\") | .name")
   run govc find . -type h
   object=${lines[0]}
 
-  run govc tags.attach ${tag} ${object}
+  run govc tags.attach "$tag" "$object"
   assert_success
 
-  result=$(govc tags.association.ls ${object})
-  assert_matches ${result} ${tag_name}
-
-  result=$(govc tags.association.ls -json ${object} | jq -r '.[].Name')
-  assert_matches ${result} ${tag_name}
-
-  run govc tags.rm ${tag}
-  assert_failure
-
-  run govc tags.detach ${tag} ${object}
+  run govc tags.attached.ls "$tag_name"
   assert_success
 
-  run govc tags.rm ${tag}
+  result=$(govc tags.attached.ls -r "$object")
+  assert_matches "$result" "$tag_name"
+
+  result=$(govc tags.attached.ls -r -json "$object")
+  assert_matches "$tag_name" "$result"
+
+  run govc tags.rm "$tag"
+  assert_failure # tags still attached
+
+  run govc tags.detach "$tag" "$object"
   assert_success
 
-  run govc tags.category.rm ${category}
+  run govc tags.attach "$tag_name" "$object"
+  assert_success # attach using name instead of ID
+
+  run govc tags.rm "$tag"
+  assert_failure # tags still attached
+
+  run govc tags.detach "$tag_name" "$object"
+  assert_success # detach using name instead of ID
+
+  run govc tags.rm "$tag"
   assert_success
+
+  run govc tags.category.rm "$category"
+  assert_success
+}
+
+@test "tags.example" {
+  vcsim_env -dc 2 -cluster 2
+
+  govc tags.category.create -d "Kubernetes region" k8s-region
+
+  for region in EMEA US ; do
+    govc tags.create -d "Kubernetes region $region" -c k8s-region k8s-region-$region
+  done
+
+  govc tags.attach k8s-region-EMEA /DC0
+  govc tags.attach k8s-region-US /DC1
+
+  govc tags.category.create -d "Kubernetes zone" k8s-zone
+
+  for zone in DE CA WA ; do
+    govc tags.create -d "Kubernetes zone $zone" -c k8s-zone k8s-zone-$zone
+  done
+
+  govc tags.attach k8s-zone-DE /DC0/host/DC0_C0
+  govc tags.attach k8s-zone-DE /DC0/host/DC0_C1
+
+  govc tags.attach k8s-zone-CA /DC1/host/DC1_C0
+  govc tags.attach k8s-zone-WA /DC1/host/DC1_C1
+
+  govc tags.category.ls
+  govc tags.category.info
+
+  govc tags.ls
+  govc tags.ls -c k8s-region
+  govc tags.ls -c k8s-zone
+  govc tags.info
+
+  govc tags.attached.ls k8s-region-US
+  govc tags.attached.ls k8s-zone-CA
+  govc tags.attached.ls -r /DC1
+  govc tags.attached.ls -r /DC1/host/DC1_C0
 }

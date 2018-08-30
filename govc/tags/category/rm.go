@@ -19,14 +19,17 @@ package category
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type rm struct {
 	*flags.ClientFlag
+	force bool
 }
 
 func init() {
@@ -36,24 +39,21 @@ func init() {
 func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
-}
-
-func (cmd *rm) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
+	f.BoolVar(&cmd.force, "f", false, "Delete tag regardless of attached objects")
 }
 
 func (cmd *rm) Usage() string {
-	return "ID"
+	return "NAME"
 }
 
 func (cmd *rm) Description() string {
-	return `Delete category.
+	return `Delete category NAME.
+
+Fails if category is used by any tag, unless the '-f' flag is provided.
 
 Examples:
-  govc tags.category.rm ID`
+  govc tags.category.rm k8s-region
+  govc tags.category.rm -f k8s-zone`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -62,7 +62,21 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	categoryID := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-		return c.DeleteCategory(ctx, categoryID)
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
+		cat, err := m.GetCategory(ctx, categoryID)
+		if err != nil {
+			return err
+		}
+		if cmd.force == false {
+			ctags, err := m.ListTagsForCategory(ctx, cat.ID)
+			if err != nil {
+				return err
+			}
+			if len(ctags) > 0 {
+				return fmt.Errorf("category %s used by %d tags", categoryID, len(ctags))
+			}
+		}
+		return m.DeleteCategory(ctx, cat)
 	})
 }
