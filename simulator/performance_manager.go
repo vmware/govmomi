@@ -21,7 +21,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/davecgh/go-spew/spew"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
@@ -175,7 +174,6 @@ func (p *PerformanceManager) QueryAvailablePerfMetric(ctx *Context, req *types.Q
 	body.Req = req
 	body.Res = p.queryAvailablePerfMetric(req.Entity, req.IntervalId)
 
-	spew.Dump(body)
 	return body
 }
 
@@ -255,6 +253,5 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 		}
 		body.Res.Returnval[i] = metrics
 	}
-	//spew.Dump(body)
 	return body
 }
