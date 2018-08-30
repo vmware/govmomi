@@ -8,6 +8,15 @@ git_version=$(git describe --dirty)
   exit 1
 fi
 
+CDIR=$(cd `dirname "$0"` && pwd)
+cd "$CDIR"
+# Workaround when GOPATH is not defined
+mkdir -p gopath/src/github.com/vmware
+if [ ! -s gopath/src/github.com/vmware/govmomi ]; then
+  ln -sf ../../../../../ gopath/src/github.com/vmware/govmomi
+fi
+export GOPATH="$CDIR"/gopath
+
 ldflags="-X github.com/vmware/govmomi/govc/version.gitVersion=${git_version}"
 
 BUILD_OS=${BUILD_OS:-darwin linux windows freebsd}

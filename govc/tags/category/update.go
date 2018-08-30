@@ -19,19 +19,17 @@ package category
 import (
 	"context"
 	"flag"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
 type update struct {
 	*flags.ClientFlag
-	name        string
-	description string
-	types       string
-	multi       string
+	cat   tags.Category
+	multi *bool
 }
 
 func init() {
@@ -41,10 +39,10 @@ func init() {
 func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
-	f.StringVar(&cmd.name, "n", "", "Name of category")
-	f.StringVar(&cmd.description, "d", "", "Description")
-	f.StringVar(&cmd.types, "t", "", "Associable object types")
-	f.StringVar(&cmd.multi, "m", "", "Allow multiple tags per object")
+	f.StringVar(&cmd.cat.Name, "n", "", "Name of category")
+	f.StringVar(&cmd.cat.Description, "d", "", "Description")
+	f.Var((*kinds)(&cmd.cat.AssociableTypes), "t", "Object types")
+	f.Var(flags.NewOptionalBool(&cmd.multi), "m", "Allow multiple tags per object")
 }
 
 func (cmd *update) Process(ctx context.Context) error {
@@ -55,43 +53,38 @@ func (cmd *update) Process(ctx context.Context) error {
 }
 
 func (cmd *update) Usage() string {
-	return "ID"
+	return "NAME"
 }
 
 func (cmd *update) Description() string {
 	return `Update category.
 
-Cardinality can be either "SINGLE" or "MULTIPLE."
+The '-t' flag can only be used to add new object types.  Removing category types is not supported by vCenter.
 
 Examples:
-  govc tags.category.update -n "name" -d "description" -t "associable_types" -m "cardinality" ID`
+  govc tags.category.update -n k8s-vcp-region -d "Kubernetes VCP region" k8s-region
+  govc tags.category.update -t ClusterComputeResource k8s-zone`
 }
 
 func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
-	id := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
+	arg := f.Arg(0)
 
-		category := new(tags.CategoryUpdateSpec)
-		categoryTemp := new(tags.Category)
-		if cmd.name != "" {
-			categoryTemp.Name = cmd.name
-		}
-		if cmd.description != "" {
-			categoryTemp.Description = cmd.description
-		}
-		if cmd.types != "" {
-			typesField := strings.Split(cmd.types, ",")
-			categoryTemp.AssociableTypes = typesField
-		}
-		if cmd.multi != "" {
-			categoryTemp.Cardinality = cmd.multi
-		}
+	if cmd.multi != nil {
+		cmd.cat.Cardinality = cardinality(*cmd.multi)
+	}
 
-		category.UpdateSpec = *categoryTemp
-		return c.UpdateCategory(ctx, id, category)
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
+		cat, err := m.GetCategory(ctx, arg)
+		if err != nil {
+			return err
+		}
+		cat.Patch(&cmd.cat)
+
+		return m.UpdateCategory(ctx, cat)
 	})
 }

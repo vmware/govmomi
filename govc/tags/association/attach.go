@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -41,15 +42,15 @@ func (cmd *attach) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *attach) Usage() string {
-	return "ID PATH"
+	return "NAME PATH"
 }
 
 func (cmd *attach) Description() string {
-	return `Attach tag to object.
+	return `Attach tag NAME to object PATH.
 
 Examples:
-  govc tags.attach ID /dc1/host/cluster1/hostname
-  govc tags.attach ID HostSystem:host`
+  govc tags.attach k8s-region-us /dc1
+  govc tags.attach k8s-zone-us-ca1 /dc1/host/cluster1`
 }
 
 func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj string) (*types.ManagedObjectReference, error) {
@@ -94,11 +95,12 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	tagID := f.Arg(0)
 	managedObj := f.Arg(1)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
 		ref, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
 		if err != nil {
 			return err
 		}
-		return c.AttachTagToObject(ctx, tagID, ref)
+
+		return tags.NewManager(c).AttachTag(ctx, tagID, ref)
 	})
 }

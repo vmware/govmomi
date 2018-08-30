@@ -24,6 +24,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -47,7 +48,7 @@ func (cmd *ls) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
-	return nil
+	return cmd.OutputFlag.Process(ctx)
 }
 
 func (cmd *ls) Description() string {
@@ -58,7 +59,7 @@ Examples:
   govc tags.category.ls -json | jq .`
 }
 
-func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestClient) error) error {
+func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*rest.Client) error) error {
 	vc, err := cmd.Client()
 	if err != nil {
 		return err
@@ -66,12 +67,12 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 	tagsURL := vc.URL()
 	tagsURL.User = cmd.Userinfo()
 
-	c := tags.NewClient(tagsURL, !cmd.IsSecure(), "")
+	c := rest.NewClient(vc)
 	if err != nil {
 		return err
 	}
 
-	if err = c.Login(ctx); err != nil {
+	if err = c.Login(ctx, tagsURL.User); err != nil {
 		return err
 	}
 	defer c.Logout(ctx)
@@ -79,44 +80,22 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*tags.RestCli
 	return f(c)
 }
 
-type getResult []string
+type lsResult []tags.Category
 
-func (r getResult) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i])
-	}
-	return nil
-}
-
-type getCategoryNameID []tags.CategoryInfo
-
-func (r getCategoryNameID) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i])
+func (r lsResult) Write(w io.Writer) error {
+	for _, c := range r {
+		fmt.Fprintln(w, c.Name)
 	}
 	return nil
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-
-		var result getResult
-		var categoryNameID getCategoryNameID
-		var err error
-
-		categoryNameID, err = c.ListCategoriesByName(ctx)
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		l, err := tags.NewManager(c).GetCategories(ctx)
 		if err != nil {
 			return err
 		}
 
-		if cmd.JSON {
-			return cmd.WriteResult(categoryNameID)
-		}
-
-		for _, item := range categoryNameID {
-			result = append(result, item.Name)
-		}
-		return cmd.WriteResult(result)
+		return cmd.WriteResult(lsResult(l))
 	})
 }

@@ -19,9 +19,11 @@ package tags
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -40,23 +42,18 @@ func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.force, "f", false, "Delete tag regardless of attached objects")
 }
 
-func (cmd *rm) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (cmd *rm) Usage() string {
-	return "ID"
+	return "NAME"
 }
 
 func (cmd *rm) Description() string {
-	return `Delete tag if not attached to any object. Will delete regardless of attached object if flag is set.
+	return `Delete tag NAME.
+
+Fails if tag is attached to any object, unless the '-f' flag is provided.
 
 Examples:
-  govc tags.rm ID
-  govc tags.rm -f ID`
+  govc tags.rm k8s-zone-us-ca1
+  govc tags.rm -f k8s-zone-us-ca2`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -66,11 +63,21 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	tagID := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *tags.RestClient) error {
-
+	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+		m := tags.NewManager(c)
 		if cmd.force == false {
-			return c.DeleteTagIfNoObjectAttached(ctx, tagID)
+			objs, err := m.ListAttachedObjects(ctx, tagID)
+			if err != nil {
+				return err
+			}
+			if len(objs) > 0 {
+				return fmt.Errorf("tag %s has %d attached objects", tagID, len(objs))
+			}
 		}
-		return c.DeleteTag(ctx, tagID)
+		cat, err := m.GetTag(ctx, tagID)
+		if err != nil {
+			return err
+		}
+		return m.DeleteTag(ctx, cat)
 	})
 }

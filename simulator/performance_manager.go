@@ -134,6 +134,11 @@ func (p *PerformanceManager) buildAvailablePerfMetricsQueryResponse(ids []types.
 			}
 		case "$physDisk":
 			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: datastoreURL})
+		case "$file":
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "DISKFILE"})
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "DELTAFILE"})
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "SWAPFILE"})
+			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: "OTHERFILE"})
 		default:
 			r.Returnval = append(r.Returnval, types.PerfMetricId{CounterId: id.CounterId, Instance: id.Instance})
 		}
@@ -225,15 +230,21 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 			series := &types.PerfMetricIntSeries{Value: make([]int64, n)}
 			series.Id = mid
 			points := metricData[mid.CounterId]
+			offset := int64(start.Unix()) / int64(interval)
 
 			for tick := int32(0); tick < n; tick++ {
 				var p int64
 
 				// Use sample data if we have it. Otherwise, just send 0.
 				if len(points) > 0 {
-					p = points[(int64(start.Second())/int64(interval)+int64(tick))%int64(len(points))]
-					if p > 0 {
-						p = p + (rand.Int63n(p / 10)) // Add some random jitter
+					p = points[(offset+int64(tick))%int64(len(points))]
+					scale := p / 5
+					if scale > 0 {
+						// Add some gaussian noise to make the data look more "real"
+						p += int64(rand.NormFloat64() * float64(scale))
+						if p < 0 {
+							p = 0
+						}
 					}
 				} else {
 					p = 0
@@ -244,6 +255,6 @@ func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.
 		}
 		body.Res.Returnval[i] = metrics
 	}
-	spew.Dump(body)
+	//spew.Dump(body)
 	return body
 }
