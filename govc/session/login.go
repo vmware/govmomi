@@ -152,6 +152,7 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 		Certificate: c.Certificate(),
 		Userinfo:    cmd.Userinfo(),
 		Renewable:   true,
+		ActAs:       true,
 		Token:       cmd.token,
 		Lifetime:    cmd.life,
 	}
