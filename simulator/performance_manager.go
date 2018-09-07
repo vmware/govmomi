@@ -44,13 +44,14 @@ var historicProviderSummary = types.PerfProviderSummary{
 
 type PerformanceManager struct {
 	mo.PerformanceManager
-	vmMetrics        []types.PerfMetricId
-	hostMetrics      []types.PerfMetricId
-	rpMetrics        []types.PerfMetricId
-	clusterMetrics   []types.PerfMetricId
-	datastoreMetrics []types.PerfMetricId
-	perfCounterIndex map[int32]types.PerfCounterInfo
-	metricData       map[string]map[int32][]int64
+	vmMetrics         []types.PerfMetricId
+	hostMetrics       []types.PerfMetricId
+	rpMetrics         []types.PerfMetricId
+	clusterMetrics    []types.PerfMetricId
+	datastoreMetrics  []types.PerfMetricId
+	datacenterMetrics []types.PerfMetricId
+	perfCounterIndex  map[int32]types.PerfCounterInfo
+	metricData        map[string]map[int32][]int64
 }
 
 func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
@@ -69,6 +70,7 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 		m.rpMetrics = vpx.ResourcePoolMetrics[:]
 		m.clusterMetrics = vpx.ClusterMetrics[:]
 		m.datastoreMetrics = vpx.DatastoreMetrics[:]
+		m.datacenterMetrics = vpx.DatacenterMetrics[:]
 		m.metricData = vpx.MetricData
 	}
 	m.perfCounterIndex = make(map[int32]types.PerfCounterInfo, len(m.PerfCounter))
@@ -162,6 +164,10 @@ func (p *PerformanceManager) queryAvailablePerfMetric(entity types.ManagedObject
 	case "Datastore":
 		if interval != 20 {
 			return p.buildAvailablePerfMetricsQueryResponse(p.datastoreMetrics, 0, "")
+		}
+	case "Datacenter":
+		if interval != 20 {
+			return p.buildAvailablePerfMetricsQueryResponse(p.datacenterMetrics, 0, "")
 		}
 	}
 
