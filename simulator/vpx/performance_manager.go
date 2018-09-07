@@ -21715,3 +21715,87 @@ var ResourcePoolMetrics = []types.PerfMetricId{
 		Instance:  "",
 	},
 }
+
+// ********************************************* Datacenter metrics ***********************************
+var DatacenterMetrics = []types.PerfMetricId{
+	{
+		CounterId: 256,
+		Instance:  "",
+	},
+	{
+		CounterId: 257,
+		Instance:  "",
+	},
+	{
+		CounterId: 258,
+		Instance:  "",
+	},
+	{
+		CounterId: 259,
+		Instance:  "",
+	},
+	{
+		CounterId: 260,
+		Instance:  "",
+	},
+	{
+		CounterId: 261,
+		Instance:  "",
+	},
+	{
+		CounterId: 262,
+		Instance:  "",
+	},
+	{
+		CounterId: 263,
+		Instance:  "",
+	},
+	{
+		CounterId: 264,
+		Instance:  "",
+	},
+	{
+		CounterId: 265,
+		Instance:  "",
+	},
+	{
+		CounterId: 266,
+		Instance:  "",
+	},
+	{
+		CounterId: 267,
+		Instance:  "",
+	},
+	{
+		CounterId: 268,
+		Instance:  "",
+	},
+	{
+		CounterId: 269,
+		Instance:  "",
+	},
+	{
+		CounterId: 270,
+		Instance:  "",
+	},
+	{
+		CounterId: 271,
+		Instance:  "",
+	},
+	{
+		CounterId: 272,
+		Instance:  "",
+	},
+	{
+		CounterId: 273,
+		Instance:  "",
+	},
+	{
+		CounterId: 274,
+		Instance:  "",
+	},
+	{
+		CounterId: 275,
+		Instance:  "",
+	},
+}
