@@ -17,12 +17,14 @@ package simulator
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"testing"
 
 	"github.com/vmware/govmomi/performance"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -235,6 +237,56 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 			t.Fatal("Expected empty list of datastores")
 		}
 	}
+
+	dc := Map.Any("Datacenter").(*Datacenter)
+	if info, err := p.AvailableMetric(ctx, dc.Reference(), 300); err != nil {
+		t.Fatal(err)
+	} else {
+		if len(info) == 0 {
+			t.Fatal("Expected non-empty list of datacenters")
+		}
+	}
+
+	if info, err := p.AvailableMetric(ctx, dc.Reference(), 20); err != nil {
+		t.Fatal(err)
+	} else {
+		if len(info) != 0 {
+			t.Fatal("Expected empty list of datacenters")
+		}
+	}
+
+}
+
+func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32) error {
+	c := m.Service.client
+
+	p := performance.NewManager(c)
+
+	// Single metric, single VM
+	//
+	qs := []types.PerfQuerySpec{
+		types.PerfQuerySpec{
+			MaxSample:  4,
+			IntervalId: interval,
+			MetricId:   []types.PerfMetricId{types.PerfMetricId{CounterId: 1, Instance: ""}},
+			Entity:     e.Reference(),
+		},
+	}
+	result, err := p.Query(ctx, qs)
+	if err != nil {
+		return err
+	}
+	if len(result) == 0 {
+		return errors.New("Emtpy result set")
+	}
+	ms, err := p.ToMetricSeries(ctx, result)
+	if err != nil {
+		return err
+	}
+	if len(ms) == 0 {
+		return errors.New("Empty metric series")
+	}
+	return nil
 }
 
 func TestQueryPerf(t *testing.T) {
@@ -249,35 +301,22 @@ func TestQueryPerf(t *testing.T) {
 
 	defer m.Remove()
 
-	c := m.Service.client
-
-	p := performance.NewManager(c)
-
-	// Single metric, single entity
-	//
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
-	qs := []types.PerfQuerySpec{
-		types.PerfQuerySpec{
-			MaxSample:  4,
-			IntervalId: 20,
-			MetricId:   []types.PerfMetricId{types.PerfMetricId{CounterId: 1, Instance: ""}},
-			Entity:     vm.Reference(),
-		},
-	}
-	result, err := p.Query(ctx, qs)
-	if err != nil {
+	if err := testPerfQuery(ctx, m, Map.Any("VirtualMachine"), 20); err != nil {
 		t.Fatal(err)
 	}
-	if len(result) == 0 {
-		t.Fatal("Empty result set")
-	}
-	ms, err := p.ToMetricSeries(ctx, result)
-	if err != nil {
+	if err := testPerfQuery(ctx, m, Map.Any("HostSystem"), 20); err != nil {
 		t.Fatal(err)
 	}
-	if len(ms) == 0 {
-		t.Fatal("Empty metric series")
+	if err := testPerfQuery(ctx, m, Map.Any("ClusterComputeResource"), 300); err != nil {
+		t.Fatal(err)
 	}
-	csv := ms[0].Value[0].ValueCSV()
-	fmt.Println(csv)
+	if err := testPerfQuery(ctx, m, Map.Any("Datastore"), 300); err != nil {
+		t.Fatal(err)
+	}
+	if err := testPerfQuery(ctx, m, Map.Any("Datacenter"), 300); err != nil {
+		t.Fatal(err)
+	}
+	if err := testPerfQuery(ctx, m, Map.Any("ResourcePool"), 300); err != nil {
+		t.Fatal(err)
+	}
 }
