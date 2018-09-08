@@ -111,11 +111,7 @@ func (p *PerformanceManager) QueryPerfProviderSummary(ctx *Context, req *types.Q
 	}
 
 	switch req.Entity.Type {
-	case "VirtualMachine":
-		fallthrough
-	case "HostSystem":
-		fallthrough
-	case "ResourcePool":
+	case "VirtualMachine", "HostSystem", "ResourcePool":
 		body.Res.Returnval = realtimeProviderSummary
 	default:
 		body.Res.Returnval = historicProviderSummary
