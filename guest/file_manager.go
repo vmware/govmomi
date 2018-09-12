@@ -127,7 +127,7 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 		return nil, err
 	}
 
-	if !m.c.IsVC() {
+	if url.Hostname() != "*" {
 		return url, nil // we already connected to the ESX host and have its thumbprint
 	}
 
