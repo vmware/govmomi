@@ -122,25 +122,26 @@ func (m FileManager) DeleteFile(ctx context.Context, auth types.BaseGuestAuthent
 // The InitiateFileTransfer{From,To}Guest methods return a URL with the host set to "*" when connected directly to ESX,
 // but return the address of VM's runtime host when connected to vCenter.
 func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error) {
-	url, err := m.c.ParseURL(u)
+	turl, err := url.Parse(u)
 	if err != nil {
 		return nil, err
 	}
 
-	if url.Hostname() != "*" {
-		return url, nil // we already connected to the ESX host and have its thumbprint
+	needsHostname := turl.Hostname() == "*"
+	if !m.c.IsVC() {
+		return turl, nil // we already connected to the ESX host and have its thumbprint
 	}
 
-	name := url.Hostname()
-	port := url.Port()
+	name := turl.Hostname()
+	port := turl.Port()
 
 	m.mu.Lock()
 	mname, ok := m.hosts[name]
 	m.mu.Unlock()
 
-	if ok {
-		url.Host = net.JoinHostPort(mname, port)
-		return url, nil
+	if ok && needsHostname {
+		turl.Host = net.JoinHostPort(mname, port)
+		return turl, nil
 	}
 
 	c := property.DefaultCollector(m.c)
@@ -152,7 +153,7 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 	}
 
 	if vm.Runtime.Host == nil {
-		return url, nil // won't matter if the VM was powered off since the call to InitiateFileTransfer
+		return turl, nil // won't matter if the VM was powered off since the call to InitiateFileTransfer
 	}
 
 	props := []string{"summary.config.sslThumbprint", "config.virtualNicManagerInfo.netConfig"}
@@ -180,11 +181,13 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 		}
 	}
 
-	url.Host = net.JoinHostPort(name, port)
+	if needsHostname {
+		turl.Host = net.JoinHostPort(name, port)
+	}
 
-	m.c.SetThumbprint(url.Host, host.Summary.Config.SslThumbprint)
+	m.c.SetThumbprint(turl.Host, host.Summary.Config.SslThumbprint)
 
-	return url, nil
+	return turl, nil
 }
 
 func (m FileManager) InitiateFileTransferFromGuest(ctx context.Context, auth types.BaseGuestAuthentication, guestFilePath string) (*types.FileTransferInformation, error) {
