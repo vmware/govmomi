@@ -128,6 +128,11 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 	}
 
 	needsHostname := turl.Hostname() == "*"
+
+	if needsHostname {
+		turl.Host = m.c.URL().Host // Also use Client's port, to support port forwarding
+	}
+
 	if !m.c.IsVC() {
 		return turl, nil // we already connected to the ESX host and have its thumbprint
 	}
