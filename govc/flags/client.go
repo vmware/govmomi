@@ -18,7 +18,7 @@ package flags
 
 import (
 	"context"
-	"crypto/sha1"
+	"crypto/sha256"
 	"crypto/tls"
 	"encoding/json"
 	"errors"
@@ -331,7 +331,7 @@ func (flag *ClientFlag) sessionFile() string {
 	// Key session file off of full URI and insecure setting.
 	// Hash key to get a predictable, canonical format.
 	key := fmt.Sprintf("%s#insecure=%t", url.String(), flag.insecure)
-	name := fmt.Sprintf("%040x", sha1.Sum([]byte(key)))
+	name := fmt.Sprintf("%064x", sha256.Sum256([]byte(key)))
 	return filepath.Join(home, "sessions", name)
 }
 
