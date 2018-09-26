@@ -59,7 +59,7 @@ func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
 	tagID := f.Arg(0)
 	managedObj := f.Arg(1)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		ref, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
 		if err != nil {
 			return err

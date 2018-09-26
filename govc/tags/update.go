@@ -59,7 +59,7 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	arg := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *rest.Client) error {
+	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := tags.NewManager(c)
 		tag, err := m.GetTag(ctx, arg)
 		if err != nil {
