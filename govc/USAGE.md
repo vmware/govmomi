@@ -46,6 +46,7 @@ but appear via `govc $cmd -h`:
  - [cluster.override.remove](#clusteroverrideremove)
  - [cluster.rule.change](#clusterrulechange)
  - [cluster.rule.create](#clusterrulecreate)
+ - [cluster.rule.info](#clusterruleinfo)
  - [cluster.rule.ls](#clusterrulels)
  - [cluster.rule.remove](#clusterruleremove)
  - [datacenter.create](#datacentercreate)
@@ -213,6 +214,19 @@ but appear via `govc $cmd -h`:
  - [sso.user.ls](#ssouserls)
  - [sso.user.rm](#ssouserrm)
  - [sso.user.update](#ssouserupdate)
+ - [tags.attach](#tagsattach)
+ - [tags.attached.ls](#tagsattachedls)
+ - [tags.category.create](#tagscategorycreate)
+ - [tags.category.info](#tagscategoryinfo)
+ - [tags.category.ls](#tagscategoryls)
+ - [tags.category.rm](#tagscategoryrm)
+ - [tags.category.update](#tagscategoryupdate)
+ - [tags.create](#tagscreate)
+ - [tags.detach](#tagsdetach)
+ - [tags.info](#tagsinfo)
+ - [tags.ls](#tagsls)
+ - [tags.rm](#tagsrm)
+ - [tags.update](#tagsupdate)
  - [task.cancel](#taskcancel)
  - [tasks](#tasks)
  - [vapp.destroy](#vappdestroy)
@@ -479,6 +493,7 @@ Options:
   -enable=<nil>             Enable rule
   -host-affine-group=       Host affine group name
   -host-anti-affine-group=  Host anti-affine group name
+  -l=false                  Long listing format
   -mandatory=<nil>          Enforce rule compliance
   -name=                    Cluster rule name
   -vm-group=                VM group name
@@ -515,10 +530,28 @@ Options:
   -enable=<nil>             Enable rule
   -host-affine-group=       Host affine group name
   -host-anti-affine-group=  Host anti-affine group name
+  -l=false                  Long listing format
   -mandatory=<nil>          Enforce rule compliance
   -name=                    Cluster rule name
   -vm-group=                VM group name
   -vm-host=false            Virtual Machines to Hosts
+```
+
+## cluster.rule.info
+
+```
+Usage: govc cluster.rule.info [OPTIONS]
+
+Provides detailed infos about cluster rules, their types and rule members.
+
+Examples:
+  govc cluster.rule.info -cluster my_cluster
+  govc cluster.rule.info -cluster my_cluster -name my_rule
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -l=false               Long listing format
+  -name=                 Cluster rule name
 ```
 
 ## cluster.rule.ls
@@ -531,9 +564,12 @@ List cluster rules and rule members.
 Examples:
   govc cluster.rule.ls -cluster my_cluster
   govc cluster.rule.ls -cluster my_cluster -name my_rule
+  govc cluster.rule.ls -cluster my_cluster -l
+  govc cluster.rule.ls -cluster my_cluster -name my_rule -l
 
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
+  -l=false               Long listing format
   -name=                 Cluster rule name
 ```
 
@@ -549,6 +585,7 @@ Examples:
 
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
+  -l=false               Long listing format
   -name=                 Cluster rule name
 ```
 
@@ -1249,6 +1286,7 @@ Options:
   -count=0               Number of matches to return (0 = unlimited)
   -inside=true           Filter by port inside or outside status
   -pg=                   Distributed Virtual Portgroup
+  -r=false               Show DVS rules
   -uplinkPort=false      Filter for uplink ports
   -vlan=0                Filter by VLAN ID (0 = unfiltered)
 ```
@@ -2684,6 +2722,7 @@ Options:
   -n=0                   Wait for N property updates
   -s=false               Output property value only
   -type=[]               Resource type.  If specified, MOID is used for a container view root
+  -wait=0s               Max wait time for updates
 ```
 
 ## object.destroy
@@ -3315,6 +3354,223 @@ Options:
   -l=                    Last name
   -m=                    Email address
   -p=                    Password
+```
+
+## tags.attach
+
+```
+Usage: govc tags.attach [OPTIONS] NAME PATH
+
+Attach tag NAME to object PATH.
+
+Examples:
+  govc tags.attach k8s-region-us /dc1
+  govc tags.attach k8s-zone-us-ca1 /dc1/host/cluster1
+
+Options:
+```
+
+## tags.attached.ls
+
+```
+Usage: govc tags.attached.ls [OPTIONS] NAME
+
+List attached tags or objects.
+
+Examples:
+  govc tags.attached.ls k8s-region-us
+  govc tags.attached.ls -json k8s-zone-us-ca1 | jq .
+  govc tags.attached.ls -r /dc1/host/cluster1
+  govc tags.attached.ls -json -r /dc1 | jq .
+
+Options:
+  -r=false               List tags attached to resource
+```
+
+## tags.category.create
+
+```
+Usage: govc tags.category.create [OPTIONS] NAME
+
+Create tag category.
+
+This command will output the ID of the new tag category.
+
+Examples:
+  govc tags.category.create -d "Kubernetes region" -t Datacenter k8s-region
+  govc tags.category.create -d "Kubernetes zone" k8s-zone
+
+Options:
+  -d=                    Description
+  -m=false               Allow multiple tags per object
+  -t=[]                  Object types
+```
+
+## tags.category.info
+
+```
+Usage: govc tags.category.info [OPTIONS] [NAME]
+
+Display category info.
+
+If NAME is provided, display info for only that category.
+Otherwise display info for all categories.
+
+Examples:
+  govc tags.category.info
+  govc tags.category.info k8s-zone
+
+Options:
+```
+
+## tags.category.ls
+
+```
+Usage: govc tags.category.ls [OPTIONS]
+
+List all categories.
+
+Examples:
+  govc tags.category.ls
+  govc tags.category.ls -json | jq .
+
+Options:
+```
+
+## tags.category.rm
+
+```
+Usage: govc tags.category.rm [OPTIONS] NAME
+
+Delete category NAME.
+
+Fails if category is used by any tag, unless the '-f' flag is provided.
+
+Examples:
+  govc tags.category.rm k8s-region
+  govc tags.category.rm -f k8s-zone
+
+Options:
+  -f=false               Delete tag regardless of attached objects
+```
+
+## tags.category.update
+
+```
+Usage: govc tags.category.update [OPTIONS] NAME
+
+Update category.
+
+The '-t' flag can only be used to add new object types.  Removing category types is not supported by vCenter.
+
+Examples:
+  govc tags.category.update -n k8s-vcp-region -d "Kubernetes VCP region" k8s-region
+  govc tags.category.update -t ClusterComputeResource k8s-zone
+
+Options:
+  -d=                    Description
+  -m=<nil>               Allow multiple tags per object
+  -n=                    Name of category
+  -t=[]                  Object types
+```
+
+## tags.create
+
+```
+Usage: govc tags.create [OPTIONS] NAME
+
+Create tag.
+
+The '-c' option to specify a tag category is required.
+This command will output the ID of the new tag.
+
+Examples:
+  govc tags.create -d "Kubernetes Zone US CA1" -c k8s-zone k8s-zone-us-ca1
+
+Options:
+  -c=                    Category name
+  -d=                    Description of tag
+```
+
+## tags.detach
+
+```
+Usage: govc tags.detach [OPTIONS] NAME PATH
+
+Detach tag NAME from object PATH.
+
+Examples:
+  govc tags.detach k8s-region-us /dc1
+  govc tags.detach k8s-zone-us-ca1 /dc1/host/cluster1
+
+Options:
+```
+
+## tags.info
+
+```
+Usage: govc tags.info [OPTIONS] NAME
+
+Display tags info.
+
+If NAME is provided, display info for only that tag.  Otherwise display info for all tags.
+
+Examples:
+  govc tags.info
+  govc tags.info k8s-zone-us-ca1
+  govc tags.info -c k8s-zone
+
+Options:
+  -c=                    Category name
+```
+
+## tags.ls
+
+```
+Usage: govc tags.ls [OPTIONS]
+
+List tags.
+
+Examples:
+  govc tags.ls
+  govc tags.ls -c k8s-zone
+  govc tags.ls -json | jq .
+  govc tags.ls -c k8s-region -json | jq .
+
+Options:
+  -c=                    Category name
+```
+
+## tags.rm
+
+```
+Usage: govc tags.rm [OPTIONS] NAME
+
+Delete tag NAME.
+
+Fails if tag is attached to any object, unless the '-f' flag is provided.
+
+Examples:
+  govc tags.rm k8s-zone-us-ca1
+  govc tags.rm -f k8s-zone-us-ca2
+
+Options:
+  -f=false               Delete tag regardless of attached objects
+```
+
+## tags.update
+
+```
+Usage: govc tags.update [OPTIONS] NAME
+
+Update tag.
+
+Examples:
+  govc tags.update -d "K8s zone US-CA1" k8s-zone-us-ca1
+
+Options:
+  -d=                    Description of tag
+  -n=                    Name of tag
 ```
 
 ## task.cancel

@@ -1,5 +1,17 @@
 # changelog
 
+### 0.19.0 (2018-09-30)
+
+* Print DVS rules for dvportgroup
+
+* Show details for ClusterVmHostRuleInfo in cluster.rule.ls
+
+* Fixed govc host.info logical CPU count
+
+* Add tags.* commands
+
+* Add option to mark VM as template to ovf.import and ova.import commands
+
 ### 0.18.0 (2018-05-24)
 
 * The import.ovf pool flag is now optional if host is specified
