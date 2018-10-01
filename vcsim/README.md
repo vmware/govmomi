@@ -114,13 +114,13 @@ rm -f $govc_sim_env
 Tests written in Go can also use the [simulator package](https://godoc.org/github.com/vmware/govmomi/simulator)
 directly, rather than the vcsim binary.
 
-## Project using vcsim
+## Projects using vcsim
 
 * [VMware VIC Engine](https://github.com/vmware/vic)
 
 * [Kubernetes](https://github.com/kubernetes/kubernetes/tree/master/pkg/cloudprovider/providers/vsphere)
 
-* [Ansible](https://github.com/ansible/ansible/tree/devel/test/utils/docker/vcenter-simulator)
+* [Ansible](https://github.com/ansible/vcenter-test-container)
 
 ## Related projects
 
