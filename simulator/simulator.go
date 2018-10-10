@@ -97,20 +97,6 @@ func New(instance *ServiceInstance) *Service {
 	return s
 }
 
-// NewWithDelay returns an initialized simulator Service instance with a delay configured
-func NewWithDelay(instance *ServiceInstance, delay *DelayConfig) *Service {
-	s := &Service{
-		readAll: ioutil.ReadAll,
-		sm:      Map.SessionManager(),
-		sdk:     make(map[string]*Registry),
-		delay:   delay,
-	}
-
-	s.client, _ = vim25.NewClient(context.Background(), s)
-
-	return s
-}
-
 type serverFaultBody struct {
 	Reason *soap.Fault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
