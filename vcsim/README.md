@@ -114,6 +114,15 @@ rm -f $govc_sim_env
 Tests written in Go can also use the [simulator package](https://godoc.org/github.com/vmware/govmomi/simulator)
 directly, rather than the vcsim binary.
 
+## Introducing delays
+Sometimes, especially when debugging software, it can be useful to introduce delays to simulate network latency or a poorly performing vCenter. There are three command line options for dealing with delays.
+
+```-delay <ms>``` Adds a constant delay (experessed in milliseconds) to every call
+
+```-method-delay <method:milliseconds,method:milliseconds...>``` Adds a specified delay to individual methods. If both ```-method-delay``` and ```-delay``` are specified, they are added together
+
+```delay-jitter``` Specifies a jitter, i.e. a random value added to or subtracted from the delay. It is specified as a <i>Coefficient of Variation</i>, which is the same as the standard deviation divided by the mean. A reasonable starting value is 0.5, as it gives a nice variation without extreme outliers.
+
 ## Projects using vcsim
 
 * [VMware VIC Engine](https://github.com/vmware/vic)
@@ -121,6 +130,8 @@ directly, rather than the vcsim binary.
 * [Kubernetes](https://github.com/kubernetes/kubernetes/tree/master/pkg/cloudprovider/providers/vsphere)
 
 * [Ansible](https://github.com/ansible/vcenter-test-container)
+
+* [Telegraf](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/vsphere)
 
 ## Related projects
 

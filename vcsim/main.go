@@ -26,6 +26,8 @@ import (
 	"os"
 	"os/signal"
 	"runtime"
+	"strconv"
+	"strings"
 	"syscall"
 
 	"github.com/google/uuid"
@@ -61,12 +63,37 @@ func main() {
 	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
 
+	flag.IntVar(&model.DelayConfig.Delay, "delay", model.DelayConfig.Delay, "Method response delay across all methods")
+	methodDelayP := flag.String("method-delay", "", "Delay per method on the form 'method1:delay1,method2:delay2...'")
+	flag.Float64Var(&model.DelayConfig.DelayJitter, "delay-jitter", model.DelayConfig.DelayJitter, "Delay jitter coefficient of variation (tip: 0.5 is a good starting value)")
+
 	flag.Parse()
+
+	methodDelay := *methodDelayP
 
 	switch flag.Arg(0) {
 	case "uuidgen": // util-linux not installed on Travis CI
 		fmt.Println(uuid.New().String())
 		return
+	}
+
+	if methodDelay != "" {
+		m := make(map[string]int)
+		for _, s := range strings.Split(methodDelay, ",") {
+			s := strings.TrimSpace(s)
+			tuples := strings.Split(s, ":")
+			if len(tuples) == 2 {
+				key := tuples[0]
+				value, err := strconv.Atoi(tuples[1])
+				if err != nil {
+					log.Fatalf("Incorrect format of method-delay argument: %s", err)
+				}
+				m[key] = value
+			} else {
+				log.Fatal("Incorrect method delay format.")
+			}
+		}
+		model.DelayConfig.MethodDelay = m
 	}
 
 	var err error
@@ -92,6 +119,9 @@ func main() {
 		model.Datastore = opts.Datastore
 		model.Machine = opts.Machine
 		model.Autostart = opts.Autostart
+		model.DelayConfig.Delay = opts.DelayConfig.Delay
+		model.DelayConfig.MethodDelay = opts.DelayConfig.MethodDelay
+		model.DelayConfig.DelayJitter = opts.DelayConfig.DelayJitter
 	}
 
 	tag := " (govmomi simulator)"
