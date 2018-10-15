@@ -498,7 +498,12 @@ func (pc *PropertyCollector) RetrievePropertiesEx(ctx *Context, r *types.Retriev
 	res, fault := pc.collect(ctx, r)
 
 	if fault != nil {
-		body.Fault_ = Fault("", fault)
+		switch fault.(type) {
+		case *types.ManagedObjectNotFound:
+			body.Fault_ = Fault("The object has already been deleted or has not been completely created", fault)
+		default:
+			body.Fault_ = Fault("", fault)
+		}
 	} else {
 		objects := res.Objects[:0]
 		for _, o := range res.Objects {
