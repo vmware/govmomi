@@ -233,7 +233,7 @@ var invalidLogin = Fault("Login failure", new(types.InvalidLogin))
 type Context struct {
 	req *http.Request
 	res http.ResponseWriter
-	m   *SessionManager
+	svc *Service
 
 	context.Context
 	Session *Session
@@ -245,7 +245,7 @@ type Context struct {
 // mapSession maps an HTTP cookie to a Session.
 func (c *Context) mapSession() {
 	if cookie, err := c.req.Cookie(soap.SessionCookieName); err == nil {
-		if val, ok := c.m.sessions[cookie.Value]; ok {
+		if val, ok := c.svc.sm.sessions[cookie.Value]; ok {
 			c.SetSession(val, false)
 		}
 	}
@@ -257,7 +257,7 @@ func (c *Context) SetSession(session Session, login bool) {
 	session.IpAddress = strings.Split(c.req.RemoteAddr, ":")[0]
 	session.LastActiveTime = time.Now()
 
-	c.m.sessions[session.Key] = session
+	c.svc.sm.sessions[session.Key] = session
 	c.Session = &session
 
 	if login {

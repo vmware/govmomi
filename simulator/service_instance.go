@@ -71,6 +71,13 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 		NewOptionManager(s.Content.Setting, setting),
 	}
 
+	switch content.VStorageObjectManager.Type {
+	case "HostVStorageObjectManager":
+		// TODO: NewHostVStorageObjectManager(*content.VStorageObjectManager)
+	case "VcenterVStorageObjectManager":
+		objects = append(objects, NewVcenterVStorageObjectManager(*content.VStorageObjectManager))
+	}
+
 	if s.Content.CustomFieldsManager != nil {
 		objects = append(objects, NewCustomFieldsManager(*s.Content.CustomFieldsManager))
 	}

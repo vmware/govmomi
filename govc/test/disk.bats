@@ -3,7 +3,7 @@
 load test_helper
 
 @test "disk.ls" {
-  esx_env
+  vcsim_env
 
   run govc disk.ls
   assert_success
@@ -13,7 +13,7 @@ load test_helper
 }
 
 @test "disk.create" {
-  esx_env
+  vcsim_env
 
   name=$(new_id)
 
@@ -34,7 +34,7 @@ load test_helper
 }
 
 @test "disk.register" {
-  esx_env
+  vcsim_env
 
   id=$(new_id)
   vmdk="$id/$id.vmdk"
@@ -46,9 +46,18 @@ load test_helper
   run govc datastore.disk.create -size 10M "$vmdk"
   assert_success
 
+  run govc disk.register "$id" "$id"
+  assert_failure # expect fail for directory
+
+  run govc disk.register "" "$id"
+  assert_failure # expect fail for empty path
+
   run govc disk.register "$vmdk" "$id"
   assert_success
   id="$output"
+
+  run govc disk.ls "$id"
+  assert_success
 
   run govc disk.register "$vmdk" "$id"
   assert_failure
@@ -61,7 +70,7 @@ load test_helper
 }
 
 @test "disk.snapshot" {
-  esx_env
+  vcsim_env
 
   name=$(new_id)
 

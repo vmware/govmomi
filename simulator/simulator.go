@@ -343,7 +343,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	ctx := &Context{
 		req: r,
 		res: w,
-		m:   s.sm,
+		svc: s,
 
 		Map:     s.sdk[r.URL.Path],
 		Context: context.Background(),
