@@ -19,9 +19,8 @@ package main
 import (
 	"os"
 
-	"github.com/vmware/govmomi/govc/cli"
-
 	_ "github.com/vmware/govmomi/govc/about"
+	"github.com/vmware/govmomi/govc/cli"
 	_ "github.com/vmware/govmomi/govc/cluster"
 	_ "github.com/vmware/govmomi/govc/cluster/group"
 	_ "github.com/vmware/govmomi/govc/cluster/override"
