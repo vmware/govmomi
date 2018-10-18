@@ -150,7 +150,8 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		return &serverFaultBody{Reason: Fault(msg, fault)}
 	}
 
-	name := method.Name
+	// Lowercase methods can't be accessed outside their package
+	name := strings.Title(method.Name)
 
 	if strings.HasSuffix(name, vTaskSuffix) {
 		// Make golint happy renaming "Foo_Task" -> "FooTask"

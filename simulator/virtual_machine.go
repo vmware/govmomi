@@ -858,6 +858,10 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 	}
 }
 
+func (vm *VirtualMachine) SetCustomValue(req *types.SetCustomValue) soap.HasFault {
+	return SetCustomValue(vm, req)
+}
+
 func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap.HasFault {
 	r := &methods.UnregisterVMBody{}
 

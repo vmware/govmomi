@@ -177,6 +177,24 @@ func (r *Registry) Any(kind string) mo.Entity {
 	return nil
 }
 
+// All returns all entities of type specified by kind.
+// If kind is empty - all entities will be returned.
+func (r *Registry) All(kind string) []mo.Entity {
+	r.m.Lock()
+	defer r.m.Unlock()
+
+	var entities []mo.Entity
+	for ref, val := range r.objects {
+		if kind == "" || ref.Type == kind {
+			if e, ok := val.(mo.Entity); ok {
+				entities = append(entities, e)
+			}
+		}
+	}
+
+	return entities
+}
+
 // applyHandlers calls the given func for each r.handlers
 func (r *Registry) applyHandlers(f func(o RegisterObject)) {
 	r.m.Lock()
@@ -441,6 +459,11 @@ func (r *Registry) SessionManager() *SessionManager {
 // OptionManager returns the OptionManager singleton
 func (r *Registry) OptionManager() *OptionManager {
 	return r.Get(r.content().Setting.Reference()).(*OptionManager)
+}
+
+// CustomFieldsManager returns CustomFieldsManager singleton
+func (r *Registry) CustomFieldsManager() *CustomFieldsManager {
+	return r.Get(r.content().CustomFieldsManager.Reference()).(*CustomFieldsManager)
 }
 
 func (r *Registry) MarshalJSON() ([]byte, error) {
