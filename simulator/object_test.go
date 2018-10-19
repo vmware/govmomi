@@ -48,10 +48,10 @@ func TestObjectCustomFields(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm  := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := Map.Any("VirtualMachine").(*VirtualMachine)
 	vmm := object.NewVirtualMachine(c.Client, vm.Reference())
 
-	fieldName  := "testField"
+	fieldName := "testField"
 	fieldValue := "12345"
 
 	// Test that field is not created
@@ -85,15 +85,15 @@ func TestObjectCustomFields(t *testing.T) {
 	}
 	if vm.AvailableField[0].ManagedObjectType != field.ManagedObjectType {
 		t.Fatalf("vm.AvailableField[0].ManagedObjectType expected %s, got %s",
-		field.ManagedObjectType, vm.AvailableField[0].ManagedObjectType)
+			field.ManagedObjectType, vm.AvailableField[0].ManagedObjectType)
 	}
 	if vm.AvailableField[0].FieldDefPrivileges != field.FieldDefPrivileges {
 		t.Fatalf("vm.AvailableField[0].FieldDefPrivileges expected %s, got %s",
-		field.FieldDefPrivileges, vm.AvailableField[0].FieldDefPrivileges)
+			field.FieldDefPrivileges, vm.AvailableField[0].FieldDefPrivileges)
 	}
 	if vm.AvailableField[0].FieldInstancePrivileges != field.FieldInstancePrivileges {
 		t.Fatalf("vm.AvailableField[0].FieldInstancePrivileges expected %s, got %s",
-		field.FieldInstancePrivileges, vm.AvailableField[0].FieldInstancePrivileges)
+			field.FieldInstancePrivileges, vm.AvailableField[0].FieldInstancePrivileges)
 	}
 
 	// Test that field with duplicate name can't be created
@@ -145,7 +145,7 @@ func TestObjectCustomFields(t *testing.T) {
 	}
 
 	// Rename field
-	newName := field.Name+"_renamed"
+	newName := field.Name + "_renamed"
 	err = cfm.Rename(ctx, field.Key, newName)
 	if err != nil {
 		t.Fatal(err)

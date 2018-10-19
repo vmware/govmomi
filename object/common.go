@@ -133,9 +133,9 @@ func (c Common) Rename(ctx context.Context, name string) (*Task, error) {
 
 func (c Common) SetCustomVal(ctx context.Context, key string, value string) error {
 	req := types.SetCustomValue{
-		This:   c.Reference(),
-		Key:    key,
-		Value:  value,
+		This:  c.Reference(),
+		Key:   key,
+		Value: value,
 	}
 
 	_, err := methods.SetCustomValue(ctx, c.c, &req)

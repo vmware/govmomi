@@ -90,8 +90,8 @@ func entitiesFieldRename(field types.CustomFieldDef) {
 
 func (c *CustomFieldsManager) findByNameType(name, moType string) (int, *types.CustomFieldDef) {
 	for i, field := range c.Field {
-		if ((field.ManagedObjectType == "" || field.ManagedObjectType == moType || moType == "") &&
-			field.Name == name) {
+		if (field.ManagedObjectType == "" || field.ManagedObjectType == moType || moType == "") &&
+			field.Name == name {
 			return i, &c.Field[i]
 		}
 	}
