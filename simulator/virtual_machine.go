@@ -503,9 +503,11 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		switch b := d.Backing.(type) {
 		case types.BaseVirtualDeviceFileBackingInfo:
 			info := b.GetVirtualDeviceFileBackingInfo()
+			var path object.DatastorePath
+			path.FromString(info.FileName)
 
-			if info.FileName == "" {
-				filename, err := vm.genVmdkPath()
+			if path.Path == "" {
+				filename, err := vm.genVmdkPath(path)
 				if err != nil {
 					return err
 				}
@@ -610,9 +612,16 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 	return devices
 }
 
-func (vm *VirtualMachine) genVmdkPath() (string, types.BaseMethodFault) {
-	vmdir := path.Dir(vm.Config.Files.VmPathName)
-
+func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.BaseMethodFault) {
+	if p.Datastore == "" {
+		p.FromString(vm.Config.Files.VmPathName)
+	}
+	if p.Path == "" {
+		p.Path = vm.Config.Name
+	} else {
+		p.Path = path.Dir(p.Path)
+	}
+	vmdir := p.String()
 	index := 0
 	for {
 		var filename string

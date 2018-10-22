@@ -608,8 +608,19 @@ func TestCreateVmWithDevices(t *testing.T) {
 			Backing: new(types.VirtualDiskFlatVer2BackingInfo), // Leave fields empty to test defaults
 		},
 	}
+	disk2 := &types.VirtualDisk{
+		CapacityInKB: 1024,
+		VirtualDevice: types.VirtualDevice{
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: "[LocalDS_0]",
+				},
+			},
+		},
+	}
 	devices.AssignController(disk, scsi.(*types.VirtualLsiLogicController))
-	devices = append(devices, ide, cdrom, scsi, disk)
+	devices.AssignController(disk2, scsi.(*types.VirtualLsiLogicController))
+	devices = append(devices, ide, cdrom, scsi, disk, disk2)
 	create, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 
 	spec := types.VirtualMachineConfigSpec{
@@ -617,7 +628,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 		GuestId:      string(types.VirtualMachineGuestOsIdentifierOtherGuest),
 		DeviceChange: create,
 		Files: &types.VirtualMachineFileInfo{
-			VmPathName: "[LocalDS_0] foo/foo.vmx",
+			VmPathName: "[LocalDS_0]",
 		},
 	}
 
@@ -648,7 +659,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 			}
 		}
 	}
-	if 1 != ndisk {
+	if 2 != ndisk {
 		t.Errorf("expected 1 disk, got %d", ndisk)
 	}
 }
