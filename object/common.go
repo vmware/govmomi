@@ -130,3 +130,14 @@ func (c Common) Rename(ctx context.Context, name string) (*Task, error) {
 
 	return NewTask(c.c, res.Returnval), nil
 }
+
+func (c Common) SetCustomValue(ctx context.Context, key string, value string) error {
+	req := types.SetCustomValue{
+		This:  c.Reference(),
+		Key:   key,
+		Value: value,
+	}
+
+	_, err := methods.SetCustomValue(ctx, c.c, &req)
+	return err
+}
