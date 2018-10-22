@@ -181,8 +181,14 @@ func (c *CustomFieldsManager) RenameCustomFieldDef(req *types.RenameCustomFieldD
 	return body
 }
 
-func (c *CustomFieldsManager) SetField(req *types.SetField) soap.HasFault {
+func (c *CustomFieldsManager) SetField(ctx *Context, req *types.SetField) soap.HasFault {
 	body := &methods.SetFieldBody{}
+
+	_, field := c.findByKey(req.Key)
+	if field == nil {
+		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "key"})
+		return body
+	}
 
 	newValue := &types.CustomFieldStringValue{
 		CustomFieldValue: types.CustomFieldValue{Key: req.Key},
@@ -190,7 +196,7 @@ func (c *CustomFieldsManager) SetField(req *types.SetField) soap.HasFault {
 	}
 
 	entity := Map.Get(req.Entity).(mo.Entity).Entity()
-	Map.WithLock(entity, func() {
+	ctx.WithLock(entity, func() {
 		entity.CustomValue = append(entity.CustomValue, newValue)
 		entity.Value = append(entity.Value, newValue)
 	})

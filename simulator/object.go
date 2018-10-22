@@ -18,12 +18,12 @@ package simulator
 
 import (
 	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func SetCustomValue(e mo.Entity, req *types.SetCustomValue) soap.HasFault {
+func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
+	ctx.Caller = &req.This
 	body := &methods.SetCustomValueBody{}
 
 	cfm := Map.CustomFieldsManager()
@@ -34,17 +34,12 @@ func SetCustomValue(e mo.Entity, req *types.SetCustomValue) soap.HasFault {
 		return body
 	}
 
-	entity := Map.Get(req.This).(mo.Entity).Entity()
-	// Temporarily unlock this object for SetField to use
-	mu := Map.locker(entity)
-	mu.Unlock()
-	res := cfm.SetField(&types.SetField{
+	res := cfm.SetField(ctx, &types.SetField{
 		This:   cfm.Reference(),
 		Entity: req.This,
 		Key:    field.Key,
 		Value:  req.Value,
 	})
-	mu.Lock()
 
 	if res.Fault() != nil {
 		body.Fault_ = res.Fault()

@@ -55,7 +55,7 @@ func TestObjectCustomFields(t *testing.T) {
 	fieldValue := "12345"
 
 	// Test that field is not created
-	err = vmm.SetCustomVal(ctx, fieldName, fieldValue)
+	err = vmm.SetCustomValue(ctx, fieldName, fieldValue)
 	if err == nil {
 		t.Fatalf("expected error")
 	}
@@ -113,7 +113,7 @@ func TestObjectCustomFields(t *testing.T) {
 	}
 
 	// Set field
-	err = vmm.SetCustomVal(ctx, fieldName, fieldValue)
+	err = vmm.SetCustomValue(ctx, fieldName, fieldValue)
 	if err != nil {
 		t.Fatal(err)
 	}
