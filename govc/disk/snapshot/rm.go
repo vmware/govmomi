@@ -60,7 +60,9 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	m := vslm.NewObjectManager(ds.Client())
 
 	task, err := m.DeleteSnapshot(ctx, ds, f.Arg(0), sid)
-
+	if err != nil {
+		return err
+	}
 	logger := cmd.ProgressLogger(fmt.Sprintf("Deleting %s...", sid))
 	defer logger.Wait()
 
