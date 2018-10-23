@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,6 +38,7 @@ import (
 	"github.com/vmware/govmomi/simulator/vpx"
 	sts "github.com/vmware/govmomi/sts/simulator"
 	vapi "github.com/vmware/govmomi/vapi/simulator"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func main() {
@@ -107,9 +109,12 @@ func main() {
 	}
 
 	f := flag.Lookup("httptest.serve")
-	if f.Value.String() == "" {
+	listen := f.Value.String()
+	if listen == "" {
 		// #nosec: Errors unhandled
 		_ = f.Value.Set("127.0.0.1:8989")
+	} else {
+		updateHostTemplate(listen)
 	}
 
 	if *isESX {
@@ -194,4 +199,23 @@ func main() {
 	<-sig
 
 	model.Remove()
+}
+
+func updateHostTemplate(ip string) {
+	addr, _, _ := net.SplitHostPort(ip)
+
+	nics := [][]types.HostVirtualNic{
+		esx.HostConfigInfo.Network.Vnic,
+		esx.HostConfigInfo.Vmotion.NetConfig.CandidateVnic,
+	}
+
+	for _, nic := range esx.HostConfigInfo.VirtualNicManagerInfo.NetConfig {
+		nics = append(nics, nic.CandidateVnic)
+	}
+
+	for _, nic := range nics {
+		for i := range nic {
+			nic[i].Spec.Ip.IpAddress = addr // replace "127.0.0.1" with $addr
+		}
+	}
 }
