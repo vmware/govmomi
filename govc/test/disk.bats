@@ -33,6 +33,31 @@ load test_helper
   assert_failure
 }
 
+@test "disk.create -datastore-cluster" {
+  vcsim_env -pod 1 -ds 3 -cluster 2
+
+  pod=/DC0/datastore/DC0_POD0
+  id=$(new_id)
+
+  run govc disk.create -datastore-cluster $pod "$id"
+  assert_failure
+
+  run govc object.mv /DC0/datastore/LocalDS_{1,2} $pod
+  assert_success
+
+  run govc disk.create -datastore-cluster $pod -size 10M "$id"
+  assert_success
+
+  id=$(new_id)
+  pool=$GOVC_RESOURCE_POOL
+  unset GOVC_RESOURCE_POOL
+  run govc disk.create -datastore-cluster $pod -size 10M "$id"
+  assert_failure # -pool is required
+
+  run govc disk.create -datastore-cluster $pod -size 10M -pool "$pool" "$id"
+  assert_success
+}
+
 @test "disk.register" {
   vcsim_env
 

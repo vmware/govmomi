@@ -177,6 +177,9 @@ func (f *Folder) CreateStoragePod(c *types.CreateStoragePod) soap.HasFault {
 
 		pod.Name = c.Name
 		pod.ChildType = []string{"Datastore"}
+		pod.Summary = new(types.StoragePodSummary)
+		pod.PodStorageDrsEntry = new(types.PodStorageDrsEntry)
+		pod.PodStorageDrsEntry.StorageDrsConfig.PodConfig.Enabled = true
 
 		f.putChild(pod)
 
@@ -191,7 +194,10 @@ func (f *Folder) CreateStoragePod(c *types.CreateStoragePod) soap.HasFault {
 }
 
 func (p *StoragePod) MoveIntoFolderTask(c *types.MoveIntoFolder_Task) soap.HasFault {
-	return (&Folder{Folder: p.Folder}).MoveIntoFolderTask(c)
+	f := &Folder{Folder: p.Folder}
+	res := f.MoveIntoFolderTask(c)
+	p.ChildEntity = append(p.ChildEntity, f.ChildEntity...)
+	return res
 }
 
 func (f *Folder) CreateDatacenter(ctx *Context, c *types.CreateDatacenter) soap.HasFault {
