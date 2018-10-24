@@ -86,6 +86,8 @@ load test_helper
   run govc tags.update -d "Updated tag" -n "$update_name" "$tag_id"
   assert_success
 
+  govc tags.info
+  govc tags.info -C=false
   govc tags.info "$update_name" | grep Updated
 
   run govc tags.create -c "$category_name" "$(new_id)"
