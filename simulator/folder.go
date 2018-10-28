@@ -23,6 +23,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -249,6 +250,22 @@ type createVM struct {
 	register bool
 }
 
+// hostsWithDatastore returns hosts that have access to the given datastore path
+func hostsWithDatastore(hosts []types.ManagedObjectReference, path string) []types.ManagedObjectReference {
+	attached := hosts[:0]
+	var p object.DatastorePath
+	p.FromString(path)
+
+	for _, host := range hosts {
+		h := Map.Get(host).(*HostSystem)
+		if Map.FindByName(p.Datastore, h.Datastore) != nil {
+			attached = append(attached, host)
+		}
+	}
+
+	return attached
+}
+
 func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	vm, err := NewVirtualMachine(c.Folder.Self, &c.req.Config)
 	if err != nil {
@@ -269,7 +286,7 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			hosts = cr.Host
 		}
 
-		// Assuming for now that all hosts have access to the datastore
+		hosts = hostsWithDatastore(hosts, c.req.Config.Files.VmPathName)
 		host := hosts[rand.Intn(len(hosts))]
 		vm.Runtime.Host = &host
 	} else {
