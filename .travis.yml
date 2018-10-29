@@ -26,3 +26,7 @@ deploy:
     tags: true
     condition: $TRAVIS_OS_NAME = linux
     go: '1.11'
+
+env:
+  global:
+    - TMPDIR=/tmp

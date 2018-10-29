@@ -40,3 +40,18 @@ load test_helper
   [ "$(jq .Machine <<<"$model")" == "0" ]
   [ "$(jq .Datastore <<<"$model")" == "0" ]
 }
+
+@test "vcsim host placement" {
+  vcsim_start -dc 0
+
+  # https://github.com/vmware/govmomi/issues/1258
+  id=$(new_id)
+  govc datacenter.create DC0
+  govc cluster.create comp
+  govc cluster.add -cluster comp -hostname test.host.com -username user -password pass
+  govc cluster.add -cluster comp -hostname test2.host.com -username user -password pass
+  govc datastore.create -type local -name vol6 -path "$TMPDIR" test.host.com
+  govc pool.create comp/Resources/testPool
+  govc vm.create -c 1 -ds vol6 -g centos64Guest -pool testPool -m 4096 "$id"
+  govc vm.destroy "$id"
+}
