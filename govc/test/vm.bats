@@ -250,6 +250,22 @@ load test_helper
   assert_success
 }
 
+@test "vm.create -datastore-cluster" {
+  vcsim_env -pod 1 -ds 3
+
+  pod=/DC0/datastore/DC0_POD0
+  id=$(new_id)
+
+  run govc vm.create -disk 10M -datastore-cluster $pod "$id"
+  assert_failure
+
+  run govc object.mv /DC0/datastore/LocalDS_{1,2} $pod
+  assert_success
+
+  run govc vm.create -disk 10M -datastore-cluster $pod "$id"
+  assert_success
+}
+
 @test "vm.info" {
   vcsim_env -esx
 

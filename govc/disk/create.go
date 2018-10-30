@@ -23,13 +23,17 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/units"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vslm"
 )
 
 type disk struct {
 	*flags.DatastoreFlag
+	*flags.ResourcePoolFlag
+	*flags.StoragePodFlag
 
 	size units.ByteSize
 	keep *bool
@@ -43,9 +47,25 @@ func (cmd *disk) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
+	cmd.StoragePodFlag, ctx = flags.NewStoragePodFlag(ctx)
+	cmd.StoragePodFlag.Register(ctx, f)
+
+	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
+	cmd.ResourcePoolFlag.Register(ctx, f)
+
 	_ = cmd.size.Set("10G")
 	f.Var(&cmd.size, "size", "Size of new disk")
 	f.Var(flags.NewOptionalBool(&cmd.keep), "keep", "Keep disk after VM is deleted")
+}
+
+func (cmd *disk) Process(ctx context.Context) error {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.StoragePodFlag.Process(ctx); err != nil {
+		return err
+	}
+	return cmd.ResourcePoolFlag.Process(ctx)
 }
 
 func (cmd *disk) Usage() string {
@@ -65,12 +85,30 @@ func (cmd *disk) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	ds, err := cmd.Datastore()
+	c, err := cmd.DatastoreFlag.Client()
 	if err != nil {
 		return err
 	}
 
-	m := vslm.NewObjectManager(ds.Client())
+	var pool *object.ResourcePool
+	var ds mo.Reference
+	if cmd.StoragePodFlag.Isset() {
+		ds, err = cmd.StoragePod()
+		if err != nil {
+			return err
+		}
+		pool, err = cmd.ResourcePool()
+		if err != nil {
+			return err
+		}
+	} else {
+		ds, err = cmd.Datastore()
+		if err != nil {
+			return err
+		}
+	}
+
+	m := vslm.NewObjectManager(c)
 
 	spec := types.VslmCreateSpec{
 		Name:              name,
@@ -84,12 +122,18 @@ func (cmd *disk) Run(ctx context.Context, f *flag.FlagSet) error {
 		},
 	}
 
+	if cmd.StoragePodFlag.Isset() {
+		if err = m.PlaceDisk(ctx, &spec, pool.Reference()); err != nil {
+			return err
+		}
+	}
+
 	task, err := m.CreateDisk(ctx, spec)
 	if err != nil {
 		return nil
 	}
 
-	logger := cmd.ProgressLogger(fmt.Sprintf("Creating %s...", spec.Name))
+	logger := cmd.DatastoreFlag.ProgressLogger(fmt.Sprintf("Creating %s...", spec.Name))
 
 	res, err := task.WaitForResult(ctx, logger)
 	logger.Wait()

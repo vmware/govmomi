@@ -18,6 +18,7 @@ package vslm
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
@@ -50,6 +51,76 @@ func NewObjectManager(client *vim25.Client, ref ...types.ManagedObjectReference)
 	}
 
 	return &m
+}
+
+// PlaceDisk uses StorageResourceManager datastore placement recommendations to choose a Datastore from a Datastore cluster.
+// If the given spec backing Datastore field is not that of type StoragePod, the spec is unmodifed.
+// Otherwise, the backing Datastore field is replaced with a Datastore suggestion.
+func (m ObjectManager) PlaceDisk(ctx context.Context, spec *types.VslmCreateSpec, pool types.ManagedObjectReference) error {
+	backing := spec.BackingSpec.GetVslmCreateSpecBackingSpec()
+	if backing.Datastore.Type != "StoragePod" {
+		return nil
+	}
+
+	device := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Key: 0,
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				DiskMode:        string(types.VirtualDiskModePersistent),
+				ThinProvisioned: types.NewBool(true),
+			},
+			UnitNumber: types.NewInt32(0),
+		},
+		CapacityInKB: spec.CapacityInMB * 1024,
+	}
+
+	storage := types.StoragePlacementSpec{
+		Type:         string(types.StoragePlacementSpecPlacementTypeCreate),
+		ResourcePool: &pool,
+		PodSelectionSpec: types.StorageDrsPodSelectionSpec{
+			StoragePod: &backing.Datastore,
+			InitialVmConfig: []types.VmPodConfigForPlacement{
+				{
+					StoragePod: backing.Datastore,
+					Disk: []types.PodDiskLocator{
+						{
+							DiskId:          device.Key,
+							DiskBackingInfo: device.Backing,
+						},
+					},
+				},
+			},
+		},
+		ConfigSpec: &types.VirtualMachineConfigSpec{
+			Name: spec.Name,
+			DeviceChange: []types.BaseVirtualDeviceConfigSpec{
+				&types.VirtualDeviceConfigSpec{
+					Operation:     types.VirtualDeviceConfigSpecOperationAdd,
+					FileOperation: types.VirtualDeviceConfigSpecFileOperationCreate,
+					Device:        device,
+				},
+			},
+		},
+	}
+
+	req := types.RecommendDatastores{
+		This:        *m.c.ServiceContent.StorageResourceManager,
+		StorageSpec: storage,
+	}
+
+	res, err := methods.RecommendDatastores(ctx, m.c, &req)
+	if err != nil {
+		return err
+	}
+
+	r := res.Returnval.Recommendations
+	if len(r) == 0 {
+		return errors.New("no storage placement recommendations")
+	}
+
+	backing.Datastore = r[0].Action[0].(*types.StoragePlacementAction).Destination
+
+	return nil
 }
 
 func (m ObjectManager) CreateDisk(ctx context.Context, spec types.VslmCreateSpec) (*object.Task, error) {
