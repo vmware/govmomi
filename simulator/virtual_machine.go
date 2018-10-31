@@ -48,12 +48,14 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
 
+	Map.Get(parent).(*Folder).putChild(vm)
+
 	if spec.Name == "" {
-		return nil, &types.InvalidVmConfig{Property: "configSpec.name"}
+		return vm, &types.InvalidVmConfig{Property: "configSpec.name"}
 	}
 
 	if spec.Files == nil || spec.Files.VmPathName == "" {
-		return nil, &types.InvalidVmConfig{Property: "configSpec.files.vmPathName"}
+		return vm, &types.InvalidVmConfig{Property: "configSpec.files.vmPathName"}
 	}
 
 	rspec := types.DefaultResourceConfigSpec()
@@ -104,7 +106,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 
 	err := vm.configure(&defaults)
 	if err != nil {
-		return nil, err
+		return vm, err
 	}
 
 	vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
