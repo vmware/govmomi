@@ -33,6 +33,7 @@ import (
 
 	"github.com/google/uuid"
 	lookup "github.com/vmware/govmomi/lookup/simulator"
+	pbm "github.com/vmware/govmomi/pbm/simulator"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
@@ -82,7 +83,7 @@ func main() {
 	if methodDelay != "" {
 		m := make(map[string]int)
 		for _, s := range strings.Split(methodDelay, ",") {
-			s := strings.TrimSpace(s)
+			s = strings.TrimSpace(s)
 			tuples := strings.Split(s, ":")
 			if len(tuples) == 2 {
 				key := tuples[0]
@@ -186,6 +187,9 @@ func main() {
 
 		// Lookup Service simulator
 		model.Service.RegisterSDK(lookup.New())
+
+		// PBM simulator
+		model.Service.RegisterSDK(pbm.New())
 	}
 
 	fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
