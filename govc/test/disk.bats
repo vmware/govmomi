@@ -123,3 +123,46 @@ load test_helper
   run govc disk.rm "$id"
   assert_success
 }
+
+@test "disk.tags" {
+  vcsim_env
+
+  run govc tags.category.create region
+  assert_success
+
+  run govc tags.create -c region US-WEST
+  assert_success
+
+  name=$(new_id)
+
+  run govc disk.create -size 10M "$name"
+  assert_success
+  id="${lines[1]}"
+
+  run govc disk.ls "$id"
+  assert_success
+
+  run govc disk.ls -c region -t US-WEST
+  assert_success ""
+
+  govc disk.ls -T | grep -v US-WEST
+
+  run govc disk.tags.attach -c region US-WEST "$id"
+  assert_success
+
+  run govc disk.ls -c region -t US-WEST
+  assert_success
+  assert_matches "$id"
+
+  run govc disk.ls -T
+  assert_success
+  assert_matches US-WEST
+
+  run govc disk.tags.detach -c region enoent "$id"
+  assert_failure
+
+  run govc disk.tags.detach -c region US-WEST "$id"
+  assert_success
+
+  govc disk.ls -T | grep -v US-WEST
+}

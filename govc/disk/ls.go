@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -33,7 +34,10 @@ import (
 
 type ls struct {
 	*flags.DatastoreFlag
-	long bool
+	long     bool
+	category string
+	tag      string
+	tags     bool
 }
 
 func init() {
@@ -45,6 +49,9 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
+	f.StringVar(&cmd.category, "c", "", "Query tag category")
+	f.StringVar(&cmd.tag, "t", "", "Query tag name")
+	f.BoolVar(&cmd.tags, "T", false, "List attached tags")
 }
 
 func (cmd *ls) Usage() string {
@@ -56,13 +63,27 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc disk.ls
-  govc disk.ls -l
-  govc disk.ls -l e9b06a8b-d047-4d3c-b15b-43ea9608b1a6`
+  govc disk.ls -l -T
+  govc disk.ls -l e9b06a8b-d047-4d3c-b15b-43ea9608b1a6
+  govc disk.ls -c k8s-region -t us-west-2`
+}
+
+type VStorageObject struct {
+	types.VStorageObject
+	Tags []types.VslmTagEntry
+}
+
+func (o *VStorageObject) tags() string {
+	var tags []string
+	for _, tag := range o.Tags {
+		tags = append(tags, tag.ParentCategoryName+":"+tag.TagName)
+	}
+	return strings.Join(tags, ",")
 }
 
 type lsResult struct {
 	cmd     *ls
-	Objects []*types.VStorageObject
+	Objects []VStorageObject
 }
 
 func (r *lsResult) Write(w io.Writer) error {
@@ -75,6 +96,9 @@ func (r *lsResult) Write(w io.Writer) error {
 			size := units.FileSize(o.Config.CapacityInMB * 1024 * 1024)
 			_, _ = fmt.Fprintf(tw, "\t%s\t%s", size, created)
 		}
+		if r.cmd.tags {
+			_, _ = fmt.Fprintf(tw, "\t%s", o.tags())
+		}
 		_, _ = fmt.Fprintln(tw)
 	}
 
@@ -86,17 +110,28 @@ func (r *lsResult) Dump() interface{} {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
+	c, err := cmd.Client()
+	if err != nil {
+		return err
+	}
+
 	ds, err := cmd.Datastore()
 	if err != nil {
 		return err
 	}
 
-	m := vslm.NewObjectManager(ds.Client())
+	m := vslm.NewObjectManager(c)
 	res := lsResult{cmd: cmd}
 
 	ids := f.Args()
 	if len(ids) == 0 {
-		oids, err := m.List(ctx, ds)
+		var oids []types.ID
+		if cmd.category == "" {
+			oids, err = m.List(ctx, ds)
+		} else {
+			oids, err = m.ListAttachedObjects(ctx, cmd.category, cmd.tag)
+		}
+
 		if err != nil {
 			return err
 		}
@@ -111,7 +146,14 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		res.Objects = append(res.Objects, o)
+		obj := VStorageObject{VStorageObject: *o}
+		if cmd.tags {
+			obj.Tags, err = m.ListAttachedTags(ctx, id)
+			if err != nil {
+				return err
+			}
+		}
+		res.Objects = append(res.Objects, obj)
 	}
 
 	return cmd.WriteResult(&res)

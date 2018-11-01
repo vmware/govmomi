@@ -75,6 +75,69 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 	return internal.Path + "/", s
 }
 
+func (s *handler) findTag(e vim.VslmTagEntry) *tags.Tag {
+	for _, c := range s.Category {
+		if c.Name == e.ParentCategoryName {
+			for _, t := range s.Tag {
+				if t.Name == e.TagName && t.CategoryID == c.ID {
+					return t
+				}
+			}
+		}
+	}
+	return nil
+}
+
+// AttachedObjects is meant for internal use via simulator.Registry.tagManager
+func (s *handler) AttachedObjects(tag vim.VslmTagEntry) ([]vim.ManagedObjectReference, vim.BaseMethodFault) {
+	t := s.findTag(tag)
+	if t == nil {
+		return nil, new(vim.NotFound)
+	}
+	var ids []vim.ManagedObjectReference
+	for id := range s.Association[t.ID] {
+		ids = append(ids, vim.ManagedObjectReference(id))
+	}
+	return ids, nil
+}
+
+// AttachedTags is meant for internal use via simulator.Registry.tagManager
+func (s *handler) AttachedTags(ref vim.ManagedObjectReference) ([]vim.VslmTagEntry, vim.BaseMethodFault) {
+	oid := internal.AssociatedObject(ref)
+	var tags []vim.VslmTagEntry
+	for id, objs := range s.Association {
+		if objs[oid] {
+			tag := s.Tag[id]
+			cat := s.Category[tag.CategoryID]
+			tags = append(tags, vim.VslmTagEntry{
+				TagName:            tag.Name,
+				ParentCategoryName: cat.Name,
+			})
+		}
+	}
+	return tags, nil
+}
+
+// AttachTag is meant for internal use via simulator.Registry.tagManager
+func (s *handler) AttachTag(ref vim.ManagedObjectReference, tag vim.VslmTagEntry) vim.BaseMethodFault {
+	t := s.findTag(tag)
+	if t == nil {
+		return new(vim.NotFound)
+	}
+	s.Association[t.ID][internal.AssociatedObject(ref)] = true
+	return nil
+}
+
+// DetachTag is meant for internal use via simulator.Registry.tagManager
+func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry) vim.BaseMethodFault {
+	t := s.findTag(tag)
+	if t == nil {
+		return new(vim.NotFound)
+	}
+	delete(s.Association[t.ID], internal.AssociatedObject(id))
+	return nil
+}
+
 // ok responds with http.StatusOK and json encodes val if given.
 func (s *handler) ok(w http.ResponseWriter, val ...interface{}) {
 	w.WriteHeader(http.StatusOK)

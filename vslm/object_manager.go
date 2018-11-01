@@ -356,3 +356,54 @@ func (m ObjectManager) RetrieveSnapshotInfo(ctx context.Context, ds mo.Reference
 
 	return &res.Returnval, nil
 }
+
+func (m ObjectManager) AttachTag(ctx context.Context, id string, tag types.VslmTagEntry) error {
+	req := &types.AttachTagToVStorageObject{
+		This:     m.ManagedObjectReference,
+		Id:       types.ID{Id: id},
+		Category: tag.ParentCategoryName,
+		Tag:      tag.TagName,
+	}
+
+	_, err := methods.AttachTagToVStorageObject(ctx, m.c, req)
+	return err
+}
+
+func (m ObjectManager) DetachTag(ctx context.Context, id string, tag types.VslmTagEntry) error {
+	req := &types.DetachTagFromVStorageObject{
+		This:     m.ManagedObjectReference,
+		Id:       types.ID{Id: id},
+		Category: tag.ParentCategoryName,
+		Tag:      tag.TagName,
+	}
+
+	_, err := methods.DetachTagFromVStorageObject(ctx, m.c, req)
+	return err
+}
+
+func (m ObjectManager) ListAttachedObjects(ctx context.Context, category, tag string) ([]types.ID, error) {
+	req := &types.ListVStorageObjectsAttachedToTag{
+		This:     m.ManagedObjectReference,
+		Category: category,
+		Tag:      tag,
+	}
+
+	res, err := methods.ListVStorageObjectsAttachedToTag(ctx, m.c, req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
+}
+
+func (m ObjectManager) ListAttachedTags(ctx context.Context, id string) ([]types.VslmTagEntry, error) {
+	req := &types.ListTagsAttachedToVStorageObject{
+		This: m.ManagedObjectReference,
+		Id:   types.ID{Id: id},
+	}
+
+	res, err := methods.ListTagsAttachedToVStorageObject(ctx, m.c, req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
+}

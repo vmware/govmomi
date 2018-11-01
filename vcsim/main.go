@@ -179,11 +179,11 @@ func main() {
 	if !*isESX {
 		// STS simulator
 		path, handler := sts.New(s.URL, vpx.Setting)
-		model.Service.ServeMux.Handle(path, handler)
+		model.Service.Handle(path, handler)
 
 		// vAPI simulator
 		path, handler = vapi.New(s.URL, vpx.Setting)
-		model.Service.ServeMux.Handle(path, handler)
+		model.Service.Handle(path, handler)
 
 		// Lookup Service simulator
 		model.Service.RegisterSDK(lookup.New())

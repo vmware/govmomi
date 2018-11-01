@@ -322,3 +322,83 @@ func (m *VcenterVStorageObjectManager) DeleteSnapshotTask(req *types.DeleteSnaps
 		},
 	}
 }
+
+func (m *VcenterVStorageObjectManager) tagID(id types.ID) types.ManagedObjectReference {
+	return types.ManagedObjectReference{
+		Type:  "fcd",
+		Value: id.Id,
+	}
+}
+
+func (m *VcenterVStorageObjectManager) AttachTagToVStorageObject(ctx *Context, req *types.AttachTagToVStorageObject) soap.HasFault {
+	body := new(methods.AttachTagToVStorageObjectBody)
+	ref := m.tagID(req.Id)
+
+	err := ctx.Map.tagManager.AttachTag(ref, types.VslmTagEntry{
+		ParentCategoryName: req.Category,
+		TagName:            req.Tag,
+	})
+
+	if err == nil {
+		body.Res = new(types.AttachTagToVStorageObjectResponse)
+	} else {
+		body.Fault_ = Fault("", err)
+	}
+
+	return body
+}
+
+func (m *VcenterVStorageObjectManager) DetachTagFromVStorageObject(ctx *Context, req *types.DetachTagFromVStorageObject) soap.HasFault {
+	body := new(methods.DetachTagFromVStorageObjectBody)
+	ref := m.tagID(req.Id)
+
+	err := ctx.Map.tagManager.DetachTag(ref, types.VslmTagEntry{
+		ParentCategoryName: req.Category,
+		TagName:            req.Tag,
+	})
+
+	if err == nil {
+		body.Res = new(types.DetachTagFromVStorageObjectResponse)
+	} else {
+		body.Fault_ = Fault("", err)
+	}
+
+	return body
+}
+
+func (m *VcenterVStorageObjectManager) ListVStorageObjectsAttachedToTag(ctx *Context, req *types.ListVStorageObjectsAttachedToTag) soap.HasFault {
+	body := new(methods.ListVStorageObjectsAttachedToTagBody)
+
+	refs, err := ctx.Map.tagManager.AttachedObjects(types.VslmTagEntry{
+		ParentCategoryName: req.Category,
+		TagName:            req.Tag,
+	})
+
+	if err == nil {
+		body.Res = new(types.ListVStorageObjectsAttachedToTagResponse)
+		for _, ref := range refs {
+			body.Res.Returnval = append(body.Res.Returnval, types.ID{Id: ref.Value})
+		}
+	} else {
+		body.Fault_ = Fault("", err)
+	}
+
+	return body
+}
+
+func (m *VcenterVStorageObjectManager) ListTagsAttachedToVStorageObject(ctx *Context, req *types.ListTagsAttachedToVStorageObject) soap.HasFault {
+	body := new(methods.ListTagsAttachedToVStorageObjectBody)
+	ref := m.tagID(req.Id)
+
+	tags, err := ctx.Map.tagManager.AttachedTags(ref)
+
+	if err == nil {
+		body.Res = &types.ListTagsAttachedToVStorageObjectResponse{
+			Returnval: tags,
+		}
+	} else {
+		body.Fault_ = Fault("", err)
+	}
+
+	return body
+}

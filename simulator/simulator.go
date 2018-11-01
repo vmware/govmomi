@@ -312,6 +312,16 @@ func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 	_ = enc.Encode(&about)
 }
 
+// Handle registers the handler for the given pattern with Service.ServeMux.
+func (s *Service) Handle(pattern string, handler http.Handler) {
+	s.ServeMux.Handle(pattern, handler)
+	// Not ideal, but avoids having to add yet another registration mechanism
+	// so we can optionally use vapi/simulator internally.
+	if m, ok := handler.(tagManager); ok {
+		s.sdk[vim25.Path].tagManager = m
+	}
+}
+
 // RegisterSDK adds an HTTP handler for the Registry's Path and Namespace.
 func (s *Service) RegisterSDK(r *Registry) {
 	if s.ServeMux == nil {
