@@ -494,7 +494,10 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			net.Value = b.Port.PortgroupKey
 		}
 
-		vm.Network = append(vm.Network, net)
+		Map.Update(vm, []types.PropertyChange{
+			{Name: "summary.config.numEthernetCards", Val: vm.Summary.Config.NumEthernetCards + 1},
+			{Name: "network", Val: append(vm.Network, net)},
+		})
 
 		c := x.GetVirtualEthernetCard()
 		if c.MacAddress == "" {
@@ -524,6 +527,10 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			if err != nil {
 				return err
 			}
+
+			Map.Update(vm, []types.PropertyChange{
+				{Name: "summary.config.numVirtualDisks", Val: vm.Summary.Config.NumVirtualDisks + 1},
+			})
 
 			p, _ := parseDatastorePath(info.FileName)
 
@@ -594,6 +601,9 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					})
 				}
 			}
+			Map.Update(vm, []types.PropertyChange{
+				{Name: "summary.config.numVirtualDisks", Val: vm.Summary.Config.NumVirtualDisks - 1},
+			})
 		case types.BaseVirtualEthernetCard:
 			var net types.ManagedObjectReference
 
@@ -605,7 +615,12 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 				net.Value = b.Port.PortgroupKey
 			}
 
-			RemoveReference(&vm.Network, net)
+			networks := vm.Network
+			RemoveReference(&networks, net)
+			Map.Update(vm, []types.PropertyChange{
+				{Name: "summary.config.numEthernetCards", Val: vm.Summary.Config.NumEthernetCards - 1},
+				{Name: "network", Val: networks},
+			})
 		}
 
 		break
@@ -696,7 +711,9 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 		}
 	}
 
-	vm.Config.Hardware.Device = []types.BaseVirtualDevice(devices)
+	Map.Update(vm, []types.PropertyChange{
+		{Name: "config.hardware.device", Val: []types.BaseVirtualDevice(devices)},
+	})
 
 	return nil
 }
