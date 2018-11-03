@@ -38,15 +38,15 @@ func (cmd *set) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 }
 
-func (cmd *set) Process(ctx context.Context) error {
-	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
-}
-
 func (cmd *set) Usage() string {
 	return "KEY VALUE PATH..."
+}
+
+func (cmd *set) Description() string {
+	return `Set custom field values for PATH.
+
+Examples:
+  govc fields.set my-field-name field-value vm/my-vm`
 }
 
 func (cmd *set) Run(ctx context.Context, f *flag.FlagSet) error {
