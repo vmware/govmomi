@@ -50,7 +50,7 @@ func (cmd *add) Description() string {
 	return `Add a custom field type with NAME.
 
 Examples:
-  govc fields.add my-field-name
+  govc fields.add my-field-name # adds a field to all managed object types
   govc fields.add -type VirtualMachine my-vm-field-name`
 }
 
