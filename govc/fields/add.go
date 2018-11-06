@@ -51,7 +51,7 @@ func (cmd *add) Description() string {
 
 Examples:
   govc fields.add my-field-name # adds a field to all managed object types
-  govc fields.add -type VirtualMachine my-vm-field-name`
+  govc fields.add -type VirtualMachine my-vm-field-name # adds a field to the VirtualMachine type`
 }
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
