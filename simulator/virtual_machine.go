@@ -455,20 +455,18 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
 
-	if d.Key < 0 {
-		// Choose a unique key
-		if d.Key == -1 {
-			d.Key = devices.NewKey()
-		}
-
+	if d.Key <= 0 {
+		// Keys can't be negative; Key 0 is reserved
+		d.Key = devices.NewKey()
 		d.Key *= -1
+	}
 
-		for {
-			if devices.FindByKey(d.Key) == nil {
-				break
-			}
-			d.Key++
+	// Choose a unique key
+	for {
+		if devices.FindByKey(d.Key) == nil {
+			break
 		}
+		d.Key++
 	}
 
 	label := devices.Name(device)
@@ -659,13 +657,18 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 
 		switch dspec.Operation {
 		case types.VirtualDeviceConfigSpecOperationAdd:
-			if devices.FindByKey(device.Key) != nil {
-				if vm.Self.Value != "" { // moid isn't set until CreateVM is done
-					return invalid
+			if devices.FindByKey(device.Key) != nil && device.ControllerKey == 0 {
+				// Note: real ESX does not allow adding base controllers (ControllerKey = 0)
+				// after VM is created (returns success but device is not added).
+				continue
+			} else if device.UnitNumber != nil && devices.SelectByType(dspec.Device).Select(func(d types.BaseVirtualDevice) bool {
+				if d.GetVirtualDevice().UnitNumber != nil {
+					return *d.GetVirtualDevice().UnitNumber == *device.UnitNumber
 				}
-
-				// In this case, the CreateVM() spec included one of the default devices
-				devices = vm.removeDevice(devices, dspec)
+				return false
+			}) != nil {
+				// UnitNumber for this device type is taken
+				return invalid
 			}
 
 			err := vm.configureDevice(devices, dspec)
@@ -929,21 +932,24 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			},
 		}
 
-		for _, device := range vm.Config.Hardware.Device {
+		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
+		devices := vm.Config.Hardware.Device
+		for _, device := range devices {
 			var fop types.VirtualDeviceConfigSpecFileOperation
 
-			switch device.(type) {
+			if defaultDevices.Find(object.VirtualDeviceList(devices).Name(device)) != nil {
+				// Default devices are added during CreateVMTask
+				continue
+			}
+
+			switch disk := device.(type) {
 			case *types.VirtualDisk:
 				// TODO: consider VirtualMachineCloneSpec.DiskMoveType
 				fop = types.VirtualDeviceConfigSpecFileOperationCreate
-				device = &types.VirtualDisk{
-					VirtualDevice: types.VirtualDevice{
-						Backing: &types.VirtualDiskFlatVer2BackingInfo{
-							DiskMode: string(types.VirtualDiskModePersistent),
-							// Leave FileName empty so CreateVM will just create a new one under VmPathName
-						},
-					},
-				}
+
+				// Leave FileName empty so CreateVM will just create a new one under VmPathName
+				disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).FileName = ""
+				disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo).Parent = nil
 			}
 
 			config.DeviceChange = append(config.DeviceChange, &types.VirtualDeviceConfigSpec{
