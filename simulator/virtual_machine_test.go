@@ -618,9 +618,11 @@ func TestCreateVmWithDevices(t *testing.T) {
 			},
 		},
 	}
+	devices = append(devices, ide, cdrom, scsi)
 	devices.AssignController(disk, scsi.(*types.VirtualLsiLogicController))
+	devices = append(devices, disk)
 	devices.AssignController(disk2, scsi.(*types.VirtualLsiLogicController))
-	devices = append(devices, ide, cdrom, scsi, disk, disk2)
+	devices = append(devices, disk2)
 	create, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 
 	spec := types.VirtualMachineConfigSpec{
