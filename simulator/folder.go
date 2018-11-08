@@ -275,6 +275,7 @@ func hostsWithDatastore(hosts []types.ManagedObjectReference, path string) []typ
 func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	vm, err := NewVirtualMachine(c.Folder.Self, &c.req.Config)
 	if err != nil {
+		c.Folder.removeChild(vm)
 		return nil, err
 	}
 
@@ -312,10 +313,9 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 
 	err = vm.create(&c.req.Config, c.register)
 	if err != nil {
+		c.Folder.removeChild(vm)
 		return nil, err
 	}
-
-	c.Folder.putChild(vm)
 
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	Map.AppendReference(host, &host.Vm, vm.Self)
