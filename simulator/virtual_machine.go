@@ -258,9 +258,247 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
+	switch {
+	case spec.VAppConfigRemoved != nil && *spec.VAppConfigRemoved:
+		vm.Config.VAppConfig = nil
+	case spec.VAppConfig != nil:
+		vm.applyVmConfigSpec(*spec.VAppConfig.GetVmConfigSpec())
+	}
+
 	vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, spec.ExtraConfig...)
 
 	vm.Config.Modified = time.Now()
+}
+
+// applyVmConfigSpec takes a VmConfigSpec (for individual VM vApp data) and
+// applies the data within it appropriately. This namely means:
+//
+// * All non-zero data fields are applied. Zero-value fields are ignored if
+// omitempty is set on the spec tag (they are on most fields)
+// * Product property data is handled separately but called from this function.
+//
+// Not all fields are currently implemented here - this comprises any field not
+// implemented by govc (namely the OVF unknown config section).
+func (vm *VirtualMachine) applyVmConfigSpec(spec types.VmConfigSpec) {
+	if vm.Config.VAppConfig == nil {
+		vm.Config.VAppConfig = new(types.VmConfigInfo)
+	}
+
+	cfg := vm.Config.VAppConfig.GetVmConfigInfo()
+
+	if spec.IpAssignment != nil {
+		vm.applyVAppIPAssignmentInfo(spec.IpAssignment)
+	}
+
+	if len(spec.Eula) > 0 {
+		vm.applyVAppEula(spec.Eula)
+	}
+
+	if len(spec.OvfEnvironmentTransport) > 0 {
+		cfg.OvfEnvironmentTransport = spec.OvfEnvironmentTransport
+	}
+
+	if spec.InstallBootRequired != nil {
+		cfg.InstallBootRequired = *spec.InstallBootRequired
+	}
+
+	if spec.InstallBootStopDelay > 0 {
+		cfg.InstallBootStopDelay = spec.InstallBootStopDelay
+	}
+
+	if len(spec.Product) > 0 {
+		vm.applyVAppProductSpec(spec.Product[0])
+	}
+	vm.applyVAppPropertySpec(spec.Property)
+}
+
+// applyVAppIPAssignmentInfo applies vApp IP assignment details.
+func (vm *VirtualMachine) applyVAppIPAssignmentInfo(info *types.VAppIPAssignmentInfo) {
+	cfg := vm.Config.VAppConfig.GetVmConfigInfo()
+
+	if len(info.SupportedAllocationScheme) > 0 {
+		cfg.IpAssignment.SupportedAllocationScheme = info.SupportedAllocationScheme
+	}
+	if info.IpAllocationPolicy != "" {
+		cfg.IpAssignment.IpAllocationPolicy = info.IpAllocationPolicy
+	}
+	if len(info.SupportedIpProtocol) > 0 {
+		cfg.IpAssignment.SupportedIpProtocol = info.SupportedIpProtocol
+	}
+	if info.IpProtocol != "" {
+		cfg.IpAssignment.IpProtocol = info.IpProtocol
+	}
+}
+
+// applyVAppEula applies any EULAs. These are consolidated so that any empty
+// supplied EULAs are removed.
+//
+// By design, this has the intended side-effect that if either a single empty
+// string or nothing but empty strings are sent as EULAs, this field is cleared
+// and set to nil. This matches the API behavior.
+func (vm *VirtualMachine) applyVAppEula(eulas []string) {
+	var newEulas []string
+
+	for _, eula := range eulas {
+		if eula != "" {
+			newEulas = append(newEulas, eula)
+		}
+	}
+
+	vm.Config.VAppConfig.GetVmConfigInfo().Eula = newEulas
+}
+
+// applyVAppProductSpec takes a single VAppProductSpec and applies it to the
+// vApp configuration.
+//
+// Multiple elements are not supported here because the real world vSphere API
+// seems to have problems with multiple operations - for example, a remove
+// operation followed by an edit operation. Unfortunately due to the HTML5
+// client not supporting vApp properties yet, this is hard to reverse engineer
+// as the flash client seems to obfuscate the actual configSpec operations.
+func (vm *VirtualMachine) applyVAppProductSpec(spec types.VAppProductSpec) {
+	switch spec.Operation {
+	case types.ArrayUpdateOperationEdit:
+		vm.applyVAppProductSpecEdit(spec.Info)
+	case types.ArrayUpdateOperationRemove:
+		vm.applyVAppProductSpecRemove()
+	}
+}
+
+// applyVAppProductSpecEdit updates the vApp product configuration (what would
+// happen when edit operation is sent).
+//
+// Note that we don't edit key, as product data always seems to be in key #0
+// only.
+func (vm *VirtualMachine) applyVAppProductSpecEdit(info *types.VAppProductInfo) {
+	if len(vm.Config.VAppConfig.GetVmConfigInfo().Product) < 1 {
+		vm.Config.VAppConfig.GetVmConfigInfo().Product = make([]types.VAppProductInfo, 1)
+	}
+	cfg := vm.Config.VAppConfig.GetVmConfigInfo().Product[0]
+	apply := []struct {
+		src string
+		dst *string
+	}{
+		{info.ClassId, &cfg.ClassId},
+		{info.InstanceId, &cfg.InstanceId},
+		{info.Name, &cfg.Name},
+		{info.Vendor, &cfg.Vendor},
+		{info.Version, &cfg.Version},
+		{info.FullVersion, &cfg.FullVersion},
+		{info.VendorUrl, &cfg.VendorUrl},
+		{info.ProductUrl, &cfg.ProductUrl},
+		{info.AppUrl, &cfg.AppUrl},
+	}
+
+	for _, f := range apply {
+		if f.src != "" {
+			*f.dst = f.src
+		}
+	}
+	vm.Config.VAppConfig.GetVmConfigInfo().Product[0] = cfg
+}
+
+// applyVAppProductSpecRemove resets the vApp product configuration (what would
+// happen when a remove operation is sent).
+func (vm *VirtualMachine) applyVAppProductSpecRemove() {
+	cfg := vm.Config.VAppConfig.GetVmConfigInfo()
+	cfg.Product = []types.VAppProductInfo{
+		types.VAppProductInfo{},
+	}
+}
+
+// applyVAppPropertySpec takes VAppPropertySpec list and applies it to the vApp
+// configuration.
+func (vm *VirtualMachine) applyVAppPropertySpec(spec []types.VAppPropertySpec) {
+	for _, s := range spec {
+		switch s.Operation {
+		case types.ArrayUpdateOperationAdd:
+			vm.applyVAppPropertySpecAdd(s.Info)
+		case types.ArrayUpdateOperationEdit:
+			vm.applyVAppPropertySpecEdit(s.Info)
+		case types.ArrayUpdateOperationRemove:
+			vm.applyVAppPropertySpecRemove(s.RemoveKey.(int32))
+		}
+	}
+}
+
+// applyVAppPropertySpecAdd adds a key in the simulator's vApp property
+// configuration for a virtual machine.
+func (vm *VirtualMachine) applyVAppPropertySpecAdd(info *types.VAppPropertyInfo) {
+	ps := vm.Config.VAppConfig.GetVmConfigInfo().Property
+	for _, p := range ps {
+		if p.Id == info.Id {
+			log.Printf("invalid property ID for adding new property - %s already exists", info.Id)
+			return
+		}
+	}
+	// Force the Key to be the length of the current set.
+	info.Key = int32(len(ps))
+	ps = append(ps, *info)
+	vm.Config.VAppConfig.GetVmConfigInfo().Property = ps
+}
+
+// applyVAppPropertySpecEdit edits a key in the simulator's vApp property
+// configuration for a virtual machine.
+func (vm *VirtualMachine) applyVAppPropertySpecEdit(info *types.VAppPropertyInfo) {
+	ps := vm.Config.VAppConfig.GetVmConfigInfo().Property
+	var target types.VAppPropertyInfo
+	idx := -1
+	for i, p := range ps {
+		if p.Key == info.Key {
+			target = p
+			idx = i
+		}
+	}
+	if idx < 0 {
+		log.Printf("property key number %d not found", info.Key)
+		return
+	}
+
+	apply := []struct {
+		src string
+		dst *string
+	}{
+		{info.ClassId, &target.ClassId},
+		{info.InstanceId, &target.InstanceId},
+		{info.Id, &target.Id},
+		{info.Category, &target.Category},
+		{info.Label, &target.Label},
+		{info.Type, &target.Type},
+		{info.TypeReference, &target.TypeReference},
+		{info.DefaultValue, &target.DefaultValue},
+		{info.Value, &target.Value},
+		{info.Description, &target.Description},
+	}
+
+	for _, f := range apply {
+		if f.src != "" {
+			*f.dst = strings.TrimSpace(f.src)
+		}
+	}
+	if info.UserConfigurable != nil {
+		*target.UserConfigurable = *info.UserConfigurable
+	}
+	vm.Config.VAppConfig.GetVmConfigInfo().Property[idx] = target
+}
+
+// applyVAppPropertySpecRemove removes the specific property from the the vApp
+// property configuration.
+func (vm *VirtualMachine) applyVAppPropertySpecRemove(key int32) {
+	ps := vm.Config.VAppConfig.GetVmConfigInfo().Property
+	idx := -1
+	for i, p := range ps {
+		if p.Key == key {
+			idx = i
+			break
+		}
+	}
+	if idx < 0 {
+		log.Printf("invalid property key for removal - removal key %d not found", key)
+		return
+	}
+	ps = append(ps[:idx], ps[idx+1:]...)
+	vm.Config.VAppConfig.GetVmConfigInfo().Property = ps
 }
 
 func validateGuestID(id string) types.BaseMethodFault {
