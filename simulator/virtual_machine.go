@@ -1065,6 +1065,8 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 
 func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soap.HasFault {
 	task := CreateTask(vm, "createSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		var changes []types.PropertyChange
+
 		if vm.Snapshot == nil {
 			vm.Snapshot = &types.VirtualMachineSnapshotInfo{}
 		}
@@ -1096,10 +1098,14 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 			ss := findSnapshotInTree(vm.Snapshot.RootSnapshotList, *cur)
 			ss.ChildSnapshotList = append(ss.ChildSnapshotList, treeItem)
 		} else {
-			vm.Snapshot.RootSnapshotList = append(vm.Snapshot.RootSnapshotList, treeItem)
+			changes = append(changes, types.PropertyChange{
+				Name: "snapshot.rootSnapshotList",
+				Val:  append(vm.Snapshot.RootSnapshotList, treeItem),
+			})
 		}
 
-		vm.Snapshot.CurrentSnapshot = &snapshot.Self
+		changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: snapshot.Self})
+		Map.Update(vm, changes)
 
 		return nil, nil
 	})
@@ -1139,7 +1145,9 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(req *types.RemoveAllSnapshots_T
 
 		refs := allSnapshotsInTree(vm.Snapshot.RootSnapshotList)
 
-		vm.Snapshot = nil
+		Map.Update(vm, []types.PropertyChange{
+			{Name: "snapshot", Val: nil},
+		})
 
 		for _, ref := range refs {
 			Map.Remove(ref)
