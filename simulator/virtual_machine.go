@@ -1026,7 +1026,7 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 			pool := Map.Get(*ref).(*ResourcePool)
 			Map.RemoveReference(pool, &pool.Vm, *ref)
 
-			changes = append(changes, types.PropertyChange{Name: "resourcePool", Val: *ref})
+			changes = append(changes, types.PropertyChange{Name: "resourcePool", Val: ref})
 		}
 
 		if ref := req.Spec.Host; ref != nil {
@@ -1034,8 +1034,8 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 			Map.RemoveReference(host, &host.Vm, *ref)
 
 			changes = append(changes,
-				types.PropertyChange{Name: "runtime.host", Val: *ref},
-				types.PropertyChange{Name: "summary.runtime.host", Val: *ref},
+				types.PropertyChange{Name: "runtime.host", Val: ref},
+				types.PropertyChange{Name: "summary.runtime.host", Val: ref},
 			)
 		}
 
