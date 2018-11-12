@@ -6,7 +6,7 @@ check: goimports govet
 
 goimports:
 	@echo checking go imports...
-	@go get golang.org/x/tools/cmd/goimports
+	@command -v goimports >/dev/null 2>&1 || go get golang.org/x/tools/cmd/goimports
 	@! goimports -d . 2>&1 | egrep -v '^$$'
 
 govet:
