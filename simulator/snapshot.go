@@ -36,11 +36,8 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(req *types.RemoveSnapshot_Ta
 		vm := Map.Get(v.Vm).(*VirtualMachine)
 		Map.WithLock(vm, func() {
 			if vm.Snapshot.CurrentSnapshot != nil && *vm.Snapshot.CurrentSnapshot == req.This {
-				var parentSnapshot types.ManagedObjectReference
-				if parentRef := findParentSnapshotInTree(vm.Snapshot.RootSnapshotList, req.This); parentRef != nil {
-					parentSnapshot = *parentRef
-				}
-				changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: parentSnapshot})
+				parent := findParentSnapshotInTree(vm.Snapshot.RootSnapshotList, req.This)
+				changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: parent})
 			}
 
 			rootSnapshots := removeSnapshotInTree(vm.Snapshot.RootSnapshotList, req.This, req.RemoveChildren)
