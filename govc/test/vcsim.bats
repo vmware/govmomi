@@ -55,3 +55,34 @@ load test_helper
   govc vm.create -c 1 -ds vol6 -g centos64Guest -pool testPool -m 4096 "$id"
   govc vm.destroy "$id"
 }
+
+@test "vcsim set vm properties" {
+  vcsim_env
+
+  vm=/DC0/vm/DC0_H0_VM0
+
+  run govc object.collect $vm guest.ipAddress
+  assert_success ""
+
+  run govc vm.change -vm $vm -e SET.guest.ipAddress=127.0.0.1
+  assert_success
+
+  run govc object.collect -s $vm guest.ipAddress
+  assert_success "127.0.0.1"
+
+  run govc object.collect -s $vm guest.hostName
+  assert_success ""
+
+  run govc vm.change -vm $vm -e SET.guest.hostName=localhost.localdomain
+  assert_success
+
+  run govc object.collect -s $vm guest.hostName
+  assert_success "localhost.localdomain"
+
+  uuid=$(uuidgen)
+  run govc vm.change -vm $vm -e SET.config.uuid="$uuid"
+  assert_success
+
+  run govc object.collect -s $vm config.uuid
+  assert_success "$uuid"
+}
