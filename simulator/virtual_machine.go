@@ -260,7 +260,19 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
-	vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, spec.ExtraConfig...)
+	var changes []types.PropertyChange
+	for _, c := range spec.ExtraConfig {
+		val := c.GetOptionValue()
+		key := strings.TrimPrefix(val.Key, "SET.")
+		if key == val.Key {
+			vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
+			continue
+		}
+		changes = append(changes, types.PropertyChange{Name: key, Val: val.Value})
+	}
+	if len(changes) != 0 {
+		Map.Update(vm, changes)
+	}
 
 	vm.Config.Modified = time.Now()
 }
