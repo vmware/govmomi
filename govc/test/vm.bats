@@ -792,13 +792,30 @@ load test_helper
 }
 
 @test "vm.upgrade" {
-  esx_env
+  vcsim_env
 
-  vm=$(new_empty_vm)
+  vm=$(new_id)
 
-  govc vm.upgrade -vm "$vm"
+  run govc vm.create -on=false -version 0.5 "$vm"
+  assert_failure
+
+  run govc vm.create -on=false -version 5.5 "$vm"
   assert_success
 
+  run govc object.collect -s "vm/$vm" config.version
+  assert_success "vmx-10"
+
+  run govc vm.upgrade -vm "$vm"
+  assert_success
+
+  version=$(govc object.collect -s "vm/$vm" config.version)
+  [[ "$version" > "vmx-10" ]]
+
+  run govc vm.upgrade -vm "$vm"
+  assert_success
+
+  run govc vm.create -on=false -version vmx-11 "$(new_id)"
+  assert_success
 }
 
 @test "vm.markastemplate" {
