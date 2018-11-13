@@ -269,6 +269,20 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 			continue
 		}
 		changes = append(changes, types.PropertyChange{Name: key, Val: val.Value})
+
+		switch key {
+		case "guest.ipAddress":
+			ip := val.Value.(string)
+			vm.Guest.Net[0].IpAddress = []string{ip}
+			changes = append(changes,
+				types.PropertyChange{Name: "summary." + key, Val: ip},
+				types.PropertyChange{Name: "guest.net", Val: vm.Guest.Net},
+			)
+		case "guest.hostName":
+			changes = append(changes,
+				types.PropertyChange{Name: "summary." + key, Val: val.Value},
+			)
+		}
 	}
 	if len(changes) != 0 {
 		Map.Update(vm, changes)
@@ -492,10 +506,12 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 	case types.BaseVirtualEthernetCard:
 		controller = devices.PickController((*types.VirtualPCIController)(nil))
 		var net types.ManagedObjectReference
+		var name string
 
 		switch b := d.Backing.(type) {
 		case *types.VirtualEthernetCardNetworkBackingInfo:
-			summary = b.DeviceName
+			name = b.DeviceName
+			summary = name
 			net = Map.FindByName(b.DeviceName, dc.Network).Reference()
 			b.Network = &net
 		case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
@@ -512,6 +528,16 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		c := x.GetVirtualEthernetCard()
 		if c.MacAddress == "" {
 			c.MacAddress = vm.generateMAC()
+		}
+
+		if spec.Operation == types.VirtualDeviceConfigSpecOperationAdd {
+			vm.Guest.Net = append(vm.Guest.Net, types.GuestNicInfo{
+				Network:        name,
+				IpAddress:      nil,
+				MacAddress:     c.MacAddress,
+				Connected:      true,
+				DeviceConfigId: c.Key,
+			})
 		}
 	case *types.VirtualDisk:
 		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
