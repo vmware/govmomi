@@ -70,6 +70,9 @@ load test_helper
   run govc object.collect -s $vm guest.ipAddress
   assert_success "127.0.0.1"
 
+  run govc vm.info -vm.ip 127.0.0.1
+  assert_success
+
   run govc object.collect -s $vm guest.hostName
   assert_success ""
 
@@ -78,6 +81,9 @@ load test_helper
 
   run govc object.collect -s $vm guest.hostName
   assert_success "localhost.localdomain"
+
+  run govc vm.info -vm.dns localhost.localdomain
+  assert_success
 
   uuid=$(uuidgen)
   run govc vm.change -vm $vm -e SET.config.uuid="$uuid"
