@@ -64,13 +64,19 @@ load test_helper
   run govc object.collect $vm guest.ipAddress
   assert_success ""
 
-  run govc vm.change -vm $vm -e SET.guest.ipAddress=127.0.0.1
+  run govc vm.change -vm $vm -e SET.guest.ipAddress=10.0.0.1
   assert_success
 
   run govc object.collect -s $vm guest.ipAddress
-  assert_success "127.0.0.1"
+  assert_success "10.0.0.1"
 
-  run govc vm.info -vm.ip 127.0.0.1
+  run govc object.collect -s $vm summary.guest.ipAddress
+  assert_success "10.0.0.1"
+
+  netip=$(govc object.collect -json -s $vm guest.net | jq -r .[].Val.GuestNicInfo[].IpAddress[0])
+  [ "$netip" = "10.0.0.1" ]
+
+  run govc vm.info -vm.ip 10.0.0.1
   assert_success
 
   run govc object.collect -s $vm guest.hostName
@@ -80,6 +86,9 @@ load test_helper
   assert_success
 
   run govc object.collect -s $vm guest.hostName
+  assert_success "localhost.localdomain"
+
+  run govc object.collect -s $vm summary.guest.hostName
   assert_success "localhost.localdomain"
 
   run govc vm.info -vm.dns localhost.localdomain
