@@ -8,39 +8,22 @@ git_version=$(git describe --dirty)
   exit 1
 fi
 
-CDIR=$(cd `dirname "$0"` && pwd)
+PROJECT_PKG="github.com/vmware/govmomi"
+PROGRAM_PKG="${PROJECT_PKG}/$(basename "$(dirname "${0}")")"
+
+CDIR=$(cd "$(dirname "${0}")" && pwd)
 cd "$CDIR"
 # Workaround when GOPATH is not defined
-mkdir -p gopath/src/github.com/vmware
-if [ ! -s gopath/src/github.com/vmware/govmomi ]; then
-  ln -sf ../../../../../ gopath/src/github.com/vmware/govmomi
+mkdir -p "gopath/src/$(dirname "${PROJECT_PKG}")"
+if [ ! -s "gopath/src/${PROJECT_PKG}" ]; then
+  ln -sf ../../../../../ "gopath/src/${PROJECT_PKG}"
 fi
-export GOPATH="$CDIR"/gopath
 
-ldflags="-X github.com/vmware/govmomi/govc/version.gitVersion=${git_version}"
+export GOPATH="${CDIR}/gopath"
+export LDFLAGS="-w -X ${PROGRAM_PKG}/version.gitVersion=${git_version}"
+export BUILD_OS="${BUILD_OS:-darwin linux windows freebsd}"
+export BUILD_ARCH="${BUILD_ARCH:-386 amd64}"
 
-BUILD_OS=${BUILD_OS:-darwin linux windows freebsd}
-BUILD_ARCH=${BUILD_ARCH:-386 amd64}
-
-for os in ${BUILD_OS}; do
-  export GOOS="${os}"
-  for arch in ${BUILD_ARCH}; do
-    export GOARCH="${arch}"
-
-    out="govc_${os}_${arch}"
-    if [ "${os}" == "windows" ]; then
-      out="${out}.exe"
-    fi
-
-    set -x
-    go build \
-      -o="${out}" \
-      -pkgdir="./_pkg" \
-      -compiler='gc' \
-      -ldflags="${ldflags}" \
-      github.com/vmware/govmomi/govc &
-    set +x
-  done
-done
-
-wait
+set -x
+make -C "${GOPATH}/src/${PROGRAM_PKG}" -j build-all
+set +x
