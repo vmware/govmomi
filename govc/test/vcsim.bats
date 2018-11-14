@@ -101,3 +101,13 @@ load test_helper
   run govc object.collect -s $vm config.uuid
   assert_success "$uuid"
 }
+
+@test "vcsim vm.create" {
+  vcsim_env
+
+  run govc vm.create foo.yakity
+  assert_success
+
+  run govc vm.create bar.yakity
+  assert_success
+}
