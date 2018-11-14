@@ -93,7 +93,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		MemoryMB:          32,
 		Uuid:              uuid.New().String(),
 		InstanceUuid:      uuid.New().String(),
-		Version:           "vmx-11",
+		Version:           esx.HardwareVersion,
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
 			SuspendDirectory:  dsPath,
@@ -406,6 +406,15 @@ func (vm *VirtualMachine) logPrintf(format string, v ...interface{}) {
 
 func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
 	vm.apply(spec)
+
+	if spec.Version != "" {
+		v := strings.TrimPrefix(spec.Version, "vmx-")
+		_, err := strconv.Atoi(v)
+		if err != nil {
+			log.Printf("unsupported hardware version: %s", spec.Version)
+			return new(types.NotSupported)
+		}
+	}
 
 	files := []struct {
 		spec string
@@ -889,6 +898,25 @@ func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Tas
 			Returnval: task.Run(),
 		},
 	}
+}
+
+func (vm *VirtualMachine) UpgradeVMTask(req *types.UpgradeVM_Task) soap.HasFault {
+	body := &methods.UpgradeVM_TaskBody{}
+
+	task := CreateTask(vm, "upgradeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if vm.Config.Version != esx.HardwareVersion {
+			Map.Update(vm, []types.PropertyChange{{
+				Name: "config.version", Val: esx.HardwareVersion,
+			}})
+		}
+		return nil, nil
+	})
+
+	body.Res = &types.UpgradeVM_TaskResponse{
+		Returnval: task.Run(),
+	}
+
+	return body
 }
 
 func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
