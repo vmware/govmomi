@@ -29,6 +29,8 @@ import (
 
 type rm struct {
 	*flags.ClientFlag
+
+	cat   string
 	force bool
 }
 
@@ -39,6 +41,8 @@ func init() {
 func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.cat, "c", "", "Tag category")
 	f.BoolVar(&cmd.force, "f", false, "Delete tag regardless of attached objects")
 }
 
@@ -53,7 +57,7 @@ Fails if tag is attached to any object, unless the '-f' flag is provided.
 
 Examples:
   govc tags.rm k8s-zone-us-ca1
-  govc tags.rm -f k8s-zone-us-ca2`
+  govc tags.rm -f -c k8s-zone us-ca2`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -74,10 +78,10 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 				return fmt.Errorf("tag %s has %d attached objects", tagID, len(objs))
 			}
 		}
-		cat, err := m.GetTag(ctx, tagID)
+		tag, err := m.GetTagForCategory(ctx, tagID, cmd.cat)
 		if err != nil {
 			return err
 		}
-		return m.DeleteTag(ctx, cat)
+		return m.DeleteTag(ctx, tag)
 	})
 }
