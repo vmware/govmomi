@@ -348,8 +348,8 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 	file := path.Join(ds.Info.GetDatastoreInfo().Url, p.Path)
 
 	if name != "" {
-		if path.Ext(file) != "" {
-			file = path.Dir(file)
+		if path.Ext(p.Path) == ".vmx" {
+			file = path.Dir(file) // vm.Config.Files.VmPathName can be a directory or full path to .vmx
 		}
 
 		file = path.Join(file, name)
