@@ -14,8 +14,8 @@ govet:
 	@go tool vet -structtags=false -methods=false $$(find . -mindepth 1 -maxdepth 1 -type d -not -name vendor)
 
 install:
-	go install -v github.com/vmware/govmomi/govc
-	go install -v github.com/vmware/govmomi/vcsim
+	$(MAKE) -C govc install
+	$(MAKE) -C vcsim install
 
 go-test:
 	GORACE=history_size=5 go test -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
