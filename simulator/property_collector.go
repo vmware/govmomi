@@ -337,6 +337,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 	}
 
 	rtype := rval.Type()
+	match := false
 
 	for _, spec := range rr.req.SpecSet {
 		for _, p := range spec.PropSet {
@@ -348,7 +349,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 					continue
 				}
 			}
-
+			match = true
 			if isTrue(p.All) {
 				rr.collectAll(ctx, rval, rtype, &content)
 				continue
@@ -358,7 +359,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 		}
 	}
 
-	if len(content.PropSet) != 0 || len(content.MissingSet) != 0 {
+	if match {
 		rr.Objects = append(rr.Objects, content)
 	}
 

@@ -1463,3 +1463,199 @@ func TestPropertyCollectorSession(t *testing.T) { // aka issue-923
 		}
 	}
 }
+
+func TestPropertyCollectorNoPathSet(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	m.Datacenter = 3
+	m.Folder = 2
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	client, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	// request from https://github.com/vmware/govmomi/issues/1199
+	req := &types.RetrieveProperties{
+		This: client.ServiceContent.PropertyCollector,
+		SpecSet: []types.PropertyFilterSpec{
+			{
+				PropSet: []types.PropertySpec{
+					{
+						Type:    "Datacenter",
+						All:     types.NewBool(false),
+						PathSet: nil,
+					},
+				},
+				ObjectSet: []types.ObjectSpec{
+					{
+						Obj:  client.ServiceContent.RootFolder,
+						Skip: types.NewBool(false),
+						SelectSet: []types.BaseSelectionSpec{
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "resourcePoolTraversalSpec",
+								},
+								Type: "ResourcePool",
+								Path: "resourcePool",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "resourcePoolTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "resourcePoolVmTraversalSpec",
+									},
+								},
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "resourcePoolVmTraversalSpec",
+								},
+								Type:      "ResourcePool",
+								Path:      "vm",
+								Skip:      types.NewBool(false),
+								SelectSet: nil,
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "computeResourceRpTraversalSpec",
+								},
+								Type: "ComputeResource",
+								Path: "resourcePool",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "resourcePoolTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "resourcePoolVmTraversalSpec",
+									},
+								},
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "computeResourceHostTraversalSpec",
+								},
+								Type:      "ComputeResource",
+								Path:      "host",
+								Skip:      types.NewBool(false),
+								SelectSet: nil,
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "datacenterVmTraversalSpec",
+								},
+								Type: "Datacenter",
+								Path: "vmFolder",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "folderTraversalSpec",
+									},
+								},
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "datacenterHostTraversalSpec",
+								},
+								Type: "Datacenter",
+								Path: "hostFolder",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "folderTraversalSpec",
+									},
+								},
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "hostVmTraversalSpec",
+								},
+								Type: "HostSystem",
+								Path: "vm",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "folderTraversalSpec",
+									},
+								},
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "datacenterDatastoreTraversalSpec",
+								},
+								Type: "Datacenter",
+								Path: "datastoreFolder",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "folderTraversalSpec",
+									},
+								},
+							},
+							&types.TraversalSpec{
+								SelectionSpec: types.SelectionSpec{
+									Name: "folderTraversalSpec",
+								},
+								Type: "Folder",
+								Path: "childEntity",
+								Skip: types.NewBool(false),
+								SelectSet: []types.BaseSelectionSpec{
+									&types.SelectionSpec{
+										Name: "folderTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "datacenterHostTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "datacenterVmTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "computeResourceRpTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "computeResourceHostTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "hostVmTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "resourcePoolVmTraversalSpec",
+									},
+									&types.SelectionSpec{
+										Name: "datacenterDatastoreTraversalSpec",
+									},
+								},
+							},
+						},
+					},
+				},
+				ReportMissingObjectsInResults: (*bool)(nil),
+			},
+		},
+	}
+
+	res, err := methods.RetrieveProperties(ctx, client, req)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	content := res.Returnval
+	count := m.Count()
+
+	if len(content) != count.Datacenter {
+		t.Fatalf("len(content)=%d", len(content))
+	}
+}
