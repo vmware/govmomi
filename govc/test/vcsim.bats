@@ -111,3 +111,23 @@ load test_helper
   run govc vm.create bar.yakity
   assert_success
 }
+
+@test "vcsim issue #1251" {
+  vcsim_env
+
+  govc object.collect -type ComputeResource -n 1 / name &
+  pid=$!
+
+  run govc object.rename /DC0/host/DC0_C0 DC0_C0b
+  assert_success
+
+  wait $pid
+
+  govc object.collect -type ClusterComputeResource -n 1 / name &
+  pid=$!
+
+  run govc object.rename /DC0/host/DC0_C0b DC0_C0
+  assert_success
+
+  wait $pid
+}
