@@ -33,6 +33,10 @@ type ClusterComputeResource struct {
 	ruleKey int32
 }
 
+func (c *ClusterComputeResource) RenameTask(req *types.Rename_Task) soap.HasFault {
+	return RenameTask(c, req)
+}
+
 type addHost struct {
 	*ClusterComputeResource
 
