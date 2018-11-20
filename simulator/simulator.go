@@ -253,14 +253,34 @@ type soapEnvelope struct {
 	Body    interface{} `xml:"soapenv:Body"`
 }
 
+type faultDetail struct {
+	Fault types.AnyType
+}
+
 // soapFault is a copy of soap.Fault, with the same changes as soapEnvelope
 type soapFault struct {
 	XMLName xml.Name `xml:"soapenv:Fault"`
 	Code    string   `xml:"faultcode"`
 	String  string   `xml:"faultstring"`
 	Detail  struct {
-		Fault types.AnyType `xml:",any,typeattr"`
+		Fault *faultDetail
 	} `xml:"detail"`
+}
+
+// MarshalXML renames the start element from "Fault" to "${Type}Fault"
+func (d *faultDetail) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	kind := reflect.TypeOf(d.Fault).Elem().Name()
+	start.Name.Local = kind + "Fault"
+	start.Attr = append(start.Attr,
+		xml.Attr{
+			Name:  xml.Name{Local: "xmlns"},
+			Value: "urn:" + vim25.Namespace,
+		},
+		xml.Attr{
+			Name:  xml.Name{Local: "xsi:type"},
+			Value: kind,
+		})
+	return e.EncodeElement(d.Fault, start)
 }
 
 // About generates some info about the simulator.
@@ -383,7 +403,9 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 			&soapFault{
 				Code:   f.Code,
 				String: f.String,
-				Detail: f.Detail,
+				Detail: struct {
+					Fault *faultDetail
+				}{&faultDetail{f.Detail.Fault}},
 			},
 		}
 	} else {
