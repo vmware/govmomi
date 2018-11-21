@@ -104,7 +104,8 @@ load test_helper
   vcsim_env
   local lines
 
-  run govc tags.category.create -m "$(new_id)"
+  category_name=$(new_id)
+  run govc tags.category.create -m "$category_name"
   assert_success
   category="$output"
 
@@ -140,10 +141,13 @@ load test_helper
   run govc tags.rm "$tag"
   assert_failure # tags still attached
 
-  run govc tags.detach "$tag_name" "$object"
+  run govc tags.detach -c enoent "$tag_name" "$object"
+  assert_failure # category does not exist
+
+  run govc tags.detach -c "$category_name" "$tag_name" "$object"
   assert_success # detach using name instead of ID
 
-  run govc tags.rm "$tag"
+  run govc tags.rm -c "$category_name" "$tag"
   assert_success
 
   run govc tags.category.rm "$category"

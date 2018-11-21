@@ -28,6 +28,7 @@ import (
 
 type detach struct {
 	*flags.DatacenterFlag
+	cat string
 }
 
 func init() {
@@ -37,6 +38,8 @@ func init() {
 func (cmd *detach) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.cat, "c", "", "Tag category")
 }
 
 func (cmd *detach) Usage() string {
@@ -48,7 +51,7 @@ func (cmd *detach) Description() string {
 
 Examples:
   govc tags.detach k8s-region-us /dc1
-  govc tags.detach k8s-zone-us-ca1 /dc1/host/cluster1`
+  govc tags.detach -c k8s-region us-ca1 /dc1/host/cluster1`
 }
 
 func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -65,6 +68,10 @@ func (cmd *detach) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		m := tags.NewManager(c)
-		return m.DetachTag(ctx, tagID, ref)
+		tag, err := m.GetTagForCategory(ctx, tagID, cmd.cat)
+		if err != nil {
+			return err
+		}
+		return m.DetachTag(ctx, tag.ID, ref)
 	})
 }
