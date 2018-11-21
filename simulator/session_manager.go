@@ -172,6 +172,23 @@ func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSess
 	return body
 }
 
+func (s *SessionManager) SessionIsActive(ctx *Context, req *types.SessionIsActive) soap.HasFault {
+	body := new(methods.SessionIsActiveBody)
+
+	if ctx.Map.IsESX() {
+		body.Fault_ = Fault("", new(types.NotImplemented))
+		return body
+	}
+
+	body.Res = new(types.SessionIsActiveResponse)
+
+	if session, exists := s.sessions[req.SessionID]; exists {
+		body.Res.Returnval = session.UserName == req.UserName
+	}
+
+	return body
+}
+
 func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneTicket) soap.HasFault {
 	session := *ctx.Session
 	session.Key = uuid.New().String()
