@@ -42,6 +42,7 @@ type VirtualMachine struct {
 
 	log string
 	sid int32
+	run container
 }
 
 func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
@@ -794,16 +795,19 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	event := c.event()
 	switch c.state {
 	case types.VirtualMachinePowerStatePoweredOn:
+		c.run.start(c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
 	case types.VirtualMachinePowerStatePoweredOff:
+		c.run.stop(c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmStoppingEvent{VmEvent: event},
 			&types.VmPoweredOffEvent{VmEvent: event},
 		)
 	case types.VirtualMachinePowerStateSuspended:
+		c.run.pause(c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmSuspendingEvent{VmEvent: event},
 			&types.VmSuspendedEvent{VmEvent: event},
@@ -943,6 +947,8 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 			Name:       vm.Config.Files.LogDirectory,
 			Datacenter: &dc,
 		})
+
+		vm.run.remove(vm)
 
 		return nil, nil
 	})
@@ -1237,6 +1243,7 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 		&types.VmGuestShutdownEvent{VmEvent: event},
 		&types.VmPoweredOffEvent{VmEvent: event},
 	)
+	vm.run.stop(vm)
 
 	Map.Update(vm, []types.PropertyChange{
 		{Name: "runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
