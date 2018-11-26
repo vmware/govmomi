@@ -82,6 +82,20 @@ func (v VirtualMachine) PowerOff(ctx context.Context) (*Task, error) {
 	return NewTask(v.c, res.Returnval), nil
 }
 
+func (v VirtualMachine) PutUsbScanCodes(ctx context.Context, spec types.UsbScanCodeSpec) (int32, error) {
+	req := types.PutUsbScanCodes{
+		This: v.Reference(),
+		Spec: spec,
+	}
+
+	res, err := methods.PutUsbScanCodes(ctx, v.c, &req)
+	if err != nil {
+		return 0, err
+	}
+
+	return res.Returnval, nil
+}
+
 func (v VirtualMachine) Reset(ctx context.Context) (*Task, error) {
 	req := types.ResetVM_Task{
 		This: v.Reference(),
