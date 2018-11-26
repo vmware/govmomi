@@ -28,13 +28,114 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type hidKey struct {
+	Code         int32
+	ShiftPressed bool
+}
+
+var hidCharacterMap = map[string]hidKey{
+	"a": {0x04, false},
+	"b": {0x05, false},
+	"c": {0x06, false},
+	"d": {0x07, false},
+	"e": {0x08, false},
+	"f": {0x09, false},
+	"g": {0x0a, false},
+	"h": {0x0b, false},
+	"i": {0x0c, false},
+	"j": {0x0d, false},
+	"k": {0x0e, false},
+	"l": {0x0f, false},
+	"m": {0x10, false},
+	"n": {0x11, false},
+	"o": {0x12, false},
+	"p": {0x13, false},
+	"q": {0x14, false},
+	"r": {0x15, false},
+	"s": {0x16, false},
+	"t": {0x17, false},
+	"u": {0x18, false},
+	"v": {0x19, false},
+	"w": {0x1a, false},
+	"x": {0x1b, false},
+	"y": {0x1c, false},
+	"z": {0x1d, false},
+	"1": {0x1e, false},
+	"2": {0x1f, false},
+	"3": {0x20, false},
+	"4": {0x21, false},
+	"5": {0x22, false},
+	"6": {0x23, false},
+	"7": {0x24, false},
+	"8": {0x25, false},
+	"9": {0x26, false},
+	"0": {0x27, false},
+	"A": {0x04, true},
+	"B": {0x05, true},
+	"C": {0x06, true},
+	"D": {0x07, true},
+	"E": {0x08, true},
+	"F": {0x09, true},
+	"G": {0x0a, true},
+	"H": {0x0b, true},
+	"I": {0x0c, true},
+	"J": {0x0d, true},
+	"K": {0x0e, true},
+	"L": {0x0f, true},
+	"M": {0x10, true},
+	"N": {0x11, true},
+	"O": {0x12, true},
+	"P": {0x13, true},
+	"Q": {0x14, true},
+	"R": {0x15, true},
+	"S": {0x16, true},
+	"T": {0x17, true},
+	"U": {0x18, true},
+	"V": {0x19, true},
+	"W": {0x1a, true},
+	"X": {0x1b, true},
+	"Y": {0x1c, true},
+	"Z": {0x1d, true},
+	"!": {0x1e, true},
+	"@": {0x1f, true},
+	"#": {0x20, true},
+	"$": {0x21, true},
+	"%": {0x22, true},
+	"^": {0x23, true},
+	"&": {0x24, true},
+	"*": {0x25, true},
+	"(": {0x26, true},
+	")": {0x27, true},
+	"-": {0x2d, false},
+	"_": {0x2d, true},
+	"=": {0x2e, false},
+	"+": {0x2e, true},
+	"[": {0x2f, false},
+	"{": {0x2f, true},
+	"]": {0x30, false},
+	"}": {0x30, true},
+	`\`: {0x31, false},
+	"|": {0x31, true},
+	";": {0x33, false},
+	":": {0x33, true},
+	"'": {0x34, false},
+	`"`: {0x34, true},
+	"`": {0x35, false},
+	"~": {0x35, true},
+	",": {0x36, false},
+	"<": {0x36, true},
+	".": {0x37, false},
+	">": {0x37, true},
+	"/": {0x38, false},
+	"?": {0x38, true},
+}
+
 type putusbscancode struct {
-	*flags.ClientFlag
-	*flags.SearchFlag
+	*flags.VirtualMachineFlag
 
 	UsbHidCodeValue int32
 	UsbHidCode      string
-	UsbHideString   string
+	UsbHidString    string
 	LeftControl     bool
 	LeftShift       bool
 	LeftAlt         bool
@@ -50,15 +151,12 @@ func init() {
 }
 
 func (cmd *putusbscancode) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
-
-	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
-	cmd.SearchFlag.Register(ctx, f)
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
 
 	f.Var(flags.NewInt32(&cmd.UsbHidCodeValue), "r", "Raw USB HID Code Value (int32)")
-	f.StringVar(&cmd.UsbHidCode, "c", "0x00", "USB HID Code (hex)")
-	f.StringVar(&cmd.UsbHideString, "s", "", "Raw String to Send")
+	f.StringVar(&cmd.UsbHidCode, "c", "", "USB HID Code (hex)")
+	f.StringVar(&cmd.UsbHidString, "s", "", "Raw String to Send")
 	f.BoolVar(&cmd.LeftControl, "lc", false, "Enable/Disable Left Control")
 	f.BoolVar(&cmd.LeftShift, "ls", false, "Enable/Disable Left Shift")
 	f.BoolVar(&cmd.LeftAlt, "la", false, "Enable/Disable Left Alt")
@@ -79,102 +177,119 @@ func (cmd *putusbscancode) Description() string {
 Examples:
  Default Scenario
   govc vm.putusbscancode $vm -r 1376263 (writes an 'r' to the console)
-  govc vm.putusbscancode -c 0x15 (writes an 'r' to the console)
-  govc vm.putusbscancode -s "root" (writes 'root' to the console)
-  govc vm.putusbscancode -c 0x58 (presses ENTER on the console)
-  govc vm.putusbscancode -c 0x4c -la true -lc true (sends CTRL+ALT+DEL to console)`
+  govc vm.putusbscancode $vm -c 0x15 (writes an 'r' to the console)
+  govc vm.putusbscancode $vm -s "root" (writes 'root' to the console)
+  govc vm.putusbscancode $vm -c 0x28 (presses ENTER on the console)
+  govc vm.putusbscancode $vm -c 0x4c -la true -lc true (sends CTRL+ALT+DEL to console)`
 }
 
 func (cmd *putusbscancode) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	if err := cmd.SearchFlag.Process(ctx); err != nil {
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (cmd *putusbscancode) Run(ctx context.Context, f *flag.FlagSet) error {
-	vms, err := cmd.VirtualMachines(f.Args())
+	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
 	}
 
-	for _, vm := range vms {
-		err := cmd.processUserInput(ctx, vm)
-		if err != nil {
-			return err
-		}
+	if vm == nil {
+		return flag.ErrHelp
 	}
-	return err
+
+	err = cmd.processUserInput(ctx, vm)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func (cmd *putusbscancode) processUserInput(ctx context.Context, vm *object.VirtualMachine) error {
 	if err := cmd.checkValidInputs(); err != nil {
 		return err
 	}
-	modifiers := types.UsbScanCodeSpecModifierType{
-		LeftControl:  &cmd.LeftControl,
-		LeftShift:    &cmd.LeftShift,
-		LeftAlt:      &cmd.LeftAlt,
-		LeftGui:      &cmd.LeftGui,
-		RightControl: &cmd.RightControl,
-		RightShift:   &cmd.RightShift,
-		RightAlt:     &cmd.RightAlt,
-		RightGui:     &cmd.RightGui,
-	}
+
 	codes, err := cmd.processUsbCode()
+
 	if err != nil {
 		return err
 	}
+
 	var keyEventArray []types.UsbScanCodeSpecKeyEvent
-	for code := range codes {
+	for _, code := range codes {
+		leftShiftSetting := false
+		if code.ShiftPressed || cmd.LeftShift {
+			leftShiftSetting = true
+		}
+		modifiers := types.UsbScanCodeSpecModifierType{
+			LeftControl:  &cmd.LeftControl,
+			LeftShift:    &leftShiftSetting,
+			LeftAlt:      &cmd.LeftAlt,
+			LeftGui:      &cmd.LeftGui,
+			RightControl: &cmd.RightControl,
+			RightShift:   &cmd.RightShift,
+			RightAlt:     &cmd.RightAlt,
+			RightGui:     &cmd.RightGui,
+		}
 		keyEvent := types.UsbScanCodeSpecKeyEvent{
-			UsbHidCode: int32(code),
+			UsbHidCode: code.Code,
 			Modifiers:  &modifiers,
 		}
-
 		keyEventArray = append(keyEventArray, keyEvent)
 	}
+
 	spec := types.UsbScanCodeSpec{
 		KeyEvents: keyEventArray,
 	}
+
 	_, err = vm.PutUsbScanCodes(ctx, spec)
+
 	return err
 }
 
-func (cmd *putusbscancode) processUsbCode() ([]int32, error) {
-	// check to ensure only 1 input is specified
-	if cmd.UsbHidCode != "" &&
-		cmd.UsbHidCodeValue != 0 &&
-		cmd.UsbHideString != "" {
-		return nil, fmt.Errorf("Specify only 1 argument for HID code")
-	}
+func (cmd *putusbscancode) processUsbCode() ([]hidKey, error) {
 	if cmd.rawCodeProvided() {
-		return []int32{cmd.UsbHidCodeValue}, nil
+		return []hidKey{{cmd.UsbHidCodeValue, false}}, nil
 	}
 	if cmd.hexCodeProvided() {
-		s, err := hexToHidCode(cmd.UsbHidCode)
+		s, err := hexStringToHidCode(cmd.UsbHidCode)
 		if err != nil {
 			return nil, err
 		}
-		return []int32{int32(s)}, nil
+		return []hidKey{{s, false}}, nil
 	}
+
 	if cmd.stringProvided() {
-		return nil, fmt.Errorf("Not yet supported")
+		var retKeyArray []hidKey
+		for _, c := range cmd.UsbHidString {
+			lookupValue, ok := hidCharacterMap[string(c)]
+			if !ok {
+				return nil, fmt.Errorf("Invalid Character %s in String: %s", string(c), cmd.UsbHidString)
+			}
+			lookupValue.Code = intToHidCode(lookupValue.Code)
+			retKeyArray = append(retKeyArray, lookupValue)
+		}
+		return retKeyArray, nil
 	}
 	return nil, nil
 }
 
-func hexToHidCode(hex string) (int32, error) {
+func hexStringToHidCode(hex string) (int32, error) {
 	s, err := strconv.ParseInt(hex, 0, 32)
 	if err != nil {
 		return 0, err
 	}
-	s = s << 16
+	return intToHidCode(int32(s)), nil
+}
+
+func intToHidCode(v int32) int32 {
+	var s int32
+	s = v << 16
 	s = s | 7
-	return int32(s), nil
+	return s
 }
 
 func (cmd *putusbscancode) checkValidInputs() error {
@@ -197,5 +312,5 @@ func (cmd putusbscancode) hexCodeProvided() bool {
 }
 
 func (cmd putusbscancode) stringProvided() bool {
-	return cmd.UsbHideString != ""
+	return cmd.UsbHidString != ""
 }
