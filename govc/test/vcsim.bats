@@ -131,3 +131,91 @@ load test_helper
 
   wait $pid
 }
+
+@test "vcsim run container" {
+  if ! docker version ; then
+    skip "docker client not installed"
+  fi
+
+  vm=DC0_H0_VM0
+
+  if docker inspect $vm ; then
+    flunk "$vm container still exists"
+  fi
+
+  vcsim_env -autostart=false
+
+  run govc vm.change -vm $vm -e RUN.container=nginx
+  assert_success
+
+  run govc vm.power -on $vm
+  assert_success
+
+  if ! docker inspect $vm ; then
+    flunk "$vm container does not exist"
+  fi
+
+  ip=$(docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' $vm)
+  run govc object.collect -s vm/$vm guest.ipAddress
+  assert_success "$ip"
+
+  run govc object.collect -s vm/$vm summary.guest.ipAddress
+  assert_success "$ip"
+
+  netip=$(govc object.collect -json -s vm/$vm guest.net | jq -r .[].Val.GuestNicInfo[].IpAddress[0])
+  [ "$netip" = "$ip" ]
+
+  run govc vm.power -s $vm
+  assert_success
+
+  run docker inspect -f '{{.State.Status}}' $vm
+  assert_success "exited"
+
+  run govc vm.power -on $vm
+  assert_success
+
+  run docker inspect -f '{{.State.Status}}' $vm
+  assert_success "running"
+
+  run govc vm.destroy $vm
+  assert_success
+
+  if docker inspect $vm ; then
+    flunk "$vm container still exists"
+  fi
+
+  vm=DC0_H0_VM1
+
+  # test json encoded args
+  run govc vm.change -vm $vm -e RUN.container="[\"-v\", \"$PWD:/usr/share/nginx/html:ro\", \"nginx\"]"
+  assert_success
+
+  run govc vm.power -on $vm
+  assert_success
+
+  run docker inspect $vm
+  assert_success
+
+  ip=$(govc object.collect -s vm/$vm guest.ipAddress)
+  run curl -f "http://$ip/vcsim.bats"
+  assert_success
+
+  # test suspend/resume
+  run docker inspect -f '{{.State.Status}}' $vm
+  assert_success "running"
+
+  run govc vm.power -suspend $vm
+  assert_success
+
+  run docker inspect -f '{{.State.Status}}' $vm
+  assert_success "paused"
+
+  run govc vm.power -on $vm
+  assert_success
+
+  run docker inspect -f '{{.State.Status}}' $vm
+  assert_success "running"
+
+  run govc vm.destroy $vm
+  assert_success
+}
