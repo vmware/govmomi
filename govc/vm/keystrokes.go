@@ -130,7 +130,7 @@ var hidCharacterMap = map[string]hidKey{
 	"?": {0x38, true},
 }
 
-type putusbscancode struct {
+type keystrokes struct {
 	*flags.VirtualMachineFlag
 
 	UsbHidCodeValue int32
@@ -147,16 +147,16 @@ type putusbscancode struct {
 }
 
 func init() {
-	cli.Register("vm.putusbscancode", &putusbscancode{})
+	cli.Register("vm.keystrokes", &keystrokes{})
 }
 
-func (cmd *putusbscancode) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *keystrokes) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
-	f.Var(flags.NewInt32(&cmd.UsbHidCodeValue), "r", "Raw USB HID Code Value (int32)")
-	f.StringVar(&cmd.UsbHidCode, "c", "", "USB HID Code (hex)")
 	f.StringVar(&cmd.UsbHidString, "s", "", "Raw String to Send")
+	f.StringVar(&cmd.UsbHidCode, "c", "", "USB HID Code (hex)")
+	f.Var(flags.NewInt32(&cmd.UsbHidCodeValue), "r", "Raw USB HID Code Value (int32)")
 	f.BoolVar(&cmd.LeftControl, "lc", false, "Enable/Disable Left Control")
 	f.BoolVar(&cmd.LeftShift, "ls", false, "Enable/Disable Left Shift")
 	f.BoolVar(&cmd.LeftAlt, "la", false, "Enable/Disable Left Alt")
@@ -167,30 +167,30 @@ func (cmd *putusbscancode) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.RightGui, "rg", false, "Enable/Disable Right Gui")
 }
 
-func (cmd *putusbscancode) Usage() string {
-	return ""
+func (cmd *keystrokes) Usage() string {
+	return "VM"
 }
 
-func (cmd *putusbscancode) Description() string {
-	return `Send Keystroke to VM.
+func (cmd *keystrokes) Description() string {
+	return `Send Keystrokes to VM.
 
 Examples:
  Default Scenario
-  govc vm.putusbscancode $vm -r 1376263 (writes an 'r' to the console)
-  govc vm.putusbscancode $vm -c 0x15 (writes an 'r' to the console)
-  govc vm.putusbscancode $vm -s "root" (writes 'root' to the console)
-  govc vm.putusbscancode $vm -c 0x28 (presses ENTER on the console)
-  govc vm.putusbscancode $vm -c 0x4c -la true -lc true (sends CTRL+ALT+DEL to console)`
+  govc vm.keystrokes $vm -s "root" 	# writes 'root' to the console
+  govc vm.keystrokes $vm -c 0x15 	# writes an 'r' to the console
+  govc vm.keystrokes $vm -r 1376263 # writes an 'r' to the console
+  govc vm.keystrokes $vm -c 0x28 	# presses ENTER on the console
+  govc vm.keystrokes $vm -c 0x4c -la true -lc true 	# sends CTRL+ALT+DEL to console`
 }
 
-func (cmd *putusbscancode) Process(ctx context.Context) error {
+func (cmd *keystrokes) Process(ctx context.Context) error {
 	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
 }
 
-func (cmd *putusbscancode) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *keystrokes) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
 		return err
@@ -207,7 +207,7 @@ func (cmd *putusbscancode) Run(ctx context.Context, f *flag.FlagSet) error {
 	return nil
 }
 
-func (cmd *putusbscancode) processUserInput(ctx context.Context, vm *object.VirtualMachine) error {
+func (cmd *keystrokes) processUserInput(ctx context.Context, vm *object.VirtualMachine) error {
 	if err := cmd.checkValidInputs(); err != nil {
 		return err
 	}
@@ -250,7 +250,7 @@ func (cmd *putusbscancode) processUserInput(ctx context.Context, vm *object.Virt
 	return err
 }
 
-func (cmd *putusbscancode) processUsbCode() ([]hidKey, error) {
+func (cmd *keystrokes) processUsbCode() ([]hidKey, error) {
 	if cmd.rawCodeProvided() {
 		return []hidKey{{cmd.UsbHidCodeValue, false}}, nil
 	}
@@ -292,7 +292,7 @@ func intToHidCode(v int32) int32 {
 	return s
 }
 
-func (cmd *putusbscancode) checkValidInputs() error {
+func (cmd *keystrokes) checkValidInputs() error {
 	// poor man's boolean XOR -> A xor B xor C = A'BC' + AB'C' + A'B'C + ABC
 	if (!cmd.rawCodeProvided() && cmd.hexCodeProvided() && !cmd.stringProvided()) || // A'BC'
 		(cmd.rawCodeProvided() && !cmd.hexCodeProvided() && !cmd.stringProvided()) || // AB'C'
@@ -303,14 +303,14 @@ func (cmd *putusbscancode) checkValidInputs() error {
 	return fmt.Errorf("Specify only 1 argument")
 }
 
-func (cmd putusbscancode) rawCodeProvided() bool {
+func (cmd keystrokes) rawCodeProvided() bool {
 	return cmd.UsbHidCodeValue != 0
 }
 
-func (cmd putusbscancode) hexCodeProvided() bool {
+func (cmd keystrokes) hexCodeProvided() bool {
 	return cmd.UsbHidCode != ""
 }
 
-func (cmd putusbscancode) stringProvided() bool {
+func (cmd keystrokes) stringProvided() bool {
 	return cmd.UsbHidString != ""
 }
