@@ -80,7 +80,7 @@ Examples:
   govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].MacAddress`
 }
 
-func (cmd *info) match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList {
+func match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList {
 	var matches object.VirtualDeviceList
 	match := func(name string) bool {
 		matched, _ := path.Match(p, name)
@@ -138,7 +138,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		res.Devices = toInfoList(devices)
 	} else {
 		for _, name := range f.Args() {
-			matches := cmd.match(name, devices)
+			matches := match(name, devices)
 			if len(matches) == 0 {
 				return fmt.Errorf("device '%s' not found", name)
 			}

@@ -727,8 +727,12 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 				// after VM is created (returns success but device is not added).
 				continue
 			} else if device.UnitNumber != nil && devices.SelectByType(dspec.Device).Select(func(d types.BaseVirtualDevice) bool {
-				if d.GetVirtualDevice().UnitNumber != nil {
-					return *d.GetVirtualDevice().UnitNumber == *device.UnitNumber
+				base := d.GetVirtualDevice()
+				if base.UnitNumber != nil {
+					if base.ControllerKey != device.ControllerKey {
+						return false
+					}
+					return *base.UnitNumber == *device.UnitNumber
 				}
 				return false
 			}) != nil {

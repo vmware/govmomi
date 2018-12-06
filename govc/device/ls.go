@@ -25,6 +25,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 )
 
 type ls struct {
@@ -55,7 +56,8 @@ func (cmd *ls) Description() string {
 	return `List devices for VM.
 
 Examples:
-  govc device.ls -vm $name`
+  govc device.ls -vm $name
+  govc device.ls -vm $name disk-*`
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -71,6 +73,18 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	devices, err := vm.Device(ctx)
 	if err != nil {
 		return err
+	}
+
+	if f.NArg() != 0 {
+		var matches object.VirtualDeviceList
+		for _, name := range f.Args() {
+			device := match(name, devices)
+			if len(device) == 0 {
+				return fmt.Errorf("device '%s' not found", name)
+			}
+			matches = append(matches, device...)
+		}
+		devices = matches
 	}
 
 	if cmd.boot {
