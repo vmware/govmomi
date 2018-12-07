@@ -22,7 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"os"
 	"path"
 	"strings"
 	"text/tabwriter"
@@ -188,7 +187,7 @@ type infoResult struct {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
 	for i := range r.Devices {
 		device := r.Devices[i].BaseVirtualDevice
