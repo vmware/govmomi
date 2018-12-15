@@ -486,6 +486,9 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 		// File does not exist, fallthrough to create via PUT logic
 		fallthrough
 	case "PUT":
+		dir := path.Dir(p)
+		_ = os.MkdirAll(dir, 0700)
+
 		f, err := os.Create(p)
 		if err != nil {
 			log.Printf("failed to %s '%s': %s", r.Method, p, err)
