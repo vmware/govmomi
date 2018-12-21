@@ -17,6 +17,7 @@ limitations under the License.
 package simulator
 
 import (
+	"os"
 	"time"
 
 	"github.com/google/uuid"
@@ -27,11 +28,21 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+var (
+	hostPortUnique = os.Getenv("VCSIM_HOST_PORT_UNIQUE") == "true"
+)
+
 type HostSystem struct {
 	mo.HostSystem
 }
 
 func NewHostSystem(host mo.HostSystem) *HostSystem {
+	if hostPortUnique { // configure unique port for each host
+		port := &esx.HostSystem.Summary.Config.Port
+		*port++
+		host.Summary.Config.Port = *port
+	}
+
 	now := time.Now()
 
 	hs := &HostSystem{
