@@ -312,11 +312,6 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	finder, err := cmd.Finder()
-	if err != nil {
-		return err
-	}
-
 	p := property.DefaultCollector(client)
 	filter := new(property.WaitFilter)
 
@@ -331,20 +326,9 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		switch arg {
 		case "", "-":
 		default:
-			if !ref.FromString(arg) {
-				l, ferr := finder.ManagedObjectList(ctx, arg)
-				if ferr != nil {
-					return err
-				}
-
-				switch len(l) {
-				case 0:
-					return fmt.Errorf("%s not found", arg)
-				case 1:
-					ref = l[0].Object.Reference()
-				default:
-					return flag.ErrHelp
-				}
+			ref, err = cmd.ManagedObject(ctx, arg)
+			if err != nil {
+				return err
 			}
 		}
 

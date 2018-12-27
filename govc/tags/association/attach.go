@@ -19,7 +19,6 @@ package association
 import (
 	"context"
 	"flag"
-	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -61,30 +60,15 @@ func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj stri
 	if err != nil {
 		return nil, err
 	}
-	finder, err := cmd.Finder()
-	if err != nil {
-		return nil, err
-	}
 
 	ref := client.ServiceContent.RootFolder
 
 	switch managedObj {
 	case "", "-":
 	default:
-		if !ref.FromString(managedObj) {
-			l, ferr := finder.ManagedObjectList(ctx, managedObj)
-			if ferr != nil {
-				return nil, ferr
-			}
-
-			switch len(l) {
-			case 0:
-				return nil, fmt.Errorf("%s not found", managedObj)
-			case 1:
-				ref = l[0].Object.Reference()
-			default:
-				return nil, flag.ErrHelp
-			}
+		ref, err = cmd.ManagedObject(ctx, managedObj)
+		if err != nil {
+			return nil, err
 		}
 	}
 	return &ref, nil

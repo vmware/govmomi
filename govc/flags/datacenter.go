@@ -137,6 +137,37 @@ func (flag *DatacenterFlag) DatacenterIfSpecified() (*object.Datacenter, error) 
 	return flag.Datacenter()
 }
 
+func (flag *DatacenterFlag) ManagedObject(ctx context.Context, arg string) (types.ManagedObjectReference, error) {
+	var ref types.ManagedObjectReference
+
+	if ref.FromString(arg) {
+		return ref, nil
+	}
+
+	finder, err := flag.Finder()
+	if err != nil {
+		return ref, err
+	}
+
+	l, err := finder.ManagedObjectList(ctx, arg)
+	if err != nil {
+		return ref, err
+	}
+
+	switch len(l) {
+	case 0:
+		return ref, fmt.Errorf("%s not found", arg)
+	case 1:
+		return l[0].Object.Reference(), nil
+	default:
+		var objs []types.ManagedObjectReference
+		for _, o := range l {
+			objs = append(objs, o.Object.Reference())
+		}
+		return ref, fmt.Errorf("%d objects at path %q: %s", len(l), arg, objs)
+	}
+}
+
 func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) ([]types.ManagedObjectReference, error) {
 	var refs []types.ManagedObjectReference
 
