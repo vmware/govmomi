@@ -56,6 +56,29 @@ load test_helper
   govc vm.destroy "$id"
 }
 
+@test "vcsim host config.port" {
+  vcsim_start -dc 0
+  url=$(govc env GOVC_URL)
+  port=$(govc env -x GOVC_URL_PORT)
+  vcsim_stop
+
+  vcsim_start -httptest.serve="$url" # reuse free port selection from above
+
+  run govc object.collect -s -type h host/DC0_H0 summary.config.port
+  assert_success "$port"
+  ports=$(govc object.collect -s -type h / summary.config.port | uniq -u | wc -l)
+  [ "$ports" = "0" ] # all host ports should be the same value
+
+  vcsim_stop
+
+  VCSIM_HOST_PORT_UNIQUE=true vcsim_start -httptest.serve="$url"
+
+  hosts=$(curl -sk "https://$url/debug/vars" | jq .vcsim.Model.Host)
+  ports=$(govc object.collect -s -type h / summary.config.port | uniq -u | wc -l)
+  [ "$ports" = "$hosts" ] # all host ports should be unique
+  [[ "$ports" != *$port* ]] # host ports should not include vcsim port
+}
+
 @test "vcsim set vm properties" {
   vcsim_env
 

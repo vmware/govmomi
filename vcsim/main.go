@@ -112,10 +112,11 @@ func main() {
 	f := flag.Lookup("httptest.serve")
 	listen := f.Value.String()
 	if listen == "" {
-		// #nosec: Errors unhandled
-		_ = f.Value.Set("127.0.0.1:8989")
-	} else {
-		updateHostTemplate(listen)
+		listen = "127.0.0.1:8989"
+		_ = f.Value.Set(listen)
+	}
+	if err = updateHostTemplate(listen); err != nil {
+		log.Fatal(err)
 	}
 
 	if *isESX {
@@ -205,8 +206,18 @@ func main() {
 	model.Remove()
 }
 
-func updateHostTemplate(ip string) {
-	addr, _, _ := net.SplitHostPort(ip)
+func updateHostTemplate(ip string) error {
+	addr, port, err := net.SplitHostPort(ip)
+	if err != nil {
+		return err
+	}
+	if port != "0" { // server starts after the model is created, skipping auto-selected ports for now
+		n, err := strconv.Atoi(port)
+		if err != nil {
+			return err
+		}
+		esx.HostSystem.Summary.Config.Port = int32(n)
+	}
 
 	nics := [][]types.HostVirtualNic{
 		esx.HostConfigInfo.Network.Vnic,
@@ -222,4 +233,6 @@ func updateHostTemplate(ip string) {
 			nic[i].Spec.Ip.IpAddress = addr // replace "127.0.0.1" with $addr
 		}
 	}
+
+	return nil
 }
