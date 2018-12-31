@@ -17,6 +17,11 @@ limitations under the License.
 package simulator
 
 import (
+	"fmt"
+	"os"
+	"path"
+
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -27,11 +32,86 @@ type VirtualMachineSnapshot struct {
 	mo.VirtualMachineSnapshot
 }
 
-func (v *VirtualMachineSnapshot) RemoveSnapshotTask(req *types.RemoveSnapshot_Task) soap.HasFault {
+func (v *VirtualMachineSnapshot) createSnapshotFiles() types.BaseMethodFault {
+	vm := Map.Get(v.Vm).(*VirtualMachine)
+
+	snapshotDirectory := vm.Config.Files.SnapshotDirectory
+	if snapshotDirectory == "" {
+		snapshotDirectory = vm.Config.Files.VmPathName
+	}
+
+	index := 1
+	for {
+		fileName := fmt.Sprintf("%s-Snapshot%d.vmsn", vm.Name, index)
+		f, err := vm.createFile(snapshotDirectory, fileName, false)
+		if err != nil {
+			switch err.(type) {
+			case *types.FileAlreadyExists:
+				index++
+				continue
+			default:
+				return err
+			}
+		}
+
+		_ = f.Close()
+
+		p, _ := parseDatastorePath(snapshotDirectory)
+		vm.useDatastore(p.Datastore)
+		datastorePath := object.DatastorePath{
+			Datastore: p.Datastore,
+			Path:      path.Join(p.Path, fileName),
+		}
+
+		dataLayoutKey := vm.addFileLayoutEx(datastorePath, 0)
+		vm.addSnapshotLayout(v.Self, dataLayoutKey)
+		vm.addSnapshotLayoutEx(v.Self, dataLayoutKey, -1)
+
+		return nil
+	}
+}
+
+func (v *VirtualMachineSnapshot) removeSnapshotFiles(ctx *Context) types.BaseMethodFault {
+	// TODO: also remove delta disks that were created when snapshot was taken
+
+	vm := Map.Get(v.Vm).(*VirtualMachine)
+
+	for idx, sLayout := range vm.Layout.Snapshot {
+		if sLayout.Key == v.Self {
+			vm.Layout.Snapshot = append(vm.Layout.Snapshot[:idx], vm.Layout.Snapshot[idx+1:]...)
+			break
+		}
+	}
+
+	for idx, sLayoutEx := range vm.LayoutEx.Snapshot {
+		if sLayoutEx.Key == v.Self {
+			for _, file := range vm.LayoutEx.File {
+				if file.Key == sLayoutEx.DataKey || file.Key == sLayoutEx.MemoryKey {
+					p, fault := parseDatastorePath(file.Name)
+					if fault != nil {
+						return fault
+					}
+
+					host := Map.Get(*vm.Runtime.Host).(*HostSystem)
+					datastore := Map.FindByName(p.Datastore, host.Datastore).(*Datastore)
+					dFilePath := path.Join(datastore.Info.GetDatastoreInfo().Url, p.Path)
+
+					_ = os.Remove(dFilePath)
+				}
+			}
+
+			vm.LayoutEx.Snapshot = append(vm.LayoutEx.Snapshot[:idx], vm.LayoutEx.Snapshot[idx+1:]...)
+		}
+	}
+
+	vm.RefreshStorageInfo(ctx, nil)
+
+	return nil
+}
+
+func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.RemoveSnapshot_Task) soap.HasFault {
 	task := CreateTask(v, "removeSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
-
-		Map.Remove(req.This)
 
 		vm := Map.Get(v.Vm).(*VirtualMachine)
 		Map.WithLock(vm, func() {
@@ -49,8 +129,12 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(req *types.RemoveSnapshot_Ta
 				}
 			}
 
+			Map.Get(req.This).(*VirtualMachineSnapshot).removeSnapshotFiles(ctx)
+
 			Map.Update(vm, changes)
 		})
+
+		Map.Remove(req.This)
 
 		return nil, nil
 	})
