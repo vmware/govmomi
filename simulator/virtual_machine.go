@@ -19,10 +19,12 @@ package simulator
 import (
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"net"
 	"os"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -66,6 +68,10 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		Tools:            &types.ToolsConfigInfo{},
 		MemoryAllocation: &rspec.MemoryAllocation,
 		CpuAllocation:    &rspec.CpuAllocation,
+	}
+	vm.Layout = &types.VirtualMachineFileLayout{}
+	vm.LayoutEx = &types.VirtualMachineFileLayoutEx{
+		Timestamp: time.Now(),
 	}
 	vm.Snapshot = nil // intentionally set to nil until a snapshot is created
 	vm.Storage = &types.VirtualMachineStorageInfo{
@@ -168,6 +174,7 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		{spec.Files.VmPathName, &vm.Config.Files.VmPathName},
 		{spec.Files.VmPathName, &vm.Summary.Config.VmPathName},
 		{spec.Files.SnapshotDirectory, &vm.Config.Files.SnapshotDirectory},
+		{spec.Files.SuspendDirectory, &vm.Config.Files.SuspendDirectory},
 		{spec.Files.LogDirectory, &vm.Config.Files.LogDirectory},
 	}
 
@@ -324,6 +331,400 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 	}
 
 	return vm.configureDevices(spec)
+}
+
+func getVMFileType(fileName string) types.VirtualMachineFileLayoutExFileType {
+	var fileType types.VirtualMachineFileLayoutExFileType
+
+	fileExt := path.Ext(fileName)
+	fileNameNoExt := strings.TrimSuffix(fileName, fileExt)
+
+	switch fileExt {
+	case ".vmx":
+		fileType = types.VirtualMachineFileLayoutExFileTypeConfig
+	case ".core":
+		fileType = types.VirtualMachineFileLayoutExFileTypeCore
+	case ".vmdk":
+		fileType = types.VirtualMachineFileLayoutExFileTypeDiskDescriptor
+		if strings.HasSuffix(fileNameNoExt, "-digest") {
+			fileType = types.VirtualMachineFileLayoutExFileTypeDigestDescriptor
+		}
+
+		extentSuffixes := []string{"-flat", "-delta", "-s", "-rdm", "-rdmp"}
+		for _, suffix := range extentSuffixes {
+			if strings.HasSuffix(fileNameNoExt, suffix) {
+				fileType = types.VirtualMachineFileLayoutExFileTypeDiskExtent
+			} else if strings.HasSuffix(fileNameNoExt, "-digest"+suffix) {
+				fileType = types.VirtualMachineFileLayoutExFileTypeDigestExtent
+			}
+		}
+	case ".psf":
+		fileType = types.VirtualMachineFileLayoutExFileTypeDiskReplicationState
+	case ".vmxf":
+		fileType = types.VirtualMachineFileLayoutExFileTypeExtendedConfig
+	case ".vmft":
+		fileType = types.VirtualMachineFileLayoutExFileTypeFtMetadata
+	case ".log":
+		fileType = types.VirtualMachineFileLayoutExFileTypeLog
+	case ".nvram":
+		fileType = types.VirtualMachineFileLayoutExFileTypeNvram
+	case ".png", ".bmp":
+		fileType = types.VirtualMachineFileLayoutExFileTypeScreenshot
+	case ".vmsn":
+		fileType = types.VirtualMachineFileLayoutExFileTypeSnapshotData
+	case ".vmsd":
+		fileType = types.VirtualMachineFileLayoutExFileTypeSnapshotList
+	case ".xml":
+		if strings.HasSuffix(fileNameNoExt, "-aux") {
+			fileType = types.VirtualMachineFileLayoutExFileTypeSnapshotManifestList
+		}
+	case ".stat":
+		fileType = types.VirtualMachineFileLayoutExFileTypeStat
+	case ".vmss":
+		fileType = types.VirtualMachineFileLayoutExFileTypeSuspend
+	case ".vmem":
+		if strings.Contains(fileNameNoExt, "Snapshot") {
+			fileType = types.VirtualMachineFileLayoutExFileTypeSnapshotMemory
+		} else {
+			fileType = types.VirtualMachineFileLayoutExFileTypeSuspendMemory
+		}
+	case ".vswp":
+		if strings.HasPrefix(fileNameNoExt, "vmx-") {
+			fileType = types.VirtualMachineFileLayoutExFileTypeUwswap
+		} else {
+			fileType = types.VirtualMachineFileLayoutExFileTypeSwap
+		}
+	case "":
+		if strings.HasPrefix(fileNameNoExt, "imcf-") {
+			fileType = types.VirtualMachineFileLayoutExFileTypeGuestCustomization
+		}
+	}
+
+	return fileType
+}
+
+func (vm *VirtualMachine) addFileLayoutEx(datastorePath object.DatastorePath, fileSize int64) int32 {
+	var newKey int32
+	for _, layoutFile := range vm.LayoutEx.File {
+		if layoutFile.Name == datastorePath.String() {
+			return layoutFile.Key
+		}
+
+		if layoutFile.Key >= newKey {
+			newKey = layoutFile.Key + 1
+		}
+	}
+
+	fileType := getVMFileType(filepath.Base(datastorePath.Path))
+
+	switch fileType {
+	case types.VirtualMachineFileLayoutExFileTypeNvram, types.VirtualMachineFileLayoutExFileTypeSnapshotList:
+		vm.addConfigLayout(datastorePath.Path)
+	case types.VirtualMachineFileLayoutExFileTypeLog:
+		vm.addLogLayout(datastorePath.Path)
+	case types.VirtualMachineFileLayoutExFileTypeSwap:
+		vm.addSwapLayout(datastorePath.String())
+	}
+
+	vm.LayoutEx.File = append(vm.LayoutEx.File, types.VirtualMachineFileLayoutExFileInfo{
+		Accessible:      types.NewBool(true),
+		BackingObjectId: "",
+		Key:             newKey,
+		Name:            datastorePath.String(),
+		Size:            fileSize,
+		Type:            string(fileType),
+		UniqueSize:      fileSize,
+	})
+
+	vm.LayoutEx.Timestamp = time.Now()
+
+	vm.updateStorage()
+
+	return newKey
+}
+
+func (vm *VirtualMachine) addConfigLayout(name string) {
+	for _, config := range vm.Layout.ConfigFile {
+		if config == name {
+			return
+		}
+	}
+
+	vm.Layout.ConfigFile = append(vm.Layout.ConfigFile, name)
+
+	vm.updateStorage()
+}
+
+func (vm *VirtualMachine) addLogLayout(name string) {
+	for _, log := range vm.Layout.LogFile {
+		if log == name {
+			return
+		}
+	}
+
+	vm.Layout.LogFile = append(vm.Layout.LogFile, name)
+
+	vm.updateStorage()
+}
+
+func (vm *VirtualMachine) addSwapLayout(name string) {
+	vm.Layout.SwapFile = name
+
+	vm.updateStorage()
+}
+
+func (vm *VirtualMachine) addSnapshotLayout(snapshot types.ManagedObjectReference, dataKey int32) {
+	for _, snapshotLayout := range vm.Layout.Snapshot {
+		if snapshotLayout.Key == snapshot {
+			return
+		}
+	}
+
+	var snapshotFiles []string
+	for _, file := range vm.LayoutEx.File {
+		if file.Key == dataKey || file.Type == "diskDescriptor" {
+			snapshotFiles = append(snapshotFiles, file.Name)
+		}
+	}
+
+	vm.Layout.Snapshot = append(vm.Layout.Snapshot, types.VirtualMachineFileLayoutSnapshotLayout{
+		Key:          snapshot,
+		SnapshotFile: snapshotFiles,
+	})
+
+	vm.updateStorage()
+}
+
+func (vm *VirtualMachine) addSnapshotLayoutEx(snapshot types.ManagedObjectReference, dataKey int32, memoryKey int32) {
+	for _, snapshotLayoutEx := range vm.LayoutEx.Snapshot {
+		if snapshotLayoutEx.Key == snapshot {
+			return
+		}
+	}
+
+	vm.LayoutEx.Snapshot = append(vm.LayoutEx.Snapshot, types.VirtualMachineFileLayoutExSnapshotLayout{
+		DataKey:   dataKey,
+		Disk:      vm.LayoutEx.Disk,
+		Key:       snapshot,
+		MemoryKey: memoryKey,
+	})
+
+	vm.LayoutEx.Timestamp = time.Now()
+
+	vm.updateStorage()
+}
+
+// Updates both vm.Layout.Disk and vm.LayoutEx.Disk
+func (vm *VirtualMachine) updateDiskLayouts() types.BaseMethodFault {
+	var disksLayout []types.VirtualMachineFileLayoutDiskLayout
+	var disksLayoutEx []types.VirtualMachineFileLayoutExDiskLayout
+
+	disks := object.VirtualDeviceList(vm.Config.Hardware.Device).SelectByType((*types.VirtualDisk)(nil))
+	for _, disk := range disks {
+		disk := disk.(*types.VirtualDisk)
+		diskBacking := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
+
+		diskLayout := &types.VirtualMachineFileLayoutDiskLayout{Key: disk.Key}
+		diskLayoutEx := &types.VirtualMachineFileLayoutExDiskLayout{Key: disk.Key}
+
+		// Iterate through disk and its parents
+		for {
+			dFileName := diskBacking.GetVirtualDeviceFileBackingInfo().FileName
+
+			var fileKeys []int32
+
+			dm := Map.VirtualDiskManager()
+			// Add disk descriptor and extent files
+			for _, diskName := range dm.names(dFileName) {
+				// get full path including datastore location
+				p, fault := parseDatastorePath(diskName)
+				if fault != nil {
+					return fault
+				}
+
+				datastore := vm.useDatastore(p.Datastore)
+				dFilePath := path.Join(datastore.Info.GetDatastoreInfo().Url, p.Path)
+
+				var fileSize int64
+				// If file can not be opened - fileSize will be 0
+				if dFileInfo, err := os.Stat(dFilePath); err == nil {
+					fileSize = dFileInfo.Size()
+				}
+
+				diskKey := vm.addFileLayoutEx(*p, fileSize)
+				fileKeys = append(fileKeys, diskKey)
+			}
+
+			diskLayout.DiskFile = append(diskLayout.DiskFile, dFileName)
+			diskLayoutEx.Chain = append(diskLayoutEx.Chain, types.VirtualMachineFileLayoutExDiskUnit{
+				FileKey: fileKeys,
+			})
+
+			if parent := diskBacking.Parent; parent != nil {
+				diskBacking = parent
+			} else {
+				break
+			}
+		}
+
+		disksLayout = append(disksLayout, *diskLayout)
+		disksLayoutEx = append(disksLayoutEx, *diskLayoutEx)
+	}
+
+	vm.Layout.Disk = disksLayout
+
+	vm.LayoutEx.Disk = disksLayoutEx
+	vm.LayoutEx.Timestamp = time.Now()
+
+	vm.updateStorage()
+
+	return nil
+}
+
+func (vm *VirtualMachine) updateStorage() types.BaseMethodFault {
+	// Committed - sum of Size for each file in vm.LayoutEx.File
+	// Unshared  - sum of Size for each disk (.vmdk) in vm.LayoutEx.File
+	// Uncommitted - disk capacity minus disk usage (only currently used disk)
+	var datastoresUsage []types.VirtualMachineUsageOnDatastore
+
+	disks := object.VirtualDeviceList(vm.Config.Hardware.Device).SelectByType((*types.VirtualDisk)(nil))
+
+	for _, file := range vm.LayoutEx.File {
+		p, fault := parseDatastorePath(file.Name)
+		if fault != nil {
+			return fault
+		}
+
+		datastore := vm.useDatastore(p.Datastore)
+		dsUsage := &types.VirtualMachineUsageOnDatastore{
+			Datastore: datastore.Self,
+		}
+
+		for idx, usage := range datastoresUsage {
+			if usage.Datastore == datastore.Self {
+				datastoresUsage = append(datastoresUsage[:idx], datastoresUsage[idx+1:]...)
+				dsUsage = &usage
+				break
+			}
+		}
+
+		dsUsage.Committed = file.Size
+
+		if path.Ext(file.Name) == ".vmdk" {
+			dsUsage.Unshared = file.Size
+		}
+
+		for _, disk := range disks {
+			disk := disk.(*types.VirtualDisk)
+			backing := disk.Backing.(types.BaseVirtualDeviceFileBackingInfo).GetVirtualDeviceFileBackingInfo()
+
+			if backing.FileName == file.Name {
+				dsUsage.Uncommitted = disk.CapacityInBytes
+			}
+		}
+
+		datastoresUsage = append(datastoresUsage, *dsUsage)
+	}
+
+	vm.Storage.PerDatastoreUsage = datastoresUsage
+	vm.Storage.Timestamp = time.Now()
+
+	storageSummary := &types.VirtualMachineStorageSummary{
+		Timestamp: time.Now(),
+	}
+
+	for _, usage := range datastoresUsage {
+		storageSummary.Committed += usage.Committed
+		storageSummary.Uncommitted += usage.Uncommitted
+		storageSummary.Unshared += usage.Unshared
+	}
+
+	vm.Summary.Storage = storageSummary
+
+	return nil
+}
+
+func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshStorageInfo) soap.HasFault {
+	body := new(methods.RefreshStorageInfoBody)
+
+	if vm.Runtime.Host == nil {
+		// VM not fully created
+		return body
+	}
+
+	// Validate that all files in vm.LayoutEx.File can still be found
+	for idx := len(vm.LayoutEx.File) - 1; idx >= 0; idx-- {
+		file := vm.LayoutEx.File[idx]
+
+		p, fault := parseDatastorePath(file.Name)
+		if fault != nil {
+			body.Fault_ = Fault("", fault)
+			return body
+		}
+
+		if _, err := os.Stat(p.String()); err != nil {
+			vm.LayoutEx.File = append(vm.LayoutEx.File[:idx], vm.LayoutEx.File[idx+1:]...)
+		}
+	}
+
+	// Directories will be used to locate VM files.
+	// Does not include information about virtual disk file locations.
+	locations := []string{
+		vm.Config.Files.VmPathName,
+		vm.Config.Files.SnapshotDirectory,
+		vm.Config.Files.LogDirectory,
+		vm.Config.Files.SuspendDirectory,
+		vm.Config.Files.FtMetadataDirectory,
+	}
+
+	for _, directory := range locations {
+		if directory == "" {
+			continue
+		}
+
+		p, fault := parseDatastorePath(directory)
+		if fault != nil {
+			body.Fault_ = Fault("", fault)
+			return body
+		}
+
+		datastore := vm.useDatastore(p.Datastore)
+		directory := path.Join(datastore.Info.GetDatastoreInfo().Url, p.Path)
+
+		if path.Ext(p.Path) == ".vmx" {
+			directory = path.Dir(directory) // vm.Config.Files.VmPathName can be a directory or full path to .vmx
+		}
+
+		if _, err := os.Stat(directory); err != nil {
+			// Can not access the directory
+			continue
+		}
+
+		files, err := ioutil.ReadDir(directory)
+		if err != nil {
+			body.Fault_ = soap.ToSoapFault(err)
+			return body
+		}
+
+		for _, file := range files {
+			datastorePath := object.DatastorePath{
+				Datastore: p.Datastore,
+				Path:      strings.TrimPrefix(file.Name(), datastore.Info.GetDatastoreInfo().Url),
+			}
+
+			vm.addFileLayoutEx(datastorePath, file.Size())
+		}
+	}
+
+	fault := vm.updateDiskLayouts()
+	if fault != nil {
+		body.Fault_ = Fault("", fault)
+		return body
+	}
+
+	vm.LayoutEx.Timestamp = time.Now()
+
+	return body
 }
 
 func (vm *VirtualMachine) useDatastore(name string) *Datastore {
@@ -591,6 +992,8 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			// XXX: compare disk size and free space until windows stat is supported
 			ds.Summary.FreeSpace -= getDiskSize(x)
 			ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+
+			vm.updateDiskLayouts()
 		}
 	}
 
@@ -650,6 +1053,8 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 			Map.Update(vm, []types.PropertyChange{
 				{Name: "summary.config.numVirtualDisks", Val: vm.Summary.Config.NumVirtualDisks - 1},
 			})
+
+			vm.updateDiskLayouts()
 		case types.BaseVirtualEthernetCard:
 			var net types.ManagedObjectReference
 
@@ -769,6 +1174,8 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 	Map.Update(vm, []types.PropertyChange{
 		{Name: "config.hardware.device", Val: []types.BaseVirtualDevice(devices)},
 	})
+
+	vm.updateDiskLayouts()
 
 	return nil
 }
@@ -1093,7 +1500,7 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 			ds := Map.Get(*ref).(*Datastore)
 			Map.RemoveReference(ds, &ds.Vm, *ref)
 
-			// TODO: migrate vm.Config.Files (and vm.Summary.Config.VmPathName)
+			// TODO: migrate vm.Config.Files, vm.Summary.Config.VmPathName, vm.Layout and vm.LayoutEx
 
 			changes = append(changes, types.PropertyChange{Name: "datastore", Val: []types.ManagedObjectReference{*ref}})
 		}
@@ -1168,6 +1575,8 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 			})
 		}
 
+		snapshot.createSnapshotFiles()
+
 		changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: snapshot.Self})
 		Map.Update(vm, changes)
 
@@ -1201,7 +1610,7 @@ func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrent
 	return body
 }
 
-func (vm *VirtualMachine) RemoveAllSnapshotsTask(req *types.RemoveAllSnapshots_Task) soap.HasFault {
+func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.RemoveAllSnapshots_Task) soap.HasFault {
 	task := CreateTask(vm, "RemoveAllSnapshots", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if vm.Snapshot == nil {
 			return nil, nil
@@ -1214,6 +1623,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(req *types.RemoveAllSnapshots_T
 		})
 
 		for _, ref := range refs {
+			Map.Get(ref).(*VirtualMachineSnapshot).removeSnapshotFiles(ctx)
 			Map.Remove(ref)
 		}
 

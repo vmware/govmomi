@@ -355,6 +355,8 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		},
 	)
 
+	vm.RefreshStorageInfo(c.ctx, nil)
+
 	return vm.Reference(), nil
 }
 
