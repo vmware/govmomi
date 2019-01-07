@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"context"
+	"reflect"
 	"testing"
 
 	"github.com/vmware/govmomi"
@@ -113,6 +114,19 @@ func TestEventManagerVPX(t *testing.T) {
 		if test.expect != n {
 			t.Errorf("%d: expected %d events, got: %d", i, test.expect, n)
 		}
+	}
+
+	// Test that we don't panic if event ID is not defined in esx.EventInfo
+	type TestHostRemovedEvent struct {
+		types.HostEvent
+	}
+	var hre TestHostRemovedEvent
+	kind := reflect.TypeOf(hre)
+	types.Add(kind.Name(), kind)
+
+	err = e.PostEvent(ctx, &hre, types.TaskInfo{})
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 

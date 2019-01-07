@@ -138,11 +138,13 @@ func (m *EventManager) formatMessage(event types.BaseEvent) {
 		}
 	}
 
-	var buf bytes.Buffer
-	if err := t.Execute(&buf, event); err != nil {
-		log.Print(err)
+	if t != nil {
+		var buf bytes.Buffer
+		if err := t.Execute(&buf, event); err != nil {
+			log.Print(err)
+		}
+		e.FullFormattedMessage = buf.String()
 	}
-	e.FullFormattedMessage = buf.String()
 
 	if logEvents {
 		log.Printf("[%s] %s", id, e.FullFormattedMessage)
