@@ -82,6 +82,16 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	return hs
 }
 
+func (h *HostSystem) event() types.HostEvent {
+	return types.HostEvent{
+		Event: types.Event{
+			Datacenter:      datacenterEventArgument(h),
+			ComputeResource: h.eventArgumentParent(),
+			Host:            h.eventArgument(),
+		},
+	}
+}
+
 func (h *HostSystem) eventArgument() *types.HostEventArgument {
 	return &types.HostEventArgument{
 		Host:                h.Self,
@@ -184,11 +194,13 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 	return host, nil
 }
 
-func (h *HostSystem) DestroyTask(req *types.Destroy_Task) soap.HasFault {
+func (h *HostSystem) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(h, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if len(h.Vm) > 0 {
 			return nil, &types.ResourceInUse{}
 		}
+
+		ctx.postEvent(&types.HostRemovedEvent{HostEvent: h.event()})
 
 		f := Map.getEntityParent(h, "Folder").(*Folder)
 		f.removeChild(h.Reference())
