@@ -136,3 +136,9 @@ Sometimes, especially when debugging software, it can be useful to introduce del
 ## Related projects
 
 [LocalStack](https://github.com/localstack/localstack/blob/master/README.md#why-localstack)
+
+## Blog posts on vcsim
+
+* [Beginning vCenter Server simulation with Govcsim](https://opensourceforu.com/2017/10/vcenter-server-simulation-govcsim/) By Abhijeet Kasurde - October 3, 2017
+
+* [govcsim – Neat incubation project (vCenter Server & ESXi API based simulator)](https://www.virtuallyghetto.com/2017/04/govcsim-neat-incubation-project-vcenter-server-esxi-api-based-simulator.html) by [William Lam](https://twitter.com/lamw) - April 21, 2017
