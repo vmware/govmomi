@@ -88,9 +88,9 @@ The default vcsim listen address is `127.0.0.1:8989`.  Use the `-httptest.serve`
 
 
 ``` shell
-vcsim -httptest.serve=10.118.69.224:8989 # specific address
+vcsim -l 10.118.69.224:8989 # specific address
 
-vcsim -httptest.serve=:8989 # any address
+vcsim -l :8989 # any address
 ```
 
 When given a port value of '0', an unused port will be chosen.  You can then source the GOVC_URL from another
@@ -101,7 +101,7 @@ govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
 
 mkfifo $govc_sim_env
 
-vcsim -httptest.serve=127.0.0.1:0 -E $govc_sim_env &
+vcsim -l 127.0.0.1:0 -E $govc_sim_env &
 
 eval "$(cat $govc_sim_env)"
 

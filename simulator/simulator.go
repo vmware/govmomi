@@ -523,6 +523,37 @@ func (*Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, versions)
 }
 
+// defaultIP returns addr.IP if specified, otherwise attempts to find a non-loopback ipv4 IP
+func defaultIP(addr *net.TCPAddr) string {
+	if !addr.IP.IsUnspecified() {
+		return addr.IP.String()
+	}
+
+	nics, err := net.Interfaces()
+	if err != nil {
+		return addr.IP.String()
+	}
+
+	for _, nic := range nics {
+		if nic.Name == "docker0" || strings.HasPrefix(nic.Name, "vmnet") {
+			continue
+		}
+		addrs, aerr := nic.Addrs()
+		if aerr != nil {
+			continue
+		}
+		for _, addr := range addrs {
+			if ip, ok := addr.(*net.IPNet); ok && !ip.IP.IsLoopback() {
+				if ip.IP.To4() != nil {
+					return ip.IP.String()
+				}
+			}
+		}
+	}
+
+	return addr.IP.String()
+}
+
 // NewServer returns an http Server instance for the given service
 func (s *Service) NewServer() *Server {
 	s.RegisterSDK(Map)
@@ -536,11 +567,12 @@ func (s *Service) NewServer() *Server {
 	// for use in main.go, where Start() blocks, we can still set ServiceHostName
 	ts := httptest.NewUnstartedServer(mux)
 
+	addr := ts.Listener.Addr().(*net.TCPAddr)
+	port := strconv.Itoa(addr.Port)
 	u := &url.URL{
 		Scheme: "http",
-		Host:   ts.Listener.Addr().String(),
+		Host:   net.JoinHostPort(defaultIP(addr), port),
 		Path:   Map.Path,
-		User:   url.UserPassword("user", "pass"),
 	}
 
 	// Redirect clients to this http server, rather than HostSystem.Name
@@ -568,13 +600,15 @@ func (s *Service) NewServer() *Server {
 	m.Setting = append(m.Setting,
 		&types.OptionValue{
 			Key:   "vcsim.server.url",
-			Value: ts.URL,
+			Value: u.String(),
 		},
 		&types.OptionValue{
 			Key:   "vcsim.server.cert",
 			Value: cert,
 		},
 	)
+
+	u.User = url.UserPassword("user", "pass")
 
 	return &Server{
 		Server: ts,

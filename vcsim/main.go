@@ -63,6 +63,7 @@ func main() {
 	cert := flag.String("tlscert", "", "Path to TLS certificate file")
 	key := flag.String("tlskey", "", "Path to TLS key file")
 	env := flag.String("E", "-", "Output vcsim variables to the given fifo or stdout")
+	listen := flag.String("l", "127.0.0.1:8989", "Listen address for vcsim")
 	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
 
@@ -110,12 +111,13 @@ func main() {
 	}
 
 	f := flag.Lookup("httptest.serve")
-	listen := f.Value.String()
-	if listen == "" {
-		listen = "127.0.0.1:8989"
-		_ = f.Value.Set(listen)
+	serve := f.Value.String()
+	if serve == "" {
+		_ = f.Value.Set(*listen) // propagate -l unless -httptest.serve is specified
+	} else {
+		*listen = serve // propagate to updateHostTemplate call below
 	}
-	if err = updateHostTemplate(listen); err != nil {
+	if err = updateHostTemplate(*listen); err != nil {
 		log.Fatal(err)
 	}
 

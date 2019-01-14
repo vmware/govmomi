@@ -50,6 +50,7 @@ vcsim_start() {
 
 vcsim_stop() {
   kill "$GOVC_SIM_PID"
+  wait "$GOVC_SIM_PID"
   rm -f "$GOVC_SIM_ENV"
   unset GOVC_SIM_PID
 }
