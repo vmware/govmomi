@@ -242,3 +242,22 @@ load test_helper
   run govc vm.destroy $vm
   assert_success
 }
+
+@test "vcsim listen" {
+  vcsim_start -dc 0
+  url=$(govc option.ls vcsim.server.url)
+  [[ "$url" == *"https://127.0.0.1:"* ]]
+  vcsim_stop
+
+  vcsim_start -dc 0 -httptest.serve 0.0.0.0:0
+  url=$(govc option.ls vcsim.server.url)
+  [[ "$url" != *"https://127.0.0.1:"* ]]
+  [[ "$url" != *"https://[::]:"* ]]
+  vcsim_stop
+
+  vcsim_start -dc 0 -l :0 -httptest.serve ""
+  url=$(govc option.ls vcsim.server.url)
+  [[ "$url" != *"https://127.0.0.1:"* ]]
+  [[ "$url" != *"https://[::]:"* ]]
+  vcsim_stop
+}
