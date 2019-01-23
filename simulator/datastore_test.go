@@ -292,6 +292,9 @@ func TestDatastoreHTTP(t *testing.T) {
 				}
 				return nil
 			}
+			if info.Entity.Type != "Datastore" {
+				t.Fatal(info.Entity.Type)
+			}
 
 			return info.Result.(types.HostDatastoreBrowserSearchResults).File
 		}
@@ -319,6 +322,9 @@ func TestDatastoreHTTP(t *testing.T) {
 					}
 				}
 				return nil
+			}
+			if info.Entity.Type != "Datastore" {
+				t.Fatal(info.Entity.Type)
 			}
 
 			return info.Result.(types.ArrayOfHostDatastoreBrowserSearchResults).HostDatastoreBrowserSearchResults
