@@ -60,6 +60,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.TagPath, s.tag},
 		{internal.TagPath + "/", s.tagID},
 		{internal.AssociationPath, s.association},
+		{internal.AssociationPath + "/", s.associationID},
 	}
 
 	for i := range handlers {
@@ -224,8 +225,12 @@ func (s *handler) action(r *http.Request) string {
 }
 
 func (s *handler) id(r *http.Request) string {
-	id := path.Base(r.URL.Path)
-	return strings.TrimPrefix(id, "id:")
+	base := path.Base(r.URL.Path)
+	id := strings.TrimPrefix(base, "id:")
+	if id == base {
+		return "" // trigger 404 Not Found w/o id: prefix
+	}
+	return id
 }
 
 func newID(kind string) string {
@@ -384,21 +389,7 @@ func (s *handler) association(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if spec.TagID != "" {
-		if _, exists := s.Association[spec.TagID]; !exists {
-			log.Printf("association tag not found: %s", spec.TagID)
-			http.NotFound(w, r)
-			return
-		}
-	}
-
 	switch s.action(r) {
-	case "attach":
-		s.Association[spec.TagID][*spec.ObjectID] = true
-		s.ok(w)
-	case "detach":
-		delete(s.Association[spec.TagID], *spec.ObjectID)
-		s.ok(w)
 	case "list-attached-tags":
 		var ids []string
 		for id, objs := range s.Association {
@@ -407,9 +398,37 @@ func (s *handler) association(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		s.ok(w, ids)
+	}
+}
+
+func (s *handler) associationID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := s.id(r)
+	if _, exists := s.Association[id]; !exists {
+		log.Printf("association tag not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	var spec internal.Association
+	if !s.decode(r, w, &spec) {
+		return
+	}
+
+	switch s.action(r) {
+	case "attach":
+		s.Association[id][*spec.ObjectID] = true
+		s.ok(w)
+	case "detach":
+		delete(s.Association[id], *spec.ObjectID)
+		s.ok(w)
 	case "list-attached-objects":
 		var ids []internal.AssociatedObject
-		for id := range s.Association[spec.TagID] {
+		for id := range s.Association[id] {
 			ids = append(ids, id)
 		}
 		s.ok(w, ids)
