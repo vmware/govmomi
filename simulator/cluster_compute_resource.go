@@ -304,6 +304,7 @@ func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConf
 	}
 
 	cluster := &ClusterComputeResource{}
+	cluster.EnvironmentBrowser = newEnvironmentBrowser()
 	cluster.Name = name
 	cluster.Summary = &types.ClusterComputeResourceSummary{
 		UsageSummary: new(types.ClusterUsageSummary),

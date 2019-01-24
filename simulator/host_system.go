@@ -142,6 +142,7 @@ func CreateDefaultESX(f *Folder) {
 	addComputeResource(summary, host)
 
 	cr := &mo.ComputeResource{Summary: summary}
+	cr.EnvironmentBrowser = newEnvironmentBrowser()
 	cr.Self = *host.Parent
 	cr.Name = host.Name
 	cr.Host = append(cr.Host, host.Reference())
@@ -176,7 +177,8 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 		ConfigurationEx: &types.ComputeResourceConfigInfo{
 			VmSwapPlacement: string(types.VirtualMachineConfigInfoSwapPlacementTypeVmDirectory),
 		},
-		Summary: summary,
+		Summary:            summary,
+		EnvironmentBrowser: newEnvironmentBrowser(),
 	}
 
 	Map.PutEntity(cr, Map.NewEntity(host))

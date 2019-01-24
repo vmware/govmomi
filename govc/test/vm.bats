@@ -838,3 +838,16 @@ load test_helper
   run govc vm.power -on "$id"
   assert_failure
 }
+
+@test "vm.option.info" {
+  vcsim_env
+
+  run govc vm.option.info -host "$GOVC_HOST"
+  assert_success
+
+  run govc vm.option.info -cluster "$(dirname "$GOVC_HOST")"
+  assert_success
+
+  run govc vm.option.info -vm DC0_H0_VM0
+  assert_success
+}
