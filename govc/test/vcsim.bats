@@ -261,3 +261,32 @@ load test_helper
   [[ "$url" != *"https://[::]:"* ]]
   vcsim_stop
 }
+
+@test "vcsim vapi auth" {
+  vcsim_env
+
+  url=$(govc env GOVC_URL)
+
+  run curl -fsk "https://$url/rest/com/vmware/cis/tagging/tag"
+  [ "$status" -ne 0 ] # not authenticated
+
+  run curl -fsk -X POST "https://$url/rest/com/vmware/cis/session"
+  [ "$status" -ne 0 ] # no basic auth header
+
+  run curl -fsk -X POST --user user: "https://$url/rest/com/vmware/cis/session"
+  [ "$status" -ne 0 ] # no password
+
+  run curl -fsk -X POST --user "$USER:pass" "https://$url/rest/com/vmware/cis/session"
+  assert_success # login with user:pass
+
+  id=$(jq -r .value <<<"$output")
+
+  run curl -fsk "https://$url/rest/com/vmware/cis/session"
+  [ "$status" -ne 0 ] # no header or cookie
+
+  run curl -fsk "https://$url/rest/com/vmware/cis/session" -H "vmware-api-session-id:$id"
+  assert_success # valid session header
+
+  user=$(jq -r .value.user <<<"$output")
+  assert_equal "$USER" "$user"
+}
