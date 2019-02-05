@@ -29,6 +29,8 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -91,6 +93,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	res := infoResult{
 		finder: finder,
 		ctx:    ctx,
+		client: c,
 	}
 
 	if !cmd.OutputFlag.All() {
@@ -134,6 +137,7 @@ type infoResult struct {
 	objects     []*object.Datacenter
 	finder      *find.Finder
 	ctx         context.Context
+	client      *vim25.Client
 }
 
 func (r *infoResult) Write(w io.Writer) error {
@@ -163,8 +167,30 @@ func (r *infoResult) Write(w io.Writer) error {
 		clusters, _ := r.finder.ClusterComputeResourceList(r.ctx, path.Join(folders.HostFolder.InventoryPath, "*"))
 		fmt.Fprintf(tw, "  Clusters:\t%d\n", len(clusters))
 
-		vms, _ := r.finder.VirtualMachineList(r.ctx, path.Join(folders.VmFolder.InventoryPath, "*"))
-		fmt.Fprintf(tw, "  Virtual Machines:\t%d\n", len(vms))
+		manager := view.NewManager(r.client)
+
+		v, err := manager.CreateContainerView(r.ctx, r.client.ServiceContent.RootFolder, []string{"VirtualMachine"}, true)
+		if err != nil {
+			return err
+		}
+
+		var vms []mo.VirtualMachine
+		err = v.Retrieve(r.ctx, []string{"VirtualMachine"}, []string{"summary.config.template"}, &vms)
+		if err != nil {
+			return err
+		}
+
+		defer v.Destroy(r.ctx)
+
+		totalVms := 0
+		for _, vm := range vms {
+			if vm.Summary.Config.Template {
+				continue
+			}
+			totalVms++
+		}
+
+		fmt.Fprintf(tw, "  Virtual Machines:\t%d\n", totalVms)
 
 		fmt.Fprintf(tw, "  Networks:\t%d\n", len(dc.Network))
 		fmt.Fprintf(tw, "  Datastores:\t%d\n", len(dc.Datastore))
