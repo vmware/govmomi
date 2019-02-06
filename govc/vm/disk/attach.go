@@ -72,7 +72,8 @@ func (cmd *attach) Description() string {
 
 Examples:
   govc vm.disk.attach -vm $name -disk $name/disk1.vmdk
-  govc vm.disk.attach -vm $name -disk $name/shared.vmdk -link=false -sharing sharingMultiWriter`
+  govc vm.disk.attach -vm $name -disk $name/shared.vmdk -link=false -sharing sharingMultiWriter
+  govc device.remove -vm $name -keep disk-* # detach disk(s)`
 }
 
 func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
