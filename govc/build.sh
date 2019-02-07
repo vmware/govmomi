@@ -8,8 +8,9 @@ git_version=$(git describe --dirty)
   exit 1
 fi
 
+PROGRAM_NAME=govc
 PROJECT_PKG="github.com/vmware/govmomi"
-PROGRAM_PKG="${PROJECT_PKG}/$(basename "$(dirname "${0}")")"
+PROGRAM_PKG="${PROJECT_PKG}/${PROGRAM_NAME}"
 
 export LDFLAGS="-w -X ${PROGRAM_PKG}/version.gitVersion=${git_version}"
 export BUILD_OS="${BUILD_OS:-darwin linux windows freebsd}"
