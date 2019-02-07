@@ -11,19 +11,10 @@ fi
 PROJECT_PKG="github.com/vmware/govmomi"
 PROGRAM_PKG="${PROJECT_PKG}/$(basename "$(dirname "${0}")")"
 
-CDIR=$(cd "$(dirname "${0}")" && pwd)
-cd "$CDIR"
-# Workaround when GOPATH is not defined
-mkdir -p "gopath/src/$(dirname "${PROJECT_PKG}")"
-if [ ! -s "gopath/src/${PROJECT_PKG}" ]; then
-  ln -sf ../../../../../ "gopath/src/${PROJECT_PKG}"
-fi
-
-export GOPATH="${CDIR}/gopath"
 export LDFLAGS="-w -X ${PROGRAM_PKG}/version.gitVersion=${git_version}"
 export BUILD_OS="${BUILD_OS:-darwin linux windows freebsd}"
 export BUILD_ARCH="${BUILD_ARCH:-386 amd64}"
 
 set -x
-make -C "${GOPATH}/src/${PROGRAM_PKG}" -j build-all
+make -C "$(go env GOPATH)/src/${PROGRAM_PKG}" -j build-all
 set +x
