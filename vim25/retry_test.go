@@ -73,12 +73,10 @@ func TestRetry(t *testing.T) {
 	}
 
 	for _, tc := range tcs {
-		var rt soap.RoundTripper
-
-		rt = &fakeRoundTripper{errs: tc.errs}
+		var rt soap.RoundTripper = &fakeRoundTripper{errs: tc.errs}
 		rt = Retry(rt, TemporaryNetworkError(2))
 
-		err := rt.RoundTrip(nil, nil, nil)
+		err := rt.RoundTrip(context.TODO(), nil, nil)
 		if err != tc.expected {
 			t.Errorf("Expected: %s, got: %s", tc.expected, err)
 		}
