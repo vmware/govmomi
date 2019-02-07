@@ -373,7 +373,7 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 	} else if cmd.StoragePod == nil && cmd.Datastore != nil {
 		datastoreref = cmd.Datastore.Reference()
 	} else {
-		return nil, fmt.Errorf("Please provide either a datastore or a storagepod")
+		return nil, fmt.Errorf("please provide either a datastore or a storagepod")
 	}
 
 	// Set the destination datastore
@@ -395,7 +395,7 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 		_, err := datastore.Stat(ctx, vmxPath)
 		if err == nil {
 			dsPath := cmd.Datastore.Path(vmxPath)
-			return nil, fmt.Errorf("File %s already exists", dsPath)
+			return nil, fmt.Errorf("file %s already exists", dsPath)
 		}
 	}
 
@@ -408,8 +408,8 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 		if err != nil {
 			return nil, err
 		}
-		if exists == false {
-			return nil, fmt.Errorf("Customization specification %s does not exists.", cmd.customization)
+		if !exists {
+			return nil, fmt.Errorf("customization specification %s does not exists", cmd.customization)
 		}
 		// get the customization specification
 		customSpecItem, err := customizationSpecManager.GetCustomizationSpec(ctx, cmd.customization)

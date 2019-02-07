@@ -139,7 +139,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	if vdmMatch == false {
+	if !vdmMatch {
 		return errors.New("please specify a valid disk mode")
 	}
 

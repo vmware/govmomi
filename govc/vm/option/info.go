@@ -83,7 +83,7 @@ Examples:
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	vmf := cmd.VirtualMachineFlag
 
-	if vmf.JSON == false && vmf.Dump == false {
+	if !vmf.JSON && !vmf.Dump {
 		vmf.Dump = true // Default to -dump as there is no plain-text format atm
 	}
 

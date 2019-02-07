@@ -462,7 +462,7 @@ func vncOptionsFromExtraConfig(ov []types.BaseOptionValue) vncOptions {
 }
 
 func (vo vncOptions) ToExtraConfig() []types.BaseOptionValue {
-	ov := make([]types.BaseOptionValue, 0, 0)
+	ov := make([]types.BaseOptionValue, 0)
 	for k, v := range vo {
 		key := vncPrefix + k
 		value := v

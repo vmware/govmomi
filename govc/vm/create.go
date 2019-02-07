@@ -370,7 +370,7 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		_, err := datastore.Stat(ctx, vmxPath)
 		if err == nil {
 			dsPath := cmd.Datastore.Path(vmxPath)
-			return nil, fmt.Errorf("File %s already exists", dsPath)
+			return nil, fmt.Errorf("file %s already exists", dsPath)
 		}
 	}
 

@@ -140,10 +140,10 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		err = task.Wait(ctx)
 		if err != nil {
-			return fmt.Errorf("Error adding device %+v \n with backing %+v \nLogged Item:  %s", device, backing, err)
+			return fmt.Errorf("error adding device %+v \n with backing %+v \nLogged Item:  %s", device, backing, err)
 		}
 		return nil
 
 	}
-	return fmt.Errorf("Error: No LUN with device name containing %s found", cmd.device)
+	return fmt.Errorf("error: No LUN with device name containing %s found", cmd.device)
 }
