@@ -1,7 +1,7 @@
-[![Build Status](https://travis-ci.org/vmware/govmomi.png?branch=master)](https://travis-ci.org/vmware/govmomi)
-[![Go Report Card](https://goreportcard.com/badge/github.com/vmware/govmomi)](https://goreportcard.com/report/github.com/vmware/govmomi)
-
 # govmomi
+
+[![Build Status](https://travis-ci.org/vmware/govmomi.svg?branch=master)](https://travis-ci.org/vmware/govmomi)
+[![Go Report Card](https://goreportcard.com/badge/github.com/vmware/govmomi)](https://goreportcard.com/report/github.com/vmware/govmomi)
 
 A Go library for interacting with VMware vSphere APIs (ESXi and/or vCenter).
 

@@ -1,4 +1,3 @@
-# changelog
 
 ### 0.22.2 (2020-02-04)
 
@@ -66,330 +65,379 @@
 
 ### 0.20.0 (2019-02-06)
 
-* Add vslm package for managing First Class Disks
+### Build
+
+* Refactored Travis-CI to use containers
+
+### Govc
+
+* fix object.collect error for multiple objects with same path
+* add device name match support to device.ls and device.remove
+* add vm.disk.attach -mode flag
+* add category option to relevant tags commands
+* add vm.create -version option
+* fields.set can now add missing fields
+* add fields.info command
 
-* Add LoginByToken to session KeepAliveHandler
+### Vcsa
 
-### 0.19.0 (2018-09-30)
+* bump to 6.7.0 U1
 
-* New vapi/rest and and vapi/tags packages
+### Vcsim
 
-* Allowing the use of STS for exchanging tokens
+* require authentication in vapi simulator
+* Resolve issue making device changes on clone (resolves [#1355](https://github.com/vmware/govmomi/issues/1355))
+* fix SearchDatastore task info entity
+* add EnvironmentBrowser support
+* avoid zero IP address in GOVC_URL output
+* avoid panic when event template is not defined
+* implement RefreshStorageInfo method for virtual machine
+* configure HostSystem port
+* datastore.upload now creates missing directories in destination path.
+* add option to run container as vm
+* add SessionIsActive support
+* fix fault detail encoding
+* support base types in property filter
+* PropertyCollector should not require PathSet
+* allow '.' in vm name
+* populate VM guest.net field
+* add SearchIndex FindByDnsName support
+* correct property update in RemoveSnapshotTask
+* update VM snapshot methods to change VM properties with UpdateObject
+* support setting vm fields via extraConfig
+* update VM configureDevices method to change VM properties with UpdateObject
+* update VM device add operation - stricter key generation, new InvalidDeviceSpec condition
+* add PBM support
+* put VM into registry earlier during CreateVM
+* add datastore access check for vm host placement
+* add task_manager description property templates
+* fix defaults when generating vmdk paths
+* fix custom_fields_manager test
+* replace HostSystem template IP with vcsim listen address
+* Change CustomFieldsManager SetField to use ctx.WithLock and add InvalidArgument fault check.
+* update DVS methods to use UpdateObject instead of setting fields directly
+* add vslm support
+* add setCustomValue support
+* add fault message to PropertyCollector RetrieveProperties
+* add HistoryCollector scrollable view support
 
-* Add object.VirtualMachine.UUID method
 
-* SetRootCAs on the soap.Client returns an error for invalid certificates
+<a name="v0.19.0"></a>
+## [v0.19.0](https://github.com/vmware/govmomi/compare/v0.18.0...v0.19.0) (2018-09-30)
+
+### Example
 
-* Add ClusterComputeResource.MoveInto method
+* uniform unit for host memory
 
-### 0.18.0 (2018-05-24)
+### Govc
 
-* Add VirtualDiskManager wrapper to set UUID
+* fix test case for new cluster.rule.info command
+* add new command cluster.rule.info
 
-* Add vmxnet2, pcnet32 and sriov to VirtualDeviceList.EthernetCardTypes
+### README
 
-* Add new vSphere 6.7 APIs
+* Fix path to LICENSE.txt file
 
-* Decrease LoginExtensionByCertificate tunnel usage
+### Vcsa
 
-* SAML token authentication support via SessionManager.LoginByToken
+* bump to 6.7.0d
+* bump to 6.7.0c release
+* bump to 6.7.0a release
 
-* New SSO admin client for managing users
+### Vcsim
 
-* New STS client for issuing and renewing SAML tokens
+* add dvpg networks to HostSystem.Parent
+* add support for tags API
+* Logout should not unregister PropertyCollector singleton
+* add ResetVM and SuspendVM support
+* add support for PropertyCollector incremental updates
+* do not include DVS in HostSystem.Network
 
-* New Lookup Service client for discovering endpoints such as STS and ssoadmin
 
-* Switch from gvt to go dep for managing dependencies
+<a name="v0.18.0"></a>
+## [v0.18.0](https://github.com/vmware/govmomi/compare/v0.17.1...v0.18.0) (2018-05-24)
+
+### Govc
+
+* import.ovf pool flag should be optional if host is specified
+* avoid Login() attempt if username is not set
+* add json support to find command
+* fix host.esxcli error handling
+
+### Vcsim
+
+* add STS simulator
+* use VirtualDisk CapacityInKB for device summary
+* add property collector field type mapping for integer arrays
+
+
+<a name="v0.17.1"></a>
+## [v0.17.1](https://github.com/vmware/govmomi/compare/v0.17.0...v0.17.1) (2018-03-19)
+
+### Vcsim
+
+* add Destroy method for Folder and Datacenter types
+* add EventManager.QueryEvents
+
+
+<a name="v0.17.0"></a>
+## [v0.17.0](https://github.com/vmware/govmomi/compare/v0.16.0...v0.17.0) (2018-02-28)
+
+### Govc
+
+* fix vm.clone to use -net flag when source does not have a NIC
+* object.collect support for raw filters
+* fix host.info CPU usage
+* add -cluster flag to license.assign command
+* allow columns in guest login password ([#972](https://github.com/vmware/govmomi/issues/972))
+
+### Object
+
+* Return correct helper object for OpaqueNetwork
+
+### Toolbox
+
+* validate request offset in ListFiles ([#946](https://github.com/vmware/govmomi/issues/946))
+
+### Vcsim
+
+* add simulator.Datastore type
+* set VirtualMachine summary.config.instanceUuid
+* update HostSystem.Summary.Host reference
+* add EventManager support
+* stats related fixes
+* avoid data races
+* respect VirtualDeviceConfigSpec FileOperation
+* avoid keeping the VM log file open
+* add UpdateOptions support
+* add session support
+* Add VM.MarkAsTemplate support
+* more input spec honored in ReConfig VM
+* Initialize VM fields properly
+* Honor the input spec in ReConfig VM
+* Add HostLocalAccountManager
+* workaround xml ns issue with pyvsphere ([#958](https://github.com/vmware/govmomi/issues/958))
+* add MakeDirectoryResponse ([#938](https://github.com/vmware/govmomi/issues/938))
+* copy RoleList for AuthorizationManager ([#932](https://github.com/vmware/govmomi/issues/932))
+* apply vm spec NumCoresPerSocket ([#930](https://github.com/vmware/govmomi/issues/930))
+* Configure dvs with the dvs config spec
+* Add VirtualMachine guest ID validation ([#921](https://github.com/vmware/govmomi/issues/921))
+* add QueryVirtualDiskUuid ([#920](https://github.com/vmware/govmomi/issues/920))
+* update ServiceContent to 6.5 ([#917](https://github.com/vmware/govmomi/issues/917))
 
-### 0.17.1 (2018-03-19)
 
-* vcsim: add Destroy method for Folder and Datacenter types
+<a name="v0.16.0"></a>
+## [v0.16.0](https://github.com/vmware/govmomi/compare/v0.15.0...v0.16.0) (2017-11-08)
 
-* In progress.Reader emit final report on EOF.
+### Govc
 
-* vcsim: add EventManager.QueryEvents
+* Fix VM clone when source doesn't have vNics
+* add tasks and task.cancel commands
+* add reboot option to host.shutdown
 
-### 0.17.0 (2018-02-28)
+### Readme
 
-* Add HostStorageSystem.AttachScsiLun method
+* fix formatting of listing ([#908](https://github.com/vmware/govmomi/issues/908))
 
-* Avoid possible panic in Datastore.Stat (#969)
+### Toolbox
 
-* Destroy event history collectors (#962)
+* avoid race when closing channels on stop
+* reset session when invalidated by the vmx
+* default to tar format for directory archives
+* make gzip optional for directory archive transfer
+* avoid blocking the RPC channel when transferring process IO
+* use host management IP for guest file transfer
+* add Client Upload and Download methods
+* support single file download via archive handler
+* SendGuestInfo before the vmx asks us to
+* update vmw-guestinfo
+* remove receiver from DefaultStartCommand
+* map exec.ErrNotFound to vix.FileNotFound
+* pass URL to ArchiveHandler Read/Write methods
+* make directory archive read/write customizable
+* add http and exec round trippers
+* fix ListFiles when given a symlink
+* support transferring /proc files from guest
 
-* Add VirtualDiskManager.CreateChildDisk method
+### Vcsim
 
-### 0.16.0 (2017-11-08)
+* preserve order in QueryIpPools ([#914](https://github.com/vmware/govmomi/issues/914))
+* return moref from Task.Run ([#913](https://github.com/vmware/govmomi/issues/913))
+* Implement IpPoolManager lifecycle
+* add autostart option to power on VMs ([#906](https://github.com/vmware/govmomi/issues/906))
+* use soapenv namespace for Fault types
+* various property additions
+* Generate similar ref value like VC
+* Add moref to vm's summary
+* validate authz privilege ids
+* AuthorizationManager additions
+* Add IpPoolManager
+* VirtualDisk file backing datastore is optional
+* add PerformanceManager
+* Implement add/update/remove roles
+* Generate device filename in CreateVM
+* add AuthorizationManager
+* populate vm snapshot fields
+* Add UpdateNetworkConfig to HostNetworkSystem
+* Implement virtual machine snapshot
+* set VirtualDisk backing datastore
+* Implement enter/exit maintenance mode
+* Implement add/remove license
+* add portgroup related operations
+* add fields support
+* remove use of df program for datastore info
+* add FileQuery support to datastore search
+* add HostConfigInfo template
+* add HostSystem hardware property
+* Fix merging of default devices
+* Add cdrom and scsi controller to Model VMs
 
-* Add support for SOAP request operation ID header
+### Vim25
 
-* Moved ovf helpers from govc import.ovf command to ovf and nfc packages
+* Move internal stuff to internal package
 
-* Added guest/toolbox (client) package
+### Vscim
 
-* Added toolbox package and toolbox command
+* Implement UserDirectory
 
-* Added simulator package and vcsim command
 
-### 0.15.0 (2017-06-19)
+<a name="v0.15.0"></a>
+## [v0.15.0](https://github.com/vmware/govmomi/compare/v0.14.0...v0.15.0) (2017-06-19)
 
-* WaitOptions.MaxWaitSeconds is now optional
 
-* Support removal of ExtraConfig entries
+<a name="v0.14.0"></a>
+## [v0.14.0](https://github.com/vmware/govmomi/compare/v0.13.0...v0.14.0) (2017-04-08)
 
-* GuestPosixFileAttributes OwnerId and GroupId fields are now pointers,
-  rather than omitempty ints to allow chown with root uid:gid
+### Emacs
 
-* Updated examples/ using view package
+* add metric select
 
-* Add DatastoreFile.TailFunc method
+### Finder
 
-* Export VirtualMachine.FindSnapshot method
+* support changing object root in find mode
 
-* Add AuthorizationManager {Enable,Disable}Methods
 
-* Add PBM client
+<a name="v0.13.0"></a>
+## [v0.13.0](https://github.com/vmware/govmomi/compare/v0.12.1...v0.13.0) (2017-03-02)
 
-### 0.14.0 (2017-04-08)
+### Emacs
 
-* Add view.ContainerView type and methods
+* add govc-command-history
 
-* Add Collector.RetrieveWithFilter method
+### Finder
 
-* Add property.Filter type
+* support automatic Folder recursion ([#663](https://github.com/vmware/govmomi/issues/663))
 
-* Implement EthernetCardBackingInfo for OpaqueNetwork
+### Vcsim
 
-* Finder: support changing object root in find mode
+* esxcli FirewallInfo fixes ([#661](https://github.com/vmware/govmomi/issues/661))
 
-* Add VirtualDiskManager.QueryVirtualDiskInfo
 
-* Add performance.Manager APIs
+<a name="v0.12.1"></a>
+## [v0.12.1](https://github.com/vmware/govmomi/compare/v0.12.0...v0.12.1) (2016-12-19)
 
-### 0.13.0 (2017-03-02)
 
-* Add DatastoreFileManager API wrapper
+<a name="v0.12.0"></a>
+## [v0.12.0](https://github.com/vmware/govmomi/compare/v0.11.4...v0.12.0) (2016-12-01)
 
-* Add HostVsanInternalSystem API wrappers
 
-* Add Container support to view package
+<a name="v0.11.4"></a>
+## [v0.11.4](https://github.com/vmware/govmomi/compare/v0.11.3...v0.11.4) (2016-11-15)
 
-* Finder supports Folder recursion without specifying a path
 
-* Add VirtualMachine.QueryConfigTarget method
+<a name="v0.11.3"></a>
+## [v0.11.3](https://github.com/vmware/govmomi/compare/v0.11.2...v0.11.3) (2016-11-08)
 
-* Add device option to VirtualMachine.WaitForNetIP
 
-* Remove _Task suffix from vapp methods
+<a name="v0.11.2"></a>
+## [v0.11.2](https://github.com/vmware/govmomi/compare/v0.11.1...v0.11.2) (2016-11-01)
 
-### 0.12.1 (2016-12-19)
 
-* Add DiagnosticLog helper
+<a name="v0.11.1"></a>
+## [v0.11.1](https://github.com/vmware/govmomi/compare/v0.11.0...v0.11.1) (2016-10-27)
 
-* Add DatastorePath helper
 
-### 0.12.0 (2016-12-01)
+<a name="v0.11.0"></a>
+## [v0.11.0](https://github.com/vmware/govmomi/compare/v0.10.0...v0.11.0) (2016-10-25)
 
-* Disable use of service ticket for datastore HTTP access by default
 
-* Attach context to HTTP requests for cancellations
+<a name="v0.10.0"></a>
+## [v0.10.0](https://github.com/vmware/govmomi/compare/v0.9.0...v0.10.0) (2016-10-20)
 
-* Update to vim25/6.5 API
 
-### 0.11.4 (2016-11-15)
+<a name="v0.9.0"></a>
+## [v0.9.0](https://github.com/vmware/govmomi/compare/v0.8.0...v0.9.0) (2016-09-09)
 
-* Add object.AuthorizationManager methods: RetrieveRolePermissions, RetrieveAllPermissions, AddRole, RemoveRole, UpdateRole
+### Emacs
 
-### 0.11.3 (2016-11-08)
+* add govc-session-network
+* add govc json diff
 
-* Allow DatastoreFile.Follow reader to drain current body after stopping
 
-### 0.11.2 (2016-11-01)
+<a name="v0.8.0"></a>
+## [v0.8.0](https://github.com/vmware/govmomi/compare/v0.7.1...v0.8.0) (2016-06-30)
 
-* Avoid possible NPE in VirtualMachine.Device method
 
-* Add support for OpaqueNetwork type to Finder
+<a name="v0.7.1"></a>
+## [v0.7.1](https://github.com/vmware/govmomi/compare/v0.7.0...v0.7.1) (2016-06-03)
 
-* Add HostConfigManager.AccountManager support for ESX 5.5
 
-### 0.11.1 (2016-10-27)
+<a name="v0.7.0"></a>
+## [v0.7.0](https://github.com/vmware/govmomi/compare/v0.6.2...v0.7.0) (2016-06-02)
 
-* Add Finder.ResourcePoolListAll method
 
-### 0.11.0 (2016-10-25)
+<a name="v0.6.2"></a>
+## [v0.6.2](https://github.com/vmware/govmomi/compare/v0.6.1...v0.6.2) (2016-05-13)
 
-* Add object.DistributedVirtualPortgroup.Reconfigure method
 
-### 0.10.0 (2016-10-20)
+<a name="v0.6.1"></a>
+## [v0.6.1](https://github.com/vmware/govmomi/compare/v0.6.0...v0.6.1) (2016-04-30)
 
-* Add option to set soap.Client.UserAgent
 
-* Add service ticket thumbprint validation
+<a name="v0.6.0"></a>
+## [v0.6.0](https://github.com/vmware/govmomi/compare/v0.5.0...v0.6.0) (2016-04-29)
 
-* Update use of http.DefaultTransport fields to 1.7
 
-* Set default locale to en_US (override with GOVMOMI_LOCALE env var)
+<a name="v0.5.0"></a>
+## [v0.5.0](https://github.com/vmware/govmomi/compare/v0.4.0...v0.5.0) (2016-03-30)
 
-* Add object.HostCertificateInfo (types.HostCertificateManagerCertificateInfo helpers)
 
-* Add object.HostCertificateManager type and HostConfigManager.CertificateManager method
+<a name="v0.4.0"></a>
+## [v0.4.0](https://github.com/vmware/govmomi/compare/v0.3.0...v0.4.0) (2016-02-26)
 
-* Add soap.Client SetRootCAs and SetDialTLS methods
 
-### 0.9.0 (2016-09-09)
+<a name="v0.3.0"></a>
+## [v0.3.0](https://github.com/vmware/govmomi/compare/v0.2.0...v0.3.0) (2016-01-15)
 
-* Add object.DatastoreFile helpers for streaming and tailing datastore files
+### VirtualMachine
 
-* Add object VirtualMachine.Unregister method
+* Add Customize function on object.VirtualMachine
 
-* Add object.ListView methods: Add, Remove, Reset
 
-* Update to Go 1.7 - using stdlib's context package
+<a name="v0.2.0"></a>
+## [v0.2.0](https://github.com/vmware/govmomi/compare/prerelease-v0.1.0-73-gfc131d4...v0.2.0) (2015-09-15)
 
-### 0.8.0 (2016-06-30)
+### Reverts
 
-* Add session.Manager.AcquireLocalTicket
+* Add Host information to vm.info
 
-* Include StoragePod in Finder.FolderList
 
-* Add Finder methods for finding by ManagedObjectReference: Element, ObjectReference
+<a name="prerelease-v0.1.0-73-gfc131d4"></a>
+## [prerelease-v0.1.0-73-gfc131d4](https://github.com/vmware/govmomi/compare/prerelease-v0.1.0-62-g7734772...prerelease-v0.1.0-73-gfc131d4) (2015-07-13)
 
-* Add mo.ManagedObjectReference methods: Reference, String, FromString
 
-* Add support using SessionManagerGenericServiceTicket.HostName for Datastore HTTP access
+<a name="prerelease-v0.1.0-62-g7734772"></a>
+## [prerelease-v0.1.0-62-g7734772](https://github.com/vmware/govmomi/compare/prerelease-v0.1.0-52-g871f5d4...prerelease-v0.1.0-62-g7734772) (2015-07-06)
 
-### 0.7.1 (2016-06-03)
 
-* Fix object.ObjectName method
+<a name="prerelease-v0.1.0-52-g871f5d4"></a>
+## [prerelease-v0.1.0-52-g871f5d4](https://github.com/vmware/govmomi/compare/v0.1.0...prerelease-v0.1.0-52-g871f5d4) (2015-06-16)
 
-### 0.7.0 (2016-06-02)
+### Reverts
 
-* Move InventoryPath field to object.Common
+* Fix git dirty status error in build script
 
-* Add HostDatastoreSystem.CreateLocalDatastore method
 
-* Add DatastoreNamespaceManager methods: CreateDirectory, DeleteDirectory
+<a name="v0.1.0"></a>
+## [v0.1.0](https://github.com/vmware/govmomi/compare/test...v0.1.0) (2015-03-17)
 
-* Add HostServiceSystem
-
-* Add HostStorageSystem methods: MarkAsSdd, MarkAsNonSdd, MarkAsLocal, MarkAsNonLocal
-
-* Add HostStorageSystem.RescanAllHba method
-
-### 0.6.2 (2016-05-11)
-
-* Get complete file details in Datastore.Stat
-
-* SOAP decoding fixes
-
-* Add VirtualMachine.RemoveAllSnapshot
-
-### 0.6.1 (2016-04-30)
-
-* Fix mo.Entity interface
-
-### 0.6.0 (2016-04-29)
-
-* Add Common.Rename method
-
-* Add mo.Entity interface
-
-* Add OptionManager
-
-* Add Finder.FolderList method
-
-* Add VirtualMachine.WaitForNetIP method
-
-* Add VirtualMachine.RevertToSnapshot method
-
-* Add Datastore.Download method
-
-### 0.5.0 (2016-03-30)
-
-Generated fields using xsd type 'int' change to Go type 'int32'
-
-VirtualDevice.UnitNumber field changed to pointer type
-
-### 0.4.0 (2016-02-26)
-
-* Add method to convert virtual device list to array with virtual device
-  changes that can be used in the VirtualMachineConfigSpec.
-
-* Make datastore cluster traversable in lister
-
-* Add finder.DatastoreCluster methods (also known as storage pods)
-
-* Add Drone CI check
-
-* Add object.Datastore Type and AttachedClusterHosts methods
-
-* Add finder.*OrDefault methods
-
-### 0.3.0 (2016-01-16)
-
-* Add object.VirtualNicManager wrapper
-
-* Add object.HostVsanSystem wrapper
-
-* Add object.HostSystem methods: EnterMaintenanceMode, ExitMaintenanceMode, Disconnect, Reconnect
-
-* Add finder.Folder method
-
-* Add object.Common.Destroy method
-
-* Add object.ComputeResource.Reconfigure method
-
-* Add license.AssignmentManager wrapper
-
-* Add object.HostFirewallSystem wrapper
-
-* Add object.DiagnosticManager wrapper
-
-* Add LoginExtensionByCertificate support
-
-* Add object.ExtensionManager
-
-...
-
-### 0.2.0 (2015-09-15)
-
-* Update to vim25/6.0 API
-
-* Stop returning children from `ManagedObjectList`
-
-    Change the `ManagedObjectList` function in the `find` package to only
-    return the managed objects specified by the path argument and not their
-    children. The original behavior was used by govc's `ls` command and is
-    now available in the newly added function `ManagedObjectListChildren`.
-
-* Add retry functionality to vim25 package
-
-* Change finder functions to no longer take varargs
-
-    The `find` package had functions to return a list of objects, given a
-    variable number of patterns. This makes it impossible to distinguish which
-    patterns produced results and which ones didn't.
-
-    In particular for govc, where multiple arguments can be passed from the
-    command line, it is useful to let the user know which ones produce results
-    and which ones don't.
-
-    To evaluate multiple patterns, the user should call the find functions
-    multiple times (either serially or in parallel).
-
-* Make optional boolean fields pointers (`vim25/types`).
-
-    False is the zero value of a boolean field, which means they are not serialized
-    if the field is marked "omitempty". If the field is a pointer instead, the zero
-    value will be the nil pointer, and both true and false values are serialized.
-
-### 0.1.0 (2015-03-17)
-
-Prior to this version the API of this library was in flux.
-
-Notable changes w.r.t. the state of this library before March 2015 are:
-
-* All functions that may execute a request take a `context.Context` parameter.
-* The `vim25` package contains a minimal client implementation.
-* The property collector and its convenience functions live in the `property` package.

@@ -31,3 +31,11 @@ test: go-test govc-test
 
 doc: install
 	./govc/usage.sh > ./govc/USAGE.md
+
+changelog:
+	@echo building changelog...
+	@command -v git-chglog >/dev/null 2>&1 || go get github.com/git-chglog/git-chglog/cmd/git-chglog
+	@git-chglog -o CHANGELOG.md v0.1.0..
+
+prepare-release: doc changelog
+	./scripts/contributors.sh

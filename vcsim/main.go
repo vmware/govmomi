@@ -46,6 +46,12 @@ import (
 	_ "github.com/vmware/govmomi/vapi/simulator"
 )
 
+// vcsim does not track versions like govc does, it only shows if a binary was
+// built during a tag event or from a git checkout.
+const Version = "dev"
+
+var GitVersion string
+
 func main() {
 	model := simulator.VPX()
 
@@ -84,6 +90,8 @@ func main() {
 	methodDelayP := flag.String("method-delay", "", "Delay per method on the form 'method1:delay1,method2:delay2...'")
 	flag.Float64Var(&model.DelayConfig.DelayJitter, "delay-jitter", model.DelayConfig.DelayJitter, "Delay jitter coefficient of variation (tip: 0.5 is a good starting value)")
 
+	ver := flag.Bool("version", false, "Show vcsim version number")
+
 	flag.Parse()
 
 	if *trace != "" {
@@ -93,6 +101,15 @@ func main() {
 			log.Fatal(err)
 		}
 		simulator.Trace = true
+	}
+	// if -version is requested, print it and exit cleanly
+	if *ver {
+		v := GitVersion
+		if v == "" {
+			v = Version
+		}
+		fmt.Printf("vcsim %s\n", v)
+		os.Exit(0)
 	}
 
 	methodDelay := *methodDelayP
