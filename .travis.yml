@@ -35,7 +35,7 @@ jobs:
     - <<:            *lint-stage
       env:           LINTER=goimports
 
-    # The "build" stage verifies the program can be built against the 
+    # The "build" stage verifies the program can be built against the
     # various GOOS and GOARCH combinations found in the Go releaser
     # config file, ".goreleaser.yml".
     - &build-stage
@@ -89,6 +89,9 @@ jobs:
       - provider:     script
         skip_cleanup: true
         script:       curl -sL http://git.io/goreleaser | bash
+        on:
+          tags: true
+          condition: $TRAVIS_OS_NAME = linux
       addons:
         apt:
           update:     true
