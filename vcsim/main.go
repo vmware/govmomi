@@ -113,7 +113,10 @@ func main() {
 	f := flag.Lookup("httptest.serve")
 	serve := f.Value.String()
 	if serve == "" {
-		_ = f.Value.Set(*listen) // propagate -l unless -httptest.serve is specified
+		err = f.Value.Set(*listen) // propagate -l unless -httptest.serve is specified
+		if err != nil {
+			log.Fatal(err)
+		}
 	} else {
 		*listen = serve // propagate to updateHostTemplate call below
 	}
@@ -197,7 +200,10 @@ func main() {
 
 	fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
 	if out != os.Stdout {
-		_ = out.Close()
+		err = out.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	sig := make(chan os.Signal, 1)
