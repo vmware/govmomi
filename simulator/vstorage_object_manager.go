@@ -191,7 +191,7 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 		path.Path = dir + "/" + id + ".vmdk"
 	}
 
-	if register == false {
+	if !register {
 		err := dm.createVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
 			Datacenter: &dc.Self,
 			Name:       path.String(),

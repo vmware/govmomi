@@ -657,12 +657,12 @@ func TestCreateVmWithDevices(t *testing.T) {
 		if ok {
 			ndisk++
 			summary := disk.DeviceInfo.GetDescription().Summary
-			if "1,024 KB" != summary {
+			if summary != "1,024 KB" {
 				t.Errorf("expected '1,1024 KB', got %s", summary)
 			}
 		}
 	}
-	if 2 != ndisk {
+	if ndisk != 2 {
 		t.Errorf("expected 1 disk, got %d", ndisk)
 	}
 }
