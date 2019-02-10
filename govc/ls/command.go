@@ -78,7 +78,7 @@ func (cmd *ls) typeMatch(ref types.ManagedObjectReference) bool {
 		return true
 	}
 
-	return strings.ToLower(cmd.Type) == strings.ToLower(ref.Type)
+	return strings.EqualFold(cmd.Type, ref.Type)
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {

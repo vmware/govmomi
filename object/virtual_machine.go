@@ -569,7 +569,7 @@ func (v VirtualMachine) FindSnapshot(ctx context.Context, name string) (*types.M
 	}
 
 	if o.Snapshot == nil || len(o.Snapshot.RootSnapshotList) == 0 {
-		return nil, errors.New("No snapshots for this VM")
+		return nil, errors.New("no snapshots for this VM")
 	}
 
 	m := make(snapshotMap)

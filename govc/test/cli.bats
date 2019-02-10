@@ -99,7 +99,7 @@ load test_helper
   vcsim_env -esx
 
   run env GOVC_MIN_API_VERSION=24.4 govc about
-  assert grep -q "^govc: Require API version \"24.4\"," <<<"${output}"
+  assert grep -q "^govc: require API version \"24.4\"," <<<"${output}"
 
   run env GOVC_MIN_API_VERSION=no.no govc about
   assert_failure

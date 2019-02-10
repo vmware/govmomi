@@ -267,7 +267,7 @@ func (cmd *keystrokes) processUsbCode() ([]hidKey, error) {
 		for _, c := range cmd.UsbHidString {
 			lookupValue, ok := hidCharacterMap[string(c)]
 			if !ok {
-				return nil, fmt.Errorf("Invalid Character %s in String: %s", string(c), cmd.UsbHidString)
+				return nil, fmt.Errorf("invalid Character %s in String: %s", string(c), cmd.UsbHidString)
 			}
 			lookupValue.Code = intToHidCode(lookupValue.Code)
 			retKeyArray = append(retKeyArray, lookupValue)
@@ -286,8 +286,7 @@ func hexStringToHidCode(hex string) (int32, error) {
 }
 
 func intToHidCode(v int32) int32 {
-	var s int32
-	s = v << 16
+	var s int32 = v << 16
 	s = s | 7
 	return s
 }
@@ -300,7 +299,7 @@ func (cmd *keystrokes) checkValidInputs() error {
 		(cmd.rawCodeProvided() && cmd.hexCodeProvided() && cmd.stringProvided()) { // ABC
 		return nil
 	}
-	return fmt.Errorf("Specify only 1 argument")
+	return fmt.Errorf("specify only 1 argument")
 }
 
 func (cmd keystrokes) rawCodeProvided() bool {

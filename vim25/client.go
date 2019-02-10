@@ -67,7 +67,7 @@ func NewClient(ctx context.Context, rt soap.RoundTripper) (*Client, error) {
 
 		if c.Namespace == "" {
 			c.Namespace = "urn:" + Namespace
-		} else if strings.Index(c.Namespace, ":") < 0 {
+		} else if !strings.Contains(c.Namespace, ":") {
 			c.Namespace = "urn:" + c.Namespace // ensure valid URI format
 		}
 		if c.Version == "" {

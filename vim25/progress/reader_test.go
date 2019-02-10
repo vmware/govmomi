@@ -72,14 +72,14 @@ func TestReader(t *testing.T) {
 
 	// Read EOF
 	_, err = pr.Read(buf[:])
-	q = <-ch
+	<-ch
 	if err != io.EOF {
 		t.Errorf("Expected io.EOF, but got: %s", err)
 	}
 
 	// Mark progress reader as done
 	pr.Done(io.EOF)
-	q = <-ch
+	<-ch
 	if err != io.EOF {
 		t.Errorf("Expected io.EOF, but got: %s", err)
 	}

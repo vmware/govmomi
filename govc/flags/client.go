@@ -503,16 +503,16 @@ func apiVersionValid(c *vim25.Client, minVersionString string) error {
 
 	realVersion, err := ParseVersion(apiVersion)
 	if err != nil {
-		return fmt.Errorf("Error parsing API version %q: %s", apiVersion, err)
+		return fmt.Errorf("error parsing API version %q: %s", apiVersion, err)
 	}
 
 	minVersion, err := ParseVersion(minVersionString)
 	if err != nil {
-		return fmt.Errorf("Error parsing %s=%q: %s", envMinAPIVersion, minVersionString, err)
+		return fmt.Errorf("error parsing %s=%q: %s", envMinAPIVersion, minVersionString, err)
 	}
 
 	if !minVersion.Lte(realVersion) {
-		err = fmt.Errorf("Require API version %q, connected to API version %q (set %s to override)",
+		err = fmt.Errorf("require API version %q, connected to API version %q (set %s to override)",
 			minVersionString,
 			c.ServiceContent.About.ApiVersion,
 			envMinAPIVersion)
@@ -621,12 +621,7 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 	u.Fragment = ""
 	u.RawQuery = ""
 
-	val := u.String()
-	prefix := "https://"
-	if strings.HasPrefix(val, prefix) {
-		val = val[len(prefix):]
-	}
-	add(envURL, val)
+	add(envURL, strings.TrimPrefix(u.String(), "https://"))
 
 	keys := []string{
 		envCertificate,

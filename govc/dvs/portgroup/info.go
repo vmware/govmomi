@@ -243,7 +243,7 @@ func (r *infoResult) Write(w io.Writer) error {
 
 	if r.cmd.dvsRules && len(r.Port) > 0 {
 		eq := 0
-		for i, _ := range r.Port {
+		for i := range r.Port {
 			if i > 0 {
 				reflect.DeepEqual(trafficRuleSet[i-1], trafficRuleSet[i])
 				if reflect.DeepEqual(trafficRuleSet[i-1], trafficRuleSet[i]) {

@@ -84,7 +84,7 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		if cmd.actas != nil {
 			action := c.GrantWSTrustRole
-			if *cmd.actas == false {
+			if !*cmd.actas {
 				action = c.RevokeWSTrustRole
 			}
 			if _, err := action(ctx, user.Id, types.RoleActAsUser); err != nil {

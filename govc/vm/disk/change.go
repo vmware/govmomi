@@ -97,11 +97,11 @@ func (cmd *change) FindDisk(ctx context.Context, list object.VirtualDeviceList) 
 
 	switch len(disks) {
 	case 0:
-		return nil, errors.New("No disk found using the given values")
+		return nil, errors.New("no disk found using the given values")
 	case 1:
 		return disks[0], nil
 	}
-	return nil, errors.New("The given disk values match multiple disks")
+	return nil, errors.New("the given disk values match multiple disks")
 }
 
 func (cmd *change) CheckDiskProperties(ctx context.Context, name string, disk *types.VirtualDisk) bool {
@@ -171,7 +171,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	err = task.Wait(ctx)
 	if err != nil {
-		return fmt.Errorf("Error resizing main disk\nLogged Item:  %s", err)
+		return fmt.Errorf("error resizing main disk\nLogged Item:  %s", err)
 	}
 	return nil
 }

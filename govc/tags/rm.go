@@ -69,7 +69,7 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := tags.NewManager(c)
-		if cmd.force == false {
+		if !cmd.force {
 			objs, err := m.ListAttachedObjects(ctx, tagID)
 			if err != nil {
 				return err
