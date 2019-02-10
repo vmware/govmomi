@@ -65,7 +65,7 @@ Examples:
   govc library.ls /lib1/item1 -json | jq .`
 }
 
-type lsResultsWriter []library.FindResult
+type lsResultsWriter []finder.FindResult
 
 func (r lsResultsWriter) Write(w io.Writer) error {
 	for _, i := range r {
