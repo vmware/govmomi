@@ -44,23 +44,22 @@ type Item struct {
 
 // CreateLibraryItem creates a new library item
 func (c *Manager) CreateLibraryItem(ctx context.Context, item Item) (string, error) {
-	type create struct {
+	type createItemSpec struct {
 		Name        string `json:"name"`
 		Description string `json:"description"`
 		LibraryID   string `json:"library_id,omitempty"`
 		Type        string `json:"type"`
 	}
 	spec := struct {
-		Item create `json:"create_spec"`
+		Item createItemSpec `json:"create_spec"`
 	}{
-		Item: create{
+		Item: createItemSpec{
 			Name:        item.Name,
 			Description: item.Description,
 			LibraryID:   item.LibraryID,
 			Type:        item.Type,
 		},
 	}
-
 	url := internal.URL(c, internal.LibraryItemPath)
 	var res string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
@@ -86,22 +85,41 @@ func (c *Manager) GetLibraryItem(ctx context.Context, id string) (*Item, error) 
 	return &res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
-// GetLibraryItems returns a list of all content library details in the system.
+// GetLibraryItems returns a list of all the library items for the specified library.
 func (c *Manager) GetLibraryItems(ctx context.Context, libraryID string) ([]Item, error) {
 	ids, err := c.ListLibraryItems(ctx, libraryID)
 	if err != nil {
 		return nil, fmt.Errorf("get library items failed for: %s", err)
 	}
-
 	var items []Item
 	for _, id := range ids {
-		library, err := c.GetLibraryItem(ctx, id)
+		item, err := c.GetLibraryItem(ctx, id)
 		if err != nil {
 			return nil, fmt.Errorf("get library item for %s failed for %s", id, err)
 		}
-
-		items = append(items, *library)
-
+		items = append(items, *item)
 	}
 	return items, nil
+}
+
+// FindLibraryItemsRequest is the search criteria for finding library items.
+type FindLibraryItemsRequest struct {
+	Cached    *bool  `json:"cached,omitempty"`
+	LibraryID string `json:"library_id,omitempty"`
+	Name      string `json:"name,omitempty"`
+	SourceID  string `json:"source_id,omitempty"`
+	Type      string `json:"type,omitempty"`
+}
+
+// FindLibraryItems returns the IDs of all the library items that match the
+// search criteria.
+func (c *Manager) FindLibraryItems(
+	ctx context.Context, search FindLibraryItemsRequest) ([]string, error) {
+
+	url := internal.URL(c, internal.LibraryItemPath).WithAction("find")
+	spec := struct {
+		Spec FindLibraryItemsRequest `json:"spec"`
+	}{search}
+	var res []string
+	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }

@@ -19,32 +19,34 @@ package library
 import (
 	"context"
 	"net/http"
+	"time"
 
 	"github.com/vmware/govmomi/vapi/internal"
 )
 
 // UpdateSession is used to create an initial update session
 type UpdateSession struct {
-	CreateSpec struct {
-		ID                        string `json:"id,omitempty"`
-		LibraryItemID             string `json:"library_item_id,omitempty"`
-		LibraryItemContentVersion string `json:"library_item_content_version,omitempty"`
-		// ErrorMessage              struct {
-		//	ID             string   `json:"id,omitempty"`
-		//	DefaultMessage string   `json:"default_message,omitempty"`
-		//	Args           []string `json:"args,omitempty"`
-		// } `json:"error_message,omitempty"`
-		ClientProgress int64  `json:"client_progress,omitempty"`
-		State          string `json:"state,omitempty"`
-		// ExpirationTime time.Time `json:"expiration_time,omitempty"`
-	} `json:"create_spec"`
+	ID                        string `json:"id,omitempty"`
+	LibraryItemID             string `json:"library_item_id,omitempty"`
+	LibraryItemContentVersion string `json:"library_item_content_version,omitempty"`
+	// ErrorMessage              struct {
+	//	ID             string   `json:"id,omitempty"`
+	//	DefaultMessage string   `json:"default_message,omitempty"`
+	//	Args           []string `json:"args,omitempty"`
+	// } `json:"error_message,omitempty"`
+	ClientProgress int64  `json:"client_progress,omitempty"`
+	State          string `json:"state,omitempty"`
+	// ExpirationTime time.Time `json:"expiration_time,omitempty"`
 }
 
 // CreateLibraryItemUpdateSession creates a new library item
 func (c *Manager) CreateLibraryItemUpdateSession(ctx context.Context, session UpdateSession) (string, error) {
 	url := internal.URL(c, internal.LibraryItemUpdateSession)
+	spec := struct {
+		CreateSpec UpdateSession `json:"create_spec"`
+	}{session}
 	var res string
-	return res, c.Do(ctx, url.Request(http.MethodPost, session), &res)
+	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
 // GetLibraryItemUpdateSession gets the update session information with status
@@ -73,76 +75,42 @@ func (c *Manager) CompleteLibraryItemUpdateSession(ctx context.Context, id strin
 	return c.Do(ctx, url.Request(http.MethodPost), nil)
 }
 
-// DeleteLibraryItemUpdateSession completes an update session
+// DeleteLibraryItemUpdateSession deletes an update session
 func (c *Manager) DeleteLibraryItemUpdateSession(ctx context.Context, id string) error {
 	url := internal.URL(c, internal.LibraryItemUpdateSession).WithID(id)
 	return c.Do(ctx, url.Request(http.MethodDelete), nil)
 }
 
-// FailLibraryItemUpdateSession completes an update session
+// FailLibraryItemUpdateSession fails an update session
 func (c *Manager) FailLibraryItemUpdateSession(ctx context.Context, id string) error {
 	url := internal.URL(c, internal.LibraryItemUpdateSession).WithID(id).WithAction("fail")
 	return c.Do(ctx, url.Request(http.MethodPost), nil)
 }
 
-// KeepAliveLibraryItemUpdateSession completes an update session
+// KeepAliveLibraryItemUpdateSession keeps an inactive update session alive.
 func (c *Manager) KeepAliveLibraryItemUpdateSession(ctx context.Context, id string) error {
 	url := internal.URL(c, internal.LibraryItemUpdateSession).WithID(id).WithAction("keep-alive")
 	return c.Do(ctx, url.Request(http.MethodPost), nil)
 }
 
-// UpdateFile is used to add a file using an update session
-type UpdateFile struct {
-	FileSpec struct {
-		Name       string `json:"name,omitempty"`
-		SourceType string `json:"source_type,omitempty"`
-		// SourceEndpoint struct {
-		//	URI                      string `json:"uri,omitempty"`
-		//	SSLCertificateThumbprint string `json:"ssl_certificate_thumbprint,omitempty"`
-		// } `json:"source_endpoint,omitempty"`
-		Size         int64 `json:"size,omitempty"`
-		ChecksumInfo struct {
-			Algorithm string `json:"algorithm,omitempty"`
-			Checksum  string `json:"checksum,omitempty"`
-		} `json:"checksum_info,omitempty"`
-	} `json:"file_spec"`
-}
+// WaitOnLibraryItemUpdateSession blocks until the update session is no longer
+// in the ACTIVE state.
+func (c *Manager) WaitOnLibraryItemUpdateSession(
+	ctx context.Context, sessionID string,
+	interval time.Duration, intervalCallback func()) error {
 
-// UpdateFileInfo is returned from adding a file when using an update session
-type UpdateFileInfo struct {
-	Name             string `json:"name,omitempty"`
-	SourceType       string `json:"source_type,omitempty"`
-	Status           string `json:"status,omitempty"`
-	BytesTransferred int64  `json:"bytes_transferred,omitempty"`
-	Size             int64  `json:"size,omitempty"`
-	ChecksumInfo     struct {
-		Algorithm string `json:"algorithm,omitempty"`
-		Checksum  string `json:"checksum,omitempty"`
-	} `json:"checksum_info,omitempty"`
-	SourceEndpoint struct {
-		URI                      string `json:"uri,omitempty"`
-		SSLCertificateThumbprint string `json:"ssl_certificate_thumbprint,omitempty"`
-	} `json:"source_endpoint,omitempty"`
-	UploadEndpoint struct {
-		URI                      string `json:"uri,omitempty"`
-		SSLCertificateThumbprint string `json:"ssl_certificate_thumbprint,omitempty"`
-	} `json:"upload_endpoint,omitempty"`
-}
-
-// AddLibraryItemFile adds a file
-func (c *Manager) AddLibraryItemFile(ctx context.Context, sessionID string, updateFile UpdateFile) (*UpdateFileInfo, error) {
-	url := internal.URL(c, internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("add")
-	var res UpdateFileInfo
-	return &res, c.Do(ctx, url.Request(http.MethodPost, updateFile), &res)
-}
-
-// GetLibraryItemFile retrieves information about a specific file
-func (c *Manager) GetLibraryItemFile(ctx context.Context, sessionID string, filename string) (*UpdateFileInfo, error) {
-	type FileName struct {
-		FileName string `json:"file_name,omitempty"`
+	// Wait until the upload operation is complete to return.
+	for {
+		session, err := c.GetLibraryItemUpdateSession(ctx, sessionID)
+		if err != nil {
+			return err
+		}
+		if session.State != "ACTIVE" {
+			return nil
+		}
+		time.Sleep(interval)
+		if intervalCallback != nil {
+			intervalCallback()
+		}
 	}
-	url := internal.URL(c, internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("get")
-	var res UpdateFileInfo
-	var fileName = FileName{FileName: filename}
-	return &res, c.Do(ctx, url.Request(http.MethodPost, fileName), &res)
 }

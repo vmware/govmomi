@@ -100,7 +100,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	cmd.library.Name = f.Arg(0)
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		id, err := library.NewManager(c).CreateLibrary(ctx, &cmd.library)
+		id, err := library.NewManager(c).CreateLibrary(ctx, cmd.library)
 
 		if err != nil {
 			return err

@@ -37,6 +37,7 @@ type Library struct {
 	Description string            `json:"description,omitempty"`
 	Name        string            `json:"name,omitempty"`
 	Version     string            `json:"version,omitempty"`
+	Type        string            `json:"type,omitempty"`
 	Storage     []StorageBackings `json:"storage_backings,omitempty"`
 }
 
@@ -52,31 +53,41 @@ func NewManager(client *rest.Client) *Manager {
 	}
 }
 
-// CreateLibrary creates a new library with the given Name, Description and CategoryID.
-func (c *Manager) CreateLibrary(ctx context.Context, library *Library) (string, error) {
+// FindLibraryRequest is the search criteria for finding libraries.
+type FindLibraryRequest struct {
+	Name string `json:"name,omitempty"`
+	Type string `json:"type,omitempty"`
+}
 
-	type create struct {
-		Name        string            `json:"name"`
-		Description string            `json:"description"`
-		Type        string            `json:"type"`
-		Storage     []StorageBackings `json:"storage_backings,omitempty"`
+// FindLibrary returns one or more libraries that match the provided search
+// criteria.
+//
+// The provided name is case-sensitive.
+//
+// Either the name or type of library may be set to empty values in order
+// to search for all libraries, all libraries with a specific name, regardless
+// of type, or all libraries of a specified type.
+func (c *Manager) FindLibrary(
+	ctx context.Context,
+	search FindLibraryRequest) ([]string, error) {
+
+	url := internal.URL(c, internal.LibraryPath).WithAction("find")
+	spec := struct {
+		Spec FindLibraryRequest `json:"spec"`
+	}{search}
+	var res []string
+	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+}
+
+// CreateLibrary creates a new library with the given Type, Name,
+// Description, and CategoryID.
+func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, error) {
+	if library.Type != "LOCAL" {
+		return "", fmt.Errorf("unsupported library type: %s", library.Type)
 	}
 	spec := struct {
-		Library create `json:"create_spec"`
-	}{
-		Library: create{
-			Name:        library.Name,
-			Description: library.Description,
-			Type:        "LOCAL",
-			Storage: []StorageBackings{
-				StorageBackings{
-					DatastoreID: "datastore-11",
-					Type:        "DATASTORE",
-				},
-			},
-		},
-	}
-
+		Library Library `json:"create_spec"`
+	}{library}
 	url := internal.URL(c, internal.LocalLibraryPath)
 	var res string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
@@ -109,13 +120,11 @@ func (c *Manager) GetLibraryByName(ctx context.Context, name string) (*Library, 
 	if err != nil {
 		return nil, err
 	}
-
 	for i := range libraries {
 		if libraries[i].Name == name {
 			return &libraries[i], nil
 		}
 	}
-
 	return nil, fmt.Errorf("library name (%s) not found", name)
 }
 

@@ -31,16 +31,26 @@ type Checksum struct {
 
 // File provides methods to get information on library item files.
 type File struct {
-	Cached   bool     `json:"cached,omitempty"`
-	Checksum Checksum `json:"checksum_info,omitempty"`
-	Name     string   `json:"name,omitempty"`
-	Size     int64    `json:"size,omitempty"`
-	Version  string   `json:"version,omitempty"`
+	Cached   *bool     `json:"cached,omitempty"`
+	Checksum *Checksum `json:"checksum_info,omitempty"`
+	Name     string    `json:"name,omitempty"`
+	Size     *int64    `json:"size,omitempty"`
+	Version  string    `json:"version,omitempty"`
 }
 
-// ListLibraryItemFiles returns a list of all items in a content library.
+// ListLibraryItemFiles returns a list of all the files for a library item.
 func (c *Manager) ListLibraryItemFiles(ctx context.Context, id string) ([]File, error) {
 	url := internal.URL(c, internal.LibraryItemFilePath).WithParameter("library_item_id", id)
 	var res []File
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
+}
+
+// GetLibraryItemFile returns a file with the provided name for a library item.
+func (c *Manager) GetLibraryItemFile(ctx context.Context, id, fileName string) (*File, error) {
+	url := internal.URL(c, internal.LibraryItemFilePath).WithID(id).WithAction("get")
+	spec := struct {
+		Name string `json:"name"`
+	}{fileName}
+	var res File
+	return &res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }

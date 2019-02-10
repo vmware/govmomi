@@ -149,11 +149,13 @@ func uploadFile(ctx context.Context, m *library.Manager, sessionID string, ovafi
 
 	// Get the URI for the file upload
 
-	updateFileInfo.FileSpec.Name = filename
-	updateFileInfo.FileSpec.Size = size
-	updateFileInfo.FileSpec.SourceType = "PUSH"
-	updateFileInfo.FileSpec.ChecksumInfo.Algorithm = "MD5"
-	updateFileInfo.FileSpec.ChecksumInfo.Checksum = md5String
+	updateFileInfo.Name = filename
+	updateFileInfo.Size = &size
+	updateFileInfo.SourceType = "PUSH"
+	updateFileInfo.Checksum = &library.Checksum{
+		Algorithm: "MD5",
+		Checksum:  md5String,
+	}
 
 	addFileInfo, err := m.AddLibraryItemFile(ctx, sessionID, updateFileInfo)
 	if err != nil {
@@ -256,7 +258,7 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 		fmt.Printf("Library item id: %s\n", itemID)
 
 		// Create the update session to use for uploading the file
-		sessionSpec.CreateSpec.LibraryItemID = itemID
+		sessionSpec.LibraryItemID = itemID
 		sessionID, err := m.CreateLibraryItemUpdateSession(ctx, sessionSpec)
 		if err != nil {
 			return err

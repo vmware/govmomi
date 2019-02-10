@@ -63,7 +63,6 @@ import (
 	_ "github.com/vmware/govmomi/govc/importx"
 	_ "github.com/vmware/govmomi/govc/library"
 	_ "github.com/vmware/govmomi/govc/library/item"
-	_ "github.com/vmware/govmomi/govc/library/item/file"
 	_ "github.com/vmware/govmomi/govc/library/item/update"
 	_ "github.com/vmware/govmomi/govc/license"
 	_ "github.com/vmware/govmomi/govc/logs"

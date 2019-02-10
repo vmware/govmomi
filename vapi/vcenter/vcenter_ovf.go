@@ -76,16 +76,23 @@ type OVFError struct {
 	Message  LocalizableMessage `json:"message,omitempty"`
 }
 
+// DeployedResourceID is a managed object reference for a deployed resource.
+type DeployedResourceID struct {
+	ID   string `json:"id,omitempty"`
+	Type string `json:"type,omitempty"`
+}
+
+// DeploymentError is an error that occurs when deploying and OVF from
+// a library item.
+type DeploymentError struct {
+	Errors []OVFError `json:"errors,omitempty"`
+}
+
 // Deployment is the results from issuing a library OVF deployment
 type Deployment struct {
-	Succeeded  bool `json:"succeeded,omitempty"`
-	ResourceID struct {
-		ID   string `json:"id,omitempty"`
-		Type string `json:"type,omitempty"`
-	} `json:"resource_id,omitempty"`
-	Error struct {
-		Errors []OVFError `json:"errors,omitempty"`
-	} `json:"error,omitempty"`
+	Succeeded  bool               `json:"succeeded,omitempty"`
+	ResourceID DeployedResourceID `json:"resource_id,omitempty"`
+	Error      DeploymentError    `json:"error,omitempty"`
 }
 
 // FilterRequest contains the information to start a vcenter filter call
@@ -114,14 +121,14 @@ func NewManager(client *rest.Client) *Manager {
 	}
 }
 
-// DeployLibraryItem deploys a librtary OVF
+// DeployLibraryItem deploys a library OVF
 func (c *Manager) DeployLibraryItem(ctx context.Context, libraryItemID string, deploy Deploy) (Deployment, error) {
 	url := internal.URL(c, internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("deploy")
 	var res Deployment
 	return res, c.Do(ctx, url.Request(http.MethodPost, deploy), &res)
 }
 
-// FilterLibraryItem deploys a librtary OVF
+// FilterLibraryItem deploys a library OVF
 func (c *Manager) FilterLibraryItem(ctx context.Context, libraryItemID string, filter FilterRequest) (FilterResponse, error) {
 	url := internal.URL(c, internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("filter")
 	var res FilterResponse

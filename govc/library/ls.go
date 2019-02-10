@@ -25,6 +25,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
+	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
@@ -52,20 +53,23 @@ func (cmd *ls) Process(ctx context.Context) error {
 }
 
 func (cmd *ls) Description() string {
-	return `List libraries.
+	return `List libraries, items, and files.
 
 Examples:
   govc library.ls
-  govc library.ls library_name
+  govc library.ls /lib1
+  govc library.ls /lib1/item1
+  govc library.ls /lib1/item1/
+  govc library.ls */
   govc library.ls -json | jq .
-  govc library.ls library_name -json | jq .`
+  govc library.ls /lib1/item1 -json | jq .`
 }
 
-type lsResult []library.Library
+type lsResultsWriter []library.FindResult
 
-func (r lsResult) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i].Name)
+func (r lsResultsWriter) Write(w io.Writer) error {
+	for _, i := range r {
+		fmt.Fprintln(w, i.GetPath())
 	}
 	return nil
 }
@@ -73,21 +77,11 @@ func (r lsResult) Write(w io.Writer) error {
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
-		var res lsResult
-		var err error
-
-		if f.NArg() == 1 {
-			var result *library.Library
-			arg := f.Arg(0)
-			result, err = m.GetLibraryByName(ctx, arg)
-			res = append(res, *result)
-		} else {
-			res, err = m.GetLibraries(ctx)
-		}
-
+		finder := finder.NewFinder(m)
+		findResults, err := finder.Find(ctx, f.Args()...)
 		if err != nil {
 			return err
 		}
-		return cmd.WriteResult(res)
+		return cmd.WriteResult(lsResultsWriter(findResults))
 	})
 }

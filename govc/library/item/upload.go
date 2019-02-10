@@ -100,14 +100,14 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		md5String := hex.EncodeToString(hash.Sum(nil)[:16])
 
-		library, err := m.GetLibraryByName(ctx, libname)
+		lib, err := m.GetLibraryByName(ctx, libname)
 		if err != nil {
 			return err
 		}
 
 		// Create a library item
 		cmd.item.Name = filename
-		cmd.item.LibraryID = library.ID
+		cmd.item.LibraryID = lib.ID
 		cmd.item.Type = "iso"
 		cmd.item.Description = "Testing 1 2 3"
 
@@ -120,7 +120,7 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		// Create the update session to use for uploading the file
 
-		sessionSpec.CreateSpec.LibraryItemID = itemID
+		sessionSpec.LibraryItemID = itemID
 		sessionID, err := m.CreateLibraryItemUpdateSession(ctx, sessionSpec)
 		if err != nil {
 			return err
@@ -130,11 +130,13 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		// Get the URI for the file upload
 
-		updateFileInfo.FileSpec.Name = filename
-		updateFileInfo.FileSpec.Size = size
-		updateFileInfo.FileSpec.SourceType = "PUSH"
-		updateFileInfo.FileSpec.ChecksumInfo.Algorithm = "MD5"
-		updateFileInfo.FileSpec.ChecksumInfo.Checksum = md5String
+		updateFileInfo.Name = filename
+		updateFileInfo.Size = &size
+		updateFileInfo.SourceType = "PUSH"
+		updateFileInfo.Checksum = &library.Checksum{
+			Algorithm: "MD5",
+			Checksum:  md5String,
+		}
 
 		addFileInfo, err := m.AddLibraryItemFile(ctx, sessionID, updateFileInfo)
 		if err != nil {

@@ -70,7 +70,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 			return flag.ErrHelp
 		}
 
-		spec.CreateSpec.LibraryItemID = f.Arg(0)
+		spec.LibraryItemID = f.Arg(0)
 		sessionID, err := m.CreateLibraryItemUpdateSession(ctx, spec)
 		if err != nil {
 			return err

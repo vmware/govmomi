@@ -23,9 +23,9 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
-	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25"
 )
 
@@ -101,11 +101,11 @@ func getOVFItemID(ctx context.Context, c *rest.Client, libname string, ovfname s
 func (cmd *deploy) getResourcePoolID(ctx context.Context, name string) (string, error) {
 	finder, err := cmd.Finder()
 	if err != nil {
-			return "", err
+		return "", err
 	}
 	o, err := finder.ClusterComputeResource(ctx, name)
 	if err != nil {
-			return "", err
+		return "", err
 	}
 
 	p, err := o.ResourcePool(ctx)
@@ -120,10 +120,10 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := vcenter.NewManager(c)
 
-		if f.NArg() !=  3 {
+		if f.NArg() != 3 {
 			return flag.ErrHelp
 		}
-	
+
 		libname := f.Arg(0)
 		templateName := f.Arg(1)
 		vmName := f.Arg(2)
@@ -134,10 +134,10 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-/* 		poolid, err := cmd.getResourcePoolID(ctx, clusterName)
-		if err != nil {
-			return err
-		} */
+		/* 		poolid, err := cmd.getResourcePoolID(ctx, clusterName)
+		   		if err != nil {
+		   			return err
+		   		} */
 		finder, err := cmd.Finder()
 
 		// Lookup default datastore
@@ -147,7 +147,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		datastoreID := ds.Reference().Value
 		fmt.Printf("Using datastore ID %s\n", datastoreID)
-	
+
 		rp, err := finder.DefaultResourcePool(ctx)
 		if err != nil {
 			return err
@@ -168,13 +168,13 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			DeploymentSpec: vcenter.DeploymentSpec{
 				Name:               vmName,
 				DefaultDatastoreID: datastoreID,
-				AcceptAllEULA: true,
+				AcceptAllEULA:      true,
 			},
 			Target: vcenter.Target{
 				ResourcePoolID: poolID,
 			},
 		}
-		
+
 		resp, err := m.DeployLibraryItem(ctx, ovfItemID, deploy)
 		if err != nil {
 			return err
