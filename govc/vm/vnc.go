@@ -48,8 +48,16 @@ func (i *intRange) Set(s string) error {
 		return fmt.Errorf("invalid range: %s", s)
 	}
 
-	low, _ := strconv.Atoi(m[1])
-	high, _ := strconv.Atoi(m[2])
+	low, err := strconv.Atoi(m[1])
+	if err != nil {
+		return fmt.Errorf("could't convert to integer: %v", err)
+	}
+
+	high, err := strconv.Atoi(m[2])
+	if err != nil {
+		return fmt.Errorf("could't convert to integer: %v", err)
+	}
+
 	if low > high {
 		return fmt.Errorf("invalid range: low > high")
 	}
@@ -75,7 +83,10 @@ type vnc struct {
 
 func init() {
 	cmd := &vnc{}
-	cmd.PortRange.Set("5900-5999")
+	err := cmd.PortRange.Set("5900-5999")
+	if err != nil {
+		fmt.Printf("Error setting port range %v", err)
+	}
 	cli.Register("vm.vnc", cmd)
 }
 
@@ -127,9 +138,15 @@ func (cmd *vnc) Run(ctx context.Context, f *flag.FlagSet) error {
 	for _, vm := range vms {
 		switch {
 		case cmd.Enable:
-			vm.enable(cmd.Port, cmd.Password)
+			err = vm.enable(cmd.Port, cmd.Password)
+			if err != nil {
+				return err
+			}
 		case cmd.Disable:
-			vm.disable()
+			err = vm.disable()
+			if err != nil {
+				return err
+			}
 		}
 	}
 

@@ -100,9 +100,11 @@ func (cmd *run) do(c *http.Client, req *http.Request) error {
 	}
 
 	_, err = io.Copy(cmd.Out, res.Body)
+	if err != nil {
+		return err
+	}
 
-	_ = res.Body.Close()
-
+	err = res.Body.Close()
 	return err
 }
 

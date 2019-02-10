@@ -113,7 +113,10 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			fmt.Fprintln(tw)
 		}
 
-		_ = tw.Flush()
+		err = tw.Flush()
+		if err != nil {
+			return err
+		}
 
 		if info.Remaining == 0 {
 			break

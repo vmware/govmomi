@@ -20,6 +20,7 @@ import (
 	"context"
 	"errors"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -71,7 +72,11 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// Set network if specified as extra argument.
 	if f.NArg() > 0 {
-		_ = cmd.NetworkFlag.Set(f.Arg(0))
+		err = cmd.NetworkFlag.Set(f.Arg(0))
+		if err != nil {
+			return errors.New(fmt.Sprintf("couldn't set specified network %v",
+				err))
+		}
 	}
 
 	net, err := cmd.NetworkFlag.Device()

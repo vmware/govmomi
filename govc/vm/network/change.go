@@ -85,7 +85,11 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// Set network if specified as extra argument.
 	if f.NArg() > 1 {
-		_ = cmd.NetworkFlag.Set(f.Arg(1))
+		err = cmd.NetworkFlag.Set(f.Arg(1))
+		if err != nil {
+			return errors.New(fmt.Sprintf("couldn't set specified network %v",
+				err))
+		}
 	}
 
 	devices, err := vm.Device(ctx)
