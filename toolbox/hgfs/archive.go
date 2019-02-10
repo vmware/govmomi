@@ -246,7 +246,7 @@ func archiveRead(u *url.URL, tr *tar.Reader) error {
 		case tar.TypeDir:
 			err = os.MkdirAll(name, mode)
 		case tar.TypeReg:
-			_ = os.MkdirAll(filepath.Dir(name), 0755)
+			_ = os.MkdirAll(filepath.Dir(name), 0750)
 
 			var f *os.File
 
