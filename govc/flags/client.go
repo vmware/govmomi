@@ -621,12 +621,7 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 	u.Fragment = ""
 	u.RawQuery = ""
 
-	val := u.String()
-	prefix := "https://"
-	if strings.HasPrefix(val, prefix) {
-		val = val[len(prefix):]
-	}
-	add(envURL, val)
+	add(envURL, strings.TrimPrefix(u.String(), "https://"))
 
 	keys := []string{
 		envCertificate,

@@ -68,7 +68,7 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
-		if cmd.force == false {
+		if !cmd.force {
 			ctags, err := m.ListTagsForCategory(ctx, cat.ID)
 			if err != nil {
 				return err
