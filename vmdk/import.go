@@ -69,11 +69,16 @@ func stat(name string) (*info, error) {
 	var buf bytes.Buffer
 
 	_, err = io.CopyN(&buf, f, int64(binary.Size(di.Header)))
+	if err != nil {
+		return nil, err
+	}
 
-	fi, _ := f.Stat()
+	fi, err := f.Stat()
+	if err != nil {
+		return nil, err
+	}
 
-	_ = f.Close()
-
+	err = f.Close()
 	if err != nil {
 		return nil, err
 	}
@@ -292,9 +297,11 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 	item := info.Items[0] // we only have 1 disk to upload
 
 	err = lease.Upload(ctx, item, f, opts)
+	if err != nil {
+		return err
+	}
 
-	_ = f.Close()
-
+	err = f.Close()
 	if err != nil {
 		return err
 	}
