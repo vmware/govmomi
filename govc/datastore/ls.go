@@ -138,7 +138,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 
 			// Treat an empty result against match pattern as file not found
 			if i == 1 && len(r) == 1 && len(r[0].File) == 0 {
-				return fmt.Errorf("File %s/%s was not found", r[0].FolderPath, spec.MatchPattern[0])
+				return fmt.Errorf("file %s/%s was not found", r[0].FolderPath, spec.MatchPattern[0])
 			}
 
 			for n := range r {
