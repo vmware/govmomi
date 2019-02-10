@@ -313,7 +313,7 @@ func archiveWrite(u *url.URL, tw *tar.Writer) error {
 		var f *os.File
 
 		if header.Typeflag == tar.TypeReg && fi.Size() != 0 {
-			f, err = os.Open(file)
+			f, err = os.Open(filepath.Clean(file))
 			if err != nil {
 				if os.IsPermission(err) {
 					return nil

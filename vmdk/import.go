@@ -59,7 +59,7 @@ type info struct {
 // stat looks at the vmdk header to make sure the format is streamOptimized and
 // extracts the disk capacity required to properly generate the ovf descriptor.
 func stat(name string) (*info, error) {
-	f, err := os.Open(name)
+	f, err := os.Open(filepath.Clean(name))
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +276,7 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 		return err
 	}
 
-	f, err := os.Open(name)
+	f, err := os.Open(filepath.Clean(name))
 	if err != nil {
 		return err
 	}

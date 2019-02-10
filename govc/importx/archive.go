@@ -28,6 +28,7 @@ import (
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 
 	"github.com/vmware/govmomi/ovf"
@@ -150,7 +151,7 @@ func isRemotePath(path string) bool {
 }
 
 func (o Opener) OpenLocal(path string) (io.ReadCloser, int64, error) {
-	f, err := os.Open(path)
+	f, err := os.Open(filepath.Clean(path))
 	if err != nil {
 		return nil, 0, err
 	}

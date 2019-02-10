@@ -21,6 +21,7 @@ import (
 	"flag"
 	"io"
 	"os"
+	"path/filepath"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -88,7 +89,7 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 	var r io.Reader = os.Stdin
 
 	if src != "-" {
-		f, err := os.Open(src)
+		f, err := os.Open(filepath.Clean(src))
 		if err != nil {
 			return err
 		}

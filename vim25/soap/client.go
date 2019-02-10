@@ -206,7 +206,7 @@ func (c *Client) SetRootCAs(file string) error {
 	pool := x509.NewCertPool()
 
 	for _, name := range filepath.SplitList(file) {
-		pem, err := ioutil.ReadFile(name)
+		pem, err := ioutil.ReadFile(filepath.Clean(name))
 		if err != nil {
 			return err
 		}
@@ -276,7 +276,7 @@ func (c *Client) LoadThumbprints(file string) error {
 }
 
 func (c *Client) loadThumbprints(name string) error {
-	f, err := os.Open(name)
+	f, err := os.Open(filepath.Clean(name))
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -680,7 +680,7 @@ func (c *Client) UploadFile(ctx context.Context, file string, u *url.URL, param 
 		return err
 	}
 
-	f, err := os.Open(file)
+	f, err := os.Open(filepath.Clean(file))
 	if err != nil {
 		return err
 	}
