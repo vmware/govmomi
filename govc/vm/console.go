@@ -146,7 +146,10 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 		fqdn := opt[0].GetOptionValue().Value.(string)
 
 		var info object.HostCertificateInfo
-		_ = info.FromURL(u, nil)
+		err = info.FromURL(u, nil)
+		if err != nil {
+			return err
+		}
 
 		u.Path = "/ui/webconsole.html"
 

@@ -758,7 +758,7 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 	}
 
 	if register {
-		f, err := os.Open(file)
+		f, err := os.Open(filepath.Clean(file))
 		if err != nil {
 			log.Printf("register %s: %s", vm.Reference(), err)
 			if os.IsNotExist(err) {

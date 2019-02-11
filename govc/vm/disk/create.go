@@ -148,7 +148,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	existing := devices.SelectByBackingInfo(disk.Backing)
 
 	if len(existing) > 0 {
-		cmd.Log("Disk already present\n")
+		_, _ = cmd.Log("Disk already present\n")
 		return nil
 	}
 
@@ -162,7 +162,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	backing.DiskMode = cmd.DiskMode
 	backing.Sharing = cmd.Sharing
 
-	cmd.Log("Creating disk\n")
+	_, _ = cmd.Log("Creating disk\n")
 	disk.CapacityInKB = int64(cmd.Bytes) / 1024
 	return vm.AddDevice(ctx, disk)
 }

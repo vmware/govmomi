@@ -53,7 +53,10 @@ func (flag *AuthFlag) Set(s string) error {
 func (flag *AuthFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	env := "GOVC_GUEST_LOGIN"
 	value := os.Getenv(env)
-	flag.Set(value)
+	err := flag.Set(value)
+	if err != nil {
+		fmt.Printf("couldn't set guest login values: %v", err)
+	}
 	usage := fmt.Sprintf("Guest VM credentials [%s]", env)
 	f.Var(flag, "l", usage)
 }

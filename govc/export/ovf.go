@@ -123,7 +123,7 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	if err = os.MkdirAll(cmd.dest, 0755); err != nil {
+	if err = os.MkdirAll(cmd.dest, 0750); err != nil {
 		return err
 	}
 

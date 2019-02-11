@@ -23,6 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -79,7 +80,7 @@ func (cmd *install) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		cert = buf.String()
 	} else {
-		b, err := ioutil.ReadFile(name)
+		b, err := ioutil.ReadFile(filepath.Clean(name))
 		if err != nil {
 			return err
 		}

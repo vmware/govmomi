@@ -20,6 +20,7 @@ import (
 	"io"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -220,7 +221,7 @@ func (f *FileManager) copyDatastoreFile(req *types.CopyDatastoreFile_Task) types
 		}
 	}
 
-	r, err := os.Open(src)
+	r, err := os.Open(filepath.Clean(src))
 	if err != nil {
 		return f.fault(dst, err, new(types.CannotAccessFile))
 	}

@@ -25,6 +25,7 @@ import (
 	"math/rand"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -179,7 +180,7 @@ func (s *Server) OpenFile(name string, mode int32) (File, error) {
 
 	switch mode {
 	case OpenModeReadOnly:
-		return os.Open(name)
+		return os.Open(filepath.Clean(name))
 	case OpenModeWriteOnly:
 		flag := os.O_WRONLY | os.O_CREATE | os.O_TRUNC
 		return os.OpenFile(name, flag, 0600)
