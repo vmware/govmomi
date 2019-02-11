@@ -26,6 +26,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"path/filepath"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -63,8 +64,8 @@ func (cmd *upload) Description() string {
 	return `List library items.
 
 Examples:
-  govc library.item.upload library_name item_name
-  govc library.item.upload library_name item_name -json | jq .`
+  govc library.item.upload library_name file_name
+  govc library.item.upload library_name file_name -json | jq .`
 }
 
 type uploadResult []library.Item
@@ -106,10 +107,9 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		// Create a library item
-		cmd.item.Name = filename
+		cmd.item.Name = filepath.Base(filename)
 		cmd.item.LibraryID = lib.ID
 		cmd.item.Type = "iso"
-		cmd.item.Description = "Testing 1 2 3"
 
 		itemID, err := m.CreateLibraryItem(ctx, cmd.item)
 

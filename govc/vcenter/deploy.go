@@ -26,13 +26,11 @@ import (
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
-	"github.com/vmware/govmomi/vim25"
 )
 
 type deploy struct {
-	*flags.ClientFlag
-	*flags.DatacenterFlag
-	datastore string
+	*flags.DatastoreFlag
+	*flags.ResourcePoolFlag
 }
 
 func init() {
@@ -40,23 +38,22 @@ func init() {
 }
 
 func (cmd *deploy) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
-	f.StringVar(&cmd.datastore, "D", "", "Datastore for library")
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
 
-	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
-	cmd.DatacenterFlag.Register(ctx, f)
+	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
+	cmd.ResourcePoolFlag.Register(ctx, f)
 }
 
 func (cmd *deploy) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
 		return err
 	}
-	return nil
+	return cmd.ResourcePoolFlag.Process(ctx)
 }
 
 func (cmd *deploy) Usage() string {
-	return "NAME"
+	return "LIBRARY TEMPLATE VM_NAME"
 }
 
 func (cmd *deploy) Description() string {
@@ -64,19 +61,6 @@ func (cmd *deploy) Description() string {
 
 Examples:
   govc vcenter.deploy library_name ovf_template vm_name`
-}
-
-func (cmd *deploy) lookupDatastore(ctx context.Context, c *vim25.Client, name string) (string, error) {
-	finder, err := cmd.Finder()
-	if err != nil {
-		return name, err
-	}
-	objects, err := finder.DatastoreList(ctx, name)
-	if err != nil {
-		return name, err
-	}
-
-	return objects[0].Reference().Value, nil
 }
 
 func getOVFItemID(ctx context.Context, c *rest.Client, libname string, ovfname string) (string, error) {
@@ -98,26 +82,8 @@ func getOVFItemID(ctx context.Context, c *rest.Client, libname string, ovfname s
 	return "", fmt.Errorf("Could not find %s in library %s", ovfname, libname)
 }
 
-func (cmd *deploy) getResourcePoolID(ctx context.Context, name string) (string, error) {
-	finder, err := cmd.Finder()
-	if err != nil {
-		return "", err
-	}
-	o, err := finder.ClusterComputeResource(ctx, name)
-	if err != nil {
-		return "", err
-	}
-
-	p, err := o.ResourcePool(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	return p.Reference().Value, nil
-}
-
 func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
+	return cmd.DatastoreFlag.WithRestClient(ctx, func(c *rest.Client) error {
 		m := vcenter.NewManager(c)
 
 		if f.NArg() != 3 {
@@ -134,21 +100,14 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		/* 		poolid, err := cmd.getResourcePoolID(ctx, clusterName)
-		   		if err != nil {
-		   			return err
-		   		} */
-		finder, err := cmd.Finder()
-
-		// Lookup default datastore
-		ds, err := finder.DefaultDatastore(ctx)
+		ds, err := cmd.Datastore()
 		if err != nil {
 			return err
 		}
 		datastoreID := ds.Reference().Value
 		fmt.Printf("Using datastore ID %s\n", datastoreID)
 
-		rp, err := finder.DefaultResourcePool(ctx)
+		rp, err := cmd.ResourcePool()
 		if err != nil {
 			return err
 		}

@@ -249,7 +249,6 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.item.Name = filepath.Base(ovafilename)
 		cmd.item.LibraryID = library.ID
 		cmd.item.Type = "ovf"
-		cmd.item.Description = "Testing 1 2 3"
 
 		itemID, err := m.CreateLibraryItem(ctx, cmd.item)
 		if err != nil {
