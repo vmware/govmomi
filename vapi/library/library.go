@@ -83,7 +83,7 @@ func (c *Manager) FindLibrary(
 // Description, and CategoryID.
 func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, error) {
 	if library.Type != "LOCAL" {
-		return "", fmt.Errorf("unsupported library type: %s", library.Type)
+		return "", fmt.Errorf("unsupported library type: %q", library.Type)
 	}
 	spec := struct {
 		Library Library `json:"create_spec"`

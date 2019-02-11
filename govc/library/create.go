@@ -26,14 +26,11 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
-	"github.com/vmware/govmomi/vim25"
 )
 
 type create struct {
-	*flags.ClientFlag
-	*flags.DatacenterFlag
-	library   library.Library
-	datastore string
+	*flags.DatastoreFlag
+	library library.Library
 }
 
 func init() {
@@ -41,20 +38,10 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
-	f.StringVar(&cmd.datastore, "D", "", "Datastore for library")
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+
 	f.StringVar(&cmd.library.Description, "d", "", "Description of library")
-
-	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
-	cmd.DatacenterFlag.Register(ctx, f)
-}
-
-func (cmd *create) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
 }
 
 func (cmd *create) Usage() string {
@@ -79,29 +66,27 @@ func (r createResult) Write(w io.Writer) error {
 	return nil
 }
 
-func (cmd *create) lookupDatastore(ctx context.Context, c *vim25.Client, name string) (string, error) {
-	finder, err := cmd.Finder()
-	if err != nil {
-		return name, err
-	}
-	objects, err := finder.DatastoreList(ctx, name)
-	if err != nil {
-		return name, err
-	}
-
-	return objects[0].Reference().Value, nil
-}
-
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 1 {
 		return flag.ErrHelp
 	}
 
+	ds, err := cmd.Datastore()
+	if err != nil {
+		return err
+	}
+
 	cmd.library.Name = f.Arg(0)
+	cmd.library.Type = "LOCAL"
+	cmd.library.Storage = []library.StorageBackings{
+		{
+			DatastoreID: ds.Reference().Value,
+			Type:        "DATASTORE",
+		},
+	}
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		id, err := library.NewManager(c).CreateLibrary(ctx, cmd.library)
-
 		if err != nil {
 			return err
 		}

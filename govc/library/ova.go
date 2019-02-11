@@ -20,7 +20,6 @@ import (
 	"archive/tar"
 	"context"
 	"crypto/md5"
-	"crypto/tls"
 	"encoding/hex"
 	"flag"
 	"fmt"
@@ -175,21 +174,9 @@ func uploadFile(ctx context.Context, m *library.Manager, sessionID string, ovafi
 	if err != nil {
 		return err
 	}
-	req.Header.Set("Accept", "application/json")
 	req.Header.Set("vmware-api-session-id", sessionID)
 
-	// TODO: this likely should be done using the rest client api
-	tr := &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
-	}
-	client := &http.Client{Transport: tr}
-	res, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-	defer res.Body.Close()
-
-	return nil
+	return m.Do(ctx, req, nil)
 }
 
 func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -249,7 +236,6 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.item.Name = filepath.Base(ovafilename)
 		cmd.item.LibraryID = library.ID
 		cmd.item.Type = "ovf"
-		cmd.item.Description = "Testing 1 2 3"
 
 		itemID, err := m.CreateLibraryItem(ctx, cmd.item)
 		if err != nil {
