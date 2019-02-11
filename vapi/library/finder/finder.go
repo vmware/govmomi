@@ -78,6 +78,17 @@ func (f *Finder) find(ctx context.Context, ipath string) ([]FindResult, error) {
 	// Tokenize the path into its distinct parts.
 	parts := strings.Split(ipath, "/")
 
+	// If there are more than three parts then the file name contains
+	// the "/" character. In that case collapse any additional parts
+	// back into the filename.
+	if len(parts) > 3 {
+		parts = []string{
+			parts[0],
+			parts[1],
+			strings.Join(parts[2:], "/"),
+		}
+	}
+
 	libs, err := f.findLibraries(ctx, parts[0])
 	if err != nil {
 		return nil, err
