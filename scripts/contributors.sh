@@ -1,5 +1,14 @@
 #!/bin/bash -e
 
+# standardize on gnu sort where available
+ssort() {
+    if hash gsort 2>/dev/null; then
+        gsort "$@"
+    else
+        sort "$@"
+    fi
+}
+
 file="$(git rev-parse --show-toplevel)/CONTRIBUTORS"
 
 cat <<EOF > "$file"
@@ -10,4 +19,4 @@ cat <<EOF > "$file"
 
 EOF
 
-git log --format='%aN <%aE>' | sort -uf >> "$file"
+git log --format='%aN <%aE>' | ssort -uf >> "$file"

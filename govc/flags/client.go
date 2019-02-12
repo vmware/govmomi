@@ -36,6 +36,8 @@ import (
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
+
+	gv "github.com/vmware/govmomi/version"
 )
 
 const (
@@ -275,7 +277,7 @@ func (flag *ClientFlag) ConfigureTLS(sc *soap.Client) error {
 	sc.Namespace = "urn:" + flag.vimNamespace
 	sc.Version = flag.vimVersion
 
-	sc.UserAgent = fmt.Sprintf("govc/%s", Version)
+	sc.UserAgent = fmt.Sprintf("govc/%s", gv.Version)
 
 	if err := flag.SetRootCAs(sc); err != nil {
 		return err

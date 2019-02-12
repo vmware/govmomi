@@ -36,6 +36,7 @@ import (
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
+	gv "github.com/vmware/govmomi/version"
 	"github.com/vmware/govmomi/vim25/types"
 
 	// Register vcsim optional endpoints
@@ -45,12 +46,6 @@ import (
 	_ "github.com/vmware/govmomi/vapi/cluster/simulator"
 	_ "github.com/vmware/govmomi/vapi/simulator"
 )
-
-// vcsim does not track versions like govc does, it only shows if a binary was
-// built during a tag event or from a git checkout.
-const Version = "dev"
-
-var GitVersion string
 
 func main() {
 	model := simulator.VPX()
@@ -104,9 +99,9 @@ func main() {
 	}
 	// if -version is requested, print it and exit cleanly
 	if *ver {
-		v := GitVersion
+		v := gv.GitVersion
 		if v == "" {
-			v = Version
+			v = gv.Version
 		}
 		fmt.Printf("vcsim %s\n", v)
 		os.Exit(0)

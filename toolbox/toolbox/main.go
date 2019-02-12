@@ -31,17 +31,30 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/vmware/govmomi/toolbox"
+	gv "github.com/vmware/govmomi/version"
 )
 
 // This example can be run on a VM hosted by ESX, Fusion or Workstation
 func main() {
+	ver := flag.Bool("version", false, "Show vcsim version number")
 	flag.Parse()
+
+	// if -version is requested, print it and exit cleanly
+	if *ver {
+		v := gv.GitVersion
+		if v == "" {
+			v = gv.Version
+		}
+		fmt.Printf("toolbox %s\n", v)
+		os.Exit(0)
+	}
 
 	in := toolbox.NewBackdoorChannelIn()
 	out := toolbox.NewBackdoorChannelOut()

@@ -23,6 +23,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+
+	gv "github.com/vmware/govmomi/version"
 )
 
 type version struct {
@@ -40,9 +42,9 @@ func (cmd *version) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *version) Run(ctx context.Context, f *flag.FlagSet) error {
-	ver := flags.GitVersion
+	ver := gv.GitVersion
 	if ver == "" {
-		ver = flags.Version
+		ver = gv.Version
 	}
 
 	if cmd.require != "" {

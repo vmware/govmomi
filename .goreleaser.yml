@@ -1,59 +1,106 @@
 ---
 project_name: govmomi
+env:
+  - CGO_ENABLED=0
 builds:
-- id: govc
-  goos:
-    - linux
-    - darwin
-    - windows
-    - freebsd
-  goarch:
-    - amd64
-    - 386
-    - arm64
-  env:
+  - id: govc
+    binary: govc
+    main: ./govc/
+    flags: -compiler gc -tags 'netgo'
+    ldflags: -X github.com/vmware/govmomi/version.GitVersion={{.Version}} -s -w
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch:
+      - arm
+      - amd64
+      - 386
+  - id: homebrew-govc
+    binary: govc
+    main: ./govc/
+    flags: -compiler gc -tags 'netgo'
+    ldflags: -X github.com/vmware/govmomi/version.GitVersion={{.Version}} -s -w
+    goos:
+      - darwin
+    goarch:
+      - amd64
+  - id: vcsim
+    binary: vcsim
+    main: ./vcsim/
+    flags: -compiler gc -tags 'netgo'
+    ldflags: -X github.com/vmware/govmomi/version.GitVersion={{.Version}} -s -w
+    goos:
+      - linux
+      - darwin
+      - windows
+    goarch:
+      - arm
+      - amd64
+      - 386
+  - id: homebrew-vcsim
+    binary: vcsim
+    main: ./vcsim/
+    flags: -compiler gc -tags 'netgo'
+    ldflags: -X github.com/vmware/govmomi/version.GitVersion={{.Version}} -s -w
+    goos:
+      - darwin
+    goarch:
+      - amd64
+  - id: toolbox
+    binary: toolbox
+    env:
     - CGO_ENABLED=0
-  main: ./govc/main.go
-  binary: govc
-  flags: -compiler gc
-  ldflags: -X github.com/vmware/govmomi/govc/flags.GitVersion={{.Version}}
-- id: vcsim
-  goos:
-    - linux
-    - darwin
-    - windows
-    - freebsd
-  goarch:
-    - amd64
-    - 386
-    - arm64
-  env:
-    - CGO_ENABLED=0
-  main: ./vcsim/main.go
-  binary: vcsim
-  flags: -compiler gc
-  ldflags: -X github.com/vmware/govmomi/vcsim/flags.GitVersion={{.Version}}
+    main: ./toolbox/toolbox/
+    flags: -compiler gc -tags 'netgo'
+    ldflags: -X github.com/vmware/govmomi/version.GitVersion={{.Version}} -s -w
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - 386
 archives:
-- id: govcbuild
-  builds: ['govc']
-  name_template: 'govc_{{ .Os }}_{{ .Arch }}'
-  format: gz
-  format_overrides:
-    - goos: windows
-      format: zip
-  files:
-  - none*
-- id: vcsimbuild
-  builds: ['vcsim']
-  name_template: 'vcsim_{{ .Os }}_{{ .Arch }}'
-  format: gz
-  format_overrides:
-    - goos: windows
-      format: zip
-  files:
-  - none*
+  - id: govc
+    builds:
+      - govc
+    name_template: 'govc_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - none*
+  - id: vcsim
+    builds:
+      - vcsim
+    name_template: 'vcsim_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: gz
+    format_overrides:
+      - goos: windows
+        format: zip
+    files:
+      - none*
+  - id: toolbox
+    builds:
+      - toolbox
+    name_template: 'toolbox_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: gz
+    files:
+      - none*
+  - id: homebrew-govc
+    builds:
+      - homebrew-govc
+    name_template: 'govc-homebrew_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: tar.gz
+  - id: homebrew-vcsim
+    builds:
+      - homebrew-vcsim
+    name_template: 'vcsim-homebrew_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    format: tar.gz
 checksum:
   name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+  algorithm: sha256
 changelog:
   sort: asc
   filters:
@@ -63,9 +110,10 @@ changelog:
       - Merge pull request
       - Merge branch
 brews:
-  - name: govc
+  - 
+    name: govc
     ids:
-      - govc
+      - homebrew-govc
     github:
       owner: govmomi
       name: homebrew-tap
@@ -79,9 +127,10 @@ brews:
       system "#{bin}/govc version"
     install: |
       bin.install "govc"
-  - name: vcsim
+  - 
+    name: vcsim
     ids:
-      - vcsim
+      - homebrew-vcsim
     github:
       owner: govmomi
       name: homebrew-tap

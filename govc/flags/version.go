@@ -21,10 +21,6 @@ import (
 	"strings"
 )
 
-const Version = "0.22.1"
-
-var GitVersion string
-
 type version []int
 
 func ParseVersion(s string) (version, error) {
