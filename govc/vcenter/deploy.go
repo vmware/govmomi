@@ -31,6 +31,7 @@ import (
 type deploy struct {
 	*flags.DatastoreFlag
 	*flags.ResourcePoolFlag
+	*flags.FolderFlag
 }
 
 func init() {
@@ -43,13 +44,19 @@ func (cmd *deploy) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
 	cmd.ResourcePoolFlag.Register(ctx, f)
+
+	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
 }
 
 func (cmd *deploy) Process(ctx context.Context) error {
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
 		return err
 	}
-	return cmd.ResourcePoolFlag.Process(ctx)
+	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
+		return err
+	}
+	return cmd.FolderFlag.Process(ctx)
 }
 
 func (cmd *deploy) Usage() string {
@@ -95,7 +102,6 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		vmName := f.Arg(2)
 
 		ovfItemID, err := getOVFItemID(ctx, c, libname, templateName)
-
 		if err != nil {
 			return err
 		}
@@ -114,6 +120,13 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		poolID := rp.Reference().Value
 		fmt.Printf("Using pool ID %s\n", poolID)
 
+		folder, err := cmd.Folder()
+		if err != nil {
+			return err
+		}
+		folderID := folder.Reference().Value
+		fmt.Printf("Using folder ID %s\n", folderID)
+
 		filter := vcenter.FilterRequest{
 			Target: vcenter.Target{
 				ResourcePoolID: poolID,
@@ -131,6 +144,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			},
 			Target: vcenter.Target{
 				ResourcePoolID: poolID,
+				FolderID:       folderID,
 			},
 		}
 
