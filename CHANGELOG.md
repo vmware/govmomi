@@ -1,6 +1,6 @@
 # changelog
 
-### 0.20.0 (2018-02-06)
+### 0.20.0 (2019-02-06)
 
 * Add vslm package for managing First Class Disks
 
