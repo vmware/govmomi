@@ -32,10 +32,11 @@ import (
 type tree struct {
 	*flags.VirtualMachineFlag
 
-	fullPath    bool
 	current     bool
 	currentName bool
 	date        bool
+	description bool
+	fullPath    bool
 	id          bool
 
 	info *types.VirtualMachineSnapshotInfo
@@ -49,10 +50,14 @@ func (cmd *tree) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.fullPath, "f", false, "Print the full path prefix for snapshot")
-	f.BoolVar(&cmd.currentName, "C", false, "Print the current snapshot name only")
 	f.BoolVar(&cmd.current, "c", true, "Print the current snapshot")
+	f.BoolVar(&cmd.currentName, "C", false,
+		"Print the current snapshot name only")
 	f.BoolVar(&cmd.date, "D", false, "Print the snapshot creation date")
+	f.BoolVar(&cmd.description, "d", false,
+		"Print the snapshot description")
+	f.BoolVar(&cmd.fullPath, "f", false,
+		"Print the full path prefix for snapshot")
 	f.BoolVar(&cmd.id, "i", false, "Print the snapshot id")
 }
 
@@ -63,7 +68,7 @@ The command will exit 0 with no output if VM does not have any snapshots.
 
 Examples:
   govc snapshot.tree -vm my-vm
-  govc snapshot.tree -vm my-vm -D -i`
+  govc snapshot.tree -vm my-vm -D -i -d`
 }
 
 func (cmd *tree) Process(ctx context.Context) error {
@@ -112,7 +117,14 @@ func (cmd *tree) write(level int, parent string, st []types.VirtualMachineSnapsh
 				meta = fmt.Sprintf("[%s]  ", strings.Join(attr, " "))
 			}
 
-			fmt.Printf("%s%s%s\n", strings.Repeat(" ", level), meta, name)
+			if cmd.description {
+				fmt.Printf("%s%s%s - %4s\n",
+					strings.Repeat(" ", level), meta, name,
+					s.Description)
+			} else {
+				fmt.Printf("%s%s%s\n",
+					strings.Repeat(" ", level), meta, name)
+			}
 		}
 
 		cmd.write(level+2, sname, s.ChildSnapshotList)
