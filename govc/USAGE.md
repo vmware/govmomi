@@ -3471,12 +3471,13 @@ The command will exit 0 with no output if VM does not have any snapshots.
 
 Examples:
   govc snapshot.tree -vm my-vm
-  govc snapshot.tree -vm my-vm -D -i
+  govc snapshot.tree -vm my-vm -D -i -d
 
 Options:
   -C=false               Print the current snapshot name only
   -D=false               Print the snapshot creation date
   -c=true                Print the current snapshot
+  -d=false               Print the snapshot description
   -f=false               Print the full path prefix for snapshot
   -i=false               Print the snapshot id
   -vm=                   Virtual machine [GOVC_VM]
