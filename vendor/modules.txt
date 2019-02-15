@@ -1,4 +1,4 @@
-# github.com/davecgh/go-xdr v0.0.0-20170217172119-4930550ba2e2
+# github.com/davecgh/go-xdr v0.0.0-20161123171359-e6a2ba005892 => github.com/rasky/go-xdr v0.0.0-20170217172119-4930550ba2e2
 github.com/davecgh/go-xdr/xdr2
 # github.com/google/uuid v0.0.0-20170306145142-6a5e28554805
 github.com/google/uuid
