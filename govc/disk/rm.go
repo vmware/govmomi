@@ -57,12 +57,16 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	id := f.Arg(0)
-	m := vslm.NewObjectManager(ds.Client())
-
-	task, err := m.Delete(ctx, ds, id)
 
 	logger := cmd.ProgressLogger(fmt.Sprintf("Deleting %s...", id))
 	defer logger.Wait()
+
+	m := vslm.NewObjectManager(ds.Client())
+
+	task, err := m.Delete(ctx, ds, id)
+	if err != nil {
+		fmt.Println(err)
+	}
 
 	_, err = task.WaitForResult(ctx, logger)
 	return err
