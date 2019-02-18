@@ -102,11 +102,12 @@ type infoResult struct {
 
 func printPort(port types.BaseDvsIpPort) string {
 	if port != nil {
-		switch port.(type) {
+		switch portType := port.(type) {
 		case *types.DvsSingleIpPort:
-			return fmt.Sprintf("%d", port.(*types.DvsSingleIpPort).PortNumber)
+			return fmt.Sprintf("%d", portType.PortNumber)
 		case *types.DvsIpPortRange:
-			return fmt.Sprintf("%d-%d", port.(*types.DvsIpPortRange).StartPortNumber, port.(*types.DvsIpPortRange).EndPortNumber)
+			return fmt.Sprintf("%d-%d", portType.StartPortNumber,
+				portType.EndPortNumber)
 		}
 	}
 	return "Any"
@@ -116,7 +117,7 @@ func printAddress(address types.BaseIpAddress) string {
 	if address != nil {
 		switch (address).(type) {
 		case *types.SingleIp:
-			return fmt.Sprintf("%s", address.(*types.SingleIp).Address)
+			return address.(*types.SingleIp).Address
 		case *types.IpRange:
 			return fmt.Sprintf("%s/%d", address.(*types.IpRange).AddressPrefix, address.(*types.IpRange).PrefixLength)
 		}

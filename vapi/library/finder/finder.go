@@ -71,9 +71,7 @@ func (f *Finder) find(ctx context.Context, ipath string) ([]FindResult, error) {
 	}
 
 	// Get the argument and remove any leading separator characters.
-	if strings.HasPrefix(ipath, "/") {
-		ipath = ipath[1:]
-	}
+	ipath = strings.TrimPrefix(ipath, "/")
 
 	// Tokenize the path into its distinct parts.
 	parts := strings.Split(ipath, "/")

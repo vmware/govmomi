@@ -77,7 +77,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 				ruleTypeInfo := GetExtendedClusterRuleInfo(g).ruleType
 				res = append(res, fmt.Sprintf("%s (%s)", ruleName, ruleTypeInfo))
 			} else {
-				res = append(res, fmt.Sprintf("%s", ruleName))
+				res = append(res, ruleName)
 			}
 		}
 	} else {

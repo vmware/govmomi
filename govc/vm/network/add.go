@@ -74,8 +74,8 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() > 0 {
 		err = cmd.NetworkFlag.Set(f.Arg(0))
 		if err != nil {
-			return errors.New(fmt.Sprintf("couldn't set specified network %v",
-				err))
+			return fmt.Errorf("couldn't set specified network %v",
+				err)
 		}
 	}
 

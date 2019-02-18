@@ -413,7 +413,6 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 				if matches > 0 {
 					return true
 				}
-
 				return false
 			}
 
