@@ -665,10 +665,8 @@ func (c *CommandServer) InitiateFileTransferToGuest(header vix.CommandRequestHea
 		if !r.Body.Overwrite {
 			return nil, vix.Error(vix.FileAlreadyExists)
 		}
-	} else {
-		if !os.IsNotExist(err) {
-			return nil, err
-		}
+	} else if !os.IsNotExist(err) {
+		return nil, err
 	}
 
 	return nil, nil
