@@ -46,7 +46,7 @@ func TestNewClient(t *testing.T) {
 		if err != nil {
 			return err
 		}
-		if len(x.Name) == 0 {
+		if x.Name == "" {
 			return errors.New("empty response")
 		}
 		return nil

@@ -253,7 +253,7 @@ func (f *Finder) managedObjectList(ctx context.Context, path string, tl bool, in
 		fn = f.dcReference
 	}
 
-	if len(path) == 0 {
+	if path == "" {
 		path = "."
 	}
 

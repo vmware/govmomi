@@ -201,7 +201,7 @@ func (o *listOutput) add(r types.HostDatastoreBrowserSearchResults) {
 			}
 
 			for _, p := range path {
-				if len(p) != 0 && p[0] == '.' {
+				if p != "" && p[0] == '.' {
 					return
 				}
 			}
