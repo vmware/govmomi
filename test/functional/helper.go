@@ -115,7 +115,7 @@ func (h *Helper) LocalDatastores(ctx context.Context, cr *object.ComputeResource
 
 		switch i := mds.Info.(type) {
 		case *types.VmfsDatastoreInfo:
-			if i.Vmfs.Local != nil && *i.Vmfs.Local == true {
+			if i.Vmfs.Local != nil && *i.Vmfs.Local {
 				break
 			}
 		default:

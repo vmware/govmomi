@@ -708,13 +708,13 @@ func TestCdrom(t *testing.T) {
 	}
 
 	for _, name := range []string{"enoent", "ide-200"} {
-		c, err = devices.FindCdrom(name)
+		_, err = devices.FindCdrom(name)
 		if err == nil {
 			t.Errorf("FindCdrom(%s) should fail", name)
 		}
 	}
 
-	c, err = devices.Select(func(device types.BaseVirtualDevice) bool {
+	_, err = devices.Select(func(device types.BaseVirtualDevice) bool {
 		if _, ok := device.(*types.VirtualCdrom); ok {
 			return false
 		}

@@ -273,7 +273,7 @@ func TestReadV3(t *testing.T) {
 		t.Errorf("type=%d", attr.Type)
 	}
 
-	if attr.Size <= 0 {
+	if attr.Size == 0 {
 		t.Errorf("size=%d", attr.Size)
 	}
 

@@ -141,11 +141,11 @@ func TestDatastoreHTTP(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if i == 0 {
-			// Cover the service ticket path
-			// TODO: govmomi requires HostSystem.Config.VirtualNicManagerInfo
-			// ctx = ds.HostContext(ctx, object.NewHostSystem(c.Client, esx.HostSystem.Reference()))
-		}
+		//if i == 0 {
+		//	// Cover the service ticket path
+		//	// TODO: govmomi requires HostSystem.Config.VirtualNicManagerInfo
+		//	// ctx = ds.HostContext(ctx, object.NewHostSystem(c.Client, esx.HostSystem.Reference()))
+		//}
 
 		dsPath := ds.Path
 

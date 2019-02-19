@@ -128,12 +128,8 @@ func (s *searchDatastore) queryMatch(file os.FileInfo) bool {
 			}
 		case *types.VmDiskFileQuery:
 			if ext == ".vmdk" {
-				if strings.HasSuffix(name, "-flat.vmdk") {
-					// only matches the descriptor, not the backing file(s)
-					return false
-				}
 				// TODO: check Filter and Details fields
-				return true
+				return !strings.HasSuffix(name, "-flat.vmdk")
 			}
 		case *types.VmLogFileQuery:
 			if ext == ".log" {

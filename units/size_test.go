@@ -17,7 +17,6 @@ limitations under the License.
 package units
 
 import (
-	"fmt"
 	"math"
 	"testing"
 )
@@ -31,8 +30,7 @@ func TestMB(t *testing.T) {
 }
 
 func TestTenMB(t *testing.T) {
-	b := ByteSize(10 * 1024 * 1024)
-	actual := fmt.Sprintf("%s", b)
+	actual := ByteSize(10 * 1024 * 1024).String()
 	expected := "10.0MB"
 	if actual != expected {
 		t.Errorf("Expected '%v' but got '%v'", expected, actual)

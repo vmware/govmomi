@@ -226,9 +226,7 @@ func TestEscapeXML(t *testing.T) {
 
 func TestProcessError(t *testing.T) {
 	fault := errors.New("fail")
-	var err error
-
-	err = &ProcessError{Err: fault}
+	var err error = &ProcessError{Err: fault}
 
 	if err.Error() != fault.Error() {
 		t.Fatal()

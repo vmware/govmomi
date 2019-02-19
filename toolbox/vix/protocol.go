@@ -816,7 +816,7 @@ func (c *UserCredentialNamePassword) UnmarshalBinary(data []byte) error {
 		return err
 	}
 
-	str, err := base64.StdEncoding.DecodeString(string(buf.Bytes()))
+	str, err := base64.StdEncoding.DecodeString(buf.String())
 	if err != nil {
 		return err
 	}
