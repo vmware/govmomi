@@ -287,7 +287,7 @@ func hexStringToHidCode(hex string) (int32, error) {
 
 func intToHidCode(v int32) int32 {
 	var s int32 = v << 16
-	s = s | 7
+	s |= 7
 	return s
 }
 

@@ -58,19 +58,19 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 	m := &PerformanceManager{}
 	m.Self = ref
 	if Map.IsESX() {
-		m.PerfCounter = esx.PerfCounter[:]
-		m.hostMetrics = esx.HostMetrics[:]
-		m.vmMetrics = esx.VmMetrics[:]
-		m.rpMetrics = esx.ResourcePoolMetrics[:]
+		m.PerfCounter = esx.PerfCounter
+		m.hostMetrics = esx.HostMetrics
+		m.vmMetrics = esx.VmMetrics
+		m.rpMetrics = esx.ResourcePoolMetrics
 		m.metricData = esx.MetricData
 	} else {
-		m.PerfCounter = vpx.PerfCounter[:]
-		m.hostMetrics = vpx.HostMetrics[:]
-		m.vmMetrics = vpx.VmMetrics[:]
-		m.rpMetrics = vpx.ResourcePoolMetrics[:]
-		m.clusterMetrics = vpx.ClusterMetrics[:]
-		m.datastoreMetrics = vpx.DatastoreMetrics[:]
-		m.datacenterMetrics = vpx.DatacenterMetrics[:]
+		m.PerfCounter = vpx.PerfCounter
+		m.hostMetrics = vpx.HostMetrics
+		m.vmMetrics = vpx.VmMetrics
+		m.rpMetrics = vpx.ResourcePoolMetrics
+		m.clusterMetrics = vpx.ClusterMetrics
+		m.datastoreMetrics = vpx.DatastoreMetrics
+		m.datacenterMetrics = vpx.DatacenterMetrics
 		m.metricData = vpx.MetricData
 	}
 	m.perfCounterIndex = make(map[int32]types.PerfCounterInfo, len(m.PerfCounter))

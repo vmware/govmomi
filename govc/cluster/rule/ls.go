@@ -86,7 +86,6 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		//res = append(res, rule.ruleType+":")
 		switch rule.ruleType {
 		case "ClusterAffinityRuleSpec", "ClusterAntiAffinityRuleSpec":
 			names, err := cmd.Names(ctx, *rule.refs)
@@ -114,9 +113,9 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WriteResult(res)
 }
 
-func extendedAppend(res ruleResult, Long bool, entryValue string, entryType string) ruleResult {
+func extendedAppend(res ruleResult, long bool, entryValue string, entryType string) ruleResult {
 	var newres ruleResult
-	if Long {
+	if long {
 		newres = append(res, fmt.Sprintf("%s (%s)", entryValue, entryType))
 	} else {
 		newres = append(res, entryValue)

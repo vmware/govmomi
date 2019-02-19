@@ -682,7 +682,7 @@ func Marshal(val interface{}) string {
 // Note that the namespace is required when encoding, but the namespace prefix must not be
 // present when decoding as Go's decoding does not handle namespace prefix.
 func mkns(ns string, obj interface{}, name ...*xml.Name) string {
-	ns = ns + ":"
+	ns += ":"
 	for i := range name {
 		name[i].Space = ""
 		if !strings.HasPrefix(name[i].Local, ns) {

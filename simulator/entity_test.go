@@ -65,6 +65,6 @@ func TestRename(t *testing.T) {
 			t.Errorf("state=%s", task.Info.State)
 		}
 
-		name = name + "-uniq"
+		name += "-uniq"
 	}
 }
