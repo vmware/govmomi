@@ -86,27 +86,27 @@ func init() {
 
 type PropertyList []*Property
 
-func NewInt32Property(ID int32, val int32) *Property {
+func NewInt32Property(id int32, val int32) *Property {
 	p := new(Property)
-	p.header.ID = ID
+	p.header.ID = id
 	p.header.Kind = vixPropertyTypeInt32
 	p.header.Length = int32Size
 	p.data.Int32 = val
 	return p
 }
 
-func NewStringProperty(ID int32, val string) *Property {
+func NewStringProperty(id int32, val string) *Property {
 	p := new(Property)
-	p.header.ID = ID
+	p.header.ID = id
 	p.header.Kind = vixPropertyTypeString
 	p.header.Length = int32(len(val) + 1)
 	p.data.String = val
 	return p
 }
 
-func NewBoolProperty(ID int32, val bool) *Property {
+func NewBoolProperty(id int32, val bool) *Property {
 	p := new(Property)
-	p.header.ID = ID
+	p.header.ID = id
 	p.header.Kind = vixPropertyTypeBool
 	p.header.Length = 1
 	if val {
@@ -115,18 +115,18 @@ func NewBoolProperty(ID int32, val bool) *Property {
 	return p
 }
 
-func NewInt64Property(ID int32, val int64) *Property {
+func NewInt64Property(id int32, val int64) *Property {
 	p := new(Property)
-	p.header.ID = ID
+	p.header.ID = id
 	p.header.Kind = vixPropertyTypeInt64
 	p.header.Length = int32Size * 2
 	p.data.Int64 = val
 	return p
 }
 
-func NewBlobProperty(ID int32, val []byte) *Property {
+func NewBlobProperty(id int32, val []byte) *Property {
 	p := new(Property)
-	p.header.ID = ID
+	p.header.ID = id
 	p.header.Kind = vixPropertyTypeBlob
 	p.header.Length = int32(len(val))
 	p.data.Blob = val
