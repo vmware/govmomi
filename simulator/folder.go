@@ -301,8 +301,9 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	}
 
 	vm.Guest = &types.GuestInfo{
-		ToolsStatus:  types.VirtualMachineToolsStatusToolsNotInstalled,
-		ToolsVersion: "0",
+		ToolsStatus:        types.VirtualMachineToolsStatusToolsNotInstalled,
+		ToolsVersion:       "0",
+		ToolsRunningStatus: string(types.VirtualMachineToolsRunningStatusGuestToolsNotRunning),
 	}
 
 	vm.Summary.Guest = &types.VirtualMachineGuestSummary{

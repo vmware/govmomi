@@ -245,6 +245,14 @@ func TestCreateVm(t *testing.T) {
 				if err != nil {
 					t.Error(err)
 				}
+
+				running, err := vm.IsToolsRunning(ctx)
+				if err != nil {
+					t.Error(err)
+				}
+				if running {
+					t.Error("tools running")
+				}
 			}
 		}
 
