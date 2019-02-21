@@ -50136,7 +50136,7 @@ type VirtualMachineConfigSpec struct {
 	LocationId                   string                            `xml:"locationId,omitempty"`
 	GuestId                      string                            `xml:"guestId,omitempty"`
 	AlternateGuestName           string                            `xml:"alternateGuestName,omitempty"`
-	Annotation                   string                            `xml:"annotation"`
+	Annotation                   *string                           `xml:"annotation"`
 	Files                        *VirtualMachineFileInfo           `xml:"files,omitempty"`
 	Tools                        *ToolsConfigInfo                  `xml:"tools,omitempty"`
 	Flags                        *VirtualMachineFlagInfo           `xml:"flags,omitempty"`
