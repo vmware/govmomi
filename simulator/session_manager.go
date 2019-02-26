@@ -36,6 +36,7 @@ type SessionManager struct {
 	mo.SessionManager
 
 	ServiceHostName string
+	TLSCert         func() string
 
 	sessions map[string]Session
 }

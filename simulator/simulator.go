@@ -574,6 +574,9 @@ func (s *Service) NewServer() *Server {
 		Host:   net.JoinHostPort(defaultIP(addr), port),
 		Path:   Map.Path,
 	}
+	if s.TLS != nil {
+		u.Scheme += "s"
+	}
 
 	// Redirect clients to this http server, rather than HostSystem.Name
 	Map.SessionManager().ServiceHostName = u.Host
@@ -583,18 +586,6 @@ func (s *Service) NewServer() *Server {
 		_ = f.Value.Set("")
 	}
 
-	cert := ""
-	if s.TLS == nil {
-		ts.Start()
-	} else {
-		ts.TLS = s.TLS
-		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
-		ts.StartTLS()
-		u.Scheme += "s"
-
-		cert = base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
-	}
-
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
 	m := Map.OptionManager()
 	m.Setting = append(m.Setting,
@@ -602,13 +593,20 @@ func (s *Service) NewServer() *Server {
 			Key:   "vcsim.server.url",
 			Value: u.String(),
 		},
-		&types.OptionValue{
-			Key:   "vcsim.server.cert",
-			Value: cert,
-		},
 	)
 
 	u.User = url.UserPassword("user", "pass")
+
+	if s.TLS != nil {
+		ts.TLS = s.TLS
+		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
+		Map.SessionManager().TLSCert = func() string {
+			return base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
+		}
+		ts.StartTLS()
+	} else {
+		ts.Start()
+	}
 
 	return &Server{
 		Server: ts,
