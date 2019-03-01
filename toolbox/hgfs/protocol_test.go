@@ -29,7 +29,7 @@ func TestProtocolEncoding(t *testing.T) {
 		packetSize = ps
 	}()
 
-	// a few structs have pading of some sort, leave PacketSize as-is for now with these tests
+	// a few structs have padding of some sort, leave PacketSize as-is for now with these tests
 	packetSize = func(r *Packet) uint32 {
 		return r.PacketSize
 	}

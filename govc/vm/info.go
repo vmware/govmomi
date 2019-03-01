@@ -180,7 +180,8 @@ type infoResult struct {
 // collectReferences builds a unique set of MORs to the set of VirtualMachines,
 // so we can collect properties in a single call for each reference type {host,datastore,network}.
 func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Context) error {
-	r.entities = make(map[types.ManagedObjectReference]string) // MOR -> Name map
+	// MOR -> Name map
+	r.entities = make(map[types.ManagedObjectReference]string)
 
 	var host []mo.HostSystem
 	var network []mo.Network

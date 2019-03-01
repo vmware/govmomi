@@ -277,7 +277,7 @@ func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32) e
 		return err
 	}
 	if len(result) == 0 {
-		return errors.New("Emtpy result set")
+		return errors.New("Empty result set")
 	}
 	ms, err := p.ToMetricSeries(ctx, result)
 	if err != nil {

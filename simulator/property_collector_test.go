@@ -521,7 +521,7 @@ func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {
 			set := res.Returnval
 			if set == nil {
 				// Retry if the result came back empty
-				// Thats a normal case when MaxWaitSeconds is set to 0.
+				// That's a normal case when MaxWaitSeconds is set to 0.
 				// It means we have no updates for now
 				time.Sleep(500 * time.Millisecond)
 				continue

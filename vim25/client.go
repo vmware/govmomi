@@ -54,7 +54,7 @@ type Client struct {
 	RoundTripper soap.RoundTripper
 }
 
-// NewClient creates and returns a new client wirh the ServiceContent field
+// NewClient creates and returns a new client with the ServiceContent field
 // filled in.
 func NewClient(ctx context.Context, rt soap.RoundTripper) (*Client, error) {
 	c := Client{

@@ -107,7 +107,7 @@ opts+=(
 )
 
 if [ "$product" = "ws" ] ; then
-  # workstation does not suport NFC
+  # workstation does not support NFC
   dir=$(govc datastore.info -json | jq -r .Datastores[0].Info.Url)
 
   ovftool --name="$name" --acceptAllEulas "$ova" "$dir"

@@ -97,7 +97,7 @@ func TestSimulator(t *testing.T) {
 	sort.Strings(qids)
 	sort.Strings(cids)
 
-	// Check whether ids retreived from QueryProfile and RetrieveContent are identical.
+	// Check whether ids retrieved from QueryProfile and RetrieveContent are identical.
 	if !reflect.DeepEqual(qids, cids) {
 		t.Error("ids mismatch")
 	}

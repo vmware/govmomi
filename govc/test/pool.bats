@@ -208,7 +208,7 @@ load test_helper
   result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
   [ $result -eq 1 ]
 
-  # delete childs
+  # delete children
   run govc pool.destroy -children $path
   assert_success
 
