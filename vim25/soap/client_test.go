@@ -62,7 +62,7 @@ func TestInvalidRootCAPath(t *testing.T) {
 	err := setCAsOnClient("fixtures/there-is-no-such-file")
 
 	if _, ok := err.(*os.PathError); !ok {
-		t.Fatalf("os.PathError should have occured: %#v", err)
+		t.Fatalf("os.PathError should have occurred: %#v", err)
 	}
 }
 
@@ -70,7 +70,7 @@ func TestValidRootCAs(t *testing.T) {
 	err := setCAsOnClient("fixtures/valid-cert.pem")
 
 	if err != nil {
-		t.Fatalf("Err should not have occured: %#v", err)
+		t.Fatalf("Err should not have occurred: %#v", err)
 	}
 }
 

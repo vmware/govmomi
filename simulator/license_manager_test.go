@@ -157,7 +157,7 @@ func TestAddRemoveLicense(t *testing.T) {
 	}
 
 	if len(info.Labels) != len(labels) {
-		t.Fatalf("expect len(info.Labels) eqaul to %d; got %d",
+		t.Fatalf("expect len(info.Labels) equal to %d; got %d",
 			len(labels), len(info.Labels))
 	}
 
@@ -181,7 +181,7 @@ func TestAddRemoveLicense(t *testing.T) {
 	}
 
 	if len(la[1].Labels) != len(labels) {
-		t.Fatalf("expect len(info.Labels) eqaul to %d; got %d",
+		t.Fatalf("expect len(info.Labels) equal to %d; got %d",
 			len(labels), len(la[1].Labels))
 	}
 

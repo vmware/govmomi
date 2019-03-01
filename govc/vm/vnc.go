@@ -50,12 +50,12 @@ func (i *intRange) Set(s string) error {
 
 	low, err := strconv.Atoi(m[1])
 	if err != nil {
-		return fmt.Errorf("could't convert to integer: %v", err)
+		return fmt.Errorf("couldn't convert to integer: %v", err)
 	}
 
 	high, err := strconv.Atoi(m[2])
 	if err != nil {
-		return fmt.Errorf("could't convert to integer: %v", err)
+		return fmt.Errorf("couldn't convert to integer: %v", err)
 	}
 
 	if low > high {
