@@ -766,10 +766,13 @@ class Operation
 
   def dump(io)
     func = ucfirst(name)
+    if namespace != "vim25"
+      tag = "urn:#{namespace} "
+    end
     io.print <<EOS
   type #{func}Body struct{
     Req *#{go_input} `xml:"urn:#{namespace} #{input},omitempty"`
-    Res *#{go_output} `xml:"urn:#{namespace} #{output},omitempty"`
+    Res *#{go_output} `xml:"#{tag}#{output},omitempty"`
     Fault_ *soap.Fault `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
   }
 

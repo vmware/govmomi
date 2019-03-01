@@ -1102,7 +1102,9 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 		t.Errorf("expected %d, got %d", fileLayoutExCount, len(vmm.LayoutEx.File))
 	}
 
-	vm.RefreshStorageInfo(ctx)
+	if err = vm.RefreshStorageInfo(ctx); err != nil {
+		t.Error(err)
+	}
 
 	if len(vmm.LayoutEx.File) != fileLayoutExCount+1 {
 		t.Errorf("expected %d, got %d", fileLayoutExCount+1, len(vmm.LayoutEx.File))
@@ -1111,7 +1113,9 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 	_ = f.Close()
 	_ = os.Remove(f.Name())
 
-	vm.RefreshStorageInfo(ctx)
+	if err = vm.RefreshStorageInfo(ctx); err != nil {
+		t.Error(err)
+	}
 
 	if len(vmm.LayoutEx.File) != fileLayoutExCount {
 		t.Errorf("expected %d, got %d", fileLayoutExCount, len(vmm.LayoutEx.File))
