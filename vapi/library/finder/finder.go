@@ -18,6 +18,7 @@ package finder
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"path"
 	"strings"
@@ -177,6 +178,10 @@ func (f findResult) GetName() string {
 	}
 }
 
+func (f findResult) MarshalJSON() ([]byte, error) {
+	return json.Marshal(f.GetResult())
+}
+
 func (f *Finder) findLibraries(
 	ctx context.Context,
 	token string) ([]FindResult, error) {
@@ -191,7 +196,7 @@ func (f *Finder) findLibraries(
 	// a lookup by name using a server side call.
 	if !strings.ContainsAny(token, "*?") {
 		libIDs, err := f.M.FindLibrary(
-			ctx, library.FindLibraryRequest{Name: token, Type: "LOCAL"})
+			ctx, library.Find{Name: token, Type: "LOCAL"})
 		if err != nil {
 			return nil, err
 		}
@@ -236,7 +241,7 @@ func (f *Finder) findLibraryItems(
 		// a lookup by name using a server side call.
 		if !strings.ContainsAny(token, "*?") {
 			childIDs, err := f.M.FindLibraryItems(
-				ctx, library.FindLibraryItemsRequest{
+				ctx, library.FindItem{
 					Name:      token,
 					LibraryID: parent.GetID(),
 				})

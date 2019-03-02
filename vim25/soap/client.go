@@ -194,6 +194,8 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	// Copy any query params (e.g. GOVMOMI_TUNNEL_PROXY_PORT used in testing)
 	client.u.RawQuery = vc.RawQuery
 
+	client.UserAgent = c.UserAgent
+
 	return client
 }
 

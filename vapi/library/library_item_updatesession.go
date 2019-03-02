@@ -34,9 +34,9 @@ type UpdateSession struct {
 	//	DefaultMessage string   `json:"default_message,omitempty"`
 	//	Args           []string `json:"args,omitempty"`
 	// } `json:"error_message,omitempty"`
-	ClientProgress int64  `json:"client_progress,omitempty"`
-	State          string `json:"state,omitempty"`
-	// ExpirationTime time.Time `json:"expiration_time,omitempty"`
+	ClientProgress int64      `json:"client_progress,omitempty"`
+	State          string     `json:"state,omitempty"`
+	ExpirationTime *time.Time `json:"expiration_time,omitempty"`
 }
 
 // CreateLibraryItemUpdateSession creates a new library item

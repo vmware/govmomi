@@ -35,6 +35,7 @@ const (
 	TagPath                      = "/cis/tagging/tag"
 	AssociationPath              = "/cis/tagging/tag-association"
 	LibraryPath                  = "/content/library"
+	LibraryItemAdd               = "/cis/data"
 	LibraryItemPath              = "/content/library/item"
 	LibraryItemFilePath          = "/content/library/item/file"
 	LibraryItemUpdateSession     = "/content/library/item/update-session"

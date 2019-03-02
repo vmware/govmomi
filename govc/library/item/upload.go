@@ -129,7 +129,7 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		// Get the URI for the file upload
 
-		updateFileInfo.Name = filename
+		updateFileInfo.Name = cmd.item.Name
 		updateFileInfo.Size = &size
 		updateFileInfo.SourceType = "PUSH"
 		updateFileInfo.Checksum = &library.Checksum{

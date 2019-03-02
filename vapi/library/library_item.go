@@ -42,6 +42,22 @@ type Item struct {
 	Version          string `json:"version,omitempty"`
 }
 
+// Patch merges updates from the given src.
+func (i *Item) Patch(src *Item) {
+	if src.Name != "" {
+		i.Name = src.Name
+	}
+	if src.Description != "" {
+		i.Description = src.Description
+	}
+	if src.Type != "" {
+		i.Type = src.Type
+	}
+	if src.Version != "" {
+		i.Version = src.Version
+	}
+}
+
 // CreateLibraryItem creates a new library item
 func (c *Manager) CreateLibraryItem(ctx context.Context, item Item) (string, error) {
 	type createItemSpec struct {
@@ -102,8 +118,8 @@ func (c *Manager) GetLibraryItems(ctx context.Context, libraryID string) ([]Item
 	return items, nil
 }
 
-// FindLibraryItemsRequest is the search criteria for finding library items.
-type FindLibraryItemsRequest struct {
+// FindItem is the search criteria for finding library items.
+type FindItem struct {
 	Cached    *bool  `json:"cached,omitempty"`
 	LibraryID string `json:"library_id,omitempty"`
 	Name      string `json:"name,omitempty"`
@@ -114,11 +130,11 @@ type FindLibraryItemsRequest struct {
 // FindLibraryItems returns the IDs of all the library items that match the
 // search criteria.
 func (c *Manager) FindLibraryItems(
-	ctx context.Context, search FindLibraryItemsRequest) ([]string, error) {
+	ctx context.Context, search FindItem) ([]string, error) {
 
 	url := internal.URL(c, internal.LibraryItemPath).WithAction("find")
 	spec := struct {
-		Spec FindLibraryItemsRequest `json:"spec"`
+		Spec FindItem `json:"spec"`
 	}{search}
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
