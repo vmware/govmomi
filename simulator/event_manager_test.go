@@ -124,7 +124,7 @@ func TestEventManagerVPX(t *testing.T) {
 	kind := reflect.TypeOf(hre)
 	types.Add(kind.Name(), kind)
 
-	err = e.PostEvent(ctx, &hre, types.TaskInfo{})
+	err = e.PostEvent(ctx, &hre)
 	if err != nil {
 		t.Fatal(err)
 	}

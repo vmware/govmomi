@@ -79,11 +79,14 @@ func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectRef
 	return nil
 }
 
-func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, taskInfo types.TaskInfo) error {
+func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, taskInfo ...types.TaskInfo) error {
 	req := types.PostEvent{
 		This:        m.Common.Reference(),
 		EventToPost: eventToPost,
-		TaskInfo:    &taskInfo,
+	}
+
+	if len(taskInfo) == 1 {
+		req.TaskInfo = &taskInfo[0]
 	}
 
 	_, err := methods.PostEvent(ctx, m.Client(), &req)
