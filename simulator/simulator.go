@@ -283,6 +283,36 @@ func (d *faultDetail) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 	return e.EncodeElement(d.Fault, start)
 }
 
+// response sets xml.Name.Space when encoding Body.
+// Note that namespace is intentionally omitted in the vim25/methods/methods.go Body.Res field tags.
+type response struct {
+	Namespace string
+	Body      soap.HasFault
+}
+
+func (r *response) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
+	val := reflect.ValueOf(r.Body).Elem().FieldByName("Res")
+	if !val.IsValid() {
+		return fmt.Errorf("%T: invalid response type (missing 'Res' field)", r.Body)
+	}
+	if val.IsNil() {
+		return fmt.Errorf("%T: invalid response (nil 'Res' field)", r.Body)
+	}
+	res := xml.StartElement{
+		Name: xml.Name{
+			Space: "urn:" + r.Namespace,
+			Local: val.Elem().Type().Name(),
+		},
+	}
+	if err := e.EncodeToken(start); err != nil {
+		return err
+	}
+	if err := e.EncodeElement(val.Interface(), res); err != nil {
+		return err
+	}
+	return e.EncodeToken(start.End())
+}
+
 // About generates some info about the simulator.
 func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 	var about struct {
@@ -411,7 +441,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	} else {
 		w.WriteHeader(http.StatusOK)
 
-		soapBody = res
+		soapBody = &response{ctx.Map.Namespace, res}
 	}
 
 	var out bytes.Buffer

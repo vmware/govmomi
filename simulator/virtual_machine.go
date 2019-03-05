@@ -724,6 +724,8 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 
 	vm.LayoutEx.Timestamp = time.Now()
 
+	body.Res = new(types.RefreshStorageInfoResponse)
+
 	return body
 }
 
