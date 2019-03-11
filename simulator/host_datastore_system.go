@@ -98,7 +98,7 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(c *types.CreateLocalDatasto
 		Path: c.Path,
 	}
 
-	ds.Summary.Type = "local"
+	ds.Summary.Type = string(types.HostFileSystemVolumeFileSystemTypeOTHER)
 
 	if err := dss.add(ds); err != nil {
 		r.Fault_ = err
