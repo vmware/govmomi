@@ -71,3 +71,13 @@ load test_helper
   run govc library.item.rm my-content library.bats
   assert_success
 }
+
+@test "library.deploy" {
+  vcsim_env
+
+  run govc library.create my-content
+  assert_success
+
+  run govc library.ova my-content "$GOVC_IMAGES/${TTYLINUX_NAME}.ova"
+  assert_success
+}

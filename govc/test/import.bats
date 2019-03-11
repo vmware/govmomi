@@ -3,22 +3,31 @@
 load test_helper
 
 @test "import.ova" {
-  esx_env
+  vcsim_env
 
-  run govc import.ova $GOVC_IMAGES/${TTYLINUX_NAME}.ova
+  run govc import.ova "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
 
-  run govc vm.destroy ${TTYLINUX_NAME}
+  run govc device.ls -vm "$TTYLINUX_NAME"
+  assert_success
+  assert_matches "disk-"
+
+  run govc vm.destroy "$TTYLINUX_NAME"
   assert_success
 }
 
 @test "import.ova with iso" {
-  esx_env
+  vcsim_env
 
-  run govc import.ova $GOVC_IMAGES/${TTYLINUX_NAME}-live.ova
+  run govc import.ova "$GOVC_IMAGES/${TTYLINUX_NAME}-live.ova"
   assert_success
 
-  run govc vm.destroy ${TTYLINUX_NAME}-live
+  run govc device.ls -vm "${TTYLINUX_NAME}-live"
+  assert_success
+  assert_matches "disk-"
+  assert_matches "cdrom-.* ${TTYLINUX_NAME}-live/_deviceImage0.iso"
+
+  run govc vm.destroy "${TTYLINUX_NAME}-live"
   assert_success
 }
 

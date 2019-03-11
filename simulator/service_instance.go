@@ -70,6 +70,7 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 		NewUserDirectory(*s.Content.UserDirectory),
 		NewOptionManager(s.Content.Setting, setting),
 		NewStorageResourceManager(*s.Content.StorageResourceManager),
+		NewOvfManager(*s.Content.OvfManager),
 	}
 
 	switch content.VStorageObjectManager.Type {

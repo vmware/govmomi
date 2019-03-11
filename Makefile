@@ -22,6 +22,7 @@ go-test:
 	GORACE=history_size=5 $(GO) test -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
 
 govc-test: install
+	./govc/test/images/update.sh
 	(cd govc/test && ./vendor/github.com/sstephenson/bats/libexec/bats -t .)
 
 .PHONY: test

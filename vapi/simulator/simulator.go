@@ -688,7 +688,7 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 	}
 	item, ok := l.Item[id]
 	if !ok {
-		log.Printf("library item found: %q", id)
+		log.Printf("library item not found: %q", id)
 		http.NotFound(w, r)
 		return
 	}
