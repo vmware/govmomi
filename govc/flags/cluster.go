@@ -133,7 +133,10 @@ func (f *ClusterFlag) objectMap(ctx context.Context, kind string, names []string
 	if err != nil {
 		return nil, err
 	}
-	defer v.Destroy(ctx)
+
+	defer func() {
+		_ = v.Destroy(ctx)
+	}()
 
 	var entities []mo.ManagedEntity
 

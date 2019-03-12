@@ -62,7 +62,11 @@ func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client) er
 		return err
 	}
 
-	defer admin.Logout(ctx)
+	defer func() {
+		if err := admin.Logout(ctx); err != nil {
+			log.Printf("user logout error: %v", err)
+		}
+	}()
 
 	id := types.PrincipalId{
 		Name:   "govmomi-test",

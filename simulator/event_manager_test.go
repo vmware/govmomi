@@ -149,7 +149,12 @@ func TestEventManagerRead(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	defer vc.Logout(ctx)
+
+	defer func() {
+		if err := vc.Logout(ctx); err != nil {
+			t.Fatal(err)
+		}
+	}()
 
 	spec := types.EventFilterSpec{}
 	c, err := event.NewManager(vc.Client).CreateCollectorForEvents(ctx, spec)
