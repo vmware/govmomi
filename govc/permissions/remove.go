@@ -21,6 +21,7 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -28,6 +29,7 @@ type remove struct {
 	*PermissionFlag
 
 	types.Permission
+	force bool
 }
 
 func init() {
@@ -40,6 +42,7 @@ func (cmd *remove) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar(&cmd.Principal, "principal", "", "User or group for which the permission is defined")
 	f.BoolVar(&cmd.Group, "group", false, "True, if principal refers to a group name; false, for a user name")
+	f.BoolVar(&cmd.force, "f", false, "Ignore NotFound fault if permission for this entity and user or group does not exist")
 }
 
 func (cmd *remove) Process(ctx context.Context) error {
@@ -75,6 +78,12 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 	for _, ref := range refs {
 		err = m.RemoveEntityPermission(ctx, ref, cmd.Principal, cmd.Group)
 		if err != nil {
+			if cmd.force && soap.IsSoapFault(err) {
+				_, ok := soap.ToSoapFault(err).VimFault().(types.NotFound)
+				if ok {
+					continue
+				}
+			}
 			return err
 		}
 	}
