@@ -32,7 +32,6 @@ import (
 	"math/rand"
 	"net"
 	"net/http"
-	"net/http/httptest"
 	"net/url"
 	"os"
 	"path"
@@ -44,6 +43,7 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/simulator/internal"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -77,7 +77,7 @@ type Service struct {
 
 // Server provides a simulator Service over HTTP
 type Server struct {
-	*httptest.Server
+	*internal.Server
 	URL    *url.URL
 	Tunnel int
 
@@ -595,7 +595,7 @@ func (s *Service) NewServer() *Server {
 
 	// Using NewUnstartedServer() instead of NewServer(),
 	// for use in main.go, where Start() blocks, we can still set ServiceHostName
-	ts := httptest.NewUnstartedServer(mux)
+	ts := internal.NewUnstartedServer(mux)
 
 	addr := ts.Listener.Addr().(*net.TCPAddr)
 	port := strconv.Itoa(addr.Port)
