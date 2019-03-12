@@ -19,9 +19,11 @@ package simulator
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"net/url"
+	"os"
 	"path"
 	"reflect"
 	"strings"
@@ -30,7 +32,9 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi/vapi/internal"
+	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/tags"
+	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
 
@@ -40,23 +44,40 @@ type session struct {
 	LastAccessed time.Time `json:"last_accessed_time"`
 }
 
+type content struct {
+	*library.Library
+	Item map[string]*library.Item
+}
+
+type update struct {
+	*library.UpdateSession
+	Library *library.Library
+	File    map[string]*library.UpdateFileInfo
+}
+
 type handler struct {
 	*http.ServeMux
 	sync.Mutex
+	URL         url.URL
 	Category    map[string]*tags.Category
 	Tag         map[string]*tags.Tag
 	Association map[string]map[internal.AssociatedObject]bool
 	Session     map[string]*session
+	Library     map[string]content
+	Update      map[string]update
 }
 
 // New creates a vAPI simulator.
 func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 	s := &handler{
 		ServeMux:    http.NewServeMux(),
+		URL:         *u,
 		Category:    make(map[string]*tags.Category),
 		Tag:         make(map[string]*tags.Tag),
 		Association: make(map[string]map[internal.AssociatedObject]bool),
 		Session:     make(map[string]*session),
+		Library:     make(map[string]content),
+		Update:      make(map[string]update),
 	}
 
 	handlers := []struct {
@@ -70,6 +91,17 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.TagPath + "/", s.tagID},
 		{internal.AssociationPath, s.association},
 		{internal.AssociationPath + "/", s.associationID},
+		{internal.LibraryPath, s.library},
+		{internal.LocalLibraryPath, s.library},
+		{internal.LibraryPath + "/", s.libraryID},
+		{internal.LocalLibraryPath + "/", s.libraryID},
+		{internal.LibraryItemPath, s.libraryItem},
+		{internal.LibraryItemPath + "/", s.libraryItemID},
+		{internal.LibraryItemUpdateSession, s.libraryItemUpdateSession},
+		{internal.LibraryItemUpdateSession + "/", s.libraryItemUpdateSessionID},
+		{internal.LibraryItemUpdateSessionFile, s.libraryItemUpdateSessionFile},
+		{internal.LibraryItemUpdateSessionFile + "/", s.libraryItemUpdateSessionFileID},
+		{internal.LibraryItemAdd + "/", s.libraryItemAdd},
 	}
 
 	for i := range handlers {
@@ -104,6 +136,8 @@ func (s *handler) isAuthorized(r *http.Request) bool {
 	info, ok := s.Session[id]
 	if ok {
 		info.LastAccessed = time.Now()
+	} else {
+		_, ok = s.Update[id]
 	}
 	return ok
 }
@@ -219,10 +253,15 @@ func (s *handler) fail(w http.ResponseWriter, kind string) {
 	}
 }
 
+func (*handler) error(w http.ResponseWriter, err error) {
+	http.Error(w, err.Error(), http.StatusInternalServerError)
+	log.Print(err)
+}
+
 // ServeHTTP handles vAPI requests.
 func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
-	case http.MethodPost, http.MethodDelete, http.MethodGet, http.MethodPatch:
+	case http.MethodPost, http.MethodDelete, http.MethodGet, http.MethodPatch, http.MethodPut:
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
@@ -259,6 +298,7 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{
 			Name:  internal.SessionCookieName,
 			Value: id,
+			Path:  internal.Path,
 		})
 		s.ok(w, id)
 	case http.MethodDelete:
@@ -481,5 +521,406 @@ func (s *handler) associationID(w http.ResponseWriter, r *http.Request) {
 			ids = append(ids, id)
 		}
 		s.ok(w, ids)
+	}
+}
+
+func (s *handler) library(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		var spec struct {
+			Library library.Library `json:"create_spec"`
+			Find    library.Find    `json:"spec"`
+		}
+		if !s.decode(r, w, &spec) {
+			return
+		}
+
+		switch s.action(r) {
+		case "find":
+			var ids []string
+			for _, l := range s.Library {
+				if spec.Find.Type != "" {
+					if spec.Find.Type != l.Library.Type {
+						continue
+					}
+				}
+				if spec.Find.Name != "" {
+					if !strings.EqualFold(l.Library.Name, spec.Find.Name) {
+						continue
+					}
+				}
+				ids = append(ids, l.ID)
+			}
+			s.ok(w, ids)
+		case "":
+			id := uuid.New().String()
+			spec.Library.ID = id
+			dir := libraryPath(&spec.Library, "")
+			if err := os.Mkdir(dir, 0750); err != nil {
+				s.error(w, err)
+				return
+			}
+			s.Library[id] = content{
+				Library: &spec.Library,
+				Item:    make(map[string]*library.Item),
+			}
+			s.ok(w, id)
+		}
+	case http.MethodGet:
+		var ids []string
+		for id := range s.Library {
+			ids = append(ids, id)
+		}
+		s.ok(w, ids)
+	}
+}
+
+func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
+	id := s.id(r)
+	l, ok := s.Library[id]
+	if !ok {
+		log.Printf("library not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodDelete:
+		p := libraryPath(l.Library, "")
+		if err := os.RemoveAll(p); err != nil {
+			s.error(w, err)
+			return
+		}
+		delete(s.Library, id)
+		s.ok(w)
+	case http.MethodPatch:
+		var spec struct {
+			Library library.Library `json:"update_spec"`
+		}
+		if s.decode(r, w, &spec) {
+			l.Patch(&spec.Library)
+			s.ok(w)
+		}
+	case http.MethodGet:
+		s.ok(w, l)
+	}
+}
+
+func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		var spec struct {
+			Item library.Item     `json:"create_spec"`
+			Find library.FindItem `json:"spec"`
+		}
+		if !s.decode(r, w, &spec) {
+			return
+		}
+
+		switch s.action(r) {
+		case "find":
+			var ids []string
+			for _, l := range s.Library {
+				if spec.Find.LibraryID != "" {
+					if spec.Find.LibraryID != l.ID {
+						continue
+					}
+				}
+				for _, i := range l.Item {
+					if spec.Find.Name != "" {
+						if spec.Find.Name != i.Name {
+							continue
+						}
+					}
+					if spec.Find.Type != "" {
+						if spec.Find.Type != i.Type {
+							continue
+						}
+					}
+					ids = append(ids, i.ID)
+				}
+			}
+			s.ok(w, ids)
+		case "create", "":
+			id := spec.Item.LibraryID
+			l, ok := s.Library[id]
+			if !ok {
+				log.Printf("library not found: %s", id)
+				http.NotFound(w, r)
+				return
+			}
+
+			id = uuid.New().String()
+			spec.Item.ID = id
+			l.Item[id] = &spec.Item
+			s.ok(w, id)
+		}
+	case http.MethodGet:
+		id := r.URL.Query().Get("library_id")
+		l, ok := s.Library[id]
+		if !ok {
+			log.Printf("library not found: %s", id)
+			http.NotFound(w, r)
+			return
+		}
+
+		var ids []string
+		for id := range l.Item {
+			ids = append(ids, id)
+		}
+		s.ok(w, ids)
+	}
+}
+
+func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
+	id := s.id(r)
+	lid := r.URL.Query().Get("library_id")
+	if lid == "" {
+		if l := s.itemLibrary(id); l != nil {
+			lid = l.ID
+		}
+	}
+	l, ok := s.Library[lid]
+	if !ok {
+		log.Printf("library not found: %q", lid)
+		http.NotFound(w, r)
+		return
+	}
+	item, ok := l.Item[id]
+	if !ok {
+		log.Printf("library item found: %q", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodDelete:
+		p := libraryPath(l.Library, id)
+		if err := os.RemoveAll(p); err != nil {
+			s.error(w, err)
+			return
+		}
+		delete(l.Item, item.ID)
+		s.ok(w)
+	case http.MethodPatch:
+		var spec struct {
+			Item library.Item `json:"update_spec"`
+		}
+		if s.decode(r, w, &spec) {
+			item.Patch(&spec.Item)
+			s.ok(w)
+		}
+	case http.MethodGet:
+		s.ok(w, item)
+	}
+}
+
+func (s *handler) libraryItemUpdateSession(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		var spec struct {
+			UpdateSession library.UpdateSession `json:"create_spec"`
+		}
+		if !s.decode(r, w, &spec) {
+			return
+		}
+
+		switch s.action(r) {
+		case "create", "":
+			lib := s.itemLibrary(spec.UpdateSession.LibraryItemID)
+			if lib == nil {
+				log.Printf("library for item %q not found", spec.UpdateSession.LibraryItemID)
+				http.NotFound(w, r)
+				return
+			}
+			session := &library.UpdateSession{
+				ID:                        uuid.New().String(),
+				LibraryItemID:             spec.UpdateSession.LibraryItemID,
+				LibraryItemContentVersion: "1",
+				ClientProgress:            0,
+				State:                     "ACTIVE",
+				ExpirationTime:            types.NewTime(time.Now().Add(time.Hour)),
+			}
+			s.Update[session.ID] = update{
+				UpdateSession: session,
+				Library:       lib,
+				File:          make(map[string]*library.UpdateFileInfo),
+			}
+			s.ok(w, session.ID)
+		case "get":
+			// TODO
+		case "list":
+			// TODO
+		}
+	}
+}
+
+func (s *handler) libraryItemUpdateSessionID(w http.ResponseWriter, r *http.Request) {
+	id := s.id(r)
+	up, ok := s.Update[id]
+	if !ok {
+		log.Printf("update session not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	session := up.UpdateSession
+	switch r.Method {
+	case http.MethodGet:
+		s.ok(w, session)
+	case http.MethodPost:
+		switch s.action(r) {
+		case "cancel", "complete", "fail":
+			delete(s.Update, id) // TODO: fully mock VC's behavior
+		case "keep-alive":
+			session.ExpirationTime = types.NewTime(time.Now().Add(time.Hour))
+		}
+		s.ok(w)
+	case http.MethodDelete:
+		delete(s.Update, id)
+		s.ok(w)
+	}
+}
+
+func (s *handler) libraryItemUpdateSessionFile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("update_session_id")
+	up, ok := s.Update[id]
+	if !ok {
+		log.Printf("update session not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	var files []*library.UpdateFileInfo
+	for _, f := range up.File {
+		files = append(files, f)
+	}
+	s.ok(w, files)
+}
+
+func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := s.id(r)
+	up, ok := s.Update[id]
+	if !ok {
+		log.Printf("update session not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	switch s.action(r) {
+	case "add":
+		var spec struct {
+			File library.UpdateFile `json:"file_spec"`
+		}
+		if s.decode(r, w, &spec) {
+			id = uuid.New().String()
+			u := url.URL{
+				Scheme: s.URL.Scheme,
+				Host:   s.URL.Host,
+				Path:   path.Join(internal.Path, internal.LibraryItemAdd, id, spec.File.Name),
+			}
+			info := &library.UpdateFileInfo{
+				Name:             spec.File.Name,
+				SourceType:       spec.File.SourceType,
+				Status:           "WAITING_FOR_TRANSFER",
+				BytesTransferred: 0,
+				UploadEndpoint: library.SourceEndpoint{
+					URI: u.String(),
+				},
+			}
+			up.File[id] = info
+			s.ok(w, info)
+		}
+	case "get":
+		s.ok(w, up.UpdateSession)
+	case "list":
+		var ids []string
+		for id := range up.File {
+			ids = append(ids, id)
+		}
+		s.ok(w, ids)
+	case "remove":
+		delete(s.Update, id)
+		s.ok(w)
+	case "validate":
+		// TODO
+	}
+}
+
+func (s *handler) itemLibrary(id string) *library.Library {
+	for _, l := range s.Library {
+		if _, ok := l.Item[id]; ok {
+			return l.Library
+		}
+	}
+	return nil
+}
+
+func (s *handler) updateFileInfo(id string) *update {
+	for _, up := range s.Update {
+		for i := range up.File {
+			if i == id {
+				return &up
+			}
+		}
+	}
+	return nil
+}
+
+// libraryPath returns the local Datastore fs path for a Library or Item if id is specified.
+func libraryPath(l *library.Library, id string) string {
+	// DatastoreID (moref) format is "$local-path@$ds-folder-id",
+	// see simulator.HostDatastoreSystem.CreateLocalDatastore
+	ds := strings.SplitN(l.Storage[0].DatastoreID, "@", 2)[0]
+	return path.Join(append([]string{ds, "contentlib-" + l.ID}, id)...)
+}
+
+func (s *handler) libraryItemAdd(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPut {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	p := strings.Split(r.URL.Path, "/")
+	id, name := p[len(p)-2], p[len(p)-1]
+	up := s.updateFileInfo(id)
+	if up == nil {
+		log.Printf("library update not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	dir := libraryPath(up.Library, up.UpdateSession.LibraryItemID)
+	if err := os.MkdirAll(dir, 0750); err != nil {
+		s.error(w, err)
+		return
+	}
+
+	file, err := os.Create(path.Join(dir, name))
+	if err != nil {
+		s.error(w, err)
+		return
+	}
+
+	_, err = io.Copy(file, r.Body)
+	_ = r.Body.Close()
+	if err != nil {
+		s.error(w, err)
+		return
+	}
+	err = file.Close()
+	if err != nil {
+		s.error(w, err)
+		return
 	}
 }

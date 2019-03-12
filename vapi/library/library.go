@@ -41,6 +41,19 @@ type Library struct {
 	Storage     []StorageBackings `json:"storage_backings,omitempty"`
 }
 
+// Patch merges updates from the given src.
+func (l *Library) Patch(src *Library) {
+	if src.Name != "" {
+		l.Name = src.Name
+	}
+	if src.Description != "" {
+		l.Description = src.Description
+	}
+	if src.Version != "" {
+		l.Version = src.Version
+	}
+}
+
 // Manager extends rest.Client, adding content library related methods.
 type Manager struct {
 	*rest.Client
@@ -53,8 +66,8 @@ func NewManager(client *rest.Client) *Manager {
 	}
 }
 
-// FindLibraryRequest is the search criteria for finding libraries.
-type FindLibraryRequest struct {
+// Find is the search criteria for finding libraries.
+type Find struct {
 	Name string `json:"name,omitempty"`
 	Type string `json:"type,omitempty"`
 }
@@ -62,18 +75,15 @@ type FindLibraryRequest struct {
 // FindLibrary returns one or more libraries that match the provided search
 // criteria.
 //
-// The provided name is case-sensitive.
+// The provided name is case-insensitive.
 //
 // Either the name or type of library may be set to empty values in order
 // to search for all libraries, all libraries with a specific name, regardless
 // of type, or all libraries of a specified type.
-func (c *Manager) FindLibrary(
-	ctx context.Context,
-	search FindLibraryRequest) ([]string, error) {
-
+func (c *Manager) FindLibrary(ctx context.Context, search Find) ([]string, error) {
 	url := internal.URL(c, internal.LibraryPath).WithAction("find")
 	spec := struct {
-		Spec FindLibraryRequest `json:"spec"`
+		Spec Find `json:"spec"`
 	}{search}
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
