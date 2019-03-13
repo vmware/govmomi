@@ -89,7 +89,9 @@ func WaitForUpdates(ctx context.Context, c *Collector, filter *WaitFilter, f fun
 
 	// Attempt to destroy the collector using the background context, as the
 	// specified context may have timed out or have been canceled.
-	defer p.Destroy(context.Background())
+	defer func() {
+		_ = p.Destroy(context.Background())
+	}()
 
 	err = p.CreateFilter(ctx, filter.CreateFilter)
 	if err != nil {

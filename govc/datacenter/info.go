@@ -180,7 +180,9 @@ func (r *infoResult) Write(w io.Writer) error {
 			return err
 		}
 
-		defer v.Destroy(r.ctx)
+		defer func() {
+			_ = v.Destroy(r.ctx)
+		}()
 
 		totalVms := 0
 		for _, vm := range vms {

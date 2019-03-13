@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"flag"
+	"log"
 	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -73,7 +74,12 @@ func withClient(ctx context.Context, cmd *flags.ClientFlag, f func(*ssoadmin.Cli
 	if err = c.Login(c.WithHeader(ctx, header)); err != nil {
 		return err
 	}
-	defer c.Logout(ctx)
+
+	defer func() {
+		if err := c.Logout(ctx); err != nil {
+			log.Printf("user logout error: %v", err)
+		}
+	}()
 
 	return f(c)
 }

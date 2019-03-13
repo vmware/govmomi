@@ -148,7 +148,9 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 		return nil
 	}
 
-	defer v.Destroy(context.Background())
+	defer func() {
+		_ = v.Destroy(context.Background())
+	}()
 
 	v.Follow = cmd.follow
 

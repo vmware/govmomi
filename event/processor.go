@@ -115,7 +115,9 @@ func (p *eventProcessor) run(ctx context.Context, tail bool) error {
 		return err
 	}
 
-	defer list.Destroy(context.Background())
+	defer func() {
+		_ = list.Destroy(context.Background())
+	}()
 
 	ref := list.Reference()
 	filter := new(property.WaitFilter).Add(ref, collectors[0].Type, props, list.TraversalSpec())

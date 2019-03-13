@@ -322,7 +322,9 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	defer v.Destroy(ctx)
+	defer func() {
+		_ = v.Destroy(ctx)
+	}()
 
 	objs, err := v.Find(ctx, cmd.kind, filter)
 	if err != nil {

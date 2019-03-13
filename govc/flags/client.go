@@ -25,6 +25,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
@@ -592,7 +593,11 @@ func (flag *ClientFlag) WithRestClient(ctx context.Context, f func(*rest.Client)
 		}
 	}
 
-	defer c.Logout(ctx)
+	defer func() {
+		if err := c.Logout(ctx); err != nil {
+			log.Printf("user logout error: %v", err)
+		}
+	}()
 
 	return f(c)
 }
