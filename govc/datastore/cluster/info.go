@@ -49,6 +49,14 @@ func (cmd *info) Usage() string {
 	return "[PATH]..."
 }
 
+func (cmd *info) Description() string {
+	return `Display datastore cluster info.
+
+Examples:
+  govc datastore.cluster.info
+  govc datastore.cluster.info MyDatastoreCluster`
+}
+
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
