@@ -28,6 +28,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/units"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vslm"
 )
@@ -123,8 +124,10 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	m := vslm.NewObjectManager(c)
 	res := lsResult{cmd: cmd}
 
+	filterNotFound := false
 	ids := f.Args()
 	if len(ids) == 0 {
+		filterNotFound = true
 		var oids []types.ID
 		if cmd.category == "" {
 			oids, err = m.List(ctx, ds)
@@ -143,6 +146,13 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	for _, id := range ids {
 		o, err := m.Retrieve(ctx, ds, id)
 		if err != nil {
+			if filterNotFound && soap.IsSoapFault(err) {
+				fault := soap.ToSoapFault(err)
+				// TODO: fault.Detail is NotFoundFault, but fails to unmarshal in this case.
+				if strings.Contains(fault.String, "could not be found") {
+					continue // hitting this case when an FCD is deleted via VM destroy
+				}
+			}
 			return err
 		}
 
