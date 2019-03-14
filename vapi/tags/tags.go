@@ -148,10 +148,10 @@ func (c *Manager) GetTagForCategory(ctx context.Context, id, category string) (*
 		return nil, err
 	}
 
-	for _, id := range ids {
-		tag, err := c.GetTag(ctx, id)
+	for _, tagid := range ids {
+		tag, err := c.GetTag(ctx, tagid)
 		if err != nil {
-			return nil, fmt.Errorf("get tag for category %s %s: %s", category, id, err)
+			return nil, fmt.Errorf("get tag for category %s %s: %s", category, tagid, err)
 		}
 		if tag.ID == id || tag.Name == id {
 			return tag, nil
