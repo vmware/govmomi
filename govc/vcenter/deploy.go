@@ -78,7 +78,11 @@ func getOVFItemID(ctx context.Context, c *rest.Client, libname string, ovfname s
 	if err != nil {
 		return "", err
 	}
+
 	res, err := m.GetLibraryItems(ctx, library.ID)
+	if err != nil {
+		return "", err
+	}
 
 	for _, r := range res {
 		if r.Name == ovfname || r.ID == ovfname {
@@ -134,6 +138,10 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		filterResponse, err := m.FilterLibraryItem(ctx, ovfItemID, filter)
+		if err != nil {
+			return err
+		}
+
 		fmt.Printf("Found OVA for deployment: %s\n", filterResponse.Name)
 
 		deploy := vcenter.Deploy{

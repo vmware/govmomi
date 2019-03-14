@@ -164,7 +164,6 @@ func TestVixRelayedCommandHandler(t *testing.T) {
 	// header.UserCredentialType not set
 	header.OpCode = vix.CommandStartProgram
 	request := new(vix.StartProgramRequest)
-	buf := marshal(request)
 	reply, _ = cmd.Dispatch(marshal())
 	rc = vixRC(reply)
 	if rc != vix.AuthenticationFail {
@@ -181,7 +180,7 @@ func TestVixRelayedCommandHandler(t *testing.T) {
 	header.CredentialLength = uint32(len(creds))
 
 	// ProgramPath not set
-	buf = append(marshal(request), creds...)
+	buf := append(marshal(request), creds...)
 	reply, _ = cmd.Dispatch(buf)
 	rc = vixRC(reply)
 	if rc != vix.FileNotFound {

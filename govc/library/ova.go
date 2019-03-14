@@ -127,7 +127,14 @@ func (of *OVAFile) Close() error {
 // getOVAFileInfo opens an OVA, finds the file entry, and returns both the size and md5 checksum
 func getOVAFileInfo(ovafile string, filename string) (int64, string, error) {
 	of, err := NewOVAFile(ovafile)
+	if err != nil {
+		return 0, "", err
+	}
+
 	hdr, err := of.Find(filename)
+	if err != nil {
+		return 0, "", err
+	}
 
 	hash := md5.New()
 	_, err = io.Copy(hash, of)
@@ -169,6 +176,9 @@ func uploadFile(ctx context.Context, m *library.Manager, sessionID string, ovafi
 
 	// Setup to point to the OVA file to be transferred
 	_, err = of.Find(filename)
+	if err != nil {
+		return err
+	}
 
 	req, err := http.NewRequest("PUT", addFileInfo.UploadEndpoint.URI, of)
 	if err != nil {
@@ -201,7 +211,11 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+
 		hdr, err := o.Next()
+		if err != nil {
+			return err
+		}
 
 		// Per the OVA spec, the first file must be the .ovf file.
 		if !strings.HasSuffix(hdr.Name, ".ovf") {

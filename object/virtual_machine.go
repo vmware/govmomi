@@ -263,7 +263,7 @@ func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool, device ...str
 	p := property.DefaultCollector(v.c)
 
 	// Wait for all NICs to have a MacAddress, which may not be generated yet.
-	err := property.Wait(ctx, p, v.Reference(), []string{"config.hardware.device"}, func(pc []types.PropertyChange) bool {
+	_ = property.Wait(ctx, p, v.Reference(), []string{"config.hardware.device"}, func(pc []types.PropertyChange) bool {
 		for _, c := range pc {
 			if c.Op != types.PropertyChangeOpAssign {
 				continue
@@ -296,7 +296,7 @@ func (v VirtualMachine) WaitForNetIP(ctx context.Context, v4 bool, device ...str
 		}
 	}
 
-	err = property.Wait(ctx, p, v.Reference(), []string{"guest.net"}, func(pc []types.PropertyChange) bool {
+	err := property.Wait(ctx, p, v.Reference(), []string{"guest.net"}, func(pc []types.PropertyChange) bool {
 		for _, c := range pc {
 			if c.Op != types.PropertyChangeOpAssign {
 				continue
