@@ -166,3 +166,29 @@ load test_helper
 
   govc disk.ls -T | grep -v US-WEST
 }
+
+@test "disk.reconcile" {
+  vcsim_env
+
+  name=$(new_id)
+
+  run govc disk.create -size 10M "$name"
+  assert_success
+  id="${lines[1]}"
+
+  run govc disk.create -size 10M "$(new_id)"
+  assert_success
+
+  run govc disk.ls
+  assert_success
+
+  path=$(govc disk.ls -json "$id" | jq -r .Objects[].Config.Backing.FilePath)
+  run govc datastore.rm "$path"
+  assert_success
+
+  run govc disk.ls
+  assert_failure # file backing was removed without using disk.rm, results in NotFound fault
+
+  run govc disk.ls -R
+  assert_success
+}

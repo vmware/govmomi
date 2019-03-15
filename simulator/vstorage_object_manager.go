@@ -17,6 +17,7 @@ limitations under the License.
 package simulator
 
 import (
+	"log"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -70,19 +71,69 @@ func (m *VcenterVStorageObjectManager) ListVStorageObject(req *types.ListVStorag
 	return body
 }
 
-func (m *VcenterVStorageObjectManager) RetrieveVStorageObject(req *types.RetrieveVStorageObject) soap.HasFault {
+func (m *VcenterVStorageObjectManager) RetrieveVStorageObject(ctx *Context, req *types.RetrieveVStorageObject) soap.HasFault {
 	body := new(methods.RetrieveVStorageObjectBody)
 
 	obj := m.object(req.Datastore, req.Id)
 	if obj == nil {
-		body.Fault_ = Fault("", new(types.InvalidArgument))
+		body.Fault_ = Fault("", new(types.NotFound))
 	} else {
+		stat := m.statDatastoreBacking(ctx, req.Datastore, &req.Id)
+		if err := stat[req.Id]; err != nil {
+			body.Fault_ = Fault(err.Error(), new(types.NotFound))
+			return body
+		}
 		body.Res = &types.RetrieveVStorageObjectResponse{
 			Returnval: obj.VStorageObject,
 		}
 	}
 
 	return body
+}
+
+// statDatastoreBacking checks if object(s) backing file exists on the given datastore ref.
+func (m *VcenterVStorageObjectManager) statDatastoreBacking(ctx *Context, ref types.ManagedObjectReference, id *types.ID) map[types.ID]error {
+	objs := m.objects[ref] // default to checking all objects
+	if id != nil {
+		// check for a specific object
+		objs = map[types.ID]*VStorageObject{
+			*id: objs[*id],
+		}
+	}
+	res := make(map[types.ID]error, len(objs))
+	ds := ctx.Map.Get(ref).(*Datastore)
+	dc := ctx.Map.getEntityDatacenter(ds)
+	fm := ctx.Map.FileManager()
+
+	for _, obj := range objs {
+		backing := obj.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
+		file, _ := fm.resolve(&dc.Self, backing.FilePath)
+		_, res[obj.Config.Id] = os.Stat(file)
+	}
+
+	return res
+}
+
+func (m *VcenterVStorageObjectManager) ReconcileDatastoreInventoryTask(ctx *Context, req *types.ReconcileDatastoreInventory_Task) soap.HasFault {
+	task := CreateTask(m, "reconcileDatastoreInventory", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		objs := m.objects[req.Datastore]
+		stat := m.statDatastoreBacking(ctx, req.Datastore, nil)
+
+		for id, err := range stat {
+			if os.IsNotExist(err) {
+				log.Printf("removing disk %s from inventory: %s", id.Id, err)
+				delete(objs, id)
+			}
+		}
+
+		return nil, nil
+	})
+
+	return &methods.ReconcileDatastoreInventory_TaskBody{
+		Res: &types.ReconcileDatastoreInventory_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
 }
 
 func (m *VcenterVStorageObjectManager) RegisterDisk(ctx *Context, req *types.RegisterDisk) soap.HasFault {
@@ -116,7 +167,7 @@ func (m *VcenterVStorageObjectManager) RegisterDisk(ctx *Context, req *types.Reg
 	path := (&object.DatastorePath{Datastore: ds.Name, Path: u.Path}).String()
 
 	for _, obj := range m.objects[ds.Self] {
-		backing := obj.Config.BaseConfigInfo.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
+		backing := obj.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
 		if backing.FilePath == path {
 			return invalid()
 		}
@@ -201,7 +252,7 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 		}
 	}
 
-	obj.Config.BaseConfigInfo.Backing = &types.BaseConfigInfoDiskFileBackingInfo{
+	obj.Config.Backing = &types.BaseConfigInfoDiskFileBackingInfo{
 		BaseConfigInfoFileBackingInfo: types.BaseConfigInfoFileBackingInfo{
 			BaseConfigInfoBackingInfo: types.BaseConfigInfoBackingInfo{
 				Datastore: ds.Self,
