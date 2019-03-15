@@ -36,6 +36,8 @@ import (
 type ls struct {
 	*flags.DatastoreFlag
 	long     bool
+	path     bool
+	r        bool
 	category string
 	tag      string
 	tags     bool
@@ -50,6 +52,8 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
+	f.BoolVar(&cmd.path, "L", false, "Print disk backing path instead of disk name")
+	f.BoolVar(&cmd.r, "R", false, "Reconcile the datastore inventory info")
 	f.StringVar(&cmd.category, "c", "", "Query tag category")
 	f.StringVar(&cmd.tag, "t", "", "Query tag name")
 	f.BoolVar(&cmd.tags, "T", false, "List attached tags")
@@ -91,7 +95,13 @@ func (r *lsResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(r.cmd.Out, 2, 0, 2, ' ', 0)
 
 	for _, o := range r.Objects {
-		_, _ = fmt.Fprintf(tw, "%s\t%s", o.Config.Id.Id, o.Config.Name)
+		name := o.Config.Name
+		if r.cmd.path {
+			if file, ok := o.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo); ok {
+				name = file.FilePath
+			}
+		}
+		_, _ = fmt.Fprintf(tw, "%s\t%s", o.Config.Id.Id, name)
 		if r.cmd.long {
 			created := o.Config.CreateTime.Format(time.Stamp)
 			size := units.FileSize(o.Config.CapacityInMB * 1024 * 1024)
@@ -122,6 +132,15 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := vslm.NewObjectManager(c)
+	if cmd.r {
+		task, err := m.ReconcileDatastoreInventory(ctx, ds)
+		if err != nil {
+			return err
+		}
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+	}
 	res := lsResult{cmd: cmd}
 
 	filterNotFound := false
@@ -147,13 +166,13 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		o, err := m.Retrieve(ctx, ds, id)
 		if err != nil {
 			if filterNotFound && soap.IsSoapFault(err) {
-				fault := soap.ToSoapFault(err)
-				// TODO: fault.Detail is NotFoundFault, but fails to unmarshal in this case.
-				if strings.Contains(fault.String, "could not be found") {
-					continue // hitting this case when an FCD is deleted via VM destroy
+				fault := soap.ToSoapFault(err).Detail.Fault
+				if _, ok := fault.(types.NotFound); ok {
+					// The case when an FCD is deleted by something other than DeleteVStorageObject_Task, such as VM destroy
+					return fmt.Errorf("%s not found: use 'disk.ls -R' to reconcile datastore inventory", id)
 				}
 			}
-			return err
+			return fmt.Errorf("retrieve %q: %s", id, err)
 		}
 
 		obj := VStorageObject{VStorageObject: *o}

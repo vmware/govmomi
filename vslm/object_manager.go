@@ -407,3 +407,16 @@ func (m ObjectManager) ListAttachedTags(ctx context.Context, id string) ([]types
 	}
 	return res.Returnval, nil
 }
+
+func (m ObjectManager) ReconcileDatastoreInventory(ctx context.Context, ds mo.Reference) (*object.Task, error) {
+	req := &types.ReconcileDatastoreInventory_Task{
+		This:      m.Reference(),
+		Datastore: ds.Reference(),
+	}
+
+	res, err := methods.ReconcileDatastoreInventory_Task(ctx, m.c, req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(m.c, res.Returnval), nil
+}
