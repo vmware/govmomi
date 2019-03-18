@@ -29,6 +29,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/datastore"
 	_ "github.com/vmware/govmomi/govc/datastore/cluster"
 	_ "github.com/vmware/govmomi/govc/datastore/disk"
+	_ "github.com/vmware/govmomi/govc/datastore/maintenance"
 	_ "github.com/vmware/govmomi/govc/datastore/vsan"
 	_ "github.com/vmware/govmomi/govc/device"
 	_ "github.com/vmware/govmomi/govc/device/cdrom"
