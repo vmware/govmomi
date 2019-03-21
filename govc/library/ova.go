@@ -61,7 +61,7 @@ func (cmd *ova) Process(ctx context.Context) error {
 }
 
 func (cmd *ova) Description() string {
-	return `Upload and OVA file.
+	return `Upload an OVA file.
 
 Examples:
   govc library.ova library_name file.ova`
