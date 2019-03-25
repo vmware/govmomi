@@ -18,6 +18,7 @@ package vcenter
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/vmware/govmomi/vapi/internal"
@@ -70,10 +71,10 @@ type ParseIssue struct {
 
 // OVFError is a list of errors from create or deploy
 type OVFError struct {
-	Category string             `json:"category,omitempty"`
-	Error    Error              `json:"error,omitempty"`
-	Issues   []ParseIssue       `json:"issues,omitempty"`
-	Message  LocalizableMessage `json:"message,omitempty"`
+	Category string              `json:"category,omitempty"`
+	Error    *Error              `json:"error,omitempty"`
+	Issues   []ParseIssue        `json:"issues,omitempty"`
+	Message  *LocalizableMessage `json:"message,omitempty"`
 }
 
 // DeployedResourceID is a managed object reference for a deployed resource.
@@ -88,11 +89,26 @@ type DeploymentError struct {
 	Errors []OVFError `json:"errors,omitempty"`
 }
 
+// Error implements the error interface
+func (e *DeploymentError) Error() string {
+	msg := ""
+	if len(e.Errors) != 0 {
+		err := e.Errors[0]
+		if err.Error != nil && len(err.Error.Messages) != 0 {
+			msg = err.Error.Messages[0].DefaultMessage
+		}
+	}
+	if msg == "" {
+		msg = fmt.Sprintf("%+v", e)
+	}
+	return "deploy error: " + msg
+}
+
 // Deployment is the results from issuing a library OVF deployment
 type Deployment struct {
-	Succeeded  bool               `json:"succeeded,omitempty"`
-	ResourceID DeployedResourceID `json:"resource_id,omitempty"`
-	Error      DeploymentError    `json:"error,omitempty"`
+	Succeeded  bool                `json:"succeeded,omitempty"`
+	ResourceID *DeployedResourceID `json:"resource_id,omitempty"`
+	Error      *DeploymentError    `json:"error,omitempty"`
 }
 
 // FilterRequest contains the information to start a vcenter filter call
