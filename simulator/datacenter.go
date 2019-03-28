@@ -100,6 +100,10 @@ func (dc *Datacenter) createFolders() {
 	}
 }
 
+func (dc *Datacenter) defaultNetwork() []types.ManagedObjectReference {
+	return dc.Network[:1] // VM Network
+}
+
 func datacenterEventArgument(obj mo.Entity) *types.DatacenterEventArgument {
 	dc, ok := obj.(*Datacenter)
 	if !ok {

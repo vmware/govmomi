@@ -56,8 +56,7 @@ func ovfNetwork(ctx *Context, req *types.CreateImportSpec, item ovf.ResourceAllo
 		return nil
 	}
 	pool := ctx.Map.Get(req.ResourcePool).(*ResourcePool)
-	dc := ctx.Map.getEntityDatacenter(pool)
-	ref := dc.Network[0] // Default to VM Network
+	ref := ctx.Map.getEntityDatacenter(pool).defaultNetwork()[0] // Default to VM Network
 	c := item.Connection[0]
 
 	for _, net := range req.Cisp.NetworkMapping {

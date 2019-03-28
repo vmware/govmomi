@@ -31037,7 +31037,7 @@ type NetworkSummary struct {
 	Network    *ManagedObjectReference `xml:"network,omitempty"`
 	Name       string                  `xml:"name"`
 	Accessible bool                    `xml:"accessible"`
-	IpPoolName string                  `xml:"ipPoolName,omitempty"`
+	IpPoolName string                  `xml:"ipPoolName"`
 	IpPoolId   int32                   `xml:"ipPoolId,omitempty"`
 }
 

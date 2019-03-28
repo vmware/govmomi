@@ -224,6 +224,9 @@ class Simple
       t = $1
       case t
       when "string"
+        if ["IpPoolName"].include?(var_name)
+          self.need_omitempty = false
+        end
       when "int"
         if pointer_type?
           prefix += "*"

@@ -125,7 +125,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "PbmRetrieveServiceContent", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
+		case "RetrieveServiceContent", "PbmRetrieveServiceContent", "Fetch", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
@@ -419,6 +419,10 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		res = serverFault(err.Error())
 	} else {
 		ctx.Header = method.Header
+		if method.Name == "Fetch" {
+			// Redirect any Fetch method calls to the PropertyCollector singleton
+			method.This = ctx.Map.content().PropertyCollector
+		}
 		res = s.call(ctx, method)
 	}
 
@@ -589,6 +593,9 @@ func (s *Service) NewServer() *Server {
 	s.RegisterSDK(Map)
 
 	mux := s.ServeMux
+	vim := Map.Path + "/vimService"
+	s.sdk[vim] = s.sdk[vim25.Path]
+	mux.HandleFunc(vim, s.ServeSDK)
 	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
 	mux.HandleFunc(nfcPrefix, ServeNFC)

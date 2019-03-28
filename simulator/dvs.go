@@ -72,6 +72,24 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 				}
 			}
 
+			if pg.Config.Policy == nil {
+				pg.Config.Policy = &types.VMwareDVSPortgroupPolicy{
+					DVPortgroupPolicy: types.DVPortgroupPolicy{
+						BlockOverrideAllowed:               true,
+						ShapingOverrideAllowed:             false,
+						VendorConfigOverrideAllowed:        false,
+						LivePortMovingAllowed:              false,
+						PortConfigResetAtDisconnect:        true,
+						NetworkResourcePoolOverrideAllowed: types.NewBool(false),
+						TrafficFilterOverrideAllowed:       types.NewBool(false),
+					},
+					VlanOverrideAllowed:           false,
+					UplinkTeamingOverrideAllowed:  false,
+					SecurityPolicyOverrideAllowed: false,
+					IpfixOverrideAllowed:          types.NewBool(false),
+				}
+			}
+
 			pg.PortKeys = []string{}
 
 			portgroups = append(portgroups, pg.Self)
@@ -142,11 +160,16 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(req *types.ReconfigureDvs_
 					Map.Update(pg, []types.PropertyChange{
 						{Name: "host", Val: pgHosts},
 					})
+
+					cr := hostParent(&host.HostSystem)
+					if FindReference(cr.Network, ref) == nil {
+						computeNetworks := append(cr.Network, ref)
+						Map.Update(parent, []types.PropertyChange{
+							{Name: "network", Val: computeNetworks},
+						})
+					}
 				}
 
-				Map.Update(parent, []types.PropertyChange{
-					{Name: "network", Val: pgs},
-				})
 			case types.ConfigSpecOperationRemove:
 				for _, ref := range host.Vm {
 					vm := Map.Get(ref).(*VirtualMachine)
