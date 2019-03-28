@@ -114,7 +114,7 @@ func (cmd *Set) Update(ctx context.Context, f *flag.FlagSet, m *object.OptionMan
 		if err != nil {
 			return err
 		}
-		set = s
+		set = int32(s)
 	case int64:
 		set, err = strconv.ParseInt(val, 10, 64)
 		if err != nil {
