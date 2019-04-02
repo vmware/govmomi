@@ -826,6 +826,9 @@ load test_helper
   run govc vm.create -on=true "$id"
   assert_success
 
+  run govc vm.change -vm "$id" -e testing=123
+  assert_success
+
   run govc vm.markastemplate "$id"
   assert_failure
 
@@ -833,6 +836,12 @@ load test_helper
   assert_success
 
   run govc vm.markastemplate "$id"
+  assert_success
+
+  run govc vm.change -vm "$id" -e testing=456
+  assert_failure # template reconfigure only allows name and annotation change
+
+  run govc vm.change -vm "$id" -annotation testing123
   assert_success
 
   run govc vm.power -on "$id"
