@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"reflect"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -137,6 +138,9 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	setAllocation(&cmd.CpuAllocation)
 	setAllocation(&cmd.MemoryAllocation)
+	if reflect.DeepEqual(cmd.Tools, new(types.ToolsConfigInfo)) {
+		cmd.Tools = nil // no flags set, avoid sending <tools/> in the request
+	}
 
 	task, err := vm.Reconfigure(ctx, cmd.VirtualMachineConfigSpec)
 	if err != nil {

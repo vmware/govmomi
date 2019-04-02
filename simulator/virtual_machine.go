@@ -25,6 +25,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"reflect"
 	"strconv"
 	"strings"
 	"sync/atomic"
@@ -1297,17 +1298,25 @@ func (vm *VirtualMachine) ResetVMTask(ctx *Context, req *types.ResetVM_Task) soa
 
 func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Task) soap.HasFault {
 	task := CreateTask(vm, "reconfigVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		err := vm.configure(&req.Spec)
-		if err != nil {
-			return nil, err
-		}
-
 		ctx.postEvent(&types.VmReconfiguredEvent{
 			VmEvent:    vm.event(),
 			ConfigSpec: req.Spec,
 		})
 
-		return nil, nil
+		if vm.Config.Template {
+			expect := types.VirtualMachineConfigSpec{
+				Name:       req.Spec.Name,
+				Annotation: req.Spec.Annotation,
+			}
+			if !reflect.DeepEqual(&req.Spec, &expect) {
+				log.Printf("template reconfigure only allows name and annotation change")
+				return nil, new(types.NotSupported)
+			}
+		}
+
+		err := vm.configure(&req.Spec)
+
+		return nil, err
 	})
 
 	return &methods.ReconfigVM_TaskBody{
