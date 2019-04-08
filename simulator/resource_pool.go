@@ -18,8 +18,11 @@ package simulator
 
 import (
 	"fmt"
+	"net/url"
+	"path"
 	"strings"
 
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -182,6 +185,81 @@ func (p *ResourcePool) UpdateConfig(c *types.UpdateConfig) soap.HasFault {
 	}
 
 	body.Res = &types.UpdateConfigResponse{}
+
+	return body
+}
+
+func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasFault {
+	body := new(methods.ImportVAppBody)
+
+	spec, ok := req.Spec.(*types.VirtualMachineImportSpec)
+	if !ok {
+		body.Fault_ = Fault(fmt.Sprintf("%T: type not supported", spec), &types.InvalidArgument{InvalidProperty: "spec"})
+		return body
+	}
+
+	dc := ctx.Map.getEntityDatacenter(p)
+	folder := ctx.Map.Get(dc.VmFolder).(*Folder)
+	if req.Folder != nil {
+		folder = ctx.Map.Get(*req.Folder).(*Folder)
+	}
+
+	ctx.Caller = &p.Self
+	res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
+		This:   folder.Self,
+		Config: spec.ConfigSpec,
+		Pool:   p.Self,
+		Host:   req.Host,
+	})
+
+	ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
+	if ctask.Info.Error != nil {
+		body.Fault_ = Fault("", ctask.Info.Error.Fault)
+		return body
+	}
+
+	lease := NewHttpNfcLease(ctx, ctask.Info.Result.(types.ManagedObjectReference))
+	ref := lease.Reference()
+	lease.Info.Lease = ref
+
+	vm := ctx.Map.Get(lease.Info.Entity).(*VirtualMachine)
+	device := object.VirtualDeviceList(vm.Config.Hardware.Device)
+	ndevice := make(map[string]int)
+	for _, d := range device {
+		info, ok := d.GetVirtualDevice().Backing.(types.BaseVirtualDeviceFileBackingInfo)
+		if !ok {
+			continue
+		}
+		var file object.DatastorePath
+		file.FromString(info.GetVirtualDeviceFileBackingInfo().FileName)
+		name := path.Base(file.Path)
+		ds := vm.findDatastore(file.Datastore)
+		lease.files[name] = path.Join(ds.Info.GetDatastoreInfo().Url, file.Path)
+
+		_, disk := d.(*types.VirtualDisk)
+		kind := device.Type(d)
+		n := ndevice[kind]
+		ndevice[kind]++
+
+		lease.Info.DeviceUrl = append(lease.Info.DeviceUrl, types.HttpNfcLeaseDeviceUrl{
+			Key:       fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
+			ImportKey: fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
+			Url: (&url.URL{
+				Scheme: "https",
+				Host:   "*",
+				Path:   nfcPrefix + path.Join(ref.Value, name),
+			}).String(),
+			SslThumbprint: "",
+			Disk:          types.NewBool(disk),
+			TargetId:      name,
+			DatastoreKey:  "",
+			FileSize:      0,
+		})
+	}
+
+	body.Res = &types.ImportVAppResponse{
+		Returnval: ref,
+	}
 
 	return body
 }

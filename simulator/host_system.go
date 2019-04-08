@@ -141,11 +141,15 @@ func CreateDefaultESX(f *Folder) {
 	summary := new(types.ComputeResourceSummary)
 	addComputeResource(summary, host)
 
-	cr := &mo.ComputeResource{Summary: summary}
+	cr := &mo.ComputeResource{
+		Summary: summary,
+		Network: esx.Datacenter.Network,
+	}
 	cr.EnvironmentBrowser = newEnvironmentBrowser()
 	cr.Self = *host.Parent
 	cr.Name = host.Name
 	cr.Host = append(cr.Host, host.Reference())
+	host.Network = cr.Network
 	Map.PutEntity(cr, host)
 
 	pool := NewResourcePool()
@@ -187,11 +191,13 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 	Map.PutEntity(cr, Map.NewEntity(pool))
 
 	cr.Name = host.Name
+	cr.Network = Map.getEntityDatacenter(f).defaultNetwork()
 	cr.Host = append(cr.Host, host.Reference())
 	cr.ResourcePool = &pool.Self
 
 	f.putChild(cr)
 	pool.Owner = cr.Self
+	host.Network = cr.Network
 
 	return host, nil
 }

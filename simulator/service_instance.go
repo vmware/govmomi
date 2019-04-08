@@ -21,6 +21,7 @@ import (
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/simulator/internal"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -70,6 +71,7 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 		NewUserDirectory(*s.Content.UserDirectory),
 		NewOptionManager(s.Content.Setting, setting),
 		NewStorageResourceManager(*s.Content.StorageResourceManager),
+		NewOvfManager(*s.Content.OvfManager),
 	}
 
 	switch content.VStorageObjectManager.Type {
@@ -110,6 +112,16 @@ func (*ServiceInstance) CurrentTime(*types.CurrentTime) soap.HasFault {
 	return &methods.CurrentTimeBody{
 		Res: &types.CurrentTimeResponse{
 			Returnval: time.Now(),
+		},
+	}
+}
+
+func (s *ServiceInstance) RetrieveInternalContent(*internal.RetrieveInternalContent) soap.HasFault {
+	return &internal.RetrieveInternalContentBody{
+		Res: &internal.RetrieveInternalContentResponse{
+			Returnval: internal.InternalServiceInstanceContent{
+				NfcService: types.ManagedObjectReference{Type: "NfcService", Value: "NfcService"},
+			},
 		},
 	}
 }

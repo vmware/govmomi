@@ -58,20 +58,21 @@ func createSession(ctx *Context, name string, locale string) types.UserSession {
 
 	session := Session{
 		UserSession: types.UserSession{
-			Key:            uuid.New().String(),
-			UserName:       name,
-			FullName:       name,
-			LoginTime:      now,
-			LastActiveTime: now,
-			Locale:         locale,
-			MessageLocale:  locale,
+			Key:              uuid.New().String(),
+			UserName:         name,
+			FullName:         name,
+			LoginTime:        now,
+			LastActiveTime:   now,
+			Locale:           locale,
+			MessageLocale:    locale,
+			ExtensionSession: types.NewBool(false),
 		},
 		Registry: NewRegistry(),
 	}
 
 	ctx.SetSession(session, true)
 
-	return session.UserSession
+	return ctx.Session.UserSession
 }
 
 func (s *SessionManager) Login(ctx *Context, req *types.Login) soap.HasFault {
@@ -274,6 +275,7 @@ func (c *Context) SetSession(session Session, login bool) {
 	session.UserAgent = c.req.UserAgent()
 	session.IpAddress = strings.Split(c.req.RemoteAddr, ":")[0]
 	session.LastActiveTime = time.Now()
+	session.CallCount++
 
 	c.svc.sm.sessions[session.Key] = session
 	c.Session = &session

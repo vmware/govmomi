@@ -136,6 +136,15 @@ load test_helper
 @test "object.collect vcsim" {
   vcsim_env -app 1 -pool 1
 
+  # test that {Cluster}ComputeResource and HostSystem network fields have the expected refs
+  for obj in DC0_C0 DC0_C0/DC0_C0_H0 DC0_H0 DC0_H0/DC0_H0; do
+    run govc object.collect /DC0/host/$obj network
+    assert_success
+    echo "obj=$obj"
+    assert_matches "DistributedVirtualPortgroup:"
+    assert_matches "Network:"
+  done
+
   run govc object.collect -s -type ClusterComputeResource / configStatus
   assert_success green
 

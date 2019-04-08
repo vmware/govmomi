@@ -68,6 +68,15 @@ func (dss *HostDatastoreSystem) add(ds *Datastore) *soap.Fault {
 	ds.Summary.Datastore = &ds.Self
 	ds.Summary.Name = ds.Name
 	ds.Summary.Url = info.Url
+	ds.Capability = types.DatastoreCapability{
+		DirectoryHierarchySupported:      true,
+		RawDiskMappingsSupported:         false,
+		PerFileThinProvisioningSupported: true,
+		StorageIORMSupported:             types.NewBool(true),
+		NativeSnapshotSupported:          types.NewBool(false),
+		TopLevelDirectoryCreateSupported: types.NewBool(true),
+		SeSparseSupported:                types.NewBool(true),
+	}
 
 	dss.Datastore = append(dss.Datastore, ds.Self)
 	dss.Host.Datastore = dss.Datastore

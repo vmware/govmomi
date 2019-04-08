@@ -290,3 +290,19 @@ load test_helper
   user=$(jq -r .value.user <<<"$output")
   assert_equal "$USER" "$user"
 }
+
+@test "vcsim ovftool" {
+  if ! ovftool -h >/dev/null ; then
+    skip "requires ovftool"
+  fi
+
+  vcsim_env
+
+  url=$(govc env GOVC_URL)
+
+  run ovftool --noSSLVerify --acceptAllEulas -ds=LocalDS_0 --network=DC0_DVPG0 "$GOVC_IMAGES/$TTYLINUX_NAME.ova" "vi://user:pass@$url/DC0/host/DC0_C0/DC0_C0_H1"
+  assert_success
+
+  run govc vm.destroy "$TTYLINUX_NAME"
+  assert_success
+}

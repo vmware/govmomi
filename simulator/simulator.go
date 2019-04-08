@@ -125,7 +125,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 
 	if session == nil {
 		switch method.Name {
-		case "RetrieveServiceContent", "PbmRetrieveServiceContent", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
+		case "RetrieveServiceContent", "PbmRetrieveServiceContent", "Fetch", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
 			// ok for now, TODO: authz
 		default:
 			fault := &types.NotAuthenticated{
@@ -384,7 +384,7 @@ func (s *Service) RegisterSDK(r *Registry) {
 
 // ServeSDK implements the http.Handler interface
 func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
+	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -419,6 +419,10 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		res = serverFault(err.Error())
 	} else {
 		ctx.Header = method.Header
+		if method.Name == "Fetch" {
+			// Redirect any Fetch method calls to the PropertyCollector singleton
+			method.This = ctx.Map.content().PropertyCollector
+		}
 		res = s.call(ctx, method)
 	}
 
@@ -505,7 +509,7 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 	p := path.Join(ds.Info.GetDatastoreInfo().Url, r.URL.Path)
 
 	switch r.Method {
-	case "POST":
+	case http.MethodPost:
 		_, err := os.Stat(p)
 		if err == nil {
 			// File exists
@@ -515,7 +519,7 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 
 		// File does not exist, fallthrough to create via PUT logic
 		fallthrough
-	case "PUT":
+	case http.MethodPut:
 		dir := path.Dir(p)
 		_ = os.MkdirAll(dir, 0700)
 
@@ -589,8 +593,12 @@ func (s *Service) NewServer() *Server {
 	s.RegisterSDK(Map)
 
 	mux := s.ServeMux
+	vim := Map.Path + "/vimService"
+	s.sdk[vim] = s.sdk[vim25.Path]
+	mux.HandleFunc(vim, s.ServeSDK)
 	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
+	mux.HandleFunc(nfcPrefix, ServeNFC)
 	mux.HandleFunc("/about", s.About)
 
 	// Using NewUnstartedServer() instead of NewServer(),

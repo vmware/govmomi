@@ -18,6 +18,7 @@ package vcenter
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 
@@ -153,12 +154,11 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		if resp.Succeeded {
-			fmt.Printf("Deploy succeeded: %s\n", resp.ResourceID.ID)
-		} else {
-			fmt.Printf("%+v", resp)
+		if !resp.Succeeded {
+			return errors.New(resp.Error.Error())
 		}
 
+		fmt.Printf("Deploy succeeded: %s\n", resp.ResourceID.ID)
 		return nil
 	})
 }

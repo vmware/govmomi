@@ -730,11 +730,14 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 	return body
 }
 
-func (vm *VirtualMachine) useDatastore(name string) *Datastore {
+func (vm *VirtualMachine) findDatastore(name string) *Datastore {
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 
-	ds := Map.FindByName(name, host.Datastore).(*Datastore)
+	return Map.FindByName(name, host.Datastore).(*Datastore)
+}
 
+func (vm *VirtualMachine) useDatastore(name string) *Datastore {
+	ds := vm.findDatastore(name)
 	if FindReference(vm.Datastore, ds.Self) == nil {
 		vm.Datastore = append(vm.Datastore, ds.Self)
 	}
@@ -983,20 +986,18 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			})
 
 			p, _ := parseDatastorePath(info.FileName)
-
-			host := Map.Get(*vm.Runtime.Host).(*HostSystem)
-
-			entity := Map.FindByName(p.Datastore, host.Datastore)
-			ref := entity.Reference()
-			info.Datastore = &ref
-
-			ds := entity.(*Datastore)
+			ds := vm.findDatastore(p.Datastore)
+			info.Datastore = &ds.Self
 
 			// XXX: compare disk size and free space until windows stat is supported
 			ds.Summary.FreeSpace -= getDiskSize(x)
 			ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
 
 			vm.updateDiskLayouts()
+		}
+	case *types.VirtualCdrom:
+		if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
+			summary = "ISO " + b.GetVirtualDeviceFileBackingInfo().FileName
 		}
 	}
 
@@ -1008,6 +1009,14 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		d.DeviceInfo = &types.Description{
 			Label:   label,
 			Summary: summary,
+		}
+	} else {
+		info := d.DeviceInfo.GetDescription()
+		if info.Label == "" {
+			info.Label = label
+		}
+		if info.Summary == "" {
+			info.Summary = summary
 		}
 	}
 
@@ -1034,10 +1043,7 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					file = b.GetVirtualDeviceFileBackingInfo().FileName
 
 					p, _ := parseDatastorePath(file)
-
-					host := Map.Get(*vm.Runtime.Host).(*HostSystem)
-
-					ds := Map.FindByName(p.Datastore, host.Datastore).(*Datastore)
+					ds := vm.findDatastore(p.Datastore)
 
 					ds.Summary.FreeSpace += getDiskSize(device)
 					ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
@@ -1148,12 +1154,22 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 				return invalid
 			}
 
+			key := device.Key
 			err := vm.configureDevice(devices, dspec)
 			if err != nil {
 				return err
 			}
 
 			devices = append(devices, dspec.Device)
+			if key != device.Key {
+				// Update ControllerKey refs
+				for i := range spec.DeviceChange {
+					ckey := &spec.DeviceChange[i].GetVirtualDeviceConfigSpec().Device.GetVirtualDevice().ControllerKey
+					if *ckey == key {
+						*ckey = device.Key
+					}
+				}
+			}
 		case types.VirtualDeviceConfigSpecOperationEdit:
 			rspec := *dspec
 			rspec.Device = devices.FindByKey(device.Key)
@@ -1161,7 +1177,7 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 				return invalid
 			}
 			devices = vm.removeDevice(devices, &rspec)
-			device.DeviceInfo = nil // regenerate summary + label
+			device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
 
 			err := vm.configureDevice(devices, dspec)
 			if err != nil {

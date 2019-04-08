@@ -17,23 +17,32 @@ limitations under the License.
 package simulator
 
 import (
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"path"
+	"path/filepath"
 	"reflect"
 	"strings"
 	"sync"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/tags"
+	"github.com/vmware/govmomi/vapi/vcenter"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
@@ -44,9 +53,14 @@ type session struct {
 	LastAccessed time.Time `json:"last_accessed_time"`
 }
 
+type item struct {
+	*library.Item
+	File []library.File
+}
+
 type content struct {
 	*library.Library
-	Item map[string]*library.Item
+	Item map[string]*item
 }
 
 type update struct {
@@ -102,6 +116,9 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.LibraryItemUpdateSessionFile, s.libraryItemUpdateSessionFile},
 		{internal.LibraryItemUpdateSessionFile + "/", s.libraryItemUpdateSessionFileID},
 		{internal.LibraryItemAdd + "/", s.libraryItemAdd},
+		{internal.LibraryItemFilePath, s.libraryItemFile},
+		{internal.LibraryItemFilePath + "/", s.libraryItemFileID},
+		{internal.VCenterOVFLibraryItem + "/", s.libraryItemDeployID},
 	}
 
 	for i := range handlers {
@@ -562,7 +579,7 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 			}
 			s.Library[id] = content{
 				Library: &spec.Library,
-				Item:    make(map[string]*library.Item),
+				Item:    make(map[string]*item),
 			}
 			s.ok(w, id)
 		}
@@ -652,7 +669,7 @@ func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
 
 			id = uuid.New().String()
 			spec.Item.ID = id
-			l.Item[id] = &spec.Item
+			l.Item[id] = &item{Item: &spec.Item}
 			s.ok(w, id)
 		}
 	case http.MethodGet:
@@ -688,7 +705,7 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 	}
 	item, ok := l.Item[id]
 	if !ok {
-		log.Printf("library item found: %q", id)
+		log.Printf("library item not found: %q", id)
 		http.NotFound(w, r)
 		return
 	}
@@ -912,7 +929,7 @@ func (s *handler) libraryItemAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = io.Copy(file, r.Body)
+	n, err := io.Copy(file, r.Body)
 	_ = r.Body.Close()
 	if err != nil {
 		s.error(w, err)
@@ -922,5 +939,181 @@ func (s *handler) libraryItemAdd(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.error(w, err)
 		return
+	}
+
+	i := s.Library[up.Library.ID].Item[up.UpdateSession.LibraryItemID]
+	i.File = append(i.File, library.File{
+		Cached:  types.NewBool(true),
+		Name:    name,
+		Size:    types.NewInt64(n),
+		Version: "1",
+	})
+}
+
+func (s *handler) libraryItemFile(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("library_item_id")
+	for _, l := range s.Library {
+		if i, ok := l.Item[id]; ok {
+			s.ok(w, i.File)
+			return
+		}
+	}
+	http.NotFound(w, r)
+}
+
+func (s *handler) libraryItemFileID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+	id := s.id(r)
+	var spec struct {
+		Name string `json:"name"`
+	}
+	if !s.decode(r, w, &spec) {
+		return
+	}
+	for _, l := range s.Library {
+		if i, ok := l.Item[id]; ok {
+			for _, f := range i.File {
+				if f.Name == spec.Name {
+					s.ok(w, f)
+					return
+				}
+			}
+		}
+	}
+	http.NotFound(w, r)
+}
+
+func (i *item) ovf() string {
+	for _, f := range i.File {
+		if strings.HasSuffix(f.Name, ".ovf") {
+			return f.Name
+		}
+	}
+	return ""
+}
+
+func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter.Deploy) (*nfc.LeaseInfo, error) {
+	name := item.ovf()
+	desc, err := ioutil.ReadFile(filepath.Join(libraryPath(lib, item.ID), name))
+	if err != nil {
+		return nil, err
+	}
+	ds := types.ManagedObjectReference{Type: "Datastore", Value: deploy.DeploymentSpec.DefaultDatastoreID}
+	pool := types.ManagedObjectReference{Type: "ResourcePool", Value: deploy.Target.ResourcePoolID}
+	var folder, host *types.ManagedObjectReference
+	if deploy.Target.FolderID != "" {
+		folder = &types.ManagedObjectReference{Type: "Folder", Value: deploy.Target.FolderID}
+	}
+	if deploy.Target.HostID != "" {
+		host = &types.ManagedObjectReference{Type: "HostSystem", Value: deploy.Target.HostID}
+	}
+	cisp := types.OvfCreateImportSpecParams{
+		EntityName: deploy.DeploymentSpec.Name,
+	}
+
+	ctx := context.Background()
+	c, err := govmomi.NewClient(ctx, &s.URL, true)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = c.Logout(ctx)
+	}()
+
+	m := ovf.NewManager(c.Client)
+	spec, err := m.CreateImportSpec(ctx, string(desc), pool, ds, cisp)
+	if err != nil {
+		return nil, err
+	}
+	if spec.Error != nil {
+		return nil, errors.New(spec.Error[0].LocalizedMessage)
+	}
+
+	req := types.ImportVApp{
+		This:   pool,
+		Spec:   spec.ImportSpec,
+		Folder: folder,
+		Host:   host,
+	}
+	res, err := methods.ImportVApp(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	lease := nfc.NewLease(c.Client, res.Returnval)
+	info, err := lease.Wait(ctx, spec.FileItem)
+	if err != nil {
+		return nil, err
+	}
+
+	return info, lease.Complete(ctx)
+}
+
+func (s *handler) libraryItemDeployID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := s.id(r)
+	ok := false
+	var lib *library.Library
+	var item *item
+	for _, l := range s.Library {
+		item, ok = l.Item[id]
+		if ok {
+			lib = l.Library
+			break
+		}
+	}
+	if !ok {
+		log.Printf("library item not found: %q", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	var spec struct {
+		vcenter.Deploy
+	}
+	if !s.decode(r, w, &spec) {
+		return
+	}
+
+	switch s.action(r) {
+	case "deploy":
+		var d vcenter.Deployment
+		info, err := s.libraryDeploy(lib, item, spec.Deploy)
+		if err == nil {
+			d.Succeeded = true
+			d.ResourceID = &vcenter.DeployedResourceID{
+				Type: info.Entity.Type,
+				ID:   info.Entity.Value,
+			}
+		} else {
+			d.Error = &vcenter.DeploymentError{
+				Errors: []vcenter.OVFError{{
+					Category: "SERVER",
+					Error: &vcenter.Error{
+						Class: "com.vmware.vapi.std.errors.error",
+						Messages: []vcenter.LocalizableMessage{
+							{
+								DefaultMessage: err.Error(),
+							},
+						},
+					},
+				}},
+			}
+		}
+		s.ok(w, d)
+	case "filter":
+		res := vcenter.FilterResponse{
+			Name: item.Name,
+		}
+		s.ok(w, res)
+	default:
+		http.NotFound(w, r)
 	}
 }

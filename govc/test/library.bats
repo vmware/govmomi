@@ -71,3 +71,31 @@ load test_helper
   run govc library.item.rm my-content library.bats
   assert_success
 }
+
+@test "library.deploy" {
+  vcsim_env
+
+  run govc library.create my-content
+  assert_success
+  library_id="$output"
+
+  run govc library.ova my-content "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+
+  run govc vcenter.deploy my-content "$TTYLINUX_NAME.ova" ttylinux
+  assert_success
+
+  run govc vm.info ttylinux
+  assert_success
+
+  run govc vm.destroy ttylinux
+  assert_success
+
+  item_id=$(govc library.info -json "/my-content/$TTYLINUX_NAME.ova" | jq -r .[].id)
+
+  run govc datastore.rm "contentlib-$library_id/$item_id" # remove library files out-of-band, forcing a deploy error below
+  assert_success
+
+  run govc vcenter.deploy my-content "$TTYLINUX_NAME.ova" ttylinux2
+  assert_failure
+}

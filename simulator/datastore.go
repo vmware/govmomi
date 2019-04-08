@@ -54,6 +54,8 @@ func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {
 	now := time.Now()
 
 	info.Timestamp = &now
+	info.MaxMemoryFileSize = info.FreeSpace
+	info.MaxFileSize = info.FreeSpace
 
 	return r
 }
