@@ -77,7 +77,7 @@ type Archive interface {
 }
 
 type TapeArchive struct {
-	path string
+	Path string
 	Opener
 }
 
@@ -91,7 +91,7 @@ func (t *TapeArchiveEntry) Close() error {
 }
 
 func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
-	f, _, err := t.OpenFile(t.path)
+	f, _, err := t.OpenFile(t.Path)
 	if err != nil {
 		return nil, 0, err
 	}
@@ -123,16 +123,16 @@ func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
 }
 
 type FileArchive struct {
-	path string
+	Path string
 	Opener
 }
 
 func (t *FileArchive) Open(name string) (io.ReadCloser, int64, error) {
 	fpath := name
-	if name != t.path {
-		index := strings.LastIndex(t.path, "/")
+	if name != t.Path {
+		index := strings.LastIndex(t.Path, "/")
 		if index != -1 {
-			fpath = t.path[:index] + "/" + name
+			fpath = t.Path[:index] + "/" + name
 		}
 	}
 

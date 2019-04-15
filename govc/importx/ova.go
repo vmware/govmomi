@@ -43,7 +43,7 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	archive := &TapeArchive{path: fpath}
+	archive := &TapeArchive{Path: fpath}
 	archive.Client = cmd.Client
 
 	cmd.Archive = archive

@@ -73,9 +73,9 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 	if len(fpath) > 0 {
 		switch path.Ext(fpath) {
 		case ".ovf":
-			cmd.Archive = &FileArchive{path: fpath}
+			cmd.Archive = &FileArchive{Path: fpath}
 		case "", ".ova":
-			cmd.Archive = &TapeArchive{path: fpath}
+			cmd.Archive = &TapeArchive{Path: fpath}
 			fpath = "*.ovf"
 		default:
 			return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
