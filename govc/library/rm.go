@@ -19,10 +19,12 @@ package library
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
+	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
@@ -45,24 +47,33 @@ func (cmd *rm) Usage() string {
 }
 
 func (cmd *rm) Description() string {
-	return `Delete library NAME.
+	return `Delete library or item NAME.
 
 Examples:
-  govc library.rm library_name`
+  govc library.rm /library_name
+  govc library.rm /library_name/item_name`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
-	var l library.Library
-
-	if f.NArg() != 1 {
-		return flag.ErrHelp
-	}
-
-	l.ID = f.Arg(0)
-
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
 
-		return m.DeleteLibrary(ctx, &l)
+		res, err := finder.NewFinder(m).Find(ctx, f.Arg(0))
+		if err != nil {
+			return err
+		}
+
+		if len(res) != 1 {
+			return fmt.Errorf("%q matches %d items", f.Arg(0), len(res))
+		}
+
+		switch t := res[0].GetResult().(type) {
+		case library.Library:
+			return m.DeleteLibrary(ctx, &t)
+		case library.Item:
+			return m.DeleteLibraryItem(ctx, &t)
+		default:
+			return fmt.Errorf("%q is a %T", f.Arg(0), t)
+		}
 	})
 }

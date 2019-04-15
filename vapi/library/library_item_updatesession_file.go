@@ -17,11 +17,14 @@ limitations under the License.
 package library
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha1"
 	"fmt"
+	"io"
 	"net/http"
+	"strings"
 
 	"github.com/vmware/govmomi/vapi/internal"
 )
@@ -123,4 +126,29 @@ func GetContentLengthAndFingerprint(
 		}
 	}
 	return resp.ContentLength, fingerprint.String(), nil
+}
+
+// ReadManifest converts an ovf manifest to a map of file name -> Checksum.
+func ReadManifest(m io.Reader) (map[string]*Checksum, error) {
+	// expected format: openssl sha1 *.{ovf,vmdk}
+	c := make(map[string]*Checksum)
+
+	scanner := bufio.NewScanner(m)
+	for scanner.Scan() {
+		line := strings.SplitN(scanner.Text(), ")=", 2)
+		if len(line) != 2 {
+			continue
+		}
+		name := strings.SplitN(line[0], "(", 2)
+		if len(name) != 2 {
+			continue
+		}
+		sum := &Checksum{
+			Algorithm: strings.TrimSpace(name[0]),
+			Checksum:  strings.TrimSpace(line[1]),
+		}
+		c[name[1]] = sum
+	}
+
+	return c, scanner.Err()
 }

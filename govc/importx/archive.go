@@ -84,6 +84,8 @@ type TapeArchive struct {
 type TapeArchiveEntry struct {
 	io.Reader
 	f io.Closer
+
+	Name string
 }
 
 func (t *TapeArchiveEntry) Close() error {
@@ -113,7 +115,7 @@ func (t *TapeArchive) Open(name string) (io.ReadCloser, int64, error) {
 		}
 
 		if matched {
-			return &TapeArchiveEntry{r, f}, h.Size, nil
+			return &TapeArchiveEntry{r, f, h.Name}, h.Size, nil
 		}
 	}
 
