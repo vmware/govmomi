@@ -91,6 +91,9 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		defer file.Close()
 
 		fileInfo, err := file.Stat()
+		if err != nil {
+			return err
+		}
 		size := fileInfo.Size()
 
 		hash := md5.New()
