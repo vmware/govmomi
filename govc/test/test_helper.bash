@@ -43,7 +43,7 @@ vcsim_start() {
     export GOVC_SIM_ENV
     mkfifo "$GOVC_SIM_ENV"
 
-    vcsim -httptest.serve=127.0.0.1:0 -E "$GOVC_SIM_ENV" "$@" &
+    vcsim -l 127.0.0.1:0 -E "$GOVC_SIM_ENV" "$@" &
 
     eval "$(cat "$GOVC_SIM_ENV")"
 }

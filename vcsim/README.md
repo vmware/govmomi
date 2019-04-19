@@ -84,7 +84,7 @@ curl -sk https://user:pass@127.0.0.1:8989/about
 
 ## Listen address
 
-The default vcsim listen address is `127.0.0.1:8989`.  Use the `-httptest.serve` flag to listen on another address:
+The default vcsim listen address is `127.0.0.1:8989`.  Use the `-l` flag to listen on another address:
 
 
 ``` shell

@@ -110,16 +110,6 @@ func main() {
 		}
 	}
 
-	f := flag.Lookup("httptest.serve")
-	serve := f.Value.String()
-	if serve == "" {
-		err = f.Value.Set(*listen) // propagate -l unless -httptest.serve is specified
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		*listen = serve // propagate to updateHostTemplate call below
-	}
 	if err = updateHostTemplate(*listen); err != nil {
 		log.Fatal(err)
 	}
@@ -147,6 +137,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	model.Service.Listen = *listen
 	if *isTLS {
 		model.Service.TLS = new(tls.Config)
 		if *cert != "" {

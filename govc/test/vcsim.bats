@@ -62,7 +62,7 @@ load test_helper
   port=$(govc env -x GOVC_URL_PORT)
   vcsim_stop
 
-  vcsim_start -httptest.serve="$url" # reuse free port selection from above
+  vcsim_start -l "$url" # reuse free port selection from above
 
   run govc object.collect -s -type h host/DC0_H0 summary.config.port
   assert_success "$port"
@@ -71,7 +71,7 @@ load test_helper
 
   vcsim_stop
 
-  VCSIM_HOST_PORT_UNIQUE=true vcsim_start -httptest.serve="$url"
+  VCSIM_HOST_PORT_UNIQUE=true vcsim_start -l "$url"
 
   hosts=$(curl -sk "https://$url/debug/vars" | jq .vcsim.Model.Host)
   ports=$(govc object.collect -s -type h / summary.config.port | uniq -u | wc -l)
@@ -249,13 +249,7 @@ load test_helper
   [[ "$url" == *"https://127.0.0.1:"* ]]
   vcsim_stop
 
-  vcsim_start -dc 0 -httptest.serve 0.0.0.0:0
-  url=$(govc option.ls vcsim.server.url)
-  [[ "$url" != *"https://127.0.0.1:"* ]]
-  [[ "$url" != *"https://[::]:"* ]]
-  vcsim_stop
-
-  vcsim_start -dc 0 -l :0 -httptest.serve ""
+  vcsim_start -dc 0 -l 0.0.0.0:0
   url=$(govc option.ls vcsim.server.url)
   [[ "$url" != *"https://127.0.0.1:"* ]]
   [[ "$url" != *"https://[::]:"* ]]

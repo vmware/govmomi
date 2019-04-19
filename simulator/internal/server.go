@@ -9,12 +9,10 @@ package internal
 import (
 	"crypto/tls"
 	"crypto/x509"
-	"flag"
 	"fmt"
 	"log"
 	"net"
 	"net/http"
-	"os"
 	"strings"
 	"sync"
 	"time"
@@ -51,11 +49,11 @@ type Server struct {
 	client *http.Client
 }
 
-func newLocalListener() net.Listener {
-	if *serve != "" {
-		l, err := net.Listen("tcp", *serve)
+func newLocalListener(serve string) net.Listener {
+	if serve != "" {
+		l, err := net.Listen("tcp", serve)
 		if err != nil {
-			panic(fmt.Sprintf("httptest: failed to listen on %v: %v", *serve, err))
+			panic(fmt.Sprintf("httptest: failed to listen on %v: %v", serve, err))
 		}
 		return l
 	}
@@ -68,16 +66,10 @@ func newLocalListener() net.Listener {
 	return l
 }
 
-// When debugging a particular http server-based test,
-// this flag lets you run
-//	go test -run=BrokenTest -httptest.serve=127.0.0.1:8000
-// to start the broken server so you can interact with it manually.
-var serve = flag.String("httptest.serve", "", "if non-empty, httptest.NewServer serves on this address and blocks")
-
 // NewServer starts and returns a new Server.
 // The caller should call Close when finished, to shut it down.
 func NewServer(handler http.Handler) *Server {
-	ts := NewUnstartedServer(handler)
+	ts := NewUnstartedServer(handler, "")
 	ts.Start()
 	return ts
 }
@@ -88,9 +80,10 @@ func NewServer(handler http.Handler) *Server {
 // StartTLS.
 //
 // The caller should call Close when finished, to shut it down.
-func NewUnstartedServer(handler http.Handler) *Server {
+// serve allows the server's listen address to be specified.
+func NewUnstartedServer(handler http.Handler, serve string) *Server {
 	return &Server{
-		Listener: newLocalListener(),
+		Listener: newLocalListener(serve),
 		Config:   &http.Server{Handler: handler},
 	}
 }
@@ -106,10 +99,6 @@ func (s *Server) Start() {
 	s.URL = "http://" + s.Listener.Addr().String()
 	s.wrap()
 	s.goServe()
-	if *serve != "" {
-		fmt.Fprintln(os.Stderr, "httptest: serving on", s.URL)
-		select {}
-	}
 }
 
 // StartTLS starts TLS on a server from NewUnstartedServer.
@@ -157,7 +146,7 @@ func (s *Server) StartTLS() {
 // NewTLSServer starts and returns a new Server using TLS.
 // The caller should call Close when finished, to shut it down.
 func NewTLSServer(handler http.Handler) *Server {
-	ts := NewUnstartedServer(handler)
+	ts := NewUnstartedServer(handler, "")
 	ts.StartTLS()
 	return ts
 }
