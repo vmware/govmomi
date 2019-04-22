@@ -24,7 +24,6 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"encoding/pem"
-	"flag"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -71,6 +70,7 @@ type Service struct {
 
 	readAll func(io.Reader) ([]byte, error)
 
+	Listen   string
 	TLS      *tls.Config
 	ServeMux *http.ServeMux
 }
@@ -601,10 +601,7 @@ func (s *Service) NewServer() *Server {
 	mux.HandleFunc(nfcPrefix, ServeNFC)
 	mux.HandleFunc("/about", s.About)
 
-	// Using NewUnstartedServer() instead of NewServer(),
-	// for use in main.go, where Start() blocks, we can still set ServiceHostName
-	ts := internal.NewUnstartedServer(mux)
-
+	ts := internal.NewUnstartedServer(mux, s.Listen)
 	addr := ts.Listener.Addr().(*net.TCPAddr)
 	port := strconv.Itoa(addr.Port)
 	u := &url.URL{
@@ -618,11 +615,6 @@ func (s *Service) NewServer() *Server {
 
 	// Redirect clients to this http server, rather than HostSystem.Name
 	Map.SessionManager().ServiceHostName = u.Host
-
-	if f := flag.Lookup("httptest.serve"); f != nil {
-		// Avoid the blocking behaviour of httptest.Server.Start() when this flag is set
-		_ = f.Value.Set("")
-	}
 
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
 	m := Map.OptionManager()
