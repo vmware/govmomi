@@ -52,8 +52,8 @@ func TestHostDatastoreSystemResignatureUresolvedVmfsVolume(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	
-	err = task.Wait(ctx);
+
+	err = task.Wait(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}

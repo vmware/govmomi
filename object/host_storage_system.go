@@ -185,9 +185,9 @@ func (s HostStorageSystem) QueryUnresolvedVmfsVolumes(ctx context.Context) ([]ty
 	return res.Returnval, nil
 }
 
-func (s HostStorageSystem) UnmountVmfsVolume(ctx context.Context, vmfsUuid string) (error) {
+func (s HostStorageSystem) UnmountVmfsVolume(ctx context.Context, vmfsUuid string) error {
 	req := &types.UnmountVmfsVolume{
-		This:s.Reference(),
+		This:     s.Reference(),
 		VmfsUuid: vmfsUuid,
 	}
 
