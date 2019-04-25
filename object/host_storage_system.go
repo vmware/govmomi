@@ -172,3 +172,15 @@ func (s HostStorageSystem) AttachScsiLun(ctx context.Context, uuid string) error
 
 	return err
 }
+
+func (s HostStorageSystem) QueryUnresolvedVmfsVolumes(ctx context.Context) ([]types.HostUnresolvedVmfsVolume, error) {
+	req := &types.QueryUnresolvedVmfsVolume{
+		This: s.Reference(),
+	}
+
+	res, err := methods.QueryUnresolvedVmfsVolume(ctx, s.Client(), req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
+}
