@@ -124,7 +124,7 @@ load test_helper
   run govc library.import my-content "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
 
-  run govc vcenter.deploy my-content "$TTYLINUX_NAME" ttylinux
+  run govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux
   assert_success
 
   run govc vm.info ttylinux
@@ -138,6 +138,6 @@ load test_helper
   run govc datastore.rm "contentlib-$library_id/$item_id" # remove library files out-of-band, forcing a deploy error below
   assert_success
 
-  run govc vcenter.deploy my-content "$TTYLINUX_NAME.ova" ttylinux2
+  run govc library.deploy "my-content/$TTYLINUX_NAME.ova" ttylinux2
   assert_failure
 }

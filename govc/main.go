@@ -82,7 +82,6 @@ import (
 	_ "github.com/vmware/govmomi/govc/tags/category"
 	_ "github.com/vmware/govmomi/govc/task"
 	_ "github.com/vmware/govmomi/govc/vapp"
-	_ "github.com/vmware/govmomi/govc/vcenter"
 	_ "github.com/vmware/govmomi/govc/version"
 	_ "github.com/vmware/govmomi/govc/vm"
 	_ "github.com/vmware/govmomi/govc/vm/disk"
