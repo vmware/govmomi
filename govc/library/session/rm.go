@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,12 +14,11 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package update
+package session
 
 import (
 	"context"
 	"flag"
-	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -29,52 +28,39 @@ import (
 
 type rm struct {
 	*flags.ClientFlag
-	*flags.OutputFlag
+
+	cancel bool
 }
 
 func init() {
-	cli.Register("library.item.update.rm", &rm{})
+	cli.Register("library.session.rm", &rm{})
 }
 
 func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
-	cmd.OutputFlag.Register(ctx, f)
-}
 
-func (cmd *rm) Process(ctx context.Context) error {
-	if err := cmd.ClientFlag.Process(ctx); err != nil {
-		return err
-	}
-	return nil
+	f.BoolVar(&cmd.cancel, "f", false, "Cancel session if active")
 }
 
 func (cmd *rm) Description() string {
-	return `Cancel a library item update session.
+	return `Remove a library item update session.
 
 Examples:
-  govc library.item.update.rm library_id
-  govc library.item.update.rm library_id -json | jq .`
+  govc library.session.rm session_id`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
+	id := f.Arg(0)
+
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
-		var err error
-
-		if f.NArg() != 1 {
-			return flag.ErrHelp
+		if cmd.cancel {
+			err := m.CancelLibraryItemUpdateSession(ctx, id)
+			if err != nil {
+				return nil
+			}
 		}
-
-		sessionID := f.Arg(0)
-		err = m.DeleteLibraryItemUpdateSession(ctx, sessionID)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("Session %s deleted\n", sessionID)
-
-		return nil
+		return m.DeleteLibraryItemUpdateSession(ctx, id)
 	})
 }

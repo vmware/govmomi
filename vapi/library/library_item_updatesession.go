@@ -57,10 +57,10 @@ func (c *Manager) GetLibraryItemUpdateSession(ctx context.Context, id string) (*
 }
 
 // ListLibraryItemUpdateSession gets the list of update sessions
-func (c *Manager) ListLibraryItemUpdateSession(ctx context.Context) (*[]string, error) {
+func (c *Manager) ListLibraryItemUpdateSession(ctx context.Context) ([]string, error) {
 	url := internal.URL(c, internal.LibraryItemUpdateSession)
 	var res []string
-	return &res, c.Do(ctx, url.Request(http.MethodGet), &res)
+	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // CancelLibraryItemUpdateSession cancels an update session

@@ -29,6 +29,10 @@ load test_helper
 @test "library.import" {
   vcsim_env
 
+  run govc session.ls
+  assert_success
+  govc session.ls -json | jq .
+
   run govc library.create my-content
   assert_success
   library_id="$output"
@@ -104,6 +108,10 @@ load test_helper
   assert_success
   assert_matches "$TTYLINUX_NAME.ovf"
   assert_matches "$TTYLINUX_NAME-disk1.vmdk"
+
+  run govc session.ls
+  assert_success
+  govc session.ls -json | jq .
 }
 
 @test "library.deploy" {
