@@ -118,7 +118,7 @@ func (s HostDatastoreSystem) QueryVmfsDatastoreCreateOptions(ctx context.Context
 	return res.Returnval, nil
 }
 
-func (s HostDatastoreSystem) ResignatureUresolvedVmfsVolumes(ctx context.Context, devicePaths []string) (*Task, error) {
+func (s HostDatastoreSystem) ResignatureUnresolvedVmfsVolumes(ctx context.Context, devicePaths []string) (*Task, error) {
 	req := &types.ResignatureUnresolvedVmfsVolume_Task{
 		This: s.Reference(),
 		ResolutionSpec: types.HostUnresolvedVmfsResignatureSpec{

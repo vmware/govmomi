@@ -24,7 +24,7 @@ import (
 	"github.com/vmware/govmomi/test"
 )
 
-func TestHostDatastoreSystemResignatureUresolvedVmfsVolume(t *testing.T) {
+func TestHostDatastoreSystemResignatureUnresolvedVmfsVolume(t *testing.T) {
 	c := test.NewAuthenticatedClient(t)
 	host := NewHostSystem(c, esx.HostSystem.Reference())
 
@@ -48,7 +48,7 @@ func TestHostDatastoreSystemResignatureUresolvedVmfsVolume(t *testing.T) {
 		t.Skip("No unresolved vmfs volumes found")
 	}
 
-	task, err := hds.ResignatureUresolvedVmfsVolumes(ctx, []string{paths[0].Extent[0].DevicePath})
+	task, err := hds.ResignatureUnresolvedVmfsVolumes(ctx, []string{paths[0].Extent[0].DevicePath})
 	if err != nil {
 		t.Fatal(err)
 	}
