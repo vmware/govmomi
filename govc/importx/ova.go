@@ -54,7 +54,7 @@ func (cmd *ova) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	vm := object.NewVirtualMachine(cmd.Client, *moref)
-	return cmd.Deploy(vm)
+	return cmd.Deploy(vm, cmd.OutputFlag)
 }
 
 func (cmd *ova) Import(fpath string) (*types.ManagedObjectReference, error) {

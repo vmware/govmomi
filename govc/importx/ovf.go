@@ -121,7 +121,7 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	vm := object.NewVirtualMachine(cmd.Client, *moref)
-	return cmd.Deploy(vm)
+	return cmd.Deploy(vm, cmd.OutputFlag)
 }
 
 func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
@@ -153,26 +153,6 @@ func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 	}
 
 	return f.Arg(0), nil
-}
-
-func (cmd *ovfx) Deploy(vm *object.VirtualMachine) error {
-	if err := cmd.InjectOvfEnv(vm); err != nil {
-		return err
-	}
-
-	if err := cmd.MarkAsTemplate(vm); err != nil {
-		return err
-	}
-
-	if err := cmd.PowerOn(vm); err != nil {
-		return err
-	}
-
-	if err := cmd.WaitForIP(vm); err != nil {
-		return err
-	}
-
-	return nil
 }
 
 func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
@@ -341,107 +321,4 @@ func (cmd *ovfx) Upload(ctx context.Context, lease *nfc.Lease, item nfc.FileItem
 	}
 
 	return lease.Upload(ctx, item, f, opts)
-}
-
-func (cmd *ovfx) PowerOn(vm *object.VirtualMachine) error {
-	ctx := context.TODO()
-	if !cmd.Options.PowerOn || cmd.Options.MarkAsTemplate {
-		return nil
-	}
-
-	cmd.Log("Powering on VM...\n")
-
-	task, err := vm.PowerOn(ctx)
-	if err != nil {
-		return err
-	}
-
-	if _, err = task.WaitForResult(ctx, nil); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cmd *ovfx) MarkAsTemplate(vm *object.VirtualMachine) error {
-	ctx := context.TODO()
-	if !cmd.Options.MarkAsTemplate {
-		return nil
-	}
-
-	cmd.Log("Marking VM as template...\n")
-
-	err := vm.MarkAsTemplate(ctx)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cmd *ovfx) InjectOvfEnv(vm *object.VirtualMachine) error {
-	if !cmd.Options.InjectOvfEnv {
-		return nil
-	}
-
-	cmd.Log("Injecting OVF environment...\n")
-
-	var opts []types.BaseOptionValue
-
-	a := cmd.Client.ServiceContent.About
-
-	// build up Environment in order to marshal to xml
-	var props []ovf.EnvProperty
-	for _, p := range cmd.Options.PropertyMapping {
-		props = append(props, ovf.EnvProperty{
-			Key:   p.Key,
-			Value: p.Value,
-		})
-	}
-
-	env := ovf.Env{
-		EsxID: vm.Reference().Value,
-		Platform: &ovf.PlatformSection{
-			Kind:    a.Name,
-			Version: a.Version,
-			Vendor:  a.Vendor,
-			Locale:  "US",
-		},
-		Property: &ovf.PropertySection{
-			Properties: props,
-		},
-	}
-
-	opts = append(opts, &types.OptionValue{
-		Key:   "guestinfo.ovfEnv",
-		Value: env.MarshalManual(),
-	})
-
-	ctx := context.Background()
-
-	task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
-		ExtraConfig: opts,
-	})
-
-	if err != nil {
-		return err
-	}
-
-	return task.Wait(ctx)
-}
-
-func (cmd *ovfx) WaitForIP(vm *object.VirtualMachine) error {
-	ctx := context.TODO()
-	if !cmd.Options.PowerOn || !cmd.Options.WaitForIP || cmd.Options.MarkAsTemplate {
-		return nil
-	}
-
-	cmd.Log("Waiting for IP address...\n")
-	ip, err := vm.WaitForIP(ctx)
-	if err != nil {
-		return err
-	}
-
-	cmd.Log(fmt.Sprintf("Received IP address: %s\n", ip))
-	return nil
 }
