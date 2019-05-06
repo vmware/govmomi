@@ -666,7 +666,12 @@ func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
 				http.NotFound(w, r)
 				return
 			}
-
+			for _, item := range l.Item {
+				if item.Name == spec.Item.Name {
+					s.fail(w, "com.vmware.vapi.std.errors.already_exists")
+					return
+				}
+			}
 			id = uuid.New().String()
 			spec.Item.ID = id
 			l.Item[id] = &item{Item: &spec.Item}

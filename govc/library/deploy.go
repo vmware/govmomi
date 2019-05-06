@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package vcenter
+package library
 
 import (
 	"context"
@@ -24,9 +24,12 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vapi/library"
+	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type deploy struct {
@@ -36,7 +39,7 @@ type deploy struct {
 }
 
 func init() {
-	cli.Register("vcenter.deploy", &deploy{})
+	cli.Register("library.deploy", &deploy{})
 }
 
 func (cmd *deploy) Register(ctx context.Context, f *flag.FlagSet) {
@@ -61,112 +64,85 @@ func (cmd *deploy) Process(ctx context.Context) error {
 }
 
 func (cmd *deploy) Usage() string {
-	return "LIBRARY TEMPLATE VM_NAME"
+	return "TEMPLATE VM_NAME"
 }
 
 func (cmd *deploy) Description() string {
-	return `Deploy library OVF template to vcenter.
+	return `Deploy library OVF template.
 
 Examples:
-  govc vcenter.deploy library_name ovf_template vm_name`
-}
-
-func getOVFItemID(ctx context.Context, c *rest.Client, libname string, ovfname string) (string, error) {
-	m := library.NewManager(c)
-
-	var library *library.Library
-	library, err := m.GetLibraryByName(ctx, libname)
-	if err != nil {
-		return "", err
-	}
-
-	res, err := m.GetLibraryItems(ctx, library.ID)
-	if err != nil {
-		return "", err
-	}
-
-	for _, r := range res {
-		if r.Name == ovfname || r.ID == ovfname {
-			return r.ID, nil
-		}
-	}
-
-	return "", fmt.Errorf("Could not find %s in library %s", ovfname, libname)
+  govc library.deploy /library_name/ovf_template vm_name`
 }
 
 func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
+	path := f.Arg(0)
+	name := f.Arg(1)
+
 	return cmd.DatastoreFlag.WithRestClient(ctx, func(c *rest.Client) error {
 		m := vcenter.NewManager(c)
 
-		if f.NArg() != 3 {
-			return flag.ErrHelp
-		}
-
-		libname := f.Arg(0)
-		templateName := f.Arg(1)
-		vmName := f.Arg(2)
-
-		ovfItemID, err := getOVFItemID(ctx, c, libname, templateName)
+		res, err := finder.NewFinder(library.NewManager(c)).Find(ctx, path)
 		if err != nil {
 			return err
+		}
+		if len(res) != 1 {
+			return fmt.Errorf("%q matches %d items", path, len(res))
+		}
+		item, ok := res[0].GetResult().(library.Item)
+		if !ok {
+			return fmt.Errorf("%q is a %T", path, item)
 		}
 
 		ds, err := cmd.Datastore()
 		if err != nil {
 			return err
 		}
-		datastoreID := ds.Reference().Value
-		fmt.Printf("Using datastore ID %s\n", datastoreID)
-
 		rp, err := cmd.ResourcePool()
 		if err != nil {
 			return err
 		}
-		poolID := rp.Reference().Value
-		fmt.Printf("Using pool ID %s\n", poolID)
-
 		folder, err := cmd.Folder()
 		if err != nil {
 			return err
 		}
-		folderID := folder.Reference().Value
-		fmt.Printf("Using folder ID %s\n", folderID)
-
-		filter := vcenter.FilterRequest{
-			Target: vcenter.Target{
-				ResourcePoolID: poolID,
-			},
-		}
-
-		filterResponse, err := m.FilterLibraryItem(ctx, ovfItemID, filter)
-		if err != nil {
-			return err
-		}
-
-		fmt.Printf("Found OVA for deployment: %s\n", filterResponse.Name)
 
 		deploy := vcenter.Deploy{
 			DeploymentSpec: vcenter.DeploymentSpec{
-				Name:               vmName,
-				DefaultDatastoreID: datastoreID,
+				Name:               name,
+				DefaultDatastoreID: ds.Reference().Value,
 				AcceptAllEULA:      true,
 			},
 			Target: vcenter.Target{
-				ResourcePoolID: poolID,
-				FolderID:       folderID,
+				ResourcePoolID: rp.Reference().Value,
+				FolderID:       folder.Reference().Value,
 			},
 		}
 
-		resp, err := m.DeployLibraryItem(ctx, ovfItemID, deploy)
+		d, err := m.DeployLibraryItem(ctx, item.ID, deploy)
 		if err != nil {
 			return err
 		}
 
-		if !resp.Succeeded {
-			return errors.New(resp.Error.Error())
+		if !d.Succeeded {
+			return errors.New(d.Error.Error())
 		}
 
-		fmt.Printf("Deploy succeeded: %s\n", resp.ResourceID.ID)
+		finder, err := cmd.FolderFlag.Finder(false)
+		if err != nil {
+			return err
+		}
+		ref, err := finder.ObjectReference(ctx, types.ManagedObjectReference{
+			Type:  "VirtualMachine",
+			Value: d.ResourceID.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		vm := ref.(*object.VirtualMachine)
+
+		fmt.Println(vm.InventoryPath)
+
 		return nil
 	})
 }

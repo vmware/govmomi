@@ -110,7 +110,7 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	archive := &FileArchive{path: fpath}
+	archive := &FileArchive{Path: fpath}
 	archive.Client = cmd.Client
 
 	cmd.Archive = archive
