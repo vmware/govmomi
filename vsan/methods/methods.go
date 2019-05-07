@@ -18,8 +18,8 @@ package methods
 
 import (
 	"context"
-	"github.com/influxdata/telegraf/plugins/inputs/vsphere/vsan-sdk/types"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vsan/types"
 )
 
 // Supported Entities
