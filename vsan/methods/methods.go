@@ -18,6 +18,7 @@ package methods
 
 import (
 	"context"
+
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vsan/types"
 )

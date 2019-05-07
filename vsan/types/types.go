@@ -17,9 +17,10 @@ limitations under the License.
 package types
 
 import (
-	"github.com/vmware/govmomi/vim25/types"
 	"reflect"
 	"time"
+
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type VsanPerfGetSupportedEntityTypes VsanPerfGetSupportedEntityTypesRequestType
