@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -45,6 +46,20 @@ func TestHostNetworkSystem(t *testing.T) {
 	_, err = finder.Network(ctx, "VM Network")
 	if err != nil {
 		t.Fatal(err)
+	}
+	var mns mo.HostNetworkSystem
+	err = ns.Properties(ctx, ns.Reference(), []string{"networkInfo.portgroup"}, &mns)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(mns.NetworkInfo.Portgroup) != 2 {
+		t.Fatal("expected networkInfo.portgroup to have length of 2")
+	}
+	if mns.NetworkInfo.Portgroup[0].Key != "key-vim.host.PortGroup-VM Network" {
+		t.Fatal("expected networkInfo.portgroup[0] to be VM Network")
+	}
+	if mns.NetworkInfo.Portgroup[1].Key != "key-vim.host.PortGroup-Management Network" {
+		t.Fatal("expected networkInfo.portgroup[1] to be Management Network")
 	}
 
 	// not created yet
@@ -86,6 +101,26 @@ func TestHostNetworkSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	err = ns.Properties(ctx, ns.Reference(), []string{"networkInfo.portgroup"}, &mns)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(mns.NetworkInfo.Portgroup) != 3 {
+		t.Fatal("expected networkInfo.portgroup to have length of 3")
+	}
+	if mns.NetworkInfo.Portgroup[2].Spec != spec {
+		t.Fatal("expected last networkInfo.portgroup to have an equal spec")
+	}
+	if mns.NetworkInfo.Portgroup[0].Key != "key-vim.host.PortGroup-VM Network" {
+		t.Fatal("expected networkInfo.portgroup[0] to be VM Network")
+	}
+	if mns.NetworkInfo.Portgroup[1].Key != "key-vim.host.PortGroup-Management Network" {
+		t.Fatal("expected networkInfo.portgroup[1] to be Management Network")
+	}
+	if mns.NetworkInfo.Portgroup[2].Key != "key-vim.host.PortGroup-bridge" {
+		t.Fatal("expected networkInfo.portgroup[2] to be bridge")
+	}
+
 	err = ns.AddPortGroup(ctx, spec)
 	if err == nil {
 		t.Error("expected error") // DuplicateName
@@ -99,6 +134,20 @@ func TestHostNetworkSystem(t *testing.T) {
 	_, err = finder.Network(ctx, "bridge")
 	if err == nil {
 		t.Fatal("expected error")
+	}
+
+	err = ns.Properties(ctx, ns.Reference(), []string{"networkInfo.portgroup"}, &mns)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(mns.NetworkInfo.Portgroup) != 2 {
+		t.Fatal("expected networkInfo.portgroup to have length of 2")
+	}
+	if mns.NetworkInfo.Portgroup[0].Key != "key-vim.host.PortGroup-VM Network" {
+		t.Fatal("expected networkInfo.portgroup[0] to be VM Network")
+	}
+	if mns.NetworkInfo.Portgroup[1].Key != "key-vim.host.PortGroup-Management Network" {
+		t.Fatal("expected networkInfo.portgroup[1] to be Management Network")
 	}
 
 	err = ns.RemovePortGroup(ctx, "bridge")
