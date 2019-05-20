@@ -20,11 +20,13 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
 	"net/url"
 	"os"
 	"strings"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 )
@@ -62,7 +64,7 @@ const (
 )
 
 var urlDescription = fmt.Sprintf("ESX or vCenter URL [%s]", envURL)
-var urlFlag = flag.String("url", getEnvString(envURL, "https://username:password@host"+vim25.Path), urlDescription)
+var urlFlag = flag.String("url", getEnvString(envURL, ""), urlDescription)
 
 var insecureDescription = fmt.Sprintf("Don't verify the server's certificate chain [%s]", envInsecure)
 var insecureFlag = flag.Bool("insecure", getEnvBool(envInsecure, false), insecureDescription)
@@ -114,4 +116,22 @@ func NewClient(ctx context.Context) (*govmomi.Client, error) {
 
 	// Connect and log in to ESX or vCenter
 	return govmomi.NewClient(ctx, u, *insecureFlag)
+}
+
+// Run calls f with Client create from the -url flag if provided,
+// otherwise runs the example against vcsim.
+func Run(f func(context.Context, *vim25.Client) error) {
+	var err error
+	if *urlFlag == "" {
+		err = simulator.VPX().Run(f)
+	} else {
+		ctx := context.Background()
+		c, err := NewClient(ctx)
+		if err == nil {
+			err = f(ctx, c.Client)
+		}
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
 }

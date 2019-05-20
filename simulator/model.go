@@ -23,9 +23,11 @@ import (
 	"os"
 	"path"
 
+	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -517,4 +519,27 @@ func (m *Model) Remove() {
 	for _, dir := range m.dirs {
 		_ = os.RemoveAll(dir)
 	}
+}
+
+// Run calls f with a Client connected to a simulator server instance, which is stopped after f returns.
+func (m *Model) Run(f func(context.Context, *vim25.Client) error) error {
+	ctx := context.Background()
+
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		return err
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		return err
+	}
+
+	defer c.Logout(ctx)
+
+	return f(ctx, c.Client)
 }
