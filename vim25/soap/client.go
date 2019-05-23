@@ -35,6 +35,7 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strings"
 	"sync"
@@ -70,6 +71,7 @@ type Client struct {
 
 	Namespace string // Vim namespace
 	Version   string // Vim version
+	Types     types.Func
 	UserAgent string
 
 	cookie string
@@ -122,6 +124,8 @@ func NewClient(u *url.URL, insecure bool) *Client {
 		u: u,
 		k: insecure,
 		d: newDebug(),
+
+		Types: types.TypeFunc(),
 	}
 
 	// Initialize http.RoundTripper on client, so we can customize it below
@@ -195,6 +199,17 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	client.u.RawQuery = vc.RawQuery
 
 	client.UserAgent = c.UserAgent
+
+	vimTypes := c.Types
+	client.Types = func(name string) (reflect.Type, bool) {
+		kind, ok := vimTypes(name)
+		if ok {
+			return kind, ok
+		}
+		// vim25/xml typeToString() does not have an option to include namespace prefix.
+		// Workaround this by re-trying the lookup with the namespace prefix.
+		return vimTypes(namespace + ":" + name)
+	}
 
 	return client
 }
@@ -571,7 +586,7 @@ func (c *Client) RoundTrip(ctx context.Context, reqBody, resBody HasFault) error
 		}
 
 		dec := xml.NewDecoder(res.Body)
-		dec.TypeFunc = types.TypeFunc()
+		dec.TypeFunc = c.Types
 		err = dec.Decode(&resEnv)
 		if err != nil {
 			return err
