@@ -49,7 +49,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	objectManager := vslm.NewVSLMObjectManager(vslmClient)
+	objectManager := vslm.NewVslmObjectManager(vslmClient)
 	res, err := objectManager.ListVStorageObjectForSpec(ctx, nil, 1000)
 	
 	fmt.Println("Got ", len(res.Id), " IDs returned")
