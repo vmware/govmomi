@@ -17,7 +17,6 @@ limitations under the License.
 package simulator
 
 import (
-	"reflect"
 	"time"
 
 	"github.com/google/uuid"
@@ -60,10 +59,6 @@ func New() *simulator.Registry {
 	r.Put(&PlacementSolver{
 		ManagedObjectReference: content.PlacementSolver,
 	})
-
-	// TODO: vim25/xml typeToString() does not have an option to include namespace prefix.
-	// workaround by adding type without the prefix for now.
-	vim.Add("PbmCapabilityProfile", reflect.TypeOf((*types.PbmCapabilityProfile)(nil)).Elem())
 
 	return r
 }
