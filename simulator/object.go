@@ -17,6 +17,7 @@ limitations under the License.
 package simulator
 
 import (
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
@@ -48,4 +49,9 @@ func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
 
 	body.Res = &types.SetCustomValueResponse{}
 	return body
+}
+
+// newUUID returns a stable UUID based on input s
+func newUUID(s string) string {
+	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(s)).String()
 }

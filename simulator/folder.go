@@ -22,7 +22,6 @@ import (
 	"path"
 	"strings"
 
-	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -491,7 +490,7 @@ func (f *Folder) CreateDVSTask(req *types.CreateDVS_Task) soap.HasFault {
 			return nil, &types.InvalidArgument{InvalidProperty: "name"}
 		}
 
-		dvs.Uuid = uuid.New().String()
+		dvs.Uuid = newUUID(dvs.Name)
 
 		f.putChild(dvs)
 

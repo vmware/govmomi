@@ -20,7 +20,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -53,7 +52,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	hs.Summary.Runtime = &hs.Runtime
 	hs.Summary.Runtime.BootTime = &now
 
-	id := uuid.New().String()
+	id := newUUID(hs.Name)
 
 	hardware := *host.Summary.Hardware
 	hs.Summary.Hardware = &hardware
