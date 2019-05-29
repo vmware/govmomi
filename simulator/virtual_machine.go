@@ -31,7 +31,6 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -99,8 +98,8 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		NumCPUs:           1,
 		NumCoresPerSocket: 1,
 		MemoryMB:          32,
-		Uuid:              uuid.New().String(),
-		InstanceUuid:      uuid.New().String(),
+		Uuid:              newUUID(spec.Files.VmPathName),
+		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
 		Version:           esx.HardwareVersion,
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
@@ -857,7 +856,7 @@ var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
 //  format of the virtual machine UUID.  The virtual machine UUID is based on a hash calculated by using the UUID of the
 //  ESXi physical machine and the path to the configuration file (.vmx) of the virtual machine."
 func (vm *VirtualMachine) generateMAC() string {
-	id := uuid.New() // Random is fine for now.
+	id := vm.Config.Uuid
 
 	offset := len(id) - len(vmwOUI)
 

@@ -128,6 +128,13 @@ load test_helper
 @test "vcsim vm.create" {
   vcsim_env
 
+  # VM uuids are stable, based on path to .vmx
+  run govc object.collect -s vm/DC0_H0_VM0 config.uuid config.instanceUuid
+  assert_success "$(printf "265104de-1472-547c-b873-6dc7883fb6cb\nb4689bed-97f0-5bcd-8a4c-07477cc8f06f")"
+
+  run govc object.collect -s host/DC0_H0/DC0_H0 summary.hardware.uuid
+  assert_success 081cb246-2225-56d3-836b-8b26da9041ea
+
   run govc vm.create foo.yakity
   assert_success
 
