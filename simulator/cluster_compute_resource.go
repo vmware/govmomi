@@ -51,13 +51,7 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	}
 
 	host := NewHostSystem(esx.HostSystem)
-	host.Summary.Config.Name = spec.HostName
-	host.Name = host.Summary.Config.Name
-	if add.req.AsConnected {
-		host.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
-	} else {
-		host.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
-	}
+	host.configure(spec, add.req.AsConnected)
 
 	cr := add.ClusterComputeResource
 	Map.PutEntity(cr, Map.NewEntity(host))

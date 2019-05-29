@@ -132,8 +132,14 @@ load test_helper
   run govc object.collect -s vm/DC0_H0_VM0 config.uuid config.instanceUuid
   assert_success "$(printf "265104de-1472-547c-b873-6dc7883fb6cb\nb4689bed-97f0-5bcd-8a4c-07477cc8f06f")"
 
+  dups=$(govc object.collect -s -type m / config.uuid | sort | uniq -d | wc -l)
+  [ "$dups" = "0" ]
+
   run govc object.collect -s host/DC0_H0/DC0_H0 summary.hardware.uuid
-  assert_success 081cb246-2225-56d3-836b-8b26da9041ea
+  assert_success dcf7fb3c-4a1c-5a05-b730-5e09f3704e2f
+
+  dups=$(govc object.collect -s -type m / summary.hardware.uuid | sort | uniq -d | wc -l)
+  [ "$dups" = "0" ]
 
   run govc vm.create foo.yakity
   assert_success
