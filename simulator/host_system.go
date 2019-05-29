@@ -52,14 +52,10 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	hs.Summary.Runtime = &hs.Runtime
 	hs.Summary.Runtime.BootTime = &now
 
-	id := newUUID(hs.Name)
-
 	hardware := *host.Summary.Hardware
 	hs.Summary.Hardware = &hardware
-	hs.Summary.Hardware.Uuid = id
 
 	info := *esx.HostHardwareInfo
-	info.SystemInfo.Uuid = id
 	hs.Hardware = &info
 
 	config := []struct {
@@ -79,6 +75,19 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	}
 
 	return hs
+}
+
+func (h *HostSystem) configure(spec types.HostConnectSpec, connected bool) {
+	h.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
+	if connected {
+		h.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
+	}
+
+	h.Summary.Config.Name = spec.HostName
+	h.Name = h.Summary.Config.Name
+	id := newUUID(h.Name)
+	h.Summary.Hardware.Uuid = id
+	h.Hardware.SystemInfo.Uuid = id
 }
 
 func (h *HostSystem) event() types.HostEvent {
@@ -168,10 +177,7 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 
 	pool := NewResourcePool()
 	host := NewHostSystem(esx.HostSystem)
-
-	host.Summary.Config.Name = spec.HostName
-	host.Name = host.Summary.Config.Name
-	host.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
+	host.configure(spec, false)
 
 	summary := new(types.ComputeResourceSummary)
 	addComputeResource(summary, host)
