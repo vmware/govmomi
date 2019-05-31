@@ -154,7 +154,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 			return fmt.Errorf("%q is a %T", f.Arg(0), t)
 		}
 
-		session, err := m.CreateLibraryItemUpdateSession(ctx, library.UpdateSession{
+		session, err := m.CreateLibraryItemUpdateSession(ctx, library.Session{
 			LibraryItemID: cmd.ID,
 		})
 

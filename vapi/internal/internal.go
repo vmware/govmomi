@@ -29,20 +29,22 @@ import (
 
 // VAPI REST Paths
 const (
-	Path                         = "/rest/com/vmware"
-	SessionPath                  = "/cis/session"
-	CategoryPath                 = "/cis/tagging/category"
-	TagPath                      = "/cis/tagging/tag"
-	AssociationPath              = "/cis/tagging/tag-association"
-	LibraryPath                  = "/content/library"
-	LibraryItemAdd               = "/cis/data"
-	LibraryItemPath              = "/content/library/item"
-	LibraryItemFilePath          = "/content/library/item/file"
-	LibraryItemUpdateSession     = "/content/library/item/update-session"
-	LibraryItemUpdateSessionFile = "/content/library/item/updatesession/file"
-	LocalLibraryPath             = "/content/local-library"
-	VCenterOVFLibraryItem        = "/vcenter/ovf/library-item"
-	SessionCookieName            = "vmware-api-session-id"
+	Path                           = "/rest/com/vmware"
+	SessionPath                    = "/cis/session"
+	CategoryPath                   = "/cis/tagging/category"
+	TagPath                        = "/cis/tagging/tag"
+	AssociationPath                = "/cis/tagging/tag-association"
+	LibraryPath                    = "/content/library"
+	LibraryItemFileData            = "/cis/data"
+	LibraryItemPath                = "/content/library/item"
+	LibraryItemFilePath            = "/content/library/item/file"
+	LibraryItemUpdateSession       = "/content/library/item/update-session"
+	LibraryItemUpdateSessionFile   = "/content/library/item/updatesession/file"
+	LibraryItemDownloadSession     = "/content/library/item/download-session"
+	LibraryItemDownloadSessionFile = "/content/library/item/downloadsession/file"
+	LocalLibraryPath               = "/content/local-library"
+	VCenterOVFLibraryItem          = "/vcenter/ovf/library-item"
+	SessionCookieName              = "vmware-api-session-id"
 )
 
 // AssociatedObject is the same structure as types.ManagedObjectReference,

@@ -55,12 +55,21 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
+		cancel := m.CancelLibraryItemUpdateSession
+		remove := m.DeleteLibraryItemUpdateSession
+
+		_, err := m.GetLibraryItemUpdateSession(ctx, id)
+		if err != nil {
+			cancel = m.CancelLibraryItemDownloadSession
+			remove = m.DeleteLibraryItemDownloadSession
+		}
+
 		if cmd.cancel {
-			err := m.CancelLibraryItemUpdateSession(ctx, id)
+			err := cancel(ctx, id)
 			if err != nil {
 				return nil
 			}
 		}
-		return m.DeleteLibraryItemUpdateSession(ctx, id)
+		return remove(ctx, id)
 	})
 }

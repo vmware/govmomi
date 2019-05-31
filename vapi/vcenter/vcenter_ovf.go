@@ -150,34 +150,27 @@ type Deploy struct {
 	Target         `json:"target,omitempty"`
 }
 
-// LocalizableMessage represents a localizable error
-type LocalizableMessage struct {
-	Args           []string `json:"args,omitempty"`
-	DefaultMessage string   `json:"default_message,omitempty"`
-	ID             string   `json:"id,omitempty"`
-}
-
 // Error is a SERVER error
 type Error struct {
-	Class    string               `json:"@class,omitempty"`
-	Messages []LocalizableMessage `json:"messages,omitempty"`
+	Class    string                    `json:"@class,omitempty"`
+	Messages []rest.LocalizableMessage `json:"messages,omitempty"`
 }
 
 // ParseIssue is a parse issue struct
 type ParseIssue struct {
-	Category     string             `json:"@classcategory,omitempty"`
-	File         string             `json:"file,omitempty"`
-	LineNumber   int64              `json:"line_number,omitempty"`
-	ColumnNumber int64              `json:"column_number,omitempty"`
-	Message      LocalizableMessage `json:"message,omitempty"`
+	Category     string                  `json:"@classcategory,omitempty"`
+	File         string                  `json:"file,omitempty"`
+	LineNumber   int64                   `json:"line_number,omitempty"`
+	ColumnNumber int64                   `json:"column_number,omitempty"`
+	Message      rest.LocalizableMessage `json:"message,omitempty"`
 }
 
 // OVFError is a list of errors from create or deploy
 type OVFError struct {
-	Category string              `json:"category,omitempty"`
-	Error    *Error              `json:"error,omitempty"`
-	Issues   []ParseIssue        `json:"issues,omitempty"`
-	Message  *LocalizableMessage `json:"message,omitempty"`
+	Category string                   `json:"category,omitempty"`
+	Error    *Error                   `json:"error,omitempty"`
+	Issues   []ParseIssue             `json:"issues,omitempty"`
+	Message  *rest.LocalizableMessage `json:"message,omitempty"`
 }
 
 // ResourceID is a managed object reference for a deployed resource.
