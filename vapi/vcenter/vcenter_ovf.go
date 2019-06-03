@@ -25,13 +25,116 @@ import (
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
+// AdditionalParams are additional OVF parameters which can be specified for a deployment target.
+// This structure is a union where based on Type, only one of each commented section will be set.
+type AdditionalParams struct {
+	Class string `json:"@class"`
+	Type  string `json:"type"`
+
+	// DeploymentOptionParams
+	SelectedKey       string             `json:"selected_key,omitempty"`
+	DeploymentOptions []DeploymentOption `json:"deployment_options,omitempty"`
+
+	// ExtraConfigs
+	ExtraConfig []ExtraConfig `json:"extra_configs,omitempty"`
+
+	// PropertyParams
+	Properties []Property `json:"properties,omitempty"`
+
+	// SizeParams
+	ApproximateSparseDeploymentSize int64 `json:"approximate_sparse_deployment_size,omitempty"`
+	VariableDiskSize                bool  `json:"variable_disk_size,omitempty"`
+	ApproximateDownloadSize         int64 `json:"approximate_download_size,omitempty"`
+	ApproximateFlatDeploymentSize   int64 `json:"approximate_flat_deployment_size,omitempty"`
+
+	// IpAllocationParams
+	SupportedAllocationScheme   []string `json:"supported_allocation_scheme,omitempty"`
+	SupportedIPProtocol         []string `json:"supported_ip_protocol,omitempty"`
+	SupportedIPAllocationPolicy []string `json:"supported_ip_allocation_policy,omitempty"`
+	IPAllocationPolicy          string   `json:"ip_allocation_policy,omitempty"`
+	IPProtocol                  string   `json:"ip_protocol,omitempty"`
+
+	// UnknownSections
+	UnknownSections []UnknownSection `json:"unknown_sections,omitempty"`
+}
+
+const (
+	ClassOvfParams             = "com.vmware.vcenter.ovf.ovf_params"
+	TypeDeploymentOptionParams = "DeploymentOptionParams"
+	TypeExtraConfigParams      = "ExtraConfigParams"
+	TypeExtraConfigs           = "ExtraConfigs"
+	TypeIPAllocationParams     = "IpAllocationParams"
+	TypePropertyParams         = "PropertyParams"
+	TypeSizeParams             = "SizeParams"
+)
+
+// DeploymentOption contains the information about a deployment option as defined in the OVF specification
+type DeploymentOption struct {
+	Key           string `json:"key,omitempty"`
+	Label         string `json:"label,omitempty"`
+	Description   string `json:"description,omitempty"`
+	DefaultChoice bool   `json:"default_choice,omitempty"`
+}
+
+// ExtraConfig contains information about a vmw:ExtraConfig OVF element
+type ExtraConfig struct {
+	Key             string `json:"key,omitempty"`
+	Value           string `json:"value,omitempty"`
+	VirtualSystemID string `json:"virtual_system_id,omitempty"`
+}
+
+// Property contains information about a property in an OVF package
+type Property struct {
+	Category    string `json:"category,omitempty"`
+	ClassID     string `json:"class_id,omitempty"`
+	Description string `json:"description,omitempty"`
+	ID          string `json:"id,omitempty"`
+	InstanceID  string `json:"instance_id,omitempty"`
+	Label       string `json:"label,omitempty"`
+	Type        string `json:"type,omitempty"`
+	UIOptional  bool   `json:"ui_optional,omitempty"`
+	Value       string `json:"value,omitempty"`
+}
+
+// UnknownSection contains information about an unknown section in an OVF package
+type UnknownSection struct {
+	Tag  string `json:"tag,omitempty"`
+	Info string `json:"info,omitempty"`
+}
+
+// NetworkMapping specifies the target network to use for sections of type ovf:NetworkSection in the OVF descriptor
+type NetworkMapping struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
+// StorageGroupMapping defines the storage deployment target and storage provisioning type for a section of type vmw:StorageGroupSection in the OVF descriptor
+type StorageGroupMapping struct {
+	Type             string `json:"type"`
+	StorageProfileID string `json:"storage_profile_id,omitempty"`
+	DatastoreID      string `json:"datastore_id,omitempty"`
+	Provisioning     string `json:"provisioning,omitempty"`
+}
+
+// StorageMapping specifies the target storage to use for sections of type vmw:StorageGroupSection in the OVF descriptor
+type StorageMapping struct {
+	Key   string              `json:"key"`
+	Value StorageGroupMapping `json:"value"`
+}
+
 // DeploymentSpec is the deployment specification for the deployment
 type DeploymentSpec struct {
-	Name               string   `json:"name,omitempty"`
-	Annotation         string   `json:"annotation,omitempty"`
-	AcceptAllEULA      bool     `json:"accept_all_EULA,omitempty"`
-	Flags              []string `json:"flags,omitempty"`
-	DefaultDatastoreID string   `json:"default_datastore_id,omitempty"`
+	Name                string             `json:"name,omitempty"`
+	Annotation          string             `json:"annotation,omitempty"`
+	AcceptAllEULA       bool               `json:"accept_all_EULA,omitempty"`
+	NetworkMappings     []NetworkMapping   `json:"network_mappings,omitempty"`
+	StorageMappings     []StorageMapping   `json:"storage_mappings,omitempty"`
+	StorageProvisioning string             `json:"storage_provisioning,omitempty"`
+	StorageProfileID    string             `json:"storage_profile_id,omitempty"`
+	Locale              string             `json:"locale,omitempty"`
+	Flags               []string           `json:"flags,omitempty"`
+	AdditionalParams    []AdditionalParams `json:"additional_parameters,omitempty"`
+	DefaultDatastoreID  string             `json:"default_datastore_id,omitempty"`
 }
 
 // Target is the target for the deployment
@@ -77,10 +180,10 @@ type OVFError struct {
 	Message  *LocalizableMessage `json:"message,omitempty"`
 }
 
-// DeployedResourceID is a managed object reference for a deployed resource.
-type DeployedResourceID struct {
-	ID   string `json:"id,omitempty"`
-	Type string `json:"type,omitempty"`
+// ResourceID is a managed object reference for a deployed resource.
+type ResourceID struct {
+	Type  string `json:"type,omitempty"`
+	Value string `json:"id,omitempty"`
 }
 
 // DeploymentError is an error that occurs when deploying and OVF from
@@ -94,21 +197,23 @@ func (e *DeploymentError) Error() string {
 	msg := ""
 	if len(e.Errors) != 0 {
 		err := e.Errors[0]
-		if err.Error != nil && len(err.Error.Messages) != 0 {
+		if err.Message != nil {
+			msg = err.Message.DefaultMessage
+		} else if err.Error != nil && len(err.Error.Messages) != 0 {
 			msg = err.Error.Messages[0].DefaultMessage
 		}
 	}
 	if msg == "" {
-		msg = fmt.Sprintf("%+v", e)
+		msg = fmt.Sprintf("%#v", e)
 	}
 	return "deploy error: " + msg
 }
 
 // Deployment is the results from issuing a library OVF deployment
 type Deployment struct {
-	Succeeded  bool                `json:"succeeded,omitempty"`
-	ResourceID *DeployedResourceID `json:"resource_id,omitempty"`
-	Error      *DeploymentError    `json:"error,omitempty"`
+	Succeeded  bool             `json:"succeeded,omitempty"`
+	ResourceID *ResourceID      `json:"resource_id,omitempty"`
+	Error      *DeploymentError `json:"error,omitempty"`
 }
 
 // FilterRequest contains the information to start a vcenter filter call
@@ -118,11 +223,12 @@ type FilterRequest struct {
 
 // FilterResponse returns information from the vcenter filter call
 type FilterResponse struct {
-	EULAs         []string `json:"EULAs,omitempty"`
-	Annotation    string   `json:"Annotation,omitempty"`
-	Name          string   `json:"name,omitempty"`
-	Networks      []string `json:"Networks,omitempty"`
-	StorageGroups []string `json:"storage_groups,omitempty"`
+	EULAs            []string           `json:"EULAs,omitempty"`
+	AdditionalParams []AdditionalParams `json:"additional_params,omitempty"`
+	Annotation       string             `json:"Annotation,omitempty"`
+	Name             string             `json:"name,omitempty"`
+	Networks         []string           `json:"Networks,omitempty"`
+	StorageGroups    []string           `json:"storage_groups,omitempty"`
 }
 
 // Manager extends rest.Client, adding content library related methods.

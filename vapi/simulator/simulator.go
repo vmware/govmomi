@@ -42,6 +42,7 @@ import (
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vapi/vcenter"
+	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -1015,9 +1016,6 @@ func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter
 	if deploy.Target.HostID != "" {
 		host = &types.ManagedObjectReference{Type: "HostSystem", Value: deploy.Target.HostID}
 	}
-	cisp := types.OvfCreateImportSpecParams{
-		EntityName: deploy.DeploymentSpec.Name,
-	}
 
 	ctx := context.Background()
 	c, err := govmomi.NewClient(ctx, &s.URL, true)
@@ -1027,6 +1025,48 @@ func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter
 	defer func() {
 		_ = c.Logout(ctx)
 	}()
+
+	v, err := view.NewManager(c.Client).CreateContainerView(ctx, c.ServiceContent.RootFolder, nil, true)
+	if err != nil {
+		return nil, err
+	}
+	defer func() {
+		_ = v.Destroy(ctx)
+	}()
+	refs, err := v.Find(ctx, []string{"Network"}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	var network []types.OvfNetworkMapping
+	for _, net := range deploy.NetworkMappings {
+		for i := range refs {
+			if refs[i].Value == net.Value {
+				network = append(network, types.OvfNetworkMapping{Name: net.Key, Network: refs[i]})
+				break
+			}
+		}
+	}
+
+	cisp := types.OvfCreateImportSpecParams{
+		DiskProvisioning: deploy.DeploymentSpec.StorageProvisioning,
+		EntityName:       deploy.DeploymentSpec.Name,
+		NetworkMapping:   network,
+	}
+
+	for _, p := range deploy.AdditionalParams {
+		switch p.Type {
+		case vcenter.TypePropertyParams:
+			for _, prop := range p.Properties {
+				cisp.PropertyMapping = append(cisp.PropertyMapping, types.KeyValue{
+					Key:   prop.ID,
+					Value: prop.Value,
+				})
+			}
+		case vcenter.TypeDeploymentOptionParams:
+			cisp.OvfManagerCommonParams.DeploymentOption = p.SelectedKey
+		}
+	}
 
 	m := ovf.NewManager(c.Client)
 	spec, err := m.CreateImportSpec(ctx, string(desc), pool, ds, cisp)
@@ -1092,11 +1132,9 @@ func (s *handler) libraryItemDeployID(w http.ResponseWriter, r *http.Request) {
 		var d vcenter.Deployment
 		info, err := s.libraryDeploy(lib, item, spec.Deploy)
 		if err == nil {
+			id := vcenter.ResourceID(info.Entity)
 			d.Succeeded = true
-			d.ResourceID = &vcenter.DeployedResourceID{
-				Type: info.Entity.Type,
-				ID:   info.Entity.Value,
-			}
+			d.ResourceID = &id
 		} else {
 			d.Error = &vcenter.DeploymentError{
 				Errors: []vcenter.OVFError{{
