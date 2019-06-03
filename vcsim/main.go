@@ -66,6 +66,7 @@ func main() {
 	listen := flag.String("l", "127.0.0.1:8989", "Listen address for vcsim")
 	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
+	stdinExit := flag.Bool("stdinexit", false, "Press any key to exit")
 
 	flag.IntVar(&model.DelayConfig.Delay, "delay", model.DelayConfig.Delay, "Method response delay across all methods")
 	methodDelayP := flag.String("method-delay", "", "Delay per method on the form 'method1:delay1,method2:delay2...'")
@@ -199,6 +200,13 @@ func main() {
 
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
+	if *stdinExit {
+		fmt.Fprintf(out, "Press any key to exit")
+		go func() {
+			os.Stdin.Read(make([]byte, 1))
+			sig <- syscall.SIGTERM
+		}()
+	}
 
 	<-sig
 
