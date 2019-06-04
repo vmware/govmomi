@@ -73,7 +73,7 @@ func (c *Manager) AddLibraryItemFileFromURI(
 	ctx context.Context,
 	sessionID, fileName, uri string) (*UpdateFileInfo, error) {
 
-	n, fingerprint, err := GetContentLengthAndFingerprint(ctx, uri)
+	n, fingerprint, err := c.getContentLengthAndFingerprint(ctx, uri)
 	if err != nil {
 		return nil, err
 	}
@@ -105,12 +105,12 @@ func (c *Manager) GetLibraryItemUpdateSessionFile(ctx context.Context, sessionID
 	return &res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
-// GetContentLengthAndFingerprint gets the number of bytes returned
+// getContentLengthAndFingerprint gets the number of bytes returned
 // by the URI as well as the SHA1 fingerprint of the peer certificate
 // if the URI's scheme is https.
-func GetContentLengthAndFingerprint(
+func (c *Manager) getContentLengthAndFingerprint(
 	ctx context.Context, uri string) (int64, string, error) {
-	resp, err := http.Head(uri)
+	resp, err := c.Head(uri)
 	if err != nil {
 		return 0, "", err
 	}

@@ -25,6 +25,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -41,6 +42,7 @@ type item struct {
 	library.Item
 
 	manifest bool
+	pull     bool
 }
 
 func init() {
@@ -57,6 +59,7 @@ func (cmd *item) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.Name, "n", "", "Library item name")
 	f.StringVar(&cmd.Type, "t", "", "Library item type")
 	f.BoolVar(&cmd.manifest, "m", false, "Require ova manifest")
+	f.BoolVar(&cmd.pull, "pull", false, "Pull library item from http endpoint")
 }
 
 func (cmd *item) Usage() string {
@@ -70,7 +73,9 @@ Examples:
   govc library.import library_name file.ova
   govc library.import library_name file.ovf
   govc library.import library_name file.iso
-  govc library.import library_name/item_name file.ova # update existing item`
+  govc library.import library_name/item_name file.ova # update existing item
+  govc library.import library_name http://example.com/file.ovf # download and push to vCenter
+  govc library.import -pull library_name http://example.com/file.ova # direct pull from vCenter`
 }
 
 func (cmd *item) Process(ctx context.Context) error {
@@ -90,7 +95,13 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 	ext := filepath.Ext(base)
 	mf := strings.Replace(base, ext, ".mf", 1)
 	kind := ""
-	archive := &importx.ArchiveFlag{Archive: &importx.FileArchive{Path: file}}
+	client, err := cmd.Client()
+	if err != nil {
+		return err
+	}
+	opener := importx.Opener{Client: client}
+	archive := &importx.ArchiveFlag{Archive: &importx.FileArchive{Path: file, Opener: opener}}
+
 	manifest := make(map[string]*library.Checksum)
 	if cmd.Name == "" {
 		cmd.Name = strings.TrimSuffix(base, ext)
@@ -98,7 +109,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	switch ext {
 	case ".ova":
-		archive.Archive = &importx.TapeArchive{Path: file}
+		archive.Archive = &importx.TapeArchive{Path: file, Opener: opener}
 		base = "*.ovf"
 		mf = "*.mf"
 		kind = "ovf"
@@ -112,7 +123,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.Type = kind
 	}
 
-	if cmd.Type == "ovf" {
+	if !cmd.pull && cmd.Type == "ovf" {
 		f, _, err := archive.Open(mf)
 		if err == nil {
 			sums, err := library.ReadManifest(f)
@@ -157,6 +168,15 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		session, err := m.CreateLibraryItemUpdateSession(ctx, library.Session{
 			LibraryItemID: cmd.ID,
 		})
+
+		if cmd.pull {
+			_, err = m.AddLibraryItemFileFromURI(ctx, session, filepath.Base(file), file)
+			if err != nil {
+				return err
+			}
+
+			return m.WaitOnLibraryItemUpdateSession(ctx, session, 3*time.Second, nil)
+		}
 
 		upload := func(name string) error {
 			f, size, err := archive.Open(name)

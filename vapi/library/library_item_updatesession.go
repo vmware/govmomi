@@ -90,6 +90,29 @@ func (c *Manager) KeepAliveLibraryItemUpdateSession(ctx context.Context, id stri
 	return c.Do(ctx, url.Request(http.MethodPost), nil)
 }
 
+// WaitOnLibraryItemUpdateSession blocks until the update session is no longer
+// in the ACTIVE state.
+func (c *Manager) WaitOnLibraryItemUpdateSession(
+	ctx context.Context, sessionID string,
+	interval time.Duration, intervalCallback func()) error {
+
+	// Wait until the upload operation is complete to return.
+	for {
+		session, err := c.GetLibraryItemUpdateSession(ctx, sessionID)
+		if err != nil {
+			return err
+		}
+
+		if session.State != "ACTIVE" {
+			return nil
+		}
+		time.Sleep(interval)
+		if intervalCallback != nil {
+			intervalCallback()
+		}
+	}
+}
+
 // CreateLibraryItemDownloadSession creates a new library item
 func (c *Manager) CreateLibraryItemDownloadSession(ctx context.Context, session Session) (string, error) {
 	url := internal.URL(c, internal.LibraryItemDownloadSession)
