@@ -44,7 +44,7 @@ func (cmd *download) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.IncludeDefault, "default", true, "Specifies if the bundle should include the default server")
+	f.BoolVar(&cmd.IncludeDefault, "default", false, "Specifies if the bundle should include the default server")
 }
 
 func (cmd *download) Process(ctx context.Context) error {
