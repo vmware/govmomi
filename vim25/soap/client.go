@@ -482,8 +482,9 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 		req.Header.Set(`User-Agent`, c.UserAgent)
 	}
 
+	ext := ""
 	if d.enabled() {
-		d.debugRequest(req)
+		ext = d.debugRequest(req)
 	}
 
 	tstart := time.Now()
@@ -507,7 +508,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 	defer res.Body.Close()
 
 	if d.enabled() {
-		d.debugResponse(res)
+		d.debugResponse(res, ext)
 	}
 
 	return f(res)

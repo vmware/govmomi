@@ -12,6 +12,10 @@ jqformat() {
   jq .
 }
 
+xmlformat() {
+  xmlstarlet fo
+}
+
 for file in *.req.{xml,json}; do
     ext=${file##*.}
     base=$(basename "$file" ".req.$ext")
