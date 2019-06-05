@@ -40,6 +40,7 @@ import (
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vapi/vcenter"
 	"github.com/vmware/govmomi/view"
@@ -65,9 +66,15 @@ type content struct {
 }
 
 type update struct {
-	*library.UpdateSession
+	*library.Session
 	Library *library.Library
 	File    map[string]*library.UpdateFileInfo
+}
+
+type download struct {
+	*library.Session
+	Library *library.Library
+	File    map[string]*library.DownloadFileInfo
 }
 
 type handler struct {
@@ -80,6 +87,7 @@ type handler struct {
 	Session     map[string]*session
 	Library     map[string]content
 	Update      map[string]update
+	Download    map[string]download
 }
 
 // New creates a vAPI simulator.
@@ -93,6 +101,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		Session:     make(map[string]*session),
 		Library:     make(map[string]content),
 		Update:      make(map[string]update),
+		Download:    make(map[string]download),
 	}
 
 	handlers := []struct {
@@ -116,7 +125,11 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.LibraryItemUpdateSession + "/", s.libraryItemUpdateSessionID},
 		{internal.LibraryItemUpdateSessionFile, s.libraryItemUpdateSessionFile},
 		{internal.LibraryItemUpdateSessionFile + "/", s.libraryItemUpdateSessionFileID},
-		{internal.LibraryItemAdd + "/", s.libraryItemAdd},
+		{internal.LibraryItemDownloadSession, s.libraryItemDownloadSession},
+		{internal.LibraryItemDownloadSession + "/", s.libraryItemDownloadSessionID},
+		{internal.LibraryItemDownloadSessionFile, s.libraryItemDownloadSessionFile},
+		{internal.LibraryItemDownloadSessionFile + "/", s.libraryItemDownloadSessionFileID},
+		{internal.LibraryItemFileData + "/", s.libraryItemFileData},
 		{internal.LibraryItemFilePath, s.libraryItemFile},
 		{internal.LibraryItemFilePath + "/", s.libraryItemFileID},
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemDeployID},
@@ -742,7 +755,7 @@ func (s *handler) libraryItemUpdateSession(w http.ResponseWriter, r *http.Reques
 	switch r.Method {
 	case http.MethodPost:
 		var spec struct {
-			UpdateSession library.UpdateSession `json:"create_spec"`
+			Session library.Session `json:"create_spec"`
 		}
 		if !s.decode(r, w, &spec) {
 			return
@@ -750,24 +763,24 @@ func (s *handler) libraryItemUpdateSession(w http.ResponseWriter, r *http.Reques
 
 		switch s.action(r) {
 		case "create", "":
-			lib := s.itemLibrary(spec.UpdateSession.LibraryItemID)
+			lib := s.itemLibrary(spec.Session.LibraryItemID)
 			if lib == nil {
-				log.Printf("library for item %q not found", spec.UpdateSession.LibraryItemID)
+				log.Printf("library for item %q not found", spec.Session.LibraryItemID)
 				http.NotFound(w, r)
 				return
 			}
-			session := &library.UpdateSession{
+			session := &library.Session{
 				ID:                        uuid.New().String(),
-				LibraryItemID:             spec.UpdateSession.LibraryItemID,
+				LibraryItemID:             spec.Session.LibraryItemID,
 				LibraryItemContentVersion: "1",
 				ClientProgress:            0,
 				State:                     "ACTIVE",
 				ExpirationTime:            types.NewTime(time.Now().Add(time.Hour)),
 			}
 			s.Update[session.ID] = update{
-				UpdateSession: session,
-				Library:       lib,
-				File:          make(map[string]*library.UpdateFileInfo),
+				Session: session,
+				Library: lib,
+				File:    make(map[string]*library.UpdateFileInfo),
 			}
 			s.ok(w, session.ID)
 		case "get":
@@ -787,7 +800,7 @@ func (s *handler) libraryItemUpdateSessionID(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	session := up.UpdateSession
+	session := up.Session
 	switch r.Method {
 	case http.MethodGet:
 		s.ok(w, session)
@@ -850,7 +863,7 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 			u := url.URL{
 				Scheme: s.URL.Scheme,
 				Host:   s.URL.Host,
-				Path:   path.Join(internal.Path, internal.LibraryItemAdd, id, spec.File.Name),
+				Path:   path.Join(internal.Path, internal.LibraryItemFileData, id, spec.File.Name),
 			}
 			info := &library.UpdateFileInfo{
 				Name:             spec.File.Name,
@@ -865,7 +878,7 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 			s.ok(w, info)
 		}
 	case "get":
-		s.ok(w, up.UpdateSession)
+		s.ok(w, up.Session)
 	case "list":
 		var ids []string
 		for id := range up.File {
@@ -877,6 +890,152 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 		s.ok(w)
 	case "validate":
 		// TODO
+	}
+}
+
+func (s *handler) libraryItemDownloadSession(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodPost:
+		var spec struct {
+			Session library.Session `json:"create_spec"`
+		}
+		if !s.decode(r, w, &spec) {
+			return
+		}
+
+		switch s.action(r) {
+		case "create", "":
+			var lib *library.Library
+			var files []library.File
+			for _, l := range s.Library {
+				if item, ok := l.Item[spec.Session.LibraryItemID]; ok {
+					lib = l.Library
+					files = item.File
+					break
+				}
+			}
+			if lib == nil {
+				log.Printf("library for item %q not found", spec.Session.LibraryItemID)
+				http.NotFound(w, r)
+				return
+			}
+			session := &library.Session{
+				ID:                        uuid.New().String(),
+				LibraryItemID:             spec.Session.LibraryItemID,
+				LibraryItemContentVersion: "1",
+				ClientProgress:            0,
+				State:                     "ACTIVE",
+				ExpirationTime:            types.NewTime(time.Now().Add(time.Hour)),
+			}
+			s.Download[session.ID] = download{
+				Session: session,
+				Library: lib,
+				File:    make(map[string]*library.DownloadFileInfo),
+			}
+			for _, file := range files {
+				s.Download[session.ID].File[file.Name] = &library.DownloadFileInfo{
+					Name:   file.Name,
+					Status: "UNPREPARED",
+				}
+			}
+			s.ok(w, session.ID)
+		case "get":
+			// TODO
+		case "list":
+			// TODO
+		}
+	}
+}
+
+func (s *handler) libraryItemDownloadSessionID(w http.ResponseWriter, r *http.Request) {
+	id := s.id(r)
+	up, ok := s.Download[id]
+	if !ok {
+		log.Printf("download session not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	session := up.Session
+	switch r.Method {
+	case http.MethodGet:
+		s.ok(w, session)
+	case http.MethodPost:
+		switch s.action(r) {
+		case "cancel", "complete", "fail":
+			delete(s.Download, id) // TODO: fully mock VC's behavior
+		case "keep-alive":
+			session.ExpirationTime = types.NewTime(time.Now().Add(time.Hour))
+		}
+		s.ok(w)
+	case http.MethodDelete:
+		delete(s.Download, id)
+		s.ok(w)
+	}
+}
+
+func (s *handler) libraryItemDownloadSessionFile(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := r.URL.Query().Get("download_session_id")
+	dl, ok := s.Download[id]
+	if !ok {
+		log.Printf("download session not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	var files []*library.DownloadFileInfo
+	for _, f := range dl.File {
+		files = append(files, f)
+	}
+	s.ok(w, files)
+}
+
+func (s *handler) libraryItemDownloadSessionFileID(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	id := s.id(r)
+	dl, ok := s.Download[id]
+	if !ok {
+		log.Printf("download session not found: %s", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	var spec struct {
+		File string `json:"file_name"`
+	}
+
+	switch s.action(r) {
+	case "prepare":
+		if s.decode(r, w, &spec) {
+			u := url.URL{
+				Scheme: s.URL.Scheme,
+				Host:   s.URL.Host,
+				Path:   path.Join(internal.Path, internal.LibraryItemFileData, id, spec.File),
+			}
+			info := &library.DownloadFileInfo{
+				Name:             spec.File,
+				Status:           "PREPARED",
+				BytesTransferred: 0,
+				DownloadEndpoint: &library.SourceEndpoint{
+					URI: u.String(),
+				},
+			}
+			dl.File[spec.File] = info
+			s.ok(w, info)
+		}
+	case "get":
+		if s.decode(r, w, &spec) {
+			s.ok(w, dl.File[spec.File])
+		}
 	}
 }
 
@@ -908,14 +1067,36 @@ func libraryPath(l *library.Library, id string) string {
 	return path.Join(append([]string{ds, "contentlib-" + l.ID}, id)...)
 }
 
-func (s *handler) libraryItemAdd(w http.ResponseWriter, r *http.Request) {
+func (s *handler) libraryItemFileData(w http.ResponseWriter, r *http.Request) {
+	p := strings.Split(r.URL.Path, "/")
+	id, name := p[len(p)-2], p[len(p)-1]
+
+	if r.Method == http.MethodGet {
+		dl, ok := s.Download[id]
+		if !ok {
+			log.Printf("library download not found: %s", id)
+			http.NotFound(w, r)
+			return
+		}
+		p := path.Join(libraryPath(dl.Library, dl.Session.LibraryItemID), name)
+		f, err := os.Open(p)
+		if err != nil {
+			s.error(w, err)
+			return
+		}
+		_, err = io.Copy(w, f)
+		if err != nil {
+			log.Printf("copy %s: %s", p, err)
+		}
+		_ = f.Close()
+		return
+	}
+
 	if r.Method != http.MethodPut {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
 
-	p := strings.Split(r.URL.Path, "/")
-	id, name := p[len(p)-2], p[len(p)-1]
 	up := s.updateFileInfo(id)
 	if up == nil {
 		log.Printf("library update not found: %s", id)
@@ -923,7 +1104,7 @@ func (s *handler) libraryItemAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	dir := libraryPath(up.Library, up.UpdateSession.LibraryItemID)
+	dir := libraryPath(up.Library, up.Session.LibraryItemID)
 	if err := os.MkdirAll(dir, 0750); err != nil {
 		s.error(w, err)
 		return
@@ -947,7 +1128,7 @@ func (s *handler) libraryItemAdd(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	i := s.Library[up.Library.ID].Item[up.UpdateSession.LibraryItemID]
+	i := s.Library[up.Library.ID].Item[up.Session.LibraryItemID]
 	i.File = append(i.File, library.File{
 		Cached:  types.NewBool(true),
 		Name:    name,
@@ -1141,7 +1322,7 @@ func (s *handler) libraryItemDeployID(w http.ResponseWriter, r *http.Request) {
 					Category: "SERVER",
 					Error: &vcenter.Error{
 						Class: "com.vmware.vapi.std.errors.error",
-						Messages: []vcenter.LocalizableMessage{
+						Messages: []rest.LocalizableMessage{
 							{
 								DefaultMessage: err.Error(),
 							},

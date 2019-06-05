@@ -74,6 +74,20 @@ load test_helper
   assert_matches "$TTYLINUX_NAME.ovf"
   assert_matches "$TTYLINUX_NAME-disk1.vmdk"
 
+  run govc library.export "/my-content/$TTYLINUX_NAME/*.ovf" -
+  assert_success "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")"
+
+  name="$BATS_TMPDIR/govc-$id-export"
+  run govc library.export "/my-content/$TTYLINUX_NAME/*.ovf" "$name"
+  assert_equal "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")" "$(cat "$name")"
+  rm "$name"
+
+  mkdir "$name"
+  run govc library.export "/my-content/$TTYLINUX_NAME" "$name"
+  assert_success
+  assert_equal "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")" "$(cat "$name/$TTYLINUX_NAME.ovf")"
+  rm -r "$name"
+
   run govc library.import /my-content "$GOVC_IMAGES/$TTYLINUX_NAME.ovf"
   assert_failure # already_exists
 

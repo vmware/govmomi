@@ -36,6 +36,13 @@ type Client struct {
 	*soap.Client
 }
 
+// LocalizableMessage represents a localizable error
+type LocalizableMessage struct {
+	Args           []string `json:"args,omitempty"`
+	DefaultMessage string   `json:"default_message,omitempty"`
+	ID             string   `json:"id,omitempty"`
+}
+
 // NewClient creates a new Client instance.
 func NewClient(c *vim25.Client) *Client {
 	sc := c.Client.NewServiceClient(internal.Path, "")
