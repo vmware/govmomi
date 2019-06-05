@@ -138,7 +138,7 @@ func (cmd *ps) list(ctx context.Context) ([]types.GuestProcessInfo, error) {
 		}
 
 		if cmd.wait && running(procs) {
-			<-time.After(time.Millisecond * 250)
+			<-time.After(time.Second)
 			continue
 		}
 
