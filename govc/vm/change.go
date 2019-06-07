@@ -99,6 +99,8 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.Tools = &types.ToolsConfigInfo{}
 	f.Var(flags.NewOptionalBool(&cmd.Tools.SyncTimeWithHost), "sync-time-with-host", "Enable SyncTimeWithHost")
 	f.Var(flags.NewOptionalBool(&cmd.VPMCEnabled), "vpmc-enabled", "Enable CPU performance counters")
+	f.Var(flags.NewOptionalBool(&cmd.MemoryHotAddEnabled), "memory-hot-add-enabled", "Enable memory hot add")
+	f.Var(flags.NewOptionalBool(&cmd.CpuHotAddEnabled), "cpu-hot-add-enabled", "Enable CPU hot add")
 }
 
 func (cmd *change) Description() string {
@@ -110,7 +112,7 @@ Examples:
   govc vm.change -vm $vm -mem.reservation 2048
   govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE
   # Enable both cpu and memory hotplug on a guest:
-  govc vm.change -vm $vm -e vcpu.hotadd=true -e mem.hotadd=true
+  govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
   vmware-rpctool "info-get guestinfo.vmname"`
