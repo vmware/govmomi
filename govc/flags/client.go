@@ -234,12 +234,22 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (flag *ClientFlag) Process(ctx context.Context) error {
 	return flag.ProcessOnce(func() error {
-		if err := flag.DebugFlag.Process(ctx); err != nil {
+		err := flag.DebugFlag.Process(ctx)
+		if err != nil {
 			return err
 		}
 
 		if flag.url == nil {
 			return errors.New("specify an " + cDescr)
+		}
+
+		flag.username, err = session.Secret(flag.username)
+		if err != nil {
+			return err
+		}
+		flag.password, err = session.Secret(flag.password)
+		if err != nil {
+			return err
 		}
 
 		// Override username if set

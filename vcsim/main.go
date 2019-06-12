@@ -24,6 +24,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"os/signal"
 	"runtime"
@@ -34,6 +35,7 @@ import (
 	"github.com/google/uuid"
 	lookup "github.com/vmware/govmomi/lookup/simulator"
 	pbm "github.com/vmware/govmomi/pbm/simulator"
+	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
@@ -64,6 +66,8 @@ func main() {
 	key := flag.String("tlskey", "", "Path to TLS key file")
 	env := flag.String("E", "-", "Output vcsim variables to the given fifo or stdout")
 	listen := flag.String("l", "127.0.0.1:8989", "Listen address for vcsim")
+	user := flag.String("username", "", "Login username for vcsim (any username allowed by default)")
+	pass := flag.String("password", "", "Login password for vcsim (any password allowed by default)")
 	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
 	stdinExit := flag.Bool("stdinexit", false, "Press any key to exit")
@@ -73,8 +77,11 @@ func main() {
 	flag.Float64Var(&model.DelayConfig.DelayJitter, "delay-jitter", model.DelayConfig.DelayJitter, "Delay jitter coefficient of variation (tip: 0.5 is a good starting value)")
 
 	flag.Parse()
-
 	methodDelay := *methodDelayP
+	u := &url.URL{Host: *listen}
+	if *user != "" {
+		u.User = url.UserPassword(secret(user), secret(pass))
+	}
 
 	switch flag.Arg(0) {
 	case "uuidgen": // util-linux not installed on Travis CI
@@ -111,7 +118,7 @@ func main() {
 		}
 	}
 
-	if err = updateHostTemplate(*listen); err != nil {
+	if err = updateHostTemplate(u.Host); err != nil {
 		log.Fatal(err)
 	}
 
@@ -138,7 +145,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	model.Service.Listen = *listen
+	model.Service.Listen = u
 	if *isTLS {
 		model.Service.TLS = new(tls.Config)
 		if *cert != "" {
@@ -242,4 +249,12 @@ func updateHostTemplate(ip string) error {
 	}
 
 	return nil
+}
+
+func secret(s *string) string {
+	val, err := session.Secret(*s)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return val
 }
