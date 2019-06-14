@@ -298,6 +298,43 @@ load test_helper
   assert_equal "$USER" "$user"
 }
 
+@test "vcsim auth" {
+  vcsim_start -username nobody -password nothing
+
+  run govc ls
+  assert_success
+
+  run env GOVC_USERNAME=nobody GOVC_PASSWORD=nothing govc ls -u "$(govc env GOVC_URL)"
+  assert_success
+
+  run govc ls -u "user:pass@$(govc env GOVC_URL)"
+  assert_failure
+
+  run env GOVC_USERNAME=user GOVC_PASSWORD=pass govc ls -u "$(govc env GOVC_URL)"
+  assert_failure
+
+  vcsim_stop
+
+  dir=$(mktemp -d govc-test-XXXXX)
+  echo nobody > "$dir/username"
+  echo nothing > "$dir/password"
+
+  vcsim_start -username "$dir/username" -password "$dir/password"
+
+  run govc ls
+  assert_success
+
+  run env GOVC_USERNAME="$dir/username" GOVC_PASSWORD="$dir/password" govc ls -u "$(govc env GOVC_URL)"
+  assert_success
+
+  run govc ls -u "user:pass@$(govc env GOVC_URL)"
+  assert_failure
+
+  vcsim_stop
+
+  rm -rf "$dir"
+}
+
 @test "vcsim ovftool" {
   if ! ovftool -h >/dev/null ; then
     skip "requires ovftool"

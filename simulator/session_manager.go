@@ -75,15 +75,27 @@ func createSession(ctx *Context, name string, locale string) types.UserSession {
 	return ctx.Session.UserSession
 }
 
+func (s *SessionManager) validLogin(ctx *Context, req *types.Login) bool {
+	if ctx.Session != nil {
+		return false
+	}
+	user := ctx.svc.Listen.User
+	if user == nil {
+		return req.UserName != "" && req.Password != ""
+	}
+	pass, _ := user.Password()
+	return req.UserName == user.Username() && req.Password == pass
+}
+
 func (s *SessionManager) Login(ctx *Context, req *types.Login) soap.HasFault {
 	body := new(methods.LoginBody)
 
-	if req.UserName == "" || req.Password == "" || ctx.Session != nil {
-		body.Fault_ = invalidLogin
-	} else {
+	if s.validLogin(ctx, req) {
 		body.Res = &types.LoginResponse{
 			Returnval: createSession(ctx, req.UserName, req.Locale),
 		}
+	} else {
+		body.Fault_ = invalidLogin
 	}
 
 	return body
