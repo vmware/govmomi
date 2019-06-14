@@ -25,6 +25,7 @@ import (
 
 	"github.com/vmware/govmomi/lookup/methods"
 	"github.com/vmware/govmomi/lookup/types"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -52,7 +53,19 @@ type Client struct {
 
 // NewClient returns a client targeting the SSO Lookup Service API endpoint.
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
-	sc := c.Client.NewServiceClient(Path, Namespace)
+	// PSC may be external, attempt to derive from sts.uri
+	path := &url.URL{Path: Path}
+	m := object.NewOptionManager(c, *c.ServiceContent.Setting)
+	opts, err := m.Query(ctx, "config.vpxd.sso.sts.uri")
+	if err == nil && len(opts) == 1 {
+		u, err := url.Parse(opts[0].GetOptionValue().Value.(string))
+		if err == nil {
+			path.Scheme = u.Scheme
+			path.Host = u.Host
+		}
+	}
+
+	sc := c.Client.NewServiceClient(path.String(), Namespace)
 	sc.Version = Version
 
 	req := types.RetrieveServiceContent{

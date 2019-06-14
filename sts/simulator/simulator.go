@@ -36,6 +36,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		setting := settings[i].GetOptionValue()
 		if setting.Key == "config.vpxd.sso.sts.uri" {
 			endpoint, _ := url.Parse(setting.Value.(string))
+			endpoint.Scheme = u.Scheme
 			endpoint.Host = u.Host
 			setting.Value = endpoint.String()
 			settings[i] = setting
