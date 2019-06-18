@@ -288,7 +288,7 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 	if flag.cert != "" {
 		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
 		if err != nil {
-			return nil, err
+			return nil, fmt.Errorf("%s=%q %s=%q: %s", envCertificate, flag.cert, envPrivateKey, flag.key, err)
 		}
 
 		sc.SetCertificate(cert)
