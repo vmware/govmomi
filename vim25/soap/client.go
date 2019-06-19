@@ -441,6 +441,7 @@ type marshaledClient struct {
 	Cookies  []*http.Cookie
 	URL      *url.URL
 	Insecure bool
+	Version  string
 }
 
 func (c *Client) MarshalJSON() ([]byte, error) {
@@ -448,6 +449,7 @@ func (c *Client) MarshalJSON() ([]byte, error) {
 		Cookies:  c.Jar.Cookies(c.u),
 		URL:      c.u,
 		Insecure: c.k,
+		Version:  c.Version,
 	}
 
 	return json.Marshal(m)
@@ -462,6 +464,7 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	}
 
 	*c = *NewClient(m.URL, m.Insecure)
+	c.Version = m.Version
 	c.Jar.SetCookies(m.URL, m.Cookies)
 
 	return nil

@@ -59,6 +59,8 @@ func main() {
 	flag.IntVar(&model.Portgroup, "pg", model.Portgroup, "Number of port groups")
 	flag.IntVar(&model.Folder, "folder", model.Folder, "Number of folders")
 	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
+	v := &model.ServiceContent.About.ApiVersion
+	flag.StringVar(v, "api-version", *v, "API version")
 
 	isESX := flag.Bool("esx", false, "Simulate standalone ESX")
 	isTLS := flag.Bool("tls", true, "Enable TLS")

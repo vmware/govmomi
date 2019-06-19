@@ -25,6 +25,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -33,6 +34,7 @@ type about struct {
 	*flags.OutputFlag
 
 	Long bool
+	c    bool
 }
 
 func init() {
@@ -47,6 +49,7 @@ func (cmd *about) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.Long, "l", false, "Include service content")
+	f.BoolVar(&cmd.c, "c", false, "Include client info")
 }
 
 func (cmd *about) Description() string {
@@ -85,12 +88,17 @@ func (cmd *about) Run(ctx context.Context, f *flag.FlagSet) error {
 		res.About = res.a
 	}
 
+	if cmd.c {
+		res.Client = c.Client
+	}
+
 	return cmd.WriteResult(&res)
 }
 
 type infoResult struct {
 	Content *types.ServiceContent `json:",omitempty"`
 	About   *types.AboutInfo      `json:",omitempty"`
+	Client  *soap.Client          `json:",omitempty"`
 	a       *types.AboutInfo
 }
 

@@ -540,13 +540,11 @@ func (s *Service) ServeDatastore(w http.ResponseWriter, r *http.Request) {
 }
 
 // ServiceVersions handler for the /sdk/vimServiceVersions.xml path.
-func (*Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
-	// pyvmomi depends on this
-
+func (s *Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
 	const versions = xml.Header + `<namespaces version="1.0">
  <namespace>
   <name>urn:vim25</name>
-  <version>6.5</version>
+  <version>%s</version>
   <priorVersions>
    <version>6.0</version>
    <version>5.5</version>
@@ -554,7 +552,7 @@ func (*Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
  </namespace>
 </namespaces>
 `
-	fmt.Fprint(w, versions)
+	fmt.Fprintf(w, versions, s.client.ServiceContent.About.ApiVersion)
 }
 
 // defaultIP returns addr.IP if specified, otherwise attempts to find a non-loopback ipv4 IP
