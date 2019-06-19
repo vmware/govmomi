@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2019 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"os"
 	"strings"
 	"text/tabwriter"
@@ -51,6 +52,34 @@ func (cmd *info) Process(ctx context.Context) error {
 	return nil
 }
 
+type Info struct {
+	Device   string
+	Network  string
+	Switch   string
+	Address  string
+	Stack    string
+	Services []string
+}
+
+type infoResult struct {
+	Info []Info
+}
+
+func (i *infoResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+
+	for _, info := range i.Info {
+		fmt.Fprintf(tw, "Device:\t%s\n", info.Device)
+		fmt.Fprintf(tw, "Network label:\t%s\n", info.Network)
+		fmt.Fprintf(tw, "Switch:\t%s\n", info.Switch)
+		fmt.Fprintf(tw, "IP address:\t%s\n", info.Address)
+		fmt.Fprintf(tw, "TCP/IP stack:\t%s\n", info.Stack)
+		fmt.Fprintf(tw, "Enabled services:\t%s\n", strings.Join(info.Services, ", "))
+	}
+
+	return tw.Flush()
+}
+
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	host, err := cmd.HostSystem()
 	if err != nil {
@@ -69,7 +98,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	info, err := m.Info(ctx)
+	minfo, err := m.Info(ctx)
 	if err != nil {
 		return err
 	}
@@ -79,17 +108,16 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
-
 	type dnet struct {
 		dvp mo.DistributedVirtualPortgroup
 		dvs mo.VmwareDistributedVirtualSwitch
 	}
 
 	dnets := make(map[string]*dnet)
+	var res infoResult
 
 	for _, nic := range mns.NetworkInfo.Vnic {
-		fmt.Fprintf(tw, "Device:\t%s\n", nic.Device)
+		info := Info{Device: nic.Device}
 
 		if dvp := nic.Spec.DistributedVirtualPort; dvp != nil {
 			dn, ok := dnets[dvp.PortgroupKey]
@@ -114,33 +142,33 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 				dnets[dvp.PortgroupKey] = dn
 			}
 
-			fmt.Fprintf(tw, "Network label:\t%s\n", dn.dvp.Name)
-			fmt.Fprintf(tw, "Switch:\t%s\n", dn.dvs.Name)
+			info.Network = dn.dvp.Name
+			info.Switch = dn.dvs.Name
 		} else {
-			fmt.Fprintf(tw, "Network label:\t%s\n", nic.Portgroup)
+			info.Network = nic.Portgroup
 			for _, pg := range mns.NetworkInfo.Portgroup {
 				if pg.Spec.Name == nic.Portgroup {
-					fmt.Fprintf(tw, "Switch:\t%s\n", pg.Spec.VswitchName)
+					info.Switch = pg.Spec.VswitchName
 					break
 				}
 			}
 		}
 
-		fmt.Fprintf(tw, "IP address:\t%s\n", nic.Spec.Ip.IpAddress)
-		fmt.Fprintf(tw, "TCP/IP stack:\t%s\n", nic.Spec.NetStackInstanceKey)
+		info.Address = nic.Spec.Ip.IpAddress
+		info.Stack = nic.Spec.NetStackInstanceKey
 
-		var services []string
-		for _, nc := range info.NetConfig {
+		for _, nc := range minfo.NetConfig {
 			for _, dev := range nc.SelectedVnic {
 				key := nc.NicType + "." + nic.Key
 				if dev == key {
-					services = append(services, nc.NicType)
+					info.Services = append(info.Services, nc.NicType)
 				}
 			}
 
 		}
-		fmt.Fprintf(tw, "Enabled services:\t%s\n", strings.Join(services, ", "))
+
+		res.Info = append(res.Info, info)
 	}
 
-	return tw.Flush()
+	return cmd.WriteResult(&res)
 }
