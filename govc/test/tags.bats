@@ -128,6 +128,7 @@ load test_helper
 
   run govc tags.attached.ls "$tag_name"
   assert_success
+  [ ${#lines[@]} -eq 1 ]
 
   result=$(govc tags.attached.ls -r "$object")
   assert_matches "$result" "$tag_name"
