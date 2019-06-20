@@ -3,7 +3,7 @@
 load test_helper
 
 @test "about" {
-  vcsim_env -esx
+  vcsim_env -api-version uE53DA
 
   run govc about
   assert_success
@@ -27,6 +27,15 @@ load test_helper
 
   run govc about -dump -l
   assert_success
+
+  version=$(govc about -json -c | jq -r .Client.Version)
+  assert_equal 6.7 "$version" # govc's default version
+
+  version=$(govc about -json -c -vim-version "" | jq -r .Client.Version)
+  assert_equal uE53DA "$version" # vcsim's service version
+
+  version=$(govc about -json -c -vim-version 6.8.2 | jq -r .Client.Version)
+  assert_equal 6.8.2 "$version" # client specified version
 }
 
 @test "about.cert" {

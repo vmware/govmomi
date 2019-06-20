@@ -473,6 +473,13 @@ func (flag *ClientFlag) newClient() (*vim25.Client, error) {
 	// Set client, since we didn't pass it in the constructor
 	c.Client = sc
 
+	if flag.vimVersion == "" {
+		if err = c.UseServiceVersion(); err != nil {
+			return nil, err
+		}
+		flag.vimVersion = c.Version
+	}
+
 	if err := flag.Login(ctx, c); err != nil {
 		return nil, err
 	}
