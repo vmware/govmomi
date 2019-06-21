@@ -21,16 +21,20 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type ls struct {
 	*flags.DatacenterFlag
 	r bool
+	l bool
 }
 
 func init() {
@@ -41,6 +45,7 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
 	f.BoolVar(&cmd.r, "r", false, "List tags attached to resource")
+	f.BoolVar(&cmd.l, "l", false, "Long listing format")
 }
 
 func (cmd *ls) Usage() string {
@@ -66,35 +71,79 @@ func (r lsResult) Write(w io.Writer) error {
 	return nil
 }
 
-func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	if f.NArg() != 1 {
-		return flag.ErrHelp
-	}
-	arg := f.Arg(0)
+type lsTagResult []tags.AttachedTags
 
+func (r lsTagResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	for _, item := range r {
+		var ids []string
+		for _, id := range item.Tags {
+			ids = append(ids, id.Name)
+		}
+		fmt.Fprintf(tw, "%s:\t%s\n", item.ObjectID.Reference(), strings.Join(ids, ","))
+	}
+	return tw.Flush()
+}
+
+type lsObjectResult []tags.AttachedObjects
+
+func (r lsObjectResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	for _, item := range r {
+		for _, id := range item.ObjectIDs {
+			var ids []string
+			ids = append(ids, id.Reference().String())
+			fmt.Fprintf(tw, "%s:\t%s\n", item.Tag.Name, strings.Join(ids, ","))
+		}
+
+	}
+	return tw.Flush()
+}
+
+func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		var res lsResult
+		var res flags.OutputWriter
 		m := tags.NewManager(c)
 
 		if cmd.r {
-			ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
+			var refs []mo.Reference
+			for _, arg := range f.Args() {
+				ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
+				if err != nil {
+					return err
+				}
+				refs = append(refs, ref)
+			}
+			attached, err := m.GetAttachedTagsOnObjects(ctx, refs)
 			if err != nil {
 				return err
 			}
-			attached, err := m.GetAttachedTags(ctx, ref)
-			if err != nil {
-				return err
-			}
-			for i := range attached {
-				res = append(res, attached[i].Name)
+			if cmd.l {
+				res = lsTagResult(attached)
+			} else {
+				var r lsResult
+				for i := range attached {
+					for _, tag := range attached[i].Tags {
+						r = append(r, tag.Name)
+					}
+				}
+				res = r
 			}
 		} else {
-			attached, err := m.ListAttachedObjects(ctx, arg)
+			attached, err := m.GetAttachedObjectsOnTags(ctx, f.Args())
 			if err != nil {
 				return err
 			}
-			for i := range attached {
-				res = append(res, attached[i].Reference().String())
+			if cmd.l {
+				res = lsObjectResult(attached)
+			} else {
+				var r lsResult
+				for _, obj := range attached {
+					for _, ref := range obj.ObjectIDs {
+						r = append(r, ref.Reference().String())
+					}
+				}
+				res = r
 			}
 		}
 

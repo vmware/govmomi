@@ -504,7 +504,11 @@ func (s *handler) association(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var spec internal.Association
+	var spec struct {
+		internal.Association
+		TagIDs    []string                    `json:"tag_ids,omitempty"`
+		ObjectIDs []internal.AssociatedObject `json:"object_ids,omitempty"`
+	}
 	if !s.decode(r, w, &spec) {
 		return
 	}
@@ -518,6 +522,28 @@ func (s *handler) association(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		s.ok(w, ids)
+	case "list-attached-objects-on-tags":
+		var res []tags.AttachedObjects
+		for _, id := range spec.TagIDs {
+			o := tags.AttachedObjects{TagID: id}
+			for i := range s.Association[id] {
+				o.ObjectIDs = append(o.ObjectIDs, i)
+			}
+			res = append(res, o)
+		}
+		s.ok(w, res)
+	case "list-attached-tags-on-objects":
+		var res []tags.AttachedTags
+		for _, ref := range spec.ObjectIDs {
+			o := tags.AttachedTags{ObjectID: ref}
+			for id, objs := range s.Association {
+				if objs[ref] {
+					o.TagIDs = append(o.TagIDs, id)
+				}
+			}
+			res = append(res, o)
+		}
+		s.ok(w, res)
 	}
 }
 
