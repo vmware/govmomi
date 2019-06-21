@@ -135,7 +135,11 @@ load test_helper
   assert_success
   library_id="$output"
 
-  run govc library.import my-content "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  # link ovf/ova to datastore so we can test library.import with an http source
+  dir=$(govc datastore.info -json | jq -r .Datastores[].Info.Url)
+  ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
+
+  run govc library.import -pull my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
   assert_success
 
   run govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux
@@ -143,6 +147,12 @@ load test_helper
 
   run govc vm.info ttylinux
   assert_success
+
+  run govc library.import -pull -n ttylinux-unpacked my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  assert_success
+
+  item_id=$(govc library.info -json /my-content/ttylinux-unpacked | jq -r .[].id)
+  assert_equal "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")" "$(cat "$dir/contentlib-$library_id/$item_id/$TTYLINUX_NAME.ovf")"
 
   cat > "$BATS_TMPDIR/ttylinux.json" <<EOF
 {
