@@ -171,6 +171,17 @@ func (c *Client) AddUsersToGroup(ctx context.Context, groupName string, userIDs 
 	return err
 }
 
+func (c *Client) RemoveUsersFromGroup(ctx context.Context, groupName string, userIDs ...types.PrincipalId) error {
+	req := types.RemovePrincipalsFromLocalGroup{
+		This:          c.ServiceContent.PrincipalManagementService,
+		GroupName:     groupName,
+		PrincipalsIds: userIDs,
+	}
+
+	_, err := methods.RemovePrincipalsFromLocalGroup(ctx, c, &req)
+	return err
+}
+
 func (c *Client) CreateGroup(ctx context.Context, name string, details types.AdminGroupDetails) error {
 	req := types.CreateLocalGroup{
 		This:         c.ServiceContent.PrincipalManagementService,
@@ -179,6 +190,17 @@ func (c *Client) CreateGroup(ctx context.Context, name string, details types.Adm
 	}
 
 	_, err := methods.CreateLocalGroup(ctx, c, &req)
+	return err
+}
+
+func (c *Client) UpdateGroup(ctx context.Context, name string, details types.AdminGroupDetails) error {
+	req := types.UpdateLocalGroupDetails{
+		This:         c.ServiceContent.PrincipalManagementService,
+		GroupName:    name,
+		GroupDetails: details,
+	}
+
+	_, err := methods.UpdateLocalGroupDetails(ctx, c, &req)
 	return err
 }
 
@@ -284,6 +306,38 @@ func (c *Client) FindPersonUsers(ctx context.Context, search string) ([]types.Ad
 	}
 
 	res, err := methods.FindPersonUsers(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) FindGroup(ctx context.Context, name string) (*types.AdminGroup, error) {
+	req := types.FindGroup{
+		This:    c.ServiceContent.PrincipalDiscoveryService,
+		GroupId: c.parseID(name),
+	}
+
+	res, err := methods.FindGroup(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) FindGroups(ctx context.Context, search string) ([]types.AdminGroup, error) {
+	req := types.FindGroups{
+		This: c.ServiceContent.PrincipalDiscoveryService,
+		Criteria: types.AdminPrincipalDiscoveryServiceSearchCriteria{
+			Domain:       c.Domain,
+			SearchString: search,
+		},
+		Limit: c.Limit,
+	}
+
+	res, err := methods.FindGroups(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}

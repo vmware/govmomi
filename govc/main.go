@@ -75,6 +75,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/pool"
 	_ "github.com/vmware/govmomi/govc/role"
 	_ "github.com/vmware/govmomi/govc/session"
+	_ "github.com/vmware/govmomi/govc/sso/group"
 	_ "github.com/vmware/govmomi/govc/sso/service"
 	_ "github.com/vmware/govmomi/govc/sso/user"
 	_ "github.com/vmware/govmomi/govc/tags"

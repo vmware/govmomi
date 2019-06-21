@@ -21,6 +21,7 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/sso"
 	"github.com/vmware/govmomi/ssoadmin"
 	"github.com/vmware/govmomi/ssoadmin/types"
 )
@@ -55,7 +56,7 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	id := f.Arg(0)
 
-	return withClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {
+	return sso.WithClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {
 		user, err := c.FindUser(ctx, id)
 		if err != nil {
 			return err

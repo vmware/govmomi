@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package user
+package group
 
 import (
 	"context"
@@ -24,34 +24,43 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/sso"
 	"github.com/vmware/govmomi/ssoadmin"
+	"github.com/vmware/govmomi/ssoadmin/types"
 )
 
-type rm struct {
+type create struct {
 	*flags.ClientFlag
+
+	types.AdminGroupDetails
 }
 
-func init() {
-	cli.Register("sso.user.rm", &rm{})
-}
-
-func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
-}
-
-func (cmd *rm) Usage() string {
+func (cmd *create) Usage() string {
 	return "NAME"
 }
 
-func (cmd *rm) Description() string {
-	return `Remove SSO users.
+func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
 
-Examples:
-  govc sso.user.rm NAME`
+	f.StringVar(&cmd.AdminGroupDetails.Description, "d", "", "Group description")
 }
 
-func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
+func init() {
+	cli.Register("sso.group.create", &create{})
+}
+
+func (cmd *create) Description() string {
+	return `Create SSO group.
+
+Examples:
+  govc sso.group.create NAME`
+}
+
+func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
+
 	return sso.WithClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {
-		return c.DeletePrincipal(ctx, f.Arg(0))
+		return c.CreateGroup(ctx, f.Arg(0), cmd.AdminGroupDetails)
 	})
 }
