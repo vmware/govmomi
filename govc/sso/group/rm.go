@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package user
+package group
 
 import (
 	"context"
@@ -31,7 +31,7 @@ type rm struct {
 }
 
 func init() {
-	cli.Register("sso.user.rm", &rm{})
+	cli.Register("sso.group.rm", &rm{})
 }
 
 func (cmd *rm) Register(ctx context.Context, f *flag.FlagSet) {
@@ -44,10 +44,10 @@ func (cmd *rm) Usage() string {
 }
 
 func (cmd *rm) Description() string {
-	return `Remove SSO users.
+	return `Remove SSO group.
 
 Examples:
-  govc sso.user.rm NAME`
+  govc sso.group.rm NAME`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package user
+package group
 
 import (
 	"context"
@@ -33,12 +33,10 @@ import (
 type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
-
-	solution bool
 }
 
 func init() {
-	cli.Register("sso.user.ls", &ls{})
+	cli.Register("sso.group.ls", &ls{})
 }
 
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
@@ -47,15 +45,13 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
-
-	f.BoolVar(&cmd.solution, "s", false, "List solution users")
 }
 
 func (cmd *ls) Description() string {
-	return `List SSO users.
+	return `List SSO groups.
 
 Examples:
-  govc sso.user.ls -s`
+  govc sso.group.ls -s`
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -65,27 +61,13 @@ func (cmd *ls) Process(ctx context.Context) error {
 	return cmd.OutputFlag.Process(ctx)
 }
 
-type solutionResult []types.AdminSolutionUser
+type groupResult []types.AdminGroup
 
-func (r solutionResult) Dump() interface{} {
-	return []types.AdminSolutionUser(r)
+func (r groupResult) Dump() interface{} {
+	return []types.AdminGroup(r)
 }
 
-func (r solutionResult) Write(w io.Writer) error {
-	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
-	for _, info := range r {
-		fmt.Fprintf(tw, "%s\t%s\n", info.Id.Name, info.Details.Description)
-	}
-	return tw.Flush()
-}
-
-type personResult []types.AdminPersonUser
-
-func (r personResult) Dump() interface{} {
-	return []types.AdminPersonUser(r)
-}
-
-func (r personResult) Write(w io.Writer) error {
+func (r groupResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 	for _, info := range r {
 		fmt.Fprintf(tw, "%s\t%s\n", info.Id.Name, info.Details.Description)
@@ -97,20 +79,11 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	arg := f.Arg(0)
 
 	return sso.WithClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {
-		if cmd.solution {
-			info, err := c.FindSolutionUsers(ctx, arg)
-			if err != nil {
-				return err
-			}
-
-			return cmd.WriteResult(solutionResult(info))
-		}
-
-		info, err := c.FindPersonUsers(ctx, arg)
+		info, err := c.FindGroups(ctx, arg)
 		if err != nil {
 			return err
 		}
 
-		return cmd.WriteResult(personResult(info))
+		return cmd.WriteResult(groupResult(info))
 	})
 }
