@@ -543,3 +543,19 @@ func (m *Model) Run(f func(context.Context, *vim25.Client) error) error {
 
 	return f(ctx, c.Client)
 }
+
+// Example calls Model.Run for each model and will panic if f returns an error.
+// If no model is specified, the VPX Model is used by default.
+func Example(f func(context.Context, *vim25.Client) error, model ...*Model) {
+	m := model
+	if len(m) == 0 {
+		m = []*Model{VPX()}
+	}
+
+	for i := range m {
+		err := m[i].Run(f)
+		if err != nil {
+			panic(err)
+		}
+	}
+}
