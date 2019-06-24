@@ -59,3 +59,31 @@ func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {
 
 	return r
 }
+
+func (ds *Datastore) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
+	task := CreateTask(ds, "destroy", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		if len(ds.Vm) != 0 {
+			return nil, &types.ResourceInUse{
+				Type: ds.Self.Type,
+				Name: ds.Name,
+			}
+		}
+
+		for _, mount := range ds.Host {
+			host := Map.Get(mount.Key).(*HostSystem)
+			Map.RemoveReference(host, &host.Datastore, ds.Self)
+			parent := hostParent(&host.HostSystem)
+			Map.RemoveReference(parent, &parent.Datastore, ds.Self)
+		}
+
+		Map.Get(*ds.Parent).(*Folder).removeChild(ds.Self)
+
+		return nil, nil
+	})
+
+	return &methods.Destroy_TaskBody{
+		Res: &types.Destroy_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
