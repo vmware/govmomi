@@ -109,6 +109,8 @@ load test_helper
 
   run govc host.vnic.info
   assert_success
+
+  govc host.vnic.info -json | jq .
 }
 
 @test "host.vswitch.info" {
