@@ -187,6 +187,12 @@ func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) (
 	}
 
 	for _, arg := range args {
+		var ref types.ManagedObjectReference
+		if ref.FromString(arg) {
+			// e.g. output from object.collect
+			refs = append(refs, ref)
+			continue
+		}
 		elements, err := finder.ManagedObjectList(ctx, arg)
 		if err != nil {
 			return nil, err

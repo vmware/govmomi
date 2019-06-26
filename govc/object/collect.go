@@ -45,6 +45,7 @@ type collect struct {
 	single bool
 	simple bool
 	raw    string
+	delim  string
 	dump   bool
 	n      int
 	kind   kinds
@@ -63,6 +64,7 @@ func (cmd *collect) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.simple, "s", false, "Output property value only")
+	f.StringVar(&cmd.delim, "d", ",", "Delimiter for array values")
 	f.BoolVar(&cmd.dump, "O", false, "Output the CreateFilter request itself")
 	f.StringVar(&cmd.raw, "R", "", "Raw XML encoded CreateFilter request")
 	f.IntVar(&cmd.n, "n", 0, "Wait for N property updates")
@@ -158,7 +160,7 @@ func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
 				val = append(val, s)
 			}
 
-			s = strings.Join(val, ",")
+			s = strings.Join(val, pc.cmd.delim)
 		}
 	case reflect.Struct:
 		if rtype.Implements(stringer) {
