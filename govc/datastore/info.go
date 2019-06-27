@@ -36,6 +36,8 @@ type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 	*flags.DatacenterFlag
+
+	host bool
 }
 
 func init() {
@@ -51,6 +53,8 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.host, "H", false, "Display info for Datastores shared between hosts")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -70,11 +74,37 @@ func (cmd *info) Usage() string {
 	return "[PATH]..."
 }
 
+func (cmd *info) Description() string {
+	return `Display info for Datastores.
+
+Examples:
+  govc datastore.info
+  govc datastore.info vsanDatastore
+  # info on Datastores shared between cluster hosts:
+  govc object.collect -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
+  # info on Datastores shared between VM hosts:
+  govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc object.collect -s % summary.runtime.host | xargs govc datastore.info -H`
+}
+
+func intersect(common []types.ManagedObjectReference, refs []types.ManagedObjectReference) []types.ManagedObjectReference {
+	var shared []types.ManagedObjectReference
+	for i := range common {
+		for j := range refs {
+			if common[i] == refs[j] {
+				shared = append(shared, common[i])
+				break
+			}
+		}
+	}
+	return shared
+}
+
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.Client()
 	if err != nil {
 		return err
 	}
+	pc := property.DefaultCollector(c)
 
 	finder, err := cmd.Finder()
 	if err != nil {
@@ -95,12 +125,43 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		props = []string{"info", "summary"} // Load summary
 	}
 
-	for _, arg := range args {
-		objects, err := finder.DatastoreList(ctx, arg)
+	if cmd.host {
+		if f.NArg() == 0 {
+			return flag.ErrHelp
+		}
+		refs, err := cmd.ManagedObjects(ctx, args)
 		if err != nil {
 			return err
 		}
-		res.objects = append(res.objects, objects...)
+
+		var hosts []mo.HostSystem
+		err = pc.Retrieve(ctx, refs, []string{"name", "datastore"}, &hosts)
+		if err != nil {
+			return err
+		}
+
+		refs = hosts[0].Datastore
+		for _, host := range hosts[1:] {
+			refs = intersect(refs, host.Datastore)
+			if len(refs) == 0 {
+				return fmt.Errorf("host %s (%s) has no shared datastores", host.Name, host.Reference())
+			}
+		}
+		for i := range refs {
+			ds, err := finder.ObjectReference(ctx, refs[i])
+			if err != nil {
+				return err
+			}
+			res.objects = append(res.objects, ds.(*object.Datastore))
+		}
+	} else {
+		for _, arg := range args {
+			objects, err := finder.DatastoreList(ctx, arg)
+			if err != nil {
+				return err
+			}
+			res.objects = append(res.objects, objects...)
+		}
 	}
 
 	if len(res.objects) != 0 {
@@ -109,7 +170,6 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			refs = append(refs, o.Reference())
 		}
 
-		pc := property.DefaultCollector(c)
 		err = pc.Retrieve(ctx, refs, props, &res.Datastores)
 		if err != nil {
 			return err

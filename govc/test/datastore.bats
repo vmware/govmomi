@@ -109,7 +109,7 @@ upload_file() {
 }
 
 @test "datastore.info" {
-  vcsim_env -esx
+  vcsim_env
 
   run govc datastore.info enoent
   assert_failure
@@ -117,6 +117,25 @@ upload_file() {
   run govc datastore.info
   assert_success
   [ ${#lines[@]} -gt 1 ]
+
+  run govc datastore.info -H
+  assert_failure
+
+  cluster=$(dirname "$GOVC_RESOURCE_POOL")
+
+  hosts=($(govc object.collect -s -d $'\n' "$cluster" host))
+  run govc datastore.info -H "${hosts[@]}"
+  assert_success
+
+  run govc cluster.add -cluster "$cluster" -hostname test.example.com -username user -password pass
+  assert_success
+
+  run govc datastore.create -type local -name tmpds -path "$BATS_TMPDIR" test.example.com
+  assert_success
+
+  hosts=($(govc object.collect -s -d $'\n' "$cluster" host))
+  run govc datastore.info -H "${hosts[@]}"
+  assert_failure # host test.example.com hast no shared datastores
 }
 
 
