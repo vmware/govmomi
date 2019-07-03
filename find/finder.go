@@ -916,6 +916,13 @@ func (f *Finder) DefaultFolder(ctx context.Context) (*object.Folder, error) {
 	}
 	folder := object.NewFolder(f.client, ref.Reference())
 
+	// Set the InventoryPath of the newly created folder object
+	e, err := f.Element(ctx, folder.Reference())
+	if err != nil {
+		return nil, err
+	}
+	folder.SetInventoryPath(e.Path)
+
 	return folder, nil
 }
 
