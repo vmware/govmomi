@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -33,12 +34,14 @@ type StorageBackings struct {
 
 // Library  provides methods to create, read, update, delete, and enumerate libraries.
 type Library struct {
-	ID          string            `json:"id,omitempty"`
-	Description string            `json:"description,omitempty"`
-	Name        string            `json:"name,omitempty"`
-	Version     string            `json:"version,omitempty"`
-	Type        string            `json:"type,omitempty"`
-	Storage     []StorageBackings `json:"storage_backings,omitempty"`
+	CreationTime     *time.Time        `json:"creation_time,omitempty"`
+	Description      string            `json:"description,omitempty"`
+	ID               string            `json:"id,omitempty"`
+	LastModifiedTime *time.Time        `json:"last_modified_time,omitempty"`
+	Name             string            `json:"name,omitempty"`
+	Storage          []StorageBackings `json:"storage_backings,omitempty"`
+	Type             string            `json:"type,omitempty"`
+	Version          string            `json:"version,omitempty"`
 }
 
 // Patch merges updates from the given src.

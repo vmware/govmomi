@@ -70,13 +70,13 @@ type content struct {
 type update struct {
 	*library.Session
 	Library *library.Library
-	File    map[string]*library.UpdateFileInfo
+	File    map[string]*library.UpdateFile
 }
 
 type download struct {
 	*library.Session
 	Library *library.Library
-	File    map[string]*library.DownloadFileInfo
+	File    map[string]*library.DownloadFile
 }
 
 type handler struct {
@@ -814,7 +814,7 @@ func (s *handler) libraryItemUpdateSession(w http.ResponseWriter, r *http.Reques
 			s.Update[session.ID] = update{
 				Session: session,
 				Library: lib,
-				File:    make(map[string]*library.UpdateFileInfo),
+				File:    make(map[string]*library.UpdateFile),
 			}
 			s.ok(w, session.ID)
 		}
@@ -875,14 +875,14 @@ func (s *handler) libraryItemUpdateSessionFile(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	var files []*library.UpdateFileInfo
+	var files []*library.UpdateFile
 	for _, f := range up.File {
 		files = append(files, f)
 	}
 	s.ok(w, files)
 }
 
-func (s *handler) pullSource(up update, info *library.UpdateFileInfo) {
+func (s *handler) pullSource(up update, info *library.UpdateFile) {
 	done := func(err error) {
 		s.Lock()
 		info.Status = "READY"
@@ -932,7 +932,7 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 		}
 		if s.decode(r, w, &spec) {
 			id = uuid.New().String()
-			info := &library.UpdateFileInfo{
+			info := &library.UpdateFile{
 				Name:             spec.File.Name,
 				SourceType:       spec.File.SourceType,
 				Status:           "WAITING_FOR_TRANSFER",
@@ -945,9 +945,9 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 					Host:   s.URL.Host,
 					Path:   path.Join(internal.Path, internal.LibraryItemFileData, id, info.Name),
 				}
-				info.UploadEndpoint = library.SourceEndpoint{URI: u.String()}
+				info.UploadEndpoint = &library.TransferEndpoint{URI: u.String()}
 			case "PULL":
-				info.SourceEndpoint = *spec.File.SourceEndpoint
+				info.SourceEndpoint = spec.File.SourceEndpoint
 				go s.pullSource(up, info)
 			}
 			up.File[id] = info
@@ -1012,10 +1012,10 @@ func (s *handler) libraryItemDownloadSession(w http.ResponseWriter, r *http.Requ
 			s.Download[session.ID] = download{
 				Session: session,
 				Library: lib,
-				File:    make(map[string]*library.DownloadFileInfo),
+				File:    make(map[string]*library.DownloadFile),
 			}
 			for _, file := range files {
-				s.Download[session.ID].File[file.Name] = &library.DownloadFileInfo{
+				s.Download[session.ID].File[file.Name] = &library.DownloadFile{
 					Name:   file.Name,
 					Status: "UNPREPARED",
 				}
@@ -1066,7 +1066,7 @@ func (s *handler) libraryItemDownloadSessionFile(w http.ResponseWriter, r *http.
 		return
 	}
 
-	var files []*library.DownloadFileInfo
+	var files []*library.DownloadFile
 	for _, f := range dl.File {
 		files = append(files, f)
 	}
@@ -1099,11 +1099,11 @@ func (s *handler) libraryItemDownloadSessionFileID(w http.ResponseWriter, r *htt
 				Host:   s.URL.Host,
 				Path:   path.Join(internal.Path, internal.LibraryItemFileData, id, spec.File),
 			}
-			info := &library.DownloadFileInfo{
+			info := &library.DownloadFile{
 				Name:             spec.File,
 				Status:           "PREPARED",
 				BytesTransferred: 0,
-				DownloadEndpoint: &library.SourceEndpoint{
+				DownloadEndpoint: &library.TransferEndpoint{
 					URI: u.String(),
 				},
 			}

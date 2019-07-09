@@ -29,7 +29,6 @@ import (
 	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type deploy struct {
@@ -185,21 +184,17 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		cmd.FolderFlag.Log("Deploying library item...\n")
 
-		d, err := m.DeployLibraryItem(ctx, item.ID, deploy)
+		ref, err := m.DeployLibraryItem(ctx, item.ID, deploy)
 		if err != nil {
 			return err
 		}
 
-		if !d.Succeeded {
-			return d.Error
-		}
-
-		ref, err := finder.ObjectReference(ctx, types.ManagedObjectReference(*d.ResourceID))
+		obj, err := finder.ObjectReference(ctx, *ref)
 		if err != nil {
 			return err
 		}
 
-		vm := ref.(*object.VirtualMachine)
+		vm := obj.(*object.VirtualMachine)
 
 		return cmd.Deploy(vm, cmd.FolderFlag.OutputFlag)
 	})

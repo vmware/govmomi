@@ -23,6 +23,7 @@ import (
 
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/rest"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // AdditionalParams are additional OVF parameters which can be specified for a deployment target.
@@ -237,10 +238,18 @@ func NewManager(client *rest.Client) *Manager {
 }
 
 // DeployLibraryItem deploys a library OVF
-func (c *Manager) DeployLibraryItem(ctx context.Context, libraryItemID string, deploy Deploy) (Deployment, error) {
+func (c *Manager) DeployLibraryItem(ctx context.Context, libraryItemID string, deploy Deploy) (*types.ManagedObjectReference, error) {
 	url := internal.URL(c, internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("deploy")
 	var res Deployment
-	return res, c.Do(ctx, url.Request(http.MethodPost, deploy), &res)
+	err := c.Do(ctx, url.Request(http.MethodPost, deploy), &res)
+	if err != nil {
+		return nil, err
+	}
+	if res.Succeeded {
+		ref := types.ManagedObjectReference(*res.ResourceID)
+		return &ref, nil
+	}
+	return nil, res.Error
 }
 
 // FilterLibraryItem deploys a library OVF

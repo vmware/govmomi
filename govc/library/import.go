@@ -193,7 +193,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 				Name:       name,
 				SourceType: "PUSH",
 				Checksum:   manifest[name],
-				Size:       &size,
+				Size:       size,
 			}
 
 			update, err := m.AddLibraryItemFile(ctx, session, info)

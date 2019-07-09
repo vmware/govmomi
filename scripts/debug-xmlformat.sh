@@ -16,8 +16,12 @@ xmlformat() {
   xmlstarlet fo
 }
 
-for file in *.req.{xml,json}; do
+for file in *.req.*; do
     ext=${file##*.}
+    if [ "$ext" = "headers" ] ; then
+        continue
+    fi
+
     base=$(basename "$file" ".req.$ext")
     header Request "$file" "${base}.req.headers"
     format=xmlformat

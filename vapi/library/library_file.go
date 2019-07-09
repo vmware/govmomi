@@ -26,7 +26,7 @@ import (
 // Checksum provides checksum information on library item files.
 type Checksum struct {
 	Algorithm string `json:"algorithm,omitempty"`
-	Checksum  string `json:"checksum,omitempty"`
+	Checksum  string `json:"checksum"`
 }
 
 // File provides methods to get information on library item files.
