@@ -109,6 +109,7 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(c *types.CreateLocalDatasto
 
 	ds.Summary.Type = string(types.HostFileSystemVolumeFileSystemTypeOTHER)
 	ds.Summary.MaintenanceMode = string(types.DatastoreSummaryMaintenanceModeStateNormal)
+	ds.Summary.Accessible = true
 
 	if err := dss.add(ds); err != nil {
 		r.Fault_ = err
@@ -156,6 +157,7 @@ func (dss *HostDatastoreSystem) CreateNasDatastore(c *types.CreateNasDatastore) 
 
 	ds.Summary.Type = c.Spec.Type
 	ds.Summary.MaintenanceMode = string(types.DatastoreSummaryMaintenanceModeStateNormal)
+	ds.Summary.Accessible = true
 
 	if err := dss.add(ds); err != nil {
 		r.Fault_ = err
