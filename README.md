@@ -83,6 +83,8 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [Open Storage](https://github.com/libopenstorage/openstorage/tree/master/pkg/storageops/vsphere)
 
+* [Juju](https://github.com/juju/juju)
+
 ## Related projects
 
 * [rbvmomi](https://github.com/vmware/rbvmomi)
