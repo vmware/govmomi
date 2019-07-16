@@ -151,8 +151,9 @@ func (this *GlobalObjectManager) RegisterDisk(ctx context.Context, path string, 
 
 func (this *GlobalObjectManager) ExtendDisk(ctx context.Context, id vim.ID, newCapacityInMB int64) (*Task, error) {
 	req := types.VslmExtendDisk_Task{
-		This: this.Reference(),
-		Id:   id,
+		This:            this.Reference(),
+		Id:              id,
+		NewCapacityInMB: newCapacityInMB,
 	}
 
 	res, err := methods.VslmExtendDisk_Task(ctx, this.c, &req)
