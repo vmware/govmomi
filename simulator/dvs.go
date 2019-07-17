@@ -69,6 +69,20 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 			if pg.Config.DefaultPortConfig == nil {
 				pg.Config.DefaultPortConfig = &types.VMwareDVSPortSetting{
 					Vlan: new(types.VmwareDistributedVirtualSwitchVlanIdSpec),
+					UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
+						Policy: &types.StringPolicy{
+							Value: "loadbalance_srcid",
+						},
+						ReversePolicy: &types.BoolPolicy{
+							Value: types.NewBool(true),
+						},
+						NotifySwitches: &types.BoolPolicy{
+							Value: types.NewBool(true),
+						},
+						RollingOrder: &types.BoolPolicy{
+							Value: types.NewBool(true),
+						},
+					},
 				}
 			}
 

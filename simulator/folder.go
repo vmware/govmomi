@@ -547,6 +547,20 @@ func (f *Folder) CreateDVSTask(req *types.CreateDVS_Task) soap.HasFault {
 					Vlan: &types.VmwareDistributedVirtualSwitchTrunkVlanSpec{
 						VlanId: []types.NumericRange{{Start: 0, End: 4094}},
 					},
+					UplinkTeamingPolicy: &types.VmwareUplinkPortTeamingPolicy{
+						Policy: &types.StringPolicy{
+							Value: "loadbalance_srcid",
+						},
+						ReversePolicy: &types.BoolPolicy{
+							Value: types.NewBool(true),
+						},
+						NotifySwitches: &types.BoolPolicy{
+							Value: types.NewBool(true),
+						},
+						RollingOrder: &types.BoolPolicy{
+							Value: types.NewBool(true),
+						},
+					},
 				},
 			}},
 		})
