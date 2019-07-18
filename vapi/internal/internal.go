@@ -42,6 +42,7 @@ const (
 	VCenterOVFLibraryItem          = "/com/vmware/vcenter/ovf/library-item"
 	VCenterVMTXLibraryItem         = "/vcenter/vm-template/library-items"
 	VCenterVM                      = "/vcenter/vm"
+	ComputePolicyPath              = "/vcenter/compute/policies"
 	SessionCookieName              = "vmware-api-session-id"
 )
 
