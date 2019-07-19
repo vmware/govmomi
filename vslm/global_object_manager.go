@@ -49,7 +49,7 @@ func (this *Task) QueryResult(ctx context.Context) (vim.AnyType, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &res.Returnval, nil
+	return res.Returnval, nil
 }
 
 func (this *Task) QueryInfo(ctx context.Context) (*types.VslmTaskInfo, error) {
