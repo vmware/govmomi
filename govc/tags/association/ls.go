@@ -108,7 +108,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.r {
 			var refs []mo.Reference
 			for _, arg := range f.Args() {
-				ref, err := convertPath(ctx, cmd.DatacenterFlag, arg)
+				ref, err := convertPath(ctx, c, cmd.DatacenterFlag, arg)
 				if err != nil {
 					return err
 				}
