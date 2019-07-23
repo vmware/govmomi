@@ -22,6 +22,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vapi/library"
+	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vim25/types"
@@ -55,7 +57,7 @@ Examples:
   govc tags.attach -c k8s-region us-ca1 /dc1/host/cluster1`
 }
 
-func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj string) (*types.ManagedObjectReference, error) {
+func convertPath(ctx context.Context, c *rest.Client, cmd *flags.DatacenterFlag, managedObj string) (*types.ManagedObjectReference, error) {
 	client, err := cmd.ClientFlag.Client()
 	if err != nil {
 		return nil, err
@@ -68,7 +70,19 @@ func convertPath(ctx context.Context, cmd *flags.DatacenterFlag, managedObj stri
 	default:
 		ref, err = cmd.ManagedObject(ctx, managedObj)
 		if err != nil {
-			return nil, err
+			m := library.NewManager(c)
+			res, _ := finder.NewFinder(m).Find(ctx, managedObj)
+			if len(res) != 1 {
+				return nil, err
+			}
+			switch t := res[0].GetResult().(type) {
+			case library.Library:
+				ref = types.ManagedObjectReference{Type: "com.vmware.content.Library", Value: t.ID}
+			case library.Item:
+				ref = types.ManagedObjectReference{Type: "com.vmware.content.library.Item", Value: t.ID}
+			default:
+				return nil, err
+			}
 		}
 	}
 	return &ref, nil
@@ -83,7 +97,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	managedObj := f.Arg(1)
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		ref, err := convertPath(ctx, cmd.DatacenterFlag, managedObj)
+		ref, err := convertPath(ctx, c, cmd.DatacenterFlag, managedObj)
 		if err != nil {
 			return err
 		}

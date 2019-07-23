@@ -22,6 +22,34 @@ load test_helper
   assert_success
   assert_matches "$id"
 
+  # test tags attach,ls,detach for libraries
+  run govc tags.category.create -m "$(new_id)"
+  assert_success
+  category="$output"
+
+  tag_name=$(new_id)
+  run govc tags.create -c "$category" "$tag_name"
+  assert_success
+  tag=$output
+
+  run govc tags.attach "$tag" /my-content
+  assert_success
+
+  run govc tags.attached.ls "$tag_name"
+  assert_success "com.vmware.content.Library:$id"
+
+  run govc tags.attached.ls -r /my-content
+  assert_success "$tag_name"
+
+  run govc tags.attached.ls -r "com.vmware.content.Library:$id"
+  assert_success "$tag_name"
+
+  run govc tags.detach "$tag" /my-content
+  assert_success
+
+  run govc tags.attached.ls "$tag_name"
+  assert_success ""
+
   run govc library.rm /my-content
   assert_success
 }
