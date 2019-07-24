@@ -18,15 +18,13 @@ package library
 
 import (
 	"bufio"
-	"bytes"
 	"context"
-	"crypto/sha1"
-	"fmt"
 	"io"
 	"net/http"
 	"strings"
 
 	"github.com/vmware/govmomi/vapi/internal"
+	"github.com/vmware/govmomi/vim25/soap"
 )
 
 // SourceEndpoint provides information on the source of a library item file.
@@ -117,15 +115,13 @@ func (c *Manager) getContentLengthAndFingerprint(
 	if resp.TLS == nil || len(resp.TLS.PeerCertificates) == 0 {
 		return resp.ContentLength, "", nil
 	}
-	fingerprint := &bytes.Buffer{}
-	sum := sha1.Sum(resp.TLS.PeerCertificates[0].Raw)
-	for i, b := range sum {
-		fmt.Fprintf(fingerprint, "%X", b)
-		if i < len(sum)-1 {
-			fmt.Fprint(fingerprint, ":")
+	fingerprint := c.Thumbprint(resp.Request.URL.Host)
+	if fingerprint == "" {
+		if c.Transport.(*http.Transport).TLSClientConfig.InsecureSkipVerify {
+			fingerprint = soap.ThumbprintSHA1(resp.TLS.PeerCertificates[0])
 		}
 	}
-	return resp.ContentLength, fingerprint.String(), nil
+	return resp.ContentLength, fingerprint, nil
 }
 
 // ReadManifest converts an ovf manifest to a map of file name -> Checksum.
