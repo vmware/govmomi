@@ -62,6 +62,8 @@ but appear via `govc $cmd -h`:
  - [datastore.download](#datastoredownload)
  - [datastore.info](#datastoreinfo)
  - [datastore.ls](#datastorels)
+ - [datastore.maintenance.enter](#datastoremaintenanceenter)
+ - [datastore.maintenance.exit](#datastoremaintenanceexit)
  - [datastore.mkdir](#datastoremkdir)
  - [datastore.mv](#datastoremv)
  - [datastore.remove](#datastoreremove)
@@ -175,6 +177,15 @@ but appear via `govc $cmd -h`:
  - [import.ovf](#importovf)
  - [import.spec](#importspec)
  - [import.vmdk](#importvmdk)
+ - [library.create](#librarycreate)
+ - [library.deploy](#librarydeploy)
+ - [library.export](#libraryexport)
+ - [library.import](#libraryimport)
+ - [library.info](#libraryinfo)
+ - [library.ls](#libraryls)
+ - [library.rm](#libraryrm)
+ - [library.session.ls](#librarysessionls)
+ - [library.session.rm](#librarysessionrm)
  - [license.add](#licenseadd)
  - [license.assign](#licenseassign)
  - [license.assigned.ls](#licenseassignedls)
@@ -221,6 +232,10 @@ but appear via `govc $cmd -h`:
  - [snapshot.remove](#snapshotremove)
  - [snapshot.revert](#snapshotrevert)
  - [snapshot.tree](#snapshottree)
+ - [sso.group.create](#ssogroupcreate)
+ - [sso.group.ls](#ssogroupls)
+ - [sso.group.rm](#ssogrouprm)
+ - [sso.group.update](#ssogroupupdate)
  - [sso.service.ls](#ssoservicels)
  - [sso.user.create](#ssousercreate)
  - [sso.user.id](#ssouserid)
@@ -288,6 +303,7 @@ Examples:
   govc about -json | jq -r .About.ProductLineId
 
 Options:
+  -c=false               Include client info
   -l=false               Include service content
 ```
 
@@ -642,6 +658,12 @@ Options:
 ```
 Usage: govc datastore.cluster.info [OPTIONS] [PATH]...
 
+Display datastore cluster info.
+
+Examples:
+  govc datastore.cluster.info
+  govc datastore.cluster.info MyDatastoreCluster
+
 Options:
 ```
 
@@ -784,7 +806,18 @@ Options:
 ```
 Usage: govc datastore.info [OPTIONS] [PATH]...
 
+Display info for Datastores.
+
+Examples:
+  govc datastore.info
+  govc datastore.info vsanDatastore
+  # info on Datastores shared between cluster hosts:
+  govc object.collect -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
+  # info on Datastores shared between VM hosts:
+  govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc object.collect -s % summary.runtime.host | xargs govc datastore.info -H
+
 Options:
+  -H=false               Display info for Datastores shared between hosts
 ```
 
 ## datastore.ls
@@ -798,6 +831,34 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -l=false               Long listing format
   -p=false               Append / indicator to directories
+```
+
+## datastore.maintenance.enter
+
+```
+Usage: govc datastore.maintenance.enter [OPTIONS] DATASTORE
+
+Put DATASTORE in maintenance mode.
+
+Examples:
+  govc datastore.cluster.change -drs-mode automated my-datastore-cluster # automatically schedule Storage DRS migration
+  govc datastore.maintenance.enter -ds my-datastore-cluster/datastore1
+  # no virtual machines can be powered on and no provisioning operations can be performed on the datastore during this time
+  govc datastore.maintenance.exit -ds my-datastore-cluster/datastore1
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
+```
+
+## datastore.maintenance.exit
+
+```
+Usage: govc datastore.maintenance.exit [OPTIONS] DATASTORE
+
+Take DATASTORE out of maintenance mode.
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
 ## datastore.mkdir
@@ -1271,6 +1332,8 @@ Examples:
   govc disk.ls -c k8s-region -t us-west-2
 
 Options:
+  -L=false               Print disk backing path instead of disk name
+  -R=false               Reconcile the datastore inventory info
   -T=false               List attached tags
   -c=                    Query tag category
   -ds=                   Datastore [GOVC_DATASTORE]
@@ -2629,6 +2692,168 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
+## library.create
+
+```
+Usage: govc library.create [OPTIONS] NAME
+
+Create library.
+
+Examples:
+  govc library.create library_name
+  govc library.create -json | jq .
+  govc library.create library_name -json | jq .
+
+Options:
+  -d=                    Description of library
+  -ds=                   Datastore [GOVC_DATASTORE]
+```
+
+## library.deploy
+
+```
+Usage: govc library.deploy [OPTIONS] TEMPLATE [NAME]
+
+Deploy library OVF template.
+
+Examples:
+  govc library.deploy /library_name/ovf_template vm_name
+  govc library.deploy /library_name/ovf_template -options deploy.json
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -host=                 Host system [GOVC_HOST]
+  -options=              Options spec file path for VM deployment
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+```
+
+## library.export
+
+```
+Usage: govc library.export [OPTIONS] PATH [DEST]
+
+Export library items.
+
+If the given PATH is a library item, all files will be downloaded.
+
+If the given PATH is a library item file, only that file will be downloaded.
+
+By default, files are saved using the library item's file names to the current directory.
+If DEST is given for a library item, files are saved there instead of the current directory.
+If DEST is given for a library item file, the file will be saved with that name.
+If DEST is '-', the file contents are written to stdout instead of saving to a file.
+
+Examples:
+  govc library.export library_name/item_name
+  govc library.export library_name/item_name/file_name
+  govc library.export library_name/item_name/*.ovf -
+
+Options:
+```
+
+## library.import
+
+```
+Usage: govc library.import [OPTIONS] LIBRARY ITEM
+
+Import library items.
+
+Examples:
+  govc library.import library_name file.ova
+  govc library.import library_name file.ovf
+  govc library.import library_name file.iso
+  govc library.import library_name/item_name file.ova # update existing item
+  govc library.import library_name http://example.com/file.ovf # download and push to vCenter
+  govc library.import -pull library_name http://example.com/file.ova # direct pull from vCenter
+
+Options:
+  -m=false               Require ova manifest
+  -n=                    Library item name
+  -pull=false            Pull library item from http endpoint
+  -t=                    Library item type
+```
+
+## library.info
+
+```
+Usage: govc library.info [OPTIONS]
+
+Display library information.
+
+Examples:
+  govc library.info
+  govc library.info /lib1
+  govc library.info /lib1/item1
+  govc library.info /lib1/item1/
+  govc library.info */
+  govc library.info -json | jq .
+  govc library.info /lib1/item1 -json | jq .
+
+Options:
+```
+
+## library.ls
+
+```
+Usage: govc library.ls [OPTIONS]
+
+List libraries, items, and files.
+
+Examples:
+  govc library.ls
+  govc library.ls /lib1
+  govc library.ls /lib1/item1
+  govc library.ls /lib1/item1/
+  govc library.ls */
+  govc library.ls -json | jq .
+  govc library.ls /lib1/item1 -json | jq .
+
+Options:
+```
+
+## library.rm
+
+```
+Usage: govc library.rm [OPTIONS] NAME
+
+Delete library or item NAME.
+
+Examples:
+  govc library.rm /library_name
+  govc library.rm /library_name/item_name
+
+Options:
+```
+
+## library.session.ls
+
+```
+Usage: govc library.session.ls [OPTIONS]
+
+List library item update sessions.
+
+Examples:
+  govc library.session.ls
+  govc library.session.ls -json | jq .
+
+Options:
+```
+
+## library.session.rm
+
+```
+Usage: govc library.session.rm [OPTIONS]
+
+Remove a library item update session.
+
+Examples:
+  govc library.session.rm session_id
+
+Options:
+  -f=false               Cancel session if active
+```
+
 ## license.add
 
 ```
@@ -2746,7 +2971,7 @@ Examples:
   govc logs.download host-a host-b
 
 Options:
-  -default=true          Specifies if the bundle should include the default server
+  -default=false         Specifies if the bundle should include the default server
 ```
 
 ## logs.ls
@@ -2949,13 +3174,13 @@ Examples:
   govc object.collect -R create-filter-request.xml # replay filter
   govc object.collect -R create-filter-request.xml -O # convert filter to Go code
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
-  govc object.collect -json -type m / config.hardware.device | \ # use -json + jq to search array elements
-    jq -r '. | select(.ChangeSet[].Val.VirtualDevice[].MacAddress == "00:50:56:bc:5e:3c") | \
-    [.Obj.Type, .Obj.Value] | join(":")' | xargs govc ls -L
+  govc object.collect -json $vm config | \ # use -json + jq to search array elements
+    jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'
 
 Options:
   -O=false               Output the CreateFilter request itself
   -R=                    Raw XML encoded CreateFilter request
+  -d=,                   Delimiter for array values
   -n=0                   Wait for N property updates
   -s=false               Output property value only
   -type=[]               Resource type.  If specified, MOID is used for a container view root
@@ -3094,6 +3319,7 @@ Examples:
   govc permissions.remove -principal $USER@vsphere.local /dc1/host/cluster1
 
 Options:
+  -f=false               Ignore NotFound fault if permission for this entity and user or group does not exist
   -group=false           True, if principal refers to a group name; false, for a user name
   -i=false               Use moref instead of inventory path
   -principal=            User or group for which the permission is defined
@@ -3483,6 +3709,64 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
+## sso.group.create
+
+```
+Usage: govc sso.group.create [OPTIONS] NAME
+
+Create SSO group.
+
+Examples:
+  govc sso.group.create NAME
+
+Options:
+  -d=                    Group description
+```
+
+## sso.group.ls
+
+```
+Usage: govc sso.group.ls [OPTIONS]
+
+List SSO groups.
+
+Examples:
+  govc sso.group.ls -s
+
+Options:
+```
+
+## sso.group.rm
+
+```
+Usage: govc sso.group.rm [OPTIONS] NAME
+
+Remove SSO group.
+
+Examples:
+  govc sso.group.rm NAME
+
+Options:
+```
+
+## sso.group.update
+
+```
+Usage: govc sso.group.update [OPTIONS]
+
+Update SSO group.
+
+Examples:
+  govc sso.group.update -d "Group description" NAME
+  govc sso.group.update -a user1 NAME
+  govc sso.group.update -r user2 NAME
+
+Options:
+  -a=                    Add user to group
+  -d=                    Group description
+  -r=                    Remove user from group
+```
+
 ## sso.service.ls
 
 ```
@@ -3623,6 +3907,7 @@ Examples:
   govc tags.attached.ls -json -r /dc1 | jq .
 
 Options:
+  -l=false               Long listing format
   -r=false               List tags attached to resource
 ```
 
@@ -3899,27 +4184,30 @@ Examples:
   govc vm.change -vm $vm -mem.reservation 2048
   govc vm.change -vm $vm -e smc.present=TRUE -e ich7m.present=TRUE
   # Enable both cpu and memory hotplug on a guest:
-  govc vm.change -vm $vm -e vcpu.hotadd=true -e mem.hotadd=true
+  govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
   vmware-rpctool "info-get guestinfo.vmname"
 
 Options:
-  -annotation=                VM description
-  -c=0                        Number of CPUs
-  -cpu.limit=<nil>            CPU limit in MHz
-  -cpu.reservation=<nil>      CPU reservation in MHz
-  -cpu.shares=                CPU shares level or number
-  -e=[]                       ExtraConfig. <key>=<value>
-  -g=                         Guest OS
-  -m=0                        Size in MB of memory
-  -mem.limit=<nil>            Memory limit in MB
-  -mem.reservation=<nil>      Memory reservation in MB
-  -mem.shares=                Memory shares level or number
-  -name=                      Display name
-  -nested-hv-enabled=<nil>    Enable nested hardware-assisted virtualization
-  -sync-time-with-host=<nil>  Enable SyncTimeWithHost
-  -vm=                        Virtual machine [GOVC_VM]
+  -annotation=                   VM description
+  -c=0                           Number of CPUs
+  -cpu-hot-add-enabled=<nil>     Enable CPU hot add
+  -cpu.limit=<nil>               CPU limit in MHz
+  -cpu.reservation=<nil>         CPU reservation in MHz
+  -cpu.shares=                   CPU shares level or number
+  -e=[]                          ExtraConfig. <key>=<value>
+  -g=                            Guest OS
+  -m=0                           Size in MB of memory
+  -mem.limit=<nil>               Memory limit in MB
+  -mem.reservation=<nil>         Memory reservation in MB
+  -mem.shares=                   Memory shares level or number
+  -memory-hot-add-enabled=<nil>  Enable memory hot add
+  -name=                         Display name
+  -nested-hv-enabled=<nil>       Enable nested hardware-assisted virtualization
+  -sync-time-with-host=<nil>     Enable SyncTimeWithHost
+  -vm=                           Virtual machine [GOVC_VM]
+  -vpmc-enabled=<nil>            Enable CPU performance counters
 ```
 
 ## vm.clone

@@ -1,5 +1,21 @@
 # changelog
 
+### 0.21.0 (2019-07-24)
+
+* Add datastore.info -H flag
+
+* Add host.vnic.info -json support
+
+* Add vm.change hot-add options
+
+* Add sso.group commands
+
+* Add vm.change '-vpmc-enabled' flag
+
+* Add datastore.maintenance.{enter,exit} commands
+
+* Add library commands
+
 ### 0.20.0 (2019-02-06)
 
 * Add license.label.set command

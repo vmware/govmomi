@@ -1,5 +1,13 @@
 # changelog
 
+### 0.21.0 (2019-07-24)
+
+* Add vsan package
+
+* Add vslm (FCD) global catalog support
+
+* Add content library support
+
 ### 0.20.0 (2019-02-06)
 
 * Add vslm package for managing First Class Disks
