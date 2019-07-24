@@ -20,26 +20,27 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/vmware/govmomi/vapi/internal"
 )
 
 // Item provides methods to create, read, update, delete, and enumerate library items.
 type Item struct {
-	Cached           bool   `json:"cached,omitempty"`
-	ContentVersion   string `json:"content_version,omitempty"`
-	CreationTime     string `json:"creation_time,omitempty"`
-	Description      string `json:"description,omitempty"`
-	ID               string `json:"id,omitempty"`
-	LastModifiedTime string `json:"last_modified_time,omitempty"`
-	LastSyncTime     string `json:"last_sync_time,omitempty"`
-	LibraryID        string `json:"library_id,omitempty"`
-	MetadataVersion  string `json:"metadata_version,omitempty"`
-	Name             string `json:"name,omitempty"`
-	Size             int64  `json:"size,omitempty"`
-	SourceID         string `json:"source_id,omitempty"`
-	Type             string `json:"type,omitempty"`
-	Version          string `json:"version,omitempty"`
+	Cached           bool       `json:"cached,omitempty"`
+	ContentVersion   string     `json:"content_version,omitempty"`
+	CreationTime     *time.Time `json:"creation_time,omitempty"`
+	Description      string     `json:"description,omitempty"`
+	ID               string     `json:"id,omitempty"`
+	LastModifiedTime *time.Time `json:"last_modified_time,omitempty"`
+	LastSyncTime     *time.Time `json:"last_sync_time,omitempty"`
+	LibraryID        string     `json:"library_id,omitempty"`
+	MetadataVersion  string     `json:"metadata_version,omitempty"`
+	Name             string     `json:"name,omitempty"`
+	Size             int64      `json:"size,omitempty"`
+	SourceID         string     `json:"source_id,omitempty"`
+	Type             string     `json:"type,omitempty"`
+	Version          string     `json:"version,omitempty"`
 }
 
 // Patch merges updates from the given src.

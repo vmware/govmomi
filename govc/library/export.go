@@ -166,16 +166,12 @@ func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		for _, name := range names {
-			var info *library.DownloadFileInfo
+			var info *library.DownloadFile
 			_, _ = fmt.Fprintf(log, "Checking %s... ", name)
 			for {
 				info, err = m.GetLibraryItemDownloadSessionFile(ctx, session, name)
 				if err != nil {
 					return err
-				}
-				if info.Status == "ERROR" {
-					_, _ = fmt.Fprintln(log, info.Status)
-					return fmt.Errorf("preparing %s: %v", name, info.ErrorMessage)
 				}
 				if info.Status == "PREPARED" {
 					_, _ = fmt.Fprintln(log, info.Status)

@@ -27,13 +27,13 @@ import (
 
 // Session is used to create an initial update or download session
 type Session struct {
-	ID                        string                   `json:"id,omitempty"`
-	LibraryItemID             string                   `json:"library_item_id,omitempty"`
-	LibraryItemContentVersion string                   `json:"library_item_content_version,omitempty"`
-	ErrorMessage              *rest.LocalizableMessage `json:"error_message,omitempty"`
 	ClientProgress            int64                    `json:"client_progress,omitempty"`
-	State                     string                   `json:"state,omitempty"`
+	ErrorMessage              *rest.LocalizableMessage `json:"error_message,omitempty"`
 	ExpirationTime            *time.Time               `json:"expiration_time,omitempty"`
+	ID                        string                   `json:"id,omitempty"`
+	LibraryItemContentVersion string                   `json:"library_item_content_version,omitempty"`
+	LibraryItemID             string                   `json:"library_item_id,omitempty"`
+	State                     string                   `json:"state,omitempty"`
 }
 
 // CreateLibraryItemUpdateSession creates a new library item
@@ -104,6 +104,9 @@ func (c *Manager) WaitOnLibraryItemUpdateSession(
 		}
 
 		if session.State != "ACTIVE" {
+			if session.State == "ERROR" {
+				return session.ErrorMessage
+			}
 			return nil
 		}
 		time.Sleep(interval)

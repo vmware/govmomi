@@ -43,6 +43,10 @@ type LocalizableMessage struct {
 	ID             string   `json:"id,omitempty"`
 }
 
+func (m *LocalizableMessage) Error() string {
+	return m.DefaultMessage
+}
+
 // NewClient creates a new Client instance.
 func NewClient(c *vim25.Client) *Client {
 	sc := c.Client.NewServiceClient(internal.Path, "")

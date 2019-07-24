@@ -24,52 +24,51 @@ import (
 	"strings"
 
 	"github.com/vmware/govmomi/vapi/internal"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
-// SourceEndpoint provides information on the source of a library item file.
-type SourceEndpoint struct {
+// TransferEndpoint provides information on the source of a library item file.
+type TransferEndpoint struct {
 	URI                      string `json:"uri,omitempty"`
 	SSLCertificateThumbprint string `json:"ssl_certificate_thumbprint,omitempty"`
 }
 
-// UpdateFile is the request specification for the updatesession operation
-// file:add.
-type UpdateFile struct {
-	Checksum       *Checksum       `json:"checksum_info,omitempty"`
-	Name           string          `json:"name,omitempty"`
-	Size           *int64          `json:"size,omitempty"`
-	SourceEndpoint *SourceEndpoint `json:"source_endpoint,omitempty"`
-	SourceType     string          `json:"source_type,omitempty"`
-}
-
-// UpdateFileInfo is the response specification for the updatesession
+// UpdateFile is the specification for the updatesession
 // operations file:add, file:get, and file:list.
-type UpdateFileInfo struct {
-	Name             string         `json:"name"`
-	SourceType       string         `json:"source_type"`
-	Status           string         `json:"status"`
-	BytesTransferred int64          `json:"bytes_transferred"`
-	Size             int64          `json:"size"`
-	ChecksumInfo     Checksum       `json:"checksum_info"`
-	SourceEndpoint   SourceEndpoint `json:"source_endpoint"`
-	UploadEndpoint   SourceEndpoint `json:"upload_endpoint"`
+type UpdateFile struct {
+	BytesTransferred int64                    `json:"bytes_transferred,omitempty"`
+	Checksum         *Checksum                `json:"checksum_info,omitempty"`
+	ErrorMessage     *rest.LocalizableMessage `json:"error_message,omitempty"`
+	Name             string                   `json:"name"`
+	Size             int64                    `json:"size,omitempty"`
+	SourceEndpoint   *TransferEndpoint        `json:"source_endpoint,omitempty"`
+	SourceType       string                   `json:"source_type"`
+	Status           string                   `json:"status,omitempty"`
+	UploadEndpoint   *TransferEndpoint        `json:"upload_endpoint,omitempty"`
 }
 
 // AddLibraryItemFile adds a file
-func (c *Manager) AddLibraryItemFile(ctx context.Context, sessionID string, updateFile UpdateFile) (*UpdateFileInfo, error) {
+func (c *Manager) AddLibraryItemFile(ctx context.Context, sessionID string, updateFile UpdateFile) (*UpdateFile, error) {
 	url := internal.URL(c, internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("add")
 	spec := struct {
 		FileSpec UpdateFile `json:"file_spec"`
 	}{updateFile}
-	var res UpdateFileInfo
-	return &res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	var res UpdateFile
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err != nil {
+		return nil, err
+	}
+	if res.Status == "ERROR" {
+		return nil, res.ErrorMessage
+	}
+	return &res, nil
 }
 
 // AddLibraryItemFileFromURI adds a file from a remote URI.
 func (c *Manager) AddLibraryItemFileFromURI(
 	ctx context.Context,
-	sessionID, fileName, uri string) (*UpdateFileInfo, error) {
+	sessionID, fileName, uri string) (*UpdateFile, error) {
 
 	n, fingerprint, err := c.getContentLengthAndFingerprint(ctx, uri)
 	if err != nil {
@@ -79,8 +78,8 @@ func (c *Manager) AddLibraryItemFileFromURI(
 	info, err := c.AddLibraryItemFile(ctx, sessionID, UpdateFile{
 		Name:       fileName,
 		SourceType: "PULL",
-		Size:       &n,
-		SourceEndpoint: &SourceEndpoint{
+		Size:       n,
+		SourceEndpoint: &TransferEndpoint{
 			URI:                      uri,
 			SSLCertificateThumbprint: fingerprint,
 		},
@@ -94,12 +93,12 @@ func (c *Manager) AddLibraryItemFileFromURI(
 
 // GetLibraryItemUpdateSessionFile retrieves information about a specific file
 // that is a part of an update session.
-func (c *Manager) GetLibraryItemUpdateSessionFile(ctx context.Context, sessionID string, fileName string) (*UpdateFileInfo, error) {
+func (c *Manager) GetLibraryItemUpdateSessionFile(ctx context.Context, sessionID string, fileName string) (*UpdateFile, error) {
 	url := internal.URL(c, internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("get")
 	spec := struct {
 		Name string `json:"file_name"`
 	}{fileName}
-	var res UpdateFileInfo
+	var res UpdateFile
 	return &res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
