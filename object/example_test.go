@@ -102,6 +102,38 @@ func ExampleVirtualMachine_Clone() {
 	// Output: example-clone
 }
 
+func ExampleVirtualMachine_Reconfigure() {
+	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+
+		spec := types.VirtualMachineConfigSpec{Annotation: "example reconfig"}
+
+		task, err := vm.Reconfigure(ctx, spec)
+		if err != nil {
+			return err
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			return err
+		}
+
+		var obj mo.VirtualMachine
+		err = vm.Properties(ctx, vm.Reference(), []string{"config.annotation"}, &obj)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(obj.Config.Annotation)
+
+		return nil
+	})
+	// Output: example reconfig
+}
+
 func ExampleCommon_Destroy() {
 	model := simulator.VPX()
 	model.Datastore = 2
