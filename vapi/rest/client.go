@@ -129,6 +129,12 @@ func (c *Client) LoginByToken(ctx context.Context) error {
 	return c.Login(ctx, nil)
 }
 
+// Get returns an error if the current session is invalid.
+func (c *Client) Get(ctx context.Context) error {
+	req := internal.URL(c, internal.SessionPath).WithAction("get").Request(http.MethodPost)
+	return c.Do(ctx, req, nil)
+}
+
 // Logout deletes the current session.
 func (c *Client) Logout(ctx context.Context) error {
 	req := internal.URL(c, internal.SessionPath).Request(http.MethodDelete)
