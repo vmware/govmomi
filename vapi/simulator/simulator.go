@@ -156,7 +156,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 }
 
 func (s *handler) isAuthorized(r *http.Request) bool {
-	if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, internal.SessionPath) {
+	if r.Method == http.MethodPost && strings.HasSuffix(r.URL.Path, internal.SessionPath) && s.action(r) == "" {
 		return true
 	}
 	id := r.Header.Get(internal.SessionCookieName)
@@ -320,6 +320,14 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 
 	switch r.Method {
 	case http.MethodPost:
+		if s.action(r) != "" {
+			if _, ok := s.Session[id]; ok {
+				s.ok(w)
+			} else {
+				w.WriteHeader(http.StatusUnauthorized)
+			}
+			return
+		}
 		user, ok := s.hasAuthorization(r)
 		if !ok {
 			w.WriteHeader(http.StatusUnauthorized)
