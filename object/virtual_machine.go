@@ -221,7 +221,9 @@ func (v VirtualMachine) RefreshStorageInfo(ctx context.Context) error {
 	return err
 }
 
-func (v VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
+// WaitForIP waits for the VM guest.ipAddress property to report an IP address.
+// Waits for an IPv4 address if the v4 param is true.
+func (v VirtualMachine) WaitForIP(ctx context.Context, v4 ...bool) (string, error) {
 	var ip string
 
 	p := property.DefaultCollector(v.c)
@@ -238,6 +240,11 @@ func (v VirtualMachine) WaitForIP(ctx context.Context) (string, error) {
 			}
 
 			ip = c.Val.(string)
+			if len(v4) == 1 && v4[0] {
+				if net.ParseIP(ip).To4() == nil {
+					return false
+				}
+			}
 			return true
 		}
 
