@@ -163,7 +163,7 @@ func (cmd *ip) Run(ctx context.Context, f *flag.FlagSet) error {
 				}
 				return strings.Join(ips, ","), nil
 			}
-			return vm.WaitForIP(deadline)
+			return vm.WaitForIP(deadline, cmd.v4)
 		}
 	}
 
