@@ -76,6 +76,10 @@ func (f *DatastoreFlag) Process(ctx context.Context) error {
 	})
 }
 
+func (flag *DatastoreFlag) IsSet() bool {
+	return flag.Name != ""
+}
+
 func (f *DatastoreFlag) Args(args []string) []object.DatastorePath {
 	var files []object.DatastorePath
 

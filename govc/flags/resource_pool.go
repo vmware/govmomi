@@ -68,6 +68,10 @@ func (flag *ResourcePoolFlag) Process(ctx context.Context) error {
 	})
 }
 
+func (flag *ResourcePoolFlag) IsSet() bool {
+	return flag.name != ""
+}
+
 func (flag *ResourcePoolFlag) ResourcePool() (*object.ResourcePool, error) {
 	if flag.pool != nil {
 		return flag.pool, nil

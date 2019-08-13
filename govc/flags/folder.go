@@ -67,6 +67,10 @@ func (flag *FolderFlag) Process(ctx context.Context) error {
 	})
 }
 
+func (flag *FolderFlag) IsSet() bool {
+	return flag.name != ""
+}
+
 func (flag *FolderFlag) Folder() (*object.Folder, error) {
 	if flag.folder != nil {
 		return flag.folder, nil

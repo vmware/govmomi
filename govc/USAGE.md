@@ -287,6 +287,7 @@ but appear via `govc $cmd -h`:
  - [vm.disk.create](#vmdiskcreate)
  - [vm.guest.tools](#vmguesttools)
  - [vm.info](#vminfo)
+ - [vm.instantclone](#vminstantclone)
  - [vm.ip](#vmip)
  - [vm.keystrokes](#vmkeystrokes)
  - [vm.markastemplate](#vmmarkastemplate)
@@ -4828,6 +4829,50 @@ Options:
   -r=false               Show resource summary
   -t=false               Show ToolsConfigInfo
   -waitip=false          Wait for VM to acquire IP address
+```
+
+## vm.instantclone
+
+```
+Usage: govc vm.instantclone [OPTIONS] NAME
+
+Instant Clone VM to NAME. 
+
+Examples:
+  govc vm.instantclone -vm source-vm new-vm
+  # Configure ExtraConfig variables on a guest VM:
+  govc vm.instantclone -vm source-vm -e guestinfo.ipaddress=192.168.0.1 -e guestinfo.netmask=255.255.255.0 new-vm
+  # Read the variable set above inside the guest:
+  vmware-rpctool "info-get guestinfo.ipaddress"
+  vmware-rpctool "info-get guestinfo.netmask"
+
+Options:
+  -cert=                 Certificate [GOVC_CERTIFICATE]
+  -dc=                   Datacenter [GOVC_DATACENTER]
+  -debug=false           Store debug logs [GOVC_DEBUG]
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -dump=false            Enable Go output
+  -e=[]                  ExtraConfig. <key>=<value>
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -json=false            Enable JSON output
+  -k=false               Skip verification of server certificate [GOVC_INSECURE]
+  -key=                  Private key [GOVC_PRIVATE_KEY]
+  -net=                  Network [GOVC_NETWORK]
+  -net.adapter=e1000     Network adapter type
+  -net.address=          Network hardware address
+  -persist-session=true  Persist session to disk [GOVC_PERSIST_SESSION]
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -tls-ca-certs=         TLS CA certificates file [GOVC_TLS_CA_CERTS]
+  -tls-known-hosts=      TLS known hosts file [GOVC_TLS_KNOWN_HOSTS]
+  -u=                    ESX or vCenter URL [GOVC_URL]
+  -vim-namespace=vim25   Vim namespace [GOVC_VIM_NAMESPACE]
+  -vim-version=6.7       Vim version [GOVC_VIM_VERSION]
+  -vm=                   Virtual machine [GOVC_VM]
+  -vm.dns=               Find VM by FQDN
+  -vm.ip=                Find VM by IP address
+  -vm.ipath=             Find VM by inventory path
+  -vm.path=              Find VM by path to .vmx file
+  -vm.uuid=              Find VM by UUID
 ```
 
 ## vm.ip
