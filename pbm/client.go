@@ -224,3 +224,18 @@ func (c *Client) ProfileIDByName(ctx context.Context, profileName string) (strin
 	}
 	return "", fmt.Errorf("no pbm profile found with name: %q", profileName)
 }
+
+func (c *Client) FetchCapabilityMetadata(ctx context.Context, rtype *types.PbmProfileResourceType, vendorUuid string) ([]types.PbmCapabilityMetadataPerCategory, error) {
+	req := types.PbmFetchCapabilityMetadata{
+		This:         c.ServiceContent.ProfileManager,
+		ResourceType: rtype,
+		VendorUuid:   vendorUuid,
+	}
+
+	res, err := methods.PbmFetchCapabilityMetadata(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
