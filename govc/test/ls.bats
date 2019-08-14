@@ -165,7 +165,7 @@ load test_helper
     # list paths in $folder
     items1=$(govc ls "$folder")
     # list refs in $folder | govc ls -L ; should output the same paths
-    items2=$(govc ls -i "$folder" | xargs -d '\n' govc ls -L)
+    items2=$(govc ls -i "$folder" | $xargs -d '\n' govc ls -L)
 
     assert_equal "$items1" "$items2"
   done
