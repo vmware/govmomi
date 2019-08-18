@@ -74,7 +74,7 @@ Example using ESX mode:
 
 The simulator supports a subset of API methods.  However, the generated [govmomi](https://github.com/vmware/govmomi)
 code includes all types and methods defined in the vmodl, which can be used to implement any method documented in the
-[VMware vSphere API Reference](http://pubs.vmware.com/vsphere-6-5/index.jsp#com.vmware.wssdk.apiref.doc/right-pane.html).
+[VMware vSphere API Reference](https://code.vmware.com/apis/196/vsphere).
 
 To see the list of supported methods:
 
