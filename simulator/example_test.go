@@ -22,7 +22,9 @@ import (
 	"log"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vim25"
 )
 
 // Example boilerplate for starting a simulator initialized with an ESX model.
@@ -89,4 +91,19 @@ func ExampleVPX() {
 
 	fmt.Printf("%s with %d hosts", c.Client.ServiceContent.About.ApiType, model.Count().Host)
 	// Output: VirtualCenter with 4 hosts
+}
+
+// Run simplifies startup/cleanup of a simulator instance
+func ExampleModel_Run() {
+	simulator.VPX().Run(func(ctx context.Context, c *vim25.Client) error {
+		// Client has connected and logged in to a new simulator instance.
+		// Server.Close and Model.Remove are called when this func returns.
+		s, err := session.NewManager(c).UserSession(ctx)
+		if err != nil {
+			return err
+		}
+		fmt.Print(s.UserName)
+		return nil
+	})
+	// Output: user
 }
