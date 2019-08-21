@@ -31,6 +31,7 @@ import (
 type create struct {
 	*flags.DatastoreFlag
 	library library.Library
+	sub     library.Subscription
 }
 
 func init() {
@@ -41,7 +42,15 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
+	cmd.sub.AutomaticSyncEnabled = new(bool)
+	cmd.sub.OnDemand = new(bool)
+
 	f.StringVar(&cmd.library.Description, "d", "", "Description of library")
+	f.StringVar(&cmd.sub.SubscriptionURL, "sub", "", "Subscribe to library URL")
+	f.StringVar(&cmd.sub.UserName, "sub-username", "", "Subscription username")
+	f.StringVar(&cmd.sub.Password, "sub-password", "", "Subscription password")
+	f.BoolVar(cmd.sub.AutomaticSyncEnabled, "sub-autosync", true, "Automatic synchronization")
+	f.BoolVar(cmd.sub.OnDemand, "sub-ondemand", false, "Download content on demand")
 }
 
 func (cmd *create) Usage() string {
@@ -53,6 +62,7 @@ func (cmd *create) Description() string {
 
 Examples:
   govc library.create library_name
+  govc library.create -sub http://server/path/lib.json library_name
   govc library.create -json | jq .
   govc library.create library_name -json | jq .`
 }
@@ -83,6 +93,15 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 			DatastoreID: ds.Reference().Value,
 			Type:        "DATASTORE",
 		},
+	}
+
+	if cmd.sub.SubscriptionURL != "" {
+		cmd.library.Subscription = &cmd.sub
+		cmd.library.Type = "SUBSCRIBED"
+		cmd.sub.AuthenticationMethod = "NONE"
+		if cmd.sub.Password != "" {
+			cmd.sub.AuthenticationMethod = "BASIC"
+		}
 	}
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {

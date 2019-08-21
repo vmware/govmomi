@@ -113,6 +113,18 @@ func (r infoResultsWriter) writeLibrary(
 		fmt.Fprintf(w, "    DatastoreID:\t%s\n", d.DatastoreID)
 		fmt.Fprintf(w, "    Type:\t%s\n", d.Type)
 	}
+	if v.Subscription != nil {
+		dl := "All"
+		if v.Subscription.OnDemand != nil && *v.Subscription.OnDemand {
+			dl = "On Demand"
+		}
+
+		fmt.Fprintf(w, "  Subscription:\n")
+		fmt.Fprintf(w, "    AutoSync:\t%t\n", *v.Subscription.AutomaticSyncEnabled)
+		fmt.Fprintf(w, "    URL:\t%s\n", v.Subscription.SubscriptionURL)
+		fmt.Fprintf(w, "    Auth:\t%s\n", v.Subscription.AuthenticationMethod)
+		fmt.Fprintf(w, "    Download:\t%s\n", dl)
+	}
 	return nil
 }
 func (r infoResultsWriter) writeItem(
