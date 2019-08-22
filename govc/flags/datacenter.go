@@ -21,9 +21,11 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -140,13 +142,21 @@ func (flag *DatacenterFlag) DatacenterIfSpecified() (*object.Datacenter, error) 
 func (flag *DatacenterFlag) ManagedObject(ctx context.Context, arg string) (types.ManagedObjectReference, error) {
 	var ref types.ManagedObjectReference
 
-	if ref.FromString(arg) {
-		return ref, nil
-	}
-
 	finder, err := flag.Finder()
 	if err != nil {
 		return ref, err
+	}
+
+	if ref.FromString(arg) {
+		if strings.HasPrefix(ref.Type, "com.vmware.content.") {
+			return ref, nil // special case for content library
+		}
+		pc := property.DefaultCollector(flag.client)
+		var content []types.ObjectContent
+		err = pc.RetrieveOne(ctx, ref, []string{"name"}, &content)
+		if err == nil {
+			return ref, nil
+		}
 	}
 
 	l, err := finder.ManagedObjectList(ctx, arg)
