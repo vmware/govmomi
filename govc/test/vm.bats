@@ -132,6 +132,22 @@ load test_helper
   [ ${#lines[@]} -gt 0 ]
 }
 
+@test "vm.change vcsim" {
+  vcsim_env
+
+  run govc vm.change -vm DC0_H0_VM0 -latency fail
+  assert_failure
+
+  run govc object.collect -s vm/DC0_H0_VM0 config.latencySensitivity.level
+  assert_success normal
+
+  run govc vm.change -vm DC0_H0_VM0 -latency high
+  assert_success
+
+  run govc object.collect -s vm/DC0_H0_VM0 config.latencySensitivity.level
+  assert_success high
+}
+
 @test "vm.power" {
   esx_env
 
