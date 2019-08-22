@@ -220,3 +220,17 @@ EOF
   run govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux2
   assert_failure
 }
+
+@test "library.pubsub" {
+  vcsim_env
+
+  url="https://$(govc env GOVC_URL)/TODO"
+
+  run govc library.create -sub "$url" my-content
+  assert_success
+
+  run govc library.info my-content
+  assert_success
+  assert_matches "Subscription:"
+  assert_matches "$url"
+}

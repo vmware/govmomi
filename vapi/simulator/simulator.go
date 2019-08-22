@@ -119,6 +119,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.AssociationPath + "/", s.associationID},
 		{internal.LibraryPath, s.library},
 		{internal.LocalLibraryPath, s.library},
+		{internal.SubscribedLibraryPath, s.library},
 		{internal.LibraryPath + "/", s.libraryID},
 		{internal.LocalLibraryPath + "/", s.libraryID},
 		{internal.LibraryItemPath, s.libraryItem},
