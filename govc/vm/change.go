@@ -128,7 +128,10 @@ Examples:
   govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
-  vmware-rpctool "info-get guestinfo.vmname"`
+  vmware-rpctool "info-get guestinfo.vmname"
+  govc vm.change -vm $vm -latency high
+  govc vm.change -vm $vm -latency normal
+  `
 }
 
 func (cmd *change) Process(ctx context.Context) error {
