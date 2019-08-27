@@ -103,8 +103,6 @@ func processOverride(u *url.URL) {
 
 // NewClient creates a govmomi.Client for use in the examples
 func NewClient(ctx context.Context) (*govmomi.Client, error) {
-	flag.Parse()
-
 	// Parse URL from string
 	u, err := soap.ParseURL(*urlFlag)
 	if err != nil {
@@ -121,6 +119,8 @@ func NewClient(ctx context.Context) (*govmomi.Client, error) {
 // Run calls f with Client create from the -url flag if provided,
 // otherwise runs the example against vcsim.
 func Run(f func(context.Context, *vim25.Client) error) {
+	flag.Parse()
+
 	var err error
 	if *urlFlag == "" {
 		err = simulator.VPX().Run(f)

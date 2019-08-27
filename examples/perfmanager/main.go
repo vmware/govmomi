@@ -22,6 +22,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 
 	"github.com/vmware/govmomi/examples"
@@ -30,6 +31,8 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+var interval = flag.Int("i", 20, "Interval ID")
 
 func main() {
 	examples.Run(func(ctx context.Context, c *vim25.Client) error {
@@ -66,7 +69,7 @@ func main() {
 		spec := types.PerfQuerySpec{
 			MaxSample:  1,
 			MetricId:   []types.PerfMetricId{{Instance: "*"}},
-			IntervalId: 300,
+			IntervalId: int32(*interval),
 		}
 
 		// Query metrics
