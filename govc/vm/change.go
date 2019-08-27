@@ -18,7 +18,6 @@ package vm
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"reflect"
@@ -50,21 +49,10 @@ type change struct {
 
 	types.VirtualMachineConfigSpec
 	extraConfig extraConfig
-	Latency     string
 }
 
 func init() {
 	cli.Register("vm.change", &change{})
-}
-
-func setLatency(info **types.VirtualMachineConfigSpec) {
-	r := *info
-
-	if r.LatencySensitivity != nil {
-		return
-	}
-
-	*info = nil
 }
 
 // setAllocation sets *info=nil if none of the fields have been set.
@@ -104,7 +92,6 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewInt32(&cmd.NumCPUs), "c", "Number of CPUs")
 	f.StringVar(&cmd.GuestId, "g", "", "Guest OS")
 	f.StringVar(&cmd.Name, "name", "", "Display name")
-	f.StringVar(&cmd.Latency, "latency", "", "Latency Normal||High")
 	f.StringVar(&cmd.Annotation, "annotation", "", "VM description")
 	f.Var(&cmd.extraConfig, "e", "ExtraConfig. <key>=<value>")
 
@@ -128,10 +115,7 @@ Examples:
   govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
-  vmware-rpctool "info-get guestinfo.vmname"
-  govc vm.change -vm $vm -latency high
-  govc vm.change -vm $vm -latency normal
-  `
+  vmware-rpctool "info-get guestinfo.vmname"`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -159,25 +143,6 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	setAllocation(&cmd.MemoryAllocation)
 	if reflect.DeepEqual(cmd.Tools, new(types.ToolsConfigInfo)) {
 		cmd.Tools = nil // no flags set, avoid sending <tools/> in the request
-	}
-
-	// Set latency caseInsensitive  high||normal
-	var ok = false
-	if cmd.Latency != "" {
-		if strings.EqualFold(cmd.Latency, "high") {
-			cmd.LatencySensitivity = new(types.LatencySensitivity)
-			cmd.LatencySensitivity.Level = "high"
-			ok = true
-		}
-		if strings.EqualFold(cmd.Latency, "normal") {
-			cmd.LatencySensitivity = new(types.LatencySensitivity)
-			cmd.LatencySensitivity.Level = "normal"
-			ok = true
-		}
-		if !ok {
-			errMsg := fmt.Sprintf("Invalid Latency specified[%s] High||Normal only", cmd.Latency)
-			return errors.New(errMsg)
-		}
 	}
 
 	task, err := vm.Reconfigure(ctx, cmd.VirtualMachineConfigSpec)
