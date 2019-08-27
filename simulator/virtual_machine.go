@@ -64,10 +64,11 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	rspec := types.DefaultResourceConfigSpec()
 	vm.Guest = &types.GuestInfo{}
 	vm.Config = &types.VirtualMachineConfigInfo{
-		ExtraConfig:      []types.BaseOptionValue{&types.OptionValue{Key: "govcsim", Value: "TRUE"}},
-		Tools:            &types.ToolsConfigInfo{},
-		MemoryAllocation: &rspec.MemoryAllocation,
-		CpuAllocation:    &rspec.CpuAllocation,
+		ExtraConfig:        []types.BaseOptionValue{&types.OptionValue{Key: "govcsim", Value: "TRUE"}},
+		Tools:              &types.ToolsConfigInfo{},
+		MemoryAllocation:   &rspec.MemoryAllocation,
+		CpuAllocation:      &rspec.CpuAllocation,
+		LatencySensitivity: &types.LatencySensitivity{Level: types.LatencySensitivitySensitivityLevelNormal},
 	}
 	vm.Layout = &types.VirtualMachineFileLayout{}
 	vm.LayoutEx = &types.VirtualMachineFileLayoutEx{

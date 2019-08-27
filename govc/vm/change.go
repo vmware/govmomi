@@ -49,10 +49,33 @@ type change struct {
 
 	types.VirtualMachineConfigSpec
 	extraConfig extraConfig
+	Latency     string
 }
 
 func init() {
 	cli.Register("vm.change", &change{})
+}
+
+var latencyLevels = []string{
+	string(types.LatencySensitivitySensitivityLevelLow),
+	string(types.LatencySensitivitySensitivityLevelNormal),
+	string(types.LatencySensitivitySensitivityLevelHigh),
+}
+
+// setLatency validates latency level if set
+func (cmd *change) setLatency() error {
+	if cmd.Latency == "" {
+		return nil
+	}
+	for _, l := range latencyLevels {
+		if l == cmd.Latency {
+			cmd.LatencySensitivity = &types.LatencySensitivity{
+				Level: types.LatencySensitivitySensitivityLevel(cmd.Latency),
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("latency must be one of: %s", strings.Join(latencyLevels, "|"))
 }
 
 // setAllocation sets *info=nil if none of the fields have been set.
@@ -92,6 +115,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewInt32(&cmd.NumCPUs), "c", "Number of CPUs")
 	f.StringVar(&cmd.GuestId, "g", "", "Guest OS")
 	f.StringVar(&cmd.Name, "name", "", "Display name")
+	f.StringVar(&cmd.Latency, "latency", "", fmt.Sprintf("Latency sensitivity (%s)", strings.Join(latencyLevels, "|")))
 	f.StringVar(&cmd.Annotation, "annotation", "", "VM description")
 	f.Var(&cmd.extraConfig, "e", "ExtraConfig. <key>=<value>")
 
@@ -115,7 +139,10 @@ Examples:
   govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
-  vmware-rpctool "info-get guestinfo.vmname"`
+  vmware-rpctool "info-get guestinfo.vmname"
+  govc vm.change -vm $vm -latency high
+  govc vm.change -vm $vm -latency normal
+  `
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -143,6 +170,10 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	setAllocation(&cmd.MemoryAllocation)
 	if reflect.DeepEqual(cmd.Tools, new(types.ToolsConfigInfo)) {
 		cmd.Tools = nil // no flags set, avoid sending <tools/> in the request
+	}
+
+	if err = cmd.setLatency(); err != nil {
+		return err
 	}
 
 	task, err := vm.Reconfigure(ctx, cmd.VirtualMachineConfigSpec)
