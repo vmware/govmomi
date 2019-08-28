@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"reflect"
 	"strings"
 	"time"
 
@@ -365,7 +366,13 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 		return &m
 	case "PropertyCollector":
 		if ref == Map.content().PropertyCollector {
-			return s.Put(NewPropertyCollector(ref))
+			// Per-session instance of the PropertyCollector singleton.
+			// Using reflection here as PropertyCollector might be wrapped with a custom type.
+			obj = Map.Get(ref)
+			pc := reflect.New(reflect.TypeOf(obj).Elem())
+			obj = pc.Interface().(mo.Reference)
+			s.Registry.setReference(obj, ref)
+			return s.Put(obj)
 		}
 	}
 
