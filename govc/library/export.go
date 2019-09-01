@@ -92,7 +92,7 @@ func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		if len(res) != 1 {
-			return fmt.Errorf("%q matches %d items", f.Arg(0), len(res))
+			return ErrMultiMatch{Type: "library", Key: "name", Val: f.Arg(0), Count: len(res)}
 		}
 
 		switch t := res[0].GetResult().(type) {

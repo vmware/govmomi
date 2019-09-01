@@ -51,6 +51,7 @@ func (cmd *rm) Description() string {
 
 Examples:
   govc library.rm /library_name
+  govc library.rm library_id # Use library id if multiple libraries have the same name
   govc library.rm /library_name/item_name`
 }
 
@@ -64,7 +65,7 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		if len(res) != 1 {
-			return fmt.Errorf("%q matches %d items", f.Arg(0), len(res))
+			return ErrMultiMatch{Type: "library", Key: "name", Val: f.Arg(0), Count: len(res)}
 		}
 
 		switch t := res[0].GetResult().(type) {

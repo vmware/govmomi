@@ -104,7 +104,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		if len(res) != 1 {
-			return fmt.Errorf("%q matches %d items", path, len(res))
+			return ErrMultiMatch{Type: "library", Key: "name", Val: f.Arg(0), Count: len(res)}
 		}
 		item, ok := res[0].GetResult().(library.Item)
 		if !ok {
