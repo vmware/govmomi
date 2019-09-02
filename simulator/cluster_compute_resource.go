@@ -17,7 +17,10 @@ limitations under the License.
 package simulator
 
 import (
+	"log"
+	"math/rand"
 	"sync/atomic"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -288,6 +291,60 @@ func (c *ClusterComputeResource) ReconfigureComputeResourceTask(req *types.Recon
 			Returnval: task.Run(),
 		},
 	}
+}
+
+func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.HasFault {
+	body := new(methods.PlaceVmBody)
+
+	if len(c.Host) == 0 {
+		body.Fault_ = Fault("", new(types.InvalidState))
+		return body
+	}
+
+	res := types.ClusterRecommendation{
+		Key:        "1",
+		Type:       "V1",
+		Time:       time.Now(),
+		Rating:     1,
+		Reason:     string(types.RecommendationReasonCodeXvmotionPlacement),
+		ReasonText: string(types.RecommendationReasonCodeXvmotionPlacement),
+		Target:     &c.Self,
+	}
+
+	host := &c.Host[rand.Intn(len(c.Host))]
+	ds := &c.Datastore[rand.Intn(len(c.Datastore))]
+
+	switch types.PlacementSpecPlacementType(req.PlacementSpec.PlacementType) {
+	case types.PlacementSpecPlacementTypeClone:
+		spec := req.PlacementSpec.RelocateSpec
+		spec.Datastore = ds
+		res.Action = append(res.Action, &types.PlacementAction{
+			Vm:           req.PlacementSpec.Vm,
+			TargetHost:   host,
+			RelocateSpec: spec,
+		})
+	case types.PlacementSpecPlacementTypeCreate:
+		res.Action = append(res.Action, &types.PlacementAction{
+			TargetHost: host,
+			RelocateSpec: &types.VirtualMachineRelocateSpec{
+				Datastore: ds,
+				Pool:      c.ResourcePool,
+				Host:      host,
+			},
+		})
+	default:
+		log.Printf("unsupported placement type: %s", req.PlacementSpec.PlacementType)
+		body.Fault_ = Fault("", new(types.NotSupported))
+		return body
+	}
+
+	body.Res = &types.PlaceVmResponse{
+		Returnval: types.PlacementResult{
+			Recommendations: []types.ClusterRecommendation{res},
+		},
+	}
+
+	return body
 }
 
 func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {

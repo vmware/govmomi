@@ -57,18 +57,28 @@ load test_helper
 }
 
 @test "vm.create" {
-  esx_env
+  unset GOVC_DATASTORE
+  vcsim_start
 
-  id=$(new_ttylinux_vm)
-
-  run govc vm.power -on $id
+  run govc cluster.create empty-cluster
   assert_success
 
-  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
-  [ $result -eq 0 ]
+  id=$(new_id)
+  run govc vm.create -on=false "$id"
+  assert_failure # -pool must be specified
 
-  result=$(govc device.ls -vm $vm | grep cdrom- | wc -l)
-  [ $result -eq 0 ]
+  run govc vm.create -pool DC0_C0/Resources "$id"
+  assert_success
+
+  id=$(new_id)
+  run govc vm.create -cluster enoent "$id"
+  assert_failure # cluster does not exist
+
+  run govc vm.create -cluster empty-cluster "$id"
+  assert_failure # cluster has no hosts
+
+  run govc vm.create -cluster DC0_C0 "$id"
+  assert_success
 }
 
 @test "vm.change" {
@@ -663,6 +673,13 @@ load test_helper
   assert_success
 
   run govc vm.clone -vm "$vm" -snapshot X "$clone"
+  assert_success
+
+  clone=$(new_id)
+  run govc vm.clone -cluster enoent -vm "$vm" "$clone"
+  assert_failure
+
+  run govc vm.clone -cluster DC0_C0 -vm "$vm" "$clone"
   assert_success
 }
 
