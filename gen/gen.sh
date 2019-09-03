@@ -47,7 +47,7 @@ generate() {
   done
 }
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 12317751 (vSphere 6.7u2)
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 14360549 (vSphere 6.7u3)
 
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@1cc9f9e
 generate "../pbm" "pbm"

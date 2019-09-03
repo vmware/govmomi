@@ -71,6 +71,14 @@ func init() {
 	types.Add("vslm:ArrayOfVslmVsoVStorageObjectResult", reflect.TypeOf((*ArrayOfVslmVsoVStorageObjectResult)(nil)).Elem())
 }
 
+type ArrayOfVslmVsoVStorageObjectSnapshotResult struct {
+	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty"`
+}
+
+func init() {
+	types.Add("vslm:ArrayOfVslmVsoVStorageObjectSnapshotResult", reflect.TypeOf((*ArrayOfVslmVsoVStorageObjectSnapshotResult)(nil)).Elem())
+}
+
 type RetrieveContent RetrieveContentRequestType
 
 func init() {
@@ -690,6 +698,26 @@ func init() {
 type VslmRenameVStorageObjectResponse struct {
 }
 
+type VslmRetrieveSnapshotDetails VslmRetrieveSnapshotDetailsRequestType
+
+func init() {
+	types.Add("vslm:VslmRetrieveSnapshotDetails", reflect.TypeOf((*VslmRetrieveSnapshotDetails)(nil)).Elem())
+}
+
+type VslmRetrieveSnapshotDetailsRequestType struct {
+	This       types.ManagedObjectReference `xml:"_this"`
+	Id         types.ID                     `xml:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId"`
+}
+
+func init() {
+	types.Add("vslm:VslmRetrieveSnapshotDetailsRequestType", reflect.TypeOf((*VslmRetrieveSnapshotDetailsRequestType)(nil)).Elem())
+}
+
+type VslmRetrieveSnapshotDetailsResponse struct {
+	Returnval types.VStorageObjectSnapshotDetails `xml:"returnval"`
+}
+
 type VslmRetrieveSnapshotInfo VslmRetrieveSnapshotInfoRequestType
 
 func init() {
@@ -1141,17 +1169,29 @@ func init() {
 type VslmVsoVStorageObjectResult struct {
 	types.DynamicData
 
-	Id           types.ID                    `xml:"id"`
-	Name         string                      `xml:"name,omitempty"`
-	CapacityInMB int64                       `xml:"capacityInMB"`
-	CreateTime   *time.Time                  `xml:"createTime"`
-	DatastoreUrl string                      `xml:"datastoreUrl,omitempty"`
-	Metadata     []types.KeyValue            `xml:"metadata,omitempty"`
-	Error        *types.LocalizedMethodFault `xml:"error,omitempty"`
+	Id              types.ID                              `xml:"id"`
+	Name            string                                `xml:"name,omitempty"`
+	CapacityInMB    int64                                 `xml:"capacityInMB"`
+	CreateTime      *time.Time                            `xml:"createTime"`
+	DatastoreUrl    string                                `xml:"datastoreUrl,omitempty"`
+	BackingObjectId *types.ID                             `xml:"backingObjectId,omitempty"`
+	SnapshotInfo    []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty"`
+	Metadata        []types.KeyValue                      `xml:"metadata,omitempty"`
+	Error           *types.LocalizedMethodFault           `xml:"error,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectResult", reflect.TypeOf((*VslmVsoVStorageObjectResult)(nil)).Elem())
+}
+
+type VslmVsoVStorageObjectSnapshotResult struct {
+	types.DynamicData
+
+	BackingObjectId types.ID `xml:"backingObjectId"`
+}
+
+func init() {
+	types.Add("vslm:VslmVsoVStorageObjectSnapshotResult", reflect.TypeOf((*VslmVsoVStorageObjectSnapshotResult)(nil)).Elem())
 }
 
 type VersionURI string

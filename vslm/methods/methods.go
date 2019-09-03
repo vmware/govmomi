@@ -603,6 +603,26 @@ func VslmRenameVStorageObject(ctx context.Context, r soap.RoundTripper, req *typ
 	return resBody.Res, nil
 }
 
+type VslmRetrieveSnapshotDetailsBody struct {
+	Req    *types.VslmRetrieveSnapshotDetails         `xml:"urn:vslm VslmRetrieveSnapshotDetails,omitempty"`
+	Res    *types.VslmRetrieveSnapshotDetailsResponse `xml:"urn:vslm VslmRetrieveSnapshotDetailsResponse,omitempty"`
+	Fault_ *soap.Fault                                `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *VslmRetrieveSnapshotDetailsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func VslmRetrieveSnapshotDetails(ctx context.Context, r soap.RoundTripper, req *types.VslmRetrieveSnapshotDetails) (*types.VslmRetrieveSnapshotDetailsResponse, error) {
+	var reqBody, resBody VslmRetrieveSnapshotDetailsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type VslmRetrieveSnapshotInfoBody struct {
 	Req    *types.VslmRetrieveSnapshotInfo         `xml:"urn:vslm VslmRetrieveSnapshotInfo,omitempty"`
 	Res    *types.VslmRetrieveSnapshotInfoResponse `xml:"urn:vslm VslmRetrieveSnapshotInfoResponse,omitempty"`
