@@ -206,6 +206,12 @@ func (f *Finder) findLibraries(
 			}
 			result = append(result, findResult{result: *lib})
 		}
+		if len(result) == 0 {
+			lib, err := f.M.GetLibraryByID(ctx, token)
+			if err == nil {
+				result = append(result, findResult{result: *lib})
+			}
+		}
 		return result, nil
 	}
 
