@@ -37,6 +37,8 @@ type deploy struct {
 	*flags.HostSystemFlag
 	*flags.FolderFlag
 	*importx.OptionsFlag
+
+	profile string
 }
 
 func init() {
@@ -58,6 +60,8 @@ func (cmd *deploy) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OptionsFlag = new(importx.OptionsFlag)
 	cmd.OptionsFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.profile, "profile", "", "Storage profile")
 }
 
 func (cmd *deploy) Process(ctx context.Context) error {
@@ -111,7 +115,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			return fmt.Errorf("%q is a %T", path, item)
 		}
 
-		ds, err := cmd.Datastore()
+		ds, err := cmd.DatastoreIfSpecified()
 		if err != nil {
 			return err
 		}
@@ -159,10 +163,15 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			})
 		}
 
+		dsID := ""
+		if ds != nil {
+			dsID = ds.Reference().Value
+		}
+
 		deploy := vcenter.Deploy{
 			DeploymentSpec: vcenter.DeploymentSpec{
 				Name:               name,
-				DefaultDatastoreID: ds.Reference().Value,
+				DefaultDatastoreID: dsID,
 				AcceptAllEULA:      true,
 				Annotation:         cmd.Options.Annotation,
 				AdditionalParams: []vcenter.AdditionalParams{
@@ -174,6 +183,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 				},
 				NetworkMappings:     networks,
 				StorageProvisioning: cmd.Options.DiskProvisioning,
+				StorageProfileID:    cmd.profile,
 			},
 			Target: vcenter.Target{
 				ResourcePoolID: rp.Reference().Value,

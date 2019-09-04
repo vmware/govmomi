@@ -209,7 +209,10 @@ EOF
   assert_success
   assert_matches DC0_DVPG0
 
-  run govc vm.destroy ttylinux ttylinux2
+  run env GOVC_DATASTORE="" govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux3 # datastore is not required
+  assert_success
+
+  run govc vm.destroy ttylinux ttylinux2 ttylinux3
   assert_success
 
   item_id=$(govc library.info -json "/my-content/$TTYLINUX_NAME" | jq -r .[].id)

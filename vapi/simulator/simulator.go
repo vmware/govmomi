@@ -1339,6 +1339,16 @@ func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter
 		}
 	}
 
+	if ds.Value == "" {
+		// Datastore is optional in the deploy spec, but not in OvfManager.CreateImportSpec
+		refs, err = v.Find(ctx, []string{"Datastore"}, nil)
+		if err != nil {
+			return nil, err
+		}
+		// TODO: consider StorageProfileID
+		ds = refs[0]
+	}
+
 	cisp := types.OvfCreateImportSpecParams{
 		DiskProvisioning: deploy.DeploymentSpec.StorageProvisioning,
 		EntityName:       deploy.DeploymentSpec.Name,
