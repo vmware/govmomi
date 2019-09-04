@@ -52,12 +52,6 @@ import (
 	vim "github.com/vmware/govmomi/vim25/types"
 )
 
-type session struct {
-	User         string    `json:"user"`
-	Created      time.Time `json:"created_time"`
-	LastAccessed time.Time `json:"last_accessed_time"`
-}
-
 type item struct {
 	*library.Item
 	File []library.File
@@ -87,7 +81,7 @@ type handler struct {
 	Category    map[string]*tags.Category
 	Tag         map[string]*tags.Tag
 	Association map[string]map[internal.AssociatedObject]bool
-	Session     map[string]*session
+	Session     map[string]*rest.Session
 	Library     map[string]content
 	Update      map[string]update
 	Download    map[string]download
@@ -110,7 +104,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		Category:    make(map[string]*tags.Category),
 		Tag:         make(map[string]*tags.Tag),
 		Association: make(map[string]map[internal.AssociatedObject]bool),
-		Session:     make(map[string]*session),
+		Session:     make(map[string]*rest.Session),
 		Library:     make(map[string]content),
 		Update:      make(map[string]update),
 		Download:    make(map[string]download),
@@ -332,8 +326,8 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 	switch r.Method {
 	case http.MethodPost:
 		if s.action(r) != "" {
-			if _, ok := s.Session[id]; ok {
-				s.ok(w)
+			if session, ok := s.Session[id]; ok {
+				s.ok(w, session)
 			} else {
 				w.WriteHeader(http.StatusUnauthorized)
 			}
@@ -346,7 +340,7 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		}
 		id = uuid.New().String()
 		now := time.Now()
-		s.Session[id] = &session{user, now, now}
+		s.Session[id] = &rest.Session{User: user, Created: now, LastAccessed: now}
 		http.SetCookie(w, &http.Cookie{
 			Name:  internal.SessionCookieName,
 			Value: id,
