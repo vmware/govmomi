@@ -384,7 +384,7 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 		// Get the recommendations
 		recommendations := result.Recommendations
 		if len(recommendations) == 0 {
-			return nil, fmt.Errorf("no recommendations")
+			return nil, fmt.Errorf("no datastore-cluster recommendations")
 		}
 
 		// Get the first recommendation
@@ -399,12 +399,17 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 			RelocateSpec:  &cloneSpec.Location,
 			Vm:            &vmref,
 		}
-		res, err := cmd.Cluster.PlaceVm(ctx, spec)
+		result, err := cmd.Cluster.PlaceVm(ctx, spec)
 		if err != nil {
 			return nil, err
 		}
 
-		cloneSpec.Location = *res.Recommendations[0].Action[0].(*types.PlacementAction).RelocateSpec
+		recs := result.Recommendations
+		if len(recs) == 0 {
+			return nil, fmt.Errorf("no cluster recommendations")
+		}
+
+		cloneSpec.Location = *recs[0].Action[0].(*types.PlacementAction).RelocateSpec
 		datastoreref = *cloneSpec.Location.Datastore
 	} else {
 		return nil, fmt.Errorf("please provide either a cluster, datastore or datastore-cluster")

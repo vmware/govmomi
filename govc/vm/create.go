@@ -388,12 +388,17 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 			PlacementType: string(types.PlacementSpecPlacementTypeCreate),
 			ConfigSpec:    spec,
 		}
-		res, err := cmd.Cluster.PlaceVm(ctx, pspec)
+		result, err := cmd.Cluster.PlaceVm(ctx, pspec)
 		if err != nil {
 			return nil, err
 		}
 
-		rspec := *res.Recommendations[0].Action[0].(*types.PlacementAction).RelocateSpec
+		recs := result.Recommendations
+		if len(recs) == 0 {
+			return nil, fmt.Errorf("no cluster recommendations")
+		}
+
+		rspec := *recs[0].Action[0].(*types.PlacementAction).RelocateSpec
 		if rspec.Datastore != nil {
 			datastore = object.NewDatastore(cmd.Client, *rspec.Datastore)
 			datastore.InventoryPath, _ = datastore.ObjectName(ctx)
@@ -580,7 +585,7 @@ func (cmd *create) recommendDatastore(ctx context.Context, spec *types.VirtualMa
 	// Use result to pin disks to recommended datastores
 	recs := result.Recommendations
 	if len(recs) == 0 {
-		return nil, fmt.Errorf("no recommendations")
+		return nil, fmt.Errorf("no datastore-cluster recommendations")
 	}
 
 	ds := recs[0].Action[0].(*types.StoragePlacementAction).Destination

@@ -311,26 +311,28 @@ func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.
 		Target:     &c.Self,
 	}
 
-	host := &c.Host[rand.Intn(len(c.Host))]
-	ds := &c.Datastore[rand.Intn(len(c.Datastore))]
+	hosts := req.PlacementSpec.Hosts
+	if len(hosts) == 0 {
+		hosts = c.Host
+	}
+
+	datastores := req.PlacementSpec.Datastores
+	if len(datastores) == 0 {
+		datastores = c.Datastore
+	}
+
+	spec := &types.VirtualMachineRelocateSpec{
+		Datastore: &datastores[rand.Intn(len(c.Datastore))],
+		Host:      &hosts[rand.Intn(len(c.Host))],
+		Pool:      c.ResourcePool,
+	}
 
 	switch types.PlacementSpecPlacementType(req.PlacementSpec.PlacementType) {
-	case types.PlacementSpecPlacementTypeClone:
-		spec := req.PlacementSpec.RelocateSpec
-		spec.Datastore = ds
+	case types.PlacementSpecPlacementTypeClone, types.PlacementSpecPlacementTypeCreate:
 		res.Action = append(res.Action, &types.PlacementAction{
 			Vm:           req.PlacementSpec.Vm,
-			TargetHost:   host,
+			TargetHost:   spec.Host,
 			RelocateSpec: spec,
-		})
-	case types.PlacementSpecPlacementTypeCreate:
-		res.Action = append(res.Action, &types.PlacementAction{
-			TargetHost: host,
-			RelocateSpec: &types.VirtualMachineRelocateSpec{
-				Datastore: ds,
-				Pool:      c.ResourcePool,
-				Host:      host,
-			},
 		})
 	default:
 		log.Printf("unsupported placement type: %s", req.PlacementSpec.PlacementType)
