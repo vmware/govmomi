@@ -31,6 +31,36 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+func ExampleResourcePool_Owner() {
+	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+
+		for _, name := range []string{"DC0_H0_VM0", "DC0_C0_RP0_VM0"} {
+			vm, err := finder.VirtualMachine(ctx, name)
+			if err != nil {
+				return err
+			}
+
+			pool, err := vm.ResourcePool(ctx)
+			if err != nil {
+				return err
+			}
+
+			owner, err := pool.Owner(ctx)
+			if err != nil {
+				return err
+			}
+
+			fmt.Printf("%s owner is a %T\n", name, owner)
+		}
+
+		return nil
+	})
+	// Output:
+	// DC0_H0_VM0 owner is a *object.ComputeResource
+	// DC0_C0_RP0_VM0 owner is a *object.ClusterComputeResource
+}
+
 func ExampleVirtualMachine_HostSystem() {
 	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
