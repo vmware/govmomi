@@ -409,8 +409,10 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 			return nil, fmt.Errorf("no cluster recommendations")
 		}
 
-		cloneSpec.Location = *recs[0].Action[0].(*types.PlacementAction).RelocateSpec
-		datastoreref = *cloneSpec.Location.Datastore
+		rspec := *recs[0].Action[0].(*types.PlacementAction).RelocateSpec
+		cloneSpec.Location.Host = rspec.Host
+		cloneSpec.Location.Datastore = rspec.Datastore
+		datastoreref = *rspec.Datastore
 	} else {
 		return nil, fmt.Errorf("please provide either a cluster, datastore or datastore-cluster")
 	}
