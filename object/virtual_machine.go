@@ -846,3 +846,67 @@ func (v VirtualMachine) UUID(ctx context.Context) string {
 
 	return o.Config.Uuid
 }
+
+func (v VirtualMachine) QueryChangedDiskAreas(ctx context.Context, baseSnapshot, curSnapshot *types.ManagedObjectReference, disk *types.VirtualDisk, offset int64) (types.DiskChangeInfo, error) {
+	var noChange types.DiskChangeInfo
+	var err error
+
+	if offset > disk.CapacityInBytes {
+		return noChange, fmt.Errorf("offset is greater than the disk size (%#x and %#x)", offset, disk.CapacityInBytes)
+	} else if offset == disk.CapacityInBytes {
+		return types.DiskChangeInfo{StartOffset: offset, Length: 0}, nil
+	}
+
+	var b mo.VirtualMachineSnapshot
+	err = v.Properties(ctx, baseSnapshot.Reference(), []string{"config.hardware"}, &b)
+	if err != nil {
+		return noChange, fmt.Errorf("failed to fetch config.hardware of snapshot %s: %s", baseSnapshot, err)
+	}
+
+	var changeId *string
+	for _, vd := range b.Config.Hardware.Device {
+		d := vd.GetVirtualDevice()
+		if d.Key != disk.Key {
+			continue
+		}
+
+		// As per VDDK programming guide, these are the four types of disks
+		// that support CBT, see "Gathering Changed Block Information".
+		if b, ok := d.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+			changeId = &b.ChangeId
+			break
+		}
+		if b, ok := d.Backing.(*types.VirtualDiskSparseVer2BackingInfo); ok {
+			changeId = &b.ChangeId
+			break
+		}
+		if b, ok := d.Backing.(*types.VirtualDiskRawDiskMappingVer1BackingInfo); ok {
+			changeId = &b.ChangeId
+			break
+		}
+		if b, ok := d.Backing.(*types.VirtualDiskRawDiskVer2BackingInfo); ok {
+			changeId = &b.ChangeId
+			break
+		}
+
+		return noChange, fmt.Errorf("disk %d has backing info without .ChangeId: %t", disk.Key, d.Backing)
+	}
+	if changeId == nil || *changeId == "" {
+		return noChange, fmt.Errorf("CBT is not enabled on disk %d", disk.Key)
+	}
+
+	req := types.QueryChangedDiskAreas{
+		This:        v.Reference(),
+		Snapshot:    curSnapshot,
+		DeviceKey:   disk.Key,
+		StartOffset: offset,
+		ChangeId:    *changeId,
+	}
+
+	res, err := methods.QueryChangedDiskAreas(ctx, v.Client(), &req)
+	if err != nil {
+		return noChange, err
+	}
+
+	return res.Returnval, nil
+}
