@@ -43,6 +43,7 @@ var hardwareVersions = []struct {
 
 type create struct {
 	*flags.ClientFlag
+	*flags.ClusterFlag
 	*flags.DatacenterFlag
 	*flags.DatastoreFlag
 	*flags.StoragePodFlag
@@ -76,6 +77,7 @@ type create struct {
 	diskByteSize int64
 
 	Client       *vim25.Client
+	Cluster      *object.ClusterComputeResource
 	Datacenter   *object.Datacenter
 	Datastore    *object.Datastore
 	StoragePod   *object.StoragePod
@@ -91,6 +93,9 @@ func init() {
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
+
+	cmd.ClusterFlag, ctx = flags.NewClusterFlag(ctx)
+	cmd.ClusterFlag.Register(ctx, f)
 
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
@@ -149,6 +154,9 @@ func (cmd *create) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
+	if err := cmd.ClusterFlag.Process(ctx); err != nil {
+		return err
+	}
 	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
 		return err
 	}
@@ -194,6 +202,8 @@ http://pubs.vmware.com/vsphere-6-5/topic/com.vmware.wssdk.apiref.doc/vim.vm.Gues
 
 Examples:
   govc vm.create vm-name
+  govc vm.create -cluster cluster1 vm-name # use compute cluster placement
+  govc vm.create -datastore-cluster dscluster vm-name # use datastore cluster placement
   govc vm.create -m 2048 -c 2 -g freebsd64Guest -net.adapter vmxnet3 -disk.controller pvscsi vm-name`
 }
 
@@ -214,6 +224,11 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
+	cmd.Cluster, err = cmd.ClusterFlag.ClusterIfSpecified()
+	if err != nil {
+		return err
+	}
+
 	cmd.Datacenter, err = cmd.DatacenterFlag.Datacenter()
 	if err != nil {
 		return err
@@ -224,7 +239,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
-	} else {
+	} else if cmd.Cluster == nil {
 		cmd.Datastore, err = cmd.DatastoreFlag.Datastore()
 		if err != nil {
 			return err
@@ -241,9 +256,15 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 	} else {
-		// -host is optional
-		if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
-			return err
+		if cmd.Cluster == nil {
+			// -host is optional
+			if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
+				return err
+			}
+		} else {
+			if cmd.ResourcePool, err = cmd.Cluster.ResourcePool(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
@@ -360,8 +381,37 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		if err != nil {
 			return nil, err
 		}
-	} else {
+	} else if cmd.Datastore != nil {
 		datastore = cmd.Datastore
+	} else if cmd.Cluster != nil {
+		pspec := types.PlacementSpec{
+			PlacementType: string(types.PlacementSpecPlacementTypeCreate),
+			ConfigSpec:    spec,
+		}
+		result, err := cmd.Cluster.PlaceVm(ctx, pspec)
+		if err != nil {
+			return nil, err
+		}
+
+		recs := result.Recommendations
+		if len(recs) == 0 {
+			return nil, fmt.Errorf("no cluster recommendations")
+		}
+
+		rspec := *recs[0].Action[0].(*types.PlacementAction).RelocateSpec
+		if rspec.Datastore != nil {
+			datastore = object.NewDatastore(cmd.Client, *rspec.Datastore)
+			datastore.InventoryPath, _ = datastore.ObjectName(ctx)
+			cmd.Datastore = datastore
+		}
+		if rspec.Host != nil {
+			cmd.HostSystem = object.NewHostSystem(cmd.Client, *rspec.Host)
+		}
+		if rspec.Pool != nil {
+			cmd.ResourcePool = object.NewResourcePool(cmd.Client, *rspec.Pool)
+		}
+	} else {
+		return nil, fmt.Errorf("please provide either a cluster, datastore or datastore-cluster")
 	}
 
 	if !cmd.force {
@@ -535,7 +585,7 @@ func (cmd *create) recommendDatastore(ctx context.Context, spec *types.VirtualMa
 	// Use result to pin disks to recommended datastores
 	recs := result.Recommendations
 	if len(recs) == 0 {
-		return nil, fmt.Errorf("no recommendations")
+		return nil, fmt.Errorf("no datastore-cluster recommendations")
 	}
 
 	ds := recs[0].Action[0].(*types.StoragePlacementAction).Destination
