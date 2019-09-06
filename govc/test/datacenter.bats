@@ -16,6 +16,23 @@ load test_helper
   assert_failure
 }
 
+@test "datacenter.info with folders" {
+  vcsim_start -cluster 3 -folder 1
+
+  info=$(govc datacenter.info DC0)
+
+  hosts=$(govc find -type h | wc -l)
+  clusters=$(govc find -type c | wc -l)
+  vms=$(govc find -type m | wc -l)
+  datastores=$(govc find -type s | wc -l)
+
+
+  assert_equal "$hosts" "$(grep Hosts: <<<"$info" | awk '{print $2}')"
+  assert_equal "$clusters" "$(grep Clusters: <<<"$info" | awk '{print $2}')"
+  assert_equal "$vms" "$(grep "Virtual Machines": <<<"$info" | awk '{print $3}')"
+  assert_equal "$datastores" "$(grep Datastores: <<<"$info" | awk '{print $2}')"
+}
+
 @test "datacenter.create" {
   vcsim_env
   unset GOVC_DATACENTER
