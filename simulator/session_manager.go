@@ -81,7 +81,7 @@ func (s *SessionManager) validLogin(ctx *Context, req *types.Login) bool {
 		return false
 	}
 	user := ctx.svc.Listen.User
-	if user == nil {
+	if user == nil || user == DefaultLogin {
 		return req.UserName != "" && req.Password != ""
 	}
 	pass, _ := user.Password()

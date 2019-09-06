@@ -25,7 +25,6 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/vpx"
-	sts "github.com/vmware/govmomi/sts/simulator"
 )
 
 func TestClient(t *testing.T) {
@@ -35,8 +34,6 @@ func TestClient(t *testing.T) {
 
 	ts := s.NewServer()
 	defer ts.Close()
-
-	_, _ = sts.New(ts.URL, vpx.Setting) // rewrite sts.uri
 
 	ctx := context.Background()
 

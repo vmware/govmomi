@@ -32,6 +32,14 @@ var content = types.LookupServiceContent{
 	L10n:                         vim.ManagedObjectReference{Type: "LookupL10n", Value: "l10n"},
 }
 
+func init() {
+	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
+		if r.IsVPX() {
+			s.RegisterSDK(New())
+		}
+	})
+}
+
 func New() *simulator.Registry {
 	r := simulator.NewRegistry()
 	r.Namespace = lookup.Namespace

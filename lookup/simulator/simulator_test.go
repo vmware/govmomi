@@ -25,8 +25,6 @@ import (
 	"github.com/vmware/govmomi/lookup"
 	"github.com/vmware/govmomi/lookup/types"
 	"github.com/vmware/govmomi/simulator"
-	"github.com/vmware/govmomi/simulator/vpx"
-	sts "github.com/vmware/govmomi/sts/simulator"
 )
 
 func TestClient(t *testing.T) {
@@ -44,8 +42,6 @@ func TestClient(t *testing.T) {
 	defer s.Close()
 
 	model.Service.RegisterSDK(New())
-
-	_, _ = sts.New(s.URL, vpx.Setting) // rewrite sts.uri
 
 	vc, err := govmomi.NewClient(ctx, s.URL, true)
 	if err != nil {
