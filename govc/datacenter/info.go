@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"path"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/find"
@@ -154,17 +153,12 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "Name:\t%s\n", dc.Name)
 		fmt.Fprintf(tw, "  Path:\t%s\n", o.InventoryPath)
 
-		folders, err := o.Folders(r.ctx)
-		if err != nil {
-			return err
-		}
-
 		r.finder.SetDatacenter(o)
 
-		hosts, _ := r.finder.HostSystemList(r.ctx, path.Join(folders.HostFolder.InventoryPath, "*"))
+		hosts, _ := r.finder.HostSystemList(r.ctx, "*")
 		fmt.Fprintf(tw, "  Hosts:\t%d\n", len(hosts))
 
-		clusters, _ := r.finder.ClusterComputeResourceList(r.ctx, path.Join(folders.HostFolder.InventoryPath, "*"))
+		clusters, _ := r.finder.ClusterComputeResourceList(r.ctx, "*")
 		fmt.Fprintf(tw, "  Clusters:\t%d\n", len(clusters))
 
 		manager := view.NewManager(r.client)
