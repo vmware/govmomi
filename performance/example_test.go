@@ -28,7 +28,7 @@ import (
 )
 
 func ExampleManager_ToMetricSeries() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		// Get virtual machines references
 		m := view.NewManager(c)
 

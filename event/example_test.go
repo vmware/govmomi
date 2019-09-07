@@ -28,7 +28,7 @@ import (
 )
 
 func ExampleManager_Events() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		m := event.NewManager(c)
 
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")

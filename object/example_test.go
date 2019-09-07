@@ -32,7 +32,7 @@ import (
 )
 
 func ExampleResourcePool_Owner() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		finder := find.NewFinder(c)
 
 		for _, name := range []string{"DC0_H0_VM0", "DC0_C0_RP0_VM0"} {
@@ -62,7 +62,7 @@ func ExampleResourcePool_Owner() {
 }
 
 func ExampleVirtualMachine_HostSystem() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
 		if err != nil {
 			return err
@@ -86,7 +86,7 @@ func ExampleVirtualMachine_HostSystem() {
 }
 
 func ExampleVirtualMachine_Clone() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		finder := find.NewFinder(c)
 		dc, err := finder.Datacenter(ctx, "DC0")
 		if err != nil {
@@ -133,7 +133,7 @@ func ExampleVirtualMachine_Clone() {
 }
 
 func ExampleVirtualMachine_Reconfigure() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
 		if err != nil {
 			return err
@@ -168,7 +168,7 @@ func ExampleCommon_Destroy() {
 	model := simulator.VPX()
 	model.Datastore = 2
 
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		// Change to "LocalDS_0" will cause ResourceInUse error,
 		// as simulator VMs created by the VPX model use "LocalDS_0".
 		ds, err := find.NewFinder(c).Datastore(ctx, "LocalDS_1")
@@ -192,7 +192,7 @@ func ExampleCommon_Destroy() {
 }
 
 func ExampleCustomFieldsManager_Set() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		m, err := object.GetCustomFieldsManager(c)
 		if err != nil {
 			return err
