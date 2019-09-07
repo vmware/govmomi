@@ -53,6 +53,9 @@ import (
 // Trace when set to true, writes SOAP traffic to stderr
 var Trace = false
 
+// DefaultLogin for authentication
+var DefaultLogin = url.UserPassword("user", "pass")
+
 // Method encapsulates a decoded SOAP client request
 type Method struct {
 	Name   string
@@ -73,6 +76,8 @@ type Service struct {
 	Listen   *url.URL
 	TLS      *tls.Config
 	ServeMux *http.ServeMux
+	// RegisterEndpoints will initialize any endpoints added via RegisterEndpoint
+	RegisterEndpoints bool
 }
 
 // Server provides a simulator Service over HTTP
@@ -362,6 +367,14 @@ func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 	_ = enc.Encode(&about)
 }
 
+var endpoints []func(*Service, *Registry)
+
+// RegisterEndpoint funcs are called after the Server is initialized if Service.RegisterEndpoints=true.
+// Such a func would typically register a SOAP endpoint via Service.RegisterSDK or REST endpoint via Service.Handle
+func RegisterEndpoint(endpoint func(*Service, *Registry)) {
+	endpoints = append(endpoints, endpoint)
+}
+
 // Handle registers the handler for the given pattern with Service.ServeMux.
 func (s *Service) Handle(pattern string, handler http.Handler) {
 	s.ServeMux.Handle(pattern, handler)
@@ -619,6 +632,19 @@ func (s *Service) NewServer() *Server {
 
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
 	m := Map.OptionManager()
+	for i := range m.Setting {
+		setting := m.Setting[i].GetOptionValue()
+
+		if strings.HasSuffix(setting.Key, ".uri") {
+			// Rewrite any URIs with vcsim's host:port
+			endpoint, err := url.Parse(setting.Value.(string))
+			if err == nil {
+				endpoint.Scheme = u.Scheme
+				endpoint.Host = u.Host
+				setting.Value = endpoint.String()
+			}
+		}
+	}
 	m.Setting = append(m.Setting,
 		&types.OptionValue{
 			Key:   "vcsim.server.url",
@@ -628,7 +654,14 @@ func (s *Service) NewServer() *Server {
 
 	u.User = s.Listen.User
 	if u.User == nil {
-		u.User = url.UserPassword("user", "pass")
+		u.User = DefaultLogin
+	}
+	s.Listen = u
+
+	if s.RegisterEndpoints {
+		for i := range endpoints {
+			endpoints[i](s, Map)
+		}
 	}
 
 	if s.TLS != nil {

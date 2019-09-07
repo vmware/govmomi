@@ -42,6 +42,14 @@ var content = types.PbmServiceInstanceContent{
 	ReplicationManager:        &vim.ManagedObjectReference{Type: "PbmReplicationManager", Value: "ReplicationManager"},
 }
 
+func init() {
+	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
+		if r.IsVPX() {
+			s.RegisterSDK(New())
+		}
+	})
+}
+
 func New() *simulator.Registry {
 	r := simulator.NewRegistry()
 	r.Namespace = pbm.Namespace

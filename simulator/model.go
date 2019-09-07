@@ -97,7 +97,7 @@ type Model struct {
 	Pod int
 
 	// Delay configurations
-	DelayConfig DelayConfig
+	DelayConfig DelayConfig `json:"-"`
 
 	// total number of inventory objects, set by Count()
 	total int
@@ -530,6 +530,8 @@ func (m *Model) Run(f func(context.Context, *vim25.Client) error) error {
 	if err != nil {
 		return err
 	}
+
+	m.Service.RegisterEndpoints = true
 
 	s := m.Service.NewServer()
 	defer s.Close()

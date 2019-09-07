@@ -40,6 +40,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -90,6 +91,15 @@ type handler struct {
 	Library     map[string]content
 	Update      map[string]update
 	Download    map[string]download
+}
+
+func init() {
+	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
+		if r.IsVPX() {
+			path, handler := New(s.Listen, r.OptionManager().Setting)
+			s.Handle(path, handler)
+		}
+	})
 }
 
 // New creates a vAPI simulator.

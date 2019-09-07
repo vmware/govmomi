@@ -33,15 +33,16 @@ import (
 	"syscall"
 
 	"github.com/google/uuid"
-	lookup "github.com/vmware/govmomi/lookup/simulator"
-	pbm "github.com/vmware/govmomi/pbm/simulator"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
-	"github.com/vmware/govmomi/simulator/vpx"
-	sts "github.com/vmware/govmomi/sts/simulator"
-	vapi "github.com/vmware/govmomi/vapi/simulator"
 	"github.com/vmware/govmomi/vim25/types"
+
+	// Register vcsim optional endpoints
+	_ "github.com/vmware/govmomi/lookup/simulator"
+	_ "github.com/vmware/govmomi/pbm/simulator"
+	_ "github.com/vmware/govmomi/sts/simulator"
+	_ "github.com/vmware/govmomi/vapi/simulator"
 )
 
 func main() {
@@ -147,6 +148,7 @@ func main() {
 		log.Fatal(err)
 	}
 
+	model.Service.RegisterEndpoints = true
 	model.Service.Listen = u
 	if *isTLS {
 		model.Service.TLS = new(tls.Config)
@@ -181,22 +183,6 @@ func main() {
 		if err := s.StartTunnel(); err != nil {
 			log.Fatal(err)
 		}
-	}
-
-	if !*isESX {
-		// STS simulator
-		path, handler := sts.New(s.URL, vpx.Setting)
-		model.Service.Handle(path, handler)
-
-		// vAPI simulator
-		path, handler = vapi.New(s.URL, vpx.Setting)
-		model.Service.Handle(path, handler)
-
-		// Lookup Service simulator
-		model.Service.RegisterSDK(lookup.New())
-
-		// PBM simulator
-		model.Service.RegisterSDK(pbm.New())
 	}
 
 	fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
