@@ -61,6 +61,39 @@ func ExampleResourcePool_Owner() {
 	// DC0_C0_RP0_VM0 owner is a *object.ClusterComputeResource
 }
 
+func ExampleVirtualMachine_CreateSnapshot() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+
+		task, err := vm.CreateSnapshot(ctx, "backup", "Backup", false, false)
+		if err != nil {
+			return err
+		}
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+
+		id, err := vm.FindSnapshot(ctx, "backup")
+		if err != nil {
+			return err
+		}
+
+		var snapshot mo.VirtualMachineSnapshot
+		err = vm.Properties(ctx, *id, []string{"config.hardware.device"}, &snapshot)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%d devices", len(snapshot.Config.Hardware.Device))
+
+		return nil
+	})
+	// Output: 13 devices
+}
+
 func ExampleVirtualMachine_HostSystem() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
