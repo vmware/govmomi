@@ -34,7 +34,7 @@ func ExampleContainerView_Retrieve() {
 	model := simulator.VPX()
 	model.Datacenter = 2
 
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		m := view.NewManager(c)
 		kind := []string{"HostSystem"}
 
@@ -68,7 +68,7 @@ func ExampleContainerView_Retrieve() {
 
 // Create a view of all VMs in the inventory, printing VM names that end with "_VM1".
 func ExampleContainerView_RetrieveWithFilter() {
-	simulator.Example(func(ctx context.Context, c *vim25.Client) error {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		m := view.NewManager(c)
 		kind := []string{"VirtualMachine"}
 
