@@ -106,6 +106,7 @@ var hidCharacterMap = map[string]hidKey{
 	"*": {0x25, true},
 	"(": {0x26, true},
 	")": {0x27, true},
+	" ": {0x2c, false},
 	"-": {0x2d, false},
 	"_": {0x2d, true},
 	"=": {0x2e, false},
