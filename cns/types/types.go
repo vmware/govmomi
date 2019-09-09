@@ -20,6 +20,7 @@ import (
 	"reflect"
 
 	"github.com/vmware/govmomi/vim25/types"
+	vsanfstypes "github.com/vmware/govmomi/vsan/vsanfs/types"
 )
 
 type CnsCreateVolumeRequestType struct {
@@ -83,6 +84,7 @@ type CnsVolumeCreateSpec struct {
 	Metadata             CnsVolumeMetadata                     `xml:"metadata,omitempty"`
 	BackingObjectDetails BaseCnsBackingObjectDetails           `xml:"backingObjectDetails,typeattr"`
 	Profile              []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
+	CreateSpec           BaseCnsBaseCreateSpec                 `xml:"createSpec,omitempty,typeattr"`
 }
 
 func init() {
@@ -325,6 +327,53 @@ type CnsBlockBackingDetails struct {
 
 func init() {
 	types.Add("CnsBlockBackingDetails", reflect.TypeOf((*CnsBlockBackingDetails)(nil)).Elem())
+}
+
+type CnsFileBackingDetails struct {
+	CnsBackingObjectDetails
+
+	BackingFileId string `xml:"backingDiskId,omitempty"`
+}
+
+func init() {
+	types.Add("CnsFileBackingDetails", reflect.TypeOf((*CnsFileBackingDetails)(nil)).Elem())
+}
+
+type CnsNfsFileShareBackingDetails struct {
+	CnsFileBackingDetails
+
+	Name    string `xml:"name,omitempty"`
+	Address string `xml:"address,omitempty"`
+}
+
+func init() {
+	types.Add("CnsNfsFileShareBackingDetails", reflect.TypeOf((*CnsNfsFileShareBackingDetails)(nil)).Elem())
+}
+
+type CnsBaseCreateSpec struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("CnsBaseCreateSpec", reflect.TypeOf((*CnsBaseCreateSpec)(nil)).Elem())
+}
+
+type CnsFileCreateSpec struct {
+	CnsBaseCreateSpec
+}
+
+func init() {
+	types.Add("CnsFileCreateSpec", reflect.TypeOf((*CnsFileCreateSpec)(nil)).Elem())
+}
+
+type CnsVSANFileCreateSpec struct {
+	CnsFileCreateSpec
+	SoftQuotaInMb int64                                    `xml:"softQuotaInMb,omitempty"`
+	Permission    []vsanfstypes.VsanFileShareNetPermission `xml:"permission,omitempty,typeattr"`
+}
+
+func init() {
+	types.Add("CnsVSANFileCreateSpec", reflect.TypeOf((*CnsVSANFileCreateSpec)(nil)).Elem())
 }
 
 type CnsQueryFilter struct {
