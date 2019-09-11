@@ -59,6 +59,7 @@ func (flag *AuthFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	}
 	usage := fmt.Sprintf("Guest VM credentials [%s]", env)
 	f.Var(flag, "l", usage)
+	f.BoolVar(&flag.auth.GetGuestAuthentication().InteractiveSession, "i", false, "Interactive session")
 }
 
 func (flag *AuthFlag) Process(ctx context.Context) error {
