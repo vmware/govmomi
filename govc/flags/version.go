@@ -21,7 +21,7 @@ import (
 	"strings"
 )
 
-const Version = "0.21.0"
+const Version = "0.22.0"
 
 var GitVersion string
 
