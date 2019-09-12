@@ -281,12 +281,14 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 
 		switch key {
 		case "guest.ipAddress":
-			ip := val.Value.(string)
-			vm.Guest.Net[0].IpAddress = []string{ip}
-			changes = append(changes,
-				types.PropertyChange{Name: "summary." + key, Val: ip},
-				types.PropertyChange{Name: "guest.net", Val: vm.Guest.Net},
-			)
+			if len(vm.Guest.Net) > 0 {
+				ip := val.Value.(string)
+				vm.Guest.Net[0].IpAddress = []string{ip}
+				changes = append(changes,
+					types.PropertyChange{Name: "summary." + key, Val: ip},
+					types.PropertyChange{Name: "guest.net", Val: vm.Guest.Net},
+				)
+			}
 		case "guest.hostName":
 			changes = append(changes,
 				types.PropertyChange{Name: "summary." + key, Val: val.Value},
