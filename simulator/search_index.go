@@ -19,7 +19,6 @@ package simulator
 import (
 	"strings"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -28,12 +27,6 @@ import (
 
 type SearchIndex struct {
 	mo.SearchIndex
-}
-
-func NewSearchIndex(ref types.ManagedObjectReference) object.Reference {
-	m := &SearchIndex{}
-	m.Self = ref
-	return m
 }
 
 func (s *SearchIndex) FindByDatastorePath(r *types.FindByDatastorePath) soap.HasFault {

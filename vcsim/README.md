@@ -21,7 +21,7 @@ removed using the API.
 
 Example using the default settings:
 
-```
+```console
 % export GOVC_URL=https://user:pass@127.0.0.1:8989
 % $GOPATH/bin/vcsim
 % govc find
@@ -51,7 +51,7 @@ Example using the default settings:
 
 Example using ESX mode:
 
-```
+```console
 % $GOPATH/vcsim -esx
 % govc find
 /
@@ -67,7 +67,33 @@ Example using ESX mode:
 /ha-datacenter/datastore/LocalDS_0
 /ha-datacenter/network
 /ha-datacenter/network/VM Network
+```
 
+## Record & Playback
+
+Example to record the inventory of a live vCenter or ESX and playback with vcsim:
+
+```console
+% govc object.save -u user:pass@my-vcenter -d my-vcenter
+Saved 164 total objects, including:
+ClusterComputeResource: 2
+Datastore: 6
+DistributedVirtualPortgroup: 2
+EnvironmentBrowser: 2
+Folder: 20
+HostDatastoreBrowser: 6
+HostSystem: 4
+Network: 3
+OpaqueNetwork: 30
+ResourcePool: 15
+VirtualMachine: 29
+
+% vcsim -load my-vcenter &
+% govc find -u user:pass@127.0.0.1:8989 / -type ClusterComputeResource | wc -l
+2
+
+% govc find -u user:pass@127.0.0.1:8989 / -type Datastore | wc -l
+6
 ```
 
 ## Supported methods

@@ -63,7 +63,10 @@ func (f *Folder) update(o mo.Reference, u func(mo.Reference, *[]types.ManagedObj
 	}
 }
 
-func networkSummary(n *mo.Network) *types.NetworkSummary {
+func networkSummary(n *mo.Network) types.BaseNetworkSummary {
+	if n.Summary != nil {
+		return n.Summary
+	}
 	return &types.NetworkSummary{
 		Network:    &n.Self,
 		Name:       n.Name,

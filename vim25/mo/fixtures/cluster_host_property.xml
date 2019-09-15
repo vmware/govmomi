@@ -3,6 +3,10 @@
  <returnval>
   <obj type="ClusterComputeResource">domain-c7</obj>
   <propSet>
+   <name>parent</name>
+   <val xsi:type="ManagedObjectReference" type="Folder">group-h6</val>
+  </propSet>
+  <propSet>
    <name>host</name>
    <val xsi:type="ArrayOfManagedObjectReference">
     <ManagedObjectReference type="HostSystem" xsi:type="ManagedObjectReference">host-14</ManagedObjectReference>

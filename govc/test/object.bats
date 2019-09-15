@@ -525,3 +525,15 @@ EOF
   run govc object.collect -s "$vm" disabledMethod
   ! assert_matches "Destroy_Task" "$output"
 }
+
+@test "object.save" {
+  vcsim_env
+
+  dir="$BATS_TMPDIR/$(new_id)"
+  run govc object.save -v -d "$dir" /DC0/vm
+  assert_success
+
+  n=$(ls "$dir"/*.xml | wc -l)
+  rm -rf "$dir"
+  assert_equal 6 "$n"
+}

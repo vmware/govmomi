@@ -23,6 +23,8 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"path/filepath"
+	"reflect"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
@@ -31,6 +33,7 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 type DelayConfig struct {
@@ -183,6 +186,139 @@ func (m *Model) Count() Model {
 
 func (*Model) fmtName(prefix string, num int) string {
 	return fmt.Sprintf("%s%d", prefix, num)
+}
+
+// kinds maps managed object types to their vcsim wrapper types
+var kinds = map[string]reflect.Type{
+	"AuthorizationManager":           reflect.TypeOf((*AuthorizationManager)(nil)).Elem(),
+	"ClusterComputeResource":         reflect.TypeOf((*ClusterComputeResource)(nil)).Elem(),
+	"CustomFieldsManager":            reflect.TypeOf((*CustomFieldsManager)(nil)).Elem(),
+	"Datacenter":                     reflect.TypeOf((*Datacenter)(nil)).Elem(),
+	"Datastore":                      reflect.TypeOf((*Datastore)(nil)).Elem(),
+	"DistributedVirtualPortgroup":    reflect.TypeOf((*DistributedVirtualPortgroup)(nil)).Elem(),
+	"DistributedVirtualSwitch":       reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem(),
+	"EnvironmentBrowser":             reflect.TypeOf((*EnvironmentBrowser)(nil)).Elem(),
+	"EventManager":                   reflect.TypeOf((*EventManager)(nil)).Elem(),
+	"FileManager":                    reflect.TypeOf((*FileManager)(nil)).Elem(),
+	"Folder":                         reflect.TypeOf((*Folder)(nil)).Elem(),
+	"HostDatastoreBrowser":           reflect.TypeOf((*HostDatastoreBrowser)(nil)).Elem(),
+	"HostLocalAccountManager":        reflect.TypeOf((*HostLocalAccountManager)(nil)).Elem(),
+	"HostSystem":                     reflect.TypeOf((*HostSystem)(nil)).Elem(),
+	"IpPoolManager":                  reflect.TypeOf((*IpPoolManager)(nil)).Elem(),
+	"LicenseManager":                 reflect.TypeOf((*LicenseManager)(nil)).Elem(),
+	"OptionManager":                  reflect.TypeOf((*OptionManager)(nil)).Elem(),
+	"OvfManager":                     reflect.TypeOf((*OvfManager)(nil)).Elem(),
+	"PerformanceManager":             reflect.TypeOf((*PerformanceManager)(nil)).Elem(),
+	"PropertyCollector":              reflect.TypeOf((*PropertyCollector)(nil)).Elem(),
+	"ResourcePool":                   reflect.TypeOf((*ResourcePool)(nil)).Elem(),
+	"SearchIndex":                    reflect.TypeOf((*SearchIndex)(nil)).Elem(),
+	"SessionManager":                 reflect.TypeOf((*SessionManager)(nil)).Elem(),
+	"StoragePod":                     reflect.TypeOf((*StoragePod)(nil)).Elem(),
+	"StorageResourceManager":         reflect.TypeOf((*StorageResourceManager)(nil)).Elem(),
+	"TaskManager":                    reflect.TypeOf((*TaskManager)(nil)).Elem(),
+	"UserDirectory":                  reflect.TypeOf((*UserDirectory)(nil)).Elem(),
+	"VcenterVStorageObjectManager":   reflect.TypeOf((*VcenterVStorageObjectManager)(nil)).Elem(),
+	"ViewManager":                    reflect.TypeOf((*ViewManager)(nil)).Elem(),
+	"VirtualApp":                     reflect.TypeOf((*VirtualApp)(nil)).Elem(),
+	"VirtualDiskManager":             reflect.TypeOf((*VirtualDiskManager)(nil)).Elem(),
+	"VirtualMachine":                 reflect.TypeOf((*VirtualMachine)(nil)).Elem(),
+	"VmwareDistributedVirtualSwitch": reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem(),
+}
+
+func loadObject(content types.ObjectContent) (mo.Reference, error) {
+	var obj mo.Reference
+	id := content.Obj
+
+	kind, ok := kinds[id.Type]
+	if ok {
+		obj = reflect.New(kind).Interface().(mo.Reference)
+	}
+
+	if obj == nil {
+		// No vcsim wrapper for this type, e.g. IoFilterManager
+		x, err := mo.ObjectContentToType(content, true)
+		if err != nil {
+			return nil, err
+		}
+		obj = x.(mo.Reference)
+	} else {
+		if len(content.PropSet) == 0 {
+			// via NewServiceInstance()
+			Map.setReference(obj, id)
+		} else {
+			// via Model.Load()
+			dst := getManagedObject(obj).Addr().Interface().(mo.Reference)
+			err := mo.LoadObjectContent([]types.ObjectContent{content}, dst)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if x, ok := obj.(interface{ init(*Registry) }); ok {
+			x.init(Map)
+		}
+	}
+
+	return obj, nil
+}
+
+// Load Model from the given directory, as created by the 'govc object.save' command.
+func (m *Model) Load(dir string) error {
+	var s *ServiceInstance
+
+	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+		if info.IsDir() {
+			return nil
+		}
+		if filepath.Ext(path) != ".xml" {
+			return nil
+		}
+
+		f, err := os.Open(path)
+		if err != nil {
+			return err
+		}
+		defer func() { _ = f.Close() }()
+
+		dec := xml.NewDecoder(f)
+		dec.TypeFunc = types.TypeFunc()
+		var content types.ObjectContent
+		err = dec.Decode(&content)
+		if err != nil {
+			return err
+		}
+
+		if content.Obj == vim25.ServiceInstance {
+			s = new(ServiceInstance)
+			s.Self = content.Obj
+			Map = NewRegistry()
+			Map.Put(s)
+			return mo.LoadObjectContent([]types.ObjectContent{content}, &s.ServiceInstance)
+		}
+
+		if s == nil {
+			return fmt.Errorf("model: missing %s", vim25.ServiceInstance)
+		}
+
+		obj, err := loadObject(content)
+		if err != nil {
+			return err
+		}
+		Map.Put(obj)
+
+		return nil
+	})
+
+	if err != nil {
+		return err
+	}
+
+	m.Service = New(s)
+
+	return nil
 }
 
 // Create populates the Model with the given ModelConfig
@@ -527,9 +663,12 @@ func (m *Model) Run(f func(context.Context, *vim25.Client) error) error {
 	ctx := context.Background()
 
 	defer m.Remove()
-	err := m.Create()
-	if err != nil {
-		return err
+
+	if m.Service == nil {
+		err := m.Create()
+		if err != nil {
+			return err
+		}
 	}
 
 	m.Service.TLS = new(tls.Config)

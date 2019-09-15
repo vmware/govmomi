@@ -142,3 +142,18 @@ func TestEmbeddedTypePropertySlice(t *testing.T) {
 		t.Fatal("Name fields should not be the same")
 	}
 }
+
+func TestReferences(t *testing.T) {
+	var cr ComputeResource
+
+	err := LoadObjectContent(load("fixtures/cluster_host_property.xml"), &cr)
+	if err != nil {
+		t.Fatalf("Expected no error, got: %s", err)
+	}
+
+	refs := References(cr)
+	n := len(refs)
+	if n != 5 {
+		t.Errorf("%d refs", n)
+	}
+}

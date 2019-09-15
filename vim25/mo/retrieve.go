@@ -46,7 +46,7 @@ func ignoreMissingProperty(ref types.ManagedObjectReference, p types.MissingProp
 // it returns the first fault it finds there as error. If the 'MissingSet'
 // field is empty, it returns a pointer to a reflect.Value. It handles contain
 // nested properties, such as 'guest.ipAddress' or 'config.hardware'.
-func ObjectContentToType(o types.ObjectContent) (interface{}, error) {
+func ObjectContentToType(o types.ObjectContent, ptr ...bool) (interface{}, error) {
 	// Expect no properties in the missing set
 	for _, p := range o.MissingSet {
 		if ignoreMissingProperty(o.Obj, p) {
@@ -62,6 +62,9 @@ func ObjectContentToType(o types.ObjectContent) (interface{}, error) {
 		return nil, err
 	}
 
+	if len(ptr) == 1 && ptr[0] {
+		return v.Interface(), nil
+	}
 	return v.Elem().Interface(), nil
 }
 
@@ -187,4 +190,58 @@ func RetrieveProperties(ctx context.Context, r soap.RoundTripper, pc, obj types.
 	}
 
 	return RetrievePropertiesForRequest(ctx, r, req, dst)
+}
+
+var morType = reflect.TypeOf((*types.ManagedObjectReference)(nil)).Elem()
+
+// References returns all non-nil moref field values in the given struct.
+func References(s interface{}) []types.ManagedObjectReference {
+	var refs []types.ManagedObjectReference
+	rval := reflect.ValueOf(s)
+	rtype := rval.Type()
+
+	if rval.Kind() == reflect.Ptr {
+		rval = rval.Elem()
+		rtype = rval.Type()
+	}
+
+	for i := 0; i < rval.NumField(); i++ {
+		val := rval.Field(i)
+		finfo := rtype.Field(i)
+
+		if finfo.Anonymous {
+			refs = append(refs, References(val.Interface())...)
+			continue
+		}
+		if finfo.Name == "Self" {
+			continue
+		}
+
+		ftype := val.Type()
+
+		if ftype.Kind() == reflect.Slice {
+			if ftype.Elem() == morType {
+				s := val.Interface().([]types.ManagedObjectReference)
+				for i := range s {
+					refs = append(refs, s[i])
+				}
+			}
+			continue
+		}
+
+		if ftype.Kind() == reflect.Ptr {
+			if val.IsNil() {
+				continue
+			}
+			val = val.Elem()
+			ftype = val.Type()
+		}
+
+		if ftype == morType {
+			refs = append(refs, val.Interface().(types.ManagedObjectReference))
+			continue
+		}
+	}
+
+	return refs
 }

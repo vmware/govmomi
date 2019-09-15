@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -30,12 +29,6 @@ import (
 
 type VirtualDiskManager struct {
 	mo.VirtualDiskManager
-}
-
-func NewVirtualDiskManager(ref types.ManagedObjectReference) object.Reference {
-	m := &VirtualDiskManager{}
-	m.Self = ref
-	return m
 }
 
 func (m *VirtualDiskManager) names(name string) []string {

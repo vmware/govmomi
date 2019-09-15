@@ -43,11 +43,8 @@ type VcenterVStorageObjectManager struct {
 	objects map[types.ManagedObjectReference]map[types.ID]*VStorageObject
 }
 
-func NewVcenterVStorageObjectManager(ref types.ManagedObjectReference) object.Reference {
-	m := &VcenterVStorageObjectManager{}
-	m.Self = ref
+func (m *VcenterVStorageObjectManager) init(*Registry) {
 	m.objects = make(map[types.ManagedObjectReference]map[types.ID]*VStorageObject)
-	return m
 }
 
 func (m *VcenterVStorageObjectManager) object(ds types.ManagedObjectReference, id types.ID) *VStorageObject {

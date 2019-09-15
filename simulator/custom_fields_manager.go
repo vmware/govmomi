@@ -17,7 +17,6 @@ limitations under the License.
 package simulator
 
 import (
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -28,12 +27,6 @@ type CustomFieldsManager struct {
 	mo.CustomFieldsManager
 
 	nextKey int32
-}
-
-func NewCustomFieldsManager(ref types.ManagedObjectReference) object.Reference {
-	m := &CustomFieldsManager{}
-	m.Self = ref
-	return m
 }
 
 // Iterates through all entities of passed field type;

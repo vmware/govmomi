@@ -24,7 +24,6 @@ import (
 	"text/template"
 	"time"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -47,20 +46,17 @@ type EventManager struct {
 	templates  map[string]*template.Template
 }
 
-func NewEventManager(ref types.ManagedObjectReference) object.Reference {
-	return &EventManager{
-		EventManager: mo.EventManager{
-			Self: ref,
-			Description: types.EventDescription{
-				EventInfo: esx.EventInfo,
-			},
-			MaxCollector: 1000,
-		},
-		root:       Map.content().RootFolder,
-		page:       ring.New(maxPageSize),
-		collectors: make(map[types.ManagedObjectReference]*EventHistoryCollector),
-		templates:  make(map[string]*template.Template),
+func (m *EventManager) init(r *Registry) {
+	if len(m.Description.EventInfo) == 0 {
+		m.Description.EventInfo = esx.EventInfo
 	}
+	if m.MaxCollector == 0 {
+		m.MaxCollector = 1000
+	}
+	m.root = r.content().RootFolder
+	m.page = ring.New(maxPageSize)
+	m.collectors = make(map[types.ManagedObjectReference]*EventHistoryCollector)
+	m.templates = make(map[string]*template.Template)
 }
 
 func (m *EventManager) createCollector(ctx *Context, req *types.CreateCollectorForEvents) (*EventHistoryCollector, *soap.Fault) {

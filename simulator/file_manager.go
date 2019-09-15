@@ -22,7 +22,6 @@ import (
 	"path"
 	"path/filepath"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -32,12 +31,6 @@ import (
 
 type FileManager struct {
 	mo.FileManager
-}
-
-func NewFileManager(ref types.ManagedObjectReference) object.Reference {
-	m := &FileManager{}
-	m.Self = ref
-	return m
 }
 
 func (f *FileManager) findDatastore(ref mo.Reference, name string) (*Datastore, types.BaseMethodFault) {

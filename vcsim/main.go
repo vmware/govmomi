@@ -74,6 +74,7 @@ func main() {
 	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
 	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
 	stdinExit := flag.Bool("stdinexit", false, "Press any key to exit")
+	dir := flag.String("load", "", "Load model from directory")
 
 	flag.IntVar(&model.DelayConfig.Delay, "delay", model.DelayConfig.Delay, "Method response delay across all methods")
 	methodDelayP := flag.String("method-delay", "", "Delay per method on the form 'method1:delay1,method2:delay2...'")
@@ -143,7 +144,11 @@ func main() {
 
 	esx.HostSystem.Summary.Hardware.Vendor += tag
 
-	err = model.Create()
+	if *dir == "" {
+		err = model.Create()
+	} else {
+		err = model.Load(*dir)
+	}
 	if err != nil {
 		log.Fatal(err)
 	}
