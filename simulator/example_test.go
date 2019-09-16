@@ -93,9 +93,9 @@ func ExampleVPX() {
 	// Output: VirtualCenter with 4 hosts
 }
 
-// Run simplifies startup/cleanup of a simulator instance
+// Run simplifies startup/cleanup of a simulator instance for example or testing purposes.
 func ExampleModel_Run() {
-	simulator.VPX().Run(func(ctx context.Context, c *vim25.Client) error {
+	err := simulator.VPX().Run(func(ctx context.Context, c *vim25.Client) error {
 		// Client has connected and logged in to a new simulator instance.
 		// Server.Close and Model.Remove are called when this func returns.
 		s, err := session.NewManager(c).UserSession(ctx)
@@ -104,6 +104,23 @@ func ExampleModel_Run() {
 		}
 		fmt.Print(s.UserName)
 		return nil
+	})
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Output: user
+}
+
+// Test simplifies startup/cleanup of a simulator instance for testing purposes.
+func ExampleTest() {
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		// Client has connected and logged in to a new simulator instance.
+		// Server.Close and Model.Remove are called when this func returns.
+		s, err := session.NewManager(c).UserSession(ctx)
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Print(s.UserName)
 	})
 	// Output: user
 }
