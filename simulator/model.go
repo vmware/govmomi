@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -531,6 +532,7 @@ func (m *Model) Run(f func(context.Context, *vim25.Client) error) error {
 		return err
 	}
 
+	m.Service.TLS = new(tls.Config)
 	m.Service.RegisterEndpoints = true
 
 	s := m.Service.NewServer()
