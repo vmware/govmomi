@@ -89,7 +89,7 @@ func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string,
 		return nil
 	}
 
-	return mo.LoadRetrievePropertiesResponse(res, dst)
+	return mo.LoadObjectContent(res.Returnval, dst)
 }
 
 // RetrieveWithFilter populates dst as Retrieve does, but only for entities matching the given filter.
