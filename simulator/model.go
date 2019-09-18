@@ -21,6 +21,7 @@ import (
 	"crypto/tls"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -31,6 +32,7 @@ import (
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -262,6 +264,48 @@ func loadObject(content types.ObjectContent) (mo.Reference, error) {
 	return obj, nil
 }
 
+// resolveReferences attempts to resolve any object references that were not included via Load()
+// example: Load's dir only contains a single OpaqueNetwork, we need to create a Datacenter and
+// place the OpaqueNetwork in the Datacenter's network folder.
+func (m *Model) resolveReferences() error {
+	dc, ok := Map.Any("Datacenter").(*Datacenter)
+	if !ok {
+		// Need to have at least 1 Datacenter
+		root := Map.Get(Map.content().RootFolder).(*Folder)
+		ref := root.CreateDatacenter(internalContext, &types.CreateDatacenter{
+			This: root.Self,
+			Name: "DC0",
+		}).(*methods.CreateDatacenterBody).Res.Returnval
+		dc = Map.Get(ref).(*Datacenter)
+	}
+
+	for ref, val := range Map.objects {
+		me, ok := val.(mo.Entity)
+		if !ok {
+			continue
+		}
+		e := me.Entity()
+		if e.Parent == nil || ref.Type == "Folder" {
+			continue
+		}
+		if Map.Get(*e.Parent) == nil {
+			// object was loaded without its parent, attempt to foster with another parent
+			switch e.Parent.Type {
+			case "Folder":
+				folder := dc.folder(me)
+				e.Parent = &folder.Self
+				log.Printf("%s adopted %s", e.Parent, ref)
+				folder.putChild(me)
+			default:
+				return fmt.Errorf("unable to foster %s with parent type=%s", ref, e.Parent.Type)
+			}
+		}
+		// TODO: resolve any remaining orphan references via mo.References()
+	}
+
+	return nil
+}
+
 // Load Model from the given directory, as created by the 'govc object.save' command.
 func (m *Model) Load(dir string) error {
 	var s *ServiceInstance
@@ -300,13 +344,14 @@ func (m *Model) Load(dir string) error {
 		}
 
 		if s == nil {
-			return fmt.Errorf("model: missing %s", vim25.ServiceInstance)
+			s = NewServiceInstance(m.ServiceContent, m.RootFolder)
 		}
 
 		obj, err := loadObject(content)
 		if err != nil {
 			return err
 		}
+
 		Map.Put(obj)
 
 		return nil
@@ -318,7 +363,7 @@ func (m *Model) Load(dir string) error {
 
 	m.Service = New(s)
 
-	return nil
+	return m.resolveReferences()
 }
 
 // Create populates the Model with the given ModelConfig
