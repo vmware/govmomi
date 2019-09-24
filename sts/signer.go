@@ -141,7 +141,9 @@ func (s *Signer) Sign(env soap.Envelope) ([]byte, error) {
 				ID:           id,
 				Value:        base64.StdEncoding.EncodeToString(s.Certificate.Certificate[0]),
 			}
-		} else {
+		}
+		// When requesting HoK token for interactive user, request will have both priv. key and username/password.
+		if s.user != nil {
 			header.UsernameToken = &internal.UsernameToken{
 				Username: s.user.Username(),
 			}
