@@ -1461,7 +1461,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			Files: &types.VirtualMachineFileInfo{
 				VmPathName: strings.Replace(vm.Config.Files.VmPathName, vm.Name, req.Name, -1),
 			},
-			ExtraConfig: req.Spec.Config.ExtraConfig,			
+			ExtraConfig: req.Spec.Config.ExtraConfig,
 		}
 
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
