@@ -121,7 +121,11 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 
 // DeleteLibrary deletes an existing library.
 func (c *Manager) DeleteLibrary(ctx context.Context, library *Library) error {
-	url := c.Resource(internal.LocalLibraryPath).WithID(library.ID)
+	path := internal.LocalLibraryPath
+	if library.Type == "SUBSCRIBED" {
+		path = internal.SubscribedLibraryPath
+	}
+	url := c.Resource(path).WithID(library.ID)
 	return c.Do(ctx, url.Request(http.MethodDelete), nil)
 }
 
