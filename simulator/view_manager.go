@@ -117,7 +117,7 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 		}
 	}
 
-	ctx.Session.Put(container)
+	ctx.Session.setReference(container)
 
 	m.ViewList = append(m.ViewList, container.Reference())
 
@@ -127,6 +127,8 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 
 	seen := make(map[types.ManagedObjectReference]bool)
 	container.add(root, seen)
+
+	ctx.Session.Registry.Put(container)
 
 	return body
 }
