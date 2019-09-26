@@ -334,13 +334,20 @@ type Session struct {
 	*Registry
 }
 
-// Put wraps Registry.Put, setting the moref value to include the session key.
-func (s *Session) Put(item mo.Reference) mo.Reference {
+func (s *Session) setReference(item mo.Reference) {
 	ref := item.Reference()
 	if ref.Value == "" {
 		ref.Value = fmt.Sprintf("session[%s]%s", s.Key, uuid.New())
 	}
+	if ref.Type == "" {
+		ref.Type = typeName(item)
+	}
 	s.Registry.setReference(item, ref)
+}
+
+// Put wraps Registry.Put, setting the moref value to include the session key.
+func (s *Session) Put(item mo.Reference) mo.Reference {
+	s.setReference(item)
 	return s.Registry.Put(item)
 }
 

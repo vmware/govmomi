@@ -69,10 +69,6 @@ func NewViewManager(ref types.ManagedObjectReference) object.Reference {
 }
 
 func destroyView(ref types.ManagedObjectReference) soap.HasFault {
-	m := Map.ViewManager()
-
-	RemoveReference(&m.ViewList, ref)
-
 	return &methods.DestroyViewBody{
 		Res: &types.DestroyViewResponse{},
 	}
@@ -117,9 +113,7 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 		}
 	}
 
-	ctx.Session.Put(container)
-
-	m.ViewList = append(m.ViewList, container.Reference())
+	ctx.Session.setReference(container)
 
 	body.Res = &types.CreateContainerViewResponse{
 		Returnval: container.Self,
@@ -127,6 +121,8 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 
 	seen := make(map[types.ManagedObjectReference]bool)
 	container.add(root, seen)
+
+	ctx.Session.Registry.Put(container)
 
 	return body
 }

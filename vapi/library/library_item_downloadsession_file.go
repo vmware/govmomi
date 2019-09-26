@@ -38,7 +38,7 @@ type DownloadFile struct {
 
 // GetLibraryItemDownloadSessionFile retrieves information about a specific file that is a part of an download session.
 func (c *Manager) GetLibraryItemDownloadSessionFile(ctx context.Context, sessionID string, name string) (*DownloadFile, error) {
-	url := internal.URL(c, internal.LibraryItemDownloadSessionFile).WithID(sessionID).WithAction("get")
+	url := c.Resource(internal.LibraryItemDownloadSessionFile).WithID(sessionID).WithAction("get")
 	spec := struct {
 		Name string `json:"file_name"`
 	}{name}
@@ -55,14 +55,14 @@ func (c *Manager) GetLibraryItemDownloadSessionFile(ctx context.Context, session
 
 // ListLibraryItemDownloadSessionFile retrieves information about a specific file that is a part of an download session.
 func (c *Manager) ListLibraryItemDownloadSessionFile(ctx context.Context, sessionID string) ([]DownloadFile, error) {
-	url := internal.URL(c, internal.LibraryItemDownloadSessionFile).WithParameter("download_session_id", sessionID)
+	url := c.Resource(internal.LibraryItemDownloadSessionFile).WithParam("download_session_id", sessionID)
 	var res []DownloadFile
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // PrepareLibraryItemDownloadSessionFile retrieves information about a specific file that is a part of an download session.
 func (c *Manager) PrepareLibraryItemDownloadSessionFile(ctx context.Context, sessionID string, name string) (*DownloadFile, error) {
-	url := internal.URL(c, internal.LibraryItemDownloadSessionFile).WithID(sessionID).WithAction("prepare")
+	url := c.Resource(internal.LibraryItemDownloadSessionFile).WithID(sessionID).WithAction("prepare")
 	spec := struct {
 		Name string `json:"file_name"`
 	}{name}

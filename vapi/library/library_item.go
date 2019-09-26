@@ -77,27 +77,27 @@ func (c *Manager) CreateLibraryItem(ctx context.Context, item Item) (string, err
 			Type:        item.Type,
 		},
 	}
-	url := internal.URL(c, internal.LibraryItemPath)
+	url := c.Resource(internal.LibraryItemPath)
 	var res string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
 // DeleteLibraryItem deletes an existing library item.
 func (c *Manager) DeleteLibraryItem(ctx context.Context, item *Item) error {
-	url := internal.URL(c, internal.LibraryItemPath).WithID(item.ID)
+	url := c.Resource(internal.LibraryItemPath).WithID(item.ID)
 	return c.Do(ctx, url.Request(http.MethodDelete), nil)
 }
 
 // ListLibraryItems returns a list of all items in a content library.
 func (c *Manager) ListLibraryItems(ctx context.Context, id string) ([]string, error) {
-	url := internal.URL(c, internal.LibraryItemPath).WithParameter("library_id", id)
+	url := c.Resource(internal.LibraryItemPath).WithParam("library_id", id)
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // GetLibraryItem returns information on a library item for the given ID.
 func (c *Manager) GetLibraryItem(ctx context.Context, id string) (*Item, error) {
-	url := internal.URL(c, internal.LibraryItemPath).WithID(id)
+	url := c.Resource(internal.LibraryItemPath).WithID(id)
 	var res Item
 	return &res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
@@ -133,7 +133,7 @@ type FindItem struct {
 func (c *Manager) FindLibraryItems(
 	ctx context.Context, search FindItem) ([]string, error) {
 
-	url := internal.URL(c, internal.LibraryItemPath).WithAction("find")
+	url := c.Resource(internal.LibraryItemPath).WithAction("find")
 	spec := struct {
 		Spec FindItem `json:"spec"`
 	}{search}

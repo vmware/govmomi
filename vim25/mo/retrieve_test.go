@@ -25,7 +25,7 @@ import (
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
-func load(name string) *types.RetrievePropertiesResponse {
+func load(name string) []types.ObjectContent {
 	f, err := os.Open(name)
 	if err != nil {
 		panic(err)
@@ -41,13 +41,13 @@ func load(name string) *types.RetrievePropertiesResponse {
 		panic(err)
 	}
 
-	return &b
+	return b.Returnval
 }
 
 func TestNotAuthenticatedFault(t *testing.T) {
 	var s SessionManager
 
-	err := LoadRetrievePropertiesResponse(load("fixtures/not_authenticated_fault.xml"), &s)
+	err := LoadObjectContent(load("fixtures/not_authenticated_fault.xml"), &s)
 	if !soap.IsVimFault(err) {
 		t.Errorf("Expected IsVimFault")
 	}
@@ -61,7 +61,7 @@ func TestNotAuthenticatedFault(t *testing.T) {
 func TestNestedProperty(t *testing.T) {
 	var vm VirtualMachine
 
-	err := LoadRetrievePropertiesResponse(load("fixtures/nested_property.xml"), &vm)
+	err := LoadObjectContent(load("fixtures/nested_property.xml"), &vm)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %s", err)
 	}
@@ -91,7 +91,7 @@ func TestNestedProperty(t *testing.T) {
 func TestPointerProperty(t *testing.T) {
 	var vm VirtualMachine
 
-	err := LoadRetrievePropertiesResponse(load("fixtures/pointer_property.xml"), &vm)
+	err := LoadObjectContent(load("fixtures/pointer_property.xml"), &vm)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %s", err)
 	}
@@ -110,7 +110,7 @@ func TestEmbeddedTypeProperty(t *testing.T) {
 	// panic: reflect.Set: value of type mo.ClusterComputeResource is not assignable to type mo.ComputeResource
 	var cr ComputeResource
 
-	err := LoadRetrievePropertiesResponse(load("fixtures/cluster_host_property.xml"), &cr)
+	err := LoadObjectContent(load("fixtures/cluster_host_property.xml"), &cr)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %s", err)
 	}
@@ -123,7 +123,7 @@ func TestEmbeddedTypeProperty(t *testing.T) {
 func TestEmbeddedTypePropertySlice(t *testing.T) {
 	var me []ManagedEntity
 
-	err := LoadRetrievePropertiesResponse(load("fixtures/hostsystem_list_name_property.xml"), &me)
+	err := LoadObjectContent(load("fixtures/hostsystem_list_name_property.xml"), &me)
 	if err != nil {
 		t.Fatalf("Expected no error, got: %s", err)
 	}
