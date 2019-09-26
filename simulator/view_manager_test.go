@@ -111,16 +111,10 @@ func TestContainerViewVPX(t *testing.T) {
 
 	pc := property.DefaultCollector(c.Client)
 
-	mvm := Map.ViewManager()
-
 	for i, test := range tests {
 		cv, err := v.CreateContainerView(ctx, test.root, test.kinds, test.recurse)
 		if err != nil {
 			t.Fatal(err)
-		}
-
-		if len(mvm.ViewList) != 1 {
-			t.Errorf("ViewList=%s", mvm.ViewList)
 		}
 
 		var mcv mo.ContainerView
@@ -138,10 +132,6 @@ func TestContainerViewVPX(t *testing.T) {
 		err = cv.Destroy(ctx)
 		if err != nil {
 			t.Fatal(err)
-		}
-
-		if len(mvm.ViewList) != 0 {
-			t.Errorf("ViewList=%s", mvm.ViewList)
 		}
 	}
 }
