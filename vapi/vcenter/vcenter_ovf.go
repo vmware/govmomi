@@ -239,7 +239,7 @@ func NewManager(client *rest.Client) *Manager {
 
 // DeployLibraryItem deploys a library OVF
 func (c *Manager) DeployLibraryItem(ctx context.Context, libraryItemID string, deploy Deploy) (*types.ManagedObjectReference, error) {
-	url := internal.URL(c, internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("deploy")
+	url := c.Resource(internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("deploy")
 	var res Deployment
 	err := c.Do(ctx, url.Request(http.MethodPost, deploy), &res)
 	if err != nil {
@@ -254,7 +254,7 @@ func (c *Manager) DeployLibraryItem(ctx context.Context, libraryItemID string, d
 
 // FilterLibraryItem deploys a library OVF
 func (c *Manager) FilterLibraryItem(ctx context.Context, libraryItemID string, filter FilterRequest) (FilterResponse, error) {
-	url := internal.URL(c, internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("filter")
+	url := c.Resource(internal.VCenterOVFLibraryItem).WithID(libraryItemID).WithAction("filter")
 	var res FilterResponse
 	return res, c.Do(ctx, url.Request(http.MethodPost, filter), &res)
 }

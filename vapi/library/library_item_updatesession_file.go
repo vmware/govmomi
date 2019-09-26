@@ -50,7 +50,7 @@ type UpdateFile struct {
 
 // AddLibraryItemFile adds a file
 func (c *Manager) AddLibraryItemFile(ctx context.Context, sessionID string, updateFile UpdateFile) (*UpdateFile, error) {
-	url := internal.URL(c, internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("add")
+	url := c.Resource(internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("add")
 	spec := struct {
 		FileSpec UpdateFile `json:"file_spec"`
 	}{updateFile}
@@ -94,7 +94,7 @@ func (c *Manager) AddLibraryItemFileFromURI(
 // GetLibraryItemUpdateSessionFile retrieves information about a specific file
 // that is a part of an update session.
 func (c *Manager) GetLibraryItemUpdateSessionFile(ctx context.Context, sessionID string, fileName string) (*UpdateFile, error) {
-	url := internal.URL(c, internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("get")
+	url := c.Resource(internal.LibraryItemUpdateSessionFile).WithID(sessionID).WithAction("get")
 	spec := struct {
 		Name string `json:"file_name"`
 	}{fileName}

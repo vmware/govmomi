@@ -75,8 +75,8 @@ type download struct {
 }
 
 type handler struct {
-	*http.ServeMux
 	sync.Mutex
+	ServeMux    *http.ServeMux
 	URL         url.URL
 	Category    map[string]*tags.Category
 	Tag         map[string]*tags.Tag
@@ -144,20 +144,29 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 
 	for i := range handlers {
 		h := handlers[i]
-		s.HandleFunc(internal.Path+h.p, func(w http.ResponseWriter, r *http.Request) {
-			s.Lock()
-			defer s.Unlock()
-
-			if !s.isAuthorized(r) {
-				w.WriteHeader(http.StatusUnauthorized)
-				return
-			}
-
-			h.m(w, r)
-		})
+		s.HandleFunc(h.p, h.m)
 	}
 
-	return internal.Path + "/", s
+	return rest.Path + "/", s
+}
+
+// HandleFunc wraps the given handler with authorization checks and passes to http.ServeMux.HandleFunc
+func (s *handler) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	if !strings.HasPrefix(pattern, rest.Path) {
+		pattern = rest.Path + pattern
+	}
+
+	s.ServeMux.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		s.Lock()
+		defer s.Unlock()
+
+		if !s.isAuthorized(r) {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+
+		handler(w, r)
+	})
 }
 
 func (s *handler) isAuthorized(r *http.Request) bool {
@@ -255,8 +264,16 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 	return nil
 }
 
-// ok responds with http.StatusOK and json encodes val if given.
 func (s *handler) ok(w http.ResponseWriter, val ...interface{}) {
+	OK(w, val...)
+}
+
+func (s *handler) fail(w http.ResponseWriter, kind string) {
+	BadRequest(w, kind)
+}
+
+// OK responds with http.StatusOK and json encoded val if given.
+func OK(w http.ResponseWriter, val ...interface{}) {
 	w.WriteHeader(http.StatusOK)
 
 	if len(val) == 0 {
@@ -274,7 +291,8 @@ func (s *handler) ok(w http.ResponseWriter, val ...interface{}) {
 	}
 }
 
-func (s *handler) fail(w http.ResponseWriter, kind string) {
+// BadRequest responds with http.StatusBadRequest and json encoded vAPI error of type kind.
+func BadRequest(w http.ResponseWriter, kind string) {
 	w.WriteHeader(http.StatusBadRequest)
 
 	err := json.NewEncoder(w).Encode(struct {
@@ -305,11 +323,17 @@ func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h, _ := s.Handler(r)
+	h, _ := s.ServeMux.Handler(r)
 	h.ServeHTTP(w, r)
 }
 
 func (s *handler) decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
+	return Decode(r, w, val)
+}
+
+// Decode the request Body into val.
+// Returns true on success, otherwise false and sends the http.StatusBadRequest response.
+func Decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
 	defer r.Body.Close()
 	err := json.NewDecoder(r.Body).Decode(val)
 	if err != nil {
@@ -344,7 +368,7 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &http.Cookie{
 			Name:  internal.SessionCookieName,
 			Value: id,
-			Path:  internal.Path,
+			Path:  rest.Path,
 		})
 		s.ok(w, id)
 	case http.MethodDelete:
@@ -956,7 +980,7 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 				u := url.URL{
 					Scheme: s.URL.Scheme,
 					Host:   s.URL.Host,
-					Path:   path.Join(internal.Path, internal.LibraryItemFileData, id, info.Name),
+					Path:   path.Join(rest.Path, internal.LibraryItemFileData, id, info.Name),
 				}
 				info.UploadEndpoint = &library.TransferEndpoint{URI: u.String()}
 			case "PULL":
@@ -1110,7 +1134,7 @@ func (s *handler) libraryItemDownloadSessionFileID(w http.ResponseWriter, r *htt
 			u := url.URL{
 				Scheme: s.URL.Scheme,
 				Host:   s.URL.Host,
-				Path:   path.Join(internal.Path, internal.LibraryItemFileData, id, spec.File),
+				Path:   path.Join(rest.Path, internal.LibraryItemFileData, id, spec.File),
 			}
 			info := &library.DownloadFile{
 				Name:             spec.File,
