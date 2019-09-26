@@ -36,7 +36,7 @@ func NewContainerView(c *vim25.Client, ref types.ManagedObjectReference) *Contai
 }
 
 // Retrieve populates dst as property.Collector.Retrieve does, for all entities in the view of types specified by kind.
-func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string, dst interface{}) error {
+func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string, dst interface{}, pspec ...types.PropertySpec) error {
 	pc := property.DefaultCollector(v.Client())
 
 	ospec := types.ObjectSpec{
@@ -49,8 +49,6 @@ func (v ContainerView) Retrieve(ctx context.Context, kind []string, ps []string,
 			},
 		},
 	}
-
-	var pspec []types.PropertySpec
 
 	if len(kind) == 0 {
 		kind = []string{"ManagedEntity"}
