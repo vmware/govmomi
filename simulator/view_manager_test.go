@@ -18,7 +18,10 @@ package simulator
 
 import (
 	"context"
+	"sync"
 	"testing"
+
+	"github.com/vmware/govmomi/vim25"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
@@ -108,16 +111,10 @@ func TestContainerViewVPX(t *testing.T) {
 
 	pc := property.DefaultCollector(c.Client)
 
-	mvm := Map.ViewManager()
-
 	for i, test := range tests {
 		cv, err := v.CreateContainerView(ctx, test.root, test.kinds, test.recurse)
 		if err != nil {
 			t.Fatal(err)
-		}
-
-		if len(mvm.ViewList) != 1 {
-			t.Errorf("ViewList=%s", mvm.ViewList)
 		}
 
 		var mcv mo.ContainerView
@@ -136,9 +133,68 @@ func TestContainerViewVPX(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+	}
+}
 
-		if len(mvm.ViewList) != 0 {
-			t.Errorf("ViewList=%s", mvm.ViewList)
+func TestViewManager_CreateContainerView(t *testing.T) {
+	m := VPX()
+	m.Datacenter = 10 // smaller numbers than this sometimes fail to trigger the DATA RACE
+	m.Datastore = 10
+	err := m.Run(func(ctx context.Context, client *vim25.Client) (err error) {
+		manager := view.NewManager(client)
+		datacenterView, err := manager.CreateContainerView(ctx, client.ServiceContent.RootFolder, []string{"Datacenter"}, true)
+		if err != nil {
+			return err
 		}
+		defer datacenterView.Destroy(ctx)
+		var datacenterList []mo.Datacenter
+		err = datacenterView.Retrieve(ctx, []string{"Datacenter"}, []string{"name", "datastoreFolder"}, &datacenterList)
+		if err != nil {
+			return err
+		}
+		var getDataStores = func(dc mo.Datacenter) (dsNames []string, err error) {
+			dataStoreView, err := manager.CreateContainerView(ctx, dc.DatastoreFolder, []string{"Datastore"}, true)
+			if err != nil {
+				return dsNames, err
+			}
+			defer dataStoreView.Destroy(ctx)
+			var dsList []mo.Datastore
+			err = dataStoreView.Retrieve(ctx, []string{"Datastore"}, []string{"name"}, &dsList)
+			if err != nil {
+				return dsNames, err
+			}
+			for _, ds := range dsList {
+				dsNames = append(dsNames, ds.Name)
+			}
+			return dsNames, err
+		}
+		wg := &sync.WaitGroup{}
+		mtx := sync.Mutex{}
+		var datastores [][]string
+		wg.Add(len(datacenterList))
+		for _, dc := range datacenterList {
+			go func(ref mo.Datacenter) {
+				defer wg.Done()
+				ds, err := getDataStores(ref)
+				if err != nil {
+					return
+				}
+				mtx.Lock()
+				datastores = append(datastores, ds)
+				mtx.Unlock()
+			}(dc)
+		}
+		wg.Wait()
+		if len(datastores) != m.Datacenter {
+			t.Errorf("Invalid number of datacenters: %d", len(datastores))
+		} else {
+			if len(datastores[0]) != m.Datastore {
+				t.Errorf("Invalid number of datastores per datacenter: %d", len(datastores[0]))
+			}
+		}
+		return nil
+	})
+	if err != nil {
+		t.Errorf("Failed to run simulation: %s", err.Error())
 	}
 }
