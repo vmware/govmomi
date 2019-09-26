@@ -69,6 +69,7 @@ type Service struct {
 	client *vim25.Client
 	sm     *SessionManager
 	sdk    map[string]*Registry
+	funcs  []handleFunc
 	delay  *DelayConfig
 
 	readAll func(io.Reader) ([]byte, error)
@@ -385,6 +386,21 @@ func (s *Service) Handle(pattern string, handler http.Handler) {
 	}
 }
 
+type muxHandleFunc interface {
+	HandleFunc(string, func(http.ResponseWriter, *http.Request))
+}
+
+type handleFunc struct {
+	pattern string
+	handler func(http.ResponseWriter, *http.Request)
+}
+
+// HandleFunc dispatches to http.ServeMux.HandleFunc after all endpoints have been registered.
+// This allows dispatching to an endpoint's HandleFunc impl, such as vapi/simulator for example.
+func (s *Service) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
+	s.funcs = append(s.funcs, handleFunc{pattern, handler})
+}
+
 // RegisterSDK adds an HTTP handler for the Registry's Path and Namespace.
 func (s *Service) RegisterSDK(r *Registry) {
 	if s.ServeMux == nil {
@@ -661,6 +677,17 @@ func (s *Service) NewServer() *Server {
 	if s.RegisterEndpoints {
 		for i := range endpoints {
 			endpoints[i](s, Map)
+		}
+	}
+
+	for _, f := range s.funcs {
+		pattern := &url.URL{Path: f.pattern}
+		endpoint, _ := s.ServeMux.Handler(&http.Request{URL: pattern})
+
+		if mux, ok := endpoint.(muxHandleFunc); ok {
+			mux.HandleFunc(f.pattern, f.handler) // e.g. vapi/simulator
+		} else {
+			s.ServeMux.HandleFunc(f.pattern, f.handler)
 		}
 	}
 

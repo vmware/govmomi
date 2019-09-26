@@ -90,7 +90,7 @@ func (c *Manager) CreateTag(ctx context.Context, tag *Tag) (string, error) {
 		}
 		spec.Tag.CategoryID = cat.ID
 	}
-	url := internal.URL(c, internal.TagPath)
+	url := c.Resource(internal.TagPath)
 	var res string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
@@ -105,13 +105,13 @@ func (c *Manager) UpdateTag(ctx context.Context, tag *Tag) error {
 			Description: tag.Description,
 		},
 	}
-	url := internal.URL(c, internal.TagPath).WithID(tag.ID)
+	url := c.Resource(internal.TagPath).WithID(tag.ID)
 	return c.Do(ctx, url.Request(http.MethodPatch, spec), nil)
 }
 
 // DeleteTag deletes an existing tag.
 func (c *Manager) DeleteTag(ctx context.Context, tag *Tag) error {
-	url := internal.URL(c, internal.TagPath).WithID(tag.ID)
+	url := c.Resource(internal.TagPath).WithID(tag.ID)
 	return c.Do(ctx, url.Request(http.MethodDelete), nil)
 }
 
@@ -131,7 +131,7 @@ func (c *Manager) GetTag(ctx context.Context, id string) (*Tag, error) {
 		}
 	}
 
-	url := internal.URL(c, internal.TagPath).WithID(id)
+	url := c.Resource(internal.TagPath).WithID(id)
 	var res Tag
 	return &res, c.Do(ctx, url.Request(http.MethodGet), &res)
 
@@ -163,7 +163,7 @@ func (c *Manager) GetTagForCategory(ctx context.Context, id, category string) (*
 
 // ListTags returns all tag IDs in the system.
 func (c *Manager) ListTags(ctx context.Context) ([]string, error) {
-	url := internal.URL(c, internal.TagPath)
+	url := c.Resource(internal.TagPath)
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
@@ -201,7 +201,7 @@ func (c *Manager) ListTagsForCategory(ctx context.Context, id string) ([]string,
 	body := struct {
 		ID string `json:"category_id"`
 	}{id}
-	url := internal.URL(c, internal.TagPath).WithID(id).WithAction("list-tags-for-category")
+	url := c.Resource(internal.TagPath).WithID(id).WithAction("list-tags-for-category")
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodPost, body), &res)
 }

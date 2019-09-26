@@ -96,7 +96,7 @@ type Find struct {
 // to search for all libraries, all libraries with a specific name, regardless
 // of type, or all libraries of a specified type.
 func (c *Manager) FindLibrary(ctx context.Context, search Find) ([]string, error) {
-	url := internal.URL(c, internal.LibraryPath).WithAction("find")
+	url := c.Resource(internal.LibraryPath).WithAction("find")
 	spec := struct {
 		Spec Find `json:"spec"`
 	}{search}
@@ -114,27 +114,27 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 	if library.Type == "SUBSCRIBED" {
 		path = internal.SubscribedLibraryPath
 	}
-	url := internal.URL(c, path)
+	url := c.Resource(path)
 	var res string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
 // DeleteLibrary deletes an existing library.
 func (c *Manager) DeleteLibrary(ctx context.Context, library *Library) error {
-	url := internal.URL(c, internal.LocalLibraryPath).WithID(library.ID)
+	url := c.Resource(internal.LocalLibraryPath).WithID(library.ID)
 	return c.Do(ctx, url.Request(http.MethodDelete), nil)
 }
 
 // ListLibraries returns a list of all content library IDs in the system.
 func (c *Manager) ListLibraries(ctx context.Context) ([]string, error) {
-	url := internal.URL(c, internal.LibraryPath)
+	url := c.Resource(internal.LibraryPath)
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // GetLibraryByID returns information on a library for the given ID.
 func (c *Manager) GetLibraryByID(ctx context.Context, id string) (*Library, error) {
-	url := internal.URL(c, internal.LibraryPath).WithID(id)
+	url := c.Resource(internal.LibraryPath).WithID(id)
 	var res Library
 	return &res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }

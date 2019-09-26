@@ -40,14 +40,14 @@ type File struct {
 
 // ListLibraryItemFiles returns a list of all the files for a library item.
 func (c *Manager) ListLibraryItemFiles(ctx context.Context, id string) ([]File, error) {
-	url := internal.URL(c, internal.LibraryItemFilePath).WithParameter("library_item_id", id)
+	url := c.Resource(internal.LibraryItemFilePath).WithParam("library_item_id", id)
 	var res []File
 	return res, c.Do(ctx, url.Request(http.MethodGet), &res)
 }
 
 // GetLibraryItemFile returns a file with the provided name for a library item.
 func (c *Manager) GetLibraryItemFile(ctx context.Context, id, fileName string) (*File, error) {
-	url := internal.URL(c, internal.LibraryItemFilePath).WithID(id).WithAction("get")
+	url := c.Resource(internal.LibraryItemFilePath).WithID(id).WithAction("get")
 	spec := struct {
 		Name string `json:"name"`
 	}{fileName}
