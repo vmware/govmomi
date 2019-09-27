@@ -181,7 +181,7 @@ Examples:
   govc vm.keystrokes -vm $vm -c 0x15 	# writes an 'r' to the console
   govc vm.keystrokes -vm $vm -r 1376263 # writes an 'r' to the console
   govc vm.keystrokes -vm $vm -c 0x28 	# presses ENTER on the console
-  govc vm.keystrokes -vm $vm -c 0x4c -la true -lc true 	# sends CTRL+ALT+DEL to console`
+  govc vm.keystrokes -vm $vm -c 0x4c -la=true -lc=true 	# sends CTRL+ALT+DEL to console`
 }
 
 func (cmd *keystrokes) Process(ctx context.Context) error {
