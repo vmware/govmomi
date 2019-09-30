@@ -36,6 +36,10 @@ func NewDistributedVirtualPortgroup(c *vim25.Client, ref types.ManagedObjectRefe
 	}
 }
 
+func (p DistributedVirtualPortgroup) GetInventoryPath() string {
+	return p.InventoryPath
+}
+
 // EthernetCardBackingInfo returns the VirtualDeviceBackingInfo for this DistributedVirtualPortgroup
 func (p DistributedVirtualPortgroup) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	var dvp mo.DistributedVirtualPortgroup
