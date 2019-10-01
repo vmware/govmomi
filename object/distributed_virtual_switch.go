@@ -34,6 +34,10 @@ func NewDistributedVirtualSwitch(c *vim25.Client, ref types.ManagedObjectReferen
 	}
 }
 
+func (s DistributedVirtualSwitch) GetInventoryPath() string {
+	return s.InventoryPath
+}
+
 func (s DistributedVirtualSwitch) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
 	return nil, ErrNotSupported // TODO: just to satisfy NetworkReference interface for the finder
 }
