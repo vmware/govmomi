@@ -33,6 +33,7 @@ import (
 
 const (
 	PropRuntimePowerState = "summary.runtime.powerState"
+	PropConfigTemplate    = "summary.config.template"
 )
 
 type VirtualMachine struct {
@@ -54,6 +55,17 @@ func (v VirtualMachine) PowerState(ctx context.Context) (types.VirtualMachinePow
 	}
 
 	return o.Summary.Runtime.PowerState, nil
+}
+
+func (v VirtualMachine) IsTemplate(ctx context.Context) (bool, error) {
+	var o mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{PropConfigTemplate}, &o)
+	if err != nil {
+		return false, err
+	}
+
+	return o.Summary.Config.Template, nil
 }
 
 func (v VirtualMachine) PowerOn(ctx context.Context) (*Task, error) {
