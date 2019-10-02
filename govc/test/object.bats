@@ -77,7 +77,7 @@ load test_helper
 }
 
 @test "object.collect" {
-  esx_env
+  vcsim_env
 
   run govc object.collect
   assert_success
@@ -124,12 +124,12 @@ load test_helper
   assert_success
 
   # test against slice of interface
-  perfman=$(govc object.collect -s - content.perfManager)
-  result=$(govc object.collect -s "$perfman" description.counterType)
+  setting=$(govc object.collect -s - content.setting)
+  result=$(govc object.collect -s "$setting" setting)
   assert_equal "..." "$result"
 
   # test against an interface field
-  run govc object.collect '/ha-datacenter/network/VM Network' summary
+  run govc object.collect 'network/VM Network' summary
   assert_success
 }
 
