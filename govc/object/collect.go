@@ -333,7 +333,9 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		default:
 			ref, err = cmd.ManagedObject(ctx, arg)
 			if err != nil {
-				return err
+				if !ref.FromString(arg) {
+					return err
+				}
 			}
 		}
 
