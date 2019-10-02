@@ -151,6 +151,36 @@ type CnsDeleteVolumeResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval"`
 }
 
+type CnsExtendVolumeRequestType struct {
+	This        types.ManagedObjectReference `xml:"_this"`
+	ExtendSpecs []CnsVolumeExtendSpec        `xml:"extendSpecs,omitempty"`
+}
+
+func init() {
+	types.Add("CnsExtendVolumeRequestType", reflect.TypeOf((*CnsExtendVolumeRequestType)(nil)).Elem())
+}
+
+type CnsExtendVolume CnsExtendVolumeRequestType
+
+func init() {
+	types.Add("CnsExtendVolume", reflect.TypeOf((*CnsExtendVolume)(nil)).Elem())
+}
+
+type CnsExtendVolumeResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsVolumeExtendSpec struct {
+	types.DynamicData
+
+	VolumeId     CnsVolumeId `xml:"volumeId"`
+	CapacityInMb int64       `xml:"capacityInMb"`
+}
+
+func init() {
+	types.Add("CnsVolumeExtendSpec", reflect.TypeOf((*CnsVolumeExtendSpec)(nil)).Elem())
+}
+
 type CnsAttachVolumeRequestType struct {
 	This        types.ManagedObjectReference `xml:"_this"`
 	AttachSpecs []CnsVolumeAttachDetachSpec  `xml:"attachSpecs,omitempty"`

@@ -333,3 +333,39 @@ func (m *CnsVolumeManager) CnsDetachVolume(ctx context.Context, req *cnstypes.Cn
 		},
 	}
 }
+
+// CnsExtendVolume simulates ExtendVolume call for simulated vc
+func (m *CnsVolumeManager) CnsExtendVolume(ctx context.Context, req *cnstypes.CnsExtendVolume) soap.HasFault {
+	task := simulator.CreateTask(m, "CnsExtendVolume", func(task *simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		if len(req.ExtendSpecs) == 0 {
+			return nil, &vim25types.InvalidArgument{InvalidProperty: "CnsExtendVolumeSpec"}
+		}
+		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
+
+		for _, extendSpecs := range req.ExtendSpecs {
+			for _, dsVolumes := range m.volumes {
+				for id, volume := range dsVolumes {
+					if id.Id == extendSpecs.VolumeId.Id {
+						volume.BackingObjectDetails = cnstypes.CnsBackingObjectDetails{
+							CapacityInMb: extendSpecs.CapacityInMb,
+						}
+						operationResult = append(operationResult, &cnstypes.CnsVolumeOperationResult{
+							VolumeId: volume.VolumeId,
+						})
+						break
+					}
+				}
+			}
+		}
+
+		return &cnstypes.CnsVolumeOperationBatchResult{
+			VolumeResults: operationResult,
+		}, nil
+	})
+
+	return &methods.CnsExtendVolumeBody{
+		Res: &cnstypes.CnsExtendVolumeResponse{
+			Returnval: task.Run(),
+		},
+	}
+}

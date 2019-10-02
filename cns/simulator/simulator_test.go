@@ -71,6 +71,7 @@ func TestSimulator(t *testing.T) {
 	datastore := simulator.Map.Any("Datastore").(*simulator.Datastore)
 
 	// Create
+	var capacityInMb int64 = 1024
 	createSpecList := []cnstypes.CnsVolumeCreateSpec{
 		{
 			Name:       "test",
@@ -79,7 +80,7 @@ func TestSimulator(t *testing.T) {
 				datastore.Self,
 			},
 			BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
-				CapacityInMb: 1024,
+				CapacityInMb: capacityInMb,
 			},
 			Profile: []vim25types.BaseVirtualMachineProfileSpec{
 				&vim25types.VirtualMachineDefinedProfileSpec{
@@ -110,6 +111,37 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
 	}
 	volumeId := createVolumeOperationRes.VolumeId.Id
+
+	// Extend
+	var newCapacityInMb int64 = 2048
+	extendSpecList := []cnstypes.CnsVolumeExtendSpec{
+		{
+			VolumeId:     createVolumeOperationRes.VolumeId,
+			CapacityInMb: newCapacityInMb,
+		},
+	}
+	extendTask, err := cnsClient.ExtendVolume(ctx, extendSpecList)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	extendTaskInfo, err := cns.GetTaskInfo(ctx, extendTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	extendTaskResult, err := cns.GetTaskResult(ctx, extendTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if extendTaskResult == nil {
+		t.Fatalf("Empty extend task results")
+	}
+
+	extendVolumeOperationRes := extendTaskResult.GetCnsVolumeOperationResult()
+	if extendVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to extend: fault=%+v", extendVolumeOperationRes.Fault)
+	}
 
 	// Attach
 	nodeVM := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)

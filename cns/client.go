@@ -91,6 +91,19 @@ func (c *Client) DeleteVolume(ctx context.Context, volumeIDList []cnstypes.CnsVo
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
 
+// ExtendVolume calls the CNS Extend API.
+func (c *Client) ExtendVolume(ctx context.Context, extendSpecList []cnstypes.CnsVolumeExtendSpec) (*object.Task, error) {
+	req := cnstypes.CnsExtendVolume{
+		This:        CnsVolumeManagerInstance,
+		ExtendSpecs: extendSpecList,
+	}
+	res, err := methods.CnsExtendVolume(ctx, c.serviceClient, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
+
 // AttachVolume calls the CNS Attach API.
 func (c *Client) AttachVolume(ctx context.Context, attachSpecList []cnstypes.CnsVolumeAttachDetachSpec) (*object.Task, error) {
 	req := cnstypes.CnsAttachVolume{

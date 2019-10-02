@@ -130,6 +130,57 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", queryResult)
 
+	// Test ExtendVolume API
+	var newCapacityInMb int64 = 10240
+	var cnsVolumeExtendSpecList []cnstypes.CnsVolumeExtendSpec
+	cnsVolumeExtendSpec := cnstypes.CnsVolumeExtendSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId,
+		},
+		CapacityInMb: newCapacityInMb,
+	}
+	cnsVolumeExtendSpecList = append(cnsVolumeExtendSpecList, cnsVolumeExtendSpec)
+	t.Logf("Extending volume using the spec: %+v", cnsVolumeExtendSpec)
+	extendTask, err := cnsClient.ExtendVolume(ctx, cnsVolumeExtendSpecList)
+	if err != nil {
+		t.Errorf("Failed to extend volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	extendTaskInfo, err := GetTaskInfo(ctx, extendTask)
+	if err != nil {
+		t.Errorf("Failed to extend volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	extendTaskResult, err := GetTaskResult(ctx, extendTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to extend volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if extendTaskResult == nil {
+		t.Fatalf("Empty extend task results")
+		t.FailNow()
+	}
+	extendVolumeOperationRes := extendTaskResult.GetCnsVolumeOperationResult()
+	if extendVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to extend volume: fault=%+v", extendVolumeOperationRes.Fault)
+	}
+	extendVolumeId := extendVolumeOperationRes.VolumeId.Id
+	t.Logf("Volume extended sucessfully. Volume ID: %s", extendVolumeId)
+
+	// Verify volume is extended to the specified size
+	t.Logf("Calling QueryVolume after ExtendVolume using queryFilter: %+v", queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	if err != nil {
+		t.Errorf("Failed to query volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", queryResult)
+	if newCapacityInMb != queryResult.Volumes[0].BackingObjectDetails.CapacityInMb {
+		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryResult.Volumes[0].BackingObjectDetails.CapacityInMb)
+	} else {
+		t.Logf("Volume extended sucessfully to the new size. Volume ID: %s New Size: %d", extendVolumeId, newCapacityInMb)
+	}
+
 	// Test UpdateVolumeMetadata
 	var updateSpecList []cnstypes.CnsVolumeMetadataUpdateSpec
 
