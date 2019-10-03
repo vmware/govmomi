@@ -89,7 +89,7 @@ func (cmd *insert) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	iso, err := cmd.DatastorePath(f.Arg(0))
 	if err != nil {
-		return nil
+		return err
 	}
 
 	return vm.EditDevice(ctx, devices.InsertIso(c, iso))
