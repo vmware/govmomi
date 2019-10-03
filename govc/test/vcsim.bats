@@ -93,6 +93,9 @@ load test_helper
   run govc object.collect -s $vm guest.ipAddress
   assert_success "10.0.0.1"
 
+  run govc vm.ip $vm
+  assert_success "10.0.0.1"
+
   run govc object.collect -s $vm summary.guest.ipAddress
   assert_success "10.0.0.1"
 
