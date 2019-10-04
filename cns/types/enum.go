@@ -64,3 +64,17 @@ const (
 	CnsKubernetesEntityTypePV  = CnsKubernetesEntityType("PERSISTENT_VOLUME")
 	CnsKubernetesEntityTypePOD = CnsKubernetesEntityType("POD")
 )
+
+type CnsQuerySelectionNameType string
+
+const (
+	CnsQuerySelectionName_VOLUME_NAME                    = CnsQuerySelectionNameType("VOLUME_NAME")
+	CnsQuerySelectionName_VOLUME_TYPE                    = CnsQuerySelectionNameType("VOLUME_TYPE")
+	CnsQuerySelectionName_BACKING_OBJECT_DETAILS         = CnsQuerySelectionNameType("BACKING_OBJECT_DETAILS")
+	CnsQuerySelectionName_COMPLIANCE_STATUS              = CnsQuerySelectionNameType("COMPLIANCE_STATUS")
+	CnsQuerySelectionName_DATASTORE_ACCESSIBILITY_STATUS = CnsQuerySelectionNameType("DATASTORE_ACCESSIBILITY_STATUS")
+)
+
+func init() {
+	types.Add("CnsKubernetesEntityType", reflect.TypeOf((*CnsKubernetesEntityType)(nil)).Elem())
+}

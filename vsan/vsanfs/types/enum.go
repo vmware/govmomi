@@ -19,7 +19,7 @@ package types
 import (
 	"reflect"
 
-	"gitlab.eng.vmware.com/hatchway/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type VsanFileShareAccessType string
