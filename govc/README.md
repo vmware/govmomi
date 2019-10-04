@@ -133,6 +133,29 @@ to set defaults:
 
 ## Troubleshooting
 
+### Debug Flag
+There is a `-debug` flag which you can use to debug the calls made to the vSphere API and there are some environment
+variables you can use to configure how it works. If you turn on the `-debug` flag the default behavior is to put the
+output in `~/.govmomi/debug/<run timestamp>`. In that directory will be four (4) files per API call.
+
+```
+1-0001.req.headers #headers from the request sent to the API
+1-0001.req.xml #body content from request sent to the API
+1-0001.res.headers #headers from the response from the API
+1-0001.res.xml #body from the respnse from the API
+```
+
+In that filename the `0001` represents the an incremented call order and will increment for each time the SOAP client
+makes an API call. 
+
+To configure the debug output you can use two environment variables.
+* `GOVC_DEBUG_PATH`: defaults to ~/.govmomi/debug
+* `GOVC_DEBUG_PATH_RUN`: defaults to timestamp of the run
+
+#### stdout debug
+If you prefer debug output to be sent to stdout and seen while the command is running you can override the file behavior
+by setting the debug path to a dash: `export GOVC_DEBUG_PATH=-`
+
 ### Environment variables
 
 If you're using environment variables to set `GOVC_URL`, verify the values are set as expected:
