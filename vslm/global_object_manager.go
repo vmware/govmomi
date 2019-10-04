@@ -18,6 +18,7 @@ package vslm
 
 import (
 	"context"
+	"errors"
 	"time"
 
 	"github.com/vmware/govmomi/object"
@@ -92,6 +93,8 @@ func (this *Task) WaitNonDefault(ctx context.Context, timeoutNS time.Duration, s
 					waitIntervalNS = maxIntervalNS
 				}
 			}
+		} else if info.State == types.VslmTaskInfoStateError {
+			return nil, errors.New(info.Error.LocalizedMessage)
 		} else {
 			break
 		}
