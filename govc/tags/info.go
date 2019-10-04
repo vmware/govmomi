@@ -109,7 +109,6 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			for i := range src {
 				if src[i].Name == arg || src[i].ID == arg {
 					res = append(res, src[i])
-					break
 				}
 			}
 			if len(res) == 0 {
