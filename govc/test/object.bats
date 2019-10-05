@@ -27,7 +27,7 @@ load test_helper
 }
 
 @test "object.rename" {
-  esx_env
+  vcsim_env
 
   run govc object.rename "/enoent" "nope"
   assert_failure

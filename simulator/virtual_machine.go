@@ -128,6 +128,10 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	return vm, nil
 }
 
+func (o *VirtualMachine) RenameTask(r *types.Rename_Task) soap.HasFault {
+	return RenameTask(o, r)
+}
+
 func (vm *VirtualMachine) event() types.VmEvent {
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 
