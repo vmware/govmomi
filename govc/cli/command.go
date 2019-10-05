@@ -24,6 +24,7 @@ import (
 	"io/ioutil"
 	"os"
 	"sort"
+	"strings"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/vim25/types"
@@ -43,16 +44,25 @@ type Command interface {
 	Run(ctx context.Context, f *flag.FlagSet) error
 }
 
-func generalHelp(w io.Writer) {
-	fmt.Fprintf(w, "Usage of %s:\n", os.Args[0])
+func generalHelp(w io.Writer, filter string) {
+	if filter == "" {
+		fmt.Fprintf(w, "Usage of %s:\n", os.Args[0])
+	} else {
+		fmt.Fprintf(w, "No command '%s' found, did you mean:\n", filter)
+	}
 
-	cmds := []string{}
+	var cmds []string
 	for name := range commands {
-		cmds = append(cmds, name)
+		if filter == "" {
+			cmds = append(cmds, name)
+			continue
+		}
+		if strings.Contains(name, filter) {
+			cmds = append(cmds, name)
+		}
 	}
 
 	sort.Strings(cmds)
-
 	for _, name := range cmds {
 		fmt.Fprintf(w, "  %s\n", name)
 	}
@@ -117,7 +127,7 @@ func Run(args []string) int {
 	var err error
 
 	if len(args) == 0 {
-		generalHelp(hw)
+		generalHelp(hw, "")
 		return rc
 	}
 
@@ -130,7 +140,7 @@ func Run(args []string) int {
 	cmd, ok := commands[name]
 	if !ok {
 		hwrc(name)
-		generalHelp(hw)
+		generalHelp(hw, name)
 		return rc
 	}
 
