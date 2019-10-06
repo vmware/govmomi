@@ -53,6 +53,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host/cert"
 	_ "github.com/vmware/govmomi/govc/host/date"
 	_ "github.com/vmware/govmomi/govc/host/esxcli"
+	_ "github.com/vmware/govmomi/govc/host/esxtop"
 	_ "github.com/vmware/govmomi/govc/host/firewall"
 	_ "github.com/vmware/govmomi/govc/host/maintenance"
 	_ "github.com/vmware/govmomi/govc/host/option"
