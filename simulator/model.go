@@ -195,6 +195,7 @@ var kinds = map[string]reflect.Type{
 	"AuthorizationManager":           reflect.TypeOf((*AuthorizationManager)(nil)).Elem(),
 	"ClusterComputeResource":         reflect.TypeOf((*ClusterComputeResource)(nil)).Elem(),
 	"CustomFieldsManager":            reflect.TypeOf((*CustomFieldsManager)(nil)).Elem(),
+	"CustomizationSpecManager":       reflect.TypeOf((*CustomizationSpecManager)(nil)).Elem(),
 	"Datacenter":                     reflect.TypeOf((*Datacenter)(nil)).Elem(),
 	"Datastore":                      reflect.TypeOf((*Datastore)(nil)).Elem(),
 	"DistributedVirtualPortgroup":    reflect.TypeOf((*DistributedVirtualPortgroup)(nil)).Elem(),

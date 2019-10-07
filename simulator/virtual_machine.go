@@ -31,6 +31,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -45,6 +46,7 @@ type VirtualMachine struct {
 	log string
 	sid int32
 	run container
+	imc *types.CustomizationSpec
 }
 
 func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
@@ -1236,6 +1238,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
+		c.customize()
 	case types.VirtualMachinePowerStatePoweredOff:
 		c.run.stop(c.VirtualMachine)
 		c.ctx.postEvent(
@@ -1568,6 +1571,108 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 
 	return &methods.RelocateVM_TaskBody{
 		Res: &types.RelocateVM_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
+
+func (vm *VirtualMachine) customize() {
+	if vm.imc == nil {
+		return
+	}
+
+	changes := []types.PropertyChange{
+		{Name: "config.tools.pendingCustomization", Val: ""},
+	}
+
+	hostname := ""
+	address := ""
+
+	switch c := vm.imc.Identity.(type) {
+	case *types.CustomizationLinuxPrep:
+		hostname = customizeName(vm, c.HostName)
+	case *types.CustomizationSysprep:
+		hostname = customizeName(vm, c.UserData.ComputerName)
+	}
+
+	for i, s := range vm.imc.NicSettingMap {
+		if i >= len(vm.Guest.Net) {
+			log.Printf("customize vm %s: NicSettingMap exceeds guest NICs", vm.Name)
+			break
+		}
+
+		nic := &vm.Guest.Net[i]
+		if s.MacAddress != "" {
+			nic.MacAddress = s.MacAddress
+		}
+		if nic.DnsConfig == nil {
+			nic.DnsConfig = new(types.NetDnsConfigInfo)
+		}
+		if s.Adapter.DnsDomain != "" {
+			nic.DnsConfig.DomainName = s.Adapter.DnsDomain
+		}
+		if len(s.Adapter.DnsServerList) != 0 {
+			nic.DnsConfig.IpAddress = s.Adapter.DnsServerList
+		}
+		if hostname != "" {
+			nic.DnsConfig.HostName = hostname
+		}
+		if len(vm.imc.GlobalIPSettings.DnsSuffixList) != 0 {
+			nic.DnsConfig.SearchDomain = vm.imc.GlobalIPSettings.DnsSuffixList
+		}
+		if nic.IpConfig == nil {
+			nic.IpConfig = new(types.NetIpConfigInfo)
+		}
+
+		switch ip := s.Adapter.Ip.(type) {
+		case *types.CustomizationCustomIpGenerator:
+		case *types.CustomizationDhcpIpGenerator:
+		case *types.CustomizationFixedIp:
+			if address == "" {
+				address = ip.IpAddress
+			}
+			nic.IpAddress = []string{ip.IpAddress}
+			nic.IpConfig.IpAddress = []types.NetIpConfigInfoIpAddress{{
+				IpAddress: ip.IpAddress,
+			}}
+		case *types.CustomizationUnknownIpGenerator:
+		}
+	}
+
+	if len(vm.imc.NicSettingMap) != 0 {
+		changes = append(changes, types.PropertyChange{Name: "guest.net", Val: vm.Guest.Net})
+	}
+	if hostname != "" {
+		changes = append(changes, types.PropertyChange{Name: "guest.hostName", Val: hostname})
+	}
+	if address != "" {
+		changes = append(changes, types.PropertyChange{Name: "guest.ipAddress", Val: address})
+	}
+
+	vm.imc = nil
+	Map.Update(vm, changes)
+}
+
+func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasFault {
+	task := CreateTask(vm, "customizeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
+			return nil, &types.InvalidPowerState{
+				RequestedState: types.VirtualMachinePowerStatePoweredOff,
+				ExistingState:  vm.Runtime.PowerState,
+			}
+		}
+		if vm.Config.Tools.PendingCustomization != "" {
+			return nil, new(types.CustomizationPending)
+		}
+
+		vm.imc = &req.Spec
+		vm.Config.Tools.PendingCustomization = uuid.New().String()
+
+		return nil, nil
+	})
+
+	return &methods.CustomizeVM_TaskBody{
+		Res: &types.CustomizeVM_TaskResponse{
 			Returnval: task.Run(),
 		},
 	}
