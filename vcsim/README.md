@@ -75,7 +75,7 @@ Example to record the inventory of a live vCenter or ESX and playback with vcsim
 
 ```console
 % govc object.save -u user:pass@my-vcenter -d my-vcenter
-Saved 164 total objects, including:
+Saved 164 total objects to "my-vcenter", including:
 ClusterComputeResource: 2
 Datastore: 6
 DistributedVirtualPortgroup: 2

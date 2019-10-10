@@ -295,7 +295,7 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 	if cmd.verbose {
 		s = ""
 	}
-	fmt.Printf("Saved %d total objects%s:\n", cmd.n, s)
+	fmt.Printf("Saved %d total objects to %q%s:\n", cmd.n, cmd.dir, s)
 	for i := range summary {
 		fmt.Println(summary[i])
 	}
