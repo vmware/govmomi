@@ -36,11 +36,12 @@ type AuthorizationManager struct {
 	nextID      int32
 }
 
-func NewAuthorizationManager(ref types.ManagedObjectReference) object.Reference {
-	m := &AuthorizationManager{}
-	m.Self = ref
-	m.RoleList = make([]types.AuthorizationRole, len(esx.RoleList))
-	copy(m.RoleList, esx.RoleList)
+func (m *AuthorizationManager) init(r *Registry) {
+	if len(m.RoleList) == 0 {
+		m.RoleList = make([]types.AuthorizationRole, len(esx.RoleList))
+		copy(m.RoleList, esx.RoleList)
+	}
+
 	m.permissions = make(map[types.ManagedObjectReference][]types.Permission)
 
 	l := object.AuthorizationRoleList(m.RoleList)
@@ -52,7 +53,7 @@ func NewAuthorizationManager(ref types.ManagedObjectReference) object.Reference 
 		m.privileges[id] = struct{}{}
 	}
 
-	root := Map.content().RootFolder
+	root := r.content().RootFolder
 
 	for _, u := range DefaultUserGroup {
 		m.permissions[root] = append(m.permissions[root], types.Permission{
@@ -63,8 +64,6 @@ func NewAuthorizationManager(ref types.ManagedObjectReference) object.Reference 
 			Propagate: true,
 		})
 	}
-
-	return m
 }
 
 func (m *AuthorizationManager) RetrieveEntityPermissions(req *types.RetrieveEntityPermissions) soap.HasFault {

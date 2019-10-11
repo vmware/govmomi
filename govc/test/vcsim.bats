@@ -353,3 +353,16 @@ load test_helper
   run govc vm.destroy "$TTYLINUX_NAME"
   assert_success
 }
+
+@test "vcsim model load" {
+  vcsim_start
+  dir="$BATS_TMPDIR/$(new_id)"
+  govc object.save -v -d "$dir"
+  vcsim_stop
+
+  vcsim_env -load "$dir"
+  rm -rf "$dir"
+
+  objs=$(govc find / | wc -l)
+  assert_equal 23 "$objs"
+}

@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/google/uuid"
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -42,12 +41,8 @@ type SessionManager struct {
 	sessions map[string]Session
 }
 
-func NewSessionManager(ref types.ManagedObjectReference) object.Reference {
-	s := &SessionManager{
-		sessions: make(map[string]Session),
-	}
-	s.Self = ref
-	return s
+func (m *SessionManager) init(*Registry) {
+	m.sessions = make(map[string]Session)
 }
 
 func createSession(ctx *Context, name string, locale string) types.UserSession {

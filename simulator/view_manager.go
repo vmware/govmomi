@@ -19,7 +19,6 @@ package simulator
 import (
 	"reflect"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -54,18 +53,11 @@ var entities = []struct {
 	{reflect.TypeOf((*mo.VmwareDistributedVirtualSwitch)(nil)).Elem(), false},
 }
 
-func NewViewManager(ref types.ManagedObjectReference) object.Reference {
-	s := &ViewManager{
-		entities: make(map[string]bool),
-	}
-
-	s.Self = ref
-
+func (m *ViewManager) init(*Registry) {
+	m.entities = make(map[string]bool, len(entities))
 	for _, e := range entities {
-		s.entities[e.Type.Name()] = e.Container
+		m.entities[e.Type.Name()] = e.Container
 	}
-
-	return s
 }
 
 func destroyView(ref types.ManagedObjectReference) soap.HasFault {

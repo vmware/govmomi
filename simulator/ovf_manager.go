@@ -36,12 +36,6 @@ type OvfManager struct {
 	mo.OvfManager
 }
 
-func NewOvfManager(ref types.ManagedObjectReference) object.Reference {
-	s := &OvfManager{}
-	s.Self = ref
-	return s
-}
-
 func ovfDisk(e *ovf.Envelope, diskID string) *ovf.VirtualDiskDesc {
 	for _, disk := range e.Disk.Disks {
 		if strings.HasSuffix(diskID, disk.DiskID) {

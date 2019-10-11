@@ -21,7 +21,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -54,10 +53,8 @@ type PerformanceManager struct {
 	metricData        map[string]map[int32][]int64
 }
 
-func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
-	m := &PerformanceManager{}
-	m.Self = ref
-	if Map.IsESX() {
+func (m *PerformanceManager) init(r *Registry) {
+	if r.IsESX() {
 		m.PerfCounter = esx.PerfCounter
 		m.hostMetrics = esx.HostMetrics
 		m.vmMetrics = esx.VmMetrics
@@ -77,7 +74,6 @@ func NewPerformanceManager(ref types.ManagedObjectReference) object.Reference {
 	for _, p := range m.PerfCounter {
 		m.perfCounterIndex[p.Key] = p
 	}
-	return m
 }
 
 func (p *PerformanceManager) QueryPerfCounter(ctx *Context, req *types.QueryPerfCounter) soap.HasFault {
