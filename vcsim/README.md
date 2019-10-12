@@ -1,8 +1,8 @@
 # vcsim - A vCenter and ESXi API based simulator
 
-This package implements a vSphere Web Services (SOAP) SDK endpoint intended for testing consumers of the API.
-While the mock framework is written in the Go language, it can be used by any language that can talk to the vSphere
-API.
+This package implements a vSphere Web Services (SOAP) SDK endpoint intended for
+testing consumers of the API.  While the mock framework is written in the Go
+language, it can be used by any language that can talk to the vSphere API.
 
 ## Installation
 
@@ -14,10 +14,11 @@ API.
 
 ## Usage
 
-The **vcsim** program by default creates a *vCenter* model with a datacenter, hosts, cluster, resource pools, networks
-and a datastore.  The naming is similar to that of the original *vcsim* mode that was included with vCenter.  The number
-of resources can be increased or decreased using the various resource type flags.  Resources can also be created and
-removed using the API.
+The **vcsim** program by default creates a *vCenter* model with a datacenter,
+hosts, cluster, resource pools, networks and a datastore.  The naming is similar
+to that of the original *vcsim* mode that was included with vCenter.  The number
+of resources can be increased or decreased using the various resource type
+flags.  Resources can also be created and removed using the API.
 
 Example using the default settings:
 
@@ -69,85 +70,55 @@ Example using ESX mode:
 /ha-datacenter/network/VM Network
 ```
 
-## Record & Playback
-
-Example to record the inventory of a live vCenter or ESX and playback with vcsim:
-
-```console
-% govc object.save -u user:pass@my-vcenter -d my-vcenter
-Saved 164 total objects to "my-vcenter", including:
-ClusterComputeResource: 2
-Datastore: 6
-DistributedVirtualPortgroup: 2
-EnvironmentBrowser: 2
-Folder: 20
-HostDatastoreBrowser: 6
-HostSystem: 4
-Network: 3
-OpaqueNetwork: 30
-ResourcePool: 15
-VirtualMachine: 29
-
-% vcsim -load my-vcenter &
-% govc find -u user:pass@127.0.0.1:8989 / -type ClusterComputeResource | wc -l
-2
-
-% govc find -u user:pass@127.0.0.1:8989 / -type Datastore | wc -l
-6
-```
-
 ## Supported methods
 
-The simulator supports a subset of API methods.  However, the generated [govmomi](https://github.com/vmware/govmomi)
-code includes all types and methods defined in the vmodl, which can be used to implement any method documented in the
-[VMware vSphere API Reference](https://code.vmware.com/apis/196/vsphere).
+The simulator supports a subset of API methods.  However, the generated govmomi
+code includes all types and methods defined in the vmodl, which can be used to
+implement any method documented in the [VMware vSphere API Reference](apiref).
 
 To see the list of supported methods:
 
+```console
+% curl -sk https://user:pass@127.0.0.1:8989/about
 ```
-curl -sk https://user:pass@127.0.0.1:8989/about
-```
+
+[apiref]:https://code.vmware.com/apis/196/vsphere
 
 ## Listen address
 
-The default vcsim listen address is `127.0.0.1:8989`.  Use the `-l` flag to listen on another address:
+The default vcsim listen address is `127.0.0.1:8989`.  Use the `-l` flag to
+listen on another address:
 
+```console
+% vcsim -l 10.118.69.224:8989 # specific address
 
-``` shell
-vcsim -l 10.118.69.224:8989 # specific address
-
-vcsim -l :8989 # any address
+% vcsim -l :8989 # any address
 ```
 
-When given a port value of '0', an unused port will be chosen.  You can then source the GOVC_URL from another
-process, for example:
+When given a port value of `0`, an unused port will be chosen.  You can then
+source the GOVC_URL from another process, for example:
 
-```sh
-govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
+```console
+% govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
 
-mkfifo $govc_sim_env
+% mkfifo $govc_sim_env
 
-vcsim -l 127.0.0.1:0 -E $govc_sim_env &
+% vcsim -l 127.0.0.1:0 -E $govc_sim_env &
 
-eval "$(cat $govc_sim_env)"
+% eval "$(cat $govc_sim_env)"
 
 # ... run tests ...
 
-kill $GOVC_SIM_PID
-rm -f $govc_sim_env
+% kill $GOVC_SIM_PID
+% rm -f $govc_sim_env
 ```
 
 Tests written in Go can also use the [simulator package](https://godoc.org/github.com/vmware/govmomi/simulator)
 directly, rather than the vcsim binary.
 
-## Introducing delays
-Sometimes, especially when debugging software, it can be useful to introduce delays to simulate network latency or a poorly performing vCenter. There are three command line options for dealing with delays.
+## Feature Details
 
-```-delay <ms>``` Adds a constant delay (experessed in milliseconds) to every call
-
-```-method-delay <method:milliseconds,method:milliseconds...>``` Adds a specified delay to individual methods. If both ```-method-delay``` and ```-delay``` are specified, they are added together
-
-```delay-jitter``` Specifies a jitter, i.e. a random value added to or subtracted from the delay. It is specified as a <i>Coefficient of Variation</i>, which is the same as the standard deviation divided by the mean. A reasonable starting value is 0.5, as it gives a nice variation without extreme outliers.
+For more details on vcsim features, see the project [wiki](https://github.com/vmware/govmomi/wiki/vcsim-features).
 
 ## Projects using vcsim
 
@@ -159,14 +130,18 @@ Sometimes, especially when debugging software, it can be useful to introduce del
 
 * [Telegraf](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/vsphere)
 
+## Blog posts
+
+* [Beginning vCenter Server simulation with vcsim](blog1) by Abhijeet Kasurde
+
+* [vCenter & ESXi API based simulator](blog2) by William Lam
+
+* [vCenter Simulator Docker Container](blog3) by Brian Bunke
+
+[blog1]:https://opensourceforu.com/2017/10/vcenter-server-simulation-govcsim/
+[blog2]:https://www.virtuallyghetto.com/2017/04/govcsim-neat-incubation-project-vcenter-server-esxi-api-based-simulator.html
+[blog3]:https://www.brianbunke.com/blog/2018/12/31/vcenter-simulator-ci/
+
 ## Related projects
 
 * [LocalStack](https://github.com/localstack/localstack/blob/master/README.md#why-localstack)
-
-## Blog posts on vcsim
-
-* [Beginning vCenter Server simulation with Govcsim](https://opensourceforu.com/2017/10/vcenter-server-simulation-govcsim/) By Abhijeet Kasurde - October 3, 2017
-
-* [govcsim – Neat incubation project (vCenter Server & ESXi API based simulator)](https://www.virtuallyghetto.com/2017/04/govcsim-neat-incubation-project-vcenter-server-esxi-api-based-simulator.html) by [William Lam](https://twitter.com/lamw) - April 21, 2017
-
-* [vCenter Simulator Docker Container](https://www.brianbunke.com/blog/2018/12/31/vcenter-simulator-ci/) By Brian Bunke - December 31, 2018
