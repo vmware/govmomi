@@ -229,6 +229,10 @@ load test_helper
   run govc vm.change -vm $vm -e RUN.container="[\"-v\", \"$PWD:/usr/share/nginx/html:ro\", \"nginx\"]"
   assert_success
 
+  # test bash -c args parsing
+  run govc vm.change -vm $vm -e RUN.container="-v '$PWD:/usr/share/nginx/html:ro' nginx"
+  assert_success
+
   run govc vm.power -on $vm
   assert_success
 

@@ -105,7 +105,7 @@ func Example_runContainer() {
 			log.Fatal(err)
 		}
 
-		args := fmt.Sprintf(`["-v", "%s:/usr/share/nginx/html:ro", "nginx"]`, dir) // json encoded args
+		args := fmt.Sprintf("-v '%s:/usr/share/nginx/html:ro' nginx", dir)
 
 		spec := types.VirtualMachineConfigSpec{
 			Name: "nginx",
