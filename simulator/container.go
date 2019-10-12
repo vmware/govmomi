@@ -26,6 +26,16 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+var (
+	shell = "/bin/sh"
+)
+
+func init() {
+	if sh, err := exec.LookPath("bash"); err != nil {
+		shell = sh
+	}
+}
+
 // container provides methods to manage a container within a simulator VM lifecycle.
 type container struct {
 	id string
@@ -111,8 +121,8 @@ func (c *container) start(vm *VirtualMachine) {
 		return
 	}
 
-	args = append([]string{"run", "-d", "--name", vm.Name}, args...)
-	cmd := exec.Command("docker", args...)
+	args = append([]string{"docker", "run", "-d", "--name", vm.Name}, args...)
+	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
 	out, err := cmd.Output()
 	if err != nil {
 		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
