@@ -19,6 +19,7 @@ package simulator
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"log"
 	"os/exec"
 	"strings"
@@ -103,6 +104,7 @@ func (c *container) start(vm *VirtualMachine) {
 	}
 
 	var args []string
+	var env []string
 
 	for _, opt := range vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
@@ -113,7 +115,11 @@ func (c *container) start(vm *VirtualMachine) {
 				args = []string{run}
 			}
 
-			break
+			continue
+		}
+		if strings.HasPrefix(val.Key, "guestinfo.") {
+			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
+			env = append(env, "--env", fmt.Sprintf("%s=%s", key, val.Value.(string)))
 		}
 	}
 
@@ -121,7 +127,8 @@ func (c *container) start(vm *VirtualMachine) {
 		return
 	}
 
-	args = append([]string{"docker", "run", "-d", "--name", vm.Name}, args...)
+	run := append([]string{"docker", "run", "-d", "--name", vm.Name}, env...)
+	args = append(run, args...)
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
 	out, err := cmd.Output()
 	if err != nil {
