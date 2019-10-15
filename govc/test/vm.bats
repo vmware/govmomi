@@ -893,3 +893,43 @@ load test_helper
   run govc vm.option.info -vm DC0_H0_VM0
   assert_success
 }
+
+@test "vm.customize" {
+  vcsim_env
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.42 -netmask 255.255.0.0 vcsim-linux-static
+  assert_failure # power must be off
+
+  run govc vm.power -off DC0_H0_VM0
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.42 -netmask 255.255.0.0 vcsim-linux-static
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.42 -netmask 255.255.0.0 vcsim-linux-static
+  assert_failure # pending customization
+
+  run govc vm.power -on DC0_H0_VM0
+  assert_success
+
+  run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
+  assert_success 10.0.0.42
+
+  run govc object.collect -s vm/DC0_H0_VM0 guest.hostName
+  assert_success vcsim-1
+
+  run govc vm.power -off DC0_H0_VM0
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.43 -domain HOME -tz D -name windoze vcsim-windows-static
+  assert_success
+
+  run govc vm.power -on DC0_H0_VM0
+  assert_success
+
+  run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
+  assert_success 10.0.0.43
+
+  run govc object.collect -s vm/DC0_H0_VM0 guest.hostName
+  assert_success windoze
+}
