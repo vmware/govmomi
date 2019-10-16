@@ -30,6 +30,7 @@ import (
 	"github.com/vmware/govmomi"
 	cnstypes "github.com/vmware/govmomi/cns/types"
 	vim25types "github.com/vmware/govmomi/vim25/types"
+	vsanfstypes "github.com/vmware/govmomi/vsan/vsanfs/types"
 )
 
 func TestClient(t *testing.T) {
@@ -40,6 +41,7 @@ func TestClient(t *testing.T) {
 		t.Skipf("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 		t.SkipNow()
 	}
+	resporcePoolPath := os.Getenv("CNS_RESOURCE_POOL_PATH") // example "/datacenter-name/host/host-ip/Resources" or  /datacenter-name/host/cluster-name/Resources
 	u, err := soap.ParseURL(url)
 	if err != nil {
 		t.Fatal(err)
@@ -232,8 +234,17 @@ func TestClient(t *testing.T) {
 		},
 	}
 	defaultFolder, err := finder.DefaultFolder(ctx)
-	defaultResourcePool, err := finder.DefaultResourcePool(ctx)
-	task, err := defaultFolder.CreateVM(ctx, virtualMachineConfigSpec, defaultResourcePool, nil)
+	var resourcePool *object.ResourcePool
+	if resporcePoolPath == "" {
+		resourcePool, err = finder.DefaultResourcePool(ctx)
+	} else {
+		resourcePool, err = finder.ResourcePool(ctx, resporcePoolPath)
+	}
+	if err != nil {
+		t.Errorf("Error occurred while getting DefaultResourcePool. err: %+v", err)
+		t.Fatal(err)
+	}
+	task, err := defaultFolder.CreateVM(ctx, virtualMachineConfigSpec, resourcePool, nil)
 	if err != nil {
 		t.Errorf("Failed to create VM. Error: %+v \n", err)
 		t.Fatal(err)
@@ -336,7 +347,7 @@ func TestClient(t *testing.T) {
 	}
 	deleteTaskResult, err := GetTaskResult(ctx, deleteTaskInfo)
 	if err != nil {
-		t.Errorf("Failed to detach volume. Error: %+v \n", err)
+		t.Errorf("Failed to delete volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
 	if deleteTaskResult == nil {
@@ -347,5 +358,95 @@ func TestClient(t *testing.T) {
 	if deleteVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
 	}
-	t.Logf("Volume deleted sucessfully")
+	t.Logf("Volume: %q deleted sucessfully", volumeId)
+
+	// Test creating vSAN file-share Volume
+	var cnsFileVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+	var containerClusterArray []cnstypes.CnsContainerCluster
+	containerCluster := cnstypes.CnsContainerCluster{
+		ClusterType:   string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:     "demo-cluster-id",
+		VSphereUser:   "Administrator@vsphere.local",
+		ClusterFlavor: string(cnstypes.CnsClusterFlavorVanilla),
+	}
+	vSANFileCreateSpec := &cnstypes.CnsVSANFileCreateSpec{
+		SoftQuotaInMb: 5120,
+		Permission: []vsanfstypes.VsanFileShareNetPermission{
+			{
+				Ips:         "*",
+				Permissions: vsanfstypes.VsanFileShareAccessTypeREAD_WRITE,
+				AllowRoot:   true,
+			},
+		},
+	}
+	containerClusterArray = append(containerClusterArray, containerCluster)
+	cnsFileVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+		Name:       "pvc-file-share-volume",
+		VolumeType: string(cnstypes.CnsVolumeTypeFile),
+		Datastores: dsList,
+		Metadata: cnstypes.CnsVolumeMetadata{
+			ContainerCluster:      containerCluster,
+			ContainerClusterArray: containerClusterArray,
+		},
+		BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
+			CapacityInMb: 5120,
+		},
+		CreateSpec: vSANFileCreateSpec,
+	}
+	cnsFileVolumeCreateSpecList = append(cnsFileVolumeCreateSpecList, cnsFileVolumeCreateSpec)
+	t.Logf("Creating vsan fileshare volume using the spec: %+v", cnsFileVolumeCreateSpec)
+	createTask, err = cnsClient.CreateVolume(ctx, cnsFileVolumeCreateSpecList)
+	if err != nil {
+		t.Errorf("Failed to create vsan fileshare volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createTaskInfo, err = GetTaskInfo(ctx, createTask)
+	if err != nil {
+		t.Errorf("Failed to create Fileshare volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createTaskResult, err = GetTaskResult(ctx, createTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to create Fileshare volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if createTaskResult == nil {
+		t.Fatalf("Empty create task results")
+		t.FailNow()
+	}
+	createVolumeOperationRes = createTaskResult.GetCnsVolumeOperationResult()
+	if createVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to create Fileshare volume: fault=%+v", createVolumeOperationRes.Fault)
+	}
+	filevolumeId := createVolumeOperationRes.VolumeId.Id
+	t.Logf("Fileshare volume created sucessfully. filevolumeId: %s", filevolumeId)
+
+	// Test Deleting vSAN file-share Volume
+	var fileVolumeIDList []cnstypes.CnsVolumeId
+	fileVolumeIDList = append(fileVolumeIDList, cnstypes.CnsVolumeId{Id: filevolumeId})
+	t.Logf("Deleting fileshare volume: %+v", fileVolumeIDList)
+	deleteTask, err = cnsClient.DeleteVolume(ctx, fileVolumeIDList, true)
+	if err != nil {
+		t.Errorf("Failed to delete fileshare volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteTaskInfo, err = GetTaskInfo(ctx, deleteTask)
+	if err != nil {
+		t.Errorf("Failed to delete fileshare volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteTaskResult, err = GetTaskResult(ctx, deleteTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to delete fileshare volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if deleteTaskResult == nil {
+		t.Fatalf("Empty delete task results")
+		t.FailNow()
+	}
+	deleteVolumeOperationRes = deleteTaskResult.GetCnsVolumeOperationResult()
+	if deleteVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to delete fileshare volume: fault=%+v", deleteVolumeOperationRes.Fault)
+	}
+	t.Logf("fileshare volume:%q deleted sucessfully", filevolumeId)
 }

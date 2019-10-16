@@ -48,17 +48,26 @@ type CnsEntityMetadata struct {
 	EntityName string           `xml:"entityName"`
 	Labels     []types.KeyValue `xml:"labels,omitempty"`
 	Delete     bool             `xml:"delete,omitempty"`
+	ClusterID  string           `xml:"clusterId,omitempty"`
 }
 
 func init() {
 	types.Add("CnsEntityMetadata", reflect.TypeOf((*CnsEntityMetadata)(nil)).Elem())
 }
 
+type CnsKubernetesEntityReference struct {
+	EntityType string `xml:"entityType"`
+	EntityName string `xml:"entityName"`
+	Namespace  string `xml:"namespace, omitempty"`
+	clusterId  string `xml:"clusterId, omitempty"`
+}
+
 type CnsKubernetesEntityMetadata struct {
 	CnsEntityMetadata
 
-	EntityType string `xml:"entityType"`
-	Namespace  string `xml:"namespace,omitempty"`
+	EntityType     string                         `xml:"entityType"`
+	Namespace      string                         `xml:"namespace,omitempty"`
+	ReferredEntity []CnsKubernetesEntityReference `xml:"referredEntity,omitempty"`
 }
 
 func init() {
@@ -68,8 +77,9 @@ func init() {
 type CnsVolumeMetadata struct {
 	types.DynamicData
 
-	ContainerCluster CnsContainerCluster     `xml:"containerCluster"`
-	EntityMetadata   []BaseCnsEntityMetadata `xml:"entityMetadata,typeattr,omitempty"`
+	ContainerCluster      CnsContainerCluster     `xml:"containerCluster"`
+	ContainerClusterArray []CnsContainerCluster   `xml:"containerClusterArray,omitempty"`
+	EntityMetadata        []BaseCnsEntityMetadata `xml:"entityMetadata,typeattr,omitempty"`
 }
 
 func init() {
@@ -232,9 +242,10 @@ type CnsQueryAllVolumeResponse struct {
 type CnsContainerCluster struct {
 	types.DynamicData
 
-	ClusterType string `xml:"clusterType"`
-	ClusterId   string `xml:"clusterId"`
-	VSphereUser string `xml:"vSphereUser"`
+	ClusterType   string `xml:"clusterType"`
+	ClusterId     string `xml:"clusterId"`
+	VSphereUser   string `xml:"vSphereUser"`
+	ClusterFlavor string `xml:"clusterFlavor,omitempty"`
 }
 
 func init() {
@@ -253,6 +264,7 @@ type CnsVolume struct {
 	ComplianceStatus             string                  `xml:"complianceStatus,omitempty"`
 	DatastoreAccessibilityStatus string                  `xml:"datastoreAccessibilityStatus,omitempty"`
 	StoragePolicyId              string                  `xml:"storagePolicyId,omitempty"`
+	HealthStatus                 string                  `xml:"healthStatus,omitempty"`
 }
 
 func init() {
@@ -332,7 +344,7 @@ func init() {
 type CnsFileBackingDetails struct {
 	CnsBackingObjectDetails
 
-	BackingFileId string `xml:"backingDiskId,omitempty"`
+	BackingFileId string `xml:"backingFileId,omitempty"`
 }
 
 func init() {
