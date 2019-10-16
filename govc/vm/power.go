@@ -65,6 +65,19 @@ func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.Wait, "wait", true, "Wait for the operation to complete")
 }
 
+func (cmd *power) Usage() string {
+	return "NAME..."
+}
+
+func (cmd *power) Description() string {
+	return `Invoke VM power operations.
+
+Examples:
+  govc vm.power -on VM1 VM2 VM3
+  govc vm.power -on -M VM1 VM2 VM3
+  govc vm.power -off -force VM1`
+}
+
 func (cmd *power) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
