@@ -82,3 +82,17 @@ func (s DistributedVirtualSwitch) FetchDVPorts(ctx context.Context, criteria *ty
 	}
 	return res.Returnval, nil
 }
+
+func (s DistributedVirtualSwitch) ReconfigureDVPort(ctx context.Context, spec []types.DVPortConfigSpec) (*Task, error) {
+	req := types.ReconfigureDVPort_Task{
+		This: s.Reference(),
+		Port: spec,
+	}
+
+	res, err := methods.ReconfigureDVPort_Task(ctx, s.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(s.Client(), res.Returnval), nil
+}
