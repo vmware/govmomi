@@ -147,6 +147,7 @@ load test_helper
 
   run govc -h
   assert_success
+  assert_matches "Usage of govc:"
 
   run govc -enoent
   assert_failure
@@ -159,4 +160,12 @@ load test_helper
 
   run govc vm.create -enoent
   assert_failure
+
+  run govc nope
+  assert_failure
+  assert_matches "Usage of govc:"
+
+  run govc power
+  assert_failure
+  assert_matches "did you mean:"
 }

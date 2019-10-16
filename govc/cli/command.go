@@ -45,21 +45,20 @@ type Command interface {
 }
 
 func generalHelp(w io.Writer, filter string) {
-	if filter == "" {
-		fmt.Fprintf(w, "Usage of %s:\n", os.Args[0])
-	} else {
-		fmt.Fprintf(w, "No command '%s' found, did you mean:\n", filter)
+	var cmds, matches []string
+	for name := range commands {
+		cmds = append(cmds, name)
+
+		if filter != "" && strings.Contains(name, filter) {
+			matches = append(matches, name)
+		}
 	}
 
-	var cmds []string
-	for name := range commands {
-		if filter == "" {
-			cmds = append(cmds, name)
-			continue
-		}
-		if strings.Contains(name, filter) {
-			cmds = append(cmds, name)
-		}
+	if len(matches) == 0 {
+		fmt.Fprintf(w, "Usage of %s:\n", os.Args[0])
+	} else {
+		fmt.Fprintf(w, "%s: command '%s' not found, did you mean:\n", os.Args[0], filter)
+		cmds = matches
 	}
 
 	sort.Strings(cmds)
