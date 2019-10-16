@@ -40,6 +40,7 @@ type customize struct {
 	gateway   flags.StringList
 	netmask   string
 	dnsserver flags.StringList
+	kind      string
 }
 
 func init() {
@@ -59,18 +60,22 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(&cmd.gateway, "gateway", "Gateway")
 	f.StringVar(&cmd.netmask, "netmask", "", "Netmask")
 	f.Var(&cmd.dnsserver, "dns-server", "DNS server")
+	f.StringVar(&cmd.kind, "type", "Linux", "Customization type if spec NAME is not specified (Linux|Windows)")
 }
 
 func (cmd *customize) Usage() string {
-	return "NAME"
+	return "[NAME]"
 }
 
 func (cmd *customize) Description() string {
-	return `Customize VM with specification NAME.
+	return `Customize VM.
+
+Optionally specify a customization spec NAME.
 
 Windows -tz value requires the Index (hex): https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values
 
 Examples:
+  govc vm.customize -vm VM -name my-hostname
   govc vm.customize -vm VM NAME
   govc vm.customize -vm VM -gateway GATEWAY -netmask NETMASK -ip NEWIP -dns-server DNS1 -dns-server DNS2 NAME
   govc vm.customize -vm VM -auto-login 3 NAME
@@ -79,11 +84,6 @@ Examples:
 }
 
 func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
-	name := f.Arg(0)
-	if name == "" {
-		return flag.ErrHelp
-	}
-
 	vm, err := cmd.VirtualMachineFlag.VirtualMachine()
 	if err != nil {
 		return err
@@ -93,22 +93,41 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	m := object.NewCustomizationSpecManager(vm.Client())
+	var spec *types.CustomizationSpec
 
-	exists, err := m.DoesCustomizationSpecExist(ctx, name)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		return fmt.Errorf("specification %q does not exist", name)
+	name := f.Arg(0)
+	if name == "" {
+		spec = &types.CustomizationSpec{
+			NicSettingMap: []types.CustomizationAdapterMapping{{}},
+		}
+		spec.NicSettingMap[0].Adapter.Ip = new(types.CustomizationDhcpIpGenerator)
+		switch cmd.kind {
+		case "Linux":
+			spec.Identity = new(types.CustomizationLinuxPrep)
+		case "Windows":
+			spec.Identity = new(types.CustomizationSysprep)
+		default:
+			return flag.ErrHelp
+		}
+	} else {
+		m := object.NewCustomizationSpecManager(vm.Client())
+
+		exists, err := m.DoesCustomizationSpecExist(ctx, name)
+		if err != nil {
+			return err
+		}
+		if !exists {
+			return fmt.Errorf("specification %q does not exist", name)
+		}
+
+		item, err := m.GetCustomizationSpec(ctx, name)
+		if err != nil {
+			return err
+		}
+
+		spec = &item.Spec
 	}
 
-	item, err := m.GetCustomizationSpec(ctx, name)
-	if err != nil {
-		return err
-	}
-
-	spec := &item.Spec
 	sysprep, isWindows := spec.Identity.(*types.CustomizationSysprep)
 	linprep, _ := spec.Identity.(*types.CustomizationLinuxPrep)
 
@@ -171,7 +190,7 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		nic.Adapter.DnsServerList = cmd.dnsserver
 	}
 
-	task, err := vm.Customize(ctx, item.Spec)
+	task, err := vm.Customize(ctx, *spec)
 	if err != nil {
 		return err
 	}

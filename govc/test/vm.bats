@@ -932,4 +932,28 @@ load test_helper
 
   run govc object.collect -s vm/DC0_H0_VM0 guest.hostName
   assert_success windoze
+
+  run govc vm.power -off DC0_H0_VM0
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.44 -type Windows
+  assert_success
+
+  run govc vm.power -on DC0_H0_VM0
+  assert_success
+
+  run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
+  assert_success 10.0.0.44
+
+  run govc vm.power -off DC0_H0_VM0
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -type Linux
+  assert_success
+
+  run govc vm.power -on DC0_H0_VM0
+  assert_success
+
+  run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
+  assert_success 10.0.0.45
 }
