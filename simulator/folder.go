@@ -149,6 +149,15 @@ func (f *Folder) CreateFolder(c *types.CreateFolder) soap.HasFault {
 	r := &methods.CreateFolderBody{}
 
 	if f.hasChildType("Folder") {
+		if obj := Map.FindByName(c.Name, f.ChildEntity); obj != nil {
+			r.Fault_ = Fault("", &types.DuplicateName{
+				Name:   c.Name,
+				Object: f.Self,
+			})
+
+			return r
+		}
+
 		folder := &Folder{}
 
 		folder.Name = c.Name
@@ -175,6 +184,15 @@ func (f *Folder) CreateStoragePod(c *types.CreateStoragePod) soap.HasFault {
 	r := &methods.CreateStoragePodBody{}
 
 	if f.hasChildType("StoragePod") {
+		if obj := Map.FindByName(c.Name, f.ChildEntity); obj != nil {
+			r.Fault_ = Fault("", &types.DuplicateName{
+				Name:   c.Name,
+				Object: f.Self,
+			})
+
+			return r
+		}
+
 		pod := &StoragePod{}
 
 		pod.Name = c.Name

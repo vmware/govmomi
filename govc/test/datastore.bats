@@ -401,6 +401,9 @@ upload_file() {
   run govc datastore.cluster.info
   assert_success
 
+  run govc folder.create -pod $pod
+  assert_failure # duplicate name
+
   run govc datastore.cluster.change -drs-enabled -drs-mode manual $pod
   assert_success
 
