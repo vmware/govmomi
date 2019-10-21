@@ -80,17 +80,18 @@ func (k *keepAlive) start() {
 	k.notifyWaitGroup.Add(1)
 
 	go func() {
-		defer k.notifyWaitGroup.Done()
-
 		for t := time.NewTimer(k.idleTime); ; {
 			select {
 			case <-k.notifyStop:
+				k.notifyWaitGroup.Done()
 				return
 			case <-k.notifyRequest:
 				t.Reset(k.idleTime)
 			case <-t.C:
 				if err := k.keepAlive(k.roundTripper); err != nil {
+					k.notifyWaitGroup.Done()
 					k.stop()
+					return
 				}
 				t = time.NewTimer(k.idleTime)
 			}

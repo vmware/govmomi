@@ -225,6 +225,9 @@ func TestKeepAliveHandler(t *testing.T) {
 	if err := m1.Login(context.Background(), u1.User); err != nil {
 		t.Error(err)
 	}
+	defer m1.Logout(context.Background())
+	defer m2.Logout(context.Background())
+
 	if err := m2.Login(context.Background(), u2.User); err != nil {
 		t.Error(err)
 	}
