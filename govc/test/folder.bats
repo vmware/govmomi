@@ -38,6 +38,9 @@ load test_helper
     run govc folder.info /$GOVC_DATACENTER/vm/$name
     assert_success
 
+    run govc folder.create vm/$name
+    assert_failure # duplicate name
+
     run govc object.destroy vm/$name
     assert_success
 
