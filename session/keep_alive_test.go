@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package session
+package session_test
 
 import (
 	"context"
@@ -22,9 +22,12 @@ import (
 	"net/url"
 	"os"
 	"runtime"
+	"sync/atomic"
 	"testing"
 	"time"
 
+	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/test"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -32,79 +35,93 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type testKeepAlive int
+type testKeepAlive struct {
+	val int32
+}
 
 func (t *testKeepAlive) Func(soap.RoundTripper) error {
-	*t++
+	atomic.AddInt32(&t.val, 1)
 	return nil
 }
 
-func newManager(t *testing.T) (*Manager, *url.URL) {
-	u := test.URL()
-	if u == nil {
-		t.SkipNow()
-	}
+func (t *testKeepAlive) Value() int {
+	n := atomic.LoadInt32(&t.val)
+	return int(n)
+}
 
-	soapClient := soap.NewClient(u, true)
-	vimClient, err := vim25.NewClient(context.Background(), soapClient)
+type manager struct {
+	*session.Manager
+	rt soap.RoundTripper
+}
+
+func newManager(u *url.URL, idle time.Duration, handler func(soap.RoundTripper) error) manager {
+	sc := soap.NewClient(u, true)
+	vc, err := vim25.NewClient(context.Background(), sc)
 	if err != nil {
-		t.Fatal(err)
+		panic(err)
 	}
 
-	return NewManager(vimClient), u
+	if idle != 0 {
+		if handler == nil {
+			vc.RoundTripper = session.KeepAlive(vc.RoundTripper, idle)
+		} else {
+			vc.RoundTripper = session.KeepAliveHandler(vc.RoundTripper, idle, handler)
+		}
+	}
+
+	return manager{session.NewManager(vc), vc.RoundTripper}
 }
 
 func TestKeepAlive(t *testing.T) {
-	var i testKeepAlive
-	var j int
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		var i testKeepAlive
+		var j int
 
-	m, u := newManager(t)
-	k := KeepAlive(m.client.RoundTripper, time.Millisecond)
-	k.(*keepAlive).keepAlive = i.Func
-	m.client.RoundTripper = k
+		m := newManager(c.URL(), time.Millisecond, i.Func)
 
-	// Expect keep alive to not have triggered yet
-	if i != 0 {
-		t.Errorf("Expected i == 0, got i: %d", i)
-	}
+		// Expect keep alive to not have triggered yet
+		if i.Value() != 0 {
+			t.Errorf("Expected i == 0, got i: %d", i)
+		}
 
-	// Logging in starts keep alive
-	err := m.Login(context.Background(), u.User)
-	if err != nil {
-		t.Error(err)
-	}
+		// Logging in starts keep alive
+		err := m.Login(ctx, simulator.DefaultLogin)
+		if err != nil {
+			t.Error(err)
+		}
 
-	time.Sleep(2 * time.Millisecond)
+		time.Sleep(2 * time.Millisecond)
 
-	// Expect keep alive to triggered at least once
-	if i == 0 {
-		t.Errorf("Expected i != 0, got i: %d", i)
-	}
+		// Expect keep alive to triggered at least once
+		if i.Value() == 0 {
+			t.Errorf("Expected i != 0, got i: %d", i)
+		}
 
-	j = int(i)
-	time.Sleep(2 * time.Millisecond)
+		j = i.Value()
+		time.Sleep(2 * time.Millisecond)
 
-	// Expect keep alive to triggered at least once more
-	if int(i) <= j {
-		t.Errorf("Expected i > j, got i: %d, j: %d", i, j)
-	}
+		// Expect keep alive to triggered at least once more
+		if i.Value() <= j {
+			t.Errorf("Expected i > j, got i: %d, j: %d", i, j)
+		}
 
-	// Logging out stops keep alive
-	err = m.Logout(context.Background())
-	if err != nil {
-		t.Error(err)
-	}
+		// Logging out stops keep alive
+		err = m.Logout(context.Background())
+		if err != nil {
+			t.Error(err)
+		}
 
-	j = int(i)
-	time.Sleep(2 * time.Millisecond)
+		j = i.Value()
+		time.Sleep(2 * time.Millisecond)
 
-	// Expect keep alive to have stopped
-	if int(i) != j {
-		t.Errorf("Expected i == j, got i: %d, j: %d", i, j)
-	}
+		// Expect keep alive to have stopped
+		if i.Value() != j {
+			t.Errorf("Expected i == j, got i: %d, j: %d", i, j)
+		}
+	})
 }
 
-func testSessionOK(t *testing.T, m *Manager, ok bool) {
+func testSessionOK(t *testing.T, m manager, ok bool) {
 	s, err := m.UserSession(context.Background())
 	if err != nil {
 		t.Fatal(err)
@@ -130,23 +147,24 @@ func TestRealKeepAlive(t *testing.T) {
 	if os.Getenv("GOVMOMI_KEEPALIVE_TEST") != "1" {
 		t.SkipNow()
 	}
-
-	m1, u1 := newManager(t)
-	m2, u2 := newManager(t)
-
+	u := test.URL()
+	if u == nil {
+		t.SkipNow()
+	}
+	var m1, m2 manager
+	m1 = newManager(u, 0, nil)
 	// Enable keepalive on m2
-	k := KeepAlive(m2.client.RoundTripper, 10*time.Minute)
-	m2.client.RoundTripper = k
+	m2 = newManager(u, 10*time.Minute, nil)
 
 	// Expect both sessions to be invalid
 	testSessionOK(t, m1, false)
 	testSessionOK(t, m2, false)
 
 	// Logging in starts keep alive
-	if err := m1.Login(context.Background(), u1.User); err != nil {
+	if err := m1.Login(context.Background(), u.User); err != nil {
 		t.Error(err)
 	}
-	if err := m2.Login(context.Background(), u2.User); err != nil {
+	if err := m2.Login(context.Background(), u.User); err != nil {
 		t.Error(err)
 	}
 
@@ -185,99 +203,92 @@ func isInvalidLogin(err error) bool {
 }
 
 func TestKeepAliveHandler(t *testing.T) {
-	u := test.URL()
-	if u == nil {
-		t.SkipNow()
-	}
-
-	m1, u1 := newManager(t)
-	m2, u2 := newManager(t)
-
-	reauth := make(chan bool)
-
-	// Keep alive handler that will re-login.
-	// Real-world case: connectivity to ESX/VC is down long enough for the session to expire
-	// Test-world case: we call TerminateSession below
-	k := KeepAliveHandler(m2.client.RoundTripper, 2*time.Second, func(roundTripper soap.RoundTripper) error {
-		_, err := methods.GetCurrentTime(context.Background(), roundTripper)
-		if err != nil {
-			if isNotAuthenticated(err) {
-				err = m2.Login(context.Background(), u2.User)
-
-				if err != nil {
-					if isInvalidLogin(err) {
-						reauth <- false
-						t.Log("failed to re-authenticate, quitting keep alive handler")
-						return err
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		reauth := make(chan bool)
+		login := simulator.DefaultLogin
+		var m1, m2 manager
+		m1 = newManager(c.URL(), 0, nil)
+		// Keep alive handler that will re-login.
+		// Real-world case: connectivity to ESX/VC is down long enough for the session to expire
+		// Test-world case: we call TerminateSession below
+		m2 = newManager(c.URL(), time.Second, func(roundTripper soap.RoundTripper) error {
+			_, err := methods.GetCurrentTime(ctx, roundTripper)
+			if err != nil {
+				if isNotAuthenticated(err) {
+					err = m2.Login(ctx, login)
+					if err != nil {
+						if isInvalidLogin(err) {
+							reauth <- false
+							t.Log("failed to re-authenticate, quitting keep alive handler")
+							return err
+						}
+					} else {
+						reauth <- true
 					}
-				} else {
-					reauth <- true
 				}
 			}
+
+			return nil
+		})
+
+		// Logging in starts keep alive
+		if err := m1.Login(ctx, simulator.DefaultLogin); err != nil {
+			t.Error(err)
+		}
+		defer m1.Logout(ctx)
+
+		if err := m2.Login(ctx, simulator.DefaultLogin); err != nil {
+			t.Error(err)
+		}
+		defer m2.Logout(ctx)
+
+		// Terminate session for m2.  Note that self terminate fails, so we need 2 sessions for this test.
+		s, err := m2.UserSession(ctx)
+		if err != nil {
+			t.Fatal(err)
 		}
 
-		return nil
+		err = m1.TerminateSession(ctx, []string{s.Key})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		_, err = methods.GetCurrentTime(ctx, m2.rt)
+		if err == nil {
+			t.Error("expected to fail")
+		}
+
+		// Wait for keepalive to re-authenticate
+		<-reauth
+
+		_, err = methods.GetCurrentTime(ctx, m2.rt)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Clear credentials to test re-authentication failure
+		login = nil
+
+		s, err = m2.UserSession(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = m1.TerminateSession(ctx, []string{s.Key})
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Wait for keepalive re-authenticate attempt
+		result := <-reauth
+
+		_, err = methods.GetCurrentTime(ctx, m2.rt)
+		if err == nil {
+			t.Error("expected to fail")
+		}
+
+		if result {
+			t.Errorf("expected reauth to fail")
+		}
 	})
-
-	m2.client.RoundTripper = k
-
-	// Logging in starts keep alive
-	if err := m1.Login(context.Background(), u1.User); err != nil {
-		t.Error(err)
-	}
-	defer m1.Logout(context.Background())
-	defer m2.Logout(context.Background())
-
-	if err := m2.Login(context.Background(), u2.User); err != nil {
-		t.Error(err)
-	}
-
-	// Terminate session for m2.  Note that self terminate fails, so we need 2 sessions for this test.
-	s, err := m2.UserSession(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = m1.TerminateSession(context.Background(), []string{s.Key})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	_, err = methods.GetCurrentTime(context.Background(), m2.client)
-	if err == nil {
-		t.Error("expected to fail")
-	}
-
-	// Wait for keepalive to re-authenticate
-	<-reauth
-
-	_, err = methods.GetCurrentTime(context.Background(), m2.client)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Clear credentials to test re-authentication failure
-	u2.User = nil
-
-	s, err = m2.UserSession(context.Background())
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	err = m1.TerminateSession(context.Background(), []string{s.Key})
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	// Wait for keepalive re-authenticate attempt
-	result := <-reauth
-
-	_, err = methods.GetCurrentTime(context.Background(), m2.client)
-	if err == nil {
-		t.Error("expected to fail")
-	}
-
-	if result {
-		t.Errorf("expected reauth to fail")
-	}
 }
