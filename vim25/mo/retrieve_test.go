@@ -19,6 +19,7 @@ package mo
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
@@ -154,6 +155,59 @@ func TestReferences(t *testing.T) {
 	refs := References(cr)
 	n := len(refs)
 	if n != 5 {
+		t.Errorf("%d refs", n)
+	}
+}
+
+func TestEventReferences(t *testing.T) {
+	event := &types.VmPoweredOnEvent{
+		VmEvent: types.VmEvent{
+			Event: types.Event{
+				Key:         0,
+				ChainId:     0,
+				CreatedTime: time.Now(),
+				UserName:    "",
+				Datacenter: &types.DatacenterEventArgument{
+					EntityEventArgument: types.EntityEventArgument{
+						EventArgument: types.EventArgument{},
+						Name:          "DC0",
+					},
+					Datacenter: types.ManagedObjectReference{Type: "Datacenter", Value: "datacenter-2"},
+				},
+				ComputeResource: &types.ComputeResourceEventArgument{
+					EntityEventArgument: types.EntityEventArgument{
+						EventArgument: types.EventArgument{},
+						Name:          "DC0_C0",
+					},
+					ComputeResource: types.ManagedObjectReference{Type: "ClusterComputeResource", Value: "clustercomputeresource-26"},
+				},
+				Host: &types.HostEventArgument{
+					EntityEventArgument: types.EntityEventArgument{
+						EventArgument: types.EventArgument{},
+						Name:          "DC0_C0_H0",
+					},
+					Host: types.ManagedObjectReference{Type: "HostSystem", Value: "host-32"},
+				},
+				Vm: &types.VmEventArgument{
+					EntityEventArgument: types.EntityEventArgument{
+						EventArgument: types.EventArgument{},
+						Name:          "DC0_C0_RP0_VM1",
+					},
+					Vm: types.ManagedObjectReference{Type: "VirtualMachine", Value: "vm-62"},
+				},
+				Ds:                   (*types.DatastoreEventArgument)(nil),
+				Net:                  (*types.NetworkEventArgument)(nil),
+				Dvs:                  (*types.DvsEventArgument)(nil),
+				FullFormattedMessage: "",
+				ChangeTag:            "",
+			},
+			Template: false,
+		},
+	}
+
+	refs := References(event, true)
+	n := len(refs)
+	if n != 4 {
 		t.Errorf("%d refs", n)
 	}
 }
