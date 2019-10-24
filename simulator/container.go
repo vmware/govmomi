@@ -119,12 +119,16 @@ func (c *container) start(vm *VirtualMachine) {
 		}
 		if strings.HasPrefix(val.Key, "guestinfo.") {
 			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
-			env = append(env, "--env", fmt.Sprintf("%s=%s", key, val.Value.(string)))
+			env = append(env, "--env", fmt.Sprintf("VMX_%s=%s", key, val.Value.(string)))
 		}
 	}
 
 	if len(args) == 0 {
 		return
+	}
+	if len(env) != 0 {
+		// Configure env as the data access method for cloud-init-vmware-guestinfo
+		env = append(env, "--env", "VMX_GUESTINFO=true")
 	}
 
 	run := append([]string{"docker", "run", "-d", "--name", vm.Name}, env...)
