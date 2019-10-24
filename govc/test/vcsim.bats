@@ -263,7 +263,7 @@ load test_helper
   assert_success
 
   vm=DC0_C0_RP0_VM1
-  run govc vm.change -vm $vm -e RUN.container="busybox sh -c 'sleep \$GUESTINFO_SLEEP'" -e guestinfo.sleep=500
+  run govc vm.change -vm $vm -e RUN.container="busybox sh -c 'sleep \$VMX_GUESTINFO_SLEEP'" -e guestinfo.sleep=500
   assert_success
 
   run govc vm.power -on $vm
