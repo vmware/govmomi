@@ -195,7 +195,9 @@ func RetrieveProperties(ctx context.Context, r soap.RoundTripper, pc, obj types.
 var morType = reflect.TypeOf((*types.ManagedObjectReference)(nil)).Elem()
 
 // References returns all non-nil moref field values in the given struct.
-func References(s interface{}) []types.ManagedObjectReference {
+// Only Anonymous struct fields are followed by default. The optional follow
+// param will follow any struct fields when true.
+func References(s interface{}, follow ...bool) []types.ManagedObjectReference {
 	var refs []types.ManagedObjectReference
 	rval := reflect.ValueOf(s)
 	rtype := rval.Type()
@@ -210,7 +212,7 @@ func References(s interface{}) []types.ManagedObjectReference {
 		finfo := rtype.Field(i)
 
 		if finfo.Anonymous {
-			refs = append(refs, References(val.Interface())...)
+			refs = append(refs, References(val.Interface(), follow...)...)
 			continue
 		}
 		if finfo.Name == "Self" {
@@ -240,6 +242,12 @@ func References(s interface{}) []types.ManagedObjectReference {
 		if ftype == morType {
 			refs = append(refs, val.Interface().(types.ManagedObjectReference))
 			continue
+		}
+
+		if len(follow) != 0 && follow[0] {
+			if ftype.Kind() == reflect.Struct && val.CanSet() {
+				refs = append(refs, References(val.Interface(), follow...)...)
+			}
 		}
 	}
 
