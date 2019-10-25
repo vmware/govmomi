@@ -175,8 +175,9 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", queryResult)
-	if newCapacityInMb != queryResult.Volumes[0].BackingObjectDetails.CapacityInMb {
-		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryResult.Volumes[0].BackingObjectDetails.CapacityInMb)
+	queryCapacity := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).CapacityInMb
+	if newCapacityInMb != queryCapacity {
+		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryCapacity)
 	} else {
 		t.Logf("Volume extended sucessfully to the new size. Volume ID: %s New Size: %d", extendVolumeId, newCapacityInMb)
 	}
@@ -471,6 +472,19 @@ func TestClient(t *testing.T) {
 	}
 	filevolumeId := createVolumeOperationRes.VolumeId.Id
 	t.Logf("Fileshare volume created sucessfully. filevolumeId: %s", filevolumeId)
+
+	// Test QueryVolume API
+	volumeIDList = []cnstypes.CnsVolumeId{{Id: filevolumeId}}
+	queryFilter.VolumeIds = volumeIDList
+	t.Logf("Calling QueryVolume using queryFilter: %+v", queryFilter)
+	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	if err != nil {
+		t.Errorf("Failed to query volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", queryResult)
+	fileBackingInfo := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsNfsFileShareBackingDetails)
+	t.Logf("File Share Name: %s with address: %s", fileBackingInfo.Name, fileBackingInfo.Address)
 
 	// Test Deleting vSAN file-share Volume
 	var fileVolumeIDList []cnstypes.CnsVolumeId

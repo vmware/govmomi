@@ -285,16 +285,16 @@ func init() {
 type CnsVolume struct {
 	types.DynamicData
 
-	VolumeId                     CnsVolumeId             `xml:"volumeId"`
-	Name                         string                  `xml:"name,omitempty"`
-	VolumeType                   string                  `xml:"volumeType,omitempty"`
-	DatastoreUrl                 string                  `xml:"datastoreUrl,omitempty"`
-	Metadata                     CnsVolumeMetadata       `xml:"metadata,omitempty"`
-	BackingObjectDetails         CnsBackingObjectDetails `xml:"backingObjectDetails,omitempty"`
-	ComplianceStatus             string                  `xml:"complianceStatus,omitempty"`
-	DatastoreAccessibilityStatus string                  `xml:"datastoreAccessibilityStatus,omitempty"`
-	StoragePolicyId              string                  `xml:"storagePolicyId,omitempty"`
-	HealthStatus                 string                  `xml:"healthStatus,omitempty"`
+	VolumeId                     CnsVolumeId                 `xml:"volumeId"`
+	Name                         string                      `xml:"name,omitempty"`
+	VolumeType                   string                      `xml:"volumeType,omitempty"`
+	DatastoreUrl                 string                      `xml:"datastoreUrl,omitempty"`
+	Metadata                     CnsVolumeMetadata           `xml:"metadata,omitempty"`
+	BackingObjectDetails         BaseCnsBackingObjectDetails `xml:"backingObjectDetails,omitempty"`
+	ComplianceStatus             string                      `xml:"complianceStatus,omitempty"`
+	DatastoreAccessibilityStatus string                      `xml:"datastoreAccessibilityStatus,omitempty"`
+	StoragePolicyId              string                      `xml:"storagePolicyId,omitempty"`
+	HealthStatus                 string                      `xml:"healthStatus,omitempty"`
 }
 
 func init() {
