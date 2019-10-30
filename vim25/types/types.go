@@ -8231,7 +8231,7 @@ func init() {
 type ClusterDasAdmissionControlPolicy struct {
 	DynamicData
 
-	ResourceReductionToToleratePercent int32 `xml:"resourceReductionToToleratePercent,omitempty"`
+	ResourceReductionToToleratePercent *int32 `xml:"resourceReductionToToleratePercent"`
 }
 
 func init() {
