@@ -75,7 +75,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 					VolumeType:                   createSpec.VolumeType,
 					DatastoreUrl:                 datastore.Info.GetDatastoreInfo().Url,
 					Metadata:                     createSpec.Metadata,
-					BackingObjectDetails:         *createSpec.BackingObjectDetails.GetCnsBackingObjectDetails(),
+					BackingObjectDetails:         createSpec.BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails(),
 					ComplianceStatus:             "Simulator Compliance Status",
 					DatastoreAccessibilityStatus: "Simulator Datastore Accessibility Status",
 				}
@@ -110,7 +110,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 						VolumeType:                   createSpec.VolumeType,
 						DatastoreUrl:                 datastore.Info.GetDatastoreInfo().Url,
 						Metadata:                     createSpec.Metadata,
-						BackingObjectDetails:         *createSpec.BackingObjectDetails.GetCnsBackingObjectDetails(),
+						BackingObjectDetails:         createSpec.BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails(),
 						ComplianceStatus:             "Simulator Compliance Status",
 						DatastoreAccessibilityStatus: "Simulator Datastore Accessibility Status",
 						StoragePolicyId:              policyId,
@@ -346,7 +346,7 @@ func (m *CnsVolumeManager) CnsExtendVolume(ctx context.Context, req *cnstypes.Cn
 			for _, dsVolumes := range m.volumes {
 				for id, volume := range dsVolumes {
 					if id.Id == extendSpecs.VolumeId.Id {
-						volume.BackingObjectDetails = cnstypes.CnsBackingObjectDetails{
+						volume.BackingObjectDetails = &cnstypes.CnsBackingObjectDetails{
 							CapacityInMb: extendSpecs.CapacityInMb,
 						}
 						operationResult = append(operationResult, &cnstypes.CnsVolumeOperationResult{
