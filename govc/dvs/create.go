@@ -32,8 +32,6 @@ type create struct {
 	types.DVSCreateSpec
 
 	configSpec *types.VMwareDVSConfigSpec
-
-	mtu int
 }
 
 func init() {
@@ -50,7 +48,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DVSCreateSpec.ProductInfo = new(types.DistributedVirtualSwitchProductSpec)
 
 	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
-	f.IntVar(&cmd.mtu, "mtu", 1500, "DVS Max MTU")
+	f.Var(flags.NewInt32(&cmd.configSpec.MaxMtu), "mtu", "DVS Max MTU")
 }
 
 func (cmd *create) Usage() string {
@@ -84,7 +82,6 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	name := f.Arg(0)
 
 	cmd.configSpec.Name = name
-	cmd.configSpec.MaxMtu = int32(cmd.mtu)
 
 	folder, err := cmd.FolderOrDefault("network")
 	if err != nil {
