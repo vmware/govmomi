@@ -224,6 +224,34 @@ EOF
   assert_failure
 }
 
+@test "library.deploy vmtx" {
+  vcsim_env
+
+  vm=DC0_H0_VM0
+  item="${vm}_item"
+
+  run govc vm.clone -library enoent -vm $vm $item
+  assert_failure # library does not exist
+
+  run govc library.create my-content
+  assert_success
+
+  run govc library.deploy my-content/$item my-vm
+  assert_failure # vmtx item does not exist
+
+  run govc library.clone -vm $vm my-content $item
+  assert_success
+
+  run govc library.deploy my-content/$item my-vm
+  assert_success
+
+  run govc vm.destroy $item
+  assert_success # expected to delete the CL item too
+
+  run govc library.deploy my-content/$item my-vm2
+  assert_failure # $item no longer exists
+}
+
 @test "library.pubsub" {
   vcsim_env
 
