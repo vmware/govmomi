@@ -47,6 +47,7 @@ import (
 	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vapi/vcenter"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -148,6 +149,18 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 	}
 
 	return rest.Path + "/", s
+}
+
+func (s *handler) withClient(f func(context.Context, *vim25.Client) error) error {
+	ctx := context.Background()
+	c, err := govmomi.NewClient(ctx, &s.URL, true)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = c.Logout(ctx)
+	}()
+	return f(ctx, c.Client)
 }
 
 // HandleFunc wraps the given handler with authorization checks and passes to http.ServeMux.HandleFunc
@@ -1312,7 +1325,7 @@ func (i *item) ovf() string {
 	return ""
 }
 
-func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter.Deploy) (*nfc.LeaseInfo, error) {
+func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *library.Library, item *item, deploy vcenter.Deploy) (*nfc.LeaseInfo, error) {
 	name := item.ovf()
 	desc, err := ioutil.ReadFile(filepath.Join(libraryPath(lib, item.ID), name))
 	if err != nil {
@@ -1328,16 +1341,7 @@ func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter
 		host = &types.ManagedObjectReference{Type: "HostSystem", Value: deploy.Target.HostID}
 	}
 
-	ctx := context.Background()
-	c, err := govmomi.NewClient(ctx, &s.URL, true)
-	if err != nil {
-		return nil, err
-	}
-	defer func() {
-		_ = c.Logout(ctx)
-	}()
-
-	v, err := view.NewManager(c.Client).CreateContainerView(ctx, c.ServiceContent.RootFolder, nil, true)
+	v, err := view.NewManager(c).CreateContainerView(ctx, c.ServiceContent.RootFolder, nil, true)
 	if err != nil {
 		return nil, err
 	}
@@ -1389,7 +1393,7 @@ func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter
 		}
 	}
 
-	m := ovf.NewManager(c.Client)
+	m := ovf.NewManager(c)
 	spec, err := m.CreateImportSpec(ctx, string(desc), pool, ds, cisp)
 	if err != nil {
 		return nil, err
@@ -1409,7 +1413,7 @@ func (s *handler) libraryDeploy(lib *library.Library, item *item, deploy vcenter
 		return nil, err
 	}
 
-	lease := nfc.NewLease(c.Client, res.Returnval)
+	lease := nfc.NewLease(c, res.Returnval)
 	info, err := lease.Wait(ctx, spec.FileItem)
 	if err != nil {
 		return nil, err
@@ -1451,12 +1455,17 @@ func (s *handler) libraryItemDeployID(w http.ResponseWriter, r *http.Request) {
 	switch s.action(r) {
 	case "deploy":
 		var d vcenter.Deployment
-		info, err := s.libraryDeploy(lib, item, spec.Deploy)
-		if err == nil {
+		err := s.withClient(func(ctx context.Context, c *vim25.Client) error {
+			info, err := s.libraryDeploy(ctx, c, lib, item, spec.Deploy)
+			if err != nil {
+				return err
+			}
 			id := vcenter.ResourceID(info.Entity)
 			d.Succeeded = true
 			d.ResourceID = &id
-		} else {
+			return nil
+		})
+		if err != nil {
 			d.Error = &vcenter.DeploymentError{
 				Errors: []vcenter.OVFError{{
 					Category: "SERVER",
