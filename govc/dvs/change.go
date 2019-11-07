@@ -29,7 +29,7 @@ import (
 )
 
 type change struct {
-	*flags.FolderFlag
+	*flags.DatacenterFlag
 
 	types.DVSCreateSpec
 
@@ -41,8 +41,8 @@ func init() {
 }
 
 func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
-	cmd.FolderFlag.Register(ctx, f)
+	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
+	cmd.DatacenterFlag.Register(ctx, f)
 
 	cmd.configSpec = new(types.VMwareDVSConfigSpec)
 
@@ -61,7 +61,6 @@ func (cmd *change) Description() string {
 	return `Change DVS (DistributedVirtualSwitch) in datacenter.
 
 Examples:
-  govc dvs.change
   govc dvs.change -product-version 5.5.0 DSwitch
   govc dvs.change -mtu 9000 DSwitch`
 }
@@ -85,38 +84,33 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	folder, err := cmd.FolderOrDefault("network")
+	net, err := finder.Network(ctx, name)
 	if err != nil {
 		return err
 	}
 
-	networks, err := finder.NetworkList(ctx, folder.InventoryPath+"/"+name)
+	dvs, ok := net.(*object.DistributedVirtualSwitch)
+	if !ok {
+		return fmt.Errorf("%s (%s) is not a DVS", f.Arg(0), net.Reference().Type)
+	}
+	var s mo.DistributedVirtualSwitch
+	err = dvs.Properties(ctx, dvs.Reference(), []string{"config"}, &s)
 	if err != nil {
 		return err
 	}
 
-	for _, net := range networks {
-		if dvs, ok := net.(*object.DistributedVirtualSwitch); ok {
-			var s mo.DistributedVirtualSwitch
-			err = dvs.Properties(ctx, dvs.Reference(), []string{"config"}, &s)
-			if err != nil {
-				return err
-			}
+	cmd.configSpec.ConfigVersion = s.Config.GetDVSConfigInfo().ConfigVersion
+	task, err := dvs.Reconfigure(ctx, cmd.ConfigSpec)
+	if err != nil {
+		return err
+	}
 
-			cmd.configSpec.ConfigVersion = s.Config.GetDVSConfigInfo().ConfigVersion
-			task, err := dvs.Reconfigure(ctx, cmd.ConfigSpec)
-			if err != nil {
-				return err
-			}
+	logger := cmd.ProgressLogger(fmt.Sprintf("updating DVS %s... ", name))
+	defer logger.Wait()
 
-			logger := cmd.ProgressLogger(fmt.Sprintf("updating %s in folder %s... ", name, folder.InventoryPath))
-			defer logger.Wait()
-
-			_, err = task.WaitForResult(ctx, logger)
-			if err != nil {
-				return err
-			}
-		}
+	_, err = task.WaitForResult(ctx, logger)
+	if err != nil {
+		return err
 	}
 
 	return nil
