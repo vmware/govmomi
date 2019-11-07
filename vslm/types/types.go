@@ -116,7 +116,7 @@ type VslmAttachDiskRequestType struct {
 	Id            types.ID                     `xml:"id"`
 	Vm            types.ManagedObjectReference `xml:"vm"`
 	ControllerKey int32                        `xml:"controllerKey,omitempty"`
-	UnitNumber    *int32                       `xml:"unitNumber"`
+	UnitNumber    *int32                       `xml:"unitNumber,omitempty"`
 }
 
 func init() {
