@@ -49,6 +49,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.sub.SubscriptionURL, "sub", "", "Subscribe to library URL")
 	f.StringVar(&cmd.sub.UserName, "sub-username", "", "Subscription username")
 	f.StringVar(&cmd.sub.Password, "sub-password", "", "Subscription password")
+	f.StringVar(&cmd.sub.SslThumbprint, "ssl-thumbprint", "", "SSL Tumbprint")
 	f.BoolVar(cmd.sub.AutomaticSyncEnabled, "sub-autosync", true, "Automatic synchronization")
 	f.BoolVar(cmd.sub.OnDemand, "sub-ondemand", false, "Download content on demand")
 }
