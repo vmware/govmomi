@@ -56,8 +56,7 @@ func (cmd *change) Usage() string {
 }
 
 func (cmd *change) Description() string {
-	return `
-Change a virtual nic device.
+	return `Change a virtual nic DEVICE.
 
 Examples:
   govc host.vnic.change -host hostname -mtu 9000 vmk1`
@@ -85,8 +84,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	for _, nic := range mns.NetworkInfo.Vnic {
 		if nic.Device == device {
 			nic.Spec.Mtu = cmd.mtu
-			ns.UpdateVirtualNic(ctx, device, nic.Spec)
-			return nil
+			return ns.UpdateVirtualNic(ctx, device, nic.Spec)
 		}
 	}
 
