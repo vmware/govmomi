@@ -48,6 +48,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DVSCreateSpec.ProductInfo = new(types.DistributedVirtualSwitchProductSpec)
 
 	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
+	f.Var(flags.NewInt32(&cmd.configSpec.MaxMtu), "mtu", "DVS Max MTU")
 }
 
 func (cmd *create) Usage() string {
@@ -62,7 +63,8 @@ this defaults to the network folder in the specified or default datacenter.
 
 Examples:
   govc dvs.create DSwitch
-  govc dvs.create -product-version 5.5.0 DSwitch`
+  govc dvs.create -product-version 5.5.0 DSwitch
+  govc dvs.create -mtu 9000 DSwitch`
 }
 
 func (cmd *create) Process(ctx context.Context) error {
