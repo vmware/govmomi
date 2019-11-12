@@ -58,8 +58,8 @@ func init() {
 type CnsKubernetesEntityReference struct {
 	EntityType string `xml:"entityType"`
 	EntityName string `xml:"entityName"`
-	Namespace  string `xml:"namespace, omitempty"`
-	clusterId  string `xml:"clusterId, omitempty"`
+	Namespace  string `xml:"namespace,omitempty"`
+	clusterId  string `xml:"clusterId,omitempty"`
 }
 
 type CnsKubernetesEntityMetadata struct {
