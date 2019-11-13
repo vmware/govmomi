@@ -245,6 +245,19 @@ EOF
   run govc library.deploy my-content/$item my-vm
   assert_success
 
+  export GOVC_SHOW_UNRELEASED=true
+  run govc library.checkout my-content/enoent my-vm-checkout
+  assert_failure # vmtx item does not exist
+
+  run govc library.checkout my-content/$item my-vm-checkout
+  assert_success
+
+  run govc library.checkin -vm my-vm-checkout my-content/enoent
+  assert_failure # vmtx item does not exist
+
+  run govc library.checkin -vm my-vm-checkout my-content/$item
+  assert_success
+
   run govc vm.destroy $item
   assert_success # expected to delete the CL item too
 

@@ -22,6 +22,7 @@ import (
 	"path"
 
 	"github.com/vmware/govmomi/vapi/internal"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -96,6 +97,18 @@ type DeployTemplate struct {
 	VMHomeStorage         *DiskStorage           `json:"vm_home_storage,omitempty"`
 }
 
+// CheckOut specification
+type CheckOut struct {
+	Name      string     `json:"name,omitempty"`
+	Placement *Placement `json:"placement,omitempty"`
+	PoweredOn bool       `json:"powered_on,omitempty"`
+}
+
+// CheckIn specification
+type CheckIn struct {
+	Message string `json:"message"`
+}
+
 // CreateTemplate creates a library item in content library from an existing VM
 func (c *Manager) CreateTemplate(ctx context.Context, vmtx Template) (string, error) {
 	url := c.Resource(internal.VCenterVMTXLibraryItem)
@@ -118,4 +131,29 @@ func (c *Manager) DeployTemplateLibraryItem(ctx context.Context, libraryItemID s
 		return nil, err
 	}
 	return &types.ManagedObjectReference{Type: "VirtualMachine", Value: res}, nil
+}
+
+// CheckOut a library item containing a VM template.
+func (c *Manager) CheckOut(ctx context.Context, libraryItemID string, checkout *CheckOut) (*types.ManagedObjectReference, error) {
+	url := c.Resource(path.Join(internal.VCenterVMTXLibraryItem, libraryItemID, "check-outs")).WithParam("action", "check-out")
+	var res string
+	spec := struct {
+		*CheckOut `json:"spec"`
+	}{checkout}
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err != nil {
+		return nil, err
+	}
+	return &types.ManagedObjectReference{Type: "VirtualMachine", Value: res}, nil
+}
+
+// CheckIn a VM into the library item.
+func (c *Manager) CheckIn(ctx context.Context, libraryItemID string, vm mo.Reference, checkin *CheckIn) (string, error) {
+	p := path.Join(internal.VCenterVMTXLibraryItem, libraryItemID, "check-outs", vm.Reference().Value)
+	url := c.Resource(p).WithParam("action", "check-in")
+	var res string
+	spec := struct {
+		*CheckIn `json:"spec"`
+	}{checkin}
+	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }

@@ -1614,7 +1614,16 @@ func (s *handler) libraryItemCreateTemplate(w http.ResponseWriter, r *http.Reque
 }
 
 func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) {
-	id := path.Base(r.URL.Path)
+	// Go's ServeMux doesn't support wildcard matching, hacking around that for now to support
+	// CheckOuts, e.g. "/vcenter/vm-template/library-items/{item}/check-outs/{vm}?action=check-in"
+	p := strings.TrimPrefix(r.URL.Path, rest.Path+internal.VCenterVMTXLibraryItem+"/")
+	route := strings.Split(p, "/")
+	if len(route) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+
+	id := route[0]
 	ok := false
 
 	var item *item
@@ -1633,6 +1642,17 @@ func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) 
 	if item.Type != "vm-template" {
 		BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
 		return
+	}
+
+	if len(route) > 1 {
+		switch route[1] {
+		case "check-outs":
+			s.libraryItemCheckOuts(item, w, r)
+			return
+		default:
+			http.NotFound(w, r)
+			return
+		}
 	}
 
 	var spec struct {
@@ -1668,6 +1688,30 @@ func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 		OK(w, ref.Value)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) libraryItemCheckOuts(item *item, w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Query().Get("action") {
+	case "check-out":
+		var spec struct {
+			*vcenter.CheckOut `json:"spec"`
+		}
+		if !s.decode(r, w, &spec) {
+			return
+		}
+
+		ref, err := s.cloneVM(item.Template.Value, spec.Name, spec.Placement, nil)
+		if err != nil {
+			BadRequest(w, err.Error())
+			return
+		}
+		OK(w, ref.Value)
+	case "check-in":
+		// TODO: increment ContentVersion
+		OK(w, "0")
 	default:
 		http.NotFound(w, r)
 	}
