@@ -34,6 +34,8 @@ type change struct {
 	types.DVSCreateSpec
 
 	configSpec *types.VMwareDVSConfigSpec
+
+	dProtocol string
 }
 
 func init() {
@@ -51,6 +53,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
 	f.Var(flags.NewInt32(&cmd.configSpec.MaxMtu), "mtu", "DVS Max MTU")
+	f.StringVar(&cmd.dProtocol, "discovery-protocol", "", "Link Discovery Protocol")
 }
 
 func (cmd *change) Usage() string {
@@ -62,7 +65,8 @@ func (cmd *change) Description() string {
 
 Examples:
   govc dvs.change -product-version 5.5.0 DSwitch
-  govc dvs.change -mtu 9000 DSwitch`
+  govc dvs.change -mtu 9000 DSwitch
+  govc dvs.change -discovery-protocol [lldp|cdp] DSwitch`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -100,6 +104,14 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	cmd.configSpec.ConfigVersion = s.Config.GetDVSConfigInfo().ConfigVersion
+
+	if cmd.dProtocol != "" {
+		cmd.configSpec.LinkDiscoveryProtocolConfig = &types.LinkDiscoveryProtocolConfig{
+			Protocol:  cmd.dProtocol,
+			Operation: "listen",
+		}
+	}
+
 	task, err := dvs.Reconfigure(ctx, cmd.ConfigSpec)
 	if err != nil {
 		return err
