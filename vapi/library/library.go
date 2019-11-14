@@ -20,8 +20,10 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"net/url"
 	"time"
 
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/rest"
 )
@@ -113,6 +115,23 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 	path := internal.LocalLibraryPath
 	if library.Type == "SUBSCRIBED" {
 		path = internal.SubscribedLibraryPath
+		sub := library.Subscription
+		u, err := url.Parse(sub.SubscriptionURL)
+		if err != nil {
+			return "", err
+		}
+		if u.Scheme == "https" && sub.SslThumbprint == "" {
+			thumbprint := c.Thumbprint(u.Host)
+			if thumbprint == "" {
+				t := c.Transport.(*http.Transport)
+				if t.TLSClientConfig.InsecureSkipVerify {
+					var info object.HostCertificateInfo
+					_ = info.FromURL(u, t.TLSClientConfig)
+					thumbprint = info.ThumbprintSHA1
+				}
+				sub.SslThumbprint = thumbprint
+			}
+		}
 	}
 	url := c.Resource(path)
 	var res string
