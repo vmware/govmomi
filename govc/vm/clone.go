@@ -74,7 +74,7 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 
 	cmd.ClusterFlag, ctx = flags.NewClusterFlag(ctx)
-	cmd.ClusterFlag.Register(ctx, f)
+	cmd.ClusterFlag.RegisterPlacement(ctx, f)
 
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
