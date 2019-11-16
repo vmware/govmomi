@@ -4425,8 +4425,12 @@ Usage: govc vm.info [OPTIONS] VM...
 
 Display info for VM.
 
+The '-r' flag displays additional info for CPU, memory and storage usage,
+along with the VM's Datastores and Networks and PortGroups.
+
 Examples:
   govc vm.info $vm
+  govc vm.info -r $vm | grep Network:
   govc vm.info -json $vm
   govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info
 
