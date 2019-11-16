@@ -164,6 +164,9 @@ load test_helper
   run govc dvs.portgroup.add -dvs "$id" -type earlyBinding -nports 16 "${id}-ExternalNetwork"
   assert_success
 
+  nports=$(govc object.collect -s "network/${id}-ExternalNetwork" portKeys | awk -F, '{print NF}')
+  [ "$nports" = "16" ]
+
   run govc dvs.portgroup.add -dvs "$id" -type ephemeral -vlan 3122 "${id}-InternalNetwork"
   assert_success
 

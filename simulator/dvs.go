@@ -17,6 +17,8 @@ limitations under the License.
 package simulator
 
 import (
+	"strconv"
+
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -104,7 +106,9 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 				}
 			}
 
-			pg.PortKeys = []string{}
+			for i := 0; i < int(spec.NumPorts); i++ {
+				pg.PortKeys = append(pg.PortKeys, strconv.Itoa(i))
+			}
 
 			portgroups = append(portgroups, pg.Self)
 			portgroupNames = append(portgroupNames, pg.Name)
