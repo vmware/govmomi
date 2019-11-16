@@ -88,8 +88,12 @@ func (cmd *info) Usage() string {
 func (cmd *info) Description() string {
 	return `Display info for VM.
 
+The '-r' flag displays additional info for CPU, memory and storage usage,
+along with the VM's Datastores, Networks and PortGroups.
+
 Examples:
   govc vm.info $vm
+  govc vm.info -r $vm | grep Network:
   govc vm.info -json $vm
   govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info`
 }
