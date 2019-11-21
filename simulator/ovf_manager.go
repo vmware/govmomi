@@ -214,6 +214,19 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 					unsupported(err)
 				}
 			}
+		case 14: // Floppy Drive
+			if device.PickController((*types.VirtualSIOController)(nil)) == nil {
+				c := &types.VirtualSIOController{}
+				c.Key = device.NewKey()
+				device = append(device, c)
+			}
+			d, err := device.CreateFloppy()
+			if err == nil {
+				device = append(device, d)
+				resources[item.InstanceID] = d
+			} else {
+				unsupported(err)
+			}
 		case 15: // CD/DVD
 			c, ok := resources[*item.Parent]
 			if !ok {
