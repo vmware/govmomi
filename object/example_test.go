@@ -276,3 +276,27 @@ func ExampleCustomFieldsManager_Set() {
 	})
 	// Output: backup 5 of 22 objects
 }
+
+func ExampleCustomizationSpecManager_Info() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		m := object.NewCustomizationSpecManager(c)
+		info, err := m.Info(ctx)
+		if err != nil {
+			return err
+		}
+
+		for i := range info {
+			item, err := m.GetCustomizationSpec(ctx, info[i].Name)
+			if err != nil {
+				return err
+			}
+			fmt.Printf("%s=%T\n", item.Info.Name, item.Spec.Identity)
+		}
+		return nil
+	})
+	// Output:
+	// vcsim-linux=*types.CustomizationLinuxPrep
+	// vcsim-linux-static=*types.CustomizationLinuxPrep
+	// vcsim-windows-static=*types.CustomizationSysprep
+	// vcsim-windows-domain=*types.CustomizationSysprep
+}
