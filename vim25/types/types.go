@@ -5931,7 +5931,7 @@ type AttachDiskRequestType struct {
 	DiskId        ID                     `xml:"diskId"`
 	Datastore     ManagedObjectReference `xml:"datastore"`
 	ControllerKey int32                  `xml:"controllerKey,omitempty"`
-	UnitNumber    *int32                 `xml:"unitNumber,omitempty"`
+	UnitNumber    *int32                 `xml:"unitNumber"`
 }
 
 func init() {
@@ -8231,7 +8231,7 @@ func init() {
 type ClusterDasAdmissionControlPolicy struct {
 	DynamicData
 
-	ResourceReductionToToleratePercent *int32 `xml:"resourceReductionToToleratePercent,omitempty"`
+	ResourceReductionToToleratePercent *int32 `xml:"resourceReductionToToleratePercent"`
 }
 
 func init() {
@@ -12167,7 +12167,7 @@ type DVSMacLearningPolicy struct {
 
 	Enabled              bool   `xml:"enabled"`
 	AllowUnicastFlooding *bool  `xml:"allowUnicastFlooding"`
-	Limit                *int32 `xml:"limit,omitempty"`
+	Limit                *int32 `xml:"limit"`
 	LimitPolicy          string `xml:"limitPolicy,omitempty"`
 }
 
@@ -19507,8 +19507,8 @@ func init() {
 type GuestPosixFileAttributes struct {
 	GuestFileAttributes
 
-	OwnerId     *int32 `xml:"ownerId,omitempty"`
-	GroupId     *int32 `xml:"groupId,omitempty"`
+	OwnerId     *int32 `xml:"ownerId"`
+	GroupId     *int32 `xml:"groupId"`
 	Permissions int64  `xml:"permissions,omitempty"`
 }
 
@@ -23831,7 +23831,7 @@ type HostPlacedVirtualNicIdentifier struct {
 
 	Vm          ManagedObjectReference `xml:"vm"`
 	VnicKey     string                 `xml:"vnicKey"`
-	Reservation *int32                 `xml:"reservation,omitempty"`
+	Reservation *int32                 `xml:"reservation"`
 }
 
 func init() {
@@ -29196,7 +29196,7 @@ type LimitExceeded struct {
 	VimFault
 
 	Property string `xml:"property,omitempty"`
-	Limit    *int32 `xml:"limit,omitempty"`
+	Limit    *int32 `xml:"limit"`
 }
 
 func init() {
@@ -29364,7 +29364,7 @@ func init() {
 
 type ListKeysRequestType struct {
 	This  ManagedObjectReference `xml:"_this"`
-	Limit *int32                 `xml:"limit,omitempty"`
+	Limit *int32                 `xml:"limit"`
 }
 
 func init() {
@@ -29383,7 +29383,7 @@ func init() {
 
 type ListKmipServersRequestType struct {
 	This  ManagedObjectReference `xml:"_this"`
-	Limit *int32                 `xml:"limit,omitempty"`
+	Limit *int32                 `xml:"limit"`
 }
 
 func init() {
@@ -31231,7 +31231,7 @@ func init() {
 type NamespaceLimitReached struct {
 	VimFault
 
-	Limit *int32 `xml:"limit,omitempty"`
+	Limit *int32 `xml:"limit"`
 }
 
 func init() {
@@ -38418,7 +38418,7 @@ func init() {
 type QueryVsanObjectUuidsByFilterRequestType struct {
 	This    ManagedObjectReference `xml:"_this"`
 	Uuids   []string               `xml:"uuids,omitempty"`
-	Limit   *int32                 `xml:"limit,omitempty"`
+	Limit   *int32                 `xml:"limit"`
 	Version int32                  `xml:"version,omitempty"`
 }
 
@@ -44554,7 +44554,7 @@ type StorageIOAllocationInfo struct {
 
 	Limit       *int64      `xml:"limit"`
 	Shares      *SharesInfo `xml:"shares,omitempty"`
-	Reservation *int32      `xml:"reservation,omitempty"`
+	Reservation *int32      `xml:"reservation"`
 }
 
 func init() {
@@ -49627,7 +49627,7 @@ type VirtualDevice struct {
 	Connectable   *VirtualDeviceConnectInfo    `xml:"connectable,omitempty"`
 	SlotInfo      BaseVirtualDeviceBusSlotInfo `xml:"slotInfo,omitempty,typeattr"`
 	ControllerKey int32                        `xml:"controllerKey,omitempty"`
-	UnitNumber    *int32                       `xml:"unitNumber,omitempty"`
+	UnitNumber    *int32                       `xml:"unitNumber"`
 }
 
 func init() {
@@ -55758,7 +55758,7 @@ type WaitForUpdatesResponse struct {
 type WaitOptions struct {
 	DynamicData
 
-	MaxWaitSeconds   *int32 `xml:"maxWaitSeconds,omitempty"`
+	MaxWaitSeconds   *int32 `xml:"maxWaitSeconds"`
 	MaxObjectUpdates int32  `xml:"maxObjectUpdates,omitempty"`
 }
 

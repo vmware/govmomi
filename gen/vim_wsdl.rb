@@ -230,6 +230,7 @@ class Simple
       when "int"
         if pointer_type?
           prefix += "*"
+          self.need_omitempty = false
         end
         t = "int32"
       when "boolean"
