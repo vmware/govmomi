@@ -5,6 +5,7 @@ replace github.com/davecgh/go-xdr => github.com/rasky/go-xdr v0.0.0-201702171721
 replace github.com/kr/pretty v0.1.0 => github.com/dougm/pretty v0.0.0-20171025230240-2ee9d7453c02
 
 require (
+	github.com/davecgh/go-spew v1.1.1
 	github.com/davecgh/go-xdr v0.0.0-20161123171359-e6a2ba005892
 	github.com/google/uuid v0.0.0-20170306145142-6a5e28554805
 	github.com/kr/pretty v0.1.0

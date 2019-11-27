@@ -20,6 +20,8 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/vmware/govmomi/vim25/mo"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -1386,4 +1388,367 @@ type VsanClusterConfigInfoHostDefaultInfo struct {
 
 func init() {
 	t["VsanClusterConfigInfoHostDefaultInfo"] = reflect.TypeOf((*VsanClusterConfigInfoHostDefaultInfo)(nil)).Elem()
+}
+
+type VsanClusterGetConfigRequestType struct {
+	This    types.ManagedObjectReference `xml:"_this"`
+	Cluster types.ManagedObjectReference `xml:"cluster"`
+}
+
+func init() {
+	types.Add("VsanClusterGetConfigRequestType", reflect.TypeOf((*VsanClusterGetConfigRequestType)(nil)).Elem())
+}
+
+type VsanClusterGetConfig VsanClusterGetConfigRequestType
+
+func init() {
+	types.Add("VsanClusterGetConfig", reflect.TypeOf((*VsanClusterGetConfig)(nil)).Elem())
+}
+
+type VsanClusterGetConfigResponse struct {
+	Returnval VsanConfigInfoEx `xml:"returnval"`
+}
+
+type VsanConfigInfoEx struct {
+	VsanClusterConfigInfo
+
+	DataEfficiencyConfig          VsanDataEfficiencyConfig          `xml:"dataEfficiencyConfig,omitempty"`
+	ResyncIopsLimitConfig         ResyncIopsInfo                    `xml:"resyncIopsLimitConfig,omitempty"`
+	IscsiConfig                   VsanIscsiTargetServiceConfig      `xml:"iscsiConfig,omitempty"`
+	DataEncryptionConfig          VsanDataEncryptionConfig          `xml:"dataEncryptionConfig,omitempty"`
+	ExtendedConfig                VsanExtendedConfig                `xml:"extendedConfig,omitempty"`
+	DatastoreConfig               VsanDatastoreConfig               `xml:"datastoreConfig,omitempty"`
+	PerfsvcConfig                 VsanPerfsvcConfig                 `xml:"perfsvcConfig,omitempty"`
+	UnmapConfig                   VsanUnmapConfig                   `xml:"unmapConfig,omitempty"`
+	VumConfig                     VsanVumConfig                     `xml:"vumConfig,omitempty"`
+	DataProtectionConfig          VsanDataProtectionInfo            `xml:"dataProtectionConfig,omitempty"`
+	FileServiceConfig             VsanFileServiceConfig             `xml:"fileServiceConfig,omitempty"`
+	BmcConfig                     []VimClusterVsanBmcSpec           `xml:"bmcConfig,omitempty"`
+	MetricsConfig                 VsanMetricsConfig                 `xml:"metricsConfig,omitempty"`
+	RdmaConfig                    VsanRdmaConfig                    `xml:"rdmaConfig,omitempty"`
+	DataInTransitEncryptionConfig VsanDataInTransitEncryptionConfig `xml:"dataInTransitEncryptionConfig,omitempty"`
+}
+
+func init() {
+	t["VsanConfigInfoEx"] = reflect.TypeOf((*VsanConfigInfoEx)(nil)).Elem()
+}
+
+type VsanDataEfficiencyConfig struct {
+	DynamicData
+
+	DedupEnabled       bool `xml:"dedupEnabled"`
+	CompressionEnabled bool `xml:"compressionEnabled,omitempty"`
+}
+
+func init() {
+	t["VsanDataEfficiencyConfig"] = reflect.TypeOf((*VsanDataEfficiencyConfig)(nil)).Elem()
+}
+
+type ResyncIopsInfo struct {
+	DynamicData
+
+	ResyncIops int `xml:"resyncIops"`
+}
+
+func init() {
+	t["ResyncIopsInfo"] = reflect.TypeOf((*ResyncIopsInfo)(nil)).Elem()
+}
+
+type VsanIscsiTargetServiceConfig struct {
+	DynamicData
+
+	DefaultConfig VsanIscsiTargetServiceDefaultConfigSpec `xml:"defaultConfig,omitempty"`
+	Enabled       bool                                    `xml:"enabled"`
+}
+
+func init() {
+	t["VsanIscsiTargetServiceConfig"] = reflect.TypeOf((*VsanIscsiTargetServiceConfig)(nil)).Elem()
+}
+
+type VsanIscsiTargetServiceDefaultConfigSpec struct {
+	DynamicData
+
+	NetworkInterface    string                  `xml:"networkInterface,omitempty"`
+	Port                int                     `xml:"port,omitempty"`
+	IscsiTargetAuthSpec VsanIscsiTargetAuthSpec `xml:"iscsiTargetAuthSpec,omitempty"`
+}
+
+func init() {
+	t["VsanIscsiTargetServiceDefaultConfigSpec"] = reflect.TypeOf((*VsanIscsiTargetServiceDefaultConfigSpec)(nil)).Elem()
+}
+
+type VsanIscsiTargetAuthSpec struct {
+	DynamicData
+
+	AuthType                    VsanIscsiTargetAuthType `xml:"authType,omitempty"`
+	UserNameAttachToTarget      string                  `xml:"userNameAttachToTarget,omitempty"`
+	UserSecretAttachToTarget    string                  `xml:"userSecretAttachToTarget,omitempty"`
+	UserNameAttachToInitiator   string                  `xml:"userNameAttachToInitiator,omitempty"`
+	UserSecretAttachToInitiator string                  `xml:"userSecretAttachToInitiator,omitempty"`
+}
+
+func init() {
+	t["VsanIscsiTargetAuthSpec"] = reflect.TypeOf((*VsanIscsiTargetAuthSpec)(nil)).Elem()
+}
+
+type VsanDataEncryptionConfig struct {
+	DynamicData
+
+	EncryptionEnabled   bool          `xml:"encryptionEnabled"`
+	KmsProviderId       KeyProviderId `xml:"kmsProviderId,omitempty"`
+	KekId               string        `xml:"kekId,omitempty"`
+	HostKeyId           string        `xml:"hostKeyId,omitempty"`
+	DekGenerationId     int64         `xml:"dekGenerationId,omitempty"`
+	Changing            bool          `xml:"changing,omitempty"`
+	EraseDisksBeforeUse bool          `xml:"eraseDisksBeforeUse,omitempty"`
+}
+
+func init() {
+	t["VsanDataEncryptionConfig"] = reflect.TypeOf((*VsanDataEncryptionConfig)(nil)).Elem()
+}
+
+type VsanExtendedConfig struct {
+	DynamicData
+
+	ObjectRepairTimer          int64                      `xml:"objectRepairTimer,omitempty"`
+	DisableSiteReadLocality    bool                       `xml:"disableSiteReadLocality,omitempty"`
+	EnableCustomizedSwapObject bool                       `xml:"enableCustomizedSwapObject,omitempty"`
+	LargeScaleClusterSupport   bool                       `xml:"largeScaleClusterSupport,omitempty"`
+	ProactiveRebalanceInfo     VsanProactiveRebalanceInfo `xml:"proactiveRebalanceInfo,omitempty"`
+}
+
+func init() {
+	t["VsanExtendedConfig"] = reflect.TypeOf((*VsanExtendedConfig)(nil)).Elem()
+}
+
+type VsanProactiveRebalanceInfo struct {
+	DynamicData
+
+	Enabled   bool `xml:"enabled,omitempty"`
+	Threshold int  `xml:"threshold,omitempty"`
+}
+
+func init() {
+	t["VsanProactiveRebalanceInfo"] = reflect.TypeOf((*VsanProactiveRebalanceInfo)(nil)).Elem()
+}
+
+type VsanDatastoreConfig struct {
+	DynamicData
+
+	Datastores []VsanDatastoreSpec `xml:"datastores,omitempty"`
+}
+
+func init() {
+	t["VsanDatastoreConfig"] = reflect.TypeOf((*VsanDatastoreConfig)(nil)).Elem()
+}
+
+type VsanDatastoreSpec struct {
+	DynamicData
+
+	Uuid string `xml:"uuid"`
+	Name string `xml:"name"`
+}
+
+func init() {
+	t["VsanDatastoreSpec"] = reflect.TypeOf((*VsanDatastoreSpec)(nil)).Elem()
+}
+
+type VsanPerfsvcConfig struct {
+	DynamicData
+
+	Enabled        bool                            `xml:"enabled"`
+	Profile        types.VirtualMachineProfileSpec `xml:"profile,omitempty"`
+	DiagnosticMode bool                            `xml:"diagnosticMode,omitempty"`
+	VerboseMode    bool                            `xml:"verboseMode,omitempty"`
+}
+
+func init() {
+	t["VsanPerfsvcConfig"] = reflect.TypeOf((*VsanPerfsvcConfig)(nil)).Elem()
+}
+
+type VsanUnmapConfig struct {
+	DynamicData
+
+	Enable bool `xml:"enable"`
+}
+
+func init() {
+	t["VsanUnmapConfig"] = reflect.TypeOf((*VsanUnmapConfig)(nil)).Elem()
+}
+
+type VsanVumConfig struct {
+	DynamicData
+
+	BaselinePreferenceType VsanBaselinePreferenceType `xml:"baselinePreferenceType"`
+}
+
+func init() {
+	t["VsanVumConfig"] = reflect.TypeOf((*VsanVumConfig)(nil)).Elem()
+}
+
+type VsanDataProtectionInfo struct {
+	DynamicData
+
+	ArchivalTarget          VsanDataProtectionArchivalLocation `xml:"archivalTarget,omitempty"`
+	UsageThreshold          int                                `xml:"usageThreshold,omitempty"`
+	PairingInfo             []VsanDataProtectionPairingInfo    `xml:"pairingInfo,omitempty"`
+	IncomingReplicationPort int                                `xml:"incomingReplicationPort,omitempty"`
+}
+
+func init() {
+	t["VsanDataProtectionInfo"] = reflect.TypeOf((*VsanDataProtectionInfo)(nil)).Elem()
+}
+
+type VsanDataProtectionArchivalLocation struct {
+	DynamicData
+
+	DatastoreUrl string `xml:"datastoreUrl"`
+}
+
+func init() {
+	t["VsanDataProtectionArchivalLocation"] = reflect.TypeOf((*VsanDataProtectionArchivalLocation)(nil)).Elem()
+}
+
+type VsanDataProtectionPairingInfo struct {
+	DynamicData
+
+	PairingId          string                                 `xml:"pairingId,omitempty"`
+	PeerSite           DataProtectionPeerSiteInfo             `xml:"peerSite,omitempty"`
+	PeerClusterUuid    string                                 `xml:"peerClusterUuid"`
+	PeerDatastoreUrl   string                                 `xml:"peerDatastoreUrl"`
+	LocalDatastoreUrl  string                                 `xml:"localDatastoreUrl"`
+	PeerClusterName    string                                 `xml:"peerClusterName,omitempty"`
+	PeerDatastoreName  string                                 `xml:"peerDatastoreName,omitempty"`
+	LocalLoadBalancers DataProtectionLoadBalancerBasicInfo    `xml:"localLoadBalancers,omitempty"`
+	PeerLoadBalancers  DataProtectionLoadBalancerDetailedInfo `xml:"peerLoadBalancers,omitempty"`
+	DeletePairing      bool                                   `xml:"deletePairing,omitempty"`
+}
+
+func init() {
+	t["VsanDataProtectionPairingInfo"] = reflect.TypeOf((*VsanDataProtectionPairingInfo)(nil)).Elem()
+}
+
+type DataProtectionPeerSiteInfo struct {
+	DynamicData
+
+	Name                    string `xml:"name"`
+	LookupServiceUrl        string `xml:"lookupServiceUrl,omitempty"`
+	LookupServiceThumbprint string `xml:"lookupServiceThumbprint,omitempty"`
+	SiteId                  string `xml:"siteId,omitempty"`
+	NodeId                  string `xml:"nodeId,omitempty"`
+}
+
+func init() {
+	t["DataProtectionPeerSiteInfo"] = reflect.TypeOf((*DataProtectionPeerSiteInfo)(nil)).Elem()
+}
+
+type DataProtectionLoadBalancerBasicInfo struct {
+	DynamicData
+
+	HostUuid string `xml:"hostUuid"`
+}
+
+func init() {
+	t["DataProtectionLoadBalancerBasicInfo"] = reflect.TypeOf((*DataProtectionLoadBalancerBasicInfo)(nil)).Elem()
+}
+
+type DataProtectionLoadBalancerDetailedInfo struct {
+	DynamicData
+
+	Url        string `xml:"url"`
+	Thumbprint string `xml:"thumbprint,omitempty"`
+	PublicKey  string `xml:"publicKey"`
+}
+
+func init() {
+	t["DataProtectionLoadBalancerDetailedInfo"] = reflect.TypeOf((*DataProtectionLoadBalancerDetailedInfo)(nil)).Elem()
+}
+
+type VsanFileServiceConfig struct {
+	DynamicData
+
+	Enabled bool                        `xml:"enabled"`
+	Network mo.Network                  `xml:"network,omitempty"`
+	Domains VsanFileServiceDomainConfig `xml:"domains,omitempty"`
+}
+
+func init() {
+	t["VsanFileServiceConfig"] = reflect.TypeOf((*VsanFileServiceConfig)(nil)).Elem()
+}
+
+type VsanFileServiceDomainConfig struct {
+	DynamicData
+
+	Name               string                    `xml:"name,omitempty"`
+	DnsServerAddresses []string                  `xml:"dnsServerAddresses,omitempty"`
+	DnsSuffixes        []string                  `xml:"dnsSuffixes,omitempty"`
+	FileServerIpConfig []VsanFileServiceIpConfig `xml:"fileServerIpConfig,omitempty"`
+}
+
+func init() {
+	t["VsanFileServiceDomainConfig"] = reflect.TypeOf((*VsanFileServiceDomainConfig)(nil)).Elem()
+}
+
+type VsanFileServiceIpConfig struct {
+	types.HostIpConfig
+
+	Fqdn      string `xml:"fqdn,omitempty"`
+	IsPrimary bool   `xml:"isPrimary,omitempty"`
+	Gateway   string `xml:"gateway"`
+}
+
+func init() {
+	t["VsanFileServiceIpConfig"] = reflect.TypeOf((*VsanFileServiceIpConfig)(nil)).Elem()
+}
+
+type VimClusterVsanBmcSpec struct {
+	Host        mo.HostSystem `xml:"host"`
+	BmcAddress  string        `xml:"bmcAddress"`
+	BmcUserName string        `xml:"bmcUserName"`
+	BmcPassword string        `xml:"bmcPassword,omitempty"`
+}
+
+func init() {
+	t["VimClusterVsanBmcSpec"] = reflect.TypeOf((*VimClusterVsanBmcSpec)(nil)).Elem()
+}
+
+type VsanMetricsConfig struct {
+	DynamicData
+
+	Profiles []VsanMetricProfile `xml:"profiles,omitempty"`
+}
+
+func init() {
+	t["VsanMetricsConfig"] = reflect.TypeOf((*VsanMetricsConfig)(nil)).Elem()
+}
+
+type VsanMetricProfile struct {
+	DynamicData
+
+	authToken string `xml:"authToken"`
+}
+
+func init() {
+	t["VsanMetricProfile"] = reflect.TypeOf((*VsanMetricProfile)(nil)).Elem()
+}
+
+type VsanRdmaConfig struct {
+	DynamicData
+
+	RdmaEnabled bool `xml:"rdmaEnabled"`
+}
+
+func init() {
+	t["VsanRdmaConfig"] = reflect.TypeOf((*VsanRdmaConfig)(nil)).Elem()
+}
+
+type VsanDataInTransitEncryptionConfig struct {
+	DynamicData
+
+	Enabled       bool `xml:"enabled,omitempty"`
+	RekeyInterval int  `xml:"rekeyInterval,omitempty"`
+}
+
+func init() {
+	t["VsanDataInTransitEncryptionConfig"] = reflect.TypeOf((*VsanDataInTransitEncryptionConfig)(nil)).Elem()
 }
