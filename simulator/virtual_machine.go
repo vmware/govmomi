@@ -1142,6 +1142,16 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 		device := dspec.Device.GetVirtualDevice()
 		invalid := &types.InvalidDeviceSpec{DeviceIndex: int32(i)}
 
+		switch dspec.FileOperation {
+		case types.VirtualDeviceConfigSpecFileOperationCreate:
+			switch dspec.Device.(type) {
+			case *types.VirtualDisk:
+				if device.UnitNumber == nil {
+					return invalid
+				}
+			}
+		}
+
 		switch dspec.Operation {
 		case types.VirtualDeviceConfigSpecOperationAdd:
 			if devices.FindByKey(device.Key) != nil && device.ControllerKey == 0 {
