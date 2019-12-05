@@ -122,7 +122,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.cpus, "c", 1, "Number of CPUs")
 	f.StringVar(&cmd.guestID, "g", "otherGuest", "Guest OS ID")
 	f.BoolVar(&cmd.link, "link", true, "Link specified disk")
-	f.BoolVar(&cmd.on, "on", true, "Power on VM. Default is true if -disk argument is given.")
+	f.BoolVar(&cmd.on, "on", true, "Power on VM")
 	f.BoolVar(&cmd.force, "force", false, "Create VM if vmx already exists")
 	f.StringVar(&cmd.controller, "disk.controller", "scsi", "Disk controller type")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
@@ -201,7 +201,7 @@ For a list of possible '-g' IDs, see:
 http://pubs.vmware.com/vsphere-6-5/topic/com.vmware.wssdk.apiref.doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
 
 Examples:
-  govc vm.create vm-name
+  govc vm.create -on=false vm-name
   govc vm.create -cluster cluster1 vm-name # use compute cluster placement
   govc vm.create -datastore-cluster dscluster vm-name # use datastore cluster placement
   govc vm.create -m 2048 -c 2 -g freebsd64Guest -net.adapter vmxnet3 -disk.controller pvscsi vm-name`
