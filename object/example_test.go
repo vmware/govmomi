@@ -94,6 +94,76 @@ func ExampleVirtualMachine_CreateSnapshot() {
 	// Output: 13 devices
 }
 
+func ExampleVirtualMachine_Customize() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+		task, err := vm.PowerOff(ctx)
+		if err != nil {
+			return err
+		}
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+
+		spec := types.CustomizationSpec{
+			NicSettingMap: []types.CustomizationAdapterMapping{
+				types.CustomizationAdapterMapping{
+					Adapter: types.CustomizationIPSettings{
+						Ip: &types.CustomizationFixedIp{
+							IpAddress: "192.168.1.100",
+						},
+						SubnetMask:    "255.255.255.0",
+						Gateway:       []string{"192.168.1.1"},
+						DnsServerList: []string{"192.168.1.1"},
+						DnsDomain:     "ad.domain",
+					},
+				},
+			},
+			Identity: &types.CustomizationLinuxPrep{
+				HostName: &types.CustomizationFixedName{
+					Name: "hostname",
+				},
+				Domain:     "ad.domain",
+				TimeZone:   "Etc/UTC",
+				HwClockUTC: types.NewBool(true),
+			},
+			GlobalIPSettings: types.CustomizationGlobalIPSettings{
+				DnsSuffixList: []string{"ad.domain"},
+				DnsServerList: []string{"192.168.1.1"},
+			},
+		}
+
+		task, err = vm.Customize(ctx, spec)
+		if err != nil {
+			return err
+		}
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+
+		task, err = vm.PowerOn(ctx)
+		if err != nil {
+			return err
+		}
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+
+		ip, err := vm.WaitForIP(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(ip)
+
+		return nil
+	})
+	// Output: 192.168.1.100
+}
+
 func ExampleVirtualMachine_HostSystem() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
