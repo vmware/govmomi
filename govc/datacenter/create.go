@@ -41,6 +41,14 @@ func (cmd *create) Usage() string {
 	return "NAME..."
 }
 
+func (cmd *create) Description() string {
+	return `Create datacenter NAME.
+
+Examples:
+  govc datacenter.create MyDC # create
+  govc object.destroy /MyDC   # delete`
+}
+
 func (cmd *create) Process(ctx context.Context) error {
 	if err := cmd.FolderFlag.Process(ctx); err != nil {
 		return err
