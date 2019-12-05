@@ -132,6 +132,7 @@ func (c *container) start(vm *VirtualMachine) {
 	}
 
 	run := append([]string{"docker", "run", "-d", "--name", vm.Name}, env...)
+	run = append(run, "--env", "VMX_CONFIG_UUID="+vm.Config.Uuid)
 	args = append(run, args...)
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
 	out, err := cmd.Output()
