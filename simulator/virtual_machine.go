@@ -46,6 +46,7 @@ type VirtualMachine struct {
 	log string
 	sid int32
 	run container
+	uid uuid.UUID
 	imc *types.CustomizationSpec
 }
 
@@ -96,12 +97,13 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 	}
 
 	dsPath := path.Dir(spec.Files.VmPathName)
+	vm.uid = sha1UUID(spec.Files.VmPathName)
 
 	defaults := types.VirtualMachineConfigSpec{
 		NumCPUs:           1,
 		NumCoresPerSocket: 1,
 		MemoryMB:          32,
-		Uuid:              newUUID(spec.Files.VmPathName),
+		Uuid:              vm.uid.String(),
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
 		Version:           esx.HardwareVersion,
 		Files: &types.VirtualMachineFileInfo{

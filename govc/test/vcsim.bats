@@ -262,6 +262,19 @@ load test_helper
   run govc vm.destroy $vm
   assert_success
 
+  vm=DC0_C0_RP0_VM0
+  run govc vm.change -vm $vm -e RUN.container="busybox grep VMware- /sys/class/dmi/id/product_serial"
+  assert_success
+
+  run govc vm.power -on $vm
+  assert_success
+
+  run docker inspect -f '{{.State.ExitCode}}' $vm
+  assert_success "0"
+
+  run govc vm.destroy $vm
+  assert_success
+
   vm=DC0_C0_RP0_VM1
   run govc vm.change -vm $vm -e RUN.container="busybox sh -c 'sleep \$VMX_GUESTINFO_SLEEP'" -e guestinfo.sleep=500
   assert_success
