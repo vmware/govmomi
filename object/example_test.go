@@ -294,6 +294,35 @@ func ExampleCommon_Destroy() {
 	// Output: destroyed /DC0/datastore/LocalDS_1
 }
 
+func ExampleCommon_Rename() {
+	model := simulator.VPX()
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		dc, err := find.NewFinder(c).Datacenter(ctx, "DC0")
+		if err != nil {
+			return err
+		}
+
+		task, err := dc.Rename(ctx, "MyDC")
+		if err != nil {
+			return err
+		}
+
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+
+		name, err := dc.ObjectName(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(name)
+		return nil
+	}, model)
+	// Output: MyDC
+}
+
 func ExampleCustomFieldsManager_Set() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		m, err := object.GetCustomFieldsManager(c)

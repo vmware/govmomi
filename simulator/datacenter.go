@@ -50,6 +50,10 @@ func NewDatacenter(f *Folder) *Datacenter {
 	return dc
 }
 
+func (dc *Datacenter) RenameTask(r *types.Rename_Task) soap.HasFault {
+	return RenameTask(dc, r)
+}
+
 // Create Datacenter Folders.
 // Every Datacenter has 4 inventory Folders: Vm, Host, Datastore and Network.
 // The ESX folder child types are limited to 1 type.
