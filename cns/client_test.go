@@ -34,7 +34,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	url := os.Getenv("CNS_VC_URL")
+	url := os.Getenv("CNS_VC_URL") // example: "https://vc-user-name:vc-password@vc-ip"
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
 	if url == "" || datacenter == "" || datastore == "" {
@@ -85,8 +85,10 @@ func TestClient(t *testing.T) {
 				VSphereUser: "Administrator@vsphere.local",
 			},
 		},
-		BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
-			CapacityInMb: 5120,
+		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails {
+				CapacityInMb: 5120,
+			},
 		},
 	}
 	cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
@@ -440,13 +442,17 @@ func TestClient(t *testing.T) {
 			ContainerCluster:      containerCluster,
 			ContainerClusterArray: containerClusterArray,
 		},
-		BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
-			CapacityInMb: 5120,
+		BackingObjectDetails: &cnstypes.CnsVsanFileShareBackingDetails {
+			CnsFileBackingDetails: cnstypes.CnsFileBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: 5120,
+				},
+			},
 		},
 		CreateSpec: vSANFileCreateSpec,
 	}
 	cnsFileVolumeCreateSpecList = append(cnsFileVolumeCreateSpecList, cnsFileVolumeCreateSpec)
-	t.Logf("Creating vsan fileshare volume using the spec: %+v", cnsFileVolumeCreateSpec)
+	t.Logf("Creating CNS file volume using the spec: %+v", cnsFileVolumeCreateSpec)
 	createTask, err = cnsClient.CreateVolume(ctx, cnsFileVolumeCreateSpecList)
 	if err != nil {
 		t.Errorf("Failed to create vsan fileshare volume. Error: %+v \n", err)
@@ -483,8 +489,8 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", queryResult)
-	fileBackingInfo := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsNfsFileShareBackingDetails)
-	t.Logf("File Share Name: %s with address: %s", fileBackingInfo.Name, fileBackingInfo.Address)
+	fileBackingInfo := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsVsanFileShareBackingDetails)
+	t.Logf("File Share Name: %s with accessPoints: %+v", fileBackingInfo.Name, fileBackingInfo.AccessPoints)
 
 	// Test Deleting vSAN file-share Volume
 	var fileVolumeIDList []cnstypes.CnsVolumeId

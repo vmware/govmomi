@@ -381,15 +381,15 @@ func init() {
 	types.Add("CnsFileBackingDetails", reflect.TypeOf((*CnsFileBackingDetails)(nil)).Elem())
 }
 
-type CnsNfsFileShareBackingDetails struct {
+type CnsVsanFileShareBackingDetails struct {
 	CnsFileBackingDetails
 
 	Name    string `xml:"name,omitempty"`
-	Address string `xml:"address,omitempty"`
+	AccessPoints     []types.KeyValue `xml:"accessPoints,omitempty"`
 }
 
 func init() {
-	types.Add("CnsNfsFileShareBackingDetails", reflect.TypeOf((*CnsNfsFileShareBackingDetails)(nil)).Elem())
+	types.Add("CnsVsanFileShareBackingDetails", reflect.TypeOf((*CnsVsanFileShareBackingDetails)(nil)).Elem())
 }
 
 type CnsBaseCreateSpec struct {
