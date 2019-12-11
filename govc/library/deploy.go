@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type deploy struct {
@@ -168,35 +169,68 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			dsID = ds.Reference().Value
 		}
 
-		deploy := vcenter.Deploy{
-			DeploymentSpec: vcenter.DeploymentSpec{
-				Name:               name,
-				DefaultDatastoreID: dsID,
-				AcceptAllEULA:      true,
-				Annotation:         cmd.Options.Annotation,
-				AdditionalParams: []vcenter.AdditionalParams{
-					{
-						Class:       vcenter.ClassOvfParams,
-						Type:        vcenter.TypeDeploymentOptionParams,
-						SelectedKey: cmd.Options.Deployment,
-					},
-				},
-				NetworkMappings:     networks,
-				StorageProvisioning: cmd.Options.DiskProvisioning,
-				StorageProfileID:    cmd.profile,
-			},
-			Target: vcenter.Target{
-				ResourcePoolID: rp.Reference().Value,
-				HostID:         hostID,
-				FolderID:       folder.Reference().Value,
-			},
-		}
-
 		cmd.FolderFlag.Log("Deploying library item...\n")
 
-		ref, err := m.DeployLibraryItem(ctx, item.ID, deploy)
-		if err != nil {
-			return err
+		var ref *types.ManagedObjectReference
+
+		switch item.Type {
+		case "ovf":
+			deploy := vcenter.Deploy{
+				DeploymentSpec: vcenter.DeploymentSpec{
+					Name:               name,
+					DefaultDatastoreID: dsID,
+					AcceptAllEULA:      true,
+					Annotation:         cmd.Options.Annotation,
+					AdditionalParams: []vcenter.AdditionalParams{
+						{
+							Class:       vcenter.ClassOvfParams,
+							Type:        vcenter.TypeDeploymentOptionParams,
+							SelectedKey: cmd.Options.Deployment,
+						},
+					},
+					NetworkMappings:     networks,
+					StorageProvisioning: cmd.Options.DiskProvisioning,
+					StorageProfileID:    cmd.profile,
+				},
+				Target: vcenter.Target{
+					ResourcePoolID: rp.Reference().Value,
+					HostID:         hostID,
+					FolderID:       folder.Reference().Value,
+				},
+			}
+			ref, err = m.DeployLibraryItem(ctx, item.ID, deploy)
+			if err != nil {
+				return err
+			}
+		case "vm-template":
+			storage := &vcenter.DiskStorage{
+				Datastore: dsID,
+				StoragePolicy: &vcenter.StoragePolicy{
+					Policy: cmd.profile,
+					Type:   "USE_SOURCE_POLICY",
+				},
+			}
+			if cmd.profile != "" {
+				storage.StoragePolicy.Type = "USE_SPECIFIED_POLICY"
+			}
+
+			deploy := vcenter.DeployTemplate{
+				Name:          name,
+				Description:   cmd.Options.Annotation,
+				DiskStorage:   storage,
+				VMHomeStorage: storage,
+				Placement: &vcenter.Placement{
+					ResourcePool: rp.Reference().Value,
+					Host:         hostID,
+					Folder:       folder.Reference().Value,
+				},
+			}
+			ref, err = m.DeployTemplateLibraryItem(ctx, item.ID, deploy)
+			if err != nil {
+				return err
+			}
+		default:
+			return fmt.Errorf("unsupported library item type: %s", item.Type)
 		}
 
 		obj, err := finder.ObjectReference(ctx, *ref)

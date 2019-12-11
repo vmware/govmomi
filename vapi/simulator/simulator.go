@@ -39,6 +39,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/nfc"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/internal"
@@ -55,7 +56,8 @@ import (
 
 type item struct {
 	*library.Item
-	File []library.File
+	File     []library.File
+	Template *types.ManagedObjectReference
 }
 
 type content struct {
@@ -141,6 +143,8 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.LibraryItemFilePath, s.libraryItemFile},
 		{internal.LibraryItemFilePath + "/", s.libraryItemFileID},
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemDeployID},
+		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
+		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 	}
 
 	for i := range handlers {
@@ -692,6 +696,9 @@ func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
 			s.error(w, err)
 			return
 		}
+		for _, item := range l.Item {
+			s.deleteVM(item.Template)
+		}
 		delete(s.Library, id)
 		OK(w)
 	case http.MethodPatch:
@@ -806,6 +813,7 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 			s.error(w, err)
 			return
 		}
+		s.deleteVM(l.Item[item.ID].Template)
 		delete(l.Item, item.ID)
 		OK(w)
 	case http.MethodPatch:
@@ -1486,6 +1494,224 @@ func (s *handler) libraryItemDeployID(w http.ResponseWriter, r *http.Request) {
 			Name: item.Name,
 		}
 		OK(w, res)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) deleteVM(ref *types.ManagedObjectReference) {
+	if ref == nil {
+		return
+	}
+	_ = s.withClient(func(ctx context.Context, c *vim25.Client) error {
+		_, _ = object.NewVirtualMachine(c, *ref).Destroy(ctx)
+		return nil
+	})
+}
+
+func (s *handler) cloneVM(source string, name string, p *vcenter.Placement, storage *vcenter.DiskStorage) (*types.ManagedObjectReference, error) {
+	var folder, pool, host, ds *types.ManagedObjectReference
+	if p.Folder != "" {
+		folder = &types.ManagedObjectReference{Type: "Folder", Value: p.Folder}
+	}
+	if p.ResourcePool != "" {
+		pool = &types.ManagedObjectReference{Type: "ResourcePool", Value: p.ResourcePool}
+	}
+	if p.Host != "" {
+		host = &types.ManagedObjectReference{Type: "HostSystem", Value: p.Host}
+	}
+	if storage != nil {
+		if storage.Datastore != "" {
+			ds = &types.ManagedObjectReference{Type: "Datastore", Value: storage.Datastore}
+		}
+	}
+
+	spec := types.VirtualMachineCloneSpec{
+		Template: true,
+		Location: types.VirtualMachineRelocateSpec{
+			Folder:    folder,
+			Pool:      pool,
+			Host:      host,
+			Datastore: ds,
+		},
+	}
+
+	var ref *types.ManagedObjectReference
+
+	return ref, s.withClient(func(ctx context.Context, c *vim25.Client) error {
+		vm := object.NewVirtualMachine(c, types.ManagedObjectReference{Type: "VirtualMachine", Value: source})
+
+		task, err := vm.Clone(ctx, object.NewFolder(c, *folder), name, spec)
+		if err != nil {
+			return err
+		}
+		res, err := task.WaitForResult(ctx, nil)
+		if err != nil {
+			return err
+		}
+		ref = types.NewReference(res.Result.(types.ManagedObjectReference))
+		return nil
+	})
+}
+
+func (s *handler) templateCreate(l content, deploy vcenter.Template) error {
+	ref, err := s.cloneVM(deploy.SourceVM, deploy.Name, deploy.Placement, nil)
+	if err != nil {
+		return err
+	}
+
+	id := uuid.New().String()
+	l.Item[id] = &item{
+		Item: &library.Item{
+			ID:        id,
+			LibraryID: l.Library.ID,
+			Name:      deploy.Name,
+			Type:      "vm-template",
+		},
+		Template: ref,
+	}
+
+	return nil
+}
+
+func (s *handler) libraryItemCreateTemplate(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var spec struct {
+		vcenter.Template `json:"spec"`
+	}
+	if !s.decode(r, w, &spec) {
+		return
+	}
+
+	l, ok := s.Library[spec.Library]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	ref, err := s.cloneVM(spec.SourceVM, spec.Name, spec.Placement, nil)
+	if err != nil {
+		BadRequest(w, err.Error())
+		return
+	}
+
+	id := uuid.New().String()
+	l.Item[id] = &item{
+		Item: &library.Item{
+			ID:        id,
+			LibraryID: l.Library.ID,
+			Name:      spec.Name,
+			Type:      "vm-template",
+		},
+		Template: ref,
+	}
+
+	OK(w, id)
+}
+
+func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) {
+	// Go's ServeMux doesn't support wildcard matching, hacking around that for now to support
+	// CheckOuts, e.g. "/vcenter/vm-template/library-items/{item}/check-outs/{vm}?action=check-in"
+	p := strings.TrimPrefix(r.URL.Path, rest.Path+internal.VCenterVMTXLibraryItem+"/")
+	route := strings.Split(p, "/")
+	if len(route) == 0 {
+		http.NotFound(w, r)
+		return
+	}
+
+	id := route[0]
+	ok := false
+
+	var item *item
+	for _, l := range s.Library {
+		item, ok = l.Item[id]
+		if ok {
+			break
+		}
+	}
+	if !ok {
+		log.Printf("library item not found: %q", id)
+		http.NotFound(w, r)
+		return
+	}
+
+	if item.Type != "vm-template" {
+		BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+		return
+	}
+
+	if len(route) > 1 {
+		switch route[1] {
+		case "check-outs":
+			s.libraryItemCheckOuts(item, w, r)
+			return
+		default:
+			http.NotFound(w, r)
+			return
+		}
+	}
+
+	var spec struct {
+		vcenter.DeployTemplate `json:"spec"`
+	}
+	if !s.decode(r, w, &spec) {
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		// TODO: place holder as the API supports this method,
+		// but not aware of a use case for the data yet.
+		t := &vcenter.TemplateInfo{}
+		OK(w, t)
+		return
+	}
+
+	switch r.URL.Query().Get("action") {
+	case "deploy":
+		p := spec.Placement
+		if p == nil {
+			BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+			return
+		}
+		if p.Cluster == "" && p.Host == "" && p.ResourcePool == "" {
+			BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+			return
+		}
+
+		ref, err := s.cloneVM(item.Template.Value, spec.Name, p, spec.DiskStorage)
+		if err != nil {
+			BadRequest(w, err.Error())
+			return
+		}
+		OK(w, ref.Value)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) libraryItemCheckOuts(item *item, w http.ResponseWriter, r *http.Request) {
+	switch r.URL.Query().Get("action") {
+	case "check-out":
+		var spec struct {
+			*vcenter.CheckOut `json:"spec"`
+		}
+		if !s.decode(r, w, &spec) {
+			return
+		}
+
+		ref, err := s.cloneVM(item.Template.Value, spec.Name, spec.Placement, nil)
+		if err != nil {
+			BadRequest(w, err.Error())
+			return
+		}
+		OK(w, ref.Value)
+	case "check-in":
+		// TODO: increment ContentVersion
+		OK(w, "0")
 	default:
 		http.NotFound(w, r)
 	}

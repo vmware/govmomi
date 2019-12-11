@@ -134,6 +134,7 @@ func (r infoResultsWriter) writeItem(
 	fmt.Fprintf(w, "  ID:\t%s\n", v.ID)
 	fmt.Fprintf(w, "  Path:\t%s\n", ipath)
 	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
+	fmt.Fprintf(w, "  Type:\t%s\n", v.Type)
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
 	return nil
 }
