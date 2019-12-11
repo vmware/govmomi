@@ -17,13 +17,17 @@ limitations under the License.
 package simulator
 
 import (
+	"archive/tar"
 	"bytes"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"log"
 	"os/exec"
 	"strings"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -88,6 +92,46 @@ func (c *container) inspect(vm *VirtualMachine) error {
 	return nil
 }
 
+// createDMI writes BIOS UUID DMI files to a container volume
+func (c *container) createDMI(vm *VirtualMachine, name string) error {
+	cmd := exec.Command("docker", "run", "--rm", "-i", "-v", name+":"+"/"+name, "busybox", "tar", "-C", "/"+name, "-xf", "-")
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return err
+	}
+
+	tw := tar.NewWriter(stdin)
+
+	dmi := []struct {
+		name string
+		val  func(uuid.UUID) string
+	}{
+		{"product_uuid", productUUID},
+		{"product_serial", productSerial},
+	}
+
+	for _, file := range dmi {
+		val := file.val(vm.uid)
+		_ = tw.WriteHeader(&tar.Header{
+			Name:    file.name,
+			Size:    int64(len(val) + 1),
+			Mode:    0444,
+			ModTime: time.Now(),
+		})
+		_, _ = fmt.Fprintln(tw, val)
+	}
+
+	_ = tw.Close()
+	_ = stdin.Close()
+
+	return cmd.Wait()
+}
+
 // start runs the container if specified by the RUN.container extraConfig property.
 func (c *container) start(vm *VirtualMachine) {
 	if c.id != "" {
@@ -132,7 +176,14 @@ func (c *container) start(vm *VirtualMachine) {
 	}
 
 	run := append([]string{"docker", "run", "-d", "--name", vm.Name}, env...)
-	run = append(run, "--env", "VMX_CONFIG_UUID="+vm.Config.Uuid)
+
+	volume := fmt.Sprintf("vcsim-%s-%s", vm.Name, vm.uid)
+	if err := c.createDMI(vm, volume); err != nil {
+		log.Printf("%s: %s", vm.Name, err)
+		return
+	}
+	run = append(run, "-v", fmt.Sprintf("%s:%s:ro", volume, "/sys/class/dmi/id"))
+
 	args = append(run, args...)
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
 	out, err := cmd.Output()
@@ -181,9 +232,52 @@ func (c *container) remove(vm *VirtualMachine) {
 		return
 	}
 
-	cmd := exec.Command("docker", "rm", "-f", c.id)
+	cmd := exec.Command("docker", "rm", "-v", "-f", c.id)
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
 	}
+}
+
+// productSerial returns the uuid in /sys/class/dmi/id/product_serial format
+func productSerial(id uuid.UUID) string {
+	var dst [len(id)*2 + len(id) - 1]byte
+
+	j := 0
+	for i := 0; i < len(id); i++ {
+		hex.Encode(dst[j:j+2], id[i:i+1])
+		j += 3
+		if j < len(dst) {
+			s := j - 1
+			if s == len(dst)/2 {
+				dst[s] = '-'
+			} else {
+				dst[s] = ' '
+			}
+		}
+	}
+
+	return fmt.Sprintf("VMware-%s", string(dst[:]))
+}
+
+// productUUID returns the uuid in /sys/class/dmi/id/product_uuid format
+func productUUID(id uuid.UUID) string {
+	var dst [36]byte
+
+	hex.Encode(dst[0:2], id[3:4])
+	hex.Encode(dst[2:4], id[2:3])
+	hex.Encode(dst[4:6], id[1:2])
+	hex.Encode(dst[6:8], id[0:1])
+	dst[8] = '-'
+	hex.Encode(dst[9:11], id[5:6])
+	hex.Encode(dst[11:13], id[4:5])
+	dst[13] = '-'
+	hex.Encode(dst[14:16], id[7:8])
+	hex.Encode(dst[16:18], id[6:7])
+	dst[18] = '-'
+	hex.Encode(dst[19:23], id[8:10])
+	dst[23] = '-'
+	hex.Encode(dst[24:], id[10:])
+
+	return strings.ToUpper(string(dst[:]))
 }

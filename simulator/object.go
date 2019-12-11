@@ -51,7 +51,12 @@ func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
 	return body
 }
 
-// newUUID returns a stable UUID based on input s
+// newUUID returns a stable UUID string based on input s
 func newUUID(s string) string {
-	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(s)).String()
+	return sha1UUID(s).String()
+}
+
+// sha1UUID returns a stable UUID based on input s
+func sha1UUID(s string) uuid.UUID {
+	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(s))
 }
