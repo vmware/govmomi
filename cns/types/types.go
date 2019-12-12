@@ -304,8 +304,8 @@ func init() {
 type CnsVolumeOperationResult struct {
 	types.DynamicData
 
-	VolumeId CnsVolumeId `xml:"volumeId,omitempty"`
-	Fault    *CnsFault   `xml:"fault,omitempty"`
+	VolumeId CnsVolumeId                 `xml:"volumeId,omitempty"`
+	Fault    *types.LocalizedMethodFault `xml:"fault,omitempty"`
 }
 
 func init() {
@@ -384,8 +384,8 @@ func init() {
 type CnsVsanFileShareBackingDetails struct {
 	CnsFileBackingDetails
 
-	Name    string `xml:"name,omitempty"`
-	AccessPoints     []types.KeyValue `xml:"accessPoints,omitempty"`
+	Name         string           `xml:"name,omitempty"`
+	AccessPoints []types.KeyValue `xml:"accessPoints,omitempty"`
 }
 
 func init() {
@@ -464,8 +464,7 @@ func init() {
 }
 
 type CnsFault struct {
-	Fault            *types.BaseMethodFault `xml:"fault,typeattr"`
-	LocalizedMessage string                 `xml:"localizedMessage,omitempty"`
+	Fault *types.LocalizedMethodFault `xml:"fault,typeattr"`
 }
 
 func init() {
