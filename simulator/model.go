@@ -699,6 +699,13 @@ func (m *Model) createLocalDatastore(dc string, name string, hosts []*object.Hos
 
 // Remove cleans up items created by the Model, such as local datastore directories
 func (m *Model) Remove() {
+	// Remove associated vm containers, if any
+	for _, obj := range Map.objects {
+		if vm, ok := obj.(*VirtualMachine); ok {
+			vm.run.remove(vm)
+		}
+	}
+
 	for _, dir := range m.dirs {
 		_ = os.RemoveAll(dir)
 	}
