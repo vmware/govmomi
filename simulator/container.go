@@ -43,7 +43,8 @@ func init() {
 
 // container provides methods to manage a container within a simulator VM lifecycle.
 type container struct {
-	id string
+	id   string
+	name string
 }
 
 // inspect applies container network settings to vm.Guest properties.
@@ -175,14 +176,14 @@ func (c *container) start(vm *VirtualMachine) {
 		env = append(env, "--env", "VMX_GUESTINFO=true")
 	}
 
-	run := append([]string{"docker", "run", "-d", "--name", vm.Name}, env...)
+	c.name = fmt.Sprintf("vcsim-%s-%s", vm.Name, vm.uid)
+	run := append([]string{"docker", "run", "-d", "--name", c.name}, env...)
 
-	volume := fmt.Sprintf("vcsim-%s-%s", vm.Name, vm.uid)
-	if err := c.createDMI(vm, volume); err != nil {
+	if err := c.createDMI(vm, c.name); err != nil {
 		log.Printf("%s: %s", vm.Name, err)
 		return
 	}
-	run = append(run, "-v", fmt.Sprintf("%s:%s:ro", volume, "/sys/class/dmi/id"))
+	run = append(run, "-v", fmt.Sprintf("%s:%s:ro", c.name, "/sys/class/dmi/id"))
 
 	args = append(run, args...)
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
@@ -232,11 +233,20 @@ func (c *container) remove(vm *VirtualMachine) {
 		return
 	}
 
-	cmd := exec.Command("docker", "rm", "-v", "-f", c.id)
-	err := cmd.Run()
-	if err != nil {
-		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+	args := [][]string{
+		[]string{"rm", "-v", "-f", c.id},
+		[]string{"volume", "rm", "-f", c.name},
 	}
+
+	for i := range args {
+		cmd := exec.Command("docker", args[i]...)
+		err := cmd.Run()
+		if err != nil {
+			log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+		}
+	}
+
+	c.id = ""
 }
 
 // productSerial returns the uuid in /sys/class/dmi/id/product_serial format
