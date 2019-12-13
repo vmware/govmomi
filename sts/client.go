@@ -48,7 +48,7 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	filter := &types.LookupServiceRegistrationFilter{
 		ServiceType: &types.LookupServiceRegistrationServiceType{
 			Product: "com.vmware.cis",
-			Type:    "sso:sts",
+			Type:    "cs.identity",
 		},
 		EndpointType: &types.LookupServiceRegistrationEndpointType{
 			Protocol: "wsTrust",

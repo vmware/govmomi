@@ -69,9 +69,9 @@ func (cmd *ls) Description() string {
 Examples:
   govc sso.service.ls
   govc sso.service.ls -t vcenterserver -P vmomi
-  govc sso.service.ls -t sso:sts
-  govc sso.service.ls -t sso:sts -U
-  govc sso.service.ls -t sso:sts -json | jq -r .[].ServiceEndpoints[].Url`
+  govc sso.service.ls -t cs.identity
+  govc sso.service.ls -t cs.identity -P wsTrust -U
+  govc sso.service.ls -t cs.identity -json | jq -r .[].ServiceEndpoints[].Url`
 }
 
 func (cmd *ls) Process(ctx context.Context) error {

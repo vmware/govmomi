@@ -72,7 +72,7 @@ func registrationInfo() []types.LookupServiceRegistrationInfo {
 				OwnerId: admin,
 				ServiceType: types.LookupServiceRegistrationServiceType{
 					Product: "com.vmware.cis",
-					Type:    "sso:sts",
+					Type:    "cs.identity",
 				},
 			},
 			ServiceId: siteID + ":" + uuid.New().String(),
