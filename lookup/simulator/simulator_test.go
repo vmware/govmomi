@@ -82,7 +82,7 @@ func TestClient(t *testing.T) {
 		},
 		&types.LookupServiceRegistrationFilter{
 			ServiceType: &types.LookupServiceRegistrationServiceType{
-				Type: "sso:sts",
+				Type: "cs.identity",
 			},
 		},
 		&types.LookupServiceRegistrationFilter{
