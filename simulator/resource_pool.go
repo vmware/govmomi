@@ -204,7 +204,6 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 		folder = ctx.Map.Get(*req.Folder).(*Folder)
 	}
 
-	ctx.Caller = &p.Self
 	res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
 		This:   folder.Self,
 		Config: spec.ConfigSpec,
@@ -331,7 +330,6 @@ func (p *ResourcePool) CreateVApp(req *types.CreateVApp) soap.HasFault {
 }
 
 func (a *VirtualApp) CreateChildVMTask(ctx *Context, req *types.CreateChildVM_Task) soap.HasFault {
-	ctx.Caller = &a.Self
 	body := &methods.CreateChildVM_TaskBody{}
 
 	folder := Map.Get(*a.ParentFolder).(*Folder)

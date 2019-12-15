@@ -1459,7 +1459,6 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 }
 
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
-	ctx.Caller = &vm.Self
 	folder := Map.Get(req.Folder).(*Folder)
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	event := vm.event()
