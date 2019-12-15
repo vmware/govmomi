@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/govmomi/event"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -206,5 +207,85 @@ func TestRace(t *testing.T) {
 	}
 	if ntasks == 0 {
 		t.Error("no tasks collected")
+	}
+}
+
+func isManagedObjectNotFound(err error) bool {
+	_, ok := err.(task.Error).Fault().(*types.ManagedObjectNotFound)
+	return ok
+}
+
+// Race VirtualMachine.Destroy vs Folder.Destroy; the latter removes the VM parent and the former should not panic in that case
+func TestRaceDestroy(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	m.Folder = 1
+	m.Autostart = false
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	finder := find.NewFinder(c.Client)
+	vms, err := finder.VirtualMachineList(ctx, "*")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	folder, err := finder.Folder(ctx, "vm/F0")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	notFound := false
+	var wg sync.WaitGroup
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		for _, vm := range vms {
+			task, err := vm.Destroy(ctx)
+			if err != nil {
+				t.Error(err)
+			}
+			err = task.Wait(ctx)
+			if err != nil {
+				if isManagedObjectNotFound(err) {
+					notFound = true
+				} else {
+					t.Error(err)
+				}
+			}
+		}
+	}()
+
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		task, err := folder.Destroy(ctx)
+		if err != nil {
+			t.Error(err)
+		}
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Error(err)
+		}
+	}()
+
+	wg.Wait()
+
+	if !notFound {
+		t.Error("expected ManagedObjectNotFound")
 	}
 }
