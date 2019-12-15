@@ -24,7 +24,6 @@ import (
 )
 
 func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
-	ctx.Caller = &req.This
 	body := &methods.SetCustomValueBody{}
 
 	cfm := Map.CustomFieldsManager()

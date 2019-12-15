@@ -128,6 +128,7 @@ func Fault(msg string, fault types.BaseMethodFault) *soap.Fault {
 func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	handler := ctx.Map.Get(method.This)
 	session := ctx.Session
+	ctx.Caller = &method.This
 
 	if session == nil {
 		switch method.Name {

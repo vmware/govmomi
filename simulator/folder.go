@@ -466,8 +466,6 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 }
 
 func (f *Folder) RegisterVMTask(ctx *Context, c *types.RegisterVM_Task) soap.HasFault {
-	ctx.Caller = &f.Self
-
 	return &methods.RegisterVM_TaskBody{
 		Res: &types.RegisterVM_TaskResponse{
 			Returnval: NewTask(&registerVM{f, ctx, c}).Run(),
