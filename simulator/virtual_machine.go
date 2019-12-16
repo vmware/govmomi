@@ -1060,9 +1060,11 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 				}
 
 				if file != "" {
-					dc := Map.getEntityDatacenter(Map.Get(*vm.Parent).(mo.Entity))
+					dc := Map.getEntityDatacenter(vm)
 					dm := Map.VirtualDiskManager()
-
+					if dc == nil {
+						continue // parent was destroyed
+					}
 					dm.DeleteVirtualDiskTask(&types.DeleteVirtualDisk_Task{
 						Name:       file,
 						Datacenter: &dc.Self,
@@ -1383,7 +1385,13 @@ func (vm *VirtualMachine) UpgradeVMTask(req *types.UpgradeVM_Task) soap.HasFault
 }
 
 func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
+	dc := ctx.Map.getEntityDatacenter(vm)
+
 	task := CreateTask(vm, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if dc == nil {
+			return nil, &types.ManagedObjectNotFound{Obj: vm.Self} // If our Parent was destroyed, so were we.
+		}
+
 		r := vm.UnregisterVM(ctx, &types.UnregisterVM{
 			This: req.This,
 		})
@@ -1399,12 +1407,11 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 
 		// Delete VM files from the datastore (ignoring result for now)
 		m := Map.FileManager()
-		dc := Map.getEntityDatacenter(vm).Reference()
 
 		_ = m.DeleteDatastoreFileTask(&types.DeleteDatastoreFile_Task{
 			This:       m.Reference(),
 			Name:       vm.Config.Files.LogDirectory,
-			Datacenter: &dc,
+			Datacenter: &dc.Self,
 		})
 
 		vm.run.remove(vm)

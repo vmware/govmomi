@@ -287,11 +287,14 @@ func (r *Registry) Update(obj mo.Reference, changes []types.PropertyChange) {
 // If no object of type kind is found, the method will panic when it reaches the
 // inventory root Folder where the Parent field is nil.
 func (r *Registry) getEntityParent(item mo.Entity, kind string) mo.Entity {
+	var ok bool
 	for {
 		parent := item.Entity().Parent
 
-		item = r.Get(*parent).(mo.Entity)
-
+		item, ok = r.Get(*parent).(mo.Entity)
+		if !ok {
+			return nil
+		}
 		if item.Reference().Type == kind {
 			return item
 		}
@@ -300,7 +303,11 @@ func (r *Registry) getEntityParent(item mo.Entity, kind string) mo.Entity {
 
 // getEntityDatacenter returns the Datacenter containing the given item
 func (r *Registry) getEntityDatacenter(item mo.Entity) *Datacenter {
-	return r.getEntityParent(item, "Datacenter").(*Datacenter)
+	dc, ok := r.getEntityParent(item, "Datacenter").(*Datacenter)
+	if ok {
+		return dc
+	}
+	return nil
 }
 
 func (r *Registry) getEntityFolder(item mo.Entity, kind string) *Folder {
