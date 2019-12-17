@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/performance"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/view"
@@ -78,7 +79,11 @@ func ExampleManager_ToMetricSeries() {
 
 		// Read result
 		for _, metric := range result {
-			name := metric.Entity
+			vm := object.NewVirtualMachine(c, metric.Entity)
+			name, err := vm.ObjectName(ctx)
+			if err != nil {
+				return err
+			}
 
 			for _, v := range metric.Value {
 				counter := counters[v.Name]
@@ -99,8 +104,8 @@ func ExampleManager_ToMetricSeries() {
 	})
 
 	// Output:
-	// VirtualMachine:vm-53	*	sys.uptime.latest	s
-	// VirtualMachine:vm-56	*	sys.uptime.latest	s
-	// VirtualMachine:vm-59	*	sys.uptime.latest	s
-	// VirtualMachine:vm-62	*	sys.uptime.latest	s
+	// DC0_H0_VM0	*	sys.uptime.latest	s
+	// DC0_H0_VM1	*	sys.uptime.latest	s
+	// DC0_C0_RP0_VM0	*	sys.uptime.latest	s
+	// DC0_C0_RP0_VM1	*	sys.uptime.latest	s
 }
