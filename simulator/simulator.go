@@ -50,11 +50,16 @@ import (
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
-// Trace when set to true, writes SOAP traffic to stderr
-var Trace = false
+var (
+	// Trace when set to true, writes SOAP traffic to stderr
+	Trace = false
 
-// DefaultLogin for authentication
-var DefaultLogin = url.UserPassword("user", "pass")
+	// TraceFile is the output file when Trace = true
+	TraceFile = os.Stderr
+
+	// DefaultLogin for authentication
+	DefaultLogin = url.UserPassword("user", "pass")
+)
 
 // Method encapsulates a decoded SOAP client request
 type Method struct {
@@ -428,7 +433,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if Trace {
-		fmt.Fprintf(os.Stderr, "Request: %s\n", string(body))
+		fmt.Fprintf(TraceFile, "Request: %s\n", string(body))
 	}
 
 	ctx := &Context{
@@ -499,7 +504,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if Trace {
-		fmt.Fprintf(os.Stderr, "Response: %s\n", out.String())
+		fmt.Fprintf(TraceFile, "Response: %s\n", out.String())
 	}
 
 	_, _ = w.Write(out.Bytes())

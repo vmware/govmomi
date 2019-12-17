@@ -418,3 +418,19 @@ docker_name() {
   objs=$(govc find / | wc -l)
   assert_equal 23 "$objs"
 }
+
+@test "vcsim trace file" {
+  file="$BATS_TMPDIR/$(new_id).trace"
+
+  vcsim_start -trace-file "$file"
+
+  run govc ls
+  assert_success
+
+  vcsim_stop
+
+  run ls -l "$file"
+  assert_success
+
+  rm "$file"
+}
