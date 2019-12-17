@@ -28,6 +28,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -47,6 +48,13 @@ type container struct {
 	name string
 }
 
+type networkSettings struct {
+	Gateway     string
+	IPAddress   string
+	IPPrefixLen int
+	MacAddress  string
+}
+
 // inspect applies container network settings to vm.Guest properties.
 func (c *container) inspect(vm *VirtualMachine) error {
 	if c.id == "" {
@@ -55,10 +63,8 @@ func (c *container) inspect(vm *VirtualMachine) error {
 
 	var objects []struct {
 		NetworkSettings struct {
-			Gateway     string
-			IPAddress   string
-			IPPrefixLen int
-			MacAddress  string
+			networkSettings
+			Networks map[string]networkSettings
 		}
 	}
 
@@ -75,7 +81,13 @@ func (c *container) inspect(vm *VirtualMachine) error {
 	vm.logPrintf("%s: %s", vm.Config.Annotation, string(out))
 
 	for _, o := range objects {
-		s := o.NetworkSettings
+		s := o.NetworkSettings.networkSettings
+
+		for _, n := range o.NetworkSettings.Networks {
+			s = n
+			break
+		}
+
 		if s.IPAddress == "" {
 			continue
 		}
