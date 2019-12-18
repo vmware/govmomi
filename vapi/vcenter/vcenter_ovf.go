@@ -61,6 +61,7 @@ type AdditionalParams struct {
 
 const (
 	ClassOvfParams             = "com.vmware.vcenter.ovf.ovf_params"
+	ClassPropertyParams        = "com.vmware.vcenter.ovf.property_params"
 	TypeDeploymentOptionParams = "DeploymentOptionParams"
 	TypeExtraConfigParams      = "ExtraConfigParams"
 	TypeExtraConfigs           = "ExtraConfigs"
