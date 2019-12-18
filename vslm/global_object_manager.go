@@ -537,6 +537,7 @@ func (this *GlobalObjectManager) QueryChangedDiskAreas(ctx context.Context, id v
 		Id:          id,
 		SnapshotId:  snapshotId,
 		StartOffset: startOffset,
+		ChangeId:    changeId,
 	}
 
 	res, err := methods.VslmQueryChangedDiskAreas(ctx, this.c, &req)
