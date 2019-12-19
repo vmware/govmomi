@@ -412,10 +412,21 @@ func (s *Service) RegisterSDK(r *Registry) {
 	s.ServeMux.HandleFunc(r.Path, s.ServeSDK)
 }
 
+// StatusSDK can be used to simulate an /sdk HTTP response code other than 200.
+// The value of StatusSDK is restored to http.StatusOK after 1 response.
+// This can be useful to test vim25.Retry() for example.
+var StatusSDK = http.StatusOK
+
 // ServeSDK implements the http.Handler interface
 func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	if StatusSDK != http.StatusOK {
+		w.WriteHeader(StatusSDK)
+		StatusSDK = http.StatusOK // reset
 		return
 	}
 
