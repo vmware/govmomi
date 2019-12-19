@@ -113,18 +113,18 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		archive.Archive = &importx.TapeArchive{Path: file, Opener: opener}
 		base = "*.ovf"
 		mf = "*.mf"
-		kind = "ovf"
+		kind = library.ItemTypeOVF
 	case ".ovf":
-		kind = "ovf"
+		kind = library.ItemTypeOVF
 	case ".iso":
-		kind = "iso"
+		kind = library.ItemTypeISO
 	}
 
 	if cmd.Type == "" {
 		cmd.Type = kind
 	}
 
-	if !cmd.pull && cmd.Type == "ovf" {
+	if !cmd.pull && cmd.Type == library.ItemTypeOVF {
 		f, _, err := archive.Open(mf)
 		if err == nil {
 			sums, err := library.ReadManifest(f)
@@ -223,7 +223,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		if cmd.Type == "ovf" {
+		if cmd.Type == library.ItemTypeOVF {
 			o, err := archive.ReadOvf(base)
 			if err != nil {
 				return err

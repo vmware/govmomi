@@ -25,6 +25,12 @@ import (
 	"github.com/vmware/govmomi/vapi/internal"
 )
 
+const (
+	ItemTypeISO  = "iso"
+	ItemTypeOVF  = "ovf"
+	ItemTypeVMTX = "vm-template"
+)
+
 // Item provides methods to create, read, update, delete, and enumerate library items.
 type Item struct {
 	Cached           bool       `json:"cached,omitempty"`

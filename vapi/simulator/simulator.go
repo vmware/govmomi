@@ -1570,7 +1570,7 @@ func (s *handler) templateCreate(l content, deploy vcenter.Template) error {
 			ID:               id,
 			LibraryID:        l.Library.ID,
 			Name:             deploy.Name,
-			Type:             "vm-template",
+			Type:             library.ItemTypeVMTX,
 			CreationTime:     types.NewTime(time.Now()),
 			LastModifiedTime: types.NewTime(time.Now()),
 		},
@@ -1611,7 +1611,7 @@ func (s *handler) libraryItemCreateTemplate(w http.ResponseWriter, r *http.Reque
 			ID:               id,
 			LibraryID:        l.Library.ID,
 			Name:             spec.Name,
-			Type:             "vm-template",
+			Type:             library.ItemTypeVMTX,
 			CreationTime:     types.NewTime(time.Now()),
 			LastModifiedTime: types.NewTime(time.Now()),
 		},
@@ -1647,7 +1647,7 @@ func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	if item.Type != "vm-template" {
+	if item.Type != library.ItemTypeVMTX {
 		BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
 		return
 	}
