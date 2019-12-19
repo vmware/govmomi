@@ -22,9 +22,11 @@ import (
 	"fmt"
 	"io"
 	"text/tabwriter"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -108,6 +110,7 @@ func (r infoResultsWriter) writeLibrary(
 	fmt.Fprintf(w, "  Path:\t%s\n", ipath)
 	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
+	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  StorageBackings:\n")
 	for _, d := range v.Storage {
 		fmt.Fprintf(w, "    DatastoreID:\t%s\n", d.DatastoreID)
@@ -135,15 +138,23 @@ func (r infoResultsWriter) writeItem(
 	fmt.Fprintf(w, "  Path:\t%s\n", ipath)
 	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
 	fmt.Fprintf(w, "  Type:\t%s\n", v.Type)
+	fmt.Fprintf(w, "  Size:\t%s\n", units.ByteSize(v.Size))
+	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
+	fmt.Fprintf(w, "  Modified:\t%s\n", v.LastModifiedTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
+
 	return nil
 }
 func (r infoResultsWriter) writeFile(
 	w io.Writer, v library.File, ipath string) error {
 
+	size := "-"
+	if v.Size != nil {
+		size = units.ByteSize(*v.Size).String()
+	}
 	fmt.Fprintf(w, "Name:\t%s\n", v.Name)
 	fmt.Fprintf(w, "  Path:\t%s\n", ipath)
-	fmt.Fprintf(w, "  Size:\t%d\n", v.Size)
+	fmt.Fprintf(w, "  Size:\t%s\n", size)
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
 	return nil
 }

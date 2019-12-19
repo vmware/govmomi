@@ -660,6 +660,8 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 		case "":
 			id := uuid.New().String()
 			spec.Library.ID = id
+			spec.Library.CreationTime = types.NewTime(time.Now())
+			spec.Library.LastModifiedTime = types.NewTime(time.Now())
 			dir := libraryPath(&spec.Library, "")
 			if err := os.Mkdir(dir, 0750); err != nil {
 				s.error(w, err)
@@ -765,6 +767,8 @@ func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
 			}
 			id = uuid.New().String()
 			spec.Item.ID = id
+			spec.Item.CreationTime = types.NewTime(time.Now())
+			spec.Item.LastModifiedTime = types.NewTime(time.Now())
 			l.Item[id] = &item{Item: &spec.Item}
 			OK(w, id)
 		}
@@ -1563,10 +1567,12 @@ func (s *handler) templateCreate(l content, deploy vcenter.Template) error {
 	id := uuid.New().String()
 	l.Item[id] = &item{
 		Item: &library.Item{
-			ID:        id,
-			LibraryID: l.Library.ID,
-			Name:      deploy.Name,
-			Type:      "vm-template",
+			ID:               id,
+			LibraryID:        l.Library.ID,
+			Name:             deploy.Name,
+			Type:             "vm-template",
+			CreationTime:     types.NewTime(time.Now()),
+			LastModifiedTime: types.NewTime(time.Now()),
 		},
 		Template: ref,
 	}
@@ -1602,10 +1608,12 @@ func (s *handler) libraryItemCreateTemplate(w http.ResponseWriter, r *http.Reque
 	id := uuid.New().String()
 	l.Item[id] = &item{
 		Item: &library.Item{
-			ID:        id,
-			LibraryID: l.Library.ID,
-			Name:      spec.Name,
-			Type:      "vm-template",
+			ID:               id,
+			LibraryID:        l.Library.ID,
+			Name:             spec.Name,
+			Type:             "vm-template",
+			CreationTime:     types.NewTime(time.Now()),
+			LastModifiedTime: types.NewTime(time.Now()),
 		},
 		Template: ref,
 	}
