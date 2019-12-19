@@ -35,7 +35,7 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	url := os.Getenv("CNS_VC_URL") // example: "https://vc-user-name:vc-password@vc-ip"
+	url := os.Getenv("CNS_VC_URL") // example: export CNS_VC_URL='https://username:password@vc-ip/sdk'
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
 	if url == "" || datacenter == "" || datastore == "" {
@@ -48,7 +48,6 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctx := context.Background()
-
 	c, err := govmomi.NewClient(ctx, u, true)
 	if err != nil {
 		t.Fatal(err)
@@ -73,6 +72,15 @@ func TestClient(t *testing.T) {
 	var dsList []vim25types.ManagedObjectReference
 	dsList = append(dsList, ds.Reference())
 
+	var containerClusterArray []cnstypes.CnsContainerCluster
+	containerCluster := cnstypes.CnsContainerCluster{
+		ClusterType:   string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:     "demo-cluster-id",
+		VSphereUser:   "Administrator@vsphere.local",
+		ClusterFlavor: string(cnstypes.CnsClusterFlavorVanilla),
+	}
+	containerClusterArray = append(containerClusterArray, containerCluster)
+
 	// Test CreateVolume API
 	var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 	cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
@@ -80,11 +88,7 @@ func TestClient(t *testing.T) {
 		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
 		Datastores: dsList,
 		Metadata: cnstypes.CnsVolumeMetadata{
-			ContainerCluster: cnstypes.CnsContainerCluster{
-				ClusterType: string(cnstypes.CnsClusterTypeKubernetes),
-				ClusterId:   "demo-cluster-id",
-				VSphereUser: "Administrator@vsphere.local",
-			},
+			ContainerCluster: containerCluster,
 		},
 		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
 			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
@@ -93,7 +97,7 @@ func TestClient(t *testing.T) {
 		},
 	}
 	cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
-	t.Logf("Creating volume using the spec: %+v", cnsVolumeCreateSpec)
+	t.Logf("Creating volume using the spec: %+v", spew.Sdump(cnsVolumeCreateSpec))
 	createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
 	if err != nil {
 		t.Errorf("Failed to create volume. Error: %+v \n", err)
@@ -125,13 +129,13 @@ func TestClient(t *testing.T) {
 	var volumeIDList []cnstypes.CnsVolumeId
 	volumeIDList = append(volumeIDList, cnstypes.CnsVolumeId{Id: volumeId})
 	queryFilter.VolumeIds = volumeIDList
-	t.Logf("Calling QueryVolume using queryFilter: %+v", queryFilter)
+	t.Logf("Calling QueryVolume using queryFilter: %+v", spew.Sdump(queryFilter))
 	queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", queryResult)
+	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", spew.Sdump(queryResult))
 
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
@@ -143,7 +147,7 @@ func TestClient(t *testing.T) {
 		CapacityInMb: newCapacityInMb,
 	}
 	cnsVolumeExtendSpecList = append(cnsVolumeExtendSpecList, cnsVolumeExtendSpec)
-	t.Logf("Extending volume using the spec: %+v", cnsVolumeExtendSpec)
+	t.Logf("Extending volume using the spec: %+v", spew.Sdump(cnsVolumeExtendSpecList))
 	extendTask, err := cnsClient.ExtendVolume(ctx, cnsVolumeExtendSpecList)
 	if err != nil {
 		t.Errorf("Failed to extend volume. Error: %+v \n", err)
@@ -177,7 +181,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", queryResult)
+	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", spew.Sdump(queryResult))
 	queryCapacity := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).CapacityInMb
 	if newCapacityInMb != queryCapacity {
 		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryCapacity)
@@ -195,27 +199,67 @@ func TestClient(t *testing.T) {
 			Value: "testValue",
 		},
 	}
-	metadata := &cnstypes.CnsKubernetesEntityMetadata{
+	pvmetadata := &cnstypes.CnsKubernetesEntityMetadata{
 		CnsEntityMetadata: cnstypes.CnsEntityMetadata{
 			DynamicData: vim25types.DynamicData{},
-			EntityName:  "PV NAME",
+			EntityName:  "pvc-53465372-5c12-4818-96f8-0ace4f4fd116",
 			Labels:      newLabels,
 			Delete:      false,
+			ClusterID:   "demo-cluster-id",
 		},
 		EntityType: string(cnstypes.CnsKubernetesEntityTypePV),
 		Namespace:  "",
 	}
-	metadataList = append(metadataList, cnstypes.BaseCnsEntityMetadata(metadata))
+	metadataList = append(metadataList, cnstypes.BaseCnsEntityMetadata(pvmetadata))
+
+	pvcmetadata := &cnstypes.CnsKubernetesEntityMetadata{
+		CnsEntityMetadata: cnstypes.CnsEntityMetadata{
+			DynamicData: vim25types.DynamicData{},
+			EntityName:  "example-vanilla-block-pvc",
+			Labels:      newLabels,
+			Delete:      false,
+			ClusterID:   "demo-cluster-id",
+		},
+		EntityType: string(cnstypes.CnsKubernetesEntityTypePVC),
+		Namespace:  "default",
+		ReferredEntity: []cnstypes.CnsKubernetesEntityReference{
+			cnstypes.CnsKubernetesEntityReference{
+				EntityType: string(cnstypes.CnsKubernetesEntityTypePV),
+				EntityName: "pvc-53465372-5c12-4818-96f8-0ace4f4fd116",
+				Namespace:  "",
+				ClusterID:  "demo-cluster-id",
+			},
+		},
+	}
+	metadataList = append(metadataList, cnstypes.BaseCnsEntityMetadata(pvcmetadata))
+
+	podmetadata := &cnstypes.CnsKubernetesEntityMetadata{
+		CnsEntityMetadata: cnstypes.CnsEntityMetadata{
+			DynamicData: vim25types.DynamicData{},
+			EntityName:  "example-pod",
+			Delete:      false,
+			ClusterID:   "demo-cluster-id",
+		},
+		EntityType: string(cnstypes.CnsKubernetesEntityTypePOD),
+		Namespace:  "default",
+		ReferredEntity: []cnstypes.CnsKubernetesEntityReference{
+			cnstypes.CnsKubernetesEntityReference{
+				EntityType: string(cnstypes.CnsKubernetesEntityTypePVC),
+				EntityName: "example-vanilla-block-pvc",
+				Namespace:  "default",
+				ClusterID:  "demo-cluster-id",
+			},
+		},
+	}
+	metadataList = append(metadataList, cnstypes.BaseCnsEntityMetadata(podmetadata))
+
 	cnsVolumeMetadataUpdateSpec := cnstypes.CnsVolumeMetadataUpdateSpec{
 		VolumeId: cnstypes.CnsVolumeId{Id: volumeId},
 		Metadata: cnstypes.CnsVolumeMetadata{
-			DynamicData: vim25types.DynamicData{},
-			ContainerCluster: cnstypes.CnsContainerCluster{
-				ClusterType: string(cnstypes.CnsClusterTypeKubernetes),
-				ClusterId:   "demo-cluster-id",
-				VSphereUser: "Administrator@vsphere.local",
-			},
-			EntityMetadata: metadataList,
+			DynamicData:           vim25types.DynamicData{},
+			ContainerCluster:      containerCluster,
+			EntityMetadata:        metadataList,
+			ContainerClusterArray: containerClusterArray,
 		},
 	}
 	t.Logf("Updating volume using the spec: %+v", cnsVolumeMetadataUpdateSpec)
@@ -246,6 +290,14 @@ func TestClient(t *testing.T) {
 		t.Logf("Sucessfully updated volume metadata")
 	}
 
+	t.Logf("Calling QueryVolume using queryFilter: %+v", spew.Sdump(queryFilter))
+	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	if err != nil {
+		t.Errorf("Failed to query volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", spew.Sdump(queryResult))
+
 	// Test QueryAll
 	querySelection := cnstypes.CnsQuerySelection{
 		Names: []string{
@@ -261,7 +313,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried all Volumes. queryResult: %+v", queryResult)
+	t.Logf("Sucessfully Queried all Volumes. queryResult: %+v", spew.Sdump(queryResult))
 
 	// Create a VM to test Attach Volume API.
 	virtualMachineConfigSpec := vim25types.VirtualMachineConfigSpec{
@@ -449,13 +501,6 @@ func TestClient(t *testing.T) {
 
 	// Test creating vSAN file-share Volume
 	var cnsFileVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
-	var containerClusterArray []cnstypes.CnsContainerCluster
-	containerCluster := cnstypes.CnsContainerCluster{
-		ClusterType:   string(cnstypes.CnsClusterTypeKubernetes),
-		ClusterId:     "demo-cluster-id",
-		VSphereUser:   "Administrator@vsphere.local",
-		ClusterFlavor: string(cnstypes.CnsClusterFlavorVanilla),
-	}
 	vSANFileCreateSpec := &cnstypes.CnsVSANFileCreateSpec{
 		SoftQuotaInMb: 5120,
 		Permission: []vsanfstypes.VsanFileShareNetPermission{
@@ -466,7 +511,7 @@ func TestClient(t *testing.T) {
 			},
 		},
 	}
-	containerClusterArray = append(containerClusterArray, containerCluster)
+
 	cnsFileVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
 		Name:       "pvc-file-share-volume",
 		VolumeType: string(cnstypes.CnsVolumeTypeFile),
