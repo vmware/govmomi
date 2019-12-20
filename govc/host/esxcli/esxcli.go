@@ -91,6 +91,12 @@ func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if len(res.Values) == 0 {
+		if res.String != "" {
+			fmt.Print(res.String)
+			if !strings.HasSuffix(res.String, "\n") {
+				fmt.Println()
+			}
+		}
 		return nil
 	}
 
