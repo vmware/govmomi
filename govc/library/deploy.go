@@ -174,7 +174,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		var ref *types.ManagedObjectReference
 
 		switch item.Type {
-		case "ovf":
+		case library.ItemTypeOVF:
 			deploy := vcenter.Deploy{
 				DeploymentSpec: vcenter.DeploymentSpec{
 					Name:               name,
@@ -202,7 +202,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			if err != nil {
 				return err
 			}
-		case "vm-template":
+		case library.ItemTypeVMTX:
 			storage := &vcenter.DiskStorage{
 				Datastore: dsID,
 				StoragePolicy: &vcenter.StoragePolicy{

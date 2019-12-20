@@ -79,12 +79,12 @@ func (cmd *recent) Process(ctx context.Context) error {
 	return nil
 }
 
-func chop(s string) string {
-	if len(s) < 30 {
+func chop(s string, n int) string {
+	if len(s) < n {
 		return s
 	}
 
-	return s[:29] + "*"
+	return s[:n-1] + "*"
 }
 
 // taskName describes the tasks similar to the ESX ui
@@ -155,7 +155,7 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 	v.Follow = cmd.follow
 
 	stamp := "15:04:05"
-	tmpl := "%-40s %-30s %15s %9s %9s %9s %s\n"
+	tmpl := "%-40s %-30s %-30s %9s %9s %9s %s\n"
 	fmt.Fprintf(cmd.Out, tmpl, "Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result")
 
 	var last string
@@ -208,7 +208,7 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 
 			result := fmt.Sprintf("%-7s [%s]", info.State, msg)
 
-			item := fmt.Sprintf(tmpl, tn(&info), chop(info.EntityName), user, queued, start, end, result)
+			item := fmt.Sprintf(tmpl, chop(tn(&info), 40), chop(info.EntityName, 30), chop(user, 30), queued, start, end, result)
 
 			if item == last {
 				continue // task info was updated, but the fields we display were not
