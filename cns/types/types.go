@@ -467,7 +467,9 @@ func init() {
 }
 
 type CnsFault struct {
-	Fault *types.LocalizedMethodFault `xml:"fault,typeattr"`
+	types.BaseMethodFault `xml:"fault,typeattr"`
+
+	Reason string `xml:"reason,omitempty"`
 }
 
 func init() {

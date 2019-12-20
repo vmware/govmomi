@@ -124,6 +124,55 @@ func TestClient(t *testing.T) {
 	volumeId := createVolumeOperationRes.VolumeId.Id
 	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
 
+	// Test creating static volume using existing CNS volume should fail
+	var staticCnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+	staticCnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+		Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0",
+		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+		Metadata: cnstypes.CnsVolumeMetadata{
+			ContainerCluster: containerCluster,
+		},
+		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+				CapacityInMb: 5120,
+			},
+			BackingDiskId: volumeId,
+		},
+	}
+
+	staticCnsVolumeCreateSpecList = append(staticCnsVolumeCreateSpecList, staticCnsVolumeCreateSpec)
+	t.Logf("Creating volume using the spec: %+v", spew.Sdump(staticCnsVolumeCreateSpec))
+	recreateTask, err := cnsClient.CreateVolume(ctx, staticCnsVolumeCreateSpecList)
+	if err != nil {
+		t.Errorf("Failed to create volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	reCreateTaskInfo, err := GetTaskInfo(ctx, recreateTask)
+	if err != nil {
+		t.Errorf("Failed to create volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	reCreateTaskResult, err := GetTaskResult(ctx, reCreateTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to create volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if reCreateTaskResult == nil {
+		t.Fatalf("Empty create task results")
+		t.FailNow()
+	}
+	reCreateVolumeOperationRes := reCreateTaskResult.GetCnsVolumeOperationResult()
+	t.Logf("reCreateVolumeOperationRes.: %+v", spew.Sdump(reCreateVolumeOperationRes))
+	if reCreateVolumeOperationRes.Fault != nil {
+		t.Logf("reCreateVolumeOperationRes.Fault: %+v", spew.Sdump(reCreateVolumeOperationRes.Fault))
+		_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsFault)
+		if !ok {
+			t.Fatalf("Fault is not CnsFault")
+		}
+	} else {
+		t.Fatalf("re-create same volume should fail with CnsFault")
+	}
+
 	// Test QueryVolume API
 	var queryFilter cnstypes.CnsQueryFilter
 	var volumeIDList []cnstypes.CnsVolumeId
