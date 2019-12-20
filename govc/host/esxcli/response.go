@@ -26,6 +26,7 @@ type Values map[string][]string
 type Response struct {
 	Info   *CommandInfoMethod
 	Values []Values
+	String string
 }
 
 func (v Values) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
@@ -67,6 +68,10 @@ func (r *Response) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
 	stype := r.Type(start)
 
 	if stype != "ArrayOfDataObject" {
+		switch stype {
+		case "xsd:string":
+			return d.DecodeElement(&r.String, &start)
+		}
 		v := Values{}
 		if err := d.DecodeElement(&v, &start); err != nil {
 			return err
