@@ -40,6 +40,7 @@ type Library struct {
 	Description      string            `json:"description,omitempty"`
 	ID               string            `json:"id,omitempty"`
 	LastModifiedTime *time.Time        `json:"last_modified_time,omitempty"`
+	LastSyncTime     *time.Time        `json:"last_sync_time,omitempty"`
 	Name             string            `json:"name,omitempty"`
 	Storage          []StorageBackings `json:"storage_backings,omitempty"`
 	Type             string            `json:"type,omitempty"`
@@ -136,6 +137,13 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 	url := c.Resource(path)
 	var res string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+}
+
+// SyncLibrary syncs a subscribed library.
+func (c *Manager) SyncLibrary(ctx context.Context, library *Library) error {
+	path := internal.SubscribedLibraryPath
+	url := c.Resource(path).WithID(library.ID).WithAction("sync")
+	return c.Do(ctx, url.Request(http.MethodPost), nil)
 }
 
 // DeleteLibrary deletes an existing library.

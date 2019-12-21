@@ -18,10 +18,14 @@ package vcenter
 
 import (
 	"context"
+	"crypto/sha1"
+	"fmt"
+	"log"
 	"net/http"
 	"path"
 
 	"github.com/vmware/govmomi/vapi/internal"
+	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -156,4 +160,131 @@ func (c *Manager) CheckIn(ctx context.Context, libraryItemID string, vm mo.Refer
 		*CheckIn `json:"spec"`
 	}{checkin}
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+}
+
+// TemplateLibrary params for synchronizing subscription library OVF items to VM Template items
+type TemplateLibrary struct {
+	Source      library.Library
+	Destination library.Library
+	Placement   Target
+	Include     func(library.Item, *library.Item) bool
+	SyncItem    func(context.Context, library.Item, *Deploy, *Template) error
+}
+
+func (c *Manager) includeTemplateLibraryItem(src library.Item, dst *library.Item) bool {
+	return dst == nil
+}
+
+// SyncTemplateLibraryItem deploys an Library OVF item from which a VM template (vmtx) Library item is created.
+// The deployed VM is deleted after being converted to a Library vmtx item.
+func (c *Manager) SyncTemplateLibraryItem(ctx context.Context, item library.Item, deploy *Deploy, spec *Template) error {
+	destroy := false
+	if spec.SourceVM == "" {
+		ref, err := c.DeployLibraryItem(ctx, item.ID, *deploy)
+		if err != nil {
+			return err
+		}
+
+		destroy = true
+		spec.SourceVM = ref.Value
+	}
+
+	_, err := c.CreateTemplate(ctx, *spec)
+
+	if destroy {
+		// Delete source VM regardless of CreateTemplate result
+		url := c.Resource("/vcenter/vm/" + spec.SourceVM)
+		derr := c.Do(ctx, url.Request(http.MethodDelete), nil)
+		if derr != nil {
+			if err == nil {
+				// Return Delete error if CreateTemplate was successful
+				return derr
+			}
+			// Return CreateTemplate error and just log Delete error
+			log.Printf("destroy %s: %s", spec.SourceVM, derr)
+		}
+	}
+
+	return err
+}
+
+func vmtxSourceName(l library.Library, item library.Item) string {
+	sum := sha1.Sum([]byte(path.Join(l.Name, item.Name)))
+	return fmt.Sprintf("vmtx-src-%x", sum)
+}
+
+// SyncTemplateLibrary converts TemplateLibrary.Source OVF items to VM Template items within TemplateLibrary.Destination
+// The optional TemplateLibrary.Include func can be used to filter which items are synced.
+// By default all items that don't exist in the Destination library are synced.
+// The optional TemplateLibrary.SyncItem func can be used to change how the item is synced, by default SyncTemplateLibraryItem is used.
+func (c *Manager) SyncTemplateLibrary(ctx context.Context, l TemplateLibrary, items ...library.Item) error {
+	m := library.NewManager(c.Client)
+	var err error
+	if len(items) == 0 {
+		items, err = m.GetLibraryItems(ctx, l.Source.ID)
+		if err != nil {
+			return err
+		}
+	}
+
+	templates, err := m.GetLibraryItems(ctx, l.Destination.ID)
+	if err != nil {
+		return err
+	}
+
+	existing := make(map[string]*library.Item)
+	for i := range templates {
+		existing[templates[i].Name] = &templates[i]
+	}
+
+	include := l.Include
+	if include == nil {
+		include = c.includeTemplateLibraryItem
+	}
+
+	sync := l.SyncItem
+	if sync == nil {
+		sync = c.SyncTemplateLibraryItem
+	}
+
+	for _, item := range items {
+		if item.Type != library.ItemTypeOVF {
+			continue
+		}
+
+		// Deploy source VM from library ovf item
+		deploy := Deploy{
+			DeploymentSpec: DeploymentSpec{
+				Name:               vmtxSourceName(l.Destination, item),
+				DefaultDatastoreID: l.Destination.Storage[0].DatastoreID,
+				AcceptAllEULA:      true,
+			},
+			Target: l.Placement,
+		}
+
+		// Create library vmtx item from source VM
+		storage := &DiskStorage{
+			Datastore: deploy.DeploymentSpec.DefaultDatastoreID,
+		}
+		spec := Template{
+			Name:          item.Name,
+			Library:       l.Destination.ID,
+			DiskStorage:   storage,
+			VMHomeStorage: storage,
+			Placement: &Placement{
+				Folder:       deploy.Target.FolderID,
+				ResourcePool: deploy.Target.ResourcePoolID,
+			},
+		}
+
+		if !l.Include(item, existing[item.Name]) {
+			continue
+		}
+
+		if err = sync(ctx, item, &deploy, &spec); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
