@@ -530,12 +530,12 @@ func (this *GlobalObjectManager) Revert(ctx context.Context, id vim.ID, snapshot
 	return NewTask(this.c, res.Returnval), nil
 }
 
-func(this *GlobalObjectManager) RetrieveSnapshotDetails(ctx context.Context, id vim.ID, snapshotId vim.ID) (
+func (this *GlobalObjectManager) RetrieveSnapshotDetails(ctx context.Context, id vim.ID, snapshotId vim.ID) (
 	*vim.VStorageObjectSnapshotDetails, error) {
 	req := types.VslmRetrieveSnapshotDetails{
-		This:        this.Reference(),
-		Id:          id,
-		SnapshotId:  snapshotId,
+		This:       this.Reference(),
+		Id:         id,
+		SnapshotId: snapshotId,
 	}
 
 	res, err := methods.VslmRetrieveSnapshotDetails(ctx, this.c, &req)
