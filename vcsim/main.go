@@ -72,7 +72,8 @@ func main() {
 	user := flag.String("username", "", "Login username for vcsim (any username allowed by default)")
 	pass := flag.String("password", "", "Login password for vcsim (any password allowed by default)")
 	tunnel := flag.Int("tunnel", -1, "SDK tunnel port")
-	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to stderr")
+	flag.BoolVar(&simulator.Trace, "trace", simulator.Trace, "Trace SOAP to -trace-file")
+	trace := flag.String("trace-file", "", "Trace output file (defaults to stderr)")
 	stdinExit := flag.Bool("stdinexit", false, "Press any key to exit")
 	dir := flag.String("load", "", "Load model from directory")
 
@@ -81,6 +82,16 @@ func main() {
 	flag.Float64Var(&model.DelayConfig.DelayJitter, "delay-jitter", model.DelayConfig.DelayJitter, "Delay jitter coefficient of variation (tip: 0.5 is a good starting value)")
 
 	flag.Parse()
+
+	if *trace != "" {
+		var err error
+		simulator.TraceFile, err = os.Create(*trace)
+		if err != nil {
+			log.Fatal(err)
+		}
+		simulator.Trace = true
+	}
+
 	methodDelay := *methodDelayP
 	u := &url.URL{Host: *listen}
 	if *user != "" {
@@ -211,6 +222,10 @@ func main() {
 	<-sig
 
 	model.Remove()
+
+	if *trace != "" {
+		_ = simulator.TraceFile.Close()
+	}
 }
 
 func updateHostTemplate(ip string) error {
