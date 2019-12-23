@@ -47,6 +47,12 @@ func DefaultCollector(c *vim25.Client) *Collector {
 	return &p
 }
 
+// SetRoundTripper returns a Collector with a custom RountTripper
+func (p Collector) SetRoundTripper(r soap.RoundTripper) *Collector {
+	p.roundTripper = r
+	return &p
+}
+
 func (p Collector) Reference() types.ManagedObjectReference {
 	return p.reference
 }

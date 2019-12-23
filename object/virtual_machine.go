@@ -22,7 +22,6 @@ import (
 	"fmt"
 	"net"
 	"path"
-	"time"
 
 	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/property"
@@ -238,40 +237,34 @@ func (v VirtualMachine) RefreshStorageInfo(ctx context.Context) error {
 // Waits for an IPv4 address if the v4 param is true.
 func (v VirtualMachine) WaitForIP(ctx context.Context, v4 ...bool) (string, error) {
 	var ip string
-	var err error
 
-	p := property.DefaultCollector(v.c)
+	// Configure retry handler, retry on network errors
+	var roundTripper = vim25.Retry(v.c.Client, vim25.TemporaryNetworkError(3))
 
-	for retry := 0; retry < 3; retry++ {
-		err = property.Wait(ctx, p, v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
-			for _, c := range pc {
-				if c.Name != "guest.ipAddress" {
-					continue
-				}
-				if c.Op != types.PropertyChangeOpAssign {
-					continue
-				}
-				if c.Val == nil {
-					continue
-				}
-
-				ip = c.Val.(string)
-				if len(v4) == 1 && v4[0] {
-					if net.ParseIP(ip).To4() == nil {
-						return false
-					}
-				}
-				return true
+	p := property.DefaultCollector(v.c).SetRoundTripper(roundTripper)
+	err := property.Wait(ctx, p, v.Reference(), []string{"guest.ipAddress"}, func(pc []types.PropertyChange) bool {
+		for _, c := range pc {
+			if c.Name != "guest.ipAddress" {
+				continue
+			}
+			if c.Op != types.PropertyChangeOpAssign {
+				continue
+			}
+			if c.Val == nil {
+				continue
 			}
 
-			return false
-		})
-
-		if err == nil {
-			break
+			ip = c.Val.(string)
+			if len(v4) == 1 && v4[0] {
+				if net.ParseIP(ip).To4() == nil {
+					return false
+				}
+			}
+			return true
 		}
-		time.Sleep(3 * time.Second)
-	}
+
+		return false
+	})
 
 	if err != nil {
 		return "", err
