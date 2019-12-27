@@ -530,6 +530,22 @@ func (this *GlobalObjectManager) Revert(ctx context.Context, id vim.ID, snapshot
 	return NewTask(this.c, res.Returnval), nil
 }
 
+func (this *GlobalObjectManager) RetrieveSnapshotDetails(ctx context.Context, id vim.ID, snapshotId vim.ID) (
+	*vim.VStorageObjectSnapshotDetails, error) {
+	req := types.VslmRetrieveSnapshotDetails{
+		This:       this.Reference(),
+		Id:         id,
+		SnapshotId: snapshotId,
+	}
+
+	res, err := methods.VslmRetrieveSnapshotDetails(ctx, this.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
+}
+
 func (this *GlobalObjectManager) QueryChangedDiskAreas(ctx context.Context, id vim.ID, snapshotId vim.ID, startOffset int64,
 	changeId string) (*vim.DiskChangeInfo, error) {
 	req := types.VslmQueryChangedDiskAreas{
