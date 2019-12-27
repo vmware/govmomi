@@ -35,6 +35,7 @@ type run struct {
 
 	data    string
 	verbose bool
+	toolbox bool
 	dir     string
 	vars    env
 }
@@ -49,6 +50,7 @@ func (cmd *run) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar(&cmd.data, "d", "", "Input data")
 	f.BoolVar(&cmd.verbose, "v", false, "Verbose")
+	f.BoolVar(&cmd.toolbox, "T", false, "Use govmomi/toolbox process I/O")
 	f.StringVar(&cmd.dir, "C", "", "The absolute path of the working directory for the program to start")
 	f.Var(&cmd.vars, "e", "Set environment variable or HTTP header")
 }
@@ -61,20 +63,19 @@ func (cmd *run) Process(ctx context.Context) error {
 }
 
 func (cmd *run) Usage() string {
-	return "NAME [ARG]..."
+	return "PATH [ARG]..."
 }
 
 func (cmd *run) Description() string {
-	return `Run program NAME in VM and display output.
+	return `Run program PATH in VM and display output.
 
-This command depends on govmomi/toolbox running in the VM guest and does not work with standard VMware tools.
-
-If the program NAME is an HTTP verb, the toolbox's http.RoundTripper will be used as the HTTP transport.
+If the program PATH is an HTTP verb, the toolbox's http.RoundTripper will be used as the HTTP transport.
+HTTP commands depend on govmomi/toolbox running in the VM guest and do not work with standard VMware tools.
 
 Examples:
-  govc guest.run -vm $name kubectl get pods
-  govc guest.run -vm $name -d - kubectl create -f - <svc.json
-  govc guest.run -vm $name kubectl delete pod,service my-service
+  govc guest.run -vm $name /usr/bin/kubectl get pods
+  govc guest.run -vm $name -d - /usr/bin/kubectl create -f - <svc.json
+  govc guest.run -vm $name /usr/bin/kubectl delete pod,service my-service
   govc guest.run -vm $name GET http://localhost:8080/api/v1/nodes
   govc guest.run -vm $name -e Content-Type:application/json -d - POST http://localhost:8080/api/v1/namespaces/default/pods <svc.json
   govc guest.run -vm $name DELETE http://localhost:8080/api/v1/namespaces/default/services/my-service`
@@ -153,6 +154,9 @@ func (cmd *run) Run(ctx context.Context, f *flag.FlagSet) error {
 			ecmd.Stdin = bytes.NewBuffer([]byte(cmd.data))
 		}
 
+		if cmd.toolbox {
+			return tc.RunToolbox(ctx, ecmd)
+		}
 		return tc.Run(ctx, ecmd)
 	}
 }

@@ -22,11 +22,13 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/vmware/govmomi/guest"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -137,8 +139,8 @@ func (c *Client) RoundTrip(req *http.Request) (*http.Response, error) {
 	return http.ReadResponse(bufio.NewReader(f), req)
 }
 
-// Run implements exec.Cmd.Run over vmx guest RPC.
-func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
+// Run implements exec.Cmd.Run over vmx guest RPC against govmomi/toolbox.
+func (c *Client) RunToolbox(ctx context.Context, cmd *exec.Cmd) error {
 	vc := c.ProcessManager.Client()
 
 	spec := types.GuestProgramSpec{
@@ -223,6 +225,145 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		rc := procs[0].ExitCode
 		if rc != 0 {
 			return fmt.Errorf("%s: exit %d", cmd.Path, rc)
+		}
+	}
+
+	return nil
+}
+
+func (c *Client) rm(ctx context.Context, path string) {
+	err := c.FileManager.DeleteFile(ctx, c.Authentication, path)
+	if err != nil {
+		log.Printf("rm %q: %s", path, err)
+	}
+}
+
+func (c *Client) mktemp(ctx context.Context) (string, error) {
+	return c.FileManager.CreateTemporaryFile(ctx, c.Authentication, "govmomi-", "", "")
+}
+
+// Run implements exec.Cmd.Run over vmx guest RPC against standard vmware-tools or toolbox.
+func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
+	vc := c.ProcessManager.Client()
+
+	if cmd.Stdin != nil {
+		dst, err := c.mktemp(ctx)
+		if err != nil {
+			return err
+		}
+
+		defer c.rm(ctx, dst)
+
+		var buf bytes.Buffer
+		size, err := io.Copy(&buf, cmd.Stdin)
+		if err != nil {
+			return err
+		}
+
+		attr := new(types.GuestPosixFileAttributes)
+
+		url, err := c.FileManager.InitiateFileTransferToGuest(ctx, c.Authentication, dst, attr, size, true)
+		if err != nil {
+			return err
+		}
+
+		u, err := c.FileManager.TransferURL(ctx, url)
+		if err != nil {
+			return err
+		}
+
+		p := soap.DefaultUpload
+		p.ContentLength = size
+
+		err = vc.Client.Upload(ctx, &buf, u, &p)
+		if err != nil {
+			return err
+		}
+
+		cmd.Args = append(cmd.Args, "<", dst)
+	}
+
+	output := []struct {
+		io.Writer
+		fd   string
+		path string
+	}{
+		{cmd.Stdout, "1", ""},
+		{cmd.Stderr, "2", ""},
+	}
+
+	for i, out := range output {
+		if out.Writer == nil {
+			continue
+		}
+
+		dst, err := c.mktemp(ctx)
+		if err != nil {
+			return err
+		}
+
+		defer c.rm(ctx, dst)
+
+		cmd.Args = append(cmd.Args, out.fd+">", dst)
+		output[i].path = dst
+	}
+
+	spec := types.GuestProgramSpec{
+		ProgramPath:      cmd.Path,
+		Arguments:        strings.Join(cmd.Args, " "),
+		EnvVariables:     cmd.Env,
+		WorkingDirectory: cmd.Dir,
+	}
+
+	pid, err := c.ProcessManager.StartProgram(ctx, c.Authentication, &spec)
+	if err != nil {
+		return err
+	}
+
+	for {
+		procs, err := c.ProcessManager.ListProcesses(ctx, c.Authentication, []int64{pid})
+		if err != nil {
+			return err
+		}
+
+		p := procs[0]
+		if p.EndTime != nil {
+			<-time.After(time.Second / 2)
+			continue
+		}
+
+		rc := p.ExitCode
+		if rc != 0 {
+			return fmt.Errorf("%s: exit %d", cmd.Path, rc)
+		}
+
+		break
+	}
+
+	for _, out := range output {
+		if out.Writer == nil {
+			continue
+		}
+
+		info, err := c.procReader(ctx, out.path)
+		if err != nil {
+			return err
+		}
+
+		u, err := c.FileManager.TransferURL(ctx, info.Url)
+		if err != nil {
+			return err
+		}
+
+		f, _, err := vc.Client.Download(ctx, u, &soap.DefaultDownload)
+		if err != nil {
+			return err
+		}
+
+		_, err = io.Copy(out.Writer, f)
+		_ = f.Close()
+		if err != nil {
+			return err
 		}
 	}
 
