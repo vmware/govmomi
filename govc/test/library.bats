@@ -136,6 +136,16 @@ load test_helper
   run govc library.import -n ttylinux-live /my-content "$GOVC_IMAGES/$TTYLINUX_NAME.iso"
   assert_success
 
+  run govc library.info -l "/my-content/ttylinux-live/$TTYLINUX_NAME.iso"
+  assert_success
+
+  run govc library.info -L /my-content/ttylinux-live/
+  assert_success
+  assert_matches contentlib-
+  file="$output"
+  run govc datastore.ls "$file"
+  assert_matches "$TTYLINUX_NAME.iso"
+
   run govc library.ls "/my-content/ttylinux-live/*"
   assert_success
   assert_matches "$TTYLINUX_NAME.iso"
