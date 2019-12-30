@@ -268,6 +268,12 @@ EOF
   run govc library.checkin -vm my-vm-checkout my-content/$item
   assert_success
 
+  run govc object.collect -s vm/$item config.template
+  assert_success "true"
+
+  run govc object.collect -s vm/$item summary.config.template
+  assert_success "true"
+
   run govc vm.destroy $item
   assert_success # expected to delete the CL item too
 

@@ -1537,6 +1537,10 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			clone.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Config.DeviceChange})
 		}
 
+		if req.Spec.Template {
+			_ = clone.MarkAsTemplate(&types.MarkAsTemplate{This: clone.Self})
+		}
+
 		ctx.postEvent(&types.VmClonedEvent{
 			VmCloneEvent: types.VmCloneEvent{VmEvent: clone.event()},
 			SourceVm:     *event.Vm,
@@ -1843,6 +1847,7 @@ func (vm *VirtualMachine) MarkAsTemplate(req *types.MarkAsTemplate) soap.HasFaul
 	}
 
 	vm.Config.Template = true
+	vm.Summary.Config.Template = true
 
 	r.Res = &types.MarkAsTemplateResponse{}
 
