@@ -167,7 +167,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		var properties []vcenter.Property
 		for _, prop := range cmd.Options.PropertyMapping {
 			properties = append(properties, vcenter.Property{
-				ID: prop.Key,
+				ID:    prop.Key,
 				Value: prop.Value,
 			})
 		}
