@@ -164,6 +164,14 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 			})
 		}
 
+		var properties []vcenter.Property
+		for _, prop := range cmd.Options.PropertyMapping {
+			properties = append(properties, vcenter.Property{
+				ID:    prop.Key,
+				Value: prop.Value,
+			})
+		}
+
 		dsID := ""
 		if ds != nil {
 			dsID = ds.Reference().Value
@@ -186,6 +194,12 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 							Class:       vcenter.ClassOvfParams,
 							Type:        vcenter.TypeDeploymentOptionParams,
 							SelectedKey: cmd.Options.Deployment,
+						},
+						{
+							Class:       vcenter.ClassPropertyParams,
+							Type:        vcenter.TypePropertyParams,
+							SelectedKey: cmd.Options.Deployment,
+							Properties:  properties,
 						},
 					},
 					NetworkMappings:     networks,
