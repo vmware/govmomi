@@ -149,7 +149,7 @@ func (r infoResultsWriter) writeLibrary(
 	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
 	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
-	fmt.Fprintf(w, "  StorageBackings:\n")
+	fmt.Fprintf(w, "  StorageBackings:\t\n")
 	for _, d := range v.Storage {
 		fmt.Fprintf(w, "    DatastoreID:\t%s\n", d.DatastoreID)
 		fmt.Fprintf(w, "    Type:\t%s\n", d.Type)
@@ -166,7 +166,6 @@ func (r infoResultsWriter) writeLibrary(
 		}
 		fmt.Fprintf(w, "  Size:\t%s\n", units.ByteSize(size))
 		fmt.Fprintf(w, "  Items:\t%d\n", len(items))
-		fmt.Fprintf(w, "  Datastore URL:\t%s\n", "")
 	}
 	if v.Subscription != nil {
 		dl := "All"
@@ -174,7 +173,7 @@ func (r infoResultsWriter) writeLibrary(
 			dl = "On Demand"
 		}
 
-		fmt.Fprintf(w, "  Subscription:\n")
+		fmt.Fprintf(w, "  Subscription:\t\n")
 		fmt.Fprintf(w, "    AutoSync:\t%t\n", *v.Subscription.AutomaticSyncEnabled)
 		fmt.Fprintf(w, "    URL:\t%s\n", v.Subscription.SubscriptionURL)
 		fmt.Fprintf(w, "    Auth:\t%s\n", v.Subscription.AuthenticationMethod)
