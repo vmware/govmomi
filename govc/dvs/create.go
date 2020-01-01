@@ -32,6 +32,8 @@ type create struct {
 	types.DVSCreateSpec
 
 	configSpec *types.VMwareDVSConfigSpec
+
+	dProtocol string
 }
 
 func init() {
@@ -49,6 +51,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
 	f.Var(flags.NewInt32(&cmd.configSpec.MaxMtu), "mtu", "DVS Max MTU")
+	f.StringVar(&cmd.dProtocol, "discovery-protocol", "", "Link Discovery Protocol")
 }
 
 func (cmd *create) Usage() string {
@@ -64,7 +67,8 @@ this defaults to the network folder in the specified or default datacenter.
 Examples:
   govc dvs.create DSwitch
   govc dvs.create -product-version 5.5.0 DSwitch
-  govc dvs.create -mtu 9000 DSwitch`
+  govc dvs.create -mtu 9000 DSwitch
+  govc dvs.create -discovery-protocol [lldp|cdp] DSwitch`
 }
 
 func (cmd *create) Process(ctx context.Context) error {
@@ -82,6 +86,13 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	name := f.Arg(0)
 
 	cmd.configSpec.Name = name
+
+	if cmd.dProtocol != "" {
+		cmd.configSpec.LinkDiscoveryProtocolConfig = &types.LinkDiscoveryProtocolConfig{
+			Protocol:  cmd.dProtocol,
+			Operation: "listen",
+		}
+	}
 
 	folder, err := cmd.FolderOrDefault("network")
 	if err != nil {
