@@ -40,6 +40,7 @@ type Client struct {
 	ProcessManager *guest.ProcessManager
 	FileManager    *guest.FileManager
 	Authentication types.BaseGuestAuthentication
+	GuestFamily    types.VirtualMachineGuestOsFamily
 }
 
 // procReader retries InitiateFileTransferFromGuest calls if toolbox is still running the process.
@@ -242,6 +243,15 @@ func (c *Client) mktemp(ctx context.Context) (string, error) {
 	return c.FileManager.CreateTemporaryFile(ctx, c.Authentication, "govmomi-", "", "")
 }
 
+type exitError struct {
+	error
+	exitCode int
+}
+
+func (e *exitError) ExitCode() int {
+	return e.exitCode
+}
+
 // Run implements exec.Cmd.Run over vmx guest RPC against standard vmware-tools or toolbox.
 func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 	vc := c.ProcessManager.Client()
@@ -308,9 +318,27 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		output[i].path = dst
 	}
 
+	path := cmd.Path
+	args := cmd.Args
+
+	switch c.GuestFamily {
+	case types.VirtualMachineGuestOsFamilyWindowsGuest:
+		// Using 'cmd.exe /c' is required on Windows for i/o redirection
+		path = "c:\\Windows\\System32\\cmd.exe"
+		args = append([]string{"/c", cmd.Path}, args...)
+	default:
+		if !strings.ContainsAny(cmd.Path, "/") {
+			// vmware-tools requires an absolute ProgramPath
+			// Default to 'bash -c' as a convenience
+			path = "/bin/bash"
+			arg := "'" + strings.Join(append([]string{cmd.Path}, args...), " ") + "'"
+			args = []string{"-c", arg}
+		}
+	}
+
 	spec := types.GuestProgramSpec{
-		ProgramPath:      cmd.Path,
-		Arguments:        strings.Join(cmd.Args, " "),
+		ProgramPath:      path,
+		Arguments:        strings.Join(args, " "),
 		EnvVariables:     cmd.Env,
 		WorkingDirectory: cmd.Dir,
 	}
@@ -320,6 +348,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		return err
 	}
 
+	rc := 0
 	for {
 		procs, err := c.ProcessManager.ListProcesses(ctx, c.Authentication, []int64{pid})
 		if err != nil {
@@ -327,15 +356,12 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		}
 
 		p := procs[0]
-		if p.EndTime != nil {
+		if p.EndTime == nil {
 			<-time.After(time.Second / 2)
 			continue
 		}
 
-		rc := p.ExitCode
-		if rc != 0 {
-			return fmt.Errorf("%s: exit %d", cmd.Path, rc)
-		}
+		rc = int(p.ExitCode)
 
 		break
 	}
@@ -365,6 +391,10 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if rc != 0 {
+		return &exitError{fmt.Errorf("%s: exit %d", cmd.Path, rc), rc}
 	}
 
 	return nil

@@ -110,6 +110,9 @@ func (cmd *run) do(c *http.Client, req *http.Request) error {
 }
 
 func (cmd *run) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
 	name := f.Arg(0)
 
 	tc, err := cmd.Toolbox()

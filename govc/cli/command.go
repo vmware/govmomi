@@ -179,7 +179,12 @@ error:
 		}
 		commandHelp(hw, args[0], cmd, fs)
 	} else {
-		fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
+		if x, ok := err.(interface{ ExitCode() int }); ok {
+			// propagate exit code, e.g. from guest.run
+			rc = x.ExitCode()
+		} else {
+			fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
+		}
 	}
 
 	_ = clientLogout(ctx, cmd)
