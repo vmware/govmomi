@@ -228,12 +228,6 @@ if [ -n "$test" ] ; then
     test -n "$(govc guest.download /proc/$name -)"
   done
 
-  addr=$(govc guest.getenv TOOLBOX_ECHO_SERVER | cut -d= -f2)
-
-  echo "Testing http.RoundTrip via $addr..."
-  govc guest.run GET "$addr/$vm" | grep "$vm"
-  echo "$vm" | govc guest.run -e Content-Type:text/plain -d - POST "$addr" | grep "$vm"
-
   echo "Testing commands with IO..."
   # Note that we don't use a pipe here, as guest.ps transitions the vm to VM_STATE_GUEST_OPERATION,
   # which prevents guest.run from invoking guest operations.  By letting guest.ps complete before
