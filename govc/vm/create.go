@@ -35,6 +35,7 @@ import (
 var hardwareVersions = []struct {
 	esx, vmx string
 }{
+	{"5.0", "vmx-8"},
 	{"5.5", "vmx-10"},
 	{"6.0", "vmx-11"},
 	{"6.5", "vmx-13"},
