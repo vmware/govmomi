@@ -1618,11 +1618,6 @@ func (vm *VirtualMachine) customize() {
 	}
 
 	for i, s := range vm.imc.NicSettingMap {
-		if i >= len(vm.Guest.Net) {
-			log.Printf("customize vm %s: NicSettingMap exceeds guest NICs", vm.Name)
-			break
-		}
-
 		nic := &vm.Guest.Net[i]
 		if s.MacAddress != "" {
 			nic.MacAddress = s.MacAddress
@@ -1685,6 +1680,12 @@ func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasF
 		}
 		if vm.Config.Tools.PendingCustomization != "" {
 			return nil, new(types.CustomizationPending)
+		}
+		if len(vm.Guest.Net) != len(req.Spec.NicSettingMap) {
+			return nil, &types.NicSettingMismatch{
+				NumberOfNicsInSpec: int32(len(req.Spec.NicSettingMap)),
+				NumberOfNicsInVM:   int32(len(vm.Guest.Net)),
+			}
 		}
 
 		vm.imc = &req.Spec

@@ -21,6 +21,7 @@ import (
 	"flag"
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -36,9 +37,10 @@ type customize struct {
 	tz        string
 	domain    string
 	host      types.CustomizationFixedName
-	ip        string
+	mac       flags.StringList
+	ip        flags.StringList
 	gateway   flags.StringList
-	netmask   string
+	netmask   flags.StringList
 	dnsserver flags.StringList
 	kind      string
 }
@@ -56,9 +58,10 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.tz, "tz", "", "Time zone")
 	f.StringVar(&cmd.domain, "domain", "", "Domain name")
 	f.StringVar(&cmd.host.Name, "name", "", "Host name")
-	f.StringVar(&cmd.ip, "ip", "", "IP address")
+	f.Var(&cmd.mac, "mac", "MAC address")
+	f.Var(&cmd.ip, "ip", "IP address")
 	f.Var(&cmd.gateway, "gateway", "Gateway")
-	f.StringVar(&cmd.netmask, "netmask", "", "Netmask")
+	f.Var(&cmd.netmask, "netmask", "Netmask")
 	f.Var(&cmd.dnsserver, "dns-server", "DNS server")
 	f.StringVar(&cmd.kind, "type", "Linux", "Customization type if spec NAME is not specified (Linux|Windows)")
 }
@@ -72,12 +75,19 @@ func (cmd *customize) Description() string {
 
 Optionally specify a customization spec NAME.
 
+The '-ip', '-netmask' and '-gateway' flags are for static IP configuration.
+If the VM has multiple NICs, an '-ip' and '-netmask' must be specified for each.
+
 Windows -tz value requires the Index (hex): https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values
 
 Examples:
-  govc vm.customize -vm VM -name my-hostname
   govc vm.customize -vm VM NAME
-  govc vm.customize -vm VM -gateway GATEWAY -netmask NETMASK -ip NEWIP -dns-server DNS1 -dns-server DNS2 NAME
+  govc vm.customize -vm VM -name my-hostname -ip dhcp
+  govc vm.customize -vm VM -gateway GATEWAY -ip NEWIP -netmask NETMASK -dns-server DNS1,DNS2 NAME
+  # Multiple -ip without -mac are applied by vCenter in the order in which the NICs appear on the bus
+  govc vm.customize -vm VM -ip 10.0.0.178 -netmask 255.255.255.0 -ip 10.0.0.162 -netmask 255.255.255.0
+  # Multiple -ip with -mac are applied by vCenter to the NIC with the given MAC address
+  govc vm.customize -vm VM -mac 00:50:56:be:dd:f8 -ip 10.0.0.178 -netmask 255.255.255.0 -mac 00:50:56:be:60:cf -ip 10.0.0.162 -netmask 255.255.255.0
   govc vm.customize -vm VM -auto-login 3 NAME
   govc vm.customize -vm VM -prefix demo NAME
   govc vm.customize -vm VM -tz America/New_York NAME`
@@ -98,14 +108,20 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 	name := f.Arg(0)
 	if name == "" {
 		spec = &types.CustomizationSpec{
-			NicSettingMap: []types.CustomizationAdapterMapping{{}},
+			NicSettingMap: make([]types.CustomizationAdapterMapping, len(cmd.ip)),
 		}
-		spec.NicSettingMap[0].Adapter.Ip = new(types.CustomizationDhcpIpGenerator)
+
 		switch cmd.kind {
 		case "Linux":
-			spec.Identity = new(types.CustomizationLinuxPrep)
+			spec.Identity = &types.CustomizationLinuxPrep{
+				HostName: new(types.CustomizationVirtualMachineName),
+			}
 		case "Windows":
-			spec.Identity = new(types.CustomizationSysprep)
+			spec.Identity = &types.CustomizationSysprep{
+				UserData: types.CustomizationUserData{
+					ComputerName: new(types.CustomizationVirtualMachineName),
+				},
+			}
 		default:
 			return flag.ErrHelp
 		}
@@ -128,6 +144,10 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		spec = &item.Spec
 	}
 
+	if len(cmd.ip) > len(spec.NicSettingMap) {
+		return fmt.Errorf("%d -ip specified, spec %q has %d", len(cmd.ip), name, len(spec.NicSettingMap))
+	}
+
 	sysprep, isWindows := spec.Identity.(*types.CustomizationSysprep)
 	linprep, _ := spec.Identity.(*types.CustomizationLinuxPrep)
 
@@ -136,6 +156,15 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 			sysprep.Identification.JoinDomain = cmd.domain
 		} else {
 			linprep.Domain = cmd.domain
+		}
+	}
+
+	if len(cmd.dnsserver) != 0 {
+		if !isWindows {
+			for _, s := range cmd.dnsserver {
+				spec.GlobalIPSettings.DnsServerList =
+					append(spec.GlobalIPSettings.DnsServerList, strings.Split(s, ",")...)
+			}
 		}
 	}
 
@@ -175,19 +204,29 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	nic := &spec.NicSettingMap[0]
-	if cmd.ip != "" {
-		nic.Adapter.Ip = &types.CustomizationFixedIp{IpAddress: cmd.ip}
-	}
-	if cmd.netmask != "" {
-		nic.Adapter.SubnetMask = cmd.netmask
-	}
-	if len(cmd.gateway) != 0 {
-		nic.Adapter.Gateway = cmd.gateway
-	}
-	if len(cmd.dnsserver) != 0 {
-		spec.GlobalIPSettings.DnsServerList = cmd.dnsserver
-		nic.Adapter.DnsServerList = cmd.dnsserver
+	for i, ip := range cmd.ip {
+		nic := &spec.NicSettingMap[i]
+		switch ip {
+		case "dhcp":
+			nic.Adapter.Ip = new(types.CustomizationDhcpIpGenerator)
+		default:
+			nic.Adapter.Ip = &types.CustomizationFixedIp{IpAddress: ip}
+		}
+
+		if i < len(cmd.netmask) {
+			nic.Adapter.SubnetMask = cmd.netmask[i]
+		}
+		if i < len(cmd.mac) {
+			nic.MacAddress = cmd.mac[i]
+		}
+		if i < len(cmd.gateway) {
+			nic.Adapter.Gateway = strings.Split(cmd.gateway[i], ",")
+		}
+		if isWindows {
+			if i < len(cmd.dnsserver) {
+				nic.Adapter.DnsServerList = strings.Split(cmd.dnsserver[i], ",")
+			}
+		}
 	}
 
 	task, err := vm.Customize(ctx, *spec)
