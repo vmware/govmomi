@@ -63,8 +63,6 @@ func (e *exitError) ExitCode() int {
 
 // Run implements exec.Cmd.Run over vmx guest RPC against standard vmware-tools or toolbox.
 func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
-	vc := c.ProcessManager.Client()
-
 	if cmd.Stdin != nil {
 		dst, err := c.mktemp(ctx)
 		if err != nil {
@@ -79,22 +77,11 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 			return err
 		}
 
-		attr := new(types.GuestPosixFileAttributes)
-
-		url, err := c.FileManager.InitiateFileTransferToGuest(ctx, c.Authentication, dst, attr, size, true)
-		if err != nil {
-			return err
-		}
-
-		u, err := c.FileManager.TransferURL(ctx, url)
-		if err != nil {
-			return err
-		}
-
 		p := soap.DefaultUpload
 		p.ContentLength = size
+		attr := new(types.GuestPosixFileAttributes)
 
-		err = vc.Client.Upload(ctx, &buf, u, &p)
+		err = c.Upload(ctx, &buf, dst, p, attr, true)
 		if err != nil {
 			return err
 		}
@@ -180,17 +167,7 @@ func (c *Client) Run(ctx context.Context, cmd *exec.Cmd) error {
 			continue
 		}
 
-		info, err := c.FileManager.InitiateFileTransferFromGuest(ctx, c.Authentication, out.path)
-		if err != nil {
-			return err
-		}
-
-		u, err := c.FileManager.TransferURL(ctx, info.Url)
-		if err != nil {
-			return err
-		}
-
-		f, _, err := vc.Client.Download(ctx, u, &soap.DefaultDownload)
+		f, _, err := c.Download(ctx, out.path)
 		if err != nil {
 			return err
 		}
