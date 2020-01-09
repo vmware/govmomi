@@ -14,10 +14,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package object
+package object_test
+
+import (
+	"context"
+	"testing"
+
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vim25"
+)
 
 // DistributedVirtualPortgroup should implement the Reference interface.
-var _ Reference = DistributedVirtualPortgroup{}
+var _ object.Reference = object.DistributedVirtualPortgroup{}
 
 // DistributedVirtualPortgroup should implement the NetworkReference interface.
-var _ NetworkReference = DistributedVirtualPortgroup{}
+var _ object.NetworkReference = object.DistributedVirtualPortgroup{}
+
+func TestDistributedVirtualPortgroupEthernetCardBackingInfo(t *testing.T) {
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		obj := simulator.Map.Any("DistributedVirtualPortgroup").(*simulator.DistributedVirtualPortgroup)
+
+		pg := object.NewDistributedVirtualPortgroup(c, obj.Self)
+		_, err := pg.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		obj.Config.DistributedVirtualSwitch = nil // expect to fail if switch can't be read
+		_, err = pg.EthernetCardBackingInfo(ctx)
+		if err == nil {
+			t.Fatal("expected error")
+		}
+	})
+}
