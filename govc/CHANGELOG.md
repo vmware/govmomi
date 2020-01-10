@@ -1,5 +1,59 @@
 # changelog
 
+### 0.22.0 (2020-01-10)
+
+* Add library.sync command
+
+* Add 5.0 to vm.create hardware version map
+
+* Add -discovery-protocol flag to dvs.create and dvs.change commands
+
+* Add OVF properties to library.deploy command
+
+* Remove toolbox dependency from guest.run command
+
+* Add library.info details and -l / -L flags
+
+* Add VM template support to library.deploy command
+
+* Add library.clone command
+
+* Add device.boot -secure flag
+
+* Add -cluster flag to vm.create and vm.clone commands
+
+* Add dvs.change command
+
+* Add -mtu flag to dvc.create command
+
+* Add vm.customize command
+
+* Add -type flag to fields.ls command
+
+* Add object.save command
+
+* Support multiple characters with vm.keystrokes -c flag
+
+* Add suggestions to -h flag when command is not found
+
+* Support duplicate names in tags info and ls commands
+
+* Scrub Login method password from -debug logs
+
+* Add stderr output option for -debug flag
+
+* Fix to report errors when cdrom.insert fails
+
+* Add space char to vm.keystrokes map
+
+* Fix datacenter.info against nested folders
+
+* Add vm.change -latency flag
+
+* Add support for subscription Content Libraries
+
+* Add guest.df command
+
 ### 0.21.0 (2019-07-24)
 
 * Add datastore.info -H flag
