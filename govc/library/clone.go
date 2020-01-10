@@ -92,6 +92,8 @@ func (cmd *clone) Usage() string {
 func (cmd *clone) Description() string {
 	return `Clone VM to Content Library PATH.
 
+The API used by this command requires vCenter version 6.7U1 or higher.
+
 Examples:
   govc library.clone -vm template-vm my-content template-vm-item`
 }

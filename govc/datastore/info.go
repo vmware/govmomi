@@ -81,7 +81,7 @@ Examples:
   govc datastore.info
   govc datastore.info vsanDatastore
   # info on Datastores shared between cluster hosts:
-  govc object.collect -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
+  govc object.collect -s -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
   # info on Datastores shared between VM hosts:
   govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc object.collect -s % summary.runtime.host | xargs govc datastore.info -H`
 }

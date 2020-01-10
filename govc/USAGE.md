@@ -99,6 +99,7 @@ but appear via `govc $cmd -h`:
  - [disk.tags.attach](#disktagsattach)
  - [disk.tags.detach](#disktagsdetach)
  - [dvs.add](#dvsadd)
+ - [dvs.change](#dvschange)
  - [dvs.create](#dvscreate)
  - [dvs.portgroup.add](#dvsportgroupadd)
  - [dvs.portgroup.change](#dvsportgroupchange)
@@ -122,6 +123,7 @@ but appear via `govc $cmd -h`:
  - [folder.info](#folderinfo)
  - [guest.chmod](#guestchmod)
  - [guest.chown](#guestchown)
+ - [guest.df](#guestdf)
  - [guest.download](#guestdownload)
  - [guest.getenv](#guestgetenv)
  - [guest.kill](#guestkill)
@@ -168,6 +170,7 @@ but appear via `govc $cmd -h`:
  - [host.storage.info](#hoststorageinfo)
  - [host.storage.mark](#hoststoragemark)
  - [host.storage.partition](#hoststoragepartition)
+ - [host.vnic.change](#hostvnicchange)
  - [host.vnic.info](#hostvnicinfo)
  - [host.vnic.service](#hostvnicservice)
  - [host.vswitch.add](#hostvswitchadd)
@@ -177,6 +180,7 @@ but appear via `govc $cmd -h`:
  - [import.ovf](#importovf)
  - [import.spec](#importspec)
  - [import.vmdk](#importvmdk)
+ - [library.clone](#libraryclone)
  - [library.create](#librarycreate)
  - [library.deploy](#librarydeploy)
  - [library.export](#libraryexport)
@@ -186,6 +190,7 @@ but appear via `govc $cmd -h`:
  - [library.rm](#libraryrm)
  - [library.session.ls](#librarysessionls)
  - [library.session.rm](#librarysessionrm)
+ - [library.sync](#librarysync)
  - [license.add](#licenseadd)
  - [license.assign](#licenseassign)
  - [license.assigned.ls](#licenseassignedls)
@@ -210,6 +215,7 @@ but appear via `govc $cmd -h`:
  - [object.mv](#objectmv)
  - [object.reload](#objectreload)
  - [object.rename](#objectrename)
+ - [object.save](#objectsave)
  - [option.ls](#optionls)
  - [option.set](#optionset)
  - [permissions.ls](#permissionsls)
@@ -264,6 +270,7 @@ but appear via `govc $cmd -h`:
  - [vm.clone](#vmclone)
  - [vm.console](#vmconsole)
  - [vm.create](#vmcreate)
+ - [vm.customize](#vmcustomize)
  - [vm.destroy](#vmdestroy)
  - [vm.disk.attach](#vmdiskattach)
  - [vm.disk.change](#vmdiskchange)
@@ -625,6 +632,12 @@ Options:
 ```
 Usage: govc datacenter.create [OPTIONS] NAME...
 
+Create datacenter NAME.
+
+Examples:
+  govc datacenter.create MyDC # create
+  govc object.destroy /MyDC   # delete
+
 Options:
   -folder=               Inventory folder [GOVC_FOLDER]
 ```
@@ -812,7 +825,7 @@ Examples:
   govc datastore.info
   govc datastore.info vsanDatastore
   # info on Datastores shared between cluster hosts:
-  govc object.collect -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
+  govc object.collect -s -d " " /dc1/host/k8s-cluster host | xargs govc datastore.info -H
   # info on Datastores shared between VM hosts:
   govc ls /dc1/vm/*k8s* | xargs -n1 -I% govc object.collect -s % summary.runtime.host | xargs govc datastore.info -H
 
@@ -1008,12 +1021,14 @@ Configure VM boot settings.
 Examples:
   govc device.boot -vm $vm -delay 1000 -order floppy,cdrom,ethernet,disk
   govc device.boot -vm $vm -order - # reset boot order
+  govc device.boot -vm $vm -secure
 
 Options:
   -delay=0               Delay in ms before starting the boot sequence
   -order=                Boot device order [-,floppy,cdrom,ethernet,disk]
   -retry=false           If true, retry boot after retry-delay
   -retry-delay=0         Delay in ms before a boot retry
+  -secure=<nil>          Enable EFI secure boot
   -setup=false           If true, enter BIOS setup on next boot
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -1456,6 +1471,24 @@ Options:
   -pnic=vmnic0           Name of the host physical NIC
 ```
 
+## dvs.change
+
+```
+Usage: govc dvs.change [OPTIONS] DVS
+
+Change DVS (DistributedVirtualSwitch) in datacenter.
+
+Examples:
+  govc dvs.change -product-version 5.5.0 DSwitch
+  govc dvs.change -mtu 9000 DSwitch
+  govc dvs.change -discovery-protocol [lldp|cdp] DSwitch
+
+Options:
+  -discovery-protocol=   Link Discovery Protocol
+  -mtu=0                 DVS Max MTU
+  -product-version=      DVS product version
+```
+
 ## dvs.create
 
 ```
@@ -1469,9 +1502,13 @@ this defaults to the network folder in the specified or default datacenter.
 Examples:
   govc dvs.create DSwitch
   govc dvs.create -product-version 5.5.0 DSwitch
+  govc dvs.create -mtu 9000 DSwitch
+  govc dvs.create -discovery-protocol [lldp|cdp] DSwitch
 
 Options:
+  -discovery-protocol=   Link Discovery Protocol
   -folder=               Inventory folder [GOVC_FOLDER]
+  -mtu=0                 DVS Max MTU
   -product-version=      DVS product version
 ```
 
@@ -1673,8 +1710,10 @@ List custom field definitions.
 
 Examples:
   govc fields.ls
+  govc fields.ls -type VirtualMachine
 
 Options:
+  -type=                 Filter by a Managed Object Type
 ```
 
 ## fields.rename
@@ -1835,6 +1874,20 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
+## guest.df
+
+```
+Usage: govc guest.df [OPTIONS]
+
+Report file system disk space usage.
+
+Examples:
+  govc guest.df -vm $name
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
 ## guest.download
 
 ```
@@ -1866,6 +1919,7 @@ Examples:
   govc guest.getenv -vm $name HOME
 
 Options:
+  -i=false               Interactive session
   -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -1881,6 +1935,7 @@ Examples:
   govc guest.kill -vm $name -p 12345
 
 Options:
+  -i=false               Interactive session
   -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
   -p=[]                  Process ID
   -vm=                   Virtual machine [GOVC_VM]
@@ -1981,6 +2036,7 @@ Options:
   -U=                    Select by process UID
   -X=false               Wait for process to exit
   -e=false               Select all processes
+  -i=false               Interactive session
   -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
   -p=[]                  Select by process ID
   -vm=                   Virtual machine [GOVC_VM]
@@ -2022,28 +2078,28 @@ Options:
 ## guest.run
 
 ```
-Usage: govc guest.run [OPTIONS] NAME [ARG]...
+Usage: govc guest.run [OPTIONS] PATH [ARG]...
 
-Run program NAME in VM and display output.
+Run program PATH in VM and display output.
 
-This command depends on govmomi/toolbox running in the VM guest and does not work with standard VMware tools.
-
-If the program NAME is an HTTP verb, the toolbox's http.RoundTripper will be used as the HTTP transport.
+The guest.run command starts a program in the VM with i/o redirected, waits for the process to exit and
+propagates the exit code to the govc process exit code.  Note that stdout and stderr are redirected by default,
+stdin is only redirected when the '-d' flag is specified.
 
 Examples:
-  govc guest.run -vm $name kubectl get pods
-  govc guest.run -vm $name -d - kubectl create -f - <svc.json
-  govc guest.run -vm $name kubectl delete pod,service my-service
-  govc guest.run -vm $name GET http://localhost:8080/api/v1/nodes
-  govc guest.run -vm $name -e Content-Type:application/json -d - POST http://localhost:8080/api/v1/namespaces/default/pods <svc.json
-  govc guest.run -vm $name DELETE http://localhost:8080/api/v1/namespaces/default/services/my-service
+  govc guest.run -vm $name ifconfig
+  govc guest.run -vm $name ifconfig eth0
+  cal | govc guest.run -vm $name -d - cat
+  govc guest.run -vm $name -d "hello $USER" cat
+  govc guest.run -vm $name curl -s :invalid: || echo $? # exit code 6
+  govc guest.run -vm $name -e FOO=bar -e BIZ=baz -C /tmp env
 
 Options:
   -C=                    The absolute path of the working directory for the program to start
-  -d=                    Input data
-  -e=[]                  Set environment variable or HTTP header
+  -d=                    Input data string. A value of '-' reads from OS stdin
+  -e=[]                  Set environment variables
+  -i=false               Interactive session
   -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
-  -v=false               Verbose
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2065,6 +2121,7 @@ Examples:
 Options:
   -C=                    The absolute path of the working directory for the program to start
   -e=[]                  Set environment variable (key=val)
+  -i=false               Interactive session
   -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -2584,6 +2641,21 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
+## host.vnic.change
+
+```
+Usage: govc host.vnic.change [OPTIONS] DEVICE
+
+Change a virtual nic DEVICE.
+
+Examples:
+  govc host.vnic.change -host hostname -mtu 9000 vmk1
+
+Options:
+  -host=                 Host system [GOVC_HOST]
+  -mtu=0                 vmk MTU
+```
+
 ## host.vnic.info
 
 ```
@@ -2692,6 +2764,28 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
+## library.clone
+
+```
+Usage: govc library.clone [OPTIONS] PATH NAME
+
+Clone VM to Content Library PATH.
+
+The API used by this command requires vCenter version 6.7U1 or higher.
+
+Examples:
+  govc library.clone -vm template-vm my-content template-vm-item
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -host=                 Host system [GOVC_HOST]
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -profile=              Storage profile
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
 ## library.create
 
 ```
@@ -2701,12 +2795,19 @@ Create library.
 
 Examples:
   govc library.create library_name
+  govc library.create -sub http://server/path/lib.json library_name
   govc library.create -json | jq .
   govc library.create library_name -json | jq .
 
 Options:
   -d=                    Description of library
   -ds=                   Datastore [GOVC_DATASTORE]
+  -sub=                  Subscribe to library URL
+  -sub-autosync=true     Automatic synchronization
+  -sub-ondemand=false    Download content on demand
+  -sub-password=         Subscription password
+  -sub-username=         Subscription username
+  -thumbprint=           SHA-1 thumbprint of the host's SSL certificate
 ```
 
 ## library.deploy
@@ -2726,6 +2827,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -profile=              Storage profile
 ```
 
 ## library.export
@@ -2763,6 +2865,7 @@ Examples:
   govc library.import library_name file.ova
   govc library.import library_name file.ovf
   govc library.import library_name file.iso
+  govc library.import library_id file.iso # Use library id if multiple libraries have the same name
   govc library.import library_name/item_name file.ova # update existing item
   govc library.import library_name http://example.com/file.ovf # download and push to vCenter
   govc library.import -pull library_name http://example.com/file.ova # direct pull from vCenter
@@ -2784,13 +2887,17 @@ Display library information.
 Examples:
   govc library.info
   govc library.info /lib1
+  govc library.info -l /lib1 | grep Size:
   govc library.info /lib1/item1
   govc library.info /lib1/item1/
   govc library.info */
+  govc device.cdrom.insert -vm $vm -device cdrom-3000 $(govc library.info -L /lib1/item1/file1)
   govc library.info -json | jq .
   govc library.info /lib1/item1 -json | jq .
 
 Options:
+  -L=false               List Datastore path only
+  -l=false               Long listing format
 ```
 
 ## library.ls
@@ -2821,6 +2928,7 @@ Delete library or item NAME.
 
 Examples:
   govc library.rm /library_name
+  govc library.rm library_id # Use library id if multiple libraries have the same name
   govc library.rm /library_name/item_name
 
 Options:
@@ -2852,6 +2960,24 @@ Examples:
 
 Options:
   -f=false               Cancel session if active
+```
+
+## library.sync
+
+```
+Usage: govc library.sync [OPTIONS] NAME|ITEM
+
+Sync library NAME or ITEM.
+
+Examples:
+  govc library.sync subscribed-library
+  govc library.sync subscribed-library/item
+  govc library.sync -vmtx local-library subscribed-library # convert subscribed OVFs to local VMTX
+
+Options:
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -vmtx=                 Sync subscribed library to local library as VM Templates
 ```
 
 ## license.add
@@ -3258,6 +3384,32 @@ Examples:
   govc object.rename /dc1/network/dvs1 Switch1
 
 Options:
+```
+
+## object.save
+
+```
+Usage: govc object.save [OPTIONS] [PATH]
+
+Save managed objects.
+
+By default, the object tree and all properties are saved, starting at PATH.
+PATH defaults to ServiceContent, but can be specified to save a subset of objects.
+The primary use case for this command is to save inventory from a live vCenter and
+load it into a vcsim instance.
+
+Examples:
+  govc object.save -d my-vcenter
+  vcsim -load my-vcenter
+
+Options:
+  -1=false               Save ROOT only, without its children
+  -d=                    Save objects in directory
+  -f=false               Remove existing object directory
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -r=true                Include children of the container view root
+  -type=[]               Resource types to save.  Defaults to all types
+  -v=false               Verbose output
 ```
 
 ## option.ls
@@ -3777,9 +3929,9 @@ List platform services.
 Examples:
   govc sso.service.ls
   govc sso.service.ls -t vcenterserver -P vmomi
-  govc sso.service.ls -t sso:sts
-  govc sso.service.ls -t sso:sts -U
-  govc sso.service.ls -t sso:sts -json | jq -r .[].ServiceEndpoints[].Url
+  govc sso.service.ls -t cs.identity
+  govc sso.service.ls -t cs.identity -P wsTrust -U
+  govc sso.service.ls -t cs.identity -json | jq -r .[].ServiceEndpoints[].Url
 
 Options:
   -P=                    Endpoint protocol
@@ -4188,6 +4340,9 @@ Examples:
   govc vm.change -vm $vm -e guestinfo.vmname $vm
   # Read the variable set above inside the guest:
   vmware-rpctool "info-get guestinfo.vmname"
+  govc vm.change -vm $vm -latency high
+  govc vm.change -vm $vm -latency normal
+  
 
 Options:
   -annotation=                   VM description
@@ -4198,6 +4353,7 @@ Options:
   -cpu.shares=                   CPU shares level or number
   -e=[]                          ExtraConfig. <key>=<value>
   -g=                            Guest OS
+  -latency=                      Latency sensitivity (low|normal|high)
   -m=0                           Size in MB of memory
   -mem.limit=<nil>               Memory limit in MB
   -mem.reservation=<nil>         Memory reservation in MB
@@ -4222,11 +4378,14 @@ Examples:
   govc vm.clone -vm template-vm -link new-vm
   govc vm.clone -vm template-vm -snapshot s-name new-vm
   govc vm.clone -vm template-vm -link -snapshot s-name new-vm
+  govc vm.clone -vm template-vm -cluster cluster1 new-vm # use compute cluster placement
+  govc vm.clone -vm template-vm -datastore-cluster dscluster new-vm # use datastore cluster placement
   govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
 
 Options:
   -annotation=           VM description
   -c=0                   Number of CPUs
+  -cluster=              Use cluster for VM placement via DRS
   -customization=        Customization Specification Name
   -datastore-cluster=    Datastore cluster [GOVC_DATASTORE_CLUSTER]
   -ds=                   Datastore [GOVC_DATASTORE]
@@ -4282,12 +4441,15 @@ For a list of possible '-g' IDs, see:
 http://pubs.vmware.com/vsphere-6-5/topic/com.vmware.wssdk.apiref.doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
 
 Examples:
-  govc vm.create vm-name
+  govc vm.create -on=false vm-name
+  govc vm.create -cluster cluster1 vm-name # use compute cluster placement
+  govc vm.create -datastore-cluster dscluster vm-name # use datastore cluster placement
   govc vm.create -m 2048 -c 2 -g freebsd64Guest -net.adapter vmxnet3 -disk.controller pvscsi vm-name
 
 Options:
   -annotation=           VM description
   -c=1                   Number of CPUs
+  -cluster=              Use cluster for VM placement via DRS
   -datastore-cluster=    Datastore cluster [GOVC_DATASTORE_CLUSTER]
   -disk=                 Disk path (to use existing) OR size (to create new, e.g. 20GB)
   -disk-datastore=       Datastore for disk file
@@ -4305,9 +4467,50 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
-  -on=true               Power on VM. Default is true if -disk argument is given.
+  -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
-  -version=              ESXi hardware version [5.5|6.0|6.5|6.7]
+  -version=              ESXi hardware version [5.0|5.5|6.0|6.5|6.7]
+```
+
+## vm.customize
+
+```
+Usage: govc vm.customize [OPTIONS] [NAME]
+
+Customize VM.
+
+Optionally specify a customization spec NAME.
+
+The '-ip', '-netmask' and '-gateway' flags are for static IP configuration.
+If the VM has multiple NICs, an '-ip' and '-netmask' must be specified for each.
+
+Windows -tz value requires the Index (hex): https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values
+
+Examples:
+  govc vm.customize -vm VM NAME
+  govc vm.customize -vm VM -name my-hostname -ip dhcp
+  govc vm.customize -vm VM -gateway GATEWAY -ip NEWIP -netmask NETMASK -dns-server DNS1,DNS2 NAME
+  # Multiple -ip without -mac are applied by vCenter in the order in which the NICs appear on the bus
+  govc vm.customize -vm VM -ip 10.0.0.178 -netmask 255.255.255.0 -ip 10.0.0.162 -netmask 255.255.255.0
+  # Multiple -ip with -mac are applied by vCenter to the NIC with the given MAC address
+  govc vm.customize -vm VM -mac 00:50:56:be:dd:f8 -ip 10.0.0.178 -netmask 255.255.255.0 -mac 00:50:56:be:60:cf -ip 10.0.0.162 -netmask 255.255.255.0
+  govc vm.customize -vm VM -auto-login 3 NAME
+  govc vm.customize -vm VM -prefix demo NAME
+  govc vm.customize -vm VM -tz America/New_York NAME
+
+Options:
+  -auto-login=0          Number of times the VM should automatically login as an administrator
+  -dns-server=[]         DNS server
+  -domain=               Domain name
+  -gateway=[]            Gateway
+  -ip=[]                 IP address
+  -mac=[]                MAC address
+  -name=                 Host name
+  -netmask=[]            Netmask
+  -prefix=               Host name generator prefix
+  -type=Linux            Customization type if spec NAME is not specified (Linux|Windows)
+  -tz=                   Time zone
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## vm.destroy
@@ -4426,7 +4629,7 @@ Usage: govc vm.info [OPTIONS] VM...
 Display info for VM.
 
 The '-r' flag displays additional info for CPU, memory and storage usage,
-along with the VM's Datastores and Networks and PortGroups.
+along with the VM's Datastores, Networks and PortGroups.
 
 Examples:
   govc vm.info $vm
@@ -4639,7 +4842,14 @@ Options:
 ## vm.power
 
 ```
-Usage: govc vm.power [OPTIONS]
+Usage: govc vm.power [OPTIONS] NAME...
+
+Invoke VM power operations.
+
+Examples:
+  govc vm.power -on VM1 VM2 VM3
+  govc vm.power -on -M VM1 VM2 VM3
+  govc vm.power -off -force VM1
 
 Options:
   -M=false               Use Datacenter.PowerOnMultiVM method instead of VirtualMachine.PowerOnVM
