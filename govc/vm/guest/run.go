@@ -39,7 +39,7 @@ func init() {
 }
 
 func (cmd *run) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag, ctx = newGuestProcessFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.data, "d", "", "Input data string. A value of '-' reads from OS stdin")

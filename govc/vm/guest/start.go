@@ -49,7 +49,7 @@ func init() {
 }
 
 func (cmd *start) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag, ctx = newGuestProcessFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.dir, "C", "", "The absolute path of the working directory for the program to start")
