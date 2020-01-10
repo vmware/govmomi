@@ -18,6 +18,7 @@ package object
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -39,7 +40,12 @@ func (s DistributedVirtualSwitch) GetInventoryPath() string {
 }
 
 func (s DistributedVirtualSwitch) EthernetCardBackingInfo(ctx context.Context) (types.BaseVirtualDeviceBackingInfo, error) {
-	return nil, ErrNotSupported // TODO: just to satisfy NetworkReference interface for the finder
+	ref := s.Reference()
+	name := s.InventoryPath
+	if name == "" {
+		name = ref.String()
+	}
+	return nil, fmt.Errorf("type %s (%s) cannot be used for EthernetCardBackingInfo", ref.Type, name)
 }
 
 func (s DistributedVirtualSwitch) Reconfigure(ctx context.Context, spec types.BaseDVSConfigSpec) (*Task, error) {
