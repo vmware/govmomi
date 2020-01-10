@@ -45,6 +45,12 @@ func newGuestFlag(ctx context.Context) (*GuestFlag, context.Context) {
 	return f, ctx
 }
 
+func newGuestProcessFlag(ctx context.Context) (*GuestFlag, context.Context) {
+	f, gctx := newGuestFlag(ctx)
+	f.proc = true
+	return f, gctx
+}
+
 func (flag *GuestFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.ClientFlag.Register(ctx, f)
 	flag.VirtualMachineFlag.Register(ctx, f)

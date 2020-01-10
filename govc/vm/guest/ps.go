@@ -77,7 +77,7 @@ func (cmd *ps) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
 
-	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag, ctx = newGuestProcessFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 
 	cmd.uids = make(map[string]bool)

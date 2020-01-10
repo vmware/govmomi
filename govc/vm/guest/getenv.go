@@ -33,7 +33,7 @@ func init() {
 }
 
 func (cmd *getenv) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.GuestFlag, ctx = newGuestFlag(ctx)
+	cmd.GuestFlag, ctx = newGuestProcessFlag(ctx)
 	cmd.GuestFlag.Register(ctx, f)
 }
 
