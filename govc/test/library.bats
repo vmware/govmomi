@@ -293,6 +293,18 @@ EOF
   assert_success
   assert_matches "Subscription:"
   assert_matches "$url"
+
+  run govc library.import my-content "$GOVC_IMAGES/ttylinux-latest.ova"
+  assert_success # TODO: this should fail, but allow until vcsim supports publishing
+
+  run govc library.sync my-content
+  assert_success
+
+  run govc library.create my-content-vmtx
+  assert_success
+
+  run govc library.sync -vmtx my-content-vmtx my-content
+  assert_success
 }
 
 @test "library.findbyid" {

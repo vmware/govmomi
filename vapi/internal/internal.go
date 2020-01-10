@@ -37,8 +37,10 @@ const (
 	LibraryItemDownloadSessionFile = "/com/vmware/content/library/item/downloadsession/file"
 	LocalLibraryPath               = "/com/vmware/content/local-library"
 	SubscribedLibraryPath          = "/com/vmware/content/subscribed-library"
+	SubscribedLibraryItem          = "/com/vmware/content/library/subscribed-item"
 	VCenterOVFLibraryItem          = "/com/vmware/vcenter/ovf/library-item"
 	VCenterVMTXLibraryItem         = "/vcenter/vm-template/library-items"
+	VCenterVM                      = "/vcenter/vm"
 	SessionCookieName              = "vmware-api-session-id"
 )
 

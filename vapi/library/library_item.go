@@ -88,6 +88,15 @@ func (c *Manager) CreateLibraryItem(ctx context.Context, item Item) (string, err
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
+// SyncLibraryItem syncs a subscribed library item
+func (c *Manager) SyncLibraryItem(ctx context.Context, item *Item, force bool) error {
+	body := struct {
+		Force bool `json:"force_sync_content"`
+	}{force}
+	url := c.Resource(internal.SubscribedLibraryItem).WithID(item.ID).WithAction("sync")
+	return c.Do(ctx, url.Request(http.MethodPost, body), nil)
+}
+
 // DeleteLibraryItem deletes an existing library item.
 func (c *Manager) DeleteLibraryItem(ctx context.Context, item *Item) error {
 	url := c.Resource(internal.LibraryItemPath).WithID(item.ID)

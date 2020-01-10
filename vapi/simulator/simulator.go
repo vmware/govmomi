@@ -129,8 +129,10 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.SubscribedLibraryPath, s.library},
 		{internal.LibraryPath + "/", s.libraryID},
 		{internal.LocalLibraryPath + "/", s.libraryID},
+		{internal.SubscribedLibraryPath + "/", s.libraryID},
 		{internal.LibraryItemPath, s.libraryItem},
 		{internal.LibraryItemPath + "/", s.libraryItemID},
+		{internal.SubscribedLibraryItem + "/", s.libraryItemID},
 		{internal.LibraryItemUpdateSession, s.libraryItemUpdateSession},
 		{internal.LibraryItemUpdateSession + "/", s.libraryItemUpdateSessionID},
 		{internal.LibraryItemUpdateSessionFile, s.libraryItemUpdateSessionFile},
@@ -145,6 +147,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemDeployID},
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
+		{internal.VCenterVM + "/", s.vmID},
 	}
 
 	for i := range handlers {
@@ -711,6 +714,14 @@ func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
 			l.Patch(&spec.Library)
 			OK(w)
 		}
+	case http.MethodPost:
+	case "sync":
+		if l.Type == "SUBSCRIBED" {
+			l.LastSyncTime = types.NewTime(time.Now())
+			OK(w)
+		} else {
+			http.NotFound(w, r)
+		}
 	case http.MethodGet:
 		OK(w, l)
 	}
@@ -827,6 +838,16 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 		if s.decode(r, w, &spec) {
 			item.Patch(&spec.Item)
 			OK(w)
+		}
+	case http.MethodPost:
+		switch s.action(r) {
+		case "sync":
+			if l.Type == "SUBSCRIBED" {
+				item.LastSyncTime = types.NewTime(time.Now())
+				OK(w)
+			} else {
+				http.NotFound(w, r)
+			}
 		}
 	case http.MethodGet:
 		OK(w, item)
@@ -1720,6 +1741,17 @@ func (s *handler) libraryItemCheckOuts(item *item, w http.ResponseWriter, r *htt
 	case "check-in":
 		// TODO: increment ContentVersion
 		OK(w, "0")
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
+	id := path.Base(r.URL.Path)
+
+	switch r.Method {
+	case http.MethodDelete:
+		s.deleteVM(&types.ManagedObjectReference{Type: "VirtualMachine", Value: id})
 	default:
 		http.NotFound(w, r)
 	}
