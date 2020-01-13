@@ -43,16 +43,16 @@ import (
 // # restart the STS service:
 // % service-control --stop vmware-stsd
 // % service-control --start vmware-stsd
-// % tail -f /var/log/vmware/sso/catalina.$(date +%Y-%m-%d).log
+// % tail -f /var/log/vmware/sso/vmware-rest-idm-http.log
 
 // solutionUserCreate ensures that solution user "govmomi-test" exists for uses with the tests that follow.
-func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client) error {
+func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client, vc *vim25.Client) error {
 	s, err := sts.Issue(ctx, TokenRequest{Userinfo: info})
 	if err != nil {
 		return err
 	}
 
-	admin, err := ssoadmin.NewClient(ctx, &vim25.Client{Client: sts.Client})
+	admin, err := ssoadmin.NewClient(ctx, vc)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func TestIssueHOK(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = solutionUserCreate(ctx, u.User, sts); err != nil {
+	if err = solutionUserCreate(ctx, u.User, sts, c); err != nil {
 		t.Fatal(err)
 	}
 
@@ -243,7 +243,7 @@ func TestIssueActAs(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if err = solutionUserCreate(ctx, u.User, sts); err != nil {
+	if err = solutionUserCreate(ctx, u.User, sts, c); err != nil {
 		t.Fatal(err)
 	}
 

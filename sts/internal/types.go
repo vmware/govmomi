@@ -478,7 +478,7 @@ type AttributeValue struct {
 }
 
 func (a *AttributeValue) C14N() string {
-	return fmt.Sprintf(`<saml2:AttributeValue xmlns:xsi="%s" xsi:type="xs:string">%s</saml2:AttributeValue>`, XSI, a.Value)
+	return fmt.Sprintf(`<saml2:AttributeValue xmlns:xsi="%s" xsi:type="%s">%s</saml2:AttributeValue>`, XSI, a.Type, a.Value)
 }
 
 type Attribute struct {
