@@ -41,6 +41,7 @@ type login struct {
 	clone  bool
 	issue  bool
 	renew  bool
+	actas  bool
 	long   bool
 	ticket string
 	life   time.Duration
@@ -62,6 +63,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.clone, "clone", false, "Acquire clone ticket")
 	f.BoolVar(&cmd.issue, "issue", false, "Issue SAML token")
 	f.BoolVar(&cmd.renew, "renew", false, "Renew SAML token")
+	f.BoolVar(&cmd.actas, "actas", false, "Request an ActAs SAML token")
 	f.DurationVar(&cmd.life, "lifetime", time.Minute*10, "SAML token lifetime")
 	f.BoolVar(&cmd.long, "l", false, "Output session cookie")
 	f.StringVar(&cmd.ticket, "ticket", "", "Use clone ticket for login")
@@ -153,7 +155,7 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 		Userinfo:    cmd.Userinfo(),
 		Renewable:   true,
 		Delegatable: true,
-		ActAs:       cmd.token != "",
+		ActAs:       cmd.actas,
 		Token:       cmd.token,
 		Lifetime:    cmd.life,
 	}
