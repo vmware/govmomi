@@ -1,5 +1,9 @@
 # changelog
 
+### 0.22.1 (2020-01-13)
+
+* Fix session.login using HoK token with delegated Bearer identity token against 6.7 U3b+
+
 ### 0.22.0 (2020-01-10)
 
 * Add library.sync command
