@@ -304,6 +304,37 @@ var (
 	textUnmarshalerType = reflect.TypeOf((*encoding.TextUnmarshaler)(nil)).Elem()
 )
 
+// Find reflect.Type for an element's type attribute.
+func (p *Decoder) typeForElement(val reflect.Value, start *StartElement) reflect.Type {
+	t := ""
+	for _, a := range start.Attr {
+		if a.Name == xmlSchemaInstance || a.Name == xsiType {
+			t = a.Value
+			break
+		}
+	}
+
+	if t == "" {
+		// No type attribute; fall back to looking up type by interface name.
+		t = val.Type().Name()
+	}
+
+	// Maybe the type is a basic xsd:* type.
+	typ := stringToType(t)
+	if typ != nil {
+		return typ
+	}
+
+	// Maybe the type is a custom type.
+	if p.TypeFunc != nil {
+		if typ, ok := p.TypeFunc(t); ok {
+			return typ
+		}
+	}
+
+	return nil
+}
+
 // Unmarshal a single XML element into val.
 func (d *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 	// Find start element if we need it.
@@ -317,6 +348,31 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 				start = &t
 				break
 			}
+		}
+	}
+
+	// Try to figure out type for empty interface values.
+	if val.Kind() == reflect.Interface && val.IsNil() {
+		typ := d.typeForElement(val, start)
+		if typ != nil {
+			pval := reflect.New(typ).Elem()
+			err := d.unmarshal(pval, start)
+			if err != nil {
+				return err
+			}
+
+			for i := 0; i < 2; i++ {
+				if typ.Implements(val.Type()) {
+					val.Set(pval)
+					return nil
+				}
+
+				typ = reflect.PtrTo(typ)
+				pval = pval.Addr()
+			}
+
+			val.Set(pval)
+			return nil
 		}
 	}
 
@@ -451,8 +507,11 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 				case fAttr:
 					strv := finfo.value(sv)
 					if a.Name.Local == finfo.name && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
-						if err := d.unmarshalAttr(strv, a); err != nil {
-							return err
+						// HACK: avoid using xsi:type value for a "type" attribute, such as ManagedObjectReference.Type for example.
+						if a.Name != xmlSchemaInstance && a.Name != xsiType {
+							if err := d.unmarshalAttr(strv, a); err != nil {
+								return err
+							}
 						}
 						handled = true
 					}
@@ -626,13 +685,35 @@ func copyValue(dst reflect.Value, src []byte) (err error) {
 		}
 		dst.SetInt(itmp)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Uintptr:
-		if len(src) == 0 {
-			dst.SetUint(0)
-			return nil
-		}
-		utmp, err := strconv.ParseUint(strings.TrimSpace(string(src)), 10, dst.Type().Bits())
-		if err != nil {
-			return err
+		var utmp uint64
+		if len(src) > 0 && src[0] == '-' {
+			// Negative value for unsigned field.
+			// Assume it was serialized following two's complement.
+			itmp, err := strconv.ParseInt(string(src), 10, dst.Type().Bits())
+			if err != nil {
+				return err
+			}
+			// Reinterpret value based on type width.
+			switch dst.Type().Bits() {
+			case 8:
+				utmp = uint64(uint8(itmp))
+			case 16:
+				utmp = uint64(uint16(itmp))
+			case 32:
+				utmp = uint64(uint32(itmp))
+			case 64:
+				utmp = uint64(uint64(itmp))
+			}
+		} else {
+			if len(src) == 0 {
+				dst.SetUint(0)
+				return nil
+			}
+
+			utmp, err = strconv.ParseUint(strings.TrimSpace(string(src)), 10, dst.Type().Bits())
+			if err != nil {
+				return err
+			}
 		}
 		dst.SetUint(utmp)
 	case reflect.Float32, reflect.Float64:

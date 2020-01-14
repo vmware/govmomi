@@ -19,6 +19,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"reflect"
 	"strconv"
 	"strings"
 	"unicode"
@@ -205,6 +206,9 @@ type Decoder struct {
 	// as if the entire XML stream were wrapped in an element containing
 	// the attribute xmlns="DefaultSpace".
 	DefaultSpace string
+
+	// TypeFunc is used to map type names to actual types.
+	TypeFunc func(string) (reflect.Type, bool)
 
 	r              io.ByteReader
 	t              TokenReader
