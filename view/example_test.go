@@ -22,6 +22,7 @@ import (
 	"log"
 	"sort"
 
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/view"
@@ -95,4 +96,48 @@ func ExampleContainerView_RetrieveWithFilter() {
 		return v.Destroy(ctx)
 	})
 	// Output: [DC0_C0_RP0_VM1 DC0_H0_VM1]
+}
+
+// Create a view of all VMs in a specific subfolder, powering off all VMs within
+func ExampleContainerView_Find() {
+	model := simulator.VPX()
+	model.Folder = 1 // put everything inside subfolders
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		folder, err := object.NewSearchIndex(c).FindByInventoryPath(ctx, "/F0/DC0/vm/F0")
+		if err != nil {
+			return err
+		}
+
+		m := view.NewManager(c)
+		kind := []string{"VirtualMachine"} // include VMs only, ignoring other object types
+
+		// Root of the view is the subfolder moid (true == recurse into any subfolders of the root)
+		v, err := m.CreateContainerView(ctx, folder.Reference(), kind, true)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		vms, err := v.Find(ctx, kind, property.Filter{})
+		if err != nil {
+			return err
+		}
+
+		for _, id := range vms {
+			vm := object.NewVirtualMachine(c, id)
+			task, err := vm.PowerOff(ctx)
+			if err != nil {
+				return err
+			}
+
+			if err = task.Wait(ctx); err != nil {
+				return err
+			}
+		}
+
+		fmt.Println(len(vms))
+
+		return v.Destroy(ctx)
+	}, model)
+	// Output: 4
 }
