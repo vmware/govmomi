@@ -27,6 +27,7 @@ import (
 	"path/filepath"
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -70,6 +71,13 @@ type Model struct {
 
 	// Portgroup specifies the number of DistributedVirtualPortgroup entities to create per Datacenter
 	Portgroup int
+
+	// PortgroupNSX specifies the number NSX backed DistributedVirtualPortgroup entities to create per Datacenter
+	PortgroupNSX int
+
+	// OpaqueNetwork specifies the number of OpaqueNetwork entities to create per Datacenter,
+	// with Summary.OpaqueNetworkType set to nsx.LogicalSwitch and Summary.OpaqueNetworkId to a random uuid.
+	OpaqueNetwork int
 
 	// Host specifies the number of standalone HostSystems entities to create per Datacenter
 	Host int `json:",omitempty"`
@@ -180,6 +188,8 @@ func (m *Model) Count() Model {
 			count.Folder++
 		case "StoragePod":
 			count.Pod++
+		case "OpaqueNetwork":
+			count.OpaqueNetwork++
 		}
 	}
 
@@ -525,7 +535,7 @@ func (m *Model) Create() error {
 			nfolder++
 		}
 
-		if m.Portgroup > 0 {
+		if m.Portgroup > 0 || m.PortgroupNSX > 0 {
 			var spec types.DVSCreateSpec
 			spec.ConfigSpec = &types.VMwareDVSConfigSpec{}
 			spec.ConfigSpec.GetDVSConfigSpec().Name = m.fmtName("DVS", 0)
@@ -541,28 +551,54 @@ func (m *Model) Create() error {
 			}
 
 			dvs = object.NewDistributedVirtualSwitch(client, info.Result.(types.ManagedObjectReference))
+		}
 
-			for npg := 0; npg < m.Portgroup; npg++ {
-				name := m.fmtName(dcName+"_DVPG", npg)
+		for npg := 0; npg < m.Portgroup; npg++ {
+			name := m.fmtName(dcName+"_DVPG", npg)
 
-				task, err = dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{{Name: name}})
-				if err != nil {
-					return err
-				}
+			task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{{Name: name}})
+			if err != nil {
+				return err
+			}
+			if err = task.Wait(ctx); err != nil {
+				return err
+			}
 
-				err = task.Wait(ctx)
-				if err != nil {
-					return err
-				}
+			// Use the 1st DVPG for the VMs eth0 backing
+			if npg == 0 {
+				// AddPortgroup_Task does not return the moid, so we look it up by name
+				net := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
+				pg := Map.FindByName(name, net.ChildEntity)
 
-				// Use the 1st DVPG for the VMs eth0 backing
-				if npg == 0 {
-					// AddPortgroup_Task does not return the moid, so we look it up by name
-					net := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
-					pg := Map.FindByName(name, net.ChildEntity)
+				vmnet, _ = object.NewDistributedVirtualPortgroup(client, pg.Reference()).EthernetCardBackingInfo(ctx)
+			}
+		}
 
-					vmnet, _ = object.NewDistributedVirtualPortgroup(client, pg.Reference()).EthernetCardBackingInfo(ctx)
-				}
+		for npg := 0; npg < m.PortgroupNSX; npg++ {
+			name := m.fmtName(dcName+"_NSXPG", npg)
+			spec := types.DVPortgroupConfigSpec{
+				Name:              name,
+				LogicalSwitchUuid: uuid.New().String(),
+			}
+
+			task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{spec})
+			if err != nil {
+				return err
+			}
+			if err = task.Wait(ctx); err != nil {
+				return err
+			}
+		}
+
+		// Must use simulator methods directly for OpaqueNetwork
+		networkFolder := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
+
+		for i := 0; i < m.OpaqueNetwork; i++ {
+			var summary types.OpaqueNetworkSummary
+			summary.Name = m.fmtName(dcName+"_NSX", i)
+			err := networkFolder.AddOpaqueNetwork(summary)
+			if err != nil {
+				return err
 			}
 		}
 

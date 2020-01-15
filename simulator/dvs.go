@@ -66,6 +66,14 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 				ConfigVersion:                spec.ConfigVersion,
 				AutoExpand:                   spec.AutoExpand,
 				VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
+				LogicalSwitchUuid:            spec.LogicalSwitchUuid,
+				BackingType:                  spec.BackingType,
+			}
+
+			if pg.Config.LogicalSwitchUuid != "" {
+				if pg.Config.BackingType == "" {
+					pg.Config.BackingType = "nsx"
+				}
 			}
 
 			if pg.Config.DefaultPortConfig == nil {

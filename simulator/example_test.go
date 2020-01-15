@@ -22,9 +22,13 @@ import (
 	"log"
 
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // Example boilerplate for starting a simulator initialized with an ESX model.
@@ -123,4 +127,95 @@ func ExampleTest() {
 		fmt.Print(s.UserName)
 	})
 	// Output: user
+}
+
+// Folder.AddOpaqueNetwork can be used to create an NSX backed OpaqueNetwork.
+func ExampleFolder_AddOpaqueNetwork() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+
+		// Find the network folder via vSphere API
+		obj, err := finder.Folder(ctx, "network")
+		if err != nil {
+			return err
+		}
+
+		// Get vcsim's network Folder object
+		folder := simulator.Map.Get(obj.Reference()).(*simulator.Folder)
+
+		spec := types.OpaqueNetworkSummary{
+			NetworkSummary: types.NetworkSummary{
+				Name: "my-nsx-network",
+			},
+			OpaqueNetworkId:   "my-nsx-id",
+			OpaqueNetworkType: "nsx.LogicalSwitch",
+		}
+
+		// Add NSX backed OpaqueNetwork, calling the simulator.Folder method directly
+		err = folder.AddOpaqueNetwork(spec)
+		if err != nil {
+			return err
+		}
+
+		// Find the OpaqueNetwork via vSphere API
+		net, err := finder.Network(ctx, spec.Name)
+		if err != nil {
+			return err
+		}
+
+		nsx := net.(*object.OpaqueNetwork)
+		summary, err := nsx.Summary(ctx)
+		if err != nil {
+			return err
+		}
+
+		// The summary fields should match those of the spec used to create it
+		fmt.Printf("%s: %s", nsx.Name(), summary.OpaqueNetworkId)
+		return nil
+	})
+	// Output: my-nsx-network: my-nsx-id
+}
+
+// AddDVPortgroup against vcsim can create both standard and nsx backed DistributedVirtualPortgroup networks
+func ExampleDistributedVirtualSwitch_AddDVPortgroupTask() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+
+		dvs0, err := finder.Network(ctx, "DVS0")
+		if err != nil {
+			return err
+		}
+
+		spec := types.DVPortgroupConfigSpec{
+			Name:              "my-nsx-dvpg",
+			LogicalSwitchUuid: "my-nsx-id",
+		}
+
+		dvs := dvs0.(*object.DistributedVirtualSwitch)
+		task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{spec})
+		if err != nil {
+			return err
+		}
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
+
+		pg0, err := finder.Network(ctx, spec.Name)
+		if err != nil {
+			return err
+		}
+
+		pg := pg0.(*object.DistributedVirtualPortgroup)
+
+		var props mo.DistributedVirtualPortgroup
+		err = pg.Properties(ctx, pg.Reference(), []string{"config"}, &props)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s: %s %s", pg.Name(), props.Config.BackingType, props.Config.LogicalSwitchUuid)
+
+		return nil
+	})
+	// Output: my-nsx-dvpg: nsx my-nsx-id
 }

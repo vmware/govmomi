@@ -17,11 +17,13 @@ limitations under the License.
 package simulator
 
 import (
+	"errors"
 	"fmt"
 	"math/rand"
 	"path"
 	"strings"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -110,6 +112,38 @@ func (f *Folder) hasChildType(kind string) bool {
 
 func (f *Folder) typeNotSupported() *soap.Fault {
 	return Fault(fmt.Sprintf("%s supports types: %#v", f.Self, f.ChildType), &types.NotSupported{})
+}
+
+// AddOpaqueNetwork adds an OpaqueNetwork type to the inventory, with default backing to that of an nsx.LogicalSwitch.
+// The vSphere API does not have a method to add this directly, so it must either be called directly or via Model.OpaqueNetwork setting.
+func (f *Folder) AddOpaqueNetwork(summary types.OpaqueNetworkSummary) error {
+	if !f.hasChildType("Network") {
+		return errors.New("not a network folder")
+	}
+
+	if summary.OpaqueNetworkId == "" {
+		summary.OpaqueNetworkId = uuid.New().String()
+	}
+	if summary.OpaqueNetworkType == "" {
+		summary.OpaqueNetworkType = "nsx.LogicalSwitch"
+	}
+	if summary.Name == "" {
+		summary.Name = summary.OpaqueNetworkType + "-" + summary.OpaqueNetworkId
+	}
+
+	net := new(mo.OpaqueNetwork)
+	if summary.Network == nil {
+		summary.Network = &net.Self
+	} else {
+		net.Self = *summary.Network
+	}
+	summary.Accessible = true
+	net.Network.Name = summary.Name
+	net.Summary = &summary
+
+	f.putChild(net)
+
+	return nil
 }
 
 type addStandaloneHost struct {
