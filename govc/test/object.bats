@@ -497,6 +497,12 @@ EOF
   unset GOVC_DATACENTER
   run govc find vm
   assert_failure # without Datacenter specified, there are 0 "vm" folders relative to the root folder
+
+  run govc find -l /
+  assert_success
+
+  run govc find -l -i /
+  assert_success
 }
 
 @test "object.method" {
