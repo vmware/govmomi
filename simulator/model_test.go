@@ -31,7 +31,7 @@ func compareModel(t *testing.T, m *Model) {
 	pools := (m.Pool * m.Cluster * m.Datacenter) + (m.Host+m.Cluster)*m.Datacenter
 	// root folder + Datacenter folders {host,vm,datastore,network} + top-level folders
 	folders := 1 + (4 * m.Datacenter) + (5 * m.Folder)
-	pgs := m.Portgroup
+	pgs := m.Portgroup + m.PortgroupNSX
 	if pgs > 0 {
 		pgs++ // uplinks
 	}
@@ -44,6 +44,7 @@ func compareModel(t *testing.T, m *Model) {
 		{m.Datacenter, count.Datacenter, "Datacenter"},
 		{m.Cluster * m.Datacenter, count.Cluster, "Cluster"},
 		{pgs * m.Datacenter, count.Portgroup, "Portgroup"},
+		{m.OpaqueNetwork * m.Datacenter, count.OpaqueNetwork, "OpaqueNetwork"},
 		{m.Datastore * m.Datacenter, count.Datastore, "Datastore"},
 		{hosts, count.Host, "Host"},
 		{vms, count.Machine, "VirtualMachine"},
@@ -95,6 +96,22 @@ func TestModelVPX(t *testing.T) {
 func TestModelNoSwitchVPX(t *testing.T) {
 	m := VPX()
 	m.Portgroup = 0 // disabled DVS creation
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	compareModel(t, m)
+}
+
+func TestModelNSX(t *testing.T) {
+	m := VPX()
+	m.Portgroup = 0
+	m.PortgroupNSX = 1
+	m.OpaqueNetwork = 1
 
 	defer m.Remove()
 

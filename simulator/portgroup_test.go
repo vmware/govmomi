@@ -18,9 +18,12 @@ package simulator
 
 import (
 	"context"
+	"strings"
 	"testing"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -123,4 +126,34 @@ func TestPortgroupBacking(t *testing.T) {
 	if err == nil {
 		t.Error("expected error")
 	}
+}
+
+func TestPortgroupBackingWithNSX(t *testing.T) {
+	model := VPX()
+	model.Portgroup = 0
+	model.PortgroupNSX = 1
+
+	Test(func(context.Context, *vim25.Client) {
+		pgs := Map.All("DistributedVirtualPortgroup")
+		n := len(pgs) - 1
+		if model.PortgroupNSX != n {
+			t.Errorf("%d pgs", n)
+		}
+
+		for _, obj := range pgs {
+			pg := obj.(*DistributedVirtualPortgroup)
+			if strings.Contains(pg.Name, "DVUplinks") {
+				continue
+			}
+
+			if pg.Config.BackingType != "nsx" {
+				t.Errorf("backing=%q", pg.Config.BackingType)
+			}
+
+			_, err := uuid.Parse(pg.Config.LogicalSwitchUuid)
+			if err != nil {
+				t.Errorf("parsing %q: %s", pg.Config.LogicalSwitchUuid, err)
+			}
+		}
+	}, model)
 }

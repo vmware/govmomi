@@ -59,6 +59,8 @@ func main() {
 	flag.IntVar(&model.App, "app", model.App, "Number of virtual apps per compute resource")
 	flag.IntVar(&model.Pod, "pod", model.Pod, "Number of storage pods per datacenter")
 	flag.IntVar(&model.Portgroup, "pg", model.Portgroup, "Number of port groups")
+	flag.IntVar(&model.PortgroupNSX, "pg-nsx", model.PortgroupNSX, "Number of NSX backed port groups")
+	flag.IntVar(&model.OpaqueNetwork, "nsx", model.OpaqueNetwork, "Number of NSX backed opaque networks")
 	flag.IntVar(&model.Folder, "folder", model.Folder, "Number of folders")
 	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
 	v := &model.ServiceContent.About.ApiVersion

@@ -11866,6 +11866,11 @@ type DVPortgroupConfigInfo struct {
 	AutoExpand                   *bool                                     `xml:"autoExpand"`
 	VmVnicNetworkResourcePoolKey string                                    `xml:"vmVnicNetworkResourcePoolKey,omitempty"`
 	Uplink                       *bool                                     `xml:"uplink"`
+	LogicalSwitchUuid            string                                    `xml:"logicalSwitchUuid,omitempty"`
+	SegmentId                    string                                    `xml:"segmentId,omitempty"`
+	TransportZoneName            string                                    `xml:"transportZoneName,omitempty"`
+	TransportZoneUuid            string                                    `xml:"transportZoneUuid,omitempty"`
+	BackingType                  string                                    `xml:"backingType,omitempty"`
 }
 
 func init() {
@@ -11887,6 +11892,11 @@ type DVPortgroupConfigSpec struct {
 	VendorSpecificConfig         []DistributedVirtualSwitchKeyedOpaqueBlob `xml:"vendorSpecificConfig,omitempty"`
 	AutoExpand                   *bool                                     `xml:"autoExpand"`
 	VmVnicNetworkResourcePoolKey string                                    `xml:"vmVnicNetworkResourcePoolKey,omitempty"`
+	LogicalSwitchUuid            string                                    `xml:"logicalSwitchUuid,omitempty"`
+	SegmentId                    string                                    `xml:"segmentId,omitempty"`
+	TransportZoneName            string                                    `xml:"transportZoneName,omitempty"`
+	TransportZoneUuid            string                                    `xml:"transportZoneUuid,omitempty"`
+	BackingType                  string                                    `xml:"backingType,omitempty"`
 }
 
 func init() {

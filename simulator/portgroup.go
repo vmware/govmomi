@@ -39,6 +39,8 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(req *types.Reco
 		s.Config.Policy = req.Spec.Policy
 		s.Config.PortNameFormat = req.Spec.PortNameFormat
 		s.Config.VmVnicNetworkResourcePoolKey = req.Spec.VmVnicNetworkResourcePoolKey
+		s.Config.LogicalSwitchUuid = req.Spec.LogicalSwitchUuid
+		s.Config.BackingType = req.Spec.BackingType
 
 		return nil, nil
 	})
