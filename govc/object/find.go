@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -37,6 +38,7 @@ type find struct {
 	*flags.DatacenterFlag
 
 	ref      bool
+	long     bool
 	kind     kinds
 	name     string
 	maxdepth int
@@ -122,6 +124,7 @@ func (cmd *find) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.name, "name", "*", "Resource name")
 	f.IntVar(&cmd.maxdepth, "maxdepth", -1, "Max depth")
 	f.BoolVar(&cmd.ref, "i", false, "Print the managed object reference")
+	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 }
 
 func (cmd *find) Usage() string {
@@ -144,6 +147,7 @@ The '-type' flag value can be a managed entity type or one of the following alia
 %s
 Examples:
   govc find
+  govc find -l / # include object type in output
   govc find /dc1 -type c
   govc find vm -name my-vm-*
   govc find . -type n
@@ -184,6 +188,23 @@ func (r findResult) Write(w io.Writer) error {
 
 func (r findResult) Dump() interface{} {
 	return []string(r)
+}
+
+type findResultLong []string
+
+func (r findResultLong) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	for i := range r {
+		fmt.Fprintln(tw, r[i])
+	}
+	return tw.Flush()
+}
+
+func (cmd *find) writeResult(paths []string) error {
+	if cmd.long {
+		return cmd.WriteResult(findResultLong(paths))
+	}
+	return cmd.WriteResult(findResult(paths))
 }
 
 func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -284,15 +305,23 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	filter["name"] = cmd.name
-	var paths findResult
+	var paths []string
 
 	printPath := func(o types.ManagedObjectReference, p string) {
-		if cmd.ref {
+		if cmd.ref && !cmd.long {
 			paths = append(paths, o.String())
 			return
 		}
 
 		path := strings.Replace(p, rootPath, arg, 1)
+		if cmd.long {
+			id := strings.TrimPrefix(o.Type, "Vmware")
+			if cmd.ref {
+				id = o.String()
+			}
+
+			path = id + "\t" + path
+		}
 		paths = append(paths, path)
 	}
 
@@ -312,7 +341,7 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.maxdepth == 0 {
-		return cmd.WriteResult(paths)
+		return cmd.writeResult(paths)
 	}
 
 	m := view.NewManager(client)
@@ -334,7 +363,7 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	for _, o := range objs {
 		var path string
 
-		if !cmd.ref {
+		if cmd.long || !cmd.ref {
 			e, err := finder.Element(ctx, o)
 			if err != nil {
 				return err
@@ -345,5 +374,5 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		printPath(o, path)
 	}
 
-	return cmd.WriteResult(paths)
+	return cmd.writeResult(paths)
 }
