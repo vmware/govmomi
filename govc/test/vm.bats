@@ -309,7 +309,7 @@ load test_helper
     [ ${#lines[@]} -eq 0 ]
 
     # If VM is not found (using -json flag): Valid json output, exit code==0
-    run govc vm.info -json $id
+    run env GOVC_INDENT=false govc vm.info -json $id
     assert_success
     assert_line "{\"VirtualMachines\":null}"
 
