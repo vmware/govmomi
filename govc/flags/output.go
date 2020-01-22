@@ -19,6 +19,7 @@ package flags
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -28,7 +29,10 @@ import (
 	"time"
 
 	"github.com/kr/pretty"
+	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25/progress"
+	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 type OutputWriter interface {
@@ -39,9 +43,13 @@ type OutputFlag struct {
 	common
 
 	JSON bool
+	XML  bool
 	TTY  bool
 	Dump bool
 	Out  io.Writer
+
+	formatError  bool
+	formatIndent bool
 }
 
 var outputFlagKey = flagKey("output")
@@ -59,13 +67,17 @@ func NewOutputFlag(ctx context.Context) (*OutputFlag, context.Context) {
 func (flag *OutputFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	flag.RegisterOnce(func() {
 		f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
+		f.BoolVar(&flag.XML, "xml", false, "Enable XML output")
 		f.BoolVar(&flag.Dump, "dump", false, "Enable Go output")
+		// Avoid adding more flags for now..
+		flag.formatIndent = os.Getenv("GOVC_INDENT") != "false"      // Default to indented output
+		flag.formatError = os.Getenv("GOVC_FORMAT_ERROR") != "false" // Default to formatted errors
 	})
 }
 
 func (flag *OutputFlag) Process(ctx context.Context) error {
 	return flag.ProcessOnce(func() error {
-		if !flag.JSON {
+		if !flag.All() {
 			// Assume we have a tty if not outputting JSON
 			flag.TTY = true
 		}
@@ -101,7 +113,7 @@ func (flag *OutputFlag) WriteString(s string) (int, error) {
 }
 
 func (flag *OutputFlag) All() bool {
-	return flag.JSON || flag.Dump
+	return flag.JSON || flag.XML || flag.Dump
 }
 
 func dumpValue(val interface{}) interface{} {
@@ -136,15 +148,90 @@ func dumpValue(val interface{}) interface{} {
 func (flag *OutputFlag) WriteResult(result OutputWriter) error {
 	var err error
 
-	if flag.JSON {
-		err = json.NewEncoder(flag.Out).Encode(result)
-	} else if flag.Dump {
-		pretty.Fprintf(flag.Out, "%# v\n", dumpValue(result))
-	} else {
+	switch {
+	case flag.Dump:
+		format := "%#v\n"
+		if flag.formatIndent {
+			format = "%# v\n"
+		}
+		_, err = pretty.Fprintf(flag.Out, format, dumpValue(result))
+	case flag.JSON:
+		e := json.NewEncoder(flag.Out)
+		if flag.formatIndent {
+			e.SetIndent("", "  ")
+		}
+		err = e.Encode(result)
+	case flag.XML:
+		e := xml.NewEncoder(flag.Out)
+		if flag.formatIndent {
+			e.Indent("", "  ")
+		}
+		err = e.Encode(dumpValue(result))
+		if err == nil {
+			fmt.Fprintln(flag.Out)
+		}
+	default:
 		err = result.Write(flag.Out)
 	}
 
 	return err
+}
+
+func (flag *OutputFlag) WriteError(err error) bool {
+	if flag.formatError {
+		flag.Out = os.Stderr
+		return flag.WriteResult(&errorOutput{err}) == nil
+	}
+	return false
+}
+
+type errorOutput struct {
+	error
+}
+
+func (e errorOutput) Write(w io.Writer) error {
+	_, ferr := fmt.Fprintf(w, "%s: %s\n", os.Args[0], e.error)
+	return ferr
+}
+
+func (e errorOutput) Dump() interface{} {
+	if f, ok := e.error.(task.Error); ok {
+		return f.LocalizedMethodFault
+	}
+	if soap.IsSoapFault(e.error) {
+		return soap.ToSoapFault(e.error)
+	}
+	if soap.IsVimFault(e.error) {
+		return soap.ToVimFault(e.error)
+	}
+	return e
+}
+
+func (e errorOutput) canEncode() bool {
+	switch e.error.(type) {
+	case task.Error:
+		return true
+	}
+	return soap.IsSoapFault(e.error) || soap.IsVimFault(e.error)
+}
+
+// cannotEncode causes cli.Run to output err.Error() as it would without an error format specified
+var cannotEncode = errors.New("cannot encode error")
+
+func (e errorOutput) MarshalJSON() ([]byte, error) {
+	_, ok := e.error.(json.Marshaler)
+	if ok || e.canEncode() {
+		return json.Marshal(e.error)
+	}
+	return nil, cannotEncode
+}
+
+func (e errorOutput) MarshalXML(encoder *xml.Encoder, start xml.StartElement) error {
+	_, ok := e.error.(xml.Marshaler)
+	if ok || e.canEncode() {
+		return encoder.Encode(e.error)
+	}
+	return cannotEncode
 }
 
 type progressLogger struct {

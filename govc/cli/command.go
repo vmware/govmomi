@@ -183,7 +183,13 @@ error:
 			// propagate exit code, e.g. from guest.run
 			rc = x.ExitCode()
 		} else {
-			fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
+			w, ok := cmd.(interface{ WriteError(error) bool })
+			if ok {
+				ok = w.WriteError(err)
+			}
+			if !ok {
+				fmt.Fprintf(os.Stderr, "%s: %s\n", os.Args[0], err)
+			}
 		}
 	}
 
