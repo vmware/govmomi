@@ -14,12 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package object
+package object_test
 
-import "testing"
+import (
+	"context"
+	"testing"
+
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vim25"
+)
 
 func TestCommonName(t *testing.T) {
-	c := &Common{}
+	c := &object.Common{}
 
 	name := c.Name()
 	if name != "" {
@@ -31,4 +38,28 @@ func TestCommonName(t *testing.T) {
 	if name != "bar" {
 		t.Errorf("Name=%s", name)
 	}
+}
+
+func TestObjectName(t *testing.T) {
+	type common interface {
+		ObjectName(context.Context) (string, error)
+	}
+
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		kinds := []string{"VirtualMachine", "Network", "DistributedVirtualPortgroup"}
+
+		for _, kind := range kinds {
+			ref := simulator.Map.Any(kind)
+			obj := object.NewReference(c, ref.Reference())
+
+			name, err := obj.(common).ObjectName(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if name == "" {
+				t.Errorf("empty name for %s", ref.Reference())
+			}
+		}
+	})
 }
