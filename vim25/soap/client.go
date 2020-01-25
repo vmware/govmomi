@@ -159,6 +159,13 @@ func NewClient(u *url.URL, insecure bool) *Client {
 	return &c
 }
 
+type CertVerifyFunc func(rawCerts [][]byte, verifiedChains [][]*x509.Certificate) error
+
+func (c *Client) SetCertVerificationMethod(verifyMethod CertVerifyFunc) {
+	c.t.TLSClientConfig.InsecureSkipVerify = true
+	c.t.TLSClientConfig.VerifyPeerCertificate = verifyMethod
+}
+
 // NewServiceClient creates a NewClient with the given URL.Path and namespace.
 func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	vc := c.URL()
