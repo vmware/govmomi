@@ -26,7 +26,6 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"os/signal"
@@ -308,15 +307,14 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 		return nil, err
 	}
 
-	if t, ok := sc.Transport.(*http.Transport); ok {
-		var err error
+	t := sc.DefaultTransport()
+	var err error
 
-		value := os.Getenv("GOVC_TLS_HANDSHAKE_TIMEOUT")
-		if value != "" {
-			t.TLSHandshakeTimeout, err = time.ParseDuration(value)
-			if err != nil {
-				return nil, err
-			}
+	value := os.Getenv("GOVC_TLS_HANDSHAKE_TIMEOUT")
+	if value != "" {
+		t.TLSHandshakeTimeout, err = time.ParseDuration(value)
+		if err != nil {
+			return nil, err
 		}
 	}
 

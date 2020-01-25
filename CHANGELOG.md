@@ -1,5 +1,9 @@
 # changelog
 
+### 0.22.2 (2020-02-04)
+
+* Expose soap client default transport
+
 ### 0.22.1 (2020-01-13)
 
 * Fix SAML token auth using Holder-of-Key with delegated Bearer identity against 6.7 U3b+
