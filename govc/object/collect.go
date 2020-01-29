@@ -34,6 +34,7 @@ import (
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -42,6 +43,7 @@ import (
 type collect struct {
 	*flags.DatacenterFlag
 
+	object bool
 	single bool
 	simple bool
 	raw    string
@@ -65,6 +67,7 @@ func (cmd *collect) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.simple, "s", false, "Output property value only")
 	f.StringVar(&cmd.delim, "d", ",", "Delimiter for array values")
+	f.BoolVar(&cmd.object, "o", false, "Output the structure of a single Managed Object")
 	f.BoolVar(&cmd.dump, "O", false, "Output the CreateFilter request itself")
 	f.StringVar(&cmd.raw, "R", "", "Raw XML encoded CreateFilter request")
 	f.IntVar(&cmd.n, "n", 0, "Wait for N property updates")
@@ -102,6 +105,7 @@ Examples:
   govc object.collect -R create-filter-request.xml # replay filter
   govc object.collect -R create-filter-request.xml -O # convert filter to Go code
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
+  govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
   govc object.collect -json $vm config | \ # use -json + jq to search array elements
     jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'`
 }
@@ -288,6 +292,23 @@ func (f *dumpFilter) Write(w io.Writer) error {
 	return nil
 }
 
+type dumpEntity struct {
+	entity interface{}
+}
+
+func (e *dumpEntity) Dump() interface{} {
+	return e.entity
+}
+
+func (e *dumpEntity) MarshalJSON() ([]byte, error) {
+	return json.Marshal(e.entity)
+}
+
+// Write satisfies the flags.OutputWriter interface, but is not used with dumpEntity.
+func (e *dumpEntity) Write(w io.Writer) error {
+	return nil
+}
+
 func (cmd *collect) decodeFilter(filter *property.WaitFilter) error {
 	var r io.Reader
 
@@ -375,10 +396,32 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.dump {
-		if !cmd.JSON {
+		if !cmd.All() {
 			cmd.Dump = true
 		}
 		return cmd.WriteResult(&dumpFilter{filter.CreateFilter})
+	}
+
+	if cmd.object {
+		if !cmd.All() {
+			cmd.Dump = true
+		}
+		req := types.RetrieveProperties{
+			SpecSet: []types.PropertyFilterSpec{filter.Spec},
+		}
+		res, err := p.RetrieveProperties(ctx, req)
+		if err != nil {
+			return nil
+		}
+		content := res.Returnval
+		if len(content) != 1 {
+			return fmt.Errorf("%d objects match", len(content))
+		}
+		obj, err := mo.ObjectContentToType(content[0])
+		if err != nil {
+			return err
+		}
+		return cmd.WriteResult(&dumpEntity{obj})
 	}
 
 	entered := false

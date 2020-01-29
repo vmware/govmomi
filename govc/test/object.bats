@@ -131,6 +131,14 @@ load test_helper
   # test against an interface field
   run govc object.collect 'network/VM Network' summary
   assert_success
+
+  run govc object.collect -dump -o 'network/VM Network'
+  assert_success
+  gofmt <<<"$output"
+
+  run govc object.collect -json -o 'network/VM Network'
+  assert_success
+  jq . <<<"$output"
 }
 
 @test "object.collect vcsim" {
