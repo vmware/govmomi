@@ -49,11 +49,14 @@ func GetTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (cnstypes
 	if taskInfo == nil {
 		return nil, errors.New("TaskInfo is empty")
 	}
-	volumeOperationBatchResult := taskInfo.Result.(cnstypes.CnsVolumeOperationBatchResult)
-	if &volumeOperationBatchResult == nil ||
-		volumeOperationBatchResult.VolumeResults == nil ||
-		len(volumeOperationBatchResult.VolumeResults) == 0 {
-		return nil, errors.New("Cannot get VolumeOperationResult")
+	if taskInfo.Result != nil {
+		volumeOperationBatchResult := taskInfo.Result.(cnstypes.CnsVolumeOperationBatchResult)
+		if &volumeOperationBatchResult == nil ||
+			volumeOperationBatchResult.VolumeResults == nil ||
+			len(volumeOperationBatchResult.VolumeResults) == 0 {
+			return nil, errors.New("Cannot get VolumeOperationResult")
+		}
+		return volumeOperationBatchResult.VolumeResults[0], nil
 	}
-	return volumeOperationBatchResult.VolumeResults[0], nil
+	return nil, errors.New("TaskInfo result is empty")
 }
