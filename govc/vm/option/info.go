@@ -19,7 +19,9 @@ package option
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -70,11 +72,11 @@ func (cmd *info) Description() string {
 The config option data contains information about the execution environment for a VM
 in the given CLUSTER, and optionally for a specific HOST.
 
-This command only supports '-json' or '-dump' output, defaulting to the latter.
+By default, supported guest OS IDs and full name are listed.
 
 Examples:
   govc vm.option.info -cluster C0
-  govc vm.option.info -cluster C0 ubuntu64Guest
+  govc vm.option.info -cluster C0 -dump ubuntu64Guest
   govc vm.option.info -cluster C0 -json | jq .GuestOSDescriptor[].Id
   govc vm.option.info -host my_hostname
   govc vm.option.info -vm my_vm`
@@ -82,10 +84,6 @@ Examples:
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	vmf := cmd.VirtualMachineFlag
-
-	if !vmf.JSON && !vmf.Dump {
-		vmf.Dump = true // Default to -dump as there is no plain-text format atm
-	}
 
 	c, err := vmf.Client()
 	if err != nil {
@@ -157,7 +155,13 @@ type infoResult struct {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
-	return flag.ErrHelp
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	for _, d := range r.GuestOSDescriptor {
+		_, _ = fmt.Fprintf(tw, "%s\t%s\n", d.Id, d.FullName)
+	}
+
+	return tw.Flush()
 }
 
 func (r *infoResult) Dump() interface{} {
