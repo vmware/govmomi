@@ -198,8 +198,8 @@ func (cmd *create) Usage() string {
 func (cmd *create) Description() string {
 	return `Create VM.
 
-For a list of possible '-g' IDs, see:
-http://pubs.vmware.com/vsphere-6-5/topic/com.vmware.wssdk.apiref.doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
+For a list of possible '-g' IDs, use 'govc vm.option.info' or see:
+https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
 
 Examples:
   govc vm.create -on=false vm-name
