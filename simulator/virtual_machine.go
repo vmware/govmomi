@@ -1458,7 +1458,9 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event()})
-	Map.getEntityParent(vm, "Folder").(*Folder).removeChild(c.This)
+	if f, ok := Map.getEntityParent(vm, "Folder").(*Folder); ok {
+		f.removeChild(c.This)
+	}
 
 	r.Res = new(types.UnregisterVMResponse)
 
