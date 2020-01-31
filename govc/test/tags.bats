@@ -83,7 +83,20 @@ load test_helper
   assert_success
   tag_id="$output"
 
-  govc tags.ls | grep $test_name
+  count=$(govc tags.ls | grep -c $test_name)
+  [ "$count" = "1" ]
+
+  run govc tags.create -c "$category_name" $test_name
+  assert_failure # already_exists
+
+  run govc tags.category.create -m "$category_name-2"
+  assert_success
+
+  run govc tags.create -c "$category_name-2" $test_name
+  assert_success # same name but different category
+
+  count=$(govc tags.ls | grep -c $test_name)
+  [ "$count" = "2" ]
 
   id=$(govc tags.ls -json | jq -r '.[].id')
   assert_matches "$id" "$tag_id"

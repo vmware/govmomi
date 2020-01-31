@@ -489,7 +489,7 @@ func (s *handler) tag(w http.ResponseWriter, r *http.Request) {
 		}
 		if s.decode(r, w, &spec) {
 			for _, tag := range s.Tag {
-				if tag.Name == spec.Tag.Name {
+				if tag.Name == spec.Tag.Name && tag.CategoryID == spec.Tag.CategoryID {
 					BadRequest(w, "com.vmware.vapi.std.errors.already_exists")
 					return
 				}
