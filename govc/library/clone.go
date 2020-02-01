@@ -38,6 +38,7 @@ type clone struct {
 	*flags.VirtualMachineFlag
 
 	profile string
+	ovf     bool
 }
 
 func init() {
@@ -63,6 +64,7 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
+	f.BoolVar(&cmd.ovf, "ovf", false, "Clone as OVF (default is VM Template)")
 	f.StringVar(&cmd.profile, "profile", "", "Storage profile")
 }
 
@@ -92,10 +94,12 @@ func (cmd *clone) Usage() string {
 func (cmd *clone) Description() string {
 	return `Clone VM to Content Library PATH.
 
-The API used by this command requires vCenter version 6.7U1 or higher.
+By default, clone as a VM template (requires vCenter version 6.7U1 or higher).
+Clone as an OVF when the '-ovf' flag is specified.
 
 Examples:
-  govc library.clone -vm template-vm my-content template-vm-item`
+  govc library.clone -vm template-vm my-content template-vm-item
+  govc library.clone -ovf -vm template-vm my-content ovf-item`
 }
 
 func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -147,6 +151,26 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		l, ok := res[0].GetResult().(library.Library)
 		if !ok {
 			return fmt.Errorf("%q is a %T", path, res[0].GetResult())
+		}
+
+		if cmd.ovf {
+			ovf := vcenter.OVF{
+				Spec: vcenter.CreateSpec{
+					Name: name,
+				},
+				Source: vcenter.ResourceID{
+					Value: vm.Reference().Value,
+				},
+				Target: vcenter.LibraryTarget{
+					LibraryID: l.ID,
+				},
+			}
+			id, err := vcenter.NewManager(c).CreateOVF(ctx, ovf)
+			if err != nil {
+				return err
+			}
+			fmt.Println(id)
+			return nil
 		}
 
 		storage := &vcenter.DiskStorage{

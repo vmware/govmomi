@@ -113,7 +113,7 @@ type CheckIn struct {
 	Message string `json:"message"`
 }
 
-// CreateTemplate creates a library item in content library from an existing VM
+// CreateTemplate creates a library VMTX item in content library from an existing VM
 func (c *Manager) CreateTemplate(ctx context.Context, vmtx Template) (string, error) {
 	url := c.Resource(internal.VCenterVMTXLibraryItem)
 	var res string

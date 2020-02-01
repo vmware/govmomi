@@ -234,6 +234,25 @@ EOF
   assert_failure
 }
 
+@test "library.clone ovf" {
+  vcsim_env
+
+  vm=DC0_H0_VM0
+  item="${vm}_item"
+
+  run govc library.create my-content
+  assert_success
+
+  run govc library.clone -vm $vm -ovf my-content $item
+  assert_success
+
+  run govc vm.destroy $vm
+  assert_success
+
+  run govc library.ls my-content/
+  assert_success /my-content/$item
+}
+
 @test "library.deploy vmtx" {
   vcsim_env
 
