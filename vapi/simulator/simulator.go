@@ -144,7 +144,8 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.LibraryItemFileData + "/", s.libraryItemFileData},
 		{internal.LibraryItemFilePath, s.libraryItemFile},
 		{internal.LibraryItemFilePath + "/", s.libraryItemFileID},
-		{internal.VCenterOVFLibraryItem + "/", s.libraryItemDeployID},
+		{internal.VCenterOVFLibraryItem, s.libraryItemOVF},
+		{internal.VCenterOVFLibraryItem + "/", s.libraryItemOVFID},
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
@@ -1455,7 +1456,50 @@ func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *libra
 	return info, lease.Complete(ctx)
 }
 
-func (s *handler) libraryItemDeployID(w http.ResponseWriter, r *http.Request) {
+func (s *handler) libraryItemOVF(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	var req vcenter.OVF
+	if !s.decode(r, w, &req) {
+		return
+	}
+
+	switch {
+	case req.Target.LibraryItemID != "":
+	case req.Target.LibraryID != "":
+		l, ok := s.Library[req.Target.LibraryID]
+		if !ok {
+			http.NotFound(w, r)
+		}
+
+		id := uuid.New().String()
+		l.Item[id] = &item{
+			Item: &library.Item{
+				ID:               id,
+				LibraryID:        l.Library.ID,
+				Name:             req.Spec.Name,
+				Description:      req.Spec.Description,
+				Type:             library.ItemTypeOVF,
+				CreationTime:     types.NewTime(time.Now()),
+				LastModifiedTime: types.NewTime(time.Now()),
+			},
+		}
+
+		res := vcenter.CreateResult{
+			Succeeded: true,
+			ID:        id,
+		}
+		OK(w, res)
+	default:
+		BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+		return
+	}
+}
+
+func (s *handler) libraryItemOVFID(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
