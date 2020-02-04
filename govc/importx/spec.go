@@ -18,13 +18,14 @@ package importx
 
 import (
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
+	"io"
 	"path"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -56,6 +57,7 @@ var (
 
 type spec struct {
 	*ArchiveFlag
+	*flags.OutputFlag
 
 	verbose bool
 }
@@ -67,6 +69,8 @@ func init() {
 func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ArchiveFlag, ctx = newArchiveFlag(ctx)
 	cmd.ArchiveFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.verbose, "verbose", false, "Verbose spec output")
 }
@@ -75,7 +79,7 @@ func (cmd *spec) Process(ctx context.Context) error {
 	if err := cmd.ArchiveFlag.Process(ctx); err != nil {
 		return err
 	}
-	return nil
+	return cmd.OutputFlag.Process(ctx)
 }
 
 func (cmd *spec) Usage() string {
@@ -101,7 +105,23 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	return cmd.Spec(fpath)
+	env, err := cmd.Spec(fpath)
+	if err != nil {
+		return err
+	}
+
+	if !cmd.All() {
+		cmd.JSON = true
+	}
+	return cmd.WriteResult(&specResult{env})
+}
+
+type specResult struct {
+	*Options
+}
+
+func (*specResult) Write(w io.Writer) error {
+	return nil
 }
 
 func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
@@ -147,16 +167,16 @@ func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
 	return
 }
 
-func (cmd *spec) Spec(fpath string) error {
+func (cmd *spec) Spec(fpath string) (*Options, error) {
 	e := &ovf.Envelope{}
 	if fpath != "" {
 		d, err := cmd.ReadOvf(fpath)
 		if err != nil {
-			return err
+			return nil, err
 		}
 
 		if e, err = cmd.ReadEnvelope(d); err != nil {
-			return err
+			return nil, err
 		}
 	}
 
@@ -212,11 +232,5 @@ func (cmd *spec) Spec(fpath string) error {
 		o.AllIPProtocolOptions = allIPProtocolOptions
 	}
 
-	j, err := json.Marshal(&o)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(string(j))
-	return nil
+	return &o, nil
 }
