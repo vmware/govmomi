@@ -33,6 +33,10 @@ const (
 	Path      = "/vsanHealth"
 )
 
+const (
+	ReleaseVSAN67u3 = "vSAN 6.7U3"
+)
+
 var (
 	CnsVolumeManagerInstance = vimtypes.ManagedObjectReference{
 		Type:  "CnsVolumeManager",
@@ -48,11 +52,14 @@ type Client struct {
 // NewClient creates a new CNS client
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
+	sc.Namespace = c.Namespace
+	sc.Version = c.Version
 	return &Client{c, sc}, nil
 }
 
 // CreateVolume calls the CNS create API.
 func (c *Client) CreateVolume(ctx context.Context, createSpecList []cnstypes.CnsVolumeCreateSpec) (*object.Task, error) {
+	createSpecList = dropUnknownCreateSpecElements(c, createSpecList)
 	req := cnstypes.CnsCreateVolume{
 		This:        CnsVolumeManagerInstance,
 		CreateSpecs: createSpecList,
@@ -66,6 +73,7 @@ func (c *Client) CreateVolume(ctx context.Context, createSpecList []cnstypes.Cns
 
 // UpdateVolumeMetadata calls the CNS CnsUpdateVolumeMetadata API with UpdateSpecs specified in the argument
 func (c *Client) UpdateVolumeMetadata(ctx context.Context, updateSpecList []cnstypes.CnsVolumeMetadataUpdateSpec) (*object.Task, error) {
+	updateSpecList = dropUnknownVolumeMetadataUpdateSpecElements(c, updateSpecList)
 	req := cnstypes.CnsUpdateVolumeMetadata{
 		This:        CnsVolumeManagerInstance,
 		UpdateSpecs: updateSpecList,
