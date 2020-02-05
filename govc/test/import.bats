@@ -32,7 +32,7 @@ load test_helper
 }
 
 @test "import.ovf" {
-  esx_env
+  vcsim_env
 
   run govc import.ovf $GOVC_IMAGES/${TTYLINUX_NAME}.ovf
   assert_success
@@ -51,7 +51,7 @@ load test_helper
 }
 
 @test "import.ovf -host.ipath" {
-  esx_env # TODO: should be against vcsim
+  vcsim_env
 
   run govc import.ovf -host.ipath="$(govc find / -type h | head -1)" "$GOVC_IMAGES/${TTYLINUX_NAME}.ovf"
   assert_success
@@ -61,7 +61,7 @@ load test_helper
 }
 
 @test "import.ovf with name in options" {
-  esx_env
+  vcsim_env
 
   name=$(new_id)
   file=$($mktemp --tmpdir govc-test-XXXXX)
@@ -77,7 +77,7 @@ load test_helper
 }
 
 @test "import.ovf with import.spec result" {
-  esx_env
+  vcsim_env
 
   file=$($mktemp --tmpdir govc-test-XXXXX)
   name=$(new_id)
@@ -92,7 +92,7 @@ load test_helper
 }
 
 @test "import.ovf with name as argument" {
-  esx_env
+  vcsim_env
 
   name=$(new_id)
 

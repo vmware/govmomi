@@ -140,6 +140,11 @@ func dumpValue(val interface{}) interface{} {
 			}
 			return f.Interface()
 		}
+
+		if rval.NumField() == 1 && rval.Type().Field(0).Anonymous {
+			// common case where govc type wraps govmomi type to implement OutputWriter
+			return f.Interface()
+		}
 	}
 
 	return val
