@@ -134,9 +134,15 @@ load test_helper
 }
 
 @test "host.storage.info" {
-    esx_env
+    vcsim_env
+
+    run govc host.storage.info
+    assert_success
 
     run govc host.storage.info -rescan -refresh -rescan-vmfs
+    assert_success
+
+    run govc host.storage.info -t hba
     assert_success
 }
 
