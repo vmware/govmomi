@@ -126,7 +126,8 @@ func Run(f func(context.Context, *vim25.Client) error) {
 		err = simulator.VPX().Run(f)
 	} else {
 		ctx := context.Background()
-		c, err := NewClient(ctx)
+		var c *govmomi.Client
+		c, err = NewClient(ctx)
 		if err == nil {
 			err = f(ctx, c.Client)
 		}
