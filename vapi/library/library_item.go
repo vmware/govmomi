@@ -88,6 +88,16 @@ func (c *Manager) CreateLibraryItem(ctx context.Context, item Item) (string, err
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
 
+// CopyLibraryItem copies a library item
+func (c *Manager) CopyLibraryItem(ctx context.Context, src *Item, dst Item) (string, error) {
+	body := struct {
+		Item `json:"destination_create_spec"`
+	}{dst}
+	url := c.Resource(internal.LibraryItemPath).WithID(src.ID).WithAction("copy")
+	var res string
+	return res, c.Do(ctx, url.Request(http.MethodPost, body), &res)
+}
+
 // SyncLibraryItem syncs a subscribed library item
 func (c *Manager) SyncLibraryItem(ctx context.Context, item *Item, force bool) error {
 	body := struct {

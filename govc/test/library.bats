@@ -251,6 +251,15 @@ EOF
 
   run govc library.ls my-content/
   assert_success /my-content/$item
+
+  run govc library.create mirror
+  assert_success
+
+  run govc library.cp /my-content/$item /mirror
+  assert_success
+
+  run govc library.ls mirror/
+  assert_success /mirror/$item
 }
 
 @test "library.deploy vmtx" {

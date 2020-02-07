@@ -834,7 +834,7 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 		OK(w)
 	case http.MethodPatch:
 		var spec struct {
-			Item library.Item `json:"update_spec"`
+			library.Item `json:"update_spec"`
 		}
 		if s.decode(r, w, &spec) {
 			item.Patch(&spec.Item)
@@ -842,6 +842,31 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 		}
 	case http.MethodPost:
 		switch s.action(r) {
+		case "copy":
+			var spec struct {
+				library.Item `json:"destination_create_spec"`
+			}
+			if !s.decode(r, w, &spec) {
+				return
+			}
+
+			l, ok = s.Library[spec.LibraryID]
+			if !ok {
+				log.Printf("library not found: %q", spec.LibraryID)
+				http.NotFound(w, r)
+				return
+			}
+			if spec.Name == "" {
+				BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
+			}
+
+			id := uuid.New().String()
+			nitem := item.cp()
+			nitem.ID = id
+			nitem.LibraryID = spec.LibraryID
+			l.Item[id] = nitem
+
+			OK(w, id)
 		case "sync":
 			if l.Type == "SUBSCRIBED" {
 				item.LastSyncTime = types.NewTime(time.Now())
@@ -1348,6 +1373,11 @@ func (s *handler) libraryItemFileID(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 	http.NotFound(w, r)
+}
+
+func (i *item) cp() *item {
+	nitem := *i.Item
+	return &item{&nitem, i.File, i.Template}
 }
 
 func (i *item) ovf() string {
