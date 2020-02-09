@@ -22,8 +22,12 @@ import (
 	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"log"
+	"net/http"
 	"os/exec"
+	"path"
+	"strconv"
 	"strings"
 	"time"
 
@@ -102,6 +106,27 @@ func (c *container) inspect(vm *VirtualMachine) error {
 		}
 	}
 
+	return nil
+}
+
+func (c *container) prepareGuestOperation(vm *VirtualMachine, auth types.BaseGuestAuthentication) types.BaseMethodFault {
+	if c.id == "" {
+		return new(types.GuestOperationsUnavailable)
+	}
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+		return &types.InvalidPowerState{
+			RequestedState: types.VirtualMachinePowerStatePoweredOn,
+			ExistingState:  vm.Runtime.PowerState,
+		}
+	}
+	switch creds := auth.(type) {
+	case *types.NamePasswordAuthentication:
+		if creds.Username == "" || creds.Password == "" {
+			return new(types.InvalidGuestLogin)
+		}
+	default:
+		return new(types.InvalidGuestLogin)
+	}
 	return nil
 }
 
@@ -259,6 +284,84 @@ func (c *container) remove(vm *VirtualMachine) {
 	}
 
 	c.id = ""
+}
+
+func guestUpload(file string, r *http.Request) error {
+	cmd := exec.Command("docker", "cp", "-", path.Dir(file))
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return err
+	}
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+
+	tw := tar.NewWriter(stdin)
+	_ = tw.WriteHeader(&tar.Header{
+		Name:    path.Base(file),
+		Size:    r.ContentLength,
+		Mode:    0444,
+		ModTime: time.Now(),
+	})
+
+	_, _ = io.Copy(tw, r.Body)
+
+	_ = tw.Close()
+	_ = stdin.Close()
+	_ = r.Body.Close()
+
+	return cmd.Wait()
+}
+
+func guestDownload(file string, w http.ResponseWriter) error {
+	cmd := exec.Command("docker", "cp", file, "-")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return err
+	}
+	if err = cmd.Start(); err != nil {
+		return err
+	}
+
+	tr := tar.NewReader(stdout)
+	header, err := tr.Next()
+	if err != nil {
+		return err
+	}
+
+	w.Header().Set("Content-Length", strconv.FormatInt(header.Size, 10))
+	_, _ = io.Copy(w, tr)
+
+	_ = stdout.Close()
+
+	return cmd.Wait()
+}
+
+const guestPrefix = "/guestFile/"
+
+// ServeGuest handles container guest file upload/download
+func ServeGuest(w http.ResponseWriter, r *http.Request) {
+	// Real vCenter form: /guestFile?id=139&token=...
+	// vcsim form:        /guestFile/tmp/foo/bar?id=ebc8837b8cb6&token=...
+
+	id := r.URL.Query().Get("id")
+	file := id + ":" + strings.TrimPrefix(r.URL.Path, guestPrefix[:len(guestPrefix)-1])
+	var err error
+
+	switch r.Method {
+	case http.MethodPut:
+		err = guestUpload(file, r)
+	case http.MethodGet:
+		err = guestDownload(file, w)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+		return
+	}
+
+	if err != nil {
+		log.Printf("%s %s: %s", r.Method, r.URL, err)
+		w.WriteHeader(http.StatusInternalServerError)
+	}
 }
 
 // productSerial returns the uuid in /sys/class/dmi/id/product_serial format
