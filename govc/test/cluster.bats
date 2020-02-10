@@ -44,6 +44,18 @@ load test_helper
   run govc cluster.group.ls -cluster DC0_C0 -name my_host_group
   assert_success
 
+  run govc cluster.group.ls -cluster DC0_C0 -l
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
+
+  run bash -c 'govc cluster.group.ls -cluster DC0_C0 -l | grep ClusterVmGroup'
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
+
+  run bash -c 'govc cluster.group.ls -cluster DC0_C0 -l | grep ClusterHostGroup'
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
+
   run govc cluster.group.remove -cluster DC0_C0 -name my_vm_group
   assert_success
 
@@ -52,6 +64,10 @@ load test_helper
 
   run govc cluster.group.ls -cluster DC0_C0
   assert_success "my_host_group"
+
+  run govc cluster.group.ls -cluster DC0_C0 -l
+  assert_success
+  [ ${#lines[@]} -eq 1 ]
 }
 
 @test "cluster.rule" {
