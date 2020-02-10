@@ -89,9 +89,14 @@ func NewClient(ctx context.Context, rt soap.RoundTripper) (*Client, error) {
 }
 
 // UseServiceVersion sets soap.Client.Version to the current version of the service endpoint via /sdk/vimServiceVersions.xml
-func (c *Client) UseServiceVersion() error {
+func (c *Client) UseServiceVersion(kind ...string) error {
+	ns := "vim"
+	if len(kind) != 0 {
+		ns = kind[0]
+	}
+
 	u := c.URL()
-	u.Path = path.Join(Path, "vimServiceVersions.xml")
+	u.Path = path.Join(Path, ns+"ServiceVersions.xml")
 
 	res, err := c.Get(u.String())
 	if err != nil {
@@ -103,8 +108,12 @@ func (c *Client) UseServiceVersion() error {
 	}
 
 	v := struct {
-		Version *string `xml:"namespace>version"`
-	}{&c.Version}
+		Namespace *string `xml:"namespace>name"`
+		Version   *string `xml:"namespace>version"`
+	}{
+		&c.Namespace,
+		&c.Version,
+	}
 
 	err = xml.NewDecoder(res.Body).Decode(&v)
 	_ = res.Body.Close()
