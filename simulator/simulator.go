@@ -642,6 +642,7 @@ func (s *Service) NewServer() *Server {
 	mux.HandleFunc(vim, s.ServeSDK)
 	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
+	mux.HandleFunc(guestPrefix, ServeGuest)
 	mux.HandleFunc(nfcPrefix, ServeNFC)
 	mux.HandleFunc("/about", s.About)
 

@@ -234,6 +234,7 @@ var kinds = map[string]reflect.Type{
 	"EventManager":                   reflect.TypeOf((*EventManager)(nil)).Elem(),
 	"FileManager":                    reflect.TypeOf((*FileManager)(nil)).Elem(),
 	"Folder":                         reflect.TypeOf((*Folder)(nil)).Elem(),
+	"GuestOperationsManager":         reflect.TypeOf((*GuestOperationsManager)(nil)).Elem(),
 	"HostDatastoreBrowser":           reflect.TypeOf((*HostDatastoreBrowser)(nil)).Elem(),
 	"HostLocalAccountManager":        reflect.TypeOf((*HostLocalAccountManager)(nil)).Elem(),
 	"HostSystem":                     reflect.TypeOf((*HostSystem)(nil)).Elem(),

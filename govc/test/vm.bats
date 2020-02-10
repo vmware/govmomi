@@ -960,3 +960,39 @@ load test_helper
   run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
   assert_success 10.0.0.45
 }
+
+@test "guest fileops" {
+  if ! docker version ; then
+    skip "docker client not installed"
+  fi
+
+  vcsim_env -autostart=false
+
+  export GOVC_VM=DC0_H0_VM0
+  name="vcsim-$GOVC_VM-$(govc object.collect -s "vm/$GOVC_VM" config.uuid)"
+
+  if docker inspect "$name" ; then
+    flunk "$GOVC_VM container still exists"
+  fi
+
+  run govc vm.change -e RUN.container=nginx
+  assert_success
+
+  run govc vm.power -on $GOVC_VM
+  assert_success
+
+  if ! docker inspect "$name" ; then
+    flunk "$GOVC_VM container does not exist"
+  fi
+
+  run govc guest.upload README.md /tmp/README.md
+  assert_failure # unauthenticated
+
+  export GOVC_GUEST_LOGIN=user:pass
+
+  run govc guest.upload README.md /tmp/README.md
+  assert_success
+
+  run govc guest.download /tmp/README.md -
+  assert_success "$(cat README.md)"
+}
