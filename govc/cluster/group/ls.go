@@ -21,12 +21,18 @@ import (
 	"flag"
 	"fmt"
 	"io"
+	"os"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ls struct {
 	*InfoFlag
+
+	long bool
 }
 
 func init() {
@@ -36,6 +42,8 @@ func init() {
 func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.InfoFlag, ctx = NewInfoFlag(ctx)
 	cmd.InfoFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -47,6 +55,7 @@ func (cmd *ls) Description() string {
 
 Examples:
   govc cluster.group.ls -cluster my_cluster
+  govc cluster.group.ls -cluster my_cluster -l | grep ClusterHostGroup
   govc cluster.group.ls -cluster my_cluster -name my_group`
 }
 
@@ -60,6 +69,21 @@ func (r groupResult) Write(w io.Writer) error {
 	return nil
 }
 
+type groupResultLong []types.BaseClusterGroupInfo
+
+func (r groupResultLong) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+
+	for i := range r {
+		info := r[i].GetClusterGroupInfo()
+		kind := fmt.Sprintf("%T", r[i])
+		kind = strings.SplitN(kind, ".", 2)[1]
+		_, _ = fmt.Fprintf(tw, "%s\t%s\n", kind, info.Name)
+	}
+
+	return tw.Flush()
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	var res groupResult
 
@@ -67,6 +91,10 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		groups, err := cmd.Groups(ctx)
 		if err != nil {
 			return err
+		}
+
+		if cmd.long {
+			return cmd.WriteResult(groupResultLong(groups))
 		}
 
 		for _, g := range groups {
