@@ -60,7 +60,7 @@ govc datastore.mkdir -p images
 if ! govc datastore.ls images | grep -q $iso ; then
   echo "Downloading ${iso}..."
   if [ ! -e $iso ] ; then
-    wget http://beta.release.core-os.net/amd64-usr/current/$iso
+    wget https://stable.release.core-os.net/amd64-usr/current/$iso
   fi
 
   echo "Uploading ${iso}..."
@@ -97,7 +97,7 @@ vm_path="$(govc find / -type m -name "$vm")"
 
 if [ -z "$vm_path" ] ; then
   echo "Creating VM ${vm}..."
-  govc vm.create -g otherGuest64 -m 1024 -on=false "$vm"
+  govc vm.create -g otherGuest64 -m 2048 -on=false "$vm"
 
   device=$(govc device.cdrom.add -vm "$vm")
   govc device.cdrom.insert -vm "$vm" -device "$device" images/$iso
