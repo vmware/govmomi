@@ -140,4 +140,10 @@ func TestClient(t *testing.T) {
 			t.Errorf("len=%d", len(info))
 		}
 	}
+
+	vc.Client.ServiceContent.Setting = nil // ensure we don't NPE without this set
+	_, err = lookup.NewClient(ctx, vc.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
