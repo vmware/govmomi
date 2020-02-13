@@ -55,13 +55,15 @@ type Client struct {
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	// PSC may be external, attempt to derive from sts.uri
 	path := &url.URL{Path: Path}
-	m := object.NewOptionManager(c, *c.ServiceContent.Setting)
-	opts, err := m.Query(ctx, "config.vpxd.sso.sts.uri")
-	if err == nil && len(opts) == 1 {
-		u, err := url.Parse(opts[0].GetOptionValue().Value.(string))
-		if err == nil {
-			path.Scheme = u.Scheme
-			path.Host = u.Host
+	if c.ServiceContent.Setting != nil {
+		m := object.NewOptionManager(c, *c.ServiceContent.Setting)
+		opts, err := m.Query(ctx, "config.vpxd.sso.sts.uri")
+		if err == nil && len(opts) == 1 {
+			u, err := url.Parse(opts[0].GetOptionValue().Value.(string))
+			if err == nil {
+				path.Scheme = u.Scheme
+				path.Host = u.Host
+			}
 		}
 	}
 
