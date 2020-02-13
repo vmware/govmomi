@@ -337,15 +337,17 @@ For more details on vcsim features, see the project [wiki](https://github.com/vm
 
 ## Blog posts
 
-* [Beginning vCenter Server simulation with vcsim](blog1) by Abhijeet Kasurde
+* [Beginning vCenter Server simulation with vcsim]( by Abhijeet Kasurde
 
-* [vCenter & ESXi API based simulator](blog2) by William Lam
+* [vCenter & ESXi API based simulator] by William Lam
 
-* [vCenter Simulator Docker Container](blog3) by Brian Bunke
+* [vCenter Simulator Docker Container] by Brian Bunke
 
-[blog1]:https://opensourceforu.com/2017/10/vcenter-server-simulation-govcsim/
-[blog2]:https://www.virtuallyghetto.com/2017/04/govcsim-neat-incubation-project-vcenter-server-esxi-api-based-simulator.html
-[blog3]:https://www.brianbunke.com/blog/2018/12/31/vcenter-simulator-ci/
+[Beginning vCenter Server simulation with vcsim]: https://opensourceforu.com/2017/10/vcenter-server-simulation-govcsim/
+
+[vCenter & ESXi API based simulator]: https://www.virtuallyghetto.com/2017/04/govcsim-neat-incubation-project-vcenter-server-esxi-api-based-simulator.html
+
+[vCenter Simulator Docker Container]: https://www.brianbunke.com/blog/2018/12/31/vcenter-simulator-ci/
 
 ## Related projects
 
