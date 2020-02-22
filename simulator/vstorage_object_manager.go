@@ -200,7 +200,6 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 	ref := req.Spec.BackingSpec.GetVslmCreateSpecBackingSpec().Datastore
 	ds := Map.Get(ref).(*Datastore)
 	dc := Map.getEntityDatacenter(ds)
-	dm := Map.VirtualDiskManager()
 
 	objects, ok := m.objects[ds.Self]
 	if !ok {
@@ -240,7 +239,7 @@ func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, 
 	}
 
 	if !register {
-		err := dm.createVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
+		err := vdmCreateVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, &types.CreateVirtualDisk_Task{
 			Datacenter: &dc.Self,
 			Name:       path.String(),
 		})

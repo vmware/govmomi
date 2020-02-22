@@ -27,6 +27,7 @@ import (
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -453,9 +454,18 @@ func (r *Registry) FileManager() *FileManager {
 	return r.Get(r.content().FileManager.Reference()).(*FileManager)
 }
 
+type VirtualDiskManagerInterface interface {
+	CreateVirtualDiskTask(req *types.CreateVirtualDisk_Task) soap.HasFault
+	DeleteVirtualDiskTask(req *types.DeleteVirtualDisk_Task) soap.HasFault
+	MoveVirtualDiskTask(req *types.MoveVirtualDisk_Task) soap.HasFault
+	CopyVirtualDiskTask(req *types.CopyVirtualDisk_Task) soap.HasFault
+	QueryVirtualDiskUuid(req *types.QueryVirtualDiskUuid) soap.HasFault
+	SetVirtualDiskUuid(req *types.SetVirtualDiskUuid) soap.HasFault
+}
+
 // VirtualDiskManager returns the VirtualDiskManager singleton
-func (r *Registry) VirtualDiskManager() *VirtualDiskManager {
-	return r.Get(r.content().VirtualDiskManager.Reference()).(*VirtualDiskManager)
+func (r *Registry) VirtualDiskManager() VirtualDiskManagerInterface {
+	return r.Get(r.content().VirtualDiskManager.Reference()).(VirtualDiskManagerInterface)
 }
 
 // ViewManager returns the ViewManager singleton

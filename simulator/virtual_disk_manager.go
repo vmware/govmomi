@@ -32,14 +32,14 @@ type VirtualDiskManager struct {
 	mo.VirtualDiskManager
 }
 
-func (m *VirtualDiskManager) names(name string) []string {
+func vdmNames(name string) []string {
 	return []string{
 		strings.Replace(name, ".vmdk", "-flat.vmdk", 1),
 		name,
 	}
 }
 
-func (m *VirtualDiskManager) createVirtualDisk(op types.VirtualDeviceConfigSpecFileOperation, req *types.CreateVirtualDisk_Task) types.BaseMethodFault {
+func vdmCreateVirtualDisk(op types.VirtualDeviceConfigSpecFileOperation, req *types.CreateVirtualDisk_Task) types.BaseMethodFault {
 	fm := Map.FileManager()
 
 	file, fault := fm.resolve(req.Datacenter, req.Name)
@@ -49,7 +49,7 @@ func (m *VirtualDiskManager) createVirtualDisk(op types.VirtualDeviceConfigSpecF
 
 	shouldReplace := op == types.VirtualDeviceConfigSpecFileOperationReplace
 	shouldExist := op == ""
-	for _, name := range m.names(file) {
+	for _, name := range vdmNames(file) {
 		_, err := os.Stat(name)
 		if err == nil {
 			if shouldExist {
@@ -79,7 +79,7 @@ func (m *VirtualDiskManager) createVirtualDisk(op types.VirtualDeviceConfigSpecF
 
 func (m *VirtualDiskManager) CreateVirtualDiskTask(req *types.CreateVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "createVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		if err := m.createVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, req); err != nil {
+		if err := vdmCreateVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, req); err != nil {
 			return "", err
 		}
 		return req.Name, nil
@@ -96,7 +96,7 @@ func (m *VirtualDiskManager) DeleteVirtualDiskTask(req *types.DeleteVirtualDisk_
 	task := CreateTask(m, "deleteVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		fm := Map.FileManager()
 
-		for _, name := range m.names(req.Name) {
+		for _, name := range vdmNames(req.Name) {
 			err := fm.deleteDatastoreFile(&types.DeleteDatastoreFile_Task{
 				Name:       name,
 				Datacenter: req.Datacenter,
@@ -121,9 +121,9 @@ func (m *VirtualDiskManager) MoveVirtualDiskTask(req *types.MoveVirtualDisk_Task
 	task := CreateTask(m, "moveVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		fm := Map.FileManager()
 
-		dest := m.names(req.DestName)
+		dest := vdmNames(req.DestName)
 
-		for i, name := range m.names(req.SourceName) {
+		for i, name := range vdmNames(req.SourceName) {
 			err := fm.moveDatastoreFile(&types.MoveDatastoreFile_Task{
 				SourceName:            name,
 				SourceDatacenter:      req.SourceDatacenter,
@@ -157,9 +157,9 @@ func (m *VirtualDiskManager) CopyVirtualDiskTask(req *types.CopyVirtualDisk_Task
 
 		fm := Map.FileManager()
 
-		dest := m.names(req.DestName)
+		dest := vdmNames(req.DestName)
 
-		for i, name := range m.names(req.SourceName) {
+		for i, name := range vdmNames(req.SourceName) {
 			err := fm.copyDatastoreFile(&types.CopyDatastoreFile_Task{
 				SourceName:            name,
 				SourceDatacenter:      req.SourceDatacenter,

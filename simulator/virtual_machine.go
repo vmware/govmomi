@@ -544,9 +544,8 @@ func (vm *VirtualMachine) updateDiskLayouts() types.BaseMethodFault {
 
 			var fileKeys []int32
 
-			dm := Map.VirtualDiskManager()
 			// Add disk descriptor and extent files
-			for _, diskName := range dm.names(dFileName) {
+			for _, diskName := range vdmNames(dFileName) {
 				// get full path including datastore location
 				p, fault := parseDatastorePath(diskName)
 				if fault != nil {
@@ -927,7 +926,6 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 	label := devices.Name(device)
 	summary := label
 	dc := Map.getEntityDatacenter(Map.Get(*vm.Parent).(mo.Entity))
-	dm := Map.VirtualDiskManager()
 
 	switch x := device.(type) {
 	case types.BaseVirtualEthernetCard:
@@ -983,7 +981,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 				info.FileName = filename
 			}
 
-			err := dm.createVirtualDisk(spec.FileOperation, &types.CreateVirtualDisk_Task{
+			err := vdmCreateVirtualDisk(spec.FileOperation, &types.CreateVirtualDisk_Task{
 				Datacenter: &dc.Self,
 				Name:       info.FileName,
 			})
