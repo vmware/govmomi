@@ -55,7 +55,7 @@ func (m *AuthorizationManager) init(r *Registry) {
 
 	root := r.content().RootFolder
 
-	for _, u := range DefaultUserGroup {
+	for _, u := range DefaultUserGroup.results {
 		m.permissions[root] = append(m.permissions[root], types.Permission{
 			Entity:    &root,
 			Principal: u.Principal,

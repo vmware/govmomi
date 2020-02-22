@@ -29,6 +29,10 @@ type CustomFieldsManager struct {
 	nextKey int32
 }
 
+func (c *CustomFieldsManager) MO() *mo.CustomFieldsManager {
+	return &c.CustomFieldsManager
+}
+
 // Iterates through all entities of passed field type;
 // Removes found field from their custom field properties.
 func entitiesFieldRemove(field types.CustomFieldDef) {
@@ -81,21 +85,21 @@ func entitiesFieldRename(field types.CustomFieldDef) {
 	}
 }
 
-func (c *CustomFieldsManager) findByNameType(name, moType string) (int, *types.CustomFieldDef) {
-	for i, field := range c.Field {
+func cfmFindByNameType(name, moType string, cfm *mo.CustomFieldsManager) (int, *types.CustomFieldDef) {
+	for i, field := range cfm.Field {
 		if (field.ManagedObjectType == "" || field.ManagedObjectType == moType || moType == "") &&
 			field.Name == name {
-			return i, &c.Field[i]
+			return i, &cfm.Field[i]
 		}
 	}
 
 	return -1, nil
 }
 
-func (c *CustomFieldsManager) findByKey(key int32) (int, *types.CustomFieldDef) {
-	for i, field := range c.Field {
+func cfmFindByKey(key int32, cfm *mo.CustomFieldsManager) (int, *types.CustomFieldDef) {
+	for i, field := range cfm.Field {
 		if field.Key == key {
-			return i, &c.Field[i]
+			return i, &cfm.Field[i]
 		}
 	}
 
@@ -105,7 +109,7 @@ func (c *CustomFieldsManager) findByKey(key int32) (int, *types.CustomFieldDef) 
 func (c *CustomFieldsManager) AddCustomFieldDef(req *types.AddCustomFieldDef) soap.HasFault {
 	body := &methods.AddCustomFieldDefBody{}
 
-	_, field := c.findByNameType(req.Name, req.MoType)
+	_, field := cfmFindByNameType(req.Name, req.MoType, c.MO())
 	if field != nil {
 		body.Fault_ = Fault("", &types.DuplicateName{
 			Name:   req.Name,
@@ -143,7 +147,7 @@ func (c *CustomFieldsManager) AddCustomFieldDef(req *types.AddCustomFieldDef) so
 func (c *CustomFieldsManager) RemoveCustomFieldDef(req *types.RemoveCustomFieldDef) soap.HasFault {
 	body := &methods.RemoveCustomFieldDefBody{}
 
-	i, field := c.findByKey(req.Key)
+	i, field := cfmFindByKey(req.Key, c.MO())
 	if field == nil {
 		body.Fault_ = Fault("", &types.NotFound{})
 		return body
@@ -160,7 +164,7 @@ func (c *CustomFieldsManager) RemoveCustomFieldDef(req *types.RemoveCustomFieldD
 func (c *CustomFieldsManager) RenameCustomFieldDef(req *types.RenameCustomFieldDef) soap.HasFault {
 	body := &methods.RenameCustomFieldDefBody{}
 
-	_, field := c.findByKey(req.Key)
+	_, field := cfmFindByKey(req.Key, c.MO())
 	if field == nil {
 		body.Fault_ = Fault("", &types.NotFound{})
 		return body
@@ -177,7 +181,7 @@ func (c *CustomFieldsManager) RenameCustomFieldDef(req *types.RenameCustomFieldD
 func (c *CustomFieldsManager) SetField(ctx *Context, req *types.SetField) soap.HasFault {
 	body := &methods.SetFieldBody{}
 
-	_, field := c.findByKey(req.Key)
+	_, field := cfmFindByKey(req.Key, c.MO())
 	if field == nil {
 		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "key"})
 		return body

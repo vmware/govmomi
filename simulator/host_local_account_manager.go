@@ -33,14 +33,15 @@ func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFaul
 	spec := req.User.GetHostAccountSpec()
 	userDirectory := Map.UserDirectory()
 
-	found := userDirectory.search(true, false, compareFunc(spec.Id, true))
+	b := userDirectory.Backend()
+	found := b.SearchEntities(true, false, compareFunc(spec.Id, true))
 	if len(found) > 0 {
 		return &methods.CreateUserBody{
 			Fault_: Fault("", &types.AlreadyExists{}),
 		}
 	}
 
-	userDirectory.addUser(spec.Id)
+	b.AddEntity(spec.Id, false)
 
 	return &methods.CreateUserBody{
 		Res: &types.CreateUserResponse{},
@@ -49,8 +50,9 @@ func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFaul
 
 func (h *HostLocalAccountManager) RemoveUser(req *types.RemoveUser) soap.HasFault {
 	userDirectory := Map.UserDirectory()
+	b := userDirectory.Backend()
 
-	found := userDirectory.search(true, false, compareFunc(req.UserName, true))
+	found := b.SearchEntities(true, false, compareFunc(req.UserName, true))
 
 	if len(found) == 0 {
 		return &methods.RemoveUserBody{
@@ -58,7 +60,7 @@ func (h *HostLocalAccountManager) RemoveUser(req *types.RemoveUser) soap.HasFaul
 		}
 	}
 
-	userDirectory.removeUser(req.UserName)
+	b.RemoveEntity(req.UserName, false)
 
 	return &methods.RemoveUserBody{
 		Res: &types.RemoveUserResponse{},

@@ -25,26 +25,70 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-var DefaultUserGroup = []*types.UserSearchResult{
-	{FullName: "root", Group: true, Principal: "root"},
-	{FullName: "root", Group: false, Principal: "root"},
-	{FullName: "administrator", Group: false, Principal: "admin"},
+type UserDirectoryBackend interface {
+	AddEntity(string, bool)
+	RemoveEntity(string, bool)
+	SearchEntities(bool, bool, func(string) bool) []types.BaseUserSearchResult
+}
+
+type userSearchResultList struct {
+	results []*types.UserSearchResult
+}
+
+func (l *userSearchResultList) AddEntity(id string, group bool) {
+	l.results = append(l.results, &types.UserSearchResult{
+		FullName:  id,
+		Group:     group,
+		Principal: id,
+	})
+}
+
+func (l *userSearchResultList) RemoveEntity(id string, group bool) {
+	for i, ug := range l.results {
+		if ug.Group == group && ug.Principal == id {
+			l.results = append(l.results[:i], l.results[i+1:]...)
+			return
+		}
+	}
+}
+
+func (l *userSearchResultList) SearchEntities(users, groups bool, principalFilter func(string) bool) (res []types.BaseUserSearchResult) {
+	for _, r := range l.results {
+		if users && !r.Group || groups && r.Group {
+			if principalFilter(r.Principal) {
+				res = append(res, r)
+			}
+		}
+	}
+	return
+}
+
+var DefaultUserGroup = &userSearchResultList{
+	results: []*types.UserSearchResult{
+		{FullName: "root", Group: true, Principal: "root"},
+		{FullName: "root", Group: false, Principal: "root"},
+		{FullName: "administrator", Group: false, Principal: "admin"},
+	},
 }
 
 type UserDirectory struct {
 	mo.UserDirectory
 
-	userGroup []*types.UserSearchResult
+	backend *userSearchResultList
+}
+
+func (u *UserDirectory) Backend() UserDirectoryBackend {
+	return u.backend
 }
 
 func (m *UserDirectory) init(*Registry) {
-	m.userGroup = DefaultUserGroup
+	m.backend = DefaultUserGroup
 }
 
 func (u *UserDirectory) RetrieveUserGroups(req *types.RetrieveUserGroups) soap.HasFault {
 	compare := compareFunc(req.SearchStr, req.ExactMatch)
 
-	res := u.search(req.FindUsers, req.FindGroups, compare)
+	res := u.backend.SearchEntities(req.FindUsers, req.FindGroups, compare)
 
 	body := &methods.RetrieveUserGroupsBody{
 		Res: &types.RetrieveUserGroupsResponse{
@@ -53,45 +97,6 @@ func (u *UserDirectory) RetrieveUserGroups(req *types.RetrieveUserGroups) soap.H
 	}
 
 	return body
-}
-
-func (u *UserDirectory) search(findUsers, findGroups bool, compare func(string) bool) (res []types.BaseUserSearchResult) {
-	for _, ug := range u.userGroup {
-		if findUsers && !ug.Group || findGroups && ug.Group {
-			if compare(ug.Principal) {
-				res = append(res, ug)
-			}
-		}
-	}
-
-	return res
-}
-
-func (u *UserDirectory) addUser(id string) {
-	u.add(id, false)
-}
-
-func (u *UserDirectory) removeUser(id string) {
-	u.remove(id, false)
-}
-
-func (u *UserDirectory) add(id string, group bool) {
-	user := &types.UserSearchResult{
-		FullName:  id,
-		Group:     group,
-		Principal: id,
-	}
-
-	u.userGroup = append(u.userGroup, user)
-}
-
-func (u *UserDirectory) remove(id string, group bool) {
-	for i, ug := range u.userGroup {
-		if ug.Group == group && ug.Principal == id {
-			u.userGroup = append(u.userGroup[:i], u.userGroup[i+1:]...)
-			return
-		}
-	}
 }
 
 func compareFunc(compared string, exactly bool) func(string) bool {

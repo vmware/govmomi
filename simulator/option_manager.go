@@ -32,6 +32,10 @@ type OptionManager struct {
 	mo.OptionManager
 }
 
+func (m *OptionManager) MO() *mo.OptionManager {
+	return &m.OptionManager
+}
+
 func NewOptionManager(ref *types.ManagedObjectReference, setting []types.BaseOptionValue) object.Reference {
 	s := &OptionManager{}
 	if ref != nil {

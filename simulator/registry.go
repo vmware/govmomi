@@ -439,28 +439,56 @@ func (r *Registry) IsVPX() bool {
 	return !r.IsESX()
 }
 
+type SearchIndexInterface interface {
+	mo.Reference
+	FindByDatastorePath(*types.FindByDatastorePath) soap.HasFault
+	FindByInventoryPath(*types.FindByInventoryPath) soap.HasFault
+	FindChild(*types.FindChild) soap.HasFault
+	FindByUuid(*types.FindByUuid) soap.HasFault
+	FindByDnsName(*types.FindByDnsName) soap.HasFault
+	FindAllByDnsName(*types.FindAllByDnsName) soap.HasFault
+	FindByIp(*types.FindByIp) soap.HasFault
+	FindAllByIp(*types.FindAllByIp) soap.HasFault
+}
+
 // SearchIndex returns the SearchIndex singleton
-func (r *Registry) SearchIndex() *SearchIndex {
-	return r.Get(r.content().SearchIndex.Reference()).(*SearchIndex)
+func (r *Registry) SearchIndex() SearchIndexInterface {
+	return r.Get(r.content().SearchIndex.Reference()).(SearchIndexInterface)
+}
+
+type EventManagerInterface interface {
+	mo.Reference
+	CreateCollectorForEvents(*Context, *types.CreateCollectorForEvents) soap.HasFault
+	QueryEvents(*Context, *types.QueryEvents) soap.HasFault
+	PostEvent(*Context, *types.PostEvent) soap.HasFault
 }
 
 // EventManager returns the EventManager singleton
-func (r *Registry) EventManager() *EventManager {
-	return r.Get(r.content().EventManager.Reference()).(*EventManager)
+func (r *Registry) EventManager() EventManagerInterface {
+	return r.Get(r.content().EventManager.Reference()).(EventManagerInterface)
+}
+
+type FileManagerInterface interface {
+	mo.Reference
+	DeleteDatastoreFileTask(*types.DeleteDatastoreFile_Task) soap.HasFault
+	MakeDirectory(*types.MakeDirectory) soap.HasFault
+	MoveDatastoreFileTask(*types.MoveDatastoreFile_Task) soap.HasFault
+	CopyDatastoreFileTask(*types.CopyDatastoreFile_Task) soap.HasFault
 }
 
 // FileManager returns the FileManager singleton
-func (r *Registry) FileManager() *FileManager {
-	return r.Get(r.content().FileManager.Reference()).(*FileManager)
+func (r *Registry) FileManager() FileManagerInterface {
+	return r.Get(r.content().FileManager.Reference()).(FileManagerInterface)
 }
 
 type VirtualDiskManagerInterface interface {
-	CreateVirtualDiskTask(req *types.CreateVirtualDisk_Task) soap.HasFault
-	DeleteVirtualDiskTask(req *types.DeleteVirtualDisk_Task) soap.HasFault
-	MoveVirtualDiskTask(req *types.MoveVirtualDisk_Task) soap.HasFault
-	CopyVirtualDiskTask(req *types.CopyVirtualDisk_Task) soap.HasFault
-	QueryVirtualDiskUuid(req *types.QueryVirtualDiskUuid) soap.HasFault
-	SetVirtualDiskUuid(req *types.SetVirtualDiskUuid) soap.HasFault
+	mo.Reference
+	CreateVirtualDiskTask(*types.CreateVirtualDisk_Task) soap.HasFault
+	DeleteVirtualDiskTask(*types.DeleteVirtualDisk_Task) soap.HasFault
+	MoveVirtualDiskTask(*types.MoveVirtualDisk_Task) soap.HasFault
+	CopyVirtualDiskTask(*types.CopyVirtualDisk_Task) soap.HasFault
+	QueryVirtualDiskUuid(*types.QueryVirtualDiskUuid) soap.HasFault
+	SetVirtualDiskUuid(*types.SetVirtualDiskUuid) soap.HasFault
 }
 
 // VirtualDiskManager returns the VirtualDiskManager singleton
@@ -468,14 +496,26 @@ func (r *Registry) VirtualDiskManager() VirtualDiskManagerInterface {
 	return r.Get(r.content().VirtualDiskManager.Reference()).(VirtualDiskManagerInterface)
 }
 
+type ViewManagerInterface interface {
+	mo.Reference
+	CreateContainerView(*Context, *types.CreateContainerView) soap.HasFault
+	CreateListView(*Context, *types.CreateListView) soap.HasFault
+}
+
 // ViewManager returns the ViewManager singleton
-func (r *Registry) ViewManager() *ViewManager {
-	return r.Get(r.content().ViewManager.Reference()).(*ViewManager)
+func (r *Registry) ViewManager() ViewManagerInterface {
+	return r.Get(r.content().ViewManager.Reference()).(ViewManagerInterface)
+}
+
+type UserDirectoryInterface interface {
+	mo.Reference
+	Backend() UserDirectoryBackend
+	RetrieveUserGroups(*types.RetrieveUserGroups) soap.HasFault
 }
 
 // UserDirectory returns the UserDirectory singleton
-func (r *Registry) UserDirectory() *UserDirectory {
-	return r.Get(r.content().UserDirectory.Reference()).(*UserDirectory)
+func (r *Registry) UserDirectory() UserDirectoryInterface {
+	return r.Get(r.content().UserDirectory.Reference()).(UserDirectoryInterface)
 }
 
 // SessionManager returns the SessionManager singleton
@@ -483,14 +523,30 @@ func (r *Registry) SessionManager() *SessionManager {
 	return r.Get(r.content().SessionManager.Reference()).(*SessionManager)
 }
 
+type OptionManagerInterface interface {
+	mo.Reference
+	MO() *mo.OptionManager
+	QueryOptions(*types.QueryOptions) soap.HasFault
+	UpdateOptions(*types.UpdateOptions) soap.HasFault
+}
+
 // OptionManager returns the OptionManager singleton
-func (r *Registry) OptionManager() *OptionManager {
-	return r.Get(r.content().Setting.Reference()).(*OptionManager)
+func (r *Registry) OptionManager() OptionManagerInterface {
+	return r.Get(r.content().Setting.Reference()).(OptionManagerInterface)
+}
+
+type CustomFieldsManagerInterface interface {
+	mo.Reference
+	MO() *mo.CustomFieldsManager
+	AddCustomFieldDef(*types.AddCustomFieldDef) soap.HasFault
+	RemoveCustomFieldDef(*types.RemoveCustomFieldDef) soap.HasFault
+	RenameCustomFieldDef(*types.RenameCustomFieldDef) soap.HasFault
+	SetField(*Context, *types.SetField) soap.HasFault
 }
 
 // CustomFieldsManager returns CustomFieldsManager singleton
-func (r *Registry) CustomFieldsManager() *CustomFieldsManager {
-	return r.Get(r.content().CustomFieldsManager.Reference()).(*CustomFieldsManager)
+func (r *Registry) CustomFieldsManager() CustomFieldsManagerInterface {
+	return r.Get(r.content().CustomFieldsManager.Reference()).(CustomFieldsManagerInterface)
 }
 
 func (r *Registry) MarshalJSON() ([]byte, error) {

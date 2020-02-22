@@ -665,7 +665,7 @@ func (s *Service) NewServer() *Server {
 	Map.SessionManager().ServiceHostName = u.Host
 
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
-	m := Map.OptionManager()
+	m := Map.OptionManager().MO()
 	for i := range m.Setting {
 		setting := m.Setting[i].GetOptionValue()
 

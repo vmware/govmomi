@@ -28,7 +28,7 @@ func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
 
 	cfm := Map.CustomFieldsManager()
 
-	_, field := cfm.findByNameType(req.Key, req.This.Type)
+	_, field := cfmFindByNameType(req.Key, req.This.Type, cfm.MO())
 	if field == nil {
 		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "key"})
 		return body

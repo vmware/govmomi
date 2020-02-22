@@ -100,11 +100,10 @@ func (m *VcenterVStorageObjectManager) statDatastoreBacking(ctx *Context, ref ty
 	res := make(map[types.ID]error, len(objs))
 	ds := ctx.Map.Get(ref).(*Datastore)
 	dc := ctx.Map.getEntityDatacenter(ds)
-	fm := ctx.Map.FileManager()
 
 	for _, obj := range objs {
 		backing := obj.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
-		file, _ := fm.resolve(&dc.Self, backing.FilePath)
+		file, _ := fmResolve(&dc.Self, backing.FilePath)
 		_, res[obj.Config.Id] = os.Stat(file)
 	}
 
