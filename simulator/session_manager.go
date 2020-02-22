@@ -32,17 +32,29 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-type SessionManager struct {
-	mo.SessionManager
-
+type SessionManagerState struct {
 	ServiceHostName string
 	TLSCert         func() string
+	Sessions        map[string]Session
+}
 
-	sessions map[string]Session
+type SessionManager struct {
+	mo.SessionManager
+	state *SessionManagerState
+}
+
+func (m *SessionManager) MO() *mo.SessionManager {
+	return &m.SessionManager
+}
+
+func (m *SessionManager) State() *SessionManagerState {
+	return m.state
 }
 
 func (m *SessionManager) init(*Registry) {
-	m.sessions = make(map[string]Session)
+	m.state = &SessionManagerState{
+		Sessions: make(map[string]Session),
+	}
 }
 
 func createSession(ctx *Context, name string, locale string) types.UserSession {
@@ -145,7 +157,7 @@ func (s *SessionManager) LoginByToken(ctx *Context, req *types.LoginByToken) soa
 
 func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
 	session := ctx.Session
-	delete(s.sessions, session.Key)
+	delete(s.state.Sessions, session.Key)
 	pc := Map.content().PropertyCollector
 
 	for ref, obj := range ctx.Session.Registry.objects {
@@ -175,7 +187,7 @@ func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSess
 			body.Fault_ = Fault("", new(types.InvalidArgument))
 			return body
 		}
-		delete(s.sessions, id)
+		delete(s.state.Sessions, id)
 	}
 
 	body.Res = new(types.TerminateSessionResponse)
@@ -192,7 +204,7 @@ func (s *SessionManager) SessionIsActive(ctx *Context, req *types.SessionIsActiv
 
 	body.Res = new(types.SessionIsActiveResponse)
 
-	if session, exists := s.sessions[req.SessionID]; exists {
+	if session, exists := s.state.Sessions[req.SessionID]; exists {
 		body.Res.Returnval = session.UserName == req.UserName
 	}
 
@@ -202,7 +214,7 @@ func (s *SessionManager) SessionIsActive(ctx *Context, req *types.SessionIsActiv
 func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneTicket) soap.HasFault {
 	session := *ctx.Session
 	session.Key = uuid.New().String()
-	s.sessions[session.Key] = session
+	s.state.Sessions[session.Key] = session
 
 	return &methods.AcquireCloneTicketBody{
 		Res: &types.AcquireCloneTicketResponse{
@@ -214,10 +226,10 @@ func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneT
 func (s *SessionManager) CloneSession(ctx *Context, ticket *types.CloneSession) soap.HasFault {
 	body := new(methods.CloneSessionBody)
 
-	session, exists := s.sessions[ticket.CloneTicket]
+	session, exists := s.state.Sessions[ticket.CloneTicket]
 
 	if exists {
-		delete(s.sessions, ticket.CloneTicket) // A clone ticket can only be used once
+		delete(s.state.Sessions, ticket.CloneTicket) // A clone ticket can only be used once
 		session.Key = uuid.New().String()
 		ctx.SetSession(session, true)
 
@@ -236,7 +248,7 @@ func (s *SessionManager) AcquireGenericServiceTicket(ticket *types.AcquireGeneri
 		Res: &types.AcquireGenericServiceTicketResponse{
 			Returnval: types.SessionManagerGenericServiceTicket{
 				Id:       uuid.New().String(),
-				HostName: s.ServiceHostName,
+				HostName: s.state.ServiceHostName,
 			},
 		},
 	}
@@ -272,7 +284,7 @@ type Context struct {
 // mapSession maps an HTTP cookie to a Session.
 func (c *Context) mapSession() {
 	if cookie, err := c.req.Cookie(soap.SessionCookieName); err == nil {
-		if val, ok := c.svc.sm.sessions[cookie.Value]; ok {
+		if val, ok := c.svc.sm.State().Sessions[cookie.Value]; ok {
 			c.SetSession(val, false)
 		}
 	}
@@ -285,7 +297,7 @@ func (c *Context) SetSession(session Session, login bool) {
 	session.LastActiveTime = time.Now()
 	session.CallCount++
 
-	c.svc.sm.sessions[session.Key] = session
+	c.svc.sm.State().Sessions[session.Key] = session
 	c.Session = &session
 
 	if login {
@@ -357,15 +369,12 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 	switch ref.Type {
 	case "SessionManager":
 		// Clone SessionManager so the PropertyCollector can properly report CurrentSession
-		m := *Map.SessionManager()
-		m.CurrentSession = &s.UserSession
-
-		// TODO: we could maintain SessionList as part of the SessionManager singleton
-		for _, session := range m.sessions {
-			m.SessionList = append(m.SessionList, session.UserSession)
+		m := &SessionManager{
+			SessionManager: *Map.SessionManager().MO(),
+			state:          Map.SessionManager().State(),
 		}
-
-		return &m
+		m.CurrentSession = &s.UserSession
+		return m
 	case "PropertyCollector":
 		if ref == Map.content().PropertyCollector {
 			// Per-session instance of the PropertyCollector singleton.

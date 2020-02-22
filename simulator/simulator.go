@@ -72,7 +72,7 @@ type Method struct {
 // Service decodes incoming requests and dispatches to a Handler
 type Service struct {
 	client *vim25.Client
-	sm     *SessionManager
+	sm     SessionManagerInterface
 	sdk    map[string]*Registry
 	funcs  []handleFunc
 	delay  *DelayConfig
@@ -662,7 +662,7 @@ func (s *Service) NewServer() *Server {
 	}
 
 	// Redirect clients to this http server, rather than HostSystem.Name
-	Map.SessionManager().ServiceHostName = u.Host
+	Map.SessionManager().State().ServiceHostName = u.Host
 
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
 	m := Map.OptionManager().MO()
@@ -712,7 +712,7 @@ func (s *Service) NewServer() *Server {
 	if s.TLS != nil {
 		ts.TLS = s.TLS
 		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
-		Map.SessionManager().TLSCert = func() string {
+		Map.SessionManager().State().TLSCert = func() string {
 			return base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
 		}
 		ts.StartTLS()

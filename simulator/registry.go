@@ -518,9 +518,24 @@ func (r *Registry) UserDirectory() UserDirectoryInterface {
 	return r.Get(r.content().UserDirectory.Reference()).(UserDirectoryInterface)
 }
 
+type SessionManagerInterface interface {
+	mo.Reference
+	MO() *mo.SessionManager
+	State() *SessionManagerState
+	Login(*Context, *types.Login) soap.HasFault
+	LoginExtensionByCertificate(*Context, *types.LoginExtensionByCertificate) soap.HasFault
+	LoginByToken(*Context, *types.LoginByToken) soap.HasFault
+	Logout(*Context, *types.Logout) soap.HasFault
+	TerminateSession(*Context, *types.TerminateSession) soap.HasFault
+	SessionIsActive(*Context, *types.SessionIsActive) soap.HasFault
+	AcquireCloneTicket(*Context, *types.AcquireCloneTicket) soap.HasFault
+	CloneSession(*Context, *types.CloneSession) soap.HasFault
+	AcquireGenericServiceTicket(*types.AcquireGenericServiceTicket) soap.HasFault
+}
+
 // SessionManager returns the SessionManager singleton
-func (r *Registry) SessionManager() *SessionManager {
-	return r.Get(r.content().SessionManager.Reference()).(*SessionManager)
+func (r *Registry) SessionManager() SessionManagerInterface {
+	return r.Get(r.content().SessionManager.Reference()).(SessionManagerInterface)
 }
 
 type OptionManagerInterface interface {
