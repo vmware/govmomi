@@ -32,7 +32,7 @@ var (
 // The complete list can be captured using: govc sso.service.ls -dump
 func registrationInfo() []types.LookupServiceRegistrationInfo {
 	vc := simulator.Map.Get(vim25.ServiceInstance).(*simulator.ServiceInstance)
-	setting := simulator.Map.OptionManager().Setting
+	setting := simulator.Map.OptionManager().MO().Setting
 	sm := simulator.Map.SessionManager()
 	opts := make(map[string]string, len(setting))
 
@@ -44,8 +44,8 @@ func registrationInfo() []types.LookupServiceRegistrationInfo {
 	}
 
 	trust := []string{""}
-	if sm.TLSCert != nil {
-		trust[0] = sm.TLSCert()
+	if cert := sm.State().TLSCert; cert != nil {
+		trust[0] = cert()
 	}
 	sdk := opts["vcsim.server.url"] + vim25.Path
 	admin := opts["config.vpxd.sso.default.admin"]

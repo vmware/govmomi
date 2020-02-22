@@ -93,7 +93,7 @@ type handler struct {
 func init() {
 	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
 		if r.IsVPX() {
-			path, handler := New(s.Listen, r.OptionManager().Setting)
+			path, handler := New(s.Listen, r.OptionManager().MO().Setting)
 			s.Handle(path, handler)
 		}
 	})
