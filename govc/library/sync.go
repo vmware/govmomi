@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
 )
@@ -123,36 +122,24 @@ func (cmd *sync) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return cmd.FolderFlag.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
-		finder := finder.NewFinder(m)
 
 		var local library.Library
 		if cmd.vmtx != "" {
-			res, err := finder.Find(ctx, cmd.vmtx)
+			l, err := flags.ContentLibrary(ctx, c, cmd.vmtx)
 			if err != nil {
 				return err
 			}
-			if len(res) != 1 {
-				return ErrMultiMatch{Type: "library", Key: "name", Val: cmd.vmtx, Count: len(res)}
-			}
-			l, ok := res[0].GetResult().(library.Library)
-			if !ok {
-				return fmt.Errorf("%q is a %T", res[0].GetPath(), l)
-			}
-			local = l
+			local = *l
 		}
 
-		res, err := finder.Find(ctx, path)
+		res, err := flags.ContentLibraryResult(ctx, c, "", path)
 		if err != nil {
 			return err
 		}
 
-		if len(res) != 1 {
-			return ErrMultiMatch{Type: "library", Key: "name", Val: path, Count: len(res)}
-		}
+		fmt.Printf("Syncing %s...\n", path)
 
-		fmt.Printf("Syncing %s...\n", res[0].GetPath())
-
-		switch t := res[0].GetResult().(type) {
+		switch t := res.GetResult().(type) {
 		case library.Library:
 			if cmd.shouldSync(t) {
 				if err = m.SyncLibrary(ctx, &t); err != nil {
@@ -161,7 +148,7 @@ func (cmd *sync) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 			return cmd.syncVMTX(ctx, m, t, local)
 		case library.Item:
-			lib := res[0].GetParent().GetResult().(library.Library)
+			lib := res.GetParent().GetResult().(library.Library)
 			if cmd.shouldSync(lib) {
 				if err = m.SyncLibraryItem(ctx, &t, false); err != nil {
 					return err
@@ -169,7 +156,7 @@ func (cmd *sync) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 			return cmd.syncVMTX(ctx, m, lib, local, t)
 		default:
-			return fmt.Errorf("%q is a %T", res[0].GetPath(), t)
+			return fmt.Errorf("%q is a %T", res.GetPath(), t)
 		}
 	})
 }

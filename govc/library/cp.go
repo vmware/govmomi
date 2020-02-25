@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
@@ -62,29 +61,14 @@ func (cmd *cp) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
-		find := finder.NewFinder(m)
-		res, err := find.Find(ctx, srcPath)
+		src, err := flags.ContentLibraryItem(ctx, c, srcPath)
 		if err != nil {
 			return err
-		}
-		if len(res) != 1 {
-			return ErrMultiMatch{Type: "library-item", Key: "name", Val: srcPath, Count: len(res)}
-		}
-		src, ok := res[0].GetResult().(library.Item)
-		if !ok {
-			return fmt.Errorf("%q is a %T", srcPath, res[0].GetResult())
 		}
 
-		res, err = find.Find(ctx, dstPath)
+		dst, err := flags.ContentLibrary(ctx, c, dstPath)
 		if err != nil {
 			return err
-		}
-		if len(res) != 1 {
-			return ErrMultiMatch{Type: "library", Key: "name", Val: dstPath, Count: len(res)}
-		}
-		dst, ok := res[0].GetResult().(library.Library)
-		if !ok {
-			return fmt.Errorf("%q is a %T", srcPath, res[0].GetResult())
 		}
 
 		cmd.LibraryID = dst.ID
@@ -92,7 +76,7 @@ func (cmd *cp) Run(ctx context.Context, f *flag.FlagSet) error {
 			cmd.Name = src.Name
 		}
 
-		id, err := m.CopyLibraryItem(ctx, &src, cmd.Item)
+		id, err := m.CopyLibraryItem(ctx, src, cmd.Item)
 		if err != nil {
 			return err
 		}

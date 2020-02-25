@@ -26,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/govc/importx"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
 	"github.com/vmware/govmomi/vim25/types"
@@ -104,16 +103,9 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.DatastoreFlag.WithRestClient(ctx, func(c *rest.Client) error {
 		m := vcenter.NewManager(c)
 
-		res, err := finder.NewFinder(library.NewManager(c)).Find(ctx, path)
+		item, err := flags.ContentLibraryItem(ctx, c, path)
 		if err != nil {
 			return err
-		}
-		if len(res) != 1 {
-			return ErrMultiMatch{Type: "library", Key: "name", Val: f.Arg(0), Count: len(res)}
-		}
-		item, ok := res[0].GetResult().(library.Item)
-		if !ok {
-			return fmt.Errorf("%q is a %T", path, item)
 		}
 
 		ds, err := cmd.DatastoreIfSpecified()
