@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
@@ -58,17 +57,12 @@ Examples:
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := library.NewManager(c)
-
-		res, err := finder.NewFinder(m).Find(ctx, f.Arg(0))
+		res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
 		if err != nil {
 			return err
 		}
 
-		if len(res) != 1 {
-			return ErrMultiMatch{Type: "library", Key: "name", Val: f.Arg(0), Count: len(res)}
-		}
-
-		switch t := res[0].GetResult().(type) {
+		switch t := res.GetResult().(type) {
 		case library.Library:
 			return m.DeleteLibrary(ctx, &t)
 		case library.Item:
