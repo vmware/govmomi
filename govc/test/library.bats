@@ -312,7 +312,19 @@ EOF
 @test "library.pubsub" {
   vcsim_env
 
-  url="https://$(govc env GOVC_URL)/TODO"
+  run govc library.create -pub published-content
+  assert_success
+  id="$output"
+
+  url="https://$(govc env GOVC_URL)/cls/vcsp/lib/$id"
+
+  run govc library.info published-content
+  assert_success
+  assert_matches "Publication:"
+  assert_matches "$url"
+
+  run govc library.import published-content "$GOVC_IMAGES/ttylinux-latest.ova"
+  assert_success
 
   run govc library.create -sub "$url" my-content
   assert_success
@@ -322,17 +334,80 @@ EOF
   assert_matches "Subscription:"
   assert_matches "$url"
 
-  run govc library.import my-content "$GOVC_IMAGES/ttylinux-latest.ova"
-  assert_success # TODO: this should fail, but allow until vcsim supports publishing
+  run govc library.import my-content "$GOVC_IMAGES/$TTYLINUX_NAME.iso"
+  assert_failure # cannot add items to subscribed libraries
+
+  run govc library.ls my-content/ttylinux-latest/
+  assert_success
+  assert_matches "/my-content/ttylinux-latest/ttylinux-pc_i486-16.1.ovf"
 
   run govc library.sync my-content
   assert_success
+}
 
-  run govc library.create my-content-vmtx
-  assert_success
+@test "library.subscriber example" {
+  vcsim_start -ds 3
 
-  run govc library.sync -vmtx my-content-vmtx my-content
-  assert_success
+  ds0=LocalDS_0
+  ds1=LocalDS_1
+  ds2=LocalDS_2
+  pool=DC0_C0/Resources
+
+  # Create a published library with OVA items
+  govc library.create -ds $ds0 -pub ttylinux-pub-ovf
+
+  govc library.import ttylinux-pub-ovf "$GOVC_IMAGES/ttylinux-pc_i486-16.1.ova"
+
+  url="$(govc library.info -U ttylinux-pub-ovf)"
+  echo "$url"
+
+  # Create a library subscribed to the publish-content library
+  govc library.create -ds $ds0 -sub "$url" govc-sub-ovf
+
+  # Create a library to contain VM Templates, and enabling publishing
+  govc library.create -ds $ds0 -pub govc-pub-vmtx
+
+  url="$(govc library.info -U govc-pub-vmtx)"
+  echo "$url"
+
+  # Create vm inventory folder to contain govc-pub-vmtx library templates
+  govc folder.create vm/govc-pub-vmtx
+
+  # Convert govc-sub-ovf's OVA items to VMTX items in the govc-pub-vmtx library
+  govc library.sync -folder govc-pub-vmtx -pool $pool -vmtx govc-pub-vmtx govc-sub-ovf
+
+  # No existing subscribers
+  govc library.subscriber.ls govc-pub-vmtx
+
+  for ds in $ds1 $ds2 ; do
+    # Create a library subscribed to the govc-pub-vmtx library
+    govc library.create -ds $ds -sub "$url" govc-sub-vmtx-$ds
+
+    # Create vm inventory folder to contain sub-content library templates
+    govc folder.create vm/govc-sub-vmtx-$ds
+
+    # Create a subscriber to which the VM Templates can be published
+    govc library.subscriber.create -folder govc-sub-vmtx-$ds -pool $pool govc-pub-vmtx govc-sub-vmtx-$ds
+  done
+
+  govc library.subscriber.ls govc-pub-vmtx | grep govc-sub-vmtx-$ds1
+  govc library.subscriber.ls govc-pub-vmtx | grep govc-sub-vmtx-$ds2
+
+  # Expect 1 VM: govc-pub-vmtx/ttylinux-pc_i486-16.1
+  govc find vm -type f -name govc-* | xargs -n1 -r govc find -type m
+
+  # Publish entire library
+  govc library.publish govc-pub-vmtx
+
+  # Publish a specific item
+  govc library.publish govc-pub-vmtx/ttylinux-pc_i486-16.1
+
+  # Expect 2 more VMs: govc-sub-vmtx-{$ds1,$ds2}
+  govc find vm -type f -name govc-* | xargs -n1 govc find -type m
+
+  for ds in $ds1 $ds2 ; do
+    govc vm.clone -link -vm govc-sub-vmtx-$ds/ttylinux-pc_i486-16.1 -ds $ds -pool $pool -folder govc-sub-vmtx-$ds ttylinux
+  done
 }
 
 @test "library.findbyid" {
