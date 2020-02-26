@@ -124,7 +124,7 @@ func (c *Manager) CreateLibrary(ctx context.Context, library Library) (string, e
 		if u.Scheme == "https" && sub.SslThumbprint == "" {
 			thumbprint := c.Thumbprint(u.Host)
 			if thumbprint == "" {
-				t := c.Transport.(*http.Transport)
+				t := c.DefaultTransport()
 				if t.TLSClientConfig.InsecureSkipVerify {
 					var info object.HostCertificateInfo
 					_ = info.FromURL(u, t.TLSClientConfig)
