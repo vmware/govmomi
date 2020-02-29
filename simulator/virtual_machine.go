@@ -53,8 +53,8 @@ type VirtualMachine struct {
 func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
-
-	Map.Get(parent).(*Folder).putChild(vm)
+	folder := Map.Get(parent).(*Folder)
+	folder.putChild(vm)
 
 	if spec.Name == "" {
 		return vm, &types.InvalidVmConfig{Property: "configSpec.name"}
@@ -87,14 +87,39 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		Timestamp: time.Now(),
 	}
 
-	// Append VM Name as the directory name if not specified
-	if strings.HasSuffix(spec.Files.VmPathName, "]") { // e.g. "[datastore1]"
-		spec.Files.VmPathName += " " + spec.Name
+	vmx := vm.vmx(spec)
+	if vmx.Path == "" {
+		// Append VM Name as the directory name if not specified
+		vmx.Path = spec.Name
 	}
 
-	if !strings.HasSuffix(spec.Files.VmPathName, ".vmx") {
-		spec.Files.VmPathName = path.Join(spec.Files.VmPathName, spec.Name+".vmx")
+	dc := Map.getEntityDatacenter(folder)
+	ds := Map.FindByName(vmx.Datastore, dc.Datastore).(*Datastore)
+	dir := path.Join(ds.Info.GetDatastoreInfo().Url, vmx.Path)
+
+	if path.Ext(vmx.Path) == ".vmx" {
+		dir = path.Dir(dir)
+		// Ignore error here, deferring to createFile
+		_ = os.Mkdir(dir, 0700)
+	} else {
+		// Create VM directory, renaming if already exists
+		name := dir
+
+		for i := 0; i < 1024; /* just in case */ i++ {
+			err := os.Mkdir(name, 0700)
+			if err != nil {
+				if os.IsExist(err) {
+					name = fmt.Sprintf("%s (%d)", dir, i)
+					continue
+				}
+				return nil, &types.FileFault{File: name}
+			}
+			break
+		}
+		vmx.Path = path.Join(path.Base(name), spec.Name+".vmx")
 	}
+
+	spec.Files.VmPathName = vmx.String()
 
 	dsPath := path.Dir(spec.Files.VmPathName)
 	vm.uid = sha1UUID(spec.Files.VmPathName)
@@ -755,6 +780,16 @@ func (vm *VirtualMachine) useDatastore(name string) *Datastore {
 	return ds
 }
 
+func (vm *VirtualMachine) vmx(spec *types.VirtualMachineConfigSpec) object.DatastorePath {
+	var p object.DatastorePath
+	vmx := vm.Config.Files.VmPathName
+	if spec != nil {
+		vmx = spec.Files.VmPathName
+	}
+	p.FromString(vmx)
+	return p
+}
+
 func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*os.File, types.BaseMethodFault) {
 	p, fault := parseDatastorePath(spec)
 	if fault != nil {
@@ -787,17 +822,11 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 		return f, nil
 	}
 
-	dir := path.Dir(file)
-
-	_ = os.MkdirAll(dir, 0700)
-
 	_, err := os.Stat(file)
 	if err == nil {
-		return nil, &types.FileAlreadyExists{
-			FileFault: types.FileFault{
-				File: file,
-			},
-		}
+		fault := &types.FileAlreadyExists{FileFault: types.FileFault{File: file}}
+		log.Printf("%T: %s", fault, file)
+		return nil, fault
 	}
 
 	f, err := os.Create(file)
@@ -1481,12 +1510,19 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		DestHost:   *host.eventArgument(),
 	})
 
+	vmx := vm.vmx(nil)
+	vmx.Path = req.Name
+	if ref := req.Spec.Location.Datastore; ref != nil {
+		ds := Map.Get(*ref).(*Datastore).Name
+		vmx.Datastore = ds
+	}
+
 	task := CreateTask(vm, "cloneVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		config := types.VirtualMachineConfigSpec{
 			Name:    req.Name,
 			GuestId: vm.Config.GuestId,
 			Files: &types.VirtualMachineFileInfo{
-				VmPathName: strings.Replace(vm.Config.Files.VmPathName, vm.Name, req.Name, -1),
+				VmPathName: vmx.String(),
 			},
 		}
 		if req.Spec.Config != nil {
