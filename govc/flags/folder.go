@@ -84,6 +84,13 @@ func (flag *FolderFlag) Folder() (*object.Folder, error) {
 	return flag.folder, nil
 }
 
+func (flag *FolderFlag) FolderIfSpecified() (*object.Folder, error) {
+	if flag.name == "" {
+		return nil, nil
+	}
+	return flag.Folder()
+}
+
 func (flag *FolderFlag) FolderOrDefault(kind string) (*object.Folder, error) {
 	if flag.folder != nil {
 		return flag.folder, nil

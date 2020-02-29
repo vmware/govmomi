@@ -28,6 +28,7 @@ import (
 )
 
 type migrate struct {
+	*flags.FolderFlag
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.DatastoreFlag
@@ -42,6 +43,9 @@ func init() {
 }
 
 func (cmd *migrate) Register(ctx context.Context, f *flag.FlagSet) {
+	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
+	cmd.FolderFlag.Register(ctx, f)
+
 	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
 	cmd.SearchFlag.Register(ctx, f)
 
@@ -58,6 +62,9 @@ func (cmd *migrate) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *migrate) Process(ctx context.Context) error {
+	if err := cmd.FolderFlag.Process(ctx); err != nil {
+		return err
+	}
 	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
 		return err
 	}
@@ -105,6 +112,16 @@ func (cmd *migrate) Run(ctx context.Context, f *flag.FlagSet) error {
 	vms, err := cmd.VirtualMachines(f.Args())
 	if err != nil {
 		return err
+	}
+
+	folder, err := cmd.FolderIfSpecified()
+	if err != nil {
+		return err
+	}
+
+	if folder != nil {
+		ref := folder.Reference()
+		cmd.spec.Folder = &ref
 	}
 
 	host, err := cmd.HostSystemFlag.HostSystemIfSpecified()

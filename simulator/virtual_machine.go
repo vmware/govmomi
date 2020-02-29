@@ -1588,6 +1588,13 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 			)
 		}
 
+		if ref := req.Spec.Folder; ref != nil {
+			folder := Map.Get(*ref).(*Folder)
+			folder.MoveIntoFolderTask(&types.MoveIntoFolder_Task{
+				List: []types.ManagedObjectReference{vm.Self},
+			})
+		}
+
 		Map.Update(vm, changes)
 
 		return nil, nil
