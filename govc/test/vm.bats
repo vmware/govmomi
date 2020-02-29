@@ -79,6 +79,9 @@ load test_helper
 
   run govc vm.create -cluster DC0_C0 "$id"
   assert_success
+
+  run govc vm.create -force -cluster DC0_C0 "$id"
+  assert_success # create vm with the same name
 }
 
 @test "vm.change" {
@@ -681,6 +684,9 @@ load test_helper
 
   run govc vm.clone -cluster DC0_C0 -vm "$vm" "$clone"
   assert_success
+
+  run govc vm.clone -force -vm "$vm" "$clone"
+  assert_success # clone vm with the same name
 }
 
 @test "vm.clone change resources" {
