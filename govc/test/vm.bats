@@ -766,6 +766,18 @@ load test_helper
   # migrate from C0 to C1
   run govc vm.migrate -pool DC0_C1/Resources "$vm"
   assert_success
+
+  run govc folder.create vm/new-folder
+  assert_success
+
+  run govc object.collect -s "vm/$vm" parent
+  assert_success
+
+  run govc vm.migrate -folder vm/new-folder "$vm"
+  assert_success
+
+  run govc object.collect -s "vm/new-folder/$vm" parent
+  assert_success
 }
 
 @test "object name with slash" {
