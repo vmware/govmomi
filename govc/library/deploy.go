@@ -183,7 +183,7 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 					Annotation:         cmd.Options.Annotation,
 					AdditionalParams: []vcenter.AdditionalParams{
 						{
-							Class:       vcenter.ClassOvfParams,
+							Class:       vcenter.ClassDeploymentOptionParams,
 							Type:        vcenter.TypeDeploymentOptionParams,
 							SelectedKey: cmd.Options.Deployment,
 						},
