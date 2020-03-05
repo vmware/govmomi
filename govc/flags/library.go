@@ -46,7 +46,11 @@ func (e errContentLibraryMatch) Error() string {
 	if kind == "" {
 		kind = "library|item"
 	}
-	return fmt.Sprintf("%q=%q matches %d items, %q id must be specified", e.Key, e.Val, e.Count, kind)
+	hint := ""
+	if e.Count > 1 {
+		hint = fmt.Sprintf(" (use %q ID instead of NAME)", kind)
+	}
+	return fmt.Sprintf("%q=%q matches %d items%s", e.Key, e.Val, e.Count, hint)
 }
 
 func ContentLibraryResult(ctx context.Context, c *rest.Client, kind string, path string) (finder.FindResult, error) {

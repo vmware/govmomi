@@ -107,6 +107,19 @@ func (c *Manager) SyncLibraryItem(ctx context.Context, item *Item, force bool) e
 	return c.Do(ctx, url.Request(http.MethodPost, body), nil)
 }
 
+// PublishLibraryItem publishes a library item to specified subscriptions.
+// If no subscriptions are specified, then publishes the library item to all subscriptions.
+func (c *Manager) PublishLibraryItem(ctx context.Context, item *Item, force bool, subscriptions []string) error {
+	body := internal.SubscriptionItemDestinationSpec{
+		Force: force,
+	}
+	for i := range subscriptions {
+		body.Subscriptions = append(body.Subscriptions, internal.SubscriptionDestination{ID: subscriptions[i]})
+	}
+	url := c.Resource(internal.LibraryItemPath).WithID(item.ID).WithAction("publish")
+	return c.Do(ctx, url.Request(http.MethodPost, body), nil)
+}
+
 // DeleteLibraryItem deletes an existing library item.
 func (c *Manager) DeleteLibraryItem(ctx context.Context, item *Item) error {
 	url := c.Resource(internal.LibraryItemPath).WithID(item.ID)

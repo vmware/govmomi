@@ -47,6 +47,7 @@ type info struct {
 
 	long bool
 	link bool
+	url  bool
 
 	names map[string]string
 }
@@ -65,6 +66,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.link, "L", false, "List Datastore path only")
+	f.BoolVar(&cmd.url, "U", false, "List pub/sub URL(s) only")
 
 	cmd.names = make(map[string]string)
 }
@@ -99,6 +101,14 @@ type infoResultsWriter struct {
 
 func (r infoResultsWriter) MarshalJSON() ([]byte, error) {
 	return json.Marshal(r.Result)
+}
+
+func (r infoResultsWriter) Dump() interface{} {
+	res := make([]interface{}, len(r.Result))
+	for i := range r.Result {
+		res[i] = r.Result[0].GetResult()
+	}
+	return res
 }
 
 func (r infoResultsWriter) Write(w io.Writer) error {
@@ -143,6 +153,19 @@ func (r infoResultsWriter) Write(w io.Writer) error {
 func (r infoResultsWriter) writeLibrary(
 	w io.Writer, v library.Library, res finder.FindResult) error {
 
+	published := v.Publication != nil && *v.Publication.Published
+
+	if r.cmd.url {
+		switch {
+		case v.Subscription != nil:
+			_, _ = fmt.Fprintf(w, "%s\n", v.Subscription.SubscriptionURL)
+		case published:
+			_, _ = fmt.Fprintf(w, "%s\n", v.Publication.PublishURL)
+		}
+
+		return nil
+	}
+
 	fmt.Fprintf(w, "Name:\t%s\n", v.Name)
 	fmt.Fprintf(w, "  ID:\t%s\n", v.ID)
 	fmt.Fprintf(w, "  Path:\t%s\n", res.GetPath())
@@ -178,6 +201,11 @@ func (r infoResultsWriter) writeLibrary(
 		fmt.Fprintf(w, "    URL:\t%s\n", v.Subscription.SubscriptionURL)
 		fmt.Fprintf(w, "    Auth:\t%s\n", v.Subscription.AuthenticationMethod)
 		fmt.Fprintf(w, "    Download:\t%s\n", dl)
+	}
+	if published {
+		fmt.Fprintf(w, "  Publication:\t\n")
+		fmt.Fprintf(w, "    URL:\t%s\n", v.Publication.PublishURL)
+		fmt.Fprintf(w, "    Auth:\t%s\n", v.Publication.AuthenticationMethod)
 	}
 	return nil
 }
