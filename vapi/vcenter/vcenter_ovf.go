@@ -60,13 +60,13 @@ type AdditionalParams struct {
 }
 
 const (
-	ClassOvfParams             = "com.vmware.vcenter.ovf.ovf_params"
-	ClassPropertyParams        = "com.vmware.vcenter.ovf.property_params"
-	TypeDeploymentOptionParams = "DeploymentOptionParams"
-	TypeExtraConfigParams      = "ExtraConfigParams"
-	TypeIPAllocationParams     = "IpAllocationParams"
-	TypePropertyParams         = "PropertyParams"
-	TypeSizeParams             = "SizeParams"
+	ClassDeploymentOptionParams = "com.vmware.vcenter.ovf.deployment_option_params"
+	ClassPropertyParams         = "com.vmware.vcenter.ovf.property_params"
+	TypeDeploymentOptionParams  = "DeploymentOptionParams"
+	TypeExtraConfigParams       = "ExtraConfigParams"
+	TypeIPAllocationParams      = "IpAllocationParams"
+	TypePropertyParams          = "PropertyParams"
+	TypeSizeParams              = "SizeParams"
 )
 
 // DeploymentOption contains the information about a deployment option as defined in the OVF specification
