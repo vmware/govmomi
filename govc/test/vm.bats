@@ -535,27 +535,19 @@ load test_helper
 }
 
 @test "vm.disk.create" {
-  esx_env
-
-  import_ttylinux_vmdk
+  vcsim_env
 
   vm=$(new_id)
 
-  govc vm.create -disk $GOVC_TEST_VMDK -on=false $vm
-  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
-  [ $result -eq 1 ]
-
-  local name=$(new_id)
-
-  run govc vm.disk.create -vm $vm -name $name -size 1G
+  govc vm.create -on=false "$vm"
   assert_success
-  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
-  [ $result -eq 2 ]
 
-  run govc vm.disk.create -vm $vm -name $name -size 1G
-  assert_success # TODO: should fail?
-  result=$(govc device.ls -vm $vm | grep disk- | wc -l)
-  [ $result -eq 2 ]
+  name=$(new_id)
+
+  run govc vm.disk.create -vm "$vm" -name "$vm/$name" -size 1M
+  assert_success
+  result=$(govc device.ls -vm "$vm" | grep -c disk-)
+  [ "$result" -eq 1 ]
 }
 
 @test "vm.disk.attach" {

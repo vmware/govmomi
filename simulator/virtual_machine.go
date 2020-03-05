@@ -829,8 +829,18 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 		return nil, fault
 	}
 
+	// Create parent directory if needed
+	dir := path.Dir(file)
+	_, err = os.Stat(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			_ = os.Mkdir(dir, 0700)
+		}
+	}
+
 	f, err := os.Create(file)
 	if err != nil {
+		log.Printf("create(%s): %s", file, err)
 		return nil, &types.FileFault{
 			File: file,
 		}

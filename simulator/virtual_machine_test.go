@@ -591,6 +591,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 	ctx := context.Background()
 
 	m := ESX()
+	m.Datastore = 2
 	defer m.Remove()
 
 	err := m.Create()
@@ -672,6 +673,29 @@ func TestCreateVmWithDevices(t *testing.T) {
 	}
 	if ndisk != 2 {
 		t.Errorf("expected 1 disk, got %d", ndisk)
+	}
+
+	// Add disk on another datastore with empty path (issue 1854)
+	ovm := object.NewVirtualMachine(c, vm.Self)
+	disk = &types.VirtualDisk{
+		CapacityInKB: 1024,
+		VirtualDevice: types.VirtualDevice{
+			Backing: &types.VirtualDiskFlatVer2BackingInfo{
+				VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+					FileName: "[LocalDS_1]",
+				},
+			},
+		},
+	}
+	devices.AssignController(disk, scsi.(*types.VirtualLsiLogicController))
+	devices = nil
+	devices = append(devices, disk)
+	create, _ = devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+	spec = types.VirtualMachineConfigSpec{DeviceChange: create}
+	rtask, _ := ovm.Reconfigure(ctx, spec)
+	_, err = rtask.WaitForResult(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
 
