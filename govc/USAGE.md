@@ -4547,7 +4547,7 @@ Options:
   -disk=                 Disk path name
   -ds=                   Datastore [GOVC_DATASTORE]
   -link=true             Link specified disk
-  -mode=                 Disk mode (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
+  -mode=                 Disk mode override (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
   -persist=true          Persist attached disk
   -sharing=              Sharing (sharingNone|sharingMultiWriter)
   -vm=                   Virtual machine [GOVC_VM]
