@@ -45,6 +45,7 @@ type ovfx struct {
 	name   string
 	force  bool
 	images bool
+	prefix bool
 	sha    int
 
 	mf bytes.Buffer
@@ -67,6 +68,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.name, "name", "", "Specifies target name (defaults to source name)")
 	f.BoolVar(&cmd.force, "f", false, "Overwrite existing")
 	f.BoolVar(&cmd.images, "i", false, "Include image files (*.{iso,img})")
+	f.BoolVar(&cmd.prefix, "prefix", true, "Prepend target name to image filenames if missing")
 	f.IntVar(&cmd.sha, "sha", 0, "Generate manifest using SHA 1, 256, 512 or 0 to skip")
 }
 
@@ -149,7 +151,7 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 			continue
 		}
 
-		if !strings.HasPrefix(i.Path, cmd.name) {
+		if cmd.prefix && !strings.HasPrefix(i.Path, cmd.name) {
 			i.Path = cmd.name + "-" + i.Path
 		}
 
