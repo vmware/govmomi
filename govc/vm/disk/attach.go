@@ -105,10 +105,6 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	backing := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
 	backing.Sharing = cmd.sharing
 
-	if len(cmd.mode) != 0 {
-		backing.DiskMode = cmd.mode
-	}
-
 	if cmd.link {
 		if cmd.persist {
 			backing.DiskMode = string(types.VirtualDiskModeIndependent_persistent)
@@ -118,12 +114,16 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 
 		disk = devices.ChildDisk(disk)
 		return vm.AddDevice(ctx, disk)
+	} else {
+		if cmd.persist {
+			backing.DiskMode = string(types.VirtualDiskModePersistent)
+		} else {
+			backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
+		}
 	}
 
-	if cmd.persist {
-		backing.DiskMode = string(types.VirtualDiskModePersistent)
-	} else {
-		backing.DiskMode = string(types.VirtualDiskModeNonpersistent)
+	if len(cmd.mode) != 0 {
+		backing.DiskMode = cmd.mode
 	}
 
 	return vm.AddDevice(ctx, disk)
