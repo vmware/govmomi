@@ -1619,6 +1619,7 @@ Examples:
 Options:
   -f=false               Overwrite existing
   -i=false               Include image files (*.{iso,img})
+  -prefix=true           Prepend target name to image filenames if missing
   -name=                 Specifies target name (defaults to source name)
   -sha=0                 Generate manifest using SHA 1, 256, 512 or 0 to skip
   -vm=                   Virtual machine [GOVC_VM]
