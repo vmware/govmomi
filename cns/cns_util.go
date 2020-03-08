@@ -59,6 +59,14 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 		for _, createSpec := range createSpecList {
 			createSpec.Metadata.ContainerCluster.ClusterFlavor = ""
 			createSpec.Metadata.ContainerClusterArray = nil
+			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
+			for _, entityMetadata := range createSpec.Metadata.EntityMetadata {
+				k8sEntityMetadata := interface{}(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
+				k8sEntityMetadata.ClusterID = ""
+				k8sEntityMetadata.ReferredEntity = nil
+				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))
+			}
+			createSpec.Metadata.EntityMetadata = updatedEntityMetadata
 			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
 		}
 		createSpecList = updatedcreateSpecList
