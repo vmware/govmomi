@@ -182,6 +182,17 @@ func (c *Client) RemoveUsersFromGroup(ctx context.Context, groupName string, use
 	return err
 }
 
+func (c *Client) AddGroupsToGroup(ctx context.Context, groupName string, groupIDs ...types.PrincipalId) error {
+	req := types.AddGroupsToLocalGroup{
+		This:      c.ServiceContent.PrincipalManagementService,
+		GroupName: groupName,
+		GroupIds:  groupIDs,
+	}
+
+	_, err := methods.AddGroupsToLocalGroup(ctx, c, &req)
+	return err
+}
+
 func (c *Client) CreateGroup(ctx context.Context, name string, details types.AdminGroupDetails) error {
 	req := types.CreateLocalGroup{
 		This:         c.ServiceContent.PrincipalManagementService,
