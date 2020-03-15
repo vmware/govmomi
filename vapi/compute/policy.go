@@ -19,8 +19,9 @@ package compute
 import (
 	"context"
 	"net/http"
+	"path"
 
-	"github.com/vmware/govmomi/vapi/internal"
+	"github.com/vmware/govmomi/vapi/compute/internal"
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
@@ -38,30 +39,62 @@ func NewPolicyManager(client *rest.Client) *PolicyManager {
 
 // Policy represents the structure a compute policy.
 type Policy struct {
-	Class       string `json:"@class,omitempty"`
+	Name        string `json:"name,omitempty"`
+	Capability  string `json:"capability,omitempty"`
+	Description string `json:"description,omitempty"`
+	Policy      string `json:"policy,omitempty"`
+	HostTag     string `json:"host_tag,omitempty"`
+	VMTag       string `json:"vm_tag,omitempty"`
+}
+
+// Capability contains information about a compute policy capability.
+type Capability struct {
+	Capability  string `json:"capability,omitempty"`
 	Name        string `json:"name,omitempty"`
 	Description string `json:"description,omitempty"`
-	VMTag       string `json:"vm_tag,omitempty"`
-	Capability  string `json:"capability,omitempty"`
-	Policy      string `json:"policy,omitempty"`
 }
 
 // Create creates a new Compute Policy and returns the id.
 func (c *PolicyManager) Create(ctx context.Context, policy Policy) (string, error) {
 	spec := struct {
-		ComputePolicy Policy `json:"spec"`
-	}{
-		ComputePolicy: policy,
-	}
+		Policy `json:"spec"`
+	}{policy}
 
-	r := c.Resource(internal.ComputePolicyPath)
+	r := c.Resource(internal.PolicyPath)
 	var res string
 	return res, c.Do(ctx, r.Request(http.MethodPost, spec), &res)
 }
 
+// Delete deletes a Compute Policy.
+func (c *PolicyManager) Delete(ctx context.Context, id string) error {
+	r := c.Resource(path.Join(internal.PolicyPath, id))
+	return c.Do(ctx, r.Request(http.MethodDelete), nil)
+}
+
 // List returns information about the compute policies available in this vCenter server.
 func (c *PolicyManager) List(ctx context.Context) ([]Policy, error) {
-	r := c.Resource(internal.ComputePolicyPath)
+	r := c.Resource(internal.PolicyPath)
 	var res []Policy
 	return res, c.Do(ctx, r.Request(http.MethodGet), &res)
+}
+
+// Get returns information about a specific compute policy
+func (c *PolicyManager) Get(ctx context.Context, id string) ([]Policy, error) {
+	r := c.Resource(path.Join(internal.PolicyPath, id))
+	var res []Policy
+	return res, c.Do(ctx, r.Request(http.MethodGet), &res)
+}
+
+// ListCapability returns information about the compute policy capabilities available in this vCenter server.
+func (c *PolicyManager) ListCapability(ctx context.Context) ([]Capability, error) {
+	r := c.Resource(internal.PolicyCapabilitiesPath)
+	var res []Capability
+	return res, c.Do(ctx, r.Request(http.MethodGet), &res)
+}
+
+// GetCapability returns information about the compute policy capability id.
+func (c *PolicyManager) GetCapability(ctx context.Context, id string) (*Capability, error) {
+	r := c.Resource(path.Join(internal.PolicyCapabilitiesPath, id))
+	var res Capability
+	return &res, c.Do(ctx, r.Request(http.MethodGet), &res)
 }
