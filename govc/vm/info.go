@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"encoding/json"
 	"strings"
 	"text/tabwriter"
 
@@ -45,7 +46,31 @@ type info struct {
 	ExtraConfig     bool
 	Resources       bool
 	ToolsConfigInfo bool
+	SummaryJson     bool
+ }
+
+
+
+type SummaryJson struct {
+		InventoryPath string `json:"inventorypath"`
+		Uuid string `json:"uuid"`
+		GuestName string `json:"guestname"`
+		Memory int32  `json:"memory"`
+		Cpus int32  `json:"cpus"`
+		PowerState string `json:"powerstate"`
+		BootTime string `json:"boottime"`
+		IpAddress  string `json:"ipaddress"`
+		Hostname  string `json:"hostname"`
+		CpuUsage  int32 `json:"cpuusage"`
+		HostMemory  int32 `json:"hostmemory"`
+		GuestMemory  int32 `json:"guestmemory"`
+		StorageUncommit  string `json:"storageuncommit"`
+		StorageCommit  string `json:"storagecommit"`
+		StorageUnshared  string `json:"storageunshared"`
+		Storage	string `json:"storage"`
+		Network  string `json:"network"`
 }
+
 
 func init() {
 	cli.Register("vm.info", &info{})
@@ -66,6 +91,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.ExtraConfig, "e", false, "Show ExtraConfig")
 	f.BoolVar(&cmd.Resources, "r", false, "Show resource summary")
 	f.BoolVar(&cmd.ToolsConfigInfo, "t", false, "Show ToolsConfigInfo")
+	f.BoolVar(&cmd.SummaryJson, "sj", false, "Show General and Resource in JSON")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -91,8 +117,11 @@ func (cmd *info) Description() string {
 The '-r' flag displays additional info for CPU, memory and storage usage,
 along with the VM's Datastores, Networks and PortGroups.
 
+The '-sj' flag displays Summary in JSON with Datastores and Resources
+
 Examples:
   govc vm.info $vm
+  govc vm.info -sj $vm
   govc vm.info -r $vm | grep Network:
   govc vm.info -json $vm
   govc find . -type m -runtime.powerState poweredOn | xargs govc vm.info`
@@ -105,6 +134,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	vms, err := cmd.VirtualMachines(f.Args())
+
 	if err != nil {
 		if _, ok := err.(*find.NotFoundError); ok {
 			// Continue with empty VM slice
@@ -132,6 +162,9 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			props = append(props, "config.extraConfig")
 		}
 		if cmd.Resources {
+			props = append(props, "datastore", "network")
+		}
+		if cmd.SummaryJson{
 			props = append(props, "datastore", "network")
 		}
 		if cmd.ToolsConfigInfo {
@@ -258,6 +291,11 @@ func (r *infoResult) collectReferences(pc *property.Collector, ctx context.Conte
 			}
 		}
 
+		if r.cmd.SummaryJson {
+			addRef(vm.Datastore...)
+			addRef(vm.Network...)
+                }
+
 		if r.cmd.Resources {
 			addRef(vm.Datastore...)
 			addRef(vm.Network...)
@@ -287,6 +325,9 @@ func (r *infoResult) entityNames(refs []types.ManagedObjectReference) string {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
+
+
+
 	// Maintain order via r.objects as Property collector does not always return results in order.
 	objects := make(map[types.ManagedObjectReference]mo.VirtualMachine, len(r.VirtualMachines))
 	for _, o := range r.VirtualMachines {
@@ -299,8 +340,39 @@ func (r *infoResult) Write(w io.Writer) error {
 		vm := objects[o.Reference()]
 		s := vm.Summary
 
-		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
 
+        if r.cmd.SummaryJson {
+                hostName := "<unavailable>"
+                if href := vm.Summary.Runtime.Host; href != nil {
+                    if name, ok := r.entities[*href]; ok {
+                        hostName = name
+                    }
+                }
+
+		summJson := SummaryJson{}
+		summJson.InventoryPath = o.InventoryPath
+		summJson.Uuid = s.Config.Uuid
+		summJson.GuestName = s.Config.GuestFullName
+		summJson.Memory = s.Config.MemorySizeMB
+		summJson.Cpus = s.Config.NumCpu
+		summJson.PowerState = fmt.Sprintf("%s",s.Runtime.PowerState)
+		summJson.BootTime = fmt.Sprintf("%s",s.Runtime.BootTime)
+		summJson.IpAddress = s.Guest.IpAddress
+		summJson.Hostname = hostName
+		summJson.CpuUsage = s.QuickStats.OverallCpuUsage
+		summJson.HostMemory = s.QuickStats.HostMemoryUsage
+		summJson.GuestMemory = s.QuickStats.GuestMemoryUsage
+		summJson.StorageUncommit = fmt.Sprintf("%s",units.ByteSize(s.Storage.Uncommitted))
+		summJson.StorageCommit = fmt.Sprintf("%s",units.ByteSize(s.Storage.Committed))
+		summJson.StorageUnshared = fmt.Sprintf("%s",units.ByteSize(s.Storage.Unshared))
+		summJson.Storage = fmt.Sprintf("%s",r.entityNames(vm.Datastore))
+		summJson.Network = fmt.Sprintf("%s",r.entityNames(vm.Network))
+
+		printSummary(summJson)
+
+       } else {
+
+		fmt.Fprintf(tw, "Name:\t%s\n", s.Config.Name)
 		if r.cmd.General {
 			hostName := "<unavailable>"
 
@@ -320,6 +392,7 @@ func (r *infoResult) Write(w io.Writer) error {
 			fmt.Fprintf(tw, "  IP address:\t%s\n", s.Guest.IpAddress)
 			fmt.Fprintf(tw, "  Host:\t%s\n", hostName)
 		}
+       }
 
 		if r.cmd.Resources {
 			if s.Storage == nil {
@@ -358,4 +431,15 @@ func (r *infoResult) Write(w io.Writer) error {
 	}
 
 	return tw.Flush()
+}
+
+// Dump the json struct
+func printSummary(data interface{}) {
+    var p []byte
+    p, err := json.MarshalIndent(data, "", "\t")
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Printf("%s \n", p)
 }
