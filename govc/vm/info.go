@@ -51,7 +51,13 @@ type info struct {
 
 
 
+
+
 type SummaryJson struct {
+		Name string `json:"name"`
+		Template bool `json:"template"`
+		NumEthernetCards int32 `json:"numethernetcards"`
+		NumVirtualDisks int32 `json:"numvirtualdisks"`
 		InventoryPath string `json:"inventorypath"`
 		Uuid string `json:"uuid"`
 		GuestName string `json:"guestname"`
@@ -117,7 +123,7 @@ func (cmd *info) Description() string {
 The '-r' flag displays additional info for CPU, memory and storage usage,
 along with the VM's Datastores, Networks and PortGroups.
 
-The '-sj' flag displays Summary in JSON with Datastores and Resources
+The '-sj' flag displays Summary in JSON with Datastores, Resources and some config
 
 Examples:
   govc vm.info $vm
@@ -350,6 +356,10 @@ func (r *infoResult) Write(w io.Writer) error {
                 }
 
 		summJson := SummaryJson{}
+		summJson.Name = s.Config.Name
+		summJson.Template = s.Config.Template
+		summJson.NumEthernetCards = s.Config.NumEthernetCards
+		summJson.NumVirtualDisks = s.Config.NumVirtualDisks
 		summJson.InventoryPath = o.InventoryPath
 		summJson.Uuid = s.Config.Uuid
 		summJson.GuestName = s.Config.GuestFullName
