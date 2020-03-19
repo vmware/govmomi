@@ -59,10 +59,15 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.domain, "domain", "", "Domain name")
 	f.StringVar(&cmd.host.Name, "name", "", "Host name")
 	f.Var(&cmd.mac, "mac", "MAC address")
+	cmd.mac = nil
 	f.Var(&cmd.ip, "ip", "IP address")
+	cmd.ip = nil
 	f.Var(&cmd.gateway, "gateway", "Gateway")
+	cmd.gateway = nil
 	f.Var(&cmd.netmask, "netmask", "Netmask")
+	cmd.netmask = nil
 	f.Var(&cmd.dnsserver, "dns-server", "DNS server")
+	cmd.dnsserver = nil
 	f.StringVar(&cmd.kind, "type", "Linux", "Customization type if spec NAME is not specified (Linux|Windows)")
 }
 
