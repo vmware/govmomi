@@ -302,6 +302,17 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Config.Hardware.NumCoresPerSocket = spec.NumCoresPerSocket
 	}
 
+	if spec.GuestId != "" {
+		// TODO: should use EnvironmentBrowser.QueryConfigOptionEx here
+		vm.Guest.GuestFamily = string(types.VirtualMachineGuestOsFamilyLinuxGuest)
+		switch {
+		case strings.HasPrefix(spec.GuestId, "win"):
+			vm.Guest.GuestFamily = string(types.VirtualMachineGuestOsFamilyWindowsGuest)
+		case strings.HasPrefix(spec.GuestId, "darwin"):
+			vm.Guest.GuestFamily = string(types.VirtualMachineGuestOsFamilyDarwinGuestFamily)
+		}
+	}
+
 	var changes []types.PropertyChange
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()

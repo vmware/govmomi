@@ -330,6 +330,12 @@ load test_helper
 
     [ "$uuids" != "$iuuids" ]
   done
+
+  govc vm.create -g ubuntu64Guest my-ubuntu
+  assert_success
+
+  govc object.collect -type m / -guest.guestFamily linuxGuest
+  assert_success
 }
 
 @test "object.collect view" {
