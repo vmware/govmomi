@@ -121,6 +121,10 @@ load test_helper
   eth1=$(govc device.ls -vm $vm | grep ethernet- | grep -v $eth0 | awk '{print $1}')
   type=$(govc device.info -vm $vm $eth1 | grep Type: | awk -F: '{print $2}')
   assert_equal "VirtualE1000e" $(collapse_ws $type)
+
+  # validate each NIC has a unique MAC
+  macs=$(govc device.info -vm "$vm" -json ethernet-* | jq -r .Devices[].MacAddress | uniq | wc -l)
+  [ "$macs" = "2" ]
 }
 
 @test "network flag required" {

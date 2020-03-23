@@ -916,12 +916,14 @@ var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
 // "The host generates generateMAC addresses that consists of the VMware OUI 00:0C:29 and the last three octets in hexadecimal
 //  format of the virtual machine UUID.  The virtual machine UUID is based on a hash calculated by using the UUID of the
 //  ESXi physical machine and the path to the configuration file (.vmx) of the virtual machine."
-func (vm *VirtualMachine) generateMAC() string {
-	id := vm.Config.Uuid
+func (vm *VirtualMachine) generateMAC(unit int32) string {
+	id := []byte(vm.Config.Uuid)
 
 	offset := len(id) - len(vmwOUI)
+	key := id[offset] + byte(unit) // add device unit number, giving each VM NIC a unique MAC
+	id = append([]byte{key}, id[offset+1:]...)
 
-	mac := append(vmwOUI, id[offset:]...)
+	mac := append(vmwOUI, id...)
 
 	return mac.String()
 }
@@ -1004,7 +1006,10 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 
 		c := x.GetVirtualEthernetCard()
 		if c.MacAddress == "" {
-			c.MacAddress = vm.generateMAC()
+			if c.UnitNumber == nil {
+				devices.AssignController(device, controller)
+			}
+			c.MacAddress = vm.generateMAC(*c.UnitNumber - 7) // Note 7 == PCI offset
 		}
 
 		if spec.Operation == types.VirtualDeviceConfigSpecOperationAdd {
