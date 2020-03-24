@@ -43,6 +43,7 @@ import (
 	_ "github.com/vmware/govmomi/pbm/simulator"
 	_ "github.com/vmware/govmomi/sts/simulator"
 	_ "github.com/vmware/govmomi/vapi/cluster/simulator"
+	_ "github.com/vmware/govmomi/vapi/compute/simulator"
 	_ "github.com/vmware/govmomi/vapi/simulator"
 )
 
