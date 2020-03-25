@@ -79,10 +79,10 @@ func (c *PolicyManager) List(ctx context.Context) ([]Policy, error) {
 }
 
 // Get returns information about a specific compute policy
-func (c *PolicyManager) Get(ctx context.Context, id string) ([]Policy, error) {
+func (c *PolicyManager) Get(ctx context.Context, id string) (*Policy, error) {
 	r := c.Resource(path.Join(internal.PolicyPath, id))
-	var res []Policy
-	return res, c.Do(ctx, r.Request(http.MethodGet), &res)
+	var res Policy
+	return &res, c.Do(ctx, r.Request(http.MethodGet), &res)
 }
 
 // ListCapability returns information about the compute policy capabilities available in this vCenter server.
