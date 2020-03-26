@@ -20,7 +20,7 @@ import (
 	"context"
 	"os"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/kr/pretty"
 	"github.com/vmware/govmomi/object"
 
 	"github.com/vmware/govmomi/find"
@@ -39,8 +39,7 @@ func TestClient(t *testing.T) {
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
 	if url == "" || datacenter == "" || datastore == "" {
-		t.Skipf("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
-		t.SkipNow()
+		t.Fatal("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
 	resporcePoolPath := os.Getenv("CNS_RESOURCE_POOL_PATH") // example "/datacenter-name/host/host-ip/Resources" or  /datacenter-name/host/cluster-name/Resources
 	u, err := soap.ParseURL(url)
@@ -97,7 +96,7 @@ func TestClient(t *testing.T) {
 		},
 	}
 	cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
-	t.Logf("Creating volume using the spec: %+v", spew.Sdump(cnsVolumeCreateSpec))
+	t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpec))
 	createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
 	if err != nil {
 		t.Errorf("Failed to create volume. Error: %+v \n", err)
@@ -142,7 +141,7 @@ func TestClient(t *testing.T) {
 		}
 
 		staticCnsVolumeCreateSpecList = append(staticCnsVolumeCreateSpecList, staticCnsVolumeCreateSpec)
-		t.Logf("Creating volume using the spec: %+v", spew.Sdump(staticCnsVolumeCreateSpec))
+		t.Logf("Creating volume using the spec: %+v", pretty.Sprint(staticCnsVolumeCreateSpec))
 		recreateTask, err := cnsClient.CreateVolume(ctx, staticCnsVolumeCreateSpecList)
 		if err != nil {
 			t.Errorf("Failed to create volume. Error: %+v \n", err)
@@ -163,9 +162,9 @@ func TestClient(t *testing.T) {
 			t.FailNow()
 		}
 		reCreateVolumeOperationRes := reCreateTaskResult.GetCnsVolumeOperationResult()
-		t.Logf("reCreateVolumeOperationRes.: %+v", spew.Sdump(reCreateVolumeOperationRes))
+		t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
 		if reCreateVolumeOperationRes.Fault != nil {
-			t.Logf("reCreateVolumeOperationRes.Fault: %+v", spew.Sdump(reCreateVolumeOperationRes.Fault))
+			t.Logf("reCreateVolumeOperationRes.Fault: %+v", pretty.Sprint(reCreateVolumeOperationRes.Fault))
 			_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsFault)
 			if !ok {
 				t.Fatalf("Fault is not CnsFault")
@@ -180,13 +179,13 @@ func TestClient(t *testing.T) {
 	var volumeIDList []cnstypes.CnsVolumeId
 	volumeIDList = append(volumeIDList, cnstypes.CnsVolumeId{Id: volumeId})
 	queryFilter.VolumeIds = volumeIDList
-	t.Logf("Calling QueryVolume using queryFilter: %+v", spew.Sdump(queryFilter))
+	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
 	queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", spew.Sdump(queryResult))
+	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
@@ -198,7 +197,7 @@ func TestClient(t *testing.T) {
 		CapacityInMb: newCapacityInMb,
 	}
 	cnsVolumeExtendSpecList = append(cnsVolumeExtendSpecList, cnsVolumeExtendSpec)
-	t.Logf("Extending volume using the spec: %+v", spew.Sdump(cnsVolumeExtendSpecList))
+	t.Logf("Extending volume using the spec: %+v", pretty.Sprint(cnsVolumeExtendSpecList))
 	extendTask, err := cnsClient.ExtendVolume(ctx, cnsVolumeExtendSpecList)
 	if err != nil {
 		t.Errorf("Failed to extend volume. Error: %+v \n", err)
@@ -232,7 +231,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", spew.Sdump(queryResult))
+	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", pretty.Sprint(queryResult))
 	queryCapacity := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).CapacityInMb
 	if newCapacityInMb != queryCapacity {
 		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryCapacity)
@@ -341,13 +340,13 @@ func TestClient(t *testing.T) {
 		t.Logf("Sucessfully updated volume metadata")
 	}
 
-	t.Logf("Calling QueryVolume using queryFilter: %+v", spew.Sdump(queryFilter))
+	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
 	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
 	if err != nil {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", spew.Sdump(queryResult))
+	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Test QueryAll
 	querySelection := cnstypes.CnsQuerySelection{
@@ -364,7 +363,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried all Volumes. queryResult: %+v", spew.Sdump(queryResult))
+	t.Logf("Sucessfully Queried all Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Create a VM to test Attach Volume API.
 	virtualMachineConfigSpec := vim25types.VirtualMachineConfigSpec{
@@ -479,7 +478,7 @@ func TestClient(t *testing.T) {
 	}
 	reAttachVolumeOperationRes := attachTaskResult.GetCnsVolumeOperationResult()
 	if reAttachVolumeOperationRes.Fault != nil {
-		t.Logf("reAttachVolumeOperationRes.Fault: %+v", spew.Sdump(reAttachVolumeOperationRes.Fault))
+		t.Logf("reAttachVolumeOperationRes.Fault: %+v", pretty.Sprint(reAttachVolumeOperationRes.Fault))
 		_, ok := reAttachVolumeOperationRes.Fault.Fault.(*vim25types.ResourceInUse)
 		if !ok {
 			t.Fatalf("Fault is not ResourceInUse")

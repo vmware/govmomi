@@ -20,7 +20,8 @@ import (
 	"os"
 	"testing"
 
-	"github.com/davecgh/go-spew/spew"
+	"github.com/kr/pretty"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -28,11 +29,10 @@ import (
 )
 
 func TestClient(t *testing.T) {
-	url := os.Getenv("VC_URL")
-	datacenter := os.Getenv("DATACENTER")
+	url := os.Getenv("VC_URL")            // example: export VC_URL='https://username:password@vc-ip/sdk'
+	datacenter := os.Getenv("DATACENTER") // example: export DATACENTER='name-of-datacenter'
 	if url == "" || datacenter == "" {
-		t.Skipf("VC_URL or DATACENTER is not set")
-		t.SkipNow()
+		t.Fatal("VC_URL or DATACENTER is not set")
 	}
 
 	u, err := soap.ParseURL(url)
@@ -77,8 +77,7 @@ func TestClient(t *testing.T) {
 			isFileServiceEnabled = true
 		}
 	}
-
 	if isFileServiceEnabled {
-		t.Logf("Printing one of the clusterConfig where file service is enabled:\n %+v", spew.Sdump(clusterConfigToPrint))
+		t.Logf("Printing one of the clusterConfig where file service is enabled:\n %+v", pretty.Sprint(clusterConfigToPrint))
 	}
 }
