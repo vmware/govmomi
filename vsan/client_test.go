@@ -32,7 +32,7 @@ func TestClient(t *testing.T) {
 	url := os.Getenv("VC_URL")            // example: export VC_URL='https://username:password@vc-ip/sdk'
 	datacenter := os.Getenv("DATACENTER") // example: export DATACENTER='name-of-datacenter'
 	if url == "" || datacenter == "" {
-		t.Fatal("VC_URL or DATACENTER is not set")
+		t.Skip("VC_URL or DATACENTER is not set")
 	}
 
 	u, err := soap.ParseURL(url)

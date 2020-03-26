@@ -39,7 +39,7 @@ func TestClient(t *testing.T) {
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
 	if url == "" || datacenter == "" || datastore == "" {
-		t.Fatal("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
+		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
 	resporcePoolPath := os.Getenv("CNS_RESOURCE_POOL_PATH") // example "/datacenter-name/host/host-ip/Resources" or  /datacenter-name/host/cluster-name/Resources
 	u, err := soap.ParseURL(url)
