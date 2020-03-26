@@ -56,12 +56,18 @@ func (cmd *ls) Process(ctx context.Context) error {
 	return cmd.OutputFlag.Process(ctx)
 }
 
+func (cmd *ls) Usage() string {
+	return "[ID]"
+}
+
 func (cmd *ls) Description() string {
 	return `List compute policies.
 
 Examples:
   govc compute.policy.ls
-  govc compute.policy.ls -c`
+  govc compute.policy.ls -c
+  govc compute.policy.ls ab6b4752-118a-4ac0-867f-4d67d48ce371
+  govc compute.policy.ls -c com.vmware.vcenter.compute.policies.capabilities.vm_vm_anti_affinity`
 }
 
 type lsResult []compute.Policy
@@ -100,18 +106,40 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
 		m := compute.NewPolicyManager(c)
 
+		var err error
+		id := f.Arg(0)
+
 		if cmd.cap {
-			res, err := m.ListCapability(ctx)
-			if err != nil {
-				return err
+			var res []compute.Capability
+			if id == "" {
+				res, err = m.ListCapability(ctx)
+				if err != nil {
+					return err
+				}
+			} else {
+				r, err := m.GetCapability(ctx, id)
+				if err != nil {
+					return err
+				}
+				res = append(res, *r)
 			}
 
 			return cmd.WriteResult(lsCapabilityResult(res))
 		}
 
-		res, err := m.List(ctx)
-		if err != nil {
-			return err
+		var res []compute.Policy
+
+		if id == "" {
+			res, err = m.List(ctx)
+			if err != nil {
+				return err
+			}
+		} else {
+			r, err := m.Get(ctx, id)
+			if err != nil {
+				return err
+			}
+			res = append(res, *r)
 		}
 
 		return cmd.WriteResult(lsResult(res))

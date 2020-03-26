@@ -81,7 +81,7 @@ func (c *PolicyManager) List(ctx context.Context) ([]Policy, error) {
 // Get returns information about a specific compute policy
 func (c *PolicyManager) Get(ctx context.Context, id string) (*Policy, error) {
 	r := c.Resource(path.Join(internal.PolicyPath, id))
-	var res Policy
+	res := Policy{Policy: id}
 	return &res, c.Do(ctx, r.Request(http.MethodGet), &res)
 }
 
@@ -95,6 +95,6 @@ func (c *PolicyManager) ListCapability(ctx context.Context) ([]Capability, error
 // GetCapability returns information about the compute policy capability id.
 func (c *PolicyManager) GetCapability(ctx context.Context, id string) (*Capability, error) {
 	r := c.Resource(path.Join(internal.PolicyCapabilitiesPath, id))
-	var res Capability
+	res := Capability{Capability: id}
 	return &res, c.Do(ctx, r.Request(http.MethodGet), &res)
 }
