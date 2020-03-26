@@ -363,6 +363,7 @@ func Decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
 
 func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 	id := r.Header.Get(internal.SessionCookieName)
+	useHeaderAuthn := strings.ToLower(r.Header.Get(internal.UseHeaderAuthn))
 
 	switch r.Method {
 	case http.MethodPost:
@@ -382,11 +383,13 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		id = uuid.New().String()
 		now := time.Now()
 		s.Session[id] = &rest.Session{User: user, Created: now, LastAccessed: now}
-		http.SetCookie(w, &http.Cookie{
-			Name:  internal.SessionCookieName,
-			Value: id,
-			Path:  rest.Path,
-		})
+		if useHeaderAuthn != "true" {
+			http.SetCookie(w, &http.Cookie{
+				Name:  internal.SessionCookieName,
+				Value: id,
+				Path:  rest.Path,
+			})
+		}
 		OK(w, id)
 	case http.MethodDelete:
 		delete(s.Session, id)
