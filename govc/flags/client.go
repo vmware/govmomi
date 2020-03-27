@@ -583,9 +583,6 @@ func (flag *ClientFlag) WithRestClient(ctx context.Context, f func(*rest.Client)
 	}
 
 	c := rest.NewClient(vc)
-	if err != nil {
-		return err
-	}
 
 	// TODO: rest.Client session cookie should be persisted as the soap.Client session cookie is.
 	if vc.Certificate() == nil {
