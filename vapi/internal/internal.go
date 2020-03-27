@@ -43,6 +43,7 @@ const (
 	VCenterVMTXLibraryItem         = "/vcenter/vm-template/library-items"
 	VCenterVM                      = "/vcenter/vm"
 	SessionCookieName              = "vmware-api-session-id"
+	UseHeaderAuthn                 = "vmware-use-header-authn"
 )
 
 // AssociatedObject is the same structure as types.ManagedObjectReference,
