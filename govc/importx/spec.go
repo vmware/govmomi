@@ -57,6 +57,7 @@ var (
 
 type spec struct {
 	*ArchiveFlag
+	*flags.ClientFlag
 	*flags.OutputFlag
 
 	verbose bool
@@ -69,6 +70,9 @@ func init() {
 func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ArchiveFlag, ctx = newArchiveFlag(ctx)
 	cmd.ArchiveFlag.Register(ctx, f)
+	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
+	cmd.ClientFlag.Register(ctx, f)
+
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
 
@@ -77,6 +81,9 @@ func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (cmd *spec) Process(ctx context.Context) error {
 	if err := cmd.ArchiveFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
 	return cmd.OutputFlag.Process(ctx)
@@ -102,6 +109,19 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 			fpath = "*.ovf"
 		default:
 			return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
+		}
+
+		if isRemotePath(fpath) {
+			client, err := cmd.Client()
+			if err != nil {
+				return err
+			}
+			switch archive := cmd.Archive.(type) {
+			case *FileArchive:
+				archive.Client = client
+			case *TapeArchive:
+				archive.Client = client
+			}
 		}
 	}
 
