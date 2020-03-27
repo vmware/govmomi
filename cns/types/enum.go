@@ -26,10 +26,24 @@ type CnsVolumeType string
 
 const (
 	CnsVolumeTypeBlock = CnsVolumeType("BLOCK")
+	CnsVolumeTypeFile  = CnsVolumeType("FILE")
 )
 
 func init() {
 	types.Add("CnsVolumeType", reflect.TypeOf((*CnsVolumeType)(nil)).Elem())
+}
+
+type CnsClusterFlavor string
+
+const (
+	CnsClusterFlavorVanilla  = CnsClusterFlavor("VANILLA")
+	CnsClusterFlavorWorkload = CnsClusterFlavor("WORKLOAD")
+	CnsClusterFlavorGuest    = CnsClusterFlavor("GUEST_CLUSTER")
+	CnsClusterFlavorUnknown  = CnsClusterFlavor("ClusterFlavor_Unknown")
+)
+
+func init() {
+	types.Add("CnsClusterFlavor", reflect.TypeOf((*CnsClusterFlavor)(nil)).Elem())
 }
 
 type QuerySelectionNameType string
@@ -40,6 +54,7 @@ const (
 	QuerySelectionNameTypeBackingObjectDetails   = QuerySelectionNameType("BACKING_OBJECT_DETAILS")
 	QuerySelectionNameTypeComplianceStatus       = QuerySelectionNameType("COMPLIANCE_STATUS")
 	QuerySelectionNameTypeDataStoreAccessibility = QuerySelectionNameType("DATASTORE_ACCESSIBILITY_STATUS")
+	QuerySelectionNameTypeHealthStatus           = QuerySelectionNameType("HEALTH_STATUS")
 )
 
 func init() {

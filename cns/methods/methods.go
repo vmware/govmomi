@@ -83,6 +83,26 @@ func CnsDeleteVolume(ctx context.Context, r soap.RoundTripper, req *types.CnsDel
 	return resBody.Res, nil
 }
 
+type CnsExtendVolumeBody struct {
+	Req    *types.CnsExtendVolume         `xml:"urn:vsan CnsExtendVolume,omitempty"`
+	Res    *types.CnsExtendVolumeResponse `xml:"urn:vsan CnsExtendVolumeResponse,omitempty"`
+	Fault_ *soap.Fault                    `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsExtendVolumeBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsExtendVolume(ctx context.Context, r soap.RoundTripper, req *types.CnsExtendVolume) (*types.CnsExtendVolumeResponse, error) {
+	var reqBody, resBody CnsExtendVolumeBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type CnsAttachVolumeBody struct {
 	Req    *types.CnsAttachVolume         `xml:"urn:vsan CnsAttachVolume,omitempty"`
 	Res    *types.CnsAttachVolumeResponse `xml:"urn:vsan CnsAttachVolumeResponse,omitempty"`

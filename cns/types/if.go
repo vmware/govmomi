@@ -44,6 +44,16 @@ func init() {
 	types.Add("BaseCnsBackingObjectDetails", reflect.TypeOf((*CnsBackingObjectDetails)(nil)).Elem())
 }
 
+func (b *CnsBaseCreateSpec) GetCnsBaseCreateSpec() *CnsBaseCreateSpec { return b }
+
+type BaseCnsBaseCreateSpec interface {
+	GetCnsBaseCreateSpec() *CnsBaseCreateSpec
+}
+
+func init() {
+	types.Add("BaseCnsBaseCreateSpec", reflect.TypeOf((*CnsBaseCreateSpec)(nil)).Elem())
+}
+
 func (b *CnsEntityMetadata) GetCnsEntityMetadata() *CnsEntityMetadata { return b }
 
 type BaseCnsEntityMetadata interface {

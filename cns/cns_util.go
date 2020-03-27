@@ -25,17 +25,8 @@ import (
 	vim25types "github.com/vmware/govmomi/vim25/types"
 )
 
-// version and namespace constants for task client
-const (
-	// ClientVersion "vSAN 6.7U3" is the stable version for vSphere 6.7u3 release
-	taskClientVersion   = "vSAN 6.7U3"
-	taskClientNamespace = "urn:vsan"
-)
-
 // GetTaskInfo gets the task info given a task
 func GetTaskInfo(ctx context.Context, task *object.Task) (*vim25types.TaskInfo, error) {
-	task.Client().Version = taskClientVersion
-	task.Client().Namespace = taskClientNamespace
 	taskInfo, err := task.WaitForResult(ctx, nil)
 	if err != nil {
 		return nil, err
@@ -48,11 +39,60 @@ func GetTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (cnstypes
 	if taskInfo == nil {
 		return nil, errors.New("TaskInfo is empty")
 	}
-	volumeOperationBatchResult := taskInfo.Result.(cnstypes.CnsVolumeOperationBatchResult)
-	if &volumeOperationBatchResult == nil ||
-		volumeOperationBatchResult.VolumeResults == nil ||
-		len(volumeOperationBatchResult.VolumeResults) == 0 {
-		return nil, errors.New("Cannot get VolumeOperationResult")
+	if taskInfo.Result != nil {
+		volumeOperationBatchResult := taskInfo.Result.(cnstypes.CnsVolumeOperationBatchResult)
+		if &volumeOperationBatchResult == nil ||
+			volumeOperationBatchResult.VolumeResults == nil ||
+			len(volumeOperationBatchResult.VolumeResults) == 0 {
+			return nil, errors.New("Cannot get VolumeOperationResult")
+		}
+		return volumeOperationBatchResult.VolumeResults[0], nil
 	}
-	return volumeOperationBatchResult.VolumeResults[0], nil
+	return nil, errors.New("TaskInfo result is empty")
+}
+
+// dropUnknownCreateSpecElements helps drop newly added elements in the CnsVolumeCreateSpec, which are not known to the prior vSphere releases
+func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolumeCreateSpec) []cnstypes.CnsVolumeCreateSpec {
+	if c.serviceClient.Version == ReleaseVSAN67u3 {
+		// Dropping optional fields not known to vSAN 6.7U3
+		var updatedcreateSpecList []cnstypes.CnsVolumeCreateSpec
+		for _, createSpec := range createSpecList {
+			createSpec.Metadata.ContainerCluster.ClusterFlavor = ""
+			createSpec.Metadata.ContainerClusterArray = nil
+			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
+			for _, entityMetadata := range createSpec.Metadata.EntityMetadata {
+				k8sEntityMetadata := interface{}(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
+				k8sEntityMetadata.ClusterID = ""
+				k8sEntityMetadata.ReferredEntity = nil
+				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))
+			}
+			createSpec.Metadata.EntityMetadata = updatedEntityMetadata
+			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
+		}
+		createSpecList = updatedcreateSpecList
+	}
+	return createSpecList
+}
+
+// dropUnknownVolumeMetadataUpdateSpecElements helps drop newly added elements in the CnsVolumeMetadataUpdateSpec, which are not known to the prior vSphere releases
+func dropUnknownVolumeMetadataUpdateSpecElements(c *Client, updateSpecList []cnstypes.CnsVolumeMetadataUpdateSpec) []cnstypes.CnsVolumeMetadataUpdateSpec {
+	if c.serviceClient.Version == ReleaseVSAN67u3 {
+		// Dropping optional fields not known to vSAN 6.7U3
+		var updatedUpdateSpecList []cnstypes.CnsVolumeMetadataUpdateSpec
+		for _, updateSpec := range updateSpecList {
+			updateSpec.Metadata.ContainerCluster.ClusterFlavor = ""
+			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
+			for _, entityMetadata := range updateSpec.Metadata.EntityMetadata {
+				k8sEntityMetadata := interface{}(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
+				k8sEntityMetadata.ClusterID = ""
+				k8sEntityMetadata.ReferredEntity = nil
+				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))
+			}
+			updateSpec.Metadata.ContainerClusterArray = nil
+			updateSpec.Metadata.EntityMetadata = updatedEntityMetadata
+			updatedUpdateSpecList = append(updatedUpdateSpecList, updateSpec)
+		}
+		updateSpecList = updatedUpdateSpecList
+	}
+	return updateSpecList
 }
