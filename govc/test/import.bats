@@ -14,6 +14,26 @@ load test_helper
 
   run govc vm.destroy "$TTYLINUX_NAME"
   assert_success
+
+  # link ovf/ova to datastore so we can test with an http source
+  dir=$(govc datastore.info -json | jq -r .Datastores[].Info.Url)
+  ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
+
+  run govc import.spec "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
+  assert_success
+
+  proto=$(jq -r .IPProtocol <<<"$output")
+  assert_equal IPv4 "$proto"
+
+  run govc import.ova "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  assert_success
+
+  run govc device.ls -vm "$TTYLINUX_NAME"
+  assert_success
+  assert_matches "disk-"
+
+  run govc vm.destroy "$TTYLINUX_NAME"
+  assert_success
 }
 
 @test "import.ova with iso" {
