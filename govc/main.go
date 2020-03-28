@@ -25,7 +25,6 @@ import (
 	_ "github.com/vmware/govmomi/govc/cluster/group"
 	_ "github.com/vmware/govmomi/govc/cluster/override"
 	_ "github.com/vmware/govmomi/govc/cluster/rule"
-	_ "github.com/vmware/govmomi/govc/compute/policy"
 	_ "github.com/vmware/govmomi/govc/datacenter"
 	_ "github.com/vmware/govmomi/govc/datastore"
 	_ "github.com/vmware/govmomi/govc/datastore/cluster"
