@@ -18,11 +18,11 @@ package vslm
 
 import (
 	"context"
-	"errors"
 	"time"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vslm/methods"
 	"github.com/vmware/govmomi/vslm/types"
@@ -94,7 +94,7 @@ func (this *Task) WaitNonDefault(ctx context.Context, timeoutNS time.Duration, s
 				}
 			}
 		} else if info.State == types.VslmTaskInfoStateError {
-			return nil, errors.New(info.Error.LocalizedMessage)
+			return nil, soap.WrapVimFault(info.Error.Fault)
 		} else {
 			break
 		}
