@@ -50,7 +50,7 @@ load test_helper
   govc cluster.create comp
   govc cluster.add -cluster comp -hostname test.host.com -username user -password pass
   govc cluster.add -cluster comp -hostname test2.host.com -username user -password pass
-  govc datastore.create -type local -name vol6 -path "$TMPDIR" test.host.com
+  govc datastore.create -type local -name vol6 -path "$BATS_TMPDIR" test.host.com
   govc pool.create comp/Resources/testPool
   govc vm.create -c 1 -ds vol6 -g centos64Guest -pool testPool -m 4096 "$id"
   govc vm.destroy "$id"
@@ -370,7 +370,7 @@ docker_name() {
 
   vcsim_stop
 
-  dir=$(mktemp -d govc-test-XXXXX)
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
   echo nobody > "$dir/username"
   echo nothing > "$dir/password"
 

@@ -175,6 +175,10 @@ func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSess
 			body.Fault_ = Fault("", new(types.InvalidArgument))
 			return body
 		}
+		if _, ok := s.sessions[id]; !ok {
+			body.Fault_ = Fault("", new(types.NotFound))
+			return body
+		}
 		delete(s.sessions, id)
 	}
 
