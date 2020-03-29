@@ -3,7 +3,7 @@
 load test_helper
 
 @test "session.ls" {
-  esx_env
+  vcsim_env
 
   run govc session.ls
   assert_success
@@ -16,11 +16,14 @@ load test_helper
 }
 
 @test "session.rm" {
-  esx_env
+  vcsim_env
+
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+  export GOVMOMI_HOME="$dir"
+  export GOVC_PERSIST_SESSION=true
 
   run govc session.rm enoent
-  assert_failure
-  assert_output "govc: ServerFaultCode: The object or item referred to could not be found."
+  assert_failure # NotFound
 
   # Can't remove the current session
   id=$(govc session.ls -json | jq -r .CurrentSession.Key)
@@ -28,15 +31,33 @@ load test_helper
   assert_failure
 
   thumbprint=$(govc about.cert -thumbprint)
-  # persist session just to avoid the Logout() so we can session.rm below
-  dir=$(mktemp -d govc-test-XXXXX)
-
-  id=$(GOVMOMI_HOME="$dir" govc session.ls -json -k=false -persist-session -tls-known-hosts <(echo "$thumbprint") | jq -r .CurrentSession.Key)
+  id=$(govc session.ls -json -k=false -tls-known-hosts <(echo "$thumbprint") | jq -r .CurrentSession.Key)
 
   rm -rf "$dir"
 
   run govc session.rm "$id"
   assert_success
+}
+
+@test "session.persist" {
+  vcsim_env
+
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+  export GOVMOMI_HOME="$dir"
+  export GOVC_PERSIST_SESSION=true
+
+  run govc role.ls
+  assert_success
+
+  host=$(govc env GOVC_URL)
+  user=$(govc env GOVC_USERNAME)
+  run govc role.ls -u "$host" # url w/o user:pass
+  assert_failure # NotAuthenticated
+
+  run govc role.ls -u "$user@$host" # url w/o pass
+  assert_success # authenticated via persisted session
+
+  rm -rf "$dir"
 }
 
 @test "session.login" {
