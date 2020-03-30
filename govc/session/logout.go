@@ -27,6 +27,8 @@ import (
 
 type logout struct {
 	*flags.ClientFlag
+
+	vapi bool
 }
 
 func init() {
@@ -36,6 +38,8 @@ func init() {
 func (cmd *logout) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.vapi, "r", false, "REST logout")
 }
 
 func (cmd *logout) Process(ctx context.Context) error {
@@ -59,5 +63,15 @@ func (cmd *logout) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return session.NewManager(c).Logout(ctx)
+	err = session.NewManager(c).Logout(ctx)
+
+	if cmd.vapi {
+		rc, err := cmd.RestClient()
+		if err != nil {
+			return err
+		}
+		return rc.Logout(ctx)
+	}
+
+	return err
 }

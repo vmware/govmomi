@@ -63,6 +63,36 @@ func NewClient(c *vim25.Client) *Client {
 	return &Client{sc, ""}
 }
 
+type marshaledClient struct {
+	SoapClient *soap.Client
+	SessionID  string
+}
+
+func (c *Client) MarshalJSON() ([]byte, error) {
+	m := marshaledClient{
+		SoapClient: c.Client,
+		SessionID:  c.SessionID,
+	}
+
+	return json.Marshal(m)
+}
+
+func (c *Client) UnmarshalJSON(b []byte) error {
+	var m marshaledClient
+
+	err := json.Unmarshal(b, &m)
+	if err != nil {
+		return err
+	}
+
+	*c = Client{
+		Client:    m.SoapClient,
+		SessionID: m.SessionID,
+	}
+
+	return nil
+}
+
 // Resource helper for the given path.
 func (c *Client) Resource(path string) *Resource {
 	r := &Resource{u: c.URL()}
@@ -180,4 +210,23 @@ func (c *Client) Session(ctx context.Context) (*Session, error) {
 func (c *Client) Logout(ctx context.Context) error {
 	req := c.Resource(internal.SessionPath).Request(http.MethodDelete)
 	return c.Do(ctx, req, nil)
+}
+
+// Valid returns whether or not the client is valid and ready for use.
+// This should be called after unmarshalling the client.
+func (c *Client) Valid() bool {
+	if c == nil {
+		return false
+	}
+
+	if c.Client == nil {
+		return false
+	}
+
+	return true
+}
+
+// Path returns rest.Path (see cache.Client)
+func (c *Client) Path() string {
+	return Path
 }

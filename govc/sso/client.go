@@ -57,7 +57,7 @@ func WithClient(ctx context.Context, cmd *flags.ClientFlag, f func(*ssoadmin.Cli
 
 		req := sts.TokenRequest{
 			Certificate: vc.Certificate(),
-			Userinfo:    cmd.Userinfo(),
+			Userinfo:    cmd.Session.URL.User,
 		}
 
 		header.Security, cerr = tokens.Issue(ctx, req)
