@@ -65,8 +65,8 @@ func (t *Task) Cancel(ctx context.Context) error {
 	return err
 }
 
-// SetTaskState sets task state and optionally sets results or fault, as appropriate for state.
-func (t *Task) SetTaskState(ctx context.Context, state types.TaskInfoState, result types.AnyType, fault *types.LocalizedMethodFault) error {
+// SetState sets task state and optionally sets results or fault, as appropriate for state.
+func (t *Task) SetState(ctx context.Context, state types.TaskInfoState, result types.AnyType, fault *types.LocalizedMethodFault) error {
 	req := types.SetTaskState{
 		This:   t.Reference(),
 		State:  state,
@@ -77,8 +77,8 @@ func (t *Task) SetTaskState(ctx context.Context, state types.TaskInfoState, resu
 	return err
 }
 
-// SetTaskDescription updates task description to describe the current phase of the task.
-func (t *Task) SetTaskDescription(ctx context.Context, description types.LocalizableMessage) error {
+// SetDescription updates task description to describe the current phase of the task.
+func (t *Task) SetDescription(ctx context.Context, description types.LocalizableMessage) error {
 	req := types.SetTaskDescription{
 		This:        t.Reference(),
 		Description: description,
