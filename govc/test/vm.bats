@@ -908,6 +908,16 @@ load test_helper
 
   run govc vm.option.info -vm DC0_H0_VM0
   assert_success
+
+  family=$(govc vm.option.info -json ubuntu64Guest | jq -r .GuestOSDescriptor[].Family)
+  assert_equal linuxGuest "$family"
+
+  family=$(govc vm.option.info -json windows8_64Guest | jq -r .GuestOSDescriptor[].Family)
+  assert_equal windowsGuest "$family"
+
+  run govc vm.option.info enoent
+  assert_success  # returns the entire simulator.GuestID list
+  [ ${#lines[@]} -ge 100 ]
 }
 
 @test "vm.customize" {

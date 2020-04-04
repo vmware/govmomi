@@ -17,6 +17,8 @@ limitations under the License.
 package simulator
 
 import (
+	"strings"
+
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -67,12 +69,51 @@ func (b *EnvironmentBrowser) QueryConfigOption(req *types.QueryConfigOption) soa
 	return body
 }
 
+func guestFamily(id string) string {
+	// TODO: We could capture the entire GuestOsDescriptor list from EnvironmentBrowser,
+	// but it is a ton of data.. this should be good enough for now.
+	switch {
+	case strings.HasPrefix(id, "win"):
+		return string(types.VirtualMachineGuestOsFamilyWindowsGuest)
+	case strings.HasPrefix(id, "darwin"):
+		return string(types.VirtualMachineGuestOsFamilyDarwinGuestFamily)
+	default:
+		return string(types.VirtualMachineGuestOsFamilyLinuxGuest)
+	}
+}
+
 func (b *EnvironmentBrowser) QueryConfigOptionEx(req *types.QueryConfigOptionEx) soap.HasFault {
 	body := new(methods.QueryConfigOptionExBody)
 
 	opt := &types.VirtualMachineConfigOption{
 		Version:       esx.HardwareVersion,
 		DefaultDevice: esx.VirtualDevice,
+	}
+
+	// From the SDK QueryConfigOptionEx doc:
+	// "If guestId is nonempty, the guestOSDescriptor array of the config option is filtered to match against the guest IDs in the spec.
+	//  If there is no match, the whole list is returned."
+	for _, id := range req.Spec.GuestId {
+		for _, gid := range GuestID {
+			if string(gid) == id {
+				opt.GuestOSDescriptor = []types.GuestOsDescriptor{{
+					Id:     id,
+					Family: guestFamily(id),
+				}}
+
+				break
+			}
+		}
+	}
+
+	if len(opt.GuestOSDescriptor) == 0 {
+		for i := range GuestID {
+			id := string(GuestID[i])
+			opt.GuestOSDescriptor = append(opt.GuestOSDescriptor, types.GuestOsDescriptor{
+				Id:     id,
+				Family: guestFamily(id),
+			})
+		}
 	}
 
 	body.Res = &types.QueryConfigOptionExResponse{
