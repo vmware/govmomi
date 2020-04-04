@@ -1500,11 +1500,13 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	Map.RemoveReference(host, &host.Vm, vm.Self)
 
-	switch pool := Map.Get(*vm.ResourcePool).(type) {
-	case *ResourcePool:
-		Map.RemoveReference(pool, &pool.Vm, vm.Self)
-	case *VirtualApp:
-		Map.RemoveReference(pool, &pool.Vm, vm.Self)
+	if vm.ResourcePool != nil {
+		switch pool := Map.Get(*vm.ResourcePool).(type) {
+		case *ResourcePool:
+			Map.RemoveReference(pool, &pool.Vm, vm.Self)
+		case *VirtualApp:
+			Map.RemoveReference(pool, &pool.Vm, vm.Self)
+		}
 	}
 
 	for i := range vm.Datastore {
@@ -1523,6 +1525,12 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 }
 
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
+	pool := req.Spec.Location.Pool
+	if pool == nil {
+		if !vm.Config.Template {
+			pool = vm.ResourcePool
+		}
+	}
 	folder := Map.Get(req.Folder).(*Folder)
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	event := vm.event()
@@ -1544,6 +1552,9 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 	}
 
 	task := CreateTask(vm, "cloneVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if pool == nil {
+			return nil, &types.InvalidArgument{InvalidProperty: "spec.location.pool"}
+		}
 		config := types.VirtualMachineConfigSpec{
 			Name:    req.Name,
 			GuestId: vm.Config.GuestId,
@@ -1585,7 +1596,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
 			This:   folder.Self,
 			Config: config,
-			Pool:   *vm.ResourcePool,
+			Pool:   *pool,
 			Host:   vm.Runtime.Host,
 		})
 
@@ -1910,6 +1921,11 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 func (vm *VirtualMachine) MarkAsTemplate(req *types.MarkAsTemplate) soap.HasFault {
 	r := &methods.MarkAsTemplateBody{}
 
+	if vm.Config.Template {
+		r.Fault_ = Fault("", new(types.NotSupported))
+		return r
+	}
+
 	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOff {
 		r.Fault_ = Fault("", &types.InvalidPowerState{
 			RequestedState: types.VirtualMachinePowerStatePoweredOff,
@@ -1920,8 +1936,37 @@ func (vm *VirtualMachine) MarkAsTemplate(req *types.MarkAsTemplate) soap.HasFaul
 
 	vm.Config.Template = true
 	vm.Summary.Config.Template = true
+	vm.ResourcePool = nil
 
-	r.Res = &types.MarkAsTemplateResponse{}
+	r.Res = new(types.MarkAsTemplateResponse)
+
+	return r
+}
+
+func (vm *VirtualMachine) MarkAsVirtualMachine(req *types.MarkAsVirtualMachine) soap.HasFault {
+	r := &methods.MarkAsVirtualMachineBody{}
+
+	if !vm.Config.Template {
+		r.Fault_ = Fault("", new(types.NotSupported))
+		return r
+	}
+
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOff {
+		r.Fault_ = Fault("", &types.InvalidPowerState{
+			RequestedState: types.VirtualMachinePowerStatePoweredOff,
+			ExistingState:  vm.Runtime.PowerState,
+		})
+		return r
+	}
+
+	vm.Config.Template = false
+	vm.Summary.Config.Template = false
+	vm.ResourcePool = &req.Pool
+	if req.Host != nil {
+		vm.Runtime.Host = req.Host
+	}
+
+	r.Res = new(types.MarkAsVirtualMachineResponse)
 
 	return r
 }

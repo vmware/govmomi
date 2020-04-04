@@ -884,8 +884,14 @@ load test_helper
   run govc vm.power -off "$id"
   assert_success
 
+  run govc vm.markasvm "$id"
+  assert_failure # already a vm
+
   run govc vm.markastemplate "$id"
   assert_success
+
+  run govc vm.markastemplate "$id"
+  assert_failure # already a template
 
   run govc vm.change -vm "$id" -e testing=456
   assert_failure # template reconfigure only allows name and annotation change
@@ -895,6 +901,12 @@ load test_helper
 
   run govc vm.power -on "$id"
   assert_failure
+
+  run govc vm.clone -vm "$id" -on=false new-vm
+  assert_success
+
+  run govc vm.markasvm "$id"
+  assert_success
 }
 
 @test "vm.option.info" {
