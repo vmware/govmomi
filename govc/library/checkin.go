@@ -33,7 +33,7 @@ type checkin struct {
 }
 
 func init() {
-	cli.Register("library.checkin", &checkin{}, true)
+	cli.Register("library.checkin", &checkin{})
 }
 
 func (cmd *checkin) Register(ctx context.Context, f *flag.FlagSet) {

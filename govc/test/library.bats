@@ -283,7 +283,6 @@ EOF
   run govc library.deploy my-content/$item my-vm
   assert_success
 
-  export GOVC_SHOW_UNRELEASED=true
   run govc library.checkout my-content/enoent my-vm-checkout
   assert_failure # vmtx item does not exist
 

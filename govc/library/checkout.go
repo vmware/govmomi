@@ -35,7 +35,7 @@ type checkout struct {
 }
 
 func init() {
-	cli.Register("library.checkout", &checkout{}, true)
+	cli.Register("library.checkout", &checkout{})
 }
 
 func (cmd *checkout) Register(ctx context.Context, f *flag.FlagSet) {
