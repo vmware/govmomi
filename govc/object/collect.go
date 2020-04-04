@@ -434,8 +434,8 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	return cmd.WithCancel(ctx, func(wctx context.Context) error {
+		matches := 0
 		return property.WaitForUpdates(wctx, p, filter, func(updates []types.ObjectUpdate) bool {
-			matches := 0
 			for _, update := range updates {
 				if entered && update.Kind == types.ObjectUpdateKindEnter {
 					// on the first update we only get kind "enter"
@@ -456,10 +456,15 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 				_ = cmd.WriteResult(c)
 			}
 
+			if filter.Truncated {
+				return false // vCenter truncates updates if > 100
+			}
+
 			entered = true
 
 			if hasFilter {
 				if matches > 0 {
+					matches = 0 // reset
 					return true
 				}
 				return false
