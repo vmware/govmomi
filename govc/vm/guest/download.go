@@ -54,7 +54,9 @@ If DEST name is "-", source is written to stdout.
 
 Examples:
   govc guest.download -l user:pass -vm=my-vm /var/log/my.log ./local.log
-  govc guest.download -l user:pass -vm=my-vm /etc/motd -`
+  govc guest.download -l user:pass -vm=my-vm /etc/motd -
+  tar -cf- foo/ | govc guest.run -d - tar -C /tmp -xf-
+  govc guest.run tar -C /tmp -cf- foo/ | tar -C /tmp -xf- # download directory`
 }
 
 func (cmd *download) Process(ctx context.Context) error {

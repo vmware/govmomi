@@ -58,7 +58,8 @@ If SOURCE name is "-", read source from stdin.
 
 Examples:
   govc guest.upload -l user:pass -vm=my-vm ~/.ssh/id_rsa.pub /home/$USER/.ssh/authorized_keys
-  cowsay "have a great day" | govc guest.upload -l user:pass -vm=my-vm - /etc/motd`
+  cowsay "have a great day" | govc guest.upload -l user:pass -vm=my-vm - /etc/motd
+  tar -cf- foo/ | govc guest.run -d - tar -C /tmp -xf- # upload a directory`
 }
 
 func (cmd *upload) Process(ctx context.Context) error {
