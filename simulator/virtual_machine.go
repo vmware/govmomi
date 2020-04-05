@@ -303,14 +303,7 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	}
 
 	if spec.GuestId != "" {
-		// TODO: should use EnvironmentBrowser.QueryConfigOptionEx here
-		vm.Guest.GuestFamily = string(types.VirtualMachineGuestOsFamilyLinuxGuest)
-		switch {
-		case strings.HasPrefix(spec.GuestId, "win"):
-			vm.Guest.GuestFamily = string(types.VirtualMachineGuestOsFamilyWindowsGuest)
-		case strings.HasPrefix(spec.GuestId, "darwin"):
-			vm.Guest.GuestFamily = string(types.VirtualMachineGuestOsFamilyDarwinGuestFamily)
-		}
+		vm.Guest.GuestFamily = guestFamily(spec.GuestId)
 	}
 
 	var changes []types.PropertyChange
