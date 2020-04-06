@@ -91,7 +91,7 @@ func (r *userID) Dump() interface{} {
 func (cmd *id) Run(ctx context.Context, f *flag.FlagSet) error {
 	arg := f.Arg(0)
 	if arg == "" {
-		arg = cmd.Userinfo().Username()
+		arg = cmd.Session.URL.User.Username()
 	}
 
 	return sso.WithClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {

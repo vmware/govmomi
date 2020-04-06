@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/sts"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -42,6 +43,7 @@ type login struct {
 	issue  bool
 	renew  bool
 	long   bool
+	vapi   bool
 	ticket string
 	life   time.Duration
 	cookie string
@@ -62,6 +64,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.clone, "clone", false, "Acquire clone ticket")
 	f.BoolVar(&cmd.issue, "issue", false, "Issue SAML token")
 	f.BoolVar(&cmd.renew, "renew", false, "Renew SAML token")
+	f.BoolVar(&cmd.vapi, "r", false, "REST login")
 	f.DurationVar(&cmd.life, "lifetime", time.Minute*10, "SAML token lifetime")
 	f.BoolVar(&cmd.long, "l", false, "Output session cookie")
 	f.StringVar(&cmd.ticket, "ticket", "", "Use clone ticket for login")
@@ -150,7 +153,7 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 
 	req := sts.TokenRequest{
 		Certificate: c.Certificate(),
-		Userinfo:    cmd.Userinfo(),
+		Userinfo:    cmd.Session.URL.User,
 		Renewable:   true,
 		Delegatable: true,
 		ActAs:       cmd.token != "",
@@ -192,6 +195,15 @@ func (cmd *login) loginByToken(ctx context.Context, c *vim25.Client) error {
 	}
 
 	return session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
+}
+
+func (cmd *login) loginRestByToken(ctx context.Context, c *rest.Client) error {
+	signer := &sts.Signer{
+		Certificate: c.Certificate(),
+		Token:       cmd.token,
+	}
+
+	return c.LoginByToken(c.WithSigner(ctx, signer))
 }
 
 func (cmd *login) loginByExtension(ctx context.Context, c *vim25.Client) error {
@@ -243,15 +255,19 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	switch {
 	case cmd.ticket != "":
-		cmd.Login = cmd.cloneSession
+		cmd.Session.LoginSOAP = cmd.cloneSession
 	case cmd.cookie != "":
-		cmd.Login = cmd.setCookie
+		cmd.Session.LoginSOAP = cmd.setCookie
 	case cmd.token != "":
-		cmd.Login = cmd.loginByToken
+		cmd.Session.LoginSOAP = cmd.loginByToken
+		cmd.Session.LoginREST = cmd.loginRestByToken
 	case cmd.ext != "":
-		cmd.Login = cmd.loginByExtension
+		cmd.Session.LoginSOAP = cmd.loginByExtension
 	case cmd.issue:
-		cmd.Login = func(_ context.Context, _ *vim25.Client) error {
+		cmd.Session.LoginSOAP = func(_ context.Context, _ *vim25.Client) error {
+			return nil
+		}
+		cmd.Session.LoginREST = func(_ context.Context, _ *rest.Client) error {
 			return nil
 		}
 	}
@@ -261,11 +277,11 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	m := session.NewManager(c)
 	r := &ticketResult{cmd: cmd}
 
 	switch {
 	case cmd.clone:
+		m := session.NewManager(c)
 		r.Ticket, err = m.AcquireCloneTicket(ctx)
 		if err != nil {
 			return err
@@ -276,6 +292,11 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		return cmd.WriteResult(r)
+	case cmd.vapi:
+		_, err = cmd.RestClient()
+		if err != nil {
+			return err
+		}
 	}
 
 	if cmd.cookie == "" {
