@@ -261,6 +261,10 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
+	if cmd.template {
+		return nil
+	}
+
 	if cmd.on {
 		task, err := vm.PowerOn(ctx)
 		if err != nil {
