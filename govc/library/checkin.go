@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
 )
 
@@ -64,19 +63,22 @@ func (cmd *checkin) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		l, err := flags.ContentLibraryItem(ctx, c, path)
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		version, err := vcenter.NewManager(c).CheckIn(ctx, l.ID, vm, &cmd.CheckIn)
-		if err != nil {
-			return err
-		}
+	l, err := flags.ContentLibraryItem(ctx, c, path)
+	if err != nil {
+		return err
+	}
 
-		fmt.Printf("%s (%s) checked in as content version %s", l.Name, l.ID, version)
+	version, err := vcenter.NewManager(c).CheckIn(ctx, l.ID, vm, &cmd.CheckIn)
+	if err != nil {
+		return err
+	}
 
-		return nil
-	})
+	fmt.Printf("%s (%s) checked in as content version %s", l.Name, l.ID, version)
+
+	return nil
 }

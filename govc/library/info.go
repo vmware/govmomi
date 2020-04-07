@@ -33,7 +33,6 @@ import (
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/library/finder"
-	"github.com/vmware/govmomi/vapi/rest"
 
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -250,25 +249,28 @@ func (r infoResultsWriter) writeFile(
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
-		finder := finder.NewFinder(m)
-		findResults, err := finder.Find(ctx, f.Args()...)
-		if err != nil {
-			return err
-		}
-		// Lookup the names(s) of the library's datastore(s).
-		for i := range findResults {
-			if t, ok := findResults[i].GetResult().(library.Library); ok {
-				for j := range t.Storage {
-					if t.Storage[j].Type == "DATASTORE" {
-						t.Storage[j].DatastoreID = cmd.getDatastoreName(t.Storage[j].DatastoreID)
-					}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+
+	m := library.NewManager(c)
+	finder := finder.NewFinder(m)
+	findResults, err := finder.Find(ctx, f.Args()...)
+	if err != nil {
+		return err
+	}
+	// Lookup the names(s) of the library's datastore(s).
+	for i := range findResults {
+		if t, ok := findResults[i].GetResult().(library.Library); ok {
+			for j := range t.Storage {
+				if t.Storage[j].Type == "DATASTORE" {
+					t.Storage[j].DatastoreID = cmd.getDatastoreName(t.Storage[j].DatastoreID)
 				}
 			}
 		}
-		return cmd.WriteResult(&infoResultsWriter{findResults, m, cmd})
-	})
+	}
+	return cmd.WriteResult(&infoResultsWriter{findResults, m, cmd})
 }
 
 func (cmd *info) getDatastoreName(id string) string {

@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -62,21 +61,24 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	categoryID := f.Arg(0)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := tags.NewManager(c)
-		cat, err := m.GetCategory(ctx, categoryID)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+
+	m := tags.NewManager(c)
+	cat, err := m.GetCategory(ctx, categoryID)
+	if err != nil {
+		return err
+	}
+	if !cmd.force {
+		ctags, err := m.ListTagsForCategory(ctx, cat.ID)
 		if err != nil {
 			return err
 		}
-		if !cmd.force {
-			ctags, err := m.ListTagsForCategory(ctx, cat.ID)
-			if err != nil {
-				return err
-			}
-			if len(ctags) > 0 {
-				return fmt.Errorf("category %s used by %d tags", categoryID, len(ctags))
-			}
+		if len(ctags) > 0 {
+			return fmt.Errorf("category %s used by %d tags", categoryID, len(ctags))
 		}
-		return m.DeleteCategory(ctx, cat)
-	})
+	}
+	return m.DeleteCategory(ctx, cat)
 }

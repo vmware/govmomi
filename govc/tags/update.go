@@ -22,7 +22,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -64,13 +63,16 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	arg := f.Arg(0)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := tags.NewManager(c)
-		tag, err := m.GetTagForCategory(ctx, arg, cmd.cat)
-		if err != nil {
-			return err
-		}
-		tag.Patch(&cmd.tag)
-		return m.UpdateTag(ctx, tag)
-	})
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+
+	m := tags.NewManager(c)
+	tag, err := m.GetTagForCategory(ctx, arg, cmd.cat)
+	if err != nil {
+		return err
+	}
+	tag.Patch(&cmd.tag)
+	return m.UpdateTag(ctx, tag)
 }

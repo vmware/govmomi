@@ -25,7 +25,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -77,34 +76,36 @@ func (r lsResult) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := tags.NewManager(c)
-		var res lsResult
-		var err error
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		if cmd.c == "" {
-			res, err = m.GetTags(ctx)
-		} else {
-			res, err = m.GetTagsForCategory(ctx, cmd.c)
-		}
+	m := tags.NewManager(c)
+	var res lsResult
 
-		if err != nil {
-			return err
-		}
+	if cmd.c == "" {
+		res, err = m.GetTags(ctx)
+	} else {
+		res, err = m.GetTagsForCategory(ctx, cmd.c)
+	}
 
-		categories, err := m.GetCategories(ctx)
-		if err != nil {
-			return err
-		}
-		cats := make(map[string]tags.Category)
-		for _, category := range categories {
-			cats[category.ID] = category
-		}
+	if err != nil {
+		return err
+	}
 
-		for i, tag := range res {
-			res[i].CategoryID = cats[tag.CategoryID].Name
-		}
+	categories, err := m.GetCategories(ctx)
+	if err != nil {
+		return err
+	}
+	cats := make(map[string]tags.Category)
+	for _, category := range categories {
+		cats[category.ID] = category
+	}
 
-		return cmd.WriteResult(res)
-	})
+	for i, tag := range res {
+		res[i].CategoryID = cats[tag.CategoryID].Name
+	}
+
+	return cmd.WriteResult(res)
 }
