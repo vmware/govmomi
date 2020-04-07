@@ -1724,6 +1724,10 @@ func (s *handler) libraryItemOVFID(w http.ResponseWriter, r *http.Request) {
 	var lib *library.Library
 	var item *item
 	for _, l := range s.Library {
+		if l.Library.Type == "SUBSCRIBED" {
+			// Subscribers share the same Item map, we need the LOCAL library to find the .ovf on disk
+			continue
+		}
 		item, ok = l.Item[id]
 		if ok {
 			lib = l.Library
