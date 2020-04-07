@@ -25,7 +25,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -87,24 +86,26 @@ func (t infoResult) Write(w io.Writer) error {
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	arg := f.Arg(0)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := tags.NewManager(c)
-		var res infoResult
-		var err error
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		if f.NArg() == 1 {
-			cat, cerr := m.GetCategory(ctx, arg)
-			if cerr != nil {
-				return cerr
-			}
-			res = append(res, *cat)
-		} else {
-			res, err = m.GetCategories(ctx)
-			if err != nil {
-				return err
-			}
+	m := tags.NewManager(c)
+	var res infoResult
+
+	if f.NArg() == 1 {
+		cat, cerr := m.GetCategory(ctx, arg)
+		if cerr != nil {
+			return cerr
 		}
+		res = append(res, *cat)
+	} else {
+		res, err = m.GetCategories(ctx)
+		if err != nil {
+			return err
+		}
+	}
 
-		return cmd.WriteResult(res)
-	})
+	return cmd.WriteResult(res)
 }

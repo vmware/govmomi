@@ -96,16 +96,19 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 	tagID := f.Arg(0)
 	managedObj := f.Arg(1)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		ref, err := convertPath(ctx, c, cmd.DatacenterFlag, managedObj)
-		if err != nil {
-			return err
-		}
-		m := tags.NewManager(c)
-		tag, err := m.GetTagForCategory(ctx, tagID, cmd.cat)
-		if err != nil {
-			return err
-		}
-		return m.AttachTag(ctx, tag.ID, ref)
-	})
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+
+	ref, err := convertPath(ctx, c, cmd.DatacenterFlag, managedObj)
+	if err != nil {
+		return err
+	}
+	m := tags.NewManager(c)
+	tag, err := m.GetTagForCategory(ctx, tagID, cmd.cat)
+	if err != nil {
+		return err
+	}
+	return m.AttachTag(ctx, tag.ID, ref)
 }

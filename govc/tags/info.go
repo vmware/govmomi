@@ -25,7 +25,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -88,48 +87,50 @@ func (t infoResult) Write(w io.Writer) error {
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := tags.NewManager(c)
-		var res lsResult
-		var err error
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		if cmd.c == "" {
-			res, err = m.GetTags(ctx)
-		} else {
-			res, err = m.GetTagsForCategory(ctx, cmd.c)
+	m := tags.NewManager(c)
+	var res lsResult
+
+	if cmd.c == "" {
+		res, err = m.GetTags(ctx)
+	} else {
+		res, err = m.GetTagsForCategory(ctx, cmd.c)
+	}
+	if err != nil {
+		return err
+	}
+
+	if f.NArg() == 1 {
+		arg := f.Arg(0)
+		src := res
+		res = nil
+		for i := range src {
+			if src[i].Name == arg || src[i].ID == arg {
+				res = append(res, src[i])
+			}
 		}
+		if len(res) == 0 {
+			return fmt.Errorf("tag %q not found", arg)
+		}
+	}
+
+	if cmd.C {
+		categories, err := m.GetCategories(ctx)
 		if err != nil {
 			return err
 		}
-
-		if f.NArg() == 1 {
-			arg := f.Arg(0)
-			src := res
-			res = nil
-			for i := range src {
-				if src[i].Name == arg || src[i].ID == arg {
-					res = append(res, src[i])
-				}
-			}
-			if len(res) == 0 {
-				return fmt.Errorf("tag %q not found", arg)
-			}
+		m := make(map[string]tags.Category)
+		for _, category := range categories {
+			m[category.ID] = category
 		}
-
-		if cmd.C {
-			categories, err := m.GetCategories(ctx)
-			if err != nil {
-				return err
-			}
-			m := make(map[string]tags.Category)
-			for _, category := range categories {
-				m[category.ID] = category
-			}
-			for i := range res {
-				res[i].CategoryID = m[res[i].CategoryID].Name
-			}
+		for i := range res {
+			res[i].CategoryID = m[res[i].CategoryID].Name
 		}
+	}
 
-		return cmd.WriteResult(infoResult(res))
-	})
+	return cmd.WriteResult(infoResult(res))
 }

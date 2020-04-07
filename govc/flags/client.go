@@ -405,15 +405,6 @@ func (flag *ClientFlag) Logout(ctx context.Context) error {
 	return nil
 }
 
-func (flag *ClientFlag) WithRestClient(ctx context.Context, f func(*rest.Client) error) error {
-	c, err := flag.RestClient()
-	if err != nil {
-		return err
-	}
-
-	return f(c)
-}
-
 // Environ returns the govc environment variables for this connection
 func (flag *ClientFlag) Environ(extra bool) []string {
 	var env []string

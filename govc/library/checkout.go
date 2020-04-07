@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
 )
 
@@ -97,35 +96,38 @@ func (cmd *checkout) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return cmd.FolderFlag.WithRestClient(ctx, func(c *rest.Client) error {
-		l, err := flags.ContentLibraryItem(ctx, c, path)
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		spec := vcenter.CheckOut{
-			Name: name,
-			Placement: &vcenter.Placement{
-				Folder: folder.Reference().Value,
-			},
-		}
-		if pool != nil {
-			spec.Placement.ResourcePool = pool.Reference().Value
-		}
-		if host != nil {
-			spec.Placement.Host = host.Reference().Value
-		}
-		if cluster != nil {
-			spec.Placement.Cluster = cluster.Reference().Value
-		}
+	l, err := flags.ContentLibraryItem(ctx, c, path)
+	if err != nil {
+		return err
+	}
 
-		id, err := vcenter.NewManager(c).CheckOut(ctx, l.ID, &spec)
-		if err != nil {
-			return err
-		}
+	spec := vcenter.CheckOut{
+		Name: name,
+		Placement: &vcenter.Placement{
+			Folder: folder.Reference().Value,
+		},
+	}
+	if pool != nil {
+		spec.Placement.ResourcePool = pool.Reference().Value
+	}
+	if host != nil {
+		spec.Placement.Host = host.Reference().Value
+	}
+	if cluster != nil {
+		spec.Placement.Cluster = cluster.Reference().Value
+	}
 
-		fmt.Println(id)
+	id, err := vcenter.NewManager(c).CheckOut(ctx, l.ID, &spec)
+	if err != nil {
+		return err
+	}
 
-		return nil
-	})
+	fmt.Println(id)
+
+	return nil
 }

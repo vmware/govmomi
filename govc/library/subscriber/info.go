@@ -27,7 +27,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -118,18 +117,21 @@ func (r infoResultsWriter) Write(w io.Writer) error {
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		lib, err := flags.ContentLibrary(ctx, c, f.Arg(0))
-		if err != nil {
-			return err
-		}
-		m := library.NewManager(c)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		s, err := m.GetSubscriber(ctx, lib, f.Arg(1))
-		if err != nil {
-			return err
-		}
+	lib, err := flags.ContentLibrary(ctx, c, f.Arg(0))
+	if err != nil {
+		return err
+	}
+	m := library.NewManager(c)
 
-		return cmd.WriteResult(infoResultsWriter{s, cmd})
-	})
+	s, err := m.GetSubscriber(ctx, lib, f.Arg(1))
+	if err != nil {
+		return err
+	}
+
+	return cmd.WriteResult(infoResultsWriter{s, cmd})
 }

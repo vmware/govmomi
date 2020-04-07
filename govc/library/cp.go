@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type cp struct {
@@ -59,30 +58,33 @@ func (cmd *cp) Run(ctx context.Context, f *flag.FlagSet) error {
 	srcPath := f.Arg(0)
 	dstPath := f.Arg(1)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
-		src, err := flags.ContentLibraryItem(ctx, c, srcPath)
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		dst, err := flags.ContentLibrary(ctx, c, dstPath)
-		if err != nil {
-			return err
-		}
+	m := library.NewManager(c)
+	src, err := flags.ContentLibraryItem(ctx, c, srcPath)
+	if err != nil {
+		return err
+	}
 
-		cmd.LibraryID = dst.ID
-		if cmd.Name == "" {
-			cmd.Name = src.Name
-		}
+	dst, err := flags.ContentLibrary(ctx, c, dstPath)
+	if err != nil {
+		return err
+	}
 
-		id, err := m.CopyLibraryItem(ctx, src, cmd.Item)
-		if err != nil {
-			return err
-		}
+	cmd.LibraryID = dst.ID
+	if cmd.Name == "" {
+		cmd.Name = src.Name
+	}
 
-		fmt.Println(id)
+	id, err := m.CopyLibraryItem(ctx, src, cmd.Item)
+	if err != nil {
+		return err
+	}
 
-		return nil
-	})
+	fmt.Println(id)
+
+	return nil
 }

@@ -24,7 +24,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -69,12 +68,15 @@ func (r lsResult) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		l, err := tags.NewManager(c).GetCategories(ctx)
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		return cmd.WriteResult(lsResult(l))
-	})
+	l, err := tags.NewManager(c).GetCategories(ctx)
+	if err != nil {
+		return err
+	}
+
+	return cmd.WriteResult(lsResult(l))
 }

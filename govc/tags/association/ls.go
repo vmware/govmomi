@@ -26,7 +26,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 	"github.com/vmware/govmomi/vim25/mo"
 )
@@ -101,52 +100,55 @@ func (r lsObjectResult) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		var res flags.OutputWriter
-		m := tags.NewManager(c)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		if cmd.r {
-			var refs []mo.Reference
-			for _, arg := range f.Args() {
-				ref, err := convertPath(ctx, c, cmd.DatacenterFlag, arg)
-				if err != nil {
-					return err
-				}
-				refs = append(refs, ref)
-			}
-			attached, err := m.GetAttachedTagsOnObjects(ctx, refs)
+	var res flags.OutputWriter
+	m := tags.NewManager(c)
+
+	if cmd.r {
+		var refs []mo.Reference
+		for _, arg := range f.Args() {
+			ref, err := convertPath(ctx, c, cmd.DatacenterFlag, arg)
 			if err != nil {
 				return err
 			}
-			if cmd.l {
-				res = lsTagResult(attached)
-			} else {
-				var r lsResult
-				for i := range attached {
-					for _, tag := range attached[i].Tags {
-						r = append(r, tag.Name)
-					}
-				}
-				res = r
-			}
-		} else {
-			attached, err := m.GetAttachedObjectsOnTags(ctx, f.Args())
-			if err != nil {
-				return err
-			}
-			if cmd.l {
-				res = lsObjectResult(attached)
-			} else {
-				var r lsResult
-				for _, obj := range attached {
-					for _, ref := range obj.ObjectIDs {
-						r = append(r, ref.Reference().String())
-					}
-				}
-				res = r
-			}
+			refs = append(refs, ref)
 		}
+		attached, err := m.GetAttachedTagsOnObjects(ctx, refs)
+		if err != nil {
+			return err
+		}
+		if cmd.l {
+			res = lsTagResult(attached)
+		} else {
+			var r lsResult
+			for i := range attached {
+				for _, tag := range attached[i].Tags {
+					r = append(r, tag.Name)
+				}
+			}
+			res = r
+		}
+	} else {
+		attached, err := m.GetAttachedObjectsOnTags(ctx, f.Args())
+		if err != nil {
+			return err
+		}
+		if cmd.l {
+			res = lsObjectResult(attached)
+		} else {
+			var r lsResult
+			for _, obj := range attached {
+				for _, ref := range obj.ObjectIDs {
+					r = append(r, ref.Reference().String())
+				}
+			}
+			res = r
+		}
+	}
 
-		return cmd.WriteResult(res)
-	})
+	return cmd.WriteResult(res)
 }

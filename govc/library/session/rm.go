@@ -23,7 +23,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type rm struct {
@@ -53,23 +52,26 @@ Examples:
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	id := f.Arg(0)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
-		cancel := m.CancelLibraryItemUpdateSession
-		remove := m.DeleteLibraryItemUpdateSession
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		_, err := m.GetLibraryItemUpdateSession(ctx, id)
+	m := library.NewManager(c)
+	cancel := m.CancelLibraryItemUpdateSession
+	remove := m.DeleteLibraryItemUpdateSession
+
+	_, err = m.GetLibraryItemUpdateSession(ctx, id)
+	if err != nil {
+		cancel = m.CancelLibraryItemDownloadSession
+		remove = m.DeleteLibraryItemDownloadSession
+	}
+
+	if cmd.cancel {
+		err := cancel(ctx, id)
 		if err != nil {
-			cancel = m.CancelLibraryItemDownloadSession
-			remove = m.DeleteLibraryItemDownloadSession
+			return nil
 		}
-
-		if cmd.cancel {
-			err := cancel(ctx, id)
-			if err != nil {
-				return nil
-			}
-		}
-		return remove(ctx, id)
-	})
+	}
+	return remove(ctx, id)
 }

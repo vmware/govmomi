@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -85,13 +84,16 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	cmd.cat.Name = f.Arg(0)
 	cmd.cat.Cardinality = cardinality(cmd.multi)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		id, err := tags.NewManager(c).CreateCategory(ctx, &cmd.cat)
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		fmt.Println(id)
-		return nil
-	})
+	id, err := tags.NewManager(c).CreateCategory(ctx, &cmd.cat)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(id)
+	return nil
 }

@@ -26,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/library/finder"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type ls struct {
@@ -75,13 +74,16 @@ func (r lsResultsWriter) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
-		finder := finder.NewFinder(m)
-		findResults, err := finder.Find(ctx, f.Args()...)
-		if err != nil {
-			return err
-		}
-		return cmd.WriteResult(lsResultsWriter(findResults))
-	})
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+
+	m := library.NewManager(c)
+	finder := finder.NewFinder(m)
+	findResults, err := finder.Find(ctx, f.Args()...)
+	if err != nil {
+		return err
+	}
+	return cmd.WriteResult(lsResultsWriter(findResults))
 }
