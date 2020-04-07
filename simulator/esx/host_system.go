@@ -1740,8 +1740,8 @@ var HostSystem = mo.HostSystem{
 		CurrentEVCModeKey:  "",
 		Gateway:            (*types.HostListSummaryGatewaySummary)(nil),
 	},
-	Hardware:           (*types.HostHardwareInfo)(nil),
-	Capability:         (*types.HostCapability)(nil),
+	Hardware:   (*types.HostHardwareInfo)(nil),
+	Capability: (*types.HostCapability)(nil),
 	LicensableResource: types.HostLicensableResourceInfo{
 		Resource: []types.KeyAnyValue{
 			{
