@@ -260,8 +260,7 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 	})
 }
 
-// configure TLS
-func (flag *ClientFlag) configure(sc *soap.Client) error {
+func (flag *ClientFlag) ConfigureTLS(sc *soap.Client) error {
 	if flag.cert != "" {
 		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
 		if err != nil {
@@ -351,7 +350,7 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 	}
 
 	c := new(vim25.Client)
-	err := flag.Session.Login(context.Background(), c, flag.configure)
+	err := flag.Session.Login(context.Background(), c, flag.ConfigureTLS)
 	if err != nil {
 		return nil, err
 	}
@@ -384,7 +383,7 @@ func (flag *ClientFlag) RestClient() (*rest.Client, error) {
 
 	c := new(rest.Client)
 
-	err := flag.Session.Login(context.Background(), c, flag.configure)
+	err := flag.Session.Login(context.Background(), c, flag.ConfigureTLS)
 	if err != nil {
 		return nil, err
 	}
