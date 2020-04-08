@@ -68,6 +68,14 @@ load test_helper
 
   run govc vm.destroy ${TTYLINUX_NAME}
   assert_success
+
+  # ensure vcsim doesn't panic without capacityAllocationUnits
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+  sed -e s/capacityAllocationUnits/invalid/ "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" > "$dir/$TTYLINUX_NAME.ovf"
+  touch "$dir/$TTYLINUX_NAME-disk1.vmdk" # .vmdk contents don't matter to vcsim
+  run govc import.ovf "$dir/$TTYLINUX_NAME.ovf"
+  assert_success
+  rm -rf "$dir"
 }
 
 @test "import.ovf -host.ipath" {

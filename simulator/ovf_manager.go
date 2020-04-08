@@ -83,6 +83,9 @@ func ovfNetwork(ctx *Context, req *types.CreateImportSpec, item ovf.ResourceAllo
 
 func ovfDiskCapacity(disk *ovf.VirtualDiskDesc) int64 {
 	b, _ := strconv.ParseUint(disk.Capacity, 10, 64)
+	if disk.CapacityAllocationUnits == nil {
+		return int64(b)
+	}
 	c := strings.Fields(*disk.CapacityAllocationUnits)
 	if len(c) == 3 && c[0] == "byte" && c[1] == "*" { // "byte * 2^20"
 		p := strings.Split(c[2], "^")
