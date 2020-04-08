@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -366,6 +367,12 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		if cmd.long || !cmd.ref {
 			e, err := finder.Element(ctx, o)
 			if err != nil {
+				if soap.IsSoapFault(err) {
+					_, ok := soap.ToSoapFault(err).VimFault().(types.ManagedObjectNotFound)
+					if ok {
+						continue // object was deleted after v.Find() returned
+					}
+				}
 				return err
 			}
 			path = e.Path
