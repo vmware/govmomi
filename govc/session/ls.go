@@ -27,13 +27,17 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	r bool
 }
 
 func init() {
@@ -46,6 +50,8 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.r, "r", false, "Include current REST session (if any)")
 }
 
 func (cmd *ls) Description() string {
@@ -77,7 +83,7 @@ func (s *sessionInfo) Write(w io.Writer) error {
 
 	fmt.Fprintf(tw, "Key\t")
 	fmt.Fprintf(tw, "Name\t")
-	fmt.Fprintf(tw, "Time\t")
+	fmt.Fprintf(tw, "Created\t")
 	fmt.Fprintf(tw, "Idle\t")
 	fmt.Fprintf(tw, "Host\t")
 	fmt.Fprintf(tw, "Agent\t")
@@ -86,7 +92,7 @@ func (s *sessionInfo) Write(w io.Writer) error {
 
 	for _, v := range s.SessionList {
 		idle := "  ."
-		if v.Key != s.CurrentSession.Key {
+		if v.Key != s.CurrentSession.Key && v.IpAddress != "-" {
 			since := s.now.Sub(v.LastActiveTime)
 			if since > time.Hour {
 				idle = "old"
@@ -122,6 +128,26 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	now, err := methods.GetCurrentTime(ctx, c)
 	if err != nil {
 		return err
+	}
+
+	// The REST API doesn't include a way to get the complete list of sessions, only the current session.
+	if cmd.r {
+		rc := new(rest.Client)
+		ok, _ := cmd.Session.Load(ctx, rc, cmd.ConfigureTLS)
+		if ok {
+			rs, err := rc.Session(ctx)
+			if err != nil {
+				return err
+			}
+			m.SessionList = append(m.SessionList, types.UserSession{
+				Key:            rc.SessionID,
+				UserName:       rs.User + " (REST)",
+				LoginTime:      rs.Created,
+				LastActiveTime: rs.LastAccessed,
+				IpAddress:      "-",
+				UserAgent:      c.UserAgent,
+			})
+		}
 	}
 
 	return cmd.WriteResult(&sessionInfo{cmd, now, m})

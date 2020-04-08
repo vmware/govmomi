@@ -49,6 +49,17 @@ load test_helper
   run govc role.ls
   assert_success
 
+  run govc session.ls -r
+  assert_success
+  grep -v REST <<<"$output" # should not have a cached REST session
+
+  run govc tags.ls
+  assert_success # created a REST session
+
+  run govc session.ls -r
+  assert_success
+  grep REST <<<"$output" # now we should have a cached REST session
+
   host=$(govc env GOVC_URL)
   user=$(govc env GOVC_USERNAME)
   run govc role.ls -u "$host" # url w/o user:pass
