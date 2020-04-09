@@ -52,7 +52,8 @@ type Client interface {
 // such as SAML token authentication (see govc session.login for example).
 type Session struct {
 	URL         *url.URL // URL of a vCenter or ESXi instance
-	Dir         string   // Dir defaults to "$HOME/.govmomi/sessions"
+	DirSOAP     string   // DirSOAP cache directory. Defaults to "$HOME/.govmomi/sessions"
+	DirREST     string   // DirREST cache directory. Defaults to "$HOME/.govmomi/rest_sessions"
 	Insecure    bool     // Insecure param for soap.NewClient (tls.Config.InsecureSkipVerify)
 	Passthrough bool     // Passthrough disables caching when set to true
 
@@ -101,15 +102,23 @@ func (s *Session) key(path string) string {
 	return fmt.Sprintf("%064x", sha256.Sum256([]byte(key)))
 }
 
-func (s *Session) dir() string {
-	if s.Dir != "" {
-		return s.Dir
-	}
-	return filepath.Join(home, "sessions")
-}
-
 func (s *Session) file(p string) string {
-	return filepath.Join(s.dir(), s.key(p))
+	dir := ""
+
+	switch p {
+	case rest.Path:
+		dir = s.DirREST
+		if dir == "" {
+			dir = filepath.Join(home, "rest_sessions")
+		}
+	default:
+		dir = s.DirSOAP
+		if dir == "" {
+			dir = filepath.Join(home, "sessions")
+		}
+	}
+
+	return filepath.Join(dir, s.key(p))
 }
 
 // Save a Client in the file cache.
