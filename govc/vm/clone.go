@@ -117,7 +117,7 @@ func (cmd *clone) Usage() string {
 }
 
 func (cmd *clone) Description() string {
-	return `Clone VM to NAME.
+	return `Clone VM or template to NAME.
 
 Examples:
   govc vm.clone -vm template-vm new-vm
@@ -126,7 +126,8 @@ Examples:
   govc vm.clone -vm template-vm -link -snapshot s-name new-vm
   govc vm.clone -vm template-vm -cluster cluster1 new-vm # use compute cluster placement
   govc vm.clone -vm template-vm -datastore-cluster dscluster new-vm # use datastore cluster placement
-  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm`
+  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
+  govc vm.clone -vm template-vm -template new-template # clone a VM template`
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
@@ -259,6 +260,10 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if cmd.template {
+		return nil
 	}
 
 	if cmd.on {
