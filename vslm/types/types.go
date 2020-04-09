@@ -965,6 +965,8 @@ type VslmSyncDatastoreResponse struct {
 
 type VslmSyncFault struct {
 	VslmFault
+
+	Id *types.ID `xml:"id,omitempty"`
 }
 
 func init() {
@@ -1096,6 +1098,27 @@ func init() {
 }
 
 type VslmUpdateVStorageObjectMetadata_TaskResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type VslmUpdateVstorageObjectCryptoRequestType struct {
+	This        types.ManagedObjectReference      `xml:"_this"`
+	Id          types.ID                          `xml:"id"`
+	Profile     []types.VirtualMachineProfileSpec `xml:"profile,omitempty"`
+	DisksCrypto *types.DiskCryptoSpec             `xml:"disksCrypto,omitempty"`
+}
+
+func init() {
+	types.Add("vslm:VslmUpdateVstorageObjectCryptoRequestType", reflect.TypeOf((*VslmUpdateVstorageObjectCryptoRequestType)(nil)).Elem())
+}
+
+type VslmUpdateVstorageObjectCrypto_Task VslmUpdateVstorageObjectCryptoRequestType
+
+func init() {
+	types.Add("vslm:VslmUpdateVstorageObjectCrypto_Task", reflect.TypeOf((*VslmUpdateVstorageObjectCrypto_Task)(nil)).Elem())
+}
+
+type VslmUpdateVstorageObjectCrypto_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval"`
 }
 

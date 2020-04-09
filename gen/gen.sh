@@ -47,9 +47,9 @@ generate() {
   done
 }
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 14360549 (vSphere 6.7u3)
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 15958918 (vSphere 7.0)
 
-generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@1cc9f9e
+generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v2.4.1
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 # originally generated, then manually pruned as there are several vim25 types that are duplicated.
