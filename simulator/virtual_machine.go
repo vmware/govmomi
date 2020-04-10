@@ -949,6 +949,47 @@ func getDiskSize(disk *types.VirtualDisk) int64 {
 	return disk.CapacityInBytes
 }
 
+func (vm *VirtualMachine) validateSwitchMembers(id string) types.BaseMethodFault {
+	var dswitch *DistributedVirtualSwitch
+
+	var find func(types.ManagedObjectReference)
+	find = func(child types.ManagedObjectReference) {
+		s, ok := Map.Get(child).(*DistributedVirtualSwitch)
+		if ok && s.Uuid == id {
+			dswitch = s
+			return
+		}
+		walk(Map.Get(child), find)
+	}
+	f := Map.getEntityDatacenter(vm).NetworkFolder
+	walk(Map.Get(f), find) // search in NetworkFolder and any sub folders
+
+	if dswitch == nil {
+		log.Printf("DVS %s cannot be found", id)
+		return new(types.NotFound)
+	}
+
+	h := Map.Get(*vm.Runtime.Host).(*HostSystem)
+	c := hostParent(&h.HostSystem)
+	isMember := func(val types.ManagedObjectReference) bool {
+		for _, mem := range dswitch.Summary.HostMember {
+			if mem == val {
+				return true
+			}
+		}
+		log.Printf("%s is not a member of VDS %s", h.Name, dswitch.Name)
+		return false
+	}
+
+	for _, ref := range c.Host {
+		if !isMember(ref) {
+			return &types.InvalidArgument{InvalidProperty: "spec.deviceChange.device.port.switchUuid"}
+		}
+	}
+
+	return nil
+}
+
 func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
 	device := spec.Device
 	d := device.GetVirtualDevice()
@@ -988,6 +1029,9 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			summary = fmt.Sprintf("DVSwitch: %s", b.Port.SwitchUuid)
 			net.Type = "DistributedVirtualPortgroup"
 			net.Value = b.Port.PortgroupKey
+			if err := vm.validateSwitchMembers(b.Port.SwitchUuid); err != nil {
+				return err
+			}
 		}
 
 		Map.Update(vm, []types.PropertyChange{
