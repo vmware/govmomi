@@ -18,7 +18,7 @@ package cache
 
 import (
 	"context"
-	"crypto/sha256"
+	"crypto/sha1"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -99,7 +99,7 @@ func (s *Session) key(path string) string {
 	// Key session file off of full URI and insecure setting.
 	// Hash key to get a predictable, canonical format.
 	key := fmt.Sprintf("%s#insecure=%t", p.String(), s.Insecure)
-	return fmt.Sprintf("%064x", sha256.Sum256([]byte(key)))
+	return fmt.Sprintf("%040x", sha1.Sum([]byte(key)))
 }
 
 func (s *Session) file(p string) string {
