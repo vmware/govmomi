@@ -126,6 +126,22 @@ load test_helper
 
   run govc object.collect -s $vm config.uuid
   assert_success "$uuid"
+
+  govc import.ovf -options - "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" <<EOF
+{
+  "PropertyMapping": [
+    {
+      "Key": "SET.guest.ipAddress",
+      "Value": "10.0.0.42"
+    }
+  ],
+  "PowerOn": true,
+  "WaitForIP": true
+}
+EOF
+
+  run govc vm.ip "$TTYLINUX_NAME"
+  assert_success "10.0.0.42"
 }
 
 @test "vcsim vm.create" {

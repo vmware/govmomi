@@ -306,6 +306,10 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Guest.GuestFamily = guestFamily(spec.GuestId)
 	}
 
+	vm.Config.Modified = time.Now()
+}
+
+func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec) {
 	var changes []types.PropertyChange
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()
@@ -335,8 +339,6 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	if len(changes) != 0 {
 		Map.Update(vm, changes)
 	}
-
-	vm.Config.Modified = time.Now()
 }
 
 func validateGuestID(id string) types.BaseMethodFault {
@@ -1263,6 +1265,8 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 	})
 
 	vm.updateDiskLayouts()
+
+	vm.applyExtraConfig(spec) // Do this after device config, as some may apply to the devices themselves (e.g. ethernet -> guest.net)
 
 	return nil
 }
