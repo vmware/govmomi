@@ -168,9 +168,9 @@ func TestEventManagerRead(t *testing.T) {
 	}
 	nevents := len(page)
 	tests := []struct {
-		max   int
-		reset bool
-		read  func(context.Context, int32) ([]types.BaseEvent, error)
+		max    int
+		rewind bool
+		read   func(context.Context, int32) ([]types.BaseEvent, error)
 	}{
 		{nevents, true, c.ReadNextEvents},
 		{nevents / 3, true, c.ReadNextEvents},
@@ -204,10 +204,38 @@ func TestEventManagerRead(t *testing.T) {
 		if count < len(page) {
 			t.Errorf("expected at least %d events, got: %d", len(page), count)
 		}
-		if test.reset {
+		if test.rewind {
 			if err = c.Rewind(ctx); err != nil {
 				t.Error(err)
 			}
 		}
+	}
+
+	// after Reset() we should only get events via ReadPreviousEvents
+	if err = c.Reset(ctx); err != nil {
+		t.Fatal(err)
+	}
+
+	events, err := c.ReadNextEvents(ctx, int32(nevents))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 0 {
+		t.Errorf("expected 0 events, got %d", len(events))
+	}
+
+	count := 0
+	for {
+		events, err = c.ReadPreviousEvents(ctx, 3)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(events) == 0 {
+			break
+		}
+		count += len(events)
+	}
+	if nevents != count {
+		t.Errorf("expected %d events, got %d", nevents, count)
 	}
 }
