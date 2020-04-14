@@ -392,6 +392,14 @@ func (c *EventHistoryCollector) SetCollectorPageSize(ctx *Context, req *types.Se
 	return body
 }
 
+func (c *EventHistoryCollector) ResetCollector(ctx *Context, req *types.ResetCollector) soap.HasFault {
+	c.pos = len(c.GetLatestPage())
+
+	return &methods.ResetCollectorBody{
+		Res: new(types.ResetCollectorResponse),
+	}
+}
+
 func (c *EventHistoryCollector) RewindCollector(ctx *Context, req *types.RewindCollector) soap.HasFault {
 	c.pos = 0
 	return &methods.RewindCollectorBody{
