@@ -309,11 +309,22 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	vm.Config.Modified = time.Now()
 }
 
+var extraConfigAlias = map[string]string{
+	"ip0": "SET.guest.ipAddress",
+}
+
+func extraConfigKey(key string) string {
+	if k, ok := extraConfigAlias[key]; ok {
+		return k
+	}
+	return key
+}
+
 func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec) {
 	var changes []types.PropertyChange
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()
-		key := strings.TrimPrefix(val.Key, "SET.")
+		key := strings.TrimPrefix(extraConfigKey(val.Key), "SET.")
 		if key == val.Key {
 			vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
 			continue

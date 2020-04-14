@@ -142,6 +142,25 @@ EOF
 
   run govc vm.ip "$TTYLINUX_NAME"
   assert_success "10.0.0.42"
+
+  run govc vm.destroy "$TTYLINUX_NAME"
+  assert_success
+
+  govc import.ovf -options - "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" <<EOF
+{
+  "PropertyMapping": [
+    {
+      "Key": "ip0",
+      "Value": "10.0.0.43"
+    }
+  ],
+  "PowerOn": true,
+  "WaitForIP": true
+}
+EOF
+
+  run govc vm.ip "$TTYLINUX_NAME"
+  assert_success "10.0.0.43"
 }
 
 @test "vcsim vm.create" {
