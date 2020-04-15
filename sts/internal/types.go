@@ -473,7 +473,7 @@ func (a *AttributeStatement) C14N() string {
 
 type AttributeValue struct {
 	XMLName xml.Name
-	Type    string `xml:"type,attr"`
+	Type    string `xml:"type,attr,typeattr"`
 	Value   string `xml:",innerxml"`
 }
 
