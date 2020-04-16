@@ -91,6 +91,10 @@ load test_helper
     run govc session.login -u "$host" -ticket "$ticket"
     assert_success
 
+    cookie=$(govc session.login -r -l)
+    run govc session.login -r -u "$host" -cookie "$cookie"
+    assert_success
+
     user=$(govc env GOVC_USERNAME)
     dir=$($mktemp --tmpdir -d govc-test-XXXXX)
     export GOVMOMI_HOME="$dir"
