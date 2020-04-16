@@ -18,6 +18,7 @@ package session
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
@@ -249,6 +250,33 @@ func (cmd *login) setCookie(ctx context.Context, c *vim25.Client) error {
 	return nil
 }
 
+func (cmd *login) setRestCookie(ctx context.Context, c *rest.Client) error {
+	if cmd.cookie == "" {
+		cmd.cookie = c.SessionID
+	} else {
+		c.SessionID = cmd.cookie
+
+		// Check the session is still valid
+		s, err := c.Session(ctx)
+		if err != nil {
+			return err
+		}
+		if s == nil {
+			return errors.New(http.StatusText(http.StatusUnauthorized))
+		}
+	}
+
+	return nil
+}
+
+func nologinSOAP(_ context.Context, _ *vim25.Client) error {
+	return nil
+}
+
+func nologinREST(_ context.Context, _ *rest.Client) error {
+	return nil
+}
+
 func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	if cmd.renew {
 		cmd.issue = true
@@ -257,19 +285,21 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	case cmd.ticket != "":
 		cmd.Session.LoginSOAP = cmd.cloneSession
 	case cmd.cookie != "":
-		cmd.Session.LoginSOAP = cmd.setCookie
+		if cmd.vapi {
+			cmd.Session.LoginSOAP = nologinSOAP
+			cmd.Session.LoginREST = cmd.setRestCookie
+		} else {
+			cmd.Session.LoginSOAP = cmd.setCookie
+			cmd.Session.LoginREST = nologinREST
+		}
 	case cmd.token != "":
 		cmd.Session.LoginSOAP = cmd.loginByToken
 		cmd.Session.LoginREST = cmd.loginRestByToken
 	case cmd.ext != "":
 		cmd.Session.LoginSOAP = cmd.loginByExtension
 	case cmd.issue:
-		cmd.Session.LoginSOAP = func(_ context.Context, _ *vim25.Client) error {
-			return nil
-		}
-		cmd.Session.LoginREST = func(_ context.Context, _ *rest.Client) error {
-			return nil
-		}
+		cmd.Session.LoginSOAP = nologinSOAP
+		cmd.Session.LoginREST = nologinREST
 	}
 
 	c, err := cmd.Client()
@@ -292,15 +322,22 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 		return cmd.WriteResult(r)
-	case cmd.vapi:
-		_, err = cmd.RestClient()
+	}
+
+	var rc *rest.Client
+	if cmd.vapi {
+		rc, err = cmd.RestClient()
 		if err != nil {
 			return err
 		}
 	}
 
 	if cmd.cookie == "" {
-		_ = cmd.setCookie(ctx, c)
+		if cmd.vapi {
+			_ = cmd.setRestCookie(ctx, rc)
+		} else {
+			_ = cmd.setCookie(ctx, c)
+		}
 		if cmd.cookie == "" {
 			return flag.ErrHelp
 		}
