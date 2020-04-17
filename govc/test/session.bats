@@ -197,3 +197,19 @@ load test_helper
   # remove generated cert and key
   rm "$id".{crt,key}
 }
+
+@test "session.curl" {
+  vcsim_env
+
+  run govc session.login /sdk/vimServiceVersions.xml
+  assert_success
+
+  run govc session.login /enoent
+  assert_failure
+
+  run govc session.login -r /rest/com/vmware/cis/session
+  assert_success
+
+  run govc session.login -r /enoent
+  assert_failure
+}

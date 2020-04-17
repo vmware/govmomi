@@ -17,12 +17,15 @@ limitations under the License.
 package session
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -50,6 +53,7 @@ type login struct {
 	cookie string
 	token  string
 	ext    string
+	method string
 }
 
 func init() {
@@ -72,6 +76,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.cookie, "cookie", "", "Set HTTP cookie for an existing session")
 	f.StringVar(&cmd.token, "token", "", "Use SAML token for login or as issue identity")
 	f.StringVar(&cmd.ext, "extension", "", "Extension name")
+	f.StringVar(&cmd.method, "X", "", "HTTP method")
 }
 
 func (cmd *login) Process(ctx context.Context) error {
@@ -79,6 +84,10 @@ func (cmd *login) Process(ctx context.Context) error {
 		return err
 	}
 	return cmd.ClientFlag.Process(ctx)
+}
+
+func (cmd *login) Usage() string {
+	return "[PATH]"
 }
 
 func (cmd *login) Description() string {
@@ -94,6 +103,7 @@ The session.login command can be used to:
 - Renew a SAML token
 - Login using a SAML token
 - Avoid passing credentials to other govc commands
+- Send an authenticated raw HTTP request
 
 Examples:
   govc session.login -u root:password@host
@@ -104,7 +114,8 @@ Examples:
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
-  token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")`
+  token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
+  govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .`
 }
 
 type ticketResult struct {
@@ -330,6 +341,41 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if f.NArg() == 1 {
+		u := c.URL()
+		u.Path = f.Arg(0)
+		var body io.Reader
+
+		switch cmd.method {
+		case http.MethodPost, http.MethodPatch:
+			// strings.Reader here as /api wants a Content-Length header
+			b, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				return err
+			}
+			body = bytes.NewReader(b)
+		default:
+			body = strings.NewReader("")
+		}
+
+		req, err := http.NewRequest(cmd.method, u.String(), body)
+		if err != nil {
+			return err
+		}
+
+		if cmd.vapi {
+			return rc.Do(ctx, req, cmd.Out)
+		}
+
+		return c.Do(ctx, req, func(res *http.Response) error {
+			if res.StatusCode != http.StatusOK {
+				return errors.New(res.Status)
+			}
+			_, err := io.Copy(cmd.Out, res.Body)
+			return err
+		})
 	}
 
 	if cmd.cookie == "" {
