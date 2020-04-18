@@ -219,10 +219,6 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 			if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
 				return err
 			}
-		} else {
-			if cmd.ResourcePool, err = cmd.Cluster.ResourcePool(ctx); err != nil {
-				return err
-			}
 		}
 	}
 
@@ -321,12 +317,15 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 	}
 
 	folderref := cmd.Folder.Reference()
-	poolref := cmd.ResourcePool.Reference()
+	var poolref *types.ManagedObjectReference
+	if cmd.ResourcePool != nil {
+		poolref = types.NewReference(cmd.ResourcePool.Reference())
+	}
 
 	relocateSpec := types.VirtualMachineRelocateSpec{
 		DeviceChange: configSpecs,
 		Folder:       &folderref,
-		Pool:         &poolref,
+		Pool:         poolref,
 	}
 
 	if cmd.HostSystem != nil {
