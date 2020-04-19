@@ -34,6 +34,18 @@ func init() {
 	types.Add("BaseCnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
 }
 
+func (b *CnsAlreadyRegisteredFault) GetCnsAlreadyRegisteredFault() *CnsAlreadyRegisteredFault {
+	return b
+}
+
+type BaseCnsAlreadyRegisteredFault interface {
+	GetCnsAlreadyRegisteredFault() *CnsAlreadyRegisteredFault
+}
+
+func init() {
+	types.Add("BaseCnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
+}
+
 func (b *CnsBackingObjectDetails) GetCnsBackingObjectDetails() *CnsBackingObjectDetails { return b }
 
 type BaseCnsBackingObjectDetails interface {
