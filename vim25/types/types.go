@@ -11865,12 +11865,12 @@ type DVPortgroupConfigInfo struct {
 	ConfigVersion                string                                    `xml:"configVersion,omitempty"`
 	AutoExpand                   *bool                                     `xml:"autoExpand"`
 	VmVnicNetworkResourcePoolKey string                                    `xml:"vmVnicNetworkResourcePoolKey,omitempty"`
-	Uplink                       *bool                                     `xml:"uplink"`
-	LogicalSwitchUuid            string                                    `xml:"logicalSwitchUuid,omitempty"`
-	SegmentId                    string                                    `xml:"segmentId,omitempty"`
-	TransportZoneName            string                                    `xml:"transportZoneName,omitempty"`
-	TransportZoneUuid            string                                    `xml:"transportZoneUuid,omitempty"`
-	BackingType                  string                                    `xml:"backingType,omitempty"`
+	//Uplink                       *bool                                     `xml:"uplink"`
+	//LogicalSwitchUuid            string                                    `xml:"logicalSwitchUuid,omitempty"`
+	//SegmentId                    string                                    `xml:"segmentId,omitempty"`
+	//TransportZoneName            string                                    `xml:"transportZoneName,omitempty"`
+	//TransportZoneUuid            string                                    `xml:"transportZoneUuid,omitempty"`
+	//BackingType                  string                                    `xml:"backingType,omitempty"`
 }
 
 func init() {
@@ -19309,12 +19309,12 @@ func init() {
 type GuestInfo struct {
 	DynamicData
 
-	ToolsStatus                     VirtualMachineToolsStatus          `xml:"toolsStatus,omitempty"`
-	ToolsVersionStatus              string                             `xml:"toolsVersionStatus,omitempty"`
-	ToolsVersionStatus2             string                             `xml:"toolsVersionStatus2,omitempty"`
-	ToolsRunningStatus              string                             `xml:"toolsRunningStatus,omitempty"`
-	ToolsVersion                    string                             `xml:"toolsVersion,omitempty"`
-	ToolsInstallType                string                             `xml:"toolsInstallType,omitempty"`
+	ToolsStatus         VirtualMachineToolsStatus `xml:"toolsStatus,omitempty"`
+	ToolsVersionStatus  string                    `xml:"toolsVersionStatus,omitempty"`
+	ToolsVersionStatus2 string                    `xml:"toolsVersionStatus2,omitempty"`
+	ToolsRunningStatus  string                    `xml:"toolsRunningStatus,omitempty"`
+	ToolsVersion        string                    `xml:"toolsVersion,omitempty"`
+	//ToolsInstallType                string                             `xml:"toolsInstallType,omitempty"`
 	GuestId                         string                             `xml:"guestId,omitempty"`
 	GuestFamily                     string                             `xml:"guestFamily,omitempty"`
 	GuestFullName                   string                             `xml:"guestFullName,omitempty"`
@@ -20695,9 +20695,9 @@ func init() {
 type HostConfigInfo struct {
 	DynamicData
 
-	Host                      ManagedObjectReference               `xml:"host"`
-	Product                   AboutInfo                            `xml:"product"`
-	DeploymentInfo            *HostDeploymentInfo                  `xml:"deploymentInfo,omitempty"`
+	Host    ManagedObjectReference `xml:"host"`
+	Product AboutInfo              `xml:"product"`
+	//DeploymentInfo            *HostDeploymentInfo                  `xml:"deploymentInfo,omitempty"`
 	HyperThread               *HostHyperThreadScheduleInfo         `xml:"hyperThread,omitempty"`
 	ConsoleReservation        *ServiceConsoleReservationInfo       `xml:"consoleReservation,omitempty"`
 	VirtualMachineReservation *VirtualMachineMemoryReservationInfo `xml:"virtualMachineReservation,omitempty"`
@@ -20745,10 +20745,10 @@ type HostConfigInfo struct {
 	HostConfigCheckSum        []byte                               `xml:"hostConfigCheckSum,omitempty"`
 	GraphicsInfo              []HostGraphicsInfo                   `xml:"graphicsInfo,omitempty"`
 	SharedPassthruGpuTypes    []string                             `xml:"sharedPassthruGpuTypes,omitempty"`
-	GraphicsConfig            *HostGraphicsConfig                  `xml:"graphicsConfig,omitempty"`
-	SharedGpuCapabilities     []HostSharedGpuCapabilities          `xml:"sharedGpuCapabilities,omitempty"`
-	IoFilterInfo              []HostIoFilterInfo                   `xml:"ioFilterInfo,omitempty"`
-	SriovDevicePool           []BaseHostSriovDevicePoolInfo        `xml:"sriovDevicePool,omitempty,typeattr"`
+	//GraphicsConfig            *HostGraphicsConfig                  `xml:"graphicsConfig,omitempty"`
+	//SharedGpuCapabilities     []HostSharedGpuCapabilities          `xml:"sharedGpuCapabilities,omitempty"`
+	IoFilterInfo []HostIoFilterInfo `xml:"ioFilterInfo,omitempty"`
+	//SriovDevicePool           []BaseHostSriovDevicePoolInfo        `xml:"sriovDevicePool,omitempty,typeattr"`
 }
 
 func init() {
@@ -20793,13 +20793,29 @@ type HostConfigManager struct {
 	HostAccessManager         *ManagedObjectReference `xml:"hostAccessManager,omitempty"`
 	GraphicsManager           *ManagedObjectReference `xml:"graphicsManager,omitempty"`
 	VsanInternalSystem        *ManagedObjectReference `xml:"vsanInternalSystem,omitempty"`
-	CertificateManager        *ManagedObjectReference `xml:"certificateManager,omitempty"`
-	CryptoManager             *ManagedObjectReference `xml:"cryptoManager,omitempty"`
-	NvdimmSystem              *ManagedObjectReference `xml:"nvdimmSystem,omitempty"`
+	//CertificateManager        *ManagedObjectReference `xml:"certificateManager,omitempty"`
+	//CryptoManager             *ManagedObjectReference `xml:"cryptoManager,omitempty"`
+	//NvdimmSystem              *ManagedObjectReference `xml:"nvdimmSystem,omitempty"`
 }
 
 func init() {
 	t["HostConfigManager"] = reflect.TypeOf((*HostConfigManager)(nil)).Elem()
+}
+
+type HostNetworkSystem struct {
+	DynamicData
+
+	Capabilities         *HostNetCapabilities        `xml:"capabilities"`
+	NetworkInfo          *HostNetworkInfo            `xml:"networkInfo"`
+	OffloadCapabilities  *HostNetOffloadCapabilities `xml:"offloadCapabilities"`
+	NetworkConfig        *HostNetworkConfig          `xml:"networkConfig"`
+	DnsConfig            BaseHostDnsConfig           `xml:"dnsConfig"`
+	IpRouteConfig        BaseHostIpRouteConfig       `xml:"ipRouteConfig"`
+	ConsoleIpRouteConfig BaseHostIpRouteConfig       `xml:"consoleIpRouteConfig"`
+}
+
+func init() {
+	t["HostNetworkSystem"] = reflect.TypeOf((*HostNetworkSystem)(nil)).Elem()
 }
 
 type HostConfigSpec struct {
@@ -24552,11 +24568,11 @@ type HostRetrieveVStorageObjectStateResponse struct {
 type HostRuntimeInfo struct {
 	DynamicData
 
-	ConnectionState            HostSystemConnectionState                   `xml:"connectionState"`
-	PowerState                 HostSystemPowerState                        `xml:"powerState"`
-	StandbyMode                string                                      `xml:"standbyMode,omitempty"`
-	InMaintenanceMode          bool                                        `xml:"inMaintenanceMode"`
-	InQuarantineMode           *bool                                       `xml:"inQuarantineMode"`
+	ConnectionState   HostSystemConnectionState `xml:"connectionState"`
+	PowerState        HostSystemPowerState      `xml:"powerState"`
+	StandbyMode       string                    `xml:"standbyMode,omitempty"`
+	InMaintenanceMode bool                      `xml:"inMaintenanceMode"`
+	//InQuarantineMode           *bool                                       `xml:"inQuarantineMode"`
 	BootTime                   *time.Time                                  `xml:"bootTime"`
 	HealthSystemRuntime        *HealthSystemRuntime                        `xml:"healthSystemRuntime,omitempty"`
 	DasHostState               *ClusterDasFdmHostState                     `xml:"dasHostState,omitempty"`
@@ -24626,7 +24642,7 @@ type HostScsiDisk struct {
 	PhysicalLocation      []string              `xml:"physicalLocation,omitempty"`
 	EmulatedDIXDIFEnabled *bool                 `xml:"emulatedDIXDIFEnabled"`
 	VsanDiskInfo          *VsanHostVsanDiskInfo `xml:"vsanDiskInfo,omitempty"`
-	ScsiDiskType          string                `xml:"scsiDiskType,omitempty"`
+	//ScsiDiskType          string                `xml:"scsiDiskType,omitempty"`
 }
 
 func init() {
@@ -25885,11 +25901,11 @@ type HostVirtualNicSpec struct {
 	Portgroup              string                                  `xml:"portgroup,omitempty"`
 	Mtu                    int32                                   `xml:"mtu,omitempty"`
 	TsoEnabled             *bool                                   `xml:"tsoEnabled"`
-	NetStackInstanceKey    string                                  `xml:"netStackInstanceKey,omitempty"`
-	OpaqueNetwork          *HostVirtualNicOpaqueNetworkSpec        `xml:"opaqueNetwork,omitempty"`
-	ExternalId             string                                  `xml:"externalId,omitempty"`
-	PinnedPnic             string                                  `xml:"pinnedPnic,omitempty"`
-	IpRouteSpec            *HostVirtualNicIpRouteSpec              `xml:"ipRouteSpec,omitempty"`
+	//NetStackInstanceKey    string                                  `xml:"netStackInstanceKey,omitempty"`
+	OpaqueNetwork *HostVirtualNicOpaqueNetworkSpec `xml:"opaqueNetwork,omitempty"`
+	ExternalId    string                           `xml:"externalId,omitempty"`
+	PinnedPnic    string                           `xml:"pinnedPnic,omitempty"`
+	//IpRouteSpec            *HostVirtualNicIpRouteSpec              `xml:"ipRouteSpec,omitempty"`
 }
 
 func init() {
@@ -26014,14 +26030,14 @@ func init() {
 type HostVmfsSpec struct {
 	DynamicData
 
-	Extent             HostScsiDiskPartition   `xml:"extent"`
-	BlockSizeMb        int32                   `xml:"blockSizeMb,omitempty"`
-	MajorVersion       int32                   `xml:"majorVersion"`
-	VolumeName         string                  `xml:"volumeName"`
-	BlockSize          int32                   `xml:"blockSize,omitempty"`
-	UnmapGranularity   int32                   `xml:"unmapGranularity,omitempty"`
-	UnmapPriority      string                  `xml:"unmapPriority,omitempty"`
-	UnmapBandwidthSpec *VmfsUnmapBandwidthSpec `xml:"unmapBandwidthSpec,omitempty"`
+	Extent       HostScsiDiskPartition `xml:"extent"`
+	BlockSizeMb  int32                 `xml:"blockSizeMb,omitempty"`
+	MajorVersion int32                 `xml:"majorVersion"`
+	VolumeName   string                `xml:"volumeName"`
+	//BlockSize          int32                   `xml:"blockSize,omitempty"`
+	//UnmapGranularity   int32                   `xml:"unmapGranularity,omitempty"`
+	//UnmapPriority      string                  `xml:"unmapPriority,omitempty"`
+	//UnmapBandwidthSpec *VmfsUnmapBandwidthSpec `xml:"unmapBandwidthSpec,omitempty"`
 }
 
 func init() {
@@ -26031,21 +26047,21 @@ func init() {
 type HostVmfsVolume struct {
 	HostFileSystemVolume
 
-	BlockSizeMb        int32                   `xml:"blockSizeMb"`
-	BlockSize          int32                   `xml:"blockSize,omitempty"`
-	UnmapGranularity   int32                   `xml:"unmapGranularity,omitempty"`
-	UnmapPriority      string                  `xml:"unmapPriority,omitempty"`
-	UnmapBandwidthSpec *VmfsUnmapBandwidthSpec `xml:"unmapBandwidthSpec,omitempty"`
-	MaxBlocks          int32                   `xml:"maxBlocks"`
-	MajorVersion       int32                   `xml:"majorVersion"`
-	Version            string                  `xml:"version"`
-	Uuid               string                  `xml:"uuid"`
-	Extent             []HostScsiDiskPartition `xml:"extent"`
-	VmfsUpgradable     bool                    `xml:"vmfsUpgradable"`
-	ForceMountedInfo   *HostForceMountedInfo   `xml:"forceMountedInfo,omitempty"`
-	Ssd                *bool                   `xml:"ssd"`
-	Local              *bool                   `xml:"local"`
-	ScsiDiskType       string                  `xml:"scsiDiskType,omitempty"`
+	BlockSizeMb int32 `xml:"blockSizeMb"`
+	//BlockSize          int32                   `xml:"blockSize,omitempty"`
+	//UnmapGranularity   int32                   `xml:"unmapGranularity,omitempty"`
+	//UnmapPriority      string                  `xml:"unmapPriority,omitempty"`
+	//UnmapBandwidthSpec *VmfsUnmapBandwidthSpec `xml:"unmapBandwidthSpec,omitempty"`
+	//MaxBlocks          int32                   `xml:"maxBlocks"`
+	MajorVersion int32 `xml:"majorVersion"`
+	//Version            string                  `xml:"version"`
+	Uuid             string                  `xml:"uuid"`
+	Extent           []HostScsiDiskPartition `xml:"extent"`
+	VmfsUpgradable   bool                    `xml:"vmfsUpgradable"`
+	ForceMountedInfo *HostForceMountedInfo   `xml:"forceMountedInfo,omitempty"`
+	Ssd              *bool                   `xml:"ssd"`
+	Local            *bool                   `xml:"local"`
+	//ScsiDiskType       string                  `xml:"scsiDiskType,omitempty"`
 }
 
 func init() {
@@ -28215,11 +28231,11 @@ func init() {
 type IoFilterInfo struct {
 	DynamicData
 
-	Id          string `xml:"id"`
-	Name        string `xml:"name"`
-	Vendor      string `xml:"vendor"`
-	Version     string `xml:"version"`
-	Type        string `xml:"type,omitempty"`
+	Id      string `xml:"id"`
+	Name    string `xml:"name"`
+	Vendor  string `xml:"vendor"`
+	Version string `xml:"version"`
+	//Type        string `xml:"type,omitempty"`
 	Summary     string `xml:"summary,omitempty"`
 	ReleaseDate string `xml:"releaseDate,omitempty"`
 }
@@ -43018,53 +43034,53 @@ func init() {
 type ServiceContent struct {
 	DynamicData
 
-	RootFolder                  ManagedObjectReference  `xml:"rootFolder"`
-	PropertyCollector           ManagedObjectReference  `xml:"propertyCollector"`
-	ViewManager                 *ManagedObjectReference `xml:"viewManager,omitempty"`
-	About                       AboutInfo               `xml:"about"`
-	Setting                     *ManagedObjectReference `xml:"setting,omitempty"`
-	UserDirectory               *ManagedObjectReference `xml:"userDirectory,omitempty"`
-	SessionManager              *ManagedObjectReference `xml:"sessionManager,omitempty"`
-	AuthorizationManager        *ManagedObjectReference `xml:"authorizationManager,omitempty"`
-	ServiceManager              *ManagedObjectReference `xml:"serviceManager,omitempty"`
-	PerfManager                 *ManagedObjectReference `xml:"perfManager,omitempty"`
-	ScheduledTaskManager        *ManagedObjectReference `xml:"scheduledTaskManager,omitempty"`
-	AlarmManager                *ManagedObjectReference `xml:"alarmManager,omitempty"`
-	EventManager                *ManagedObjectReference `xml:"eventManager,omitempty"`
-	TaskManager                 *ManagedObjectReference `xml:"taskManager,omitempty"`
-	ExtensionManager            *ManagedObjectReference `xml:"extensionManager,omitempty"`
-	CustomizationSpecManager    *ManagedObjectReference `xml:"customizationSpecManager,omitempty"`
-	CustomFieldsManager         *ManagedObjectReference `xml:"customFieldsManager,omitempty"`
-	AccountManager              *ManagedObjectReference `xml:"accountManager,omitempty"`
-	DiagnosticManager           *ManagedObjectReference `xml:"diagnosticManager,omitempty"`
-	LicenseManager              *ManagedObjectReference `xml:"licenseManager,omitempty"`
-	SearchIndex                 *ManagedObjectReference `xml:"searchIndex,omitempty"`
-	FileManager                 *ManagedObjectReference `xml:"fileManager,omitempty"`
-	DatastoreNamespaceManager   *ManagedObjectReference `xml:"datastoreNamespaceManager,omitempty"`
-	VirtualDiskManager          *ManagedObjectReference `xml:"virtualDiskManager,omitempty"`
-	VirtualizationManager       *ManagedObjectReference `xml:"virtualizationManager,omitempty"`
-	SnmpSystem                  *ManagedObjectReference `xml:"snmpSystem,omitempty"`
-	VmProvisioningChecker       *ManagedObjectReference `xml:"vmProvisioningChecker,omitempty"`
-	VmCompatibilityChecker      *ManagedObjectReference `xml:"vmCompatibilityChecker,omitempty"`
-	OvfManager                  *ManagedObjectReference `xml:"ovfManager,omitempty"`
-	IpPoolManager               *ManagedObjectReference `xml:"ipPoolManager,omitempty"`
-	DvSwitchManager             *ManagedObjectReference `xml:"dvSwitchManager,omitempty"`
-	HostProfileManager          *ManagedObjectReference `xml:"hostProfileManager,omitempty"`
-	ClusterProfileManager       *ManagedObjectReference `xml:"clusterProfileManager,omitempty"`
-	ComplianceManager           *ManagedObjectReference `xml:"complianceManager,omitempty"`
-	LocalizationManager         *ManagedObjectReference `xml:"localizationManager,omitempty"`
-	StorageResourceManager      *ManagedObjectReference `xml:"storageResourceManager,omitempty"`
-	GuestOperationsManager      *ManagedObjectReference `xml:"guestOperationsManager,omitempty"`
-	OverheadMemoryManager       *ManagedObjectReference `xml:"overheadMemoryManager,omitempty"`
-	CertificateManager          *ManagedObjectReference `xml:"certificateManager,omitempty"`
-	IoFilterManager             *ManagedObjectReference `xml:"ioFilterManager,omitempty"`
-	VStorageObjectManager       *ManagedObjectReference `xml:"vStorageObjectManager,omitempty"`
-	HostSpecManager             *ManagedObjectReference `xml:"hostSpecManager,omitempty"`
-	CryptoManager               *ManagedObjectReference `xml:"cryptoManager,omitempty"`
-	HealthUpdateManager         *ManagedObjectReference `xml:"healthUpdateManager,omitempty"`
-	FailoverClusterConfigurator *ManagedObjectReference `xml:"failoverClusterConfigurator,omitempty"`
-	FailoverClusterManager      *ManagedObjectReference `xml:"failoverClusterManager,omitempty"`
-	StorageQueryManager         *ManagedObjectReference `xml:"storageQueryManager,omitempty"`
+	RootFolder                ManagedObjectReference  `xml:"rootFolder"`
+	PropertyCollector         ManagedObjectReference  `xml:"propertyCollector"`
+	ViewManager               *ManagedObjectReference `xml:"viewManager,omitempty"`
+	About                     AboutInfo               `xml:"about"`
+	Setting                   *ManagedObjectReference `xml:"setting,omitempty"`
+	UserDirectory             *ManagedObjectReference `xml:"userDirectory,omitempty"`
+	SessionManager            *ManagedObjectReference `xml:"sessionManager,omitempty"`
+	AuthorizationManager      *ManagedObjectReference `xml:"authorizationManager,omitempty"`
+	ServiceManager            *ManagedObjectReference `xml:"serviceManager,omitempty"`
+	PerfManager               *ManagedObjectReference `xml:"perfManager,omitempty"`
+	ScheduledTaskManager      *ManagedObjectReference `xml:"scheduledTaskManager,omitempty"`
+	AlarmManager              *ManagedObjectReference `xml:"alarmManager,omitempty"`
+	EventManager              *ManagedObjectReference `xml:"eventManager,omitempty"`
+	TaskManager               *ManagedObjectReference `xml:"taskManager,omitempty"`
+	ExtensionManager          *ManagedObjectReference `xml:"extensionManager,omitempty"`
+	CustomizationSpecManager  *ManagedObjectReference `xml:"customizationSpecManager,omitempty"`
+	CustomFieldsManager       *ManagedObjectReference `xml:"customFieldsManager,omitempty"`
+	AccountManager            *ManagedObjectReference `xml:"accountManager,omitempty"`
+	DiagnosticManager         *ManagedObjectReference `xml:"diagnosticManager,omitempty"`
+	LicenseManager            *ManagedObjectReference `xml:"licenseManager,omitempty"`
+	SearchIndex               *ManagedObjectReference `xml:"searchIndex,omitempty"`
+	FileManager               *ManagedObjectReference `xml:"fileManager,omitempty"`
+	DatastoreNamespaceManager *ManagedObjectReference `xml:"datastoreNamespaceManager,omitempty"`
+	VirtualDiskManager        *ManagedObjectReference `xml:"virtualDiskManager,omitempty"`
+	VirtualizationManager     *ManagedObjectReference `xml:"virtualizationManager,omitempty"`
+	SnmpSystem                *ManagedObjectReference `xml:"snmpSystem,omitempty"`
+	VmProvisioningChecker     *ManagedObjectReference `xml:"vmProvisioningChecker,omitempty"`
+	VmCompatibilityChecker    *ManagedObjectReference `xml:"vmCompatibilityChecker,omitempty"`
+	OvfManager                *ManagedObjectReference `xml:"ovfManager,omitempty"`
+	IpPoolManager             *ManagedObjectReference `xml:"ipPoolManager,omitempty"`
+	DvSwitchManager           *ManagedObjectReference `xml:"dvSwitchManager,omitempty"`
+	HostProfileManager        *ManagedObjectReference `xml:"hostProfileManager,omitempty"`
+	ClusterProfileManager     *ManagedObjectReference `xml:"clusterProfileManager,omitempty"`
+	ComplianceManager         *ManagedObjectReference `xml:"complianceManager,omitempty"`
+	LocalizationManager       *ManagedObjectReference `xml:"localizationManager,omitempty"`
+	StorageResourceManager    *ManagedObjectReference `xml:"storageResourceManager,omitempty"`
+	GuestOperationsManager    *ManagedObjectReference `xml:"guestOperationsManager,omitempty"`
+	OverheadMemoryManager     *ManagedObjectReference `xml:"overheadMemoryManager,omitempty"`
+	CertificateManager        *ManagedObjectReference `xml:"certificateManager,omitempty"`
+	IoFilterManager           *ManagedObjectReference `xml:"ioFilterManager,omitempty"`
+	//VStorageObjectManager       *ManagedObjectReference `xml:"vStorageObjectManager,omitempty"`
+	//HostSpecManager             *ManagedObjectReference `xml:"hostSpecManager,omitempty"`
+	//CryptoManager               *ManagedObjectReference `xml:"cryptoManager,omitempty"`
+	//HealthUpdateManager         *ManagedObjectReference `xml:"healthUpdateManager,omitempty"`
+	//FailoverClusterConfigurator *ManagedObjectReference `xml:"failoverClusterConfigurator,omitempty"`
+	//FailoverClusterManager      *ManagedObjectReference `xml:"failoverClusterManager,omitempty"`
+	//StorageQueryManager         *ManagedObjectReference `xml:"storageQueryManager,omitempty"`
 }
 
 func init() {
@@ -45539,8 +45555,8 @@ func init() {
 type ToolsConfigInfo struct {
 	DynamicData
 
-	ToolsVersion         int32                                `xml:"toolsVersion,omitempty"`
-	ToolsInstallType     string                               `xml:"toolsInstallType,omitempty"`
+	ToolsVersion int32 `xml:"toolsVersion,omitempty"`
+	//ToolsInstallType     string                               `xml:"toolsInstallType,omitempty"`
 	AfterPowerOn         *bool                                `xml:"afterPowerOn"`
 	AfterResume          *bool                                `xml:"afterResume"`
 	BeforeGuestStandby   *bool                                `xml:"beforeGuestStandby"`
@@ -48726,7 +48742,7 @@ type VMwareDVSPortgroupPolicy struct {
 	UplinkTeamingOverrideAllowed  bool  `xml:"uplinkTeamingOverrideAllowed"`
 	SecurityPolicyOverrideAllowed bool  `xml:"securityPolicyOverrideAllowed"`
 	IpfixOverrideAllowed          *bool `xml:"ipfixOverrideAllowed"`
-	MacManagementOverrideAllowed  *bool `xml:"macManagementOverrideAllowed"`
+	//MacManagementOverrideAllowed  *bool `xml:"macManagementOverrideAllowed"`
 }
 
 func init() {
@@ -50691,13 +50707,13 @@ func init() {
 type VirtualMachineBootOptions struct {
 	DynamicData
 
-	BootDelay            int64                                         `xml:"bootDelay,omitempty"`
-	EnterBIOSSetup       *bool                                         `xml:"enterBIOSSetup"`
-	EfiSecureBootEnabled *bool                                         `xml:"efiSecureBootEnabled"`
-	BootRetryEnabled     *bool                                         `xml:"bootRetryEnabled"`
-	BootRetryDelay       int64                                         `xml:"bootRetryDelay,omitempty"`
-	BootOrder            []BaseVirtualMachineBootOptionsBootableDevice `xml:"bootOrder,omitempty,typeattr"`
-	NetworkBootProtocol  string                                        `xml:"networkBootProtocol,omitempty"`
+	BootDelay      int64 `xml:"bootDelay,omitempty"`
+	EnterBIOSSetup *bool `xml:"enterBIOSSetup"`
+	//EfiSecureBootEnabled *bool                                         `xml:"efiSecureBootEnabled"`
+	BootRetryEnabled    *bool                                         `xml:"bootRetryEnabled"`
+	BootRetryDelay      int64                                         `xml:"bootRetryDelay,omitempty"`
+	BootOrder           []BaseVirtualMachineBootOptionsBootableDevice `xml:"bootOrder,omitempty,typeattr"`
+	NetworkBootProtocol string                                        `xml:"networkBootProtocol,omitempty"`
 }
 
 func init() {
@@ -50828,71 +50844,71 @@ func init() {
 type VirtualMachineConfigInfo struct {
 	DynamicData
 
-	ChangeVersion                string                                     `xml:"changeVersion"`
-	Modified                     time.Time                                  `xml:"modified"`
-	Name                         string                                     `xml:"name"`
-	GuestFullName                string                                     `xml:"guestFullName"`
-	Version                      string                                     `xml:"version"`
-	Uuid                         string                                     `xml:"uuid"`
-	CreateDate                   *time.Time                                 `xml:"createDate"`
-	InstanceUuid                 string                                     `xml:"instanceUuid,omitempty"`
-	NpivNodeWorldWideName        []int64                                    `xml:"npivNodeWorldWideName,omitempty"`
-	NpivPortWorldWideName        []int64                                    `xml:"npivPortWorldWideName,omitempty"`
-	NpivWorldWideNameType        string                                     `xml:"npivWorldWideNameType,omitempty"`
-	NpivDesiredNodeWwns          int16                                      `xml:"npivDesiredNodeWwns,omitempty"`
-	NpivDesiredPortWwns          int16                                      `xml:"npivDesiredPortWwns,omitempty"`
-	NpivTemporaryDisabled        *bool                                      `xml:"npivTemporaryDisabled"`
-	NpivOnNonRdmDisks            *bool                                      `xml:"npivOnNonRdmDisks"`
-	LocationId                   string                                     `xml:"locationId,omitempty"`
-	Template                     bool                                       `xml:"template"`
-	GuestId                      string                                     `xml:"guestId"`
-	AlternateGuestName           string                                     `xml:"alternateGuestName"`
-	Annotation                   string                                     `xml:"annotation,omitempty"`
-	Files                        VirtualMachineFileInfo                     `xml:"files"`
-	Tools                        *ToolsConfigInfo                           `xml:"tools,omitempty"`
-	Flags                        VirtualMachineFlagInfo                     `xml:"flags"`
-	ConsolePreferences           *VirtualMachineConsolePreferences          `xml:"consolePreferences,omitempty"`
-	DefaultPowerOps              VirtualMachineDefaultPowerOpInfo           `xml:"defaultPowerOps"`
-	Hardware                     VirtualHardware                            `xml:"hardware"`
-	CpuAllocation                *ResourceAllocationInfo                    `xml:"cpuAllocation,omitempty"`
-	MemoryAllocation             *ResourceAllocationInfo                    `xml:"memoryAllocation,omitempty"`
-	LatencySensitivity           *LatencySensitivity                        `xml:"latencySensitivity,omitempty"`
-	MemoryHotAddEnabled          *bool                                      `xml:"memoryHotAddEnabled"`
-	CpuHotAddEnabled             *bool                                      `xml:"cpuHotAddEnabled"`
-	CpuHotRemoveEnabled          *bool                                      `xml:"cpuHotRemoveEnabled"`
-	HotPlugMemoryLimit           int64                                      `xml:"hotPlugMemoryLimit,omitempty"`
-	HotPlugMemoryIncrementSize   int64                                      `xml:"hotPlugMemoryIncrementSize,omitempty"`
-	CpuAffinity                  *VirtualMachineAffinityInfo                `xml:"cpuAffinity,omitempty"`
-	MemoryAffinity               *VirtualMachineAffinityInfo                `xml:"memoryAffinity,omitempty"`
-	NetworkShaper                *VirtualMachineNetworkShaperInfo           `xml:"networkShaper,omitempty"`
-	ExtraConfig                  []BaseOptionValue                          `xml:"extraConfig,omitempty,typeattr"`
-	CpuFeatureMask               []HostCpuIdInfo                            `xml:"cpuFeatureMask,omitempty"`
-	DatastoreUrl                 []VirtualMachineConfigInfoDatastoreUrlPair `xml:"datastoreUrl,omitempty"`
-	SwapPlacement                string                                     `xml:"swapPlacement,omitempty"`
-	BootOptions                  *VirtualMachineBootOptions                 `xml:"bootOptions,omitempty"`
-	FtInfo                       BaseFaultToleranceConfigInfo               `xml:"ftInfo,omitempty,typeattr"`
-	RepConfig                    *ReplicationConfigSpec                     `xml:"repConfig,omitempty"`
-	VAppConfig                   BaseVmConfigInfo                           `xml:"vAppConfig,omitempty,typeattr"`
-	VAssertsEnabled              *bool                                      `xml:"vAssertsEnabled"`
-	ChangeTrackingEnabled        *bool                                      `xml:"changeTrackingEnabled"`
-	Firmware                     string                                     `xml:"firmware,omitempty"`
-	MaxMksConnections            int32                                      `xml:"maxMksConnections,omitempty"`
-	GuestAutoLockEnabled         *bool                                      `xml:"guestAutoLockEnabled"`
-	ManagedBy                    *ManagedByInfo                             `xml:"managedBy,omitempty"`
-	MemoryReservationLockedToMax *bool                                      `xml:"memoryReservationLockedToMax"`
-	InitialOverhead              *VirtualMachineConfigInfoOverheadInfo      `xml:"initialOverhead,omitempty"`
-	NestedHVEnabled              *bool                                      `xml:"nestedHVEnabled"`
-	VPMCEnabled                  *bool                                      `xml:"vPMCEnabled"`
-	ScheduledHardwareUpgradeInfo *ScheduledHardwareUpgradeInfo              `xml:"scheduledHardwareUpgradeInfo,omitempty"`
-	ForkConfigInfo               *VirtualMachineForkConfigInfo              `xml:"forkConfigInfo,omitempty"`
-	VFlashCacheReservation       int64                                      `xml:"vFlashCacheReservation,omitempty"`
-	VmxConfigChecksum            []byte                                     `xml:"vmxConfigChecksum,omitempty"`
-	MessageBusTunnelEnabled      *bool                                      `xml:"messageBusTunnelEnabled"`
-	VmStorageObjectId            string                                     `xml:"vmStorageObjectId,omitempty"`
-	SwapStorageObjectId          string                                     `xml:"swapStorageObjectId,omitempty"`
-	KeyId                        *CryptoKeyId                               `xml:"keyId,omitempty"`
-	GuestIntegrityInfo           *VirtualMachineGuestIntegrityInfo          `xml:"guestIntegrityInfo,omitempty"`
-	MigrateEncryption            string                                     `xml:"migrateEncryption,omitempty"`
+	ChangeVersion string    `xml:"changeVersion"`
+	Modified      time.Time `xml:"modified"`
+	Name          string    `xml:"name"`
+	GuestFullName string    `xml:"guestFullName"`
+	Version       string    `xml:"version"`
+	Uuid          string    `xml:"uuid"`
+	//CreateDate                   *time.Time                                 `xml:"createDate"`
+	InstanceUuid               string                                     `xml:"instanceUuid,omitempty"`
+	NpivNodeWorldWideName      []int64                                    `xml:"npivNodeWorldWideName,omitempty"`
+	NpivPortWorldWideName      []int64                                    `xml:"npivPortWorldWideName,omitempty"`
+	NpivWorldWideNameType      string                                     `xml:"npivWorldWideNameType,omitempty"`
+	NpivDesiredNodeWwns        int16                                      `xml:"npivDesiredNodeWwns,omitempty"`
+	NpivDesiredPortWwns        int16                                      `xml:"npivDesiredPortWwns,omitempty"`
+	NpivTemporaryDisabled      *bool                                      `xml:"npivTemporaryDisabled"`
+	NpivOnNonRdmDisks          *bool                                      `xml:"npivOnNonRdmDisks"`
+	LocationId                 string                                     `xml:"locationId,omitempty"`
+	Template                   bool                                       `xml:"template"`
+	GuestId                    string                                     `xml:"guestId"`
+	AlternateGuestName         string                                     `xml:"alternateGuestName"`
+	Annotation                 string                                     `xml:"annotation,omitempty"`
+	Files                      VirtualMachineFileInfo                     `xml:"files"`
+	Tools                      *ToolsConfigInfo                           `xml:"tools,omitempty"`
+	Flags                      VirtualMachineFlagInfo                     `xml:"flags"`
+	ConsolePreferences         *VirtualMachineConsolePreferences          `xml:"consolePreferences,omitempty"`
+	DefaultPowerOps            VirtualMachineDefaultPowerOpInfo           `xml:"defaultPowerOps"`
+	Hardware                   VirtualHardware                            `xml:"hardware"`
+	CpuAllocation              *ResourceAllocationInfo                    `xml:"cpuAllocation,omitempty"`
+	MemoryAllocation           *ResourceAllocationInfo                    `xml:"memoryAllocation,omitempty"`
+	LatencySensitivity         *LatencySensitivity                        `xml:"latencySensitivity,omitempty"`
+	MemoryHotAddEnabled        *bool                                      `xml:"memoryHotAddEnabled"`
+	CpuHotAddEnabled           *bool                                      `xml:"cpuHotAddEnabled"`
+	CpuHotRemoveEnabled        *bool                                      `xml:"cpuHotRemoveEnabled"`
+	HotPlugMemoryLimit         int64                                      `xml:"hotPlugMemoryLimit,omitempty"`
+	HotPlugMemoryIncrementSize int64                                      `xml:"hotPlugMemoryIncrementSize,omitempty"`
+	CpuAffinity                *VirtualMachineAffinityInfo                `xml:"cpuAffinity,omitempty"`
+	MemoryAffinity             *VirtualMachineAffinityInfo                `xml:"memoryAffinity,omitempty"`
+	NetworkShaper              *VirtualMachineNetworkShaperInfo           `xml:"networkShaper,omitempty"`
+	ExtraConfig                []BaseOptionValue                          `xml:"extraConfig,omitempty,typeattr"`
+	CpuFeatureMask             []HostCpuIdInfo                            `xml:"cpuFeatureMask,omitempty"`
+	DatastoreUrl               []VirtualMachineConfigInfoDatastoreUrlPair `xml:"datastoreUrl,omitempty"`
+	SwapPlacement              string                                     `xml:"swapPlacement,omitempty"`
+	BootOptions                *VirtualMachineBootOptions                 `xml:"bootOptions,omitempty"`
+	FtInfo                     BaseFaultToleranceConfigInfo               `xml:"ftInfo,omitempty,typeattr"`
+	//RepConfig                    *ReplicationConfigSpec                     `xml:"repConfig,omitempty"`
+	VAppConfig                   BaseVmConfigInfo                      `xml:"vAppConfig,omitempty,typeattr"`
+	VAssertsEnabled              *bool                                 `xml:"vAssertsEnabled"`
+	ChangeTrackingEnabled        *bool                                 `xml:"changeTrackingEnabled"`
+	Firmware                     string                                `xml:"firmware,omitempty"`
+	MaxMksConnections            int32                                 `xml:"maxMksConnections,omitempty"`
+	GuestAutoLockEnabled         *bool                                 `xml:"guestAutoLockEnabled"`
+	ManagedBy                    *ManagedByInfo                        `xml:"managedBy,omitempty"`
+	MemoryReservationLockedToMax *bool                                 `xml:"memoryReservationLockedToMax"`
+	InitialOverhead              *VirtualMachineConfigInfoOverheadInfo `xml:"initialOverhead,omitempty"`
+	NestedHVEnabled              *bool                                 `xml:"nestedHVEnabled"`
+	VPMCEnabled                  *bool                                 `xml:"vPMCEnabled"`
+	ScheduledHardwareUpgradeInfo *ScheduledHardwareUpgradeInfo         `xml:"scheduledHardwareUpgradeInfo,omitempty"`
+	//ForkConfigInfo               *VirtualMachineForkConfigInfo              `xml:"forkConfigInfo,omitempty"`
+	VFlashCacheReservation int64 `xml:"vFlashCacheReservation,omitempty"`
+	//VmxConfigChecksum            []byte                                     `xml:"vmxConfigChecksum,omitempty"`
+	//MessageBusTunnelEnabled      *bool                                      `xml:"messageBusTunnelEnabled"`
+	//VmStorageObjectId            string                                     `xml:"vmStorageObjectId,omitempty"`
+	//SwapStorageObjectId          string                                     `xml:"swapStorageObjectId,omitempty"`
+	//KeyId                        *CryptoKeyId                               `xml:"keyId,omitempty"`
+	//GuestIntegrityInfo           *VirtualMachineGuestIntegrityInfo          `xml:"guestIntegrityInfo,omitempty"`
+	//MigrateEncryption            string                                     `xml:"migrateEncryption,omitempty"`
 }
 
 func init() {
@@ -51352,9 +51368,9 @@ type VirtualMachineFlagInfo struct {
 	SnapshotPowerOffBehavior string `xml:"snapshotPowerOffBehavior,omitempty"`
 	RecordReplayEnabled      *bool  `xml:"recordReplayEnabled"`
 	FaultToleranceType       string `xml:"faultToleranceType,omitempty"`
-	CbrcCacheEnabled         *bool  `xml:"cbrcCacheEnabled"`
-	VvtdEnabled              *bool  `xml:"vvtdEnabled"`
-	VbsEnabled               *bool  `xml:"vbsEnabled"`
+	//CbrcCacheEnabled         *bool  `xml:"cbrcCacheEnabled"`
+	//VvtdEnabled              *bool  `xml:"vvtdEnabled"`
+	//VbsEnabled               *bool  `xml:"vbsEnabled"`
 }
 
 func init() {

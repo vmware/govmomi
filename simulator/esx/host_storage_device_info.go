@@ -167,7 +167,7 @@ var HostStorageDeviceInfo = types.HostStorageDeviceInfo{
 			PhysicalLocation:      nil,
 			EmulatedDIXDIFEnabled: types.NewBool(false),
 			VsanDiskInfo:          (*types.VsanHostVsanDiskInfo)(nil),
-			ScsiDiskType:          "native512",
+			//ScsiDiskType:          "native512",
 		},
 	},
 	ScsiTopology: &types.HostScsiTopology{

@@ -228,7 +228,7 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		{spec.GuestAutoLockEnabled, &vm.Config.GuestAutoLockEnabled},
 		{spec.MemoryHotAddEnabled, &vm.Config.MemoryHotAddEnabled},
 		{spec.MemoryReservationLockedToMax, &vm.Config.MemoryReservationLockedToMax},
-		{spec.MessageBusTunnelEnabled, &vm.Config.MessageBusTunnelEnabled},
+		//{spec.MessageBusTunnelEnabled, &vm.Config.MessageBusTunnelEnabled},
 		{spec.NpivTemporaryDisabled, &vm.Config.NpivTemporaryDisabled},
 		{spec.NpivOnNonRdmDisks, &vm.Config.NpivOnNonRdmDisks},
 		{spec.ChangeTrackingEnabled, &vm.Config.ChangeTrackingEnabled},
@@ -256,9 +256,9 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Config.BootOptions = spec.BootOptions
 	}
 
-	if spec.RepConfig != nil {
-		vm.Config.RepConfig = spec.RepConfig
-	}
+	//if spec.RepConfig != nil {
+	//	vm.Config.RepConfig = spec.RepConfig
+	//}
 
 	if spec.Tools != nil {
 		vm.Config.Tools = spec.Tools

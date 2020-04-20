@@ -38,7 +38,7 @@ type ObjectManager struct {
 // the HostVStorageObjectManager singleton when connected to an ESX host.  The optional ref param can be used to specify a ESX
 // host instead, when connected to vCenter.
 func NewObjectManager(client *vim25.Client, ref ...types.ManagedObjectReference) *ObjectManager {
-	mref := *client.ServiceContent.VStorageObjectManager
+	mref := *client.ServiceContent.CertificateManager
 
 	if len(ref) == 1 {
 		mref = ref[0]

@@ -1780,7 +1780,7 @@ var HostSystem = mo.HostSystem{
 		HostAccessManager:         &types.ManagedObjectReference{Type: "HostAccessManager", Value: "ha-host-access-manager"},
 		GraphicsManager:           &types.ManagedObjectReference{Type: "HostGraphicsManager", Value: "ha-graphics-manager"},
 		VsanInternalSystem:        &types.ManagedObjectReference{Type: "HostVsanInternalSystem", Value: "ha-vsan-internal-system"},
-		CertificateManager:        &types.ManagedObjectReference{Type: "HostCertificateManager", Value: "ha-certificate-manager"},
+		//CertificateManager:        &types.ManagedObjectReference{Type: "HostCertificateManager", Value: "ha-certificate-manager"},
 	},
 	Config:           &HostConfigInfo,
 	Vm:               nil,
