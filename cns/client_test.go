@@ -686,17 +686,66 @@ func TestClient(t *testing.T) {
 			t.FailNow()
 		}
 		createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+		var volumeID string
 		if createVolumeOperationRes.Fault != nil {
 			t.Logf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
-			_, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+			fault, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
 			if !ok {
 				t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
 			} else {
-				t.Fatalf("Fault is CnsAlreadyRegisteredFault")
+				t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %s is already registered", backingDiskURLPath)
+				volumeID = fault.VolumeId.Id
+			}
+		} else {
+			volumeID = createVolumeOperationRes.VolumeId.Id
+			t.Logf("Volume created sucessfully with backingDiskURLPath: %s. volumeId: %s", backingDiskURLPath, volumeID)
+
+			// Test re creating volume using BACKING_DISK_URL_PATH
+			var reCreateCnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+			reCreateCnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+				Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0",
+				VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+				Metadata: cnstypes.CnsVolumeMetadata{
+					ContainerCluster: containerCluster,
+				},
+				BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+					BackingDiskUrlPath: backingDiskURLPath,
+				},
+			}
+
+			reCreateCnsVolumeCreateSpecList = append(reCreateCnsVolumeCreateSpecList, reCreateCnsVolumeCreateSpec)
+			t.Logf("Creating volume using the spec: %+v", pretty.Sprint(reCreateCnsVolumeCreateSpec))
+			recreateTask, err := cnsClient.CreateVolume(ctx, reCreateCnsVolumeCreateSpecList)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			reCreateTaskInfo, err := GetTaskInfo(ctx, recreateTask)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			reCreateTaskResult, err := GetTaskResult(ctx, reCreateTaskInfo)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			if reCreateTaskResult == nil {
+				t.Fatalf("Empty create task results")
+				t.FailNow()
+			}
+			reCreateVolumeOperationRes := reCreateTaskResult.GetCnsVolumeOperationResult()
+			t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
+			if reCreateVolumeOperationRes.Fault != nil {
+				t.Logf("Failed to create volume: fault=%+v", reCreateVolumeOperationRes.Fault)
+				_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+				if !ok {
+					t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
+				} else {
+					t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %q is already registered", backingDiskURLPath)
+				}
 			}
 		}
-		volumeID := createVolumeOperationRes.VolumeId.Id
-		t.Logf("Volume created sucessfully. volumeId: %s", volumeID)
 
 		// Test QueryVolume API
 		var queryFilter cnstypes.CnsQueryFilter
@@ -710,5 +759,31 @@ func TestClient(t *testing.T) {
 			t.Fatal(err)
 		}
 		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+
+		t.Logf("Deleting CNS volume created above using BACKING_DISK_URL_PATH: %s with volume: %+v", backingDiskURLPath, volumeIDList)
+		deleteTask, err = cnsClient.DeleteVolume(ctx, volumeIDList, true)
+		if err != nil {
+			t.Errorf("Failed to delete volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		deleteTaskInfo, err = GetTaskInfo(ctx, deleteTask)
+		if err != nil {
+			t.Errorf("Failed to delete volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		deleteTaskResult, err = GetTaskResult(ctx, deleteTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to delete volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if deleteTaskResult == nil {
+			t.Fatalf("Empty delete task results")
+			t.FailNow()
+		}
+		deleteVolumeOperationRes = deleteTaskResult.GetCnsVolumeOperationResult()
+		if deleteVolumeOperationRes.Fault != nil {
+			t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
+		}
+		t.Logf("volume:%q deleted sucessfully", volumeID)
 	}
 }
