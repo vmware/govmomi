@@ -364,7 +364,8 @@ func init() {
 type CnsBlockBackingDetails struct {
 	CnsBackingObjectDetails
 
-	BackingDiskId string `xml:"backingDiskId,omitempty"`
+	BackingDiskId      string `xml:"backingDiskId,omitempty"`
+	BackingDiskUrlPath string `xml:"backingDiskUrlPath,omitempty"`
 }
 
 func init() {
@@ -474,4 +475,14 @@ type CnsFault struct {
 
 func init() {
 	types.Add("CnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
+}
+
+type CnsAlreadyRegisteredFault struct {
+	CnsFault `xml:"fault,typeattr"`
+
+	VolumeId string `xml:"volumeId,omitempty"`
+}
+
+func init() {
+	types.Add("CnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
 }

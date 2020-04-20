@@ -650,4 +650,65 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("fileshare volume:%q deleted sucessfully", filevolumeId)
 	}
+	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
+		backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
+		// Test CreateVolume API with existing VMDK
+		var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+		cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+			Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0",
+			VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+			Metadata: cnstypes.CnsVolumeMetadata{
+				ContainerCluster: containerCluster,
+			},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				BackingDiskUrlPath: backingDiskURLPath,
+			},
+		}
+		cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
+		t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpec))
+		createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		createTaskInfo, err := GetTaskInfo(ctx, createTask)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		createTaskResult, err := GetTaskResult(ctx, createTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if createTaskResult == nil {
+			t.Fatalf("Empty create task results")
+			t.FailNow()
+		}
+		createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+		if createVolumeOperationRes.Fault != nil {
+			t.Logf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
+			_, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+			if !ok {
+				t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
+			} else {
+				t.Fatalf("Fault is CnsAlreadyRegisteredFault")
+			}
+		}
+		volumeID := createVolumeOperationRes.VolumeId.Id
+		t.Logf("Volume created sucessfully. volumeId: %s", volumeID)
+
+		// Test QueryVolume API
+		var queryFilter cnstypes.CnsQueryFilter
+		var volumeIDList []cnstypes.CnsVolumeId
+		volumeIDList = append(volumeIDList, cnstypes.CnsVolumeId{Id: volumeID})
+		queryFilter.VolumeIds = volumeIDList
+		t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
+		queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
+		if err != nil {
+			t.Errorf("Failed to query volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	}
 }
