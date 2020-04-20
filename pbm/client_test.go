@@ -283,17 +283,30 @@ func TestClient(t *testing.T) {
 	t.Logf("VSAN-SIOC Profile: %q successfully created", vsansiocProfileID.UniqueId)
 
 	// 9. Get ProfileID by Name
-	profileID, err := pc.ProfileIDByName(ctx, "Kubernetes-VSAN-SIOC-TestPolicy")
+	profileID, err := pc.ProfileIDByName(ctx, pbmCreateSpecVSANandSIOC.Name)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	if vsansiocProfileID.UniqueId != profileID {
-		t.Errorf("vsan-sioc profile: %q and retrieved profileID: %q successfully matched", vsansiocProfileID.UniqueId, profileID)
+		t.Errorf("vsan-sioc profile: %q and retrieved profileID: %q did not match", vsansiocProfileID.UniqueId, profileID)
 	}
+
 	t.Logf("VSAN-SIOC profile: %q and retrieved profileID: %q successfully matched", vsansiocProfileID.UniqueId, profileID)
 
-	// 10. Delete VSAN and VSAN-SIOC profile.
+	// 10. Get ProfileName by ID
+	profileName, err := pc.GetProfileNameByID(ctx, profileID)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if profileName != pbmCreateSpecVSANandSIOC.Name {
+		t.Errorf("vsan-sioc profile: %q and retrieved profileName: %q did not match", pbmCreateSpecVSANandSIOC.Name, profileName)
+	}
+
+	t.Logf("vsan-sioc profile: %q and retrieved profileName: %q successfully matched", pbmCreateSpecVSANandSIOC.Name, profileName)
+
+	// 11. Delete VSAN and VSAN-SIOC profile.
 	_, err = pc.DeleteProfile(ctx, []types.PbmProfileId{*vsanProfileID, *vsansiocProfileID})
 	if err != nil {
 		t.Fatal(err)
