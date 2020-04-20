@@ -224,6 +224,15 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 							Name: "datastoreTraversalSpec",
 						},
 						&types.SelectionSpec{
+							Name: "hostDatastoreSystemTraversalSpec",
+						},
+						&types.SelectionSpec{
+							Name: "hostNetworkSystemTraversalSpec",
+						},
+						&types.SelectionSpec{
+							Name: "hostVirtualNicManagerTraversalSpec",
+						},
+						&types.SelectionSpec{
 							Name: "entityTraversalSpec",
 						},
 					},
@@ -244,6 +253,27 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 				},
 				&types.TraversalSpec{
 					SelectionSpec: types.SelectionSpec{
+						Name: "hostNetworkSystemTraversalSpec",
+					},
+					Type: "HostSystem",
+					Path: "configManager.networkSystem",
+				},
+				&types.TraversalSpec{
+					SelectionSpec: types.SelectionSpec{
+						Name: "hostVirtualNicManagerTraversalSpec",
+					},
+					Type: "HostSystem",
+					Path: "configManager.virtualNicManager",
+				},
+				&types.TraversalSpec{
+					SelectionSpec: types.SelectionSpec{
+						Name: "hostDatastoreSystemTraversalSpec",
+					},
+					Type: "HostSystem",
+					Path: "configManager.datastoreSystem",
+				},
+				&types.TraversalSpec{
+					SelectionSpec: types.SelectionSpec{
 						Name: "entityTraversalSpec",
 					},
 					Type: "ManagedEntity",
@@ -254,6 +284,9 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 		PropSet: []types.PropertySpec{
 			{Type: "EnvironmentBrowser", All: all},
 			{Type: "HostDatastoreBrowser", All: all},
+			{Type: "HostDatastoreSystem", All: all},
+			{Type: "HostNetworkSystem", All: all},
+			{Type: "HostVirtualNicManager", All: all},
 			{Type: "ManagedEntity", All: all},
 			{Type: "Task", All: all},
 		},

@@ -450,6 +450,8 @@ docker_name() {
   vcsim_env -load "$dir"
   rm -rf "$dir"
 
+  govc object.collect -s -type h / configManager.networkSystem | xargs -n1 -I% govc object.collect -s % dnsConfig
+
   objs=$(govc find / | wc -l)
   assert_equal 23 "$objs"
 }
