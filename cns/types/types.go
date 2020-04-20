@@ -480,7 +480,7 @@ func init() {
 type CnsAlreadyRegisteredFault struct {
 	CnsFault `xml:"fault,typeattr"`
 
-	VolumeId string `xml:"volumeId,omitempty"`
+	VolumeId CnsVolumeId `xml:"volumeId,omitempty"`
 }
 
 func init() {

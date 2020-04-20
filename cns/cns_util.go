@@ -67,13 +67,19 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))
 			}
 			createSpec.Metadata.EntityMetadata = updatedEntityMetadata
-			createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
+			_, ok := createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
+			if ok {
+				createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
+			}
 			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
 		}
 		createSpecList = updatedcreateSpecList
 	} else if c.serviceClient.Version == ReleaseVSAN70 {
 		for _, createSpec := range createSpecList {
-			createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
+			_, ok := createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
+			if ok {
+				createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
+			}
 			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
 		}
 		createSpecList = updatedcreateSpecList
