@@ -148,6 +148,29 @@ func (m *AuthorizationManager) RetrieveRolePermissions(req *types.RetrieveRolePe
 	}
 }
 
+func (m *AuthorizationManager) HasPrivilegeOnEntities(req *types.HasPrivilegeOnEntities) soap.HasFault {
+	var p []types.EntityPrivilege
+
+	for _, e := range req.Entity {
+		priv := types.EntityPrivilege{Entity: e}
+
+		for _, id := range req.PrivId {
+			priv.PrivAvailability = append(priv.PrivAvailability, types.PrivilegeAvailability{
+				PrivId:    id,
+				IsGranted: true,
+			})
+		}
+
+		p = append(p, priv)
+	}
+
+	return &methods.HasPrivilegeOnEntitiesBody{
+		Res: &types.HasPrivilegeOnEntitiesResponse{
+			Returnval: p,
+		},
+	}
+}
+
 func (m *AuthorizationManager) AddAuthorizationRole(req *types.AddAuthorizationRole) soap.HasFault {
 	body := &methods.AddAuthorizationRoleBody{}
 
