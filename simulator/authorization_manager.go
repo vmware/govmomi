@@ -231,6 +231,28 @@ func (m *AuthorizationManager) RemoveAuthorizationRole(req *types.RemoveAuthoriz
 
 	return body
 }
+func (m *AuthorizationManager) HasPrivilegeOnEntities(req *types.HasPrivilegeOnEntities) soap.HasFault {
+	var p []types.EntityPrivilege
+
+	for _, e := range req.Entity {
+		priv := types.EntityPrivilege{Entity: e}
+
+		for _, id := range req.PrivId {
+			priv.PrivAvailability = append(priv.PrivAvailability, types.PrivilegeAvailability{
+				PrivId:    id,
+				IsGranted: true,
+			})
+		}
+
+		p = append(p, priv)
+	}
+
+	return &methods.HasPrivilegeOnEntitiesBody{
+		Res: &types.HasPrivilegeOnEntitiesResponse{
+			Returnval: p,
+		},
+	}
+}
 
 func (m *AuthorizationManager) privIDs(ids []string) ([]string, *soap.Fault) {
 	system := make(map[string]struct{}, len(m.system))
