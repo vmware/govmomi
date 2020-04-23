@@ -22,6 +22,28 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type VslmEventType string
+
+const (
+	VslmEventTypePreFcdMigrateEvent  = VslmEventType("preFcdMigrateEvent")
+	VslmEventTypePostFcdMigrateEvent = VslmEventType("postFcdMigrateEvent")
+)
+
+func init() {
+	types.Add("vslm:VslmEventType", reflect.TypeOf((*VslmEventType)(nil)).Elem())
+}
+
+type VslmEventVslmEventInfoState string
+
+const (
+	VslmEventVslmEventInfoStateSuccess = VslmEventVslmEventInfoState("success")
+	VslmEventVslmEventInfoStateError   = VslmEventVslmEventInfoState("error")
+)
+
+func init() {
+	types.Add("vslm:VslmEventVslmEventInfoState", reflect.TypeOf((*VslmEventVslmEventInfoState)(nil)).Elem())
+}
+
 type VslmTaskInfoState string
 
 const (
