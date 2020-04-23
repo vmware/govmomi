@@ -279,7 +279,7 @@ For example, the name **DC0_H0_VM1** is composed of:
 
 The simulator supports a subset of API methods.  However, the generated govmomi
 code includes all types and methods defined in the vmodl, which can be used to
-implement any method documented in the [VMware vSphere API Reference](apiref).
+implement any method documented in the [VMware vSphere API Reference][apiref].
 
 To see the list of supported methods:
 
