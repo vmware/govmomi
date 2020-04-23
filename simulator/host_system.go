@@ -35,6 +35,11 @@ type HostSystem struct {
 	mo.HostSystem
 }
 
+func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
+	h, ok := getManagedObject(obj).Addr().Interface().(*mo.HostSystem)
+	return h, ok
+}
+
 func NewHostSystem(host mo.HostSystem) *HostSystem {
 	if hostPortUnique { // configure unique port for each host
 		port := &esx.HostSystem.Summary.Config.Port

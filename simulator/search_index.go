@@ -33,7 +33,7 @@ func (s *SearchIndex) FindByDatastorePath(r *types.FindByDatastorePath) soap.Has
 	res := &methods.FindByDatastorePathBody{Res: new(types.FindByDatastorePathResponse)}
 
 	for ref, obj := range Map.objects {
-		vm, ok := obj.(*VirtualMachine)
+		vm, ok := asVirtualMachineMO(obj)
 		if !ok {
 			continue
 		}
@@ -124,7 +124,7 @@ func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 	if req.VmSearch {
 		// Find Virtual Machine using UUID
 		for ref, obj := range Map.objects {
-			vm, ok := obj.(*VirtualMachine)
+			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
 			}
@@ -143,7 +143,7 @@ func (s *SearchIndex) FindByUuid(req *types.FindByUuid) soap.HasFault {
 	} else {
 		// Find Host System using UUID
 		for ref, obj := range Map.objects {
-			host, ok := obj.(*HostSystem)
+			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue
 			}
@@ -180,7 +180,7 @@ func (s *SearchIndex) FindAllByDnsName(req *types.FindAllByDnsName) soap.HasFaul
 	if req.VmSearch {
 		// Find Virtual Machine using DNS name
 		for ref, obj := range Map.objects {
-			vm, ok := obj.(*VirtualMachine)
+			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
 			}
@@ -191,7 +191,7 @@ func (s *SearchIndex) FindAllByDnsName(req *types.FindAllByDnsName) soap.HasFaul
 	} else {
 		// Find Host System using DNS name
 		for ref, obj := range Map.objects {
-			host, ok := obj.(*HostSystem)
+			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue
 			}
@@ -229,7 +229,7 @@ func (s *SearchIndex) FindAllByIp(req *types.FindAllByIp) soap.HasFault {
 	if req.VmSearch {
 		// Find Virtual Machine using IP
 		for ref, obj := range Map.objects {
-			vm, ok := obj.(*VirtualMachine)
+			vm, ok := asVirtualMachineMO(obj)
 			if !ok {
 				continue
 			}
@@ -240,7 +240,7 @@ func (s *SearchIndex) FindAllByIp(req *types.FindAllByIp) soap.HasFault {
 	} else {
 		// Find Host System using IP
 		for ref, obj := range Map.objects {
-			host, ok := obj.(*HostSystem)
+			host, ok := asHostSystemMO(obj)
 			if !ok {
 				continue
 			}
