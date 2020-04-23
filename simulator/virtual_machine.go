@@ -50,6 +50,11 @@ type VirtualMachine struct {
 	imc *types.CustomizationSpec
 }
 
+func asVirtualMachineMO(obj mo.Reference) (*mo.VirtualMachine, bool) {
+	vm, ok := getManagedObject(obj).Addr().Interface().(*mo.VirtualMachine)
+	return vm, ok
+}
+
 func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
