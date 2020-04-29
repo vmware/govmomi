@@ -49,6 +49,7 @@ type create struct {
 
 	// Options for VMFS
 	DiskCanonicalName string
+	Version           *int32
 
 	// Options for local
 	Path string
@@ -142,6 +143,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 
 	// Options for VMFS
 	f.StringVar(&cmd.DiskCanonicalName, "disk", "", "Canonical name of disk (VMFS only)")
+	f.Var(flags.NewOptionalInt32(&cmd.Version), "version", "VMFS major version")
 
 	// Options for Local
 	f.StringVar(&cmd.Path, "path", "", "Local directory path for the datastore (local only)")
@@ -287,6 +289,9 @@ func (cmd *create) CreateVmfsDatastore(ctx context.Context, hosts []*object.Host
 
 		spec := *option.Spec.(*types.VmfsDatastoreCreateSpec)
 		spec.Vmfs.VolumeName = cmd.Name
+		if cmd.Version != nil {
+			spec.Vmfs.MajorVersion = *cmd.Version
+		}
 		_, err = ds.CreateVmfsDatastore(ctx, spec)
 		if err != nil {
 			return err
