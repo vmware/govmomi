@@ -189,6 +189,10 @@ func (p *ResourcePool) UpdateConfig(c *types.UpdateConfig) soap.HasFault {
 	return body
 }
 
+func (a *VirtualApp) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasFault {
+	return (&ResourcePool{ResourcePool: a.ResourcePool}).ImportVApp(ctx, req)
+}
+
 func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasFault {
 	body := new(methods.ImportVAppBody)
 
@@ -201,6 +205,10 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 	dc := ctx.Map.getEntityDatacenter(p)
 	folder := ctx.Map.Get(dc.VmFolder).(*Folder)
 	if req.Folder != nil {
+		if p.Self.Type == "VirtualApp" {
+			body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "pool"})
+			return body
+		}
 		folder = ctx.Map.Get(*req.Folder).(*Folder)
 	}
 

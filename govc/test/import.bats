@@ -3,7 +3,7 @@
 load test_helper
 
 @test "import.ova" {
-  vcsim_env
+  vcsim_env -app 1
 
   run govc import.ova "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
@@ -33,6 +33,9 @@ load test_helper
   assert_matches "disk-"
 
   run govc vm.destroy "$TTYLINUX_NAME"
+  assert_success
+
+  run govc import.ova -pool /DC0/host/DC0_C0/Resources/DC0_C0_APP0 "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
 }
 

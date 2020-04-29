@@ -275,9 +275,14 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
-	folder, err := cmd.FolderOrDefault("vm")
-	if err != nil {
-		return nil, err
+	var folder *object.Folder
+	// The folder argument must not be set on a VM in a vApp, otherwise causes
+	// InvalidArgument fault: A specified parameter was not correct: pool
+	if cmd.ResourcePool.Reference().Type != "VirtualApp" {
+		folder, err = cmd.FolderOrDefault("vm")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	lease, err := cmd.ResourcePool.ImportVApp(ctx, spec.ImportSpec, folder, host)
