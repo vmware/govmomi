@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/methods"
 	cnstypes "github.com/vmware/govmomi/cns/types"
+	pbmtypes "github.com/vmware/govmomi/pbm/types"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim25types "github.com/vmware/govmomi/vim25/types"
@@ -78,6 +79,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 					BackingObjectDetails:         createSpec.BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails(),
 					ComplianceStatus:             "Simulator Compliance Status",
 					DatastoreAccessibilityStatus: "Simulator Datastore Accessibility Status",
+					HealthStatus:                 string(pbmtypes.PbmHealthStatusForEntityGreen),
 				}
 
 				volumes[newVolume.VolumeId] = newVolume
@@ -113,6 +115,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 						BackingObjectDetails:         createSpec.BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails(),
 						ComplianceStatus:             "Simulator Compliance Status",
 						DatastoreAccessibilityStatus: "Simulator Datastore Accessibility Status",
+						HealthStatus:                 string(pbmtypes.PbmHealthStatusForEntityGreen),
 						StoragePolicyId:              policyId,
 					}
 
