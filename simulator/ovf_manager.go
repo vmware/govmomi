@@ -49,7 +49,7 @@ func ovfNetwork(ctx *Context, req *types.CreateImportSpec, item ovf.ResourceAllo
 	if len(item.Connection) == 0 {
 		return nil
 	}
-	pool := ctx.Map.Get(req.ResourcePool).(*ResourcePool)
+	pool := ctx.Map.Get(req.ResourcePool).(mo.Entity)
 	ref := ctx.Map.getEntityDatacenter(pool).defaultNetwork()[0] // Default to VM Network
 	c := item.Connection[0]
 
