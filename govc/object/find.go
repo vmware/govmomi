@@ -155,6 +155,7 @@ Examples:
   govc find . -type m -runtime.powerState poweredOn
   govc find . -type m -datastore $(govc find -i datastore -name vsanDatastore)
   govc find . -type s -summary.type vsan
+  govc find . -type s -customValue *:prod # Key:Value
   govc find . -type h -hardware.cpuInfo.numCpuCores 16`, atable)
 }
 
