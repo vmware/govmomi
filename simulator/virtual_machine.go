@@ -1108,8 +1108,10 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			info.Datastore = &ds.Self
 
 			// XXX: compare disk size and free space until windows stat is supported
-			ds.Summary.FreeSpace -= getDiskSize(x)
-			ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+			Map.WithLock(ds, func() {
+				ds.Summary.FreeSpace -= getDiskSize(x)
+				ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+			})
 
 			vm.updateDiskLayouts()
 		}
@@ -1163,8 +1165,10 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					p, _ := parseDatastorePath(file)
 					ds := vm.findDatastore(p.Datastore)
 
-					ds.Summary.FreeSpace += getDiskSize(device)
-					ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+					Map.WithLock(ds, func() {
+						ds.Summary.FreeSpace += getDiskSize(device)
+						ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+					})
 				}
 
 				if file != "" {
