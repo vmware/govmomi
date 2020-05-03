@@ -336,20 +336,22 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	vm.ResourcePool = &c.req.Pool
 
 	if c.req.Host == nil {
-		var hosts []types.ManagedObjectReference
-
 		pool := Map.Get(c.req.Pool).(mo.Entity)
+		cr := Map.getEntityComputeResource(pool)
 
-		switch cr := Map.getEntityComputeResource(pool).(type) {
-		case *mo.ComputeResource:
-			hosts = cr.Host
-		case *ClusterComputeResource:
-			hosts = cr.Host
-		}
+		Map.WithLock(cr, func() {
+			var hosts []types.ManagedObjectReference
+			switch cr := cr.(type) {
+			case *mo.ComputeResource:
+				hosts = cr.Host
+			case *ClusterComputeResource:
+				hosts = cr.Host
+			}
 
-		hosts = hostsWithDatastore(hosts, c.req.Config.Files.VmPathName)
-		host := hosts[rand.Intn(len(hosts))]
-		vm.Runtime.Host = &host
+			hosts = hostsWithDatastore(hosts, c.req.Config.Files.VmPathName)
+			host := hosts[rand.Intn(len(hosts))]
+			vm.Runtime.Host = &host
+		})
 	} else {
 		vm.Runtime.Host = c.req.Host
 	}
