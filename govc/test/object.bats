@@ -392,7 +392,7 @@ EOF
 }
 
 @test "object.find" {
-  esx_env
+  vcsim_env -ds 2
 
   unset GOVC_DATACENTER
 
@@ -437,14 +437,14 @@ EOF
   assert_output "$folder/$vm"
 
   # moref for VM Network
-  net=$(govc find -i network -name "$GOVC_NETWORK")
+  net=$(govc find -i network -name "$(basename "$GOVC_NETWORK")")
 
   # $vm.network.contains($net) == true
   run govc find . -type m -name "$vm" -network "$net"
   assert_output "$folder/$vm"
 
   # remove network reference
-  run govc device.remove -vm "$vm" ethernet-0
+  run govc device.remove -vm "$vm" ethernet-*
   assert_success
 
   # $vm.network.contains($net) == false
@@ -480,6 +480,39 @@ EOF
   # Make sure property filter doesn't match when guest is unset for $vm (issue 1089)
   run govc find "$folder" -type m -guest.ipAddress 0.0.0.0
   assert_output ""
+
+  run govc fields.add -type Datastore ds-mode
+  assert_success
+
+  run govc fields.add -type Datastore ds-other
+  assert_success
+
+  run govc fields.set ds-mode prod datastore/LocalDS_0
+  assert_success
+
+  run govc fields.set ds-other prod datastore/LocalDS_1
+  assert_success
+
+  run govc fields.set ds-mode test datastore/LocalDS_1
+  assert_success
+
+  run govc fields.set ds-other foo datastore/LocalDS_1
+  assert_success
+
+  key=$(govc fields.ls | grep ds-mode | awk '{print $1}')
+
+  run govc find -type s / -customValue "$key:prod" # match specific key:val
+  assert_success /DC0/datastore/LocalDS_0
+
+  run govc find -type s / -customValue "*:test" # match any key:val
+  assert_success /DC0/datastore/LocalDS_1
+
+  run govc find -type s / -customValue "$key:*" # match specific key w/ any val
+  assert_matches /DC0/datastore/LocalDS_0
+  assert_matches /DC0/datastore/LocalDS_1
+
+  run govc find -type s / -customValue 0:dev # value doesn't match any entity
+  assert_success ""
 }
 
 @test "object.find multi root" {
