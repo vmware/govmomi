@@ -384,11 +384,11 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	pool := Map.Get(*vm.ResourcePool)
 	// This can be an internal call from VirtualApp.CreateChildVMTask, where pool is already locked.
 	c.ctx.WithLock(pool, func() {
-		switch rp := pool.(type) {
-		case *ResourcePool:
+		if rp, ok := asResourcePoolMO(pool); ok {
 			rp.Vm = append(rp.Vm, vm.Self)
-		case *VirtualApp:
-			rp.Vm = append(rp.Vm, vm.Self)
+		}
+		if vapp, ok := pool.(*VirtualApp); ok {
+			vapp.Vm = append(vapp.Vm, vm.Self)
 		}
 	})
 
