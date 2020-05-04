@@ -34,6 +34,11 @@ type ResourcePool struct {
 	mo.ResourcePool
 }
 
+func asResourcePoolMO(obj mo.Reference) (*mo.ResourcePool, bool) {
+	rp, ok := getManagedObject(obj).Addr().Interface().(*mo.ResourcePool)
+	return rp, ok
+}
+
 func NewResourcePool() *ResourcePool {
 	pool := &ResourcePool{
 		ResourcePool: esx.ResourcePool,
@@ -367,9 +372,8 @@ func (p *ResourcePool) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 			return nil, &types.InvalidArgument{}
 		}
 
-		pp := Map.Get(*p.Parent).(*ResourcePool)
+		parent, _ := asResourcePoolMO(Map.Get(*p.Parent))
 
-		parent := &pp.ResourcePool
 		// Remove child reference from rp
 		Map.RemoveReference(parent, &parent.ResourcePool, req.This)
 
