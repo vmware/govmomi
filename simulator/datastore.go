@@ -76,7 +76,8 @@ func (ds *Datastore) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 			Map.RemoveReference(parent, &parent.Datastore, ds.Self)
 		}
 
-		Map.Get(*ds.Parent).(*Folder).removeChild(ds.Self)
+		p, _ := asFolderMO(Map.Get(*ds.Parent))
+		folderRemoveChild(ctx, p, ds.Self)
 
 		return nil, nil
 	})

@@ -52,14 +52,14 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(req *types.Reco
 	}
 }
 
-func (s *DistributedVirtualPortgroup) DestroyTask(req *types.Destroy_Task) soap.HasFault {
+func (s *DistributedVirtualPortgroup) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		vswitch := Map.Get(*s.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
 		Map.RemoveReference(vswitch, &vswitch.Portgroup, s.Reference())
 		Map.removeString(vswitch, &vswitch.Summary.PortgroupName, s.Name)
 
 		f := Map.getEntityParent(vswitch, "Folder").(*Folder)
-		f.removeChild(s.Reference())
+		folderRemoveChild(ctx, &f.Folder, s.Reference())
 
 		return nil, nil
 	})

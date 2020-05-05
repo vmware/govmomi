@@ -55,11 +55,13 @@ func asVirtualMachineMO(obj mo.Reference) (*mo.VirtualMachine, bool) {
 	return vm, ok
 }
 
-func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
+func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
-	folder := Map.Get(parent).(*Folder)
-	folder.putChild(vm)
+
+	folder := Map.Get(parent)
+	f, _ := asFolderMO(folder)
+	folderPutChild(ctx, f, vm)
 
 	if spec.Name == "" {
 		return vm, &types.InvalidVmConfig{Property: "configSpec.name"}
@@ -98,7 +100,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		vmx.Path = spec.Name
 	}
 
-	dc := Map.getEntityDatacenter(folder)
+	dc := Map.getEntityDatacenter(folder.(mo.Entity))
 	ds := Map.FindByName(vmx.Datastore, dc.Datastore).(*Datastore)
 	dir := path.Join(ds.Info.GetDatastoreInfo().Url, vmx.Path)
 
@@ -1574,13 +1576,17 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event()})
-	if f, ok := Map.getEntityParent(vm, "Folder").(*Folder); ok {
-		f.removeChild(c.This)
+	if f, ok := asFolderMO(Map.getEntityParent(vm, "Folder")); ok {
+		folderRemoveChild(ctx, f, c.This)
 	}
 
 	r.Res = new(types.UnregisterVMResponse)
 
 	return r
+}
+
+type vmFolder interface {
+	CreateVMTask(ctx *Context, c *types.CreateVM_Task) soap.HasFault
 }
 
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
@@ -1590,7 +1596,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			pool = vm.ResourcePool
 		}
 	}
-	folder := Map.Get(req.Folder).(*Folder)
+	folder, _ := asFolderMO(Map.Get(req.Folder))
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	event := vm.event()
 
@@ -1598,7 +1604,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		VmCloneEvent: types.VmCloneEvent{
 			VmEvent: event,
 		},
-		DestFolder: folder.eventArgument(),
+		DestFolder: folderEventArgument(folder),
 		DestName:   req.Name,
 		DestHost:   *host.eventArgument(),
 	})
@@ -1652,7 +1658,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			})
 		}
 
-		res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
+		res := Map.Get(req.Folder).(vmFolder).CreateVMTask(ctx, &types.CreateVM_Task{
 			This:   folder.Self,
 			Config: config,
 			Pool:   *pool,
@@ -1690,7 +1696,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 	}
 }
 
-func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFault {
+func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Task) soap.HasFault {
 	task := CreateTask(vm, "relocateVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
 
@@ -1722,7 +1728,7 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 
 		if ref := req.Spec.Folder; ref != nil {
 			folder := Map.Get(*ref).(*Folder)
-			folder.MoveIntoFolderTask(&types.MoveIntoFolder_Task{
+			folder.MoveIntoFolderTask(ctx, &types.MoveIntoFolder_Task{
 				List: []types.ManagedObjectReference{vm.Self},
 			})
 		}

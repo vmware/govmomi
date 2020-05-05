@@ -32,7 +32,7 @@ type HostDatastoreSystem struct {
 	Host *mo.HostSystem
 }
 
-func (dss *HostDatastoreSystem) add(ds *Datastore) *soap.Fault {
+func (dss *HostDatastoreSystem) add(ctx *Context, ds *Datastore) *soap.Fault {
 	info := ds.Info.GetDatastoreInfo()
 
 	info.Name = ds.Name
@@ -87,12 +87,12 @@ func (dss *HostDatastoreSystem) add(ds *Datastore) *soap.Fault {
 	browser.Datastore = dss.Datastore
 	ds.Browser = Map.Put(browser).Reference()
 
-	folder.putChild(ds)
+	folderPutChild(ctx, folder, ds)
 
 	return nil
 }
 
-func (dss *HostDatastoreSystem) CreateLocalDatastore(c *types.CreateLocalDatastore) soap.HasFault {
+func (dss *HostDatastoreSystem) CreateLocalDatastore(ctx *Context, c *types.CreateLocalDatastore) soap.HasFault {
 	r := &methods.CreateLocalDatastoreBody{}
 
 	ds := &Datastore{}
@@ -111,7 +111,7 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(c *types.CreateLocalDatasto
 	ds.Summary.MaintenanceMode = string(types.DatastoreSummaryMaintenanceModeStateNormal)
 	ds.Summary.Accessible = true
 
-	if err := dss.add(ds); err != nil {
+	if err := dss.add(ctx, ds); err != nil {
 		r.Fault_ = err
 		return r
 	}
@@ -134,7 +134,7 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(c *types.CreateLocalDatasto
 	return r
 }
 
-func (dss *HostDatastoreSystem) CreateNasDatastore(c *types.CreateNasDatastore) soap.HasFault {
+func (dss *HostDatastoreSystem) CreateNasDatastore(ctx *Context, c *types.CreateNasDatastore) soap.HasFault {
 	r := &methods.CreateNasDatastoreBody{}
 
 	ds := &Datastore{}
@@ -159,7 +159,7 @@ func (dss *HostDatastoreSystem) CreateNasDatastore(c *types.CreateNasDatastore) 
 	ds.Summary.MaintenanceMode = string(types.DatastoreSummaryMaintenanceModeStateNormal)
 	ds.Summary.Accessible = true
 
-	if err := dss.add(ds); err != nil {
+	if err := dss.add(ctx, ds); err != nil {
 		r.Fault_ = err
 		return r
 	}

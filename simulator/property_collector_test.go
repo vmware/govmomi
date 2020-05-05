@@ -801,7 +801,7 @@ func TestPropertyCollectorFold(t *testing.T) {
 
 func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 	obj := Map.Put(new(Folder))
-	obj.(*Folder).putChild(new(Folder))
+	folderPutChild(internalContext, &obj.(*Folder).Folder, new(Folder))
 
 	pc := &PropertyCollector{}
 

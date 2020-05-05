@@ -46,7 +46,7 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 	Map.Put(f)
 
 	if content.About.ApiType == "HostAgent" {
-		CreateDefaultESX(f)
+		CreateDefaultESX(internalContext, f)
 	} else {
 		content.About.InstanceUuid = uuid.New().String()
 	}

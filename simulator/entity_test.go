@@ -43,7 +43,7 @@ func TestRename(t *testing.T) {
 
 	f1 := Map.Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"
 
-	id := vmFolder.CreateFolder(&types.CreateFolder{
+	id := vmFolder.CreateFolder(internalContext, &types.CreateFolder{
 		This: vmFolder.Reference(),
 		Name: "F2",
 	}).(*methods.CreateFolderBody).Res.Returnval

@@ -29,7 +29,7 @@ type DistributedVirtualSwitch struct {
 	mo.DistributedVirtualSwitch
 }
 
-func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := Map.getEntityParent(s, "Folder").(*Folder)
 
@@ -48,7 +48,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 				}
 			}
 
-			f.putChild(pg)
+			folderPutChild(ctx, &f.Folder, pg)
 
 			pg.Key = pg.Self.Value
 			pg.Config = types.DVPortgroupConfigInfo{
@@ -235,10 +235,10 @@ func (s *DistributedVirtualSwitch) FetchDVPorts(req *types.FetchDVPorts) soap.Ha
 	return body
 }
 
-func (s *DistributedVirtualSwitch) DestroyTask(req *types.Destroy_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := Map.getEntityParent(s, "Folder").(*Folder)
-		f.removeChild(s.Reference())
+		folderRemoveChild(ctx, &f.Folder, s.Reference())
 		return nil, nil
 	})
 

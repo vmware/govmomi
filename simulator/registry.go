@@ -311,7 +311,7 @@ func (r *Registry) getEntityDatacenter(item mo.Entity) *Datacenter {
 	return nil
 }
 
-func (r *Registry) getEntityFolder(item mo.Entity, kind string) *Folder {
+func (r *Registry) getEntityFolder(item mo.Entity, kind string) *mo.Folder {
 	dc := Map.getEntityDatacenter(item)
 
 	var ref types.ManagedObjectReference
@@ -321,12 +321,12 @@ func (r *Registry) getEntityFolder(item mo.Entity, kind string) *Folder {
 		ref = dc.DatastoreFolder
 	}
 
-	folder := r.Get(ref).(*Folder)
+	folder, _ := asFolderMO(r.Get(ref))
 
 	// If Model was created with Folder option, use that Folder; else use top-level folder
 	for _, child := range folder.ChildEntity {
 		if child.Type == "Folder" {
-			folder = Map.Get(child).(*Folder)
+			folder, _ = asFolderMO(Map.Get(child))
 			break
 		}
 	}
