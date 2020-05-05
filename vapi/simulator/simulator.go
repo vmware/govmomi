@@ -620,8 +620,18 @@ func (s *handler) associationID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var spec internal.Association
-	if !s.decode(r, w, &spec) {
-		return
+	var specs struct {
+		ObjectIDs []internal.AssociatedObject `json:"object_ids"`
+	}
+	switch s.action(r) {
+	case "attach", "detach", "list-attached-objects":
+		if !s.decode(r, w, &spec) {
+			return
+		}
+	case "attach-tag-to-multiple-objects":
+		if !s.decode(r, w, &specs) {
+			return
+		}
 	}
 
 	switch s.action(r) {
@@ -637,6 +647,11 @@ func (s *handler) associationID(w http.ResponseWriter, r *http.Request) {
 			ids = append(ids, id)
 		}
 		OK(w, ids)
+	case "attach-tag-to-multiple-objects":
+		for _, obj := range specs.ObjectIDs {
+			s.Association[id][obj] = true
+		}
+		OK(w)
 	}
 }
 
