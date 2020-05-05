@@ -36,21 +36,27 @@ type FileManager struct {
 func (f *FileManager) findDatastore(ref mo.Reference, name string) (*Datastore, types.BaseMethodFault) {
 	var refs []types.ManagedObjectReference
 
-	switch obj := ref.(type) {
-	case *Folder:
-		refs = obj.ChildEntity
-	case *StoragePod:
-		refs = obj.ChildEntity
+	if d, ok := asFolderMO(ref); ok {
+		refs = d.ChildEntity
+	}
+	if p, ok := ref.(*StoragePod); ok {
+		refs = p.ChildEntity
 	}
 
 	for _, ref := range refs {
-		switch obj := Map.Get(ref).(type) {
-		case *Datastore:
-			if obj.Name == name {
-				return obj, nil
+		obj := Map.Get(ref)
+
+		if ds, ok := obj.(*Datastore); ok && ds.Name == name {
+			return ds, nil
+		}
+		if p, ok := obj.(*StoragePod); ok {
+			ds, _ := f.findDatastore(p, name)
+			if ds != nil {
+				return ds, nil
 			}
-		case *Folder, *StoragePod:
-			ds, _ := f.findDatastore(obj, name)
+		}
+		if d, ok := asFolderMO(obj); ok {
+			ds, _ := f.findDatastore(d, name)
 			if ds != nil {
 				return ds, nil
 			}

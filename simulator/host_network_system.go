@@ -88,7 +88,7 @@ func (s *HostNetworkSystem) RemoveVirtualSwitch(c *types.RemoveVirtualSwitch) so
 	return r
 }
 
-func (s *HostNetworkSystem) AddPortGroup(c *types.AddPortGroup) soap.HasFault {
+func (s *HostNetworkSystem) AddPortGroup(ctx *Context, c *types.AddPortGroup) soap.HasFault {
 	var vswitch *types.HostVirtualSwitch
 
 	r := &methods.AddPortGroupBody{}
@@ -125,7 +125,7 @@ func (s *HostNetworkSystem) AddPortGroup(c *types.AddPortGroup) soap.HasFault {
 		return r
 	}
 
-	folder.putChild(network)
+	folderPutChild(ctx, &folder.Folder, network)
 
 	vswitch.Portgroup = append(vswitch.Portgroup, c.Portgrp.Name)
 
@@ -140,7 +140,7 @@ func (s *HostNetworkSystem) AddPortGroup(c *types.AddPortGroup) soap.HasFault {
 	return r
 }
 
-func (s *HostNetworkSystem) RemovePortGroup(c *types.RemovePortGroup) soap.HasFault {
+func (s *HostNetworkSystem) RemovePortGroup(ctx *Context, c *types.RemovePortGroup) soap.HasFault {
 	var vswitch *types.HostVirtualSwitch
 
 	r := &methods.RemovePortGroupBody{}
@@ -161,7 +161,7 @@ func (s *HostNetworkSystem) RemovePortGroup(c *types.RemovePortGroup) soap.HasFa
 
 	folder := s.folder()
 	e := Map.FindByName(c.PgName, folder.ChildEntity)
-	folder.removeChild(e.Reference())
+	folderRemoveChild(ctx, &folder.Folder, e.Reference())
 
 	for i, pg := range s.NetworkInfo.Portgroup {
 		if pg.Spec.Name == c.PgName {

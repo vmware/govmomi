@@ -349,7 +349,7 @@ func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.
 	return body
 }
 
-func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {
+func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {
 	if e := Map.FindByName(name, f.ChildEntity); e != nil {
 		return nil, &types.DuplicateName{
 			Name:   e.Entity().Name,
@@ -375,7 +375,7 @@ func CreateClusterComputeResource(f *Folder, name string, spec types.ClusterConf
 	Map.PutEntity(cluster, Map.NewEntity(pool))
 	cluster.ResourcePool = &pool.Self
 
-	f.putChild(cluster)
+	folderPutChild(ctx, &f.Folder, cluster)
 	pool.Owner = cluster.Self
 
 	return cluster, nil
