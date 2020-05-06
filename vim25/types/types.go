@@ -49883,15 +49883,15 @@ func init() {
 type VirtualDisk struct {
 	VirtualDevice
 
-	CapacityInKB               int64                             `xml:"capacityInKB"`
-	CapacityInBytes            int64                             `xml:"capacityInBytes,omitempty"`
-	Shares                     *SharesInfo                       `xml:"shares,omitempty"`
-	StorageIOAllocation        *StorageIOAllocationInfo          `xml:"storageIOAllocation,omitempty"`
-	DiskObjectId               string                            `xml:"diskObjectId,omitempty"`
-	VFlashCacheConfigInfo      *VirtualDiskVFlashCacheConfigInfo `xml:"vFlashCacheConfigInfo,omitempty"`
-	Iofilter                   []string                          `xml:"iofilter,omitempty"`
-	VDiskId                    *ID                               `xml:"vDiskId,omitempty"`
-	NativeUnmanagedLinkedClone *bool                             `xml:"nativeUnmanagedLinkedClone"`
+	CapacityInKB          int64                             `xml:"capacityInKB"`
+	CapacityInBytes       int64                             `xml:"capacityInBytes,omitempty"`
+	Shares                *SharesInfo                       `xml:"shares,omitempty"`
+	StorageIOAllocation   *StorageIOAllocationInfo          `xml:"storageIOAllocation,omitempty"`
+	DiskObjectId          string                            `xml:"diskObjectId,omitempty"`
+	VFlashCacheConfigInfo *VirtualDiskVFlashCacheConfigInfo `xml:"vFlashCacheConfigInfo,omitempty"`
+	Iofilter              []string                          `xml:"iofilter,omitempty"`
+	VDiskId               *ID                               `xml:"vDiskId,omitempty"`
+	//NativeUnmanagedLinkedClone *bool                             `xml:"nativeUnmanagedLinkedClone"`
 }
 
 func init() {
