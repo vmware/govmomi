@@ -49724,7 +49724,7 @@ func init() {
 type VirtualDeviceConnectInfo struct {
 	DynamicData
 
-	MigrateConnect    string `xml:"migrateConnect,omitempty"`
+	//MigrateConnect    string `xml:"migrateConnect,omitempty"`
 	StartConnected    bool   `xml:"startConnected"`
 	AllowGuestControl bool   `xml:"allowGuestControl"`
 	Connected         bool   `xml:"connected"`
