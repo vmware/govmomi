@@ -139,7 +139,7 @@ func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 	download := func(src *url.URL, name string) error {
 		p := soap.DefaultDownload
 		p.Headers = map[string]string{
-			"vmware-api-session-id": c.SessionID,
+			"vmware-api-session-id": c.SessionID(),
 		}
 		if isStdout {
 			s, _, err := c.Download(ctx, src, &p)

@@ -140,7 +140,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 				return err
 			}
 			m.SessionList = append(m.SessionList, types.UserSession{
-				Key:            rc.SessionID,
+				Key:            rc.SessionID(),
 				UserName:       rs.User + " (REST)",
 				LoginTime:      rs.Created,
 				LastActiveTime: rs.LastAccessed,

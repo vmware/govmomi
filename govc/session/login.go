@@ -263,9 +263,9 @@ func (cmd *login) setCookie(ctx context.Context, c *vim25.Client) error {
 
 func (cmd *login) setRestCookie(ctx context.Context, c *rest.Client) error {
 	if cmd.cookie == "" {
-		cmd.cookie = c.SessionID
+		cmd.cookie = c.SessionID()
 	} else {
-		c.SessionID = cmd.cookie
+		c.SessionID(cmd.cookie)
 
 		// Check the session is still valid
 		s, err := c.Session(ctx)
