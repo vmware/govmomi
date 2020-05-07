@@ -20925,7 +20925,7 @@ type HostConnectInfo struct {
 	Network                []BaseHostConnectInfoNetworkInfo `xml:"network,omitempty,typeattr"`
 	Datastore              []BaseHostDatastoreConnectInfo   `xml:"datastore,omitempty,typeattr"`
 	License                *HostLicenseConnectInfo          `xml:"license,omitempty"`
-	Capability             *HostCapability                  `xml:"capability,omitempty"`
+	//Capability             *HostCapability                  `xml:"capability,omitempty"`
 }
 
 func init() {
@@ -23642,11 +23642,11 @@ func init() {
 type HostOpaqueNetworkInfo struct {
 	DynamicData
 
-	OpaqueNetworkId   string                   `xml:"opaqueNetworkId"`
-	OpaqueNetworkName string                   `xml:"opaqueNetworkName"`
-	OpaqueNetworkType string                   `xml:"opaqueNetworkType"`
-	PnicZone          []string                 `xml:"pnicZone,omitempty"`
-	Capability        *OpaqueNetworkCapability `xml:"capability,omitempty"`
+	OpaqueNetworkId   string `xml:"opaqueNetworkId"`
+	OpaqueNetworkName string `xml:"opaqueNetworkName"`
+	OpaqueNetworkType string `xml:"opaqueNetworkType"`
+	//PnicZone          []string                 `xml:"pnicZone,omitempty"`
+	//Capability        *OpaqueNetworkCapability `xml:"capability,omitempty"`
 	//ExtraConfig       []BaseOptionValue        `xml:"extraConfig,omitempty,typeattr"`
 }
 

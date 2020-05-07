@@ -1283,8 +1283,8 @@ func init() {
 type OpaqueNetwork struct {
 	Network
 
-	Capability  *types.OpaqueNetworkCapability `mo:"capability"`
-	ExtraConfig []types.BaseOptionValue        `mo:"extraConfig"`
+	//Capability  *types.OpaqueNetworkCapability `mo:"capability"`
+	//ExtraConfig []types.BaseOptionValue        `mo:"extraConfig"`
 }
 
 func init() {
