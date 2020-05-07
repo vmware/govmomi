@@ -325,18 +325,16 @@ func (s *Session) Login(ctx context.Context, c Client, config func(*soap.Client)
 		*client = *vc
 		c = client
 	case *rest.Client:
-		vc := &vim25.Client{Client: sc}
-		rc := rest.NewClient(vc)
+		client.Client = sc.NewServiceClient(rest.Path, "")
 
 		login := s.loginREST
 		if s.LoginREST != nil {
 			login = s.LoginREST
 		}
-		if err = login(ctx, rc); err != nil {
+		if err = login(ctx, client); err != nil {
 			return err
 		}
 
-		*client = *rc
 		c = client
 	default:
 		panic(fmt.Sprintf("unsupported client type=%T", client))

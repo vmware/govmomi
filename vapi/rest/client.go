@@ -25,6 +25,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"net/url"
+	"sync"
 	"time"
 
 	"github.com/vmware/govmomi/vapi/internal"
@@ -34,8 +35,10 @@ import (
 
 // Client extends soap.Client to support JSON encoding, while inheriting security features, debug tracing and session persistence.
 type Client struct {
+	mu sync.Mutex
+
 	*soap.Client
-	SessionID string
+	sessionID string
 }
 
 // Session information
@@ -60,7 +63,17 @@ func (m *LocalizableMessage) Error() string {
 func NewClient(c *vim25.Client) *Client {
 	sc := c.Client.NewServiceClient(Path, "")
 
-	return &Client{sc, ""}
+	return &Client{Client: sc}
+}
+
+// SessionID is set by calling Login() or optionally with the given id param
+func (c *Client) SessionID(id ...string) string {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	if len(id) != 0 {
+		c.sessionID = id[0]
+	}
+	return c.sessionID
 }
 
 type marshaledClient struct {
@@ -71,7 +84,7 @@ type marshaledClient struct {
 func (c *Client) MarshalJSON() ([]byte, error) {
 	m := marshaledClient{
 		SoapClient: c.Client,
-		SessionID:  c.SessionID,
+		SessionID:  c.sessionID,
 	}
 
 	return json.Marshal(m)
@@ -87,7 +100,7 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 
 	*c = Client{
 		Client:    m.SoapClient,
-		SessionID: m.SessionID,
+		sessionID: m.SessionID,
 	}
 
 	return nil
@@ -127,8 +140,8 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 
 	req.Header.Set("Accept", "application/json")
 
-	if c.SessionID != "" {
-		req.Header.Set(internal.SessionCookieName, c.SessionID)
+	if id := c.SessionID(); id != "" {
+		req.Header.Set(internal.SessionCookieName, id)
 	}
 
 	if s, ok := ctx.Value(signerContext{}).(Signer); ok {
@@ -183,7 +196,15 @@ func (c *Client) Login(ctx context.Context, user *url.Userinfo) error {
 		}
 	}
 
-	return c.Do(ctx, req, &c.SessionID)
+	var id string
+	err := c.Do(ctx, req, &id)
+	if err != nil {
+		return err
+	}
+
+	c.SessionID(id)
+
+	return nil
 }
 
 func (c *Client) LoginByToken(ctx context.Context) error {
