@@ -51064,8 +51064,8 @@ type VirtualMachineConfigSummary struct {
 	InstallBootRequired *bool                        `xml:"installBootRequired"`
 	FtInfo              BaseFaultToleranceConfigInfo `xml:"ftInfo,omitempty,typeattr"`
 	ManagedBy           *ManagedByInfo               `xml:"managedBy,omitempty"`
-	TpmPresent          *bool                        `xml:"tpmPresent"`
-	NumVmiopBackings    int32                        `xml:"numVmiopBackings,omitempty"`
+	//TpmPresent          *bool                        `xml:"tpmPresent"`
+	NumVmiopBackings int32 `xml:"numVmiopBackings,omitempty"`
 }
 
 func init() {
