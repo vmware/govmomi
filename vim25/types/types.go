@@ -35368,9 +35368,9 @@ func init() {
 type PhysicalNicSpec struct {
 	DynamicData
 
-	Ip                            *HostIpConfig        `xml:"ip,omitempty"`
-	LinkSpeed                     *PhysicalNicLinkInfo `xml:"linkSpeed,omitempty"`
-	EnableEnhancedNetworkingStack *bool                `xml:"enableEnhancedNetworkingStack"`
+	Ip        *HostIpConfig        `xml:"ip,omitempty"`
+	LinkSpeed *PhysicalNicLinkInfo `xml:"linkSpeed,omitempty"`
+	//EnableEnhancedNetworkingStack *bool                `xml:"enableEnhancedNetworkingStack"`
 }
 
 func init() {
