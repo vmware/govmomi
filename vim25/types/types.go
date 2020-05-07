@@ -23664,7 +23664,7 @@ type HostOpaqueSwitch struct {
 	Status   string                            `xml:"status,omitempty"`
 	Vtep     []HostVirtualNic                  `xml:"vtep,omitempty"`
 	//ExtraConfig       []BaseOptionValue                 `xml:"extraConfig,omitempty,typeattr"`
-	FeatureCapability []HostFeatureCapability `xml:"featureCapability,omitempty"`
+	//FeatureCapability []HostFeatureCapability `xml:"featureCapability,omitempty"`
 }
 
 func init() {
