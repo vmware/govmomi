@@ -51794,8 +51794,8 @@ type VirtualMachineRuntimeInfo struct {
 	Paused                    *bool                                        `xml:"paused"`
 	SnapshotInBackground      *bool                                        `xml:"snapshotInBackground"`
 	QuiescedForkParent        *bool                                        `xml:"quiescedForkParent"`
-	InstantCloneFrozen        *bool                                        `xml:"instantCloneFrozen"`
-	CryptoState               string                                       `xml:"cryptoState,omitempty"`
+	//InstantCloneFrozen        *bool                                        `xml:"instantCloneFrozen"`
+	CryptoState string `xml:"cryptoState,omitempty"`
 }
 
 func init() {
