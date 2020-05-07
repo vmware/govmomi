@@ -23647,7 +23647,7 @@ type HostOpaqueNetworkInfo struct {
 	OpaqueNetworkType string                   `xml:"opaqueNetworkType"`
 	PnicZone          []string                 `xml:"pnicZone,omitempty"`
 	Capability        *OpaqueNetworkCapability `xml:"capability,omitempty"`
-	ExtraConfig       []BaseOptionValue        `xml:"extraConfig,omitempty,typeattr"`
+	//ExtraConfig       []BaseOptionValue        `xml:"extraConfig,omitempty,typeattr"`
 }
 
 func init() {
@@ -23657,14 +23657,14 @@ func init() {
 type HostOpaqueSwitch struct {
 	DynamicData
 
-	Key               string                            `xml:"key"`
-	Name              string                            `xml:"name,omitempty"`
-	Pnic              []string                          `xml:"pnic,omitempty"`
-	PnicZone          []HostOpaqueSwitchPhysicalNicZone `xml:"pnicZone,omitempty"`
-	Status            string                            `xml:"status,omitempty"`
-	Vtep              []HostVirtualNic                  `xml:"vtep,omitempty"`
-	ExtraConfig       []BaseOptionValue                 `xml:"extraConfig,omitempty,typeattr"`
-	FeatureCapability []HostFeatureCapability           `xml:"featureCapability,omitempty"`
+	Key      string                            `xml:"key"`
+	Name     string                            `xml:"name,omitempty"`
+	Pnic     []string                          `xml:"pnic,omitempty"`
+	PnicZone []HostOpaqueSwitchPhysicalNicZone `xml:"pnicZone,omitempty"`
+	Status   string                            `xml:"status,omitempty"`
+	Vtep     []HostVirtualNic                  `xml:"vtep,omitempty"`
+	//ExtraConfig       []BaseOptionValue                 `xml:"extraConfig,omitempty,typeattr"`
+	FeatureCapability []HostFeatureCapability `xml:"featureCapability,omitempty"`
 }
 
 func init() {
@@ -51181,13 +51181,13 @@ func init() {
 type VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeState struct {
 	VirtualMachineDeviceRuntimeInfoDeviceRuntimeState
 
-	VmDirectPathGen2Active                 bool                               `xml:"vmDirectPathGen2Active"`
-	VmDirectPathGen2InactiveReasonVm       []string                           `xml:"vmDirectPathGen2InactiveReasonVm,omitempty"`
-	VmDirectPathGen2InactiveReasonOther    []string                           `xml:"vmDirectPathGen2InactiveReasonOther,omitempty"`
-	VmDirectPathGen2InactiveReasonExtended string                             `xml:"vmDirectPathGen2InactiveReasonExtended,omitempty"`
-	ReservationStatus                      string                             `xml:"reservationStatus,omitempty"`
-	AttachmentStatus                       string                             `xml:"attachmentStatus,omitempty"`
-	FeatureRequirement                     []VirtualMachineFeatureRequirement `xml:"featureRequirement,omitempty"`
+	VmDirectPathGen2Active                 bool     `xml:"vmDirectPathGen2Active"`
+	VmDirectPathGen2InactiveReasonVm       []string `xml:"vmDirectPathGen2InactiveReasonVm,omitempty"`
+	VmDirectPathGen2InactiveReasonOther    []string `xml:"vmDirectPathGen2InactiveReasonOther,omitempty"`
+	VmDirectPathGen2InactiveReasonExtended string   `xml:"vmDirectPathGen2InactiveReasonExtended,omitempty"`
+	ReservationStatus                      string   `xml:"reservationStatus,omitempty"`
+	//AttachmentStatus                       string                             `xml:"attachmentStatus,omitempty"`
+	FeatureRequirement []VirtualMachineFeatureRequirement `xml:"featureRequirement,omitempty"`
 }
 
 func init() {
