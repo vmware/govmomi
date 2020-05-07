@@ -35238,7 +35238,7 @@ type PhysicalNic struct {
 	ResourcePoolSchedulerAllowed          *bool                 `xml:"resourcePoolSchedulerAllowed"`
 	ResourcePoolSchedulerDisallowedReason []string              `xml:"resourcePoolSchedulerDisallowedReason,omitempty"`
 	AutoNegotiateSupported                *bool                 `xml:"autoNegotiateSupported"`
-	EnhancedNetworkingStackSupported      *bool                 `xml:"enhancedNetworkingStackSupported"`
+	//EnhancedNetworkingStackSupported      *bool                 `xml:"enhancedNetworkingStackSupported"`
 }
 
 func init() {
