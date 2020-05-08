@@ -144,6 +144,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	cmd.KeepAlive(c)
 
 	m := library.NewManager(c)
 	res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))

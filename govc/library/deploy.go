@@ -99,10 +99,17 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 		name = *cmd.Options.Name
 	}
 
+	vc, err := cmd.DatastoreFlag.Client()
+	if err != nil {
+		return err
+	}
+	cmd.KeepAlive(vc)
+
 	c, err := cmd.DatastoreFlag.RestClient()
 	if err != nil {
 		return err
 	}
+	cmd.KeepAlive(c)
 
 	m := vcenter.NewManager(c)
 

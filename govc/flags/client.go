@@ -32,6 +32,7 @@ import (
 
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/session/cache"
+	"github.com/vmware/govmomi/session/keepalive"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -390,6 +391,17 @@ func (flag *ClientFlag) RestClient() (*rest.Client, error) {
 
 	flag.restClient = c
 	return flag.restClient, nil
+}
+
+func (flag *ClientFlag) KeepAlive(client cache.Client) {
+	switch c := client.(type) {
+	case *vim25.Client:
+		keepalive.NewHandlerSOAP(c, 0, nil).Start()
+	case *rest.Client:
+		keepalive.NewHandlerREST(c, 0, nil).Start()
+	default:
+		panic(fmt.Sprintf("unsupported client type=%T", client))
+	}
 }
 
 func (flag *ClientFlag) Logout(ctx context.Context) error {
