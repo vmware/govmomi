@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/cns"
 	cnstypes "github.com/vmware/govmomi/cns/types"
@@ -209,6 +210,27 @@ func TestSimulator(t *testing.T) {
 
 	if len(queryResult.Volumes) != existingNumDisks+1 {
 		t.Fatal("Number of volumes mismatches after creating a single volume")
+	}
+
+	// QueryVolumeInfo
+	queryVolumeInfoTask, err := cnsClient.QueryVolumeInfo(ctx, []cnstypes.CnsVolumeId{{Id: createVolumeOperationRes.VolumeId.Id}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	queryVolumeInfoTaskInfo, err := cns.GetTaskInfo(ctx, queryVolumeInfoTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	queryVolumeInfoTaskResult, err := cns.GetTaskResult(ctx, queryVolumeInfoTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if queryVolumeInfoTaskResult == nil {
+		t.Fatalf("Empty query VolumeInfo Task Result")
+	}
+	queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
+	if queryVolumeInfoOperationRes.Fault != nil {
+		t.Fatalf("Failed to query volume detail using QueryVolumeInfo: fault=%+v", queryVolumeInfoOperationRes.Fault)
 	}
 
 	// QueryAll
