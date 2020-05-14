@@ -76,6 +76,16 @@ func init() {
 	types.Add("BaseCnsEntityMetadata", reflect.TypeOf((*CnsEntityMetadata)(nil)).Elem())
 }
 
+func (b *CnsVolumeInfo) GetCnsVolumeInfo() *CnsVolumeInfo { return b }
+
+type BaseCnsVolumeInfo interface {
+	GetCnsVolumeInfo() *CnsVolumeInfo
+}
+
+func init() {
+	types.Add("BaseCnsVolumeInfo", reflect.TypeOf((*CnsVolumeInfo)(nil)).Elem())
+}
+
 func (b *CnsVolumeOperationResult) GetCnsVolumeOperationResult() *CnsVolumeOperationResult { return b }
 
 type BaseCnsVolumeOperationResult interface {

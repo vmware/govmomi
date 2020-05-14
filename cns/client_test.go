@@ -19,14 +19,14 @@ package cns
 import (
 	"context"
 	"os"
+	"testing"
 
 	"github.com/kr/pretty"
-	"github.com/vmware/govmomi/object"
 
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/soap"
-
-	"testing"
 
 	"github.com/vmware/govmomi"
 	cnstypes "github.com/vmware/govmomi/cns/types"
@@ -35,9 +35,26 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	// set CNS_DEBUG to true if you need to emit soap traces from these tests
+	// soap traces will be emitted in the govmomi/cns/.soap directory
+	// example export CNS_DEBUG='true'
+	enableDebug := os.Getenv("CNS_DEBUG")
+	soapTraceDirectory := ".soap"
+
 	url := os.Getenv("CNS_VC_URL") // example: export CNS_VC_URL='https://username:password@vc-ip/sdk'
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
+
+	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
+	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
+	// example: export export CNS_RUN_FILESHARE_TESTS='true'
+	run_fileshare_tests := os.Getenv("CNS_RUN_FILESHARE_TESTS")
+
+	// if backingDiskURLPath is not set, test for Creating Volume with setting BackingDiskUrlPath in the BackingObjectDetails of
+	// CnsVolumeCreateSpec will be skipped.
+	// example: Export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
+	backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
+
 	if url == "" || datacenter == "" || datastore == "" {
 		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
@@ -46,6 +63,17 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if enableDebug == "true" {
+		if _, err := os.Stat(soapTraceDirectory); os.IsNotExist(err) {
+			os.Mkdir(soapTraceDirectory, 0755)
+		}
+		p := debug.FileProvider{
+			Path: soapTraceDirectory,
+		}
+		debug.SetProvider(&p)
+	}
+
 	ctx := context.Background()
 	c, err := govmomi.NewClient(ctx, u, true)
 	if err != nil {
@@ -187,6 +215,36 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
+	// Test QueryVolumeInfo API
+	// QueryVolumeInfo is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
+	// This API is available on vSphere 7.0u1 onward
+	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
+		t.Logf("Calling QueryVolumeInfo using: %+v", pretty.Sprint(volumeIDList))
+		queryVolumeInfoTask, err := cnsClient.QueryVolumeInfo(ctx, volumeIDList)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		queryVolumeInfoTaskInfo, err := GetTaskInfo(ctx, queryVolumeInfoTask)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		queryVolumeInfoTaskResult, err := GetTaskResult(ctx, queryVolumeInfoTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if queryVolumeInfoTaskResult == nil {
+			t.Fatalf("Empty queryVolumeInfoTaskResult")
+			t.FailNow()
+		}
+		queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
+		if queryVolumeInfoOperationRes.Fault != nil {
+			t.Fatalf("Failed to query volumes with QueryVolumeInfo. fault=%+v", queryVolumeInfoOperationRes.Fault)
+		}
+		t.Logf("Sucessfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
+	}
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
 	var cnsVolumeExtendSpecList []cnstypes.CnsVolumeExtendSpec
@@ -452,7 +510,7 @@ func TestClient(t *testing.T) {
 	if attachVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to attach volume: fault=%+v", attachVolumeOperationRes.Fault)
 	}
-	diskUUID := attachVolumeOperationRes.VolumeId.Id
+	diskUUID := interface{}(attachTaskResult).(*cnstypes.CnsVolumeAttachResult).DiskUUID
 	t.Logf("Volume attached sucessfully. Disk UUID: %s", diskUUID)
 
 	// Re-Attach same volume to the same node and expect ResourceInUse fault
@@ -549,7 +607,7 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Volume: %q deleted sucessfully", volumeId)
 
-	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
+	if run_fileshare_tests == "true" && cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
 		// Test creating vSAN file-share Volume
 		var cnsFileVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 		vSANFileCreateSpec := &cnstypes.CnsVSANFileCreateSpec{
@@ -650,8 +708,7 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("fileshare volume:%q deleted sucessfully", filevolumeId)
 	}
-	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
-		backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
+	if backingDiskURLPath != "" && cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
 		// Test CreateVolume API with existing VMDK
 		var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 		cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
