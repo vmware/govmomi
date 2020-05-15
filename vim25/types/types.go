@@ -24592,7 +24592,7 @@ func init() {
 type HostRuntimeInfoNetStackInstanceRuntimeInfo struct {
 	DynamicData
 
-	NetStackInstanceKey    string   `xml:"netStackInstanceKey"`
+	//NetStackInstanceKey    string   `xml:"netStackInstanceKey"`
 	State                  string   `xml:"state,omitempty"`
 	VmknicKeys             []string `xml:"vmknicKeys,omitempty"`
 	MaxNumberOfConnections int32    `xml:"maxNumberOfConnections,omitempty"`

@@ -1632,7 +1632,7 @@ var HostSystem = mo.HostSystem{
 			NetStackInstanceRuntimeInfo: []types.HostRuntimeInfoNetStackInstanceRuntimeInfo{
 				{
 					DynamicData:            types.DynamicData{},
-					NetStackInstanceKey:    "defaultTcpipStack",
+					//NetStackInstanceKey:    "defaultTcpipStack",
 					State:                  "active",
 					VmknicKeys:             []string{"vmk0"},
 					MaxNumberOfConnections: 11000,
