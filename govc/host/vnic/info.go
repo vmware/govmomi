@@ -155,7 +155,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 
 		info.Address = nic.Spec.Ip.IpAddress
-		info.Stack = nic.Spec.NetStackInstanceKey
+		//info.Stack = nic.Spec.NetStackInstanceKey
 
 		for _, nc := range minfo.NetConfig {
 			for _, dev := range nc.SelectedVnic {
