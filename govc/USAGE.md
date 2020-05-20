@@ -2094,6 +2094,8 @@ Examples:
   govc guest.run -vm $name -d "hello $USER" cat
   govc guest.run -vm $name curl -s :invalid: || echo $? # exit code 6
   govc guest.run -vm $name -e FOO=bar -e BIZ=baz -C /tmp env
+  govc guest.run -dc=datacenter01 -l root:'mypassword' -vm=my_vm_hostname "ntpdate -u pool.ntp.org"
+
 
 Options:
   -C=                    The absolute path of the working directory for the program to start
