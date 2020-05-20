@@ -139,7 +139,7 @@ func (v *ContainerView) include(o types.ManagedObjectReference) bool {
 }
 
 func walk(root mo.Reference, f func(child types.ManagedObjectReference)) {
-	if _, ok := root.(types.ManagedObjectReference); ok {
+	if _, ok := root.(types.ManagedObjectReference); ok || root == nil {
 		return
 	}
 
