@@ -24581,7 +24581,7 @@ type HostRuntimeInfo struct {
 	NetworkRuntimeInfo         *HostRuntimeInfoNetworkRuntimeInfo          `xml:"networkRuntimeInfo,omitempty"`
 	VFlashResourceRuntimeInfo  *HostVFlashManagerVFlashResourceRunTimeInfo `xml:"vFlashResourceRuntimeInfo,omitempty"`
 	HostMaxVirtualDiskCapacity int64                                       `xml:"hostMaxVirtualDiskCapacity,omitempty"`
-	CryptoState                string                                      `xml:"cryptoState,omitempty"`
+	//CryptoState                string                                      `xml:"cryptoState,omitempty"`
 	CryptoKeyId                *CryptoKeyId                                `xml:"cryptoKeyId,omitempty"`
 }
 
