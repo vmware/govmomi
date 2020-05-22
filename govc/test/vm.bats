@@ -375,6 +375,32 @@ load test_helper
   assert_equal "$hv" "true"
 }
 
+@test "vm.info multi dc" {
+  vcsim_start -dc 2
+
+  run govc vm.info /DC1/vm/DC1_H0_VM1
+  assert_success
+
+  run govc vm.info DC1_H0_VM1
+  assert_failure
+
+  run govc vm.info -vm.ipath /DC1/vm/DC1_H0_VM1
+  assert_success
+  uuid=$(grep "UUID:" <<<"$output" | awk '{print $2}')
+
+  run govc vm.info -vm.ipath DC1_H0_VM1
+  assert_failure
+
+  run govc vm.info -vm.uuid enoent
+  assert_failure
+
+  run govc vm.info -vm.uuid "$uuid"
+  assert_failure
+
+  run govc vm.info -dc DC1 -vm.uuid "$uuid"
+  assert_success
+}
+
 @test "vm.create linked ide disk" {
   esx_env
 

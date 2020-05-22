@@ -171,8 +171,7 @@ func (flag *SearchFlag) searchByDNSName(c *vim25.Client, dc *object.Datacenter) 
 	}
 }
 
-func (flag *SearchFlag) searchByInventoryPath(c *vim25.Client, dc *object.Datacenter) (object.Reference, error) {
-	// TODO(PN): The datacenter flag should not be set because it is ignored.
+func (flag *SearchFlag) searchByInventoryPath(c *vim25.Client) (object.Reference, error) {
 	ctx := context.TODO()
 	return flag.searchIndex(c).FindByInventoryPath(ctx, flag.byInventoryPath)
 }
@@ -226,24 +225,29 @@ func (flag *SearchFlag) search() (object.Reference, error) {
 	ctx := context.TODO()
 	var ref object.Reference
 	var err error
+	var dc *object.Datacenter
 
 	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
 
-	dc, err := flag.Datacenter()
-	if err != nil {
-		return nil, err
+	isPath := flag.byInventoryPath != ""
+	if !isPath {
+		// All other SearchIndex methods require a Datacenter param
+		dc, err = flag.Datacenter()
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	switch {
+	case isPath:
+		ref, err = flag.searchByInventoryPath(c)
 	case flag.byDatastorePath != "":
 		ref, err = flag.searchByDatastorePath(c, dc)
 	case flag.byDNSName != "":
 		ref, err = flag.searchByDNSName(c, dc)
-	case flag.byInventoryPath != "":
-		ref, err = flag.searchByInventoryPath(c, dc)
 	case flag.byIP != "":
 		ref, err = flag.searchByIP(c, dc)
 	case flag.byUUID != "":
