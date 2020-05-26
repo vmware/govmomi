@@ -23,16 +23,16 @@ import (
 	"github.com/vmware/govmomi/vapi/rest"
 )
 
-const ApplianceLoggingForwardingPath = "/appliance/logging/forwarding"
+const applianceLoggingForwardingPath = "/appliance/logging/forwarding"
 
-// Forwarding provides convenience methods to configure appliance logging forwarding.
-type Forwarding struct {
+// Manager provides convenience methods to configure appliance logging forwarding.
+type Manager struct {
 	*rest.Client
 }
 
-// NewForwarding creates a new Forwarding with the given client
-func NewForwarding(client *rest.Client) *Forwarding {
-	return &Forwarding{
+// NewManager creates a new Manager with the given client
+func NewManager(client *rest.Client) *Manager {
+	return &Manager{
 		Client: client,
 	}
 }
@@ -44,13 +44,13 @@ type Config struct {
 	Protocol string `json:"protocol,omitempty"`
 }
 
-func (f *Forwarding) getForwardingResource() *rest.Resource {
-	return f.Resource(ApplianceLoggingForwardingPath)
+func (m *Manager) getManagerResource() *rest.Resource {
+	return m.Resource(applianceLoggingForwardingPath)
 }
 
-// Config returns all logging forwarding config.
-func (f *Forwarding) Config(ctx context.Context) ([]Config, error) {
-	r := f.getForwardingResource()
+// Forwarding returns all logging forwarding config.
+func (m *Manager) Forwarding(ctx context.Context) ([]Config, error) {
+	r := m.getManagerResource()
 	var res []Config
-	return res, f.Do(ctx, r.Request(http.MethodGet), &res)
+	return res, m.Do(ctx, r.Request(http.MethodGet), &res)
 }

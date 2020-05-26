@@ -28,17 +28,13 @@ import (
 	vlogging "github.com/vmware/govmomi/vapi/appliance/logging"
 )
 
-func main() {
-	fmt.Println("vim-go")
-}
-
 type forwarding struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 }
 
 func init() {
-	cli.Register("appliance.logging.forwarding", &forwarding{})
+	cli.Register("vcsa.log.forwarding.info", &forwarding{})
 }
 
 func (cmd *forwarding) Register(ctx context.Context, f *flag.FlagSet) {
@@ -59,15 +55,11 @@ func (cmd *forwarding) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *forwarding) Usage() string {
-	return ""
-}
-
 func (cmd *forwarding) Description() string {
 	return `Retrieve the VC Appliance log forwarding configuration
 
 Examples:
-  govc appliance.logging.forwarding`
+  govc vcsa.log.forwarding.info`
 }
 
 func (cmd *forwarding) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -76,9 +68,9 @@ func (cmd *forwarding) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	fwd := vlogging.NewForwarding(c)
+	fwd := vlogging.NewManager(c)
 
-	res, err := fwd.Config(ctx)
+	res, err := fwd.Forwarding(ctx)
 	if err != nil {
 		return nil
 	}
