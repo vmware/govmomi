@@ -1894,7 +1894,7 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 		changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: snapshot.Self})
 		Map.Update(vm, changes)
 
-		return nil, nil
+		return snapshot.Self, nil
 	})
 
 	return &methods.CreateSnapshot_TaskBody{
