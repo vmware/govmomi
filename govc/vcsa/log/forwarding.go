@@ -25,7 +25,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	vlogging "github.com/vmware/govmomi/vapi/vcsa/log"
+	vlogging "github.com/vmware/govmomi/vapi/appliance/logging"
 )
 
 type info struct {
