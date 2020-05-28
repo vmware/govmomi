@@ -148,3 +148,40 @@ load test_helper
   run govc import.vmdk -force "$GOVC_TEST_VMDK_SRC" "$name"
   assert_success # exists, but -force was used
 }
+
+@test "import duplicate dvpg names" {
+  vcsim_env
+
+  run govc dvs.create DVS1 # DVS0 already exists
+  assert_success
+
+  run govc dvs.portgroup.add -dvs DVS0 -type ephemeral NSX-dvpg
+  assert_success
+
+  run govc dvs.portgroup.add -dvs DVS1 -type ephemeral NSX-dvpg
+  assert_success
+
+  ovf="$GOVC_IMAGES/$TTYLINUX_NAME.ovf"
+
+  spec=$(govc import.spec "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")
+
+  run govc import.ovf -name ttylinux -options - "$ovf" <<<"$spec"
+  assert_success # no network specified
+
+  options=$(jq ".NetworkMapping[].Network = \"enoent\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_failure # network not found
+
+  options=$(jq ".NetworkMapping[].Network = \"NSX-dvpg\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_failure # 2 networks have the same name
+
+  switch=$(govc find -i network -name DVS0)
+  id=$(govc find -i network -config.distributedVirtualSwitch "$switch" -name NSX-dvpg)
+  options=$(jq ".NetworkMapping[].Network = \"$id\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_success # using raw MO id
+}

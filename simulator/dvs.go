@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -41,10 +42,14 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 			pg.Name = spec.Name
 			pg.Entity().Name = pg.Name
 
-			if obj := Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
-				return nil, &types.DuplicateName{
-					Name:   pg.Name,
-					Object: obj.Reference(),
+			// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
+			// Allow duplicate names using this prefix so we can reproduce and test this condition.
+			if !strings.HasPrefix(pg.Name, "NSX-") {
+				if obj := Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
+					return nil, &types.DuplicateName{
+						Name:   pg.Name,
+						Object: obj.Reference(),
+					}
 				}
 			}
 
