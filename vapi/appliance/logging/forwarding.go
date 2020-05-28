@@ -37,8 +37,8 @@ func NewManager(client *rest.Client) *Manager {
 	}
 }
 
-// Config represents configuration for log message forwarding.
-type Config struct {
+// Forwarding represents configuration for log message forwarding.
+type Forwarding struct {
 	Hostname string `json:"hostname,omitempty"`
 	Port     int    `json:"port,omitempty"`
 	Protocol string `json:"protocol,omitempty"`
@@ -49,8 +49,8 @@ func (m *Manager) getManagerResource() *rest.Resource {
 }
 
 // Forwarding returns all logging forwarding config.
-func (m *Manager) Forwarding(ctx context.Context) ([]Config, error) {
+func (m *Manager) Forwarding(ctx context.Context) ([]Forwarding, error) {
 	r := m.getManagerResource()
-	var res []Config
+	var res []Forwarding
 	return res, m.Do(ctx, r.Request(http.MethodGet), &res)
 }

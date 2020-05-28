@@ -25,19 +25,19 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	vlogging "github.com/vmware/govmomi/vapi/appliance/logging"
+	vlogging "github.com/vmware/govmomi/vapi/vcsa/log"
 )
 
-type forwarding struct {
+type info struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 }
 
 func init() {
-	cli.Register("vcsa.log.forwarding.info", &forwarding{})
+	cli.Register("vcsa.log.forwarding.info", &info{})
 }
 
-func (cmd *forwarding) Register(ctx context.Context, f *flag.FlagSet) {
+func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
@@ -45,7 +45,7 @@ func (cmd *forwarding) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag.Register(ctx, f)
 }
 
-func (cmd *forwarding) Process(ctx context.Context) error {
+func (cmd *info) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
@@ -55,14 +55,14 @@ func (cmd *forwarding) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *forwarding) Description() string {
+func (cmd *info) Description() string {
 	return `Retrieve the VC Appliance log forwarding configuration
 
 Examples:
   govc vcsa.log.forwarding.info`
 }
 
-func (cmd *forwarding) Run(ctx context.Context, f *flag.FlagSet) error {
+func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	c, err := cmd.RestClient()
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func (cmd *forwarding) Run(ctx context.Context, f *flag.FlagSet) error {
 	return cmd.WriteResult(forwardingConfigResult(res))
 }
 
-type forwardingConfigResult []vlogging.Config
+type forwardingConfigResult []vlogging.Forwarding
 
 func (res forwardingConfigResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
