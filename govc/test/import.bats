@@ -178,6 +178,11 @@ load test_helper
   run govc import.ovf -options - "$ovf" <<<"$options"
   assert_failure # 2 networks have the same name
 
+  options=$(jq ".NetworkMapping[].Network = \"DVS0/NSX-dvpg\"" <<<"$spec")
+
+  run govc import.ovf -name ttylinux2 -options - "$ovf" <<<"$options"
+  assert_success # switch_name/portgroup_name is unique
+
   switch=$(govc find -i network -name DVS0)
   id=$(govc find -i network -config.distributedVirtualSwitch "$switch" -name NSX-dvpg)
   options=$(jq ".NetworkMapping[].Network = \"$id\"" <<<"$spec")

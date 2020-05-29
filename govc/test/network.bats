@@ -38,6 +38,22 @@ load test_helper
 
   run govc device.remove -vm $vm $eth0
   assert_failure "govc: device '$eth0' not found"
+
+  # Test PG's with the same name
+  run govc dvs.create DVS1 # DVS0 already exists
+  assert_success
+
+  run govc dvs.portgroup.add -dvs DVS0 -type ephemeral NSX-dvpg
+  assert_success
+
+  run govc dvs.portgroup.add -dvs DVS1 -type ephemeral NSX-dvpg
+  assert_success
+
+  run govc vm.network.add -vm $vm -net NSX-dvpg
+  assert_failure # resolves to multiple networks
+
+  run govc vm.network.add -vm $vm -net DVS0/NSX-dvpg
+  assert_success # switch_name/portgroup_name is unique
 }
 
 @test "network change backing" {
