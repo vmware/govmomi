@@ -2386,6 +2386,7 @@ Examples:
   govc host.esxcli system settings advanced set -o /Net/GuestIPHack -i 1
   govc host.esxcli network firewall ruleset set -r remoteSerialPort -e true
   govc host.esxcli network firewall set -e false
+  govc host.esxcli -host.dns=myhost.site.com hardware platform get
 
 Options:
   -hints=true            Use command info hints when formatting output
@@ -4384,6 +4385,7 @@ Examples:
   govc vm.clone -vm template-vm -cluster cluster1 new-vm # use compute cluster placement
   govc vm.clone -vm template-vm -datastore-cluster dscluster new-vm # use datastore cluster placement
   govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
+  govc vm.clone -vm=/ClusterName/vm/FolderName/VM_templateName -on=true -host=myesxi01 -ds=datastore01 myVM_name
 
 Options:
   -annotation=           VM description
