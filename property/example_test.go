@@ -48,3 +48,30 @@ func ExampleCollector_RetrieveOne() {
 	})
 	// Output: hardware version vmx-13
 }
+
+func ExampleCollector_Retrieve() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		pc := property.DefaultCollector(c)
+
+		obj, err := find.NewFinder(c).HostSystem(ctx, "DC0_H0")
+		if err != nil {
+			return err
+		}
+
+		var host mo.HostSystem
+		err = pc.RetrieveOne(ctx, obj.Reference(), []string{"vm"}, &host)
+		if err != nil {
+			return err
+		}
+
+		var vms []mo.VirtualMachine
+		err = pc.Retrieve(ctx, host.Vm, []string{"name"}, &vms)
+		fmt.Printf("host has %d vms:", len(vms))
+		for i := range vms {
+			fmt.Print(" ", vms[i].Name)
+		}
+
+		return nil
+	})
+	// Output: host has 2 vms: DC0_H0_VM0 DC0_H0_VM1
+}
