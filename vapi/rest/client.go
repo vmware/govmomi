@@ -184,6 +184,41 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 	})
 }
 
+// authHeaders ensures the given map contains a REST auth header
+func (c *Client) authHeaders(h map[string]string) map[string]string {
+	if _, exists := h[internal.SessionCookieName]; exists {
+		return h
+	}
+	if h == nil {
+		h = make(map[string]string)
+	}
+
+	h[internal.SessionCookieName] = c.SessionID()
+
+	return h
+}
+
+// Download wraps soap.Client.Download, adding the REST authentication header
+func (c *Client) Download(ctx context.Context, u *url.URL, param *soap.Download) (io.ReadCloser, int64, error) {
+	p := *param
+	p.Headers = c.authHeaders(p.Headers)
+	return c.Client.Download(ctx, u, &p)
+}
+
+// DownloadFile wraps soap.Client.DownloadFile, adding the REST authentication header
+func (c *Client) DownloadFile(ctx context.Context, file string, u *url.URL, param *soap.Download) error {
+	p := *param
+	p.Headers = c.authHeaders(p.Headers)
+	return c.Client.DownloadFile(ctx, file, u, &p)
+}
+
+// Upload wraps soap.Client.Upload, adding the REST authentication header
+func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *soap.Upload) error {
+	p := *param
+	p.Headers = c.authHeaders(p.Headers)
+	return c.Client.Upload(ctx, f, u, &p)
+}
+
 // Login creates a new session via Basic Authentication with the given url.Userinfo.
 func (c *Client) Login(ctx context.Context, user *url.Userinfo) error {
 	req := c.Resource(internal.SessionPath).Request(http.MethodPost)
