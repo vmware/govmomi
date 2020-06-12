@@ -118,6 +118,13 @@ func (m *ProfileManager) PbmQueryProfile(req *types.PbmQueryProfile) soap.HasFau
 	return body
 }
 
+func (m *ProfileManager) PbmQueryAssociatedProfile(req *types.PbmQueryAssociatedProfile) soap.HasFault {
+	body := new(methods.PbmQueryAssociatedProfileBody)
+	body.Res = new(types.PbmQueryAssociatedProfileResponse)
+
+	return body
+}
+
 func (m *ProfileManager) PbmRetrieveContent(req *types.PbmRetrieveContent) soap.HasFault {
 	body := new(methods.PbmRetrieveContentBody)
 	if len(req.ProfileIds) == 0 {
