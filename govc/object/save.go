@@ -84,6 +84,7 @@ Examples:
 
 func (cmd *save) save(content []types.ObjectContent) error {
 	for _, x := range content {
+		x.MissingSet = nil // drop any NoPermission faults
 		cmd.summary[x.Obj.Type]++
 		if cmd.verbose {
 			fmt.Printf("Saving %s...", x.Obj)
