@@ -93,6 +93,14 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [pyvmomi](https://github.com/vmware/pyvmomi)
 
+* [go-vmware-nsxt](https://github.com/vmware/go-vmware-nsxt)
+
 ## License
 
 govmomi is available under the [Apache 2 license](LICENSE.txt).
+
+## Name
+
+Pronounced "go-v-mom-ie"
+
+Follows pyvmomi and rbvmomi: language prefix + the vSphere acronym "VM Object Management Infrastructure".

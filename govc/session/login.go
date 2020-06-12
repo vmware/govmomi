@@ -106,7 +106,8 @@ The session.login command can be used to:
 - Send an authenticated raw HTTP request
 
 Examples:
-  govc session.login -u root:password@host
+  govc session.login -u root:password@host # Creates a cached session in ~/.govmomi/sessions
+  govc session.ls -u root@host # Use the cached session with another command
   ticket=$(govc session.login -u root@host -clone)
   govc session.login -u root@host -ticket $ticket
   govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key

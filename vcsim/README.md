@@ -352,3 +352,11 @@ For more details on vcsim features, see the project [wiki](https://github.com/vm
 ## Related projects
 
 * [LocalStack](https://github.com/localstack/localstack/blob/master/README.md#why-localstack)
+
+## License
+
+vcsim is available under the [Apache 2 license](../LICENSE).
+
+## Name
+
+Pronounced "v-c-sim", short for "vCenter Simulator"

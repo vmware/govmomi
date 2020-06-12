@@ -60,7 +60,7 @@ Examples:
   govc host.esxcli system settings advanced set -o /Net/GuestIPHack -i 1
   govc host.esxcli network firewall ruleset set -r remoteSerialPort -e true
   govc host.esxcli network firewall set -e false
-  govc host.esxcli -host.dns=myhost.site.com hardware platform get`
+  govc host.esxcli hardware platform get`
 }
 
 func (cmd *esxcli) Process(ctx context.Context) error {

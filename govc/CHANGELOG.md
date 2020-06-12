@@ -1,5 +1,51 @@
 # changelog
 
+### 0.23.0 (2020-06-11)
+
+* Add vcsa.log.forwarding.info command
+
+* ipath search flag does not require a Datacenter
+
+* Support find with -customValue filter
+
+* Support VirtualApp with -pool flag
+
+* Add '-version' flag to datastore.create command
+
+* Add session.login '-X' flag
+
+* Fix host.info CPU usage
+
+* Add session.ls '-r' flag
+
+* Support REST session caching
+
+* Add vm.change '-uuid' flag
+
+* Enable library.checkout and library.checkin by default (7.0 feature)
+
+* Avoid truncation in object.collect
+
+* Add vm.change '-memory-pin' flag
+
+* Support nested groups in sso.group.update
+
+* Add library.publish command
+
+* Add library.subscriber commands: create, info, ls, rm
+
+* Add cluster.group.ls -l flag
+
+* Add library.cp command
+
+* Add library.clone -ovf flag
+
+* Add object.collect -o flag
+
+* Add find '-l' flag
+
+* Add '-xml' output flag
+
 ### 0.22.1 (2020-01-13)
 
 * Fix session.login using HoK token with delegated Bearer identity token against 6.7 U3b+
