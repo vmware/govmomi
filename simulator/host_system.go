@@ -17,6 +17,7 @@ limitations under the License.
 package simulator
 
 import (
+	"net"
 	"os"
 	"time"
 
@@ -63,6 +64,10 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	info := *esx.HostHardwareInfo
 	hs.Hardware = &info
 
+	cfg := new(types.HostConfigInfo)
+	deepCopy(hs.Config, cfg)
+	hs.Config = cfg
+
 	config := []struct {
 		ref **types.ManagedObjectReference
 		obj mo.Reference
@@ -87,6 +92,9 @@ func (h *HostSystem) configure(spec types.HostConnectSpec, connected bool) {
 	h.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
 	if connected {
 		h.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
+	}
+	if net.ParseIP(spec.HostName) != nil {
+		h.Config.Network.Vnic[0].Spec.Ip.IpAddress = spec.HostName
 	}
 
 	h.Summary.Config.Name = spec.HostName

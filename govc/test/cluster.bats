@@ -227,3 +227,21 @@ _EOF_
   run govc cluster.override.remove -vm DC0_C0_RP0_VM0
   assert_success
 }
+
+@test "cluster.add" {
+    vcsim_env
+    unset GOVC_HOST
+
+    ip=$(govc object.collect -o -json host/DC0_C0/DC0_C0_H0 | jq -r .Config.Network.Vnic[].Spec.Ip.IpAddress)
+    assert_equal 127.0.0.1 "$ip"
+
+    govc cluster.add -cluster DC0_C0 -hostname 10.0.0.42 -username user -password pass
+    assert_success
+
+    ip=$(govc object.collect -o -json host/DC0_C0/10.0.0.42 | jq -r .Config.Network.Vnic[].Spec.Ip.IpAddress)
+
+    assert_equal 10.0.0.42 "$ip"
+    govc host.info -json '*' | jq -r .HostSystems[].Config.Network.Vnic[].Spec.Ip
+    name=$(govc host.info -json -host.ip 10.0.0.42 | jq -r .HostSystems[].Name)
+    assert_equal 10.0.0.42 "$name"
+}

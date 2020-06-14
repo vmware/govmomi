@@ -22,6 +22,7 @@ import (
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -186,5 +187,12 @@ func TestObjectCustomFields(t *testing.T) {
 
 	if len(vm.AvailableField) != 0 {
 		t.Fatalf("len(vm.AvailableField) expected 0, got %d", len(vm.AvailableField))
+	}
+}
+
+func BenchmarkDeepCopy(b *testing.B) {
+	for i := 0; i < b.N; i++ {
+		config := new(types.HostConfigInfo)
+		deepCopy(esx.HostConfigInfo, config)
 	}
 }
