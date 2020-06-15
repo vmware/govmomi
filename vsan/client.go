@@ -74,7 +74,7 @@ func (c *Client) VsanClusterGetConfig(ctx context.Context, cluster vimtypes.Mana
 func (c *Client) VsanPerfQueryPerf(ctx context.Context, cluster vimtypes.ManagedObjectReference, qSpecs []vsantypes.VsanPerfQuerySpec) ([]vsantypes.VsanPerfEntityMetricCSV, error) {
 	req := vsantypes.VsanPerfQueryPerf{
 		This:       VsanPerformanceManagerInstance,
-		Cluster:    cluster,
+		Cluster:    &cluster,
 		QuerySpecs: qSpecs,
 	}
 
