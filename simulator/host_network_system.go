@@ -46,6 +46,16 @@ func NewHostNetworkSystem(host *mo.HostSystem) *HostNetworkSystem {
 	}
 }
 
+func (s *HostNetworkSystem) init(r *Registry) {
+	for _, obj := range r.objects {
+		if h, ok := obj.(*HostSystem); ok {
+			if h.ConfigManager.NetworkSystem.Value == s.Self.Value {
+				s.Host = &h.HostSystem
+			}
+		}
+	}
+}
+
 func (s *HostNetworkSystem) folder() *Folder {
 	f := Map.getEntityDatacenter(s.Host).NetworkFolder
 	return Map.Get(f).(*Folder)

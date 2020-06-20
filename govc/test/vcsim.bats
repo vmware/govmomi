@@ -454,6 +454,9 @@ docker_name() {
 
   objs=$(govc find / | wc -l)
   assert_equal 23 "$objs"
+
+  run govc host.portgroup.add -host DC0_H0 -vswitch vSwitch0 bridge
+  assert_success # issue #2016
 }
 
 @test "vcsim trace file" {
