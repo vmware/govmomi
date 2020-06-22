@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-type AbandonHciWorkflow AbandonHciWorkflowRequestType
+type AbandonHciWorkflow AbandonHciWorkflowRequestTypehasPrivilegeOnEntities
 
 func init() {
 	t["AbandonHciWorkflow"] = reflect.TypeOf((*AbandonHciWorkflow)(nil)).Elem()
@@ -48728,7 +48728,7 @@ type VMwareDVSPortSetting struct {
 	IpfixEnabled        *BoolPolicy                                `xml:"ipfixEnabled,omitempty"`
 	TxUplink            *BoolPolicy                                `xml:"txUplink,omitempty"`
 	LacpPolicy          *VMwareUplinkLacpPolicy                    `xml:"lacpPolicy,omitempty"`
-	MacManagementPolicy *DVSMacManagementPolicy                    `xml:"macManagementPolicy,omitempty"`
+	//MacManagementPolicy *DVSMacManagementPolicy                    `xml:"macManagementPolicy,omitempty"`
 }
 
 func init() {
