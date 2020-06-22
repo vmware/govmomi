@@ -85,6 +85,8 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [Juju](https://github.com/juju/juju)
 
+* [OPS](https://github.com/nanovms/ops)
+
 ## Related projects
 
 * [rbvmomi](https://github.com/vmware/rbvmomi)
