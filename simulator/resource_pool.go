@@ -34,6 +34,11 @@ type ResourcePool struct {
 	mo.ResourcePool
 }
 
+func asResourcePoolMO(obj mo.Reference) (*mo.ResourcePool, bool) {
+	rp, ok := getManagedObject(obj).Addr().Interface().(*mo.ResourcePool)
+	return rp, ok
+}
+
 func NewResourcePool() *ResourcePool {
 	pool := &ResourcePool{
 		ResourcePool: esx.ResourcePool,
@@ -189,6 +194,10 @@ func (p *ResourcePool) UpdateConfig(c *types.UpdateConfig) soap.HasFault {
 	return body
 }
 
+func (a *VirtualApp) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasFault {
+	return (&ResourcePool{ResourcePool: a.ResourcePool}).ImportVApp(ctx, req)
+}
+
 func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasFault {
 	body := new(methods.ImportVAppBody)
 
@@ -201,6 +210,10 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 	dc := ctx.Map.getEntityDatacenter(p)
 	folder := ctx.Map.Get(dc.VmFolder).(*Folder)
 	if req.Folder != nil {
+		if p.Self.Type == "VirtualApp" {
+			body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "pool"})
+			return body
+		}
 		folder = ctx.Map.Get(*req.Folder).(*Folder)
 	}
 
@@ -359,9 +372,8 @@ func (p *ResourcePool) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 			return nil, &types.InvalidArgument{}
 		}
 
-		pp := Map.Get(*p.Parent).(*ResourcePool)
+		parent, _ := asResourcePoolMO(Map.Get(*p.Parent))
 
-		parent := &pp.ResourcePool
 		// Remove child reference from rp
 		Map.RemoveReference(parent, &parent.ResourcePool, req.This)
 

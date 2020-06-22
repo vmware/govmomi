@@ -136,7 +136,7 @@ func TestClient(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(info) != 2 {
+		if len(info) != 3 {
 			t.Errorf("len=%d", len(info))
 		}
 	}

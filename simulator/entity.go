@@ -27,7 +27,7 @@ func RenameTask(e mo.Entity, r *types.Rename_Task) soap.HasFault {
 	task := CreateTask(e, "rename", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		obj := Map.Get(r.This).(mo.Entity).Entity()
 
-		if parent, ok := Map.Get(*obj.Parent).(*Folder); ok {
+		if parent, ok := asFolderMO(Map.Get(*obj.Parent)); ok {
 			if Map.FindByName(r.NewName, parent.ChildEntity) != nil {
 				return nil, &types.InvalidArgument{InvalidProperty: "name"}
 			}

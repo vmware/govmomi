@@ -26,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type ls struct {
@@ -79,50 +78,53 @@ func (i *info) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		kinds := []struct {
-			kind string
-			list func(context.Context) ([]string, error)
-			get  func(context.Context, string) (*library.Session, error)
-		}{
-			{"Update", m.ListLibraryItemUpdateSession, m.GetLibraryItemUpdateSession},
-			{"Download", m.ListLibraryItemDownloadSession, m.GetLibraryItemDownloadSession},
+	m := library.NewManager(c)
+
+	kinds := []struct {
+		kind string
+		list func(context.Context) ([]string, error)
+		get  func(context.Context, string) (*library.Session, error)
+	}{
+		{"Update", m.ListLibraryItemUpdateSession, m.GetLibraryItemUpdateSession},
+		{"Download", m.ListLibraryItemDownloadSession, m.GetLibraryItemDownloadSession},
+	}
+
+	for _, k := range kinds {
+		ids, err := k.list(ctx)
+		if err != nil {
+			return err
 		}
+		if len(ids) == 0 {
+			continue
+		}
+		var sessions []*library.Session
 
-		for _, k := range kinds {
-			ids, err := k.list(ctx)
+		for _, id := range ids {
+			session, err := k.get(ctx, id)
 			if err != nil {
 				return err
 			}
-			if len(ids) == 0 {
-				continue
-			}
-			var sessions []*library.Session
-
-			for _, id := range ids {
-				session, err := k.get(ctx, id)
-				if err != nil {
-					return err
-				}
-				item, err := m.GetLibraryItem(ctx, session.LibraryItemID)
-				if err != nil {
-					return err
-				}
-				lib, err := m.GetLibraryByID(ctx, item.LibraryID)
-				if err != nil {
-					return err
-				}
-				session.LibraryItemID = fmt.Sprintf("/%s/%s", lib.Name, item.Name)
-				sessions = append(sessions, session)
-			}
-
-			err = cmd.WriteResult(&info{sessions, k.kind})
+			item, err := m.GetLibraryItem(ctx, session.LibraryItemID)
 			if err != nil {
 				return err
 			}
+			lib, err := m.GetLibraryByID(ctx, item.LibraryID)
+			if err != nil {
+				return err
+			}
+			session.LibraryItemID = fmt.Sprintf("/%s/%s", lib.Name, item.Name)
+			sessions = append(sessions, session)
 		}
-		return nil
-	})
+
+		err = cmd.WriteResult(&info{sessions, k.kind})
+		if err != nil {
+			return err
+		}
+	}
+	return nil
 }

@@ -146,7 +146,7 @@ output in `~/.govmomi/debug/<run timestamp>`. In that directory will be four (4)
 ```
 
 In that filename the `0001` represents the an incremented call order and will increment for each time the SOAP client
-makes an API call. 
+makes an API call.
 
 To configure the debug output you can use two environment variables.
 * `GOVC_DEBUG_PATH`: defaults to ~/.govmomi/debug
@@ -232,3 +232,7 @@ version from within a script, for example:
 ## License
 
 govc is available under the [Apache 2 license](../LICENSE).
+
+## Name
+
+Pronounced "go-v-c", short for "Go(lang) vCenter CLI".

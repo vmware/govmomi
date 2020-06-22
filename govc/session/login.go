@@ -17,11 +17,15 @@ limitations under the License.
 package session
 
 import (
+	"bytes"
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -29,6 +33,7 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/sts"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -42,11 +47,13 @@ type login struct {
 	issue  bool
 	renew  bool
 	long   bool
+	vapi   bool
 	ticket string
 	life   time.Duration
 	cookie string
 	token  string
 	ext    string
+	method string
 }
 
 func init() {
@@ -62,12 +69,14 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.clone, "clone", false, "Acquire clone ticket")
 	f.BoolVar(&cmd.issue, "issue", false, "Issue SAML token")
 	f.BoolVar(&cmd.renew, "renew", false, "Renew SAML token")
+	f.BoolVar(&cmd.vapi, "r", false, "REST login")
 	f.DurationVar(&cmd.life, "lifetime", time.Minute*10, "SAML token lifetime")
 	f.BoolVar(&cmd.long, "l", false, "Output session cookie")
 	f.StringVar(&cmd.ticket, "ticket", "", "Use clone ticket for login")
 	f.StringVar(&cmd.cookie, "cookie", "", "Set HTTP cookie for an existing session")
 	f.StringVar(&cmd.token, "token", "", "Use SAML token for login or as issue identity")
 	f.StringVar(&cmd.ext, "extension", "", "Extension name")
+	f.StringVar(&cmd.method, "X", "", "HTTP method")
 }
 
 func (cmd *login) Process(ctx context.Context) error {
@@ -75,6 +84,10 @@ func (cmd *login) Process(ctx context.Context) error {
 		return err
 	}
 	return cmd.ClientFlag.Process(ctx)
+}
+
+func (cmd *login) Usage() string {
+	return "[PATH]"
 }
 
 func (cmd *login) Description() string {
@@ -90,9 +103,11 @@ The session.login command can be used to:
 - Renew a SAML token
 - Login using a SAML token
 - Avoid passing credentials to other govc commands
+- Send an authenticated raw HTTP request
 
 Examples:
-  govc session.login -u root:password@host
+  govc session.login -u root:password@host # Creates a cached session in ~/.govmomi/sessions
+  govc session.ls -u root@host # Use the cached session with another command
   ticket=$(govc session.login -u root@host -clone)
   govc session.login -u root@host -ticket $ticket
   govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key
@@ -100,7 +115,8 @@ Examples:
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
-  token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")`
+  token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
+  govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .`
 }
 
 type ticketResult struct {
@@ -150,7 +166,7 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 
 	req := sts.TokenRequest{
 		Certificate: c.Certificate(),
-		Userinfo:    cmd.Userinfo(),
+		Userinfo:    cmd.Session.URL.User,
 		Renewable:   true,
 		Delegatable: true,
 		ActAs:       cmd.token != "",
@@ -192,6 +208,15 @@ func (cmd *login) loginByToken(ctx context.Context, c *vim25.Client) error {
 	}
 
 	return session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
+}
+
+func (cmd *login) loginRestByToken(ctx context.Context, c *rest.Client) error {
+	signer := &sts.Signer{
+		Certificate: c.Certificate(),
+		Token:       cmd.token,
+	}
+
+	return c.LoginByToken(c.WithSigner(ctx, signer))
 }
 
 func (cmd *login) loginByExtension(ctx context.Context, c *vim25.Client) error {
@@ -237,23 +262,56 @@ func (cmd *login) setCookie(ctx context.Context, c *vim25.Client) error {
 	return nil
 }
 
+func (cmd *login) setRestCookie(ctx context.Context, c *rest.Client) error {
+	if cmd.cookie == "" {
+		cmd.cookie = c.SessionID()
+	} else {
+		c.SessionID(cmd.cookie)
+
+		// Check the session is still valid
+		s, err := c.Session(ctx)
+		if err != nil {
+			return err
+		}
+		if s == nil {
+			return errors.New(http.StatusText(http.StatusUnauthorized))
+		}
+	}
+
+	return nil
+}
+
+func nologinSOAP(_ context.Context, _ *vim25.Client) error {
+	return nil
+}
+
+func nologinREST(_ context.Context, _ *rest.Client) error {
+	return nil
+}
+
 func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	if cmd.renew {
 		cmd.issue = true
 	}
 	switch {
 	case cmd.ticket != "":
-		cmd.Login = cmd.cloneSession
+		cmd.Session.LoginSOAP = cmd.cloneSession
 	case cmd.cookie != "":
-		cmd.Login = cmd.setCookie
-	case cmd.token != "":
-		cmd.Login = cmd.loginByToken
-	case cmd.ext != "":
-		cmd.Login = cmd.loginByExtension
-	case cmd.issue:
-		cmd.Login = func(_ context.Context, _ *vim25.Client) error {
-			return nil
+		if cmd.vapi {
+			cmd.Session.LoginSOAP = nologinSOAP
+			cmd.Session.LoginREST = cmd.setRestCookie
+		} else {
+			cmd.Session.LoginSOAP = cmd.setCookie
+			cmd.Session.LoginREST = nologinREST
 		}
+	case cmd.token != "":
+		cmd.Session.LoginSOAP = cmd.loginByToken
+		cmd.Session.LoginREST = cmd.loginRestByToken
+	case cmd.ext != "":
+		cmd.Session.LoginSOAP = cmd.loginByExtension
+	case cmd.issue:
+		cmd.Session.LoginSOAP = nologinSOAP
+		cmd.Session.LoginREST = nologinREST
 	}
 
 	c, err := cmd.Client()
@@ -261,11 +319,11 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	m := session.NewManager(c)
 	r := &ticketResult{cmd: cmd}
 
 	switch {
 	case cmd.clone:
+		m := session.NewManager(c)
 		r.Ticket, err = m.AcquireCloneTicket(ctx)
 		if err != nil {
 			return err
@@ -278,8 +336,55 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		return cmd.WriteResult(r)
 	}
 
+	var rc *rest.Client
+	if cmd.vapi {
+		rc, err = cmd.RestClient()
+		if err != nil {
+			return err
+		}
+	}
+
+	if f.NArg() == 1 {
+		u := c.URL()
+		u.Path = f.Arg(0)
+		var body io.Reader
+
+		switch cmd.method {
+		case http.MethodPost, http.MethodPatch:
+			// strings.Reader here as /api wants a Content-Length header
+			b, err := ioutil.ReadAll(os.Stdin)
+			if err != nil {
+				return err
+			}
+			body = bytes.NewReader(b)
+		default:
+			body = strings.NewReader("")
+		}
+
+		req, err := http.NewRequest(cmd.method, u.String(), body)
+		if err != nil {
+			return err
+		}
+
+		if cmd.vapi {
+			return rc.Do(ctx, req, cmd.Out)
+		}
+
+		return c.Do(ctx, req, func(res *http.Response) error {
+			if res.StatusCode != http.StatusOK {
+				return errors.New(res.Status)
+			}
+			_, err := io.Copy(cmd.Out, res.Body)
+			return err
+		})
+	}
+
 	if cmd.cookie == "" {
-		_ = cmd.setCookie(ctx, c)
+		if cmd.vapi {
+			_ = cmd.setRestCookie(ctx, rc)
+		} else {
+			_ = cmd.setCookie(ctx, c)
+		}
 		if cmd.cookie == "" {
 			return flag.ErrHelp
 		}

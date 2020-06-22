@@ -40,6 +40,7 @@ var hardwareVersions = []struct {
 	{"6.0", "vmx-11"},
 	{"6.5", "vmx-13"},
 	{"6.7", "vmx-14"},
+	{"7.0", "vmx-17"},
 }
 
 type create struct {

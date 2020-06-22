@@ -49,7 +49,7 @@ func ovfNetwork(ctx *Context, req *types.CreateImportSpec, item ovf.ResourceAllo
 	if len(item.Connection) == 0 {
 		return nil
 	}
-	pool := ctx.Map.Get(req.ResourcePool).(*ResourcePool)
+	pool := ctx.Map.Get(req.ResourcePool).(mo.Entity)
 	ref := ctx.Map.getEntityDatacenter(pool).defaultNetwork()[0] // Default to VM Network
 	c := item.Connection[0]
 
@@ -83,6 +83,9 @@ func ovfNetwork(ctx *Context, req *types.CreateImportSpec, item ovf.ResourceAllo
 
 func ovfDiskCapacity(disk *ovf.VirtualDiskDesc) int64 {
 	b, _ := strconv.ParseUint(disk.Capacity, 10, 64)
+	if disk.CapacityAllocationUnits == nil {
+		return int64(b)
+	}
 	c := strings.Fields(*disk.CapacityAllocationUnits)
 	if len(c) == 3 && c[0] == "byte" && c[1] == "*" { // "byte * 2^20"
 		p := strings.Split(c[2], "^")

@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/tags"
 )
 
@@ -67,21 +66,24 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	tagID := f.Arg(0)
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := tags.NewManager(c)
-		if !cmd.force {
-			objs, err := m.ListAttachedObjects(ctx, tagID)
-			if err != nil {
-				return err
-			}
-			if len(objs) > 0 {
-				return fmt.Errorf("tag %s has %d attached objects", tagID, len(objs))
-			}
-		}
-		tag, err := m.GetTagForCategory(ctx, tagID, cmd.cat)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+
+	m := tags.NewManager(c)
+	if !cmd.force {
+		objs, err := m.ListAttachedObjects(ctx, tagID)
 		if err != nil {
 			return err
 		}
-		return m.DeleteTag(ctx, tag)
-	})
+		if len(objs) > 0 {
+			return fmt.Errorf("tag %s has %d attached objects", tagID, len(objs))
+		}
+	}
+	tag, err := m.GetTagForCategory(ctx, tagID, cmd.cat)
+	if err != nil {
+		return err
+	}
+	return m.DeleteTag(ctx, tag)
 }

@@ -239,3 +239,28 @@ func (c *Client) FetchCapabilityMetadata(ctx context.Context, rtype *types.PbmPr
 
 	return res.Returnval, nil
 }
+
+// GetProfileNameByID gets storage profile name by ID
+func (c *Client) GetProfileNameByID(ctx context.Context, profileID string) (string, error) {
+	resourceType := types.PbmProfileResourceType{
+		ResourceType: string(types.PbmProfileResourceTypeEnumSTORAGE),
+	}
+	category := types.PbmProfileCategoryEnumREQUIREMENT
+	ids, err := c.QueryProfile(ctx, resourceType, string(category))
+	if err != nil {
+		return "", err
+	}
+
+	profiles, err := c.RetrieveContent(ctx, ids)
+	if err != nil {
+		return "", err
+	}
+
+	for i := range profiles {
+		profile := profiles[i].GetPbmProfile()
+		if profile.ProfileId.UniqueId == profileID {
+			return profile.Name, nil
+		}
+	}
+	return "", fmt.Errorf("no pbm profile found with id: %q", profileID)
+}

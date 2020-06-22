@@ -139,26 +139,30 @@ func (v *ContainerView) include(o types.ManagedObjectReference) bool {
 }
 
 func walk(root mo.Reference, f func(child types.ManagedObjectReference)) {
+	if _, ok := root.(types.ManagedObjectReference); ok || root == nil {
+		return
+	}
+
 	var children []types.ManagedObjectReference
 
-	switch e := root.(type) {
-	case *Datacenter:
+	switch e := getManagedObject(root).Addr().Interface().(type) {
+	case *mo.Datacenter:
 		children = []types.ManagedObjectReference{e.VmFolder, e.HostFolder, e.DatastoreFolder, e.NetworkFolder}
-	case *Folder:
+	case *mo.Folder:
 		children = e.ChildEntity
 	case *mo.ComputeResource:
 		children = e.Host
 		children = append(children, *e.ResourcePool)
-	case *ClusterComputeResource:
+	case *mo.ClusterComputeResource:
 		children = e.Host
 		children = append(children, *e.ResourcePool)
-	case *ResourcePool:
+	case *mo.ResourcePool:
+		children = e.ResourcePool
+		children = append(children, e.Vm...)
+	case *mo.VirtualApp:
 		children = e.ResourcePool.ResourcePool
 		children = append(children, e.Vm...)
-	case *VirtualApp:
-		children = e.ResourcePool.ResourcePool
-		children = append(children, e.Vm...)
-	case *HostSystem:
+	case *mo.HostSystem:
 		children = e.Vm
 	}
 

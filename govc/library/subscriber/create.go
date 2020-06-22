@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type create struct {
@@ -84,65 +83,68 @@ Examples:
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.FolderFlag.WithRestClient(ctx, func(c *rest.Client) error {
-		lib, err := flags.ContentLibrary(ctx, c, f.Arg(0))
-		if err != nil {
-			return err
-		}
-		m := library.NewManager(c)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		sub, err := flags.ContentLibrary(ctx, c, f.Arg(1))
-		if err != nil {
-			return err
-		}
+	lib, err := flags.ContentLibrary(ctx, c, f.Arg(0))
+	if err != nil {
+		return err
+	}
+	m := library.NewManager(c)
 
-		cluster, err := cmd.ClusterIfSpecified()
-		if err != nil {
-			return err
-		}
-		pool, err := cmd.ResourcePoolIfSpecified()
-		if err != nil {
-			return err
-		}
-		host, err := cmd.HostSystemIfSpecified()
-		if err != nil {
-			return err
-		}
-		folder, err := cmd.Folder()
-		if err != nil {
-			return err
-		}
-		network, err := cmd.Network()
-		if err != nil {
-			return err
-		}
+	sub, err := flags.ContentLibrary(ctx, c, f.Arg(1))
+	if err != nil {
+		return err
+	}
 
-		spec := library.SubscriberLibrary{
-			Target:    "USE_EXISTING",
-			Location:  "LOCAL",
-			LibraryID: sub.ID,
-			Placement: &library.Placement{
-				Folder:  folder.Reference().Value,
-				Network: network.Reference().Value,
-			},
-		}
+	cluster, err := cmd.ClusterIfSpecified()
+	if err != nil {
+		return err
+	}
+	pool, err := cmd.ResourcePoolIfSpecified()
+	if err != nil {
+		return err
+	}
+	host, err := cmd.HostSystemIfSpecified()
+	if err != nil {
+		return err
+	}
+	folder, err := cmd.Folder()
+	if err != nil {
+		return err
+	}
+	network, err := cmd.Network()
+	if err != nil {
+		return err
+	}
 
-		if pool != nil {
-			spec.Placement.ResourcePool = pool.Reference().Value
-		}
-		if host != nil {
-			spec.Placement.Host = host.Reference().Value
-		}
-		if cluster != nil {
-			spec.Placement.Cluster = cluster.Reference().Value
-		}
+	spec := library.SubscriberLibrary{
+		Target:    "USE_EXISTING",
+		Location:  "LOCAL",
+		LibraryID: sub.ID,
+		Placement: &library.Placement{
+			Folder:  folder.Reference().Value,
+			Network: network.Reference().Value,
+		},
+	}
 
-		id, err := m.CreateSubscriber(ctx, lib, spec)
-		if err != nil {
-			return err
-		}
+	if pool != nil {
+		spec.Placement.ResourcePool = pool.Reference().Value
+	}
+	if host != nil {
+		spec.Placement.Host = host.Reference().Value
+	}
+	if cluster != nil {
+		spec.Placement.Cluster = cluster.Reference().Value
+	}
 
-		fmt.Println(id)
-		return nil
-	})
+	id, err := m.CreateSubscriber(ctx, lib, spec)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(id)
+	return nil
 }

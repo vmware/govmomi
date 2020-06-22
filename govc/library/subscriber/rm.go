@@ -23,7 +23,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type rm struct {
@@ -54,13 +53,16 @@ Examples:
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		lib, err := flags.ContentLibrary(ctx, c, f.Arg(0))
-		if err != nil {
-			return err
-		}
-		m := library.NewManager(c)
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		return m.DeleteSubscriber(ctx, lib, f.Arg(0))
-	})
+	lib, err := flags.ContentLibrary(ctx, c, f.Arg(0))
+	if err != nil {
+		return err
+	}
+	m := library.NewManager(c)
+
+	return m.DeleteSubscriber(ctx, lib, f.Arg(0))
 }

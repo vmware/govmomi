@@ -53,9 +53,9 @@ func GetTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (cnstypes
 
 // dropUnknownCreateSpecElements helps drop newly added elements in the CnsVolumeCreateSpec, which are not known to the prior vSphere releases
 func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolumeCreateSpec) []cnstypes.CnsVolumeCreateSpec {
+	var updatedcreateSpecList []cnstypes.CnsVolumeCreateSpec
 	if c.serviceClient.Version == ReleaseVSAN67u3 {
 		// Dropping optional fields not known to vSAN 6.7U3
-		var updatedcreateSpecList []cnstypes.CnsVolumeCreateSpec
 		for _, createSpec := range createSpecList {
 			createSpec.Metadata.ContainerCluster.ClusterFlavor = ""
 			createSpec.Metadata.ContainerClusterArray = nil
@@ -67,6 +67,19 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 				updatedEntityMetadata = append(updatedEntityMetadata, cnstypes.BaseCnsEntityMetadata(k8sEntityMetadata))
 			}
 			createSpec.Metadata.EntityMetadata = updatedEntityMetadata
+			_, ok := createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
+			if ok {
+				createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
+			}
+			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
+		}
+		createSpecList = updatedcreateSpecList
+	} else if c.serviceClient.Version == ReleaseVSAN70 {
+		for _, createSpec := range createSpecList {
+			_, ok := createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
+			if ok {
+				createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
+			}
 			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
 		}
 		createSpecList = updatedcreateSpecList

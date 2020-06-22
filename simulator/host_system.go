@@ -35,6 +35,11 @@ type HostSystem struct {
 	mo.HostSystem
 }
 
+func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
+	h, ok := getManagedObject(obj).Addr().Interface().(*mo.HostSystem)
+	return h, ok
+}
+
 func NewHostSystem(host mo.HostSystem) *HostSystem {
 	if hostPortUnique { // configure unique port for each host
 		port := &esx.HostSystem.Summary.Config.Port
@@ -142,8 +147,8 @@ func addComputeResource(s *types.ComputeResourceSummary, h *HostSystem) {
 
 // CreateDefaultESX creates a standalone ESX
 // Adds objects of type: Datacenter, Network, ComputeResource, ResourcePool and HostSystem
-func CreateDefaultESX(f *Folder) {
-	dc := NewDatacenter(f)
+func CreateDefaultESX(ctx *Context, f *Folder) {
+	dc := NewDatacenter(ctx, &f.Folder)
 
 	host := NewHostSystem(esx.HostSystem)
 
@@ -166,12 +171,12 @@ func CreateDefaultESX(f *Folder) {
 	Map.PutEntity(cr, pool)
 	pool.Owner = cr.Self
 
-	Map.Get(dc.HostFolder).(*Folder).putChild(cr)
+	folderPutChild(ctx, &Map.Get(dc.HostFolder).(*Folder).Folder, cr)
 }
 
 // CreateStandaloneHost uses esx.HostSystem as a template, applying the given spec
 // and creating the ComputeResource parent and ResourcePool sibling.
-func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, types.BaseMethodFault) {
+func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (*HostSystem, types.BaseMethodFault) {
 	if spec.HostName == "" {
 		return nil, &types.NoHost{}
 	}
@@ -201,7 +206,7 @@ func CreateStandaloneHost(f *Folder, spec types.HostConnectSpec) (*HostSystem, t
 	cr.Host = append(cr.Host, host.Reference())
 	cr.ResourcePool = &pool.Self
 
-	f.putChild(cr)
+	folderPutChild(ctx, &f.Folder, cr)
 	pool.Owner = cr.Self
 	host.Network = cr.Network
 
@@ -217,7 +222,7 @@ func (h *HostSystem) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 		ctx.postEvent(&types.HostRemovedEvent{HostEvent: h.event()})
 
 		f := Map.getEntityParent(h, "Folder").(*Folder)
-		f.removeChild(h.Reference())
+		folderRemoveChild(ctx, &f.Folder, h.Reference())
 
 		return nil, nil
 	})

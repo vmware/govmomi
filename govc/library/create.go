@@ -25,7 +25,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type create struct {
@@ -116,13 +115,16 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		id, err := library.NewManager(c).CreateLibrary(ctx, cmd.library)
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		fmt.Println(id)
-		return nil
-	})
+	id, err := library.NewManager(c).CreateLibrary(ctx, cmd.library)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(id)
+	return nil
 }

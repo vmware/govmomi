@@ -163,6 +163,26 @@ func CnsQueryVolume(ctx context.Context, r soap.RoundTripper, req *types.CnsQuer
 	return resBody.Res, nil
 }
 
+type CnsQueryVolumeInfoBody struct {
+	Req    *types.CnsQueryVolumeInfo         `xml:"urn:vsan CnsQueryVolumeInfo,omitempty"`
+	Res    *types.CnsQueryVolumeInfoResponse `xml:"urn:vsan CnsQueryVolumeInfoResponse,omitempty"`
+	Fault_ *soap.Fault                       `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsQueryVolumeInfoBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsQueryVolumeInfo(ctx context.Context, r soap.RoundTripper, req *types.CnsQueryVolumeInfo) (*types.CnsQueryVolumeInfoResponse, error) {
+	var reqBody, resBody CnsQueryVolumeInfoBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type CnsQueryAllVolumeBody struct {
 	Req    *types.CnsQueryAllVolume         `xml:"urn:vsan CnsQueryAllVolume,omitempty"`
 	Res    *types.CnsQueryAllVolumeResponse `xml:"urn:vsan CnsQueryAllVolumeResponse,omitempty"`

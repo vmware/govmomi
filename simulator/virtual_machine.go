@@ -50,11 +50,18 @@ type VirtualMachine struct {
 	imc *types.CustomizationSpec
 }
 
-func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
+func asVirtualMachineMO(obj mo.Reference) (*mo.VirtualMachine, bool) {
+	vm, ok := getManagedObject(obj).Addr().Interface().(*mo.VirtualMachine)
+	return vm, ok
+}
+
+func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *types.VirtualMachineConfigSpec) (*VirtualMachine, types.BaseMethodFault) {
 	vm := &VirtualMachine{}
 	vm.Parent = &parent
-	folder := Map.Get(parent).(*Folder)
-	folder.putChild(vm)
+
+	folder := Map.Get(parent)
+	f, _ := asFolderMO(folder)
+	folderPutChild(ctx, f, vm)
 
 	if spec.Name == "" {
 		return vm, &types.InvalidVmConfig{Property: "configSpec.name"}
@@ -93,7 +100,7 @@ func NewVirtualMachine(parent types.ManagedObjectReference, spec *types.VirtualM
 		vmx.Path = spec.Name
 	}
 
-	dc := Map.getEntityDatacenter(folder)
+	dc := Map.getEntityDatacenter(folder.(mo.Entity))
 	ds := Map.FindByName(vmx.Datastore, dc.Datastore).(*Datastore)
 	dir := path.Join(ds.Info.GetDatastoreInfo().Url, vmx.Path)
 
@@ -306,10 +313,25 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		vm.Guest.GuestFamily = guestFamily(spec.GuestId)
 	}
 
+	vm.Config.Modified = time.Now()
+}
+
+var extraConfigAlias = map[string]string{
+	"ip0": "SET.guest.ipAddress",
+}
+
+func extraConfigKey(key string) string {
+	if k, ok := extraConfigAlias[key]; ok {
+		return k
+	}
+	return key
+}
+
+func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec) {
 	var changes []types.PropertyChange
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()
-		key := strings.TrimPrefix(val.Key, "SET.")
+		key := strings.TrimPrefix(extraConfigKey(val.Key), "SET.")
 		if key == val.Key {
 			vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
 			continue
@@ -335,8 +357,6 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	if len(changes) != 0 {
 		Map.Update(vm, changes)
 	}
-
-	vm.Config.Modified = time.Now()
 }
 
 func validateGuestID(id string) types.BaseMethodFault {
@@ -949,6 +969,47 @@ func getDiskSize(disk *types.VirtualDisk) int64 {
 	return disk.CapacityInBytes
 }
 
+func (vm *VirtualMachine) validateSwitchMembers(id string) types.BaseMethodFault {
+	var dswitch *DistributedVirtualSwitch
+
+	var find func(types.ManagedObjectReference)
+	find = func(child types.ManagedObjectReference) {
+		s, ok := Map.Get(child).(*DistributedVirtualSwitch)
+		if ok && s.Uuid == id {
+			dswitch = s
+			return
+		}
+		walk(Map.Get(child), find)
+	}
+	f := Map.getEntityDatacenter(vm).NetworkFolder
+	walk(Map.Get(f), find) // search in NetworkFolder and any sub folders
+
+	if dswitch == nil {
+		log.Printf("DVS %s cannot be found", id)
+		return new(types.NotFound)
+	}
+
+	h := Map.Get(*vm.Runtime.Host).(*HostSystem)
+	c := hostParent(&h.HostSystem)
+	isMember := func(val types.ManagedObjectReference) bool {
+		for _, mem := range dswitch.Summary.HostMember {
+			if mem == val {
+				return true
+			}
+		}
+		log.Printf("%s is not a member of VDS %s", h.Name, dswitch.Name)
+		return false
+	}
+
+	for _, ref := range c.Host {
+		if !isMember(ref) {
+			return &types.InvalidArgument{InvalidProperty: "spec.deviceChange.device.port.switchUuid"}
+		}
+	}
+
+	return nil
+}
+
 func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
 	device := spec.Device
 	d := device.GetVirtualDevice()
@@ -988,6 +1049,9 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			summary = fmt.Sprintf("DVSwitch: %s", b.Port.SwitchUuid)
 			net.Type = "DistributedVirtualPortgroup"
 			net.Value = b.Port.PortgroupKey
+			if err := vm.validateSwitchMembers(b.Port.SwitchUuid); err != nil {
+				return err
+			}
 		}
 
 		Map.Update(vm, []types.PropertyChange{
@@ -1046,8 +1110,10 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			info.Datastore = &ds.Self
 
 			// XXX: compare disk size and free space until windows stat is supported
-			ds.Summary.FreeSpace -= getDiskSize(x)
-			ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+			Map.WithLock(ds, func() {
+				ds.Summary.FreeSpace -= getDiskSize(x)
+				ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+			})
 
 			vm.updateDiskLayouts()
 		}
@@ -1101,8 +1167,10 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					p, _ := parseDatastorePath(file)
 					ds := vm.findDatastore(p.Datastore)
 
-					ds.Summary.FreeSpace += getDiskSize(device)
-					ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+					Map.WithLock(ds, func() {
+						ds.Summary.FreeSpace += getDiskSize(device)
+						ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+					})
 				}
 
 				if file != "" {
@@ -1263,6 +1331,8 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 	})
 
 	vm.updateDiskLayouts()
+
+	vm.applyExtraConfig(spec) // Do this after device config, as some may apply to the devices themselves (e.g. ethernet -> guest.net)
 
 	return nil
 }
@@ -1506,13 +1576,17 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event()})
-	if f, ok := Map.getEntityParent(vm, "Folder").(*Folder); ok {
-		f.removeChild(c.This)
+	if f, ok := asFolderMO(Map.getEntityParent(vm, "Folder")); ok {
+		folderRemoveChild(ctx, f, c.This)
 	}
 
 	r.Res = new(types.UnregisterVMResponse)
 
 	return r
+}
+
+type vmFolder interface {
+	CreateVMTask(ctx *Context, c *types.CreateVM_Task) soap.HasFault
 }
 
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
@@ -1522,7 +1596,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			pool = vm.ResourcePool
 		}
 	}
-	folder := Map.Get(req.Folder).(*Folder)
+	folder, _ := asFolderMO(Map.Get(req.Folder))
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 	event := vm.event()
 
@@ -1530,7 +1604,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		VmCloneEvent: types.VmCloneEvent{
 			VmEvent: event,
 		},
-		DestFolder: folder.eventArgument(),
+		DestFolder: folderEventArgument(folder),
 		DestName:   req.Name,
 		DestHost:   *host.eventArgument(),
 	})
@@ -1584,7 +1658,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			})
 		}
 
-		res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
+		res := Map.Get(req.Folder).(vmFolder).CreateVMTask(ctx, &types.CreateVM_Task{
 			This:   folder.Self,
 			Config: config,
 			Pool:   *pool,
@@ -1622,7 +1696,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 	}
 }
 
-func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFault {
+func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Task) soap.HasFault {
 	task := CreateTask(vm, "relocateVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
 
@@ -1654,7 +1728,7 @@ func (vm *VirtualMachine) RelocateVMTask(req *types.RelocateVM_Task) soap.HasFau
 
 		if ref := req.Spec.Folder; ref != nil {
 			folder := Map.Get(*ref).(*Folder)
-			folder.MoveIntoFolderTask(&types.MoveIntoFolder_Task{
+			folder.MoveIntoFolderTask(ctx, &types.MoveIntoFolder_Task{
 				List: []types.ManagedObjectReference{vm.Self},
 			})
 		}
@@ -1820,7 +1894,7 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 		changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: snapshot.Self})
 		Map.Update(vm, changes)
 
-		return nil, nil
+		return snapshot.Self, nil
 	})
 
 	return &methods.CreateSnapshot_TaskBody{

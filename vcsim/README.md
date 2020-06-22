@@ -255,7 +255,7 @@ Network                 /godc/network/VM Network
 ## Generated inventory names
 
 The generated names include a prefix per-type and integer suffix per-instance.
-See the [simulator.Model](model) documentation for a complete list of type prefixes.
+See the [simulator.Model][model] documentation for a complete list of type prefixes.
 For example, the name **DC0_C1_RP0_VM6** is composed of:
 
 | Prefix | Instance | Type                   | Flag     |
@@ -279,7 +279,7 @@ For example, the name **DC0_H0_VM1** is composed of:
 
 The simulator supports a subset of API methods.  However, the generated govmomi
 code includes all types and methods defined in the vmodl, which can be used to
-implement any method documented in the [VMware vSphere API Reference](apiref).
+implement any method documented in the [VMware vSphere API Reference][apiref].
 
 To see the list of supported methods:
 
@@ -352,3 +352,11 @@ For more details on vcsim features, see the project [wiki](https://github.com/vm
 ## Related projects
 
 * [LocalStack](https://github.com/localstack/localstack/blob/master/README.md#why-localstack)
+
+## License
+
+vcsim is available under the [Apache 2 license](../LICENSE).
+
+## Name
+
+Pronounced "v-c-sim", short for "vCenter Simulator"

@@ -34,6 +34,18 @@ func init() {
 	types.Add("BaseCnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
 }
 
+func (b *CnsAlreadyRegisteredFault) GetCnsAlreadyRegisteredFault() *CnsAlreadyRegisteredFault {
+	return b
+}
+
+type BaseCnsAlreadyRegisteredFault interface {
+	GetCnsAlreadyRegisteredFault() *CnsAlreadyRegisteredFault
+}
+
+func init() {
+	types.Add("BaseCnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
+}
+
 func (b *CnsBackingObjectDetails) GetCnsBackingObjectDetails() *CnsBackingObjectDetails { return b }
 
 type BaseCnsBackingObjectDetails interface {
@@ -62,6 +74,16 @@ type BaseCnsEntityMetadata interface {
 
 func init() {
 	types.Add("BaseCnsEntityMetadata", reflect.TypeOf((*CnsEntityMetadata)(nil)).Elem())
+}
+
+func (b *CnsVolumeInfo) GetCnsVolumeInfo() *CnsVolumeInfo { return b }
+
+type BaseCnsVolumeInfo interface {
+	GetCnsVolumeInfo() *CnsVolumeInfo
+}
+
+func init() {
+	types.Add("BaseCnsVolumeInfo", reflect.TypeOf((*CnsVolumeInfo)(nil)).Elem())
 }
 
 func (b *CnsVolumeOperationResult) GetCnsVolumeOperationResult() *CnsVolumeOperationResult { return b }

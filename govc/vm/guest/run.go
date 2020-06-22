@@ -64,7 +64,8 @@ Examples:
   cal | govc guest.run -vm $name -d - cat
   govc guest.run -vm $name -d "hello $USER" cat
   govc guest.run -vm $name curl -s :invalid: || echo $? # exit code 6
-  govc guest.run -vm $name -e FOO=bar -e BIZ=baz -C /tmp env`
+  govc guest.run -vm $name -e FOO=bar -e BIZ=baz -C /tmp env
+  govc guest.run -l root:'mypassword' -vm my_vm_hostname "ntpdate -u pool.ntp.org"`
 }
 
 func (cmd *run) Run(ctx context.Context, f *flag.FlagSet) error {

@@ -19,14 +19,14 @@ package cns
 import (
 	"context"
 	"os"
+	"testing"
 
 	"github.com/kr/pretty"
-	"github.com/vmware/govmomi/object"
 
 	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/soap"
-
-	"testing"
 
 	"github.com/vmware/govmomi"
 	cnstypes "github.com/vmware/govmomi/cns/types"
@@ -35,9 +35,26 @@ import (
 )
 
 func TestClient(t *testing.T) {
+	// set CNS_DEBUG to true if you need to emit soap traces from these tests
+	// soap traces will be emitted in the govmomi/cns/.soap directory
+	// example export CNS_DEBUG='true'
+	enableDebug := os.Getenv("CNS_DEBUG")
+	soapTraceDirectory := ".soap"
+
 	url := os.Getenv("CNS_VC_URL") // example: export CNS_VC_URL='https://username:password@vc-ip/sdk'
 	datacenter := os.Getenv("CNS_DATACENTER")
 	datastore := os.Getenv("CNS_DATASTORE")
+
+	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
+	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
+	// example: export export CNS_RUN_FILESHARE_TESTS='true'
+	run_fileshare_tests := os.Getenv("CNS_RUN_FILESHARE_TESTS")
+
+	// if backingDiskURLPath is not set, test for Creating Volume with setting BackingDiskUrlPath in the BackingObjectDetails of
+	// CnsVolumeCreateSpec will be skipped.
+	// example: Export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
+	backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
+
 	if url == "" || datacenter == "" || datastore == "" {
 		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
@@ -46,6 +63,17 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	if enableDebug == "true" {
+		if _, err := os.Stat(soapTraceDirectory); os.IsNotExist(err) {
+			os.Mkdir(soapTraceDirectory, 0755)
+		}
+		p := debug.FileProvider{
+			Path: soapTraceDirectory,
+		}
+		debug.SetProvider(&p)
+	}
+
 	ctx := context.Background()
 	c, err := govmomi.NewClient(ctx, u, true)
 	if err != nil {
@@ -187,6 +215,36 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
+	// Test QueryVolumeInfo API
+	// QueryVolumeInfo is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
+	// This API is available on vSphere 7.0u1 onward
+	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
+		t.Logf("Calling QueryVolumeInfo using: %+v", pretty.Sprint(volumeIDList))
+		queryVolumeInfoTask, err := cnsClient.QueryVolumeInfo(ctx, volumeIDList)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		queryVolumeInfoTaskInfo, err := GetTaskInfo(ctx, queryVolumeInfoTask)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		queryVolumeInfoTaskResult, err := GetTaskResult(ctx, queryVolumeInfoTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if queryVolumeInfoTaskResult == nil {
+			t.Fatalf("Empty queryVolumeInfoTaskResult")
+			t.FailNow()
+		}
+		queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
+		if queryVolumeInfoOperationRes.Fault != nil {
+			t.Fatalf("Failed to query volumes with QueryVolumeInfo. fault=%+v", queryVolumeInfoOperationRes.Fault)
+		}
+		t.Logf("Sucessfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
+	}
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
 	var cnsVolumeExtendSpecList []cnstypes.CnsVolumeExtendSpec
@@ -452,7 +510,7 @@ func TestClient(t *testing.T) {
 	if attachVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to attach volume: fault=%+v", attachVolumeOperationRes.Fault)
 	}
-	diskUUID := attachVolumeOperationRes.VolumeId.Id
+	diskUUID := interface{}(attachTaskResult).(*cnstypes.CnsVolumeAttachResult).DiskUUID
 	t.Logf("Volume attached sucessfully. Disk UUID: %s", diskUUID)
 
 	// Re-Attach same volume to the same node and expect ResourceInUse fault
@@ -549,7 +607,7 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Volume: %q deleted sucessfully", volumeId)
 
-	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
+	if run_fileshare_tests == "true" && cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
 		// Test creating vSAN file-share Volume
 		var cnsFileVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 		vSANFileCreateSpec := &cnstypes.CnsVSANFileCreateSpec{
@@ -649,5 +707,140 @@ func TestClient(t *testing.T) {
 			t.Fatalf("Failed to delete fileshare volume: fault=%+v", deleteVolumeOperationRes.Fault)
 		}
 		t.Logf("fileshare volume:%q deleted sucessfully", filevolumeId)
+	}
+	if backingDiskURLPath != "" && cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
+		// Test CreateVolume API with existing VMDK
+		var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+		cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+			Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0",
+			VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+			Metadata: cnstypes.CnsVolumeMetadata{
+				ContainerCluster: containerCluster,
+			},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				BackingDiskUrlPath: backingDiskURLPath,
+			},
+		}
+		cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
+		t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpec))
+		createTask, err := cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		createTaskInfo, err := GetTaskInfo(ctx, createTask)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		createTaskResult, err := GetTaskResult(ctx, createTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if createTaskResult == nil {
+			t.Fatalf("Empty create task results")
+			t.FailNow()
+		}
+		createVolumeOperationRes := createTaskResult.GetCnsVolumeOperationResult()
+		var volumeID string
+		if createVolumeOperationRes.Fault != nil {
+			t.Logf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
+			fault, ok := createVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+			if !ok {
+				t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
+			} else {
+				t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %s is already registered", backingDiskURLPath)
+				volumeID = fault.VolumeId.Id
+			}
+		} else {
+			volumeID = createVolumeOperationRes.VolumeId.Id
+			t.Logf("Volume created sucessfully with backingDiskURLPath: %s. volumeId: %s", backingDiskURLPath, volumeID)
+
+			// Test re creating volume using BACKING_DISK_URL_PATH
+			var reCreateCnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+			reCreateCnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+				Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0",
+				VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+				Metadata: cnstypes.CnsVolumeMetadata{
+					ContainerCluster: containerCluster,
+				},
+				BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+					BackingDiskUrlPath: backingDiskURLPath,
+				},
+			}
+
+			reCreateCnsVolumeCreateSpecList = append(reCreateCnsVolumeCreateSpecList, reCreateCnsVolumeCreateSpec)
+			t.Logf("Creating volume using the spec: %+v", pretty.Sprint(reCreateCnsVolumeCreateSpec))
+			recreateTask, err := cnsClient.CreateVolume(ctx, reCreateCnsVolumeCreateSpecList)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			reCreateTaskInfo, err := GetTaskInfo(ctx, recreateTask)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			reCreateTaskResult, err := GetTaskResult(ctx, reCreateTaskInfo)
+			if err != nil {
+				t.Errorf("Failed to create volume. Error: %+v \n", err)
+				t.Fatal(err)
+			}
+			if reCreateTaskResult == nil {
+				t.Fatalf("Empty create task results")
+				t.FailNow()
+			}
+			reCreateVolumeOperationRes := reCreateTaskResult.GetCnsVolumeOperationResult()
+			t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
+			if reCreateVolumeOperationRes.Fault != nil {
+				t.Logf("Failed to create volume: fault=%+v", reCreateVolumeOperationRes.Fault)
+				_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
+				if !ok {
+					t.Fatalf("Fault is not CnsAlreadyRegisteredFault")
+				} else {
+					t.Logf("Fault is CnsAlreadyRegisteredFault. backingDiskURLPath: %q is already registered", backingDiskURLPath)
+				}
+			}
+		}
+
+		// Test QueryVolume API
+		var queryFilter cnstypes.CnsQueryFilter
+		var volumeIDList []cnstypes.CnsVolumeId
+		volumeIDList = append(volumeIDList, cnstypes.CnsVolumeId{Id: volumeID})
+		queryFilter.VolumeIds = volumeIDList
+		t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
+		queryResult, err := cnsClient.QueryVolume(ctx, queryFilter)
+		if err != nil {
+			t.Errorf("Failed to query volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+
+		t.Logf("Deleting CNS volume created above using BACKING_DISK_URL_PATH: %s with volume: %+v", backingDiskURLPath, volumeIDList)
+		deleteTask, err = cnsClient.DeleteVolume(ctx, volumeIDList, true)
+		if err != nil {
+			t.Errorf("Failed to delete volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		deleteTaskInfo, err = GetTaskInfo(ctx, deleteTask)
+		if err != nil {
+			t.Errorf("Failed to delete volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		deleteTaskResult, err = GetTaskResult(ctx, deleteTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to delete volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if deleteTaskResult == nil {
+			t.Fatalf("Empty delete task results")
+			t.FailNow()
+		}
+		deleteVolumeOperationRes = deleteTaskResult.GetCnsVolumeOperationResult()
+		if deleteVolumeOperationRes.Fault != nil {
+			t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
+		}
+		t.Logf("volume:%q deleted sucessfully", volumeID)
 	}
 }

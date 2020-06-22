@@ -126,6 +126,41 @@ load test_helper
 
   run govc object.collect -s $vm config.uuid
   assert_success "$uuid"
+
+  govc import.ovf -options - "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" <<EOF
+{
+  "PropertyMapping": [
+    {
+      "Key": "SET.guest.ipAddress",
+      "Value": "10.0.0.42"
+    }
+  ],
+  "PowerOn": true,
+  "WaitForIP": true
+}
+EOF
+
+  run govc vm.ip "$TTYLINUX_NAME"
+  assert_success "10.0.0.42"
+
+  run govc vm.destroy "$TTYLINUX_NAME"
+  assert_success
+
+  govc import.ovf -options - "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" <<EOF
+{
+  "PropertyMapping": [
+    {
+      "Key": "ip0",
+      "Value": "10.0.0.43"
+    }
+  ],
+  "PowerOn": true,
+  "WaitForIP": true
+}
+EOF
+
+  run govc vm.ip "$TTYLINUX_NAME"
+  assert_success "10.0.0.43"
 }
 
 @test "vcsim vm.create" {
@@ -414,6 +449,8 @@ docker_name() {
 
   vcsim_env -load "$dir"
   rm -rf "$dir"
+
+  govc object.collect -s -type h / configManager.networkSystem | xargs -n1 -I% govc object.collect -s % dnsConfig
 
   objs=$(govc find / | wc -l)
   assert_equal 23 "$objs"

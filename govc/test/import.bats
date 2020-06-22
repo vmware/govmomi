@@ -3,7 +3,7 @@
 load test_helper
 
 @test "import.ova" {
-  vcsim_env
+  vcsim_env -app 1
 
   run govc import.ova "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
@@ -33,6 +33,9 @@ load test_helper
   assert_matches "disk-"
 
   run govc vm.destroy "$TTYLINUX_NAME"
+  assert_success
+
+  run govc import.ova -pool /DC0/host/DC0_C0/Resources/DC0_C0_APP0 "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
 }
 
@@ -68,6 +71,14 @@ load test_helper
 
   run govc vm.destroy ${TTYLINUX_NAME}
   assert_success
+
+  # ensure vcsim doesn't panic without capacityAllocationUnits
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+  sed -e s/capacityAllocationUnits/invalid/ "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" > "$dir/$TTYLINUX_NAME.ovf"
+  touch "$dir/$TTYLINUX_NAME-disk1.vmdk" # .vmdk contents don't matter to vcsim
+  run govc import.ovf "$dir/$TTYLINUX_NAME.ovf"
+  assert_success
+  rm -rf "$dir"
 }
 
 @test "import.ovf -host.ipath" {
@@ -136,4 +147,46 @@ load test_helper
 
   run govc import.vmdk -force "$GOVC_TEST_VMDK_SRC" "$name"
   assert_success # exists, but -force was used
+}
+
+@test "import duplicate dvpg names" {
+  vcsim_env
+
+  run govc dvs.create DVS1 # DVS0 already exists
+  assert_success
+
+  run govc dvs.portgroup.add -dvs DVS0 -type ephemeral NSX-dvpg
+  assert_success
+
+  run govc dvs.portgroup.add -dvs DVS1 -type ephemeral NSX-dvpg
+  assert_success
+
+  ovf="$GOVC_IMAGES/$TTYLINUX_NAME.ovf"
+
+  spec=$(govc import.spec "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")
+
+  run govc import.ovf -name ttylinux -options - "$ovf" <<<"$spec"
+  assert_success # no network specified
+
+  options=$(jq ".NetworkMapping[].Network = \"enoent\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_failure # network not found
+
+  options=$(jq ".NetworkMapping[].Network = \"NSX-dvpg\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_failure # 2 networks have the same name
+
+  options=$(jq ".NetworkMapping[].Network = \"DVS0/NSX-dvpg\"" <<<"$spec")
+
+  run govc import.ovf -name ttylinux2 -options - "$ovf" <<<"$options"
+  assert_success # switch_name/portgroup_name is unique
+
+  switch=$(govc find -i network -name DVS0)
+  id=$(govc find -i network -config.distributedVirtualSwitch "$switch" -name NSX-dvpg)
+  options=$(jq ".NetworkMapping[].Network = \"$id\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_success # using raw MO id
 }

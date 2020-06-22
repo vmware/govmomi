@@ -249,6 +249,21 @@ type CnsQueryVolumeResponse struct {
 	Returnval CnsQueryResult `xml:"returnval"`
 }
 
+type CnsQueryVolumeInfo CnsQueryVolumeInfoRequestType
+
+func init() {
+	types.Add("CnsQueryVolumeInfo", reflect.TypeOf((*CnsQueryVolumeInfo)(nil)).Elem())
+}
+
+type CnsQueryVolumeInfoRequestType struct {
+	This      types.ManagedObjectReference `xml:"_this"`
+	VolumeIds []CnsVolumeId                `xml:"volumes"`
+}
+
+type CnsQueryVolumeInfoResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
 type CnsQueryAllVolume CnsQueryAllVolumeRequestType
 
 func init() {
@@ -364,7 +379,8 @@ func init() {
 type CnsBlockBackingDetails struct {
 	CnsBackingObjectDetails
 
-	BackingDiskId string `xml:"backingDiskId,omitempty"`
+	BackingDiskId      string `xml:"backingDiskId,omitempty"`
+	BackingDiskUrlPath string `xml:"backingDiskUrlPath,omitempty"`
 }
 
 func init() {
@@ -454,6 +470,34 @@ func init() {
 	types.Add("CnsQueryResult", reflect.TypeOf((*CnsQueryResult)(nil)).Elem())
 }
 
+type CnsVolumeInfo struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("CnsVolumeInfo", reflect.TypeOf((*CnsVolumeInfo)(nil)).Elem())
+}
+
+type CnsBlockVolumeInfo struct {
+	CnsVolumeInfo
+
+	VStorageObject types.VStorageObject `xml:"vStorageObject"`
+}
+
+func init() {
+	types.Add("CnsBlockVolumeInfo", reflect.TypeOf((*CnsBlockVolumeInfo)(nil)).Elem())
+}
+
+type CnsQueryVolumeInfoResult struct {
+	CnsVolumeOperationResult
+
+	VolumeInfo BaseCnsVolumeInfo `xml:"volumeInfo,typeattr,omitempty"`
+}
+
+func init() {
+	types.Add("CnsQueryVolumeInfoResult", reflect.TypeOf((*CnsQueryVolumeInfoResult)(nil)).Elem())
+}
+
 type CnsCursor struct {
 	types.DynamicData
 
@@ -474,4 +518,14 @@ type CnsFault struct {
 
 func init() {
 	types.Add("CnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
+}
+
+type CnsAlreadyRegisteredFault struct {
+	CnsFault `xml:"fault,typeattr"`
+
+	VolumeId CnsVolumeId `xml:"volumeId,omitempty"`
+}
+
+func init() {
+	types.Add("CnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
 }

@@ -32,7 +32,7 @@ import (
 
 const (
 	Namespace = "vim25"
-	Version   = "6.7"
+	Version   = "7.0"
 	Path      = "/sdk"
 )
 
@@ -178,6 +178,11 @@ func (c *Client) Valid() bool {
 	}
 
 	return true
+}
+
+// Path returns vim25.Path (see cache.Client)
+func (c *Client) Path() string {
+	return Path
 }
 
 // IsVC returns true if we are connected to a vCenter

@@ -218,7 +218,7 @@ func TestFolderFaults(t *testing.T) {
 	f := Folder{}
 	f.ChildType = []string{"VirtualMachine"}
 
-	if f.CreateFolder(nil).Fault() == nil {
+	if f.CreateFolder(nil, nil).Fault() == nil {
 		t.Error("expected fault")
 	}
 

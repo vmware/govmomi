@@ -31,7 +31,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/importx"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
@@ -141,101 +140,102 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
-		res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
+	cmd.KeepAlive(c)
+
+	m := library.NewManager(c)
+	res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
+	if err != nil {
+		return err
+	}
+
+	switch t := res.GetResult().(type) {
+	case library.Library:
+		cmd.LibraryID = t.ID
+		cmd.ID, err = m.CreateLibraryItem(ctx, cmd.Item)
+		if err != nil {
+			return err
+		}
+	case library.Item:
+		cmd.Item = t
+	default:
+		return fmt.Errorf("%q is a %T", f.Arg(0), t)
+	}
+
+	session, err := m.CreateLibraryItemUpdateSession(ctx, library.Session{
+		LibraryItemID: cmd.ID,
+	})
+
+	if cmd.pull {
+		_, err = m.AddLibraryItemFileFromURI(ctx, session, filepath.Base(file), file)
 		if err != nil {
 			return err
 		}
 
-		switch t := res.GetResult().(type) {
-		case library.Library:
-			cmd.LibraryID = t.ID
-			cmd.ID, err = m.CreateLibraryItem(ctx, cmd.Item)
-			if err != nil {
-				return err
-			}
-		case library.Item:
-			cmd.Item = t
-		default:
-			return fmt.Errorf("%q is a %T", f.Arg(0), t)
+		return m.WaitOnLibraryItemUpdateSession(ctx, session, 3*time.Second, nil)
+	}
+
+	upload := func(name string) error {
+		f, size, err := archive.Open(name)
+		if err != nil {
+			return err
+		}
+		defer f.Close()
+
+		if e, ok := f.(*importx.TapeArchiveEntry); ok {
+			name = e.Name // expand path.Match's (e.g. "*.ovf" -> "name.ovf")
 		}
 
-		session, err := m.CreateLibraryItemUpdateSession(ctx, library.Session{
-			LibraryItemID: cmd.ID,
-		})
-
-		if cmd.pull {
-			_, err = m.AddLibraryItemFileFromURI(ctx, session, filepath.Base(file), file)
-			if err != nil {
-				return err
-			}
-
-			return m.WaitOnLibraryItemUpdateSession(ctx, session, 3*time.Second, nil)
+		info := library.UpdateFile{
+			Name:       name,
+			SourceType: "PUSH",
+			Checksum:   manifest[name],
+			Size:       size,
 		}
 
-		upload := func(name string) error {
-			f, size, err := archive.Open(name)
-			if err != nil {
-				return err
-			}
-			defer f.Close()
-
-			if e, ok := f.(*importx.TapeArchiveEntry); ok {
-				name = e.Name // expand path.Match's (e.g. "*.ovf" -> "name.ovf")
-			}
-
-			info := library.UpdateFile{
-				Name:       name,
-				SourceType: "PUSH",
-				Checksum:   manifest[name],
-				Size:       size,
-			}
-
-			update, err := m.AddLibraryItemFile(ctx, session, info)
-			if err != nil {
-				return err
-			}
-
-			p := soap.DefaultUpload
-			p.Headers = map[string]string{
-				"vmware-api-session-id": session,
-			}
-			p.ContentLength = size
-			u, err := url.Parse(update.UploadEndpoint.URI)
-			if err != nil {
-				return err
-			}
-			if cmd.OutputFlag.TTY {
-				logger := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", name))
-				p.Progress = logger
-				defer logger.Wait()
-			}
-			return c.Upload(ctx, f, u, &p)
-		}
-
-		if err = upload(base); err != nil {
+		update, err := m.AddLibraryItemFile(ctx, session, info)
+		if err != nil {
 			return err
 		}
 
-		if cmd.Type == library.ItemTypeOVF {
-			o, err := archive.ReadOvf(base)
-			if err != nil {
-				return err
-			}
+		p := soap.DefaultUpload
+		p.ContentLength = size
+		u, err := url.Parse(update.UploadEndpoint.URI)
+		if err != nil {
+			return err
+		}
+		if cmd.OutputFlag.TTY {
+			logger := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", name))
+			p.Progress = logger
+			defer logger.Wait()
+		}
+		return c.Upload(ctx, f, u, &p)
+	}
 
-			e, err := archive.ReadEnvelope(o)
-			if err != nil {
-				return fmt.Errorf("failed to parse ovf: %s", err)
-			}
+	if err = upload(base); err != nil {
+		return err
+	}
 
-			for i := range e.References {
-				if err = upload(e.References[i].Href); err != nil {
-					return err
-				}
-			}
+	if cmd.Type == library.ItemTypeOVF {
+		o, err := archive.ReadOvf(base)
+		if err != nil {
+			return err
 		}
 
-		return m.CompleteLibraryItemUpdateSession(ctx, session)
-	})
+		e, err := archive.ReadEnvelope(o)
+		if err != nil {
+			return fmt.Errorf("failed to parse ovf: %s", err)
+		}
+
+		for i := range e.References {
+			if err = upload(e.References[i].Href); err != nil {
+				return err
+			}
+		}
+	}
+
+	return m.CompleteLibraryItemUpdateSession(ctx, session)
 }

@@ -361,6 +361,20 @@ func Decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
 	return true
 }
 
+func (s *handler) expiredSession(id string, now time.Time) bool {
+	expired := true
+	s.Lock()
+	session, ok := s.Session[id]
+	if ok {
+		expired = now.Sub(session.LastAccessed) > simulator.SessionIdleTimeout
+		if expired {
+			delete(s.Session, id)
+		}
+	}
+	s.Unlock()
+	return expired
+}
+
 func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 	id := r.Header.Get(internal.SessionCookieName)
 	useHeaderAuthn := strings.ToLower(r.Header.Get(internal.UseHeaderAuthn))
@@ -383,6 +397,7 @@ func (s *handler) session(w http.ResponseWriter, r *http.Request) {
 		id = uuid.New().String()
 		now := time.Now()
 		s.Session[id] = &rest.Session{User: user, Created: now, LastAccessed: now}
+		simulator.SessionIdleWatch(context.Background(), id, s.expiredSession)
 		if useHeaderAuthn != "true" {
 			http.SetCookie(w, &http.Cookie{
 				Name:  internal.SessionCookieName,
@@ -620,8 +635,18 @@ func (s *handler) associationID(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var spec internal.Association
-	if !s.decode(r, w, &spec) {
-		return
+	var specs struct {
+		ObjectIDs []internal.AssociatedObject `json:"object_ids"`
+	}
+	switch s.action(r) {
+	case "attach", "detach", "list-attached-objects":
+		if !s.decode(r, w, &spec) {
+			return
+		}
+	case "attach-tag-to-multiple-objects":
+		if !s.decode(r, w, &specs) {
+			return
+		}
 	}
 
 	switch s.action(r) {
@@ -637,6 +662,11 @@ func (s *handler) associationID(w http.ResponseWriter, r *http.Request) {
 			ids = append(ids, id)
 		}
 		OK(w, ids)
+	case "attach-tag-to-multiple-objects":
+		for _, obj := range specs.ObjectIDs {
+			s.Association[id][obj] = true
+		}
+		OK(w)
 	}
 }
 
@@ -1724,6 +1754,10 @@ func (s *handler) libraryItemOVFID(w http.ResponseWriter, r *http.Request) {
 	var lib *library.Library
 	var item *item
 	for _, l := range s.Library {
+		if l.Library.Type == "SUBSCRIBED" {
+			// Subscribers share the same Item map, we need the LOCAL library to find the .ovf on disk
+			continue
+		}
 		item, ok = l.Item[id]
 		if ok {
 			lib = l.Library

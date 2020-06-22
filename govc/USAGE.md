@@ -10,6 +10,7 @@ but appear via `govc $cmd -h`:
   -debug=false              Store debug logs [GOVC_DEBUG]
   -dump=false               Enable output dump
   -json=false               Enable JSON output
+  -xml=false                Enable XML output
   -k=false                  Skip verification of server certificate [GOVC_INSECURE]
   -key=                     Private key [GOVC_PRIVATE_KEY]
   -persist-session=true     Persist session to disk [GOVC_PERSIST_SESSION]
@@ -180,16 +181,24 @@ but appear via `govc $cmd -h`:
  - [import.ovf](#importovf)
  - [import.spec](#importspec)
  - [import.vmdk](#importvmdk)
+ - [library.checkin](#librarycheckin)
+ - [library.checkout](#librarycheckout)
  - [library.clone](#libraryclone)
+ - [library.cp](#librarycp)
  - [library.create](#librarycreate)
  - [library.deploy](#librarydeploy)
  - [library.export](#libraryexport)
  - [library.import](#libraryimport)
  - [library.info](#libraryinfo)
  - [library.ls](#libraryls)
+ - [library.publish](#librarypublish)
  - [library.rm](#libraryrm)
  - [library.session.ls](#librarysessionls)
  - [library.session.rm](#librarysessionrm)
+ - [library.subscriber.create](#librarysubscribercreate)
+ - [library.subscriber.info](#librarysubscriberinfo)
+ - [library.subscriber.ls](#librarysubscriberls)
+ - [library.subscriber.rm](#librarysubscriberrm)
  - [library.sync](#librarysync)
  - [license.add](#licenseadd)
  - [license.assign](#licenseassign)
@@ -265,6 +274,7 @@ but appear via `govc $cmd -h`:
  - [tasks](#tasks)
  - [vapp.destroy](#vappdestroy)
  - [vapp.power](#vapppower)
+ - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
  - [version](#version)
  - [vm.change](#vmchange)
  - [vm.clone](#vmclone)
@@ -444,10 +454,12 @@ List cluster groups and group members.
 
 Examples:
   govc cluster.group.ls -cluster my_cluster
+  govc cluster.group.ls -cluster my_cluster -l | grep ClusterHostGroup
   govc cluster.group.ls -cluster my_cluster -name my_group
 
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
+  -l=false               Long listing format
   -name=                 Cluster group name
 ```
 
@@ -726,6 +738,7 @@ Options:
   -remote-path=          Remote path of the NFS mount point
   -type=                 Datastore type (NFS|NFS41|CIFS|VMFS|local)
   -username=             Username to use when connecting (CIFS only)
+  -version=<nil>         VMFS major version
 ```
 
 ## datastore.disk.create
@@ -1619,8 +1632,8 @@ Examples:
 Options:
   -f=false               Overwrite existing
   -i=false               Include image files (*.{iso,img})
-  -prefix=true           Prepend target name to image filenames if missing
   -name=                 Specifies target name (defaults to source name)
+  -prefix=true           Prepend target name to image filenames if missing
   -sha=0                 Generate manifest using SHA 1, 256, 512 or 0 to skip
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -1781,16 +1794,19 @@ The '-type' flag value can be a managed entity type or one of the following alia
 
 Examples:
   govc find
+  govc find -l / # include object type in output
   govc find /dc1 -type c
   govc find vm -name my-vm-*
   govc find . -type n
   govc find . -type m -runtime.powerState poweredOn
   govc find . -type m -datastore $(govc find -i datastore -name vsanDatastore)
   govc find . -type s -summary.type vsan
+  govc find . -type s -customValue *:prod # Key:Value
   govc find . -type h -hardware.cpuInfo.numCpuCores 16
 
 Options:
   -i=false               Print the managed object reference
+  -l=false               Long listing format
   -maxdepth=-1           Max depth
   -name=*                Resource name
   -type=[]               Resource type
@@ -1901,6 +1917,8 @@ If DEST name is "-", source is written to stdout.
 Examples:
   govc guest.download -l user:pass -vm=my-vm /var/log/my.log ./local.log
   govc guest.download -l user:pass -vm=my-vm /etc/motd -
+  tar -cf- foo/ | govc guest.run -d - tar -C /tmp -xf-
+  govc guest.run tar -C /tmp -cf- foo/ | tar -C /tmp -xf- # download directory
 
 Options:
   -f=false               If set, the local destination file is clobbered
@@ -2094,6 +2112,7 @@ Examples:
   govc guest.run -vm $name -d "hello $USER" cat
   govc guest.run -vm $name curl -s :invalid: || echo $? # exit code 6
   govc guest.run -vm $name -e FOO=bar -e BIZ=baz -C /tmp env
+  govc guest.run -l root:'mypassword' -vm my_vm_hostname "ntpdate -u pool.ntp.org"
 
 Options:
   -C=                    The absolute path of the working directory for the program to start
@@ -2158,6 +2177,7 @@ If SOURCE name is "-", read source from stdin.
 Examples:
   govc guest.upload -l user:pass -vm=my-vm ~/.ssh/id_rsa.pub /home/$USER/.ssh/authorized_keys
   cowsay "have a great day" | govc guest.upload -l user:pass -vm=my-vm - /etc/motd
+  tar -cf- foo/ | govc guest.run -d - tar -C /tmp -xf- # upload a directory
 
 Options:
   -f=false               If set, the guest destination file is clobbered
@@ -2384,6 +2404,7 @@ Examples:
   govc host.esxcli system settings advanced set -o /Net/GuestIPHack -i 1
   govc host.esxcli network firewall ruleset set -r remoteSerialPort -e true
   govc host.esxcli network firewall set -e false
+  govc host.esxcli hardware platform get
 
 Options:
   -hints=true            Use command info hints when formatting output
@@ -2750,7 +2771,7 @@ Options:
 Usage: govc import.spec [OPTIONS] PATH_TO_OVF_OR_OVA
 
 Options:
-  -verbose=false  Verbose spec output
+  -verbose=false         Verbose spec output
 ```
 
 ## import.vmdk
@@ -2765,6 +2786,38 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
+## library.checkin
+
+```
+Usage: govc library.checkin [OPTIONS] PATH
+
+Check in VM to Content Library item PATH.
+
+Examples:
+  govc library.checkin -vm my-vm my-content/template-vm-item
+
+Options:
+  -m=                    Check in message
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## library.checkout
+
+```
+Usage: govc library.checkout [OPTIONS] PATH NAME
+
+Check out Content Library item PATH to vm NAME.
+
+Examples:
+  govc library.checkout -cluster my-cluster my-content/template-vm-item my-vm
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -host=                 Host system [GOVC_HOST]
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+```
+
 ## library.clone
 
 ```
@@ -2772,19 +2825,36 @@ Usage: govc library.clone [OPTIONS] PATH NAME
 
 Clone VM to Content Library PATH.
 
-The API used by this command requires vCenter version 6.7U1 or higher.
+By default, clone as a VM template (requires vCenter version 6.7U1 or higher).
+Clone as an OVF when the '-ovf' flag is specified.
 
 Examples:
   govc library.clone -vm template-vm my-content template-vm-item
+  govc library.clone -ovf -vm template-vm my-content ovf-item
 
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
   -host=                 Host system [GOVC_HOST]
+  -ovf=false             Clone as OVF (default is VM Template)
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -profile=              Storage profile
   -vm=                   Virtual machine [GOVC_VM]
+```
+
+## library.cp
+
+```
+Usage: govc library.cp [OPTIONS] SRC DST
+
+Copy SRC library item to DST library.
+Examples:
+  govc library.cp /my-content/my-item /my-other-content
+  govc library.cp -n my-item2 /my-content/my-item /my-other-content
+
+Options:
+  -n=                    Library item name
 ```
 
 ## library.create
@@ -2797,12 +2867,14 @@ Create library.
 Examples:
   govc library.create library_name
   govc library.create -sub http://server/path/lib.json library_name
-  govc library.create -json | jq .
-  govc library.create library_name -json | jq .
+  govc library.create -pub library_name
 
 Options:
   -d=                    Description of library
   -ds=                   Datastore [GOVC_DATASTORE]
+  -pub=<nil>             Publish library
+  -pub-password=         Publication password
+  -pub-username=         Publication username
   -sub=                  Subscribe to library URL
   -sub-autosync=true     Automatic synchronization
   -sub-ondemand=false    Download content on demand
@@ -2898,6 +2970,7 @@ Examples:
 
 Options:
   -L=false               List Datastore path only
+  -U=false               List pub/sub URL(s) only
   -l=false               Long listing format
 ```
 
@@ -2916,6 +2989,25 @@ Examples:
   govc library.ls */
   govc library.ls -json | jq .
   govc library.ls /lib1/item1 -json | jq .
+
+Options:
+```
+
+## library.publish
+
+```
+Usage: govc library.publish [OPTIONS] NAME|ITEM [SUBSCRIPTION-ID]...
+
+Publish library NAME or ITEM to subscribers.
+
+If no subscriptions are specified, then publishes the library to all its subscribers.
+See 'govc library.subscriber.ls' to get a list of subscription IDs.
+
+Examples:
+  govc library.publish /my-library
+  govc library.publish /my-library subscription-id1 subscription-id2
+  govc library.publish /my-library/my-item
+  govc library.publish /my-library/my-item subscription-id1 subscription-id2
 
 Options:
 ```
@@ -2961,6 +3053,69 @@ Examples:
 
 Options:
   -f=false               Cancel session if active
+```
+
+## library.subscriber.create
+
+```
+Usage: govc library.subscriber.create [OPTIONS] PUBLISHED-LIBRARY SUBSCRIPTION-LIBRARY
+
+Create library subscriber.
+
+Examples:
+  govc library.subscriber.create -cluster my-cluster published-library subscription-library
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -host=                 Host system [GOVC_HOST]
+  -net=                  Network [GOVC_NETWORK]
+  -net.adapter=e1000     Network adapter type
+  -net.address=          Network hardware address
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+```
+
+## library.subscriber.info
+
+```
+Usage: govc library.subscriber.info [OPTIONS] PUBLISHED-LIBRARY SUBSCRIPTION-ID
+
+Library subscriber info.
+
+Examples:
+  id=$(govc library.subscriber.ls | grep my-library-name | awk '{print $1}')
+  govc library.subscriber.info published-library-name $id
+
+Options:
+```
+
+## library.subscriber.ls
+
+```
+Usage: govc library.subscriber.ls [OPTIONS]
+
+List library subscriptions.
+
+Examples:
+  govc library.subscriber.ls library-name
+
+Options:
+```
+
+## library.subscriber.rm
+
+```
+Usage: govc library.subscriber.rm [OPTIONS] SUBSCRIPTION-ID
+
+Delete subscription of the published library.
+
+The subscribed library associated with the subscription will not be deleted.
+
+Examples:
+  id=$(govc library-subscriber.ls | grep my-library-name | awk '{print $1}')
+  govc library.subscriber.rm $id
+
+Options:
 ```
 
 ## library.sync
@@ -3301,6 +3456,7 @@ Examples:
   govc object.collect -R create-filter-request.xml # replay filter
   govc object.collect -R create-filter-request.xml -O # convert filter to Go code
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
+  govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
   govc object.collect -json $vm config | \ # use -json + jq to search array elements
     jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'
 
@@ -3309,6 +3465,7 @@ Options:
   -R=                    Raw XML encoded CreateFilter request
   -d=,                   Delimiter for array values
   -n=0                   Wait for N property updates
+  -o=false               Output the structure of a single Managed Object
   -s=false               Output property value only
   -type=[]               Resource type.  If specified, MOID is used for a container view root
   -wait=0s               Max wait time for updates
@@ -3704,7 +3861,7 @@ Options:
 ## session.login
 
 ```
-Usage: govc session.login [OPTIONS]
+Usage: govc session.login [OPTIONS] [PATH]
 
 Session login.
 
@@ -3718,9 +3875,11 @@ The session.login command can be used to:
 - Renew a SAML token
 - Login using a SAML token
 - Avoid passing credentials to other govc commands
+- Send an authenticated raw HTTP request
 
 Examples:
-  govc session.login -u root:password@host
+  govc session.login -u root:password@host # Creates a cached session in ~/.govmomi/sessions
+  govc session.ls -u root@host # Use the cached session with another command
   ticket=$(govc session.login -u root@host -clone)
   govc session.login -u root@host -ticket $ticket
   govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key
@@ -3729,14 +3888,17 @@ Examples:
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
   token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
+  govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .
 
 Options:
+  -X=                    HTTP method
   -clone=false           Acquire clone ticket
   -cookie=               Set HTTP cookie for an existing session
   -extension=            Extension name
   -issue=false           Issue SAML token
   -l=false               Output session cookie
   -lifetime=10m0s        SAML token lifetime
+  -r=false               REST login
   -renew=false           Renew SAML token
   -ticket=               Use clone ticket for login
   -token=                Use SAML token for login or as issue identity
@@ -3756,6 +3918,7 @@ Examples:
   govc session.logout
 
 Options:
+  -r=false               REST logout
 ```
 
 ## session.ls
@@ -3770,6 +3933,7 @@ Examples:
   govc session.ls -json | jq -r .CurrentSession.Key
 
 Options:
+  -r=false               Include current REST session (if any)
 ```
 
 ## session.rm
@@ -3913,11 +4077,14 @@ Examples:
   govc sso.group.update -d "Group description" NAME
   govc sso.group.update -a user1 NAME
   govc sso.group.update -r user2 NAME
+  govc sso.group.update -g -a group1 NAME
+  govc sso.group.update -g -r group2 NAME
 
 Options:
-  -a=                    Add user to group
+  -a=                    Add user/group to group
   -d=                    Group description
-  -r=                    Remove user from group
+  -g=false               Add/Remove group from group
+  -r=                    Remove user/group from group
 ```
 
 ## sso.service.ls
@@ -4315,6 +4482,19 @@ Options:
   -vapp.ipath=           Find vapp by inventory path
 ```
 
+## vcsa.log.forwarding.info
+
+```
+Usage: govc vcsa.log.forwarding.info [OPTIONS]
+
+Retrieve the VC Appliance log forwarding configuration
+
+Examples:
+  govc vcsa.log.forwarding.info
+
+Options:
+```
+
 ## version
 
 ```
@@ -4343,7 +4523,7 @@ Examples:
   vmware-rpctool "info-get guestinfo.vmname"
   govc vm.change -vm $vm -latency high
   govc vm.change -vm $vm -latency normal
-  
+  govc vm.change -vm $vm -uuid 4139c345-7186-4924-a842-36b69a24159b
 
 Options:
   -annotation=                   VM description
@@ -4360,9 +4540,11 @@ Options:
   -mem.reservation=<nil>         Memory reservation in MB
   -mem.shares=                   Memory shares level or number
   -memory-hot-add-enabled=<nil>  Enable memory hot add
+  -memory-pin=<nil>              Reserve all guest memory
   -name=                         Display name
   -nested-hv-enabled=<nil>       Enable nested hardware-assisted virtualization
   -sync-time-with-host=<nil>     Enable SyncTimeWithHost
+  -uuid=                         BIOS UUID
   -vm=                           Virtual machine [GOVC_VM]
   -vpmc-enabled=<nil>            Enable CPU performance counters
 ```
@@ -4372,7 +4554,7 @@ Options:
 ```
 Usage: govc vm.clone [OPTIONS] NAME
 
-Clone VM to NAME.
+Clone VM or template to NAME.
 
 Examples:
   govc vm.clone -vm template-vm new-vm
@@ -4382,6 +4564,8 @@ Examples:
   govc vm.clone -vm template-vm -cluster cluster1 new-vm # use compute cluster placement
   govc vm.clone -vm template-vm -datastore-cluster dscluster new-vm # use datastore cluster placement
   govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
+  govc vm.clone -vm template-vm -template new-template # clone a VM template
+  govc vm.clone -vm=/ClusterName/vm/FolderName/VM_templateName -on=true -host=myesxi01 -ds=datastore01 myVM_name
 
 Options:
   -annotation=           VM description
@@ -4438,8 +4622,8 @@ Usage: govc vm.create [OPTIONS] NAME
 
 Create VM.
 
-For a list of possible '-g' IDs, see:
-http://pubs.vmware.com/vsphere-6-5/topic/com.vmware.wssdk.apiref.doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
+For a list of possible '-g' IDs, use 'govc vm.option.info' or see:
+https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIdentifier.html
 
 Examples:
   govc vm.create -on=false vm-name
@@ -4470,7 +4654,7 @@ Options:
   -net.address=          Network hardware address
   -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
-  -version=              ESXi hardware version [5.0|5.5|6.0|6.5|6.7]
+  -version=              ESXi hardware version [5.0|5.5|6.0|6.5|6.7|7.0]
 ```
 
 ## vm.customize
@@ -4548,7 +4732,7 @@ Options:
   -disk=                 Disk path name
   -ds=                   Datastore [GOVC_DATASTORE]
   -link=true             Link specified disk
-  -mode=                 Disk mode override (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
+  -mode=                 Disk mode (persistent|nonpersistent|undoable|independent_persistent|independent_nonpersistent|append)
   -persist=true          Persist attached disk
   -sharing=              Sharing (sharingNone|sharingMultiWriter)
   -vm=                   Virtual machine [GOVC_VM]
@@ -4771,6 +4955,7 @@ Examples:
 
 Options:
   -ds=                       Datastore [GOVC_DATASTORE]
+  -folder=                   Inventory folder [GOVC_FOLDER]
   -host=                     Host system [GOVC_HOST]
   -pool=                     Resource pool [GOVC_RESOURCE_POOL]
   -priority=defaultPriority  The task priority
@@ -4785,6 +4970,7 @@ Add network adapter to VM.
 
 Examples:
   govc vm.network.add -vm $vm -net "VM Network" -net.adapter e1000e
+  govc vm.network.add -vm $vm -net SwitchName/PortgroupName
   govc device.info -vm $vm ethernet-*
 
 Options:
@@ -4825,11 +5011,11 @@ VM config options for CLUSTER.
 The config option data contains information about the execution environment for a VM
 in the given CLUSTER, and optionally for a specific HOST.
 
-This command only supports '-json' or '-dump' output, defaulting to the latter.
+By default, supported guest OS IDs and full name are listed.
 
 Examples:
   govc vm.option.info -cluster C0
-  govc vm.option.info -cluster C0 ubuntu64Guest
+  govc vm.option.info -cluster C0 -dump ubuntu64Guest
   govc vm.option.info -cluster C0 -json | jq .GuestOSDescriptor[].Id
   govc vm.option.info -host my_hostname
   govc vm.option.info -vm my_vm

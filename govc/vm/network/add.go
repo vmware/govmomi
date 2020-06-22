@@ -47,6 +47,7 @@ func (cmd *add) Description() string {
 
 Examples:
   govc vm.network.add -vm $vm -net "VM Network" -net.adapter e1000e
+  govc vm.network.add -vm $vm -net SwitchName/PortgroupName
   govc device.info -vm $vm ethernet-*`
 }
 

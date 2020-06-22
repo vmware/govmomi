@@ -35,6 +35,7 @@ const (
 
 const (
 	ReleaseVSAN67u3 = "vSAN 6.7U3"
+	ReleaseVSAN70   = "7.0"
 )
 
 var (
@@ -149,6 +150,20 @@ func (c *Client) QueryVolume(ctx context.Context, queryFilter cnstypes.CnsQueryF
 		return nil, err
 	}
 	return &res.Returnval, nil
+}
+
+// QueryVolumeInfo calls the CNS QueryVolumeInfo API and return a task, from which we can extract VolumeInfo
+// containing VStorageObject
+func (c *Client) QueryVolumeInfo(ctx context.Context, volumeIDList []cnstypes.CnsVolumeId) (*object.Task, error) {
+	req := cnstypes.CnsQueryVolumeInfo{
+		This:      CnsVolumeManagerInstance,
+		VolumeIds: volumeIDList,
+	}
+	res, err := methods.CnsQueryVolumeInfo(ctx, c.serviceClient, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
 
 // QueryVolume calls the CNS QueryAllVolume API.

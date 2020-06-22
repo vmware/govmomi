@@ -773,9 +773,19 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = task.Wait(ctx)
+	info, err := task.WaitForResult(ctx)
 	if err != nil {
 		t.Fatal(err)
+	}
+
+	snapRef, ok := info.Result.(types.ManagedObjectReference)
+	if !ok {
+		t.Fatal("expected ManagedObjectRefrence result for CreateSnapshot")
+	}
+
+	_, err = vm.FindSnapshot(ctx, snapRef.Value)
+	if err != nil {
+		t.Fatal(err, "snapshot should be found by result reference")
 	}
 
 	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")

@@ -107,6 +107,7 @@ load test_helper
 
   name="$BATS_TMPDIR/govc-$id-export"
   run govc library.export "/my-content/$TTYLINUX_NAME/*.ovf" "$name"
+  assert_success
   assert_equal "$(cat "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")" "$(cat "$name")"
   rm "$name"
 

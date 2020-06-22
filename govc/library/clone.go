@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
 )
 
@@ -137,70 +136,73 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		dsID = ds.Reference().Value
 	}
 
-	return cmd.VirtualMachineFlag.WithRestClient(ctx, func(c *rest.Client) error {
-		l, err := flags.ContentLibrary(ctx, c, path)
+	c, err := cmd.FolderFlag.RestClient()
+	if err != nil {
+		return err
+	}
+
+	l, err := flags.ContentLibrary(ctx, c, path)
+	if err != nil {
+		return err
+	}
+
+	if cmd.ovf {
+		ovf := vcenter.OVF{
+			Spec: vcenter.CreateSpec{
+				Name: name,
+			},
+			Source: vcenter.ResourceID{
+				Value: vm.Reference().Value,
+			},
+			Target: vcenter.LibraryTarget{
+				LibraryID: l.ID,
+			},
+		}
+		id, err := vcenter.NewManager(c).CreateOVF(ctx, ovf)
 		if err != nil {
 			return err
 		}
-
-		if cmd.ovf {
-			ovf := vcenter.OVF{
-				Spec: vcenter.CreateSpec{
-					Name: name,
-				},
-				Source: vcenter.ResourceID{
-					Value: vm.Reference().Value,
-				},
-				Target: vcenter.LibraryTarget{
-					LibraryID: l.ID,
-				},
-			}
-			id, err := vcenter.NewManager(c).CreateOVF(ctx, ovf)
-			if err != nil {
-				return err
-			}
-			fmt.Println(id)
-			return nil
-		}
-
-		storage := &vcenter.DiskStorage{
-			Datastore: dsID,
-			StoragePolicy: &vcenter.StoragePolicy{
-				Policy: cmd.profile,
-				Type:   "USE_SOURCE_POLICY",
-			},
-		}
-		if cmd.profile != "" {
-			storage.StoragePolicy.Type = "USE_SPECIFIED_POLICY"
-		}
-
-		spec := vcenter.Template{
-			Name:          name,
-			Library:       l.ID,
-			DiskStorage:   storage,
-			VMHomeStorage: storage,
-			SourceVM:      vm.Reference().Value,
-			Placement: &vcenter.Placement{
-				Folder: folder.Reference().Value,
-			},
-		}
-		if pool != nil {
-			spec.Placement.ResourcePool = pool.Reference().Value
-		}
-		if host != nil {
-			spec.Placement.Host = host.Reference().Value
-		}
-		if cluster != nil {
-			spec.Placement.Cluster = cluster.Reference().Value
-		}
-
-		id, err := vcenter.NewManager(c).CreateTemplate(ctx, spec)
-		if err != nil {
-			return err
-		}
-
 		fmt.Println(id)
-
 		return nil
-	})
+	}
+
+	storage := &vcenter.DiskStorage{
+		Datastore: dsID,
+		StoragePolicy: &vcenter.StoragePolicy{
+			Policy: cmd.profile,
+			Type:   "USE_SOURCE_POLICY",
+		},
+	}
+	if cmd.profile != "" {
+		storage.StoragePolicy.Type = "USE_SPECIFIED_POLICY"
+	}
+
+	spec := vcenter.Template{
+		Name:          name,
+		Library:       l.ID,
+		DiskStorage:   storage,
+		VMHomeStorage: storage,
+		SourceVM:      vm.Reference().Value,
+		Placement: &vcenter.Placement{
+			Folder: folder.Reference().Value,
+		},
+	}
+	if pool != nil {
+		spec.Placement.ResourcePool = pool.Reference().Value
+	}
+	if host != nil {
+		spec.Placement.Host = host.Reference().Value
+	}
+	if cluster != nil {
+		spec.Placement.Cluster = cluster.Reference().Value
+	}
+
+	id, err := vcenter.NewManager(c).CreateTemplate(ctx, spec)
+	if err != nil {
+		return err
+	}
+
+	fmt.Println(id)
+
+	return nil
 }

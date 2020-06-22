@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/google/uuid"
@@ -34,6 +35,7 @@ import (
 
 type SessionManager struct {
 	mo.SessionManager
+	nopLocker
 
 	ServiceHostName string
 	TLSCert         func() string
@@ -44,6 +46,13 @@ type SessionManager struct {
 func (m *SessionManager) init(*Registry) {
 	m.sessions = make(map[string]Session)
 }
+
+var (
+	// SessionIdleTimeout duration used to expire idle sessions
+	SessionIdleTimeout time.Duration
+
+	sessionMutex sync.Mutex
+)
 
 func createSession(ctx *Context, name string, locale string) types.UserSession {
 	now := time.Now().UTC()
@@ -69,6 +78,25 @@ func createSession(ctx *Context, name string, locale string) types.UserSession {
 	ctx.SetSession(session, true)
 
 	return ctx.Session.UserSession
+}
+
+func (m *SessionManager) getSession(id string) (Session, bool) {
+	sessionMutex.Lock()
+	defer sessionMutex.Unlock()
+	s, ok := m.sessions[id]
+	return s, ok
+}
+
+func (m *SessionManager) delSession(id string) {
+	sessionMutex.Lock()
+	defer sessionMutex.Unlock()
+	delete(m.sessions, id)
+}
+
+func (m *SessionManager) putSession(s Session) {
+	sessionMutex.Lock()
+	defer sessionMutex.Unlock()
+	m.sessions[s.Key] = s
 }
 
 func (s *SessionManager) validLogin(ctx *Context, req *types.Login) bool {
@@ -145,7 +173,7 @@ func (s *SessionManager) LoginByToken(ctx *Context, req *types.LoginByToken) soa
 
 func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
 	session := ctx.Session
-	delete(s.sessions, session.Key)
+	s.delSession(session.Key)
 	pc := Map.content().PropertyCollector
 
 	for ref, obj := range ctx.Session.Registry.objects {
@@ -175,11 +203,11 @@ func (s *SessionManager) TerminateSession(ctx *Context, req *types.TerminateSess
 			body.Fault_ = Fault("", new(types.InvalidArgument))
 			return body
 		}
-		if _, ok := s.sessions[id]; !ok {
+		if _, ok := s.getSession(id); !ok {
 			body.Fault_ = Fault("", new(types.NotFound))
 			return body
 		}
-		delete(s.sessions, id)
+		s.delSession(id)
 	}
 
 	body.Res = new(types.TerminateSessionResponse)
@@ -196,7 +224,7 @@ func (s *SessionManager) SessionIsActive(ctx *Context, req *types.SessionIsActiv
 
 	body.Res = new(types.SessionIsActiveResponse)
 
-	if session, exists := s.sessions[req.SessionID]; exists {
+	if session, exists := s.getSession(req.SessionID); exists {
 		body.Res.Returnval = session.UserName == req.UserName
 	}
 
@@ -206,7 +234,7 @@ func (s *SessionManager) SessionIsActive(ctx *Context, req *types.SessionIsActiv
 func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneTicket) soap.HasFault {
 	session := *ctx.Session
 	session.Key = uuid.New().String()
-	s.sessions[session.Key] = session
+	s.putSession(session)
 
 	return &methods.AcquireCloneTicketBody{
 		Res: &types.AcquireCloneTicketResponse{
@@ -218,10 +246,10 @@ func (s *SessionManager) AcquireCloneTicket(ctx *Context, _ *types.AcquireCloneT
 func (s *SessionManager) CloneSession(ctx *Context, ticket *types.CloneSession) soap.HasFault {
 	body := new(methods.CloneSessionBody)
 
-	session, exists := s.sessions[ticket.CloneTicket]
+	session, exists := s.getSession(ticket.CloneTicket)
 
 	if exists {
-		delete(s.sessions, ticket.CloneTicket) // A clone ticket can only be used once
+		s.delSession(ticket.CloneTicket) // A clone ticket can only be used once
 		session.Key = uuid.New().String()
 		ctx.SetSession(session, true)
 
@@ -276,10 +304,46 @@ type Context struct {
 // mapSession maps an HTTP cookie to a Session.
 func (c *Context) mapSession() {
 	if cookie, err := c.req.Cookie(soap.SessionCookieName); err == nil {
-		if val, ok := c.svc.sm.sessions[cookie.Value]; ok {
+		if val, ok := c.svc.sm.getSession(cookie.Value); ok {
 			c.SetSession(val, false)
 		}
 	}
+}
+
+func (m *SessionManager) expiredSession(id string, now time.Time) bool {
+	expired := true
+
+	s, ok := m.getSession(id)
+	if ok {
+		expired = now.Sub(s.LastActiveTime) > SessionIdleTimeout
+		if expired {
+			m.delSession(id)
+		}
+	}
+
+	return expired
+}
+
+// SessionIdleWatch starts a goroutine that calls func expired() at SessionIdleTimeout intervals.
+// The goroutine exits if the func returns true.
+func SessionIdleWatch(ctx context.Context, id string, expired func(string, time.Time) bool) {
+	if SessionIdleTimeout == 0 {
+		return
+	}
+
+	go func() {
+		for t := time.NewTimer(SessionIdleTimeout); ; {
+			select {
+			case <-ctx.Done():
+				return
+			case now := <-t.C:
+				if expired(id, now) {
+					return
+				}
+				t.Reset(SessionIdleTimeout)
+			}
+		}
+	}()
 }
 
 // SetSession should be called after successful authentication.
@@ -289,7 +353,7 @@ func (c *Context) SetSession(session Session, login bool) {
 	session.LastActiveTime = time.Now()
 	session.CallCount++
 
-	c.svc.sm.sessions[session.Key] = session
+	c.svc.sm.putSession(session)
 	c.Session = &session
 
 	if login {
@@ -304,6 +368,8 @@ func (c *Context) SetSession(session Session, login bool) {
 			UserAgent: session.UserAgent,
 			Locale:    session.Locale,
 		})
+
+		SessionIdleWatch(c.Context, session.Key, c.svc.sm.expiredSession)
 	}
 }
 
@@ -365,9 +431,11 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 		m.CurrentSession = &s.UserSession
 
 		// TODO: we could maintain SessionList as part of the SessionManager singleton
+		sessionMutex.Lock()
 		for _, session := range m.sessions {
 			m.SessionList = append(m.SessionList, session.UserSession)
 		}
+		sessionMutex.Unlock()
 
 		return &m
 	case "PropertyCollector":

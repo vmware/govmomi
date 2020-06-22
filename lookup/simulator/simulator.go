@@ -17,6 +17,8 @@ limitations under the License.
 package simulator
 
 import (
+	"sync"
+
 	"github.com/vmware/govmomi/lookup"
 	"github.com/vmware/govmomi/lookup/methods"
 	"github.com/vmware/govmomi/lookup/types"
@@ -48,10 +50,12 @@ func New() *simulator.Registry {
 	r.Put(&ServiceInstance{
 		ManagedObjectReference: lookup.ServiceInstance,
 		Content:                content,
-	})
-	r.Put(&ServiceRegistration{
-		ManagedObjectReference: *content.ServiceRegistration,
-		Info:                   registrationInfo(),
+		register: func() {
+			r.Put(&ServiceRegistration{
+				ManagedObjectReference: *content.ServiceRegistration,
+				Info:                   registrationInfo(),
+			})
+		},
 	})
 
 	return r
@@ -61,9 +65,16 @@ type ServiceInstance struct {
 	vim.ManagedObjectReference
 
 	Content types.LookupServiceContent
+
+	instance sync.Once
+	register func()
 }
 
 func (s *ServiceInstance) RetrieveServiceContent(_ *types.RetrieveServiceContent) soap.HasFault {
+	// defer register to this point to ensure we can include vcsim's cert in ServiceEndpoints.SslTrust
+	// TODO: we should be able to register within New(), but this is the only place that currently depends on vcsim's cert.
+	s.instance.Do(s.register)
+
 	return &methods.RetrieveServiceContentBody{
 		Res: &types.RetrieveServiceContentResponse{
 			Returnval: s.Content,

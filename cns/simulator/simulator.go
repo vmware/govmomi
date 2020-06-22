@@ -19,11 +19,14 @@ package simulator
 import (
 	"context"
 	"reflect"
+	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/methods"
 	cnstypes "github.com/vmware/govmomi/cns/types"
+	pbmtypes "github.com/vmware/govmomi/pbm/types"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim25types "github.com/vmware/govmomi/vim25/types"
@@ -78,6 +81,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 					BackingObjectDetails:         createSpec.BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails(),
 					ComplianceStatus:             "Simulator Compliance Status",
 					DatastoreAccessibilityStatus: "Simulator Datastore Accessibility Status",
+					HealthStatus:                 string(pbmtypes.PbmHealthStatusForEntityGreen),
 				}
 
 				volumes[newVolume.VolumeId] = newVolume
@@ -113,6 +117,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 						BackingObjectDetails:         createSpec.BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails(),
 						ComplianceStatus:             "Simulator Compliance Status",
 						DatastoreAccessibilityStatus: "Simulator Datastore Accessibility Status",
+						HealthStatus:                 string(pbmtypes.PbmHealthStatusForEntityGreen),
 						StoragePolicyId:              policyId,
 					}
 
@@ -365,6 +370,64 @@ func (m *CnsVolumeManager) CnsExtendVolume(ctx context.Context, req *cnstypes.Cn
 
 	return &methods.CnsExtendVolumeBody{
 		Res: &cnstypes.CnsExtendVolumeResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
+
+func (m *CnsVolumeManager) CnsQueryVolumeInfo(ctx context.Context, req *cnstypes.CnsQueryVolumeInfo) soap.HasFault {
+	task := simulator.CreateTask(m, "CnsQueryVolumeInfo", func(*simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
+		for _, volumeId := range req.VolumeIds {
+			vstorageObject := vim25types.VStorageObject{
+				Config: vim25types.VStorageObjectConfigInfo{
+					BaseConfigInfo: vim25types.BaseConfigInfo{
+						Id: vim25types.ID{
+							Id: uuid.New().String(),
+						},
+						Name:                        "name",
+						CreateTime:                  time.Now(),
+						KeepAfterDeleteVm:           vim25types.NewBool(true),
+						RelocationDisabled:          vim25types.NewBool(false),
+						NativeSnapshotSupported:     vim25types.NewBool(false),
+						ChangedBlockTrackingEnabled: vim25types.NewBool(false),
+						Iofilter:                    nil,
+					},
+					CapacityInMB:    1024,
+					ConsumptionType: []string{"disk"},
+					ConsumerId:      nil,
+				},
+			}
+			vstorageObject.Config.Backing = &vim25types.BaseConfigInfoDiskFileBackingInfo{
+				BaseConfigInfoFileBackingInfo: vim25types.BaseConfigInfoFileBackingInfo{
+					BaseConfigInfoBackingInfo: vim25types.BaseConfigInfoBackingInfo{
+						Datastore: simulator.Map.Any("Datastore").(*simulator.Datastore).Self,
+					},
+					FilePath:        "[vsanDatastore] 6785a85e-268e-6352-a2e8-02008b7afadd/kubernetes-dynamic-pvc-68734c9f-a679-42e6-a694-39632c51e31f.vmdk",
+					BackingObjectId: volumeId.Id,
+					Parent:          nil,
+					DeltaSizeInMB:   0,
+				},
+			}
+
+			operationResult = append(operationResult, &cnstypes.CnsQueryVolumeInfoResult{
+				CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
+					VolumeId: volumeId,
+				},
+				VolumeInfo: &cnstypes.CnsBlockVolumeInfo{
+					CnsVolumeInfo:  cnstypes.CnsVolumeInfo{},
+					VStorageObject: vstorageObject,
+				},
+			})
+
+		}
+		return &cnstypes.CnsVolumeOperationBatchResult{
+			VolumeResults: operationResult,
+		}, nil
+	})
+
+	return &methods.CnsQueryVolumeInfoBody{
+		Res: &cnstypes.CnsQueryVolumeInfoResponse{
 			Returnval: task.Run(),
 		},
 	}

@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"strconv"
+	"strings"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -29,7 +30,7 @@ type DistributedVirtualSwitch struct {
 	mo.DistributedVirtualSwitch
 }
 
-func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := Map.getEntityParent(s, "Folder").(*Folder)
 
@@ -41,14 +42,18 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(c *types.AddDVPortgroup_Ta
 			pg.Name = spec.Name
 			pg.Entity().Name = pg.Name
 
-			if obj := Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
-				return nil, &types.DuplicateName{
-					Name:   pg.Name,
-					Object: obj.Reference(),
+			// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
+			// Allow duplicate names using this prefix so we can reproduce and test this condition.
+			if !strings.HasPrefix(pg.Name, "NSX-") {
+				if obj := Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
+					return nil, &types.DuplicateName{
+						Name:   pg.Name,
+						Object: obj.Reference(),
+					}
 				}
 			}
 
-			f.putChild(pg)
+			folderPutChild(ctx, &f.Folder, pg)
 
 			pg.Key = pg.Self.Value
 			pg.Config = types.DVPortgroupConfigInfo{
@@ -235,10 +240,10 @@ func (s *DistributedVirtualSwitch) FetchDVPorts(req *types.FetchDVPorts) soap.Ha
 	return body
 }
 
-func (s *DistributedVirtualSwitch) DestroyTask(req *types.Destroy_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := Map.getEntityParent(s, "Folder").(*Folder)
-		f.removeChild(s.Reference())
+		folderRemoveChild(ctx, &f.Folder, s.Reference())
 		return nil, nil
 	})
 

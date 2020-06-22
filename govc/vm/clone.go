@@ -117,7 +117,7 @@ func (cmd *clone) Usage() string {
 }
 
 func (cmd *clone) Description() string {
-	return `Clone VM to NAME.
+	return `Clone VM or template to NAME.
 
 Examples:
   govc vm.clone -vm template-vm new-vm
@@ -126,7 +126,9 @@ Examples:
   govc vm.clone -vm template-vm -link -snapshot s-name new-vm
   govc vm.clone -vm template-vm -cluster cluster1 new-vm # use compute cluster placement
   govc vm.clone -vm template-vm -datastore-cluster dscluster new-vm # use datastore cluster placement
-  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm`
+  govc vm.clone -vm template-vm -snapshot $(govc snapshot.tree -vm template-vm -C) new-vm
+  govc vm.clone -vm template-vm -template new-template # clone a VM template
+  govc vm.clone -vm=/ClusterName/vm/FolderName/VM_templateName -on=true -host=myesxi01 -ds=datastore01 myVM_name`
 }
 
 func (cmd *clone) Process(ctx context.Context) error {
@@ -218,10 +220,6 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 			if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
 				return err
 			}
-		} else {
-			if cmd.ResourcePool, err = cmd.Cluster.ResourcePool(ctx); err != nil {
-				return err
-			}
 		}
 	}
 
@@ -259,6 +257,10 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+	}
+
+	if cmd.template {
+		return nil
 	}
 
 	if cmd.on {
@@ -316,12 +318,15 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 	}
 
 	folderref := cmd.Folder.Reference()
-	poolref := cmd.ResourcePool.Reference()
+	var poolref *types.ManagedObjectReference
+	if cmd.ResourcePool != nil {
+		poolref = types.NewReference(cmd.ResourcePool.Reference())
+	}
 
 	relocateSpec := types.VirtualMachineRelocateSpec{
 		DeviceChange: configSpecs,
 		Folder:       &folderref,
-		Pool:         &poolref,
+		Pool:         poolref,
 	}
 
 	if cmd.HostSystem != nil {

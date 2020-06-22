@@ -30,7 +30,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25/soap"
 )
 
@@ -82,111 +81,112 @@ func (cmd *export) Process(ctx context.Context) error {
 }
 
 func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		var names []string
-		m := library.NewManager(c)
-		res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		switch t := res.GetResult().(type) {
-		case library.Item:
-			cmd.Item = t
-		case library.File:
-			names = []string{t.Name}
-			cmd.Item = res.GetParent().GetResult().(library.Item)
-		default:
-			return fmt.Errorf("%q is a %T", f.Arg(0), t)
-		}
+	var names []string
+	m := library.NewManager(c)
+	res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
+	if err != nil {
+		return err
+	}
 
-		dst := f.Arg(1)
-		one := len(names) == 1
-		var log io.Writer = os.Stdout
-		isStdout := one && dst == "-"
-		if isStdout {
-			log = ioutil.Discard
-		}
+	switch t := res.GetResult().(type) {
+	case library.Item:
+		cmd.Item = t
+	case library.File:
+		names = []string{t.Name}
+		cmd.Item = res.GetParent().GetResult().(library.Item)
+	default:
+		return fmt.Errorf("%q is a %T", f.Arg(0), t)
+	}
 
-		session, err := m.CreateLibraryItemDownloadSession(ctx, library.Session{
-			LibraryItemID: cmd.ID,
-		})
-		if err != nil {
-			return err
-		}
+	dst := f.Arg(1)
+	one := len(names) == 1
+	var log io.Writer = os.Stdout
+	isStdout := one && dst == "-"
+	if isStdout {
+		log = ioutil.Discard
+	}
 
-		if len(names) == 0 {
-			files, err := m.ListLibraryItemDownloadSessionFile(ctx, session)
-			if err != nil {
-				return err
-			}
-
-			for _, file := range files {
-				names = append(names, file.Name)
-			}
-		}
-
-		for _, name := range names {
-			_, err = m.PrepareLibraryItemDownloadSessionFile(ctx, session, name)
-			if err != nil {
-				return err
-			}
-		}
-
-		download := func(src *url.URL, name string) error {
-			p := soap.DefaultDownload
-			p.Headers = map[string]string{
-				"vmware-api-session-id": c.SessionID,
-			}
-			if isStdout {
-				s, _, err := c.Download(ctx, src, &p)
-				if err != nil {
-					return err
-				}
-				_, err = io.Copy(os.Stdout, s)
-				_ = s.Close()
-				return err
-			}
-
-			if cmd.OutputFlag.TTY {
-				logger := cmd.ProgressLogger(fmt.Sprintf("Downloading %s... ", src.String()))
-				defer logger.Wait()
-				p.Progress = logger
-			}
-
-			if one && dst != "" {
-				name = dst
-			} else {
-				name = filepath.Join(dst, name)
-			}
-			return c.DownloadFile(ctx, name, src, &p)
-		}
-
-		for _, name := range names {
-			var info *library.DownloadFile
-			_, _ = fmt.Fprintf(log, "Checking %s... ", name)
-			for {
-				info, err = m.GetLibraryItemDownloadSessionFile(ctx, session, name)
-				if err != nil {
-					return err
-				}
-				if info.Status == "PREPARED" {
-					_, _ = fmt.Fprintln(log, info.Status)
-					break // with this status we have a DownloadEndpoint.URI
-				}
-				time.Sleep(time.Second)
-			}
-
-			src, err := url.Parse(info.DownloadEndpoint.URI)
-			if err != nil {
-				return err
-			}
-			err = download(src, name)
-			if err != nil {
-				return err
-			}
-		}
-
-		return nil
+	session, err := m.CreateLibraryItemDownloadSession(ctx, library.Session{
+		LibraryItemID: cmd.ID,
 	})
+	if err != nil {
+		return err
+	}
+
+	if len(names) == 0 {
+		files, err := m.ListLibraryItemDownloadSessionFile(ctx, session)
+		if err != nil {
+			return err
+		}
+
+		for _, file := range files {
+			names = append(names, file.Name)
+		}
+	}
+
+	for _, name := range names {
+		_, err = m.PrepareLibraryItemDownloadSessionFile(ctx, session, name)
+		if err != nil {
+			return err
+		}
+	}
+
+	download := func(src *url.URL, name string) error {
+		p := soap.DefaultDownload
+
+		if isStdout {
+			s, _, err := c.Download(ctx, src, &p)
+			if err != nil {
+				return err
+			}
+			_, err = io.Copy(os.Stdout, s)
+			_ = s.Close()
+			return err
+		}
+
+		if cmd.OutputFlag.TTY {
+			logger := cmd.ProgressLogger(fmt.Sprintf("Downloading %s... ", src.String()))
+			defer logger.Wait()
+			p.Progress = logger
+		}
+
+		if one && dst != "" {
+			name = dst
+		} else {
+			name = filepath.Join(dst, name)
+		}
+		return c.DownloadFile(ctx, name, src, &p)
+	}
+
+	for _, name := range names {
+		var info *library.DownloadFile
+		_, _ = fmt.Fprintf(log, "Checking %s... ", name)
+		for {
+			info, err = m.GetLibraryItemDownloadSessionFile(ctx, session, name)
+			if err != nil {
+				return err
+			}
+			if info.Status == "PREPARED" {
+				_, _ = fmt.Fprintln(log, info.Status)
+				break // with this status we have a DownloadEndpoint.URI
+			}
+			time.Sleep(time.Second)
+		}
+
+		src, err := url.Parse(info.DownloadEndpoint.URI)
+		if err != nil {
+			return err
+		}
+		err = download(src, name)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }

@@ -507,8 +507,9 @@ func (d *Decoder) unmarshal(val reflect.Value, start *StartElement) error {
 				case fAttr:
 					strv := finfo.value(sv)
 					if a.Name.Local == finfo.name && (finfo.xmlns == "" || finfo.xmlns == a.Name.Space) {
+						needTypeAttr := (finfo.flags & fTypeAttr) != 0
 						// HACK: avoid using xsi:type value for a "type" attribute, such as ManagedObjectReference.Type for example.
-						if a.Name != xmlSchemaInstance && a.Name != xsiType {
+						if needTypeAttr || (a.Name != xmlSchemaInstance && a.Name != xsiType) {
 							if err := d.unmarshalAttr(strv, a); err != nil {
 								return err
 							}

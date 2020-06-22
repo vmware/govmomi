@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 )
 
 type publish struct {
@@ -58,23 +57,26 @@ Examples:
 }
 
 func (cmd *publish) Run(ctx context.Context, f *flag.FlagSet) error {
-	return cmd.WithRestClient(ctx, func(c *rest.Client) error {
-		res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
-		if err != nil {
-			return err
-		}
+	c, err := cmd.RestClient()
+	if err != nil {
+		return err
+	}
 
-		m := library.NewManager(c)
+	res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
+	if err != nil {
+		return err
+	}
 
-		ids := f.Args()[1:]
+	m := library.NewManager(c)
 
-		switch t := res.GetResult().(type) {
-		case library.Library:
-			return m.PublishLibrary(ctx, &t, ids)
-		case library.Item:
-			return m.PublishLibraryItem(ctx, &t, false, ids)
-		default:
-			return fmt.Errorf("%q is a %T", res.GetPath(), t)
-		}
-	})
+	ids := f.Args()[1:]
+
+	switch t := res.GetResult().(type) {
+	case library.Library:
+		return m.PublishLibrary(ctx, &t, ids)
+	case library.Item:
+		return m.PublishLibraryItem(ctx, &t, false, ids)
+	default:
+		return fmt.Errorf("%q is a %T", res.GetPath(), t)
+	}
 }

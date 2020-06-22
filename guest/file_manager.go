@@ -18,6 +18,7 @@ package guest
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"net/url"
 	"sync"
@@ -150,7 +151,7 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 	c := property.DefaultCollector(m.c)
 
 	var vm mo.VirtualMachine
-	err = c.RetrieveOne(ctx, m.vm, []string{"runtime.host"}, &vm)
+	err = c.RetrieveOne(ctx, m.vm, []string{"name", "runtime.host"}, &vm)
 	if err != nil {
 		return nil, err
 	}
@@ -159,12 +160,23 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 		return turl, nil // won't matter if the VM was powered off since the call to InitiateFileTransfer will fail
 	}
 
-	props := []string{"summary.config.sslThumbprint", "config.virtualNicManagerInfo.netConfig"}
+	props := []string{
+		"name",
+		"runtime.connectionState",
+		"summary.config.sslThumbprint",
+		"config.virtualNicManagerInfo.netConfig",
+	}
 
 	var host mo.HostSystem
 	err = c.RetrieveOne(ctx, *vm.Runtime.Host, props, &host)
 	if err != nil {
 		return nil, err
+	}
+
+	if host.Config == nil {
+		return nil, fmt.Errorf("guest TransferURL failed for vm %q (%s): host %q (%s) config==nil, connectionState==%s",
+			vm.Name, vm.Self,
+			host.Name, host.Self, host.Runtime.ConnectionState)
 	}
 
 	// prefer an ESX management IP, as the hostname used when adding to VC may not be valid for this client

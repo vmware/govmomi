@@ -903,6 +903,26 @@ func VslmUpdateVStorageObjectMetadata_Task(ctx context.Context, r soap.RoundTrip
 	return resBody.Res, nil
 }
 
+type VslmUpdateVstorageObjectCrypto_TaskBody struct {
+	Req    *types.VslmUpdateVstorageObjectCrypto_Task         `xml:"urn:vslm VslmUpdateVstorageObjectCrypto_Task,omitempty"`
+	Res    *types.VslmUpdateVstorageObjectCrypto_TaskResponse `xml:"urn:vslm VslmUpdateVstorageObjectCrypto_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                                        `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *VslmUpdateVstorageObjectCrypto_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func VslmUpdateVstorageObjectCrypto_Task(ctx context.Context, r soap.RoundTripper, req *types.VslmUpdateVstorageObjectCrypto_Task) (*types.VslmUpdateVstorageObjectCrypto_TaskResponse, error) {
+	var reqBody, resBody VslmUpdateVstorageObjectCrypto_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type VslmUpdateVstorageObjectPolicy_TaskBody struct {
 	Req    *types.VslmUpdateVstorageObjectPolicy_Task         `xml:"urn:vslm VslmUpdateVstorageObjectPolicy_Task,omitempty"`
 	Res    *types.VslmUpdateVstorageObjectPolicy_TaskResponse `xml:"urn:vslm VslmUpdateVstorageObjectPolicy_TaskResponse,omitempty"`

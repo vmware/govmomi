@@ -9,6 +9,7 @@ common_opts=$(cat <<EOF
   -debug=false              Store debug logs [GOVC_DEBUG]
   -dump=false               Enable output dump
   -json=false               Enable JSON output
+  -xml=false                Enable XML output
   -k=false                  Skip verification of server certificate [GOVC_INSECURE]
   -key=                     Private key [GOVC_PRIVATE_KEY]
   -persist-session=true     Persist session to disk [GOVC_PERSIST_SESSION]

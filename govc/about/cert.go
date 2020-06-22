@@ -88,7 +88,7 @@ func (r *certResult) Write(w io.Writer) error {
 	}
 
 	if r.cmd.thumbprint {
-		u := r.cmd.URLWithoutPassword()
+		u := r.cmd.Session.URL
 		_, err := fmt.Fprintf(w, "%s %s\n", u.Host, r.info.ThumbprintSHA1)
 		return err
 	}
@@ -97,7 +97,7 @@ func (r *certResult) Write(w io.Writer) error {
 }
 
 func (cmd *cert) Run(ctx context.Context, f *flag.FlagSet) error {
-	u := cmd.URLWithoutPassword()
+	u := cmd.Session.URL
 	c := soap.NewClient(u, false)
 	t := c.Client.Transport.(*http.Transport)
 	r := certResult{cmd: cmd}
@@ -110,7 +110,7 @@ func (cmd *cert) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if r.info.Err != nil && r.cmd.IsSecure() {
+	if r.info.Err != nil && !r.cmd.Session.Insecure {
 		cmd.Out = os.Stderr
 		// using same exit code as curl:
 		defer os.Exit(60)

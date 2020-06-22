@@ -18,14 +18,10 @@ package flags
 
 import (
 	"context"
-	"crypto/sha256"
 	"crypto/tls"
-	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
-	"io/ioutil"
-	"log"
 	"net/url"
 	"os"
 	"os/signal"
@@ -35,11 +31,11 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/session"
-	"github.com/vmware/govmomi/sts"
+	"github.com/vmware/govmomi/session/cache"
+	"github.com/vmware/govmomi/session/keepalive"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 const (
@@ -66,12 +62,10 @@ type ClientFlag struct {
 
 	*DebugFlag
 
-	url           *url.URL
 	username      string
 	password      string
 	cert          string
 	key           string
-	insecure      bool
 	persist       bool
 	minAPIVersion string
 	vimNamespace  string
@@ -79,8 +73,8 @@ type ClientFlag struct {
 	tlsCaCerts    string
 	tlsKnownHosts string
 	client        *vim25.Client
-
-	Login func(context.Context, *vim25.Client) error
+	restClient    *rest.Client
+	Session       cache.Session
 }
 
 var (
@@ -100,32 +94,13 @@ func NewClientFlag(ctx context.Context) (*ClientFlag, context.Context) {
 	}
 
 	v := &ClientFlag{}
-	v.Login = v.login
 	v.DebugFlag, ctx = NewDebugFlag(ctx)
 	ctx = context.WithValue(ctx, clientFlagKey, v)
 	return v, ctx
 }
 
-func (flag *ClientFlag) URLWithoutPassword() *url.URL {
-	if flag.url == nil {
-		return nil
-	}
-
-	withoutCredentials := *flag.url
-	withoutCredentials.User = url.User(flag.url.User.Username())
-	return &withoutCredentials
-}
-
-func (flag *ClientFlag) Userinfo() *url.Userinfo {
-	return flag.url.User
-}
-
-func (flag *ClientFlag) IsSecure() bool {
-	return !flag.insecure
-}
-
 func (flag *ClientFlag) String() string {
-	url := flag.URLWithoutPassword()
+	url := flag.Session.Endpoint()
 	if url == nil {
 		return ""
 	}
@@ -136,7 +111,7 @@ func (flag *ClientFlag) String() string {
 func (flag *ClientFlag) Set(s string) error {
 	var err error
 
-	flag.url, err = soap.ParseURL(s)
+	flag.Session.URL, err = soap.ParseURL(s)
 
 	return err
 }
@@ -176,7 +151,7 @@ func (flag *ClientFlag) Register(ctx context.Context, f *flag.FlagSet) {
 			}
 
 			usage := fmt.Sprintf("Skip verification of server certificate [%s]", envInsecure)
-			f.BoolVar(&flag.insecure, "k", insecure, usage)
+			f.BoolVar(&flag.Session.Insecure, "k", insecure, usage)
 		}
 
 		{
@@ -238,8 +213,12 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 			return err
 		}
 
-		if flag.url == nil {
+		if flag.Session.URL == nil {
 			return errors.New("specify an " + cDescr)
+		}
+
+		if !flag.persist {
+			flag.Session.Passthrough = true
 		}
 
 		flag.username, err = session.Secret(flag.username)
@@ -256,14 +235,14 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 			var password string
 			var ok bool
 
-			if flag.url.User != nil {
-				password, ok = flag.url.User.Password()
+			if flag.Session.URL.User != nil {
+				password, ok = flag.Session.URL.User.Password()
 			}
 
 			if ok {
-				flag.url.User = url.UserPassword(flag.username, password)
+				flag.Session.URL.User = url.UserPassword(flag.username, password)
 			} else {
-				flag.url.User = url.User(flag.username)
+				flag.Session.URL.User = url.User(flag.username)
 			}
 		}
 
@@ -271,23 +250,22 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 		if flag.password != "" {
 			var username string
 
-			if flag.url.User != nil {
-				username = flag.url.User.Username()
+			if flag.Session.URL.User != nil {
+				username = flag.Session.URL.User.Username()
 			}
 
-			flag.url.User = url.UserPassword(username, flag.password)
+			flag.Session.URL.User = url.UserPassword(username, flag.password)
 		}
 
 		return nil
 	})
 }
 
-// configure TLS and retry settings before making any connections
-func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
+func (flag *ClientFlag) ConfigureTLS(sc *soap.Client) error {
 	if flag.cert != "" {
 		cert, err := tls.LoadX509KeyPair(flag.cert, flag.key)
 		if err != nil {
-			return nil, fmt.Errorf("%s=%q %s=%q: %s", envCertificate, flag.cert, envPrivateKey, flag.key, err)
+			return fmt.Errorf("%s=%q %s=%q: %s", envCertificate, flag.cert, envPrivateKey, flag.key, err)
 		}
 
 		sc.SetCertificate(cert)
@@ -300,11 +278,11 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 	sc.UserAgent = fmt.Sprintf("govc/%s", Version)
 
 	if err := flag.SetRootCAs(sc); err != nil {
-		return nil, err
+		return err
 	}
 
 	if err := sc.LoadThumbprints(flag.tlsKnownHosts); err != nil {
-		return nil, err
+		return err
 	}
 
 	t := sc.DefaultTransport()
@@ -314,111 +292,11 @@ func (flag *ClientFlag) configure(sc *soap.Client) (soap.RoundTripper, error) {
 	if value != "" {
 		t.TLSHandshakeTimeout, err = time.ParseDuration(value)
 		if err != nil {
-			return nil, err
+			return err
 		}
-	}
-
-	// Retry twice when a temporary I/O error occurs.
-	// This means a maximum of 3 attempts.
-	return vim25.Retry(sc, vim25.TemporaryNetworkError(3)), nil
-}
-
-func (flag *ClientFlag) sessionFile() string {
-	url := flag.URLWithoutPassword()
-
-	// Key session file off of full URI and insecure setting.
-	// Hash key to get a predictable, canonical format.
-	key := fmt.Sprintf("%s#insecure=%t", url.String(), flag.insecure)
-	name := fmt.Sprintf("%064x", sha256.Sum256([]byte(key)))
-	return filepath.Join(home, "sessions", name)
-}
-
-func (flag *ClientFlag) saveClient(c *vim25.Client) error {
-	if !flag.persist {
-		return nil
-	}
-
-	p := flag.sessionFile()
-	err := os.MkdirAll(filepath.Dir(p), 0700)
-	if err != nil {
-		return err
-	}
-
-	f, err := os.OpenFile(p, os.O_CREATE|os.O_WRONLY, 0600)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	err = json.NewEncoder(f).Encode(c)
-	if err != nil {
-		return err
 	}
 
 	return nil
-}
-
-func (flag *ClientFlag) restoreClient(c *vim25.Client) (bool, error) {
-	if !flag.persist {
-		return false, nil
-	}
-
-	f, err := os.Open(flag.sessionFile())
-	if err != nil {
-		if os.IsNotExist(err) {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	defer f.Close()
-
-	dec := json.NewDecoder(f)
-	err = dec.Decode(c)
-	if err != nil {
-		return false, err
-	}
-
-	return true, nil
-}
-
-func (flag *ClientFlag) loadClient() (*vim25.Client, error) {
-	c := new(vim25.Client)
-	ok, err := flag.restoreClient(c)
-	if err != nil {
-		return nil, err
-	}
-
-	if !ok || !c.Valid() {
-		return nil, nil
-	}
-
-	c.RoundTripper, err = flag.configure(c.Client)
-	if err != nil {
-		return nil, err
-	}
-
-	m := session.NewManager(c)
-	u, err := m.UserSession(context.TODO())
-	if err != nil {
-		if soap.IsSoapFault(err) {
-			fault := soap.ToSoapFault(err).VimFault()
-			// If the PropertyCollector is not found, the saved session for this URL is not valid
-			if _, ok := fault.(types.ManagedObjectNotFound); ok {
-				return nil, nil
-			}
-		}
-
-		return nil, err
-	}
-
-	// If the session is nil, the client is not authenticated
-	if u == nil {
-		return nil, nil
-	}
-
-	return c, nil
 }
 
 func (flag *ClientFlag) SetRootCAs(c *soap.Client) error {
@@ -426,77 +304,6 @@ func (flag *ClientFlag) SetRootCAs(c *soap.Client) error {
 		return c.SetRootCAs(flag.tlsCaCerts)
 	}
 	return nil
-}
-
-func (flag *ClientFlag) login(ctx context.Context, c *vim25.Client) error {
-	m := session.NewManager(c)
-	u := flag.url.User
-	name := u.Username()
-
-	if name == "" && !c.IsVC() {
-		// If no username is provided, try to acquire a local ticket.
-		// When invoked remotely, ESX returns an InvalidRequestFault.
-		// So, rather than return an error here, fallthrough to Login() with the original User to
-		// to avoid what would be a confusing error message.
-		luser, lerr := flag.localTicket(ctx, m)
-		if lerr == nil {
-			// We are running directly on an ESX or Workstation host and can use the ticket with Login()
-			u = luser
-			name = u.Username()
-		}
-	}
-	if name == "" {
-		// Skip auto-login if we don't have a username
-		flag.persist = true // Not persisting, but this avoids the call to Logout()
-		return nil          // Avoid SaveSession for non-authenticated session
-	}
-
-	return m.Login(ctx, u)
-}
-
-func (flag *ClientFlag) newClient() (*vim25.Client, error) {
-	ctx := context.TODO()
-	sc := soap.NewClient(flag.url, flag.insecure)
-
-	rt, err := flag.configure(sc)
-	if err != nil {
-		return nil, err
-	}
-
-	c, err := vim25.NewClient(ctx, rt)
-	if err != nil {
-		return nil, err
-	}
-
-	// Set client, since we didn't pass it in the constructor
-	c.Client = sc
-
-	if flag.vimVersion == "" {
-		if err = c.UseServiceVersion(); err != nil {
-			return nil, err
-		}
-		flag.vimVersion = c.Version
-	}
-
-	if err := flag.Login(ctx, c); err != nil {
-		return nil, err
-	}
-
-	return c, flag.saveClient(c)
-}
-
-func (flag *ClientFlag) localTicket(ctx context.Context, m *session.Manager) (*url.Userinfo, error) {
-	ticket, err := m.AcquireLocalTicket(ctx, os.Getenv("USER"))
-	if err != nil {
-		return nil, err
-	}
-
-	password, err := ioutil.ReadFile(ticket.PasswordFilePath)
-	if err != nil {
-		return nil, err
-	}
-
-	return url.UserPassword(ticket.UserName, string(password)), nil
 }
 
 func isDevelopmentVersion(apiVersion string) bool {
@@ -543,17 +350,10 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 		return flag.client, nil
 	}
 
-	c, err := flag.loadClient()
+	c := new(vim25.Client)
+	err := flag.Session.Login(context.Background(), c, flag.ConfigureTLS)
 	if err != nil {
 		return nil, err
-	}
-
-	// loadClient returns nil if it was unable to load a session from disk
-	if c == nil {
-		c, err = flag.newClient()
-		if err != nil {
-			return nil, err
-		}
 	}
 
 	// Check that the endpoint has the right API version
@@ -562,56 +362,58 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 		return nil, err
 	}
 
+	if flag.vimVersion == "" {
+		err = c.UseServiceVersion()
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	// Retry twice when a temporary I/O error occurs.
+	// This means a maximum of 3 attempts.
+	c.RoundTripper = vim25.Retry(c.Client, vim25.TemporaryNetworkError(3))
 	flag.client = c
+
 	return flag.client, nil
 }
 
-func (flag *ClientFlag) Logout(ctx context.Context) error {
-	if flag.persist || flag.client == nil {
-		return nil
+func (flag *ClientFlag) RestClient() (*rest.Client, error) {
+	if flag.restClient != nil {
+		return flag.restClient, nil
 	}
 
-	m := session.NewManager(flag.client)
+	c := new(rest.Client)
 
-	return m.Logout(ctx)
+	err := flag.Session.Login(context.Background(), c, flag.ConfigureTLS)
+	if err != nil {
+		return nil, err
+	}
+
+	flag.restClient = c
+	return flag.restClient, nil
 }
 
-func (flag *ClientFlag) WithRestClient(ctx context.Context, f func(*rest.Client) error) error {
-	vc, err := flag.Client()
-	if err != nil {
-		return err
+func (flag *ClientFlag) KeepAlive(client cache.Client) {
+	switch c := client.(type) {
+	case *vim25.Client:
+		keepalive.NewHandlerSOAP(c, 0, nil).Start()
+	case *rest.Client:
+		keepalive.NewHandlerREST(c, 0, nil).Start()
+	default:
+		panic(fmt.Sprintf("unsupported client type=%T", client))
+	}
+}
+
+func (flag *ClientFlag) Logout(ctx context.Context) error {
+	if flag.client != nil {
+		_ = flag.Session.Logout(ctx, flag.client)
 	}
 
-	c := rest.NewClient(vc)
-
-	// TODO: rest.Client session cookie should be persisted as the soap.Client session cookie is.
-	if vc.Certificate() == nil {
-		if err = c.Login(ctx, flag.Userinfo()); err != nil {
-			return err
-		}
-	} else {
-		// TODO: session.login should support rest.Client SSO login to avoid this env var (depends on the TODO above)
-		token := os.Getenv("GOVC_LOGIN_TOKEN")
-		if token == "" {
-			return errors.New("GOVC_LOGIN_TOKEN must be set for rest.Client SSO login")
-		}
-		signer := &sts.Signer{
-			Certificate: c.Certificate(),
-			Token:       token,
-		}
-
-		if err = c.LoginByToken(c.WithSigner(ctx, signer)); err != nil {
-			return err
-		}
+	if flag.restClient != nil {
+		_ = flag.Session.Logout(ctx, flag.restClient)
 	}
 
-	defer func() {
-		if err := c.Logout(ctx); err != nil {
-			log.Printf("user logout error: %v", err)
-		}
-	}()
-
-	return f(c)
+	return nil
 }
 
 // Environ returns the govc environment variables for this connection
@@ -621,7 +423,7 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 		env = append(env, fmt.Sprintf("%s=%s", k, v))
 	}
 
-	u := *flag.url
+	u := *flag.Session.URL
 	if u.User != nil {
 		add(envUsername, u.User.Username())
 
@@ -657,7 +459,7 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 	}
 
 	if extra {
-		add("GOVC_URL_SCHEME", flag.url.Scheme)
+		add("GOVC_URL_SCHEME", flag.Session.URL.Scheme)
 
 		v := strings.SplitN(u.Host, ":", 2)
 		add("GOVC_URL_HOST", v[0])
@@ -665,13 +467,13 @@ func (flag *ClientFlag) Environ(extra bool) []string {
 			add("GOVC_URL_PORT", v[1])
 		}
 
-		add("GOVC_URL_PATH", flag.url.Path)
+		add("GOVC_URL_PATH", flag.Session.URL.Path)
 
-		if f := flag.url.Fragment; f != "" {
+		if f := flag.Session.URL.Fragment; f != "" {
 			add("GOVC_URL_FRAGMENT", f)
 		}
 
-		if q := flag.url.RawQuery; q != "" {
+		if q := flag.Session.URL.RawQuery; q != "" {
 			add("GOVC_URL_QUERY", q)
 		}
 	}

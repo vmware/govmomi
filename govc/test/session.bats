@@ -49,6 +49,17 @@ load test_helper
   run govc role.ls
   assert_success
 
+  run govc session.ls -r
+  assert_success
+  grep -v REST <<<"$output" # should not have a cached REST session
+
+  run govc tags.ls
+  assert_success # created a REST session
+
+  run govc session.ls -r
+  assert_success
+  grep REST <<<"$output" # now we should have a cached REST session
+
   host=$(govc env GOVC_URL)
   user=$(govc env GOVC_USERNAME)
   run govc role.ls -u "$host" # url w/o user:pass
@@ -79,10 +90,50 @@ load test_helper
 
     run govc session.login -u "$host" -ticket "$ticket"
     assert_success
+
+    cookie=$(govc session.login -r -l)
+    run govc session.login -r -u "$host" -cookie "$cookie"
+    assert_success
+
+    user=$(govc env GOVC_USERNAME)
+    dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+    export GOVMOMI_HOME="$dir"
+    export GOVC_PERSIST_SESSION=true
+
+    run govc session.login
+    assert_success
+
+    run govc role.ls -u "$user@$host" # url w/o pass
+    assert_success # authenticated via persisted SOAP session
+
+    run govc tags.ls -u "$user@$host" # url w/o pass
+    assert_failure # no persisted REST session yet
+
+    run govc session.login -r
+    assert_success
+
+    run govc tags.ls -u "$user@$host" # url w/o pass
+    assert_success # authenticated via persisted REST session
+
+    run govc session.logout -r
+    assert_success
+
+    run govc role.ls -u "$user@$host"
+    assert_failure # logged out of persisted session
+
+    run govc tags.ls -u "$user@$host"
+    assert_failure # logged out of persisted session
+
+    rm -rf "$dir"
 }
 
 @test "session.loginbytoken" {
   vcsim_env
+
+  user=$(govc env GOVC_USERNAME)
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+  export GOVMOMI_HOME="$dir"
+  export GOVC_PERSIST_SESSION=true
 
   # Remove username/password
   host=$(govc env GOVC_URL)
@@ -96,6 +147,18 @@ load test_helper
   # shellcheck disable=2059
   run govc session.login -l -token "$(printf $token root@localos)"
   assert_success # non-empty NameID is enough to login
+
+  run govc role.ls -u "$user@$host" # url w/o pass
+  assert_success # authenticated via persisted SOAP session
+
+  run govc tags.ls -u "$user@$host" # url w/o pass
+  assert_failure # no persisted REST session yet
+
+  run govc session.login -r -token "$(printf $token root@localos)"
+  assert_success
+
+  run govc tags.ls -u "$user@$host" # url w/o pass
+  assert_success # authenticated via persisted REST session
 
   id=$(new_id)
   run govc extension.setcert -cert-pem ++ "$id" # generate a cert for testing
@@ -114,6 +177,7 @@ load test_helper
 
   # remove generated cert and key
   rm "$id".{crt,key}
+  rm -rf "$dir"
 }
 
 @test "session.loginextension" {
@@ -132,4 +196,20 @@ load test_helper
 
   # remove generated cert and key
   rm "$id".{crt,key}
+}
+
+@test "session.curl" {
+  vcsim_env
+
+  run govc session.login /sdk/vimServiceVersions.xml
+  assert_success
+
+  run govc session.login /enoent
+  assert_failure
+
+  run govc session.login -r /rest/com/vmware/cis/session
+  assert_success
+
+  run govc session.login -r /enoent
+  assert_failure
 }

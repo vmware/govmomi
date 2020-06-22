@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"path"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/nfc"
@@ -163,34 +164,42 @@ func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
 	return
 }
 
-func (cmd *ovfx) NetworkMap(e *ovf.Envelope) (p []types.OvfNetworkMapping) {
+func (cmd *ovfx) NetworkMap(e *ovf.Envelope) ([]types.OvfNetworkMapping, error) {
 	ctx := context.TODO()
 	finder, err := cmd.DatastoreFlag.Finder()
 	if err != nil {
-		return
+		return nil, err
 	}
 
-	networks := map[string]string{}
-
-	if e.Network != nil {
-		for _, net := range e.Network.Networks {
-			networks[net.Name] = net.Name
+	var nmap []types.OvfNetworkMapping
+	for _, m := range cmd.Options.NetworkMapping {
+		if m.Network == "" {
+			continue // Not set, let vSphere choose the default network
 		}
-	}
 
-	for _, net := range cmd.Options.NetworkMapping {
-		networks[net.Name] = net.Network
-	}
+		var ref types.ManagedObjectReference
 
-	for src, dst := range networks {
-		if net, err := finder.Network(ctx, dst); err == nil {
-			p = append(p, types.OvfNetworkMapping{
-				Name:    src,
-				Network: net.Reference(),
-			})
+		net, err := finder.Network(ctx, m.Network)
+		if err != nil {
+			switch err.(type) {
+			case *find.NotFoundError:
+				if !ref.FromString(m.Network) {
+					return nil, err
+				} // else this is a raw MO ref
+			default:
+				return nil, err
+			}
+		} else {
+			ref = net.Reference()
 		}
+
+		nmap = append(nmap, types.OvfNetworkMapping{
+			Name:    m.Name,
+			Network: ref,
+		})
 	}
-	return
+
+	return nmap, err
 }
 
 func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
@@ -224,6 +233,11 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		name = cmd.Name
 	}
 
+	nmap, err := cmd.NetworkMap(e)
+	if err != nil {
+		return nil, err
+	}
+
 	cisp := types.OvfCreateImportSpecParams{
 		DiskProvisioning:   cmd.Options.DiskProvisioning,
 		EntityName:         name,
@@ -233,7 +247,7 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 			DeploymentOption: cmd.Options.Deployment,
 			Locale:           "US"},
 		PropertyMapping: cmd.Map(cmd.Options.PropertyMapping),
-		NetworkMapping:  cmd.NetworkMap(e),
+		NetworkMapping:  nmap,
 	}
 
 	host, err := cmd.HostSystemIfSpecified()
@@ -275,9 +289,14 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
-	folder, err := cmd.FolderOrDefault("vm")
-	if err != nil {
-		return nil, err
+	var folder *object.Folder
+	// The folder argument must not be set on a VM in a vApp, otherwise causes
+	// InvalidArgument fault: A specified parameter was not correct: pool
+	if cmd.ResourcePool.Reference().Type != "VirtualApp" {
+		folder, err = cmd.FolderOrDefault("vm")
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	lease, err := cmd.ResourcePool.ImportVApp(ctx, spec.ImportSpec, folder, host)

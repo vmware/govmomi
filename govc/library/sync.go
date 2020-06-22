@@ -24,7 +24,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/library"
-	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vapi/vcenter"
 )
 
@@ -120,43 +119,46 @@ func (cmd *sync) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	path := f.Arg(0)
 
-	return cmd.FolderFlag.WithRestClient(ctx, func(c *rest.Client) error {
-		m := library.NewManager(c)
+	c, err := cmd.FolderFlag.RestClient()
+	if err != nil {
+		return err
+	}
 
-		var local library.Library
-		if cmd.vmtx != "" {
-			l, err := flags.ContentLibrary(ctx, c, cmd.vmtx)
-			if err != nil {
-				return err
-			}
-			local = *l
-		}
+	m := library.NewManager(c)
 
-		res, err := flags.ContentLibraryResult(ctx, c, "", path)
+	var local library.Library
+	if cmd.vmtx != "" {
+		l, err := flags.ContentLibrary(ctx, c, cmd.vmtx)
 		if err != nil {
 			return err
 		}
+		local = *l
+	}
 
-		fmt.Printf("Syncing %s...\n", path)
+	res, err := flags.ContentLibraryResult(ctx, c, "", path)
+	if err != nil {
+		return err
+	}
 
-		switch t := res.GetResult().(type) {
-		case library.Library:
-			if cmd.shouldSync(t) {
-				if err = m.SyncLibrary(ctx, &t); err != nil {
-					return err
-				}
+	fmt.Printf("Syncing %s...\n", path)
+
+	switch t := res.GetResult().(type) {
+	case library.Library:
+		if cmd.shouldSync(t) {
+			if err = m.SyncLibrary(ctx, &t); err != nil {
+				return err
 			}
-			return cmd.syncVMTX(ctx, m, t, local)
-		case library.Item:
-			lib := res.GetParent().GetResult().(library.Library)
-			if cmd.shouldSync(lib) {
-				if err = m.SyncLibraryItem(ctx, &t, false); err != nil {
-					return err
-				}
-			}
-			return cmd.syncVMTX(ctx, m, lib, local, t)
-		default:
-			return fmt.Errorf("%q is a %T", res.GetPath(), t)
 		}
-	})
+		return cmd.syncVMTX(ctx, m, t, local)
+	case library.Item:
+		lib := res.GetParent().GetResult().(library.Library)
+		if cmd.shouldSync(lib) {
+			if err = m.SyncLibraryItem(ctx, &t, false); err != nil {
+				return err
+			}
+		}
+		return cmd.syncVMTX(ctx, m, lib, local, t)
+	default:
+		return fmt.Errorf("%q is a %T", res.GetPath(), t)
+	}
 }
