@@ -87,6 +87,8 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [vSphere 7.0](https://docs.vmware.com/en/VMware-vSphere/7.0/rn/vsphere-esxi-vcenter-server-7-vsphere-with-kubernetes-release-notes.html)
 
+* [OPS](https://github.com/nanovms/ops)
+
 ## Related projects
 
 * [rbvmomi](https://github.com/vmware/rbvmomi)
