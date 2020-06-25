@@ -164,4 +164,13 @@ func TestHostNetworkSystem(t *testing.T) {
 	if err == nil {
 		t.Error("expected error")
 	}
+
+	info, err := ns.QueryNetworkHint(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(info) != len(esx.HostConfigInfo.Network.Pnic) {
+		t.Errorf("len=%d", len(info))
+	}
 }
