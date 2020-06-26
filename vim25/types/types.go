@@ -21,7 +21,7 @@ import (
 	"time"
 )
 
-type AbandonHciWorkflow AbandonHciWorkflowRequestTypehasPrivilegeOnEntities
+type AbandonHciWorkflow AbandonHciWorkflowRequestType
 
 func init() {
 	t["AbandonHciWorkflow"] = reflect.TypeOf((*AbandonHciWorkflow)(nil)).Elem()
