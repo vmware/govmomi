@@ -200,3 +200,13 @@ func (s *HostNetworkSystem) QueryNetworkHint(req *types.QueryNetworkHint) soap.H
 		},
 	}
 }
+
+func (s *HostNetworkSystem) init(r *Registry) {
+	for _, obj := range r.objects {
+		if h, ok := obj.(*HostSystem); ok {
+			if h.ConfigManager.NetworkSystem.Value == s.Self.Value {
+				s.Host = &h.HostSystem
+			}
+		}
+	}
+}
