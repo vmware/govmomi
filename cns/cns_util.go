@@ -51,6 +51,23 @@ func GetTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (cnstypes
 	return nil, errors.New("TaskInfo result is empty")
 }
 
+// GetTaskResultArray gets the task result array for a specified task info
+func GetTaskResultArray(ctx context.Context, taskInfo *vim25types.TaskInfo) ([]cnstypes.BaseCnsVolumeOperationResult, error) {
+	if taskInfo == nil {
+		return nil, errors.New("TaskInfo is empty")
+	}
+	if taskInfo.Result != nil {
+		volumeOperationBatchResult := taskInfo.Result.(cnstypes.CnsVolumeOperationBatchResult)
+		if &volumeOperationBatchResult == nil ||
+			volumeOperationBatchResult.VolumeResults == nil ||
+			len(volumeOperationBatchResult.VolumeResults) == 0 {
+			return nil, errors.New("Cannot get VolumeOperationResult")
+		}
+		return volumeOperationBatchResult.VolumeResults, nil
+	}
+	return nil, errors.New("TaskInfo result is empty")
+}
+
 // dropUnknownCreateSpecElements helps drop newly added elements in the CnsVolumeCreateSpec, which are not known to the prior vSphere releases
 func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolumeCreateSpec) []cnstypes.CnsVolumeCreateSpec {
 	var updatedcreateSpecList []cnstypes.CnsVolumeCreateSpec
