@@ -70,6 +70,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/ls"
 	_ "github.com/vmware/govmomi/govc/metric"
 	_ "github.com/vmware/govmomi/govc/metric/interval"
+	_ "github.com/vmware/govmomi/govc/namespace/cluster"
 	_ "github.com/vmware/govmomi/govc/object"
 	_ "github.com/vmware/govmomi/govc/option"
 	_ "github.com/vmware/govmomi/govc/permissions"
