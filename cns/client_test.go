@@ -213,7 +213,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Test QueryVolumeInfo API
 	// QueryVolumeInfo is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
@@ -230,20 +230,22 @@ func TestClient(t *testing.T) {
 			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		queryVolumeInfoTaskResult, err := GetTaskResult(ctx, queryVolumeInfoTaskInfo)
+		queryVolumeInfoTaskResults, err := GetTaskResultArray(ctx, queryVolumeInfoTaskInfo)
 		if err != nil {
 			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		if queryVolumeInfoTaskResult == nil {
+		if queryVolumeInfoTaskResults == nil {
 			t.Fatalf("Empty queryVolumeInfoTaskResult")
 			t.FailNow()
 		}
-		queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
-		if queryVolumeInfoOperationRes.Fault != nil {
-			t.Fatalf("Failed to query volumes with QueryVolumeInfo. fault=%+v", queryVolumeInfoOperationRes.Fault)
+		for _, queryVolumeInfoTaskResult := range queryVolumeInfoTaskResults {
+			queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
+			if queryVolumeInfoOperationRes.Fault != nil {
+				t.Fatalf("Failed to query volumes with QueryVolumeInfo. fault=%+v", queryVolumeInfoOperationRes.Fault)
+			}
+			t.Logf("Successfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
 		}
-		t.Logf("Sucessfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
 	}
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
@@ -289,7 +291,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried Volumes after ExtendVolume. queryResult: %+v", pretty.Sprint(queryResult))
 	queryCapacity := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).CapacityInMb
 	if newCapacityInMb != queryCapacity {
 		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryCapacity)
@@ -395,7 +397,7 @@ func TestClient(t *testing.T) {
 	if updateVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to update volume metadata: fault=%+v", updateVolumeOperationRes.Fault)
 	} else {
-		t.Logf("Sucessfully updated volume metadata")
+		t.Logf("Successfully updated volume metadata")
 	}
 
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
@@ -404,7 +406,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Test QueryAll
 	querySelection := cnstypes.CnsQuerySelection{
@@ -421,7 +423,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried all Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried all Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Create a VM to test Attach Volume API.
 	virtualMachineConfigSpec := vim25types.VirtualMachineConfigSpec{
@@ -675,7 +677,7 @@ func TestClient(t *testing.T) {
 			t.Errorf("Failed to query volume. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", queryResult)
+		t.Logf("Successfully Queried Volumes. queryResult: %+v", queryResult)
 		fileBackingInfo := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsVsanFileShareBackingDetails)
 		t.Logf("File Share Name: %s with accessPoints: %+v", fileBackingInfo.Name, fileBackingInfo.AccessPoints)
 
@@ -815,7 +817,7 @@ func TestClient(t *testing.T) {
 			t.Errorf("Failed to query volume. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+		t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 		t.Logf("Deleting CNS volume created above using BACKING_DISK_URL_PATH: %s with volume: %+v", backingDiskURLPath, volumeIDList)
 		deleteTask, err = cnsClient.DeleteVolume(ctx, volumeIDList, true)
