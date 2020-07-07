@@ -289,26 +289,40 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 	return nil
 }
 
-// OK responds with http.StatusOK and json encoded val if given.
-func OK(w http.ResponseWriter, val ...interface{}) {
+// StatusOK responds with http.StatusOK and json encoded val if given.
+// For use with "/api" endpoints.
+func StatusOK(w http.ResponseWriter, val ...interface{}) {
 	w.WriteHeader(http.StatusOK)
-
 	if len(val) == 0 {
 		return
 	}
 
-	err := json.NewEncoder(w).Encode(struct {
-		Value interface{} `json:"value,omitempty"`
-	}{
-		val[0],
-	})
+	err := json.NewEncoder(w).Encode(val[0])
 
 	if err != nil {
 		log.Panic(err)
 	}
 }
 
+// OK responds with http.StatusOK and json encoded val if given.
+// For use with "/rest" endpoints where the response is a "value" wrapped structure.
+func OK(w http.ResponseWriter, val ...interface{}) {
+	if len(val) == 0 {
+		w.WriteHeader(http.StatusOK)
+		return
+	}
+
+	s := struct {
+		Value interface{} `json:"value,omitempty"`
+	}{
+		val[0],
+	}
+
+	StatusOK(w, s)
+}
+
 // BadRequest responds with http.StatusBadRequest and json encoded vAPI error of type kind.
+// For use with "/rest" endpoints where the response is a "value" wrapped structure.
 func BadRequest(w http.ResponseWriter, kind string) {
 	w.WriteHeader(http.StatusBadRequest)
 
