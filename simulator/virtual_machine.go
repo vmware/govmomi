@@ -1621,8 +1621,9 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			return nil, &types.InvalidArgument{InvalidProperty: "spec.location.pool"}
 		}
 		config := types.VirtualMachineConfigSpec{
-			Name:    req.Name,
-			GuestId: vm.Config.GuestId,
+			Name:         req.Name,
+			GuestId:      vm.Config.GuestId,
+			InstanceUuid: req.Spec.Config.InstanceUuid,
 			Files: &types.VirtualMachineFileInfo{
 				VmPathName: vmx.String(),
 			},
