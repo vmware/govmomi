@@ -1621,15 +1621,15 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			return nil, &types.InvalidArgument{InvalidProperty: "spec.location.pool"}
 		}
 		config := types.VirtualMachineConfigSpec{
-			Name:         req.Name,
-			GuestId:      vm.Config.GuestId,
-			InstanceUuid: req.Spec.Config.InstanceUuid,
+			Name:    req.Name,
+			GuestId: vm.Config.GuestId,
 			Files: &types.VirtualMachineFileInfo{
 				VmPathName: vmx.String(),
 			},
 		}
 		if req.Spec.Config != nil {
 			config.ExtraConfig = req.Spec.Config.ExtraConfig
+			config.InstanceUuid = req.Spec.Config.InstanceUuid
 		}
 
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
