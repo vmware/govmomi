@@ -1631,6 +1631,13 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			config.ExtraConfig = req.Spec.Config.ExtraConfig
 		}
 
+		// Copying hardware properties
+		config.NumCPUs = vm.Config.Hardware.NumCPU
+		config.MemoryMB = int64(vm.Config.Hardware.MemoryMB)
+		config.NumCoresPerSocket = vm.Config.Hardware.NumCoresPerSocket
+		config.VirtualICH7MPresent = vm.Config.Hardware.VirtualICH7MPresent
+		config.VirtualSMCPresent = vm.Config.Hardware.VirtualSMCPresent
+
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
 		devices := vm.Config.Hardware.Device
 		for _, device := range devices {
