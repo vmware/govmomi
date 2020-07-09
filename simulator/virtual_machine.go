@@ -1629,6 +1629,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		}
 		if req.Spec.Config != nil {
 			config.ExtraConfig = req.Spec.Config.ExtraConfig
+			config.InstanceUuid = req.Spec.Config.InstanceUuid
 		}
 
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
