@@ -165,6 +165,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 	return c.Client.Do(ctx, req, func(res *http.Response) error {
 		switch res.StatusCode {
 		case http.StatusOK:
+		case http.StatusCreated:
 		case http.StatusNoContent:
 		case http.StatusBadRequest:
 			// TODO: structured error types

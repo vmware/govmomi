@@ -17,10 +17,16 @@ limitations under the License.
 package simulator
 
 import (
+	"archive/tar"
 	"context"
+	"encoding/json"
+	"fmt"
 	"net/http"
 	"net/url"
+	"path"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"
@@ -54,6 +60,7 @@ func New(u *url.URL) *Handler {
 func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	if r.IsVPX() {
 		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
+		s.HandleFunc(internal.NamespaceClusterPath+"/", h.clustersID)
 	}
 }
 
@@ -96,4 +103,58 @@ func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 		}
 		vapi.StatusOK(w, clusters)
 	}
+}
+
+func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) {
+	var token internal.SupportBundleToken
+	_ = json.NewDecoder(r.Body).Decode(&token)
+	_ = r.Body.Close()
+
+	if token.Value == "" {
+		u := *h.URL
+		u.Path = r.URL.Path
+		// Create support bundle request
+		location := namespace.SupportBundleLocation{
+			Token: namespace.SupportBundleToken{
+				Token: uuid.New().String(),
+			},
+			URL: u.String(),
+		}
+
+		vapi.StatusOK(w, &location)
+		return
+	}
+
+	// Get support bundle
+	id := path.Base(path.Dir(r.URL.Path))
+	name := fmt.Sprintf("wcp-support-bundle-%s-%s--00-00.tar", id, time.Now().Format("2006Jan02"))
+
+	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
+	r.Header.Set("Content-Type", "application/octet-stream")
+
+	readme := "vcsim generated support bundle"
+	tw := tar.NewWriter(w)
+	_ = tw.WriteHeader(&tar.Header{
+		Name:    "README",
+		Size:    int64(len(readme) + 1),
+		Mode:    0444,
+		ModTime: time.Now(),
+	})
+	_, _ = fmt.Fprintln(tw, readme)
+	_ = tw.Close()
+}
+
+func (h *Handler) clustersID(w http.ResponseWriter, r *http.Request) {
+	id := path.Base(r.URL.Path)
+	route := map[string]func(http.ResponseWriter, *http.Request){
+		"support-bundle": h.clustersSupportBundle,
+	}[id]
+
+	if route != nil {
+		route(w, r)
+		return
+	}
+
+	// TODO:
+	// https://vmware.github.io/vsphere-automation-sdk-rest/vsphere/index.html#SVC_com.vmware.vcenter.namespace_management.clusters
 }

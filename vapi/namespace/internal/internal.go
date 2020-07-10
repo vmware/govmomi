@@ -20,3 +20,7 @@ const (
 	// NamespaceClusterPath is the rest endpoint for the namespace cluster management API
 	NamespaceClusterPath = "/api/vcenter/namespace-management/clusters"
 )
+
+type SupportBundleToken struct {
+	Value string `json:"wcp-support-bundle-token"`
+}
