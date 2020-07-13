@@ -341,7 +341,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 
 	for _, spec := range rr.req.SpecSet {
 		for _, p := range spec.PropSet {
-			if p.Type != ref.Type {
+			if p.Type != ref.Type && p.Type != rtype.Name() {
 				// e.g. ManagedEntity, ComputeResource
 				field, ok := rtype.FieldByName(p.Type)
 
