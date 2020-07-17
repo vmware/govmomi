@@ -140,7 +140,7 @@ load test_helper
 
   # validate each NIC has a unique MAC
   macs=$(govc device.info -vm "$vm" -json ethernet-* | jq -r .Devices[].MacAddress | uniq | wc -l)
-  [ "$macs" = "2" ]
+  assert_equal 2 "$macs"
 }
 
 @test "network flag required" {
