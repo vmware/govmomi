@@ -26,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
@@ -339,6 +340,46 @@ func (m *Model) resolveReferences(ctx *Context) error {
 	return nil
 }
 
+func (m *Model) decode(path string, data interface{}) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	dec := xml.NewDecoder(f)
+	dec.TypeFunc = types.TypeFunc()
+	err = dec.Decode(data)
+	_ = f.Close()
+	return err
+}
+
+func (m *Model) loadMethod(obj mo.Reference, dir string) error {
+	dir = filepath.Join(dir, obj.Reference().Encode())
+
+	info, err := ioutil.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	zero := reflect.Value{}
+	for _, x := range info {
+		name := strings.TrimSuffix(x.Name(), ".xml") + "Response"
+		path := filepath.Join(dir, x.Name())
+		response := reflect.ValueOf(obj).Elem().FieldByName(name)
+		if response == zero {
+			return fmt.Errorf("field %T.%s not found", obj, name)
+		}
+		if err = m.decode(path, response.Addr().Interface()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Load Model from the given directory, as created by the 'govc object.save' command.
 func (m *Model) Load(dir string) error {
 	ctx := internalContext
@@ -349,22 +390,17 @@ func (m *Model) Load(dir string) error {
 			return err
 		}
 		if info.IsDir() {
-			return nil
+			if path == dir {
+				return nil
+			}
+			return filepath.SkipDir
 		}
 		if filepath.Ext(path) != ".xml" {
 			return nil
 		}
 
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = f.Close() }()
-
-		dec := xml.NewDecoder(f)
-		dec.TypeFunc = types.TypeFunc()
 		var content types.ObjectContent
-		err = dec.Decode(&content)
+		err = m.decode(path, &content)
 		if err != nil {
 			return err
 		}
@@ -386,9 +422,7 @@ func (m *Model) Load(dir string) error {
 			return err
 		}
 
-		Map.Put(obj)
-
-		return nil
+		return m.loadMethod(Map.Put(obj), dir)
 	})
 
 	if err != nil {
