@@ -1199,7 +1199,7 @@ func init() {
 type VsanPerfQueryPerfRequestType struct {
 	This       types.ManagedObjectReference  `xml:"_this"`
 	QuerySpecs []VsanPerfQuerySpec           `xml:"querySpecs"`
-	Cluster    types.ManagedObjectReference `xml:"cluster,omitempty"`
+	Cluster    *types.ManagedObjectReference `xml:"cluster,omitempty"`
 }
 
 func init() {

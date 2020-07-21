@@ -71,7 +71,7 @@ func (c *Client) VsanClusterGetConfig(ctx context.Context, cluster vimtypes.Mana
 }
 
 // VsanPerfQueryPerf calls the vsan performance manager API
-func (c *Client) VsanPerfQueryPerf(ctx context.Context, cluster vimtypes.ManagedObjectReference, qSpecs []vsantypes.VsanPerfQuerySpec) ([]vsantypes.VsanPerfEntityMetricCSV, error) {
+func (c *Client) VsanPerfQueryPerf(ctx context.Context, cluster *vimtypes.ManagedObjectReference, qSpecs []vsantypes.VsanPerfQuerySpec) ([]vsantypes.VsanPerfEntityMetricCSV, error) {
 	req := vsantypes.VsanPerfQueryPerf{
 		This:       VsanPerformanceManagerInstance,
 		Cluster:    cluster,
