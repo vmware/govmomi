@@ -38,6 +38,10 @@ var (
 		Type:  "VsanVcClusterConfigSystem",
 		Value: "vsan-cluster-config-system",
 	}
+	VsanPerformanceManagerInstance = vimtypes.ManagedObjectReference{
+		Type:  "VsanPerformanceManager",
+		Value: "vsan-performance-manager",
+	}
 )
 
 // Client used for accessing vsan health APIs.
@@ -64,4 +68,19 @@ func (c *Client) VsanClusterGetConfig(ctx context.Context, cluster vimtypes.Mana
 		return nil, err
 	}
 	return &res.Returnval, nil
+}
+
+// VsanPerfQueryPerf calls the vsan performance manager API
+func (c *Client) VsanPerfQueryPerf(ctx context.Context, cluster *vimtypes.ManagedObjectReference, qSpecs []vsantypes.VsanPerfQuerySpec) ([]vsantypes.VsanPerfEntityMetricCSV, error) {
+	req := vsantypes.VsanPerfQueryPerf{
+		This:       VsanPerformanceManagerInstance,
+		Cluster:    cluster,
+		QuerySpecs: qSpecs,
+	}
+
+	res, err := methods.VsanPerfQueryPerf(ctx, c.serviceClient, &req)
+	if err != nil {
+		return nil, err
+	}
+	return res.Returnval, nil
 }
