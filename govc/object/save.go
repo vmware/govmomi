@@ -82,29 +82,74 @@ Examples:
   vcsim -load my-vcenter`
 }
 
+// write encodes data to file name
+func (cmd *save) write(name string, data interface{}) error {
+	f, err := os.Create(filepath.Join(cmd.dir, name) + ".xml")
+	if err != nil {
+		return err
+	}
+	e := xml.NewEncoder(f)
+	e.Indent("", "  ")
+	if err = e.Encode(data); err != nil {
+		_ = f.Close()
+		return err
+	}
+	if err = f.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
+type saveMethod struct {
+	Name string
+	Data interface{}
+}
+
+func saveDVS(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
+	res, err := methods.FetchDVPorts(ctx, c, &types.FetchDVPorts{This: ref})
+	if err != nil {
+		return nil, err
+	}
+	return []saveMethod{{"FetchDVPorts", res}}, nil
+}
+
+// saveObjects maps object types to functions that can save data that isn't available via the PropertyCollector
+var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedObjectReference) ([]saveMethod, error){
+	"VmwareDistributedVirtualSwitch": saveDVS,
+}
 func (cmd *save) save(content []types.ObjectContent) error {
 	for _, x := range content {
+		x.MissingSet = nil // drop any NoPermission faults
 		cmd.summary[x.Obj.Type]++
 		if cmd.verbose {
 			fmt.Printf("Saving %s...", x.Obj)
 		}
-		name := fmt.Sprintf("%04d-%s-%s", cmd.n, x.Obj.Type, url.QueryEscape(x.Obj.Value))
+		ref := x.Obj.Encode()
+		name := fmt.Sprintf("%04d-%s", cmd.n, ref)
 		cmd.n++
-		f, err := os.Create(filepath.Join(cmd.dir, name) + ".xml")
-		if err != nil {
-			return err
-		}
-		e := xml.NewEncoder(f)
-		e.Indent("", "  ")
-		if err = e.Encode(x); err != nil {
-			_ = f.Close()
-			return err
-		}
-		if err = f.Close(); err != nil {
+		if err := cmd.write(name, x); err != nil {
 			return err
 		}
 		if cmd.verbose {
 			fmt.Println("ok")
+		}
+
+		c, _ := cmd.Client()
+		if method, ok := saveObjects[x.Obj.Type]; ok {
+			objs, err := method(context.Background(), c, x.Obj)
+			if err != nil {
+				return err
+			}
+			dir := filepath.Join(cmd.dir, ref)
+			if err = os.Mkdir(dir, 0755); err != nil {
+				return err
+			}
+			for _, obj := range objs {
+				err = cmd.write(filepath.Join(ref, obj.Name), obj.Data)
+				if err != nil {
+					return err
+				}
+			}
 		}
 	}
 	return nil

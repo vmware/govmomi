@@ -1,4 +1,4 @@
-module github.com/vmware/govmomi
+module github.com/akulkarnivnera/govmomi
 
 replace github.com/davecgh/go-xdr => github.com/rasky/go-xdr v0.0.0-20170217172119-4930550ba2e2
 
