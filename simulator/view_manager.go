@@ -209,7 +209,7 @@ type ListView struct {
 }
 
 func (v *ListView) update() {
-	Map.Update(v, []types.PropertyChange{{Name: "view", Val: v.View}})
+	Map.Update(v.Self, []types.PropertyChange{{Name: "view", Val: v.View}})
 }
 
 func (v *ListView) add(refs []types.ManagedObjectReference) *types.ManagedObjectNotFound {
