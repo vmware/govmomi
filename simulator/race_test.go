@@ -86,6 +86,11 @@ func TestRace(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	lv, err := view.NewManager(c.Client).CreateListView(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
 	wg.Add(1)
 	collectors.Add(1)
 	go func() {
@@ -144,10 +149,11 @@ func TestRace(t *testing.T) {
 					defer wg.Done()
 
 					task, _ := f.VmFolder.CreateVM(ctx, cspec, pool, nil)
-					_, terr := task.WaitForResult(ctx, nil)
+					r, terr := task.WaitForResult(ctx, nil)
 					if terr != nil {
 						t.Error(terr)
 					}
+					_ = lv.Add(ctx, []types.ManagedObjectReference{r.Result.(types.ManagedObjectReference)})
 				}()
 			}
 
@@ -178,6 +184,7 @@ func TestRace(t *testing.T) {
 						time.AfterFunc(100*time.Millisecond, func() {
 							defer wg.Done()
 
+							_ = lv.Remove(ctx, []types.ManagedObjectReference{vm.Reference()})
 							task, _ := vm.PowerOff(ctx)
 							_ = task.Wait(ctx)
 						})
