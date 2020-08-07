@@ -81,3 +81,51 @@ func TestClient(t *testing.T) {
 		t.Logf("Printing one of the clusterConfig where file service is enabled:\n %+v", pretty.Sprint(clusterConfigToPrint))
 	}
 }
+
+func TestVsanQueryObjectIdentities(t *testing.T) {
+	url := os.Getenv("VC_URL")            // example: export VC_URL='https://username:password@vc-ip/sdk'
+	datacenter := os.Getenv("DATACENTER") // example: export DATACENTER='name-of-datacenter'
+	if url == "" || datacenter == "" {
+		t.Skip("VC_URL or DATACENTER is not set")
+	}
+
+	u, err := soap.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ctx := context.Background()
+
+	c, err := govmomi.NewClient(ctx, u, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vsanHealthClient, err := NewClient(ctx, c.Client)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	finder := find.NewFinder(vsanHealthClient.vim25Client, false)
+	dc, err := finder.Datacenter(ctx, datacenter)
+	if err != nil {
+		t.Fatal(err)
+	}
+	finder.SetDatacenter(dc)
+
+	clusterComputeResource, err := finder.ClusterComputeResourceList(ctx, "*")
+
+	if err != nil {
+		t.Logf("Error occurred while getting clusterComputeResource %+v", err.Error())
+		t.Fatal(err)
+	}
+
+	for _, cluster := range clusterComputeResource {
+		clusterConfig, err := vsanHealthClient.VsanQueryObjectIdentities(ctx, cluster.Reference())
+		if err != nil {
+			t.Logf("Error occurred: %+v", err.Error())
+			t.Fatal(err)
+		}
+		t.Logf("Printing clusterConfig:\n %+s", pretty.Sprint(clusterConfig))
+	}
+
+}
