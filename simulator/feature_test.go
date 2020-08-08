@@ -17,12 +17,10 @@ limitations under the License.
 package simulator_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"io"
-	"io/ioutil"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
@@ -138,13 +136,12 @@ func Example_runContainer() {
 		ip, _ := vm.WaitForIP(ctx, true) // Returns the docker container's IP
 
 		// Count the number of bytes in feature_test.go via nginx
-		res, err := http.Get(fmt.Sprintf("http://%s/feature_test.go", ip))
+		cmd := exec.Command("docker", "run", "--rm", "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s/feature_test.go", ip))
+		var buf bytes.Buffer
+		cmd.Stdout = &buf
+		err = cmd.Run()
 		if err != nil {
 			log.Fatal(err)
-		}
-		n, err := io.Copy(ioutil.Discard, res.Body)
-		if err != nil {
-			log.Print(err)
 		}
 
 		// PowerOff stops the container
@@ -155,7 +152,7 @@ func Example_runContainer() {
 		_ = task.Wait(ctx)
 
 		st, _ := os.Stat("feature_test.go")
-		fmt.Printf("%d diff", n-st.Size())
+		fmt.Printf("%d diff", buf.Len()-int(st.Size()))
 	})
 	// Output: 0 diff
 }
