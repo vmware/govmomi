@@ -188,6 +188,42 @@ func ExampleVirtualMachine_HostSystem() {
 	// Output: DC0_H0
 }
 
+func ExampleVirtualMachine_ResourcePool() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+		vm, err := finder.VirtualMachine(ctx, "DC0_C0_RP0_VM0")
+		if err != nil {
+			return err
+		}
+
+		pool, err := vm.ResourcePool(ctx)
+		if err != nil {
+			return err
+		}
+
+		name, err := pool.ObjectName(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(name)
+
+		// The InventoryPath field not populated unless Finder.ResourcePool() or
+		// Finder.ResourcePoolList() was used. But we can populate it explicity.
+		pool.InventoryPath, err = find.InventoryPath(ctx, c, pool.Reference())
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(pool.InventoryPath)
+
+		return nil
+	})
+	// Output:
+	// Resources
+	// /DC0/host/DC0_C0/Resources
+}
+
 func ExampleVirtualMachine_Clone() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		finder := find.NewFinder(c)
