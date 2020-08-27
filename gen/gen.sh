@@ -52,6 +52,7 @@ generate() {
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v2.4.1
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
+generate "../sms" "sms"
 # originally generated, then manually pruned as there are several vim25 types that are duplicated.
 # generate "../lookup" "lookup" # lookup.wsdl from build 4571810
 # originally generated, then manually pruned.
