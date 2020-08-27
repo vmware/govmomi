@@ -32,6 +32,14 @@ import (
 	vim25types "github.com/vmware/govmomi/vim25/types"
 )
 
+func init() {
+	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
+		if r.IsVPX() {
+			s.RegisterSDK(New())
+		}
+	})
+}
+
 func New() *simulator.Registry {
 	r := simulator.NewRegistry()
 	r.Namespace = cns.Namespace
