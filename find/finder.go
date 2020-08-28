@@ -22,6 +22,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/list"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
@@ -76,18 +77,7 @@ func InventoryPath(ctx context.Context, client *vim25.Client, obj types.ManagedO
 	if err != nil {
 		return "", err
 	}
-
-	val := "/"
-
-	for _, entity := range entities {
-		// Skip root folder in building inventory path.
-		if entity.Parent == nil {
-			continue
-		}
-		val = path.Join(val, entity.Name)
-	}
-
-	return val, err
+	return internal.InventoryPath(entities), nil
 }
 
 // findRoot makes it possible to use "find" mode with a different root path.
