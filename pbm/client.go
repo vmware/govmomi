@@ -240,6 +240,20 @@ func (c *Client) FetchCapabilityMetadata(ctx context.Context, rtype *types.PbmPr
 	return res.Returnval, nil
 }
 
+func (c *Client) FetchComplianceResult(ctx context.Context, entities []types.PbmServerObjectRef) ([]types.PbmComplianceResult, error) {
+	req := types.PbmFetchComplianceResult{
+		This:     c.ServiceContent.ComplianceManager,
+		Entities: entities,
+	}
+
+	res, err := methods.PbmFetchComplianceResult(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
 // GetProfileNameByID gets storage profile name by ID
 func (c *Client) GetProfileNameByID(ctx context.Context, profileID string) (string, error) {
 	resourceType := types.PbmProfileResourceType{

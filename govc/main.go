@@ -81,6 +81,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/sso/group"
 	_ "github.com/vmware/govmomi/govc/sso/service"
 	_ "github.com/vmware/govmomi/govc/sso/user"
+	_ "github.com/vmware/govmomi/govc/storage/policy"
 	_ "github.com/vmware/govmomi/govc/tags"
 	_ "github.com/vmware/govmomi/govc/tags/association"
 	_ "github.com/vmware/govmomi/govc/tags/category"
