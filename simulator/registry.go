@@ -520,6 +520,8 @@ func (r *Registry) locker(obj mo.Reference) sync.Locker {
 	case *types.ManagedObjectReference:
 		ref = *x
 		obj = r.Get(ref) // to check for sync.Locker
+	case *ListView: // otherwise race_test.go fails in the default case
+		ref = x.Self
 	default:
 		ref = obj.Reference()
 	}
