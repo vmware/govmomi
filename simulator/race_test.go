@@ -153,7 +153,10 @@ func TestRace(t *testing.T) {
 					if terr != nil {
 						t.Error(terr)
 					}
-					_ = lv.Add(ctx, []types.ManagedObjectReference{r.Result.(types.ManagedObjectReference)})
+					terr = lv.Add(ctx, []types.ManagedObjectReference{r.Result.(types.ManagedObjectReference)})
+					if terr != nil {
+						t.Error(terr)
+					}
 				}()
 			}
 
