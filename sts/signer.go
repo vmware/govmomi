@@ -265,7 +265,7 @@ func (s *Signer) SignRequest(req *http.Request) error {
 				return fmt.Errorf("sts: reading http.Request body: %s", rerr)
 			}
 		}
-		bhash := sha256.New().Sum(body)
+		bhash := sha256.Sum256(body)
 
 		port := req.URL.Port()
 		if port == "" {
@@ -284,7 +284,7 @@ func (s *Signer) SignRequest(req *http.Request) error {
 			buf.WriteString(msg[i])
 			buf.WriteByte('\n')
 		}
-		buf.Write(bhash)
+		buf.Write(bhash[:])
 		buf.WriteByte('\n')
 
 		sum := sha256.Sum256(buf.Bytes())
@@ -311,7 +311,7 @@ func (s *Signer) SignRequest(req *http.Request) error {
 		})
 		add(param{
 			key: "bodyhash",
-			val: base64.StdEncoding.EncodeToString(bhash),
+			val: base64.StdEncoding.EncodeToString(bhash[:]),
 		})
 	}
 
