@@ -27,3 +27,16 @@ load test_helper
     run govc object.collect -s "ClusterComputeResource:$id" name
     assert_success WCP-cluster
 }
+
+@test "namespace.logs" {
+  vcsim_env
+
+  id=$(govc find -i -maxdepth 0 host/DC0_C0 | awk -F: '{print $2}')
+
+  run govc namespace.logs.download -cluster DC0_C0
+  assert_success
+
+  rm "wcp-support-bundle-$id-"*.tar
+
+  govc namespace.logs.download -cluster DC0_C0 - | tar -xvOf-
+}
