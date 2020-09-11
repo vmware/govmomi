@@ -122,6 +122,12 @@ func (cmd *change) CheckDiskProperties(ctx context.Context, name string, disk *t
 	return true
 }
 
+func (cmd *change) setMode(mode *string) {
+	if cmd.mode != "" {
+		*mode = cmd.mode
+	}
+}
+
 func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	vm, err := cmd.VirtualMachine()
 	if err != nil {
@@ -146,11 +152,12 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		editdisk.CapacityInKB = int64(cmd.bytes) / 1024
 	}
 
-	backing := editdisk.Backing.(*types.VirtualDiskFlatVer2BackingInfo)
-	backing.Sharing = cmd.sharing
-
-	if len(cmd.mode) != 0 {
-		backing.DiskMode = cmd.mode
+	switch backing := editdisk.Backing.(type) {
+	case *types.VirtualDiskFlatVer2BackingInfo:
+		backing.Sharing = cmd.sharing
+		cmd.setMode(&backing.DiskMode)
+	case *types.VirtualDiskSeSparseBackingInfo:
+		cmd.setMode(&backing.DiskMode)
 	}
 
 	spec := types.VirtualMachineConfigSpec{}
