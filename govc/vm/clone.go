@@ -440,7 +440,7 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 
 		_, err := datastore.Stat(ctx, vmxPath)
 		if err == nil {
-			dsPath := cmd.Datastore.Path(vmxPath)
+			dsPath := datastore.Path(vmxPath)
 			return nil, fmt.Errorf("file %s already exists", dsPath)
 		}
 	}
