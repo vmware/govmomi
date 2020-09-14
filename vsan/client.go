@@ -84,3 +84,28 @@ func (c *Client) VsanPerfQueryPerf(ctx context.Context, cluster *vimtypes.Manage
 	}
 	return res.Returnval, nil
 }
+
+// Creates the vsan object identities instance. This is to be queried from vsan health.
+var (
+	VsanQueryObjectIdentitiesInstance = vimtypes.ManagedObjectReference{
+		Type:  "VsanObjectSystem",
+		Value: "vsan-cluster-object-system",
+	}
+)
+
+// VsanQueryObjectIdentities return host uuid
+func (c *Client) VsanQueryObjectIdentities(ctx context.Context, cluster vimtypes.ManagedObjectReference) (*vsantypes.VsanObjectIdentityAndHealth, error) {
+	req := vsantypes.VsanQueryObjectIdentities{
+		This:    VsanQueryObjectIdentitiesInstance,
+		Cluster: cluster,
+	}
+
+	res, err := methods.VsanQueryObjectIdentities(ctx, c.serviceClient, &req)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
+
+}
