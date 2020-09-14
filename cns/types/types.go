@@ -287,10 +287,11 @@ type CnsQueryAllVolumeResponse struct {
 type CnsContainerCluster struct {
 	types.DynamicData
 
-	ClusterType   string `xml:"clusterType"`
-	ClusterId     string `xml:"clusterId"`
-	VSphereUser   string `xml:"vSphereUser"`
-	ClusterFlavor string `xml:"clusterFlavor,omitempty"`
+	ClusterType         string `xml:"clusterType"`
+	ClusterId           string `xml:"clusterId"`
+	VSphereUser         string `xml:"vSphereUser"`
+	ClusterFlavor       string `xml:"clusterFlavor,omitempty"`
+	ClusterDistribution string `xml:"clusterDistribution,omitempty"`
 }
 
 func init() {
