@@ -101,10 +101,11 @@ func TestClient(t *testing.T) {
 
 	var containerClusterArray []cnstypes.CnsContainerCluster
 	containerCluster := cnstypes.CnsContainerCluster{
-		ClusterType:   string(cnstypes.CnsClusterTypeKubernetes),
-		ClusterId:     "demo-cluster-id",
-		VSphereUser:   "Administrator@vsphere.local",
-		ClusterFlavor: string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterType:         string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:           "demo-cluster-id",
+		VSphereUser:         "Administrator@vsphere.local",
+		ClusterFlavor:       string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterDistribution: "OpenShift",
 	}
 	containerClusterArray = append(containerClusterArray, containerCluster)
 
