@@ -1116,6 +1116,22 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			})
 
 			vm.updateDiskLayouts()
+
+			if disk, ok := b.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+				// These properties default to false
+				props := []**bool{
+					&disk.EagerlyScrub,
+					&disk.ThinProvisioned,
+					&disk.WriteThrough,
+					&disk.Split,
+					&disk.DigestEnabled,
+				}
+				for _, prop := range props {
+					if *prop == nil {
+						*prop = types.NewBool(false)
+					}
+				}
+			}
 		}
 	case *types.VirtualCdrom:
 		if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
