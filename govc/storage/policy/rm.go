@@ -70,7 +70,7 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 	arg := f.Arg(0)
 	id := types.PbmProfileId{UniqueId: arg}
 
-	profile, err := listProfiles(ctx, c, arg)
+	profile, err := ListProfiles(ctx, c, arg)
 	if err != nil {
 		return err
 	}
