@@ -683,11 +683,15 @@ load test_helper
 @test "vm.clone" {
   vcsim_env
 
-  vm=$(new_empty_vm)
+  vm="DC0_H0_VM0"
   clone=$(new_id)
 
   run govc vm.clone -vm "$vm" -annotation $$ "$clone"
   assert_success
+
+  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].Backing)
+  assert_equal false "$(jq .EagerlyScrub <<<"$backing")"
+  assert_equal true "$(jq .ThinProvisioned <<<"$backing")"
 
   run govc object.collect -s "/$GOVC_DATACENTER/vm/$clone" config.annotation
   assert_success $$
@@ -714,6 +718,22 @@ load test_helper
 
   run govc vm.clone -force -vm "$vm" "$clone"
   assert_success # clone vm with the same name
+
+  vm=$(new_empty_vm)
+  run govc vm.disk.create -vm "$vm" -thick -eager -size 10M -name "$vm/data.vmdk"
+  assert_success
+
+  backing=$(govc device.info -json -vm "$vm" disk-* | jq .Devices[].Backing)
+  assert_equal true "$(jq .EagerlyScrub <<<"$backing")"
+  assert_equal false "$(jq .ThinProvisioned <<<"$backing")"
+
+  clone=$(new_id)
+  run govc vm.clone -vm "$vm" "$clone"
+  assert_success
+
+  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].Backing)
+  assert_equal true "$(jq .EagerlyScrub <<<"$backing")"
+  assert_equal false "$(jq .ThinProvisioned <<<"$backing")"
 }
 
 @test "vm.clone change resources" {
