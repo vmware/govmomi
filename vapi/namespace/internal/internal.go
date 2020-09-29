@@ -18,7 +18,9 @@ package internal
 
 const (
 	// NamespaceClusterPath is the rest endpoint for the namespace cluster management API
-	NamespaceClusterPath = "/api/vcenter/namespace-management/clusters"
+	NamespaceClusterPath                    = "/api/vcenter/namespace-management/clusters"
+	NamespaceDistributedSwitchCompatibility = "/api/vcenter/namespace-management/distributed-switch-compatibility"
+	NamespaceEdgeClusterCompatibility       = "/api/vcenter/namespace-management/edge-cluster-compatibility"
 )
 
 type SupportBundleToken struct {
