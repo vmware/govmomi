@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"path"
 
@@ -38,6 +39,73 @@ func NewManager(client *rest.Client) *Manager {
 	return &Manager{
 		Client: client,
 	}
+}
+
+type EnableClusterSpec struct {
+	MasterDNSSearchDomains                 []string                 `json:"master_DNS_search_domains,omitempty"`
+	ImageStorage                           ImageStorage             `json:"image_storage"`
+	NcpClusterNetworkSpec                  *NcpClusterNetworkSpec   `json:"ncp_cluster_network_spec"`
+	MasterManagementNetwork                *MasterManagementNetwork `json:"master_management_network"`
+	MasterDNSNames                         []string                 `json:"Master_DNS_names,omitempty"`
+	MasterNTPServers                       []string                 `json:"master_NTP_servers,omitempty"`
+	EphemeralStoragePolicy                 string                   `json:"ephemeral_storage_policy,omitempty"`
+	DefaultImageRepository                 string                   `json:"default_image_repository,omitempty"`
+	ServiceCidr                            *Cidr                    `json:"service_cidr"`
+	LoginBanner                            string                   `json:"login_banner,omitempty"`
+	SizeHint                               string                   `json:"size_hint"`
+	WorkerDNS                              []string                 `json:"worker_DNS,omitempty"`
+	DefaultImageRegistry                   *DefaultImageRegistry    `json:"default_image_registry,omitempty"`
+	MasterDNS                              []string                 `json:"master_DNS,omitempty"`
+	NetworkProvider                        string                   `json:"network_provider"`
+	MasterStoragePolicy                    string                   `json:"master_storage_policy,omitempty"`
+	DefaultKubernetesServiceContentLibrary string                   `json:"default_kubernetes_service_content_library,omitempty"`
+}
+
+type ImageStorage struct {
+	StoragePolicy string `json:"storage_policy"`
+}
+
+type Cidr struct {
+	Address string `json:"address"`
+	Prefix  int    `json:"prefix"`
+}
+
+type NcpClusterNetworkSpec struct {
+	NsxEdgeCluster           string `json:"nsx_edge_cluster,omitempty"`
+	PodCidrs                 []Cidr `json:"pod_cidrs"`
+	EgressCidrs              []Cidr `json:"egress_cidrs"`
+	ClusterDistributedSwitch string `json:"cluster_distributed_switch,omitempty"`
+	IngressCidrs             []Cidr `json:"ingress_cidrs"`
+}
+
+type AddressRange struct {
+	SubnetMask      string `json:"subnet_mask,omitempty"`
+	StartingAddress string `json:"starting_address"`
+	Gateway         string `json:"gateway"`
+	AddressCount    int    `json:"address_count"`
+}
+
+type MasterManagementNetwork struct {
+	Mode         string        `json:"mode"`
+	FloatingIP   string        `json:"floating_IP,omitempty"`
+	AddressRange *AddressRange `json:"address_range,omitempty"`
+	Network      string        `json:"network"`
+}
+
+type DefaultImageRegistry struct {
+	Hostname string `json:"hostname"`
+	Port     int    `json:"port,omitempty"`
+}
+
+// EnableCluster enables vSphere Namespaces on the specified cluster, using the given spec.
+func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClusterSpec) error {
+	var response interface{}
+	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "enable")
+	bytes, _ := json.MarshalIndent(spec, "", "\t")
+	fmt.Println(string(bytes))
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), response)
+	fmt.Printf("%#v", response)
+	return err
 }
 
 // ClusterSummary for a cluster with vSphere Namespaces enabled.
