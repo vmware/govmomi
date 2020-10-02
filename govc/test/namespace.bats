@@ -38,7 +38,7 @@ load test_helper
     govc dvs.create "DVPG-Management Network"
     assert_success
 
-   govc namespace.cluster.enable \
+    govc namespace.cluster.enable \
       --service-cidr 10.96.0.0/23 \
       --pod-cidrs 10.244.0.0/20 \
       --cluster "Workload-Cluster" \
@@ -61,6 +61,16 @@ load test_helper
       --ephemeral-storage-policy "vSAN Default Storage Policy" \
       --control-plane-storage-policy "vSAN Default Storage Policy" \
       --image-storage-policy "vSAN Default Storage Policy"
+    assert_success
+}
+
+@test "namespace.cluster.disable" {
+    vcsim_env
+
+    govc cluster.create Workload-Cluster
+    assert_success
+
+    govc namespace.cluster.disable --cluster Workload-Cluster
     assert_success
 }
 

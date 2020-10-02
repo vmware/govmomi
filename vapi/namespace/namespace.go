@@ -107,6 +107,16 @@ func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClus
 	return err
 }
 
+// EnableCluster enables vSphere Namespaces on the specified cluster, using the given spec.
+func (c *Manager) DisableCluster(ctx context.Context, id string) error {
+	var response interface{}
+	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "disable")
+	// bytes, _ := json.MarshalIndent(spec, "", "\t")
+	// fmt.Println(string(bytes))
+	err := c.Do(ctx, url.Request(http.MethodPost), response)
+	return err
+}
+
 // ClusterSummary for a cluster with vSphere Namespaces enabled.
 type ClusterSummary struct {
 	ID               string `json:"cluster"`

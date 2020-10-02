@@ -1,16 +1,33 @@
+/*
+Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+	http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 package cluster
 
 import (
 	"context"
 	"flag"
 	"fmt"
+	"strconv"
+	"strings"
+
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/storage/policy"
 	"github.com/vmware/govmomi/pbm"
 	"github.com/vmware/govmomi/vapi/namespace"
-	"strconv"
-	"strings"
 )
 
 type enableCluster struct {
@@ -69,36 +86,64 @@ func (cmd *enableCluster) Register(ctx context.Context, f *flag.FlagSet) {
 	// ClientFlag, which we do need to control auth and connection details
 	// OutputFlag, which doesn't have any effect in this case as there's no response to output
 	cmd.ClusterFlag.Register(ctx, f)
-	// Descriptions are mostly extracted from https://vmware.github.io/vsphere-automation-sdk-rest/vsphere/operations/com/vmware/vcenter/namespace_management/clusters.enable-operation.html
-	f.StringVar(&cmd.SizeHint, "size", "", "The size of the Kubernetes API server and the worker nodes. Value is one of: TINY, SMALL, MEDIUM, LARGE.")
-	f.StringVar(&cmd.ServiceCidr, "service-cidr", "", "CIDR block from which Kubernetes allocates service cluster IP addresses. Shouldn't overlap with pod, ingress or egress CIDRs")
-	f.StringVar(&cmd.NetworkProvider, "network-provider", "NSXT_CONTAINER_PLUGIN", "Optional. Provider of cluster networking for this vSphere Namespaces cluster. Currently only value supported is: NSXT_CONTAINER_PLUGIN.")
-	f.StringVar(&cmd.NcpClusterNetworkSpec.PodCidrs, "pod-cidrs", "", "CIDR blocks from which Kubernetes allocates pod IP addresses. Comma-separated list. Shouldn't overlap with service, ingress or egress CIDRs.")
-	f.StringVar(&cmd.NcpClusterNetworkSpec.IngressCidrs, "workload-network.ingress-cidrs", "", "CIDR blocks from which NSX assigns IP addresses for Kubernetes Ingresses and Kubernetes Services of type LoadBalancer. Comma-separated list. Shouldn't overlap with pod, service or egress CIDRs.")
-	f.StringVar(&cmd.NcpClusterNetworkSpec.EgressCidrs, "workload-network.egress-cidrs", "", "CIDR blocks from which NSX assigns IP addresses used for performing SNAT from container IPs to external IPs. Comma-separated list. Shouldn't overlap with pod, service or ingress CIDRs.")
-	f.StringVar(&cmd.NcpClusterNetworkSpec.Switch, "workload-network.switch", "", "vSphere Distributed Switch used to connect this cluster.")
-	f.StringVar(&cmd.NcpClusterNetworkSpec.NsxEdgeCluster, "workload-network.edge-cluster", "", "NSX Edge Cluster to be used for Kubernetes Services of type LoadBalancer, Kubernetes Ingresses, and NSX SNAT.")
-	f.StringVar(&cmd.ControlPlaneManagementNetwork.Network, "mgmt-network.network", "", "Identifier for the management network.")
-	f.StringVar(&cmd.ControlPlaneManagementNetwork.Mode, "mgmt-network.mode", "STATICRANGE", " IPv4 address assignment modes. Value is one of: DHCP, STATICRANGE")
-	f.StringVar(&cmd.ControlPlaneManagementNetwork.FloatingIP, "mgmt-network.floating-IP", "", "Optional. The Floating IP used by the HA master cluster in the when network Mode is DHCP.")
-	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.StartingAddress, "mgmt-network.starting-address", "", "Denotes the start of the IP range ti be ysed. Optional, but required with network mode STATICRANGE.")
-	f.IntVar(&cmd.ControlPlaneManagementNetwork.AddressRange.AddressCount, "mgmt-network.address-count", 5, "The number of IP addresses in the management range. Optional, but required with network mode STATICRANGE.")
-	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.SubnetMask, "mgmt-network.subnet-mask", "", "Subnet mask of the management network. Optional, but required with network mode STATICRANGE.")
-	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.Gateway, "mgmt-network.gateway", "", "Gateway to be used for the management IP range")
-	f.StringVar(&cmd.ControlPlaneDNS, "control-plane-dns", "", "Comma-separated list of DNS server IP addresses to use on Kubernetes API server, specified in order of preference.")
-	f.StringVar(&cmd.ControlPlaneDNSNames, "control-plane-dns-names", "", "Comma-separated of DNS names to associate with the Kubernetes API server. These DNS names are embedded in the TLS certificate presented by the API server.")
-	f.StringVar(&cmd.ControlPlaneDNSSearchDomains, "control-plane-dns-search-domains", "", "Comma-separated of domains to be searched when trying to lookup a host name on Kubernetes API server, specified in order of preference.")
-	f.StringVar(&cmd.ControlPlaneNTPServers, "control-plane-ntp-servers", "", "Optional. Comma-separated of NTP server DNS names or IP addresses to use on Kubernetes API server, specified in order of preference. If unset, VMware Tools based time synchronization is enabled.")
-	f.StringVar(&cmd.WorkerDNS, "worker-dns", "", "Comma-separated list of DNS server IP addresses to use on the worker nodes, specified in order of preference.")
-	f.StringVar(&cmd.ControlPlaneStoragePolicy, "control-plane-storage-policy", "", "Storage policy associated with Kubernetes API server.")
-	f.StringVar(&cmd.EphemeralStoragePolicy, "ephemeral-storage-policy", "", "Storage policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.")
-	f.StringVar(&cmd.ImageStoragePolicy, "image-storage-policy", "", "Storage policy to be used for container images.")
-	f.StringVar(&cmd.LoginBanner, "login-banner", "", "Optional. Disclaimer to be displayed prior to login via the Kubectl plugin.")
+	// Descriptions are mostly extracted from:
+	// https://vmware.github.io/vsphere-automation-sdk-rest/vsphere/operations/com/vmware/vcenter/namespace_management/clusters.enable-operation.html
+	f.StringVar(&cmd.SizeHint, "size", "",
+		"The size of the Kubernetes API server and the worker nodes. Value is one of: TINY, SMALL, MEDIUM, LARGE.")
+	f.StringVar(&cmd.ServiceCidr, "service-cidr", "",
+		"CIDR block from which Kubernetes allocates service cluster IP addresses. Shouldn't overlap with pod, ingress or egress CIDRs")
+	f.StringVar(&cmd.NetworkProvider, "network-provider", "NSXT_CONTAINER_PLUGIN",
+		"Optional. Provider of cluster networking for this vSphere Namespaces cluster. Currently only value supported is: NSXT_CONTAINER_PLUGIN.")
+	f.StringVar(&cmd.NcpClusterNetworkSpec.PodCidrs, "pod-cidrs", "",
+		"CIDR blocks from which Kubernetes allocates pod IP addresses. Comma-separated list. Shouldn't overlap with service, ingress or egress CIDRs.")
+	f.StringVar(&cmd.NcpClusterNetworkSpec.IngressCidrs, "workload-network.ingress-cidrs", "",
+		"CIDR blocks from which NSX assigns IP addresses for Kubernetes Ingresses and Kubernetes Services of type LoadBalancer. Comma-separated list. Shouldn't overlap with pod, service or egress CIDRs.")
+	f.StringVar(&cmd.NcpClusterNetworkSpec.EgressCidrs, "workload-network.egress-cidrs", "",
+		"CIDR blocks from which NSX assigns IP addresses used for performing SNAT from container IPs to external IPs. Comma-separated list. Shouldn't overlap with pod, service or ingress CIDRs.")
+	f.StringVar(&cmd.NcpClusterNetworkSpec.Switch, "workload-network.switch", "",
+		"vSphere Distributed Switch used to connect this cluster.")
+	f.StringVar(&cmd.NcpClusterNetworkSpec.NsxEdgeCluster, "workload-network.edge-cluster", "",
+		"NSX Edge Cluster to be used for Kubernetes Services of type LoadBalancer, Kubernetes Ingresses, and NSX SNAT.")
+	f.StringVar(&cmd.ControlPlaneManagementNetwork.Network, "mgmt-network.network", "",
+		"Identifier for the management network.")
+	f.StringVar(&cmd.ControlPlaneManagementNetwork.Mode, "mgmt-network.mode", "STATICRANGE",
+		" IPv4 address assignment modes. Value is one of: DHCP, STATICRANGE")
+	f.StringVar(&cmd.ControlPlaneManagementNetwork.FloatingIP, "mgmt-network.floating-IP", "",
+		"Optional. The Floating IP used by the HA master cluster in the when network Mode is DHCP.")
+	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.StartingAddress, "mgmt-network.starting-address", "",
+		"Denotes the start of the IP range to be used. Optional, but required with network mode STATICRANGE.")
+	f.IntVar(&cmd.ControlPlaneManagementNetwork.AddressRange.AddressCount, "mgmt-network.address-count", 5,
+		"The number of IP addresses in the management range. Optional, but required with network mode STATICRANGE.")
+	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.SubnetMask, "mgmt-network.subnet-mask", "",
+		"Subnet mask of the management network. Optional, but required with network mode STATICRANGE.")
+	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.Gateway, "mgmt-network.gateway", "",
+		"Gateway to be used for the management IP range")
+	f.StringVar(&cmd.ControlPlaneDNS, "control-plane-dns", "",
+		"Comma-separated list of DNS server IP addresses to use on Kubernetes API server, specified in order of preference.")
+	f.StringVar(&cmd.ControlPlaneDNSNames, "control-plane-dns-names", "",
+		"Comma-separated list of DNS names to associate with the Kubernetes API server. These DNS names are embedded in the TLS certificate presented by the API server.")
+	f.StringVar(&cmd.ControlPlaneDNSSearchDomains, "control-plane-dns-search-domains", "",
+		"Comma-separated list of domains to be searched when trying to lookup a host name on Kubernetes API server, specified in order of preference.")
+	f.StringVar(&cmd.ControlPlaneNTPServers, "control-plane-ntp-servers", "",
+		"Optional. Comma-separated list of NTP server DNS names or IP addresses to use on Kubernetes API server, specified in order of preference. If unset, VMware Tools based time synchronization is enabled.")
+	f.StringVar(&cmd.WorkerDNS, "worker-dns", "",
+		"Comma-separated list of DNS server IP addresses to use on the worker nodes, specified in order of preference.")
+	f.StringVar(&cmd.ControlPlaneStoragePolicy, "control-plane-storage-policy", "",
+		"Storage policy associated with Kubernetes API server.")
+	f.StringVar(&cmd.EphemeralStoragePolicy, "ephemeral-storage-policy", "",
+		"Storage policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.")
+	f.StringVar(&cmd.ImageStoragePolicy, "image-storage-policy", "",
+		"Storage policy to be used for container images.")
+	f.StringVar(&cmd.LoginBanner, "login-banner", "",
+		"Optional. Disclaimer to be displayed prior to login via the Kubectl plugin.")
 	// documented API is currently ambiguous with these duplicated fields, need to wait for this to be resolved
-	//f.StringVar(&cmd.DefaultImageRegistry, "default-image-registry", "", "Optional. Default image registry to use when unspecified in the container image name. Defaults to Docker Hub.")
-	//f.StringVar(&cmd.DefaultImageRepository, "default-image-repository", "", "Optional. Default image registry to use when unspecified in the container image name. Defaults to Docker Hub.")
+	//f.StringVar(&cmd.DefaultImageRegistry, "default-image-registry", "",
+	//  "Optional. Default image registry to use when unspecified in the container image name. Defaults to Docker Hub.")
+	//f.StringVar(&cmd.DefaultImageRepository, "default-image-repository", "",
+	//  "Optional. Default image registry to use when unspecified in the container image name. Defaults to Docker Hub.")
 	// TODO
-	// f.StringVar(&cmd.DefaultKubernetesServiceContentLibrary, "default-kubernetes-service-content-library", "", "Optional. Content Library which holds the VM Images for vSphere Kubernetes Service. This Content Library should be subscribed to VMware's hosted vSphere Kubernetes Service Repository.")
+	// f.StringVar(&cmd.DefaultKubernetesServiceContentLibrary, "default-kubernetes-service-content-library", "",
+	//  "Optional. Content Library which holds the VM Images for vSphere Kubernetes Service. This Content Library should be subscribed to VMware's hosted vSphere Kubernetes Service Repository.")
 }
 
 func (cmd *enableCluster) Process(ctx context.Context) error {
@@ -199,7 +244,8 @@ func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// DVS Object reference lookup
 	// We need an id returned from the namespace lookup here, not a regular managed object reference.
-	// Similar approach in powerCLI here: https://github.com/lamw/PowerCLI-Example-Scripts/blob/7e4b9b9c93c5ffaa0ac2fefa8e02e5f751c044b7/Modules/VMware.WorkloadManagement/VMware.WorkloadManagement.psm1#L123
+	// Similar approach in powerCLI here:
+	// https://github.com/lamw/PowerCLI-Example-Scripts/blob/7e4b9b9c93c5ffaa0ac2fefa8e02e5f751c044b7/Modules/VMware.WorkloadManagement/VMware.WorkloadManagement.psm1#L123
 	// Note that the data model returned means we get no chance to choose the switch by name.
 	// We assume there's just one switch per cluster and bail out otherwise.
 	m := namespace.NewManager(c)
@@ -208,7 +254,8 @@ func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return fmt.Errorf("error in compatible switch lookup: %s", err)
 	} else if len(switches) != 1 {
-		return fmt.Errorf("expected to find 1 namespace compatible switch in cluster %q, found %d", clusterId, len(switches))
+		return fmt.Errorf("expected to find 1 namespace compatible switch in cluster %q, found %d",
+			clusterId, len(switches))
 	}
 
 	switchId := switches[0].DistributedSwitch
@@ -226,7 +273,8 @@ func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 	if len(matchingEdgeClusters) != 1 {
-		return fmt.Errorf("Didn't find unique match for edge cluster %q, found %d objects", edgeClusterDisplayName, len(matchingEdgeClusters))
+		return fmt.Errorf("Didn't find unique match for edge cluster %q, found %d objects",
+			edgeClusterDisplayName, len(matchingEdgeClusters))
 	}
 
 	resolvedObjectRefs := objectReferences{
