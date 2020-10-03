@@ -67,6 +67,39 @@ func ExampleContainerView_Retrieve() {
 	// Output: [DC0_C0_H0 DC0_C0_H1 DC0_C0_H2 DC1_C0_H0 DC1_C0_H1 DC1_C0_H2]
 }
 
+func ExampleContainerView_retrieveClusters() {
+	model := simulator.VPX()
+	model.Cluster = 3
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		m := view.NewManager(c)
+		kind := []string{"ClusterComputeResource"}
+
+		v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, kind, true)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		var clusters []mo.ClusterComputeResource
+		var names []string
+
+		err = v.Retrieve(ctx, kind, []string{"name"}, &clusters)
+		if err != nil {
+			return err
+		}
+
+		for _, cluster := range clusters {
+			names = append(names, cluster.Name)
+		}
+
+		sort.Strings(names)
+		fmt.Println(names)
+
+		return v.Destroy(ctx)
+	}, model)
+	// Output: [DC0_C0 DC0_C1 DC0_C2]
+}
+
 // Create a view of all VMs in the inventory, printing VM names that end with "_VM1".
 func ExampleContainerView_RetrieveWithFilter() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
