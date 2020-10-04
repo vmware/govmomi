@@ -86,6 +86,7 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 			Recursive: req.Recursive,
 			Type:      req.Type,
 		},
+		root,
 		make(map[string]bool),
 	}
 
@@ -115,6 +116,7 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 	container.add(root, seen)
 
 	ctx.Session.Registry.Put(container)
+	ctx.Map.AddHandler(container)
 
 	return body
 }
@@ -122,10 +124,12 @@ func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContain
 type ContainerView struct {
 	mo.ContainerView
 
+	root  mo.Reference
 	types map[string]bool
 }
 
 func (v *ContainerView) DestroyView(ctx *Context, c *types.DestroyView) soap.HasFault {
+	ctx.Map.RemoveHandler(v)
 	ctx.Session.Remove(c.This)
 	return destroyView(c.This)
 }
@@ -185,6 +189,37 @@ func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectRefer
 		}
 	})
 }
+
+func (v *ContainerView) find(root mo.Reference, ref types.ManagedObjectReference, found *bool) bool {
+	walk(root, func(child types.ManagedObjectReference) {
+		if *found {
+			return
+		}
+		if child == ref {
+			*found = true
+			return
+		}
+		if v.Recursive {
+			*found = v.find(Map.Get(child), ref, found)
+		}
+	})
+
+	return *found
+}
+
+func (v *ContainerView) PutObject(obj mo.Reference) {
+	ref := obj.Reference()
+
+	if v.include(ref) && v.find(v.root, ref, types.NewBool(false)) {
+		Map.Update(v, []types.PropertyChange{{Name: "view", Val: append(v.View, ref)}})
+	}
+}
+
+func (v *ContainerView) RemoveObject(obj types.ManagedObjectReference) {
+	Map.RemoveReference(v, &v.View, obj)
+}
+
+func (*ContainerView) UpdateObject(mo.Reference, []types.PropertyChange) {}
 
 func (m *ViewManager) CreateListView(ctx *Context, req *types.CreateListView) soap.HasFault {
 	body := new(methods.CreateListViewBody)

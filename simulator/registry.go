@@ -144,6 +144,13 @@ func (r *Registry) AddHandler(h RegisterObject) {
 	r.m.Unlock()
 }
 
+// RemoveHandler removes a RegisterObject handler from the Registry.
+func (r *Registry) RemoveHandler(h RegisterObject) {
+	r.m.Lock()
+	delete(r.handlers, h.Reference())
+	r.m.Unlock()
+}
+
 // NewEntity sets Entity().Self with a new, unique Value.
 // Useful for creating object instances from templates.
 func (r *Registry) NewEntity(item mo.Entity) mo.Entity {
@@ -220,15 +227,18 @@ func (r *Registry) applyHandlers(f func(o RegisterObject)) {
 	}
 }
 
-// Put adds a new object to Registry, generating a ManagedObjectReference if not already set.
-func (r *Registry) Put(item mo.Reference) mo.Reference {
-	r.m.Lock()
-
+func (r *Registry) reference(item mo.Reference) types.ManagedObjectReference {
 	ref := item.Reference()
 	if ref.Type == "" || ref.Value == "" {
 		ref = r.newReference(item)
 		r.setReference(item, ref)
 	}
+	return ref
+}
+
+// Put adds a new object to Registry, generating a ManagedObjectReference if not already set.
+func (r *Registry) Put(item mo.Reference) mo.Reference {
+	r.m.Lock()
 
 	if me, ok := item.(mo.Entity); ok {
 		me.Entity().ConfigStatus = types.ManagedEntityStatusGreen
@@ -236,7 +246,7 @@ func (r *Registry) Put(item mo.Reference) mo.Reference {
 		me.Entity().EffectiveRole = []int32{-1} // Admin
 	}
 
-	r.objects[ref] = item
+	r.objects[r.reference(item)] = item
 
 	r.m.Unlock()
 
