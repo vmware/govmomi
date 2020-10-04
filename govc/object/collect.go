@@ -424,7 +424,6 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		return cmd.WriteResult(&dumpEntity{obj})
 	}
 
-	entered := false
 	hasFilter := len(cmd.filter) != 0
 
 	if cmd.wait != 0 {
@@ -437,12 +436,6 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 		matches := 0
 		return property.WaitForUpdates(wctx, p, filter, func(updates []types.ObjectUpdate) bool {
 			for _, update := range updates {
-				if entered && update.Kind == types.ObjectUpdateKindEnter {
-					// on the first update we only get kind "enter"
-					// if a new object is added, the next update with have both "enter" and "modify".
-					continue
-				}
-
 				c := &change{cmd, update}
 
 				if hasFilter {
@@ -459,8 +452,6 @@ func (cmd *collect) Run(ctx context.Context, f *flag.FlagSet) error {
 			if filter.Truncated {
 				return false // vCenter truncates updates if > 100
 			}
-
-			entered = true
 
 			if hasFilter {
 				if matches > 0 {
