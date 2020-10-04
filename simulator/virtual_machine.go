@@ -1158,6 +1158,13 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		}
 	}
 
+	switch device.(type) {
+	case types.BaseVirtualEthernetCard, *types.VirtualCdrom, *types.VirtualFloppy, *types.VirtualUSB:
+		if d.Connectable == nil {
+			d.Connectable = &types.VirtualDeviceConnectInfo{StartConnected: true, Connected: true}
+		}
+	}
+
 	return nil
 }
 
