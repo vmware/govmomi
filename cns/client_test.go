@@ -55,6 +55,11 @@ func TestClient(t *testing.T) {
 	// example: Export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
 	backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
 
+	// if datastoreForMigration is not set, test for CNS Relocate API of a volume to another datastore is skipped.
+	// input format is same as CNS_DATASTORE. Format eg. "vSANDirect_10.92.217.162_mpx.vmhba0:C0:T2:L0"/ "vsandatastore"
+	// make sure that migration datastore is accessible from host on which CNS_DATASTORE is mounted.
+	datastoreForMigration := os.Getenv("CNS_MIGRATION_DATASTORE")
+
 	if url == "" || datacenter == "" || datastore == "" {
 		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
@@ -248,6 +253,37 @@ func TestClient(t *testing.T) {
 			t.Logf("Successfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
 		}
 	}
+
+	// Test Relocate API
+	// Relocate API is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
+	// This API is available on vSphere 7.0u1 onward
+	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 && datastoreForMigration != "" {
+		migrationDS, err := finder.Datastore(ctx, datastoreForMigration)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("Relocating volume %v to datastore %+v", pretty.Sprint(volumeId), migrationDS.Reference())
+		relocateSpec := cnstypes.NewCnsBlockVolumeRelocateSpec(volumeId, migrationDS.Reference())
+		relocateTask, err := cnsClient.RelocateVolume(ctx, relocateSpec)
+		if err != nil {
+			t.Errorf("Failed to migrate volume with Relocate API. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		relocateTaskInfo, err := GetTaskInfo(ctx, relocateTask)
+		if err != nil {
+			t.Errorf("Failed to get info of task returned by Relocate API. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		taskResults, err := GetTaskResultArray(ctx, relocateTaskInfo)
+		for _, taskResult := range taskResults {
+			res := taskResult.GetCnsVolumeOperationResult()
+			if res.Fault != nil {
+				t.Fatalf("Relocation failed due to fault: %+v", res.Fault)
+			}
+			t.Logf("Successfully Relocated volume. Relocate task info result: %+v", pretty.Sprint(taskResult))
+		}
+	}
+
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
 	var cnsVolumeExtendSpecList []cnstypes.CnsVolumeExtendSpec
