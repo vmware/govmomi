@@ -127,7 +127,7 @@ func (m CustomFieldsManager) FindKey(ctx context.Context, name string) (int32, e
 		}
 	}
 
-	k, err := strconv.Atoi(name)
+	k, err := strconv.ParseInt(name, 10, 32)
 	if err == nil {
 		// assume literal int key
 		return int32(k), nil
