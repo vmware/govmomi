@@ -18,6 +18,7 @@ package vm
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"strconv"
@@ -39,6 +40,7 @@ type customize struct {
 	host      types.CustomizationFixedName
 	mac       flags.StringList
 	ip        flags.StringList
+	ip6       flags.StringList
 	gateway   flags.StringList
 	netmask   flags.StringList
 	dnsserver flags.StringList
@@ -62,6 +64,8 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.mac = nil
 	f.Var(&cmd.ip, "ip", "IP address")
 	cmd.ip = nil
+	f.Var(&cmd.ip6, "ip6", "IPv6 address with optional netmask (defaults to 64)")
+	cmd.ip6 = nil
 	f.Var(&cmd.gateway, "gateway", "Gateway")
 	cmd.gateway = nil
 	f.Var(&cmd.netmask, "netmask", "Netmask")
@@ -232,6 +236,34 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 				nic.Adapter.DnsServerList = strings.Split(cmd.dnsserver[i], ",")
 			}
 		}
+	}
+
+	var (
+		ipaddress  string
+		subnetmask int32
+	)
+	for i, ip6 := range cmd.ip6 {
+		switch strings.Count(ip6, "/") {
+		case 0:
+			ipaddress = ip6
+			subnetmask = 64
+		case 1:
+			parts := strings.Split(ip6, "/")
+			ipaddress = parts[0]
+			mask, err := strconv.Atoi(parts[1])
+			if err != nil {
+				return err
+			}
+			subnetmask = int32(mask)
+		default:
+			return errors.New("Unable to parse IPv6 address (too many subnet separators): " + ip6)
+		}
+		nic := &spec.NicSettingMap[i]
+		nic.Adapter.IpV6Spec.Ip = append(nic.Adapter.IpV6Spec.Ip,
+			&types.CustomizationFixedIpV6{
+				IpAddress:  ipaddress,
+				SubnetMask: subnetmask,
+			})
 	}
 
 	task, err := vm.Customize(ctx, *spec)
