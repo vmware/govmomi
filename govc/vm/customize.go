@@ -18,7 +18,6 @@ package vm
 
 import (
 	"context"
-	"errors"
 	"flag"
 	"fmt"
 	"strconv"
@@ -62,7 +61,7 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.host.Name, "name", "", "Host name")
 	f.Var(&cmd.mac, "mac", "MAC address")
 	f.Var(&cmd.ip, "ip", "IPv4 address")
-	f.Var(&cmd.ip6, "ip6", "IPv6 address with optional netmask (defaults to 64)")
+	f.Var(&cmd.ip6, "ip6", "IPv6 addresses with optional netmask (defaults to /64), separated by space")
 	f.Var(&cmd.gateway, "gateway", "Gateway")
 	f.Var(&cmd.netmask, "netmask", "Netmask")
 	f.Var(&cmd.dnsserver, "dns-server", "DNS server")
@@ -94,6 +93,36 @@ Examples:
   govc vm.customize -vm VM -auto-login 3 NAME
   govc vm.customize -vm VM -prefix demo NAME
   govc vm.customize -vm VM -tz America/New_York NAME`
+}
+
+// Parse a string of multiple IPv6 addresses with optional netmask separated by space
+func parseIPv6Argument(argv string) (ipconf []types.BaseCustomizationIpV6Generator, err error) {
+	for _, substring := range strings.Split(argv, " ") {
+		// check if subnet mask was specified
+		switch strings.Count(substring, "/") {
+		// no mask, set default
+		case 0:
+			ipconf = append(ipconf, &types.CustomizationFixedIpV6{
+				IpAddress:  substring,
+				SubnetMask: 64,
+			})
+		// a single forward slash was found: parse and use subnet mask
+		case 1:
+			parts := strings.Split(substring, "/")
+			mask, err := strconv.Atoi(parts[1])
+			if err != nil {
+				return nil, fmt.Errorf("unable to convert subnet mask to int: %w", err)
+			}
+			ipconf = append(ipconf, &types.CustomizationFixedIpV6{
+				IpAddress:  parts[0],
+				SubnetMask: int32(mask),
+			})
+		// to many forward slash; return error
+		default:
+			return nil, fmt.Errorf("unable to parse IPv6 address (too many subnet separators): %s", substring)
+		}
+	}
+	return ipconf, nil
 }
 
 func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -232,32 +261,18 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	var (
-		ipaddress  string
-		subnetmask int32
-	)
 	for i, ip6 := range cmd.ip6 {
-		switch strings.Count(ip6, "/") {
-		case 0:
-			ipaddress = ip6
-			subnetmask = 64
-		case 1:
-			parts := strings.Split(ip6, "/")
-			ipaddress = parts[0]
-			mask, err := strconv.Atoi(parts[1])
-			if err != nil {
-				return err
-			}
-			subnetmask = int32(mask)
-		default:
-			return errors.New("Unable to parse IPv6 address (too many subnet separators): " + ip6)
+		ipconfig, err := parseIPv6Argument(ip6)
+		if err != nil {
+			return err
+		}
+		// use the same logic as the ip switch: the first occurrence if the ip6 switch is assigned to the first nic,
+		// the second to the second nic and so forth.
+		if spec.NicSettingMap == nil || len(spec.NicSettingMap) < i {
+			return fmt.Errorf("unable to find a network adapter for IPv6 settings %d (%s)", i, ip6)
 		}
 		nic := &spec.NicSettingMap[i]
-		nic.Adapter.IpV6Spec.Ip = append(nic.Adapter.IpV6Spec.Ip,
-			&types.CustomizationFixedIpV6{
-				IpAddress:  ipaddress,
-				SubnetMask: subnetmask,
-			})
+		nic.Adapter.IpV6Spec.Ip = append(nic.Adapter.IpV6Spec.Ip, ipconfig...)
 	}
 
 	task, err := vm.Customize(ctx, *spec)
