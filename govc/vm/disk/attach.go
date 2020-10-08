@@ -70,8 +70,11 @@ func (cmd *attach) Process(ctx context.Context) error {
 func (cmd *attach) Description() string {
 	return `Attach existing disk to VM.
 
+A delta disk is created by default, where changes are persisted. Specifying '-link=false' will persist to the same disk.
+
 Examples:
   govc vm.disk.attach -vm $name -disk $name/disk1.vmdk
+  govc device.info -vm $name disk-* # 'File' field is where changes are persisted. 'Parent' field is set when '-link=true'
   govc vm.disk.attach -vm $name -disk $name/shared.vmdk -link=false -sharing sharingMultiWriter
   govc device.remove -vm $name -keep disk-* # detach disk(s)`
 }
