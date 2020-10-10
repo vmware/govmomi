@@ -266,7 +266,7 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
-		// use the same logic as the ip switch: the first occurrence if the ip6 switch is assigned to the first nic,
+		// use the same logic as the ip switch: the first occurrence of the ip6 switch is assigned to the first nic,
 		// the second to the second nic and so forth.
 		if spec.NicSettingMap == nil || len(spec.NicSettingMap) < i {
 			return fmt.Errorf("unable to find a network adapter for IPv6 settings %d (%s)", i, ip6)
