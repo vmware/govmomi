@@ -36,6 +36,7 @@ type console struct {
 	*flags.VirtualMachineFlag
 
 	h5      bool
+	wss     bool
 	capture string
 }
 
@@ -48,6 +49,7 @@ func (cmd *console) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.h5, "h5", false, "Generate HTML5 UI console link")
+	f.BoolVar(&cmd.wss, "wss", false, "Generate WebSocket console link")
 	f.StringVar(&cmd.capture, "capture", "", "Capture console screen shot to file")
 }
 
@@ -127,6 +129,17 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 		return c.DownloadFile(ctx, cmd.capture, u, &param)
 	}
 
+	if cmd.wss {
+		ticket, err := vm.AcquireTicket(ctx, string(types.VirtualMachineTicketTypeWebmks))
+		if err != nil {
+			return err
+		}
+
+		link := fmt.Sprintf("wss://%s:%d/ticket/%s", ticket.Host, ticket.Port, ticket.Ticket)
+		fmt.Fprintln(cmd.Out, link)
+		return nil
+	}
+
 	m := session.NewManager(c)
 	ticket, err := m.AcquireCloneTicket(ctx)
 	if err != nil {
@@ -167,7 +180,7 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 		link = fmt.Sprintf("vmrc://clone:%s@%s/?moid=%s", ticket, u.Hostname(), vm.Reference().Value)
 	}
 
-	fmt.Fprintln(os.Stdout, link)
+	fmt.Fprintln(cmd.Out, link)
 
 	return nil
 }

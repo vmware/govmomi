@@ -394,7 +394,7 @@ EOF
   govc library.subscriber.ls govc-pub-vmtx | grep govc-sub-vmtx-$ds2
 
   # Expect 1 VM: govc-pub-vmtx/ttylinux-pc_i486-16.1
-  govc find vm -type f -name govc-* | xargs -n1 -r govc find -type m
+  govc find vm -type f -name govc-* | $xargs -n1 -r govc find -type m
 
   # Publish entire library
   govc library.publish govc-pub-vmtx
@@ -403,7 +403,7 @@ EOF
   govc library.publish govc-pub-vmtx/ttylinux-pc_i486-16.1
 
   # Expect 2 more VMs: govc-sub-vmtx-{$ds1,$ds2}
-  govc find vm -type f -name govc-* | xargs -n1 govc find -type m
+  govc find vm -type f -name govc-* | $xargs -n1 govc find -type m
 
   for ds in $ds1 $ds2 ; do
     govc vm.clone -link -vm govc-sub-vmtx-$ds/ttylinux-pc_i486-16.1 -ds $ds -pool $pool -folder govc-sub-vmtx-$ds ttylinux

@@ -25,7 +25,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/session/cache"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -101,8 +101,8 @@ func processOverride(u *url.URL) {
 	}
 }
 
-// NewClient creates a govmomi.Client for use in the examples
-func NewClient(ctx context.Context) (*govmomi.Client, error) {
+// NewClient creates a vim25.Client for use in the examples
+func NewClient(ctx context.Context) (*vim25.Client, error) {
 	// Parse URL from string
 	u, err := soap.ParseURL(*urlFlag)
 	if err != nil {
@@ -112,8 +112,19 @@ func NewClient(ctx context.Context) (*govmomi.Client, error) {
 	// Override username and/or password as required
 	processOverride(u)
 
-	// Connect and log in to ESX or vCenter
-	return govmomi.NewClient(ctx, u, *insecureFlag)
+	// Share govc's session cache
+	s := &cache.Session{
+		URL:      u,
+		Insecure: *insecureFlag,
+	}
+
+	c := new(vim25.Client)
+	err = s.Login(ctx, c, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
 }
 
 // Run calls f with Client create from the -url flag if provided,
@@ -126,10 +137,9 @@ func Run(f func(context.Context, *vim25.Client) error) {
 		err = simulator.VPX().Run(f)
 	} else {
 		ctx := context.Background()
-		var c *govmomi.Client
-		c, err = NewClient(ctx)
+		c, err := NewClient(ctx)
 		if err == nil {
-			err = f(ctx, c.Client)
+			err = f(ctx, c)
 		}
 	}
 	if err != nil {

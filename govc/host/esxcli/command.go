@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/internal"
 )
 
@@ -93,18 +94,18 @@ func (c *Command) Moid() string {
 // Parse generates a flag.FlagSet based on the given []CommandInfoParam and
 // returns arguments for use with methods.ExecuteSoap
 func (c *Command) Parse(params []CommandInfoParam) ([]internal.ReflectManagedMethodExecuterSoapArgument, error) {
-	flags := flag.NewFlagSet(strings.Join(c.name, " "), flag.ExitOnError)
-	vals := make([]string, len(params))
+	fs := flag.NewFlagSet(strings.Join(c.name, " "), flag.ExitOnError)
+	vals := make([]flags.StringList, len(params))
 
 	for i, p := range params {
 		v := &vals[i]
 		for _, a := range p.Aliases {
 			a = strings.TrimPrefix(a[1:], "-")
-			flags.StringVar(v, a, "", p.Help)
+			fs.Var(v, a, p.Help)
 		}
 	}
 
-	err := flags.Parse(c.args)
+	err := fs.Parse(c.args)
 	if err != nil {
 		return nil, err
 	}
@@ -112,19 +113,22 @@ func (c *Command) Parse(params []CommandInfoParam) ([]internal.ReflectManagedMet
 	args := []internal.ReflectManagedMethodExecuterSoapArgument{}
 
 	for i, p := range params {
-		if vals[i] == "" {
-			continue
+		if len(vals[i]) != 0 {
+			args = append(args, c.Argument(p.Name, vals[i]...))
 		}
-		args = append(args, c.Argument(p.Name, vals[i]))
 	}
 
 	return args, nil
 }
 
-func (c *Command) Argument(name string, val string) internal.ReflectManagedMethodExecuterSoapArgument {
+func (c *Command) Argument(name string, args ...string) internal.ReflectManagedMethodExecuterSoapArgument {
+	var vars []string
+	for _, arg := range args {
+		vars = append(vars, fmt.Sprintf("<%s>%s</%s>", name, arg, name))
+	}
 	return internal.ReflectManagedMethodExecuterSoapArgument{
 		Name: name,
-		Val:  fmt.Sprintf("<%s>%s</%s>", name, val, name),
+		Val:  strings.Join(vars, ""),
 	}
 }
 

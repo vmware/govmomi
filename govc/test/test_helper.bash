@@ -206,7 +206,7 @@ assert_failure() {
 }
 
 assert_equal() {
-  if [ "$1" != "$2" ]; then
+  if [ "$(collapse_ws "$1")" != "$(collapse_ws "$2")" ]; then
     { echo "expected: $1"
       echo "actual:   $2"
     } | flunk

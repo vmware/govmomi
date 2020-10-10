@@ -67,7 +67,7 @@ load test_helper
   run govc object.collect -s -type h host/DC0_H0 summary.config.port
   assert_success "$port"
   ports=$(govc object.collect -s -type h / summary.config.port | uniq -u | wc -l)
-  [ "$ports" = "0" ] # all host ports should be the same value
+  assert_equal 0 "$ports" # all host ports should be the same value
 
   vcsim_stop
 
@@ -75,8 +75,8 @@ load test_helper
 
   hosts=$(curl -sk "https://$url/debug/vars" | jq .vcsim.Model.Host)
   ports=$(govc object.collect -s -type h / summary.config.port | uniq -u | wc -l)
-  [ "$ports" = "$hosts" ] # all host ports should be unique
-  [[ "$ports" != *$port* ]] # host ports should not include vcsim port
+  assert_equal "$ports" "$hosts" # all host ports should be unique
+  grep -v "$port" <<<"$ports" # host ports should not include vcsim port
 }
 
 @test "vcsim set vm properties" {
@@ -171,13 +171,13 @@ EOF
   assert_success "$(printf "265104de-1472-547c-b873-6dc7883fb6cb\nb4689bed-97f0-5bcd-8a4c-07477cc8f06f")"
 
   dups=$(govc object.collect -s -type m / config.uuid | sort | uniq -d | wc -l)
-  [ "$dups" = "0" ]
+  assert_equal 0 "$dups"
 
   run govc object.collect -s host/DC0_H0/DC0_H0 summary.hardware.uuid
   assert_success dcf7fb3c-4a1c-5a05-b730-5e09f3704e2f
 
   dups=$(govc object.collect -s -type m / summary.hardware.uuid | sort | uniq -d | wc -l)
-  [ "$dups" = "0" ]
+  assert_equal 0 "$dups"
 
   run govc vm.create foo.yakity
   assert_success
@@ -281,7 +281,7 @@ docker_name() {
   assert_success
 
   ip=$(govc object.collect -s vm/$vm guest.ipAddress)
-  run curl -f "http://$ip/vcsim.bats"
+  run docker run --rm curlimages/curl curl -f "http://$ip/vcsim.bats"
   assert_success
 
   # test suspend/resume

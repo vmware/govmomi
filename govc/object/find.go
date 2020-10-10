@@ -27,10 +27,12 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -40,6 +42,7 @@ type find struct {
 
 	ref      bool
 	long     bool
+	parent   bool
 	kind     kinds
 	name     string
 	maxdepth int
@@ -126,6 +129,7 @@ func (cmd *find) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.maxdepth, "maxdepth", -1, "Max depth")
 	f.BoolVar(&cmd.ref, "i", false, "Print the managed object reference")
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
+	f.BoolVar(&cmd.parent, "p", false, "Find parent objects")
 }
 
 func (cmd *find) Usage() string {
@@ -152,6 +156,7 @@ Examples:
   govc find /dc1 -type c
   govc find vm -name my-vm-*
   govc find . -type n
+  govc find -p /folder-a/dc-1/host/folder-b/cluster-a -type Datacenter # prints /folder-a/dc-1
   govc find . -type m -runtime.powerState poweredOn
   govc find . -type m -datastore $(govc find -i datastore -name vsanDatastore)
   govc find . -type s -summary.type vsan
@@ -336,6 +341,21 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 	case 1:
 	default:
 		return flag.ErrHelp // TODO: ?
+	}
+
+	if cmd.parent {
+		entities, err := mo.Ancestors(ctx, client, client.ServiceContent.PropertyCollector, root)
+		if err != nil {
+			return err
+		}
+
+		for i := len(entities) - 1; i >= 0; i-- {
+			if cmd.rootMatch(ctx, entities[i], client, filter) {
+				printPath(entities[i].Reference(), internal.InventoryPath(entities[:i+1]))
+			}
+		}
+
+		return cmd.writeResult(paths)
 	}
 
 	if cmd.rootMatch(ctx, root, client, filter) {

@@ -433,6 +433,9 @@ EOF
   run govc find . -name "$vm"
   assert_output "$folder/$vm"
 
+  run govc find -p "$folder/$vm" -type Datacenter
+  assert_output "$dc"
+
   run govc find "$folder" -name "$vm"
   assert_output "$folder/$vm"
 

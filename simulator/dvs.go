@@ -28,6 +28,8 @@ import (
 
 type DistributedVirtualSwitch struct {
 	mo.DistributedVirtualSwitch
+
+	types.FetchDVPortsResponse
 }
 
 func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
@@ -256,7 +258,11 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 
 func (s *DistributedVirtualSwitch) dvPortgroups(_ *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
 	// TODO(agui): Filter is not implemented yet
-	var res []types.DistributedVirtualPort
+	res := s.FetchDVPortsResponse.Returnval
+	if len(res) != 0 {
+		return res
+	}
+
 	for _, ref := range s.Portgroup {
 		pg := Map.Get(ref).(*DistributedVirtualPortgroup)
 		res = append(res, types.DistributedVirtualPort{

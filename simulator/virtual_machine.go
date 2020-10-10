@@ -1116,6 +1116,22 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			})
 
 			vm.updateDiskLayouts()
+
+			if disk, ok := b.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+				// These properties default to false
+				props := []**bool{
+					&disk.EagerlyScrub,
+					&disk.ThinProvisioned,
+					&disk.WriteThrough,
+					&disk.Split,
+					&disk.DigestEnabled,
+				}
+				for _, prop := range props {
+					if *prop == nil {
+						*prop = types.NewBool(false)
+					}
+				}
+			}
 		}
 	case *types.VirtualCdrom:
 		if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
@@ -1139,6 +1155,13 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		}
 		if info.Summary == "" {
 			info.Summary = summary
+		}
+	}
+
+	switch device.(type) {
+	case types.BaseVirtualEthernetCard, *types.VirtualCdrom, *types.VirtualFloppy, *types.VirtualUSB:
+		if d.Connectable == nil {
+			d.Connectable = &types.VirtualDeviceConnectInfo{StartConnected: true, Connected: true}
 		}
 	}
 
@@ -1629,7 +1652,15 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		}
 		if req.Spec.Config != nil {
 			config.ExtraConfig = req.Spec.Config.ExtraConfig
+			config.InstanceUuid = req.Spec.Config.InstanceUuid
 		}
+
+		// Copying hardware properties
+		config.NumCPUs = vm.Config.Hardware.NumCPU
+		config.MemoryMB = int64(vm.Config.Hardware.MemoryMB)
+		config.NumCoresPerSocket = vm.Config.Hardware.NumCoresPerSocket
+		config.VirtualICH7MPresent = vm.Config.Hardware.VirtualICH7MPresent
+		config.VirtualSMCPresent = vm.Config.Hardware.VirtualSMCPresent
 
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
 		devices := vm.Config.Hardware.Device
