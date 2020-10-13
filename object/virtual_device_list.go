@@ -19,6 +19,7 @@ package object
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -67,7 +68,7 @@ func EthernetCardTypes() VirtualDeviceList {
 		&types.VirtualSriovEthernetCard{},
 	}).Select(func(device types.BaseVirtualDevice) bool {
 		c := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
-		c.GetVirtualDevice().Key = -1
+		c.GetVirtualDevice().Key = int32(rand.Uint32()) * -1
 		return true
 	})
 }
