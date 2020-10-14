@@ -39,10 +39,10 @@ type DVPortgroupConfigSpec struct {
 }
 
 var (
-	vlanMode string
-	vlanId int32
+	vlanMode  string
+	vlanId    int32
 	vlanRange string
-	vlanSpec types.BaseVmwareDistributedVirtualSwitchVlanSpec
+	vlanSpec  types.BaseVmwareDistributedVirtualSwitchVlanSpec
 )
 
 func (spec *DVPortgroupConfigSpec) Register(ctx context.Context, f *flag.FlagSet) {
