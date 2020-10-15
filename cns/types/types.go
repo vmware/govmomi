@@ -499,6 +499,60 @@ func init() {
 	types.Add("CnsQueryVolumeInfoResult", reflect.TypeOf((*CnsQueryVolumeInfoResult)(nil)).Elem())
 }
 
+type CnsRelocateVolumeRequestType struct {
+	This          types.ManagedObjectReference `xml:"_this"`
+	RelocateSpecs []BaseCnsVolumeRelocateSpec  `xml:"relocateSpecs,typeattr"`
+}
+
+func init() {
+	types.Add("CnsRelocateVolumeRequestType", reflect.TypeOf((*CnsRelocateVolumeRequestType)(nil)).Elem())
+}
+
+type CnsRelocateVolume CnsRelocateVolumeRequestType
+
+func init() {
+	types.Add("CnsRelocateVolume", reflect.TypeOf((*CnsRelocateVolume)(nil)).Elem())
+}
+
+type CnsRelocateVolumeResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsVolumeRelocateSpec struct {
+	types.DynamicData
+
+	VolumeId  CnsVolumeId                           `xml:"volumeId"`
+	Datastore types.ManagedObjectReference          `xml:"datastore"`
+	Profile   []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
+}
+
+func init() {
+	types.Add("CnsVolumeRelocateSpec", reflect.TypeOf((*CnsVolumeRelocateSpec)(nil)).Elem())
+}
+
+type CnsBlockVolumeRelocateSpec struct {
+	CnsVolumeRelocateSpec
+}
+
+func NewCnsBlockVolumeRelocateSpec(volumeId string, datastore types.ManagedObjectReference, profile ...types.BaseVirtualMachineProfileSpec) CnsBlockVolumeRelocateSpec {
+	cnsVolumeID := CnsVolumeId{
+		Id: volumeId,
+	}
+	volumeSpec := CnsVolumeRelocateSpec{
+		VolumeId:  cnsVolumeID,
+		Datastore: datastore,
+		Profile:   profile,
+	}
+	blockVolSpec := CnsBlockVolumeRelocateSpec{
+		CnsVolumeRelocateSpec: volumeSpec,
+	}
+	return blockVolSpec
+}
+
+func init() {
+	types.Add("CnsBlockVolumeRelocateSpec", reflect.TypeOf((*CnsBlockVolumeRelocateSpec)(nil)).Elem())
+}
+
 type CnsCursor struct {
 	types.DynamicData
 

@@ -66,6 +66,16 @@ func init() {
 	types.Add("BaseCnsBaseCreateSpec", reflect.TypeOf((*CnsBaseCreateSpec)(nil)).Elem())
 }
 
+type BaseCnsVolumeRelocateSpec interface {
+	GetCnsVolumeRelocateSpec() CnsVolumeRelocateSpec
+}
+
+func (s CnsVolumeRelocateSpec) GetCnsVolumeRelocateSpec() CnsVolumeRelocateSpec { return s }
+
+func init() {
+	types.Add("BaseCnsVolumeRelocateSpec", reflect.TypeOf((*CnsVolumeRelocateSpec)(nil)).Elem())
+}
+
 func (b *CnsEntityMetadata) GetCnsEntityMetadata() *CnsEntityMetadata { return b }
 
 type BaseCnsEntityMetadata interface {
