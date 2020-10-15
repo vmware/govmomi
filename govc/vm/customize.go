@@ -95,9 +95,11 @@ Examples:
   govc vm.customize -vm VM -tz America/New_York NAME`
 }
 
-// Parse a string of multiple IPv6 addresses with optional netmask separated by space
+// Parse a string of multiple IPv6 addresses with optional netmask separated by comma
 func parseIPv6Argument(argv string) (ipconf []types.BaseCustomizationIpV6Generator, err error) {
-	for _, substring := range strings.Split(argv, " ") {
+	for _, substring := range strings.Split(argv, ",") {
+		// remove leading and trailing white space
+		substring = strings.TrimSpace(substring)
 		// check if subnet mask was specified
 		switch strings.Count(substring, "/") {
 		// no mask, set default
@@ -117,7 +119,7 @@ func parseIPv6Argument(argv string) (ipconf []types.BaseCustomizationIpV6Generat
 				IpAddress:  parts[0],
 				SubnetMask: int32(mask),
 			})
-		// to many forward slash; return error
+		// to many forward slashes; return error
 		default:
 			return nil, fmt.Errorf("unable to parse IPv6 address (too many subnet separators): %s", substring)
 		}
