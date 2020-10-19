@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"path"
 
@@ -101,8 +100,6 @@ type DefaultImageRegistry struct {
 func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClusterSpec) error {
 	var response interface{}
 	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "enable")
-	// bytes, _ := json.MarshalIndent(spec, "", "\t")
-	// fmt.Println(string(bytes))
 	err := c.Do(ctx, url.Request(http.MethodPost, spec), response)
 	return err
 }
@@ -111,8 +108,6 @@ func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClus
 func (c *Manager) DisableCluster(ctx context.Context, id string) error {
 	var response interface{}
 	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "disable")
-	// bytes, _ := json.MarshalIndent(spec, "", "\t")
-	// fmt.Println(string(bytes))
 	err := c.Do(ctx, url.Request(http.MethodPost), response)
 	return err
 }
@@ -181,9 +176,6 @@ func (c *Manager) ListCompatibleDistributedSwitches(ctx context.Context, cluster
 	listUrl := c.Resource(internal.NamespaceDistributedSwitchCompatibility).
 		WithParam("cluster", clusterId).
 		WithParam("compatible", "true")
-	if err != nil {
-		return nil, fmt.Errorf("error in url construction: %s", err)
-	}
 	return result, c.Do(ctx, listUrl.Request(http.MethodGet), &result)
 }
 
@@ -198,8 +190,5 @@ func (c *Manager) ListCompatibleEdgeClusters(ctx context.Context, clusterId stri
 		WithParam("cluster", clusterId).
 		WithParam("distributed_switch", switchId).
 		WithParam("compatible", "true")
-	if err != nil {
-		return nil, fmt.Errorf("error in url construction: %s", err)
-	}
 	return result, c.Do(ctx, listUrl.Request(http.MethodGet), &result)
 }
