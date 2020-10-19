@@ -203,7 +203,7 @@ func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	// Network object reference lookup.
-	networkRef, err := finder.Network(context.TODO(), cmd.ControlPlaneManagementNetwork.Network)
+	networkRef, err := finder.Network(ctx, cmd.ControlPlaneManagementNetwork.Network)
 	if err != nil {
 		return err
 	}
