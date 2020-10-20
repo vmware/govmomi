@@ -61,6 +61,8 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	if r.IsVPX() {
 		s.HandleFunc(internal.NamespaceClusterPath, h.clusters)
 		s.HandleFunc(internal.NamespaceClusterPath+"/", h.clustersID)
+		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility+"/", h.listCompatibleDistributedSwitches)
+		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility+"/", h.listCompatibleEdgeClusters)
 	}
 }
 
@@ -157,4 +159,40 @@ func (h *Handler) clustersID(w http.ResponseWriter, r *http.Request) {
 
 	// TODO:
 	// https://vmware.github.io/vsphere-automation-sdk-rest/vsphere/index.html#SVC_com.vmware.vcenter.namespace_management.clusters
+}
+
+func (h *Handler) listCompatibleDistributedSwitches(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+
+		// normally expect to get exactly one result back
+		switches := []namespace.DistributedSwitchCompatibilitySummary{
+			{
+				Compatible:        true,
+				DistributedSwitch: "Compatible-DVS-1",
+			},
+		}
+		vapi.StatusOK(w, switches)
+	}
+}
+
+func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+
+		// CLI is able to filter in case we get multiple results
+		switches := []namespace.EdgeClusterCompatibilitySummary{
+			{
+				Compatible:  true,
+				EdgeCluster: "Compat-Edge-ID1",
+				DisplayName: "Edge-Cluster-1",
+			},
+			{
+				Compatible:  true,
+				EdgeCluster: "Compat-Edge-ID2",
+				DisplayName: "Edge-Cluster-2",
+			},
+		}
+		vapi.StatusOK(w, switches)
+	}
 }

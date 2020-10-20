@@ -40,6 +40,78 @@ func NewManager(client *rest.Client) *Manager {
 	}
 }
 
+type EnableClusterSpec struct {
+	MasterDNSSearchDomains                 []string                 `json:"master_DNS_search_domains,omitempty"`
+	ImageStorage                           ImageStorage             `json:"image_storage"`
+	NcpClusterNetworkSpec                  *NcpClusterNetworkSpec   `json:"ncp_cluster_network_spec"`
+	MasterManagementNetwork                *MasterManagementNetwork `json:"master_management_network"`
+	MasterDNSNames                         []string                 `json:"Master_DNS_names,omitempty"`
+	MasterNTPServers                       []string                 `json:"master_NTP_servers,omitempty"`
+	EphemeralStoragePolicy                 string                   `json:"ephemeral_storage_policy,omitempty"`
+	DefaultImageRepository                 string                   `json:"default_image_repository,omitempty"`
+	ServiceCidr                            *Cidr                    `json:"service_cidr"`
+	LoginBanner                            string                   `json:"login_banner,omitempty"`
+	SizeHint                               string                   `json:"size_hint"`
+	WorkerDNS                              []string                 `json:"worker_DNS,omitempty"`
+	DefaultImageRegistry                   *DefaultImageRegistry    `json:"default_image_registry,omitempty"`
+	MasterDNS                              []string                 `json:"master_DNS,omitempty"`
+	NetworkProvider                        string                   `json:"network_provider"`
+	MasterStoragePolicy                    string                   `json:"master_storage_policy,omitempty"`
+	DefaultKubernetesServiceContentLibrary string                   `json:"default_kubernetes_service_content_library,omitempty"`
+}
+
+type ImageStorage struct {
+	StoragePolicy string `json:"storage_policy"`
+}
+
+type Cidr struct {
+	Address string `json:"address"`
+	Prefix  int    `json:"prefix"`
+}
+
+type NcpClusterNetworkSpec struct {
+	NsxEdgeCluster           string `json:"nsx_edge_cluster,omitempty"`
+	PodCidrs                 []Cidr `json:"pod_cidrs"`
+	EgressCidrs              []Cidr `json:"egress_cidrs"`
+	ClusterDistributedSwitch string `json:"cluster_distributed_switch,omitempty"`
+	IngressCidrs             []Cidr `json:"ingress_cidrs"`
+}
+
+type AddressRange struct {
+	SubnetMask      string `json:"subnet_mask,omitempty"`
+	StartingAddress string `json:"starting_address"`
+	Gateway         string `json:"gateway"`
+	AddressCount    int    `json:"address_count,omitempty"`
+}
+
+type MasterManagementNetwork struct {
+	Mode         string        `json:"mode"`
+	FloatingIP   string        `json:"floating_IP,omitempty"`
+	AddressRange *AddressRange `json:"address_range,omitempty"`
+	Network      string        `json:"network"`
+}
+
+type DefaultImageRegistry struct {
+	Hostname string `json:"hostname"`
+	Port     int    `json:"port,omitempty"`
+}
+
+// EnableCluster enables vSphere Namespaces on the specified cluster, using the given spec.
+func (c *Manager) EnableCluster(ctx context.Context, id string, spec *EnableClusterSpec) error {
+	var response interface{}
+	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "enable")
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), response)
+	return err
+}
+
+// EnableCluster enables vSphere Namespaces on the specified cluster, using the given spec.
+func (c *Manager) DisableCluster(ctx context.Context, id string) error {
+	var response interface{}
+	url := c.Resource(path.Join(internal.NamespaceClusterPath, id)).WithParam("action", "disable")
+	err := c.Do(ctx, url.Request(http.MethodPost), response)
+	return err
+}
+
 // ClusterSummary for a cluster with vSphere Namespaces enabled.
 type ClusterSummary struct {
 	ID               string `json:"cluster"`
@@ -93,4 +165,30 @@ func (c *Manager) SupportBundleRequest(ctx context.Context, bundle *SupportBundl
 	}
 
 	return http.NewRequest(http.MethodPost, bundle.URL, &b)
+}
+
+type DistributedSwitchCompatibilitySummary struct {
+	Compatible        bool   `json:"compatible"`
+	DistributedSwitch string `json:"distributed_switch"`
+}
+
+func (c *Manager) ListCompatibleDistributedSwitches(ctx context.Context, clusterId string) (result []DistributedSwitchCompatibilitySummary, err error) {
+	listUrl := c.Resource(internal.NamespaceDistributedSwitchCompatibility).
+		WithParam("cluster", clusterId).
+		WithParam("compatible", "true")
+	return result, c.Do(ctx, listUrl.Request(http.MethodGet), &result)
+}
+
+type EdgeClusterCompatibilitySummary struct {
+	Compatible  bool   `json:"compatible"`
+	EdgeCluster string `json:"edge_cluster"`
+	DisplayName string `json:"display_name"`
+}
+
+func (c *Manager) ListCompatibleEdgeClusters(ctx context.Context, clusterId string, switchId string) (result []EdgeClusterCompatibilitySummary, err error) {
+	listUrl := c.Resource(internal.NamespaceEdgeClusterCompatibility).
+		WithParam("cluster", clusterId).
+		WithParam("distributed_switch", switchId).
+		WithParam("compatible", "true")
+	return result, c.Do(ctx, listUrl.Request(http.MethodGet), &result)
 }

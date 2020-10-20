@@ -121,7 +121,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	profiles, err := listProfiles(ctx, c, f.Arg(0))
+	profiles, err := ListProfiles(ctx, c, f.Arg(0))
 	if err != nil {
 		return err
 	}
