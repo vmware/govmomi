@@ -338,9 +338,19 @@ func init() {
 	types.Add("CnsVolumeOperationBatchResult", reflect.TypeOf((*CnsVolumeOperationBatchResult)(nil)).Elem())
 }
 
+type CnsPlacementResult struct {
+	Datastore       types.ManagedObjectReference  `xml:"datastore,omitempty"`
+	PlacementFaults []*types.LocalizedMethodFault `xml:"placementFaults,omitempty"`
+}
+
+func init() {
+	types.Add("CnsPlacementResult", reflect.TypeOf((*CnsPlacementResult)(nil)).Elem())
+}
+
 type CnsVolumeCreateResult struct {
 	CnsVolumeOperationResult
-	Name string `xml:"name,omitempty"`
+	Name             string               `xml:"name,omitempty"`
+	PlacementResults []CnsPlacementResult `xml:"placementResults,omitempty"`
 }
 
 func init() {

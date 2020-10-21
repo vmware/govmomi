@@ -112,6 +112,8 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
 	}
 	volumeId := createVolumeOperationRes.VolumeId.Id
+	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("volumeCreateResult %+v", volumeCreateResult)
 
 	// Extend
 	var newCapacityInMb int64 = 2048

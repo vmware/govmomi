@@ -155,6 +155,8 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
 	}
 	volumeId := createVolumeOperationRes.VolumeId.Id
+	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("volumeCreateResult %+v", volumeCreateResult)
 	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
 
 	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
