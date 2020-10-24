@@ -63,6 +63,7 @@ func (spec *DVPortgroupConfigSpec) Register(ctx context.Context, f *flag.FlagSet
 	f.Var(flags.NewInt32(&vlanId), "vlan", "VLAN ID")
 	f.StringVar(&vlanRange, "vlan-range", "0-4094", "VLAN Ranges with comma delimited")
 	f.StringVar(&vlanMode, "vlan-mode", "vlan", fmt.Sprintf("vlan mode (%s)", strings.Join(vlanModes, "|")))
+	f.Var(flags.NewOptionalBool(&spec.AutoExpand), "auto-expand", "Ignore the limit on the number of ports")
 }
 
 func getRange(vlanRange string) []types.NumericRange {
