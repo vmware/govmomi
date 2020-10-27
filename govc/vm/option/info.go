@@ -133,13 +133,21 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	req := types.QueryConfigOptionEx{
 		This: content[0].PropSet[0].Val.(types.ManagedObjectReference),
-		Spec: &types.EnvironmentBrowserConfigOptionQuerySpec{
-			GuestId: f.Args(),
-		},
+	}
+
+	spec := func() *types.EnvironmentBrowserConfigOptionQuerySpec {
+		if req.Spec == nil {
+			req.Spec = new(types.EnvironmentBrowserConfigOptionQuerySpec)
+		}
+		return req.Spec
+	}
+
+	if f.NArg() != 0 {
+		spec().GuestId = f.Args()
 	}
 
 	if host != nil {
-		req.Spec.Host = types.NewReference(host.Reference())
+		spec().Host = types.NewReference(host.Reference())
 	}
 
 	opt, err := methods.QueryConfigOptionEx(ctx, c, &req)
