@@ -361,6 +361,68 @@ func (a *VirtualApp) CreateChildVMTask(ctx *Context, req *types.CreateChildVM_Ta
 	return body
 }
 
+func (a *VirtualApp) CloneVAppTask(ctx *Context, req *types.CloneVApp_Task) soap.HasFault {
+	task := CreateTask(a, "cloneVapp", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		folder := req.Spec.VmFolder
+		if folder == nil {
+			folder = a.ParentFolder
+		}
+
+		rspec := req.Spec.ResourceSpec
+		if rspec == nil {
+			s := types.DefaultResourceConfigSpec()
+			rspec = &s
+		}
+
+		res := a.CreateVApp(&types.CreateVApp{
+			This:       a.Self,
+			Name:       req.Name,
+			ResSpec:    *rspec,
+			ConfigSpec: types.VAppConfigSpec{},
+			VmFolder:   folder,
+		})
+
+		if res.Fault() != nil {
+			return nil, res.Fault().VimFault().(types.BaseMethodFault)
+		}
+
+		target := res.(*methods.CreateVAppBody).Res.Returnval
+
+		for _, ref := range a.Vm {
+			vm := ctx.Map.Get(ref).(*VirtualMachine)
+
+			res := vm.CloneVMTask(ctx, &types.CloneVM_Task{
+				This:   ref,
+				Folder: *folder,
+				Name:   req.Name,
+				Spec: types.VirtualMachineCloneSpec{
+					Location: types.VirtualMachineRelocateSpec{
+						Pool: &target,
+						Host: req.Spec.Host,
+					},
+				},
+			})
+
+			ctask := Map.Get(res.(*methods.CloneVM_TaskBody).Res.Returnval).(*Task)
+			if ctask.Info.Error != nil {
+				return nil, ctask.Info.Error.Fault
+			}
+		}
+
+		return target, nil
+	})
+
+	return &methods.CloneVApp_TaskBody{
+		Res: &types.CloneVApp_TaskResponse{
+			Returnval: task.Run(),
+		},
+	}
+}
+
+func (a *VirtualApp) CreateVApp(req *types.CreateVApp) soap.HasFault {
+	return (&ResourcePool{ResourcePool: a.ResourcePool}).CreateVApp(req)
+}
+
 func (a *VirtualApp) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 	return (&ResourcePool{ResourcePool: a.ResourcePool}).DestroyTask(req)
 }
