@@ -422,6 +422,12 @@ func (m *Model) Load(dir string) error {
 			return err
 		}
 
+		if x, ok := obj.(interface{ model(*Model) error }); ok {
+			if err = x.model(m); err != nil {
+				return err
+			}
+		}
+
 		return m.loadMethod(Map.Put(obj), dir)
 	})
 
@@ -766,14 +772,20 @@ func (m *Model) Create() error {
 	return nil
 }
 
+func (m *Model) createTempDir(dc string, name string) (string, error) {
+	dir, err := ioutil.TempDir("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
+	if err == nil {
+		m.dirs = append(m.dirs, dir)
+	}
+	return dir, err
+}
+
 func (m *Model) createLocalDatastore(dc string, name string, hosts []*object.HostSystem) error {
 	ctx := context.Background()
-	dir, err := ioutil.TempDir("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
+	dir, err := m.createTempDir(dc, name)
 	if err != nil {
 		return err
 	}
-
-	m.dirs = append(m.dirs, dir)
 
 	for _, host := range hosts {
 		dss, err := host.ConfigManager().DatastoreSystem(ctx)

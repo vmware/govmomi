@@ -19,6 +19,7 @@ package simulator
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -362,6 +363,31 @@ func (r *Registry) getEntityComputeResource(item mo.Entity) mo.Entity {
 	}
 }
 
+func entityName(e mo.Entity) string {
+	name := e.Entity().Name
+	if name != "" {
+		return name
+	}
+
+	obj := getManagedObject(e).Addr().Interface()
+
+	// The types below have their own 'Name' field, so ManagedEntity.Name (me.Name) is empty.
+	// See also mo.Ancestors
+	switch x := obj.(type) {
+	case *mo.Network:
+		return x.Name
+	case *mo.DistributedVirtualSwitch:
+		return x.Name
+	case *mo.DistributedVirtualPortgroup:
+		return x.Name
+	case *mo.OpaqueNetwork:
+		return x.Name
+	}
+
+	log.Panicf("%T object %s does not have a Name", obj, e.Reference())
+	return name
+}
+
 // FindByName returns the first mo.Entity of the given refs whose Name field is equal to the given name.
 // If there is no match, nil is returned.
 // This method is useful for cases where objects are required to have a unique name, such as Datastore with
@@ -369,7 +395,7 @@ func (r *Registry) getEntityComputeResource(item mo.Entity) mo.Entity {
 func (r *Registry) FindByName(name string, refs []types.ManagedObjectReference) mo.Entity {
 	for _, ref := range refs {
 		if e, ok := r.Get(ref).(mo.Entity); ok {
-			if name == e.Entity().Name {
+			if name == entityName(e) {
 				return e
 			}
 		}
