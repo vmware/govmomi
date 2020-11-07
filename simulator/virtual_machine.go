@@ -79,6 +79,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		MemoryAllocation:   &rspec.MemoryAllocation,
 		CpuAllocation:      &rspec.CpuAllocation,
 		LatencySensitivity: &types.LatencySensitivity{Level: types.LatencySensitivitySensitivityLevelNormal},
+		BootOptions:        &types.VirtualMachineBootOptions{},
 	}
 	vm.Layout = &types.VirtualMachineFileLayout{}
 	vm.LayoutEx = &types.VirtualMachineFileLayoutEx{
@@ -138,6 +139,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		Uuid:              vm.uid.String(),
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
 		Version:           esx.HardwareVersion,
+		Firmware:          string(types.GuestOsDescriptorFirmwareTypeBios),
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
 			SuspendDirectory:  dsPath,
@@ -387,6 +389,12 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 	if spec.GuestId != "" {
 		if err := validateGuestID(spec.GuestId); err != nil {
 			return err
+		}
+	}
+
+	if o := spec.BootOptions; o != nil {
+		if isTrue(o.EfiSecureBootEnabled) && vm.Config.Firmware != string(types.GuestOsDescriptorFirmwareTypeEfi) {
+			return &types.InvalidVmConfig{Property: "msg.hostd.configSpec.efi"}
 		}
 	}
 

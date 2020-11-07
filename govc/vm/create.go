@@ -43,6 +43,14 @@ var hardwareVersions = []struct {
 	{"7.0", "vmx-17"},
 }
 
+var (
+	FirmwareTypes = []string{
+		string(types.GuestOsDescriptorFirmwareTypeBios),
+		string(types.GuestOsDescriptorFirmwareTypeEfi),
+	}
+	FirmwareUsage = fmt.Sprintf("Firmware type [%s]", strings.Join(FirmwareTypes, "|"))
+)
+
 type create struct {
 	*flags.ClientFlag
 	*flags.ClusterFlag
@@ -129,13 +137,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.controller, "disk.controller", "scsi", "Disk controller type")
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
 
-	firmwareTypes := []string{
-		string(types.GuestOsDescriptorFirmwareTypeBios),
-		string(types.GuestOsDescriptorFirmwareTypeEfi),
-	}
-
-	f.StringVar(&cmd.firmware, "firmware", firmwareTypes[0],
-		fmt.Sprintf("Firmware type [%s]", strings.Join(firmwareTypes, "|")))
+	f.StringVar(&cmd.firmware, "firmware", FirmwareTypes[0], FirmwareUsage)
 	var versions []string
 	for i := range hardwareVersions {
 		versions = append(versions, hardwareVersions[i].esx)
