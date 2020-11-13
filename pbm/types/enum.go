@@ -144,6 +144,7 @@ const (
 	PbmLineOfServiceInfoLineOfServiceEnumPERSISTENCE          = PbmLineOfServiceInfoLineOfServiceEnum("PERSISTENCE")
 	PbmLineOfServiceInfoLineOfServiceEnumDATA_PROVIDER        = PbmLineOfServiceInfoLineOfServiceEnum("DATA_PROVIDER")
 	PbmLineOfServiceInfoLineOfServiceEnumDATASTORE_IO_CONTROL = PbmLineOfServiceInfoLineOfServiceEnum("DATASTORE_IO_CONTROL")
+	PbmLineOfServiceInfoLineOfServiceEnumDATA_PROTECTION      = PbmLineOfServiceInfoLineOfServiceEnum("DATA_PROTECTION")
 )
 
 func init() {
