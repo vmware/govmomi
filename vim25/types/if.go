@@ -3022,6 +3022,16 @@ func init() {
 	t["BaseVirtualMachineBootOptionsBootableDevice"] = reflect.TypeOf((*VirtualMachineBootOptionsBootableDevice)(nil)).Elem()
 }
 
+func (b *VirtualMachineConnection) GetVirtualMachineConnection() *VirtualMachineConnection { return b }
+
+type BaseVirtualMachineConnection interface {
+	GetVirtualMachineConnection() *VirtualMachineConnection
+}
+
+func init() {
+	t["BaseVirtualMachineConnection"] = reflect.TypeOf((*VirtualMachineConnection)(nil)).Elem()
+}
+
 func (b *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState) GetVirtualMachineDeviceRuntimeInfoDeviceRuntimeState() *VirtualMachineDeviceRuntimeInfoDeviceRuntimeState {
 	return b
 }
