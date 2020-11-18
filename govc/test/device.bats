@@ -38,9 +38,12 @@ load test_helper
 }
 
 @test "device.boot" {
-  esx_env
+  vcsim_env
 
-  vm=$(new_ttylinux_vm)
+  vm="DC0_H0_VM0"
+
+  run govc device.remove -vm $vm cdrom-*
+  assert_success
 
   result=$(govc device.ls -vm $vm -boot | wc -l)
   [ $result -eq 0 ]
@@ -68,6 +71,12 @@ load test_helper
 
   result=$(govc device.ls -vm $vm -boot | wc -l)
   [ $result -eq 0 ]
+
+  run govc device.boot -vm $vm -secure
+  assert_failure
+
+  run govc device.boot -vm $vm -secure -firmware efi
+  assert_success
 }
 
 @test "device.cdrom" {

@@ -23,13 +23,15 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/govc/vm"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type boot struct {
 	*flags.VirtualMachineFlag
 
-	order string
+	firmware string
+	order    string
 	types.VirtualMachineBootOptions
 }
 
@@ -52,6 +54,7 @@ func (cmd *boot) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
 
 	f.Var(flags.NewOptionalBool(&cmd.EfiSecureBootEnabled), "secure", "Enable EFI secure boot")
+	f.StringVar(&cmd.firmware, "firmware", vm.FirmwareTypes[0], vm.FirmwareUsage)
 }
 
 func (cmd *boot) Description() string {
@@ -60,7 +63,8 @@ func (cmd *boot) Description() string {
 Examples:
   govc device.boot -vm $vm -delay 1000 -order floppy,cdrom,ethernet,disk
   govc device.boot -vm $vm -order - # reset boot order
-  govc device.boot -vm $vm -secure`
+  govc device.boot -vm $vm -firmware efi -secure
+  govc device.boot -vm $vm -firmware bios -secure=false`
 }
 
 func (cmd *boot) Process(ctx context.Context) error {
@@ -90,5 +94,15 @@ func (cmd *boot) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.BootOrder = devices.BootOrder(o)
 	}
 
-	return vm.SetBootOptions(ctx, &cmd.VirtualMachineBootOptions)
+	spec := types.VirtualMachineConfigSpec{
+		BootOptions: &cmd.VirtualMachineBootOptions,
+		Firmware:    cmd.firmware,
+	}
+
+	task, err := vm.Reconfigure(ctx, spec)
+	if err != nil {
+		return err
+	}
+
+	return task.Wait(ctx)
 }
