@@ -55,6 +55,11 @@ func TestClient(t *testing.T) {
 	// example: Export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
 	backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
 
+	// if datastoreForMigration is not set, test for CNS Relocate API of a volume to another datastore is skipped.
+	// input format is same as CNS_DATASTORE. Format eg. "vSANDirect_10.92.217.162_mpx.vmhba0:C0:T2:L0"/ "vsandatastore"
+	// make sure that migration datastore is accessible from host on which CNS_DATASTORE is mounted.
+	datastoreForMigration := os.Getenv("CNS_MIGRATION_DATASTORE")
+
 	if url == "" || datacenter == "" || datastore == "" {
 		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
@@ -101,10 +106,11 @@ func TestClient(t *testing.T) {
 
 	var containerClusterArray []cnstypes.CnsContainerCluster
 	containerCluster := cnstypes.CnsContainerCluster{
-		ClusterType:   string(cnstypes.CnsClusterTypeKubernetes),
-		ClusterId:     "demo-cluster-id",
-		VSphereUser:   "Administrator@vsphere.local",
-		ClusterFlavor: string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterType:         string(cnstypes.CnsClusterTypeKubernetes),
+		ClusterId:           "demo-cluster-id",
+		VSphereUser:         "Administrator@vsphere.local",
+		ClusterFlavor:       string(cnstypes.CnsClusterFlavorVanilla),
+		ClusterDistribution: "OpenShift",
 	}
 	containerClusterArray = append(containerClusterArray, containerCluster)
 
@@ -149,6 +155,8 @@ func TestClient(t *testing.T) {
 		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
 	}
 	volumeId := createVolumeOperationRes.VolumeId.Id
+	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("volumeCreateResult %+v", volumeCreateResult)
 	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
 
 	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
@@ -213,7 +221,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Test QueryVolumeInfo API
 	// QueryVolumeInfo is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
@@ -230,21 +238,54 @@ func TestClient(t *testing.T) {
 			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		queryVolumeInfoTaskResult, err := GetTaskResult(ctx, queryVolumeInfoTaskInfo)
+		queryVolumeInfoTaskResults, err := GetTaskResultArray(ctx, queryVolumeInfoTaskInfo)
 		if err != nil {
 			t.Errorf("Failed to query volumes with QueryVolumeInfo. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		if queryVolumeInfoTaskResult == nil {
+		if queryVolumeInfoTaskResults == nil {
 			t.Fatalf("Empty queryVolumeInfoTaskResult")
 			t.FailNow()
 		}
-		queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
-		if queryVolumeInfoOperationRes.Fault != nil {
-			t.Fatalf("Failed to query volumes with QueryVolumeInfo. fault=%+v", queryVolumeInfoOperationRes.Fault)
+		for _, queryVolumeInfoTaskResult := range queryVolumeInfoTaskResults {
+			queryVolumeInfoOperationRes := queryVolumeInfoTaskResult.GetCnsVolumeOperationResult()
+			if queryVolumeInfoOperationRes.Fault != nil {
+				t.Fatalf("Failed to query volumes with QueryVolumeInfo. fault=%+v", queryVolumeInfoOperationRes.Fault)
+			}
+			t.Logf("Successfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
 		}
-		t.Logf("Sucessfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
 	}
+
+	// Test Relocate API
+	// Relocate API is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
+	// This API is available on vSphere 7.0u1 onward
+	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 && datastoreForMigration != "" {
+		migrationDS, err := finder.Datastore(ctx, datastoreForMigration)
+		if err != nil {
+			t.Fatal(err)
+		}
+		t.Logf("Relocating volume %v to datastore %+v", pretty.Sprint(volumeId), migrationDS.Reference())
+		relocateSpec := cnstypes.NewCnsBlockVolumeRelocateSpec(volumeId, migrationDS.Reference())
+		relocateTask, err := cnsClient.RelocateVolume(ctx, relocateSpec)
+		if err != nil {
+			t.Errorf("Failed to migrate volume with Relocate API. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		relocateTaskInfo, err := GetTaskInfo(ctx, relocateTask)
+		if err != nil {
+			t.Errorf("Failed to get info of task returned by Relocate API. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		taskResults, err := GetTaskResultArray(ctx, relocateTaskInfo)
+		for _, taskResult := range taskResults {
+			res := taskResult.GetCnsVolumeOperationResult()
+			if res.Fault != nil {
+				t.Fatalf("Relocation failed due to fault: %+v", res.Fault)
+			}
+			t.Logf("Successfully Relocated volume. Relocate task info result: %+v", pretty.Sprint(taskResult))
+		}
+	}
+
 	// Test ExtendVolume API
 	var newCapacityInMb int64 = 10240
 	var cnsVolumeExtendSpecList []cnstypes.CnsVolumeExtendSpec
@@ -289,7 +330,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes after ExtendVolume. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried Volumes after ExtendVolume. queryResult: %+v", pretty.Sprint(queryResult))
 	queryCapacity := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).CapacityInMb
 	if newCapacityInMb != queryCapacity {
 		t.Errorf("After extend volume %s, expected new volume size is %d, but actual volume size is %d.", extendVolumeId, newCapacityInMb, queryCapacity)
@@ -395,7 +436,7 @@ func TestClient(t *testing.T) {
 	if updateVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to update volume metadata: fault=%+v", updateVolumeOperationRes.Fault)
 	} else {
-		t.Logf("Sucessfully updated volume metadata")
+		t.Logf("Successfully updated volume metadata")
 	}
 
 	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
@@ -404,7 +445,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query volume. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Test QueryAll
 	querySelection := cnstypes.CnsQuerySelection{
@@ -421,7 +462,7 @@ func TestClient(t *testing.T) {
 		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
 		t.Fatal(err)
 	}
-	t.Logf("Sucessfully Queried all Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	t.Logf("Successfully Queried all Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 	// Create a VM to test Attach Volume API.
 	virtualMachineConfigSpec := vim25types.VirtualMachineConfigSpec{
@@ -675,7 +716,7 @@ func TestClient(t *testing.T) {
 			t.Errorf("Failed to query volume. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", queryResult)
+		t.Logf("Successfully Queried Volumes. queryResult: %+v", queryResult)
 		fileBackingInfo := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsVsanFileShareBackingDetails)
 		t.Logf("File Share Name: %s with accessPoints: %+v", fileBackingInfo.Name, fileBackingInfo.AccessPoints)
 
@@ -815,7 +856,7 @@ func TestClient(t *testing.T) {
 			t.Errorf("Failed to query volume. Error: %+v \n", err)
 			t.Fatal(err)
 		}
-		t.Logf("Sucessfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+		t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
 
 		t.Logf("Deleting CNS volume created above using BACKING_DISK_URL_PATH: %s with volume: %+v", backingDiskURLPath, volumeIDList)
 		deleteTask, err = cnsClient.DeleteVolume(ctx, volumeIDList, true)

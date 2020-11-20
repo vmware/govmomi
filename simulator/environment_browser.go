@@ -90,18 +90,20 @@ func (b *EnvironmentBrowser) QueryConfigOptionEx(req *types.QueryConfigOptionEx)
 		DefaultDevice: esx.VirtualDevice,
 	}
 
-	// From the SDK QueryConfigOptionEx doc:
-	// "If guestId is nonempty, the guestOSDescriptor array of the config option is filtered to match against the guest IDs in the spec.
-	//  If there is no match, the whole list is returned."
-	for _, id := range req.Spec.GuestId {
-		for _, gid := range GuestID {
-			if string(gid) == id {
-				opt.GuestOSDescriptor = []types.GuestOsDescriptor{{
-					Id:     id,
-					Family: guestFamily(id),
-				}}
+	if req.Spec != nil {
+		// From the SDK QueryConfigOptionEx doc:
+		// "If guestId is nonempty, the guestOSDescriptor array of the config option is filtered to match against the guest IDs in the spec.
+		//  If there is no match, the whole list is returned."
+		for _, id := range req.Spec.GuestId {
+			for _, gid := range GuestID {
+				if string(gid) == id {
+					opt.GuestOSDescriptor = []types.GuestOsDescriptor{{
+						Id:     id,
+						Family: guestFamily(id),
+					}}
 
-				break
+					break
+				}
 			}
 		}
 	}

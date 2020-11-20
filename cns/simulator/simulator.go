@@ -32,6 +32,14 @@ import (
 	vim25types "github.com/vmware/govmomi/vim25/types"
 )
 
+func init() {
+	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
+		if r.IsVPX() {
+			s.RegisterSDK(New())
+		}
+	})
+}
+
 func New() *simulator.Registry {
 	r := simulator.NewRegistry()
 	r.Namespace = cns.Namespace
@@ -85,8 +93,16 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 				}
 
 				volumes[newVolume.VolumeId] = newVolume
-				operationResult = append(operationResult, &cnstypes.CnsVolumeOperationResult{
-					VolumeId: newVolume.VolumeId,
+				placementResults := []cnstypes.CnsPlacementResult{}
+				placementResults = append(placementResults, cnstypes.CnsPlacementResult{
+					Datastore: datastore.Reference(),
+				})
+				operationResult = append(operationResult, &cnstypes.CnsVolumeCreateResult{
+					CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
+						VolumeId: newVolume.VolumeId,
+					},
+					Name:             createSpec.Name,
+					PlacementResults: placementResults,
 				})
 
 			} else {
@@ -122,8 +138,16 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx context.Context, req *cnstypes.Cn
 					}
 
 					volumes[newVolume.VolumeId] = newVolume
-					operationResult = append(operationResult, &cnstypes.CnsVolumeOperationResult{
-						VolumeId: newVolume.VolumeId,
+					placementResults := []cnstypes.CnsPlacementResult{}
+					placementResults = append(placementResults, cnstypes.CnsPlacementResult{
+						Datastore: datastore.Reference(),
+					})
+					operationResult = append(operationResult, &cnstypes.CnsVolumeCreateResult{
+						CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
+							VolumeId: newVolume.VolumeId,
+						},
+						Name:             createSpec.Name,
+						PlacementResults: placementResults,
 					})
 				}
 			}

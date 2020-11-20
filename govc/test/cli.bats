@@ -189,3 +189,27 @@ load test_helper
   assert_failure
   gofmt <<<"$output"
 }
+
+@test "insecure cookies" {
+  vcsim_start -tls=false
+
+  run govc ls
+  assert_success
+
+  vcsim_stop
+
+  VCSIM_SECURE_COOKIES=true vcsim_start -tls=false
+
+  run govc ls
+  assert_failure
+  assert_matches NotAuthenticated # Go's cookiejar won't send Secure cookies if scheme != https
+
+  vcsim_stop
+
+  VCSIM_SECURE_COOKIES=true vcsim_start -tls=false
+
+  run env GOVMOMI_INSECURE_COOKIES=true govc ls
+  assert_success # soap.Client will set Cookie.Secure=false
+
+  vcsim_stop
+}

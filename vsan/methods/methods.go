@@ -44,6 +44,29 @@ func VsanPerfGetSupportedEntityTypes(ctx context.Context, r soap.RoundTripper, r
 	return resBody.Res, nil
 }
 
+//Object Identities
+
+type VsanQueryObjectIdentitiesBody struct {
+	Req    *types.VsanQueryObjectIdentities         `xml:"urn:vsan VsanQueryObjectIdentities,omitempty"`
+	Res    *types.VsanQueryObjectIdentitiesResponse `xml:"urn:vsan VsanQueryObjectIdentitiesResponse,omitempty"`
+	Fault_ *soap.Fault                              `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *VsanQueryObjectIdentitiesBody) Fault() *soap.Fault { return b.Fault_ }
+
+func VsanQueryObjectIdentities(ctx context.Context, r soap.RoundTripper, req *types.VsanQueryObjectIdentities) (*types.VsanQueryObjectIdentitiesResponse, error) {
+	var reqBody, resBody VsanQueryObjectIdentitiesBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+
+}
+
 // Health summary
 type VsanQueryVcClusterHealthSummaryBody struct {
 	Req    *types.VsanQueryVcClusterHealthSummary         `xml:"urn:vsan VsanQueryVcClusterHealthSummary,omitempty"`
@@ -138,6 +161,26 @@ func (b *VsanClusterGetConfigBody) Fault() *soap.Fault { return b.Fault_ }
 
 func VsanClusterGetConfig(ctx context.Context, r soap.RoundTripper, req *types.VsanClusterGetConfig) (*types.VsanClusterGetConfigResponse, error) {
 	var reqBody, resBody VsanClusterGetConfigBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type QueryVsanObjectsBody struct {
+	Req    *types.QueryVsanObjects         `xml:"urn:vsan QueryVsanObjects,omitempty"`
+	Res    *types.QueryVsanObjectsResponse `xml:"urn:vsan QueryVsanObjectsResponse,omitempty"`
+	Fault_ *soap.Fault                     `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *QueryVsanObjectsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func QueryVsanObjects(ctx context.Context, r soap.RoundTripper, req *types.QueryVsanObjects) (*types.QueryVsanObjectsResponse, error) {
+	var reqBody, resBody QueryVsanObjectsBody
 
 	reqBody.Req = req
 

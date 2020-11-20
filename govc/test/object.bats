@@ -361,6 +361,26 @@ load test_helper
 
   run govc object.collect -type enoent / name
   assert_failure
+
+  govc object.collect -wait 5m -s -type m ./vm -name foo &
+  pid=$!
+  run govc vm.create -on=false foo
+  assert_success
+
+  wait $pid # wait for object.collect to exit
+
+  run govc object.collect -s -type m ./vm -name foo
+  assert_success
+
+  govc object.collect -wait 5m -s -type d / -name dcx &
+  pid=$!
+  run govc datacenter.create dcx
+  assert_success
+
+  wait $pid # wait for object.collect to exit
+
+  run govc object.collect -s -type d / -name dcx
+  assert_success
 }
 
 @test "object.collect raw" {
@@ -432,6 +452,9 @@ EOF
 
   run govc find . -name "$vm"
   assert_output "$folder/$vm"
+
+  run govc find -p "$folder/$vm" -type Datacenter
+  assert_output "$dc"
 
   run govc find "$folder" -name "$vm"
   assert_output "$folder/$vm"

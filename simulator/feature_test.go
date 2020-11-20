@@ -17,15 +17,15 @@ limitations under the License.
 package simulator_test
 
 import (
+	"bytes"
 	"context"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
-	"net/http"
 	"net/url"
 	"os"
 	"os/exec"
+	"path/filepath"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
@@ -100,10 +100,17 @@ func Example_runContainer() {
 			log.Fatal(err)
 		}
 		f, _ := dc.Folders(ctx)
-		dir, err := os.Getwd()
+		dir, err := ioutil.TempDir("", "example")
 		if err != nil {
 			log.Fatal(err)
 		}
+		os.Chmod(dir, 0755)
+		fpath := filepath.Join(dir, "index.html")
+		fcontent := "foo"
+		ioutil.WriteFile(fpath, []byte(fcontent), 0644)
+		// just in case umask gets in the way
+		os.Chmod(fpath, 0644)
+		defer os.RemoveAll(dir)
 
 		args := fmt.Sprintf("-v '%s:/usr/share/nginx/html:ro' nginx", dir)
 
@@ -138,13 +145,12 @@ func Example_runContainer() {
 		ip, _ := vm.WaitForIP(ctx, true) // Returns the docker container's IP
 
 		// Count the number of bytes in feature_test.go via nginx
-		res, err := http.Get(fmt.Sprintf("http://%s/feature_test.go", ip))
+		cmd := exec.Command("docker", "run", "--rm", "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s", ip))
+		var buf bytes.Buffer
+		cmd.Stdout = &buf
+		err = cmd.Run()
 		if err != nil {
 			log.Fatal(err)
-		}
-		n, err := io.Copy(ioutil.Discard, res.Body)
-		if err != nil {
-			log.Print(err)
 		}
 
 		// PowerOff stops the container
@@ -154,8 +160,7 @@ func Example_runContainer() {
 		task, _ = vm.Destroy(ctx)
 		_ = task.Wait(ctx)
 
-		st, _ := os.Stat("feature_test.go")
-		fmt.Printf("%d diff", n-st.Size())
+		fmt.Printf("%d diff", buf.Len()-len(fcontent))
 	})
 	// Output: 0 diff
 }

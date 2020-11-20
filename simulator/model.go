@@ -26,6 +26,7 @@ import (
 	"path"
 	"path/filepath"
 	"reflect"
+	"strings"
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
@@ -237,6 +238,7 @@ var kinds = map[string]reflect.Type{
 	"GuestOperationsManager":         reflect.TypeOf((*GuestOperationsManager)(nil)).Elem(),
 	"HostDatastoreBrowser":           reflect.TypeOf((*HostDatastoreBrowser)(nil)).Elem(),
 	"HostLocalAccountManager":        reflect.TypeOf((*HostLocalAccountManager)(nil)).Elem(),
+	"HostNetworkSystem":              reflect.TypeOf((*HostNetworkSystem)(nil)).Elem(),
 	"HostSystem":                     reflect.TypeOf((*HostSystem)(nil)).Elem(),
 	"IpPoolManager":                  reflect.TypeOf((*IpPoolManager)(nil)).Elem(),
 	"LicenseManager":                 reflect.TypeOf((*LicenseManager)(nil)).Elem(),
@@ -338,6 +340,46 @@ func (m *Model) resolveReferences(ctx *Context) error {
 	return nil
 }
 
+func (m *Model) decode(path string, data interface{}) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+
+	dec := xml.NewDecoder(f)
+	dec.TypeFunc = types.TypeFunc()
+	err = dec.Decode(data)
+	_ = f.Close()
+	return err
+}
+
+func (m *Model) loadMethod(obj mo.Reference, dir string) error {
+	dir = filepath.Join(dir, obj.Reference().Encode())
+
+	info, err := ioutil.ReadDir(dir)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil
+		}
+		return err
+	}
+
+	zero := reflect.Value{}
+	for _, x := range info {
+		name := strings.TrimSuffix(x.Name(), ".xml") + "Response"
+		path := filepath.Join(dir, x.Name())
+		response := reflect.ValueOf(obj).Elem().FieldByName(name)
+		if response == zero {
+			return fmt.Errorf("field %T.%s not found", obj, name)
+		}
+		if err = m.decode(path, response.Addr().Interface()); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 // Load Model from the given directory, as created by the 'govc object.save' command.
 func (m *Model) Load(dir string) error {
 	ctx := internalContext
@@ -348,22 +390,17 @@ func (m *Model) Load(dir string) error {
 			return err
 		}
 		if info.IsDir() {
-			return nil
+			if path == dir {
+				return nil
+			}
+			return filepath.SkipDir
 		}
 		if filepath.Ext(path) != ".xml" {
 			return nil
 		}
 
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer func() { _ = f.Close() }()
-
-		dec := xml.NewDecoder(f)
-		dec.TypeFunc = types.TypeFunc()
 		var content types.ObjectContent
-		err = dec.Decode(&content)
+		err = m.decode(path, &content)
 		if err != nil {
 			return err
 		}
@@ -385,9 +422,13 @@ func (m *Model) Load(dir string) error {
 			return err
 		}
 
-		Map.Put(obj)
+		if x, ok := obj.(interface{ model(*Model) error }); ok {
+			if err = x.model(m); err != nil {
+				return err
+			}
+		}
 
-		return nil
+		return m.loadMethod(Map.Put(obj), dir)
 	})
 
 	if err != nil {
@@ -731,14 +772,20 @@ func (m *Model) Create() error {
 	return nil
 }
 
+func (m *Model) createTempDir(dc string, name string) (string, error) {
+	dir, err := ioutil.TempDir("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
+	if err == nil {
+		m.dirs = append(m.dirs, dir)
+	}
+	return dir, err
+}
+
 func (m *Model) createLocalDatastore(dc string, name string, hosts []*object.HostSystem) error {
 	ctx := context.Background()
-	dir, err := ioutil.TempDir("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
+	dir, err := m.createTempDir(dc, name)
 	if err != nil {
 		return err
 	}
-
-	m.dirs = append(m.dirs, dir)
 
 	for _, host := range hosts {
 		dss, err := host.ConfigManager().DatastoreSystem(ctx)

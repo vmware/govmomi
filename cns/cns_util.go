@@ -51,13 +51,31 @@ func GetTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (cnstypes
 	return nil, errors.New("TaskInfo result is empty")
 }
 
+// GetTaskResultArray gets the task result array for a specified task info
+func GetTaskResultArray(ctx context.Context, taskInfo *vim25types.TaskInfo) ([]cnstypes.BaseCnsVolumeOperationResult, error) {
+	if taskInfo == nil {
+		return nil, errors.New("TaskInfo is empty")
+	}
+	if taskInfo.Result != nil {
+		volumeOperationBatchResult := taskInfo.Result.(cnstypes.CnsVolumeOperationBatchResult)
+		if &volumeOperationBatchResult == nil ||
+			volumeOperationBatchResult.VolumeResults == nil ||
+			len(volumeOperationBatchResult.VolumeResults) == 0 {
+			return nil, errors.New("Cannot get VolumeOperationResult")
+		}
+		return volumeOperationBatchResult.VolumeResults, nil
+	}
+	return nil, errors.New("TaskInfo result is empty")
+}
+
 // dropUnknownCreateSpecElements helps drop newly added elements in the CnsVolumeCreateSpec, which are not known to the prior vSphere releases
 func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolumeCreateSpec) []cnstypes.CnsVolumeCreateSpec {
-	var updatedcreateSpecList []cnstypes.CnsVolumeCreateSpec
 	if c.serviceClient.Version == ReleaseVSAN67u3 {
 		// Dropping optional fields not known to vSAN 6.7U3
+		updatedcreateSpecList := make([]cnstypes.CnsVolumeCreateSpec, 0, len(createSpecList))
 		for _, createSpec := range createSpecList {
 			createSpec.Metadata.ContainerCluster.ClusterFlavor = ""
+			createSpec.Metadata.ContainerCluster.ClusterDistribution = ""
 			createSpec.Metadata.ContainerClusterArray = nil
 			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
 			for _, entityMetadata := range createSpec.Metadata.EntityMetadata {
@@ -75,7 +93,9 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 		}
 		createSpecList = updatedcreateSpecList
 	} else if c.serviceClient.Version == ReleaseVSAN70 {
+		updatedcreateSpecList := make([]cnstypes.CnsVolumeCreateSpec, 0, len(createSpecList))
 		for _, createSpec := range createSpecList {
+			createSpec.Metadata.ContainerCluster.ClusterDistribution = ""
 			_, ok := createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
 			if ok {
 				createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
@@ -89,11 +109,12 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 
 // dropUnknownVolumeMetadataUpdateSpecElements helps drop newly added elements in the CnsVolumeMetadataUpdateSpec, which are not known to the prior vSphere releases
 func dropUnknownVolumeMetadataUpdateSpecElements(c *Client, updateSpecList []cnstypes.CnsVolumeMetadataUpdateSpec) []cnstypes.CnsVolumeMetadataUpdateSpec {
+	// Dropping optional fields not known to vSAN 6.7U3
 	if c.serviceClient.Version == ReleaseVSAN67u3 {
-		// Dropping optional fields not known to vSAN 6.7U3
-		var updatedUpdateSpecList []cnstypes.CnsVolumeMetadataUpdateSpec
+		updatedUpdateSpecList := make([]cnstypes.CnsVolumeMetadataUpdateSpec, 0, len(updateSpecList))
 		for _, updateSpec := range updateSpecList {
 			updateSpec.Metadata.ContainerCluster.ClusterFlavor = ""
+			updateSpec.Metadata.ContainerCluster.ClusterDistribution = ""
 			var updatedEntityMetadata []cnstypes.BaseCnsEntityMetadata
 			for _, entityMetadata := range updateSpec.Metadata.EntityMetadata {
 				k8sEntityMetadata := interface{}(entityMetadata).(*cnstypes.CnsKubernetesEntityMetadata)
@@ -103,6 +124,19 @@ func dropUnknownVolumeMetadataUpdateSpecElements(c *Client, updateSpecList []cns
 			}
 			updateSpec.Metadata.ContainerClusterArray = nil
 			updateSpec.Metadata.EntityMetadata = updatedEntityMetadata
+			updatedUpdateSpecList = append(updatedUpdateSpecList, updateSpec)
+		}
+		updateSpecList = updatedUpdateSpecList
+	} else if c.serviceClient.Version == ReleaseVSAN70 {
+		updatedUpdateSpecList := make([]cnstypes.CnsVolumeMetadataUpdateSpec, 0, len(updateSpecList))
+		for _, updateSpec := range updateSpecList {
+			updateSpec.Metadata.ContainerCluster.ClusterDistribution = ""
+			var updatedContainerClusterArray []cnstypes.CnsContainerCluster
+			for _, containerCluster := range updateSpec.Metadata.ContainerClusterArray {
+				containerCluster.ClusterDistribution = ""
+				updatedContainerClusterArray = append(updatedContainerClusterArray, containerCluster)
+			}
+			updateSpec.Metadata.ContainerClusterArray = updatedContainerClusterArray
 			updatedUpdateSpecList = append(updatedUpdateSpecList, updateSpec)
 		}
 		updateSpecList = updatedUpdateSpecList

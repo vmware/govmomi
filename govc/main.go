@@ -34,6 +34,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/device"
 	_ "github.com/vmware/govmomi/govc/device/cdrom"
 	_ "github.com/vmware/govmomi/govc/device/floppy"
+	_ "github.com/vmware/govmomi/govc/device/pci"
 	_ "github.com/vmware/govmomi/govc/device/scsi"
 	_ "github.com/vmware/govmomi/govc/device/serial"
 	_ "github.com/vmware/govmomi/govc/device/usb"
@@ -70,6 +71,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/ls"
 	_ "github.com/vmware/govmomi/govc/metric"
 	_ "github.com/vmware/govmomi/govc/metric/interval"
+	_ "github.com/vmware/govmomi/govc/namespace/cluster"
 	_ "github.com/vmware/govmomi/govc/object"
 	_ "github.com/vmware/govmomi/govc/option"
 	_ "github.com/vmware/govmomi/govc/permissions"
@@ -79,6 +81,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/sso/group"
 	_ "github.com/vmware/govmomi/govc/sso/service"
 	_ "github.com/vmware/govmomi/govc/sso/user"
+	_ "github.com/vmware/govmomi/govc/storage/policy"
 	_ "github.com/vmware/govmomi/govc/tags"
 	_ "github.com/vmware/govmomi/govc/tags/association"
 	_ "github.com/vmware/govmomi/govc/tags/category"
@@ -93,6 +96,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/vm/option"
 	_ "github.com/vmware/govmomi/govc/vm/rdm"
 	_ "github.com/vmware/govmomi/govc/vm/snapshot"
+	_ "github.com/vmware/govmomi/govc/volume"
 )
 
 func main() {

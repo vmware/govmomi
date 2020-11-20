@@ -46,6 +46,16 @@ func NewHostNetworkSystem(host *mo.HostSystem) *HostNetworkSystem {
 	}
 }
 
+func (s *HostNetworkSystem) init(r *Registry) {
+	for _, obj := range r.objects {
+		if h, ok := obj.(*HostSystem); ok {
+			if h.ConfigManager.NetworkSystem.Value == s.Self.Value {
+				s.Host = &h.HostSystem
+			}
+		}
+	}
+}
+
 func (s *HostNetworkSystem) folder() *Folder {
 	f := Map.getEntityDatacenter(s.Host).NetworkFolder
 	return Map.Get(f).(*Folder)
@@ -181,6 +191,22 @@ func (s *HostNetworkSystem) UpdateNetworkConfig(req *types.UpdateNetworkConfig) 
 	return &methods.UpdateNetworkConfigBody{
 		Res: &types.UpdateNetworkConfigResponse{
 			Returnval: types.HostNetworkConfigResult{},
+		},
+	}
+}
+
+func (s *HostNetworkSystem) QueryNetworkHint(req *types.QueryNetworkHint) soap.HasFault {
+	var info []types.PhysicalNicHintInfo
+
+	for _, nic := range s.Host.Config.Network.Pnic {
+		info = append(info, types.PhysicalNicHintInfo{
+			Device: nic.Device,
+		})
+	}
+
+	return &methods.QueryNetworkHintBody{
+		Res: &types.QueryNetworkHintResponse{
+			Returnval: info,
 		},
 	}
 }

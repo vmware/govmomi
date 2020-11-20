@@ -469,6 +469,41 @@ func (v VirtualMachine) RemoveDevice(ctx context.Context, keepFiles bool, device
 	return v.configureDevice(ctx, types.VirtualDeviceConfigSpecOperationRemove, fop, device...)
 }
 
+// AttachDisk attaches the given disk to the VirtualMachine
+func (v VirtualMachine) AttachDisk(ctx context.Context, id string, datastore *Datastore, controllerKey int32, unitNumber int32) error {
+	req := types.AttachDisk_Task{
+		This:          v.Reference(),
+		DiskId:        types.ID{Id: id},
+		Datastore:     datastore.Reference(),
+		ControllerKey: controllerKey,
+		UnitNumber:    &unitNumber,
+	}
+
+	res, err := methods.AttachDisk_Task(ctx, v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	task := NewTask(v.c, res.Returnval)
+	return task.Wait(ctx)
+}
+
+// DetachDisk detaches the given disk from the VirtualMachine
+func (v VirtualMachine) DetachDisk(ctx context.Context, id string) error {
+	req := types.DetachDisk_Task{
+		This:   v.Reference(),
+		DiskId: types.ID{Id: id},
+	}
+
+	res, err := methods.DetachDisk_Task(ctx, v.c, &req)
+	if err != nil {
+		return err
+	}
+
+	task := NewTask(v.c, res.Returnval)
+	return task.Wait(ctx)
+}
+
 // BootOptions returns the VirtualMachine's config.bootOptions property.
 func (v VirtualMachine) BootOptions(ctx context.Context) (*types.VirtualMachineBootOptions, error) {
 	var o mo.VirtualMachine
@@ -855,8 +890,10 @@ func (v VirtualMachine) UUID(ctx context.Context) string {
 	if err != nil {
 		return ""
 	}
-
-	return o.Config.Uuid
+	if o.Config != nil {
+		return o.Config.Uuid
+	}
+	return ""
 }
 
 func (v VirtualMachine) QueryChangedDiskAreas(ctx context.Context, baseSnapshot, curSnapshot *types.ManagedObjectReference, disk *types.VirtualDisk, offset int64) (types.DiskChangeInfo, error) {

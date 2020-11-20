@@ -79,6 +79,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		MemoryAllocation:   &rspec.MemoryAllocation,
 		CpuAllocation:      &rspec.CpuAllocation,
 		LatencySensitivity: &types.LatencySensitivity{Level: types.LatencySensitivitySensitivityLevelNormal},
+		BootOptions:        &types.VirtualMachineBootOptions{},
 	}
 	vm.Layout = &types.VirtualMachineFileLayout{}
 	vm.LayoutEx = &types.VirtualMachineFileLayoutEx{
@@ -138,6 +139,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		Uuid:              vm.uid.String(),
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
 		Version:           esx.HardwareVersion,
+		Firmware:          string(types.GuestOsDescriptorFirmwareTypeBios),
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
 			SuspendDirectory:  dsPath,
@@ -387,6 +389,12 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 	if spec.GuestId != "" {
 		if err := validateGuestID(spec.GuestId); err != nil {
 			return err
+		}
+	}
+
+	if o := spec.BootOptions; o != nil {
+		if isTrue(o.EfiSecureBootEnabled) && vm.Config.Firmware != string(types.GuestOsDescriptorFirmwareTypeEfi) {
+			return &types.InvalidVmConfig{Property: "msg.hostd.configSpec.efi"}
 		}
 	}
 
@@ -1116,6 +1124,22 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			})
 
 			vm.updateDiskLayouts()
+
+			if disk, ok := b.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+				// These properties default to false
+				props := []**bool{
+					&disk.EagerlyScrub,
+					&disk.ThinProvisioned,
+					&disk.WriteThrough,
+					&disk.Split,
+					&disk.DigestEnabled,
+				}
+				for _, prop := range props {
+					if *prop == nil {
+						*prop = types.NewBool(false)
+					}
+				}
+			}
 		}
 	case *types.VirtualCdrom:
 		if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
@@ -1139,6 +1163,13 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		}
 		if info.Summary == "" {
 			info.Summary = summary
+		}
+	}
+
+	switch device.(type) {
+	case types.BaseVirtualEthernetCard, *types.VirtualCdrom, *types.VirtualFloppy, *types.VirtualUSB:
+		if d.Connectable == nil {
+			d.Connectable = &types.VirtualDeviceConnectInfo{StartConnected: true, Connected: true}
 		}
 	}
 
@@ -1629,7 +1660,15 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		}
 		if req.Spec.Config != nil {
 			config.ExtraConfig = req.Spec.Config.ExtraConfig
+			config.InstanceUuid = req.Spec.Config.InstanceUuid
 		}
+
+		// Copying hardware properties
+		config.NumCPUs = vm.Config.Hardware.NumCPU
+		config.MemoryMB = int64(vm.Config.Hardware.MemoryMB)
+		config.NumCoresPerSocket = vm.Config.Hardware.NumCoresPerSocket
+		config.VirtualICH7MPresent = vm.Config.Hardware.VirtualICH7MPresent
+		config.VirtualSMCPresent = vm.Config.Hardware.VirtualSMCPresent
 
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
 		devices := vm.Config.Hardware.Device

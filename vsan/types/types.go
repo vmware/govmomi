@@ -83,6 +83,52 @@ func init() {
 	t["VsanPerfThreshold"] = reflect.TypeOf((*VsanPerfThreshold)(nil)).Elem()
 }
 
+// Vsan Query Object Identies
+type VsanQueryObjectIdentities VsanQueryObjectIdentitiesRequestType
+
+func init() {
+	t["VsanQueryObjectIdentities"] = reflect.TypeOf((*VsanQueryObjectIdentities)(nil)).Elem()
+}
+
+type VsanQueryObjectIdentitiesRequestType struct {
+	This                types.ManagedObjectReference `xml:"_this"`
+	Cluster             types.ManagedObjectReference `xml:"cluster"`
+	ObjTypes            []string                     `xml:"objTypes,omitempty"`
+	ObjUuids            []string                     `xml:"objUuids,omitempty"`
+	IncludeObjIdentity  *bool                        `xml:"includeObjIdentity"`
+	IncludeHealth       *bool                        `xml:"includeHealth,omitempty"`
+	IncludeSpaceSummary *bool                        `xml:"includeSpaceSummary"`
+}
+
+func init() {
+	t["VsanQueryObjectIdentitiesRequestType"] = reflect.TypeOf((*VsanQueryObjectIdentitiesRequestType)(nil)).Elem()
+}
+
+type VsanQueryObjectIdentitiesResponse struct {
+	Returnval VsanObjectIdentityAndHealth `xml:"returnval"`
+}
+
+type VsanObjectIdentityAndHealth struct {
+	DynamicData
+
+	Health       *VsanObjectOverallHealth `xml:"health,omitempty"`
+	Identities   *VsanObjectIdentity      `xml:"identities,omitempty"`
+	RawData      string                   `xml:"rawData,omitempty"`
+	SpaceSummary []VsanObjectSpaceSummary `xml:"spaceSummary,omitempty"`
+}
+
+func init() {
+	t["VsanObjectIdentityAndHealth"] = reflect.TypeOf((*VsanObjectIdentityAndHealth)(nil)).Elem()
+}
+
+type VsanObjectIdentity struct {
+	Uuid string `xml:"uuid,omitempty"`
+}
+
+func init() {
+	t["VsanObjectIdentity"] = reflect.TypeOf((*VsanObjectIdentity)(nil)).Elem()
+}
+
 // Cluster health summary
 type VsanQueryVcClusterHealthSummary VsanQueryVcClusterHealthSummaryRequestType
 
@@ -1407,6 +1453,25 @@ func init() {
 
 type VsanClusterGetConfigResponse struct {
 	Returnval VsanConfigInfoEx `xml:"returnval"`
+}
+
+type QueryVsanObjectsRequestType struct {
+	This  types.ManagedObjectReference `xml:"_this"`
+	Uuids []string                     `xml:"uuids"`
+}
+
+func init() {
+	types.Add("QueryVsanObjecstRequestType", reflect.TypeOf((*QueryVsanObjectsRequestType)(nil)).Elem())
+}
+
+type QueryVsanObjects QueryVsanObjectsRequestType
+
+func init() {
+	types.Add("QueryVsanObjects", reflect.TypeOf((*QueryVsanObjects)(nil)).Elem())
+}
+
+type QueryVsanObjectsResponse struct {
+	Returnval string `xml:"returnval"`
 }
 
 type VsanConfigInfoEx struct {

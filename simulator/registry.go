@@ -19,6 +19,7 @@ package simulator
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"reflect"
 	"strings"
@@ -144,6 +145,13 @@ func (r *Registry) AddHandler(h RegisterObject) {
 	r.m.Unlock()
 }
 
+// RemoveHandler removes a RegisterObject handler from the Registry.
+func (r *Registry) RemoveHandler(h RegisterObject) {
+	r.m.Lock()
+	delete(r.handlers, h.Reference())
+	r.m.Unlock()
+}
+
 // NewEntity sets Entity().Self with a new, unique Value.
 // Useful for creating object instances from templates.
 func (r *Registry) NewEntity(item mo.Entity) mo.Entity {
@@ -220,15 +228,18 @@ func (r *Registry) applyHandlers(f func(o RegisterObject)) {
 	}
 }
 
-// Put adds a new object to Registry, generating a ManagedObjectReference if not already set.
-func (r *Registry) Put(item mo.Reference) mo.Reference {
-	r.m.Lock()
-
+func (r *Registry) reference(item mo.Reference) types.ManagedObjectReference {
 	ref := item.Reference()
 	if ref.Type == "" || ref.Value == "" {
 		ref = r.newReference(item)
 		r.setReference(item, ref)
 	}
+	return ref
+}
+
+// Put adds a new object to Registry, generating a ManagedObjectReference if not already set.
+func (r *Registry) Put(item mo.Reference) mo.Reference {
+	r.m.Lock()
 
 	if me, ok := item.(mo.Entity); ok {
 		me.Entity().ConfigStatus = types.ManagedEntityStatusGreen
@@ -236,7 +247,7 @@ func (r *Registry) Put(item mo.Reference) mo.Reference {
 		me.Entity().EffectiveRole = []int32{-1} // Admin
 	}
 
-	r.objects[ref] = item
+	r.objects[r.reference(item)] = item
 
 	r.m.Unlock()
 
@@ -352,6 +363,31 @@ func (r *Registry) getEntityComputeResource(item mo.Entity) mo.Entity {
 	}
 }
 
+func entityName(e mo.Entity) string {
+	name := e.Entity().Name
+	if name != "" {
+		return name
+	}
+
+	obj := getManagedObject(e).Addr().Interface()
+
+	// The types below have their own 'Name' field, so ManagedEntity.Name (me.Name) is empty.
+	// See also mo.Ancestors
+	switch x := obj.(type) {
+	case *mo.Network:
+		return x.Name
+	case *mo.DistributedVirtualSwitch:
+		return x.Name
+	case *mo.DistributedVirtualPortgroup:
+		return x.Name
+	case *mo.OpaqueNetwork:
+		return x.Name
+	}
+
+	log.Panicf("%T object %s does not have a Name", obj, e.Reference())
+	return name
+}
+
 // FindByName returns the first mo.Entity of the given refs whose Name field is equal to the given name.
 // If there is no match, nil is returned.
 // This method is useful for cases where objects are required to have a unique name, such as Datastore with
@@ -359,7 +395,7 @@ func (r *Registry) getEntityComputeResource(item mo.Entity) mo.Entity {
 func (r *Registry) FindByName(name string, refs []types.ManagedObjectReference) mo.Entity {
 	for _, ref := range refs {
 		if e, ok := r.Get(ref).(mo.Entity); ok {
-			if name == e.Entity().Name {
+			if name == entityName(e) {
 				return e
 			}
 		}
@@ -520,6 +556,8 @@ func (r *Registry) locker(obj mo.Reference) sync.Locker {
 	case *types.ManagedObjectReference:
 		ref = *x
 		obj = r.Get(ref) // to check for sync.Locker
+	case *ListView: // otherwise race_test.go fails in the default case
+		ref = x.Self
 	default:
 		ref = obj.Reference()
 	}

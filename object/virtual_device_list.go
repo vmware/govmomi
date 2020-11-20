@@ -19,6 +19,7 @@ package object
 import (
 	"errors"
 	"fmt"
+	"math/rand"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -67,7 +68,7 @@ func EthernetCardTypes() VirtualDeviceList {
 		&types.VirtualSriovEthernetCard{},
 	}).Select(func(device types.BaseVirtualDevice) bool {
 		c := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
-		c.GetVirtualDevice().Key = -1
+		c.GetVirtualDevice().Key = int32(rand.Uint32()) * -1
 		return true
 	})
 }
@@ -433,7 +434,7 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	d.UnitNumber = new(int32)
 	*d.UnitNumber = l.newUnitNumber(c)
 	if d.Key == 0 {
-		d.Key = -1
+		d.Key = int32(rand.Uint32()) * -1
 	}
 }
 
