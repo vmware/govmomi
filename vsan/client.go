@@ -97,7 +97,7 @@ var (
 func (c *Client) VsanQueryObjectIdentities(ctx context.Context, cluster vimtypes.ManagedObjectReference) (*vsantypes.VsanObjectIdentityAndHealth, error) {
 	req := vsantypes.VsanQueryObjectIdentities{
 		This:    VsanQueryObjectIdentitiesInstance,
-		Cluster: cluster,
+		Cluster: &cluster,
 	}
 
 	res, err := methods.VsanQueryObjectIdentities(ctx, c.serviceClient, &req)
@@ -106,6 +106,6 @@ func (c *Client) VsanQueryObjectIdentities(ctx context.Context, cluster vimtypes
 		return nil, err
 	}
 
-	return &res.Returnval, nil
+	return res.Returnval, nil
 
 }
