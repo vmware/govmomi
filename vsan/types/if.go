@@ -14,7 +14,6 @@ limitations under the License.
 package types
 
 import (
-
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -44,7 +43,9 @@ type BaseVsanIscsiLUNCommonInfo interface {
 	GetVsanIscsiLUNCommonInfo() *VsanIscsiLUNCommonInfo
 }
 
-func (b *EntityResourceCheckDetails) GetEntityResourceCheckDetails() *EntityResourceCheckDetails { return b }
+func (b *EntityResourceCheckDetails) GetEntityResourceCheckDetails() *EntityResourceCheckDetails {
+	return b
+}
 
 type BaseEntityResourceCheckDetails interface {
 	GetEntityResourceCheckDetails() *EntityResourceCheckDetails
@@ -62,19 +63,25 @@ type BaseVsanDatastoreSpec interface {
 	GetVsanDatastoreSpec() *VsanDatastoreSpec
 }
 
-func (b *VsanNetworkConfigBaseIssue) GetVsanNetworkConfigBaseIssue() *VsanNetworkConfigBaseIssue { return b }
+func (b *VsanNetworkConfigBaseIssue) GetVsanNetworkConfigBaseIssue() *VsanNetworkConfigBaseIssue {
+	return b
+}
 
 type BaseVsanNetworkConfigBaseIssue interface {
 	GetVsanNetworkConfigBaseIssue() *VsanNetworkConfigBaseIssue
 }
 
-func (b *VsanIscsiTargetCommonInfo) GetVsanIscsiTargetCommonInfo() *VsanIscsiTargetCommonInfo { return b }
+func (b *VsanIscsiTargetCommonInfo) GetVsanIscsiTargetCommonInfo() *VsanIscsiTargetCommonInfo {
+	return b
+}
 
 type BaseVsanIscsiTargetCommonInfo interface {
 	GetVsanIscsiTargetCommonInfo() *VsanIscsiTargetCommonInfo
 }
 
-func (b *VsanClusterHealthResultBase) GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase { return b }
+func (b *VsanClusterHealthResultBase) GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase {
+	return b
+}
 
 type BaseVsanClusterHealthResultBase interface {
 	GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase
@@ -98,7 +105,9 @@ type BaseVsanComparator interface {
 	GetVsanComparator() *VsanComparator
 }
 
-func (b *VsanIscsiTargetServiceConfig) GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig { return b }
+func (b *VsanIscsiTargetServiceConfig) GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig {
+	return b
+}
 
 type BaseVsanIscsiTargetServiceConfig interface {
 	GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig
@@ -115,4 +124,3 @@ func (b *CnsBackingObjectDetails) GetCnsBackingObjectDetails() *CnsBackingObject
 type BaseCnsBackingObjectDetails interface {
 	GetCnsBackingObjectDetails() *CnsBackingObjectDetails
 }
-

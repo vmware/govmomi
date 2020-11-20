@@ -20,7 +20,7 @@ import (
 )
 
 type VsanPerformanceManager struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanPerformanceManager) Reference() types.ManagedObjectReference {
@@ -32,7 +32,7 @@ func init() {
 }
 
 type VimClusterVsanVcDiskManagementSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VimClusterVsanVcDiskManagementSystem) Reference() types.ManagedObjectReference {
@@ -44,7 +44,7 @@ func init() {
 }
 
 type VsanHostVdsSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanHostVdsSystem) Reference() types.ManagedObjectReference {
@@ -56,7 +56,7 @@ func init() {
 }
 
 type VsanPhoneHomeSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanPhoneHomeSystem) Reference() types.ManagedObjectReference {
@@ -68,7 +68,7 @@ func init() {
 }
 
 type VsanIscsiTargetSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanIscsiTargetSystem) Reference() types.ManagedObjectReference {
@@ -80,7 +80,7 @@ func init() {
 }
 
 type VsanClusterMgmtInternalSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanClusterMgmtInternalSystem) Reference() types.ManagedObjectReference {
@@ -92,7 +92,7 @@ func init() {
 }
 
 type VsanCapabilitySystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanCapabilitySystem) Reference() types.ManagedObjectReference {
@@ -104,7 +104,7 @@ func init() {
 }
 
 type VsanVumSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanVumSystem) Reference() types.ManagedObjectReference {
@@ -116,7 +116,7 @@ func init() {
 }
 
 type VsanResourceCheckSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanResourceCheckSystem) Reference() types.ManagedObjectReference {
@@ -128,7 +128,7 @@ func init() {
 }
 
 type VsanObjectSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanObjectSystem) Reference() types.ManagedObjectReference {
@@ -140,7 +140,7 @@ func init() {
 }
 
 type VsanVcClusterConfigSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanVcClusterConfigSystem) Reference() types.ManagedObjectReference {
@@ -152,7 +152,7 @@ func init() {
 }
 
 type VsanVcClusterHealthSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanVcClusterHealthSystem) Reference() types.ManagedObjectReference {
@@ -164,7 +164,7 @@ func init() {
 }
 
 type VsanVcsaDeployerSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanVcsaDeployerSystem) Reference() types.ManagedObjectReference {
@@ -176,7 +176,7 @@ func init() {
 }
 
 type VsanVdsSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanVdsSystem) Reference() types.ManagedObjectReference {
@@ -188,7 +188,7 @@ func init() {
 }
 
 type VsanRemoteDatastoreSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanRemoteDatastoreSystem) Reference() types.ManagedObjectReference {
@@ -200,7 +200,7 @@ func init() {
 }
 
 type VsanUpgradeSystemEx struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanUpgradeSystemEx) Reference() types.ManagedObjectReference {
@@ -212,7 +212,7 @@ func init() {
 }
 
 type VsanSpaceReportSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanSpaceReportSystem) Reference() types.ManagedObjectReference {
@@ -224,7 +224,7 @@ func init() {
 }
 
 type VsanIoInsightManager struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanIoInsightManager) Reference() types.ManagedObjectReference {
@@ -236,7 +236,7 @@ func init() {
 }
 
 type VsanUpdateManager struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanUpdateManager) Reference() types.ManagedObjectReference {
@@ -248,7 +248,7 @@ func init() {
 }
 
 type VsanSystemEx struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanSystemEx) Reference() types.ManagedObjectReference {
@@ -260,7 +260,7 @@ func init() {
 }
 
 type VsanFileServiceSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanFileServiceSystem) Reference() types.ManagedObjectReference {
@@ -272,7 +272,7 @@ func init() {
 }
 
 type HostVsanHealthSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m HostVsanHealthSystem) Reference() types.ManagedObjectReference {
@@ -284,7 +284,7 @@ func init() {
 }
 
 type CnsVolumeManager struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m CnsVolumeManager) Reference() types.ManagedObjectReference {
@@ -296,7 +296,7 @@ func init() {
 }
 
 type HostSpbm struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m HostSpbm) Reference() types.ManagedObjectReference {
@@ -308,7 +308,7 @@ func init() {
 }
 
 type VimClusterVsanVcStretchedClusterSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VimClusterVsanVcStretchedClusterSystem) Reference() types.ManagedObjectReference {
@@ -320,7 +320,7 @@ func init() {
 }
 
 type VsanClusterHealthSystem struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanClusterHealthSystem) Reference() types.ManagedObjectReference {
@@ -332,7 +332,7 @@ func init() {
 }
 
 type VsanMassCollector struct {
-	Self	types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (m VsanMassCollector) Reference() types.ManagedObjectReference {
@@ -342,4 +342,3 @@ func (m VsanMassCollector) Reference() types.ManagedObjectReference {
 func init() {
 	types.Add("vsan:VsanMassCollector", reflect.TypeOf((*VsanMassCollector)(nil)).Elem())
 }
-
