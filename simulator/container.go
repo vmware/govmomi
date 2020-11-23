@@ -226,7 +226,11 @@ func (c *container) start(vm *VirtualMachine) {
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
 	out, err := cmd.Output()
 	if err != nil {
-		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+		stderr := ""
+		if xerr, ok := err.(*exec.ExitError); ok {
+			stderr = string(xerr.Stderr)
+		}
+		log.Printf("%s %s: %s %s", vm.Name, cmd.Args, err, stderr)
 		return
 	}
 
