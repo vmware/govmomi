@@ -594,3 +594,46 @@ type CnsAlreadyRegisteredFault struct {
 func init() {
 	types.Add("CnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
 }
+
+type CnsConfigureVolumeACLs CnsConfigureVolumeACLsRequestType
+
+func init() {
+	types.Add("vsan:CnsConfigureVolumeACLs", reflect.TypeOf((*CnsConfigureVolumeACLs)(nil)).Elem())
+}
+
+type CnsConfigureVolumeACLsRequestType struct {
+	This           types.ManagedObjectReference `xml:"_this"`
+	ACLConfigSpecs []CnsVolumeACLConfigureSpec  `xml:"ACLConfigSpecs"`
+}
+
+func init() {
+	types.Add("vsan:CnsConfigureVolumeACLsRequestType", reflect.TypeOf((*CnsConfigureVolumeACLsRequestType)(nil)).Elem())
+}
+
+type CnsConfigureVolumeACLsResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsVolumeACLConfigureSpec struct {
+	types.DynamicData
+
+	VolumeId              CnsVolumeId                `xml:"volumeId"`
+	AccessControlSpecList []BaseCnsAccessControlSpec `xml:"accessControlSpecList,typeattr"`
+}
+
+func init() {
+	types.Add("vsan:CnsVolumeACLConfigureSpec", reflect.TypeOf((*CnsVolumeACLConfigureSpec)(nil)).Elem())
+}
+func (b *CnsAccessControlSpec) GetCnsAccessControlSpec() *CnsAccessControlSpec { return b }
+
+type BaseCnsAccessControlSpec interface {
+	GetCnsAccessControlSpec() *CnsAccessControlSpec
+}
+
+type CnsAccessControlSpec struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("vsan:CnsAccessControlSpec", reflect.TypeOf((*CnsAccessControlSpec)(nil)).Elem())
+}
