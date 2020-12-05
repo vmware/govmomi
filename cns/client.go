@@ -192,3 +192,16 @@ func (c *Client) RelocateVolume(ctx context.Context, relocateSpecs ...cnstypes.B
 	}
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
+
+// ConfigureVolumeACLs calls the CNS Configure ACL API.
+func (c *Client) ConfigureVolumeACLs(ctx context.Context, aclConfigSpecs ...cnstypes.CnsVolumeACLConfigureSpec) (*object.Task, error) {
+	req := cnstypes.CnsConfigureVolumeACLs{
+		This:           CnsVolumeManagerInstance,
+		ACLConfigSpecs: aclConfigSpecs,
+	}
+	res, err := methods.CnsConfigureVolumeACLs(ctx, c.serviceClient, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
