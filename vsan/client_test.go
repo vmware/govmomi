@@ -51,7 +51,7 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	finder := find.NewFinder(vsanHealthClient.vim25Client, false)
+	finder := find.NewFinder(vsanHealthClient.Vim25Client, false)
 	dc, err := finder.Datacenter(ctx, datacenter)
 	if err != nil {
 		t.Fatal(err)
@@ -80,6 +80,26 @@ func TestClient(t *testing.T) {
 	if isFileServiceEnabled {
 		t.Logf("Printing one of the clusterConfig where file service is enabled:\n %+v", pretty.Sprint(clusterConfigToPrint))
 	}
+
+	hosts, _ := finder.HostSystemList(ctx, "*")
+	if err != nil {
+		t.Logf("Error occurred while getting hostSystem %+v", err.Error())
+		t.Fatal(err)
+	}
+
+	for _, host := range hosts {
+		vsanSystem, _ := host.ConfigManager().VsanInternalSystem(ctx)
+		if err != nil {
+			t.Logf("Error occurred: %+v", err.Error())
+			t.Fatal(err)
+		}
+		hostConfig, err := vsanHealthClient.VsanHostGetConfig(ctx, vsanSystem.Reference())
+		if err != nil {
+			t.Logf("Error occurred: %+v", err.Error())
+			t.Fatal(err)
+		}
+		t.Logf("Printing hostConfig:\n %+s", pretty.Sprint(hostConfig))
+	}
 }
 
 func TestVsanQueryObjectIdentities(t *testing.T) {
@@ -105,7 +125,7 @@ func TestVsanQueryObjectIdentities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	finder := find.NewFinder(vsanHealthClient.vim25Client, false)
+	finder := find.NewFinder(vsanHealthClient.Vim25Client, false)
 	dc, err := finder.Datacenter(ctx, datacenter)
 	if err != nil {
 		t.Fatal(err)
