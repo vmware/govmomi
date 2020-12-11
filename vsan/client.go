@@ -18,6 +18,7 @@ package vsan
 
 import (
 	"context"
+	"errors"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -42,18 +43,27 @@ var (
 		Type:  "VsanPerformanceManager",
 		Value: "vsan-performance-manager",
 	}
+	VsanQueryObjectIdentitiesInstance = vimtypes.ManagedObjectReference{
+		Type:  "VsanObjectSystem",
+		Value: "vsan-cluster-object-system",
+	}
+	VsanPropertyCollectorInstance = vimtypes.ManagedObjectReference{
+		Type:  "PropertyCollector",
+		Value: "vsan-property-collector",
+	}
 )
 
 // Client used for accessing vsan health APIs.
 type Client struct {
-	vim25Client   *vim25.Client
-	serviceClient *soap.Client
+	*soap.Client
+
+	Vim25Client *vim25.Client
 }
 
 // NewClient creates a new VsanHealth client
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
-	return &Client{c, sc}, nil
+	return &Client{sc, c}, nil
 }
 
 // VsanClusterGetConfig calls the Vsan health's VsanClusterGetConfig API.
@@ -63,7 +73,7 @@ func (c *Client) VsanClusterGetConfig(ctx context.Context, cluster vimtypes.Mana
 		Cluster: cluster,
 	}
 
-	res, err := methods.VsanClusterGetConfig(ctx, c.serviceClient, &req)
+	res, err := methods.VsanClusterGetConfig(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -78,20 +88,12 @@ func (c *Client) VsanPerfQueryPerf(ctx context.Context, cluster *vimtypes.Manage
 		QuerySpecs: qSpecs,
 	}
 
-	res, err := methods.VsanPerfQueryPerf(ctx, c.serviceClient, &req)
+	res, err := methods.VsanPerfQueryPerf(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
 	return res.Returnval, nil
 }
-
-// Creates the vsan object identities instance. This is to be queried from vsan health.
-var (
-	VsanQueryObjectIdentitiesInstance = vimtypes.ManagedObjectReference{
-		Type:  "VsanObjectSystem",
-		Value: "vsan-cluster-object-system",
-	}
-)
 
 // VsanQueryObjectIdentities return host uuid
 func (c *Client) VsanQueryObjectIdentities(ctx context.Context, cluster vimtypes.ManagedObjectReference) (*vsantypes.VsanObjectIdentityAndHealth, error) {
@@ -100,12 +102,49 @@ func (c *Client) VsanQueryObjectIdentities(ctx context.Context, cluster vimtypes
 		Cluster: &cluster,
 	}
 
-	res, err := methods.VsanQueryObjectIdentities(ctx, c.serviceClient, &req)
+	res, err := methods.VsanQueryObjectIdentities(ctx, c, &req)
 
 	if err != nil {
 		return nil, err
 	}
 
 	return res.Returnval, nil
+}
 
+// VsanHostGetConfig returns the config of host's vSAN system.
+func (c *Client) VsanHostGetConfig(ctx context.Context, vsanSystem vimtypes.ManagedObjectReference) (*vsantypes.VsanHostConfigInfoEx, error) {
+	req := vimtypes.RetrievePropertiesEx{
+		SpecSet: []vimtypes.PropertyFilterSpec{{
+			ObjectSet: []vimtypes.ObjectSpec{{
+				Obj: vsanSystem}},
+			PropSet: []vimtypes.PropertySpec{{
+				Type:    "HostVsanSystem",
+				PathSet: []string{"config"}}}}},
+		This: VsanPropertyCollectorInstance}
+
+	res, err := methods.RetrievePropertiesEx(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	var property vimtypes.DynamicProperty
+	if res != nil && res.Returnval != nil {
+		for _, obj := range res.Returnval.Objects {
+			for _, prop := range obj.PropSet {
+				if prop.Name == "config" {
+					property = prop
+					break
+				}
+			}
+		}
+	}
+
+	switch cfg := property.Val.(type) {
+	case vimtypes.VsanHostConfigInfo:
+		return &vsantypes.VsanHostConfigInfoEx{VsanHostConfigInfo: cfg}, nil
+	case vsantypes.VsanHostConfigInfoEx:
+		return &cfg, nil
+	default:
+		return nil, errors.New("host vSAN config not found")
+	}
 }
