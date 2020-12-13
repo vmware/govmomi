@@ -245,3 +245,16 @@ _EOF_
     name=$(govc host.info -json -host.ip 10.0.0.42 | jq -r .HostSystems[].Name)
     assert_equal 10.0.0.42 "$name"
 }
+
+@test "cluster.usage" {
+  vcsim_env -host 4
+
+  run govc cluster.usage enoent
+  assert_failure
+
+  run govc cluster.usage DC0_C0
+  assert_success
+
+  memory=$(govc cluster.usage -json DC0_C0 | jq -r .Memory.Summary.Usage)
+  [ "$memory" = "34.3" ]
+}
