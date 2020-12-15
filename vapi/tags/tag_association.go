@@ -60,7 +60,19 @@ func (c *Manager) DetachTag(ctx context.Context, tagID string, ref mo.Reference)
 	return c.Do(ctx, url.Request(http.MethodPost, spec), nil)
 }
 
-// AttachTagToMultipleObjects attaches a tag ID to multiple managed objects
+// batchResponse is the response type used by attach/detach operations which
+// take multiple tagIDs or moRefs as input. On failure Success will be false and
+// Errors contains information about all failed operations
+type batchResponse struct {
+	Success bool        `json:"success"`
+	Errors  BatchErrors `json:"error_messages,omitempty"`
+}
+
+// AttachTagToMultipleObjects attaches a tag ID to multiple managed objects.
+// This operation is idempotent, i.e. if a tag is already attached to the
+// object, then the individual operation is a no-op and no error will be thrown.
+//
+// This operation was added in vSphere API 6.5.
 func (c *Manager) AttachTagToMultipleObjects(ctx context.Context, tagID string, refs []mo.Reference) error {
 	id, err := c.tagID(ctx, tagID)
 	if err != nil {
@@ -78,6 +90,106 @@ func (c *Manager) AttachTagToMultipleObjects(ctx context.Context, tagID string, 
 
 	url := c.Resource(internal.AssociationPath).WithID(id).WithAction("attach-tag-to-multiple-objects")
 	return c.Do(ctx, url.Request(http.MethodPost, spec), nil)
+}
+
+// AttachMultipleTagsToObject attaches multiple tag IDs to a managed object.
+// This operation is idempotent. If a tag is already attached to the object,
+// then the individual operation is a no-op and no error will be thrown. This
+// operation is not atomic. If the underlying call fails with one or more tags
+// not successfully attached to the managed object reference it might leave the
+// managed object reference in a partially tagged state and needs to be resolved
+// by the caller. In this case BatchErrors is returned and can be used to
+// analyse failure reasons on each failed tag.
+//
+// Specified tagIDs must use URN-notation instead of display names or a generic
+// error will be returned and no tagging operation will be performed. If the
+// managed object reference does not exist a generic 403 Forbidden error will be
+// returned.
+//
+// This operation was added in vSphere API 6.5.
+func (c *Manager) AttachMultipleTagsToObject(ctx context.Context, tagIDs []string, ref mo.Reference) error {
+	for _, id := range tagIDs {
+		// URN enforced to avoid unnecessary round-trips due to invalid tags or display
+		// name lookups
+		if isName(id) {
+			return fmt.Errorf("specified tag is not a URN: %q", id)
+		}
+	}
+
+	obj := internal.AssociatedObject(ref.Reference())
+	spec := struct {
+		ObjectID internal.AssociatedObject `json:"object_id"`
+		TagIDs   []string                  `json:"tag_ids"`
+	}{
+		ObjectID: obj,
+		TagIDs:   tagIDs,
+	}
+
+	var res batchResponse
+	url := c.Resource(internal.AssociationPath).WithAction("attach-multiple-tags-to-object")
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err != nil {
+		return err
+	}
+
+	if !res.Success {
+		if len(res.Errors) != 0 {
+			return res.Errors
+		}
+		panic("invalid batch error")
+	}
+
+	return nil
+}
+
+// DetachMultipleTagsFromObject detaches multiple tag IDs from a managed object.
+// This operation is idempotent. If a tag is already detached from the object,
+// then the individual operation is a no-op and no error will be thrown. This
+// operation is not atomic. If the underlying call fails with one or more tags
+// not successfully detached from the managed object reference it might leave
+// the managed object reference in a partially tagged state and needs to be
+// resolved by the caller. In this case BatchErrors is returned and can be used
+// to analyse failure reasons on each failed tag.
+//
+// Specified tagIDs must use URN-notation instead of display names or a generic
+// error will be returned and no tagging operation will be performed. If the
+// managed object reference does not exist a generic 403 Forbidden error will be
+// returned.
+//
+// This operation was added in vSphere API 6.5.
+func (c *Manager) DetachMultipleTagsFromObject(ctx context.Context, tagIDs []string, ref mo.Reference) error {
+	for _, id := range tagIDs {
+		// URN enforced to avoid unnecessary round-trips due to invalid tags or display
+		// name lookups
+		if isName(id) {
+			return fmt.Errorf("specified tag is not a URN: %q", id)
+		}
+	}
+
+	obj := internal.AssociatedObject(ref.Reference())
+	spec := struct {
+		ObjectID internal.AssociatedObject `json:"object_id"`
+		TagIDs   []string                  `json:"tag_ids"`
+	}{
+		ObjectID: obj,
+		TagIDs:   tagIDs,
+	}
+
+	var res batchResponse
+	url := c.Resource(internal.AssociationPath).WithAction("detach-multiple-tags-from-object")
+	err := c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	if err != nil {
+		return err
+	}
+
+	if !res.Success {
+		if len(res.Errors) != 0 {
+			return res.Errors
+		}
+		panic("invalid batch error")
+	}
+
+	return nil
 }
 
 // ListAttachedTags fetches the array of tag IDs attached to the given object.
