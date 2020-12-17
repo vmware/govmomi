@@ -271,6 +271,57 @@ func ExampleVirtualMachine_Clone() {
 	// Output: example-clone
 }
 
+func ExampleFolder_CreateVM() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+		dc, err := finder.Datacenter(ctx, "DC0")
+		if err != nil {
+			return err
+		}
+
+		finder.SetDatacenter(dc)
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			return err
+		}
+
+		pool, err := finder.ResourcePool(ctx, "DC0_C0/Resources")
+		if err != nil {
+			return err
+		}
+
+		spec := types.VirtualMachineConfigSpec{
+			Name:    "example-vm",
+			GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+			Files: &types.VirtualMachineFileInfo{
+				VmPathName: "[LocalDS_0]",
+			},
+		}
+
+		task, err := folders.VmFolder.CreateVM(ctx, spec, pool, nil)
+		if err != nil {
+			return err
+		}
+
+		info, err := task.WaitForResult(ctx)
+		if err != nil {
+			return err
+		}
+
+		vm := object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+		name, err := vm.ObjectName(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(name)
+
+		return nil
+	})
+	// Output: example-vm
+}
+
 func ExampleVirtualMachine_Reconfigure() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
