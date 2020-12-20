@@ -82,7 +82,7 @@ func (cmd *instantclone) Usage() string {
 }
 
 func (cmd *instantclone) Description() string {
-	return `Instant Clone VM to NAME. 
+	return `Instant Clone VM to NAME.
 
 Examples:
   govc vm.instantclone -vm source-vm new-vm

@@ -39,25 +39,11 @@ func (cmd *disableCluster) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClusterFlag.Register(ctx, f)
 }
 
-func (cmd *disableCluster) Process(ctx context.Context) error {
-	if err := cmd.ClusterFlag.Process(ctx); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (cmd *disableCluster) Usage() string {
-	return ""
-}
-
 func (cmd *disableCluster) Description() string {
 	return `Disables vSphere Namespaces on the specified cluster.
 
-Example:
-      govc namespace.cluster.disable \
-      --cluster "Workload-Cluster"
-  `
+Examples:
+  govc namespace.cluster.disable -cluster "Workload-Cluster"`
 }
 
 func (cmd *disableCluster) Run(ctx context.Context, f *flag.FlagSet) error {

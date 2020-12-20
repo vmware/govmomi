@@ -107,7 +107,7 @@ func (cmd *enableCluster) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.ControlPlaneManagementNetwork.Network, "mgmt-network.network", "",
 		"Identifier for the management network.")
 	f.StringVar(&cmd.ControlPlaneManagementNetwork.Mode, "mgmt-network.mode", "STATICRANGE",
-		" IPv4 address assignment modes. Value is one of: DHCP, STATICRANGE")
+		"IPv4 address assignment modes. Value is one of: DHCP, STATICRANGE")
 	f.StringVar(&cmd.ControlPlaneManagementNetwork.FloatingIP, "mgmt-network.floating-IP", "",
 		"Optional. The Floating IP used by the HA master cluster in the when network Mode is DHCP.")
 	f.StringVar(&cmd.ControlPlaneManagementNetwork.AddressRange.StartingAddress, "mgmt-network.starting-address", "",
@@ -146,42 +146,28 @@ func (cmd *enableCluster) Register(ctx context.Context, f *flag.FlagSet) {
 	//  "Optional. Content Library which holds the VM Images for vSphere Kubernetes Service. This Content Library should be subscribed to VMware's hosted vSphere Kubernetes Service Repository.")
 }
 
-func (cmd *enableCluster) Process(ctx context.Context) error {
-	if err := cmd.ClusterFlag.Process(ctx); err != nil {
-		return err
-	}
-	// relying on Vsphere API to check mandatory values are not empty
-
-	return nil
-}
-
-func (cmd *enableCluster) Usage() string {
-	return ""
-}
-
 func (cmd *enableCluster) Description() string {
-	return `Enable vSphere Namespaces on the cluster. 
+	return `Enable vSphere Namespaces on the cluster.
 This operation sets up Kubernetes instance for the cluster along with worker nodes.
 
-Example:
-      govc namespace.cluster.enable \
-      --cluster "Workload-Cluster" \
-      --service-cidr 10.96.0.0/23 \
-      --pod-cidrs 10.244.0.0/20 \
-      --control-plane-dns-names wcp.example.com \
-      --workload-network.egress-cidrs 10.0.0.128/26 \
-      --workload-network.ingress-cidrs "10.0.0.64/26" \
-      --workload-network.switch VDS \
-      --workload-network.edge-cluster Edge-Cluster-1 \
-      --size TINY   \
-      --mgmt-network.network "DVPG-Management Network" \
-      --mgmt-network.gateway 10.0.0.1 \
-      --mgmt-network.starting-address 10.0.0.45 \
-      --mgmt-network.subnet-mask 255.255.255.0 \
-      --ephemeral-storage-policy "vSAN Default Storage Policy" \
-      --control-plane-storage-policy "vSAN Default Storage Policy" \
-      --image-storage-policy "vSAN Default Storage Policy" 
-  `
+Examples:
+  govc namespace.cluster.enable \
+    -cluster "Workload-Cluster" \
+    -service-cidr 10.96.0.0/23 \
+    -pod-cidrs 10.244.0.0/20 \
+    -control-plane-dns-names wcp.example.com \
+    -workload-network.egress-cidrs 10.0.0.128/26 \
+    -workload-network.ingress-cidrs "10.0.0.64/26" \
+    -workload-network.switch VDS \
+    -workload-network.edge-cluster Edge-Cluster-1 \
+    -size TINY   \
+    -mgmt-network.network "DVPG-Management Network" \
+    -mgmt-network.gateway 10.0.0.1 \
+    -mgmt-network.starting-address 10.0.0.45 \
+    -mgmt-network.subnet-mask 255.255.255.0 \
+    -ephemeral-storage-policy "vSAN Default Storage Policy" \
+    -control-plane-storage-policy "vSAN Default Storage Policy" \
+    -image-storage-policy "vSAN Default Storage Policy"`
 }
 
 func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {

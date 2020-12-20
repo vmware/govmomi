@@ -1,5 +1,27 @@
 # changelog
 
+### 0.24.0 (2020-12-20)
+
+* Add cluster.usage command
+
+* Add device.pci commands: add, ls, remove
+
+* Add namespace.cluster commands: disable, ls, enable, logs.download
+
+* Add storage policy commands: create, info, ls, rm
+
+* Add volume commands: ls, rm
+
+* Add vm.instantclone command
+
+* Add device.boot '-firmware' flag
+
+* Add dvs.portgroup.{add,change} '-auto-expand', '-vlan-mode', '-vlan-range' flags
+
+* Add find '-p' flag
+
+* Add vm.console '-wss' flag
+
 ### 0.23.0 (2020-06-11)
 
 * Add vcsa.log.forwarding.info command
