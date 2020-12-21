@@ -48,12 +48,12 @@ func (cmd *remove) Description() string {
 
 Examples:
   govc device.info -vm $vm
-  govc device.pci.remove -vm $vm {pci address}*
+  govc device.pci.remove -vm $vm $pci_address
   govc device.info -vm $vm
 
 Assuming vm name is helloworld, device info command has below output
 
-$ govc device.info --vm helloworld
+$ govc device.info -vm helloworld
 ...
 Name:               pcipassthrough-13000
   Type:             VirtualPCIPassthrough
@@ -72,13 +72,12 @@ Name:               pcipassthrough-13001
 
 To remove only 'pcipassthrough-13000', command should be as below. No output upon success.
 
-$ govc device.pci.remove --vm helloworld pcipassthrough-13000
+$ govc device.pci.remove -vm helloworld pcipassthrough-13000
 
 To remove both 'pcipassthrough-13000' and 'pcipassthrough-13001', command should be as below.
 No output upon success.
 
-$ govc device.pci.remove --vm helloworld pcipassthrough-13000 pcipassthrough-13001
-`
+$ govc device.pci.remove -vm helloworld pcipassthrough-13000 pcipassthrough-13001`
 }
 
 func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
