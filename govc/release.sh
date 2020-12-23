@@ -92,10 +92,10 @@ Instructions:
 '
 
 echo '```'
-echo '$ sha1sum govc_*.gz'
-sha1sum govc_*.gz
-echo '$ sha1sum govc_*.zip'
-sha1sum govc_*.zip
+echo '$ sha256sum govc_*.gz'
+sha256sum govc_*.gz
+echo '$ sha256sum govc_*.zip'
+sha256sum govc_*.zip
 echo '```'
 )
 
