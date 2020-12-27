@@ -32821,7 +32821,7 @@ type NetworkSummary struct {
 	Name       string                  `xml:"name"`
 	Accessible bool                    `xml:"accessible"`
 	IpPoolName string                  `xml:"ipPoolName"`
-	IpPoolId   int32                   `xml:"ipPoolId,omitempty"`
+	IpPoolId   *int32                  `xml:"ipPoolId"`
 }
 
 func init() {

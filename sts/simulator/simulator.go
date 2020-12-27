@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"path"
+	"strings"
 	"time"
 
 	"github.com/vmware/govmomi/simulator"
@@ -57,6 +58,8 @@ type handler struct{}
 // ServeHTTP handles STS requests.
 func (s *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	action := r.Header.Get("SOAPAction")
+	action = strings.TrimSuffix(action, `"`) // PowerCLI sts client quotes the header value
+
 	env := soap.Envelope{}
 	now := time.Now()
 	lifetime := &internal.Lifetime{

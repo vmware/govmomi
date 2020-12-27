@@ -12,6 +12,26 @@ load test_helper
   ruby ./vcsim_test.rb "$(govc env -x GOVC_URL_PORT)"
 }
 
+@test "vcsim powercli" {
+  if ! docker version ; then
+    skip "docker client not installed"
+  fi
+
+  vcsim_env -l 0.0.0.0:0
+
+  server=$(govc env -x GOVC_URL_HOST)
+  port=$(govc env -x GOVC_URL_PORT)
+
+  docker run --rm vmware/powerclicore /usr/bin/pwsh -f - <<EOF
+Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:\$false | Out-Null
+Connect-VIServer -Server $server -Port $port -User user -Password pass
+
+Get-VM
+Get-VIEvent
+Get-VirtualNetwork
+EOF
+}
+
 @test "vcsim examples" {
   vcsim_env
 
