@@ -618,8 +618,12 @@ func (m *Model) Create() error {
 
 		for npg := 0; npg < m.Portgroup; npg++ {
 			name := m.fmtName(dcName+"_DVPG", npg)
+			spec := types.DVPortgroupConfigSpec{
+				Name: name,
+				Type: string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
+			}
 
-			task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{{Name: name}})
+			task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{spec})
 			if err != nil {
 				return err
 			}
@@ -642,6 +646,7 @@ func (m *Model) Create() error {
 			spec := types.DVPortgroupConfigSpec{
 				Name:              name,
 				LogicalSwitchUuid: uuid.New().String(),
+				Type:              string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
 			}
 
 			task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{spec})
