@@ -1046,9 +1046,7 @@ load test_helper
 }
 
 @test "guest fileops" {
-  if ! docker version ; then
-    skip "docker client not installed"
-  fi
+  require_docker
 
   vcsim_env -autostart=false
 

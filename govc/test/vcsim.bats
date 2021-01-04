@@ -13,9 +13,7 @@ load test_helper
 }
 
 @test "vcsim powercli" {
-  if ! docker version ; then
-    skip "docker client not installed"
-  fi
+  require_docker
 
   vcsim_env -l 0.0.0.0:0
 
@@ -231,9 +229,7 @@ docker_name() {
 }
 
 @test "vcsim run container" {
-  if ! docker version ; then
-    skip "docker client not installed"
-  fi
+  require_docker
 
   vcsim_env -autostart=false
 
