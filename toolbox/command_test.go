@@ -26,6 +26,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"testing"
@@ -640,6 +641,10 @@ func TestVixDirectories(t *testing.T) {
 }
 
 func TestVixFiles(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("requires Linux")
+	}
+
 	c := NewCommandClient()
 
 	mktemp := &vix.CreateTempFileRequest{

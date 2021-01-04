@@ -21,6 +21,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	"runtime"
 	"testing"
 )
 
@@ -334,6 +335,10 @@ func TestReadV3(t *testing.T) {
 }
 
 func TestWriteV3(t *testing.T) {
+	if runtime.GOOS != "linux" {
+		t.Skip("requires Linux")
+	}
+
 	Trace = testing.Verbose()
 
 	f, err := ioutil.TempFile("", "toolbox")
