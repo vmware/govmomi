@@ -3,14 +3,14 @@
 load test_helper
 
 @test "tasks" {
-  esx_env
+  vcsim_env
 
   run govc tasks
   assert_success
 }
 
 @test "tasks host" {
-  esx_env
+  vcsim_env
 
   run govc tasks 'host/*'
   assert_success

@@ -94,7 +94,7 @@ load test_helper
 }
 
 @test "pool.change multiple" {
-  esx_env
+  vcsim_env
 
   id=$(new_id)
   path="*/Resources/$id"
@@ -132,7 +132,7 @@ load test_helper
 }
 
 @test "pool.destroy" {
-  esx_env
+  vcsim_env
 
   id=$(new_id)
 
@@ -155,11 +155,11 @@ load test_helper
 
   # 2 child pools
   result=$(govc ls "host/$path/*" | wc -l)
-  [ $result -eq 2 ]
+  [ $result -eq 4 ]
 
   # 1 parent pool
   result=$(govc ls "host/$path" | wc -l)
-  [ $result -eq 1 ]
+  [ $result -eq 2 ]
 
   run govc pool.destroy $path
   assert_success
@@ -173,15 +173,15 @@ load test_helper
 
   # first child pool
   result=$(govc ls "host/*/Resources/$id1" | wc -l)
-  [ $result -eq 0 ]
+  [ $result -eq 2 ]
 
   # second child pool
   result=$(govc ls "host/*/Resources/$id2" | wc -l)
-  [ $result -eq 0 ]
+  [ $result -eq 2 ]
 }
 
 @test "pool.destroy children" {
-  esx_env
+  vcsim_env
 
   id=$(new_id)
 
@@ -202,11 +202,11 @@ load test_helper
 
   # 2 child pools
   result=$(govc ls "host/$path/*" | wc -l)
-  [ $result -eq 2 ]
+  [ $result -eq 4 ]
 
   # 1 parent pool
   result=$(govc ls "host/*/Resources/govc-test-*" | wc -l)
-  [ $result -eq 1 ]
+  [ $result -eq 2 ]
 
   # delete children
   run govc pool.destroy -children $path
@@ -252,7 +252,7 @@ load test_helper
 }
 
 @test "vm.create -pool" {
-  esx_env
+  vcsim_env -esx
 
   # test with full inventory path to pools
   parent_path=$(govc ls 'host/*/Resources')
@@ -273,9 +273,6 @@ load test_helper
     run govc vm.create -pool $path $(new_id)
     assert_success
   done
-
-  run govc pool.change -mem.limit 100 -mem.expandable=false $child_path
-  assert_failure
 
   run govc pool.change -mem.limit 100 $child_path
   assert_success

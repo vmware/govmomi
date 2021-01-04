@@ -170,6 +170,10 @@ func (o *VirtualMachine) RenameTask(r *types.Rename_Task) soap.HasFault {
 	return RenameTask(o, r)
 }
 
+func (*VirtualMachine) Reload(*types.Reload) soap.HasFault {
+	return &methods.ReloadBody{Res: new(types.ReloadResponse)}
+}
+
 func (vm *VirtualMachine) event() types.VmEvent {
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
 
@@ -1145,6 +1149,17 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 		if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
 			summary = "ISO " + b.GetVirtualDeviceFileBackingInfo().FileName
 		}
+	case *types.VirtualFloppy:
+		if b, ok := d.Backing.(types.BaseVirtualDeviceFileBackingInfo); ok {
+			summary = "Image " + b.GetVirtualDeviceFileBackingInfo().FileName
+		}
+	case *types.VirtualSerialPort:
+		switch b := d.Backing.(type) {
+		case types.BaseVirtualDeviceFileBackingInfo:
+			summary = "File " + b.GetVirtualDeviceFileBackingInfo().FileName
+		case *types.VirtualSerialPortURIBackingInfo:
+			summary = "Remote " + b.ServiceURI
+		}
 	}
 
 	if d.UnitNumber == nil && controller != nil {
@@ -1167,7 +1182,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 	}
 
 	switch device.(type) {
-	case types.BaseVirtualEthernetCard, *types.VirtualCdrom, *types.VirtualFloppy, *types.VirtualUSB:
+	case types.BaseVirtualEthernetCard, *types.VirtualCdrom, *types.VirtualFloppy, *types.VirtualUSB, *types.VirtualSerialPort:
 		if d.Connectable == nil {
 			d.Connectable = &types.VirtualDeviceConnectInfo{StartConnected: true, Connected: true}
 		}
@@ -1407,6 +1422,13 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			&types.VmPoweredOffEvent{VmEvent: event},
 		)
 	case types.VirtualMachinePowerStateSuspended:
+		if c.VirtualMachine.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+			return nil, &types.InvalidPowerState{
+				RequestedState: types.VirtualMachinePowerStatePoweredOn,
+				ExistingState:  c.VirtualMachine.Runtime.PowerState,
+			}
+		}
+
 		c.run.pause(c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmSuspendingEvent{VmEvent: event},
@@ -1480,6 +1502,22 @@ func (vm *VirtualMachine) ResetVMTask(ctx *Context, req *types.ResetVM_Task) soa
 			Returnval: task.Run(),
 		},
 	}
+}
+
+func (vm *VirtualMachine) RebootGuest(ctx *Context, req *types.RebootGuest) soap.HasFault {
+	body := new(methods.RebootGuestBody)
+
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+		body.Fault_ = Fault("", &types.InvalidPowerState{
+			RequestedState: types.VirtualMachinePowerStatePoweredOn,
+			ExistingState:  vm.Runtime.PowerState,
+		})
+		return body
+	}
+
+	body.Fault_ = Fault("", new(types.ToolsUnavailable))
+
+	return body
 }
 
 func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Task) soap.HasFault {

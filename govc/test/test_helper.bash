@@ -39,6 +39,16 @@ GOVC_TEST_IMG=govc-images/$(basename $GOVC_TEST_IMG_SRC)
 
 PATH="$GOPATH/bin:$PATH"
 
+require_docker() {
+  if [ "$TRAVIS" = "true" ] ; then
+    skip "TravisCI is docker rate limited"
+  fi
+
+  if ! docker version ; then
+    skip "docker client not installed"
+  fi
+}
+
 vcsim_start() {
     GOVC_SIM_ENV="$BATS_TMPDIR/$(new_id)"
     export GOVC_SIM_ENV

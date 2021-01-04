@@ -3,7 +3,7 @@
 load test_helper
 
 @test "metric.ls" {
-  esx_env
+  vcsim_env -esx
 
   run govc metric.ls
   assert_failure
@@ -66,7 +66,7 @@ load test_helper
 }
 
 @test "metric.info" {
-  esx_env
+  vcsim_env
 
   host=$(govc ls -t HostSystem ./... | head -n 1)
   metrics=($(govc metric.ls "$host"))

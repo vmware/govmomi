@@ -423,35 +423,39 @@ func (a *VirtualApp) CreateVApp(req *types.CreateVApp) soap.HasFault {
 	return (&ResourcePool{ResourcePool: a.ResourcePool}).CreateVApp(req)
 }
 
-func (a *VirtualApp) DestroyTask(req *types.Destroy_Task) soap.HasFault {
-	return (&ResourcePool{ResourcePool: a.ResourcePool}).DestroyTask(req)
+func (a *VirtualApp) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
+	return (&ResourcePool{ResourcePool: a.ResourcePool}).DestroyTask(ctx, req)
 }
 
-func (p *ResourcePool) DestroyTask(req *types.Destroy_Task) soap.HasFault {
+func (p *ResourcePool) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(p, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if strings.HasSuffix(p.Parent.Type, "ComputeResource") {
 			// Can't destroy the root pool
 			return nil, &types.InvalidArgument{}
 		}
 
-		parent, _ := asResourcePoolMO(Map.Get(*p.Parent))
+		parent, _ := asResourcePoolMO(ctx.Map.Get(*p.Parent))
 
 		// Remove child reference from rp
-		Map.RemoveReference(parent, &parent.ResourcePool, req.This)
+		ctx.WithLock(parent, func() {
+			RemoveReference(&parent.ResourcePool, req.This)
 
-		// The grandchildren become children of the parent (rp)
-		Map.AppendReference(parent, &parent.ResourcePool, p.ResourcePool.ResourcePool...)
+			// The grandchildren become children of the parent (rp)
+			parent.ResourcePool = append(parent.ResourcePool, p.ResourcePool.ResourcePool...)
+		})
 
 		// And VMs move to the parent
 		vms := p.ResourcePool.Vm
 		for _, ref := range vms {
-			vm := Map.Get(ref).(*VirtualMachine)
-			Map.WithLock(vm, func() { vm.ResourcePool = &parent.Self })
+			vm := ctx.Map.Get(ref).(*VirtualMachine)
+			ctx.Map.WithLock(vm, func() { vm.ResourcePool = &parent.Self })
 		}
 
-		Map.AppendReference(parent, &parent.Vm, vms...)
+		ctx.WithLock(parent, func() {
+			parent.Vm = append(parent.Vm, vms...)
+		})
 
-		Map.Remove(req.This)
+		ctx.Map.Remove(req.This)
 
 		return nil, nil
 	})
@@ -461,4 +465,15 @@ func (p *ResourcePool) DestroyTask(req *types.Destroy_Task) soap.HasFault {
 			Returnval: task.Run(),
 		},
 	}
+}
+
+func (p *ResourcePool) DestroyChildren(ctx *Context, req *types.DestroyChildren) soap.HasFault {
+	walk(p, func(child types.ManagedObjectReference) {
+		if child.Type != "ResourcePool" {
+			return
+		}
+		ctx.Map.Get(child).(*ResourcePool).DestroyTask(ctx, &types.Destroy_Task{This: child})
+	})
+
+	return &methods.DestroyChildrenBody{Res: new(types.DestroyChildrenResponse)}
 }

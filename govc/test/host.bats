@@ -114,7 +114,7 @@ load test_helper
 }
 
 @test "host.vswitch.info" {
-  esx_env
+  vcsim_env -esx
 
   run govc host.vswitch.info
   assert_success
@@ -124,7 +124,7 @@ load test_helper
 }
 
 @test "host.portgroup.info" {
-  esx_env
+  vcsim_env -esx
 
   run govc host.portgroup.info
   assert_success
@@ -147,15 +147,15 @@ load test_helper
 }
 
 @test "host.options" {
-  esx_env
-
-  run govc host.option.ls Config.HostAgent.plugins.solo.enableMob
+  vcsim_env -esx
+  govc host.option.ls
+  run govc host.option.ls Config.HostAgent.log.level
   assert_success
 
-  run govc host.option.ls Config.HostAgent.plugins.
+  run govc host.option.ls Config.HostAgent.log.
   assert_success
 
-  run govc host.option.ls -json Config.HostAgent.plugins.
+  run govc host.option.ls -json Config.HostAgent.log.
   assert_success
 
   run govc host.option.ls Config.HostAgent.plugins.solo.ENOENT
