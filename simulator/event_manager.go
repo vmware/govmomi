@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"bytes"
+	"container/list"
 	"container/ring"
 	"log"
 	"reflect"
@@ -40,7 +41,7 @@ type EventManager struct {
 	mo.EventManager
 
 	root       types.ManagedObjectReference
-	page       *ring.Ring
+	history    *list.List
 	key        int32
 	collectors map[types.ManagedObjectReference]*EventHistoryCollector
 	templates  map[string]*template.Template
@@ -54,7 +55,7 @@ func (m *EventManager) init(r *Registry) {
 		m.MaxCollector = 1000
 	}
 	m.root = r.content().RootFolder
-	m.page = ring.New(maxPageSize)
+	m.history = list.New()
 	m.collectors = make(map[types.ManagedObjectReference]*EventHistoryCollector)
 	m.templates = make(map[string]*template.Template)
 }
@@ -155,9 +156,14 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 	event.CreatedTime = time.Now()
 	event.UserName = ctx.Session.UserName
 
-	m.page = m.page.Prev()
-	m.page.Value = req.EventToPost
 	m.formatMessage(req.EventToPost)
+
+	if m.history.Len() > maxPageSize*5 {
+		// Prune history
+		m.history.Remove(m.history.Front())
+	}
+
+	m.history.PushBack(req.EventToPost)
 
 	for _, c := range m.collectors {
 		ctx.WithLock(c, func() {
@@ -179,7 +185,7 @@ type EventHistoryCollector struct {
 
 	m    *EventManager
 	page *ring.Ring
-	pos  int
+	pos  *list.Element
 }
 
 // doEntityEventArgument calls f for each entity argument in the event.
@@ -327,31 +333,11 @@ func (c *EventHistoryCollector) eventMatches(event types.BaseEvent) bool {
 
 // filePage copies the manager's latest events into the collector's page with Filter applied.
 func (c *EventHistoryCollector) fillPage(size int) {
-	c.pos = 0
-	l := c.page.Len()
-	delta := size - l
-
-	if delta < 0 {
-		// Shrink ring size
-		c.page = c.page.Unlink(-delta)
-		return
-	}
-
 	matches := 0
-	mpage := c.m.page
 	page := c.page
 
-	if delta != 0 {
-		// Grow ring size
-		c.page = c.page.Link(ring.New(delta))
-	}
-
-	for i := 0; i < maxPageSize; i++ {
-		event, ok := mpage.Value.(types.BaseEvent)
-		mpage = mpage.Prev()
-		if !ok {
-			continue
-		}
+	for e := c.m.history.Back(); e != nil; e = e.Prev() {
+		event := e.Value.(types.BaseEvent)
 
 		if c.eventMatches(event) {
 			page.Value = event
@@ -385,6 +371,7 @@ func (c *EventHistoryCollector) SetCollectorPageSize(ctx *Context, req *types.Se
 	}
 
 	ctx.WithLock(c.m, func() {
+		c.page = ring.New(size)
 		c.fillPage(size)
 	})
 
@@ -393,7 +380,7 @@ func (c *EventHistoryCollector) SetCollectorPageSize(ctx *Context, req *types.Se
 }
 
 func (c *EventHistoryCollector) ResetCollector(ctx *Context, req *types.ResetCollector) soap.HasFault {
-	c.pos = len(c.GetLatestPage())
+	c.pos = c.m.history.Back()
 
 	return &methods.ResetCollectorBody{
 		Res: new(types.ResetCollectorResponse),
@@ -401,10 +388,28 @@ func (c *EventHistoryCollector) ResetCollector(ctx *Context, req *types.ResetCol
 }
 
 func (c *EventHistoryCollector) RewindCollector(ctx *Context, req *types.RewindCollector) soap.HasFault {
-	c.pos = 0
+	c.pos = c.m.history.Front()
+
 	return &methods.RewindCollectorBody{
 		Res: new(types.RewindCollectorResponse),
 	}
+}
+
+// readEvents returns the next max Events from the EventManager's history
+func (c *EventHistoryCollector) readEvents(ctx *Context, max int32, next func() *list.Element) []types.BaseEvent {
+	var events []types.BaseEvent
+
+	for i := 0; i < int(max); i++ {
+		e := next()
+		if e == nil {
+			break
+		}
+
+		events = append(events, e.Value.(types.BaseEvent))
+		c.pos = e
+	}
+
+	return events
 }
 
 func (c *EventHistoryCollector) ReadNextEvents(ctx *Context, req *types.ReadNextEvents) soap.HasFault {
@@ -415,21 +420,14 @@ func (c *EventHistoryCollector) ReadNextEvents(ctx *Context, req *types.ReadNext
 	}
 	body.Res = new(types.ReadNextEventsResponse)
 
-	events := c.GetLatestPage()
-	nevents := len(events)
-	if c.pos == nevents {
-		return body // already read to EOF
+	next := func() *list.Element {
+		if c.pos != nil {
+			return c.pos.Next()
+		}
+		return c.m.history.Front()
 	}
 
-	start := c.pos
-	end := start + int(req.MaxCount)
-	c.pos += int(req.MaxCount)
-	if end > nevents {
-		end = nevents
-		c.pos = nevents
-	}
-
-	body.Res.Returnval = events[start:end]
+	body.Res.Returnval = c.readEvents(ctx, req.MaxCount, next)
 
 	return body
 }
@@ -442,20 +440,14 @@ func (c *EventHistoryCollector) ReadPreviousEvents(ctx *Context, req *types.Read
 	}
 	body.Res = new(types.ReadPreviousEventsResponse)
 
-	events := c.GetLatestPage()
-	if c.pos == 0 {
-		return body // already read to EOF
+	next := func() *list.Element {
+		if c.pos != nil {
+			return c.pos.Prev()
+		}
+		return c.m.history.Back()
 	}
 
-	start := c.pos - int(req.MaxCount)
-	end := c.pos
-	c.pos -= int(req.MaxCount)
-	if start < 0 {
-		start = 0
-		c.pos = 0
-	}
-
-	body.Res.Returnval = events[start:end]
+	body.Res.Returnval = c.readEvents(ctx, req.MaxCount, next)
 
 	return body
 }

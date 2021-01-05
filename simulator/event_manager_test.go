@@ -157,7 +157,8 @@ func TestEventManagerRead(t *testing.T) {
 	}()
 
 	spec := types.EventFilterSpec{}
-	c, err := event.NewManager(vc.Client).CreateCollectorForEvents(ctx, spec)
+	em := event.NewManager(vc.Client)
+	c, err := em.CreateCollectorForEvents(ctx, spec)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -224,6 +225,19 @@ func TestEventManagerRead(t *testing.T) {
 		t.Errorf("expected 0 events, got %d", len(events))
 	}
 
+	err = em.PostEvent(ctx, &types.GeneralEvent{Message: "vcsim"})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	events, err = c.ReadNextEvents(ctx, int32(nevents))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(events) != 1 {
+		t.Errorf("expected 1 events, got %d", len(events))
+	}
+
 	count := 0
 	for {
 		events, err = c.ReadPreviousEvents(ctx, 3)
@@ -235,7 +249,7 @@ func TestEventManagerRead(t *testing.T) {
 		}
 		count += len(events)
 	}
-	if nevents != count {
+	if count < nevents {
 		t.Errorf("expected %d events, got %d", nevents, count)
 	}
 }

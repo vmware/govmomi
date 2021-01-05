@@ -80,6 +80,40 @@ func TestRace(t *testing.T) {
 		}
 	}()
 
+	collectors.Add(1)
+	go func() {
+		defer collectors.Done()
+
+		ec, werr := em.CreateCollectorForEvents(ctx, types.EventFilterSpec{})
+		if werr != nil {
+			t.Error(werr)
+		}
+
+		n := 0
+		for {
+			events, werr := ec.ReadNextEvents(ctx, 10)
+			if werr != nil {
+				t.Error(werr)
+			}
+
+			n += len(events)
+			if len(events) != 0 {
+				continue
+			}
+
+			select {
+			case <-wctx.Done():
+				logf := t.Logf
+				if n == 0 {
+					logf = t.Errorf
+				}
+				logf("ReadNextEvents=%d", n)
+				return
+			case <-time.After(time.Millisecond * 100):
+			}
+		}
+	}()
+
 	ntasks := -1
 	tv, err := view.NewManager(c.Client).CreateTaskView(ctx, content.TaskManager)
 	if err != nil {
