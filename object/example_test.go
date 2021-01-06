@@ -486,3 +486,52 @@ func ExampleCustomizationSpecManager_Info() {
 	// vcsim-windows-static=*types.CustomizationSysprep
 	// vcsim-windows-domain=*types.CustomizationSysprep
 }
+
+func ExampleNetworkReference_EthernetCardBackingInfo() {
+	model := simulator.VPX()
+	model.OpaqueNetwork = 1 // Create 1 NSX backed OpaqueNetwork per DC
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+		vm, err := finder.VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+
+		// finder.Network returns an object.NetworkReference
+		net, err := finder.Network(ctx, "DC0_NSX0")
+		if err != nil {
+			return err
+		}
+
+		// EthernetCardBackingInfo creates the backing for any network type:
+		// "Network", "DistributedVirtualPortgroup" or "OpaqueNetwork"
+		backing, err := net.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			return err
+		}
+
+		device, err := object.EthernetCardTypes().CreateEthernetCard("e1000", backing)
+		if err != nil {
+			return err
+		}
+
+		err = vm.AddDevice(ctx, device)
+		if err != nil {
+			return err
+		}
+
+		list, err := vm.Device(ctx)
+		if err != nil {
+			return err
+		}
+
+		nics := list.SelectByType((*types.VirtualEthernetCard)(nil)) // All VM NICs (DC0_DVPG0 + DC0_NSX0)
+		match := list.SelectByBackingInfo(backing)                   // VM NIC with DC0_NSX0 backing
+
+		fmt.Printf("%d of %d NICs match backing\n", len(match), len(nics))
+
+		return nil
+	}, model)
+	// Output: 1 of 2 NICs match backing
+}
