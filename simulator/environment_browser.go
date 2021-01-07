@@ -28,6 +28,8 @@ import (
 
 type EnvironmentBrowser struct {
 	mo.EnvironmentBrowser
+
+	types.QueryConfigOptionResponse
 }
 
 func newEnvironmentBrowser() *types.ManagedObjectReference {
@@ -57,9 +59,12 @@ func (b *EnvironmentBrowser) hosts(ctx *Context) []types.ManagedObjectReference 
 func (b *EnvironmentBrowser) QueryConfigOption(req *types.QueryConfigOption) soap.HasFault {
 	body := new(methods.QueryConfigOptionBody)
 
-	opt := &types.VirtualMachineConfigOption{
-		Version:       esx.HardwareVersion,
-		DefaultDevice: esx.VirtualDevice,
+	opt := b.QueryConfigOptionResponse.Returnval
+	if opt == nil {
+		opt = &types.VirtualMachineConfigOption{
+			Version:       esx.HardwareVersion,
+			DefaultDevice: esx.VirtualDevice,
+		}
 	}
 
 	body.Res = &types.QueryConfigOptionResponse{
@@ -85,9 +90,12 @@ func guestFamily(id string) string {
 func (b *EnvironmentBrowser) QueryConfigOptionEx(req *types.QueryConfigOptionEx) soap.HasFault {
 	body := new(methods.QueryConfigOptionExBody)
 
-	opt := &types.VirtualMachineConfigOption{
-		Version:       esx.HardwareVersion,
-		DefaultDevice: esx.VirtualDevice,
+	opt := b.QueryConfigOptionResponse.Returnval
+	if opt == nil {
+		opt = &types.VirtualMachineConfigOption{
+			Version:       esx.HardwareVersion,
+			DefaultDevice: esx.VirtualDevice,
+		}
 	}
 
 	if req.Spec != nil {
