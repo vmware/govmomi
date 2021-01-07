@@ -12,9 +12,9 @@ PROGRAM_NAME=govc
 PROJECT_PKG="github.com/vmware/govmomi"
 PROGRAM_PKG="${PROJECT_PKG}/${PROGRAM_NAME}"
 
-export LDFLAGS="-w -X ${PROGRAM_PKG}/version.gitVersion=${git_version}"
+export LDFLAGS="-w -X ${PROGRAM_PKG}/flags.GitVersion=${git_version}"
 export BUILD_OS="${BUILD_OS:-darwin linux windows freebsd}"
-export BUILD_ARCH="${BUILD_ARCH:-386 amd64}"
+export BUILD_ARCH="${BUILD_ARCH:-amd64}"
 
 set -x
 make -C "$(go env GOPATH)/src/${PROGRAM_PKG}" -j build-all

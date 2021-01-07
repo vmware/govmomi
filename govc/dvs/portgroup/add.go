@@ -53,6 +53,16 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 func (cmd *add) Description() string {
 	return `Add portgroup to DVS.
 
+The '-type' options are defined by the dvs.DistributedVirtualPortgroup.PortgroupType API.
+The UI labels '-type' as "Port binding" with the following choices:
+    "Static binding":  earlyBinding
+    "Dynanic binding": lateBinding
+    "No binding":      ephemeral
+
+The '-auto-expand' option is labeled in the UI as "Port allocation".
+The default value is false, behaves as the UI labeled "Fixed" choice.
+When given '-auto-expand=true', behaves as the UI labeled "Elastic" choice.
+
 Examples:
   govc dvs.create DSwitch
   govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork

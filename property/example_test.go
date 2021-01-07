@@ -66,6 +66,10 @@ func ExampleCollector_Retrieve() {
 
 		var vms []mo.VirtualMachine
 		err = pc.Retrieve(ctx, host.Vm, []string{"name"}, &vms)
+		if err != nil {
+			return err
+		}
+
 		fmt.Printf("host has %d vms:", len(vms))
 		for i := range vms {
 			fmt.Print(" ", vms[i].Name)

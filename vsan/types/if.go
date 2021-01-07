@@ -1,12 +1,9 @@
 /*
-Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
-
+Copyright (c) 2020 VMware, Inc. All Rights Reserved.
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
-
     http://www.apache.org/licenses/LICENSE-2.0
-
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -16,44 +13,114 @@ limitations under the License.
 
 package types
 
-import "reflect"
+import (
+	"github.com/vmware/govmomi/vim25/types"
+)
 
-type BaseMethodFault interface {
-	GetMethodFault() *MethodFault
+type VsanClusterConfigInfo types.VsanClusterConfigInfo
+
+func (b *VsanClusterConfigInfo) GetVsanClusterConfigInfo() *VsanClusterConfigInfo { return b }
+
+type BaseVsanClusterConfigInfo interface {
+	GetVsanClusterConfigInfo() *VsanClusterConfigInfo
 }
 
-func init() {
-	t["BaseMethodFault"] = reflect.TypeOf((*MethodFault)(nil)).Elem()
+func (b *VsanResourceConstraint) GetVsanResourceConstraint() *VsanResourceConstraint { return b }
+
+type BaseVsanResourceConstraint interface {
+	GetVsanResourceConstraint() *VsanResourceConstraint
 }
 
-type BaseVsanClusterHealthResultBase interface {
-	GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase
+func (b *CnsFileCreateSpec) GetCnsFileCreateSpec() *CnsFileCreateSpec { return b }
+
+type BaseCnsFileCreateSpec interface {
+	GetCnsFileCreateSpec() *CnsFileCreateSpec
 }
 
-func init() {
-	t["BaseVsanClusterHealthResultBase"] = reflect.TypeOf((*VsanClusterHealthResultBase)(nil)).Elem()
+func (b *VsanIscsiLUNCommonInfo) GetVsanIscsiLUNCommonInfo() *VsanIscsiLUNCommonInfo { return b }
+
+type BaseVsanIscsiLUNCommonInfo interface {
+	GetVsanIscsiLUNCommonInfo() *VsanIscsiLUNCommonInfo
 }
 
-type BaseElementDescription interface {
-	GetElementDescription() *ElementDescription
+func (b *EntityResourceCheckDetails) GetEntityResourceCheckDetails() *EntityResourceCheckDetails {
+	return b
 }
 
-func init() {
-	t["BaseElementDescription"] = reflect.TypeOf((*ElementDescription)(nil)).Elem()
+type BaseEntityResourceCheckDetails interface {
+	GetEntityResourceCheckDetails() *EntityResourceCheckDetails
+}
+
+func (b *VsanDatastoreConfig) GetVsanDatastoreConfig() *VsanDatastoreConfig { return b }
+
+type BaseVsanDatastoreConfig interface {
+	GetVsanDatastoreConfig() *VsanDatastoreConfig
+}
+
+func (b *VsanDatastoreSpec) GetVsanDatastoreSpec() *VsanDatastoreSpec { return b }
+
+type BaseVsanDatastoreSpec interface {
+	GetVsanDatastoreSpec() *VsanDatastoreSpec
+}
+
+func (b *VsanNetworkConfigBaseIssue) GetVsanNetworkConfigBaseIssue() *VsanNetworkConfigBaseIssue {
+	return b
 }
 
 type BaseVsanNetworkConfigBaseIssue interface {
 	GetVsanNetworkConfigBaseIssue() *VsanNetworkConfigBaseIssue
 }
 
-func init() {
-	t["BaseVsanNetworkConfigBaseIssue"] = reflect.TypeOf((*VsanNetworkConfigBaseIssue)(nil)).Elem()
+func (b *VsanIscsiTargetCommonInfo) GetVsanIscsiTargetCommonInfo() *VsanIscsiTargetCommonInfo {
+	return b
 }
 
-type BaseVsanClusterConfigInfo interface {
-	GetVsanClusterConfigInfo() *VsanClusterConfigInfo
+type BaseVsanIscsiTargetCommonInfo interface {
+	GetVsanIscsiTargetCommonInfo() *VsanIscsiTargetCommonInfo
 }
 
-func init() {
-	t["BaseVsanClusterConfigInfo"] = reflect.TypeOf((*VsanClusterConfigInfo)(nil)).Elem()
+func (b *VsanClusterHealthResultBase) GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase {
+	return b
+}
+
+type BaseVsanClusterHealthResultBase interface {
+	GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase
+}
+
+func (b *CnsVolumeOperationResult) GetCnsVolumeOperationResult() *CnsVolumeOperationResult { return b }
+
+type BaseCnsVolumeOperationResult interface {
+	GetCnsVolumeOperationResult() *CnsVolumeOperationResult
+}
+
+func (b *VsanHclCommonDeviceInfo) GetVsanHclCommonDeviceInfo() *VsanHclCommonDeviceInfo { return b }
+
+type BaseVsanHclCommonDeviceInfo interface {
+	GetVsanHclCommonDeviceInfo() *VsanHclCommonDeviceInfo
+}
+
+func (b *VsanComparator) GetVsanComparator() *VsanComparator { return b }
+
+type BaseVsanComparator interface {
+	GetVsanComparator() *VsanComparator
+}
+
+func (b *VsanIscsiTargetServiceConfig) GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig {
+	return b
+}
+
+type BaseVsanIscsiTargetServiceConfig interface {
+	GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig
+}
+
+func (b *CnsFault) GetCnsFault() *CnsFault { return b }
+
+type BaseCnsFault interface {
+	GetCnsFault() *CnsFault
+}
+
+func (b *CnsBackingObjectDetails) GetCnsBackingObjectDetails() *CnsBackingObjectDetails { return b }
+
+type BaseCnsBackingObjectDetails interface {
+	GetCnsBackingObjectDetails() *CnsBackingObjectDetails
 }

@@ -93,17 +93,17 @@ load test_helper
 }
 
 @test "network standard backing" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
-  run govc device.info -vm $vm ethernet-0
+  run govc device.info -vm $vm ethernet-*
   assert_success
 
-  run govc device.remove -vm $vm ethernet-0
+  run govc device.remove -vm $vm ethernet-*
   assert_success
 
-  run govc device.info -vm $vm ethernet-0
+  run govc device.info -vm $vm ethernet-*
   assert_failure
 
   run govc vm.network.add -vm $vm enoent
@@ -112,7 +112,7 @@ load test_helper
   run govc vm.network.add -vm $vm "VM Network"
   assert_success
 
-  run govc device.info -vm $vm ethernet-0
+  run govc device.info -vm $vm ethernet-*
   assert_success
 }
 

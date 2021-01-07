@@ -3,7 +3,7 @@
 load test_helper
 
 @test "events dc" {
-  esx_env
+  vcsim_env
 
   run govc events
   assert_success
@@ -18,7 +18,7 @@ load test_helper
 }
 
 @test "events host" {
-  esx_env
+  vcsim_env -esx
 
   run govc events 'host/*'
   assert_success

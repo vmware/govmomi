@@ -85,10 +85,11 @@ func networkSummary(n *mo.Network) types.BaseNetworkSummary {
 }
 
 func folderPutChild(ctx *Context, f *mo.Folder, o mo.Entity) {
-	Map.PutEntity(f, o)
-
 	ctx.WithLock(f, func() {
-		f.ChildEntity = append(f.ChildEntity, o.Reference())
+		// Need to update ChildEntity before Map.Put for ContainerView updates to work properly
+		f.ChildEntity = append(f.ChildEntity, Map.reference(o))
+		Map.PutEntity(f, o)
+
 		folderUpdate(f, o, Map.AddReference)
 
 		ctx.WithLock(o, func() {
@@ -273,7 +274,9 @@ func (f *Folder) CreateDatacenter(ctx *Context, c *types.CreateDatacenter) soap.
 	if folderHasChildType(&f.Folder, "Datacenter") && folderHasChildType(&f.Folder, "Folder") {
 		dc := NewDatacenter(ctx, &f.Folder)
 
-		dc.Name = c.Name
+		Map.Update(dc, []types.PropertyChange{
+			{Name: "name", Val: c.Name},
+		})
 
 		r.Res = &types.CreateDatacenterResponse{
 			Returnval: dc.Self,
@@ -427,6 +430,10 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	)
 
 	vm.RefreshStorageInfo(c.ctx, nil)
+
+	Map.Update(vm, []types.PropertyChange{
+		{Name: "name", Val: c.req.Config.Name},
+	})
 
 	return vm.Reference(), nil
 }
@@ -611,6 +618,7 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 		dvs.AddDVPortgroupTask(ctx, &types.AddDVPortgroup_Task{
 			Spec: []types.DVPortgroupConfigSpec{{
 				Name: dvs.Name + "-DVUplinks" + strings.TrimPrefix(dvs.Self.Value, "dvs"),
+				Type: string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
 				DefaultPortConfig: &types.VMwareDVSPortSetting{
 					Vlan: &types.VmwareDistributedVirtualSwitchTrunkVlanSpec{
 						VlanId: []types.NumericRange{{Start: 0, End: 4094}},

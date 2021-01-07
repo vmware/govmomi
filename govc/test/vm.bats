@@ -85,16 +85,16 @@ load test_helper
 }
 
 @test "vm.change" {
-  esx_env
+  vcsim_env
 
-  id=$(new_ttylinux_vm)
+  id=DC0_H0_VM0
 
   run govc vm.change -g ubuntu64Guest -m 1024 -c 2 -vm $id
   assert_success
 
   run govc vm.info $id
   assert_success
-  assert_line "Guest name: Ubuntu Linux (64-bit)"
+  assert_matches "buntu"
   assert_line "Memory: 1024MB"
   assert_line "CPU: 2 vCPU(s)"
 
@@ -168,9 +168,9 @@ load test_helper
 }
 
 @test "vm.power" {
-  esx_env
+  vcsim_env -autostart=false
 
-  vm=$(new_ttylinux_vm)
+  vm=DC0_H0_VM0
 
   run vm_power_state $vm
   assert_success "poweredOff"
@@ -223,7 +223,7 @@ load test_helper
 }
 
 @test "vm.power -force" {
-  esx_env
+  vcsim_env
 
   vm=$(new_id)
   govc vm.create $vm
@@ -235,9 +235,6 @@ load test_helper
   assert_success
 
   run govc vm.power -s $vm
-  assert_failure
-
-  run govc vm.power -s -force $vm
   assert_success
 
   run govc vm.power -off $vm
@@ -257,7 +254,7 @@ load test_helper
 }
 
 @test "vm.create pvscsi" {
-  esx_env
+  vcsim_env
 
   vm=$(new_id)
   govc vm.create -on=false -disk.controller pvscsi $vm
@@ -446,7 +443,6 @@ load test_helper
   run govc vm.create -disk enoent -on=false $vm
   assert_failure "govc: cannot stat '[${GOVC_DATASTORE##*/}] enoent': No such file"
 
-
   run govc vm.create -disk $GOVC_TEST_VMDK -on=false -link=false $vm
   assert_success
 
@@ -492,7 +488,7 @@ load test_helper
 }
 
 @test "vm.create iso with datastore argument" {
-  esx_env
+  vcsim_env
 
   upload_iso
 
@@ -501,13 +497,13 @@ load test_helper
   run govc vm.create -iso="${GOVC_TEST_ISO}" -iso-datastore="${GOVC_DATASTORE}" -on=false $vm
   assert_success
 
-  run govc device.info -vm $vm cdrom-3000
+  run govc device.info -vm $vm cdrom-*
   assert_success
   assert_line "Summary: ISO [${GOVC_DATASTORE##*/}] $GOVC_TEST_ISO"
 }
 
 @test "vm.disk.create empty vm" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -521,7 +517,7 @@ load test_helper
 
   name=$(new_id)
 
-  run govc vm.disk.create -vm "$vm" -name "$vm/$name" -controller lsilogic-1000 -size 2G
+  run govc vm.disk.create -vm "$vm" -name "$vm/$name" -size 2G
   assert_success
 
   result=$(govc device.ls -vm "$vm" | grep -c disk-)
@@ -610,34 +606,35 @@ load test_helper
 }
 
 @test "vm.create new disk with datastore argument" {
-  esx_env
+  vcsim_env
 
   vm=$(new_id)
 
   run govc vm.create -disk="1GiB" -ds="${GOVC_DATASTORE}" -on=false -link=false $vm
   assert_success
 
-  run govc device.info -vm $vm disk-1000-0
+  run govc device.info -vm $vm disk-*
   assert_success
   assert_line "File: [${GOVC_DATASTORE##*/}] ${vm}/${vm}.vmdk"
 }
 
 @test "vm.create new disk with datastore cluster argument" {
-  if [ -z "${GOVC_DATASTORE_CLUSTER}" ]; then
-    skip "requires datastore cluster"
-  fi
+  vcsim_env -pod 1 -ds 3
 
   vm=$(new_id)
 
-  run govc vm.create -disk="1GiB" -datastore-cluster="${GOVC_DATASTORE_CLUSTER}" -on=false -link=false $vm
+  run govc object.mv /DC0/datastore/LocalDS_{1,2} /DC0/datastore/DC0_POD0
   assert_success
 
-  run govc device.info -vm $vm disk-1000-0
+  run govc vm.create -disk="1GiB" -datastore-cluster=/DC0/datastore/DC0_POD0 -on=false -link=false "$vm"
+  assert_success
+
+  run govc device.info -vm $vm disk-*
   assert_success
 }
 
 @test "vm.register" {
-  esx_env
+  vcsim_env
 
   run govc vm.unregister enoent
   assert_failure
@@ -828,9 +825,9 @@ load test_helper
 }
 
 @test "object name with slash" {
-  esx_env
+  vcsim_env
 
-  vm=$(new_empty_vm)
+  vm=DC0_H0_VM0
 
   name="$vm/with-slash"
 
@@ -1049,9 +1046,7 @@ load test_helper
 }
 
 @test "guest fileops" {
-  if ! docker version ; then
-    skip "docker client not installed"
-  fi
+  require_docker
 
   vcsim_env -autostart=false
 

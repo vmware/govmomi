@@ -46,28 +46,26 @@ func (cmd *add) Description() string {
 
 Examples:
   govc device.pci.ls -vm $vm
-  govc device.pci.add -vm $vm {pci address}*
+  govc device.pci.add -vm $vm $pci_address
   govc device.info -vm $vm
 
 Assuming vm name is helloworld, list command has below output
 
-$ govc device.pci.ls --vm helloworld
+$ govc device.pci.ls -vm helloworld
 System ID                             Address       Vendor Name Device Name
 5b087ce4-ce46-72c0-c7c2-28ac9e22c3c2  0000:60:00.0  Pensando    Ethernet Controller 1
 5b087ce4-ce46-72c0-c7c2-28ac9e22c3c2  0000:61:00.0  Pensando    Ethernet Controller 2
 
 To add only 'Ethernet Controller 1', command should be as below. No output upon success.
 
-$ govc device.pci.add --vm helloworld 0000:60:00.0
+$ govc device.pci.add -vm helloworld 0000:60:00.0
 
 To add both 'Ethernet Controller 1' and 'Ethernet Controller 2', command should be as below.
 No output upon success.
 
-$ govc device.pci.add --vm helloworld 0000:60:00.0 0000:61:00.0
+$ govc device.pci.add -vm helloworld 0000:60:00.0 0000:61:00.0
 
-Device.info command can be used to list new device as below.
-
-$ govc device.info --vm helloworld
+$ govc device.info -vm helloworld
 ...
 Name:               pcipassthrough-13000
   Type:             VirtualPCIPassthrough
@@ -82,12 +80,11 @@ Name:               pcipassthrough-13001
   Summary:
   Key:              13001
   Controller:       pci-100
-  Unit number:      19
-`
+  Unit number:      19`
 }
 
 func (cmd *add) Usage() string {
-	return "<PCI ADDRESS>..."
+	return "PCI_ADDRESS..."
 }
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {

@@ -25,6 +25,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"path"
 	"strconv"
@@ -132,7 +133,11 @@ func (c *container) prepareGuestOperation(vm *VirtualMachine, auth types.BaseGue
 
 // createDMI writes BIOS UUID DMI files to a container volume
 func (c *container) createDMI(vm *VirtualMachine, name string) error {
-	cmd := exec.Command("docker", "run", "--rm", "-i", "-v", name+":"+"/"+name, "busybox", "tar", "-C", "/"+name, "-xf", "-")
+	image := os.Getenv("VCSIM_BUSYBOX")
+	if image == "" {
+		image = "busybox"
+	}
+	cmd := exec.Command("docker", "run", "--rm", "-i", "-v", name+":"+"/"+name, image, "tar", "-C", "/"+name, "-xf", "-")
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return err
@@ -167,7 +172,15 @@ func (c *container) createDMI(vm *VirtualMachine, name string) error {
 	_ = tw.Close()
 	_ = stdin.Close()
 
-	return cmd.Wait()
+	err = cmd.Wait()
+	if err != nil {
+		stderr := ""
+		if xerr, ok := err.(*exec.ExitError); ok {
+			stderr = string(xerr.Stderr)
+		}
+		log.Printf("%s %s: %s %s", vm.Name, cmd.Args, err, stderr)
+	}
+	return err
 }
 
 // start runs the container if specified by the RUN.container extraConfig property.
@@ -217,7 +230,6 @@ func (c *container) start(vm *VirtualMachine) {
 	run := append([]string{"docker", "run", "-d", "--name", c.name}, env...)
 
 	if err := c.createDMI(vm, c.name); err != nil {
-		log.Printf("%s: %s", vm.Name, err)
 		return
 	}
 	run = append(run, "-v", fmt.Sprintf("%s:%s:ro", c.name, "/sys/class/dmi/id"))
@@ -226,7 +238,11 @@ func (c *container) start(vm *VirtualMachine) {
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
 	out, err := cmd.Output()
 	if err != nil {
-		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+		stderr := ""
+		if xerr, ok := err.(*exec.ExitError); ok {
+			stderr = string(xerr.Stderr)
+		}
+		log.Printf("%s %s: %s %s", vm.Name, cmd.Args, err, stderr)
 		return
 	}
 

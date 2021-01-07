@@ -181,6 +181,20 @@ func (v VirtualMachine) Clone(ctx context.Context, folder *Folder, name string, 
 	return NewTask(v.c, res.Returnval), nil
 }
 
+func (v VirtualMachine) InstantClone(ctx context.Context, config types.VirtualMachineInstantCloneSpec) (*Task, error) {
+	req := types.InstantClone_Task{
+		This: v.Reference(),
+		Spec: config,
+	}
+
+	res, err := methods.InstantClone_Task(ctx, v.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(v.c, res.Returnval), nil
+}
+
 func (v VirtualMachine) Customize(ctx context.Context, spec types.CustomizationSpec) (*Task, error) {
 	req := types.CustomizeVM_Task{
 		This: v.Reference(),

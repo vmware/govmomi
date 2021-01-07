@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
+	"os"
 	"reflect"
 	"strings"
 	"sync"
@@ -52,6 +53,11 @@ var (
 	SessionIdleTimeout time.Duration
 
 	sessionMutex sync.Mutex
+
+	// secureCookies enables Set-Cookie.Secure=true
+	// We can't do this by default as simulator.Service defaults to no TLS by default and
+	// Go's cookiejar does not send Secure cookies unless the URL scheme is https.
+	secureCookies = os.Getenv("VCSIM_SECURE_COOKIES") == "true"
 )
 
 func createSession(ctx *Context, name string, locale string) types.UserSession {
@@ -358,8 +364,10 @@ func (c *Context) SetSession(session Session, login bool) {
 
 	if login {
 		http.SetCookie(c.res, &http.Cookie{
-			Name:  soap.SessionCookieName,
-			Value: session.Key,
+			Name:     soap.SessionCookieName,
+			Value:    session.Key,
+			Secure:   secureCookies,
+			HttpOnly: true,
 		})
 
 		c.postEvent(&types.UserLoginSessionEvent{

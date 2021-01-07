@@ -24,6 +24,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -206,8 +207,8 @@ func TestCreateVAppVPX(t *testing.T) {
 
 	c := m.Service.client
 
-	parent := object.NewResourcePool(c, Map.Any("ResourcePool").Reference())
-
+	pool := Map.Any("ResourcePool")
+	parent := object.NewResourcePool(c, pool.Reference())
 	rspec := types.DefaultResourceConfigSpec()
 	vspec := NewVAppConfigSpec()
 
@@ -258,7 +259,44 @@ func TestCreateVAppVPX(t *testing.T) {
 		t.Errorf("FindChild(%s)==nil", spec.Name)
 	}
 
-	task, err := vapp.Destroy(ctx)
+	ref := Map.Get(Map.getEntityDatacenter(pool).VmFolder).Reference()
+	folder, err := object.NewFolder(c, ref).CreateFolder(ctx, "myapp-clone")
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	cspec := types.VAppCloneSpec{
+		VmFolder: types.NewReference(folder.Reference()),
+	}
+
+	task, err := vapp.Clone(ctx, "myapp-clone", parent.Reference(), cspec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	res, err := task.WaitForResult(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	var apps []mo.VirtualApp
+	refs := []types.ManagedObjectReference{vapp.Reference(), res.Result.(types.ManagedObjectReference)}
+	err = property.DefaultCollector(c).Retrieve(ctx, refs, []string{"vm"}, &apps)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if len(apps) != 2 {
+		t.Errorf("apps=%d", len(apps))
+	}
+
+	for _, app := range apps {
+		if len(app.Vm) != 1 {
+			t.Errorf("app %s vm=%d", app.Reference(), len(app.Vm))
+		}
+	}
+
+	task, err = vapp.Destroy(ctx)
 	if err != nil {
 		t.Fatal(err)
 	}

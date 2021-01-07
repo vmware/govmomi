@@ -30,8 +30,9 @@ import (
 )
 
 const (
-	testLabel = "testLabel"
-	testValue = "testValue"
+	testLabel              = "testLabel"
+	testValue              = "testValue"
+	simulatorBackingDiskID = "fake-volume-Handle"
 )
 
 func TestSimulator(t *testing.T) {
@@ -71,17 +72,20 @@ func TestSimulator(t *testing.T) {
 	// Get a simulator DS
 	datastore := simulator.Map.Any("Datastore").(*simulator.Datastore)
 
-	// Create
+	// Create volume for static provisioning
 	var capacityInMb int64 = 1024
-	createSpecList := []cnstypes.CnsVolumeCreateSpec{
+	createSpecListForStaticProvision := []cnstypes.CnsVolumeCreateSpec{
 		{
 			Name:       "test",
 			VolumeType: "TestVolumeType",
 			Datastores: []vim25types.ManagedObjectReference{
 				datastore.Self,
 			},
-			BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
-				CapacityInMb: capacityInMb,
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: capacityInMb,
+				},
+				BackingDiskId: simulatorBackingDiskID,
 			},
 			Profile: []vim25types.BaseVirtualMachineProfileSpec{
 				&vim25types.VirtualMachineDefinedProfileSpec{
@@ -90,7 +94,7 @@ func TestSimulator(t *testing.T) {
 			},
 		},
 	}
-	createTask, err := cnsClient.CreateVolume(ctx, createSpecList)
+	createTask, err := cnsClient.CreateVolume(ctx, createSpecListForStaticProvision)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -112,6 +116,77 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
 	}
 	volumeId := createVolumeOperationRes.VolumeId.Id
+	volumeCreateResult := (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("volumeCreateResult %+v", volumeCreateResult)
+
+	// Delete the static provisioning volume
+	deleteVolumeList := []cnstypes.CnsVolumeId{
+		{
+			Id: volumeId,
+		},
+	}
+	deleteTask, err := cnsClient.DeleteVolume(ctx, deleteVolumeList, true)
+
+	deleteTaskInfo, err := cns.GetTaskInfo(ctx, deleteTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	deleteTaskResult, err := cns.GetTaskResult(ctx, deleteTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if deleteTaskResult == nil {
+		t.Fatalf("Empty delete task results")
+	}
+
+	deleteVolumeOperationRes := deleteTaskResult.GetCnsVolumeOperationResult()
+	if deleteVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
+	}
+
+	// Create
+	createSpecList := []cnstypes.CnsVolumeCreateSpec{
+		{
+			Name:       "test",
+			VolumeType: "TestVolumeType",
+			Datastores: []vim25types.ManagedObjectReference{
+				datastore.Self,
+			},
+			BackingObjectDetails: &cnstypes.CnsBackingObjectDetails{
+				CapacityInMb: capacityInMb,
+			},
+			Profile: []vim25types.BaseVirtualMachineProfileSpec{
+				&vim25types.VirtualMachineDefinedProfileSpec{
+					ProfileId: uuid.New().String(),
+				},
+			},
+		},
+	}
+	createTask, err = cnsClient.CreateVolume(ctx, createSpecList)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	createTaskInfo, err = cns.GetTaskInfo(ctx, createTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	createTaskResult, err = cns.GetTaskResult(ctx, createTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if createTaskResult == nil {
+		t.Fatalf("Empty create task results")
+	}
+	createVolumeOperationRes = createTaskResult.GetCnsVolumeOperationResult()
+	if createVolumeOperationRes.Fault != nil {
+		t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
+	}
+	volumeId = createVolumeOperationRes.VolumeId.Id
+	volumeCreateResult = (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("volumeCreateResult %+v", volumeCreateResult)
 
 	// Extend
 	var newCapacityInMb int64 = 2048
@@ -295,19 +370,19 @@ func TestSimulator(t *testing.T) {
 	}
 
 	// Delete
-	deleteVolumeList := []cnstypes.CnsVolumeId{
+	deleteVolumeList = []cnstypes.CnsVolumeId{
 		{
 			Id: volumeId,
 		},
 	}
-	deleteTask, err := cnsClient.DeleteVolume(ctx, deleteVolumeList, true)
+	deleteTask, err = cnsClient.DeleteVolume(ctx, deleteVolumeList, true)
 
-	deleteTaskInfo, err := cns.GetTaskInfo(ctx, deleteTask)
+	deleteTaskInfo, err = cns.GetTaskInfo(ctx, deleteTask)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	deleteTaskResult, err := cns.GetTaskResult(ctx, deleteTaskInfo)
+	deleteTaskResult, err = cns.GetTaskResult(ctx, deleteTaskInfo)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -315,7 +390,7 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Empty delete task results")
 	}
 
-	deleteVolumeOperationRes := deleteTaskResult.GetCnsVolumeOperationResult()
+	deleteVolumeOperationRes = deleteTaskResult.GetCnsVolumeOperationResult()
 	if deleteVolumeOperationRes.Fault != nil {
 		t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeOperationRes.Fault)
 	}

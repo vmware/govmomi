@@ -182,6 +182,16 @@ Test connection using curl:
 Inventory path arguments with a leading '/' are subject
 to [Posix path conversion](http://www.mingw.org/wiki/Posix_path_conversion).
 
+### NotAuthenticated
+
+When connecting to a non-TLS endpoint, Go's http.Client will not send Secure cookies, resulting in a `NotAuthenticated` error.
+For example, running govc directly against the vCenter vpxd endpoint at `http://127.0.0.1:8085`.
+Set the environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
+
+``` console
+% GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
+```
+
 ## Examples
 
 Several examples are embedded in the govc command [help](USAGE.md)

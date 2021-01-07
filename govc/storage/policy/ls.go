@@ -73,7 +73,7 @@ Examples:
   govc storage.policy.ls -i "vSAN Default Storage Policy"`
 }
 
-func listProfiles(ctx context.Context, c *pbm.Client, name string) ([]types.BasePbmProfile, error) {
+func ListProfiles(ctx context.Context, c *pbm.Client, name string) ([]types.BasePbmProfile, error) {
 	rtype := types.PbmProfileResourceType{
 		ResourceType: string(types.PbmProfileResourceTypeEnumSTORAGE),
 	}
@@ -134,7 +134,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	profiles, err := listProfiles(ctx, c, f.Arg(0))
+	profiles, err := ListProfiles(ctx, c, f.Arg(0))
 	if err != nil {
 		return err
 	}

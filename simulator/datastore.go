@@ -17,6 +17,9 @@ limitations under the License.
 package simulator
 
 import (
+	"net/url"
+	"path"
+	"strings"
 	"time"
 
 	"github.com/vmware/govmomi/object"
@@ -28,6 +31,25 @@ import (
 
 type Datastore struct {
 	mo.Datastore
+}
+
+func (ds *Datastore) model(m *Model) error {
+	info := ds.Info.GetDatastoreInfo()
+	u, _ := url.Parse(info.Url)
+	if u.Scheme == "ds" {
+		// rewrite saved vmfs path to a local temp dir
+		u.Path = path.Clean(u.Path)
+		parent := strings.ReplaceAll(path.Dir(u.Path), "/", "_")
+		name := path.Base(u.Path)
+
+		dir, err := m.createTempDir(parent, name)
+		if err != nil {
+			return err
+		}
+
+		info.Url = dir
+	}
+	return nil
 }
 
 func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodFault) {

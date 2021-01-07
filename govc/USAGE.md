@@ -50,6 +50,7 @@ but appear via `govc $cmd -h`:
  - [cluster.rule.info](#clusterruleinfo)
  - [cluster.rule.ls](#clusterrulels)
  - [cluster.rule.remove](#clusterruleremove)
+ - [cluster.usage](#clusterusage)
  - [datacenter.create](#datacentercreate)
  - [datacenter.info](#datacenterinfo)
  - [datastore.cluster.change](#datastoreclusterchange)
@@ -84,6 +85,9 @@ but appear via `govc $cmd -h`:
  - [device.floppy.insert](#devicefloppyinsert)
  - [device.info](#deviceinfo)
  - [device.ls](#devicels)
+ - [device.pci.add](#devicepciadd)
+ - [device.pci.ls](#devicepcils)
+ - [device.pci.remove](#devicepciremove)
  - [device.remove](#deviceremove)
  - [device.scsi.add](#devicescsiadd)
  - [device.serial.add](#deviceserialadd)
@@ -218,6 +222,10 @@ but appear via `govc $cmd -h`:
  - [metric.ls](#metricls)
  - [metric.reset](#metricreset)
  - [metric.sample](#metricsample)
+ - [namespace.cluster.disable](#namespaceclusterdisable)
+ - [namespace.cluster.enable](#namespaceclusterenable)
+ - [namespace.cluster.ls](#namespaceclusterls)
+ - [namespace.logs.download](#namespacelogsdownload)
  - [object.collect](#objectcollect)
  - [object.destroy](#objectdestroy)
  - [object.method](#objectmethod)
@@ -257,6 +265,10 @@ but appear via `govc $cmd -h`:
  - [sso.user.ls](#ssouserls)
  - [sso.user.rm](#ssouserrm)
  - [sso.user.update](#ssouserupdate)
+ - [storage.policy.create](#storagepolicycreate)
+ - [storage.policy.info](#storagepolicyinfo)
+ - [storage.policy.ls](#storagepolicyls)
+ - [storage.policy.rm](#storagepolicyrm)
  - [tags.attach](#tagsattach)
  - [tags.attached.ls](#tagsattachedls)
  - [tags.category.create](#tagscategorycreate)
@@ -287,6 +299,7 @@ but appear via `govc $cmd -h`:
  - [vm.disk.create](#vmdiskcreate)
  - [vm.guest.tools](#vmguesttools)
  - [vm.info](#vminfo)
+ - [vm.instantclone](#vminstantclone)
  - [vm.ip](#vmip)
  - [vm.keystrokes](#vmkeystrokes)
  - [vm.markastemplate](#vmmarkastemplate)
@@ -303,6 +316,8 @@ but appear via `govc $cmd -h`:
  - [vm.unregister](#vmunregister)
  - [vm.upgrade](#vmupgrade)
  - [vm.vnc](#vmvnc)
+ - [volume.ls](#volumels)
+ - [volume.rm](#volumerm)
 
 </details>
 
@@ -637,6 +652,22 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -l=false               Long listing format
   -name=                 Cluster rule name
+```
+
+## cluster.usage
+
+```
+Usage: govc cluster.usage [OPTIONS] CLUSTER
+
+Cluster resource usage summary.
+
+Examples:
+  govc cluster.usage ClusterName
+  govc cluster.usage -S ClusterName # summarize shared storage only
+  govc cluster.usage -json ClusterName | jq -r .CPU.Summary.Usage
+
+Options:
+  -S=false               Exclude host local storage
 ```
 
 ## datacenter.create
@@ -1034,10 +1065,12 @@ Configure VM boot settings.
 Examples:
   govc device.boot -vm $vm -delay 1000 -order floppy,cdrom,ethernet,disk
   govc device.boot -vm $vm -order - # reset boot order
-  govc device.boot -vm $vm -secure
+  govc device.boot -vm $vm -firmware efi -secure
+  govc device.boot -vm $vm -firmware bios -secure=false
 
 Options:
   -delay=0               Delay in ms before starting the boot sequence
+  -firmware=bios         Firmware type [bios|efi]
   -order=                Boot device order [-,floppy,cdrom,ethernet,disk]
   -retry=false           If true, retry boot after retry-delay
   -retry-delay=0         Delay in ms before a boot retry
@@ -1211,6 +1244,113 @@ Examples:
 
 Options:
   -boot=false            List devices configured in the VM's boot options
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## device.pci.add
+
+```
+Usage: govc device.pci.add [OPTIONS] PCI_ADDRESS...
+
+Add PCI Passthrough device to VM.
+
+Examples:
+  govc device.pci.ls -vm $vm
+  govc device.pci.add -vm $vm $pci_address
+  govc device.info -vm $vm
+
+Assuming vm name is helloworld, list command has below output
+
+$ govc device.pci.ls -vm helloworld
+System ID                             Address       Vendor Name Device Name
+5b087ce4-ce46-72c0-c7c2-28ac9e22c3c2  0000:60:00.0  Pensando    Ethernet Controller 1
+5b087ce4-ce46-72c0-c7c2-28ac9e22c3c2  0000:61:00.0  Pensando    Ethernet Controller 2
+
+To add only 'Ethernet Controller 1', command should be as below. No output upon success.
+
+$ govc device.pci.add -vm helloworld 0000:60:00.0
+
+To add both 'Ethernet Controller 1' and 'Ethernet Controller 2', command should be as below.
+No output upon success.
+
+$ govc device.pci.add -vm helloworld 0000:60:00.0 0000:61:00.0
+
+$ govc device.info -vm helloworld
+...
+Name:               pcipassthrough-13000
+  Type:             VirtualPCIPassthrough
+  Label:            PCI device 0
+  Summary:
+  Key:              13000
+  Controller:       pci-100
+  Unit number:      18
+Name:               pcipassthrough-13001
+  Type:             VirtualPCIPassthrough
+  Label:            PCI device 1
+  Summary:
+  Key:              13001
+  Controller:       pci-100
+  Unit number:      19
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## device.pci.ls
+
+```
+Usage: govc device.pci.ls [OPTIONS]
+
+List allowed PCI passthrough devices that could be attach to VM.
+
+Examples:
+  govc device.pci.ls -vm VM
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## device.pci.remove
+
+```
+Usage: govc device.pci.remove [OPTIONS] <PCI ADDRESS>...
+
+Remove PCI Passthrough device from VM.
+
+Examples:
+  govc device.info -vm $vm
+  govc device.pci.remove -vm $vm $pci_address
+  govc device.info -vm $vm
+
+Assuming vm name is helloworld, device info command has below output
+
+$ govc device.info -vm helloworld
+...
+Name:               pcipassthrough-13000
+  Type:             VirtualPCIPassthrough
+  Label:            PCI device 0
+  Summary:
+  Key:              13000
+  Controller:       pci-100
+  Unit number:      18
+Name:               pcipassthrough-13001
+  Type:             VirtualPCIPassthrough
+  Label:            PCI device 1
+  Summary:
+  Key:              13001
+  Controller:       pci-100
+  Unit number:      19
+
+To remove only 'pcipassthrough-13000', command should be as below. No output upon success.
+
+$ govc device.pci.remove -vm helloworld pcipassthrough-13000
+
+To remove both 'pcipassthrough-13000' and 'pcipassthrough-13001', command should be as below.
+No output upon success.
+
+$ govc device.pci.remove -vm helloworld pcipassthrough-13000 pcipassthrough-13001
+
+Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -1532,16 +1672,29 @@ Usage: govc dvs.portgroup.add [OPTIONS] NAME
 
 Add portgroup to DVS.
 
+The '-type' options are defined by the dvs.DistributedVirtualPortgroup.PortgroupType API.
+The UI labels '-type' as "Port binding" with the following choices:
+    "Static binding":  earlyBinding
+    "Dynanic binding": lateBinding
+    "No binding":      ephemeral
+
+The '-auto-expand' option is labeled in the UI as "Port allocation".
+The default value is false, behaves as the UI labeled "Fixed" choice.
+When given '-auto-expand=true', behaves as the UI labeled "Elastic" choice.
+
 Examples:
   govc dvs.create DSwitch
   govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork
   govc dvs.portgroup.add -dvs DSwitch -type ephemeral InternalNetwork
 
 Options:
+  -auto-expand=<nil>     Ignore the limit on the number of ports
   -dvs=                  DVS path
   -nports=128            Number of ports
   -type=earlyBinding     Portgroup type (earlyBinding|lateBinding|ephemeral)
   -vlan=0                VLAN ID
+  -vlan-mode=vlan        vlan mode (vlan|trunking)
+  -vlan-range=0-4094     VLAN Ranges with comma delimited
 ```
 
 ## dvs.portgroup.change
@@ -1556,9 +1709,12 @@ Examples:
   govc dvs.portgroup.change -vlan 3214 ExternalNetwork
 
 Options:
+  -auto-expand=<nil>     Ignore the limit on the number of ports
   -nports=0              Number of ports
   -type=earlyBinding     Portgroup type (earlyBinding|lateBinding|ephemeral)
   -vlan=0                VLAN ID
+  -vlan-mode=vlan        vlan mode (vlan|trunking)
+  -vlan-range=0-4094     VLAN Ranges with comma delimited
 ```
 
 ## dvs.portgroup.info
@@ -1798,6 +1954,7 @@ Examples:
   govc find /dc1 -type c
   govc find vm -name my-vm-*
   govc find . -type n
+  govc find -p /folder-a/dc-1/host/folder-b/cluster-a -type Datacenter # prints /folder-a/dc-1
   govc find . -type m -runtime.powerState poweredOn
   govc find . -type m -datastore $(govc find -i datastore -name vsanDatastore)
   govc find . -type s -summary.type vsan
@@ -1809,6 +1966,7 @@ Options:
   -l=false               Long listing format
   -maxdepth=-1           Max depth
   -name=*                Resource name
+  -p=false               Find parent objects
   -type=[]               Resource type
 ```
 
@@ -3426,6 +3584,111 @@ Options:
   -t=false               Include sample times
 ```
 
+## namespace.cluster.disable
+
+```
+Usage: govc namespace.cluster.disable [OPTIONS]
+
+Disables vSphere Namespaces on the specified cluster.
+
+Examples:
+  govc namespace.cluster.disable -cluster "Workload-Cluster"
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+```
+
+## namespace.cluster.enable
+
+```
+Usage: govc namespace.cluster.enable [OPTIONS]
+
+Enable vSphere Namespaces on the cluster.
+This operation sets up Kubernetes instance for the cluster along with worker nodes.
+
+Examples:
+  govc namespace.cluster.enable \
+    -cluster "Workload-Cluster" \
+    -service-cidr 10.96.0.0/23 \
+    -pod-cidrs 10.244.0.0/20 \
+    -control-plane-dns-names wcp.example.com \
+    -workload-network.egress-cidrs 10.0.0.128/26 \
+    -workload-network.ingress-cidrs "10.0.0.64/26" \
+    -workload-network.switch VDS \
+    -workload-network.edge-cluster Edge-Cluster-1 \
+    -size TINY   \
+    -mgmt-network.network "DVPG-Management Network" \
+    -mgmt-network.gateway 10.0.0.1 \
+    -mgmt-network.starting-address 10.0.0.45 \
+    -mgmt-network.subnet-mask 255.255.255.0 \
+    -ephemeral-storage-policy "vSAN Default Storage Policy" \
+    -control-plane-storage-policy "vSAN Default Storage Policy" \
+    -image-storage-policy "vSAN Default Storage Policy"
+
+Options:
+  -cluster=                                Cluster [GOVC_CLUSTER]
+  -control-plane-dns=                      Comma-separated list of DNS server IP addresses to use on Kubernetes API server, specified in order of preference.
+  -control-plane-dns-names=                Comma-separated list of DNS names to associate with the Kubernetes API server. These DNS names are embedded in the TLS certificate presented by the API server.
+  -control-plane-dns-search-domains=       Comma-separated list of domains to be searched when trying to lookup a host name on Kubernetes API server, specified in order of preference.
+  -control-plane-ntp-servers=              Optional. Comma-separated list of NTP server DNS names or IP addresses to use on Kubernetes API server, specified in order of preference. If unset, VMware Tools based time synchronization is enabled.
+  -control-plane-storage-policy=           Storage policy associated with Kubernetes API server.
+  -ephemeral-storage-policy=               Storage policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.
+  -image-storage-policy=                   Storage policy to be used for container images.
+  -login-banner=                           Optional. Disclaimer to be displayed prior to login via the Kubectl plugin.
+  -mgmt-network.address-count=5            The number of IP addresses in the management range. Optional, but required with network mode STATICRANGE.
+  -mgmt-network.floating-IP=               Optional. The Floating IP used by the HA master cluster in the when network Mode is DHCP.
+  -mgmt-network.gateway=                   Gateway to be used for the management IP range
+  -mgmt-network.mode=STATICRANGE           IPv4 address assignment modes. Value is one of: DHCP, STATICRANGE
+  -mgmt-network.network=                   Identifier for the management network.
+  -mgmt-network.starting-address=          Denotes the start of the IP range to be used. Optional, but required with network mode STATICRANGE.
+  -mgmt-network.subnet-mask=               Subnet mask of the management network. Optional, but required with network mode STATICRANGE.
+  -network-provider=NSXT_CONTAINER_PLUGIN  Optional. Provider of cluster networking for this vSphere Namespaces cluster. Currently only value supported is: NSXT_CONTAINER_PLUGIN.
+  -pod-cidrs=                              CIDR blocks from which Kubernetes allocates pod IP addresses. Comma-separated list. Shouldn't overlap with service, ingress or egress CIDRs.
+  -service-cidr=                           CIDR block from which Kubernetes allocates service cluster IP addresses. Shouldn't overlap with pod, ingress or egress CIDRs
+  -size=                                   The size of the Kubernetes API server and the worker nodes. Value is one of: TINY, SMALL, MEDIUM, LARGE.
+  -worker-dns=                             Comma-separated list of DNS server IP addresses to use on the worker nodes, specified in order of preference.
+  -workload-network.edge-cluster=          NSX Edge Cluster to be used for Kubernetes Services of type LoadBalancer, Kubernetes Ingresses, and NSX SNAT.
+  -workload-network.egress-cidrs=          CIDR blocks from which NSX assigns IP addresses used for performing SNAT from container IPs to external IPs. Comma-separated list. Shouldn't overlap with pod, service or ingress CIDRs.
+  -workload-network.ingress-cidrs=         CIDR blocks from which NSX assigns IP addresses for Kubernetes Ingresses and Kubernetes Services of type LoadBalancer. Comma-separated list. Shouldn't overlap with pod, service or egress CIDRs.
+  -workload-network.switch=                vSphere Distributed Switch used to connect this cluster.
+```
+
+## namespace.cluster.ls
+
+```
+Usage: govc namespace.cluster.ls [OPTIONS]
+
+List namepace enabled clusters.
+
+Examples:
+  govc namespace.cluster.ls
+  govc namespace.cluster.ls -l
+  govc namespace.cluster.ls -json | jq .
+
+Options:
+  -l=false               Long listing format
+```
+
+## namespace.logs.download
+
+```
+Usage: govc namespace.logs.download [OPTIONS] [NAME]
+
+Download namespace cluster support bundle.
+
+If NAME name is "-", bundle is written to stdout.
+
+See also: govc logs.download
+
+Examples:
+  govc namespace.logs.download -cluster k8s
+  govc namespace.logs.download -cluster k8s - | tar -xvf -
+  govc namespace.logs.download -cluster k8s logs.tar
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+```
+
 ## object.collect
 
 ```
@@ -4198,6 +4461,69 @@ Options:
   -p=                    Password
 ```
 
+## storage.policy.create
+
+```
+Usage: govc storage.policy.create [OPTIONS] NAME
+
+Create VM Storage Policy.
+
+Examples:
+  govc storage.policy.create -category my_cat -tag my_tag MyStoragePolicy # Tag based placement
+
+Options:
+  -category=             Category
+  -d=                    Description
+  -tag=                  Tag
+```
+
+## storage.policy.info
+
+```
+Usage: govc storage.policy.info [OPTIONS] [NAME]
+
+VM Storage Policy info.
+
+Examples:
+  govc storage.policy.info
+  govc storage.policy.info "vSAN Default Storage Policy"
+  govc storage.policy.info -c -s
+
+Options:
+  -c=false               Check VM Compliance
+  -s=false               Check Storage Compatibility
+```
+
+## storage.policy.ls
+
+```
+Usage: govc storage.policy.ls [OPTIONS] [NAME]
+
+VM Storage Policy listing.
+
+Examples:
+  govc storage.policy.ls
+  govc storage.policy.ls "vSAN Default Storage Policy"
+  govc storage.policy.ls -i "vSAN Default Storage Policy"
+
+Options:
+  -i=false               List policy ID only
+```
+
+## storage.policy.rm
+
+```
+Usage: govc storage.policy.rm [OPTIONS] ID
+
+Remove Storage Policy ID.
+
+Examples:
+  govc storage.policy.rm "my policy name"
+  govc storage.policy.rm af7935ab-466d-4b0e-af3c-4ec6bce2112f
+
+Options:
+```
+
 ## tags.attach
 
 ```
@@ -4613,6 +4939,7 @@ Options:
   -capture=              Capture console screen shot to file
   -h5=false              Generate HTML5 UI console link
   -vm=                   Virtual machine [GOVC_VM]
+  -wss=false             Generate WebSocket console link
 ```
 
 ## vm.create
@@ -4722,8 +5049,11 @@ Usage: govc vm.disk.attach [OPTIONS]
 
 Attach existing disk to VM.
 
+A delta disk is created by default, where changes are persisted. Specifying '-link=false' will persist to the same disk.
+
 Examples:
   govc vm.disk.attach -vm $name -disk $name/disk1.vmdk
+  govc device.info -vm $name disk-* # 'File' field is where changes are persisted. 'Parent' field is set when '-link=true'
   govc vm.disk.attach -vm $name -disk $name/shared.vmdk -link=false -sharing sharingMultiWriter
   govc device.remove -vm $name -keep disk-* # detach disk(s)
 
@@ -4828,6 +5158,32 @@ Options:
   -r=false               Show resource summary
   -t=false               Show ToolsConfigInfo
   -waitip=false          Wait for VM to acquire IP address
+```
+
+## vm.instantclone
+
+```
+Usage: govc vm.instantclone [OPTIONS] NAME
+
+Instant Clone VM to NAME.
+
+Examples:
+  govc vm.instantclone -vm source-vm new-vm
+  # Configure ExtraConfig variables on a guest VM:
+  govc vm.instantclone -vm source-vm -e guestinfo.ipaddress=192.168.0.1 -e guestinfo.netmask=255.255.255.0 new-vm
+  # Read the variable set above inside the guest:
+  vmware-rpctool "info-get guestinfo.ipaddress"
+  vmware-rpctool "info-get guestinfo.netmask"
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -e=[]                  ExtraConfig. <key>=<value>
+  -folder=               Inventory folder [GOVC_FOLDER]
+  -net=                  Network [GOVC_NETWORK]
+  -net.adapter=e1000     Network adapter type
+  -net.address=          Network hardware address
+  -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## vm.ip
@@ -5158,5 +5514,40 @@ Options:
   -password=             VNC password
   -port=-1               VNC port (-1 for auto-select)
   -port-range=5900-5999  VNC port auto-select range
+```
+
+## volume.ls
+
+```
+Usage: govc volume.ls [OPTIONS] [ID...]
+
+List CNS volumes.
+
+Examples:
+  govc volume.ls
+  govc volume.ls -l
+  govc volume.ls -ds vsanDatastore
+  govc volume.ls df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc disk.ls -l $(govc volume.ls -L pvc-9744a4ff-07f4-43c4-b8ed-48ea7a528734)
+
+Options:
+  -L=false               List volume disk or file backing ID only
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -i=false               List volume ID only
+  -l=false               Long listing format
+```
+
+## volume.rm
+
+```
+Usage: govc volume.rm [OPTIONS] ID
+
+Remove CNS volume.
+
+Examples:
+  govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d
+  govc volume.rm $(govc volume.ls -i pvc-de368f19-a997-4d5d-9eae-4496f10f429a)
+
+Options:
 ```
 

@@ -214,15 +214,22 @@ func (r *infoResult) Write(w io.Writer) error {
 				setting.FilterPolicy.FilterConfig != nil &&
 				len(setting.FilterPolicy.FilterConfig) > 0 {
 
-				rules := setting.FilterPolicy.FilterConfig[0].GetDvsTrafficFilterConfig()
-				if rules != nil && rules.TrafficRuleset != nil && rules.TrafficRuleset.Rules != nil {
+				rules, ok := setting.FilterPolicy.FilterConfig[0].(*types.DvsTrafficFilterConfig)
+				if !ok {
+					continue
+				}
+				if rules != nil && rules.TrafficRuleset != nil {
 					for _, rule := range rules.TrafficRuleset.Rules {
 						for _, q := range rule.Qualifier {
 							var protocol string
-							if val, ok := protocols[q.GetDvsIpNetworkRuleQualifier().Protocol.Value]; ok {
+							ipr, ok := q.(*types.DvsIpNetworkRuleQualifier)
+							if !ok {
+								continue
+							}
+							if val, ok := protocols[ipr.Protocol.Value]; ok {
 								protocol = val
 							} else {
-								protocol = fmt.Sprintf("%d", q.GetDvsIpNetworkRuleQualifier().Protocol.Value)
+								protocol = fmt.Sprintf("%d", ipr.Protocol.Value)
 							}
 
 							trafficRuleSet[portID][int(rule.Sequence)] = trafficRule{
@@ -230,10 +237,10 @@ func (r *infoResult) Write(w io.Writer) error {
 								Direction:          rule.Direction,
 								Action:             printAction(rule.Action),
 								Protocol:           protocol,
-								SourceAddress:      printAddress(q.GetDvsIpNetworkRuleQualifier().SourceAddress),
-								SourceIpPort:       printPort(q.GetDvsIpNetworkRuleQualifier().SourceIpPort),
-								DestinationAddress: printAddress(q.GetDvsIpNetworkRuleQualifier().DestinationAddress),
-								DestinationIpPort:  printPort(q.GetDvsIpNetworkRuleQualifier().DestinationIpPort),
+								SourceAddress:      printAddress(ipr.SourceAddress),
+								SourceIpPort:       printPort(ipr.SourceIpPort),
+								DestinationAddress: printAddress(ipr.DestinationAddress),
+								DestinationIpPort:  printPort(ipr.DestinationIpPort),
 							}
 						}
 					}

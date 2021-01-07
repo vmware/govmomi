@@ -1414,6 +1414,7 @@ type QueryPointInTimeReplicaParam struct {
 	ReplicaTimeQueryParam *ReplicaQueryIntervalParam `xml:"replicaTimeQueryParam,omitempty"`
 	PitName               string                     `xml:"pitName,omitempty"`
 	Tags                  []string                   `xml:"tags,omitempty"`
+	PreferDetails         *bool                      `xml:"preferDetails"`
 }
 
 func init() {

@@ -1192,15 +1192,17 @@ func init() {
 type VslmVsoVStorageObjectResult struct {
 	types.DynamicData
 
-	Id              types.ID                              `xml:"id"`
-	Name            string                                `xml:"name,omitempty"`
-	CapacityInMB    int64                                 `xml:"capacityInMB"`
-	CreateTime      *time.Time                            `xml:"createTime"`
-	DatastoreUrl    string                                `xml:"datastoreUrl,omitempty"`
-	BackingObjectId *types.ID                             `xml:"backingObjectId,omitempty"`
-	SnapshotInfo    []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty"`
-	Metadata        []types.KeyValue                      `xml:"metadata,omitempty"`
-	Error           *types.LocalizedMethodFault           `xml:"error,omitempty"`
+	Id               types.ID                              `xml:"id"`
+	Name             string                                `xml:"name,omitempty"`
+	CapacityInMB     int64                                 `xml:"capacityInMB"`
+	CreateTime       *time.Time                            `xml:"createTime"`
+	DatastoreUrl     string                                `xml:"datastoreUrl,omitempty"`
+	DiskPath         string                                `xml:"diskPath,omitempty"`
+	UsedCapacityInMB int64                                 `xml:"usedCapacityInMB,omitempty"`
+	BackingObjectId  *types.ID                             `xml:"backingObjectId,omitempty"`
+	SnapshotInfo     []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty"`
+	Metadata         []types.KeyValue                      `xml:"metadata,omitempty"`
+	Error            *types.LocalizedMethodFault           `xml:"error,omitempty"`
 }
 
 func init() {

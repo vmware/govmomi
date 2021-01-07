@@ -3,16 +3,16 @@
 load test_helper
 
 @test "device.ls" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
-  result=$(govc device.ls -vm $vm | grep ethernet-0 | wc -l)
+  result=$(govc device.ls -vm $vm ethernet-* | wc -l)
   [ $result -eq 1 ]
 }
 
 @test "device.info" {
-  esx_env
+  vcsim_env -esx
 
   vm=$(new_empty_vm)
 
@@ -32,15 +32,18 @@ load test_helper
   [ $result -eq 1 ]
 
   run govc device.info -vm $vm -json
-  assert_matches ethernet-0
+  assert_matches ethernet-
   assert_matches '"Name":' # injected field
   assert_matches '"Type":' # injected field
 }
 
 @test "device.boot" {
-  esx_env
+  vcsim_env
 
-  vm=$(new_ttylinux_vm)
+  vm="DC0_H0_VM0"
+
+  run govc device.remove -vm $vm cdrom-*
+  assert_success
 
   result=$(govc device.ls -vm $vm -boot | wc -l)
   [ $result -eq 0 ]
@@ -68,10 +71,16 @@ load test_helper
 
   result=$(govc device.ls -vm $vm -boot | wc -l)
   [ $result -eq 0 ]
+
+  run govc device.boot -vm $vm -secure
+  assert_failure
+
+  run govc device.boot -vm $vm -secure -firmware efi
+  assert_success
 }
 
 @test "device.cdrom" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -114,7 +123,7 @@ load test_helper
 }
 
 @test "device.floppy" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -157,7 +166,7 @@ load test_helper
 }
 
 @test "device.serial" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -213,7 +222,7 @@ load test_helper
 }
 
 @test "device.scsi" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -239,7 +248,7 @@ load test_helper
 }
 
 @test "device.usb" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -256,22 +265,16 @@ load test_helper
   result=$(govc device.ls -vm $vm | grep $id | wc -l)
   [ $result -eq 1 ]
 
-  run govc device.usb.add -vm $vm
-  assert_failure # 1 per vm max
-
   run govc device.usb.add -type xhci -vm $vm
   assert_success
   id=$output
 
   result=$(govc device.ls -vm $vm | grep $id | wc -l)
   [ $result -eq 1 ]
-
-  run govc device.usb.add -type xhci -vm $vm
-  assert_failure # 1 per vm max
 }
 
 @test "device.scsi slots" {
-  esx_env
+  vcsim_env
 
   vm=$(new_empty_vm)
 
@@ -282,40 +285,6 @@ load test_helper
     result=$(govc device.ls -vm "$vm" | grep disk- | wc -l)
     [ "$result" -eq "$i" ]
   done
-
-  # We're at the max, so this will fail
-  run govc vm.disk.create -vm "$vm" -name disk-16 -size 1K
-  assert_failure
-
-  # Remove disk #2
-  run govc device.remove -vm "$vm" disk-1000-2
-  assert_success
-
-  # No longer at the max, this should use the UnitNumber released by the remove above
-  run govc vm.disk.create -vm "$vm" -name disk-16 -size 1K
-  assert_success
-}
-
-
-@test "device nil config" {
-  esx_env
-
-  vm=$(new_empty_vm)
-
-  run govc device.ls -vm "$vm"
-  assert_success
-
-  run govc datastore.rm "$vm"
-  assert_success
-
-  run govc object.reload "vm/$vm"
-  assert_success
-
-  run govc device.ls -vm "$vm"
-  assert_failure
-
-  run govc vm.unregister "$vm"
-  assert_success
 }
 
 @test "device.match" {

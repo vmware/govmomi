@@ -271,6 +271,57 @@ func ExampleVirtualMachine_Clone() {
 	// Output: example-clone
 }
 
+func ExampleFolder_CreateVM() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+		dc, err := finder.Datacenter(ctx, "DC0")
+		if err != nil {
+			return err
+		}
+
+		finder.SetDatacenter(dc)
+
+		folders, err := dc.Folders(ctx)
+		if err != nil {
+			return err
+		}
+
+		pool, err := finder.ResourcePool(ctx, "DC0_C0/Resources")
+		if err != nil {
+			return err
+		}
+
+		spec := types.VirtualMachineConfigSpec{
+			Name:    "example-vm",
+			GuestId: string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+			Files: &types.VirtualMachineFileInfo{
+				VmPathName: "[LocalDS_0]",
+			},
+		}
+
+		task, err := folders.VmFolder.CreateVM(ctx, spec, pool, nil)
+		if err != nil {
+			return err
+		}
+
+		info, err := task.WaitForResult(ctx)
+		if err != nil {
+			return err
+		}
+
+		vm := object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+		name, err := vm.ObjectName(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Println(name)
+
+		return nil
+	})
+	// Output: example-vm
+}
+
 func ExampleVirtualMachine_Reconfigure() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
 		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
@@ -434,4 +485,53 @@ func ExampleCustomizationSpecManager_Info() {
 	// vcsim-linux-static=*types.CustomizationLinuxPrep
 	// vcsim-windows-static=*types.CustomizationSysprep
 	// vcsim-windows-domain=*types.CustomizationSysprep
+}
+
+func ExampleNetworkReference_EthernetCardBackingInfo() {
+	model := simulator.VPX()
+	model.OpaqueNetwork = 1 // Create 1 NSX backed OpaqueNetwork per DC
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+		vm, err := finder.VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+
+		// finder.Network returns an object.NetworkReference
+		net, err := finder.Network(ctx, "DC0_NSX0")
+		if err != nil {
+			return err
+		}
+
+		// EthernetCardBackingInfo creates the backing for any network type:
+		// "Network", "DistributedVirtualPortgroup" or "OpaqueNetwork"
+		backing, err := net.EthernetCardBackingInfo(ctx)
+		if err != nil {
+			return err
+		}
+
+		device, err := object.EthernetCardTypes().CreateEthernetCard("e1000", backing)
+		if err != nil {
+			return err
+		}
+
+		err = vm.AddDevice(ctx, device)
+		if err != nil {
+			return err
+		}
+
+		list, err := vm.Device(ctx)
+		if err != nil {
+			return err
+		}
+
+		nics := list.SelectByType((*types.VirtualEthernetCard)(nil)) // All VM NICs (DC0_DVPG0 + DC0_NSX0)
+		match := list.SelectByBackingInfo(backing)                   // VM NIC with DC0_NSX0 backing
+
+		fmt.Printf("%d of %d NICs match backing\n", len(match), len(nics))
+
+		return nil
+	}, model)
+	// Output: 1 of 2 NICs match backing
 }

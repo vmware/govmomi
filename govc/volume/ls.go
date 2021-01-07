@@ -29,10 +29,12 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/units"
+	vim "github.com/vmware/govmomi/vim25/types"
 )
 
 type ls struct {
 	*flags.ClientFlag
+	*flags.DatastoreFlag
 	*flags.OutputFlag
 
 	types.CnsQueryFilter
@@ -50,6 +52,9 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
+	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
+	cmd.DatastoreFlag.Register(ctx, f)
+
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
 
@@ -60,6 +65,9 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (cmd *ls) Process(ctx context.Context) error {
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
 		return err
 	}
 	return cmd.OutputFlag.Process(ctx)
@@ -75,6 +83,7 @@ func (cmd *ls) Description() string {
 Examples:
   govc volume.ls
   govc volume.ls -l
+  govc volume.ls -ds vsanDatastore
   govc volume.ls df86393b-5ae0-4fca-87d0-b692dbc67d45
   govc disk.ls -l $(govc volume.ls -L pvc-9744a4ff-07f4-43c4-b8ed-48ea7a528734)`
 }
@@ -132,6 +141,15 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 	_ = vc.UseServiceVersion("vsan")
+
+	ds, err := cmd.DatastoreIfSpecified()
+	if err != nil {
+		return err
+	}
+
+	if ds != nil {
+		cmd.Datastores = []vim.ManagedObjectReference{ds.Reference()}
+	}
 
 	c, err := cns.NewClient(ctx, vc)
 	if err != nil {
