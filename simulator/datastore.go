@@ -40,7 +40,7 @@ func (ds *Datastore) model(m *Model) error {
 		// rewrite saved vmfs path to a local temp dir
 		u.Path = path.Clean(u.Path)
 		parent := strings.ReplaceAll(path.Dir(u.Path), "/", "_")
-		name := path.Base(u.Path)
+		name := strings.ReplaceAll(path.Base(u.Path), ":", "_")
 
 		dir, err := m.createTempDir(parent, name)
 		if err != nil {
