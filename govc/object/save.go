@@ -112,9 +112,18 @@ func saveDVS(ctx context.Context, c *vim25.Client, ref types.ManagedObjectRefere
 	return []saveMethod{{"FetchDVPorts", res}}, nil
 }
 
+func saveEnvironmentBrowser(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
+	res, err := methods.QueryConfigOption(ctx, c, &types.QueryConfigOption{This: ref})
+	if err != nil {
+		return nil, err
+	}
+	return []saveMethod{{"QueryConfigOption", res}}, nil
+}
+
 // saveObjects maps object types to functions that can save data that isn't available via the PropertyCollector
 var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedObjectReference) ([]saveMethod, error){
 	"VmwareDistributedVirtualSwitch": saveDVS,
+	"EnvironmentBrowser":             saveEnvironmentBrowser,
 }
 
 func (cmd *save) save(content []types.ObjectContent) error {
