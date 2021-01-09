@@ -1231,6 +1231,12 @@ func init() {
 	t["LocalizationManager"] = reflect.TypeOf((*LocalizationManager)(nil)).Elem()
 }
 
+// ManagedEntity is an abstract base type for all managed objects present in
+// the inventory tree. The base type provides common functionality for
+// traversing the tree structure, as well as health monitoring and other basic
+// functions.
+//
+// Most Virtual Infrastructure managed object types extend this type.
 type ManagedEntity struct {
 	ExtensibleManagedObject
 
