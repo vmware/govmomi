@@ -1143,6 +1143,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 						*prop = types.NewBool(false)
 					}
 				}
+				disk.Uuid = virtualDiskUUID(&dc.Self, info.FileName)
 			}
 		}
 	case *types.VirtualCdrom:
