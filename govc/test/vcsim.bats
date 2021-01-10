@@ -57,6 +57,10 @@ EOF
   [ "$(jq .Cluster <<<"$model")" == "6" ]
   [ "$(jq .Machine <<<"$model")" == "0" ]
   [ "$(jq .Datastore <<<"$model")" == "0" ]
+
+  run govc about
+  assert_success
+  assert_matches "govmomi simulator"
 }
 
 @test "vcsim host placement" {

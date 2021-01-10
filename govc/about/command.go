@@ -104,6 +104,7 @@ type infoResult struct {
 
 func (r *infoResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	fmt.Fprintf(tw, "FullName:\t%s\n", r.a.FullName)
 	fmt.Fprintf(tw, "Name:\t%s\n", r.a.Name)
 	fmt.Fprintf(tw, "Vendor:\t%s\n", r.a.Vendor)
 	fmt.Fprintf(tw, "Version:\t%s\n", r.a.Version)

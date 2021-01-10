@@ -155,7 +155,7 @@ func main() {
 	}
 
 	tag := " (govmomi simulator)"
-	model.ServiceContent.About.Name += tag
+	model.ServiceContent.About.FullName += tag
 	model.ServiceContent.About.OsType = runtime.GOOS + "-" + runtime.GOARCH
 
 	esx.HostSystem.Summary.Hardware.Vendor += tag
