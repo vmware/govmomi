@@ -1415,7 +1415,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
-		c.customize()
+		c.customize(c.ctx)
 	case types.VirtualMachinePowerStatePoweredOff:
 		c.run.stop(c.VirtualMachine)
 		c.ctx.postEvent(
@@ -1823,10 +1823,13 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 	}
 }
 
-func (vm *VirtualMachine) customize() {
+func (vm *VirtualMachine) customize(ctx *Context) {
 	if vm.imc == nil {
 		return
 	}
+
+	event := types.CustomizationEvent{VmEvent: vm.event()}
+	ctx.postEvent(&types.CustomizationStartedEvent{CustomizationEvent: event})
 
 	changes := []types.PropertyChange{
 		{Name: "config.tools.pendingCustomization", Val: ""},
@@ -1893,6 +1896,7 @@ func (vm *VirtualMachine) customize() {
 
 	vm.imc = nil
 	Map.Update(vm, changes)
+	ctx.postEvent(&types.CustomizationSucceeded{CustomizationEvent: event})
 }
 
 func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasFault {
