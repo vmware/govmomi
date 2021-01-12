@@ -16,6 +16,7 @@ package types
 import (
 	"reflect"
 
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -28,7 +29,7 @@ func (m VsanPerformanceManager) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanPerformanceManager", reflect.TypeOf((*VsanPerformanceManager)(nil)).Elem())
+	mo.Add("vsan:VsanPerformanceManager", reflect.TypeOf((*VsanPerformanceManager)(nil)).Elem())
 }
 
 type VimClusterVsanVcDiskManagementSystem struct {
@@ -40,7 +41,7 @@ func (m VimClusterVsanVcDiskManagementSystem) Reference() types.ManagedObjectRef
 }
 
 func init() {
-	types.Add("vsan:VimClusterVsanVcDiskManagementSystem", reflect.TypeOf((*VimClusterVsanVcDiskManagementSystem)(nil)).Elem())
+	mo.Add("vsan:VimClusterVsanVcDiskManagementSystem", reflect.TypeOf((*VimClusterVsanVcDiskManagementSystem)(nil)).Elem())
 }
 
 type VsanHostVdsSystem struct {
@@ -52,7 +53,7 @@ func (m VsanHostVdsSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanHostVdsSystem", reflect.TypeOf((*VsanHostVdsSystem)(nil)).Elem())
+	mo.Add("vsan:VsanHostVdsSystem", reflect.TypeOf((*VsanHostVdsSystem)(nil)).Elem())
 }
 
 type VsanPhoneHomeSystem struct {
@@ -64,7 +65,7 @@ func (m VsanPhoneHomeSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanPhoneHomeSystem", reflect.TypeOf((*VsanPhoneHomeSystem)(nil)).Elem())
+	mo.Add("vsan:VsanPhoneHomeSystem", reflect.TypeOf((*VsanPhoneHomeSystem)(nil)).Elem())
 }
 
 type VsanIscsiTargetSystem struct {
@@ -76,7 +77,7 @@ func (m VsanIscsiTargetSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanIscsiTargetSystem", reflect.TypeOf((*VsanIscsiTargetSystem)(nil)).Elem())
+	mo.Add("vsan:VsanIscsiTargetSystem", reflect.TypeOf((*VsanIscsiTargetSystem)(nil)).Elem())
 }
 
 type VsanClusterMgmtInternalSystem struct {
@@ -88,7 +89,7 @@ func (m VsanClusterMgmtInternalSystem) Reference() types.ManagedObjectReference 
 }
 
 func init() {
-	types.Add("vsan:VsanClusterMgmtInternalSystem", reflect.TypeOf((*VsanClusterMgmtInternalSystem)(nil)).Elem())
+	mo.Add("vsan:VsanClusterMgmtInternalSystem", reflect.TypeOf((*VsanClusterMgmtInternalSystem)(nil)).Elem())
 }
 
 type VsanCapabilitySystem struct {
@@ -100,7 +101,7 @@ func (m VsanCapabilitySystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanCapabilitySystem", reflect.TypeOf((*VsanCapabilitySystem)(nil)).Elem())
+	mo.Add("vsan:VsanCapabilitySystem", reflect.TypeOf((*VsanCapabilitySystem)(nil)).Elem())
 }
 
 type VsanVumSystem struct {
@@ -112,7 +113,7 @@ func (m VsanVumSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanVumSystem", reflect.TypeOf((*VsanVumSystem)(nil)).Elem())
+	mo.Add("vsan:VsanVumSystem", reflect.TypeOf((*VsanVumSystem)(nil)).Elem())
 }
 
 type VsanResourceCheckSystem struct {
@@ -124,7 +125,7 @@ func (m VsanResourceCheckSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanResourceCheckSystem", reflect.TypeOf((*VsanResourceCheckSystem)(nil)).Elem())
+	mo.Add("vsan:VsanResourceCheckSystem", reflect.TypeOf((*VsanResourceCheckSystem)(nil)).Elem())
 }
 
 type VsanObjectSystem struct {
@@ -136,7 +137,7 @@ func (m VsanObjectSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanObjectSystem", reflect.TypeOf((*VsanObjectSystem)(nil)).Elem())
+	mo.Add("vsan:VsanObjectSystem", reflect.TypeOf((*VsanObjectSystem)(nil)).Elem())
 }
 
 type VsanVcClusterConfigSystem struct {
@@ -148,7 +149,7 @@ func (m VsanVcClusterConfigSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanVcClusterConfigSystem", reflect.TypeOf((*VsanVcClusterConfigSystem)(nil)).Elem())
+	mo.Add("vsan:VsanVcClusterConfigSystem", reflect.TypeOf((*VsanVcClusterConfigSystem)(nil)).Elem())
 }
 
 type VsanVcClusterHealthSystem struct {
@@ -160,7 +161,7 @@ func (m VsanVcClusterHealthSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanVcClusterHealthSystem", reflect.TypeOf((*VsanVcClusterHealthSystem)(nil)).Elem())
+	mo.Add("vsan:VsanVcClusterHealthSystem", reflect.TypeOf((*VsanVcClusterHealthSystem)(nil)).Elem())
 }
 
 type VsanVcsaDeployerSystem struct {
@@ -172,7 +173,7 @@ func (m VsanVcsaDeployerSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanVcsaDeployerSystem", reflect.TypeOf((*VsanVcsaDeployerSystem)(nil)).Elem())
+	mo.Add("vsan:VsanVcsaDeployerSystem", reflect.TypeOf((*VsanVcsaDeployerSystem)(nil)).Elem())
 }
 
 type VsanVdsSystem struct {
@@ -184,7 +185,7 @@ func (m VsanVdsSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanVdsSystem", reflect.TypeOf((*VsanVdsSystem)(nil)).Elem())
+	mo.Add("vsan:VsanVdsSystem", reflect.TypeOf((*VsanVdsSystem)(nil)).Elem())
 }
 
 type VsanRemoteDatastoreSystem struct {
@@ -196,7 +197,7 @@ func (m VsanRemoteDatastoreSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanRemoteDatastoreSystem", reflect.TypeOf((*VsanRemoteDatastoreSystem)(nil)).Elem())
+	mo.Add("vsan:VsanRemoteDatastoreSystem", reflect.TypeOf((*VsanRemoteDatastoreSystem)(nil)).Elem())
 }
 
 type VsanUpgradeSystemEx struct {
@@ -208,7 +209,7 @@ func (m VsanUpgradeSystemEx) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanUpgradeSystemEx", reflect.TypeOf((*VsanUpgradeSystemEx)(nil)).Elem())
+	mo.Add("vsan:VsanUpgradeSystemEx", reflect.TypeOf((*VsanUpgradeSystemEx)(nil)).Elem())
 }
 
 type VsanSpaceReportSystem struct {
@@ -220,7 +221,7 @@ func (m VsanSpaceReportSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanSpaceReportSystem", reflect.TypeOf((*VsanSpaceReportSystem)(nil)).Elem())
+	mo.Add("vsan:VsanSpaceReportSystem", reflect.TypeOf((*VsanSpaceReportSystem)(nil)).Elem())
 }
 
 type VsanIoInsightManager struct {
@@ -232,7 +233,7 @@ func (m VsanIoInsightManager) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanIoInsightManager", reflect.TypeOf((*VsanIoInsightManager)(nil)).Elem())
+	mo.Add("vsan:VsanIoInsightManager", reflect.TypeOf((*VsanIoInsightManager)(nil)).Elem())
 }
 
 type VsanUpdateManager struct {
@@ -244,7 +245,7 @@ func (m VsanUpdateManager) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanUpdateManager", reflect.TypeOf((*VsanUpdateManager)(nil)).Elem())
+	mo.Add("vsan:VsanUpdateManager", reflect.TypeOf((*VsanUpdateManager)(nil)).Elem())
 }
 
 type VsanSystemEx struct {
@@ -256,7 +257,7 @@ func (m VsanSystemEx) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanSystemEx", reflect.TypeOf((*VsanSystemEx)(nil)).Elem())
+	mo.Add("vsan:VsanSystemEx", reflect.TypeOf((*VsanSystemEx)(nil)).Elem())
 }
 
 type VsanFileServiceSystem struct {
@@ -268,7 +269,7 @@ func (m VsanFileServiceSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanFileServiceSystem", reflect.TypeOf((*VsanFileServiceSystem)(nil)).Elem())
+	mo.Add("vsan:VsanFileServiceSystem", reflect.TypeOf((*VsanFileServiceSystem)(nil)).Elem())
 }
 
 type HostVsanHealthSystem struct {
@@ -280,7 +281,7 @@ func (m HostVsanHealthSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:HostVsanHealthSystem", reflect.TypeOf((*HostVsanHealthSystem)(nil)).Elem())
+	mo.Add("vsan:HostVsanHealthSystem", reflect.TypeOf((*HostVsanHealthSystem)(nil)).Elem())
 }
 
 type CnsVolumeManager struct {
@@ -292,7 +293,7 @@ func (m CnsVolumeManager) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:CnsVolumeManager", reflect.TypeOf((*CnsVolumeManager)(nil)).Elem())
+	mo.Add("vsan:CnsVolumeManager", reflect.TypeOf((*CnsVolumeManager)(nil)).Elem())
 }
 
 type HostSpbm struct {
@@ -304,7 +305,7 @@ func (m HostSpbm) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:HostSpbm", reflect.TypeOf((*HostSpbm)(nil)).Elem())
+	mo.Add("vsan:HostSpbm", reflect.TypeOf((*HostSpbm)(nil)).Elem())
 }
 
 type VimClusterVsanVcStretchedClusterSystem struct {
@@ -316,7 +317,7 @@ func (m VimClusterVsanVcStretchedClusterSystem) Reference() types.ManagedObjectR
 }
 
 func init() {
-	types.Add("vsan:VimClusterVsanVcStretchedClusterSystem", reflect.TypeOf((*VimClusterVsanVcStretchedClusterSystem)(nil)).Elem())
+	mo.Add("vsan:VimClusterVsanVcStretchedClusterSystem", reflect.TypeOf((*VimClusterVsanVcStretchedClusterSystem)(nil)).Elem())
 }
 
 type VsanClusterHealthSystem struct {
@@ -328,7 +329,7 @@ func (m VsanClusterHealthSystem) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanClusterHealthSystem", reflect.TypeOf((*VsanClusterHealthSystem)(nil)).Elem())
+	mo.Add("vsan:VsanClusterHealthSystem", reflect.TypeOf((*VsanClusterHealthSystem)(nil)).Elem())
 }
 
 type VsanMassCollector struct {
@@ -340,5 +341,5 @@ func (m VsanMassCollector) Reference() types.ManagedObjectReference {
 }
 
 func init() {
-	types.Add("vsan:VsanMassCollector", reflect.TypeOf((*VsanMassCollector)(nil)).Elem())
+	mo.Add("vsan:VsanMassCollector", reflect.TypeOf((*VsanMassCollector)(nil)).Elem())
 }
