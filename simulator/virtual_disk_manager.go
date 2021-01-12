@@ -187,6 +187,13 @@ func (m *VirtualDiskManager) CopyVirtualDiskTask(_ *Context, req *types.CopyVirt
 	}
 }
 
+func virtualDiskUUID(dc *types.ManagedObjectReference, file string) string {
+	if dc != nil {
+		file = dc.String() + file
+	}
+	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(file)).String()
+}
+
 func (m *VirtualDiskManager) QueryVirtualDiskUuid(_ *Context, req *types.QueryVirtualDiskUuid) soap.HasFault {
 	body := new(methods.QueryVirtualDiskUuidBody)
 
@@ -206,7 +213,7 @@ func (m *VirtualDiskManager) QueryVirtualDiskUuid(_ *Context, req *types.QueryVi
 	}
 
 	body.Res = &types.QueryVirtualDiskUuidResponse{
-		Returnval: uuid.NewSHA1(uuid.NameSpaceOID, []byte(file)).String(),
+		Returnval: virtualDiskUUID(req.Datacenter, file),
 	}
 
 	return body
