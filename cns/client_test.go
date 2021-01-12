@@ -18,6 +18,7 @@ package cns
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -260,6 +261,183 @@ func TestClient(t *testing.T) {
 			t.Logf("Successfully Queried Volumes. queryVolumeInfoTaskResult: %+v", pretty.Sprint(queryVolumeInfoTaskResult))
 		}
 	}
+
+	// Test CreateSnapshot API
+	// Construct the CNS SnapshotCreateSpec list
+	desc := "example-vanilla-block-snapshot"
+	var cnsSnapshotCreateSpecList []cnstypes.CnsSnapshotCreateSpec
+	cnsSnapshotCreateSpec := cnstypes.CnsSnapshotCreateSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId,
+		},
+		Description: desc,
+	}
+	cnsSnapshotCreateSpecList = append(cnsSnapshotCreateSpecList, cnsSnapshotCreateSpec)
+	t.Logf("Creating snapshot using the spec: %+v", pretty.Sprint(cnsSnapshotCreateSpecList))
+	createSnapshotsTask, err := cnsClient.CreateSnapshots(ctx, cnsSnapshotCreateSpecList)
+	if err != nil {
+		t.Errorf("Failed to get the task of CreateSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createSnapshotsTaskInfo, err := GetTaskInfo(ctx, createSnapshotsTask)
+	if err != nil {
+		t.Errorf("Failed to get the task info of CreateSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createSnapshotsTaskResult, err := GetTaskResult(ctx, createSnapshotsTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to get the task result of CreateSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createSnapshotsOperationRes := createSnapshotsTaskResult.GetCnsVolumeOperationResult()
+	if createSnapshotsOperationRes.Fault != nil {
+		t.Fatalf("Failed to create snapshots: fault=%+v", createSnapshotsOperationRes.Fault)
+	}
+
+	snapshotCreateResult := interface{}(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
+	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
+	snapshotCreateTime := snapshotCreateResult.Snapshot.CreateTime
+	t.Logf("CreateSnapshots: Snapshot created successfully. volumeId: %q, snapshot id %q, time stamp %+v, opId: %q", volumeId, snapshotId, snapshotCreateTime, createSnapshotsTaskInfo.ActivationId)
+
+	// Test CreateVolumeFromSnapshot functionality by calling CreateVolume with VolumeSource set
+	// Query Volume for capacity
+	var queryVolumeIDList []cnstypes.CnsVolumeId
+	queryVolumeIDList = append(queryVolumeIDList, cnstypes.CnsVolumeId{Id: volumeId})
+	queryFilter.VolumeIds = queryVolumeIDList
+	t.Logf("CreateVolumeFromSnapshot: calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter))
+	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	if err != nil {
+		t.Errorf("Failed to query volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	var snapshotSize int64
+	if len(queryResult.Volumes) > 0 {
+		snapshotSize = queryResult.Volumes[0].BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails().CapacityInMb
+	} else {
+		msg := fmt.Sprintf("failed to get the snapshot size by querying volume: %q", volumeId)
+		t.Fatal(msg)
+	}
+	t.Logf("CreateVolumeFromSnapshot: Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+
+	// Construct the CNS VolumeCreateSpec list
+	cnsCreateVolumeFromSnapshotCreateSpec := cnstypes.CnsVolumeCreateSpec{
+		Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0-create-from-snapshot",
+		VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+		Datastores: dsList,
+		Metadata: cnstypes.CnsVolumeMetadata{
+			ContainerCluster: containerCluster,
+		},
+		BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+			CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+				CapacityInMb: snapshotSize,
+			},
+		},
+		VolumeSource: &cnstypes.CnsSnapshotVolumeSource{
+			VolumeId: cnstypes.CnsVolumeId{
+				Id: volumeId,
+			},
+			SnapshotId: cnstypes.CnsSnapshotId{
+				Id: snapshotId,
+			},
+		},
+	}
+	var cnsCreateVolumeFromSnapshotCreateSpecList []cnstypes.CnsVolumeCreateSpec
+	cnsCreateVolumeFromSnapshotCreateSpecList = append(cnsCreateVolumeFromSnapshotCreateSpecList, cnsCreateVolumeFromSnapshotCreateSpec)
+	t.Logf("Creating volume from snapshot using the spec: %+v", pretty.Sprint(cnsCreateVolumeFromSnapshotCreateSpec))
+	createVolumeFromSnapshotTask, err := cnsClient.CreateVolume(ctx, cnsCreateVolumeFromSnapshotCreateSpecList)
+	if err != nil {
+		t.Errorf("Failed to create volume from snapshot. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createVolumeFromSnapshotTaskInfo, err := GetTaskInfo(ctx, createVolumeFromSnapshotTask)
+	if err != nil {
+		t.Errorf("Failed to create volume from snapshot. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createVolumeFromSnapshotTaskResult, err := GetTaskResult(ctx, createVolumeFromSnapshotTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to create volume from snapshot. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if createVolumeFromSnapshotTaskResult == nil {
+		t.Fatalf("Empty create task results")
+		t.FailNow()
+	}
+	createVolumeFromSnapshotOperationRes := createVolumeFromSnapshotTaskResult.GetCnsVolumeOperationResult()
+	if createVolumeFromSnapshotOperationRes.Fault != nil {
+		t.Fatalf("Failed to create volume from snapshot: fault=%+v", createVolumeFromSnapshotOperationRes.Fault)
+	}
+	createVolumeFromSnapshotVolumeId := createVolumeFromSnapshotOperationRes.VolumeId.Id
+	createVolumeFromSnapshotResult := (createVolumeFromSnapshotTaskResult).(*cnstypes.CnsVolumeCreateResult)
+	t.Logf("createVolumeFromSnapshotResult %+v", createVolumeFromSnapshotResult)
+	t.Logf("Volume created from snapshot %s sucessfully. volumeId: %s", snapshotId, createVolumeFromSnapshotVolumeId)
+
+	//  Clean up volume created from snapshot above
+	var deleteVolumeFromSnapshotVolumeIDList []cnstypes.CnsVolumeId
+	deleteVolumeFromSnapshotVolumeIDList = append(deleteVolumeFromSnapshotVolumeIDList, cnstypes.CnsVolumeId{Id: createVolumeFromSnapshotVolumeId})
+	t.Logf("Deleting volume: %+v", deleteVolumeFromSnapshotVolumeIDList)
+	deleteVolumeFromSnapshotTask, err := cnsClient.DeleteVolume(ctx, deleteVolumeFromSnapshotVolumeIDList, true)
+	if err != nil {
+		t.Errorf("Failed to delete volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteVolumeFromSnapshotTaskInfo, err := GetTaskInfo(ctx, deleteVolumeFromSnapshotTask)
+	if err != nil {
+		t.Errorf("Failed to delete volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteVolumeFromSnapshotTaskResult, err := GetTaskResult(ctx, deleteVolumeFromSnapshotTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to delete volume. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if deleteVolumeFromSnapshotTaskResult == nil {
+		t.Fatalf("Empty delete task results")
+		t.FailNow()
+	}
+	deleteVolumeFromSnapshotOperationRes := deleteVolumeFromSnapshotTaskResult.GetCnsVolumeOperationResult()
+	if deleteVolumeFromSnapshotOperationRes.Fault != nil {
+		t.Fatalf("Failed to delete volume: fault=%+v", deleteVolumeFromSnapshotOperationRes.Fault)
+	}
+	t.Logf("Volume: %q deleted sucessfully", createVolumeFromSnapshotVolumeId)
+
+	// Test DeleteSnapshot API
+	// Construct the CNS SnapshotDeleteSpec list
+	var cnsSnapshotDeleteSpecList []cnstypes.CnsSnapshotDeleteSpec
+	cnsSnapshotDeleteSpec := cnstypes.CnsSnapshotDeleteSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId,
+		},
+		SnapshotId: cnstypes.CnsSnapshotId{
+			Id: snapshotId,
+		},
+	}
+	cnsSnapshotDeleteSpecList = append(cnsSnapshotDeleteSpecList, cnsSnapshotDeleteSpec)
+	t.Logf("Deleting snapshot using the spec: %+v", pretty.Sprint(cnsSnapshotDeleteSpecList))
+	deleteSnapshotsTask, err := cnsClient.DeleteSnapshots(ctx, cnsSnapshotDeleteSpecList)
+	if err != nil {
+		t.Errorf("Failed to get the task of DeleteSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	deleteSnapshotsTaskInfo, err := GetTaskInfo(ctx, deleteSnapshotsTask)
+	if err != nil {
+		t.Errorf("Failed to get the task info of DeleteSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+
+	deleteSnapshotsTaskResult, err := GetTaskResult(ctx, deleteSnapshotsTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to get the task result of DeleteSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+
+	deleteSnapshotsOperationRes := deleteSnapshotsTaskResult.GetCnsVolumeOperationResult()
+	if deleteSnapshotsOperationRes.Fault != nil {
+		t.Fatalf("Failed to delete snapshots: fault=%+v", deleteSnapshotsOperationRes.Fault)
+	}
+
+	snapshotDeleteResult := interface{}(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
+	t.Logf("DeleteSnapshots: Snapshot deleted successfully. volumeId: %q, snapshot id %q, opId: %q", volumeId, snapshotDeleteResult.SnapshotId, deleteSnapshotsTaskInfo.ActivationId)
 
 	// Test Relocate API
 	// Relocate API is not supported on ReleaseVSAN67u3 and ReleaseVSAN70

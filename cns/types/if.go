@@ -105,3 +105,13 @@ type BaseCnsVolumeOperationResult interface {
 func init() {
 	types.Add("BaseCnsVolumeOperationResult", reflect.TypeOf((*CnsVolumeOperationResult)(nil)).Elem())
 }
+
+func (b *CnsVolumeSource) GetCnsVolumeSource() *CnsVolumeSource { return b }
+
+type BaseCnsVolumeSource interface {
+	GetCnsVolumeSource() *CnsVolumeSource
+}
+
+func init() {
+	types.Add("BaseCnsVolumeSource", reflect.TypeOf((*CnsVolumeSource)(nil)).Elem())
+}
