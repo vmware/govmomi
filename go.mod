@@ -10,8 +10,6 @@ require (
 	github.com/kr/pretty v0.1.0
 	github.com/kr/text v0.1.0 // indirect
 	github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
-	golang.org/x/tools v0.0.0-20201007032633-0806396f153e // indirect
-	golang.org/x/vgo v0.0.0-20180912184537-9d567625acf4 // indirect
 )
 
 go 1.13
