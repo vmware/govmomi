@@ -171,13 +171,14 @@ func TestEventManagerRead(t *testing.T) {
 	tests := []struct {
 		max    int
 		rewind bool
+		order  bool
 		read   func(context.Context, int32) ([]types.BaseEvent, error)
 	}{
-		{nevents, true, c.ReadNextEvents},
-		{nevents / 3, true, c.ReadNextEvents},
-		{nevents * 3, false, c.ReadNextEvents},
-		{3, false, c.ReadPreviousEvents},
-		{nevents * 3, false, c.ReadNextEvents},
+		{nevents, true, true, c.ReadNextEvents},
+		{nevents / 3, true, true, c.ReadNextEvents},
+		{nevents * 3, false, true, c.ReadNextEvents},
+		{3, false, false, c.ReadPreviousEvents},
+		{nevents * 3, false, true, c.ReadNextEvents},
 	}
 
 	for _, test := range tests {
@@ -205,6 +206,21 @@ func TestEventManagerRead(t *testing.T) {
 		if count < len(page) {
 			t.Errorf("expected at least %d events, got: %d", len(page), count)
 		}
+
+		for i := 1; i < len(all); i++ {
+			prev := all[i-1].GetEvent().Key
+			key := all[i].GetEvent().Key
+			if test.order {
+				if prev > key {
+					t.Errorf("key %d > %d", prev, key)
+				}
+			} else {
+				if prev < key {
+					t.Errorf("key %d < %d", prev, key)
+				}
+			}
+		}
+
 		if test.rewind {
 			if err = c.Rewind(ctx); err != nil {
 				t.Error(err)

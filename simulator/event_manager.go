@@ -19,7 +19,6 @@ package simulator
 import (
 	"bytes"
 	"container/list"
-	"container/ring"
 	"log"
 	"reflect"
 	"text/template"
@@ -72,10 +71,11 @@ func (m *EventManager) createCollector(ctx *Context, req *types.CreateCollectorF
 
 	collector := &EventHistoryCollector{
 		m:    m,
-		page: ring.New(size),
+		page: list.New(),
+		size: size,
 	}
 	collector.Filter = req.Filter
-	collector.fillPage(size)
+	collector.fillPage()
 
 	return collector, nil
 }
@@ -148,6 +148,13 @@ func (m *EventManager) formatMessage(event types.BaseEvent) {
 	}
 }
 
+func pushEvent(l *list.List, event types.BaseEvent) {
+	if l.Len() > maxPageSize*5 {
+		l.Remove(l.Front()) // Prune history
+	}
+	l.PushBack(event)
+}
+
 func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFault {
 	m.key++
 	event := req.EventToPost.GetEvent()
@@ -158,18 +165,12 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 
 	m.formatMessage(req.EventToPost)
 
-	if m.history.Len() > maxPageSize*5 {
-		// Prune history
-		m.history.Remove(m.history.Front())
-	}
-
-	m.history.PushBack(req.EventToPost)
+	pushEvent(m.history, req.EventToPost)
 
 	for _, c := range m.collectors {
 		ctx.WithLock(c, func() {
 			if c.eventMatches(req.EventToPost) {
-				c.page = c.page.Prev()
-				c.page.Value = req.EventToPost
+				pushEvent(c.page, req.EventToPost)
 				Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
@@ -184,7 +185,8 @@ type EventHistoryCollector struct {
 	mo.EventHistoryCollector
 
 	m    *EventManager
-	page *ring.Ring
+	size int
+	page *list.List
 	pos  *list.Element
 }
 
@@ -331,21 +333,13 @@ func (c *EventHistoryCollector) eventMatches(event types.BaseEvent) bool {
 	return c.entityMatches(event, &spec)
 }
 
-// filePage copies the manager's latest events into the collector's page with Filter applied.
-func (c *EventHistoryCollector) fillPage(size int) {
-	matches := 0
-	page := c.page
-
-	for e := c.m.history.Back(); e != nil; e = e.Prev() {
+// fillPage copies the manager's latest events into the collector's page with Filter applied.
+func (c *EventHistoryCollector) fillPage() {
+	for e := c.m.history.Front(); e != nil; e = e.Next() {
 		event := e.Value.(types.BaseEvent)
 
 		if c.eventMatches(event) {
-			page.Value = event
-			page = page.Prev()
-			matches++
-			if matches == size {
-				break
-			}
+			c.page.PushBack(event)
 		}
 	}
 }
@@ -370,17 +364,16 @@ func (c *EventHistoryCollector) SetCollectorPageSize(ctx *Context, req *types.Se
 		return body
 	}
 
-	ctx.WithLock(c.m, func() {
-		c.page = ring.New(size)
-		c.fillPage(size)
-	})
+	c.size = size
+	c.page = list.New()
+	ctx.WithLock(c.m, c.fillPage)
 
 	body.Res = new(types.SetCollectorPageSizeResponse)
 	return body
 }
 
 func (c *EventHistoryCollector) ResetCollector(ctx *Context, req *types.ResetCollector) soap.HasFault {
-	c.pos = c.m.history.Back()
+	c.pos = c.page.Back()
 
 	return &methods.ResetCollectorBody{
 		Res: new(types.ResetCollectorResponse),
@@ -388,7 +381,7 @@ func (c *EventHistoryCollector) ResetCollector(ctx *Context, req *types.ResetCol
 }
 
 func (c *EventHistoryCollector) RewindCollector(ctx *Context, req *types.RewindCollector) soap.HasFault {
-	c.pos = c.m.history.Front()
+	c.pos = c.page.Front()
 
 	return &methods.RewindCollectorBody{
 		Res: new(types.RewindCollectorResponse),
@@ -424,7 +417,7 @@ func (c *EventHistoryCollector) ReadNextEvents(ctx *Context, req *types.ReadNext
 		if c.pos != nil {
 			return c.pos.Next()
 		}
-		return c.m.history.Front()
+		return c.page.Front()
 	}
 
 	body.Res.Returnval = c.readEvents(ctx, req.MaxCount, next)
@@ -444,7 +437,7 @@ func (c *EventHistoryCollector) ReadPreviousEvents(ctx *Context, req *types.Read
 		if c.pos != nil {
 			return c.pos.Prev()
 		}
-		return c.m.history.Back()
+		return c.page.Back()
 	}
 
 	body.Res.Returnval = c.readEvents(ctx, req.MaxCount, next)
@@ -467,12 +460,14 @@ func (c *EventHistoryCollector) DestroyCollector(ctx *Context, req *types.Destro
 func (c *EventHistoryCollector) GetLatestPage() []types.BaseEvent {
 	var latestPage []types.BaseEvent
 
-	c.page.Do(func(val interface{}) {
-		if val == nil {
-			return
+	e := c.page.Back()
+	for i := 0; i < c.size; i++ {
+		if e == nil {
+			break
 		}
-		latestPage = append(latestPage, val.(types.BaseEvent))
-	})
+		latestPage = append(latestPage, e.Value.(types.BaseEvent))
+		e = e.Prev()
+	}
 
 	return latestPage
 }
