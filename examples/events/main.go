@@ -33,6 +33,7 @@ import (
 // example use: go run main.go -url $GOVC_URL -b 8h -f VmEvent
 func main() {
 	begin := flag.Duration("b", time.Hour, "Begin time") // default BeginTime is 1h ago
+	end := flag.Duration("e", 0, "End time")
 	follow := flag.Bool("f", false, "Follow event stream")
 
 	examples.Run(func(ctx context.Context, c *vim25.Client) error {
@@ -54,6 +55,9 @@ func main() {
 			Time: &types.EventFilterSpecByTime{
 				BeginTime: types.NewTime(now.Add(*begin * -1)),
 			},
+		}
+		if *end != 0 {
+			filter.Time.EndTime = types.NewTime(now.Add(*end * -1))
 		}
 
 		collector, err := m.CreateCollectorForEvents(ctx, filter)

@@ -320,17 +320,46 @@ func (c *EventHistoryCollector) typeMatches(event types.BaseEvent, spec *types.E
 	return false
 }
 
+func (c *EventHistoryCollector) timeMatches(event types.BaseEvent, spec *types.EventFilterSpec) bool {
+	if spec.Time == nil {
+		return true
+	}
+
+	created := event.GetEvent().CreatedTime
+
+	if begin := spec.Time.BeginTime; begin != nil {
+		if created.Before(*begin) {
+			return false
+		}
+	}
+
+	if end := spec.Time.EndTime; end != nil {
+		if created.After(*end) {
+			return false
+		}
+	}
+
+	return true
+}
+
 // eventMatches returns true one of the filters matches the event.
 func (c *EventHistoryCollector) eventMatches(event types.BaseEvent) bool {
 	spec := c.Filter.(types.EventFilterSpec)
 
-	if !c.typeMatches(event, &spec) {
-		return false
+	matchers := []func(types.BaseEvent, *types.EventFilterSpec) bool{
+		c.typeMatches,
+		c.timeMatches,
+		c.entityMatches,
+		// TODO: spec.UserName, etc
 	}
 
-	// TODO: spec.Time, spec.UserName, etc
+	for _, match := range matchers {
+		if !match(event, &spec) {
+			return false
+		}
+	}
 
-	return c.entityMatches(event, &spec)
+	return true
 }
 
 // fillPage copies the manager's latest events into the collector's page with Filter applied.
