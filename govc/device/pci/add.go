@@ -21,7 +21,6 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"strconv"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -130,7 +129,7 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		device := &types.VirtualPCIPassthrough{}
 		device.Backing = &types.VirtualPCIPassthroughDeviceBackingInfo{
-			Id: d.PciDevice.Id, DeviceId: strconv.Itoa(int(d.PciDevice.DeviceId)),
+			Id: d.PciDevice.Id, DeviceId: fmt.Sprintf("%x", d.PciDevice.DeviceId),
 			SystemId: d.SystemId, VendorId: d.PciDevice.VendorId,
 		}
 		device.Connectable = &types.VirtualDeviceConnectInfo{StartConnected: true, Connected: true}
