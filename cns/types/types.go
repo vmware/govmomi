@@ -617,23 +617,15 @@ type CnsConfigureVolumeACLsResponse struct {
 type CnsVolumeACLConfigureSpec struct {
 	types.DynamicData
 
-	VolumeId              CnsVolumeId                `xml:"volumeId"`
-	AccessControlSpecList []BaseCnsAccessControlSpec `xml:"accessControlSpecList,typeattr"`
+	VolumeId              CnsVolumeId               `xml:"volumeId"`
+	AccessControlSpecList []CnsNFSAccessControlSpec `xml:"accessControlSpecList,typeattr"`
 }
 
-func init() {
-	types.Add("vsan:CnsVolumeACLConfigureSpec", reflect.TypeOf((*CnsVolumeACLConfigureSpec)(nil)).Elem())
-}
-func (b *CnsAccessControlSpec) GetCnsAccessControlSpec() *CnsAccessControlSpec { return b }
-
-type BaseCnsAccessControlSpec interface {
-	GetCnsAccessControlSpec() *CnsAccessControlSpec
-}
-
-type CnsAccessControlSpec struct {
+type CnsNFSAccessControlSpec struct {
 	types.DynamicData
+	Permission []vsanfstypes.VsanFileShareNetPermission `xml:"netPermission,omitempty,typeattr"`
 }
 
 func init() {
-	types.Add("vsan:CnsAccessControlSpec", reflect.TypeOf((*CnsAccessControlSpec)(nil)).Elem())
+	types.Add("CnsNFSAccessControlSpec", reflect.TypeOf((*CnsNFSAccessControlSpec)(nil)).Elem())
 }
