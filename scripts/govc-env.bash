@@ -51,7 +51,7 @@ govc-env() {
   # Save current environment
   if [ "$1" == "--save" ]; then
     if [ ! -z "$2" ]; then
-    	govc-env > ${_govc_env_dir}/$2
+    	govc-env > ${_govc_env_dir}/$2 && echo govc env has been saved to ${_govc_env_dir}/$2
     else
 	echo Usage: govc-env --save configname
     fi
