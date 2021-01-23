@@ -71,6 +71,8 @@ func (cmd *checkout) Usage() string {
 func (cmd *checkout) Description() string {
 	return `Check out Content Library item PATH to vm NAME.
 
+Note: this command requires vCenter 7.0 or higher.
+
 Examples:
   govc library.checkout -cluster my-cluster my-content/template-vm-item my-vm`
 }

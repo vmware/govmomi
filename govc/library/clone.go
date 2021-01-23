@@ -107,7 +107,7 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-	if vm == nil {
+	if vm == nil || name == "" {
 		return flag.ErrHelp
 	}
 	ds, err := cmd.DatastoreIfSpecified()
