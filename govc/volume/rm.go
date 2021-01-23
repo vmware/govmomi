@@ -48,9 +48,11 @@ func (cmd *rm) Usage() string {
 func (cmd *rm) Description() string {
 	return `Remove CNS volume.
 
+Note: if volume.rm returns not found errors,
+consider using 'govc disk.ls -R' to reconcile the datastore inventory.
+
 Examples:
-  govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d
-  govc volume.rm $(govc volume.ls -i pvc-de368f19-a997-4d5d-9eae-4496f10f429a)`
+  govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d`
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
