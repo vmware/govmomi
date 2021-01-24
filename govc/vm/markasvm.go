@@ -64,8 +64,8 @@ func (cmd *markasvm) Description() string {
 	return `Mark VM template as a virtual machine.
 
 Examples:
-  govc vm.markasvm $name -host host1
-  govc vm.markasvm $name -pool cluster1/Resources`
+  govc vm.markasvm -host host1 $name
+  govc vm.markasvm -host host1 $name`
 }
 
 func (cmd *markasvm) Run(ctx context.Context, f *flag.FlagSet) error {

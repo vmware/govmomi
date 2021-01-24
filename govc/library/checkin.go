@@ -49,6 +49,8 @@ func (cmd *checkin) Usage() string {
 func (cmd *checkin) Description() string {
 	return `Check in VM to Content Library item PATH.
 
+Note: this command requires vCenter 7.0 or higher.
+
 Examples:
   govc library.checkin -vm my-vm my-content/template-vm-item`
 }

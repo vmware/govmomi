@@ -19,6 +19,7 @@ package license
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -67,6 +68,19 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 		err = m.Remove(ctx, v)
 		if err != nil {
 			return err
+		}
+	}
+
+	list, err := m.List(ctx)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range f.Args() {
+		for _, l := range list {
+			if v == l.LicenseKey {
+				return fmt.Errorf("cannot remove license %q", v)
+			}
 		}
 	}
 
