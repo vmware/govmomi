@@ -44,13 +44,17 @@ govc-env() {
     for VAR in $(env | grep ^GOVC_ | cut -d= -f1); do
       echo "export ${VAR}='${!VAR}'"
     done
-
+ 
     return
   fi
 
   # Save current environment
   if [ "$1" == "--save" ]; then
-    govc-env > ${_govc_env_dir}/$2
+    if [ ! -z "$2" ]; then
+    	govc-env > ${_govc_env_dir}/$2 && echo govc env has been saved to ${_govc_env_dir}/$2
+    else
+	echo Usage: govc-env --save configname
+    fi
     return
   fi
 
