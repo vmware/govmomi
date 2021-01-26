@@ -624,6 +624,7 @@ type CnsVolumeACLConfigureSpec struct {
 type CnsNFSAccessControlSpec struct {
 	types.DynamicData
 	Permission []vsanfstypes.VsanFileShareNetPermission `xml:"netPermission,omitempty,typeattr"`
+	Delete     bool                                     `xml:"delete,omitempty"`
 }
 
 func init() {

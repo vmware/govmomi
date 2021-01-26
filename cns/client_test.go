@@ -720,7 +720,7 @@ func TestClient(t *testing.T) {
 		fileBackingInfo := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsVsanFileShareBackingDetails)
 		t.Logf("File Share Name: %s with accessPoints: %+v", fileBackingInfo.Name, fileBackingInfo.AccessPoints)
 
-		// Test Configure ACLs
+		// Test add read-only permissions using Configure ACLs
 		netPerms := make([]vsanfstypes.VsanFileShareNetPermission, 0)
 		netPerms = append(netPerms, vsanfstypes.VsanFileShareNetPermission{
 			Ips:         "192.168.124.2",
@@ -751,6 +751,44 @@ func TestClient(t *testing.T) {
 			t.Fatal(err)
 		}
 		aclTaskResult, err := GetTaskResult(ctx, aclTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to configure VolumeACLs. Error: %+v", err)
+			t.Fatal(err)
+		}
+		if aclTaskResult == nil {
+			t.Fatalf("Empty configure VolumeACLs task results")
+			t.FailNow()
+		}
+
+		// Test to revoke all permissions using Configure ACLs
+		netPerms = make([]vsanfstypes.VsanFileShareNetPermission, 0)
+		netPerms = append(netPerms, vsanfstypes.VsanFileShareNetPermission{
+			Ips:         "192.168.124.2",
+			Permissions: "READ_ONLY",
+		})
+
+		vSanNFSACLEntry = make([]cnstypes.CnsNFSAccessControlSpec, 0)
+		vSanNFSACLEntry = append(vSanNFSACLEntry, cnstypes.CnsNFSAccessControlSpec{
+			Permission: netPerms,
+			Delete:     true,
+		})
+
+		aclSpec = cnstypes.CnsVolumeACLConfigureSpec{
+			VolumeId:              volumeID,
+			AccessControlSpecList: vSanNFSACLEntry,
+		}
+		t.Logf("Invoking ConfigureVolumeACLs using the spec: %+v", pretty.Sprint(aclSpec))
+		aclTask, err = cnsClient.ConfigureVolumeACLs(ctx, aclSpec)
+		if err != nil {
+			t.Errorf("Failed to configure VolumeACLs. Error: %+v", err)
+			t.Fatal(err)
+		}
+		aclTaskInfo, err = GetTaskInfo(ctx, aclTask)
+		if err != nil {
+			t.Errorf("Failed to configure VolumeACLs. Error: %+v", err)
+			t.Fatal(err)
+		}
+		aclTaskResult, err = GetTaskResult(ctx, aclTaskInfo)
 		if err != nil {
 			t.Errorf("Failed to configure VolumeACLs. Error: %+v", err)
 			t.Fatal(err)
