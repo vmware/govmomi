@@ -3820,121 +3820,6 @@ type VsanHostQueryCheckLimitsResponse struct {
 	Returnval VsanLimitHealthResult `xml:"returnval"`
 }
 
-type CnsCreateVolume CnsCreateVolumeRequestType
-
-func init() {
-	types.Add("vsan:CnsCreateVolume", reflect.TypeOf((*CnsCreateVolume)(nil)).Elem())
-}
-
-type CnsCreateVolumeRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	CreateSpecs []CnsVolumeCreateSpec        `xml:"createSpecs"`
-}
-
-func init() {
-	types.Add("vsan:CnsCreateVolumeRequestType", reflect.TypeOf((*CnsCreateVolumeRequestType)(nil)).Elem())
-}
-
-type CnsCreateVolumeResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
-}
-
-type CnsAttachVolume CnsAttachVolumeRequestType
-
-func init() {
-	types.Add("vsan:CnsAttachVolume", reflect.TypeOf((*CnsAttachVolume)(nil)).Elem())
-}
-
-type CnsAttachVolumeRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	AttachSpecs []CnsVolumeAttachDetachSpec  `xml:"attachSpecs"`
-}
-
-func init() {
-	types.Add("vsan:CnsAttachVolumeRequestType", reflect.TypeOf((*CnsAttachVolumeRequestType)(nil)).Elem())
-}
-
-type CnsAttachVolumeResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
-}
-
-type CnsUpdateVolumeMetadata CnsUpdateVolumeMetadataRequestType
-
-func init() {
-	types.Add("vsan:CnsUpdateVolumeMetadata", reflect.TypeOf((*CnsUpdateVolumeMetadata)(nil)).Elem())
-}
-
-type CnsUpdateVolumeMetadataRequestType struct {
-	This        types.ManagedObjectReference  `xml:"_this"`
-	UpdateSpecs []CnsVolumeMetadataUpdateSpec `xml:"updateSpecs"`
-}
-
-func init() {
-	types.Add("vsan:CnsUpdateVolumeMetadataRequestType", reflect.TypeOf((*CnsUpdateVolumeMetadataRequestType)(nil)).Elem())
-}
-
-type CnsUpdateVolumeMetadataResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
-}
-
-type CnsQueryVolume CnsQueryVolumeRequestType
-
-func init() {
-	types.Add("vsan:CnsQueryVolume", reflect.TypeOf((*CnsQueryVolume)(nil)).Elem())
-}
-
-type CnsQueryVolumeRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Filter CnsQueryFilter               `xml:"filter"`
-}
-
-func init() {
-	types.Add("vsan:CnsQueryVolumeRequestType", reflect.TypeOf((*CnsQueryVolumeRequestType)(nil)).Elem())
-}
-
-type CnsQueryVolumeResponse struct {
-	Returnval CnsQueryResult `xml:"returnval"`
-}
-
-type CnsDetachVolume CnsDetachVolumeRequestType
-
-func init() {
-	types.Add("vsan:CnsDetachVolume", reflect.TypeOf((*CnsDetachVolume)(nil)).Elem())
-}
-
-type CnsDetachVolumeRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	DetachSpecs []CnsVolumeAttachDetachSpec  `xml:"detachSpecs"`
-}
-
-func init() {
-	types.Add("vsan:CnsDetachVolumeRequestType", reflect.TypeOf((*CnsDetachVolumeRequestType)(nil)).Elem())
-}
-
-type CnsDetachVolumeResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
-}
-
-type CnsDeleteVolume CnsDeleteVolumeRequestType
-
-func init() {
-	types.Add("vsan:CnsDeleteVolume", reflect.TypeOf((*CnsDeleteVolume)(nil)).Elem())
-}
-
-type CnsDeleteVolumeRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	VolumeIds  []CnsVolumeId                `xml:"volumeIds"`
-	DeleteDisk bool                         `xml:"deleteDisk"`
-}
-
-func init() {
-	types.Add("vsan:CnsDeleteVolumeRequestType", reflect.TypeOf((*CnsDeleteVolumeRequestType)(nil)).Elem())
-}
-
-type CnsDeleteVolumeResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
-}
-
 type VSANVcIsWitnessHost VSANVcIsWitnessHostRequestType
 
 func init() {
@@ -4764,14 +4649,6 @@ func init() {
 	types.Add("vsan:VsanVsanClusterPcapResult", reflect.TypeOf((*VsanVsanClusterPcapResult)(nil)).Elem())
 }
 
-type CnsFileCreateSpec struct {
-	CnsBaseCreateSpec
-}
-
-func init() {
-	types.Add("vsan:CnsFileCreateSpec", reflect.TypeOf((*CnsFileCreateSpec)(nil)).Elem())
-}
-
 type VsanVibSpec struct {
 	types.DynamicData
 
@@ -4942,17 +4819,6 @@ type VsanLimitHealthResult struct {
 
 func init() {
 	types.Add("vsan:VsanLimitHealthResult", reflect.TypeOf((*VsanLimitHealthResult)(nil)).Elem())
-}
-
-type CnsQueryResult struct {
-	types.DynamicData
-
-	Volumes []CnsVolume `xml:"volumes,omitempty"`
-	Cursor  CnsCursor   `xml:"cursor"`
-}
-
-func init() {
-	types.Add("vsan:CnsQueryResult", reflect.TypeOf((*CnsQueryResult)(nil)).Elem())
 }
 
 type VsanIscsiInitiatorGroup struct {
@@ -5222,17 +5088,6 @@ func init() {
 	types.Add("vsan:VsanHclDiskInfo", reflect.TypeOf((*VsanHclDiskInfo)(nil)).Elem())
 }
 
-type CnsVsanFileShareBackingDetails struct {
-	CnsFileBackingDetails
-
-	Name         string           `xml:"name,omitempty"`
-	AccessPoints []types.KeyValue `xml:"accessPoints,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVsanFileShareBackingDetails", reflect.TypeOf((*CnsVsanFileShareBackingDetails)(nil)).Elem())
-}
-
 type VsanFileServiceDomainQuerySpec struct {
 	types.DynamicData
 
@@ -5242,19 +5097,6 @@ type VsanFileServiceDomainQuerySpec struct {
 
 func init() {
 	types.Add("vsan:VsanFileServiceDomainQuerySpec", reflect.TypeOf((*VsanFileServiceDomainQuerySpec)(nil)).Elem())
-}
-
-type CnsKubernetesQueryFilter struct {
-	CnsQueryFilter
-
-	Namespaces []string `xml:"namespaces,omitempty"`
-	PodNames   []string `xml:"podNames,omitempty"`
-	PvcNames   []string `xml:"pvcNames,omitempty"`
-	PvNames    []string `xml:"pvNames,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsKubernetesQueryFilter", reflect.TypeOf((*CnsKubernetesQueryFilter)(nil)).Elem())
 }
 
 type VsanClusterAdvCfgSyncResult struct {
@@ -5354,17 +5196,6 @@ type VsanSyncingObjectFilter struct {
 
 func init() {
 	types.Add("vsan:VsanSyncingObjectFilter", reflect.TypeOf((*VsanSyncingObjectFilter)(nil)).Elem())
-}
-
-type CnsSnapshotVolumeSource struct {
-	CnsVolumeSource
-
-	VolumeId   *CnsVolumeId   `xml:"volumeId,omitempty"`
-	SnapshotId *CnsSnapshotId `xml:"snapshotId,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsSnapshotVolumeSource", reflect.TypeOf((*CnsSnapshotVolumeSource)(nil)).Elem())
 }
 
 type VsanClusterLimitHealthResult struct {
@@ -5526,18 +5357,6 @@ func init() {
 	types.Add("vsan:VsanClusterBalanceSummary", reflect.TypeOf((*VsanClusterBalanceSummary)(nil)).Elem())
 }
 
-type CnsKubernetesEntityMetadata struct {
-	CnsEntityMetadata
-
-	EntityType     string                         `xml:"entityType"`
-	Namespace      string                         `xml:"namespace,omitempty"`
-	ReferredEntity []CnsKubernetesEntityReference `xml:"referredEntity,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsKubernetesEntityMetadata", reflect.TypeOf((*CnsKubernetesEntityMetadata)(nil)).Elem())
-}
-
 type VsanHostAssociatedObjectsResult struct {
 	types.DynamicData
 
@@ -5696,18 +5515,6 @@ func init() {
 	types.Add("vsan:VsanClusterHealthResultBase", reflect.TypeOf((*VsanClusterHealthResultBase)(nil)).Elem())
 }
 
-type CnsCursor struct {
-	types.DynamicData
-
-	Offset       int64 `xml:"offset"`
-	Limit        int64 `xml:"limit"`
-	TotalRecords int64 `xml:"totalRecords,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsCursor", reflect.TypeOf((*CnsCursor)(nil)).Elem())
-}
-
 type VsanNetworkConfigVdsScopeIssue struct {
 	VsanNetworkConfigBaseIssue
 
@@ -5729,14 +5536,6 @@ type VimClusterVsanFaultDomainsConfigSpec struct {
 
 func init() {
 	types.Add("vsan:VimClusterVsanFaultDomainsConfigSpec", reflect.TypeOf((*VimClusterVsanFaultDomainsConfigSpec)(nil)).Elem())
-}
-
-type CnsVolumeSource struct {
-	types.DynamicData
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeSource", reflect.TypeOf((*CnsVolumeSource)(nil)).Elem())
 }
 
 type VsanMassCollectorSpec struct {
@@ -5926,16 +5725,6 @@ func init() {
 	types.Add("vsan:VsanWitnessHostConfig", reflect.TypeOf((*VsanWitnessHostConfig)(nil)).Elem())
 }
 
-type CnsVolumeCreateResult struct {
-	CnsVolumeOperationResult
-
-	Name string `xml:"name,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeCreateResult", reflect.TypeOf((*CnsVolumeCreateResult)(nil)).Elem())
-}
-
 type VimClusterVsanDiskMappingsConfigSpec struct {
 	types.DynamicData
 
@@ -6064,17 +5853,6 @@ func init() {
 	types.Add("vsan:VsanConfigBaseIssue", reflect.TypeOf((*VsanConfigBaseIssue)(nil)).Elem())
 }
 
-type CnsVolumeOperationResult struct {
-	types.DynamicData
-
-	VolumeId *CnsVolumeId          `xml:"volumeId,omitempty"`
-	Fault    types.BaseMethodFault `xml:"fault,omitempty,typeattr"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeOperationResult", reflect.TypeOf((*CnsVolumeOperationResult)(nil)).Elem())
-}
-
 type VsanVsanClusterPcapGroup struct {
 	types.DynamicData
 
@@ -6113,19 +5891,6 @@ type VsanIoInsightInfo struct {
 
 func init() {
 	types.Add("vsan:VsanIoInsightInfo", reflect.TypeOf((*VsanIoInsightInfo)(nil)).Elem())
-}
-
-type CnsContainerCluster struct {
-	types.DynamicData
-
-	ClusterType   string `xml:"clusterType"`
-	ClusterId     string `xml:"clusterId"`
-	VSphereUser   string `xml:"vSphereUser"`
-	ClusterFlavor string `xml:"clusterFlavor,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsContainerCluster", reflect.TypeOf((*CnsContainerCluster)(nil)).Elem())
 }
 
 type VsanInternalExtendedConfig struct {
@@ -6243,19 +6008,6 @@ func init() {
 	types.Add("vsan:HostSpbmHashInfo", reflect.TypeOf((*HostSpbmHashInfo)(nil)).Elem())
 }
 
-type CnsKubernetesEntityReference struct {
-	types.DynamicData
-
-	EntityType string `xml:"entityType"`
-	EntityName string `xml:"entityName"`
-	Namespace  string `xml:"namespace,omitempty"`
-	ClusterId  string `xml:"clusterId,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsKubernetesEntityReference", reflect.TypeOf((*CnsKubernetesEntityReference)(nil)).Elem())
-}
-
 type VsanSmartParameter struct {
 	types.DynamicData
 
@@ -6305,25 +6057,6 @@ type VsanClusterHealthQuerySpec struct {
 
 func init() {
 	types.Add("vsan:VsanClusterHealthQuerySpec", reflect.TypeOf((*VsanClusterHealthQuerySpec)(nil)).Elem())
-}
-
-type CnsQueryFilter struct {
-	types.DynamicData
-
-	VolumeIds                    []CnsVolumeId                  `xml:"volumeIds,omitempty"`
-	Names                        []string                       `xml:"names,omitempty"`
-	ContainerClusterIds          []string                       `xml:"containerClusterIds,omitempty"`
-	StoragePolicyId              string                         `xml:"storagePolicyId,omitempty"`
-	Datastores                   []types.ManagedObjectReference `xml:"datastores,omitempty"`
-	Labels                       []types.KeyValue               `xml:"labels,omitempty"`
-	ComplianceStatus             string                         `xml:"complianceStatus,omitempty"`
-	DatastoreAccessibilityStatus string                         `xml:"datastoreAccessibilityStatus,omitempty"`
-	Cursor                       *CnsCursor                     `xml:"cursor,omitempty"`
-	HealthStatus                 string                         `xml:"healthStatus,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsQueryFilter", reflect.TypeOf((*CnsQueryFilter)(nil)).Elem())
 }
 
 type VsanClusterHealthCheckInfo struct {
@@ -6607,14 +6340,6 @@ func init() {
 	types.Add("vsan:VsanHostPortConfigEx", reflect.TypeOf((*VsanHostPortConfigEx)(nil)).Elem())
 }
 
-type CnsBaseCreateSpec struct {
-	types.DynamicData
-}
-
-func init() {
-	types.Add("vsan:CnsBaseCreateSpec", reflect.TypeOf((*CnsBaseCreateSpec)(nil)).Elem())
-}
-
 type VsanFileServiceConfig struct {
 	types.DynamicData
 
@@ -6629,16 +6354,6 @@ type VsanFileServiceConfig struct {
 
 func init() {
 	types.Add("vsan:VsanFileServiceConfig", reflect.TypeOf((*VsanFileServiceConfig)(nil)).Elem())
-}
-
-type CnsVolumeOperationBatchResult struct {
-	types.DynamicData
-
-	VolumeResults []BaseCnsVolumeOperationResult `xml:"volumeResults,omitempty,typeattr"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeOperationBatchResult", reflect.TypeOf((*CnsVolumeOperationBatchResult)(nil)).Elem())
 }
 
 type VsanVdsMigrationPlan struct {
@@ -6883,18 +6598,6 @@ type VsanHclFirmwareUpdateSpec struct {
 
 func init() {
 	types.Add("vsan:VsanHclFirmwareUpdateSpec", reflect.TypeOf((*VsanHclFirmwareUpdateSpec)(nil)).Elem())
-}
-
-type CnsVolumeMetadata struct {
-	types.DynamicData
-
-	ContainerCluster      CnsContainerCluster   `xml:"containerCluster"`
-	EntityMetadata        []CnsEntityMetadata   `xml:"entityMetadata,omitempty"`
-	ContainerClusterArray []CnsContainerCluster `xml:"containerClusterArray,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeMetadata", reflect.TypeOf((*CnsVolumeMetadata)(nil)).Elem())
 }
 
 type VsanHostServerClusterUnicastInfo struct {
@@ -7156,17 +6859,6 @@ func init() {
 	types.Add("vsan:VsanHostVsanObjectSyncState", reflect.TypeOf((*VsanHostVsanObjectSyncState)(nil)).Elem())
 }
 
-type CnsVSANFileCreateSpec struct {
-	CnsFileCreateSpec
-
-	SoftQuotaInMb int64                        `xml:"softQuotaInMb,omitempty"`
-	Permission    []VsanFileShareNetPermission `xml:"permission,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVSANFileCreateSpec", reflect.TypeOf((*CnsVSANFileCreateSpec)(nil)).Elem())
-}
-
 type VimVsanHostVsanDiskManagementSystemCapability struct {
 	types.DynamicData
 
@@ -7313,16 +7005,6 @@ type VsanFileServiceDomain struct {
 
 func init() {
 	types.Add("vsan:VsanFileServiceDomain", reflect.TypeOf((*VsanFileServiceDomain)(nil)).Elem())
-}
-
-type CnsFault struct {
-	types.VimFault
-
-	Reason string `xml:"reason"`
-}
-
-func init() {
-	types.Add("vsan:CnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
 }
 
 type VsanEntitySpaceUsage struct {
@@ -7670,16 +7352,6 @@ func init() {
 	types.Add("vsan:VsanStretchedClusterConfig", reflect.TypeOf((*VsanStretchedClusterConfig)(nil)).Elem())
 }
 
-type CnsFileBackingDetails struct {
-	CnsBackingObjectDetails
-
-	BackingFileId string `xml:"backingFileId,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsFileBackingDetails", reflect.TypeOf((*CnsFileBackingDetails)(nil)).Elem())
-}
-
 type VsanClusterVMsHealthOverallResult struct {
 	types.DynamicData
 
@@ -7689,19 +7361,6 @@ type VsanClusterVMsHealthOverallResult struct {
 
 func init() {
 	types.Add("vsan:VsanClusterVMsHealthOverallResult", reflect.TypeOf((*VsanClusterVMsHealthOverallResult)(nil)).Elem())
-}
-
-type CnsEntityMetadata struct {
-	types.DynamicData
-
-	EntityName string           `xml:"entityName"`
-	Labels     []types.KeyValue `xml:"labels,omitempty"`
-	Delete     *bool            `xml:"delete"`
-	ClusterId  string           `xml:"clusterId,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsEntityMetadata", reflect.TypeOf((*CnsEntityMetadata)(nil)).Elem())
 }
 
 type VsanHostHealthSystemStatusResult struct {
@@ -8092,16 +7751,6 @@ func init() {
 	types.Add("vsan:VsanHclDriverInfo", reflect.TypeOf((*VsanHclDriverInfo)(nil)).Elem())
 }
 
-type CnsVolumeAttachResult struct {
-	CnsVolumeOperationResult
-
-	DiskUUID string `xml:"diskUUID,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeAttachResult", reflect.TypeOf((*CnsVolumeAttachResult)(nil)).Elem())
-}
-
 type VsanSpaceUsageWithDatastoreType struct {
 	types.DynamicData
 
@@ -8295,17 +7944,6 @@ func init() {
 	types.Add("vsan:VsanFileServerHealthSummary", reflect.TypeOf((*VsanFileServerHealthSummary)(nil)).Elem())
 }
 
-type CnsVolumeAttachDetachSpec struct {
-	types.DynamicData
-
-	VolumeId CnsVolumeId                  `xml:"volumeId"`
-	Vm       types.ManagedObjectReference `xml:"vm"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeAttachDetachSpec", reflect.TypeOf((*CnsVolumeAttachDetachSpec)(nil)).Elem())
-}
-
 type VsanHclControllerInfo struct {
 	types.DynamicData
 
@@ -8351,16 +7989,6 @@ type VsanHclControllerInfo struct {
 
 func init() {
 	types.Add("vsan:VsanHclControllerInfo", reflect.TypeOf((*VsanHclControllerInfo)(nil)).Elem())
-}
-
-type CnsBackingObjectDetails struct {
-	types.DynamicData
-
-	CapacityInMb int64 `xml:"capacityInMb,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsBackingObjectDetails", reflect.TypeOf((*CnsBackingObjectDetails)(nil)).Elem())
 }
 
 type VsanHostVmdkLoadTestResult struct {
@@ -8537,25 +8165,6 @@ func init() {
 	types.Add("vsan:VsanIoInsightInstanceQuerySpec", reflect.TypeOf((*VsanIoInsightInstanceQuerySpec)(nil)).Elem())
 }
 
-type CnsVolume struct {
-	types.DynamicData
-
-	VolumeId                     CnsVolumeId                 `xml:"volumeId"`
-	DatastoreUrl                 string                      `xml:"datastoreUrl,omitempty"`
-	Name                         string                      `xml:"name,omitempty"`
-	VolumeType                   string                      `xml:"volumeType,omitempty"`
-	StoragePolicyId              string                      `xml:"storagePolicyId,omitempty"`
-	Metadata                     *CnsVolumeMetadata          `xml:"metadata,omitempty"`
-	BackingObjectDetails         BaseCnsBackingObjectDetails `xml:"backingObjectDetails,omitempty,typeattr"`
-	ComplianceStatus             string                      `xml:"complianceStatus,omitempty"`
-	DatastoreAccessibilityStatus string                      `xml:"datastoreAccessibilityStatus,omitempty"`
-	HealthStatus                 string                      `xml:"healthStatus,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolume", reflect.TypeOf((*CnsVolume)(nil)).Elem())
-}
-
 type VsanPerfTopEntities struct {
 	types.DynamicData
 
@@ -8668,27 +8277,6 @@ func init() {
 	types.Add("vsan:VsanRemoteClusterNotCompatible", reflect.TypeOf((*VsanRemoteClusterNotCompatible)(nil)).Elem())
 }
 
-type CnsVolumeMetadataUpdateSpec struct {
-	types.DynamicData
-
-	VolumeId CnsVolumeId       `xml:"volumeId"`
-	Metadata CnsVolumeMetadata `xml:"metadata"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeMetadataUpdateSpec", reflect.TypeOf((*CnsVolumeMetadataUpdateSpec)(nil)).Elem())
-}
-
-type CnsVolumeId struct {
-	types.DynamicData
-
-	Id string `xml:"id"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeId", reflect.TypeOf((*CnsVolumeId)(nil)).Elem())
-}
-
 type HostSpbmPolicyBlobInfo struct {
 	types.DynamicData
 
@@ -8698,17 +8286,6 @@ type HostSpbmPolicyBlobInfo struct {
 
 func init() {
 	types.Add("vsan:HostSpbmPolicyBlobInfo", reflect.TypeOf((*HostSpbmPolicyBlobInfo)(nil)).Elem())
-}
-
-type CnsBlockBackingDetails struct {
-	CnsBackingObjectDetails
-
-	BackingDiskId      string `xml:"backingDiskId,omitempty"`
-	BackingDiskUrlPath string `xml:"backingDiskUrlPath,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsBlockBackingDetails", reflect.TypeOf((*CnsBlockBackingDetails)(nil)).Elem())
 }
 
 type VsanCompositeConstraint struct {
@@ -8753,23 +8330,6 @@ type VsanIscsiTargetServiceSpec struct {
 
 func init() {
 	types.Add("vsan:VsanIscsiTargetServiceSpec", reflect.TypeOf((*VsanIscsiTargetServiceSpec)(nil)).Elem())
-}
-
-type CnsVolumeCreateSpec struct {
-	types.DynamicData
-
-	Name                 string                            `xml:"name"`
-	VolumeType           string                            `xml:"volumeType"`
-	Datastores           []types.ManagedObjectReference    `xml:"datastores,omitempty"`
-	Metadata             *CnsVolumeMetadata                `xml:"metadata,omitempty"`
-	BackingObjectDetails BaseCnsBackingObjectDetails       `xml:"backingObjectDetails,typeattr"`
-	Profile              []types.VirtualMachineProfileSpec `xml:"profile,omitempty"`
-	CreateSpec           *CnsBaseCreateSpec                `xml:"createSpec,omitempty"`
-	VolumeSource         *CnsVolumeSource                  `xml:"volumeSource,omitempty"`
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeCreateSpec", reflect.TypeOf((*CnsVolumeCreateSpec)(nil)).Elem())
 }
 
 type VsanProactiveRebalanceInfo struct {
@@ -9057,16 +8617,6 @@ func init() {
 	types.Add("vsan:VsanPropertyConstraint", reflect.TypeOf((*VsanPropertyConstraint)(nil)).Elem())
 }
 
-type CnsAlreadyRegisteredFault struct {
-	CnsFault
-
-	VolumeId CnsVolumeId `xml:"volumeId"`
-}
-
-func init() {
-	types.Add("vsan:CnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
-}
-
 type VsanDataObfuscationRule struct {
 	types.DynamicData
 }
@@ -9109,16 +8659,6 @@ type VsanRegexBasedRule struct {
 
 func init() {
 	types.Add("vsan:VsanRegexBasedRule", reflect.TypeOf((*VsanRegexBasedRule)(nil)).Elem())
-}
-
-type CnsSnapshotId struct {
-	types.DynamicData
-
-	Id string `xml:"id"`
-}
-
-func init() {
-	types.Add("vsan:CnsSnapshotId", reflect.TypeOf((*CnsSnapshotId)(nil)).Elem())
 }
 
 type QueryVsanManagedStorageSpaceUsageSpec struct {

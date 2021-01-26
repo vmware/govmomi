@@ -31,12 +31,6 @@ type BaseVsanResourceConstraint interface {
 	GetVsanResourceConstraint() *VsanResourceConstraint
 }
 
-func (b *CnsFileCreateSpec) GetCnsFileCreateSpec() *CnsFileCreateSpec { return b }
-
-type BaseCnsFileCreateSpec interface {
-	GetCnsFileCreateSpec() *CnsFileCreateSpec
-}
-
 func (b *VsanIscsiLUNCommonInfo) GetVsanIscsiLUNCommonInfo() *VsanIscsiLUNCommonInfo { return b }
 
 type BaseVsanIscsiLUNCommonInfo interface {
@@ -87,12 +81,6 @@ type BaseVsanClusterHealthResultBase interface {
 	GetVsanClusterHealthResultBase() *VsanClusterHealthResultBase
 }
 
-func (b *CnsVolumeOperationResult) GetCnsVolumeOperationResult() *CnsVolumeOperationResult { return b }
-
-type BaseCnsVolumeOperationResult interface {
-	GetCnsVolumeOperationResult() *CnsVolumeOperationResult
-}
-
 func (b *VsanHclCommonDeviceInfo) GetVsanHclCommonDeviceInfo() *VsanHclCommonDeviceInfo { return b }
 
 type BaseVsanHclCommonDeviceInfo interface {
@@ -111,16 +99,4 @@ func (b *VsanIscsiTargetServiceConfig) GetVsanIscsiTargetServiceConfig() *VsanIs
 
 type BaseVsanIscsiTargetServiceConfig interface {
 	GetVsanIscsiTargetServiceConfig() *VsanIscsiTargetServiceConfig
-}
-
-func (b *CnsFault) GetCnsFault() *CnsFault { return b }
-
-type BaseCnsFault interface {
-	GetCnsFault() *CnsFault
-}
-
-func (b *CnsBackingObjectDetails) GetCnsBackingObjectDetails() *CnsBackingObjectDetails { return b }
-
-type BaseCnsBackingObjectDetails interface {
-	GetCnsBackingObjectDetails() *CnsBackingObjectDetails
 }
