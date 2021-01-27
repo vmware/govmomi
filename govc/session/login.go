@@ -25,6 +25,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -105,6 +106,10 @@ The session.login command can be used to:
 - Avoid passing credentials to other govc commands
 - Send an authenticated raw HTTP request
 
+The session.login command can be used for authenticated curl-style HTTP requests when a PATH arg is given.
+PATH may also contain a query string. The '-u' flag (GOVC_URL) is used for the URL scheme, host and port.
+The request method (-X) defaults to GET. When set to POST, PUT or PATCH, a request body must be provided via stdin.
+
 Examples:
   govc session.login -u root:password@host # Creates a cached session in ~/.govmomi/sessions
   govc session.ls -u root@host # Use the cached session with another command
@@ -116,7 +121,9 @@ Examples:
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
   token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
-  govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .`
+  # HTTP requests
+  govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .
+  govc session.login -r -X POST /rest/vcenter/cluster/modules <<<'{"spec": {"cluster": "domain-c9"}}'`
 }
 
 type ticketResult struct {
@@ -345,12 +352,18 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if f.NArg() == 1 {
-		u := c.URL()
-		u.Path = f.Arg(0)
+		u, err := url.Parse(f.Arg(0))
+		if err != nil {
+			return err
+		}
+		vc := c.URL()
+		u.Scheme = vc.Scheme
+		u.Host = vc.Host
+
 		var body io.Reader
 
 		switch cmd.method {
-		case http.MethodPost, http.MethodPatch:
+		case http.MethodPost, http.MethodPut, http.MethodPatch:
 			// strings.Reader here as /api wants a Content-Length header
 			b, err := ioutil.ReadAll(os.Stdin)
 			if err != nil {

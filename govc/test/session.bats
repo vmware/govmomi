@@ -212,4 +212,25 @@ load test_helper
 
   run govc session.login -r /enoent
   assert_failure
+
+  cluster=$(govc find -i / -type c -name DC0_C0 | cut -d: -f2)
+
+  run govc session.login -r -X POST "/rest/vcenter/cluster/modules" <<EOF
+  {"spec": {"cluster": "$cluster"}}
+EOF
+  assert_success
+  module=$(jq -r .value <<<"$output")
+
+  members="/rest/vcenter/cluster/modules/vm/$module/members"
+  vms=$(govc find -i /DC0/host/DC0_C0 -type m | cut -d: -f2 | jq --raw-input --slurp 'split("\n") | map(select(. != ""))')
+
+  run govc session.login -r -X POST "$members?action=invalid" <<EOF
+  {"vms": $vms}
+EOF
+  assert_failure # action=invalid
+
+  run govc session.login -r -X POST "$members?action=add" <<EOF
+  {"vms": $vms}
+EOF
+  assert_success
 }
