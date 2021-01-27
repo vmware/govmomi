@@ -320,19 +320,6 @@ func init() {
 	types.Add("vsan:VimVsanMountPrecheckType", reflect.TypeOf((*VimVsanMountPrecheckType)(nil)).Elem())
 }
 
-type CnsKubernetesEntityType string
-
-const (
-	CnsKubernetesEntityTypePERSISTENT_VOLUME            = CnsKubernetesEntityType("PERSISTENT_VOLUME")
-	CnsKubernetesEntityTypePERSISTENT_VOLUME_CLAIM      = CnsKubernetesEntityType("PERSISTENT_VOLUME_CLAIM")
-	CnsKubernetesEntityTypePOD                          = CnsKubernetesEntityType("POD")
-	CnsKubernetesEntityTypeKubernetesEntityType_Unknown = CnsKubernetesEntityType("KubernetesEntityType_Unknown")
-)
-
-func init() {
-	types.Add("vsan:CnsKubernetesEntityType", reflect.TypeOf((*CnsKubernetesEntityType)(nil)).Elem())
-}
-
 type VsanEncryptionTransitionState string
 
 const (
@@ -721,29 +708,6 @@ func init() {
 	types.Add("vsan:VsanPerfSummaryType", reflect.TypeOf((*VsanPerfSummaryType)(nil)).Elem())
 }
 
-type CnsClusterType string
-
-const (
-	CnsClusterTypeClusterType_Unknown = CnsClusterType("ClusterType_Unknown")
-	CnsClusterTypeKUBERNETES          = CnsClusterType("KUBERNETES")
-)
-
-func init() {
-	types.Add("vsan:CnsClusterType", reflect.TypeOf((*CnsClusterType)(nil)).Elem())
-}
-
-type CnsVolumeType string
-
-const (
-	CnsVolumeTypeFILE               = CnsVolumeType("FILE")
-	CnsVolumeTypeBLOCK              = CnsVolumeType("BLOCK")
-	CnsVolumeTypeVolumeType_Unknown = CnsVolumeType("VolumeType_Unknown")
-)
-
-func init() {
-	types.Add("vsan:CnsVolumeType", reflect.TypeOf((*CnsVolumeType)(nil)).Elem())
-}
-
 type VsanPerfStatsUnitType string
 
 const (
@@ -888,19 +852,6 @@ const (
 
 func init() {
 	types.Add("vsan:VsanHostQueryCheckLimitsOptionType", reflect.TypeOf((*VsanHostQueryCheckLimitsOptionType)(nil)).Elem())
-}
-
-type CnsClusterFlavor string
-
-const (
-	CnsClusterFlavorVANILLA               = CnsClusterFlavor("VANILLA")
-	CnsClusterFlavorWORKLOAD              = CnsClusterFlavor("WORKLOAD")
-	CnsClusterFlavorClusterFlavor_Unknown = CnsClusterFlavor("ClusterFlavor_Unknown")
-	CnsClusterFlavorGUEST_CLUSTER         = CnsClusterFlavor("GUEST_CLUSTER")
-)
-
-func init() {
-	types.Add("vsan:CnsClusterFlavor", reflect.TypeOf((*CnsClusterFlavor)(nil)).Elem())
 }
 
 type VsanHostWipeDiskState string

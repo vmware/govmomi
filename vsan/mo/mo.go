@@ -283,18 +283,6 @@ func init() {
 	types.Add("vsan:HostVsanHealthSystem", reflect.TypeOf((*HostVsanHealthSystem)(nil)).Elem())
 }
 
-type CnsVolumeManager struct {
-	Self types.ManagedObjectReference
-}
-
-func (m CnsVolumeManager) Reference() types.ManagedObjectReference {
-	return m.Self
-}
-
-func init() {
-	types.Add("vsan:CnsVolumeManager", reflect.TypeOf((*CnsVolumeManager)(nil)).Elem())
-}
-
 type HostSpbm struct {
 	Self types.ManagedObjectReference
 }
