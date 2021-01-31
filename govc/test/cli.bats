@@ -36,6 +36,15 @@ load test_helper
 
   version=$(govc about -json -c -vim-version 6.8.2 | jq -r .Client.Version)
   assert_equal 6.8.2 "$version" # client specified version
+
+  run govc about -trace
+  assert_success
+
+  run env GOVC_DEBUG_FORMAT=false govc about -trace
+  assert_success
+
+  run env GOVC_DEBUG_XML=enoent GOVC_DEBUG_JSON=enoent govc library.ls -trace
+  assert_success
 }
 
 @test "about.cert" {
@@ -212,4 +221,55 @@ load test_helper
   assert_success # soap.Client will set Cookie.Secure=false
 
   vcsim_stop
+}
+
+@test "govc verbose" {
+  vcsim_env
+
+  vm=DC0_H0_VM0
+
+  run govc vm.power -verbose -off $vm
+  assert_success
+
+  run govc vm.power -verbose -off $vm
+  assert_failure
+
+  run govc vm.power -verbose -on $vm
+  assert_success
+
+  run govc vm.power -verbose -on $vm
+  assert_failure
+
+  run govc vm.info -verbose '*'
+  assert_success
+
+  run govc device.ls -vm DC0_H0_VM0 -verbose
+  assert_success
+
+  run govc device.info -vm DC0_H0_VM0 -verbose
+  assert_success
+
+  run govc vm.destroy -verbose $vm
+  assert_success
+
+  run govc host.info -verbose '*'
+  assert_success
+
+  run govc cluster.group.create -verbose -cluster DC0_C0 -name cgroup -vm DC0_C0_RP0_VM{0,1}
+  assert_success
+
+  run govc cluster.group.ls -cluster DC0_C0
+  assert_success
+
+  run govc cluster.create -verbose ClusterA
+  assert_success
+
+  run govc metric.ls -verbose /DC0/host/DC0_C0
+  assert_success
+
+  run govc metric.info -verbose /DC0/host/DC0_C0
+  assert_success
+
+  run govc metric.sample -verbose /DC0/host/DC0_C0 cpu.usage.average
+  assert_success
 }

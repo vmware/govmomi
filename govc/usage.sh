@@ -7,6 +7,8 @@ done
 common_opts=$(cat <<EOF
   -cert=                    Certificate [GOVC_CERTIFICATE]
   -debug=false              Store debug logs [GOVC_DEBUG]
+  -trace=false              Write SOAP/REST traffic to stderr
+  -verbose=false            Write request/response data to stderr
   -dump=false               Enable output dump
   -json=false               Enable JSON output
   -xml=false                Enable XML output

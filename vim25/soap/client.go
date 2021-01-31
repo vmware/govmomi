@@ -528,8 +528,6 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 		return err
 	}
 
-	defer res.Body.Close()
-
 	if d.enabled() {
 		d.debugResponse(res, ext)
 	}
@@ -537,6 +535,8 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 	if c.insecureCookies {
 		c.setInsecureCookies(res)
 	}
+
+	defer res.Body.Close()
 
 	return f(res)
 }

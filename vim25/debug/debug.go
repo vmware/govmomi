@@ -29,6 +29,20 @@ type Provider interface {
 	Flush()
 }
 
+// ReadCloser is a struct that satisfies the io.ReadCloser interface
+type ReadCloser struct {
+	io.Reader
+	io.Closer
+}
+
+// NewTeeReader wraps io.TeeReader and patches through the Close() function.
+func NewTeeReader(rc io.ReadCloser, w io.Writer) io.ReadCloser {
+	return ReadCloser{
+		Reader: io.TeeReader(rc, w),
+		Closer: rc,
+	}
+}
+
 var currentProvider Provider = nil
 var scrubPassword = regexp.MustCompile(`<password>(.*)</password>`)
 
@@ -55,8 +69,5 @@ func Flush() {
 }
 
 func Scrub(in []byte) []byte {
-	out := string(in)
-	out = scrubPassword.ReplaceAllString(out, `<password>********</password>`)
-
-	return []byte(out)
+	return scrubPassword.ReplaceAll(in, []byte(`<password>********</password>`))
 }

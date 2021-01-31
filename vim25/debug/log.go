@@ -17,8 +17,9 @@ limitations under the License.
 package debug
 
 import (
+	"fmt"
 	"io"
-	"log"
+	"os"
 )
 
 type LogWriterCloser struct {
@@ -29,7 +30,7 @@ func NewLogWriterCloser() *LogWriterCloser {
 }
 
 func (lwc *LogWriterCloser) Write(p []byte) (n int, err error) {
-	log.Print(string(Scrub(p)))
+	fmt.Fprint(os.Stderr, string(Scrub(p)))
 	return len(p), nil
 }
 
@@ -41,7 +42,6 @@ type LogProvider struct {
 }
 
 func (s *LogProvider) NewFile(p string) io.WriteCloser {
-	log.Print(p)
 	return NewLogWriterCloser()
 }
 

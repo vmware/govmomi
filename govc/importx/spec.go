@@ -59,8 +59,6 @@ type spec struct {
 	*ArchiveFlag
 	*flags.ClientFlag
 	*flags.OutputFlag
-
-	verbose bool
 }
 
 func init() {
@@ -75,8 +73,6 @@ func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
-
-	f.BoolVar(&cmd.verbose, "verbose", false, "Verbose spec output")
 }
 
 func (cmd *spec) Process(ctx context.Context) error {
@@ -176,7 +172,7 @@ func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
 			}
 
 			np := Property{KeyValue: types.KeyValue{Key: k, Value: d}}
-			if cmd.verbose {
+			if cmd.Verbose() {
 				np.Spec = &p.Property[i]
 			}
 
@@ -243,7 +239,7 @@ func (cmd *spec) Spec(fpath string) (*Options, error) {
 		}
 	}
 
-	if cmd.verbose {
+	if cmd.Verbose() {
 		if deploymentOptions != nil {
 			o.AllDeploymentOptions = deploymentOptions
 		}
