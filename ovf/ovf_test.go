@@ -24,22 +24,11 @@ import (
 	"text/tabwriter"
 )
 
-func testFile(t *testing.T) *os.File {
-	fn := os.Getenv("OVF_TEST_FILE")
-	if fn == "" {
-		t.Skip("OVF_TEST_FILE not specified")
-	}
-
+func testEnvelope(t *testing.T, fn string) *Envelope {
 	f, err := os.Open(fn)
 	if err != nil {
 		t.Fatalf("error opening %s %s", fn, err)
 	}
-
-	return f
-}
-
-func testEnvelope(t *testing.T) *Envelope {
-	f := testFile(t)
 	defer f.Close()
 
 	e, err := Unmarshal(f)
@@ -55,11 +44,34 @@ func testEnvelope(t *testing.T) *Envelope {
 }
 
 func TestUnmarshal(t *testing.T) {
-	testEnvelope(t)
+	e := testEnvelope(t, "fixtures/ttylinux.ovf")
+
+	hw := e.VirtualSystem.VirtualHardware[0]
+	if n := len(hw.Config); n != 3 {
+		t.Errorf("Config=%d", n)
+	}
+	if n := len(hw.ExtraConfig); n != 2 {
+		t.Errorf("ExtraConfig=%d", n)
+	}
+	for i, c := range append(hw.Config, hw.ExtraConfig...) {
+		if *c.Required {
+			t.Errorf("%d: Required=%t", i, *c.Required)
+		}
+		if c.Key == "" {
+			t.Errorf("%d: key=''", i)
+		}
+		if c.Value == "" {
+			t.Errorf("%d: value=''", i)
+		}
+	}
 }
 
 func TestDeploymentOptions(t *testing.T) {
-	e := testEnvelope(t)
+	fn := os.Getenv("OVF_TEST_FILE")
+	if fn == "" {
+		t.Skip("OVF_TEST_FILE not specified")
+	}
+	e := testEnvelope(t, fn)
 
 	if e.DeploymentOption == nil {
 		t.Fatal("DeploymentOptionSection empty")
