@@ -80,6 +80,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		CpuAllocation:      &rspec.CpuAllocation,
 		LatencySensitivity: &types.LatencySensitivity{Level: types.LatencySensitivitySensitivityLevelNormal},
 		BootOptions:        &types.VirtualMachineBootOptions{},
+		CreateDate:         types.NewTime(time.Now()),
 	}
 	vm.Layout = &types.VirtualMachineFileLayout{}
 	vm.LayoutEx = &types.VirtualMachineFileLayoutEx{
