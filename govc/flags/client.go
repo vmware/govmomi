@@ -371,7 +371,7 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 
 	// Retry twice when a temporary I/O error occurs.
 	// This means a maximum of 3 attempts.
-	c.RoundTripper = vim25.Retry(c.Client, vim25.TemporaryNetworkError(3))
+	c.RoundTripper = vim25.Retry(c.Client, vim25.RetryTemporaryNetworkError, 3)
 	flag.client = c
 
 	return flag.client, nil

@@ -560,7 +560,7 @@ type statusError struct {
 }
 
 // Temporary returns true for HTTP response codes that can be retried
-// See vim25.TemporaryNetworkError
+// See vim25.IsTemporaryNetworkError
 func (e *statusError) Temporary() bool {
 	switch e.res.StatusCode {
 	case http.StatusBadGateway:

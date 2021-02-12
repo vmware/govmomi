@@ -14,13 +14,19 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package vim25
+package vim25_test
 
 import (
 	"context"
+	"net/http"
 	"testing"
+	"time"
 
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type tempError struct{}
@@ -74,11 +80,55 @@ func TestRetry(t *testing.T) {
 
 	for _, tc := range tcs {
 		var rt soap.RoundTripper = &fakeRoundTripper{errs: tc.errs}
-		rt = Retry(rt, TemporaryNetworkError(2))
+		rt = vim25.Retry(rt, vim25.RetryTemporaryNetworkError, 2)
 
 		err := rt.RoundTrip(context.TODO(), nil, nil)
 		if err != tc.expected {
 			t.Errorf("Expected: %s, got: %s", tc.expected, err)
 		}
 	}
+}
+
+func TestRetryNetworkError(t *testing.T) {
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		c.RoundTripper = vim25.Retry(c.Client, vim25.RetryTemporaryNetworkError, 2)
+
+		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		// Tell vcsim to respond with 502 on the 1st request
+		simulator.StatusSDK = http.StatusBadGateway
+
+		state, err := vm.PowerState(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if state != types.VirtualMachinePowerStatePoweredOn {
+			t.Errorf("state=%s", state)
+		}
+
+		retry := func(err error) (bool, time.Duration) {
+			simulator.StatusSDK = http.StatusBadGateway // Tell vcsim to respond with 502 on every request
+			return vim25.IsTemporaryNetworkError(err), 0
+		}
+		c.RoundTripper = vim25.Retry(c.Client, retry, 2)
+
+		simulator.StatusSDK = http.StatusBadGateway
+		// beyond max retry attempts, should result in an erro
+		for i := 0; i < 3; i++ {
+			_, err = vm.PowerState(ctx)
+		}
+
+		if err == nil {
+			t.Error("expected error")
+		}
+
+		if !vim25.IsTemporaryNetworkError(err) {
+			t.Errorf("unexpected error=%s", err)
+		}
+		simulator.StatusSDK = http.StatusOK
+	})
 }

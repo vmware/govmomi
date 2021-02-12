@@ -40,7 +40,7 @@ func TestKeepAlive(t *testing.T) {
 
 		var mu sync.Mutex
 		n := 0
-		c.RoundTripper = vim25.Retry(c.Client, vim25.TemporaryNetworkError(3))
+		c.RoundTripper = vim25.Retry(c.Client, vim25.RetryTemporaryNetworkError, 3)
 		c.RoundTripper = session.KeepAliveHandler(c.RoundTripper, time.Millisecond, func(soap.RoundTripper) error {
 			mu.Lock()
 			n++
