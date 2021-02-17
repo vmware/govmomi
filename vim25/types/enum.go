@@ -650,9 +650,11 @@ type DasVmPriority string
 
 const (
 	DasVmPriorityDisabled = DasVmPriority("disabled")
+	DasVmPriorityLowest   = DasVmPriority("lowest")
 	DasVmPriorityLow      = DasVmPriority("low")
 	DasVmPriorityMedium   = DasVmPriority("medium")
 	DasVmPriorityHigh     = DasVmPriority("high")
+	DasVmPriorityHighest  = DasVmPriority("highest")
 )
 
 func init() {
