@@ -121,7 +121,11 @@ func (flag *NetworkFlag) Device() (types.BaseVirtualDevice, error) {
 		return nil, err
 	}
 
-	if flag.address != "" {
+	if flag.address == "-" {
+		card := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+		card.AddressType = string(types.VirtualEthernetCardMacTypeGenerated)
+		card.MacAddress = ""
+	} else if flag.address != "" {
 		card := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
 		card.AddressType = string(types.VirtualEthernetCardMacTypeManual)
 		card.MacAddress = flag.address
