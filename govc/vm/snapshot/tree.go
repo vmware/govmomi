@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -25,6 +25,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -38,8 +40,10 @@ type tree struct {
 	description bool
 	fullPath    bool
 	id          bool
+	size        bool
 
-	info *types.VirtualMachineSnapshotInfo
+	info   *types.VirtualMachineSnapshotInfo
+	layout *types.VirtualMachineFileLayoutEx
 }
 
 func init() {
@@ -59,6 +63,7 @@ func (cmd *tree) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.fullPath, "f", false,
 		"Print the full path prefix for snapshot")
 	f.BoolVar(&cmd.id, "i", false, "Print the snapshot id")
+	f.BoolVar(&cmd.size, "s", false, "Print the snapshot size")
 }
 
 func (cmd *tree) Description() string {
@@ -78,7 +83,7 @@ func (cmd *tree) Process(ctx context.Context) error {
 	return nil
 }
 
-func (cmd *tree) write(level int, parent string, st []types.VirtualMachineSnapshotTree) {
+func (cmd *tree) write(level int, parent string, pref *types.ManagedObjectReference, st []types.VirtualMachineSnapshotTree) {
 	for _, s := range st {
 		sname := s.Name
 
@@ -92,7 +97,10 @@ func (cmd *tree) write(level int, parent string, st []types.VirtualMachineSnapsh
 			names = append(names, sname)
 		}
 
+		isCurrent := false
+
 		if s.Snapshot == *cmd.info.CurrentSnapshot {
+			isCurrent = true
 			if cmd.current {
 				names = append(names, ".")
 			} else if cmd.currentName {
@@ -104,6 +112,12 @@ func (cmd *tree) write(level int, parent string, st []types.VirtualMachineSnapsh
 		for _, name := range names {
 			var attr []string
 			var meta string
+
+			if cmd.size {
+				size := object.SnapshotSize(s.Snapshot, pref, cmd.layout, isCurrent)
+
+				attr = append(attr, units.ByteSize(size).String())
+			}
 
 			if cmd.id {
 				attr = append(attr, s.Snapshot.Value)
@@ -127,7 +141,7 @@ func (cmd *tree) write(level int, parent string, st []types.VirtualMachineSnapsh
 			}
 		}
 
-		cmd.write(level+2, sname, s.ChildSnapshotList)
+		cmd.write(level+2, sname, &s.Snapshot, s.ChildSnapshotList)
 	}
 }
 
@@ -147,7 +161,7 @@ func (cmd *tree) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var o mo.VirtualMachine
 
-	err = vm.Properties(ctx, vm.Reference(), []string{"snapshot"}, &o)
+	err = vm.Properties(ctx, vm.Reference(), []string{"snapshot", "layoutEx"}, &o)
 	if err != nil {
 		return err
 	}
@@ -161,8 +175,9 @@ func (cmd *tree) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	cmd.info = o.Snapshot
+	cmd.layout = o.LayoutEx
 
-	cmd.write(0, "", o.Snapshot.RootSnapshotList)
+	cmd.write(0, "", nil, o.Snapshot.RootSnapshotList)
 
 	return nil
 }
