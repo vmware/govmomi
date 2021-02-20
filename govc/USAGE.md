@@ -509,7 +509,7 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -drs-enabled=<nil>     Enable DRS
   -drs-mode=             DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
-  -ha-restart-priority=  HA restart priority: disabled, low, medium, high
+  -ha-restart-priority=  HA restart priority: disabled, lowest, low, medium, high, highest
   -vm=                   Virtual machine [GOVC_VM]
 ```
 

@@ -52,10 +52,12 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 	// HA
 	rp := []string{
-		string(types.DasVmPriorityDisabled),
-		string(types.DasVmPriorityLow),
-		string(types.DasVmPriorityMedium),
-		string(types.DasVmPriorityHigh),
+		string(types.ClusterDasVmSettingsRestartPriorityDisabled),
+		string(types.ClusterDasVmSettingsRestartPriorityLowest),
+		string(types.ClusterDasVmSettingsRestartPriorityLow),
+		string(types.ClusterDasVmSettingsRestartPriorityMedium),
+		string(types.ClusterDasVmSettingsRestartPriorityHigh),
+		string(types.ClusterDasVmSettingsRestartPriorityHighest),
 	}
 	cmd.das.DasSettings = new(types.ClusterDasVmSettings)
 
