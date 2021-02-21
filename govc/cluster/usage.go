@@ -144,7 +144,7 @@ func (r *ResourceUsage) summarize(f func(int64) string) {
 	r.Summary.Usage = fmt.Sprintf("%.1f", r.Usage)
 	r.Summary.Capacity = f(r.Capacity)
 	r.Summary.Used = f(r.Used)
-	r.Summary.Free = f(r.Used)
+	r.Summary.Free = f(r.Free)
 }
 
 func (r *ResourceUsage) write(w io.Writer, label string) {
