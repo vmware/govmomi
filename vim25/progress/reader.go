@@ -36,6 +36,9 @@ type readerReport struct {
 }
 
 func (r readerReport) Percentage() float32 {
+	if r.size <= 0 {
+		return 0
+	}
 	return 100.0 * float32(r.pos) / float32(r.size)
 }
 
