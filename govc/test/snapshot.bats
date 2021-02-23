@@ -75,6 +75,11 @@ test_vm_snapshot() {
 
   # set current to grand
   run govc snapshot.revert -vm "$vm" grand
+  assert_success
+
+  vm_id=$(govc find -i vm -name "$vm")
+  entity=$(govc object.collect -s TaskManager:TaskManager recentTask | awk -F, '{print $NF}' | xargs -I% govc object.collect -s % info.entity)
+  assert_equal "$vm_id" "$entity"
 
   # name is unique
   run govc snapshot.remove -vm "$vm" grand
