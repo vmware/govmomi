@@ -33,6 +33,7 @@ type change struct {
 
 	drs types.ClusterDrsVmConfigInfo
 	das types.ClusterDasVmConfigInfo
+	orc types.ClusterVmOrchestrationInfo
 }
 
 func init() {
@@ -62,6 +63,16 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.das.DasSettings = new(types.ClusterDasVmSettings)
 
 	f.StringVar((*string)(&cmd.das.DasSettings.RestartPriority), "ha-restart-priority", "", "HA restart priority: "+strings.Join(rp, ", "))
+
+	rc := []string{
+		string(types.ClusterVmReadinessReadyConditionPoweredOn),
+		string(types.ClusterVmReadinessReadyConditionGuestHbStatusGreen),
+		string(types.ClusterVmReadinessReadyConditionAppHbStatusGreen),
+		string(types.ClusterVmReadinessReadyConditionUseClusterDefault),
+	}
+
+	f.StringVar((*string)(&cmd.orc.VmReadiness.ReadyCondition), "ha-readiness", "", "HA VM readiness: "+strings.Join(rc, ", "))
+	f.Var(flags.NewInt32(&cmd.orc.VmReadiness.PostReadyDelay), "ha-restart-delay", "HA additional delay seconds")
 }
 
 func (cmd *change) Description() string {
@@ -70,7 +81,8 @@ func (cmd *change) Description() string {
 Examples:
   govc cluster.override.change -cluster cluster_1 -vm vm_1 -ha-restart-priority high
   govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled=false
-  govc cluster.override.change -cluster cluster_1 -vm vm_3 -drs-enabled -drs-mode fullyAutomated`
+  govc cluster.override.change -cluster cluster_1 -vm vm_3 -drs-enabled -drs-mode fullyAutomated
+  govc cluster.override.change -cluster cluster_1 -vm vm_4 -ha-readiness poweredOn -ha-restart-delay 60`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -103,6 +115,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	spec := &types.ClusterConfigSpecEx{}
 	cmd.drs.Key = vm.Reference()
 	cmd.das.Key = vm.Reference()
+	cmd.orc.Vm = vm.Reference()
 
 	if cmd.drs.Behavior != "" || cmd.drs.Enabled != nil {
 		op := types.ArrayUpdateOperationAdd
@@ -142,7 +155,26 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	if spec.DrsVmConfigSpec == nil && spec.DasVmConfigSpec == nil {
+	if cmd.orc.VmReadiness.ReadyCondition != "" || cmd.orc.VmReadiness.PostReadyDelay > 0 {
+		op := types.ArrayUpdateOperationAdd
+		for _, c := range config.VmOrchestration {
+			if c.Vm == cmd.orc.Vm {
+				op = types.ArrayUpdateOperationEdit
+				break
+			}
+		}
+
+		spec.VmOrchestrationSpec = []types.ClusterVmOrchestrationSpec{
+			{
+				ArrayUpdateSpec: types.ArrayUpdateSpec{
+					Operation: op,
+				},
+				Info: &cmd.orc,
+			},
+		}
+	}
+
+	if spec.DrsVmConfigSpec == nil && spec.DasVmConfigSpec == nil && spec.VmOrchestrationSpec == nil {
 		return flag.ErrHelp
 	}
 

@@ -226,6 +226,12 @@ _EOF_
 
   run govc cluster.override.remove -vm DC0_C0_RP0_VM0
   assert_success
+
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.VmReadiness.PostReadyDelay"
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-readiness poweredOn -ha-restart-delay 60
+  assert_success
+  [ "$(govc cluster.override.info -json | jq -r "$query")" == "60" ]
 }
 
 @test "cluster.add" {
