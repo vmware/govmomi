@@ -207,6 +207,9 @@ _EOF_
   assert_success
   [ "$(govc cluster.override.info -json | jq "$query")" == "true" ]
 
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-mode=manual
+  assert_success
+
   # DAS override
   query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DAS.DasSettings.RestartPriority"
 
@@ -216,16 +219,24 @@ _EOF_
   assert_success
   [ "$(govc cluster.override.info -json | jq -r "$query")" == "high" ]
 
+  # Orchestration override
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.VmReadiness.PostReadyDelay"
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-additional-delay 60
+  assert_success
+  [ "$(govc cluster.override.info -json | jq -r "$query")" == "60" ]
+
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.VmReadiness.ReadyCondition"
+
+  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-ready-condition poweredOn
+  assert_success
+  [ "$(govc cluster.override.info -json | jq -r "$query")" == "poweredOn" ]
+
+  # remove overrides
   run govc cluster.override.remove -vm DC0_C0_RP0_VM0
   assert_success
   run govc cluster.override.info
   assert_success "" # no overrides == empty output
-
-  run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-mode=manual
-  assert_success
-
-  run govc cluster.override.remove -vm DC0_C0_RP0_VM0
-  assert_success
 }
 
 @test "cluster.add" {

@@ -23,6 +23,7 @@ import (
 	"io"
 	"strings"
 	"text/tabwriter"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -56,11 +57,12 @@ func (cmd *info) Process(ctx context.Context) error {
 }
 
 type Override struct {
-	id   types.ManagedObjectReference
-	Name string
-	Host string                        `json:",omitempty"`
-	DRS  *types.ClusterDrsVmConfigInfo `json:",omitempty"`
-	DAS  *types.ClusterDasVmConfigInfo `json:",omitempty"`
+	id            types.ManagedObjectReference
+	Name          string
+	Host          string                            `json:",omitempty"`
+	DRS           *types.ClusterDrsVmConfigInfo     `json:",omitempty"`
+	DAS           *types.ClusterDasVmConfigInfo     `json:",omitempty"`
+	Orchestration *types.ClusterVmOrchestrationInfo `json:",omitempty"`
 }
 
 type infoResult struct {
@@ -83,9 +85,21 @@ func (r *infoResult) Write(w io.Writer) error {
 			priority = entry.DAS.DasSettings.RestartPriority
 		}
 
+		ready := "Default (Resources allocated)"
+		additionalDelay := 0
+		if entry.Orchestration != nil {
+			r := entry.Orchestration.VmReadiness
+			if r.ReadyCondition != string(types.ClusterVmReadinessReadyConditionUseClusterDefault) {
+				ready = strings.Title(r.ReadyCondition)
+			}
+			additionalDelay = int(r.PostReadyDelay)
+		}
+
 		fmt.Fprintf(tw, "Name:\t%s\n", entry.Name)
 		fmt.Fprintf(tw, "  DRS Automation Level:\t%s\n", strings.Title(behavior))
 		fmt.Fprintf(tw, "  HA Restart Priority:\t%s\n", strings.Title(priority))
+		fmt.Fprintf(tw, "  HA Ready Condition:\t%s\n", strings.Title(ready))
+		fmt.Fprintf(tw, "  HA Additional Delay:\t%s\n", time.Duration(additionalDelay)*time.Second)
 		fmt.Fprintf(tw, "  Host:\t%s\n", entry.Host)
 	}
 
@@ -127,6 +141,12 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		vm := res.entry(config.DrsVmConfig[i].Key)
 
 		vm.DRS = &config.DrsVmConfig[i]
+	}
+
+	for i := range config.VmOrchestration {
+		vm := res.entry(config.VmOrchestration[i].Vm)
+
+		vm.Orchestration = &config.VmOrchestration[i]
 	}
 
 	for _, o := range res.Overrides {
