@@ -31,9 +31,9 @@ type change struct {
 	*flags.ClusterFlag
 	*flags.VirtualMachineFlag
 
-	drs             types.ClusterDrsVmConfigInfo
-	das             types.ClusterDasVmConfigInfo
-	vmOrchestration types.ClusterVmOrchestrationInfo
+	drs types.ClusterDrsVmConfigInfo
+	das types.ClusterDasVmConfigInfo
+	orc types.ClusterVmOrchestrationInfo
 }
 
 func init() {
@@ -64,17 +64,26 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar((*string)(&cmd.das.DasSettings.RestartPriority), "ha-restart-priority", "", "HA restart priority: "+strings.Join(rp, ", "))
 
-	f.Var(flags.NewInt32(&cmd.vmOrchestration.VmReadiness.PostReadyDelay), "ha-additional-delay", "HA Additional Delay")
+	f.Var(flags.NewInt32(&cmd.orc.VmReadiness.PostReadyDelay), "ha-additional-delay", "HA Additional Delay")
+
+	rc := []string{
+		string(types.ClusterVmReadinessReadyConditionPoweredOn),
+		string(types.ClusterVmReadinessReadyConditionGuestHbStatusGreen),
+		string(types.ClusterVmReadinessReadyConditionAppHbStatusGreen),
+		string(types.ClusterVmReadinessReadyConditionUseClusterDefault),
+	}
+	f.StringVar((*string)(&cmd.orc.VmReadiness.ReadyCondition), "ha-ready-condition", "", "HA VM Ready Condition (Start next priority VMs when): "+strings.Join(rc, ", "))
 }
 
 func (cmd *change) Description() string {
 	return `Change cluster VM overrides.
 	
 Examples:
-  govc cluster.override.change -cluster cluster_1 -vm vm_1 -ha-restart-priority high
-  govc cluster.override.change -cluster cluster_1 -vm vm_2 -ha-additional-delay 30
-  govc cluster.override.change -cluster cluster_1 -vm vm_3 -drs-enabled=false
-  govc cluster.override.change -cluster cluster_1 -vm vm_4 -drs-enabled -drs-mode fullyAutomated`
+	govc cluster.override.change -cluster cluster_1 -vm vm_1 -drs-enabled=false
+	govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled -drs-mode fullyAutomated
+	govc cluster.override.change -cluster cluster_1 -vm vm_3 -ha-restart-priority high
+	govc cluster.override.change -cluster cluster_1 -vm vm_4 -ha-additional-delay 30
+	govc cluster.override.change -cluster cluster_1 -vm vm_5 -ha-ready-condition poweredOn`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -107,7 +116,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	spec := &types.ClusterConfigSpecEx{}
 	cmd.drs.Key = vm.Reference()
 	cmd.das.Key = vm.Reference()
-	cmd.vmOrchestration.Vm = vm.Reference()
+	cmd.orc.Vm = vm.Reference()
 
 	if cmd.drs.Behavior != "" || cmd.drs.Enabled != nil {
 		op := types.ArrayUpdateOperationAdd
@@ -147,10 +156,10 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	if cmd.vmOrchestration.VmReadiness.PostReadyDelay != 0 {
+	if cmd.orc.VmReadiness.PostReadyDelay > 0 || cmd.orc.VmReadiness.ReadyCondition != "" {
 		op := types.ArrayUpdateOperationAdd
 		for _, c := range config.VmOrchestration {
-			if c.Vm == cmd.vmOrchestration.Vm {
+			if c.Vm == cmd.orc.Vm {
 				op = types.ArrayUpdateOperationEdit
 				break
 			}
@@ -160,7 +169,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 				ArrayUpdateSpec: types.ArrayUpdateSpec{
 					Operation: op,
 				},
-				Info: &cmd.vmOrchestration,
+				Info: &cmd.orc,
 			},
 		}
 	}
