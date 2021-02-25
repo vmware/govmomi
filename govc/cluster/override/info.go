@@ -56,11 +56,12 @@ func (cmd *info) Process(ctx context.Context) error {
 }
 
 type Override struct {
-	id   types.ManagedObjectReference
-	Name string
-	Host string                        `json:",omitempty"`
-	DRS  *types.ClusterDrsVmConfigInfo `json:",omitempty"`
-	DAS  *types.ClusterDasVmConfigInfo `json:",omitempty"`
+	id              types.ManagedObjectReference
+	Name            string
+	Host            string                            `json:",omitempty"`
+	DRS             *types.ClusterDrsVmConfigInfo     `json:",omitempty"`
+	DAS             *types.ClusterDasVmConfigInfo     `json:",omitempty"`
+	VmOrchestration *types.ClusterVmOrchestrationInfo `json:",omitempty"`
 }
 
 type infoResult struct {
@@ -83,9 +84,15 @@ func (r *infoResult) Write(w io.Writer) error {
 			priority = entry.DAS.DasSettings.RestartPriority
 		}
 
+		additionalDelay := fmt.Sprintf("Default (%d seconds)", 0)
+		if entry.VmOrchestration != nil {
+			additionalDelay = fmt.Sprintf("%d seconds", int(entry.VmOrchestration.VmReadiness.PostReadyDelay))
+		}
+
 		fmt.Fprintf(tw, "Name:\t%s\n", entry.Name)
 		fmt.Fprintf(tw, "  DRS Automation Level:\t%s\n", strings.Title(behavior))
 		fmt.Fprintf(tw, "  HA Restart Priority:\t%s\n", strings.Title(priority))
+		fmt.Fprintf(tw, "  HA Additional Delay:\t%s\n", strings.Title(additionalDelay))
 		fmt.Fprintf(tw, "  Host:\t%s\n", entry.Host)
 	}
 
@@ -127,6 +134,12 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		vm := res.entry(config.DrsVmConfig[i].Key)
 
 		vm.DRS = &config.DrsVmConfig[i]
+	}
+
+	for i := range config.VmOrchestration {
+		vm := res.entry(config.VmOrchestration[i].Vm)
+
+		vm.VmOrchestration = &config.VmOrchestration[i]
 	}
 
 	for _, o := range res.Overrides {

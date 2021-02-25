@@ -106,5 +106,19 @@ func (cmd *remove) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
+	for _, c := range config.VmOrchestration {
+		if c.Vm == ref {
+			spec.VmOrchestrationSpec = []types.ClusterVmOrchestrationSpec{
+				{
+					ArrayUpdateSpec: types.ArrayUpdateSpec{
+						Operation: types.ArrayUpdateOperationRemove,
+						RemoveKey: ref,
+					},
+				},
+			}
+			break
+		}
+	}
+
 	return cmd.Reconfigure(ctx, spec)
 }
