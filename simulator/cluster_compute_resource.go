@@ -263,7 +263,6 @@ func (c *ClusterComputeResource) updateOverridesDRS(cfg *types.ClusterConfigInfo
 	return nil
 }
 
-
 func (c *ClusterComputeResource) updateOverridesVmOrchestration(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
 	for _, spec := range cspec.VmOrchestrationSpec {
 		var i int

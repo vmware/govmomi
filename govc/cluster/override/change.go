@@ -79,11 +79,11 @@ func (cmd *change) Description() string {
 	return `Change cluster VM overrides.
 	
 Examples:
-	govc cluster.override.change -cluster cluster_1 -vm vm_1 -drs-enabled=false
-	govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled -drs-mode fullyAutomated
-	govc cluster.override.change -cluster cluster_1 -vm vm_3 -ha-restart-priority high
-	govc cluster.override.change -cluster cluster_1 -vm vm_4 -ha-additional-delay 30
-	govc cluster.override.change -cluster cluster_1 -vm vm_5 -ha-ready-condition poweredOn`
+  govc cluster.override.change -cluster cluster_1 -vm vm_1 -drs-enabled=false
+  govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled -drs-mode fullyAutomated
+  govc cluster.override.change -cluster cluster_1 -vm vm_3 -ha-restart-priority high
+  govc cluster.override.change -cluster cluster_1 -vm vm_4 -ha-additional-delay 30
+  govc cluster.override.change -cluster cluster_1 -vm vm_5 -ha-ready-condition poweredOn`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
