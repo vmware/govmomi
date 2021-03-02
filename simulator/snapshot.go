@@ -147,7 +147,7 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 }
 
 func (v *VirtualMachineSnapshot) RevertToSnapshotTask(req *types.RevertToSnapshot_Task) soap.HasFault {
-	task := CreateTask(v, "revertToSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+	task := CreateTask(v.Vm, "revertToSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		vm := Map.Get(v.Vm).(*VirtualMachine)
 
 		Map.WithLock(vm, func() {
