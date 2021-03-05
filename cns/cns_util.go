@@ -70,9 +70,10 @@ func GetTaskResultArray(ctx context.Context, taskInfo *vim25types.TaskInfo) ([]c
 
 // dropUnknownCreateSpecElements helps drop newly added elements in the CnsVolumeCreateSpec, which are not known to the prior vSphere releases
 func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolumeCreateSpec) []cnstypes.CnsVolumeCreateSpec {
-	if c.serviceClient.Version == ReleaseVSAN67u3 {
+	updatedcreateSpecList := make([]cnstypes.CnsVolumeCreateSpec, 0, len(createSpecList))
+	switch c.serviceClient.Version {
+	case ReleaseVSAN67u3:
 		// Dropping optional fields not known to vSAN 6.7U3
-		updatedcreateSpecList := make([]cnstypes.CnsVolumeCreateSpec, 0, len(createSpecList))
 		for _, createSpec := range createSpecList {
 			createSpec.Metadata.ContainerCluster.ClusterFlavor = ""
 			createSpec.Metadata.ContainerCluster.ClusterDistribution = ""
@@ -92,14 +93,33 @@ func dropUnknownCreateSpecElements(c *Client, createSpecList []cnstypes.CnsVolum
 			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
 		}
 		createSpecList = updatedcreateSpecList
-	} else if c.serviceClient.Version == ReleaseVSAN70 {
-		updatedcreateSpecList := make([]cnstypes.CnsVolumeCreateSpec, 0, len(createSpecList))
+	case ReleaseVSAN70:
+		// Dropping optional fields not known to vSAN 7.0
 		for _, createSpec := range createSpecList {
 			createSpec.Metadata.ContainerCluster.ClusterDistribution = ""
+			var updatedContainerClusterArray []cnstypes.CnsContainerCluster
+			for _, containerCluster := range createSpec.Metadata.ContainerClusterArray {
+				containerCluster.ClusterDistribution = ""
+				updatedContainerClusterArray = append(updatedContainerClusterArray, containerCluster)
+			}
+			createSpec.Metadata.ContainerClusterArray = updatedContainerClusterArray
 			_, ok := createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
 			if ok {
 				createSpec.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskUrlPath = ""
 			}
+			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
+		}
+		createSpecList = updatedcreateSpecList
+	case ReleaseVSAN70u1:
+		// Dropping optional fields not known to vSAN 7.0U1
+		for _, createSpec := range createSpecList {
+			createSpec.Metadata.ContainerCluster.ClusterDistribution = ""
+			var updatedContainerClusterArray []cnstypes.CnsContainerCluster
+			for _, containerCluster := range createSpec.Metadata.ContainerClusterArray {
+				containerCluster.ClusterDistribution = ""
+				updatedContainerClusterArray = append(updatedContainerClusterArray, containerCluster)
+			}
+			createSpec.Metadata.ContainerClusterArray = updatedContainerClusterArray
 			updatedcreateSpecList = append(updatedcreateSpecList, createSpec)
 		}
 		createSpecList = updatedcreateSpecList
@@ -127,7 +147,7 @@ func dropUnknownVolumeMetadataUpdateSpecElements(c *Client, updateSpecList []cns
 			updatedUpdateSpecList = append(updatedUpdateSpecList, updateSpec)
 		}
 		updateSpecList = updatedUpdateSpecList
-	} else if c.serviceClient.Version == ReleaseVSAN70 {
+	} else if c.serviceClient.Version == ReleaseVSAN70 || c.serviceClient.Version == ReleaseVSAN70u1 {
 		updatedUpdateSpecList := make([]cnstypes.CnsVolumeMetadataUpdateSpec, 0, len(updateSpecList))
 		for _, updateSpec := range updateSpecList {
 			updateSpec.Metadata.ContainerCluster.ClusterDistribution = ""
