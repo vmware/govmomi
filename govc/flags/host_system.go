@@ -86,7 +86,7 @@ func (flag *HostSystemFlag) HostSystemIfSpecified() (*object.HostSystem, error) 
 	}
 
 	// Use search flags if specified.
-	if flag.SearchFlag.IsSet() {
+	if flag.SearchFlag.IsSet() && flag.SearchFlag.t == SearchHosts {
 		host, err := flag.SearchFlag.HostSystem()
 		if err != nil {
 			return nil, err
