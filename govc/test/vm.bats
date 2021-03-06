@@ -817,7 +817,8 @@ load test_helper
   run govc object.collect -s "vm/$vm" parent
   assert_success
 
-  run govc vm.migrate -folder vm/new-folder "$vm"
+  uuid=$(govc object.collect -s "vm/$vm" config.uuid)
+  run govc vm.migrate -folder vm/new-folder -vm.uuid "$uuid"
   assert_success
 
   run govc object.collect -s "vm/new-folder/$vm" parent
