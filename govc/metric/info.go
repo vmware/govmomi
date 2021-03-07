@@ -31,6 +31,7 @@ import (
 
 type info struct {
 	*PerformanceFlag
+	group string
 }
 
 func init() {
@@ -40,6 +41,8 @@ func init() {
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.PerformanceFlag, ctx = NewPerformanceFlag(ctx)
 	cmd.PerformanceFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.group, "g", "", "Show info for a specific Group")
 }
 
 func (cmd *info) Usage() string {
@@ -179,11 +182,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		if len(names) == 0 {
 			nc, _ := m.CounterInfoByKey(ctx)
 
+			seen := make(map[int32]bool)
 			for i := range all {
 				id := &all[i]
-				if id.Instance != "" {
+				if seen[id.CounterId] {
 					continue
 				}
+				seen[id.CounterId] = true
 
 				names = append(names, nc[id.CounterId].Name())
 			}
@@ -196,6 +201,12 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		counter, ok := counters[name]
 		if !ok {
 			return cmd.ErrNotFound(name)
+		}
+
+		if cmd.group != "" {
+			if counter.GroupInfo.GetElementDescription().Label != cmd.group {
+				continue
+			}
 		}
 
 		info := &MetricInfo{

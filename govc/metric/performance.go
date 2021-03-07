@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"strconv"
 
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/performance"
@@ -31,7 +32,7 @@ type PerformanceFlag struct {
 
 	m *performance.Manager
 
-	interval int
+	interval string
 }
 
 func NewPerformanceFlag(ctx context.Context) (*PerformanceFlag, context.Context) {
@@ -45,7 +46,7 @@ func (f *PerformanceFlag) Register(ctx context.Context, fs *flag.FlagSet) {
 	f.DatacenterFlag.Register(ctx, fs)
 	f.OutputFlag.Register(ctx, fs)
 
-	fs.IntVar(&f.interval, "i", 0, "Interval ID")
+	fs.StringVar(&f.interval, "i", "real", "Interval ID (real|day|week|month|year)")
 }
 
 func (f *PerformanceFlag) Process(ctx context.Context) error {
@@ -77,7 +78,19 @@ func (f *PerformanceFlag) Manager(ctx context.Context) (*performance.Manager, er
 }
 
 func (f *PerformanceFlag) Interval(val int32) int32 {
-	interval := int32(f.interval)
+	var interval int32
+
+	if f.interval != "" {
+		if i, ok := performance.Intervals[f.interval]; ok {
+			interval = i
+		} else {
+			n, err := strconv.ParseUint(f.interval, 10, 32)
+			if err != nil {
+				panic(err)
+			}
+			interval = int32(n)
+		}
+	}
 
 	if interval == 0 {
 		if val == -1 {

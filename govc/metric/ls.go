@@ -32,7 +32,9 @@ import (
 type ls struct {
 	*PerformanceFlag
 
-	long bool
+	group    string
+	long     bool
+	longlong bool
 }
 
 func init() {
@@ -43,7 +45,9 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.PerformanceFlag, ctx = NewPerformanceFlag(ctx)
 	cmd.PerformanceFlag.Register(ctx, f)
 
+	f.StringVar(&cmd.group, "g", "", "List a specific Group")
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
+	f.BoolVar(&cmd.longlong, "L", false, "Longer listing format")
 }
 
 func (cmd *ls) Usage() string {
@@ -53,9 +57,16 @@ func (cmd *ls) Usage() string {
 func (cmd *ls) Description() string {
 	return `List available metrics for PATH.
 
+The default output format is the metric name.
+The '-l' flag includes the metric description.
+The '-L' flag includes the metric units, instance count (if any) and description.
+The instance count is prefixed with a single '@'.
+If no aggregate is provided for the metric, instance count is prefixed with two '@@'.
+
 Examples:
   govc metric.ls /dc1/host/cluster1
   govc metric.ls datastore/*
+  govc metric.ls -L -g CPU /dc1/host/cluster1/host1
   govc metric.ls vm/* | grep mem. | xargs govc metric.sample vm/*`
 }
 
@@ -75,20 +86,58 @@ type lsResult struct {
 func (r *lsResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
+	type count struct {
+		aggregate bool
+		instances int
+	}
+	seen := make(map[int32]*count)
+	var res []types.PerfMetricId
+
 	for _, id := range r.MetricList {
-		if id.Instance != "" {
-			continue
+		if r.cmd.group != "" {
+			info := r.counters[id.CounterId]
+			if info.GroupInfo.GetElementDescription().Label != r.cmd.group {
+				continue
+			}
 		}
 
+		c := seen[id.CounterId]
+		if c == nil {
+			c = new(count)
+			seen[id.CounterId] = c
+			res = append(res, id)
+		}
+
+		if id.Instance == "" {
+			c.aggregate = true
+		} else {
+			c.instances++
+		}
+	}
+
+	for _, id := range res {
 		info := r.counters[id.CounterId]
 
-		if r.cmd.long {
-			fmt.Fprintf(w, "%s\t%s\n", info.Name(),
+		switch {
+		case r.cmd.long:
+			fmt.Fprintf(tw, "%s\t%s\n", info.Name(),
 				info.NameInfo.GetElementDescription().Label)
-			continue
+		case r.cmd.longlong:
+			i := ""
+			c := seen[id.CounterId]
+			if !c.aggregate {
+				i = "@"
+			}
+			if c.instances > 0 {
+				i += fmt.Sprintf("@%d", c.instances)
+			}
+			fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", info.Name(),
+				i,
+				info.UnitInfo.GetElementDescription().Label,
+				info.NameInfo.GetElementDescription().Label)
+		default:
+			fmt.Fprintln(w, info.Name())
 		}
-
-		fmt.Fprintln(w, info.Name())
 	}
 
 	return tw.Flush()

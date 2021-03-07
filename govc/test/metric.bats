@@ -25,7 +25,7 @@ load test_helper
 }
 
 @test "metric.sample" {
-  esx_env
+  vcsim_env
 
   host=$(govc ls -t HostSystem ./... | head -n 1)
   metrics=($(govc metric.ls "$host"))
@@ -42,26 +42,17 @@ load test_helper
   run govc metric.sample -json "$host" "${metrics[@]}"
   assert_success
 
-  vm=$(new_ttylinux_vm)
-
-  run govc metric.ls "$vm"
-  assert_output ""
-
-  run govc vm.power -on "$vm"
-  assert_success
-
-  run govc vm.ip "$vm"
-  assert_success
+  vm=vm/DC0_H0_VM0
 
   metrics=($(govc metric.ls "$vm"))
 
-  run govc metric.sample "$vm" "${metrics[@]}"
+  run govc metric.sample -i day "$vm" "${metrics[@]}"
   assert_success
 
-  run govc metric.sample -json "$vm" "${metrics[@]}"
+  run govc metric.sample -i 300 -json "$vm" "${metrics[@]}"
   assert_success
 
-  run govc metric.sample "govc-test-*" "${metrics[@]}"
+  run govc metric.sample $vm "${metrics[@]}"
   assert_success
 }
 
