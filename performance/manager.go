@@ -346,17 +346,22 @@ func (m *Manager) SampleByName(ctx context.Context, spec types.PerfQuerySpec, me
 				break
 			}
 
+			n := len(s.SampleInfo)
+			diff := n - int(spec.MaxSample)
+			if diff > 0 {
+				s.SampleInfo = s.SampleInfo[diff:]
+			}
+
 			for j := range s.Value {
 				v, ok := s.Value[j].(*types.PerfMetricIntSeries)
 				if !ok {
 					break
 				}
 
-				n := len(v.Value)
-				diff := n - int(spec.MaxSample)
+				n = len(v.Value)
+				diff = n - int(spec.MaxSample)
 				if diff > 0 {
 					v.Value = v.Value[diff:]
-					s.SampleInfo = s.SampleInfo[diff:]
 				}
 			}
 		}
