@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -76,9 +77,17 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			continue
 		}
 
+		period := (time.Duration(i.SamplingPeriod) * time.Second).String()
+		period = strings.TrimSuffix(period, "0s")
+		if strings.Contains(period, "h") {
+			period = strings.TrimSuffix(period, "0m")
+		}
+		samples := i.Length / i.SamplingPeriod
+
 		fmt.Fprintf(cmd.Out, "ID:\t%d\n", i.SamplingPeriod)
 		fmt.Fprintf(cmd.Out, "  Enabled:\t%t\n", i.Enabled)
-		fmt.Fprintf(cmd.Out, "  Interval:\t%s\n", time.Duration(i.SamplingPeriod)*time.Second)
+		fmt.Fprintf(cmd.Out, "  Interval:\t%s\n", period)
+		fmt.Fprintf(cmd.Out, "  Available Samples:\t%d\n", samples)
 		fmt.Fprintf(cmd.Out, "  Name:\t%s\n", i.Name)
 		fmt.Fprintf(cmd.Out, "  Level:\t%d\n", i.Level)
 	}

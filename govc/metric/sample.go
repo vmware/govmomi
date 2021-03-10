@@ -54,7 +54,7 @@ func (cmd *sample) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.PerformanceFlag.Register(ctx, f)
 
 	f.IntVar(&cmd.d, "d", 30, "Limit object display name to D chars")
-	f.IntVar(&cmd.n, "n", 6, "Max number of samples")
+	f.IntVar(&cmd.n, "n", 5, "Max number of samples")
 	f.StringVar(&cmd.plot, "plot", "", "Plot data using gnuplot")
 	f.BoolVar(&cmd.t, "t", false, "Include sample times")
 	f.StringVar(&cmd.instance, "instance", "*", "Instance")
