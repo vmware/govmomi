@@ -259,14 +259,23 @@ func (m ObjectManager) RegisterDisk(ctx context.Context, path, name string) (*ty
 }
 
 func (m ObjectManager) ExtendDisk(ctx context.Context, ds mo.Reference, id string, newCapacityInMB int64) (*object.Task, error) {
-	req := types.HostExtendDisk_Task{
+	req := types.ExtendDisk_Task{
 		This:            m.Reference(),
 		Id:              types.ID{Id: id},
 		Datastore:       ds.Reference(),
 		NewCapacityInMB: newCapacityInMB,
 	}
 
-	res, err := methods.HostExtendDisk_Task(ctx, m.c, &req)
+	if m.isVC {
+		res, err := methods.ExtendDisk_Task(ctx, m.c, &req)
+		if err != nil {
+			return nil, err
+		}
+
+		return object.NewTask(m.c, res.Returnval), nil
+	}
+
+	res, err := methods.HostExtendDisk_Task(ctx, m.c, (*types.HostExtendDisk_Task)(&req))
 	if err != nil {
 		return nil, err
 	}
@@ -275,13 +284,22 @@ func (m ObjectManager) ExtendDisk(ctx context.Context, ds mo.Reference, id strin
 }
 
 func (m ObjectManager) InflateDisk(ctx context.Context, ds mo.Reference, id string) (*object.Task, error) {
-	req := types.HostInflateDisk_Task{
+	req := types.InflateDisk_Task{
 		This:      m.Reference(),
 		Id:        types.ID{Id: id},
 		Datastore: ds.Reference(),
 	}
 
-	res, err := methods.HostInflateDisk_Task(ctx, m.c, &req)
+	if m.isVC {
+		res, err := methods.InflateDisk_Task(ctx, m.c, &req)
+		if err != nil {
+			return nil, err
+		}
+
+		return object.NewTask(m.c, res.Returnval), nil
+	}
+
+	res, err := methods.HostInflateDisk_Task(ctx, m.c, (*types.HostInflateDisk_Task)(&req))
 	if err != nil {
 		return nil, err
 	}
