@@ -133,11 +133,13 @@ func Run(f func(context.Context, *vim25.Client) error) {
 	flag.Parse()
 
 	var err error
+	var c *vim25.Client
+
 	if *urlFlag == "" {
 		err = simulator.VPX().Run(f)
 	} else {
 		ctx := context.Background()
-		c, err := NewClient(ctx)
+		c, err = NewClient(ctx)
 		if err == nil {
 			err = f(ctx, c)
 		}

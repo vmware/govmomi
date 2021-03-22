@@ -30,9 +30,11 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-// example use: go run main.go -url $GOVC_URL -b 8h -f VmEvent
 func main() {
-	begin := flag.Duration("b", time.Hour, "Begin time") // default BeginTime is 1h ago
+	// example use against simulator: go run main.go -b 8h -f
+	// example use against vCenter with optional event filters:
+	// go run main.go -url $GOVMOMI_URL -insecure $GOVMOMI_INSECURE -b 8h -f VmEvent UserLoginSessionEvent
+	begin := flag.Duration("b", 10*time.Minute, "Begin time") // default BeginTime is 10min ago
 	end := flag.Duration("e", 0, "End time")
 	follow := flag.Bool("f", false, "Follow event stream")
 
