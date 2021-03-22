@@ -345,6 +345,21 @@ func apiVersionValid(c *vim25.Client, minVersionString string) error {
 	return nil
 }
 
+func (flag *ClientFlag) RoundTripper(c *soap.Client) soap.RoundTripper {
+	// Retry twice when a temporary I/O error occurs.
+	// This means a maximum of 3 attempts.
+	rt := vim25.Retry(c, vim25.RetryTemporaryNetworkError, 3)
+
+	switch {
+	case flag.dump:
+		rt = &dump{roundTripper: rt}
+	case flag.verbose:
+		rt = &verbose{roundTripper: rt}
+	}
+
+	return rt
+}
+
 func (flag *ClientFlag) Client() (*vim25.Client, error) {
 	if flag.client != nil {
 		return flag.client, nil
@@ -369,9 +384,7 @@ func (flag *ClientFlag) Client() (*vim25.Client, error) {
 		}
 	}
 
-	// Retry twice when a temporary I/O error occurs.
-	// This means a maximum of 3 attempts.
-	c.RoundTripper = vim25.Retry(c.Client, vim25.RetryTemporaryNetworkError, 3)
+	c.RoundTripper = flag.RoundTripper(c.Client)
 	flag.client = c
 
 	return flag.client, nil

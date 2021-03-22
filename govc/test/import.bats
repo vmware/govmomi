@@ -25,7 +25,7 @@ load test_helper
   proto=$(jq -r .IPProtocol <<<"$output")
   assert_equal IPv4 "$proto"
 
-  run govc import.ova "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  run govc import.ova -verbose "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
   assert_success
 
   run govc device.ls -vm "$TTYLINUX_NAME"
@@ -35,7 +35,7 @@ load test_helper
   run govc vm.destroy "$TTYLINUX_NAME"
   assert_success
 
-  run govc import.ova -pool /DC0/host/DC0_C0/Resources/DC0_C0_APP0 "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  run govc import.ova -verbose -pool /DC0/host/DC0_C0/Resources/DC0_C0_APP0 "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
   assert_success
 }
 

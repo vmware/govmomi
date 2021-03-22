@@ -1,0 +1,37 @@
+#!/bin/bash -e
+
+# format the most recent debug run
+cd ${GOVC_DEBUG_PATH-"$HOME/.govmomi/debug"}
+cd $(ls -t | head -1)
+
+header() {
+  printf "<!-- %s %s/%s\n%s\n-->\n" "$1" "$PWD" "$2" "$(tr -d '\r' < "$3")"
+}
+
+jqformat() {
+  jq .
+}
+
+xmlformat() {
+  xmlstarlet fo
+}
+
+for file in *.req.*; do
+  ext=${file##*.}
+  if [ "$ext" = "headers" ] ; then
+    continue
+  fi
+
+  base=$(basename "$file" ".req.$ext")
+  header Request "$file" "${base}.req.headers"
+  format=xmlformat
+  if [ "$ext" = "json" ] ; then
+    format=jqformat
+  fi
+  $format < "$file"
+  file="${base}.res.$ext"
+  if [ -e "$file" ] ; then
+    header Response "$file" "${base}.res.headers"
+    $format < "$file"
+  fi
+done

@@ -133,10 +133,26 @@ to set defaults:
 
 ## Troubleshooting
 
+### Verbose Flag
+
+The `-verbose` flag writes request and response data to stderr, in a format more compact than the `-trace` or `-debug` flags.
+The output includes the request method name with abbreviated input parameters. The response data is more detailed and may include
+structures formatted as Go code, such as Task property updates.  The value of some properties will the govc `object.collect`
+command that can be used to view the actual value.
+
+### Trace flag
+
+The `-trace` flag writes HTTP request and response data to stderr.
+XML bodies are formatted using `xmlstarlet` if installed and JSON bodies using `jq` if installed.
+Formatting can be disabled via `export GOVC_DEBUG_FORMAT=false`.
+
+If both `-trace` and `-verbose` flags are specified, request and response data is formatted as Go code.
+
 ### Debug Flag
-There is a `-debug` flag which you can use to debug the calls made to the vSphere API and there are some environment
-variables you can use to configure how it works. If you turn on the `-debug` flag the default behavior is to put the
-output in `~/.govmomi/debug/<run timestamp>`. In that directory will be four (4) files per API call.
+
+The`-debug` flag traces vSphere API calls similar to the `-trace` flag, but saves to files rather than stderr.
+When the `-debug` flag is specified, the default behavior is to put the output in `~/.govmomi/debug/<run timestamp>`.
+In that directory will be four (4) files per API call.
 
 ```
 1-0001.req.headers #headers from the request sent to the API
@@ -152,8 +168,11 @@ To configure the debug output you can use two environment variables.
 * `GOVC_DEBUG_PATH`: defaults to ~/.govmomi/debug
 * `GOVC_DEBUG_PATH_RUN`: defaults to timestamp of the run
 
-#### stdout debug
-If you prefer debug output to be sent to stdout and seen while the command is running you can override the file behavior
+The [debug-format](../scripts/debug-format.sh) script can be used to format the debug output similar to the `-trace` flag.
+
+#### stderr debug
+
+If you prefer debug output to be sent to stderr and seen while the command is running you can override the file behavior
 by setting the debug path to a dash: `export GOVC_DEBUG_PATH=-`
 
 ### Environment variables

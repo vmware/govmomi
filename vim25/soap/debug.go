@@ -27,18 +27,13 @@ import (
 	"github.com/vmware/govmomi/vim25/debug"
 )
 
-// teeReader wraps io.TeeReader and patches through the Close() function.
-type teeReader struct {
-	io.Reader
-	io.Closer
-}
-
-func newTeeReader(rc io.ReadCloser, w io.Writer) io.ReadCloser {
-	return teeReader{
-		Reader: io.TeeReader(rc, w),
-		Closer: rc,
+var (
+	// Trace reads an http request or response from rc and writes to w.
+	// The content type (kind) should be one of "xml" or "json".
+	Trace = func(rc io.ReadCloser, w io.Writer, kind string) io.ReadCloser {
+		return debug.NewTeeReader(rc, w)
 	}
-}
+)
 
 // debugRoundTrip contains state and logic needed to debug a single round trip.
 type debugRoundTrip struct {
@@ -92,7 +87,7 @@ func (d *debugRoundTrip) debugRequest(req *http.Request) string {
 	ext := d.ext(req.Header)
 	// Capture body
 	wc = d.newFile("req." + ext)
-	req.Body = newTeeReader(req.Body, wc)
+	req.Body = Trace(req.Body, wc, ext)
 
 	// Delay closing until marked done
 	d.cs = append(d.cs, wc)
@@ -113,7 +108,7 @@ func (d *debugRoundTrip) debugResponse(res *http.Response, ext string) {
 
 	// Capture body
 	wc = d.newFile("res." + ext)
-	res.Body = newTeeReader(res.Body, wc)
+	res.Body = Trace(res.Body, wc, ext)
 
 	// Delay closing until marked done
 	d.cs = append(d.cs, wc)
