@@ -51,6 +51,10 @@ var (
 		Type:  "PropertyCollector",
 		Value: "vsan-property-collector",
 	}
+	VsanVcStretchedClusterSystem = vimtypes.ManagedObjectReference{
+		Type:  "VimClusterVsanVcStretchedClusterSystem",
+		Value: "vsan-stretched-cluster-system",
+	}
 )
 
 // Client used for accessing vsan health APIs.
