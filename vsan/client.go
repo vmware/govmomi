@@ -61,13 +61,18 @@ var (
 type Client struct {
 	*soap.Client
 
-	Vim25Client *vim25.Client
+	RoundTripper soap.RoundTripper
 }
 
 // NewClient creates a new VsanHealth client
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
-	return &Client{sc, c}, nil
+	return &Client{sc, sc}, nil
+}
+
+// RoundTrip dispatches to the RoundTripper field.
+func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
 // VsanClusterGetConfig calls the Vsan health's VsanClusterGetConfig API.

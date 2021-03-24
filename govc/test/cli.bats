@@ -272,4 +272,16 @@ load test_helper
 
   run govc metric.sample -verbose /DC0/host/DC0_C0 cpu.usage.average
   assert_success
+
+  run govc session.login -verbose -issue # sts.Client
+  assert_success
+
+  run govc sso.service.ls -verbose # lookup.Client
+  assert_success
+
+  run govc storage.policy.ls -verbose # pbm.Client
+  assert_success
+
+  run govc volume.ls -verbose # cns.Client
+  assert_success
 }

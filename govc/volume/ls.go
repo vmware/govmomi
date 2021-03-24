@@ -24,7 +24,6 @@ import (
 	"log"
 	"text/tabwriter"
 
-	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -136,12 +135,6 @@ func (r *lsWriter) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	vc, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-	_ = vc.UseServiceVersion("vsan")
-
 	ds, err := cmd.DatastoreIfSpecified()
 	if err != nil {
 		return err
@@ -151,7 +144,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.Datastores = []vim.ManagedObjectReference{ds.Reference()}
 	}
 
-	c, err := cns.NewClient(ctx, vc)
+	c, err := cmd.CnsClient()
 	if err != nil {
 		return err
 	}

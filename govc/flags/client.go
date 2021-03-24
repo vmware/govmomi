@@ -30,6 +30,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/vmware/govmomi/cns"
+	"github.com/vmware/govmomi/pbm"
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/session/cache"
 	"github.com/vmware/govmomi/session/keepalive"
@@ -404,6 +406,38 @@ func (flag *ClientFlag) RestClient() (*rest.Client, error) {
 
 	flag.restClient = c
 	return flag.restClient, nil
+}
+
+func (flag *ClientFlag) PbmClient() (*pbm.Client, error) {
+	vc, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+	c, err := pbm.NewClient(context.Background(), vc)
+	if err != nil {
+		return nil, err
+	}
+
+	c.RoundTripper = flag.RoundTripper(c.Client)
+
+	return c, nil
+}
+
+func (flag *ClientFlag) CnsClient() (*cns.Client, error) {
+	vc, err := flag.Client()
+	if err != nil {
+		return nil, err
+	}
+	_ = vc.UseServiceVersion("vsan")
+
+	c, err := cns.NewClient(context.Background(), vc)
+	if err != nil {
+		return nil, err
+	}
+
+	c.RoundTripper = flag.RoundTripper(c.Client)
+
+	return c, nil
 }
 
 func (flag *ClientFlag) KeepAlive(client cache.Client) {

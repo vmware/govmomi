@@ -124,12 +124,7 @@ func (r *lsResult) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	vc, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
-	c, err := pbm.NewClient(ctx, vc)
+	c, err := cmd.PbmClient()
 	if err != nil {
 		return err
 	}

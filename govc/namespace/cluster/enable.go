@@ -26,7 +26,6 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/govc/storage/policy"
-	"github.com/vmware/govmomi/pbm"
 	"github.com/vmware/govmomi/vapi/namespace"
 )
 
@@ -195,12 +194,7 @@ func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	// Storage policy object references lookup
-	vc, err := cmd.Client()
-	if err != nil {
-		return fmt.Errorf("error creating soap client: %s", err)
-	}
-
-	pbmc, err := pbm.NewClient(ctx, vc)
+	pbmc, err := cmd.PbmClient()
 	if err != nil {
 		return fmt.Errorf("error creating client for storage policy lookup: %s", err)
 	}

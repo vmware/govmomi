@@ -23,7 +23,6 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/pbm"
 	"github.com/vmware/govmomi/pbm/types"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
@@ -95,12 +94,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		}},
 	}
 
-	vc, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-
-	c, err := pbm.NewClient(ctx, vc)
+	c, err := cmd.PbmClient()
 	if err != nil {
 		return err
 	}
