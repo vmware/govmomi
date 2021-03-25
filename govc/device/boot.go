@@ -54,7 +54,7 @@ func (cmd *boot) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(cmd.EnterBIOSSetup, "setup", false, "If true, enter BIOS setup on next boot")
 
 	f.Var(flags.NewOptionalBool(&cmd.EfiSecureBootEnabled), "secure", "Enable EFI secure boot")
-	f.StringVar(&cmd.firmware, "firmware", vm.FirmwareTypes[0], vm.FirmwareUsage)
+	f.StringVar(&cmd.firmware, "firmware", "", vm.FirmwareUsage)
 }
 
 func (cmd *boot) Description() string {
