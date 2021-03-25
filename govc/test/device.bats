@@ -77,6 +77,12 @@ load test_helper
 
   run govc device.boot -vm $vm -secure -firmware efi
   assert_success
+
+  run govc device.boot -vm $vm -order -
+  assert_success
+
+  firmware=$(govc object.collect -s vm/$vm config.firmware)
+  assert_equal efi "$firmware"
 }
 
 @test "device.cdrom" {
