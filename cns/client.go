@@ -47,8 +47,11 @@ var (
 )
 
 type Client struct {
-	vim25Client   *vim25.Client
-	serviceClient *soap.Client
+	*soap.Client
+
+	RoundTripper soap.RoundTripper
+
+	vim25Client *vim25.Client
 }
 
 // NewClient creates a new CNS client
@@ -56,7 +59,12 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
 	sc.Namespace = c.Namespace
 	sc.Version = c.Version
-	return &Client{c, sc}, nil
+	return &Client{sc, sc, c}, nil
+}
+
+// RoundTrip dispatches to the RoundTripper field.
+func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
 // CreateVolume calls the CNS create API.
@@ -66,7 +74,7 @@ func (c *Client) CreateVolume(ctx context.Context, createSpecList []cnstypes.Cns
 		This:        CnsVolumeManagerInstance,
 		CreateSpecs: createSpecList,
 	}
-	res, err := methods.CnsCreateVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsCreateVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +88,7 @@ func (c *Client) UpdateVolumeMetadata(ctx context.Context, updateSpecList []cnst
 		This:        CnsVolumeManagerInstance,
 		UpdateSpecs: updateSpecList,
 	}
-	res, err := methods.CnsUpdateVolumeMetadata(ctx, c.serviceClient, &req)
+	res, err := methods.CnsUpdateVolumeMetadata(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -94,7 +102,7 @@ func (c *Client) DeleteVolume(ctx context.Context, volumeIDList []cnstypes.CnsVo
 		VolumeIds:  volumeIDList,
 		DeleteDisk: deleteDisk,
 	}
-	res, err := methods.CnsDeleteVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsDeleteVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -107,7 +115,7 @@ func (c *Client) ExtendVolume(ctx context.Context, extendSpecList []cnstypes.Cns
 		This:        CnsVolumeManagerInstance,
 		ExtendSpecs: extendSpecList,
 	}
-	res, err := methods.CnsExtendVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsExtendVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +128,7 @@ func (c *Client) AttachVolume(ctx context.Context, attachSpecList []cnstypes.Cns
 		This:        CnsVolumeManagerInstance,
 		AttachSpecs: attachSpecList,
 	}
-	res, err := methods.CnsAttachVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsAttachVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -133,7 +141,7 @@ func (c *Client) DetachVolume(ctx context.Context, detachSpecList []cnstypes.Cns
 		This:        CnsVolumeManagerInstance,
 		DetachSpecs: detachSpecList,
 	}
-	res, err := methods.CnsDetachVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsDetachVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -146,7 +154,7 @@ func (c *Client) QueryVolume(ctx context.Context, queryFilter cnstypes.CnsQueryF
 		This:   CnsVolumeManagerInstance,
 		Filter: queryFilter,
 	}
-	res, err := methods.CnsQueryVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsQueryVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -160,7 +168,7 @@ func (c *Client) QueryVolumeInfo(ctx context.Context, volumeIDList []cnstypes.Cn
 		This:      CnsVolumeManagerInstance,
 		VolumeIds: volumeIDList,
 	}
-	res, err := methods.CnsQueryVolumeInfo(ctx, c.serviceClient, &req)
+	res, err := methods.CnsQueryVolumeInfo(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -174,7 +182,7 @@ func (c *Client) QueryAllVolume(ctx context.Context, queryFilter cnstypes.CnsQue
 		Filter:    queryFilter,
 		Selection: querySelection,
 	}
-	res, err := methods.CnsQueryAllVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsQueryAllVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -187,7 +195,7 @@ func (c *Client) RelocateVolume(ctx context.Context, relocateSpecs ...cnstypes.B
 		This:          CnsVolumeManagerInstance,
 		RelocateSpecs: relocateSpecs,
 	}
-	res, err := methods.CnsRelocateVolume(ctx, c.serviceClient, &req)
+	res, err := methods.CnsRelocateVolume(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -200,7 +208,7 @@ func (c *Client) ConfigureVolumeACLs(ctx context.Context, aclConfigSpecs ...cnst
 		This:           CnsVolumeManagerInstance,
 		ACLConfigSpecs: aclConfigSpecs,
 	}
-	res, err := methods.CnsConfigureVolumeACLs(ctx, c.serviceClient, &req)
+	res, err := methods.CnsConfigureVolumeACLs(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}

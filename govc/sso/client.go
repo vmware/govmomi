@@ -37,6 +37,7 @@ func WithClient(ctx context.Context, cmd *flags.ClientFlag, f func(*ssoadmin.Cli
 	if err != nil {
 		return err
 	}
+	c.RoundTripper = cmd.RoundTripper(c.Client)
 
 	// SSO admin server has its own session manager, so the govc persisted session cookies cannot
 	// be used to authenticate.  There is no SSO token persistence in govc yet, so just use an env

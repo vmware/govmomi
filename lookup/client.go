@@ -48,6 +48,8 @@ var (
 type Client struct {
 	*soap.Client
 
+	RoundTripper soap.RoundTripper
+
 	ServiceContent types.LookupServiceContent
 }
 
@@ -79,7 +81,12 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{sc, res.Returnval}, nil
+	return &Client{sc, sc, res.Returnval}, nil
+}
+
+// RoundTrip dispatches to the RoundTripper field.
+func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
 func (c *Client) List(ctx context.Context, filter *types.LookupServiceRegistrationFilter) ([]types.LookupServiceRegistrationInfo, error) {

@@ -143,6 +143,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	c.RoundTripper = cmd.RoundTripper(c.Client)
 
 	info, err := c.List(ctx, &cmd.LookupServiceRegistrationFilter)
 	if err != nil {

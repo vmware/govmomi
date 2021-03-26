@@ -43,6 +43,8 @@ type Client struct {
 	*soap.Client
 
 	ServiceContent types.PbmServiceInstanceContent
+
+	RoundTripper soap.RoundTripper
 }
 
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
@@ -57,7 +59,12 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{sc, res.Returnval}, nil
+	return &Client{sc, res.Returnval, sc}, nil
+}
+
+// RoundTrip dispatches to the RoundTripper field.
+func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
 func (c *Client) QueryProfile(ctx context.Context, rtype types.PbmProfileResourceType, category string) ([]types.PbmProfileId, error) {

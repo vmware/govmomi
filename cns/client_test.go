@@ -159,7 +159,7 @@ func TestClient(t *testing.T) {
 	t.Logf("volumeCreateResult %+v", volumeCreateResult)
 	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
 
-	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
+	if cnsClient.Version != ReleaseVSAN67u3 {
 		// Test creating static volume using existing CNS volume should fail
 		var staticCnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 		staticCnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
@@ -226,7 +226,7 @@ func TestClient(t *testing.T) {
 	// Test QueryVolumeInfo API
 	// QueryVolumeInfo is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
 	// This API is available on vSphere 7.0u1 onward
-	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
+	if cnsClient.Version != ReleaseVSAN67u3 && cnsClient.Version != ReleaseVSAN70 {
 		t.Logf("Calling QueryVolumeInfo using: %+v", pretty.Sprint(volumeIDList))
 		queryVolumeInfoTask, err := cnsClient.QueryVolumeInfo(ctx, volumeIDList)
 		if err != nil {
@@ -259,7 +259,7 @@ func TestClient(t *testing.T) {
 	// Test Relocate API
 	// Relocate API is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
 	// This API is available on vSphere 7.0u1 onward
-	if cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 && datastoreForMigration != "" {
+	if cnsClient.Version != ReleaseVSAN67u3 && cnsClient.Version != ReleaseVSAN70 && datastoreForMigration != "" {
 		migrationDS, err := finder.Datastore(ctx, datastoreForMigration)
 		if err != nil {
 			t.Fatal(err)
@@ -648,7 +648,7 @@ func TestClient(t *testing.T) {
 	}
 	t.Logf("Volume: %q deleted sucessfully", volumeId)
 
-	if run_fileshare_tests == "true" && cnsClient.serviceClient.Version != ReleaseVSAN67u3 {
+	if run_fileshare_tests == "true" && cnsClient.Version != ReleaseVSAN67u3 {
 		// Test creating vSAN file-share Volume
 		var cnsFileVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 		vSANFileCreateSpec := &cnstypes.CnsVSANFileCreateSpec{
@@ -827,7 +827,7 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("fileshare volume:%q deleted sucessfully", filevolumeId)
 	}
-	if backingDiskURLPath != "" && cnsClient.serviceClient.Version != ReleaseVSAN67u3 && cnsClient.serviceClient.Version != ReleaseVSAN70 {
+	if backingDiskURLPath != "" && cnsClient.Version != ReleaseVSAN67u3 && cnsClient.Version != ReleaseVSAN70 {
 		// Test CreateVolume API with existing VMDK
 		var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 		cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{

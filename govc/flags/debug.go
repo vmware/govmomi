@@ -295,6 +295,12 @@ func (*verbose) str(val reflect.Value) string {
 		p = fmt.Sprintf("%s", pval)
 	case []string:
 		p = fmt.Sprintf("%v", pval)
+	case []types.ManagedObjectReference:
+		refs := make([]string, len(pval))
+		for i := range pval {
+			refs[i] = pval[i].Value
+		}
+		p = fmt.Sprintf("%v", refs)
 	default:
 		return ""
 	}
@@ -382,8 +388,13 @@ func (v *verbose) table(vals []string) {
 
 func (v *verbose) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
 	vreq := reflect.ValueOf(req).Elem().FieldByName("Req").Elem()
-	this := vreq.Field(0).Interface().(types.ManagedObjectReference)
-	param := []string{v.mor(this)}
+	param := []string{""}
+	switch f := vreq.Field(0).Interface().(type) {
+	case types.ManagedObjectReference:
+		param[0] = v.mor(f)
+	default:
+		param[0] = fmt.Sprintf("%v", f)
+	}
 
 	for i := 1; i < vreq.NumField(); i++ {
 		val := vreq.Field(i)

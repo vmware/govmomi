@@ -170,6 +170,7 @@ func (cmd *login) issueToken(ctx context.Context, vc *vim25.Client) (string, err
 	if err != nil {
 		return "", err
 	}
+	c.RoundTripper = cmd.RoundTripper(c.Client)
 
 	req := sts.TokenRequest{
 		Certificate: c.Certificate(),

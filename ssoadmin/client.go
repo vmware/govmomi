@@ -47,6 +47,7 @@ var (
 type Client struct {
 	*soap.Client
 
+	RoundTripper   soap.RoundTripper
 	ServiceContent types.AdminServiceContent
 	GroupCheck     types.GroupcheckServiceContent
 	Domain         string
@@ -115,6 +116,11 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	}
 
 	return admin, nil
+}
+
+// RoundTrip dispatches to the RoundTripper field.
+func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
+	return c.RoundTripper.RoundTrip(ctx, req, res)
 }
 
 func (c *Client) parseID(name string) types.PrincipalId {

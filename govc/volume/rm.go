@@ -21,7 +21,6 @@ import (
 	"errors"
 	"flag"
 
-	"github.com/vmware/govmomi/cns"
 	"github.com/vmware/govmomi/cns/types"
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -56,13 +55,7 @@ Examples:
 }
 
 func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
-	vc, err := cmd.Client()
-	if err != nil {
-		return err
-	}
-	_ = vc.UseServiceVersion("vsan")
-
-	c, err := cns.NewClient(ctx, vc)
+	c, err := cmd.CnsClient()
 	if err != nil {
 		return err
 	}

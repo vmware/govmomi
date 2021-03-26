@@ -51,7 +51,7 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	finder := find.NewFinder(vsanHealthClient.Vim25Client, false)
+	finder := find.NewFinder(c.Client, false)
 	dc, err := finder.Datacenter(ctx, datacenter)
 	if err != nil {
 		t.Fatal(err)
@@ -125,7 +125,7 @@ func TestVsanQueryObjectIdentities(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	finder := find.NewFinder(vsanHealthClient.Vim25Client, false)
+	finder := find.NewFinder(c.Client, false)
 	dc, err := finder.Datacenter(ctx, datacenter)
 	if err != nil {
 		t.Fatal(err)
