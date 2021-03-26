@@ -1,4 +1,5 @@
-[![Build Status](https://travis-ci.org/vmware/govmomi.png?branch=master)](https://travis-ci.org/vmware/govmomi)
+[![Build](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-build.yaml/badge.svg)](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-build.yaml)
+[![Test](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-test.yaml/badge.svg)](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-test.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vmware/govmomi)](https://goreportcard.com/report/github.com/vmware/govmomi)
 
 # govmomi
