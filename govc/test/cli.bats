@@ -197,6 +197,13 @@ load test_helper
   run govc vm.power -dump -on $vm
   assert_failure
   gofmt <<<"$output"
+
+  run govc datastore.create -type local -name vsanDatastore -path "$BATS_TMPDIR" DC0_C0_H0
+  assert_success
+
+  run govc vm.create -ds vsanDatastore "$(new_id)"
+  assert_failure
+  assert_matches "requires 2 more usable fault domains"
 }
 
 @test "insecure cookies" {

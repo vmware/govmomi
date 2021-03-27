@@ -834,6 +834,23 @@ func (vm *VirtualMachine) createFile(spec string, name string, register bool) (*
 
 	ds := vm.useDatastore(p.Datastore)
 
+	nhost := len(ds.Host)
+	if ds.Name == "vsanDatastore" && nhost < 3 {
+		fault := new(types.CannotCreateFile)
+		fault.FaultMessage = []types.LocalizableMessage{
+			{
+				Key:     "vob.vsanprovider.object.creation.failed",
+				Message: "Failed to create object.",
+			},
+			{
+				Key:     "vob.vsan.clomd.needMoreFaultDomains2",
+				Message: fmt.Sprintf("There are currently %d usable fault domains. The operation requires %d more usable fault domains.", nhost, 3-nhost),
+			},
+		}
+		fault.File = p.Path
+		return nil, fault
+	}
+
 	file := path.Join(ds.Info.GetDatastoreInfo().Url, p.Path)
 
 	if name != "" {

@@ -25,6 +25,7 @@ import (
 	"io"
 	"os"
 	"reflect"
+	"strings"
 	"sync"
 	"time"
 
@@ -32,6 +33,7 @@ import (
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
@@ -195,8 +197,41 @@ type errorOutput struct {
 }
 
 func (e errorOutput) Write(w io.Writer) error {
-	_, ferr := fmt.Fprintf(w, "%s: %s\n", os.Args[0], e.error)
-	return ferr
+	reason := e.error.Error()
+	var messages []string
+	var faults []types.LocalizableMessage
+
+	switch err := e.error.(type) {
+	case task.Error:
+		faults = err.LocalizedMethodFault.Fault.GetMethodFault().FaultMessage
+		if err.Description != nil {
+			reason = fmt.Sprintf("%s (%s)", reason, err.Description.Message)
+		}
+	default:
+		if soap.IsSoapFault(err) {
+			detail := soap.ToSoapFault(err).Detail.Fault
+			if f, ok := detail.(types.BaseMethodFault); ok {
+				faults = f.GetMethodFault().FaultMessage
+			}
+		}
+	}
+
+	for _, m := range faults {
+		if m.Message != "" && !strings.HasPrefix(m.Message, "[context]") {
+			messages = append(messages, fmt.Sprintf("%s (%s)", m.Message, m.Key))
+		}
+	}
+
+	messages = append(messages, reason)
+
+	for _, message := range messages {
+		_, ferr := fmt.Fprintf(w, "%s: %s\n", os.Args[0], message)
+		if ferr != nil {
+			return ferr
+		}
+	}
+
+	return nil
 }
 
 func (e errorOutput) Dump() interface{} {
