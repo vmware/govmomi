@@ -225,10 +225,9 @@ func (e errorOutput) Write(w io.Writer) error {
 	messages = append(messages, reason)
 
 	for _, message := range messages {
-		_, ferr := fmt.Fprintf(w, "%s: %s\n", os.Args[0], message)
-		if ferr != nil {
-			return ferr
-		}
+                if _, err := fmt.Fprintf(w, "%s: %s\n", os.Args[0], message); err != nil {
+                        return err
+                }
 	}
 
 	return nil
