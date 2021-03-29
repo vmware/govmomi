@@ -336,6 +336,14 @@ func (v *verbose) propertyValue(obj types.ManagedObjectReference, name string, p
 	return fmt.Sprintf("%s\t%s:\t%s", v.mor(obj), name, val)
 }
 
+func (v *verbose) missingSet(o types.ManagedObjectReference, m []types.MissingProperty) []string {
+	var s []string
+	for _, p := range m {
+		s = append(s, fmt.Sprintf("%s\t%s:\t%s", v.mor(o), p.Path, v.prettyPrint(p.Fault.Fault)))
+	}
+	return s
+}
+
 func (v *verbose) updateSet(u *types.UpdateSet) []string {
 	var s []string
 	for _, f := range u.FilterSet {
@@ -343,6 +351,7 @@ func (v *verbose) updateSet(u *types.UpdateSet) []string {
 			for _, c := range o.ChangeSet {
 				s = append(s, v.propertyValue(o.Obj, c.Name, c.Val))
 			}
+			s = append(s, v.missingSet(o.Obj, o.MissingSet)...)
 		}
 	}
 	return s
@@ -354,12 +363,16 @@ func (v *verbose) objectContent(content []types.ObjectContent) []string {
 		for _, p := range o.PropSet {
 			s = append(s, v.propertyValue(o.Obj, p.Name, p.Val))
 		}
+		s = append(s, v.missingSet(o.Obj, o.MissingSet)...)
 	}
 	return s
 }
 
 func (v *verbose) prettyPrint(val interface{}) string {
 	p := pretty.Sprintf("%# v\n", val)
+	if len(p) > 640 {
+		return p // don't bother pruning
+	}
 	var res []string
 	scanner := bufio.NewScanner(strings.NewReader(p))
 	for scanner.Scan() {
@@ -369,6 +382,9 @@ func (v *verbose) prettyPrint(val interface{}) string {
 		}
 		if strings.Contains(line, `"",`) {
 			continue // empty string field
+		}
+		if strings.Contains(line, `{},`) {
+			continue // empty embedded struct
 		}
 		if strings.Contains(line, "[context]") {
 			continue // noisy base64 encoded backtrace

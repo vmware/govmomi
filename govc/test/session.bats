@@ -13,6 +13,12 @@ load test_helper
 
   # Test User-Agent
   govc session.ls | grep "$(govc version | tr ' ' /)"
+
+  run govc session.ls -S
+  assert_success
+
+  run govc session.ls -u "$(govc env GOVC_USERNAME)@$(govc env GOVC_URL)" -S
+  assert_failure # no password
 }
 
 @test "session.rm" {
