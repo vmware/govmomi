@@ -613,3 +613,13 @@ EOF
   rm -rf "$dir"
   assert_equal 6 "$n"
 }
+
+@test "tree" {
+  vcsim_start -dc 2 -folder 1 -pod 1 -nsx 1 -pool 2
+
+  run govc tree
+  assert_success
+
+  run govc tree /DC0
+  assert_success
+}
