@@ -408,7 +408,15 @@ func (s *Service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 }
 
 // RegisterSDK adds an HTTP handler for the Registry's Path and Namespace.
+// If r.Path is already registered, r's objects are added to the existing Registry.
 func (s *Service) RegisterSDK(r *Registry) {
+	if existing, ok := s.sdk[r.Path]; ok {
+		for id, obj := range r.objects {
+			existing.objects[id] = obj
+		}
+		return
+	}
+
 	if s.ServeMux == nil {
 		s.ServeMux = http.NewServeMux()
 	}

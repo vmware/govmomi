@@ -269,3 +269,16 @@ _EOF_
   memory=$(govc cluster.usage -json DC0_C0 | jq -r .Memory.Summary.Usage)
   [ "$memory" = "34.3" ]
 }
+
+@test "cluster.stretch" {
+  vcsim_env -host 4
+
+  run govc cluster.stretch -witness DC0_H0 -first-fault-domain-hosts=DC0_C0_H1,DC0_C0_H2 -second-fault-domain-hosts DC0_C0_H2,DC0_C0_H3
+  assert_failure # no cluster specified
+
+  run govc cluster.stretch -witness DC0_H0 -first-fault-domain-hosts=DC0_C0_H1,DC0_C0_H2 DC0_C0
+  assert_failure # no second-fault-domain-hosts specified
+
+  run govc cluster.stretch -witness DC0_H0 -first-fault-domain-hosts=DC0_C0_H1,DC0_C0_H2 -second-fault-domain-hosts DC0_C0_H2,DC0_C0_H3 DC0_C0
+  assert_success
+}
