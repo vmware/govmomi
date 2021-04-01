@@ -667,9 +667,9 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 	}
 
 	if r.Version == "" {
+		ctx.Map.AddHandler(pc) // Listen for create, update, delete of managed objects
 		apply()                // Collect current state
 		set.Version = "-"      // Next request with Version set will wait via loop below
-		ctx.Map.AddHandler(pc) // Listen for create, update, delete of managed objects
 		return body
 	}
 
