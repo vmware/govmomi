@@ -212,6 +212,20 @@ func (c *Manager) PublishLibrary(ctx context.Context, library *Library, subscrip
 	return c.Do(ctx, url.Request(http.MethodPost, spec), nil)
 }
 
+// UpdateLibrary can update one or both of the tag Description and Name fields.
+func (c *Manager) UpdateLibrary(ctx context.Context, l *Library) error {
+	spec := struct {
+		Library `json:"update_spec"`
+	}{
+		Library{
+			Name:        l.Name,
+			Description: l.Description,
+		},
+	}
+	url := c.Resource(internal.LibraryPath).WithID(l.ID)
+	return c.Do(ctx, url.Request(http.MethodPatch, spec), nil)
+}
+
 // DeleteLibrary deletes an existing library.
 func (c *Manager) DeleteLibrary(ctx context.Context, library *Library) error {
 	path := internal.LocalLibraryPath
