@@ -38,6 +38,7 @@ type ls struct {
 	*flags.OutputFlag
 
 	r bool
+	s bool
 }
 
 func init() {
@@ -51,11 +52,14 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
 
-	f.BoolVar(&cmd.r, "r", false, "Include current REST session (if any)")
+	f.BoolVar(&cmd.r, "r", false, "List cached REST session (if any)")
+	f.BoolVar(&cmd.s, "S", false, "List current SOAP session")
 }
 
 func (cmd *ls) Description() string {
 	return `List active sessions.
+
+All SOAP sessions are listed by default. The '-S' flag will limit this list to the current session.
 
 Examples:
   govc session.ls
@@ -119,10 +123,19 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	var m mo.SessionManager
+	var props []string
 	pc := property.DefaultCollector(c)
-	err = pc.RetrieveOne(ctx, *c.ServiceContent.SessionManager, nil, &m)
+	if cmd.s {
+		props = []string{"currentSession"}
+	}
+
+	err = pc.RetrieveOne(ctx, *c.ServiceContent.SessionManager, props, &m)
 	if err != nil {
-		return nil
+		return err
+	}
+
+	if cmd.s {
+		m.SessionList = []types.UserSession{*m.CurrentSession}
 	}
 
 	now, err := methods.GetCurrentTime(ctx, c)
