@@ -68,7 +68,7 @@ brews:
   - name: govc
     ids:
       - govc
-    github:
+    tap:
       owner: govmomi
       name: homebrew-tap
     commit_author:
@@ -84,7 +84,7 @@ brews:
   - name: vcsim
     ids:
       - vcsim
-    github:
+    tap:
       owner: govmomi
       name: homebrew-tap
     commit_author:
