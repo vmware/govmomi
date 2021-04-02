@@ -50,7 +50,14 @@ load test_helper
   run govc tags.attached.ls "$tag_name"
   assert_success ""
 
-  run govc library.rm /my-content
+  run govc library.update -n new-content my-content
+  assert_success
+
+  run govc library.info new-content
+  assert_success
+  assert_matches "$id"
+
+  run govc library.rm /new-content
   assert_success
 }
 
