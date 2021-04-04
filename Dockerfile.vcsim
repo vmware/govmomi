@@ -43,4 +43,4 @@ EXPOSE 8989
 COPY vcsim /vcsim
 
 # Set entrypoint to application with container defaults
-ENTRYPOINT ["/vcsim", "-l", "0.0.0.0:8989"]
+CMD ["/vcsim", "-l", "0.0.0.0:8989"]

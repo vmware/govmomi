@@ -1,76 +1,82 @@
 ---
 project_name: govmomi
 builds:
-- id: govc
-  goos:
-    - linux
-    - darwin
-    - windows
-    - freebsd
-  goarch:
-    - amd64
-    - 386
-    - arm64
-    - mips64le
-  env:
-    - CGO_ENABLED=0
-  main: ./govc/main.go
-  binary: govc
-  flags: -compiler gc
-  ldflags: -X github.com/vmware/govmomi/govc/flags.GitVersion={{.Version}}
-- id: vcsim
-  goos:
-    - linux
-    - darwin
-    - windows
-    - freebsd
-  goarch:
-    - amd64
-    - 386
-    - arm64
-    - mips64le
-  env:
-    - CGO_ENABLED=0
-  main: ./vcsim/main.go
-  binary: vcsim
-  flags: -compiler gc
-  ldflags: -X github.com/vmware/govmomi/vcsim/flags.GitVersion={{.Version}}
+  - id: govc
+    goos: &goos-defs
+      - linux
+      - darwin
+      - windows
+      - freebsd
+    goarch: &goarch-defs
+      - amd64
+      - arm
+      - arm64
+      - mips64le
+    env:
+      - CGO_ENABLED=0
+      - PKGPATH=github.com/vmware/govmomi/govc/flags
+    flags:
+      - "-mod=vendor"
+    main: ./govc/main.go
+    binary: govc
+    ldflags:
+      - "-X {{.Env.PKGPATH}}.BuildVersion={{.Version}} -X {{.Env.PKGPATH}}.BuildCommit={{.ShortCommit}} -X {{.Env.PKGPATH}}.BuildDate={{.Date}}"
+  - id: vcsim
+    goos: *goos-defs
+    goarch: *goarch-defs
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - "-mod=vendor"
+    main: ./vcsim/main.go
+    binary: vcsim
+    ldflags:
+      - "-X main.buildVersion={{.Version}} -X main.buildCommit={{.ShortCommit}} -X main.buildDate={{.Date}}"
 archives:
-- id: govcbuild
-  builds: ['govc']
-  name_template: 'govc_{{ .Os }}_{{ .Arch }}'
-  format: gz
-  format_overrides:
-    - goos: windows
-      format: zip
-  files:
-  - none*
-- id: vcsimbuild
-  builds: ['vcsim']
-  name_template: 'vcsim_{{ .Os }}_{{ .Arch }}'
-  format: gz
-  format_overrides:
-    - goos: windows
-      format: zip
-  files:
-  - none*
+  - id: govcbuild
+    builds:
+      - govc
+    name_template: "govc_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    replacements: &replacements
+      darwin: Darwin
+      linux: Linux
+      windows: Windows
+      freebsd: FreeBSD
+      amd64: x86_64
+    format_overrides:
+      - goos: windows
+        format: zip
+  - id: vcsimbuild
+    builds:
+      - vcsim
+    name_template: "vcsim_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
+    replacements: *replacements
+    format_overrides:
+      - goos: windows
+        format: zip
+snapshot:
+  name_template: "{{ .Tag }}-next"
 checksum:
-  name_template: '{{ .ProjectName }}_{{ .Version }}_checksums.txt'
+  name_template: "checksums.txt"
 changelog:
   sort: asc
   filters:
     exclude:
-      - '^docs:'
-      - '^test:'
+      - "^docs:"
+      - "^test:"
       - Merge pull request
       - Merge branch
 brews:
   - name: govc
     ids:
-      - govc
+      - govcbuild
     tap:
       owner: govmomi
       name: homebrew-tap
+      # TODO: create token in specified tap repo, add as secret to govmomi repo and reference in release workflow
+      # token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    # enable once we do fully automated releases
+    skip_upload: true
     commit_author:
       name: Alfred the Narwhal
       email: cna-alfred@vmware.com
@@ -83,10 +89,14 @@ brews:
       bin.install "govc"
   - name: vcsim
     ids:
-      - vcsim
+      - vcsimbuild
     tap:
       owner: govmomi
       name: homebrew-tap
+      # TODO: create token in specified tap repo, add as secret to govmomi repo and reference in release workflow
+      # token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    # enable once we do fully automated releases
+    skip_upload: true
     commit_author:
       name: Alfred the Narwhal
       email: cna-alfred@vmware.com
@@ -98,23 +108,33 @@ brews:
     install: |
       bin.install "vcsim"
 dockers:
-- image_templates: 
-  - "vmware/govc:{{ .Tag }}"
-  - "vmware/govc:v{{ .Major }}"
-  - "vmware/govc:v{{ .Major }}.{{ .Minor }}"
-  - "vmware/govc:latest"
-  goos: linux
-  goarch: amd64
-  dockerfile: Dockerfile.govc
-  binaries: 
-  - govc
-- image_templates: 
-  - "vmware/vcsim:{{ .Tag }}"
-  - "vmware/vcsim:v{{ .Major }}"
-  - "vmware/vcsim:v{{ .Major }}.{{ .Minor }}"
-  - "vmware/vcsim:latest"
-  goos: linux
-  goarch: amd64
-  dockerfile: Dockerfile.vcsim
-  binaries: 
-  - vcsim
+  - image_templates:
+      - "vmware/govc:{{ .Tag }}"
+      - "vmware/govc:{{ .ShortCommit }}"
+      - "vmware/govc:latest"
+    dockerfile: Dockerfile.govc
+    ids:
+      - govc
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.url=https://github.com/vmware/govmomi"
+      - "--platform=linux/amd64"
+  - image_templates:
+      - "vmware/vcsim:{{ .Tag }}"
+      - "vmware/vcsim:{{ .ShortCommit }}"
+      - "vmware/vcsim:latest"
+    dockerfile: Dockerfile.vcsim
+    ids:
+      - vcsim
+    build_flag_templates:
+      - "--pull"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.title={{.ProjectName}}"
+      - "--label=org.opencontainers.image.revision={{.FullCommit}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.url=https://github.com/vmware/govmomi"
+      - "--platform=linux/amd64"

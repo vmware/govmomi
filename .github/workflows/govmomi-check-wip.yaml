@@ -13,7 +13,7 @@
 #  limitations under the License.
 
 # Perform "exit 1" if PR title starts with "WIP" to block accidental merges
-name: Check "WIP" in PR Title
+name: Check WIP
 
 on:
   pull_request:
@@ -21,7 +21,7 @@ on:
 
 jobs:
   WIP:
-    name: "Check WIP in title"
+    name: "Check WIP in PR title"
     runs-on: ubuntu-latest
     if: startsWith(github.event.pull_request.title, 'WIP')
     steps:

@@ -16,25 +16,38 @@ limitations under the License.
 
 package flags
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestParseVersion(t *testing.T) {
-	var v version
-	var err error
-
-	v, err = ParseVersion("5.5.5.5")
-	if err != nil {
-		t.Error(err)
+	type args struct {
+		version string
 	}
-
-	if len(v) != 4 {
-		t.Errorf("Expected %d elements, got %d", 4, len(v))
+	tests := []struct {
+		name    string
+		args    args
+		want    version
+		wantErr bool
+	}{
+		{name: "5.5.5.5", args: args{version: "5.5.5.5"}, want: version{5, 5, 5, 5}, wantErr: false},
+		{name: "0.24.0", args: args{version: "0.24.0"}, want: version{0, 24, 0}, wantErr: false},
+		{name: "v0.24.0", args: args{version: "v0.24.0"}, want: version{0, 24, 0}, wantErr: false},
+		{name: "v0.24.0-next", args: args{version: "v0.24.0-next"}, want: version{0, 24, 0}, wantErr: false},
+		{name: "0.10x", args: args{version: "0.10x"}, want: nil, wantErr: true},
 	}
-
-	for i := 0; i < len(v); i++ {
-		if v[i] != 5 {
-			t.Errorf("Expected %d, got %d", 5, v[i])
-		}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseVersion(tt.args.version)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseVersion() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseVersion() got = %v, want %v", got, tt.want)
+			}
+		})
 	}
 }
 

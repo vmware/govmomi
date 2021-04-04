@@ -277,7 +277,7 @@ func (flag *ClientFlag) ConfigureTLS(sc *soap.Client) error {
 	sc.Namespace = "urn:" + flag.vimNamespace
 	sc.Version = flag.vimVersion
 
-	sc.UserAgent = fmt.Sprintf("govc/%s", Version)
+	sc.UserAgent = fmt.Sprintf("govc/%s", strings.TrimPrefix(BuildVersion, "v"))
 
 	if err := flag.SetRootCAs(sc); err != nil {
 		return err

@@ -1,5 +1,5 @@
-[![Build](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-build.yaml/badge.svg)](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-build.yaml)
-[![Test](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-test.yaml/badge.svg)](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-test.yaml)
+[![Build](https://github.com/vmware/govmomi/actions/workflows/govmomi-build.yaml/badge.svg)](https://github.com/vmware/govmomi/actions/workflows/govmomi-build.yaml)
+[![Tests](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-tests.yaml/badge.svg)](https://github.com/vmware/govmomi/actions/workflows/govmomi-go-tests.yaml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/vmware/govmomi)](https://goreportcard.com/report/github.com/vmware/govmomi)
 [![Latest Release](https://img.shields.io/github/release/vmware/govmomi.svg?logo=github&style=flat-square)](https://github.com/vmware/govmomi/releases/latest)
 [![Go Reference](https://pkg.go.dev/badge/github.com/vmware/govmomi.svg)](https://pkg.go.dev/github.com/vmware/govmomi)

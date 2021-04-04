@@ -24,7 +24,7 @@ TAGS += netgo
 ifeq (,$(strip $(findstring -w,$(LDFLAGS))))
 LDFLAGS += -w
 endif
-BUILD_ARGS := -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -v
+BUILD_ARGS := -tags '$(TAGS)' -ldflags '$(LDFLAGS)' -mod=vendor -v
 
 $(PROGRAM):
 	CGO_ENABLED=0 go build -a $(BUILD_ARGS) -o $@

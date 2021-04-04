@@ -21,14 +21,19 @@ import (
 	"strings"
 )
 
-const Version = "0.24.0"
-
-var GitVersion string
+var (
+	BuildVersion = "v0.0.0" // govc-test requires an (arbitrary) version set
+	BuildCommit  string
+	BuildDate    string
+)
 
 type version []int
 
 func ParseVersion(s string) (version, error) {
+	// remove any trailing "v" version identifier
+	s = strings.TrimPrefix(s, "v")
 	v := make(version, 0)
+
 	ds := strings.Split(s, "-")
 	ps := strings.Split(ds[0], ".")
 	for _, p := range ps {

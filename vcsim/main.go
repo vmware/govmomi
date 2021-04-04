@@ -49,6 +49,12 @@ import (
 	_ "github.com/vmware/govmomi/vsan/simulator"
 )
 
+var (
+	buildVersion string
+	buildCommit  string
+	buildDate    string
+)
+
 func main() {
 	model := simulator.VPX()
 
@@ -107,7 +113,12 @@ func main() {
 	switch flag.Arg(0) {
 	case "uuidgen": // util-linux not installed on Travis CI
 		fmt.Println(uuid.New().String())
-		return
+		os.Exit(0)
+	case "version":
+		fmt.Printf("Build Version: %s\n", buildVersion)
+		fmt.Printf("Build Commit: %s\n", buildCommit)
+		fmt.Printf("Build Date: %s\n", buildDate)
+		os.Exit(0)
 	}
 
 	if methodDelay != "" {

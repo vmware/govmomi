@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -29,6 +30,7 @@ type version struct {
 	*flags.EmptyFlag
 
 	require string
+	long    bool // detailed govc version output
 }
 
 func init() {
@@ -37,14 +39,11 @@ func init() {
 
 func (cmd *version) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.require, "require", "", "Require govc version >= this value")
+	f.BoolVar(&cmd.long, "l", false, "Print detailed govc version information")
 }
 
 func (cmd *version) Run(ctx context.Context, f *flag.FlagSet) error {
-	ver := flags.GitVersion
-	if ver == "" {
-		ver = flags.Version
-	}
-
+	ver := strings.TrimPrefix(flags.BuildVersion, "v")
 	if cmd.require != "" {
 		v, err := flags.ParseVersion(ver)
 		if err != nil {
@@ -61,7 +60,13 @@ func (cmd *version) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	fmt.Printf("govc %s\n", ver)
+	if cmd.long {
+		fmt.Printf("Build Version: %s\n", flags.BuildVersion)
+		fmt.Printf("Build Commit: %s\n", flags.BuildCommit)
+		fmt.Printf("Build Date: %s\n", flags.BuildDate)
+	} else {
+		fmt.Printf("govc %s\n", ver)
+	}
 
 	return nil
 }
