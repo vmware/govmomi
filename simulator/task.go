@@ -29,6 +29,12 @@ import (
 const vTaskSuffix = "_Task" // vmomi suffix
 const sTaskSuffix = "Task"  // simulator suffix (avoiding golint warning)
 
+// TaskDelay applies to all tasks.
+// Names for DelayConfig.MethodDelay will differ for task and api delays. API
+// level names often look like PowerOff_Task, whereas the task name is simply
+// PowerOff.
+var TaskDelay = DelayConfig{}
+
 type Task struct {
 	mo.Task
 
@@ -101,6 +107,8 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 		var res types.AnyType
 		var err types.BaseMethodFault
 		ctx.WithLock(tr, func() {
+			// introduce a delay if requested
+			TaskDelay.delay(t.Info.Name)
 			res, err = t.Execute(t)
 		})
 

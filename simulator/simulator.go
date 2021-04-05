@@ -28,7 +28,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -38,7 +37,6 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi/find"
@@ -190,22 +188,8 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	}
 
 	// We have a valid call. Introduce a delay if requested
-	//
 	if s.delay != nil {
-		d := 0
-		if s.delay.Delay > 0 {
-			d = s.delay.Delay
-		}
-		if md, ok := s.delay.MethodDelay[method.Name]; ok {
-			d += md
-		}
-		if s.delay.DelayJitter > 0 {
-			d += int(rand.NormFloat64() * s.delay.DelayJitter * float64(d))
-		}
-		if d > 0 {
-			//fmt.Printf("Delaying method %s %d ms\n", name, d)
-			time.Sleep(time.Duration(d) * time.Millisecond)
-		}
+		s.delay.delay(method.Name)
 	}
 
 	var args, res []reflect.Value

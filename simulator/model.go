@@ -22,11 +22,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/vmware/govmomi"
@@ -895,4 +897,22 @@ func Test(f func(context.Context, *vim25.Client), model ...*Model) {
 		f(ctx, c)
 		return nil
 	}, model...)
+}
+
+// delay sleeps according to DelayConfig. If no delay specified, returns immediately.
+func (dc *DelayConfig) delay(method string) {
+	d := 0
+	if dc.Delay > 0 {
+		d = dc.Delay
+	}
+	if md, ok := dc.MethodDelay[method]; ok {
+		d += md
+	}
+	if dc.DelayJitter > 0 {
+		d += int(rand.NormFloat64() * dc.DelayJitter * float64(d))
+	}
+	if d > 0 {
+		//fmt.Printf("Delaying method %s %d ms\n", method, d)
+		time.Sleep(time.Duration(d) * time.Millisecond)
+	}
 }
