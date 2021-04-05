@@ -296,6 +296,12 @@ func (r *Registry) Update(obj mo.Reference, changes []types.PropertyChange) {
 	})
 }
 
+func (r *Registry) AtomicUpdate(ctx *Context, obj mo.Reference, changes []types.PropertyChange) {
+	r.WithLock(ctx, obj, func() {
+		r.Update(obj, changes)
+	})
+}
+
 // getEntityParent traverses up the inventory and returns the first object of type kind.
 // If no object of type kind is found, the method will panic when it reaches the
 // inventory root Folder where the Parent field is nil.

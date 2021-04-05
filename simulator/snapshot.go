@@ -141,7 +141,7 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 
 	return &methods.RemoveSnapshot_TaskBody{
 		Res: &types.RemoveSnapshot_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -161,7 +161,7 @@ func (v *VirtualMachineSnapshot) RevertToSnapshotTask(ctx *Context, req *types.R
 
 	return &methods.RevertToSnapshot_TaskBody{
 		Res: &types.RevertToSnapshot_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

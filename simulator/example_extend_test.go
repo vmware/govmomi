@@ -35,14 +35,14 @@ type BusyVM struct {
 }
 
 // Override simulator.VirtualMachine.PowerOffVMTask to inject faults
-func (vm *BusyVM) PowerOffVMTask(req *types.PowerOffVM_Task) soap.HasFault {
+func (vm *BusyVM) PowerOffVMTask(ctx *simulator.Context, req *types.PowerOffVM_Task) soap.HasFault {
 	task := simulator.CreateTask(req.This, "powerOff", func(*simulator.Task) (types.AnyType, types.BaseMethodFault) {
 		return nil, &types.TaskInProgress{}
 	})
 
 	return &methods.PowerOffVM_TaskBody{
 		Res: &types.PowerOffVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

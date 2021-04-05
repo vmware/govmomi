@@ -106,7 +106,7 @@ func (ds *Datastore) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

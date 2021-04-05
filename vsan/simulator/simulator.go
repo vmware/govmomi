@@ -57,7 +57,7 @@ func (s *StretchedClusterSystem) VSANVcConvertToStretchedCluster(ctx *simulator.
 
 	return &methods.VSANVcConvertToStretchedClusterBody{
 		Res: &types.VSANVcConvertToStretchedClusterResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

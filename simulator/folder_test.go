@@ -310,6 +310,9 @@ func TestRegisterVm(t *testing.T) {
 				t.Fatal(err)
 			}
 
+			ct := object.NewTask(c.Client, res.Returnval)
+			_ = ct.Wait(ctx)
+
 			rt := Map.Get(res.Returnval).(*Task)
 
 			if step.e != nil {
@@ -335,14 +338,15 @@ func TestRegisterVm(t *testing.T) {
 			t.Error("expected new moref")
 		}
 
-		_, _ = nvm.PowerOn(ctx)
+		onTask, _ := nvm.PowerOn(ctx)
+		_ = onTask.Wait(ctx)
 
 		steps = []struct {
 			e interface{}
 			f func()
 		}{
 			{
-				types.InvalidPowerState{}, func() { _, _ = nvm.PowerOff(ctx) },
+				types.InvalidPowerState{}, func() { offTask, _ := nvm.PowerOff(ctx); _ = offTask.Wait(ctx) },
 			},
 			{
 				nil, func() {},

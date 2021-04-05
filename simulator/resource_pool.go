@@ -225,6 +225,8 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 	})
 
 	ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
+	ctask.wait()
+
 	if ctask.Info.Error != nil {
 		body.Fault_ = Fault("", ctask.Info.Error.Fault)
 		return body
@@ -404,6 +406,7 @@ func (a *VirtualApp) CloneVAppTask(ctx *Context, req *types.CloneVApp_Task) soap
 			})
 
 			ctask := Map.Get(res.(*methods.CloneVM_TaskBody).Res.Returnval).(*Task)
+			ctask.wait()
 			if ctask.Info.Error != nil {
 				return nil, ctask.Info.Error.Fault
 			}
@@ -414,7 +417,7 @@ func (a *VirtualApp) CloneVAppTask(ctx *Context, req *types.CloneVApp_Task) soap
 
 	return &methods.CloneVApp_TaskBody{
 		Res: &types.CloneVApp_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -438,7 +441,7 @@ func (p *ResourcePool) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.H
 
 		// Remove child reference from rp
 		ctx.WithLock(parent, func() {
-			RemoveReference(ctx, &parent.ResourcePool, req.This)
+			RemoveReference(&parent.ResourcePool, req.This)
 
 			// The grandchildren become children of the parent (rp)
 			parent.ResourcePool = append(parent.ResourcePool, p.ResourcePool.ResourcePool...)
@@ -462,7 +465,7 @@ func (p *ResourcePool) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.H
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

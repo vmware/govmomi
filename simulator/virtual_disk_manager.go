@@ -81,7 +81,7 @@ func vdmCreateVirtualDisk(op types.VirtualDeviceConfigSpecFileOperation, req *ty
 	return nil
 }
 
-func (m *VirtualDiskManager) CreateVirtualDiskTask(_ *Context, req *types.CreateVirtualDisk_Task) soap.HasFault {
+func (m *VirtualDiskManager) CreateVirtualDiskTask(ctx *Context, req *types.CreateVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "createVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		if err := vdmCreateVirtualDisk(types.VirtualDeviceConfigSpecFileOperationCreate, req); err != nil {
 			return "", err
@@ -91,12 +91,12 @@ func (m *VirtualDiskManager) CreateVirtualDiskTask(_ *Context, req *types.Create
 
 	return &methods.CreateVirtualDisk_TaskBody{
 		Res: &types.CreateVirtualDisk_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (m *VirtualDiskManager) DeleteVirtualDiskTask(_ *Context, req *types.DeleteVirtualDisk_Task) soap.HasFault {
+func (m *VirtualDiskManager) DeleteVirtualDiskTask(ctx *Context, req *types.DeleteVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "deleteVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		fm := Map.FileManager()
 
@@ -116,12 +116,12 @@ func (m *VirtualDiskManager) DeleteVirtualDiskTask(_ *Context, req *types.Delete
 
 	return &methods.DeleteVirtualDisk_TaskBody{
 		Res: &types.DeleteVirtualDisk_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (m *VirtualDiskManager) MoveVirtualDiskTask(_ *Context, req *types.MoveVirtualDisk_Task) soap.HasFault {
+func (m *VirtualDiskManager) MoveVirtualDiskTask(ctx *Context, req *types.MoveVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "moveVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		fm := Map.FileManager()
 
@@ -146,12 +146,12 @@ func (m *VirtualDiskManager) MoveVirtualDiskTask(_ *Context, req *types.MoveVirt
 
 	return &methods.MoveVirtualDisk_TaskBody{
 		Res: &types.MoveVirtualDisk_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (m *VirtualDiskManager) CopyVirtualDiskTask(_ *Context, req *types.CopyVirtualDisk_Task) soap.HasFault {
+func (m *VirtualDiskManager) CopyVirtualDiskTask(ctx *Context, req *types.CopyVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "copyVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		if req.DestSpec != nil {
 			if Map.IsVPX() {
@@ -182,7 +182,7 @@ func (m *VirtualDiskManager) CopyVirtualDiskTask(_ *Context, req *types.CopyVirt
 
 	return &methods.CopyVirtualDisk_TaskBody{
 		Res: &types.CopyVirtualDisk_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

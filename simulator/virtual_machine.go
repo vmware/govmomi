@@ -169,8 +169,8 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	return vm, nil
 }
 
-func (o *VirtualMachine) RenameTask(r *types.Rename_Task) soap.HasFault {
-	return RenameTask(o, r)
+func (o *VirtualMachine) RenameTask(ctx *Context, r *types.Rename_Task) soap.HasFault {
+	return RenameTask(ctx, o, r)
 }
 
 func (*VirtualMachine) Reload(*types.Reload) soap.HasFault {
@@ -1246,10 +1246,12 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 					if dc == nil {
 						continue // parent was destroyed
 					}
-					dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
+					res := dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
 						Name:       file,
 						Datacenter: &dc.Self,
 					})
+					ctask := Map.Get(res.(*methods.DeleteVirtualDisk_TaskBody).Res.Returnval).(*Task)
+					ctask.wait()
 				}
 			}
 			Map.Update(vm, []types.PropertyChange{
@@ -1478,7 +1480,7 @@ func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) s
 
 	return &methods.PowerOnVM_TaskBody{
 		Res: &types.PowerOnVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1489,7 +1491,7 @@ func (vm *VirtualMachine) PowerOffVMTask(ctx *Context, c *types.PowerOffVM_Task)
 
 	return &methods.PowerOffVM_TaskBody{
 		Res: &types.PowerOffVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1500,7 +1502,7 @@ func (vm *VirtualMachine) SuspendVMTask(ctx *Context, req *types.SuspendVM_Task)
 
 	return &methods.SuspendVM_TaskBody{
 		Res: &types.SuspendVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1509,18 +1511,21 @@ func (vm *VirtualMachine) ResetVMTask(ctx *Context, req *types.ResetVM_Task) soa
 	task := CreateTask(vm, "reset", func(task *Task) (types.AnyType, types.BaseMethodFault) {
 		res := vm.PowerOffVMTask(ctx, &types.PowerOffVM_Task{This: vm.Self})
 		ctask := Map.Get(res.(*methods.PowerOffVM_TaskBody).Res.Returnval).(*Task)
+		ctask.wait()
 		if ctask.Info.Error != nil {
 			return nil, ctask.Info.Error.Fault
 		}
 
-		_ = vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: vm.Self})
+		res = vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: vm.Self})
+		ctask = Map.Get(res.(*methods.PowerOnVM_TaskBody).Res.Returnval).(*Task)
+		ctask.wait()
 
 		return nil, nil
 	})
 
 	return &methods.ResetVM_TaskBody{
 		Res: &types.ResetVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1566,12 +1571,12 @@ func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Tas
 
 	return &methods.ReconfigVM_TaskBody{
 		Res: &types.ReconfigVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (vm *VirtualMachine) UpgradeVMTask(req *types.UpgradeVM_Task) soap.HasFault {
+func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task) soap.HasFault {
 	body := &methods.UpgradeVM_TaskBody{}
 
 	task := CreateTask(vm, "upgradeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
@@ -1584,7 +1589,7 @@ func (vm *VirtualMachine) UpgradeVMTask(req *types.UpgradeVM_Task) soap.HasFault
 	})
 
 	body.Res = &types.UpgradeVM_TaskResponse{
-		Returnval: task.Run(),
+		Returnval: task.Run(ctx),
 	}
 
 	return body
@@ -1614,7 +1619,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 		// Delete VM files from the datastore (ignoring result for now)
 		m := Map.FileManager()
 
-		_ = m.DeleteDatastoreFileTask(&types.DeleteDatastoreFile_Task{
+		_ = m.DeleteDatastoreFileTask(ctx, &types.DeleteDatastoreFile_Task{
 			This:       m.Reference(),
 			Name:       vm.Config.Files.LogDirectory,
 			Datacenter: &dc.Self,
@@ -1627,7 +1632,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1768,6 +1773,8 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			return nil, ctask.Info.Error.Fault
 		}
 
+		ctask.wait()
+
 		ref := ctask.Info.Result.(types.ManagedObjectReference)
 		clone := Map.Get(ref).(*VirtualMachine)
 		clone.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Location.DeviceChange})
@@ -1789,7 +1796,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 
 	return &methods.CloneVM_TaskBody{
 		Res: &types.CloneVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1838,7 +1845,7 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 	return &methods.RelocateVM_TaskBody{
 		Res: &types.RelocateVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1919,7 +1926,7 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 	ctx.postEvent(&types.CustomizationSucceeded{CustomizationEvent: event})
 }
 
-func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasFault {
+func (vm *VirtualMachine) CustomizeVMTask(ctx *Context, req *types.CustomizeVM_Task) soap.HasFault {
 	task := CreateTask(vm, "customizeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
 			return nil, &types.InvalidPowerState{
@@ -1945,12 +1952,12 @@ func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasF
 
 	return &methods.CustomizeVM_TaskBody{
 		Res: &types.CustomizeVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soap.HasFault {
+func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnapshot_Task) soap.HasFault {
 	task := CreateTask(vm, "createSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
 
@@ -2001,12 +2008,12 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 
 	return &methods.CreateSnapshot_TaskBody{
 		Res: &types.CreateSnapshot_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrentSnapshot_Task) soap.HasFault {
+func (vm *VirtualMachine) RevertToCurrentSnapshotTask(ctx *Context, req *types.RevertToCurrentSnapshot_Task) soap.HasFault {
 	body := &methods.RevertToCurrentSnapshot_TaskBody{}
 
 	if vm.Snapshot == nil || vm.Snapshot.CurrentSnapshot == nil {
@@ -2020,7 +2027,7 @@ func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrent
 	})
 
 	body.Res = &types.RevertToCurrentSnapshot_TaskResponse{
-		Returnval: task.Run(),
+		Returnval: task.Run(ctx),
 	}
 
 	return body
@@ -2048,7 +2055,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 
 	return &methods.RemoveAllSnapshots_TaskBody{
 		Res: &types.RemoveAllSnapshots_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

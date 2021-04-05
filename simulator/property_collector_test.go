@@ -446,9 +446,11 @@ func TestIncrementalWaitForUpdates(t *testing.T) {
 
 	wg.Wait() // wait for 1st enter
 	wg.Add(1)
-	_, _ = vm.PowerOff(ctx)
-	_, _ = vm.Destroy(ctx)
+	task, _ := vm.PowerOff(ctx)
+	_ = task.Wait(ctx)
+	task, _ = vm.Destroy(ctx)
 	wg.Wait() // wait for Delete to be reported
+	task.Wait(ctx)
 }
 
 func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {

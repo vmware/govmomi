@@ -23,7 +23,7 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-func RenameTask(e mo.Entity, r *types.Rename_Task) soap.HasFault {
+func RenameTask(ctx *Context, e mo.Entity, r *types.Rename_Task) soap.HasFault {
 	task := CreateTask(e, "rename", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		obj := Map.Get(r.This).(mo.Entity).Entity()
 
@@ -40,7 +40,7 @@ func RenameTask(e mo.Entity, r *types.Rename_Task) soap.HasFault {
 
 	return &methods.Rename_TaskBody{
 		Res: &types.Rename_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

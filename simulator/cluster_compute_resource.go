@@ -36,8 +36,8 @@ type ClusterComputeResource struct {
 	ruleKey int32
 }
 
-func (c *ClusterComputeResource) RenameTask(req *types.Rename_Task) soap.HasFault {
-	return RenameTask(c, req)
+func (c *ClusterComputeResource) RenameTask(ctx *Context, req *types.Rename_Task) soap.HasFault {
+	return RenameTask(ctx, c, req)
 }
 
 type addHost struct {
@@ -67,10 +67,10 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	return host.Reference(), nil
 }
 
-func (c *ClusterComputeResource) AddHostTask(add *types.AddHost_Task) soap.HasFault {
+func (c *ClusterComputeResource) AddHostTask(ctx *Context, add *types.AddHost_Task) soap.HasFault {
 	return &methods.AddHost_TaskBody{
 		Res: &types.AddHost_TaskResponse{
-			Returnval: NewTask(&addHost{c, add}).Run(),
+			Returnval: NewTask(&addHost{c, add}).Run(ctx),
 		},
 	}
 }
@@ -309,7 +309,7 @@ func (c *ClusterComputeResource) updateOverridesVmOrchestration(cfg *types.Clust
 	return nil
 }
 
-func (c *ClusterComputeResource) ReconfigureComputeResourceTask(req *types.ReconfigureComputeResource_Task) soap.HasFault {
+func (c *ClusterComputeResource) ReconfigureComputeResourceTask(ctx *Context, req *types.ReconfigureComputeResource_Task) soap.HasFault {
 	task := CreateTask(c, "reconfigureCluster", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		spec, ok := req.Spec.(*types.ClusterConfigSpecEx)
 		if !ok {
@@ -335,7 +335,7 @@ func (c *ClusterComputeResource) ReconfigureComputeResourceTask(req *types.Recon
 
 	return &methods.ReconfigureComputeResource_TaskBody{
 		Res: &types.ReconfigureComputeResource_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

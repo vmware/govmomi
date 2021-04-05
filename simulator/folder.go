@@ -184,7 +184,7 @@ func (f *Folder) AddStandaloneHostTask(ctx *Context, a *types.AddStandaloneHost_
 
 	if folderHasChildType(&f.Folder, "ComputeResource") && folderHasChildType(&f.Folder, "Folder") {
 		r.Res = &types.AddStandaloneHost_TaskResponse{
-			Returnval: NewTask(&addStandaloneHost{f, ctx, a}).Run(),
+			Returnval: NewTask(&addStandaloneHost{f, ctx, a}).Run(ctx),
 		}
 	} else {
 		r.Fault_ = f.typeNotSupported()
@@ -262,10 +262,22 @@ func (f *Folder) CreateStoragePod(ctx *Context, c *types.CreateStoragePod) soap.
 }
 
 func (p *StoragePod) MoveIntoFolderTask(ctx *Context, c *types.MoveIntoFolder_Task) soap.HasFault {
-	f := &Folder{Folder: p.Folder}
-	res := f.MoveIntoFolderTask(ctx, c)
-	p.ChildEntity = append(p.ChildEntity, f.ChildEntity...)
-	return res
+	task := CreateTask(p, "moveIntoFolder", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		f := &Folder{Folder: p.Folder}
+		id := f.MoveIntoFolderTask(ctx, c).(*methods.MoveIntoFolder_TaskBody).Res.Returnval
+		ftask := Map.Get(id).(*Task)
+		ftask.wait()
+		if ftask.Info.Error != nil {
+			return nil, ftask.Info.Error.Fault
+		}
+		p.ChildEntity = append(p.ChildEntity, f.ChildEntity...)
+		return nil, nil
+	})
+	return &methods.MoveIntoFolder_TaskBody{
+		Res: &types.MoveIntoFolder_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
 }
 
 func (f *Folder) CreateDatacenter(ctx *Context, c *types.CreateDatacenter) soap.HasFault {
@@ -441,7 +453,7 @@ func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 func (f *Folder) CreateVMTask(ctx *Context, c *types.CreateVM_Task) soap.HasFault {
 	return &methods.CreateVM_TaskBody{
 		Res: &types.CreateVM_TaskResponse{
-			Returnval: NewTask(&createVM{f, ctx, c, false}).Run(),
+			Returnval: NewTask(&createVM{f, ctx, c, false}).Run(ctx),
 		},
 	}
 }
@@ -512,7 +524,7 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		},
 	})
 
-	create.Run()
+	create.RunBlocking(c.ctx)
 
 	if create.Info.Error != nil {
 		return nil, create.Info.Error.Fault
@@ -524,7 +536,7 @@ func (c *registerVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 func (f *Folder) RegisterVMTask(ctx *Context, c *types.RegisterVM_Task) soap.HasFault {
 	return &methods.RegisterVM_TaskBody{
 		Res: &types.RegisterVM_TaskResponse{
-			Returnval: NewTask(&registerVM{f, ctx, c}).Run(),
+			Returnval: NewTask(&registerVM{f, ctx, c}).Run(ctx),
 		},
 	}
 }
@@ -549,7 +561,7 @@ func (f *Folder) MoveIntoFolderTask(ctx *Context, c *types.MoveIntoFolder_Task) 
 
 	return &methods.MoveIntoFolder_TaskBody{
 		Res: &types.MoveIntoFolder_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -646,13 +658,13 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 
 	return &methods.CreateDVS_TaskBody{
 		Res: &types.CreateDVS_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (f *Folder) RenameTask(r *types.Rename_Task) soap.HasFault {
-	return RenameTask(f, r)
+func (f *Folder) RenameTask(ctx *Context, r *types.Rename_Task) soap.HasFault {
+	return RenameTask(ctx, f, r)
 }
 
 func (f *Folder) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
@@ -676,6 +688,7 @@ func (f *Folder) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFaul
 				}).(*methods.Destroy_TaskBody).Res.Returnval
 
 				t := Map.Get(id).(*Task)
+				t.wait()
 				if t.Info.Error != nil {
 					fault = t.Info.Error.Fault // For example, can't destroy a powered on VM
 				}
@@ -692,7 +705,7 @@ func (f *Folder) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFaul
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

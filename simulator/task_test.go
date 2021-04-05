@@ -49,7 +49,7 @@ func TestNewTask(t *testing.T) {
 		t.Errorf("descriptionId=%s", info.DescriptionId)
 	}
 
-	task.Run()
+	task.RunBlocking(SpoofContext())
 
 	if info.State != types.TaskInfoStateSuccess {
 		t.Fail()
@@ -57,7 +57,8 @@ func TestNewTask(t *testing.T) {
 
 	add.fault = &types.ManagedObjectNotFound{}
 
-	task.Run()
+	task.Run(SpoofContext())
+	task.wait()
 
 	if info.State != types.TaskInfoStateError {
 		t.Fail()

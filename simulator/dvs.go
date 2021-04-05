@@ -152,12 +152,12 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 
 	return &methods.AddDVPortgroup_TaskBody{
 		Res: &types.AddDVPortgroup_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (s *DistributedVirtualSwitch) ReconfigureDvsTask(req *types.ReconfigureDvs_Task) soap.HasFault {
+func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.ReconfigureDvs_Task) soap.HasFault {
 	task := CreateTask(s, "reconfigureDvs", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		spec := req.Spec.GetDVSConfigSpec()
 
@@ -229,7 +229,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(req *types.ReconfigureDvs_
 
 	return &methods.ReconfigureDvs_TaskBody{
 		Res: &types.ReconfigureDvs_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -251,7 +251,7 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

@@ -237,12 +237,12 @@ func (h *HostSystem) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (h *HostSystem) EnterMaintenanceModeTask(spec *types.EnterMaintenanceMode_Task) soap.HasFault {
+func (h *HostSystem) EnterMaintenanceModeTask(ctx *Context, spec *types.EnterMaintenanceMode_Task) soap.HasFault {
 	task := CreateTask(h, "enterMaintenanceMode", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		h.Runtime.InMaintenanceMode = true
 		return nil, nil
@@ -250,12 +250,12 @@ func (h *HostSystem) EnterMaintenanceModeTask(spec *types.EnterMaintenanceMode_T
 
 	return &methods.EnterMaintenanceMode_TaskBody{
 		Res: &types.EnterMaintenanceMode_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (h *HostSystem) ExitMaintenanceModeTask(spec *types.ExitMaintenanceMode_Task) soap.HasFault {
+func (h *HostSystem) ExitMaintenanceModeTask(ctx *Context, spec *types.ExitMaintenanceMode_Task) soap.HasFault {
 	task := CreateTask(h, "exitMaintenanceMode", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		h.Runtime.InMaintenanceMode = false
 		return nil, nil
@@ -263,7 +263,7 @@ func (h *HostSystem) ExitMaintenanceModeTask(spec *types.ExitMaintenanceMode_Tas
 
 	return &methods.ExitMaintenanceMode_TaskBody{
 		Res: &types.ExitMaintenanceMode_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

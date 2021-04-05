@@ -505,7 +505,8 @@ func (m *Model) Create() error {
 				}},
 			}
 
-			_, _ = dvs.Reconfigure(ctx, config)
+			task, _ = dvs.Reconfigure(ctx, config)
+			_, _ = task.WaitForResult(context.Background(), nil)
 		}
 
 		return host, nil
@@ -559,7 +560,8 @@ func (m *Model) Create() error {
 				vm := object.NewVirtualMachine(client, info.Result.(types.ManagedObjectReference))
 
 				if m.Autostart {
-					_, _ = vm.PowerOn(ctx)
+					task, _ = vm.PowerOn(ctx)
+					_, _ = task.WaitForResult(ctx, nil)
 				}
 			}
 
@@ -829,11 +831,13 @@ func (m *Model) createLocalDatastore(dc string, name string, hosts []*object.Hos
 // Remove cleans up items created by the Model, such as local datastore directories
 func (m *Model) Remove() {
 	// Remove associated vm containers, if any
+	Map.m.Lock()
 	for _, obj := range Map.objects {
 		if vm, ok := obj.(*VirtualMachine); ok {
 			vm.run.remove(vm)
 		}
 	}
+	Map.m.Unlock()
 
 	for _, dir := range m.dirs {
 		_ = os.RemoveAll(dir)
