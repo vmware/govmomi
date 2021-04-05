@@ -29,7 +29,7 @@ import (
 
 func TestClusterESX(t *testing.T) {
 	content := esx.ServiceContent
-	s := New(NewServiceInstance(content, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), content, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -55,7 +55,7 @@ func TestClusterESX(t *testing.T) {
 
 func TestClusterVC(t *testing.T) {
 	content := vpx.ServiceContent
-	s := New(NewServiceInstance(content, vpx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), content, vpx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()

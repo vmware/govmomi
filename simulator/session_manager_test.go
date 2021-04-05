@@ -236,7 +236,7 @@ func TestSessionManagerAuth(t *testing.T) {
 func TestSessionManagerLoginExtension(t *testing.T) {
 	ctx := context.Background()
 
-	s := New(NewServiceInstance(vpx.ServiceContent, vpx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), vpx.ServiceContent, vpx.RootFolder))
 	s.TLS = new(tls.Config)
 	ts := s.NewServer()
 	defer ts.Close()

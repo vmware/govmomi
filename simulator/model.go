@@ -307,7 +307,7 @@ func (m *Model) resolveReferences(ctx *Context) error {
 	if !ok {
 		// Need to have at least 1 Datacenter
 		root := Map.Get(Map.content().RootFolder).(*Folder)
-		ref := root.CreateDatacenter(internalContext, &types.CreateDatacenter{
+		ref := root.CreateDatacenter(ctx, &types.CreateDatacenter{
 			This: root.Self,
 			Name: "DC0",
 		}).(*methods.CreateDatacenterBody).Res.Returnval
@@ -381,9 +381,27 @@ func (m *Model) loadMethod(obj mo.Reference, dir string) error {
 	return nil
 }
 
+// When simulator code needs to call other simulator code, it typically passes whatever
+// context is associated with the request it's servicing.
+// Model code isn't servicing a request, but still needs a context, so we spoof
+// one for the purposes of calling simulator code.
+// Test code also tends to do this.
+func SpoofContext() *Context {
+	return &Context{
+		Context: context.Background(),
+		Session: &Session{
+			UserSession: types.UserSession{
+				Key: uuid.New().String(),
+			},
+			Registry: NewRegistry(),
+		},
+		Map: Map,
+	}
+}
+
 // Load Model from the given directory, as created by the 'govc object.save' command.
 func (m *Model) Load(dir string) error {
-	ctx := internalContext
+	ctx := SpoofContext()
 	var s *ServiceInstance
 
 	err := filepath.Walk(dir, func(path string, info os.FileInfo, err error) error {
@@ -415,7 +433,7 @@ func (m *Model) Load(dir string) error {
 		}
 
 		if s == nil {
-			s = NewServiceInstance(m.ServiceContent, m.RootFolder)
+			s = NewServiceInstance(ctx, m.ServiceContent, m.RootFolder)
 		}
 
 		obj, err := loadObject(content)
@@ -443,8 +461,8 @@ func (m *Model) Load(dir string) error {
 
 // Create populates the Model with the given ModelConfig
 func (m *Model) Create() error {
-	ctx := internalContext
-	m.Service = New(NewServiceInstance(m.ServiceContent, m.RootFolder))
+	ctx := SpoofContext()
+	m.Service = New(NewServiceInstance(ctx, m.ServiceContent, m.RootFolder))
 
 	client := m.Service.client
 	root := object.NewRootFolder(client)
@@ -665,7 +683,7 @@ func (m *Model) Create() error {
 		for i := 0; i < m.OpaqueNetwork; i++ {
 			var summary types.OpaqueNetworkSummary
 			summary.Name = m.fmtName(dcName+"_NSX", i)
-			err := networkFolder.AddOpaqueNetwork(summary)
+			err := networkFolder.AddOpaqueNetwork(ctx, summary)
 			if err != nil {
 				return err
 			}

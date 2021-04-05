@@ -30,7 +30,7 @@ import (
 func TestHostNetworkSystem(t *testing.T) {
 	ctx := context.Background()
 
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 
 	host := object.NewHostSystem(s.client, esx.HostSystem.Reference())
 

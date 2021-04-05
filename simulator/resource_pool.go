@@ -438,7 +438,7 @@ func (p *ResourcePool) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.H
 
 		// Remove child reference from rp
 		ctx.WithLock(parent, func() {
-			RemoveReference(&parent.ResourcePool, req.This)
+			RemoveReference(ctx, &parent.ResourcePool, req.This)
 
 			// The grandchildren become children of the parent (rp)
 			parent.ResourcePool = append(parent.ResourcePool, p.ResourcePool.ResourcePool...)
@@ -448,14 +448,14 @@ func (p *ResourcePool) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.H
 		vms := p.ResourcePool.Vm
 		for _, ref := range vms {
 			vm := ctx.Map.Get(ref).(*VirtualMachine)
-			ctx.Map.WithLock(vm, func() { vm.ResourcePool = &parent.Self })
+			ctx.WithLock(vm, func() { vm.ResourcePool = &parent.Self })
 		}
 
 		ctx.WithLock(parent, func() {
 			parent.Vm = append(parent.Vm, vms...)
 		})
 
-		ctx.Map.Remove(req.This)
+		ctx.Map.Remove(ctx, req.This)
 
 		return nil, nil
 	})

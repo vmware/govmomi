@@ -114,7 +114,7 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 		var changes []types.PropertyChange
 
 		vm := Map.Get(v.Vm).(*VirtualMachine)
-		Map.WithLock(vm, func() {
+		ctx.WithLock(vm, func() {
 			if vm.Snapshot.CurrentSnapshot != nil && *vm.Snapshot.CurrentSnapshot == req.This {
 				parent := findParentSnapshotInTree(vm.Snapshot.RootSnapshotList, req.This)
 				changes = append(changes, types.PropertyChange{Name: "snapshot.currentSnapshot", Val: parent})
@@ -134,7 +134,7 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 			Map.Update(vm, changes)
 		})
 
-		Map.Remove(req.This)
+		Map.Remove(ctx, req.This)
 
 		return nil, nil
 	})
@@ -146,11 +146,11 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 	}
 }
 
-func (v *VirtualMachineSnapshot) RevertToSnapshotTask(req *types.RevertToSnapshot_Task) soap.HasFault {
+func (v *VirtualMachineSnapshot) RevertToSnapshotTask(ctx *Context, req *types.RevertToSnapshot_Task) soap.HasFault {
 	task := CreateTask(v.Vm, "revertToSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		vm := Map.Get(v.Vm).(*VirtualMachine)
 
-		Map.WithLock(vm, func() {
+		ctx.WithLock(vm, func() {
 			Map.Update(vm, []types.PropertyChange{
 				{Name: "snapshot.currentSnapshot", Val: v.Self},
 			})

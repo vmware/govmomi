@@ -43,7 +43,7 @@ func TestRename(t *testing.T) {
 
 	f1 := Map.Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"
 
-	id := vmFolder.CreateFolder(internalContext, &types.CreateFolder{
+	id := vmFolder.CreateFolder(SpoofContext(), &types.CreateFolder{
 		This: vmFolder.Reference(),
 		Name: "F2",
 	}).(*methods.CreateFolderBody).Res.Returnval
@@ -54,12 +54,13 @@ func TestRename(t *testing.T) {
 	name := f1.Name
 
 	for _, expect := range states {
-		id = f2.RenameTask(&types.Rename_Task{
+		id = f2.RenameTask(SpoofContext(), &types.Rename_Task{
 			This:    f2.Reference(),
 			NewName: name,
 		}).(*methods.Rename_TaskBody).Res.Returnval
 
 		task := Map.Get(id).(*Task)
+		task.wait()
 
 		if task.Info.State != expect {
 			t.Errorf("state=%s", task.Info.State)

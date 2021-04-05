@@ -132,7 +132,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 				pg.Host = append(pg.Host, h)
 
 				host := Map.Get(h).(*HostSystem)
-				Map.AppendReference(host, &host.Network, pg.Reference())
+				Map.AppendReference(ctx, host, &host.Network, pg.Reference())
 
 				parent := Map.Get(*host.HostSystem.Parent)
 				computeNetworks := append(hostParent(&host.HostSystem).Network, pg.Reference())

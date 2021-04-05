@@ -214,7 +214,7 @@ func TestServeHTTP(t *testing.T) {
 	}
 
 	for _, config := range configs {
-		s := New(NewServiceInstance(config.content, config.folder))
+		s := New(NewServiceInstance(SpoofContext(), config.content, config.folder))
 		ts := s.NewServer()
 		defer ts.Close()
 
@@ -302,7 +302,7 @@ func TestServeAbout(t *testing.T) {
 }
 
 func TestServeHTTPS(t *testing.T) {
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 	s.TLS = new(tls.Config)
 	ts := s.NewServer()
 	defer ts.Close()
@@ -396,7 +396,7 @@ type errorNoSuchMethod struct {
 }
 
 func TestServeHTTPErrors(t *testing.T) {
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -429,7 +429,7 @@ func TestServeHTTPErrors(t *testing.T) {
 	}
 
 	// cover the no such object path
-	Map.Remove(vim25.ServiceInstance)
+	Map.Remove(SpoofContext(), vim25.ServiceInstance)
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")

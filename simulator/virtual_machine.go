@@ -150,7 +150,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	// Add the default devices
 	defaults.DeviceChange, _ = object.VirtualDeviceList(esx.VirtualDevice).ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 
-	err := vm.configure(&defaults)
+	err := vm.configure(ctx, &defaults)
 	if err != nil {
 		return vm, err
 	}
@@ -378,7 +378,7 @@ func validateGuestID(id string) types.BaseMethodFault {
 	return &types.InvalidArgument{InvalidProperty: "configSpec.guestId"}
 }
 
-func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	vm.apply(spec)
 
 	if spec.MemoryAllocation != nil {
@@ -405,7 +405,7 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 		}
 	}
 
-	return vm.configureDevices(spec)
+	return vm.configureDevices(ctx, spec)
 }
 
 func getVMFileType(fileName string) types.VirtualMachineFileLayoutExFileType {
@@ -916,7 +916,7 @@ func (vm *VirtualMachine) logPrintf(format string, v ...interface{}) {
 	_ = f.Close()
 }
 
-func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
+func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
 	vm.apply(spec)
 
 	if spec.Version != "" {
@@ -951,7 +951,7 @@ func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register 
 
 	vm.logPrintf("created")
 
-	return vm.configureDevices(spec)
+	return vm.configureDevices(ctx, spec)
 }
 
 var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
@@ -1042,7 +1042,7 @@ func (vm *VirtualMachine) validateSwitchMembers(id string) types.BaseMethodFault
 	return nil
 }
 
-func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
 	device := spec.Device
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
@@ -1142,7 +1142,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			info.Datastore = &ds.Self
 
 			// XXX: compare disk size and free space until windows stat is supported
-			Map.WithLock(ds, func() {
+			ctx.WithLock(ds, func() {
 				ds.Summary.FreeSpace -= getDiskSize(x)
 				ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
 			})
@@ -1212,7 +1212,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 	return nil
 }
 
-func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) object.VirtualDeviceList {
+func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) object.VirtualDeviceList {
 	key := spec.Device.GetVirtualDevice().Key
 
 	for i, d := range devices {
@@ -1234,7 +1234,7 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					p, _ := parseDatastorePath(file)
 					ds := vm.findDatastore(p.Datastore)
 
-					Map.WithLock(ds, func() {
+					ctx.WithLock(ds, func() {
 						ds.Summary.FreeSpace += getDiskSize(device)
 						ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
 					})
@@ -1246,7 +1246,7 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					if dc == nil {
 						continue // parent was destroyed
 					}
-					dm.DeleteVirtualDiskTask(internalContext, &types.DeleteVirtualDisk_Task{
+					dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
 						Name:       file,
 						Datacenter: &dc.Self,
 					})
@@ -1319,7 +1319,7 @@ func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.Bas
 	}
 }
 
-func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 
 	for i, change := range spec.DeviceChange {
@@ -1358,7 +1358,7 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 			}
 
 			key := device.Key
-			err := vm.configureDevice(devices, dspec)
+			err := vm.configureDevice(ctx, devices, dspec)
 			if err != nil {
 				return err
 			}
@@ -1379,17 +1379,17 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 			if rspec.Device == nil {
 				return invalid
 			}
-			devices = vm.removeDevice(devices, &rspec)
+			devices = vm.removeDevice(ctx, devices, &rspec)
 			device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
 
-			err := vm.configureDevice(devices, dspec)
+			err := vm.configureDevice(ctx, devices, dspec)
 			if err != nil {
 				return err
 			}
 
 			devices = append(devices, dspec.Device)
 		case types.VirtualDeviceConfigSpecOperationRemove:
-			devices = vm.removeDevice(devices, dspec)
+			devices = vm.removeDevice(ctx, devices, dspec)
 		}
 	}
 
@@ -1559,7 +1559,7 @@ func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Tas
 			}
 		}
 
-		err := vm.configure(&req.Spec)
+		err := vm.configure(ctx, &req.Spec)
 
 		return nil, err
 	})
@@ -1609,7 +1609,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 		// Remove all devices
 		devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 		spec, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationRemove)
-		vm.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: spec})
+		vm.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: spec})
 
 		// Delete VM files from the datastore (ignoring result for now)
 		m := Map.FileManager()
@@ -1649,20 +1649,20 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	}
 
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
-	Map.RemoveReference(host, &host.Vm, vm.Self)
+	Map.RemoveReference(ctx, host, &host.Vm, vm.Self)
 
 	if vm.ResourcePool != nil {
 		switch pool := Map.Get(*vm.ResourcePool).(type) {
 		case *ResourcePool:
-			Map.RemoveReference(pool, &pool.Vm, vm.Self)
+			Map.RemoveReference(ctx, pool, &pool.Vm, vm.Self)
 		case *VirtualApp:
-			Map.RemoveReference(pool, &pool.Vm, vm.Self)
+			Map.RemoveReference(ctx, pool, &pool.Vm, vm.Self)
 		}
 	}
 
 	for i := range vm.Datastore {
 		ds := Map.Get(vm.Datastore[i]).(*Datastore)
-		Map.RemoveReference(ds, &ds.Vm, vm.Self)
+		Map.RemoveReference(ctx, ds, &ds.Vm, vm.Self)
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event()})
@@ -1770,9 +1770,9 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 
 		ref := ctask.Info.Result.(types.ManagedObjectReference)
 		clone := Map.Get(ref).(*VirtualMachine)
-		clone.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Location.DeviceChange})
+		clone.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Location.DeviceChange})
 		if req.Spec.Config != nil && req.Spec.Config.DeviceChange != nil {
-			clone.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Config.DeviceChange})
+			clone.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Config.DeviceChange})
 		}
 
 		if req.Spec.Template {
@@ -1800,7 +1800,7 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 		if ref := req.Spec.Datastore; ref != nil {
 			ds := Map.Get(*ref).(*Datastore)
-			Map.RemoveReference(ds, &ds.Vm, *ref)
+			Map.RemoveReference(ctx, ds, &ds.Vm, *ref)
 
 			// TODO: migrate vm.Config.Files, vm.Summary.Config.VmPathName, vm.Layout and vm.LayoutEx
 
@@ -1809,14 +1809,14 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 		if ref := req.Spec.Pool; ref != nil {
 			pool := Map.Get(*ref).(*ResourcePool)
-			Map.RemoveReference(pool, &pool.Vm, *ref)
+			Map.RemoveReference(ctx, pool, &pool.Vm, *ref)
 
 			changes = append(changes, types.PropertyChange{Name: "resourcePool", Val: ref})
 		}
 
 		if ref := req.Spec.Host; ref != nil {
 			host := Map.Get(*ref).(*HostSystem)
-			Map.RemoveReference(host, &host.Vm, *ref)
+			Map.RemoveReference(ctx, host, &host.Vm, *ref)
 
 			changes = append(changes,
 				types.PropertyChange{Name: "runtime.host", Val: ref},
@@ -2040,7 +2040,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 
 		for _, ref := range refs {
 			Map.Get(ref).(*VirtualMachineSnapshot).removeSnapshotFiles(ctx)
-			Map.Remove(ref)
+			Map.Remove(ctx, ref)
 		}
 
 		return nil, nil

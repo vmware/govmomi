@@ -93,9 +93,9 @@ func (ds *Datastore) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 
 		for _, mount := range ds.Host {
 			host := Map.Get(mount.Key).(*HostSystem)
-			Map.RemoveReference(host, &host.Datastore, ds.Self)
+			Map.RemoveReference(ctx, host, &host.Datastore, ds.Self)
 			parent := hostParent(&host.HostSystem)
-			Map.RemoveReference(parent, &parent.Datastore, ds.Self)
+			Map.RemoveReference(ctx, parent, &parent.Datastore, ds.Self)
 		}
 
 		p, _ := asFolderMO(Map.Get(*ds.Parent))

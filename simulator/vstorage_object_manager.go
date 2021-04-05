@@ -279,7 +279,7 @@ func (m *VcenterVStorageObjectManager) CreateDiskTask(req *types.CreateDisk_Task
 	}
 }
 
-func (m *VcenterVStorageObjectManager) DeleteVStorageObjectTask(req *types.DeleteVStorageObject_Task) soap.HasFault {
+func (m *VcenterVStorageObjectManager) DeleteVStorageObjectTask(ctx *Context, req *types.DeleteVStorageObject_Task) soap.HasFault {
 	task := CreateTask(m, "deleteDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		obj := m.object(req.Datastore, req.Id)
 		if obj == nil {
@@ -290,7 +290,7 @@ func (m *VcenterVStorageObjectManager) DeleteVStorageObjectTask(req *types.Delet
 		ds := Map.Get(req.Datastore).(*Datastore)
 		dc := Map.getEntityDatacenter(ds)
 		dm := Map.VirtualDiskManager()
-		dm.DeleteVirtualDiskTask(internalContext, &types.DeleteVirtualDisk_Task{
+		dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
 			Name:       backing.FilePath,
 			Datacenter: &dc.Self,
 		})

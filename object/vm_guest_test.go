@@ -61,7 +61,7 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 		wg.Wait()
 
 		wg.Add(1)
-		simulator.Map.WithLock(obj.Reference(), func() {
+		simulator.Map.WithLock(simulator.SpoofContext(), obj.Reference(), func() {
 			simulator.Map.Update(obj, []types.PropertyChange{
 				{Name: "guest.ipAddress", Val: "10.0.0.1"},
 			})

@@ -155,7 +155,7 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 
 		for _, ref := range req.Vm {
 			vm := Map.Get(ref).(*VirtualMachine)
-			Map.WithLock(vm, func() {
+			ctx.WithLock(vm, func() {
 				vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{})
 			})
 		}

@@ -31,11 +31,11 @@ type CustomFieldsManager struct {
 
 // Iterates through all entities of passed field type;
 // Removes found field from their custom field properties.
-func entitiesFieldRemove(field types.CustomFieldDef) {
+func entitiesFieldRemove(ctx *Context, field types.CustomFieldDef) {
 	entities := Map.All(field.ManagedObjectType)
 	for _, e := range entities {
 		entity := e.Entity()
-		Map.WithLock(entity, func() {
+		ctx.WithLock(entity, func() {
 			aFields := entity.AvailableField
 			for i, aField := range aFields {
 				if aField.Key == field.Key {
@@ -65,11 +65,11 @@ func entitiesFieldRemove(field types.CustomFieldDef) {
 
 // Iterates through all entities of passed field type;
 // Renames found field in entity's AvailableField property.
-func entitiesFieldRename(field types.CustomFieldDef) {
+func entitiesFieldRename(ctx *Context, field types.CustomFieldDef) {
 	entities := Map.All(field.ManagedObjectType)
 	for _, e := range entities {
 		entity := e.Entity()
-		Map.WithLock(entity, func() {
+		ctx.WithLock(entity, func() {
 			aFields := entity.AvailableField
 			for i, aField := range aFields {
 				if aField.Key == field.Key {
@@ -102,7 +102,7 @@ func (c *CustomFieldsManager) findByKey(key int32) (int, *types.CustomFieldDef) 
 	return -1, nil
 }
 
-func (c *CustomFieldsManager) AddCustomFieldDef(req *types.AddCustomFieldDef) soap.HasFault {
+func (c *CustomFieldsManager) AddCustomFieldDef(ctx *Context, req *types.AddCustomFieldDef) soap.HasFault {
 	body := &methods.AddCustomFieldDefBody{}
 
 	_, field := c.findByNameType(req.Name, req.MoType)
@@ -126,7 +126,7 @@ func (c *CustomFieldsManager) AddCustomFieldDef(req *types.AddCustomFieldDef) so
 	entities := Map.All(req.MoType)
 	for _, e := range entities {
 		entity := e.Entity()
-		Map.WithLock(entity, func() {
+		ctx.WithLock(entity, func() {
 			entity.AvailableField = append(entity.AvailableField, def)
 		})
 	}
@@ -140,7 +140,7 @@ func (c *CustomFieldsManager) AddCustomFieldDef(req *types.AddCustomFieldDef) so
 	return body
 }
 
-func (c *CustomFieldsManager) RemoveCustomFieldDef(req *types.RemoveCustomFieldDef) soap.HasFault {
+func (c *CustomFieldsManager) RemoveCustomFieldDef(ctx *Context, req *types.RemoveCustomFieldDef) soap.HasFault {
 	body := &methods.RemoveCustomFieldDefBody{}
 
 	i, field := c.findByKey(req.Key)
@@ -149,7 +149,7 @@ func (c *CustomFieldsManager) RemoveCustomFieldDef(req *types.RemoveCustomFieldD
 		return body
 	}
 
-	entitiesFieldRemove(*field)
+	entitiesFieldRemove(ctx, *field)
 
 	c.Field = append(c.Field[:i], c.Field[i+1:]...)
 
@@ -157,7 +157,7 @@ func (c *CustomFieldsManager) RemoveCustomFieldDef(req *types.RemoveCustomFieldD
 	return body
 }
 
-func (c *CustomFieldsManager) RenameCustomFieldDef(req *types.RenameCustomFieldDef) soap.HasFault {
+func (c *CustomFieldsManager) RenameCustomFieldDef(ctx *Context, req *types.RenameCustomFieldDef) soap.HasFault {
 	body := &methods.RenameCustomFieldDefBody{}
 
 	_, field := c.findByKey(req.Key)
@@ -168,7 +168,7 @@ func (c *CustomFieldsManager) RenameCustomFieldDef(req *types.RenameCustomFieldD
 
 	field.Name = req.Name
 
-	entitiesFieldRename(*field)
+	entitiesFieldRename(ctx, *field)
 
 	body.Res = &types.RenameCustomFieldDefResponse{}
 	return body

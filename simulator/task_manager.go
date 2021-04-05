@@ -59,6 +59,6 @@ func (m *TaskManager) PutObject(obj mo.Reference) {
 	m.Unlock()
 }
 
-func (*TaskManager) RemoveObject(types.ManagedObjectReference) {}
+func (*TaskManager) RemoveObject(*Context, types.ManagedObjectReference) {}
 
 func (*TaskManager) UpdateObject(mo.Reference, []types.PropertyChange) {}
