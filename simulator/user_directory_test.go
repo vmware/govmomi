@@ -27,7 +27,7 @@ import (
 )
 
 func TestUserDirectory(t *testing.T) {
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -92,7 +92,7 @@ func TestUserDirectory(t *testing.T) {
 }
 
 func TestUserDirectoryExactlyMatch(t *testing.T) {
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()

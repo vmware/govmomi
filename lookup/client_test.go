@@ -30,7 +30,7 @@ import (
 func TestClient(t *testing.T) {
 	// lookup/simulator/simulator_test.go has the functional test..
 	// in this test we just verify requests to /lookup/sdk return 404
-	s := simulator.New(simulator.NewServiceInstance(vpx.ServiceContent, vpx.RootFolder))
+	s := simulator.New(simulator.NewServiceInstance(simulator.SpoofContext(), vpx.ServiceContent, vpx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()

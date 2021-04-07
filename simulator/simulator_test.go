@@ -214,7 +214,7 @@ func TestServeHTTP(t *testing.T) {
 	}
 
 	for _, config := range configs {
-		s := New(NewServiceInstance(config.content, config.folder))
+		s := New(NewServiceInstance(SpoofContext(), config.content, config.folder))
 		ts := s.NewServer()
 		defer ts.Close()
 
@@ -302,7 +302,7 @@ func TestServeAbout(t *testing.T) {
 }
 
 func TestServeHTTPS(t *testing.T) {
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 	s.TLS = new(tls.Config)
 	ts := s.NewServer()
 	defer ts.Close()
@@ -396,7 +396,7 @@ type errorNoSuchMethod struct {
 }
 
 func TestServeHTTPErrors(t *testing.T) {
-	s := New(NewServiceInstance(esx.ServiceContent, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -429,7 +429,7 @@ func TestServeHTTPErrors(t *testing.T) {
 	}
 
 	// cover the no such object path
-	Map.Remove(vim25.ServiceInstance)
+	Map.Remove(SpoofContext(), vim25.ServiceInstance)
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
@@ -467,4 +467,75 @@ func TestServeHTTPErrors(t *testing.T) {
 	if res.StatusCode != http.StatusBadRequest {
 		t.Errorf("expected status %d, got %s", http.StatusBadRequest, res.Status)
 	}
+}
+
+func TestDelay(t *testing.T) {
+	m := ESX()
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	client, err := govmomi.NewClient(context.Background(), s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	simvm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(client.Client, simvm.Reference())
+
+	m.Service.delay.Delay = 1000
+
+	ctx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+
+	_, err = vm.PowerOff(ctx)
+	if err == nil {
+		t.Fatalf("expected timeout initiating task")
+	}
+	// give time for task to finish
+	time.Sleep(1000 * time.Millisecond)
+}
+
+func TestDelayTask(t *testing.T) {
+	m := ESX()
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	client, err := govmomi.NewClient(context.Background(), s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	simvm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(client.Client, simvm.Reference())
+
+	TaskDelay.Delay = 1000
+	defer func() { TaskDelay.Delay = 0 }()
+
+	task, err := vm.PowerOff(context.Background())
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 20*time.Millisecond)
+	defer cancel()
+	err = task.Wait(timeoutCtx)
+	if err == nil {
+		t.Fatal("expected timeout waiting for task")
+	}
+	// make sure to wait for task, or else it can run while other tests run!
+	task.Wait(context.Background())
 }

@@ -32,7 +32,7 @@ type ServiceInstance struct {
 	mo.ServiceInstance
 }
 
-func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *ServiceInstance {
+func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Folder) *ServiceInstance {
 	Map = NewRegistry()
 
 	s := &ServiceInstance{}
@@ -46,7 +46,7 @@ func NewServiceInstance(content types.ServiceContent, folder mo.Folder) *Service
 	Map.Put(f)
 
 	if content.About.ApiType == "HostAgent" {
-		CreateDefaultESX(internalContext, f)
+		CreateDefaultESX(ctx, f)
 	} else {
 		content.About.InstanceUuid = uuid.New().String()
 	}

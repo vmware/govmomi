@@ -50,8 +50,8 @@ func NewDatacenter(ctx *Context, f *mo.Folder) *Datacenter {
 	return dc
 }
 
-func (dc *Datacenter) RenameTask(r *types.Rename_Task) soap.HasFault {
-	return RenameTask(dc, r)
+func (dc *Datacenter) RenameTask(ctx *Context, r *types.Rename_Task) soap.HasFault {
+	return RenameTask(ctx, dc, r)
 }
 
 // Create Datacenter Folders.
@@ -155,7 +155,7 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 
 		for _, ref := range req.Vm {
 			vm := Map.Get(ref).(*VirtualMachine)
-			Map.WithLock(vm, func() {
+			ctx.WithLock(vm, func() {
 				vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{})
 			})
 		}
@@ -165,7 +165,7 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 
 	return &methods.PowerOnMultiVM_TaskBody{
 		Res: &types.PowerOnMultiVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -192,7 +192,7 @@ func (d *Datacenter) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

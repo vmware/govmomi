@@ -38,7 +38,7 @@ func TestRegistry(t *testing.T) {
 		t.Fail()
 	}
 
-	r.Remove(ref)
+	r.Remove(SpoofContext(), ref)
 
 	if r.Get(ref) != nil {
 		t.Fail()

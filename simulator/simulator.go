@@ -28,7 +28,6 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
-	"math/rand"
 	"net"
 	"net/http"
 	"net/url"
@@ -38,8 +37,8 @@ import (
 	"sort"
 	"strconv"
 	"strings"
-	"time"
 
+	"github.com/google/uuid"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/internal"
@@ -189,22 +188,8 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	}
 
 	// We have a valid call. Introduce a delay if requested
-	//
 	if s.delay != nil {
-		d := 0
-		if s.delay.Delay > 0 {
-			d = s.delay.Delay
-		}
-		if md, ok := s.delay.MethodDelay[method.Name]; ok {
-			d += md
-		}
-		if s.delay.DelayJitter > 0 {
-			d += int(rand.NormFloat64() * s.delay.DelayJitter * float64(d))
-		}
-		if d > 0 {
-			//fmt.Printf("Delaying method %s %d ms\n", name, d)
-			time.Sleep(time.Duration(d) * time.Millisecond)
-		}
+		s.delay.delay(method.Name)
 	}
 
 	var args, res []reflect.Value
@@ -212,11 +197,19 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		args = append(args, reflect.ValueOf(ctx))
 	}
 	args = append(args, reflect.ValueOf(method.Body))
-	ctx.Map.WithLock(handler, func() {
+	ctx.Map.WithLock(ctx, handler, func() {
 		res = m.Call(args)
 	})
 
 	return res[0].Interface().(soap.HasFault)
+}
+
+// internalSession is the session for use by the in-memory client (Service.RoundTrip)
+var internalSession = &Session{
+	UserSession: types.UserSession{
+		Key: uuid.New().String(),
+	},
+	Registry: NewRegistry(),
 }
 
 // RoundTrip implements the soap.RoundTripper interface in process.
@@ -241,7 +234,7 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 	res := s.call(&Context{
 		Map:     Map,
 		Context: ctx,
-		Session: internalContext.Session,
+		Session: internalSession,
 	}, method)
 
 	if err := res.Fault(); err != nil {
@@ -463,7 +456,7 @@ func (s *Service) ServeSDK(w http.ResponseWriter, r *http.Request) {
 		Map:     s.sdk[r.URL.Path],
 		Context: context.Background(),
 	}
-	ctx.Map.WithLock(s.sm, ctx.mapSession)
+	ctx.Map.WithLock(ctx, s.sm, ctx.mapSession)
 
 	var res soap.HasFault
 	var soapBody interface{}

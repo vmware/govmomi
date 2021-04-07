@@ -151,8 +151,8 @@ func ExampleFolder_AddOpaqueNetwork() {
 			OpaqueNetworkType: "nsx.LogicalSwitch",
 		}
 
-		// Add NSX backed OpaqueNetwork, calling the simulator.Folder method directly
-		err = folder.AddOpaqueNetwork(spec)
+		// Add NSX backed OpaqueNetwork, calling the simulator.Folder method directly.
+		err = folder.AddOpaqueNetwork(simulator.SpoofContext(), spec)
 		if err != nil {
 			return err
 		}

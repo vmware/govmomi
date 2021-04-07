@@ -485,8 +485,8 @@ func (pc *PropertyCollector) DestroyPropertyCollector(ctx *Context, c *types.Des
 		filter.DestroyPropertyFilter(ctx, &types.DestroyPropertyFilter{This: ref})
 	}
 
-	ctx.Session.Remove(c.This)
-	ctx.Map.Remove(c.This)
+	ctx.Session.Remove(ctx, c.This)
+	ctx.Map.Remove(ctx, c.This)
 
 	body.Res = &types.DestroyPropertyCollectorResponse{}
 
@@ -579,7 +579,7 @@ func (pc *PropertyCollector) UpdateObject(o mo.Reference, changes []types.Proper
 	})
 }
 
-func (pc *PropertyCollector) RemoveObject(ref types.ManagedObjectReference) {
+func (pc *PropertyCollector) RemoveObject(_ *Context, ref types.ManagedObjectReference) {
 	pc.update(types.ObjectUpdate{
 		Obj:       ref,
 		Kind:      types.ObjectUpdateKindLeave,
@@ -673,7 +673,7 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 		return body
 	}
 
-	ticker := time.NewTicker(250 * time.Millisecond) // allow for updates to accumulate
+	ticker := time.NewTicker(20 * time.Millisecond) // allow for updates to accumulate
 	defer ticker.Stop()
 	// Start the wait loop, returning on one of:
 	// - Client calls CancelWaitForUpdates

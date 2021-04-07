@@ -150,7 +150,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	// Add the default devices
 	defaults.DeviceChange, _ = object.VirtualDeviceList(esx.VirtualDevice).ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
 
-	err := vm.configure(&defaults)
+	err := vm.configure(ctx, &defaults)
 	if err != nil {
 		return vm, err
 	}
@@ -169,8 +169,8 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	return vm, nil
 }
 
-func (o *VirtualMachine) RenameTask(r *types.Rename_Task) soap.HasFault {
-	return RenameTask(o, r)
+func (o *VirtualMachine) RenameTask(ctx *Context, r *types.Rename_Task) soap.HasFault {
+	return RenameTask(ctx, o, r)
 }
 
 func (*VirtualMachine) Reload(*types.Reload) soap.HasFault {
@@ -378,7 +378,7 @@ func validateGuestID(id string) types.BaseMethodFault {
 	return &types.InvalidArgument{InvalidProperty: "configSpec.guestId"}
 }
 
-func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	vm.apply(spec)
 
 	if spec.MemoryAllocation != nil {
@@ -405,7 +405,7 @@ func (vm *VirtualMachine) configure(spec *types.VirtualMachineConfigSpec) types.
 		}
 	}
 
-	return vm.configureDevices(spec)
+	return vm.configureDevices(ctx, spec)
 }
 
 func getVMFileType(fileName string) types.VirtualMachineFileLayoutExFileType {
@@ -916,7 +916,7 @@ func (vm *VirtualMachine) logPrintf(format string, v ...interface{}) {
 	_ = f.Close()
 }
 
-func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
+func (vm *VirtualMachine) create(ctx *Context, spec *types.VirtualMachineConfigSpec, register bool) types.BaseMethodFault {
 	vm.apply(spec)
 
 	if spec.Version != "" {
@@ -951,7 +951,7 @@ func (vm *VirtualMachine) create(spec *types.VirtualMachineConfigSpec, register 
 
 	vm.logPrintf("created")
 
-	return vm.configureDevices(spec)
+	return vm.configureDevices(ctx, spec)
 }
 
 var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
@@ -1042,7 +1042,7 @@ func (vm *VirtualMachine) validateSwitchMembers(id string) types.BaseMethodFault
 	return nil
 }
 
-func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
 	device := spec.Device
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
@@ -1142,7 +1142,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 			info.Datastore = &ds.Self
 
 			// XXX: compare disk size and free space until windows stat is supported
-			Map.WithLock(ds, func() {
+			ctx.WithLock(ds, func() {
 				ds.Summary.FreeSpace -= getDiskSize(x)
 				ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
 			})
@@ -1212,7 +1212,7 @@ func (vm *VirtualMachine) configureDevice(devices object.VirtualDeviceList, spec
 	return nil
 }
 
-func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) object.VirtualDeviceList {
+func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) object.VirtualDeviceList {
 	key := spec.Device.GetVirtualDevice().Key
 
 	for i, d := range devices {
@@ -1234,7 +1234,7 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					p, _ := parseDatastorePath(file)
 					ds := vm.findDatastore(p.Datastore)
 
-					Map.WithLock(ds, func() {
+					ctx.WithLock(ds, func() {
 						ds.Summary.FreeSpace += getDiskSize(device)
 						ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
 					})
@@ -1246,10 +1246,12 @@ func (vm *VirtualMachine) removeDevice(devices object.VirtualDeviceList, spec *t
 					if dc == nil {
 						continue // parent was destroyed
 					}
-					dm.DeleteVirtualDiskTask(internalContext, &types.DeleteVirtualDisk_Task{
+					res := dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
 						Name:       file,
 						Datacenter: &dc.Self,
 					})
+					ctask := Map.Get(res.(*methods.DeleteVirtualDisk_TaskBody).Res.Returnval).(*Task)
+					ctask.wait()
 				}
 			}
 			Map.Update(vm, []types.PropertyChange{
@@ -1319,7 +1321,7 @@ func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.Bas
 	}
 }
 
-func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 
 	for i, change := range spec.DeviceChange {
@@ -1358,7 +1360,7 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 			}
 
 			key := device.Key
-			err := vm.configureDevice(devices, dspec)
+			err := vm.configureDevice(ctx, devices, dspec)
 			if err != nil {
 				return err
 			}
@@ -1379,17 +1381,17 @@ func (vm *VirtualMachine) configureDevices(spec *types.VirtualMachineConfigSpec)
 			if rspec.Device == nil {
 				return invalid
 			}
-			devices = vm.removeDevice(devices, &rspec)
+			devices = vm.removeDevice(ctx, devices, &rspec)
 			device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
 
-			err := vm.configureDevice(devices, dspec)
+			err := vm.configureDevice(ctx, devices, dspec)
 			if err != nil {
 				return err
 			}
 
 			devices = append(devices, dspec.Device)
 		case types.VirtualDeviceConfigSpecOperationRemove:
-			devices = vm.removeDevice(devices, dspec)
+			devices = vm.removeDevice(ctx, devices, dspec)
 		}
 	}
 
@@ -1478,7 +1480,7 @@ func (vm *VirtualMachine) PowerOnVMTask(ctx *Context, c *types.PowerOnVM_Task) s
 
 	return &methods.PowerOnVM_TaskBody{
 		Res: &types.PowerOnVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1489,7 +1491,7 @@ func (vm *VirtualMachine) PowerOffVMTask(ctx *Context, c *types.PowerOffVM_Task)
 
 	return &methods.PowerOffVM_TaskBody{
 		Res: &types.PowerOffVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1500,7 +1502,7 @@ func (vm *VirtualMachine) SuspendVMTask(ctx *Context, req *types.SuspendVM_Task)
 
 	return &methods.SuspendVM_TaskBody{
 		Res: &types.SuspendVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1509,18 +1511,21 @@ func (vm *VirtualMachine) ResetVMTask(ctx *Context, req *types.ResetVM_Task) soa
 	task := CreateTask(vm, "reset", func(task *Task) (types.AnyType, types.BaseMethodFault) {
 		res := vm.PowerOffVMTask(ctx, &types.PowerOffVM_Task{This: vm.Self})
 		ctask := Map.Get(res.(*methods.PowerOffVM_TaskBody).Res.Returnval).(*Task)
+		ctask.wait()
 		if ctask.Info.Error != nil {
 			return nil, ctask.Info.Error.Fault
 		}
 
-		_ = vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: vm.Self})
+		res = vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: vm.Self})
+		ctask = Map.Get(res.(*methods.PowerOnVM_TaskBody).Res.Returnval).(*Task)
+		ctask.wait()
 
 		return nil, nil
 	})
 
 	return &methods.ResetVM_TaskBody{
 		Res: &types.ResetVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1559,19 +1564,19 @@ func (vm *VirtualMachine) ReconfigVMTask(ctx *Context, req *types.ReconfigVM_Tas
 			}
 		}
 
-		err := vm.configure(&req.Spec)
+		err := vm.configure(ctx, &req.Spec)
 
 		return nil, err
 	})
 
 	return &methods.ReconfigVM_TaskBody{
 		Res: &types.ReconfigVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (vm *VirtualMachine) UpgradeVMTask(req *types.UpgradeVM_Task) soap.HasFault {
+func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task) soap.HasFault {
 	body := &methods.UpgradeVM_TaskBody{}
 
 	task := CreateTask(vm, "upgradeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
@@ -1584,7 +1589,7 @@ func (vm *VirtualMachine) UpgradeVMTask(req *types.UpgradeVM_Task) soap.HasFault
 	})
 
 	body.Res = &types.UpgradeVM_TaskResponse{
-		Returnval: task.Run(),
+		Returnval: task.Run(ctx),
 	}
 
 	return body
@@ -1609,12 +1614,12 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 		// Remove all devices
 		devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 		spec, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationRemove)
-		vm.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: spec})
+		vm.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: spec})
 
 		// Delete VM files from the datastore (ignoring result for now)
 		m := Map.FileManager()
 
-		_ = m.DeleteDatastoreFileTask(&types.DeleteDatastoreFile_Task{
+		_ = m.DeleteDatastoreFileTask(ctx, &types.DeleteDatastoreFile_Task{
 			This:       m.Reference(),
 			Name:       vm.Config.Files.LogDirectory,
 			Datacenter: &dc.Self,
@@ -1627,7 +1632,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 
 	return &methods.Destroy_TaskBody{
 		Res: &types.Destroy_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1649,20 +1654,20 @@ func (vm *VirtualMachine) UnregisterVM(ctx *Context, c *types.UnregisterVM) soap
 	}
 
 	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
-	Map.RemoveReference(host, &host.Vm, vm.Self)
+	Map.RemoveReference(ctx, host, &host.Vm, vm.Self)
 
 	if vm.ResourcePool != nil {
 		switch pool := Map.Get(*vm.ResourcePool).(type) {
 		case *ResourcePool:
-			Map.RemoveReference(pool, &pool.Vm, vm.Self)
+			Map.RemoveReference(ctx, pool, &pool.Vm, vm.Self)
 		case *VirtualApp:
-			Map.RemoveReference(pool, &pool.Vm, vm.Self)
+			Map.RemoveReference(ctx, pool, &pool.Vm, vm.Self)
 		}
 	}
 
 	for i := range vm.Datastore {
 		ds := Map.Get(vm.Datastore[i]).(*Datastore)
-		Map.RemoveReference(ds, &ds.Vm, vm.Self)
+		Map.RemoveReference(ctx, ds, &ds.Vm, vm.Self)
 	}
 
 	ctx.postEvent(&types.VmRemovedEvent{VmEvent: vm.event()})
@@ -1768,11 +1773,13 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			return nil, ctask.Info.Error.Fault
 		}
 
+		ctask.wait()
+
 		ref := ctask.Info.Result.(types.ManagedObjectReference)
 		clone := Map.Get(ref).(*VirtualMachine)
-		clone.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Location.DeviceChange})
+		clone.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Location.DeviceChange})
 		if req.Spec.Config != nil && req.Spec.Config.DeviceChange != nil {
-			clone.configureDevices(&types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Config.DeviceChange})
+			clone.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Config.DeviceChange})
 		}
 
 		if req.Spec.Template {
@@ -1789,7 +1796,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 
 	return &methods.CloneVM_TaskBody{
 		Res: &types.CloneVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1800,7 +1807,7 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 		if ref := req.Spec.Datastore; ref != nil {
 			ds := Map.Get(*ref).(*Datastore)
-			Map.RemoveReference(ds, &ds.Vm, *ref)
+			Map.RemoveReference(ctx, ds, &ds.Vm, *ref)
 
 			// TODO: migrate vm.Config.Files, vm.Summary.Config.VmPathName, vm.Layout and vm.LayoutEx
 
@@ -1809,14 +1816,14 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 		if ref := req.Spec.Pool; ref != nil {
 			pool := Map.Get(*ref).(*ResourcePool)
-			Map.RemoveReference(pool, &pool.Vm, *ref)
+			Map.RemoveReference(ctx, pool, &pool.Vm, *ref)
 
 			changes = append(changes, types.PropertyChange{Name: "resourcePool", Val: ref})
 		}
 
 		if ref := req.Spec.Host; ref != nil {
 			host := Map.Get(*ref).(*HostSystem)
-			Map.RemoveReference(host, &host.Vm, *ref)
+			Map.RemoveReference(ctx, host, &host.Vm, *ref)
 
 			changes = append(changes,
 				types.PropertyChange{Name: "runtime.host", Val: ref},
@@ -1838,7 +1845,7 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 
 	return &methods.RelocateVM_TaskBody{
 		Res: &types.RelocateVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
@@ -1919,7 +1926,7 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 	ctx.postEvent(&types.CustomizationSucceeded{CustomizationEvent: event})
 }
 
-func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasFault {
+func (vm *VirtualMachine) CustomizeVMTask(ctx *Context, req *types.CustomizeVM_Task) soap.HasFault {
 	task := CreateTask(vm, "customizeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
 			return nil, &types.InvalidPowerState{
@@ -1945,12 +1952,12 @@ func (vm *VirtualMachine) CustomizeVMTask(req *types.CustomizeVM_Task) soap.HasF
 
 	return &methods.CustomizeVM_TaskBody{
 		Res: &types.CustomizeVM_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soap.HasFault {
+func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnapshot_Task) soap.HasFault {
 	task := CreateTask(vm, "createSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
 
@@ -2001,12 +2008,12 @@ func (vm *VirtualMachine) CreateSnapshotTask(req *types.CreateSnapshot_Task) soa
 
 	return &methods.CreateSnapshot_TaskBody{
 		Res: &types.CreateSnapshot_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }
 
-func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrentSnapshot_Task) soap.HasFault {
+func (vm *VirtualMachine) RevertToCurrentSnapshotTask(ctx *Context, req *types.RevertToCurrentSnapshot_Task) soap.HasFault {
 	body := &methods.RevertToCurrentSnapshot_TaskBody{}
 
 	if vm.Snapshot == nil || vm.Snapshot.CurrentSnapshot == nil {
@@ -2020,7 +2027,7 @@ func (vm *VirtualMachine) RevertToCurrentSnapshotTask(req *types.RevertToCurrent
 	})
 
 	body.Res = &types.RevertToCurrentSnapshot_TaskResponse{
-		Returnval: task.Run(),
+		Returnval: task.Run(ctx),
 	}
 
 	return body
@@ -2040,7 +2047,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 
 		for _, ref := range refs {
 			Map.Get(ref).(*VirtualMachineSnapshot).removeSnapshotFiles(ctx)
-			Map.Remove(ref)
+			Map.Remove(ctx, ref)
 		}
 
 		return nil, nil
@@ -2048,7 +2055,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 
 	return &methods.RemoveAllSnapshots_TaskBody{
 		Res: &types.RemoveAllSnapshots_TaskResponse{
-			Returnval: task.Run(),
+			Returnval: task.Run(ctx),
 		},
 	}
 }

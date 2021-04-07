@@ -48,7 +48,7 @@ func TestRetrieveProperties(t *testing.T) {
 	}
 
 	for _, config := range configs {
-		s := New(NewServiceInstance(config.content, config.folder))
+		s := New(NewServiceInstance(SpoofContext(), config.content, config.folder))
 
 		ts := s.NewServer()
 		defer ts.Close()
@@ -232,7 +232,7 @@ func TestRetrieveProperties(t *testing.T) {
 		}
 
 		// Expect ManagedObjectNotFoundError
-		Map.Remove(dc.Reference())
+		Map.Remove(SpoofContext(), dc.Reference())
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"name"}, &mdc)
 		if err == nil {
 			t.Fatal("expected error")
@@ -242,7 +242,7 @@ func TestRetrieveProperties(t *testing.T) {
 
 func TestWaitForUpdates(t *testing.T) {
 	folder := esx.RootFolder
-	s := New(NewServiceInstance(esx.ServiceContent, folder))
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, folder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -299,7 +299,7 @@ func TestWaitForUpdates(t *testing.T) {
 	wg.Wait()
 
 	// test object not found
-	Map.Remove(folder.Reference())
+	Map.Remove(SpoofContext(), folder.Reference())
 
 	err = property.Wait(ctx, pc, folder.Reference(), props, cb(true))
 	if err == nil {
@@ -446,9 +446,11 @@ func TestIncrementalWaitForUpdates(t *testing.T) {
 
 	wg.Wait() // wait for 1st enter
 	wg.Add(1)
-	_, _ = vm.PowerOff(ctx)
-	_, _ = vm.Destroy(ctx)
+	task, _ := vm.PowerOff(ctx)
+	_ = task.Wait(ctx)
+	task, _ = vm.Destroy(ctx)
 	wg.Wait() // wait for Delete to be reported
+	task.Wait(ctx)
 }
 
 func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {
@@ -705,7 +707,7 @@ func TestExtractEmbeddedField(t *testing.T) {
 
 	Map.Put(x)
 
-	obj, ok := getObject(internalContext, x.Reference())
+	obj, ok := getObject(SpoofContext(), x.Reference())
 	if !ok {
 		t.Error("expected obj")
 	}
@@ -801,7 +803,7 @@ func TestPropertyCollectorFold(t *testing.T) {
 
 func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 	obj := Map.Put(new(Folder))
-	folderPutChild(internalContext, &obj.(*Folder).Folder, new(Folder))
+	folderPutChild(SpoofContext(), &obj.(*Folder).Folder, new(Folder))
 
 	pc := &PropertyCollector{}
 
@@ -834,7 +836,7 @@ func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 		},
 	}
 
-	_, err := pc.collect(internalContext, &req)
+	_, err := pc.collect(SpoofContext(), &req)
 	if err == nil {
 		t.Fatal("expected error")
 	}

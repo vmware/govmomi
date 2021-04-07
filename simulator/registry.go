@@ -26,6 +26,7 @@ import (
 	"sync"
 	"sync/atomic"
 
+	"github.com/vmware/govmomi/simulator/internal"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -54,7 +55,7 @@ type RegisterObject interface {
 	mo.Reference
 	PutObject(mo.Reference)
 	UpdateObject(mo.Reference, []types.PropertyChange)
-	RemoveObject(types.ManagedObjectReference)
+	RemoveObject(*Context, types.ManagedObjectReference)
 }
 
 // Registry manages a map of mo.Reference objects
@@ -63,7 +64,7 @@ type Registry struct {
 	m        sync.Mutex
 	objects  map[types.ManagedObjectReference]mo.Reference
 	handlers map[types.ManagedObjectReference]RegisterObject
-	locks    map[types.ManagedObjectReference]sync.Locker
+	locks    map[types.ManagedObjectReference]*internal.ObjectLock
 
 	Namespace string
 	Path      string
@@ -84,7 +85,7 @@ func NewRegistry() *Registry {
 	r := &Registry{
 		objects:  make(map[types.ManagedObjectReference]mo.Reference),
 		handlers: make(map[types.ManagedObjectReference]RegisterObject),
-		locks:    make(map[types.ManagedObjectReference]sync.Locker),
+		locks:    make(map[types.ManagedObjectReference]*internal.ObjectLock),
 
 		Namespace: vim25.Namespace,
 		Path:      vim25.Path,
@@ -259,9 +260,9 @@ func (r *Registry) Put(item mo.Reference) mo.Reference {
 }
 
 // Remove removes an object from the Registry.
-func (r *Registry) Remove(item types.ManagedObjectReference) {
+func (r *Registry) Remove(ctx *Context, item types.ManagedObjectReference) {
 	r.applyHandlers(func(o RegisterObject) {
-		o.RemoveObject(item)
+		o.RemoveObject(ctx, item)
 	})
 
 	r.m.Lock()
@@ -292,6 +293,12 @@ func (r *Registry) Update(obj mo.Reference, changes []types.PropertyChange) {
 
 	r.applyHandlers(func(o RegisterObject) {
 		o.UpdateObject(val, changes)
+	})
+}
+
+func (r *Registry) AtomicUpdate(ctx *Context, obj mo.Reference, changes []types.PropertyChange) {
+	r.WithLock(ctx, obj, func() {
+		r.Update(obj, changes)
 	})
 }
 
@@ -418,15 +425,15 @@ func FindReference(refs []types.ManagedObjectReference, match ...types.ManagedOb
 }
 
 // AppendReference appends the given refs to field.
-func (r *Registry) AppendReference(obj mo.Reference, field *[]types.ManagedObjectReference, ref ...types.ManagedObjectReference) {
-	r.WithLock(obj, func() {
+func (r *Registry) AppendReference(ctx *Context, obj mo.Reference, field *[]types.ManagedObjectReference, ref ...types.ManagedObjectReference) {
+	r.WithLock(ctx, obj, func() {
 		*field = append(*field, ref...)
 	})
 }
 
 // AddReference appends ref to field if not already in the given field.
-func (r *Registry) AddReference(obj mo.Reference, field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
-	r.WithLock(obj, func() {
+func (r *Registry) AddReference(ctx *Context, obj mo.Reference, field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
+	r.WithLock(ctx, obj, func() {
 		if FindReference(*field, ref) == nil {
 			*field = append(*field, ref)
 		}
@@ -444,14 +451,14 @@ func RemoveReference(field *[]types.ManagedObjectReference, ref types.ManagedObj
 }
 
 // RemoveReference removes ref from the given field.
-func (r *Registry) RemoveReference(obj mo.Reference, field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
-	r.WithLock(obj, func() {
+func (r *Registry) RemoveReference(ctx *Context, obj mo.Reference, field *[]types.ManagedObjectReference, ref types.ManagedObjectReference) {
+	r.WithLock(ctx, obj, func() {
 		RemoveReference(field, ref)
 	})
 }
 
-func (r *Registry) removeString(obj mo.Reference, field *[]string, val string) {
-	r.WithLock(obj, func() {
+func (r *Registry) removeString(ctx *Context, obj mo.Reference, field *[]string, val string) {
+	r.WithLock(ctx, obj, func() {
 		for i, name := range *field {
 			if name == val {
 				*field = append((*field)[:i], (*field)[i+1:]...)
@@ -546,7 +553,7 @@ func (r *Registry) MarshalJSON() ([]byte, error) {
 	return json.Marshal(vars)
 }
 
-func (r *Registry) locker(obj mo.Reference) sync.Locker {
+func (r *Registry) locker(obj mo.Reference) *internal.ObjectLock {
 	var ref types.ManagedObjectReference
 
 	switch x := obj.(type) {
@@ -563,13 +570,17 @@ func (r *Registry) locker(obj mo.Reference) sync.Locker {
 	}
 
 	if mu, ok := obj.(sync.Locker); ok {
-		return mu
+		// Objects that opt out of default locking are responsible for
+		// implementing their own lock sharing, if needed. Returning
+		// nil as heldBy means that WithLock will call Lock/Unlock
+		// every time.
+		return internal.NewObjectLock(mu)
 	}
 
 	r.m.Lock()
 	mu, ok := r.locks[ref]
 	if !ok {
-		mu = new(sync.Mutex)
+		mu = internal.NewObjectLock(new(sync.Mutex))
 		r.locks[ref] = mu
 	}
 	r.m.Unlock()
@@ -580,13 +591,29 @@ func (r *Registry) locker(obj mo.Reference) sync.Locker {
 var enableLocker = os.Getenv("VCSIM_LOCKER") != "false"
 
 // WithLock holds a lock for the given object while then given function is run.
-func (r *Registry) WithLock(obj mo.Reference, f func()) {
-	if enableLocker {
-		mu := r.locker(obj)
-		mu.Lock()
-		defer mu.Unlock()
-	}
+func (r *Registry) WithLock(onBehalfOf *Context, obj mo.Reference, f func()) {
+	unlock := r.AcquireLock(onBehalfOf, obj)
 	f()
+	unlock()
+}
+
+// AcquireLock acquires the lock for onBehalfOf then returns. The lock MUST be
+// released by calling the returned function. WithLock should be preferred
+// wherever possible.
+func (r *Registry) AcquireLock(onBehalfOf *Context, obj mo.Reference) func() {
+	if onBehalfOf == nil {
+		panic(fmt.Sprintf("Attempt to lock %v with nil onBehalfOf", obj))
+	}
+
+	if !enableLocker {
+		return func() {}
+	}
+
+	l := r.locker(obj)
+	l.Acquire(onBehalfOf)
+	return func() {
+		l.Release(onBehalfOf)
+	}
 }
 
 // nopLocker can be embedded to opt-out of auto-locking (see Registry.WithLock)

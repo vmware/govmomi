@@ -121,7 +121,6 @@ func TestHandlerREST(t *testing.T) {
 
 		rc := rest.NewClient(vc)
 		rc.Transport = keepalive.NewHandlerREST(rc, time.Millisecond, i.Send)
-		err = rc.Login(ctx, simulator.DefaultLogin)
 		if err != nil {
 			t.Fatal(err)
 		}

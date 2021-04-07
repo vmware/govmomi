@@ -51,7 +51,7 @@ func addStandaloneHostTask(folder *object.Folder, spec types.HostConnectSpec) (*
 
 func TestFolderESX(t *testing.T) {
 	content := esx.ServiceContent
-	s := New(NewServiceInstance(content, esx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), content, esx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -99,7 +99,7 @@ func TestFolderESX(t *testing.T) {
 
 func TestFolderVC(t *testing.T) {
 	content := vpx.ServiceContent
-	s := New(NewServiceInstance(content, vpx.RootFolder))
+	s := New(NewServiceInstance(SpoofContext(), content, vpx.RootFolder))
 
 	ts := s.NewServer()
 	defer ts.Close()
@@ -297,7 +297,7 @@ func TestRegisterVm(t *testing.T) {
 				new(types.NotFound), func() { req.Path = vm.Config.Files.VmPathName },
 			},
 			{
-				new(types.AlreadyExists), func() { Map.Remove(vm.Reference()) },
+				new(types.AlreadyExists), func() { Map.Remove(SpoofContext(), vm.Reference()) },
 			},
 			{
 				nil, func() {},
@@ -309,6 +309,9 @@ func TestRegisterVm(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
+
+			ct := object.NewTask(c.Client, res.Returnval)
+			_ = ct.Wait(ctx)
 
 			rt := Map.Get(res.Returnval).(*Task)
 
@@ -335,14 +338,15 @@ func TestRegisterVm(t *testing.T) {
 			t.Error("expected new moref")
 		}
 
-		_, _ = nvm.PowerOn(ctx)
+		onTask, _ := nvm.PowerOn(ctx)
+		_ = onTask.Wait(ctx)
 
 		steps = []struct {
 			e interface{}
 			f func()
 		}{
 			{
-				types.InvalidPowerState{}, func() { _, _ = nvm.PowerOff(ctx) },
+				types.InvalidPowerState{}, func() { offTask, _ := nvm.PowerOff(ctx); _ = offTask.Wait(ctx) },
 			},
 			{
 				nil, func() {},
