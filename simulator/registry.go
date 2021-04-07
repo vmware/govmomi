@@ -592,16 +592,28 @@ var enableLocker = os.Getenv("VCSIM_LOCKER") != "false"
 
 // WithLock holds a lock for the given object while then given function is run.
 func (r *Registry) WithLock(onBehalfOf *Context, obj mo.Reference, f func()) {
+	unlock := r.AcquireLock(onBehalfOf, obj)
+	f()
+	unlock()
+}
+
+// AcquireLock acquires the lock for onBehalfOf then returns. The lock MUST be
+// released by calling the returned function. WithLock should be preferred
+// wherever possible.
+func (r *Registry) AcquireLock(onBehalfOf *Context, obj mo.Reference) func() {
 	if onBehalfOf == nil {
 		panic(fmt.Sprintf("Attempt to lock %v with nil onBehalfOf", obj))
 	}
 
-	if enableLocker {
-		l := r.locker(obj)
-		l.Acquire(onBehalfOf)
-		defer l.Release(onBehalfOf)
+	if !enableLocker {
+		return func() {}
 	}
-	f()
+
+	l := r.locker(obj)
+	l.Acquire(onBehalfOf)
+	return func() {
+		l.Release(onBehalfOf)
+	}
 }
 
 // nopLocker can be embedded to opt-out of auto-locking (see Registry.WithLock)

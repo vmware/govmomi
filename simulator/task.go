@@ -84,7 +84,7 @@ type TaskRunner interface {
 	Run(*Task) (types.AnyType, types.BaseMethodFault)
 }
 
-// taskReference is a helper struct so we can call WithLock in Run()
+// taskReference is a helper struct so we can call AcquireLock in Run()
 type taskReference struct {
 	ref types.ManagedObjectReference
 }
@@ -100,17 +100,17 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 		{Name: "info.state", Val: types.TaskInfoStateRunning},
 	})
 
+	tr := &taskReference{
+		ref: *t.Info.Entity,
+	}
+	// in most cases, the caller already holds this lock, and we would like
+	// the lock to be held across the "hand off" to the async goroutine.
+	unlock := Map.AcquireLock(ctx, tr)
+
 	go func() {
-		tr := &taskReference{
-			ref: *t.Info.Entity,
-		}
-		var res types.AnyType
-		var err types.BaseMethodFault
-		ctx.WithLock(tr, func() {
-			// introduce a delay if requested
-			TaskDelay.delay(t.Info.Name)
-			res, err = t.Execute(t)
-		})
+		TaskDelay.delay(t.Info.Name)
+		res, err := t.Execute(t)
+		unlock()
 
 		state := types.TaskInfoStateSuccess
 		var fault interface{}
