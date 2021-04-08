@@ -1251,7 +1251,7 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 						Datacenter: &dc.Self,
 					})
 					ctask := Map.Get(res.(*methods.DeleteVirtualDisk_TaskBody).Res.Returnval).(*Task)
-					ctask.wait()
+					ctask.Wait()
 				}
 			}
 			Map.Update(vm, []types.PropertyChange{
@@ -1511,14 +1511,14 @@ func (vm *VirtualMachine) ResetVMTask(ctx *Context, req *types.ResetVM_Task) soa
 	task := CreateTask(vm, "reset", func(task *Task) (types.AnyType, types.BaseMethodFault) {
 		res := vm.PowerOffVMTask(ctx, &types.PowerOffVM_Task{This: vm.Self})
 		ctask := Map.Get(res.(*methods.PowerOffVM_TaskBody).Res.Returnval).(*Task)
-		ctask.wait()
+		ctask.Wait()
 		if ctask.Info.Error != nil {
 			return nil, ctask.Info.Error.Fault
 		}
 
 		res = vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{This: vm.Self})
 		ctask = Map.Get(res.(*methods.PowerOnVM_TaskBody).Res.Returnval).(*Task)
-		ctask.wait()
+		ctask.Wait()
 
 		return nil, nil
 	})
@@ -1773,7 +1773,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			return nil, ctask.Info.Error.Fault
 		}
 
-		ctask.wait()
+		ctask.Wait()
 
 		ref := ctask.Info.Result.(types.ManagedObjectReference)
 		clone := Map.Get(ref).(*VirtualMachine)
