@@ -225,7 +225,7 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 	})
 
 	ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
-	ctask.wait()
+	ctask.Wait()
 
 	if ctask.Info.Error != nil {
 		body.Fault_ = Fault("", ctask.Info.Error.Fault)
@@ -406,7 +406,7 @@ func (a *VirtualApp) CloneVAppTask(ctx *Context, req *types.CloneVApp_Task) soap
 			})
 
 			ctask := Map.Get(res.(*methods.CloneVM_TaskBody).Res.Returnval).(*Task)
-			ctask.wait()
+			ctask.Wait()
 			if ctask.Info.Error != nil {
 				return nil, ctask.Info.Error.Fault
 			}

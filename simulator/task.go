@@ -138,10 +138,11 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 // It polls for task completion to avoid the need to set up a PropertyCollector.
 func (t *Task) RunBlocking(ctx *Context) {
 	_ = t.Run(ctx)
-	t.wait()
+	t.Wait()
 }
 
-func (t *Task) wait() {
+// Wait blocks until the task is complete.
+func (t *Task) Wait() {
 	// we do NOT want to share our lock with the tasks's context, because
 	// the goroutine that executes the task will use ctx to update the
 	// state (among other things).

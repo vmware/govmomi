@@ -266,7 +266,7 @@ func (p *StoragePod) MoveIntoFolderTask(ctx *Context, c *types.MoveIntoFolder_Ta
 		f := &Folder{Folder: p.Folder}
 		id := f.MoveIntoFolderTask(ctx, c).(*methods.MoveIntoFolder_TaskBody).Res.Returnval
 		ftask := Map.Get(id).(*Task)
-		ftask.wait()
+		ftask.Wait()
 		if ftask.Info.Error != nil {
 			return nil, ftask.Info.Error.Fault
 		}
@@ -688,7 +688,7 @@ func (f *Folder) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFaul
 				}).(*methods.Destroy_TaskBody).Res.Returnval
 
 				t := Map.Get(id).(*Task)
-				t.wait()
+				t.Wait()
 				if t.Info.Error != nil {
 					fault = t.Info.Error.Fault // For example, can't destroy a powered on VM
 				}

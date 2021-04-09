@@ -60,7 +60,7 @@ func TestRename(t *testing.T) {
 		}).(*methods.Rename_TaskBody).Res.Returnval
 
 		task := Map.Get(id).(*Task)
-		task.wait()
+		task.Wait()
 
 		if task.Info.State != expect {
 			t.Errorf("state=%s", task.Info.State)
