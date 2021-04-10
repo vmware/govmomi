@@ -4827,7 +4827,9 @@ Options:
 Usage: govc version [OPTIONS]
 
 Options:
-  -require=  Require govc version >= this value
+  -require=     Require govc version >= this value
+  -l=false      Print detailed govc version information
+information
 ```
 
 ## vm.change

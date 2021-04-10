@@ -20,7 +20,7 @@ install:
 	$(MAKE) -C vcsim install
 
 go-test:
-	GORACE=history_size=5 $(GO) test -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
+	GORACE=history_size=5 $(GO) test -mod=vendor -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
 
 govc-test: install
 	./govc/test/images/update.sh

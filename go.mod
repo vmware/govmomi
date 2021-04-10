@@ -13,4 +13,4 @@ require (
 	github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
 )
 
-go 1.13
+go 1.14

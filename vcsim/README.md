@@ -52,6 +52,10 @@ Usage of vcsim:
 
 [model]:https://godoc.org/github.com/vmware/govmomi/simulator#Model
 
+### Version Information
+
+To print detailed (build) information for vcsim run: `vcsim version`. 
+
 ## Examples
 
 The following examples illustrate how **vcsim** flags can be used to change the

@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-name: Build
+name: Unit Tests
 
 on:
   push:
@@ -22,19 +22,17 @@ on:
     branches: [ 'main', 'master' ]
 
 jobs:
-
-  build:
-    name: Build
+  go-tests:
+    name: Run Unit Tests
     strategy:
       matrix:
-        go-version: [ '1.15', '1.16']
-        buildOS: [ 'linux', 'darwin', 'freebsd', 'windows' ]
-        platform: [ 'ubuntu-latest']
+        go-version: ["1.15", "1.16"]
+        platform: ["ubuntu-latest"]
 
     runs-on: ${{ matrix.platform }}
+    timeout-minutes: 10
 
     steps:
-
       - name: Set up Go ${{ matrix.go-version }}
         uses: actions/setup-go@v2
         with:
@@ -44,14 +42,8 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Build govc
+      - name: Run Tests
         env:
-          GOOS: ${{ matrix.buildOS }}
-        run: |
-          make -C govc install
-
-      - name: Build vcsim
-        env:
-          GOOS: ${{ matrix.buildOS }}
-        run: |
-          make -C vcsim install
+          TIMEOUT: 5m
+          TEST_OPTS: ""
+        run: go test -mod=vendor -timeout $TIMEOUT -count 1 -race -v $TEST_OPTS ./...
