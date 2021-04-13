@@ -45,6 +45,8 @@ var refValueMap = map[string]string{
 	"VirtualMachineSnapshot":         "snapshot",
 	"VmwareDistributedVirtualSwitch": "dvs",
 	"DistributedVirtualSwitch":       "dvs",
+	"ClusterComputeResource":         "domain",
+	"Folder":                         "group",
 }
 
 // Map is the default Registry instance.
