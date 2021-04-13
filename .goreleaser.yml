@@ -1,5 +1,9 @@
 ---
 project_name: govmomi
+before:
+  hooks:
+  - go mod vendor
+  
 builds:
   - id: govc
     goos: &goos-defs
@@ -32,6 +36,7 @@ builds:
     binary: vcsim
     ldflags:
       - "-X main.buildVersion={{.Version}} -X main.buildCommit={{.ShortCommit}} -X main.buildDate={{.Date}}"
+
 archives:
   - id: govcbuild
     builds:
@@ -43,7 +48,7 @@ archives:
       windows: Windows
       freebsd: FreeBSD
       amd64: x86_64
-    format_overrides:
+    format_overrides: &overrides
       - goos: windows
         format: zip
   - id: vcsimbuild
@@ -51,13 +56,14 @@ archives:
       - vcsim
     name_template: "vcsim_{{ .Os }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}"
     replacements: *replacements
-    format_overrides:
-      - goos: windows
-        format: zip
+    format_overrides: *overrides
+        
 snapshot:
   name_template: "{{ .Tag }}-next"
+  
 checksum:
   name_template: "checksums.txt"
+  
 changelog:
   sort: asc
   filters:
@@ -66,6 +72,8 @@ changelog:
       - "^test:"
       - Merge pull request
       - Merge branch
+      
+# upload disabled since it is maintained in homebrew-core
 brews:
   - name: govc
     ids:
@@ -107,6 +115,7 @@ brews:
       system "#{bin}/vcsim -h"
     install: |
       bin.install "vcsim"
+      
 dockers:
   - image_templates:
       - "vmware/govc:{{ .Tag }}"
