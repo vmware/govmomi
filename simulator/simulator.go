@@ -129,6 +129,12 @@ func Fault(msg string, fault types.BaseMethodFault) *soap.Fault {
 	return f
 }
 
+func tracef(format string, v ...interface{}) {
+	if Trace {
+		log.Printf(format, v...)
+	}
+}
+
 func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	handler := ctx.Map.Get(method.This)
 	session := ctx.Session

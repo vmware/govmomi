@@ -18,7 +18,6 @@ package simulator
 
 import (
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"strings"
@@ -152,7 +151,7 @@ func (s *searchDatastore) queryMatch(file os.FileInfo) bool {
 func (s *searchDatastore) search(ds *types.ManagedObjectReference, folder string, dir string) error {
 	files, err := ioutil.ReadDir(dir)
 	if err != nil {
-		log.Printf("search %s: %s", dir, err)
+		tracef("search %s: %s", dir, err)
 		return err
 	}
 

@@ -88,7 +88,7 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 		status = http.StatusInternalServerError
 		msg = err.Error()
 	}
-	log.Printf("nfc %s %s: %s", r.Method, file, msg)
+	tracef("nfc %s %s: %s", r.Method, file, msg)
 	w.WriteHeader(status)
 }
 
