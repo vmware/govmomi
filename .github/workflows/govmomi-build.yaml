@@ -29,22 +29,30 @@ jobs:
   artifacts:
     name: Build Snapshot Release (no upload)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
 
     steps:
       - name: Checkout
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+          
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-      - name: GoReleaser Snapshot
+
+      - name: Docker Login (verify only)
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+          
+      - name: Build Artifacts
         uses: goreleaser/goreleaser-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: latest
           args: release --rm-dist --snapshot # snapshot will disable push/release
+          
       - name: Verify git clean
         shell: bash
         run: |
@@ -55,6 +63,7 @@ jobs:
             echo "::error:: $(git status)"
             exit 1
           fi
+
       # make artifacts available for inspection
       # https://docs.github.com/en/actions/guides/storing-workflow-data-as-artifacts
       - name: Archive run artifacts
