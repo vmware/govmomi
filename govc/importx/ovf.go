@@ -164,6 +164,21 @@ func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
 	return
 }
 
+func (cmd *ovfx) validateNetwork(e *ovf.Envelope, net Network) {
+	var names []string
+
+	if e.Network != nil {
+		for _, n := range e.Network.Networks {
+			if n.Name == net.Name {
+				return
+			}
+			names = append(names, n.Name)
+		}
+	}
+
+	_, _ = cmd.Log(fmt.Sprintf("Warning: invalid NetworkMapping.Name=%q, valid names=%s\n", net.Name, names))
+}
+
 func (cmd *ovfx) NetworkMap(e *ovf.Envelope) ([]types.OvfNetworkMapping, error) {
 	ctx := context.TODO()
 	finder, err := cmd.DatastoreFlag.Finder()
@@ -176,6 +191,7 @@ func (cmd *ovfx) NetworkMap(e *ovf.Envelope) ([]types.OvfNetworkMapping, error) 
 		if m.Network == "" {
 			continue // Not set, let vSphere choose the default network
 		}
+		cmd.validateNetwork(e, m)
 
 		var ref types.ManagedObjectReference
 

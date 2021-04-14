@@ -182,11 +182,14 @@ load test_helper
 
   run govc import.ovf -name ttylinux2 -options - "$ovf" <<<"$options"
   assert_success # switch_name/portgroup_name is unique
+  grep -v "invalid NetworkMapping.Name" <<<"$output"
 
   switch=$(govc find -i network -name DVS0)
   id=$(govc find -i network -config.distributedVirtualSwitch "$switch" -name NSX-dvpg)
   options=$(jq ".NetworkMapping[].Network = \"$id\"" <<<"$spec")
+  options=$(jq ".NetworkMapping[].Name = \"enoent\"" <<<"$options")
 
   run govc import.ovf -options - "$ovf" <<<"$options"
   assert_success # using raw MO id
+  grep "invalid NetworkMapping.Name" <<<"$output"
 }
