@@ -370,9 +370,6 @@ func (v *verbose) objectContent(content []types.ObjectContent) []string {
 
 func (v *verbose) prettyPrint(val interface{}) string {
 	p := pretty.Sprintf("%# v\n", val)
-	if len(p) > 640 {
-		return p // don't bother pruning
-	}
 	var res []string
 	scanner := bufio.NewScanner(strings.NewReader(p))
 	for scanner.Scan() {
