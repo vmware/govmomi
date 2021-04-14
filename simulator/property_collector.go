@@ -332,7 +332,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 	rval, ok := getObject(ctx, ref)
 	if !ok {
 		// Possible if a test uses Map.Remove instead of Destroy_Task
-		log.Printf("object %s no longer exists", ref)
+		tracef("object %s no longer exists", ref)
 		return
 	}
 
@@ -685,11 +685,11 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 			body.Res.Returnval = nil
 			switch wait.Err() {
 			case context.Canceled:
-				log.Printf("%s: WaitForUpdates canceled", pc.Self)
+				tracef("%s: WaitForUpdates canceled", pc.Self)
 				body.Fault_ = Fault("", new(types.RequestCanceled)) // CancelWaitForUpdates was called
 				body.Res = nil
 			case context.DeadlineExceeded:
-				log.Printf("%s: WaitForUpdates MaxWaitSeconds exceeded", pc.Self)
+				tracef("%s: WaitForUpdates MaxWaitSeconds exceeded", pc.Self)
 			}
 
 			return body
@@ -706,7 +706,7 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 				continue
 			}
 
-			log.Printf("%s: applying %d updates to %d filters", pc.Self, len(updates), len(pc.Filter))
+			tracef("%s: applying %d updates to %d filters", pc.Self, len(updates), len(pc.Filter))
 
 			for _, f := range pc.Filter {
 				filter := ctx.Session.Get(f).(*PropertyFilter)
@@ -719,7 +719,7 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 							return body
 						}
 					case types.ObjectUpdateKindModify: // Update
-						log.Printf("%s has %d changes", update.Obj, len(update.ChangeSet))
+						tracef("%s has %d changes", update.Obj, len(update.ChangeSet))
 						if !apply() { // An update may apply to collector traversal specs
 							return body
 						}
