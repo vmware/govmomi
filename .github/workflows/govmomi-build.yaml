@@ -42,9 +42,6 @@ jobs:
         with:
           go-version: 1.16
 
-      - name: Docker Login (verify only)
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-          
       - name: Build Artifacts
         uses: goreleaser/goreleaser-action@v2
         env:
