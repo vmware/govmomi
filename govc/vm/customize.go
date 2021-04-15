@@ -43,6 +43,7 @@ type customize struct {
 	gateway   flags.StringList
 	netmask   flags.StringList
 	dnsserver flags.StringList
+	dnssuffix flags.StringList
 	kind      string
 }
 
@@ -69,8 +70,10 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.gateway = nil
 	f.Var(&cmd.netmask, "netmask", "Netmask")
 	cmd.netmask = nil
-	f.Var(&cmd.dnsserver, "dns-server", "DNS server")
+	f.Var(&cmd.dnsserver, "dns-server", "DNS server list")
 	cmd.dnsserver = nil
+	f.Var(&cmd.dnssuffix, "dns-suffix", "DNS suffix list")
+	cmd.dnssuffix = nil
 	f.StringVar(&cmd.kind, "type", "Linux", "Customization type if spec NAME is not specified (Linux|Windows)")
 }
 
@@ -85,6 +88,8 @@ Optionally specify a customization spec NAME.
 
 The '-ip', '-netmask' and '-gateway' flags are for static IP configuration.
 If the VM has multiple NICs, an '-ip' and '-netmask' must be specified for each.
+
+The '-dns-server' and '-dns-suffix' flags can be specified multiple times.
 
 Windows -tz value requires the Index (hex): https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values
 
@@ -222,6 +227,8 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 			}
 		}
 	}
+
+	spec.GlobalIPSettings.DnsSuffixList = cmd.dnssuffix
 
 	if cmd.prefix.Base != "" {
 		if isWindows {
