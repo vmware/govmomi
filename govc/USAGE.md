@@ -8,6 +8,8 @@ but appear via `govc $cmd -h`:
 ```
   -cert=                    Certificate [GOVC_CERTIFICATE]
   -debug=false              Store debug logs [GOVC_DEBUG]
+  -trace=false              Write SOAP/REST traffic to stderr
+  -verbose=false            Write request/response data to stderr
   -dump=false               Enable output dump
   -json=false               Enable JSON output
   -xml=false                Enable XML output
@@ -50,6 +52,7 @@ but appear via `govc $cmd -h`:
  - [cluster.rule.info](#clusterruleinfo)
  - [cluster.rule.ls](#clusterrulels)
  - [cluster.rule.remove](#clusterruleremove)
+ - [cluster.stretch](#clusterstretch)
  - [cluster.usage](#clusterusage)
  - [datacenter.create](#datacentercreate)
  - [datacenter.info](#datacenterinfo)
@@ -204,6 +207,7 @@ but appear via `govc $cmd -h`:
  - [library.subscriber.ls](#librarysubscriberls)
  - [library.subscriber.rm](#librarysubscriberrm)
  - [library.sync](#librarysync)
+ - [library.update](#libraryupdate)
  - [license.add](#licenseadd)
  - [license.assign](#licenseassign)
  - [license.assigned.ls](#licenseassignedls)
@@ -284,6 +288,7 @@ but appear via `govc $cmd -h`:
  - [tags.update](#tagsupdate)
  - [task.cancel](#taskcancel)
  - [tasks](#tasks)
+ - [tree](#tree)
  - [vapp.destroy](#vappdestroy)
  - [vapp.power](#vapppower)
  - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
@@ -501,16 +506,20 @@ Usage: govc cluster.override.change [OPTIONS]
 Change cluster VM overrides.
 
 Examples:
-  govc cluster.override.change -cluster cluster_1 -vm vm_1 -ha-restart-priority high
-  govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled=false
-  govc cluster.override.change -cluster cluster_1 -vm vm_3 -drs-enabled -drs-mode fullyAutomated
+  govc cluster.override.change -cluster cluster_1 -vm vm_1 -drs-enabled=false
+  govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled -drs-mode fullyAutomated
+  govc cluster.override.change -cluster cluster_1 -vm vm_3 -ha-restart-priority high
+  govc cluster.override.change -cluster cluster_1 -vm vm_4 -ha-additional-delay 30
+  govc cluster.override.change -cluster cluster_1 -vm vm_5 -ha-ready-condition poweredOn
 
 Options:
-  -cluster=              Cluster [GOVC_CLUSTER]
-  -drs-enabled=<nil>     Enable DRS
-  -drs-mode=             DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
-  -ha-restart-priority=  HA restart priority: disabled, lowest, low, medium, high, highest
-  -vm=                   Virtual machine [GOVC_VM]
+  -cluster=               Cluster [GOVC_CLUSTER]
+  -drs-enabled=<nil>      Enable DRS
+  -drs-mode=              DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
+  -ha-additional-delay=0  HA Additional Delay
+  -ha-ready-condition=    HA VM Ready Condition (Start next priority VMs when): poweredOn, guestHbStatusGreen, appHbStatusGreen, useClusterDefault
+  -ha-restart-priority=   HA restart priority: disabled, lowest, low, medium, high, highest
+  -vm=                    Virtual machine [GOVC_VM]
 ```
 
 ## cluster.override.info
@@ -652,6 +661,34 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -l=false               Long listing format
   -name=                 Cluster rule name
+```
+
+## cluster.stretch
+
+```
+Usage: govc cluster.stretch [OPTIONS] CLUSTER
+
+Convert a vSAN cluster into a stretched cluster
+
+The vSAN cluster is converted to a stretched cluster with a witness host
+specified by the 'witness' flag.  The datastore hosts are placed into one
+of two fault domains that are specified in each host list. The name of the
+preferred fault domain can be specified by the 'preferred-fault-domain' flag.
+
+Examples:
+  govc cluster.stretch -dc remote-site-1 \
+    -witness /dc-name/host/192.168.112.2 \
+    -first-fault-domain-hosts 192.168.113.121 \
+    -second-fault-domain-hosts 192.168.113.45,192.168.113.70 \
+    cluster-name
+
+Options:
+  -first-fault-domain-hosts=           Hosts to place in the first fault domain
+  -first-fault-domain-name=Primary     Name of the first fault domain
+  -preferred-fault-domain=Primary      Name of the preferred fault domain
+  -second-fault-domain-hosts=          Hosts to place in the second fault domain
+  -second-fault-domain-name=Secondary  Name of the second fault domain
+  -witness=                            Witness host for the stretched cluster
 ```
 
 ## cluster.usage
@@ -1070,7 +1107,7 @@ Examples:
 
 Options:
   -delay=0               Delay in ms before starting the boot sequence
-  -firmware=bios         Firmware type [bios|efi]
+  -firmware=             Firmware type [bios|efi]
   -order=                Boot device order [-,floppy,cdrom,ethernet,disk]
   -retry=false           If true, retry boot after retry-delay
   -retry-delay=0         Delay in ms before a boot retry
@@ -1221,6 +1258,8 @@ Device info for VM.
 Examples:
   govc device.info -vm $name
   govc device.info -vm $name disk-*
+  govc device.info -vm $name -json disk-* | jq -r .Devices[].Backing.Uuid
+  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].Backing.FileName # vmdk path
   govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].MacAddress
 
 Options:
@@ -1686,6 +1725,7 @@ Examples:
   govc dvs.create DSwitch
   govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork
   govc dvs.portgroup.add -dvs DSwitch -type ephemeral InternalNetwork
+  govc object.destroy network/InternalNetwork # remove the portgroup
 
 Options:
   -auto-expand=<nil>     Ignore the limit on the number of ports
@@ -2929,7 +2969,6 @@ Options:
 Usage: govc import.spec [OPTIONS] PATH_TO_OVF_OR_OVA
 
 Options:
-  -verbose=false         Verbose spec output
 ```
 
 ## import.vmdk
@@ -2951,6 +2990,8 @@ Usage: govc library.checkin [OPTIONS] PATH
 
 Check in VM to Content Library item PATH.
 
+Note: this command requires vCenter 7.0 or higher.
+
 Examples:
   govc library.checkin -vm my-vm my-content/template-vm-item
 
@@ -2965,6 +3006,8 @@ Options:
 Usage: govc library.checkout [OPTIONS] PATH NAME
 
 Check out Content Library item PATH to vm NAME.
+
+Note: this command requires vCenter 7.0 or higher.
 
 Examples:
   govc library.checkout -cluster my-cluster my-content/template-vm-item my-vm
@@ -3294,6 +3337,21 @@ Options:
   -vmtx=                 Sync subscribed library to local library as VM Templates
 ```
 
+## library.update
+
+```
+Usage: govc library.update [OPTIONS] NAME
+
+Update library.
+
+Examples:
+  govc library.update -d "new description" -n "new-name" current-name
+
+Options:
+  -d=                    Library description
+  -n=                    Library name
+```
+
 ## license.add
 
 ```
@@ -3460,7 +3518,7 @@ Examples:
 
 Options:
   -device-level=0        Level for the per device counter
-  -i=0                   Interval ID
+  -i=real                Interval ID (real|day|week|month|year)
   -level=0               Level for the aggregate counter
 ```
 
@@ -3484,7 +3542,8 @@ Examples:
   govc metric.info /dc1/host/cluster cpu.usage.average
 
 Options:
-  -i=0                   Interval ID
+  -g=                    Show info for a specific Group
+  -i=real                Interval ID (real|day|week|month|year)
 ```
 
 ## metric.interval.change
@@ -3500,7 +3559,7 @@ Examples:
 
 Options:
   -enabled=<nil>         Enable or disable
-  -i=0                   Interval ID
+  -i=real                Interval ID (real|day|week|month|year)
   -level=0               Level
 ```
 
@@ -3516,7 +3575,7 @@ Examples:
   govc metric.interval.info -i 300
 
 Options:
-  -i=0                   Interval ID
+  -i=real                Interval ID (real|day|week|month|year)
 ```
 
 ## metric.ls
@@ -3526,13 +3585,22 @@ Usage: govc metric.ls [OPTIONS] PATH
 
 List available metrics for PATH.
 
+The default output format is the metric name.
+The '-l' flag includes the metric description.
+The '-L' flag includes the metric units, instance count (if any) and description.
+The instance count is prefixed with a single '@'.
+If no aggregate is provided for the metric, instance count is prefixed with two '@@'.
+
 Examples:
   govc metric.ls /dc1/host/cluster1
   govc metric.ls datastore/*
+  govc metric.ls -L -g CPU /dc1/host/cluster1/host1
   govc metric.ls vm/* | grep mem. | xargs govc metric.sample vm/*
 
 Options:
-  -i=0                   Interval ID
+  -L=false               Longer listing format
+  -g=                    List a specific Group
+  -i=real                Interval ID (real|day|week|month|year)
   -l=false               Long listing format
 ```
 
@@ -3547,7 +3615,7 @@ Examples:
   govc metric.reset net.bytesRx.average net.bytesTx.average
 
 Options:
-  -i=0                   Interval ID
+  -i=real                Interval ID (real|day|week|month|year)
 ```
 
 ## metric.sample
@@ -3577,9 +3645,9 @@ Examples:
 
 Options:
   -d=30                  Limit object display name to D chars
-  -i=0                   Interval ID
+  -i=real                Interval ID (real|day|week|month|year)
   -instance=*            Instance
-  -n=6                   Max number of samples
+  -n=5                   Max number of samples
   -plot=                 Plot data using gnuplot
   -t=false               Include sample times
 ```
@@ -4140,6 +4208,10 @@ The session.login command can be used to:
 - Avoid passing credentials to other govc commands
 - Send an authenticated raw HTTP request
 
+The session.login command can be used for authenticated curl-style HTTP requests when a PATH arg is given.
+PATH may also contain a query string. The '-u' flag (GOVC_URL) is used for the URL scheme, host and port.
+The request method (-X) defaults to GET. When set to POST, PUT or PATCH, a request body must be provided via stdin.
+
 Examples:
   govc session.login -u root:password@host # Creates a cached session in ~/.govmomi/sessions
   govc session.ls -u root@host # Use the cached session with another command
@@ -4151,7 +4223,9 @@ Examples:
   token=$(govc session.login -u host -cert user.crt -key user.key -issue -token "$bearer")
   govc session.login -u host -cert user.crt -key user.key -token "$token"
   token=$(govc session.login -u host -cert user.crt -key user.key -renew -lifetime 24h -token "$token")
+  # HTTP requests
   govc session.login -r -X GET /api/vcenter/namespace-management/clusters | jq .
+  govc session.login -r -X POST /rest/vcenter/cluster/modules <<<'{"spec": {"cluster": "domain-c9"}}'
 
 Options:
   -X=                    HTTP method
@@ -4191,12 +4265,15 @@ Usage: govc session.ls [OPTIONS]
 
 List active sessions.
 
+All SOAP sessions are listed by default. The '-S' flag will limit this list to the current session.
+
 Examples:
   govc session.ls
   govc session.ls -json | jq -r .CurrentSession.Key
 
 Options:
-  -r=false               Include current REST session (if any)
+  -S=false               List current SOAP session
+  -r=false               List cached REST session (if any)
 ```
 
 ## session.rm
@@ -4286,6 +4363,7 @@ Options:
   -d=false               Print the snapshot description
   -f=false               Print the full path prefix for snapshot
   -i=false               Print the snapshot id
+  -s=false               Print the snapshot size
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -4787,6 +4865,24 @@ Options:
   -n=25                  Output the last N tasks
 ```
 
+## tree
+
+```
+Usage: govc tree [OPTIONS] [PATH]
+
+List contents of the inventory in a tree-like format.
+
+Examples:
+  govc tree -C /
+  govc tree /datacenter/vm
+
+Options:
+  -C=false               Colorize output
+  -L=0                   Max display depth of the inventory tree
+  -l=false               Follow runtime references (e.g. HostSystem VMs)
+  -p=false               Print the object type
+```
+
 ## vapp.destroy
 
 ```
@@ -4827,9 +4923,8 @@ Options:
 Usage: govc version [OPTIONS]
 
 Options:
-  -require=     Require govc version >= this value
-  -l=false      Print detailed govc version information
-information
+  -l=false   Print detailed govc version information
+  -require=  Require govc version >= this value
 ```
 
 ## vm.change
@@ -4998,6 +5093,8 @@ Optionally specify a customization spec NAME.
 The '-ip', '-netmask' and '-gateway' flags are for static IP configuration.
 If the VM has multiple NICs, an '-ip' and '-netmask' must be specified for each.
 
+The '-dns-server' and '-dns-suffix' flags can be specified multiple times.
+
 Windows -tz value requires the Index (hex): https://support.microsoft.com/en-us/help/973627/microsoft-time-zone-index-values
 
 Examples:
@@ -5008,16 +5105,24 @@ Examples:
   govc vm.customize -vm VM -ip 10.0.0.178 -netmask 255.255.255.0 -ip 10.0.0.162 -netmask 255.255.255.0
   # Multiple -ip with -mac are applied by vCenter to the NIC with the given MAC address
   govc vm.customize -vm VM -mac 00:50:56:be:dd:f8 -ip 10.0.0.178 -netmask 255.255.255.0 -mac 00:50:56:be:60:cf -ip 10.0.0.162 -netmask 255.255.255.0
+  # Dual stack IPv4/IPv6, single NIC
+  govc vm.customize -vm VM -ip 10.0.0.1 -netmask 255.255.255.0 -ip6 '2001:db8::1/64' -name my-hostname NAME
+  # DHCPv6, single NIC
+  govc vm.customize -vm VM -ip6 dhcp6 NAME
+  # Static IPv6, three NICs, last one with two addresses
+  govc vm.customize -vm VM -ip6 2001:db8::1/64 -ip6 2001:db8::2/64 -ip6 2001:db8::3/64,2001:db8::4/64 NAME
   govc vm.customize -vm VM -auto-login 3 NAME
   govc vm.customize -vm VM -prefix demo NAME
   govc vm.customize -vm VM -tz America/New_York NAME
 
 Options:
   -auto-login=0          Number of times the VM should automatically login as an administrator
-  -dns-server=[]         DNS server
+  -dns-server=[]         DNS server list
+  -dns-suffix=[]         DNS suffix list
   -domain=               Domain name
   -gateway=[]            Gateway
-  -ip=[]                 IP address
+  -ip=[]                 IPv4 address
+  -ip6=[]                IPv6 addresses with optional netmask (defaults to /64), separated by comma
   -mac=[]                MAC address
   -name=                 Host name
   -netmask=[]            Netmask
@@ -5291,8 +5396,8 @@ Usage: govc vm.markasvm [OPTIONS] VM...
 Mark VM template as a virtual machine.
 
 Examples:
-  govc vm.markasvm $name -host host1
-  govc vm.markasvm $name -pool cluster1/Resources
+  govc vm.markasvm -host host1 $name
+  govc vm.markasvm -host host1 $name
 
 Options:
   -host=                 Host system [GOVC_HOST]
@@ -5349,7 +5454,8 @@ Note that '-net' is currently required with '-net.address', even when not changi
 
 Examples:
   govc vm.network.change -vm $vm -net PG2 ethernet-0
-  govc vm.network.change -vm $vm -net PG2 -net.address 00:00:0f:2e:5d:69 ethernet-0
+  govc vm.network.change -vm $vm -net PG2 -net.address 00:00:0f:2e:5d:69 ethernet-0 # set to manual MAC address
+  govc vm.network.change -vm $vm -net PG2 -net.address - ethernet-0 # set to generated MAC address
   govc device.info -vm $vm ethernet-*
 
 Options:
@@ -5546,9 +5652,11 @@ Usage: govc volume.rm [OPTIONS] ID
 
 Remove CNS volume.
 
+Note: if volume.rm returns not found errors,
+consider using 'govc disk.ls -R' to reconcile the datastore inventory.
+
 Examples:
   govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d
-  govc volume.rm $(govc volume.ls -i pvc-de368f19-a997-4d5d-9eae-4496f10f429a)
 
 Options:
 ```

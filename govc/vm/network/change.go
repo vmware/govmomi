@@ -63,7 +63,8 @@ Note that '-net' is currently required with '-net.address', even when not changi
 
 Examples:
   govc vm.network.change -vm $vm -net PG2 ethernet-0
-  govc vm.network.change -vm $vm -net PG2 -net.address 00:00:0f:2e:5d:69 ethernet-0
+  govc vm.network.change -vm $vm -net PG2 -net.address 00:00:0f:2e:5d:69 ethernet-0 # set to manual MAC address
+  govc vm.network.change -vm $vm -net PG2 -net.address - ethernet-0 # set to generated MAC address
   govc device.info -vm $vm ethernet-*`
 }
 

@@ -66,7 +66,8 @@ When given '-auto-expand=true', behaves as the UI labeled "Elastic" choice.
 Examples:
   govc dvs.create DSwitch
   govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork
-  govc dvs.portgroup.add -dvs DSwitch -type ephemeral InternalNetwork`
+  govc dvs.portgroup.add -dvs DSwitch -type ephemeral InternalNetwork
+  govc object.destroy network/InternalNetwork # remove the portgroup`
 }
 
 func (cmd *add) Process(ctx context.Context) error {

@@ -1,5 +1,31 @@
 # changelog
 
+### 0.25.0 (2021-04-16)
+
+* Add tree command
+
+* Add library.update command
+
+* Add cluster.stretch command
+
+* Add '-trace' and '-verbose' flags
+
+* Add '-l' option to version command
+
+* Add '-s' option to snapshot.tree command
+
+* Add 'ha-additional-delay' flag to cluster.override.change
+
+* Add IPv6 support to vm.customize
+
+* Add '-g' flag to metric.info and metric.ls
+
+* Add session.ls '-S' flag
+
+* Fix incorrect DeviceID value in device.pci.add
+
+* Fix cluster.usage Free field
+
 ### 0.24.0 (2020-12-20)
 
 * Add cluster.usage command
