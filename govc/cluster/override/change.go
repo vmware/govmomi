@@ -77,7 +77,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (cmd *change) Description() string {
 	return `Change cluster VM overrides.
-	
+
 Examples:
   govc cluster.override.change -cluster cluster_1 -vm vm_1 -drs-enabled=false
   govc cluster.override.change -cluster cluster_1 -vm vm_2 -drs-enabled -drs-mode fullyAutomated

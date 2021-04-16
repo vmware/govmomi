@@ -59,8 +59,11 @@ of two fault domains that are specified in each host list. The name of the
 preferred fault domain can be specified by the 'preferred-fault-domain' flag.
 
 Examples:
-  govc cluster.stretch -dc=remote-site-1 -witness=/datacenter/host/192.168.112.2 -first-fault-domain-hosts=192.168.113.121 -second-fault-domain-hosts=192.168.113.45,192.168.113.70 cluster-name
-`
+  govc cluster.stretch -dc remote-site-1 \
+    -witness /dc-name/host/192.168.112.2 \
+    -first-fault-domain-hosts 192.168.113.121 \
+    -second-fault-domain-hosts 192.168.113.45,192.168.113.70 \
+    cluster-name`
 }
 
 func (cmd *stretch) Register(ctx context.Context, f *flag.FlagSet) {
