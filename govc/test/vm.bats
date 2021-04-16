@@ -1036,7 +1036,7 @@ load test_helper
   run govc vm.customize -vm DC0_H0_VM0 -type Linux
   assert_failure # no -ip specified
 
-  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -netmask 255.255.0.0 -type Linux
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -netmask 255.255.0.0 -type Linux -dns-server 1.1.1.1 -dns-suffix example.com
   assert_success
 
   run govc vm.power -on DC0_H0_VM0
