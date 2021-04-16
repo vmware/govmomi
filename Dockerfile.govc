@@ -10,7 +10,6 @@ ENV UID=10001
 RUN adduser \
     --disabled-password \
     --gecos "" \
-    --home "/nonexistent" \
     --shell "/sbin/nologin" \
     --no-create-home \
     --uid "${UID}" \
@@ -22,9 +21,6 @@ RUN mkdir /temporary-tmp-directory && chmod 777 /temporary-tmp-directory
 ###############################################################################
 # Final stage
 FROM scratch
-
-# Run all commands as non-root
-USER appuser:appuser
 
 # Allow container to use latest TLS certificates
 COPY --from=build /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
@@ -38,6 +34,12 @@ COPY --chown=appuser --from=build /temporary-tmp-directory /tmp
 
 # Copy application from external build
 COPY govc /govc
+
+# Run all commands as non-root
+USER appuser:appuser
+
+# session cache, etc
+ENV GOVMOMI_HOME=/tmp
 
 # Set CMD to application with container defaults
 CMD ["/govc"]
