@@ -228,10 +228,6 @@ EOF
   wait $pid
 }
 
-docker_name() {
-  echo "vcsim-$1-$(govc object.collect -s "vm/$1" config.uuid)"
-}
-
 @test "vcsim run container" {
   require_docker
 
