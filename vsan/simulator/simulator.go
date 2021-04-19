@@ -17,6 +17,8 @@ limitations under the License.
 package simulator
 
 import (
+	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -42,6 +44,10 @@ func New() *simulator.Registry {
 		ManagedObjectReference: vsan.VsanVcStretchedClusterSystem,
 	})
 
+	r.Put(&ClusterConfigSystem{
+		ManagedObjectReference: vsan.VsanVcClusterConfigSystemInstance,
+	})
+
 	return r
 }
 
@@ -57,6 +63,54 @@ func (s *StretchedClusterSystem) VSANVcConvertToStretchedCluster(ctx *simulator.
 
 	return &methods.VSANVcConvertToStretchedClusterBody{
 		Res: &types.VSANVcConvertToStretchedClusterResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+type ClusterConfigSystem struct {
+	vim.ManagedObjectReference
+
+	Config map[vim.ManagedObjectReference]*types.VsanConfigInfoEx
+}
+
+func (s *ClusterConfigSystem) info(ref vim.ManagedObjectReference) *types.VsanConfigInfoEx {
+	if s.Config == nil {
+		s.Config = make(map[vim.ManagedObjectReference]*types.VsanConfigInfoEx)
+	}
+
+	info := s.Config[ref]
+	if info == nil {
+		info = &types.VsanConfigInfoEx{}
+		info.DefaultConfig = &vim.VsanClusterConfigInfoHostDefaultInfo{
+			Uuid: uuid.New().String(),
+		}
+		s.Config[ref] = info
+	}
+
+	return info
+}
+
+func (s *ClusterConfigSystem) VsanClusterGetConfig(ctx *simulator.Context, req *types.VsanClusterGetConfig) soap.HasFault {
+	return &methods.VsanClusterGetConfigBody{
+		Res: &types.VsanClusterGetConfigResponse{
+			Returnval: *s.info(req.Cluster),
+		},
+	}
+}
+
+func (s *ClusterConfigSystem) VsanClusterReconfig(ctx *simulator.Context, req *types.VsanClusterReconfig) soap.HasFault {
+	task := simulator.CreateTask(s, "vsanClusterReconfig", func(*simulator.Task) (vim.AnyType, vim.BaseMethodFault) {
+		// TODO: validate req fields
+		info := s.info(req.Cluster)
+		if req.VsanReconfigSpec.UnmapConfig != nil {
+			info.UnmapConfig = req.VsanReconfigSpec.UnmapConfig
+		}
+		return nil, nil
+	})
+
+	return &methods.VsanClusterReconfigBody{
+		Res: &types.VsanClusterReconfigResponse{
 			Returnval: task.Run(ctx),
 		},
 	}
