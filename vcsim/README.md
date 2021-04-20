@@ -6,11 +6,26 @@ language, it can be used by any language that can talk to the vSphere API.
 
 ## Installation
 
-```sh
-% export GOPATH=$HOME/gopath
-% go get -u github.com/vmware/govmomi/vcsim
-% $GOPATH/bin/vcsim -h
+### Docker
+
+The official `vcsim` [Docker images](https://hub.docker.com/r/vmware/vcsim) are built from this [Dockerfile](../Dockerfile.vcsim).
+
+### Binaries
+You can find prebuilt `vcsim` binaries on the [releases page](https://github.com/vmware/govmomi/releases).
+
+### Source
+
+To build `vcsim` from source, first install the [Go toolchain](https://golang.org/dl/).
+
+You can then install the latest `vcsim` from Github using:
+
+```console
+$ go get -u github.com/vmware/govmomi/vcsim
+$ $GOPATH/bin/vcsim -h
 ```
+
+**Note:** govmomi and its binaries use [Go modules](https://golang.org/ref/mod),
+i.e. explicitly setting `GOPATH` is not required anymore.
 
 ## Usage
 
@@ -21,8 +36,8 @@ of resources can be increased or decreased using the various resource type
 flags.  Resources can also be created and removed using the API. In fact, vcsim
 itself uses the vSphere API generate its inventory.
 
-``` console
-% vcsim -h # pruned to model type flags used in the Examples section
+```console
+$ vcsim -h # pruned to model type flags used in the Examples section
 Usage of vcsim:
   -app int
         Number of virtual apps per compute resource
@@ -63,15 +78,15 @@ generated inventory.  Each example assumes **GOVC_URL** is set to vcsim's defaul
 [listen address](#listen-address):
 
 ```console
-% export GOVC_URL=https://user:pass@127.0.0.1:8989
+$ export GOVC_URL=https://user:pass@127.0.0.1:8989
 ```
 
 ### Default vCenter inventory
 
 ```console
-% $GOPATH/bin/vcsim
+$ $GOPATH/bin/vcsim
 
-% govc find -l
+$ govc find -l
 Folder                       /
 Datacenter                   /DC0
 Folder                       /DC0/vm
@@ -103,9 +118,9 @@ With the `-esx` flag, vcsim behaves as a standalone ESX host without any vCenter
 specific features.
 
 ```console
-% $GOPATH/vcsim -esx
+$ $GOPATH/vcsim -esx
 
-% govc find
+$ govc find
 /
 /ha-datacenter
 /ha-datacenter/vm
@@ -125,10 +140,10 @@ specific features.
 
 Model flags can be specified to increase or decrease the generated inventory.
 
-``` console
-% vcsim -dc 2 -folder 1 -ds 4 -pod 1 -nsx 2 -pool 2 -app 1
+```console
+$ vcsim -dc 2 -folder 1 -ds 4 -pod 1 -nsx 2 -pool 2 -app 1
 
-% govc find -l
+$ govc find -l
 Folder                       /
 Datacenter                   /DC0
 Folder                       /DC0/vm
@@ -205,10 +220,10 @@ OpaqueNetwork                /F0/DC1/network/F0/DC1_NSX1
 
 Create yourself a Datastore cluster:
 
-``` console
-% govc object.mv /F0/DC0/datastore/F0/LocalDS_[123] /DC1/datastore/DC0_POD0
+```console
+$ govc object.mv /F0/DC0/datastore/F0/LocalDS_[123] /DC1/datastore/DC0_POD0
 
-% govc find -l /DC0/datastore
+$ govc find -l /DC0/datastore
 Folder      /DC0/datastore
 StoragePod  /DC0/datastore/DC0_POD0
 Datastore   /DC0/datastore/LocalDS_0
@@ -223,25 +238,25 @@ The model flags when set to 0 can be used to turn off generation of any type.
 With **Datacenter** generation turned off, the inventory will be empty:
 
 ```console
-% $GOPATH/vcsim -dc 0
-% govc find
+$ $GOPATH/vcsim -dc 0
+$ govc find
 /
 ```
 
 You can create your own inventory using the API or govc:
 
-``` console
-% govc datacenter.create godc
+```console
+$ govc datacenter.create godc
 
-% govc cluster.create gocluster
+$ govc cluster.create gocluster
 
-% govc cluster.add -hostname gohost1 -username user -password pass -noverify
+$ govc cluster.add -hostname gohost1 -username user -password pass -noverify
 
-% govc datastore.create -type local -name gostore -path /tmp gocluster/*
+$ govc datastore.create -type local -name gostore -path /tmp gocluster/*
 
-% govc vm.create -ds gostore -cluster gocluster govm1
+$ govc vm.create -ds gostore -cluster gocluster govm1
 
-% govc find -l
+$ govc find -l
 Folder                  /
 Datacenter              /godc
 Folder                  /godc/vm
@@ -288,7 +303,7 @@ implement any method documented in the [VMware vSphere API Reference][apiref].
 To see the list of supported methods:
 
 ```console
-% curl -sk https://user:pass@127.0.0.1:8989/about
+$ curl -sk https://user:pass@127.0.0.1:8989/about
 ```
 
 [apiref]:https://code.vmware.com/apis/196/vsphere
@@ -299,27 +314,27 @@ The default vcsim listen address is `127.0.0.1:8989`.  Use the `-l` flag to
 listen on another address:
 
 ```console
-% vcsim -l 10.118.69.224:8989 # specific address
+$ vcsim -l 10.118.69.224:8989 # specific address
 
-% vcsim -l :8989 # any address
+$ vcsim -l :8989 # any address
 ```
 
 When given a port value of `0`, an unused port will be chosen.  You can then
 source the GOVC_URL from another process, for example:
 
 ```console
-% govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
+$ govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
 
-% mkfifo $govc_sim_env
+$ mkfifo $govc_sim_env
 
-% vcsim -l 127.0.0.1:0 -E $govc_sim_env &
+$ vcsim -l 127.0.0.1:0 -E $govc_sim_env &
 
-% eval "$(cat $govc_sim_env)"
+$ eval "$(cat $govc_sim_env)"
 
 # ... run tests ...
 
-% kill $GOVC_SIM_PID
-% rm -f $govc_sim_env
+$ kill $GOVC_SIM_PID
+$ rm -f $govc_sim_env
 ```
 
 Tests written in Go can also use the [simulator package](https://godoc.org/github.com/vmware/govmomi/simulator)
