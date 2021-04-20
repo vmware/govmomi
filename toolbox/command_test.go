@@ -33,6 +33,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/toolbox/hgfs"
+	"github.com/vmware/govmomi/toolbox/process"
 	"github.com/vmware/govmomi/toolbox/vix"
 )
 
@@ -188,7 +189,7 @@ func TestVixRelayedCommandHandler(t *testing.T) {
 		t.Fatalf("%q", reply)
 	}
 
-	cmd.ProcessStartCommand = func(pm *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
+	cmd.ProcessStartCommand = func(pm *process.Manager, r *vix.StartProgramRequest) (int64, error) {
 		return -1, nil
 	}
 
@@ -443,13 +444,12 @@ func TestVixProcessHgfsPacket(t *testing.T) {
 
 func TestVixListProcessesEx(t *testing.T) {
 	c := NewCommandClient()
-	pm := c.Service.Command.ProcessManager
 
-	c.Service.Command.ProcessStartCommand = func(pm *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
-		var p *Process
+	c.Service.Command.ProcessStartCommand = func(pm *process.Manager, r *vix.StartProgramRequest) (int64, error) {
+		var p *process.Process
 		switch r.ProgramPath {
 		case "foo":
-			p = NewProcessFunc(func(ctx context.Context, arg string) error {
+			p = process.NewFunc(func(ctx context.Context, arg string) error {
 				return nil
 			})
 		default:
@@ -483,7 +483,7 @@ func TestVixListProcessesEx(t *testing.T) {
 		t.Fatalf("rc: %d", rc)
 	}
 
-	pm.wg.Wait()
+	<-time.Tick(time.Millisecond * 100)
 
 	ps := new(vix.ListProcessesRequest)
 

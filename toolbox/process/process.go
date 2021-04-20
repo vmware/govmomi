@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package toolbox
+package process
 
 import (
 	"bytes"
@@ -40,7 +40,7 @@ import (
 )
 
 var (
-	xmlEscape *strings.Replacer
+	EscapeXML *strings.Replacer
 
 	shell = "/bin/sh"
 
@@ -65,7 +65,7 @@ func init() {
 		replace = append(replace, url.QueryEscape(c))
 	}
 
-	xmlEscape = strings.NewReplacer(replace...)
+	EscapeXML = strings.NewReplacer(replace...)
 
 	// See procMgrPosix.c:ProcMgrStartProcess:
 	// Prefer bash -c as is uses exec() to replace itself,
@@ -79,9 +79,9 @@ func init() {
 	}
 }
 
-// ProcessIO encapsulates IO for Go functions and OS commands such that they can interact via the OperationsManager
+// IO encapsulates IO for Go functions and OS commands such that they can interact via the OperationsManager
 // without file system disk IO.
-type ProcessIO struct {
+type IO struct {
 	In struct {
 		io.Writer
 		io.Reader
@@ -92,8 +92,8 @@ type ProcessIO struct {
 	Err *bytes.Buffer
 }
 
-// ProcessState is the toolbox representation of the GuestProcessInfo type
-type ProcessState struct {
+// State is the toolbox representation of the GuestProcessInfo type
+type State struct {
 	StartTime int64 // (keep first to ensure 64-bit alignment)
 	EndTime   int64 // (keep first to ensure 64-bit alignment)
 
@@ -103,12 +103,12 @@ type ProcessState struct {
 	Pid      int64
 	ExitCode int32
 
-	IO *ProcessIO
+	IO *IO
 }
 
 // WithIO enables toolbox Process IO without file system disk IO.
 func (p *Process) WithIO() *Process {
-	p.IO = &ProcessIO{
+	p.IO = &IO{
 		Out: new(bytes.Buffer),
 		Err: new(bytes.Buffer),
 	}
@@ -116,8 +116,8 @@ func (p *Process) WithIO() *Process {
 	return p
 }
 
-// ProcessFile implements the os.FileInfo interface to enable toolbox interaction with virtual files.
-type ProcessFile struct {
+// File implements the os.FileInfo interface to enable toolbox interaction with virtual files.
+type File struct {
 	io.Reader
 	io.Writer
 	io.Closer
@@ -127,17 +127,17 @@ type ProcessFile struct {
 }
 
 // Name implementation of the os.FileInfo interface method.
-func (a *ProcessFile) Name() string {
+func (a *File) Name() string {
 	return a.name
 }
 
 // Size implementation of the os.FileInfo interface method.
-func (a *ProcessFile) Size() int64 {
+func (a *File) Size() int64 {
 	return int64(a.size)
 }
 
 // Mode implementation of the os.FileInfo interface method.
-func (a *ProcessFile) Mode() os.FileMode {
+func (a *File) Mode() os.FileMode {
 	if strings.HasSuffix(a.name, "stdin") {
 		return 0200
 	}
@@ -145,21 +145,21 @@ func (a *ProcessFile) Mode() os.FileMode {
 }
 
 // ModTime implementation of the os.FileInfo interface method.
-func (a *ProcessFile) ModTime() time.Time {
+func (a *File) ModTime() time.Time {
 	return time.Now()
 }
 
 // IsDir implementation of the os.FileInfo interface method.
-func (a *ProcessFile) IsDir() bool {
+func (a *File) IsDir() bool {
 	return false
 }
 
 // Sys implementation of the os.FileInfo interface method.
-func (a *ProcessFile) Sys() interface{} {
+func (a *File) Sys() interface{} {
 	return nil
 }
 
-func (s *ProcessState) toXML() string {
+func (s *State) toXML() string {
 	const format = "<proc>" +
 		"<cmd>%s</cmd>" +
 		"<name>%s</name>" +
@@ -175,7 +175,7 @@ func (s *ProcessState) toXML() string {
 	argv := []string{s.Name}
 
 	if len(s.Args) != 0 {
-		argv = append(argv, xmlEscape.Replace(s.Args))
+		argv = append(argv, EscapeXML.Replace(s.Args))
 	}
 
 	args := strings.Join(argv, " ")
@@ -188,7 +188,7 @@ func (s *ProcessState) toXML() string {
 
 // Process managed by the ProcessManager.
 type Process struct {
-	ProcessState
+	State
 
 	Start func(*Process, *vix.StartProgramRequest) (int64, error)
 	Wait  func() error
@@ -197,19 +197,19 @@ type Process struct {
 	ctx context.Context
 }
 
-// ProcessError can be returned by the Process.Wait function to propagate ExitCode to ProcessState.
-type ProcessError struct {
+// Error can be returned by the Process.Wait function to propagate ExitCode to ProcessState.
+type Error struct {
 	Err      error
 	ExitCode int32
 }
 
-func (e *ProcessError) Error() string {
+func (e *Error) Error() string {
 	return e.Err.Error()
 }
 
-// ProcessManager manages processes within the guest.
-// See: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.vm.guest.ProcessManager.html
-type ProcessManager struct {
+// Manager manages processes within the guest.
+// See: http://pubs.vmware.com/vsphere-60/topic/com.vmware.wssdk.apiref.doc/vim.vm.guest.Manager.html
+type Manager struct {
 	wg      sync.WaitGroup
 	mu      sync.Mutex
 	expire  time.Duration
@@ -217,14 +217,14 @@ type ProcessManager struct {
 	pids    sync.Pool
 }
 
-// NewProcessManager creates a new ProcessManager instance.
-func NewProcessManager() *ProcessManager {
+// NewManager creates a new ProcessManager instance.
+func NewManager() *Manager {
 	// We use pseudo PIDs that don't conflict with OS PIDs, so they can live in the same table.
 	// For the pseudo PIDs, we use a sync.Pool rather than a plain old counter to avoid the unlikely,
 	// but possible wrapping should such a counter exceed MaxInt64.
 	pid := int64(32768) // TODO: /proc/sys/kernel/pid_max
 
-	return &ProcessManager{
+	return &Manager{
 		expire:  time.Minute * 5,
 		entries: make(map[int64]*Process),
 		pids: sync.Pool{
@@ -239,7 +239,7 @@ func NewProcessManager() *ProcessManager {
 // A goroutine is started that calls the Process.Wait function.  After Process.Wait has
 // returned, the ProcessState EndTime and ExitCode fields are set.  The process state can be
 // queried via ListProcessesInGuest until it is removed, 5 minutes after Wait returns.
-func (m *ProcessManager) Start(r *vix.StartProgramRequest, p *Process) (int64, error) {
+func (m *Manager) Start(r *vix.StartProgramRequest, p *Process) (int64, error) {
 	p.Name = r.ProgramPath
 	p.Args = r.Arguments
 
@@ -275,7 +275,7 @@ func (m *ProcessManager) Start(r *vix.StartProgramRequest, p *Process) (int64, e
 
 		if werr != nil {
 			rc := int32(1)
-			if xerr, ok := werr.(*ProcessError); ok {
+			if xerr, ok := werr.(*Error); ok {
 				rc = xerr.ExitCode
 			}
 
@@ -304,7 +304,7 @@ func (m *ProcessManager) Start(r *vix.StartProgramRequest, p *Process) (int64, e
 
 // Kill cancels the Process Context.
 // Returns true if pid exists in the process table, false otherwise.
-func (m *ProcessManager) Kill(pid int64) bool {
+func (m *Manager) Kill(pid int64) bool {
 	m.mu.Lock()
 	entry, ok := m.entries[pid]
 	m.mu.Unlock()
@@ -320,7 +320,7 @@ func (m *ProcessManager) Kill(pid int64) bool {
 // ListProcesses marshals the ProcessState for the given pids.
 // If no pids are specified, all current processes are included.
 // The return value can be used for responding to a VixMsgListProcessesExRequest.
-func (m *ProcessManager) ListProcesses(pids []int64) []byte {
+func (m *Manager) ListProcesses(pids []int64) []byte {
 	w := new(bytes.Buffer)
 
 	m.mu.Lock()
@@ -356,7 +356,7 @@ func (p procFileInfo) Size() int64 {
 }
 
 // Stat implements hgfs.FileHandler.Stat
-func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
+func (m *Manager) Stat(u *url.URL) (os.FileInfo, error) {
 	name := path.Join("/proc", u.Path)
 
 	info, err := os.Stat(name)
@@ -380,7 +380,7 @@ func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
 		return nil, os.ErrNotExist
 	}
 
-	pf := &ProcessFile{
+	pf := &File{
 		name:   name,
 		Closer: ioutil.NopCloser(nil), // via hgfs, nop for stdout and stderr
 	}
@@ -424,13 +424,13 @@ func (m *ProcessManager) Stat(u *url.URL) (os.FileInfo, error) {
 }
 
 // Open implements hgfs.FileHandler.Open
-func (m *ProcessManager) Open(u *url.URL, mode int32) (hgfs.File, error) {
+func (m *Manager) Open(u *url.URL, mode int32) (hgfs.File, error) {
 	info, err := m.Stat(u)
 	if err != nil {
 		return nil, err
 	}
 
-	pinfo, ok := info.(*ProcessFile)
+	pinfo, ok := info.(*File)
 
 	if !ok {
 		return nil, os.ErrNotExist // fall through to default os.Open
@@ -458,11 +458,11 @@ type processFunc struct {
 	err error
 }
 
-// NewProcessFunc creates a new Process, where the Start function calls the given run function within a goroutine.
+// NewFunc creates a new Process, where the Start function calls the given run function within a goroutine.
 // The Wait function waits for the goroutine to finish and returns the error returned by run.
 // The run ctx param may be used to return early via the ProcessManager.Kill method.
 // The run args command is that of the VixMsgStartProgramRequest.Arguments field.
-func NewProcessFunc(run func(ctx context.Context, args string) error) *Process {
+func NewFunc(run func(ctx context.Context, args string) error) *Process {
 	f := &processFunc{run: run}
 
 	return &Process{
@@ -471,8 +471,8 @@ func NewProcessFunc(run func(ctx context.Context, args string) error) *Process {
 	}
 }
 
-// ProcessFuncIO is the Context key to access optional ProcessIO
-var ProcessFuncIO = struct {
+// FuncIO is the Context key to access optional ProcessIO
+var FuncIO = struct {
 	key int64
 }{vix.CommandMagicWord}
 
@@ -487,7 +487,7 @@ func (f *processFunc) start(p *Process, r *vix.StartProgramRequest) (int64, erro
 		p.IO.In.Reader, p.IO.In.Writer = pr, pw
 		c, p.IO.In.Closer = pr, pw
 
-		p.ctx = context.WithValue(p.ctx, ProcessFuncIO, p.IO)
+		p.ctx = context.WithValue(p.ctx, FuncIO, p.IO)
 	}
 
 	go func() {
@@ -516,13 +516,13 @@ type processCmd struct {
 	cmd *exec.Cmd
 }
 
-// NewProcess creates a new Process, where the Start function use exec.CommandContext to create and start the process.
+// New creates a new Process, where the Start function use exec.CommandContext to create and start the process.
 // The Wait function waits for the process to finish and returns the error returned by exec.Cmd.Wait().
 // Prior to Wait returning, the exec.Cmd.Wait() error is used to set the ProcessState.ExitCode, if error is of type exec.ExitError.
 // The ctx param may be used to kill the process via the ProcessManager.Kill method.
 // The VixMsgStartProgramRequest param fields are mapped to the exec.Cmd counterpart fields.
 // Processes are started within a sub-shell, allowing for i/o redirection, just as with the C version of vmware-tools.
-func NewProcess() *Process {
+func New() *Process {
 	c := new(processCmd)
 
 	return &Process{
@@ -572,7 +572,7 @@ func (c *processCmd) start(p *Process, r *vix.StartProgramRequest) (int64, error
 func (c *processCmd) wait() error {
 	err := c.cmd.Wait()
 	if err != nil {
-		xerr := &ProcessError{
+		xerr := &Error{
 			Err:      err,
 			ExitCode: 1,
 		}
@@ -589,10 +589,10 @@ func (c *processCmd) wait() error {
 	return nil
 }
 
-// NewProcessRoundTrip starts a Go function to implement a toolbox backed http.RoundTripper
-func NewProcessRoundTrip() *Process {
-	return NewProcessFunc(func(ctx context.Context, host string) error {
-		p, _ := ctx.Value(ProcessFuncIO).(*ProcessIO)
+// NewRoundTrip starts a Go function to implement a toolbox backed http.RoundTripper
+func NewRoundTrip() *Process {
+	return NewFunc(func(ctx context.Context, host string) error {
+		p, _ := ctx.Value(FuncIO).(*IO)
 
 		closers := []io.Closer{p.In.Closer}
 

@@ -34,6 +34,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/toolbox/hgfs"
+	"github.com/vmware/govmomi/toolbox/process"
 	"github.com/vmware/govmomi/toolbox/vix"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -413,7 +414,7 @@ func TestServiceRunESX(t *testing.T) {
 	}
 
 	if *testPID != 0 {
-		service.Command.ProcessStartCommand = func(m *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
+		service.Command.ProcessStartCommand = func(m *process.Manager, r *vix.StartProgramRequest) (int64, error) {
 			wg.Add(1)
 			defer wg.Done()
 
@@ -421,7 +422,7 @@ func TestServiceRunESX(t *testing.T) {
 			case "/bin/date":
 				return *testPID, nil
 			case "sleep":
-				p := NewProcessFunc(func(ctx context.Context, arg string) error {
+				p := process.NewFunc(func(ctx context.Context, arg string) error {
 					d, err := time.ParseDuration(arg)
 					if err != nil {
 						return err
@@ -429,7 +430,7 @@ func TestServiceRunESX(t *testing.T) {
 
 					select {
 					case <-ctx.Done():
-						return &ProcessError{Err: ctx.Err(), ExitCode: 42}
+						return &process.Error{Err: ctx.Err(), ExitCode: 42}
 					case <-time.After(d):
 					}
 
