@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package toolbox
+package process
 
 import (
 	"bufio"
@@ -34,7 +34,7 @@ import (
 )
 
 func TestProcessFunction(t *testing.T) {
-	m := NewProcessManager()
+	m := NewManager()
 	var pids []int64
 
 	for i := 0; i <= 2; i++ {
@@ -43,13 +43,13 @@ func TestProcessFunction(t *testing.T) {
 			Arguments:   strconv.Itoa(i),
 		}
 
-		pid, _ := m.Start(r, NewProcessFunc(func(_ context.Context, arg string) error {
+		pid, _ := m.Start(r, NewFunc(func(_ context.Context, arg string) error {
 			rc, _ := strconv.Atoi(arg)
 			if rc == 0 {
 				return nil
 
 			}
-			return &ProcessError{Err: errors.New("fail"), ExitCode: int32(rc)}
+			return &Error{Err: errors.New("fail"), ExitCode: int32(rc)}
 		}))
 
 		if pid == 0 {
@@ -72,7 +72,7 @@ func TestProcessFunction(t *testing.T) {
 }
 
 func TestProcessCommand(t *testing.T) {
-	m := NewProcessManager()
+	m := NewManager()
 	var pids []int64
 
 	for i := 0; i <= 2; i++ {
@@ -81,7 +81,7 @@ func TestProcessCommand(t *testing.T) {
 			Arguments:   fmt.Sprintf(`-c "exit %d"`, i),
 		}
 
-		pid, _ := m.Start(r, NewProcess())
+		pid, _ := m.Start(r, New())
 		pids = append(pids, pid)
 	}
 
@@ -101,21 +101,21 @@ func TestProcessCommand(t *testing.T) {
 	}
 
 	shell = "/enoent/enoent"
-	_, err := m.Start(r, NewProcess())
+	_, err := m.Start(r, New())
 	if err == nil {
 		t.Error("expected error")
 	}
 	shell = r.ProgramPath
 
 	r.ProgramPath = "/enoent/enoent"
-	_, err = m.Start(r, NewProcess())
+	_, err = m.Start(r, New())
 	if err == nil {
 		t.Error("expected error")
 	}
 }
 
 func TestProcessKill(t *testing.T) {
-	m := NewProcessManager()
+	m := NewManager()
 	var pids []int64
 
 	procs := []struct {
@@ -127,10 +127,10 @@ func TestProcessKill(t *testing.T) {
 				ProgramPath: "test",
 				Arguments:   "none",
 			},
-			NewProcessFunc(func(ctx context.Context, _ string) error {
+			NewFunc(func(ctx context.Context, _ string) error {
 				select {
 				case <-ctx.Done():
-					return &ProcessError{Err: ctx.Err(), ExitCode: 42}
+					return &Error{Err: ctx.Err(), ExitCode: 42}
 				case <-time.After(time.Minute):
 				}
 
@@ -142,7 +142,7 @@ func TestProcessKill(t *testing.T) {
 				ProgramPath: "/bin/bash",
 				Arguments:   fmt.Sprintf(`-c "while true; do sleep 1; done"`),
 			},
-			NewProcess(),
+			New(),
 		},
 	}
 
@@ -186,7 +186,7 @@ func TestProcessKill(t *testing.T) {
 }
 
 func TestProcessRemove(t *testing.T) {
-	m := NewProcessManager()
+	m := NewManager()
 
 	m.expire = time.Millisecond
 
@@ -194,7 +194,7 @@ func TestProcessRemove(t *testing.T) {
 		ProgramPath: "test",
 	}
 
-	pid, _ := m.Start(r, NewProcessFunc(func(_ context.Context, arg string) error {
+	pid, _ := m.Start(r, NewFunc(func(_ context.Context, arg string) error {
 		return nil
 	}))
 
@@ -217,7 +217,7 @@ func TestEscapeXML(t *testing.T) {
 	}
 
 	for i, test := range tests {
-		e := xmlEscape.Replace(test.in)
+		e := EscapeXML.Replace(test.in)
 		if e != test.out {
 			t.Errorf("%d: %s != %s", i, e, test.out)
 		}
@@ -226,7 +226,7 @@ func TestEscapeXML(t *testing.T) {
 
 func TestProcessError(t *testing.T) {
 	fault := errors.New("fail")
-	var err error = &ProcessError{Err: fault}
+	var err error = &Error{Err: fault}
 
 	if err.Error() != fault.Error() {
 		t.Fatal()
@@ -234,13 +234,13 @@ func TestProcessError(t *testing.T) {
 }
 
 func TestProcessIO(t *testing.T) {
-	m := NewProcessManager()
+	m := NewManager()
 
 	r := &vix.StartProgramRequest{
 		ProgramPath: "/bin/date",
 	}
 
-	p := NewProcess().WithIO()
+	p := New().WithIO()
 
 	_, err := m.Start(r, p)
 	if err != nil {
@@ -284,14 +284,14 @@ func TestProcessRoundTripper(t *testing.T) {
 
 	u, _ := url.Parse(echo.URL)
 
-	m := NewProcessManager()
+	m := NewManager()
 
 	r := &vix.StartProgramRequest{
 		ProgramPath: "http.RoundTrip",
 		Arguments:   u.Host,
 	}
 
-	p := NewProcessRoundTrip()
+	p := NewRoundTrip()
 
 	_, err := m.Start(r, p)
 	if err != nil {

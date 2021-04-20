@@ -31,6 +31,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/toolbox/hgfs"
+	"github.com/vmware/govmomi/toolbox/process"
 	"github.com/vmware/govmomi/toolbox/vix"
 )
 
@@ -39,11 +40,11 @@ type CommandHandler func(vix.CommandRequestHeader, []byte) ([]byte, error)
 type CommandServer struct {
 	Out *ChannelOut
 
-	ProcessManager *ProcessManager
+	ProcessManager *process.Manager
 
 	Authenticate func(vix.CommandRequestHeader, []byte) error
 
-	ProcessStartCommand func(*ProcessManager, *vix.StartProgramRequest) (int64, error)
+	ProcessStartCommand func(*process.Manager, *vix.StartProgramRequest) (int64, error)
 
 	handlers map[uint32]CommandHandler
 
@@ -53,7 +54,7 @@ type CommandServer struct {
 func registerCommandServer(service *Service) *CommandServer {
 	server := &CommandServer{
 		Out:            service.out,
-		ProcessManager: NewProcessManager(),
+		ProcessManager: process.NewManager(),
 	}
 
 	server.handlers = map[uint32]CommandHandler{
@@ -231,12 +232,12 @@ func (c *CommandServer) StartCommand(header vix.CommandRequestHeader, data []byt
 	return append([]byte(fmt.Sprintf("%d", pid)), 0), nil
 }
 
-func DefaultStartCommand(m *ProcessManager, r *vix.StartProgramRequest) (int64, error) {
-	p := NewProcess()
+func DefaultStartCommand(m *process.Manager, r *vix.StartProgramRequest) (int64, error) {
+	p := process.New()
 
 	switch r.ProgramPath {
 	case "http.RoundTrip":
-		p = NewProcessRoundTrip()
+		p = process.NewRoundTrip()
 	default:
 		// Standard vmware-tools requires an absolute path,
 		// we'll enable IO redirection by default without an absolute path.
@@ -296,7 +297,7 @@ func (c *CommandServer) ReadEnvironmentVariables(header vix.CommandRequestHeader
 
 	if len(r.Names) == 0 {
 		for _, e := range os.Environ() {
-			_, _ = buf.WriteString(fmt.Sprintf("<ev>%s</ev>", xmlEscape.Replace(e)))
+			_, _ = buf.WriteString(fmt.Sprintf("<ev>%s</ev>", process.EscapeXML.Replace(e)))
 		}
 	} else {
 		for _, key := range r.Names {
@@ -304,7 +305,7 @@ func (c *CommandServer) ReadEnvironmentVariables(header vix.CommandRequestHeader
 			if val == "" {
 				continue
 			}
-			_, _ = buf.WriteString(fmt.Sprintf("<ev>%s=%s</ev>", xmlEscape.Replace(key), xmlEscape.Replace(val)))
+			_, _ = buf.WriteString(fmt.Sprintf("<ev>%s=%s</ev>", process.EscapeXML.Replace(key), process.EscapeXML.Replace(val)))
 		}
 	}
 
