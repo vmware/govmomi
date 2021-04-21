@@ -21,6 +21,7 @@ import (
 	"net"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/simulator"
@@ -48,29 +49,32 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 			t.Errorf("expected v6 ip, but %q is v4", ip)
 		}
 
+		delay := time.Second
 		var wg sync.WaitGroup
-		wg.Add(1)
-		go func() {
-			wg.Done()
-			ip, err = vm.WaitForIP(ctx, true)
-			if err != nil {
-				t.Fatal(err)
-			}
-			wg.Done()
-		}()
-		wg.Wait()
 
 		wg.Add(1)
-		simulator.Map.WithLock(simulator.SpoofContext(), obj.Reference(), func() {
-			simulator.Map.Update(obj, []types.PropertyChange{
-				{Name: "guest.ipAddress", Val: "10.0.0.1"},
+		go func() {
+			defer wg.Done()
+			t.Logf("delaying map update for %v", delay)
+			time.Sleep(delay)
+
+			simulator.Map.WithLock(simulator.SpoofContext(), obj.Reference(), func() {
+				simulator.Map.Update(obj, []types.PropertyChange{
+					{Name: "guest.ipAddress", Val: "10.0.0.1"},
+				})
 			})
-		})
-		wg.Wait()
+		}()
+
+		ip, err = vm.WaitForIP(ctx, true)
+		if err != nil {
+			t.Fatal(err)
+		}
+
 		if net.ParseIP(ip).To4() == nil {
 			t.Errorf("expected v4 ip, but %q is v6", ip)
 		}
 
+		wg.Wait()
 		return nil
 	})
 
