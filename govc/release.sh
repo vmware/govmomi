@@ -1,5 +1,9 @@
 #!/bin/bash -e
 
+# DEPRECATED!!!!
+# Github Actions is creating releases from 0.25.0 onwards. 
+# TODO (@embano1): remove this file once #2369 lands
+
 # To release govc:
 # - Bump Version version var in flags/version.go
 # - Update ../CHANGELOG.md and ./CHANGELOG.md
