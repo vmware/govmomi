@@ -287,6 +287,38 @@ func TestSimulator(t *testing.T) {
 		t.Fatal("Number of volumes mismatches after creating a single volume")
 	}
 
+	// QueryAsync
+	queryFilter = cnstypes.CnsQueryFilter{}
+	querySelection := cnstypes.CnsQuerySelection{}
+	queryVolumeAsyncTask, err := cnsClient.QueryVolumeAsync(ctx, queryFilter, querySelection)
+	if err != nil {
+		t.Fatal(err)
+	}
+	queryVolumeAsyncTaskInfo, err := cns.GetTaskInfo(ctx, queryVolumeAsyncTask)
+	if err != nil {
+		t.Fatal(err)
+	}
+	queryVolumeAsyncTaskResult, err := cns.GetTaskResult(ctx, queryVolumeAsyncTaskInfo)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if queryVolumeAsyncTaskResult == nil {
+		t.Fatalf("Empty queryVolumeAsync Task Result")
+	}
+	queryVolumeAsyncOperationRes := queryVolumeAsyncTaskResult.GetCnsVolumeOperationResult()
+	if queryVolumeAsyncOperationRes.Fault != nil {
+		t.Fatalf("Failed to query volume detail using queryVolumeAsync: fault=%+v", queryVolumeAsyncOperationRes.Fault)
+	}
+
+	// QueryVolume
+	queryFilter = cnstypes.CnsQueryFilter{}
+	queryResult, err = cnsClient.QueryVolume(ctx, queryFilter)
+	if err != nil {
+		t.Fatalf("Failed to query volume with QueryFilter: err=%+v", err)
+	}
+	if len(queryResult.Volumes) != existingNumDisks+1 {
+		t.Fatal("Number of volumes mismatches after deleting a single volume")
+	}
 	// QueryVolumeInfo
 	queryVolumeInfoTask, err := cnsClient.QueryVolumeInfo(ctx, []cnstypes.CnsVolumeId{{Id: createVolumeOperationRes.VolumeId.Id}})
 	if err != nil {
@@ -310,7 +342,7 @@ func TestSimulator(t *testing.T) {
 
 	// QueryAll
 	queryFilter = cnstypes.CnsQueryFilter{}
-	querySelection := cnstypes.CnsQuerySelection{}
+	querySelection = cnstypes.CnsQuerySelection{}
 	queryResult, err = cnsClient.QueryAllVolume(ctx, queryFilter, querySelection)
 
 	if len(queryResult.Volumes) != existingNumDisks+1 {
