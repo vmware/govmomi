@@ -240,3 +240,23 @@ func CnsConfigureVolumeACLs(ctx context.Context, r soap.RoundTripper, req *types
 
 	return resBody.Res, nil
 }
+
+type CnsQueryAsyncBody struct {
+	Req    *types.CnsQueryAsync         `xml:"urn:vsan CnsQueryAsync,omitempty"`
+	Res    *types.CnsQueryAsyncResponse `xml:"urn:vsan CnsQueryAsyncResponse,omitempty"`
+	Fault_ *soap.Fault                  `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsQueryAsyncBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsQueryAsync(ctx context.Context, r soap.RoundTripper, req *types.CnsQueryAsync) (*types.CnsQueryAsyncResponse, error) {
+	var reqBody, resBody CnsQueryAsyncBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}

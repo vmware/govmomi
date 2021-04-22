@@ -630,3 +630,33 @@ type CnsNFSAccessControlSpec struct {
 func init() {
 	types.Add("CnsNFSAccessControlSpec", reflect.TypeOf((*CnsNFSAccessControlSpec)(nil)).Elem())
 }
+
+type CnsQueryAsync CnsQueryAsyncRequestType
+
+func init() {
+	types.Add("CnsQueryAsync", reflect.TypeOf((*CnsQueryAsync)(nil)).Elem())
+}
+
+type CnsQueryAsyncRequestType struct {
+	This      types.ManagedObjectReference `xml:"_this"`
+	Filter    CnsQueryFilter               `xml:"filter"`
+	Selection *CnsQuerySelection           `xml:"selection,omitempty"`
+}
+
+func init() {
+	types.Add("CnsQueryAsyncRequestType", reflect.TypeOf((*CnsQueryAsyncRequestType)(nil)).Elem())
+}
+
+type CnsQueryAsyncResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsAsyncQueryResult struct {
+	CnsVolumeOperationResult
+
+	QueryResult CnsQueryResult `xml:"queryResult,omitempty"`
+}
+
+func init() {
+	types.Add("CnsAsyncQueryResult", reflect.TypeOf((*CnsAsyncQueryResult)(nil)).Elem())
+}

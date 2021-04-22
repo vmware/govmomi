@@ -962,4 +962,27 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("volume:%q deleted sucessfully", volumeID)
 	}
+	// Test QueryVolumeAsync API
+	queryVolumeAsyncTask, err := cnsClient.QueryVolumeAsync(ctx, queryFilter, querySelection)
+	if err != nil {
+		t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	queryVolumeAsyncTaskInfo, err := GetTaskInfo(ctx, queryVolumeAsyncTask)
+	if err != nil {
+		t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	queryVolumeAsyncTaskResults, err := GetTaskResultArray(ctx, queryVolumeAsyncTaskInfo)
+	if err != nil {
+		t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	for _, queryVolumeAsyncTaskResult := range queryVolumeAsyncTaskResults {
+		queryVolumeAsyncOperationRes := queryVolumeAsyncTaskResult.GetCnsVolumeOperationResult()
+		if queryVolumeAsyncOperationRes.Fault != nil {
+			t.Fatalf("Failed to query volumes with QueryVolumeAsync. fault=%+v", queryVolumeAsyncOperationRes.Fault)
+		}
+		t.Logf("Successfully queried Volume using queryAsync API. queryVolumeAsyncTaskResult: %+v", pretty.Sprint(queryVolumeAsyncTaskResult))
+	}
 }
