@@ -1,39 +1,49 @@
 # govc
 
-govc is a vSphere CLI built on top of govmomi.
+`govc` is a vSphere CLI built on top of govmomi.
 
 The CLI is designed to be a user friendly CLI alternative to the GUI and well suited for automation tasks.
 It also acts as a [test harness](test) for the govmomi APIs and provides working examples of how to use the APIs.
 
 ## Installation
 
-You can find prebuilt govc binaries on the [releases page](https://github.com/vmware/govmomi/releases).
+### Docker
 
-Download and install a binary locally like this:
+The official `govc` [Docker images](https://hub.docker.com/r/vmware/govc) are built from this [Dockerfile](../Dockerfile.govc).
+
+### Binaries
+You can find prebuilt `govc` binaries on the [releases page](https://github.com/vmware/govmomi/releases).
+
+You can download and install a binary locally like this:
 
 ``` console
-% curl -L $URL_TO_BINARY | gunzip > /usr/local/bin/govc
-% chmod +x /usr/local/bin/govc
+# get version from https://github.com/vmware/govmomi/releases/latest
+$ VERSION=v0.25.0
+$ URL=https://github.com/vmware/govmomi/releases/download/${VERSION}/govc_$(uname -s)_$(uname -m).tar.gz
+
+$ curl -L -o - $URL | tar -Oxvzf - govc > /usr/local/bin/govc
+$ chmod +x /usr/local/bin/govc
 ```
 
 ### Source
 
-To build govc from source, first install the [Go toolchain](https://golang.org/dl/).
-
-Make sure to set the environment variable [GOPATH](https://github.com/golang/go/wiki/SettingGOPATH).
-
-You can then install the latest govc from github using:
+To build `govc` from source, first install the [Go
+toolchain](https://golang.org/dl/). You can then install the latest `govc` from
+Github using:
 
 ``` console
-% go get -u github.com/vmware/govmomi/govc
+$ go get -u github.com/vmware/govmomi/govc
 ```
+
+**Note:** govmomi and its binaries use [Go modules](https://golang.org/ref/mod),
+i.e. explicitly setting `GOPATH` is not required anymore.
 
 Make sure `$GOPATH/bin` is in your `PATH` to use the version installed from source.
 
 If you've made local modifications to the repository at `$GOPATH/src/github.com/vmware/govmomi`, you can install using:
 
 ``` console
-% go install github.com/vmware/govmomi/govc
+$ go install github.com/vmware/govmomi/govc
 ```
 
 ## Usage
@@ -170,6 +180,17 @@ To configure the debug output you can use two environment variables.
 
 The [debug-format](../scripts/debug-format.sh) script can be used to format the debug output similar to the `-trace` flag.
 
+### Print Version Information
+
+For troubleshooting and when filing issues, get build related details with:
+
+```console
+$ govc version -l
+Build Version: v0.25.0-next
+Build Commit: e86da96e
+Build Date: 2021-04-19T10:29:57Z
+```
+
 #### stderr debug
 
 If you prefer debug output to be sent to stderr and seen while the command is running you can override the file behavior
@@ -180,7 +201,7 @@ by setting the debug path to a dash: `export GOVC_DEBUG_PATH=-`
 If you're using environment variables to set `GOVC_URL`, verify the values are set as expected:
 
 ``` console
-% govc env
+$ govc env
 ```
 
 ### Connection issues
@@ -188,12 +209,12 @@ If you're using environment variables to set `GOVC_URL`, verify the values are s
 Check your proxy settings:
 
 ``` console
-% env | grep -i https_proxy
+$ env | grep -i https_proxy
 ```
 
 Test connection using curl:
 ``` console
-% curl --verbose -k -X POST https://x.x.x.x/sdk
+$ curl --verbose -k -X POST https://x.x.x.x/sdk
 ```
 
 ### MSYS2 (Windows)
@@ -208,7 +229,7 @@ For example, running govc directly against the vCenter vpxd endpoint at `http://
 Set the environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
 
 ``` console
-% GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
+$ GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
 ```
 
 ## Examples
@@ -231,7 +252,7 @@ Several examples are embedded in the govc command [help](USAGE.md)
 
 ## Status
 
-Changes to the cli are subject to [semantic versioning](http://semver.org).
+Changes to the CLI are subject to [semantic versioning](http://semver.org).
 
 Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
@@ -239,7 +260,7 @@ When new govc commands or flags are added, the PATCH version will be incremented
 version from within a script, for example:
 
 ``` console
-% govc version -require 0.14
+$ govc version -require 0.24
 ```
 
 ## Projects using govc

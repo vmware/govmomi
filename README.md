@@ -37,9 +37,17 @@ See [godoc.org][godoc] for documentation.
 
 ## Installation
 
-```sh
-go get -u github.com/vmware/govmomi
+### govmomi (Package)
+
+```console
+$ go get -u github.com/vmware/govmomi
 ```
+
+### Binaries and Docker Images for `govc` and `vcsim`
+
+Installation instructions, released binaries and Docker images are documented in
+the respective README files of [`govc`](govc/README.md) and
+[`vcsim`](vcsim/README.md).
 
 ## Discussion
 
