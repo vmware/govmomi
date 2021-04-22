@@ -54,12 +54,17 @@ Changes to the API are subject to [semantic versioning](http://semver.org).
 Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 ## Projects using govmomi
+* [collectd-vsphere](https://github.com/travis-ci/collectd-vsphere)
 
 * [Docker Machine](https://github.com/docker/machine/tree/master/drivers/vmwarevsphere)
 
 * [Docker InfraKit](https://github.com/docker/infrakit/tree/master/pkg/provider/vsphere)
 
 * [Docker LinuxKit](https://github.com/linuxkit/linuxkit/tree/master/src/cmd/linuxkit)
+
+* [Gru](https://github.com/dnaeon/gru)
+
+* [Juju](https://github.com/juju/juju)
 
 * [Kubernetes](https://github.com/kubernetes/kubernetes/tree/master/pkg/cloudprovider/providers/vsphere)
 
@@ -69,31 +74,27 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [Kubernetes kops](https://github.com/kubernetes/kops/tree/master/upup/pkg/fi/cloudup/vsphere)
 
-* [Terraform](https://github.com/terraform-providers/terraform-provider-vsphere)
-
-* [Packer](https://github.com/jetbrains-infra/packer-builder-vsphere)
-
-* [VMware VIC Engine](https://github.com/vmware/vic)
-
-* [Travis CI](https://github.com/travis-ci/jupiter-brain)
-
-* [collectd-vsphere](https://github.com/travis-ci/collectd-vsphere)
-
-* [Gru](https://github.com/dnaeon/gru)
-
 * [Libretto](https://github.com/apcera/libretto/tree/master/virtualmachine/vsphere)
-
-* [Telegraf](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/vsphere)
 
 * [Open Storage](https://github.com/libopenstorage/openstorage/tree/master/pkg/storageops/vsphere)
 
-* [Juju](https://github.com/juju/juju)
-
-* [vSphere 7.0](https://docs.vmware.com/en/VMware-vSphere/7.0/rn/vsphere-esxi-vcenter-server-7-vsphere-with-kubernetes-release-notes.html)
-
 * [OPS](https://github.com/nanovms/ops)
 
+* [Packer](https://github.com/jetbrains-infra/packer-builder-vsphere)
+
+* [Rancher](https://github.com/rancher/rancher/blob/master/pkg/api/norman/customization/vsphere/listers.go)
+
+* [Terraform](https://github.com/terraform-providers/terraform-provider-vsphere)
+
+* [Travis CI](https://github.com/travis-ci/jupiter-brain)
+
+* [Telegraf](https://github.com/influxdata/telegraf/tree/master/plugins/inputs/vsphere)
+
 * [VMware Event Broker Appliance](https://github.com/vmware-samples/vcenter-event-broker-appliance/tree/development/vmware-event-router)
+
+* [VMware VIC Engine](https://github.com/vmware/vic)
+  
+* [vSphere 7.0](https://docs.vmware.com/en/VMware-vSphere/7.0/rn/vsphere-esxi-vcenter-server-7-vsphere-with-kubernetes-release-notes.html)
 
 ## Related projects
 
