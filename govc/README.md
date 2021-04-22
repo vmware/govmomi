@@ -21,8 +21,8 @@ You can download and install a binary locally like this:
 $ VERSION=v0.25.0
 $ URL=https://github.com/vmware/govmomi/releases/download/${VERSION}/govc_$(uname -s)_$(uname -m).tar.gz
 
-$ curl -L -o - $URL | tar -Oxvzf - govc > /usr/local/bin/govc
-$ chmod +x /usr/local/bin/govc
+# extract govc binary to /usr/local/bin
+$ curl -L -o - $URL | tar -C /usr/local/bin -xvzf - govc
 ```
 
 ### Source

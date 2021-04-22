@@ -13,6 +13,17 @@ The official `vcsim` [Docker images](https://hub.docker.com/r/vmware/vcsim) are 
 ### Binaries
 You can find prebuilt `vcsim` binaries on the [releases page](https://github.com/vmware/govmomi/releases).
 
+You can download and install a binary locally like this:
+
+``` console
+# get version from https://github.com/vmware/govmomi/releases/latest
+$ VERSION=v0.25.0
+$ URL=https://github.com/vmware/govmomi/releases/download/${VERSION}/vcsim_$(uname -s)_$(uname -m).tar.gz
+
+# extract vcsim binary to /usr/local/bin
+$ curl -L -o - $URL | tar -C /usr/local/bin -xvzf - vcsim
+```
+
 ### Source
 
 To build `vcsim` from source, first install the [Go toolchain](https://golang.org/dl/).
