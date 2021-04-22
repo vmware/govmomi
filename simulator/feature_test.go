@@ -88,10 +88,9 @@ func Example_setVirtualMachineProperties() {
 // Tie a docker container to the lifecycle of a vcsim VM
 func Example_runContainer() {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		_, err := exec.LookPath("docker")
-		if err != nil || os.Getenv("TRAVIS") == "true" {
+		if _, err := exec.LookPath("docker"); err != nil {
 			fmt.Println("0 diff")
-			return // docker is required; TravisCI is rate limited
+			return
 		}
 
 		finder := find.NewFinder(c)
