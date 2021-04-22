@@ -111,7 +111,7 @@ func main() {
 	}
 
 	switch flag.Arg(0) {
-	case "uuidgen": // util-linux not installed on Travis CI
+	case "uuidgen":
 		fmt.Println(uuid.New().String())
 		os.Exit(0)
 	case "version":
