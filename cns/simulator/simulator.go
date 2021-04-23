@@ -456,3 +456,48 @@ func (m *CnsVolumeManager) CnsQueryVolumeInfo(ctx *simulator.Context, req *cnsty
 		},
 	}
 }
+
+func (m *CnsVolumeManager) CnsQueryAsync(ctx *simulator.Context, req *cnstypes.CnsQueryAsync) soap.HasFault {
+	task := simulator.CreateTask(m, "QueryVolumeAsync", func(*simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		retVolumes := []cnstypes.CnsVolume{}
+		reqVolumeIds := make(map[string]bool)
+		isQueryFilter := false
+
+		if req.Filter.VolumeIds != nil {
+			isQueryFilter = true
+		}
+		// Create map of requested volume Ids in query request
+		for _, volumeID := range req.Filter.VolumeIds {
+			reqVolumeIds[volumeID.Id] = true
+		}
+
+		for _, dsVolumes := range m.volumes {
+			for _, volume := range dsVolumes {
+				if isQueryFilter {
+					if _, ok := reqVolumeIds[volume.VolumeId.Id]; ok {
+						retVolumes = append(retVolumes, *volume)
+					}
+				} else {
+					retVolumes = append(retVolumes, *volume)
+				}
+			}
+		}
+		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
+		operationResult = append(operationResult, &cnstypes.CnsAsyncQueryResult{
+			QueryResult: cnstypes.CnsQueryResult{
+				Volumes: retVolumes,
+				Cursor:  cnstypes.CnsCursor{},
+			},
+		})
+
+		return &cnstypes.CnsVolumeOperationBatchResult{
+			VolumeResults: operationResult,
+		}, nil
+	})
+
+	return &methods.CnsQueryAsyncBody{
+		Res: &cnstypes.CnsQueryAsyncResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
