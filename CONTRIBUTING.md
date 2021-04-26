@@ -1,104 +1,123 @@
-# Contributing to govmomi
+# Contributing to `govmomi`
 
 ## Getting started
 
 First, fork the repository on GitHub to your personal account.
 
-Note that _GOPATH_ can be any directory, the example below uses _$HOME/govmomi_.
-Change _$USER_ below to your github username if they are not the same.
+Note that `GOPATH` can be any directory, the example below uses `$HOME/govmomi`.
+Change `$USER` below to your Github username if they are not the same.
 
-``` shell
-export GOPATH=$HOME/govmomi
-go get github.com/vmware/govmomi
-cd $GOPATH/src/github.com/vmware/govmomi
-git config push.default nothing # anything to avoid pushing to vmware/govmomi by default
-git remote rename origin vmware
-git remote add $USER git@github.com:$USER/govmomi.git
-git fetch $USER
+```console
+$ export GOPATH=$HOME/govmomi
+$ go get github.com/vmware/govmomi
+
+$ cd $GOPATH/src/github.com/vmware/govmomi
+$ git config push.default nothing # anything to avoid pushing to vmware/govmomi by default
+$ git remote rename origin vmware
+$ git remote add $USER git@github.com:$USER/govmomi.git
+$ git fetch $USER
 ```
 
-## Installing from source
-
-Compile the govmomi libraries and install govc using:
-
-``` shell
-go install -v github.com/vmware/govmomi/govc
-```
-
-Note that **govc/build.sh** is only used for building release binaries.
-
-## Contribution flow
+## Contribution Flow
 
 This is a rough outline of what a contributor's workflow looks like:
 
+- Create an issue describing the feature/fix
 - Create a topic branch from where you want to base your work.
 - Make commits of logical units.
 - Make sure your commit messages are in the proper format (see below).
-- Update CHANGELOG.md and/or govc/CHANGELOG.md when appropriate.
 - Push your changes to a topic branch in your fork of the repository.
-- Submit a pull request to vmware/govmomi.
+- Submit a pull request to `vmware/govmomi`.
 
-Example:
+See [below](#format-of-the-commit-message) for details on commit best practices
+and **supported prefixes**, e.g. `govc: <message>`.
 
-``` shell
-git checkout -b my-new-feature vmware/master
-git commit -a
-git push $USER my-new-feature
+### Example 1 - Fix a Bug in `govmomi`
+
+```console
+$ git checkout -b issue-<number> vmware/master
+$ git commit -a -m "Fix ..." -m "Closes: #<issue-number>"
+$ git push $USER issue-<number>
 ```
 
-### Stay in sync with upstream
+### Example 2 - Add a Feature to `govc`
 
-When your branch gets out of sync with the vmware/master branch, use the following to update:
-
-``` shell
-git checkout my-new-feature
-git fetch -a
-git rebase vmware/master
-git push --force-with-lease $USER my-new-feature
+```console
+$ git checkout -b issue-<number> vmware/master
+$ git commit -a -m "govc: Add feature ..." -m "Closes: #<issue-number>"
+$ git push $USER issue-<number>
 ```
 
-### Updating pull requests
+### Example 3 - Fix a Bug in `vcsim`
 
-If your PR fails to pass CI or needs changes based on code review, you'll most likely want to squash these changes into
-existing commits.
+```console
+$ git checkout -b issue-<number> vmware/master
+$ git commit -a -m "vcsim: Fix ..." -m "Closes: #<issue-number>"
+$ git push $USER issue-<number>
+```
 
-If your pull request contains a single commit or your changes are related to the most recent commit, you can simply
-amend the commit.
+### Stay in sync with Upstream
 
-``` shell
-git add .
-git commit --amend
-git push --force-with-lease $USER my-new-feature
+When your branch gets out of sync with the vmware/master branch, use the
+following to update (rebase):
+
+```console
+$ git checkout issue-<number>
+$ git fetch -a
+$ git rebase vmware/master
+$ git push --force-with-lease $USER issue-<number>
+```
+
+### Updating Pull Requests
+
+If your PR fails to pass CI or needs changes based on code review, you'll most
+likely want to squash these changes into existing commits.
+
+If your pull request contains a single commit or your changes are related to the
+most recent commit, you can simply amend the commit.
+
+```console
+$ git add .
+$ git commit --amend
+$ git push --force-with-lease $USER issue-<number>
 ```
 
 If you need to squash changes into an earlier commit, you can use:
 
-``` shell
-git add .
-git commit --fixup <commit>
-git rebase -i --autosquash vmware/master
-git push --force-with-lease $USER my-new-feature
+```console
+$ git add .
+$ git commit --fixup <commit>
+$ git rebase -i --autosquash vmware/master
+$ git push --force-with-lease $USER issue-<number>
 ```
 
-Be sure to add a comment to the PR indicating your new changes are ready to review, as github does not generate a
-notification when you git push.
+Be sure to add a comment to the PR indicating your new changes are ready to
+review, as Github does not generate a notification when you git push.
 
-### Code style
+### Code Style
 
-The coding style suggested by the Golang community is used in govmomi. See the
+The coding style suggested by the Go community is used in `govmomi`. See the
 [style doc](https://github.com/golang/go/wiki/CodeReviewComments) for details.
 
-Try to limit column width to 120 characters for both code and markdown documents such as this one.
+Try to limit column width to 120 characters for both code and markdown documents
+such as this one.
 
 ### Format of the Commit Message
 
-We follow the conventions on [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/).
+We follow the conventions described in [How to Write a Git Commit
+Message](http://chris.beams.io/posts/git-commit/).
 
-Be sure to include any related GitHub issue references in the commit message.
+Be sure to include any related GitHub issue references in the commit message,
+e.g. `Closes: #<number>`.
 
-### Running CI checks and tests
-You can run both `make check` and `make test` from the top level of the repository. While `make check` will catch formatting and import errors, it will not apply any fixes. The developer is expected to do that.
+### Running CI Checks and Tests
+You can run both `make check` and `make test` from the top level of the
+repository. 
+
+While `make check` will catch formatting and import errors, it will not apply
+any fixes. The developer is expected to do that.
 
 ## Reporting Bugs and Creating Issues
 
-When opening a new issue, try to roughly follow the commit message format conventions above.
+When opening a new issue, try to roughly follow the commit message format
+conventions above.
