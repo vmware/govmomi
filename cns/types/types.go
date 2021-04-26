@@ -585,6 +585,16 @@ func init() {
 	types.Add("CnsFault", reflect.TypeOf((*CnsFault)(nil)).Elem())
 }
 
+type CnsVolumeNotFoundFault struct {
+	CnsFault
+
+	VolumeId CnsVolumeId `xml:"volumeId"`
+}
+
+func init() {
+	types.Add("CnsVolumeNotFoundFault", reflect.TypeOf((*CnsVolumeNotFoundFault)(nil)).Elem())
+}
+
 type CnsAlreadyRegisteredFault struct {
 	CnsFault `xml:"fault,typeattr"`
 
