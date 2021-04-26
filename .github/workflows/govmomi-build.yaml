@@ -35,12 +35,30 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-          
+          fetch-depth: 0 # for CHANGELOG
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
+
+      - name: Create CHANGELOG
+        env:
+          IMAGE: quay.io/git-chglog/git-chglog
+          # https://quay.io/repository/git-chglog/git-chglog from tag v0.14.2
+          IMAGE_SHA: 998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
+        run: |
+          # use a pseudo tag to only include changes since last release
+          NEXT_TAG=$(git describe --abbrev=0 --tags)-next
+          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} --next-tag ${NEXT_TAG} -o RELEASE_CHANGELOG.md ${NEXT_TAG}
+
+      - name: Archive CHANGELOG
+        uses: actions/upload-artifact@v2
+        with:
+          name: CHANGELOG
+          path: |
+            ./RELEASE_CHANGELOG.md
+          retention-days: 1
 
       - name: Build Artifacts
         uses: goreleaser/goreleaser-action@v2
@@ -48,8 +66,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: latest
-          args: release --rm-dist --snapshot # snapshot will disable push/release
-          
+          # snapshot will disable push/release
+          args: release --rm-dist --snapshot --release-notes RELEASE_CHANGELOG.md
+
       - name: Verify git clean
         shell: bash
         run: |
