@@ -26,23 +26,32 @@ jobs:
     timeout-minutes: 60
 
     steps:
+      - name: Docker Login
+        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
+
       - name: Checkout
         uses: actions/checkout@v2
         with:
-          fetch-depth: 0
-          
+          fetch-depth: 0 # for CHANGELOG
+
       - name: Set up Go
         uses: actions/setup-go@v2
         with:
           go-version: 1.16
-          
-      - name: Docker Login
-        run: docker login -u ${{ secrets.DOCKERHUB_USERNAME }} -p ${{ secrets.DOCKERHUB_PASSWORD }}
-        
+
+      - name: Create CHANGELOG
+        env:
+          IMAGE: quay.io/git-chglog/git-chglog
+          # https://quay.io/repository/git-chglog/git-chglog from tag v0.14.2
+          IMAGE_SHA: 998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
+        run: |
+          # generate CHANGELOG for this Github release tag only
+          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md $(basename "${{ github.ref }}" )
+
       - name: Build and push Artifacts
         uses: goreleaser/goreleaser-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: latest
-          args: release --rm-dist # will push artefacts and container images
+          args: release --rm-dist --release-notes RELEASE_CHANGELOG.md # will push artefacts and container images

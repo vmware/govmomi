@@ -65,15 +65,15 @@ datastore, given there are no other datastores that match those globs.
 
 The relative path in this example can only be used if the command can
 umambigously resolve a datacenter to use as origin for the query. If no
-datacenter is specified, govc defaults to the only datacenter, if there is only
-one. The datacenter itself can be specified as a pattern as well, enabling the
-following arguments: `-dc='my*' -ds='*store'`. The datastore pattern is looked
-up and matched relative to the datacenter which itself is specified as a
+datacenter is specified, `govc` defaults to the only datacenter, if there is
+only one. The datacenter itself can be specified as a pattern as well, enabling
+the following arguments: `-dc='my*' -ds='*store'`. The datastore pattern is
+looked up and matched relative to the datacenter which itself is specified as a
 pattern.
 
 Besides specifying managed entities as arguments, they can also be specified
-using environment variables. The following environment variables are used by govc
-to set defaults:
+using environment variables. The following environment variables are used by
+`govc` to set defaults:
 
 * `GOVC_URL`: URL of ESXi or vCenter instance to connect to.
 
@@ -147,7 +147,7 @@ to set defaults:
 
 The `-verbose` flag writes request and response data to stderr, in a format more compact than the `-trace` or `-debug` flags.
 The output includes the request method name with abbreviated input parameters. The response data is more detailed and may include
-structures formatted as Go code, such as Task property updates.  The value of some properties will the govc `object.collect`
+structures formatted as Go code, such as Task property updates.  The value of some properties will the `govc` `object.collect`
 command that can be used to view the actual value.
 
 ### Trace flag
@@ -224,9 +224,10 @@ to [Posix path conversion](http://www.mingw.org/wiki/Posix_path_conversion).
 
 ### NotAuthenticated
 
-When connecting to a non-TLS endpoint, Go's http.Client will not send Secure cookies, resulting in a `NotAuthenticated` error.
-For example, running govc directly against the vCenter vpxd endpoint at `http://127.0.0.1:8085`.
-Set the environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
+When connecting to a non-TLS endpoint, Go's http.Client will not send Secure
+cookies, resulting in a `NotAuthenticated` error. For example, running `govc`
+directly against the vCenter vpxd endpoint at `http://127.0.0.1:8085`. Set the
+environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
 
 ``` console
 $ GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
@@ -254,16 +255,17 @@ Several examples are embedded in the govc command [help](USAGE.md)
 
 Changes to the CLI are subject to [semantic versioning](http://semver.org).
 
-Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
+Refer to the [CHANGELOG](../CHANGELOG.md) for version to version changes.
 
-When new govc commands or flags are added, the PATCH version will be incremented.  This enables you to require a minimum
-version from within a script, for example:
+When new `govc` commands or flags are added, the PATCH version will be
+incremented.  This enables you to require a minimum version from within a
+script, for example:
 
 ``` console
 $ govc version -require 0.24
 ```
 
-## Projects using govc
+## Projects using `govc`
 
 * [Emacs govc package](./emacs)
 
@@ -281,7 +283,7 @@ $ govc version -require 0.24
 
 ## License
 
-govc is available under the [Apache 2 license](../LICENSE).
+`govc` is available under the [Apache 2 license](../LICENSE).
 
 ## Name
 

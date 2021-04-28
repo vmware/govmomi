@@ -1,0 +1,27 @@
+style: github
+template: CHANGELOG.tpl.md
+info:
+  title: CHANGELOG
+  repository_url: https://github.com/vmware/govmomi
+options:
+  commits:
+    filters:
+      Type:
+        - govc
+        - vcsim
+  commit_groups:
+    title_maps:
+      govc: 💫 `govc` (CLI)
+      vcsim: 💫 `vcsim` (Simulator)
+  header:
+    pattern: "^(\\w*)\\:\\s(.*)$"
+    pattern_maps:
+      - Type
+      - Subject
+  refs:
+    actions:
+      - Closes
+      - Fixes
+  notes:
+    keywords:
+      - "BREAKING"
