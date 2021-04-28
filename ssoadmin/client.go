@@ -79,9 +79,10 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc.Version = Version
 
 	admin := &Client{
-		Client: sc,
-		Domain: "vsphere.local", // Default
-		Limit:  100,
+		Client:       sc,
+		RoundTripper: sc,
+		Domain:       "vsphere.local", // Default
+		Limit:        100,
 	}
 	if url != Path {
 		admin.Domain = path.Base(url)
