@@ -45,6 +45,10 @@ require_docker() {
   fi
 }
 
+docker_name() {
+  echo "vcsim-$1-$(govc object.collect -s "vm/$1" config.uuid)"
+}
+
 vcsim_start() {
     GOVC_SIM_ENV="$BATS_TMPDIR/$(new_id)"
     export GOVC_SIM_ENV

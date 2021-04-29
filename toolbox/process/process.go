@@ -180,13 +180,10 @@ func (s *State) toXML() string {
 
 	args := strings.Join(argv, " ")
 
-	exit := atomic.LoadInt32(&s.ExitCode)
-	end := atomic.LoadInt64(&s.EndTime)
-
-	return fmt.Sprintf(format, name, args, s.Pid, s.Owner, s.StartTime, exit, end)
+	return fmt.Sprintf(format, name, args, s.Pid, s.Owner, s.StartTime, s.ExitCode, s.EndTime)
 }
 
-// Process managed by the ProcessManager.
+// Process managed by the process Manager.
 type Process struct {
 	State
 
@@ -197,7 +194,7 @@ type Process struct {
 	ctx context.Context
 }
 
-// Error can be returned by the Process.Wait function to propagate ExitCode to ProcessState.
+// Error can be returned by the Process.Wait function to propagate ExitCode to process State.
 type Error struct {
 	Err      error
 	ExitCode int32
@@ -217,7 +214,7 @@ type Manager struct {
 	pids    sync.Pool
 }
 
-// NewManager creates a new ProcessManager instance.
+// NewManager creates a new process Manager instance.
 func NewManager() *Manager {
 	// We use pseudo PIDs that don't conflict with OS PIDs, so they can live in the same table.
 	// For the pseudo PIDs, we use a sync.Pool rather than a plain old counter to avoid the unlikely,
@@ -237,7 +234,7 @@ func NewManager() *Manager {
 
 // Start calls the Process.Start function, returning the pid on success or an error.
 // A goroutine is started that calls the Process.Wait function.  After Process.Wait has
-// returned, the ProcessState EndTime and ExitCode fields are set.  The process state can be
+// returned, the process State EndTime and ExitCode fields are set.  The process state can be
 // queried via ListProcessesInGuest until it is removed, 5 minutes after Wait returns.
 func (m *Manager) Start(r *vix.StartProgramRequest, p *Process) (int64, error) {
 	p.Name = r.ProgramPath
@@ -271,7 +268,8 @@ func (m *Manager) Start(r *vix.StartProgramRequest, p *Process) (int64, error) {
 	go func() {
 		werr := p.Wait()
 
-		atomic.StoreInt64(&p.EndTime, time.Now().Unix())
+		m.mu.Lock()
+		p.EndTime = time.Now().Unix()
 
 		if werr != nil {
 			rc := int32(1)
@@ -279,9 +277,10 @@ func (m *Manager) Start(r *vix.StartProgramRequest, p *Process) (int64, error) {
 				rc = xerr.ExitCode
 			}
 
-			atomic.StoreInt32(&p.ExitCode, rc)
+			p.ExitCode = rc
 		}
 
+		m.mu.Unlock()
 		m.wg.Done()
 		p.Kill() // cancel context for those waiting on p.ctx.Done()
 
@@ -317,17 +316,28 @@ func (m *Manager) Kill(pid int64) bool {
 	return false
 }
 
-// ListProcesses marshals the ProcessState for the given pids.
+// ListProcesses marshals the process State for the given pids.
 // If no pids are specified, all current processes are included.
 // The return value can be used for responding to a VixMsgListProcessesExRequest.
 func (m *Manager) ListProcesses(pids []int64) []byte {
 	w := new(bytes.Buffer)
 
+	for _, p := range m.List(pids) {
+		_, _ = w.WriteString(p.toXML())
+	}
+
+	return w.Bytes()
+}
+
+// List the process State for the given pids.
+func (m *Manager) List(pids []int64) []State {
+	var list []State
+
 	m.mu.Lock()
 
 	if len(pids) == 0 {
 		for _, p := range m.entries {
-			_, _ = w.WriteString(p.toXML())
+			list = append(list, p.State)
 		}
 	} else {
 		for _, id := range pids {
@@ -336,13 +346,13 @@ func (m *Manager) ListProcesses(pids []int64) []byte {
 				continue
 			}
 
-			_, _ = w.WriteString(p.toXML())
+			list = append(list, p.State)
 		}
 	}
 
 	m.mu.Unlock()
 
-	return w.Bytes()
+	return list
 }
 
 type procFileInfo struct {
@@ -460,7 +470,7 @@ type processFunc struct {
 
 // NewFunc creates a new Process, where the Start function calls the given run function within a goroutine.
 // The Wait function waits for the goroutine to finish and returns the error returned by run.
-// The run ctx param may be used to return early via the ProcessManager.Kill method.
+// The run ctx param may be used to return early via the process Manager.Kill method.
 // The run args command is that of the VixMsgStartProgramRequest.Arguments field.
 func NewFunc(run func(ctx context.Context, args string) error) *Process {
 	f := &processFunc{run: run}
@@ -518,8 +528,8 @@ type processCmd struct {
 
 // New creates a new Process, where the Start function use exec.CommandContext to create and start the process.
 // The Wait function waits for the process to finish and returns the error returned by exec.Cmd.Wait().
-// Prior to Wait returning, the exec.Cmd.Wait() error is used to set the ProcessState.ExitCode, if error is of type exec.ExitError.
-// The ctx param may be used to kill the process via the ProcessManager.Kill method.
+// Prior to Wait returning, the exec.Cmd.Wait() error is used to set the Process.ExitCode, if error is of type exec.ExitError.
+// The ctx param may be used to kill the process via the process Manager.Kill method.
 // The VixMsgStartProgramRequest param fields are mapped to the exec.Cmd counterpart fields.
 // Processes are started within a sub-shell, allowing for i/o redirection, just as with the C version of vmware-tools.
 func New() *Process {

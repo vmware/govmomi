@@ -183,8 +183,20 @@ func (c *container) createDMI(vm *VirtualMachine, name string) error {
 	return err
 }
 
+var (
+	toolsRunning = []types.PropertyChange{
+		{Name: "guest.toolsStatus", Val: types.VirtualMachineToolsStatusToolsOk},
+		{Name: "guest.toolsRunningStatus", Val: string(types.VirtualMachineToolsRunningStatusGuestToolsRunning)},
+	}
+
+	toolsNotRunning = []types.PropertyChange{
+		{Name: "guest.toolsStatus", Val: types.VirtualMachineToolsStatusToolsNotRunning},
+		{Name: "guest.toolsRunningStatus", Val: string(types.VirtualMachineToolsRunningStatusGuestToolsNotRunning)},
+	}
+)
+
 // start runs the container if specified by the RUN.container extraConfig property.
-func (c *container) start(vm *VirtualMachine) {
+func (c *container) start(ctx *Context, vm *VirtualMachine) {
 	if c.id != "" {
 		start := "start"
 		if vm.Runtime.PowerState == types.VirtualMachinePowerStateSuspended {
@@ -194,6 +206,8 @@ func (c *container) start(vm *VirtualMachine) {
 		err := cmd.Run()
 		if err != nil {
 			log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+		} else {
+			ctx.Map.Update(vm, toolsRunning)
 		}
 		return
 	}
@@ -246,6 +260,8 @@ func (c *container) start(vm *VirtualMachine) {
 		return
 	}
 
+	ctx.Map.Update(vm, toolsRunning)
+
 	c.id = strings.TrimSpace(string(out))
 	vm.logPrintf("%s %s: %s", cmd.Path, cmd.Args, c.id)
 
@@ -255,7 +271,7 @@ func (c *container) start(vm *VirtualMachine) {
 }
 
 // stop the container (if any) for the given vm.
-func (c *container) stop(vm *VirtualMachine) {
+func (c *container) stop(ctx *Context, vm *VirtualMachine) {
 	if c.id == "" {
 		return
 	}
@@ -264,11 +280,13 @@ func (c *container) stop(vm *VirtualMachine) {
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+	} else {
+		ctx.Map.Update(vm, toolsNotRunning)
 	}
 }
 
 // pause the container (if any) for the given vm.
-func (c *container) pause(vm *VirtualMachine) {
+func (c *container) pause(ctx *Context, vm *VirtualMachine) {
 	if c.id == "" {
 		return
 	}
@@ -277,6 +295,23 @@ func (c *container) pause(vm *VirtualMachine) {
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+	} else {
+		ctx.Map.Update(vm, toolsNotRunning)
+	}
+}
+
+// restart the container (if any) for the given vm.
+func (c *container) restart(ctx *Context, vm *VirtualMachine) {
+	if c.id == "" {
+		return
+	}
+
+	cmd := exec.Command("docker", "restart", c.id)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
+	} else {
+		ctx.Map.Update(vm, toolsRunning)
 	}
 }
 
@@ -302,8 +337,30 @@ func (c *container) remove(vm *VirtualMachine) {
 	c.id = ""
 }
 
-func guestUpload(file string, r *http.Request) error {
-	cmd := exec.Command("docker", "cp", "-", path.Dir(file))
+func (c *container) exec(ctx *Context, vm *VirtualMachine, auth types.BaseGuestAuthentication, args []string) (string, types.BaseMethodFault) {
+	fault := vm.run.prepareGuestOperation(vm, auth)
+	if fault != nil {
+		return "", fault
+	}
+
+	args = append([]string{"exec", vm.run.id}, args...)
+	cmd := exec.Command("docker", args...)
+
+	res, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("%s: %s (%s)", vm.Self, cmd.Args, string(res))
+		return "", new(types.GuestOperationsFault)
+	}
+
+	return strings.TrimSpace(string(res)), nil
+}
+
+// From https://docs.docker.com/engine/reference/commandline/cp/ :
+// > It is not possible to copy certain system files such as resources under /proc, /sys, /dev, tmpfs, and mounts created by the user in the container.
+// > However, you can still copy such files by manually running tar in docker exec.
+func guestUpload(id string, file string, r *http.Request) error {
+	cmd := exec.Command("docker", "exec", "-i", id, "tar", "Cxf", path.Dir(file), "-")
+	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return err
@@ -329,8 +386,9 @@ func guestUpload(file string, r *http.Request) error {
 	return cmd.Wait()
 }
 
-func guestDownload(file string, w http.ResponseWriter) error {
-	cmd := exec.Command("docker", "cp", file, "-")
+func guestDownload(id string, file string, w http.ResponseWriter) error {
+	cmd := exec.Command("docker", "exec", id, "tar", "Ccf", path.Dir(file), "-", path.Base(file))
+	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
 		return err
@@ -348,8 +406,6 @@ func guestDownload(file string, w http.ResponseWriter) error {
 	w.Header().Set("Content-Length", strconv.FormatInt(header.Size, 10))
 	_, _ = io.Copy(w, tr)
 
-	_ = stdout.Close()
-
 	return cmd.Wait()
 }
 
@@ -361,14 +417,14 @@ func ServeGuest(w http.ResponseWriter, r *http.Request) {
 	// vcsim form:        /guestFile/tmp/foo/bar?id=ebc8837b8cb6&token=...
 
 	id := r.URL.Query().Get("id")
-	file := id + ":" + strings.TrimPrefix(r.URL.Path, guestPrefix[:len(guestPrefix)-1])
+	file := strings.TrimPrefix(r.URL.Path, guestPrefix[:len(guestPrefix)-1])
 	var err error
 
 	switch r.Method {
 	case http.MethodPut:
-		err = guestUpload(file, r)
+		err = guestUpload(id, file, r)
 	case http.MethodGet:
-		err = guestDownload(file, w)
+		err = guestDownload(id, file, w)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return

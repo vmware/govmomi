@@ -1432,14 +1432,14 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	event := c.event()
 	switch c.state {
 	case types.VirtualMachinePowerStatePoweredOn:
-		c.run.start(c.VirtualMachine)
+		c.run.start(c.ctx, c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
 		c.customize(c.ctx)
 	case types.VirtualMachinePowerStatePoweredOff:
-		c.run.stop(c.VirtualMachine)
+		c.run.stop(c.ctx, c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmStoppingEvent{VmEvent: event},
 			&types.VmPoweredOffEvent{VmEvent: event},
@@ -1452,7 +1452,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			}
 		}
 
-		c.run.pause(c.VirtualMachine)
+		c.run.pause(c.ctx, c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmSuspendingEvent{VmEvent: event},
 			&types.VmSuspendedEvent{VmEvent: event},
@@ -1541,7 +1541,12 @@ func (vm *VirtualMachine) RebootGuest(ctx *Context, req *types.RebootGuest) soap
 		return body
 	}
 
-	body.Fault_ = Fault("", new(types.ToolsUnavailable))
+	if vm.Guest.ToolsRunningStatus == string(types.VirtualMachineToolsRunningStatusGuestToolsRunning) {
+		vm.run.restart(ctx, vm)
+		body.Res = new(types.RebootGuestResponse)
+	} else {
+		body.Fault_ = Fault("", new(types.ToolsUnavailable))
+	}
 
 	return body
 }
@@ -2080,7 +2085,7 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 		&types.VmGuestShutdownEvent{VmEvent: event},
 		&types.VmPoweredOffEvent{VmEvent: event},
 	)
-	vm.run.stop(vm)
+	vm.run.stop(ctx, vm)
 
 	Map.Update(vm, []types.PropertyChange{
 		{Name: "runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
