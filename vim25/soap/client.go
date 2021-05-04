@@ -224,15 +224,17 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 	return client
 }
 
-// SetRootCAs defines the set of root certificate authorities
-// that clients use when verifying server certificates.
-// By default TLS uses the host's root CA set.
+// SetRootCAs defines the set of PEM-encoded file locations of root certificate
+// authorities the client uses when verifying server certificates instead of the
+// TLS defaults which uses the host's root CA set. Multiple PEM file locations
+// can be specified using the OS-specific PathListSeparator.
 //
-// See: http.Client.Transport.TLSClientConfig.RootCAs
-func (c *Client) SetRootCAs(file string) error {
+// See: http.Client.Transport.TLSClientConfig.RootCAs and
+// https://pkg.go.dev/os#PathListSeparator
+func (c *Client) SetRootCAs(pemPaths string) error {
 	pool := x509.NewCertPool()
 
-	for _, name := range filepath.SplitList(file) {
+	for _, name := range filepath.SplitList(pemPaths) {
 		pem, err := ioutil.ReadFile(filepath.Clean(name))
 		if err != nil {
 			return err
