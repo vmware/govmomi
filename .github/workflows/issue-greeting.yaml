@@ -1,0 +1,32 @@
+name: Greeting
+
+on:
+  issues:
+    types: ["opened"]
+
+jobs:
+  greeting:
+    name: Send Greeting
+    runs-on: ubuntu-latest
+    # only send message to first-time contributors
+    if: github.event.issue.author_association == 'FIRST_TIME_CONTRIBUTOR'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+
+      - name: Render template
+        id: template
+        uses: chuhlomin/render-template@v1.2
+        with:
+          template: .github/comment-template.md
+          vars: |
+            author: ${{ github.actor }}
+
+      - name: Create comment
+        uses: peter-evans/create-or-update-comment@v1
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: ${{ steps.template.outputs.result }}
