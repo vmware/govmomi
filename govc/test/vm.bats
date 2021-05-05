@@ -134,7 +134,7 @@ load test_helper
   run govc object.collect -s "vm/$id" config.annotation
   assert_success $$
 
-  uuid=$(uuidgen)
+  uuid=$(vcsim uuidgen)
   run govc vm.change -vm $id -uuid "$uuid"
   assert_success
   run govc object.collect -s "vm/$id" config.uuid

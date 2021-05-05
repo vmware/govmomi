@@ -142,7 +142,7 @@ EOF
   run govc vm.info -vm.dns localhost.localdomain
   assert_success
 
-  uuid=$(uuidgen)
+  uuid=$(vcsim uuidgen)
   run govc vm.change -vm $vm -e SET.config.uuid="$uuid"
   assert_success
 
