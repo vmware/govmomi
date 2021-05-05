@@ -26,17 +26,50 @@ $ curl -L -o - $URL | tar -C /usr/local/bin -xvzf - vcsim
 
 ### Source
 
-To build `vcsim` from source, first install the [Go toolchain](https://golang.org/dl/).
+#### Install via `go get`
 
-You can then install the latest `vcsim` from Github using:
+To build `vcsim` from source, first install the [Go
+toolchain](https://golang.org/dl/). You can then install the latest `vcsim` from
+Github using:
 
 ```console
 $ go get -u github.com/vmware/govmomi/vcsim
 $ $GOPATH/bin/vcsim -h
 ```
 
-**Note:** govmomi and its binaries use [Go modules](https://golang.org/ref/mod),
-i.e. explicitly setting `GOPATH` is not required anymore.
+**Note:** `govmomi` and its binaries use [Go
+modules](https://golang.org/ref/mod), i.e. explicitly setting `GOPATH` is not
+required anymore. To inject build variables (see details
+[below](#install-via-goreleaser)) used by `vcsim version`, `GOFLAGS` can be
+defined and are honored by `go get`.
+
+⚠️ Make sure `$GOPATH/bin` is in your `PATH` to use the version installed from
+source.
+
+#### Install via `goreleaser`
+
+You can also build `vcsim` following our release process using `goreleaser`
+(requires [Go toolchain](https://golang.org/dl/)). This will ensure that build
+time variables are correctly injected. Build (linker) flags and injection are
+defined in [.goreleaser.yaml](./../.goreleaser.yml) and automatically set as
+`GOFLAGS` when building with `goreleaser`.
+
+Install `goreleaser` as per the installation
+[instructions](https://goreleaser.com/install/), then:
+
+```console
+$ git clone https://github.com/vmware/govmomi.git
+$ cd govmomi
+
+# pick a tag (>=v0.25.0)
+$ RELEASE=v0.25.0
+
+$ git checkout ${RELEASE}
+
+# build for the host OS/ARCH, otherwise omit --single-target
+# binaries are placed in respective subdirectories in ./dist/
+$ goreleaser build --rm-dist --single-target
+```
 
 ## Usage
 

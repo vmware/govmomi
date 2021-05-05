@@ -1,9 +1,9 @@
 # govc
 
-`govc` is a vSphere CLI built on top of govmomi.
+`govc` is a vSphere CLI built on top of `govmomi`.
 
 The CLI is designed to be a user friendly CLI alternative to the GUI and well suited for automation tasks.
-It also acts as a [test harness](test) for the govmomi APIs and provides working examples of how to use the APIs.
+It also acts as a [test harness](test) for the `govmomi` APIs and provides working examples of how to use the APIs.
 
 ## Installation
 
@@ -16,7 +16,7 @@ You can find prebuilt `govc` binaries on the [releases page](https://github.com/
 
 You can download and install a binary locally like this:
 
-``` console
+```console
 # get version from https://github.com/vmware/govmomi/releases/latest
 $ VERSION=v0.25.0
 $ URL=https://github.com/vmware/govmomi/releases/download/${VERSION}/govc_$(uname -s)_$(uname -m).tar.gz
@@ -27,23 +27,55 @@ $ curl -L -o - $URL | tar -C /usr/local/bin -xvzf - govc
 
 ### Source
 
+#### Install via `go get`
+
 To build `govc` from source, first install the [Go
 toolchain](https://golang.org/dl/). You can then install the latest `govc` from
 Github using:
 
-``` console
+```console
 $ go get -u github.com/vmware/govmomi/govc
 ```
 
-**Note:** govmomi and its binaries use [Go modules](https://golang.org/ref/mod),
-i.e. explicitly setting `GOPATH` is not required anymore.
+**Note:** `govmomi` and its binaries use [Go
+modules](https://golang.org/ref/mod), i.e. explicitly setting `GOPATH` is not
+required anymore. To inject build variables (see details
+[below](#install-via-goreleaser)) used by `govc version [-l]`, `GOFLAGS` can be
+defined and are honored by `go get`.
 
-Make sure `$GOPATH/bin` is in your `PATH` to use the version installed from source.
+⚠️ Make sure `$GOPATH/bin` is in your `PATH` to use the version installed from
+source.
 
-If you've made local modifications to the repository at `$GOPATH/src/github.com/vmware/govmomi`, you can install using:
+If you've made local modifications to the repository at
+`$GOPATH/src/github.com/vmware/govmomi`, you can install using:
 
-``` console
+```console
 $ go install github.com/vmware/govmomi/govc
+```
+
+#### Install via `goreleaser`
+
+You can also build `govc` following our release process using `goreleaser`
+(requires [Go toolchain](https://golang.org/dl/)). This will ensure that build
+time variables are correctly injected. Build (linker) flags and injection are
+defined in [.goreleaser.yaml](./../.goreleaser.yml) and automatically set as
+`GOFLAGS` when building with `goreleaser`.
+
+Install `goreleaser` as per the installation
+[instructions](https://goreleaser.com/install/), then:
+
+```console
+$ git clone https://github.com/vmware/govmomi.git
+$ cd govmomi
+
+# pick a tag (>=v0.25.0)
+$ RELEASE=v0.25.0
+
+$ git checkout ${RELEASE}
+
+# build for the host OS/ARCH, otherwise omit --single-target
+# binaries are placed in respective subdirectories in ./dist/
+$ goreleaser build --rm-dist --single-target
 ```
 
 ## Usage
@@ -93,7 +125,7 @@ using environment variables. The following environment variables are used by
 
 * `GOVC_TLS_CA_CERTS`: Override system root certificate authorities.
 
-    ``` console
+    ```console
     $ export GOVC_TLS_CA_CERTS=~/.govc_ca.crt
     # Use path separator to specify multiple files:
     $ export GOVC_TLS_CA_CERTS=~/ca-certificates/bar.crt:~/ca-certificates/foo.crt
@@ -104,7 +136,7 @@ using environment variables. The following environment variables are used by
     Thumbprint based verification can be used in addition to or as an alternative to
     `GOVC_TLS_CA_CERTS` for self-signed certificates.  Example:
 
-    ``` console
+    ```console
     $ export GOVC_TLS_KNOWN_HOSTS=~/.govc_known_hosts
     $ govc about.cert -u host -k -thumbprint | tee -a $GOVC_TLS_KNOWN_HOSTS
     $ govc about -u user:pass@host
@@ -200,7 +232,7 @@ by setting the debug path to a dash: `export GOVC_DEBUG_PATH=-`
 
 If you're using environment variables to set `GOVC_URL`, verify the values are set as expected:
 
-``` console
+```console
 $ govc env
 ```
 
@@ -208,12 +240,12 @@ $ govc env
 
 Check your proxy settings:
 
-``` console
+```console
 $ env | grep -i https_proxy
 ```
 
 Test connection using curl:
-``` console
+```console
 $ curl --verbose -k -X POST https://x.x.x.x/sdk
 ```
 
@@ -229,7 +261,7 @@ cookies, resulting in a `NotAuthenticated` error. For example, running `govc`
 directly against the vCenter vpxd endpoint at `http://127.0.0.1:8085`. Set the
 environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
 
-``` console
+```console
 $ GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
 ```
 
@@ -261,7 +293,7 @@ When new `govc` commands or flags are added, the PATCH version will be
 incremented.  This enables you to require a minimum version from within a
 script, for example:
 
-``` console
+```console
 $ govc version -require 0.24
 ```
 
