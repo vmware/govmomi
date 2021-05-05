@@ -1,59 +1,115 @@
-# Functional tests for govc
+# Functional Tests for govc
 
-The govc tests use [bats](https://github.com/sstephenson/bats/)
+The govc tests use [bats](https://github.com/sstephenson/bats/), a framework that provides a simple way to verify *NIX programs behave as expected.
 
-## Download test images
+## Enabling ESX Tests
 
-Some tests depend on ttylinux images, these can be downloaded by running:
-
-```
-./images/update.sh
-```
-
-These images are uploaded to the `$GOVC_TEST_URL` as needed by tests and can be
-removed with the following command:
+Some of the govc tests require an ESX instance. These tests may be enabled with any ESX host with the following environment variable:
 
 ```
-./clean.sh
+GOVC_TEST_URL=user:pass@<ESX_HOST>
 ```
 
-## GOVC_TEST_URL
+## Running Tests
 
-Some of the govc tests need an ESX instance to run against.  Any ESX box can be used by exporting the following variable:
+There are two ways to run the tests locally:
 
+1. [_Via GitHub Actions in Docker_](#run-tests-via-github-actions-in-docker) - mimics how GitHub actions will execute the tests
+2. [_Natively on Linux and macOS_](#run-tests-natively-on-linux-and-macos) - the fastest way to run the tests
+
+### Run Tests via GitHub Actions in Docker
+
+This method of running the govc functional tests mimics how the project's associated GitHub actions will execute the tests when new pull requests are opened:
+
+1. Install [`act`](https://github.com/nektos/act):
+
+    * Linux (curl bash)
+
+        ```shell
+        curl https://raw.githubusercontent.com/nektos/act/master/install.sh | sudo bash
+        ```
+
+    * macOS
+
+        ```shell
+        brew install act
+        ```
+
+    * [_Documentation for other installation methods_](https://github.com/nektos/act#installation)
+
+2. Run the `govc-tests` action:
+
+    ```shell
+    act --env USER=user -j govc-tests
+    ```
+
+    ---
+
+    **Note**: To run the ESX tests with `act`, execute the following command:
+
+    ```shell
+    act --env USER=user --env GOVC_TEST_URL="user:pass@<ESX_HOST>" -j govc-tests
+    ```
+
+    ---
+
+### Run Tests Natively on Linux and macOS
+
+The fastest way to run the tests is to do so natively on Linux or macOS:
+
+1. Install [bats](https://github.com/sstephenson/bats/):
+
+    * Debian / Ubuntu Linux
+
+        ```shell
+        apt-get install bats
+        ```
+
+    * macOS
+
+        ```shell
+        brew install bats
+        ```
+
+    * [_Installing bats from source_](https://github.com/sstephenson/bats#installing-bats-from-source)
+
+
+2. Some tests depend on the `ttylinux` images, and they can be downloaded with the following command:
+
+    ```shell
+    ./govc/test/images/update.sh
+    ```
+
+    The images are uploaded to the `$GOVC_TEST_URL` as needed by tests and can be removed with the following command:
+
+    ```shell
+    ./govc/test/images/clean.sh
+    ```
+
+---
+
+**Note**: Users of macOS will want to install `gxargs`, `greadlink`, and `gmktemp` with the following command:
+
+```shell
+brew install coreutils findutils
 ```
-export GOVC_TEST_URL=user:pass@hostname
-```
 
-## Running tests
+---
 
-Tests can be run using the top-level Makefile:
+3. The easiest way to run the tests is with the top-level Makefile:
 
-```
-make govc-test
-```
+    ```shell
+    make govc-test
+    ```
 
-Or the following command:
+    The tests can also be run directly with the `bats` command:
 
-```
-bats .
-```
+    ```shell
+    bats -t ./govc/test/
+    ```
 
-Or individually, for example:
+    Finally, it's also possible to run the tests individually with:
 
-```
-./cli.bats
-```
-
-Note that the test helper prepends `$GOPATH/bin` to `PATH` as the tests depend on both the *govc* and *vcsim* binaries.
-
-## Platform specific notes
-
-### Darwin (MacOSX)
-
-Install gxargs, greadlink and gmktemp on Darwin
-
-```
-brew install coreutils
-brew install findutils
-```
+    ```shell
+    ./govc/test/cli.bats
+    ```
