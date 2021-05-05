@@ -45,3 +45,51 @@ jobs:
 
       - name: Run govc Tests
         run: make govc-test
+
+  govc-tests-sso:
+    name: Run govc Tests - sso
+    strategy:
+      matrix:
+        go-version: ["1.15", "1.16"]
+        # tests randomly hang on ubuntu-20.04 go v1.16
+        platform: ["ubuntu-18.04"]
+
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 20
+
+    steps:
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Run govc Tests - sso
+        run: make govc-test-sso
+
+  govc-tests-sso-assert-cert:
+    name: Run govc Tests - sso - assert cert
+    strategy:
+      matrix:
+        go-version: ["1.15", "1.16"]
+        # tests randomly hang on ubuntu-20.04 go v1.16
+        platform: ["ubuntu-18.04"]
+
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 20
+
+    steps:
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Run govc Tests - sso - assert cert
+        run: make govc-test-sso-assert-cert
