@@ -9,10 +9,12 @@ options:
       Type:
         - govc
         - vcsim
+        - chore
   commit_groups:
     title_maps:
       govc: 💫 `govc` (CLI)
       vcsim: 💫 `vcsim` (Simulator)
+      chore: 🧹 Chore
   header:
     pattern: "^(\\w*)\\:\\s(.*)$"
     pattern_maps:

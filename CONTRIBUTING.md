@@ -110,6 +110,24 @@ Message](http://chris.beams.io/posts/git-commit/).
 Be sure to include any related GitHub issue references in the commit message,
 e.g. `Closes: #<number>`.
 
+The [`CHANGELOG.md`](./CHANGELOG.md) and release page uses commit message
+prefixes for grouping and highlighting. A commit message that
+starts with `[prefix:] ` will place this commit under the respective
+section in the `CHANGELOG`. 
+
+The following example creates a commit referencing the `issue: 1234` and puts
+the commit message in the `govc` `CHANGELOG` section:
+
+```console
+$ git commit -s -m "govc: Add CLI command X" -m "Closes: #1234"
+```
+
+Currently the following prefixes are used:
+
+- `govc:` - CLI
+- `vcsim:` - Simulator
+- `chore:` - Repository related activities
+
 ### Running CI Checks and Tests
 You can run both `make check` and `make test` from the top level of the
 repository. 
