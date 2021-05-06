@@ -8,8 +8,9 @@ jobs:
   greeting:
     name: Send Greeting
     runs-on: ubuntu-latest
-    # only send message to first-time contributors
-    if: github.event.issue.author_association == 'FIRST_TIME_CONTRIBUTOR'
+    # only send message to users not (yet) associated with repo
+    # https://docs.github.com/en/graphql/reference/enums#commentauthorassociation
+    if: github.event.issue.author_association == 'NONE'
 
     steps:
       - name: Checkout
