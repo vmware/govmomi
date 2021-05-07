@@ -27,11 +27,25 @@ jobs:
     strategy:
       matrix:
         go-version: ["1.15", "1.16"]
-        # tests randomly hang on ubuntu-20.04 go v1.16
         platform: ["ubuntu-18.04"]
+        cmd: ["govc-test"]
+        experimental: [false]
+        timeout: [10]
+        include:
+          - go-version: "1.15"
+            platform: "ubuntu-18.04"
+            cmd: "govc-test-sso"
+            experimental: true
+            timeout: 3
+          - go-version: "1.15"
+            platform: "ubuntu-18.04"
+            cmd: "govc-test-sso-assert-cert"
+            experimental: true
+            timeout: 3
 
     runs-on: ${{ matrix.platform }}
-    timeout-minutes: 20
+    continue-on-error: ${{ matrix.experimental }}
+    timeout-minutes: ${{ matrix.timeout }}
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}
@@ -43,5 +57,5 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v2
 
-      - name: Run govc Tests
-        run: make govc-test
+      - name: Run ${{ matrix.cmd }}
+        run: make ${{ matrix.cmd }}
