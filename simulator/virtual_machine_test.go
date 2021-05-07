@@ -374,6 +374,11 @@ func TestReconfigVmDevice(t *testing.T) {
 			t.Error(err)
 		}
 
+		d.GetVirtualDevice().DeviceInfo = nil
+		if err = vm.EditDevice(ctx, d); err != nil {
+			t.Error(err)
+		}
+
 		// RemoveDevice and delete the file backing
 		if err = vm.RemoveDevice(ctx, false, d); err != nil {
 			t.Error(err)
