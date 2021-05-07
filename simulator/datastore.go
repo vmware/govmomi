@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"net/url"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -65,7 +66,7 @@ func parseDatastorePath(dsPath string) (*object.DatastorePath, types.BaseMethodF
 func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {
 	r := &methods.RefreshDatastoreBody{}
 
-	err := ds.stat()
+	_, err := os.Stat(ds.Info.GetDatastoreInfo().Url)
 	if err != nil {
 		r.Fault_ = Fault(err.Error(), &types.HostConfigFault{})
 		return r
@@ -73,11 +74,7 @@ func (ds *Datastore) RefreshDatastore(*types.RefreshDatastore) soap.HasFault {
 
 	info := ds.Info.GetDatastoreInfo()
 
-	now := time.Now()
-
-	info.Timestamp = &now
-	info.MaxMemoryFileSize = info.FreeSpace
-	info.MaxFileSize = info.FreeSpace
+	info.Timestamp = types.NewTime(time.Now())
 
 	return r
 }

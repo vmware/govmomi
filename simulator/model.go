@@ -36,6 +36,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -544,7 +545,7 @@ func (m *Model) Create() error {
 				cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
 				disk := devices.CreateDisk(scsi.(types.BaseVirtualController), ds,
 					config.Files.VmPathName+" "+path.Join(name, "disk1.vmdk"))
-				disk.CapacityInKB = 1024
+				disk.CapacityInKB = int64(units.GB*10) / units.KB
 
 				devices = append(devices, scsi, cdrom, disk, &nic)
 
