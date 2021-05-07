@@ -16,12 +16,9 @@ You can find prebuilt `vcsim` binaries on the [releases page](https://github.com
 You can download and install a binary locally like this:
 
 ``` console
-# get version from https://github.com/vmware/govmomi/releases/latest
-$ VERSION=v0.25.0
-$ URL=https://github.com/vmware/govmomi/releases/download/${VERSION}/vcsim_$(uname -s)_$(uname -m).tar.gz
-
 # extract vcsim binary to /usr/local/bin
-$ curl -L -o - $URL | tar -C /usr/local/bin -xvzf - vcsim
+# note: the "tar" command must run with root permissions
+$ curl -L -o - https://github.com/vmware/govmomi/releases/latest/download/vcsim_$(uname -s)_$(uname -m).tar.gz | tar -C /usr/local/bin -xvzf - vcsim
 ```
 
 ### Source
