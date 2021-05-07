@@ -301,7 +301,7 @@ $ govc version -require 0.24
 
 * [Emacs govc package](./emacs)
 
-* [Kubernetes vSphere Provider](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
+* [Kubernetes vSphere Cloud Provider](https://github.com/kubernetes/cloud-provider-vsphere)
 
 * [VMware VIC Engine](https://github.com/vmware/vic)
 

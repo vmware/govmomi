@@ -74,9 +74,7 @@ Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 * [Juju](https://github.com/juju/juju)
 
-* [Kubernetes](https://github.com/kubernetes/kubernetes/tree/master/pkg/cloudprovider/providers/vsphere)
-
-* [Kubernetes Cloud Provider](https://github.com/kubernetes/cloud-provider-vsphere)
+* [Kubernetes vSphere Cloud Provider](https://github.com/kubernetes/cloud-provider-vsphere)
 
 * [Kubernetes Cluster API](https://github.com/kubernetes-sigs/cluster-api-provider-vsphere)
 
