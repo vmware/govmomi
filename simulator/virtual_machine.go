@@ -1382,7 +1382,9 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 				return invalid
 			}
 			devices = vm.removeDevice(ctx, devices, &rspec)
-			device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
+			if device.DeviceInfo != nil {
+				device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
+			}
 
 			err := vm.configureDevice(ctx, devices, dspec)
 			if err != nil {
