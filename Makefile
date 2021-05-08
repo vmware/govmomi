@@ -26,6 +26,13 @@ govc-test: install
 	./govc/test/images/update.sh
 	(cd govc/test && ./vendor/github.com/sstephenson/bats/libexec/bats -t .)
 
+govc-test-sso: install
+	./govc/test/images/update.sh
+	(cd govc/test && SSO_BATS=1 ./vendor/github.com/sstephenson/bats/libexec/bats -t sso.bats)
+
+govc-test-sso-assert-cert:
+	SSO_BATS_ASSERT_CERT=1 $(MAKE) govc-test-sso
+
 .PHONY: test
 test: go-test govc-test
 
