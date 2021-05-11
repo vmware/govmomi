@@ -19,6 +19,8 @@ package cns
 import (
 	"context"
 	"os"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/kr/pretty"
@@ -27,12 +29,15 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/vmware/govmomi"
 	cnstypes "github.com/vmware/govmomi/cns/types"
 	vim25types "github.com/vmware/govmomi/vim25/types"
 	vsanfstypes "github.com/vmware/govmomi/vsan/vsanfs/types"
 )
+
+const VSphere70u3VersionInt = 703
 
 func TestClient(t *testing.T) {
 	// set CNS_DEBUG to true if you need to emit soap traces from these tests
@@ -201,12 +206,12 @@ func TestClient(t *testing.T) {
 		t.Logf("reCreateVolumeOperationRes.: %+v", pretty.Sprint(reCreateVolumeOperationRes))
 		if reCreateVolumeOperationRes.Fault != nil {
 			t.Logf("reCreateVolumeOperationRes.Fault: %+v", pretty.Sprint(reCreateVolumeOperationRes.Fault))
-			_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsFault)
+			_, ok := reCreateVolumeOperationRes.Fault.Fault.(cnstypes.CnsAlreadyRegisteredFault)
 			if !ok {
-				t.Fatalf("Fault is not CnsFault")
+				t.Fatalf("Fault is not a CnsAlreadyRegisteredFault")
 			}
 		} else {
-			t.Fatalf("re-create same volume should fail with CnsFault")
+			t.Fatalf("re-create same volume should fail with CnsAlreadyRegisteredFault")
 		}
 	}
 
@@ -962,27 +967,52 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("volume:%q deleted sucessfully", volumeID)
 	}
-	// Test QueryVolumeAsync API
-	queryVolumeAsyncTask, err := cnsClient.QueryVolumeAsync(ctx, queryFilter, querySelection)
-	if err != nil {
-		t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
-		t.Fatal(err)
-	}
-	queryVolumeAsyncTaskInfo, err := GetTaskInfo(ctx, queryVolumeAsyncTask)
-	if err != nil {
-		t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
-		t.Fatal(err)
-	}
-	queryVolumeAsyncTaskResults, err := GetTaskResultArray(ctx, queryVolumeAsyncTaskInfo)
-	if err != nil {
-		t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
-		t.Fatal(err)
-	}
-	for _, queryVolumeAsyncTaskResult := range queryVolumeAsyncTaskResults {
-		queryVolumeAsyncOperationRes := queryVolumeAsyncTaskResult.GetCnsVolumeOperationResult()
-		if queryVolumeAsyncOperationRes.Fault != nil {
-			t.Fatalf("Failed to query volumes with QueryVolumeAsync. fault=%+v", queryVolumeAsyncOperationRes.Fault)
+	// Test QueryVolumeAsync API only for vSphere version 7.0.3++
+	if isvSphereVersion70U3orAbove(ctx, c.ServiceContent.About) {
+		queryVolumeAsyncTask, err := cnsClient.QueryVolumeAsync(ctx, queryFilter, querySelection)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
+			t.Fatal(err)
 		}
-		t.Logf("Successfully queried Volume using queryAsync API. queryVolumeAsyncTaskResult: %+v", pretty.Sprint(queryVolumeAsyncTaskResult))
+		queryVolumeAsyncTaskInfo, err := GetTaskInfo(ctx, queryVolumeAsyncTask)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		queryVolumeAsyncTaskResults, err := GetTaskResultArray(ctx, queryVolumeAsyncTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to query volumes with QueryVolumeAsync. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		for _, queryVolumeAsyncTaskResult := range queryVolumeAsyncTaskResults {
+			queryVolumeAsyncOperationRes := queryVolumeAsyncTaskResult.GetCnsVolumeOperationResult()
+			if queryVolumeAsyncOperationRes.Fault != nil {
+				t.Fatalf("Failed to query volumes with QueryVolumeAsync. fault=%+v", queryVolumeAsyncOperationRes.Fault)
+			}
+			t.Logf("Successfully queried Volume using queryAsync API. queryVolumeAsyncTaskResult: %+v", pretty.Sprint(queryVolumeAsyncTaskResult))
+		}
 	}
+}
+
+// isvSphereVersion70U3orAbove checks if specified version is 7.0 Update 3 or higher
+// The method takes aboutInfo{} as input which contains details about
+// VC version, build number and so on.
+// If the version is 7.0 Update 3 or higher, the method returns true, else returns false
+// along with appropriate errors during failure cases
+func isvSphereVersion70U3orAbove(ctx context.Context, aboutInfo types.AboutInfo) bool {
+	items := strings.Split(aboutInfo.Version, ".")
+	version := strings.Join(items[:], "")
+	// Convert version string to string, Ex: "7.0.3" becomes 703, "7.0.3.1" becomes 703
+	if len(version) >= 3 {
+		vSphereVersionInt, err := strconv.Atoi(version[0:2])
+		if err != nil {
+			return false
+		}
+		// Check if the current vSphere version is 7.0.3 or higher
+		if vSphereVersionInt >= VSphere70u3VersionInt {
+			return true
+		}
+	}
+	// For all other versions
+	return false
 }
