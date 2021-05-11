@@ -48,6 +48,8 @@ EOF
   run curl -skf "$url/about"
   assert_matches "CurrentTime" # 1 param (without Context)
   assert_matches "TerminateSession" # 2 params (with Context)
+  assert_matches "CnsAttachVolume" # method from namespace vsan
+  assert_matches "PbmCreate" # method from namespace pbm
 
   run curl -skf "$url/debug/vars"
   assert_success
