@@ -335,32 +335,34 @@ func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 
 	f := reflect.TypeOf((*soap.HasFault)(nil)).Elem()
 
-	for _, obj := range Map.objects {
-		kind := obj.Reference().Type
-		if seen[kind] {
-			continue
-		}
-		seen[kind] = true
-
-		about.Types = append(about.Types, kind)
-
-		t := reflect.TypeOf(obj)
-		for i := 0; i < t.NumMethod(); i++ {
-			m := t.Method(i)
-			if seen[m.Name] {
+	for _, sdk := range s.sdk {
+		for _, obj := range sdk.objects {
+			kind := obj.Reference().Type
+			if seen[kind] {
 				continue
 			}
-			seen[m.Name] = true
+			seen[kind] = true
 
-			in := m.Type.NumIn()
-			if in < 2 || in > 3 { // at least 2 params (receiver and request), optionally a 3rd param (context)
-				continue
-			}
-			if m.Type.NumOut() != 1 || m.Type.Out(0) != f { // all methods return soap.HasFault
-				continue
-			}
+			about.Types = append(about.Types, kind)
 
-			about.Methods = append(about.Methods, strings.Replace(m.Name, "Task", "_Task", 1))
+			t := reflect.TypeOf(obj)
+			for i := 0; i < t.NumMethod(); i++ {
+				m := t.Method(i)
+				if seen[m.Name] {
+					continue
+				}
+				seen[m.Name] = true
+
+				in := m.Type.NumIn()
+				if in < 2 || in > 3 { // at least 2 params (receiver and request), optionally a 3rd param (context)
+					continue
+				}
+				if m.Type.NumOut() != 1 || m.Type.Out(0) != f { // all methods return soap.HasFault
+					continue
+				}
+
+				about.Methods = append(about.Methods, strings.Replace(m.Name, "Task", "_Task", 1))
+			}
 		}
 	}
 
