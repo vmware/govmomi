@@ -38,8 +38,8 @@ func NewManager(client *rest.Client) *Manager {
 	}
 }
 
-// ProtocolProxyConfig represents configuration for specific proxy - ftp, http, https.
-type ProtocolProxyConfig struct {
+// Proxy represents configuration for specific proxy - ftp, http, https.
+type Proxy struct {
 	Server   string `json:"server,omitempty"`
 	Port     int    `json:"port,omitempty"`
 	Username string `json:"username,omitempty"`
@@ -49,41 +49,41 @@ type ProtocolProxyConfig struct {
 
 // ProxyConfig represents configuration for vcenter proxy.
 type ProxyConfig struct {
-	Ftp   ProtocolProxyConfig `json:"ftp,omitempty"`
-	Http  ProtocolProxyConfig `json:"http,omitempty"`
-	Https ProtocolProxyConfig `json:"https,omitempty"`
+	Ftp   Proxy `json:"ftp,omitempty"`
+	Http  Proxy `json:"http,omitempty"`
+	Https Proxy `json:"https,omitempty"`
 }
 
 // Proxy returns all Proxy configuration.
-func (m *Manager) Proxy(ctx context.Context) (ProxyConfig, error) {
+func (m *Manager) ProxyConfig(ctx context.Context) (*ProxyConfig, error) {
 	var res ProxyConfig
 	var rawRes []struct {
 		Key   string
-		Value ProtocolProxyConfig
+		Value Proxy
 	}
 
 	r := m.Resource(applianceProxyConfigPath)
 	err := m.Do(ctx, r.Request(http.MethodGet), &rawRes)
 	if err != nil {
-		return res, err
+		return &res, err
 	}
 
 	for _, c := range rawRes {
-		switch {
-		case c.Key == "http":
+		switch c.Key {
+		case "http":
 			res.Http = c.Value
-		case c.Key == "https":
+		case "https":
 			res.Https = c.Value
-		case c.Key == "ftp":
+		case "ftp":
 			res.Ftp = c.Value
 		}
 	}
 
-	return res, nil
+	return &res, nil
 }
 
 // NoProxy returns all excluded servers for proxying.
-func (m *Manager) NoProxy(ctx context.Context) ([]string, error) {
+func (m *Manager) NoProxyConfig(ctx context.Context) ([]string, error) {
 	r := m.Resource(applianceNoProxyConfigPath)
 	var res []string
 	return res, m.Do(ctx, r.Request(http.MethodGet), &res)

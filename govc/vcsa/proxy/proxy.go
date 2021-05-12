@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package logging
+package net
 
 import (
 	"context"
@@ -35,7 +35,7 @@ type info struct {
 }
 
 func init() {
-	cli.Register("vcsa.networking.proxy.info", &info{})
+	cli.Register("vcsa.net.proxy.info", &info{})
 }
 
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
@@ -60,11 +60,11 @@ func (cmd *info) Description() string {
 	return `Retrieve the VC networking proxy configuration
 
 Examples:
-  govc vcsa.networking.proxy.info`
+  govc vcsa.net.proxy.info`
 }
 
 type proxyResult struct {
-	proxy   vnetworking.ProxyConfig
+	proxy   *vnetworking.ProxyConfig
 	noProxy []string
 }
 
@@ -76,22 +76,19 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	fwd := vnetworking.NewManager(c)
 
-	proxyRes, err := fwd.Proxy(ctx)
+	proxyRes, err := fwd.ProxyConfig(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	noProxyRes, err := fwd.NoProxy(ctx)
+	noProxyRes, err := fwd.NoProxyConfig(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	var res proxyResult
-	res.proxy = proxyRes
-	res.noProxy = noProxyRes
-	return cmd.WriteResult(res)
+	return cmd.WriteResult(&proxyResult{proxyRes, noProxyRes})
 }
 
 func (res proxyResult) Write(w io.Writer) error {
@@ -104,7 +101,7 @@ func (res proxyResult) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
-func printProxyConfig(proxyName string, proxyProtocolConfig vnetworking.ProtocolProxyConfig, w io.Writer) {
+func printProxyConfig(proxyName string, proxyProtocolConfig vnetworking.Proxy, w io.Writer) {
 	if !proxyProtocolConfig.Enabled {
 		fmt.Fprintf(w, "%s proxy:\tDisabled\n", proxyName)
 		return
