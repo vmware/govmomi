@@ -47,16 +47,16 @@ type Proxy struct {
 	Enabled  bool   `json:"enabled,omitempty"`
 }
 
-// ProxyConfig represents configuration for vcenter proxy.
-type ProxyConfig struct {
+// ProxyList represents configuration for vcenter proxy.
+type ProxyList struct {
 	Ftp   Proxy `json:"ftp,omitempty"`
 	Http  Proxy `json:"http,omitempty"`
 	Https Proxy `json:"https,omitempty"`
 }
 
-// Proxy returns all Proxy configuration.
-func (m *Manager) ProxyConfig(ctx context.Context) (*ProxyConfig, error) {
-	var res ProxyConfig
+// ProxyList returns all Proxy configuration.
+func (m *Manager) ProxyList(ctx context.Context) (*ProxyList, error) {
+	var res ProxyList
 	var rawRes []struct {
 		Key   string
 		Value Proxy
@@ -83,7 +83,7 @@ func (m *Manager) ProxyConfig(ctx context.Context) (*ProxyConfig, error) {
 }
 
 // NoProxy returns all excluded servers for proxying.
-func (m *Manager) NoProxyConfig(ctx context.Context) ([]string, error) {
+func (m *Manager) NoProxy(ctx context.Context) ([]string, error) {
 	r := m.Resource(applianceNoProxyConfigPath)
 	var res []string
 	return res, m.Do(ctx, r.Request(http.MethodGet), &res)

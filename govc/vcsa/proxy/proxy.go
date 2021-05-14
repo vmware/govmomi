@@ -64,7 +64,7 @@ Examples:
 }
 
 type proxyResult struct {
-	proxy   *vnetworking.ProxyConfig
+	proxy   *vnetworking.ProxyList
 	noProxy []string
 }
 
@@ -76,13 +76,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	fwd := vnetworking.NewManager(c)
 
-	proxyRes, err := fwd.ProxyConfig(ctx)
+	proxyRes, err := fwd.ProxyList(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil
 	}
 
-	noProxyRes, err := fwd.NoProxyConfig(ctx)
+	noProxyRes, err := fwd.NoProxy(ctx)
 	if err != nil {
 		fmt.Println(err)
 		return nil
