@@ -53,6 +53,17 @@ generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
+
+# ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
+# eam-wsdl.zip, from eam-vcenter build 17073099 (vSphere 7.0U1), a
+# dependency component of the aforementioned vimbase build 17097359.
+#
+# Please note the EAM files are also available at the following, public URL --
+# http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact
+# public. A specific build was obtained in order to match the same build as
+# used for the file from above, wsdl.zip.
+COPYRIGHT_DATE_RANGE=2021 generate "../eam" "eam"
+
 # originally generated, then manually pruned as there are several vim25 types that are duplicated.
 # generate "../lookup" "lookup" # lookup.wsdl from build 4571810
 # originally generated, then manually pruned.

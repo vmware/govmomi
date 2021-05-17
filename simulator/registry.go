@@ -217,6 +217,22 @@ func (r *Registry) All(kind string) []mo.Entity {
 	return entities
 }
 
+// AllReference returns all mo.Reference objects of type specified by kind.
+// If kind is empty - all objects will be returned.
+func (r *Registry) AllReference(kind string) []mo.Reference {
+	r.m.Lock()
+	defer r.m.Unlock()
+
+	var objs []mo.Reference
+	for ref, val := range r.objects {
+		if kind == "" || ref.Type == kind {
+			objs = append(objs, val)
+		}
+	}
+
+	return objs
+}
+
 // applyHandlers calls the given func for each r.handlers
 func (r *Registry) applyHandlers(f func(o RegisterObject)) {
 	r.m.Lock()

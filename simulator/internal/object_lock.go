@@ -6,7 +6,7 @@ import (
 )
 
 // SharedLockingContext is used to identify when locks can be shared. In
-// practice, simulator code uses the simulator.Context for a requst, but in
+// practice, simulator code uses the simulator.Context for a request, but in
 // principle this could be anything.
 type SharedLockingContext interface{}
 
