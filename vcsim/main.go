@@ -40,6 +40,7 @@ import (
 
 	// Register vcsim optional endpoints
 	_ "github.com/vmware/govmomi/cns/simulator"
+	_ "github.com/vmware/govmomi/eam/simulator"
 	_ "github.com/vmware/govmomi/lookup/simulator"
 	_ "github.com/vmware/govmomi/pbm/simulator"
 	_ "github.com/vmware/govmomi/sts/simulator"
