@@ -120,7 +120,10 @@ func (c *container) inspect(vm *VirtualMachine) error {
 	return nil
 }
 
-func (c *container) prepareGuestOperation(vm *VirtualMachine, auth types.BaseGuestAuthentication) types.BaseMethodFault {
+func (c *container) prepareGuestOperation(
+	vm *VirtualMachine,
+	auth types.BaseGuestAuthentication) types.BaseMethodFault {
+
 	if c.id == "" {
 		return new(types.GuestOperationsUnavailable)
 	}
@@ -279,7 +282,6 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 	}
 
 	ctx.Map.Update(vm, toolsRunning)
-
 	c.id = strings.TrimSpace(string(out))
 	vm.logPrintf("%s %s: %s", cmd.Path, cmd.Args, c.id)
 
@@ -287,46 +289,76 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 		log.Printf("%s inspect %s: %s", vm.Name, c.id, err)
 	}
 
-	// Keep updating the VM properties by inspecting the container until
-	// an inspect call fails.
+	// Start watching the container resource.
+	go c.watchContainer(vm)
+}
+
+// watchContainer monitors the underlying container and updates the VM
+// properties based on the container status. This occurs until either
+// the container or the VM is removed.
+func (c *container) watchContainer(vm *VirtualMachine) {
+
 	inspectInterval := time.Duration(5 * time.Second)
 	if d, err := time.ParseDuration(os.Getenv("VCSIM_INSPECT_INTERVAL")); err == nil {
 		inspectInterval = d
 	}
 
-	go func() {
-		if inspectInterval == 0 {
+	var (
+		ctx    = SpoofContext()
+		done   = make(chan struct{})
+		ticker = time.NewTicker(inspectInterval)
+	)
+
+	stopUpdatingVmFromContainer := func() {
+		ticker.Stop()
+		close(done)
+	}
+
+	destroyVm := func() {
+		// If the container cannot be found then destroy this VM.
+		taskRef := vm.DestroyTask(ctx, &types.Destroy_Task{
+			This: vm.Self,
+		}).(*methods.Destroy_TaskBody).Res.Returnval
+		task := ctx.Map.Get(taskRef).(*Task)
+
+		// Wait for the task to complete and see if there is an error.
+		task.Wait()
+		if task.Info.Error != nil {
+			vm.logPrintf("failed to destroy vm: err=%v", *task.Info.Error)
+		}
+	}
+
+	updateVmFromContainer := func() {
+		// Exit the monitor loop if the VM was removed from the API side.
+		if c.id == "" {
+			stopUpdatingVmFromContainer()
 			return
 		}
-		for {
-			// Exit the monitor loop if the VM was removed from the API side.
-			if c.id == "" {
-				return
-			}
 
-			time.Sleep(inspectInterval)
-			if err := c.inspect(vm); err != nil {
-				stderr := ""
-				if xerr, ok := err.(*exec.ExitError); ok {
-					stderr = string(xerr.Stderr)
+		if err := c.inspect(vm); err != nil {
+			// If there is an error inspecting the container because it no
+			// longer exists, then destroy the VM as well. Please note the
+			// reason this logic does not invoke stopUpdatingVmFromContainer
+			// is because that will be handled the next time this function
+			// is entered and c.id is empty.
+			if err, ok := err.(*exec.ExitError); ok {
+				if strings.Contains(string(err.Stderr), "No such object") {
+					destroyVm()
 				}
-				if strings.Contains(stderr, "No such object") {
-					// If the container cannot be found then destroy this VM.
-					taskRef := vm.DestroyTask(ctx, &types.Destroy_Task{
-						This: vm.Self,
-					}).(*methods.Destroy_TaskBody).Res.Returnval
-					task := ctx.Map.Get(taskRef).(*Task)
-
-					// Wait for the task to complete and see if there is an error.
-					task.Wait()
-					if task.Info.Error != nil {
-						vm.logPrintf("failed to destroy vm: err=%v", *task.Info.Error)
-					}
-				}
-				return
 			}
 		}
-	}()
+	}
+
+	// Update the VM from the container at regular intervals until the done
+	// channel is closed.
+	for {
+		select {
+		case <-ticker.C:
+			ctx.WithLock(vm, updateVmFromContainer)
+		case <-done:
+			return
+		}
+	}
 }
 
 // stop the container (if any) for the given vm.
@@ -381,8 +413,8 @@ func (c *container) remove(vm *VirtualMachine) {
 	}
 
 	args := [][]string{
-		[]string{"rm", "-v", "-f", c.id},
-		[]string{"volume", "rm", "-f", c.name},
+		{"rm", "-v", "-f", c.id},
+		{"volume", "rm", "-f", c.name},
 	}
 
 	for i := range args {
