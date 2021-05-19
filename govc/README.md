@@ -17,12 +17,9 @@ You can find prebuilt `govc` binaries on the [releases page](https://github.com/
 You can download and install a binary locally like this:
 
 ```console
-# get version from https://github.com/vmware/govmomi/releases/latest
-$ VERSION=v0.25.0
-$ URL=https://github.com/vmware/govmomi/releases/download/${VERSION}/govc_$(uname -s)_$(uname -m).tar.gz
-
 # extract govc binary to /usr/local/bin
-$ curl -L -o - $URL | tar -C /usr/local/bin -xvzf - govc
+# note: the "tar" command must run with root permissions
+$ curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
 ```
 
 ### Source
