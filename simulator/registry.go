@@ -70,6 +70,7 @@ type Registry struct {
 
 	Namespace string
 	Path      string
+	Handler   func(*Context, *Method) (mo.Reference, types.BaseMethodFault)
 
 	tagManager tagManager
 }

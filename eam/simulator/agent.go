@@ -161,9 +161,8 @@ func NewAgent(
 	}
 
 	// Start watching this VM and updating the agent's information about the VM.
-	go func(eamReg, vimReg *simulator.Registry) {
+	go func(ctx *simulator.Context, eamReg, vimReg *simulator.Registry) {
 		var (
-			ctx    = simulator.SpoofContext()
 			ticker = time.NewTicker(1 * time.Second)
 			vmName string
 		)
@@ -229,7 +228,7 @@ func NewAgent(
 				})
 			})
 		}
-	}(ctx.Map, vimMap)
+	}(simulator.SpoofContext(), ctx.Map, vimMap)
 
 	return agent, nil
 }

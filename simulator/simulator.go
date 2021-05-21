@@ -140,6 +140,16 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 	session := ctx.Session
 	ctx.Caller = &method.This
 
+	if ctx.Map.Handler != nil {
+		h, fault := ctx.Map.Handler(ctx, method)
+		if fault != nil {
+			return &serverFaultBody{Reason: Fault("", fault)}
+		}
+		if h != nil {
+			handler = h
+		}
+	}
+
 	if session == nil {
 		switch method.Name {
 		case "RetrieveServiceContent", "PbmRetrieveServiceContent", "Fetch", "List", "Login", "LoginByToken", "LoginExtensionByCertificate", "RetrieveProperties", "RetrievePropertiesEx", "CloneSession":
