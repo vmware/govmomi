@@ -1,8 +1,5 @@
 ---
 project_name: govmomi
-before:
-  hooks:
-    - go mod vendor
 
 builds:
   - id: govc
@@ -19,8 +16,6 @@ builds:
     env:
       - CGO_ENABLED=0
       - PKGPATH=github.com/vmware/govmomi/govc/flags
-    flags:
-      - "-mod=vendor"
     main: ./govc/main.go
     binary: govc
     ldflags:
@@ -30,8 +25,6 @@ builds:
     goarch: *goarch-defs
     env:
       - CGO_ENABLED=0
-    flags:
-      - "-mod=vendor"
     main: ./vcsim/main.go
     binary: vcsim
     ldflags:

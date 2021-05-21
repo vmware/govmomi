@@ -6,9 +6,14 @@ all: check test	## Run linters and tests
 
 check: goimports govet	## Run linters
 
+# If the goimports command does not exist locally, it will be installed with
+# "go get." The reason "go get" is executed with GO111MODULE=off is to prevent
+# "go get" from modifying GoVmomi's go.mod and go.sum files. Please note that
+# "go get" is free to ignore the -mod=readonly flag, which is why the
+# environment variable is necessary.
 goimports:
 	@echo checking go imports...
-	@command -v goimports >/dev/null 2>&1 || $(GO) get golang.org/x/tools/cmd/goimports
+	@command -v goimports >/dev/null 2>&1 || GO111MODULE=off $(GO) get golang.org/x/tools/cmd/goimports
 	@! goimports -d . 2>&1 | egrep -v '^$$'
 	@! TERM=xterm git grep encoding/xml -- '*.go' ':!vim25/xml/*.go'
 
@@ -20,8 +25,8 @@ install: ## Install govc and vcsim
 	$(MAKE) -C govc install
 	$(MAKE) -C vcsim install
 
-go-test:	## Runs go unit tests with race detector enabled
-	GORACE=history_size=5 $(GO) test -mod=vendor -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
+go-test: ## Runs go unit tests with race detector enabled
+	GORACE=history_size=5 $(GO) test -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
 
 govc-test: install	## Runs govc bats tests
 	./govc/test/images/update.sh
