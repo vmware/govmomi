@@ -1,50 +1,135 @@
-GO                      ?= go
-pkgs                    = $(shell $(GO) list ./... | grep -v 'github.com/vmware/govmomi/vim25/xml')
-.DEFAULT_GOAL:=help
+# Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
 
-all: check test	## Run linters and tests
+# If you update this file, please follow
+# https://suva.sh/posts/well-documented-makefiles
 
-check: goimports govet	## Run linters
+# Ensure Make is run with bash shell as some syntax below is bash-specific
+SHELL := /usr/bin/env bash
 
-# If the goimports command does not exist locally, it will be installed with
-# "go get." The reason "go get" is executed with GO111MODULE=off is to prevent
-# "go get" from modifying GoVmomi's go.mod and go.sum files. Please note that
-# "go get" is free to ignore the -mod=readonly flag, which is why the
-# environment variable is necessary.
-goimports:
-	@echo checking go imports...
-	@command -v goimports >/dev/null 2>&1 || GO111MODULE=off $(GO) get golang.org/x/tools/cmd/goimports
-	@! goimports -d . 2>&1 | egrep -v '^$$'
-	@! TERM=xterm git grep encoding/xml -- '*.go' ':!vim25/xml/*.go'
+# Print the help/usage when make is executed without any other arguments
+.DEFAULT_GOAL := help
 
-govet:
-	@echo checking go vet...
-	@$(GO) vet -structtag=false -methods=false $(pkgs)
 
+## --------------------------------------
+## Help
+## --------------------------------------
+
+.PHONY: help
+help: ## Display usage
+	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make [target] \033[36m\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
+
+
+## --------------------------------------
+## Locations and programs
+## --------------------------------------
+
+# Directories
+BIN_DIR       := bin
+TOOLS_DIR     := hack/tools
+TOOLS_BIN_DIR := $(TOOLS_DIR)/bin
+
+# Tooling binaries
+GO            ?= $(shell command -v go 2>/dev/null)
+GOLANGCI_LINT := $(TOOLS_BIN_DIR)/golangci-lint
+
+
+## --------------------------------------
+## Prerequisites
+## --------------------------------------
+
+# Do not proceed unless the go binary is present.
+ifeq (,$(strip $(GO)))
+$(error The "go" program cannot be found)
+endif
+
+
+## --------------------------------------
+## Linting and fixing linter errors
+## --------------------------------------
+
+.PHONY: lint
+lint: ## Run all the lint targets
+	$(MAKE) lint-go-full
+
+GOLANGCI_LINT_FLAGS ?= --fast=true
+.PHONY: lint-go
+lint-go: $(GOLANGCI_LINT) ## Lint codebase
+	$(GOLANGCI_LINT) run -v $(GOLANGCI_LINT_FLAGS)
+
+.PHONY: lint-go-full
+lint-go-full: GOLANGCI_LINT_FLAGS = --fast=false
+lint-go-full: lint-go ## Run slower linters to detect possible issues
+
+.PHONY: fix
+fix: GOLANGCI_LINT_FLAGS = --fast=false --fix
+fix: lint-go ## Tries to fix errors reported by lint-go-full target
+
+.PHONY: check
+check: lint-go-full
+check: 	## Run linters
+
+
+## --------------------------------------
+## Tooling Binaries
+## --------------------------------------
+
+TOOLING_BINARIES := $(GOLANGCI_LINT)
+tools: $(TOOLING_BINARIES) ## Build tooling binaries
+.PHONY: $(TOOLING_BINARIES)
+$(TOOLING_BINARIES):
+	cd $(TOOLS_DIR); make $(@F)
+
+
+## --------------------------------------
+## Build / Install
+## --------------------------------------
+.PHONY: install
 install: ## Install govc and vcsim
 	$(MAKE) -C govc install
 	$(MAKE) -C vcsim install
 
+
+## --------------------------------------
+## Generate
+## --------------------------------------
+
+.PHONY: mod
+mod: ## Runs go mod tidy to validate modules
+	go mod tidy -v
+
+.PHONY: mod-get
+mod-get: ## Downloads and caches the modules
+	go mod download
+
+.PHONY: doc
+doc: install
+doc: ## Generates govc USAGE.md
+	./govc/usage.sh > ./govc/USAGE.md
+
+
+## --------------------------------------
+## Tests
+## --------------------------------------
+
+.PHONY: go-test
 go-test: ## Runs go unit tests with race detector enabled
 	GORACE=history_size=5 $(GO) test -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
 
-govc-test: install	## Runs govc bats tests
+.PHONY: govc-test
+govc-test: install
+govc-test: ## Runs govc bats tests
 	./govc/test/images/update.sh
 	(cd govc/test && ./vendor/github.com/sstephenson/bats/libexec/bats -t .)
 
+.PHONY: govc-test-sso
 govc-test-sso: install
 	./govc/test/images/update.sh
 	(cd govc/test && SSO_BATS=1 ./vendor/github.com/sstephenson/bats/libexec/bats -t sso.bats)
 
+.PHONY: govc-test-sso-assert-cert
 govc-test-sso-assert-cert:
 	SSO_BATS_ASSERT_CERT=1 $(MAKE) govc-test-sso
 
 .PHONY: test
 test: go-test govc-test	## Runs go-test and govc-test
-
-doc: install	## Generates govc USAGE.md
-	./govc/usage.sh > ./govc/USAGE.md
-
-.PHONY: help
-help: ## Display usage
-	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make [target] \033[36m\033[0m\n\nTargets:\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-20s\033[0m %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
