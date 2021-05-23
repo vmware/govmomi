@@ -80,28 +80,66 @@ itself uses the vSphere API generate its inventory.
 ```console
 $ vcsim -h # pruned to model type flags used in the Examples section
 Usage of vcsim:
+  -E string
+        Output vcsim variables to the given fifo or stdout (default "-")
+  -api-version string
+        API version (default "6.5")
   -app int
         Number of virtual apps per compute resource
+  -autostart
+        Autostart model created VMs (default true)
   -cluster int
         Number of clusters (default 1)
   -dc int
         Number of datacenters (default 1)
+  -delay int
+        Method response delay across all methods
+  -delay-jitter float
+        Delay jitter coefficient of variation (tip: 0.5 is a good starting value)
   -ds int
         Number of local datastores (default 1)
+  -esx
+        Simulate standalone ESX
   -folder int
         Number of folders
   -host int
         Number of hosts per cluster (default 3)
+  -l string
+        Listen address for vcsim (default "127.0.0.1:8989")
+  -load string
+        Load model from directory
+  -method-delay string
+        Delay per method on the form 'method1:delay1,method2:delay2...'
   -nsx int
         Number of NSX backed opaque networks
+  -password string
+        Login password for vcsim (any password allowed by default)
   -pg int
         Number of port groups (default 1)
+  -pg-nsx int
+        Number of NSX backed port groups
   -pod int
         Number of storage pods per datacenter
   -pool int
         Number of resource pools per compute resource
   -standalone-host int
         Number of standalone hosts (default 1)
+  -stdinexit
+        Press any key to exit
+  -tls
+        Enable TLS (default true)
+  -tlscert string
+        Path to TLS certificate file
+  -tlskey string
+        Path to TLS key file
+  -trace
+        Trace SOAP to -trace-file
+  -trace-file string
+        Trace output file (defaults to stderr)
+  -tunnel int
+        SDK tunnel port (default -1)
+  -username string
+        Login username for vcsim (any username allowed by default)
   -vm int
         Number of virtual machines per resource pool (default 2)
 ```
