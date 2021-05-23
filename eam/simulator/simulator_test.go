@@ -31,11 +31,21 @@ import (
 	"github.com/vmware/govmomi/eam/types"
 	"github.com/vmware/govmomi/find"
 	vimobject "github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/session"
 	vcsim "github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
+
+const waitLoopMessage = `
+
+################################################################################
+# When executed with the flags -powerOnVMs and -waitForExit, this test will    #
+# pause here and update the screen with the status of the agent VMs until      #
+# SIGINT is sent to this process.                                              #
+################################################################################
+`
 
 var (
 	flagPowerOnVMs = flag.Bool("powerOnVMs", false, "Powers on the VMs in the test with Docker")
@@ -332,11 +342,106 @@ func TestSimulator(t *testing.T) {
 	})
 }
 
-const waitLoopMessage = `
+func TestNotAuthenticated(t *testing.T) {
+	vcsim.Test(func(ctx context.Context, vimClient *vim25.Client) {
 
-################################################################################
-# When executed with the flags -powerOnVMs and -waitForExit, this test will    #
-# pause here and update the screen with the status of the agent VMs until      #
-# SIGINT is sent to this process.                                              #
-################################################################################
-`
+		isNotAuthenticatedFault := func(fault vim.AnyType) bool {
+			switch fault.(type) {
+			case vim.NotAuthenticated, *vim.NotAuthenticated:
+				return true
+			default:
+				return false
+			}
+		}
+
+		isEamInvalidLoginFault := func(fault vim.AnyType) bool {
+			switch fault.(type) {
+			case types.EamInvalidLogin, *types.EamInvalidLogin:
+				return true
+			default:
+				return false
+			}
+		}
+
+		validateFault := func(
+			err error,
+			faultType string,
+			faultIsTypeFn func(vim.AnyType) bool) error {
+
+			if err == nil {
+				return fmt.Errorf("%s expected", faultType)
+			}
+
+			validateVimFault := func(vimFault vim.AnyType) error {
+				if !faultIsTypeFn(vimFault) {
+					return fmt.Errorf(
+						"err is not %[1]s: %[2]T %[2]v", faultType, vimFault)
+				}
+				return nil
+			}
+
+			if soap.IsSoapFault(err) {
+				return validateVimFault(soap.ToSoapFault(err).VimFault())
+			}
+
+			if soap.IsVimFault(err) {
+				return validateVimFault(soap.ToVimFault(err))
+			}
+
+			return fmt.Errorf(
+				"err is not a Soap or Vim fault: %[1]T %[1]v", err)
+		}
+
+		t.Run("TerminateSession", func(t *testing.T) {
+			// Terminate the session.
+			sessionManager := session.NewManager(vimClient)
+			if err := sessionManager.Logout(ctx); err != nil {
+				t.Fatalf("logout failed: %v", err)
+			}
+		})
+
+		t.Run("ValidateFaults", func(t *testing.T) {
+
+			t.Run("vim.NotAuthenticated", func(t *testing.T) {
+				t.Parallel()
+
+				// Create a finder to get the default datacenter.
+				finder := find.NewFinder(vimClient, true)
+
+				// Try to get the default datacenter, but receive a NotAuthenticated
+				// error.
+				_, err := finder.DefaultDatacenter(ctx)
+
+				if err := validateFault(
+					err,
+					"NotAuthenticated",
+					isNotAuthenticatedFault); err != nil {
+
+					t.Fatal(err)
+				}
+			})
+
+			t.Run("eam.EamInvalidLogin", func(t *testing.T) {
+				t.Parallel()
+
+				// Get an EAM client.
+				eamClient := eam.NewClient(vimClient)
+
+				// Get the EAM root object.
+				mgr := object.NewEsxAgentManager(eamClient, eam.EsxAgentManager)
+
+				// Try to list the agencies, but receive an EamInvalidLogin error.
+				_, err := mgr.Agencies(ctx)
+
+				if err := validateFault(
+					err,
+					"EamInvalidLogin",
+					isEamInvalidLoginFault); err != nil {
+
+					t.Fatal(err)
+				}
+			})
+		})
+
+	})
+}
