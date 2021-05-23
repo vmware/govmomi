@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"

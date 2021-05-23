@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/pbm"
 	"github.com/vmware/govmomi/pbm/methods"
 	"github.com/vmware/govmomi/pbm/types"

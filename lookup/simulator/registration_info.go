@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/lookup"
 	"github.com/vmware/govmomi/lookup/types"
 	"github.com/vmware/govmomi/simulator"

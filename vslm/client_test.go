@@ -21,6 +21,7 @@ import (
 	"testing"
 
 	"github.com/kr/pretty"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/cns"
 	cnstypes "github.com/vmware/govmomi/cns/types"

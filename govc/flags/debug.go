@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/kr/pretty"
+
 	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"

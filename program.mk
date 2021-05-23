@@ -1,3 +1,6 @@
+# Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+# SPDX-License-Identifier: Apache-2.0
+
 ifneq (,$(strip $(GOOS)))
 ifeq (,$(strip $(GOARCH)))
 GOARCH := $(shell go env | grep GOARCH | awk -F= '{print $$2}' | tr -d '"')
