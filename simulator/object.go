@@ -20,6 +20,7 @@ import (
 	"bytes"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"

@@ -150,8 +150,8 @@ func (f *InfoFlag) Apply(ctx context.Context, update types.ArrayUpdateSpec, info
 type SpecFlag struct {
 	types.ClusterRuleInfo
 	types.ClusterVmHostRuleInfo
-	types.ClusterAffinityRuleSpec
-	types.ClusterAntiAffinityRuleSpec
+	types.ClusterAffinityRuleSpec     //nolint:govet
+	types.ClusterAntiAffinityRuleSpec //nolint:govet
 }
 
 func (s *SpecFlag) Register(ctx context.Context, f *flag.FlagSet) {

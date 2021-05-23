@@ -22,6 +22,7 @@ import (
 	"testing"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"

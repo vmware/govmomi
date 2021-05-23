@@ -37,6 +37,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/nfc"
 	"github.com/vmware/govmomi/object"

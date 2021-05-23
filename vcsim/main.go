@@ -33,6 +33,7 @@ import (
 	"syscall"
 
 	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/simulator/esx"
