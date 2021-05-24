@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,6 +21,18 @@ import (
 
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+type PbmAssociateAndApplyPolicyStatusPolicyStatus string
+
+const (
+	PbmAssociateAndApplyPolicyStatusPolicyStatusSuccess = PbmAssociateAndApplyPolicyStatusPolicyStatus("success")
+	PbmAssociateAndApplyPolicyStatusPolicyStatusFailed  = PbmAssociateAndApplyPolicyStatusPolicyStatus("failed")
+	PbmAssociateAndApplyPolicyStatusPolicyStatusInvalid = PbmAssociateAndApplyPolicyStatusPolicyStatus("invalid")
+)
+
+func init() {
+	types.Add("pbm:PbmAssociateAndApplyPolicyStatusPolicyStatus", reflect.TypeOf((*PbmAssociateAndApplyPolicyStatusPolicyStatus)(nil)).Elem())
+}
 
 type PbmBuiltinGenericType string
 
