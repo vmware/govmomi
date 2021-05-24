@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1212,7 +1212,10 @@ func init() {
 type VslmVsoVStorageObjectSnapshotResult struct {
 	types.DynamicData
 
-	BackingObjectId types.ID `xml:"backingObjectId"`
+	BackingObjectId types.ID  `xml:"backingObjectId"`
+	Description     string    `xml:"description,omitempty"`
+	SnapshotId      *types.ID `xml:"snapshotId,omitempty"`
+	DiskPath        string    `xml:"diskPath,omitempty"`
 }
 
 func init() {
