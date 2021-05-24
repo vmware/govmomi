@@ -47,16 +47,19 @@ generate() {
   done
 }
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 17097359 (vSphere 7.0U1)
+#
+# All types derive from vCenter build 17986435, vSphere 7.0U2 Hot Patch 4
+#
+export COPYRIGHT_DATE_RANGE="2014-2021"
 
-generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v2.4.1
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 17354719
+generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
 
 # ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
-# eam-wsdl.zip, from eam-vcenter build 17073099 (vSphere 7.0U1), a
-# dependency component of the aforementioned vimbase build 17097359.
+# eam-wsdl.zip, from eam-vcenter build 17490501.
 #
 # Please note the EAM files are also available at the following, public URL --
 # http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact
