@@ -610,12 +610,6 @@ func init() {
 	types.Add("eam:EamInvalidState", reflect.TypeOf((*EamInvalidState)(nil)).Elem())
 }
 
-type EamInvalidStateFault EamInvalidState
-
-func init() {
-	types.Add("eam:EamInvalidStateFault", reflect.TypeOf((*EamInvalidStateFault)(nil)).Elem())
-}
-
 type EamInvalidVibPackage struct {
 	EamRuntimeFault
 }
@@ -714,6 +708,14 @@ type ExtensibleIssue struct {
 
 func init() {
 	types.Add("eam:ExtensibleIssue", reflect.TypeOf((*ExtensibleIssue)(nil)).Elem())
+}
+
+type GetMaintenanceModePolicyRequestType struct {
+	This types.ManagedObjectReference `xml:"_this"`
+}
+
+func init() {
+	types.Add("eam:GetMaintenanceModePolicyRequestType", reflect.TypeOf((*GetMaintenanceModePolicyRequestType)(nil)).Elem())
 }
 
 type HostInMaintenanceMode struct {
@@ -1309,6 +1311,15 @@ func init() {
 }
 
 type ScanForUnknownAgentVmResponse struct {
+}
+
+type SetMaintenanceModePolicyRequestType struct {
+	This   types.ManagedObjectReference `xml:"_this"`
+	Policy string                       `xml:"policy"`
+}
+
+func init() {
+	types.Add("eam:SetMaintenanceModePolicyRequestType", reflect.TypeOf((*SetMaintenanceModePolicyRequestType)(nil)).Elem())
 }
 
 type Uninstall UninstallRequestType

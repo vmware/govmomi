@@ -91,3 +91,14 @@ const (
 func init() {
 	types.Add("eam:EamObjectRuntimeInfoStatus", reflect.TypeOf((*EamObjectRuntimeInfoStatus)(nil)).Elem())
 }
+
+type EsxAgentManagerMaintenanceModePolicy string
+
+const (
+	EsxAgentManagerMaintenanceModePolicySingleHost    = EsxAgentManagerMaintenanceModePolicy("singleHost")
+	EsxAgentManagerMaintenanceModePolicyMultipleHosts = EsxAgentManagerMaintenanceModePolicy("multipleHosts")
+)
+
+func init() {
+	types.Add("eam:EsxAgentManagerMaintenanceModePolicy", reflect.TypeOf((*EsxAgentManagerMaintenanceModePolicy)(nil)).Elem())
+}
