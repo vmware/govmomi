@@ -112,9 +112,32 @@ doc: ## Generates govc USAGE.md
 ## Tests
 ## --------------------------------------
 
+# Test options
+TEST_COUNT ?= 1
+TEST_TIMEOUT ?= 5m
+TEST_RACE_HISTORY_SIZE ?= 5
+GORACE ?= history_size=$(TEST_RACE_HISTORY_SIZE)
+
+ifeq (-count,$(findstring -count,$(TEST_OPTS)))
+$(error Use TEST_COUNT to override this option)
+endif
+
+ifeq (-race,$(findstring -race,$(TEST_OPTS)))
+$(error The -race flag is enabled by default & cannot be specified in TEST_OPTS)
+endif
+
+ifeq (-timeout,$(findstring -timeout,$(TEST_OPTS)))
+$(error Use TEST_TIMEOUT to override this option)
+endif
+
 .PHONY: go-test
 go-test: ## Runs go unit tests with race detector enabled
-	GORACE=history_size=5 $(GO) test -timeout 5m -count 1 -race -v $(TEST_OPTS) ./...
+	GORACE=$(GORACE) $(GO) test \
+  -count $(TEST_COUNT) \
+  -race \
+  -timeout $(TEST_TIMEOUT) \
+  -v $(TEST_OPTS) \
+  ./...
 
 .PHONY: govc-test
 govc-test: install
