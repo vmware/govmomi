@@ -260,3 +260,45 @@ func CnsQueryAsync(ctx context.Context, r soap.RoundTripper, req *types.CnsQuery
 
 	return resBody.Res, nil
 }
+
+// Cns Snapshot Methods
+
+type CnsCreateSnapshotsBody struct {
+	Req    *types.CnsCreateSnapshots         `xml:"urn:vsan CnsCreateSnapshots,omitempty"`
+	Res    *types.CnsCreateSnapshotsResponse `xml:"urn:vsan CnsCreateSnapshotsResponse,omitempty"`
+	Fault_ *soap.Fault                       `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsCreateSnapshotsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsCreateSnapshots(ctx context.Context, r soap.RoundTripper, req *types.CnsCreateSnapshots) (*types.CnsCreateSnapshotsResponse, error) {
+	var reqBody, resBody CnsCreateSnapshotsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type CnsDeleteSnapshotBody struct {
+	Req    *types.CnsDeleteSnapshots         `xml:"urn:vsan CnsDeleteSnapshots,omitempty"`
+	Res    *types.CnsDeleteSnapshotsResponse `xml:"urn:vsan CnsDeleteSnapshotsResponse,omitempty"`
+	Fault_ *soap.Fault                       `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsDeleteSnapshotBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsDeleteSnapshots(ctx context.Context, r soap.RoundTripper, req *types.CnsDeleteSnapshots) (*types.CnsDeleteSnapshotsResponse, error) {
+	var reqBody, resBody CnsDeleteSnapshotBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
