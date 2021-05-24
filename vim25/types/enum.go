@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1131,6 +1131,20 @@ func init() {
 	t["GuestInfoAppStateType"] = reflect.TypeOf((*GuestInfoAppStateType)(nil)).Elem()
 }
 
+type GuestInfoCustomizationStatus string
+
+const (
+	GuestInfoCustomizationStatusTOOLSDEPLOYPKG_IDLE      = GuestInfoCustomizationStatus("TOOLSDEPLOYPKG_IDLE")
+	GuestInfoCustomizationStatusTOOLSDEPLOYPKG_PENDING   = GuestInfoCustomizationStatus("TOOLSDEPLOYPKG_PENDING")
+	GuestInfoCustomizationStatusTOOLSDEPLOYPKG_RUNNING   = GuestInfoCustomizationStatus("TOOLSDEPLOYPKG_RUNNING")
+	GuestInfoCustomizationStatusTOOLSDEPLOYPKG_SUCCEEDED = GuestInfoCustomizationStatus("TOOLSDEPLOYPKG_SUCCEEDED")
+	GuestInfoCustomizationStatusTOOLSDEPLOYPKG_FAILED    = GuestInfoCustomizationStatus("TOOLSDEPLOYPKG_FAILED")
+)
+
+func init() {
+	t["GuestInfoCustomizationStatus"] = reflect.TypeOf((*GuestInfoCustomizationStatus)(nil)).Elem()
+}
+
 type GuestOsDescriptorFirmwareType string
 
 const (
@@ -2101,6 +2115,18 @@ func init() {
 	t["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = reflect.TypeOf((*HostRuntimeInfoNetStackInstanceRuntimeInfoState)(nil)).Elem()
 }
 
+type HostRuntimeInfoStatelessNvdsMigrationState string
+
+const (
+	HostRuntimeInfoStatelessNvdsMigrationStateReady     = HostRuntimeInfoStatelessNvdsMigrationState("ready")
+	HostRuntimeInfoStatelessNvdsMigrationStateNotNeeded = HostRuntimeInfoStatelessNvdsMigrationState("notNeeded")
+	HostRuntimeInfoStatelessNvdsMigrationStateUnknown   = HostRuntimeInfoStatelessNvdsMigrationState("unknown")
+)
+
+func init() {
+	t["HostRuntimeInfoStatelessNvdsMigrationState"] = reflect.TypeOf((*HostRuntimeInfoStatelessNvdsMigrationState)(nil)).Elem()
+}
+
 type HostServicePolicy string
 
 const (
@@ -2470,6 +2496,7 @@ const (
 	KmipClusterInfoKmsManagementTypeUnknown        = KmipClusterInfoKmsManagementType("unknown")
 	KmipClusterInfoKmsManagementTypeVCenter        = KmipClusterInfoKmsManagementType("vCenter")
 	KmipClusterInfoKmsManagementTypeTrustAuthority = KmipClusterInfoKmsManagementType("trustAuthority")
+	KmipClusterInfoKmsManagementTypeNativeProvider = KmipClusterInfoKmsManagementType("nativeProvider")
 )
 
 func init() {
@@ -3141,6 +3168,7 @@ const (
 	RecommendationReasonCodeVmHostAffinityPolicy            = RecommendationReasonCode("vmHostAffinityPolicy")
 	RecommendationReasonCodeVmHostAntiAffinityPolicy        = RecommendationReasonCode("vmHostAntiAffinityPolicy")
 	RecommendationReasonCodeVmAntiAffinityPolicy            = RecommendationReasonCode("vmAntiAffinityPolicy")
+	RecommendationReasonCodeBalanceVsanUsage                = RecommendationReasonCode("balanceVsanUsage")
 )
 
 func init() {
@@ -3355,6 +3383,18 @@ const (
 
 func init() {
 	t["ScsiLunVStorageSupportStatus"] = reflect.TypeOf((*ScsiLunVStorageSupportStatus)(nil)).Elem()
+}
+
+type SessionManagerGenericServiceTicketTicketType string
+
+const (
+	SessionManagerGenericServiceTicketTicketTypeHttpNfcServiceTicket = SessionManagerGenericServiceTicketTicketType("HttpNfcServiceTicket")
+	SessionManagerGenericServiceTicketTicketTypeHostServiceTicket    = SessionManagerGenericServiceTicketTicketType("HostServiceTicket")
+	SessionManagerGenericServiceTicketTicketTypeVcServiceTicket      = SessionManagerGenericServiceTicketTicketType("VcServiceTicket")
+)
+
+func init() {
+	t["SessionManagerGenericServiceTicketTicketType"] = reflect.TypeOf((*SessionManagerGenericServiceTicketTicketType)(nil)).Elem()
 }
 
 type SessionManagerHttpServiceRequestSpecMethod string
@@ -3741,6 +3781,17 @@ func init() {
 	t["VMwareUplinkLacpMode"] = reflect.TypeOf((*VMwareUplinkLacpMode)(nil)).Elem()
 }
 
+type VMwareUplinkLacpTimeoutMode string
+
+const (
+	VMwareUplinkLacpTimeoutModeFast = VMwareUplinkLacpTimeoutMode("fast")
+	VMwareUplinkLacpTimeoutModeSlow = VMwareUplinkLacpTimeoutMode("slow")
+)
+
+func init() {
+	t["VMwareUplinkLacpTimeoutMode"] = reflect.TypeOf((*VMwareUplinkLacpTimeoutMode)(nil)).Elem()
+}
+
 type VStorageObjectConsumptionType string
 
 const (
@@ -4108,6 +4159,18 @@ const (
 
 func init() {
 	t["VirtualMachineConfigInfoSwapPlacementType"] = reflect.TypeOf((*VirtualMachineConfigInfoSwapPlacementType)(nil)).Elem()
+}
+
+type VirtualMachineConfigSpecEncryptedFtModes string
+
+const (
+	VirtualMachineConfigSpecEncryptedFtModesFtEncryptionDisabled      = VirtualMachineConfigSpecEncryptedFtModes("ftEncryptionDisabled")
+	VirtualMachineConfigSpecEncryptedFtModesFtEncryptionOpportunistic = VirtualMachineConfigSpecEncryptedFtModes("ftEncryptionOpportunistic")
+	VirtualMachineConfigSpecEncryptedFtModesFtEncryptionRequired      = VirtualMachineConfigSpecEncryptedFtModes("ftEncryptionRequired")
+)
+
+func init() {
+	t["VirtualMachineConfigSpecEncryptedFtModes"] = reflect.TypeOf((*VirtualMachineConfigSpecEncryptedFtModes)(nil)).Elem()
 }
 
 type VirtualMachineConfigSpecEncryptedVMotionModes string
@@ -5009,6 +5072,7 @@ const (
 	VmFaultToleranceConfigIssueReasonForIssueHasEFIFirmware                 = VmFaultToleranceConfigIssueReasonForIssue("hasEFIFirmware")
 	VmFaultToleranceConfigIssueReasonForIssueTooManyVCPUs                   = VmFaultToleranceConfigIssueReasonForIssue("tooManyVCPUs")
 	VmFaultToleranceConfigIssueReasonForIssueTooMuchMemory                  = VmFaultToleranceConfigIssueReasonForIssue("tooMuchMemory")
+	VmFaultToleranceConfigIssueReasonForIssueUnsupportedPMemHAFailOver      = VmFaultToleranceConfigIssueReasonForIssue("unsupportedPMemHAFailOver")
 )
 
 func init() {
