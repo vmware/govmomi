@@ -80,7 +80,7 @@ func (cmd *run) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 	name := f.Arg(0)
 
-	c, err := cmd.Toolbox()
+	c, err := cmd.Toolbox(ctx)
 	if err != nil {
 		return err
 	}

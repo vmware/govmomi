@@ -79,7 +79,7 @@ func (cmd *download) Run(ctx context.Context, f *flag.FlagSet) error {
 		return os.ErrExist
 	}
 
-	c, err := cmd.Toolbox()
+	c, err := cmd.Toolbox(ctx)
 	if err != nil {
 		return err
 	}

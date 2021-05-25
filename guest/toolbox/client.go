@@ -29,6 +29,9 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/guest"
+	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -39,6 +42,46 @@ type Client struct {
 	FileManager    *guest.FileManager
 	Authentication types.BaseGuestAuthentication
 	GuestFamily    types.VirtualMachineGuestOsFamily
+}
+
+// NewClient initializes a Client's ProcessManager, FileManager and GuestFamily
+func NewClient(ctx context.Context, c *vim25.Client, vm mo.Reference, auth types.BaseGuestAuthentication) (*Client, error) {
+	m := guest.NewOperationsManager(c, vm.Reference())
+
+	pm, err := m.ProcessManager(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	fm, err := m.FileManager(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	family := ""
+	var props mo.VirtualMachine
+	pc := property.DefaultCollector(c)
+	err = pc.RetrieveOne(context.Background(), vm.Reference(), []string{"guest.guestFamily", "guest.toolsInstallType"}, &props)
+	if err != nil {
+		return nil, err
+	}
+
+	if props.Guest != nil {
+		family = props.Guest.GuestFamily
+		if family == string(types.VirtualMachineGuestOsFamilyOtherGuestFamily) {
+			if props.Guest.ToolsInstallType == string(types.VirtualMachineToolsInstallTypeGuestToolsTypeMSI) {
+				// The case of Windows version not supported by the ESX version
+				family = string(types.VirtualMachineGuestOsFamilyWindowsGuest)
+			}
+		}
+	}
+
+	return &Client{
+		ProcessManager: pm,
+		FileManager:    fm,
+		Authentication: auth,
+		GuestFamily:    types.VirtualMachineGuestOsFamily(family),
+	}, nil
 }
 
 func (c *Client) rm(ctx context.Context, path string) {

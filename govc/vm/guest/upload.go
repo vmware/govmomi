@@ -77,7 +77,7 @@ func (cmd *upload) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	c, err := cmd.Toolbox()
+	c, err := cmd.Toolbox(ctx)
 	if err != nil {
 		return err
 	}
