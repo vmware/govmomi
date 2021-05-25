@@ -88,12 +88,18 @@ func (flag *GuestFlag) Toolbox() (*toolbox.Client, error) {
 
 	family := ""
 	var props mo.VirtualMachine
-	err = vm.Properties(context.Background(), vm.Reference(), []string{"guest.guestFamily"}, &props)
+	err = vm.Properties(context.Background(), vm.Reference(), []string{"guest.guestFamily", "guest.toolsInstallType"}, &props)
 	if err != nil {
 		return nil, err
 	}
 	if props.Guest != nil {
 		family = props.Guest.GuestFamily
+		if family == string(types.VirtualMachineGuestOsFamilyOtherGuestFamily) {
+			if props.Guest.ToolsInstallType == string(types.VirtualMachineToolsInstallTypeGuestToolsTypeMSI) {
+				// The case of Windows version not supported by the ESX version
+				family = string(types.VirtualMachineGuestOsFamilyWindowsGuest)
+			}
+		}
 	}
 
 	return &toolbox.Client{
