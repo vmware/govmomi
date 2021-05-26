@@ -1777,11 +1777,10 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		})
 
 		ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
+		ctask.Wait()
 		if ctask.Info.Error != nil {
 			return nil, ctask.Info.Error.Fault
 		}
-
-		ctask.Wait()
 
 		ref := ctask.Info.Result.(types.ManagedObjectReference)
 		clone := Map.Get(ref).(*VirtualMachine)
