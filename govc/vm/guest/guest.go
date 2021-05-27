@@ -26,8 +26,6 @@ import (
 	"github.com/vmware/govmomi/guest"
 	"github.com/vmware/govmomi/guest/toolbox"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type GuestFlag struct {
@@ -70,44 +68,18 @@ func (flag *GuestFlag) Process(ctx context.Context) error {
 	return nil
 }
 
-func (flag *GuestFlag) Toolbox() (*toolbox.Client, error) {
-	pm, err := flag.ProcessManager()
-	if err != nil {
-		return nil, err
-	}
-
-	fm, err := flag.FileManager()
-	if err != nil {
-		return nil, err
-	}
-
+func (flag *GuestFlag) Toolbox(ctx context.Context) (*toolbox.Client, error) {
 	vm, err := flag.VirtualMachine()
 	if err != nil {
 		return nil, err
 	}
 
-	family := ""
-	var props mo.VirtualMachine
-	err = vm.Properties(context.Background(), vm.Reference(), []string{"guest.guestFamily", "guest.toolsInstallType"}, &props)
+	c, err := flag.Client()
 	if err != nil {
 		return nil, err
 	}
-	if props.Guest != nil {
-		family = props.Guest.GuestFamily
-		if family == string(types.VirtualMachineGuestOsFamilyOtherGuestFamily) {
-			if props.Guest.ToolsInstallType == string(types.VirtualMachineToolsInstallTypeGuestToolsTypeMSI) {
-				// The case of Windows version not supported by the ESX version
-				family = string(types.VirtualMachineGuestOsFamilyWindowsGuest)
-			}
-		}
-	}
 
-	return &toolbox.Client{
-		ProcessManager: pm,
-		FileManager:    fm,
-		Authentication: flag.Auth(),
-		GuestFamily:    types.VirtualMachineGuestOsFamily(family),
-	}, nil
+	return toolbox.NewClient(ctx, c, vm, flag.Auth())
 }
 
 func (flag *GuestFlag) FileManager() (*guest.FileManager, error) {

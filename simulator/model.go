@@ -901,6 +901,36 @@ func Test(f func(context.Context, *vim25.Client), model ...*Model) {
 	}, model...)
 }
 
+// RunContainer runs a vm container with the given args
+func RunContainer(ctx context.Context, c *vim25.Client, vm mo.Reference, args string) error {
+	obj, ok := vm.(*object.VirtualMachine)
+	if !ok {
+		obj = object.NewVirtualMachine(c, vm.Reference())
+	}
+
+	task, err := obj.PowerOff(ctx)
+	if err != nil {
+		return err
+	}
+	_ = task.Wait(ctx) // ignore InvalidPowerState if already off
+
+	task, err = obj.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+		ExtraConfig: []types.BaseOptionValue{&types.OptionValue{Key: "RUN.container", Value: args}},
+	})
+	if err != nil {
+		return err
+	}
+	if err = task.Wait(ctx); err != nil {
+		return err
+	}
+
+	task, err = obj.PowerOn(ctx)
+	if err != nil {
+		return err
+	}
+	return task.Wait(ctx)
+}
+
 // delay sleeps according to DelayConfig. If no delay specified, returns immediately.
 func (dc *DelayConfig) delay(method string) {
 	d := 0
