@@ -160,6 +160,8 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	vm.Runtime.ConnectionState = types.VirtualMachineConnectionStateConnected
 	vm.Summary.Runtime = vm.Runtime
 
+	vm.Capability.ChangeTrackingSupported = types.NewBool(changeTrackingSupported(spec))
+
 	vm.Summary.QuickStats.GuestHeartbeatStatus = types.ManagedEntityStatusGray
 	vm.Summary.OverallStatus = types.ManagedEntityStatusGreen
 	vm.ConfigStatus = types.ManagedEntityStatusGreen
@@ -2236,4 +2238,24 @@ func allSnapshotsInTree(tree []types.VirtualMachineSnapshotTree) []types.Managed
 	}
 
 	return result
+}
+
+func changeTrackingSupported(spec *types.VirtualMachineConfigSpec) bool {
+	for _, device := range spec.DeviceChange {
+		if dev, ok := device.GetVirtualDeviceConfigSpec().Device.(*types.VirtualDisk); ok {
+			switch dev.Backing.(type) {
+			case *types.VirtualDiskFlatVer2BackingInfo:
+				return true
+			case *types.VirtualDiskSparseVer2BackingInfo:
+				return true
+			case *types.VirtualDiskRawDiskMappingVer1BackingInfo:
+				return true
+			case *types.VirtualDiskRawDiskVer2BackingInfo:
+				return true
+			default:
+				return false
+			}
+		}
+	}
+	return false
 }
