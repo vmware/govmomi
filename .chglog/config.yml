@@ -1,5 +1,7 @@
 style: github
-template: CHANGELOG.tpl.md
+# by default use Github RELEASE template which includes refs to issues/PRs
+# to generate CHANGELOG.md use git-chlog -t <path_to_CHANGELOG.tpl.md>
+template: RELEASE.tpl.md
 info:
   title: CHANGELOG
   repository_url: https://github.com/vmware/govmomi
@@ -10,11 +12,17 @@ options:
         - govc
         - vcsim
         - chore
+        - docs
+        - examples
+        - fix
   commit_groups:
     title_maps:
       govc: 💫 `govc` (CLI)
       vcsim: 💫 `vcsim` (Simulator)
       chore: 🧹 Chore
+      fix: 🐞 Fix
+      docs: 📃 Documentation
+      examples: 💡 Examples
   header:
     pattern: "^(\\w*)\\:\\s(.*)$"
     pattern_maps:

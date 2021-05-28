@@ -63,32 +63,7 @@ workflow can be inspected
 
 ![Release](static/release-workflow.png "Successful Release Run")
 
-## Update the CHANGELOG
-
-After a successful release, update the [CHANGELOG](CHANGELOG.md). The
-`CHANGELOG.md` is generated with `git-chglog` and requires the release tag (see
-[above](#create-the-git-tag)) to be created before updating the `CHANGELOG.md`
-file.
-
-To avoid inconsistencies with the
-[release](.github/workflows/govmomi-release.yaml) workflow, please use the same
-Docker image to create the `CHANGELOG.md`.
-
-```console
-$ IMAGE=quay.io/git-chglog/git-chglog
-$ IMAGE_SHA=998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
-$ docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md v0.1.0..${RELEASE_VERSION}
-⌚  Generating changelog ...
-✨  Generate of "CHANGELOG.md" is completed! (8.4079146s)
-```
-
-Verify the modified file and create a PR following the usual
-[CONTRIBUTING](CONTRIBUTING.md) guidelines to commit the changes in
-`CHANGELOG.md`.
-
-⚠️ **Note:** The **commit message title** for the `CHANGELOG` PR should follow this
-convention: 
-
-> `"Update CHANGELOG for ${RELEASE_VERSION}"`. 
- 
-These commit messages are then excluded from the `CHANGELOG.md`.
+After a successful release, a pull request is automatically created by the
+Github Actions bot to update the [CHANGELOG](CHANGELOG.md). This `CHANGELOG.md`
+is also generated with `git-chglog` but uses a slightly different template
+(`.chglog/CHANGELOG.tpl.md`) for rendering (issue/PR refs are excluded).

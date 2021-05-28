@@ -23,6 +23,12 @@
 - [0ef4ae22]	add moid value mapping mappings
 - [082f9927]	add vsan simulator
 
+### 📃 Documentation
+
+- [e18b601f]	update for 0.25 release
+
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [6fe8d60a]	Fix folder write for govc container
@@ -70,6 +76,10 @@
 
 > Release Date: 2021-03-17
 
+### 💡 Examples
+
+- [38da87ff]	add NetworkReference.EthernetCardBackingInfo
+
 ### 💫 `govc` (CLI)
 
 - [63bb5c1e]	metric command enhancements and fixes
@@ -99,6 +109,8 @@
 - [5fd7e264]	fix EventHistoryCollector fixes
 - [0b755a59]	switch bats tests from esx to vcsim env
 - [3f1caf82]	fixes for PowerCLI Get-VirtualNetwork
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -161,6 +173,14 @@
 
 > Release Date: 2020-12-21
 
+### 💡 Examples
+
+- [7178588c]	add Folder.CreateVM
+- [b4f7243b]	add ContainerView retrieve clusters
+- [1d21fff9]	use session.Cache
+- [8af8cef6]	add events
+- [e153061f]	fix simulator.RunContainer on MacOSX
+
 ### 💫 `govc` (CLI)
 
 - [1ec59a7c]	fix build.sh git tag injection
@@ -196,6 +216,8 @@
 - [55f6f952]	add mechanism for modeling methods
 - [69942fe2]	fix save/load property collection for VmwareDistributedVirtualSwitch
 - [33121b87]	Honoring the instance uuid provided in spec by caller ([#2052](https://github.com/vmware/govmomi/issues/2052))
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -287,12 +309,18 @@
 
 > Release Date: 2020-07-02
 
+### 💡 Examples
+
+- [0bbb6a7d]	add property.Collector.Retrieve example
+
 ### 💫 `vcsim` (Simulator)
 
 - [0697d33f]	add HostNetworkSystem.QueryNetworkHint
 - [d7f4bba6]	use HostNetworkSystem wrapper with -load flag
 - [916b12e6]	set HostSystem IP in cluster AddHost_Task
 - [e63ec002]	add PbmQueryAssociatedProfile method
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -315,6 +343,8 @@
 
 - [4f19eb6d]	ipath search flag does not require a Datacenter
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [b639ab4c]	Update docs for 0.23 release
@@ -327,6 +357,11 @@
 ## [Release prerelease-v0.22.1-247-g770fcba2](https://github.com/vmware/govmomi/compare/v0.22.2...prerelease-v0.22.1-247-g770fcba2)
 
 > Release Date: 2020-05-29
+
+### 💡 Examples
+
+- [0e4b487e]	Fixed error is not logging in example.go
+- [c17eb769]	add ContainerView.Find
 
 ### 💫 `govc` (CLI)
 
@@ -390,6 +425,8 @@
 - [617c18e7]	support tags with the same name
 - [dfcf9437]	add docs on generated inventory names
 - [4cfc2905]	add support for NSX backed networks
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -540,6 +577,8 @@
 
 > Release Date: 2020-02-13
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [e7df0c11]	Avoid ServiceContent requirement in lookup.NewClient
@@ -548,6 +587,8 @@
 ## [Release v0.22.1](https://github.com/vmware/govmomi/compare/v0.22.0...v0.22.1)
 
 > Release Date: 2020-01-13
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -561,6 +602,16 @@
 ## [Release v0.22.0](https://github.com/vmware/govmomi/compare/v0.20.3...v0.22.0)
 
 > Release Date: 2020-01-10
+
+### 💡 Examples
+
+- [72b1cd92]	output VM names in performance example
+- [f4b3cda7]	add Common.Rename
+- [dab4ab0d]	add VirtualMachine.Customize
+- [1828eee9]	add VirtualMachine.CreateSnapshot
+- [6ff7040e]	fix flag parsing
+- [cad9a8e2]	add ExampleVirtualMachine_Reconfigure
+- [9495f0d8]	add CustomFieldManager.Set
 
 ### 💫 `govc` (CLI)
 
@@ -657,6 +708,8 @@
 ### ⏮ Reverts
 
 - [7914609d]	gen: retain omitempty field tag with int pointer types
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -924,6 +977,8 @@
 
 > Release Date: 2019-10-08
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [fdd27786]	Fix tls config in soap.NewServiceClient
@@ -934,6 +989,12 @@
 ## [Release prerelease-v0.21.0-58-g8d28646](https://github.com/vmware/govmomi/compare/v0.21.0...prerelease-v0.21.0-58-g8d28646)
 
 > Release Date: 2019-09-08
+
+### 💡 Examples
+
+- [1828eee9]	add VirtualMachine.CreateSnapshot
+- [6ff7040e]	fix flag parsing
+- [cad9a8e2]	add ExampleVirtualMachine_Reconfigure
 
 ### 💫 `govc` (CLI)
 
@@ -948,6 +1009,8 @@
 - [43d69860]	add endpoint registration mechanism
 - [c183577b]	add PlaceVm support ([#1589](https://github.com/vmware/govmomi/issues/1589))
 - [b17f3a51]	DefaultDatastoreID is optional in library deploy
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -987,6 +1050,10 @@
 
 > Release Date: 2019-07-24
 
+### 💡 Examples
+
+- [9495f0d8]	add CustomFieldManager.Set
+
 ### 💫 `govc` (CLI)
 
 - [fa755779]	support library paths in tags.attach commands
@@ -1023,6 +1090,8 @@
 - [6684016f]	fork httptest server package
 - [48c1e0a5]	add content library support
 - [8543ea4f]	set guest.toolsRunningStatus property
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1148,6 +1217,8 @@
 
 > Release Date: 2019-07-03
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [bd9cfd18]	Set the InventoryPath of the folder object in DefaultFolder ([#1515](https://github.com/vmware/govmomi/issues/1515))
@@ -1156,6 +1227,8 @@
 ## [Release v0.20.1](https://github.com/vmware/govmomi/compare/v0.20.0...v0.20.1)
 
 > Release Date: 2019-05-20
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1213,6 +1286,8 @@
 - [c02efc3d]	add setCustomValue support
 - [94804159]	add fault message to PropertyCollector RetrieveProperties
 - [36035f5b]	add HistoryCollector scrollable view support
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1318,6 +1393,8 @@
 - [39e6592d]	add support for PropertyCollector incremental updates
 - [619fbe28]	do not include DVS in HostSystem.Network
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [3617f28d]	Update docs for 0.19 release
@@ -1389,6 +1466,8 @@
 - [c0337740]	use VirtualDisk CapacityInKB for device summary
 - [3d7fbac2]	add property collector field type mapping for integer arrays
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [e4b69fab]	Update docs for 0.18 release
@@ -1441,6 +1520,8 @@
 - [0502ee9b]	add Destroy method for Folder and Datacenter types
 - [0636dc8c]	add EventManager.QueryEvents
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [123ed177]	govc release 0.17.1
@@ -1489,6 +1570,8 @@
 - [5f0f4004]	Add VirtualMachine guest ID validation ([#921](https://github.com/vmware/govmomi/issues/921))
 - [ef571547]	add QueryVirtualDiskUuid ([#920](https://github.com/vmware/govmomi/issues/920))
 - [27229ab7]	update ServiceContent to 6.5 ([#917](https://github.com/vmware/govmomi/issues/917))
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1605,6 +1688,8 @@
 - [0833484e]	Fix merging of default devices
 - [f6a734f5]	Add cdrom and scsi controller to Model VMs
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [7d879bac]	Doc updates ([#915](https://github.com/vmware/govmomi/issues/915))
@@ -1709,6 +1794,8 @@
 
 > Release Date: 2017-06-19
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [b63044e5]	Release 0.15.0
@@ -1744,6 +1831,8 @@
 
 > Release Date: 2017-04-08
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [9bfdc5ce]	Release 0.14.0
@@ -1773,6 +1862,8 @@
 ### 💫 `vcsim` (Simulator)
 
 - [5f7efaf1]	esxcli FirewallInfo fixes ([#661](https://github.com/vmware/govmomi/issues/661))
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1805,6 +1896,8 @@
 
 > Release Date: 2016-12-19
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [6103db21]	Release 0.12.1
@@ -1825,6 +1918,8 @@
 
 > Release Date: 2016-12-01
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [ab40ac73]	Release 0.12.0
@@ -1841,6 +1936,8 @@
 
 > Release Date: 2016-11-15
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [b9bcc6f4]	Release 0.11.4
@@ -1854,6 +1951,8 @@
 
 > Release Date: 2016-11-08
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [e16673dd]	Release 0.11.3
@@ -1864,6 +1963,8 @@
 ## [Release v0.11.2](https://github.com/vmware/govmomi/compare/v0.11.1...v0.11.2)
 
 > Release Date: 2016-11-01
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1877,6 +1978,8 @@
 
 > Release Date: 2016-10-27
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [1a7df5e3]	Release 0.11.1
@@ -1888,6 +1991,8 @@
 
 > Release Date: 2016-10-25
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [a16901d7]	Release 0.11.0
@@ -1898,6 +2003,8 @@
 ## [Release v0.10.0](https://github.com/vmware/govmomi/compare/v0.9.0...v0.10.0)
 
 > Release Date: 2016-10-20
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1924,6 +2031,8 @@
 ## [Release v0.9.0](https://github.com/vmware/govmomi/compare/v0.8.0...v0.9.0)
 
 > Release Date: 2016-09-09
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -1978,6 +2087,8 @@
 
 > Release Date: 2016-06-30
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [c0c7ce63]	Release 0.8.0
@@ -2002,6 +2113,8 @@
 
 > Release Date: 2016-06-03
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [2cad28d0]	Fix Datastore upload/download against VC
@@ -2010,6 +2123,8 @@
 ## [Release v0.7.0](https://github.com/vmware/govmomi/compare/v0.6.2...v0.7.0)
 
 > Release Date: 2016-06-02
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -2031,6 +2146,8 @@
 
 > Release Date: 2016-05-13
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [9051bd6b]	Release 0.6.2
@@ -2044,6 +2161,8 @@
 
 > Release Date: 2016-04-30
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [18154e51]	Release 0.6.1
@@ -2053,6 +2172,8 @@
 ## [Release v0.6.0](https://github.com/vmware/govmomi/compare/v0.5.0...v0.6.0)
 
 > Release Date: 2016-04-29
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -2084,6 +2205,8 @@
 ## [Release v0.5.0](https://github.com/vmware/govmomi/compare/v0.4.0...v0.5.0)
 
 > Release Date: 2016-03-30
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -2124,6 +2247,8 @@
 
 > Release Date: 2016-02-26
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [b3d202ab]	Release 0.4.0
@@ -2163,6 +2288,8 @@
 ## [Release v0.3.0](https://github.com/vmware/govmomi/compare/v0.2.0...v0.3.0)
 
 > Release Date: 2016-01-15
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -2265,6 +2392,8 @@
 
 - [2900f2ff]	Add Host information to vm.info
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [b3315079]	Mark 0.2.0 in change log
@@ -2331,6 +2460,8 @@
 
 > Release Date: 2015-07-13
 
+### ⚠️ BREAKING
+
 ### 📖 Commits
 
 - [e01555f9]	Add command to add host to datacenter
@@ -2346,6 +2477,8 @@
 ## [Release prerelease-v0.1.0-62-g7734772](https://github.com/vmware/govmomi/compare/prerelease-v0.1.0-52-g871f5d4...prerelease-v0.1.0-62-g7734772)
 
 > Release Date: 2015-07-06
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -2364,6 +2497,8 @@
 ### ⏮ Reverts
 
 - [8bec13f7]	Fix git dirty status error in build script
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 
@@ -2405,6 +2540,8 @@
 ## [Release v0.1.0](https://github.com/vmware/govmomi/compare/test...v0.1.0)
 
 > Release Date: 2015-03-17
+
+### ⚠️ BREAKING
 
 ### 📖 Commits
 

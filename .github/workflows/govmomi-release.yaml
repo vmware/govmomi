@@ -18,9 +18,10 @@ on:
   push:
     tags:
       - "v*" # Push events to matching v*, i.e. v0.25.0, v1.15.1
+  workflow_dispatch:
 
 jobs:
-  artifacts:
+  release:
     name: Create Release
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -34,12 +35,7 @@ jobs:
         with:
           fetch-depth: 0 # for CHANGELOG
 
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: 1.16
-
-      - name: Create CHANGELOG
+      - name: Create RELEASE CHANGELOG
         env:
           IMAGE: quay.io/git-chglog/git-chglog
           # https://quay.io/repository/git-chglog/git-chglog from tag v0.14.2
@@ -48,10 +44,45 @@ jobs:
           # generate CHANGELOG for this Github release tag only
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md $(basename "${{ github.ref }}" )
 
-      - name: Build and push Artifacts
+      - name: Create Release and build/push Artifacts
         uses: goreleaser/goreleaser-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           version: latest
           args: release --rm-dist --release-notes RELEASE_CHANGELOG.md # will push artefacts and container images
+
+  pull-request:
+    needs: release
+    name: Create CHANGELOG.md PR
+    runs-on: ubuntu-latest
+    continue-on-error: true # errors caused by this job won't stop workflow
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          # for changelog
+          fetch-depth: 0
+          ref: "master"
+
+      - name: Create CHANGELOG.md commit
+        env:
+          IMAGE: quay.io/git-chglog/git-chglog
+          # https://quay.io/repository/git-chglog/git-chglog from tag v0.14.2
+          IMAGE_SHA: 998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
+        run: |
+          # generate CHANGELOG for this Github release tag only
+          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md -t .chglog/CHANGELOG.tpl.md v0.1.0..$(basename "${{ github.ref }}" )
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git config user.name "${{ github.actor }}"
+          git add CHANGELOG.md
+          git commit -m "Update CHANGELOG for $(basename ${{ github.ref }})"
+
+      - name: Create Pull Request
+        uses: peter-evans/create-pull-request@v3
+        with:
+          delete-branch: true
+          title: "Update CHANGELOG"
+          body: |
+            Update CHANGELOG.md for new release

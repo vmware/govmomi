@@ -36,23 +36,60 @@ and **supported prefixes**, e.g. `govc: <message>`.
 
 ```console
 $ git checkout -b issue-<number> vmware/master
-$ git commit -a -m "Fix ..." -m "Closes: #<issue-number>"
+$ git add <files>
+$ git commit -m "fix: ..." -m "Closes: #<issue-number>"
 $ git push $USER issue-<number>
 ```
 
-### Example 2 - Add a Feature to `govc`
+### Example 2 - Add a new (non-breaking) API to `govmomi`
 
 ```console
 $ git checkout -b issue-<number> vmware/master
-$ git commit -a -m "govc: Add feature ..." -m "Closes: #<issue-number>"
+$ git add <files>
+$ git commit -m "Add API ..." -m "Closes: #<issue-number>"
 $ git push $USER issue-<number>
 ```
 
-### Example 3 - Fix a Bug in `vcsim`
+### Example 3 - Add a Feature to `govc`
 
 ```console
 $ git checkout -b issue-<number> vmware/master
-$ git commit -a -m "vcsim: Fix ..." -m "Closes: #<issue-number>"
+$ git add <files>
+$ git commit -m "govc: Add feature ..." -m "Closes: #<issue-number>"
+$ git push $USER issue-<number>
+```
+
+### Example 4 - Fix a Bug in `vcsim`
+
+```console
+$ git checkout -b issue-<number> vmware/master
+$ git add <files>
+$ git commit -m "vcsim: Fix ..." -m "Closes: #<issue-number>"
+$ git push $USER issue-<number>
+```
+
+### Example 5 - Document Breaking (API) Changes
+
+Breaking changes, e.g. to the `govmomi` APIs, are highlighted in the `CHANGELOG`
+and release notes when the keyword `BREAKING:` is used in the commit message
+body. 
+
+The text after `BREAKING:` is used in the corresponding highlighted section.
+Thus these details should be stated at the body of the commit message.
+Multi-line strings are supported.
+
+```console
+$ git checkout -b issue-<number> vmware/master
+$ git add <files>
+$ cat << EOF | git commit -F -
+Add ctx to funcXYZ
+
+This commit introduces context.Context to function XYZ
+Closes: #1234
+
+BREAKING: Add ctx to funcXYZ()
+EOF
+
 $ git push $USER issue-<number>
 ```
 
@@ -110,8 +147,8 @@ Message](http://chris.beams.io/posts/git-commit/).
 Be sure to include any related GitHub issue references in the commit message,
 e.g. `Closes: #<number>`.
 
-The [`CHANGELOG.md`](./CHANGELOG.md) and release page uses commit message
-prefixes for grouping and highlighting. A commit message that
+The [`CHANGELOG.md`](./CHANGELOG.md) and release page uses **commit message
+prefixes** for grouping and highlighting. A commit message that
 starts with `[prefix:] ` will place this commit under the respective
 section in the `CHANGELOG`. 
 
@@ -124,9 +161,12 @@ $ git commit -s -m "govc: Add CLI command X" -m "Closes: #1234"
 
 Currently the following prefixes are used:
 
-- `govc:` - CLI
-- `vcsim:` - Simulator
-- `chore:` - Repository related activities
+- `govc:` - Use for changes to `govc` CLI
+- `vcsim:` - Use for changes to vCenter Simulator
+- `chore:` - Use for repository related activities
+- `fix:` - Use for bug fixes
+- `docs:` - Use for changes to the documentation
+- `examples:` - Use for changes to examples
 
 ### Running CI Checks and Tests
 You can run both `make check` and `make test` from the top level of the
