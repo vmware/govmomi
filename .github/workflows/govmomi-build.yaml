@@ -24,6 +24,8 @@ on:
   # also run every night
   schedule:
     - cron: "0 1 * * *"
+  
+  workflow_dispatch:
 
 jobs:
   artifacts:
