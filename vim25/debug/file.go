@@ -20,13 +20,16 @@ import (
 	"io"
 	"os"
 	"path"
+	"sync"
 )
 
 // FileProvider implements a debugging provider that creates a real file for
 // every call to NewFile. It maintains a list of all files that it creates,
 // such that it can close them when its Flush function is called.
 type FileProvider struct {
-	Path  string
+	Path string
+
+	mu    sync.Mutex
 	files []*os.File
 }
 
@@ -36,12 +39,16 @@ func (fp *FileProvider) NewFile(p string) io.WriteCloser {
 		panic(err)
 	}
 
+	fp.mu.Lock()
+	defer fp.mu.Unlock()
 	fp.files = append(fp.files, f)
 
 	return NewFileWriterCloser(f, p)
 }
 
 func (fp *FileProvider) Flush() {
+	fp.mu.Lock()
+	defer fp.mu.Unlock()
 	for _, f := range fp.files {
 		f.Close()
 	}
