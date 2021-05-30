@@ -78,7 +78,7 @@ func (m *PerformanceManager) init(r *Registry) {
 
 func (p *PerformanceManager) QueryPerfCounter(ctx *Context, req *types.QueryPerfCounter) soap.HasFault {
 	body := new(methods.QueryPerfCounterBody)
-	body.Req = req
+	body.Res = new(types.QueryPerfCounterResponse)
 	body.Res.Returnval = make([]types.PerfCounterInfo, len(req.CounterId))
 	for i, id := range req.CounterId {
 		if info, ok := p.perfCounterIndex[id]; !ok {
@@ -95,7 +95,6 @@ func (p *PerformanceManager) QueryPerfCounter(ctx *Context, req *types.QueryPerf
 
 func (p *PerformanceManager) QueryPerfProviderSummary(ctx *Context, req *types.QueryPerfProviderSummary) soap.HasFault {
 	body := new(methods.QueryPerfProviderSummaryBody)
-	body.Req = req
 	body.Res = new(types.QueryPerfProviderSummaryResponse)
 
 	// The entity must exist
@@ -169,7 +168,6 @@ func (p *PerformanceManager) queryAvailablePerfMetric(entity types.ManagedObject
 
 func (p *PerformanceManager) QueryAvailablePerfMetric(ctx *Context, req *types.QueryAvailablePerfMetric) soap.HasFault {
 	body := new(methods.QueryAvailablePerfMetricBody)
-	body.Req = req
 	body.Res = p.queryAvailablePerfMetric(req.Entity, req.IntervalId)
 
 	return body
@@ -177,7 +175,6 @@ func (p *PerformanceManager) QueryAvailablePerfMetric(ctx *Context, req *types.Q
 
 func (p *PerformanceManager) QueryPerf(ctx *Context, req *types.QueryPerf) soap.HasFault {
 	body := new(methods.QueryPerfBody)
-	body.Req = req
 	body.Res = new(types.QueryPerfResponse)
 	body.Res.Returnval = make([]types.BasePerfEntityMetricBase, len(req.QuerySpec))
 

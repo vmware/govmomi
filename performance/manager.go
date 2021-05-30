@@ -271,6 +271,21 @@ func (m *Manager) Query(ctx context.Context, spec []types.PerfQuerySpec) ([]type
 	return res.Returnval, nil
 }
 
+// QueryCounter wraps the QueryPerfCounter method.
+func (m *Manager) QueryCounter(ctx context.Context, ids []int32) ([]types.PerfCounterInfo, error) {
+	req := types.QueryPerfCounter{
+		This:      m.Reference(),
+		CounterId: ids,
+	}
+
+	res, err := methods.QueryPerfCounter(ctx, m.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
 // SampleByName uses the spec param as a template, constructing a []types.PerfQuerySpec for the given metrics and entities
 // and invoking the Query method.
 // The spec template can specify instances using the MetricId.Instance field, by default all instances are collected.

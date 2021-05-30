@@ -193,6 +193,17 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		if len(info) == 0 {
 			t.Fatal("Expected non-empty list of host")
 		}
+		var ids []int32
+		for i := range info {
+			ids = append(ids, info[i].CounterId)
+		}
+		perf, err := p.QueryCounter(ctx, ids)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(perf) != len(ids) {
+			t.Errorf("%d counters", len(perf))
+		}
 	}
 
 	pool := Map.Any("ResourcePool").(*ResourcePool)
