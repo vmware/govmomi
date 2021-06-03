@@ -292,6 +292,7 @@ but appear via `govc $cmd -h`:
  - [vapp.destroy](#vappdestroy)
  - [vapp.power](#vapppower)
  - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
+ - [vcsa.net.proxy.info](#vcsanetproxyinfo)
  - [version](#version)
  - [vm.change](#vmchange)
  - [vm.clone](#vmclone)
@@ -2303,6 +2304,11 @@ The guest.run command starts a program in the VM with i/o redirected, waits for 
 propagates the exit code to the govc process exit code.  Note that stdout and stderr are redirected by default,
 stdin is only redirected when the '-d' flag is specified.
 
+Note that vmware-tools requires program PATH to be absolute.
+If PATH is not absolute and vm guest family is Windows,
+guest.run changes the command to: 'c:\\Windows\\System32\\cmd.exe /c "PATH [ARG]..."'
+Otherwise the command is changed to: '/bin/bash -c "PATH [ARG]..."'
+
 Examples:
   govc guest.run -vm $name ifconfig
   govc guest.run -vm $name ifconfig eth0
@@ -2310,7 +2316,8 @@ Examples:
   govc guest.run -vm $name -d "hello $USER" cat
   govc guest.run -vm $name curl -s :invalid: || echo $? # exit code 6
   govc guest.run -vm $name -e FOO=bar -e BIZ=baz -C /tmp env
-  govc guest.run -l root:'mypassword' -vm my_vm_hostname "ntpdate -u pool.ntp.org"
+  govc guest.run -vm $name -l root:mypassword ntpdate -u pool.ntp.org
+  govc guest.run -vm $name powershell C:\\network_refresh.ps1
 
 Options:
   -C=                    The absolute path of the working directory for the program to start
@@ -4913,6 +4920,19 @@ Retrieve the VC Appliance log forwarding configuration
 
 Examples:
   govc vcsa.log.forwarding.info
+
+Options:
+```
+
+## vcsa.net.proxy.info
+
+```
+Usage: govc vcsa.net.proxy.info [OPTIONS]
+
+Retrieve the VC networking proxy configuration
+
+Examples:
+  govc vcsa.net.proxy.info
 
 Options:
 ```
