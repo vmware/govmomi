@@ -1,4 +1,130 @@
 
+<a name="v0.26.0"></a>
+## [Release v0.26.0](https://github.com/vmware/govmomi/compare/v0.25.0...v0.26.0)
+
+> Release Date: 2021-06-03
+
+### 🐞 Fix
+
+- [70b92d6d]	Isolate SSO govc tests
+
+### 💡 Examples
+
+- [81b1de17]	add toolbox Client.Run
+
+### 💫 `govc` (CLI)
+
+- [e37e515b]	fix default guest.run path for unsupported Windows guests
+- [0e7012d0]	Add support for getting the VC proxy and no-proxy configuration ([#2435](https://github.com/vmware/govmomi/issues/2435))
+- [6afb8ff9]	Change 'Maintenance Mode' printing in host.info
+
+### 💫 `vcsim` (Simulator)
+
+- [dff7f6bb]	fix panic in QueryPerfCounter method
+- [df9dfde1]	set VirtualMachine ChangeTrackingSupported property ([#2468](https://github.com/vmware/govmomi/issues/2468))
+- [0c0ed98a]	fix race in CloneVM_Task
+- [d01d0fa7]	add simulator.RunContainer method
+- [8ab0c99a]	untie datastore capacity from local fs
+- [d31941c8]	Modify Usage of README. (based on v0.25.0)
+- [4fea687c]	include all namespaces in /about info
+- [bd3467d4]	avoid edit device panic when DeviceInfo is nil
+- [35a42af5]	add guest operations process support
+
+### 📃 Documentation
+
+- [75eee8e4]	update govc/USAGE and CONTRIBUTORS
+- [1f795d21]	Add blog to vcsim README
+- [2719c229]	Document linker and GOFLAGS for build vars
+
+### 🧹 Chore
+
+- [b4e1f965]	Fix CONTRIB link in greeting
+- [6f2597be]	Update CHANGELOG implementation
+- [d3944e17]	Add and reorder commits in CHANGELOG
+- [a796d3fc]	Add make help target
+- [8bc8fd28]	Add issue and PR templates
+- [60e33916]	Document commit prefixes
+- [cac1d8d7]	Add issue greeting
+- [0f1c3f89]	Add WIP Action
+- [921ad37a]	Remove dep files
+- [1d4ce94a]	Clean up documentation
+- [991278b9]	Remove unused release script
+- [16d8add5]	Automate CHANGELOG
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [75eee8e4]	docs: update govc/USAGE and CONTRIBUTORS
+- [dff7f6bb]	vcsim: fix panic in QueryPerfCounter method
+- [b4e1f965]	chore: Fix CONTRIB link in greeting
+- [df9dfde1]	vcsim: set VirtualMachine ChangeTrackingSupported property ([#2468](https://github.com/vmware/govmomi/issues/2468))
+- [8cbe64c5]	Fix: Protect FileProvider.files to avoid concurrent modification
+- [6f2597be]	chore: Update CHANGELOG implementation
+- [0c0ed98a]	vcsim: fix race in CloneVM_Task
+- [81b1de17]	examples: add toolbox Client.Run
+- [d01d0fa7]	vcsim: add simulator.RunContainer method
+- [9223b5ae]	Add toolbox.NewClient method
+- [8ab0c99a]	vcsim: untie datastore capacity from local fs
+- [e37e515b]	govc: fix default guest.run path for unsupported Windows guests
+- [d3944e17]	chore: Add and reorder commits in CHANGELOG
+- [83e29c69]	Update GitHub Test Action to use Makefile
+- [a7f2c47e]	Update vslm types vC build 17986435 (7.0U2HP4)
+- [067374fd]	Update sms types vC build 17986435 (7.0U2HP4)
+- [d9f507f0]	Update pbm types vC build 17986435 (7.0U2HP4)
+- [c89f8dd5]	Update eam types vC build 17986435 (7.0U2HP4)
+- [b72432ef]	Update vim25 types vC build 17986435 (7.0U2HP4)
+- [e53716dd]	Update gen.sh to vC build 17986435 (7.0U2HP4)
+- [1f795d21]	docs: Add blog to vcsim README
+- [338f5529]	Ran "make fix" to correct lint issues
+- [23d77ba4]	Add support for golangci-lint
+- [d31941c8]	vcsim: Modify Usage of README. (based on v0.25.0)
+- [7046a0d3]	Support pre-auth handlers in vC Sim
+- [2e8860d1]	Add CNS Snapshot APIs in govmomi
+- [13d4d376]	Remove vendor
+- [a796d3fc]	chore: Add make help target
+- [ef824a20]	Fix QueryAsyncVolume API test to be invoked only for vSphere 7.0.3
+- [c1900234]	Fix data race in simulator.container.id
+- [3212351e]	install bin doc: permalink to latest version
+- [7d779833]	Setup CodeQL Analysis
+- [566250ff]	build(deps): bump nokogiri from 1.11.1 to 1.11.4 in /gen
+- [f814a9ca]	ESX Agent Manager (EAM) Client and Simulator
+- [0e7012d0]	govc: Add support for getting the VC proxy and no-proxy configuration ([#2435](https://github.com/vmware/govmomi/issues/2435))
+- [8bc8fd28]	chore: Add issue and PR templates
+- [4fea687c]	vcsim: include all namespaces in /about info
+- [bd3467d4]	vcsim: avoid edit device panic when DeviceInfo is nil
+- [70b92d6d]	fix: Isolate SSO govc tests
+- [80c9053e]	Correcting broken Kubernetes vSphere Cloud Provider links
+- [60e33916]	chore: Document commit prefixes
+- [57a141f3]	Update govc test docs with act
+- [ff578914]	Use "vcsim uuidgen" for bats tests
+- [61e12ddb]	Only greet unassociated users
+- [e39dfdc8]	Add chore section to CHANGELOG
+- [6afb8ff9]	govc: Change 'Maintenance Mode' printing in host.info
+- [cac1d8d7]	chore: Add issue greeting
+- [0f1c3f89]	chore: Add WIP Action
+- [921ad37a]	chore: Remove dep files
+- [2719c229]	docs: Document linker and GOFLAGS for build vars
+- [f3645a96]	Clarify SetRootCAs behavior
+- [c368e57f]	toolbox: add hgfs freebsd stub
+- [35a42af5]	vcsim: add guest operations process support
+- [64e55d81]	Set RoundTripper in ssoadmin.NewClient
+- [1d4ce94a]	chore: Clean up documentation
+- [991278b9]	chore: Remove unused release script
+- [16d8add5]	chore: Automate CHANGELOG
+- [e8805c92]	Add NotFoundFault in cns types
+- [8576fe27]	Add queryAsyncVolume in simulator
+- [4b9e0813]	Simplify binary download instructions
+- [3062dda9]	Remove Travis CI
+- [0be5632f]	adding rancher to projects and reorganizing in alpha order
+- [4a63a28c]	Add bindings for CnsQueryAsyncVolume API
+- [a8c80b93]	Update READMEs with artifacts and Docker images
+- [26c9690c]	Fix VM Guest test and vet warnings
+- [a32cd0b3]	Add RELEASE documentation
+- [cc660b0e]	Increase govc tests timeout
+- [d7bfaf4f]	toolbox: move process management to its own package
+- [e86da96e]	Exclude go files in release tarball
+
 <a name="v0.25.0"></a>
 ## [Release v0.25.0](https://github.com/vmware/govmomi/compare/v0.24.1...v0.25.0)
 
