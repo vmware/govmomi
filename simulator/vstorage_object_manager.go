@@ -350,6 +350,23 @@ func (m *VcenterVStorageObjectManager) VStorageObjectCreateSnapshotTask(ctx *Con
 	}
 }
 
+func (m *VcenterVStorageObjectManager) ExtendDiskTask(ctx *Context, req *types.ExtendDisk_Task) soap.HasFault {
+	task := CreateTask(m, "extendDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		obj := m.object(req.Datastore, req.Id)
+		if obj == nil {
+			return nil, new(types.InvalidArgument)
+		}
+
+		obj.Config.CapacityInMB = req.NewCapacityInMB
+		return nil, nil
+	})
+	return &methods.ExtendDisk_TaskBody{
+		Res: &types.ExtendDisk_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
 func (m *VcenterVStorageObjectManager) DeleteSnapshotTask(ctx *Context, req *types.DeleteSnapshot_Task) soap.HasFault {
 	task := CreateTask(m, "deleteSnapshot", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		obj := m.object(req.Datastore, req.Id)
