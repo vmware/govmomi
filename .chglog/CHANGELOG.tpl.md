@@ -26,7 +26,7 @@
 {{ if .Notes -}}
 {{ if not .Merge -}}
 {{ if not (contains .Header "Update CHANGELOG for" ) -}}
-{{ range .Notes }}{{ .Body }}
+{{ .Subject }} [{{ .Hash.Short }}]:{{"\n"}}{{ range .Notes }}{{ .Body }}
 {{ end }}
 {{ end -}}
 {{ end -}}
