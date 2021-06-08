@@ -36,6 +36,9 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
+
+	// making sure the SDK endpoint is registered
+	_ "github.com/vmware/govmomi/eam/simulator"
 )
 
 const waitLoopMessage = `
