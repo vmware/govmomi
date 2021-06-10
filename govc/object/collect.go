@@ -80,7 +80,9 @@ func (cmd *collect) Usage() string {
 }
 
 func (cmd *collect) Description() string {
-	return `Collect managed object properties.
+	atable := aliasHelp()
+
+	return fmt.Sprintf(`Collect managed object properties.
 
 MOID can be an inventory path or ManagedObjectReference.
 MOID defaults to '-', an alias for 'ServiceInstance:ServiceInstance' or the root folder if a '-type' flag is given.
@@ -94,6 +96,9 @@ followed by the value to match.
 The '-R' flag sets the Filter using the given XML encoded request, which can be captured by 'vcsim -trace' for example.
 It can be useful for replaying property filters created by other clients and converting filters to Go code via '-O -dump'.
 
+The '-type' flag value can be a managed entity type or one of the following aliases:
+
+%s
 Examples:
   govc object.collect - content
   govc object.collect -s HostSystem:ha-host hardware.systemInfo.uuid
@@ -107,7 +112,7 @@ Examples:
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
   govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
   govc object.collect -json $vm config | \ # use -json + jq to search array elements
-    jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'`
+    jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'`, atable)
 }
 
 var stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
