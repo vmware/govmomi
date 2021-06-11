@@ -593,3 +593,80 @@ func (m *CnsVolumeManager) CnsDeleteSnapshots(ctx *simulator.Context, req *cnsty
 		},
 	}
 }
+
+func (m *CnsVolumeManager) CnsQuerySnapshots(ctx *simulator.Context, req *cnstypes.CnsQuerySnapshots) soap.HasFault {
+	task := simulator.CreateTask(m, "QuerySnapshots", func(*simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		if len(req.SnapshotQueryFilter.SnapshotQuerySpecs) > 1 {
+			return nil, &vim25types.InvalidArgument{InvalidProperty: "CnsSnapshotQuerySpec"}
+		}
+
+		snapshotQueryResultEntries := []cnstypes.CnsSnapshotQueryResultEntry{}
+		checkVolumeExists := func(volumeId cnstypes.CnsVolumeId) bool {
+			for _, dsVolumes := range m.volumes {
+				for id, _ := range dsVolumes {
+					if id.Id == volumeId.Id {
+						return true
+					}
+				}
+			}
+			return false
+		}
+
+		if req.SnapshotQueryFilter.SnapshotQuerySpecs == nil && len(req.SnapshotQueryFilter.SnapshotQuerySpecs) == 0 {
+			// return all snapshots if snapshotQuerySpecs is empty
+			for _, volSnapshots := range m.snapshots {
+				for _, snapshot := range volSnapshots {
+					snapshotQueryResultEntries = append(snapshotQueryResultEntries, cnstypes.CnsSnapshotQueryResultEntry{Snapshot: *snapshot})
+				}
+			}
+		} else {
+			// snapshotQuerySpecs is not empty
+			isSnapshotQueryFilter := false
+			snapshotQuerySpec := req.SnapshotQueryFilter.SnapshotQuerySpecs[0]
+			if snapshotQuerySpec.SnapshotId != nil && (*snapshotQuerySpec.SnapshotId != cnstypes.CnsSnapshotId{}) {
+				isSnapshotQueryFilter = true
+			}
+
+			if !checkVolumeExists(snapshotQuerySpec.VolumeId) {
+				// volumeId in snapshotQuerySpecs does not exist
+				snapshotQueryResultEntries = append(snapshotQueryResultEntries, cnstypes.CnsSnapshotQueryResultEntry{
+					Error: &vim25types.LocalizedMethodFault{
+						Fault: cnstypes.CnsVolumeNotFoundFault{
+							VolumeId: snapshotQuerySpec.VolumeId,
+						},
+					},
+				})
+			} else {
+				// volumeId in snapshotQuerySpecs exists
+				for _, snapshot := range m.snapshots[snapshotQuerySpec.VolumeId] {
+					if isSnapshotQueryFilter && snapshot.SnapshotId.Id != (*snapshotQuerySpec.SnapshotId).Id {
+						continue
+					}
+
+					snapshotQueryResultEntries = append(snapshotQueryResultEntries, cnstypes.CnsSnapshotQueryResultEntry{Snapshot: *snapshot})
+				}
+
+				if isSnapshotQueryFilter && len(snapshotQueryResultEntries) == 0 {
+					snapshotQueryResultEntries = append(snapshotQueryResultEntries, cnstypes.CnsSnapshotQueryResultEntry{
+						Error: &vim25types.LocalizedMethodFault{
+							Fault: cnstypes.CnsSnapshotNotFoundFault{
+								VolumeId:   snapshotQuerySpec.VolumeId,
+								SnapshotId: *snapshotQuerySpec.SnapshotId,
+							},
+						},
+					})
+				}
+			}
+		}
+
+		return &cnstypes.CnsSnapshotQueryResult{
+			Entries: snapshotQueryResultEntries,
+		}, nil
+	})
+
+	return &methods.CnsQuerySnapshotsBody{
+		Res: &cnstypes.CnsQuerySnapshotsResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}

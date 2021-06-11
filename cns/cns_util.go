@@ -34,6 +34,21 @@ func GetTaskInfo(ctx context.Context, task *object.Task) (*vim25types.TaskInfo, 
 	return taskInfo, nil
 }
 
+// GetQuerySnapshotsTaskResult gets the task result of QuerySnapshots given a task info
+func GetQuerySnapshotsTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (*cnstypes.CnsSnapshotQueryResult, error) {
+	if taskInfo == nil {
+		return nil, errors.New("TaskInfo is empty")
+	}
+	if taskInfo.Result != nil {
+		snapshotQueryResult := taskInfo.Result.(cnstypes.CnsSnapshotQueryResult)
+		if &snapshotQueryResult == nil {
+			return nil, errors.New("Cannot get SnapshotQueryResult")
+		}
+		return &snapshotQueryResult, nil
+	}
+	return nil, errors.New("TaskInfo result is empty")
+}
+
 // GetTaskResult gets the task result given a task info
 func GetTaskResult(ctx context.Context, taskInfo *vim25types.TaskInfo) (cnstypes.BaseCnsVolumeOperationResult, error) {
 	if taskInfo == nil {

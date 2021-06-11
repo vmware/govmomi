@@ -262,6 +262,42 @@ func TestClient(t *testing.T) {
 		}
 	}
 
+	// Test QuerySnapshots API on 7.0 U3 or above
+	var snapshotQueryFilter cnstypes.CnsSnapshotQueryFilter
+	var querySnapshotsTaskResult *cnstypes.CnsSnapshotQueryResult
+	var QuerySnapshotsFunc func(snapshotQueryFilter cnstypes.CnsSnapshotQueryFilter) *cnstypes.CnsSnapshotQueryResult
+
+	if isvSphereVersion70U3orAbove(ctx, c.ServiceContent.About) {
+		// Construct the CNS SnapshotQueryFilter and the function handler of QuerySnapshots
+		QuerySnapshotsFunc = func(snapshotQueryFilter cnstypes.CnsSnapshotQueryFilter) *cnstypes.CnsSnapshotQueryResult {
+			querySnapshotsTask, err := cnsClient.QuerySnapshots(ctx, snapshotQueryFilter)
+			if err != nil {
+				t.Fatalf("Failed to get the task of QuerySnapshots. Error: %+v \n", err)
+			}
+			querySnapshotsTaskInfo, err := GetTaskInfo(ctx, querySnapshotsTask)
+			if err != nil {
+				t.Fatalf("Failed to get the task info of QuerySnapshots. Error: %+v \n", err)
+			}
+			querySnapshotsTaskResult, err := GetQuerySnapshotsTaskResult(ctx, querySnapshotsTaskInfo)
+			if err != nil {
+				t.Fatalf("Failed to get the task result of QuerySnapshots. Error: %+v \n", err)
+			}
+			return querySnapshotsTaskResult
+		}
+
+		// Calls QuerySnapshots before CreateSnapshots
+		snapshotQueryFilter = cnstypes.CnsSnapshotQueryFilter{
+			SnapshotQuerySpecs: []cnstypes.CnsSnapshotQuerySpec{
+				{
+					VolumeId: cnstypes.CnsVolumeId{Id: volumeId},
+				},
+			},
+		}
+		t.Logf("QuerySnapshots before CreateSnapshots, snapshotQueryFilter %+v", snapshotQueryFilter)
+		querySnapshotsTaskResult = QuerySnapshotsFunc(snapshotQueryFilter)
+		t.Logf("snapshotQueryResult %+v", querySnapshotsTaskResult)
+	}
+
 	// Test CreateSnapshot API
 	// Construct the CNS SnapshotCreateSpec list
 	desc := "example-vanilla-block-snapshot"
@@ -298,6 +334,22 @@ func TestClient(t *testing.T) {
 	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
 	snapshotCreateTime := snapshotCreateResult.Snapshot.CreateTime
 	t.Logf("CreateSnapshots: Snapshot created successfully. volumeId: %q, snapshot id %q, time stamp %+v, opId: %q", volumeId, snapshotId, snapshotCreateTime, createSnapshotsTaskInfo.ActivationId)
+
+	// Test QuerySnapshots API on 7.0 U3 or above
+	if isvSphereVersion70U3orAbove(ctx, c.ServiceContent.About) {
+		// Calls QuerySnapshots after CreateSnapshots
+		snapshotQueryFilter = cnstypes.CnsSnapshotQueryFilter{
+			SnapshotQuerySpecs: []cnstypes.CnsSnapshotQuerySpec{
+				{
+					VolumeId:   cnstypes.CnsVolumeId{Id: volumeId},
+					SnapshotId: &cnstypes.CnsSnapshotId{Id: snapshotId},
+				},
+			},
+		}
+		t.Logf("QuerySnapshots after CreateSnapshots, snapshotQueryFilter %+v", snapshotQueryFilter)
+		querySnapshotsTaskResult = QuerySnapshotsFunc(snapshotQueryFilter)
+		t.Logf("snapshotQueryResult %+v", querySnapshotsTaskResult)
+	}
 
 	// Test CreateVolumeFromSnapshot functionality by calling CreateVolume with VolumeSource set
 	// Query Volume for capacity
@@ -1182,7 +1234,7 @@ func isvSphereVersion70U3orAbove(ctx context.Context, aboutInfo types.AboutInfo)
 	version := strings.Join(items[:], "")
 	// Convert version string to string, Ex: "7.0.3" becomes 703, "7.0.3.1" becomes 703
 	if len(version) >= 3 {
-		vSphereVersionInt, err := strconv.Atoi(version[0:2])
+		vSphereVersionInt, err := strconv.Atoi(version[0:3])
 		if err != nil {
 			return false
 		}

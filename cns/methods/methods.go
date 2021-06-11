@@ -261,7 +261,7 @@ func CnsQueryAsync(ctx context.Context, r soap.RoundTripper, req *types.CnsQuery
 	return resBody.Res, nil
 }
 
-// Cns Snapshot Methods
+// CNS CreateSnapshots API
 
 type CnsCreateSnapshotsBody struct {
 	Req    *types.CnsCreateSnapshots         `xml:"urn:vsan CnsCreateSnapshots,omitempty"`
@@ -283,6 +283,8 @@ func CnsCreateSnapshots(ctx context.Context, r soap.RoundTripper, req *types.Cns
 	return resBody.Res, nil
 }
 
+// CNS DeleteSnapshot API
+
 type CnsDeleteSnapshotBody struct {
 	Req    *types.CnsDeleteSnapshots         `xml:"urn:vsan CnsDeleteSnapshots,omitempty"`
 	Res    *types.CnsDeleteSnapshotsResponse `xml:"urn:vsan CnsDeleteSnapshotsResponse,omitempty"`
@@ -293,6 +295,28 @@ func (b *CnsDeleteSnapshotBody) Fault() *soap.Fault { return b.Fault_ }
 
 func CnsDeleteSnapshots(ctx context.Context, r soap.RoundTripper, req *types.CnsDeleteSnapshots) (*types.CnsDeleteSnapshotsResponse, error) {
 	var reqBody, resBody CnsDeleteSnapshotBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+// CNS QuerySnapshots API
+
+type CnsQuerySnapshotsBody struct {
+	Req    *types.CnsQuerySnapshots         `xml:"urn:vsan CnsQuerySnapshots,omitempty"`
+	Res    *types.CnsQuerySnapshotsResponse `xml:"urn:vsan CnsQuerySnapshotsResponse,omitempty"`
+	Fault_ *soap.Fault                      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsQuerySnapshotsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsQuerySnapshots(ctx context.Context, r soap.RoundTripper, req *types.CnsQuerySnapshots) (*types.CnsQuerySnapshotsResponse, error) {
+	var reqBody, resBody CnsQuerySnapshotsBody
 
 	reqBody.Req = req
 
