@@ -49,6 +49,7 @@ func New() *simulator.Registry {
 		ManagedObjectReference: cns.CnsVolumeManagerInstance,
 		volumes:                make(map[vim25types.ManagedObjectReference]map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume),
 		attachments:            make(map[cnstypes.CnsVolumeId]vim25types.ManagedObjectReference),
+		snapshots:              make(map[cnstypes.CnsVolumeId]map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot),
 	})
 
 	return r
@@ -58,6 +59,7 @@ type CnsVolumeManager struct {
 	vim25types.ManagedObjectReference
 	volumes     map[vim25types.ManagedObjectReference]map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume
 	attachments map[cnstypes.CnsVolumeId]vim25types.ManagedObjectReference
+	snapshots   map[cnstypes.CnsVolumeId]map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot
 }
 
 const simulatorDiskUUID = "6000c298595bf4575739e9105b2c0c2d"
@@ -497,6 +499,96 @@ func (m *CnsVolumeManager) CnsQueryAsync(ctx *simulator.Context, req *cnstypes.C
 
 	return &methods.CnsQueryAsyncBody{
 		Res: &cnstypes.CnsQueryAsyncResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (m *CnsVolumeManager) CnsCreateSnapshots(ctx *simulator.Context, req *cnstypes.CnsCreateSnapshots) soap.HasFault {
+	task := simulator.CreateTask(m, "CreateSnapshots", func(*simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		if len(req.SnapshotSpecs) == 0 {
+			return nil, &vim25types.InvalidArgument{InvalidProperty: "CnsSnapshotCreateSpec"}
+		}
+
+		snapshotOperationResult := []cnstypes.BaseCnsVolumeOperationResult{}
+		for _, snapshotCreateSpec := range req.SnapshotSpecs {
+			for _, dsVolumes := range m.volumes {
+				for id, _ := range dsVolumes {
+					if id.Id != snapshotCreateSpec.VolumeId.Id {
+						continue
+					}
+					snapshots, ok := m.snapshots[snapshotCreateSpec.VolumeId]
+					if !ok {
+						snapshots = make(map[cnstypes.CnsSnapshotId]*cnstypes.CnsSnapshot)
+						m.snapshots[snapshotCreateSpec.VolumeId] = snapshots
+					}
+
+					newSnapshot := &cnstypes.CnsSnapshot{
+						SnapshotId: cnstypes.CnsSnapshotId{
+							Id: uuid.New().String(),
+						},
+						VolumeId:    snapshotCreateSpec.VolumeId,
+						Description: snapshotCreateSpec.Description,
+						CreateTime:  time.Now(),
+					}
+					snapshots[newSnapshot.SnapshotId] = newSnapshot
+					snapshotOperationResult = append(snapshotOperationResult, &cnstypes.CnsSnapshotCreateResult{
+						CnsSnapshotOperationResult: cnstypes.CnsSnapshotOperationResult{
+							CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
+								VolumeId: newSnapshot.VolumeId,
+							},
+						},
+						Snapshot: *newSnapshot,
+					})
+				}
+			}
+		}
+
+		return &cnstypes.CnsVolumeOperationBatchResult{
+			VolumeResults: snapshotOperationResult,
+		}, nil
+	})
+
+	return &methods.CnsCreateSnapshotsBody{
+		Res: &cnstypes.CnsCreateSnapshotsResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (m *CnsVolumeManager) CnsDeleteSnapshots(ctx *simulator.Context, req *cnstypes.CnsDeleteSnapshots) soap.HasFault {
+	task := simulator.CreateTask(m, "DeleteSnapshots", func(*simulator.Task) (vim25types.AnyType, vim25types.BaseMethodFault) {
+		snapshotOperationResult := []cnstypes.BaseCnsVolumeOperationResult{}
+		for _, snapshotDeleteSpec := range req.SnapshotDeleteSpecs {
+			for _, dsVolumes := range m.volumes {
+				for id, _ := range dsVolumes {
+					if id.Id != snapshotDeleteSpec.VolumeId.Id {
+						continue
+					}
+					snapshots := m.snapshots[snapshotDeleteSpec.VolumeId]
+					snapshot, ok := snapshots[snapshotDeleteSpec.SnapshotId]
+					if ok {
+						delete(m.snapshots[snapshotDeleteSpec.VolumeId], snapshotDeleteSpec.SnapshotId)
+						snapshotOperationResult = append(snapshotOperationResult, &cnstypes.CnsSnapshotDeleteResult{
+							CnsSnapshotOperationResult: cnstypes.CnsSnapshotOperationResult{
+								CnsVolumeOperationResult: cnstypes.CnsVolumeOperationResult{
+									VolumeId: snapshot.VolumeId,
+								},
+							},
+							SnapshotId: snapshot.SnapshotId,
+						})
+					}
+				}
+			}
+		}
+
+		return &cnstypes.CnsVolumeOperationBatchResult{
+			VolumeResults: snapshotOperationResult,
+		}, nil
+	})
+
+	return &methods.CnsDeleteSnapshotBody{
+		Res: &cnstypes.CnsDeleteSnapshotsResponse{
 			Returnval: task.Run(ctx),
 		},
 	}

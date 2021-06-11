@@ -401,6 +401,70 @@ func TestSimulator(t *testing.T) {
 		t.Fatalf("Failed to create volume: fault=%+v", updateVolumeOperationRes.Fault)
 	}
 
+	// Create Snapshots
+	desc := "simulator-snapshot"
+	var cnsSnapshotCreateSpecList []cnstypes.CnsSnapshotCreateSpec
+	cnsSnapshotCreateSpec := cnstypes.CnsSnapshotCreateSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId,
+		},
+		Description: desc,
+	}
+	cnsSnapshotCreateSpecList = append(cnsSnapshotCreateSpecList, cnsSnapshotCreateSpec)
+	createSnapshotsTask, err := cnsClient.CreateSnapshots(ctx, cnsSnapshotCreateSpecList)
+	if err != nil {
+		t.Fatalf("Failed to get the task of CreateSnapshots. Error: %+v \n", err)
+	}
+	createSnapshotsTaskInfo, err := cns.GetTaskInfo(ctx, createSnapshotsTask)
+	if err != nil {
+		t.Fatalf("Failed to get the task info of CreateSnapshots. Error: %+v \n", err)
+	}
+	createSnapshotsTaskResult, err := cns.GetTaskResult(ctx, createSnapshotsTaskInfo)
+	if err != nil {
+		t.Fatalf("Failed to get the task result of CreateSnapshots. Error: %+v \n", err)
+	}
+	createSnapshotsOperationRes := createSnapshotsTaskResult.GetCnsVolumeOperationResult()
+	if createSnapshotsOperationRes.Fault != nil {
+		t.Fatalf("Failed to create snapshots: fault=%+v", createSnapshotsOperationRes.Fault)
+	}
+
+	snapshotCreateResult := interface{}(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
+	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
+	t.Logf("snapshotCreateResult %+v", snapshotCreateResult)
+
+	// Delete Snapshots
+	var cnsSnapshotDeleteSpecList []cnstypes.CnsSnapshotDeleteSpec
+	cnsSnapshotDeleteSpec := cnstypes.CnsSnapshotDeleteSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId,
+		},
+		SnapshotId: cnstypes.CnsSnapshotId{
+			Id: snapshotId,
+		},
+	}
+	cnsSnapshotDeleteSpecList = append(cnsSnapshotDeleteSpecList, cnsSnapshotDeleteSpec)
+	deleteSnapshotsTask, err := cnsClient.DeleteSnapshots(ctx, cnsSnapshotDeleteSpecList)
+	if err != nil {
+		t.Fatalf("Failed to get the task of DeleteSnapshots. Error: %+v \n", err)
+	}
+	deleteSnapshotsTaskInfo, err := cns.GetTaskInfo(ctx, deleteSnapshotsTask)
+	if err != nil {
+		t.Fatalf("Failed to get the task info of DeleteSnapshots. Error: %+v \n", err)
+	}
+
+	deleteSnapshotsTaskResult, err := cns.GetTaskResult(ctx, deleteSnapshotsTaskInfo)
+	if err != nil {
+		t.Fatalf("Failed to get the task result of DeleteSnapshots. Error: %+v \n", err)
+	}
+
+	deleteSnapshotsOperationRes := deleteSnapshotsTaskResult.GetCnsVolumeOperationResult()
+	if deleteSnapshotsOperationRes.Fault != nil {
+		t.Fatalf("Failed to delete snapshots: fault=%+v", deleteSnapshotsOperationRes.Fault)
+	}
+
+	snapshotDeleteResult := interface{}(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
+	t.Logf("snapshotDeleteResult %+v", snapshotDeleteResult)
+
 	// Delete
 	deleteVolumeList = []cnstypes.CnsVolumeId{
 		{
