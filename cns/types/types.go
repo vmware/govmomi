@@ -607,6 +607,17 @@ func init() {
 	types.Add("CnsAlreadyRegisteredFault", reflect.TypeOf((*CnsAlreadyRegisteredFault)(nil)).Elem())
 }
 
+type CnsSnapshotNotFoundFault struct {
+	CnsFault
+
+	VolumeId   CnsVolumeId   `xml:"volumeId,omitempty"`
+	SnapshotId CnsSnapshotId `xml:"snapshotId"`
+}
+
+func init() {
+	types.Add("CnsSnapshotNotFoundFault", reflect.TypeOf((*CnsSnapshotNotFoundFault)(nil)).Elem())
+}
+
 type CnsConfigureVolumeACLs CnsConfigureVolumeACLsRequestType
 
 func init() {
@@ -801,4 +812,69 @@ type CnsSnapshotVolumeSource struct {
 
 func init() {
 	types.Add("CnsSnapshotVolumeSource", reflect.TypeOf((*CnsSnapshotVolumeSource)(nil)).Elem())
+}
+
+// CNS QuerySnapshots related types
+
+type CnsQuerySnapshotsRequestType struct {
+	This                types.ManagedObjectReference `xml:"_this"`
+	SnapshotQueryFilter CnsSnapshotQueryFilter       `xml:"snapshotQueryFilter"`
+}
+
+func init() {
+	types.Add("CnsQuerySnapshotsRequestType", reflect.TypeOf((*CnsQuerySnapshotsRequestType)(nil)).Elem())
+}
+
+type CnsQuerySnapshots CnsQuerySnapshotsRequestType
+
+func init() {
+	types.Add("CnsQuerySnapshots", reflect.TypeOf((*CnsQuerySnapshots)(nil)).Elem())
+}
+
+type CnsQuerySnapshotsResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsSnapshotQueryResult struct {
+	types.DynamicData
+
+	Entries []CnsSnapshotQueryResultEntry `xml:"entries,omitempty"`
+	Cursor  CnsCursor                     `xml:"cursor"`
+}
+
+func init() {
+	types.Add("CnsSnapshotQueryResult", reflect.TypeOf((*CnsSnapshotQueryResult)(nil)).Elem())
+}
+
+type CnsSnapshotQueryResultEntry struct {
+	types.DynamicData
+
+	Snapshot CnsSnapshot                 `xml:"snapshot,omitempty"`
+	Error    *types.LocalizedMethodFault `xml:"error,omitempty"`
+}
+
+func init() {
+	types.Add("CnsSnapshotQueryResultEntry", reflect.TypeOf((*CnsSnapshotQueryResultEntry)(nil)).Elem())
+}
+
+type CnsSnapshotQueryFilter struct {
+	types.DynamicData
+
+	SnapshotQuerySpecs []CnsSnapshotQuerySpec `xml:"snapshotQuerySpecs,omitempty"`
+	Cursor             *CnsCursor             `xml:"cursor,omitempty"`
+}
+
+func init() {
+	types.Add("CnsSnapshotQueryFilter", reflect.TypeOf((*CnsSnapshotQueryFilter)(nil)).Elem())
+}
+
+type CnsSnapshotQuerySpec struct {
+	types.DynamicData
+
+	VolumeId   CnsVolumeId    `xml:"volumeId"`
+	SnapshotId *CnsSnapshotId `xml:"snapshotId,omitempty"`
+}
+
+func init() {
+	types.Add("CnsSnapshotQuerySpec", reflect.TypeOf((*CnsSnapshotQuerySpec)(nil)).Elem())
 }
