@@ -1701,8 +1701,15 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			pool = vm.ResourcePool
 		}
 	}
+
+	destHost := vm.Runtime.Host
+
+	if req.Spec.Location.Host != nil {
+		destHost = req.Spec.Location.Host
+	}
+
 	folder, _ := asFolderMO(Map.Get(req.Folder))
-	host := Map.Get(*vm.Runtime.Host).(*HostSystem)
+	host := Map.Get(*destHost).(*HostSystem)
 	event := vm.event()
 
 	ctx.postEvent(&types.VmBeingClonedEvent{
@@ -1775,7 +1782,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			This:   folder.Self,
 			Config: config,
 			Pool:   *pool,
-			Host:   vm.Runtime.Host,
+			Host:   destHost,
 		})
 
 		ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
