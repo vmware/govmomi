@@ -18,9 +18,9 @@ package dvs
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
-
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vim25/types"
@@ -34,6 +34,8 @@ type create struct {
 	configSpec *types.VMwareDVSConfigSpec
 
 	dProtocol string
+
+	numUplinkPorts int32
 }
 
 func init() {
@@ -49,9 +51,12 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DVSCreateSpec.ConfigSpec = cmd.configSpec
 	cmd.DVSCreateSpec.ProductInfo = new(types.DistributedVirtualSwitchProductSpec)
 
+	cmd.numUplinkPorts = 2 // Set Default Uplink ports to 2
+
 	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
 	f.Var(flags.NewInt32(&cmd.configSpec.MaxMtu), "mtu", "DVS Max MTU")
 	f.StringVar(&cmd.dProtocol, "discovery-protocol", "", "Link Discovery Protocol")
+	f.Var(flags.NewInt32(&cmd.numUplinkPorts), "num-uplinks", "Number of Uplinks")
 }
 
 func (cmd *create) Usage() string {
@@ -92,6 +97,18 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 			Protocol:  cmd.dProtocol,
 			Operation: "listen",
 		}
+	}
+
+	numUplinkPorts := int(cmd.numUplinkPorts)
+
+	if numUplinkPorts > 0 {
+		var policy types.DVSNameArrayUplinkPortPolicy
+		for i := 0; i < numUplinkPorts; i++ {
+			policy.UplinkPortName = append(policy.UplinkPortName, fmt.Sprintf("Uplink %d", i+1))
+		}
+		cmd.configSpec.UplinkPortPolicy = &policy
+	} else {
+		return errors.New("Must specify more than one uplink port")
 	}
 
 	folder, err := cmd.FolderOrDefault("network")
