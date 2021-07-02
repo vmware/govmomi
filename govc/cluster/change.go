@@ -60,6 +60,8 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar((*string)(&cmd.DrsConfig.DefaultVmBehavior), "drs-mode", "", DrsBehaviorUsage())
 
+	f.Var(flags.NewInt32(&cmd.DrsConfig.VmotionRate), "drs-vmotion-rate", "Aggressiveness of vMotions (1-5)")
+
 	// HA
 	f.Var(flags.NewOptionalBool(&cmd.DasConfig.Enabled), "ha-enabled", "Enable HA")
 
@@ -84,7 +86,8 @@ func (cmd *change) Description() string {
 
 Examples:
   govc cluster.change -drs-enabled -vsan-enabled -vsan-autoclaim ClusterA
-  govc cluster.change -drs-enabled=false ClusterB`
+  govc cluster.change -drs-enabled=false ClusterB
+  govc cluster.change -drs-vmotion-rate=4 ClusterC`
 }
 
 func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
