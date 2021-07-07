@@ -1888,10 +1888,15 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 		hostname = customizeName(vm, c.UserData.ComputerName)
 	}
 
+	cards := object.VirtualDeviceList(vm.Config.Hardware.Device).SelectByType((*types.VirtualEthernetCard)(nil))
+
 	for i, s := range vm.imc.NicSettingMap {
 		nic := &vm.Guest.Net[i]
 		if s.MacAddress != "" {
-			nic.MacAddress = s.MacAddress
+			nic.MacAddress = strings.ToLower(s.MacAddress) // MacAddress in guest will always be lowercase
+			card := cards[i].(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
+			card.MacAddress = s.MacAddress // MacAddress in Virtual NIC can be any case
+			card.AddressType = string(types.VirtualEthernetCardMacTypeManual)
 		}
 		if nic.DnsConfig == nil {
 			nic.DnsConfig = new(types.NetDnsConfigInfo)
