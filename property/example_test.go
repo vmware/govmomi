@@ -19,12 +19,14 @@ package property_test
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // Example to retrieve properties from a single object
@@ -78,4 +80,40 @@ func ExampleCollector_Retrieve() {
 		return nil
 	})
 	// Output: host has 2 vms: DC0_H0_VM0 DC0_H0_VM1
+}
+
+func ExampleWait() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		pc := property.DefaultCollector(c)
+
+		vm, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+
+		// power off VM after some time
+		go func() {
+			time.Sleep(time.Millisecond * 100)
+			_, err := vm.PowerOff(ctx)
+			if err != nil {
+				panic(err)
+			}
+		}()
+
+		return property.Wait(ctx, pc, vm.Reference(), []string{"runtime.powerState"}, func(changes []types.PropertyChange) bool {
+			for _, change := range changes {
+				state := change.Val.(types.VirtualMachinePowerState)
+				fmt.Println(state)
+				if state == types.VirtualMachinePowerStatePoweredOff {
+					return true
+				}
+			}
+
+			// continue polling
+			return false
+		})
+	})
+	// Output:
+	// poweredOn
+	// poweredOff
 }
