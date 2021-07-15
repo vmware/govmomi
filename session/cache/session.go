@@ -50,12 +50,18 @@ type Client interface {
 // By default, username/password authentication is used to create new sessions.
 // The Session.Login{SOAP,REST} fields can be set to use other methods,
 // such as SAML token authentication (see govc session.login for example).
+//
+// When Reauth is set to true, Login skips loading file cache and performs username/password
+// authentication, which is helpful in the case that the password in URL is different than
+// previously cached session. Comparing to `Passthrough`, the file cache will be updated after
+// authentication is done.
 type Session struct {
 	URL         *url.URL // URL of a vCenter or ESXi instance
 	DirSOAP     string   // DirSOAP cache directory. Defaults to "$HOME/.govmomi/sessions"
 	DirREST     string   // DirREST cache directory. Defaults to "$HOME/.govmomi/rest_sessions"
 	Insecure    bool     // Insecure param for soap.NewClient (tls.Config.InsecureSkipVerify)
 	Passthrough bool     // Passthrough disables caching when set to true
+	Reauth      bool     // Reauth skips loading of cached sessions when set to true
 
 	LoginSOAP func(context.Context, *vim25.Client) error // LoginSOAP defaults to session.Manager.Login()
 	LoginREST func(context.Context, *rest.Client) error  // LoginREST defaults to rest.Client.Login()
@@ -252,7 +258,7 @@ func restSessionValid(ctx context.Context, client *rest.Client) (bool, error) {
 // An error is returned if the session ID cannot be validated.
 // Returns false if Session.Passthrough is true.
 func (s *Session) Load(ctx context.Context, c Client, config func(*soap.Client) error) (bool, error) {
-	if s.Passthrough {
+	if s.Passthrough || s.Reauth {
 		return false, nil
 	}
 
