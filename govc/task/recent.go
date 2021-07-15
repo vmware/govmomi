@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -45,6 +46,8 @@ func init() {
 func (cmd *recent) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag, ctx = flags.NewDatacenterFlag(ctx)
 	cmd.DatacenterFlag.Register(ctx, f)
+	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 
 	f.IntVar(&cmd.max, "n", 25, "Output the last N tasks")
 	f.BoolVar(&cmd.follow, "f", false, "Follow recent task updates")
@@ -74,6 +77,9 @@ func (cmd *recent) Usage() string {
 
 func (cmd *recent) Process(ctx context.Context) error {
 	if err := cmd.DatacenterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.OutputFlag.Process(ctx); err != nil {
 		return err
 	}
 	return nil
@@ -154,10 +160,6 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	v.Follow = cmd.follow
 
-	stamp := "15:04:05"
-	tmpl := "%-40s %-30s %-30s %9s %9s %9s %s\n"
-	fmt.Fprintf(cmd.Out, tmpl, "Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result")
-
 	var last string
 	updated := false
 
@@ -168,54 +170,78 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 		updated = true
 
 		for _, info := range tasks {
-			var user string
-
-			switch x := info.Reason.(type) {
-			case *types.TaskReasonUser:
-				user = x.UserName
-			}
-
-			if info.EntityName == "" || user == "" {
-				continue
-			}
-
-			ruser := strings.SplitN(user, "\\", 2)
-			if len(ruser) == 2 {
-				user = ruser[1] // discard domain
-			} else {
-				user = strings.TrimPrefix(user, "com.vmware.") // e.g. com.vmware.vsan.health
-			}
-
-			queued := info.QueueTime.Format(stamp)
-			start := "-"
-			end := start
-
-			if info.StartTime != nil {
-				start = info.StartTime.Format(stamp)
-			}
-
-			msg := fmt.Sprintf("%2d%% %s", info.Progress, info.Task)
-
-			if info.CompleteTime != nil {
-				msg = info.CompleteTime.Sub(*info.StartTime).String()
-
-				if info.State == types.TaskInfoStateError {
-					msg = strings.TrimSuffix(info.Error.LocalizedMessage, ".")
-				}
-
-				end = info.CompleteTime.Format(stamp)
-			}
-
-			result := fmt.Sprintf("%-7s [%s]", info.State, msg)
-
-			item := fmt.Sprintf(tmpl, chop(tn(&info), 40), chop(info.EntityName, 30), chop(user, 30), queued, start, end, result)
-
-			if item == last {
-				continue // task info was updated, but the fields we display were not
-			}
-			last = item
-
-			fmt.Fprint(cmd.Out, item)
+			cmd.WriteResult(taskRecentResult{
+				TaskInfo: info,
+				TaskName: tn(&info),
+				lastLine: &last,
+			})
 		}
 	})
+}
+
+type taskRecentResult struct {
+	TaskName string
+	TaskInfo types.TaskInfo
+	lastLine *string
+}
+
+const (
+	timestampFormat = "15:04:05"
+	tableTemplate   = "%-40s %-30s %-30s %9s %9s %9s %s\n"
+)
+
+func (trr taskRecentResult) Write(w io.Writer) error {
+	if *trr.lastLine == "" {
+		fmt.Fprintf(w, tableTemplate, "Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result")
+	}
+	var user string
+
+	switch x := trr.TaskInfo.Reason.(type) {
+	case *types.TaskReasonUser:
+		user = x.UserName
+	}
+
+	if trr.TaskInfo.EntityName == "" || user == "" {
+		return nil
+	}
+
+	ruser := strings.SplitN(user, "\\", 2)
+	if len(ruser) == 2 {
+		user = ruser[1] // discard domain
+	} else {
+		user = strings.TrimPrefix(user, "com.vmware.") // e.g. com.vmware.vsan.health
+	}
+
+	queued := trr.TaskInfo.QueueTime.Format(timestampFormat)
+	start := "-"
+	end := start
+
+	if trr.TaskInfo.StartTime != nil {
+		start = trr.TaskInfo.StartTime.Format(timestampFormat)
+	}
+
+	msg := fmt.Sprintf("%2d%% %s", trr.TaskInfo.Progress, trr.TaskInfo.Task)
+
+	if trr.TaskInfo.CompleteTime != nil {
+		msg = trr.TaskInfo.CompleteTime.Sub(*trr.TaskInfo.StartTime).String()
+
+		if trr.TaskInfo.State == types.TaskInfoStateError {
+			msg = strings.TrimSuffix(trr.TaskInfo.Error.LocalizedMessage, ".")
+		}
+
+		end = trr.TaskInfo.CompleteTime.Format(timestampFormat)
+	}
+
+	result := fmt.Sprintf("%-7s [%s]", trr.TaskInfo.State, msg)
+
+	item := fmt.Sprintf(tableTemplate, chop(trr.TaskName, 40), chop(trr.TaskInfo.EntityName, 30), chop(user, 30), queued, start, end, result)
+
+	if item == *trr.lastLine {
+		return nil // task info was updated, but the fields we display were not
+	}
+	*trr.lastLine = item
+
+	fmt.Fprint(w, item)
+
+	return nil
 }
