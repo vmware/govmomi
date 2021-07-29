@@ -120,6 +120,20 @@ func (c *Manager) PublishLibraryItem(ctx context.Context, item *Item, force bool
 	return c.Do(ctx, url.Request(http.MethodPost, body), nil)
 }
 
+// UpdateLibraryItem can update one or both of the item Description and Name fields.
+func (c *Manager) UpdateLibraryItem(ctx context.Context, item *Item) error {
+	spec := struct {
+		Item `json:"update_spec"`
+	}{
+		Item{
+			Name:        item.Name,
+			Description: item.Description,
+		},
+	}
+	url := c.Resource(internal.LibraryItemPath).WithID(item.ID)
+	return c.Do(ctx, url.Request(http.MethodPatch, spec), nil)
+}
+
 // DeleteLibraryItem deletes an existing library item.
 func (c *Manager) DeleteLibraryItem(ctx context.Context, item *Item) error {
 	url := c.Resource(internal.LibraryItemPath).WithID(item.ID)

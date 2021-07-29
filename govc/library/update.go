@@ -19,6 +19,7 @@ package library
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -28,7 +29,7 @@ import (
 type update struct {
 	*flags.ClientFlag
 
-	library.Library
+	name, desc string
 }
 
 func init() {
@@ -39,19 +40,20 @@ func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.Library.Name, "n", "", "Library name")
-	f.StringVar(&cmd.Library.Description, "d", "", "Library description")
+	f.StringVar(&cmd.name, "n", "", "Library or item name")
+	f.StringVar(&cmd.desc, "d", "", "Library or item description")
 }
 
 func (cmd *update) Usage() string {
-	return "NAME"
+	return "PATH"
 }
 
 func (cmd *update) Description() string {
-	return `Update library.
+	return `Update library or item PATH.
 
 Examples:
-  govc library.update -d "new description" -n "new-name" current-name`
+  govc library.update -d "new library description" -n "new-name" my-library
+  govc library.update -d "new item description" -n "new-item-name" my-library/my-item`
 }
 
 func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -65,13 +67,30 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	m := library.NewManager(c)
-	dst, err := flags.ContentLibrary(ctx, c, f.Arg(0))
+
+	res, err := flags.ContentLibraryResult(ctx, c, "", f.Arg(0))
 	if err != nil {
 		return err
 	}
 
-	cmd.ID = dst.ID
-	dst.Patch(&cmd.Library)
-
-	return m.UpdateLibrary(ctx, dst)
+	switch t := res.GetResult().(type) {
+	case library.Library:
+		lib := &library.Library{
+			ID:          t.ID,
+			Name:        cmd.name,
+			Description: cmd.desc,
+		}
+		t.Patch(lib)
+		return m.UpdateLibrary(ctx, &t)
+	case library.Item:
+		item := &library.Item{
+			ID:          t.ID,
+			Name:        cmd.name,
+			Description: cmd.desc,
+		}
+		t.Patch(item)
+		return m.UpdateLibraryItem(ctx, item)
+	default:
+		return fmt.Errorf("%q is a %T", f.Arg(0), t)
+	}
 }
