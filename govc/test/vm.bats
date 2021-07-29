@@ -36,6 +36,40 @@ load test_helper
   assert_equal $ip $res
 }
 
+@test "vm.ip capital MAC" {
+  vcsim_env -autostart=false
+
+  id=/DC0/vm/DC0_H0_VM0
+
+  mac=00:50:56:83:3A:5D
+  run govc vm.customize -vm $id -mac $mac -ip 10.0.0.1 -netmask 255.255.0.0 -type Linux
+  assert_success
+
+  run govc vm.power -on $id
+  assert_success
+
+  run govc vm.ip -wait 5s $id
+  assert_success
+
+  run govc vm.ip -wait 5s -a -v4 $id
+  assert_success
+
+  run govc vm.ip -wait 5s -n $mac $id
+  assert_success
+
+  run govc vm.ip -wait 5s -n ethernet-0 $id
+  assert_success
+
+  ip=$(govc vm.ip -wait 5s $id)
+
+  # add a second nic
+  run govc vm.network.add -vm $id "VM Network"
+  assert_success
+
+  res=$(govc vm.ip -wait 5s -n ethernet-0 $id)
+  assert_equal $ip $res
+}
+
 @test "vm.ip -esxcli" {
   esx_env
 
