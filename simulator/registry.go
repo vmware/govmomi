@@ -45,8 +45,9 @@ var refValueMap = map[string]string{
 	"VirtualMachineSnapshot":         "snapshot",
 	"VmwareDistributedVirtualSwitch": "dvs",
 	"DistributedVirtualSwitch":       "dvs",
-	"ClusterComputeResource":         "domain",
+	"ClusterComputeResource":         "domain-c",
 	"Folder":                         "group",
+	"StoragePod":                     "group-p",
 }
 
 // Map is the default Registry instance.
@@ -113,11 +114,16 @@ func typeName(item mo.Reference) string {
 
 // valuePrefix returns the value name prefix of a given object
 func valuePrefix(typeName string) string {
-	if v, ok := refValueMap[typeName]; ok {
-		return v
+	v, ok := refValueMap[typeName]
+	if ok {
+		if strings.Contains(v, "-") {
+			return v
+		}
+	} else {
+		v = strings.ToLower(typeName)
 	}
 
-	return strings.ToLower(typeName)
+	return v + "-"
 }
 
 // newReference returns a new MOR, where Type defaults to type of the given item
@@ -131,7 +137,7 @@ func (r *Registry) newReference(item mo.Reference) types.ManagedObjectReference 
 
 	if ref.Value == "" {
 		n := atomic.AddInt64(&r.counter, 1)
-		ref.Value = fmt.Sprintf("%s-%d", valuePrefix(ref.Type), n)
+		ref.Value = fmt.Sprintf("%s%d", valuePrefix(ref.Type), n)
 	}
 
 	return ref
