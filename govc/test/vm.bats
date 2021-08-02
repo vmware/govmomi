@@ -291,6 +291,17 @@ load test_helper
   assert_failure
 }
 
+@test "vm.destroy" {
+  vcsim_env
+
+  vm=$(new_id)
+  govc vm.create $vm
+
+  # destroy powers off vm before destruction
+  run govc vm.destroy $vm
+  assert_success
+}
+
 @test "vm.create pvscsi" {
   vcsim_env
 

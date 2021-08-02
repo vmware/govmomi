@@ -22,6 +22,8 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 type destroy struct {
@@ -73,24 +75,33 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	for _, vm := range vms {
-		task, err := vm.PowerOff(ctx)
+		var (
+			task  *object.Task
+			state types.VirtualMachinePowerState
+		)
+
+		state, err = vm.PowerState(ctx)
 		if err != nil {
 			return err
 		}
 
-		// Ignore error since the VM may already been in powered off state.
-		// vm.Destroy will fail if the VM is still powered on.
-		_ = task.Wait(ctx)
+		if state == types.VirtualMachinePowerStatePoweredOn {
+			task, err = vm.PowerOff(ctx)
+			if err != nil {
+				return err
+			}
+
+			// Ignore error since the VM may already been in powered off state.
+			// vm.Destroy will fail if the VM is still powered on.
+			_ = task.Wait(ctx)
+		}
 
 		task, err = vm.Destroy(ctx)
 		if err != nil {
 			return err
 		}
 
-		err = task.Wait(ctx)
-		if err != nil {
-			return err
-		}
+		return task.Wait(ctx)
 	}
 
 	return nil
