@@ -86,11 +86,11 @@ type TaskRunner interface {
 
 // taskReference is a helper struct so we can call AcquireLock in Run()
 type taskReference struct {
-	ref types.ManagedObjectReference
+	Self types.ManagedObjectReference
 }
 
 func (tr *taskReference) Reference() types.ManagedObjectReference {
-	return tr.ref
+	return tr.Self
 }
 
 func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
@@ -101,7 +101,7 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 	})
 
 	tr := &taskReference{
-		ref: *t.Info.Entity,
+		Self: *t.Info.Entity,
 	}
 	// in most cases, the caller already holds this lock, and we would like
 	// the lock to be held across the "hand off" to the async goroutine.

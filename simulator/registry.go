@@ -588,10 +588,14 @@ func (r *Registry) locker(obj mo.Reference) *internal.ObjectLock {
 	case *types.ManagedObjectReference:
 		ref = *x
 		obj = r.Get(ref) // to check for sync.Locker
-	case *ListView: // otherwise race_test.go fails in the default case
-		ref = x.Self
 	default:
-		ref = obj.Reference()
+		// Use of obj.Reference() may cause a read race, prefer the mo 'Self' field to avoid this
+		self := reflect.ValueOf(obj).Elem().FieldByName("Self")
+		if self.IsValid() {
+			ref = self.Interface().(types.ManagedObjectReference)
+		} else {
+			ref = obj.Reference()
+		}
 	}
 
 	if mu, ok := obj.(sync.Locker); ok {
