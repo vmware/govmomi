@@ -115,7 +115,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 					}
 				}
 			}
-			if free {
+			if free && u != 7 {
 				unitNumber = &u
 				break
 			}
