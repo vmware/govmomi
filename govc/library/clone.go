@@ -36,6 +36,8 @@ type clone struct {
 
 	profile string
 	ovf     bool
+	extra   bool
+	mac     bool
 }
 
 func init() {
@@ -62,6 +64,8 @@ func (cmd *clone) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
 	f.BoolVar(&cmd.ovf, "ovf", false, "Clone as OVF (default is VM Template)")
+	f.BoolVar(&cmd.extra, "e", false, "Include extra configuration")
+	f.BoolVar(&cmd.mac, "m", false, "Preserve MAC-addresses on network adapters")
 	f.StringVar(&cmd.profile, "profile", "", "Storage profile")
 }
 
@@ -157,6 +161,12 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 			Target: vcenter.LibraryTarget{
 				LibraryID: l.ID,
 			},
+		}
+		if cmd.extra {
+			ovf.Spec.Flags = append(ovf.Spec.Flags, "EXTRA_CONFIG")
+		}
+		if cmd.mac {
+			ovf.Spec.Flags = append(ovf.Spec.Flags, "PRESERVE_MAC")
 		}
 		id, err := vcenter.NewManager(c).CreateOVF(ctx, ovf)
 		if err != nil {
