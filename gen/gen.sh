@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -51,6 +51,13 @@ generate() {
 # All types derive from vCenter build 17986435, vSphere 7.0U2 Hot Patch 4
 #
 export COPYRIGHT_DATE_RANGE="2014-2021"
+
+#
+# FORCE_BASE_INTERFACE_FOR_TYPES defines the types that we want to
+# generate base interfaces. The type names should be comman seperated -
+# e.g. "TypeA,TypeB,TypeC"
+#
+export FORCE_BASE_INTERFACE_FOR_TYPES="AgencyConfigInfo"
 
 # ./sdk/ contains the contents of wsdl.zip from vimbase build 17354719
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0

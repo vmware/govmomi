@@ -500,7 +500,7 @@ func init() {
 
 type CreateAgencyRequestType struct {
 	This             types.ManagedObjectReference `xml:"_this"`
-	AgencyConfigInfo AgencyConfigInfo             `xml:"agencyConfigInfo"`
+	AgencyConfigInfo BaseAgencyConfigInfo         `xml:"agencyConfigInfo,typeattr"`
 	InitialGoalState string                       `xml:"initialGoalState"`
 }
 
@@ -1201,7 +1201,7 @@ func init() {
 }
 
 type QueryConfigResponse struct {
-	Returnval AgencyConfigInfo `xml:"returnval"`
+	Returnval BaseAgencyConfigInfo `xml:"returnval,typeattr"`
 }
 
 type QueryIssue QueryIssueRequestType
@@ -1375,7 +1375,7 @@ func init() {
 
 type UpdateRequestType struct {
 	This   types.ManagedObjectReference `xml:"_this"`
-	Config AgencyConfigInfo             `xml:"config"`
+	Config BaseAgencyConfigInfo         `xml:"config,typeattr"`
 }
 
 func init() {
