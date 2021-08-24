@@ -287,6 +287,9 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 							Name: "hostVirtualNicManagerTraversalSpec",
 						},
 						&types.SelectionSpec{
+							Name: "optionManagerTraversalSpec",
+						},
+						&types.SelectionSpec{
 							Name: "entityTraversalSpec",
 						},
 					},
@@ -328,6 +331,13 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 				},
 				&types.TraversalSpec{
 					SelectionSpec: types.SelectionSpec{
+						Name: "optionManagerTraversalSpec",
+					},
+					Type: "OptionManager",
+					Path: "configManager.advancedOption",
+				},
+				&types.TraversalSpec{
+					SelectionSpec: types.SelectionSpec{
 						Name: "entityTraversalSpec",
 					},
 					Type: "ManagedEntity",
@@ -341,6 +351,7 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 			{Type: "HostDatastoreSystem", All: all},
 			{Type: "HostNetworkSystem", All: all},
 			{Type: "HostVirtualNicManager", All: all},
+			{Type: "OptionManager", All: all},
 			{Type: "ManagedEntity", All: all},
 			{Type: "Task", All: all},
 		},
