@@ -253,7 +253,7 @@ EOF
   run govc library.create my-content
   assert_success
 
-  run govc library.clone -vm $vm -ovf my-content $item
+  run govc library.clone -vm $vm -ovf -e -m my-content $item
   assert_success
 
   run govc vm.destroy $vm
