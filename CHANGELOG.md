@@ -1,4 +1,58 @@
 
+<a name="v0.26.1"></a>
+## [Release v0.26.1](https://github.com/vmware/govmomi/compare/v0.26.0...v0.26.1)
+
+> Release Date: 2021-08-16
+
+### 🐞 Fix
+
+- [a366e352]	Regenerated interface and type to include BaseAgencyConfigInfo. Closes: [#2545](https://github.com/vmware/govmomi/issues/2545).
+- [d66ef551]	explicitly import eam/simulator in test
+
+### 💡 Examples
+
+- [0c045a63]	Add Property Wait example
+
+### 💫 `govc` (CLI)
+
+- [012f5348]	support updating items in library.update command
+- [5743d5b6]	Allow cluster.change to set ClusterDrsConfigInfo.vmotionRate
+- [03210c91]	Add object.collect type flag alias help
+
+### 💫 `vcsim` (Simulator)
+
+- [ce6ed634]	avoid race when fetching object Locker
+- [31821de3]	use 'domain-c' prefix for cluster moids
+- [3625e6dd]	propagate CustomizeVM MacAddress to Virtual NIC
+- [389c0382]	Take the host parameter into account while cloning a VM on a cluster
+- [6fba1da7]	Implement VSLM ExtendDisk_Task
+
+### 🧹 Chore
+
+- [ddc2b47a]	Include commit details in BREAKING section
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [a366e352]	fix: Regenerated interface and type to include BaseAgencyConfigInfo. Closes: [#2545](https://github.com/vmware/govmomi/issues/2545).
+- [655f8e5c]	testing for lab
+- [ce6ed634]	vcsim: avoid race when fetching object Locker
+- [31821de3]	vcsim: use 'domain-c' prefix for cluster moids
+- [0aa1de31]	make processing of mac addresses case insensitive ([#2510](https://github.com/vmware/govmomi/issues/2510))
+- [012f5348]	govc: support updating items in library.update command
+- [0c045a63]	examples: Add Property Wait example
+- [f30cefc3]	Add Reauth flag to skip loading cached sessions
+- [3625e6dd]	vcsim: propagate CustomizeVM MacAddress to Virtual NIC
+- [5743d5b6]	govc: Allow cluster.change to set ClusterDrsConfigInfo.vmotionRate
+- [389c0382]	vcsim: Take the host parameter into account while cloning a VM on a cluster
+- [7bf48333]	Added CNS querySnapshots binding, simulator testcases and client testcases
+- [017ab414]	Added CreateSnapshots and DeleteSnapshots methods in cns simulator as well as their test cases
+- [03210c91]	govc: Add object.collect type flag alias help
+- [d66ef551]	fix: explicitly import eam/simulator in test
+- [ddc2b47a]	chore: Include commit details in BREAKING section
+- [6fba1da7]	vcsim: Implement VSLM ExtendDisk_Task
+
 <a name="v0.26.0"></a>
 ## [Release v0.26.0](https://github.com/vmware/govmomi/compare/v0.25.0...v0.26.0)
 
