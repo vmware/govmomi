@@ -120,6 +120,12 @@ load test_helper
 
   run govc vm.create -force -cluster DC0_C0 "$id"
   assert_success # create vm with the same name
+
+  run govc vm.create -cluster DC0_C0 "my:vm"
+  assert_success # vm has special characters (moref)
+
+  run govc object.collect -s vm/my:vm name
+  assert_success my:vm
 }
 
 @test "vm.change" {

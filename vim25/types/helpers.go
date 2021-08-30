@@ -54,7 +54,7 @@ func (r ManagedObjectReference) String() string {
 func (r *ManagedObjectReference) FromString(o string) bool {
 	s := strings.SplitN(o, ":", 2)
 
-	if len(s) < 2 {
+	if len(s) != 2 {
 		return false
 	}
 
