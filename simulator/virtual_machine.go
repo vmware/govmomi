@@ -196,6 +196,10 @@ func (vm *VirtualMachine) event() types.VmEvent {
 	}
 }
 
+func (vm *VirtualMachine) hostInMM(ctx *Context) bool {
+	return ctx.Map.Get(*vm.Runtime.Host).(*HostSystem).Runtime.InMaintenanceMode
+}
+
 func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	if spec.Files == nil {
 		spec.Files = new(types.VirtualMachineFileInfo)
@@ -1429,6 +1433,10 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		}
 	}
 
+	if c.VirtualMachine.hostInMM(c.ctx) {
+		return nil, new(types.InvalidState)
+	}
+
 	var boot types.AnyType
 	if c.state == types.VirtualMachinePowerStatePoweredOn {
 		boot = time.Now()
@@ -1949,6 +1957,10 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 
 func (vm *VirtualMachine) CustomizeVMTask(ctx *Context, req *types.CustomizeVM_Task) soap.HasFault {
 	task := CreateTask(vm, "customizeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		if vm.hostInMM(ctx) {
+			return nil, new(types.InvalidState)
+		}
+
 		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
 			return nil, &types.InvalidPowerState{
 				RequestedState: types.VirtualMachinePowerStatePoweredOff,
