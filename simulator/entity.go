@@ -25,15 +25,15 @@ import (
 
 func RenameTask(ctx *Context, e mo.Entity, r *types.Rename_Task) soap.HasFault {
 	task := CreateTask(e, "rename", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		obj := Map.Get(r.This).(mo.Entity).Entity()
+		obj := Map().Get(r.This).(mo.Entity).Entity()
 
-		if parent, ok := asFolderMO(Map.Get(*obj.Parent)); ok {
-			if Map.FindByName(r.NewName, parent.ChildEntity) != nil {
+		if parent, ok := asFolderMO(Map().Get(*obj.Parent)); ok {
+			if Map().FindByName(r.NewName, parent.ChildEntity) != nil {
 				return nil, &types.InvalidArgument{InvalidProperty: "name"}
 			}
 		}
 
-		Map.Update(e, []types.PropertyChange{{Name: "name", Val: r.NewName}})
+		Map().Update(e, []types.PropertyChange{{Name: "name", Val: r.NewName}})
 
 		return nil, nil
 	})

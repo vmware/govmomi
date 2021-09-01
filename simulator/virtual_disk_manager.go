@@ -45,7 +45,7 @@ func vdmNames(name string) []string {
 }
 
 func vdmCreateVirtualDisk(op types.VirtualDeviceConfigSpecFileOperation, req *types.CreateVirtualDisk_Task) types.BaseMethodFault {
-	fm := Map.FileManager()
+	fm := Map().FileManager()
 
 	file, fault := fm.resolve(req.Datacenter, req.Name)
 	if fault != nil {
@@ -99,7 +99,7 @@ func (m *VirtualDiskManager) CreateVirtualDiskTask(ctx *Context, req *types.Crea
 
 func (m *VirtualDiskManager) DeleteVirtualDiskTask(ctx *Context, req *types.DeleteVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "deleteVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		fm := Map.FileManager()
+		fm := Map().FileManager()
 
 		for _, name := range vdmNames(req.Name) {
 			err := fm.deleteDatastoreFile(&types.DeleteDatastoreFile_Task{
@@ -124,7 +124,7 @@ func (m *VirtualDiskManager) DeleteVirtualDiskTask(ctx *Context, req *types.Dele
 
 func (m *VirtualDiskManager) MoveVirtualDiskTask(ctx *Context, req *types.MoveVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "moveVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		fm := Map.FileManager()
+		fm := Map().FileManager()
 
 		dest := vdmNames(req.DestName)
 
@@ -155,12 +155,12 @@ func (m *VirtualDiskManager) MoveVirtualDiskTask(ctx *Context, req *types.MoveVi
 func (m *VirtualDiskManager) CopyVirtualDiskTask(ctx *Context, req *types.CopyVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "copyVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		if req.DestSpec != nil {
-			if Map.IsVPX() {
+			if Map().IsVPX() {
 				return nil, new(types.NotImplemented)
 			}
 		}
 
-		fm := Map.FileManager()
+		fm := Map().FileManager()
 
 		dest := vdmNames(req.DestName)
 
@@ -198,7 +198,7 @@ func virtualDiskUUID(dc *types.ManagedObjectReference, file string) string {
 func (m *VirtualDiskManager) QueryVirtualDiskUuid(_ *Context, req *types.QueryVirtualDiskUuid) soap.HasFault {
 	body := new(methods.QueryVirtualDiskUuidBody)
 
-	fm := Map.FileManager()
+	fm := Map().FileManager()
 
 	file, fault := fm.resolve(req.Datacenter, req.Name)
 	if fault != nil {

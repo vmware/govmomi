@@ -93,7 +93,7 @@ func TestWaitPermissionFault(t *testing.T) {
 
 	pc := new(PropertyCollector)
 	pc.Self = model.ServiceContent.PropertyCollector
-	simulator.Map.Put(pc)
+	simulator.Map().Put(pc)
 
 	dm := object.NewVirtualDiskManager(c.Client)
 

@@ -59,7 +59,7 @@ func TestSearchIndex(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		vm := Map.Get(vms[0].Reference()).(*VirtualMachine)
+		vm := Map().Get(vms[0].Reference()).(*VirtualMachine)
 
 		si := object.NewSearchIndex(c.Client)
 
@@ -117,7 +117,7 @@ func TestSearchIndex(t *testing.T) {
 			t.Error("expected nil")
 		}
 
-		host := Map.Any("HostSystem").(*HostSystem)
+		host := Map().Any("HostSystem").(*HostSystem)
 
 		ref, err = si.FindByUuid(ctx, dc, host.Summary.Hardware.Uuid, false, nil)
 		if err != nil {

@@ -92,7 +92,7 @@ func TestCustomFieldsManager(t *testing.T) {
 		t.Fatalf("expect field.name to be %s; got %s", "new_field_name", fields[0].Name)
 	}
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := Map().Any("VirtualMachine").(*VirtualMachine)
 	err = fieldsManager.Set(ctx, vm.Reference(), field.Key, "value")
 	if err != nil {
 		t.Fatal(err)

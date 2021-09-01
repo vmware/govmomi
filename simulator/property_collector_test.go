@@ -201,7 +201,7 @@ func TestRetrieveProperties(t *testing.T) {
 		}
 
 		// Retrieve a nested property
-		Map.Get(dc.Reference()).(*Datacenter).Configuration.DefaultHardwareVersionKey = "foo"
+		Map().Get(dc.Reference()).(*Datacenter).Configuration.DefaultHardwareVersionKey = "foo"
 		mdc = mo.Datacenter{}
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"configuration.defaultHardwareVersionKey"}, &mdc)
 		if err != nil {
@@ -232,7 +232,7 @@ func TestRetrieveProperties(t *testing.T) {
 		}
 
 		// Expect ManagedObjectNotFoundError
-		Map.Remove(SpoofContext(), dc.Reference())
+		Map().Remove(SpoofContext(), dc.Reference())
 		err = client.RetrieveOne(ctx, dc.Reference(), []string{"name"}, &mdc)
 		if err == nil {
 			t.Fatal("expected error")
@@ -299,7 +299,7 @@ func TestWaitForUpdates(t *testing.T) {
 	wg.Wait()
 
 	// test object not found
-	Map.Remove(SpoofContext(), folder.Reference())
+	Map().Remove(SpoofContext(), folder.Reference())
 
 	err = property.Wait(ctx, pc, folder.Reference(), props, cb(true))
 	if err == nil {
@@ -345,7 +345,7 @@ func TestIncrementalWaitForUpdates(t *testing.T) {
 	}
 
 	pc := property.DefaultCollector(c.Client)
-	obj := Map.Any("VirtualMachine").(*VirtualMachine)
+	obj := Map().Any("VirtualMachine").(*VirtualMachine)
 	ref := obj.Reference()
 	vm := object.NewVirtualMachine(c.Client, ref)
 
@@ -482,7 +482,7 @@ func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {
 
 	wait := make(chan bool)
 	pc := property.DefaultCollector(c.Client)
-	obj := Map.Any("VirtualMachine").(*VirtualMachine)
+	obj := Map().Any("VirtualMachine").(*VirtualMachine)
 	ref := obj.Reference()
 	vm := object.NewVirtualMachine(c.Client, ref)
 	filter := new(property.WaitFilter).Add(ref, ref.Type, []string{"runtime.powerState"})
@@ -584,7 +584,7 @@ func TestPropertyCollectorWithUnsetValues(t *testing.T) {
 
 	pc := property.DefaultCollector(client.Client)
 
-	vm := Map.Any("VirtualMachine")
+	vm := Map().Any("VirtualMachine")
 	vmRef := vm.Reference()
 
 	propSets := [][]string{
@@ -705,7 +705,7 @@ func TestExtractEmbeddedField(t *testing.T) {
 
 	x := new(MyResourcePool)
 
-	Map.Put(x)
+	Map().Put(x)
 
 	obj, ok := getObject(SpoofContext(), x.Reference())
 	if !ok {
@@ -737,8 +737,8 @@ func TestPropertyCollectorFold(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	cluster := Map.Any("ClusterComputeResource")
-	compute := Map.Any("ComputeResource")
+	cluster := Map().Any("ClusterComputeResource")
+	compute := Map().Any("ComputeResource")
 
 	// Test that we fold duplicate properties (rbvmomi depends on this)
 	var content []types.ObjectContent
@@ -802,7 +802,7 @@ func TestPropertyCollectorFold(t *testing.T) {
 }
 
 func TestPropertyCollectorInvalidSpecName(t *testing.T) {
-	obj := Map.Put(new(Folder))
+	obj := Map().Put(new(Folder))
 	folderPutChild(SpoofContext(), &obj.(*Folder).Folder, new(Folder))
 
 	pc := &PropertyCollector{}

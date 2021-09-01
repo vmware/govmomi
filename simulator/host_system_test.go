@@ -83,7 +83,7 @@ func TestMaintenanceMode(t *testing.T) {
 
 	c := m.Service.client
 
-	hs := Map.Get(esx.HostSystem.Reference()).(*HostSystem)
+	hs := Map().Get(esx.HostSystem.Reference()).(*HostSystem)
 	host := object.NewHostSystem(c, hs.Self)
 
 	task, err := host.EnterMaintenanceMode(ctx, 1, false, nil)
@@ -147,13 +147,13 @@ func TestDestroyHostSystem(t *testing.T) {
 
 	c := m.Service.client
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
-	hs := Map.Get(*vm.Runtime.Host).(*HostSystem)
+	vm := Map().Any("VirtualMachine").(*VirtualMachine)
+	hs := Map().Get(*vm.Runtime.Host).(*HostSystem)
 	host := object.NewHostSystem(c, hs.Self)
 
 	vms := []*VirtualMachine{}
 	for _, vmref := range hs.Vm {
-		vms = append(vms, Map.Get(vmref).(*VirtualMachine))
+		vms = append(vms, Map().Get(vmref).(*VirtualMachine))
 	}
 
 	task, err := host.Destroy(ctx)
@@ -167,7 +167,7 @@ func TestDestroyHostSystem(t *testing.T) {
 	}
 
 	for _, vmref := range hs.Vm {
-		vm := Map.Get(vmref).(*VirtualMachine)
+		vm := Map().Get(vmref).(*VirtualMachine)
 		vmo := object.NewVirtualMachine(c, vm.Self)
 
 		task, err := vmo.PowerOff(ctx)
@@ -201,7 +201,7 @@ func TestDestroyHostSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	hs2 := Map.Get(esx.HostSystem.Reference())
+	hs2 := Map().Get(esx.HostSystem.Reference())
 	if hs2 != nil {
 		t.Fatal("host should have been destroyed")
 	}

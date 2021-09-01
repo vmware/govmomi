@@ -98,7 +98,7 @@ func (p *PerformanceManager) QueryPerfProviderSummary(ctx *Context, req *types.Q
 	body.Res = new(types.QueryPerfProviderSummaryResponse)
 
 	// The entity must exist
-	if Map.Get(req.Entity) == nil {
+	if Map().Get(req.Entity) == nil {
 		body.Fault_ = Fault("", &types.InvalidArgument{
 			InvalidProperty: "Entity",
 		})
@@ -141,10 +141,10 @@ func (p *PerformanceManager) buildAvailablePerfMetricsQueryResponse(ids []types.
 func (p *PerformanceManager) queryAvailablePerfMetric(entity types.ManagedObjectReference, interval int32) *types.QueryAvailablePerfMetricResponse {
 	switch entity.Type {
 	case "VirtualMachine":
-		vm := Map.Get(entity).(*VirtualMachine)
+		vm := Map().Get(entity).(*VirtualMachine)
 		return p.buildAvailablePerfMetricsQueryResponse(p.vmMetrics, int(vm.Summary.Config.NumCpu), vm.Datastore[0].Value)
 	case "HostSystem":
-		host := Map.Get(entity).(*HostSystem)
+		host := Map().Get(entity).(*HostSystem)
 		return p.buildAvailablePerfMetricsQueryResponse(p.hostMetrics, int(host.Hardware.CpuInfo.NumCpuThreads), host.Datastore[0].Value)
 	case "ResourcePool":
 		return p.buildAvailablePerfMetricsQueryResponse(p.rpMetrics, 0, "")

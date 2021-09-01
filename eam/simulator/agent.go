@@ -61,7 +61,7 @@ func NewAgent(
 	vmName string,
 	vmPlacement AgentVMPlacementOptions) (*Agent, vim.BaseMethodFault) {
 
-	vimMap := simulator.Map
+	vimMap := simulator.Map()
 
 	agent := &Agent{
 		EamObject: EamObject{

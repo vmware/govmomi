@@ -408,7 +408,7 @@ func TestReconfigVm(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	tests := []struct {
@@ -655,7 +655,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := Map.Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
+	vm := Map().Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
 
 	expect := len(esx.VirtualDevice) + len(devices)
 	ndevice := len(vm.Config.Hardware.Device)
@@ -723,7 +723,7 @@ func TestShutdownGuest(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+		vm := object.NewVirtualMachine(c.Client, Map().Any("VirtualMachine").Reference())
 		// shutdown the vm
 		err = vm.ShutdownGuest(ctx)
 		if err != nil {
@@ -765,7 +765,7 @@ func TestVmSnapshot(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	simVm := Map.Any("VirtualMachine")
+	simVm := Map().Any("VirtualMachine")
 	vm := object.NewVirtualMachine(c.Client, simVm.Reference())
 
 	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
@@ -892,7 +892,7 @@ func TestVmMarkAsTemplate(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
+	vm := object.NewVirtualMachine(c.Client, Map().Any("VirtualMachine").Reference())
 
 	err = vm.MarkAsTemplate(ctx)
 	if err == nil {
@@ -935,7 +935,7 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vmm := Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	// take snapshot
@@ -1018,8 +1018,8 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 	}
 
 	findDsStorage := func(dsName string) *types.VirtualMachineUsageOnDatastore {
-		host := Map.Get(*vmm.Runtime.Host).(*HostSystem)
-		ds := Map.FindByName(dsName, host.Datastore).(*Datastore)
+		host := Map().Get(*vmm.Runtime.Host).(*HostSystem)
+		ds := Map().FindByName(dsName, host.Datastore).(*Datastore)
 
 		for _, dsUsage := range vmm.Storage.PerDatastoreUsage {
 			if dsUsage.Datastore == ds.Self {

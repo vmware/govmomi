@@ -29,7 +29,7 @@ func TestAuthorizationManager(t *testing.T) {
 
 		_ = New(NewServiceInstance(SpoofContext(), model.ServiceContent, model.RootFolder)) // 2nd pass panics w/o copying RoleList
 
-		authz := Map.Get(*vpx.ServiceContent.AuthorizationManager).(*AuthorizationManager)
+		authz := Map().Get(*vpx.ServiceContent.AuthorizationManager).(*AuthorizationManager)
 		authz.RemoveAuthorizationRole(&types.RemoveAuthorizationRole{
 			RoleId: -2, // ReadOnly
 		})

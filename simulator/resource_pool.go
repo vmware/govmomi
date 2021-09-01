@@ -44,7 +44,7 @@ func NewResourcePool() *ResourcePool {
 		ResourcePool: esx.ResourcePool,
 	}
 
-	if Map.IsVPX() {
+	if Map().IsVPX() {
 		pool.DisabledMethod = nil // Enable VApp methods for VC
 	}
 
@@ -87,7 +87,7 @@ func allResourceFieldsValid(info *types.ResourceAllocationInfo) bool {
 }
 
 func (p *ResourcePool) createChild(name string, spec types.ResourceConfigSpec) (*ResourcePool, *soap.Fault) {
-	if e := Map.FindByName(name, p.ResourcePool.ResourcePool); e != nil {
+	if e := Map().FindByName(name, p.ResourcePool.ResourcePool); e != nil {
 		return nil, Fault("", &types.DuplicateName{
 			Name:   e.Entity().Name,
 			Object: e.Reference(),
@@ -127,7 +127,7 @@ func (p *ResourcePool) CreateResourcePool(c *types.CreateResourcePool) soap.HasF
 		return body
 	}
 
-	Map.PutEntity(p, Map.NewEntity(child))
+	Map().PutEntity(p, Map().NewEntity(child))
 
 	p.ResourcePool.ResourcePool = append(p.ResourcePool.ResourcePool, child.Reference())
 
@@ -164,7 +164,7 @@ func (p *ResourcePool) UpdateConfig(c *types.UpdateConfig) soap.HasFault {
 	body := &methods.UpdateConfigBody{}
 
 	if c.Name != "" {
-		if e := Map.FindByName(c.Name, p.ResourcePool.ResourcePool); e != nil {
+		if e := Map().FindByName(c.Name, p.ResourcePool.ResourcePool); e != nil {
 			body.Fault_ = Fault("", &types.DuplicateName{
 				Name:   e.Entity().Name,
 				Object: e.Reference(),
@@ -224,7 +224,7 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 		Host:   req.Host,
 	})
 
-	ctask := Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
+	ctask := Map().Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
 	ctask.Wait()
 
 	if ctask.Info.Error != nil {
@@ -320,7 +320,7 @@ func (p *ResourcePool) CreateVApp(req *types.CreateVApp) soap.HasFault {
 	child.ParentFolder = req.VmFolder
 
 	if child.ParentFolder == nil {
-		folder := Map.getEntityDatacenter(p).VmFolder
+		folder := Map().getEntityDatacenter(p).VmFolder
 		child.ParentFolder = &folder
 	}
 
@@ -333,7 +333,7 @@ func (p *ResourcePool) CreateVApp(req *types.CreateVApp) soap.HasFault {
 		child.VAppConfig.Product = append(child.VAppConfig.Product, *product.Info)
 	}
 
-	Map.PutEntity(p, Map.NewEntity(child))
+	Map().PutEntity(p, Map().NewEntity(child))
 
 	p.ResourcePool.ResourcePool = append(p.ResourcePool.ResourcePool, child.Reference())
 
@@ -347,7 +347,7 @@ func (p *ResourcePool) CreateVApp(req *types.CreateVApp) soap.HasFault {
 func (a *VirtualApp) CreateChildVMTask(ctx *Context, req *types.CreateChildVM_Task) soap.HasFault {
 	body := &methods.CreateChildVM_TaskBody{}
 
-	folder := Map.Get(*a.ParentFolder).(*Folder)
+	folder := Map().Get(*a.ParentFolder).(*Folder)
 
 	res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
 		This:   folder.Self,
@@ -405,7 +405,7 @@ func (a *VirtualApp) CloneVAppTask(ctx *Context, req *types.CloneVApp_Task) soap
 				},
 			})
 
-			ctask := Map.Get(res.(*methods.CloneVM_TaskBody).Res.Returnval).(*Task)
+			ctask := Map().Get(res.(*methods.CloneVM_TaskBody).Res.Returnval).(*Task)
 			ctask.Wait()
 			if ctask.Info.Error != nil {
 				return nil, ctask.Info.Error.Fault

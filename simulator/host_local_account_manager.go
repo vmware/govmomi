@@ -31,7 +31,7 @@ type HostLocalAccountManager struct {
 
 func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFault {
 	spec := req.User.GetHostAccountSpec()
-	userDirectory := Map.UserDirectory()
+	userDirectory := Map().UserDirectory()
 
 	found := userDirectory.search(true, false, compareFunc(spec.Id, true))
 	if len(found) > 0 {
@@ -48,7 +48,7 @@ func (h *HostLocalAccountManager) CreateUser(req *types.CreateUser) soap.HasFaul
 }
 
 func (h *HostLocalAccountManager) RemoveUser(req *types.RemoveUser) soap.HasFault {
-	userDirectory := Map.UserDirectory()
+	userDirectory := Map().UserDirectory()
 
 	found := userDirectory.search(true, false, compareFunc(req.UserName, true))
 

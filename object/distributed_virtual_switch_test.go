@@ -27,7 +27,7 @@ import (
 
 func TestDistributedVirtualSwitchEthernetCardBackingInfo(t *testing.T) {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		obj := simulator.Map.Any("DistributedVirtualSwitch").(*simulator.DistributedVirtualSwitch)
+		obj := simulator.Map().Any("DistributedVirtualSwitch").(*simulator.DistributedVirtualSwitch)
 
 		dvs := object.NewDistributedVirtualSwitch(c, obj.Self)
 

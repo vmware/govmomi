@@ -188,7 +188,7 @@ func (s *searchDatastore) Run(task *Task) (types.AnyType, types.BaseMethodFault)
 		return nil, fault
 	}
 
-	ref := Map.FindByName(p.Datastore, s.Datastore)
+	ref := Map().FindByName(p.Datastore, s.Datastore)
 	if ref == nil {
 		return nil, &types.InvalidDatastore{Name: p.Datastore}
 	}
@@ -196,7 +196,7 @@ func (s *searchDatastore) Run(task *Task) (types.AnyType, types.BaseMethodFault)
 	ds := ref.(*Datastore)
 
 	isolatedLockContext := &Context{} // we don't need/want to share the task lock
-	Map.WithLock(isolatedLockContext, task, func() {
+	Map().WithLock(isolatedLockContext, task, func() {
 		task.Info.Entity = &ds.Self // TODO: CreateTask() should require mo.Entity, rather than mo.Reference
 		task.Info.EntityName = ds.Name
 	})

@@ -33,7 +33,7 @@ type StorageResourceManager struct {
 
 func (m *StorageResourceManager) ConfigureStorageDrsForPodTask(ctx *Context, req *types.ConfigureStorageDrsForPod_Task) soap.HasFault {
 	task := CreateTask(m, "configureStorageDrsForPod", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		cluster := Map.Get(req.Pod).(*StoragePod)
+		cluster := Map().Get(req.Pod).(*StoragePod)
 
 		if s := req.Spec.PodConfigSpec; s != nil {
 			config := &cluster.PodStorageDrsEntry.StorageDrsConfig.PodConfig
@@ -60,7 +60,7 @@ func (m *StorageResourceManager) pod(ref *types.ManagedObjectReference) *Storage
 	if ref == nil {
 		return nil
 	}
-	cluster := Map.Get(*ref).(*StoragePod)
+	cluster := Map().Get(*ref).(*StoragePod)
 	config := &cluster.PodStorageDrsEntry.StorageDrsConfig.PodConfig
 
 	if !config.Enabled {

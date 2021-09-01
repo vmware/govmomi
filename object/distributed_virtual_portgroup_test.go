@@ -33,7 +33,7 @@ var _ object.NetworkReference = object.DistributedVirtualPortgroup{}
 
 func TestDistributedVirtualPortgroupEthernetCardBackingInfo(t *testing.T) {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		obj := simulator.Map.Any("DistributedVirtualPortgroup").(*simulator.DistributedVirtualPortgroup)
+		obj := simulator.Map().Any("DistributedVirtualPortgroup").(*simulator.DistributedVirtualPortgroup)
 
 		pg := object.NewDistributedVirtualPortgroup(c, obj.Self)
 		_, err := pg.EthernetCardBackingInfo(ctx)

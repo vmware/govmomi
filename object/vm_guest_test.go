@@ -37,7 +37,7 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 			return err
 		}
 
-		obj := simulator.Map.Get(vm.Reference()).(*simulator.VirtualMachine)
+		obj := simulator.Map().Get(vm.Reference()).(*simulator.VirtualMachine)
 		obj.Guest.IpAddress = "fe80::250:56ff:fe97:2458"
 
 		ip, err := vm.WaitForIP(ctx)
@@ -58,8 +58,8 @@ func TestVirtualMachineWaitForIP(t *testing.T) {
 			t.Logf("delaying map update for %v", delay)
 			time.Sleep(delay)
 
-			simulator.Map.WithLock(simulator.SpoofContext(), obj.Reference(), func() {
-				simulator.Map.Update(obj, []types.PropertyChange{
+			simulator.Map().WithLock(simulator.SpoofContext(), obj.Reference(), func() {
+				simulator.Map().Update(obj, []types.PropertyChange{
 					{Name: "guest.ipAddress", Val: "10.0.0.1"},
 				})
 			})

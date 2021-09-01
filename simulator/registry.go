@@ -50,8 +50,30 @@ var refValueMap = map[string]string{
 	"StoragePod":                     "group-p",
 }
 
+var (
+	defaultRegistry      *Registry
+	defaultRegistryMutex sync.Mutex
+)
+
 // Map is the default Registry instance.
-var Map = NewRegistry()
+func Map() *Registry {
+	defaultRegistryMutex.Lock()
+	defer defaultRegistryMutex.Unlock()
+
+	if defaultRegistry == nil {
+		defaultRegistry = NewRegistry()
+	}
+	return defaultRegistry
+}
+
+// NewMap is used to create a new global default Registry.
+func NewMap() *Registry {
+	defaultRegistryMutex.Lock()
+	defer defaultRegistryMutex.Unlock()
+
+	defaultRegistry = NewRegistry()
+	return defaultRegistry
+}
 
 // RegisterObject interface supports callbacks when objects are created, updated and deleted from the Registry
 type RegisterObject interface {
@@ -355,7 +377,7 @@ func (r *Registry) getEntityDatacenter(item mo.Entity) *Datacenter {
 }
 
 func (r *Registry) getEntityFolder(item mo.Entity, kind string) *mo.Folder {
-	dc := Map.getEntityDatacenter(item)
+	dc := Map().getEntityDatacenter(item)
 
 	var ref types.ManagedObjectReference
 
@@ -369,7 +391,7 @@ func (r *Registry) getEntityFolder(item mo.Entity, kind string) *mo.Folder {
 	// If Model was created with Folder option, use that Folder; else use top-level folder
 	for _, child := range folder.ChildEntity {
 		if child.Type == "Folder" {
-			folder, _ = asFolderMO(Map.Get(child))
+			folder, _ = asFolderMO(Map().Get(child))
 			break
 		}
 	}

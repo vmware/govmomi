@@ -49,7 +49,7 @@ func TestObjectCustomFields(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := Map().Any("VirtualMachine").(*VirtualMachine)
 	vmm := object.NewVirtualMachine(c.Client, vm.Reference())
 
 	fieldName := "testField"

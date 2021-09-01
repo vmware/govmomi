@@ -32,9 +32,9 @@ var (
 // registrationInfo returns a ServiceRegistration populated with vcsim's OptionManager settings.
 // The complete list can be captured using: govc sso.service.ls -dump
 func registrationInfo() []types.LookupServiceRegistrationInfo {
-	vc := simulator.Map.Get(vim25.ServiceInstance).(*simulator.ServiceInstance)
-	setting := simulator.Map.OptionManager().Setting
-	sm := simulator.Map.SessionManager()
+	vc := simulator.Map().Get(vim25.ServiceInstance).(*simulator.ServiceInstance)
+	setting := simulator.Map().OptionManager().Setting
+	sm := simulator.Map().SessionManager()
 	opts := make(map[string]string, len(setting))
 
 	for _, o := range setting {

@@ -34,7 +34,7 @@ type EnvironmentBrowser struct {
 
 func newEnvironmentBrowser() *types.ManagedObjectReference {
 	env := new(EnvironmentBrowser)
-	Map.Put(env)
+	Map().Put(env)
 	return &env.Self
 }
 

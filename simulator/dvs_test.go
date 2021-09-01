@@ -45,7 +45,7 @@ func TestDVS(t *testing.T) {
 	finder.SetDatacenter(dc[0])
 	folders, _ := dc[0].Folders(ctx)
 	hosts, _ := finder.HostSystemList(ctx, "*/*")
-	vswitch := Map.Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	vswitch := Map().Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
 	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
 
 	if len(vswitch.Summary.HostMember) == 0 {
@@ -53,7 +53,7 @@ func TestDVS(t *testing.T) {
 	}
 
 	for _, ref := range vswitch.Summary.HostMember {
-		host := Map.Get(ref).(*HostSystem)
+		host := Map().Get(ref).(*HostSystem)
 		if len(host.Network) == 0 {
 			t.Fatalf("%s.Network=%v", ref, host.Network)
 		}

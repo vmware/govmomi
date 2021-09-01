@@ -57,8 +57,8 @@ func (s *HostNetworkSystem) init(r *Registry) {
 }
 
 func (s *HostNetworkSystem) folder() *Folder {
-	f := Map.getEntityDatacenter(s.Host).NetworkFolder
-	return Map.Get(f).(*Folder)
+	f := Map().getEntityDatacenter(s.Host).NetworkFolder
+	return Map().Get(f).(*Folder)
 }
 
 func (s *HostNetworkSystem) AddVirtualSwitch(c *types.AddVirtualSwitch) soap.HasFault {
@@ -126,7 +126,7 @@ func (s *HostNetworkSystem) AddPortGroup(ctx *Context, c *types.AddPortGroup) so
 
 	folder := s.folder()
 
-	if obj := Map.FindByName(c.Portgrp.Name, folder.ChildEntity); obj != nil {
+	if obj := Map().FindByName(c.Portgrp.Name, folder.ChildEntity); obj != nil {
 		r.Fault_ = Fault("", &types.DuplicateName{
 			Name:   c.Portgrp.Name,
 			Object: obj.Reference(),
@@ -170,7 +170,7 @@ func (s *HostNetworkSystem) RemovePortGroup(ctx *Context, c *types.RemovePortGro
 	}
 
 	folder := s.folder()
-	e := Map.FindByName(c.PgName, folder.ChildEntity)
+	e := Map().FindByName(c.PgName, folder.ChildEntity)
 	folderRemoveChild(ctx, &folder.Folder, e.Reference())
 
 	for i, pg := range s.NetworkInfo.Portgroup {

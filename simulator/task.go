@@ -62,7 +62,7 @@ func CreateTask(e mo.Reference, name string, run func(*Task) (types.AnyType, typ
 		Execute: run,
 	}
 
-	task.Self = Map.newReference(task)
+	task.Self = Map().newReference(task)
 	task.Info.Key = task.Self.Value
 	task.Info.Task = task.Self
 	task.Info.Name = ucFirst(name)
@@ -73,7 +73,7 @@ func CreateTask(e mo.Reference, name string, run func(*Task) (types.AnyType, typ
 	task.Info.QueueTime = time.Now()
 	task.Info.State = types.TaskInfoStateQueued
 
-	Map.Put(task)
+	Map().Put(task)
 
 	return task
 }
@@ -95,7 +95,7 @@ func (tr *taskReference) Reference() types.ManagedObjectReference {
 
 func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 	t.ctx = ctx
-	Map.AtomicUpdate(t.ctx, t, []types.PropertyChange{
+	Map().AtomicUpdate(t.ctx, t, []types.PropertyChange{
 		{Name: "info.startTime", Val: time.Now()},
 		{Name: "info.state", Val: types.TaskInfoStateRunning},
 	})
@@ -105,7 +105,7 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 	}
 	// in most cases, the caller already holds this lock, and we would like
 	// the lock to be held across the "hand off" to the async goroutine.
-	unlock := Map.AcquireLock(ctx, tr)
+	unlock := Map().AcquireLock(ctx, tr)
 
 	go func() {
 		TaskDelay.delay(t.Info.Name)
@@ -122,7 +122,7 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 			}
 		}
 
-		Map.AtomicUpdate(t.ctx, t, []types.PropertyChange{
+		Map().AtomicUpdate(t.ctx, t, []types.PropertyChange{
 			{Name: "info.completeTime", Val: time.Now()},
 			{Name: "info.state", Val: state},
 			{Name: "info.result", Val: res},
@@ -150,7 +150,7 @@ func (t *Task) Wait() {
 
 	isRunning := func() bool {
 		var running bool
-		Map.WithLock(isolatedLockingContext, t, func() {
+		Map().WithLock(isolatedLockingContext, t, func() {
 			switch t.Info.State {
 			case types.TaskInfoStateSuccess, types.TaskInfoStateError:
 				running = false

@@ -54,7 +54,7 @@ func TestClusterModules(t *testing.T) {
 			t.Errorf("expected 0 modules")
 		}
 
-		ccr := simulator.Map.Any("ClusterComputeResource")
+		ccr := simulator.Map().Any("ClusterComputeResource")
 
 		_, err = m.CreateModule(ctx, enoent)
 		if err == nil {
@@ -112,7 +112,7 @@ func TestClusterModuleMembers(t *testing.T) {
 			t.Error("expected error")
 		}
 
-		ccr := simulator.Map.Any("ClusterComputeResource")
+		ccr := simulator.Map().Any("ClusterComputeResource")
 
 		id, err := m.CreateModule(ctx, ccr)
 		if err != nil {

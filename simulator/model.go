@@ -185,7 +185,7 @@ func VPX() *Model {
 func (m *Model) Count() Model {
 	count := Model{}
 
-	for ref, obj := range Map.objects {
+	for ref, obj := range Map().objects {
 		if _, ok := obj.(mo.Entity); !ok {
 			continue
 		}
@@ -285,7 +285,7 @@ func loadObject(content types.ObjectContent) (mo.Reference, error) {
 	} else {
 		if len(content.PropSet) == 0 {
 			// via NewServiceInstance()
-			Map.setReference(obj, id)
+			Map().setReference(obj, id)
 		} else {
 			// via Model.Load()
 			dst := getManagedObject(obj).Addr().Interface().(mo.Reference)
@@ -296,7 +296,7 @@ func loadObject(content types.ObjectContent) (mo.Reference, error) {
 		}
 
 		if x, ok := obj.(interface{ init(*Registry) }); ok {
-			x.init(Map)
+			x.init(Map())
 		}
 	}
 
@@ -307,18 +307,18 @@ func loadObject(content types.ObjectContent) (mo.Reference, error) {
 // example: Load's dir only contains a single OpaqueNetwork, we need to create a Datacenter and
 // place the OpaqueNetwork in the Datacenter's network folder.
 func (m *Model) resolveReferences(ctx *Context) error {
-	dc, ok := Map.Any("Datacenter").(*Datacenter)
+	dc, ok := Map().Any("Datacenter").(*Datacenter)
 	if !ok {
 		// Need to have at least 1 Datacenter
-		root := Map.Get(Map.content().RootFolder).(*Folder)
+		root := Map().Get(Map().content().RootFolder).(*Folder)
 		ref := root.CreateDatacenter(ctx, &types.CreateDatacenter{
 			This: root.Self,
 			Name: "DC0",
 		}).(*methods.CreateDatacenterBody).Res.Returnval
-		dc = Map.Get(ref).(*Datacenter)
+		dc = Map().Get(ref).(*Datacenter)
 	}
 
-	for ref, val := range Map.objects {
+	for ref, val := range Map().objects {
 		me, ok := val.(mo.Entity)
 		if !ok {
 			continue
@@ -327,7 +327,7 @@ func (m *Model) resolveReferences(ctx *Context) error {
 		if e.Parent == nil || ref.Type == "Folder" {
 			continue
 		}
-		if Map.Get(*e.Parent) == nil {
+		if Map().Get(*e.Parent) == nil {
 			// object was loaded without its parent, attempt to foster with another parent
 			switch e.Parent.Type {
 			case "Folder":
@@ -399,7 +399,7 @@ func SpoofContext() *Context {
 			},
 			Registry: NewRegistry(),
 		},
-		Map: Map,
+		Map: Map(),
 	}
 }
 
@@ -431,8 +431,8 @@ func (m *Model) Load(dir string) error {
 		if content.Obj == vim25.ServiceInstance {
 			s = new(ServiceInstance)
 			s.Self = content.Obj
-			Map = NewRegistry()
-			Map.Put(s)
+			NewMap()
+			Map().Put(s)
 			return mo.LoadObjectContent([]types.ObjectContent{content}, &s.ServiceInstance)
 		}
 
@@ -451,7 +451,7 @@ func (m *Model) Load(dir string) error {
 			}
 		}
 
-		return m.loadMethod(Map.Put(obj), dir)
+		return m.loadMethod(Map().Put(obj), dir)
 	})
 
 	if err != nil {
@@ -659,8 +659,8 @@ func (m *Model) Create() error {
 			// Use the 1st DVPG for the VMs eth0 backing
 			if npg == 0 {
 				// AddPortgroup_Task does not return the moid, so we look it up by name
-				net := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
-				pg := Map.FindByName(name, net.ChildEntity)
+				net := Map().Get(folders.NetworkFolder.Reference()).(*Folder)
+				pg := Map().FindByName(name, net.ChildEntity)
 
 				vmnet, _ = object.NewDistributedVirtualPortgroup(client, pg.Reference()).EthernetCardBackingInfo(ctx)
 			}
@@ -684,7 +684,7 @@ func (m *Model) Create() error {
 		}
 
 		// Must use simulator methods directly for OpaqueNetwork
-		networkFolder := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
+		networkFolder := Map().Get(folders.NetworkFolder.Reference()).(*Folder)
 
 		for i := 0; i < m.OpaqueNetwork; i++ {
 			var summary types.OpaqueNetworkSummary
@@ -835,13 +835,13 @@ func (m *Model) createLocalDatastore(dc string, name string, hosts []*object.Hos
 // Remove cleans up items created by the Model, such as local datastore directories
 func (m *Model) Remove() {
 	// Remove associated vm containers, if any
-	Map.m.Lock()
-	for _, obj := range Map.objects {
+	Map().m.Lock()
+	for _, obj := range Map().objects {
 		if vm, ok := obj.(*VirtualMachine); ok {
 			vm.run.remove(vm)
 		}
 	}
-	Map.m.Unlock()
+	Map().m.Unlock()
 
 	for _, dir := range m.dirs {
 		_ = os.RemoveAll(dir)

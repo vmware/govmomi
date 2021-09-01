@@ -99,7 +99,7 @@ type Server struct {
 func New(instance *ServiceInstance) *Service {
 	s := &Service{
 		readAll: ioutil.ReadAll,
-		sm:      Map.SessionManager(),
+		sm:      Map().SessionManager(),
 		sdk:     make(map[string]*Registry),
 	}
 
@@ -249,7 +249,7 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 	}
 
 	res := s.call(&Context{
-		Map:     Map,
+		Map:     Map(),
 		Context: ctx,
 		Session: internalSession,
 	}, method)
@@ -557,7 +557,7 @@ func (s *Service) findDatastore(query url.Values) (*Datastore, error) {
 		return nil, err
 	}
 
-	return Map.Get(ds.Reference()).(*Datastore), nil
+	return Map().Get(ds.Reference()).(*Datastore), nil
 }
 
 const folderPrefix = "/folder/"
@@ -654,13 +654,13 @@ func defaultIP(addr *net.TCPAddr) string {
 
 // NewServer returns an http Server instance for the given service
 func (s *Service) NewServer() *Server {
-	s.RegisterSDK(Map)
+	s.RegisterSDK(Map())
 
 	mux := s.ServeMux
-	vim := Map.Path + "/vimService"
+	vim := Map().Path + "/vimService"
 	s.sdk[vim] = s.sdk[vim25.Path]
 	mux.HandleFunc(vim, s.ServeSDK)
-	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
+	mux.HandleFunc(Map().Path+"/vimServiceVersions.xml", s.ServiceVersions)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
 	mux.HandleFunc(guestPrefix, ServeGuest)
 	mux.HandleFunc(nfcPrefix, ServeNFC)
@@ -675,17 +675,17 @@ func (s *Service) NewServer() *Server {
 	u := &url.URL{
 		Scheme: "http",
 		Host:   net.JoinHostPort(defaultIP(addr), port),
-		Path:   Map.Path,
+		Path:   Map().Path,
 	}
 	if s.TLS != nil {
 		u.Scheme += "s"
 	}
 
 	// Redirect clients to this http server, rather than HostSystem.Name
-	Map.SessionManager().ServiceHostName = u.Host
+	Map().SessionManager().ServiceHostName = u.Host
 
 	// Add vcsim config to OptionManager for use by SDK handlers (see lookup/simulator for example)
-	m := Map.OptionManager()
+	m := Map().OptionManager()
 	for i := range m.Setting {
 		setting := m.Setting[i].GetOptionValue()
 
@@ -714,7 +714,7 @@ func (s *Service) NewServer() *Server {
 
 	if s.RegisterEndpoints {
 		for i := range endpoints {
-			endpoints[i](s, Map)
+			endpoints[i](s, Map())
 		}
 	}
 
@@ -732,7 +732,7 @@ func (s *Service) NewServer() *Server {
 	if s.TLS != nil {
 		ts.TLS = s.TLS
 		ts.TLS.ClientAuth = tls.RequestClientCert // Used by SessionManager.LoginExtensionByCertificate
-		Map.SessionManager().TLSCert = func() string {
+		Map().SessionManager().TLSCert = func() string {
 			return base64.StdEncoding.EncodeToString(ts.TLS.Certificates[0].Certificate[0])
 		}
 		ts.StartTLS()

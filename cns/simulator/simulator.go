@@ -74,7 +74,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx *simulator.Context, req *cnstypes
 		for _, createSpec := range req.CreateSpecs {
 			staticProvisionedSpec, ok := interface{}(createSpec.BackingObjectDetails).(*cnstypes.CnsBlockBackingDetails)
 			if ok && staticProvisionedSpec.BackingDiskId != "" {
-				datastore := simulator.Map.Any("Datastore").(*simulator.Datastore)
+				datastore := simulator.Map().Any("Datastore").(*simulator.Datastore)
 				volumes, ok := m.volumes[datastore.Self]
 				if !ok {
 					volumes = make(map[cnstypes.CnsVolumeId]*cnstypes.CnsVolume)
@@ -109,7 +109,7 @@ func (m *CnsVolumeManager) CnsCreateVolume(ctx *simulator.Context, req *cnstypes
 
 			} else {
 				for _, datastoreRef := range createSpec.Datastores {
-					datastore := simulator.Map.Get(datastoreRef).(*simulator.Datastore)
+					datastore := simulator.Map().Get(datastoreRef).(*simulator.Datastore)
 
 					volumes, ok := m.volumes[datastore.Self]
 					if !ok {
@@ -306,7 +306,7 @@ func (m *CnsVolumeManager) CnsAttachVolume(ctx *simulator.Context, req *cnstypes
 		}
 		operationResult := []cnstypes.BaseCnsVolumeOperationResult{}
 		for _, attachSpec := range req.AttachSpecs {
-			node := simulator.Map.Get(attachSpec.Vm).(*simulator.VirtualMachine)
+			node := simulator.Map().Get(attachSpec.Vm).(*simulator.VirtualMachine)
 			if _, ok := m.attachments[attachSpec.VolumeId]; !ok {
 				m.attachments[attachSpec.VolumeId] = node.Self
 			} else {
@@ -427,7 +427,7 @@ func (m *CnsVolumeManager) CnsQueryVolumeInfo(ctx *simulator.Context, req *cnsty
 			vstorageObject.Config.Backing = &vim25types.BaseConfigInfoDiskFileBackingInfo{
 				BaseConfigInfoFileBackingInfo: vim25types.BaseConfigInfoFileBackingInfo{
 					BaseConfigInfoBackingInfo: vim25types.BaseConfigInfoBackingInfo{
-						Datastore: simulator.Map.Any("Datastore").(*simulator.Datastore).Self,
+						Datastore: simulator.Map().Any("Datastore").(*simulator.Datastore).Self,
 					},
 					FilePath:        "[vsanDatastore] 6785a85e-268e-6352-a2e8-02008b7afadd/kubernetes-dynamic-pvc-68734c9f-a679-42e6-a694-39632c51e31f.vmdk",
 					BackingObjectId: volumeId.Id,

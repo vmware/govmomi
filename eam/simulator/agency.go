@@ -75,7 +75,7 @@ func NewAgency(
 	rng := rand.New(rand.NewSource(time.Now().UnixNano()))
 
 	// Alias the registry that contains the vim25 objects.
-	vimMap := simulator.Map
+	vimMap := simulator.Map()
 
 	// Create the agents.
 	for i, agentConfig := range agencyConfig.AgentConfig {

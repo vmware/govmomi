@@ -34,17 +34,17 @@ type ServiceInstance struct {
 }
 
 func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Folder) *ServiceInstance {
-	Map = NewRegistry()
+	NewMap()
 
 	s := &ServiceInstance{}
 
 	s.Self = vim25.ServiceInstance
 	s.Content = content
 
-	Map.Put(s)
+	Map().Put(s)
 
 	f := &Folder{Folder: folder}
-	Map.Put(f)
+	Map().Put(f)
 
 	if content.About.ApiType == "HostAgent" {
 		CreateDefaultESX(ctx, f)
@@ -55,7 +55,7 @@ func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Fo
 	refs := mo.References(content)
 
 	for i := range refs {
-		if Map.Get(refs[i]) != nil {
+		if Map().Get(refs[i]) != nil {
 			continue
 		}
 		content := types.ObjectContent{Obj: refs[i]}
@@ -63,7 +63,7 @@ func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Fo
 		if err != nil {
 			panic(err)
 		}
-		Map.Put(o)
+		Map().Put(o)
 	}
 
 	return s

@@ -108,7 +108,7 @@ func TestQueryProviderSummary(t *testing.T) {
 
 	p := performance.NewManager(c)
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := Map().Any("VirtualMachine").(*VirtualMachine)
 	if info, err := p.ProviderSummary(ctx, vm.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -117,7 +117,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	host := Map.Any("HostSystem").(*HostSystem)
+	host := Map().Any("HostSystem").(*HostSystem)
 	if info, err := p.ProviderSummary(ctx, host.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -126,7 +126,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	pool := Map.Any("ResourcePool").(*ResourcePool)
+	pool := Map().Any("ResourcePool").(*ResourcePool)
 	if info, err := p.ProviderSummary(ctx, pool.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -135,7 +135,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	cluster := Map.Any("ClusterComputeResource").(*ClusterComputeResource)
+	cluster := Map().Any("ClusterComputeResource").(*ClusterComputeResource)
 	if info, err := p.ProviderSummary(ctx, cluster.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -144,7 +144,7 @@ func TestQueryProviderSummary(t *testing.T) {
 		}
 	}
 
-	datastore := Map.Any("Datastore").(*Datastore)
+	datastore := Map().Any("Datastore").(*Datastore)
 	if info, err := p.ProviderSummary(ctx, datastore.Reference()); err != nil {
 		t.Fatal(err)
 	} else {
@@ -177,7 +177,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 	c := m.Service.client
 	p := performance.NewManager(c)
 
-	vm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := Map().Any("VirtualMachine").(*VirtualMachine)
 	if info, err := p.AvailableMetric(ctx, vm.Reference(), 20); err != nil {
 		t.Fatal(err)
 	} else {
@@ -186,7 +186,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	host := Map.Any("HostSystem").(*HostSystem)
+	host := Map().Any("HostSystem").(*HostSystem)
 	if info, err := p.AvailableMetric(ctx, host.Reference(), 20); err != nil {
 		t.Fatal(err)
 	} else {
@@ -206,7 +206,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	pool := Map.Any("ResourcePool").(*ResourcePool)
+	pool := Map().Any("ResourcePool").(*ResourcePool)
 	if info, err := p.AvailableMetric(ctx, pool.Reference(), 20); err != nil {
 		t.Fatal(err)
 	} else {
@@ -215,7 +215,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	cluster := Map.Any("ClusterComputeResource").(*ClusterComputeResource)
+	cluster := Map().Any("ClusterComputeResource").(*ClusterComputeResource)
 	if info, err := p.AvailableMetric(ctx, cluster.Reference(), 300); err != nil {
 		t.Fatal(err)
 	} else {
@@ -232,7 +232,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	ds := Map.Any("Datastore").(*Datastore)
+	ds := Map().Any("Datastore").(*Datastore)
 	if info, err := p.AvailableMetric(ctx, ds.Reference(), 300); err != nil {
 		t.Fatal(err)
 	} else {
@@ -249,7 +249,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 		}
 	}
 
-	dc := Map.Any("Datacenter").(*Datacenter)
+	dc := Map().Any("Datacenter").(*Datacenter)
 	if info, err := p.AvailableMetric(ctx, dc.Reference(), 300); err != nil {
 		t.Fatal(err)
 	} else {
@@ -312,22 +312,22 @@ func TestQueryPerf(t *testing.T) {
 
 	defer m.Remove()
 
-	if err := testPerfQuery(ctx, m, Map.Any("VirtualMachine"), 20); err != nil {
+	if err := testPerfQuery(ctx, m, Map().Any("VirtualMachine"), 20); err != nil {
 		t.Fatal(err)
 	}
-	if err := testPerfQuery(ctx, m, Map.Any("HostSystem"), 20); err != nil {
+	if err := testPerfQuery(ctx, m, Map().Any("HostSystem"), 20); err != nil {
 		t.Fatal(err)
 	}
-	if err := testPerfQuery(ctx, m, Map.Any("ClusterComputeResource"), 300); err != nil {
+	if err := testPerfQuery(ctx, m, Map().Any("ClusterComputeResource"), 300); err != nil {
 		t.Fatal(err)
 	}
-	if err := testPerfQuery(ctx, m, Map.Any("Datastore"), 300); err != nil {
+	if err := testPerfQuery(ctx, m, Map().Any("Datastore"), 300); err != nil {
 		t.Fatal(err)
 	}
-	if err := testPerfQuery(ctx, m, Map.Any("Datacenter"), 300); err != nil {
+	if err := testPerfQuery(ctx, m, Map().Any("Datacenter"), 300); err != nil {
 		t.Fatal(err)
 	}
-	if err := testPerfQuery(ctx, m, Map.Any("ResourcePool"), 300); err != nil {
+	if err := testPerfQuery(ctx, m, Map().Any("ResourcePool"), 300); err != nil {
 		t.Fatal(err)
 	}
 }

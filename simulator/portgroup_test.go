@@ -43,7 +43,7 @@ func TestReconfigurePortgroup(t *testing.T) {
 	c := m.Service.client
 
 	dvs := object.NewDistributedVirtualSwitch(c,
-		Map.Any("DistributedVirtualSwitch").Reference())
+		Map().Any("DistributedVirtualSwitch").Reference())
 
 	spec := []types.DVPortgroupConfigSpec{
 		types.DVPortgroupConfigSpec{
@@ -63,7 +63,7 @@ func TestReconfigurePortgroup(t *testing.T) {
 	}
 
 	pg := object.NewDistributedVirtualPortgroup(c,
-		Map.Any("DistributedVirtualPortgroup").Reference())
+		Map().Any("DistributedVirtualPortgroup").Reference())
 	pgspec := types.DVPortgroupConfigSpec{
 		NumPorts: 5,
 		Name:     "pg1",
@@ -79,7 +79,7 @@ func TestReconfigurePortgroup(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	pge := Map.Get(pg.Reference()).(*DistributedVirtualPortgroup)
+	pge := Map().Get(pg.Reference()).(*DistributedVirtualPortgroup)
 	if pge.Config.Name != "pg1" || pge.Config.NumPorts != 5 {
 		t.Fatalf("expect pg.Name==pg1 && pg.Config.NumPort==5; got %s,%d",
 			pge.Config.Name, pge.Config.NumPorts)
@@ -110,7 +110,7 @@ func TestPortgroupBacking(t *testing.T) {
 
 	c := m.Service.client
 
-	pg := Map.Any("DistributedVirtualPortgroup").(*DistributedVirtualPortgroup)
+	pg := Map().Any("DistributedVirtualPortgroup").(*DistributedVirtualPortgroup)
 
 	net := object.NewDistributedVirtualPortgroup(c, pg.Reference())
 	t.Logf("pg=%s", net.Reference())
@@ -135,7 +135,7 @@ func TestPortgroupBackingWithNSX(t *testing.T) {
 	model.PortgroupNSX = 1
 
 	Test(func(context.Context, *vim25.Client) {
-		pgs := Map.All("DistributedVirtualPortgroup")
+		pgs := Map().All("DistributedVirtualPortgroup")
 		n := len(pgs) - 1
 		if model.PortgroupNSX != n {
 			t.Errorf("%d pgs", n)

@@ -28,7 +28,7 @@ import (
 
 func TestHostConfigManager(t *testing.T) {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		obj := simulator.Map.Any("HostSystem").(*simulator.HostSystem)
+		obj := simulator.Map().Any("HostSystem").(*simulator.HostSystem)
 		host := object.NewHostSystem(c, obj.Self)
 
 		m := host.ConfigManager()

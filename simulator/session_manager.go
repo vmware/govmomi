@@ -181,7 +181,7 @@ func (s *SessionManager) LoginByToken(ctx *Context, req *types.LoginByToken) soa
 func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
 	session := ctx.Session
 	s.delSession(session.Key)
-	pc := Map.content().PropertyCollector
+	pc := Map().content().PropertyCollector
 
 	for ref, obj := range ctx.Session.Registry.objects {
 		if ref == pc {
@@ -375,16 +375,16 @@ func (c *Context) SetSession(session Session, login bool) {
 func (c *Context) WithLock(obj mo.Reference, f func()) {
 	// TODO: This is not always going to be correct. An object should
 	// really be locked by the registry that "owns it", which is not always
-	// Map. This function will need to take the Registry as an additional
+	// Map(). This function will need to take the Registry as an additional
 	// argument to accomplish this.
 	// Basic mutex locking will work even if obj doesn't belong to Map, but
 	// if obj implements sync.Locker, that custom locking will not be used.
-	Map.WithLock(c, obj, f)
+	Map().WithLock(c, obj, f)
 }
 
 // postEvent wraps EventManager.PostEvent for internal use, with a lock on the EventManager.
 func (c *Context) postEvent(events ...types.BaseEvent) {
-	m := Map.EventManager()
+	m := Map().EventManager()
 	c.WithLock(m, func() {
 		for _, event := range events {
 			m.PostEvent(c, &types.PostEvent{EventToPost: event})
@@ -426,7 +426,7 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 	switch ref.Type {
 	case "SessionManager":
 		// Clone SessionManager so the PropertyCollector can properly report CurrentSession
-		m := *Map.SessionManager()
+		m := *Map().SessionManager()
 		m.CurrentSession = &s.UserSession
 
 		// TODO: we could maintain SessionList as part of the SessionManager singleton
@@ -438,10 +438,10 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 
 		return &m
 	case "PropertyCollector":
-		if ref == Map.content().PropertyCollector {
+		if ref == Map().content().PropertyCollector {
 			// Per-session instance of the PropertyCollector singleton.
 			// Using reflection here as PropertyCollector might be wrapped with a custom type.
-			obj = Map.Get(ref)
+			obj = Map().Get(ref)
 			pc := reflect.New(reflect.TypeOf(obj).Elem())
 			obj = pc.Interface().(mo.Reference)
 			s.Registry.setReference(obj, ref)
@@ -449,5 +449,5 @@ func (s *Session) Get(ref types.ManagedObjectReference) mo.Reference {
 		}
 	}
 
-	return Map.Get(ref)
+	return Map().Get(ref)
 }

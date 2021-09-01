@@ -80,7 +80,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	}
 
 	for _, c := range config {
-		ref := Map.Put(c.obj).Reference()
+		ref := Map().Put(c.obj).Reference()
 
 		*c.ref = &ref
 	}
@@ -131,7 +131,7 @@ func (h *HostSystem) eventArgumentParent() *types.ComputeResourceEventArgument {
 }
 
 func hostParent(host *mo.HostSystem) *mo.ComputeResource {
-	switch parent := Map.Get(*host.Parent).(type) {
+	switch parent := Map().Get(*host.Parent).(type) {
 	case *mo.ComputeResource:
 		return parent
 	case *ClusterComputeResource:
@@ -172,14 +172,14 @@ func CreateDefaultESX(ctx *Context, f *Folder) {
 	cr.Name = host.Name
 	cr.Host = append(cr.Host, host.Reference())
 	host.Network = cr.Network
-	Map.PutEntity(cr, host)
+	Map().PutEntity(cr, host)
 
 	pool := NewResourcePool()
 	cr.ResourcePool = &pool.Self
-	Map.PutEntity(cr, pool)
+	Map().PutEntity(cr, pool)
 	pool.Owner = cr.Self
 
-	folderPutChild(ctx, &Map.Get(dc.HostFolder).(*Folder).Folder, cr)
+	folderPutChild(ctx, &Map().Get(dc.HostFolder).(*Folder).Folder, cr)
 }
 
 // CreateStandaloneHost uses esx.HostSystem as a template, applying the given spec
@@ -204,13 +204,13 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 		EnvironmentBrowser: newEnvironmentBrowser(),
 	}
 
-	Map.PutEntity(cr, Map.NewEntity(host))
+	Map().PutEntity(cr, Map().NewEntity(host))
 	host.Summary.Host = &host.Self
 
-	Map.PutEntity(cr, Map.NewEntity(pool))
+	Map().PutEntity(cr, Map().NewEntity(pool))
 
 	cr.Name = host.Name
-	cr.Network = Map.getEntityDatacenter(f).defaultNetwork()
+	cr.Network = Map().getEntityDatacenter(f).defaultNetwork()
 	cr.Host = append(cr.Host, host.Reference())
 	cr.ResourcePool = &pool.Self
 
@@ -229,7 +229,7 @@ func (h *HostSystem) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 
 		ctx.postEvent(&types.HostRemovedEvent{HostEvent: h.event()})
 
-		f := Map.getEntityParent(h, "Folder").(*Folder)
+		f := Map().getEntityParent(h, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, h.Reference())
 
 		return nil, nil

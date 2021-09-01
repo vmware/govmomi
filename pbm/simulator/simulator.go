@@ -217,7 +217,7 @@ func (m *PlacementSolver) PbmCheckRequirements(req *types.PbmCheckRequirements) 
 	body := new(methods.PbmCheckRequirementsBody)
 	body.Res = new(types.PbmCheckRequirementsResponse)
 
-	for _, ds := range simulator.Map.All("Datastore") {
+	for _, ds := range simulator.Map().All("Datastore") {
 		// TODO: filter
 		ref := ds.Reference()
 		body.Res.Returnval = append(body.Res.Returnval, types.PbmPlacementCompatibilityResult{

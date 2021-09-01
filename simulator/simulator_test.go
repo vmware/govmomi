@@ -415,21 +415,21 @@ func TestServeHTTPErrors(t *testing.T) {
 	}
 
 	// cover the does not implement method error path
-	Map.objects[vim25.ServiceInstance] = &errorNoSuchMethod{}
+	Map().objects[vim25.ServiceInstance] = &errorNoSuchMethod{}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the xml encode error path
-	Map.objects[vim25.ServiceInstance] = &errorMarshal{}
+	Map().objects[vim25.ServiceInstance] = &errorMarshal{}
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
 	}
 
 	// cover the no such object path
-	Map.Remove(SpoofContext(), vim25.ServiceInstance)
+	Map().Remove(SpoofContext(), vim25.ServiceInstance)
 	_, err = methods.GetCurrentTime(ctx, client)
 	if err == nil {
 		t.Error("expected error")
@@ -486,7 +486,7 @@ func TestDelay(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	simvm := Map.Any("VirtualMachine").(*VirtualMachine)
+	simvm := Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(client.Client, simvm.Reference())
 
 	m.Service.delay.Delay = 1000
@@ -519,7 +519,7 @@ func TestDelayTask(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	simvm := Map.Any("VirtualMachine").(*VirtualMachine)
+	simvm := Map().Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(client.Client, simvm.Reference())
 
 	TaskDelay.Delay = 1000

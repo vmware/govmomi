@@ -79,14 +79,14 @@ func Example() {
 	c, _ := govmomi.NewClient(ctx, s.URL, true)
 
 	// Shortcut to choose any VM, rather than using the more verbose Finder or ContainerView.
-	obj := simulator.Map.Any("VirtualMachine").(*simulator.VirtualMachine)
+	obj := simulator.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
 	// Validate VM is powered on
 	if obj.Runtime.PowerState != "poweredOn" {
 		log.Fatal(obj.Runtime.PowerState)
 	}
 
 	// Wrap the existing vm object, using the same vm.Self (ManagedObjectReference) value as the Map key.
-	simulator.Map.Put(&BusyVM{obj})
+	simulator.Map().Put(&BusyVM{obj})
 
 	vm := object.NewVirtualMachine(c.Client, obj.Reference())
 

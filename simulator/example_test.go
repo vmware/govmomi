@@ -141,7 +141,7 @@ func ExampleFolder_AddOpaqueNetwork() {
 		}
 
 		// Get vcsim's network Folder object
-		folder := simulator.Map.Get(obj.Reference()).(*simulator.Folder)
+		folder := simulator.Map().Get(obj.Reference()).(*simulator.Folder)
 
 		spec := types.OpaqueNetworkSummary{
 			NetworkSummary: types.NetworkSummary{

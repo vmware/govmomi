@@ -99,7 +99,7 @@ func (m *EventManager) CreateCollectorForEvents(ctx *Context, req *types.CreateC
 }
 
 func (m *EventManager) QueryEvents(ctx *Context, req *types.QueryEvents) soap.HasFault {
-	if Map.IsESX() {
+	if Map().IsESX() {
 		return &methods.QueryEventsBody{
 			Fault_: Fault("", new(types.NotImplemented)),
 		}
@@ -171,7 +171,7 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 		ctx.WithLock(c, func() {
 			if c.eventMatches(req.EventToPost) {
 				pushEvent(c.page, req.EventToPost)
-				Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
+				Map().Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
 	}

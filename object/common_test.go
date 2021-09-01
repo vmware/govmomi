@@ -49,7 +49,7 @@ func TestObjectName(t *testing.T) {
 		kinds := []string{"VirtualMachine", "Network", "DistributedVirtualPortgroup"}
 
 		for _, kind := range kinds {
-			ref := simulator.Map.Any(kind)
+			ref := simulator.Map().Any(kind)
 			obj := object.NewReference(c, ref.Reference())
 
 			name, err := obj.(common).ObjectName(ctx)

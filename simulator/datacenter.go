@@ -77,10 +77,10 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		if dc.isESX {
 			folder.ChildType = f.types[:1]
 			folder.Self = *f.ref
-			Map.PutEntity(dc, folder)
+			Map().PutEntity(dc, folder)
 		} else {
 			folder.ChildType = f.types
-			e := Map.PutEntity(dc, folder)
+			e := Map().PutEntity(dc, folder)
 
 			// propagate the generated morefs to Datacenter
 			ref := e.Reference()
@@ -89,7 +89,7 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		}
 	}
 
-	net := Map.Get(dc.NetworkFolder).(*Folder)
+	net := Map().Get(dc.NetworkFolder).(*Folder)
 
 	for _, ref := range esx.Datacenter.Network {
 		// Add VM Network by default to each Datacenter
@@ -121,7 +121,7 @@ func (dc *Datacenter) folder(obj mo.Entity) *mo.Folder {
 	rtype := obj.Reference().Type
 
 	for i := range folders {
-		folder, _ := asFolderMO(Map.Get(folders[i]))
+		folder, _ := asFolderMO(Map().Get(folders[i]))
 		for _, kind := range folder.ChildType {
 			if rtype == kind {
 				return folder
@@ -139,7 +139,7 @@ func (dc *Datacenter) folder(obj mo.Entity) *mo.Folder {
 func datacenterEventArgument(obj mo.Entity) *types.DatacenterEventArgument {
 	dc, ok := obj.(*Datacenter)
 	if !ok {
-		dc = Map.getEntityDatacenter(obj)
+		dc = Map().getEntityDatacenter(obj)
 	}
 	return &types.DatacenterEventArgument{
 		Datacenter:          dc.Self,
@@ -154,7 +154,7 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 		}
 
 		for _, ref := range req.Vm {
-			vm := Map.Get(ref).(*VirtualMachine)
+			vm := Map().Get(ref).(*VirtualMachine)
 			ctx.WithLock(vm, func() {
 				vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{})
 			})
@@ -178,13 +178,13 @@ func (d *Datacenter) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 		}
 
 		for _, ref := range folders {
-			f, _ := asFolderMO(Map.Get(ref))
+			f, _ := asFolderMO(Map().Get(ref))
 			if len(f.ChildEntity) != 0 {
 				return nil, &types.ResourceInUse{}
 			}
 		}
 
-		p, _ := asFolderMO(Map.Get(*d.Parent))
+		p, _ := asFolderMO(Map().Get(*d.Parent))
 		folderRemoveChild(ctx, p, d.Self)
 
 		return nil, nil

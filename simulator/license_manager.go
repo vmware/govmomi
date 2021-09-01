@@ -67,7 +67,7 @@ func (m *LicenseManager) init(r *Registry) {
 	m.Licenses = []types.LicenseManagerLicenseInfo{EvalLicense}
 
 	if r.IsVPX() {
-		am := Map.Put(&LicenseAssignmentManager{}).Reference()
+		am := Map().Put(&LicenseAssignmentManager{}).Reference()
 		m.LicenseAssignmentManager = &am
 	}
 }
@@ -156,13 +156,13 @@ func (m *LicenseAssignmentManager) QueryAssignedLicenses(req *types.QueryAssigne
 
 	// EntityId can be a HostSystem or the vCenter InstanceUuid
 	if req.EntityId != "" {
-		if req.EntityId != Map.content().About.InstanceUuid {
+		if req.EntityId != Map().content().About.InstanceUuid {
 			id := types.ManagedObjectReference{
 				Type:  "HostSystem",
 				Value: req.EntityId,
 			}
 
-			if Map.Get(id) == nil {
+			if Map().Get(id) == nil {
 				return body
 			}
 		}

@@ -77,7 +77,7 @@ func TestContainerViewVPX(t *testing.T) {
 		t.Fatal("expected error")
 	}
 
-	vapp := object.NewVirtualApp(c.Client, Map.Any("VirtualApp").Reference())
+	vapp := object.NewVirtualApp(c.Client, Map().Any("VirtualApp").Reference())
 
 	count := m.Count()
 

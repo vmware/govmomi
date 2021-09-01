@@ -40,8 +40,8 @@ func TestSwitchMembers(t *testing.T) {
 		// The proper way to remove a host from is with dvs.Reconfigure + types.ConfigSpecOperationRemove,
 		// but that would fail here with ResourceInUse. And creating a new DVS + PG is cumbersome,
 		// so just force the removal of host from the DVS + PG, which has the same effect on vm.AddDevice().
-		dswitch := simulator.Map.Get(dvs.Reference()).(*simulator.DistributedVirtualSwitch)
-		portgrp := simulator.Map.Get(pg.Reference()).(*simulator.DistributedVirtualPortgroup)
+		dswitch := simulator.Map().Get(dvs.Reference()).(*simulator.DistributedVirtualSwitch)
+		portgrp := simulator.Map().Get(pg.Reference()).(*simulator.DistributedVirtualPortgroup)
 		simulator.RemoveReference(&dswitch.Summary.HostMember, host.Reference())
 		simulator.RemoveReference(&portgrp.Host, host.Reference())
 

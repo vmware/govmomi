@@ -123,7 +123,7 @@ func TestFolderVC(t *testing.T) {
 	}
 
 	for _, ref := range []object.Reference{ff, dc} {
-		o := Map.Get(ref.Reference())
+		o := Map().Get(ref.Reference())
 		if o == nil {
 			t.Fatalf("failed to find %#v", ref)
 		}
@@ -190,7 +190,7 @@ func TestFolderVC(t *testing.T) {
 			if !ok {
 				t.Errorf("expected moref, got type=%T", res.Result)
 			}
-			host := Map.Get(ref).(*HostSystem)
+			host := Map().Get(ref).(*HostSystem)
 			if host.Name != test.name {
 				t.Fail()
 			}
@@ -202,7 +202,7 @@ func TestFolderVC(t *testing.T) {
 				t.Error("expected new host summary Self reference")
 			}
 
-			pool := Map.Get(*host.Parent).(*mo.ComputeResource).ResourcePool
+			pool := Map().Get(*host.Parent).(*mo.ComputeResource).ResourcePool
 			if *pool == esx.ResourcePool.Self {
 				t.Error("expected new pool Self reference")
 			}
@@ -270,7 +270,7 @@ func TestRegisterVm(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		vm := Map.Get(vms[0].Reference()).(*VirtualMachine)
+		vm := Map().Get(vms[0].Reference()).(*VirtualMachine)
 
 		req := types.RegisterVM_Task{
 			This:       vmFolder.Reference(),
@@ -297,7 +297,7 @@ func TestRegisterVm(t *testing.T) {
 				new(types.NotFound), func() { req.Path = vm.Config.Files.VmPathName },
 			},
 			{
-				new(types.AlreadyExists), func() { Map.Remove(SpoofContext(), vm.Reference()) },
+				new(types.AlreadyExists), func() { Map().Remove(SpoofContext(), vm.Reference()) },
 			},
 			{
 				nil, func() {},
@@ -313,7 +313,7 @@ func TestRegisterVm(t *testing.T) {
 			ct := object.NewTask(c.Client, res.Returnval)
 			_ = ct.Wait(ctx)
 
-			rt := Map.Get(res.Returnval).(*Task)
+			rt := Map().Get(res.Returnval).(*Task)
 
 			if step.e != nil {
 				fault := rt.Info.Error.Fault

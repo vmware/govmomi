@@ -80,7 +80,7 @@ func (h *Handler) modules(w http.ResponseWriter, r *http.Request) {
 		var m internal.CreateModule
 		if vapi.Decode(r, w, &m) {
 			ref := types.ManagedObjectReference{Type: "ClusterComputeResource", Value: m.Spec.ID}
-			if simulator.Map.Get(ref) == nil {
+			if simulator.Map().Get(ref) == nil {
 				vapi.BadRequest(w, "com.vmware.vapi.std.errors.invalid_argument")
 				return
 			}

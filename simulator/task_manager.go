@@ -55,7 +55,7 @@ func (m *TaskManager) PutObject(obj mo.Reference) {
 		recent = recent[1:]
 	}
 
-	Map.Update(m, []types.PropertyChange{{Name: "recentTask", Val: recent}})
+	Map().Update(m, []types.PropertyChange{{Name: "recentTask", Val: recent}})
 	m.Unlock()
 }
 

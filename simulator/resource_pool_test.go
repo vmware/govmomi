@@ -208,7 +208,7 @@ func TestCreateVAppVPX(t *testing.T) {
 
 	c := m.Service.client
 
-	pool := Map.Any("ResourcePool")
+	pool := Map().Any("ResourcePool")
 	parent := object.NewResourcePool(c, pool.Reference())
 	rspec := types.DefaultResourceConfigSpec()
 	vspec := NewVAppConfigSpec()
@@ -260,7 +260,7 @@ func TestCreateVAppVPX(t *testing.T) {
 		t.Errorf("FindChild(%s)==nil", spec.Name)
 	}
 
-	ref := Map.Get(Map.getEntityDatacenter(pool).VmFolder).Reference()
+	ref := Map().Get(Map().getEntityDatacenter(pool).VmFolder).Reference()
 	folder, err := object.NewFolder(c, ref).CreateFolder(ctx, "myapp-clone")
 	if err != nil {
 		t.Fatal(err)

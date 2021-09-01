@@ -69,7 +69,7 @@ func destroyView(ref types.ManagedObjectReference) soap.HasFault {
 func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContainerView) soap.HasFault {
 	body := &methods.CreateContainerViewBody{}
 
-	root := Map.Get(req.Container)
+	root := Map().Get(req.Container)
 	if root == nil {
 		body.Fault_ = Fault("", &types.ManagedObjectNotFound{Obj: req.Container})
 		return body
@@ -185,7 +185,7 @@ func (v *ContainerView) add(root mo.Reference, seen map[types.ManagedObjectRefer
 		}
 
 		if v.Recursive {
-			v.add(Map.Get(child), seen)
+			v.add(Map().Get(child), seen)
 		}
 	})
 }
@@ -200,7 +200,7 @@ func (v *ContainerView) find(root mo.Reference, ref types.ManagedObjectReference
 			return
 		}
 		if v.Recursive {
-			*found = v.find(Map.Get(child), ref, found)
+			*found = v.find(Map().Get(child), ref, found)
 		}
 	})
 
@@ -211,12 +211,12 @@ func (v *ContainerView) PutObject(obj mo.Reference) {
 	ref := obj.Reference()
 
 	if v.include(ref) && v.find(v.root, ref, types.NewBool(false)) {
-		Map.Update(v, []types.PropertyChange{{Name: "view", Val: append(v.View, ref)}})
+		Map().Update(v, []types.PropertyChange{{Name: "view", Val: append(v.View, ref)}})
 	}
 }
 
 func (v *ContainerView) RemoveObject(ctx *Context, obj types.ManagedObjectReference) {
-	Map.RemoveReference(ctx, v, &v.View, obj)
+	Map().RemoveReference(ctx, v, &v.View, obj)
 }
 
 func (*ContainerView) UpdateObject(mo.Reference, []types.PropertyChange) {}
@@ -244,12 +244,12 @@ type ListView struct {
 }
 
 func (v *ListView) update() {
-	Map.Update(v, []types.PropertyChange{{Name: "view", Val: v.View}})
+	Map().Update(v, []types.PropertyChange{{Name: "view", Val: v.View}})
 }
 
 func (v *ListView) add(refs []types.ManagedObjectReference) *types.ManagedObjectNotFound {
 	for _, ref := range refs {
-		obj := Map.Get(ref)
+		obj := Map().Get(ref)
 		if obj == nil {
 			return &types.ManagedObjectNotFound{Obj: ref}
 		}

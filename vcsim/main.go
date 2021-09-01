@@ -204,7 +204,7 @@ func main() {
 			Registry *simulator.Registry
 			Model    *simulator.Model
 		}{
-			simulator.Map,
+			simulator.Map(),
 			&count,
 		}
 	}))

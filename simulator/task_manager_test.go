@@ -34,7 +34,7 @@ func TestTaskManagerRecent(t *testing.T) {
 
 	recentTaskMax = 5
 
-	tm := Map.Get(*esx.ServiceContent.TaskManager).(*TaskManager)
+	tm := Map().Get(*esx.ServiceContent.TaskManager).(*TaskManager)
 	tm.RecentTask = nil
 
 	for i := 0; i < recentTaskMax+2; i++ {

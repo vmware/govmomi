@@ -30,7 +30,7 @@ import (
 func SetCustomValue(ctx *Context, req *types.SetCustomValue) soap.HasFault {
 	body := &methods.SetCustomValueBody{}
 
-	cfm := Map.CustomFieldsManager()
+	cfm := Map().CustomFieldsManager()
 
 	_, field := cfm.findByNameType(req.Key, req.This.Type)
 	if field == nil {
