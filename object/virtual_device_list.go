@@ -68,7 +68,13 @@ func EthernetCardTypes() VirtualDeviceList {
 		&types.VirtualSriovEthernetCard{},
 	}).Select(func(device types.BaseVirtualDevice) bool {
 		c := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
-		c.GetVirtualDevice().Key = int32(rand.Uint32()) * -1
+
+		key := rand.Int31() * -1
+		if key == 0 {
+			key = -1
+		}
+
+		c.GetVirtualDevice().Key = key
 		return true
 	})
 }
