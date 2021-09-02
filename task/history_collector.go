@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package event
+package task
 
 import (
 	"context"
@@ -26,6 +26,8 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// HistoryCollector provides a mechanism for retrieving historical data and
+// updates when the server appends new tasks.
 type HistoryCollector struct {
 	*history.Collector
 }
@@ -36,10 +38,12 @@ func newHistoryCollector(c *vim25.Client, ref types.ManagedObjectReference) *His
 	}
 }
 
-func (h HistoryCollector) LatestPage(ctx context.Context) ([]types.BaseEvent, error) {
-	var o mo.EventHistoryCollector
+// RecentTasks returns a list of task managed objects that completed recently,
+// that are currently running, or that are queued to run.
+func (h HistoryCollector) RecentTasks(ctx context.Context) ([]types.TaskInfo, error) {
+	var o mo.TaskHistoryCollector
 
-	err := h.Properties(ctx, h.Reference(), []string{"latestPage"}, &o)
+	err := h.Properties(ctx, h.Reference(), []string{"recentTask"}, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -47,13 +51,16 @@ func (h HistoryCollector) LatestPage(ctx context.Context) ([]types.BaseEvent, er
 	return o.LatestPage, nil
 }
 
-func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int32) ([]types.BaseEvent, error) {
-	req := types.ReadNextEvents{
+// ReadNextTasks reads the scrollable view from the current position. The
+// scrollable position is moved to the next newer page after the read. No item
+// is returned when the end of the collector is reached.
+func (h HistoryCollector) ReadNextTasks(ctx context.Context, maxCount int32) ([]types.TaskInfo, error) {
+	req := types.ReadNextTasks{
 		This:     h.Reference(),
 		MaxCount: maxCount,
 	}
 
-	res, err := methods.ReadNextEvents(ctx, h.Client(), &req)
+	res, err := methods.ReadNextTasks(ctx, h.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
@@ -61,13 +68,16 @@ func (h HistoryCollector) ReadNextEvents(ctx context.Context, maxCount int32) ([
 	return res.Returnval, nil
 }
 
-func (h HistoryCollector) ReadPreviousEvents(ctx context.Context, maxCount int32) ([]types.BaseEvent, error) {
-	req := types.ReadPreviousEvents{
+// ReadPreviousTasks reads the scrollable view from the current position. The
+// scrollable position is then moved to the next older page after the read. No
+// item is returned when the head of the collector is reached.
+func (h HistoryCollector) ReadPreviousTasks(ctx context.Context, maxCount int32) ([]types.TaskInfo, error) {
+	req := types.ReadPreviousTasks{
 		This:     h.Reference(),
 		MaxCount: maxCount,
 	}
 
-	res, err := methods.ReadPreviousEvents(ctx, h.Client(), &req)
+	res, err := methods.ReadPreviousTasks(ctx, h.Client(), &req)
 	if err != nil {
 		return nil, err
 	}
