@@ -22,7 +22,6 @@ import (
 	"reflect"
 	"sync"
 
-	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -31,7 +30,8 @@ import (
 )
 
 type Manager struct {
-	object.Common
+	r types.ManagedObjectReference
+	c *vim25.Client
 
 	eventCategory   map[string]string
 	eventCategoryMu *sync.Mutex
@@ -40,8 +40,8 @@ type Manager struct {
 
 func NewManager(c *vim25.Client) *Manager {
 	m := Manager{
-		Common: object.NewCommon(c, *c.ServiceContent.EventManager),
-
+		r:               c.ServiceContent.EventManager.Reference(),
+		c:               c,
 		eventCategory:   make(map[string]string),
 		eventCategoryMu: new(sync.Mutex),
 		maxObjects:      10,
@@ -50,28 +50,32 @@ func NewManager(c *vim25.Client) *Manager {
 	return &m
 }
 
+func (m Manager) Client() *vim25.Client {
+	return m.c
+}
+
 func (m Manager) CreateCollectorForEvents(ctx context.Context, filter types.EventFilterSpec) (*HistoryCollector, error) {
 	req := types.CreateCollectorForEvents{
-		This:   m.Common.Reference(),
+		This:   m.r,
 		Filter: filter,
 	}
 
-	res, err := methods.CreateCollectorForEvents(ctx, m.Client(), &req)
+	res, err := methods.CreateCollectorForEvents(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewHistoryCollector(m.Client(), res.Returnval), nil
+	return newHistoryCollector(m.c, res.Returnval), nil
 }
 
 func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectReference, msg string) error {
 	req := types.LogUserEvent{
-		This:   m.Common.Reference(),
+		This:   m.r,
 		Entity: entity,
 		Msg:    msg,
 	}
 
-	_, err := methods.LogUserEvent(ctx, m.Client(), &req)
+	_, err := methods.LogUserEvent(ctx, m.c, &req)
 	if err != nil {
 		return err
 	}
@@ -81,7 +85,7 @@ func (m Manager) LogUserEvent(ctx context.Context, entity types.ManagedObjectRef
 
 func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, taskInfo ...types.TaskInfo) error {
 	req := types.PostEvent{
-		This:        m.Common.Reference(),
+		This:        m.r,
 		EventToPost: eventToPost,
 	}
 
@@ -89,7 +93,7 @@ func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, tas
 		req.TaskInfo = &taskInfo[0]
 	}
 
-	_, err := methods.PostEvent(ctx, m.Client(), &req)
+	_, err := methods.PostEvent(ctx, m.c, &req)
 	if err != nil {
 		return err
 	}
@@ -99,11 +103,11 @@ func (m Manager) PostEvent(ctx context.Context, eventToPost types.BaseEvent, tas
 
 func (m Manager) QueryEvents(ctx context.Context, filter types.EventFilterSpec) ([]types.BaseEvent, error) {
 	req := types.QueryEvents{
-		This:   m.Common.Reference(),
+		This:   m.r,
 		Filter: filter,
 	}
 
-	res, err := methods.QueryEvents(ctx, m.Client(), &req)
+	res, err := methods.QueryEvents(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -113,11 +117,11 @@ func (m Manager) QueryEvents(ctx context.Context, filter types.EventFilterSpec) 
 
 func (m Manager) RetrieveArgumentDescription(ctx context.Context, eventTypeID string) ([]types.EventArgDesc, error) {
 	req := types.RetrieveArgumentDescription{
-		This:        m.Common.Reference(),
+		This:        m.r,
 		EventTypeId: eventTypeID,
 	}
 
-	res, err := methods.RetrieveArgumentDescription(ctx, m.Client(), &req)
+	res, err := methods.RetrieveArgumentDescription(ctx, m.c, &req)
 	if err != nil {
 		return nil, err
 	}
@@ -136,7 +140,7 @@ func (m Manager) eventCategoryMap(ctx context.Context) (map[string]string, error
 	var o mo.EventManager
 
 	ps := []string{"description.eventInfo"}
-	err := property.DefaultCollector(m.Client()).RetrieveOne(ctx, m.Common.Reference(), ps, &o)
+	err := property.DefaultCollector(m.c).RetrieveOne(ctx, m.r, ps, &o)
 	if err != nil {
 		return nil, err
 	}
@@ -171,7 +175,8 @@ func (m Manager) EventCategory(ctx context.Context, event types.BaseEvent) (stri
 	return eventCategory[class], nil
 }
 
-// Get the events from the specified object(s) and optionanlly tail the event stream
+// Events gets the events from the specified object(s) and optionanlly tail the
+// event stream
 func (m Manager) Events(ctx context.Context, objects []types.ManagedObjectReference, pageSize int32, tail bool, force bool, f func(types.ManagedObjectReference, []types.BaseEvent) error, kind ...string) error {
 	// TODO: deprecated this method and add one that uses a single config struct, so we can extend further without breaking the method signature.
 	if len(objects) >= m.maxObjects && !force {
