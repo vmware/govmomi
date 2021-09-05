@@ -1114,6 +1114,17 @@ func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDe
 				Connected:      true,
 				DeviceConfigId: c.Key,
 			})
+
+			if c.ResourceAllocation == nil {
+				c.ResourceAllocation = &types.VirtualEthernetCardResourceAllocation{
+					Reservation: types.NewInt64(0),
+					Share: types.SharesInfo{
+						Shares: 50,
+						Level:  "normal",
+					},
+					Limit: types.NewInt64(-1),
+				}
+			}
 		}
 	case *types.VirtualDisk:
 		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
