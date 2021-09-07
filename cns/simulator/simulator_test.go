@@ -290,7 +290,7 @@ func TestSimulator(t *testing.T) {
 	// QueryAsync
 	queryFilter = cnstypes.CnsQueryFilter{}
 	querySelection := cnstypes.CnsQuerySelection{}
-	queryVolumeAsyncTask, err := cnsClient.QueryVolumeAsync(ctx, queryFilter, querySelection)
+	queryVolumeAsyncTask, err := cnsClient.QueryVolumeAsync(ctx, queryFilter, &querySelection)
 	if err != nil {
 		t.Fatal(err)
 	}
