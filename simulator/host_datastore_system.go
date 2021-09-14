@@ -38,7 +38,8 @@ func (dss *HostDatastoreSystem) add(ctx *Context, ds *Datastore) *soap.Fault {
 
 	info.Name = ds.Name
 
-	if e := Map().FindByName(ds.Name, dss.Datastore); e != nil {
+	r := Map()
+	if e := r.FindByName(ds.Name, dss.Datastore); e != nil {
 		return Fault(e.Reference().Value, &types.DuplicateName{
 			Name:   ds.Name,
 			Object: e.Reference(),
@@ -59,7 +60,7 @@ func (dss *HostDatastoreSystem) add(ctx *Context, ds *Datastore) *soap.Fault {
 		}
 	}
 
-	folder := Map().getEntityFolder(dss.Host, "datastore")
+	folder := r.getEntityFolder(dss.Host, "datastore")
 	ds.Self.Type = typeName(ds)
 	// Datastore is the only type where create methods do not include the parent (Folder in this case),
 	// but we need the moref to be unique per DC/datastoreFolder, but not per-HostSystem.
