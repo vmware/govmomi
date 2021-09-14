@@ -197,7 +197,9 @@ func (vm *VirtualMachine) event() types.VmEvent {
 }
 
 func (vm *VirtualMachine) hostInMM(ctx *Context) bool {
-	return ctx.Map.Get(*vm.Runtime.Host).(*HostSystem).Runtime.InMaintenanceMode
+	// TODO Change back to ctx.Map once it is determined why this
+	//      causes the expected behavior of CustomizeVM to fail.
+	return Map.Get(*vm.Runtime.Host).(*HostSystem).Runtime.InMaintenanceMode
 }
 
 func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
