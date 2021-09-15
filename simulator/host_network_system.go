@@ -57,8 +57,9 @@ func (s *HostNetworkSystem) init(r *Registry) {
 }
 
 func (s *HostNetworkSystem) folder() *Folder {
-	f := Map().getEntityDatacenter(s.Host).NetworkFolder
-	return Map().Get(f).(*Folder)
+	vimMap := Map()
+	f := vimMap.getEntityDatacenter(s.Host).NetworkFolder
+	return vimMap.Get(f).(*Folder)
 }
 
 func (s *HostNetworkSystem) AddVirtualSwitch(c *types.AddVirtualSwitch) soap.HasFault {
