@@ -78,15 +78,18 @@ func Example() {
 	// NewClient connects to s.URL over https and invokes 2 SOAP methods (RetrieveServiceContent + Login)
 	c, _ := govmomi.NewClient(ctx, s.URL, true)
 
+	// Create a local reference the default registry
+	vimMap := simulator.Map()
+
 	// Shortcut to choose any VM, rather than using the more verbose Finder or ContainerView.
-	obj := simulator.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
+	obj := vimMap.Any("VirtualMachine").(*simulator.VirtualMachine)
 	// Validate VM is powered on
 	if obj.Runtime.PowerState != "poweredOn" {
 		log.Fatal(obj.Runtime.PowerState)
 	}
 
 	// Wrap the existing vm object, using the same vm.Self (ManagedObjectReference) value as the Map key.
-	simulator.Map().Put(&BusyVM{obj})
+	vimMap.Put(&BusyVM{obj})
 
 	vm := object.NewVirtualMachine(c.Client, obj.Reference())
 
