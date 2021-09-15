@@ -88,14 +88,15 @@ func (ds *Datastore) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 			}
 		}
 
+		vimMap := Map()
 		for _, mount := range ds.Host {
-			host := Map().Get(mount.Key).(*HostSystem)
-			Map().RemoveReference(ctx, host, &host.Datastore, ds.Self)
+			host := vimMap.Get(mount.Key).(*HostSystem)
+			vimMap.RemoveReference(ctx, host, &host.Datastore, ds.Self)
 			parent := hostParent(&host.HostSystem)
-			Map().RemoveReference(ctx, parent, &parent.Datastore, ds.Self)
+			vimMap.RemoveReference(ctx, parent, &parent.Datastore, ds.Self)
 		}
 
-		p, _ := asFolderMO(Map().Get(*ds.Parent))
+		p, _ := asFolderMO(vimMap.Get(*ds.Parent))
 		folderRemoveChild(ctx, p, ds.Self)
 
 		return nil, nil
