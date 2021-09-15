@@ -935,7 +935,8 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	vmm := Map().Any("VirtualMachine").(*VirtualMachine)
+	vimMap := Map()
+	vmm := vimMap.Any("VirtualMachine").(*VirtualMachine)
 	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
 
 	// take snapshot
@@ -1018,8 +1019,8 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 	}
 
 	findDsStorage := func(dsName string) *types.VirtualMachineUsageOnDatastore {
-		host := Map().Get(*vmm.Runtime.Host).(*HostSystem)
-		ds := Map().FindByName(dsName, host.Datastore).(*Datastore)
+		host := vimMap.Get(*vmm.Runtime.Host).(*HostSystem)
+		ds := vimMap.FindByName(dsName, host.Datastore).(*Datastore)
 
 		for _, dsUsage := range vmm.Storage.PerDatastoreUsage {
 			if dsUsage.Datastore == ds.Self {
