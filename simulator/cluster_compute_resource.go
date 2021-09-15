@@ -398,7 +398,8 @@ func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.
 }
 
 func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {
-	if e := Map().FindByName(name, f.ChildEntity); e != nil {
+	vimMap := Map()
+	if e := vimMap.FindByName(name, f.ChildEntity); e != nil {
 		return nil, &types.DuplicateName{
 			Name:   e.Entity().Name,
 			Object: e.Reference(),
@@ -408,7 +409,7 @@ func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec typ
 	cluster := &ClusterComputeResource{}
 	cluster.EnvironmentBrowser = newEnvironmentBrowser()
 	cluster.Name = name
-	cluster.Network = Map().getEntityDatacenter(f).defaultNetwork()
+	cluster.Network = vimMap.getEntityDatacenter(f).defaultNetwork()
 	cluster.Summary = &types.ClusterComputeResourceSummary{
 		UsageSummary: new(types.ClusterUsageSummary),
 	}
@@ -420,7 +421,7 @@ func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec typ
 	config.DrsConfig.Enabled = types.NewBool(true)
 
 	pool := NewResourcePool()
-	Map().PutEntity(cluster, Map().NewEntity(pool))
+	vimMap.PutEntity(cluster, vimMap.NewEntity(pool))
 	cluster.ResourcePool = &pool.Self
 
 	folderPutChild(ctx, &f.Folder, cluster)
