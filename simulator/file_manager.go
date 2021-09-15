@@ -43,8 +43,9 @@ func (f *FileManager) findDatastore(ref mo.Reference, name string) (*Datastore, 
 		refs = p.ChildEntity
 	}
 
+	vimMap := Map()
 	for _, ref := range refs {
-		obj := Map().Get(ref)
+		obj := vimMap.Get(ref)
 
 		if ds, ok := obj.(*Datastore); ok && ds.Name == name {
 			return ds, nil
@@ -72,17 +73,18 @@ func (f *FileManager) resolve(dc *types.ManagedObjectReference, name string) (st
 		return "", fault
 	}
 
+	vimMap := Map()
 	if dc == nil {
-		if Map().IsESX() {
+		if vimMap.IsESX() {
 			dc = &esx.Datacenter.Self
 		} else {
 			return "", &types.InvalidArgument{InvalidProperty: "dc"}
 		}
 	}
 
-	folder := Map().Get(*dc).(*Datacenter).DatastoreFolder
+	folder := vimMap.Get(*dc).(*Datacenter).DatastoreFolder
 
-	ds, fault := f.findDatastore(Map().Get(folder), p.Datastore)
+	ds, fault := f.findDatastore(vimMap.Get(folder), p.Datastore)
 	if fault != nil {
 		return "", fault
 	}
