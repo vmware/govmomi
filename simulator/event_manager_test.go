@@ -52,8 +52,9 @@ func TestEventManagerVPX(t *testing.T) {
 	count := m.Count()
 
 	root := c.ServiceContent.RootFolder
-	vm := Map().Any("VirtualMachine").(*VirtualMachine)
-	host := Map().Get(vm.Runtime.Host.Reference()).(*HostSystem)
+	vimMap := Map()
+	vm := vimMap.Any("VirtualMachine").(*VirtualMachine)
+	host := vimMap.Get(vm.Runtime.Host.Reference()).(*HostSystem)
 
 	vmEvents := 6 // BeingCreated + InstanceUuid + Uuid + Created + Starting + PoweredOn
 	tests := []struct {
