@@ -48,8 +48,9 @@ func TestObjectName(t *testing.T) {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
 		kinds := []string{"VirtualMachine", "Network", "DistributedVirtualPortgroup"}
 
+		vimMap := simulator.Map()
 		for _, kind := range kinds {
-			ref := simulator.Map().Any(kind)
+			ref := vimMap.Any(kind)
 			obj := object.NewReference(c, ref.Reference())
 
 			name, err := obj.(common).ObjectName(ctx)
