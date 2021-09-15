@@ -79,8 +79,9 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 		{&hs.ConfigManager.StorageSystem, NewHostStorageSystem(&hs.HostSystem)},
 	}
 
+	vimMap := Map()
 	for _, c := range config {
-		ref := Map().Put(c.obj).Reference()
+		ref := vimMap.Put(c.obj).Reference()
 
 		*c.ref = &ref
 	}
@@ -172,14 +173,16 @@ func CreateDefaultESX(ctx *Context, f *Folder) {
 	cr.Name = host.Name
 	cr.Host = append(cr.Host, host.Reference())
 	host.Network = cr.Network
-	Map().PutEntity(cr, host)
+
+	vimMap := Map()
+	vimMap.PutEntity(cr, host)
 
 	pool := NewResourcePool()
 	cr.ResourcePool = &pool.Self
-	Map().PutEntity(cr, pool)
+	vimMap.PutEntity(cr, pool)
 	pool.Owner = cr.Self
 
-	folderPutChild(ctx, &Map().Get(dc.HostFolder).(*Folder).Folder, cr)
+	folderPutChild(ctx, &vimMap.Get(dc.HostFolder).(*Folder).Folder, cr)
 }
 
 // CreateStandaloneHost uses esx.HostSystem as a template, applying the given spec
