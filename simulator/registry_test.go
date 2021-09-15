@@ -67,3 +67,31 @@ func TestRemoveReference(t *testing.T) {
 		t.Errorf("%d", len(refs))
 	}
 }
+
+// TestGetEntityParent is a test to exercise a data race that was found when
+// getEntityParent is called.
+func TestGetEntityParent(t *testing.T) {
+	r := NewRegistry()
+
+	o := types.ManagedObjectReference{Type: "Parent", Value: "Parent"}
+	p := &mo.Folder{}
+	p.Self = o
+	r.PutEntity(nil, p)
+
+	o = types.ManagedObjectReference{Type: "Child", Value: "Child"}
+	c := &mo.Folder{}
+	c.Self = o
+	r.PutEntity(p, c)
+
+	go func() {
+		r.getEntityParent(c, "Parent")
+	}()
+
+	go func() {
+		o := types.ManagedObjectReference{Type: "Child2", Value: "Child2"}
+		f := &mo.Folder{}
+		f.Self = o
+		r.PutEntity(p, f)
+	}()
+
+}
