@@ -431,8 +431,8 @@ func (m *Model) Load(dir string) error {
 		if content.Obj == vim25.ServiceInstance {
 			s = new(ServiceInstance)
 			s.Self = content.Obj
-			NewMap()
-			Map().Put(s)
+			vimMap := NewMap()
+			vimMap.Put(s)
 			return mo.LoadObjectContent([]types.ObjectContent{content}, &s.ServiceInstance)
 		}
 
