@@ -167,11 +167,12 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 
 	pushEvent(m.history, req.EventToPost)
 
+	vimMap := Map()
 	for _, c := range m.collectors {
 		ctx.WithLock(c, func() {
 			if c.eventMatches(req.EventToPost) {
 				pushEvent(c.page, req.EventToPost)
-				Map().Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
+				vimMap.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
 	}
