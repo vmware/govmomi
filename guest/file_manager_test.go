@@ -27,8 +27,9 @@ import (
 
 func TestTranferURL(t *testing.T) {
 	simulator.Test(func(ctx context.Context, c *vim25.Client) {
-		vm := simulator.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
-		host := simulator.Map().Get(*vm.Runtime.Host).(*simulator.HostSystem)
+		vimMap := simulator.Map()
+		vm := vimMap.Any("VirtualMachine").(*simulator.VirtualMachine)
+		host := vimMap.Get(*vm.Runtime.Host).(*simulator.HostSystem)
 
 		ops := guest.NewOperationsManager(c, vm.Reference())
 		m, err := ops.FileManager(ctx)
