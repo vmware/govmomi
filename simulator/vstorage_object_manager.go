@@ -199,8 +199,9 @@ func (m *VcenterVStorageObjectManager) RegisterDisk(ctx *Context, req *types.Reg
 func (m *VcenterVStorageObjectManager) createObject(req *types.CreateDisk_Task, register bool) (*types.VStorageObject, types.BaseMethodFault) {
 	dir := "fcd"
 	ref := req.Spec.BackingSpec.GetVslmCreateSpecBackingSpec().Datastore
-	ds := Map().Get(ref).(*Datastore)
-	dc := Map().getEntityDatacenter(ds)
+	vimMap := Map()
+	ds := vimMap.Get(ref).(*Datastore)
+	dc := vimMap.getEntityDatacenter(ds)
 
 	objects, ok := m.objects[ds.Self]
 	if !ok {
@@ -288,9 +289,10 @@ func (m *VcenterVStorageObjectManager) DeleteVStorageObjectTask(ctx *Context, re
 		}
 
 		backing := obj.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
-		ds := Map().Get(req.Datastore).(*Datastore)
-		dc := Map().getEntityDatacenter(ds)
-		dm := Map().VirtualDiskManager()
+		vimMap := Map()
+		ds := vimMap.Get(req.Datastore).(*Datastore)
+		dc := vimMap.getEntityDatacenter(ds)
+		dm := vimMap.VirtualDiskManager()
 		dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
 			Name:       backing.FilePath,
 			Datacenter: &dc.Self,
