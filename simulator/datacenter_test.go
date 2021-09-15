@@ -39,10 +39,11 @@ func TestDatacenterCreateFolders(t *testing.T) {
 		},
 	}
 
+	vimMap := Map()
 	for _, model := range models {
 		_ = model.Create()
 
-		dc := Map().Any("Datacenter").(*Datacenter)
+		dc := vimMap.Any("Datacenter").(*Datacenter)
 
 		folders := []types.ManagedObjectReference{
 			dc.VmFolder,
@@ -56,7 +57,7 @@ func TestDatacenterCreateFolders(t *testing.T) {
 				t.Errorf("invalid moref=%#v", ref)
 			}
 
-			e := Map().Get(ref).(mo.Entity)
+			e := vimMap.Get(ref).(mo.Entity)
 
 			if e.Entity().Name == "" {
 				t.Error("empty name")
@@ -71,7 +72,7 @@ func TestDatacenterCreateFolders(t *testing.T) {
 				t.Fatalf("unexpected type (%T) for %#v", e, ref)
 			}
 
-			if Map().IsVPX() {
+			if vimMap.IsVPX() {
 				if len(f.ChildType) < 2 {
 					t.Fail()
 				}
