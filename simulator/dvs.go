@@ -34,7 +34,8 @@ type DistributedVirtualSwitch struct {
 
 func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		f := Map().getEntityParent(s, "Folder").(*Folder)
+		vimMap := Map()
+		f := vimMap.getEntityParent(s, "Folder").(*Folder)
 
 		portgroups := s.Portgroup
 		portgroupNames := s.Summary.PortgroupName
@@ -47,7 +48,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 			// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
 			// Allow duplicate names using this prefix so we can reproduce and test this condition.
 			if !strings.HasPrefix(pg.Name, "NSX-") {
-				if obj := Map().FindByName(pg.Name, f.ChildEntity); obj != nil {
+				if obj := vimMap.FindByName(pg.Name, f.ChildEntity); obj != nil {
 					return nil, &types.DuplicateName{
 						Name:   pg.Name,
 						Object: obj.Reference(),
@@ -131,18 +132,18 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 			for _, h := range s.Summary.HostMember {
 				pg.Host = append(pg.Host, h)
 
-				host := Map().Get(h).(*HostSystem)
-				Map().AppendReference(ctx, host, &host.Network, pg.Reference())
+				host := vimMap.Get(h).(*HostSystem)
+				vimMap.AppendReference(ctx, host, &host.Network, pg.Reference())
 
-				parent := Map().Get(*host.HostSystem.Parent)
+				parent := vimMap.Get(*host.HostSystem.Parent)
 				computeNetworks := append(hostParent(&host.HostSystem).Network, pg.Reference())
-				Map().Update(parent, []types.PropertyChange{
+				vimMap.Update(parent, []types.PropertyChange{
 					{Name: "network", Val: computeNetworks},
 				})
 			}
 		}
 
-		Map().Update(s, []types.PropertyChange{
+		vimMap.Update(s, []types.PropertyChange{
 			{Name: "portgroup", Val: portgroups},
 			{Name: "summary.portgroupName", Val: portgroupNames},
 		})
@@ -163,8 +164,9 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 
 		members := s.Summary.HostMember
 
+		vimMap := Map()
 		for _, member := range spec.Host {
-			h := Map().Get(member.Host)
+			h := vimMap.Get(member.Host)
 			if h == nil {
 				return nil, &types.ManagedObjectNotFound{Obj: member.Host}
 			}
@@ -178,26 +180,26 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				}
 
 				hostNetworks := append(host.Network, s.Portgroup...)
-				Map().Update(host, []types.PropertyChange{
+				vimMap.Update(host, []types.PropertyChange{
 					{Name: "network", Val: hostNetworks},
 				})
 				members = append(members, member.Host)
-				parent := Map().Get(*host.HostSystem.Parent)
+				parent := vimMap.Get(*host.HostSystem.Parent)
 
 				var pgs []types.ManagedObjectReference
 				for _, ref := range s.Portgroup {
-					pg := Map().Get(ref).(*DistributedVirtualPortgroup)
+					pg := vimMap.Get(ref).(*DistributedVirtualPortgroup)
 					pgs = append(pgs, ref)
 
 					pgHosts := append(pg.Host, member.Host)
-					Map().Update(pg, []types.PropertyChange{
+					vimMap.Update(pg, []types.PropertyChange{
 						{Name: "host", Val: pgHosts},
 					})
 
 					cr := hostParent(&host.HostSystem)
 					if FindReference(cr.Network, ref) == nil {
 						computeNetworks := append(cr.Network, ref)
-						Map().Update(parent, []types.PropertyChange{
+						vimMap.Update(parent, []types.PropertyChange{
 							{Name: "network", Val: computeNetworks},
 						})
 					}
@@ -205,7 +207,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 
 			case types.ConfigSpecOperationRemove:
 				for _, ref := range host.Vm {
-					vm := Map().Get(ref).(*VirtualMachine)
+					vm := vimMap.Get(ref).(*VirtualMachine)
 					if pg := FindReference(vm.Network, s.Portgroup...); pg != nil {
 						return nil, &types.ResourceInUse{
 							Type: pg.Type,
@@ -220,7 +222,7 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 			}
 		}
 
-		Map().Update(s, []types.PropertyChange{
+		vimMap.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
 		})
 
@@ -263,8 +265,9 @@ func (s *DistributedVirtualSwitch) dvPortgroups(_ *types.DistributedVirtualSwitc
 		return res
 	}
 
+	vimMap := Map()
 	for _, ref := range s.Portgroup {
-		pg := Map().Get(ref).(*DistributedVirtualPortgroup)
+		pg := vimMap.Get(ref).(*DistributedVirtualPortgroup)
 		res = append(res, types.DistributedVirtualPort{
 			DvsUuid: s.Uuid,
 			Key:     pg.Key,
