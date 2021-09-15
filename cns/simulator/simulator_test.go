@@ -69,8 +69,11 @@ func TestSimulator(t *testing.T) {
 	}
 	existingNumDisks := len(queryResult.Volumes)
 
+	// alias the default registry
+	vimMap := simulator.Map()
+
 	// Get a simulator DS
-	datastore := simulator.Map().Any("Datastore").(*simulator.Datastore)
+	datastore := vimMap.Any("Datastore").(*simulator.Datastore)
 
 	// Create volume for static provisioning
 	var capacityInMb int64 = 1024
@@ -220,7 +223,7 @@ func TestSimulator(t *testing.T) {
 	}
 
 	// Attach
-	nodeVM := simulator.Map().Any("VirtualMachine").(*simulator.VirtualMachine)
+	nodeVM := vimMap.Any("VirtualMachine").(*simulator.VirtualMachine)
 	attachSpecList := []cnstypes.CnsVolumeAttachDetachSpec{
 		{
 			VolumeId: createVolumeOperationRes.VolumeId,
