@@ -38,17 +38,19 @@ func TestRename(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	dc := Map().Any("Datacenter").(*Datacenter)
-	vmFolder := Map().Get(dc.VmFolder).(*Folder)
+	vimMap := Map()
 
-	f1 := Map().Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"
+	dc := vimMap.Any("Datacenter").(*Datacenter)
+	vmFolder := vimMap.Get(dc.VmFolder).(*Folder)
+
+	f1 := vimMap.Get(vmFolder.ChildEntity[0]).(*Folder) // "F1"
 
 	id := vmFolder.CreateFolder(SpoofContext(), &types.CreateFolder{
 		This: vmFolder.Reference(),
 		Name: "F2",
 	}).(*methods.CreateFolderBody).Res.Returnval
 
-	f2 := Map().Get(id).(*Folder) // "F2"
+	f2 := vimMap.Get(id).(*Folder) // "F2"
 
 	states := []types.TaskInfoState{types.TaskInfoStateError, types.TaskInfoStateSuccess}
 	name := f1.Name
@@ -59,7 +61,7 @@ func TestRename(t *testing.T) {
 			NewName: name,
 		}).(*methods.Rename_TaskBody).Res.Returnval
 
-		task := Map().Get(id).(*Task)
+		task := vimMap.Get(id).(*Task)
 		task.Wait()
 
 		if task.Info.State != expect {
