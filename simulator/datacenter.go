@@ -70,6 +70,7 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		{&dc.NetworkFolder, "network", []string{"Network", "DistributedVirtualSwitch", "Folder"}},
 	}
 
+	vimMap := Map()
 	for _, f := range folders {
 		folder := &Folder{}
 		folder.Name = f.name
@@ -77,10 +78,10 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		if dc.isESX {
 			folder.ChildType = f.types[:1]
 			folder.Self = *f.ref
-			Map().PutEntity(dc, folder)
+			vimMap.PutEntity(dc, folder)
 		} else {
 			folder.ChildType = f.types
-			e := Map().PutEntity(dc, folder)
+			e := vimMap.PutEntity(dc, folder)
 
 			// propagate the generated morefs to Datacenter
 			ref := e.Reference()
@@ -89,7 +90,7 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		}
 	}
 
-	net := Map().Get(dc.NetworkFolder).(*Folder)
+	net := vimMap.Get(dc.NetworkFolder).(*Folder)
 
 	for _, ref := range esx.Datacenter.Network {
 		// Add VM Network by default to each Datacenter
@@ -120,8 +121,9 @@ func (dc *Datacenter) folder(obj mo.Entity) *mo.Folder {
 	otype := getManagedObject(obj).Type()
 	rtype := obj.Reference().Type
 
+	vimMap := Map()
 	for i := range folders {
-		folder, _ := asFolderMO(Map().Get(folders[i]))
+		folder, _ := asFolderMO(vimMap.Get(folders[i]))
 		for _, kind := range folder.ChildType {
 			if rtype == kind {
 				return folder
@@ -153,8 +155,9 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 			return nil, new(types.NotImplemented)
 		}
 
+		vimMap := Map()
 		for _, ref := range req.Vm {
-			vm := Map().Get(ref).(*VirtualMachine)
+			vm := vimMap.Get(ref).(*VirtualMachine)
 			ctx.WithLock(vm, func() {
 				vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{})
 			})
@@ -177,14 +180,15 @@ func (d *Datacenter) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 			d.HostFolder,
 		}
 
+		vimMap := Map()
 		for _, ref := range folders {
-			f, _ := asFolderMO(Map().Get(ref))
+			f, _ := asFolderMO(vimMap.Get(ref))
 			if len(f.ChildEntity) != 0 {
 				return nil, &types.ResourceInUse{}
 			}
 		}
 
-		p, _ := asFolderMO(Map().Get(*d.Parent))
+		p, _ := asFolderMO(vimMap.Get(*d.Parent))
 		folderRemoveChild(ctx, p, d.Self)
 
 		return nil, nil
