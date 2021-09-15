@@ -34,7 +34,7 @@ type ServiceInstance struct {
 }
 
 func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Folder) *ServiceInstance {
-	NewMap()
+	vimMap := NewMap()
 
 	s := &ServiceInstance{}
 
@@ -63,7 +63,7 @@ func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Fo
 		if err != nil {
 			panic(err)
 		}
-		Map().Put(o)
+		vimMap.Put(o)
 	}
 
 	return s
