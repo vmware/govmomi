@@ -67,7 +67,8 @@ func (m *AuthorizationManager) init(r *Registry) {
 }
 
 func (m *AuthorizationManager) RetrieveEntityPermissions(req *types.RetrieveEntityPermissions) soap.HasFault {
-	e := Map().Get(req.Entity).(mo.Entity)
+	vimMap := Map()
+	e := vimMap.Get(req.Entity).(mo.Entity)
 
 	p := m.permissions[e.Reference()]
 
@@ -78,7 +79,7 @@ func (m *AuthorizationManager) RetrieveEntityPermissions(req *types.RetrieveEnti
 				break
 			}
 
-			e = Map().Get(parent.Reference()).(mo.Entity)
+			e = vimMap.Get(parent.Reference()).(mo.Entity)
 
 			p = append(p, m.permissions[e.Reference()]...)
 		}
