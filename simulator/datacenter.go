@@ -153,14 +153,25 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 			return nil, new(types.NotImplemented)
 		}
 
+		// Return per-VM tasks, structured as:
+		// thisTask.result - DC level task
+		//    +- []Attempted
+		//        +- subTask.result - VM level powerOn task result
+		//        +- ...
+		res := types.ClusterPowerOnVmResult{}
+		res.Attempted = []types.ClusterAttemptedVmInfo{}
+
 		for _, ref := range req.Vm {
 			vm := Map.Get(ref).(*VirtualMachine)
+			// NOTE: Simulator does not actually perform any specific host-level placement
+			// (equivalent to vSphere DRS).
 			ctx.WithLock(vm, func() {
-				vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{})
+				vmTaskBody := vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{}).(*methods.PowerOnVM_TaskBody)
+				res.Attempted = append(res.Attempted, types.ClusterAttemptedVmInfo{Vm: ref, Task: &vmTaskBody.Res.Returnval})
 			})
 		}
 
-		return nil, nil
+		return res, nil
 	})
 
 	return &methods.PowerOnMultiVM_TaskBody{
