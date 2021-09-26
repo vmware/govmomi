@@ -142,6 +142,7 @@ load test_helper
   assert_line "Memory: 1024MB"
   assert_line "CPU: 2 vCPU(s)"
 
+  # test extraConfig
   run govc vm.change -e "guestinfo.a=1" -e "guestinfo.b=2" -vm $id
   assert_success
 
@@ -149,6 +150,18 @@ load test_helper
   assert_success
   assert_line "guestinfo.a: 1"
   assert_line "guestinfo.b: 2"
+
+  # test extraConfigFile
+  run govc vm.change -f "guestinfo.c=this_is_not_an_existing.file" -vm $id
+  assert_failure
+
+  echo -n "3" > "$BATS_TMPDIR/extraConfigFile.conf"
+  run govc vm.change -f "guestinfo.d=$BATS_TMPDIR/extraConfigFile.conf" -vm $id
+  assert_success
+
+  run govc vm.info -e $id
+  assert_success
+  assert_line "guestinfo.d: 3"
 
   run govc vm.change -sync-time-with-host=false -vm $id
   assert_success
@@ -418,6 +431,19 @@ load test_helper
   run govc vm.change -e "guestinfo.a=" -vm $id
   assert_success
   refute_line "guestinfo.a: 2"
+
+  # test extraConfigFile
+  run govc vm.change -f "guestinfo.b=this_is_not_an_existing.file" -vm $id
+  assert_failure
+  echo -n "3" > "$BATS_TMPDIR/extraConfigFile.conf"
+  run govc vm.change -f "guestinfo.b=$BATS_TMPDIR/extraConfigFile.conf" -vm $id
+  assert_success
+  run govc vm.info -e $id
+  assert_success
+  assert_line "guestinfo.b: 3"
+  run govc vm.change -f "guestinfo.b=" -vm $id
+  assert_success
+  refute_line "guestinfo.b: 3"
 
   # test optional bool Config
   run govc vm.change -nested-hv-enabled=true -vm "$id"

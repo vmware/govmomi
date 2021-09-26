@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"reflect"
 	"strings"
 
@@ -43,13 +44,39 @@ func (e *extraConfig) Set(v string) error {
 	return nil
 }
 
+type extraConfigFile []types.BaseOptionValue
+
+func (e *extraConfigFile) String() string {
+	return fmt.Sprintf("%v", *e)
+}
+
+func (e *extraConfigFile) Set(v string) error {
+	r := strings.SplitN(v, "=", 2)
+	if len(r) < 2 {
+		return fmt.Errorf("failed to parse extraConfigFile: %s", v)
+	}
+
+	var fileContents = ""
+	if len(r[1]) > 0 {
+		contents, err := ioutil.ReadFile(r[1])
+		if err != nil {
+			return fmt.Errorf("failed to parse extraConfigFile '%s': %w", v, err)
+		}
+		fileContents = string(contents)
+	}
+
+	*e = append(*e, &types.OptionValue{Key: r[0], Value: fileContents})
+	return nil
+}
+
 type change struct {
 	*flags.VirtualMachineFlag
 	*flags.ResourceAllocationFlag
 
 	types.VirtualMachineConfigSpec
-	extraConfig extraConfig
-	Latency     string
+	extraConfig     extraConfig
+	extraConfigFile extraConfigFile
+	Latency         string
 }
 
 func init() {
@@ -119,6 +146,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.Annotation, "annotation", "", "VM description")
 	f.StringVar(&cmd.Uuid, "uuid", "", "BIOS UUID")
 	f.Var(&cmd.extraConfig, "e", "ExtraConfig. <key>=<value>")
+	f.Var(&cmd.extraConfigFile, "f", "ExtraConfig. <key>=<absolute path to file>")
 
 	f.Var(flags.NewOptionalBool(&cmd.NestedHVEnabled), "nested-hv-enabled", "Enable nested hardware-assisted virtualization")
 	cmd.Tools = &types.ToolsConfigInfo{}
@@ -140,6 +168,8 @@ Examples:
   # Enable both cpu and memory hotplug on a guest:
   govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
+  # Read the contents of a file and use them as ExtraConfig value
+  govc vm.change -vm $vm -f guestinfo.data="$(realpath .)/vmdata.config"
   # Read the variable set above inside the guest:
   vmware-rpctool "info-get guestinfo.vmname"
   govc vm.change -vm $vm -latency high
@@ -164,9 +194,7 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	if len(cmd.extraConfig) > 0 {
-		cmd.VirtualMachineConfigSpec.ExtraConfig = cmd.extraConfig
-	}
+	cmd.VirtualMachineConfigSpec.ExtraConfig = append(cmd.extraConfig, cmd.extraConfigFile...)
 
 	setAllocation(&cmd.CpuAllocation)
 	setAllocation(&cmd.MemoryAllocation)

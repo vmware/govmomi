@@ -4962,6 +4962,8 @@ Examples:
   # Enable both cpu and memory hotplug on a guest:
   govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
+  # Read the contents of a file and use them as ExtraConfig value
+  govc vm.change -vm $vm -f guestinfo.data="$(realpath .)/vmdata.config"
   # Read the variable set above inside the guest:
   vmware-rpctool "info-get guestinfo.vmname"
   govc vm.change -vm $vm -latency high
@@ -4976,6 +4978,7 @@ Options:
   -cpu.reservation=<nil>         CPU reservation in MHz
   -cpu.shares=                   CPU shares level or number
   -e=[]                          ExtraConfig. <key>=<value>
+  -f=[]                          ExtraConfig. <key>=<absolute file path>
   -g=                            Guest OS
   -latency=                      Latency sensitivity (low|normal|high)
   -m=0                           Size in MB of memory
