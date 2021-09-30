@@ -15,6 +15,7 @@ Please mark options that are relevant:
 - [ ] Breaking change (fix or feature that would cause existing functionality to
   not work as expected)
 - [ ] This change requires a documentation update
+- [ ] Build related change
 
 ## How Has This Been Tested?
 
@@ -24,11 +25,6 @@ details for your test configuration.
 
 - [ ] Test Description 1
 - [ ] Test Description 2
-
-**Test Configuration**:
-* Toolchain:
-* SDK:
-* (add more if needed)
 
 ## Checklist:
 
