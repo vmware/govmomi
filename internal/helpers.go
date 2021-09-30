@@ -17,9 +17,11 @@ limitations under the License.
 package internal
 
 import (
+	"net"
 	"path"
 
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // InventoryPath composed of entities by Name
@@ -35,4 +37,27 @@ func InventoryPath(entities []mo.ManagedEntity) string {
 	}
 
 	return val
+}
+
+func HostSystemManagementIPs(config []types.VirtualNicManagerNetConfig) []net.IP {
+	var ips []net.IP
+
+	for _, nc := range config {
+		if nc.NicType != string(types.HostVirtualNicManagerNicTypeManagement) {
+			continue
+		}
+		for ix := range nc.CandidateVnic {
+			for _, selectedVnicKey := range nc.SelectedVnic {
+				if nc.CandidateVnic[ix].Key != selectedVnicKey {
+					continue
+				}
+				ip := net.ParseIP(nc.CandidateVnic[ix].Spec.Ip.IpAddress)
+				if ip != nil {
+					ips = append(ips, ip)
+				}
+			}
+		}
+	}
+
+	return ips
 }
