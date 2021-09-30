@@ -21,6 +21,11 @@ on:
   pull_request:
     branches: ["main", "master"]
 
+# cancel any in-progress job or run on changes
+concurrency: 
+  group: join(github.head_ref,github.workflow,'-'')
+  cancel-in-progress: true
+
 jobs:
   govc-tests:
     name: Run govc Tests

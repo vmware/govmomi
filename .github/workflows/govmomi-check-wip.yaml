@@ -19,6 +19,11 @@ on:
   pull_request:
     types: [opened, synchronize, reopened, edited]
 
+# cancel any in-progress job or run on changes
+concurrency: 
+  group: join(github.head_ref,github.workflow,'-'')
+  cancel-in-progress: true
+
 jobs:
   wip:
     runs-on: ubuntu-latest

@@ -27,6 +27,11 @@ on:
   
   workflow_dispatch:
 
+# cancel any in-progress job or run on changes
+concurrency: 
+  group: join(github.head_ref,github.workflow,'-'')
+  cancel-in-progress: true
+
 jobs:
   artifacts:
     name: Build Snapshot Release (no upload)
