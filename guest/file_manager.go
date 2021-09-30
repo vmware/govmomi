@@ -21,8 +21,10 @@ import (
 	"fmt"
 	"net"
 	"net/url"
+	"os"
 	"sync"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -119,6 +121,9 @@ func (m FileManager) DeleteFile(ctx context.Context, auth types.BaseGuestAuthent
 	return err
 }
 
+// escape hatch to disable the preference to use ESX host management IP for guest file transfer
+var useGuestTransferIP = os.Getenv("GOVMOMI_USE_GUEST_TRANSFER_IP") != "false"
+
 // TransferURL rewrites the url with a valid hostname and adds the host's thumbprint.
 // The InitiateFileTransfer{From,To}Guest methods return a URL with the host set to "*" when connected directly to ESX,
 // but return the address of VM's runtime host when connected to vCenter.
@@ -179,29 +184,19 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 			host.Name, host.Self, host.Runtime.ConnectionState)
 	}
 
-	// prefer an ESX management IP, as the hostname used when adding to VC may not be valid for this client
-	// See also object.HostSystem.ManagementIPs which we can't use here due to import cycle
-	for _, nc := range host.Config.VirtualNicManagerInfo.NetConfig {
-		if nc.NicType != string(types.HostVirtualNicManagerNicTypeManagement) {
-			continue
-		}
-		for ix := range nc.CandidateVnic {
-			for _, selectedVnicKey := range nc.SelectedVnic {
-				if nc.CandidateVnic[ix].Key != selectedVnicKey {
-					continue
-				}
-				ip := net.ParseIP(nc.CandidateVnic[ix].Spec.Ip.IpAddress)
-				if ip != nil {
-					mname = ip.String()
-					m.mu.Lock()
-					m.hosts[name] = mname
-					m.mu.Unlock()
+	// InitiateFileTransfer{To,From}Guest methods return an ESX host's inventory name (HostSystem.Name).
+	// This name was used to add the host to vCenter and cannot be changed (unless the host is removed from inventory and added back with another name).
+	// The name used when adding to VC may not resolvable by this client's DNS, so we prefer an ESX management IP.
+	// However, if there is more than one management vNIC, we don't know which IP(s) the client has a route to.
+	// Leave the hostname as-is in that case or if the env var has disabled the preference.
+	ips := internal.HostSystemManagementIPs(host.Config.VirtualNicManagerInfo.NetConfig)
+	if len(ips) == 1 && useGuestTransferIP {
+		mname = ips[0].String()
+		m.mu.Lock()
+		m.hosts[name] = mname
+		m.mu.Unlock()
 
-					name = mname
-					break
-				}
-			}
-		}
+		name = mname
 	}
 
 	turl.Host = net.JoinHostPort(name, port)
