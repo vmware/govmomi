@@ -18,6 +18,7 @@ package guest_test
 
 import (
 	"context"
+	"fmt"
 	"testing"
 
 	"github.com/vmware/govmomi/guest"
@@ -37,13 +38,25 @@ func TestTranferURL(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		turl := "https://esx:443/foo/bar"
-		u, err := m.TransferURL(ctx, turl)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if u.Hostname() != "127.0.0.1" {
-			t.Errorf("hostname=%s", u.Hostname())
+		for i := 0; i < 2; i++ { // 2nd time is to validate the cached value
+			turl := "https://esx:443/foo/bar"
+			u, err := m.TransferURL(ctx, turl)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if u.Hostname() != "127.0.0.1" {
+				t.Errorf("hostname=%s", u.Hostname())
+			}
+
+			ipv6 := "[fd01:1:3:1528::10bf]:443"
+			turl = fmt.Sprintf("https://%s/foo/bar", ipv6)
+			u, err = m.TransferURL(ctx, turl)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if u.Host != ipv6 {
+				t.Errorf("host=%s", u.Host)
+			}
 		}
 
 		// hostname should be returned by TransferURL when there are multiple management IPs
@@ -54,13 +67,15 @@ func TestTranferURL(t *testing.T) {
 			}
 		}
 
-		turl = "https://esx2:443/foo/bar"
-		u, err = m.TransferURL(ctx, turl)
-		if err != nil {
-			t.Fatal(err)
-		}
-		if u.Hostname() != "esx2" {
-			t.Errorf("hostname=%s", u.Hostname())
+		for i := 0; i < 2; i++ { // 2nd time is to validate the cached value
+			turl := "https://esx2:443/foo/bar"
+			u, err := m.TransferURL(ctx, turl)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if u.Hostname() != "esx2" {
+				t.Errorf("hostname=%s", u.Hostname())
+			}
 		}
 
 		// error should be returned if HostSystem.Config is nil
@@ -70,10 +85,10 @@ func TestTranferURL(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		u, err = m.TransferURL(ctx, turl)
+		turl := "https://noconfig:443/foo/bar"
+		u, err := m.TransferURL(ctx, turl)
 		if err == nil {
 			t.Errorf("expected error (url=%s)", u)
 		}
-		t.Log(err)
 	})
 }
