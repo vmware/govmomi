@@ -5001,7 +5001,7 @@ Options:
   -cpu.reservation=<nil>         CPU reservation in MHz
   -cpu.shares=                   CPU shares level or number
   -e=[]                          ExtraConfig. <key>=<value>
-  -f=[]                          ExtraConfig. <key>=<absolute file path>
+  -f=[]                          ExtraConfig. <key>=<absolute path to file>
   -g=                            Guest OS
   -latency=                      Latency sensitivity (low|normal|high)
   -m=0                           Size in MB of memory
