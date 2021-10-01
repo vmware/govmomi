@@ -20,6 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"io"
 	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -152,13 +153,15 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 		_ = v.Destroy(context.Background())
 	}()
 
-	v.Follow = cmd.follow
+	// writes dump/json/xml once even if follow is specified, otherwise syntax error occurs
+	writesPlain := !(cmd.Dump || cmd.JSON || cmd.XML)
+	v.Follow = cmd.follow && writesPlain
 
-	stamp := "15:04:05"
-	tmpl := "%-40s %-30s %-30s %9s %9s %9s %s\n"
-	fmt.Fprintf(cmd.Out, tmpl, "Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result")
+	res := &taskResult{name: tn}
+	if writesPlain {
+		res.WriteHeader(cmd.Out)
+	}
 
-	var last string
 	updated := false
 
 	return v.Collect(ctx, func(tasks []types.TaskInfo) {
@@ -167,55 +170,79 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		updated = true
 
-		for _, info := range tasks {
-			var user string
-
-			switch x := info.Reason.(type) {
-			case *types.TaskReasonUser:
-				user = x.UserName
-			}
-
-			if info.EntityName == "" || user == "" {
-				continue
-			}
-
-			ruser := strings.SplitN(user, "\\", 2)
-			if len(ruser) == 2 {
-				user = ruser[1] // discard domain
-			} else {
-				user = strings.TrimPrefix(user, "com.vmware.") // e.g. com.vmware.vsan.health
-			}
-
-			queued := info.QueueTime.Format(stamp)
-			start := "-"
-			end := start
-
-			if info.StartTime != nil {
-				start = info.StartTime.Format(stamp)
-			}
-
-			msg := fmt.Sprintf("%2d%% %s", info.Progress, info.Task)
-
-			if info.CompleteTime != nil {
-				msg = info.CompleteTime.Sub(*info.StartTime).String()
-
-				if info.State == types.TaskInfoStateError {
-					msg = strings.TrimSuffix(info.Error.LocalizedMessage, ".")
-				}
-
-				end = info.CompleteTime.Format(stamp)
-			}
-
-			result := fmt.Sprintf("%-7s [%s]", info.State, msg)
-
-			item := fmt.Sprintf(tmpl, chop(tn(&info), 40), chop(info.EntityName, 30), chop(user, 30), queued, start, end, result)
-
-			if item == last {
-				continue // task info was updated, but the fields we display were not
-			}
-			last = item
-
-			fmt.Fprint(cmd.Out, item)
-		}
+		res.Tasks = tasks
+		cmd.WriteResult(res)
 	})
+}
+
+type taskResult struct {
+	Tasks []types.TaskInfo
+	last  string
+	name  func(info *types.TaskInfo) string
+}
+
+func (t *taskResult) WriteHeader(w io.Writer) {
+	fmt.Fprintf(w, t.format("Task", "Target", "Initiator", "Queued", "Started", "Completed", "Result"))
+}
+
+func (t *taskResult) Write(w io.Writer) error {
+	stamp := "15:04:05"
+
+	for _, info := range t.Tasks {
+		var user string
+
+		switch x := info.Reason.(type) {
+		case *types.TaskReasonUser:
+			user = x.UserName
+		}
+
+		if info.EntityName == "" || user == "" {
+			continue
+		}
+
+		ruser := strings.SplitN(user, "\\", 2)
+		if len(ruser) == 2 {
+			user = ruser[1] // discard domain
+		} else {
+			user = strings.TrimPrefix(user, "com.vmware.") // e.g. com.vmware.vsan.health
+		}
+
+		queued := info.QueueTime.Format(stamp)
+		start := "-"
+		end := start
+
+		if info.StartTime != nil {
+			start = info.StartTime.Format(stamp)
+		}
+
+		msg := fmt.Sprintf("%2d%% %s", info.Progress, info.Task)
+
+		if info.CompleteTime != nil {
+			msg = info.CompleteTime.Sub(*info.StartTime).String()
+
+			if info.State == types.TaskInfoStateError {
+				msg = strings.TrimSuffix(info.Error.LocalizedMessage, ".")
+			}
+
+			end = info.CompleteTime.Format(stamp)
+		}
+
+		result := fmt.Sprintf("%-7s [%s]", info.State, msg)
+
+		item := t.format(chop(t.name(&info), 40), chop(info.EntityName, 30), chop(user, 30), queued, start, end, result)
+
+		if item == t.last {
+			continue // task info was updated, but the fields we display were not
+		}
+		t.last = item
+
+		fmt.Fprint(w, item)
+	}
+
+	return nil
+}
+
+func (t *taskResult) format(task, target, initiator, queued, started, completed, result string) string {
+	return fmt.Sprintf("%-40s %-30s %-30s %9s %9s %9s %s\n",
+		task, target, initiator, queued, started, completed, result)
 }
