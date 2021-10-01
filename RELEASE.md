@@ -19,17 +19,32 @@ of this project.
 ## Verify `master` branch is up to date with the remote
 
 ```console
-$ git checkout master
-$ git fetch -avp
-$ git diff master origin/master
+git checkout master
+git fetch -avp
+git diff master origin/master
 
 # if your local and remote branches diverge run
-$ git pull origin/master
+git pull origin/master
 ```
 
 ⚠️ **Note:** These steps assume `origin` to point to the remote
 `https://github.com/vmware/govmomi`, respectively
 `git@github.com:vmware/govmomi`.
+
+## Verify `make docs` and `CONTRIBUTORS` are up to date
+
+⚠️ Run the following commands and commit (PR) any changes before proceeding with
+the release.
+
+```console
+make doc
+./scripts/contributors.sh
+if [ -z "$(git status --porcelain)" ]; then 
+  echo "working directory clean: proceed with release"
+else 
+  echo "working directory dirty: please commit changes"
+fi
+```
 
 
 ## Set `RELEASE_VERSION` variable
@@ -39,26 +54,25 @@ This variable is used and referenced in the subsequent commands. Set it to the
 versioning](https://semver.org/) scheme:
 
 ```console
-$ export RELEASE_VERSION=v0.25.0
+export RELEASE_VERSION=v0.27.0
 ```
 
 ## Create the Git Tag
 
 ```console
-$ git tag -a ${RELEASE_VERSION} -m "Release ${RELEASE_VERSION}"
+git tag -a ${RELEASE_VERSION} -m "Release ${RELEASE_VERSION}"
 ```
 
 ## Push the new Tag
 
 ```console
 # Will trigger Github Actions Release Workflow
-$ git push origin refs/tags/${RELEASE_VERSION}
+git push origin refs/tags/${RELEASE_VERSION}
 ```
 
 ## Verify Github Action Release Workflow
 
-After pushing a new release tag, the status of the
-workflow can be inspected
+After pushing a new release tag, the status of the workflow can be inspected
 [here](https://github.com/vmware/govmomi/actions/workflows/govmomi-release.yaml).
 
 ![Release](static/release-workflow.png "Successful Release Run")

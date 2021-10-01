@@ -59,3 +59,31 @@ jobs:
 
       - name: Run ${{ matrix.cmd }}
         run: make ${{ matrix.cmd }}
+
+  govc-docs:
+    name: Verify govc docs are up2date
+    strategy:
+      matrix:
+        go-version: ["1.16"]
+        platform: ["ubuntu-18.04"]
+    runs-on: ${{ matrix.platform }}
+    timeout-minutes: 3
+    steps:
+      - name: Set up Go ${{ matrix.go-version }}
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+        id: go
+      - name: Check out code
+        uses: actions/checkout@v2
+      - name: Run "make doc"
+        run: |
+          make doc
+          if [ -z "$(git status --porcelain)" ]; then 
+            echo "govc/USAGE.md is up2date..."
+          else 
+            echo "dirty working directory (diff):"
+            git --no-pager diff
+            echo "::error file=govc/USAGE.md::Run make doc to update USAGE.md"
+            exit 1
+          fi
