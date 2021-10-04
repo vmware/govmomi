@@ -154,6 +154,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
+		{internal.DebugEcho, s.debugEcho},
 	}
 
 	for i := range handlers {
@@ -2094,4 +2095,8 @@ func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
 	default:
 		http.NotFound(w, r)
 	}
+}
+
+func (s *handler) debugEcho(w http.ResponseWriter, r *http.Request) {
+	r.Write(w)
 }

@@ -44,6 +44,7 @@ const (
 	VCenterVM                      = "/vcenter/vm"
 	SessionCookieName              = "vmware-api-session-id"
 	UseHeaderAuthn                 = "vmware-use-header-authn"
+	DebugEcho                      = "/vc-sim/debug/echo"
 )
 
 // AssociatedObject is the same structure as types.ManagedObjectReference,
