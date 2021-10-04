@@ -143,14 +143,17 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 
 	name := turl.Hostname()
 	port := turl.Port()
+	isHostname := net.ParseIP(name) == nil
 
 	m.mu.Lock()
 	mname, ok := m.hosts[name]
 	m.mu.Unlock()
 
 	if ok {
-		turl.Host = net.JoinHostPort(mname, port)
+		turl.Host = mname
 		return turl, nil
+	} else {
+		mname = turl.Host
 	}
 
 	c := property.DefaultCollector(m.c)
@@ -169,7 +172,10 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 		"name",
 		"runtime.connectionState",
 		"summary.config.sslThumbprint",
-		"config.virtualNicManagerInfo.netConfig",
+	}
+
+	if isHostname {
+		props = append(props, "config.virtualNicManagerInfo.netConfig")
 	}
 
 	var host mo.HostSystem
@@ -178,28 +184,29 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 		return nil, err
 	}
 
-	if host.Config == nil {
-		return nil, fmt.Errorf("guest TransferURL failed for vm %q (%s): host %q (%s) config==nil, connectionState==%s",
-			vm.Name, vm.Self,
-			host.Name, host.Self, host.Runtime.ConnectionState)
+	if isHostname {
+		if host.Config == nil {
+			return nil, fmt.Errorf("guest TransferURL failed for vm %q (%s): host %q (%s) config==nil, connectionState==%s",
+				vm.Name, vm.Self,
+				host.Name, host.Self, host.Runtime.ConnectionState)
+		}
+
+		// InitiateFileTransfer{To,From}Guest methods return an ESX host's inventory name (HostSystem.Name).
+		// This name was used to add the host to vCenter and cannot be changed (unless the host is removed from inventory and added back with another name).
+		// The name used when adding to VC may not resolvable by this client's DNS, so we prefer an ESX management IP.
+		// However, if there is more than one management vNIC, we don't know which IP(s) the client has a route to.
+		// Leave the hostname as-is in that case or if the env var has disabled the preference.
+		ips := internal.HostSystemManagementIPs(host.Config.VirtualNicManagerInfo.NetConfig)
+		if len(ips) == 1 && useGuestTransferIP {
+			mname = net.JoinHostPort(ips[0].String(), port)
+
+			turl.Host = mname
+		}
 	}
 
-	// InitiateFileTransfer{To,From}Guest methods return an ESX host's inventory name (HostSystem.Name).
-	// This name was used to add the host to vCenter and cannot be changed (unless the host is removed from inventory and added back with another name).
-	// The name used when adding to VC may not resolvable by this client's DNS, so we prefer an ESX management IP.
-	// However, if there is more than one management vNIC, we don't know which IP(s) the client has a route to.
-	// Leave the hostname as-is in that case or if the env var has disabled the preference.
-	ips := internal.HostSystemManagementIPs(host.Config.VirtualNicManagerInfo.NetConfig)
-	if len(ips) == 1 && useGuestTransferIP {
-		mname = ips[0].String()
-		m.mu.Lock()
-		m.hosts[name] = mname
-		m.mu.Unlock()
-
-		name = mname
-	}
-
-	turl.Host = net.JoinHostPort(name, port)
+	m.mu.Lock()
+	m.hosts[name] = mname
+	m.mu.Unlock()
 
 	m.c.SetThumbprint(turl.Host, host.Summary.Config.SslThumbprint)
 
