@@ -35,6 +35,10 @@ EOF
 
   # compile + run examples against vcsim
   for main in ../../examples/*/main.go ; do
+    # TODO: #2567
+    if [[ $main =~ "task" ]]; then
+      continue
+    fi
     run go run "$main" -insecure -url "$GOVC_URL"
     assert_success
   done

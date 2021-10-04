@@ -61,7 +61,7 @@ func (m Agency) Config(ctx context.Context) (*types.AgencyConfigInfo, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &resp.Returnval, nil
+	return resp.Returnval.GetAgencyConfigInfo(), nil
 }
 
 func (m Agency) Runtime(ctx context.Context) (*types.EamObjectRuntimeInfo, error) {

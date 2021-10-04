@@ -324,6 +324,8 @@ but appear via `govc $cmd -h`:
  - [vm.vnc](#vmvnc)
  - [volume.ls](#volumels)
  - [volume.rm](#volumerm)
+ - [vsan.change](#vsanchange)
+ - [vsan.info](#vsaninfo)
 
 </details>
 
@@ -402,10 +404,12 @@ Change configuration of the given clusters.
 Examples:
   govc cluster.change -drs-enabled -vsan-enabled -vsan-autoclaim ClusterA
   govc cluster.change -drs-enabled=false ClusterB
+  govc cluster.change -drs-vmotion-rate=4 ClusterC
 
 Options:
   -drs-enabled=<nil>     Enable DRS
   -drs-mode=             DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
+  -drs-vmotion-rate=0    Aggressiveness of vMotions (1-5)
   -ha-enabled=<nil>      Enable HA
   -vsan-autoclaim=<nil>  Autoclaim storage on cluster hosts
   -vsan-enabled=<nil>    Enable vSAN
@@ -3043,8 +3047,10 @@ Examples:
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -ds=                   Datastore [GOVC_DATASTORE]
+  -e=false               Include extra configuration
   -folder=               Inventory folder [GOVC_FOLDER]
   -host=                 Host system [GOVC_HOST]
+  -m=false               Preserve MAC-addresses on network adapters
   -ovf=false             Clone as OVF (default is VM Template)
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -profile=              Storage profile
@@ -3347,16 +3353,17 @@ Options:
 ## library.update
 
 ```
-Usage: govc library.update [OPTIONS] NAME
+Usage: govc library.update [OPTIONS] PATH
 
-Update library.
+Update library or item PATH.
 
 Examples:
-  govc library.update -d "new description" -n "new-name" current-name
+  govc library.update -d "new library description" -n "new-name" my-library
+  govc library.update -d "new item description" -n "new-item-name" my-library/my-item
 
 Options:
-  -d=                    Library description
-  -n=                    Library name
+  -d=                    Library or item description
+  -n=                    Library or item name
 ```
 
 ## license.add
@@ -3782,6 +3789,22 @@ followed by the value to match.
 
 The '-R' flag sets the Filter using the given XML encoded request, which can be captured by 'vcsim -trace' for example.
 It can be useful for replaying property filters created by other clients and converting filters to Go code via '-O -dump'.
+
+The '-type' flag value can be a managed entity type or one of the following aliases:
+
+  a    VirtualApp
+  c    ClusterComputeResource
+  d    Datacenter
+  f    Folder
+  g    DistributedVirtualPortgroup
+  h    HostSystem
+  m    VirtualMachine
+  n    Network
+  o    OpaqueNetwork
+  p    ResourcePool
+  r    ComputeResource
+  s    Datastore
+  w    DistributedVirtualSwitch
 
 Examples:
   govc object.collect - content
@@ -4962,6 +4985,8 @@ Examples:
   # Enable both cpu and memory hotplug on a guest:
   govc vm.change -vm $vm -cpu-hot-add-enabled -memory-hot-add-enabled
   govc vm.change -vm $vm -e guestinfo.vmname $vm
+  # Read the contents of a file and use them as ExtraConfig value
+  govc vm.change -vm $vm -f guestinfo.data="$(realpath .)/vmdata.config"
   # Read the variable set above inside the guest:
   vmware-rpctool "info-get guestinfo.vmname"
   govc vm.change -vm $vm -latency high
@@ -4976,6 +5001,7 @@ Options:
   -cpu.reservation=<nil>         CPU reservation in MHz
   -cpu.shares=                   CPU shares level or number
   -e=[]                          ExtraConfig. <key>=<value>
+  -f=[]                          ExtraConfig. <key>=<absolute path to file>
   -g=                            Guest OS
   -latency=                      Latency sensitivity (low|normal|high)
   -m=0                           Size in MB of memory
@@ -5677,6 +5703,36 @@ consider using 'govc disk.ls -R' to reconcile the datastore inventory.
 
 Examples:
   govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d
+
+Options:
+```
+
+## vsan.change
+
+```
+Usage: govc vsan.change [OPTIONS] CLUSTER
+
+Change vSAN configuration.
+
+Examples:
+  govc vsan.change -unmap-enabled ClusterA # enable unmap
+  govc vsan.change -unmap-enabled=false ClusterA # disable unmap
+
+Options:
+  -unmap-enabled=<nil>   Enable Unmap
+```
+
+## vsan.info
+
+```
+Usage: govc vsan.info [OPTIONS] CLUSTER...
+
+Display vSAN configuration.
+
+Examples:
+  govc vsan.info
+  govc vsan.info ClusterA
+  govc vsan.info -json
 
 Options:
 ```

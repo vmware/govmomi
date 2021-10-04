@@ -164,7 +164,9 @@ load test_helper
   # test where $name.{ovf,mf} differs from ova name
   run govc library.import -m my-content "$GOVC_IMAGES/ttylinux-latest.ova"
   assert_success
-  run govc library.ls "/my-content/ttylinux-latest/*"
+  run govc library.update -n ttylinux_latest my-content/ttylinux-latest
+  assert_success
+  run govc library.ls "/my-content/ttylinux_latest/*"
   assert_success
   assert_matches "$TTYLINUX_NAME.ovf"
   assert_matches "$TTYLINUX_NAME-disk1.vmdk"
@@ -251,7 +253,7 @@ EOF
   run govc library.create my-content
   assert_success
 
-  run govc library.clone -vm $vm -ovf my-content $item
+  run govc library.clone -vm $vm -ovf -e -m my-content $item
   assert_success
 
   run govc vm.destroy $vm

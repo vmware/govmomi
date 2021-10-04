@@ -45,8 +45,9 @@ var refValueMap = map[string]string{
 	"VirtualMachineSnapshot":         "snapshot",
 	"VmwareDistributedVirtualSwitch": "dvs",
 	"DistributedVirtualSwitch":       "dvs",
-	"ClusterComputeResource":         "domain",
+	"ClusterComputeResource":         "domain-c",
 	"Folder":                         "group",
+	"StoragePod":                     "group-p",
 }
 
 // Map is the default Registry instance.
@@ -113,11 +114,16 @@ func typeName(item mo.Reference) string {
 
 // valuePrefix returns the value name prefix of a given object
 func valuePrefix(typeName string) string {
-	if v, ok := refValueMap[typeName]; ok {
-		return v
+	v, ok := refValueMap[typeName]
+	if ok {
+		if strings.Contains(v, "-") {
+			return v
+		}
+	} else {
+		v = strings.ToLower(typeName)
 	}
 
-	return strings.ToLower(typeName)
+	return v + "-"
 }
 
 // newReference returns a new MOR, where Type defaults to type of the given item
@@ -131,7 +137,7 @@ func (r *Registry) newReference(item mo.Reference) types.ManagedObjectReference 
 
 	if ref.Value == "" {
 		n := atomic.AddInt64(&r.counter, 1)
-		ref.Value = fmt.Sprintf("%s-%d", valuePrefix(ref.Type), n)
+		ref.Value = fmt.Sprintf("%s%d", valuePrefix(ref.Type), n)
 	}
 
 	return ref
@@ -582,10 +588,14 @@ func (r *Registry) locker(obj mo.Reference) *internal.ObjectLock {
 	case *types.ManagedObjectReference:
 		ref = *x
 		obj = r.Get(ref) // to check for sync.Locker
-	case *ListView: // otherwise race_test.go fails in the default case
-		ref = x.Self
 	default:
-		ref = obj.Reference()
+		// Use of obj.Reference() may cause a read race, prefer the mo 'Self' field to avoid this
+		self := reflect.ValueOf(obj).Elem().FieldByName("Self")
+		if self.IsValid() {
+			ref = self.Interface().(types.ManagedObjectReference)
+		} else {
+			ref = obj.Reference()
+		}
 	}
 
 	if mu, ok := obj.(sync.Locker); ok {

@@ -1,4 +1,4 @@
-# Copyright (c) 2014-2018 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,6 +16,7 @@ require "nokogiri"
 require "test/unit"
 
 $namespaces = %w(vim25)
+$force_base_interface_for_types = ENV['FORCE_BASE_INTERFACE_FOR_TYPES']
 
 def valid_ns?(t)
   $namespaces.include?(t)
@@ -62,7 +63,7 @@ class Peek
       # VrpResourceAllocationInfo is removed in 6.7, so base will no longer generated
       return false if ["ResourceAllocationInfo", "FaultDomainId"].include?(@name)
 
-      return !children.empty?
+      return !children.empty? || $force_base_interface_for_types.split(",").include?(@name)
     end
   end
 
@@ -193,7 +194,7 @@ class Simple
   end
 
   def base_type?
-    vim_type? && Peek.base?(vim_type)
+    vim_type? && (Peek.base?(vim_type) || $force_base_interface_for_types.split(",").include?(vim_type))
   end
 
   def enum_type?

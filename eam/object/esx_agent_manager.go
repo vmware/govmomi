@@ -47,7 +47,7 @@ func (m EsxAgentManager) CreateAgency(
 	var agency Agency
 	resp, err := methods.CreateAgency(ctx, m.c, &types.CreateAgency{
 		This:             m.r,
-		AgencyConfigInfo: config,
+		AgencyConfigInfo: config.GetAgencyConfigInfo(),
 		InitialGoalState: initialGoalState,
 	})
 	if err != nil {

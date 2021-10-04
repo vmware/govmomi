@@ -22,6 +22,16 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+func (b *AgencyConfigInfo) GetAgencyConfigInfo() *AgencyConfigInfo { return b }
+
+type BaseAgencyConfigInfo interface {
+	GetAgencyConfigInfo() *AgencyConfigInfo
+}
+
+func init() {
+	types.Add("BaseAgencyConfigInfo", reflect.TypeOf((*AgencyConfigInfo)(nil)).Elem())
+}
+
 func (b *AgencyIssue) GetAgencyIssue() *AgencyIssue { return b }
 
 type BaseAgencyIssue interface {

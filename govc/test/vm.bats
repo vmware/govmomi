@@ -3,32 +3,70 @@
 load test_helper
 
 @test "vm.ip" {
-  esx_env
+  vcsim_env -autostart=false
 
-  id=$(new_ttylinux_vm)
+  id=/DC0/vm/DC0_H0_VM0
+
+  mac=00:50:56:83:3a:5d
+  run govc vm.customize -vm $id -mac $mac -ip 10.0.0.1 -netmask 255.255.0.0 -type Linux
+  assert_success
 
   run govc vm.power -on $id
   assert_success
 
-  run govc vm.ip $id
+  run govc vm.ip -wait 5s $id
   assert_success
 
-  run govc vm.ip -a -v4 $id
+  run govc vm.ip -wait 5s -a -v4 $id
   assert_success
 
-  run govc vm.ip -n $(vm_mac $id) $id
+  run govc vm.ip -wait 5s -n $mac $id
   assert_success
 
-  run govc vm.ip -n ethernet-0 $id
+  run govc vm.ip -wait 5s -n ethernet-0 $id
   assert_success
 
-  ip=$(govc vm.ip $id)
+  ip=$(govc vm.ip -wait 5s $id)
 
   # add a second nic
   run govc vm.network.add -vm $id "VM Network"
   assert_success
 
-  res=$(govc vm.ip -n ethernet-0 $id)
+  res=$(govc vm.ip -wait 5s -n ethernet-0 $id)
+  assert_equal $ip $res
+}
+
+@test "vm.ip capital MAC" {
+  vcsim_env -autostart=false
+
+  id=/DC0/vm/DC0_H0_VM0
+
+  mac=00:50:56:83:3A:5D
+  run govc vm.customize -vm $id -mac $mac -ip 10.0.0.1 -netmask 255.255.0.0 -type Linux
+  assert_success
+
+  run govc vm.power -on $id
+  assert_success
+
+  run govc vm.ip -wait 5s $id
+  assert_success
+
+  run govc vm.ip -wait 5s -a -v4 $id
+  assert_success
+
+  run govc vm.ip -wait 5s -n $mac $id
+  assert_success
+
+  run govc vm.ip -wait 5s -n ethernet-0 $id
+  assert_success
+
+  ip=$(govc vm.ip -wait 5s $id)
+
+  # add a second nic
+  run govc vm.network.add -vm $id "VM Network"
+  assert_success
+
+  res=$(govc vm.ip -wait 5s -n ethernet-0 $id)
   assert_equal $ip $res
 }
 
@@ -82,6 +120,12 @@ load test_helper
 
   run govc vm.create -force -cluster DC0_C0 "$id"
   assert_success # create vm with the same name
+
+  run govc vm.create -cluster DC0_C0 "my:vm"
+  assert_success # vm has special characters (moref)
+
+  run govc object.collect -s vm/my:vm name
+  assert_success my:vm
 }
 
 @test "vm.change" {
@@ -98,6 +142,7 @@ load test_helper
   assert_line "Memory: 1024MB"
   assert_line "CPU: 2 vCPU(s)"
 
+  # test extraConfig
   run govc vm.change -e "guestinfo.a=1" -e "guestinfo.b=2" -vm $id
   assert_success
 
@@ -105,6 +150,18 @@ load test_helper
   assert_success
   assert_line "guestinfo.a: 1"
   assert_line "guestinfo.b: 2"
+
+  # test extraConfigFile
+  run govc vm.change -f "guestinfo.c=this_is_not_an_existing.file" -vm $id
+  assert_failure
+
+  echo -n "3" > "$BATS_TMPDIR/extraConfigFile.conf"
+  run govc vm.change -f "guestinfo.d=$BATS_TMPDIR/extraConfigFile.conf" -vm $id
+  assert_success
+
+  run govc vm.info -e $id
+  assert_success
+  assert_line "guestinfo.d: 3"
 
   run govc vm.change -sync-time-with-host=false -vm $id
   assert_success
@@ -253,6 +310,17 @@ load test_helper
   assert_failure
 }
 
+@test "vm.destroy" {
+  vcsim_env
+
+  vm=$(new_id)
+  govc vm.create $vm
+
+  # destroy powers off vm before destruction
+  run govc vm.destroy $vm
+  assert_success
+}
+
 @test "vm.create pvscsi" {
   vcsim_env
 
@@ -363,6 +431,19 @@ load test_helper
   run govc vm.change -e "guestinfo.a=" -vm $id
   assert_success
   refute_line "guestinfo.a: 2"
+
+  # test extraConfigFile
+  run govc vm.change -f "guestinfo.b=this_is_not_an_existing.file" -vm $id
+  assert_failure
+  echo -n "3" > "$BATS_TMPDIR/extraConfigFile.conf"
+  run govc vm.change -f "guestinfo.b=$BATS_TMPDIR/extraConfigFile.conf" -vm $id
+  assert_success
+  run govc vm.info -e $id
+  assert_success
+  assert_line "guestinfo.b: 3"
+  run govc vm.change -f "guestinfo.b=" -vm $id
+  assert_success
+  refute_line "guestinfo.b: 3"
 
   # test optional bool Config
   run govc vm.change -nested-hv-enabled=true -vm "$id"
@@ -1044,4 +1125,20 @@ load test_helper
 
   run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
   assert_success 10.0.0.45
+
+  run govc vm.power -off DC0_H0_VM0
+  assert_success
+
+  host=$(govc ls -L "$(govc object.collect -s vm/DC0_H0_VM0 runtime.host)")
+  run govc host.maintenance.enter "$host"
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -netmask 255.255.0.0 -type Linux
+  assert_failure # InvalidState
+
+  run govc host.maintenance.exit "$host"
+  assert_success
+
+  run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -netmask 255.255.0.0 -type Linux
+  assert_success
 }

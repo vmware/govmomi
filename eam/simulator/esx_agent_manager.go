@@ -39,7 +39,7 @@ func (m *EsxAgentManager) CreateAgency(
 
 	if agency, err := NewAgency(
 		ctx,
-		req.AgencyConfigInfo,
+		*req.AgencyConfigInfo.GetAgencyConfigInfo(),
 		req.InitialGoalState); err != nil {
 
 		res.Fault_ = simulator.Fault("", err)

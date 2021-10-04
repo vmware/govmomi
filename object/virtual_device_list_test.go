@@ -688,9 +688,13 @@ func TestCreateEthernetCard(t *testing.T) {
 	}
 
 	for _, name := range []string{"", "e1000", "e1000e", "vmxnet2", "vmxnet3", "pcnet32", "sriov"} {
-		_, err := EthernetCardTypes().CreateEthernetCard(name, nil)
+		c, err := EthernetCardTypes().CreateEthernetCard(name, nil)
 		if err != nil {
 			t.Error(err)
+		}
+
+		if key := c.GetVirtualDevice().Key; key >= 0 {
+			t.Errorf("device key %d should be negative", key)
 		}
 	}
 }

@@ -197,7 +197,7 @@ func (m *Agency) QueryConfig(
 
 	return &methods.QueryConfigBody{
 		Res: &types.QueryConfigResponse{
-			Returnval: m.Config,
+			Returnval: &m.Config,
 		},
 	}
 }
@@ -237,7 +237,7 @@ func (m *Agency) Update(
 	ctx *simulator.Context,
 	req *types.Update) soap.HasFault {
 
-	m.Config = req.Config
+	m.Config = *req.Config.GetAgencyConfigInfo()
 
 	return &methods.UpdateBody{
 		Res: &types.UpdateResponse{},

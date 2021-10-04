@@ -573,7 +573,7 @@ EOF
 
   run govc find -l -i /
   assert_success
-  assert_matches :domain- # ClusterComputeResource moid value
+  assert_matches :domain-c # ClusterComputeResource moid value
   assert_matches :group- # Folder moid value
   assert_matches :resgroup- # ResourcePool moid value
   assert_matches :dvs- # DistributedVirtualSwitch moid value

@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/guest"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestTranferURL(t *testing.T) {
@@ -45,6 +46,24 @@ func TestTranferURL(t *testing.T) {
 			t.Errorf("hostname=%s", u.Hostname())
 		}
 
+		// hostname should be returned by TransferURL when there are multiple management IPs
+		for _, nc := range host.Config.VirtualNicManagerInfo.NetConfig {
+			if nc.NicType == string(types.HostVirtualNicManagerNicTypeManagement) {
+				host.Config.VirtualNicManagerInfo.NetConfig = append(host.Config.VirtualNicManagerInfo.NetConfig, nc)
+				break
+			}
+		}
+
+		turl = "https://esx2:443/foo/bar"
+		u, err = m.TransferURL(ctx, turl)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if u.Hostname() != "esx2" {
+			t.Errorf("hostname=%s", u.Hostname())
+		}
+
+		// error should be returned if HostSystem.Config is nil
 		host.Config = nil
 		m, err = ops.FileManager(ctx)
 		if err != nil {
