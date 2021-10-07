@@ -52,7 +52,7 @@ func (r *Resource) WithAction(action string) *Resource {
 func (r *Resource) WithParam(name string, value string) *Resource {
 	// ParseQuery handles empty case, and we control access to query string so shouldn't encounter an error case
 	params, _ := url.ParseQuery(r.u.RawQuery)
-	params[name] = []string{value}
+	params[name] = append(params[name], value)
 	r.u.RawQuery = params.Encode()
 	return r
 }

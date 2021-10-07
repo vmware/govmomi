@@ -42,5 +42,12 @@ func TestResource_WithParam(t *testing.T) {
 		if !strings.Contains(url.String(), expectedPath) {
 			t.Errorf("Param incorrectly updated on resource, URL %q, expected path %q", url.String(), expectedPath)
 		}
+
+		url = c.Resource("api/some/resource")
+		url = url.WithParam("names", "foo").WithParam("names", "bar")
+		expectedPath = "api/some/resource?names=foo&names=bar"
+		if !strings.Contains(url.String(), expectedPath) {
+			t.Errorf("Param incorrectly updated on resource, URL %q, expected path %q", url.String(), expectedPath)
+		}
 	})
 }
