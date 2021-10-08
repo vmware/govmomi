@@ -535,3 +535,29 @@ func ExampleNetworkReference_EthernetCardBackingInfo() {
 	}, model)
 	// Output: 1 of 2 NICs match backing
 }
+
+// Find a VirtualMachine's Cluster
+func ExampleVirtualMachine_resourcePoolOwner() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		obj, err := find.NewFinder(c).VirtualMachine(ctx, "DC0_C0_RP0_VM0")
+		if err != nil {
+			return err
+		}
+
+		pool, err := obj.ResourcePool(ctx)
+		if err != nil {
+			return err
+		}
+
+		// ResourcePool owner will be a ComputeResource or ClusterComputeResource
+		cluster, err := pool.Owner(ctx)
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%s", cluster.Reference().Type)
+
+		return nil
+	})
+	// Output: ClusterComputeResource
+}
