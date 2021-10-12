@@ -1256,6 +1256,18 @@ func init() {
 	t["BaseHostDasEvent"] = reflect.TypeOf((*HostDasEvent)(nil)).Elem()
 }
 
+func (b *HostDataTransportConnectionInfo) GetHostDataTransportConnectionInfo() *HostDataTransportConnectionInfo {
+	return b
+}
+
+type BaseHostDataTransportConnectionInfo interface {
+	GetHostDataTransportConnectionInfo() *HostDataTransportConnectionInfo
+}
+
+func init() {
+	t["BaseHostDataTransportConnectionInfo"] = reflect.TypeOf((*HostDataTransportConnectionInfo)(nil)).Elem()
+}
+
 func (b *HostDatastoreConnectInfo) GetHostDatastoreConnectInfo() *HostDatastoreConnectInfo { return b }
 
 type BaseHostDatastoreConnectInfo interface {
@@ -1356,6 +1368,16 @@ type BaseHostHardwareElementInfo interface {
 
 func init() {
 	t["BaseHostHardwareElementInfo"] = reflect.TypeOf((*HostHardwareElementInfo)(nil)).Elem()
+}
+
+func (b *HostHbaCreateSpec) GetHostHbaCreateSpec() *HostHbaCreateSpec { return b }
+
+type BaseHostHbaCreateSpec interface {
+	GetHostHbaCreateSpec() *HostHbaCreateSpec
+}
+
+func init() {
+	t["BaseHostHbaCreateSpec"] = reflect.TypeOf((*HostHbaCreateSpec)(nil)).Elem()
 }
 
 func (b *HostHostBusAdapter) GetHostHostBusAdapter() *HostHostBusAdapter { return b }
@@ -3010,6 +3032,18 @@ type BaseVirtualHardwareCompatibilityIssue interface {
 
 func init() {
 	t["BaseVirtualHardwareCompatibilityIssue"] = reflect.TypeOf((*VirtualHardwareCompatibilityIssue)(nil)).Elem()
+}
+
+func (b *VirtualMachineBaseIndependentFilterSpec) GetVirtualMachineBaseIndependentFilterSpec() *VirtualMachineBaseIndependentFilterSpec {
+	return b
+}
+
+type BaseVirtualMachineBaseIndependentFilterSpec interface {
+	GetVirtualMachineBaseIndependentFilterSpec() *VirtualMachineBaseIndependentFilterSpec
+}
+
+func init() {
+	t["BaseVirtualMachineBaseIndependentFilterSpec"] = reflect.TypeOf((*VirtualMachineBaseIndependentFilterSpec)(nil)).Elem()
 }
 
 func (b *VirtualMachineBootOptionsBootableDevice) GetVirtualMachineBootOptionsBootableDevice() *VirtualMachineBootOptionsBootableDevice {
