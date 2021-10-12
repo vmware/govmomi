@@ -48,25 +48,25 @@ generate() {
 }
 
 #
-# All types derive from vCenter build 17986435, vSphere 7.0U2 Hot Patch 4
+# All types derive from vCenter build 18700403, vSphere 7.0U3.
 #
 export COPYRIGHT_DATE_RANGE="2014-2021"
 
 #
 # FORCE_BASE_INTERFACE_FOR_TYPES defines the types that we want to
 # generate base interfaces for. The type names should be comma seperated -
-# e.g. "TypeA,TypeB,TypeC"
+# e.g. "TypeA,TypeB,TypeC".
 #
 export FORCE_BASE_INTERFACE_FOR_TYPES="AgencyConfigInfo"
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 17354719
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 18281059.
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
 
 # ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
-# eam-wsdl.zip, from eam-vcenter build 17490501.
+# eam-wsdl.zip, from eam-vcenter build 18281060.
 #
 # Please note the EAM files are also available at the following, public URL --
 # http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact
