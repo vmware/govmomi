@@ -63,6 +63,46 @@ func AgencyQueryRuntime(ctx context.Context, r soap.RoundTripper, req *types.Age
 	return resBody.Res, nil
 }
 
+type Agency_DisableBody struct {
+	Req    *types.Agency_Disable         `xml:"urn:eam Agency_Disable,omitempty"`
+	Res    *types.Agency_DisableResponse `xml:"urn:eam Agency_DisableResponse,omitempty"`
+	Fault_ *soap.Fault                   `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *Agency_DisableBody) Fault() *soap.Fault { return b.Fault_ }
+
+func Agency_Disable(ctx context.Context, r soap.RoundTripper, req *types.Agency_Disable) (*types.Agency_DisableResponse, error) {
+	var reqBody, resBody Agency_DisableBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type Agency_EnableBody struct {
+	Req    *types.Agency_Enable         `xml:"urn:eam Agency_Enable,omitempty"`
+	Res    *types.Agency_EnableResponse `xml:"urn:eam Agency_EnableResponse,omitempty"`
+	Fault_ *soap.Fault                  `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *Agency_EnableBody) Fault() *soap.Fault { return b.Fault_ }
+
+func Agency_Enable(ctx context.Context, r soap.RoundTripper, req *types.Agency_Enable) (*types.Agency_EnableResponse, error) {
+	var reqBody, resBody Agency_EnableBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type AgentQueryConfigBody struct {
 	Req    *types.AgentQueryConfig         `xml:"urn:eam AgentQueryConfig,omitempty"`
 	Res    *types.AgentQueryConfigResponse `xml:"urn:eam AgentQueryConfigResponse,omitempty"`
@@ -143,36 +183,16 @@ func DestroyAgency(ctx context.Context, r soap.RoundTripper, req *types.DestroyA
 	return resBody.Res, nil
 }
 
-type DisableBody struct {
-	Req    *types.Disable         `xml:"urn:eam Disable,omitempty"`
-	Res    *types.DisableResponse `xml:"urn:eam DisableResponse,omitempty"`
-	Fault_ *soap.Fault            `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+type GetMaintenanceModePolicyBody struct {
+	Req    *types.GetMaintenanceModePolicy         `xml:"urn:eam GetMaintenanceModePolicy,omitempty"`
+	Res    *types.GetMaintenanceModePolicyResponse `xml:"urn:eam GetMaintenanceModePolicyResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
 }
 
-func (b *DisableBody) Fault() *soap.Fault { return b.Fault_ }
+func (b *GetMaintenanceModePolicyBody) Fault() *soap.Fault { return b.Fault_ }
 
-func Disable(ctx context.Context, r soap.RoundTripper, req *types.Disable) (*types.DisableResponse, error) {
-	var reqBody, resBody DisableBody
-
-	reqBody.Req = req
-
-	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
-		return nil, err
-	}
-
-	return resBody.Res, nil
-}
-
-type EnableBody struct {
-	Req    *types.Enable         `xml:"urn:eam Enable,omitempty"`
-	Res    *types.EnableResponse `xml:"urn:eam EnableResponse,omitempty"`
-	Fault_ *soap.Fault           `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
-}
-
-func (b *EnableBody) Fault() *soap.Fault { return b.Fault_ }
-
-func Enable(ctx context.Context, r soap.RoundTripper, req *types.Enable) (*types.EnableResponse, error) {
-	var reqBody, resBody EnableBody
+func GetMaintenanceModePolicy(ctx context.Context, r soap.RoundTripper, req *types.GetMaintenanceModePolicy) (*types.GetMaintenanceModePolicyResponse, error) {
+	var reqBody, resBody GetMaintenanceModePolicyBody
 
 	reqBody.Req = req
 
@@ -373,6 +393,26 @@ func (b *ScanForUnknownAgentVmBody) Fault() *soap.Fault { return b.Fault_ }
 
 func ScanForUnknownAgentVm(ctx context.Context, r soap.RoundTripper, req *types.ScanForUnknownAgentVm) (*types.ScanForUnknownAgentVmResponse, error) {
 	var reqBody, resBody ScanForUnknownAgentVmBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type SetMaintenanceModePolicyBody struct {
+	Req    *types.SetMaintenanceModePolicy         `xml:"urn:eam SetMaintenanceModePolicy,omitempty"`
+	Res    *types.SetMaintenanceModePolicyResponse `xml:"urn:eam SetMaintenanceModePolicyResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *SetMaintenanceModePolicyBody) Fault() *soap.Fault { return b.Fault_ }
+
+func SetMaintenanceModePolicy(ctx context.Context, r soap.RoundTripper, req *types.SetMaintenanceModePolicy) (*types.SetMaintenanceModePolicyResponse, error) {
+	var reqBody, resBody SetMaintenanceModePolicyBody
 
 	reqBody.Req = req
 

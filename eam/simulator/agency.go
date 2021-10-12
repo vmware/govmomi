@@ -151,25 +151,25 @@ func (m *Agency) DestroyAgency(
 	}
 }
 
-func (m *Agency) Disable(
+func (m *Agency) Agency_Disable(
 	ctx *simulator.Context,
-	req *types.Disable) soap.HasFault {
+	req *types.Agency_Disable) soap.HasFault {
 
 	m.Runtime.GoalState = string(types.EamObjectRuntimeInfoGoalStateDisabled)
 
-	return &methods.DisableBody{
-		Res: &types.DisableResponse{},
+	return &methods.Agency_DisableBody{
+		Res: &types.Agency_DisableResponse{},
 	}
 }
 
-func (m *Agency) Enable(
+func (m *Agency) Agency_Enable(
 	ctx *simulator.Context,
-	req *types.Enable) soap.HasFault {
+	req *types.Agency_Enable) soap.HasFault {
 
 	m.Runtime.GoalState = string(types.EamObjectRuntimeInfoGoalStateEnabled)
 
-	return &methods.EnableBody{
-		Res: &types.EnableResponse{},
+	return &methods.Agency_EnableBody{
+		Res: &types.Agency_EnableResponse{},
 	}
 }
 
