@@ -954,6 +954,7 @@ type VslmSyncDatastoreRequestType struct {
 	This         types.ManagedObjectReference `xml:"_this"`
 	DatastoreUrl string                       `xml:"datastoreUrl"`
 	FullSync     bool                         `xml:"fullSync"`
+	FcdId        *types.ID                    `xml:"fcdId,omitempty"`
 }
 
 func init() {
