@@ -171,6 +171,7 @@ const (
 	PbmObjectTypeVirtualDiskId          = PbmObjectType("virtualDiskId")
 	PbmObjectTypeVirtualDiskUUID        = PbmObjectType("virtualDiskUUID")
 	PbmObjectTypeDatastore              = PbmObjectType("datastore")
+	PbmObjectTypeVsanObjectId           = PbmObjectType("vsanObjectId")
 	PbmObjectTypeFileShareId            = PbmObjectType("fileShareId")
 	PbmObjectTypeUnknown                = PbmObjectType("unknown")
 )
