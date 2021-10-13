@@ -19,8 +19,12 @@ package task
 import (
 	"testing"
 
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+// ensure task.Manager implements the mo.Reference interface
+var _ mo.Reference = new(Manager)
 
 func TestCallbackFn(t *testing.T) {
 	cb := &taskCallback{}

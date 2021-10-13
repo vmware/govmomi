@@ -24,8 +24,12 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+// ensure event.Manager implements the mo.Reference interface
+var _ mo.Reference = new(event.Manager)
 
 func ExampleManager_Events() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {

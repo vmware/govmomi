@@ -23,6 +23,11 @@ func NewManager(c *vim25.Client) *Manager {
 	return &m
 }
 
+// Reference returns the task.Manager MOID
+func (m Manager) Reference() types.ManagedObjectReference {
+	return m.r
+}
+
 // CreateCollectorForTasks returns a task history collector, a specialized
 // history collector that gathers TaskInfo data objects.
 func (m Manager) CreateCollectorForTasks(ctx context.Context, filter types.TaskFilterSpec) (*HistoryCollector, error) {
