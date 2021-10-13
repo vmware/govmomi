@@ -95,7 +95,7 @@ func (m Agency) Destroy(ctx context.Context) error {
 }
 
 func (m Agency) Disable(ctx context.Context) error {
-	_, err := methods.Disable(ctx, m.c, &types.Disable{
+	_, err := methods.Agency_Disable(ctx, m.c, &types.Agency_Disable{
 		This: m.r,
 	})
 	if err != nil {
@@ -105,7 +105,7 @@ func (m Agency) Disable(ctx context.Context) error {
 }
 
 func (m Agency) Enable(ctx context.Context) error {
-	_, err := methods.Enable(ctx, m.c, &types.Enable{
+	_, err := methods.Agency_Enable(ctx, m.c, &types.Agency_Enable{
 		This: m.r,
 	})
 	if err != nil {

@@ -62,6 +62,7 @@ type AgencyConfigInfo struct {
 	OptimizedDeploymentEnabled                    *bool                          `xml:"optimizedDeploymentEnabled"`
 	AgentName                                     string                         `xml:"agentName,omitempty"`
 	AgencyName                                    string                         `xml:"agencyName,omitempty"`
+	UseUuidVmName                                 *bool                          `xml:"useUuidVmName"`
 	ManuallyProvisioned                           *bool                          `xml:"manuallyProvisioned"`
 	ManuallyMonitored                             *bool                          `xml:"manuallyMonitored"`
 	BypassVumEnabled                              *bool                          `xml:"bypassVumEnabled"`
@@ -75,6 +76,14 @@ type AgencyConfigInfo struct {
 
 func init() {
 	types.Add("eam:AgencyConfigInfo", reflect.TypeOf((*AgencyConfigInfo)(nil)).Elem())
+}
+
+type AgencyDisabled struct {
+	AgencyIssue
+}
+
+func init() {
+	types.Add("eam:AgencyDisabled", reflect.TypeOf((*AgencyDisabled)(nil)).Elem())
 }
 
 type AgencyIssue struct {
@@ -136,6 +145,40 @@ type AgencyVMResourcePool struct {
 
 func init() {
 	types.Add("eam:AgencyVMResourcePool", reflect.TypeOf((*AgencyVMResourcePool)(nil)).Elem())
+}
+
+type Agency_Disable Agency_DisableRequestType
+
+func init() {
+	types.Add("eam:Agency_Disable", reflect.TypeOf((*Agency_Disable)(nil)).Elem())
+}
+
+type Agency_DisableRequestType struct {
+	This types.ManagedObjectReference `xml:"_this"`
+}
+
+func init() {
+	types.Add("eam:Agency_DisableRequestType", reflect.TypeOf((*Agency_DisableRequestType)(nil)).Elem())
+}
+
+type Agency_DisableResponse struct {
+}
+
+type Agency_Enable Agency_EnableRequestType
+
+func init() {
+	types.Add("eam:Agency_Enable", reflect.TypeOf((*Agency_Enable)(nil)).Elem())
+}
+
+type Agency_EnableRequestType struct {
+	This types.ManagedObjectReference `xml:"_this"`
+}
+
+func init() {
+	types.Add("eam:Agency_EnableRequestType", reflect.TypeOf((*Agency_EnableRequestType)(nil)).Elem())
+}
+
+type Agency_EnableResponse struct {
 }
 
 type AgentConfigInfo struct {
@@ -529,21 +572,20 @@ func init() {
 type DestroyAgencyResponse struct {
 }
 
-type Disable DisableRequestType
+type DisabledClusterFault struct {
+	EamAppFault
 
-func init() {
-	types.Add("eam:Disable", reflect.TypeOf((*Disable)(nil)).Elem())
-}
-
-type DisableRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	DisabledComputeResource []types.ManagedObjectReference `xml:"disabledComputeResource,omitempty"`
 }
 
 func init() {
-	types.Add("eam:DisableRequestType", reflect.TypeOf((*DisableRequestType)(nil)).Elem())
+	types.Add("eam:DisabledClusterFault", reflect.TypeOf((*DisabledClusterFault)(nil)).Elem())
 }
 
-type DisableResponse struct {
+type DisabledClusterFaultFault DisabledClusterFault
+
+func init() {
+	types.Add("eam:DisabledClusterFaultFault", reflect.TypeOf((*DisabledClusterFaultFault)(nil)).Elem())
 }
 
 type EamAppFault struct {
@@ -608,6 +650,12 @@ type EamInvalidState struct {
 
 func init() {
 	types.Add("eam:EamInvalidState", reflect.TypeOf((*EamInvalidState)(nil)).Elem())
+}
+
+type EamInvalidStateFault EamInvalidState
+
+func init() {
+	types.Add("eam:EamInvalidStateFault", reflect.TypeOf((*EamInvalidStateFault)(nil)).Elem())
 }
 
 type EamInvalidVibPackage struct {
@@ -679,23 +727,6 @@ func init() {
 	types.Add("eam:EamSystemFaultFault", reflect.TypeOf((*EamSystemFaultFault)(nil)).Elem())
 }
 
-type Enable EnableRequestType
-
-func init() {
-	types.Add("eam:Enable", reflect.TypeOf((*Enable)(nil)).Elem())
-}
-
-type EnableRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-}
-
-func init() {
-	types.Add("eam:EnableRequestType", reflect.TypeOf((*EnableRequestType)(nil)).Elem())
-}
-
-type EnableResponse struct {
-}
-
 type ExtensibleIssue struct {
 	Issue
 
@@ -710,12 +741,22 @@ func init() {
 	types.Add("eam:ExtensibleIssue", reflect.TypeOf((*ExtensibleIssue)(nil)).Elem())
 }
 
+type GetMaintenanceModePolicy GetMaintenanceModePolicyRequestType
+
+func init() {
+	types.Add("eam:GetMaintenanceModePolicy", reflect.TypeOf((*GetMaintenanceModePolicy)(nil)).Elem())
+}
+
 type GetMaintenanceModePolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this"`
 }
 
 func init() {
 	types.Add("eam:GetMaintenanceModePolicyRequestType", reflect.TypeOf((*GetMaintenanceModePolicyRequestType)(nil)).Elem())
+}
+
+type GetMaintenanceModePolicyResponse struct {
+	Returnval string `xml:"returnval"`
 }
 
 type HostInMaintenanceMode struct {
@@ -1313,6 +1354,12 @@ func init() {
 type ScanForUnknownAgentVmResponse struct {
 }
 
+type SetMaintenanceModePolicy SetMaintenanceModePolicyRequestType
+
+func init() {
+	types.Add("eam:SetMaintenanceModePolicy", reflect.TypeOf((*SetMaintenanceModePolicy)(nil)).Elem())
+}
+
 type SetMaintenanceModePolicyRequestType struct {
 	This   types.ManagedObjectReference `xml:"_this"`
 	Policy string                       `xml:"policy"`
@@ -1320,6 +1367,9 @@ type SetMaintenanceModePolicyRequestType struct {
 
 func init() {
 	types.Add("eam:SetMaintenanceModePolicyRequestType", reflect.TypeOf((*SetMaintenanceModePolicyRequestType)(nil)).Elem())
+}
+
+type SetMaintenanceModePolicyResponse struct {
 }
 
 type Uninstall UninstallRequestType
