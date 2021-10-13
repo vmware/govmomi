@@ -50,6 +50,11 @@ func NewManager(c *vim25.Client) *Manager {
 	return &m
 }
 
+// Reference returns the event.Manager MOID
+func (m Manager) Reference() types.ManagedObjectReference {
+	return m.r
+}
+
 func (m Manager) Client() *vim25.Client {
 	return m.c
 }
