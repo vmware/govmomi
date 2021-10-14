@@ -161,7 +161,7 @@ func TestSimulator(t *testing.T) {
 		t.Log("creating a new agency")
 		agency, err := mgr.CreateAgency(
 			ctx,
-			types.AgencyConfigInfo{
+			&types.AgencyConfigInfo{
 				AgencyName: "nginx",
 				AgentVmDatastore: []vim.ManagedObjectReference{
 					datastore.Reference(),

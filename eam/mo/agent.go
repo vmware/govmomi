@@ -20,8 +20,8 @@ import (
 	"github.com/vmware/govmomi/eam/types"
 )
 
-// Agenct is the vSphere ESX Agent Manager managed object responsible
-// fordeploying an Agency on a single host. The Agent maintains the state
+// Agent is the vSphere ESX Agent Manager managed object responsible
+// for deploying an Agency on a single host. The Agent maintains the state
 // of the current deployment in its runtime information
 type Agent struct {
 	EamObject `yaml:",inline"`

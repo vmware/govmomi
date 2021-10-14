@@ -54,14 +54,14 @@ func (m Agency) Agents(ctx context.Context) ([]Agent, error) {
 	return objs, nil
 }
 
-func (m Agency) Config(ctx context.Context) (*types.AgencyConfigInfo, error) {
+func (m Agency) Config(ctx context.Context) (types.BaseAgencyConfigInfo, error) {
 	resp, err := methods.QueryConfig(ctx, m.c, &types.QueryConfig{
 		This: m.r,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return resp.Returnval.GetAgencyConfigInfo(), nil
+	return resp.Returnval, nil
 }
 
 func (m Agency) Runtime(ctx context.Context) (*types.EamObjectRuntimeInfo, error) {
@@ -154,10 +154,11 @@ func (m Agency) UnregisterAgentVm(
 
 func (m Agency) Update(
 	ctx context.Context,
-	config types.AgencyConfigInfo) error {
+	config types.BaseAgencyConfigInfo) error {
 
 	_, err := methods.Update(ctx, m.c, &types.Update{
-		This: m.r,
+		This:   m.r,
+		Config: config,
 	})
 	if err != nil {
 		return err

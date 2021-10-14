@@ -41,13 +41,13 @@ func NewEsxAgentManager(c *eam.Client, ref vim.ManagedObjectReference) EsxAgentM
 
 func (m EsxAgentManager) CreateAgency(
 	ctx context.Context,
-	config types.AgencyConfigInfo,
+	config types.BaseAgencyConfigInfo,
 	initialGoalState string) (Agency, error) {
 
 	var agency Agency
 	resp, err := methods.CreateAgency(ctx, m.c, &types.CreateAgency{
 		This:             m.r,
-		AgencyConfigInfo: config.GetAgencyConfigInfo(),
+		AgencyConfigInfo: config,
 		InitialGoalState: initialGoalState,
 	})
 	if err != nil {
