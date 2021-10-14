@@ -1,4 +1,82 @@
 
+<a name="v0.27.0"></a>
+## [Release v0.27.0](https://github.com/vmware/govmomi/compare/v0.26.1...v0.27.0)
+
+> Release Date: 2021-10-14
+
+### 🐞 Fix
+
+- [57c4be58]	multi-value query params for vAPI methods
+- [815e2d8f]	avoid vNIC mapping in guest.TransferURL if URL.Host is an IP
+- [81a7dbe9]	avoid use of vNIC IP in guest.TransferURL if there are multiple
+- [61afce31]	Update CnsQueryAsync API request parameters to handle nil for QuerySelection
+- [a601a8a8]	generate negative device key
+
+### 💫 `govc` (CLI)
+
+- [b5426eba]	Add feature to read file contents for ExtraConfig
+- [85956c77]	fix tasks to activate option dump/json/xml
+- [f4ef4d93]	Fix incorrect MoRef parsing
+- [d695f4cf]	Handle powered on VMs in vm.destroy
+- [94f63681]	add library.clone '-e' and '-m' options
+- [2fcae372]	add vsan info and change commands
+
+### 💫 `vcsim` (Simulator)
+
+- [fa457940]	Fix PowerOnMultiVMTask() to return per-VM tasks
+- [e67b1b11]	check if VM host InMaintenanceMode
+
+### 📃 Documentation
+
+- [82e447d9]	Update govc USAGE
+
+### 🧹 Chore
+
+- [05adcc97]	Remove -i parameter in go install
+- [18ea9cc5]	Update PR and release docs
+
+### ⚠️ BREAKING
+
+Add task manager and collector [397c8aad]:
+`event.Manager` does not embed `object.Common` anymore. Only the methods
+`Client()` and `Reference()` are implemented.
+`event.NewHistoryCollector()` is now unexported (to
+`newHistoryCollector()`) as it was merely a helper and to comply with
+the task manager implementation.
+
+### 📖 Commits
+
+- [78f30265]	update contributors
+- [68b54585]	Refactor EAM code to use BaseAgencyConfigInfo interface instead of impl
+- [d5ded1f0]	Implement mo.Reference interface in task+event managers
+- [038bc3d8]	Update vslm types to vCenter 7.0U3 (build 18700403)
+- [ae8161df]	Update pbm types to vCenter 7.0U3 (build 18700403)
+- [f2d167de]	Update eam types to vCenter 7.0U3 (build 18700403)
+- [f1c7b54d]	Update vim25 types to vCenter 7.0U3 (build 18700403)
+- [445fd552]	Update gen.sh to vCenter 7.0U3 (build 18700403)
+- [961f0ae6]	example: find VirtualMachine's Cluster
+- [57c4be58]	fix: multi-value query params for vAPI methods
+- [f7e8ed73]	Set custom HTTP headers for VAPI calls
+- [05adcc97]	chore: Remove -i parameter in go install
+- [82e447d9]	docs: Update govc USAGE
+- [b5426eba]	govc: Add feature to read file contents for ExtraConfig
+- [815e2d8f]	fix: avoid vNIC mapping in guest.TransferURL if URL.Host is an IP
+- [81a7dbe9]	fix: avoid use of vNIC IP in guest.TransferURL if there are multiple
+- [18ea9cc5]	chore: Update PR and release docs
+- [a66d23ed]	build(deps): bump nokogiri from 1.11.4 to 1.12.5 in /gen
+- [a853b300]	Fix: Nil-Pointer Exception in ResourceAllocation
+- [fa457940]	vcsim: Fix PowerOnMultiVMTask() to return per-VM tasks
+- [85956c77]	govc: fix tasks to activate option dump/json/xml
+- [61afce31]	fix: Update CnsQueryAsync API request parameters to handle nil for QuerySelection
+- [397c8aad]	feat: Add task manager and collector
+- [a601a8a8]	fix: generate negative device key
+- [f4ef4d93]	govc: Fix incorrect MoRef parsing
+- [e67b1b11]	vcsim: check if VM host InMaintenanceMode
+- [d695f4cf]	govc: Handle powered on VMs in vm.destroy
+- [a55fa7dc]	feat: Add optional WaitOptions to WaitForUpdates
+- [94f63681]	govc: add library.clone '-e' and '-m' options
+- [2fcae372]	govc: add vsan info and change commands
+
 <a name="v0.26.1"></a>
 ## [Release v0.26.1](https://github.com/vmware/govmomi/compare/v0.26.0...v0.26.1)
 
