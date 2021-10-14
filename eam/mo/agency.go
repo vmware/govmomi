@@ -27,7 +27,7 @@ type Agency struct {
 	EamObject `yaml:",inline"`
 
 	Agent      []vim.ManagedObjectReference `json:"agent,omitempty"`
-	Config     types.AgencyConfigInfo       `json:"config"`
+	Config     types.BaseAgencyConfigInfo   `json:"config"`
 	Runtime    types.EamObjectRuntimeInfo   `json:"runtime"`
 	SolutionId string                       `json:"solutionId,omitempty"`
 }

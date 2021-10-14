@@ -47,10 +47,10 @@ func getAgentVMPlacementOptions(
 	ctx *simulator.Context,
 	reg *simulator.Registry,
 	r *rand.Rand, i int,
-	agencyConfig types.AgencyConfigInfo) (AgentVMPlacementOptions, error) {
+	baseAgencyConfig types.BaseAgencyConfigInfo) (AgentVMPlacementOptions, error) {
 
 	var opts AgentVMPlacementOptions
-
+	agencyConfig := baseAgencyConfig.GetAgencyConfigInfo()
 	if l := len(agencyConfig.AgentVmDatastore); l == 0 {
 		return opts, agentVmDatastoreEmptyErr
 	} else if l == len(agencyConfig.AgentConfig) {

@@ -43,9 +43,10 @@ type Agency struct {
 // EsxAgentManager object.
 func NewAgency(
 	ctx *simulator.Context,
-	agencyConfig types.AgencyConfigInfo,
+	baseAgencyConfig types.BaseAgencyConfigInfo,
 	initialGoalState string) (*Agency, vim.BaseMethodFault) {
 
+	agencyConfig := baseAgencyConfig.GetAgencyConfigInfo()
 	if agencyConfig.AgentName == "" {
 		agencyConfig.AgentName = agencyConfig.AgencyName
 	}
@@ -197,7 +198,7 @@ func (m *Agency) QueryConfig(
 
 	return &methods.QueryConfigBody{
 		Res: &types.QueryConfigResponse{
-			Returnval: &m.Config,
+			Returnval: m.Config,
 		},
 	}
 }
@@ -237,7 +238,7 @@ func (m *Agency) Update(
 	ctx *simulator.Context,
 	req *types.Update) soap.HasFault {
 
-	m.Config = *req.Config.GetAgencyConfigInfo()
+	m.Config = req.Config
 
 	return &methods.UpdateBody{
 		Res: &types.UpdateResponse{},

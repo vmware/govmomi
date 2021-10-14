@@ -76,7 +76,7 @@ func TestAgency(t *testing.T) {
 	)
 	var (
 		agency       object.Agency
-		agencyConfig = types.AgencyConfigInfo{
+		agencyConfig = &types.AgencyConfigInfo{
 			AgencyName: t.Name(),
 			AgentName:  t.Name(),
 			AgentConfig: []types.AgentConfigInfo{
@@ -135,10 +135,11 @@ func TestAgency(t *testing.T) {
 	testConfig := func(t *testing.T) {
 		t.Parallel()
 
-		config, err := agency.Config(client.ctx)
+		baseConfig, err := agency.Config(client.ctx)
 		if err != nil {
 			t.Fatal(err)
 		}
+		config := baseConfig.GetAgencyConfigInfo()
 		if config.AgencyName != agencyConfig.AgencyName {
 			t.Fatalf(
 				"unexpected agency name: exp=%v, act=%v",
