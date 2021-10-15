@@ -34,6 +34,13 @@ type Datastore struct {
 	mo.Datastore
 }
 
+func (ds *Datastore) eventArgument() *types.DatastoreEventArgument {
+	return &types.DatastoreEventArgument{
+		Datastore:           ds.Self,
+		EntityEventArgument: types.EntityEventArgument{Name: ds.Name},
+	}
+}
+
 func (ds *Datastore) model(m *Model) error {
 	info := ds.Info.GetDatastoreInfo()
 	u, _ := url.Parse(info.Url)
