@@ -126,3 +126,20 @@ func (v ContainerView) Find(ctx context.Context, kind []string, filter property.
 
 	return filter.MatchObjectContent(content), nil
 }
+
+// FindAny returns object references for entities of type kind, matching any property the given filter.
+func (v ContainerView) FindAny(ctx context.Context, kind []string, filter property.Filter) ([]types.ManagedObjectReference, error) {
+	if len(filter) == 0 {
+		// Ensure we have at least 1 filter to avoid retrieving all properties.
+		filter = property.Filter{"name": "*"}
+	}
+
+	var content []types.ObjectContent
+
+	err := v.Retrieve(ctx, kind, filter.Keys(), &content)
+	if err != nil {
+		return nil, err
+	}
+
+	return filter.MatchAnyObjectContent(content), nil
+}
