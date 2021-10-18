@@ -18,7 +18,6 @@ on:
   push:
     tags:
       - "v*" # Push events to matching v*, i.e. v0.25.0, v1.15.1
-  workflow_dispatch:
 
 jobs:
   release:
@@ -44,6 +43,15 @@ jobs:
           # generate CHANGELOG for this Github release tag only
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md $(basename "${{ github.ref }}" )
 
+      - name: Archive CHANGELOG
+        uses: actions/upload-artifact@v2
+        continue-on-error: true
+        with:
+          name: CHANGELOG
+          path: |
+            ./RELEASE_CHANGELOG.md
+          retention-days: 14
+
       - name: Create Release and build/push Artifacts
         uses: goreleaser/goreleaser-action@v2
         env:
@@ -56,7 +64,7 @@ jobs:
     needs: release
     name: Create CHANGELOG.md PR
     runs-on: ubuntu-latest
-    continue-on-error: true # errors caused by this job won't stop workflow
+    continue-on-error: true
 
     steps:
       - name: Checkout
@@ -74,15 +82,23 @@ jobs:
         run: |
           # generate CHANGELOG for this Github release tag only
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md -t .chglog/CHANGELOG.tpl.md v0.1.0..$(basename "${{ github.ref }}" )
-          git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git config user.name "${{ github.actor }}"
-          git add CHANGELOG.md
-          git commit -m "Update CHANGELOG for $(basename ${{ github.ref }})"
 
       - name: Create Pull Request
+        id: cpr
         uses: peter-evans/create-pull-request@v3
         with:
+          commit-message: "Update CHANGELOG for ${{ github.ref }}"
           delete-branch: true
-          title: "Update CHANGELOG"
+          title: "Update CHANGELOG for ${{ github.ref }}"
+          signoff: true
+          reviewers: embano1,dougm
+          draft: false
           body: |
-            Update CHANGELOG.md for new release
+            Update CHANGELOG.md for new release.
+
+            **Note:** Due to a [limitation](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#triggering-further-workflow-runs) in Github Actions please **close and immediately reopen** this PR to trigger the required workflow checks before merging.
+
+      - name: Pull Request Information
+        run: |
+          echo "Pull Request Number - ${{ steps.cpr.outputs.pull-request-number }}"
+          echo "Pull Request URL - ${{ steps.cpr.outputs.pull-request-url }}"
