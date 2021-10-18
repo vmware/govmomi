@@ -882,6 +882,10 @@ load test_helper
   run govc vm.migrate -host $host1 "$vm"
   assert_success
 
+  run govc events -type VmMigratedEvent "vm/$vm"
+  assert_success
+  assert_matches "Migration of virtual machine"
+
   wait $pid
 
   # (re-)assert VM is now on H1

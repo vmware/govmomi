@@ -188,6 +188,7 @@ func (vm *VirtualMachine) event() types.VmEvent {
 			Datacenter:      datacenterEventArgument(host),
 			ComputeResource: host.eventArgumentParent(),
 			Host:            host.eventArgument(),
+			Ds:              Map.Get(vm.Datastore[0]).(*Datastore).eventArgument(),
 			Vm: &types.VmEventArgument{
 				EntityEventArgument: types.EntityEventArgument{Name: vm.Name},
 				Vm:                  vm.Self,
@@ -1872,6 +1873,13 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 				List: []types.ManagedObjectReference{vm.Self},
 			})
 		}
+
+		ctx.postEvent(&types.VmMigratedEvent{
+			VmEvent:          vm.event(),
+			SourceHost:       *ctx.Map.Get(*vm.Runtime.Host).(*HostSystem).eventArgument(),
+			SourceDatacenter: datacenterEventArgument(vm),
+			SourceDatastore:  ctx.Map.Get(vm.Datastore[0]).(*Datastore).eventArgument(),
+		})
 
 		Map.Update(vm, changes)
 

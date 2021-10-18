@@ -93,7 +93,7 @@ var EventInfo = []types.EventDescriptionEventDetail{
 		Key:         "VmMigratedEvent",
 		Description: "VM migrated",
 		Category:    "info",
-		FullFormat:  "Migration of virtual machine {{.Vm.Name}} from {{.SourceHost.Name}, {{.SourceDatastore.Name}} to {{.Host.Name}, {{.Ds.Name}} completed",
+		FullFormat:  "Migration of virtual machine {{.Vm.Name}} from {{.SourceHost.Name}}, {{.SourceDatastore.Name}} to {{.Host.Name}}, {{.Ds.Name}} completed",
 	},
 	{
 		Key:         "VmBeingMigratedEvent",
