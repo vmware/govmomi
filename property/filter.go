@@ -130,12 +130,36 @@ func (f Filter) MatchPropertyList(props []types.DynamicProperty) bool {
 	return len(f) == len(props) // false if a property such as VM "guest" is unset
 }
 
-// MatchObjectContent returns a list of ObjectContent.Obj where the ObjectContent.PropSet matches the Filter.
+// MatchObjectContent returns a list of ObjectContent.Obj where the ObjectContent.PropSet matches all properties the Filter.
 func (f Filter) MatchObjectContent(objects []types.ObjectContent) []types.ManagedObjectReference {
 	var refs []types.ManagedObjectReference
 
 	for _, o := range objects {
 		if f.MatchPropertyList(o.PropSet) {
+			refs = append(refs, o.Obj)
+		}
+	}
+
+	return refs
+}
+
+// MatchAnyPropertyList returns true if any given props match the Filter.
+func (f Filter) MatchAnyPropertyList(props []types.DynamicProperty) bool {
+	for _, p := range props {
+		if f.MatchProperty(p) {
+			return true
+		}
+	}
+
+	return false
+}
+
+// MatchAnyObjectContent returns a list of ObjectContent.Obj where the ObjectContent.PropSet matches any property in the Filter.
+func (f Filter) MatchAnyObjectContent(objects []types.ObjectContent) []types.ManagedObjectReference {
+	var refs []types.ManagedObjectReference
+
+	for _, o := range objects {
+		if f.MatchAnyPropertyList(o.PropSet) {
 			refs = append(refs, o.Obj)
 		}
 	}

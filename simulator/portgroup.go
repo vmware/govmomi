@@ -27,6 +27,12 @@ type DistributedVirtualPortgroup struct {
 	mo.DistributedVirtualPortgroup
 }
 
+func (s *DistributedVirtualPortgroup) RenameTask(ctx *Context, req *types.Rename_Task) soap.HasFault {
+	canDup := s.DistributedVirtualPortgroup.Config.BackingType == string(types.DistributedVirtualPortgroupBackingTypeNsx)
+
+	return RenameTask(ctx, s, req, canDup)
+}
+
 func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(ctx *Context, req *types.ReconfigureDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "reconfigureDvPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		s.Config.DefaultPortConfig = req.Spec.DefaultPortConfig

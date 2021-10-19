@@ -17,8 +17,11 @@ limitations under the License.
 package simulator
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
+
+	"github.com/google/uuid"
 
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -46,7 +49,15 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 
 			// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
 			// Allow duplicate names using this prefix so we can reproduce and test this condition.
-			if !strings.HasPrefix(pg.Name, "NSX-") {
+			if strings.HasPrefix(pg.Name, "NSX-") || spec.BackingType == string(types.DistributedVirtualPortgroupBackingTypeNsx) {
+				if spec.LogicalSwitchUuid == "" {
+					spec.LogicalSwitchUuid = uuid.New().String()
+				}
+				if spec.SegmentId == "" {
+					spec.SegmentId = fmt.Sprintf("/infra/segments/vnet_%s", uuid.New().String())
+				}
+
+			} else {
 				if obj := Map.FindByName(pg.Name, f.ChildEntity); obj != nil {
 					return nil, &types.DuplicateName{
 						Name:   pg.Name,
@@ -74,6 +85,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 				AutoExpand:                   spec.AutoExpand,
 				VmVnicNetworkResourcePoolKey: spec.VmVnicNetworkResourcePoolKey,
 				LogicalSwitchUuid:            spec.LogicalSwitchUuid,
+				SegmentId:                    spec.SegmentId,
 				BackingType:                  spec.BackingType,
 			}
 

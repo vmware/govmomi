@@ -46,6 +46,10 @@ load test_helper
   run govc dvs.portgroup.add -dvs DVS0 -type ephemeral NSX-dvpg
   assert_success
 
+  uuid=$(govc object.collect -s network/NSX-dvpg config.logicalSwitchUuid)
+  sid=$(govc object.collect -s network/NSX-dvpg config.segmentId)
+  moid=$(govc ls -i network/NSX-dvpg)
+
   run govc dvs.portgroup.add -dvs DVS1 -type ephemeral NSX-dvpg
   assert_success
 
@@ -54,6 +58,25 @@ load test_helper
 
   run govc vm.network.add -vm $vm -net DVS0/NSX-dvpg
   assert_success # switch_name/portgroup_name is unique
+
+  # Add a 2nd PG to the same switch, with the same name
+  run govc dvs.portgroup.add -dvs DVS0 -type ephemeral NSX-dvpg
+  assert_success
+
+  run govc vm.network.add -vm $vm -net NSX-dvpg
+  assert_failure # resolves to multiple networks
+
+  run govc vm.network.add -vm $vm -net DVS0/NSX-dvpg
+  assert_failure # switch_name/portgroup_name not is unique
+
+  run govc vm.network.add -vm $vm -net "$uuid"
+  assert_success # switch uuid is unique
+
+  run govc vm.network.add -vm $vm -net "$sid"
+  assert_success # segment id is unique
+
+  run govc vm.network.add -vm $vm -net "$moid"
+  assert_success # moid is unique
 }
 
 @test "network change backing" {
