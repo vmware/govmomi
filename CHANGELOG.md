@@ -1,4 +1,361 @@
 
+<a name="v0.27.1"></a>
+## [Release v0.27.1](https://github.com/vmware/govmomi/compare/v0.24.2...v0.27.1)
+
+> Release Date: 2021-10-20
+
+### 🐞 Fix
+
+- [57c4be58]	multi-value query params for vAPI methods
+- [815e2d8f]	avoid vNIC mapping in guest.TransferURL if URL.Host is an IP
+- [81a7dbe9]	avoid use of vNIC IP in guest.TransferURL if there are multiple
+- [61afce31]	Update CnsQueryAsync API request parameters to handle nil for QuerySelection
+- [a601a8a8]	generate negative device key
+- [a366e352]	Regenerated interface and type to include BaseAgencyConfigInfo. Closes: [#2545](https://github.com/vmware/govmomi/issues/2545).
+- [d66ef551]	explicitly import eam/simulator in test
+- [70b92d6d]	Isolate SSO govc tests
+
+### 💡 Examples
+
+- [0c045a63]	Add Property Wait example
+- [81b1de17]	add toolbox Client.Run
+- [38da87ff]	add NetworkReference.EthernetCardBackingInfo
+
+### 💫 `govc` (CLI)
+
+- [b5426eba]	Add feature to read file contents for ExtraConfig
+- [85956c77]	fix tasks to activate option dump/json/xml
+- [f4ef4d93]	Fix incorrect MoRef parsing
+- [d695f4cf]	Handle powered on VMs in vm.destroy
+- [94f63681]	add library.clone '-e' and '-m' options
+- [012f5348]	support updating items in library.update command
+- [2fcae372]	add vsan info and change commands
+- [5743d5b6]	Allow cluster.change to set ClusterDrsConfigInfo.vmotionRate
+- [03210c91]	Add object.collect type flag alias help
+- [e37e515b]	fix default guest.run path for unsupported Windows guests
+- [0e7012d0]	Add support for getting the VC proxy and no-proxy configuration ([#2435](https://github.com/vmware/govmomi/issues/2435))
+- [6afb8ff9]	Change 'Maintenance Mode' printing in host.info
+- [1ac314c3]	add vm.customize -dns-suffix flag
+- [60e0e895]	update test images URL
+- [cdf3ace6]	log invalid NetworkMapping.Name with import.ova command
+- [f8b3d8a8]	revert pretty print pruning optimization
+- [35481467]	add library.update command
+- [749c2239]	add session.ls -S flag
+- [93245c1e]	add tree command
+- [790f9ce6]	include sub task fault messages on failure
+- [d2a353ba]	remove device.boot -firmware default
+- [de6032e0]	add '-trace' and '-verbose' flags
+- [63bb5c1e]	metric command enhancements and fixes
+- [7844a8c2]	fix vm.migrate search index flags
+- [5dacf627]	fix cluster.usage Free field
+- [f71bcf25]	fix session curl when given a URL query
+- [c954c2a5]	validate license.remove
+- [3b25c3f1]	validate required library.clone NAME arg
+- [344b7a30]	note 'disk.ls -R' in volume.rm help
+- [8942055a]	add device.info examples to get disk UUID and vmdk
+- [1b0af949]	fix vm.markasvm examples
+- [add8be5a]	fix incorrect DeviceID value in device.pci.add
+- [1f4f5640]	add IPv6 support to vm.customize
+
+### 💫 `vcsim` (Simulator)
+
+- [fa457940]	Fix PowerOnMultiVMTask() to return per-VM tasks
+- [e67b1b11]	check if VM host InMaintenanceMode
+- [ce6ed634]	avoid race when fetching object Locker
+- [31821de3]	use 'domain-c' prefix for cluster moids
+- [3625e6dd]	propagate CustomizeVM MacAddress to Virtual NIC
+- [389c0382]	Take the host parameter into account while cloning a VM on a cluster
+- [6fba1da7]	Implement VSLM ExtendDisk_Task
+- [dff7f6bb]	fix panic in QueryPerfCounter method
+- [df9dfde1]	set VirtualMachine ChangeTrackingSupported property ([#2468](https://github.com/vmware/govmomi/issues/2468))
+- [0c0ed98a]	fix race in CloneVM_Task
+- [d01d0fa7]	add simulator.RunContainer method
+- [8ab0c99a]	untie datastore capacity from local fs
+- [d31941c8]	Modify Usage of README. (based on v0.25.0)
+- [4fea687c]	include all namespaces in /about info
+- [bd3467d4]	avoid edit device panic when DeviceInfo is nil
+- [35a42af5]	add guest operations process support
+- [27d8d2e4]	put verbose logging behind '-trace' flag
+- [0ef4ae22]	add moid value mapping mappings
+- [082f9927]	add vsan simulator
+- [25970530]	fix Task.Info.Entity in RevertToSnapshot_Task
+- [f0a045ac]	set VirtualMachine.Config.CreateDate property
+- [e51eb2b9]	support EventFilterSpec.Time
+- [8e45fa4a]	emit CustomizationSucceeded event from CustomizeVM
+- [c000bd6e]	add DistributedVirtualSwitchManager
+- [bcd5fa87]	set VirtualDisk backing UUID
+- [ccdcbe89]	move product suffix in ServiceContent.About
+- [393e7330]	use linked list for EventHistoryCollector
+- [9c4dc1a1]	escape datastore name
+- [9c2fe70f]	record/replay EnvironmentBrowser.QueryConfigOption
+- [5fd7e264]	fix EventHistoryCollector fixes
+- [0b755a59]	switch bats tests from esx to vcsim env
+- [3f1caf82]	fixes for PowerCLI Get-VirtualNetwork
+
+### 📃 Documentation
+
+- [82e447d9]	Update govc USAGE
+- [75eee8e4]	update govc/USAGE and CONTRIBUTORS
+- [1f795d21]	Add blog to vcsim README
+- [2719c229]	Document linker and GOFLAGS for build vars
+- [e18b601f]	update for 0.25 release
+
+### 🧹 Chore
+
+- [05adcc97]	Remove -i parameter in go install
+- [18ea9cc5]	Update PR and release docs
+- [ddc2b47a]	Include commit details in BREAKING section
+- [b4e1f965]	Fix CONTRIB link in greeting
+- [6f2597be]	Update CHANGELOG implementation
+- [d3944e17]	Add and reorder commits in CHANGELOG
+- [a796d3fc]	Add make help target
+- [8bc8fd28]	Add issue and PR templates
+- [60e33916]	Document commit prefixes
+- [cac1d8d7]	Add issue greeting
+- [0f1c3f89]	Add WIP Action
+- [921ad37a]	Remove dep files
+- [1d4ce94a]	Clean up documentation
+- [991278b9]	Remove unused release script
+- [16d8add5]	Automate CHANGELOG
+
+### ⚠️ BREAKING
+
+Add task manager and collector [397c8aad]:
+`event.Manager` does not embed `object.Common` anymore. Only the methods
+`Client()` and `Reference()` are implemented.
+`event.NewHistoryCollector()` is now unexported (to
+`newHistoryCollector()`) as it was merely a helper and to comply with
+the task manager implementation.
+
+### 📖 Commits
+
+- [6209be5b]	Support finding Portgroups by ID in Finder.Network
+- [78f30265]	update contributors
+- [68b54585]	Refactor EAM code to use BaseAgencyConfigInfo interface instead of impl
+- [d5ded1f0]	Implement mo.Reference interface in task+event managers
+- [038bc3d8]	Update vslm types to vCenter 7.0U3 (build 18700403)
+- [ae8161df]	Update pbm types to vCenter 7.0U3 (build 18700403)
+- [f2d167de]	Update eam types to vCenter 7.0U3 (build 18700403)
+- [f1c7b54d]	Update vim25 types to vCenter 7.0U3 (build 18700403)
+- [445fd552]	Update gen.sh to vCenter 7.0U3 (build 18700403)
+- [961f0ae6]	example: find VirtualMachine's Cluster
+- [57c4be58]	fix: multi-value query params for vAPI methods
+- [f7e8ed73]	Set custom HTTP headers for VAPI calls
+- [05adcc97]	chore: Remove -i parameter in go install
+- [82e447d9]	docs: Update govc USAGE
+- [b5426eba]	govc: Add feature to read file contents for ExtraConfig
+- [815e2d8f]	fix: avoid vNIC mapping in guest.TransferURL if URL.Host is an IP
+- [81a7dbe9]	fix: avoid use of vNIC IP in guest.TransferURL if there are multiple
+- [18ea9cc5]	chore: Update PR and release docs
+- [a66d23ed]	build(deps): bump nokogiri from 1.11.4 to 1.12.5 in /gen
+- [a853b300]	Fix: Nil-Pointer Exception in ResourceAllocation
+- [fa457940]	vcsim: Fix PowerOnMultiVMTask() to return per-VM tasks
+- [85956c77]	govc: fix tasks to activate option dump/json/xml
+- [61afce31]	fix: Update CnsQueryAsync API request parameters to handle nil for QuerySelection
+- [397c8aad]	feat: Add task manager and collector
+- [a601a8a8]	fix: generate negative device key
+- [f4ef4d93]	govc: Fix incorrect MoRef parsing
+- [e67b1b11]	vcsim: check if VM host InMaintenanceMode
+- [d695f4cf]	govc: Handle powered on VMs in vm.destroy
+- [a55fa7dc]	feat: Add optional WaitOptions to WaitForUpdates
+- [a366e352]	fix: Regenerated interface and type to include BaseAgencyConfigInfo. Closes: [#2545](https://github.com/vmware/govmomi/issues/2545).
+- [94f63681]	govc: add library.clone '-e' and '-m' options
+- [655f8e5c]	testing for lab
+- [ce6ed634]	vcsim: avoid race when fetching object Locker
+- [31821de3]	vcsim: use 'domain-c' prefix for cluster moids
+- [0aa1de31]	make processing of mac addresses case insensitive ([#2510](https://github.com/vmware/govmomi/issues/2510))
+- [012f5348]	govc: support updating items in library.update command
+- [2fcae372]	govc: add vsan info and change commands
+- [0c045a63]	examples: Add Property Wait example
+- [f30cefc3]	Add Reauth flag to skip loading cached sessions
+- [3625e6dd]	vcsim: propagate CustomizeVM MacAddress to Virtual NIC
+- [5743d5b6]	govc: Allow cluster.change to set ClusterDrsConfigInfo.vmotionRate
+- [389c0382]	vcsim: Take the host parameter into account while cloning a VM on a cluster
+- [7bf48333]	Added CNS querySnapshots binding, simulator testcases and client testcases
+- [017ab414]	Added CreateSnapshots and DeleteSnapshots methods in cns simulator as well as their test cases
+- [03210c91]	govc: Add object.collect type flag alias help
+- [d66ef551]	fix: explicitly import eam/simulator in test
+- [ddc2b47a]	chore: Include commit details in BREAKING section
+- [6fba1da7]	vcsim: Implement VSLM ExtendDisk_Task
+- [75eee8e4]	docs: update govc/USAGE and CONTRIBUTORS
+- [dff7f6bb]	vcsim: fix panic in QueryPerfCounter method
+- [b4e1f965]	chore: Fix CONTRIB link in greeting
+- [df9dfde1]	vcsim: set VirtualMachine ChangeTrackingSupported property ([#2468](https://github.com/vmware/govmomi/issues/2468))
+- [8cbe64c5]	Fix: Protect FileProvider.files to avoid concurrent modification
+- [6f2597be]	chore: Update CHANGELOG implementation
+- [0c0ed98a]	vcsim: fix race in CloneVM_Task
+- [81b1de17]	examples: add toolbox Client.Run
+- [d01d0fa7]	vcsim: add simulator.RunContainer method
+- [9223b5ae]	Add toolbox.NewClient method
+- [8ab0c99a]	vcsim: untie datastore capacity from local fs
+- [e37e515b]	govc: fix default guest.run path for unsupported Windows guests
+- [d3944e17]	chore: Add and reorder commits in CHANGELOG
+- [83e29c69]	Update GitHub Test Action to use Makefile
+- [a7f2c47e]	Update vslm types vC build 17986435 (7.0U2HP4)
+- [067374fd]	Update sms types vC build 17986435 (7.0U2HP4)
+- [d9f507f0]	Update pbm types vC build 17986435 (7.0U2HP4)
+- [c89f8dd5]	Update eam types vC build 17986435 (7.0U2HP4)
+- [b72432ef]	Update vim25 types vC build 17986435 (7.0U2HP4)
+- [e53716dd]	Update gen.sh to vC build 17986435 (7.0U2HP4)
+- [1f795d21]	docs: Add blog to vcsim README
+- [338f5529]	Ran "make fix" to correct lint issues
+- [23d77ba4]	Add support for golangci-lint
+- [d31941c8]	vcsim: Modify Usage of README. (based on v0.25.0)
+- [7046a0d3]	Support pre-auth handlers in vC Sim
+- [2e8860d1]	Add CNS Snapshot APIs in govmomi
+- [13d4d376]	Remove vendor
+- [a796d3fc]	chore: Add make help target
+- [ef824a20]	Fix QueryAsyncVolume API test to be invoked only for vSphere 7.0.3
+- [c1900234]	Fix data race in simulator.container.id
+- [3212351e]	install bin doc: permalink to latest version
+- [7d779833]	Setup CodeQL Analysis
+- [566250ff]	build(deps): bump nokogiri from 1.11.1 to 1.11.4 in /gen
+- [f814a9ca]	ESX Agent Manager (EAM) Client and Simulator
+- [0e7012d0]	govc: Add support for getting the VC proxy and no-proxy configuration ([#2435](https://github.com/vmware/govmomi/issues/2435))
+- [8bc8fd28]	chore: Add issue and PR templates
+- [4fea687c]	vcsim: include all namespaces in /about info
+- [bd3467d4]	vcsim: avoid edit device panic when DeviceInfo is nil
+- [70b92d6d]	fix: Isolate SSO govc tests
+- [80c9053e]	Correcting broken Kubernetes vSphere Cloud Provider links
+- [60e33916]	chore: Document commit prefixes
+- [57a141f3]	Update govc test docs with act
+- [ff578914]	Use "vcsim uuidgen" for bats tests
+- [61e12ddb]	Only greet unassociated users
+- [e39dfdc8]	Add chore section to CHANGELOG
+- [6afb8ff9]	govc: Change 'Maintenance Mode' printing in host.info
+- [cac1d8d7]	chore: Add issue greeting
+- [0f1c3f89]	chore: Add WIP Action
+- [921ad37a]	chore: Remove dep files
+- [2719c229]	docs: Document linker and GOFLAGS for build vars
+- [f3645a96]	Clarify SetRootCAs behavior
+- [c368e57f]	toolbox: add hgfs freebsd stub
+- [35a42af5]	vcsim: add guest operations process support
+- [64e55d81]	Set RoundTripper in ssoadmin.NewClient
+- [1d4ce94a]	chore: Clean up documentation
+- [991278b9]	chore: Remove unused release script
+- [16d8add5]	chore: Automate CHANGELOG
+- [e8805c92]	Add NotFoundFault in cns types
+- [8576fe27]	Add queryAsyncVolume in simulator
+- [4b9e0813]	Simplify binary download instructions
+- [3062dda9]	Remove Travis CI
+- [0be5632f]	adding rancher to projects and reorganizing in alpha order
+- [4a63a28c]	Add bindings for CnsQueryAsyncVolume API
+- [a8c80b93]	Update READMEs with artifacts and Docker images
+- [26c9690c]	Fix VM Guest test and vet warnings
+- [a32cd0b3]	Add RELEASE documentation
+- [cc660b0e]	Increase govc tests timeout
+- [d7bfaf4f]	toolbox: move process management to its own package
+- [e86da96e]	Exclude go files in release tarball
+- [6fe8d60a]	Fix folder write for govc container
+- [e18b601f]	docs: update for 0.25 release
+- [1ac314c3]	govc: add vm.customize -dns-suffix flag
+- [22d911f6]	Add Cron Docker Login Action
+- [60e0e895]	govc: update test images URL
+- [3385b3e0]	Add action to automate release
+- [cdf3ace6]	govc: log invalid NetworkMapping.Name with import.ova command
+- [27d8d2e4]	vcsim: put verbose logging behind '-trace' flag
+- [f8b3d8a8]	govc: revert pretty print pruning optimization
+- [0ef4ae22]	vcsim: add moid value mapping mappings
+- [df08d4b2]	First step towards release automation
+- [f9b79a4f]	export simulator.task.Wait()
+- [917c4ec8]	Ensure lock hand-off to simulator.Task goroutine
+- [b45b228f]	Simulator Task Delay
+- [4b59b652]	Make Simulator Tasks Async
+- [bc52c793]	Associate every registry lock with a Context.
+- [054971ee]	Wait until VM creation completes before adding to folder
+- [35481467]	govc: add library.update command
+- [7403b470]	Fix race in simulator's PropertyCollector
+- [aadb2082]	Add action to block WIP PRs
+- [749c2239]	govc: add session.ls -S flag
+- [bc297330]	[3ad0f415] Update Dockerfiles and .goreleaser.yml
+- [082f9927]	vcsim: add vsan simulator
+- [8c38d56d]	Add a stretched cluster conversion command.
+- [408c531a]	gofmt
+- [e8a6b126]	Update govc/flags/output.go
+- [bf54a7c4]	Add more badges
+- [93245c1e]	govc: add tree command
+- [790f9ce6]	govc: include sub task fault messages on failure
+- [07e6e923]	Use Github Actions Status Badges
+- [d2a353ba]	govc: remove device.boot -firmware default
+- [4ed615f6]	Add chainable RoundTripper support to endpoint clients
+- [bab95d26]	Add the vSAN stretched cluster reference.
+- [6ff33db7]	Fix events example
+- [de6032e0]	govc: add '-trace' and '-verbose' flags
+- [7aae8dfb]	Add support for calling vCenter for VLSM ExtendDisk and InflateDisk
+- [7a276bf6]	Add client test file for vslm package to validate register disk and cns create volume
+- [dc29aa29]	Fix performance.Manager.SampleByName truncation
+- [18b53fd2]	Added UpdateServiceMessage to Session Manager
+- [63bb5c1e]	govc: metric command enhancements and fixes
+- [7844a8c2]	govc: fix vm.migrate search index flags
+- [7ab111bd]	Drop clusterDistribution from vSAN 7.0 update and create spec elements
+- [2c57a8a3]	Use Github Actions
+- [52631496]	Marshal soapFaultError as JSON
+- [f9e323a6]	fix tab indentation
+- [ae129ba0]	add tests and implement HA Ready Condition
+- [f34b3fa2]	implement vSphere HA additional delay to VM HA overrides in govc
+- [25970530]	vcsim: fix Task.Info.Entity in RevertToSnapshot_Task
+- [5dacf627]	govc: fix cluster.usage Free field
+- [0d155a61]	Handling invalid reader size
+- [b70542a5]	Using progress reader in WriteFile
+- [b7f9e034]	use correct enum for vm restart priority
+- [d3d49a36]	Add support for snapshot size calculations
+- [61bfa072]	Use a dash to indicate empty address
+- [f0a045ac]	vcsim: set VirtualMachine.Config.CreateDate property
+- [4d9a9000]	vim25: fix race in TemporaryNetworkError retry func
+- [2f14e4b2]	ovf: add Config and ExtraConfig to VirtualHardwareSection
+- [50328780]	Add vSAN 7.0U1 release constant
+- [886573de]	Update .goreleaser.yml
+- [1cdb3164]	Change the address type to automatic
+- [667a3791]	Remove duplicate cns bindings from vsan directory
+- [f71bcf25]	govc: fix session curl when given a URL query
+- [d92f41de]	Update volume ACL spec to add delete field
+- [c954c2a5]	govc: validate license.remove
+- [2a4f8c8a]	Update ConfigureVolumeACLs bindings in cns types
+- [3b25c3f1]	govc: validate required library.clone NAME arg
+- [344b7a30]	govc: note 'disk.ls -R' in volume.rm help
+- [8942055a]	govc: add device.info examples to get disk UUID and vmdk
+- [1b0af949]	govc: fix vm.markasvm examples
+- [543e52ea]	govc-env --save default
+- [0a5f2a99]	Little fix for "govc-env --save without config name"
+- [4a7a0b45]	gen: require nokogiri 1.11.0 or higher
+- [add8be5a]	govc: fix incorrect DeviceID value in device.pci.add
+- [e51eb2b9]	vcsim: support EventFilterSpec.Time
+- [1f4f5640]	govc: add IPv6 support to vm.customize
+- [8e45fa4a]	vcsim: emit CustomizationSucceeded event from CustomizeVM
+- [c000bd6e]	vcsim: add DistributedVirtualSwitchManager
+- [bcd5fa87]	vcsim: set VirtualDisk backing UUID
+- [ccdcbe89]	vcsim: move product suffix in ServiceContent.About
+- [393e7330]	vcsim: use linked list for EventHistoryCollector
+- [9c4dc1a1]	vcsim: escape datastore name
+- [9c2fe70f]	vcsim: record/replay EnvironmentBrowser.QueryConfigOption
+- [5fd7e264]	vcsim: fix EventHistoryCollector fixes
+- [40a2cf0b]	Skip tests that require docker on TravisCI
+- [00ee2911]	toolbox: skip tests that require Linux
+- [0b755a59]	vcsim: switch bats tests from esx to vcsim env
+- [c6d5264a]	Updated projects to include VMware Event Broker Appliance
+- [ae44a547]	ExampleCollector_Retrieve: Add missing err return
+- [38da87ff]	examples: add NetworkReference.EthernetCardBackingInfo
+- [3f1caf82]	vcsim: fixes for PowerCLI Get-VirtualNetwork
+- [041a98b8]	Fix DvsNetworkRuleQualifier interface
+- [44e05fe4]	SHA-1 deprecated in 2011, sha256sum for releases
+
+<a name="v0.24.2"></a>
+## [Release v0.24.2](https://github.com/vmware/govmomi/compare/v0.27.0...v0.24.2)
+
+> Release Date: 2021-10-14
+
+### 🐞 Fix
+
+- [b18f06b5]	avoid vNIC mapping in guest.TransferURL if URL.Host is an IP
+- [5a2a8aba]	avoid use of vNIC IP in guest.TransferURL if there are multiple
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [b18f06b5]	fix: avoid vNIC mapping in guest.TransferURL if URL.Host is an IP
+- [5a2a8aba]	fix: avoid use of vNIC IP in guest.TransferURL if there are multiple
+
 <a name="v0.27.0"></a>
 ## [Release v0.27.0](https://github.com/vmware/govmomi/compare/v0.26.1...v0.27.0)
 
