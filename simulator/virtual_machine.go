@@ -1445,10 +1445,6 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		}
 	}
 
-	if c.VirtualMachine.hostInMM(c.ctx) {
-		return nil, new(types.InvalidState)
-	}
-
 	var boot types.AnyType
 	if c.state == types.VirtualMachinePowerStatePoweredOn {
 		boot = time.Now()
@@ -1457,6 +1453,10 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	event := c.event()
 	switch c.state {
 	case types.VirtualMachinePowerStatePoweredOn:
+		if c.VirtualMachine.hostInMM(c.ctx) {
+			return nil, new(types.InvalidState)
+		}
+
 		c.run.start(c.ctx, c.VirtualMachine)
 		c.ctx.postEvent(
 			&types.VmStartingEvent{VmEvent: event},

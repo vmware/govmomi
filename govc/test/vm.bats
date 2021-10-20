@@ -1130,12 +1130,15 @@ load test_helper
   run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
   assert_success 10.0.0.45
 
-  run govc vm.power -off DC0_H0_VM0
-  assert_success
-
   host=$(govc ls -L "$(govc object.collect -s vm/DC0_H0_VM0 runtime.host)")
   run govc host.maintenance.enter "$host"
   assert_success
+
+  run govc vm.power -off DC0_H0_VM0
+  assert_success
+
+  run govc vm.power -on DC0_H0_VM0
+  assert_failure # InvalidState
 
   run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -netmask 255.255.0.0 -type Linux
   assert_failure # InvalidState
