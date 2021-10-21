@@ -221,6 +221,9 @@ load test_helper
 }
 EOF
 
+  run govc library.deploy "my-content/$TTYLINUX_NAME" -options "$BATS_TMPDIR/ttylinux.json"
+  assert_failure # see issue #2599
+
   run govc library.deploy -options "$BATS_TMPDIR/ttylinux.json" "my-content/$TTYLINUX_NAME"
   assert_success
   rm "$BATS_TMPDIR/ttylinux.json"

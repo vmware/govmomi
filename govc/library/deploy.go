@@ -88,10 +88,16 @@ func (cmd *deploy) Description() string {
 
 Examples:
   govc library.deploy /library_name/ovf_template vm_name
-  govc library.deploy /library_name/ovf_template -options deploy.json`
+  govc library.export /library_name/ovf_template/*.ovf # save local copy of .ovf
+  govc import.spec *.ovf > deploy.json # generate options from .ovf
+  # edit deploy.json as needed
+  govc library.deploy -options deploy.json /library_name/ovf_template`
 }
 
 func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() > 2 {
+		return flag.ErrHelp
+	}
 	path := f.Arg(0)
 	name := f.Arg(1)
 
