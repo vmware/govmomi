@@ -17,13 +17,16 @@ limitations under the License.
 package simulator
 
 import (
+	"context"
 	"reflect"
 	"sort"
 	"strings"
 	"testing"
 
-	"github.com/vmware/govmomi/simulator/vpx"
-	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -40,7 +43,15 @@ func sortMoRefSlice(a []types.ManagedObjectReference) {
 	})
 }
 
-func TestTenantManagerVPX(t *testing.T) {
+func TestTenantManagerForOldClients(t *testing.T) {
+	// ServiceContent TenantManager field is not present in older (<6.9.1) vmodl
+	// (e.g. response to RetrieveServiceConent() API or propery collector on
+	// ServiceInstance object), this field should be set only if the client is newer.
+	// Currently TenantManager is not set in vpx simulator's ServiceContent, and
+	// would be added once simulator supports client vmodl versioning properly.
+	t.Skip("needs vmodl versioning")
+
+	ctx := context.Background()
 	m := VPX()
 	defer m.Remove()
 
@@ -52,7 +63,67 @@ func TestTenantManagerVPX(t *testing.T) {
 	s := m.Service.NewServer()
 	defer s.Close()
 
-	tenantManager := Map.Get(*vpx.ServiceContent.TenantManager).(*TenantManager)
+	// Ensure non-nil moref being returned for ServiceContent.TenantManger for newer vim version clients.
+	newSoapClient := soap.NewClient(s.URL, true)
+	newSoapClient.Version = "6.9.1"
+	newVimClient, err := vim25.NewClient(ctx, newSoapClient)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if newVimClient.ServiceContent.TenantManager == nil {
+		t.Fatal("Expected retrieved ServiceContent.TenantManager to be non-nil")
+	}
+
+	// Ensure non-nil moref being returned for ServiceContent.TenantManger for default version used in vim25 client.
+	defaultSoapClient := soap.NewClient(s.URL, true)
+	// No version being set for soap client
+	defaultVimClient, err := vim25.NewClient(ctx, defaultSoapClient)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if defaultVimClient.ServiceContent.TenantManager == nil {
+		t.Fatal("Expected retrieved ServiceContent.TenantManager to be non-nil")
+	}
+
+	// Ensure nil being returned for ServiceContent.TenantManger for older vim version clients.
+	oldSoapClient := soap.NewClient(s.URL, true)
+	oldSoapClient.Version = "6.5"
+	oldVimClient, err := vim25.NewClient(ctx, oldSoapClient)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if oldVimClient.ServiceContent.TenantManager != nil {
+		t.Fatalf("Expected retrieved ServiceContent.TenantManager to be nil but found %v", oldVimClient.ServiceContent.TenantManager)
+	}
+
+}
+
+func TestTenantManagerVPX(t *testing.T) {
+	// ServiceContent TenantManager field is not present in older (<6.9.1) vmodl
+	// (e.g. response to RetrieveServiceConent() API or propery collector on
+	// ServiceInstance object), this field should be set only if the client is newer.
+	// Currently TenantManager is not set in vpx simulator's ServiceContent, and
+	// would be added once simulator supports client vmodl versioning properly.
+	t.Skip("needs vmodl versioning")
+
+	ctx := context.Background()
+	m := VPX()
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tenantManager := object.NewTenantManager(c.Client)
 	serviceProviderEntities := []types.ManagedObjectReference{
 		{Type: "VirtualMachine", Value: "vm-123"},
 		{Type: "HostSystem", Value: "host-1"},
@@ -60,34 +131,28 @@ func TestTenantManagerVPX(t *testing.T) {
 	sortMoRefSlice(serviceProviderEntities)
 
 	// "Read your writes", mark entities and verify they are marked.
-	resBody := tenantManager.MarkServiceProviderEntities(&types.MarkServiceProviderEntities{
-		Entity: serviceProviderEntities,
-	})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	err = tenantManager.MarkServiceProviderEntities(ctx, serviceProviderEntities)
+	if err != nil {
+		t.Fatal(err)
 	}
-	resBody = tenantManager.RetrieveServiceProviderEntities(&types.RetrieveServiceProviderEntities{})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	markedEntities, err := tenantManager.RetrieveServiceProviderEntities(ctx)
+	if err != nil {
+		t.Fatal(err)
 	}
-	markedEntities := resBody.(*methods.RetrieveServiceProviderEntitiesBody).Res.Returnval
 	sortMoRefSlice(markedEntities)
 	if !reflect.DeepEqual(serviceProviderEntities, markedEntities) {
 		t.Errorf("Requested-to-be-marked entities mismatch with acutally marked: %+v, %+v", serviceProviderEntities, markedEntities)
 	}
 
-	// Repeatedely mark entities and verify they are deduped.
-	resBody = tenantManager.MarkServiceProviderEntities(&types.MarkServiceProviderEntities{
-		Entity: serviceProviderEntities,
-	})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	// Repeatedely mark same entities and verify they are deduped.
+	err = tenantManager.MarkServiceProviderEntities(ctx, serviceProviderEntities)
+	if err != nil {
+		t.Fatal(err)
 	}
-	resBody = tenantManager.RetrieveServiceProviderEntities(&types.RetrieveServiceProviderEntities{})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	markedEntities, err = tenantManager.RetrieveServiceProviderEntities(ctx)
+	if err != nil {
+		t.Fatal(err)
 	}
-	markedEntities = resBody.(*methods.RetrieveServiceProviderEntitiesBody).Res.Returnval
 	sortMoRefSlice(markedEntities)
 	if !reflect.DeepEqual(serviceProviderEntities, markedEntities) {
 		t.Errorf("Requested-to-be-marked entities mismatch with acutally marked: %+v, %+v", serviceProviderEntities, markedEntities)
@@ -95,34 +160,28 @@ func TestTenantManagerVPX(t *testing.T) {
 
 	// Unmark not-previously-marked entity and verify no-op.
 	unknownEntities := []types.ManagedObjectReference{{Type: "Folder", Value: "group-3"}}
-	resBody = tenantManager.UnmarkServiceProviderEntities(&types.UnmarkServiceProviderEntities{
-		Entity: unknownEntities,
-	})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	err = tenantManager.UnmarkServiceProviderEntities(ctx, unknownEntities)
+	if err != nil {
+		t.Fatal(err)
 	}
-	resBody = tenantManager.RetrieveServiceProviderEntities(&types.RetrieveServiceProviderEntities{})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	markedEntities, err = tenantManager.RetrieveServiceProviderEntities(ctx)
+	if err != nil {
+		t.Fatal(err)
 	}
-	markedEntities = resBody.(*methods.RetrieveServiceProviderEntitiesBody).Res.Returnval
 	sortMoRefSlice(markedEntities)
 	if !reflect.DeepEqual(serviceProviderEntities, markedEntities) {
 		t.Errorf("Requested-to-be-marked entities mismatch with acutally marked: %+v, %+v", serviceProviderEntities, markedEntities)
 	}
 
 	// Unmark marked entities and verify no longer marked.
-	resBody = tenantManager.UnmarkServiceProviderEntities(&types.UnmarkServiceProviderEntities{
-		Entity: serviceProviderEntities,
-	})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	err = tenantManager.UnmarkServiceProviderEntities(ctx, serviceProviderEntities)
+	if err != nil {
+		t.Fatal(err)
 	}
-	resBody = tenantManager.RetrieveServiceProviderEntities(&types.RetrieveServiceProviderEntities{})
-	if f := resBody.Fault(); f != nil {
-		t.Fatal(f)
+	markedEntities, err = tenantManager.RetrieveServiceProviderEntities(ctx)
+	if err != nil {
+		t.Fatal(err)
 	}
-	markedEntities = resBody.(*methods.RetrieveServiceProviderEntitiesBody).Res.Returnval
 	if len(markedEntities) > 0 {
 		t.Errorf("Expected all entities to be unmarked but still found marked: %+v", markedEntities)
 	}

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -83,5 +83,4 @@ var ServiceContent = types.ServiceContent{
 	HealthUpdateManager:         &types.ManagedObjectReference{Type: "HealthUpdateManager", Value: "HealthUpdateManager"},
 	FailoverClusterConfigurator: &types.ManagedObjectReference{Type: "FailoverClusterConfigurator", Value: "FailoverClusterConfigurator"},
 	FailoverClusterManager:      &types.ManagedObjectReference{Type: "FailoverClusterManager", Value: "FailoverClusterManager"},
-	TenantManager:               &types.ManagedObjectReference{Type: "TenantTenantManager", Value: "TenantManager"},
 }
