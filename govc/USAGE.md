@@ -3106,7 +3106,10 @@ Deploy library OVF template.
 
 Examples:
   govc library.deploy /library_name/ovf_template vm_name
-  govc library.deploy /library_name/ovf_template -options deploy.json
+  govc library.export /library_name/ovf_template/*.ovf # save local copy of .ovf
+  govc import.spec *.ovf > deploy.json # generate options from .ovf
+  # edit deploy.json as needed
+  govc library.deploy -options deploy.json /library_name/ovf_template
 
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]
