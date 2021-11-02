@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -257,6 +257,7 @@ var kinds = map[string]reflect.Type{
 	"StoragePod":                      reflect.TypeOf((*StoragePod)(nil)).Elem(),
 	"StorageResourceManager":          reflect.TypeOf((*StorageResourceManager)(nil)).Elem(),
 	"TaskManager":                     reflect.TypeOf((*TaskManager)(nil)).Elem(),
+	"TenantTenantManager":             reflect.TypeOf((*TenantManager)(nil)).Elem(),
 	"UserDirectory":                   reflect.TypeOf((*UserDirectory)(nil)).Elem(),
 	"VcenterVStorageObjectManager":    reflect.TypeOf((*VcenterVStorageObjectManager)(nil)).Elem(),
 	"ViewManager":                     reflect.TypeOf((*ViewManager)(nil)).Elem(),
