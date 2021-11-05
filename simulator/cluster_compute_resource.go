@@ -58,7 +58,7 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	host.configure(spec, add.req.AsConnected)
 
 	cr := add.ClusterComputeResource
-	Map.PutEntity(cr, Map.NewEntity(host))
+	task.ctx.Map.PutEntity(cr, task.ctx.Map.NewEntity(host))
 	host.Summary.Host = &host.Self
 
 	cr.Host = append(cr.Host, host.Reference())
@@ -398,7 +398,7 @@ func (c *ClusterComputeResource) PlaceVm(ctx *Context, req *types.PlaceVm) soap.
 }
 
 func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec types.ClusterConfigSpecEx) (*ClusterComputeResource, types.BaseMethodFault) {
-	if e := Map.FindByName(name, f.ChildEntity); e != nil {
+	if e := ctx.Map.FindByName(name, f.ChildEntity); e != nil {
 		return nil, &types.DuplicateName{
 			Name:   e.Entity().Name,
 			Object: e.Reference(),
@@ -408,7 +408,7 @@ func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec typ
 	cluster := &ClusterComputeResource{}
 	cluster.EnvironmentBrowser = newEnvironmentBrowser()
 	cluster.Name = name
-	cluster.Network = Map.getEntityDatacenter(f).defaultNetwork()
+	cluster.Network = ctx.Map.getEntityDatacenter(f).defaultNetwork()
 	cluster.Summary = &types.ClusterComputeResourceSummary{
 		UsageSummary: new(types.ClusterUsageSummary),
 	}
@@ -420,7 +420,7 @@ func CreateClusterComputeResource(ctx *Context, f *Folder, name string, spec typ
 	config.DrsConfig.Enabled = types.NewBool(true)
 
 	pool := NewResourcePool()
-	Map.PutEntity(cluster, Map.NewEntity(pool))
+	ctx.Map.PutEntity(cluster, ctx.Map.NewEntity(pool))
 	cluster.ResourcePool = &pool.Self
 
 	folderPutChild(ctx, &f.Folder, cluster)

@@ -276,10 +276,10 @@ func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32) e
 	// Single metric, single VM
 	//
 	qs := []types.PerfQuerySpec{
-		types.PerfQuerySpec{
+		{
 			MaxSample:  4,
 			IntervalId: interval,
-			MetricId:   []types.PerfMetricId{types.PerfMetricId{CounterId: 1, Instance: ""}},
+			MetricId:   []types.PerfMetricId{{CounterId: 1, Instance: ""}},
 			Entity:     e.Reference(),
 		},
 	}

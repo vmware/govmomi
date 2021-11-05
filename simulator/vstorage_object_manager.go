@@ -288,9 +288,9 @@ func (m *VcenterVStorageObjectManager) DeleteVStorageObjectTask(ctx *Context, re
 		}
 
 		backing := obj.Config.Backing.(*types.BaseConfigInfoDiskFileBackingInfo)
-		ds := Map.Get(req.Datastore).(*Datastore)
-		dc := Map.getEntityDatacenter(ds)
-		dm := Map.VirtualDiskManager()
+		ds := ctx.Map.Get(req.Datastore).(*Datastore)
+		dc := ctx.Map.getEntityDatacenter(ds)
+		dm := ctx.Map.VirtualDiskManager()
 		dm.DeleteVirtualDiskTask(ctx, &types.DeleteVirtualDisk_Task{
 			Name:       backing.FilePath,
 			Datacenter: &dc.Self,

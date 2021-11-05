@@ -34,13 +34,10 @@ type ServiceInstance struct {
 }
 
 func NewServiceInstance(ctx *Context, content types.ServiceContent, folder mo.Folder) *ServiceInstance {
-	oldMap := Map
+	// TODO: This function ignores the passed in Map and operates on the
+	// global Map.
 	Map = NewRegistry()
-	// FIXME: To support the eventual transition to a non-global Map, set the
-	// context.Map for consumers that may use ctx.Map.
-	if ctx.Map == oldMap {
-		ctx.Map = Map
-	}
+	ctx.Map = Map
 
 	s := &ServiceInstance{}
 

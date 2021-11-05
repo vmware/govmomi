@@ -181,7 +181,7 @@ func (s *SessionManager) LoginByToken(ctx *Context, req *types.LoginByToken) soa
 func (s *SessionManager) Logout(ctx *Context, _ *types.Logout) soap.HasFault {
 	session := ctx.Session
 	s.delSession(session.Key)
-	pc := Map.content().PropertyCollector
+	pc := ctx.Map.content().PropertyCollector
 
 	for ref, obj := range ctx.Session.Registry.objects {
 		if ref == pc {
@@ -384,7 +384,7 @@ func (c *Context) WithLock(obj mo.Reference, f func()) {
 
 // postEvent wraps EventManager.PostEvent for internal use, with a lock on the EventManager.
 func (c *Context) postEvent(events ...types.BaseEvent) {
-	m := Map.EventManager()
+	m := c.Map.EventManager()
 	c.WithLock(m, func() {
 		for _, event := range events {
 			m.PostEvent(c, &types.PostEvent{EventToPost: event})

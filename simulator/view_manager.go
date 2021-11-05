@@ -69,7 +69,7 @@ func destroyView(ref types.ManagedObjectReference) soap.HasFault {
 func (m *ViewManager) CreateContainerView(ctx *Context, req *types.CreateContainerView) soap.HasFault {
 	body := &methods.CreateContainerViewBody{}
 
-	root := Map.Get(req.Container)
+	root := ctx.Map.Get(req.Container)
 	if root == nil {
 		body.Fault_ = Fault("", &types.ManagedObjectNotFound{Obj: req.Container})
 		return body
@@ -216,7 +216,7 @@ func (v *ContainerView) PutObject(obj mo.Reference) {
 }
 
 func (v *ContainerView) RemoveObject(ctx *Context, obj types.ManagedObjectReference) {
-	Map.RemoveReference(ctx, v, &v.View, obj)
+	ctx.Map.RemoveReference(ctx, v, &v.View, obj)
 }
 
 func (*ContainerView) UpdateObject(mo.Reference, []types.PropertyChange) {}

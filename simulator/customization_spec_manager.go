@@ -28,7 +28,7 @@ import (
 )
 
 var DefaultCustomizationSpec = []types.CustomizationSpecItem{
-	types.CustomizationSpecItem{
+	{
 		Info: types.CustomizationSpecInfo{
 			Name:           "vcsim-linux",
 			Description:    "",
@@ -68,7 +68,7 @@ var DefaultCustomizationSpec = []types.CustomizationSpecItem{
 			EncryptionKey: nil,
 		},
 	},
-	types.CustomizationSpecItem{
+	{
 		Info: types.CustomizationSpecInfo{
 			Name:           "vcsim-linux-static",
 			Description:    "",
@@ -111,7 +111,7 @@ var DefaultCustomizationSpec = []types.CustomizationSpecItem{
 			EncryptionKey: nil,
 		},
 	},
-	types.CustomizationSpecItem{
+	{
 		Info: types.CustomizationSpecInfo{
 			Name:           "vcsim-windows-static",
 			Description:    "",
@@ -172,7 +172,7 @@ var DefaultCustomizationSpec = []types.CustomizationSpecItem{
 			EncryptionKey: []uint8{0x30},
 		},
 	},
-	types.CustomizationSpecItem{
+	{
 		Info: types.CustomizationSpecInfo{
 			Name:           "vcsim-windows-domain",
 			Description:    "",
