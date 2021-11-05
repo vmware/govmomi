@@ -379,7 +379,7 @@ func (c *Context) WithLock(obj mo.Reference, f func()) {
 	// argument to accomplish this.
 	// Basic mutex locking will work even if obj doesn't belong to Map, but
 	// if obj implements sync.Locker, that custom locking will not be used.
-	Map.WithLock(c, obj, f)
+	c.Map.WithLock(c, obj, f)
 }
 
 // postEvent wraps EventManager.PostEvent for internal use, with a lock on the EventManager.

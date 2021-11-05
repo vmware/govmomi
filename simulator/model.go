@@ -308,18 +308,18 @@ func loadObject(content types.ObjectContent) (mo.Reference, error) {
 // example: Load's dir only contains a single OpaqueNetwork, we need to create a Datacenter and
 // place the OpaqueNetwork in the Datacenter's network folder.
 func (m *Model) resolveReferences(ctx *Context) error {
-	dc, ok := Map.Any("Datacenter").(*Datacenter)
+	dc, ok := ctx.Map.Any("Datacenter").(*Datacenter)
 	if !ok {
 		// Need to have at least 1 Datacenter
-		root := Map.Get(Map.content().RootFolder).(*Folder)
+		root := ctx.Map.Get(ctx.Map.content().RootFolder).(*Folder)
 		ref := root.CreateDatacenter(ctx, &types.CreateDatacenter{
 			This: root.Self,
 			Name: "DC0",
 		}).(*methods.CreateDatacenterBody).Res.Returnval
-		dc = Map.Get(ref).(*Datacenter)
+		dc = ctx.Map.Get(ref).(*Datacenter)
 	}
 
-	for ref, val := range Map.objects {
+	for ref, val := range ctx.Map.objects {
 		me, ok := val.(mo.Entity)
 		if !ok {
 			continue
@@ -328,7 +328,7 @@ func (m *Model) resolveReferences(ctx *Context) error {
 		if e.Parent == nil || ref.Type == "Folder" {
 			continue
 		}
-		if Map.Get(*e.Parent) == nil {
+		if ctx.Map.Get(*e.Parent) == nil {
 			// object was loaded without its parent, attempt to foster with another parent
 			switch e.Parent.Type {
 			case "Folder":
@@ -433,12 +433,14 @@ func (m *Model) Load(dir string) error {
 			s = new(ServiceInstance)
 			s.Self = content.Obj
 			Map = NewRegistry()
-			Map.Put(s)
+			ctx.Map = Map
+			ctx.Map.Put(s)
 			return mo.LoadObjectContent([]types.ObjectContent{content}, &s.ServiceInstance)
 		}
 
 		if s == nil {
 			s = NewServiceInstance(ctx, m.ServiceContent, m.RootFolder)
+			ctx.Map = Map
 		}
 
 		obj, err := loadObject(content)
@@ -452,7 +454,7 @@ func (m *Model) Load(dir string) error {
 			}
 		}
 
-		return m.loadMethod(Map.Put(obj), dir)
+		return m.loadMethod(ctx.Map.Put(obj), dir)
 	})
 
 	if err != nil {
@@ -468,6 +470,7 @@ func (m *Model) Load(dir string) error {
 func (m *Model) Create() error {
 	ctx := SpoofContext()
 	m.Service = New(NewServiceInstance(ctx, m.ServiceContent, m.RootFolder))
+	ctx.Map = Map
 
 	client := m.Service.client
 	root := object.NewRootFolder(client)
@@ -660,8 +663,8 @@ func (m *Model) Create() error {
 			// Use the 1st DVPG for the VMs eth0 backing
 			if npg == 0 {
 				// AddPortgroup_Task does not return the moid, so we look it up by name
-				net := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
-				pg := Map.FindByName(name, net.ChildEntity)
+				net := ctx.Map.Get(folders.NetworkFolder.Reference()).(*Folder)
+				pg := ctx.Map.FindByName(name, net.ChildEntity)
 
 				vmnet, _ = object.NewDistributedVirtualPortgroup(client, pg.Reference()).EthernetCardBackingInfo(ctx)
 			}
@@ -685,7 +688,7 @@ func (m *Model) Create() error {
 		}
 
 		// Must use simulator methods directly for OpaqueNetwork
-		networkFolder := Map.Get(folders.NetworkFolder.Reference()).(*Folder)
+		networkFolder := ctx.Map.Get(folders.NetworkFolder.Reference()).(*Folder)
 
 		for i := 0; i < m.OpaqueNetwork; i++ {
 			var summary types.OpaqueNetworkSummary
