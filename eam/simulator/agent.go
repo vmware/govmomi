@@ -60,7 +60,6 @@ func NewAgent(
 	config types.AgentConfigInfo,
 	vmName string,
 	vmPlacement AgentVMPlacementOptions) (*Agent, vim.BaseMethodFault) {
-
 	vimMap := simulator.Map
 
 	agent := &Agent{
@@ -85,6 +84,9 @@ func NewAgent(
 	// Register the agent with the registry in order for the agent to start
 	// receiving API calls from clients.
 	ctx.Map.Put(agent)
+
+	// simulator.VirtualMachine related calls need the vimMap (aka global Map)
+	vimCtx := simulator.SpoofContext()
 
 	createVm := func() (vim.ManagedObjectReference, *vim.LocalizedMethodFault) {
 		var vmRef vim.ManagedObjectReference
@@ -127,13 +129,13 @@ func NewAgent(
 
 		// Create the VM for this agent.
 		vmFolder := vimMap.Get(vmPlacement.folder).(*simulator.Folder)
-		createVmTaskRef := vmFolder.CreateVMTask(ctx, &vim.CreateVM_Task{
+		createVmTaskRef := vmFolder.CreateVMTask(vimCtx, &vim.CreateVM_Task{
 			This:   vmFolder.Self,
 			Config: vmConfigSpec,
 			Pool:   vmPlacement.pool,
 			Host:   &vmPlacement.host,
 		}).(*vimmethods.CreateVM_TaskBody).Res.Returnval
-		createVmTask := vimMap.Get(createVmTaskRef).(*simulator.Task)
+		createVmTask := simulator.Map.Get(createVmTaskRef).(*simulator.Task)
 
 		// Wait for the task to complete and see if there is an error.
 		createVmTask.Wait()
