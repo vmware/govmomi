@@ -32,7 +32,7 @@ type CustomFieldsManager struct {
 // Iterates through all entities of passed field type;
 // Removes found field from their custom field properties.
 func entitiesFieldRemove(ctx *Context, field types.CustomFieldDef) {
-	entities := Map.All(field.ManagedObjectType)
+	entities := ctx.Map.All(field.ManagedObjectType)
 	for _, e := range entities {
 		entity := e.Entity()
 		ctx.WithLock(entity, func() {
@@ -66,7 +66,7 @@ func entitiesFieldRemove(ctx *Context, field types.CustomFieldDef) {
 // Iterates through all entities of passed field type;
 // Renames found field in entity's AvailableField property.
 func entitiesFieldRename(ctx *Context, field types.CustomFieldDef) {
-	entities := Map.All(field.ManagedObjectType)
+	entities := ctx.Map.All(field.ManagedObjectType)
 	for _, e := range entities {
 		entity := e.Entity()
 		ctx.WithLock(entity, func() {
@@ -123,7 +123,7 @@ func (c *CustomFieldsManager) AddCustomFieldDef(ctx *Context, req *types.AddCust
 		FieldInstancePrivileges: req.FieldPolicy,
 	}
 
-	entities := Map.All(req.MoType)
+	entities := ctx.Map.All(req.MoType)
 	for _, e := range entities {
 		entity := e.Entity()
 		ctx.WithLock(entity, func() {
@@ -188,7 +188,7 @@ func (c *CustomFieldsManager) SetField(ctx *Context, req *types.SetField) soap.H
 		Value:            req.Value,
 	}
 
-	entity := Map.Get(req.Entity).(mo.Entity).Entity()
+	entity := ctx.Map.Get(req.Entity).(mo.Entity).Entity()
 	ctx.WithLock(entity, func() {
 		entity.CustomValue = append(entity.CustomValue, newValue)
 		entity.Value = append(entity.Value, newValue)

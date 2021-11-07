@@ -95,7 +95,11 @@ func (tr *taskReference) Reference() types.ManagedObjectReference {
 
 func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 	t.ctx = ctx
-	Map.AtomicUpdate(t.ctx, t, []types.PropertyChange{
+	// alias the global Map to reduce data races in tests that reset the
+	// global Map variable.
+	vimMap := Map
+
+	vimMap.AtomicUpdate(t.ctx, t, []types.PropertyChange{
 		{Name: "info.startTime", Val: time.Now()},
 		{Name: "info.state", Val: types.TaskInfoStateRunning},
 	})
@@ -103,9 +107,10 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 	tr := &taskReference{
 		Self: *t.Info.Entity,
 	}
+
 	// in most cases, the caller already holds this lock, and we would like
 	// the lock to be held across the "hand off" to the async goroutine.
-	unlock := Map.AcquireLock(ctx, tr)
+	unlock := vimMap.AcquireLock(ctx, tr)
 
 	go func() {
 		TaskDelay.delay(t.Info.Name)
@@ -122,7 +127,7 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 			}
 		}
 
-		Map.AtomicUpdate(t.ctx, t, []types.PropertyChange{
+		vimMap.AtomicUpdate(t.ctx, t, []types.PropertyChange{
 			{Name: "info.completeTime", Val: time.Now()},
 			{Name: "info.state", Val: state},
 			{Name: "info.result", Val: res},

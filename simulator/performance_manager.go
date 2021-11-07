@@ -98,7 +98,7 @@ func (p *PerformanceManager) QueryPerfProviderSummary(ctx *Context, req *types.Q
 	body.Res = new(types.QueryPerfProviderSummaryResponse)
 
 	// The entity must exist
-	if Map.Get(req.Entity) == nil {
+	if ctx.Map.Get(req.Entity) == nil {
 		body.Fault_ = Fault("", &types.InvalidArgument{
 			InvalidProperty: "Entity",
 		})

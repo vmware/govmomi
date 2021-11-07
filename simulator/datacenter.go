@@ -77,10 +77,10 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		if dc.isESX {
 			folder.ChildType = f.types[:1]
 			folder.Self = *f.ref
-			Map.PutEntity(dc, folder)
+			ctx.Map.PutEntity(dc, folder)
 		} else {
 			folder.ChildType = f.types
-			e := Map.PutEntity(dc, folder)
+			e := ctx.Map.PutEntity(dc, folder)
 
 			// propagate the generated morefs to Datacenter
 			ref := e.Reference()
@@ -89,7 +89,7 @@ func (dc *Datacenter) createFolders(ctx *Context) {
 		}
 	}
 
-	net := Map.Get(dc.NetworkFolder).(*Folder)
+	net := ctx.Map.Get(dc.NetworkFolder).(*Folder)
 
 	for _, ref := range esx.Datacenter.Network {
 		// Add VM Network by default to each Datacenter
@@ -162,7 +162,7 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 		res.Attempted = []types.ClusterAttemptedVmInfo{}
 
 		for _, ref := range req.Vm {
-			vm := Map.Get(ref).(*VirtualMachine)
+			vm := ctx.Map.Get(ref).(*VirtualMachine)
 			// NOTE: Simulator does not actually perform any specific host-level placement
 			// (equivalent to vSphere DRS).
 			ctx.WithLock(vm, func() {
@@ -189,13 +189,13 @@ func (d *Datacenter) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 		}
 
 		for _, ref := range folders {
-			f, _ := asFolderMO(Map.Get(ref))
+			f, _ := asFolderMO(ctx.Map.Get(ref))
 			if len(f.ChildEntity) != 0 {
 				return nil, &types.ResourceInUse{}
 			}
 		}
 
-		p, _ := asFolderMO(Map.Get(*d.Parent))
+		p, _ := asFolderMO(ctx.Map.Get(*d.Parent))
 		folderRemoveChild(ctx, p, d.Self)
 
 		return nil, nil

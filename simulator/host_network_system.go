@@ -126,7 +126,7 @@ func (s *HostNetworkSystem) AddPortGroup(ctx *Context, c *types.AddPortGroup) so
 
 	folder := s.folder()
 
-	if obj := Map.FindByName(c.Portgrp.Name, folder.ChildEntity); obj != nil {
+	if obj := ctx.Map.FindByName(c.Portgrp.Name, folder.ChildEntity); obj != nil {
 		r.Fault_ = Fault("", &types.DuplicateName{
 			Name:   c.Portgrp.Name,
 			Object: obj.Reference(),
@@ -170,7 +170,7 @@ func (s *HostNetworkSystem) RemovePortGroup(ctx *Context, c *types.RemovePortGro
 	}
 
 	folder := s.folder()
-	e := Map.FindByName(c.PgName, folder.ChildEntity)
+	e := ctx.Map.FindByName(c.PgName, folder.ChildEntity)
 	folderRemoveChild(ctx, &folder.Folder, e.Reference())
 
 	for i, pg := range s.NetworkInfo.Portgroup {

@@ -58,7 +58,7 @@ func getObject(ctx *Context, ref types.ManagedObjectReference) (reflect.Value, b
 	if ctx.Session == nil {
 		// Even without permissions to access an object or specific fields, RetrieveProperties
 		// returns an ObjectContent response as long as the object exists.  See retrieveResult.add()
-		obj = Map.Get(ref)
+		obj = ctx.Map.Get(ref)
 	} else {
 		obj = ctx.Session.Get(ref)
 	}
@@ -331,7 +331,7 @@ func (rr *retrieveResult) collect(ctx *Context, ref types.ManagedObjectReference
 
 	rval, ok := getObject(ctx, ref)
 	if !ok {
-		// Possible if a test uses Map.Remove instead of Destroy_Task
+		// Possible if a test uses ctx.Map.Remove instead of Destroy_Task
 		tracef("object %s no longer exists", ref)
 		return
 	}

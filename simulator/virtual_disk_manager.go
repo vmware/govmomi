@@ -124,7 +124,7 @@ func (m *VirtualDiskManager) DeleteVirtualDiskTask(ctx *Context, req *types.Dele
 
 func (m *VirtualDiskManager) MoveVirtualDiskTask(ctx *Context, req *types.MoveVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "moveVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		fm := Map.FileManager()
+		fm := ctx.Map.FileManager()
 
 		dest := vdmNames(req.DestName)
 
@@ -155,12 +155,12 @@ func (m *VirtualDiskManager) MoveVirtualDiskTask(ctx *Context, req *types.MoveVi
 func (m *VirtualDiskManager) CopyVirtualDiskTask(ctx *Context, req *types.CopyVirtualDisk_Task) soap.HasFault {
 	task := CreateTask(m, "copyVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
 		if req.DestSpec != nil {
-			if Map.IsVPX() {
+			if ctx.Map.IsVPX() {
 				return nil, new(types.NotImplemented)
 			}
 		}
 
-		fm := Map.FileManager()
+		fm := ctx.Map.FileManager()
 
 		dest := vdmNames(req.DestName)
 
@@ -195,10 +195,10 @@ func virtualDiskUUID(dc *types.ManagedObjectReference, file string) string {
 	return uuid.NewSHA1(uuid.NameSpaceOID, []byte(file)).String()
 }
 
-func (m *VirtualDiskManager) QueryVirtualDiskUuid(_ *Context, req *types.QueryVirtualDiskUuid) soap.HasFault {
+func (m *VirtualDiskManager) QueryVirtualDiskUuid(ctx *Context, req *types.QueryVirtualDiskUuid) soap.HasFault {
 	body := new(methods.QueryVirtualDiskUuidBody)
 
-	fm := Map.FileManager()
+	fm := ctx.Map.FileManager()
 
 	file, fault := fm.resolve(req.Datacenter, req.Name)
 	if fault != nil {
