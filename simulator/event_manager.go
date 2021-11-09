@@ -39,9 +39,11 @@ var (
 type EventManager struct {
 	mo.EventManager
 
-	root       types.ManagedObjectReference
-	history    *list.List
-	key        int32
+	root types.ManagedObjectReference
+
+	history *list.List
+	key     int32
+
 	collectors map[types.ManagedObjectReference]*EventHistoryCollector
 	templates  map[string]*template.Template
 }

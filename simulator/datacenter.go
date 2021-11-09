@@ -163,10 +163,21 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 
 		for _, ref := range req.Vm {
 			vm := ctx.Map.Get(ref).(*VirtualMachine)
+
+			// This task creates multiple subtasks which violates the assumption
+			// of 1:1 Context:Task, which results in data races in objects
+			// like the Simulator.Event manager. This is the minimum context
+			// required for the PowerOnVMTask to complete.
+			taskCtx := &Context{
+				Context: ctx.Context,
+				Session: ctx.Session,
+				Map:     ctx.Map,
+			}
+
 			// NOTE: Simulator does not actually perform any specific host-level placement
 			// (equivalent to vSphere DRS).
-			ctx.WithLock(vm, func() {
-				vmTaskBody := vm.PowerOnVMTask(ctx, &types.PowerOnVM_Task{}).(*methods.PowerOnVM_TaskBody)
+			taskCtx.WithLock(vm, func() {
+				vmTaskBody := vm.PowerOnVMTask(taskCtx, &types.PowerOnVM_Task{}).(*methods.PowerOnVM_TaskBody)
 				res.Attempted = append(res.Attempted, types.ClusterAttemptedVmInfo{Vm: ref, Task: &vmTaskBody.Res.Returnval})
 			})
 		}
