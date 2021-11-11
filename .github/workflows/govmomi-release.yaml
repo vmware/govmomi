@@ -41,7 +41,7 @@ jobs:
           IMAGE_SHA: 998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
         run: |
           # generate CHANGELOG for this Github release tag only
-          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md $(basename "${{ github.ref }}" )
+          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' $(basename "${{ github.ref }}" )
 
       - name: Archive CHANGELOG
         uses: actions/upload-artifact@v2
@@ -80,8 +80,8 @@ jobs:
           # https://quay.io/repository/git-chglog/git-chglog from tag v0.14.2
           IMAGE_SHA: 998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
         run: |
-          # generate CHANGELOG for this Github release tag only
-          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md -t .chglog/CHANGELOG.tpl.md v0.1.0..$(basename "${{ github.ref }}" )
+          # update CHANGELOG
+          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' -t .chglog/CHANGELOG.tpl.md
 
       - name: Create Pull Request
         id: cpr
