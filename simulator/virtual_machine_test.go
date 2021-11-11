@@ -390,6 +390,342 @@ func TestReconfigVmDevice(t *testing.T) {
 	}
 }
 
+func TestVAppConfigAdd(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
+
+	tests := []struct {
+		description      string
+		expectedErr      types.BaseMethodFault
+		spec             types.VirtualMachineConfigSpec
+		existingVMConfig *types.VirtualMachineConfigSpec
+		expectedProps    []types.VAppPropertyInfo
+	}{
+
+		{
+			description: "successfully add a new property",
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key:   int32(1),
+								Id:    "foo-id",
+								Value: "foo-value",
+							},
+						},
+					},
+				},
+			},
+			expectedProps: []types.VAppPropertyInfo{
+				{
+					Key:   int32(1),
+					Id:    "foo-id",
+					Value: "foo-value",
+				},
+			},
+		},
+		{
+			description: "return error when a property that exists is added",
+			expectedErr: new(types.InvalidArgument),
+			existingVMConfig: &types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key:   int32(2),
+								Id:    "foo-id",
+								Value: "foo-value",
+							},
+						},
+					},
+				},
+			},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key: int32(2),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.description, func(t *testing.T) {
+			if testCase.existingVMConfig != nil {
+				rtask, _ := vm.Reconfigure(ctx, *testCase.existingVMConfig)
+				if err := rtask.Wait(ctx); err != nil {
+					t.Errorf("Reconfigure failed during test setup. err: %v", err)
+				}
+			}
+
+			err := vmm.updateVAppProperty(testCase.spec.VAppConfig.GetVmConfigSpec())
+			if err != testCase.expectedErr {
+				t.Errorf("unexpected error in updating VApp property of VM. expectedErr: %v, actualErr: %v", testCase.expectedErr, err)
+			}
+
+			if testCase.expectedErr == nil {
+				props := vmm.Config.VAppConfig.GetVmConfigInfo().Property
+				// the testcase only has one VApp property, so ordering of the elements does not matter.
+				if !reflect.DeepEqual(props, testCase.expectedProps) {
+					t.Errorf("unexpected VApp properties. expected: %v, actual: %v", testCase.expectedProps, props)
+				}
+			}
+		})
+	}
+}
+
+func TestVAppConfigEdit(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
+
+	tests := []struct {
+		description      string
+		expectedErr      types.BaseMethodFault
+		spec             types.VirtualMachineConfigSpec
+		existingVMConfig *types.VirtualMachineConfigSpec
+		expectedProps    []types.VAppPropertyInfo
+	}{
+
+		{
+			description: "successfully update a property that exists",
+			existingVMConfig: &types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key:   int32(1),
+								Id:    "foo-id",
+								Value: "foo-value",
+							},
+						},
+					},
+				},
+			},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationEdit,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key:   int32(1),
+								Id:    "foo-id-updated",
+								Value: "foo-value-updated",
+							},
+						},
+					},
+				},
+			},
+			expectedProps: []types.VAppPropertyInfo{
+				{
+					Key:   int32(1),
+					Id:    "foo-id-updated",
+					Value: "foo-value-updated",
+				},
+			},
+		},
+		{
+			description: "return error when a property that doesn't exist is updated",
+			expectedErr: new(types.InvalidArgument),
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationEdit,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key: int32(2),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.description, func(t *testing.T) {
+			if testCase.existingVMConfig != nil {
+				rtask, _ := vm.Reconfigure(ctx, *testCase.existingVMConfig)
+				if err := rtask.Wait(ctx); err != nil {
+					t.Errorf("Reconfigure failed during test setup. err: %v", err)
+				}
+			}
+
+			err := vmm.updateVAppProperty(testCase.spec.VAppConfig.GetVmConfigSpec())
+			if err != testCase.expectedErr {
+				t.Errorf("unexpected error in updating VApp property of VM. expectedErr: %v, actualErr: %v", testCase.expectedErr, err)
+			}
+
+			if testCase.expectedErr == nil {
+				props := vmm.Config.VAppConfig.GetVmConfigInfo().Property
+				// the testcase only has one VApp property, so ordering of the elements does not matter.
+				if !reflect.DeepEqual(props, testCase.expectedProps) {
+					t.Errorf("unexpected VApp properties. expected: %v, actual: %v", testCase.expectedProps, props)
+				}
+			}
+		})
+	}
+}
+
+func TestVAppConfigRemove(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
+
+	tests := []struct {
+		description      string
+		expectedErr      types.BaseMethodFault
+		spec             types.VirtualMachineConfigSpec
+		existingVMConfig *types.VirtualMachineConfigSpec
+		expectedProps    []types.VAppPropertyInfo
+	}{
+		{
+			description: "returns success when a property that exists is removed",
+			existingVMConfig: &types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationAdd,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key: int32(1),
+							},
+						},
+					},
+				},
+			},
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationRemove,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key: int32(1),
+							},
+						},
+					},
+				},
+			},
+		},
+		{
+			description: "return error when a property that doesn't exist is removed",
+			expectedErr: new(types.InvalidArgument),
+			spec: types.VirtualMachineConfigSpec{
+				VAppConfig: &types.VmConfigSpec{
+					Property: []types.VAppPropertySpec{
+						{
+							ArrayUpdateSpec: types.ArrayUpdateSpec{
+								Operation: types.ArrayUpdateOperationRemove,
+							},
+							Info: &types.VAppPropertyInfo{
+								Key: int32(2),
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	for _, testCase := range tests {
+		t.Run(testCase.description, func(t *testing.T) {
+			if testCase.existingVMConfig != nil {
+				rtask, _ := vm.Reconfigure(ctx, *testCase.existingVMConfig)
+				if err := rtask.Wait(ctx); err != nil {
+					t.Errorf("Reconfigure failed during test setup. err: %v", err)
+				}
+			}
+
+			err := vmm.updateVAppProperty(testCase.spec.VAppConfig.GetVmConfigSpec())
+			if err != testCase.expectedErr {
+				t.Errorf("unexpected error in updating VApp property of VM. expectedErr: %v, actualErr: %v", testCase.expectedErr, err)
+			}
+
+			if testCase.expectedErr == nil {
+				props := vmm.Config.VAppConfig.GetVmConfigInfo().Property
+				// the testcase only has one VApp property, so ordering of the elements does not matter.
+				if !reflect.DeepEqual(props, testCase.expectedProps) {
+					t.Errorf("unexpected VApp properties. expected: %v, actual: %v", testCase.expectedProps, props)
+				}
+			}
+		})
+	}
+}
+
 func TestReconfigVm(t *testing.T) {
 	ctx := context.Background()
 
