@@ -333,6 +333,55 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 	vm.Config.Modified = time.Now()
 }
 
+// updateVAppProperty updates the simulator VM with the specified VApp properties.
+func (vm *VirtualMachine) updateVAppProperty(spec *types.VmConfigSpec) types.BaseMethodFault {
+	ps := make([]types.VAppPropertyInfo, 0)
+
+	if vm.Config.VAppConfig != nil && vm.Config.VAppConfig.GetVmConfigInfo() != nil {
+		ps = vm.Config.VAppConfig.GetVmConfigInfo().Property
+	}
+
+	for _, prop := range spec.Property {
+		var foundIndex int
+		exists := false
+		// Check if the specified property exists or not. This helps rejecting invalid
+		// operations (e.g., Adding a VApp property that already exists)
+		for i, p := range ps {
+			if p.Key == prop.Info.Key {
+				exists = true
+				foundIndex = i
+				break
+			}
+		}
+
+		switch prop.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if exists {
+				return new(types.InvalidArgument)
+			}
+			ps = append(ps, *prop.Info)
+		case types.ArrayUpdateOperationEdit:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			ps[foundIndex] = *prop.Info
+		case types.ArrayUpdateOperationRemove:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			ps = append(ps[:foundIndex], ps[foundIndex+1:]...)
+		}
+	}
+
+	if vm.Config.VAppConfig == nil {
+		vm.Config.VAppConfig = &types.VmConfigInfo{}
+	}
+
+	vm.Config.VAppConfig.GetVmConfigInfo().Property = ps
+
+	return nil
+}
+
 var extraConfigAlias = map[string]string{
 	"ip0": "SET.guest.ipAddress",
 }
@@ -410,6 +459,12 @@ func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConf
 	if o := spec.BootOptions; o != nil {
 		if isTrue(o.EfiSecureBootEnabled) && vm.Config.Firmware != string(types.GuestOsDescriptorFirmwareTypeEfi) {
 			return &types.InvalidVmConfig{Property: "msg.hostd.configSpec.efi"}
+		}
+	}
+
+	if spec.VAppConfig != nil {
+		if err := vm.updateVAppProperty(spec.VAppConfig.GetVmConfigSpec()); err != nil {
+			return err
 		}
 	}
 
