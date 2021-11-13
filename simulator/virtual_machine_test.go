@@ -491,7 +491,7 @@ func TestVAppConfigAdd(t *testing.T) {
 			}
 
 			err := vmm.updateVAppProperty(testCase.spec.VAppConfig.GetVmConfigSpec())
-			if err != testCase.expectedErr {
+			if !reflect.DeepEqual(err, testCase.expectedErr) {
 				t.Errorf("unexpected error in updating VApp property of VM. expectedErr: %v, actualErr: %v", testCase.expectedErr, err)
 			}
 
@@ -607,7 +607,7 @@ func TestVAppConfigEdit(t *testing.T) {
 			}
 
 			err := vmm.updateVAppProperty(testCase.spec.VAppConfig.GetVmConfigSpec())
-			if err != testCase.expectedErr {
+			if !reflect.DeepEqual(err, testCase.expectedErr) {
 				t.Errorf("unexpected error in updating VApp property of VM. expectedErr: %v, actualErr: %v", testCase.expectedErr, err)
 			}
 
@@ -680,6 +680,7 @@ func TestVAppConfigRemove(t *testing.T) {
 					},
 				},
 			},
+			expectedProps: []types.VAppPropertyInfo{},
 		},
 		{
 			description: "return error when a property that doesn't exist is removed",
@@ -711,7 +712,7 @@ func TestVAppConfigRemove(t *testing.T) {
 			}
 
 			err := vmm.updateVAppProperty(testCase.spec.VAppConfig.GetVmConfigSpec())
-			if err != testCase.expectedErr {
+			if !reflect.DeepEqual(err, testCase.expectedErr) {
 				t.Errorf("unexpected error in updating VApp property of VM. expectedErr: %v, actualErr: %v", testCase.expectedErr, err)
 			}
 
