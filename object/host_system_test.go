@@ -15,7 +15,6 @@ package object_test
 
 import (
 	"context"
-	"log"
 	"testing"
 
 	"github.com/vmware/govmomi/find"
@@ -24,16 +23,8 @@ import (
 )
 
 func TestHostSystemManagementIPs(t *testing.T) {
-	m := simulator.ESX()
-	m.Run(func(ctx context.Context, c *vim25.Client) error {
-		finder := find.NewFinder(c, false)
-		dc, err := finder.DefaultDatacenter(ctx)
-		if err != nil {
-			log.Fatalf("Failed to get default DC")
-		}
-		finder.SetDatacenter(dc)
-
-		host, err := finder.DefaultHostSystem(ctx)
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		host, err := find.NewFinder(c).HostSystem(ctx, "DC0_C0_H0")
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -43,11 +34,28 @@ func TestHostSystemManagementIPs(t *testing.T) {
 			t.Fatal(err)
 		}
 		if len(ips) != 1 {
-			t.Fatalf("no mgmt ip found")
+			t.Fatal("no mgmt ip found")
 		}
 		if ips[0].String() != "127.0.0.1" {
 			t.Fatalf("Expected management ip %s, got %s", "127.0.0.1", ips[0].String())
 		}
-		return nil
+
+		// These fields can be nil while ESX is being upgraded
+		hs := simulator.Map.Get(host.Reference()).(*simulator.HostSystem)
+		tests := []func(){
+			func() { hs.Config.VirtualNicManagerInfo = nil },
+			func() { hs.Config = nil },
+		}
+
+		for _, f := range tests {
+			f()
+			ips, err = host.ManagementIPs(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if len(ips) != 0 {
+				t.Fatal("expected zero ips")
+			}
+		}
 	})
 }
