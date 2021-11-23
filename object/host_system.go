@@ -82,7 +82,17 @@ func (h HostSystem) ManagementIPs(ctx context.Context) ([]net.IP, error) {
 		return nil, err
 	}
 
-	return internal.HostSystemManagementIPs(mh.Config.VirtualNicManagerInfo.NetConfig), nil
+	config := mh.Config
+	if config == nil {
+		return nil, nil
+	}
+
+	info := config.VirtualNicManagerInfo
+	if info == nil {
+		return nil, nil
+	}
+
+	return internal.HostSystemManagementIPs(info.NetConfig), nil
 }
 
 func (h HostSystem) Disconnect(ctx context.Context) (*Task, error) {
