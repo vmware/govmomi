@@ -1,4 +1,19 @@
 
+<a name="v0.27.2"></a>
+## [Release v0.27.2](https://github.com/vmware/govmomi/compare/v0.27.1...v0.27.2)
+
+> Release Date: 2021-11-23
+
+### 🐞 Fix
+
+- [f04d77d6]	avoid possible panic in HostSystem.ManagementIPs
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [f04d77d6]	fix: avoid possible panic in HostSystem.ManagementIPs
+
 <a name="v0.27.1"></a>
 ## [Release v0.27.1](https://github.com/vmware/govmomi/compare/v0.27.0...v0.27.1)
 
