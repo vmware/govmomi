@@ -64,6 +64,10 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 		s.HandleFunc(internal.NamespaceClusterPath+"/", h.clustersID)
 		s.HandleFunc(internal.NamespaceDistributedSwitchCompatibility+"/", h.listCompatibleDistributedSwitches)
 		s.HandleFunc(internal.NamespaceEdgeClusterCompatibility+"/", h.listCompatibleEdgeClusters)
+
+		s.HandleFunc(internal.SupervisorServicesPath, h.listServices)
+		s.HandleFunc(internal.SupervisorServicesPath+"/", h.getService)
+
 	}
 }
 
@@ -195,5 +199,44 @@ func (h *Handler) listCompatibleEdgeClusters(w http.ResponseWriter, r *http.Requ
 			},
 		}
 		vapi.StatusOK(w, switches)
+	}
+}
+
+var supervisorServices []namespace.SupervisorServiceSummary = []namespace.SupervisorServiceSummary{
+	{
+		ID:    "service1",
+		Name:  "mock-service-1",
+		State: "ACTIVATED",
+	},
+	{
+		ID:    "service2",
+		Name:  "mock-service-2",
+		State: "DE-ACTIVATED",
+	},
+}
+
+func (h *Handler) listServices(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, supervisorServices)
+	}
+}
+
+func (h *Handler) getService(w http.ResponseWriter, r *http.Request) {
+	id := path.Base(r.URL.Path)
+	switch r.Method {
+	case http.MethodGet:
+		for _, svc := range supervisorServices {
+			if svc.ID == id {
+				svcInfo := namespace.SupervisorServiceInfo{
+					Name:        svc.Name,
+					State:       svc.State,
+					Description: fmt.Sprintf("Description of %s", svc.ID),
+				}
+				vapi.StatusOK(w, svcInfo)
+				return
+			}
+		}
+		vapi.Status(w, http.StatusNotFound)
 	}
 }

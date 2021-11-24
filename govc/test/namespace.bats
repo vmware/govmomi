@@ -86,3 +86,31 @@ load test_helper
 
   govc namespace.logs.download -cluster DC0_C0 - | tar -xvOf-
 }
+
+@test "namespace.service.ls" {
+    vcsim_env
+
+    run govc namespace.service.ls
+    assert_success
+    assert_matches service1
+    assert_matches service2
+
+    run govc namespace.service.ls -l
+    assert_success
+    assert_matches ACTIVATED
+    assert_matches mock-service-1
+}
+
+@test "namespace.service.info" {
+    vcsim_env
+
+    run govc namespace.service.info service1
+    assert_success
+    assert_matches mock-service-1
+    assert_matches ACTIVATED
+    assert_matches "Description of service1"
+
+    run govc namespace.service.info -json service2
+    assert_matches DE-ACTIVATED
+
+}
