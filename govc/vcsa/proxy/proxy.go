@@ -64,8 +64,8 @@ Examples:
 }
 
 type proxyResult struct {
-	proxy   *vnetworking.ProxyList
-	noProxy []string
+	Proxy   *vnetworking.ProxyList
+	NoProxy []string
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -93,10 +93,10 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 
 func (res proxyResult) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
-	printProxyConfig("HTTP", res.proxy.Http, tw)
-	printProxyConfig("HTTPS", res.proxy.Https, tw)
-	printProxyConfig("FTP", res.proxy.Ftp, tw)
-	fmt.Fprintf(tw, "No Proxy addresses:\t%s\n", strings.Join(res.noProxy, ", "))
+	printProxyConfig("HTTP", res.Proxy.Http, tw)
+	printProxyConfig("HTTPS", res.Proxy.Https, tw)
+	printProxyConfig("FTP", res.Proxy.Ftp, tw)
+	fmt.Fprintf(tw, "No Proxy addresses:\t%s\n", strings.Join(res.NoProxy, ", "))
 
 	return tw.Flush()
 }
