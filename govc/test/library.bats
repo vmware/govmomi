@@ -321,6 +321,22 @@ EOF
   assert_failure # $item no longer exists
 }
 
+@test "library.vmtx.info" {
+  vcsim_env
+
+  vm=DC0_H0_VM0
+  item="${vm}_item"
+
+  run govc library.create my-content
+  assert_success
+
+  run govc library.clone -vm $vm my-content $item
+  assert_success
+
+  run govc library.vmtx.info my-content/$item
+  assert_success
+}
+
 @test "library.pubsub" {
   vcsim_env
 
