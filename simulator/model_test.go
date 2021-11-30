@@ -26,7 +26,7 @@ func compareModel(t *testing.T, m *Model) {
 	count := m.Count()
 
 	hosts := (m.Host + (m.ClusterHost * m.Cluster)) * m.Datacenter
-	vms := ((m.Host + m.Cluster) * m.Datacenter) * m.Machine
+	vms := ((m.Host + m.Cluster + m.Pool) * m.Datacenter) * m.Machine
 	// child pools + root pools
 	pools := (m.Pool * m.Cluster * m.Datacenter) + (m.Host+m.Cluster)*m.Datacenter
 	// root folder + Datacenter folders {host,vm,datastore,network} + top-level folders

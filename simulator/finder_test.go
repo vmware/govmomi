@@ -74,9 +74,9 @@ func TestFinderVPX(t *testing.T) {
 		{"DatacenterList", "/F0/*", 1},
 		{"DatacenterList", "/DC0", 1},
 		{"VirtualMachineList", "/DC0/vm/*", (m.Host + m.Cluster) * m.Machine},
-		{"VirtualMachineList", "F0/DC1_C0_RP0_VM0", 1},
-		{"VirtualMachineList", "./DC1_C0_RP0_VM0", 0},
-		{"VirtualMachineList", "DC1_C0_RP0_VM0", 1}, // find . -type VirtualMachine -name DC1_C0_RP0_VM0
+		{"VirtualMachineList", "F0/DC1_C0_RP1_VM0", 1},
+		{"VirtualMachineList", "./DC1_C0_RP1_VM0", 0},
+		{"VirtualMachineList", "DC1_C0_RP1_VM0", 1}, // find . -type VirtualMachine -name DC1_C0_RP0_VM0
 		{"VirtualAppList", "/DC0/vm/*", 0},
 		{"DatastoreList", "/DC0/datastore/*", m.Datastore},
 		{"DatastoreList", "./*", 0},
@@ -123,7 +123,7 @@ func TestFinderVPX(t *testing.T) {
 		{"DatacenterList", "/*", m.Datacenter - m.Folder},
 		{"DatacenterList", "/*/*", m.Folder},
 		{"DatastoreList", "/F1/DC2/datastore/F1/LocalDS_0", 1},
-		{"VirtualMachineList", "DC1_C0_RP0_VM0", 0}, // TODO: recurse all Datacenters?
+		{"VirtualMachineList", "DC1_C0_RP1_VM0", 0}, // TODO: recurse all Datacenters?
 	}
 
 	f := reflect.ValueOf(finder)

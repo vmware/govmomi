@@ -107,6 +107,7 @@ type Model struct {
 	// For example: /DC0/host/DC0_C0/Resources
 	// The root ResourcePool is named "RP0" within other object names.
 	// When Model.Pool is set to 1 or higher, this creates child ResourcePools under the root pool.
+	// Note that this flag is not effective on standalone hosts.
 	// For example: /DC0/host/DC0_C0/Resources/DC0_C0_RP1
 	// Name prefix: RP, vcsim flag: -pool
 	Pool int
@@ -117,7 +118,12 @@ type Model struct {
 	// Name prefix: LocalDS, vcsim flag: -ds
 	Datastore int
 
-	// Machine specifies the number of VirtualMachine entities to create per ResourcePool
+	// Machine specifies the number of VirtualMachine entities to create per
+	// ResourcePool. If the pool flag is specified, the specified number of virtual
+	// machines will be deployed to each child pool and prefixed with the child
+	// resource pool name. Otherwise they are deployed into the root resource pool,
+	// prefixed with RP0. On standalone hosts, machines are always deployed into the
+	// root resource pool without any prefix.
 	// Name prefix: VM, vcsim flag: -vm
 	Machine int
 
@@ -731,19 +737,24 @@ func (m *Model) Create() error {
 				}
 			}
 
-			pool, err := cluster.ResourcePool(ctx)
+			rootRP, err := cluster.ResourcePool(ctx)
 			if err != nil {
 				return err
 			}
 
 			prefix := clusterName + "_RP"
 
-			addMachine(prefix+"0", nil, pool, folders)
+			// put VMs in cluster RP if no child RP(s) configured
+			if m.Pool == 0 {
+				addMachine(prefix+"0", nil, rootRP, folders)
+			}
 
-			for npool := 1; npool <= m.Pool; npool++ {
+			// create child RP(s) with VMs
+			for childRP := 1; childRP <= m.Pool; childRP++ {
 				spec := types.DefaultResourceConfigSpec()
 
-				_, err = pool.Create(ctx, m.fmtName(prefix, npool), spec)
+				p, err := rootRP.Create(ctx, m.fmtName(prefix, childRP), spec)
+				addMachine(m.fmtName(prefix, childRP), nil, p, folders)
 				if err != nil {
 					return err
 				}
@@ -756,7 +767,7 @@ func (m *Model) Create() error {
 				vspec := NewVAppConfigSpec()
 				name := m.fmtName(prefix, napp)
 
-				vapp, err := pool.CreateVApp(ctx, name, rspec, vspec, nil)
+				vapp, err := rootRP.CreateVApp(ctx, name, rspec, vspec, nil)
 				if err != nil {
 					return err
 				}

@@ -160,9 +160,9 @@ func TestSearchIndexFindChild(t *testing.T) {
 		// Datacenter -> host Folder -> Cluster -> ResourcePool -> ResourcePool
 		{"DC0", "host", "DC0_C0", "Resources", "DC0_C0_RP1"},
 		// Datacenter -> host Folder -> Cluster -> ResourcePool -> VirtualMachine
-		{"DC0", "host", "DC0_C0", "Resources", "DC0_C0_RP0_VM0"},
+		{"DC0", "host", "DC0_C0", "Resources", "DC0_C0_RP1", "DC0_C0_RP1_VM0"},
 		// Datacenter -> vm Folder -> VirtualMachine
-		{"DC0", "vm", "DC0_C0_RP0_VM0"},
+		{"DC0", "vm", "DC0_C0_RP1_VM0"},
 	}
 
 	root := c.ServiceContent.RootFolder
