@@ -46,10 +46,51 @@ type Template struct {
 	VMHomeStorage        *DiskStorage          `json:"vm_home_storage,omitempty"`
 }
 
+// CPU defines Cores and CPU count
+type CPU struct {
+	CoresPerSocket int `json:"cores_per_socket,omitempty"`
+	Count          int `json:"count,omitempty"`
+}
+
+// DiskInfo defines disk capacity and storage info
+type DiskInfo struct {
+	Capacity    int         `json:"capacity,omitempty"`
+	DiskStorage DiskStorage `json:"disk_storage,omitempty"`
+}
+
+// Disks defines the disk information
+type Disks struct {
+	Key   string    `json:"key"`
+	Value *DiskInfo `json:"value"`
+}
+
+// Memory defines the memory size in MB
+type Memory struct {
+	SizeMB int `json:"size_mib,omitempty"`
+}
+
+// NicDetails defines the network adapter details
+type NicDetails struct {
+	Network     string `json:"network,omitempty"`
+	BackingType string `json:"backing_type,omitempty"`
+	MacType     string `json:"mac_type,omitempty"`
+}
+
+// Nics defines the network identifier
+type Nics struct {
+	Key   string      `json:"key,omitempty"`
+	Value *NicDetails `json:"value,omitempty"`
+}
+
 // TemplateInfo for a VM template contained in an existing library item
 type TemplateInfo struct {
-	GuestOS string `json:"guest_OS,omitempty"`
-	// TODO...
+	CPU           CPU         `json:"cpu,omitempty"`
+	Disks         []Disks     `json:"disks,omitempty"`
+	GuestOS       string      `json:"guest_OS,omitempty"`
+	Memory        Memory      `json:"memory,omitempty"`
+	Nics          []Nics      `json:"nics,omitempty"`
+	VMHomeStorage DiskStorage `json:"vm_home_storage,omitempty"`
+	VmTemplate    string      `json:"vm_template,omitempty"`
 }
 
 // Placement information used to place the virtual machine template
@@ -116,6 +157,17 @@ func (c *Manager) CreateTemplate(ctx context.Context, vmtx Template) (string, er
 		Template `json:"spec"`
 	}{vmtx}
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+}
+
+// GetLibraryTemplateInfo fetches the library template info using template library id
+func (c *Manager) GetLibraryTemplateInfo(ctx context.Context, libraryItemID string) (*TemplateInfo, error) {
+	url := c.Resource(path.Join(internal.VCenterVMTXLibraryItem, libraryItemID))
+	var res TemplateInfo
+	err := c.Do(ctx, url.Request(http.MethodGet), &res)
+	if err != nil {
+		return nil, err
+	}
+	return &res, nil
 }
 
 // DeployTemplateLibraryItem deploys a VM as a copy of the source VM template contained in the given library item

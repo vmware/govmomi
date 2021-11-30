@@ -208,6 +208,7 @@ but appear via `govc $cmd -h`:
  - [library.subscriber.rm](#librarysubscriberrm)
  - [library.sync](#librarysync)
  - [library.update](#libraryupdate)
+ - [library.vmtx.info](#libraryvmtxinfo)
  - [license.add](#licenseadd)
  - [license.assign](#licenseassign)
  - [license.assigned.ls](#licenseassignedls)
@@ -3367,6 +3368,19 @@ Examples:
 Options:
   -d=                    Library or item description
   -n=                    Library or item name
+```
+
+## library.vmtx.info
+
+```
+Usage: govc library.vmtx.info [OPTIONS]
+
+Display VMTX template details
+
+Examples:
+  govc library.vmtx.info /library_name/vmtx_template_name
+
+Options:
 ```
 
 ## license.add

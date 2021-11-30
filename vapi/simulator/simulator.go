@@ -2024,18 +2024,17 @@ func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) 
 		}
 	}
 
+	if r.Method == http.MethodGet {
+		// TODO: add mock data
+		t := &vcenter.TemplateInfo{}
+		OK(w, t)
+		return
+	}
+
 	var spec struct {
 		vcenter.DeployTemplate `json:"spec"`
 	}
 	if !s.decode(r, w, &spec) {
-		return
-	}
-
-	if r.Method == http.MethodGet {
-		// TODO: place holder as the API supports this method,
-		// but not aware of a use case for the data yet.
-		t := &vcenter.TemplateInfo{}
-		OK(w, t)
 		return
 	}
 
