@@ -319,6 +319,12 @@ load test_helper
   # destroy powers off vm before destruction
   run govc vm.destroy $vm
   assert_success
+
+  run govc vm.destroy '*'
+  assert_success
+
+  run govc find / -type m
+  assert_success "" # expect all VMs are gone
 }
 
 @test "vm.create pvscsi" {

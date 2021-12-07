@@ -101,7 +101,9 @@ func (cmd *destroy) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
-		return task.Wait(ctx)
+		if err = task.Wait(ctx); err != nil {
+			return err
+		}
 	}
 
 	return nil
