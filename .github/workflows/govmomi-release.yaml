@@ -34,6 +34,11 @@ jobs:
         with:
           fetch-depth: 0 # for CHANGELOG
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: 1.17
+
       - name: Create RELEASE CHANGELOG
         env:
           IMAGE: quay.io/git-chglog/git-chglog
