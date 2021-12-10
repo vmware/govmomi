@@ -58,11 +58,15 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	hs.Summary.Runtime = &hs.Runtime
 	hs.Summary.Runtime.BootTime = &now
 
+	// shallow copy Summary.Hardware, as each host will be assigned its own .Uuid
 	hardware := *host.Summary.Hardware
 	hs.Summary.Hardware = &hardware
 
-	info := *esx.HostHardwareInfo
-	hs.Hardware = &info
+	if hs.Hardware == nil {
+		// shallow copy Hardware, as each host will be assigned its own .Uuid
+		info := *esx.HostHardwareInfo
+		hs.Hardware = &info
+	}
 
 	cfg := new(types.HostConfigInfo)
 	deepCopy(hs.Config, cfg)
@@ -189,8 +193,20 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 		return nil, &types.NoHost{}
 	}
 
+	template := esx.HostSystem
+	network := ctx.Map.getEntityDatacenter(f).defaultNetwork()
+
+	if p := ctx.Map.FindByName(spec.UserName, f.ChildEntity); p != nil {
+		cr := p.(*mo.ComputeResource)
+		h := ctx.Map.Get(cr.Host[0])
+		// "clone" an existing host from the inventory
+		template = h.(*HostSystem).HostSystem
+		template.Vm = nil
+		network = cr.Network
+	}
+
 	pool := NewResourcePool()
-	host := NewHostSystem(esx.HostSystem)
+	host := NewHostSystem(template)
 	host.configure(spec, false)
 
 	summary := new(types.ComputeResourceSummary)
@@ -210,7 +226,7 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 	ctx.Map.PutEntity(cr, ctx.Map.NewEntity(pool))
 
 	cr.Name = host.Name
-	cr.Network = ctx.Map.getEntityDatacenter(f).defaultNetwork()
+	cr.Network = network
 	cr.Host = append(cr.Host, host.Reference())
 	cr.ResourcePool = &pool.Self
 
