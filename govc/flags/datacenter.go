@@ -203,6 +203,10 @@ func (flag *DatacenterFlag) ManagedObjects(ctx context.Context, args []string) (
 			continue
 		}
 
+		if !strings.Contains(arg, "/") {
+			return nil, fmt.Errorf("%q must be qualified with a path", arg)
+		}
+
 		elements, err := finder.ManagedObjectList(ctx, arg)
 		if err != nil {
 			return nil, err
