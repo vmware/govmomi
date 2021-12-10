@@ -25,6 +25,10 @@ load test_helper
   key=$(govc fields.ls | grep $field | awk '{print $1}')
 
   val="foo"
+
+  run govc fields.set $field $val $vm_id
+  assert_failure
+
   run govc fields.set $field $val vm/$vm_id
   assert_success
 
