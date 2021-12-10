@@ -26,18 +26,18 @@ jobs:
     name: Run govc Tests
     strategy:
       matrix:
-        go-version: ["1.15", "1.16"]
+        go-version: ["1.16", "1.17"]
         platform: ["ubuntu-18.04"]
         cmd: ["govc-test"]
         experimental: [false]
         timeout: [10]
         include:
-          - go-version: "1.15"
+          - go-version: "1.16"
             platform: "ubuntu-18.04"
             cmd: "govc-test-sso"
             experimental: true
             timeout: 3
-          - go-version: "1.15"
+          - go-version: "1.16"
             platform: "ubuntu-18.04"
             cmd: "govc-test-sso-assert-cert"
             experimental: true
@@ -64,7 +64,7 @@ jobs:
     name: Verify govc docs are up2date
     strategy:
       matrix:
-        go-version: ["1.16"]
+        go-version: ["1.17"]
         platform: ["ubuntu-18.04"]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 3
