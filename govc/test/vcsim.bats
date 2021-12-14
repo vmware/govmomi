@@ -477,6 +477,16 @@ EOF
   objs=$(govc find / | wc -l)
   assert_equal 23 "$objs"
 
+  run govc cluster.add -cluster DC0_C0 -hostname DC0_C0_H0-clone -username DC0_C0_H0 -password pass -noverify
+  assert_success
+  objs=$(govc find / | wc -l)
+  assert_equal 24 "$objs"
+
+  run govc host.add -hostname DC0_H0-clone -username DC0_H0 -password pass -noverify
+  assert_success
+  objs=$(govc find / | wc -l)
+  assert_equal 27 "$objs" # ComputeResource + ResourcePool + HostSystem
+
   run govc host.portgroup.add -host DC0_H0 -vswitch vSwitch0 bridge
   assert_success # issue #2016
 }

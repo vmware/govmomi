@@ -54,16 +54,25 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		return nil, &types.NoHost{}
 	}
 
-	host := NewHostSystem(esx.HostSystem)
+	cr := add.ClusterComputeResource
+	template := esx.HostSystem
+
+	if h := task.ctx.Map.FindByName(spec.UserName, cr.Host); h != nil {
+		// "clone" an existing host from the inventory
+		template = h.(*HostSystem).HostSystem
+		template.Vm = nil
+	} else {
+		template.Network = cr.Network[:1] // VM Network
+	}
+
+	host := NewHostSystem(template)
 	host.configure(spec, add.req.AsConnected)
 
-	cr := add.ClusterComputeResource
 	task.ctx.Map.PutEntity(cr, task.ctx.Map.NewEntity(host))
 	host.Summary.Host = &host.Self
 
 	cr.Host = append(cr.Host, host.Reference())
 	addComputeResource(cr.Summary.GetComputeResourceSummary(), host)
-	host.Network = cr.Network[:1] // VM Network
 
 	return host.Reference(), nil
 }
