@@ -16,7 +16,9 @@ limitations under the License.
 
 package task
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 type Error struct {
 	*types.LocalizedMethodFault
@@ -30,4 +32,11 @@ func (e Error) Error() string {
 
 func (e Error) Fault() types.BaseMethodFault {
 	return e.LocalizedMethodFault.Fault
+}
+
+func (e Error) Unwrap() error {
+	if f, ok := e.Fault().(error); ok {
+		return f
+	}
+	return nil
 }

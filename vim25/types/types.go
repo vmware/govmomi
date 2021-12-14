@@ -17,6 +17,7 @@ limitations under the License.
 package types
 
 import (
+	"fmt"
 	"reflect"
 	"time"
 )
@@ -18894,6 +18895,18 @@ func init() {
 
 type FileNotFound struct {
 	FileFault
+}
+
+func (f *FileNotFound) Error() string {
+	return fmt.Sprintf("fault: FileNotFound (file=%s)", f.File)
+}
+
+func (f *FileNotFound) Is(target error) bool {
+	if _, ok := target.(*FileNotFound); ok {
+		return true
+	}
+
+	return false
 }
 
 func init() {
@@ -47551,6 +47564,18 @@ func init() {
 
 type ToolsUnavailable struct {
 	VimFault
+}
+
+func (f ToolsUnavailable) Error() string {
+	return f.GetMethodFault().FaultMessage[0].Message
+}
+
+func (f ToolsUnavailable) Is(target error) bool {
+	if _, ok := target.(ToolsUnavailable); ok {
+		return true
+	}
+
+	return false
 }
 
 func init() {

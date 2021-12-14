@@ -47,3 +47,15 @@ type Fault struct {
 func (f *Fault) VimFault() types.AnyType {
 	return f.Detail.Fault
 }
+
+func (f *Fault) Error() string {
+	return f.String
+}
+
+func (f *Fault) Unwrap() error {
+	switch f.VimFault().(type) {
+	case types.ToolsUnavailable:
+		return f.VimFault().(types.ToolsUnavailable)
+	}
+	return nil
+}

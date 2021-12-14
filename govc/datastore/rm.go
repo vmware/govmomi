@@ -18,6 +18,7 @@ package datastore
 
 import (
 	"context"
+	"errors"
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -106,11 +107,8 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		err = remove(ctx, args[0])
 	}
 
-	if err != nil {
-		if types.IsFileNotFound(err) && cmd.force {
-			// Ignore error
-			return nil
-		}
+	if errors.Is(err, &types.FileNotFound{}) && cmd.force {
+		return nil // Ignore error
 	}
 
 	return err

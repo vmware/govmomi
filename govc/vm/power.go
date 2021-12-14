@@ -18,6 +18,7 @@ package vm
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 
@@ -185,7 +186,7 @@ func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 			fmt.Fprintf(cmd, "Shutdown guest %s... ", vm.Reference())
 			err = vm.ShutdownGuest(ctx)
 
-			if err != nil && cmd.Force && isToolsUnavailable(err) {
+			if err != nil && cmd.Force && errors.Is(err, types.ToolsUnavailable{}) {
 				task, err = vm.PowerOff(ctx)
 			}
 		}

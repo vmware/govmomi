@@ -50,6 +50,10 @@ func (s soapFaultError) Error() string {
 	return fmt.Sprintf("%s: %s", s.fault.Code, msg)
 }
 
+func (s soapFaultError) Unwrap() error {
+	return s.fault
+}
+
 func (s soapFaultError) MarshalJSON() ([]byte, error) {
 	out := struct {
 		Fault *Fault

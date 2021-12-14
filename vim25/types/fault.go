@@ -20,6 +20,7 @@ type HasFault interface {
 	Fault() BaseMethodFault
 }
 
+// TODO: Add deprecation note
 func IsFileNotFound(err error) bool {
 	if f, ok := err.(HasFault); ok {
 		switch f.Fault().(type) {
