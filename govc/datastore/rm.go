@@ -107,7 +107,8 @@ func (cmd *rm) Run(ctx context.Context, f *flag.FlagSet) error {
 		err = remove(ctx, args[0])
 	}
 
-	if errors.Is(err, &types.FileNotFound{}) && cmd.force {
+	var nfe *types.FileNotFound
+	if errors.As(err, &nfe) && cmd.force {
 		return nil // Ignore error
 	}
 

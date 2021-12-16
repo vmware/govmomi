@@ -18901,13 +18901,13 @@ func (f *FileNotFound) Error() string {
 	return fmt.Sprintf("fault: FileNotFound (file=%s)", f.File)
 }
 
-func (f *FileNotFound) Is(target error) bool {
+/*func (f *FileNotFound) Is(target error) bool {
 	if _, ok := target.(*FileNotFound); ok {
 		return true
 	}
 
 	return false
-}
+}*/
 
 func init() {
 	t["FileNotFound"] = reflect.TypeOf((*FileNotFound)(nil)).Elem()
