@@ -21,7 +21,10 @@ import (
 	"time"
 )
 
-var xmlSchemaInstance = Name{Space: "http://www.w3.org/2001/XMLSchema-instance", Local: "type"}
+// SchemaInstanceURI is the XML namespace URI for the schema instance.
+const SchemaInstanceURI = "http://www.w3.org/2001/XMLSchema-instance"
+
+var xmlSchemaInstance = Name{Space: SchemaInstanceURI, Local: "type"}
 
 var xsiType = Name{Space: "xsi", Local: "type"}
 
