@@ -1838,6 +1838,7 @@ Options:
   -prefix=true           Prepend target name to image filenames if missing
   -sha=0                 Generate manifest using SHA 1, 256, 512 or 0 to skip
   -vm=                   Virtual machine [GOVC_VM]
+  -snapshot=             Specifies a snapshot to export from (supports running VMs)
 ```
 
 ## extension.info
