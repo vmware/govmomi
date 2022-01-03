@@ -24,6 +24,7 @@ import (
 	"crypto/sha512"
 	"flag"
 	"fmt"
+	"github.com/vmware/govmomi/object"
 	"hash"
 	"io"
 	"os"
@@ -41,12 +42,13 @@ import (
 type ovfx struct {
 	*flags.VirtualMachineFlag
 
-	dest   string
-	name   string
-	force  bool
-	images bool
-	prefix bool
-	sha    int
+	dest     string
+	name     string
+	snapshot string
+	force    bool
+	images   bool
+	prefix   bool
+	sha      int
 
 	mf bytes.Buffer
 }
@@ -66,6 +68,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.VirtualMachineFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.name, "name", "", "Specifies target name (defaults to source name)")
+	f.StringVar(&cmd.snapshot, "snapshot", "", "Specifies a snapshot to export from (supports running VMs)")
 	f.BoolVar(&cmd.force, "f", false, "Overwrite existing")
 	f.BoolVar(&cmd.images, "i", false, "Include image files (*.{iso,img})")
 	f.BoolVar(&cmd.prefix, "prefix", true, "Prepend target name to image filenames if missing")
@@ -129,7 +132,7 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	lease, err := vm.Export(ctx)
+	lease, err := cmd.requestExport(ctx, vm)
 	if err != nil {
 		return err
 	}
@@ -211,6 +214,17 @@ func (cmd *ovfx) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	return file.Close()
+}
+
+func (cmd *ovfx) requestExport(ctx context.Context, vm *object.VirtualMachine) (*nfc.Lease, error) {
+	if cmd.snapshot != "" {
+		snapRef, err := vm.FindSnapshot(ctx, cmd.snapshot)
+		if err != nil {
+			return nil, err
+		}
+		return vm.ExportSnapshot(ctx, snapRef)
+	}
+	return vm.Export(ctx)
 }
 
 func (cmd *ovfx) include(item *nfc.FileItem) bool {
