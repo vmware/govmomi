@@ -24,12 +24,13 @@ import (
 	"crypto/sha512"
 	"flag"
 	"fmt"
-	"github.com/vmware/govmomi/object"
 	"hash"
 	"io"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/vmware/govmomi/object"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
