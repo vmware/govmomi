@@ -231,6 +231,12 @@ but appear via `govc $cmd -h`:
  - [namespace.cluster.enable](#namespaceclusterenable)
  - [namespace.cluster.ls](#namespaceclusterls)
  - [namespace.logs.download](#namespacelogsdownload)
+ - [namespace.service.activate](#namespaceserviceactivate)
+ - [namespace.service.create](#namespaceservicecreate)
+ - [namespace.service.deactivate](#namespaceservicedeactivate)
+ - [namespace.service.info](#namespaceserviceinfo)
+ - [namespace.service.ls](#namespaceservicels)
+ - [namespace.service.rm](#namespaceservicerm)
  - [object.collect](#objectcollect)
  - [object.destroy](#objectdestroy)
  - [object.method](#objectmethod)
@@ -3786,6 +3792,88 @@ Examples:
 
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
+```
+
+## namespace.service.activate
+
+```
+Usage: govc namespace.service.activate [OPTIONS] NAME...
+
+Activates a vSphere Namespace Supervisor Service.
+
+Examples:
+  govc namespace.service.activate my-supervisor-service other-supervisor-service
+
+Options:
+```
+
+## namespace.service.create
+
+```
+Usage: govc namespace.service.create [OPTIONS] MANIFEST
+
+Creates a vSphere Namespace Supervisor Service.
+
+Examples:
+  govc namespace.service.create manifest.yaml
+
+Options:
+```
+
+## namespace.service.deactivate
+
+```
+Usage: govc namespace.service.deactivate [OPTIONS] NAME...
+
+Deactivates a vSphere Namespace Supervisor Service.
+
+Examples:
+  govc namespace.service.deactivate my-supervisor-service other-supervisor-service
+
+Options:
+```
+
+## namespace.service.info
+
+```
+Usage: govc namespace.service.info [OPTIONS] NAME
+
+Gets information of a specific supervisor service.
+
+Examples:
+  govc namespace.service.info my-supervisor-service
+  govc namespace.service.info -json my-supervisor-service | jq .
+
+Options:
+```
+
+## namespace.service.ls
+
+```
+Usage: govc namespace.service.ls [OPTIONS]
+
+List namepace registered supervisor services.
+
+Examples:
+  govc namespace.service.ls
+  govc namespace.service.ls -l
+  govc namespace.service.ls -json | jq .
+
+Options:
+  -l=false               Long listing format
+```
+
+## namespace.service.rm
+
+```
+Usage: govc namespace.service.rm [OPTIONS] NAME...
+
+Removes a vSphere Namespace Supervisor Service.
+
+Examples:
+  govc namespace.service.rm my-supervisor-service other-supervisor-service
+
+Options:
 ```
 
 ## object.collect

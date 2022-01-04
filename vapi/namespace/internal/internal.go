@@ -21,6 +21,7 @@ const (
 	NamespaceClusterPath                    = "/api/vcenter/namespace-management/clusters"
 	NamespaceDistributedSwitchCompatibility = "/api/vcenter/namespace-management/distributed-switch-compatibility"
 	NamespaceEdgeClusterCompatibility       = "/api/vcenter/namespace-management/edge-cluster-compatibility"
+	SupervisorServicesPath                  = "/api/vcenter/namespace-management/supervisor-services"
 )
 
 type SupportBundleToken struct {
