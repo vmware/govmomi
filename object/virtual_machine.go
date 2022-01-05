@@ -1063,3 +1063,16 @@ func (v VirtualMachine) QueryChangedDiskAreas(ctx context.Context, baseSnapshot,
 
 	return res.Returnval, nil
 }
+
+// ExportSnapshot exports all VMDK-files up to (but not including) a specified snapshot. This
+// is useful when exporting a running VM.
+func (v *VirtualMachine) ExportSnapshot(ctx context.Context, snapshot *types.ManagedObjectReference) (*nfc.Lease, error) {
+	req := types.ExportSnapshot{
+		This: *snapshot,
+	}
+	resp, err := methods.ExportSnapshot(ctx, v.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+	return nfc.NewLease(v.c, resp.Returnval), nil
+}
