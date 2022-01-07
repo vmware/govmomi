@@ -370,7 +370,7 @@ func (c *Context) SetSession(session Session, login bool) {
 	}
 }
 
-// WithLock holds a lock for the given object while then given function is run.
+// WithLock holds a lock for the given object while the given function is run.
 // It will skip locking if this context already holds the given object's lock.
 func (c *Context) WithLock(obj mo.Reference, f func()) {
 	// TODO: This is not always going to be correct. An object should
