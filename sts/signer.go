@@ -30,6 +30,7 @@ import (
 	"io"
 	"io/ioutil"
 	mrand "math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"strings"
@@ -274,11 +275,18 @@ func (s *Signer) SignRequest(req *http.Request) error {
 		}
 
 		var buf bytes.Buffer
+		host := req.URL.Hostname()
+
+		// Check if the host IP is in IPv6 format. If yes, add the opening and closing square brackets.
+		if isIPv6(host) {
+			host = fmt.Sprintf("%s%s%s", "[", host, "]")
+		}
+
 		msg := []string{
 			nonce,
 			req.Method,
 			req.URL.Path,
-			strings.ToLower(req.URL.Hostname()),
+			strings.ToLower(host),
 			port,
 		}
 		for i := range msg {
@@ -328,4 +336,12 @@ func (s *Signer) NewRequest() TokenRequest {
 		Userinfo:    s.user,
 		KeyID:       s.keyID,
 	}
+}
+
+func isIPv6(s string) bool {
+	ip := net.ParseIP(s)
+	if ip == nil {
+		return false
+	}
+	return len(ip) == net.IPv6len
 }

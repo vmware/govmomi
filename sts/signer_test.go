@@ -133,4 +133,10 @@ func TestSigner(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	req, _ = http.NewRequest(http.MethodPost, "https://[0:0:0:0:0:0:0:1]", nil)
+	err = s.SignRequest(req)
+	if err != nil {
+		t.Fatal(err)
+	}
 }
