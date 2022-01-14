@@ -5098,6 +5098,7 @@ Examples:
   govc vm.change -vm $vm -latency high
   govc vm.change -vm $vm -latency normal
   govc vm.change -vm $vm -uuid 4139c345-7186-4924-a842-36b69a24159b
+  govc vm.change -vm $vm -scheduled-hw-upgrade-policy always
 
 Options:
   -annotation=                   VM description
@@ -5118,6 +5119,7 @@ Options:
   -memory-pin=<nil>              Reserve all guest memory
   -name=                         Display name
   -nested-hv-enabled=<nil>       Enable nested hardware-assisted virtualization
+  -scheduled-hw-upgrade-policy=  Schedule hardware upgrade policy (onSoftPowerOff|never|always)
   -sync-time-with-host=<nil>     Enable SyncTimeWithHost
   -uuid=                         BIOS UUID
   -vm=                           Virtual machine [GOVC_VM]
