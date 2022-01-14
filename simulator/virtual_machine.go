@@ -1769,6 +1769,15 @@ type vmFolder interface {
 	CreateVMTask(ctx *Context, c *types.CreateVM_Task) soap.HasFault
 }
 
+func (vm *VirtualMachine) cloneDevice() []types.BaseVirtualDevice {
+	src := types.ArrayOfVirtualDevice{
+		VirtualDevice: vm.Config.Hardware.Device,
+	}
+	dst := types.ArrayOfVirtualDevice{}
+	deepCopy(src, &dst)
+	return dst.VirtualDevice
+}
+
 func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soap.HasFault {
 	pool := req.Spec.Location.Pool
 	if pool == nil {
@@ -1827,7 +1836,8 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		config.VirtualSMCPresent = vm.Config.Hardware.VirtualSMCPresent
 
 		defaultDevices := object.VirtualDeviceList(esx.VirtualDevice)
-		devices := vm.Config.Hardware.Device
+		devices := vm.cloneDevice()
+
 		for _, device := range devices {
 			var fop types.VirtualDeviceConfigSpecFileOperation
 
