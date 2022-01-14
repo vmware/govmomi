@@ -188,8 +188,30 @@ func (c *CustomFieldsManager) SetField(ctx *Context, req *types.SetField) soap.H
 		Value:            req.Value,
 	}
 
+	removeIndex := func(s []types.BaseCustomFieldValue, i int) []types.BaseCustomFieldValue {
+		new := make([]types.BaseCustomFieldValue, 0)
+		new = append(new, s[:i]...)
+		return append(new, s[i+1:]...)
+	}
+
+	removeExistingValues := func(s []types.BaseCustomFieldValue) []types.BaseCustomFieldValue {
+		for i := 0; i < len(s); {
+			if s[i].GetCustomFieldValue().Key == newValue.GetCustomFieldValue().Key {
+				s = removeIndex(s, i)
+			}
+			i++
+		}
+		return s
+	}
+
 	entity := ctx.Map.Get(req.Entity).(mo.Entity).Entity()
+
 	ctx.WithLock(entity, func() {
+		// Check if custom value and value are already set. If so, remove them.
+		entity.CustomValue = removeExistingValues(entity.CustomValue)
+		entity.Value = removeExistingValues(entity.Value)
+
+		// Add the new value
 		entity.CustomValue = append(entity.CustomValue, newValue)
 		entity.Value = append(entity.Value, newValue)
 	})
