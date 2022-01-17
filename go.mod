@@ -14,4 +14,4 @@ require (
 	github.com/vmware/vmw-guestinfo v0.0.0-20170707015358-25eff159a728
 )
 
-require github.com/kr/text v0.1.0 // indirect
+require	github.com/kr/text v0.1.0 // indirect
