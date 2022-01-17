@@ -818,6 +818,16 @@ load test_helper
   backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].Backing)
   assert_equal true "$(jq .EagerlyScrub <<<"$backing")"
   assert_equal false "$(jq .ThinProvisioned <<<"$backing")"
+
+  # test that each vm has a unique vmdk path
+  for item in FileName Uuid;  do
+    items=$(govc object.collect -json -type m / config.hardware.device | \
+              jq ".ChangeSet[].Val.VirtualDevice[].Backing.$item | select(. != null)")
+
+    nitems=$(wc -l <<<"$items")
+    uitems=$(sort -u <<<"$items" | wc -l)
+    assert_equal "$nitems" "$uitems"
+  done
 }
 
 @test "vm.clone change resources" {
