@@ -54,6 +54,7 @@ func TestObjectCustomFields(t *testing.T) {
 
 	fieldName := "testField"
 	fieldValue := "12345"
+	updatedFieldValue := "67890"
 
 	// Test that field is not created
 	err = vmm.SetCustomValue(ctx, fieldName, fieldValue)
@@ -113,37 +114,47 @@ func TestObjectCustomFields(t *testing.T) {
 		t.Fatalf("len(vm.AvailableField) expected 2, got %d", len(vm.AvailableField))
 	}
 
+	testFieldValues := func(want string) {
+		if len(vm.CustomValue) != 1 {
+			t.Fatalf("len(vm.CustomValue) expected 1, got %d", len(vm.CustomValue))
+		}
+
+		if len(vm.Value) != 1 {
+			t.Fatalf("len(vm.Value) expected 1, got %d", len(vm.Value))
+		}
+
+		if vm.CustomValue[0].(*types.CustomFieldStringValue).Key != field.Key {
+			t.Fatalf("vm.CustomValue[0].Key expected %d, got %d",
+				field.Key, vm.CustomValue[0].(*types.CustomFieldStringValue).Key)
+		}
+		if vm.CustomValue[0].(*types.CustomFieldStringValue).Value != want {
+			t.Fatalf("vm.CustomValue[0].Value expected %s, got %s",
+				want, vm.CustomValue[0].(*types.CustomFieldStringValue).Value)
+		}
+
+		if vm.Value[0].(*types.CustomFieldStringValue).Key != field.Key {
+			t.Fatalf("vm.Value[0].Key expected %d, got %d",
+				field.Key, vm.Value[0].(*types.CustomFieldStringValue).Key)
+		}
+		if vm.Value[0].(*types.CustomFieldStringValue).Value != want {
+			t.Fatalf("vm.Value[0].Value expected %s, got %s",
+				want, vm.Value[0].(*types.CustomFieldStringValue).Value)
+		}
+	}
+
 	// Set field
 	err = vmm.SetCustomValue(ctx, fieldName, fieldValue)
 	if err != nil {
 		t.Fatal(err)
 	}
+	testFieldValues(fieldValue)
 
-	if len(vm.CustomValue) != 1 {
-		t.Fatalf("len(vm.CustomValue) expected 1, got %d", len(vm.CustomValue))
+	// Update field
+	err = vmm.SetCustomValue(ctx, fieldName, updatedFieldValue)
+	if err != nil {
+		t.Fatal(err)
 	}
-
-	if len(vm.Value) != 1 {
-		t.Fatalf("len(vm.Value) expected 1, got %d", len(vm.Value))
-	}
-
-	if vm.CustomValue[0].(*types.CustomFieldStringValue).Key != field.Key {
-		t.Fatalf("vm.CustomValue[0].Key expected %d, got %d",
-			field.Key, vm.CustomValue[0].(*types.CustomFieldStringValue).Key)
-	}
-	if vm.CustomValue[0].(*types.CustomFieldStringValue).Value != fieldValue {
-		t.Fatalf("vm.CustomValue[0].Value expected %s, got %s",
-			fieldValue, vm.CustomValue[0].(*types.CustomFieldStringValue).Value)
-	}
-
-	if vm.Value[0].(*types.CustomFieldStringValue).Key != field.Key {
-		t.Fatalf("vm.Value[0].Key expected %d, got %d",
-			field.Key, vm.Value[0].(*types.CustomFieldStringValue).Key)
-	}
-	if vm.Value[0].(*types.CustomFieldStringValue).Value != fieldValue {
-		t.Fatalf("vm.Value[0].Value expected %s, got %s",
-			fieldValue, vm.Value[0].(*types.CustomFieldStringValue).Value)
-	}
+	testFieldValues(updatedFieldValue)
 
 	// Rename field
 	newName := field.Name + "_renamed"
