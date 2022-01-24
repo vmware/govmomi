@@ -58,6 +58,8 @@ $ git add <files>
 $ git commit -m "govc: Add feature ..." -m "Closes: #<issue-number>"
 $ git push $USER issue-<number>
 ```
+**Note**:  
+To register the new `govc` command package, add a blank `_` import to `govmomi/govc/main.go`.
 
 ### Example 4 - Fix a Bug in `vcsim`
 
