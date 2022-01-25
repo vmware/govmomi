@@ -43,6 +43,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vapi/appliance/shutdown"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -91,6 +92,7 @@ type handler struct {
 	Library     map[string]*content
 	Update      map[string]update
 	Download    map[string]download
+	Shutdown    shutdown.Status
 }
 
 func init() {
@@ -114,6 +116,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		Library:     make(map[string]*content),
 		Update:      make(map[string]update),
 		Download:    make(map[string]download),
+		Shutdown:    shutdown.Status{},
 	}
 
 	handlers := []struct {
@@ -155,6 +158,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
 		{internal.DebugEcho, s.debugEcho},
+		{shutdown.ApplianceShutDownPath, s.shutdown},
 	}
 
 	for i := range handlers {
@@ -300,7 +304,6 @@ func Status(w http.ResponseWriter, httpStatus int, val ...interface{}) {
 	}
 
 	err := json.NewEncoder(w).Encode(val[0])
-
 	if err != nil {
 		log.Panic(err)
 	}
@@ -329,6 +332,16 @@ func OK(w http.ResponseWriter, val ...interface{}) {
 	StatusOK(w, s)
 }
 
+// OKWithNoContent responds with http.StatusNoContent.
+func OKWithNoContent(w http.ResponseWriter) {
+	OKStatusNoContent(w)
+}
+
+// OKStatusNoContent responds with http.StatusNoContent.
+func OKStatusNoContent(w http.ResponseWriter) {
+	Status(w, http.StatusNoContent)
+}
+
 // BadRequest responds with http.StatusBadRequest and json encoded vAPI error of type kind.
 // For use with "/rest" endpoints where the response is a "value" wrapped structure.
 func BadRequest(w http.ResponseWriter, kind string) {
@@ -342,7 +355,6 @@ func BadRequest(w http.ResponseWriter, kind string) {
 	}{
 		Type: kind,
 	})
-
 	if err != nil {
 		log.Panic(err)
 	}
@@ -478,6 +490,47 @@ func (s *handler) category(w http.ResponseWriter, r *http.Request) {
 		}
 
 		OK(w, ids)
+	}
+}
+
+func (s *handler) shutdown(w http.ResponseWriter, r *http.Request) {
+	delayShutdown := func(delay int) {
+		go time.AfterFunc(time.Duration(delay)*time.Minute, func() {
+			s.Lock()
+			s.Shutdown.ShutDownTime = ""
+			s.Shutdown.Action = ""
+			s.Shutdown.Reason = ""
+			s.Unlock()
+		})
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		OK(w, s.Shutdown)
+	case http.MethodPost:
+		switch r.URL.Query().Get(shutdown.Action) {
+		case shutdown.Cancel:
+			delayShutdown(0)
+			OKWithNoContent(w)
+		case shutdown.Reboot:
+			var spec shutdown.Spec
+			if s.decode(r, w, &spec) {
+				s.Shutdown.ShutDownTime = time.Now().UTC().Add(time.Duration(spec.Delay) * time.Minute).String()
+				s.Shutdown.Reason = spec.Reason
+				s.Shutdown.Action = shutdown.Reboot
+				delayShutdown(spec.Delay)
+				OKWithNoContent(w)
+			}
+		case shutdown.PowerOff:
+			var spec shutdown.Spec
+			if s.decode(r, w, &spec) {
+				s.Shutdown.ShutDownTime = time.Now().Local().Add(time.Duration(spec.Delay) * time.Minute).String()
+				s.Shutdown.Reason = spec.Reason
+				s.Shutdown.Action = shutdown.PowerOff
+				delayShutdown(spec.Delay)
+				OKWithNoContent(w)
+			}
+		}
 	}
 }
 

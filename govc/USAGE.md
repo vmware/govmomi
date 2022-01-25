@@ -300,6 +300,10 @@ but appear via `govc $cmd -h`:
  - [vapp.power](#vapppower)
  - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
  - [vcsa.net.proxy.info](#vcsanetproxyinfo)
+ - [vcsa.shutdown.cancel](#vcsashutdowncancel)
+ - [vcsa.shutdown.poweroff](#vcsashutdownpoweroff)
+ - [vcsa.shutdown.reboot](#vcsashutdownreboot)
+ - [vcsa.shutdown.status](#vcsashutdownstatus)
  - [version](#version)
  - [vm.change](#vmchange)
  - [vm.clone](#vmclone)
@@ -5062,6 +5066,61 @@ Retrieve the VC networking proxy configuration
 
 Examples:
   govc vcsa.net.proxy.info
+
+Options:
+```
+
+## vcsa.shutdown.cancel
+
+```
+Usage: govc vcsa.shutdown.cancel [OPTIONS]
+
+Cancel pending shutdown action.
+
+
+Examples:
+  govc vcsa.shutdown.cancel
+
+Options:
+```
+
+## vcsa.shutdown.poweroff
+
+```
+Usage: govc vcsa.shutdown.poweroff [OPTIONS] REASON
+
+Power off the appliance.
+
+Examples:
+  govc vcsa.shutdown.poweroff  -delay 10 "powering off for maintenance"
+
+Options:
+  -delay=0               Minutes after which Power off should be initiated.
+```
+
+## vcsa.shutdown.reboot
+
+```
+Usage: govc vcsa.shutdown.reboot [OPTIONS] REASON
+
+Reboot the appliance.
+
+Examples:
+  govc vcsa.shutdown.reboot -delay 10 "rebooting for maintenance"
+
+Options:
+  -delay=0               Minutes after which reboot action should be initiated.
+```
+
+## vcsa.shutdown.status
+
+```
+Usage: govc vcsa.shutdown.status [OPTIONS]
+
+Get details about the pending shutdown action.
+
+Examples:
+  govc vcsa.shutdown.status
 
 Options:
 ```

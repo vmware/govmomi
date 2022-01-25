@@ -77,6 +77,7 @@ type change struct {
 	extraConfig     extraConfig
 	extraConfigFile extraConfigFile
 	Latency         string
+	hwUpgradePolicy string
 }
 
 func init() {
@@ -103,6 +104,28 @@ func (cmd *change) setLatency() error {
 		}
 	}
 	return fmt.Errorf("latency must be one of: %s", strings.Join(latencyLevels, "|"))
+}
+
+var hwUpgradePolicies = []string{
+	string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicyOnSoftPowerOff),
+	string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicyNever),
+	string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicyAlways),
+}
+
+// setHwUpgradePolicy validates hwUpgradePolicy if set
+func (cmd *change) setHwUpgradePolicy() error {
+	if cmd.hwUpgradePolicy == "" {
+		return nil
+	}
+	for _, l := range hwUpgradePolicies {
+		if l == cmd.hwUpgradePolicy {
+			cmd.ScheduledHardwareUpgradeInfo = &types.ScheduledHardwareUpgradeInfo{
+				UpgradePolicy: string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicy(cmd.hwUpgradePolicy)),
+			}
+			return nil
+		}
+	}
+	return fmt.Errorf("Hardware upgrade policy must be one of: %s", strings.Join(hwUpgradePolicies, "|"))
 }
 
 // setAllocation sets *info=nil if none of the fields have been set.
@@ -155,6 +178,8 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.MemoryHotAddEnabled), "memory-hot-add-enabled", "Enable memory hot add")
 	f.Var(flags.NewOptionalBool(&cmd.MemoryReservationLockedToMax), "memory-pin", "Reserve all guest memory")
 	f.Var(flags.NewOptionalBool(&cmd.CpuHotAddEnabled), "cpu-hot-add-enabled", "Enable CPU hot add")
+
+	f.StringVar(&cmd.hwUpgradePolicy, "scheduled-hw-upgrade-policy", "", fmt.Sprintf("Schedule hardware upgrade policy (%s)", strings.Join(hwUpgradePolicies, "|")))
 }
 
 func (cmd *change) Description() string {
@@ -174,7 +199,8 @@ Examples:
   vmware-rpctool "info-get guestinfo.vmname"
   govc vm.change -vm $vm -latency high
   govc vm.change -vm $vm -latency normal
-  govc vm.change -vm $vm -uuid 4139c345-7186-4924-a842-36b69a24159b`
+  govc vm.change -vm $vm -uuid 4139c345-7186-4924-a842-36b69a24159b
+  govc vm.change -vm $vm -scheduled-hw-upgrade-policy always`
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -203,6 +229,10 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if err = cmd.setLatency(); err != nil {
+		return err
+	}
+
+	if err = cmd.setHwUpgradePolicy(); err != nil {
 		return err
 	}
 
