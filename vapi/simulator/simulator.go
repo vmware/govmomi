@@ -43,6 +43,9 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vapi/appliance/update/pending"
+	"github.com/vmware/govmomi/vapi/appliance/update/policy"
+	"github.com/vmware/govmomi/vapi/appliance/update/staged"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -155,6 +158,10 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
 		{internal.DebugEcho, s.debugEcho},
+		{pending.Path, s.listPendingUpdates},
+		{pending.Path + "/", s.pendingUpdates},
+		{staged.Path + "/", s.stagedUpdates},
+		{policy.Path + "/", s.checkUpdates},
 	}
 
 	for i := range handlers {
@@ -2104,4 +2111,286 @@ func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
 
 func (s *handler) debugEcho(w http.ResponseWriter, r *http.Request) {
 	r.Write(w)
+}
+
+func (s *handler) listPendingUpdates(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		pendingUpdates := []pending.Summary{
+			{
+				Description: pending.Description{
+					Args:           []string{"Patch for VMware vCenter Server 7.0"},
+					DefaultMessage: "Patch for VMware vCenter Server 7.0",
+					ID:             "com.applmgmt.plain_message",
+				},
+				Name:           "VC-7.0U2c",
+				Priority:       pending.HIGH,
+				RebootRequired: false,
+				ReleaseDate:    "2021-08-24T00:00:00.000Z",
+				Severity:       pending.IMPORTANT,
+				Size:           5142,
+				UpdateType:     pending.FIX,
+				Version:        "7.0.2.00400",
+			},
+			{
+				Description: pending.Description{
+					Args:           []string{"Patch for VMware vCenter Server 7.0"},
+					DefaultMessage: "Patch for VMware vCenter Server 7.0",
+					ID:             "com.applmgmt.plain_message",
+				},
+				Name:           "VC-7.0U3a",
+				Priority:       pending.MEDIUM,
+				RebootRequired: false,
+				ReleaseDate:    "2021-10-21T00:00:00.000Z",
+				Severity:       pending.CRITICAL,
+				Size:           7084,
+				UpdateType:     pending.UPDATE,
+				Version:        "7.0.3.00100",
+			},
+			{
+				Description: pending.Description{
+					Args:           []string{"Patch for VMware vCenter Server 7.0"},
+					DefaultMessage: "Patch for VMware vCenter Server 7.0",
+					ID:             "com.applmgmt.plain_message",
+				},
+				Name:           "VC-7.0U2d",
+				Priority:       pending.LOW,
+				RebootRequired: false,
+				ReleaseDate:    "2021-09-16T00:00:00.000Z",
+				Severity:       pending.LOW_SEVERITY,
+				Size:           5291,
+				UpdateType:     pending.UPDATE,
+				Version:        "7.0.2.00500",
+			},
+		}
+		OK(w, pendingUpdates)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) pendingUpdates(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		var info pending.Info
+
+		info.Name = "VC-7.0U2a"
+		info.UpdateType = pending.SECURITY
+		info.RebootRequired = false
+		info.Priority = pending.HIGH
+		info.KnowledgeBase = "https://docs.vmware.com/en/VMware-vSphere/7.0/rn/vsphere-vcenter-server-70u2a-release-notes.html"
+		info.ReleaseDate = "2021-04-27T00:00:00.000Z"
+		info.Severity = pending.MODERATE
+		info.Size = 5142
+		info.Staged = false
+
+		info.Contents = []pending.Content{
+			{
+				ID:             "",
+				DefaultMessage: "",
+				Args:           []string{},
+			},
+		}
+
+		info.ServicesInfo = []pending.UpdateServiceInfo{
+			{
+				Service: "vmware-pod",
+				Description: pending.Description{
+					DefaultMessage: "vmware-pod",
+					ID:             "com.applmgmt.plain_message",
+					Args:           []string{"vmware-pod"},
+				},
+			}, {
+				Description: pending.Description{
+					Args:           []string{"vsphere-ui"},
+					DefaultMessage: "vsphere-ui",
+					ID:             "com.applmgmt.plain_message",
+				},
+				Service: "vsphere-ui",
+			}, {
+				Description: pending.Description{
+					Args:           []string{"vmafdd"},
+					DefaultMessage: "com.applmgmt.plain_message",
+					ID:             "vmafdd",
+				},
+				Service: "vmafdd",
+			},
+		}
+
+		info.Description = pending.Description{
+			Args:           []string{"Patch for VMware vCenter Server 7.0"},
+			DefaultMessage: "Patch for VMware vCenter Server 7.0",
+			ID:             "com.applmgmt.plain_message",
+		}
+
+		info.Eulas = []pending.Eula{
+			{
+				Args:           []string{},
+				DefaultMessage: "VMWARE END USER LICENSE AGREEMENT",
+				ID:             "patch.plain.message",
+			},
+		}
+
+		OK(w, info)
+	case http.MethodPost:
+		switch r.URL.Query().Get(pending.Action) {
+		case pending.Precheck:
+			res := pending.PrecheckResult{}
+
+			res.RebootRequired = false
+			res.CheckTime = "2022-01-24T15:30:03.173Z"
+
+			res.Questions = []pending.Question{
+				{
+					DataItem: "vmdir.password",
+					Description: pending.Description{
+						Args: []string{},
+						DefaultMessage: "For the first instance of the identity domain, this is the password given to the Administrator account.  " +
+							"Otherwise, this is the password of the Administrator account of the replication partner.",
+						ID: "vmdir.password.desc",
+					},
+					Text: pending.Text{
+						Args:           []string{},
+						DefaultMessage: "Single Sign-On administrator password",
+						ID:             "vmdir.password.text",
+					},
+					Type: pending.PLAIN_TEXT,
+				},
+			}
+
+			OK(w, res)
+
+		case pending.Stage:
+			w.WriteHeader(http.StatusNoContent)
+		case pending.Validate:
+			res := pending.Notifications{
+				Errors: []pending.Notification{
+					{
+						ID: "",
+						Message: pending.Message{
+							Args:           nil,
+							DefaultMessage: "",
+							ID:             "",
+						},
+						Resolution: pending.Resolution{
+							Args:           nil,
+							DefaultMessage: "",
+							ID:             "",
+						},
+					},
+				},
+				Warnings: []pending.Notification{
+					{
+						ID: "",
+						Message: pending.Message{
+							Args:           nil,
+							DefaultMessage: "",
+							ID:             "",
+						},
+						Resolution: pending.Resolution{
+							Args:           nil,
+							DefaultMessage: "",
+							ID:             "",
+						},
+					},
+				},
+				Info: []pending.Notification{
+					{
+						ID: "",
+						Message: pending.Message{
+							Args:           nil,
+							DefaultMessage: "",
+							ID:             "",
+						},
+						Resolution: pending.Resolution{
+							Args:           nil,
+							DefaultMessage: "",
+							ID:             "",
+						},
+					},
+				},
+			}
+			OK(w, res)
+		case pending.Install:
+			w.WriteHeader(http.StatusNoContent)
+		case pending.StageAndInstall:
+			w.WriteHeader(http.StatusNoContent)
+		default:
+			http.NotFound(w, r)
+		}
+	}
+}
+
+func (s *handler) stagedUpdates(w http.ResponseWriter, r *http.Request) {
+	var info staged.Info
+	switch r.Method {
+	case http.MethodGet:
+		info = staged.Info{
+			Description: staged.Description{
+				Args:           []string{"Patch for VMware vCenter Server 7.0"},
+				DefaultMessage: "Patch for VMware vCenter Server 7.0",
+				ID:             "com.applmgmt.plain_message",
+			},
+			Name:            "VC-7.0U1d",
+			Priority:        staged.LOW,
+			RebootRequired:  false,
+			ReleaseDate:     "2021-02-02T00:00:00.000Z",
+			Severity:        staged.CRITICAL,
+			Size:            1029345,
+			StagingComplete: false,
+			UpdateType:      staged.FIX,
+			Version:         "7.0.1.00300",
+		}
+		OK(w, info)
+	case http.MethodDelete:
+		info.Description = staged.Description{
+			Args:           nil,
+			DefaultMessage: "",
+			ID:             "",
+		}
+		info.Name = ""
+		info.Priority = ""
+		info.RebootRequired = false
+		info.ReleaseDate = ""
+		info.Severity = ""
+		info.Size = 0
+		info.StagingComplete = false
+		info.UpdateType = ""
+		info.Version = ""
+
+		w.WriteHeader(http.StatusNoContent)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) checkUpdates(w http.ResponseWriter, r *http.Request) {
+
+	switch r.Method {
+	case http.MethodGet:
+		var p policy.Info
+		p.AutoStage = false
+		p.AutoUpdate = false
+		p.CertificateCheck = true
+		p.CustomURL = "https://vcsim-updates.com/"
+		p.DefaultURL = "https://vapp-updates.vmware.com/vai-catalog/valm/vmw/8d167796-34d5-4899-be0a-6daade4005a3/7.0.1.00200.latest/"
+		p.ManualControl = false
+		p.Username = "vcsim-user"
+		p.CheckSchedule = []policy.CheckSchedule{
+			{
+				Day:    "MONDAY",
+				Hour:   12,
+				Minute: 24,
+			},
+		}
+
+		OK(w, p)
+	case http.MethodPut:
+		var input policy.PolicyConfig
+		if s.decode(r, w, &input) {
+			w.WriteHeader(http.StatusNoContent)
+		}
+	default:
+		http.NotFound(w, r)
+	}
 }

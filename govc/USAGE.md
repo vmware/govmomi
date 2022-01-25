@@ -300,6 +300,17 @@ but appear via `govc $cmd -h`:
  - [vapp.power](#vapppower)
  - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
  - [vcsa.net.proxy.info](#vcsanetproxyinfo)
+ - [vcsa.update.pending.get](#vcsaupdatependingget)
+ - [vcsa.update.pending.install](#vcsaupdatependinginstall)
+ - [vcsa.update.pending.list](#vcsaupdatependinglist)
+ - [vcsa.update.pending.precheck](#vcsaupdatependingprecheck)
+ - [vcsa.update.pending.stage](#vcsaupdatependingstage)
+ - [vcsa.update.pending.stage-and-install](#vcsaupdatependingstage-and-install)
+ - [vcsa.update.pending.validate](#vcsaupdatependingvalidate)
+ - [vcsa.update.policy.get](#vcsaupdatepolicyget)
+ - [vcsa.update.policy.set](#vcsaupdatepolicyset)
+ - [vcsa.update.staged.delete](#vcsaupdatestageddelete)
+ - [vcsa.update.staged.get](#vcsaupdatestagedget)
  - [version](#version)
  - [vm.change](#vmchange)
  - [vm.clone](#vmclone)
@@ -5062,6 +5073,152 @@ Retrieve the VC networking proxy configuration
 
 Examples:
   govc vcsa.net.proxy.info
+
+Options:
+```
+
+## vcsa.update.pending.get
+
+```
+Usage: govc vcsa.update.pending.get [OPTIONS] VERSION
+
+Gets update information
+Examples:
+  govc vcsa.update.pending.get 7.0.3.00000
+
+Options:
+```
+
+## vcsa.update.pending.install
+
+```
+Usage: govc vcsa.update.pending.install [OPTIONS] [VERSION] [USERDATA]
+
+Validates the user provided data before the update installation.
+
+Examples:
+  govc vcsa.update.pending.install 7.0.3.00000 "key1=val1,key2=val2"
+
+Options:
+```
+
+## vcsa.update.pending.list
+
+```
+Usage: govc vcsa.update.pending.list [OPTIONS] SOURCE_TYPE
+
+Checks if new updates are available.
+Examples:
+  1. govc vcsa.update.pending.list LOCAL_AND_ONLINE
+  2. govc vcsa.update.pending.list LAST_CHECK 
+  3. govc vcsa.update.pending.list LOCAL
+
+Options:
+```
+
+## vcsa.update.pending.precheck
+
+```
+Usage: govc vcsa.update.pending.precheck [OPTIONS] VERSION
+
+Runs update precheck
+Examples:
+  govc vcsa.update.pending.precheck 7.0.3.00000
+
+Options:
+```
+
+## vcsa.update.pending.stage
+
+```
+Usage: govc vcsa.update.pending.stage [OPTIONS] VERSION
+
+Starts staging the appliance update. 
+The updates are searched for in the following order: staged, CDROM, URL.
+Examples:
+  govc vcsa.update.pending.stage 7.0.3.00000
+
+Options:
+```
+
+## vcsa.update.pending.stage-and-install
+
+```
+Usage: govc vcsa.update.pending.stage-and-install [OPTIONS] [VERSION] [USERDATA]
+
+Starts operation of installing the appliance update. 
+Will stage update if not already staged The updates are searched for in the following order: staged, CDROM, URL
+
+Examples:
+  govc vcsa.update.pending.stage-and-install 7.0.3.00000 "key1=val1,key2=val2"
+
+Options:
+```
+
+## vcsa.update.pending.validate
+
+```
+Usage: govc vcsa.update.pending.validate [OPTIONS] [VERSION] [USERDATA]
+
+Validates the user provided data before the update installation.
+
+Examples:
+  govc vcsa.update.pending.validate 7.0.3.00000 "key1=val1,key2=val2"
+
+Options:
+```
+
+## vcsa.update.policy.get
+
+```
+Usage: govc vcsa.update.policy.get [OPTIONS]
+
+Gets the automatic update checking and staging policy.
+Examples:
+  govc vcsa.update.policy.get
+
+Options:
+```
+
+## vcsa.update.policy.set
+
+```
+Usage: govc vcsa.update.policy.set [OPTIONS] [DAY]
+
+Sets the automatic update checking and staging policy.
+Examples:
+  govc vcsa.update.policy.set
+
+Options:
+  -auto_stage=false        Automatically stage the latest update if available.
+  -certificate_check=true  Indicates whether certificates will be checked during patching. Warning: Setting this field to false will result in an insecure connection to update repository which can potentially put the appliance security at risk.
+  -custom_URL=             Current appliance update repository URL. If unset then default URL is assumed.
+  -hour=0                  Hour 0-24
+  -minute=0                Minute 0-59
+  -password=               Password for the update repository password If unset password will not be used to login.
+  -username=               Username for the update repository If unset username will not be used to login.
+```
+
+## vcsa.update.staged.delete
+
+```
+Usage: govc vcsa.update.staged.delete [OPTIONS]
+
+Deletes the staged update
+Examples:
+  govc vcsa.update.staged.delete
+
+Options:
+```
+
+## vcsa.update.staged.get
+
+```
+Usage: govc vcsa.update.staged.get [OPTIONS]
+
+Gets the current status of the staged update.
+Examples:
+  govc vcsa.update.staged.get
 
 Options:
 ```
