@@ -43,6 +43,15 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vapi/appliance/health/applmgmt"
+	"github.com/vmware/govmomi/vapi/appliance/health/database"
+	"github.com/vmware/govmomi/vapi/appliance/health/database_storage"
+	"github.com/vmware/govmomi/vapi/appliance/health/load"
+	"github.com/vmware/govmomi/vapi/appliance/health/mem"
+	"github.com/vmware/govmomi/vapi/appliance/health/software_packages"
+	"github.com/vmware/govmomi/vapi/appliance/health/storage"
+	"github.com/vmware/govmomi/vapi/appliance/health/swap"
+	"github.com/vmware/govmomi/vapi/appliance/health/system"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -155,6 +164,16 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
 		{internal.DebugEcho, s.debugEcho},
+		{applmgmt.HealthPath, s.applianceHealth},
+		{database.HealthPath, s.applianceDatabaseHealth},
+		{database_storage.HealthPath, s.applianceDatabaseStorageHealth},
+		{load.HealthPath, s.applianceLoadHealth},
+		{mem.HealthPath, s.applianceMemoryHealth},
+		{software_packages.HealthPath, s.applianceSoftwarePackagesHealth},
+		{storage.HealthPath, s.applianceStorageHealth},
+		{swap.HealthPath, s.applianceSwapHealth},
+		{system.HealthPath, s.applianceSystemHealth},
+		{system.HealthPath + "/", s.applianceSystemLastCheck},
 	}
 
 	for i := range handlers {
@@ -2104,4 +2123,113 @@ func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
 
 func (s *handler) debugEcho(w http.ResponseWriter, r *http.Request) {
 	r.Write(w)
+}
+
+func (s *handler) applianceHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceDatabaseHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := database.Info{
+			Messages: []database.Message{
+				{
+					Args:           nil,
+					DefaultMessage: "",
+					ID:             "",
+				},
+			},
+			Status: database.ERROR,
+		}
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceDatabaseStorageHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceLoadHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceMemoryHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceSoftwarePackagesHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceStorageHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceSwapHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceSystemHealth(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		status := "green"
+		OK(w, status)
+	default:
+		http.NotFound(w, r)
+	}
+}
+
+func (s *handler) applianceSystemLastCheck(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		lastCheckTime := time.Now().UTC().String()
+		OK(w, lastCheckTime)
+	default:
+		http.NotFound(w, r)
+	}
 }

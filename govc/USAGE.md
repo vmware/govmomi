@@ -298,6 +298,16 @@ but appear via `govc $cmd -h`:
  - [tree](#tree)
  - [vapp.destroy](#vappdestroy)
  - [vapp.power](#vapppower)
+ - [vcsa.health.applmgmt.get](#vcsahealthapplmgmtget)
+ - [vcsa.health.database.get](#vcsahealthdatabaseget)
+ - [vcsa.health.database_storage.get](#vcsahealthdatabase_storageget)
+ - [vcsa.health.load.get](#vcsahealthloadget)
+ - [vcsa.health.mem.get](#vcsahealthmemget)
+ - [vcsa.health.software_packages.get](#vcsahealthsoftware_packagesget)
+ - [vcsa.health.storage.get](#vcsahealthstorageget)
+ - [vcsa.health.swap.get](#vcsahealthswapget)
+ - [vcsa.health.system.get](#vcsahealthsystemget)
+ - [vcsa.health.system.last_check](#vcsahealthsystemlast_check)
  - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
  - [vcsa.net.proxy.info](#vcsanetproxyinfo)
  - [version](#version)
@@ -5038,6 +5048,130 @@ Options:
   -on=false              Power on
   -suspend=false         Power suspend
   -vapp.ipath=           Find vapp by inventory path
+```
+
+## vcsa.health.applmgmt.get
+
+```
+Usage: govc vcsa.health.applmgmt.get [OPTIONS]
+
+Get health status of applmgmt services.
+Examples:
+  govc vcsa.health.applmgmt.get
+
+Options:
+```
+
+## vcsa.health.database.get
+
+```
+Usage: govc vcsa.health.database.get [OPTIONS]
+
+Returns the health status of the database.
+Examples:
+  govc vcsa.health.database.get
+
+Options:
+```
+
+## vcsa.health.database_storage.get
+
+```
+Usage: govc vcsa.health.database_storage.get [OPTIONS]
+
+Get database storage health.
+Examples:
+  govc vcsa.health.database_storage.get
+
+Options:
+```
+
+## vcsa.health.load.get
+
+```
+Usage: govc vcsa.health.load.get [OPTIONS]
+
+Get load health.
+Examples:
+  govc vcsa.health.load.get
+
+Options:
+```
+
+## vcsa.health.mem.get
+
+```
+Usage: govc vcsa.health.mem.get [OPTIONS]
+
+Get memory health.
+Examples:
+  govc vcsa.health.mem.get
+
+Options:
+```
+
+## vcsa.health.software_packages.get
+
+```
+Usage: govc vcsa.health.software_packages.get [OPTIONS]
+
+Get information on available software updates available in the remote vSphere Update Manager repository.   
+Red indicates that security updates are available.  
+Orange indicates that non-security updates are available.  
+Green indicates that there are no updates available. 
+Gray indicates that there was an error retreiving information on software updates.  
+Examples:
+  govc vcsa.health.software_packages.get
+
+Options:
+```
+
+## vcsa.health.storage.get
+
+```
+Usage: govc vcsa.health.storage.get [OPTIONS]
+
+Get storage health.
+Examples:
+  govc vcsa.health.storage.get
+
+Options:
+```
+
+## vcsa.health.swap.get
+
+```
+Usage: govc vcsa.health.swap.get [OPTIONS]
+
+Get swap health.
+Examples:
+  govc vcsa.health.swap.get
+
+Options:
+```
+
+## vcsa.health.system.get
+
+```
+Usage: govc vcsa.health.system.get [OPTIONS]
+
+Get overall health of system.
+Examples:
+  govc vcsa.health.system.get
+
+Options:
+```
+
+## vcsa.health.system.last_check
+
+```
+Usage: govc vcsa.health.system.last_check [OPTIONS]
+
+Get last check timestamp of the health of the system.
+Examples:
+  govc vcsa.health.system.last_check
+
+Options:
 ```
 
 ## vcsa.log.forwarding.info

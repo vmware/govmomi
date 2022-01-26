@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -88,6 +88,15 @@ import (
 	_ "github.com/vmware/govmomi/govc/tags/category"
 	_ "github.com/vmware/govmomi/govc/task"
 	_ "github.com/vmware/govmomi/govc/vapp"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/applmgmt"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/database"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/database_storage"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/load"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/mem"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/software_packages"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/storage"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/swap"
+	_ "github.com/vmware/govmomi/govc/vcsa/health/system"
 	_ "github.com/vmware/govmomi/govc/vcsa/log"
 	_ "github.com/vmware/govmomi/govc/vcsa/proxy"
 	_ "github.com/vmware/govmomi/govc/version"
