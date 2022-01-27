@@ -20,6 +20,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"net/url"
 	"path"
 	"strings"
 
@@ -198,9 +199,11 @@ func (f *Folder) CreateFolder(ctx *Context, c *types.CreateFolder) soap.HasFault
 	r := &methods.CreateFolderBody{}
 
 	if folderHasChildType(&f.Folder, "Folder") {
-		if obj := ctx.Map.FindByName(c.Name, f.ChildEntity); obj != nil {
+		name := f.escapeSpecialCharacters(c.Name)
+
+		if obj := ctx.Map.FindByName(name, f.ChildEntity); obj != nil {
 			r.Fault_ = Fault("", &types.DuplicateName{
-				Name:   c.Name,
+				Name:   name,
 				Object: f.Self,
 			})
 
@@ -209,7 +212,7 @@ func (f *Folder) CreateFolder(ctx *Context, c *types.CreateFolder) soap.HasFault
 
 		folder := &Folder{}
 
-		folder.Name = c.Name
+		folder.Name = name
 		folder.ChildType = f.ChildType
 
 		folderPutChild(ctx, &f.Folder, folder)
@@ -222,6 +225,13 @@ func (f *Folder) CreateFolder(ctx *Context, c *types.CreateFolder) soap.HasFault
 	}
 
 	return r
+}
+
+func (f *Folder) escapeSpecialCharacters(name string) string {
+	name = strings.ReplaceAll(name, `%`, strings.ToLower(url.QueryEscape(`%`)))
+	name = strings.ReplaceAll(name, `/`, strings.ToLower(url.QueryEscape(`/`)))
+	name = strings.ReplaceAll(name, `\`, strings.ToLower(url.QueryEscape(`\`)))
+	return name
 }
 
 // StoragePod aka "Datastore Cluster"

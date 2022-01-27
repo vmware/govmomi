@@ -214,6 +214,50 @@ func TestFolderVC(t *testing.T) {
 	}
 }
 
+func TestFolderSpecialCharaters(t *testing.T) {
+	content := vpx.ServiceContent
+	s := New(NewServiceInstance(SpoofContext(), content, vpx.RootFolder))
+
+	ts := s.NewServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+	c, err := govmomi.NewClient(ctx, ts.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	f := object.NewRootFolder(c.Client)
+
+	tests := []struct {
+		name     string
+		expected string
+	}{
+		{`/`, `%2f`},
+		{`\`, `%5c`},
+		{`%`, `%25`},
+		// multiple special characters
+		{`%%`, `%25%25`},
+	}
+
+	for _, test := range tests {
+		ff, err := f.CreateFolder(ctx, test.name)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		o := Map.Get(ff.Reference())
+		if o == nil {
+			t.Fatalf("failed to find %#v", ff)
+		}
+
+		e := o.(mo.Entity).Entity()
+		if e.Name != test.expected {
+			t.Errorf("expected %s, got %s", test.expected, e.Name)
+		}
+	}
+}
+
 func TestFolderFaults(t *testing.T) {
 	f := Folder{}
 	f.ChildType = []string{"VirtualMachine"}
