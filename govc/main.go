@@ -90,6 +90,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/vapp"
 	_ "github.com/vmware/govmomi/govc/vcsa/log"
 	_ "github.com/vmware/govmomi/govc/vcsa/proxy"
+	_ "github.com/vmware/govmomi/govc/vcsa/shutdown"
 	_ "github.com/vmware/govmomi/govc/version"
 	_ "github.com/vmware/govmomi/govc/vm"
 	_ "github.com/vmware/govmomi/govc/vm/disk"
