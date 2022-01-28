@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -43,6 +43,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vapi/appliance/shutdown"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -91,6 +92,7 @@ type handler struct {
 	Library     map[string]*content
 	Update      map[string]update
 	Download    map[string]download
+	Config      shutdown.Config
 }
 
 func init() {
@@ -114,6 +116,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		Library:     make(map[string]*content),
 		Update:      make(map[string]update),
 		Download:    make(map[string]download),
+		Config:      shutdown.Config{},
 	}
 
 	handlers := []struct {
@@ -155,6 +158,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
 		{internal.DebugEcho, s.debugEcho},
+		{shutdown.Path, s.shutdown},
 	}
 
 	for i := range handlers {
@@ -2104,4 +2108,49 @@ func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
 
 func (s *handler) debugEcho(w http.ResponseWriter, r *http.Request) {
 	r.Write(w)
+}
+
+func (s *handler) shutdown(w http.ResponseWriter, r *http.Request) {
+	delayShutdown := func(delay int) {
+		go time.AfterFunc(time.Duration(delay)*time.Minute, func() {
+			s.Lock()
+			s.Config.ShutdownTime = ""
+			s.Config.Action = ""
+			s.Config.Reason = ""
+			s.Unlock()
+		})
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		OK(w, s.Config)
+	case http.MethodPost:
+		switch r.URL.Query().Get(shutdown.Action) {
+		case shutdown.Cancel:
+			delayShutdown(0)
+			w.WriteHeader(http.StatusNoContent)
+		case shutdown.Reboot:
+			var spec shutdown.Spec
+			if s.decode(r, w, &spec) {
+				s.Config.ShutdownTime = time.Now().UTC().Add(time.Duration(spec.Delay) * time.Minute).String()
+				s.Config.Reason = spec.Reason
+				s.Config.Action = shutdown.Reboot
+				delayShutdown(spec.Delay)
+				w.WriteHeader(http.StatusNoContent)
+			}
+		case shutdown.PowerOff:
+			var spec shutdown.Spec
+			if s.decode(r, w, &spec) {
+				s.Config.ShutdownTime = time.Now().Local().Add(time.Duration(spec.Delay) * time.Minute).String()
+				s.Config.Reason = spec.Reason
+				s.Config.Action = shutdown.PowerOff
+				delayShutdown(spec.Delay)
+				w.WriteHeader(http.StatusNoContent)
+			}
+		default:
+			http.NotFound(w, r)
+		}
+	default:
+		http.NotFound(w, r)
+	}
 }
