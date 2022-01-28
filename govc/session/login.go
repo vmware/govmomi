@@ -215,6 +215,13 @@ func (cmd *login) loginByToken(ctx context.Context, c *vim25.Client) error {
 		},
 	}
 
+	// something behind the LoginByToken scene requires a version from /sdk/vimServiceVersions.xml
+	// in the SOAPAction header. For example, if vim25.Version is "7.0" but the service version is "6.3",
+	// LoginByToken fails with: 'VersionMismatchFaultCode: Unsupported version URI "urn:vim25/7.0"'
+	if c.Version == vim25.Version {
+		_ = c.UseServiceVersion()
+	}
+
 	return session.NewManager(c).LoginByToken(c.WithHeader(ctx, header))
 }
 

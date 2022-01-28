@@ -71,6 +71,9 @@ func (c *Client) RoundTrip(ctx context.Context, req, res soap.HasFault) error {
 
 // TokenRequest parameters for issuing a SAML token.
 // At least one of Userinfo or Certificate must be specified.
+// When `TokenRequest.Certificate` is set, the `tls.Certificate.PrivateKey` field must be set as it is required to sign the request.
+// When the `tls.Certificate.Certificate` field is not set, the request Assertion header is set to that of the TokenRequest.Token.
+// Otherwise `tls.Certificate.Certificate` is used as the BinarySecurityToken in the request.
 type TokenRequest struct {
 	Userinfo    *url.Userinfo    // Userinfo when set issues a Bearer token
 	Certificate *tls.Certificate // Certificate when set issues a HoK token
