@@ -122,6 +122,7 @@ func TestIssueHOK(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_ = c.UseServiceVersion()
 
 	if !c.IsVC() {
 		t.SkipNow()
@@ -161,6 +162,75 @@ func TestIssueHOK(t *testing.T) {
 	log.Printf("current time=%s", now)
 }
 
+func TestIssueTokenByToken(t *testing.T) {
+	ctx := context.Background()
+	url := os.Getenv("GOVC_TEST_URL")
+	if url == "" {
+		t.SkipNow()
+	}
+
+	u, err := soap.ParseURL(url)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vc1, err := vim25.NewClient(ctx, soap.NewClient(u, true))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = vc1.UseServiceVersion()
+
+	if !vc1.IsVC() {
+		t.SkipNow()
+	}
+
+	vc2, err := vim25.NewClient(ctx, soap.NewClient(u, true))
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = vc2.UseServiceVersion()
+
+	sts1, err := NewClient(ctx, vc1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err = solutionUserCreate(ctx, u.User, sts1, vc1); err != nil {
+		t.Fatal(err)
+	}
+
+	sts2, err := NewClient(ctx, vc2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req1 := TokenRequest{
+		Certificate: solutionUserCert(),
+		Delegatable: true,
+	}
+
+	signer1, err := sts1.Issue(ctx, req1)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	req2 := signer1.NewRequest()
+	// use Assertion header instead of BinarySecurityToken
+	req2.Certificate = &tls.Certificate{PrivateKey: req1.Certificate.PrivateKey}
+
+	signer2, err := sts2.Issue(ctx, req2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	header := soap.Header{Security: signer2}
+
+	err = session.NewManager(vc2).LoginByToken(vc2.WithHeader(ctx, header))
+	if err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestIssueBearer(t *testing.T) {
 	ctx := context.Background()
 	url := os.Getenv("GOVC_TEST_URL")
@@ -177,6 +247,7 @@ func TestIssueBearer(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_ = c.UseServiceVersion()
 
 	if !c.IsVC() {
 		t.SkipNow()
@@ -233,6 +304,7 @@ func TestIssueActAs(t *testing.T) {
 	if err != nil {
 		log.Fatal(err)
 	}
+	_ = c.UseServiceVersion()
 
 	if !c.IsVC() {
 		t.SkipNow()
