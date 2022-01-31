@@ -188,7 +188,7 @@ type EdgeClusterCompatibilitySummary struct {
 func (c *Manager) ListCompatibleEdgeClusters(ctx context.Context, clusterId string, switchId string) (result []EdgeClusterCompatibilitySummary, err error) {
 	listUrl := c.Resource(internal.NamespaceEdgeClusterCompatibility).
 		WithParam("cluster", clusterId).
-		WithParam("distributed_switch", switchId).
-		WithParam("compatible", "true")
+		WithParam("compatible", "true").
+		WithPathEncodedParam("distributed_switch", switchId)
 	return result, c.Do(ctx, listUrl.Request(http.MethodGet), &result)
 }
