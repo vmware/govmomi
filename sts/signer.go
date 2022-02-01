@@ -128,20 +128,28 @@ func (s *Signer) Sign(env soap.Envelope) ([]byte, error) {
 			req := x.RequestSecurityToken()
 			c14n = req.C14N()
 			body = req.String()
-			id := newID()
 
-			info.SecurityTokenReference = &internal.SecurityTokenReference{
-				Reference: &internal.SecurityReference{
-					URI:       "#" + id,
-					ValueType: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3",
-				},
-			}
+			if len(s.Certificate.Certificate) == 0 {
+				header.Assertion = s.Token
+				if err := s.setTokenReference(&info); err != nil {
+					return nil, err
+				}
+			} else {
+				id := newID()
 
-			header.BinarySecurityToken = &internal.BinarySecurityToken{
-				EncodingType: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary",
-				ValueType:    "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3",
-				ID:           id,
-				Value:        base64.StdEncoding.EncodeToString(s.Certificate.Certificate[0]),
+				header.BinarySecurityToken = &internal.BinarySecurityToken{
+					EncodingType: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-soap-message-security-1.0#Base64Binary",
+					ValueType:    "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3",
+					ID:           id,
+					Value:        base64.StdEncoding.EncodeToString(s.Certificate.Certificate[0]),
+				}
+
+				info.SecurityTokenReference = &internal.SecurityTokenReference{
+					Reference: &internal.SecurityReference{
+						URI:       "#" + id,
+						ValueType: "http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3",
+					},
+				}
 			}
 		}
 		// When requesting HoK token for interactive user, request will have both priv. key and username/password.
