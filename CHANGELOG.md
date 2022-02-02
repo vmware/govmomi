@@ -1,4 +1,20 @@
 
+<a name="v0.27.3"></a>
+## [Release v0.27.3](https://github.com/vmware/govmomi/compare/v0.27.2...v0.27.3)
+
+> Release Date: 2022-02-01
+
+### 🐞 Fix
+
+- [2d7cd133]	Add IPv6 support for signing HTTP request
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [6b4e2391]	sts: support issuing HoK token using HoK token
+- [2d7cd133]	fix: Add IPv6 support for signing HTTP request
+
 <a name="v0.27.2"></a>
 ## [Release v0.27.2](https://github.com/vmware/govmomi/compare/v0.27.1...v0.27.2)
 
