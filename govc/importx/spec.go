@@ -107,7 +107,7 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 			return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
 		}
 
-		if isRemotePath(fpath) {
+		if isRemotePath(f.Arg(0)) {
 			client, err := cmd.Client()
 			if err != nil {
 				return err
