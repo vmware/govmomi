@@ -22,6 +22,9 @@ load test_helper
   run govc import.spec "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
   assert_success
 
+  run govc import.spec "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  assert_success
+
   proto=$(jq -r .IPProtocol <<<"$output")
   assert_equal IPv4 "$proto"
 
