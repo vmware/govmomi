@@ -109,29 +109,33 @@ $ git push --force-with-lease $USER issue-<number>
 
 ### Updating Pull Requests
 
-If your PR fails to pass CI or needs changes based on code review, you'll most
-likely want to squash these changes into existing commits.
+If your PR fails to pass CI or needs changes based on code review, it's ok to
+add more commits stating the changes made, e.g. "Address review comments". This
+is to assist the reviewer(s) to easily detect and review the recent changes.
 
-If your pull request contains a single commit or your changes are related to the
-most recent commit, you can simply amend the commit.
-
-```console
-$ git add .
-$ git commit --amend
-$ git push --force-with-lease $USER issue-<number>
-```
-
-If you need to squash changes into an earlier commit, you can use:
+In case of small PRs, it's ok to squash and force-push (see further below)
+directly instead.
 
 ```console
+# incorporate review feedback
 $ git add .
+
+# create a fixup commit which will be merged into your (original) <commit>
 $ git commit --fixup <commit>
-$ git rebase -i --autosquash vmware/master
-$ git push --force-with-lease $USER issue-<number>
+$ git push $USER issue-<number>
 ```
 
 Be sure to add a comment to the PR indicating your new changes are ready to
 review, as Github does not generate a notification when you git push.
+
+Once the review is complete, squash and push your final commit(s):
+
+```console
+# squash all commits into one
+# --autosquash will automatically detect and merge fixup commits
+$ git rebase -i --autosquash vmware/master
+$ git push --force-with-lease $USER issue-<number>
+```
 
 ### Code Style
 
