@@ -237,6 +237,6 @@ func (h *Handler) getService(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-		vapi.Status(w, http.StatusNotFound)
+		w.WriteHeader(http.StatusNotFound)
 	}
 }

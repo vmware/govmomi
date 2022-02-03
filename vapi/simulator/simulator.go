@@ -295,10 +295,10 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 	return nil
 }
 
-// Status responds with custom HTTP status and json encoded val if given.
+// StatusOK responds with http.StatusOK and encodes val, if specified, to JSON
 // For use with "/api" endpoints.
-func Status(w http.ResponseWriter, httpStatus int, val ...interface{}) {
-	w.WriteHeader(httpStatus)
+func StatusOK(w http.ResponseWriter, val ...interface{}) {
+	w.WriteHeader(http.StatusOK)
 	if len(val) == 0 {
 		return
 	}
@@ -310,13 +310,7 @@ func Status(w http.ResponseWriter, httpStatus int, val ...interface{}) {
 	}
 }
 
-// StatusOK responds with http.StatusOK and json encoded val if given.
-// For use with "/api" endpoints.
-func StatusOK(w http.ResponseWriter, val ...interface{}) {
-	Status(w, http.StatusOK, val...)
-}
-
-// OK responds with http.StatusOK and json encoded val if given.
+// OK responds with http.StatusOK and encodes val, if specified, to JSON
 // For use with "/rest" endpoints where the response is a "value" wrapped structure.
 func OK(w http.ResponseWriter, val ...interface{}) {
 	if len(val) == 0 {
