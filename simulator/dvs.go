@@ -277,18 +277,12 @@ func (s *DistributedVirtualSwitch) dvPortgroups(_ *types.DistributedVirtualSwitc
 
 	for _, ref := range s.Portgroup {
 		pg := Map.Get(ref).(*DistributedVirtualPortgroup)
-		res = append(res, types.DistributedVirtualPort{
-			DvsUuid: s.Uuid,
-			Key:     pg.Key,
-			Config: types.DVPortConfigInfo{
-				Setting: pg.Config.DefaultPortConfig,
-			},
-		})
 
 		for _, key := range pg.PortKeys {
 			res = append(res, types.DistributedVirtualPort{
-				DvsUuid: s.Uuid,
-				Key:     key,
+				DvsUuid:      s.Uuid,
+				Key:          key,
+				PortgroupKey: pg.Key,
 				Config: types.DVPortConfigInfo{
 					Setting: pg.Config.DefaultPortConfig,
 				},

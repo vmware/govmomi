@@ -124,7 +124,9 @@ func TestDVS(t *testing.T) {
 		} else {
 			switch test.op {
 			case types.ConfigSpecOperationAdd:
-				dtask, err = dswitch.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{{Name: test.pg}})
+				dtask, err = dswitch.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{
+					{Name: test.pg, NumPorts: 1},
+				})
 			}
 		}
 

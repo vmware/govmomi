@@ -654,8 +654,9 @@ func (m *Model) Create() error {
 		for npg := 0; npg < m.Portgroup; npg++ {
 			name := m.fmtName(dcName+"_DVPG", npg)
 			spec := types.DVPortgroupConfigSpec{
-				Name: name,
-				Type: string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
+				Name:     name,
+				Type:     string(types.DistributedVirtualPortgroupPortgroupTypeEarlyBinding),
+				NumPorts: 1,
 			}
 
 			task, err := dvs.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{spec})
