@@ -140,3 +140,20 @@ func TestSigner(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestIsIPv6(t *testing.T) {
+	tests := []struct {
+		ip string
+		v6 bool
+	}{
+		{"0:0:0:0:0:0:0:1", true},
+		{"10.0.0.42", false},
+	}
+
+	for _, test := range tests {
+		v6 := isIPv6(test.ip)
+		if v6 != test.v6 {
+			t.Errorf("%s: expected %t, got %t", test.ip, test.v6, v6)
+		}
+	}
+}
