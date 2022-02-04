@@ -743,6 +743,26 @@ func FindUsersInGroup(ctx context.Context, r soap.RoundTripper, req *types.FindU
 	return resBody.Res, nil
 }
 
+type GetBody struct {
+	Req    *types.Get         `xml:"urn:sso Get,omitempty"`
+	Res    *types.GetResponse `xml:"urn:sso GetResponse,omitempty"`
+	Fault_ *soap.Fault        `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *GetBody) Fault() *soap.Fault { return b.Fault_ }
+
+func Get(ctx context.Context, r soap.RoundTripper, req *types.Get) (*types.GetResponse, error) {
+	var reqBody, resBody GetBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type GetAllCertificatesBody struct {
 	Req    *types.GetAllCertificates         `xml:"urn:sso GetAllCertificates,omitempty"`
 	Res    *types.GetAllCertificatesResponse `xml:"urn:sso GetAllCertificatesResponse,omitempty"`
