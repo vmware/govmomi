@@ -441,3 +441,16 @@ func (c *Client) RevokeWSTrustRole(ctx context.Context, id types.PrincipalId, ro
 
 	return res.Returnval, nil
 }
+
+func (c *Client) IdentitySources(ctx context.Context) (*types.IdentitySources, error) {
+	req := types.Get{
+		This: c.ServiceContent.IdentitySourceManagementService,
+	}
+
+	res, err := methods.Get(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
+}

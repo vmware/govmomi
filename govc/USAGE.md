@@ -263,6 +263,7 @@ but appear via `govc $cmd -h`:
  - [sso.group.ls](#ssogroupls)
  - [sso.group.rm](#ssogrouprm)
  - [sso.group.update](#ssogroupupdate)
+ - [sso.idp.ls](#ssoidpls)
  - [sso.service.ls](#ssoservicels)
  - [sso.user.create](#ssousercreate)
  - [sso.user.id](#ssouserid)
@@ -4456,6 +4457,20 @@ Options:
   -d=                    Group description
   -g=false               Add/Remove group from group
   -r=                    Remove user/group from group
+```
+
+## sso.idp.ls
+
+```
+Usage: govc sso.idp.ls [OPTIONS]
+
+List SSO identity provider sources.
+
+Examples:
+  govc sso.idp.ls
+  govc sso.idp.ls -json
+
+Options:
 ```
 
 ## sso.service.ls
