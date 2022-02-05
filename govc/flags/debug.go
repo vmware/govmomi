@@ -31,7 +31,7 @@ import (
 	"text/tabwriter"
 	"time"
 
-	"github.com/kr/pretty"
+	"github.com/dougm/pretty"
 
 	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/soap"

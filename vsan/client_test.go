@@ -20,7 +20,7 @@ import (
 	"os"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/dougm/pretty"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"

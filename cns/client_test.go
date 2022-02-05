@@ -24,7 +24,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kr/pretty"
+	"github.com/dougm/pretty"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
