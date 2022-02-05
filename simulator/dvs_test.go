@@ -170,3 +170,112 @@ func TestDVS(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+func TestFetchDVPortsCriteria(t *testing.T) {
+	m := VPX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client
+
+	finder := find.NewFinder(c, false)
+	dc, _ := finder.DatacenterList(ctx, "*")
+	finder.SetDatacenter(dc[0])
+	vswitch := Map.Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+	pgs := vswitch.Portgroup
+	if len(pgs) != 2 {
+		t.Fatalf("expected 2 portgroups in DVS; got %d", len(pgs))
+	}
+
+	tests := []struct {
+		name     string
+		criteria *types.DistributedVirtualSwitchPortCriteria
+		expected []types.DistributedVirtualPort
+	}{
+		{
+			"empty criteria",
+			&types.DistributedVirtualSwitchPortCriteria{},
+			[]types.DistributedVirtualPort{
+				{PortgroupKey: pgs[0].Value, Key: "0"},
+				{PortgroupKey: pgs[1].Value, Key: "0"},
+			},
+		},
+		{
+			"inside PortgroupKeys",
+			&types.DistributedVirtualSwitchPortCriteria{
+				PortgroupKey: []string{pgs[0].Value},
+				Inside:       types.NewBool(true),
+			},
+			[]types.DistributedVirtualPort{
+				{PortgroupKey: pgs[0].Value, Key: "0"},
+			},
+		},
+		{
+			"outside PortgroupKeys",
+			&types.DistributedVirtualSwitchPortCriteria{
+				PortgroupKey: []string{pgs[0].Value},
+				Inside:       types.NewBool(false),
+			},
+			[]types.DistributedVirtualPort{
+				{PortgroupKey: pgs[1].Value, Key: "0"},
+			},
+		},
+		{
+			"PortKeys",
+			&types.DistributedVirtualSwitchPortCriteria{
+				PortKey: []string{"1"},
+			},
+			[]types.DistributedVirtualPort{},
+		},
+		{
+			"connected",
+			&types.DistributedVirtualSwitchPortCriteria{
+				Connected: types.NewBool(true),
+			},
+			[]types.DistributedVirtualPort{},
+		},
+		{
+			"not connected",
+			&types.DistributedVirtualSwitchPortCriteria{
+				Connected: types.NewBool(false),
+			},
+			[]types.DistributedVirtualPort{
+				{PortgroupKey: pgs[0].Value, Key: "0"},
+				{PortgroupKey: pgs[1].Value, Key: "0"},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			actual, err := dvs0.FetchDVPorts(context.TODO(), test.criteria)
+
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			if len(actual) != len(test.expected) {
+				t.Fatalf("expected %d ports; got %d", len(test.expected), len(actual))
+			}
+
+			for i, p := range actual {
+				if p.Key != test.expected[i].Key {
+					t.Errorf("ports[%d]: expected Key `%s`; got `%s`",
+						i, test.expected[i].Key, p.Key)
+				}
+
+				if p.PortgroupKey != test.expected[i].PortgroupKey {
+					t.Errorf("ports[%d]: expected PortgroupKey `%s`; got `%s`",
+						i, test.expected[i].PortgroupKey, p.PortgroupKey)
+				}
+			}
+		})
+	}
+}

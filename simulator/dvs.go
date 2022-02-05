@@ -268,8 +268,7 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 	}
 }
 
-func (s *DistributedVirtualSwitch) dvPortgroups(_ *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
-	// TODO(agui): Filter is not implemented yet
+func (s *DistributedVirtualSwitch) dvPortgroups(criteria *types.DistributedVirtualSwitchPortCriteria) []types.DistributedVirtualPort {
 	res := s.FetchDVPortsResponse.Returnval
 	if len(res) != 0 {
 		return res
@@ -289,5 +288,108 @@ func (s *DistributedVirtualSwitch) dvPortgroups(_ *types.DistributedVirtualSwitc
 			})
 		}
 	}
+
+	// filter ports by criteria
+	res = s.filterDVPorts(res, criteria)
+
 	return res
+}
+
+func (s *DistributedVirtualSwitch) filterDVPorts(
+	ports []types.DistributedVirtualPort,
+	criteria *types.DistributedVirtualSwitchPortCriteria,
+) []types.DistributedVirtualPort {
+	if criteria == nil {
+		return ports
+	}
+
+	ports = s.filterDVPortsByPortgroupKey(ports, criteria)
+	ports = s.filterDVPortsByPortKey(ports, criteria)
+	ports = s.filterDVPortsByConnected(ports, criteria)
+
+	return ports
+}
+
+func (s *DistributedVirtualSwitch) filterDVPortsByPortgroupKey(
+	ports []types.DistributedVirtualPort,
+	criteria *types.DistributedVirtualSwitchPortCriteria,
+) []types.DistributedVirtualPort {
+	if len(criteria.PortgroupKey) == 0 || criteria.Inside == nil {
+		return ports
+	}
+
+	// inside portgroup keys
+	if *criteria.Inside {
+		filtered := []types.DistributedVirtualPort{}
+
+		for _, p := range ports {
+			for _, pgk := range criteria.PortgroupKey {
+				if p.PortgroupKey == pgk {
+					filtered = append(filtered, p)
+					break
+				}
+			}
+		}
+		return filtered
+	}
+
+	// outside portgroup keys
+	filtered := []types.DistributedVirtualPort{}
+
+	for _, p := range ports {
+		found := false
+		for _, pgk := range criteria.PortgroupKey {
+			if p.PortgroupKey == pgk {
+				found = true
+				break
+			}
+		}
+
+		if !found {
+			filtered = append(filtered, p)
+		}
+	}
+	return filtered
+}
+
+func (s *DistributedVirtualSwitch) filterDVPortsByPortKey(
+	ports []types.DistributedVirtualPort,
+	criteria *types.DistributedVirtualSwitchPortCriteria,
+) []types.DistributedVirtualPort {
+	if len(criteria.PortKey) == 0 {
+		return ports
+	}
+
+	filtered := []types.DistributedVirtualPort{}
+
+	for _, p := range ports {
+		for _, pk := range criteria.PortKey {
+			if p.Key == pk {
+				filtered = append(filtered, p)
+				break
+			}
+		}
+	}
+
+	return filtered
+}
+
+func (s *DistributedVirtualSwitch) filterDVPortsByConnected(
+	ports []types.DistributedVirtualPort,
+	criteria *types.DistributedVirtualSwitchPortCriteria,
+) []types.DistributedVirtualPort {
+	if criteria.Connected == nil {
+		return ports
+	}
+
+	filtered := []types.DistributedVirtualPort{}
+
+	for _, p := range ports {
+		connected := p.Connectee != nil
+		if connected == *criteria.Connected {
+			filtered = append(filtered, p)
+		}
+	}
+
+	return filtered
 }
