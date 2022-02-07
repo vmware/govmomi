@@ -46,3 +46,17 @@ load test_helper
   govc sso.service.ls -P vmomi | grep vcenterserver | grep -v https:
   govc sso.service.ls -P vmomi -l | grep https:
 }
+
+@test "sso.idp.ls" {
+  vcsim_env
+
+  run govc sso.idp.ls -json
+  assert_success
+
+  run govc sso.idp.ls
+  assert_success
+  [ ${#lines[@]} -eq 4 ]
+  assert_matches "System Domain"
+  assert_matches "Local OS"
+  assert_matches "ActiveDirectory"
+}

@@ -1038,6 +1038,62 @@ type FindUsersResponse struct {
 	Returnval []AdminUser `xml:"returnval,omitempty"`
 }
 
+type Domain struct {
+	Name  string `xml:"name"`
+	Alias string `xml:"alias,omitempty"`
+}
+
+type IdentitySource struct {
+	Name    string   `xml:"name"`
+	Domains []Domain `xml:"domains"`
+}
+
+type LdapIdentitySourceDetails struct {
+	FriendlyName string `xml:"friendlyName"`
+	UserBaseDn   string `xml:"userBaseDn,omitempty"`
+	GroupBaseDn  string `xml:"groupBaseDn,omitempty"`
+	PrimaryURL   string `xml:"primaryUrl"`
+	FailoverURL  string `xml:"failoverUrl,omitempty"`
+}
+
+type AuthenticationDetails struct {
+	AuthenticationType string `xml:"authenticationType"`
+	Username           string `xml:"username"`
+}
+
+type LdapIdentitySource struct {
+	IdentitySource
+	Type                  string                    `xml:"type"`
+	Details               LdapIdentitySourceDetails `xml:"details"`
+	AuthenticationDetails AuthenticationDetails     `xml:"authenticationDetails"`
+}
+
+type IdentitySources struct {
+	All      []IdentitySource     `xml:"all"`
+	System   IdentitySource       `xml:"system"`
+	LocalOS  *IdentitySource      `xml:"localOS"`
+	NativeAD *IdentitySource      `xml:"nativeAD"`
+	LDAPS    []LdapIdentitySource `xml:"ldaps"`
+}
+
+type Get GetRequestType
+
+func init() {
+	types.Add("sso:Get", reflect.TypeOf((*Get)(nil)).Elem())
+}
+
+type GetRequestType struct {
+	This types.ManagedObjectReference `xml:"_this"`
+}
+
+func init() {
+	types.Add("sso:GetRequestType", reflect.TypeOf((*GetRequestType)(nil)).Elem())
+}
+
+type GetResponse struct {
+	Returnval IdentitySources `xml:"returnval,omitempty"`
+}
+
 type GetAllCertificates GetAllCertificatesRequestType
 
 func init() {
