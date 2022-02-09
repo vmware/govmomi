@@ -51,9 +51,33 @@ func (r *Resource) WithAction(action string) *Resource {
 // WithParam adds one parameter on the URL.RawQuery
 func (r *Resource) WithParam(name string, value string) *Resource {
 	// ParseQuery handles empty case, and we control access to query string so shouldn't encounter an error case
-	params, _ := url.ParseQuery(r.u.RawQuery)
+	params, err := url.ParseQuery(r.u.RawQuery)
+	if err != nil {
+		panic(err)
+	}
 	params[name] = append(params[name], value)
 	r.u.RawQuery = params.Encode()
+	return r
+}
+
+// WithPathEncodedParam appends a parameter on the URL.RawQuery,
+// For special cases where URL Path-style encoding is needed
+func (r *Resource) WithPathEncodedParam(name string, value string) *Resource {
+	t := &url.URL{Path: value}
+	encodedValue := t.String()
+	t = &url.URL{Path: name}
+	encodedName := t.String()
+	// ParseQuery handles empty case, and we control access to query string so shouldn't encounter an error case
+	params, err := url.ParseQuery(r.u.RawQuery)
+	if err != nil {
+		panic(err)
+	}
+	// Values.Encode() doesn't escape exactly how we want, so we need to build the query string ourselves
+	if len(params) >= 1 {
+		r.u.RawQuery = r.u.RawQuery + "&" + encodedName + "=" + encodedValue
+	} else {
+		r.u.RawQuery = r.u.RawQuery + encodedName + "=" + encodedValue
+	}
 	return r
 }
 

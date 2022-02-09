@@ -154,6 +154,7 @@ Examples:
     -cluster "Workload-Cluster" \
     -service-cidr 10.96.0.0/23 \
     -pod-cidrs 10.244.0.0/20 \
+    -control-plane-dns 10.10.10.10 \
     -control-plane-dns-names wcp.example.com \
     -workload-network.egress-cidrs 10.0.0.128/26 \
     -workload-network.ingress-cidrs "10.0.0.64/26" \
@@ -243,7 +244,7 @@ func (cmd *enableCluster) Run(ctx context.Context, f *flag.FlagSet) error {
 	edgeClusterDisplayName := cmd.NcpClusterNetworkSpec.NsxEdgeCluster
 	edgeClusters, err := m.ListCompatibleEdgeClusters(ctx, clusterId, switchId)
 	if err != nil {
-		return fmt.Errorf("error in compatible switch lookup: %s", err)
+		return fmt.Errorf("error in compatible edge cluster lookup: %s", err)
 	}
 
 	matchingEdgeClusters := make([]string, 0)
