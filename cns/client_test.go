@@ -262,6 +262,35 @@ func TestClient(t *testing.T) {
 		}
 	}
 
+	// Test BackingDiskObjectId field only for vVol or vSAN volume type
+	var queryFilterBackingDiskObjectIdTest cnstypes.CnsQueryFilter
+	var volumeIDListBackingDiskObjectIdTest []cnstypes.CnsVolumeId
+	volumeIDListBackingDiskObjectIdTest = append(volumeIDListBackingDiskObjectIdTest, cnstypes.CnsVolumeId{Id: volumeId})
+	queryFilterBackingDiskObjectIdTest.VolumeIds = volumeIDListBackingDiskObjectIdTest
+	t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilterBackingDiskObjectIdTest))
+	queryResultBackingDiskObjectIdTest, err := cnsClient.QueryVolume(ctx, queryFilterBackingDiskObjectIdTest)
+	if err != nil {
+		t.Errorf("Failed to query all volumes. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	t.Logf("Successfully Queried Volumes. queryResultBackingDiskObjectIdTest: %+v", pretty.Sprint(queryResultBackingDiskObjectIdTest))
+	t.Log("Checking backingDiskObjectId retieved")
+	datastoreType, err := ds.Type(ctx)
+	if err != nil {
+		t.Errorf("Failed to get datastore type. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	for _, vol := range queryResultBackingDiskObjectIdTest.Volumes {
+		// BackingDiskObjectId is only for vsan/vvol, for other type this field is empty but test should not fail
+		backingDiskObjectId := vol.BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails).BackingDiskObjectId
+		if backingDiskObjectId == "" {
+			if datastoreType == vim25types.HostFileSystemVolumeFileSystemTypeVsan || datastoreType == vim25types.HostFileSystemVolumeFileSystemTypeVVOL {
+				t.Errorf("Failed to get BackingDiskObjectId")
+				t.FailNow()
+			}
+		}
+	}
+
 	// Test QuerySnapshots API on 7.0 U3 or above
 	var snapshotQueryFilter cnstypes.CnsSnapshotQueryFilter
 	var querySnapshotsTaskResult *cnstypes.CnsSnapshotQueryResult
