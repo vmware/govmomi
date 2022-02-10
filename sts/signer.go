@@ -351,5 +351,5 @@ func isIPv6(s string) bool {
 	if ip == nil {
 		return false
 	}
-	return len(ip) == net.IPv6len
+	return ip.To4() == nil
 }

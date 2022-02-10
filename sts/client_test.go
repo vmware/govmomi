@@ -30,6 +30,7 @@ import (
 	"github.com/vmware/govmomi/session"
 	"github.com/vmware/govmomi/ssoadmin"
 	"github.com/vmware/govmomi/ssoadmin/types"
+	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -160,6 +161,12 @@ func TestIssueHOK(t *testing.T) {
 	}
 
 	log.Printf("current time=%s", now)
+
+	rc := rest.NewClient(c)
+	err = rc.LoginByToken(rc.WithSigner(ctx, s))
+	if err != nil {
+		t.Fatal(err)
+	}
 }
 
 func TestIssueTokenByToken(t *testing.T) {
