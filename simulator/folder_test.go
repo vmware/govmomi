@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -563,4 +564,40 @@ func TestFolderCreateDVS(t *testing.T) {
 	if err == nil {
 		t.Error("expected error")
 	}
+}
+
+func TestPlaceVmsXCluster(t *testing.T) {
+	vpx := VPX()
+	vpx.Cluster = 3
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, false)
+
+		spec := types.PlaceVmsXClusterSpec{}
+
+		pools, err := finder.ResourcePoolList(ctx, "/DC0/host/DC0_C*/*")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		for _, pool := range pools {
+			spec.ResourcePools = append(spec.ResourcePools, pool.Reference())
+		}
+
+		spec.VmPlacementSpecs = []types.PlaceVmsXClusterSpecVmPlacementSpec{{
+			ConfigSpec: types.VirtualMachineConfigSpec{
+				Name: "test-vm",
+			},
+		}}
+
+		folder := object.NewRootFolder(c)
+		res, err := folder.PlaceVmsXCluster(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if len(res.PlacementInfos) != len(spec.VmPlacementSpecs) {
+			t.Errorf("%d PlacementInfos vs %d VmPlacementSpecs", len(res.PlacementInfos), len(spec.VmPlacementSpecs))
+		}
+	}, vpx)
 }

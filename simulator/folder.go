@@ -710,3 +710,51 @@ func (f *Folder) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFaul
 		},
 	}
 }
+
+func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soap.HasFault {
+	body := new(methods.PlaceVmsXClusterBody)
+
+	// Reject the request if it is against any folder other than the root folder.
+	if req.This != ctx.Map.content().RootFolder {
+		body.Fault_ = Fault("", new(types.InvalidRequest))
+	}
+
+	body.Res = new(types.PlaceVmsXClusterResponse)
+
+	for _, spec := range req.PlacementSpec.VmPlacementSpecs {
+		pspec := types.PlacementSpec{
+			PlacementType: string(types.PlacementSpecPlacementTypeCreate),
+			ConfigSpec:    &spec.ConfigSpec,
+		}
+
+		pools := req.PlacementSpec.ResourcePools
+		pool := ctx.Map.Get(pools[rand.Intn(len(pools))]).(*ResourcePool)
+		cluster := ctx.Map.Get(pool.Owner).(*ClusterComputeResource)
+
+		res := cluster.PlaceVm(ctx, &types.PlaceVm{
+			This:          f.Self,
+			PlacementSpec: pspec,
+		})
+
+		if res.Fault() != nil {
+			faults := types.PlaceVmsXClusterResultPlacementFaults{
+				VmName:       spec.ConfigSpec.Name,
+				ResourcePool: pool.Self,
+				Faults: []types.LocalizedMethodFault{
+					{
+						Fault: res.Fault().Detail.Fault.(types.BaseMethodFault),
+					},
+				},
+			}
+			body.Res.Returnval.Faults = append(body.Res.Returnval.Faults, faults)
+		} else {
+			placement := types.PlaceVmsXClusterResultPlacementInfo{
+				VmName:         spec.ConfigSpec.Name,
+				Recommendation: res.(*methods.PlaceVmBody).Res.Returnval.Recommendations[0],
+			}
+			body.Res.Returnval.PlacementInfos = append(body.Res.Returnval.PlacementInfos, placement)
+		}
+	}
+
+	return body
+}
