@@ -1,4 +1,31 @@
 
+<a name="v0.27.4"></a>
+## [Release v0.27.4](https://github.com/vmware/govmomi/compare/v0.27.3...v0.27.4)
+
+> Release Date: 2022-02-10
+
+### 🐞 Fix
+
+- [285e80cd]	avoid debug trace if http.Request.Body is nil
+- [dde50904]	Ignore concurrent deletes in GetCategories
+- [cbc68fc0]	rest.Client.LoginByToken invalid signature
+
+### 💫 `vcsim` (Simulator)
+
+- [df595d82]	add ssoadmin simulator
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [285e80cd]	fix: avoid debug trace if http.Request.Body is nil
+- [dde50904]	fix: Ignore concurrent deletes in GetCategories
+- [fc1fce62]	Add PlaceVmsXCluster bindings and simulator
+- [df595d82]	vcsim: add ssoadmin simulator
+- [9ca477aa]	ssoadmin: add IdentitySources API bindings
+- [24fe60f1]	Add BackingDiskObjectId go bindings to CNS API
+- [cbc68fc0]	fix: rest.Client.LoginByToken invalid signature
+
 <a name="v0.27.3"></a>
 ## [Release v0.27.3](https://github.com/vmware/govmomi/compare/v0.27.2...v0.27.3)
 
