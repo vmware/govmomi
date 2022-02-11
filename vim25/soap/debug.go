@@ -87,7 +87,9 @@ func (d *debugRoundTrip) debugRequest(req *http.Request) string {
 	ext := d.ext(req.Header)
 	// Capture body
 	wc = d.newFile("req." + ext)
-	req.Body = Trace(req.Body, wc, ext)
+	if req.Body != nil {
+		req.Body = Trace(req.Body, wc, ext)
+	}
 
 	// Delay closing until marked done
 	d.cs = append(d.cs, wc)
