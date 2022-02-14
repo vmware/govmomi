@@ -29,7 +29,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kr/pretty"
+	"github.com/dougm/pretty"
 
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25/progress"

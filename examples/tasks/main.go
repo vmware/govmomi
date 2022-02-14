@@ -21,7 +21,7 @@ import (
 	"flag"
 	"time"
 
-	"github.com/kr/pretty"
+	"github.com/dougm/pretty"
 
 	"github.com/vmware/govmomi/task"
 

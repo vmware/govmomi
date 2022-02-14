@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"net"
 
-	xdr "github.com/davecgh/go-xdr/xdr2"
+	xdr "github.com/rasky/go-xdr/xdr2"
 )
 
 // Defs from: open-vm-tools/lib/guestRpc/nicinfo.x
