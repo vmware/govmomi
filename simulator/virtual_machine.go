@@ -2029,9 +2029,11 @@ func (vm *VirtualMachine) customize(ctx *Context) {
 	}
 	if hostname != "" {
 		changes = append(changes, types.PropertyChange{Name: "guest.hostName", Val: hostname})
+		changes = append(changes, types.PropertyChange{Name: "summary.guest.hostName", Val: hostname})
 	}
 	if address != "" {
 		changes = append(changes, types.PropertyChange{Name: "guest.ipAddress", Val: address})
+		changes = append(changes, types.PropertyChange{Name: "summary.guest.ipAddress", Val: address})
 	}
 
 	vm.imc = nil
