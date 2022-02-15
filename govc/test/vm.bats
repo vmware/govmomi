@@ -1116,6 +1116,16 @@ load test_helper
   run govc object.collect -s vm/DC0_H0_VM0 guest.ipAddress
   assert_success 10.0.0.43
 
+  run govc object.collect -s vm/DC0_H0_VM0 summary.guest.ipAddress
+  assert_success 10.0.0.43
+
+  run govc object.collect -s vm/DC0_H0_VM0 summary.guest.hostName
+  assert_success windoze
+
+  run govc vm.info DC0_H0_VM0
+  assert_success
+  assert_matches 10.0.0.43
+
   run govc object.collect -s vm/DC0_H0_VM0 guest.hostName
   assert_success windoze
 
