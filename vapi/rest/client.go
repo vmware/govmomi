@@ -164,7 +164,7 @@ type RawResponse struct {
 // Do sends the http.Request, decoding resBody if provided.
 func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{}) error {
 	switch req.Method {
-	case http.MethodPost, http.MethodPatch:
+	case http.MethodPost, http.MethodPatch, http.MethodPut:
 		req.Header.Set("Content-Type", "application/json")
 	}
 

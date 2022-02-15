@@ -46,6 +46,7 @@ import (
 	_ "github.com/vmware/govmomi/pbm/simulator"
 	_ "github.com/vmware/govmomi/ssoadmin/simulator"
 	_ "github.com/vmware/govmomi/sts/simulator"
+	_ "github.com/vmware/govmomi/vapi/appliance/simulator"
 	_ "github.com/vmware/govmomi/vapi/cluster/simulator"
 	_ "github.com/vmware/govmomi/vapi/namespace/simulator"
 	_ "github.com/vmware/govmomi/vapi/simulator"

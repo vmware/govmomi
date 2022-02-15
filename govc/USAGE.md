@@ -299,6 +299,14 @@ but appear via `govc $cmd -h`:
  - [tree](#tree)
  - [vapp.destroy](#vappdestroy)
  - [vapp.power](#vapppower)
+ - [vcsa.access.consolecli.get](#vcsaaccessconsolecliget)
+ - [vcsa.access.consolecli.set](#vcsaaccessconsolecliset)
+ - [vcsa.access.dcui.get](#vcsaaccessdcuiget)
+ - [vcsa.access.dcui.set](#vcsaaccessdcuiset)
+ - [vcsa.access.shell.get](#vcsaaccessshellget)
+ - [vcsa.access.shell.set](#vcsaaccessshellset)
+ - [vcsa.access.ssh.get](#vcsaaccesssshget)
+ - [vcsa.access.ssh.set](#vcsaaccesssshset)
  - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
  - [vcsa.net.proxy.info](#vcsanetproxyinfo)
  - [vcsa.shutdown.cancel](#vcsashutdowncancel)
@@ -5058,6 +5066,147 @@ Options:
   -on=false              Power on
   -suspend=false         Power suspend
   -vapp.ipath=           Find vapp by inventory path
+```
+
+## vcsa.access.consolecli.get
+
+```
+Usage: govc vcsa.access.consolecli.get [OPTIONS]
+
+Get enabled state of the console-based controlled CLI (TTY1).
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+govc vcsa.access.consolecli.get
+
+Options:
+```
+
+## vcsa.access.consolecli.set
+
+```
+Usage: govc vcsa.access.consolecli.set [OPTIONS]
+
+Set enabled state of the console-based controlled CLI (TTY1).
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+# Enable Console CLI
+govc vcsa.access.consolecli.set -enabled=true
+
+# Disable Console CLI
+govc vcsa.access.consolecli.set -enabled=false
+
+Options:
+  -enabled=false         Enable Console CLI.
+```
+
+## vcsa.access.dcui.get
+
+```
+Usage: govc vcsa.access.dcui.get [OPTIONS]
+
+Get enabled state of Direct Console User Interface (DCUI TTY2).
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+govc vcsa.access.dcui.get
+
+Options:
+```
+
+## vcsa.access.dcui.set
+
+```
+Usage: govc vcsa.access.dcui.set [OPTIONS]
+
+Set enabled state of Direct Console User Interface (DCUI TTY2).
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+# Enable DCUI
+govc vcsa.access.dcui.set -enabled=true
+
+# Disable DCUI
+govc vcsa.access.dcui.set -enabled=false
+
+Options:
+  -enabled=false         Enable Direct Console User Interface (DCUI TTY2).
+```
+
+## vcsa.access.shell.get
+
+```
+Usage: govc vcsa.access.shell.get [OPTIONS]
+
+Get enabled state of BASH, that is, access to BASH from within the controlled CLI.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+govc vcsa.access.shell.get
+
+Options:
+```
+
+## vcsa.access.shell.set
+
+```
+Usage: govc vcsa.access.shell.set [OPTIONS]
+
+Set enabled state of BASH, that is, access to BASH from within the controlled CLI.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+# Enable Shell
+govc vcsa.access.shell.set -enabled=true -timeout=240
+
+# Disable Shell
+govc vcsa.access.shell.set -enabled=false
+
+Options:
+  -enabled=false         Enable BASH, that is, access to BASH from within the controlled CLI.
+  -timeout=0             The timeout (in seconds) specifies how long you enable the Shell access. The maximum timeout is 86400 seconds(1 day).
+```
+
+## vcsa.access.ssh.get
+
+```
+Usage: govc vcsa.access.ssh.get [OPTIONS]
+
+Get enabled state of the SSH-based controlled CLI.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+govc vcsa.access.ssh.get
+
+Options:
+```
+
+## vcsa.access.ssh.set
+
+```
+Usage: govc vcsa.access.ssh.set [OPTIONS]
+
+Set enabled state of the SSH-based controlled CLI.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
+Examples:
+# Enable SSH
+govc vcsa.access.ssh.set -enabled=true
+
+# Disable SSH
+govc vcsa.access.ssh.set -enabled=false
+
+Options:
+  -enabled=false         Enable SSH-based controlled CLI.
 ```
 
 ## vcsa.log.forwarding.info
