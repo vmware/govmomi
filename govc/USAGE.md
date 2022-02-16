@@ -5241,8 +5241,11 @@ Options:
 Usage: govc vcsa.shutdown.cancel [OPTIONS]
 
 Cancel pending shutdown action.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.cancel
+govc vcsa.shutdown.cancel
 
 Options:
 ```
@@ -5253,8 +5256,11 @@ Options:
 Usage: govc vcsa.shutdown.get [OPTIONS]
 
 Get details about the pending shutdown action.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.get
+govc vcsa.shutdown.get
 
 Options:
 ```
@@ -5265,8 +5271,11 @@ Options:
 Usage: govc vcsa.shutdown.poweroff [OPTIONS] REASON
 
 Power off the appliance.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.poweroff -delay 10 "powering off for maintenance"
+govc vcsa.shutdown.poweroff -delay 10 "powering off for maintenance"
 
 Options:
   -delay=0               Minutes after which poweroff should start.
@@ -5278,8 +5287,11 @@ Options:
 Usage: govc vcsa.shutdown.reboot [OPTIONS] REASON
 
 Reboot the appliance.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.reboot -delay 10 "rebooting for maintenance"
+govc vcsa.shutdown.reboot -delay 10 "rebooting for maintenance"
 
 Options:
   -delay=0               Minutes after which reboot should start.

@@ -57,12 +57,15 @@ func (cmd *get) Process(ctx context.Context) error {
 
 func (cmd *get) Description() string {
 	return `Get details about the pending shutdown action.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.get`
+govc vcsa.shutdown.get`
 }
 
-type shutdownStatus struct {
-	Values shutdown.Config `json:"values"`
+type config struct {
+	shutdown.Config
 }
 
 func (cmd *get) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -71,23 +74,23 @@ func (cmd *get) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	s := shutdown.NewManager(c)
+	m := shutdown.NewManager(c)
 
-	r, err := s.Get(ctx)
+	s, err := m.Get(ctx)
 	if err != nil {
 		return err
 	}
 
-	return cmd.WriteResult(shutdownStatus{
-		Values: r,
+	return cmd.WriteResult(config{
+		s,
 	})
 }
 
-func (res shutdownStatus) Write(w io.Writer) error {
+func (c config) Write(w io.Writer) error {
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Action:%s\n", res.Values.Action)
-	fmt.Fprintf(tw, "Reason:%s\n", res.Values.Reason)
-	fmt.Fprintf(tw, "ShutDown Time:%s\n", res.Values.ShutdownTime)
+	fmt.Fprintf(tw, "Action:%s\n", c.Action)
+	fmt.Fprintf(tw, "Reason:%s\n", c.Reason)
+	fmt.Fprintf(tw, "ShutDown Time:%s\n", c.ShutdownTime)
 
 	return tw.Flush()
 }
