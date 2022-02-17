@@ -15,8 +15,10 @@ options:
         - docs
         - examples
         - fix
+        - api
   commit_groups:
     title_maps:
+      api: 💫 API Changes
       govc: 💫 `govc` (CLI)
       vcsim: 💫 `vcsim` (Simulator)
       chore: 🧹 Chore
