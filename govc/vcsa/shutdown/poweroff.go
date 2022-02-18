@@ -52,8 +52,11 @@ func (cmd *powerOff) Usage() string {
 
 func (cmd *powerOff) Description() string {
 	return `Power off the appliance.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.poweroff -delay 10 "powering off for maintenance"`
+govc vcsa.shutdown.poweroff -delay 10 "powering off for maintenance"`
 }
 
 func (cmd *powerOff) Run(ctx context.Context, f *flag.FlagSet) error {

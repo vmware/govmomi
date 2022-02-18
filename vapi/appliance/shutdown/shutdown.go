@@ -24,7 +24,7 @@ import (
 )
 
 const (
-	Path     = "/appliance/shutdown"
+	Path     = "/api/appliance/shutdown"
 	Action   = "action"
 	Cancel   = "cancel"
 	PowerOff = "poweroff"
@@ -56,7 +56,7 @@ type Spec struct {
 	Reason string `json:"reason"`
 }
 
-// Config  defines shutdown configuration returned by the Shutdown.get operation
+// Config defines shutdown configuration returned by the Shutdown.get operation
 type Config struct {
 	Action       string `json:"action"`
 	Reason       string `json:"reason"`
@@ -73,23 +73,21 @@ func (m *Manager) Get(ctx context.Context) (Config, error) {
 }
 
 // PowerOff powers off the appliance.
-func (m *Manager) PowerOff(ctx context.Context, powerOffReason string, delay int) error {
+func (m *Manager) PowerOff(ctx context.Context, reason string, delay int) error {
 	r := m.Resource(Path).WithParam(Action, PowerOff)
-	s := Spec{
-		Delay:  delay,
-		Reason: powerOffReason,
-	}
 
-	return m.Do(ctx, r.Request(http.MethodPost, s), nil)
+	return m.Do(ctx, r.Request(http.MethodPost, Spec{
+		Delay:  delay,
+		Reason: reason,
+	}), nil)
 }
 
 // Reboot reboots the appliance
-func (m *Manager) Reboot(ctx context.Context, rebootReason string, delay int) error {
+func (m *Manager) Reboot(ctx context.Context, reason string, delay int) error {
 	r := m.Resource(Path).WithParam(Action, Reboot)
-	s := Spec{
-		Delay:  delay,
-		Reason: rebootReason,
-	}
 
-	return m.Do(ctx, r.Request(http.MethodPost, s), nil)
+	return m.Do(ctx, r.Request(http.MethodPost, Spec{
+		Delay:  delay,
+		Reason: reason,
+	}), nil)
 }

@@ -21,12 +21,14 @@ import (
 	"log"
 	"net/http"
 	"net/url"
+	"time"
 
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/appliance/access/consolecli"
 	"github.com/vmware/govmomi/vapi/appliance/access/dcui"
 	"github.com/vmware/govmomi/vapi/appliance/access/shell"
 	"github.com/vmware/govmomi/vapi/appliance/access/ssh"
+	"github.com/vmware/govmomi/vapi/appliance/shutdown"
 	vapi "github.com/vmware/govmomi/vapi/simulator"
 )
 
@@ -38,21 +40,23 @@ func init() {
 
 // Handler implements the Appliance API simulator
 type Handler struct {
-	URL        *url.URL
-	consolecli consolecli.Access
-	dcui       dcui.Access
-	ssh        ssh.Access
-	shell      shell.Access
+	URL            *url.URL
+	consolecli     consolecli.Access
+	dcui           dcui.Access
+	ssh            ssh.Access
+	shell          shell.Access
+	shutdownConfig shutdown.Config
 }
 
 // New creates a Handler instance
 func New(u *url.URL) *Handler {
 	return &Handler{
-		URL:        nil,
-		consolecli: consolecli.Access{Enabled: false},
-		dcui:       dcui.Access{Enabled: false},
-		ssh:        ssh.Access{Enabled: false},
-		shell:      shell.Access{Enabled: false, Timeout: 0},
+		URL:            nil,
+		consolecli:     consolecli.Access{Enabled: false},
+		dcui:           dcui.Access{Enabled: false},
+		ssh:            ssh.Access{Enabled: false},
+		shell:          shell.Access{Enabled: false, Timeout: 0},
+		shutdownConfig: shutdown.Config{},
 	}
 }
 
@@ -62,6 +66,7 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	s.HandleFunc(dcui.Path, h.dcuiAccess)
 	s.HandleFunc(ssh.Path, h.sshAccess)
 	s.HandleFunc(shell.Path, h.shellAccess)
+	s.HandleFunc(shutdown.Path, h.shutdown)
 }
 
 func (h *Handler) decode(r *http.Request, w http.ResponseWriter, val interface{}) bool {
@@ -145,5 +150,40 @@ func (h *Handler) shellAccess(writer http.ResponseWriter, request *http.Request)
 		}
 	default:
 		http.NotFound(writer, request)
+	}
+}
+
+func (h *Handler) shutdown(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, h.shutdownConfig)
+	case http.MethodPost:
+		switch r.URL.Query().Get(shutdown.Action) {
+		case shutdown.Cancel:
+			h.shutdownConfig.ShutdownTime = ""
+			h.shutdownConfig.Action = ""
+			h.shutdownConfig.Reason = ""
+			w.WriteHeader(http.StatusNoContent)
+		case shutdown.Reboot:
+			var spec shutdown.Spec
+			if h.decode(r, w, &spec) {
+				h.shutdownConfig.ShutdownTime = time.Now().UTC().Add(time.Duration(spec.Delay) * time.Minute).String()
+				h.shutdownConfig.Reason = spec.Reason
+				h.shutdownConfig.Action = shutdown.Reboot
+				w.WriteHeader(http.StatusNoContent)
+			}
+		case shutdown.PowerOff:
+			var spec shutdown.Spec
+			if h.decode(r, w, &spec) {
+				h.shutdownConfig.ShutdownTime = time.Now().UTC().Add(time.Duration(spec.Delay) * time.Minute).String()
+				h.shutdownConfig.Reason = spec.Reason
+				h.shutdownConfig.Action = shutdown.PowerOff
+				w.WriteHeader(http.StatusNoContent)
+			}
+		default:
+			http.NotFound(w, r)
+		}
+	default:
+		http.NotFound(w, r)
 	}
 }

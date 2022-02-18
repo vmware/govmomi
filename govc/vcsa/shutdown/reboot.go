@@ -60,8 +60,11 @@ func (cmd *reboot) Usage() string {
 
 func (cmd *reboot) Description() string {
 	return `Reboot the appliance.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.reboot -delay 10 "rebooting for maintenance"`
+govc vcsa.shutdown.reboot -delay 10 "rebooting for maintenance"`
 }
 
 func (cmd *reboot) Run(ctx context.Context, f *flag.FlagSet) error {

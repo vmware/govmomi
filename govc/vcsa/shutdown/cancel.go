@@ -40,8 +40,11 @@ func (cmd *cancel) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (cmd *cancel) Description() string {
 	return `Cancel pending shutdown action.
+
+Note: This command requires vCenter 7.0.2 or higher.
+
 Examples:
-  govc vcsa.shutdown.cancel`
+govc vcsa.shutdown.cancel`
 }
 
 func (cmd *cancel) Run(ctx context.Context, f *flag.FlagSet) error {
