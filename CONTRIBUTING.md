@@ -167,12 +167,16 @@ $ git commit -s -m "govc: Add CLI command X" -m "Closes: #1234"
 
 Currently the following prefixes are used:
 
+- `api:` - Use for API-related changes
 - `govc:` - Use for changes to `govc` CLI
 - `vcsim:` - Use for changes to vCenter Simulator
 - `chore:` - Use for repository related activities
 - `fix:` - Use for bug fixes
 - `docs:` - Use for changes to the documentation
 - `examples:` - Use for changes to examples
+
+If your contribution falls into multiple categories, e.g. `api` and `vcsim` it
+is recommended to break up your commits using distinct prefixes.
 
 ### Running CI Checks and Tests
 You can run both `make check` and `make test` from the top level of the
