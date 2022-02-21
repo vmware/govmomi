@@ -98,3 +98,61 @@ func TestHostDatastoreSystem(t *testing.T) {
 		}
 	}
 }
+
+func TestCreateNasDatastoreValidation(t *testing.T) {
+	s := New(NewServiceInstance(SpoofContext(), esx.ServiceContent, esx.RootFolder))
+
+	ts := s.NewServer()
+	defer ts.Close()
+
+	ctx := context.Background()
+
+	c, err := govmomi.NewClient(ctx, ts.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	host := object.NewHostSystem(c.Client, esx.HostSystem.Reference())
+
+	dss, err := host.ConfigManager().DatastoreSystem(ctx)
+	if err != nil {
+		t.Error(err)
+	}
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	tests := []struct {
+		name string
+		spec types.HostNasVolumeSpec
+	}{
+		{
+			"RemotePath is not specified",
+			types.HostNasVolumeSpec{
+				Type:       string(types.HostFileSystemVolumeFileSystemTypeNFS),
+				LocalPath:  pwd,
+				RemoteHost: "localhost",
+			},
+		},
+		{
+			"RemoteHost is not specified",
+			types.HostNasVolumeSpec{
+				Type:       string(types.HostFileSystemVolumeFileSystemTypeNFS),
+				LocalPath:  pwd,
+				RemotePath: pwd,
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			_, err := dss.CreateNasDatastore(ctx, tt.spec)
+
+			if err == nil {
+				t.Error("expected error")
+			}
+		})
+	}
+}

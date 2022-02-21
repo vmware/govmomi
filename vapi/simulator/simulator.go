@@ -1523,10 +1523,13 @@ func (s *handler) updateFileInfo(id string) *update {
 
 // libraryPath returns the local Datastore fs path for a Library or Item if id is specified.
 func libraryPath(l *library.Library, id string) string {
-	// DatastoreID (moref) format is "$local-path@$ds-folder-id",
-	// see simulator.HostDatastoreSystem.CreateLocalDatastore
-	ds := strings.SplitN(l.Storage[0].DatastoreID, "@", 2)[0]
-	return path.Join(append([]string{ds, "contentlib-" + l.ID}, id)...)
+	dsref := types.ManagedObjectReference{
+		Type:  "Datastore",
+		Value: l.Storage[0].DatastoreID,
+	}
+	ds := simulator.Map.Get(dsref).(*simulator.Datastore)
+
+	return path.Join(append([]string{ds.Info.GetDatastoreInfo().Url, "contentlib-" + l.ID}, id)...)
 }
 
 func (s *handler) libraryItemFileCreate(up *update, name string, body io.ReadCloser) error {

@@ -60,11 +60,23 @@ func (dss *HostDatastoreSystem) add(ctx *Context, ds *Datastore) *soap.Fault {
 	}
 
 	folder := ctx.Map.getEntityFolder(dss.Host, "datastore")
-	ds.Self.Type = typeName(ds)
-	// Datastore is the only type where create methods do not include the parent (Folder in this case),
-	// but we need the moref to be unique per DC/datastoreFolder, but not per-HostSystem.
-	ds.Self.Value += "@" + folder.Self.Value
-	// TODO: name should be made unique in the case of Local ds type
+
+	found := false
+	if e := ctx.Map.FindByName(ds.Name, folder.ChildEntity); e != nil {
+		if e.Reference().Type != "Datastore" {
+			return Fault(e.Reference().Value, &types.DuplicateName{
+				Name:   ds.Name,
+				Object: e.Reference(),
+			})
+		}
+
+		// if datastore already exists, use current reference
+		found = true
+		ds.Self = e.Reference()
+	} else {
+		// put datastore to folder and generate reference
+		folderPutChild(ctx, folder, ds)
+	}
 
 	ds.Summary.Datastore = &ds.Self
 	ds.Summary.Name = ds.Name
@@ -84,7 +96,8 @@ func (dss *HostDatastoreSystem) add(ctx *Context, ds *Datastore) *soap.Fault {
 	parent := hostParent(dss.Host)
 	ctx.Map.AddReference(ctx, parent, &parent.Datastore, ds.Self)
 
-	if ctx.Map.Get(ds.Self) == nil {
+	// NOTE: browser must be created after ds is appended to dss.Datastore
+	if !found {
 		browser := &HostDatastoreBrowser{}
 		browser.Datastore = dss.Datastore
 		ds.Browser = ctx.Map.Put(browser).Reference()
@@ -95,8 +108,6 @@ func (dss *HostDatastoreSystem) add(ctx *Context, ds *Datastore) *soap.Fault {
 		info.FreeSpace = ds.Summary.FreeSpace
 		info.MaxMemoryFileSize = ds.Summary.Capacity
 		info.MaxFileSize = ds.Summary.Capacity
-
-		folderPutChild(ctx, folder, ds)
 	}
 
 	return nil
@@ -107,7 +118,6 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(ctx *Context, c *types.Crea
 
 	ds := &Datastore{}
 	ds.Name = c.Name
-	ds.Self.Value = c.Path
 
 	ds.Info = &types.LocalDatastoreInfo{
 		DatastoreInfo: types.DatastoreInfo{
@@ -147,9 +157,24 @@ func (dss *HostDatastoreSystem) CreateLocalDatastore(ctx *Context, c *types.Crea
 func (dss *HostDatastoreSystem) CreateNasDatastore(ctx *Context, c *types.CreateNasDatastore) soap.HasFault {
 	r := &methods.CreateNasDatastoreBody{}
 
+	// validate RemoteHost and RemotePath are specified
+	if c.Spec.RemoteHost == "" {
+		r.Fault_ = Fault(
+			"A specified parameter was not correct: Spec.RemoteHost",
+			&types.InvalidArgument{InvalidProperty: "RemoteHost"},
+		)
+		return r
+	}
+	if c.Spec.RemotePath == "" {
+		r.Fault_ = Fault(
+			"A specified parameter was not correct: Spec.RemotePath",
+			&types.InvalidArgument{InvalidProperty: "RemotePath"},
+		)
+		return r
+	}
+
 	ds := &Datastore{}
 	ds.Name = path.Base(c.Spec.LocalPath)
-	ds.Self.Value = c.Spec.RemoteHost + ":" + c.Spec.RemotePath
 
 	ds.Info = &types.NasDatastoreInfo{
 		DatastoreInfo: types.DatastoreInfo{
