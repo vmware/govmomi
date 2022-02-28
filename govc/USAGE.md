@@ -1726,6 +1726,7 @@ Options:
   -discovery-protocol=   Link Discovery Protocol
   -folder=               Inventory folder [GOVC_FOLDER]
   -mtu=0                 DVS Max MTU
+  -num-uplinks=0         Number of Uplinks
   -product-version=      DVS product version
 ```
 
