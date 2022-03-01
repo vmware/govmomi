@@ -64,6 +64,7 @@ func EthernetCardTypes() VirtualDeviceList {
 		&types.VirtualE1000e{},
 		&types.VirtualVmxnet2{},
 		&types.VirtualVmxnet3{},
+		&types.VirtualVmxnet3Vrdma{},
 		&types.VirtualPCNet32{},
 		&types.VirtualSriovEthernetCard{},
 	}).Select(func(device types.BaseVirtualDevice) bool {
