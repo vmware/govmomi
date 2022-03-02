@@ -455,6 +455,50 @@ var devices = VirtualDeviceList([]types.BaseVirtualDevice{
 		},
 		YieldOnPoll: true,
 	},
+	&types.VirtualPCIPassthrough{
+		VirtualDevice: types.VirtualDevice{
+			Key: 13000,
+			DeviceInfo: &types.Description{
+				Label:   "PCI device 0",
+				Summary: "NVIDIA GRID vGPU grid_v100-4q",
+			},
+			Backing: &types.VirtualPCIPassthroughVmiopBackingInfo{
+				VirtualPCIPassthroughPluginBackingInfo: types.VirtualPCIPassthroughPluginBackingInfo{},
+				Vgpu:                                   "grid_v100-4q",
+				MigrateSupported:                       (*bool)(nil),
+			},
+			Connectable: (*types.VirtualDeviceConnectInfo)(nil),
+			SlotInfo: &types.VirtualDevicePciBusSlotInfo{
+				VirtualDeviceBusSlotInfo: types.VirtualDeviceBusSlotInfo{},
+				PciSlotNumber:            33,
+			},
+			ControllerKey: 100,
+			UnitNumber:    types.NewInt32(18),
+		},
+	},
+	&types.VirtualPCIPassthrough{
+		VirtualDevice: types.VirtualDevice{
+			Key: 14000,
+			DeviceInfo: &types.Description{
+				Label:   "PCI device 1",
+				Summary: "NVIDIA GPU",
+			},
+			Backing: &types.VirtualPCIPassthroughDynamicBackingInfo{
+				AllowedDevice: []types.VirtualPCIPassthroughAllowedDevice{{
+					VendorId: int32(111),
+					DeviceId: int32(222),
+				}},
+				CustomLabel: "mygpu",
+			},
+			Connectable: (*types.VirtualDeviceConnectInfo)(nil),
+			SlotInfo: &types.VirtualDevicePciBusSlotInfo{
+				VirtualDeviceBusSlotInfo: types.VirtualDeviceBusSlotInfo{},
+				PciSlotNumber:            34,
+			},
+			ControllerKey: 100,
+			UnitNumber:    types.NewInt32(19),
+		},
+	},
 })
 
 func TestSelectByType(t *testing.T) {
@@ -540,6 +584,20 @@ func TestSelectByBackingInfo(t *testing.T) {
 			},
 		},
 		(*types.VirtualSerialPortURIBackingInfo)(nil),
+		&types.VirtualPCIPassthroughVmiopBackingInfo{
+			Vgpu: "grid_v100-4q",
+		},
+		(*types.VirtualPCIPassthroughVmiopBackingInfo)(nil),
+		(*types.VirtualPCIPassthroughDynamicBackingInfo)(nil),
+		&types.VirtualPCIPassthroughDynamicBackingInfo{
+			CustomLabel: "mygpu",
+		},
+		&types.VirtualPCIPassthroughDynamicBackingInfo{
+			AllowedDevice: []types.VirtualPCIPassthroughAllowedDevice{{
+				VendorId: int32(111),
+				DeviceId: int32(222),
+			}},
+		},
 	}
 
 	for _, test := range tests {
