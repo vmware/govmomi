@@ -157,6 +157,25 @@ func (l VirtualDeviceList) SelectByBackingInfo(backing types.BaseVirtualDeviceBa
 		case types.BaseVirtualDeviceFileBackingInfo:
 			b := backing.(types.BaseVirtualDeviceFileBackingInfo)
 			return a.GetVirtualDeviceFileBackingInfo().FileName == b.GetVirtualDeviceFileBackingInfo().FileName
+		case *types.VirtualPCIPassthroughVmiopBackingInfo:
+			b := backing.(*types.VirtualPCIPassthroughVmiopBackingInfo)
+			return a.Vgpu == b.Vgpu
+		case *types.VirtualPCIPassthroughDynamicBackingInfo:
+			b := backing.(*types.VirtualPCIPassthroughDynamicBackingInfo)
+			if b.CustomLabel != "" && b.CustomLabel != a.CustomLabel {
+				return false
+			}
+			if len(b.AllowedDevice) == 0 {
+				return true
+			}
+			for _, x := range a.AllowedDevice {
+				for _, y := range b.AllowedDevice {
+					if x.DeviceId == y.DeviceId && x.VendorId == y.VendorId {
+						return true
+					}
+				}
+			}
+			return false
 		default:
 			return false
 		}

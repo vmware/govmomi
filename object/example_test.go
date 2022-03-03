@@ -536,6 +536,60 @@ func ExampleNetworkReference_EthernetCardBackingInfo() {
 	// Output: 1 of 2 NICs match backing
 }
 
+func ExampleVirtualDeviceList_SelectByBackingInfo() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		finder := find.NewFinder(c)
+		vm, err := finder.VirtualMachine(ctx, "DC0_H0_VM0")
+		if err != nil {
+			return err
+		}
+
+		backing := &types.VirtualPCIPassthroughVmiopBackingInfo{
+			Vgpu: "grid_v100-4q",
+		}
+
+		gpu := &types.VirtualPCIPassthrough{
+			VirtualDevice: types.VirtualDevice{Backing: backing},
+		}
+
+		err = vm.AddDevice(ctx, gpu) // add a GPU to this VM
+		if err != nil {
+			return err
+		}
+
+		device, err := vm.Device(ctx) // get the VM's virtual device list
+		if err != nil {
+			return err
+		}
+
+		// find the device with the given backing info
+		gpus := device.SelectByBackingInfo(backing)
+
+		name := gpus[0].(*types.VirtualPCIPassthrough).Backing.(*types.VirtualPCIPassthroughVmiopBackingInfo).Vgpu
+
+		fmt.Println(name)
+
+		// example alternative to using SelectByBackingInfo for the use-case above:
+		for i := range device {
+			switch d := device[i].(type) {
+			case *types.VirtualPCIPassthrough:
+				switch b := d.Backing.(type) {
+				case *types.VirtualPCIPassthroughVmiopBackingInfo:
+					if b.Vgpu == backing.Vgpu {
+						fmt.Println(b.Vgpu)
+					}
+				}
+			}
+		}
+
+		return nil
+	})
+
+	// Output:
+	// grid_v100-4q
+	// grid_v100-4q
+}
+
 // Find a VirtualMachine's Cluster
 func ExampleVirtualMachine_resourcePoolOwner() {
 	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
