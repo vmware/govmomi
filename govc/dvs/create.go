@@ -99,11 +99,13 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	numUplinkPorts := int(cmd.numUplinkPorts)
 
-	var policy types.DVSNameArrayUplinkPortPolicy
-	for i := 0; i < numUplinkPorts; i++ {
-		policy.UplinkPortName = append(policy.UplinkPortName, fmt.Sprintf("Uplink %d", i+1))
+	if numUplinkPorts > 0 {
+		var policy types.DVSNameArrayUplinkPortPolicy
+		for i := 0; i < numUplinkPorts; i++ {
+			policy.UplinkPortName = append(policy.UplinkPortName, fmt.Sprintf("Uplink %d", i+1))
+		}
+		cmd.configSpec.UplinkPortPolicy = &policy
 	}
-	cmd.configSpec.UplinkPortPolicy = &policy
 
 	folder, err := cmd.FolderOrDefault("network")
 	if err != nil {
