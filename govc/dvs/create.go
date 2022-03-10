@@ -34,6 +34,8 @@ type create struct {
 	configSpec *types.VMwareDVSConfigSpec
 
 	dProtocol string
+
+	numUplinkPorts uint
 }
 
 func init() {
@@ -52,6 +54,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.ProductInfo.Version, "product-version", "", "DVS product version")
 	f.Var(flags.NewInt32(&cmd.configSpec.MaxMtu), "mtu", "DVS Max MTU")
 	f.StringVar(&cmd.dProtocol, "discovery-protocol", "", "Link Discovery Protocol")
+	f.UintVar(&cmd.numUplinkPorts, "num-uplinks", 0, "Number of Uplinks")
 }
 
 func (cmd *create) Usage() string {
@@ -92,6 +95,16 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 			Protocol:  cmd.dProtocol,
 			Operation: "listen",
 		}
+	}
+
+	numUplinkPorts := int(cmd.numUplinkPorts)
+
+	if numUplinkPorts > 0 {
+		var policy types.DVSNameArrayUplinkPortPolicy
+		for i := 0; i < numUplinkPorts; i++ {
+			policy.UplinkPortName = append(policy.UplinkPortName, fmt.Sprintf("Uplink %d", i+1))
+		}
+		cmd.configSpec.UplinkPortPolicy = &policy
 	}
 
 	folder, err := cmd.FolderOrDefault("network")
