@@ -102,3 +102,17 @@ func (s DistributedVirtualSwitch) ReconfigureDVPort(ctx context.Context, spec []
 
 	return NewTask(s.Client(), res.Returnval), nil
 }
+
+func (s DistributedVirtualSwitch) ReconfigureLACP(ctx context.Context, spec []types.VMwareDvsLacpGroupSpec) (*Task, error) {
+	req := types.UpdateDVSLacpGroupConfig_Task{
+		This:          s.Reference(),
+		LacpGroupSpec: spec,
+	}
+
+	res, err := methods.UpdateDVSLacpGroupConfig_Task(ctx, s.Client(), &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(s.Client(), res.Returnval), nil
+}
