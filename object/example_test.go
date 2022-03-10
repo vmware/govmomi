@@ -615,3 +615,51 @@ func ExampleVirtualMachine_resourcePoolOwner() {
 	})
 	// Output: ClusterComputeResource
 }
+
+func ExampleHostConfigManager_OptionManager() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		m := view.NewManager(c)
+		kind := []string{"HostSystem"}
+
+		v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, kind, true)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		refs, err := v.Find(ctx, kind, nil)
+		if err != nil {
+			return err
+		}
+
+		setting := ""
+
+		for _, ref := range refs {
+			host := object.NewHostSystem(c, ref)
+			m, err := host.ConfigManager().OptionManager(ctx)
+			if err != nil {
+				return err
+			}
+
+			opt := []types.BaseOptionValue{&types.OptionValue{
+				Key:   "vcrun",
+				Value: "Config.HostAgent.plugins.hostsvc.esxAdminsGroup",
+			}}
+
+			err = m.Update(ctx, opt)
+			if err != nil {
+				return err
+			}
+
+			opt, err = m.Query(ctx, "vcrun")
+			if err != nil {
+				return err
+			}
+			setting = opt[0].GetOptionValue().Value.(string)
+		}
+
+		fmt.Println(setting)
+
+		return v.Destroy(ctx)
+	})
+	// Output: Config.HostAgent.plugins.hostsvc.esxAdminsGroup
+}
