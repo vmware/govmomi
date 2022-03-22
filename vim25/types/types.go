@@ -9146,7 +9146,7 @@ func init() {
 type ClusterClusterInitialPlacementAction struct {
 	ClusterInitialPlacementAction
 
-	ConfigSpec *VirtualMachineConfigSpec   `xml:"configSpec,omitempty"`
+	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
 }
 
 func init() {
