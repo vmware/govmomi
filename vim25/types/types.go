@@ -9143,16 +9143,6 @@ func init() {
 	t["ClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterInitialPlacementAction)(nil)).Elem()
 }
 
-type ClusterClusterInitialPlacementAction struct {
-	ClusterInitialPlacementAction
-
-	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
-}
-
-func init() {
-	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
-}
-
 type ClusterIoFilterInfo struct {
 	IoFilterInfo
 

@@ -115,3 +115,13 @@ type PlaceVmsXClusterSpecVmPlacementSpec struct {
 func init() {
 	t["PlaceVmsXClusterSpecVmPlacementSpec"] = reflect.TypeOf((*PlaceVmsXClusterSpecVmPlacementSpec)(nil)).Elem()
 }
+
+type ClusterClusterInitialPlacementAction struct {
+	ClusterInitialPlacementAction
+
+	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
+}
+
+func init() {
+	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
+}
