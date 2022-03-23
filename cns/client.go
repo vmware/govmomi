@@ -37,6 +37,7 @@ const (
 	ReleaseVSAN67u3 = "vSAN 6.7U3"
 	ReleaseVSAN70   = "7.0"
 	ReleaseVSAN70u1 = "vSAN 7.0U1"
+	ReleaseVSAN70u2 = "vSAN 7.0U2"
 )
 
 var (
