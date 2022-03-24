@@ -55,6 +55,10 @@ Examples:
 }
 
 func (cmd *inflate) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
+
 	dc, err := cmd.Datacenter()
 	if err != nil {
 		return err
