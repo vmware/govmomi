@@ -116,6 +116,8 @@ func init() {
 	t["PlaceVmsXClusterSpecVmPlacementSpec"] = reflect.TypeOf((*PlaceVmsXClusterSpecVmPlacementSpec)(nil)).Elem()
 }
 
+const RecommendationReasonCodeXClusterPlacement = RecommendationReasonCode("xClusterPlacement")
+
 type ClusterClusterInitialPlacementAction struct {
 	ClusterInitialPlacementAction
 

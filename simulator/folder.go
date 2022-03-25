@@ -23,6 +23,7 @@ import (
 	"net/url"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 
@@ -728,42 +729,90 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 	// Reject the request if it is against any folder other than the root folder.
 	if req.This != ctx.Map.content().RootFolder {
 		body.Fault_ = Fault("", new(types.InvalidRequest))
+		return body
+	}
+
+	pools := req.PlacementSpec.ResourcePools
+	specs := req.PlacementSpec.VmPlacementSpecs
+
+	if len(pools) == 0 {
+		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "resourcePools"})
+		return body
+	}
+
+	// Do not allow duplicate clusters.
+	clusters := map[mo.Reference]struct{}{}
+	for _, obj := range pools {
+		o := ctx.Map.Get(obj)
+		pool, ok := o.(*ResourcePool)
+		if !ok {
+			body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "resourcePool"})
+			return body
+		}
+		if _, exists := clusters[pool.Owner]; exists {
+			body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "clusters"})
+			return body
+		}
+		clusters[pool.Owner] = struct{}{}
+	}
+
+	// MVP: Only a single VM is supported.
+	if len(specs) != 1 {
+		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "vmPlacementSpecs"})
+		return body
+	}
+
+	for _, spec := range specs {
+		if spec.ConfigSpec.Name == "" {
+			body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "configSpec.name"})
+			return body
+		}
 	}
 
 	body.Res = new(types.PlaceVmsXClusterResponse)
 
-	for _, spec := range req.PlacementSpec.VmPlacementSpecs {
-		pspec := types.PlacementSpec{
-			PlacementType: string(types.PlacementSpecPlacementTypeCreate),
-			ConfigSpec:    &spec.ConfigSpec,
-		}
-
-		pools := req.PlacementSpec.ResourcePools
+	for _, spec := range specs {
 		pool := ctx.Map.Get(pools[rand.Intn(len(pools))]).(*ResourcePool)
 		cluster := ctx.Map.Get(pool.Owner).(*ClusterComputeResource)
 
-		res := cluster.PlaceVm(ctx, &types.PlaceVm{
-			This:          f.Self,
-			PlacementSpec: pspec,
-		})
-
-		if res.Fault() != nil {
+		if len(cluster.Host) == 0 {
 			faults := types.PlaceVmsXClusterResultPlacementFaults{
 				VmName:       spec.ConfigSpec.Name,
 				ResourcePool: pool.Self,
 				Faults: []types.LocalizedMethodFault{
 					{
-						Fault: res.Fault().Detail.Fault.(types.BaseMethodFault),
+						Fault: &types.GenericDrsFault{},
 					},
 				},
 			}
 			body.Res.Returnval.Faults = append(body.Res.Returnval.Faults, faults)
 		} else {
-			placement := types.PlaceVmsXClusterResultPlacementInfo{
-				VmName:         spec.ConfigSpec.Name,
-				Recommendation: res.(*methods.PlaceVmBody).Res.Returnval.Recommendations[0],
+			res := types.ClusterRecommendation{
+				Key:        "1",
+				Type:       "V1",
+				Time:       time.Now(),
+				Rating:     1,
+				Reason:     string(types.RecommendationReasonCodeXClusterPlacement),
+				ReasonText: string(types.RecommendationReasonCodeXClusterPlacement),
+				Target:     &cluster.Self,
 			}
-			body.Res.Returnval.PlacementInfos = append(body.Res.Returnval.PlacementInfos, placement)
+
+			placementAction := types.ClusterInitialPlacementAction{
+				TargetHost: cluster.Host[rand.Intn(len(cluster.Host))],
+				Pool:       &pool.Self,
+			}
+
+			res.Action = append(res.Action, &types.ClusterClusterInitialPlacementAction{
+				ClusterInitialPlacementAction: placementAction,
+				ConfigSpec:                    &spec.ConfigSpec,
+			})
+
+			body.Res.Returnval.PlacementInfos = append(body.Res.Returnval.PlacementInfos,
+				types.PlaceVmsXClusterResultPlacementInfo{
+					VmName:         spec.ConfigSpec.Name,
+					Recommendation: res,
+				},
+			)
 		}
 	}
 
