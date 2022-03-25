@@ -26,19 +26,19 @@ jobs:
     name: Run govc Tests
     strategy:
       matrix:
-        go-version: ["1.16", "1.17"]
-        platform: ["ubuntu-18.04"]
+        go-version: ["1.17", "1.18"]
+        platform: ["ubuntu-20.04"]
         cmd: ["govc-test"]
         experimental: [false]
         timeout: [10]
         include:
-          - go-version: "1.16"
-            platform: "ubuntu-18.04"
+          - go-version: "1.18"
+            platform: "ubuntu-20.04"
             cmd: "govc-test-sso"
             experimental: true
             timeout: 3
-          - go-version: "1.16"
-            platform: "ubuntu-18.04"
+          - go-version: "1.18"
+            platform: "ubuntu-20.04"
             cmd: "govc-test-sso-assert-cert"
             experimental: true
             timeout: 3
@@ -49,7 +49,7 @@ jobs:
 
     steps:
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
         id: go
@@ -58,19 +58,22 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run ${{ matrix.cmd }}
-        run: make ${{ matrix.cmd }}
+        run: |
+          # hack: https://github.com/actions/setup-go/issues/107#issuecomment-956161446
+          cp -f `which go` /usr/bin/go 
+          make ${{ matrix.cmd }}
 
   govc-docs:
     name: Verify govc docs are up2date
     strategy:
       matrix:
         go-version: ["1.17"]
-        platform: ["ubuntu-18.04"]
+        platform: ["ubuntu-20.04"]
     runs-on: ${{ matrix.platform }}
     timeout-minutes: 3
     steps:
       - name: Set up Go ${{ matrix.go-version }}
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v3
         with:
           go-version: ${{ matrix.go-version }}
         id: go
