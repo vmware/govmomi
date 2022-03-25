@@ -20,7 +20,8 @@ load test_helper
   server=$(govc env -x GOVC_URL_HOST)
   port=$(govc env -x GOVC_URL_PORT)
 
-  docker run --rm projects.registry.vmware.com/pez/powerclicore@sha256:09b29f69c0653f871f6d569f7c4c03c952909f68a27e9792ef2f7c8653235668 /usr/bin/pwsh -f - <<EOF
+  # docker run --rm projects.registry.vmware.com/pez/powerclicore@sha256:09b29f69c0653f871f6d569f7c4c03c952909f68a27e9792ef2f7c8653235668 /usr/bin/pwsh -f - <<EOF
+  docker run --rm ghcr.io/embano1/powerclicore@sha256:09b29f69c0653f871f6d569f7c4c03c952909f68a27e9792ef2f7c8653235668 /usr/bin/pwsh -f - <<EOF
 Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -confirm:\$false | Out-Null
 Connect-VIServer -Server $server -Port $port -User user -Password pass
 
