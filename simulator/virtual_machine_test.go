@@ -390,6 +390,104 @@ func TestReconfigVmDevice(t *testing.T) {
 	}
 }
 
+func TestConnectVmDevice(t *testing.T) {
+	ctx := context.Background()
+
+	m := ESX()
+	defer m.Remove()
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c, err := govmomi.NewClient(ctx, s.URL, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+	vm := object.NewVirtualMachine(c.Client, vmm.Reference())
+
+	l := object.VirtualDeviceList{} // used only for Connect/Disconnect function
+
+	tests := []struct {
+		description            string
+		changePower            func(context.Context) (*object.Task, error)
+		changeConnectivity     func(types.BaseVirtualDevice) error
+		expectedConnected      bool
+		expectedStartConnected bool
+	}{
+		{"disconnect when vm is on", nil, l.Disconnect, false, false},
+		{"connect when vm is on", nil, l.Connect, true, true},
+		{"power off vm", vm.PowerOff, nil, false, true},
+		{"disconnect when vm is off", nil, l.Disconnect, false, false},
+		{"connect when vm is off", nil, l.Connect, false, true},
+		{"power on vm when StartConnected is true", vm.PowerOn, nil, true, true},
+		{"power off vm and disconnect again", vm.PowerOff, l.Disconnect, false, false},
+		{"power on vm when StartConnected is false", vm.PowerOn, nil, false, false},
+	}
+
+	for _, testCase := range tests {
+		testCase := testCase // assign to local var since loop var is reused
+
+		t.Run(testCase.description, func(t *testing.T) {
+			if testCase.changePower != nil {
+				task, err := testCase.changePower(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = task.Wait(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			if testCase.changeConnectivity != nil {
+				list, err := vm.Device(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				device := list.FindByKey(esx.EthernetCard.Key)
+				if device == nil {
+					t.Fatal("cloud not find EthernetCard")
+				}
+
+				err = testCase.changeConnectivity(device)
+				if err != nil {
+					t.Fatal(err)
+				}
+				err = vm.EditDevice(ctx, device)
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			updatedList, err := vm.Device(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			updatedDevice := updatedList.FindByKey(esx.EthernetCard.Key)
+			if updatedDevice == nil {
+				t.Fatal("cloud not find EthernetCard")
+			}
+			conn := updatedDevice.GetVirtualDevice().Connectable
+
+			if conn.Connected != testCase.expectedConnected {
+				t.Errorf("unexpected Connected property. expected: %t, actual: %t",
+					testCase.expectedConnected, conn.Connected)
+			}
+			if conn.StartConnected != testCase.expectedStartConnected {
+				t.Errorf("unexpected StartConnected property. expected: %t, actual: %t",
+					testCase.expectedStartConnected, conn.StartConnected)
+			}
+		})
+	}
+}
+
 func TestVAppConfigAdd(t *testing.T) {
 	ctx := context.Background()
 

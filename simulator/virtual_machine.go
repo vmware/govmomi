@@ -1283,6 +1283,13 @@ func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDe
 		}
 	}
 
+	// device can be connected only if vm is powered on
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+		if d.Connectable != nil {
+			d.Connectable.Connected = false
+		}
+	}
+
 	return nil
 }
 
@@ -1539,10 +1546,27 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 		)
 	}
 
+	// copy devices to prevent data race
+	devices := c.VirtualMachine.cloneDevice()
+	for _, d := range devices {
+		conn := d.GetVirtualDevice().Connectable
+		if conn == nil {
+			continue
+		}
+
+		if c.state == types.VirtualMachinePowerStatePoweredOn {
+			// apply startConnected to current connection
+			conn.Connected = conn.StartConnected
+		} else {
+			conn.Connected = false
+		}
+	}
+
 	c.ctx.Map.Update(c.VirtualMachine, []types.PropertyChange{
 		{Name: "runtime.powerState", Val: c.state},
 		{Name: "summary.runtime.powerState", Val: c.state},
 		{Name: "summary.runtime.bootTime", Val: boot},
+		{Name: "config.hardware.device", Val: devices},
 	})
 
 	return nil, nil
