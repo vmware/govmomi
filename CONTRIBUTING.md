@@ -32,6 +32,10 @@ This is a rough outline of what a contributor's workflow looks like:
 See [below](#format-of-the-commit-message) for details on commit best practices
 and **supported prefixes**, e.g. `govc: <message>`.
 
+> **Note:** If you are new to Git(hub) check out [Git rebase, squash...oh
+> my!](https://www.mgasch.com/2021/05/git-basics/) for more details on how to
+> successfully contribute to an open source project.
+
 ### Example 1 - Fix a Bug in `govmomi`
 
 ```console
