@@ -282,3 +282,48 @@ _EOF_
   run govc cluster.stretch -witness DC0_H0 -first-fault-domain-hosts=DC0_C0_H1,DC0_C0_H2 -second-fault-domain-hosts DC0_C0_H2,DC0_C0_H3 DC0_C0
   assert_success
 }
+
+@test "cluster.module" {
+  vcsim_env
+  local output
+
+  run govc cluster.module.ls
+  assert_success # no tags defined yet
+
+  run govc cluster.module.ls -k=false
+  assert_failure
+
+  run govc cluster.module.ls -id enoent
+  assert_failure # specific module does not exist
+
+  run govc cluster.module.create -cluster DC0_C0
+  assert_success
+
+  id="$output"
+
+  run govc cluster.module.ls -id $id
+  assert_success
+
+  vm="/DC0/vm/DC0_C0_RP0_VM0"
+
+  run govc cluster.module.vm.add -id $id $vm
+  assert_success
+
+  count=$(govc cluster.module.ls -id $id | grep -c VirtualMachine)
+  [ "$count" = "1" ]
+
+  run govc cluster.module.vm.add -id $id $vm
+  assert_failure # already a member
+
+  run govc cluster.module.vm.rm -id $id $vm
+  assert_success
+
+  run govc cluster.module.ls -id $id
+  [ -z "$output" ]
+
+  run govc cluster.module.rm $id
+  assert_success
+
+  run govc cluster.module.ls -id $id
+  assert_failure
+}
