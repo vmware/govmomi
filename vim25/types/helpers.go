@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -92,6 +92,149 @@ func DefaultResourceConfigSpec() ResourceConfigSpec {
 		CpuAllocation:    defaultResourceAllocationInfo(),
 		MemoryAllocation: defaultResourceAllocationInfo(),
 	}
+}
+
+// ToConfigSpec returns a VirtualMachineConfigSpec based on the
+// VirtualMachineConfigInfo.
+func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
+	cs := VirtualMachineConfigSpec{
+		ChangeVersion:                ci.ChangeVersion,
+		Name:                         ci.Name,
+		Version:                      ci.Version,
+		CreateDate:                   ci.CreateDate,
+		Uuid:                         ci.Uuid,
+		InstanceUuid:                 ci.InstanceUuid,
+		NpivNodeWorldWideName:        ci.NpivNodeWorldWideName,
+		NpivPortWorldWideName:        ci.NpivPortWorldWideName,
+		NpivWorldWideNameType:        ci.NpivWorldWideNameType,
+		NpivDesiredNodeWwns:          ci.NpivDesiredNodeWwns,
+		NpivDesiredPortWwns:          ci.NpivDesiredPortWwns,
+		NpivTemporaryDisabled:        ci.NpivTemporaryDisabled,
+		NpivOnNonRdmDisks:            ci.NpivOnNonRdmDisks,
+		LocationId:                   ci.LocationId,
+		GuestId:                      ci.GuestId,
+		AlternateGuestName:           ci.AlternateGuestName,
+		Annotation:                   ci.Annotation,
+		Files:                        &ci.Files,
+		Tools:                        ci.Tools,
+		Flags:                        &ci.Flags,
+		ConsolePreferences:           ci.ConsolePreferences,
+		PowerOpInfo:                  &ci.DefaultPowerOps,
+		NumCPUs:                      ci.Hardware.NumCPU,
+		VcpuConfig:                   ci.VcpuConfig,
+		NumCoresPerSocket:            ci.Hardware.NumCoresPerSocket,
+		MemoryMB:                     int64(ci.Hardware.MemoryMB),
+		MemoryHotAddEnabled:          ci.MemoryHotAddEnabled,
+		CpuHotAddEnabled:             ci.CpuHotAddEnabled,
+		CpuHotRemoveEnabled:          ci.CpuHotRemoveEnabled,
+		VirtualICH7MPresent:          ci.Hardware.VirtualICH7MPresent,
+		VirtualSMCPresent:            ci.Hardware.VirtualSMCPresent,
+		DeviceChange:                 make([]BaseVirtualDeviceConfigSpec, len(ci.Hardware.Device)),
+		CpuAllocation:                ci.CpuAllocation,
+		MemoryAllocation:             ci.MemoryAllocation,
+		LatencySensitivity:           ci.LatencySensitivity,
+		CpuAffinity:                  ci.CpuAffinity,
+		MemoryAffinity:               ci.MemoryAffinity,
+		NetworkShaper:                ci.NetworkShaper,
+		CpuFeatureMask:               make([]VirtualMachineCpuIdInfoSpec, len(ci.CpuFeatureMask)),
+		ExtraConfig:                  ci.ExtraConfig,
+		SwapPlacement:                ci.SwapPlacement,
+		BootOptions:                  ci.BootOptions,
+		FtInfo:                       ci.FtInfo,
+		RepConfig:                    ci.RepConfig,
+		VAssertsEnabled:              ci.VAssertsEnabled,
+		ChangeTrackingEnabled:        ci.ChangeTrackingEnabled,
+		Firmware:                     ci.Firmware,
+		MaxMksConnections:            ci.MaxMksConnections,
+		GuestAutoLockEnabled:         ci.GuestAutoLockEnabled,
+		ManagedBy:                    ci.ManagedBy,
+		MemoryReservationLockedToMax: ci.MemoryReservationLockedToMax,
+		NestedHVEnabled:              ci.NestedHVEnabled,
+		VPMCEnabled:                  ci.VPMCEnabled,
+		MessageBusTunnelEnabled:      ci.MessageBusTunnelEnabled,
+		MigrateEncryption:            ci.MigrateEncryption,
+		FtEncryptionMode:             ci.FtEncryptionMode,
+		SevEnabled:                   ci.SevEnabled,
+		PmemFailoverEnabled:          ci.PmemFailoverEnabled,
+		Pmem:                         ci.Pmem,
+	}
+
+	// Unassign the Files field if all of its fields are empty.
+	if ci.Files.FtMetadataDirectory == "" && ci.Files.LogDirectory == "" &&
+		ci.Files.SnapshotDirectory == "" && ci.Files.SuspendDirectory == "" &&
+		ci.Files.VmPathName == "" {
+		cs.Files = nil
+	}
+
+	// Unassign the Flags field if all of its fields are empty.
+	if ci.Flags.CbrcCacheEnabled == nil &&
+		ci.Flags.DisableAcceleration == nil &&
+		ci.Flags.DiskUuidEnabled == nil &&
+		ci.Flags.EnableLogging == nil &&
+		ci.Flags.FaultToleranceType == "" &&
+		ci.Flags.HtSharing == "" &&
+		ci.Flags.MonitorType == "" &&
+		ci.Flags.RecordReplayEnabled == nil &&
+		ci.Flags.RunWithDebugInfo == nil &&
+		ci.Flags.SnapshotDisabled == nil &&
+		ci.Flags.SnapshotLocked == nil &&
+		ci.Flags.SnapshotPowerOffBehavior == "" &&
+		ci.Flags.UseToe == nil &&
+		ci.Flags.VbsEnabled == nil &&
+		ci.Flags.VirtualExecUsage == "" &&
+		ci.Flags.VirtualMmuUsage == "" &&
+		ci.Flags.VvtdEnabled == nil {
+		cs.Flags = nil
+	}
+
+	// Unassign the PowerOps field if all of its fields are empty.
+	if ci.DefaultPowerOps.DefaultPowerOffType == "" &&
+		ci.DefaultPowerOps.DefaultResetType == "" &&
+		ci.DefaultPowerOps.DefaultSuspendType == "" &&
+		ci.DefaultPowerOps.PowerOffType == "" &&
+		ci.DefaultPowerOps.ResetType == "" &&
+		ci.DefaultPowerOps.StandbyAction == "" &&
+		ci.DefaultPowerOps.SuspendType == "" {
+		cs.PowerOpInfo = nil
+	}
+
+	for i := 0; i < len(cs.CpuFeatureMask); i++ {
+		cs.CpuFeatureMask[i] = VirtualMachineCpuIdInfoSpec{
+			ArrayUpdateSpec: ArrayUpdateSpec{
+				Operation: ArrayUpdateOperationAdd,
+			},
+			Info: &HostCpuIdInfo{
+				// TODO: Does DynamicData need to be copied?
+				//       It is an empty struct...
+				Level:  ci.CpuFeatureMask[i].Level,
+				Vendor: ci.CpuFeatureMask[i].Vendor,
+				Eax:    ci.CpuFeatureMask[i].Eax,
+				Ebx:    ci.CpuFeatureMask[i].Ebx,
+				Ecx:    ci.CpuFeatureMask[i].Ecx,
+				Edx:    ci.CpuFeatureMask[i].Edx,
+			},
+		}
+	}
+
+	for i := 0; i < len(cs.DeviceChange); i++ {
+		cs.DeviceChange[i] = &VirtualDeviceConfigSpec{
+			// TODO: Does DynamicData need to be copied?
+			//       It is an empty struct...
+			Operation:     VirtualDeviceConfigSpecOperationAdd,
+			FileOperation: VirtualDeviceConfigSpecFileOperationCreate,
+			Device:        ci.Hardware.Device[i],
+			// TODO: It is unclear how the profiles associated with the VM or
+			//       its hardware can be reintroduced/persisted in the
+			//       ConfigSpec.
+			Profile: nil,
+			// The backing will come from the device.
+			Backing: nil,
+			// TODO: Investigate futher.
+			FilterSpec: nil,
+		}
+	}
+
+	return cs
 }
 
 func init() {
