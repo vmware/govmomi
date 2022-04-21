@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/govc/cli"
 	_ "github.com/vmware/govmomi/govc/cluster"
 	_ "github.com/vmware/govmomi/govc/cluster/group"
+	_ "github.com/vmware/govmomi/govc/cluster/module"
 	_ "github.com/vmware/govmomi/govc/cluster/override"
 	_ "github.com/vmware/govmomi/govc/cluster/rule"
 	_ "github.com/vmware/govmomi/govc/datacenter"
