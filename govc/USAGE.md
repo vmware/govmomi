@@ -44,6 +44,11 @@ but appear via `govc $cmd -h`:
  - [cluster.group.create](#clustergroupcreate)
  - [cluster.group.ls](#clustergroupls)
  - [cluster.group.remove](#clustergroupremove)
+ - [cluster.module.create](#clustermodulecreate)
+ - [cluster.module.ls](#clustermodulels)
+ - [cluster.module.rm](#clustermodulerm)
+ - [cluster.module.vm.add](#clustermodulevmadd)
+ - [cluster.module.vm.rm](#clustermodulevmrm)
  - [cluster.override.change](#clusteroverridechange)
  - [cluster.override.info](#clusteroverrideinfo)
  - [cluster.override.remove](#clusteroverrideremove)
@@ -521,6 +526,81 @@ Examples:
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -name=                 Cluster group name
+```
+
+## cluster.module.create
+
+```
+Usage: govc cluster.module.create [OPTIONS]
+
+Create cluster module.
+
+This command will output the ID of the new module.
+
+Examples:
+  govc cluster.module.create -cluster my_cluster
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+```
+
+## cluster.module.ls
+
+```
+Usage: govc cluster.module.ls [OPTIONS]
+
+List cluster modules.
+
+When -id is specified, that module's members are listed.
+
+Examples:
+  govc cluster.module.ls
+  govc cluster.module.ls -json | jq .
+  govc cluster.module.ls -id module_id
+
+Options:
+  -id=                   Module ID
+```
+
+## cluster.module.rm
+
+```
+Usage: govc cluster.module.rm [OPTIONS] ID
+
+Delete cluster module ID.
+
+Examples:
+  govc cluster.module.rm module_id
+
+Options:
+```
+
+## cluster.module.vm.add
+
+```
+Usage: govc cluster.module.vm.add [OPTIONS] VM...
+
+Add VM(s) to a cluster module.
+
+Examples:
+  govc cluster.module.vm.add -id module_id $vm...
+
+Options:
+  -id=                   Module ID
+```
+
+## cluster.module.vm.rm
+
+```
+Usage: govc cluster.module.vm.rm [OPTIONS] VM...
+
+Remove VM(s) from a cluster module.
+
+Examples:
+  govc cluster.module.vm.rm -id module_id $vm...
+
+Options:
+  -id=                   Module ID
 ```
 
 ## cluster.override.change
