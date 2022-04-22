@@ -204,3 +204,52 @@ func TestVirtualMachineSnapshotMap(t *testing.T) {
 		}
 	}
 }
+
+func TestDiskFileOperation(t *testing.T) {
+	backing := &types.VirtualDiskFlatVer2BackingInfo{
+		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+			FileName: "[datastore1] data/disk1.vmdk",
+		},
+		Parent: nil,
+	}
+
+	parent := &types.VirtualDiskFlatVer2BackingInfo{
+		VirtualDeviceFileBackingInfo: types.VirtualDeviceFileBackingInfo{
+			FileName: "[datastore1] data/parent.vmdk",
+		},
+	}
+
+	disk := &types.VirtualDisk{
+		VirtualDevice: types.VirtualDevice{
+			Backing: backing,
+		},
+	}
+
+	op := types.VirtualDeviceConfigSpecOperationAdd
+	fop := types.VirtualDeviceConfigSpecFileOperationCreate
+
+	res := diskFileOperation(op, fop, disk)
+	if res != "" {
+		t.Errorf("res=%s", res)
+	}
+
+	disk.CapacityInKB = 1
+	res = diskFileOperation(op, fop, disk)
+	if res != types.VirtualDeviceConfigSpecFileOperationCreate {
+		t.Errorf("res=%s", res)
+	}
+
+	disk.CapacityInKB = 0
+	disk.CapacityInBytes = 1
+	res = diskFileOperation(op, fop, disk)
+	if res != types.VirtualDeviceConfigSpecFileOperationCreate {
+		t.Errorf("res=%s", res)
+	}
+
+	disk.CapacityInBytes = 0
+	backing.Parent = parent
+	res = diskFileOperation(op, fop, disk)
+	if res != types.VirtualDeviceConfigSpecFileOperationCreate {
+		t.Errorf("res=%s", res)
+	}
+}
