@@ -56,9 +56,9 @@ func (flag *AuthFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	value := os.Getenv(env)
 	err := flag.Set(value)
 	if err != nil {
-		fmt.Printf("couldn't set guest login values: %v", err)
+		fmt.Printf("could not set guest login values: %v", err)
 	}
-	usage := fmt.Sprintf("Guest VM credentials [%s]", env)
+	usage := fmt.Sprintf("Guest VM credentials (<user>:<password>) [%s]", env)
 	f.Var(flag, "l", usage)
 	if flag.proc {
 		f.BoolVar(&flag.auth.GuestAuthentication.InteractiveSession, "i", false, "Interactive session")
@@ -66,6 +66,10 @@ func (flag *AuthFlag) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (flag *AuthFlag) Process(ctx context.Context) error {
+	if flag.auth.Username == "" {
+		return fmt.Errorf("guest login username must not be empty")
+	}
+
 	return nil
 }
 
