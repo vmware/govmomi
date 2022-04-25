@@ -2177,7 +2177,7 @@ Examples:
   govc guest.chmod -vm $name 0644 /var/log/foo.log
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2192,7 +2192,7 @@ Examples:
   govc guest.chown -vm $name UID[:GID] /var/log/foo.log
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2227,7 +2227,7 @@ Examples:
 
 Options:
   -f=false               If set, the local destination file is clobbered
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2244,7 +2244,7 @@ Examples:
 
 Options:
   -i=false               Interactive session
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2260,7 +2260,7 @@ Examples:
 
 Options:
   -i=false               Interactive session
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -p=[]                  Process ID
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -2276,7 +2276,7 @@ Examples:
   govc guest.ls -vm $name /tmp
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -s=false               Simple path only listing
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -2293,7 +2293,7 @@ Examples:
   govc guest.mkdir -vm $name -p /tmp/logs/foo/bar
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -p=false               Create intermediate directories as needed
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -2313,7 +2313,7 @@ Examples:
 
 Options:
   -d=false               Make a directory instead of a file
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -p=                    If specified, create relative to this directory
   -s=                    Suffix
   -t=                    Prefix
@@ -2332,7 +2332,7 @@ Examples:
   govc guest.mv -vm $name -n /tmp/baz.sh /tmp/bar.sh
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -n=false               Do not overwrite an existing file
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -2361,7 +2361,7 @@ Options:
   -X=false               Wait for process to exit
   -e=false               Select all processes
   -i=false               Interactive session
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -p=[]                  Select by process ID
   -vm=                   Virtual machine [GOVC_VM]
   -x=false               Output exit time and code
@@ -2378,7 +2378,7 @@ Examples:
   govc guest.rm -vm $name /tmp/foo.log
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2394,7 +2394,7 @@ Examples:
   govc guest.rmdir -vm $name -r /tmp/non-empty-dir
 
 Options:
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -r=false               Recursive removal
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -2430,7 +2430,7 @@ Options:
   -d=                    Input data string. A value of '-' reads from OS stdin
   -e=[]                  Set environment variables
   -i=false               Interactive session
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2453,7 +2453,7 @@ Options:
   -C=                    The absolute path of the working directory for the program to start
   -e=[]                  Set environment variable (key=val)
   -i=false               Interactive session
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2472,7 +2472,7 @@ Options:
   -a=false               Change only the access time
   -c=false               Do not create any files
   -d=                    Use DATE instead of current time
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -2493,7 +2493,7 @@ Examples:
 Options:
   -f=false               If set, the guest destination file is clobbered
   -gid=<nil>             Group ID
-  -l=:                   Guest VM credentials [GOVC_GUEST_LOGIN]
+  -l=:                   Guest VM credentials (<user>:<password>) [GOVC_GUEST_LOGIN]
   -perm=0                File permissions
   -uid=<nil>             User ID
   -vm=                   Virtual machine [GOVC_VM]
