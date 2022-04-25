@@ -939,25 +939,9 @@ func (l VirtualDeviceList) ConfigSpec(op types.VirtualDeviceConfigSpecOperation)
 	var res []types.BaseVirtualDeviceConfigSpec
 	for _, device := range l {
 		config := &types.VirtualDeviceConfigSpec{
-			Device:    device,
-			Operation: op,
-		}
-
-		if disk, ok := device.(*types.VirtualDisk); ok {
-			config.FileOperation = fop
-
-			// Special case to attach an existing disk
-			if op == types.VirtualDeviceConfigSpecOperationAdd && disk.CapacityInKB == 0 {
-				childDisk := false
-				if b, ok := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
-					childDisk = b.Parent != nil
-				}
-
-				if !childDisk {
-					// Existing disk, clear file operation
-					config.FileOperation = ""
-				}
-			}
+			Device:        device,
+			Operation:     op,
+			FileOperation: diskFileOperation(op, fop, device),
 		}
 
 		res = append(res, config)

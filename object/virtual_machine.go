@@ -461,29 +461,33 @@ func (v VirtualMachine) ResourcePool(ctx context.Context) (*ResourcePool, error)
 	return NewResourcePool(v.c, *rp), nil
 }
 
+func diskFileOperation(op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, device types.BaseVirtualDevice) types.VirtualDeviceConfigSpecFileOperation {
+	if disk, ok := device.(*types.VirtualDisk); ok {
+		// Special case to attach an existing disk
+		if op == types.VirtualDeviceConfigSpecOperationAdd && disk.CapacityInKB == 0 && disk.CapacityInBytes == 0 {
+			childDisk := false
+			if b, ok := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
+				childDisk = b.Parent != nil
+			}
+
+			if !childDisk {
+				fop = "" // existing disk
+			}
+		}
+		return fop
+	}
+
+	return ""
+}
+
 func (v VirtualMachine) configureDevice(ctx context.Context, op types.VirtualDeviceConfigSpecOperation, fop types.VirtualDeviceConfigSpecFileOperation, devices ...types.BaseVirtualDevice) error {
 	spec := types.VirtualMachineConfigSpec{}
 
 	for _, device := range devices {
 		config := &types.VirtualDeviceConfigSpec{
-			Device:    device,
-			Operation: op,
-		}
-
-		if disk, ok := device.(*types.VirtualDisk); ok {
-			config.FileOperation = fop
-
-			// Special case to attach an existing disk
-			if op == types.VirtualDeviceConfigSpecOperationAdd && disk.CapacityInKB == 0 {
-				childDisk := false
-				if b, ok := disk.Backing.(*types.VirtualDiskFlatVer2BackingInfo); ok {
-					childDisk = b.Parent != nil
-				}
-
-				if !childDisk {
-					config.FileOperation = "" // existing disk
-				}
-			}
+			Device:        device,
+			Operation:     op,
+			FileOperation: diskFileOperation(op, fop, device),
 		}
 
 		spec.DeviceChange = append(spec.DeviceChange, config)
