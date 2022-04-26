@@ -41,6 +41,9 @@ type change struct {
 
 	bytes units.ByteSize
 	mode  string
+
+	// 	SIOC
+	limit *int64
 }
 
 func init() {
@@ -73,6 +76,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.key, "disk.key", 0, "Disk unique key")
 	f.StringVar(&cmd.mode, "mode", "", fmt.Sprintf("Disk mode (%s)", strings.Join(vdmTypes, "|")))
 	f.StringVar(&cmd.sharing, "sharing", "", fmt.Sprintf("Sharing (%s)", strings.Join(sharing, "|")))
+	f.Var(flags.NewOptionalInt64(&cmd.limit), "disk.io.limit", "Disk storage IO per seconds limit (-1 for unlimited)")
 }
 
 func (cmd *change) Process(ctx context.Context) error {
@@ -151,6 +155,8 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	if int64(cmd.bytes) != 0 {
 		editdisk.CapacityInKB = int64(cmd.bytes) / 1024
 	}
+
+	editdisk.StorageIOAllocation.Limit = cmd.limit
 
 	switch backing := editdisk.Backing.(type) {
 	case *types.VirtualDiskFlatVer2BackingInfo:
