@@ -21,16 +21,21 @@ on:
   pull_request:
     branches: ["main", "master"]
 
+concurrency:
+  group: govmomi-govc-tests-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   govc-tests:
     name: Run govc Tests
     strategy:
+      fail-fast: false
       matrix:
         go-version: ["1.17", "1.18"]
         platform: ["ubuntu-20.04"]
         cmd: ["govc-test"]
         experimental: [false]
-        timeout: [10]
+        timeout: [20]
         include:
           - go-version: "1.18"
             platform: "ubuntu-20.04"
@@ -63,9 +68,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Run ${{ matrix.cmd }}
         run: |
@@ -97,9 +102,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-${{ matrix.go-version }}-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-${{ matrix.go-version }}-
 
       - name: Run "make doc"
         run: |

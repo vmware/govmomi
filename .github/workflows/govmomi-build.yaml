@@ -27,6 +27,10 @@ on:
   
   workflow_dispatch:
 
+concurrency:
+  group: govmomi-build-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   artifacts:
     name: Build Snapshot Release (no upload)
@@ -50,9 +54,9 @@ jobs:
           path: |
             ~/.cache/go-build
             ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          key: ${{ runner.os }}-go-1.18-${{ hashFiles('**/go.sum') }}
           restore-keys: |
-            ${{ runner.os }}-go-
+            ${{ runner.os }}-go-1.18-
 
       - name: Create CHANGELOG
         env:
