@@ -39,8 +39,8 @@ See [godoc.org][godoc] for documentation.
 
 ### govmomi (Package)
 
-```console
-$ go get -u github.com/vmware/govmomi
+```bash
+go get -u github.com/vmware/govmomi
 ```
 
 ### Binaries and Docker Images for `govc` and `vcsim`

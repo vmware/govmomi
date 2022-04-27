@@ -15,23 +15,23 @@ You can find prebuilt `vcsim` binaries on the [releases page](https://github.com
 
 You can download and install a binary locally like this:
 
-``` console
+```bash
 # extract vcsim binary to /usr/local/bin
 # note: the "tar" command must run with root permissions
-$ curl -L -o - https://github.com/vmware/govmomi/releases/latest/download/vcsim_$(uname -s)_$(uname -m).tar.gz | tar -C /usr/local/bin -xvzf - vcsim
+curl -L -o - https://github.com/vmware/govmomi/releases/latest/download/vcsim_$(uname -s)_$(uname -m).tar.gz | tar -C /usr/local/bin -xvzf - vcsim
 ```
 
 ### Source
 
-#### Install via `go get`
+#### Install via `go install`
 
 To build `vcsim` from source, first install the [Go
 toolchain](https://golang.org/dl/). You can then install the latest `vcsim` from
 Github using:
 
-```console
-$ go get -u github.com/vmware/govmomi/vcsim
-$ $GOPATH/bin/vcsim -h
+```bash
+go install github.com/vmware/govmomi/vcsim@latest
+$GOPATH/bin/vcsim -h
 ```
 
 **Note:** `govmomi` and its binaries use [Go
@@ -54,18 +54,18 @@ defined in [.goreleaser.yaml](./../.goreleaser.yml) and automatically set as
 Install `goreleaser` as per the installation
 [instructions](https://goreleaser.com/install/), then:
 
-```console
-$ git clone https://github.com/vmware/govmomi.git
-$ cd govmomi
+```bash
+git clone https://github.com/vmware/govmomi.git
+cd govmomi
 
 # pick a tag (>=v0.25.0)
-$ RELEASE=v0.25.0
+RELEASE=v0.25.0
 
-$ git checkout ${RELEASE}
+git checkout ${RELEASE}
 
 # build for the host OS/ARCH, otherwise omit --single-target
 # binaries are placed in respective subdirectories in ./dist/
-$ goreleaser build --rm-dist --single-target
+goreleaser build --rm-dist --single-target
 ```
 
 ## Usage
@@ -156,8 +156,8 @@ The following examples illustrate how **vcsim** flags can be used to change the
 generated inventory.  Each example assumes **GOVC_URL** is set to vcsim's default
 [listen address](#listen-address):
 
-```console
-$ export GOVC_URL=https://user:pass@127.0.0.1:8989
+```bash
+export GOVC_URL=https://user:pass@127.0.0.1:8989
 ```
 
 ### Default vCenter inventory
@@ -381,8 +381,8 @@ implement any method documented in the [VMware vSphere API Reference][apiref].
 
 To see the list of supported methods:
 
-```console
-$ curl -sk https://user:pass@127.0.0.1:8989/about
+```bash
+curl -sk https://user:pass@127.0.0.1:8989/about
 ```
 
 [apiref]:https://code.vmware.com/apis/196/vsphere
@@ -392,28 +392,28 @@ $ curl -sk https://user:pass@127.0.0.1:8989/about
 The default vcsim listen address is `127.0.0.1:8989`.  Use the `-l` flag to
 listen on another address:
 
-```console
-$ vcsim -l 10.118.69.224:8989 # specific address
+```bash
+vcsim -l 10.118.69.224:8989 # specific address
 
-$ vcsim -l :8989 # any address
+vcsim -l :8989 # any address
 ```
 
 When given a port value of `0`, an unused port will be chosen.  You can then
 source the GOVC_URL from another process, for example:
 
-```console
-$ govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
+```bash
+govc_sim_env=$TMPDIR/vcsim-$(uuidgen)
 
-$ mkfifo $govc_sim_env
+mkfifo $govc_sim_env
 
-$ vcsim -l 127.0.0.1:0 -E $govc_sim_env &
+vcsim -l 127.0.0.1:0 -E $govc_sim_env &
 
-$ eval "$(cat $govc_sim_env)"
+eval "$(cat $govc_sim_env)"
 
 # ... run tests ...
 
-$ kill $GOVC_SIM_PID
-$ rm -f $govc_sim_env
+kill $GOVC_SIM_PID
+rm -f $govc_sim_env
 ```
 
 Tests written in Go can also use the [simulator package](https://godoc.org/github.com/vmware/govmomi/simulator)
