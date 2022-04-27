@@ -1,4 +1,192 @@
 
+<a name="v0.28.0"></a>
+## [Release v0.28.0](https://github.com/vmware/govmomi/compare/v0.27.4...v0.28.0)
+
+> Release Date: 2022-04-27
+
+### 🐞 Fix
+
+- [5ef4aaaf]	DiskFileOperation must consider both capacity fields
+- [3566a35d]	govc guest validate username/password
+- [bbbfd7bc]	govc test workflow cp error
+- [a587742b]	avoid debug trace if http.Request.Body is nil
+- [7e2ce135]	Ignore concurrent deletes in GetCategories
+- [a7c6f15b]	Allow go 1.17 to go install
+- [0f0201ad]	vapi - special param encoding for edge cluster lookup
+- [e5209e34]	rest.Client.LoginByToken invalid signature
+- [ad66761e]	support govc import.spec for remote ova
+- [ebeaa71b]	Add IPv6 support for signing HTTP request
+- [512c168e]	govc vm.destroy only destroys the 1st argument
+- [d25aba08]	govc vcsa.net.proxy.info doesnt give output in json format
+- [ac7c9bf9]	avoid possible panic in HostSystem.ManagementIPs
+- [10fec668]	CHANGELOG sorting and generation
+
+### 💡 Examples
+
+- [c5826b8f]	Add Alarm Manager Example
+- [9617bded]	add HostConfigManager_OptionManager
+- [a1a9d848]	add VirtualDeviceList_SelectByBackingInfo
+
+### 💫 API Changes
+
+- [61c40001]	add GPU support to VirtualDeviceList.SelectByBackingInfo
+
+### 💫 `govc` (CLI)
+
+- [d8dd7f2b]	Add CLI command cluster.module
+- [49a83e71]	Fix arguments validation in datastore.disk.inflate/shrink
+- [01d31b53]	Add Feature dvs.create '-num-uplinks' flag
+- [40e6cbc8]	Add Appliance access API
+- [949ef572]	Add Appliance shutdown API's
+- [d5ed6855]	Add support for VM hardware upgrade scheduling
+- [742f2893]	add support for supervisor services deploy
+- [3ba25d70]	Require full or absolute paths
+- [a4ae62e7]	Add library info command
+- [8fde8bce]	validate library.deploy arguments
+
+### 💫 `vcsim` (Simulator)
+
+- [3d8ddf16]	Fix device connectivity when vm is powered off
+- [111ad9fc]	Use new action type in simulator PlaceVmsXCluster response
+- [e92db045]	Fix NFS datastore moid collision
+- [16e6bace]	set summary.guest.{hostName,ipAddress} in CustomizeVM
+- [46a85642]	add ssoadmin simulator
+- [811b829c]	Fix port filtering by criteria in FetchDVPorts
+- [e8425be5]	revert vapi.Status() method
+- [451ec35a]	Fix keys in DistributedVirtualPorts
+- [6542ccb5]	Fix CreateFolder to encode folder name
+- [8629c499]	Allow updating custom fields
+- [93c2afd1]	copy device list when cloning a VM
+- [3214d97a]	add support for cloning HostSystems
+- [9b3d6353]	Fix distribute VMs across resource pools
+- [93d39917]	Add TenantManager support in simulator
+- [6de12ab7]	allow VM PowerOff when Host is in maintenance mode
+- [48f7a881]	emit VmMigratedEvent in RelocateVM method
+
+### 📃 Documentation
+
+- [9ea287c2]	Update documentation
+- [b4a2d3b3]	Add git blog post to CONTRIBUTING
+- [c7e103e7]	Clarify squash in CONTRIBUTING
+- [9317bdaf]	Update CONTIRBUTING.md file
+
+### 🧹 Chore
+
+- [d60b21d5]	Optimize Go CI workflows
+- [2d72f576]	Add dependabot configuration
+- [5c301091]	Use powerclicore on ghcr.io
+- [7d8af1e7]	Update CI to Go 1.18
+- [205c0e0d]	Add api: commit prefix
+- [b6cd7c1b]	Add link to Discussions in New Issue
+- [15efe49f]	Replace /rest with /api in vcsa.shutdown API's
+- [db7edbf4]	Update workflow Go versions
+- [05c28f4a]	upgrade go directive in go.mod to 1.17
+- [ebff29b7]	Add notes to PR RELEASE workflow
+
+### ⚠️ BREAKING
+
+Fix distribute VMs across resource pools [9b3d6353]:
+The name of virtual machines deployed in `vcsim` in a cluster (and
+optionally child resource pools) has changed to include the
+corresponding resource pool name. VM names deployed to standalone hosts
+in `vcsim` are not changed.
+
+### 📖 Commits
+
+- [9ea287c2]	docs: Update documentation
+- [89ae0933]	build(deps): bump actions/stale from 3 to 5
+- [d60b21d5]	chore: Optimize Go CI workflows
+- [0d1b4189]	build(deps): bump peter-evans/create-or-update-comment from 1 to 2
+- [e85b164d]	build(deps): bump github/codeql-action from 1 to 2
+- [5ef4aaaf]	fix: DiskFileOperation must consider both capacity fields
+- [3566a35d]	fix: govc guest validate username/password
+- [1f0f8cc8]	build(deps): bump chuhlomin/render-template from 1.2 to 1.4
+- [7324f647]	build(deps): bump actions/upload-artifact from 2 to 3
+- [808a439a]	build(deps): bump peter-evans/create-pull-request from 3 to 4
+- [bdee9992]	build(deps): bump github.com/google/uuid from 1.2.0 to 1.3.0
+- [2d72f576]	chore: Add dependabot configuration
+- [bbbfd7bc]	fix: govc test workflow cp error
+- [d8dd7f2b]	govc: Add CLI command cluster.module
+- [90c90a0a]	build(deps): bump nokogiri from 1.13.2 to 1.13.4 in /gen
+- [3cb3eff1]	ConfigInfo2ConfigSpec
+- [3d8ddf16]	vcsim: Fix device connectivity when vm is powered off
+- [b4a2d3b3]	docs: Add git blog post to CONTRIBUTING
+- [49a83e71]	govc: Fix arguments validation in datastore.disk.inflate/shrink
+- [5c301091]	chore: Use powerclicore on ghcr.io
+- [7d8af1e7]	chore: Update CI to Go 1.18
+- [111ad9fc]	vcsim: Use new action type in simulator PlaceVmsXCluster response
+- [c5826b8f]	examples: Add Alarm Manager Example
+- [46583051]	Move the ClusterClusterInitialPlacementAction to unreleased types + fix linter error
+- [9b1de9c8]	Fix a linter error
+- [cb2b8f5c]	Add a new type of cluster action used for placing a VM. This action inherits from InitialPlacement action because it conveys the resource pool and host for placing the VM. In addition, it also has the VM's ConfigSpecwhich is used for indicating the recommended datastore for each virtual disk in VM's ConfigSpec
+- [9617bded]	examples: add HostConfigManager_OptionManager
+- [8e4054fa]	adding a check that number of uplinks otherwise do default
+- [aada9aa1]	Reconfigure LACP API for DVS
+- [a1a9d848]	examples: add VirtualDeviceList_SelectByBackingInfo
+- [61c40001]	api: add GPU support to VirtualDeviceList.SelectByBackingInfo
+- [e92db045]	vcsim: Fix NFS datastore moid collision
+- [01d31b53]	govc: Add Feature dvs.create '-num-uplinks' flag
+- [11e469a4]	build(deps): bump nokogiri from 1.12.5 to 1.13.2 in /gen
+- [547c63fd]	Added Support for vrdma NIC Type Signed-off-by: C S P Nanda <cspnanda[@gmail](https://github.com/gmail).com>
+- [205c0e0d]	chore: Add api: commit prefix
+- [b6cd7c1b]	chore: Add link to Discussions in New Issue
+- [15efe49f]	chore: Replace /rest with /api in vcsa.shutdown API's
+- [40e6cbc8]	govc: Add Appliance access API
+- [16e6bace]	vcsim: set summary.guest.{hostName,ipAddress} in CustomizeVM
+- [a587742b]	fix: avoid debug trace if http.Request.Body is nil
+- [7e2ce135]	fix: Ignore concurrent deletes in GetCategories
+- [1875bac1]	Add PlaceVmsXCluster bindings and simulator
+- [a7c6f15b]	fix: Allow go 1.17 to go install
+- [a5498b89]	Add BackingDiskObjectId go bindings to CNS API
+- [0f0201ad]	fix: vapi - special param encoding for edge cluster lookup
+- [46a85642]	vcsim: add ssoadmin simulator
+- [297a3cae]	ssoadmin: add IdentitySources API bindings
+- [811b829c]	vcsim: Fix port filtering by criteria in FetchDVPorts
+- [e5209e34]	fix: rest.Client.LoginByToken invalid signature
+- [c7e103e7]	docs: Clarify squash in CONTRIBUTING
+- [e8425be5]	vcsim: revert vapi.Status() method
+- [ad66761e]	fix: support govc import.spec for remote ova
+- [803b6362]	sts: support issuing HoK token using HoK token
+- [451ec35a]	vcsim: Fix keys in DistributedVirtualPorts
+- [949ef572]	govc: Add Appliance shutdown API's
+- [6542ccb5]	vcsim: Fix CreateFolder to encode folder name
+- [d5ed6855]	govc: Add support for VM hardware upgrade scheduling
+- [9317bdaf]	docs: Update CONTIRBUTING.md file
+- [8629c499]	vcsim: Allow updating custom fields
+- [93c2afd1]	vcsim: copy device list when cloning a VM
+- [ebeaa71b]	fix: Add IPv6 support for signing HTTP request
+- [b729a862]	Fix typo in (simulator.Context).WithLock() comment
+- [cd577f46]	Fixed doc
+- [ca1f45ae]	Added command flag documentation
+- [512240a0]	Fixed goimports issues
+- [ce88635f]	Added vm::ExportSnapshot and snapshot flag to export.ovf
+- [742f2893]	govc: add support for supervisor services deploy
+- [3214d97a]	vcsim: add support for cloning HostSystems
+- [3ba25d70]	govc: Require full or absolute paths
+- [db7edbf4]	chore: Update workflow Go versions
+- [512c168e]	fix: govc vm.destroy only destroys the 1st argument
+- [b51418e3]	Add IsAlreadyExists error helper
+- [05c28f4a]	chore: upgrade go directive in go.mod to 1.17
+- [a4ae62e7]	govc: Add library info command
+- [d25aba08]	fix: govc vcsa.net.proxy.info doesnt give output in json format
+- [ac7c9bf9]	fix: avoid possible panic in HostSystem.ManagementIPs
+- [9b3d6353]	vcsim: Fix distribute VMs across resource pools
+- [1da8c5e8]	Fix: Deep compare error types in simulator VM tests
+- [d3eaa9b9]	Support Creating/Reconfiguring a simulator VM with VApp properties
+- [10fec668]	fix: CHANGELOG sorting and generation
+- [b05ed4e0]	Independent simulator.Context per-subtask in PowerOnMultiVM.
+- [a0224d91]	Fix eam/simulator tests
+- [e2498fb8]	Change references from global Map to ctx.Map.
+- [ab446838]	Set the Context.Map's when global Map is set
+- [3b86fd0c]	Re-work TenantManager addition to ServiceContent for older clients
+- [93d39917]	vcsim: Add TenantManager support in simulator
+- [9f737e00]	fix updating stale url from Makefile
+- [8fde8bce]	govc: validate library.deploy arguments
+- [6de12ab7]	vcsim: allow VM PowerOff when Host is in maintenance mode
+- [ebff29b7]	chore: Add notes to PR RELEASE workflow
+- [48f7a881]	vcsim: emit VmMigratedEvent in RelocateVM method
+- [bb4f739b]	Support finding Portgroups by ID in Finder.Network
+
 <a name="v0.27.4"></a>
 ## [Release v0.27.4](https://github.com/vmware/govmomi/compare/v0.27.3...v0.27.4)
 
@@ -69,7 +257,7 @@
 - [6209be5b]	Support finding Portgroups by ID in Finder.Network
 
 <a name="v0.27.0"></a>
-## [Release v0.27.0](https://github.com/vmware/govmomi/compare/v0.26.1...v0.27.0)
+## [Release v0.27.0](https://github.com/vmware/govmomi/compare/v0.26.2...v0.27.0)
 
 > Release Date: 2021-10-14
 
@@ -145,6 +333,23 @@ the task manager implementation.
 - [a55fa7dc]	feat: Add optional WaitOptions to WaitForUpdates
 - [94f63681]	govc: add library.clone '-e' and '-m' options
 - [2fcae372]	govc: add vsan info and change commands
+
+<a name="v0.26.2"></a>
+## [Release v0.26.2](https://github.com/vmware/govmomi/compare/v0.26.1...v0.26.2)
+
+> Release Date: 2022-03-21
+
+### 🐞 Fix
+
+- [76a22af3]	avoid possible panic in HostSystem.ManagementIPs
+- [566d2ac1]	avoid use of vNIC IP in guest.TransferURL if there are multiple
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [76a22af3]	fix: avoid possible panic in HostSystem.ManagementIPs
+- [566d2ac1]	fix: avoid use of vNIC IP in guest.TransferURL if there are multiple
 
 <a name="v0.26.1"></a>
 ## [Release v0.26.1](https://github.com/vmware/govmomi/compare/v0.26.0...v0.26.1)
