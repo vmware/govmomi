@@ -16,22 +16,22 @@ You can find prebuilt `govc` binaries on the [releases page](https://github.com/
 
 You can download and install a binary locally like this:
 
-```console
+```bash
 # extract govc binary to /usr/local/bin
 # note: the "tar" command must run with root permissions
-$ curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
+curl -L -o - "https://github.com/vmware/govmomi/releases/latest/download/govc_$(uname -s)_$(uname -m).tar.gz" | tar -C /usr/local/bin -xvzf - govc
 ```
 
 ### Source
 
-#### Install via `go get`
+#### Install via `go install`
 
 To build `govc` from source, first install the [Go
 toolchain](https://golang.org/dl/). You can then install the latest `govc` from
 Github using:
 
-```console
-$ go get -u github.com/vmware/govmomi/govc
+```bash
+go install github.com/vmware/govmomi/govc@latest
 ```
 
 **Note:** `govmomi` and its binaries use [Go
@@ -46,8 +46,8 @@ source.
 If you've made local modifications to the repository at
 `$GOPATH/src/github.com/vmware/govmomi`, you can install using:
 
-```console
-$ go install github.com/vmware/govmomi/govc
+```bash
+go install github.com/vmware/govmomi/govc
 ```
 
 #### Install via `goreleaser`
@@ -61,18 +61,18 @@ defined in [.goreleaser.yaml](./../.goreleaser.yml) and automatically set as
 Install `goreleaser` as per the installation
 [instructions](https://goreleaser.com/install/), then:
 
-```console
-$ git clone https://github.com/vmware/govmomi.git
-$ cd govmomi
+```bash
+git clone https://github.com/vmware/govmomi.git
+cd govmomi
 
 # pick a tag (>=v0.25.0)
-$ RELEASE=v0.25.0
+RELEASE=v0.25.0
 
-$ git checkout ${RELEASE}
+git checkout ${RELEASE}
 
 # build for the host OS/ARCH, otherwise omit --single-target
 # binaries are placed in respective subdirectories in ./dist/
-$ goreleaser build --rm-dist --single-target
+goreleaser build --rm-dist --single-target
 ```
 
 ## Usage
@@ -122,10 +122,10 @@ using environment variables. The following environment variables are used by
 
 * `GOVC_TLS_CA_CERTS`: Override system root certificate authorities.
 
-    ```console
-    $ export GOVC_TLS_CA_CERTS=~/.govc_ca.crt
+    ```bash
+    export GOVC_TLS_CA_CERTS=~/.govc_ca.crt
     # Use path separator to specify multiple files:
-    $ export GOVC_TLS_CA_CERTS=~/ca-certificates/bar.crt:~/ca-certificates/foo.crt
+    export GOVC_TLS_CA_CERTS=~/ca-certificates/bar.crt:~/ca-certificates/foo.crt
     ```
 
 * `GOVC_TLS_KNOWN_HOSTS`: File(s) for thumbprint based certificate verification.
@@ -133,10 +133,10 @@ using environment variables. The following environment variables are used by
     Thumbprint based verification can be used in addition to or as an alternative to
     `GOVC_TLS_CA_CERTS` for self-signed certificates.  Example:
 
-    ```console
-    $ export GOVC_TLS_KNOWN_HOSTS=~/.govc_known_hosts
-    $ govc about.cert -u host -k -thumbprint | tee -a $GOVC_TLS_KNOWN_HOSTS
-    $ govc about -u user:pass@host
+    ```bash
+    export GOVC_TLS_KNOWN_HOSTS=~/.govc_known_hosts
+    govc about.cert -u host -k -thumbprint | tee -a $GOVC_TLS_KNOWN_HOSTS
+    govc about -u user:pass@host
     ```
 
 * `GOVC_TLS_HANDSHAKE_TIMEOUT`: Limits the time spent performing the TLS handshake.
@@ -193,7 +193,7 @@ The`-debug` flag traces vSphere API calls similar to the `-trace` flag, but save
 When the `-debug` flag is specified, the default behavior is to put the output in `~/.govmomi/debug/<run timestamp>`.
 In that directory will be four (4) files per API call.
 
-```
+```bash
 1-0001.req.headers #headers from the request sent to the API
 1-0001.req.xml #body content from request sent to the API
 1-0001.res.headers #headers from the response from the API
@@ -229,21 +229,22 @@ by setting the debug path to a dash: `export GOVC_DEBUG_PATH=-`
 
 If you're using environment variables to set `GOVC_URL`, verify the values are set as expected:
 
-```console
-$ govc env
+```bash
+govc env
 ```
 
 ### Connection issues
 
 Check your proxy settings:
 
-```console
-$ env | grep -i https_proxy
+```bash
+env | grep -i https_proxy
 ```
 
-Test connection using curl:
-```console
-$ curl --verbose -k -X POST https://x.x.x.x/sdk
+Test connection using `curl`:
+
+```bash
+curl --verbose -k -X POST https://x.x.x.x/sdk
 ```
 
 ### MSYS2 (Windows)
@@ -258,8 +259,8 @@ cookies, resulting in a `NotAuthenticated` error. For example, running `govc`
 directly against the vCenter vpxd endpoint at `http://127.0.0.1:8085`. Set the
 environment variable `GOVMOMI_INSECURE_COOKIES=true` to workaround this:
 
-```console
-$ GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
+```bash
+GOVMOMI_INSECURE_COOKIES=true govc ls -u http://user:pass@127.0.0.1:8085
 ```
 
 ## Examples
@@ -290,8 +291,8 @@ When new `govc` commands or flags are added, the PATCH version will be
 incremented.  This enables you to require a minimum version from within a
 script, for example:
 
-```console
-$ govc version -require 0.24
+```bash
+govc version -require 0.24
 ```
 
 ## Projects using `govc`

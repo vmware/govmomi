@@ -38,7 +38,8 @@ While a system that has few content library objects benefits from wildcard searc
 ## `govc library.ls`
 
 ### Listing all the objects in the content library
-```shell
+
+```console
 $ govc library.ls '*/*/'
 /ISOs/CentOS-7-x86_64-Minimal-1804/CentOS-7-x86_64-Minimal-1804.iso
 /ISOs/CoreOS Production/coreos_production_iso_image.iso
@@ -72,7 +73,8 @@ $ govc library.ls '*/*/'
 ## `govc library.info`
 
 ### Getting the info for all the objects in the content library
-```shell
+
+```console
 $ govc library.info '*/*/'
 Name:       CentOS-7-x86_64-Minimal-1804.iso
   Path:     /ISOs/CentOS-7-x86_64-Minimal-1804/CentOS-7-x86_64-Minimal-1804.iso
