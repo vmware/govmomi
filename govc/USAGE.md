@@ -5658,6 +5658,7 @@ Examples:
 
 Options:
   -disk.filePath=        Disk file name
+  -disk.io.limit=<nil>   Disk storage IO per seconds limit (-1 for unlimited)
   -disk.key=0            Disk unique key
   -disk.label=           Disk label
   -disk.name=            Disk name
