@@ -279,6 +279,22 @@ load test_helper
   [ $result -eq 1 ]
 }
 
+@test "device.clock" {
+  vcsim_env
+
+  vm=$(new_empty_vm)
+
+  result=$(govc device.ls -vm "$vm" | grep clock | wc -l)
+  [ "$result" -eq 0 ]
+
+  run govc device.clock.add -vm "$vm"
+  assert_success
+  id=$output
+
+  result=$(govc device.ls -vm "$vm" | grep "$id" | wc -l)
+  [ "$result" -eq 1 ]
+}
+
 @test "device.scsi slots" {
   vcsim_env
 

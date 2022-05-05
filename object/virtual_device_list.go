@@ -894,6 +894,8 @@ func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 		return "lsilogic-sas"
 	case *types.VirtualNVMEController:
 		return "nvme"
+	case *types.VirtualPrecisionClock:
+		return "clock"
 	default:
 		return l.deviceName(device)
 	}

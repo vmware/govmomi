@@ -243,6 +243,14 @@ func (r *infoResult) Write(w io.Writer) error {
 				fmt.Fprintf(tw, "  Service URI:\t%s\n", b.ServiceURI)
 				fmt.Fprintf(tw, "  Proxy URI:\t%s\n", b.ProxyURI)
 			}
+		case *types.VirtualPrecisionClock:
+			if b, ok := md.Backing.(*types.VirtualPrecisionClockSystemClockBackingInfo); ok {
+				proto := b.Protocol
+				if proto == "" {
+					proto = string(types.HostDateTimeInfoProtocolPtp)
+				}
+				fmt.Fprintf(tw, "  Protocol:\t%s\n", proto)
+			}
 		}
 	}
 
