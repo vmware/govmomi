@@ -33,328 +33,504 @@ but appear via `govc $cmd -h`:
   -vm.uuid=                 Find VM by UUID
 ```
 
-<details><summary>Contents</summary>
+## Contents
 
- - [about](#about)
- - [about.cert](#aboutcert)
- - [cluster.add](#clusteradd)
- - [cluster.change](#clusterchange)
- - [cluster.create](#clustercreate)
- - [cluster.group.change](#clustergroupchange)
- - [cluster.group.create](#clustergroupcreate)
- - [cluster.group.ls](#clustergroupls)
- - [cluster.group.remove](#clustergroupremove)
- - [cluster.module.create](#clustermodulecreate)
- - [cluster.module.ls](#clustermodulels)
- - [cluster.module.rm](#clustermodulerm)
- - [cluster.module.vm.add](#clustermodulevmadd)
- - [cluster.module.vm.rm](#clustermodulevmrm)
- - [cluster.override.change](#clusteroverridechange)
- - [cluster.override.info](#clusteroverrideinfo)
- - [cluster.override.remove](#clusteroverrideremove)
- - [cluster.rule.change](#clusterrulechange)
- - [cluster.rule.create](#clusterrulecreate)
- - [cluster.rule.info](#clusterruleinfo)
- - [cluster.rule.ls](#clusterrulels)
- - [cluster.rule.remove](#clusterruleremove)
- - [cluster.stretch](#clusterstretch)
- - [cluster.usage](#clusterusage)
- - [datacenter.create](#datacentercreate)
- - [datacenter.info](#datacenterinfo)
- - [datastore.cluster.change](#datastoreclusterchange)
- - [datastore.cluster.info](#datastoreclusterinfo)
- - [datastore.cp](#datastorecp)
- - [datastore.create](#datastorecreate)
- - [datastore.disk.create](#datastorediskcreate)
- - [datastore.disk.inflate](#datastorediskinflate)
- - [datastore.disk.info](#datastorediskinfo)
- - [datastore.disk.shrink](#datastorediskshrink)
- - [datastore.download](#datastoredownload)
- - [datastore.info](#datastoreinfo)
- - [datastore.ls](#datastorels)
- - [datastore.maintenance.enter](#datastoremaintenanceenter)
- - [datastore.maintenance.exit](#datastoremaintenanceexit)
- - [datastore.mkdir](#datastoremkdir)
- - [datastore.mv](#datastoremv)
- - [datastore.remove](#datastoreremove)
- - [datastore.rm](#datastorerm)
- - [datastore.tail](#datastoretail)
- - [datastore.upload](#datastoreupload)
- - [datastore.vsan.dom.ls](#datastorevsandomls)
- - [datastore.vsan.dom.rm](#datastorevsandomrm)
- - [device.boot](#deviceboot)
- - [device.cdrom.add](#devicecdromadd)
- - [device.cdrom.eject](#devicecdromeject)
- - [device.cdrom.insert](#devicecdrominsert)
- - [device.connect](#deviceconnect)
- - [device.disconnect](#devicedisconnect)
- - [device.floppy.add](#devicefloppyadd)
- - [device.floppy.eject](#devicefloppyeject)
- - [device.floppy.insert](#devicefloppyinsert)
- - [device.info](#deviceinfo)
- - [device.ls](#devicels)
- - [device.pci.add](#devicepciadd)
- - [device.pci.ls](#devicepcils)
- - [device.pci.remove](#devicepciremove)
- - [device.remove](#deviceremove)
- - [device.scsi.add](#devicescsiadd)
- - [device.serial.add](#deviceserialadd)
- - [device.serial.connect](#deviceserialconnect)
- - [device.serial.disconnect](#deviceserialdisconnect)
- - [device.usb.add](#deviceusbadd)
- - [disk.create](#diskcreate)
- - [disk.ls](#diskls)
- - [disk.register](#diskregister)
- - [disk.rm](#diskrm)
- - [disk.snapshot.create](#disksnapshotcreate)
- - [disk.snapshot.ls](#disksnapshotls)
- - [disk.snapshot.rm](#disksnapshotrm)
- - [disk.tags.attach](#disktagsattach)
- - [disk.tags.detach](#disktagsdetach)
- - [dvs.add](#dvsadd)
- - [dvs.change](#dvschange)
- - [dvs.create](#dvscreate)
- - [dvs.portgroup.add](#dvsportgroupadd)
- - [dvs.portgroup.change](#dvsportgroupchange)
- - [dvs.portgroup.info](#dvsportgroupinfo)
- - [env](#env)
- - [events](#events)
- - [export.ovf](#exportovf)
- - [extension.info](#extensioninfo)
- - [extension.register](#extensionregister)
- - [extension.setcert](#extensionsetcert)
- - [extension.unregister](#extensionunregister)
- - [fields.add](#fieldsadd)
- - [fields.info](#fieldsinfo)
- - [fields.ls](#fieldsls)
- - [fields.rename](#fieldsrename)
- - [fields.rm](#fieldsrm)
- - [fields.set](#fieldsset)
- - [find](#find)
- - [firewall.ruleset.find](#firewallrulesetfind)
- - [folder.create](#foldercreate)
- - [folder.info](#folderinfo)
- - [guest.chmod](#guestchmod)
- - [guest.chown](#guestchown)
- - [guest.df](#guestdf)
- - [guest.download](#guestdownload)
- - [guest.getenv](#guestgetenv)
- - [guest.kill](#guestkill)
- - [guest.ls](#guestls)
- - [guest.mkdir](#guestmkdir)
- - [guest.mktemp](#guestmktemp)
- - [guest.mv](#guestmv)
- - [guest.ps](#guestps)
- - [guest.rm](#guestrm)
- - [guest.rmdir](#guestrmdir)
- - [guest.run](#guestrun)
- - [guest.start](#gueststart)
- - [guest.touch](#guesttouch)
- - [guest.upload](#guestupload)
- - [host.account.create](#hostaccountcreate)
- - [host.account.remove](#hostaccountremove)
- - [host.account.update](#hostaccountupdate)
- - [host.add](#hostadd)
- - [host.autostart.add](#hostautostartadd)
- - [host.autostart.configure](#hostautostartconfigure)
- - [host.autostart.info](#hostautostartinfo)
- - [host.autostart.remove](#hostautostartremove)
- - [host.cert.csr](#hostcertcsr)
- - [host.cert.import](#hostcertimport)
- - [host.cert.info](#hostcertinfo)
- - [host.date.change](#hostdatechange)
- - [host.date.info](#hostdateinfo)
- - [host.disconnect](#hostdisconnect)
- - [host.esxcli](#hostesxcli)
- - [host.info](#hostinfo)
- - [host.maintenance.enter](#hostmaintenanceenter)
- - [host.maintenance.exit](#hostmaintenanceexit)
- - [host.option.ls](#hostoptionls)
- - [host.option.set](#hostoptionset)
- - [host.portgroup.add](#hostportgroupadd)
- - [host.portgroup.change](#hostportgroupchange)
- - [host.portgroup.info](#hostportgroupinfo)
- - [host.portgroup.remove](#hostportgroupremove)
- - [host.reconnect](#hostreconnect)
- - [host.remove](#hostremove)
- - [host.service](#hostservice)
- - [host.service.ls](#hostservicels)
- - [host.shutdown](#hostshutdown)
- - [host.storage.info](#hoststorageinfo)
- - [host.storage.mark](#hoststoragemark)
- - [host.storage.partition](#hoststoragepartition)
- - [host.vnic.change](#hostvnicchange)
- - [host.vnic.info](#hostvnicinfo)
- - [host.vnic.service](#hostvnicservice)
- - [host.vswitch.add](#hostvswitchadd)
- - [host.vswitch.info](#hostvswitchinfo)
- - [host.vswitch.remove](#hostvswitchremove)
- - [import.ova](#importova)
- - [import.ovf](#importovf)
- - [import.spec](#importspec)
- - [import.vmdk](#importvmdk)
- - [library.checkin](#librarycheckin)
- - [library.checkout](#librarycheckout)
- - [library.clone](#libraryclone)
- - [library.cp](#librarycp)
- - [library.create](#librarycreate)
- - [library.deploy](#librarydeploy)
- - [library.export](#libraryexport)
- - [library.import](#libraryimport)
- - [library.info](#libraryinfo)
- - [library.ls](#libraryls)
- - [library.publish](#librarypublish)
- - [library.rm](#libraryrm)
- - [library.session.ls](#librarysessionls)
- - [library.session.rm](#librarysessionrm)
- - [library.subscriber.create](#librarysubscribercreate)
- - [library.subscriber.info](#librarysubscriberinfo)
- - [library.subscriber.ls](#librarysubscriberls)
- - [library.subscriber.rm](#librarysubscriberrm)
- - [library.sync](#librarysync)
- - [library.update](#libraryupdate)
- - [library.vmtx.info](#libraryvmtxinfo)
- - [license.add](#licenseadd)
- - [license.assign](#licenseassign)
- - [license.assigned.ls](#licenseassignedls)
- - [license.decode](#licensedecode)
- - [license.label.set](#licenselabelset)
- - [license.ls](#licensels)
- - [license.remove](#licenseremove)
- - [logs](#logs)
- - [logs.download](#logsdownload)
- - [logs.ls](#logsls)
- - [ls](#ls)
- - [metric.change](#metricchange)
- - [metric.info](#metricinfo)
- - [metric.interval.change](#metricintervalchange)
- - [metric.interval.info](#metricintervalinfo)
- - [metric.ls](#metricls)
- - [metric.reset](#metricreset)
- - [metric.sample](#metricsample)
- - [namespace.cluster.disable](#namespaceclusterdisable)
- - [namespace.cluster.enable](#namespaceclusterenable)
- - [namespace.cluster.ls](#namespaceclusterls)
- - [namespace.logs.download](#namespacelogsdownload)
- - [namespace.service.activate](#namespaceserviceactivate)
- - [namespace.service.create](#namespaceservicecreate)
- - [namespace.service.deactivate](#namespaceservicedeactivate)
- - [namespace.service.info](#namespaceserviceinfo)
- - [namespace.service.ls](#namespaceservicels)
- - [namespace.service.rm](#namespaceservicerm)
- - [object.collect](#objectcollect)
- - [object.destroy](#objectdestroy)
- - [object.method](#objectmethod)
- - [object.mv](#objectmv)
- - [object.reload](#objectreload)
- - [object.rename](#objectrename)
- - [object.save](#objectsave)
- - [option.ls](#optionls)
- - [option.set](#optionset)
- - [permissions.ls](#permissionsls)
- - [permissions.remove](#permissionsremove)
- - [permissions.set](#permissionsset)
- - [pool.change](#poolchange)
- - [pool.create](#poolcreate)
- - [pool.destroy](#pooldestroy)
- - [pool.info](#poolinfo)
- - [role.create](#rolecreate)
- - [role.ls](#rolels)
- - [role.remove](#roleremove)
- - [role.update](#roleupdate)
- - [role.usage](#roleusage)
- - [session.login](#sessionlogin)
- - [session.logout](#sessionlogout)
- - [session.ls](#sessionls)
- - [session.rm](#sessionrm)
- - [snapshot.create](#snapshotcreate)
- - [snapshot.remove](#snapshotremove)
- - [snapshot.revert](#snapshotrevert)
- - [snapshot.tree](#snapshottree)
- - [sso.group.create](#ssogroupcreate)
- - [sso.group.ls](#ssogroupls)
- - [sso.group.rm](#ssogrouprm)
- - [sso.group.update](#ssogroupupdate)
- - [sso.idp.ls](#ssoidpls)
- - [sso.service.ls](#ssoservicels)
- - [sso.user.create](#ssousercreate)
- - [sso.user.id](#ssouserid)
- - [sso.user.ls](#ssouserls)
- - [sso.user.rm](#ssouserrm)
- - [sso.user.update](#ssouserupdate)
- - [storage.policy.create](#storagepolicycreate)
- - [storage.policy.info](#storagepolicyinfo)
- - [storage.policy.ls](#storagepolicyls)
- - [storage.policy.rm](#storagepolicyrm)
- - [tags.attach](#tagsattach)
- - [tags.attached.ls](#tagsattachedls)
- - [tags.category.create](#tagscategorycreate)
- - [tags.category.info](#tagscategoryinfo)
- - [tags.category.ls](#tagscategoryls)
- - [tags.category.rm](#tagscategoryrm)
- - [tags.category.update](#tagscategoryupdate)
- - [tags.create](#tagscreate)
- - [tags.detach](#tagsdetach)
- - [tags.info](#tagsinfo)
- - [tags.ls](#tagsls)
- - [tags.rm](#tagsrm)
- - [tags.update](#tagsupdate)
- - [task.cancel](#taskcancel)
- - [tasks](#tasks)
- - [tree](#tree)
- - [vapp.destroy](#vappdestroy)
- - [vapp.power](#vapppower)
- - [vcsa.access.consolecli.get](#vcsaaccessconsolecliget)
- - [vcsa.access.consolecli.set](#vcsaaccessconsolecliset)
- - [vcsa.access.dcui.get](#vcsaaccessdcuiget)
- - [vcsa.access.dcui.set](#vcsaaccessdcuiset)
- - [vcsa.access.shell.get](#vcsaaccessshellget)
- - [vcsa.access.shell.set](#vcsaaccessshellset)
- - [vcsa.access.ssh.get](#vcsaaccesssshget)
- - [vcsa.access.ssh.set](#vcsaaccesssshset)
- - [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
- - [vcsa.net.proxy.info](#vcsanetproxyinfo)
- - [vcsa.shutdown.cancel](#vcsashutdowncancel)
- - [vcsa.shutdown.get](#vcsashutdownget)
- - [vcsa.shutdown.poweroff](#vcsashutdownpoweroff)
- - [vcsa.shutdown.reboot](#vcsashutdownreboot)
- - [version](#version)
- - [vm.change](#vmchange)
- - [vm.clone](#vmclone)
- - [vm.console](#vmconsole)
- - [vm.create](#vmcreate)
- - [vm.customize](#vmcustomize)
- - [vm.destroy](#vmdestroy)
- - [vm.disk.attach](#vmdiskattach)
- - [vm.disk.change](#vmdiskchange)
- - [vm.disk.create](#vmdiskcreate)
- - [vm.guest.tools](#vmguesttools)
- - [vm.info](#vminfo)
- - [vm.instantclone](#vminstantclone)
- - [vm.ip](#vmip)
- - [vm.keystrokes](#vmkeystrokes)
- - [vm.markastemplate](#vmmarkastemplate)
- - [vm.markasvm](#vmmarkasvm)
- - [vm.migrate](#vmmigrate)
- - [vm.network.add](#vmnetworkadd)
- - [vm.network.change](#vmnetworkchange)
- - [vm.option.info](#vmoptioninfo)
- - [vm.power](#vmpower)
- - [vm.question](#vmquestion)
- - [vm.rdm.attach](#vmrdmattach)
- - [vm.rdm.ls](#vmrdmls)
- - [vm.register](#vmregister)
- - [vm.unregister](#vmunregister)
- - [vm.upgrade](#vmupgrade)
- - [vm.vnc](#vmvnc)
- - [volume.ls](#volumels)
- - [volume.rm](#volumerm)
- - [vsan.change](#vsanchange)
- - [vsan.info](#vsaninfo)
+<details><summary><a href="#about">about</a></summary>
 
-</details>
+- [about](#about)
+- [about.cert](#aboutcert)
 
-## about
+</details> 
+
+<details><summary><a href="#cluster">cluster</a></summary>
+
+- [cluster.add](#clusteradd)
+- [cluster.change](#clusterchange)
+- [cluster.create](#clustercreate)
+- [cluster.group.change](#clustergroupchange)
+- [cluster.group.create](#clustergroupcreate)
+- [cluster.group.ls](#clustergroupls)
+- [cluster.group.remove](#clustergroupremove)
+- [cluster.module.create](#clustermodulecreate)
+- [cluster.module.ls](#clustermodulels)
+- [cluster.module.rm](#clustermodulerm)
+- [cluster.module.vm.add](#clustermodulevmadd)
+- [cluster.module.vm.rm](#clustermodulevmrm)
+- [cluster.override.change](#clusteroverridechange)
+- [cluster.override.info](#clusteroverrideinfo)
+- [cluster.override.remove](#clusteroverrideremove)
+- [cluster.rule.change](#clusterrulechange)
+- [cluster.rule.create](#clusterrulecreate)
+- [cluster.rule.info](#clusterruleinfo)
+- [cluster.rule.ls](#clusterrulels)
+- [cluster.rule.remove](#clusterruleremove)
+- [cluster.stretch](#clusterstretch)
+- [cluster.usage](#clusterusage)
+
+</details> 
+
+<details><summary><a href="#datacenter">datacenter</a></summary>
+
+
+- [datacenter.create](#datacentercreate)
+- [datacenter.info](#datacenterinfo)
+
+</details> 
+
+<details><summary><a href="#datastore">datastore</a></summary>
+
+- [datastore.cluster.change](#datastoreclusterchange)
+- [datastore.cluster.info](#datastoreclusterinfo)
+- [datastore.cp](#datastorecp)
+- [datastore.create](#datastorecreate)
+- [datastore.disk.create](#datastorediskcreate)
+- [datastore.disk.inflate](#datastorediskinflate)
+- [datastore.disk.info](#datastorediskinfo)
+- [datastore.disk.shrink](#datastorediskshrink)
+- [datastore.download](#datastoredownload)
+- [datastore.info](#datastoreinfo)
+- [datastore.ls](#datastorels)
+- [datastore.maintenance.enter](#datastoremaintenanceenter)
+- [datastore.maintenance.exit](#datastoremaintenanceexit)
+- [datastore.mkdir](#datastoremkdir)
+- [datastore.mv](#datastoremv)
+- [datastore.remove](#datastoreremove)
+- [datastore.rm](#datastorerm)
+- [datastore.tail](#datastoretail)
+- [datastore.upload](#datastoreupload)
+- [datastore.vsan.dom.ls](#datastorevsandomls)
+- [datastore.vsan.dom.rm](#datastorevsandomrm)
+
+</details> 
+<details><summary><a href="#device">device</a></summary>
+
+- [device.boot](#deviceboot)
+- [device.cdrom.add](#devicecdromadd)
+- [device.cdrom.eject](#devicecdromeject)
+- [device.cdrom.insert](#devicecdrominsert)
+- [device.connect](#deviceconnect)
+- [device.disconnect](#devicedisconnect)
+- [device.floppy.add](#devicefloppyadd)
+- [device.floppy.eject](#devicefloppyeject)
+- [device.floppy.insert](#devicefloppyinsert)
+- [device.info](#deviceinfo)
+- [device.ls](#devicels)
+- [device.pci.add](#devicepciadd)
+- [device.pci.ls](#devicepcils)
+- [device.pci.remove](#devicepciremove)
+- [device.remove](#deviceremove)
+- [device.scsi.add](#devicescsiadd)
+- [device.serial.add](#deviceserialadd)
+- [device.serial.connect](#deviceserialconnect)
+- [device.serial.disconnect](#deviceserialdisconnect)
+- [device.usb.add](#deviceusbadd)
+
+</details> 
+<details><summary><a href="#disk">disk</a></summary>
+
+- [disk.create](#diskcreate)
+- [disk.ls](#diskls)
+- [disk.register](#diskregister)
+- [disk.rm](#diskrm)
+- [disk.snapshot.create](#disksnapshotcreate)
+- [disk.snapshot.ls](#disksnapshotls)
+- [disk.snapshot.rm](#disksnapshotrm)
+- [disk.tags.attach](#disktagsattach)
+- [disk.tags.detach](#disktagsdetach)
+
+</details> 
+<details><summary><a href="#dvs">dvs</a></summary>
+
+- [dvs.add](#dvsadd)
+- [dvs.change](#dvschange)
+- [dvs.create](#dvscreate)
+- [dvs.portgroup.add](#dvsportgroupadd)
+- [dvs.portgroup.change](#dvsportgroupchange)
+- [dvs.portgroup.info](#dvsportgroupinfo)
+
+</details> 
+<details><summary><a href="#env">env</a></summary>
+
+- [env](#env)
+
+</details> 
+<details><summary><a href="#events">events</a></summary>
+
+- [events](#events)
+
+</details> 
+<details><summary><a href="#export">export</a></summary>
+
+- [export.ovf](#exportovf)
+
+</details> 
+<details><summary><a href="#extension">extension</a></summary>
+
+- [extension.info](#extensioninfo)
+- [extension.register](#extensionregister)
+- [extension.setcert](#extensionsetcert)
+- [extension.unregister](#extensionunregister)
+
+</details> 
+<details><summary><a href="#fields">fields</a></summary>
+
+- [fields.add](#fieldsadd)
+- [fields.info](#fieldsinfo)
+- [fields.ls](#fieldsls)
+- [fields.rename](#fieldsrename)
+- [fields.rm](#fieldsrm)
+- [fields.set](#fieldsset)
+
+</details> 
+<details><summary><a href="#find">find</a></summary>
+
+- [find](#find)
+
+</details> 
+<details><summary><a href="#firewall">firewall</a></summary>
+
+- [firewall.ruleset.find](#firewallrulesetfind)
+
+</details> 
+<details><summary><a href="#folder">folder</a></summary>
+
+- [folder.create](#foldercreate)
+- [folder.info](#folderinfo)
+
+</details> 
+<details><summary><a href="#guest">guest</a></summary>
+
+- [guest.chmod](#guestchmod)
+- [guest.chown](#guestchown)
+- [guest.df](#guestdf)
+- [guest.download](#guestdownload)
+- [guest.getenv](#guestgetenv)
+- [guest.kill](#guestkill)
+- [guest.ls](#guestls)
+- [guest.mkdir](#guestmkdir)
+- [guest.mktemp](#guestmktemp)
+- [guest.mv](#guestmv)
+- [guest.ps](#guestps)
+- [guest.rm](#guestrm)
+- [guest.rmdir](#guestrmdir)
+- [guest.run](#guestrun)
+- [guest.start](#gueststart)
+- [guest.touch](#guesttouch)
+- [guest.upload](#guestupload)
+
+</details> 
+<details><summary><a href="#host">host</a></summary>
+
+- [host.account.create](#hostaccountcreate)
+- [host.account.remove](#hostaccountremove)
+- [host.account.update](#hostaccountupdate)
+- [host.add](#hostadd)
+- [host.autostart.add](#hostautostartadd)
+- [host.autostart.configure](#hostautostartconfigure)
+- [host.autostart.info](#hostautostartinfo)
+- [host.autostart.remove](#hostautostartremove)
+- [host.cert.csr](#hostcertcsr)
+- [host.cert.import](#hostcertimport)
+- [host.cert.info](#hostcertinfo)
+- [host.date.change](#hostdatechange)
+- [host.date.info](#hostdateinfo)
+- [host.disconnect](#hostdisconnect)
+- [host.esxcli](#hostesxcli)
+- [host.info](#hostinfo)
+- [host.maintenance.enter](#hostmaintenanceenter)
+- [host.maintenance.exit](#hostmaintenanceexit)
+- [host.option.ls](#hostoptionls)
+- [host.option.set](#hostoptionset)
+- [host.portgroup.add](#hostportgroupadd)
+- [host.portgroup.change](#hostportgroupchange)
+- [host.portgroup.info](#hostportgroupinfo)
+- [host.portgroup.remove](#hostportgroupremove)
+- [host.reconnect](#hostreconnect)
+- [host.remove](#hostremove)
+- [host.service](#hostservice)
+- [host.service.ls](#hostservicels)
+- [host.shutdown](#hostshutdown)
+- [host.storage.info](#hoststorageinfo)
+- [host.storage.mark](#hoststoragemark)
+- [host.storage.partition](#hoststoragepartition)
+- [host.vnic.change](#hostvnicchange)
+- [host.vnic.info](#hostvnicinfo)
+- [host.vnic.service](#hostvnicservice)
+- [host.vswitch.add](#hostvswitchadd)
+- [host.vswitch.info](#hostvswitchinfo)
+- [host.vswitch.remove](#hostvswitchremove)
+
+</details> 
+<details><summary><a href="#import">import</a></summary>
+
+- [import.ova](#importova)
+- [import.ovf](#importovf)
+- [import.spec](#importspec)
+- [import.vmdk](#importvmdk)
+
+</details> 
+<details><summary><a href="#library">library</a></summary>
+
+- [library.checkin](#librarycheckin)
+- [library.checkout](#librarycheckout)
+- [library.clone](#libraryclone)
+- [library.cp](#librarycp)
+- [library.create](#librarycreate)
+- [library.deploy](#librarydeploy)
+- [library.export](#libraryexport)
+- [library.import](#libraryimport)
+- [library.info](#libraryinfo)
+- [library.ls](#libraryls)
+- [library.publish](#librarypublish)
+- [library.rm](#libraryrm)
+- [library.session.ls](#librarysessionls)
+- [library.session.rm](#librarysessionrm)
+- [library.subscriber.create](#librarysubscribercreate)
+- [library.subscriber.info](#librarysubscriberinfo)
+- [library.subscriber.ls](#librarysubscriberls)
+- [library.subscriber.rm](#librarysubscriberrm)
+- [library.sync](#librarysync)
+- [library.update](#libraryupdate)
+- [library.vmtx.info](#libraryvmtxinfo)
+
+</details> 
+<details><summary><a href="#license">license</a></summary>
+
+- [license.add](#licenseadd)
+- [license.assign](#licenseassign)
+- [license.assigned.ls](#licenseassignedls)
+- [license.decode](#licensedecode)
+- [license.label.set](#licenselabelset)
+- [license.ls](#licensels)
+- [license.remove](#licenseremove)
+
+</details> 
+<details><summary><a href="#logs">logs</a></summary>
+
+- [logs](#logs)
+- [logs.download](#logsdownload)
+- [logs.ls](#logsls)
+
+</details> 
+<details><summary><a href="#ls">ls</a></summary>
+
+- [ls](#ls)
+
+</details> 
+<details><summary><a href="#metric">metric</a></summary>
+
+- [metric.change](#metricchange)
+- [metric.info](#metricinfo)
+- [metric.interval.change](#metricintervalchange)
+- [metric.interval.info](#metricintervalinfo)
+- [metric.ls](#metricls)
+- [metric.reset](#metricreset)
+- [metric.sample](#metricsample)
+
+</details> 
+<details><summary><a href="#namespace">namespace</a></summary>
+
+- [namespace.cluster.disable](#namespaceclusterdisable)
+- [namespace.cluster.enable](#namespaceclusterenable)
+- [namespace.cluster.ls](#namespaceclusterls)
+- [namespace.logs.download](#namespacelogsdownload)
+- [namespace.service.activate](#namespaceserviceactivate)
+- [namespace.service.create](#namespaceservicecreate)
+- [namespace.service.deactivate](#namespaceservicedeactivate)
+- [namespace.service.info](#namespaceserviceinfo)
+- [namespace.service.ls](#namespaceservicels)
+- [namespace.service.rm](#namespaceservicerm)
+
+</details> 
+<details><summary><a href="#object">object</a></summary>
+
+- [object.collect](#objectcollect)
+- [object.destroy](#objectdestroy)
+- [object.method](#objectmethod)
+- [object.mv](#objectmv)
+- [object.reload](#objectreload)
+- [object.rename](#objectrename)
+- [object.save](#objectsave)
+
+</details> 
+<details><summary><a href="#option">option</a></summary>
+
+- [option.ls](#optionls)
+- [option.set](#optionset)
+
+</details> 
+<details><summary><a href="#permissions">permissions</a></summary>
+
+- [permissions.ls](#permissionsls)
+- [permissions.remove](#permissionsremove)
+- [permissions.set](#permissionsset)
+
+</details> 
+<details><summary><a href="#pool">pool</a></summary>
+
+- [pool.change](#poolchange)
+- [pool.create](#poolcreate)
+- [pool.destroy](#pooldestroy)
+- [pool.info](#poolinfo)
+
+</details> 
+<details><summary><a href="#role">role</a></summary>
+
+- [role.create](#rolecreate)
+- [role.ls](#rolels)
+- [role.remove](#roleremove)
+- [role.update](#roleupdate)
+- [role.usage](#roleusage)
+
+</details> 
+<details><summary><a href="#session">session</a></summary>
+
+- [session.login](#sessionlogin)
+- [session.logout](#sessionlogout)
+- [session.ls](#sessionls)
+- [session.rm](#sessionrm)
+
+</details> 
+<details><summary><a href="#snapshot">snapshot</a></summary>
+
+- [snapshot.create](#snapshotcreate)
+- [snapshot.remove](#snapshotremove)
+- [snapshot.revert](#snapshotrevert)
+- [snapshot.tree](#snapshottree)
+
+</details> 
+<details><summary><a href="#sso">sso</a></summary>
+
+- [sso.group.create](#ssogroupcreate)
+- [sso.group.ls](#ssogroupls)
+- [sso.group.rm](#ssogrouprm)
+- [sso.group.update](#ssogroupupdate)
+- [sso.idp.ls](#ssoidpls)
+- [sso.service.ls](#ssoservicels)
+- [sso.user.create](#ssousercreate)
+- [sso.user.id](#ssouserid)
+- [sso.user.ls](#ssouserls)
+- [sso.user.rm](#ssouserrm)
+- [sso.user.update](#ssouserupdate)
+
+</details> 
+<details><summary><a href="#storage">storage</a></summary>
+
+- [storage.policy.create](#storagepolicycreate)
+- [storage.policy.info](#storagepolicyinfo)
+- [storage.policy.ls](#storagepolicyls)
+- [storage.policy.rm](#storagepolicyrm)
+
+</details> 
+<details><summary><a href="#tags">tags</a></summary>
+
+- [tags.attach](#tagsattach)
+- [tags.attached.ls](#tagsattachedls)
+- [tags.category.create](#tagscategorycreate)
+- [tags.category.info](#tagscategoryinfo)
+- [tags.category.ls](#tagscategoryls)
+- [tags.category.rm](#tagscategoryrm)
+- [tags.category.update](#tagscategoryupdate)
+- [tags.create](#tagscreate)
+- [tags.detach](#tagsdetach)
+- [tags.info](#tagsinfo)
+- [tags.ls](#tagsls)
+- [tags.rm](#tagsrm)
+- [tags.update](#tagsupdate)
+- [task.cancel](#taskcancel)
+
+</details> 
+<details><summary><a href="#tasks">tasks</a></summary>
+
+- [tasks](#tasks)
+
+</details> 
+<details><summary><a href="#tree">tree</a></summary>
+
+- [tree](#tree)
+
+</details> 
+<details><summary><a href="#dvs">dvs</a></summary>
+
+- [vapp.destroy](#vappdestroy)
+- [vapp.power](#vapppower)
+
+</details> 
+<details><summary><a href="#vcsa">vcsa</a></summary>
+
+- [vcsa.access.consolecli.get](#vcsaaccessconsolecliget)
+- [vcsa.access.consolecli.set](#vcsaaccessconsolecliset)
+- [vcsa.access.dcui.get](#vcsaaccessdcuiget)
+- [vcsa.access.dcui.set](#vcsaaccessdcuiset)
+- [vcsa.access.shell.get](#vcsaaccessshellget)
+- [vcsa.access.shell.set](#vcsaaccessshellset)
+- [vcsa.access.ssh.get](#vcsaaccesssshget)
+- [vcsa.access.ssh.set](#vcsaaccesssshset)
+- [vcsa.log.forwarding.info](#vcsalogforwardinginfo)
+- [vcsa.net.proxy.info](#vcsanetproxyinfo)
+- [vcsa.shutdown.cancel](#vcsashutdowncancel)
+- [vcsa.shutdown.get](#vcsashutdownget)
+- [vcsa.shutdown.poweroff](#vcsashutdownpoweroff)
+- [vcsa.shutdown.reboot](#vcsashutdownreboot)
+
+</details> 
+<details><summary><a href="#version">version</a></summary>
+
+- [version](#version)
+
+</details> 
+<details><summary><a href="#vm">vm</a></summary>
+
+- [vm.change](#vmchange)
+- [vm.clone](#vmclone)
+- [vm.console](#vmconsole)
+- [vm.create](#vmcreate)
+- [vm.customize](#vmcustomize)
+- [vm.destroy](#vmdestroy)
+- [vm.disk.attach](#vmdiskattach)
+- [vm.disk.change](#vmdiskchange)
+- [vm.disk.create](#vmdiskcreate)
+- [vm.guest.tools](#vmguesttools)
+- [vm.info](#vminfo)
+- [vm.instantclone](#vminstantclone)
+- [vm.ip](#vmip)
+- [vm.keystrokes](#vmkeystrokes)
+- [vm.markastemplate](#vmmarkastemplate)
+- [vm.markasvm](#vmmarkasvm)
+- [vm.migrate](#vmmigrate)
+- [vm.network.add](#vmnetworkadd)
+- [vm.network.change](#vmnetworkchange)
+- [vm.option.info](#vmoptioninfo)
+- [vm.power](#vmpower)
+- [vm.question](#vmquestion)
+- [vm.rdm.attach](#vmrdmattach)
+- [vm.rdm.ls](#vmrdmls)
+- [vm.register](#vmregister)
+- [vm.unregister](#vmunregister)
+- [vm.upgrade](#vmupgrade)
+- [vm.vnc](#vmvnc)
+
+</details> 
+<details><summary><a href="#volume">volume</a></summary>
+
+- [volume.ls](#volumels)
+- [volume.rm](#volumerm)
+
+</details> 
+<details><summary><a href="#vsan">vsan</a></summary>
+
+- [vsan.change](#vsanchange)
+- [vsan.info](#vsaninfo)
+
+</details> 
+
+## Reference
+
+### about
+
+----
+
+#### about
 
 ```
 Usage: govc about [OPTIONS]
@@ -372,7 +548,7 @@ Options:
   -l=false               Include service content
 ```
 
-## about.cert
+#### about.cert
 
 ```
 Usage: govc about.cert [OPTIONS]
@@ -393,7 +569,13 @@ Options:
   -thumbprint=false      Output host hash and thumbprint only
 ```
 
-## cluster.add
+[Back to Contents](#contents)
+
+### cluster
+
+----
+
+#### cluster.add
 
 ```
 Usage: govc cluster.add [OPTIONS]
@@ -419,7 +601,7 @@ Options:
   -username=             Username of administration account on the host
 ```
 
-## cluster.change
+#### cluster.change
 
 ```
 Usage: govc cluster.change [OPTIONS] CLUSTER...
@@ -440,7 +622,7 @@ Options:
   -vsan-enabled=<nil>    Enable vSAN
 ```
 
-## cluster.create
+#### cluster.create
 
 ```
 Usage: govc cluster.create [OPTIONS] CLUSTER
@@ -458,7 +640,7 @@ Options:
   -folder=               Inventory folder [GOVC_FOLDER]
 ```
 
-## cluster.group.change
+#### cluster.group.change
 
 ```
 Usage: govc cluster.group.change [OPTIONS] NAME...
@@ -475,7 +657,7 @@ Options:
   -name=                 Cluster group name
 ```
 
-## cluster.group.create
+#### cluster.group.create
 
 ```
 Usage: govc cluster.group.create [OPTIONS]
@@ -495,7 +677,7 @@ Options:
   -vm=false              Create cluster VM group
 ```
 
-## cluster.group.ls
+#### cluster.group.ls
 
 ```
 Usage: govc cluster.group.ls [OPTIONS]
@@ -513,7 +695,7 @@ Options:
   -name=                 Cluster group name
 ```
 
-## cluster.group.remove
+#### cluster.group.remove
 
 ```
 Usage: govc cluster.group.remove [OPTIONS]
@@ -528,7 +710,7 @@ Options:
   -name=                 Cluster group name
 ```
 
-## cluster.module.create
+#### cluster.module.create
 
 ```
 Usage: govc cluster.module.create [OPTIONS]
@@ -544,7 +726,7 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
 ```
 
-## cluster.module.ls
+#### cluster.module.ls
 
 ```
 Usage: govc cluster.module.ls [OPTIONS]
@@ -562,7 +744,7 @@ Options:
   -id=                   Module ID
 ```
 
-## cluster.module.rm
+#### cluster.module.rm
 
 ```
 Usage: govc cluster.module.rm [OPTIONS] ID
@@ -575,7 +757,7 @@ Examples:
 Options:
 ```
 
-## cluster.module.vm.add
+#### cluster.module.vm.add
 
 ```
 Usage: govc cluster.module.vm.add [OPTIONS] VM...
@@ -589,7 +771,7 @@ Options:
   -id=                   Module ID
 ```
 
-## cluster.module.vm.rm
+#### cluster.module.vm.rm
 
 ```
 Usage: govc cluster.module.vm.rm [OPTIONS] VM...
@@ -603,7 +785,7 @@ Options:
   -id=                   Module ID
 ```
 
-## cluster.override.change
+#### cluster.override.change
 
 ```
 Usage: govc cluster.override.change [OPTIONS]
@@ -627,7 +809,7 @@ Options:
   -vm=                    Virtual machine [GOVC_VM]
 ```
 
-## cluster.override.info
+#### cluster.override.info
 
 ```
 Usage: govc cluster.override.info [OPTIONS]
@@ -642,7 +824,7 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
 ```
 
-## cluster.override.remove
+#### cluster.override.remove
 
 ```
 Usage: govc cluster.override.remove [OPTIONS]
@@ -657,7 +839,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## cluster.rule.change
+#### cluster.rule.change
 
 ```
 Usage: govc cluster.rule.change [OPTIONS] NAME...
@@ -678,7 +860,7 @@ Options:
   -vm-group=                VM group name
 ```
 
-## cluster.rule.create
+#### cluster.rule.create
 
 ```
 Usage: govc cluster.rule.create [OPTIONS] NAME...
@@ -716,7 +898,7 @@ Options:
   -vm-host=false            Virtual Machines to Hosts
 ```
 
-## cluster.rule.info
+#### cluster.rule.info
 
 ```
 Usage: govc cluster.rule.info [OPTIONS]
@@ -733,7 +915,7 @@ Options:
   -name=                 Cluster rule name
 ```
 
-## cluster.rule.ls
+#### cluster.rule.ls
 
 ```
 Usage: govc cluster.rule.ls [OPTIONS]
@@ -752,7 +934,7 @@ Options:
   -name=                 Cluster rule name
 ```
 
-## cluster.rule.remove
+#### cluster.rule.remove
 
 ```
 Usage: govc cluster.rule.remove [OPTIONS]
@@ -768,7 +950,7 @@ Options:
   -name=                 Cluster rule name
 ```
 
-## cluster.stretch
+#### cluster.stretch
 
 ```
 Usage: govc cluster.stretch [OPTIONS] CLUSTER
@@ -796,7 +978,7 @@ Options:
   -witness=                            Witness host for the stretched cluster
 ```
 
-## cluster.usage
+#### cluster.usage
 
 ```
 Usage: govc cluster.usage [OPTIONS] CLUSTER
@@ -812,7 +994,13 @@ Options:
   -S=false               Exclude host local storage
 ```
 
-## datacenter.create
+[Back to Contents](#contents)
+
+### datacenter
+
+----
+
+#### datacenter.create
 
 ```
 Usage: govc datacenter.create [OPTIONS] NAME...
@@ -827,7 +1015,7 @@ Options:
   -folder=               Inventory folder [GOVC_FOLDER]
 ```
 
-## datacenter.info
+#### datacenter.info
 
 ```
 Usage: govc datacenter.info [OPTIONS] [PATH]...
@@ -835,7 +1023,13 @@ Usage: govc datacenter.info [OPTIONS] [PATH]...
 Options:
 ```
 
-## datastore.cluster.change
+[Back to Contents](#contents)
+
+### datastore
+
+----
+
+#### datastore.cluster.change
 
 ```
 Usage: govc datastore.cluster.change [OPTIONS] CLUSTER...
@@ -851,7 +1045,7 @@ Options:
   -drs-mode=             Storage DRS behavior: manual, automated
 ```
 
-## datastore.cluster.info
+#### datastore.cluster.info
 
 ```
 Usage: govc datastore.cluster.info [OPTIONS] [PATH]...
@@ -865,7 +1059,7 @@ Examples:
 Options:
 ```
 
-## datastore.cp
+#### datastore.cp
 
 ```
 Usage: govc datastore.cp [OPTIONS] SRC DST
@@ -887,7 +1081,7 @@ Options:
   -t=true                Use file type to choose disk or file manager
 ```
 
-## datastore.create
+#### datastore.create
 
 ```
 Usage: govc datastore.create [OPTIONS] HOST...
@@ -914,7 +1108,7 @@ Options:
   -version=<nil>         VMFS major version
 ```
 
-## datastore.disk.create
+#### datastore.disk.create
 
 ```
 Usage: govc datastore.disk.create [OPTIONS] VMDK
@@ -935,7 +1129,7 @@ Options:
   -uuid=                 Disk UUID
 ```
 
-## datastore.disk.inflate
+#### datastore.disk.inflate
 
 ```
 Usage: govc datastore.disk.inflate [OPTIONS] VMDK
@@ -949,7 +1143,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## datastore.disk.info
+#### datastore.disk.info
 
 ```
 Usage: govc datastore.disk.info [OPTIONS] VMDK
@@ -967,7 +1161,7 @@ Options:
   -uuid=false            Include disk UUID
 ```
 
-## datastore.disk.shrink
+#### datastore.disk.shrink
 
 ```
 Usage: govc datastore.disk.shrink [OPTIONS] VMDK
@@ -982,7 +1176,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## datastore.download
+#### datastore.download
 
 ```
 Usage: govc datastore.download [OPTIONS] SOURCE DEST
@@ -1000,7 +1194,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## datastore.info
+#### datastore.info
 
 ```
 Usage: govc datastore.info [OPTIONS] [PATH]...
@@ -1019,7 +1213,7 @@ Options:
   -H=false               Display info for Datastores shared between hosts
 ```
 
-## datastore.ls
+#### datastore.ls
 
 ```
 Usage: govc datastore.ls [OPTIONS] [FILE]...
@@ -1032,7 +1226,7 @@ Options:
   -p=false               Append / indicator to directories
 ```
 
-## datastore.maintenance.enter
+#### datastore.maintenance.enter
 
 ```
 Usage: govc datastore.maintenance.enter [OPTIONS] DATASTORE
@@ -1049,7 +1243,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## datastore.maintenance.exit
+#### datastore.maintenance.exit
 
 ```
 Usage: govc datastore.maintenance.exit [OPTIONS] DATASTORE
@@ -1060,7 +1254,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## datastore.mkdir
+#### datastore.mkdir
 
 ```
 Usage: govc datastore.mkdir [OPTIONS] DIRECTORY
@@ -1071,7 +1265,7 @@ Options:
   -p=false               Create intermediate directories as needed
 ```
 
-## datastore.mv
+#### datastore.mv
 
 ```
 Usage: govc datastore.mv [OPTIONS] SRC DST
@@ -1090,7 +1284,7 @@ Options:
   -t=true                Use file type to choose disk or file manager
 ```
 
-## datastore.remove
+#### datastore.remove
 
 ```
 Usage: govc datastore.remove [OPTIONS] HOST...
@@ -1106,7 +1300,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## datastore.rm
+#### datastore.rm
 
 ```
 Usage: govc datastore.rm [OPTIONS] FILE
@@ -1125,7 +1319,7 @@ Options:
   -t=true                Use file type to choose disk or file manager
 ```
 
-## datastore.tail
+#### datastore.tail
 
 ```
 Usage: govc datastore.tail [OPTIONS] PATH
@@ -1144,7 +1338,7 @@ Options:
   -n=10                  Output the last NUM lines
 ```
 
-## datastore.upload
+#### datastore.upload
 
 ```
 Usage: govc datastore.upload [OPTIONS] SOURCE DEST
@@ -1161,7 +1355,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## datastore.vsan.dom.ls
+#### datastore.vsan.dom.ls
 
 ```
 Usage: govc datastore.vsan.dom.ls [OPTIONS] [UUID]...
@@ -1179,7 +1373,7 @@ Options:
   -o=false               List orphan objects
 ```
 
-## datastore.vsan.dom.rm
+#### datastore.vsan.dom.rm
 
 ```
 Usage: govc datastore.vsan.dom.rm [OPTIONS] UUID...
@@ -1197,7 +1391,13 @@ Options:
   -v=false               Print deleted UUIDs to stdout, failed to stderr
 ```
 
-## device.boot
+[Back to Contents](#contents)
+
+### device
+
+----
+
+#### device.boot
 
 ```
 Usage: govc device.boot [OPTIONS]
@@ -1221,7 +1421,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.cdrom.add
+#### device.cdrom.add
 
 ```
 Usage: govc device.cdrom.add [OPTIONS]
@@ -1239,7 +1439,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.cdrom.eject
+#### device.cdrom.eject
 
 ```
 Usage: govc device.cdrom.eject [OPTIONS]
@@ -1257,7 +1457,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.cdrom.insert
+#### device.cdrom.insert
 
 ```
 Usage: govc device.cdrom.insert [OPTIONS] ISO
@@ -1275,7 +1475,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.connect
+#### device.connect
 
 ```
 Usage: govc device.connect [OPTIONS] DEVICE...
@@ -1289,7 +1489,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.disconnect
+#### device.disconnect
 
 ```
 Usage: govc device.disconnect [OPTIONS] DEVICE...
@@ -1303,7 +1503,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.floppy.add
+#### device.floppy.add
 
 ```
 Usage: govc device.floppy.add [OPTIONS]
@@ -1318,7 +1518,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.floppy.eject
+#### device.floppy.eject
 
 ```
 Usage: govc device.floppy.eject [OPTIONS]
@@ -1335,7 +1535,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.floppy.insert
+#### device.floppy.insert
 
 ```
 Usage: govc device.floppy.insert [OPTIONS] IMG
@@ -1353,7 +1553,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.info
+#### device.info
 
 ```
 Usage: govc device.info [OPTIONS] [DEVICE]...
@@ -1374,7 +1574,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.ls
+#### device.ls
 
 ```
 Usage: govc device.ls [OPTIONS]
@@ -1391,7 +1591,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.pci.add
+#### device.pci.add
 
 ```
 Usage: govc device.pci.add [OPTIONS] PCI_ADDRESS...
@@ -1440,7 +1640,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.pci.ls
+#### device.pci.ls
 
 ```
 Usage: govc device.pci.ls [OPTIONS]
@@ -1454,7 +1654,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.pci.remove
+#### device.pci.remove
 
 ```
 Usage: govc device.pci.remove [OPTIONS] <PCI ADDRESS>...
@@ -1498,7 +1698,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.remove
+#### device.remove
 
 ```
 Usage: govc device.remove [OPTIONS] DEVICE...
@@ -1515,7 +1715,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.scsi.add
+#### device.scsi.add
 
 ```
 Usage: govc device.scsi.add [OPTIONS]
@@ -1534,7 +1734,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.serial.add
+#### device.serial.add
 
 ```
 Usage: govc device.serial.add [OPTIONS]
@@ -1549,7 +1749,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.serial.connect
+#### device.serial.connect
 
 ```
 Usage: govc device.serial.connect [OPTIONS] URI
@@ -1576,7 +1776,7 @@ Options:
   -vspc-proxy=           vSPC proxy URI
 ```
 
-## device.serial.disconnect
+#### device.serial.disconnect
 
 ```
 Usage: govc device.serial.disconnect [OPTIONS]
@@ -1593,7 +1793,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## device.usb.add
+#### device.usb.add
 
 ```
 Usage: govc device.usb.add [OPTIONS]
@@ -1612,7 +1812,13 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## disk.create
+[Back to Contents](#contents)
+
+### disk
+
+----
+
+#### disk.create
 
 ```
 Usage: govc disk.create [OPTIONS] NAME
@@ -1630,7 +1836,7 @@ Options:
   -size=10.0GB           Size of new disk
 ```
 
-## disk.ls
+#### disk.ls
 
 ```
 Usage: govc disk.ls [OPTIONS] [ID]...
@@ -1653,7 +1859,7 @@ Options:
   -t=                    Query tag name
 ```
 
-## disk.register
+#### disk.register
 
 ```
 Usage: govc disk.register [OPTIONS] PATH [NAME]
@@ -1667,7 +1873,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## disk.rm
+#### disk.rm
 
 ```
 Usage: govc disk.rm [OPTIONS] ID
@@ -1681,7 +1887,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## disk.snapshot.create
+#### disk.snapshot.create
 
 ```
 Usage: govc disk.snapshot.create [OPTIONS] ID DESC
@@ -1695,7 +1901,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## disk.snapshot.ls
+#### disk.snapshot.ls
 
 ```
 Usage: govc disk.snapshot.ls [OPTIONS] ID
@@ -1710,7 +1916,7 @@ Options:
   -l=false               Long listing format
 ```
 
-## disk.snapshot.rm
+#### disk.snapshot.rm
 
 ```
 Usage: govc disk.snapshot.rm [OPTIONS] ID SID
@@ -1724,7 +1930,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
 ```
 
-## disk.tags.attach
+#### disk.tags.attach
 
 ```
 Usage: govc disk.tags.attach [OPTIONS] NAME ID
@@ -1738,7 +1944,7 @@ Options:
   -c=                    Tag category
 ```
 
-## disk.tags.detach
+#### disk.tags.detach
 
 ```
 Usage: govc disk.tags.detach [OPTIONS] NAME ID
@@ -1752,7 +1958,13 @@ Options:
   -c=                    Tag category
 ```
 
-## dvs.add
+[Back to Contents](#contents)
+
+### dvs
+
+----
+
+#### dvs.add
 
 ```
 Usage: govc dvs.add [OPTIONS] HOST...
@@ -1768,7 +1980,7 @@ Options:
   -pnic=vmnic0           Name of the host physical NIC
 ```
 
-## dvs.change
+#### dvs.change
 
 ```
 Usage: govc dvs.change [OPTIONS] DVS
@@ -1786,7 +1998,7 @@ Options:
   -product-version=      DVS product version
 ```
 
-## dvs.create
+#### dvs.create
 
 ```
 Usage: govc dvs.create [OPTIONS] DVS
@@ -1810,7 +2022,7 @@ Options:
   -product-version=      DVS product version
 ```
 
-## dvs.portgroup.add
+#### dvs.portgroup.add
 
 ```
 Usage: govc dvs.portgroup.add [OPTIONS] NAME
@@ -1843,7 +2055,7 @@ Options:
   -vlan-range=0-4094     VLAN Ranges with comma delimited
 ```
 
-## dvs.portgroup.change
+#### dvs.portgroup.change
 
 ```
 Usage: govc dvs.portgroup.change [OPTIONS] PATH
@@ -1863,7 +2075,7 @@ Options:
   -vlan-range=0-4094     VLAN Ranges with comma delimited
 ```
 
-## dvs.portgroup.info
+#### dvs.portgroup.info
 
 ```
 Usage: govc dvs.portgroup.info [OPTIONS] DVS
@@ -1886,7 +2098,13 @@ Options:
   -vlan=0                Filter by VLAN ID (0 = unfiltered)
 ```
 
-## env
+[Back to Contents](#contents)
+
+### env
+
+----
+
+#### env
 
 ```
 Usage: govc env [OPTIONS]
@@ -1900,7 +2118,13 @@ Options:
   -x=false               Output variables for each GOVC_URL component
 ```
 
-## events
+[Back to Contents](#contents)
+
+### events
+
+----
+
+#### events
 
 ```
 Usage: govc events [OPTIONS] [PATH]...
@@ -1921,7 +2145,13 @@ Options:
   -type=[]               Include only the specified event types
 ```
 
-## export.ovf
+[Back to Contents](#contents)
+
+### export
+
+----
+
+#### export.ovf
 
 ```
 Usage: govc export.ovf [OPTIONS] DIR
@@ -1941,7 +2171,13 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## extension.info
+[Back to Contents](#contents)
+
+### extension
+
+----
+
+#### extension.info
 
 ```
 Usage: govc extension.info [OPTIONS] [KEY]...
@@ -1949,7 +2185,7 @@ Usage: govc extension.info [OPTIONS] [KEY]...
 Options:
 ```
 
-## extension.register
+#### extension.register
 
 ```
 Usage: govc extension.register [OPTIONS]
@@ -1958,7 +2194,7 @@ Options:
   -update=false          Update extension
 ```
 
-## extension.setcert
+#### extension.setcert
 
 ```
 Usage: govc extension.setcert [OPTIONS] ID
@@ -1978,7 +2214,7 @@ Options:
   -org=VMware            Organization for generated certificate
 ```
 
-## extension.unregister
+#### extension.unregister
 
 ```
 Usage: govc extension.unregister [OPTIONS]
@@ -1986,7 +2222,13 @@ Usage: govc extension.unregister [OPTIONS]
 Options:
 ```
 
-## fields.add
+[Back to Contents](#contents)
+
+### fields
+
+----
+
+#### fields.add
 
 ```
 Usage: govc fields.add [OPTIONS] NAME
@@ -2001,7 +2243,7 @@ Options:
   -type=                 Managed object type
 ```
 
-## fields.info
+#### fields.info
 
 ```
 Usage: govc fields.info [OPTIONS] PATH...
@@ -2018,7 +2260,7 @@ Options:
   -n=                    Filter by custom field name
 ```
 
-## fields.ls
+#### fields.ls
 
 ```
 Usage: govc fields.ls [OPTIONS]
@@ -2033,7 +2275,7 @@ Options:
   -type=                 Filter by a Managed Object Type
 ```
 
-## fields.rename
+#### fields.rename
 
 ```
 Usage: govc fields.rename [OPTIONS] KEY NAME
@@ -2041,7 +2283,7 @@ Usage: govc fields.rename [OPTIONS] KEY NAME
 Options:
 ```
 
-## fields.rm
+#### fields.rm
 
 ```
 Usage: govc fields.rm [OPTIONS] KEY...
@@ -2049,7 +2291,7 @@ Usage: govc fields.rm [OPTIONS] KEY...
 Options:
 ```
 
-## fields.set
+#### fields.set
 
 ```
 Usage: govc fields.set [OPTIONS] KEY VALUE PATH...
@@ -2066,7 +2308,13 @@ Options:
   -type=                 Managed object type on which to add the field if it does not exist. This flag is ignored unless -add=true
 ```
 
-## find
+[Back to Contents](#contents)
+
+### find
+
+----
+
+#### find
 
 ```
 Usage: govc find [OPTIONS] [ROOT] [KEY VAL]...
@@ -2117,7 +2365,14 @@ Options:
   -type=[]               Resource type
 ```
 
-## firewall.ruleset.find
+[Back to Contents](#contents)
+
+### firewall
+
+----
+
+
+#### firewall.ruleset.find
 
 ```
 Usage: govc firewall.ruleset.find [OPTIONS]
@@ -2141,7 +2396,13 @@ Options:
   -type=dst              Port type
 ```
 
-## folder.create
+[Back to Contents](#contents)
+
+### folder
+
+----
+
+###### folder.create
 
 ```
 Usage: govc folder.create [OPTIONS] PATH...
@@ -2158,7 +2419,7 @@ Options:
   -pod=false             Create folder(s) of type StoragePod (DatastoreCluster)
 ```
 
-## folder.info
+##### folder.info
 
 ```
 Usage: govc folder.info [OPTIONS] [PATH]...
@@ -2166,7 +2427,13 @@ Usage: govc folder.info [OPTIONS] [PATH]...
 Options:
 ```
 
-## guest.chmod
+[Back to Contents](#contents)
+
+### guest
+
+----
+
+#### guest.chmod
 
 ```
 Usage: govc guest.chmod [OPTIONS] MODE FILE
@@ -2181,7 +2448,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.chown
+#### guest.chown
 
 ```
 Usage: govc guest.chown [OPTIONS] UID[:GID] FILE
@@ -2196,7 +2463,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.df
+#### guest.df
 
 ```
 Usage: govc guest.df [OPTIONS]
@@ -2210,7 +2477,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.download
+#### guest.download
 
 ```
 Usage: govc guest.download [OPTIONS] SOURCE DEST
@@ -2231,7 +2498,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.getenv
+#### guest.getenv
 
 ```
 Usage: govc guest.getenv [OPTIONS] [NAME]...
@@ -2248,7 +2515,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.kill
+#### guest.kill
 
 ```
 Usage: govc guest.kill [OPTIONS]
@@ -2265,7 +2532,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.ls
+#### guest.ls
 
 ```
 Usage: govc guest.ls [OPTIONS] PATH
@@ -2281,7 +2548,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.mkdir
+#### guest.mkdir
 
 ```
 Usage: govc guest.mkdir [OPTIONS] PATH
@@ -2298,7 +2565,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.mktemp
+#### guest.mktemp
 
 ```
 Usage: govc guest.mktemp [OPTIONS]
@@ -2320,7 +2587,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.mv
+#### guest.mv
 
 ```
 Usage: govc guest.mv [OPTIONS] SOURCE DEST
@@ -2337,7 +2604,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.ps
+#### guest.ps
 
 ```
 Usage: govc guest.ps [OPTIONS]
@@ -2367,7 +2634,7 @@ Options:
   -x=false               Output exit time and code
 ```
 
-## guest.rm
+#### guest.rm
 
 ```
 Usage: govc guest.rm [OPTIONS] PATH
@@ -2382,7 +2649,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.rmdir
+#### guest.rmdir
 
 ```
 Usage: govc guest.rmdir [OPTIONS] PATH
@@ -2399,7 +2666,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.run
+#### guest.run
 
 ```
 Usage: govc guest.run [OPTIONS] PATH [ARG]...
@@ -2434,7 +2701,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.start
+#### guest.start
 
 ```
 Usage: govc guest.start [OPTIONS] PATH [ARG]...
@@ -2457,7 +2724,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.touch
+#### guest.touch
 
 ```
 Usage: govc guest.touch [OPTIONS] FILE
@@ -2476,7 +2743,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## guest.upload
+#### guest.upload
 
 ```
 Usage: govc guest.upload [OPTIONS] SOURCE DEST
@@ -2499,7 +2766,13 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## host.account.create
+[Back to Contents](#contents)
+
+### host
+
+----
+
+#### host.account.create
 
 ```
 Usage: govc host.account.create [OPTIONS]
@@ -2516,7 +2789,7 @@ Options:
   -password=             The password for the specified account id
 ```
 
-## host.account.remove
+#### host.account.remove
 
 ```
 Usage: govc host.account.remove [OPTIONS]
@@ -2533,7 +2806,7 @@ Options:
   -password=             The password for the specified account id
 ```
 
-## host.account.update
+#### host.account.update
 
 ```
 Usage: govc host.account.update [OPTIONS]
@@ -2550,7 +2823,7 @@ Options:
   -password=             The password for the specified account id
 ```
 
-## host.add
+#### host.add
 
 ```
 Usage: govc host.add [OPTIONS]
@@ -2576,7 +2849,7 @@ Options:
   -username=             Username of administration account on the host
 ```
 
-## host.autostart.add
+#### host.autostart.add
 
 ```
 Usage: govc host.autostart.add [OPTIONS] VM...
@@ -2591,7 +2864,7 @@ Options:
   -wait=systemDefault         Wait for Hearbeat Setting (systemDefault|yes|no)
 ```
 
-## host.autostart.configure
+#### host.autostart.configure
 
 ```
 Usage: govc host.autostart.configure [OPTIONS]
@@ -2605,7 +2878,7 @@ Options:
   -wait-for-heartbeat=<nil>  Wait for hearbeat
 ```
 
-## host.autostart.info
+#### host.autostart.info
 
 ```
 Usage: govc host.autostart.info [OPTIONS]
@@ -2614,7 +2887,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.autostart.remove
+#### host.autostart.remove
 
 ```
 Usage: govc host.autostart.remove [OPTIONS] VM...
@@ -2623,7 +2896,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.cert.csr
+#### host.cert.csr
 
 ```
 Usage: govc host.cert.csr [OPTIONS]
@@ -2635,7 +2908,7 @@ Options:
   -ip=false              Use IP address as CN
 ```
 
-## host.cert.import
+#### host.cert.import
 
 ```
 Usage: govc host.cert.import [OPTIONS] FILE
@@ -2648,7 +2921,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.cert.info
+#### host.cert.info
 
 ```
 Usage: govc host.cert.info [OPTIONS]
@@ -2659,7 +2932,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.date.change
+#### host.date.change
 
 ```
 Usage: govc host.date.change [OPTIONS]
@@ -2679,7 +2952,7 @@ Options:
   -tz=                   Change timezone of the host
 ```
 
-## host.date.info
+#### host.date.info
 
 ```
 Usage: govc host.date.info [OPTIONS]
@@ -2690,7 +2963,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.disconnect
+#### host.disconnect
 
 ```
 Usage: govc host.disconnect [OPTIONS]
@@ -2701,7 +2974,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.esxcli
+#### host.esxcli
 
 ```
 Usage: govc host.esxcli [OPTIONS] COMMAND [ARG]...
@@ -2722,7 +2995,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.info
+#### host.info
 
 ```
 Usage: govc host.info [OPTIONS]
@@ -2731,7 +3004,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.maintenance.enter
+#### host.maintenance.enter
 
 ```
 Usage: govc host.maintenance.enter [OPTIONS] HOST...
@@ -2747,7 +3020,7 @@ Options:
   -timeout=0             Timeout
 ```
 
-## host.maintenance.exit
+#### host.maintenance.exit
 
 ```
 Usage: govc host.maintenance.exit [OPTIONS] HOST...
@@ -2765,7 +3038,7 @@ Options:
   -timeout=0             Timeout
 ```
 
-## host.option.ls
+#### host.option.ls
 
 ```
 Usage: govc host.option.ls [OPTIONS] [NAME]
@@ -2783,7 +3056,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.option.set
+#### host.option.set
 
 ```
 Usage: govc host.option.set [OPTIONS] NAME VALUE
@@ -2798,7 +3071,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.portgroup.add
+#### host.portgroup.add
 
 ```
 Usage: govc host.portgroup.add [OPTIONS] NAME
@@ -2814,7 +3087,7 @@ Options:
   -vswitch=              vSwitch Name
 ```
 
-## host.portgroup.change
+#### host.portgroup.change
 
 ```
 Usage: govc host.portgroup.change [OPTIONS] NAME
@@ -2835,7 +3108,7 @@ Options:
   -vswitch-name=            vSwitch name
 ```
 
-## host.portgroup.info
+#### host.portgroup.info
 
 ```
 Usage: govc host.portgroup.info [OPTIONS]
@@ -2844,7 +3117,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.portgroup.remove
+#### host.portgroup.remove
 
 ```
 Usage: govc host.portgroup.remove [OPTIONS] NAME
@@ -2858,7 +3131,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.reconnect
+#### host.reconnect
 
 ```
 Usage: govc host.reconnect [OPTIONS]
@@ -2879,7 +3152,7 @@ Options:
   -username=             Username of administration account on the host
 ```
 
-## host.remove
+#### host.remove
 
 ```
 Usage: govc host.remove [OPTIONS] HOST...
@@ -2890,7 +3163,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.service
+#### host.service
 
 ```
 Usage: govc host.service [OPTIONS] ACTION ID
@@ -2907,7 +3180,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.service.ls
+#### host.service.ls
 
 ```
 Usage: govc host.service.ls [OPTIONS]
@@ -2918,7 +3191,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.shutdown
+#### host.shutdown
 
 ```
 Usage: govc host.shutdown [OPTIONS] HOST...
@@ -2931,7 +3204,7 @@ Options:
   -r=false               Reboot host
 ```
 
-## host.storage.info
+#### host.storage.info
 
 ```
 Usage: govc host.storage.info [OPTIONS]
@@ -2950,7 +3223,7 @@ Options:
   -unclaimed=false       Only show disks that can be used as new VMFS datastores
 ```
 
-## host.storage.mark
+#### host.storage.mark
 
 ```
 Usage: govc host.storage.mark [OPTIONS] DEVICE_PATH
@@ -2963,7 +3236,7 @@ Options:
   -ssd=<nil>             Mark as SSD
 ```
 
-## host.storage.partition
+#### host.storage.partition
 
 ```
 Usage: govc host.storage.partition [OPTIONS] DEVICE_PATH
@@ -2974,7 +3247,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.vnic.change
+#### host.vnic.change
 
 ```
 Usage: govc host.vnic.change [OPTIONS] DEVICE
@@ -2989,7 +3262,7 @@ Options:
   -mtu=0                 vmk MTU
 ```
 
-## host.vnic.info
+#### host.vnic.info
 
 ```
 Usage: govc host.vnic.info [OPTIONS]
@@ -2998,7 +3271,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.vnic.service
+#### host.vnic.service
 
 ```
 Usage: govc host.vnic.service [OPTIONS] SERVICE DEVICE
@@ -3018,7 +3291,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.vswitch.add
+#### host.vswitch.add
 
 ```
 Usage: govc host.vswitch.add [OPTIONS] NAME
@@ -3030,7 +3303,7 @@ Options:
   -ports=128             Number of ports
 ```
 
-## host.vswitch.info
+#### host.vswitch.info
 
 ```
 Usage: govc host.vswitch.info [OPTIONS]
@@ -3039,7 +3312,7 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## host.vswitch.remove
+#### host.vswitch.remove
 
 ```
 Usage: govc host.vswitch.remove [OPTIONS] NAME
@@ -3048,7 +3321,13 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## import.ova
+[Back to Contents](#contents)
+
+### import
+
+----
+
+#### import.ova
 
 ```
 Usage: govc import.ova [OPTIONS] PATH_TO_OVA
@@ -3062,7 +3341,7 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
-## import.ovf
+#### import.ovf
 
 ```
 Usage: govc import.ovf [OPTIONS] PATH_TO_OVF
@@ -3076,7 +3355,7 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
-## import.spec
+#### import.spec
 
 ```
 Usage: govc import.spec [OPTIONS] PATH_TO_OVF_OR_OVA
@@ -3084,7 +3363,7 @@ Usage: govc import.spec [OPTIONS] PATH_TO_OVF_OR_OVA
 Options:
 ```
 
-## import.vmdk
+#### import.vmdk
 
 ```
 Usage: govc import.vmdk [OPTIONS] PATH_TO_VMDK [REMOTE_DIRECTORY]
@@ -3096,7 +3375,13 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
-## library.checkin
+[Back to Contents](#contents)
+
+### library
+
+----
+
+#### library.checkin
 
 ```
 Usage: govc library.checkin [OPTIONS] PATH
@@ -3113,7 +3398,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## library.checkout
+#### library.checkout
 
 ```
 Usage: govc library.checkout [OPTIONS] PATH NAME
@@ -3132,7 +3417,7 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
-## library.clone
+#### library.clone
 
 ```
 Usage: govc library.clone [OPTIONS] PATH NAME
@@ -3159,7 +3444,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## library.cp
+#### library.cp
 
 ```
 Usage: govc library.cp [OPTIONS] SRC DST
@@ -3173,7 +3458,7 @@ Options:
   -n=                    Library item name
 ```
 
-## library.create
+#### library.create
 
 ```
 Usage: govc library.create [OPTIONS] NAME
@@ -3199,7 +3484,7 @@ Options:
   -thumbprint=           SHA-1 thumbprint of the host's SSL certificate
 ```
 
-## library.deploy
+#### library.deploy
 
 ```
 Usage: govc library.deploy [OPTIONS] TEMPLATE [NAME]
@@ -3222,7 +3507,7 @@ Options:
   -profile=              Storage profile
 ```
 
-## library.export
+#### library.export
 
 ```
 Usage: govc library.export [OPTIONS] PATH [DEST]
@@ -3246,7 +3531,7 @@ Examples:
 Options:
 ```
 
-## library.import
+#### library.import
 
 ```
 Usage: govc library.import [OPTIONS] LIBRARY ITEM
@@ -3269,7 +3554,7 @@ Options:
   -t=                    Library item type
 ```
 
-## library.info
+#### library.info
 
 ```
 Usage: govc library.info [OPTIONS]
@@ -3293,7 +3578,7 @@ Options:
   -l=false               Long listing format
 ```
 
-## library.ls
+#### library.ls
 
 ```
 Usage: govc library.ls [OPTIONS]
@@ -3312,7 +3597,7 @@ Examples:
 Options:
 ```
 
-## library.publish
+#### library.publish
 
 ```
 Usage: govc library.publish [OPTIONS] NAME|ITEM [SUBSCRIPTION-ID]...
@@ -3331,7 +3616,7 @@ Examples:
 Options:
 ```
 
-## library.rm
+#### library.rm
 
 ```
 Usage: govc library.rm [OPTIONS] NAME
@@ -3346,7 +3631,7 @@ Examples:
 Options:
 ```
 
-## library.session.ls
+#### library.session.ls
 
 ```
 Usage: govc library.session.ls [OPTIONS]
@@ -3360,7 +3645,7 @@ Examples:
 Options:
 ```
 
-## library.session.rm
+#### library.session.rm
 
 ```
 Usage: govc library.session.rm [OPTIONS]
@@ -3374,7 +3659,7 @@ Options:
   -f=false               Cancel session if active
 ```
 
-## library.subscriber.create
+#### library.subscriber.create
 
 ```
 Usage: govc library.subscriber.create [OPTIONS] PUBLISHED-LIBRARY SUBSCRIPTION-LIBRARY
@@ -3394,7 +3679,7 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
-## library.subscriber.info
+#### library.subscriber.info
 
 ```
 Usage: govc library.subscriber.info [OPTIONS] PUBLISHED-LIBRARY SUBSCRIPTION-ID
@@ -3408,7 +3693,7 @@ Examples:
 Options:
 ```
 
-## library.subscriber.ls
+#### library.subscriber.ls
 
 ```
 Usage: govc library.subscriber.ls [OPTIONS]
@@ -3421,7 +3706,7 @@ Examples:
 Options:
 ```
 
-## library.subscriber.rm
+#### library.subscriber.rm
 
 ```
 Usage: govc library.subscriber.rm [OPTIONS] SUBSCRIPTION-ID
@@ -3437,7 +3722,7 @@ Examples:
 Options:
 ```
 
-## library.sync
+#### library.sync
 
 ```
 Usage: govc library.sync [OPTIONS] NAME|ITEM
@@ -3455,7 +3740,7 @@ Options:
   -vmtx=                 Sync subscribed library to local library as VM Templates
 ```
 
-## library.update
+#### library.update
 
 ```
 Usage: govc library.update [OPTIONS] PATH
@@ -3471,7 +3756,7 @@ Options:
   -n=                    Library or item name
 ```
 
-## library.vmtx.info
+#### library.vmtx.info
 
 ```
 Usage: govc library.vmtx.info [OPTIONS]
@@ -3484,7 +3769,13 @@ Examples:
 Options:
 ```
 
-## license.add
+[Back to Contents](#contents)
+
+### license
+
+----
+
+#### license.add
 
 ```
 Usage: govc license.add [OPTIONS] KEY...
@@ -3492,7 +3783,7 @@ Usage: govc license.add [OPTIONS] KEY...
 Options:
 ```
 
-## license.assign
+#### license.assign
 
 ```
 Usage: govc license.assign [OPTIONS] KEY
@@ -3511,7 +3802,7 @@ Options:
   -remove=false          Remove assignment
 ```
 
-## license.assigned.ls
+#### license.assigned.ls
 
 ```
 Usage: govc license.assigned.ls [OPTIONS]
@@ -3520,7 +3811,7 @@ Options:
   -id=                   Entity ID
 ```
 
-## license.decode
+#### license.decode
 
 ```
 Usage: govc license.decode [OPTIONS] KEY...
@@ -3529,7 +3820,7 @@ Options:
   -feature=              List licenses with given feature
 ```
 
-## license.label.set
+#### license.label.set
 
 ```
 Usage: govc license.label.set [OPTIONS] LICENSE KEY VAL
@@ -3544,7 +3835,7 @@ Examples:
 Options:
 ```
 
-## license.ls
+#### license.ls
 
 ```
 Usage: govc license.ls [OPTIONS]
@@ -3553,7 +3844,7 @@ Options:
   -feature=              List licenses with given feature
 ```
 
-## license.remove
+#### license.remove
 
 ```
 Usage: govc license.remove [OPTIONS] KEY...
@@ -3561,7 +3852,13 @@ Usage: govc license.remove [OPTIONS] KEY...
 Options:
 ```
 
-## logs
+[Back to Contents](#contents)
+
+### logs
+
+----
+
+#### logs
 
 ```
 Usage: govc logs [OPTIONS]
@@ -3585,7 +3882,7 @@ Options:
   -n=25                  Output the last N log lines
 ```
 
-## logs.download
+#### logs.download
 
 ```
 Usage: govc logs.download [OPTIONS] [PATH]...
@@ -3604,7 +3901,7 @@ Options:
   -default=false         Specifies if the bundle should include the default server
 ```
 
-## logs.ls
+#### logs.ls
 
 ```
 Usage: govc logs.ls [OPTIONS]
@@ -3619,7 +3916,13 @@ Options:
   -host=                 Host system [GOVC_HOST]
 ```
 
-## ls
+[Back to Contents](#contents)
+
+### ls
+
+----
+
+#### ls
 
 ```
 Usage: govc ls [OPTIONS] [PATH]...
@@ -3638,7 +3941,13 @@ Options:
   -t=                    Object type
 ```
 
-## metric.change
+[Back to Contents](#contents)
+
+### metric
+
+----
+
+#### metric.change
 
 ```
 Usage: govc metric.change [OPTIONS] NAME...
@@ -3654,7 +3963,7 @@ Options:
   -level=0               Level for the aggregate counter
 ```
 
-## metric.info
+#### metric.info
 
 ```
 Usage: govc metric.info [OPTIONS] PATH [NAME]...
@@ -3678,7 +3987,7 @@ Options:
   -i=real                Interval ID (real|day|week|month|year)
 ```
 
-## metric.interval.change
+#### metric.interval.change
 
 ```
 Usage: govc metric.interval.change [OPTIONS]
@@ -3695,7 +4004,7 @@ Options:
   -level=0               Level
 ```
 
-## metric.interval.info
+#### metric.interval.info
 
 ```
 Usage: govc metric.interval.info [OPTIONS]
@@ -3710,7 +4019,7 @@ Options:
   -i=real                Interval ID (real|day|week|month|year)
 ```
 
-## metric.ls
+#### metric.ls
 
 ```
 Usage: govc metric.ls [OPTIONS] PATH
@@ -3736,7 +4045,7 @@ Options:
   -l=false               Long listing format
 ```
 
-## metric.reset
+#### metric.reset
 
 ```
 Usage: govc metric.reset [OPTIONS] NAME...
@@ -3750,7 +4059,7 @@ Options:
   -i=real                Interval ID (real|day|week|month|year)
 ```
 
-## metric.sample
+#### metric.sample
 
 ```
 Usage: govc metric.sample [OPTIONS] PATH... NAME...
@@ -3784,7 +4093,13 @@ Options:
   -t=false               Include sample times
 ```
 
-## namespace.cluster.disable
+[Back to Contents](#contents)
+
+### namespace
+
+----
+
+#### namespace.cluster.disable
 
 ```
 Usage: govc namespace.cluster.disable [OPTIONS]
@@ -3798,7 +4113,7 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
 ```
 
-## namespace.cluster.enable
+#### namespace.cluster.enable
 
 ```
 Usage: govc namespace.cluster.enable [OPTIONS]
@@ -3854,7 +4169,7 @@ Options:
   -workload-network.switch=                vSphere Distributed Switch used to connect this cluster.
 ```
 
-## namespace.cluster.ls
+#### namespace.cluster.ls
 
 ```
 Usage: govc namespace.cluster.ls [OPTIONS]
@@ -3870,7 +4185,7 @@ Options:
   -l=false               Long listing format
 ```
 
-## namespace.logs.download
+#### namespace.logs.download
 
 ```
 Usage: govc namespace.logs.download [OPTIONS] [NAME]
@@ -3890,7 +4205,7 @@ Options:
   -cluster=              Cluster [GOVC_CLUSTER]
 ```
 
-## namespace.service.activate
+#### namespace.service.activate
 
 ```
 Usage: govc namespace.service.activate [OPTIONS] NAME...
@@ -3903,7 +4218,7 @@ Examples:
 Options:
 ```
 
-## namespace.service.create
+#### namespace.service.create
 
 ```
 Usage: govc namespace.service.create [OPTIONS] MANIFEST
@@ -3916,7 +4231,7 @@ Examples:
 Options:
 ```
 
-## namespace.service.deactivate
+#### namespace.service.deactivate
 
 ```
 Usage: govc namespace.service.deactivate [OPTIONS] NAME...
@@ -3929,7 +4244,7 @@ Examples:
 Options:
 ```
 
-## namespace.service.info
+#### namespace.service.info
 
 ```
 Usage: govc namespace.service.info [OPTIONS] NAME
@@ -3943,7 +4258,7 @@ Examples:
 Options:
 ```
 
-## namespace.service.ls
+#### namespace.service.ls
 
 ```
 Usage: govc namespace.service.ls [OPTIONS]
@@ -3959,7 +4274,7 @@ Options:
   -l=false               Long listing format
 ```
 
-## namespace.service.rm
+#### namespace.service.rm
 
 ```
 Usage: govc namespace.service.rm [OPTIONS] NAME...
@@ -3972,7 +4287,13 @@ Examples:
 Options:
 ```
 
-## object.collect
+[Back to Contents](#contents)
+
+### object
+
+----
+
+#### object.collect
 
 ```
 Usage: govc object.collect [OPTIONS] [MOID] [PROPERTY]...
@@ -4033,7 +4354,7 @@ Options:
   -wait=0s               Max wait time for updates
 ```
 
-## object.destroy
+#### object.destroy
 
 ```
 Usage: govc object.destroy [OPTIONS] PATH...
@@ -4046,7 +4367,7 @@ Examples:
 Options:
 ```
 
-## object.method
+#### object.method
 
 ```
 Usage: govc object.method [OPTIONS] PATH...
@@ -4065,7 +4386,7 @@ Options:
   -source=govc           Source ID
 ```
 
-## object.mv
+#### object.mv
 
 ```
 Usage: govc object.mv [OPTIONS] PATH... FOLDER
@@ -4079,7 +4400,7 @@ Examples:
 Options:
 ```
 
-## object.reload
+#### object.reload
 
 ```
 Usage: govc object.reload [OPTIONS] PATH...
@@ -4093,7 +4414,7 @@ Examples:
 Options:
 ```
 
-## object.rename
+#### object.rename
 
 ```
 Usage: govc object.rename [OPTIONS] PATH NAME
@@ -4106,7 +4427,7 @@ Examples:
 Options:
 ```
 
-## object.save
+#### object.save
 
 ```
 Usage: govc object.save [OPTIONS] [PATH]
@@ -4132,7 +4453,13 @@ Options:
   -v=false               Verbose output
 ```
 
-## option.ls
+[Back to Contents](#contents)
+
+### option
+
+----
+
+#### option.ls
 
 ```
 Usage: govc option.ls [OPTIONS] [NAME]
@@ -4149,7 +4476,7 @@ Examples:
 Options:
 ```
 
-## option.set
+#### option.set
 
 ```
 Usage: govc option.set [OPTIONS] NAME VALUE
@@ -4163,7 +4490,13 @@ Examples:
 Options:
 ```
 
-## permissions.ls
+[Back to Contents](#contents)
+
+### permissions
+
+----
+
+#### permissions.ls
 
 ```
 Usage: govc permissions.ls [OPTIONS] [PATH]...
@@ -4179,7 +4512,7 @@ Options:
   -i=false               Use moref instead of inventory path
 ```
 
-## permissions.remove
+#### permissions.remove
 
 ```
 Usage: govc permissions.remove [OPTIONS] [PATH]...
@@ -4197,7 +4530,7 @@ Options:
   -principal=            User or group for which the permission is defined
 ```
 
-## permissions.set
+#### permissions.set
 
 ```
 Usage: govc permissions.set [OPTIONS] [PATH]...
@@ -4216,7 +4549,13 @@ Options:
   -role=Admin            Permission role name
 ```
 
-## pool.change
+[Back to Contents](#contents)
+
+### pool
+
+----
+
+#### pool.change
 
 ```
 Usage: govc pool.change [OPTIONS] POOL...
@@ -4248,7 +4587,7 @@ Options:
   -name=                  Resource pool name
 ```
 
-## pool.create
+#### pool.create
 
 ```
 Usage: govc pool.create [OPTIONS] POOL...
@@ -4284,7 +4623,7 @@ Options:
   -mem.shares=normal     Memory shares level or number
 ```
 
-## pool.destroy
+#### pool.destroy
 
 ```
 Usage: govc pool.destroy [OPTIONS] POOL...
@@ -4308,7 +4647,7 @@ Options:
   -children=false        Remove all children pools
 ```
 
-## pool.info
+#### pool.info
 
 ```
 Usage: govc pool.info [OPTIONS] POOL...
@@ -4333,7 +4672,13 @@ Options:
   -p=true                List resource pools
 ```
 
-## role.create
+[Back to Contents](#contents)
+
+### role
+
+----
+
+#### role.create
 
 ```
 Usage: govc role.create [OPTIONS] NAME [PRIVILEGE]...
@@ -4350,7 +4695,7 @@ Options:
   -i=false               Use moref instead of inventory path
 ```
 
-## role.ls
+#### role.ls
 
 ```
 Usage: govc role.ls [OPTIONS] [NAME]
@@ -4367,7 +4712,7 @@ Options:
   -i=false               Use moref instead of inventory path
 ```
 
-## role.remove
+#### role.remove
 
 ```
 Usage: govc role.remove [OPTIONS] NAME
@@ -4383,7 +4728,7 @@ Options:
   -i=false               Use moref instead of inventory path
 ```
 
-## role.update
+#### role.update
 
 ```
 Usage: govc role.update [OPTIONS] NAME [PRIVILEGE]...
@@ -4405,7 +4750,7 @@ Options:
   -r=false               Remove given PRIVILEGE(s)
 ```
 
-## role.usage
+#### role.usage
 
 ```
 Usage: govc role.usage [OPTIONS] NAME...
@@ -4420,7 +4765,13 @@ Options:
   -i=false               Use moref instead of inventory path
 ```
 
-## session.login
+[Back to Contents](#contents)
+
+### session
+
+----
+
+#### session.login
 
 ```
 Usage: govc session.login [OPTIONS] [PATH]
@@ -4472,7 +4823,7 @@ Options:
   -token=                Use SAML token for login or as issue identity
 ```
 
-## session.logout
+#### session.logout
 
 ```
 Usage: govc session.logout [OPTIONS]
@@ -4489,7 +4840,7 @@ Options:
   -r=false               REST logout
 ```
 
-## session.ls
+#### session.ls
 
 ```
 Usage: govc session.ls [OPTIONS]
@@ -4507,7 +4858,7 @@ Options:
   -r=false               List cached REST session (if any)
 ```
 
-## session.rm
+#### session.rm
 
 ```
 Usage: govc session.rm [OPTIONS] KEY...
@@ -4521,7 +4872,13 @@ Examples:
 Options:
 ```
 
-## snapshot.create
+[Back to Contents](#contents)
+
+### snapshot
+
+----
+
+#### snapshot.create
 
 ```
 Usage: govc snapshot.create [OPTIONS] NAME
@@ -4538,7 +4895,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## snapshot.remove
+#### snapshot.remove
 
 ```
 Usage: govc snapshot.remove [OPTIONS] NAME
@@ -4556,7 +4913,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## snapshot.revert
+#### snapshot.revert
 
 ```
 Usage: govc snapshot.revert [OPTIONS] [NAME]
@@ -4574,7 +4931,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## snapshot.tree
+#### snapshot.tree
 
 ```
 Usage: govc snapshot.tree [OPTIONS]
@@ -4598,7 +4955,12 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## sso.group.create
+[Back to Contents](#contents)
+
+### sso
+
+----
+#### sso.group.create
 
 ```
 Usage: govc sso.group.create [OPTIONS] NAME
@@ -4612,7 +4974,7 @@ Options:
   -d=                    Group description
 ```
 
-## sso.group.ls
+#### sso.group.ls
 
 ```
 Usage: govc sso.group.ls [OPTIONS]
@@ -4625,7 +4987,7 @@ Examples:
 Options:
 ```
 
-## sso.group.rm
+#### sso.group.rm
 
 ```
 Usage: govc sso.group.rm [OPTIONS] NAME
@@ -4638,7 +5000,7 @@ Examples:
 Options:
 ```
 
-## sso.group.update
+#### sso.group.update
 
 ```
 Usage: govc sso.group.update [OPTIONS]
@@ -4659,7 +5021,7 @@ Options:
   -r=                    Remove user/group from group
 ```
 
-## sso.idp.ls
+#### sso.idp.ls
 
 ```
 Usage: govc sso.idp.ls [OPTIONS]
@@ -4673,7 +5035,7 @@ Examples:
 Options:
 ```
 
-## sso.service.ls
+#### sso.service.ls
 
 ```
 Usage: govc sso.service.ls [OPTIONS]
@@ -4698,7 +5060,7 @@ Options:
   -t=                    Service type
 ```
 
-## sso.user.create
+#### sso.user.create
 
 ```
 Usage: govc sso.user.create [OPTIONS] NAME
@@ -4720,7 +5082,7 @@ Options:
   -p=                    Password
 ```
 
-## sso.user.id
+#### sso.user.id
 
 ```
 Usage: govc sso.user.id [OPTIONS] NAME
@@ -4735,7 +5097,7 @@ Examples:
 Options:
 ```
 
-## sso.user.ls
+#### sso.user.ls
 
 ```
 Usage: govc sso.user.ls [OPTIONS]
@@ -4749,7 +5111,7 @@ Options:
   -s=false               List solution users
 ```
 
-## sso.user.rm
+#### sso.user.rm
 
 ```
 Usage: govc sso.user.rm [OPTIONS] NAME
@@ -4762,7 +5124,7 @@ Examples:
 Options:
 ```
 
-## sso.user.update
+#### sso.user.update
 
 ```
 Usage: govc sso.user.update [OPTIONS] NAME
@@ -4784,7 +5146,13 @@ Options:
   -p=                    Password
 ```
 
-## storage.policy.create
+[Back to Contents](#contents)
+
+### storage
+
+----
+
+#### storage.policy.create
 
 ```
 Usage: govc storage.policy.create [OPTIONS] NAME
@@ -4800,7 +5168,7 @@ Options:
   -tag=                  Tag
 ```
 
-## storage.policy.info
+#### storage.policy.info
 
 ```
 Usage: govc storage.policy.info [OPTIONS] [NAME]
@@ -4817,7 +5185,7 @@ Options:
   -s=false               Check Storage Compatibility
 ```
 
-## storage.policy.ls
+#### storage.policy.ls
 
 ```
 Usage: govc storage.policy.ls [OPTIONS] [NAME]
@@ -4833,7 +5201,7 @@ Options:
   -i=false               List policy ID only
 ```
 
-## storage.policy.rm
+#### storage.policy.rm
 
 ```
 Usage: govc storage.policy.rm [OPTIONS] ID
@@ -4847,7 +5215,13 @@ Examples:
 Options:
 ```
 
-## tags.attach
+[Back to Contents](#contents)
+
+### tags
+
+----
+
+#### tags.attach
 
 ```
 Usage: govc tags.attach [OPTIONS] NAME PATH
@@ -4862,7 +5236,7 @@ Options:
   -c=                    Tag category
 ```
 
-## tags.attached.ls
+#### tags.attached.ls
 
 ```
 Usage: govc tags.attached.ls [OPTIONS] NAME
@@ -4880,7 +5254,7 @@ Options:
   -r=false               List tags attached to resource
 ```
 
-## tags.category.create
+#### tags.category.create
 
 ```
 Usage: govc tags.category.create [OPTIONS] NAME
@@ -4899,7 +5273,7 @@ Options:
   -t=[]                  Object types
 ```
 
-## tags.category.info
+#### tags.category.info
 
 ```
 Usage: govc tags.category.info [OPTIONS] [NAME]
@@ -4916,7 +5290,7 @@ Examples:
 Options:
 ```
 
-## tags.category.ls
+#### tags.category.ls
 
 ```
 Usage: govc tags.category.ls [OPTIONS]
@@ -4930,7 +5304,7 @@ Examples:
 Options:
 ```
 
-## tags.category.rm
+#### tags.category.rm
 
 ```
 Usage: govc tags.category.rm [OPTIONS] NAME
@@ -4947,7 +5321,7 @@ Options:
   -f=false               Delete tag regardless of attached objects
 ```
 
-## tags.category.update
+#### tags.category.update
 
 ```
 Usage: govc tags.category.update [OPTIONS] NAME
@@ -4967,7 +5341,7 @@ Options:
   -t=[]                  Object types
 ```
 
-## tags.create
+#### tags.create
 
 ```
 Usage: govc tags.create [OPTIONS] NAME
@@ -4985,7 +5359,7 @@ Options:
   -d=                    Description of tag
 ```
 
-## tags.detach
+#### tags.detach
 
 ```
 Usage: govc tags.detach [OPTIONS] NAME PATH
@@ -5000,7 +5374,7 @@ Options:
   -c=                    Tag category
 ```
 
-## tags.info
+#### tags.info
 
 ```
 Usage: govc tags.info [OPTIONS] NAME
@@ -5019,7 +5393,7 @@ Options:
   -c=                    Category name
 ```
 
-## tags.ls
+#### tags.ls
 
 ```
 Usage: govc tags.ls [OPTIONS]
@@ -5036,7 +5410,7 @@ Options:
   -c=                    Category name
 ```
 
-## tags.rm
+#### tags.rm
 
 ```
 Usage: govc tags.rm [OPTIONS] NAME
@@ -5054,7 +5428,7 @@ Options:
   -f=false               Delete tag regardless of attached objects
 ```
 
-## tags.update
+#### tags.update
 
 ```
 Usage: govc tags.update [OPTIONS] NAME
@@ -5071,7 +5445,15 @@ Options:
   -n=                    Name of tag
 ```
 
-## task.cancel
+[Back to Contents](#contents)
+
+### task
+
+----
+
+#### task
+
+#### task.cancel
 
 ```
 Usage: govc task.cancel [OPTIONS] ID...
@@ -5084,7 +5466,11 @@ Examples:
 Options:
 ```
 
-## tasks
+[Back to Contents](#contents)
+
+### tasks
+
+----
 
 ```
 Usage: govc tasks [OPTIONS] [PATH]
@@ -5110,7 +5496,14 @@ Options:
   -n=25                  Output the last N tasks
 ```
 
-## tree
+[Back to Contents](#contents)
+
+### tree
+
+----
+
+#### tree
+
 
 ```
 Usage: govc tree [OPTIONS] [PATH]
@@ -5128,7 +5521,13 @@ Options:
   -p=false               Print the object type
 ```
 
-## vapp.destroy
+[Back to Contents](#contents)
+
+### vapp
+
+----
+
+#### vapp.destroy
 
 ```
 Usage: govc vapp.destroy [OPTIONS] VAPP...
@@ -5136,7 +5535,7 @@ Usage: govc vapp.destroy [OPTIONS] VAPP...
 Options:
 ```
 
-## vapp.power
+#### vapp.power
 
 ```
 Usage: govc vapp.power [OPTIONS]
@@ -5149,7 +5548,13 @@ Options:
   -vapp.ipath=           Find vapp by inventory path
 ```
 
-## vcsa.access.consolecli.get
+[Back to Contents](#contents)
+
+### vcsa
+
+----
+
+#### vcsa.access.consolecli.get
 
 ```
 Usage: govc vcsa.access.consolecli.get [OPTIONS]
@@ -5164,7 +5569,7 @@ govc vcsa.access.consolecli.get
 Options:
 ```
 
-## vcsa.access.consolecli.set
+#### vcsa.access.consolecli.set
 
 ```
 Usage: govc vcsa.access.consolecli.set [OPTIONS]
@@ -5184,7 +5589,7 @@ Options:
   -enabled=false         Enable Console CLI.
 ```
 
-## vcsa.access.dcui.get
+#### vcsa.access.dcui.get
 
 ```
 Usage: govc vcsa.access.dcui.get [OPTIONS]
@@ -5199,7 +5604,7 @@ govc vcsa.access.dcui.get
 Options:
 ```
 
-## vcsa.access.dcui.set
+#### vcsa.access.dcui.set
 
 ```
 Usage: govc vcsa.access.dcui.set [OPTIONS]
@@ -5219,7 +5624,7 @@ Options:
   -enabled=false         Enable Direct Console User Interface (DCUI TTY2).
 ```
 
-## vcsa.access.shell.get
+#### vcsa.access.shell.get
 
 ```
 Usage: govc vcsa.access.shell.get [OPTIONS]
@@ -5234,7 +5639,7 @@ govc vcsa.access.shell.get
 Options:
 ```
 
-## vcsa.access.shell.set
+#### vcsa.access.shell.set
 
 ```
 Usage: govc vcsa.access.shell.set [OPTIONS]
@@ -5255,7 +5660,7 @@ Options:
   -timeout=0             The timeout (in seconds) specifies how long you enable the Shell access. The maximum timeout is 86400 seconds(1 day).
 ```
 
-## vcsa.access.ssh.get
+#### vcsa.access.ssh.get
 
 ```
 Usage: govc vcsa.access.ssh.get [OPTIONS]
@@ -5270,7 +5675,7 @@ govc vcsa.access.ssh.get
 Options:
 ```
 
-## vcsa.access.ssh.set
+#### vcsa.access.ssh.set
 
 ```
 Usage: govc vcsa.access.ssh.set [OPTIONS]
@@ -5290,7 +5695,7 @@ Options:
   -enabled=false         Enable SSH-based controlled CLI.
 ```
 
-## vcsa.log.forwarding.info
+#### vcsa.log.forwarding.info
 
 ```
 Usage: govc vcsa.log.forwarding.info [OPTIONS]
@@ -5303,7 +5708,7 @@ Examples:
 Options:
 ```
 
-## vcsa.net.proxy.info
+#### vcsa.net.proxy.info
 
 ```
 Usage: govc vcsa.net.proxy.info [OPTIONS]
@@ -5316,7 +5721,7 @@ Examples:
 Options:
 ```
 
-## vcsa.shutdown.cancel
+#### vcsa.shutdown.cancel
 
 ```
 Usage: govc vcsa.shutdown.cancel [OPTIONS]
@@ -5331,7 +5736,7 @@ govc vcsa.shutdown.cancel
 Options:
 ```
 
-## vcsa.shutdown.get
+#### vcsa.shutdown.get
 
 ```
 Usage: govc vcsa.shutdown.get [OPTIONS]
@@ -5346,7 +5751,7 @@ govc vcsa.shutdown.get
 Options:
 ```
 
-## vcsa.shutdown.poweroff
+#### vcsa.shutdown.poweroff
 
 ```
 Usage: govc vcsa.shutdown.poweroff [OPTIONS] REASON
@@ -5362,7 +5767,7 @@ Options:
   -delay=0               Minutes after which poweroff should start.
 ```
 
-## vcsa.shutdown.reboot
+#### vcsa.shutdown.reboot
 
 ```
 Usage: govc vcsa.shutdown.reboot [OPTIONS] REASON
@@ -5378,7 +5783,12 @@ Options:
   -delay=0               Minutes after which reboot should start.
 ```
 
-## version
+[Back to Contents](#contents)
+
+### version
+
+----
+#### version
 
 ```
 Usage: govc version [OPTIONS]
@@ -5388,7 +5798,13 @@ Options:
   -require=  Require govc version >= this value
 ```
 
-## vm.change
+[Back to Contents](#contents)
+
+### vm
+
+----
+
+#### vm.change
 
 ```
 Usage: govc vm.change [OPTIONS]
@@ -5438,7 +5854,7 @@ Options:
   -vpmc-enabled=<nil>            Enable CPU performance counters
 ```
 
-## vm.clone
+#### vm.clone
 
 ```
 Usage: govc vm.clone [OPTIONS] NAME
@@ -5479,7 +5895,7 @@ Options:
   -waitip=false          Wait for VM to acquire IP address
 ```
 
-## vm.console
+#### vm.console
 
 ```
 Usage: govc vm.console [OPTIONS] VM
@@ -5505,7 +5921,7 @@ Options:
   -wss=false             Generate WebSocket console link
 ```
 
-## vm.create
+#### vm.create
 
 ```
 Usage: govc vm.create [OPTIONS] NAME
@@ -5547,7 +5963,7 @@ Options:
   -version=              ESXi hardware version [5.0|5.5|6.0|6.5|6.7|7.0]
 ```
 
-## vm.customize
+#### vm.customize
 
 ```
 Usage: govc vm.customize [OPTIONS] [NAME]
@@ -5598,7 +6014,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.destroy
+#### vm.destroy
 
 ```
 Usage: govc vm.destroy [OPTIONS] VM...
@@ -5615,7 +6031,7 @@ Examples:
 Options:
 ```
 
-## vm.disk.attach
+#### vm.disk.attach
 
 ```
 Usage: govc vm.disk.attach [OPTIONS]
@@ -5641,7 +6057,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.disk.change
+#### vm.disk.change
 
 ```
 Usage: govc vm.disk.change [OPTIONS]
@@ -5668,7 +6084,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.disk.create
+#### vm.disk.create
 
 ```
 Usage: govc vm.disk.create [OPTIONS]
@@ -5691,7 +6107,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.guest.tools
+#### vm.guest.tools
 
 ```
 Usage: govc vm.guest.tools [OPTIONS] VM...
@@ -5710,7 +6126,7 @@ Options:
   -upgrade=false         Upgrade tools in the guest
 ```
 
-## vm.info
+#### vm.info
 
 ```
 Usage: govc vm.info [OPTIONS] VM...
@@ -5734,7 +6150,7 @@ Options:
   -waitip=false          Wait for VM to acquire IP address
 ```
 
-## vm.instantclone
+#### vm.instantclone
 
 ```
 Usage: govc vm.instantclone [OPTIONS] NAME
@@ -5760,7 +6176,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.ip
+#### vm.ip
 
 ```
 Usage: govc vm.ip [OPTIONS] VM...
@@ -5807,7 +6223,7 @@ Options:
   -wait=1h0m0s           Wait time for the VM obtain an IP address
 ```
 
-## vm.keystrokes
+#### vm.keystrokes
 
 ```
 Usage: govc vm.keystrokes [OPTIONS] VM
@@ -5842,7 +6258,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.markastemplate
+#### vm.markastemplate
 
 ```
 Usage: govc vm.markastemplate [OPTIONS] VM...
@@ -5855,7 +6271,7 @@ Examples:
 Options:
 ```
 
-## vm.markasvm
+#### vm.markasvm
 
 ```
 Usage: govc vm.markasvm [OPTIONS] VM...
@@ -5871,7 +6287,7 @@ Options:
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
-## vm.migrate
+#### vm.migrate
 
 ```
 Usage: govc vm.migrate [OPTIONS] VM...
@@ -5891,7 +6307,7 @@ Options:
   -priority=defaultPriority  The task priority
 ```
 
-## vm.network.add
+#### vm.network.add
 
 ```
 Usage: govc vm.network.add [OPTIONS]
@@ -5910,7 +6326,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.network.change
+#### vm.network.change
 
 ```
 Usage: govc vm.network.change [OPTIONS] DEVICE
@@ -5932,7 +6348,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.option.info
+#### vm.option.info
 
 ```
 Usage: govc vm.option.info [OPTIONS] [GUEST_ID]...
@@ -5957,7 +6373,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.power
+#### vm.power
 
 ```
 Usage: govc vm.power [OPTIONS] NAME...
@@ -5981,7 +6397,7 @@ Options:
   -wait=true             Wait for the operation to complete
 ```
 
-## vm.question
+#### vm.question
 
 ```
 Usage: govc vm.question [OPTIONS]
@@ -5991,7 +6407,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.rdm.attach
+#### vm.rdm.attach
 
 ```
 Usage: govc vm.rdm.attach [OPTIONS]
@@ -6006,7 +6422,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.rdm.ls
+#### vm.rdm.ls
 
 ```
 Usage: govc vm.rdm.ls [OPTIONS]
@@ -6020,7 +6436,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.register
+#### vm.register
 
 ```
 Usage: govc vm.register [OPTIONS] VMX
@@ -6042,7 +6458,7 @@ Options:
   -template=false        Mark VM as template
 ```
 
-## vm.unregister
+#### vm.unregister
 
 ```
 Usage: govc vm.unregister [OPTIONS] VM...
@@ -6052,7 +6468,7 @@ Remove VM from inventory without removing any of the VM files on disk.
 Options:
 ```
 
-## vm.upgrade
+#### vm.upgrade
 
 ```
 Usage: govc vm.upgrade [OPTIONS]
@@ -6069,7 +6485,7 @@ Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
-## vm.vnc
+#### vm.vnc
 
 ```
 Usage: govc vm.vnc [OPTIONS] VM...
@@ -6091,7 +6507,13 @@ Options:
   -port-range=5900-5999  VNC port auto-select range
 ```
 
-## volume.ls
+[Back to Contents](#contents)
+
+### volume
+
+----
+
+#### volume.ls
 
 ```
 Usage: govc volume.ls [OPTIONS] [ID...]
@@ -6112,7 +6534,7 @@ Options:
   -l=false               Long listing format
 ```
 
-## volume.rm
+#### volume.rm
 
 ```
 Usage: govc volume.rm [OPTIONS] ID
@@ -6128,7 +6550,13 @@ Examples:
 Options:
 ```
 
-## vsan.change
+[Back to Contents](#contents)
+
+### vsan
+
+----
+
+#### vsan.change
 
 ```
 Usage: govc vsan.change [OPTIONS] CLUSTER
@@ -6143,7 +6571,7 @@ Options:
   -unmap-enabled=<nil>   Enable Unmap
 ```
 
-## vsan.info
+#### vsan.info
 
 ```
 Usage: govc vsan.info [OPTIONS] CLUSTER...
