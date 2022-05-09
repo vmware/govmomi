@@ -86,6 +86,7 @@ but appear via `govc $cmd -h`:
  - [device.cdrom.add](#devicecdromadd)
  - [device.cdrom.eject](#devicecdromeject)
  - [device.cdrom.insert](#devicecdrominsert)
+ - [device.clock.add](#deviceclockadd)
  - [device.connect](#deviceconnect)
  - [device.disconnect](#devicedisconnect)
  - [device.floppy.add](#devicefloppyadd)
@@ -1272,6 +1273,21 @@ Examples:
 Options:
   -device=               CD-ROM device name
   -ds=                   Datastore [GOVC_DATASTORE]
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## device.clock.add
+
+```
+Usage: govc device.clock.add [OPTIONS]
+
+Add precision clock device to VM.
+
+Examples:
+  govc device.clock.add -vm $vm
+  govc device.info clock-*
+
+Options:
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
