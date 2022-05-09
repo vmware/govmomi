@@ -743,8 +743,7 @@ returned, assuming that's what the user wanted."
                     (copy-to-buffer buffer (point-min) (point-max))
                     (with-current-buffer buffer
                       (json-mode)
-                      ;; We use `json-mode-beautify' as `json-pretty-print-buffer' does not work for `govc-host-json-info'
-                      (json-mode-beautify))
+                      (json-pretty-print-buffer))
                     (display-buffer buffer))))
   (if current-prefix-arg
       (govc-json-diff)))
