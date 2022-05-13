@@ -38,6 +38,7 @@ type deploy struct {
 	*importx.OptionsFlag
 
 	profile string
+	config  string
 }
 
 func init() {
@@ -61,6 +62,10 @@ func (cmd *deploy) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OptionsFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.profile, "profile", "", "Storage profile")
+
+	if cli.ShowUnreleased() {
+		f.StringVar(&cmd.config, "config", "", "VM config spec")
+	}
 }
 
 func (cmd *deploy) Process(ctx context.Context) error {
@@ -220,6 +225,14 @@ func (cmd *deploy) Run(ctx context.Context, f *flag.FlagSet) error {
 				FolderID:       folder.Reference().Value,
 			},
 		}
+
+		if cmd.config != "" {
+			deploy.VmConfigSpec = &vcenter.VmConfigSpec{
+				Provider: "XML",
+				XML:      cmd.config,
+			}
+		}
+
 		ref, err = m.DeployLibraryItem(ctx, item.ID, deploy)
 		if err != nil {
 			return err

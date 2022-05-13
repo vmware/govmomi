@@ -27,6 +27,10 @@ var aliases = map[string]string{}
 // Setting the env var GOVC_SHOW_UNRELEASED=true enables any commands registered as unreleased.
 var hideUnreleased = os.Getenv("GOVC_SHOW_UNRELEASED") != "true"
 
+func ShowUnreleased() bool {
+	return !hideUnreleased
+}
+
 func Register(name string, c Command, unreleased ...bool) {
 	if len(unreleased) != 0 && unreleased[0] && hideUnreleased {
 		return
