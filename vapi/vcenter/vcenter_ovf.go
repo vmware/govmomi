@@ -123,6 +123,12 @@ type StorageMapping struct {
 	Value StorageGroupMapping `json:"value"`
 }
 
+// VmConfigSpec defines the optional virtual machine configuration settings used when deploying an OVF template
+type VmConfigSpec struct {
+	Provider string `json:"provider"`
+	XML      string `json:"xml"`
+}
+
 // DeploymentSpec is the deployment specification for the deployment
 type DeploymentSpec struct {
 	Name                string             `json:"name,omitempty"`
@@ -136,6 +142,7 @@ type DeploymentSpec struct {
 	Flags               []string           `json:"flags,omitempty"`
 	AdditionalParams    []AdditionalParams `json:"additional_parameters,omitempty"`
 	DefaultDatastoreID  string             `json:"default_datastore_id,omitempty"`
+	VmConfigSpec        *VmConfigSpec      `json:"vmConfigSpec,omitempty"`
 }
 
 // Target is the target for the deployment
