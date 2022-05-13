@@ -18,8 +18,10 @@ package simulator
 
 import (
 	"archive/tar"
+	"bytes"
 	"context"
 	"crypto/tls"
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -53,6 +55,7 @@ import (
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
+	"github.com/vmware/govmomi/vim25/xml"
 )
 
 type item struct {
@@ -1675,7 +1678,34 @@ func (i *item) ovf() string {
 	return ""
 }
 
+func vmConfigSpec(ctx context.Context, c *vim25.Client, deploy vcenter.Deploy) (*types.VirtualMachineConfigSpec, error) {
+	if deploy.VmConfigSpec == nil {
+		return nil, nil
+	}
+
+	b, err := base64.StdEncoding.DecodeString(deploy.VmConfigSpec.XML)
+	if err != nil {
+		return nil, err
+	}
+
+	var spec *types.VirtualMachineConfigSpec
+
+	dec := xml.NewDecoder(bytes.NewReader(b))
+	dec.TypeFunc = c.Types
+	err = dec.Decode(&spec)
+	if err != nil {
+		return nil, err
+	}
+
+	return spec, nil
+}
+
 func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *library.Library, item *item, deploy vcenter.Deploy) (*nfc.LeaseInfo, error) {
+	config, err := vmConfigSpec(ctx, c, deploy)
+	if err != nil {
+		return nil, err
+	}
+
 	name := item.ovf()
 	desc, err := ioutil.ReadFile(filepath.Join(libraryPath(lib, item.ID), name))
 	if err != nil {
@@ -1769,7 +1799,17 @@ func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *libra
 		return nil, err
 	}
 
-	return info, lease.Complete(ctx)
+	if err = lease.Complete(ctx); err != nil {
+		return nil, err
+	}
+
+	if config != nil {
+		if err = s.reconfigVM(info.Entity, *config); err != nil {
+			return nil, err
+		}
+	}
+
+	return info, nil
 }
 
 func (s *handler) libraryItemOVF(w http.ResponseWriter, r *http.Request) {
@@ -1895,6 +1935,17 @@ func (s *handler) deleteVM(ref *types.ManagedObjectReference) {
 	_ = s.withClient(func(ctx context.Context, c *vim25.Client) error {
 		_, _ = object.NewVirtualMachine(c, *ref).Destroy(ctx)
 		return nil
+	})
+}
+
+func (s *handler) reconfigVM(ref types.ManagedObjectReference, config types.VirtualMachineConfigSpec) error {
+	return s.withClient(func(ctx context.Context, c *vim25.Client) error {
+		vm := object.NewVirtualMachine(c, ref)
+		task, err := vm.Reconfigure(ctx, config)
+		if err != nil {
+			return err
+		}
+		return task.Wait(ctx)
 	})
 }
 
