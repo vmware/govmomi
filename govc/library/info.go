@@ -89,7 +89,7 @@ Examples:
   govc library.info */
   govc device.cdrom.insert -vm $vm -device cdrom-3000 $(govc library.info -L /lib1/item1/file1)
   govc library.info -json | jq .
-  govc library.info /lib1/item1 -json | jq .`
+  govc library.info -json /lib1/item1 | jq .`
 }
 
 type infoResultsWriter struct {
