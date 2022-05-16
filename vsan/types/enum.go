@@ -828,7 +828,7 @@ func init() {
 type VimClusterVsanDiskGroupCreationType string
 
 const (
-	VimClusterVsanDiskGroupCreationTypeallflash                          = VimClusterVsanDiskGroupCreationType("allflash")
+	VimClusterVsanDiskGroupCreationTypeallflash                          = VimClusterVsanDiskGroupCreationType("allFlash")
 	VimClusterVsanDiskGroupCreationTypepmem                              = VimClusterVsanDiskGroupCreationType("pmem")
 	VimClusterVsanDiskGroupCreationTypehybrid                            = VimClusterVsanDiskGroupCreationType("hybrid")
 	VimClusterVsanDiskGroupCreationTypeVsanDiskGroupCreationType_Unknown = VimClusterVsanDiskGroupCreationType("VsanDiskGroupCreationType_Unknown")
