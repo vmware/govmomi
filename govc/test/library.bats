@@ -231,12 +231,28 @@ EOF
   run govc vm.info -r ttylinux2
   assert_success
   assert_matches DC0_DVPG0
+  assert_matches 32MB
+  assert_matches "1 vCPU"
 
   run env GOVC_DATASTORE="" govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux3 # datastore is not required
   assert_success
 
   run govc vm.destroy ttylinux ttylinux2 ttylinux3
   assert_success
+
+  config=$(base64 <<<'
+<obj xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:type="vim25:VirtualMachineConfigSpec" xmlns:vim25="urn:vim25">
+ <numCPUs>4</numCPUs>
+ <memoryMB>2048</memoryMB>
+</obj>')
+
+  run env GOVC_SHOW_UNRELEASED=true govc library.deploy -config "$config" "my-content/$TTYLINUX_NAME" ttylinux
+  assert_success
+
+  run govc vm.info -r ttylinux
+  assert_success
+  assert_matches 2048MB
+  assert_matches "4 vCPU"
 
   item_id=$(govc library.info -json "/my-content/$TTYLINUX_NAME" | jq -r .[].id)
 
