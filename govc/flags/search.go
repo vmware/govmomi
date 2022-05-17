@@ -54,9 +54,9 @@ type SearchFlag struct {
 	isset bool
 }
 
-var searchFlagKey = flagKey("search")
-
 func NewSearchFlag(ctx context.Context, t int) (*SearchFlag, context.Context) {
+	searchFlagKey := flagKey(fmt.Sprintf("search%d", t))
+
 	if v := ctx.Value(searchFlagKey); v != nil {
 		return v.(*SearchFlag), ctx
 	}
