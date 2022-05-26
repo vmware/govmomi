@@ -142,7 +142,7 @@ type DeploymentSpec struct {
 	Flags               []string           `json:"flags,omitempty"`
 	AdditionalParams    []AdditionalParams `json:"additional_parameters,omitempty"`
 	DefaultDatastoreID  string             `json:"default_datastore_id,omitempty"`
-	VmConfigSpec        *VmConfigSpec      `json:"vmConfigSpec,omitempty"`
+	VmConfigSpec        *VmConfigSpec      `json:"vm_config_spec,omitempty"`
 }
 
 // Target is the target for the deployment
