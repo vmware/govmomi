@@ -185,12 +185,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 			seen := make(map[int32]bool)
 			for i := range all {
 				id := &all[i]
-				if seen[id.CounterId] {
+				info, ok := nc[id.CounterId]
+				if !ok || seen[id.CounterId] {
 					continue
 				}
 				seen[id.CounterId] = true
 
-				names = append(names, nc[id.CounterId].Name())
+				names = append(names, info.Name())
 			}
 		}
 	}

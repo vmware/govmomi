@@ -205,10 +205,18 @@ func (d groupPerfCounterInfo) Len() int {
 func (d groupPerfCounterInfo) Less(i, j int) bool {
 	ci := d.ids[i].CounterId
 	cj := d.ids[j].CounterId
-	gi := d.info[ci].GroupInfo.GetElementDescription()
-	gj := d.info[cj].GroupInfo.GetElementDescription()
 
-	return gi.Key < gj.Key
+	giKey := "-"
+	gjKey := "-"
+
+	if gi, ok := d.info[ci]; ok {
+		giKey = gi.GroupInfo.GetElementDescription().Key
+	}
+	if gj, ok := d.info[cj]; ok {
+		gjKey = gj.GroupInfo.GetElementDescription().Key
+	}
+
+	return giKey < gjKey
 }
 
 func (d groupPerfCounterInfo) Swap(i, j int) {
@@ -455,10 +463,14 @@ func (m *Manager) ToMetricSeries(ctx context.Context, series []types.BasePerfEnt
 
 		for j := range s.Value {
 			v := s.Value[j].(*types.PerfMetricIntSeries)
+			info, ok := counters[v.Id.CounterId]
+			if !ok {
+				continue
+			}
 
 			values = append(values, MetricSeries{
-				Name:     counters[v.Id.CounterId].Name(),
-				unit:     counters[v.Id.CounterId].UnitInfo.GetElementDescription().Key,
+				Name:     info.Name(),
+				unit:     info.UnitInfo.GetElementDescription().Key,
 				Instance: v.Id.Instance,
 				Value:    v.Value,
 			})
