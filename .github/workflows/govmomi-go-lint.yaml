@@ -22,7 +22,6 @@ on:
     branches: [ 'main', 'master' ]
 
 jobs:
-
   lint:
     name: Lint Files
     runs-on: ubuntu-20.04
@@ -40,3 +39,72 @@ jobs:
 
       - name: Go Lint
         run: make lint
+
+  boilerplate:
+    name: Boilerplate Check
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false # Keep running if one leg fails.
+      matrix:
+        extension:
+        - go
+
+        # Map between extension and human-readable name.
+        include:
+        - extension: go
+          language: Go
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Go
+        uses: actions/setup-go@v3
+        with:
+          go-version: 1.18
+        id: go
+
+      - name: Install Tools
+        run: |
+          TEMP_PATH="$(mktemp -d)"
+          cd "$TEMP_PATH"
+
+          echo '::group::🐶 Installing reviewdog ... https://github.com/reviewdog/reviewdog'
+          curl -sfL https://raw.githubusercontent.com/reviewdog/reviewdog/master/install.sh | sh -s -- -b "${TEMP_PATH}" 2>&1
+          echo '::endgroup::'
+
+          echo '::group:: Installing boilerplate-check ... https://github.com/mattmoor/boilerplate-check'
+          go install github.com/mattmoor/boilerplate-check/cmd/boilerplate-check@latest
+          echo '::endgroup::'
+
+          echo "${TEMP_PATH}" >> "$GITHUB_PATH"
+
+      - id: boilerplate_txt
+        uses: andstor/file-existence-action@v1
+        with:
+          files: ./hack/boilerplate/boilerplate.${{ matrix.extension }}.txt
+
+      - name: ${{ matrix.language }} license boilerplate
+        shell: bash
+        if: ${{ steps.boilerplate_txt.outputs.files_exists == 'true' }}
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ github.token }}
+        run: |
+          set -e
+          cd "${GITHUB_WORKSPACE}" || exit 1
+
+          echo '::group:: Running github.com/mattmoor/boilerplate-check for ${{ matrix.language }} with reviewdog 🐶 ...'
+          # Don't fail because of boilerplate-check
+          set +o pipefail
+          boilerplate-check check \
+            --boilerplate ./hack/boilerplate/boilerplate.${{ matrix.extension }}.txt \
+            --file-extension ${{ matrix.extension }} \
+            --exclude "(vendor|third_party|dist)/" |
+          reviewdog -efm="%A%f:%l: %m" \
+                -efm="%C%.%#" \
+                -name="${{ matrix.language }} headers" \
+                -reporter="github-pr-check" \
+                -filter-mode="diff_context" \
+                -fail-on-error="true" \
+                -level="error"
+          echo '::endgroup::'
