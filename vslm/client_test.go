@@ -119,7 +119,8 @@ func TestClient(t *testing.T) {
 	t.Logf("volumeCreateResult %+v", volumeCreateResult)
 	t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
 
-	err = globalObjectManager.SetControlFlags(ctx, types.ID{Id: volumeId}, []string{"FCD_KEEP_AFTER_DELETE_VM"})
+	err = globalObjectManager.SetControlFlags(ctx, types.ID{Id: volumeId}, []string{
+		string(types.VslmVStorageObjectControlFlagKeepAfterDeleteVm)})
 	if err != nil {
 		t.Fatal(err)
 	}
