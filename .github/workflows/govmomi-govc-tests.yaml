@@ -74,8 +74,6 @@ jobs:
 
       - name: Run ${{ matrix.cmd }}
         run: |
-          # hack: https://github.com/actions/setup-go/issues/107#issuecomment-956161446
-          cp -fv `which go` /usr/bin/go || true
           make ${{ matrix.cmd }}
 
   govc-docs:
