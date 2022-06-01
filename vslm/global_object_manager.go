@@ -345,9 +345,10 @@ func (this *GlobalObjectManager) Relocate(ct context.Context, id vim.ID, spec vi
 	return NewTask(this.c, res.Returnval), nil
 }
 
-func (this *GlobalObjectManager) SetControlFlags(ct context.Context, controlFlags []string) error {
+func (this *GlobalObjectManager) SetControlFlags(ct context.Context, id vim.ID, controlFlags []string) error {
 	req := types.VslmSetVStorageObjectControlFlags{
 		This:         this.Reference(),
+		Id:           id,
 		ControlFlags: controlFlags,
 	}
 
@@ -359,9 +360,10 @@ func (this *GlobalObjectManager) SetControlFlags(ct context.Context, controlFlag
 	return nil
 }
 
-func (this *GlobalObjectManager) ClearControlFlags(ct context.Context) error {
+func (this *GlobalObjectManager) ClearControlFlags(ct context.Context, id vim.ID) error {
 	req := types.VslmClearVStorageObjectControlFlags{
 		This: this.Reference(),
+		Id:   id,
 	}
 
 	_, err := methods.VslmClearVStorageObjectControlFlags(ct, this.c, &req)
