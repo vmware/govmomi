@@ -32,7 +32,7 @@ type migrate struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.DatastoreFlag
-	*flags.SearchFlag
+	*flags.VirtualMachineFlag
 
 	priority types.VirtualMachineMovePriority
 	spec     types.VirtualMachineRelocateSpec
@@ -46,8 +46,8 @@ func (cmd *migrate) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.FolderFlag, ctx = flags.NewFolderFlag(ctx)
 	cmd.FolderFlag.Register(ctx, f)
 
-	cmd.SearchFlag, ctx = flags.NewSearchFlag(ctx, flags.SearchVirtualMachines)
-	cmd.SearchFlag.Register(ctx, f)
+	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
+	cmd.VirtualMachineFlag.Register(ctx, f)
 
 	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
 	cmd.ResourcePoolFlag.Register(ctx, f)
@@ -63,6 +63,9 @@ func (cmd *migrate) Register(ctx context.Context, f *flag.FlagSet) {
 
 func (cmd *migrate) Process(ctx context.Context) error {
 	if err := cmd.FolderFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.VirtualMachineFlag.Process(ctx); err != nil {
 		return err
 	}
 	if err := cmd.ResourcePoolFlag.Process(ctx); err != nil {
@@ -109,7 +112,7 @@ func (cmd *migrate) relocate(ctx context.Context, vm *object.VirtualMachine) err
 }
 
 func (cmd *migrate) Run(ctx context.Context, f *flag.FlagSet) error {
-	vms, err := cmd.VirtualMachines(f.Args())
+	vms, err := cmd.VirtualMachineFlag.VirtualMachines(f.Args())
 	if err != nil {
 		return err
 	}

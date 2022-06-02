@@ -770,7 +770,7 @@ load test_helper
   vm="DC0_H0_VM0"
   clone=$(new_id)
 
-  run govc vm.clone -vm "$vm" -annotation $$ "$clone"
+  run govc vm.clone -vm "$vm" -host.ipath /DC0/host/DC0_C0/DC0_C0_H0 -annotation $$ "$clone"
   assert_success
 
   backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].Backing)

@@ -5905,6 +5905,7 @@ Options:
   -host=                     Host system [GOVC_HOST]
   -pool=                     Resource pool [GOVC_RESOURCE_POOL]
   -priority=defaultPriority  The task priority
+  -vm=                       Virtual machine [GOVC_VM]
 ```
 
 ## vm.network.add
