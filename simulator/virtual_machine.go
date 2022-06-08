@@ -839,7 +839,7 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 
 		files, err := ioutil.ReadDir(directory)
 		if err != nil {
-			body.Fault_ = soap.ToSoapFault(err)
+			body.Fault_ = Fault("", ctx.Map.FileManager().fault(directory, err, new(types.CannotAccessFile)))
 			return body
 		}
 
