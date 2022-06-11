@@ -200,7 +200,7 @@ func (f *Folder) CreateFolder(ctx *Context, c *types.CreateFolder) soap.HasFault
 	r := &methods.CreateFolderBody{}
 
 	if folderHasChildType(&f.Folder, "Folder") {
-		name := f.escapeSpecialCharacters(c.Name)
+		name := escapeSpecialCharacters(c.Name)
 
 		if obj := ctx.Map.FindByName(name, f.ChildEntity); obj != nil {
 			r.Fault_ = Fault("", &types.DuplicateName{
@@ -228,7 +228,7 @@ func (f *Folder) CreateFolder(ctx *Context, c *types.CreateFolder) soap.HasFault
 	return r
 }
 
-func (f *Folder) escapeSpecialCharacters(name string) string {
+func escapeSpecialCharacters(name string) string {
 	name = strings.ReplaceAll(name, `%`, strings.ToLower(url.QueryEscape(`%`)))
 	name = strings.ReplaceAll(name, `/`, strings.ToLower(url.QueryEscape(`/`)))
 	name = strings.ReplaceAll(name, `\`, strings.ToLower(url.QueryEscape(`\`)))
@@ -367,9 +367,15 @@ func hostsWithDatastore(hosts []types.ManagedObjectReference, path string) []typ
 }
 
 func (c *createVM) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
+	config := &c.req.Config
+	// escape special characters in vm name
+	if config.Name != escapeSpecialCharacters(config.Name) {
+		deepCopy(c.req.Config, config)
+		config.Name = escapeSpecialCharacters(config.Name)
+	}
+
 	vm, err := NewVirtualMachine(c.ctx, c.Folder.Self, &c.req.Config)
 	if err != nil {
-		folderRemoveChild(c.ctx, &c.Folder.Folder, vm)
 		return nil, err
 	}
 

@@ -166,6 +166,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	vm.Summary.OverallStatus = types.ManagedEntityStatusGreen
 	vm.ConfigStatus = types.ManagedEntityStatusGreen
 
+	// put vm in the folder only if no errors occurred
 	f, _ := asFolderMO(folder)
 	folderPutChild(ctx, f, vm)
 
