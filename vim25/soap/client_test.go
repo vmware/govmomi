@@ -17,10 +17,70 @@ limitations under the License.
 package soap
 
 import (
+	"context"
+	"fmt"
+	"net/http"
 	"net/url"
 	"os"
 	"testing"
 )
+
+type mockRT struct{}
+
+func (m mockRT) RoundTrip(req *http.Request) (*http.Response, error) {
+	var res http.Response
+	res.Header = req.Header.Clone()
+	return &res, nil
+}
+
+func TestUserAgent(t *testing.T) {
+	tests := []struct {
+		name  string
+		agent string
+	}{
+		{name: "default agent", agent: ""},
+		{name: "custom agent", agent: "govmomi-test/0.0.0"},
+	}
+
+	const rawURL = "https://vcenter.local"
+	u, err := url.Parse(rawURL)
+	if err != nil {
+		t.Fatalf("parse url: %v", err)
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			c := NewClient(u, false)
+			c.Transport = &mockRT{}
+
+			req, err := http.NewRequest(http.MethodPost, rawURL, nil)
+			if err != nil {
+				t.Fatalf("create request: %v", err)
+			}
+
+			if test.agent != "" {
+				c.UserAgent = test.agent
+			}
+
+			if err = c.Do(context.Background(), req, func(response *http.Response) error {
+				got := response.Header.Get("user-agent")
+				want := func() string {
+					if test.agent == "" {
+						return defaultUserAgent
+					}
+					return test.agent
+				}
+
+				if got != want() {
+					return fmt.Errorf("user-agent header mismatch: got=%s want=%s", got, want())
+				}
+				return nil
+			}); err != nil {
+				t.Errorf("user-agent header validation failed: %v", err)
+			}
+		})
+	}
+}
 
 func TestSplitHostPort(t *testing.T) {
 	tests := []struct {
@@ -68,7 +128,6 @@ func TestInvalidRootCAPath(t *testing.T) {
 
 func TestValidRootCAs(t *testing.T) {
 	err := setCAsOnClient("fixtures/valid-cert.pem")
-
 	if err != nil {
 		t.Fatalf("Err should not have occurred: %#v", err)
 	}

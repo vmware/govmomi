@@ -37,10 +37,12 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
 
+	"github.com/vmware/govmomi/internal/version"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -56,6 +58,15 @@ type RoundTripper interface {
 
 const (
 	SessionCookieName = "vmware_soap_session"
+)
+
+// defaultUserAgent is the default user agent string, e.g.
+// "govmomi/0.28.0 (go1.18.3;linux;amd64)"
+var defaultUserAgent = fmt.Sprintf(
+	"%s/%s (%s)",
+	version.ClientName,
+	version.ClientVersion,
+	strings.Join([]string{runtime.Version(), runtime.GOOS, runtime.GOARCH}, ";"),
 )
 
 type Client struct {
@@ -503,9 +514,12 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 		defer d.done()
 	}
 
-	if c.UserAgent != "" {
-		req.Header.Set(`User-Agent`, c.UserAgent)
+	// use default
+	if c.UserAgent == "" {
+		c.UserAgent = defaultUserAgent
 	}
+
+	req.Header.Set(`User-Agent`, c.UserAgent)
 
 	ext := ""
 	if d.enabled() {
