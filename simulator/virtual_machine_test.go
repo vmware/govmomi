@@ -30,6 +30,7 @@ import (
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -261,6 +262,74 @@ func TestCreateVm(t *testing.T) {
 		if err == nil {
 			t.Error("expected error")
 		}
+	}
+}
+
+func TestCreateVmWithSpecialCharaters(t *testing.T) {
+	tests := []struct {
+		name     string
+		expected string
+	}{
+		{`/`, `%2f`},
+		{`\`, `%5c`},
+		{`%`, `%25`},
+		// multiple special characters
+		{`%%`, `%25%25`},
+		// slash-separated name
+		{`foo/bar`, `foo%2fbar`},
+	}
+
+	for _, test := range tests {
+		m := ESX()
+
+		Test(func(ctx context.Context, c *vim25.Client) {
+			finder := find.NewFinder(c, false)
+
+			dc, err := finder.DefaultDatacenter(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			finder.SetDatacenter(dc)
+			folders, err := dc.Folders(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			vmFolder := folders.VmFolder
+
+			ds, err := finder.DefaultDatastore(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			spec := types.VirtualMachineConfigSpec{
+				Name: test.name,
+				Files: &types.VirtualMachineFileInfo{
+					VmPathName: fmt.Sprintf("[%s]", ds.Name()),
+				},
+			}
+
+			pool := object.NewResourcePool(c, esx.ResourcePool.Self)
+
+			task, err := vmFolder.CreateVM(ctx, spec, pool, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			info, err := task.WaitForResult(ctx, nil)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			vm := object.NewVirtualMachine(c, info.Result.(types.ManagedObjectReference))
+			name, err := vm.ObjectName(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if name != test.expected {
+				t.Errorf("expected %s, got %s", test.expected, name)
+			}
+		}, m)
 	}
 }
 
