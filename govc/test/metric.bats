@@ -13,6 +13,7 @@ load test_helper
 
   host=$(govc ls -t HostSystem ./... | head -n 1)
   pool=$(govc ls -t ResourcePool ./... | head -n 1)
+  vm=$(govc ls -t VirtualMachine ./... | head -n 1)
 
   run govc metric.ls "$host"
   assert_success
@@ -21,6 +22,9 @@ load test_helper
   assert_success
 
   run govc metric.ls "$pool"
+  assert_success
+
+  run govc metric.ls "$vm"
   assert_success
 }
 

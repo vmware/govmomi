@@ -95,8 +95,8 @@ func (r *lsResult) Write(w io.Writer) error {
 
 	for _, id := range r.MetricList {
 		if r.cmd.group != "" {
-			info := r.counters[id.CounterId]
-			if info.GroupInfo.GetElementDescription().Label != r.cmd.group {
+			info, ok := r.counters[id.CounterId]
+			if !ok || info.GroupInfo.GetElementDescription().Label != r.cmd.group {
 				continue
 			}
 		}
@@ -116,7 +116,10 @@ func (r *lsResult) Write(w io.Writer) error {
 	}
 
 	for _, id := range res {
-		info := r.counters[id.CounterId]
+		info, ok := r.counters[id.CounterId]
+		if !ok {
+			continue
+		}
 
 		switch {
 		case r.cmd.long:
@@ -147,9 +150,9 @@ func (r *lsResult) MarshalJSON() ([]byte, error) {
 	m := make(map[string]*types.PerfCounterInfo)
 
 	for _, id := range r.MetricList {
-		info := r.counters[id.CounterId]
-
-		m[info.Name()] = info
+		if info, ok := r.counters[id.CounterId]; ok {
+			m[info.Name()] = info
+		}
 	}
 
 	return json.Marshal(m)
