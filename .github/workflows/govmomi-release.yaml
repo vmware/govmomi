@@ -15,15 +15,26 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - "v*" # Push events to matching v*, i.e. v0.25.0, v1.15.1
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Create release using this non-existing semantic tag for the specified ref'
+        required: true
+        type: string
+        default: 'v0.99.0'
+      dryrun:
+        description: 'Verify release workflow without pushing any changes (catches most but not all errors)'
+        type: boolean
+        required: false
+        default: true
 
 jobs:
   release:
     name: Create Release
     runs-on: ubuntu-20.04
     timeout-minutes: 60
+    outputs:
+      latesttag: ${{ steps.tag.outputs.islatest }}
 
     steps:
       - name: Docker Login
@@ -33,11 +44,73 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0 # for CHANGELOG
+          ref: ${{ github.ref }} # branch provided on dispatch
+
+      - name: Validate branch and tag
+        run: |
+          # do not allow release on master branch
+          if [[ ${{ github.ref }} == refs/heads/master ]]; then
+            echo "::error:: release must be done on a release branch"
+            exit 1
+          fi
+
+          # check it starts with "v"
+          if [[ ${{ inputs.tag }} != v* ]]; then 
+            echo "::error:: tag must have a \"v\" prefix"
+            exit 1
+          fi
+
+          # check it does not exist
+          if [[ $(git tag -l ${{ inputs.tag }} ) ]]; then
+            echo "::error:: tag already exists"
+            exit 1
+          fi
+
+          # set tag environment variable
+          echo "TAG=${{ inputs.tag }}" >> $GITHUB_ENV
 
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
           go-version: 1.18
+
+      - name: Update version.go
+        run: |
+          # strip semantic v
+          export GOVMOMI_VERSION=${TAG#"v"}
+
+          sed -i "s/ClientVersion =.*/ClientVersion = \"$GOVMOMI_VERSION\"/" internal/version/version.go
+          git --no-pager diff internal/version/version.go
+
+          # configure author
+          # https://github.community/t/github-actions-bot-email-address/17204/6
+          git config --local user.email 41898282+github-actions[bot]@users.noreply.github.com
+          git config --local user.name "GitHub Action"
+
+          # commit changes
+          git add internal/version/version.go
+          git commit -s -m "chore: Update version.go for ${TAG}"
+
+      - name: Create tag
+        id: tag
+        run: |
+          # create new tag
+          git tag -a ${TAG} -m "Release ${TAG}"
+
+          # find latest tag sorted by semver ref
+          LATEST=$(git tag --sort=v:refname | tail -1)
+          
+          # check whether the new tag is also the latest
+          if [[ $LATEST == $TAG ]]; then 
+            echo "::set-output name=islatest::true"
+          else
+            echo "::set-output name=islatest::false"
+          fi
+
+      - name: Push changes and tag to release branch
+        if: ${{ !inputs.dryrun }}
+        run: |
+          git push --atomic --follow-tags origin ${{ github.ref }}
 
       - name: Create RELEASE CHANGELOG
         env:
@@ -46,7 +119,7 @@ jobs:
           IMAGE_SHA: 998e89dab8dd8284cfff5f8cfb9e9af41fe3fcd4671f2e86a180e453c20959e3
         run: |
           # generate CHANGELOG for this Github release tag only
-          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' $(basename "${{ github.ref }}" )
+          docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' ${TAG}
 
       - name: Archive CHANGELOG
         uses: actions/upload-artifact@v3
@@ -57,7 +130,18 @@ jobs:
             ./RELEASE_CHANGELOG.md
           retention-days: 14
 
+      - name: Simulate Release without pushing Artifacts
+        if: ${{ inputs.dryrun }}
+        uses: goreleaser/goreleaser-action@v3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          version: latest
+          args: release --snapshot --rm-dist --release-notes RELEASE_CHANGELOG.md
+
+
       - name: Create Release and build/push Artifacts
+        if: ${{ !inputs.dryrun }}
         uses: goreleaser/goreleaser-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,6 +154,8 @@ jobs:
     name: Create CHANGELOG.md PR
     runs-on: ubuntu-20.04
     continue-on-error: true
+    # only update CHANGELOG for latest semver tag
+    if: ${{ !inputs.dryrun && needs.release.outputs.latesttag == 'true' }}
 
     steps:
       - name: Checkout
@@ -92,16 +178,16 @@ jobs:
         id: cpr
         uses: peter-evans/create-pull-request@v4
         with:
-          commit-message: "Update CHANGELOG for ${{ github.ref }}"
+          commit-message: "Update CHANGELOG for ${{ inputs.tag }}"
           delete-branch: true
-          title: "Update CHANGELOG for ${{ github.ref }}"
+          title: "Update CHANGELOG for ${{ inputs.tag }}"
           signoff: true
-          reviewers: embano1,dougm
           draft: false
           body: |
-            Update CHANGELOG.md for new release.
+            ### Update CHANGELOG.md for new release.
 
-            **Note:** Due to a [limitation](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#triggering-further-workflow-runs) in Github Actions please **close and immediately reopen** this PR to trigger the required workflow checks before merging.
+            > **Note** 
+            > Due to a [limitation](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#triggering-further-workflow-runs) in Github Actions please **close and immediately reopen** this PR to trigger the required workflow checks before merging.
 
       - name: Pull Request Information
         run: |
