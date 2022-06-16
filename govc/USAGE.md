@@ -185,6 +185,7 @@ but appear via `govc $cmd -h`:
  - [host.storage.mark](#hoststoragemark)
  - [host.storage.partition](#hoststoragepartition)
  - [host.vnic.change](#hostvnicchange)
+ - [host.vnic.hint](#hostvnichint)
  - [host.vnic.info](#hostvnicinfo)
  - [host.vnic.service](#hostvnicservice)
  - [host.vswitch.add](#hostvswitchadd)
@@ -3004,6 +3005,20 @@ Examples:
 Options:
   -host=                 Host system [GOVC_HOST]
   -mtu=0                 vmk MTU
+```
+
+## host.vnic.hint
+
+```
+Usage: govc host.vnic.hint [OPTIONS] [DEVICE]...
+
+Query virtual nic DEVICE hints.
+Examples:
+  govc host.vnic.hint -host hostname
+  govc host.vnic.hint -host hostname vmnic1
+
+Options:
+  -host=                 Host system [GOVC_HOST]
 ```
 
 ## host.vnic.info

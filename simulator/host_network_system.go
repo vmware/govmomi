@@ -27,6 +27,8 @@ type HostNetworkSystem struct {
 	mo.HostNetworkSystem
 
 	Host *mo.HostSystem
+
+	types.QueryNetworkHintResponse
 }
 
 func NewHostNetworkSystem(host *mo.HostSystem) *HostNetworkSystem {
@@ -196,17 +198,9 @@ func (s *HostNetworkSystem) UpdateNetworkConfig(req *types.UpdateNetworkConfig) 
 }
 
 func (s *HostNetworkSystem) QueryNetworkHint(req *types.QueryNetworkHint) soap.HasFault {
-	var info []types.PhysicalNicHintInfo
-
-	for _, nic := range s.Host.Config.Network.Pnic {
-		info = append(info, types.PhysicalNicHintInfo{
-			Device: nic.Device,
-		})
-	}
-
 	return &methods.QueryNetworkHintBody{
 		Res: &types.QueryNetworkHintResponse{
-			Returnval: info,
+			Returnval: s.QueryNetworkHintResponse.Returnval,
 		},
 	}
 }
