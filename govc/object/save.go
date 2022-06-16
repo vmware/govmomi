@@ -120,10 +120,19 @@ func saveEnvironmentBrowser(ctx context.Context, c *vim25.Client, ref types.Mana
 	return []saveMethod{{"QueryConfigOption", res}}, nil
 }
 
+func saveHostNetworkSystem(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
+	res, err := methods.QueryNetworkHint(ctx, c, &types.QueryNetworkHint{This: ref})
+	if err != nil {
+		return nil, err
+	}
+	return []saveMethod{{"QueryNetworkHint", res}}, nil
+}
+
 // saveObjects maps object types to functions that can save data that isn't available via the PropertyCollector
 var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedObjectReference) ([]saveMethod, error){
 	"VmwareDistributedVirtualSwitch": saveDVS,
 	"EnvironmentBrowser":             saveEnvironmentBrowser,
+	"HostNetworkSystem":              saveHostNetworkSystem,
 }
 
 func (cmd *save) save(content []types.ObjectContent) error {

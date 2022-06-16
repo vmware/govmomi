@@ -170,7 +170,7 @@ func TestHostNetworkSystem(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if len(info) != len(esx.HostConfigInfo.Network.Pnic) {
+	if len(info) != 0 { // TODO: data is only returned when Model.Load is used
 		t.Errorf("len=%d", len(info))
 	}
 }
