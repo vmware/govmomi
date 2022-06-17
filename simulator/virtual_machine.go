@@ -1163,15 +1163,15 @@ func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDe
 			c.MacAddress = vm.generateMAC(*c.UnitNumber - 7) // Note 7 == PCI offset
 		}
 
-		if spec.Operation == types.VirtualDeviceConfigSpecOperationAdd {
-			vm.Guest.Net = append(vm.Guest.Net, types.GuestNicInfo{
-				Network:        name,
-				IpAddress:      nil,
-				MacAddress:     c.MacAddress,
-				Connected:      true,
-				DeviceConfigId: c.Key,
-			})
+		vm.Guest.Net = append(vm.Guest.Net, types.GuestNicInfo{
+			Network:        name,
+			IpAddress:      nil,
+			MacAddress:     c.MacAddress,
+			Connected:      true,
+			DeviceConfigId: c.Key,
+		})
 
+		if spec.Operation == types.VirtualDeviceConfigSpecOperationAdd {
 			if c.ResourceAllocation == nil {
 				c.ResourceAllocation = &types.VirtualEthernetCardResourceAllocation{
 					Reservation: types.NewInt64(0),
@@ -1350,6 +1350,13 @@ func (vm *VirtualMachine) removeDevice(ctx *Context, devices object.VirtualDevic
 			case *types.VirtualEthernetCardDistributedVirtualPortBackingInfo:
 				net.Type = "DistributedVirtualPortgroup"
 				net.Value = b.Port.PortgroupKey
+			}
+
+			for j, nicInfo := range vm.Guest.Net {
+				if nicInfo.DeviceConfigId == key {
+					vm.Guest.Net = append(vm.Guest.Net[:j], vm.Guest.Net[j+1:]...)
+					break
+				}
 			}
 
 			networks := vm.Network
