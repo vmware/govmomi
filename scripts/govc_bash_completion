@@ -5,39 +5,103 @@
 
 _govc_complete()
 {
-	local cur prev subcmd
-	prev=${COMP_WORDS[COMP_CWORD-1]}
-	cur=${COMP_WORDS[COMP_CWORD]}
-	subcmd=${COMP_WORDS[1]}
-	COMPREPLY=()
+    local IFS=$'\n'
+    local cur prev subcmd
+    prev=${COMP_WORDS[COMP_CWORD-1]}
+    cur=${COMP_WORDS[COMP_CWORD]}
+    subcmd=${COMP_WORDS[1]}
+    COMPREPLY=()
 
-	if [[ ${prev} == "govc" ]] ; then # show subcommands, no options
-		COMPREPLY=( $(compgen -W "$(govc -h | grep -v Usage | tr -s '\n' ' ')" -- ${cur}) )
-		return 0
+    if [[ ${prev} == "govc" ]] ; then # show subcommands, no options
+        COMPREPLY=( $(compgen -W "$(govc -h | grep -v Usage | awk '{print $1}' )" -- ${cur}) )
+        return 0
+    elif [[ ${cur} == "-"* ]] ; then
+        : # drop out and show options
+    elif [[ ${subcmd} == "ls" ]] ; then # not completing an option, try for appropriate values
+        if [[ ${prev} == "-t" ]] ; then
+            COMPREPLY=( $(compgen -W "$(govc ls -l "/**" | awk '{print $2}' | sort -u | tr -d '()' )" -- ${cur}) )
+        else
+            COMPREPLY=( $(compgen -W "$(govc ls /\*\* | rev | cut -d'/' -f1 | rev | sort | uniq)" -- ${cur}) )
+        fi
+    elif [[ ${prev} == "-net" ]] ; then
+        CANDIDATES=( $(compgen -W "$(govc ls /\*/network/\* | rev | cut -d'/' -f1 | rev | sort | uniq)" -- ${cur}) )
+        if [ ${#CANDIDATES[*]} -eq 0 ]; then
+            COMPREPLY=()
+        else
+            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+        fi
+    elif [[ ${prev} == "-host" ]] ; then
+        COMPREPLY=( $(compgen -W "$(govc ls /\*/host/\* | rev | cut -d'/' -f1 | rev | sort | uniq)" -- ${cur}) )
+    elif [[ ${prev} == "-ds" ]] ; then
+        CANDIDATES=( $(compgen -W "$(govc ls /\*/datastore/\* | rev | cut -d'/' -f1 | rev | sort | uniq)" -- ${cur}) )
+        if [ ${#CANDIDATES[*]} -eq 0 ]; then
+            COMPREPLY=()
+        else
+            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+        fi
+    elif [[ ${prev} == "-pool" ]] ; then
+        CANDIDATES=( $(compgen -W "$(govc find -type p)" -- ${cur}) )
+        if [ ${#CANDIDATES[*]} -eq 0 ]; then
+            COMPREPLY=()
+        else
+            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+        fi
+    elif [[ ${subcmd} == "vm.network.change" ]] ; then
+        # Example of sub command
+        #govc vm.network.change -vm linuxserver1 -net Pvt_1289_Server ethernet-0
+        # Get device
+        local i=1
+        local vm=""
+        while [[ "$i" -lt "$COMP_CWORD" ]]; do
+            if [[ ${COMP_WORDS[i]} == "-vm" ]]; then
+                local vm=${COMP_WORDS[((i+1))]}
+            fi
+            (( i++ ))
+        done
+        COMPREPLY=( $(compgen -W "$(govc device.ls -vm $vm  eth* | awk '{print $1}')" -- ${cur}))
+    elif [[ ${prev} == "-disk.label" ]] ; then
+        local i=1
+        local vm=""
+        while [[ "$i" -lt "$COMP_CWORD" ]]; do
+            if [[ ${COMP_WORDS[i]} == "-vm" ]]; then
+                local vm=${COMP_WORDS[((i+1))]}
+            fi
+            (( i++ ))
+        done
 
-	elif [[ ${cur} == "-"* ]] ; then
-		: # drop out and show options
+        CANDIDATES=( $(compgen -W "$(govc device.info -json -vm $vm disk-* | jq '.Devices[].DeviceInfo.Label' | sed 's/"//g')" -- ${cur}))
+        if [ ${#CANDIDATES[*]} -eq 0 ]; then
+            COMPREPLY=()
+        else
+            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+        fi
+    elif [[ ${prev} == "-vm" || ${subcmd} =~ vm.(console|destroy|guest.tools|info|ip|markastemplate|markasvm|migrate|power|vnc) ]] ; then
+        #CANDIDATES=( $(compgen -W "$(govc find -type VirtualMachine -name=${cur}\* | rev | cut -d'/' -f1 | rev )" -- ${cur}) )
+        # -- find is too slow ( # of objects to retreive = 450  )
+        #    govc find -type VirtualMachine : 8.5s
+        #    govc ls /SDDC-Datacenter/vm/* : 0.45
+        #    govc ls is also weird that it doesn't show the complete list of vm  just by doing ls
 
-	elif [[ ${subcmd} == "ls" ]] ; then # not completing an option, try for appropriate values
-		if [[ ${prev} == "-t" ]] ; then
-			COMPREPLY=( $(compgen -W "$(govc ls -l "/**" | awk '{print $2}' | \
-				sort -u | tr -d '()' | tr '\n' ' '  )" -- ${cur}) )
-		else
-			COMPREPLY=( $(compgen -W "$(govc ls "${cur:-/*}*" | tr -s '\n' ' ' )" -- ${cur}) )
-		fi
+        # Check cache freshness
+        CACHE_DIR="~/govc/cache"
+        VM_CACHE="$CACHE_DIR/$GOVC_URL-vmcache"
+        if [[ $(find $VM_CACHE -mmin -1 -type f -print  2>/dev/null | wc -l) -lt 1 ]]
+        then
+            mkdir -p $CACHE_DIR
+            govc ls /\*/vm/\* | rev | cut -d'/' -f1 | rev | sort > $VM_CACHE
+        fi
+        CANDIDATES=( $(compgen -W "$(cat $VM_CACHE)" -- ${cur}) )
+        if [ ${#CANDIDATES[*]} -eq 0 ]; then
+            COMPREPLY=()
+        else
+            COMPREPLY=($(printf '%q\n' "${CANDIDATES[@]}"))
+        fi
+    fi
+    # did not hit any specifcs so show all options from help
+    if [[ -z ${COMPREPLY} ]]; then
+        COMPREPLY=( $(compgen -W "-h $(govc ${subcmd} -h | awk '{print $1}' | grep "^-" | sed -e 's/=.*//g' )" -- ${cur}) )
+    fi
 
-	elif [[ ${subcmd} == "vm."* || ${prev} == "-vm" ]] ; then  
-		COMPREPLY=( $(compgen -W "$(govc ls -t VirtualMachine -l "${cur}*" | \
-			awk '{print $1}' | tr -s '\n' ' ' )" -- ${cur}) )
-	fi
-
-	# did not hit any specifcs so show all options from help
-	if [[ -z ${COMPREPLY} ]]; then
-		COMPREPLY=( $(compgen -W "-h $(govc ${subcmd} -h | awk '{print $1}' | \
-		   	grep "^-" | sed -e 's/=.*//g' | tr -s '\n' ' ' )" -- ${cur}) )
-	fi
-
-	return 0
+    return 0
 }
 complete -F _govc_complete govc
-
