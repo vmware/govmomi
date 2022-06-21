@@ -111,7 +111,7 @@ func TestMultipleCAPaths(t *testing.T) {
 
 	certErr, ok := err.(errInvalidCACertificate)
 	if !ok {
-		t.Fatalf("Expected errInvalidCertificate to occur")
+		t.Fatalf("Expected errInvalidCACertificate to occur")
 	}
 	if certErr.File != "fixtures/invalid-cert.pem" {
 		t.Fatalf("Expected Err to show invalid file")
@@ -138,7 +138,7 @@ func TestInvalidRootCAs(t *testing.T) {
 
 	certErr, ok := err.(errInvalidCACertificate)
 	if !ok {
-		t.Fatalf("Expected errInvalidCertificate to occur")
+		t.Fatalf("Expected errInvalidCACertificate to occur")
 	}
 	if certErr.File != "fixtures/invalid-cert.pem" {
 		t.Fatalf("Expected Err to show invalid file")
