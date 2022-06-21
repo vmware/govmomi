@@ -723,6 +723,29 @@ func TestPickController(t *testing.T) {
 	}
 }
 
+func TestAssignController(t *testing.T) {
+	scsi, _ := devices.CreateSCSIController("scsi")
+	disk := &types.VirtualDisk{
+		CapacityInBytes: 512 * 1024,
+		VirtualDevice: types.VirtualDevice{
+			Backing: new(types.VirtualDiskFlatVer2BackingInfo), // Leave fields empty to test defaults
+		},
+	}
+
+	devices := VirtualDeviceList([]types.BaseVirtualDevice{scsi})
+	devices.AssignController(disk, scsi.(*types.VirtualLsiLogicController))
+
+	if disk.ControllerKey != scsi.GetVirtualDevice().Key {
+		t.Errorf("expected controller key: %d, got: %d\n", scsi.GetVirtualDevice().Key, disk.ControllerKey)
+	}
+
+	// if disk does not have device key, AssignController gives a random negative key to the disk
+	// so that it will not collide with existing device keys
+	if disk.Key >= 0 {
+		t.Errorf("device key %d should be negative", disk.Key)
+	}
+}
+
 func TestCreateSCSIController(t *testing.T) {
 	for _, l := range []VirtualDeviceList{SCSIControllerTypes(), devices} {
 		_, err := l.CreateSCSIController("enoent")
