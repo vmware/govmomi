@@ -69,13 +69,7 @@ func EthernetCardTypes() VirtualDeviceList {
 		&types.VirtualSriovEthernetCard{},
 	}).Select(func(device types.BaseVirtualDevice) bool {
 		c := device.(types.BaseVirtualEthernetCard).GetVirtualEthernetCard()
-
-		key := rand.Int31() * -1
-		if key == 0 {
-			key = -1
-		}
-
-		c.GetVirtualDevice().Key = key
+		c.GetVirtualDevice().Key = VirtualDeviceList{}.newRandomKey()
 		return true
 	})
 }
@@ -463,8 +457,20 @@ func (l VirtualDeviceList) AssignController(device types.BaseVirtualDevice, c ty
 	d.UnitNumber = new(int32)
 	*d.UnitNumber = l.newUnitNumber(c)
 	if d.Key == 0 {
-		d.Key = int32(rand.Uint32()) * -1
+		d.Key = l.newRandomKey()
 	}
+}
+
+// newRandomKey returns a random negative device key.
+// The generated key can be used for devices you want to add so that it does not collide with existing ones.
+func (l VirtualDeviceList) newRandomKey() int32 {
+	// NOTE: rand.Uint32 cannot be used here because conversion from uint32 to int32 may change the sign
+	key := rand.Int31() * -1
+	if key == 0 {
+		return -1
+	}
+
+	return key
 }
 
 // CreateDisk creates a new VirtualDisk device which can be added to a VM.
