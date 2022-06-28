@@ -158,7 +158,7 @@ func (s *Service) call(ctx *Context, method *Method) soap.HasFault {
 		default:
 			fault := &types.NotAuthenticated{
 				NoPermission: types.NoPermission{
-					Object:      method.This,
+					Object:      &method.This,
 					PrivilegeId: "System.View",
 				},
 			}

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -48,9 +48,9 @@ generate() {
 }
 
 #
-# All types derive from vCenter build 18700403, vSphere 7.0U3.
+# All types derive from vCenter build 20023987, vSphere 8.0.
 #
-export COPYRIGHT_DATE_RANGE="2014-2021"
+export COPYRIGHT_DATE_RANGE="2014-2022"
 
 #
 # FORCE_BASE_INTERFACE_FOR_TYPES defines the types that we want to
@@ -59,14 +59,14 @@ export COPYRIGHT_DATE_RANGE="2014-2021"
 #
 export FORCE_BASE_INTERFACE_FOR_TYPES="AgencyConfigInfo"
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 18281059.
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 19936444.
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
 
 # ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
-# eam-wsdl.zip, from eam-vcenter build 18281060.
+# eam-wsdl.zip, from eam-vcenter build 19970683.
 #
 # Please note the EAM files are also available at the following, public URL --
 # http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact

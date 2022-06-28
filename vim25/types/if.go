@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -3148,6 +3148,18 @@ type BaseVirtualMachineTargetInfo interface {
 
 func init() {
 	t["BaseVirtualMachineTargetInfo"] = reflect.TypeOf((*VirtualMachineTargetInfo)(nil)).Elem()
+}
+
+func (b *VirtualMachineVirtualDeviceGroupsDeviceGroup) GetVirtualMachineVirtualDeviceGroupsDeviceGroup() *VirtualMachineVirtualDeviceGroupsDeviceGroup {
+	return b
+}
+
+type BaseVirtualMachineVirtualDeviceGroupsDeviceGroup interface {
+	GetVirtualMachineVirtualDeviceGroupsDeviceGroup() *VirtualMachineVirtualDeviceGroupsDeviceGroup
+}
+
+func init() {
+	t["BaseVirtualMachineVirtualDeviceGroupsDeviceGroup"] = reflect.TypeOf((*VirtualMachineVirtualDeviceGroupsDeviceGroup)(nil)).Elem()
 }
 
 func (b *VirtualPCIPassthroughPluginBackingInfo) GetVirtualPCIPassthroughPluginBackingInfo() *VirtualPCIPassthroughPluginBackingInfo {
