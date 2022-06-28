@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -2107,16 +2107,17 @@ func init() {
 type StorageArray struct {
 	types.DynamicData
 
-	Name                         string   `xml:"name"`
-	Uuid                         string   `xml:"uuid"`
-	VendorId                     string   `xml:"vendorId"`
-	ModelId                      string   `xml:"modelId"`
-	Firmware                     string   `xml:"firmware,omitempty"`
-	AlternateName                []string `xml:"alternateName,omitempty"`
-	SupportedBlockInterface      []string `xml:"supportedBlockInterface,omitempty"`
-	SupportedFileSystemInterface []string `xml:"supportedFileSystemInterface,omitempty"`
-	SupportedProfile             []string `xml:"supportedProfile,omitempty"`
-	Priority                     int32    `xml:"priority,omitempty"`
+	Name                         string                                   `xml:"name"`
+	Uuid                         string                                   `xml:"uuid"`
+	VendorId                     string                                   `xml:"vendorId"`
+	ModelId                      string                                   `xml:"modelId"`
+	Firmware                     string                                   `xml:"firmware,omitempty"`
+	AlternateName                []string                                 `xml:"alternateName,omitempty"`
+	SupportedBlockInterface      []string                                 `xml:"supportedBlockInterface,omitempty"`
+	SupportedFileSystemInterface []string                                 `xml:"supportedFileSystemInterface,omitempty"`
+	SupportedProfile             []string                                 `xml:"supportedProfile,omitempty"`
+	Priority                     int32                                    `xml:"priority,omitempty"`
+	DiscoverySvc                 []types.VASAStorageArrayDiscoverySvcInfo `xml:"discoverySvc,omitempty"`
 }
 
 func init() {
@@ -2138,11 +2139,12 @@ func init() {
 type StorageContainer struct {
 	types.DynamicData
 
-	Uuid            string   `xml:"uuid"`
-	Name            string   `xml:"name"`
-	MaxVvolSizeInMB int64    `xml:"maxVvolSizeInMB"`
-	ProviderId      []string `xml:"providerId"`
-	ArrayId         []string `xml:"arrayId"`
+	Uuid              string   `xml:"uuid"`
+	Name              string   `xml:"name"`
+	MaxVvolSizeInMB   int64    `xml:"maxVvolSizeInMB"`
+	ProviderId        []string `xml:"providerId"`
+	ArrayId           []string `xml:"arrayId"`
+	VvolContainerType string   `xml:"vvolContainerType,omitempty"`
 }
 
 func init() {

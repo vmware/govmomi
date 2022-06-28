@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -181,6 +181,19 @@ const (
 
 func init() {
 	types.Add("sms:SmsTaskState", reflect.TypeOf((*SmsTaskState)(nil)).Elem())
+}
+
+type StorageContainerVvolContainerTypeEnum string
+
+const (
+	StorageContainerVvolContainerTypeEnumNFS   = StorageContainerVvolContainerTypeEnum("NFS")
+	StorageContainerVvolContainerTypeEnumNFS4x = StorageContainerVvolContainerTypeEnum("NFS4x")
+	StorageContainerVvolContainerTypeEnumSCSI  = StorageContainerVvolContainerTypeEnum("SCSI")
+	StorageContainerVvolContainerTypeEnumNVMe  = StorageContainerVvolContainerTypeEnum("NVMe")
+)
+
+func init() {
+	types.Add("sms:StorageContainerVvolContainerTypeEnum", reflect.TypeOf((*StorageContainerVvolContainerTypeEnum)(nil)).Elem())
 }
 
 type ThinProvisioningStatus string

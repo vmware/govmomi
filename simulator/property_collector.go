@@ -262,7 +262,7 @@ func (rr *retrieveResult) add(ctx *Context, name string, val types.AnyType, cont
 		Path: name,
 		Fault: types.LocalizedMethodFault{Fault: &types.NotAuthenticated{
 			NoPermission: types.NoPermission{
-				Object:      content.Obj,
+				Object:      &content.Obj,
 				PrivilegeId: "System.Read",
 			}},
 		},

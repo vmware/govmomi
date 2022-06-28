@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -116,6 +116,17 @@ func init() {
 	types.Add("pbm:PbmComplianceStatus", reflect.TypeOf((*PbmComplianceStatus)(nil)).Elem())
 }
 
+type PbmDebugManagerKeystoreName string
+
+const (
+	PbmDebugManagerKeystoreNameSMS           = PbmDebugManagerKeystoreName("SMS")
+	PbmDebugManagerKeystoreNameTRUSTED_ROOTS = PbmDebugManagerKeystoreName("TRUSTED_ROOTS")
+)
+
+func init() {
+	types.Add("pbm:PbmDebugManagerKeystoreName", reflect.TypeOf((*PbmDebugManagerKeystoreName)(nil)).Elem())
+}
+
 type PbmHealthStatusForEntity string
 
 const (
@@ -163,6 +174,35 @@ func init() {
 	types.Add("pbm:PbmLineOfServiceInfoLineOfServiceEnum", reflect.TypeOf((*PbmLineOfServiceInfoLineOfServiceEnum)(nil)).Elem())
 }
 
+type PbmLoggingConfigurationComponent string
+
+const (
+	PbmLoggingConfigurationComponentPbm                = PbmLoggingConfigurationComponent("pbm")
+	PbmLoggingConfigurationComponentVslm               = PbmLoggingConfigurationComponent("vslm")
+	PbmLoggingConfigurationComponentSms                = PbmLoggingConfigurationComponent("sms")
+	PbmLoggingConfigurationComponentSpbm               = PbmLoggingConfigurationComponent("spbm")
+	PbmLoggingConfigurationComponentSps                = PbmLoggingConfigurationComponent("sps")
+	PbmLoggingConfigurationComponentHttpclient_header  = PbmLoggingConfigurationComponent("httpclient_header")
+	PbmLoggingConfigurationComponentHttpclient_content = PbmLoggingConfigurationComponent("httpclient_content")
+	PbmLoggingConfigurationComponentVmomi              = PbmLoggingConfigurationComponent("vmomi")
+)
+
+func init() {
+	types.Add("pbm:PbmLoggingConfigurationComponent", reflect.TypeOf((*PbmLoggingConfigurationComponent)(nil)).Elem())
+}
+
+type PbmLoggingConfigurationLogLevel string
+
+const (
+	PbmLoggingConfigurationLogLevelINFO  = PbmLoggingConfigurationLogLevel("INFO")
+	PbmLoggingConfigurationLogLevelDEBUG = PbmLoggingConfigurationLogLevel("DEBUG")
+	PbmLoggingConfigurationLogLevelTRACE = PbmLoggingConfigurationLogLevel("TRACE")
+)
+
+func init() {
+	types.Add("pbm:PbmLoggingConfigurationLogLevel", reflect.TypeOf((*PbmLoggingConfigurationLogLevel)(nil)).Elem())
+}
+
 type PbmObjectType string
 
 const (
@@ -194,6 +234,18 @@ func init() {
 	types.Add("pbm:PbmOperation", reflect.TypeOf((*PbmOperation)(nil)).Elem())
 }
 
+type PbmPolicyAssociationVolumeAllocationType string
+
+const (
+	PbmPolicyAssociationVolumeAllocationTypeFullyInitialized          = PbmPolicyAssociationVolumeAllocationType("FullyInitialized")
+	PbmPolicyAssociationVolumeAllocationTypeReserveSpace              = PbmPolicyAssociationVolumeAllocationType("ReserveSpace")
+	PbmPolicyAssociationVolumeAllocationTypeConserveSpaceWhenPossible = PbmPolicyAssociationVolumeAllocationType("ConserveSpaceWhenPossible")
+)
+
+func init() {
+	types.Add("pbm:PbmPolicyAssociationVolumeAllocationType", reflect.TypeOf((*PbmPolicyAssociationVolumeAllocationType)(nil)).Elem())
+}
+
 type PbmProfileCategoryEnum string
 
 const (
@@ -219,9 +271,10 @@ func init() {
 type PbmSystemCreatedProfileType string
 
 const (
-	PbmSystemCreatedProfileTypeVsanDefaultProfile = PbmSystemCreatedProfileType("VsanDefaultProfile")
-	PbmSystemCreatedProfileTypeVVolDefaultProfile = PbmSystemCreatedProfileType("VVolDefaultProfile")
-	PbmSystemCreatedProfileTypePmemDefaultProfile = PbmSystemCreatedProfileType("PmemDefaultProfile")
+	PbmSystemCreatedProfileTypeVsanDefaultProfile    = PbmSystemCreatedProfileType("VsanDefaultProfile")
+	PbmSystemCreatedProfileTypeVVolDefaultProfile    = PbmSystemCreatedProfileType("VVolDefaultProfile")
+	PbmSystemCreatedProfileTypePmemDefaultProfile    = PbmSystemCreatedProfileType("PmemDefaultProfile")
+	PbmSystemCreatedProfileTypeVsanMaxDefaultProfile = PbmSystemCreatedProfileType("VsanMaxDefaultProfile")
 )
 
 func init() {
