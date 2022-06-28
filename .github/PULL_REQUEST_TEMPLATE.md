@@ -28,7 +28,8 @@ details for your test configuration.
 
 ## Checklist:
 
-- [ ] My code follows the CONTRIBUTION [guidelines](./../CONTRIBUTING.md) of
+- [ ] My code follows the `CONTRIBUTION`
+  [guidelines](https://github.com/vmware/govmomi/blob/master/CONTRIBUTING.md) of
   this project
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
