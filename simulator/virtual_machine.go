@@ -1184,6 +1184,10 @@ func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDe
 			}
 		}
 	case *types.VirtualDisk:
+		// NOTE: either of capacityInBytes and capacityInKB may not be specified
+		x.CapacityInBytes = getDiskSize(x)
+		x.CapacityInKB = getDiskSize(x) / 1024
+
 		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
 		switch b := d.Backing.(type) {
 		case types.BaseVirtualDeviceFileBackingInfo:
