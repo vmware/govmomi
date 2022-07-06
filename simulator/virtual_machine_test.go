@@ -1302,6 +1302,114 @@ func TestReconfigureDevicesCapacity(t *testing.T) {
 	}
 }
 
+func TestReconfigureDevicesDatastoreFreespace(t *testing.T) {
+	tests := []struct {
+		name          string
+		reconfigure   func(context.Context, *object.VirtualMachine, *Datastore, object.VirtualDeviceList) error
+		freespaceDiff int64
+	}{
+		{
+			"create a new disk",
+			func(ctx context.Context, vm *object.VirtualMachine, ds *Datastore, l object.VirtualDeviceList) error {
+				controller, err := l.FindDiskController("")
+				if err != nil {
+					return err
+				}
+
+				disk := l.CreateDisk(controller, ds.Reference(), "")
+				disk.CapacityInBytes = 10 * 1024 * 1024 * 1024 // 10GB
+
+				if err := vm.AddDevice(ctx, disk); err != nil {
+					return err
+				}
+				return nil
+			},
+			-10 * 1024 * 1024 * 1024, // -10GB
+		},
+		{
+			"edit disk size",
+			func(ctx context.Context, vm *object.VirtualMachine, ds *Datastore, l object.VirtualDeviceList) error {
+				disks := l.SelectByType((*types.VirtualDisk)(nil))
+				if len(disks) == 0 {
+					return fmt.Errorf("disk not found")
+				}
+				disk := disks[len(disks)-1].(*types.VirtualDisk)
+
+				// specify same disk capacity
+				if err := vm.EditDevice(ctx, disk); err != nil {
+					return err
+				}
+				return nil
+			},
+			0,
+		},
+		{
+			"remove a disk and its files",
+			func(ctx context.Context, vm *object.VirtualMachine, ds *Datastore, l object.VirtualDeviceList) error {
+				disks := l.SelectByType((*types.VirtualDisk)(nil))
+				if len(disks) == 0 {
+					return fmt.Errorf("disk not found")
+				}
+				disk := disks[len(disks)-1].(*types.VirtualDisk)
+
+				if err := vm.RemoveDevice(ctx, false, disk); err != nil {
+					return err
+				}
+				return nil
+			},
+			10 * 1024 * 1024 * 1024, // 10GB
+		},
+		{
+			"remove a disk but keep its files",
+			func(ctx context.Context, vm *object.VirtualMachine, ds *Datastore, l object.VirtualDeviceList) error {
+				disks := l.SelectByType((*types.VirtualDisk)(nil))
+				if len(disks) == 0 {
+					return fmt.Errorf("disk not found")
+				}
+				disk := disks[len(disks)-1].(*types.VirtualDisk)
+
+				if err := vm.RemoveDevice(ctx, true, disk); err != nil {
+					return err
+				}
+				return nil
+			},
+			0,
+		},
+	}
+
+	for _, test := range tests {
+		test := test // assign to local var since loop var is reused
+		t.Run(test.name, func(t *testing.T) {
+			m := ESX()
+
+			Test(func(ctx context.Context, c *vim25.Client) {
+				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vm := object.NewVirtualMachine(c, vmm.Reference())
+
+				ds := Map.Any("Datastore").(*Datastore)
+				freespaceBefore := ds.Datastore.Summary.FreeSpace
+
+				devices, err := vm.Device(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = test.reconfigure(ctx, vm, ds, devices)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				freespaceAfter := ds.Datastore.Summary.FreeSpace
+
+				if freespaceAfter-freespaceBefore != test.freespaceDiff {
+					t.Errorf("difference of freespace expected %d, got %d",
+						test.freespaceDiff, freespaceAfter-freespaceBefore)
+				}
+			}, m)
+		})
+	}
+}
+
 func TestShutdownGuest(t *testing.T) {
 	// use the default vm for testing
 	ctx := context.Background()
