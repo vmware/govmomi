@@ -1106,7 +1106,12 @@ func (vm *VirtualMachine) validateSwitchMembers(id string) types.BaseMethodFault
 	return nil
 }
 
-func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDeviceList, spec *types.VirtualDeviceConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configureDevice(
+	ctx *Context,
+	devices object.VirtualDeviceList,
+	spec *types.VirtualDeviceConfigSpec,
+	oldDevice types.BaseVirtualDevice) types.BaseMethodFault {
+
 	device := spec.Device
 	d := device.GetVirtualDevice()
 	var controller types.BaseVirtualController
@@ -1220,6 +1225,17 @@ func (vm *VirtualMachine) configureDevice(ctx *Context, devices object.VirtualDe
 			ds := vm.findDatastore(p.Datastore)
 			info.Datastore = &ds.Self
 
+			if oldDevice != nil {
+				if oldDisk, ok := oldDevice.(*types.VirtualDisk); ok {
+					// add previous capacity to datastore freespace
+					ctx.WithLock(ds, func() {
+						ds.Summary.FreeSpace += getDiskSize(oldDisk)
+						ds.Info.GetDatastoreInfo().FreeSpace = ds.Summary.FreeSpace
+					})
+				}
+			}
+
+			// then subtract new capacity from datastore freespace
 			// XXX: compare disk size and free space until windows stat is supported
 			ctx.WithLock(ds, func() {
 				ds.Summary.FreeSpace -= getDiskSize(x)
@@ -1453,7 +1469,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 			}
 
 			key := device.Key
-			err := vm.configureDevice(ctx, devices, dspec)
+			err := vm.configureDevice(ctx, devices, dspec, nil)
 			if err != nil {
 				return err
 			}
@@ -1470,16 +1486,17 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 			}
 		case types.VirtualDeviceConfigSpecOperationEdit:
 			rspec := *dspec
-			rspec.Device = devices.FindByKey(device.Key)
-			if rspec.Device == nil {
+			oldDevice := devices.FindByKey(device.Key)
+			if oldDevice == nil {
 				return invalid
 			}
+			rspec.Device = oldDevice
 			devices = vm.removeDevice(ctx, devices, &rspec)
 			if device.DeviceInfo != nil {
 				device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
 			}
 
-			err := vm.configureDevice(ctx, devices, dspec)
+			err := vm.configureDevice(ctx, devices, dspec, oldDevice)
 			if err != nil {
 				return err
 			}
