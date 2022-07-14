@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 func TestDefaultESX(t *testing.T) {
@@ -204,5 +205,55 @@ func TestDestroyHostSystem(t *testing.T) {
 	hs2 := Map.Get(esx.HostSystem.Reference())
 	if hs2 != nil {
 		t.Fatal("host should have been destroyed")
+	}
+}
+
+func TestDisconnect(t *testing.T) {
+	ctx := context.Background()
+	m := ESX()
+
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c := m.Service.client
+
+	hs := Map.Get(esx.HostSystem.Reference()).(*HostSystem)
+	host := object.NewHostSystem(c, hs.Self)
+
+	task, err := host.Disconnect(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if hs.Runtime.ConnectionState != types.HostSystemConnectionStateDisconnected {
+		t.Fatalf("expect ConnectionState to be %s; got %s",
+			types.HostSystemConnectionStateDisconnected, hs.Runtime.ConnectionState)
+	}
+
+	task, err = host.Reconnect(ctx, nil, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = task.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if hs.Runtime.ConnectionState != types.HostSystemConnectionStateConnected {
+		t.Fatalf("expect ConnectionState to be %s; got %s",
+			types.HostSystemConnectionStateConnected, hs.Runtime.ConnectionState)
 	}
 }
