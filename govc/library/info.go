@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -171,6 +171,7 @@ func (r infoResultsWriter) writeLibrary(
 	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
 	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
+	fmt.Fprintf(w, "  Security Policy ID\t%s\n", v.SecurityPolicyID)
 	fmt.Fprintf(w, "  StorageBackings:\t\n")
 	for _, d := range v.Storage {
 		fmt.Fprintf(w, "    DatastoreID:\t%s\n", d.DatastoreID)

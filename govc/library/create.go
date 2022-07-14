@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -55,6 +54,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.pub.Published), "pub", "Publish library")
 	f.StringVar(&cmd.pub.UserName, "pub-username", "", "Publication username")
 	f.StringVar(&cmd.pub.Password, "pub-password", "", "Publication password")
+	f.StringVar(&cmd.library.SecurityPolicyID, "policy", "", "Security Policy ID")
 }
 
 func (cmd *create) Usage() string {
@@ -68,15 +68,6 @@ Examples:
   govc library.create library_name
   govc library.create -sub http://server/path/lib.json library_name
   govc library.create -pub library_name`
-}
-
-type createResult []library.Library
-
-func (r createResult) Write(w io.Writer) error {
-	for i := range r {
-		fmt.Fprintln(w, r[i].Name)
-	}
-	return nil
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {

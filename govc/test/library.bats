@@ -454,6 +454,25 @@ EOF
   done
 }
 
+@test "library.create.withpolicy" {
+  vcsim_env
+
+  policy_id=$(govc library.policy.ls -json | jq '.[][0].policy' -r)
+  echo "$policy_id"
+
+  run govc library.create -policy=foo secure-content
+  assert_failure
+
+  run govc library.create -policy "$policy_id" secure-content
+  assert_success
+
+  library_secpol=$(govc library.info -json secure-content | jq '.[].security_policy_id' -r)
+  assert_equal "$library_secpol" "$policy_id"
+
+  run govc library.rm secure-content
+  assert_success
+}
+
 @test "library.findbyid" {
   vcsim_env
 

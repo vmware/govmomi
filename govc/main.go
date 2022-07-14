@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -66,6 +66,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host/vswitch"
 	_ "github.com/vmware/govmomi/govc/importx"
 	_ "github.com/vmware/govmomi/govc/library"
+	_ "github.com/vmware/govmomi/govc/library/policy"
 	_ "github.com/vmware/govmomi/govc/library/session"
 	_ "github.com/vmware/govmomi/govc/library/subscriber"
 	_ "github.com/vmware/govmomi/govc/license"

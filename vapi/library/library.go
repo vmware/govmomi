@@ -36,17 +36,19 @@ type StorageBackings struct {
 
 // Library  provides methods to create, read, update, delete, and enumerate libraries.
 type Library struct {
-	CreationTime     *time.Time        `json:"creation_time,omitempty"`
-	Description      string            `json:"description,omitempty"`
-	ID               string            `json:"id,omitempty"`
-	LastModifiedTime *time.Time        `json:"last_modified_time,omitempty"`
-	LastSyncTime     *time.Time        `json:"last_sync_time,omitempty"`
-	Name             string            `json:"name,omitempty"`
-	Storage          []StorageBackings `json:"storage_backings,omitempty"`
-	Type             string            `json:"type,omitempty"`
-	Version          string            `json:"version,omitempty"`
-	Subscription     *Subscription     `json:"subscription_info,omitempty"`
-	Publication      *Publication      `json:"publish_info,omitempty"`
+	CreationTime          *time.Time        `json:"creation_time,omitempty"`
+	Description           string            `json:"description,omitempty"`
+	ID                    string            `json:"id,omitempty"`
+	LastModifiedTime      *time.Time        `json:"last_modified_time,omitempty"`
+	LastSyncTime          *time.Time        `json:"last_sync_time,omitempty"`
+	Name                  string            `json:"name,omitempty"`
+	Storage               []StorageBackings `json:"storage_backings,omitempty"`
+	Type                  string            `json:"type,omitempty"`
+	Version               string            `json:"version,omitempty"`
+	Subscription          *Subscription     `json:"subscription_info,omitempty"`
+	Publication           *Publication      `json:"publish_info,omitempty"`
+	SecurityPolicyID      string            `json:"security_policy_id,omitempty"`
+	UnsetSecurityPolicyID bool              `json:"unset_security_policy_id,omitempty"`
 }
 
 // Subscription info

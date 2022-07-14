@@ -128,11 +128,11 @@ func (cmd *enableCluster) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.WorkerDNS, "worker-dns", "",
 		"Comma-separated list of DNS server IP addresses to use on the worker nodes, specified in order of preference.")
 	f.StringVar(&cmd.ControlPlaneStoragePolicy, "control-plane-storage-policy", "",
-		"Storage policy associated with Kubernetes API server.")
+		"Storage Policy associated with Kubernetes API server.")
 	f.StringVar(&cmd.EphemeralStoragePolicy, "ephemeral-storage-policy", "",
-		"Storage policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.")
+		"Storage Policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.")
 	f.StringVar(&cmd.ImageStoragePolicy, "image-storage-policy", "",
-		"Storage policy to be used for container images.")
+		"Storage Policy to be used for container images.")
 	f.StringVar(&cmd.LoginBanner, "login-banner", "",
 		"Optional. Disclaimer to be displayed prior to login via the Kubectl plugin.")
 	// documented API is currently ambiguous with these duplicated fields, need to wait for this to be resolved
