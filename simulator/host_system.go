@@ -283,3 +283,29 @@ func (h *HostSystem) ExitMaintenanceModeTask(ctx *Context, spec *types.ExitMaint
 		},
 	}
 }
+
+func (h *HostSystem) DisconnectHostTask(ctx *Context, spec *types.DisconnectHost_Task) soap.HasFault {
+	task := CreateTask(h, "disconnectHost", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		h.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
+		return nil, nil
+	})
+
+	return &methods.DisconnectHost_TaskBody{
+		Res: &types.DisconnectHost_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (h *HostSystem) ReconnectHostTask(ctx *Context, spec *types.ReconnectHost_Task) soap.HasFault {
+	task := CreateTask(h, "reconnectHost", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		h.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
+		return nil, nil
+	})
+
+	return &methods.ReconnectHost_TaskBody{
+		Res: &types.ReconnectHost_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
