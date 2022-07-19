@@ -556,6 +556,7 @@ func (m *Model) Create() error {
 				disk := devices.CreateDisk(scsi.(types.BaseVirtualController), ds,
 					config.Files.VmPathName+" "+path.Join(name, "disk1.vmdk"))
 				disk.CapacityInKB = int64(units.GB*10) / units.KB
+				disk.StorageIOAllocation = &types.StorageIOAllocationInfo{Limit: types.NewInt64(-1)}
 
 				devices = append(devices, scsi, cdrom, disk, &nic)
 
