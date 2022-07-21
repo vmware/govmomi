@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,7 +33,7 @@ type enableCluster struct {
 	ControlPlaneDNSSearchDomains           string
 	ImageStoragePolicy                     string
 	NcpClusterNetworkSpec                  workloadNetwork
-	ControlPlaneManagementNetwork          namespace.MasterManagementNetwork
+	ControlPlaneManagementNetwork          masterManagementNetwork
 	ControlPlaneDNSNames                   string
 	ControlPlaneNTPServers                 string
 	EphemeralStoragePolicy                 string
@@ -49,6 +49,13 @@ type enableCluster struct {
 	DefaultKubernetesServiceContentLibrary string
 
 	*flags.ClusterFlag
+}
+
+type masterManagementNetwork struct {
+	Mode         string
+	FloatingIP   string
+	AddressRange *namespace.AddressRange
+	Network      string
 }
 
 type workloadNetwork struct {
@@ -71,7 +78,7 @@ type objectReferences struct {
 
 func init() {
 	newEnableCluster := &enableCluster{
-		ControlPlaneManagementNetwork: namespace.MasterManagementNetwork{
+		ControlPlaneManagementNetwork: masterManagementNetwork{
 			AddressRange: &namespace.AddressRange{},
 		},
 	}
@@ -303,7 +310,11 @@ func (cmd *enableCluster) toVapiSpec(refs objectReferences) (*namespace.EnableCl
 	if (cmd.ControlPlaneManagementNetwork.Mode != "") ||
 		(cmd.ControlPlaneManagementNetwork.FloatingIP != "") ||
 		(cmd.ControlPlaneManagementNetwork.Network != "") {
-		masterManagementNetwork = &cmd.ControlPlaneManagementNetwork
+		masterManagementNetwork.AddressRange = cmd.ControlPlaneManagementNetwork.AddressRange
+		masterManagementNetwork.FloatingIP = cmd.ControlPlaneManagementNetwork.FloatingIP
+		ipam := namespace.IpAssignmentModeFromString(cmd.ControlPlaneManagementNetwork.Mode)
+		masterManagementNetwork.Mode = &ipam
+		masterManagementNetwork.Network = cmd.ControlPlaneManagementNetwork.Network
 	}
 	if masterManagementNetwork != nil {
 		if (masterManagementNetwork.AddressRange.SubnetMask == "") &&
@@ -315,9 +326,12 @@ func (cmd *enableCluster) toVapiSpec(refs objectReferences) (*namespace.EnableCl
 		masterManagementNetwork.Network = refs.Network
 	}
 
+	sh := namespace.SizingHintFromString(cmd.SizeHint)
+	np := namespace.ClusterNetworkProviderFromString(cmd.NetworkProvider)
+
 	spec := namespace.EnableClusterSpec{
 		MasterDNSSearchDomains: splitCommaSeparatedList(cmd.ControlPlaneDNSSearchDomains),
-		ImageStorage:           namespace.ImageStorage{StoragePolicy: refs.ImageStoragePolicy},
+		ImageStorage:           namespace.ImageStorageSpec{StoragePolicy: refs.ImageStoragePolicy},
 		NcpClusterNetworkSpec: &namespace.NcpClusterNetworkSpec{
 			NsxEdgeCluster:           refs.EdgeCluster,
 			PodCidrs:                 podCidrs,
@@ -332,11 +346,11 @@ func (cmd *enableCluster) toVapiSpec(refs objectReferences) (*namespace.EnableCl
 		DefaultImageRepository:                 cmd.DefaultImageRepository,
 		ServiceCidr:                            serviceCidr,
 		LoginBanner:                            cmd.LoginBanner,
-		SizeHint:                               cmd.SizeHint,
+		SizeHint:                               &sh,
 		WorkerDNS:                              splitCommaSeparatedList(cmd.WorkerDNS),
 		DefaultImageRegistry:                   nil,
 		MasterDNS:                              splitCommaSeparatedList(cmd.ControlPlaneDNS),
-		NetworkProvider:                        cmd.NetworkProvider,
+		NetworkProvider:                        &np,
 		MasterStoragePolicy:                    refs.ControlPlaneStoragePolicy,
 		DefaultKubernetesServiceContentLibrary: cmd.DefaultKubernetesServiceContentLibrary,
 	}
