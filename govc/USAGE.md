@@ -204,6 +204,7 @@ but appear via `govc $cmd -h`:
  - [library.import](#libraryimport)
  - [library.info](#libraryinfo)
  - [library.ls](#libraryls)
+ - [library.policy.ls](#librarypolicyls)
  - [library.publish](#librarypublish)
  - [library.rm](#libraryrm)
  - [library.session.ls](#librarysessionls)
@@ -3204,6 +3205,7 @@ Examples:
 Options:
   -d=                    Description of library
   -ds=                   Datastore [GOVC_DATASTORE]
+  -policy=               Security Policy ID
   -pub=<nil>             Publish library
   -pub-password=         Publication password
   -pub-username=         Publication username
@@ -3324,6 +3326,20 @@ Examples:
   govc library.ls */
   govc library.ls -json | jq .
   govc library.ls /lib1/item1 -json | jq .
+
+Options:
+```
+
+## library.policy.ls
+
+```
+Usage: govc library.policy.ls [OPTIONS]
+
+List security policies for content libraries.
+
+Examples:
+  govc library.policy.ls
+
 
 Options:
 ```
@@ -3848,9 +3864,9 @@ Options:
   -control-plane-dns-names=                Comma-separated list of DNS names to associate with the Kubernetes API server. These DNS names are embedded in the TLS certificate presented by the API server.
   -control-plane-dns-search-domains=       Comma-separated list of domains to be searched when trying to lookup a host name on Kubernetes API server, specified in order of preference.
   -control-plane-ntp-servers=              Optional. Comma-separated list of NTP server DNS names or IP addresses to use on Kubernetes API server, specified in order of preference. If unset, VMware Tools based time synchronization is enabled.
-  -control-plane-storage-policy=           Storage policy associated with Kubernetes API server.
-  -ephemeral-storage-policy=               Storage policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.
-  -image-storage-policy=                   Storage policy to be used for container images.
+  -control-plane-storage-policy=           Storage Policy associated with Kubernetes API server.
+  -ephemeral-storage-policy=               Storage Policy associated with ephemeral disks of all the Kubernetes Pods in the cluster.
+  -image-storage-policy=                   Storage Policy to be used for container images.
   -login-banner=                           Optional. Disclaimer to be displayed prior to login via the Kubectl plugin.
   -mgmt-network.address-count=5            The number of IP addresses in the management range. Optional, but required with network mode STATICRANGE.
   -mgmt-network.floating-IP=               Optional. The Floating IP used by the HA master cluster in the when network Mode is DHCP.

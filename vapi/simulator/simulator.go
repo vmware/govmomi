@@ -45,6 +45,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/ovf"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/vapi"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/rest"
@@ -94,19 +95,22 @@ type handler struct {
 	Library     map[string]*content
 	Update      map[string]update
 	Download    map[string]download
+	Policies    []library.ContentSecurityPoliciesInfo
 }
 
 func init() {
 	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
 		if r.IsVPX() {
-			path, handler := New(s.Listen, r.OptionManager().Setting)
-			s.Handle(path, handler)
+			patterns, h := New(s.Listen, r.OptionManager().Setting)
+			for _, p := range patterns {
+				s.Handle(p, h)
+			}
 		}
 	})
 }
 
 // New creates a vAPI simulator.
-func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
+func New(u *url.URL, settings []vim.BaseOptionValue) ([]string, http.Handler) {
 	s := &handler{
 		ServeMux:    http.NewServeMux(),
 		URL:         *u,
@@ -117,12 +121,14 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		Library:     make(map[string]*content),
 		Update:      make(map[string]update),
 		Download:    make(map[string]download),
+		Policies:    defaultSecurityPolicies(),
 	}
 
 	handlers := []struct {
 		p string
 		m http.HandlerFunc
 	}{
+		// /rest/ patterns.
 		{internal.SessionPath, s.session},
 		{internal.CategoryPath, s.category},
 		{internal.CategoryPath + "/", s.categoryID},
@@ -158,6 +164,8 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
 		{internal.VCenterVM + "/", s.vmID},
 		{internal.DebugEcho, s.debugEcho},
+		// /api/ patterns.
+		{internal.SecurityPoliciesPath, s.librarySecurityPolicies},
 	}
 
 	for i := range handlers {
@@ -165,7 +173,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) (string, http.Handler) {
 		s.HandleFunc(h.p, h.m)
 	}
 
-	return rest.Path + "/", s
+	return []string{rest.Path + "/", vapi.Path + "/"}, s
 }
 
 func (s *handler) withClient(f func(context.Context, *vim25.Client) error) error {
@@ -182,7 +190,8 @@ func (s *handler) withClient(f func(context.Context, *vim25.Client) error) error
 
 // HandleFunc wraps the given handler with authorization checks and passes to http.ServeMux.HandleFunc
 func (s *handler) HandleFunc(pattern string, handler func(http.ResponseWriter, *http.Request)) {
-	if !strings.HasPrefix(pattern, rest.Path) {
+	// Rest paths have been moved from /rest/* to /api/*. Account for both the legacy and new cases here.
+	if !strings.HasPrefix(pattern, rest.Path) && !strings.HasPrefix(pattern, vapi.Path) {
 		pattern = rest.Path + pattern
 	}
 
@@ -771,10 +780,16 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 			}
 			OK(w, ids)
 		case "":
+			if !s.isValidSecurityPolicy(spec.Library.SecurityPolicyID) {
+				http.NotFound(w, r)
+				return
+			}
+
 			id := uuid.New().String()
 			spec.Library.ID = id
 			spec.Library.CreationTime = types.NewTime(time.Now())
 			spec.Library.LastModifiedTime = types.NewTime(time.Now())
+			spec.Library.UnsetSecurityPolicyID = spec.Library.SecurityPolicyID == ""
 			dir := libraryPath(&spec.Library, "")
 			if err := os.Mkdir(dir, 0750); err != nil {
 				s.error(w, err)
@@ -2137,6 +2152,42 @@ func (s *handler) libraryItemCheckOuts(item *item, w http.ResponseWriter, r *htt
 	default:
 		http.NotFound(w, r)
 	}
+}
+
+// defaultSecurityPolicies generates the initial set of security policies always present on vCenter.
+func defaultSecurityPolicies() []library.ContentSecurityPoliciesInfo {
+	policyID, _ := uuid.NewUUID()
+	return []library.ContentSecurityPoliciesInfo{
+		{
+			ItemTypeRules: map[string]string{
+				"ovf": "OVF_STRICT_VERIFICATION",
+			},
+			Name:   "OVF default policy",
+			Policy: policyID.String(),
+		},
+	}
+}
+
+func (s *handler) librarySecurityPolicies(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		StatusOK(w, s.Policies)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *handler) isValidSecurityPolicy(policy string) bool {
+	if policy == "" {
+		return true
+	}
+
+	for _, p := range s.Policies {
+		if p.Policy == policy {
+			return true
+		}
+	}
+	return false
 }
 
 func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
