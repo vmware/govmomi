@@ -1209,7 +1209,7 @@ func TestCreateVmWithDevices(t *testing.T) {
 	}
 }
 
-func TestReconfigureDevicesCapacity(t *testing.T) {
+func TestAddedDiskCapacity(t *testing.T) {
 	tests := []struct {
 		name                    string
 		capacityInBytes         int64
@@ -1297,6 +1297,140 @@ func TestReconfigureDevicesCapacity(t *testing.T) {
 						test.expectedCapacityInKB, newDisk.CapacityInKB)
 				}
 
+			}, m)
+		})
+	}
+}
+
+func TestEditedDiskCapacity(t *testing.T) {
+	tests := []struct {
+		name                    string
+		capacityInBytes         int64
+		capacityInKB            int64
+		expectedCapacityInBytes int64
+		expectedCapacityInKB    int64
+		expectedErr             types.BaseMethodFault
+	}{
+		{
+			"specify same capacities as before",
+			10 * 1024 * 1024 * 1024, // 10GB
+			10 * 1024 * 1024,        // 10GB
+			10 * 1024 * 1024 * 1024, // 10GB
+			10 * 1024 * 1024,        // 10GB
+			nil,
+		},
+		{
+			"increase only capacityInBytes",
+			20 * 1024 * 1024 * 1024, // 20GB
+			10 * 1024 * 1024,        // 10GB
+			20 * 1024 * 1024 * 1024, // 20GB
+			20 * 1024 * 1024,        // 20GB
+			nil,
+		},
+		{
+			"increase only capacityInKB",
+			10 * 1024 * 1024 * 1024, // 10GB
+			20 * 1024 * 1024,        // 20GB
+			20 * 1024 * 1024 * 1024, // 20GB
+			20 * 1024 * 1024,        // 20GB
+			nil,
+		},
+		{
+			"increase both capacityInBytes and capacityInKB",
+			20 * 1024 * 1024 * 1024, // 20GB
+			20 * 1024 * 1024,        // 20GB
+			20 * 1024 * 1024 * 1024, // 20GB
+			20 * 1024 * 1024,        // 20GB
+			nil,
+		},
+		{
+			"increase both capacityInBytes and capacityInKB but value is different",
+			20 * 1024 * 1024 * 1024, // 20GB
+			30 * 1024 * 1024,        // 30GB
+			0,
+			0,
+			new(types.InvalidDeviceOperation),
+		},
+		{
+			"decrease capacity",
+			1 * 1024 * 1024 * 1024, // 1GB
+			1 * 1024 * 1024,        // 1GB
+			0,
+			0,
+			new(types.InvalidDeviceOperation),
+		},
+	}
+
+	for _, test := range tests {
+		test := test // assign to local var since loop var is reused
+		t.Run(test.name, func(t *testing.T) {
+			m := ESX()
+
+			Test(func(ctx context.Context, c *vim25.Client) {
+				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vm := object.NewVirtualMachine(c, vmm.Reference())
+				ds := Map.Any("Datastore").(*Datastore)
+
+				// create a new 10GB disk
+				devices, err := vm.Device(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				controller, err := devices.FindDiskController("")
+				if err != nil {
+					t.Fatal(err)
+				}
+				disk := devices.CreateDisk(controller, ds.Reference(), "")
+				disk.CapacityInBytes = 10 * 1024 * 1024 * 1024 // 10GB
+				err = vm.AddDevice(ctx, disk)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// edit its capacity
+				addedDevices, err := vm.Device(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+				addedDisks := addedDevices.SelectByType((*types.VirtualDisk)(nil))
+				if len(addedDisks) == 0 {
+					t.Fatal("disk not found")
+				}
+				addedDisk := addedDisks[0].(*types.VirtualDisk)
+				addedDisk.CapacityInBytes = test.capacityInBytes
+				addedDisk.CapacityInKB = test.capacityInKB
+				err = vm.EditDevice(ctx, addedDisk)
+
+				if test.expectedErr != nil {
+					terr, ok := err.(task.Error)
+					if !ok {
+						t.Fatalf("error should be task.Error. actual: %T", err)
+					}
+
+					if !reflect.DeepEqual(terr.Fault(), test.expectedErr) {
+						t.Errorf("expectedErr: %v, actualErr: %v", test.expectedErr, terr.Fault())
+					}
+				} else {
+					// obtain the disk again
+					editedDevices, err := vm.Device(ctx)
+					if err != nil {
+						t.Fatal(err)
+					}
+					editedDisks := editedDevices.SelectByType((*types.VirtualDisk)(nil))
+					if len(editedDevices) == 0 {
+						t.Fatal("disk not found")
+					}
+					editedDisk := editedDisks[len(editedDisks)-1].(*types.VirtualDisk)
+
+					if editedDisk.CapacityInBytes != test.expectedCapacityInBytes {
+						t.Errorf("CapacityInBytes expected %d, got %d",
+							test.expectedCapacityInBytes, editedDisk.CapacityInBytes)
+					}
+					if editedDisk.CapacityInKB != test.expectedCapacityInKB {
+						t.Errorf("CapacityInKB expected %d, got %d",
+							test.expectedCapacityInKB, editedDisk.CapacityInKB)
+					}
+				}
 			}, m)
 		})
 	}

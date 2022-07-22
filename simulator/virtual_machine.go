@@ -1065,6 +1065,27 @@ func getDiskSize(disk *types.VirtualDisk) int64 {
 	return disk.CapacityInBytes
 }
 
+func changedDiskSize(oldDisk *types.VirtualDisk, newDiskSpec *types.VirtualDisk) (int64, bool) {
+	// capacity cannot be decreased
+	if newDiskSpec.CapacityInBytes < oldDisk.CapacityInBytes || newDiskSpec.CapacityInKB < oldDisk.CapacityInKB {
+		return 0, false
+	}
+
+	// NOTE: capacity is ignored if specified value is same as before
+	if newDiskSpec.CapacityInBytes == oldDisk.CapacityInBytes {
+		return newDiskSpec.CapacityInKB * 1024, true
+	}
+	if newDiskSpec.CapacityInKB == oldDisk.CapacityInKB {
+		return newDiskSpec.CapacityInBytes, true
+	}
+
+	// CapacityInBytes and CapacityInKB indicate different values
+	if newDiskSpec.CapacityInBytes != newDiskSpec.CapacityInKB*1024 {
+		return 0, false
+	}
+	return newDiskSpec.CapacityInBytes, true
+}
+
 func (vm *VirtualMachine) validateSwitchMembers(id string) types.BaseMethodFault {
 	var dswitch *DistributedVirtualSwitch
 
@@ -1189,9 +1210,20 @@ func (vm *VirtualMachine) configureDevice(
 			}
 		}
 	case *types.VirtualDisk:
-		// NOTE: either of capacityInBytes and capacityInKB may not be specified
-		x.CapacityInBytes = getDiskSize(x)
-		x.CapacityInKB = getDiskSize(x) / 1024
+		if oldDevice == nil {
+			// NOTE: either of capacityInBytes and capacityInKB may not be specified
+			x.CapacityInBytes = getDiskSize(x)
+			x.CapacityInKB = getDiskSize(x) / 1024
+		} else {
+			if oldDisk, ok := oldDevice.(*types.VirtualDisk); ok {
+				diskSize, ok := changedDiskSize(oldDisk, x)
+				if !ok {
+					return &types.InvalidDeviceOperation{}
+				}
+				x.CapacityInBytes = diskSize
+				x.CapacityInKB = diskSize / 1024
+			}
+		}
 
 		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
 		switch b := d.Backing.(type) {
