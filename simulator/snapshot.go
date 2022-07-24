@@ -123,9 +123,16 @@ func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.Rem
 			rootSnapshots := removeSnapshotInTree(vm.Snapshot.RootSnapshotList, req.This, req.RemoveChildren)
 			changes = append(changes, types.PropertyChange{Name: "snapshot.rootSnapshotList", Val: rootSnapshots})
 
+			rootSnapshotRefs := make([]types.ManagedObjectReference, len(rootSnapshots))
+			for i, rs := range rootSnapshots {
+				rootSnapshotRefs[i] = rs.Snapshot
+			}
+			changes = append(changes, types.PropertyChange{Name: "rootSnapshot", Val: rootSnapshotRefs})
+
 			if len(rootSnapshots) == 0 {
 				changes = []types.PropertyChange{
 					{Name: "snapshot", Val: nil},
+					{Name: "rootSnapshot", Val: nil},
 				}
 			}
 
