@@ -2200,6 +2200,10 @@ func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnap
 				Name: "snapshot.rootSnapshotList",
 				Val:  append(vm.Snapshot.RootSnapshotList, treeItem),
 			})
+			changes = append(changes, types.PropertyChange{
+				Name: "rootSnapshot",
+				Val:  append(vm.RootSnapshot, treeItem.Snapshot),
+			})
 		}
 
 		snapshot.createSnapshotFiles()
@@ -2247,6 +2251,7 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{Name: "snapshot", Val: nil},
+			{Name: "rootSnapshot", Val: nil},
 		})
 
 		for _, ref := range refs {

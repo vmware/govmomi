@@ -1637,6 +1637,10 @@ func TestVmSnapshot(t *testing.T) {
 	if err == errEmptyField {
 		t.Fatal("snapshot property should not be 'nil' if there are snapshots")
 	}
+	// NOTE: fieldValue cannot be used for nil check
+	if len(simVm.(*VirtualMachine).RootSnapshot) == 0 {
+		t.Fatal("rootSnapshot property should have elements if there are snapshots")
+	}
 
 	task, err = vm.CreateSnapshot(ctx, "child", "description", true, true)
 	if err != nil {
@@ -1687,6 +1691,10 @@ func TestVmSnapshot(t *testing.T) {
 	if err == errEmptyField {
 		t.Fatal("snapshot property should not be 'nil' if there are snapshots")
 	}
+	// NOTE: fieldValue cannot be used for nil check
+	if len(simVm.(*VirtualMachine).RootSnapshot) == 0 {
+		t.Fatal("rootSnapshot property should have elements if there are snapshots")
+	}
 
 	_, err = vm.FindSnapshot(ctx, "child")
 	if err == nil {
@@ -1706,6 +1714,10 @@ func TestVmSnapshot(t *testing.T) {
 	_, err = fieldValue(reflect.ValueOf(simVm), "snapshot")
 	if err != errEmptyField {
 		t.Fatal("snapshot property should be 'nil' if there are no snapshots")
+	}
+	// NOTE: fieldValue cannot be used for nil check
+	if len(simVm.(*VirtualMachine).RootSnapshot) != 0 {
+		t.Fatal("rootSnapshot property should not have elements if there are no snapshots")
 	}
 
 	_, err = vm.FindSnapshot(ctx, "root")
