@@ -113,6 +113,10 @@ func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectRefe
 			r.Type = reflect.TypeOf(e).Elem().Name()
 		}
 
+		if cmd.Long {
+			r.Key = event.Key
+		}
+
 		// if this is a TaskEvent gather a little more information
 		if t, ok := e.(*types.TaskEvent); ok {
 			// some tasks won't have this information, so just use the event message
@@ -134,6 +138,7 @@ type record struct {
 	CreatedTime time.Time
 	Category    string
 	Message     string
+	Key         int32 `json:",omitempty"`
 
 	event types.BaseEvent
 }
@@ -145,11 +150,14 @@ func (r *record) Dump() interface{} {
 
 func (r *record) Write(w io.Writer) error {
 	when := r.CreatedTime.Local().Format(time.ANSIC)
-	var kind string
+	var kind, key string
 	if r.Type != "" {
 		kind = fmt.Sprintf(" [%s]", r.Type)
 	}
-	_, err := fmt.Fprintf(w, "[%s] [%s]%s %s\n", when, r.Category, kind, r.Message)
+	if r.Key != 0 {
+		key = fmt.Sprintf(" [%d]", r.Key)
+	}
+	_, err := fmt.Fprintf(w, "[%s] [%s]%s%s %s\n", when, r.Category, key, kind, r.Message)
 	return err
 }
 

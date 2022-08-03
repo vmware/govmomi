@@ -15,6 +15,13 @@ load test_helper
   run govc events -n $((nevents - 1))
   assert_success
   [ ${#lines[@]} -le $nevents ]
+
+  # test keys in json
+  [ "$(govc events -l -n 1 -json | jq -r 'has("CreatedTime")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("Category")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("Message")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("Type")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("Key")')" = "true" ]
 }
 
 @test "events host" {
