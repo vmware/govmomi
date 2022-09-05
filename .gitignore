@@ -10,3 +10,4 @@ dist/
 
 # Ignore editor temp files
 *~
+.vscode/
