@@ -145,6 +145,27 @@ func (m VirtualDiskManager) DeleteVirtualDisk(ctx context.Context, name string, 
 	return NewTask(m.c, res.Returnval), nil
 }
 
+// ExtendVirtualDisk extends a virtual disk
+func (m VirtualDiskManager) ExtendVirtualDisk(ctx context.Context, name string, dc *Datacenter, newSize int64) (*Task, error) {
+	req := types.ExtendVirtualDisk_Task{
+		This:          m.Reference(),
+		Name:          name,
+		NewCapacityKb: newSize,
+	}
+
+	if dc != nil {
+		ref := dc.Reference()
+		req.Datacenter = &ref
+	}
+
+	res, err := methods.ExtendVirtualDisk_Task(ctx, m.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(m.c, res.Returnval), nil
+}
+
 // InflateVirtualDisk inflates a virtual disk.
 func (m VirtualDiskManager) InflateVirtualDisk(ctx context.Context, name string, dc *Datacenter) (*Task, error) {
 	req := types.InflateVirtualDisk_Task{
