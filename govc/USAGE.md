@@ -275,6 +275,7 @@ but appear via `govc $cmd -h`:
  - [snapshot.tree](#snapshottree)
  - [sso.group.create](#ssogroupcreate)
  - [sso.group.ls](#ssogroupls)
+ - [sso.group.ls](#ssogrouplsgroups)
  - [sso.group.rm](#ssogrouprm)
  - [sso.group.update](#ssogroupupdate)
  - [sso.idp.ls](#ssoidpls)
@@ -4657,6 +4658,18 @@ Examples:
 Options:
 ```
 
+## sso.group.lsgroups
+
+```
+Usage: sso.group.lsgroups [OPTIONS] NAME
+
+List SSO groups, which are members of a local group NAME.
+
+Examples:
+  govc sso.group.lsgroups
+  govc sso.group.lsgroups syncusers
+  govc sso.group.lsgroups -json syncusers
+```
 ## sso.group.rm
 
 ```
