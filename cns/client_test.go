@@ -716,6 +716,9 @@ func TestClient(t *testing.T) {
 		Names: []string{
 			string(cnstypes.CnsQuerySelectionName_VOLUME_NAME),
 			string(cnstypes.CnsQuerySelectionName_VOLUME_TYPE),
+			string(cnstypes.CnsQuerySelectionName_DATASTORE_URL),
+			string(cnstypes.CnsQuerySelectionName_STORAGE_POLICY_ID),
+			string(cnstypes.CnsQuerySelectionName_HEALTH_STATUS),
 			string(cnstypes.CnsQuerySelectionName_BACKING_OBJECT_DETAILS),
 			string(cnstypes.CnsQuerySelectionName_COMPLIANCE_STATUS),
 			string(cnstypes.CnsQuerySelectionName_DATASTORE_ACCESSIBILITY_STATUS),
