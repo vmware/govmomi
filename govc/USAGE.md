@@ -4655,6 +4655,7 @@ Examples:
   govc sso.group.ls
   govc sso.group.ls group-name # list groups in group-name
   govc sso.group.ls -search Admin # search for groups`
+
 Options:
   -search string # search for groups
 ```
@@ -4779,6 +4780,7 @@ List SSO users.
 Examples:
   govc sso.user.ls -s
   govc sso.user.ls -group group-name # list users in group-name
+
 Options:
   -s=false               List solution users
   -group                 List users in group-name
