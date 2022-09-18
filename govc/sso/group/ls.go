@@ -33,6 +33,9 @@ import (
 type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	search string
+	users  bool
 }
 
 func init() {
@@ -45,13 +48,23 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.search, "s", "", "Search")
+	f.BoolVar(&cmd.users, "users", false, "List users in group")
+}
+
+func (cmd *ls) Usage() string {
+	return "[NAME]"
 }
 
 func (cmd *ls) Description() string {
 	return `List SSO groups.
 
 Examples:
-  govc sso.group.ls -s`
+  govc sso.group.ls
+  govc sso.group.ls group-name # list groups in group-name
+  govc sso.group.ls -users group-name # list users in group-name instead groups
+  govc sso.group.ls -s Admin # search for groups`
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -75,15 +88,43 @@ func (r groupResult) Write(w io.Writer) error {
 	return tw.Flush()
 }
 
+type userResult []types.AdminUser
+
+func (r userResult) Dump() interface{} {
+	return []types.AdminUser(r)
+}
+
+func (r userResult) Write(w io.Writer) error {
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	for _, info := range r {
+		fmt.Fprintf(tw, "%s\t%s\n", info.Id.Name, info.Description)
+	}
+	return tw.Flush()
+}
+
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	arg := f.Arg(0)
-
 	return sso.WithClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {
-		info, err := c.FindGroups(ctx, arg)
-		if err != nil {
-			return err
+		if f.NArg() == 0 && !cmd.users {
+			info, err := c.FindGroups(ctx, cmd.search)
+			if err != nil {
+				return err
+			}
+			return cmd.WriteResult(groupResult(info))
 		}
-
-		return cmd.WriteResult(groupResult(info))
+		if f.NArg() != 0 && cmd.users {
+			info, err := c.FindUsersInGroup(ctx, f.Arg(0), cmd.search)
+			if err != nil {
+				return err
+			}
+			return cmd.WriteResult(userResult(info))
+		}
+		if f.NArg() != 0 {
+			info, err := c.FindGroupsInGroup(ctx, f.Arg(0), cmd.search)
+			if err != nil {
+				return err
+			}
+			return cmd.WriteResult(groupResult(info))
+		}
+		return flag.ErrHelp
 	})
 }
