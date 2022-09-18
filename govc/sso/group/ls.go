@@ -98,6 +98,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
+
 		return cmd.WriteResult(groupResult(info))
 	})
 }
