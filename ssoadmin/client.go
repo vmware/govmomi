@@ -363,12 +363,28 @@ func (c *Client) FindGroups(ctx context.Context, search string) ([]types.AdminGr
 	return res.Returnval, nil
 }
 
+func (c *Client) FindUsersInGroup(ctx context.Context, name string, search string) ([]types.AdminUser, error) {
+	req := types.FindUsersInGroup{
+		This:         c.ServiceContent.PrincipalDiscoveryService,
+		GroupId:      c.parseID(name),
+		SearchString: search,
+		Limit:        c.Limit,
+	}
+
+	res, err := methods.FindUsersInGroup(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
 func (c *Client) FindGroupsInGroup(ctx context.Context, name string, search string) ([]types.AdminGroup, error) {
 	req := types.FindGroupsInGroup{
-		This: c.ServiceContent.PrincipalDiscoveryService,
-		GroupId: c.parseID(name),
+		This:         c.ServiceContent.PrincipalDiscoveryService,
+		GroupId:      c.parseID(name),
 		SearchString: search,
-		Limit: c.Limit,
+		Limit:        c.Limit,
 	}
 
 	res, err := methods.FindGroupsInGroup(ctx, c, &req)
