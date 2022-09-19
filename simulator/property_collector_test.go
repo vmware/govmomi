@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -843,6 +844,53 @@ func TestPropertyCollectorInvalidSpecName(t *testing.T) {
 
 	if _, ok := err.(*types.InvalidArgument); !ok {
 		t.Errorf("unexpected fault: %#v", err)
+	}
+}
+
+func TestPropertyCollectorInvalidProperty(t *testing.T) {
+	tests := []struct {
+		name          string
+		path          string
+		expectedFault types.BaseMethodFault
+	}{
+		{
+			"specify property of array property",
+			"config.hardware.device.key",
+			new(types.InvalidProperty),
+		},
+	}
+
+	for _, test := range tests {
+		test := test // assign to local var since loop var is reused
+
+		t.Run(test.name, func(t *testing.T) {
+			m := ESX()
+
+			Test(func(ctx context.Context, c *vim25.Client) {
+				pc := property.DefaultCollector(c)
+
+				vm := Map.Any("VirtualMachine")
+				vmRef := vm.Reference()
+
+				var vmMo mo.VirtualMachine
+				err := pc.RetrieveOne(ctx, vmRef, []string{test.path}, &vmMo)
+				if err == nil {
+					t.Fatal("expected error")
+				}
+
+				// NOTE: since soap.vimFaultError is not exported, use interface literal for assertion instead
+				fault, ok := err.(interface {
+					Fault() types.BaseMethodFault
+				})
+				if !ok {
+					t.Fatalf("err does not have fault: type: %T", err)
+				}
+
+				if reflect.TypeOf(fault.Fault()) != reflect.TypeOf(test.expectedFault) {
+					t.Errorf("expected fault: %T, actual fault: %T", test.expectedFault, fault.Fault())
+				}
+			}, m)
+		})
 	}
 }
 
