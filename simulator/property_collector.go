@@ -52,6 +52,7 @@ func NewPropertyCollector(ref types.ManagedObjectReference) object.Reference {
 
 var errMissingField = errors.New("missing field")
 var errEmptyField = errors.New("empty field")
+var errInvalidField = errors.New("invalid field")
 
 func getObject(ctx *Context, ref types.ManagedObjectReference) (reflect.Value, bool) {
 	var obj mo.Reference
@@ -178,6 +179,11 @@ func fieldValue(rval reflect.Value, p string) (interface{}, error) {
 				continue
 			}
 			rval = rval.Elem()
+		}
+
+		if kind == reflect.Slice {
+			// field of array field cannot be specified
+			return nil, errInvalidField
 		}
 
 		x := ucFirst(name)
@@ -310,6 +316,13 @@ func (rr *retrieveResult) collectFields(ctx *Context, rval reflect.Value, fields
 		case nil, errEmptyField:
 			rr.add(ctx, name, val, content)
 		case errMissingField:
+			content.MissingSet = append(content.MissingSet, types.MissingProperty{
+				Path: name,
+				Fault: types.LocalizedMethodFault{Fault: &types.InvalidProperty{
+					Name: name,
+				}},
+			})
+		case errInvalidField:
 			content.MissingSet = append(content.MissingSet, types.MissingProperty{
 				Path: name,
 				Fault: types.LocalizedMethodFault{Fault: &types.InvalidProperty{
