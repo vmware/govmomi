@@ -56,7 +56,7 @@ const (
 	QuerySelectionNameTypeDataStoreAccessibility = QuerySelectionNameType("DATASTORE_ACCESSIBILITY_STATUS")
 	QuerySelectionNameTypeHealthStatus           = QuerySelectionNameType("HEALTH_STATUS")
 	QuerySelectionNameTypeDataStoreUrl           = QuerySelectionNameType("DATASTORE_URL")
-	QuerySelectionNameTypeStoragePolicyId        = QuerySelectionNameType("POLICY_ID")
+	QuerySelectionNameTypePolicyId               = QuerySelectionNameType("POLICY_ID")
 )
 
 func init() {
@@ -91,7 +91,7 @@ const (
 	CnsQuerySelectionName_DATASTORE_ACCESSIBILITY_STATUS = CnsQuerySelectionNameType("DATASTORE_ACCESSIBILITY_STATUS")
 	CnsQuerySelectionName_HEALTH_STATUS                  = CnsQuerySelectionNameType("HEALTH_STATUS")
 	CnsQuerySelectionName_DATASTORE_URL                  = CnsQuerySelectionNameType("DATASTORE_URL")
-	CnsQuerySelectionName_STORAGE_POLICY_ID              = CnsQuerySelectionNameType("POLICY_ID")
+	CnsQuerySelectionName_POLICY_ID                      = CnsQuerySelectionNameType("POLICY_ID")
 )
 
 func init() {
