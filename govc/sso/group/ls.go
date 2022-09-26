@@ -33,6 +33,8 @@ import (
 type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	search string
 }
 
 func init() {
@@ -45,13 +47,21 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	f.StringVar(&cmd.search, "search", "", "Search")
+}
+
+func (cmd *ls) Usage() string {
+	return "[NAME]"
 }
 
 func (cmd *ls) Description() string {
 	return `List SSO groups.
 
 Examples:
-  govc sso.group.ls -s`
+  govc sso.group.ls
+  govc sso.group.ls group-name # list groups in group-name
+  govc sso.group.ls -search Admin # search for groups`
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -76,10 +86,15 @@ func (r groupResult) Write(w io.Writer) error {
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
-	arg := f.Arg(0)
-
 	return sso.WithClient(ctx, cmd.ClientFlag, func(c *ssoadmin.Client) error {
-		info, err := c.FindGroups(ctx, arg)
+		if f.NArg() == 0 {
+			info, err := c.FindGroups(ctx, cmd.search)
+			if err != nil {
+				return err
+			}
+			return cmd.WriteResult(groupResult(info))
+		}
+		info, err := c.FindGroupsInGroup(ctx, f.Arg(0), cmd.search)
 		if err != nil {
 			return err
 		}
