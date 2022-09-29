@@ -326,3 +326,23 @@ func CnsQuerySnapshots(ctx context.Context, r soap.RoundTripper, req *types.CnsQ
 
 	return resBody.Res, nil
 }
+
+type CnsReconfigVolumePolicyBody struct {
+	Req    *types.CnsReconfigVolumePolicy         `xml:"urn:vsan CnsReconfigVolumePolicy,omitempty"`
+	Res    *types.CnsReconfigVolumePolicyResponse `xml:"urn:vsan CnsReconfigVolumePolicyResponse,omitempty"`
+	Fault_ *soap.Fault                            `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsReconfigVolumePolicyBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CnsReconfigVolumePolicy(ctx context.Context, r soap.RoundTripper, req *types.CnsReconfigVolumePolicy) (*types.CnsReconfigVolumePolicyResponse, error) {
+	var reqBody, resBody CnsReconfigVolumePolicyBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}

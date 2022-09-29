@@ -30,7 +30,6 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/debug"
 	"github.com/vmware/govmomi/vim25/soap"
-	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/vmware/govmomi"
 	cnstypes "github.com/vmware/govmomi/cns/types"
@@ -53,18 +52,22 @@ func TestClient(t *testing.T) {
 
 	// set CNS_RUN_FILESHARE_TESTS environment to true, if your setup has vsanfileshare enabled.
 	// when CNS_RUN_FILESHARE_TESTS is not set to true, vsan file share related tests are skipped.
-	// example: export export CNS_RUN_FILESHARE_TESTS='true'
+	// example: export CNS_RUN_FILESHARE_TESTS='true'
 	run_fileshare_tests := os.Getenv("CNS_RUN_FILESHARE_TESTS")
 
 	// if backingDiskURLPath is not set, test for Creating Volume with setting BackingDiskUrlPath in the BackingObjectDetails of
 	// CnsVolumeCreateSpec will be skipped.
-	// example: Export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
+	// example: export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
 	backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
 
 	// if datastoreForMigration is not set, test for CNS Relocate API of a volume to another datastore is skipped.
 	// input format is same as CNS_DATASTORE. Format eg. "vSANDirect_10.92.217.162_mpx.vmhba0:C0:T2:L0"/ "vsandatastore"
 	// make sure that migration datastore is accessible from host on which CNS_DATASTORE is mounted.
 	datastoreForMigration := os.Getenv("CNS_MIGRATION_DATASTORE")
+
+	// if spbmPolicyId4Reconfig is not set, test for CnsReconfigVolumePolicy API will be skipped
+	// example: export CNS_SPBM_POLICY_ID_4_RECONFIG=6f64d90e-2ad5-4c4d-8cbc-a3330ebc496c
+	spbmPolicyId4Reconfig := os.Getenv("CNS_SPBM_POLICY_ID_4_RECONFIG")
 
 	if url == "" || datacenter == "" || datastore == "" {
 		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
@@ -393,7 +396,7 @@ func TestClient(t *testing.T) {
 	}
 	var snapshotSize int64
 	if len(queryResult.Volumes) > 0 {
-		snapshotSize = queryResult.Volumes[0].BackingObjectDetails.(cnstypes.BaseCnsBackingObjectDetails).GetCnsBackingObjectDetails().CapacityInMb
+		snapshotSize = queryResult.Volumes[0].BackingObjectDetails.GetCnsBackingObjectDetails().CapacityInMb
 	} else {
 		msg := fmt.Sprintf("failed to get the snapshot size by querying volume: %q", volumeId)
 		t.Fatal(msg)
@@ -541,6 +544,9 @@ func TestClient(t *testing.T) {
 			t.Fatal(err)
 		}
 		taskResults, err := GetTaskResultArray(ctx, relocateTaskInfo)
+		if err != nil {
+			t.Fatal(err)
+		}
 		for _, taskResult := range taskResults {
 			res := taskResult.GetCnsVolumeOperationResult()
 			if res.Fault != nil {
@@ -636,7 +642,7 @@ func TestClient(t *testing.T) {
 		EntityType: string(cnstypes.CnsKubernetesEntityTypePVC),
 		Namespace:  "default",
 		ReferredEntity: []cnstypes.CnsKubernetesEntityReference{
-			cnstypes.CnsKubernetesEntityReference{
+			{
 				EntityType: string(cnstypes.CnsKubernetesEntityTypePV),
 				EntityName: "pvc-53465372-5c12-4818-96f8-0ace4f4fd116",
 				Namespace:  "",
@@ -656,7 +662,7 @@ func TestClient(t *testing.T) {
 		EntityType: string(cnstypes.CnsKubernetesEntityTypePOD),
 		Namespace:  "default",
 		ReferredEntity: []cnstypes.CnsKubernetesEntityReference{
-			cnstypes.CnsKubernetesEntityReference{
+			{
 				EntityType: string(cnstypes.CnsKubernetesEntityTypePVC),
 				EntityName: "example-vanilla-block-pvc",
 				Namespace:  "default",
@@ -757,6 +763,9 @@ func TestClient(t *testing.T) {
 		},
 	}
 	defaultFolder, err := finder.DefaultFolder(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
 	var resourcePool *object.ResourcePool
 	if resporcePoolPath == "" {
 		resourcePool, err = finder.DefaultResourcePool(ctx)
@@ -1251,6 +1260,90 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("volume:%q deleted sucessfully", volumeID)
 	}
+
+	// Test CnsReconfigVolumePolicy API
+	if spbmPolicyId4Reconfig != "" {
+		var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
+		cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
+			Name:       "pvc-901e87eb-c2bd-11e9-806f-005056a0c9a0-1",
+			VolumeType: string(cnstypes.CnsVolumeTypeBlock),
+			Datastores: dsList,
+			Metadata: cnstypes.CnsVolumeMetadata{
+				ContainerCluster: containerCluster,
+			},
+			BackingObjectDetails: &cnstypes.CnsBlockBackingDetails{
+				CnsBackingObjectDetails: cnstypes.CnsBackingObjectDetails{
+					CapacityInMb: 5120,
+				},
+			},
+		}
+		cnsVolumeCreateSpecList = append(cnsVolumeCreateSpecList, cnsVolumeCreateSpec)
+		t.Logf("Creating volume using the spec: %+v", pretty.Sprint(cnsVolumeCreateSpecList))
+		createTask, err = cnsClient.CreateVolume(ctx, cnsVolumeCreateSpecList)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		createTaskInfo, err = GetTaskInfo(ctx, createTask)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		createTaskResult, err = GetTaskResult(ctx, createTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to create volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if createTaskResult == nil {
+			t.Fatalf("Empty create task results")
+			t.FailNow()
+		}
+		createVolumeOperationRes = createTaskResult.GetCnsVolumeOperationResult()
+		if createVolumeOperationRes.Fault != nil {
+			t.Fatalf("Failed to create volume: fault=%+v", createVolumeOperationRes.Fault)
+		}
+		volumeId = createVolumeOperationRes.VolumeId.Id
+		volumeCreateResult = (createTaskResult).(*cnstypes.CnsVolumeCreateResult)
+		t.Logf("volumeCreateResult %+v", volumeCreateResult)
+		t.Logf("Volume created sucessfully. volumeId: %s", volumeId)
+
+		t.Logf("Calling reconfigpolicy on volume %v with policy %+v \n", volumeId, spbmPolicyId4Reconfig)
+		reconfigSpecs := []cnstypes.CnsVolumePolicyReconfigSpec{
+			{
+				VolumeId: createVolumeOperationRes.VolumeId,
+				Profile: []vim25types.BaseVirtualMachineProfileSpec{
+					&vim25types.VirtualMachineDefinedProfileSpec{
+						ProfileId: spbmPolicyId4Reconfig,
+					},
+				},
+			},
+		}
+		reconfigTask, err := cnsClient.ReconfigVolumePolicy(ctx, reconfigSpecs)
+		if err != nil {
+			t.Errorf("Failed to reconfig policy %v on volume %v. Error: %+v \n", spbmPolicyId4Reconfig, volumeId, err)
+			t.Fatal(err)
+		}
+		reconfigTaskInfo, err := GetTaskInfo(ctx, reconfigTask)
+		if err != nil {
+			t.Errorf("Failed to reconfig volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		reconfigTaskResult, err := GetTaskResult(ctx, reconfigTaskInfo)
+		if err != nil {
+			t.Errorf("Failed to reconfig volume. Error: %+v \n", err)
+			t.Fatal(err)
+		}
+		if reconfigTaskResult == nil {
+			t.Fatalf("Empty reconfig task results")
+			t.FailNow()
+		}
+		reconfigVolumeOperationRes := reconfigTaskResult.GetCnsVolumeOperationResult()
+		if reconfigVolumeOperationRes.Fault != nil {
+			t.Fatalf("Failed to reconfig volume %v with policy %v: fault=%+v",
+				volumeId, spbmPolicyId4Reconfig, reconfigVolumeOperationRes.Fault)
+		}
+		t.Logf("reconfigpolicy on volume %v with policy %+v successful\n", volumeId, spbmPolicyId4Reconfig)
+	}
 }
 
 // isvSphereVersion70U3orAbove checks if specified version is 7.0 Update 3 or higher
@@ -1258,7 +1351,7 @@ func TestClient(t *testing.T) {
 // VC version, build number and so on.
 // If the version is 7.0 Update 3 or higher, the method returns true, else returns false
 // along with appropriate errors during failure cases
-func isvSphereVersion70U3orAbove(ctx context.Context, aboutInfo types.AboutInfo) bool {
+func isvSphereVersion70U3orAbove(ctx context.Context, aboutInfo vim25types.AboutInfo) bool {
 	items := strings.Split(aboutInfo.Version, ".")
 	version := strings.Join(items[:], "")
 	// Convert version string to string, Ex: "7.0.3" becomes 703, "7.0.3.1" becomes 703

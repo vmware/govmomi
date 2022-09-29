@@ -269,3 +269,16 @@ func (c *Client) QuerySnapshots(ctx context.Context, snapshotQueryFilter cnstype
 	}
 	return object.NewTask(c.vim25Client, res.Returnval), nil
 }
+
+// ReconfigVolumePolicy calls the CnsReconfigVolumePolicy API
+func (c *Client) ReconfigVolumePolicy(ctx context.Context, PolicyReconfigSpecs []cnstypes.CnsVolumePolicyReconfigSpec) (*object.Task, error) {
+	req := cnstypes.CnsReconfigVolumePolicy{
+		This:                      CnsVolumeManagerInstance,
+		VolumePolicyReconfigSpecs: PolicyReconfigSpecs,
+	}
+	res, err := methods.CnsReconfigVolumePolicy(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}

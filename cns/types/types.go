@@ -392,8 +392,8 @@ func init() {
 type CnsBlockBackingDetails struct {
 	CnsBackingObjectDetails
 
-	BackingDiskId      string `xml:"backingDiskId,omitempty"`
-	BackingDiskUrlPath string `xml:"backingDiskUrlPath,omitempty"`
+	BackingDiskId       string `xml:"backingDiskId,omitempty"`
+	BackingDiskUrlPath  string `xml:"backingDiskUrlPath,omitempty"`
 	BackingDiskObjectId string `xml:"backingDiskObjectId,omitempty"`
 }
 
@@ -460,7 +460,7 @@ type CnsQueryFilter struct {
 	ComplianceStatus             string                         `xml:"complianceStatus,omitempty"`
 	DatastoreAccessibilityStatus string                         `xml:"datastoreAccessibilityStatus,omitempty"`
 	Cursor                       *CnsCursor                     `xml:"cursor,omitempty"`
-	healthStatus                 string                         `xml:"healthStatus,omitempty"`
+	HealthStatus                 string                         `xml:"healthStatus,omitempty"`
 }
 
 func init() {
@@ -878,4 +878,34 @@ type CnsSnapshotQuerySpec struct {
 
 func init() {
 	types.Add("CnsSnapshotQuerySpec", reflect.TypeOf((*CnsSnapshotQuerySpec)(nil)).Elem())
+}
+
+type CnsReconfigVolumePolicy CnsReconfigVolumePolicyRequestType
+
+func init() {
+	types.Add("vsan:CnsReconfigVolumePolicy", reflect.TypeOf((*CnsReconfigVolumePolicy)(nil)).Elem())
+}
+
+type CnsReconfigVolumePolicyRequestType struct {
+	This                      types.ManagedObjectReference  `xml:"_this"`
+	VolumePolicyReconfigSpecs []CnsVolumePolicyReconfigSpec `xml:"volumePolicyReconfigSpecs,omitempty"`
+}
+
+func init() {
+	types.Add("vsan:CnsReconfigVolumePolicyRequestType", reflect.TypeOf((*CnsReconfigVolumePolicyRequestType)(nil)).Elem())
+}
+
+type CnsReconfigVolumePolicyResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
+
+type CnsVolumePolicyReconfigSpec struct {
+	types.DynamicData
+
+	VolumeId CnsVolumeId                           `xml:"volumeId"`
+	Profile  []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
+}
+
+func init() {
+	types.Add("vsan:CnsVolumePolicyReconfigSpec", reflect.TypeOf((*CnsVolumePolicyReconfigSpec)(nil)).Elem())
 }
