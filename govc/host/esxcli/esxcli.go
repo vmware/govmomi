@@ -71,6 +71,10 @@ func (cmd *esxcli) Process(ctx context.Context) error {
 }
 
 func (cmd *esxcli) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
+
 	c, err := cmd.Client()
 	if err != nil {
 		return err
