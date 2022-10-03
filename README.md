@@ -62,6 +62,8 @@ Changes to the API are subject to [semantic versioning](http://semver.org).
 Refer to the [CHANGELOG](CHANGELOG.md) for version to version changes.
 
 ## Projects using govmomi
+* [Elastic Agent VMware vSphere integration](https://github.com/elastic/integrations/tree/main/packages/vsphere)
+
 * [collectd-vsphere](https://github.com/travis-ci/collectd-vsphere)
 
 * [Docker Machine](https://github.com/docker/machine/tree/master/drivers/vmwarevsphere)
