@@ -776,6 +776,8 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 	}
 
 	body.Res = new(types.PlaceVmsXClusterResponse)
+	hostRequired := req.PlacementSpec.HostRecommRequired != nil && *req.PlacementSpec.HostRecommRequired
+	datastoreRequired := req.PlacementSpec.DatastoreRecommRequired != nil && *req.PlacementSpec.DatastoreRecommRequired
 
 	for _, spec := range specs {
 		pool := ctx.Map.Get(pools[rand.Intn(len(pools))]).(*ResourcePool)
@@ -793,6 +795,8 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 			}
 			body.Res.Returnval.Faults = append(body.Res.Returnval.Faults, faults)
 		} else {
+			var configSpec *types.VirtualMachineConfigSpec
+
 			res := types.ClusterRecommendation{
 				Key:        "1",
 				Type:       "V1",
@@ -804,13 +808,59 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 			}
 
 			placementAction := types.ClusterInitialPlacementAction{
-				TargetHost: cluster.Host[rand.Intn(len(cluster.Host))],
-				Pool:       &pool.Self,
+				Pool: &pool.Self,
+			}
+
+			if hostRequired {
+				placementAction.TargetHost = cluster.Host[rand.Intn(len(cluster.Host))]
+			}
+
+			if datastoreRequired {
+				configSpec = &spec.ConfigSpec
+
+				// TODO: This is just an initial implementation aimed at returning some data but it is not
+				// necessarily fully consistent, like we should ensure the host, if also required, has the
+				// datastore mounted.
+				ds := ctx.Map.Get(cluster.Datastore[rand.Intn(len(cluster.Datastore))]).(*Datastore)
+
+				if configSpec.Files == nil {
+					configSpec.Files = new(types.VirtualMachineFileInfo)
+				}
+				configSpec.Files.VmPathName = fmt.Sprintf("[%[1]s] %[2]s/%[2]s.vmx", ds.Name, spec.ConfigSpec.Name)
+
+				for _, change := range configSpec.DeviceChange {
+					dspec := change.GetVirtualDeviceConfigSpec()
+
+					if dspec.FileOperation != types.VirtualDeviceConfigSpecFileOperationCreate {
+						continue
+					}
+
+					switch dspec.Operation {
+					case types.VirtualDeviceConfigSpecOperationAdd:
+						device := dspec.Device
+						d := device.GetVirtualDevice()
+
+						switch device.(type) {
+						case *types.VirtualDisk:
+							switch b := d.Backing.(type) {
+							case types.BaseVirtualDeviceFileBackingInfo:
+								info := b.GetVirtualDeviceFileBackingInfo()
+								info.Datastore = types.NewReference(ds.Reference())
+
+								var dsPath object.DatastorePath
+								if dsPath.FromString(info.FileName) {
+									dsPath.Datastore = ds.Name
+									info.FileName = dsPath.String()
+								}
+							}
+						}
+					}
+				}
 			}
 
 			res.Action = append(res.Action, &types.ClusterClusterInitialPlacementAction{
 				ClusterInitialPlacementAction: placementAction,
-				ConfigSpec:                    &spec.ConfigSpec,
+				ConfigSpec:                    configSpec,
 			})
 
 			body.Res.Returnval.PlacementInfos = append(body.Res.Returnval.PlacementInfos,
