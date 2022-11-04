@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -47,6 +47,15 @@ type Item struct {
 	SourceID         string     `json:"source_id,omitempty"`
 	Type             string     `json:"type,omitempty"`
 	Version          string     `json:"version,omitempty"`
+
+	SecurityCompliance      *bool                        `json:"security_compliance,omitempty"`
+	CertificateVerification *ItemCertificateVerification `json:"certificate_verification_info,omitempty"`
+}
+
+// ItemCertificateVerification contains the certificate verification status and item's signing certificate
+type ItemCertificateVerification struct {
+	Status    string   `json:"status"`
+	CertChain []string `json:"cert_chain,omitempty"`
 }
 
 // Patch merges updates from the given src.

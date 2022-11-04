@@ -21,8 +21,10 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io"
@@ -96,6 +98,7 @@ type handler struct {
 	Update      map[string]update
 	Download    map[string]download
 	Policies    []library.ContentSecurityPoliciesInfo
+	Trust       map[string]library.TrustedCertificate
 }
 
 func init() {
@@ -122,6 +125,7 @@ func New(u *url.URL, settings []vim.BaseOptionValue) ([]string, http.Handler) {
 		Update:      make(map[string]update),
 		Download:    make(map[string]download),
 		Policies:    defaultSecurityPolicies(),
+		Trust:       make(map[string]library.TrustedCertificate),
 	}
 
 	handlers := []struct {
@@ -166,6 +170,8 @@ func New(u *url.URL, settings []vim.BaseOptionValue) ([]string, http.Handler) {
 		{internal.DebugEcho, s.debugEcho},
 		// /api/ patterns.
 		{internal.SecurityPoliciesPath, s.librarySecurityPolicies},
+		{internal.TrustedCertificatesPath, s.libraryTrustedCertificates},
+		{internal.TrustedCertificatesPath + "/", s.libraryTrustedCertificatesID},
 	}
 
 	for i := range handlers {
@@ -1075,6 +1081,13 @@ func (s *handler) libraryItem(w http.ResponseWriter, r *http.Request) {
 			spec.Item.ID = id
 			spec.Item.CreationTime = types.NewTime(time.Now())
 			spec.Item.LastModifiedTime = types.NewTime(time.Now())
+			if l.SecurityPolicyID != "" {
+				// TODO: verify signed items
+				spec.Item.SecurityCompliance = types.NewBool(false)
+				spec.Item.CertificateVerification = &library.ItemCertificateVerification{
+					Status: "NOT_AVAILABLE",
+				}
+			}
 			l.Item[id] = &item{Item: &spec.Item}
 			OK(w, id)
 		}
@@ -2188,6 +2201,68 @@ func (s *handler) isValidSecurityPolicy(policy string) bool {
 		}
 	}
 	return false
+}
+
+func (s *handler) libraryTrustedCertificates(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		var res struct {
+			Certificates []library.TrustedCertificateSummary `json:"certificates"`
+		}
+		for id, cert := range s.Trust {
+			res.Certificates = append(res.Certificates, library.TrustedCertificateSummary{
+				TrustedCertificate: cert,
+				ID:                 id,
+			})
+		}
+
+		StatusOK(w, &res)
+	case http.MethodPost:
+		var info library.TrustedCertificate
+		if s.decode(r, w, &info) {
+			block, _ := pem.Decode([]byte(info.Text))
+			if block == nil {
+				s.error(w, errors.New("invalid certificate"))
+				return
+			}
+			_, err := x509.ParseCertificate(block.Bytes)
+			if err != nil {
+				s.error(w, err)
+				return
+			}
+
+			id := uuid.New().String()
+			for x, cert := range s.Trust {
+				if info.Text == cert.Text {
+					id = x // existing certificate
+					break
+				}
+			}
+			s.Trust[id] = info
+
+			w.WriteHeader(http.StatusCreated)
+		}
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
+}
+
+func (s *handler) libraryTrustedCertificatesID(w http.ResponseWriter, r *http.Request) {
+	id := path.Base(r.URL.Path)
+	cert, ok := s.Trust[id]
+	if !ok {
+		http.NotFound(w, r)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodGet:
+		StatusOK(w, &cert)
+	case http.MethodDelete:
+		delete(s.Trust, id)
+	default:
+		w.WriteHeader(http.StatusMethodNotAllowed)
+	}
 }
 
 func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
