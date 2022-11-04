@@ -222,7 +222,12 @@ func (r infoResultsWriter) writeItem(
 	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  Modified:\t%s\n", v.LastModifiedTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
-
+	if v.SecurityCompliance != nil {
+		fmt.Fprintf(w, "  Security Compliance:\t%t\n", *v.SecurityCompliance)
+	}
+	if v.CertificateVerification != nil {
+		fmt.Fprintf(w, "  Certificate Status:\t%s\n", v.CertificateVerification.Status)
+	}
 	if r.cmd.long {
 		fmt.Fprintf(w, "  Datastore Path:\t%s\n", r.cmd.getDatastorePath(res))
 	}

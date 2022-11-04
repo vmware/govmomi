@@ -40,6 +40,7 @@ const (
 	SecurityPoliciesPath           = "/api/content/security-policies"
 	SubscribedLibraryItem          = "/com/vmware/content/library/subscribed-item"
 	Subscriptions                  = "/com/vmware/content/library/subscriptions"
+	TrustedCertificatesPath        = "/api/content/trusted-certificates"
 	VCenterOVFLibraryItem          = "/com/vmware/vcenter/ovf/library-item"
 	VCenterVMTXLibraryItem         = "/vcenter/vm-template/library-items"
 	VCenterVM                      = "/vcenter/vm"

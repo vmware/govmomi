@@ -469,6 +469,16 @@ EOF
   library_secpol=$(govc library.info -json secure-content | jq '.[].security_policy_id' -r)
   assert_equal "$library_secpol" "$policy_id"
 
+  run govc library.import secure-content "$GOVC_IMAGES/ttylinux-latest.ova"
+  assert_success
+
+  run govc library.info -json secure-content/ttylinux-latest
+  assert_success
+
+  assert_equal false "$(jq -r <<<"$output" .[].security_compliance)"
+
+  assert_equal NOT_AVAILABLE "$(jq -r <<<"$output" .[].certificate_verification_info.status)"
+
   run govc library.rm secure-content
   assert_success
 }
@@ -503,4 +513,41 @@ EOF
 
   n=$(govc library.info my-content | grep -c Name:)
   [ "$n" == 1 ]
+}
+
+@test "library.trust" {
+  vcsim_env
+
+  run govc library.trust.ls
+  assert_success
+
+  run govc library.trust.info enoent
+  assert_failure # id does not exist
+
+  run govc library.trust.rm enoent
+  assert_failure # id does not exist
+
+  pem=$(new_id)
+  run govc extension.setcert -cert-pem ++ -org govc-library-trust "$pem" # generate a cert for testing
+  assert_success
+
+  run govc library.trust.create "$pem.crt"
+  assert_success
+
+  id=$(govc library.trust.ls | grep O=govc-library-trust | awk '{print $1}')
+  run govc library.trust.info "$id"
+  assert_success
+
+  run govc library.trust.rm "$id"
+  assert_success
+
+  run govc library.trust.info "$id"
+  assert_failure # id does not exist
+
+  date > "$pem.crt"
+  run govc library.trust.create "$id.crt"
+  assert_failure # invalid cert
+
+  # remove generated cert and key
+  rm "$pem".{crt,key}
 }
