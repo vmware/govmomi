@@ -333,6 +333,77 @@ func TestCreateVmWithSpecialCharaters(t *testing.T) {
 	}
 }
 
+func TestCloneVm(t *testing.T) {
+	tests := []struct {
+		name   string
+		vmName string
+		config types.VirtualMachineCloneSpec
+		fail   bool
+	}{
+		{
+			"clone a vm",
+			"cloned-vm",
+			types.VirtualMachineCloneSpec{
+				Template: false,
+				PowerOn:  false,
+			},
+			false,
+		},
+		{
+			"vm name is duplicated",
+			"DC0_H0_VM0",
+			types.VirtualMachineCloneSpec{
+				Template: false,
+				PowerOn:  false,
+			},
+			true,
+		},
+	}
+
+	for _, test := range tests {
+		test := test // assign to local var since loop var is reused
+
+		t.Run(test.name, func(t *testing.T) {
+			m := VPX()
+			defer m.Remove()
+
+			Test(func(ctx context.Context, c *vim25.Client) {
+				finder := find.NewFinder(c, false)
+				dc, err := finder.DefaultDatacenter(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				folders, err := dc.Folders(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				vmFolder := folders.VmFolder
+
+				vmm := Map.Any("VirtualMachine").(*VirtualMachine)
+				vm := object.NewVirtualMachine(c, vmm.Reference())
+
+				task, err := vm.Clone(ctx, vmFolder, test.vmName, test.config)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				err = task.Wait(ctx)
+				if test.fail {
+					if err == nil {
+						t.Errorf("%s: expected error", test.name)
+					}
+				} else {
+					if err != nil {
+						t.Errorf("%s: %s", test.name, err)
+					}
+				}
+			}, m)
+		})
+	}
+}
+
 func TestReconfigVmDevice(t *testing.T) {
 	ctx := context.Background()
 
