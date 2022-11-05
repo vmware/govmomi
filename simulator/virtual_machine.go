@@ -1901,6 +1901,12 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		if pool == nil {
 			return nil, &types.InvalidArgument{InvalidProperty: "spec.location.pool"}
 		}
+		if obj := ctx.Map.FindByName(req.Name, folder.ChildEntity); obj != nil {
+			return nil, &types.DuplicateName{
+				Name:   req.Name,
+				Object: obj.Reference(),
+			}
+		}
 		config := types.VirtualMachineConfigSpec{
 			Name:    req.Name,
 			GuestId: vm.Config.GuestId,

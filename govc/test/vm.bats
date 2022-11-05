@@ -800,8 +800,11 @@ load test_helper
   run govc vm.clone -cluster DC0_C0 -vm "$vm" "$clone"
   assert_failure # already exists
 
+  run govc datastore.cp "$clone"/"$clone".vmx "$clone"/"$clone".vmx.copy
+  run govc vm.destroy "$clone"
+  run govc datastore.mv "$clone"/"$clone".vmx.copy "$clone"/"$clone".vmx # leave vmx file
   run govc vm.clone -force -vm "$vm" "$clone"
-  assert_success # clone vm with the same name
+  assert_success # clone vm with the same name vmx file
 
   vm=$(new_empty_vm)
   run govc vm.disk.create -vm "$vm" -thick -eager -size 10M -name "$vm/data.vmdk"
