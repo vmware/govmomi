@@ -215,6 +215,10 @@ but appear via `govc $cmd -h`:
  - [library.subscriber.ls](#librarysubscriberls)
  - [library.subscriber.rm](#librarysubscriberrm)
  - [library.sync](#librarysync)
+ - [library.trust.create](#librarytrustcreate)
+ - [library.trust.info](#librarytrustinfo)
+ - [library.trust.ls](#librarytrustls)
+ - [library.trust.rm](#librarytrustrm)
  - [library.update](#libraryupdate)
  - [library.vmtx.info](#libraryvmtxinfo)
  - [license.add](#licenseadd)
@@ -3500,6 +3504,62 @@ Options:
   -folder=               Inventory folder [GOVC_FOLDER]
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -vmtx=                 Sync subscribed library to local library as VM Templates
+```
+
+## library.trust.create
+
+```
+Usage: govc library.trust.create [OPTIONS] FILE
+
+Add a certificate to content library trust store.
+
+If FILE name is "-", read certificate from stdin.
+
+Examples:
+  govc library.trust.create cert.pem
+  govc about.cert -show -u wp-content-int.vmware.com | govc library.trust.create -
+
+Options:
+```
+
+## library.trust.info
+
+```
+Usage: govc library.trust.info [OPTIONS] ID
+
+Display trusted certificate info.
+
+Examples:
+  govc library.trust.info vmware_signed
+
+Options:
+```
+
+## library.trust.ls
+
+```
+Usage: govc library.trust.ls [OPTIONS]
+
+List trusted certificates for content libraries.
+
+Examples:
+  govc library.trust.ls
+  govc library.trust.ls -json
+
+Options:
+```
+
+## library.trust.rm
+
+```
+Usage: govc library.trust.rm [OPTIONS] ID
+
+Remove certificate ID from trusted certificates.
+
+Examples:
+  govc library.trust.rm $id
+
+Options:
 ```
 
 ## library.update
