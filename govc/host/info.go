@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"os"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -132,7 +131,7 @@ func (r *infoResult) Write(w io.Writer) error {
 		objects[o.Reference()] = o
 	}
 
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
 	for _, o := range r.objects {
 		host := objects[o.Reference()]
