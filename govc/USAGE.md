@@ -278,6 +278,8 @@ but appear via `govc $cmd -h`:
  - [sso.group.rm](#ssogrouprm)
  - [sso.group.update](#ssogroupupdate)
  - [sso.idp.ls](#ssoidpls)
+ - [sso.lpp.info](#ssolppinfo)
+ - [sso.lpp.update](#ssolppupdate)
  - [sso.service.ls](#ssoservicels)
  - [sso.user.create](#ssousercreate)
  - [sso.user.id](#ssouserid)
@@ -4706,6 +4708,44 @@ Examples:
   govc sso.idp.ls -json
 
 Options:
+```
+
+## sso.lpp.info
+
+```
+Usage: govc sso.lpp.info [OPTIONS]
+
+Get SSO local password policy.
+
+Examples:
+  govc sso.lpp.info
+  govc sso.lpp.info -json
+
+Options:
+```
+
+## sso.lpp.update
+
+```
+Usage: govc sso.lpp.update [OPTIONS] NAME
+
+Update SSO local password policy.
+
+Examples:
+  govc sso.lpp.update -PasswordLifetimeDays 0
+
+Options:
+  -Description=                        Description
+  -MaxIdenticalAdjacentCharacters=0    Maximum identical adjacent characters
+  -MaxLength=0                         Maximum length
+  -MinAlphabeticCount=<nil>            Minimum alphabetic count
+  -MinLength=<nil>                     Minimim length
+  -MinLowercaseCount=<nil>             Minimum lowercase count
+  -MinNumericCount=<nil>               Minimum numeric count
+  -MinSpecialCharCount=<nil>           Minimum special characters count
+  -MinUppercaseCount=<nil>             Minimum uppercase count
+  -PasswordLifetimeDays=<nil>          Password lifetime days
+  -ProhibitedPreviousPasswordsCount=0  Prohibited previous passwords count
 ```
 
 ## sso.service.ls
