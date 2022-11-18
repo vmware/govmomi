@@ -85,6 +85,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/session"
 	_ "github.com/vmware/govmomi/govc/sso/group"
 	_ "github.com/vmware/govmomi/govc/sso/idp"
+	_ "github.com/vmware/govmomi/govc/sso/lpp"
 	_ "github.com/vmware/govmomi/govc/sso/service"
 	_ "github.com/vmware/govmomi/govc/sso/user"
 	_ "github.com/vmware/govmomi/govc/storage/policy"

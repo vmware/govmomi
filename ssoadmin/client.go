@@ -146,6 +146,16 @@ func (c *Client) CreateSolutionUser(ctx context.Context, name string, details ty
 	return err
 }
 
+func (c *Client) UpdateLocalPasswordPolicy(ctx context.Context, policy types.AdminPasswordPolicy) error {
+	req := types.UpdateLocalPasswordPolicy{
+		This:   c.ServiceContent.PasswordPolicyService,
+		Policy: policy,
+	}
+
+	_, err := methods.UpdateLocalPasswordPolicy(ctx, c, &req)
+	return err
+}
+
 func (c *Client) UpdateSolutionUser(ctx context.Context, name string, details types.AdminSolutionDetails) error {
 	req := types.UpdateLocalSolutionUserDetails{
 		This:        c.ServiceContent.PrincipalManagementService,
@@ -409,6 +419,19 @@ func (c *Client) FindParentGroups(ctx context.Context, id types.PrincipalId, gro
 	}
 
 	return nil, nil
+}
+
+func (c *Client) GetLocalPasswordPolicy(ctx context.Context) (*types.AdminPasswordPolicy, error) {
+	req := types.GetLocalPasswordPolicy{
+		This: c.ServiceContent.PasswordPolicyService,
+	}
+
+	res, err := methods.GetLocalPasswordPolicy(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return &res.Returnval, nil
 }
 
 func (c *Client) Login(ctx context.Context) error {
