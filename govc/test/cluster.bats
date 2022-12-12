@@ -197,7 +197,7 @@ _EOF_
   assert_failure # no changes specified
 
   # DRS override
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DRS.Enabled"
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DRS.enabled"
 
   run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-enabled=false
   assert_success
@@ -211,7 +211,7 @@ _EOF_
   assert_success
 
   # DAS override
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DAS.DasSettings.RestartPriority"
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DAS.dasSettings.restartPriority"
 
   [ "$(govc cluster.override.info -json | jq -r "$query")" != "high" ]
 
@@ -220,13 +220,13 @@ _EOF_
   [ "$(govc cluster.override.info -json | jq -r "$query")" == "high" ]
 
   # Orchestration override
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.VmReadiness.PostReadyDelay"
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.vmReadiness.postReadyDelay"
 
   run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-additional-delay 60
   assert_success
   [ "$(govc cluster.override.info -json | jq -r "$query")" == "60" ]
 
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.VmReadiness.ReadyCondition"
+  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.vmReadiness.readyCondition"
 
   run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-ready-condition poweredOn
   assert_success
@@ -243,16 +243,16 @@ _EOF_
     vcsim_env
     unset GOVC_HOST
 
-    ip=$(govc object.collect -o -json host/DC0_C0/DC0_C0_H0 | jq -r .Config.Network.Vnic[].Spec.Ip.IpAddress)
+    ip=$(govc object.collect -o -json host/DC0_C0/DC0_C0_H0 | jq -r .Config.network.vnic[].spec.ip.ipAddress)
     assert_equal 127.0.0.1 "$ip"
 
     govc cluster.add -cluster DC0_C0 -hostname 10.0.0.42 -username user -password pass
     assert_success
 
-    ip=$(govc object.collect -o -json host/DC0_C0/10.0.0.42 | jq -r .Config.Network.Vnic[].Spec.Ip.IpAddress)
+    ip=$(govc object.collect -o -json host/DC0_C0/10.0.0.42 | jq -r .Config.network.vnic[].spec.ip.ipAddress)
 
     assert_equal 10.0.0.42 "$ip"
-    govc host.info -json '*' | jq -r .HostSystems[].Config.Network.Vnic[].Spec.Ip
+    govc host.info -json '*' | jq -r .HostSystems[].Config.network.vnic[].spec.ip
     name=$(govc host.info -json -host.ip 10.0.0.42 | jq -r .HostSystems[].Name)
     assert_equal 10.0.0.42 "$name"
 }

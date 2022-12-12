@@ -24,7 +24,7 @@ import (
 )
 
 type ArrayOfPbmCapabilityConstraintInstance struct {
-	PbmCapabilityConstraintInstance []PbmCapabilityConstraintInstance `xml:"PbmCapabilityConstraintInstance,omitempty"`
+	PbmCapabilityConstraintInstance []PbmCapabilityConstraintInstance `xml:"PbmCapabilityConstraintInstance,omitempty" json:"PbmCapabilityConstraintInstance,omitempty"`
 }
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityInstance struct {
-	PbmCapabilityInstance []PbmCapabilityInstance `xml:"PbmCapabilityInstance,omitempty"`
+	PbmCapabilityInstance []PbmCapabilityInstance `xml:"PbmCapabilityInstance,omitempty" json:"PbmCapabilityInstance,omitempty"`
 }
 
 func init() {
@@ -40,7 +40,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityMetadata struct {
-	PbmCapabilityMetadata []PbmCapabilityMetadata `xml:"PbmCapabilityMetadata,omitempty"`
+	PbmCapabilityMetadata []PbmCapabilityMetadata `xml:"PbmCapabilityMetadata,omitempty" json:"PbmCapabilityMetadata,omitempty"`
 }
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityMetadataPerCategory struct {
-	PbmCapabilityMetadataPerCategory []PbmCapabilityMetadataPerCategory `xml:"PbmCapabilityMetadataPerCategory,omitempty"`
+	PbmCapabilityMetadataPerCategory []PbmCapabilityMetadataPerCategory `xml:"PbmCapabilityMetadataPerCategory,omitempty" json:"PbmCapabilityMetadataPerCategory,omitempty"`
 }
 
 func init() {
@@ -56,7 +56,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityPropertyInstance struct {
-	PbmCapabilityPropertyInstance []PbmCapabilityPropertyInstance `xml:"PbmCapabilityPropertyInstance,omitempty"`
+	PbmCapabilityPropertyInstance []PbmCapabilityPropertyInstance `xml:"PbmCapabilityPropertyInstance,omitempty" json:"PbmCapabilityPropertyInstance,omitempty"`
 }
 
 func init() {
@@ -64,7 +64,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityPropertyMetadata struct {
-	PbmCapabilityPropertyMetadata []PbmCapabilityPropertyMetadata `xml:"PbmCapabilityPropertyMetadata,omitempty"`
+	PbmCapabilityPropertyMetadata []PbmCapabilityPropertyMetadata `xml:"PbmCapabilityPropertyMetadata,omitempty" json:"PbmCapabilityPropertyMetadata,omitempty"`
 }
 
 func init() {
@@ -72,7 +72,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilitySchema struct {
-	PbmCapabilitySchema []PbmCapabilitySchema `xml:"PbmCapabilitySchema,omitempty"`
+	PbmCapabilitySchema []PbmCapabilitySchema `xml:"PbmCapabilitySchema,omitempty" json:"PbmCapabilitySchema,omitempty"`
 }
 
 func init() {
@@ -80,7 +80,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilitySubProfile struct {
-	PbmCapabilitySubProfile []PbmCapabilitySubProfile `xml:"PbmCapabilitySubProfile,omitempty"`
+	PbmCapabilitySubProfile []PbmCapabilitySubProfile `xml:"PbmCapabilitySubProfile,omitempty" json:"PbmCapabilitySubProfile,omitempty"`
 }
 
 func init() {
@@ -88,7 +88,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityVendorNamespaceInfo struct {
-	PbmCapabilityVendorNamespaceInfo []PbmCapabilityVendorNamespaceInfo `xml:"PbmCapabilityVendorNamespaceInfo,omitempty"`
+	PbmCapabilityVendorNamespaceInfo []PbmCapabilityVendorNamespaceInfo `xml:"PbmCapabilityVendorNamespaceInfo,omitempty" json:"PbmCapabilityVendorNamespaceInfo,omitempty"`
 }
 
 func init() {
@@ -96,7 +96,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityVendorResourceTypeInfo struct {
-	PbmCapabilityVendorResourceTypeInfo []PbmCapabilityVendorResourceTypeInfo `xml:"PbmCapabilityVendorResourceTypeInfo,omitempty"`
+	PbmCapabilityVendorResourceTypeInfo []PbmCapabilityVendorResourceTypeInfo `xml:"PbmCapabilityVendorResourceTypeInfo,omitempty" json:"PbmCapabilityVendorResourceTypeInfo,omitempty"`
 }
 
 func init() {
@@ -104,7 +104,7 @@ func init() {
 }
 
 type ArrayOfPbmCompliancePolicyStatus struct {
-	PbmCompliancePolicyStatus []PbmCompliancePolicyStatus `xml:"PbmCompliancePolicyStatus,omitempty"`
+	PbmCompliancePolicyStatus []PbmCompliancePolicyStatus `xml:"PbmCompliancePolicyStatus,omitempty" json:"PbmCompliancePolicyStatus,omitempty"`
 }
 
 func init() {
@@ -112,7 +112,7 @@ func init() {
 }
 
 type ArrayOfPbmComplianceResult struct {
-	PbmComplianceResult []PbmComplianceResult `xml:"PbmComplianceResult,omitempty"`
+	PbmComplianceResult []PbmComplianceResult `xml:"PbmComplianceResult,omitempty" json:"PbmComplianceResult,omitempty"`
 }
 
 func init() {
@@ -120,7 +120,7 @@ func init() {
 }
 
 type ArrayOfPbmDatastoreSpaceStatistics struct {
-	PbmDatastoreSpaceStatistics []PbmDatastoreSpaceStatistics `xml:"PbmDatastoreSpaceStatistics,omitempty"`
+	PbmDatastoreSpaceStatistics []PbmDatastoreSpaceStatistics `xml:"PbmDatastoreSpaceStatistics,omitempty" json:"PbmDatastoreSpaceStatistics,omitempty"`
 }
 
 func init() {
@@ -128,7 +128,7 @@ func init() {
 }
 
 type ArrayOfPbmDefaultProfileInfo struct {
-	PbmDefaultProfileInfo []PbmDefaultProfileInfo `xml:"PbmDefaultProfileInfo,omitempty"`
+	PbmDefaultProfileInfo []PbmDefaultProfileInfo `xml:"PbmDefaultProfileInfo,omitempty" json:"PbmDefaultProfileInfo,omitempty"`
 }
 
 func init() {
@@ -136,7 +136,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementCompatibilityResult struct {
-	PbmPlacementCompatibilityResult []PbmPlacementCompatibilityResult `xml:"PbmPlacementCompatibilityResult,omitempty"`
+	PbmPlacementCompatibilityResult []PbmPlacementCompatibilityResult `xml:"PbmPlacementCompatibilityResult,omitempty" json:"PbmPlacementCompatibilityResult,omitempty"`
 }
 
 func init() {
@@ -144,7 +144,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementHub struct {
-	PbmPlacementHub []PbmPlacementHub `xml:"PbmPlacementHub,omitempty"`
+	PbmPlacementHub []PbmPlacementHub `xml:"PbmPlacementHub,omitempty" json:"PbmPlacementHub,omitempty"`
 }
 
 func init() {
@@ -152,7 +152,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementMatchingResources struct {
-	PbmPlacementMatchingResources []BasePbmPlacementMatchingResources `xml:"PbmPlacementMatchingResources,omitempty,typeattr"`
+	PbmPlacementMatchingResources []BasePbmPlacementMatchingResources `xml:"PbmPlacementMatchingResources,omitempty,typeattr" json:"PbmPlacementMatchingResources,omitempty"`
 }
 
 func init() {
@@ -160,7 +160,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementRequirement struct {
-	PbmPlacementRequirement []BasePbmPlacementRequirement `xml:"PbmPlacementRequirement,omitempty,typeattr"`
+	PbmPlacementRequirement []BasePbmPlacementRequirement `xml:"PbmPlacementRequirement,omitempty,typeattr" json:"PbmPlacementRequirement,omitempty"`
 }
 
 func init() {
@@ -168,7 +168,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementResourceUtilization struct {
-	PbmPlacementResourceUtilization []PbmPlacementResourceUtilization `xml:"PbmPlacementResourceUtilization,omitempty"`
+	PbmPlacementResourceUtilization []PbmPlacementResourceUtilization `xml:"PbmPlacementResourceUtilization,omitempty" json:"PbmPlacementResourceUtilization,omitempty"`
 }
 
 func init() {
@@ -176,7 +176,7 @@ func init() {
 }
 
 type ArrayOfPbmProfile struct {
-	PbmProfile []BasePbmProfile `xml:"PbmProfile,omitempty,typeattr"`
+	PbmProfile []BasePbmProfile `xml:"PbmProfile,omitempty,typeattr" json:"PbmProfile,omitempty"`
 }
 
 func init() {
@@ -184,7 +184,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileId struct {
-	PbmProfileId []PbmProfileId `xml:"PbmProfileId,omitempty"`
+	PbmProfileId []PbmProfileId `xml:"PbmProfileId,omitempty" json:"PbmProfileId,omitempty"`
 }
 
 func init() {
@@ -192,7 +192,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileOperationOutcome struct {
-	PbmProfileOperationOutcome []PbmProfileOperationOutcome `xml:"PbmProfileOperationOutcome,omitempty"`
+	PbmProfileOperationOutcome []PbmProfileOperationOutcome `xml:"PbmProfileOperationOutcome,omitempty" json:"PbmProfileOperationOutcome,omitempty"`
 }
 
 func init() {
@@ -200,7 +200,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileResourceType struct {
-	PbmProfileResourceType []PbmProfileResourceType `xml:"PbmProfileResourceType,omitempty"`
+	PbmProfileResourceType []PbmProfileResourceType `xml:"PbmProfileResourceType,omitempty" json:"PbmProfileResourceType,omitempty"`
 }
 
 func init() {
@@ -208,7 +208,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileType struct {
-	PbmProfileType []PbmProfileType `xml:"PbmProfileType,omitempty"`
+	PbmProfileType []PbmProfileType `xml:"PbmProfileType,omitempty" json:"PbmProfileType,omitempty"`
 }
 
 func init() {
@@ -216,7 +216,7 @@ func init() {
 }
 
 type ArrayOfPbmQueryProfileResult struct {
-	PbmQueryProfileResult []PbmQueryProfileResult `xml:"PbmQueryProfileResult,omitempty"`
+	PbmQueryProfileResult []PbmQueryProfileResult `xml:"PbmQueryProfileResult,omitempty" json:"PbmQueryProfileResult,omitempty"`
 }
 
 func init() {
@@ -224,7 +224,7 @@ func init() {
 }
 
 type ArrayOfPbmQueryReplicationGroupResult struct {
-	PbmQueryReplicationGroupResult []PbmQueryReplicationGroupResult `xml:"PbmQueryReplicationGroupResult,omitempty"`
+	PbmQueryReplicationGroupResult []PbmQueryReplicationGroupResult `xml:"PbmQueryReplicationGroupResult,omitempty" json:"PbmQueryReplicationGroupResult,omitempty"`
 }
 
 func init() {
@@ -232,7 +232,7 @@ func init() {
 }
 
 type ArrayOfPbmRollupComplianceResult struct {
-	PbmRollupComplianceResult []PbmRollupComplianceResult `xml:"PbmRollupComplianceResult,omitempty"`
+	PbmRollupComplianceResult []PbmRollupComplianceResult `xml:"PbmRollupComplianceResult,omitempty" json:"PbmRollupComplianceResult,omitempty"`
 }
 
 func init() {
@@ -240,7 +240,7 @@ func init() {
 }
 
 type ArrayOfPbmServerObjectRef struct {
-	PbmServerObjectRef []PbmServerObjectRef `xml:"PbmServerObjectRef,omitempty"`
+	PbmServerObjectRef []PbmServerObjectRef `xml:"PbmServerObjectRef,omitempty" json:"PbmServerObjectRef,omitempty"`
 }
 
 func init() {
@@ -250,9 +250,9 @@ func init() {
 type PbmAboutInfo struct {
 	types.DynamicData
 
-	Name         string `xml:"name"`
-	Version      string `xml:"version"`
-	InstanceUuid string `xml:"instanceUuid"`
+	Name         string `xml:"name" json:"name"`
+	Version      string `xml:"version" json:"version"`
+	InstanceUuid string `xml:"instanceUuid" json:"instanceUuid"`
 }
 
 func init() {
@@ -262,7 +262,7 @@ func init() {
 type PbmAlreadyExists struct {
 	PbmFault
 
-	Name string `xml:"name,omitempty"`
+	Name string `xml:"name,omitempty" json:"name,omitempty"`
 }
 
 func init() {
@@ -282,9 +282,9 @@ func init() {
 }
 
 type PbmAssignDefaultRequirementProfileRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Profile    PbmProfileId                 `xml:"profile"`
-	Datastores []PbmPlacementHub            `xml:"datastores"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Profile    PbmProfileId                 `xml:"profile" json:"profile"`
+	Datastores []PbmPlacementHub            `xml:"datastores" json:"datastores"`
 }
 
 func init() {
@@ -297,7 +297,7 @@ type PbmAssignDefaultRequirementProfileResponse struct {
 type PbmCapabilityConstraintInstance struct {
 	types.DynamicData
 
-	PropertyInstance []PbmCapabilityPropertyInstance `xml:"propertyInstance"`
+	PropertyInstance []PbmCapabilityPropertyInstance `xml:"propertyInstance" json:"propertyInstance"`
 }
 
 func init() {
@@ -315,8 +315,8 @@ func init() {
 type PbmCapabilityDescription struct {
 	types.DynamicData
 
-	Description PbmExtendedElementDescription `xml:"description"`
-	Value       types.AnyType                 `xml:"value,typeattr"`
+	Description PbmExtendedElementDescription `xml:"description" json:"description"`
+	Value       types.AnyType                 `xml:"value,typeattr" json:"value"`
 }
 
 func init() {
@@ -326,7 +326,7 @@ func init() {
 type PbmCapabilityDiscreteSet struct {
 	types.DynamicData
 
-	Values []types.AnyType `xml:"values,typeattr"`
+	Values []types.AnyType `xml:"values,typeattr" json:"values"`
 }
 
 func init() {
@@ -336,7 +336,7 @@ func init() {
 type PbmCapabilityGenericTypeInfo struct {
 	PbmCapabilityTypeInfo
 
-	GenericTypeName string `xml:"genericTypeName"`
+	GenericTypeName string `xml:"genericTypeName" json:"genericTypeName"`
 }
 
 func init() {
@@ -346,8 +346,8 @@ func init() {
 type PbmCapabilityInstance struct {
 	types.DynamicData
 
-	Id         PbmCapabilityMetadataUniqueId     `xml:"id"`
-	Constraint []PbmCapabilityConstraintInstance `xml:"constraint"`
+	Id         PbmCapabilityMetadataUniqueId     `xml:"id" json:"id"`
+	Constraint []PbmCapabilityConstraintInstance `xml:"constraint" json:"constraint"`
 }
 
 func init() {
@@ -357,13 +357,13 @@ func init() {
 type PbmCapabilityMetadata struct {
 	types.DynamicData
 
-	Id                       PbmCapabilityMetadataUniqueId   `xml:"id"`
-	Summary                  PbmExtendedElementDescription   `xml:"summary"`
-	Mandatory                *bool                           `xml:"mandatory"`
-	Hint                     *bool                           `xml:"hint"`
-	KeyId                    string                          `xml:"keyId,omitempty"`
-	AllowMultipleConstraints *bool                           `xml:"allowMultipleConstraints"`
-	PropertyMetadata         []PbmCapabilityPropertyMetadata `xml:"propertyMetadata"`
+	Id                       PbmCapabilityMetadataUniqueId   `xml:"id" json:"id"`
+	Summary                  PbmExtendedElementDescription   `xml:"summary" json:"summary"`
+	Mandatory                *bool                           `xml:"mandatory" json:"mandatory,omitempty"`
+	Hint                     *bool                           `xml:"hint" json:"hint,omitempty"`
+	KeyId                    string                          `xml:"keyId,omitempty" json:"keyId,omitempty"`
+	AllowMultipleConstraints *bool                           `xml:"allowMultipleConstraints" json:"allowMultipleConstraints,omitempty"`
+	PropertyMetadata         []PbmCapabilityPropertyMetadata `xml:"propertyMetadata" json:"propertyMetadata"`
 }
 
 func init() {
@@ -373,8 +373,8 @@ func init() {
 type PbmCapabilityMetadataPerCategory struct {
 	types.DynamicData
 
-	SubCategory        string                  `xml:"subCategory"`
-	CapabilityMetadata []PbmCapabilityMetadata `xml:"capabilityMetadata"`
+	SubCategory        string                  `xml:"subCategory" json:"subCategory"`
+	CapabilityMetadata []PbmCapabilityMetadata `xml:"capabilityMetadata" json:"capabilityMetadata"`
 }
 
 func init() {
@@ -384,8 +384,8 @@ func init() {
 type PbmCapabilityMetadataUniqueId struct {
 	types.DynamicData
 
-	Namespace string `xml:"namespace"`
-	Id        string `xml:"id"`
+	Namespace string `xml:"namespace" json:"namespace"`
+	Id        string `xml:"id" json:"id"`
 }
 
 func init() {
@@ -395,9 +395,9 @@ func init() {
 type PbmCapabilityNamespaceInfo struct {
 	types.DynamicData
 
-	Version   string                         `xml:"version"`
-	Namespace string                         `xml:"namespace"`
-	Info      *PbmExtendedElementDescription `xml:"info,omitempty"`
+	Version   string                         `xml:"version" json:"version"`
+	Namespace string                         `xml:"namespace" json:"namespace"`
+	Info      *PbmExtendedElementDescription `xml:"info,omitempty" json:"info,omitempty"`
 }
 
 func init() {
@@ -407,13 +407,13 @@ func init() {
 type PbmCapabilityProfile struct {
 	PbmProfile
 
-	ProfileCategory          string                       `xml:"profileCategory"`
-	ResourceType             PbmProfileResourceType       `xml:"resourceType"`
-	Constraints              BasePbmCapabilityConstraints `xml:"constraints,typeattr"`
-	GenerationId             int64                        `xml:"generationId,omitempty"`
-	IsDefault                bool                         `xml:"isDefault"`
-	SystemCreatedProfileType string                       `xml:"systemCreatedProfileType,omitempty"`
-	LineOfService            string                       `xml:"lineOfService,omitempty"`
+	ProfileCategory          string                       `xml:"profileCategory" json:"profileCategory"`
+	ResourceType             PbmProfileResourceType       `xml:"resourceType" json:"resourceType"`
+	Constraints              BasePbmCapabilityConstraints `xml:"constraints,typeattr" json:"constraints"`
+	GenerationId             int64                        `xml:"generationId,omitempty" json:"generationId,omitempty"`
+	IsDefault                bool                         `xml:"isDefault" json:"isDefault"`
+	SystemCreatedProfileType string                       `xml:"systemCreatedProfileType,omitempty" json:"systemCreatedProfileType,omitempty"`
+	LineOfService            string                       `xml:"lineOfService,omitempty" json:"lineOfService,omitempty"`
 }
 
 func init() {
@@ -423,11 +423,11 @@ func init() {
 type PbmCapabilityProfileCreateSpec struct {
 	types.DynamicData
 
-	Name         string                       `xml:"name"`
-	Description  string                       `xml:"description,omitempty"`
-	Category     string                       `xml:"category,omitempty"`
-	ResourceType PbmProfileResourceType       `xml:"resourceType"`
-	Constraints  BasePbmCapabilityConstraints `xml:"constraints,typeattr"`
+	Name         string                       `xml:"name" json:"name"`
+	Description  string                       `xml:"description,omitempty" json:"description,omitempty"`
+	Category     string                       `xml:"category,omitempty" json:"category,omitempty"`
+	ResourceType PbmProfileResourceType       `xml:"resourceType" json:"resourceType"`
+	Constraints  BasePbmCapabilityConstraints `xml:"constraints,typeattr" json:"constraints"`
 }
 
 func init() {
@@ -437,7 +437,7 @@ func init() {
 type PbmCapabilityProfilePropertyMismatchFault struct {
 	PbmPropertyMismatchFault
 
-	ResourcePropertyInstance PbmCapabilityPropertyInstance `xml:"resourcePropertyInstance"`
+	ResourcePropertyInstance PbmCapabilityPropertyInstance `xml:"resourcePropertyInstance" json:"resourcePropertyInstance"`
 }
 
 func init() {
@@ -453,9 +453,9 @@ func init() {
 type PbmCapabilityProfileUpdateSpec struct {
 	types.DynamicData
 
-	Name        string                       `xml:"name,omitempty"`
-	Description string                       `xml:"description,omitempty"`
-	Constraints BasePbmCapabilityConstraints `xml:"constraints,omitempty,typeattr"`
+	Name        string                       `xml:"name,omitempty" json:"name,omitempty"`
+	Description string                       `xml:"description,omitempty" json:"description,omitempty"`
+	Constraints BasePbmCapabilityConstraints `xml:"constraints,omitempty,typeattr" json:"constraints,omitempty"`
 }
 
 func init() {
@@ -465,9 +465,9 @@ func init() {
 type PbmCapabilityPropertyInstance struct {
 	types.DynamicData
 
-	Id       string        `xml:"id"`
-	Operator string        `xml:"operator,omitempty"`
-	Value    types.AnyType `xml:"value,typeattr"`
+	Id       string        `xml:"id" json:"id"`
+	Operator string        `xml:"operator,omitempty" json:"operator,omitempty"`
+	Value    types.AnyType `xml:"value,typeattr" json:"value"`
 }
 
 func init() {
@@ -477,13 +477,13 @@ func init() {
 type PbmCapabilityPropertyMetadata struct {
 	types.DynamicData
 
-	Id                   string                        `xml:"id"`
-	Summary              PbmExtendedElementDescription `xml:"summary"`
-	Mandatory            bool                          `xml:"mandatory"`
-	Type                 BasePbmCapabilityTypeInfo     `xml:"type,omitempty,typeattr"`
-	DefaultValue         types.AnyType                 `xml:"defaultValue,omitempty,typeattr"`
-	AllowedValue         types.AnyType                 `xml:"allowedValue,omitempty,typeattr"`
-	RequirementsTypeHint string                        `xml:"requirementsTypeHint,omitempty"`
+	Id                   string                        `xml:"id" json:"id"`
+	Summary              PbmExtendedElementDescription `xml:"summary" json:"summary"`
+	Mandatory            bool                          `xml:"mandatory" json:"mandatory"`
+	Type                 BasePbmCapabilityTypeInfo     `xml:"type,omitempty,typeattr" json:"type,omitempty"`
+	DefaultValue         types.AnyType                 `xml:"defaultValue,omitempty,typeattr" json:"defaultValue,omitempty"`
+	AllowedValue         types.AnyType                 `xml:"allowedValue,omitempty,typeattr" json:"allowedValue,omitempty"`
+	RequirementsTypeHint string                        `xml:"requirementsTypeHint,omitempty" json:"requirementsTypeHint,omitempty"`
 }
 
 func init() {
@@ -493,8 +493,8 @@ func init() {
 type PbmCapabilityRange struct {
 	types.DynamicData
 
-	Min types.AnyType `xml:"min,typeattr"`
-	Max types.AnyType `xml:"max,typeattr"`
+	Min types.AnyType `xml:"min,typeattr" json:"min"`
+	Max types.AnyType `xml:"max,typeattr" json:"max"`
 }
 
 func init() {
@@ -504,10 +504,10 @@ func init() {
 type PbmCapabilitySchema struct {
 	types.DynamicData
 
-	VendorInfo                    PbmCapabilitySchemaVendorInfo      `xml:"vendorInfo"`
-	NamespaceInfo                 PbmCapabilityNamespaceInfo         `xml:"namespaceInfo"`
-	LineOfService                 BasePbmLineOfServiceInfo           `xml:"lineOfService,omitempty,typeattr"`
-	CapabilityMetadataPerCategory []PbmCapabilityMetadataPerCategory `xml:"capabilityMetadataPerCategory"`
+	VendorInfo                    PbmCapabilitySchemaVendorInfo      `xml:"vendorInfo" json:"vendorInfo"`
+	NamespaceInfo                 PbmCapabilityNamespaceInfo         `xml:"namespaceInfo" json:"namespaceInfo"`
+	LineOfService                 BasePbmLineOfServiceInfo           `xml:"lineOfService,omitempty,typeattr" json:"lineOfService,omitempty"`
+	CapabilityMetadataPerCategory []PbmCapabilityMetadataPerCategory `xml:"capabilityMetadataPerCategory" json:"capabilityMetadataPerCategory"`
 }
 
 func init() {
@@ -517,8 +517,8 @@ func init() {
 type PbmCapabilitySchemaVendorInfo struct {
 	types.DynamicData
 
-	VendorUuid string                        `xml:"vendorUuid"`
-	Info       PbmExtendedElementDescription `xml:"info"`
+	VendorUuid string                        `xml:"vendorUuid" json:"vendorUuid"`
+	Info       PbmExtendedElementDescription `xml:"info" json:"info"`
 }
 
 func init() {
@@ -528,9 +528,9 @@ func init() {
 type PbmCapabilitySubProfile struct {
 	types.DynamicData
 
-	Name           string                  `xml:"name"`
-	Capability     []PbmCapabilityInstance `xml:"capability"`
-	ForceProvision *bool                   `xml:"forceProvision"`
+	Name           string                  `xml:"name" json:"name"`
+	Capability     []PbmCapabilityInstance `xml:"capability" json:"capability"`
+	ForceProvision *bool                   `xml:"forceProvision" json:"forceProvision,omitempty"`
 }
 
 func init() {
@@ -540,7 +540,7 @@ func init() {
 type PbmCapabilitySubProfileConstraints struct {
 	PbmCapabilityConstraints
 
-	SubProfiles []PbmCapabilitySubProfile `xml:"subProfiles"`
+	SubProfiles []PbmCapabilitySubProfile `xml:"subProfiles" json:"subProfiles"`
 }
 
 func init() {
@@ -550,8 +550,8 @@ func init() {
 type PbmCapabilityTimeSpan struct {
 	types.DynamicData
 
-	Value int32  `xml:"value"`
-	Unit  string `xml:"unit"`
+	Value int32  `xml:"value" json:"value"`
+	Unit  string `xml:"unit" json:"unit"`
 }
 
 func init() {
@@ -561,7 +561,7 @@ func init() {
 type PbmCapabilityTypeInfo struct {
 	types.DynamicData
 
-	TypeName string `xml:"typeName"`
+	TypeName string `xml:"typeName" json:"typeName"`
 }
 
 func init() {
@@ -571,8 +571,8 @@ func init() {
 type PbmCapabilityVendorNamespaceInfo struct {
 	types.DynamicData
 
-	VendorInfo    PbmCapabilitySchemaVendorInfo `xml:"vendorInfo"`
-	NamespaceInfo PbmCapabilityNamespaceInfo    `xml:"namespaceInfo"`
+	VendorInfo    PbmCapabilitySchemaVendorInfo `xml:"vendorInfo" json:"vendorInfo"`
+	NamespaceInfo PbmCapabilityNamespaceInfo    `xml:"namespaceInfo" json:"namespaceInfo"`
 }
 
 func init() {
@@ -582,8 +582,8 @@ func init() {
 type PbmCapabilityVendorResourceTypeInfo struct {
 	types.DynamicData
 
-	ResourceType        string                             `xml:"resourceType"`
-	VendorNamespaceInfo []PbmCapabilityVendorNamespaceInfo `xml:"vendorNamespaceInfo"`
+	ResourceType        string                             `xml:"resourceType" json:"resourceType"`
+	VendorNamespaceInfo []PbmCapabilityVendorNamespaceInfo `xml:"vendorNamespaceInfo" json:"vendorNamespaceInfo"`
 }
 
 func init() {
@@ -597,9 +597,9 @@ func init() {
 }
 
 type PbmCheckCompatibilityRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	HubsToSearch []PbmPlacementHub            `xml:"hubsToSearch,omitempty"`
-	Profile      PbmProfileId                 `xml:"profile"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	HubsToSearch []PbmPlacementHub            `xml:"hubsToSearch,omitempty" json:"hubsToSearch,omitempty"`
+	Profile      PbmProfileId                 `xml:"profile" json:"profile"`
 }
 
 func init() {
@@ -607,7 +607,7 @@ func init() {
 }
 
 type PbmCheckCompatibilityResponse struct {
-	Returnval []PbmPlacementCompatibilityResult `xml:"returnval,omitempty"`
+	Returnval []PbmPlacementCompatibilityResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmCheckCompatibilityWithSpec PbmCheckCompatibilityWithSpecRequestType
@@ -617,9 +617,9 @@ func init() {
 }
 
 type PbmCheckCompatibilityWithSpecRequestType struct {
-	This         types.ManagedObjectReference   `xml:"_this"`
-	HubsToSearch []PbmPlacementHub              `xml:"hubsToSearch,omitempty"`
-	ProfileSpec  PbmCapabilityProfileCreateSpec `xml:"profileSpec"`
+	This         types.ManagedObjectReference   `xml:"_this" json:"_this"`
+	HubsToSearch []PbmPlacementHub              `xml:"hubsToSearch,omitempty" json:"hubsToSearch,omitempty"`
+	ProfileSpec  PbmCapabilityProfileCreateSpec `xml:"profileSpec" json:"profileSpec"`
 }
 
 func init() {
@@ -627,7 +627,7 @@ func init() {
 }
 
 type PbmCheckCompatibilityWithSpecResponse struct {
-	Returnval []PbmPlacementCompatibilityResult `xml:"returnval,omitempty"`
+	Returnval []PbmPlacementCompatibilityResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmCheckCompliance PbmCheckComplianceRequestType
@@ -637,9 +637,9 @@ func init() {
 }
 
 type PbmCheckComplianceRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Entities []PbmServerObjectRef         `xml:"entities"`
-	Profile  *PbmProfileId                `xml:"profile,omitempty"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entities []PbmServerObjectRef         `xml:"entities" json:"entities"`
+	Profile  *PbmProfileId                `xml:"profile,omitempty" json:"profile,omitempty"`
 }
 
 func init() {
@@ -647,7 +647,7 @@ func init() {
 }
 
 type PbmCheckComplianceResponse struct {
-	Returnval []PbmComplianceResult `xml:"returnval,omitempty"`
+	Returnval []PbmComplianceResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmCheckRequirements PbmCheckRequirementsRequestType
@@ -657,10 +657,10 @@ func init() {
 }
 
 type PbmCheckRequirementsRequestType struct {
-	This                        types.ManagedObjectReference  `xml:"_this"`
-	HubsToSearch                []PbmPlacementHub             `xml:"hubsToSearch,omitempty"`
-	PlacementSubjectRef         *PbmServerObjectRef           `xml:"placementSubjectRef,omitempty"`
-	PlacementSubjectRequirement []BasePbmPlacementRequirement `xml:"placementSubjectRequirement,omitempty,typeattr"`
+	This                        types.ManagedObjectReference  `xml:"_this" json:"_this"`
+	HubsToSearch                []PbmPlacementHub             `xml:"hubsToSearch,omitempty" json:"hubsToSearch,omitempty"`
+	PlacementSubjectRef         *PbmServerObjectRef           `xml:"placementSubjectRef,omitempty" json:"placementSubjectRef,omitempty"`
+	PlacementSubjectRequirement []BasePbmPlacementRequirement `xml:"placementSubjectRequirement,omitempty,typeattr" json:"placementSubjectRequirement,omitempty"`
 }
 
 func init() {
@@ -668,7 +668,7 @@ func init() {
 }
 
 type PbmCheckRequirementsResponse struct {
-	Returnval []PbmPlacementCompatibilityResult `xml:"returnval,omitempty"`
+	Returnval []PbmPlacementCompatibilityResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmCheckRollupCompliance PbmCheckRollupComplianceRequestType
@@ -678,8 +678,8 @@ func init() {
 }
 
 type PbmCheckRollupComplianceRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Entity []PbmServerObjectRef         `xml:"entity"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entity []PbmServerObjectRef         `xml:"entity" json:"entity"`
 }
 
 func init() {
@@ -687,13 +687,13 @@ func init() {
 }
 
 type PbmCheckRollupComplianceResponse struct {
-	Returnval []PbmRollupComplianceResult `xml:"returnval,omitempty"`
+	Returnval []PbmRollupComplianceResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmCompatibilityCheckFault struct {
 	PbmFault
 
-	Hub PbmPlacementHub `xml:"hub"`
+	Hub PbmPlacementHub `xml:"hub" json:"hub"`
 }
 
 func init() {
@@ -709,10 +709,10 @@ func init() {
 type PbmComplianceOperationalStatus struct {
 	types.DynamicData
 
-	Healthy           *bool      `xml:"healthy"`
-	OperationETA      *time.Time `xml:"operationETA"`
-	OperationProgress int64      `xml:"operationProgress,omitempty"`
-	Transitional      *bool      `xml:"transitional"`
+	Healthy           *bool      `xml:"healthy" json:"healthy,omitempty"`
+	OperationETA      *time.Time `xml:"operationETA" json:"operationETA,omitempty"`
+	OperationProgress int64      `xml:"operationProgress,omitempty" json:"operationProgress,omitempty"`
+	Transitional      *bool      `xml:"transitional" json:"transitional,omitempty"`
 }
 
 func init() {
@@ -722,8 +722,8 @@ func init() {
 type PbmCompliancePolicyStatus struct {
 	types.DynamicData
 
-	ExpectedValue PbmCapabilityInstance  `xml:"expectedValue"`
-	CurrentValue  *PbmCapabilityInstance `xml:"currentValue,omitempty"`
+	ExpectedValue PbmCapabilityInstance  `xml:"expectedValue" json:"expectedValue"`
+	CurrentValue  *PbmCapabilityInstance `xml:"currentValue,omitempty" json:"currentValue,omitempty"`
 }
 
 func init() {
@@ -733,16 +733,16 @@ func init() {
 type PbmComplianceResult struct {
 	types.DynamicData
 
-	CheckTime            time.Time                       `xml:"checkTime"`
-	Entity               PbmServerObjectRef              `xml:"entity"`
-	Profile              *PbmProfileId                   `xml:"profile,omitempty"`
-	ComplianceTaskStatus string                          `xml:"complianceTaskStatus,omitempty"`
-	ComplianceStatus     string                          `xml:"complianceStatus"`
-	Mismatch             bool                            `xml:"mismatch"`
-	ViolatedPolicies     []PbmCompliancePolicyStatus     `xml:"violatedPolicies,omitempty"`
-	ErrorCause           []types.LocalizedMethodFault    `xml:"errorCause,omitempty"`
-	OperationalStatus    *PbmComplianceOperationalStatus `xml:"operationalStatus,omitempty"`
-	Info                 *PbmExtendedElementDescription  `xml:"info,omitempty"`
+	CheckTime            time.Time                       `xml:"checkTime" json:"checkTime"`
+	Entity               PbmServerObjectRef              `xml:"entity" json:"entity"`
+	Profile              *PbmProfileId                   `xml:"profile,omitempty" json:"profile,omitempty"`
+	ComplianceTaskStatus string                          `xml:"complianceTaskStatus,omitempty" json:"complianceTaskStatus,omitempty"`
+	ComplianceStatus     string                          `xml:"complianceStatus" json:"complianceStatus"`
+	Mismatch             bool                            `xml:"mismatch" json:"mismatch"`
+	ViolatedPolicies     []PbmCompliancePolicyStatus     `xml:"violatedPolicies,omitempty" json:"violatedPolicies,omitempty"`
+	ErrorCause           []types.LocalizedMethodFault    `xml:"errorCause,omitempty" json:"errorCause,omitempty"`
+	OperationalStatus    *PbmComplianceOperationalStatus `xml:"operationalStatus,omitempty" json:"operationalStatus,omitempty"`
+	Info                 *PbmExtendedElementDescription  `xml:"info,omitempty" json:"info,omitempty"`
 }
 
 func init() {
@@ -756,8 +756,8 @@ func init() {
 }
 
 type PbmCreateRequestType struct {
-	This       types.ManagedObjectReference   `xml:"_this"`
-	CreateSpec PbmCapabilityProfileCreateSpec `xml:"createSpec"`
+	This       types.ManagedObjectReference   `xml:"_this" json:"_this"`
+	CreateSpec PbmCapabilityProfileCreateSpec `xml:"createSpec" json:"createSpec"`
 }
 
 func init() {
@@ -765,15 +765,15 @@ func init() {
 }
 
 type PbmCreateResponse struct {
-	Returnval PbmProfileId `xml:"returnval"`
+	Returnval PbmProfileId `xml:"returnval" json:"returnval"`
 }
 
 type PbmDataServiceToPoliciesMap struct {
 	types.DynamicData
 
-	DataServicePolicy     PbmProfileId                `xml:"dataServicePolicy"`
-	ParentStoragePolicies []PbmProfileId              `xml:"parentStoragePolicies,omitempty"`
-	Fault                 *types.LocalizedMethodFault `xml:"fault,omitempty"`
+	DataServicePolicy     PbmProfileId                `xml:"dataServicePolicy" json:"dataServicePolicy"`
+	ParentStoragePolicies []PbmProfileId              `xml:"parentStoragePolicies,omitempty" json:"parentStoragePolicies,omitempty"`
+	Fault                 *types.LocalizedMethodFault `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
 func init() {
@@ -783,13 +783,13 @@ func init() {
 type PbmDatastoreSpaceStatistics struct {
 	types.DynamicData
 
-	ProfileId         string `xml:"profileId,omitempty"`
-	PhysicalTotalInMB int64  `xml:"physicalTotalInMB"`
-	PhysicalFreeInMB  int64  `xml:"physicalFreeInMB"`
-	PhysicalUsedInMB  int64  `xml:"physicalUsedInMB"`
-	LogicalLimitInMB  int64  `xml:"logicalLimitInMB,omitempty"`
-	LogicalFreeInMB   int64  `xml:"logicalFreeInMB"`
-	LogicalUsedInMB   int64  `xml:"logicalUsedInMB"`
+	ProfileId         string `xml:"profileId,omitempty" json:"profileId,omitempty"`
+	PhysicalTotalInMB int64  `xml:"physicalTotalInMB" json:"physicalTotalInMB"`
+	PhysicalFreeInMB  int64  `xml:"physicalFreeInMB" json:"physicalFreeInMB"`
+	PhysicalUsedInMB  int64  `xml:"physicalUsedInMB" json:"physicalUsedInMB"`
+	LogicalLimitInMB  int64  `xml:"logicalLimitInMB,omitempty" json:"logicalLimitInMB,omitempty"`
+	LogicalFreeInMB   int64  `xml:"logicalFreeInMB" json:"logicalFreeInMB"`
+	LogicalUsedInMB   int64  `xml:"logicalUsedInMB" json:"logicalUsedInMB"`
 }
 
 func init() {
@@ -799,8 +799,8 @@ func init() {
 type PbmDefaultCapabilityProfile struct {
 	PbmCapabilityProfile
 
-	VvolType    []string `xml:"vvolType"`
-	ContainerId string   `xml:"containerId"`
+	VvolType    []string `xml:"vvolType" json:"vvolType"`
+	ContainerId string   `xml:"containerId" json:"containerId"`
 }
 
 func init() {
@@ -824,8 +824,8 @@ func init() {
 type PbmDefaultProfileInfo struct {
 	types.DynamicData
 
-	Datastores     []PbmPlacementHub `xml:"datastores"`
-	DefaultProfile BasePbmProfile    `xml:"defaultProfile,omitempty,typeattr"`
+	Datastores     []PbmPlacementHub `xml:"datastores" json:"datastores"`
+	DefaultProfile BasePbmProfile    `xml:"defaultProfile,omitempty,typeattr" json:"defaultProfile,omitempty"`
 }
 
 func init() {
@@ -839,8 +839,8 @@ func init() {
 }
 
 type PbmDeleteRequestType struct {
-	This      types.ManagedObjectReference `xml:"_this"`
-	ProfileId []PbmProfileId               `xml:"profileId"`
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProfileId []PbmProfileId               `xml:"profileId" json:"profileId"`
 }
 
 func init() {
@@ -848,13 +848,13 @@ func init() {
 }
 
 type PbmDeleteResponse struct {
-	Returnval []PbmProfileOperationOutcome `xml:"returnval,omitempty"`
+	Returnval []PbmProfileOperationOutcome `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmDuplicateName struct {
 	PbmFault
 
-	Name string `xml:"name"`
+	Name string `xml:"name" json:"name"`
 }
 
 func init() {
@@ -870,11 +870,11 @@ func init() {
 type PbmExtendedElementDescription struct {
 	types.DynamicData
 
-	Label                   string              `xml:"label"`
-	Summary                 string              `xml:"summary"`
-	Key                     string              `xml:"key"`
-	MessageCatalogKeyPrefix string              `xml:"messageCatalogKeyPrefix"`
-	MessageArg              []types.KeyAnyValue `xml:"messageArg,omitempty"`
+	Label                   string              `xml:"label" json:"label"`
+	Summary                 string              `xml:"summary" json:"summary"`
+	Key                     string              `xml:"key" json:"key"`
+	MessageCatalogKeyPrefix string              `xml:"messageCatalogKeyPrefix" json:"messageCatalogKeyPrefix"`
+	MessageArg              []types.KeyAnyValue `xml:"messageArg,omitempty" json:"messageArg,omitempty"`
 }
 
 func init() {
@@ -912,8 +912,8 @@ func init() {
 type PbmFaultNoPermissionEntityPrivileges struct {
 	types.DynamicData
 
-	ProfileId    *PbmProfileId `xml:"profileId,omitempty"`
-	PrivilegeIds []string      `xml:"privilegeIds,omitempty"`
+	ProfileId    *PbmProfileId `xml:"profileId,omitempty" json:"profileId,omitempty"`
+	PrivilegeIds []string      `xml:"privilegeIds,omitempty" json:"privilegeIds,omitempty"`
 }
 
 func init() {
@@ -955,9 +955,9 @@ func init() {
 }
 
 type PbmFetchCapabilityMetadataRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	ResourceType *PbmProfileResourceType      `xml:"resourceType,omitempty"`
-	VendorUuid   string                       `xml:"vendorUuid,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ResourceType *PbmProfileResourceType      `xml:"resourceType,omitempty" json:"resourceType,omitempty"`
+	VendorUuid   string                       `xml:"vendorUuid,omitempty" json:"vendorUuid,omitempty"`
 }
 
 func init() {
@@ -965,7 +965,7 @@ func init() {
 }
 
 type PbmFetchCapabilityMetadataResponse struct {
-	Returnval []PbmCapabilityMetadataPerCategory `xml:"returnval,omitempty"`
+	Returnval []PbmCapabilityMetadataPerCategory `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmFetchCapabilitySchema PbmFetchCapabilitySchemaRequestType
@@ -975,9 +975,9 @@ func init() {
 }
 
 type PbmFetchCapabilitySchemaRequestType struct {
-	This          types.ManagedObjectReference `xml:"_this"`
-	VendorUuid    string                       `xml:"vendorUuid,omitempty"`
-	LineOfService []string                     `xml:"lineOfService,omitempty"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	VendorUuid    string                       `xml:"vendorUuid,omitempty" json:"vendorUuid,omitempty"`
+	LineOfService []string                     `xml:"lineOfService,omitempty" json:"lineOfService,omitempty"`
 }
 
 func init() {
@@ -985,7 +985,7 @@ func init() {
 }
 
 type PbmFetchCapabilitySchemaResponse struct {
-	Returnval []PbmCapabilitySchema `xml:"returnval,omitempty"`
+	Returnval []PbmCapabilitySchema `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmFetchComplianceResult PbmFetchComplianceResultRequestType
@@ -995,9 +995,9 @@ func init() {
 }
 
 type PbmFetchComplianceResultRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Entities []PbmServerObjectRef         `xml:"entities"`
-	Profile  *PbmProfileId                `xml:"profile,omitempty"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entities []PbmServerObjectRef         `xml:"entities" json:"entities"`
+	Profile  *PbmProfileId                `xml:"profile,omitempty" json:"profile,omitempty"`
 }
 
 func init() {
@@ -1005,14 +1005,14 @@ func init() {
 }
 
 type PbmFetchComplianceResultResponse struct {
-	Returnval []PbmComplianceResult `xml:"returnval,omitempty"`
+	Returnval []PbmComplianceResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmFetchEntityHealthStatusSpec struct {
 	types.DynamicData
 
-	ObjectRef PbmServerObjectRef `xml:"objectRef"`
-	BackingId string             `xml:"backingId,omitempty"`
+	ObjectRef PbmServerObjectRef `xml:"objectRef" json:"objectRef"`
+	BackingId string             `xml:"backingId,omitempty" json:"backingId,omitempty"`
 }
 
 func init() {
@@ -1026,7 +1026,7 @@ func init() {
 }
 
 type PbmFetchResourceTypeRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1034,7 +1034,7 @@ func init() {
 }
 
 type PbmFetchResourceTypeResponse struct {
-	Returnval []PbmProfileResourceType `xml:"returnval,omitempty"`
+	Returnval []PbmProfileResourceType `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmFetchRollupComplianceResult PbmFetchRollupComplianceResultRequestType
@@ -1044,8 +1044,8 @@ func init() {
 }
 
 type PbmFetchRollupComplianceResultRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Entity []PbmServerObjectRef         `xml:"entity"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entity []PbmServerObjectRef         `xml:"entity" json:"entity"`
 }
 
 func init() {
@@ -1053,7 +1053,7 @@ func init() {
 }
 
 type PbmFetchRollupComplianceResultResponse struct {
-	Returnval []PbmRollupComplianceResult `xml:"returnval,omitempty"`
+	Returnval []PbmRollupComplianceResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmFetchVendorInfo PbmFetchVendorInfoRequestType
@@ -1063,8 +1063,8 @@ func init() {
 }
 
 type PbmFetchVendorInfoRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	ResourceType *PbmProfileResourceType      `xml:"resourceType,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ResourceType *PbmProfileResourceType      `xml:"resourceType,omitempty" json:"resourceType,omitempty"`
 }
 
 func init() {
@@ -1072,7 +1072,7 @@ func init() {
 }
 
 type PbmFetchVendorInfoResponse struct {
-	Returnval []PbmCapabilityVendorResourceTypeInfo `xml:"returnval,omitempty"`
+	Returnval []PbmCapabilityVendorResourceTypeInfo `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmFindApplicableDefaultProfile PbmFindApplicableDefaultProfileRequestType
@@ -1082,8 +1082,8 @@ func init() {
 }
 
 type PbmFindApplicableDefaultProfileRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Datastores []PbmPlacementHub            `xml:"datastores"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastores []PbmPlacementHub            `xml:"datastores" json:"datastores"`
 }
 
 func init() {
@@ -1091,7 +1091,7 @@ func init() {
 }
 
 type PbmFindApplicableDefaultProfileResponse struct {
-	Returnval []BasePbmProfile `xml:"returnval,omitempty,typeattr"`
+	Returnval []BasePbmProfile `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type PbmIncompatibleVendorSpecificRuleSet struct {
@@ -1111,7 +1111,7 @@ func init() {
 type PbmLegacyHubsNotSupported struct {
 	PbmFault
 
-	Hubs []PbmPlacementHub `xml:"hubs"`
+	Hubs []PbmPlacementHub `xml:"hubs" json:"hubs"`
 }
 
 func init() {
@@ -1127,9 +1127,9 @@ func init() {
 type PbmLineOfServiceInfo struct {
 	types.DynamicData
 
-	LineOfService string                         `xml:"lineOfService"`
-	Name          PbmExtendedElementDescription  `xml:"name"`
-	Description   *PbmExtendedElementDescription `xml:"description,omitempty"`
+	LineOfService string                         `xml:"lineOfService" json:"lineOfService"`
+	Name          PbmExtendedElementDescription  `xml:"name" json:"name"`
+	Description   *PbmExtendedElementDescription `xml:"description,omitempty" json:"description,omitempty"`
 }
 
 func init() {
@@ -1139,8 +1139,8 @@ func init() {
 type PbmLoggingConfiguration struct {
 	types.DynamicData
 
-	Component string `xml:"component"`
-	LogLevel  string `xml:"logLevel"`
+	Component string `xml:"component" json:"component"`
+	LogLevel  string `xml:"logLevel" json:"logLevel"`
 }
 
 func init() {
@@ -1150,7 +1150,7 @@ func init() {
 type PbmNonExistentHubs struct {
 	PbmFault
 
-	Hubs []PbmPlacementHub `xml:"hubs"`
+	Hubs []PbmPlacementHub `xml:"hubs" json:"hubs"`
 }
 
 func init() {
@@ -1166,7 +1166,7 @@ func init() {
 type PbmPersistenceBasedDataServiceInfo struct {
 	PbmLineOfServiceInfo
 
-	CompatiblePersistenceSchemaNamespace []string `xml:"compatiblePersistenceSchemaNamespace,omitempty"`
+	CompatiblePersistenceSchemaNamespace []string `xml:"compatiblePersistenceSchemaNamespace,omitempty" json:"compatiblePersistenceSchemaNamespace,omitempty"`
 }
 
 func init() {
@@ -1176,7 +1176,7 @@ func init() {
 type PbmPlacementCapabilityConstraintsRequirement struct {
 	PbmPlacementRequirement
 
-	Constraints BasePbmCapabilityConstraints `xml:"constraints,typeattr"`
+	Constraints BasePbmCapabilityConstraints `xml:"constraints,typeattr" json:"constraints"`
 }
 
 func init() {
@@ -1186,7 +1186,7 @@ func init() {
 type PbmPlacementCapabilityProfileRequirement struct {
 	PbmPlacementRequirement
 
-	ProfileId PbmProfileId `xml:"profileId"`
+	ProfileId PbmProfileId `xml:"profileId" json:"profileId"`
 }
 
 func init() {
@@ -1196,12 +1196,12 @@ func init() {
 type PbmPlacementCompatibilityResult struct {
 	types.DynamicData
 
-	Hub               PbmPlacementHub                     `xml:"hub"`
-	MatchingResources []BasePbmPlacementMatchingResources `xml:"matchingResources,omitempty,typeattr"`
-	HowMany           int64                               `xml:"howMany,omitempty"`
-	Utilization       []PbmPlacementResourceUtilization   `xml:"utilization,omitempty"`
-	Warning           []types.LocalizedMethodFault        `xml:"warning,omitempty"`
-	Error             []types.LocalizedMethodFault        `xml:"error,omitempty"`
+	Hub               PbmPlacementHub                     `xml:"hub" json:"hub"`
+	MatchingResources []BasePbmPlacementMatchingResources `xml:"matchingResources,omitempty,typeattr" json:"matchingResources,omitempty"`
+	HowMany           int64                               `xml:"howMany,omitempty" json:"howMany,omitempty"`
+	Utilization       []PbmPlacementResourceUtilization   `xml:"utilization,omitempty" json:"utilization,omitempty"`
+	Warning           []types.LocalizedMethodFault        `xml:"warning,omitempty" json:"warning,omitempty"`
+	Error             []types.LocalizedMethodFault        `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
@@ -1211,8 +1211,8 @@ func init() {
 type PbmPlacementHub struct {
 	types.DynamicData
 
-	HubType string `xml:"hubType"`
-	HubId   string `xml:"hubId"`
+	HubType string `xml:"hubType" json:"hubType"`
+	HubId   string `xml:"hubId" json:"hubId"`
 }
 
 func init() {
@@ -1222,7 +1222,7 @@ func init() {
 type PbmPlacementMatchingReplicationResources struct {
 	PbmPlacementMatchingResources
 
-	ReplicationGroup []types.ReplicationGroupId `xml:"replicationGroup,omitempty"`
+	ReplicationGroup []types.ReplicationGroupId `xml:"replicationGroup,omitempty" json:"replicationGroup,omitempty"`
 }
 
 func init() {
@@ -1248,11 +1248,11 @@ func init() {
 type PbmPlacementResourceUtilization struct {
 	types.DynamicData
 
-	Name            PbmExtendedElementDescription `xml:"name"`
-	Description     PbmExtendedElementDescription `xml:"description"`
-	AvailableBefore int64                         `xml:"availableBefore,omitempty"`
-	AvailableAfter  int64                         `xml:"availableAfter,omitempty"`
-	Total           int64                         `xml:"total,omitempty"`
+	Name            PbmExtendedElementDescription `xml:"name" json:"name"`
+	Description     PbmExtendedElementDescription `xml:"description" json:"description"`
+	AvailableBefore int64                         `xml:"availableBefore,omitempty" json:"availableBefore,omitempty"`
+	AvailableAfter  int64                         `xml:"availableAfter,omitempty" json:"availableAfter,omitempty"`
+	Total           int64                         `xml:"total,omitempty" json:"total,omitempty"`
 }
 
 func init() {
@@ -1262,13 +1262,13 @@ func init() {
 type PbmProfile struct {
 	types.DynamicData
 
-	ProfileId       PbmProfileId `xml:"profileId"`
-	Name            string       `xml:"name"`
-	Description     string       `xml:"description,omitempty"`
-	CreationTime    time.Time    `xml:"creationTime"`
-	CreatedBy       string       `xml:"createdBy"`
-	LastUpdatedTime time.Time    `xml:"lastUpdatedTime"`
-	LastUpdatedBy   string       `xml:"lastUpdatedBy"`
+	ProfileId       PbmProfileId `xml:"profileId" json:"profileId"`
+	Name            string       `xml:"name" json:"name"`
+	Description     string       `xml:"description,omitempty" json:"description,omitempty"`
+	CreationTime    time.Time    `xml:"creationTime" json:"creationTime"`
+	CreatedBy       string       `xml:"createdBy" json:"createdBy"`
+	LastUpdatedTime time.Time    `xml:"lastUpdatedTime" json:"lastUpdatedTime"`
+	LastUpdatedBy   string       `xml:"lastUpdatedBy" json:"lastUpdatedBy"`
 }
 
 func init() {
@@ -1278,7 +1278,7 @@ func init() {
 type PbmProfileId struct {
 	types.DynamicData
 
-	UniqueId string `xml:"uniqueId"`
+	UniqueId string `xml:"uniqueId" json:"uniqueId"`
 }
 
 func init() {
@@ -1288,8 +1288,8 @@ func init() {
 type PbmProfileOperationOutcome struct {
 	types.DynamicData
 
-	ProfileId PbmProfileId                `xml:"profileId"`
-	Fault     *types.LocalizedMethodFault `xml:"fault,omitempty"`
+	ProfileId PbmProfileId                `xml:"profileId" json:"profileId"`
+	Fault     *types.LocalizedMethodFault `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
 func init() {
@@ -1299,7 +1299,7 @@ func init() {
 type PbmProfileResourceType struct {
 	types.DynamicData
 
-	ResourceType string `xml:"resourceType"`
+	ResourceType string `xml:"resourceType" json:"resourceType"`
 }
 
 func init() {
@@ -1309,7 +1309,7 @@ func init() {
 type PbmProfileType struct {
 	types.DynamicData
 
-	UniqueId string `xml:"uniqueId"`
+	UniqueId string `xml:"uniqueId" json:"uniqueId"`
 }
 
 func init() {
@@ -1319,8 +1319,8 @@ func init() {
 type PbmPropertyMismatchFault struct {
 	PbmCompatibilityCheckFault
 
-	CapabilityInstanceId        PbmCapabilityMetadataUniqueId `xml:"capabilityInstanceId"`
-	RequirementPropertyInstance PbmCapabilityPropertyInstance `xml:"requirementPropertyInstance"`
+	CapabilityInstanceId        PbmCapabilityMetadataUniqueId `xml:"capabilityInstanceId" json:"capabilityInstanceId"`
+	RequirementPropertyInstance PbmCapabilityPropertyInstance `xml:"requirementPropertyInstance" json:"requirementPropertyInstance"`
 }
 
 func init() {
@@ -1340,8 +1340,8 @@ func init() {
 }
 
 type PbmQueryAssociatedEntitiesRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Profiles []PbmProfileId               `xml:"profiles,omitempty"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Profiles []PbmProfileId               `xml:"profiles,omitempty" json:"profiles,omitempty"`
 }
 
 func init() {
@@ -1349,7 +1349,7 @@ func init() {
 }
 
 type PbmQueryAssociatedEntitiesResponse struct {
-	Returnval []PbmQueryProfileResult `xml:"returnval,omitempty"`
+	Returnval []PbmQueryProfileResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryAssociatedEntity PbmQueryAssociatedEntityRequestType
@@ -1359,9 +1359,9 @@ func init() {
 }
 
 type PbmQueryAssociatedEntityRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Profile    PbmProfileId                 `xml:"profile"`
-	EntityType string                       `xml:"entityType,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Profile    PbmProfileId                 `xml:"profile" json:"profile"`
+	EntityType string                       `xml:"entityType,omitempty" json:"entityType,omitempty"`
 }
 
 func init() {
@@ -1369,7 +1369,7 @@ func init() {
 }
 
 type PbmQueryAssociatedEntityResponse struct {
-	Returnval []PbmServerObjectRef `xml:"returnval,omitempty"`
+	Returnval []PbmServerObjectRef `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryAssociatedProfile PbmQueryAssociatedProfileRequestType
@@ -1379,8 +1379,8 @@ func init() {
 }
 
 type PbmQueryAssociatedProfileRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Entity PbmServerObjectRef           `xml:"entity"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entity PbmServerObjectRef           `xml:"entity" json:"entity"`
 }
 
 func init() {
@@ -1388,7 +1388,7 @@ func init() {
 }
 
 type PbmQueryAssociatedProfileResponse struct {
-	Returnval []PbmProfileId `xml:"returnval,omitempty"`
+	Returnval []PbmProfileId `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryAssociatedProfiles PbmQueryAssociatedProfilesRequestType
@@ -1398,8 +1398,8 @@ func init() {
 }
 
 type PbmQueryAssociatedProfilesRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Entities []PbmServerObjectRef         `xml:"entities"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entities []PbmServerObjectRef         `xml:"entities" json:"entities"`
 }
 
 func init() {
@@ -1407,7 +1407,7 @@ func init() {
 }
 
 type PbmQueryAssociatedProfilesResponse struct {
-	Returnval []PbmQueryProfileResult `xml:"returnval,omitempty"`
+	Returnval []PbmQueryProfileResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryByRollupComplianceStatus PbmQueryByRollupComplianceStatusRequestType
@@ -1417,8 +1417,8 @@ func init() {
 }
 
 type PbmQueryByRollupComplianceStatusRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Status string                       `xml:"status"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Status string                       `xml:"status" json:"status"`
 }
 
 func init() {
@@ -1426,7 +1426,7 @@ func init() {
 }
 
 type PbmQueryByRollupComplianceStatusResponse struct {
-	Returnval []PbmServerObjectRef `xml:"returnval,omitempty"`
+	Returnval []PbmServerObjectRef `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryDefaultRequirementProfile PbmQueryDefaultRequirementProfileRequestType
@@ -1436,8 +1436,8 @@ func init() {
 }
 
 type PbmQueryDefaultRequirementProfileRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Hub  PbmPlacementHub              `xml:"hub"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Hub  PbmPlacementHub              `xml:"hub" json:"hub"`
 }
 
 func init() {
@@ -1445,7 +1445,7 @@ func init() {
 }
 
 type PbmQueryDefaultRequirementProfileResponse struct {
-	Returnval *PbmProfileId `xml:"returnval,omitempty"`
+	Returnval *PbmProfileId `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryDefaultRequirementProfiles PbmQueryDefaultRequirementProfilesRequestType
@@ -1455,8 +1455,8 @@ func init() {
 }
 
 type PbmQueryDefaultRequirementProfilesRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Datastores []PbmPlacementHub            `xml:"datastores"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastores []PbmPlacementHub            `xml:"datastores" json:"datastores"`
 }
 
 func init() {
@@ -1464,7 +1464,7 @@ func init() {
 }
 
 type PbmQueryDefaultRequirementProfilesResponse struct {
-	Returnval []PbmDefaultProfileInfo `xml:"returnval"`
+	Returnval []PbmDefaultProfileInfo `xml:"returnval" json:"returnval"`
 }
 
 type PbmQueryMatchingHub PbmQueryMatchingHubRequestType
@@ -1474,9 +1474,9 @@ func init() {
 }
 
 type PbmQueryMatchingHubRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	HubsToSearch []PbmPlacementHub            `xml:"hubsToSearch,omitempty"`
-	Profile      PbmProfileId                 `xml:"profile"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	HubsToSearch []PbmPlacementHub            `xml:"hubsToSearch,omitempty" json:"hubsToSearch,omitempty"`
+	Profile      PbmProfileId                 `xml:"profile" json:"profile"`
 }
 
 func init() {
@@ -1484,7 +1484,7 @@ func init() {
 }
 
 type PbmQueryMatchingHubResponse struct {
-	Returnval []PbmPlacementHub `xml:"returnval,omitempty"`
+	Returnval []PbmPlacementHub `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryMatchingHubWithSpec PbmQueryMatchingHubWithSpecRequestType
@@ -1494,9 +1494,9 @@ func init() {
 }
 
 type PbmQueryMatchingHubWithSpecRequestType struct {
-	This         types.ManagedObjectReference   `xml:"_this"`
-	HubsToSearch []PbmPlacementHub              `xml:"hubsToSearch,omitempty"`
-	CreateSpec   PbmCapabilityProfileCreateSpec `xml:"createSpec"`
+	This         types.ManagedObjectReference   `xml:"_this" json:"_this"`
+	HubsToSearch []PbmPlacementHub              `xml:"hubsToSearch,omitempty" json:"hubsToSearch,omitempty"`
+	CreateSpec   PbmCapabilityProfileCreateSpec `xml:"createSpec" json:"createSpec"`
 }
 
 func init() {
@@ -1504,7 +1504,7 @@ func init() {
 }
 
 type PbmQueryMatchingHubWithSpecResponse struct {
-	Returnval []PbmPlacementHub `xml:"returnval,omitempty"`
+	Returnval []PbmPlacementHub `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryProfile PbmQueryProfileRequestType
@@ -1514,9 +1514,9 @@ func init() {
 }
 
 type PbmQueryProfileRequestType struct {
-	This            types.ManagedObjectReference `xml:"_this"`
-	ResourceType    PbmProfileResourceType       `xml:"resourceType"`
-	ProfileCategory string                       `xml:"profileCategory,omitempty"`
+	This            types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ResourceType    PbmProfileResourceType       `xml:"resourceType" json:"resourceType"`
+	ProfileCategory string                       `xml:"profileCategory,omitempty" json:"profileCategory,omitempty"`
 }
 
 func init() {
@@ -1524,15 +1524,15 @@ func init() {
 }
 
 type PbmQueryProfileResponse struct {
-	Returnval []PbmProfileId `xml:"returnval,omitempty"`
+	Returnval []PbmProfileId `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQueryProfileResult struct {
 	types.DynamicData
 
-	Object    PbmServerObjectRef          `xml:"object"`
-	ProfileId []PbmProfileId              `xml:"profileId,omitempty"`
-	Fault     *types.LocalizedMethodFault `xml:"fault,omitempty"`
+	Object    PbmServerObjectRef          `xml:"object" json:"object"`
+	ProfileId []PbmProfileId              `xml:"profileId,omitempty" json:"profileId,omitempty"`
+	Fault     *types.LocalizedMethodFault `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
 func init() {
@@ -1542,9 +1542,9 @@ func init() {
 type PbmQueryReplicationGroupResult struct {
 	types.DynamicData
 
-	Object             PbmServerObjectRef          `xml:"object"`
-	ReplicationGroupId *types.ReplicationGroupId   `xml:"replicationGroupId,omitempty"`
-	Fault              *types.LocalizedMethodFault `xml:"fault,omitempty"`
+	Object             PbmServerObjectRef          `xml:"object" json:"object"`
+	ReplicationGroupId *types.ReplicationGroupId   `xml:"replicationGroupId,omitempty" json:"replicationGroupId,omitempty"`
+	Fault              *types.LocalizedMethodFault `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
 func init() {
@@ -1558,8 +1558,8 @@ func init() {
 }
 
 type PbmQueryReplicationGroupsRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Entities []PbmServerObjectRef         `xml:"entities,omitempty"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Entities []PbmServerObjectRef         `xml:"entities,omitempty" json:"entities,omitempty"`
 }
 
 func init() {
@@ -1567,7 +1567,7 @@ func init() {
 }
 
 type PbmQueryReplicationGroupsResponse struct {
-	Returnval []PbmQueryReplicationGroupResult `xml:"returnval,omitempty"`
+	Returnval []PbmQueryReplicationGroupResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmQuerySpaceStatsForStorageContainer PbmQuerySpaceStatsForStorageContainerRequestType
@@ -1577,9 +1577,9 @@ func init() {
 }
 
 type PbmQuerySpaceStatsForStorageContainerRequestType struct {
-	This                types.ManagedObjectReference `xml:"_this"`
-	Datastore           PbmServerObjectRef           `xml:"datastore"`
-	CapabilityProfileId []PbmProfileId               `xml:"capabilityProfileId,omitempty"`
+	This                types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastore           PbmServerObjectRef           `xml:"datastore" json:"datastore"`
+	CapabilityProfileId []PbmProfileId               `xml:"capabilityProfileId,omitempty" json:"capabilityProfileId,omitempty"`
 }
 
 func init() {
@@ -1587,7 +1587,7 @@ func init() {
 }
 
 type PbmQuerySpaceStatsForStorageContainerResponse struct {
-	Returnval []PbmDatastoreSpaceStatistics `xml:"returnval,omitempty"`
+	Returnval []PbmDatastoreSpaceStatistics `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type PbmResetDefaultRequirementProfile PbmResetDefaultRequirementProfileRequestType
@@ -1597,8 +1597,8 @@ func init() {
 }
 
 type PbmResetDefaultRequirementProfileRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	Profile *PbmProfileId                `xml:"profile,omitempty"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Profile *PbmProfileId                `xml:"profile,omitempty" json:"profile,omitempty"`
 }
 
 func init() {
@@ -1615,7 +1615,7 @@ func init() {
 }
 
 type PbmResetVSanDefaultProfileRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1628,8 +1628,8 @@ type PbmResetVSanDefaultProfileResponse struct {
 type PbmResourceInUse struct {
 	PbmFault
 
-	Type string `xml:"type,omitempty"`
-	Name string `xml:"name,omitempty"`
+	Type string `xml:"type,omitempty" json:"type,omitempty"`
+	Name string `xml:"name,omitempty" json:"name,omitempty"`
 }
 
 func init() {
@@ -1649,8 +1649,8 @@ func init() {
 }
 
 type PbmRetrieveContentRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	ProfileIds []PbmProfileId               `xml:"profileIds"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProfileIds []PbmProfileId               `xml:"profileIds" json:"profileIds"`
 }
 
 func init() {
@@ -1658,7 +1658,7 @@ func init() {
 }
 
 type PbmRetrieveContentResponse struct {
-	Returnval []BasePbmProfile `xml:"returnval,typeattr"`
+	Returnval []BasePbmProfile `xml:"returnval,typeattr" json:"returnval"`
 }
 
 type PbmRetrieveServiceContent PbmRetrieveServiceContentRequestType
@@ -1668,7 +1668,7 @@ func init() {
 }
 
 type PbmRetrieveServiceContentRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1676,19 +1676,19 @@ func init() {
 }
 
 type PbmRetrieveServiceContentResponse struct {
-	Returnval PbmServiceInstanceContent `xml:"returnval"`
+	Returnval PbmServiceInstanceContent `xml:"returnval" json:"returnval"`
 }
 
 type PbmRollupComplianceResult struct {
 	types.DynamicData
 
-	OldestCheckTime             time.Time                    `xml:"oldestCheckTime"`
-	Entity                      PbmServerObjectRef           `xml:"entity"`
-	OverallComplianceStatus     string                       `xml:"overallComplianceStatus"`
-	OverallComplianceTaskStatus string                       `xml:"overallComplianceTaskStatus,omitempty"`
-	Result                      []PbmComplianceResult        `xml:"result,omitempty"`
-	ErrorCause                  []types.LocalizedMethodFault `xml:"errorCause,omitempty"`
-	ProfileMismatch             bool                         `xml:"profileMismatch"`
+	OldestCheckTime             time.Time                    `xml:"oldestCheckTime" json:"oldestCheckTime"`
+	Entity                      PbmServerObjectRef           `xml:"entity" json:"entity"`
+	OverallComplianceStatus     string                       `xml:"overallComplianceStatus" json:"overallComplianceStatus"`
+	OverallComplianceTaskStatus string                       `xml:"overallComplianceTaskStatus,omitempty" json:"overallComplianceTaskStatus,omitempty"`
+	Result                      []PbmComplianceResult        `xml:"result,omitempty" json:"result,omitempty"`
+	ErrorCause                  []types.LocalizedMethodFault `xml:"errorCause,omitempty" json:"errorCause,omitempty"`
+	ProfileMismatch             bool                         `xml:"profileMismatch" json:"profileMismatch"`
 }
 
 func init() {
@@ -1698,9 +1698,9 @@ func init() {
 type PbmServerObjectRef struct {
 	types.DynamicData
 
-	ObjectType string `xml:"objectType"`
-	Key        string `xml:"key"`
-	ServerUuid string `xml:"serverUuid,omitempty"`
+	ObjectType string `xml:"objectType" json:"objectType"`
+	Key        string `xml:"key" json:"key"`
+	ServerUuid string `xml:"serverUuid,omitempty" json:"serverUuid,omitempty"`
 }
 
 func init() {
@@ -1710,13 +1710,13 @@ func init() {
 type PbmServiceInstanceContent struct {
 	types.DynamicData
 
-	AboutInfo                 PbmAboutInfo                  `xml:"aboutInfo"`
-	SessionManager            types.ManagedObjectReference  `xml:"sessionManager"`
-	CapabilityMetadataManager types.ManagedObjectReference  `xml:"capabilityMetadataManager"`
-	ProfileManager            types.ManagedObjectReference  `xml:"profileManager"`
-	ComplianceManager         types.ManagedObjectReference  `xml:"complianceManager"`
-	PlacementSolver           types.ManagedObjectReference  `xml:"placementSolver"`
-	ReplicationManager        *types.ManagedObjectReference `xml:"replicationManager,omitempty"`
+	AboutInfo                 PbmAboutInfo                  `xml:"aboutInfo" json:"aboutInfo"`
+	SessionManager            types.ManagedObjectReference  `xml:"sessionManager" json:"sessionManager"`
+	CapabilityMetadataManager types.ManagedObjectReference  `xml:"capabilityMetadataManager" json:"capabilityMetadataManager"`
+	ProfileManager            types.ManagedObjectReference  `xml:"profileManager" json:"profileManager"`
+	ComplianceManager         types.ManagedObjectReference  `xml:"complianceManager" json:"complianceManager"`
+	PlacementSolver           types.ManagedObjectReference  `xml:"placementSolver" json:"placementSolver"`
+	ReplicationManager        *types.ManagedObjectReference `xml:"replicationManager,omitempty" json:"replicationManager,omitempty"`
 }
 
 func init() {
@@ -1730,9 +1730,9 @@ func init() {
 }
 
 type PbmUpdateRequestType struct {
-	This       types.ManagedObjectReference   `xml:"_this"`
-	ProfileId  PbmProfileId                   `xml:"profileId"`
-	UpdateSpec PbmCapabilityProfileUpdateSpec `xml:"updateSpec"`
+	This       types.ManagedObjectReference   `xml:"_this" json:"_this"`
+	ProfileId  PbmProfileId                   `xml:"profileId" json:"profileId"`
+	UpdateSpec PbmCapabilityProfileUpdateSpec `xml:"updateSpec" json:"updateSpec"`
 }
 
 func init() {
