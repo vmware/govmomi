@@ -119,13 +119,3 @@ func init() {
 }
 
 const RecommendationReasonCodeXClusterPlacement = RecommendationReasonCode("xClusterPlacement")
-
-type ClusterClusterInitialPlacementAction struct {
-	ClusterInitialPlacementAction
-
-	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
-}
-
-func init() {
-	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
-}

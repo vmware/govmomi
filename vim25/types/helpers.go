@@ -157,6 +157,18 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 		SevEnabled:                   ci.SevEnabled,
 		PmemFailoverEnabled:          ci.PmemFailoverEnabled,
 		Pmem:                         ci.Pmem,
+		NpivWorldWideNameOp:          ci.NpivWorldWideNameType,
+		RebootPowerOff:               ci.RebootPowerOff,
+		ScheduledHardwareUpgradeInfo: ci.ScheduledHardwareUpgradeInfo,
+		SgxInfo:                      ci.SgxInfo,
+		GuestMonitoringModeInfo:      ci.GuestMonitoringModeInfo,
+		VmxStatsCollectionEnabled:    ci.VmxStatsCollectionEnabled,
+		VmOpNotificationToAppEnabled: ci.VmOpNotificationToAppEnabled,
+		VmOpNotificationTimeout:      ci.VmOpNotificationTimeout,
+		DeviceSwap:                   ci.DeviceSwap,
+		SimultaneousThreads:          ci.Hardware.SimultaneousThreads,
+		DeviceGroups:                 ci.DeviceGroups,
+		MotherboardLayout:            ci.Hardware.MotherboardLayout,
 	}
 
 	// Unassign the Files field if all of its fields are empty.
@@ -232,6 +244,66 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 			// TODO: Investigate futher.
 			FilterSpec: nil,
 		}
+	}
+
+	if ni := ci.NumaInfo; ni != nil {
+		cs.VirtualNuma = &VirtualMachineVirtualNuma{
+			CoresPerNumaNode:       ni.CoresPerNumaNode,
+			ExposeVnumaOnCpuHotadd: ni.VnumaOnCpuHotaddExposed,
+		}
+	}
+
+	if civa, ok := ci.VAppConfig.(*VmConfigInfo); ok {
+		var csva VmConfigSpec
+
+		csva.Eula = civa.Eula
+		csva.InstallBootRequired = &civa.InstallBootRequired
+		csva.InstallBootStopDelay = civa.InstallBootStopDelay
+
+		ipAssignment := civa.IpAssignment
+		csva.IpAssignment = &ipAssignment
+
+		csva.OvfEnvironmentTransport = civa.OvfEnvironmentTransport
+		for i := range civa.OvfSection {
+			s := civa.OvfSection[i]
+			csva.OvfSection = append(
+				csva.OvfSection,
+				VAppOvfSectionSpec{
+					ArrayUpdateSpec: ArrayUpdateSpec{
+						Operation: ArrayUpdateOperationAdd,
+					},
+					Info: &s,
+				},
+			)
+		}
+
+		for i := range civa.Product {
+			p := civa.Product[i]
+			csva.Product = append(
+				csva.Product,
+				VAppProductSpec{
+					ArrayUpdateSpec: ArrayUpdateSpec{
+						Operation: ArrayUpdateOperationAdd,
+					},
+					Info: &p,
+				},
+			)
+		}
+
+		for i := range civa.Property {
+			p := civa.Property[i]
+			csva.Property = append(
+				csva.Property,
+				VAppPropertySpec{
+					ArrayUpdateSpec: ArrayUpdateSpec{
+						Operation: ArrayUpdateOperationAdd,
+					},
+					Info: &p,
+				},
+			)
+		}
+
+		cs.VAppConfig = &csva
 	}
 
 	return cs

@@ -807,12 +807,13 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 				Target:     &cluster.Self,
 			}
 
-			placementAction := types.ClusterInitialPlacementAction{
-				Pool: &pool.Self,
+			placementAction := types.ClusterClusterInitialPlacementAction{
+				Pool: pool.Self,
 			}
 
 			if hostRequired {
-				placementAction.TargetHost = cluster.Host[rand.Intn(len(cluster.Host))]
+				randomHost := cluster.Host[rand.Intn(len(cluster.Host))]
+				placementAction.TargetHost = &randomHost
 			}
 
 			if datastoreRequired {
@@ -856,12 +857,11 @@ func (f *Folder) PlaceVmsXCluster(ctx *Context, req *types.PlaceVmsXCluster) soa
 						}
 					}
 				}
+
+				placementAction.ConfigSpec = configSpec
 			}
 
-			res.Action = append(res.Action, &types.ClusterClusterInitialPlacementAction{
-				ClusterInitialPlacementAction: placementAction,
-				ConfigSpec:                    configSpec,
-			})
+			res.Action = append(res.Action, &placementAction)
 
 			body.Res.Returnval.PlacementInfos = append(body.Res.Returnval.PlacementInfos,
 				types.PlaceVmsXClusterResultPlacementInfo{
