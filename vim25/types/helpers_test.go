@@ -123,6 +123,40 @@ func TestVirtualMachineConfigInfoToConfigSpec(t *testing.T) {
 			},
 		},
 		{
+			name: "vAppConfig",
+			conf: VirtualMachineConfigInfo{
+				Name: "Hello, world.",
+				VAppConfig: &VmConfigInfo{
+					InstallBootRequired: false,
+					IpAssignment:        VAppIPAssignmentInfo{},
+					Product: []VAppProductInfo{
+						{
+							Key:  1,
+							Name: "P1",
+						},
+					},
+				},
+			},
+			spec: VirtualMachineConfigSpec{
+				Name: "Hello, world.",
+				VAppConfig: &VmConfigSpec{
+					InstallBootRequired: NewBool(false),
+					IpAssignment:        &VAppIPAssignmentInfo{},
+					Product: []VAppProductSpec{
+						{
+							ArrayUpdateSpec: ArrayUpdateSpec{
+								Operation: ArrayUpdateOperationAdd,
+							},
+							Info: &VAppProductInfo{
+								Key:  1,
+								Name: "P1",
+							},
+						},
+					},
+				},
+			},
+		},
+		{
 			name: "really big config",
 			conf: VirtualMachineConfigInfo{
 				Name:    "vm-001",
