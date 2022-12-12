@@ -310,6 +310,7 @@ func (cmd *enableCluster) toVapiSpec(refs objectReferences) (*namespace.EnableCl
 	if (cmd.ControlPlaneManagementNetwork.Mode != "") ||
 		(cmd.ControlPlaneManagementNetwork.FloatingIP != "") ||
 		(cmd.ControlPlaneManagementNetwork.Network != "") {
+		masterManagementNetwork = &namespace.MasterManagementNetwork{}
 		masterManagementNetwork.AddressRange = cmd.ControlPlaneManagementNetwork.AddressRange
 		masterManagementNetwork.FloatingIP = cmd.ControlPlaneManagementNetwork.FloatingIP
 		ipam := namespace.IpAssignmentModeFromString(cmd.ControlPlaneManagementNetwork.Mode)
