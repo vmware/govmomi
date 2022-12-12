@@ -98,7 +98,7 @@ func (r *certResult) Write(w io.Writer) error {
 
 func (cmd *cert) Run(ctx context.Context, f *flag.FlagSet) error {
 	u := cmd.Session.URL
-	c := soap.NewClient(u, false)
+	c := soap.NewClient(u, cmd.Session.Insecure)
 	t := c.Client.Transport.(*http.Transport)
 	r := certResult{cmd: cmd}
 

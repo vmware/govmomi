@@ -8313,6 +8313,18 @@ func init() {
 	t["ClusterAttemptedVmInfo"] = reflect.TypeOf((*ClusterAttemptedVmInfo)(nil)).Elem()
 }
 
+type ClusterClusterInitialPlacementAction struct {
+	ClusterAction
+
+	TargetHost *ManagedObjectReference   `xml:"targetHost,omitempty"`
+	Pool       ManagedObjectReference    `xml:"pool"`
+	ConfigSpec *VirtualMachineConfigSpec `xml:"configSpec,omitempty"`
+}
+
+func init() {
+	t["ClusterClusterInitialPlacementAction"] = reflect.TypeOf((*ClusterClusterInitialPlacementAction)(nil)).Elem()
+}
+
 type ClusterComplianceCheckedEvent struct {
 	ClusterEvent
 
@@ -8833,18 +8845,6 @@ type ClusterDasVmConfigSpec struct {
 
 func init() {
 	t["ClusterDasVmConfigSpec"] = reflect.TypeOf((*ClusterDasVmConfigSpec)(nil)).Elem()
-}
-
-type ClusterDasVmPreemptiblePairInfo struct {
-	DynamicData
-
-	Key           int32                  `xml:"key,omitempty"`
-	MonitoredVm   ManagedObjectReference `xml:"monitoredVm"`
-	PreemptibleVm ManagedObjectReference `xml:"preemptibleVm"`
-}
-
-func init() {
-	t["ClusterDasVmPreemptiblePairInfo"] = reflect.TypeOf((*ClusterDasVmPreemptiblePairInfo)(nil)).Elem()
 }
 
 type ClusterDasVmSettings struct {

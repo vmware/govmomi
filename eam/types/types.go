@@ -582,6 +582,12 @@ func init() {
 	types.Add("eam:DisabledClusterFault", reflect.TypeOf((*DisabledClusterFault)(nil)).Elem())
 }
 
+type DisabledClusterFaultFault DisabledClusterFault
+
+func init() {
+	types.Add("eam:DisabledClusterFaultFault", reflect.TypeOf((*DisabledClusterFaultFault)(nil)).Elem())
+}
+
 type EamAppFault struct {
 	EamRuntimeFault
 }
@@ -644,6 +650,12 @@ type EamInvalidState struct {
 
 func init() {
 	types.Add("eam:EamInvalidState", reflect.TypeOf((*EamInvalidState)(nil)).Elem())
+}
+
+type EamInvalidStateFault EamInvalidState
+
+func init() {
+	types.Add("eam:EamInvalidStateFault", reflect.TypeOf((*EamInvalidStateFault)(nil)).Elem())
 }
 
 type EamInvalidVibPackage struct {
@@ -729,12 +741,22 @@ func init() {
 	types.Add("eam:ExtensibleIssue", reflect.TypeOf((*ExtensibleIssue)(nil)).Elem())
 }
 
+type GetMaintenanceModePolicy GetMaintenanceModePolicyRequestType
+
+func init() {
+	types.Add("eam:GetMaintenanceModePolicy", reflect.TypeOf((*GetMaintenanceModePolicy)(nil)).Elem())
+}
+
 type GetMaintenanceModePolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this"`
 }
 
 func init() {
 	types.Add("eam:GetMaintenanceModePolicyRequestType", reflect.TypeOf((*GetMaintenanceModePolicyRequestType)(nil)).Elem())
+}
+
+type GetMaintenanceModePolicyResponse struct {
+	Returnval string `xml:"returnval"`
 }
 
 type HostInMaintenanceMode struct {
@@ -1332,6 +1354,12 @@ func init() {
 type ScanForUnknownAgentVmResponse struct {
 }
 
+type SetMaintenanceModePolicy SetMaintenanceModePolicyRequestType
+
+func init() {
+	types.Add("eam:SetMaintenanceModePolicy", reflect.TypeOf((*SetMaintenanceModePolicy)(nil)).Elem())
+}
+
 type SetMaintenanceModePolicyRequestType struct {
 	This   types.ManagedObjectReference `xml:"_this"`
 	Policy string                       `xml:"policy"`
@@ -1339,6 +1367,9 @@ type SetMaintenanceModePolicyRequestType struct {
 
 func init() {
 	types.Add("eam:SetMaintenanceModePolicyRequestType", reflect.TypeOf((*SetMaintenanceModePolicyRequestType)(nil)).Elem())
+}
+
+type SetMaintenanceModePolicyResponse struct {
 }
 
 type Uninstall UninstallRequestType

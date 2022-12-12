@@ -183,6 +183,26 @@ func DestroyAgency(ctx context.Context, r soap.RoundTripper, req *types.DestroyA
 	return resBody.Res, nil
 }
 
+type GetMaintenanceModePolicyBody struct {
+	Req    *types.GetMaintenanceModePolicy         `xml:"urn:eam GetMaintenanceModePolicy,omitempty"`
+	Res    *types.GetMaintenanceModePolicyResponse `xml:"urn:eam GetMaintenanceModePolicyResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *GetMaintenanceModePolicyBody) Fault() *soap.Fault { return b.Fault_ }
+
+func GetMaintenanceModePolicy(ctx context.Context, r soap.RoundTripper, req *types.GetMaintenanceModePolicy) (*types.GetMaintenanceModePolicyResponse, error) {
+	var reqBody, resBody GetMaintenanceModePolicyBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type MarkAsAvailableBody struct {
 	Req    *types.MarkAsAvailable         `xml:"urn:eam MarkAsAvailable,omitempty"`
 	Res    *types.MarkAsAvailableResponse `xml:"urn:eam MarkAsAvailableResponse,omitempty"`
@@ -373,6 +393,26 @@ func (b *ScanForUnknownAgentVmBody) Fault() *soap.Fault { return b.Fault_ }
 
 func ScanForUnknownAgentVm(ctx context.Context, r soap.RoundTripper, req *types.ScanForUnknownAgentVm) (*types.ScanForUnknownAgentVmResponse, error) {
 	var reqBody, resBody ScanForUnknownAgentVmBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type SetMaintenanceModePolicyBody struct {
+	Req    *types.SetMaintenanceModePolicy         `xml:"urn:eam SetMaintenanceModePolicy,omitempty"`
+	Res    *types.SetMaintenanceModePolicyResponse `xml:"urn:eam SetMaintenanceModePolicyResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *SetMaintenanceModePolicyBody) Fault() *soap.Fault { return b.Fault_ }
+
+func SetMaintenanceModePolicy(ctx context.Context, r soap.RoundTripper, req *types.SetMaintenanceModePolicy) (*types.SetMaintenanceModePolicyResponse, error) {
+	var reqBody, resBody SetMaintenanceModePolicyBody
 
 	reqBody.Req = req
 

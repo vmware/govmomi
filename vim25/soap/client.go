@@ -156,10 +156,14 @@ func NewClient(u *url.URL, insecure bool) *Client {
 
 	c.hosts = make(map[string]string)
 	c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k}
-	// Don't bother setting DialTLS if InsecureSkipVerify=true
-	if !c.k {
-		c.t.DialTLS = c.dialTLS
-	}
+
+	// Always set DialTLS and DialTLSContext, even if InsecureSkipVerify=true,
+	// because of how certificate verification has been delegated to the host's
+	// PKI framework in Go 1.18. Please see the following links for more info:
+	//
+	//   * https://tip.golang.org/doc/go1.18 (search for "Certificate.Verify")
+	//   * https://github.com/square/certigo/issues/264
+	c.t.DialTLSContext = c.dialTLSContext
 
 	c.Client.Transport = c.t
 	c.Client.Jar, _ = cookiejar.New(nil)
@@ -352,7 +356,10 @@ func ThumbprintSHA1(cert *x509.Certificate) string {
 	return strings.Join(hex, ":")
 }
 
-func (c *Client) dialTLS(network string, addr string) (net.Conn, error) {
+func (c *Client) dialTLSContext(
+	ctx context.Context,
+	network, addr string) (net.Conn, error) {
+
 	// Would be nice if there was a tls.Config.Verify func,
 	// see tls.clientHandshakeState.doFullHandshake
 
@@ -366,7 +373,20 @@ func (c *Client) dialTLS(network string, addr string) (net.Conn, error) {
 	case x509.UnknownAuthorityError:
 	case x509.HostnameError:
 	default:
-		return nil, err
+		// Allow a thumbprint verification attempt if the error indicates
+		// the failure was due to lack of trust.
+		//
+		// Please note the err variable is not a special type of x509 or HTTP
+		// error that can be validated by a type assertion. The err variable is
+		// in fact an *errors.errorString.
+		switch {
+		case strings.HasSuffix(err.Error(), "certificate is not trusted"):
+			// darwin and linux
+		case strings.HasSuffix(err.Error(), "certificate signed by unknown authority"):
+			// windows
+		default:
+			return nil, err
+		}
 	}
 
 	thumbprint := c.Thumbprint(addr)
@@ -389,6 +409,10 @@ func (c *Client) dialTLS(network string, addr string) (net.Conn, error) {
 	}
 
 	return conn, nil
+}
+
+func (c *Client) dialTLS(network, addr string) (net.Conn, error) {
+	return c.dialTLSContext(context.Background(), network, addr)
 }
 
 // splitHostPort is similar to net.SplitHostPort,
