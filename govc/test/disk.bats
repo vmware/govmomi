@@ -182,7 +182,7 @@ load test_helper
   run govc disk.ls
   assert_success
 
-  path=$(govc disk.ls -json "$id" | jq -r .Objects[].Config.Backing.FilePath)
+  path=$(govc disk.ls -json "$id" | jq -r .Objects[].config.backing.filePath)
   run govc datastore.rm "$path"
   assert_success
 

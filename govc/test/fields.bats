@@ -40,10 +40,10 @@ load test_helper
 
   info=$(govc vm.info -json $vm_id | jq .VirtualMachines[0].CustomValue[0])
 
-  ikey=$(jq -r .Key <<<"$info")
+  ikey=$(jq -r .key <<<"$info")
   assert_equal $key $ikey
 
-  ival=$(jq -r .Value <<<"$info")
+  ival=$(jq -r .value <<<"$info")
   assert_equal $val $ival
 
   old_field=$field

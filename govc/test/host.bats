@@ -74,7 +74,7 @@ load test_helper
   run govc host.info -host.dns $(basename "$name")
   assert_failure # TODO: SearchIndex:SearchIndex does not implement: FindByDnsName
 
-  uuid=$(govc host.info -host "$name" -json | jq -r .HostSystems[].Summary.Hardware.Uuid)
+  uuid=$(govc host.info -host "$name" -json | jq -r .HostSystems[].Summary.hardware.uuid)
   run govc host.info -host.uuid "$uuid"
   assert_success
 
