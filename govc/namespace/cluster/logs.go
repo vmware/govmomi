@@ -86,6 +86,10 @@ func (cmd *logs) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
+	if id := c.SessionID(); id != "" {
+		req.Header.Set("vmware-api-session-id", id)
+	}
+
 	return c.Client.Do(ctx, req, func(res *http.Response) error {
 		if name == "" {
 			d := res.Header.Get("Content-Disposition")

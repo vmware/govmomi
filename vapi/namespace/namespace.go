@@ -338,7 +338,9 @@ type AviConfigCreateSpec struct {
 // a Tanzu Kubernetes Grid enabled vSphere cluster to a HA Proxy
 // Load Balancer.
 // Note: HA Proxy is not supported in vSphere 7.0u3 and above. Use Avi
-//       with vSphere networking, or NSX-T networking, instead.
+//
+//	with vSphere networking, or NSX-T networking, instead.
+//
 // See https://developer.vmware.com/apis/vsphere-automation/latest/vcenter/data-structures/NamespaceManagement/LoadBalancers/HAProxyConfigCreateSpec/
 // Since 7.0u1:-
 type HAProxyConfigCreateSpec struct {
@@ -352,10 +354,12 @@ type HAProxyConfigCreateSpec struct {
 // the Load Balancer technology in use in a Tanzu Kubernetes Grid
 // cluster.
 // Note: If invalid or undefined (E.g. if a newer/older vSphere
-//       version is used whose option isn't listed) then the
-//       UndefinedLoadBalancerProvider value shall be set.
-//       This translates to an empty string, removing its element
-//       from the produces JSON.
+//
+//	version is used whose option isn't listed) then the
+//	UndefinedLoadBalancerProvider value shall be set.
+//	This translates to an empty string, removing its element
+//	from the produces JSON.
+//
 // See https://developer.vmware.com/apis/vsphere-automation/latest/vcenter/data-structures/NamespaceManagement/LoadBalancers/Provider/
 type LoadBalancerProvider struct {
 	slug string

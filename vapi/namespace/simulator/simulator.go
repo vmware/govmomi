@@ -137,7 +137,7 @@ func (h *Handler) clustersSupportBundle(w http.ResponseWriter, r *http.Request) 
 	name := fmt.Sprintf("wcp-support-bundle-%s-%s--00-00.tar", id, time.Now().Format("2006Jan02"))
 
 	w.Header().Set("Content-Disposition", fmt.Sprintf("attachment; filename=%s", name))
-	r.Header.Set("Content-Type", "application/octet-stream")
+	w.Header().Set("Content-Type", "application/octet-stream")
 
 	readme := "vcsim generated support bundle"
 	tw := tar.NewWriter(w)
