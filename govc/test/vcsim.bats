@@ -428,7 +428,7 @@ EOF
 
   vcsim_stop
 
-  dir=$($mktemp --tmpdir -d govc-test-XXXXX)
+  dir=$($mktemp --tmpdir -d govc-test-XXXXX 2>/dev/null || $mktemp -d -t govc-test-XXXXX)
   echo nobody > "$dir/username"
   echo nothing > "$dir/password"
 
