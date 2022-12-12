@@ -1,4 +1,112 @@
 
+<a name="v0.30.0"></a>
+## [Release v0.30.0](https://github.com/vmware/govmomi/compare/v0.29.0...v0.30.0)
+
+> Release Date: 2022-12-12
+
+### 🐞 Fix
+
+- [1ad33d48]	Heal the broken Namespace API
+- [22c48147]	Update $mktemp to support macOS
+- [05b0b08c]	DialTLSContext / Go 1.18+ CertificateVerify support
+
+### 💫 API Changes
+
+- [58f4112b]	Update types to vSphere 8.0 GA
+- [ba206c5b]	add Content Library security compliance support
+- [4c24f821]	Add SRIOV device names
+- [642156dd]	Adds vSphere 7.0u1-u3 support to namespace-management (Tanzu)
+
+### 💫 `govc` (CLI)
+
+- [60a18c56]	about.cert was not respecting -k
+- [15d1181d]	bash completion improvements
+- [0dbf717b]	Add sso.lpp.info and sso.lpp.update commands
+- [fe87cff9]	host.info: use writer instead of os.stdout
+- [a7196e41]	host.info: use writer instead of os.stdout
+- [3d6de9da]	fix host.esxcli runtime error occurred when no arguments specified
+- [8c7ba5ef]	Add feature in sso.group.ls to list groups using FindGroupsInGroup method
+- [dc3e1d79]	Add feature sso.group.lsgroups using FindGroupsInGroup method
+- [bf991e6e]	add event key for json and plain text output
+- [2017e846]	Support creating content libraries with security policies
+
+### 💫 `vcsim` (Simulator)
+
+- [86f9d42a]	Update test keys to be RSA 2048
+- [cedf695b]	Fix duplicated name check in CloneVM_Task
+- [8f4da558]	add QueryNetworkHint support for LLDP and CDP details
+- [1cab3254]	Fix RetrieveProperties path validation to avoid panic
+- [7f42a1d2]	use node id for ServiceContent.InstanceUuid
+- [03319493]	Fix snapshot tasks to update rootSnapshot
+- [b6ebcb6b]	Fix disk capacity validation in ConfigureDevices
+- [61032a23]	Fix StorageIOAllocationInfo of VirtualDisk
+- [cbfe0c93]	support disconnect/reconnect host
+- [b44828a4]	Fix datastore freespace changed by ReconfigVM_Task
+
+### 📃 Documentation
+
+- [813a5d88]	update `README.md`
+
+### 🧹 Chore
+
+- [eabc29ba]	Update version.go for v0.30.0
+
+### ⚠️ BREAKING
+
+### 📖 Commits
+
+- [eabc29ba]	chore: Update version.go for v0.30.0
+- [1c919824]	Update CONTRIBUTORS for release
+- [1ad33d48]	fix: Heal the broken Namespace API
+- [22c48147]	fix: Update $mktemp to support macOS
+- [05b0b08c]	fix: DialTLSContext / Go 1.18+ CertificateVerify support
+- [86f9d42a]	vcsim: Update test keys to be RSA 2048
+- [60a18c56]	govc: about.cert was not respecting -k
+- [58f4112b]	api: Update types to vSphere 8.0 GA
+- [15d1181d]	govc: bash completion improvements
+- [c018f078]	perms on template files
+- [813a5d88]	docs: update `README.md`
+- [0dbf717b]	govc: Add sso.lpp.info and sso.lpp.update commands
+- [fe87cff9]	govc: host.info: use writer instead of os.stdout
+- [a7196e41]	govc: host.info: use writer instead of os.stdout
+- [ba206c5b]	api: add Content Library security compliance support
+- [cedf695b]	vcsim: Fix duplicated name check in CloneVM_Task
+- [8f4da558]	vcsim: add QueryNetworkHint support for LLDP and CDP details
+- [3b2816ac]	Add optional recommRequired PlaceVmsXCluster req arguments
+- [f975908a]	build(deps): bump andstor/file-existence-action from 1 to 2
+- [1373b80f]	build(deps): bump chuhlomin/render-template from 1.5 to 1.6
+- [dc55a27e]	build(deps): bump nokogiri from 1.13.6 to 1.13.9 in /gen
+- [63980ff2]	Fix: use latestPages in task HistoryCollector
+- [3d6de9da]	govc: fix host.esxcli runtime error occurred when no arguments specified
+- [1e9eed94]	Update list of projects using govmomi
+- [7f4d115c]	fixup! api: Add SRIOV device names
+- [8f1dc575]	Add API cnsreconfigpolicy bindings and static check fixes to cns/client_test.go
+- [bf68e8f0]	fixup! api: Add SRIOV device names
+- [4c24f821]	api: Add SRIOV device names
+- [c1bb56db]	Updated USAGE.md
+- [aca677ad]	build(deps): bump actions/stale from 5 to 6
+- [1cab3254]	vcsim: Fix RetrieveProperties path validation to avoid panic
+- [65a6f6bc]	Address review comments
+- [99d12605]	correct new lines in group.ls
+- [4d9f6e01]	correct new lines in USAGE.md
+- [e5bee862]	move FindUsersInGroup to users.ls
+- [8c7ba5ef]	govc: Add feature in sso.group.ls to list groups using FindGroupsInGroup method
+- [ee332ae7]	Add new query selection parameters to be used for QueryAllVolume/QueryVolumeAsync API
+- [dc3e1d79]	govc: Add feature sso.group.lsgroups using FindGroupsInGroup method
+- [201ae28f]	Add common stub for hgfs for non-linux env
+- [7f42a1d2]	vcsim: use node id for ServiceContent.InstanceUuid
+- [76e99b00]	Boilerplate check requires a date range in the license.
+- [bf991e6e]	govc: add event key for json and plain text output
+- [4a29caee]	add OpenBSD build constraint
+- [81bc76bc]	toolbbox: add hgfs OpenBSD stub
+- [03319493]	vcsim: Fix snapshot tasks to update rootSnapshot
+- [b6ebcb6b]	vcsim: Fix disk capacity validation in ConfigureDevices
+- [2017e846]	govc: Support creating content libraries with security policies
+- [642156dd]	api: Adds vSphere 7.0u1-u3 support to namespace-management (Tanzu)
+- [61032a23]	vcsim: Fix StorageIOAllocationInfo of VirtualDisk
+- [cbfe0c93]	vcsim: support disconnect/reconnect host
+- [b44828a4]	vcsim: Fix datastore freespace changed by ReconfigVM_Task
+
 <a name="v0.29.0"></a>
 ## [Release v0.29.0](https://github.com/vmware/govmomi/compare/v0.28.0...v0.29.0)
 
