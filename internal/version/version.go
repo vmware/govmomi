@@ -21,5 +21,5 @@ const (
 	ClientName = "govmomi"
 
 	// ClientVersion is the version of this SDK
-	ClientVersion = "master"
+	ClientVersion = "0.30.0"
 )
