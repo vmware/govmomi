@@ -99,7 +99,7 @@ jobs:
           boilerplate-check check \
             --boilerplate ./hack/boilerplate/boilerplate.${{ matrix.extension }}.txt \
             --file-extension ${{ matrix.extension }} \
-            --exclude "(vendor|third_party|dist)/" |
+            --exclude "((vim25/json)|vendor|third_party|dist)/" |
           reviewdog -efm="%A%f:%l: %m" \
                 -efm="%C%.%#" \
                 -name="${{ matrix.language }} headers" \

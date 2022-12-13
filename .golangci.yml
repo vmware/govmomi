@@ -14,5 +14,6 @@ linters-settings:
 run:
   timeout: 6m
   skip-dirs:
+  - vim25/json
   - vim25/xml
   - cns/types
