@@ -216,6 +216,11 @@ type decodeState struct {
 	savedError            error
 	useNumber             bool
 	disallowUnknownFields bool
+
+	discriminatorTypeFieldName   string
+	discriminatorValueFieldName  string
+	discriminatorByAddrFieldName string
+	discriminatorToTypeFn        DiscriminatorToTypeFunc
 }
 
 // readIndex returns the position of the last byte read.
@@ -617,10 +622,11 @@ func (d *decodeState) object(v reflect.Value) error {
 		return nil
 	}
 	v = pv
+	dve := v
 	t := v.Type()
 
 	// Decoding into nil interface? Switch to non-reflect code.
-	if v.Kind() == reflect.Interface && v.NumMethod() == 0 {
+	if v.Kind() == reflect.Interface && v.NumMethod() == 0 && !d.isDiscriminatorSet() {
 		oi := d.objectInterface()
 		v.Set(reflect.ValueOf(oi))
 		return nil
@@ -654,9 +660,48 @@ func (d *decodeState) object(v reflect.Value) error {
 		fields = cachedTypeFields(t)
 		// ok
 	default:
-		d.saveError(&UnmarshalTypeError{Value: "object", Type: t, Offset: int64(d.off)})
-		d.skip()
-		return nil
+		dv, ok := d.getDiscriminatorValue()
+		if !ok {
+			d.saveError(&UnmarshalTypeError{Value: "object", Type: t, Offset: int64(d.off)})
+			d.skip()
+			return nil
+		}
+
+		// If the discriminator value is a struct or a pointer to a struct we
+		// want to cache its fields. If a pointer to a struct we also store the
+		// type of struct in dve so it can be used later when iterating fields.
+		if dv.Kind() == reflect.Struct {
+			dve = dv
+			fields = cachedTypeFields(dv.Type())
+		} else if dv.Kind() == reflect.Ptr && dv.Elem().Kind() == reflect.Struct {
+			dve = dv.Elem()
+			fields = cachedTypeFields(dve.Type())
+		}
+
+		// If the discriminator value is not a pointer and cannot be assigned
+		// to v, then see if an address to the discriminator value can be
+		// assigned to v.
+		if dv.Kind() != reflect.Ptr && !dv.Type().AssignableTo(v.Type()) {
+			dv = dv.Addr()
+			if !dv.Type().AssignableTo(v.Type()) {
+				d.saveError(&UnmarshalTypeError{Value: "object", Type: t, Offset: int64(d.off)})
+				d.skip()
+				return nil
+			}
+		}
+
+		// If the discriminator value is not a pointer then its information is
+		// not persisted upon being decoded. Instead we get an address to the
+		// discriminator value and then ensure that before returning from this
+		// function we assign the dereferenced value to v.
+		if dv.Kind() != reflect.Ptr {
+			dv = dv.Addr()
+			defer func(v *reflect.Value, d *reflect.Value) {
+				v.Set(d.Elem())
+			}(&v, &dv)
+		}
+
+		v.Set(dv)
 	}
 
 	var mapElem reflect.Value
@@ -714,7 +759,7 @@ func (d *decodeState) object(v reflect.Value) error {
 				}
 			}
 			if f != nil {
-				subv = v
+				subv = dve
 				destring = f.quoted
 				for _, i := range f.index {
 					if subv.Kind() == reflect.Ptr {

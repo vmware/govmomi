@@ -365,6 +365,12 @@ type encOpts struct {
 	quoted bool
 	// escapeHTML causes '<', '>', and '&' to be escaped in JSON strings.
 	escapeHTML bool
+	// see Encoder.SetDiscriminator
+	discriminatorTypeFieldName string
+	// see Encoder.SetDiscriminator
+	discriminatorValueFieldName string
+	// see Encoder.SetDiscriminator
+	discriminatorByAddrFieldName string
 }
 
 type encoderFunc func(e *encodeState, v reflect.Value, opts encOpts)
@@ -709,6 +715,12 @@ func isValidNumber(s string) bool {
 }
 
 func interfaceEncoder(e *encodeState, v reflect.Value, opts encOpts) {
+	if opts.isDiscriminatorSet() {
+		de := discriminatorInterfaceEncoder{}
+		if de.encode(e, v, opts) {
+			return
+		}
+	}
 	if v.IsNil() {
 		e.WriteString("null")
 		return
@@ -721,7 +733,9 @@ func unsupportedTypeEncoder(e *encodeState, v reflect.Value, _ encOpts) {
 }
 
 type structEncoder struct {
-	fields structFields
+	fields   structFields
+	typeName string
+	byAddr   bool
 }
 
 type structFields struct {
@@ -731,6 +745,11 @@ type structFields struct {
 
 func (se structEncoder) encode(e *encodeState, v reflect.Value, opts encOpts) {
 	next := byte('{')
+	if opts.isDiscriminatorSet() {
+		de := discriminatorStructEncoder{structEncoder: se}
+		de.encode(e, v, opts)
+		next = byte(',')
+	}
 FieldLoop:
 	for i := range se.fields.list {
 		f := &se.fields.list[i]
@@ -758,6 +777,7 @@ FieldLoop:
 			e.WriteString(f.nameNonEsc)
 		}
 		opts.quoted = f.quoted
+
 		f.encoder(e, fv, opts)
 	}
 	if next == '{' {
@@ -768,7 +788,7 @@ FieldLoop:
 }
 
 func newStructEncoder(t reflect.Type) encoderFunc {
-	se := structEncoder{fields: cachedTypeFields(t)}
+	se := structEncoder{fields: cachedTypeFields(t), typeName: t.Name()}
 	return se.encode
 }
 
