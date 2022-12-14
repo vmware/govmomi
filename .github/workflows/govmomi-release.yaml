@@ -132,7 +132,7 @@ jobs:
 
       - name: Simulate Release without pushing Artifacts
         if: ${{ inputs.dryrun }}
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
@@ -142,7 +142,7 @@ jobs:
 
       - name: Create Release and build/push Artifacts
         if: ${{ !inputs.dryrun }}
-        uses: goreleaser/goreleaser-action@v3
+        uses: goreleaser/goreleaser-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
