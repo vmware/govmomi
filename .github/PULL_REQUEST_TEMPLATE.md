@@ -29,7 +29,7 @@ details for your test configuration.
 ## Checklist:
 
 - [ ] My code follows the `CONTRIBUTION`
-  [guidelines](https://github.com/vmware/govmomi/blob/master/CONTRIBUTING.md) of
+  [guidelines](https://github.com/vmware/govmomi/blob/main/CONTRIBUTING.md) of
   this project
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation

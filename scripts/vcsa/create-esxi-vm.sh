@@ -22,7 +22,7 @@ usage() {
   cat <<'EOF'
 Usage: $0 [-d DISK_GB] [-m MEM_GB] [-i ESX_ISO] [-s] ESX_URL VM_NAME
 
-GOVC_* environment variables also apply, see https://github.com/vmware/govmomi/tree/master/govc#usage
+GOVC_* environment variables also apply, see https://github.com/vmware/govmomi/tree/main/govc#usage
 If GOVC_USERNAME is set, it is used to create an account on the ESX vm.  Default is to use the existing root account.
 If GOVC_PASSWORD is set, the account password will be set to this value.  Default is to use the given ESX_URL password.
 EOF

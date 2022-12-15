@@ -9,7 +9,7 @@ This script makes it simple to run your laptop/desktop local binaries on such a 
 This script is a fork of the [VIC devbox](https://github.com/vmware/vic/tree/master/infra/machines/devbox),
 without a Vagrant file or provisioning beyond the bento box itself.
 
-[toolbox]:https://github.com/vmware/govmomi/blob/master/toolbox/README.md
+[toolbox]:https://github.com/vmware/govmomi/blob/main/toolbox/README.md
 [vic]:https://github.com/vmware/vic
 [vcp]:https://github.com/kubernetes/kubernetes/tree/master/pkg/cloudprovider/providers/vsphere
 

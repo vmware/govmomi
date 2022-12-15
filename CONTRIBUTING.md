@@ -41,7 +41,7 @@ and **supported prefixes**, e.g. `govc: <message>`.
 ### Example 1 - Fix a Bug in `govmomi`
 
 ```bash
-git checkout -b issue-<number> vmware/master
+git checkout -b issue-<number> main
 git add <files>
 git commit -m "fix: ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
@@ -50,7 +50,7 @@ git push $USER issue-<number>
 ### Example 2 - Add a new (non-breaking) API to `govmomi`
 
 ```bash
-git checkout -b issue-<number> vmware/master
+git checkout -b issue-<number> main
 git add <files>
 git commit -m "Add API ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
@@ -59,7 +59,7 @@ git push $USER issue-<number>
 ### Example 3 - Add a Feature to `govc`
 
 ```bash
-git checkout -b issue-<number> vmware/master
+git checkout -b issue-<number> main
 git add <files>
 git commit -m "govc: Add feature ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
@@ -70,7 +70,7 @@ To register the new `govc` command package, add a blank `_` import to `govmomi/g
 ### Example 4 - Fix a Bug in `vcsim`
 
 ```bash
-git checkout -b issue-<number> vmware/master
+git checkout -b issue-<number> main
 git add <files>
 git commit -m "vcsim: Fix ..." -m "Closes: #<issue-number>"
 git push $USER issue-<number>
@@ -87,7 +87,7 @@ Thus these details should be stated at the body of the commit message.
 Multi-line strings are supported.
 
 ```bash
-git checkout -b issue-<number> vmware/master
+git checkout -b issue-<number> main
 git add <files>
 cat << EOF | git commit -F -
 Add ctx to funcXYZ
@@ -103,13 +103,13 @@ git push $USER issue-<number>
 
 ### Stay in sync with Upstream
 
-When your branch gets out of sync with the vmware/master branch, use the
+When your branch gets out of sync with the main branch, use the
 following to update (rebase):
 
 ```bash
 git checkout issue-<number>
 git fetch -a
-git rebase vmware/master
+git rebase main
 git push --force-with-lease $USER issue-<number>
 ```
 
@@ -139,7 +139,7 @@ Once the review is complete, squash and push your final commit(s):
 ```bash
 # squash all commits into one
 # --autosquash will automatically detect and merge fixup commits
-git rebase -i --autosquash vmware/master
+git rebase -i --autosquash main
 git push --force-with-lease $USER issue-<number>
 ```
 

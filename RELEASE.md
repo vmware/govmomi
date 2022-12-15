@@ -18,7 +18,7 @@ uses [`goreleaser`](http://goreleaser.com/) and automatically creates/pushes:
 - Docker images for `vmware/govc` and `vmware/vcsim` to Docker Hub
 - Source code
 
-Starting with release tag `v0.29.0`, releases are not tagged on the `master`
+Starting with release tag `v0.29.0`, releases are not tagged on the `main`
 branch anymore but a dedicated release branch, for example `release-0.29`. This
 process has already been followed for patch releases and back-ports.
 
@@ -37,15 +37,15 @@ which can be done through the Github UI or `git` CLI.
 
 This guide describes the CLI process.
 
-### Verify `master` branch is up to date with the remote
+### Verify `main` branch is up to date with the remote
 
 ```console
-git checkout master
+git checkout main
 git fetch -avp
-git diff master origin/master
+git diff main origin/main
 
 # if your local and remote branches diverge run
-git pull origin/master
+git pull origin/main
 ```
 
 > **Warning** 
@@ -57,7 +57,7 @@ git pull origin/master
 ### Create a release branch
 
 For new releases, create a release branch from the most recent commit in
-`master`, e.g. `release-0.30`.
+`main`, e.g. `release-0.30`.
 
 ```console
 export RELEASE_BRANCH=release-0.30
@@ -106,7 +106,7 @@ navigate to `Actions -> Workflows -> Release`.
 
 Click `Run Workflow` which opens a dropdown list.
 
-Select the new/updated branch, e.g. `release-0.30`, i.e. **not** the `master`
+Select the new/updated branch, e.g. `release-0.30`, i.e. **not** the `main`
 branch.
 
 Specify a semantic `tag` to associate with the release, e.g. `v0.30.0`. 
@@ -124,7 +124,7 @@ Click `Run Workflow` to kick off the workflow.
 
 After successful completion and if the newly created `tag` is the **latest**
 (semantic version sorted) tag in the repository, a PR is automatically opened
-against the `master` branch to update the `CHANGELOG`. Please review and merge
+against the `main` branch to update the `CHANGELOG`. Please review and merge
 accordingly.
 
 ## Creating a release before Version `v0.29.0`
@@ -133,15 +133,15 @@ The release process before `v0.29.0` differs since it's based on manually
 creating and pushing tags. Here, on every new tag matching `v*` pushed to the
 repository a Github Action Release Workflow is executed. 
 
-### Verify `master` branch is up to date with the remote
+### Verify `main` branch is up to date with the remote
 
 ```console
-git checkout master
+git checkout main
 git fetch -avp
-git diff master origin/master
+git diff main origin/main
 
 # if your local and remote branches diverge run
-git pull origin/master
+git pull origin/main
 ```
 
 > **Warning** 

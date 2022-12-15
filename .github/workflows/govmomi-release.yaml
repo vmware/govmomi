@@ -48,8 +48,8 @@ jobs:
 
       - name: Validate branch and tag
         run: |
-          # do not allow release on master branch
-          if [[ ${{ github.ref }} == refs/heads/master ]]; then
+          # do not allow release on main branch
+          if [[ ${{ github.ref }} == refs/heads/main ]]; then
             echo "::error:: release must be done on a release branch"
             exit 1
           fi
@@ -163,7 +163,7 @@ jobs:
         with:
           # for changelog
           fetch-depth: 0
-          ref: "master"
+          ref: "main"
 
       - name: Create CHANGELOG.md commit
         env:
