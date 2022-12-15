@@ -17,6 +17,6 @@ limitations under the License.
 /*
 Package simulator is a mock framework for the vSphere API.
 
-See also: https://github.com/vmware/govmomi/blob/master/vcsim/README.md
+See also: https://github.com/vmware/govmomi/blob/main/vcsim/README.md
 */
 package simulator

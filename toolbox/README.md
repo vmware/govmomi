@@ -53,19 +53,19 @@ See [vim.vm.guest.AuthManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic
 
 | Method                          | Supported | Client Examples                                                                     |
 |---------------------------------|-----------|-------------------------------------------------------------------------------------|
-| ChangeFileAttributesInGuest     | Yes       | [chmod](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/chmod.go)       |
-|                                 |           | [chown](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/chown.go)       |
-|                                 |           | [touch](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/touch.go)       |
-| CreateTemporaryDirectoryInGuest | Yes       | [mktemp](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/mktemp.go)     |
-| CreateTemporaryFileInGuest      | Yes       | [mktemp](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/mktemp.go)     |
-| DeleteDirectoryInGuest          | Yes       | [rmdir](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/rmdir.go)       |
-| DeleteFileInGuest               | Yes       | [rm](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/rm.go)             |
-| InitiateFileTransferFromGuest   | Yes       | [download](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/download.go) |
-| InitiateFileTransferToGuest     | Yes       | [upload](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/upload.go)     |
-| ListFilesInGuest                | Yes       | [ls](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/ls.go)             |
-| MakeDirectoryInGuest            | Yes       | [mkdir](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/mkdir.go)       |
-| MoveDirectoryInGuest            | Yes       | [mv](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/mv.go)             |
-| MoveFileInGuest                 | Yes       | [mv](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/mv.go)             |
+| ChangeFileAttributesInGuest     | Yes       | [chmod](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/chmod.go)       |
+|                                 |           | [chown](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/chown.go)       |
+|                                 |           | [touch](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/touch.go)       |
+| CreateTemporaryDirectoryInGuest | Yes       | [mktemp](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mktemp.go)     |
+| CreateTemporaryFileInGuest      | Yes       | [mktemp](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mktemp.go)     |
+| DeleteDirectoryInGuest          | Yes       | [rmdir](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/rmdir.go)       |
+| DeleteFileInGuest               | Yes       | [rm](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/rm.go)             |
+| InitiateFileTransferFromGuest   | Yes       | [download](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/download.go) |
+| InitiateFileTransferToGuest     | Yes       | [upload](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/upload.go)     |
+| ListFilesInGuest                | Yes       | [ls](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/ls.go)             |
+| MakeDirectoryInGuest            | Yes       | [mkdir](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mkdir.go)       |
+| MoveDirectoryInGuest            | Yes       | [mv](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mv.go)             |
+| MoveFileInGuest                 | Yes       | [mv](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/mv.go)             |
 
 See [vim.vm.guest.FileManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.guest.FileManager.html)
 
@@ -76,10 +76,10 @@ started by `StartProgramInGuest`.
 
 | Method                         | Supported | Client Examples                                                                     |
 |--------------------------------|-----------|-------------------------------------------------------------------------------------|
-| ListProcessesInGuest           | Yes       | [ps](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/ps.go)             |
-| ReadEnvironmentVariableInGuest | Yes       | [getenv](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/getenv.go)     |
-| StartProgramInGuest            | Yes       | [start](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/start.go)       |
-| TerminateProcessInGuest        | Yes       | [kill](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/kill.go)         |
+| ListProcessesInGuest           | Yes       | [ps](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/ps.go)             |
+| ReadEnvironmentVariableInGuest | Yes       | [getenv](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/getenv.go)     |
+| StartProgramInGuest            | Yes       | [start](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/start.go)       |
+| TerminateProcessInGuest        | Yes       | [kill](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/kill.go)         |
 
 See [vim.vm.guest.ProcessManager](http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvim.vm.guest.ProcessManager.html)
 
@@ -102,8 +102,8 @@ The `hgfs.FileHandler` interface can be used to customize file transfer.
 The toolbox provides support for I/O redirection without the use of disk files within the guest.
 Access to *stdin*, *stdout* and *stderr* streams is implemented as an `hgfs.FileHandler` within the `ProcessManager`.
 
-See [toolbox.Client](https://github.com/vmware/govmomi/blob/master/guest/toolbox/client.go) and
-[govc guest.run](https://github.com/vmware/govmomi/blob/master/govc/vm/guest/run.go)
+See [toolbox.Client](https://github.com/vmware/govmomi/blob/main/guest/toolbox/client.go) and
+[govc guest.run](https://github.com/vmware/govmomi/blob/main/govc/vm/guest/run.go)
 
 ### http.RoundTripper
 
@@ -117,7 +117,7 @@ example.
 
 The toolbox provides support for transferring directories to and from guests as gzip'd tar streams, without writing the
 tar file itself to the guest file system.  Archive supports is implemented as an `hgfs.FileHandler` within the `hgfs`
-package.  See [hgfs.NewArchiveHandler](https://github.com/vmware/govmomi/blob/master/toolbox/hgfs/archive.go)
+package.  See [hgfs.NewArchiveHandler](https://github.com/vmware/govmomi/blob/main/toolbox/hgfs/archive.go)
 
 ### Linux /proc file access
 
@@ -140,7 +140,7 @@ without running the test suite.
 
 ## Consumers of the toolbox library
 
-* [Toolbox example main](https://github.com/vmware/govmomi/blob/master/toolbox/toolbox/main.go)
+* [Toolbox example main](https://github.com/vmware/govmomi/blob/main/toolbox/toolbox/main.go)
 
 * [VIC tether toolbox extension](https://github.com/vmware/vic/blob/master/lib/tether/toolbox.go)
 
