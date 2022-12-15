@@ -455,7 +455,7 @@ load test_helper
   run govc vm.change -nested-hv-enabled=true -vm "$id"
   assert_success
 
-  hv=$(govc vm.info -json "$id" | jq '.[][0].Config.NestedHVEnabled')
+  hv=$(govc vm.info -json "$id" | jq '.[][0].Config.nestedHVEnabled')
   assert_equal "$hv" "true"
 }
 
@@ -773,9 +773,9 @@ load test_helper
   run govc vm.clone -vm "$vm" -host.ipath /DC0/host/DC0_C0/DC0_C0_H0 -annotation $$ "$clone"
   assert_success
 
-  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].Backing)
-  assert_equal false "$(jq .EagerlyScrub <<<"$backing")"
-  assert_equal true "$(jq .ThinProvisioned <<<"$backing")"
+  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].backing)
+  assert_equal false "$(jq .eagerlyScrub <<<"$backing")"
+  assert_equal true "$(jq .thinProvisioned <<<"$backing")"
 
   run govc object.collect -s "/$GOVC_DATACENTER/vm/$clone" config.annotation
   assert_success $$
@@ -810,22 +810,22 @@ load test_helper
   run govc vm.disk.create -vm "$vm" -thick -eager -size 10M -name "$vm/data.vmdk"
   assert_success
 
-  backing=$(govc device.info -json -vm "$vm" disk-* | jq .Devices[].Backing)
-  assert_equal true "$(jq .EagerlyScrub <<<"$backing")"
-  assert_equal false "$(jq .ThinProvisioned <<<"$backing")"
+  backing=$(govc device.info -json -vm "$vm" disk-* | jq .Devices[].backing)
+  assert_equal true "$(jq .eagerlyScrub <<<"$backing")"
+  assert_equal false "$(jq .thinProvisioned <<<"$backing")"
 
   clone=$(new_id)
   run govc vm.clone -vm "$vm" "$clone"
   assert_success
 
-  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].Backing)
-  assert_equal true "$(jq .EagerlyScrub <<<"$backing")"
-  assert_equal false "$(jq .ThinProvisioned <<<"$backing")"
+  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].backing)
+  assert_equal true "$(jq .eagerlyScrub <<<"$backing")"
+  assert_equal false "$(jq .thinProvisioned <<<"$backing")"
 
   # test that each vm has a unique vmdk path
-  for item in FileName Uuid;  do
+  for item in fileName uuid;  do
     items=$(govc object.collect -json -type m / config.hardware.device | \
-              jq ".ChangeSet[].Val.VirtualDevice[].Backing.$item | select(. != null)")
+              jq ".changeSet[].val.VirtualDevice[].backing.$item | select(. != null)")
 
     nitems=$(wc -l <<<"$items")
     uitems=$(sort -u <<<"$items" | wc -l)
@@ -1072,10 +1072,10 @@ load test_helper
   run govc vm.option.info -vm DC0_H0_VM0
   assert_success
 
-  family=$(govc vm.option.info -json ubuntu64Guest | jq -r .GuestOSDescriptor[].Family)
+  family=$(govc vm.option.info -json ubuntu64Guest | jq -r .guestOSDescriptor[].family)
   assert_equal linuxGuest "$family"
 
-  family=$(govc vm.option.info -json windows8_64Guest | jq -r .GuestOSDescriptor[].Family)
+  family=$(govc vm.option.info -json windows8_64Guest | jq -r .guestOSDescriptor[].family)
   assert_equal windowsGuest "$family"
 
   run govc vm.option.info enoent

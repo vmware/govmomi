@@ -24,7 +24,7 @@ import (
 )
 
 type ArrayOfVslmDatastoreSyncStatus struct {
-	VslmDatastoreSyncStatus []VslmDatastoreSyncStatus `xml:"VslmDatastoreSyncStatus,omitempty"`
+	VslmDatastoreSyncStatus []VslmDatastoreSyncStatus `xml:"VslmDatastoreSyncStatus,omitempty" json:"VslmDatastoreSyncStatus,omitempty"`
 }
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 }
 
 type ArrayOfVslmQueryDatastoreInfoResult struct {
-	VslmQueryDatastoreInfoResult []VslmQueryDatastoreInfoResult `xml:"VslmQueryDatastoreInfoResult,omitempty"`
+	VslmQueryDatastoreInfoResult []VslmQueryDatastoreInfoResult `xml:"VslmQueryDatastoreInfoResult,omitempty" json:"VslmQueryDatastoreInfoResult,omitempty"`
 }
 
 func init() {
@@ -40,7 +40,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectAssociations struct {
-	VslmVsoVStorageObjectAssociations []VslmVsoVStorageObjectAssociations `xml:"VslmVsoVStorageObjectAssociations,omitempty"`
+	VslmVsoVStorageObjectAssociations []VslmVsoVStorageObjectAssociations `xml:"VslmVsoVStorageObjectAssociations,omitempty" json:"VslmVsoVStorageObjectAssociations,omitempty"`
 }
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectAssociationsVmDiskAssociation struct {
-	VslmVsoVStorageObjectAssociationsVmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty"`
+	VslmVsoVStorageObjectAssociationsVmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty" json:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty"`
 }
 
 func init() {
@@ -56,7 +56,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectQuerySpec struct {
-	VslmVsoVStorageObjectQuerySpec []VslmVsoVStorageObjectQuerySpec `xml:"VslmVsoVStorageObjectQuerySpec,omitempty"`
+	VslmVsoVStorageObjectQuerySpec []VslmVsoVStorageObjectQuerySpec `xml:"VslmVsoVStorageObjectQuerySpec,omitempty" json:"VslmVsoVStorageObjectQuerySpec,omitempty"`
 }
 
 func init() {
@@ -64,7 +64,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectResult struct {
-	VslmVsoVStorageObjectResult []VslmVsoVStorageObjectResult `xml:"VslmVsoVStorageObjectResult,omitempty"`
+	VslmVsoVStorageObjectResult []VslmVsoVStorageObjectResult `xml:"VslmVsoVStorageObjectResult,omitempty" json:"VslmVsoVStorageObjectResult,omitempty"`
 }
 
 func init() {
@@ -72,7 +72,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectSnapshotResult struct {
-	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty"`
+	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty" json:"VslmVsoVStorageObjectSnapshotResult,omitempty"`
 }
 
 func init() {
@@ -86,7 +86,7 @@ func init() {
 }
 
 type RetrieveContentRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -94,17 +94,17 @@ func init() {
 }
 
 type RetrieveContentResponse struct {
-	Returnval VslmServiceInstanceContent `xml:"returnval"`
+	Returnval VslmServiceInstanceContent `xml:"returnval" json:"returnval"`
 }
 
 type VslmAboutInfo struct {
 	types.DynamicData
 
-	Name         string `xml:"name"`
-	FullName     string `xml:"fullName"`
-	Vendor       string `xml:"vendor"`
-	ApiVersion   string `xml:"apiVersion"`
-	InstanceUuid string `xml:"instanceUuid"`
+	Name         string `xml:"name" json:"name"`
+	FullName     string `xml:"fullName" json:"fullName"`
+	Vendor       string `xml:"vendor" json:"vendor"`
+	ApiVersion   string `xml:"apiVersion" json:"apiVersion"`
+	InstanceUuid string `xml:"instanceUuid" json:"instanceUuid"`
 }
 
 func init() {
@@ -112,11 +112,11 @@ func init() {
 }
 
 type VslmAttachDiskRequestType struct {
-	This          types.ManagedObjectReference `xml:"_this"`
-	Id            types.ID                     `xml:"id"`
-	Vm            types.ManagedObjectReference `xml:"vm"`
-	ControllerKey int32                        `xml:"controllerKey,omitempty"`
-	UnitNumber    *int32                       `xml:"unitNumber"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id            types.ID                     `xml:"id" json:"id"`
+	Vm            types.ManagedObjectReference `xml:"vm" json:"vm"`
+	ControllerKey int32                        `xml:"controllerKey,omitempty" json:"controllerKey,omitempty"`
+	UnitNumber    *int32                       `xml:"unitNumber" json:"unitNumber,omitempty"`
 }
 
 func init() {
@@ -130,7 +130,7 @@ func init() {
 }
 
 type VslmAttachDisk_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmAttachTagToVStorageObject VslmAttachTagToVStorageObjectRequestType
@@ -140,10 +140,10 @@ func init() {
 }
 
 type VslmAttachTagToVStorageObjectRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Id       types.ID                     `xml:"id"`
-	Category string                       `xml:"category"`
-	Tag      string                       `xml:"tag"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id       types.ID                     `xml:"id" json:"id"`
+	Category string                       `xml:"category" json:"category"`
+	Tag      string                       `xml:"tag" json:"tag"`
 }
 
 func init() {
@@ -160,7 +160,7 @@ func init() {
 }
 
 type VslmCancelTaskRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -177,9 +177,9 @@ func init() {
 }
 
 type VslmClearVStorageObjectControlFlagsRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	Id           types.ID                     `xml:"id"`
-	ControlFlags []string                     `xml:"controlFlags,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id           types.ID                     `xml:"id" json:"id"`
+	ControlFlags []string                     `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
 }
 
 func init() {
@@ -190,9 +190,9 @@ type VslmClearVStorageObjectControlFlagsResponse struct {
 }
 
 type VslmCloneVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
-	Spec types.VslmCloneSpec          `xml:"spec"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
+	Spec types.VslmCloneSpec          `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -206,17 +206,17 @@ func init() {
 }
 
 type VslmCloneVStorageObject_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmCreateDiskFromSnapshotRequestType struct {
-	This       types.ManagedObjectReference      `xml:"_this"`
-	Id         types.ID                          `xml:"id"`
-	SnapshotId types.ID                          `xml:"snapshotId"`
-	Name       string                            `xml:"name"`
-	Profile    []types.VirtualMachineProfileSpec `xml:"profile,omitempty"`
-	Crypto     *types.CryptoSpec                 `xml:"crypto,omitempty"`
-	Path       string                            `xml:"path,omitempty"`
+	This       types.ManagedObjectReference      `xml:"_this" json:"_this"`
+	Id         types.ID                          `xml:"id" json:"id"`
+	SnapshotId types.ID                          `xml:"snapshotId" json:"snapshotId"`
+	Name       string                            `xml:"name" json:"name"`
+	Profile    []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
+	Crypto     *types.CryptoSpec                 `xml:"crypto,omitempty" json:"crypto,omitempty"`
+	Path       string                            `xml:"path,omitempty" json:"path,omitempty"`
 }
 
 func init() {
@@ -230,12 +230,12 @@ func init() {
 }
 
 type VslmCreateDiskFromSnapshot_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmCreateDiskRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Spec types.VslmCreateSpec         `xml:"spec"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Spec types.VslmCreateSpec         `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -249,13 +249,13 @@ func init() {
 }
 
 type VslmCreateDisk_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmCreateSnapshotRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	Id          types.ID                     `xml:"id"`
-	Description string                       `xml:"description"`
+	This        types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id          types.ID                     `xml:"id" json:"id"`
+	Description string                       `xml:"description" json:"description"`
 }
 
 func init() {
@@ -269,18 +269,18 @@ func init() {
 }
 
 type VslmCreateSnapshot_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmDatastoreSyncStatus struct {
 	types.DynamicData
 
-	DatastoreURL    string                      `xml:"datastoreURL"`
-	ObjectVClock    int64                       `xml:"objectVClock"`
-	SyncVClock      int64                       `xml:"syncVClock"`
-	SyncTime        *time.Time                  `xml:"syncTime"`
-	NumberOfRetries int32                       `xml:"numberOfRetries,omitempty"`
-	Error           *types.LocalizedMethodFault `xml:"error,omitempty"`
+	DatastoreURL    string                      `xml:"datastoreURL" json:"datastoreURL"`
+	ObjectVClock    int64                       `xml:"objectVClock" json:"objectVClock"`
+	SyncVClock      int64                       `xml:"syncVClock" json:"syncVClock"`
+	SyncTime        *time.Time                  `xml:"syncTime" json:"syncTime,omitempty"`
+	NumberOfRetries int32                       `xml:"numberOfRetries,omitempty" json:"numberOfRetries,omitempty"`
+	Error           *types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
@@ -288,9 +288,9 @@ func init() {
 }
 
 type VslmDeleteSnapshotRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Id         types.ID                     `xml:"id"`
-	SnapshotId types.ID                     `xml:"snapshotId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId" json:"snapshotId"`
 }
 
 func init() {
@@ -304,12 +304,12 @@ func init() {
 }
 
 type VslmDeleteSnapshot_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmDeleteVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -323,7 +323,7 @@ func init() {
 }
 
 type VslmDeleteVStorageObject_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmDetachTagFromVStorageObject VslmDetachTagFromVStorageObjectRequestType
@@ -333,10 +333,10 @@ func init() {
 }
 
 type VslmDetachTagFromVStorageObjectRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Id       types.ID                     `xml:"id"`
-	Category string                       `xml:"category"`
-	Tag      string                       `xml:"tag"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id       types.ID                     `xml:"id" json:"id"`
+	Category string                       `xml:"category" json:"category"`
+	Tag      string                       `xml:"tag" json:"tag"`
 }
 
 func init() {
@@ -347,9 +347,9 @@ type VslmDetachTagFromVStorageObjectResponse struct {
 }
 
 type VslmExtendDiskRequestType struct {
-	This            types.ManagedObjectReference `xml:"_this"`
-	Id              types.ID                     `xml:"id"`
-	NewCapacityInMB int64                        `xml:"newCapacityInMB"`
+	This            types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id              types.ID                     `xml:"id" json:"id"`
+	NewCapacityInMB int64                        `xml:"newCapacityInMB" json:"newCapacityInMB"`
 }
 
 func init() {
@@ -363,13 +363,13 @@ func init() {
 }
 
 type VslmExtendDisk_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmFault struct {
 	types.MethodFault
 
-	Msg string `xml:"msg,omitempty"`
+	Msg string `xml:"msg,omitempty" json:"msg,omitempty"`
 }
 
 func init() {
@@ -383,8 +383,8 @@ func init() {
 }
 
 type VslmInflateDiskRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -398,7 +398,7 @@ func init() {
 }
 
 type VslmInflateDisk_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmListTagsAttachedToVStorageObject VslmListTagsAttachedToVStorageObjectRequestType
@@ -408,8 +408,8 @@ func init() {
 }
 
 type VslmListTagsAttachedToVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -417,7 +417,7 @@ func init() {
 }
 
 type VslmListTagsAttachedToVStorageObjectResponse struct {
-	Returnval []types.VslmTagEntry `xml:"returnval,omitempty"`
+	Returnval []types.VslmTagEntry `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmListVStorageObjectForSpec VslmListVStorageObjectForSpecRequestType
@@ -427,9 +427,9 @@ func init() {
 }
 
 type VslmListVStorageObjectForSpecRequestType struct {
-	This      types.ManagedObjectReference     `xml:"_this"`
-	Query     []VslmVsoVStorageObjectQuerySpec `xml:"query,omitempty"`
-	MaxResult int32                            `xml:"maxResult"`
+	This      types.ManagedObjectReference     `xml:"_this" json:"_this"`
+	Query     []VslmVsoVStorageObjectQuerySpec `xml:"query,omitempty" json:"query,omitempty"`
+	MaxResult int32                            `xml:"maxResult" json:"maxResult"`
 }
 
 func init() {
@@ -437,7 +437,7 @@ func init() {
 }
 
 type VslmListVStorageObjectForSpecResponse struct {
-	Returnval *VslmVsoVStorageObjectQueryResult `xml:"returnval,omitempty"`
+	Returnval *VslmVsoVStorageObjectQueryResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmListVStorageObjectsAttachedToTag VslmListVStorageObjectsAttachedToTagRequestType
@@ -447,9 +447,9 @@ func init() {
 }
 
 type VslmListVStorageObjectsAttachedToTagRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	Category string                       `xml:"category"`
-	Tag      string                       `xml:"tag"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Category string                       `xml:"category" json:"category"`
+	Tag      string                       `xml:"tag" json:"tag"`
 }
 
 func init() {
@@ -457,7 +457,7 @@ func init() {
 }
 
 type VslmListVStorageObjectsAttachedToTagResponse struct {
-	Returnval []types.ID `xml:"returnval,omitempty"`
+	Returnval []types.ID `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmLoginByToken VslmLoginByTokenRequestType
@@ -467,8 +467,8 @@ func init() {
 }
 
 type VslmLoginByTokenRequestType struct {
-	This              types.ManagedObjectReference `xml:"_this"`
-	DelegatedTokenXml string                       `xml:"delegatedTokenXml"`
+	This              types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DelegatedTokenXml string                       `xml:"delegatedTokenXml" json:"delegatedTokenXml"`
 }
 
 func init() {
@@ -485,7 +485,7 @@ func init() {
 }
 
 type VslmLogoutRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -502,11 +502,11 @@ func init() {
 }
 
 type VslmQueryChangedDiskAreasRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	Id          types.ID                     `xml:"id"`
-	SnapshotId  types.ID                     `xml:"snapshotId"`
-	StartOffset int64                        `xml:"startOffset"`
-	ChangeId    string                       `xml:"changeId"`
+	This        types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id          types.ID                     `xml:"id" json:"id"`
+	SnapshotId  types.ID                     `xml:"snapshotId" json:"snapshotId"`
+	StartOffset int64                        `xml:"startOffset" json:"startOffset"`
+	ChangeId    string                       `xml:"changeId" json:"changeId"`
 }
 
 func init() {
@@ -514,7 +514,7 @@ func init() {
 }
 
 type VslmQueryChangedDiskAreasResponse struct {
-	Returnval types.DiskChangeInfo `xml:"returnval"`
+	Returnval types.DiskChangeInfo `xml:"returnval" json:"returnval"`
 }
 
 type VslmQueryDatastoreInfo VslmQueryDatastoreInfoRequestType
@@ -524,8 +524,8 @@ func init() {
 }
 
 type VslmQueryDatastoreInfoRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	DatastoreUrl string                       `xml:"datastoreUrl"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DatastoreUrl string                       `xml:"datastoreUrl" json:"datastoreUrl"`
 }
 
 func init() {
@@ -533,14 +533,14 @@ func init() {
 }
 
 type VslmQueryDatastoreInfoResponse struct {
-	Returnval []VslmQueryDatastoreInfoResult `xml:"returnval,omitempty"`
+	Returnval []VslmQueryDatastoreInfoResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmQueryDatastoreInfoResult struct {
 	types.DynamicData
 
-	Datacenter types.ManagedObjectReference `xml:"datacenter"`
-	Datastore  types.ManagedObjectReference `xml:"datastore"`
+	Datacenter types.ManagedObjectReference `xml:"datacenter" json:"datacenter"`
+	Datastore  types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -560,8 +560,8 @@ func init() {
 }
 
 type VslmQueryGlobalCatalogSyncStatusForDatastoreRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	DatastoreURL string                       `xml:"datastoreURL"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DatastoreURL string                       `xml:"datastoreURL" json:"datastoreURL"`
 }
 
 func init() {
@@ -569,11 +569,11 @@ func init() {
 }
 
 type VslmQueryGlobalCatalogSyncStatusForDatastoreResponse struct {
-	Returnval *VslmDatastoreSyncStatus `xml:"returnval,omitempty"`
+	Returnval *VslmDatastoreSyncStatus `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmQueryGlobalCatalogSyncStatusRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -581,7 +581,7 @@ func init() {
 }
 
 type VslmQueryGlobalCatalogSyncStatusResponse struct {
-	Returnval []VslmDatastoreSyncStatus `xml:"returnval,omitempty"`
+	Returnval []VslmDatastoreSyncStatus `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmQueryInfo VslmQueryInfoRequestType
@@ -591,7 +591,7 @@ func init() {
 }
 
 type VslmQueryInfoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -599,7 +599,7 @@ func init() {
 }
 
 type VslmQueryInfoResponse struct {
-	Returnval VslmTaskInfo `xml:"returnval"`
+	Returnval VslmTaskInfo `xml:"returnval" json:"returnval"`
 }
 
 type VslmQueryTaskResult VslmQueryTaskResultRequestType
@@ -609,7 +609,7 @@ func init() {
 }
 
 type VslmQueryTaskResultRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -617,12 +617,12 @@ func init() {
 }
 
 type VslmQueryTaskResultResponse struct {
-	Returnval types.AnyType `xml:"returnval,omitempty,typeattr"`
+	Returnval types.AnyType `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type VslmReconcileDatastoreInventoryRequestType struct {
-	This      types.ManagedObjectReference `xml:"_this"`
-	Datastore types.ManagedObjectReference `xml:"datastore"`
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -636,7 +636,7 @@ func init() {
 }
 
 type VslmReconcileDatastoreInventory_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmRegisterDisk VslmRegisterDiskRequestType
@@ -646,9 +646,9 @@ func init() {
 }
 
 type VslmRegisterDiskRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Path string                       `xml:"path"`
-	Name string                       `xml:"name,omitempty"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Path string                       `xml:"path" json:"path"`
+	Name string                       `xml:"name,omitempty" json:"name,omitempty"`
 }
 
 func init() {
@@ -656,13 +656,13 @@ func init() {
 }
 
 type VslmRegisterDiskResponse struct {
-	Returnval types.VStorageObject `xml:"returnval"`
+	Returnval types.VStorageObject `xml:"returnval" json:"returnval"`
 }
 
 type VslmRelocateVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
-	Spec types.VslmRelocateSpec       `xml:"spec"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
+	Spec types.VslmRelocateSpec       `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -676,7 +676,7 @@ func init() {
 }
 
 type VslmRelocateVStorageObject_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmRenameVStorageObject VslmRenameVStorageObjectRequestType
@@ -686,9 +686,9 @@ func init() {
 }
 
 type VslmRenameVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
-	Name string                       `xml:"name"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
+	Name string                       `xml:"name" json:"name"`
 }
 
 func init() {
@@ -705,9 +705,9 @@ func init() {
 }
 
 type VslmRetrieveSnapshotDetailsRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Id         types.ID                     `xml:"id"`
-	SnapshotId types.ID                     `xml:"snapshotId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId" json:"snapshotId"`
 }
 
 func init() {
@@ -715,7 +715,7 @@ func init() {
 }
 
 type VslmRetrieveSnapshotDetailsResponse struct {
-	Returnval types.VStorageObjectSnapshotDetails `xml:"returnval"`
+	Returnval types.VStorageObjectSnapshotDetails `xml:"returnval" json:"returnval"`
 }
 
 type VslmRetrieveSnapshotInfo VslmRetrieveSnapshotInfoRequestType
@@ -725,8 +725,8 @@ func init() {
 }
 
 type VslmRetrieveSnapshotInfoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -734,7 +734,7 @@ func init() {
 }
 
 type VslmRetrieveSnapshotInfoResponse struct {
-	Returnval types.VStorageObjectSnapshotInfo `xml:"returnval"`
+	Returnval types.VStorageObjectSnapshotInfo `xml:"returnval" json:"returnval"`
 }
 
 type VslmRetrieveVStorageInfrastructureObjectPolicy VslmRetrieveVStorageInfrastructureObjectPolicyRequestType
@@ -744,8 +744,8 @@ func init() {
 }
 
 type VslmRetrieveVStorageInfrastructureObjectPolicyRequestType struct {
-	This      types.ManagedObjectReference `xml:"_this"`
-	Datastore types.ManagedObjectReference `xml:"datastore"`
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -753,7 +753,7 @@ func init() {
 }
 
 type VslmRetrieveVStorageInfrastructureObjectPolicyResponse struct {
-	Returnval []types.VslmInfrastructureObjectPolicy `xml:"returnval,omitempty"`
+	Returnval []types.VslmInfrastructureObjectPolicy `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmRetrieveVStorageObject VslmRetrieveVStorageObjectRequestType
@@ -769,8 +769,8 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectAssociationsRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Ids  []types.ID                   `xml:"ids,omitempty"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Ids  []types.ID                   `xml:"ids,omitempty" json:"ids,omitempty"`
 }
 
 func init() {
@@ -778,7 +778,7 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectAssociationsResponse struct {
-	Returnval []VslmVsoVStorageObjectAssociations `xml:"returnval,omitempty"`
+	Returnval []VslmVsoVStorageObjectAssociations `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmRetrieveVStorageObjectMetadata VslmRetrieveVStorageObjectMetadataRequestType
@@ -788,10 +788,10 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectMetadataRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Id         types.ID                     `xml:"id"`
-	SnapshotId *types.ID                    `xml:"snapshotId,omitempty"`
-	Prefix     string                       `xml:"prefix,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId *types.ID                    `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
+	Prefix     string                       `xml:"prefix,omitempty" json:"prefix,omitempty"`
 }
 
 func init() {
@@ -799,7 +799,7 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectMetadataResponse struct {
-	Returnval []types.KeyValue `xml:"returnval,omitempty"`
+	Returnval []types.KeyValue `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmRetrieveVStorageObjectMetadataValue VslmRetrieveVStorageObjectMetadataValueRequestType
@@ -809,10 +809,10 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectMetadataValueRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Id         types.ID                     `xml:"id"`
-	SnapshotId *types.ID                    `xml:"snapshotId,omitempty"`
-	Key        string                       `xml:"key"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId *types.ID                    `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
+	Key        string                       `xml:"key" json:"key"`
 }
 
 func init() {
@@ -820,12 +820,12 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectMetadataValueResponse struct {
-	Returnval string `xml:"returnval"`
+	Returnval string `xml:"returnval" json:"returnval"`
 }
 
 type VslmRetrieveVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -833,7 +833,7 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectResponse struct {
-	Returnval types.VStorageObject `xml:"returnval"`
+	Returnval types.VStorageObject `xml:"returnval" json:"returnval"`
 }
 
 type VslmRetrieveVStorageObjectState VslmRetrieveVStorageObjectStateRequestType
@@ -843,8 +843,8 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectStateRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Id   types.ID                     `xml:"id"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -852,7 +852,7 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectStateResponse struct {
-	Returnval types.VStorageObjectStateInfo `xml:"returnval"`
+	Returnval types.VStorageObjectStateInfo `xml:"returnval" json:"returnval"`
 }
 
 type VslmRetrieveVStorageObjects VslmRetrieveVStorageObjectsRequestType
@@ -862,8 +862,8 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectsRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
-	Ids  []types.ID                   `xml:"ids,omitempty"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Ids  []types.ID                   `xml:"ids,omitempty" json:"ids,omitempty"`
 }
 
 func init() {
@@ -871,13 +871,13 @@ func init() {
 }
 
 type VslmRetrieveVStorageObjectsResponse struct {
-	Returnval []VslmVsoVStorageObjectResult `xml:"returnval,omitempty"`
+	Returnval []VslmVsoVStorageObjectResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type VslmRevertVStorageObjectRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Id         types.ID                     `xml:"id"`
-	SnapshotId types.ID                     `xml:"snapshotId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId" json:"snapshotId"`
 }
 
 func init() {
@@ -891,7 +891,7 @@ func init() {
 }
 
 type VslmRevertVStorageObject_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmScheduleReconcileDatastoreInventory VslmScheduleReconcileDatastoreInventoryRequestType
@@ -901,8 +901,8 @@ func init() {
 }
 
 type VslmScheduleReconcileDatastoreInventoryRequestType struct {
-	This      types.ManagedObjectReference `xml:"_this"`
-	Datastore types.ManagedObjectReference `xml:"datastore"`
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -915,10 +915,10 @@ type VslmScheduleReconcileDatastoreInventoryResponse struct {
 type VslmServiceInstanceContent struct {
 	types.DynamicData
 
-	AboutInfo               VslmAboutInfo                `xml:"aboutInfo"`
-	SessionManager          types.ManagedObjectReference `xml:"sessionManager"`
-	VStorageObjectManager   types.ManagedObjectReference `xml:"vStorageObjectManager"`
-	StorageLifecycleManager types.ManagedObjectReference `xml:"storageLifecycleManager"`
+	AboutInfo               VslmAboutInfo                `xml:"aboutInfo" json:"aboutInfo"`
+	SessionManager          types.ManagedObjectReference `xml:"sessionManager" json:"sessionManager"`
+	VStorageObjectManager   types.ManagedObjectReference `xml:"vStorageObjectManager" json:"vStorageObjectManager"`
+	StorageLifecycleManager types.ManagedObjectReference `xml:"storageLifecycleManager" json:"storageLifecycleManager"`
 }
 
 func init() {
@@ -932,9 +932,9 @@ func init() {
 }
 
 type VslmSetVStorageObjectControlFlagsRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	Id           types.ID                     `xml:"id"`
-	ControlFlags []string                     `xml:"controlFlags,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id           types.ID                     `xml:"id" json:"id"`
+	ControlFlags []string                     `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
 }
 
 func init() {
@@ -951,10 +951,10 @@ func init() {
 }
 
 type VslmSyncDatastoreRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	DatastoreUrl string                       `xml:"datastoreUrl"`
-	FullSync     bool                         `xml:"fullSync"`
-	FcdId        *types.ID                    `xml:"fcdId,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DatastoreUrl string                       `xml:"datastoreUrl" json:"datastoreUrl"`
+	FullSync     bool                         `xml:"fullSync" json:"fullSync"`
+	FcdId        *types.ID                    `xml:"fcdId,omitempty" json:"fcdId,omitempty"`
 }
 
 func init() {
@@ -967,7 +967,7 @@ type VslmSyncDatastoreResponse struct {
 type VslmSyncFault struct {
 	VslmFault
 
-	Id *types.ID `xml:"id,omitempty"`
+	Id *types.ID `xml:"id,omitempty" json:"id,omitempty"`
 }
 
 func init() {
@@ -983,29 +983,29 @@ func init() {
 type VslmTaskInfo struct {
 	types.DynamicData
 
-	Key           string                         `xml:"key"`
-	Task          types.ManagedObjectReference   `xml:"task"`
-	Description   *types.LocalizableMessage      `xml:"description,omitempty"`
-	Name          string                         `xml:"name,omitempty"`
-	DescriptionId string                         `xml:"descriptionId"`
-	Entity        *types.ManagedObjectReference  `xml:"entity,omitempty"`
-	EntityName    string                         `xml:"entityName,omitempty"`
-	Locked        []types.ManagedObjectReference `xml:"locked,omitempty"`
-	State         VslmTaskInfoState              `xml:"state"`
-	Cancelled     bool                           `xml:"cancelled"`
-	Cancelable    bool                           `xml:"cancelable"`
-	Error         *types.LocalizedMethodFault    `xml:"error,omitempty"`
-	Result        types.AnyType                  `xml:"result,omitempty,typeattr"`
-	Progress      int32                          `xml:"progress,omitempty"`
-	Reason        BaseVslmTaskReason             `xml:"reason,typeattr"`
-	QueueTime     time.Time                      `xml:"queueTime"`
-	StartTime     *time.Time                     `xml:"startTime"`
-	CompleteTime  *time.Time                     `xml:"completeTime"`
-	EventChainId  int32                          `xml:"eventChainId"`
-	ChangeTag     string                         `xml:"changeTag,omitempty"`
-	ParentTaskKey string                         `xml:"parentTaskKey,omitempty"`
-	RootTaskKey   string                         `xml:"rootTaskKey,omitempty"`
-	ActivationId  string                         `xml:"activationId,omitempty"`
+	Key           string                         `xml:"key" json:"key"`
+	Task          types.ManagedObjectReference   `xml:"task" json:"task"`
+	Description   *types.LocalizableMessage      `xml:"description,omitempty" json:"description,omitempty"`
+	Name          string                         `xml:"name,omitempty" json:"name,omitempty"`
+	DescriptionId string                         `xml:"descriptionId" json:"descriptionId"`
+	Entity        *types.ManagedObjectReference  `xml:"entity,omitempty" json:"entity,omitempty"`
+	EntityName    string                         `xml:"entityName,omitempty" json:"entityName,omitempty"`
+	Locked        []types.ManagedObjectReference `xml:"locked,omitempty" json:"locked,omitempty"`
+	State         VslmTaskInfoState              `xml:"state" json:"state"`
+	Cancelled     bool                           `xml:"cancelled" json:"cancelled"`
+	Cancelable    bool                           `xml:"cancelable" json:"cancelable"`
+	Error         *types.LocalizedMethodFault    `xml:"error,omitempty" json:"error,omitempty"`
+	Result        types.AnyType                  `xml:"result,omitempty,typeattr" json:"result,omitempty"`
+	Progress      int32                          `xml:"progress,omitempty" json:"progress,omitempty"`
+	Reason        BaseVslmTaskReason             `xml:"reason,typeattr" json:"reason"`
+	QueueTime     time.Time                      `xml:"queueTime" json:"queueTime"`
+	StartTime     *time.Time                     `xml:"startTime" json:"startTime,omitempty"`
+	CompleteTime  *time.Time                     `xml:"completeTime" json:"completeTime,omitempty"`
+	EventChainId  int32                          `xml:"eventChainId" json:"eventChainId"`
+	ChangeTag     string                         `xml:"changeTag,omitempty" json:"changeTag,omitempty"`
+	ParentTaskKey string                         `xml:"parentTaskKey,omitempty" json:"parentTaskKey,omitempty"`
+	RootTaskKey   string                         `xml:"rootTaskKey,omitempty" json:"rootTaskKey,omitempty"`
+	ActivationId  string                         `xml:"activationId,omitempty" json:"activationId,omitempty"`
 }
 
 func init() {
@@ -1023,10 +1023,10 @@ func init() {
 type VslmTaskReasonAlarm struct {
 	VslmTaskReason
 
-	AlarmName  string                       `xml:"alarmName"`
-	Alarm      types.ManagedObjectReference `xml:"alarm"`
-	EntityName string                       `xml:"entityName"`
-	Entity     types.ManagedObjectReference `xml:"entity"`
+	AlarmName  string                       `xml:"alarmName" json:"alarmName"`
+	Alarm      types.ManagedObjectReference `xml:"alarm" json:"alarm"`
+	EntityName string                       `xml:"entityName" json:"entityName"`
+	Entity     types.ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
 func init() {
@@ -1036,8 +1036,8 @@ func init() {
 type VslmTaskReasonSchedule struct {
 	VslmTaskReason
 
-	Name          string                       `xml:"name"`
-	ScheduledTask types.ManagedObjectReference `xml:"scheduledTask"`
+	Name          string                       `xml:"name" json:"name"`
+	ScheduledTask types.ManagedObjectReference `xml:"scheduledTask" json:"scheduledTask"`
 }
 
 func init() {
@@ -1055,7 +1055,7 @@ func init() {
 type VslmTaskReasonUser struct {
 	VslmTaskReason
 
-	UserName string `xml:"userName"`
+	UserName string `xml:"userName" json:"userName"`
 }
 
 func init() {
@@ -1063,8 +1063,8 @@ func init() {
 }
 
 type VslmUpdateVStorageInfrastructureObjectPolicyRequestType struct {
-	This types.ManagedObjectReference             `xml:"_this"`
-	Spec types.VslmInfrastructureObjectPolicySpec `xml:"spec"`
+	This types.ManagedObjectReference             `xml:"_this" json:"_this"`
+	Spec types.VslmInfrastructureObjectPolicySpec `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -1078,14 +1078,14 @@ func init() {
 }
 
 type VslmUpdateVStorageInfrastructureObjectPolicy_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmUpdateVStorageObjectMetadataRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	Id         types.ID                     `xml:"id"`
-	Metadata   []types.KeyValue             `xml:"metadata,omitempty"`
-	DeleteKeys []string                     `xml:"deleteKeys,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	Metadata   []types.KeyValue             `xml:"metadata,omitempty" json:"metadata,omitempty"`
+	DeleteKeys []string                     `xml:"deleteKeys,omitempty" json:"deleteKeys,omitempty"`
 }
 
 func init() {
@@ -1099,14 +1099,14 @@ func init() {
 }
 
 type VslmUpdateVStorageObjectMetadata_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmUpdateVstorageObjectCryptoRequestType struct {
-	This        types.ManagedObjectReference      `xml:"_this"`
-	Id          types.ID                          `xml:"id"`
-	Profile     []types.VirtualMachineProfileSpec `xml:"profile,omitempty"`
-	DisksCrypto *types.DiskCryptoSpec             `xml:"disksCrypto,omitempty"`
+	This        types.ManagedObjectReference      `xml:"_this" json:"_this"`
+	Id          types.ID                          `xml:"id" json:"id"`
+	Profile     []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
+	DisksCrypto *types.DiskCryptoSpec             `xml:"disksCrypto,omitempty" json:"disksCrypto,omitempty"`
 }
 
 func init() {
@@ -1120,13 +1120,13 @@ func init() {
 }
 
 type VslmUpdateVstorageObjectCrypto_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmUpdateVstorageObjectPolicyRequestType struct {
-	This    types.ManagedObjectReference      `xml:"_this"`
-	Id      types.ID                          `xml:"id"`
-	Profile []types.VirtualMachineProfileSpec `xml:"profile,omitempty"`
+	This    types.ManagedObjectReference      `xml:"_this" json:"_this"`
+	Id      types.ID                          `xml:"id" json:"id"`
+	Profile []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
 }
 
 func init() {
@@ -1140,15 +1140,15 @@ func init() {
 }
 
 type VslmUpdateVstorageObjectPolicy_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VslmVsoVStorageObjectAssociations struct {
 	types.DynamicData
 
-	Id                types.ID                                             `xml:"id"`
-	VmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"vmDiskAssociation,omitempty"`
-	Fault             *types.LocalizedMethodFault                          `xml:"fault,omitempty"`
+	Id                types.ID                                             `xml:"id" json:"id"`
+	VmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"vmDiskAssociation,omitempty" json:"vmDiskAssociation,omitempty"`
+	Fault             *types.LocalizedMethodFault                          `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
 func init() {
@@ -1158,8 +1158,8 @@ func init() {
 type VslmVsoVStorageObjectAssociationsVmDiskAssociation struct {
 	types.DynamicData
 
-	VmId    string `xml:"vmId"`
-	DiskKey int32  `xml:"diskKey"`
+	VmId    string `xml:"vmId" json:"vmId"`
+	DiskKey int32  `xml:"diskKey" json:"diskKey"`
 }
 
 func init() {
@@ -1169,9 +1169,9 @@ func init() {
 type VslmVsoVStorageObjectQueryResult struct {
 	types.DynamicData
 
-	AllRecordsReturned bool                          `xml:"allRecordsReturned"`
-	Id                 []types.ID                    `xml:"id,omitempty"`
-	QueryResults       []VslmVsoVStorageObjectResult `xml:"queryResults,omitempty"`
+	AllRecordsReturned bool                          `xml:"allRecordsReturned" json:"allRecordsReturned"`
+	Id                 []types.ID                    `xml:"id,omitempty" json:"id,omitempty"`
+	QueryResults       []VslmVsoVStorageObjectResult `xml:"queryResults,omitempty" json:"queryResults,omitempty"`
 }
 
 func init() {
@@ -1181,9 +1181,9 @@ func init() {
 type VslmVsoVStorageObjectQuerySpec struct {
 	types.DynamicData
 
-	QueryField    string   `xml:"queryField"`
-	QueryOperator string   `xml:"queryOperator"`
-	QueryValue    []string `xml:"queryValue,omitempty"`
+	QueryField    string   `xml:"queryField" json:"queryField"`
+	QueryOperator string   `xml:"queryOperator" json:"queryOperator"`
+	QueryValue    []string `xml:"queryValue,omitempty" json:"queryValue,omitempty"`
 }
 
 func init() {
@@ -1193,17 +1193,17 @@ func init() {
 type VslmVsoVStorageObjectResult struct {
 	types.DynamicData
 
-	Id               types.ID                              `xml:"id"`
-	Name             string                                `xml:"name,omitempty"`
-	CapacityInMB     int64                                 `xml:"capacityInMB"`
-	CreateTime       *time.Time                            `xml:"createTime"`
-	DatastoreUrl     string                                `xml:"datastoreUrl,omitempty"`
-	DiskPath         string                                `xml:"diskPath,omitempty"`
-	UsedCapacityInMB int64                                 `xml:"usedCapacityInMB,omitempty"`
-	BackingObjectId  *types.ID                             `xml:"backingObjectId,omitempty"`
-	SnapshotInfo     []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty"`
-	Metadata         []types.KeyValue                      `xml:"metadata,omitempty"`
-	Error            *types.LocalizedMethodFault           `xml:"error,omitempty"`
+	Id               types.ID                              `xml:"id" json:"id"`
+	Name             string                                `xml:"name,omitempty" json:"name,omitempty"`
+	CapacityInMB     int64                                 `xml:"capacityInMB" json:"capacityInMB"`
+	CreateTime       *time.Time                            `xml:"createTime" json:"createTime,omitempty"`
+	DatastoreUrl     string                                `xml:"datastoreUrl,omitempty" json:"datastoreUrl,omitempty"`
+	DiskPath         string                                `xml:"diskPath,omitempty" json:"diskPath,omitempty"`
+	UsedCapacityInMB int64                                 `xml:"usedCapacityInMB,omitempty" json:"usedCapacityInMB,omitempty"`
+	BackingObjectId  *types.ID                             `xml:"backingObjectId,omitempty" json:"backingObjectId,omitempty"`
+	SnapshotInfo     []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty" json:"snapshotInfo,omitempty"`
+	Metadata         []types.KeyValue                      `xml:"metadata,omitempty" json:"metadata,omitempty"`
+	Error            *types.LocalizedMethodFault           `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
@@ -1213,10 +1213,10 @@ func init() {
 type VslmVsoVStorageObjectSnapshotResult struct {
 	types.DynamicData
 
-	BackingObjectId types.ID  `xml:"backingObjectId"`
-	Description     string    `xml:"description,omitempty"`
-	SnapshotId      *types.ID `xml:"snapshotId,omitempty"`
-	DiskPath        string    `xml:"diskPath,omitempty"`
+	BackingObjectId types.ID  `xml:"backingObjectId" json:"backingObjectId"`
+	Description     string    `xml:"description,omitempty" json:"description,omitempty"`
+	SnapshotId      *types.ID `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
+	DiskPath        string    `xml:"diskPath,omitempty" json:"diskPath,omitempty"`
 }
 
 func init() {

@@ -30,8 +30,8 @@ func init() {
 }
 
 type AddIssueRequestType struct {
-	This  types.ManagedObjectReference `xml:"_this"`
-	Issue BaseIssue                    `xml:"issue,typeattr"`
+	This  types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Issue BaseIssue                    `xml:"issue,typeattr" json:"issue"`
 }
 
 func init() {
@@ -39,13 +39,13 @@ func init() {
 }
 
 type AddIssueResponse struct {
-	Returnval BaseIssue `xml:"returnval,typeattr"`
+	Returnval BaseIssue `xml:"returnval,typeattr" json:"returnval"`
 }
 
 type AgencyComputeResourceScope struct {
 	AgencyScope
 
-	ComputeResource []types.ManagedObjectReference `xml:"computeResource,omitempty"`
+	ComputeResource []types.ManagedObjectReference `xml:"computeResource,omitempty" json:"computeResource,omitempty"`
 }
 
 func init() {
@@ -55,23 +55,23 @@ func init() {
 type AgencyConfigInfo struct {
 	types.DynamicData
 
-	AgentConfig                                   []AgentConfigInfo              `xml:"agentConfig,omitempty"`
-	Scope                                         BaseAgencyScope                `xml:"scope,omitempty,typeattr"`
-	ManuallyMarkAgentVmAvailableAfterProvisioning *bool                          `xml:"manuallyMarkAgentVmAvailableAfterProvisioning"`
-	ManuallyMarkAgentVmAvailableAfterPowerOn      *bool                          `xml:"manuallyMarkAgentVmAvailableAfterPowerOn"`
-	OptimizedDeploymentEnabled                    *bool                          `xml:"optimizedDeploymentEnabled"`
-	AgentName                                     string                         `xml:"agentName,omitempty"`
-	AgencyName                                    string                         `xml:"agencyName,omitempty"`
-	UseUuidVmName                                 *bool                          `xml:"useUuidVmName"`
-	ManuallyProvisioned                           *bool                          `xml:"manuallyProvisioned"`
-	ManuallyMonitored                             *bool                          `xml:"manuallyMonitored"`
-	BypassVumEnabled                              *bool                          `xml:"bypassVumEnabled"`
-	AgentVmNetwork                                []types.ManagedObjectReference `xml:"agentVmNetwork,omitempty"`
-	AgentVmDatastore                              []types.ManagedObjectReference `xml:"agentVmDatastore,omitempty"`
-	PreferHostConfiguration                       *bool                          `xml:"preferHostConfiguration"`
-	IpPool                                        *types.IpPool                  `xml:"ipPool,omitempty"`
-	ResourcePools                                 []AgencyVMResourcePool         `xml:"resourcePools,omitempty"`
-	Folders                                       []AgencyVMFolder               `xml:"folders,omitempty"`
+	AgentConfig                                   []AgentConfigInfo              `xml:"agentConfig,omitempty" json:"agentConfig,omitempty"`
+	Scope                                         BaseAgencyScope                `xml:"scope,omitempty,typeattr" json:"scope,omitempty"`
+	ManuallyMarkAgentVmAvailableAfterProvisioning *bool                          `xml:"manuallyMarkAgentVmAvailableAfterProvisioning" json:"manuallyMarkAgentVmAvailableAfterProvisioning,omitempty"`
+	ManuallyMarkAgentVmAvailableAfterPowerOn      *bool                          `xml:"manuallyMarkAgentVmAvailableAfterPowerOn" json:"manuallyMarkAgentVmAvailableAfterPowerOn,omitempty"`
+	OptimizedDeploymentEnabled                    *bool                          `xml:"optimizedDeploymentEnabled" json:"optimizedDeploymentEnabled,omitempty"`
+	AgentName                                     string                         `xml:"agentName,omitempty" json:"agentName,omitempty"`
+	AgencyName                                    string                         `xml:"agencyName,omitempty" json:"agencyName,omitempty"`
+	UseUuidVmName                                 *bool                          `xml:"useUuidVmName" json:"useUuidVmName,omitempty"`
+	ManuallyProvisioned                           *bool                          `xml:"manuallyProvisioned" json:"manuallyProvisioned,omitempty"`
+	ManuallyMonitored                             *bool                          `xml:"manuallyMonitored" json:"manuallyMonitored,omitempty"`
+	BypassVumEnabled                              *bool                          `xml:"bypassVumEnabled" json:"bypassVumEnabled,omitempty"`
+	AgentVmNetwork                                []types.ManagedObjectReference `xml:"agentVmNetwork,omitempty" json:"agentVmNetwork,omitempty"`
+	AgentVmDatastore                              []types.ManagedObjectReference `xml:"agentVmDatastore,omitempty" json:"agentVmDatastore,omitempty"`
+	PreferHostConfiguration                       *bool                          `xml:"preferHostConfiguration" json:"preferHostConfiguration,omitempty"`
+	IpPool                                        *types.IpPool                  `xml:"ipPool,omitempty" json:"ipPool,omitempty"`
+	ResourcePools                                 []AgencyVMResourcePool         `xml:"resourcePools,omitempty" json:"resourcePools,omitempty"`
+	Folders                                       []AgencyVMFolder               `xml:"folders,omitempty" json:"folders,omitempty"`
 }
 
 func init() {
@@ -89,10 +89,10 @@ func init() {
 type AgencyIssue struct {
 	Issue
 
-	Agency       types.ManagedObjectReference `xml:"agency"`
-	AgencyName   string                       `xml:"agencyName"`
-	SolutionId   string                       `xml:"solutionId"`
-	SolutionName string                       `xml:"solutionName"`
+	Agency       types.ManagedObjectReference `xml:"agency" json:"agency"`
+	AgencyName   string                       `xml:"agencyName" json:"agencyName"`
+	SolutionId   string                       `xml:"solutionId" json:"solutionId"`
+	SolutionName string                       `xml:"solutionName" json:"solutionName"`
 }
 
 func init() {
@@ -106,7 +106,7 @@ func init() {
 }
 
 type AgencyQueryRuntimeRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -114,7 +114,7 @@ func init() {
 }
 
 type AgencyQueryRuntimeResponse struct {
-	Returnval BaseEamObjectRuntimeInfo `xml:"returnval,typeattr"`
+	Returnval BaseEamObjectRuntimeInfo `xml:"returnval,typeattr" json:"returnval"`
 }
 
 type AgencyScope struct {
@@ -128,8 +128,8 @@ func init() {
 type AgencyVMFolder struct {
 	types.DynamicData
 
-	FolderId     types.ManagedObjectReference `xml:"folderId"`
-	DatacenterId types.ManagedObjectReference `xml:"datacenterId"`
+	FolderId     types.ManagedObjectReference `xml:"folderId" json:"folderId"`
+	DatacenterId types.ManagedObjectReference `xml:"datacenterId" json:"datacenterId"`
 }
 
 func init() {
@@ -139,8 +139,8 @@ func init() {
 type AgencyVMResourcePool struct {
 	types.DynamicData
 
-	ResourcePoolId    types.ManagedObjectReference `xml:"resourcePoolId"`
-	ComputeResourceId types.ManagedObjectReference `xml:"computeResourceId"`
+	ResourcePoolId    types.ManagedObjectReference `xml:"resourcePoolId" json:"resourcePoolId"`
+	ComputeResourceId types.ManagedObjectReference `xml:"computeResourceId" json:"computeResourceId"`
 }
 
 func init() {
@@ -154,7 +154,7 @@ func init() {
 }
 
 type Agency_DisableRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -171,7 +171,7 @@ func init() {
 }
 
 type Agency_EnableRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -184,18 +184,18 @@ type Agency_EnableResponse struct {
 type AgentConfigInfo struct {
 	types.DynamicData
 
-	ProductLineId               string                   `xml:"productLineId,omitempty"`
-	HostVersion                 string                   `xml:"hostVersion,omitempty"`
-	OvfPackageUrl               string                   `xml:"ovfPackageUrl,omitempty"`
-	OvfEnvironment              *AgentOvfEnvironmentInfo `xml:"ovfEnvironment,omitempty"`
-	VibUrl                      string                   `xml:"vibUrl,omitempty"`
-	VibMatchingRules            []AgentVibMatchingRule   `xml:"vibMatchingRules,omitempty"`
-	VibName                     string                   `xml:"vibName,omitempty"`
-	DvFilterEnabled             *bool                    `xml:"dvFilterEnabled"`
-	RebootHostAfterVibUninstall *bool                    `xml:"rebootHostAfterVibUninstall"`
-	VmciService                 []string                 `xml:"vmciService,omitempty"`
-	OvfDiskProvisioning         string                   `xml:"ovfDiskProvisioning,omitempty"`
-	VmStoragePolicies           []BaseAgentStoragePolicy `xml:"vmStoragePolicies,omitempty,typeattr"`
+	ProductLineId               string                   `xml:"productLineId,omitempty" json:"productLineId,omitempty"`
+	HostVersion                 string                   `xml:"hostVersion,omitempty" json:"hostVersion,omitempty"`
+	OvfPackageUrl               string                   `xml:"ovfPackageUrl,omitempty" json:"ovfPackageUrl,omitempty"`
+	OvfEnvironment              *AgentOvfEnvironmentInfo `xml:"ovfEnvironment,omitempty" json:"ovfEnvironment,omitempty"`
+	VibUrl                      string                   `xml:"vibUrl,omitempty" json:"vibUrl,omitempty"`
+	VibMatchingRules            []AgentVibMatchingRule   `xml:"vibMatchingRules,omitempty" json:"vibMatchingRules,omitempty"`
+	VibName                     string                   `xml:"vibName,omitempty" json:"vibName,omitempty"`
+	DvFilterEnabled             *bool                    `xml:"dvFilterEnabled" json:"dvFilterEnabled,omitempty"`
+	RebootHostAfterVibUninstall *bool                    `xml:"rebootHostAfterVibUninstall" json:"rebootHostAfterVibUninstall,omitempty"`
+	VmciService                 []string                 `xml:"vmciService,omitempty" json:"vmciService,omitempty"`
+	OvfDiskProvisioning         string                   `xml:"ovfDiskProvisioning,omitempty" json:"ovfDiskProvisioning,omitempty"`
+	VmStoragePolicies           []BaseAgentStoragePolicy `xml:"vmStoragePolicies,omitempty,typeattr" json:"vmStoragePolicies,omitempty"`
 }
 
 func init() {
@@ -205,10 +205,10 @@ func init() {
 type AgentIssue struct {
 	AgencyIssue
 
-	Agent     types.ManagedObjectReference `xml:"agent"`
-	AgentName string                       `xml:"agentName"`
-	Host      types.ManagedObjectReference `xml:"host"`
-	HostName  string                       `xml:"hostName"`
+	Agent     types.ManagedObjectReference `xml:"agent" json:"agent"`
+	AgentName string                       `xml:"agentName" json:"agentName"`
+	Host      types.ManagedObjectReference `xml:"host" json:"host"`
+	HostName  string                       `xml:"hostName" json:"hostName"`
 }
 
 func init() {
@@ -218,7 +218,7 @@ func init() {
 type AgentOvfEnvironmentInfo struct {
 	types.DynamicData
 
-	OvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"ovfProperty,omitempty"`
+	OvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"ovfProperty,omitempty" json:"ovfProperty,omitempty"`
 }
 
 func init() {
@@ -228,8 +228,8 @@ func init() {
 type AgentOvfEnvironmentInfoOvfProperty struct {
 	types.DynamicData
 
-	Key   string `xml:"key"`
-	Value string `xml:"value"`
+	Key   string `xml:"key" json:"key"`
+	Value string `xml:"value" json:"value"`
 }
 
 func init() {
@@ -243,7 +243,7 @@ func init() {
 }
 
 type AgentQueryConfigRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -251,7 +251,7 @@ func init() {
 }
 
 type AgentQueryConfigResponse struct {
-	Returnval AgentConfigInfo `xml:"returnval"`
+	Returnval AgentConfigInfo `xml:"returnval" json:"returnval"`
 }
 
 type AgentQueryRuntime AgentQueryRuntimeRequestType
@@ -261,7 +261,7 @@ func init() {
 }
 
 type AgentQueryRuntimeRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -269,24 +269,24 @@ func init() {
 }
 
 type AgentQueryRuntimeResponse struct {
-	Returnval AgentRuntimeInfo `xml:"returnval"`
+	Returnval AgentRuntimeInfo `xml:"returnval" json:"returnval"`
 }
 
 type AgentRuntimeInfo struct {
 	EamObjectRuntimeInfo
 
-	VmPowerState         types.VirtualMachinePowerState `xml:"vmPowerState"`
-	ReceivingHeartBeat   bool                           `xml:"receivingHeartBeat"`
-	Host                 *types.ManagedObjectReference  `xml:"host,omitempty"`
-	Vm                   *types.ManagedObjectReference  `xml:"vm,omitempty"`
-	VmIp                 string                         `xml:"vmIp,omitempty"`
-	VmName               string                         `xml:"vmName"`
-	EsxAgentResourcePool *types.ManagedObjectReference  `xml:"esxAgentResourcePool,omitempty"`
-	EsxAgentFolder       *types.ManagedObjectReference  `xml:"esxAgentFolder,omitempty"`
-	InstalledBulletin    []string                       `xml:"installedBulletin,omitempty"`
-	InstalledVibs        []VibVibInfo                   `xml:"installedVibs,omitempty"`
-	Agency               *types.ManagedObjectReference  `xml:"agency,omitempty"`
-	VmHook               *AgentVmHook                   `xml:"vmHook,omitempty"`
+	VmPowerState         types.VirtualMachinePowerState `xml:"vmPowerState" json:"vmPowerState"`
+	ReceivingHeartBeat   bool                           `xml:"receivingHeartBeat" json:"receivingHeartBeat"`
+	Host                 *types.ManagedObjectReference  `xml:"host,omitempty" json:"host,omitempty"`
+	Vm                   *types.ManagedObjectReference  `xml:"vm,omitempty" json:"vm,omitempty"`
+	VmIp                 string                         `xml:"vmIp,omitempty" json:"vmIp,omitempty"`
+	VmName               string                         `xml:"vmName" json:"vmName"`
+	EsxAgentResourcePool *types.ManagedObjectReference  `xml:"esxAgentResourcePool,omitempty" json:"esxAgentResourcePool,omitempty"`
+	EsxAgentFolder       *types.ManagedObjectReference  `xml:"esxAgentFolder,omitempty" json:"esxAgentFolder,omitempty"`
+	InstalledBulletin    []string                       `xml:"installedBulletin,omitempty" json:"installedBulletin,omitempty"`
+	InstalledVibs        []VibVibInfo                   `xml:"installedVibs,omitempty" json:"installedVibs,omitempty"`
+	Agency               *types.ManagedObjectReference  `xml:"agency,omitempty" json:"agency,omitempty"`
+	VmHook               *AgentVmHook                   `xml:"vmHook,omitempty" json:"vmHook,omitempty"`
 }
 
 func init() {
@@ -304,8 +304,8 @@ func init() {
 type AgentVibMatchingRule struct {
 	types.DynamicData
 
-	VibNameRegex    string `xml:"vibNameRegex"`
-	VibVersionRegex string `xml:"vibVersionRegex"`
+	VibNameRegex    string `xml:"vibNameRegex" json:"vibNameRegex"`
+	VibVersionRegex string `xml:"vibVersionRegex" json:"vibVersionRegex"`
 }
 
 func init() {
@@ -315,8 +315,8 @@ func init() {
 type AgentVmHook struct {
 	types.DynamicData
 
-	Vm      types.ManagedObjectReference `xml:"vm"`
-	VmState string                       `xml:"vmState"`
+	Vm      types.ManagedObjectReference `xml:"vm" json:"vm"`
+	VmState string                       `xml:"vmState" json:"vmState"`
 }
 
 func init() {
@@ -326,7 +326,7 @@ func init() {
 type AgentVsanStoragePolicy struct {
 	AgentStoragePolicy
 
-	ProfileId string `xml:"profileId"`
+	ProfileId string `xml:"profileId" json:"profileId"`
 }
 
 func init() {
@@ -334,7 +334,7 @@ func init() {
 }
 
 type ArrayOfAgencyVMFolder struct {
-	AgencyVMFolder []AgencyVMFolder `xml:"AgencyVMFolder,omitempty"`
+	AgencyVMFolder []AgencyVMFolder `xml:"AgencyVMFolder,omitempty" json:"AgencyVMFolder,omitempty"`
 }
 
 func init() {
@@ -342,7 +342,7 @@ func init() {
 }
 
 type ArrayOfAgencyVMResourcePool struct {
-	AgencyVMResourcePool []AgencyVMResourcePool `xml:"AgencyVMResourcePool,omitempty"`
+	AgencyVMResourcePool []AgencyVMResourcePool `xml:"AgencyVMResourcePool,omitempty" json:"AgencyVMResourcePool,omitempty"`
 }
 
 func init() {
@@ -350,7 +350,7 @@ func init() {
 }
 
 type ArrayOfAgentConfigInfo struct {
-	AgentConfigInfo []AgentConfigInfo `xml:"AgentConfigInfo,omitempty"`
+	AgentConfigInfo []AgentConfigInfo `xml:"AgentConfigInfo,omitempty" json:"AgentConfigInfo,omitempty"`
 }
 
 func init() {
@@ -358,7 +358,7 @@ func init() {
 }
 
 type ArrayOfAgentOvfEnvironmentInfoOvfProperty struct {
-	AgentOvfEnvironmentInfoOvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"AgentOvfEnvironmentInfoOvfProperty,omitempty"`
+	AgentOvfEnvironmentInfoOvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"AgentOvfEnvironmentInfoOvfProperty,omitempty" json:"AgentOvfEnvironmentInfoOvfProperty,omitempty"`
 }
 
 func init() {
@@ -366,7 +366,7 @@ func init() {
 }
 
 type ArrayOfAgentStoragePolicy struct {
-	AgentStoragePolicy []BaseAgentStoragePolicy `xml:"AgentStoragePolicy,omitempty,typeattr"`
+	AgentStoragePolicy []BaseAgentStoragePolicy `xml:"AgentStoragePolicy,omitempty,typeattr" json:"AgentStoragePolicy,omitempty"`
 }
 
 func init() {
@@ -374,7 +374,7 @@ func init() {
 }
 
 type ArrayOfAgentVibMatchingRule struct {
-	AgentVibMatchingRule []AgentVibMatchingRule `xml:"AgentVibMatchingRule,omitempty"`
+	AgentVibMatchingRule []AgentVibMatchingRule `xml:"AgentVibMatchingRule,omitempty" json:"AgentVibMatchingRule,omitempty"`
 }
 
 func init() {
@@ -382,7 +382,7 @@ func init() {
 }
 
 type ArrayOfIssue struct {
-	Issue []BaseIssue `xml:"Issue,omitempty,typeattr"`
+	Issue []BaseIssue `xml:"Issue,omitempty,typeattr" json:"Issue,omitempty"`
 }
 
 func init() {
@@ -390,7 +390,7 @@ func init() {
 }
 
 type ArrayOfVibVibInfo struct {
-	VibVibInfo []VibVibInfo `xml:"VibVibInfo,omitempty"`
+	VibVibInfo []VibVibInfo `xml:"VibVibInfo,omitempty" json:"VibVibInfo,omitempty"`
 }
 
 func init() {
@@ -400,7 +400,7 @@ func init() {
 type CannotAccessAgentOVF struct {
 	VmNotDeployed
 
-	DownloadUrl string `xml:"downloadUrl"`
+	DownloadUrl string `xml:"downloadUrl" json:"downloadUrl"`
 }
 
 func init() {
@@ -410,7 +410,7 @@ func init() {
 type CannotAccessAgentVib struct {
 	VibNotInstalled
 
-	DownloadUrl string `xml:"downloadUrl"`
+	DownloadUrl string `xml:"downloadUrl" json:"downloadUrl"`
 }
 
 func init() {
@@ -420,8 +420,8 @@ func init() {
 type ClusterAgentAgentIssue struct {
 	AgencyIssue
 
-	Agent   types.ManagedObjectReference  `xml:"agent"`
-	Cluster *types.ManagedObjectReference `xml:"cluster,omitempty"`
+	Agent   types.ManagedObjectReference  `xml:"agent" json:"agent"`
+	Cluster *types.ManagedObjectReference `xml:"cluster,omitempty" json:"cluster,omitempty"`
 }
 
 func init() {
@@ -447,7 +447,7 @@ func init() {
 type ClusterAgentInvalidConfig struct {
 	ClusterAgentVmIssue
 
-	Error types.AnyType `xml:"error,typeattr"`
+	Error types.AnyType `xml:"error,typeattr" json:"error"`
 }
 
 func init() {
@@ -457,7 +457,7 @@ func init() {
 type ClusterAgentMissingClusterVmDatastore struct {
 	ClusterAgentVmNotDeployed
 
-	MissingDatastores []types.ManagedObjectReference `xml:"missingDatastores,omitempty"`
+	MissingDatastores []types.ManagedObjectReference `xml:"missingDatastores,omitempty" json:"missingDatastores,omitempty"`
 }
 
 func init() {
@@ -467,8 +467,8 @@ func init() {
 type ClusterAgentMissingClusterVmNetwork struct {
 	ClusterAgentVmNotDeployed
 
-	MissingNetworks []types.ManagedObjectReference `xml:"missingNetworks,omitempty"`
-	NetworkNames    []string                       `xml:"networkNames,omitempty"`
+	MissingNetworks []types.ManagedObjectReference `xml:"missingNetworks,omitempty" json:"missingNetworks,omitempty"`
+	NetworkNames    []string                       `xml:"networkNames,omitempty" json:"networkNames,omitempty"`
 }
 
 func init() {
@@ -478,7 +478,7 @@ func init() {
 type ClusterAgentOvfInvalidProperty struct {
 	ClusterAgentAgentIssue
 
-	Error []types.LocalizedMethodFault `xml:"error,omitempty"`
+	Error []types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
@@ -488,7 +488,7 @@ func init() {
 type ClusterAgentVmIssue struct {
 	ClusterAgentAgentIssue
 
-	Vm types.ManagedObjectReference `xml:"vm"`
+	Vm types.ManagedObjectReference `xml:"vm" json:"vm"`
 }
 
 func init() {
@@ -542,9 +542,9 @@ func init() {
 }
 
 type CreateAgencyRequestType struct {
-	This             types.ManagedObjectReference `xml:"_this"`
-	AgencyConfigInfo BaseAgencyConfigInfo         `xml:"agencyConfigInfo,typeattr"`
-	InitialGoalState string                       `xml:"initialGoalState"`
+	This             types.ManagedObjectReference `xml:"_this" json:"_this"`
+	AgencyConfigInfo BaseAgencyConfigInfo         `xml:"agencyConfigInfo,typeattr" json:"agencyConfigInfo"`
+	InitialGoalState string                       `xml:"initialGoalState" json:"initialGoalState"`
 }
 
 func init() {
@@ -552,7 +552,7 @@ func init() {
 }
 
 type CreateAgencyResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type DestroyAgency DestroyAgencyRequestType
@@ -562,7 +562,7 @@ func init() {
 }
 
 type DestroyAgencyRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -575,7 +575,7 @@ type DestroyAgencyResponse struct {
 type DisabledClusterFault struct {
 	EamAppFault
 
-	DisabledComputeResource []types.ManagedObjectReference `xml:"disabledComputeResource,omitempty"`
+	DisabledComputeResource []types.ManagedObjectReference `xml:"disabledComputeResource,omitempty" json:"disabledComputeResource,omitempty"`
 }
 
 func init() {
@@ -675,10 +675,10 @@ func init() {
 type EamObjectRuntimeInfo struct {
 	types.DynamicData
 
-	Status    string                       `xml:"status"`
-	Issue     []BaseIssue                  `xml:"issue,omitempty,typeattr"`
-	GoalState string                       `xml:"goalState"`
-	Entity    types.ManagedObjectReference `xml:"entity"`
+	Status    string                       `xml:"status" json:"status"`
+	Issue     []BaseIssue                  `xml:"issue,omitempty,typeattr" json:"issue,omitempty"`
+	GoalState string                       `xml:"goalState" json:"goalState"`
+	Entity    types.ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
 func init() {
@@ -730,11 +730,11 @@ func init() {
 type ExtensibleIssue struct {
 	Issue
 
-	TypeId   string                        `xml:"typeId"`
-	Argument []types.KeyAnyValue           `xml:"argument,omitempty"`
-	Target   *types.ManagedObjectReference `xml:"target,omitempty"`
-	Agent    *types.ManagedObjectReference `xml:"agent,omitempty"`
-	Agency   *types.ManagedObjectReference `xml:"agency,omitempty"`
+	TypeId   string                        `xml:"typeId" json:"typeId"`
+	Argument []types.KeyAnyValue           `xml:"argument,omitempty" json:"argument,omitempty"`
+	Target   *types.ManagedObjectReference `xml:"target,omitempty" json:"target,omitempty"`
+	Agent    *types.ManagedObjectReference `xml:"agent,omitempty" json:"agent,omitempty"`
+	Agency   *types.ManagedObjectReference `xml:"agency,omitempty" json:"agency,omitempty"`
 }
 
 func init() {
@@ -748,7 +748,7 @@ func init() {
 }
 
 type GetMaintenanceModePolicyRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -756,7 +756,7 @@ func init() {
 }
 
 type GetMaintenanceModePolicyResponse struct {
-	Returnval string `xml:"returnval"`
+	Returnval string `xml:"returnval" json:"returnval"`
 }
 
 type HostInMaintenanceMode struct {
@@ -778,7 +778,7 @@ func init() {
 type HostIssue struct {
 	Issue
 
-	Host types.ManagedObjectReference `xml:"host"`
+	Host types.ManagedObjectReference `xml:"host" json:"host"`
 }
 
 func init() {
@@ -812,7 +812,7 @@ func init() {
 type InsufficientIpAddresses struct {
 	VmPoweredOff
 
-	Network types.ManagedObjectReference `xml:"network"`
+	Network types.ManagedObjectReference `xml:"network" json:"network"`
 }
 
 func init() {
@@ -870,7 +870,7 @@ func init() {
 type InvalidAgencyScope struct {
 	EamFault
 
-	UnknownComputeResource []types.ManagedObjectReference `xml:"unknownComputeResource,omitempty"`
+	UnknownComputeResource []types.ManagedObjectReference `xml:"unknownComputeResource,omitempty" json:"unknownComputeResource,omitempty"`
 }
 
 func init() {
@@ -886,8 +886,8 @@ func init() {
 type InvalidAgentConfiguration struct {
 	EamFault
 
-	InvalidAgentConfiguration *AgentConfigInfo `xml:"invalidAgentConfiguration,omitempty"`
-	InvalidField              string           `xml:"invalidField,omitempty"`
+	InvalidAgentConfiguration *AgentConfigInfo `xml:"invalidAgentConfiguration,omitempty" json:"invalidAgentConfiguration,omitempty"`
+	InvalidField              string           `xml:"invalidField,omitempty" json:"invalidField,omitempty"`
 }
 
 func init() {
@@ -903,7 +903,7 @@ func init() {
 type InvalidConfig struct {
 	VmIssue
 
-	Error types.AnyType `xml:"error,typeattr"`
+	Error types.AnyType `xml:"error,typeattr" json:"error"`
 }
 
 func init() {
@@ -913,11 +913,11 @@ func init() {
 type InvalidUrl struct {
 	EamFault
 
-	Url               string `xml:"url"`
-	MalformedUrl      bool   `xml:"malformedUrl"`
-	UnknownHost       bool   `xml:"unknownHost"`
-	ConnectionRefused bool   `xml:"connectionRefused"`
-	ResponseCode      int32  `xml:"responseCode,omitempty"`
+	Url               string `xml:"url" json:"url"`
+	MalformedUrl      bool   `xml:"malformedUrl" json:"malformedUrl"`
+	UnknownHost       bool   `xml:"unknownHost" json:"unknownHost"`
+	ConnectionRefused bool   `xml:"connectionRefused" json:"connectionRefused"`
+	ResponseCode      int32  `xml:"responseCode,omitempty" json:"responseCode,omitempty"`
 }
 
 func init() {
@@ -933,9 +933,9 @@ func init() {
 type Issue struct {
 	types.DynamicData
 
-	Key         int32     `xml:"key"`
-	Description string    `xml:"description"`
-	Time        time.Time `xml:"time"`
+	Key         int32     `xml:"key" json:"key"`
+	Description string    `xml:"description" json:"description"`
+	Time        time.Time `xml:"time" json:"time"`
 }
 
 func init() {
@@ -957,7 +957,7 @@ func init() {
 }
 
 type MarkAsAvailableRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -970,7 +970,7 @@ type MarkAsAvailableResponse struct {
 type MissingAgentIpPool struct {
 	VmPoweredOff
 
-	Network types.ManagedObjectReference `xml:"network"`
+	Network types.ManagedObjectReference `xml:"network" json:"network"`
 }
 
 func init() {
@@ -1018,8 +1018,8 @@ func init() {
 type NoCustomAgentVmDatastore struct {
 	NoAgentVmDatastore
 
-	CustomAgentVmDatastore     []types.ManagedObjectReference `xml:"customAgentVmDatastore"`
-	CustomAgentVmDatastoreName []string                       `xml:"customAgentVmDatastoreName"`
+	CustomAgentVmDatastore     []types.ManagedObjectReference `xml:"customAgentVmDatastore" json:"customAgentVmDatastore"`
+	CustomAgentVmDatastoreName []string                       `xml:"customAgentVmDatastoreName" json:"customAgentVmDatastoreName"`
 }
 
 func init() {
@@ -1029,8 +1029,8 @@ func init() {
 type NoCustomAgentVmNetwork struct {
 	NoAgentVmNetwork
 
-	CustomAgentVmNetwork     []types.ManagedObjectReference `xml:"customAgentVmNetwork"`
-	CustomAgentVmNetworkName []string                       `xml:"customAgentVmNetworkName"`
+	CustomAgentVmNetwork     []types.ManagedObjectReference `xml:"customAgentVmNetwork" json:"customAgentVmNetwork"`
+	CustomAgentVmNetworkName []string                       `xml:"customAgentVmNetworkName" json:"customAgentVmNetworkName"`
 }
 
 func init() {
@@ -1086,7 +1086,7 @@ func init() {
 type OvfInvalidFormat struct {
 	VmNotDeployed
 
-	Error []types.LocalizedMethodFault `xml:"error,omitempty"`
+	Error []types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
@@ -1096,7 +1096,7 @@ func init() {
 type OvfInvalidProperty struct {
 	AgentIssue
 
-	Error []types.LocalizedMethodFault `xml:"error,omitempty"`
+	Error []types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
@@ -1106,9 +1106,9 @@ func init() {
 type PersonalityAgencyCannotConfigureSolutions struct {
 	PersonalityAgencyPMIssue
 
-	Cr                types.ManagedObjectReference `xml:"cr"`
-	SolutionsToModify []string                     `xml:"solutionsToModify,omitempty"`
-	SolutionsToRemove []string                     `xml:"solutionsToRemove,omitempty"`
+	Cr                types.ManagedObjectReference `xml:"cr" json:"cr"`
+	SolutionsToModify []string                     `xml:"solutionsToModify,omitempty" json:"solutionsToModify,omitempty"`
+	SolutionsToRemove []string                     `xml:"solutionsToRemove,omitempty" json:"solutionsToRemove,omitempty"`
 }
 
 func init() {
@@ -1118,7 +1118,7 @@ func init() {
 type PersonalityAgencyCannotUploadDepot struct {
 	PersonalityAgencyDepotIssue
 
-	LocalDepotUrl string `xml:"localDepotUrl"`
+	LocalDepotUrl string `xml:"localDepotUrl" json:"localDepotUrl"`
 }
 
 func init() {
@@ -1128,7 +1128,7 @@ func init() {
 type PersonalityAgencyDepotIssue struct {
 	PersonalityAgencyPMIssue
 
-	RemoteDepotUrl string `xml:"remoteDepotUrl"`
+	RemoteDepotUrl string `xml:"remoteDepotUrl" json:"remoteDepotUrl"`
 }
 
 func init() {
@@ -1198,7 +1198,7 @@ func init() {
 }
 
 type QueryAgencyRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1206,7 +1206,7 @@ func init() {
 }
 
 type QueryAgencyResponse struct {
-	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty"`
+	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryAgent QueryAgentRequestType
@@ -1216,7 +1216,7 @@ func init() {
 }
 
 type QueryAgentRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1224,7 +1224,7 @@ func init() {
 }
 
 type QueryAgentResponse struct {
-	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty"`
+	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryConfig QueryConfigRequestType
@@ -1234,7 +1234,7 @@ func init() {
 }
 
 type QueryConfigRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1242,7 +1242,7 @@ func init() {
 }
 
 type QueryConfigResponse struct {
-	Returnval BaseAgencyConfigInfo `xml:"returnval,typeattr"`
+	Returnval BaseAgencyConfigInfo `xml:"returnval,typeattr" json:"returnval"`
 }
 
 type QueryIssue QueryIssueRequestType
@@ -1252,8 +1252,8 @@ func init() {
 }
 
 type QueryIssueRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	IssueKey []int32                      `xml:"issueKey,omitempty"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	IssueKey []int32                      `xml:"issueKey,omitempty" json:"issueKey,omitempty"`
 }
 
 func init() {
@@ -1261,7 +1261,7 @@ func init() {
 }
 
 type QueryIssueResponse struct {
-	Returnval []BaseIssue `xml:"returnval,omitempty,typeattr"`
+	Returnval []BaseIssue `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QuerySolutionId QuerySolutionIdRequestType
@@ -1271,7 +1271,7 @@ func init() {
 }
 
 type QuerySolutionIdRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1279,7 +1279,7 @@ func init() {
 }
 
 type QuerySolutionIdResponse struct {
-	Returnval string `xml:"returnval"`
+	Returnval string `xml:"returnval" json:"returnval"`
 }
 
 type RegisterAgentVm RegisterAgentVmRequestType
@@ -1289,8 +1289,8 @@ func init() {
 }
 
 type RegisterAgentVmRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	AgentVm types.ManagedObjectReference `xml:"agentVm"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	AgentVm types.ManagedObjectReference `xml:"agentVm" json:"agentVm"`
 }
 
 func init() {
@@ -1298,7 +1298,7 @@ func init() {
 }
 
 type RegisterAgentVmResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type Resolve ResolveRequestType
@@ -1314,7 +1314,7 @@ func init() {
 }
 
 type ResolveAllRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1325,8 +1325,8 @@ type ResolveAllResponse struct {
 }
 
 type ResolveRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	IssueKey []int32                      `xml:"issueKey"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	IssueKey []int32                      `xml:"issueKey" json:"issueKey"`
 }
 
 func init() {
@@ -1334,7 +1334,7 @@ func init() {
 }
 
 type ResolveResponse struct {
-	Returnval []int32 `xml:"returnval,omitempty"`
+	Returnval []int32 `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type ScanForUnknownAgentVm ScanForUnknownAgentVmRequestType
@@ -1344,7 +1344,7 @@ func init() {
 }
 
 type ScanForUnknownAgentVmRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1361,8 +1361,8 @@ func init() {
 }
 
 type SetMaintenanceModePolicyRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Policy string                       `xml:"policy"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Policy string                       `xml:"policy" json:"policy"`
 }
 
 func init() {
@@ -1379,7 +1379,7 @@ func init() {
 }
 
 type UninstallRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1392,7 +1392,7 @@ type UninstallResponse struct {
 type UnknownAgentVm struct {
 	HostIssue
 
-	Vm types.ManagedObjectReference `xml:"vm"`
+	Vm types.ManagedObjectReference `xml:"vm" json:"vm"`
 }
 
 func init() {
@@ -1406,8 +1406,8 @@ func init() {
 }
 
 type UnregisterAgentVmRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	AgentVm types.ManagedObjectReference `xml:"agentVm"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	AgentVm types.ManagedObjectReference `xml:"agentVm" json:"agentVm"`
 }
 
 func init() {
@@ -1424,8 +1424,8 @@ func init() {
 }
 
 type UpdateRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Config BaseAgencyConfigInfo         `xml:"config,typeattr"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Config BaseAgencyConfigInfo         `xml:"config,typeattr" json:"config"`
 }
 
 func init() {
@@ -1510,7 +1510,7 @@ func init() {
 type VibRequiresManualInstallation struct {
 	VibIssue
 
-	Bulletin []string `xml:"bulletin"`
+	Bulletin []string `xml:"bulletin" json:"bulletin"`
 }
 
 func init() {
@@ -1520,7 +1520,7 @@ func init() {
 type VibRequiresManualUninstallation struct {
 	VibIssue
 
-	Bulletin []string `xml:"bulletin"`
+	Bulletin []string `xml:"bulletin" json:"bulletin"`
 }
 
 func init() {
@@ -1530,13 +1530,13 @@ func init() {
 type VibVibInfo struct {
 	types.DynamicData
 
-	Id           string                  `xml:"id"`
-	Name         string                  `xml:"name"`
-	Version      string                  `xml:"version"`
-	Vendor       string                  `xml:"vendor"`
-	Summary      string                  `xml:"summary"`
-	SoftwareTags *VibVibInfoSoftwareTags `xml:"softwareTags,omitempty"`
-	ReleaseDate  time.Time               `xml:"releaseDate"`
+	Id           string                  `xml:"id" json:"id"`
+	Name         string                  `xml:"name" json:"name"`
+	Version      string                  `xml:"version" json:"version"`
+	Vendor       string                  `xml:"vendor" json:"vendor"`
+	Summary      string                  `xml:"summary" json:"summary"`
+	SoftwareTags *VibVibInfoSoftwareTags `xml:"softwareTags,omitempty" json:"softwareTags,omitempty"`
+	ReleaseDate  time.Time               `xml:"releaseDate" json:"releaseDate"`
 }
 
 func init() {
@@ -1546,7 +1546,7 @@ func init() {
 type VibVibInfoSoftwareTags struct {
 	types.DynamicData
 
-	Tags []string `xml:"tags,omitempty"`
+	Tags []string `xml:"tags,omitempty" json:"tags,omitempty"`
 }
 
 func init() {
@@ -1556,7 +1556,7 @@ func init() {
 type VmCorrupted struct {
 	VmIssue
 
-	MissingFile string `xml:"missingFile,omitempty"`
+	MissingFile string `xml:"missingFile,omitempty" json:"missingFile,omitempty"`
 }
 
 func init() {
@@ -1574,7 +1574,7 @@ func init() {
 type VmIssue struct {
 	AgentIssue
 
-	Vm types.ManagedObjectReference `xml:"vm"`
+	Vm types.ManagedObjectReference `xml:"vm" json:"vm"`
 }
 
 func init() {
@@ -1640,8 +1640,8 @@ func init() {
 type VmWrongFolder struct {
 	VmIssue
 
-	CurrentFolder  types.ManagedObjectReference `xml:"currentFolder"`
-	RequiredFolder types.ManagedObjectReference `xml:"requiredFolder"`
+	CurrentFolder  types.ManagedObjectReference `xml:"currentFolder" json:"currentFolder"`
+	RequiredFolder types.ManagedObjectReference `xml:"requiredFolder" json:"requiredFolder"`
 }
 
 func init() {
@@ -1651,8 +1651,8 @@ func init() {
 type VmWrongResourcePool struct {
 	VmIssue
 
-	CurrentResourcePool  types.ManagedObjectReference `xml:"currentResourcePool"`
-	RequiredResourcePool types.ManagedObjectReference `xml:"requiredResourcePool"`
+	CurrentResourcePool  types.ManagedObjectReference `xml:"currentResourcePool" json:"currentResourcePool"`
+	RequiredResourcePool types.ManagedObjectReference `xml:"requiredResourcePool" json:"requiredResourcePool"`
 }
 
 func init() {

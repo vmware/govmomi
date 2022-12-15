@@ -162,7 +162,7 @@ load test_helper
   assert_equal "VirtualE1000e" $(collapse_ws $type)
 
   # validate each NIC has a unique MAC
-  macs=$(govc device.info -vm "$vm" -json ethernet-* | jq -r .Devices[].MacAddress | uniq | wc -l)
+  macs=$(govc device.info -vm "$vm" -json ethernet-* | jq -r .Devices[].macAddress | uniq | wc -l)
   assert_equal 2 "$macs"
 }
 
@@ -222,10 +222,10 @@ load test_helper
   info=$(govc dvs.portgroup.info "$id" | grep VlanId: | uniq | grep 3123)
   [ -n "$info" ]
 
-  info=$(govc dvs.portgroup.info -json "$id" | jq  '.Port[].Config.Setting.Vlan | select(.VlanId == 3123)')
+  info=$(govc dvs.portgroup.info -json "$id" | jq  '.Port[].config.setting.vlan | select(.vlanId == 3123)')
   [ -n "$info" ]
 
-  info=$(govc dvs.portgroup.info -json "$id" | jq  '.Port[].Config.Setting.Vlan | select(.VlanId == 7777)')
+  info=$(govc dvs.portgroup.info -json "$id" | jq  '.Port[].config.setting.Vlan | select(.vlanId == 7777)')
   [ -z "$info" ]
 
   run govc object.destroy "network/${id}-ExternalNetwork" "network/${id}-InternalNetwork" "network/${id}"

@@ -232,6 +232,7 @@ class Simple
         if pointer_type?
           prefix += "*"
           self.need_omitempty = false
+          self.json_omitempty = true
         end
         t = "int32"
       when "boolean"
@@ -239,11 +240,13 @@ class Simple
         if !slice? && optional?
           prefix += "*"
           self.need_omitempty = false
+          self.json_omitempty = true
         end
       when "long"
         if pointer_type?
           prefix += "*"
           self.need_omitempty = false
+          self.json_omitempty = true
         end
         t = "int64"
       when "dateTime"
@@ -251,6 +254,7 @@ class Simple
         if !slice? && optional?
           prefix += "*"
           self.need_omitempty = false
+          self.json_omitempty = true
         end
       when "anyType"
         pkg = ""
@@ -306,12 +310,25 @@ class Simple
     @need_omitempty = v
   end
 
+  def json_omitempty=(v)
+    @json_omitempty = v
+  end
+
   def need_omitempty?
     var_type # HACK: trigger setting need_omitempty if necessary
     if @need_omitempty.nil?
       @need_omitempty = optional?
     else
       @need_omitempty
+    end
+  end
+
+  def json_omitempty?
+    var_type # HACK: trigger setting json_omitempty if necessary
+    if @json_omitempty.nil?
+      @json_omitempty = need_omitempty?
+    else
+      @json_omitempty
     end
   end
 
@@ -370,10 +387,16 @@ class Element < Simple
   end
 
   def dump_field(io)
-    tag = name
-    tag += ",omitempty" if need_omitempty?
-    tag += ",typeattr" if need_typeattr?
-    io.print "%s %s `xml:\"%s\"`\n" % [var_name, var_type, tag]
+    xmlTag = name
+    xmlTag += ",omitempty" if need_omitempty?
+    xmlTag += ",typeattr" if need_typeattr?
+    tag = "%s %s `xml:\"%s\"" % [var_name, var_type, xmlTag]
+
+    jsonTag = name
+    jsonTag += ",omitempty" if json_omitempty?
+    tag += " json:\"%s\"" % [jsonTag]
+
+    io.print "%s`\n" % [tag]
   end
 
   def peek(type=nil)
@@ -389,10 +412,17 @@ end
 
 class Attribute < Simple
   def dump_field(io)
-    tag = name
-    tag += ",omitempty" if need_omitempty?
-    tag += ",attr"
-    io.print "%s %s `xml:\"%s\"`\n" % [var_name, var_type, tag]
+    xmlTag = name
+    xmlTag += ",omitempty" if need_omitempty?
+    xmlTag += ",attr"
+    xmlTag += ",typeattr" if need_typeattr?
+    tag = "%s %s `xml:\"%s\"" % [var_name, var_type, xmlTag]
+
+    jsonTag = name
+    jsonTag += ",omitempty" if json_omitempty?
+    tag += " json:\"%s\"" % [jsonTag]
+
+    io.print "%s`\n" % [tag]
   end
 end
 
@@ -430,7 +460,7 @@ class ComplexType < Simple
       # HACK DELUXE(PN)
       extension = @node.at_xpath(".//xsd:extension")
       type = extension["base"].split(":", 2)[1]
-      io.print "Value %s `xml:\",chardata\"`\n" % type
+      io.print "Value %s `xml:\",chardata\" json:\"value\"`\n" % type
     end
 
     def peek
@@ -541,7 +571,8 @@ class ComplexType < Simple
   end
 
   def dump(io)
-    io.print "type %s struct {\n" % ucfirst(name)
+    ucfirstName = ucfirst(name)
+    io.print "type %s struct {\n" % ucfirstName
     klass.dump(io) if klass
     io.print "}\n\n"
   end

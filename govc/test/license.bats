@@ -10,19 +10,19 @@ verify_evaluation() {
 }
 
 get_key() {
-  jq ".[] | select(.LicenseKey == \"$1\")"
+  jq ".[] | select(.licenseKey == \"$1\")"
 }
 
 get_property() {
-  jq -r ".Properties[] | select(.Key == \"$1\") | .Value"
+  jq -r ".properties[] | select(.key == \"$1\") | .value"
 }
 
 get_label() {
-  govc license.ls -json | jq -r ".[] | select(.LicenseKey == \"$1\") | .Labels[] | select(.Key == \"$2\") | .Value"
+  govc license.ls -json | jq -r ".[] | select(.licenseKey == \"$1\") | .labels[] | select(.key == \"$2\") | .value"
 }
 
 get_nlabel() {
-  govc license.ls -json | jq ".[] | select(.LicenseKey == \"$1\") | .Labels[].Key" | wc -l
+  govc license.ls -json | jq ".[] | select(.licenseKey == \"$1\") | .labels[].key" | wc -l
 }
 
 @test "license.add" {

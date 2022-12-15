@@ -184,7 +184,7 @@ load test_helper
   library_id="$output"
 
   # link ovf/ova to datastore so we can test library.import with an http source
-  dir=$(govc datastore.info -json | jq -r .Datastores[].Info.Url)
+  dir=$(govc datastore.info -json | jq -r .Datastores[].Info.url)
   ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
 
   run govc library.import -pull my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"

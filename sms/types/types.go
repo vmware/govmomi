@@ -26,11 +26,11 @@ import (
 type AlarmFilter struct {
 	types.DynamicData
 
-	AlarmStatus string          `xml:"alarmStatus,omitempty"`
-	AlarmType   string          `xml:"alarmType,omitempty"`
-	EntityType  string          `xml:"entityType,omitempty"`
-	EntityId    []types.AnyType `xml:"entityId,omitempty,typeattr"`
-	PageMarker  string          `xml:"pageMarker,omitempty"`
+	AlarmStatus string          `xml:"alarmStatus,omitempty" json:"alarmStatus,omitempty"`
+	AlarmType   string          `xml:"alarmType,omitempty" json:"alarmType,omitempty"`
+	EntityType  string          `xml:"entityType,omitempty" json:"entityType,omitempty"`
+	EntityId    []types.AnyType `xml:"entityId,omitempty,typeattr" json:"entityId,omitempty"`
+	PageMarker  string          `xml:"pageMarker,omitempty" json:"pageMarker,omitempty"`
 }
 
 func init() {
@@ -40,8 +40,8 @@ func init() {
 type AlarmResult struct {
 	types.DynamicData
 
-	StorageAlarm []StorageAlarm `xml:"storageAlarm,omitempty"`
-	PageMarker   string         `xml:"pageMarker,omitempty"`
+	StorageAlarm []StorageAlarm `xml:"storageAlarm,omitempty" json:"storageAlarm,omitempty"`
+	PageMarker   string         `xml:"pageMarker,omitempty" json:"pageMarker,omitempty"`
 }
 
 func init() {
@@ -63,7 +63,7 @@ func init() {
 }
 
 type ArrayOfBackingStoragePool struct {
-	BackingStoragePool []BackingStoragePool `xml:"BackingStoragePool,omitempty"`
+	BackingStoragePool []BackingStoragePool `xml:"BackingStoragePool,omitempty" json:"BackingStoragePool,omitempty"`
 }
 
 func init() {
@@ -71,7 +71,7 @@ func init() {
 }
 
 type ArrayOfDatastoreBackingPoolMapping struct {
-	DatastoreBackingPoolMapping []DatastoreBackingPoolMapping `xml:"DatastoreBackingPoolMapping,omitempty"`
+	DatastoreBackingPoolMapping []DatastoreBackingPoolMapping `xml:"DatastoreBackingPoolMapping,omitempty" json:"DatastoreBackingPoolMapping,omitempty"`
 }
 
 func init() {
@@ -79,7 +79,7 @@ func init() {
 }
 
 type ArrayOfDatastorePair struct {
-	DatastorePair []DatastorePair `xml:"DatastorePair,omitempty"`
+	DatastorePair []DatastorePair `xml:"DatastorePair,omitempty" json:"DatastorePair,omitempty"`
 }
 
 func init() {
@@ -87,7 +87,7 @@ func init() {
 }
 
 type ArrayOfDeviceId struct {
-	DeviceId []BaseDeviceId `xml:"DeviceId,omitempty,typeattr"`
+	DeviceId []BaseDeviceId `xml:"DeviceId,omitempty,typeattr" json:"DeviceId,omitempty"`
 }
 
 func init() {
@@ -95,7 +95,7 @@ func init() {
 }
 
 type ArrayOfFaultDomainProviderMapping struct {
-	FaultDomainProviderMapping []FaultDomainProviderMapping `xml:"FaultDomainProviderMapping,omitempty"`
+	FaultDomainProviderMapping []FaultDomainProviderMapping `xml:"FaultDomainProviderMapping,omitempty" json:"FaultDomainProviderMapping,omitempty"`
 }
 
 func init() {
@@ -103,7 +103,7 @@ func init() {
 }
 
 type ArrayOfGroupOperationResult struct {
-	GroupOperationResult []BaseGroupOperationResult `xml:"GroupOperationResult,omitempty,typeattr"`
+	GroupOperationResult []BaseGroupOperationResult `xml:"GroupOperationResult,omitempty,typeattr" json:"GroupOperationResult,omitempty"`
 }
 
 func init() {
@@ -111,7 +111,7 @@ func init() {
 }
 
 type ArrayOfNameValuePair struct {
-	NameValuePair []NameValuePair `xml:"NameValuePair,omitempty"`
+	NameValuePair []NameValuePair `xml:"NameValuePair,omitempty" json:"NameValuePair,omitempty"`
 }
 
 func init() {
@@ -119,7 +119,7 @@ func init() {
 }
 
 type ArrayOfPointInTimeReplicaInfo struct {
-	PointInTimeReplicaInfo []PointInTimeReplicaInfo `xml:"PointInTimeReplicaInfo,omitempty"`
+	PointInTimeReplicaInfo []PointInTimeReplicaInfo `xml:"PointInTimeReplicaInfo,omitempty" json:"PointInTimeReplicaInfo,omitempty"`
 }
 
 func init() {
@@ -127,7 +127,7 @@ func init() {
 }
 
 type ArrayOfPolicyAssociation struct {
-	PolicyAssociation []PolicyAssociation `xml:"PolicyAssociation,omitempty"`
+	PolicyAssociation []PolicyAssociation `xml:"PolicyAssociation,omitempty" json:"PolicyAssociation,omitempty"`
 }
 
 func init() {
@@ -135,7 +135,7 @@ func init() {
 }
 
 type ArrayOfQueryReplicationPeerResult struct {
-	QueryReplicationPeerResult []QueryReplicationPeerResult `xml:"QueryReplicationPeerResult,omitempty"`
+	QueryReplicationPeerResult []QueryReplicationPeerResult `xml:"QueryReplicationPeerResult,omitempty" json:"QueryReplicationPeerResult,omitempty"`
 }
 
 func init() {
@@ -143,7 +143,7 @@ func init() {
 }
 
 type ArrayOfRecoveredDevice struct {
-	RecoveredDevice []RecoveredDevice `xml:"RecoveredDevice,omitempty"`
+	RecoveredDevice []RecoveredDevice `xml:"RecoveredDevice,omitempty" json:"RecoveredDevice,omitempty"`
 }
 
 func init() {
@@ -151,7 +151,7 @@ func init() {
 }
 
 type ArrayOfRecoveredDiskInfo struct {
-	RecoveredDiskInfo []RecoveredDiskInfo `xml:"RecoveredDiskInfo,omitempty"`
+	RecoveredDiskInfo []RecoveredDiskInfo `xml:"RecoveredDiskInfo,omitempty" json:"RecoveredDiskInfo,omitempty"`
 }
 
 func init() {
@@ -159,7 +159,7 @@ func init() {
 }
 
 type ArrayOfRelatedStorageArray struct {
-	RelatedStorageArray []RelatedStorageArray `xml:"RelatedStorageArray,omitempty"`
+	RelatedStorageArray []RelatedStorageArray `xml:"RelatedStorageArray,omitempty" json:"RelatedStorageArray,omitempty"`
 }
 
 func init() {
@@ -167,7 +167,7 @@ func init() {
 }
 
 type ArrayOfReplicaIntervalQueryResult struct {
-	ReplicaIntervalQueryResult []ReplicaIntervalQueryResult `xml:"ReplicaIntervalQueryResult,omitempty"`
+	ReplicaIntervalQueryResult []ReplicaIntervalQueryResult `xml:"ReplicaIntervalQueryResult,omitempty" json:"ReplicaIntervalQueryResult,omitempty"`
 }
 
 func init() {
@@ -175,7 +175,7 @@ func init() {
 }
 
 type ArrayOfReplicationGroupData struct {
-	ReplicationGroupData []ReplicationGroupData `xml:"ReplicationGroupData,omitempty"`
+	ReplicationGroupData []ReplicationGroupData `xml:"ReplicationGroupData,omitempty" json:"ReplicationGroupData,omitempty"`
 }
 
 func init() {
@@ -183,7 +183,7 @@ func init() {
 }
 
 type ArrayOfReplicationTargetInfo struct {
-	ReplicationTargetInfo []ReplicationTargetInfo `xml:"ReplicationTargetInfo,omitempty"`
+	ReplicationTargetInfo []ReplicationTargetInfo `xml:"ReplicationTargetInfo,omitempty" json:"ReplicationTargetInfo,omitempty"`
 }
 
 func init() {
@@ -191,7 +191,7 @@ func init() {
 }
 
 type ArrayOfSmsProviderInfo struct {
-	SmsProviderInfo []BaseSmsProviderInfo `xml:"SmsProviderInfo,omitempty,typeattr"`
+	SmsProviderInfo []BaseSmsProviderInfo `xml:"SmsProviderInfo,omitempty,typeattr" json:"SmsProviderInfo,omitempty"`
 }
 
 func init() {
@@ -199,7 +199,7 @@ func init() {
 }
 
 type ArrayOfSourceGroupMemberInfo struct {
-	SourceGroupMemberInfo []SourceGroupMemberInfo `xml:"SourceGroupMemberInfo,omitempty"`
+	SourceGroupMemberInfo []SourceGroupMemberInfo `xml:"SourceGroupMemberInfo,omitempty" json:"SourceGroupMemberInfo,omitempty"`
 }
 
 func init() {
@@ -207,7 +207,7 @@ func init() {
 }
 
 type ArrayOfStorageAlarm struct {
-	StorageAlarm []StorageAlarm `xml:"StorageAlarm,omitempty"`
+	StorageAlarm []StorageAlarm `xml:"StorageAlarm,omitempty" json:"StorageAlarm,omitempty"`
 }
 
 func init() {
@@ -215,7 +215,7 @@ func init() {
 }
 
 type ArrayOfStorageArray struct {
-	StorageArray []StorageArray `xml:"StorageArray,omitempty"`
+	StorageArray []StorageArray `xml:"StorageArray,omitempty" json:"StorageArray,omitempty"`
 }
 
 func init() {
@@ -223,7 +223,7 @@ func init() {
 }
 
 type ArrayOfStorageContainer struct {
-	StorageContainer []StorageContainer `xml:"StorageContainer,omitempty"`
+	StorageContainer []StorageContainer `xml:"StorageContainer,omitempty" json:"StorageContainer,omitempty"`
 }
 
 func init() {
@@ -231,7 +231,7 @@ func init() {
 }
 
 type ArrayOfStorageFileSystem struct {
-	StorageFileSystem []StorageFileSystem `xml:"StorageFileSystem,omitempty"`
+	StorageFileSystem []StorageFileSystem `xml:"StorageFileSystem,omitempty" json:"StorageFileSystem,omitempty"`
 }
 
 func init() {
@@ -239,7 +239,7 @@ func init() {
 }
 
 type ArrayOfStorageFileSystemInfo struct {
-	StorageFileSystemInfo []StorageFileSystemInfo `xml:"StorageFileSystemInfo,omitempty"`
+	StorageFileSystemInfo []StorageFileSystemInfo `xml:"StorageFileSystemInfo,omitempty" json:"StorageFileSystemInfo,omitempty"`
 }
 
 func init() {
@@ -247,7 +247,7 @@ func init() {
 }
 
 type ArrayOfStorageLun struct {
-	StorageLun []StorageLun `xml:"StorageLun,omitempty"`
+	StorageLun []StorageLun `xml:"StorageLun,omitempty" json:"StorageLun,omitempty"`
 }
 
 func init() {
@@ -255,7 +255,7 @@ func init() {
 }
 
 type ArrayOfStoragePort struct {
-	StoragePort []BaseStoragePort `xml:"StoragePort,omitempty,typeattr"`
+	StoragePort []BaseStoragePort `xml:"StoragePort,omitempty,typeattr" json:"StoragePort,omitempty"`
 }
 
 func init() {
@@ -263,7 +263,7 @@ func init() {
 }
 
 type ArrayOfStorageProcessor struct {
-	StorageProcessor []StorageProcessor `xml:"StorageProcessor,omitempty"`
+	StorageProcessor []StorageProcessor `xml:"StorageProcessor,omitempty" json:"StorageProcessor,omitempty"`
 }
 
 func init() {
@@ -271,7 +271,7 @@ func init() {
 }
 
 type ArrayOfSupportedVendorModelMapping struct {
-	SupportedVendorModelMapping []SupportedVendorModelMapping `xml:"SupportedVendorModelMapping,omitempty"`
+	SupportedVendorModelMapping []SupportedVendorModelMapping `xml:"SupportedVendorModelMapping,omitempty" json:"SupportedVendorModelMapping,omitempty"`
 }
 
 func init() {
@@ -279,7 +279,7 @@ func init() {
 }
 
 type ArrayOfTargetDeviceId struct {
-	TargetDeviceId []TargetDeviceId `xml:"TargetDeviceId,omitempty"`
+	TargetDeviceId []TargetDeviceId `xml:"TargetDeviceId,omitempty" json:"TargetDeviceId,omitempty"`
 }
 
 func init() {
@@ -287,7 +287,7 @@ func init() {
 }
 
 type ArrayOfTargetGroupMemberInfo struct {
-	TargetGroupMemberInfo []BaseTargetGroupMemberInfo `xml:"TargetGroupMemberInfo,omitempty,typeattr"`
+	TargetGroupMemberInfo []BaseTargetGroupMemberInfo `xml:"TargetGroupMemberInfo,omitempty,typeattr" json:"TargetGroupMemberInfo,omitempty"`
 }
 
 func init() {
@@ -311,11 +311,11 @@ func init() {
 type BackingConfig struct {
 	types.DynamicData
 
-	ThinProvisionBackingIdentifier  string `xml:"thinProvisionBackingIdentifier,omitempty"`
-	DeduplicationBackingIdentifier  string `xml:"deduplicationBackingIdentifier,omitempty"`
-	AutoTieringEnabled              *bool  `xml:"autoTieringEnabled"`
-	DeduplicationEfficiency         int64  `xml:"deduplicationEfficiency,omitempty"`
-	PerformanceOptimizationInterval int64  `xml:"performanceOptimizationInterval,omitempty"`
+	ThinProvisionBackingIdentifier  string `xml:"thinProvisionBackingIdentifier,omitempty" json:"thinProvisionBackingIdentifier,omitempty"`
+	DeduplicationBackingIdentifier  string `xml:"deduplicationBackingIdentifier,omitempty" json:"deduplicationBackingIdentifier,omitempty"`
+	AutoTieringEnabled              *bool  `xml:"autoTieringEnabled" json:"autoTieringEnabled,omitempty"`
+	DeduplicationEfficiency         int64  `xml:"deduplicationEfficiency,omitempty" json:"deduplicationEfficiency,omitempty"`
+	PerformanceOptimizationInterval int64  `xml:"performanceOptimizationInterval,omitempty" json:"performanceOptimizationInterval,omitempty"`
 }
 
 func init() {
@@ -325,10 +325,10 @@ func init() {
 type BackingStoragePool struct {
 	types.DynamicData
 
-	Uuid          string `xml:"uuid"`
-	Type          string `xml:"type"`
-	CapacityInMB  int64  `xml:"capacityInMB"`
-	UsedSpaceInMB int64  `xml:"usedSpaceInMB"`
+	Uuid          string `xml:"uuid" json:"uuid"`
+	Type          string `xml:"type" json:"type"`
+	CapacityInMB  int64  `xml:"capacityInMB" json:"capacityInMB"`
+	UsedSpaceInMB int64  `xml:"usedSpaceInMB" json:"usedSpaceInMB"`
 }
 
 func init() {
@@ -338,7 +338,7 @@ func init() {
 type CertificateAuthorityFault struct {
 	ProviderRegistrationFault
 
-	FaultCode int32 `xml:"faultCode"`
+	FaultCode int32 `xml:"faultCode" json:"faultCode"`
 }
 
 func init() {
@@ -368,7 +368,7 @@ func init() {
 type CertificateNotTrusted struct {
 	ProviderRegistrationFault
 
-	Certificate string `xml:"certificate"`
+	Certificate string `xml:"certificate" json:"certificate"`
 }
 
 func init() {
@@ -384,7 +384,7 @@ func init() {
 type CertificateRefreshFailed struct {
 	types.MethodFault
 
-	ProviderId []string `xml:"providerId,omitempty"`
+	ProviderId []string `xml:"providerId,omitempty" json:"providerId,omitempty"`
 }
 
 func init() {
@@ -414,8 +414,8 @@ func init() {
 type DatastoreBackingPoolMapping struct {
 	types.DynamicData
 
-	Datastore          []types.ManagedObjectReference `xml:"datastore"`
-	BackingStoragePool []BackingStoragePool           `xml:"backingStoragePool,omitempty"`
+	Datastore          []types.ManagedObjectReference `xml:"datastore" json:"datastore"`
+	BackingStoragePool []BackingStoragePool           `xml:"backingStoragePool,omitempty" json:"backingStoragePool,omitempty"`
 }
 
 func init() {
@@ -425,8 +425,8 @@ func init() {
 type DatastorePair struct {
 	types.DynamicData
 
-	Datastore1 types.ManagedObjectReference `xml:"datastore1"`
-	Datastore2 types.ManagedObjectReference `xml:"datastore2"`
+	Datastore1 types.ManagedObjectReference `xml:"datastore1" json:"datastore1"`
+	Datastore2 types.ManagedObjectReference `xml:"datastore2" json:"datastore2"`
 }
 
 func init() {
@@ -444,8 +444,8 @@ func init() {
 type DrsMigrationCapabilityResult struct {
 	types.DynamicData
 
-	RecommendedDatastorePair    []DatastorePair `xml:"recommendedDatastorePair,omitempty"`
-	NonRecommendedDatastorePair []DatastorePair `xml:"nonRecommendedDatastorePair,omitempty"`
+	RecommendedDatastorePair    []DatastorePair `xml:"recommendedDatastorePair,omitempty" json:"recommendedDatastorePair,omitempty"`
+	NonRecommendedDatastorePair []DatastorePair `xml:"nonRecommendedDatastorePair,omitempty" json:"nonRecommendedDatastorePair,omitempty"`
 }
 
 func init() {
@@ -469,8 +469,8 @@ func init() {
 type EntityReference struct {
 	types.DynamicData
 
-	Id   string                    `xml:"id"`
-	Type EntityReferenceEntityType `xml:"type,omitempty"`
+	Id   string                    `xml:"id" json:"id"`
+	Type EntityReferenceEntityType `xml:"type,omitempty" json:"type,omitempty"`
 }
 
 func init() {
@@ -480,10 +480,10 @@ func init() {
 type FailoverParam struct {
 	types.DynamicData
 
-	IsPlanned                   bool                   `xml:"isPlanned"`
-	CheckOnly                   bool                   `xml:"checkOnly"`
-	ReplicationGroupsToFailover []ReplicationGroupData `xml:"replicationGroupsToFailover,omitempty"`
-	PolicyAssociations          []PolicyAssociation    `xml:"policyAssociations,omitempty"`
+	IsPlanned                   bool                   `xml:"isPlanned" json:"isPlanned"`
+	CheckOnly                   bool                   `xml:"checkOnly" json:"checkOnly"`
+	ReplicationGroupsToFailover []ReplicationGroupData `xml:"replicationGroupsToFailover,omitempty" json:"replicationGroupsToFailover,omitempty"`
+	PolicyAssociations          []PolicyAssociation    `xml:"policyAssociations,omitempty" json:"policyAssociations,omitempty"`
 }
 
 func init() {
@@ -491,8 +491,8 @@ func init() {
 }
 
 type FailoverReplicationGroupRequestType struct {
-	This          types.ManagedObjectReference `xml:"_this"`
-	FailoverParam BaseFailoverParam            `xml:"failoverParam,typeattr"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	FailoverParam BaseFailoverParam            `xml:"failoverParam,typeattr" json:"failoverParam"`
 }
 
 func init() {
@@ -506,17 +506,17 @@ func init() {
 }
 
 type FailoverReplicationGroup_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type FailoverSuccessResult struct {
 	GroupOperationResult
 
-	NewState            string                `xml:"newState"`
-	PitId               *PointInTimeReplicaId `xml:"pitId,omitempty"`
-	PitIdBeforeFailover *PointInTimeReplicaId `xml:"pitIdBeforeFailover,omitempty"`
-	RecoveredDeviceInfo []RecoveredDevice     `xml:"recoveredDeviceInfo,omitempty"`
-	TimeStamp           *time.Time            `xml:"timeStamp"`
+	NewState            string                `xml:"newState" json:"newState"`
+	PitId               *PointInTimeReplicaId `xml:"pitId,omitempty" json:"pitId,omitempty"`
+	PitIdBeforeFailover *PointInTimeReplicaId `xml:"pitIdBeforeFailover,omitempty" json:"pitIdBeforeFailover,omitempty"`
+	RecoveredDeviceInfo []RecoveredDevice     `xml:"recoveredDeviceInfo,omitempty" json:"recoveredDeviceInfo,omitempty"`
+	TimeStamp           *time.Time            `xml:"timeStamp" json:"timeStamp,omitempty"`
 }
 
 func init() {
@@ -526,7 +526,7 @@ func init() {
 type FaultDomainFilter struct {
 	types.DynamicData
 
-	ProviderId string `xml:"providerId,omitempty"`
+	ProviderId string `xml:"providerId,omitempty" json:"providerId,omitempty"`
 }
 
 func init() {
@@ -536,11 +536,11 @@ func init() {
 type FaultDomainInfo struct {
 	types.FaultDomainId
 
-	Name           string                        `xml:"name,omitempty"`
-	Description    string                        `xml:"description,omitempty"`
-	StorageArrayId string                        `xml:"storageArrayId,omitempty"`
-	Children       []types.FaultDomainId         `xml:"children,omitempty"`
-	Provider       *types.ManagedObjectReference `xml:"provider,omitempty"`
+	Name           string                        `xml:"name,omitempty" json:"name,omitempty"`
+	Description    string                        `xml:"description,omitempty" json:"description,omitempty"`
+	StorageArrayId string                        `xml:"storageArrayId,omitempty" json:"storageArrayId,omitempty"`
+	Children       []types.FaultDomainId         `xml:"children,omitempty" json:"children,omitempty"`
+	Provider       *types.ManagedObjectReference `xml:"provider,omitempty" json:"provider,omitempty"`
 }
 
 func init() {
@@ -550,8 +550,8 @@ func init() {
 type FaultDomainProviderMapping struct {
 	types.DynamicData
 
-	ActiveProvider types.ManagedObjectReference `xml:"activeProvider"`
-	FaultDomainId  []types.FaultDomainId        `xml:"faultDomainId,omitempty"`
+	ActiveProvider types.ManagedObjectReference `xml:"activeProvider" json:"activeProvider"`
+	FaultDomainId  []types.FaultDomainId        `xml:"faultDomainId,omitempty" json:"faultDomainId,omitempty"`
 }
 
 func init() {
@@ -561,8 +561,8 @@ func init() {
 type FcStoragePort struct {
 	StoragePort
 
-	PortWwn string `xml:"portWwn"`
-	NodeWwn string `xml:"nodeWwn"`
+	PortWwn string `xml:"portWwn" json:"portWwn"`
+	NodeWwn string `xml:"nodeWwn" json:"nodeWwn"`
 }
 
 func init() {
@@ -572,8 +572,8 @@ func init() {
 type FcoeStoragePort struct {
 	StoragePort
 
-	PortWwn string `xml:"portWwn"`
-	NodeWwn string `xml:"nodeWwn"`
+	PortWwn string `xml:"portWwn" json:"portWwn"`
+	NodeWwn string `xml:"nodeWwn" json:"nodeWwn"`
 }
 
 func init() {
@@ -583,7 +583,7 @@ func init() {
 type GroupErrorResult struct {
 	GroupOperationResult
 
-	Error []types.LocalizedMethodFault `xml:"error"`
+	Error []types.LocalizedMethodFault `xml:"error" json:"error"`
 }
 
 func init() {
@@ -593,7 +593,7 @@ func init() {
 type GroupInfo struct {
 	types.DynamicData
 
-	GroupId types.ReplicationGroupId `xml:"groupId"`
+	GroupId types.ReplicationGroupId `xml:"groupId" json:"groupId"`
 }
 
 func init() {
@@ -603,8 +603,8 @@ func init() {
 type GroupOperationResult struct {
 	types.DynamicData
 
-	GroupId types.ReplicationGroupId     `xml:"groupId"`
-	Warning []types.LocalizedMethodFault `xml:"warning,omitempty"`
+	GroupId types.ReplicationGroupId     `xml:"groupId" json:"groupId"`
+	Warning []types.LocalizedMethodFault `xml:"warning,omitempty" json:"warning,omitempty"`
 }
 
 func init() {
@@ -614,7 +614,7 @@ func init() {
 type InactiveProvider struct {
 	types.MethodFault
 
-	Mapping []FaultDomainProviderMapping `xml:"mapping,omitempty"`
+	Mapping []FaultDomainProviderMapping `xml:"mapping,omitempty" json:"mapping,omitempty"`
 }
 
 func init() {
@@ -644,7 +644,7 @@ func init() {
 type InvalidCertificate struct {
 	ProviderRegistrationFault
 
-	Certificate string `xml:"certificate"`
+	Certificate string `xml:"certificate" json:"certificate"`
 }
 
 func init() {
@@ -688,8 +688,8 @@ func init() {
 type InvalidReplicationState struct {
 	SmsReplicationFault
 
-	DesiredState []string `xml:"desiredState,omitempty"`
-	CurrentState string   `xml:"currentState"`
+	DesiredState []string `xml:"desiredState,omitempty" json:"desiredState,omitempty"`
+	CurrentState string   `xml:"currentState" json:"currentState"`
 }
 
 func init() {
@@ -705,7 +705,7 @@ func init() {
 type InvalidSession struct {
 	types.NoPermission
 
-	SessionCookie string `xml:"sessionCookie"`
+	SessionCookie string `xml:"sessionCookie" json:"sessionCookie"`
 }
 
 func init() {
@@ -721,7 +721,7 @@ func init() {
 type InvalidUrl struct {
 	ProviderRegistrationFault
 
-	Url string `xml:"url"`
+	Url string `xml:"url" json:"url"`
 }
 
 func init() {
@@ -737,7 +737,7 @@ func init() {
 type IscsiStoragePort struct {
 	StoragePort
 
-	Identifier string `xml:"identifier"`
+	Identifier string `xml:"identifier" json:"identifier"`
 }
 
 func init() {
@@ -747,8 +747,8 @@ func init() {
 type LunHbaAssociation struct {
 	types.DynamicData
 
-	CanonicalName string                     `xml:"canonicalName"`
-	Hba           []types.HostHostBusAdapter `xml:"hba"`
+	CanonicalName string                     `xml:"canonicalName" json:"canonicalName"`
+	Hba           []types.HostHostBusAdapter `xml:"hba" json:"hba"`
 }
 
 func init() {
@@ -772,8 +772,8 @@ func init() {
 type NameValuePair struct {
 	types.DynamicData
 
-	ParameterName  string `xml:"parameterName"`
-	ParameterValue string `xml:"parameterValue"`
+	ParameterName  string `xml:"parameterName" json:"parameterName"`
+	ParameterValue string `xml:"parameterValue" json:"parameterValue"`
 }
 
 func init() {
@@ -811,7 +811,7 @@ func init() {
 type NoValidReplica struct {
 	SmsReplicationFault
 
-	DeviceId BaseDeviceId `xml:"deviceId,omitempty,typeattr"`
+	DeviceId BaseDeviceId `xml:"deviceId,omitempty,typeattr" json:"deviceId,omitempty"`
 }
 
 func init() {
@@ -855,7 +855,7 @@ func init() {
 type PointInTimeReplicaId struct {
 	types.DynamicData
 
-	Id string `xml:"id"`
+	Id string `xml:"id" json:"id"`
 }
 
 func init() {
@@ -865,10 +865,10 @@ func init() {
 type PointInTimeReplicaInfo struct {
 	types.DynamicData
 
-	Id        PointInTimeReplicaId `xml:"id"`
-	PitName   string               `xml:"pitName"`
-	TimeStamp time.Time            `xml:"timeStamp"`
-	Tags      []string             `xml:"tags,omitempty"`
+	Id        PointInTimeReplicaId `xml:"id" json:"id"`
+	PitName   string               `xml:"pitName" json:"pitName"`
+	TimeStamp time.Time            `xml:"timeStamp" json:"timeStamp"`
+	Tags      []string             `xml:"tags,omitempty" json:"tags,omitempty"`
 }
 
 func init() {
@@ -878,9 +878,9 @@ func init() {
 type PolicyAssociation struct {
 	types.DynamicData
 
-	Id        BaseDeviceId                 `xml:"id,typeattr"`
-	PolicyId  string                       `xml:"policyId"`
-	Datastore types.ManagedObjectReference `xml:"datastore"`
+	Id        BaseDeviceId                 `xml:"id,typeattr" json:"id"`
+	PolicyId  string                       `xml:"policyId" json:"policyId"`
+	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -888,8 +888,8 @@ func init() {
 }
 
 type PrepareFailoverReplicationGroupRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty" json:"groupId,omitempty"`
 }
 
 func init() {
@@ -903,14 +903,14 @@ func init() {
 }
 
 type PrepareFailoverReplicationGroup_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type PromoteParam struct {
 	types.DynamicData
 
-	IsPlanned                  bool                       `xml:"isPlanned"`
-	ReplicationGroupsToPromote []types.ReplicationGroupId `xml:"replicationGroupsToPromote,omitempty"`
+	IsPlanned                  bool                       `xml:"isPlanned" json:"isPlanned"`
+	ReplicationGroupsToPromote []types.ReplicationGroupId `xml:"replicationGroupsToPromote,omitempty" json:"replicationGroupsToPromote,omitempty"`
 }
 
 func init() {
@@ -918,8 +918,8 @@ func init() {
 }
 
 type PromoteReplicationGroupRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	PromoteParam PromoteParam                 `xml:"promoteParam"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	PromoteParam PromoteParam                 `xml:"promoteParam" json:"promoteParam"`
 }
 
 func init() {
@@ -933,7 +933,7 @@ func init() {
 }
 
 type PromoteReplicationGroup_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type ProviderBusy struct {
@@ -981,11 +981,11 @@ func init() {
 type ProviderOutOfProvisioningResource struct {
 	types.MethodFault
 
-	ProvisioningResourceId string `xml:"provisioningResourceId"`
-	AvailableBefore        int64  `xml:"availableBefore,omitempty"`
-	AvailableAfter         int64  `xml:"availableAfter,omitempty"`
-	Total                  int64  `xml:"total,omitempty"`
-	IsTransient            *bool  `xml:"isTransient"`
+	ProvisioningResourceId string `xml:"provisioningResourceId" json:"provisioningResourceId"`
+	AvailableBefore        int64  `xml:"availableBefore,omitempty" json:"availableBefore,omitempty"`
+	AvailableAfter         int64  `xml:"availableAfter,omitempty" json:"availableAfter,omitempty"`
+	Total                  int64  `xml:"total,omitempty" json:"total,omitempty"`
+	IsTransient            *bool  `xml:"isTransient" json:"isTransient,omitempty"`
 }
 
 func init() {
@@ -1089,7 +1089,7 @@ func init() {
 }
 
 type QueryAboutInfoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1097,7 +1097,7 @@ func init() {
 }
 
 type QueryAboutInfoResponse struct {
-	Returnval SmsAboutInfo `xml:"returnval"`
+	Returnval SmsAboutInfo `xml:"returnval" json:"returnval"`
 }
 
 type QueryActiveAlarm QueryActiveAlarmRequestType
@@ -1107,8 +1107,8 @@ func init() {
 }
 
 type QueryActiveAlarmRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	AlarmFilter *AlarmFilter                 `xml:"alarmFilter,omitempty"`
+	This        types.ManagedObjectReference `xml:"_this" json:"_this"`
+	AlarmFilter *AlarmFilter                 `xml:"alarmFilter,omitempty" json:"alarmFilter,omitempty"`
 }
 
 func init() {
@@ -1116,7 +1116,7 @@ func init() {
 }
 
 type QueryActiveAlarmResponse struct {
-	Returnval *AlarmResult `xml:"returnval,omitempty"`
+	Returnval *AlarmResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryArray QueryArrayRequestType
@@ -1132,8 +1132,8 @@ func init() {
 }
 
 type QueryArrayAssociatedWithLunRequestType struct {
-	This          types.ManagedObjectReference `xml:"_this"`
-	CanonicalName string                       `xml:"canonicalName"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	CanonicalName string                       `xml:"canonicalName" json:"canonicalName"`
 }
 
 func init() {
@@ -1141,12 +1141,12 @@ func init() {
 }
 
 type QueryArrayAssociatedWithLunResponse struct {
-	Returnval *StorageArray `xml:"returnval,omitempty"`
+	Returnval *StorageArray `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryArrayRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	ProviderId []string                     `xml:"providerId,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProviderId []string                     `xml:"providerId,omitempty" json:"providerId,omitempty"`
 }
 
 func init() {
@@ -1154,7 +1154,7 @@ func init() {
 }
 
 type QueryArrayResponse struct {
-	Returnval []StorageArray `xml:"returnval,omitempty"`
+	Returnval []StorageArray `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryAssociatedBackingStoragePool QueryAssociatedBackingStoragePoolRequestType
@@ -1164,9 +1164,9 @@ func init() {
 }
 
 type QueryAssociatedBackingStoragePoolRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	EntityId   string                       `xml:"entityId,omitempty"`
-	EntityType string                       `xml:"entityType,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	EntityId   string                       `xml:"entityId,omitempty" json:"entityId,omitempty"`
+	EntityType string                       `xml:"entityType,omitempty" json:"entityType,omitempty"`
 }
 
 func init() {
@@ -1174,7 +1174,7 @@ func init() {
 }
 
 type QueryAssociatedBackingStoragePoolResponse struct {
-	Returnval []BackingStoragePool `xml:"returnval,omitempty"`
+	Returnval []BackingStoragePool `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryDatastoreBackingPoolMapping QueryDatastoreBackingPoolMappingRequestType
@@ -1184,8 +1184,8 @@ func init() {
 }
 
 type QueryDatastoreBackingPoolMappingRequestType struct {
-	This      types.ManagedObjectReference   `xml:"_this"`
-	Datastore []types.ManagedObjectReference `xml:"datastore"`
+	This      types.ManagedObjectReference   `xml:"_this" json:"_this"`
+	Datastore []types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -1193,7 +1193,7 @@ func init() {
 }
 
 type QueryDatastoreBackingPoolMappingResponse struct {
-	Returnval []DatastoreBackingPoolMapping `xml:"returnval"`
+	Returnval []DatastoreBackingPoolMapping `xml:"returnval" json:"returnval"`
 }
 
 type QueryDatastoreCapability QueryDatastoreCapabilityRequestType
@@ -1203,8 +1203,8 @@ func init() {
 }
 
 type QueryDatastoreCapabilityRequestType struct {
-	This      types.ManagedObjectReference `xml:"_this"`
-	Datastore types.ManagedObjectReference `xml:"datastore"`
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -1212,7 +1212,7 @@ func init() {
 }
 
 type QueryDatastoreCapabilityResponse struct {
-	Returnval *StorageCapability `xml:"returnval,omitempty"`
+	Returnval *StorageCapability `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryDrsMigrationCapabilityForPerformance QueryDrsMigrationCapabilityForPerformanceRequestType
@@ -1228,8 +1228,8 @@ func init() {
 }
 
 type QueryDrsMigrationCapabilityForPerformanceExRequestType struct {
-	This      types.ManagedObjectReference   `xml:"_this"`
-	Datastore []types.ManagedObjectReference `xml:"datastore"`
+	This      types.ManagedObjectReference   `xml:"_this" json:"_this"`
+	Datastore []types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -1237,13 +1237,13 @@ func init() {
 }
 
 type QueryDrsMigrationCapabilityForPerformanceExResponse struct {
-	Returnval DrsMigrationCapabilityResult `xml:"returnval"`
+	Returnval DrsMigrationCapabilityResult `xml:"returnval" json:"returnval"`
 }
 
 type QueryDrsMigrationCapabilityForPerformanceRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	SrcDatastore types.ManagedObjectReference `xml:"srcDatastore"`
-	DstDatastore types.ManagedObjectReference `xml:"dstDatastore"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	SrcDatastore types.ManagedObjectReference `xml:"srcDatastore" json:"srcDatastore"`
+	DstDatastore types.ManagedObjectReference `xml:"dstDatastore" json:"dstDatastore"`
 }
 
 func init() {
@@ -1251,7 +1251,7 @@ func init() {
 }
 
 type QueryDrsMigrationCapabilityForPerformanceResponse struct {
-	Returnval bool `xml:"returnval"`
+	Returnval bool `xml:"returnval" json:"returnval"`
 }
 
 type QueryExecutionFault struct {
@@ -1275,8 +1275,8 @@ func init() {
 }
 
 type QueryFaultDomainRequestType struct {
-	This   types.ManagedObjectReference `xml:"_this"`
-	Filter *FaultDomainFilter           `xml:"filter,omitempty"`
+	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Filter *FaultDomainFilter           `xml:"filter,omitempty" json:"filter,omitempty"`
 }
 
 func init() {
@@ -1284,7 +1284,7 @@ func init() {
 }
 
 type QueryFaultDomainResponse struct {
-	Returnval []types.FaultDomainId `xml:"returnval,omitempty"`
+	Returnval []types.FaultDomainId `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryFileSystemAssociatedWithArray QueryFileSystemAssociatedWithArrayRequestType
@@ -1294,8 +1294,8 @@ func init() {
 }
 
 type QueryFileSystemAssociatedWithArrayRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1303,7 +1303,7 @@ func init() {
 }
 
 type QueryFileSystemAssociatedWithArrayResponse struct {
-	Returnval []StorageFileSystem `xml:"returnval,omitempty"`
+	Returnval []StorageFileSystem `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryHostAssociatedWithLun QueryHostAssociatedWithLunRequestType
@@ -1313,9 +1313,9 @@ func init() {
 }
 
 type QueryHostAssociatedWithLunRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	Scsi3Id string                       `xml:"scsi3Id"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Scsi3Id string                       `xml:"scsi3Id" json:"scsi3Id"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1323,7 +1323,7 @@ func init() {
 }
 
 type QueryHostAssociatedWithLunResponse struct {
-	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty"`
+	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryLunAssociatedWithArray QueryLunAssociatedWithArrayRequestType
@@ -1333,8 +1333,8 @@ func init() {
 }
 
 type QueryLunAssociatedWithArrayRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1342,7 +1342,7 @@ func init() {
 }
 
 type QueryLunAssociatedWithArrayResponse struct {
-	Returnval []StorageLun `xml:"returnval,omitempty"`
+	Returnval []StorageLun `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryLunAssociatedWithPort QueryLunAssociatedWithPortRequestType
@@ -1352,9 +1352,9 @@ func init() {
 }
 
 type QueryLunAssociatedWithPortRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	PortId  string                       `xml:"portId"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	PortId  string                       `xml:"portId" json:"portId"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1362,7 +1362,7 @@ func init() {
 }
 
 type QueryLunAssociatedWithPortResponse struct {
-	Returnval []StorageLun `xml:"returnval,omitempty"`
+	Returnval []StorageLun `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryNfsDatastoreAssociatedWithFileSystem QueryNfsDatastoreAssociatedWithFileSystemRequestType
@@ -1372,9 +1372,9 @@ func init() {
 }
 
 type QueryNfsDatastoreAssociatedWithFileSystemRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	FileSystemId string                       `xml:"fileSystemId"`
-	ArrayId      string                       `xml:"arrayId"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	FileSystemId string                       `xml:"fileSystemId" json:"fileSystemId"`
+	ArrayId      string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1382,14 +1382,14 @@ func init() {
 }
 
 type QueryNfsDatastoreAssociatedWithFileSystemResponse struct {
-	Returnval *types.ManagedObjectReference `xml:"returnval,omitempty"`
+	Returnval *types.ManagedObjectReference `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryNotSupported struct {
 	types.InvalidArgument
 
-	EntityType        EntityReferenceEntityType `xml:"entityType,omitempty"`
-	RelatedEntityType EntityReferenceEntityType `xml:"relatedEntityType"`
+	EntityType        EntityReferenceEntityType `xml:"entityType,omitempty" json:"entityType,omitempty"`
+	RelatedEntityType EntityReferenceEntityType `xml:"relatedEntityType" json:"relatedEntityType"`
 }
 
 func init() {
@@ -1411,10 +1411,10 @@ func init() {
 type QueryPointInTimeReplicaParam struct {
 	types.DynamicData
 
-	ReplicaTimeQueryParam *ReplicaQueryIntervalParam `xml:"replicaTimeQueryParam,omitempty"`
-	PitName               string                     `xml:"pitName,omitempty"`
-	Tags                  []string                   `xml:"tags,omitempty"`
-	PreferDetails         *bool                      `xml:"preferDetails"`
+	ReplicaTimeQueryParam *ReplicaQueryIntervalParam `xml:"replicaTimeQueryParam,omitempty" json:"replicaTimeQueryParam,omitempty"`
+	PitName               string                     `xml:"pitName,omitempty" json:"pitName,omitempty"`
+	Tags                  []string                   `xml:"tags,omitempty" json:"tags,omitempty"`
+	PreferDetails         *bool                      `xml:"preferDetails" json:"preferDetails,omitempty"`
 }
 
 func init() {
@@ -1422,9 +1422,9 @@ func init() {
 }
 
 type QueryPointInTimeReplicaRequestType struct {
-	This       types.ManagedObjectReference  `xml:"_this"`
-	GroupId    []types.ReplicationGroupId    `xml:"groupId,omitempty"`
-	QueryParam *QueryPointInTimeReplicaParam `xml:"queryParam,omitempty"`
+	This       types.ManagedObjectReference  `xml:"_this" json:"_this"`
+	GroupId    []types.ReplicationGroupId    `xml:"groupId,omitempty" json:"groupId,omitempty"`
+	QueryParam *QueryPointInTimeReplicaParam `xml:"queryParam,omitempty" json:"queryParam,omitempty"`
 }
 
 func init() {
@@ -1432,13 +1432,13 @@ func init() {
 }
 
 type QueryPointInTimeReplicaResponse struct {
-	Returnval []BaseGroupOperationResult `xml:"returnval,omitempty,typeattr"`
+	Returnval []BaseGroupOperationResult `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryPointInTimeReplicaSuccessResult struct {
 	GroupOperationResult
 
-	ReplicaInfo []PointInTimeReplicaInfo `xml:"replicaInfo,omitempty"`
+	ReplicaInfo []PointInTimeReplicaInfo `xml:"replicaInfo,omitempty" json:"replicaInfo,omitempty"`
 }
 
 func init() {
@@ -1448,7 +1448,7 @@ func init() {
 type QueryPointInTimeReplicaSummaryResult struct {
 	GroupOperationResult
 
-	IntervalResults []ReplicaIntervalQueryResult `xml:"intervalResults,omitempty"`
+	IntervalResults []ReplicaIntervalQueryResult `xml:"intervalResults,omitempty" json:"intervalResults,omitempty"`
 }
 
 func init() {
@@ -1462,8 +1462,8 @@ func init() {
 }
 
 type QueryPortAssociatedWithArrayRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1471,7 +1471,7 @@ func init() {
 }
 
 type QueryPortAssociatedWithArrayResponse struct {
-	Returnval []BaseStoragePort `xml:"returnval,omitempty,typeattr"`
+	Returnval []BaseStoragePort `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryPortAssociatedWithLun QueryPortAssociatedWithLunRequestType
@@ -1481,9 +1481,9 @@ func init() {
 }
 
 type QueryPortAssociatedWithLunRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	Scsi3Id string                       `xml:"scsi3Id"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Scsi3Id string                       `xml:"scsi3Id" json:"scsi3Id"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1491,7 +1491,7 @@ func init() {
 }
 
 type QueryPortAssociatedWithLunResponse struct {
-	Returnval BaseStoragePort `xml:"returnval,omitempty,typeattr"`
+	Returnval BaseStoragePort `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryPortAssociatedWithProcessor QueryPortAssociatedWithProcessorRequestType
@@ -1501,9 +1501,9 @@ func init() {
 }
 
 type QueryPortAssociatedWithProcessorRequestType struct {
-	This        types.ManagedObjectReference `xml:"_this"`
-	ProcessorId string                       `xml:"processorId"`
-	ArrayId     string                       `xml:"arrayId"`
+	This        types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProcessorId string                       `xml:"processorId" json:"processorId"`
+	ArrayId     string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1511,7 +1511,7 @@ func init() {
 }
 
 type QueryPortAssociatedWithProcessorResponse struct {
-	Returnval []BaseStoragePort `xml:"returnval,omitempty,typeattr"`
+	Returnval []BaseStoragePort `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryProcessorAssociatedWithArray QueryProcessorAssociatedWithArrayRequestType
@@ -1521,8 +1521,8 @@ func init() {
 }
 
 type QueryProcessorAssociatedWithArrayRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1530,7 +1530,7 @@ func init() {
 }
 
 type QueryProcessorAssociatedWithArrayResponse struct {
-	Returnval []StorageProcessor `xml:"returnval,omitempty"`
+	Returnval []StorageProcessor `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryProvider QueryProviderRequestType
@@ -1546,7 +1546,7 @@ func init() {
 }
 
 type QueryProviderInfoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1554,11 +1554,11 @@ func init() {
 }
 
 type QueryProviderInfoResponse struct {
-	Returnval BaseSmsProviderInfo `xml:"returnval,typeattr"`
+	Returnval BaseSmsProviderInfo `xml:"returnval,typeattr" json:"returnval"`
 }
 
 type QueryProviderRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1566,7 +1566,7 @@ func init() {
 }
 
 type QueryProviderResponse struct {
-	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty"`
+	Returnval []types.ManagedObjectReference `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryReplicationGroup QueryReplicationGroupRequestType
@@ -1582,8 +1582,8 @@ func init() {
 }
 
 type QueryReplicationGroupInfoRequestType struct {
-	This     types.ManagedObjectReference `xml:"_this"`
-	RgFilter ReplicationGroupFilter       `xml:"rgFilter"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	RgFilter ReplicationGroupFilter       `xml:"rgFilter" json:"rgFilter"`
 }
 
 func init() {
@@ -1591,12 +1591,12 @@ func init() {
 }
 
 type QueryReplicationGroupInfoResponse struct {
-	Returnval []BaseGroupOperationResult `xml:"returnval,omitempty,typeattr"`
+	Returnval []BaseGroupOperationResult `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryReplicationGroupRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty" json:"groupId,omitempty"`
 }
 
 func init() {
@@ -1604,13 +1604,13 @@ func init() {
 }
 
 type QueryReplicationGroupResponse struct {
-	Returnval []BaseGroupOperationResult `xml:"returnval,omitempty,typeattr"`
+	Returnval []BaseGroupOperationResult `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryReplicationGroupSuccessResult struct {
 	GroupOperationResult
 
-	RgInfo BaseGroupInfo `xml:"rgInfo,typeattr"`
+	RgInfo BaseGroupInfo `xml:"rgInfo,typeattr" json:"rgInfo"`
 }
 
 func init() {
@@ -1624,8 +1624,8 @@ func init() {
 }
 
 type QueryReplicationPeerRequestType struct {
-	This          types.ManagedObjectReference `xml:"_this"`
-	FaultDomainId []types.FaultDomainId        `xml:"faultDomainId,omitempty"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	FaultDomainId []types.FaultDomainId        `xml:"faultDomainId,omitempty" json:"faultDomainId,omitempty"`
 }
 
 func init() {
@@ -1633,16 +1633,16 @@ func init() {
 }
 
 type QueryReplicationPeerResponse struct {
-	Returnval []QueryReplicationPeerResult `xml:"returnval,omitempty"`
+	Returnval []QueryReplicationPeerResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryReplicationPeerResult struct {
 	types.DynamicData
 
-	SourceDomain types.FaultDomainId          `xml:"sourceDomain"`
-	TargetDomain []types.FaultDomainId        `xml:"targetDomain,omitempty"`
-	Error        []types.LocalizedMethodFault `xml:"error,omitempty"`
-	Warning      []types.LocalizedMethodFault `xml:"warning,omitempty"`
+	SourceDomain types.FaultDomainId          `xml:"sourceDomain" json:"sourceDomain"`
+	TargetDomain []types.FaultDomainId        `xml:"targetDomain,omitempty" json:"targetDomain,omitempty"`
+	Error        []types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
+	Warning      []types.LocalizedMethodFault `xml:"warning,omitempty" json:"warning,omitempty"`
 }
 
 func init() {
@@ -1656,7 +1656,7 @@ func init() {
 }
 
 type QuerySessionManagerRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1664,7 +1664,7 @@ func init() {
 }
 
 type QuerySessionManagerResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type QuerySmsTaskInfo QuerySmsTaskInfoRequestType
@@ -1674,7 +1674,7 @@ func init() {
 }
 
 type QuerySmsTaskInfoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1682,7 +1682,7 @@ func init() {
 }
 
 type QuerySmsTaskInfoResponse struct {
-	Returnval SmsTaskInfo `xml:"returnval"`
+	Returnval SmsTaskInfo `xml:"returnval" json:"returnval"`
 }
 
 type QuerySmsTaskResult QuerySmsTaskResultRequestType
@@ -1692,7 +1692,7 @@ func init() {
 }
 
 type QuerySmsTaskResultRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1700,7 +1700,7 @@ func init() {
 }
 
 type QuerySmsTaskResultResponse struct {
-	Returnval types.AnyType `xml:"returnval,omitempty,typeattr"`
+	Returnval types.AnyType `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
 type QueryStorageContainer QueryStorageContainerRequestType
@@ -1710,8 +1710,8 @@ func init() {
 }
 
 type QueryStorageContainerRequestType struct {
-	This          types.ManagedObjectReference `xml:"_this"`
-	ContainerSpec *StorageContainerSpec        `xml:"containerSpec,omitempty"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ContainerSpec *StorageContainerSpec        `xml:"containerSpec,omitempty" json:"containerSpec,omitempty"`
 }
 
 func init() {
@@ -1719,7 +1719,7 @@ func init() {
 }
 
 type QueryStorageContainerResponse struct {
-	Returnval *StorageContainerResult `xml:"returnval,omitempty"`
+	Returnval *StorageContainerResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type QueryStorageManager QueryStorageManagerRequestType
@@ -1729,7 +1729,7 @@ func init() {
 }
 
 type QueryStorageManagerRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -1737,7 +1737,7 @@ func init() {
 }
 
 type QueryStorageManagerResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type QueryVmfsDatastoreAssociatedWithLun QueryVmfsDatastoreAssociatedWithLunRequestType
@@ -1747,9 +1747,9 @@ func init() {
 }
 
 type QueryVmfsDatastoreAssociatedWithLunRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	Scsi3Id string                       `xml:"scsi3Id"`
-	ArrayId string                       `xml:"arrayId"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Scsi3Id string                       `xml:"scsi3Id" json:"scsi3Id"`
+	ArrayId string                       `xml:"arrayId" json:"arrayId"`
 }
 
 func init() {
@@ -1757,20 +1757,20 @@ func init() {
 }
 
 type QueryVmfsDatastoreAssociatedWithLunResponse struct {
-	Returnval *types.ManagedObjectReference `xml:"returnval,omitempty"`
+	Returnval *types.ManagedObjectReference `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
 type RecoveredDevice struct {
 	types.DynamicData
 
-	TargetDeviceId    *ReplicaId                   `xml:"targetDeviceId,omitempty"`
-	RecoveredDeviceId BaseDeviceId                 `xml:"recoveredDeviceId,omitempty,typeattr"`
-	SourceDeviceId    BaseDeviceId                 `xml:"sourceDeviceId,typeattr"`
-	Info              []string                     `xml:"info,omitempty"`
-	Datastore         types.ManagedObjectReference `xml:"datastore"`
-	RecoveredDiskInfo []RecoveredDiskInfo          `xml:"recoveredDiskInfo,omitempty"`
-	Error             *types.LocalizedMethodFault  `xml:"error,omitempty"`
-	Warnings          []types.LocalizedMethodFault `xml:"warnings,omitempty"`
+	TargetDeviceId    *ReplicaId                   `xml:"targetDeviceId,omitempty" json:"targetDeviceId,omitempty"`
+	RecoveredDeviceId BaseDeviceId                 `xml:"recoveredDeviceId,omitempty,typeattr" json:"recoveredDeviceId,omitempty"`
+	SourceDeviceId    BaseDeviceId                 `xml:"sourceDeviceId,typeattr" json:"sourceDeviceId"`
+	Info              []string                     `xml:"info,omitempty" json:"info,omitempty"`
+	Datastore         types.ManagedObjectReference `xml:"datastore" json:"datastore"`
+	RecoveredDiskInfo []RecoveredDiskInfo          `xml:"recoveredDiskInfo,omitempty" json:"recoveredDiskInfo,omitempty"`
+	Error             *types.LocalizedMethodFault  `xml:"error,omitempty" json:"error,omitempty"`
+	Warnings          []types.LocalizedMethodFault `xml:"warnings,omitempty" json:"warnings,omitempty"`
 }
 
 func init() {
@@ -1780,9 +1780,9 @@ func init() {
 type RecoveredDiskInfo struct {
 	types.DynamicData
 
-	DeviceKey int32  `xml:"deviceKey"`
-	DsUrl     string `xml:"dsUrl"`
-	DiskPath  string `xml:"diskPath"`
+	DeviceKey int32  `xml:"deviceKey" json:"deviceKey"`
+	DsUrl     string `xml:"dsUrl" json:"dsUrl"`
+	DiskPath  string `xml:"diskPath" json:"diskPath"`
 }
 
 func init() {
@@ -1792,7 +1792,7 @@ func init() {
 type RecoveredTargetGroupMemberInfo struct {
 	TargetGroupMemberInfo
 
-	RecoveredDeviceId BaseDeviceId `xml:"recoveredDeviceId,omitempty,typeattr"`
+	RecoveredDeviceId BaseDeviceId `xml:"recoveredDeviceId,omitempty,typeattr" json:"recoveredDeviceId,omitempty"`
 }
 
 func init() {
@@ -1800,8 +1800,8 @@ func init() {
 }
 
 type RegisterProviderRequestType struct {
-	This         types.ManagedObjectReference `xml:"_this"`
-	ProviderSpec BaseSmsProviderSpec          `xml:"providerSpec,typeattr"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProviderSpec BaseSmsProviderSpec          `xml:"providerSpec,typeattr" json:"providerSpec"`
 }
 
 func init() {
@@ -1815,16 +1815,16 @@ func init() {
 }
 
 type RegisterProvider_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type RelatedStorageArray struct {
 	types.DynamicData
 
-	ArrayId    string `xml:"arrayId"`
-	Active     bool   `xml:"active"`
-	Manageable bool   `xml:"manageable"`
-	Priority   int32  `xml:"priority"`
+	ArrayId    string `xml:"arrayId" json:"arrayId"`
+	Active     bool   `xml:"active" json:"active"`
+	Manageable bool   `xml:"manageable" json:"manageable"`
+	Priority   int32  `xml:"priority" json:"priority"`
 }
 
 func init() {
@@ -1834,7 +1834,7 @@ func init() {
 type ReplicaId struct {
 	types.DynamicData
 
-	Id string `xml:"id"`
+	Id string `xml:"id" json:"id"`
 }
 
 func init() {
@@ -1844,9 +1844,9 @@ func init() {
 type ReplicaIntervalQueryResult struct {
 	types.DynamicData
 
-	FromDate time.Time `xml:"fromDate"`
-	ToDate   time.Time `xml:"toDate"`
-	Number   int32     `xml:"number"`
+	FromDate time.Time `xml:"fromDate" json:"fromDate"`
+	ToDate   time.Time `xml:"toDate" json:"toDate"`
+	Number   int32     `xml:"number" json:"number"`
 }
 
 func init() {
@@ -1856,9 +1856,9 @@ func init() {
 type ReplicaQueryIntervalParam struct {
 	types.DynamicData
 
-	FromDate *time.Time `xml:"fromDate"`
-	ToDate   *time.Time `xml:"toDate"`
-	Number   int32      `xml:"number,omitempty"`
+	FromDate *time.Time `xml:"fromDate" json:"fromDate,omitempty"`
+	ToDate   *time.Time `xml:"toDate" json:"toDate,omitempty"`
+	Number   int32      `xml:"number,omitempty" json:"number,omitempty"`
 }
 
 func init() {
@@ -1868,8 +1868,8 @@ func init() {
 type ReplicationGroupData struct {
 	types.DynamicData
 
-	GroupId types.ReplicationGroupId `xml:"groupId"`
-	PitId   *PointInTimeReplicaId    `xml:"pitId,omitempty"`
+	GroupId types.ReplicationGroupId `xml:"groupId" json:"groupId"`
+	PitId   *PointInTimeReplicaId    `xml:"pitId,omitempty" json:"pitId,omitempty"`
 }
 
 func init() {
@@ -1879,7 +1879,7 @@ func init() {
 type ReplicationGroupFilter struct {
 	types.DynamicData
 
-	GroupId []types.ReplicationGroupId `xml:"groupId,omitempty"`
+	GroupId []types.ReplicationGroupId `xml:"groupId,omitempty" json:"groupId,omitempty"`
 }
 
 func init() {
@@ -1889,8 +1889,8 @@ func init() {
 type ReplicationTargetInfo struct {
 	types.DynamicData
 
-	TargetGroupId                   types.ReplicationGroupId `xml:"targetGroupId"`
-	ReplicationAgreementDescription string                   `xml:"replicationAgreementDescription,omitempty"`
+	TargetGroupId                   types.ReplicationGroupId `xml:"targetGroupId" json:"targetGroupId"`
+	ReplicationAgreementDescription string                   `xml:"replicationAgreementDescription,omitempty" json:"replicationAgreementDescription,omitempty"`
 }
 
 func init() {
@@ -1898,8 +1898,8 @@ func init() {
 }
 
 type ReverseReplicateGroupRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty" json:"groupId,omitempty"`
 }
 
 func init() {
@@ -1913,13 +1913,13 @@ func init() {
 }
 
 type ReverseReplicateGroup_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type ReverseReplicationSuccessResult struct {
 	GroupOperationResult
 
-	NewGroupId types.DeviceGroupId `xml:"newGroupId"`
+	NewGroupId types.DeviceGroupId `xml:"newGroupId" json:"newGroupId"`
 }
 
 func init() {
@@ -1943,12 +1943,12 @@ func init() {
 type SmsAboutInfo struct {
 	types.DynamicData
 
-	Name           string `xml:"name"`
-	FullName       string `xml:"fullName"`
-	Vendor         string `xml:"vendor"`
-	ApiVersion     string `xml:"apiVersion"`
-	InstanceUuid   string `xml:"instanceUuid"`
-	VasaApiVersion string `xml:"vasaApiVersion,omitempty"`
+	Name           string `xml:"name" json:"name"`
+	FullName       string `xml:"fullName" json:"fullName"`
+	Vendor         string `xml:"vendor" json:"vendor"`
+	ApiVersion     string `xml:"apiVersion" json:"apiVersion"`
+	InstanceUuid   string `xml:"instanceUuid" json:"instanceUuid"`
+	VasaApiVersion string `xml:"vasaApiVersion,omitempty" json:"vasaApiVersion,omitempty"`
 }
 
 func init() {
@@ -1972,10 +1972,10 @@ func init() {
 type SmsProviderInfo struct {
 	types.DynamicData
 
-	Uid         string `xml:"uid"`
-	Name        string `xml:"name"`
-	Description string `xml:"description,omitempty"`
-	Version     string `xml:"version,omitempty"`
+	Uid         string `xml:"uid" json:"uid"`
+	Name        string `xml:"name" json:"name"`
+	Description string `xml:"description,omitempty" json:"description,omitempty"`
+	Version     string `xml:"version,omitempty" json:"version,omitempty"`
 }
 
 func init() {
@@ -1985,8 +1985,8 @@ func init() {
 type SmsProviderSpec struct {
 	types.DynamicData
 
-	Name        string `xml:"name"`
-	Description string `xml:"description,omitempty"`
+	Name        string `xml:"name" json:"name"`
+	Description string `xml:"description,omitempty" json:"description,omitempty"`
 }
 
 func init() {
@@ -1994,8 +1994,8 @@ func init() {
 }
 
 type SmsRefreshCACertificatesAndCRLsRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	ProviderId []string                     `xml:"providerId,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProviderId []string                     `xml:"providerId,omitempty" json:"providerId,omitempty"`
 }
 
 func init() {
@@ -2009,7 +2009,7 @@ func init() {
 }
 
 type SmsRefreshCACertificatesAndCRLs_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type SmsReplicationFault struct {
@@ -2029,7 +2029,7 @@ func init() {
 type SmsResourceInUse struct {
 	types.ResourceInUse
 
-	DeviceIds []BaseDeviceId `xml:"deviceIds,omitempty,typeattr"`
+	DeviceIds []BaseDeviceId `xml:"deviceIds,omitempty,typeattr" json:"deviceIds,omitempty"`
 }
 
 func init() {
@@ -2045,15 +2045,15 @@ func init() {
 type SmsTaskInfo struct {
 	types.DynamicData
 
-	Key            string                        `xml:"key"`
-	Task           types.ManagedObjectReference  `xml:"task"`
-	Object         *types.ManagedObjectReference `xml:"object,omitempty"`
-	Error          *types.LocalizedMethodFault   `xml:"error,omitempty"`
-	Result         types.AnyType                 `xml:"result,omitempty,typeattr"`
-	StartTime      *time.Time                    `xml:"startTime"`
-	CompletionTime *time.Time                    `xml:"completionTime"`
-	State          string                        `xml:"state"`
-	Progress       int32                         `xml:"progress,omitempty"`
+	Key            string                        `xml:"key" json:"key"`
+	Task           types.ManagedObjectReference  `xml:"task" json:"task"`
+	Object         *types.ManagedObjectReference `xml:"object,omitempty" json:"object,omitempty"`
+	Error          *types.LocalizedMethodFault   `xml:"error,omitempty" json:"error,omitempty"`
+	Result         types.AnyType                 `xml:"result,omitempty,typeattr" json:"result,omitempty"`
+	StartTime      *time.Time                    `xml:"startTime" json:"startTime,omitempty"`
+	CompletionTime *time.Time                    `xml:"completionTime" json:"completionTime,omitempty"`
+	State          string                        `xml:"state" json:"state"`
+	Progress       int32                         `xml:"progress,omitempty" json:"progress,omitempty"`
 }
 
 func init() {
@@ -2063,11 +2063,11 @@ func init() {
 type SourceGroupInfo struct {
 	GroupInfo
 
-	Name        string                  `xml:"name,omitempty"`
-	Description string                  `xml:"description,omitempty"`
-	State       string                  `xml:"state"`
-	Replica     []ReplicationTargetInfo `xml:"replica,omitempty"`
-	MemberInfo  []SourceGroupMemberInfo `xml:"memberInfo,omitempty"`
+	Name        string                  `xml:"name,omitempty" json:"name,omitempty"`
+	Description string                  `xml:"description,omitempty" json:"description,omitempty"`
+	State       string                  `xml:"state" json:"state"`
+	Replica     []ReplicationTargetInfo `xml:"replica,omitempty" json:"replica,omitempty"`
+	MemberInfo  []SourceGroupMemberInfo `xml:"memberInfo,omitempty" json:"memberInfo,omitempty"`
 }
 
 func init() {
@@ -2077,8 +2077,8 @@ func init() {
 type SourceGroupMemberInfo struct {
 	types.DynamicData
 
-	DeviceId BaseDeviceId     `xml:"deviceId,typeattr"`
-	TargetId []TargetDeviceId `xml:"targetId,omitempty"`
+	DeviceId BaseDeviceId     `xml:"deviceId,typeattr" json:"deviceId"`
+	TargetId []TargetDeviceId `xml:"targetId,omitempty" json:"targetId,omitempty"`
 }
 
 func init() {
@@ -2088,16 +2088,16 @@ func init() {
 type StorageAlarm struct {
 	types.DynamicData
 
-	AlarmId        int64           `xml:"alarmId"`
-	AlarmType      string          `xml:"alarmType"`
-	ContainerId    string          `xml:"containerId,omitempty"`
-	ObjectId       string          `xml:"objectId,omitempty"`
-	ObjectType     string          `xml:"objectType"`
-	Status         string          `xml:"status"`
-	AlarmTimeStamp time.Time       `xml:"alarmTimeStamp"`
-	MessageId      string          `xml:"messageId"`
-	ParameterList  []NameValuePair `xml:"parameterList,omitempty"`
-	AlarmObject    types.AnyType   `xml:"alarmObject,omitempty,typeattr"`
+	AlarmId        int64           `xml:"alarmId" json:"alarmId"`
+	AlarmType      string          `xml:"alarmType" json:"alarmType"`
+	ContainerId    string          `xml:"containerId,omitempty" json:"containerId,omitempty"`
+	ObjectId       string          `xml:"objectId,omitempty" json:"objectId,omitempty"`
+	ObjectType     string          `xml:"objectType" json:"objectType"`
+	Status         string          `xml:"status" json:"status"`
+	AlarmTimeStamp time.Time       `xml:"alarmTimeStamp" json:"alarmTimeStamp"`
+	MessageId      string          `xml:"messageId" json:"messageId"`
+	ParameterList  []NameValuePair `xml:"parameterList,omitempty" json:"parameterList,omitempty"`
+	AlarmObject    types.AnyType   `xml:"alarmObject,omitempty,typeattr" json:"alarmObject,omitempty"`
 }
 
 func init() {
@@ -2107,17 +2107,17 @@ func init() {
 type StorageArray struct {
 	types.DynamicData
 
-	Name                         string                                   `xml:"name"`
-	Uuid                         string                                   `xml:"uuid"`
-	VendorId                     string                                   `xml:"vendorId"`
-	ModelId                      string                                   `xml:"modelId"`
-	Firmware                     string                                   `xml:"firmware,omitempty"`
-	AlternateName                []string                                 `xml:"alternateName,omitempty"`
-	SupportedBlockInterface      []string                                 `xml:"supportedBlockInterface,omitempty"`
-	SupportedFileSystemInterface []string                                 `xml:"supportedFileSystemInterface,omitempty"`
-	SupportedProfile             []string                                 `xml:"supportedProfile,omitempty"`
-	Priority                     int32                                    `xml:"priority,omitempty"`
-	DiscoverySvc                 []types.VASAStorageArrayDiscoverySvcInfo `xml:"discoverySvc,omitempty"`
+	Name                         string                                   `xml:"name" json:"name"`
+	Uuid                         string                                   `xml:"uuid" json:"uuid"`
+	VendorId                     string                                   `xml:"vendorId" json:"vendorId"`
+	ModelId                      string                                   `xml:"modelId" json:"modelId"`
+	Firmware                     string                                   `xml:"firmware,omitempty" json:"firmware,omitempty"`
+	AlternateName                []string                                 `xml:"alternateName,omitempty" json:"alternateName,omitempty"`
+	SupportedBlockInterface      []string                                 `xml:"supportedBlockInterface,omitempty" json:"supportedBlockInterface,omitempty"`
+	SupportedFileSystemInterface []string                                 `xml:"supportedFileSystemInterface,omitempty" json:"supportedFileSystemInterface,omitempty"`
+	SupportedProfile             []string                                 `xml:"supportedProfile,omitempty" json:"supportedProfile,omitempty"`
+	Priority                     int32                                    `xml:"priority,omitempty" json:"priority,omitempty"`
+	DiscoverySvc                 []types.VASAStorageArrayDiscoverySvcInfo `xml:"discoverySvc,omitempty" json:"discoverySvc,omitempty"`
 }
 
 func init() {
@@ -2127,9 +2127,9 @@ func init() {
 type StorageCapability struct {
 	types.DynamicData
 
-	Uuid        string `xml:"uuid"`
-	Name        string `xml:"name"`
-	Description string `xml:"description"`
+	Uuid        string `xml:"uuid" json:"uuid"`
+	Name        string `xml:"name" json:"name"`
+	Description string `xml:"description" json:"description"`
 }
 
 func init() {
@@ -2139,12 +2139,12 @@ func init() {
 type StorageContainer struct {
 	types.DynamicData
 
-	Uuid              string   `xml:"uuid"`
-	Name              string   `xml:"name"`
-	MaxVvolSizeInMB   int64    `xml:"maxVvolSizeInMB"`
-	ProviderId        []string `xml:"providerId"`
-	ArrayId           []string `xml:"arrayId"`
-	VvolContainerType string   `xml:"vvolContainerType,omitempty"`
+	Uuid              string   `xml:"uuid" json:"uuid"`
+	Name              string   `xml:"name" json:"name"`
+	MaxVvolSizeInMB   int64    `xml:"maxVvolSizeInMB" json:"maxVvolSizeInMB"`
+	ProviderId        []string `xml:"providerId" json:"providerId"`
+	ArrayId           []string `xml:"arrayId" json:"arrayId"`
+	VvolContainerType string   `xml:"vvolContainerType,omitempty" json:"vvolContainerType,omitempty"`
 }
 
 func init() {
@@ -2154,8 +2154,8 @@ func init() {
 type StorageContainerResult struct {
 	types.DynamicData
 
-	StorageContainer []StorageContainer    `xml:"storageContainer,omitempty"`
-	ProviderInfo     []BaseSmsProviderInfo `xml:"providerInfo,omitempty,typeattr"`
+	StorageContainer []StorageContainer    `xml:"storageContainer,omitempty" json:"storageContainer,omitempty"`
+	ProviderInfo     []BaseSmsProviderInfo `xml:"providerInfo,omitempty,typeattr" json:"providerInfo,omitempty"`
 }
 
 func init() {
@@ -2165,7 +2165,7 @@ func init() {
 type StorageContainerSpec struct {
 	types.DynamicData
 
-	ContainerId []string `xml:"containerId,omitempty"`
+	ContainerId []string `xml:"containerId,omitempty" json:"containerId,omitempty"`
 }
 
 func init() {
@@ -2175,13 +2175,13 @@ func init() {
 type StorageFileSystem struct {
 	types.DynamicData
 
-	Uuid                    string                  `xml:"uuid"`
-	Info                    []StorageFileSystemInfo `xml:"info"`
-	NativeSnapshotSupported bool                    `xml:"nativeSnapshotSupported"`
-	ThinProvisioningStatus  string                  `xml:"thinProvisioningStatus"`
-	Type                    string                  `xml:"type"`
-	Version                 string                  `xml:"version"`
-	BackingConfig           *BackingConfig          `xml:"backingConfig,omitempty"`
+	Uuid                    string                  `xml:"uuid" json:"uuid"`
+	Info                    []StorageFileSystemInfo `xml:"info" json:"info"`
+	NativeSnapshotSupported bool                    `xml:"nativeSnapshotSupported" json:"nativeSnapshotSupported"`
+	ThinProvisioningStatus  string                  `xml:"thinProvisioningStatus" json:"thinProvisioningStatus"`
+	Type                    string                  `xml:"type" json:"type"`
+	Version                 string                  `xml:"version" json:"version"`
+	BackingConfig           *BackingConfig          `xml:"backingConfig,omitempty" json:"backingConfig,omitempty"`
 }
 
 func init() {
@@ -2191,9 +2191,9 @@ func init() {
 type StorageFileSystemInfo struct {
 	types.DynamicData
 
-	FileServerName string `xml:"fileServerName"`
-	FileSystemPath string `xml:"fileSystemPath"`
-	IpAddress      string `xml:"ipAddress,omitempty"`
+	FileServerName string `xml:"fileServerName" json:"fileServerName"`
+	FileSystemPath string `xml:"fileSystemPath" json:"fileSystemPath"`
+	IpAddress      string `xml:"ipAddress,omitempty" json:"ipAddress,omitempty"`
 }
 
 func init() {
@@ -2203,16 +2203,16 @@ func init() {
 type StorageLun struct {
 	types.DynamicData
 
-	Uuid                   string         `xml:"uuid"`
-	VSphereLunIdentifier   string         `xml:"vSphereLunIdentifier"`
-	VendorDisplayName      string         `xml:"vendorDisplayName"`
-	CapacityInMB           int64          `xml:"capacityInMB"`
-	UsedSpaceInMB          int64          `xml:"usedSpaceInMB"`
-	LunThinProvisioned     bool           `xml:"lunThinProvisioned"`
-	AlternateIdentifier    []string       `xml:"alternateIdentifier,omitempty"`
-	DrsManagementPermitted bool           `xml:"drsManagementPermitted"`
-	ThinProvisioningStatus string         `xml:"thinProvisioningStatus"`
-	BackingConfig          *BackingConfig `xml:"backingConfig,omitempty"`
+	Uuid                   string         `xml:"uuid" json:"uuid"`
+	VSphereLunIdentifier   string         `xml:"vSphereLunIdentifier" json:"vSphereLunIdentifier"`
+	VendorDisplayName      string         `xml:"vendorDisplayName" json:"vendorDisplayName"`
+	CapacityInMB           int64          `xml:"capacityInMB" json:"capacityInMB"`
+	UsedSpaceInMB          int64          `xml:"usedSpaceInMB" json:"usedSpaceInMB"`
+	LunThinProvisioned     bool           `xml:"lunThinProvisioned" json:"lunThinProvisioned"`
+	AlternateIdentifier    []string       `xml:"alternateIdentifier,omitempty" json:"alternateIdentifier,omitempty"`
+	DrsManagementPermitted bool           `xml:"drsManagementPermitted" json:"drsManagementPermitted"`
+	ThinProvisioningStatus string         `xml:"thinProvisioningStatus" json:"thinProvisioningStatus"`
+	BackingConfig          *BackingConfig `xml:"backingConfig,omitempty" json:"backingConfig,omitempty"`
 }
 
 func init() {
@@ -2222,9 +2222,9 @@ func init() {
 type StoragePort struct {
 	types.DynamicData
 
-	Uuid          string   `xml:"uuid"`
-	Type          string   `xml:"type"`
-	AlternateName []string `xml:"alternateName,omitempty"`
+	Uuid          string   `xml:"uuid" json:"uuid"`
+	Type          string   `xml:"type" json:"type"`
+	AlternateName []string `xml:"alternateName,omitempty" json:"alternateName,omitempty"`
 }
 
 func init() {
@@ -2234,8 +2234,8 @@ func init() {
 type StorageProcessor struct {
 	types.DynamicData
 
-	Uuid               string   `xml:"uuid"`
-	AlternateIdentifer []string `xml:"alternateIdentifer,omitempty"`
+	Uuid               string   `xml:"uuid" json:"uuid"`
+	AlternateIdentifer []string `xml:"alternateIdentifer,omitempty" json:"alternateIdentifer,omitempty"`
 }
 
 func init() {
@@ -2245,8 +2245,8 @@ func init() {
 type SupportedVendorModelMapping struct {
 	types.DynamicData
 
-	VendorId string `xml:"vendorId,omitempty"`
-	ModelId  string `xml:"modelId,omitempty"`
+	VendorId string `xml:"vendorId,omitempty" json:"vendorId,omitempty"`
+	ModelId  string `xml:"modelId,omitempty" json:"modelId,omitempty"`
 }
 
 func init() {
@@ -2270,7 +2270,7 @@ func init() {
 type SyncOngoing struct {
 	SmsReplicationFault
 
-	Task types.ManagedObjectReference `xml:"task"`
+	Task types.ManagedObjectReference `xml:"task" json:"task"`
 }
 
 func init() {
@@ -2284,9 +2284,9 @@ func init() {
 }
 
 type SyncReplicationGroupRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty"`
-	PitName string                       `xml:"pitName"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty" json:"groupId,omitempty"`
+	PitName string                       `xml:"pitName" json:"pitName"`
 }
 
 func init() {
@@ -2296,9 +2296,9 @@ func init() {
 type SyncReplicationGroupSuccessResult struct {
 	GroupOperationResult
 
-	TimeStamp time.Time             `xml:"timeStamp"`
-	PitId     *PointInTimeReplicaId `xml:"pitId,omitempty"`
-	PitName   string                `xml:"pitName,omitempty"`
+	TimeStamp time.Time             `xml:"timeStamp" json:"timeStamp"`
+	PitId     *PointInTimeReplicaId `xml:"pitId,omitempty" json:"pitId,omitempty"`
+	PitName   string                `xml:"pitName,omitempty" json:"pitName,omitempty"`
 }
 
 func init() {
@@ -2312,14 +2312,14 @@ func init() {
 }
 
 type SyncReplicationGroup_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type TargetDeviceId struct {
 	types.DynamicData
 
-	DomainId types.FaultDomainId `xml:"domainId"`
-	DeviceId ReplicaId           `xml:"deviceId"`
+	DomainId types.FaultDomainId `xml:"domainId" json:"domainId"`
+	DeviceId ReplicaId           `xml:"deviceId" json:"deviceId"`
 }
 
 func init() {
@@ -2329,10 +2329,10 @@ func init() {
 type TargetGroupInfo struct {
 	GroupInfo
 
-	SourceInfo       TargetToSourceInfo          `xml:"sourceInfo"`
-	State            string                      `xml:"state"`
-	Devices          []BaseTargetGroupMemberInfo `xml:"devices,omitempty,typeattr"`
-	IsPromoteCapable *bool                       `xml:"isPromoteCapable"`
+	SourceInfo       TargetToSourceInfo          `xml:"sourceInfo" json:"sourceInfo"`
+	State            string                      `xml:"state" json:"state"`
+	Devices          []BaseTargetGroupMemberInfo `xml:"devices,omitempty,typeattr" json:"devices,omitempty"`
+	IsPromoteCapable *bool                       `xml:"isPromoteCapable" json:"isPromoteCapable,omitempty"`
 }
 
 func init() {
@@ -2342,9 +2342,9 @@ func init() {
 type TargetGroupMemberInfo struct {
 	types.DynamicData
 
-	ReplicaId       ReplicaId                    `xml:"replicaId"`
-	SourceId        BaseDeviceId                 `xml:"sourceId,typeattr"`
-	TargetDatastore types.ManagedObjectReference `xml:"targetDatastore"`
+	ReplicaId       ReplicaId                    `xml:"replicaId" json:"replicaId"`
+	SourceId        BaseDeviceId                 `xml:"sourceId,typeattr" json:"sourceId"`
+	TargetDatastore types.ManagedObjectReference `xml:"targetDatastore" json:"targetDatastore"`
 }
 
 func init() {
@@ -2354,8 +2354,8 @@ func init() {
 type TargetToSourceInfo struct {
 	types.DynamicData
 
-	SourceGroupId                   types.ReplicationGroupId `xml:"sourceGroupId"`
-	ReplicationAgreementDescription string                   `xml:"replicationAgreementDescription,omitempty"`
+	SourceGroupId                   types.ReplicationGroupId `xml:"sourceGroupId" json:"sourceGroupId"`
+	ReplicationAgreementDescription string                   `xml:"replicationAgreementDescription,omitempty" json:"replicationAgreementDescription,omitempty"`
 }
 
 func init() {
@@ -2371,8 +2371,8 @@ func init() {
 }
 
 type TestFailoverReplicationGroupStartRequestType struct {
-	This              types.ManagedObjectReference `xml:"_this"`
-	TestFailoverParam TestFailoverParam            `xml:"testFailoverParam"`
+	This              types.ManagedObjectReference `xml:"_this" json:"_this"`
+	TestFailoverParam TestFailoverParam            `xml:"testFailoverParam" json:"testFailoverParam"`
 }
 
 func init() {
@@ -2386,13 +2386,13 @@ func init() {
 }
 
 type TestFailoverReplicationGroupStart_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type TestFailoverReplicationGroupStopRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty"`
-	Force   bool                         `xml:"force"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	GroupId []types.ReplicationGroupId   `xml:"groupId,omitempty" json:"groupId,omitempty"`
+	Force   bool                         `xml:"force" json:"force"`
 }
 
 func init() {
@@ -2406,13 +2406,13 @@ func init() {
 }
 
 type TestFailoverReplicationGroupStop_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type TooMany struct {
 	types.MethodFault
 
-	MaxBatchSize int64 `xml:"maxBatchSize,omitempty"`
+	MaxBatchSize int64 `xml:"maxBatchSize,omitempty" json:"maxBatchSize,omitempty"`
 }
 
 func init() {
@@ -2426,8 +2426,8 @@ func init() {
 }
 
 type UnregisterProviderRequestType struct {
-	This       types.ManagedObjectReference `xml:"_this"`
-	ProviderId string                       `xml:"providerId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ProviderId string                       `xml:"providerId" json:"providerId"`
 }
 
 func init() {
@@ -2441,13 +2441,13 @@ func init() {
 }
 
 type UnregisterProvider_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VVolId struct {
 	DeviceId
 
-	Id string `xml:"id"`
+	Id string `xml:"id" json:"id"`
 }
 
 func init() {
@@ -2457,29 +2457,29 @@ func init() {
 type VasaProviderInfo struct {
 	SmsProviderInfo
 
-	Url                           string                        `xml:"url"`
-	Certificate                   string                        `xml:"certificate,omitempty"`
-	Status                        string                        `xml:"status,omitempty"`
-	StatusFault                   *types.LocalizedMethodFault   `xml:"statusFault,omitempty"`
-	VasaVersion                   string                        `xml:"vasaVersion,omitempty"`
-	Namespace                     string                        `xml:"namespace,omitempty"`
-	LastSyncTime                  string                        `xml:"lastSyncTime,omitempty"`
-	SupportedVendorModelMapping   []SupportedVendorModelMapping `xml:"supportedVendorModelMapping,omitempty"`
-	SupportedProfile              []string                      `xml:"supportedProfile,omitempty"`
-	SupportedProviderProfile      []string                      `xml:"supportedProviderProfile,omitempty"`
-	RelatedStorageArray           []RelatedStorageArray         `xml:"relatedStorageArray,omitempty"`
-	ProviderId                    string                        `xml:"providerId,omitempty"`
-	CertificateExpiryDate         string                        `xml:"certificateExpiryDate,omitempty"`
-	CertificateStatus             string                        `xml:"certificateStatus,omitempty"`
-	ServiceLocation               string                        `xml:"serviceLocation,omitempty"`
-	NeedsExplicitActivation       *bool                         `xml:"needsExplicitActivation"`
-	MaxBatchSize                  int64                         `xml:"maxBatchSize,omitempty"`
-	RetainVasaProviderCertificate *bool                         `xml:"retainVasaProviderCertificate"`
-	ArrayIndependentProvider      *bool                         `xml:"arrayIndependentProvider"`
-	Type                          string                        `xml:"type,omitempty"`
-	Category                      string                        `xml:"category,omitempty"`
-	Priority                      int32                         `xml:"priority,omitempty"`
-	FailoverGroupId               string                        `xml:"failoverGroupId,omitempty"`
+	Url                           string                        `xml:"url" json:"url"`
+	Certificate                   string                        `xml:"certificate,omitempty" json:"certificate,omitempty"`
+	Status                        string                        `xml:"status,omitempty" json:"status,omitempty"`
+	StatusFault                   *types.LocalizedMethodFault   `xml:"statusFault,omitempty" json:"statusFault,omitempty"`
+	VasaVersion                   string                        `xml:"vasaVersion,omitempty" json:"vasaVersion,omitempty"`
+	Namespace                     string                        `xml:"namespace,omitempty" json:"namespace,omitempty"`
+	LastSyncTime                  string                        `xml:"lastSyncTime,omitempty" json:"lastSyncTime,omitempty"`
+	SupportedVendorModelMapping   []SupportedVendorModelMapping `xml:"supportedVendorModelMapping,omitempty" json:"supportedVendorModelMapping,omitempty"`
+	SupportedProfile              []string                      `xml:"supportedProfile,omitempty" json:"supportedProfile,omitempty"`
+	SupportedProviderProfile      []string                      `xml:"supportedProviderProfile,omitempty" json:"supportedProviderProfile,omitempty"`
+	RelatedStorageArray           []RelatedStorageArray         `xml:"relatedStorageArray,omitempty" json:"relatedStorageArray,omitempty"`
+	ProviderId                    string                        `xml:"providerId,omitempty" json:"providerId,omitempty"`
+	CertificateExpiryDate         string                        `xml:"certificateExpiryDate,omitempty" json:"certificateExpiryDate,omitempty"`
+	CertificateStatus             string                        `xml:"certificateStatus,omitempty" json:"certificateStatus,omitempty"`
+	ServiceLocation               string                        `xml:"serviceLocation,omitempty" json:"serviceLocation,omitempty"`
+	NeedsExplicitActivation       *bool                         `xml:"needsExplicitActivation" json:"needsExplicitActivation,omitempty"`
+	MaxBatchSize                  int64                         `xml:"maxBatchSize,omitempty" json:"maxBatchSize,omitempty"`
+	RetainVasaProviderCertificate *bool                         `xml:"retainVasaProviderCertificate" json:"retainVasaProviderCertificate,omitempty"`
+	ArrayIndependentProvider      *bool                         `xml:"arrayIndependentProvider" json:"arrayIndependentProvider,omitempty"`
+	Type                          string                        `xml:"type,omitempty" json:"type,omitempty"`
+	Category                      string                        `xml:"category,omitempty" json:"category,omitempty"`
+	Priority                      int32                         `xml:"priority,omitempty" json:"priority,omitempty"`
+	FailoverGroupId               string                        `xml:"failoverGroupId,omitempty" json:"failoverGroupId,omitempty"`
 }
 
 func init() {
@@ -2487,7 +2487,7 @@ func init() {
 }
 
 type VasaProviderReconnectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -2501,11 +2501,11 @@ func init() {
 }
 
 type VasaProviderReconnect_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VasaProviderRefreshCertificateRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -2519,11 +2519,11 @@ func init() {
 }
 
 type VasaProviderRefreshCertificate_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VasaProviderRevokeCertificateRequestType struct {
-	This types.ManagedObjectReference `xml:"_this"`
+	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
 
 func init() {
@@ -2537,16 +2537,16 @@ func init() {
 }
 
 type VasaProviderRevokeCertificate_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VasaProviderSpec struct {
 	SmsProviderSpec
 
-	Username    string `xml:"username"`
-	Password    string `xml:"password"`
-	Url         string `xml:"url"`
-	Certificate string `xml:"certificate,omitempty"`
+	Username    string `xml:"username" json:"username"`
+	Password    string `xml:"password" json:"password"`
+	Url         string `xml:"url" json:"url"`
+	Certificate string `xml:"certificate,omitempty" json:"certificate,omitempty"`
 }
 
 func init() {
@@ -2554,8 +2554,8 @@ func init() {
 }
 
 type VasaProviderSyncRequestType struct {
-	This    types.ManagedObjectReference `xml:"_this"`
-	ArrayId string                       `xml:"arrayId,omitempty"`
+	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
+	ArrayId string                       `xml:"arrayId,omitempty" json:"arrayId,omitempty"`
 }
 
 func init() {
@@ -2569,13 +2569,13 @@ func init() {
 }
 
 type VasaProviderSync_TaskResponse struct {
-	Returnval types.ManagedObjectReference `xml:"returnval"`
+	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
 type VasaVirtualDiskId struct {
 	DeviceId
 
-	DiskId string `xml:"diskId"`
+	DiskId string `xml:"diskId" json:"diskId"`
 }
 
 func init() {
@@ -2585,8 +2585,8 @@ func init() {
 type VirtualDiskKey struct {
 	DeviceId
 
-	VmInstanceUUID string `xml:"vmInstanceUUID"`
-	DeviceKey      int32  `xml:"deviceKey"`
+	VmInstanceUUID string `xml:"vmInstanceUUID" json:"vmInstanceUUID"`
+	DeviceKey      int32  `xml:"deviceKey" json:"deviceKey"`
 }
 
 func init() {
@@ -2596,9 +2596,9 @@ func init() {
 type VirtualDiskMoId struct {
 	DeviceId
 
-	VcUuid  string `xml:"vcUuid,omitempty"`
-	VmMoid  string `xml:"vmMoid"`
-	DiskKey string `xml:"diskKey"`
+	VcUuid  string `xml:"vcUuid,omitempty" json:"vcUuid,omitempty"`
+	VmMoid  string `xml:"vmMoid" json:"vmMoid"`
+	DiskKey string `xml:"diskKey" json:"diskKey"`
 }
 
 func init() {
@@ -2608,9 +2608,9 @@ func init() {
 type VirtualMachineFilePath struct {
 	VirtualMachineId
 
-	VcUuid  string `xml:"vcUuid,omitempty"`
-	DsUrl   string `xml:"dsUrl"`
-	VmxPath string `xml:"vmxPath"`
+	VcUuid  string `xml:"vcUuid,omitempty" json:"vcUuid,omitempty"`
+	DsUrl   string `xml:"dsUrl" json:"dsUrl"`
+	VmxPath string `xml:"vmxPath" json:"vmxPath"`
 }
 
 func init() {
@@ -2628,8 +2628,8 @@ func init() {
 type VirtualMachineMoId struct {
 	VirtualMachineId
 
-	VcUuid string `xml:"vcUuid,omitempty"`
-	VmMoid string `xml:"vmMoid"`
+	VcUuid string `xml:"vcUuid,omitempty" json:"vcUuid,omitempty"`
+	VmMoid string `xml:"vmMoid" json:"vmMoid"`
 }
 
 func init() {
@@ -2639,7 +2639,7 @@ func init() {
 type VirtualMachineUUID struct {
 	VirtualMachineId
 
-	VmInstanceUUID string `xml:"vmInstanceUUID"`
+	VmInstanceUUID string `xml:"vmInstanceUUID" json:"vmInstanceUUID"`
 }
 
 func init() {
