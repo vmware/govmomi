@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2022 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,6 +18,7 @@ package ssoadmin
 
 import (
 	"context"
+	"math"
 	"path"
 	"reflect"
 	"strings"
@@ -82,7 +83,7 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 		Client:       sc,
 		RoundTripper: sc,
 		Domain:       "vsphere.local", // Default
-		Limit:        100,
+		Limit:        math.MaxInt32,
 	}
 	if url != Path {
 		admin.Domain = path.Base(url)
