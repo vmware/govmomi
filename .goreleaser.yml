@@ -88,7 +88,7 @@ brews:
       name: Alfred the Narwhal
       email: cna-alfred@vmware.com
     folder: Formula
-    homepage: "https://github.com/vmware/govmomi/blob/master/govc/README.md"
+    homepage: "https://github.com/vmware/govmomi/blob/main/govc/README.md"
     description: "govc is a vSphere CLI built on top of govmomi."
     test: |
       system "#{bin}/govc version"
@@ -108,7 +108,7 @@ brews:
       name: Alfred the Narwhal
       email: cna-alfred@vmware.com
     folder: Formula
-    homepage: "https://github.com/vmware/govmomi/blob/master/vcsim/README.md"
+    homepage: "https://github.com/vmware/govmomi/blob/main/vcsim/README.md"
     description: "vcsim is a vSphere API simulator built on top of govmomi."
     test: |
       system "#{bin}/vcsim -h"

@@ -269,7 +269,7 @@ Several examples are embedded in the govc command [help](USAGE.md)
 
 * [Upload ssh public key to a VM](examples/lib/ssh.sh)
 
-* [Create a CoreOS VM](https://github.com/vmware/govmomi/blob/master/toolbox/toolbox-test.sh)
+* [Create a CoreOS VM](https://github.com/vmware/govmomi/blob/main/toolbox/toolbox-test.sh)
 
 * [Create a Debian VM](https://github.com/kubernetes/kubernetes/tree/master/cluster/vsphere)
 

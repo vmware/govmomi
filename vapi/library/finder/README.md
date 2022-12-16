@@ -1,5 +1,5 @@
 # The content library finder
-The govmomi package now includes a finder for the content library, [`github.com/vmware/govmomi/vapi/library.Finder`](https://github.com/akutz/govmomi/blob/feature/content-library/vapi/library/finder/finder.go). This finder supports searching for objects in the content library using an inventory path design similar to the [standard govmomi finder](https://github.com/vmware/govmomi/blob/master/find/finder.go) and includes support for wildcard matching courtesy of golang's [`path.Match`](https://golang.org/pkg/path/#Match). For example:
+The govmomi package now includes a finder for the content library, [`github.com/vmware/govmomi/vapi/library.Finder`](https://github.com/akutz/govmomi/blob/feature/content-library/vapi/library/finder/finder.go). This finder supports searching for objects in the content library using an inventory path design similar to the [standard govmomi finder](https://github.com/vmware/govmomi/blob/main/find/finder.go) and includes support for wildcard matching courtesy of golang's [`path.Match`](https://golang.org/pkg/path/#Match). For example:
 
 | Pattern | Result |
 |---------|--------|
