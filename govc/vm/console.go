@@ -97,7 +97,7 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	if state != types.VirtualMachinePowerStatePoweredOn {
+	if (cmd.capture != "" || cmd.wss) && state != types.VirtualMachinePowerStatePoweredOn {
 		return fmt.Errorf("vm is not powered on (%s)", state)
 	}
 
