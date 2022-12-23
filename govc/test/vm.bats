@@ -979,12 +979,18 @@ load test_helper
   vm=$(new_empty_vm)
 
   run govc vm.console "$vm"
+  assert_success
+
+  run govc vm.console -wss "$vm"
   assert_failure
 
   run govc vm.power -on "$vm"
   assert_success
 
   run govc vm.console "$vm"
+  assert_success
+
+  run govc vm.console -wss "$vm"
   assert_success
 
   run govc vm.console -capture - "$vm"
