@@ -1094,6 +1094,24 @@ type GetResponse struct {
 	Returnval IdentitySources `xml:"returnval,omitempty"`
 }
 
+type GetDefaultDomains GetDefaultDomainsRequestType
+
+func init() {
+	types.Add("sso:GetDefaultDomains", reflect.TypeOf((*GetDefaultDomains)(nil)).Elem())
+}
+
+type GetDefaultDomainsRequestType struct {
+	This types.ManagedObjectReference `xml:"_this"`
+}
+
+func init() {
+	types.Add("sso:GetDefaultDomainsRequestType", reflect.TypeOf((*GetDefaultDomainsRequestType)(nil)).Elem())
+}
+
+type GetDefaultDomainsResponse struct {
+	Returnval []string `xml:"returnval,omitempty"`
+}
+
 type GetAllCertificates GetAllCertificatesRequestType
 
 func init() {
@@ -1647,6 +1665,24 @@ func init() {
 }
 
 type SetClockToleranceResponse struct {
+}
+
+type SetDefaultDomains SetDefaultDomainsRequestType
+
+func init() {
+	types.Add("sso:SetDefaultDomains", reflect.TypeOf((*SetDefaultDomains)(nil)).Elem())
+}
+
+type SetDefaultDomainsRequestType struct {
+	This        types.ManagedObjectReference `xml:"_this"`
+	DomainNames string                       `xml:"domainNames"`
+}
+
+func init() {
+	types.Add("sso:SetDefaultDomainsRequestType", reflect.TypeOf((*SetDefaultDomainsRequestType)(nil)).Elem())
+}
+
+type SetDefaultDomainsResponse struct {
 }
 
 type SetDelegationCount SetDelegationCountRequestType
