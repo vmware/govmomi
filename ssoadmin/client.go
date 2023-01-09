@@ -510,3 +510,26 @@ func (c *Client) IdentitySources(ctx context.Context) (*types.IdentitySources, e
 
 	return &res.Returnval, nil
 }
+
+func (c *Client) GetDefaultDomains(ctx context.Context) ([]string, error) {
+	req := types.GetDefaultDomains{
+		This: c.ServiceContent.IdentitySourceManagementService,
+	}
+
+	res, err := methods.GetDefaultDomains(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) SetDefaultDomains(ctx context.Context, domain string) error {
+	req := types.SetDefaultDomains{
+		This:        c.ServiceContent.IdentitySourceManagementService,
+		DomainNames: domain,
+	}
+
+	_, err := methods.SetDefaultDomains(ctx, c, &req)
+	return err
+}

@@ -282,6 +282,8 @@ but appear via `govc $cmd -h`:
  - [sso.group.ls](#ssogroupls)
  - [sso.group.rm](#ssogrouprm)
  - [sso.group.update](#ssogroupupdate)
+ - [sso.idp.default.ls](#ssoidpdefaultls)
+ - [sso.idp.default.update](#ssoidpdefaultupdate)
  - [sso.idp.ls](#ssoidpls)
  - [sso.lpp.info](#ssolppinfo)
  - [sso.lpp.update](#ssolppupdate)
@@ -4769,6 +4771,33 @@ Options:
   -d=                    Group description
   -g=false               Add/Remove group from group
   -r=                    Remove user/group from group
+```
+
+## sso.idp.default.ls
+
+```
+Usage: govc sso.idp.default.ls [OPTIONS]
+
+List SSO default identity provider sources.
+
+Examples:
+  govc sso.idp.default.ls
+  govc sso.idp.default.ls -json
+
+Options:
+```
+
+## sso.idp.default.update
+
+```
+Usage: govc sso.idp.default.update [OPTIONS] NAME
+
+Set SSO default identity provider source.
+
+Examples:
+  govc sso.idp.default.update NAME
+
+Options:
 ```
 
 ## sso.idp.ls

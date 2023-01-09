@@ -763,6 +763,26 @@ func Get(ctx context.Context, r soap.RoundTripper, req *types.Get) (*types.GetRe
 	return resBody.Res, nil
 }
 
+type GetDefaultDomainsBody struct {
+	Req    *types.GetDefaultDomains         `xml:"urn:sso IdS_getDefaultDomains,omitempty"`
+	Res    *types.GetDefaultDomainsResponse `xml:"urn:sso IdS_getDefaultDomainsResponse,omitempty"`
+	Fault_ *soap.Fault                      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *GetDefaultDomainsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func GetDefaultDomains(ctx context.Context, r soap.RoundTripper, req *types.GetDefaultDomains) (*types.GetDefaultDomainsResponse, error) {
+	var reqBody, resBody GetDefaultDomainsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type GetAllCertificatesBody struct {
 	Req    *types.GetAllCertificates         `xml:"urn:sso GetAllCertificates,omitempty"`
 	Res    *types.GetAllCertificatesResponse `xml:"urn:sso GetAllCertificatesResponse,omitempty"`
@@ -1333,6 +1353,26 @@ func (b *SetClockToleranceBody) Fault() *soap.Fault { return b.Fault_ }
 
 func SetClockTolerance(ctx context.Context, r soap.RoundTripper, req *types.SetClockTolerance) (*types.SetClockToleranceResponse, error) {
 	var reqBody, resBody SetClockToleranceBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type SetDefaultDomainsBody struct {
+	Req    *types.SetDefaultDomains         `xml:"urn:sso IdS_setDefaultDomains,omitempty"`
+	Res    *types.SetDefaultDomainsResponse `xml:"urn:sso IdS_setDefaultDomainsResponse,omitempty"`
+	Fault_ *soap.Fault                      `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *SetDefaultDomainsBody) Fault() *soap.Fault { return b.Fault_ }
+
+func SetDefaultDomains(ctx context.Context, r soap.RoundTripper, req *types.SetDefaultDomains) (*types.SetDefaultDomainsResponse, error) {
+	var reqBody, resBody SetDefaultDomainsBody
 
 	reqBody.Req = req
 
