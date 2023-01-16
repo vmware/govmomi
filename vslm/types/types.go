@@ -24,7 +24,7 @@ import (
 )
 
 type ArrayOfVslmDatastoreSyncStatus struct {
-	VslmDatastoreSyncStatus []VslmDatastoreSyncStatus `xml:"VslmDatastoreSyncStatus,omitempty" json:"VslmDatastoreSyncStatus,omitempty"`
+	VslmDatastoreSyncStatus []VslmDatastoreSyncStatus `xml:"VslmDatastoreSyncStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 }
 
 type ArrayOfVslmQueryDatastoreInfoResult struct {
-	VslmQueryDatastoreInfoResult []VslmQueryDatastoreInfoResult `xml:"VslmQueryDatastoreInfoResult,omitempty" json:"VslmQueryDatastoreInfoResult,omitempty"`
+	VslmQueryDatastoreInfoResult []VslmQueryDatastoreInfoResult `xml:"VslmQueryDatastoreInfoResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -40,7 +40,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectAssociations struct {
-	VslmVsoVStorageObjectAssociations []VslmVsoVStorageObjectAssociations `xml:"VslmVsoVStorageObjectAssociations,omitempty" json:"VslmVsoVStorageObjectAssociations,omitempty"`
+	VslmVsoVStorageObjectAssociations []VslmVsoVStorageObjectAssociations `xml:"VslmVsoVStorageObjectAssociations,omitempty" json:"_value"`
 }
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectAssociationsVmDiskAssociation struct {
-	VslmVsoVStorageObjectAssociationsVmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty" json:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty"`
+	VslmVsoVStorageObjectAssociationsVmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -56,7 +56,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectQuerySpec struct {
-	VslmVsoVStorageObjectQuerySpec []VslmVsoVStorageObjectQuerySpec `xml:"VslmVsoVStorageObjectQuerySpec,omitempty" json:"VslmVsoVStorageObjectQuerySpec,omitempty"`
+	VslmVsoVStorageObjectQuerySpec []VslmVsoVStorageObjectQuerySpec `xml:"VslmVsoVStorageObjectQuerySpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -64,7 +64,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectResult struct {
-	VslmVsoVStorageObjectResult []VslmVsoVStorageObjectResult `xml:"VslmVsoVStorageObjectResult,omitempty" json:"VslmVsoVStorageObjectResult,omitempty"`
+	VslmVsoVStorageObjectResult []VslmVsoVStorageObjectResult `xml:"VslmVsoVStorageObjectResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -72,7 +72,7 @@ func init() {
 }
 
 type ArrayOfVslmVsoVStorageObjectSnapshotResult struct {
-	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty" json:"VslmVsoVStorageObjectSnapshotResult,omitempty"`
+	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty" json:"_value"`
 }
 
 func init() {
