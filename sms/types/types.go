@@ -63,7 +63,7 @@ func init() {
 }
 
 type ArrayOfBackingStoragePool struct {
-	BackingStoragePool []BackingStoragePool `xml:"BackingStoragePool,omitempty" json:"BackingStoragePool,omitempty"`
+	BackingStoragePool []BackingStoragePool `xml:"BackingStoragePool,omitempty" json:"_value"`
 }
 
 func init() {
@@ -71,7 +71,7 @@ func init() {
 }
 
 type ArrayOfDatastoreBackingPoolMapping struct {
-	DatastoreBackingPoolMapping []DatastoreBackingPoolMapping `xml:"DatastoreBackingPoolMapping,omitempty" json:"DatastoreBackingPoolMapping,omitempty"`
+	DatastoreBackingPoolMapping []DatastoreBackingPoolMapping `xml:"DatastoreBackingPoolMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -79,7 +79,7 @@ func init() {
 }
 
 type ArrayOfDatastorePair struct {
-	DatastorePair []DatastorePair `xml:"DatastorePair,omitempty" json:"DatastorePair,omitempty"`
+	DatastorePair []DatastorePair `xml:"DatastorePair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -87,7 +87,7 @@ func init() {
 }
 
 type ArrayOfDeviceId struct {
-	DeviceId []BaseDeviceId `xml:"DeviceId,omitempty,typeattr" json:"DeviceId,omitempty"`
+	DeviceId []BaseDeviceId `xml:"DeviceId,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -95,7 +95,7 @@ func init() {
 }
 
 type ArrayOfFaultDomainProviderMapping struct {
-	FaultDomainProviderMapping []FaultDomainProviderMapping `xml:"FaultDomainProviderMapping,omitempty" json:"FaultDomainProviderMapping,omitempty"`
+	FaultDomainProviderMapping []FaultDomainProviderMapping `xml:"FaultDomainProviderMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -103,7 +103,7 @@ func init() {
 }
 
 type ArrayOfGroupOperationResult struct {
-	GroupOperationResult []BaseGroupOperationResult `xml:"GroupOperationResult,omitempty,typeattr" json:"GroupOperationResult,omitempty"`
+	GroupOperationResult []BaseGroupOperationResult `xml:"GroupOperationResult,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -111,7 +111,7 @@ func init() {
 }
 
 type ArrayOfNameValuePair struct {
-	NameValuePair []NameValuePair `xml:"NameValuePair,omitempty" json:"NameValuePair,omitempty"`
+	NameValuePair []NameValuePair `xml:"NameValuePair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -119,7 +119,7 @@ func init() {
 }
 
 type ArrayOfPointInTimeReplicaInfo struct {
-	PointInTimeReplicaInfo []PointInTimeReplicaInfo `xml:"PointInTimeReplicaInfo,omitempty" json:"PointInTimeReplicaInfo,omitempty"`
+	PointInTimeReplicaInfo []PointInTimeReplicaInfo `xml:"PointInTimeReplicaInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -127,7 +127,7 @@ func init() {
 }
 
 type ArrayOfPolicyAssociation struct {
-	PolicyAssociation []PolicyAssociation `xml:"PolicyAssociation,omitempty" json:"PolicyAssociation,omitempty"`
+	PolicyAssociation []PolicyAssociation `xml:"PolicyAssociation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -135,7 +135,7 @@ func init() {
 }
 
 type ArrayOfQueryReplicationPeerResult struct {
-	QueryReplicationPeerResult []QueryReplicationPeerResult `xml:"QueryReplicationPeerResult,omitempty" json:"QueryReplicationPeerResult,omitempty"`
+	QueryReplicationPeerResult []QueryReplicationPeerResult `xml:"QueryReplicationPeerResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -143,7 +143,7 @@ func init() {
 }
 
 type ArrayOfRecoveredDevice struct {
-	RecoveredDevice []RecoveredDevice `xml:"RecoveredDevice,omitempty" json:"RecoveredDevice,omitempty"`
+	RecoveredDevice []RecoveredDevice `xml:"RecoveredDevice,omitempty" json:"_value"`
 }
 
 func init() {
@@ -151,7 +151,7 @@ func init() {
 }
 
 type ArrayOfRecoveredDiskInfo struct {
-	RecoveredDiskInfo []RecoveredDiskInfo `xml:"RecoveredDiskInfo,omitempty" json:"RecoveredDiskInfo,omitempty"`
+	RecoveredDiskInfo []RecoveredDiskInfo `xml:"RecoveredDiskInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -159,7 +159,7 @@ func init() {
 }
 
 type ArrayOfRelatedStorageArray struct {
-	RelatedStorageArray []RelatedStorageArray `xml:"RelatedStorageArray,omitempty" json:"RelatedStorageArray,omitempty"`
+	RelatedStorageArray []RelatedStorageArray `xml:"RelatedStorageArray,omitempty" json:"_value"`
 }
 
 func init() {
@@ -167,7 +167,7 @@ func init() {
 }
 
 type ArrayOfReplicaIntervalQueryResult struct {
-	ReplicaIntervalQueryResult []ReplicaIntervalQueryResult `xml:"ReplicaIntervalQueryResult,omitempty" json:"ReplicaIntervalQueryResult,omitempty"`
+	ReplicaIntervalQueryResult []ReplicaIntervalQueryResult `xml:"ReplicaIntervalQueryResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -175,7 +175,7 @@ func init() {
 }
 
 type ArrayOfReplicationGroupData struct {
-	ReplicationGroupData []ReplicationGroupData `xml:"ReplicationGroupData,omitempty" json:"ReplicationGroupData,omitempty"`
+	ReplicationGroupData []ReplicationGroupData `xml:"ReplicationGroupData,omitempty" json:"_value"`
 }
 
 func init() {
@@ -183,7 +183,7 @@ func init() {
 }
 
 type ArrayOfReplicationTargetInfo struct {
-	ReplicationTargetInfo []ReplicationTargetInfo `xml:"ReplicationTargetInfo,omitempty" json:"ReplicationTargetInfo,omitempty"`
+	ReplicationTargetInfo []ReplicationTargetInfo `xml:"ReplicationTargetInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -191,7 +191,7 @@ func init() {
 }
 
 type ArrayOfSmsProviderInfo struct {
-	SmsProviderInfo []BaseSmsProviderInfo `xml:"SmsProviderInfo,omitempty,typeattr" json:"SmsProviderInfo,omitempty"`
+	SmsProviderInfo []BaseSmsProviderInfo `xml:"SmsProviderInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -199,7 +199,7 @@ func init() {
 }
 
 type ArrayOfSourceGroupMemberInfo struct {
-	SourceGroupMemberInfo []SourceGroupMemberInfo `xml:"SourceGroupMemberInfo,omitempty" json:"SourceGroupMemberInfo,omitempty"`
+	SourceGroupMemberInfo []SourceGroupMemberInfo `xml:"SourceGroupMemberInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -207,7 +207,7 @@ func init() {
 }
 
 type ArrayOfStorageAlarm struct {
-	StorageAlarm []StorageAlarm `xml:"StorageAlarm,omitempty" json:"StorageAlarm,omitempty"`
+	StorageAlarm []StorageAlarm `xml:"StorageAlarm,omitempty" json:"_value"`
 }
 
 func init() {
@@ -215,7 +215,7 @@ func init() {
 }
 
 type ArrayOfStorageArray struct {
-	StorageArray []StorageArray `xml:"StorageArray,omitempty" json:"StorageArray,omitempty"`
+	StorageArray []StorageArray `xml:"StorageArray,omitempty" json:"_value"`
 }
 
 func init() {
@@ -223,7 +223,7 @@ func init() {
 }
 
 type ArrayOfStorageContainer struct {
-	StorageContainer []StorageContainer `xml:"StorageContainer,omitempty" json:"StorageContainer,omitempty"`
+	StorageContainer []StorageContainer `xml:"StorageContainer,omitempty" json:"_value"`
 }
 
 func init() {
@@ -231,7 +231,7 @@ func init() {
 }
 
 type ArrayOfStorageFileSystem struct {
-	StorageFileSystem []StorageFileSystem `xml:"StorageFileSystem,omitempty" json:"StorageFileSystem,omitempty"`
+	StorageFileSystem []StorageFileSystem `xml:"StorageFileSystem,omitempty" json:"_value"`
 }
 
 func init() {
@@ -239,7 +239,7 @@ func init() {
 }
 
 type ArrayOfStorageFileSystemInfo struct {
-	StorageFileSystemInfo []StorageFileSystemInfo `xml:"StorageFileSystemInfo,omitempty" json:"StorageFileSystemInfo,omitempty"`
+	StorageFileSystemInfo []StorageFileSystemInfo `xml:"StorageFileSystemInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -247,7 +247,7 @@ func init() {
 }
 
 type ArrayOfStorageLun struct {
-	StorageLun []StorageLun `xml:"StorageLun,omitempty" json:"StorageLun,omitempty"`
+	StorageLun []StorageLun `xml:"StorageLun,omitempty" json:"_value"`
 }
 
 func init() {
@@ -255,7 +255,7 @@ func init() {
 }
 
 type ArrayOfStoragePort struct {
-	StoragePort []BaseStoragePort `xml:"StoragePort,omitempty,typeattr" json:"StoragePort,omitempty"`
+	StoragePort []BaseStoragePort `xml:"StoragePort,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -263,7 +263,7 @@ func init() {
 }
 
 type ArrayOfStorageProcessor struct {
-	StorageProcessor []StorageProcessor `xml:"StorageProcessor,omitempty" json:"StorageProcessor,omitempty"`
+	StorageProcessor []StorageProcessor `xml:"StorageProcessor,omitempty" json:"_value"`
 }
 
 func init() {
@@ -271,7 +271,7 @@ func init() {
 }
 
 type ArrayOfSupportedVendorModelMapping struct {
-	SupportedVendorModelMapping []SupportedVendorModelMapping `xml:"SupportedVendorModelMapping,omitempty" json:"SupportedVendorModelMapping,omitempty"`
+	SupportedVendorModelMapping []SupportedVendorModelMapping `xml:"SupportedVendorModelMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -279,7 +279,7 @@ func init() {
 }
 
 type ArrayOfTargetDeviceId struct {
-	TargetDeviceId []TargetDeviceId `xml:"TargetDeviceId,omitempty" json:"TargetDeviceId,omitempty"`
+	TargetDeviceId []TargetDeviceId `xml:"TargetDeviceId,omitempty" json:"_value"`
 }
 
 func init() {
@@ -287,7 +287,7 @@ func init() {
 }
 
 type ArrayOfTargetGroupMemberInfo struct {
-	TargetGroupMemberInfo []BaseTargetGroupMemberInfo `xml:"TargetGroupMemberInfo,omitempty,typeattr" json:"TargetGroupMemberInfo,omitempty"`
+	TargetGroupMemberInfo []BaseTargetGroupMemberInfo `xml:"TargetGroupMemberInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
