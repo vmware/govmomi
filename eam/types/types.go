@@ -334,7 +334,7 @@ func init() {
 }
 
 type ArrayOfAgencyVMFolder struct {
-	AgencyVMFolder []AgencyVMFolder `xml:"AgencyVMFolder,omitempty" json:"AgencyVMFolder,omitempty"`
+	AgencyVMFolder []AgencyVMFolder `xml:"AgencyVMFolder,omitempty" json:"_value"`
 }
 
 func init() {
@@ -342,7 +342,7 @@ func init() {
 }
 
 type ArrayOfAgencyVMResourcePool struct {
-	AgencyVMResourcePool []AgencyVMResourcePool `xml:"AgencyVMResourcePool,omitempty" json:"AgencyVMResourcePool,omitempty"`
+	AgencyVMResourcePool []AgencyVMResourcePool `xml:"AgencyVMResourcePool,omitempty" json:"_value"`
 }
 
 func init() {
@@ -350,7 +350,7 @@ func init() {
 }
 
 type ArrayOfAgentConfigInfo struct {
-	AgentConfigInfo []AgentConfigInfo `xml:"AgentConfigInfo,omitempty" json:"AgentConfigInfo,omitempty"`
+	AgentConfigInfo []AgentConfigInfo `xml:"AgentConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -358,7 +358,7 @@ func init() {
 }
 
 type ArrayOfAgentOvfEnvironmentInfoOvfProperty struct {
-	AgentOvfEnvironmentInfoOvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"AgentOvfEnvironmentInfoOvfProperty,omitempty" json:"AgentOvfEnvironmentInfoOvfProperty,omitempty"`
+	AgentOvfEnvironmentInfoOvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"AgentOvfEnvironmentInfoOvfProperty,omitempty" json:"_value"`
 }
 
 func init() {
@@ -366,7 +366,7 @@ func init() {
 }
 
 type ArrayOfAgentStoragePolicy struct {
-	AgentStoragePolicy []BaseAgentStoragePolicy `xml:"AgentStoragePolicy,omitempty,typeattr" json:"AgentStoragePolicy,omitempty"`
+	AgentStoragePolicy []BaseAgentStoragePolicy `xml:"AgentStoragePolicy,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -374,7 +374,7 @@ func init() {
 }
 
 type ArrayOfAgentVibMatchingRule struct {
-	AgentVibMatchingRule []AgentVibMatchingRule `xml:"AgentVibMatchingRule,omitempty" json:"AgentVibMatchingRule,omitempty"`
+	AgentVibMatchingRule []AgentVibMatchingRule `xml:"AgentVibMatchingRule,omitempty" json:"_value"`
 }
 
 func init() {
@@ -382,7 +382,7 @@ func init() {
 }
 
 type ArrayOfIssue struct {
-	Issue []BaseIssue `xml:"Issue,omitempty,typeattr" json:"Issue,omitempty"`
+	Issue []BaseIssue `xml:"Issue,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -390,7 +390,7 @@ func init() {
 }
 
 type ArrayOfVibVibInfo struct {
-	VibVibInfo []VibVibInfo `xml:"VibVibInfo,omitempty" json:"VibVibInfo,omitempty"`
+	VibVibInfo []VibVibInfo `xml:"VibVibInfo,omitempty" json:"_value"`
 }
 
 func init() {

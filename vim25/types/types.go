@@ -28,7 +28,7 @@ func init() {
 }
 
 type AbandonHciWorkflowRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -45,7 +45,7 @@ func init() {
 }
 
 type AbdicateDomOwnershipRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids []string               `xml:"uuids" json:"uuids"`
 }
 
@@ -58,7 +58,7 @@ type AbdicateDomOwnershipResponse struct {
 }
 
 type AbortCustomizationRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 }
@@ -142,7 +142,7 @@ func init() {
 }
 
 type AcknowledgeAlarmRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Alarm  ManagedObjectReference `xml:"alarm" json:"alarm"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
@@ -161,7 +161,7 @@ func init() {
 }
 
 type AcquireCimServicesTicketRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -179,7 +179,7 @@ func init() {
 }
 
 type AcquireCloneTicketRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -197,7 +197,7 @@ func init() {
 }
 
 type AcquireCredentialsInGuestRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference  `xml:"vm" json:"vm"`
 	RequestedAuth BaseGuestAuthentication `xml:"requestedAuth,typeattr" json:"requestedAuth"`
 	SessionID     int64                   `xml:"sessionID,omitempty" json:"sessionID,omitempty"`
@@ -218,7 +218,7 @@ func init() {
 }
 
 type AcquireGenericServiceTicketRequestType struct {
-	This ManagedObjectReference               `xml:"_this" json:"_this"`
+	This ManagedObjectReference               `xml:"_this" json:"-"`
 	Spec BaseSessionManagerServiceRequestSpec `xml:"spec,typeattr" json:"spec"`
 }
 
@@ -237,7 +237,7 @@ func init() {
 }
 
 type AcquireLocalTicketRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	UserName string                 `xml:"userName" json:"userName"`
 }
 
@@ -256,7 +256,7 @@ func init() {
 }
 
 type AcquireMksTicketRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -274,7 +274,7 @@ func init() {
 }
 
 type AcquireTicketRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	TicketType string                 `xml:"ticketType" json:"ticketType"`
 }
 
@@ -343,7 +343,7 @@ func init() {
 }
 
 type AddAuthorizationRoleRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Name    string                 `xml:"name" json:"name"`
 	PrivIds []string               `xml:"privIds,omitempty" json:"privIds,omitempty"`
 }
@@ -363,7 +363,7 @@ func init() {
 }
 
 type AddCustomFieldDefRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	Name           string                 `xml:"name" json:"name"`
 	MoType         string                 `xml:"moType,omitempty" json:"moType,omitempty"`
 	FieldDefPolicy *PrivilegePolicyDef    `xml:"fieldDefPolicy,omitempty" json:"fieldDefPolicy,omitempty"`
@@ -379,7 +379,7 @@ type AddCustomFieldDefResponse struct {
 }
 
 type AddDVPortgroupRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Spec []DVPortgroupConfigSpec `xml:"spec" json:"spec"`
 }
 
@@ -398,7 +398,7 @@ type AddDVPortgroup_TaskResponse struct {
 }
 
 type AddDisksRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Disk []HostScsiDisk         `xml:"disk" json:"disk"`
 }
 
@@ -429,7 +429,7 @@ func init() {
 }
 
 type AddFilterEntitiesRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	FilterId string                   `xml:"filterId" json:"filterId"`
 	Entities []ManagedObjectReference `xml:"entities,omitempty" json:"entities,omitempty"`
 }
@@ -442,7 +442,7 @@ type AddFilterEntitiesResponse struct {
 }
 
 type AddFilterRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 	FilterName string                 `xml:"filterName" json:"filterName"`
 	InfoIds    []string               `xml:"infoIds,omitempty" json:"infoIds,omitempty"`
@@ -463,7 +463,7 @@ func init() {
 }
 
 type AddGuestAliasRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm         ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth       BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Username   string                  `xml:"username" json:"username"`
@@ -480,7 +480,7 @@ type AddGuestAliasResponse struct {
 }
 
 type AddHostRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Spec         HostConnectSpec         `xml:"spec" json:"spec"`
 	AsConnected  bool                    `xml:"asConnected" json:"asConnected"`
 	ResourcePool *ManagedObjectReference `xml:"resourcePool,omitempty" json:"resourcePool,omitempty"`
@@ -508,7 +508,7 @@ func init() {
 }
 
 type AddInternetScsiSendTargetsRequestType struct {
-	This           ManagedObjectReference          `xml:"_this" json:"_this"`
+	This           ManagedObjectReference          `xml:"_this" json:"-"`
 	IScsiHbaDevice string                          `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	Targets        []HostInternetScsiHbaSendTarget `xml:"targets" json:"targets"`
 }
@@ -527,7 +527,7 @@ func init() {
 }
 
 type AddInternetScsiStaticTargetsRequestType struct {
-	This           ManagedObjectReference            `xml:"_this" json:"_this"`
+	This           ManagedObjectReference            `xml:"_this" json:"-"`
 	IScsiHbaDevice string                            `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	Targets        []HostInternetScsiHbaStaticTarget `xml:"targets" json:"targets"`
 }
@@ -546,7 +546,7 @@ func init() {
 }
 
 type AddKeyRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  CryptoKeyPlain         `xml:"key" json:"key"`
 }
 
@@ -564,7 +564,7 @@ func init() {
 }
 
 type AddKeysRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Keys []CryptoKeyPlain       `xml:"keys,omitempty" json:"keys,omitempty"`
 }
 
@@ -583,7 +583,7 @@ func init() {
 }
 
 type AddLicenseRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	LicenseKey string                 `xml:"licenseKey" json:"licenseKey"`
 	Labels     []KeyValue             `xml:"labels,omitempty" json:"labels,omitempty"`
 }
@@ -603,7 +603,7 @@ func init() {
 }
 
 type AddMonitoredEntitiesRequestType struct {
-	This       ManagedObjectReference   `xml:"_this" json:"_this"`
+	This       ManagedObjectReference   `xml:"_this" json:"-"`
 	ProviderId string                   `xml:"providerId" json:"providerId"`
 	Entities   []ManagedObjectReference `xml:"entities,omitempty" json:"entities,omitempty"`
 }
@@ -622,7 +622,7 @@ func init() {
 }
 
 type AddNetworkResourcePoolRequestType struct {
-	This       ManagedObjectReference             `xml:"_this" json:"_this"`
+	This       ManagedObjectReference             `xml:"_this" json:"-"`
 	ConfigSpec []DVSNetworkResourcePoolConfigSpec `xml:"configSpec" json:"configSpec"`
 }
 
@@ -640,7 +640,7 @@ func init() {
 }
 
 type AddPortGroupRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Portgrp HostPortGroupSpec      `xml:"portgrp" json:"portgrp"`
 }
 
@@ -658,7 +658,7 @@ func init() {
 }
 
 type AddServiceConsoleVirtualNicRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Portgroup string                 `xml:"portgroup" json:"portgroup"`
 	Nic       HostVirtualNicSpec     `xml:"nic" json:"nic"`
 }
@@ -672,7 +672,7 @@ type AddServiceConsoleVirtualNicResponse struct {
 }
 
 type AddStandaloneHostRequestType struct {
-	This         ManagedObjectReference        `xml:"_this" json:"_this"`
+	This         ManagedObjectReference        `xml:"_this" json:"-"`
 	Spec         HostConnectSpec               `xml:"spec" json:"spec"`
 	CompResSpec  BaseComputeResourceConfigSpec `xml:"compResSpec,omitempty,typeattr" json:"compResSpec,omitempty"`
 	AddConnected bool                          `xml:"addConnected" json:"addConnected"`
@@ -700,7 +700,7 @@ func init() {
 }
 
 type AddVirtualNicRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Portgroup string                 `xml:"portgroup" json:"portgroup"`
 	Nic       HostVirtualNicSpec     `xml:"nic" json:"nic"`
 }
@@ -720,7 +720,7 @@ func init() {
 }
 
 type AddVirtualSwitchRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	VswitchName string                 `xml:"vswitchName" json:"vswitchName"`
 	Spec        *HostVirtualSwitchSpec `xml:"spec,omitempty" json:"spec,omitempty"`
 }
@@ -1128,7 +1128,7 @@ func init() {
 }
 
 type AllocateIpv4AddressRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Dc           ManagedObjectReference `xml:"dc" json:"dc"`
 	PoolId       int32                  `xml:"poolId" json:"poolId"`
 	AllocationId string                 `xml:"allocationId" json:"allocationId"`
@@ -1149,7 +1149,7 @@ func init() {
 }
 
 type AllocateIpv6AddressRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Dc           ManagedObjectReference `xml:"dc" json:"dc"`
 	PoolId       int32                  `xml:"poolId" json:"poolId"`
 	AllocationId string                 `xml:"allocationId" json:"allocationId"`
@@ -1343,7 +1343,7 @@ func init() {
 }
 
 type AnswerVMRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	QuestionId   string                 `xml:"questionId" json:"questionId"`
 	AnswerChoice string                 `xml:"answerChoice" json:"answerChoice"`
 }
@@ -1370,7 +1370,7 @@ func init() {
 }
 
 type ApplyEntitiesConfigRequestType struct {
-	This             ManagedObjectReference              `xml:"_this" json:"_this"`
+	This             ManagedObjectReference              `xml:"_this" json:"-"`
 	ApplyConfigSpecs []ApplyHostProfileConfigurationSpec `xml:"applyConfigSpecs,omitempty" json:"applyConfigSpecs,omitempty"`
 }
 
@@ -1389,7 +1389,7 @@ type ApplyEntitiesConfig_TaskResponse struct {
 }
 
 type ApplyEvcModeVMRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	Mask          []HostFeatureMask      `xml:"mask,omitempty" json:"mask,omitempty"`
 	CompleteMasks *bool                  `xml:"completeMasks" json:"completeMasks,omitempty"`
 }
@@ -1409,7 +1409,7 @@ type ApplyEvcModeVM_TaskResponse struct {
 }
 
 type ApplyHostConfigRequestType struct {
-	This       ManagedObjectReference                 `xml:"_this" json:"_this"`
+	This       ManagedObjectReference                 `xml:"_this" json:"-"`
 	Host       ManagedObjectReference                 `xml:"host" json:"host"`
 	ConfigSpec HostConfigSpec                         `xml:"configSpec" json:"configSpec"`
 	UserInput  []ProfileDeferredPolicyOptionParameter `xml:"userInput,omitempty" json:"userInput,omitempty"`
@@ -1485,7 +1485,7 @@ func init() {
 }
 
 type ApplyRecommendationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  string                 `xml:"key" json:"key"`
 }
 
@@ -1497,7 +1497,7 @@ type ApplyRecommendationResponse struct {
 }
 
 type ApplyStorageDrsRecommendationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  []string               `xml:"key" json:"key"`
 }
 
@@ -1506,7 +1506,7 @@ func init() {
 }
 
 type ApplyStorageDrsRecommendationToPodRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Pod  ManagedObjectReference `xml:"pod" json:"pod"`
 	Key  string                 `xml:"key" json:"key"`
 }
@@ -1552,7 +1552,7 @@ func init() {
 }
 
 type AreAlarmActionsEnabledRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -1565,7 +1565,7 @@ type AreAlarmActionsEnabledResponse struct {
 }
 
 type ArrayOfAlarmAction struct {
-	AlarmAction []BaseAlarmAction `xml:"AlarmAction,omitempty,typeattr" json:"AlarmAction,omitempty"`
+	AlarmAction []BaseAlarmAction `xml:"AlarmAction,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1573,7 +1573,7 @@ func init() {
 }
 
 type ArrayOfAlarmExpression struct {
-	AlarmExpression []BaseAlarmExpression `xml:"AlarmExpression,omitempty,typeattr" json:"AlarmExpression,omitempty"`
+	AlarmExpression []BaseAlarmExpression `xml:"AlarmExpression,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1581,7 +1581,7 @@ func init() {
 }
 
 type ArrayOfAlarmState struct {
-	AlarmState []AlarmState `xml:"AlarmState,omitempty" json:"AlarmState,omitempty"`
+	AlarmState []AlarmState `xml:"AlarmState,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1589,7 +1589,7 @@ func init() {
 }
 
 type ArrayOfAlarmTriggeringActionTransitionSpec struct {
-	AlarmTriggeringActionTransitionSpec []AlarmTriggeringActionTransitionSpec `xml:"AlarmTriggeringActionTransitionSpec,omitempty" json:"AlarmTriggeringActionTransitionSpec,omitempty"`
+	AlarmTriggeringActionTransitionSpec []AlarmTriggeringActionTransitionSpec `xml:"AlarmTriggeringActionTransitionSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1597,7 +1597,7 @@ func init() {
 }
 
 type ArrayOfAnswerFileStatusError struct {
-	AnswerFileStatusError []AnswerFileStatusError `xml:"AnswerFileStatusError,omitempty" json:"AnswerFileStatusError,omitempty"`
+	AnswerFileStatusError []AnswerFileStatusError `xml:"AnswerFileStatusError,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1605,7 +1605,7 @@ func init() {
 }
 
 type ArrayOfAnswerFileStatusResult struct {
-	AnswerFileStatusResult []AnswerFileStatusResult `xml:"AnswerFileStatusResult,omitempty" json:"AnswerFileStatusResult,omitempty"`
+	AnswerFileStatusResult []AnswerFileStatusResult `xml:"AnswerFileStatusResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1613,7 +1613,7 @@ func init() {
 }
 
 type ArrayOfAnswerFileUpdateFailure struct {
-	AnswerFileUpdateFailure []AnswerFileUpdateFailure `xml:"AnswerFileUpdateFailure,omitempty" json:"AnswerFileUpdateFailure,omitempty"`
+	AnswerFileUpdateFailure []AnswerFileUpdateFailure `xml:"AnswerFileUpdateFailure,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1621,7 +1621,7 @@ func init() {
 }
 
 type ArrayOfAnyType struct {
-	AnyType []AnyType `xml:"anyType,omitempty,typeattr" json:"anyType,omitempty"`
+	AnyType []AnyType `xml:"anyType,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1629,7 +1629,7 @@ func init() {
 }
 
 type ArrayOfAnyURI struct {
-	AnyURI []string `xml:"anyURI,omitempty" json:"anyURI,omitempty"`
+	AnyURI []string `xml:"anyURI,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1637,7 +1637,7 @@ func init() {
 }
 
 type ArrayOfApplyHostProfileConfigurationResult struct {
-	ApplyHostProfileConfigurationResult []ApplyHostProfileConfigurationResult `xml:"ApplyHostProfileConfigurationResult,omitempty" json:"ApplyHostProfileConfigurationResult,omitempty"`
+	ApplyHostProfileConfigurationResult []ApplyHostProfileConfigurationResult `xml:"ApplyHostProfileConfigurationResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1645,7 +1645,7 @@ func init() {
 }
 
 type ArrayOfApplyHostProfileConfigurationSpec struct {
-	ApplyHostProfileConfigurationSpec []ApplyHostProfileConfigurationSpec `xml:"ApplyHostProfileConfigurationSpec,omitempty" json:"ApplyHostProfileConfigurationSpec,omitempty"`
+	ApplyHostProfileConfigurationSpec []ApplyHostProfileConfigurationSpec `xml:"ApplyHostProfileConfigurationSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1653,7 +1653,7 @@ func init() {
 }
 
 type ArrayOfApplyProfile struct {
-	ApplyProfile []BaseApplyProfile `xml:"ApplyProfile,omitempty,typeattr" json:"ApplyProfile,omitempty"`
+	ApplyProfile []BaseApplyProfile `xml:"ApplyProfile,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1661,7 +1661,7 @@ func init() {
 }
 
 type ArrayOfAuthorizationPrivilege struct {
-	AuthorizationPrivilege []AuthorizationPrivilege `xml:"AuthorizationPrivilege,omitempty" json:"AuthorizationPrivilege,omitempty"`
+	AuthorizationPrivilege []AuthorizationPrivilege `xml:"AuthorizationPrivilege,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1669,7 +1669,7 @@ func init() {
 }
 
 type ArrayOfAuthorizationRole struct {
-	AuthorizationRole []AuthorizationRole `xml:"AuthorizationRole,omitempty" json:"AuthorizationRole,omitempty"`
+	AuthorizationRole []AuthorizationRole `xml:"AuthorizationRole,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1677,7 +1677,7 @@ func init() {
 }
 
 type ArrayOfAutoStartPowerInfo struct {
-	AutoStartPowerInfo []AutoStartPowerInfo `xml:"AutoStartPowerInfo,omitempty" json:"AutoStartPowerInfo,omitempty"`
+	AutoStartPowerInfo []AutoStartPowerInfo `xml:"AutoStartPowerInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1685,7 +1685,7 @@ func init() {
 }
 
 type ArrayOfBase64Binary struct {
-	Base64Binary [][]byte `xml:"base64Binary,omitempty" json:"base64Binary,omitempty"`
+	Base64Binary [][]byte `xml:"base64Binary,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1693,7 +1693,7 @@ func init() {
 }
 
 type ArrayOfBoolean struct {
-	Boolean []bool `xml:"boolean,omitempty" json:"boolean,omitempty"`
+	Boolean []bool `xml:"boolean,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1701,7 +1701,7 @@ func init() {
 }
 
 type ArrayOfByte struct {
-	Byte []byte `xml:"byte,omitempty" json:"byte,omitempty"`
+	Byte []byte `xml:"byte,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1709,7 +1709,7 @@ func init() {
 }
 
 type ArrayOfChangesInfoEventArgument struct {
-	ChangesInfoEventArgument []ChangesInfoEventArgument `xml:"ChangesInfoEventArgument,omitempty" json:"ChangesInfoEventArgument,omitempty"`
+	ChangesInfoEventArgument []ChangesInfoEventArgument `xml:"ChangesInfoEventArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1717,7 +1717,7 @@ func init() {
 }
 
 type ArrayOfCheckResult struct {
-	CheckResult []CheckResult `xml:"CheckResult,omitempty" json:"CheckResult,omitempty"`
+	CheckResult []CheckResult `xml:"CheckResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1725,7 +1725,7 @@ func init() {
 }
 
 type ArrayOfClusterAction struct {
-	ClusterAction []BaseClusterAction `xml:"ClusterAction,omitempty,typeattr" json:"ClusterAction,omitempty"`
+	ClusterAction []BaseClusterAction `xml:"ClusterAction,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1733,7 +1733,7 @@ func init() {
 }
 
 type ArrayOfClusterActionHistory struct {
-	ClusterActionHistory []ClusterActionHistory `xml:"ClusterActionHistory,omitempty" json:"ClusterActionHistory,omitempty"`
+	ClusterActionHistory []ClusterActionHistory `xml:"ClusterActionHistory,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1741,7 +1741,7 @@ func init() {
 }
 
 type ArrayOfClusterAttemptedVmInfo struct {
-	ClusterAttemptedVmInfo []ClusterAttemptedVmInfo `xml:"ClusterAttemptedVmInfo,omitempty" json:"ClusterAttemptedVmInfo,omitempty"`
+	ClusterAttemptedVmInfo []ClusterAttemptedVmInfo `xml:"ClusterAttemptedVmInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1749,7 +1749,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceDVSSetting struct {
-	ClusterComputeResourceDVSSetting []ClusterComputeResourceDVSSetting `xml:"ClusterComputeResourceDVSSetting,omitempty" json:"ClusterComputeResourceDVSSetting,omitempty"`
+	ClusterComputeResourceDVSSetting []ClusterComputeResourceDVSSetting `xml:"ClusterComputeResourceDVSSetting,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1757,7 +1757,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceDVSSettingDVPortgroupToServiceMapping struct {
-	ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping []ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping `xml:"ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping,omitempty" json:"ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping,omitempty"`
+	ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping []ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping `xml:"ClusterComputeResourceDVSSettingDVPortgroupToServiceMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1765,7 +1765,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceDvsProfile struct {
-	ClusterComputeResourceDvsProfile []ClusterComputeResourceDvsProfile `xml:"ClusterComputeResourceDvsProfile,omitempty" json:"ClusterComputeResourceDvsProfile,omitempty"`
+	ClusterComputeResourceDvsProfile []ClusterComputeResourceDvsProfile `xml:"ClusterComputeResourceDvsProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1773,7 +1773,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping struct {
-	ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping []ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping `xml:"ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping,omitempty" json:"ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping,omitempty"`
+	ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping []ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping `xml:"ClusterComputeResourceDvsProfileDVPortgroupSpecToServiceMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1781,7 +1781,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceHostConfigurationInput struct {
-	ClusterComputeResourceHostConfigurationInput []ClusterComputeResourceHostConfigurationInput `xml:"ClusterComputeResourceHostConfigurationInput,omitempty" json:"ClusterComputeResourceHostConfigurationInput,omitempty"`
+	ClusterComputeResourceHostConfigurationInput []ClusterComputeResourceHostConfigurationInput `xml:"ClusterComputeResourceHostConfigurationInput,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1789,7 +1789,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceHostVmkNicInfo struct {
-	ClusterComputeResourceHostVmkNicInfo []ClusterComputeResourceHostVmkNicInfo `xml:"ClusterComputeResourceHostVmkNicInfo,omitempty" json:"ClusterComputeResourceHostVmkNicInfo,omitempty"`
+	ClusterComputeResourceHostVmkNicInfo []ClusterComputeResourceHostVmkNicInfo `xml:"ClusterComputeResourceHostVmkNicInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1797,7 +1797,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceValidationResultBase struct {
-	ClusterComputeResourceValidationResultBase []BaseClusterComputeResourceValidationResultBase `xml:"ClusterComputeResourceValidationResultBase,omitempty,typeattr" json:"ClusterComputeResourceValidationResultBase,omitempty"`
+	ClusterComputeResourceValidationResultBase []BaseClusterComputeResourceValidationResultBase `xml:"ClusterComputeResourceValidationResultBase,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1805,7 +1805,7 @@ func init() {
 }
 
 type ArrayOfClusterComputeResourceVcsSlots struct {
-	ClusterComputeResourceVcsSlots []ClusterComputeResourceVcsSlots `xml:"ClusterComputeResourceVcsSlots,omitempty" json:"ClusterComputeResourceVcsSlots,omitempty"`
+	ClusterComputeResourceVcsSlots []ClusterComputeResourceVcsSlots `xml:"ClusterComputeResourceVcsSlots,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1813,7 +1813,7 @@ func init() {
 }
 
 type ArrayOfClusterDasAamNodeState struct {
-	ClusterDasAamNodeState []ClusterDasAamNodeState `xml:"ClusterDasAamNodeState,omitempty" json:"ClusterDasAamNodeState,omitempty"`
+	ClusterDasAamNodeState []ClusterDasAamNodeState `xml:"ClusterDasAamNodeState,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1821,7 +1821,7 @@ func init() {
 }
 
 type ArrayOfClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots struct {
-	ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots []ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots `xml:"ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots,omitempty" json:"ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots,omitempty"`
+	ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots []ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots `xml:"ClusterDasFailoverLevelAdvancedRuntimeInfoHostSlots,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1829,7 +1829,7 @@ func init() {
 }
 
 type ArrayOfClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots struct {
-	ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots []ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots `xml:"ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots,omitempty" json:"ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots,omitempty"`
+	ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots []ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots `xml:"ClusterDasFailoverLevelAdvancedRuntimeInfoVmSlots,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1837,7 +1837,7 @@ func init() {
 }
 
 type ArrayOfClusterDasVmConfigInfo struct {
-	ClusterDasVmConfigInfo []ClusterDasVmConfigInfo `xml:"ClusterDasVmConfigInfo,omitempty" json:"ClusterDasVmConfigInfo,omitempty"`
+	ClusterDasVmConfigInfo []ClusterDasVmConfigInfo `xml:"ClusterDasVmConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1845,7 +1845,7 @@ func init() {
 }
 
 type ArrayOfClusterDasVmConfigSpec struct {
-	ClusterDasVmConfigSpec []ClusterDasVmConfigSpec `xml:"ClusterDasVmConfigSpec,omitempty" json:"ClusterDasVmConfigSpec,omitempty"`
+	ClusterDasVmConfigSpec []ClusterDasVmConfigSpec `xml:"ClusterDasVmConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1853,7 +1853,7 @@ func init() {
 }
 
 type ArrayOfClusterDatastoreUpdateSpec struct {
-	ClusterDatastoreUpdateSpec []ClusterDatastoreUpdateSpec `xml:"ClusterDatastoreUpdateSpec,omitempty" json:"ClusterDatastoreUpdateSpec,omitempty"`
+	ClusterDatastoreUpdateSpec []ClusterDatastoreUpdateSpec `xml:"ClusterDatastoreUpdateSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1861,7 +1861,7 @@ func init() {
 }
 
 type ArrayOfClusterDpmHostConfigInfo struct {
-	ClusterDpmHostConfigInfo []ClusterDpmHostConfigInfo `xml:"ClusterDpmHostConfigInfo,omitempty" json:"ClusterDpmHostConfigInfo,omitempty"`
+	ClusterDpmHostConfigInfo []ClusterDpmHostConfigInfo `xml:"ClusterDpmHostConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1869,7 +1869,7 @@ func init() {
 }
 
 type ArrayOfClusterDpmHostConfigSpec struct {
-	ClusterDpmHostConfigSpec []ClusterDpmHostConfigSpec `xml:"ClusterDpmHostConfigSpec,omitempty" json:"ClusterDpmHostConfigSpec,omitempty"`
+	ClusterDpmHostConfigSpec []ClusterDpmHostConfigSpec `xml:"ClusterDpmHostConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1877,7 +1877,7 @@ func init() {
 }
 
 type ArrayOfClusterDrsFaults struct {
-	ClusterDrsFaults []ClusterDrsFaults `xml:"ClusterDrsFaults,omitempty" json:"ClusterDrsFaults,omitempty"`
+	ClusterDrsFaults []ClusterDrsFaults `xml:"ClusterDrsFaults,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1885,7 +1885,7 @@ func init() {
 }
 
 type ArrayOfClusterDrsFaultsFaultsByVm struct {
-	ClusterDrsFaultsFaultsByVm []BaseClusterDrsFaultsFaultsByVm `xml:"ClusterDrsFaultsFaultsByVm,omitempty,typeattr" json:"ClusterDrsFaultsFaultsByVm,omitempty"`
+	ClusterDrsFaultsFaultsByVm []BaseClusterDrsFaultsFaultsByVm `xml:"ClusterDrsFaultsFaultsByVm,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1893,7 +1893,7 @@ func init() {
 }
 
 type ArrayOfClusterDrsMigration struct {
-	ClusterDrsMigration []ClusterDrsMigration `xml:"ClusterDrsMigration,omitempty" json:"ClusterDrsMigration,omitempty"`
+	ClusterDrsMigration []ClusterDrsMigration `xml:"ClusterDrsMigration,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1901,7 +1901,7 @@ func init() {
 }
 
 type ArrayOfClusterDrsRecommendation struct {
-	ClusterDrsRecommendation []ClusterDrsRecommendation `xml:"ClusterDrsRecommendation,omitempty" json:"ClusterDrsRecommendation,omitempty"`
+	ClusterDrsRecommendation []ClusterDrsRecommendation `xml:"ClusterDrsRecommendation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1909,7 +1909,7 @@ func init() {
 }
 
 type ArrayOfClusterDrsVmConfigInfo struct {
-	ClusterDrsVmConfigInfo []ClusterDrsVmConfigInfo `xml:"ClusterDrsVmConfigInfo,omitempty" json:"ClusterDrsVmConfigInfo,omitempty"`
+	ClusterDrsVmConfigInfo []ClusterDrsVmConfigInfo `xml:"ClusterDrsVmConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1917,7 +1917,7 @@ func init() {
 }
 
 type ArrayOfClusterDrsVmConfigSpec struct {
-	ClusterDrsVmConfigSpec []ClusterDrsVmConfigSpec `xml:"ClusterDrsVmConfigSpec,omitempty" json:"ClusterDrsVmConfigSpec,omitempty"`
+	ClusterDrsVmConfigSpec []ClusterDrsVmConfigSpec `xml:"ClusterDrsVmConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1925,7 +1925,7 @@ func init() {
 }
 
 type ArrayOfClusterEVCManagerCheckResult struct {
-	ClusterEVCManagerCheckResult []ClusterEVCManagerCheckResult `xml:"ClusterEVCManagerCheckResult,omitempty" json:"ClusterEVCManagerCheckResult,omitempty"`
+	ClusterEVCManagerCheckResult []ClusterEVCManagerCheckResult `xml:"ClusterEVCManagerCheckResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1933,7 +1933,7 @@ func init() {
 }
 
 type ArrayOfClusterFailoverHostAdmissionControlInfoHostStatus struct {
-	ClusterFailoverHostAdmissionControlInfoHostStatus []ClusterFailoverHostAdmissionControlInfoHostStatus `xml:"ClusterFailoverHostAdmissionControlInfoHostStatus,omitempty" json:"ClusterFailoverHostAdmissionControlInfoHostStatus,omitempty"`
+	ClusterFailoverHostAdmissionControlInfoHostStatus []ClusterFailoverHostAdmissionControlInfoHostStatus `xml:"ClusterFailoverHostAdmissionControlInfoHostStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1941,7 +1941,7 @@ func init() {
 }
 
 type ArrayOfClusterGroupInfo struct {
-	ClusterGroupInfo []BaseClusterGroupInfo `xml:"ClusterGroupInfo,omitempty,typeattr" json:"ClusterGroupInfo,omitempty"`
+	ClusterGroupInfo []BaseClusterGroupInfo `xml:"ClusterGroupInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1949,7 +1949,7 @@ func init() {
 }
 
 type ArrayOfClusterGroupSpec struct {
-	ClusterGroupSpec []ClusterGroupSpec `xml:"ClusterGroupSpec,omitempty" json:"ClusterGroupSpec,omitempty"`
+	ClusterGroupSpec []ClusterGroupSpec `xml:"ClusterGroupSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1957,7 +1957,7 @@ func init() {
 }
 
 type ArrayOfClusterHostRecommendation struct {
-	ClusterHostRecommendation []ClusterHostRecommendation `xml:"ClusterHostRecommendation,omitempty" json:"ClusterHostRecommendation,omitempty"`
+	ClusterHostRecommendation []ClusterHostRecommendation `xml:"ClusterHostRecommendation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1965,7 +1965,7 @@ func init() {
 }
 
 type ArrayOfClusterIoFilterInfo struct {
-	ClusterIoFilterInfo []ClusterIoFilterInfo `xml:"ClusterIoFilterInfo,omitempty" json:"ClusterIoFilterInfo,omitempty"`
+	ClusterIoFilterInfo []ClusterIoFilterInfo `xml:"ClusterIoFilterInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1973,7 +1973,7 @@ func init() {
 }
 
 type ArrayOfClusterNotAttemptedVmInfo struct {
-	ClusterNotAttemptedVmInfo []ClusterNotAttemptedVmInfo `xml:"ClusterNotAttemptedVmInfo,omitempty" json:"ClusterNotAttemptedVmInfo,omitempty"`
+	ClusterNotAttemptedVmInfo []ClusterNotAttemptedVmInfo `xml:"ClusterNotAttemptedVmInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1981,7 +1981,7 @@ func init() {
 }
 
 type ArrayOfClusterRecommendation struct {
-	ClusterRecommendation []ClusterRecommendation `xml:"ClusterRecommendation,omitempty" json:"ClusterRecommendation,omitempty"`
+	ClusterRecommendation []ClusterRecommendation `xml:"ClusterRecommendation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -1989,7 +1989,7 @@ func init() {
 }
 
 type ArrayOfClusterRuleInfo struct {
-	ClusterRuleInfo []BaseClusterRuleInfo `xml:"ClusterRuleInfo,omitempty,typeattr" json:"ClusterRuleInfo,omitempty"`
+	ClusterRuleInfo []BaseClusterRuleInfo `xml:"ClusterRuleInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -1997,7 +1997,7 @@ func init() {
 }
 
 type ArrayOfClusterRuleSpec struct {
-	ClusterRuleSpec []ClusterRuleSpec `xml:"ClusterRuleSpec,omitempty" json:"ClusterRuleSpec,omitempty"`
+	ClusterRuleSpec []ClusterRuleSpec `xml:"ClusterRuleSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2005,7 +2005,7 @@ func init() {
 }
 
 type ArrayOfClusterTagCategoryUpdateSpec struct {
-	ClusterTagCategoryUpdateSpec []ClusterTagCategoryUpdateSpec `xml:"ClusterTagCategoryUpdateSpec,omitempty" json:"ClusterTagCategoryUpdateSpec,omitempty"`
+	ClusterTagCategoryUpdateSpec []ClusterTagCategoryUpdateSpec `xml:"ClusterTagCategoryUpdateSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2013,7 +2013,7 @@ func init() {
 }
 
 type ArrayOfClusterVmOrchestrationInfo struct {
-	ClusterVmOrchestrationInfo []ClusterVmOrchestrationInfo `xml:"ClusterVmOrchestrationInfo,omitempty" json:"ClusterVmOrchestrationInfo,omitempty"`
+	ClusterVmOrchestrationInfo []ClusterVmOrchestrationInfo `xml:"ClusterVmOrchestrationInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2021,7 +2021,7 @@ func init() {
 }
 
 type ArrayOfClusterVmOrchestrationSpec struct {
-	ClusterVmOrchestrationSpec []ClusterVmOrchestrationSpec `xml:"ClusterVmOrchestrationSpec,omitempty" json:"ClusterVmOrchestrationSpec,omitempty"`
+	ClusterVmOrchestrationSpec []ClusterVmOrchestrationSpec `xml:"ClusterVmOrchestrationSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2029,7 +2029,7 @@ func init() {
 }
 
 type ArrayOfComplianceFailure struct {
-	ComplianceFailure []ComplianceFailure `xml:"ComplianceFailure,omitempty" json:"ComplianceFailure,omitempty"`
+	ComplianceFailure []ComplianceFailure `xml:"ComplianceFailure,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2037,7 +2037,7 @@ func init() {
 }
 
 type ArrayOfComplianceFailureComplianceFailureValues struct {
-	ComplianceFailureComplianceFailureValues []ComplianceFailureComplianceFailureValues `xml:"ComplianceFailureComplianceFailureValues,omitempty" json:"ComplianceFailureComplianceFailureValues,omitempty"`
+	ComplianceFailureComplianceFailureValues []ComplianceFailureComplianceFailureValues `xml:"ComplianceFailureComplianceFailureValues,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2045,7 +2045,7 @@ func init() {
 }
 
 type ArrayOfComplianceLocator struct {
-	ComplianceLocator []ComplianceLocator `xml:"ComplianceLocator,omitempty" json:"ComplianceLocator,omitempty"`
+	ComplianceLocator []ComplianceLocator `xml:"ComplianceLocator,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2053,7 +2053,7 @@ func init() {
 }
 
 type ArrayOfComplianceResult struct {
-	ComplianceResult []ComplianceResult `xml:"ComplianceResult,omitempty" json:"ComplianceResult,omitempty"`
+	ComplianceResult []ComplianceResult `xml:"ComplianceResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2061,7 +2061,7 @@ func init() {
 }
 
 type ArrayOfComputeResourceHostSPBMLicenseInfo struct {
-	ComputeResourceHostSPBMLicenseInfo []ComputeResourceHostSPBMLicenseInfo `xml:"ComputeResourceHostSPBMLicenseInfo,omitempty" json:"ComputeResourceHostSPBMLicenseInfo,omitempty"`
+	ComputeResourceHostSPBMLicenseInfo []ComputeResourceHostSPBMLicenseInfo `xml:"ComputeResourceHostSPBMLicenseInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2069,7 +2069,7 @@ func init() {
 }
 
 type ArrayOfConflictingConfigurationConfig struct {
-	ConflictingConfigurationConfig []ConflictingConfigurationConfig `xml:"ConflictingConfigurationConfig,omitempty" json:"ConflictingConfigurationConfig,omitempty"`
+	ConflictingConfigurationConfig []ConflictingConfigurationConfig `xml:"ConflictingConfigurationConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2077,7 +2077,7 @@ func init() {
 }
 
 type ArrayOfCryptoKeyId struct {
-	CryptoKeyId []CryptoKeyId `xml:"CryptoKeyId,omitempty" json:"CryptoKeyId,omitempty"`
+	CryptoKeyId []CryptoKeyId `xml:"CryptoKeyId,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2085,7 +2085,7 @@ func init() {
 }
 
 type ArrayOfCryptoKeyPlain struct {
-	CryptoKeyPlain []CryptoKeyPlain `xml:"CryptoKeyPlain,omitempty" json:"CryptoKeyPlain,omitempty"`
+	CryptoKeyPlain []CryptoKeyPlain `xml:"CryptoKeyPlain,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2093,7 +2093,7 @@ func init() {
 }
 
 type ArrayOfCryptoKeyResult struct {
-	CryptoKeyResult []CryptoKeyResult `xml:"CryptoKeyResult,omitempty" json:"CryptoKeyResult,omitempty"`
+	CryptoKeyResult []CryptoKeyResult `xml:"CryptoKeyResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2101,7 +2101,7 @@ func init() {
 }
 
 type ArrayOfCryptoManagerKmipClusterStatus struct {
-	CryptoManagerKmipClusterStatus []CryptoManagerKmipClusterStatus `xml:"CryptoManagerKmipClusterStatus,omitempty" json:"CryptoManagerKmipClusterStatus,omitempty"`
+	CryptoManagerKmipClusterStatus []CryptoManagerKmipClusterStatus `xml:"CryptoManagerKmipClusterStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2109,7 +2109,7 @@ func init() {
 }
 
 type ArrayOfCryptoManagerKmipCryptoKeyStatus struct {
-	CryptoManagerKmipCryptoKeyStatus []CryptoManagerKmipCryptoKeyStatus `xml:"CryptoManagerKmipCryptoKeyStatus,omitempty" json:"CryptoManagerKmipCryptoKeyStatus,omitempty"`
+	CryptoManagerKmipCryptoKeyStatus []CryptoManagerKmipCryptoKeyStatus `xml:"CryptoManagerKmipCryptoKeyStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2117,7 +2117,7 @@ func init() {
 }
 
 type ArrayOfCryptoManagerKmipServerStatus struct {
-	CryptoManagerKmipServerStatus []CryptoManagerKmipServerStatus `xml:"CryptoManagerKmipServerStatus,omitempty" json:"CryptoManagerKmipServerStatus,omitempty"`
+	CryptoManagerKmipServerStatus []CryptoManagerKmipServerStatus `xml:"CryptoManagerKmipServerStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2125,7 +2125,7 @@ func init() {
 }
 
 type ArrayOfCustomFieldDef struct {
-	CustomFieldDef []CustomFieldDef `xml:"CustomFieldDef,omitempty" json:"CustomFieldDef,omitempty"`
+	CustomFieldDef []CustomFieldDef `xml:"CustomFieldDef,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2133,7 +2133,7 @@ func init() {
 }
 
 type ArrayOfCustomFieldValue struct {
-	CustomFieldValue []BaseCustomFieldValue `xml:"CustomFieldValue,omitempty,typeattr" json:"CustomFieldValue,omitempty"`
+	CustomFieldValue []BaseCustomFieldValue `xml:"CustomFieldValue,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2141,7 +2141,7 @@ func init() {
 }
 
 type ArrayOfCustomizationAdapterMapping struct {
-	CustomizationAdapterMapping []CustomizationAdapterMapping `xml:"CustomizationAdapterMapping,omitempty" json:"CustomizationAdapterMapping,omitempty"`
+	CustomizationAdapterMapping []CustomizationAdapterMapping `xml:"CustomizationAdapterMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2149,7 +2149,7 @@ func init() {
 }
 
 type ArrayOfCustomizationIpV6Generator struct {
-	CustomizationIpV6Generator []BaseCustomizationIpV6Generator `xml:"CustomizationIpV6Generator,omitempty,typeattr" json:"CustomizationIpV6Generator,omitempty"`
+	CustomizationIpV6Generator []BaseCustomizationIpV6Generator `xml:"CustomizationIpV6Generator,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2157,7 +2157,7 @@ func init() {
 }
 
 type ArrayOfCustomizationSpecInfo struct {
-	CustomizationSpecInfo []CustomizationSpecInfo `xml:"CustomizationSpecInfo,omitempty" json:"CustomizationSpecInfo,omitempty"`
+	CustomizationSpecInfo []CustomizationSpecInfo `xml:"CustomizationSpecInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2165,7 +2165,7 @@ func init() {
 }
 
 type ArrayOfDVPortConfigSpec struct {
-	DVPortConfigSpec []DVPortConfigSpec `xml:"DVPortConfigSpec,omitempty" json:"DVPortConfigSpec,omitempty"`
+	DVPortConfigSpec []DVPortConfigSpec `xml:"DVPortConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2173,7 +2173,7 @@ func init() {
 }
 
 type ArrayOfDVPortgroupConfigSpec struct {
-	DVPortgroupConfigSpec []DVPortgroupConfigSpec `xml:"DVPortgroupConfigSpec,omitempty" json:"DVPortgroupConfigSpec,omitempty"`
+	DVPortgroupConfigSpec []DVPortgroupConfigSpec `xml:"DVPortgroupConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2181,7 +2181,7 @@ func init() {
 }
 
 type ArrayOfDVSHealthCheckConfig struct {
-	DVSHealthCheckConfig []BaseDVSHealthCheckConfig `xml:"DVSHealthCheckConfig,omitempty,typeattr" json:"DVSHealthCheckConfig,omitempty"`
+	DVSHealthCheckConfig []BaseDVSHealthCheckConfig `xml:"DVSHealthCheckConfig,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2189,7 +2189,7 @@ func init() {
 }
 
 type ArrayOfDVSManagerPhysicalNicsList struct {
-	DVSManagerPhysicalNicsList []DVSManagerPhysicalNicsList `xml:"DVSManagerPhysicalNicsList,omitempty" json:"DVSManagerPhysicalNicsList,omitempty"`
+	DVSManagerPhysicalNicsList []DVSManagerPhysicalNicsList `xml:"DVSManagerPhysicalNicsList,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2197,7 +2197,7 @@ func init() {
 }
 
 type ArrayOfDVSNetworkResourcePool struct {
-	DVSNetworkResourcePool []DVSNetworkResourcePool `xml:"DVSNetworkResourcePool,omitempty" json:"DVSNetworkResourcePool,omitempty"`
+	DVSNetworkResourcePool []DVSNetworkResourcePool `xml:"DVSNetworkResourcePool,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2205,7 +2205,7 @@ func init() {
 }
 
 type ArrayOfDVSNetworkResourcePoolConfigSpec struct {
-	DVSNetworkResourcePoolConfigSpec []DVSNetworkResourcePoolConfigSpec `xml:"DVSNetworkResourcePoolConfigSpec,omitempty" json:"DVSNetworkResourcePoolConfigSpec,omitempty"`
+	DVSNetworkResourcePoolConfigSpec []DVSNetworkResourcePoolConfigSpec `xml:"DVSNetworkResourcePoolConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2213,7 +2213,7 @@ func init() {
 }
 
 type ArrayOfDVSVmVnicNetworkResourcePool struct {
-	DVSVmVnicNetworkResourcePool []DVSVmVnicNetworkResourcePool `xml:"DVSVmVnicNetworkResourcePool,omitempty" json:"DVSVmVnicNetworkResourcePool,omitempty"`
+	DVSVmVnicNetworkResourcePool []DVSVmVnicNetworkResourcePool `xml:"DVSVmVnicNetworkResourcePool,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2221,7 +2221,7 @@ func init() {
 }
 
 type ArrayOfDasHeartbeatDatastoreInfo struct {
-	DasHeartbeatDatastoreInfo []DasHeartbeatDatastoreInfo `xml:"DasHeartbeatDatastoreInfo,omitempty" json:"DasHeartbeatDatastoreInfo,omitempty"`
+	DasHeartbeatDatastoreInfo []DasHeartbeatDatastoreInfo `xml:"DasHeartbeatDatastoreInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2229,7 +2229,7 @@ func init() {
 }
 
 type ArrayOfDatacenterBasicConnectInfo struct {
-	DatacenterBasicConnectInfo []DatacenterBasicConnectInfo `xml:"DatacenterBasicConnectInfo,omitempty" json:"DatacenterBasicConnectInfo,omitempty"`
+	DatacenterBasicConnectInfo []DatacenterBasicConnectInfo `xml:"DatacenterBasicConnectInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2237,7 +2237,7 @@ func init() {
 }
 
 type ArrayOfDatacenterMismatchArgument struct {
-	DatacenterMismatchArgument []DatacenterMismatchArgument `xml:"DatacenterMismatchArgument,omitempty" json:"DatacenterMismatchArgument,omitempty"`
+	DatacenterMismatchArgument []DatacenterMismatchArgument `xml:"DatacenterMismatchArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2245,7 +2245,7 @@ func init() {
 }
 
 type ArrayOfDatastoreHostMount struct {
-	DatastoreHostMount []DatastoreHostMount `xml:"DatastoreHostMount,omitempty" json:"DatastoreHostMount,omitempty"`
+	DatastoreHostMount []DatastoreHostMount `xml:"DatastoreHostMount,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2253,7 +2253,7 @@ func init() {
 }
 
 type ArrayOfDatastoreMountPathDatastorePair struct {
-	DatastoreMountPathDatastorePair []DatastoreMountPathDatastorePair `xml:"DatastoreMountPathDatastorePair,omitempty" json:"DatastoreMountPathDatastorePair,omitempty"`
+	DatastoreMountPathDatastorePair []DatastoreMountPathDatastorePair `xml:"DatastoreMountPathDatastorePair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2261,7 +2261,7 @@ func init() {
 }
 
 type ArrayOfDatastoreVVolContainerFailoverPair struct {
-	DatastoreVVolContainerFailoverPair []DatastoreVVolContainerFailoverPair `xml:"DatastoreVVolContainerFailoverPair,omitempty" json:"DatastoreVVolContainerFailoverPair,omitempty"`
+	DatastoreVVolContainerFailoverPair []DatastoreVVolContainerFailoverPair `xml:"DatastoreVVolContainerFailoverPair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2269,7 +2269,7 @@ func init() {
 }
 
 type ArrayOfDesiredSoftwareSpecComponentSpec struct {
-	DesiredSoftwareSpecComponentSpec []DesiredSoftwareSpecComponentSpec `xml:"DesiredSoftwareSpecComponentSpec,omitempty" json:"DesiredSoftwareSpecComponentSpec,omitempty"`
+	DesiredSoftwareSpecComponentSpec []DesiredSoftwareSpecComponentSpec `xml:"DesiredSoftwareSpecComponentSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2277,7 +2277,7 @@ func init() {
 }
 
 type ArrayOfDiagnosticManagerBundleInfo struct {
-	DiagnosticManagerBundleInfo []DiagnosticManagerBundleInfo `xml:"DiagnosticManagerBundleInfo,omitempty" json:"DiagnosticManagerBundleInfo,omitempty"`
+	DiagnosticManagerBundleInfo []DiagnosticManagerBundleInfo `xml:"DiagnosticManagerBundleInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2285,7 +2285,7 @@ func init() {
 }
 
 type ArrayOfDiagnosticManagerLogDescriptor struct {
-	DiagnosticManagerLogDescriptor []DiagnosticManagerLogDescriptor `xml:"DiagnosticManagerLogDescriptor,omitempty" json:"DiagnosticManagerLogDescriptor,omitempty"`
+	DiagnosticManagerLogDescriptor []DiagnosticManagerLogDescriptor `xml:"DiagnosticManagerLogDescriptor,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2293,7 +2293,7 @@ func init() {
 }
 
 type ArrayOfDiskChangeExtent struct {
-	DiskChangeExtent []DiskChangeExtent `xml:"DiskChangeExtent,omitempty" json:"DiskChangeExtent,omitempty"`
+	DiskChangeExtent []DiskChangeExtent `xml:"DiskChangeExtent,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2301,7 +2301,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualPort struct {
-	DistributedVirtualPort []DistributedVirtualPort `xml:"DistributedVirtualPort,omitempty" json:"DistributedVirtualPort,omitempty"`
+	DistributedVirtualPort []DistributedVirtualPort `xml:"DistributedVirtualPort,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2309,7 +2309,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualPortgroupInfo struct {
-	DistributedVirtualPortgroupInfo []DistributedVirtualPortgroupInfo `xml:"DistributedVirtualPortgroupInfo,omitempty" json:"DistributedVirtualPortgroupInfo,omitempty"`
+	DistributedVirtualPortgroupInfo []DistributedVirtualPortgroupInfo `xml:"DistributedVirtualPortgroupInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2317,7 +2317,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualPortgroupProblem struct {
-	DistributedVirtualPortgroupProblem []DistributedVirtualPortgroupProblem `xml:"DistributedVirtualPortgroupProblem,omitempty" json:"DistributedVirtualPortgroupProblem,omitempty"`
+	DistributedVirtualPortgroupProblem []DistributedVirtualPortgroupProblem `xml:"DistributedVirtualPortgroupProblem,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2325,7 +2325,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchHostMember struct {
-	DistributedVirtualSwitchHostMember []DistributedVirtualSwitchHostMember `xml:"DistributedVirtualSwitchHostMember,omitempty" json:"DistributedVirtualSwitchHostMember,omitempty"`
+	DistributedVirtualSwitchHostMember []DistributedVirtualSwitchHostMember `xml:"DistributedVirtualSwitchHostMember,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2333,7 +2333,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchHostMemberConfigSpec struct {
-	DistributedVirtualSwitchHostMemberConfigSpec []DistributedVirtualSwitchHostMemberConfigSpec `xml:"DistributedVirtualSwitchHostMemberConfigSpec,omitempty" json:"DistributedVirtualSwitchHostMemberConfigSpec,omitempty"`
+	DistributedVirtualSwitchHostMemberConfigSpec []DistributedVirtualSwitchHostMemberConfigSpec `xml:"DistributedVirtualSwitchHostMemberConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2341,7 +2341,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchHostMemberPnicSpec struct {
-	DistributedVirtualSwitchHostMemberPnicSpec []DistributedVirtualSwitchHostMemberPnicSpec `xml:"DistributedVirtualSwitchHostMemberPnicSpec,omitempty" json:"DistributedVirtualSwitchHostMemberPnicSpec,omitempty"`
+	DistributedVirtualSwitchHostMemberPnicSpec []DistributedVirtualSwitchHostMemberPnicSpec `xml:"DistributedVirtualSwitchHostMemberPnicSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2349,7 +2349,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchHostMemberTransportZoneInfo struct {
-	DistributedVirtualSwitchHostMemberTransportZoneInfo []DistributedVirtualSwitchHostMemberTransportZoneInfo `xml:"DistributedVirtualSwitchHostMemberTransportZoneInfo,omitempty" json:"DistributedVirtualSwitchHostMemberTransportZoneInfo,omitempty"`
+	DistributedVirtualSwitchHostMemberTransportZoneInfo []DistributedVirtualSwitchHostMemberTransportZoneInfo `xml:"DistributedVirtualSwitchHostMemberTransportZoneInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2357,7 +2357,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchHostProductSpec struct {
-	DistributedVirtualSwitchHostProductSpec []DistributedVirtualSwitchHostProductSpec `xml:"DistributedVirtualSwitchHostProductSpec,omitempty" json:"DistributedVirtualSwitchHostProductSpec,omitempty"`
+	DistributedVirtualSwitchHostProductSpec []DistributedVirtualSwitchHostProductSpec `xml:"DistributedVirtualSwitchHostProductSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2365,7 +2365,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchInfo struct {
-	DistributedVirtualSwitchInfo []DistributedVirtualSwitchInfo `xml:"DistributedVirtualSwitchInfo,omitempty" json:"DistributedVirtualSwitchInfo,omitempty"`
+	DistributedVirtualSwitchInfo []DistributedVirtualSwitchInfo `xml:"DistributedVirtualSwitchInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2373,7 +2373,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchKeyedOpaqueBlob struct {
-	DistributedVirtualSwitchKeyedOpaqueBlob []DistributedVirtualSwitchKeyedOpaqueBlob `xml:"DistributedVirtualSwitchKeyedOpaqueBlob,omitempty" json:"DistributedVirtualSwitchKeyedOpaqueBlob,omitempty"`
+	DistributedVirtualSwitchKeyedOpaqueBlob []DistributedVirtualSwitchKeyedOpaqueBlob `xml:"DistributedVirtualSwitchKeyedOpaqueBlob,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2381,7 +2381,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchManagerCompatibilityResult struct {
-	DistributedVirtualSwitchManagerCompatibilityResult []DistributedVirtualSwitchManagerCompatibilityResult `xml:"DistributedVirtualSwitchManagerCompatibilityResult,omitempty" json:"DistributedVirtualSwitchManagerCompatibilityResult,omitempty"`
+	DistributedVirtualSwitchManagerCompatibilityResult []DistributedVirtualSwitchManagerCompatibilityResult `xml:"DistributedVirtualSwitchManagerCompatibilityResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2389,7 +2389,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchManagerHostDvsFilterSpec struct {
-	DistributedVirtualSwitchManagerHostDvsFilterSpec []BaseDistributedVirtualSwitchManagerHostDvsFilterSpec `xml:"DistributedVirtualSwitchManagerHostDvsFilterSpec,omitempty,typeattr" json:"DistributedVirtualSwitchManagerHostDvsFilterSpec,omitempty"`
+	DistributedVirtualSwitchManagerHostDvsFilterSpec []BaseDistributedVirtualSwitchManagerHostDvsFilterSpec `xml:"DistributedVirtualSwitchManagerHostDvsFilterSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2397,7 +2397,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchNetworkOffloadSpec struct {
-	DistributedVirtualSwitchNetworkOffloadSpec []DistributedVirtualSwitchNetworkOffloadSpec `xml:"DistributedVirtualSwitchNetworkOffloadSpec,omitempty" json:"DistributedVirtualSwitchNetworkOffloadSpec,omitempty"`
+	DistributedVirtualSwitchNetworkOffloadSpec []DistributedVirtualSwitchNetworkOffloadSpec `xml:"DistributedVirtualSwitchNetworkOffloadSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2405,7 +2405,7 @@ func init() {
 }
 
 type ArrayOfDistributedVirtualSwitchProductSpec struct {
-	DistributedVirtualSwitchProductSpec []DistributedVirtualSwitchProductSpec `xml:"DistributedVirtualSwitchProductSpec,omitempty" json:"DistributedVirtualSwitchProductSpec,omitempty"`
+	DistributedVirtualSwitchProductSpec []DistributedVirtualSwitchProductSpec `xml:"DistributedVirtualSwitchProductSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2413,7 +2413,7 @@ func init() {
 }
 
 type ArrayOfDouble struct {
-	Double []float64 `xml:"double,omitempty" json:"double,omitempty"`
+	Double []float64 `xml:"double,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2421,7 +2421,7 @@ func init() {
 }
 
 type ArrayOfDpuStatusInfo struct {
-	DpuStatusInfo []DpuStatusInfo `xml:"DpuStatusInfo,omitempty" json:"DpuStatusInfo,omitempty"`
+	DpuStatusInfo []DpuStatusInfo `xml:"DpuStatusInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2429,7 +2429,7 @@ func init() {
 }
 
 type ArrayOfDpuStatusInfoOperationalInfo struct {
-	DpuStatusInfoOperationalInfo []DpuStatusInfoOperationalInfo `xml:"DpuStatusInfoOperationalInfo,omitempty" json:"DpuStatusInfoOperationalInfo,omitempty"`
+	DpuStatusInfoOperationalInfo []DpuStatusInfoOperationalInfo `xml:"DpuStatusInfoOperationalInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2437,7 +2437,7 @@ func init() {
 }
 
 type ArrayOfDvsApplyOperationFaultFaultOnObject struct {
-	DvsApplyOperationFaultFaultOnObject []DvsApplyOperationFaultFaultOnObject `xml:"DvsApplyOperationFaultFaultOnObject,omitempty" json:"DvsApplyOperationFaultFaultOnObject,omitempty"`
+	DvsApplyOperationFaultFaultOnObject []DvsApplyOperationFaultFaultOnObject `xml:"DvsApplyOperationFaultFaultOnObject,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2445,7 +2445,7 @@ func init() {
 }
 
 type ArrayOfDvsFilterConfig struct {
-	DvsFilterConfig []BaseDvsFilterConfig `xml:"DvsFilterConfig,omitempty,typeattr" json:"DvsFilterConfig,omitempty"`
+	DvsFilterConfig []BaseDvsFilterConfig `xml:"DvsFilterConfig,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2453,7 +2453,7 @@ func init() {
 }
 
 type ArrayOfDvsHostInfrastructureTrafficResource struct {
-	DvsHostInfrastructureTrafficResource []DvsHostInfrastructureTrafficResource `xml:"DvsHostInfrastructureTrafficResource,omitempty" json:"DvsHostInfrastructureTrafficResource,omitempty"`
+	DvsHostInfrastructureTrafficResource []DvsHostInfrastructureTrafficResource `xml:"DvsHostInfrastructureTrafficResource,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2461,7 +2461,7 @@ func init() {
 }
 
 type ArrayOfDvsHostVNicProfile struct {
-	DvsHostVNicProfile []DvsHostVNicProfile `xml:"DvsHostVNicProfile,omitempty" json:"DvsHostVNicProfile,omitempty"`
+	DvsHostVNicProfile []DvsHostVNicProfile `xml:"DvsHostVNicProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2469,7 +2469,7 @@ func init() {
 }
 
 type ArrayOfDvsNetworkRuleQualifier struct {
-	DvsNetworkRuleQualifier []BaseDvsNetworkRuleQualifier `xml:"DvsNetworkRuleQualifier,omitempty,typeattr" json:"DvsNetworkRuleQualifier,omitempty"`
+	DvsNetworkRuleQualifier []BaseDvsNetworkRuleQualifier `xml:"DvsNetworkRuleQualifier,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2477,7 +2477,7 @@ func init() {
 }
 
 type ArrayOfDvsOperationBulkFaultFaultOnHost struct {
-	DvsOperationBulkFaultFaultOnHost []DvsOperationBulkFaultFaultOnHost `xml:"DvsOperationBulkFaultFaultOnHost,omitempty" json:"DvsOperationBulkFaultFaultOnHost,omitempty"`
+	DvsOperationBulkFaultFaultOnHost []DvsOperationBulkFaultFaultOnHost `xml:"DvsOperationBulkFaultFaultOnHost,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2485,7 +2485,7 @@ func init() {
 }
 
 type ArrayOfDvsOutOfSyncHostArgument struct {
-	DvsOutOfSyncHostArgument []DvsOutOfSyncHostArgument `xml:"DvsOutOfSyncHostArgument,omitempty" json:"DvsOutOfSyncHostArgument,omitempty"`
+	DvsOutOfSyncHostArgument []DvsOutOfSyncHostArgument `xml:"DvsOutOfSyncHostArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2493,7 +2493,7 @@ func init() {
 }
 
 type ArrayOfDvsProfile struct {
-	DvsProfile []DvsProfile `xml:"DvsProfile,omitempty" json:"DvsProfile,omitempty"`
+	DvsProfile []DvsProfile `xml:"DvsProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2501,7 +2501,7 @@ func init() {
 }
 
 type ArrayOfDvsServiceConsoleVNicProfile struct {
-	DvsServiceConsoleVNicProfile []DvsServiceConsoleVNicProfile `xml:"DvsServiceConsoleVNicProfile,omitempty" json:"DvsServiceConsoleVNicProfile,omitempty"`
+	DvsServiceConsoleVNicProfile []DvsServiceConsoleVNicProfile `xml:"DvsServiceConsoleVNicProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2509,7 +2509,7 @@ func init() {
 }
 
 type ArrayOfDvsTrafficRule struct {
-	DvsTrafficRule []DvsTrafficRule `xml:"DvsTrafficRule,omitempty" json:"DvsTrafficRule,omitempty"`
+	DvsTrafficRule []DvsTrafficRule `xml:"DvsTrafficRule,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2517,7 +2517,7 @@ func init() {
 }
 
 type ArrayOfDvsVmVnicNetworkResourcePoolRuntimeInfo struct {
-	DvsVmVnicNetworkResourcePoolRuntimeInfo []DvsVmVnicNetworkResourcePoolRuntimeInfo `xml:"DvsVmVnicNetworkResourcePoolRuntimeInfo,omitempty" json:"DvsVmVnicNetworkResourcePoolRuntimeInfo,omitempty"`
+	DvsVmVnicNetworkResourcePoolRuntimeInfo []DvsVmVnicNetworkResourcePoolRuntimeInfo `xml:"DvsVmVnicNetworkResourcePoolRuntimeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2525,7 +2525,7 @@ func init() {
 }
 
 type ArrayOfDvsVmVnicResourcePoolConfigSpec struct {
-	DvsVmVnicResourcePoolConfigSpec []DvsVmVnicResourcePoolConfigSpec `xml:"DvsVmVnicResourcePoolConfigSpec,omitempty" json:"DvsVmVnicResourcePoolConfigSpec,omitempty"`
+	DvsVmVnicResourcePoolConfigSpec []DvsVmVnicResourcePoolConfigSpec `xml:"DvsVmVnicResourcePoolConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2533,7 +2533,7 @@ func init() {
 }
 
 type ArrayOfDvsVnicAllocatedResource struct {
-	DvsVnicAllocatedResource []DvsVnicAllocatedResource `xml:"DvsVnicAllocatedResource,omitempty" json:"DvsVnicAllocatedResource,omitempty"`
+	DvsVnicAllocatedResource []DvsVnicAllocatedResource `xml:"DvsVnicAllocatedResource,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2541,7 +2541,7 @@ func init() {
 }
 
 type ArrayOfDynamicProperty struct {
-	DynamicProperty []DynamicProperty `xml:"DynamicProperty,omitempty" json:"DynamicProperty,omitempty"`
+	DynamicProperty []DynamicProperty `xml:"DynamicProperty,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2549,7 +2549,7 @@ func init() {
 }
 
 type ArrayOfEVCMode struct {
-	EVCMode []EVCMode `xml:"EVCMode,omitempty" json:"EVCMode,omitempty"`
+	EVCMode []EVCMode `xml:"EVCMode,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2557,7 +2557,7 @@ func init() {
 }
 
 type ArrayOfElementDescription struct {
-	ElementDescription []BaseElementDescription `xml:"ElementDescription,omitempty,typeattr" json:"ElementDescription,omitempty"`
+	ElementDescription []BaseElementDescription `xml:"ElementDescription,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2565,7 +2565,7 @@ func init() {
 }
 
 type ArrayOfEntityBackupConfig struct {
-	EntityBackupConfig []EntityBackupConfig `xml:"EntityBackupConfig,omitempty" json:"EntityBackupConfig,omitempty"`
+	EntityBackupConfig []EntityBackupConfig `xml:"EntityBackupConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2573,7 +2573,7 @@ func init() {
 }
 
 type ArrayOfEntityPrivilege struct {
-	EntityPrivilege []EntityPrivilege `xml:"EntityPrivilege,omitempty" json:"EntityPrivilege,omitempty"`
+	EntityPrivilege []EntityPrivilege `xml:"EntityPrivilege,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2581,7 +2581,7 @@ func init() {
 }
 
 type ArrayOfEnumDescription struct {
-	EnumDescription []EnumDescription `xml:"EnumDescription,omitempty" json:"EnumDescription,omitempty"`
+	EnumDescription []EnumDescription `xml:"EnumDescription,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2589,7 +2589,7 @@ func init() {
 }
 
 type ArrayOfEvent struct {
-	Event []BaseEvent `xml:"Event,omitempty,typeattr" json:"Event,omitempty"`
+	Event []BaseEvent `xml:"Event,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2597,7 +2597,7 @@ func init() {
 }
 
 type ArrayOfEventAlarmExpressionComparison struct {
-	EventAlarmExpressionComparison []EventAlarmExpressionComparison `xml:"EventAlarmExpressionComparison,omitempty" json:"EventAlarmExpressionComparison,omitempty"`
+	EventAlarmExpressionComparison []EventAlarmExpressionComparison `xml:"EventAlarmExpressionComparison,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2605,7 +2605,7 @@ func init() {
 }
 
 type ArrayOfEventArgDesc struct {
-	EventArgDesc []EventArgDesc `xml:"EventArgDesc,omitempty" json:"EventArgDesc,omitempty"`
+	EventArgDesc []EventArgDesc `xml:"EventArgDesc,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2613,7 +2613,7 @@ func init() {
 }
 
 type ArrayOfEventDescriptionEventDetail struct {
-	EventDescriptionEventDetail []EventDescriptionEventDetail `xml:"EventDescriptionEventDetail,omitempty" json:"EventDescriptionEventDetail,omitempty"`
+	EventDescriptionEventDetail []EventDescriptionEventDetail `xml:"EventDescriptionEventDetail,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2621,7 +2621,7 @@ func init() {
 }
 
 type ArrayOfExtManagedEntityInfo struct {
-	ExtManagedEntityInfo []ExtManagedEntityInfo `xml:"ExtManagedEntityInfo,omitempty" json:"ExtManagedEntityInfo,omitempty"`
+	ExtManagedEntityInfo []ExtManagedEntityInfo `xml:"ExtManagedEntityInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2629,7 +2629,7 @@ func init() {
 }
 
 type ArrayOfExtSolutionManagerInfoTabInfo struct {
-	ExtSolutionManagerInfoTabInfo []ExtSolutionManagerInfoTabInfo `xml:"ExtSolutionManagerInfoTabInfo,omitempty" json:"ExtSolutionManagerInfoTabInfo,omitempty"`
+	ExtSolutionManagerInfoTabInfo []ExtSolutionManagerInfoTabInfo `xml:"ExtSolutionManagerInfoTabInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2637,7 +2637,7 @@ func init() {
 }
 
 type ArrayOfExtendedEventPair struct {
-	ExtendedEventPair []ExtendedEventPair `xml:"ExtendedEventPair,omitempty" json:"ExtendedEventPair,omitempty"`
+	ExtendedEventPair []ExtendedEventPair `xml:"ExtendedEventPair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2645,7 +2645,7 @@ func init() {
 }
 
 type ArrayOfExtension struct {
-	Extension []Extension `xml:"Extension,omitempty" json:"Extension,omitempty"`
+	Extension []Extension `xml:"Extension,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2653,7 +2653,7 @@ func init() {
 }
 
 type ArrayOfExtensionClientInfo struct {
-	ExtensionClientInfo []ExtensionClientInfo `xml:"ExtensionClientInfo,omitempty" json:"ExtensionClientInfo,omitempty"`
+	ExtensionClientInfo []ExtensionClientInfo `xml:"ExtensionClientInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2661,7 +2661,7 @@ func init() {
 }
 
 type ArrayOfExtensionEventTypeInfo struct {
-	ExtensionEventTypeInfo []ExtensionEventTypeInfo `xml:"ExtensionEventTypeInfo,omitempty" json:"ExtensionEventTypeInfo,omitempty"`
+	ExtensionEventTypeInfo []ExtensionEventTypeInfo `xml:"ExtensionEventTypeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2669,7 +2669,7 @@ func init() {
 }
 
 type ArrayOfExtensionFaultTypeInfo struct {
-	ExtensionFaultTypeInfo []ExtensionFaultTypeInfo `xml:"ExtensionFaultTypeInfo,omitempty" json:"ExtensionFaultTypeInfo,omitempty"`
+	ExtensionFaultTypeInfo []ExtensionFaultTypeInfo `xml:"ExtensionFaultTypeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2677,7 +2677,7 @@ func init() {
 }
 
 type ArrayOfExtensionManagerIpAllocationUsage struct {
-	ExtensionManagerIpAllocationUsage []ExtensionManagerIpAllocationUsage `xml:"ExtensionManagerIpAllocationUsage,omitempty" json:"ExtensionManagerIpAllocationUsage,omitempty"`
+	ExtensionManagerIpAllocationUsage []ExtensionManagerIpAllocationUsage `xml:"ExtensionManagerIpAllocationUsage,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2685,7 +2685,7 @@ func init() {
 }
 
 type ArrayOfExtensionPrivilegeInfo struct {
-	ExtensionPrivilegeInfo []ExtensionPrivilegeInfo `xml:"ExtensionPrivilegeInfo,omitempty" json:"ExtensionPrivilegeInfo,omitempty"`
+	ExtensionPrivilegeInfo []ExtensionPrivilegeInfo `xml:"ExtensionPrivilegeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2693,7 +2693,7 @@ func init() {
 }
 
 type ArrayOfExtensionResourceInfo struct {
-	ExtensionResourceInfo []ExtensionResourceInfo `xml:"ExtensionResourceInfo,omitempty" json:"ExtensionResourceInfo,omitempty"`
+	ExtensionResourceInfo []ExtensionResourceInfo `xml:"ExtensionResourceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2701,7 +2701,7 @@ func init() {
 }
 
 type ArrayOfExtensionServerInfo struct {
-	ExtensionServerInfo []ExtensionServerInfo `xml:"ExtensionServerInfo,omitempty" json:"ExtensionServerInfo,omitempty"`
+	ExtensionServerInfo []ExtensionServerInfo `xml:"ExtensionServerInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2709,7 +2709,7 @@ func init() {
 }
 
 type ArrayOfExtensionTaskTypeInfo struct {
-	ExtensionTaskTypeInfo []ExtensionTaskTypeInfo `xml:"ExtensionTaskTypeInfo,omitempty" json:"ExtensionTaskTypeInfo,omitempty"`
+	ExtensionTaskTypeInfo []ExtensionTaskTypeInfo `xml:"ExtensionTaskTypeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2717,7 +2717,7 @@ func init() {
 }
 
 type ArrayOfFaultToleranceDiskSpec struct {
-	FaultToleranceDiskSpec []FaultToleranceDiskSpec `xml:"FaultToleranceDiskSpec,omitempty" json:"FaultToleranceDiskSpec,omitempty"`
+	FaultToleranceDiskSpec []FaultToleranceDiskSpec `xml:"FaultToleranceDiskSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2725,7 +2725,7 @@ func init() {
 }
 
 type ArrayOfFaultsByHost struct {
-	FaultsByHost []FaultsByHost `xml:"FaultsByHost,omitempty" json:"FaultsByHost,omitempty"`
+	FaultsByHost []FaultsByHost `xml:"FaultsByHost,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2733,7 +2733,7 @@ func init() {
 }
 
 type ArrayOfFaultsByVM struct {
-	FaultsByVM []FaultsByVM `xml:"FaultsByVM,omitempty" json:"FaultsByVM,omitempty"`
+	FaultsByVM []FaultsByVM `xml:"FaultsByVM,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2741,7 +2741,7 @@ func init() {
 }
 
 type ArrayOfFcoeConfigVlanRange struct {
-	FcoeConfigVlanRange []FcoeConfigVlanRange `xml:"FcoeConfigVlanRange,omitempty" json:"FcoeConfigVlanRange,omitempty"`
+	FcoeConfigVlanRange []FcoeConfigVlanRange `xml:"FcoeConfigVlanRange,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2749,7 +2749,7 @@ func init() {
 }
 
 type ArrayOfFeatureEVCMode struct {
-	FeatureEVCMode []FeatureEVCMode `xml:"FeatureEVCMode,omitempty" json:"FeatureEVCMode,omitempty"`
+	FeatureEVCMode []FeatureEVCMode `xml:"FeatureEVCMode,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2757,7 +2757,7 @@ func init() {
 }
 
 type ArrayOfFileInfo struct {
-	FileInfo []BaseFileInfo `xml:"FileInfo,omitempty,typeattr" json:"FileInfo,omitempty"`
+	FileInfo []BaseFileInfo `xml:"FileInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2765,7 +2765,7 @@ func init() {
 }
 
 type ArrayOfFileQuery struct {
-	FileQuery []BaseFileQuery `xml:"FileQuery,omitempty,typeattr" json:"FileQuery,omitempty"`
+	FileQuery []BaseFileQuery `xml:"FileQuery,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2773,7 +2773,7 @@ func init() {
 }
 
 type ArrayOfFirewallProfileRulesetProfile struct {
-	FirewallProfileRulesetProfile []FirewallProfileRulesetProfile `xml:"FirewallProfileRulesetProfile,omitempty" json:"FirewallProfileRulesetProfile,omitempty"`
+	FirewallProfileRulesetProfile []FirewallProfileRulesetProfile `xml:"FirewallProfileRulesetProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2781,7 +2781,7 @@ func init() {
 }
 
 type ArrayOfFolderFailedHostResult struct {
-	FolderFailedHostResult []FolderFailedHostResult `xml:"FolderFailedHostResult,omitempty" json:"FolderFailedHostResult,omitempty"`
+	FolderFailedHostResult []FolderFailedHostResult `xml:"FolderFailedHostResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2789,7 +2789,7 @@ func init() {
 }
 
 type ArrayOfFolderNewHostSpec struct {
-	FolderNewHostSpec []FolderNewHostSpec `xml:"FolderNewHostSpec,omitempty" json:"FolderNewHostSpec,omitempty"`
+	FolderNewHostSpec []FolderNewHostSpec `xml:"FolderNewHostSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2797,7 +2797,7 @@ func init() {
 }
 
 type ArrayOfGuestAliases struct {
-	GuestAliases []GuestAliases `xml:"GuestAliases,omitempty" json:"GuestAliases,omitempty"`
+	GuestAliases []GuestAliases `xml:"GuestAliases,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2805,7 +2805,7 @@ func init() {
 }
 
 type ArrayOfGuestAuthAliasInfo struct {
-	GuestAuthAliasInfo []GuestAuthAliasInfo `xml:"GuestAuthAliasInfo,omitempty" json:"GuestAuthAliasInfo,omitempty"`
+	GuestAuthAliasInfo []GuestAuthAliasInfo `xml:"GuestAuthAliasInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2813,7 +2813,7 @@ func init() {
 }
 
 type ArrayOfGuestAuthSubject struct {
-	GuestAuthSubject []BaseGuestAuthSubject `xml:"GuestAuthSubject,omitempty,typeattr" json:"GuestAuthSubject,omitempty"`
+	GuestAuthSubject []BaseGuestAuthSubject `xml:"GuestAuthSubject,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2821,7 +2821,7 @@ func init() {
 }
 
 type ArrayOfGuestDiskInfo struct {
-	GuestDiskInfo []GuestDiskInfo `xml:"GuestDiskInfo,omitempty" json:"GuestDiskInfo,omitempty"`
+	GuestDiskInfo []GuestDiskInfo `xml:"GuestDiskInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2829,7 +2829,7 @@ func init() {
 }
 
 type ArrayOfGuestFileInfo struct {
-	GuestFileInfo []GuestFileInfo `xml:"GuestFileInfo,omitempty" json:"GuestFileInfo,omitempty"`
+	GuestFileInfo []GuestFileInfo `xml:"GuestFileInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2837,7 +2837,7 @@ func init() {
 }
 
 type ArrayOfGuestInfoNamespaceGenerationInfo struct {
-	GuestInfoNamespaceGenerationInfo []GuestInfoNamespaceGenerationInfo `xml:"GuestInfoNamespaceGenerationInfo,omitempty" json:"GuestInfoNamespaceGenerationInfo,omitempty"`
+	GuestInfoNamespaceGenerationInfo []GuestInfoNamespaceGenerationInfo `xml:"GuestInfoNamespaceGenerationInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2845,7 +2845,7 @@ func init() {
 }
 
 type ArrayOfGuestInfoVirtualDiskMapping struct {
-	GuestInfoVirtualDiskMapping []GuestInfoVirtualDiskMapping `xml:"GuestInfoVirtualDiskMapping,omitempty" json:"GuestInfoVirtualDiskMapping,omitempty"`
+	GuestInfoVirtualDiskMapping []GuestInfoVirtualDiskMapping `xml:"GuestInfoVirtualDiskMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2853,7 +2853,7 @@ func init() {
 }
 
 type ArrayOfGuestMappedAliases struct {
-	GuestMappedAliases []GuestMappedAliases `xml:"GuestMappedAliases,omitempty" json:"GuestMappedAliases,omitempty"`
+	GuestMappedAliases []GuestMappedAliases `xml:"GuestMappedAliases,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2861,7 +2861,7 @@ func init() {
 }
 
 type ArrayOfGuestNicInfo struct {
-	GuestNicInfo []GuestNicInfo `xml:"GuestNicInfo,omitempty" json:"GuestNicInfo,omitempty"`
+	GuestNicInfo []GuestNicInfo `xml:"GuestNicInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2869,7 +2869,7 @@ func init() {
 }
 
 type ArrayOfGuestOsDescriptor struct {
-	GuestOsDescriptor []GuestOsDescriptor `xml:"GuestOsDescriptor,omitempty" json:"GuestOsDescriptor,omitempty"`
+	GuestOsDescriptor []GuestOsDescriptor `xml:"GuestOsDescriptor,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2877,7 +2877,7 @@ func init() {
 }
 
 type ArrayOfGuestProcessInfo struct {
-	GuestProcessInfo []GuestProcessInfo `xml:"GuestProcessInfo,omitempty" json:"GuestProcessInfo,omitempty"`
+	GuestProcessInfo []GuestProcessInfo `xml:"GuestProcessInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2885,7 +2885,7 @@ func init() {
 }
 
 type ArrayOfGuestRegKeyRecordSpec struct {
-	GuestRegKeyRecordSpec []GuestRegKeyRecordSpec `xml:"GuestRegKeyRecordSpec,omitempty" json:"GuestRegKeyRecordSpec,omitempty"`
+	GuestRegKeyRecordSpec []GuestRegKeyRecordSpec `xml:"GuestRegKeyRecordSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2893,7 +2893,7 @@ func init() {
 }
 
 type ArrayOfGuestRegValueSpec struct {
-	GuestRegValueSpec []GuestRegValueSpec `xml:"GuestRegValueSpec,omitempty" json:"GuestRegValueSpec,omitempty"`
+	GuestRegValueSpec []GuestRegValueSpec `xml:"GuestRegValueSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2901,7 +2901,7 @@ func init() {
 }
 
 type ArrayOfGuestStackInfo struct {
-	GuestStackInfo []GuestStackInfo `xml:"GuestStackInfo,omitempty" json:"GuestStackInfo,omitempty"`
+	GuestStackInfo []GuestStackInfo `xml:"GuestStackInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2909,7 +2909,7 @@ func init() {
 }
 
 type ArrayOfHbrManagerVmReplicationCapability struct {
-	HbrManagerVmReplicationCapability []HbrManagerVmReplicationCapability `xml:"HbrManagerVmReplicationCapability,omitempty" json:"HbrManagerVmReplicationCapability,omitempty"`
+	HbrManagerVmReplicationCapability []HbrManagerVmReplicationCapability `xml:"HbrManagerVmReplicationCapability,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2917,7 +2917,7 @@ func init() {
 }
 
 type ArrayOfHealthUpdate struct {
-	HealthUpdate []HealthUpdate `xml:"HealthUpdate,omitempty" json:"HealthUpdate,omitempty"`
+	HealthUpdate []HealthUpdate `xml:"HealthUpdate,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2925,7 +2925,7 @@ func init() {
 }
 
 type ArrayOfHealthUpdateInfo struct {
-	HealthUpdateInfo []HealthUpdateInfo `xml:"HealthUpdateInfo,omitempty" json:"HealthUpdateInfo,omitempty"`
+	HealthUpdateInfo []HealthUpdateInfo `xml:"HealthUpdateInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2933,7 +2933,7 @@ func init() {
 }
 
 type ArrayOfHostAccessControlEntry struct {
-	HostAccessControlEntry []HostAccessControlEntry `xml:"HostAccessControlEntry,omitempty" json:"HostAccessControlEntry,omitempty"`
+	HostAccessControlEntry []HostAccessControlEntry `xml:"HostAccessControlEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2941,7 +2941,7 @@ func init() {
 }
 
 type ArrayOfHostAccountSpec struct {
-	HostAccountSpec []BaseHostAccountSpec `xml:"HostAccountSpec,omitempty,typeattr" json:"HostAccountSpec,omitempty"`
+	HostAccountSpec []BaseHostAccountSpec `xml:"HostAccountSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2949,7 +2949,7 @@ func init() {
 }
 
 type ArrayOfHostActiveDirectory struct {
-	HostActiveDirectory []HostActiveDirectory `xml:"HostActiveDirectory,omitempty" json:"HostActiveDirectory,omitempty"`
+	HostActiveDirectory []HostActiveDirectory `xml:"HostActiveDirectory,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2957,7 +2957,7 @@ func init() {
 }
 
 type ArrayOfHostAssignableHardwareBinding struct {
-	HostAssignableHardwareBinding []HostAssignableHardwareBinding `xml:"HostAssignableHardwareBinding,omitempty" json:"HostAssignableHardwareBinding,omitempty"`
+	HostAssignableHardwareBinding []HostAssignableHardwareBinding `xml:"HostAssignableHardwareBinding,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2965,7 +2965,7 @@ func init() {
 }
 
 type ArrayOfHostAssignableHardwareConfigAttributeOverride struct {
-	HostAssignableHardwareConfigAttributeOverride []HostAssignableHardwareConfigAttributeOverride `xml:"HostAssignableHardwareConfigAttributeOverride,omitempty" json:"HostAssignableHardwareConfigAttributeOverride,omitempty"`
+	HostAssignableHardwareConfigAttributeOverride []HostAssignableHardwareConfigAttributeOverride `xml:"HostAssignableHardwareConfigAttributeOverride,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2973,7 +2973,7 @@ func init() {
 }
 
 type ArrayOfHostAuthenticationStoreInfo struct {
-	HostAuthenticationStoreInfo []BaseHostAuthenticationStoreInfo `xml:"HostAuthenticationStoreInfo,omitempty,typeattr" json:"HostAuthenticationStoreInfo,omitempty"`
+	HostAuthenticationStoreInfo []BaseHostAuthenticationStoreInfo `xml:"HostAuthenticationStoreInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -2981,7 +2981,7 @@ func init() {
 }
 
 type ArrayOfHostBootDevice struct {
-	HostBootDevice []HostBootDevice `xml:"HostBootDevice,omitempty" json:"HostBootDevice,omitempty"`
+	HostBootDevice []HostBootDevice `xml:"HostBootDevice,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2989,7 +2989,7 @@ func init() {
 }
 
 type ArrayOfHostCacheConfigurationInfo struct {
-	HostCacheConfigurationInfo []HostCacheConfigurationInfo `xml:"HostCacheConfigurationInfo,omitempty" json:"HostCacheConfigurationInfo,omitempty"`
+	HostCacheConfigurationInfo []HostCacheConfigurationInfo `xml:"HostCacheConfigurationInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -2997,7 +2997,7 @@ func init() {
 }
 
 type ArrayOfHostConnectInfoNetworkInfo struct {
-	HostConnectInfoNetworkInfo []BaseHostConnectInfoNetworkInfo `xml:"HostConnectInfoNetworkInfo,omitempty,typeattr" json:"HostConnectInfoNetworkInfo,omitempty"`
+	HostConnectInfoNetworkInfo []BaseHostConnectInfoNetworkInfo `xml:"HostConnectInfoNetworkInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3005,7 +3005,7 @@ func init() {
 }
 
 type ArrayOfHostConnectSpec struct {
-	HostConnectSpec []HostConnectSpec `xml:"HostConnectSpec,omitempty" json:"HostConnectSpec,omitempty"`
+	HostConnectSpec []HostConnectSpec `xml:"HostConnectSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3013,7 +3013,7 @@ func init() {
 }
 
 type ArrayOfHostCpuIdInfo struct {
-	HostCpuIdInfo []HostCpuIdInfo `xml:"HostCpuIdInfo,omitempty" json:"HostCpuIdInfo,omitempty"`
+	HostCpuIdInfo []HostCpuIdInfo `xml:"HostCpuIdInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3021,7 +3021,7 @@ func init() {
 }
 
 type ArrayOfHostCpuPackage struct {
-	HostCpuPackage []HostCpuPackage `xml:"HostCpuPackage,omitempty" json:"HostCpuPackage,omitempty"`
+	HostCpuPackage []HostCpuPackage `xml:"HostCpuPackage,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3029,7 +3029,7 @@ func init() {
 }
 
 type ArrayOfHostDatastoreBrowserSearchResults struct {
-	HostDatastoreBrowserSearchResults []HostDatastoreBrowserSearchResults `xml:"HostDatastoreBrowserSearchResults,omitempty" json:"HostDatastoreBrowserSearchResults,omitempty"`
+	HostDatastoreBrowserSearchResults []HostDatastoreBrowserSearchResults `xml:"HostDatastoreBrowserSearchResults,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3037,7 +3037,7 @@ func init() {
 }
 
 type ArrayOfHostDatastoreConnectInfo struct {
-	HostDatastoreConnectInfo []BaseHostDatastoreConnectInfo `xml:"HostDatastoreConnectInfo,omitempty,typeattr" json:"HostDatastoreConnectInfo,omitempty"`
+	HostDatastoreConnectInfo []BaseHostDatastoreConnectInfo `xml:"HostDatastoreConnectInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3045,7 +3045,7 @@ func init() {
 }
 
 type ArrayOfHostDatastoreSystemDatastoreResult struct {
-	HostDatastoreSystemDatastoreResult []HostDatastoreSystemDatastoreResult `xml:"HostDatastoreSystemDatastoreResult,omitempty" json:"HostDatastoreSystemDatastoreResult,omitempty"`
+	HostDatastoreSystemDatastoreResult []HostDatastoreSystemDatastoreResult `xml:"HostDatastoreSystemDatastoreResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3053,7 +3053,7 @@ func init() {
 }
 
 type ArrayOfHostDateTimeSystemTimeZone struct {
-	HostDateTimeSystemTimeZone []HostDateTimeSystemTimeZone `xml:"HostDateTimeSystemTimeZone,omitempty" json:"HostDateTimeSystemTimeZone,omitempty"`
+	HostDateTimeSystemTimeZone []HostDateTimeSystemTimeZone `xml:"HostDateTimeSystemTimeZone,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3061,7 +3061,7 @@ func init() {
 }
 
 type ArrayOfHostDhcpService struct {
-	HostDhcpService []HostDhcpService `xml:"HostDhcpService,omitempty" json:"HostDhcpService,omitempty"`
+	HostDhcpService []HostDhcpService `xml:"HostDhcpService,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3069,7 +3069,7 @@ func init() {
 }
 
 type ArrayOfHostDhcpServiceConfig struct {
-	HostDhcpServiceConfig []HostDhcpServiceConfig `xml:"HostDhcpServiceConfig,omitempty" json:"HostDhcpServiceConfig,omitempty"`
+	HostDhcpServiceConfig []HostDhcpServiceConfig `xml:"HostDhcpServiceConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3077,7 +3077,7 @@ func init() {
 }
 
 type ArrayOfHostDiagnosticPartition struct {
-	HostDiagnosticPartition []HostDiagnosticPartition `xml:"HostDiagnosticPartition,omitempty" json:"HostDiagnosticPartition,omitempty"`
+	HostDiagnosticPartition []HostDiagnosticPartition `xml:"HostDiagnosticPartition,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3085,7 +3085,7 @@ func init() {
 }
 
 type ArrayOfHostDiagnosticPartitionCreateOption struct {
-	HostDiagnosticPartitionCreateOption []HostDiagnosticPartitionCreateOption `xml:"HostDiagnosticPartitionCreateOption,omitempty" json:"HostDiagnosticPartitionCreateOption,omitempty"`
+	HostDiagnosticPartitionCreateOption []HostDiagnosticPartitionCreateOption `xml:"HostDiagnosticPartitionCreateOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3093,7 +3093,7 @@ func init() {
 }
 
 type ArrayOfHostDiskConfigurationResult struct {
-	HostDiskConfigurationResult []HostDiskConfigurationResult `xml:"HostDiskConfigurationResult,omitempty" json:"HostDiskConfigurationResult,omitempty"`
+	HostDiskConfigurationResult []HostDiskConfigurationResult `xml:"HostDiskConfigurationResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3101,7 +3101,7 @@ func init() {
 }
 
 type ArrayOfHostDiskMappingPartitionOption struct {
-	HostDiskMappingPartitionOption []HostDiskMappingPartitionOption `xml:"HostDiskMappingPartitionOption,omitempty" json:"HostDiskMappingPartitionOption,omitempty"`
+	HostDiskMappingPartitionOption []HostDiskMappingPartitionOption `xml:"HostDiskMappingPartitionOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3109,7 +3109,7 @@ func init() {
 }
 
 type ArrayOfHostDiskPartitionAttributes struct {
-	HostDiskPartitionAttributes []HostDiskPartitionAttributes `xml:"HostDiskPartitionAttributes,omitempty" json:"HostDiskPartitionAttributes,omitempty"`
+	HostDiskPartitionAttributes []HostDiskPartitionAttributes `xml:"HostDiskPartitionAttributes,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3117,7 +3117,7 @@ func init() {
 }
 
 type ArrayOfHostDiskPartitionBlockRange struct {
-	HostDiskPartitionBlockRange []HostDiskPartitionBlockRange `xml:"HostDiskPartitionBlockRange,omitempty" json:"HostDiskPartitionBlockRange,omitempty"`
+	HostDiskPartitionBlockRange []HostDiskPartitionBlockRange `xml:"HostDiskPartitionBlockRange,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3125,7 +3125,7 @@ func init() {
 }
 
 type ArrayOfHostDiskPartitionInfo struct {
-	HostDiskPartitionInfo []HostDiskPartitionInfo `xml:"HostDiskPartitionInfo,omitempty" json:"HostDiskPartitionInfo,omitempty"`
+	HostDiskPartitionInfo []HostDiskPartitionInfo `xml:"HostDiskPartitionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3133,7 +3133,7 @@ func init() {
 }
 
 type ArrayOfHostDvxClass struct {
-	HostDvxClass []HostDvxClass `xml:"HostDvxClass,omitempty" json:"HostDvxClass,omitempty"`
+	HostDvxClass []HostDvxClass `xml:"HostDvxClass,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3141,7 +3141,7 @@ func init() {
 }
 
 type ArrayOfHostEventArgument struct {
-	HostEventArgument []HostEventArgument `xml:"HostEventArgument,omitempty" json:"HostEventArgument,omitempty"`
+	HostEventArgument []HostEventArgument `xml:"HostEventArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3149,7 +3149,7 @@ func init() {
 }
 
 type ArrayOfHostFeatureCapability struct {
-	HostFeatureCapability []HostFeatureCapability `xml:"HostFeatureCapability,omitempty" json:"HostFeatureCapability,omitempty"`
+	HostFeatureCapability []HostFeatureCapability `xml:"HostFeatureCapability,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3157,7 +3157,7 @@ func init() {
 }
 
 type ArrayOfHostFeatureMask struct {
-	HostFeatureMask []HostFeatureMask `xml:"HostFeatureMask,omitempty" json:"HostFeatureMask,omitempty"`
+	HostFeatureMask []HostFeatureMask `xml:"HostFeatureMask,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3165,7 +3165,7 @@ func init() {
 }
 
 type ArrayOfHostFeatureVersionInfo struct {
-	HostFeatureVersionInfo []HostFeatureVersionInfo `xml:"HostFeatureVersionInfo,omitempty" json:"HostFeatureVersionInfo,omitempty"`
+	HostFeatureVersionInfo []HostFeatureVersionInfo `xml:"HostFeatureVersionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3173,7 +3173,7 @@ func init() {
 }
 
 type ArrayOfHostFileSystemMountInfo struct {
-	HostFileSystemMountInfo []HostFileSystemMountInfo `xml:"HostFileSystemMountInfo,omitempty" json:"HostFileSystemMountInfo,omitempty"`
+	HostFileSystemMountInfo []HostFileSystemMountInfo `xml:"HostFileSystemMountInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3181,7 +3181,7 @@ func init() {
 }
 
 type ArrayOfHostFirewallConfigRuleSetConfig struct {
-	HostFirewallConfigRuleSetConfig []HostFirewallConfigRuleSetConfig `xml:"HostFirewallConfigRuleSetConfig,omitempty" json:"HostFirewallConfigRuleSetConfig,omitempty"`
+	HostFirewallConfigRuleSetConfig []HostFirewallConfigRuleSetConfig `xml:"HostFirewallConfigRuleSetConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3189,7 +3189,7 @@ func init() {
 }
 
 type ArrayOfHostFirewallRule struct {
-	HostFirewallRule []HostFirewallRule `xml:"HostFirewallRule,omitempty" json:"HostFirewallRule,omitempty"`
+	HostFirewallRule []HostFirewallRule `xml:"HostFirewallRule,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3197,7 +3197,7 @@ func init() {
 }
 
 type ArrayOfHostFirewallRuleset struct {
-	HostFirewallRuleset []HostFirewallRuleset `xml:"HostFirewallRuleset,omitempty" json:"HostFirewallRuleset,omitempty"`
+	HostFirewallRuleset []HostFirewallRuleset `xml:"HostFirewallRuleset,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3205,7 +3205,7 @@ func init() {
 }
 
 type ArrayOfHostFirewallRulesetIpNetwork struct {
-	HostFirewallRulesetIpNetwork []HostFirewallRulesetIpNetwork `xml:"HostFirewallRulesetIpNetwork,omitempty" json:"HostFirewallRulesetIpNetwork,omitempty"`
+	HostFirewallRulesetIpNetwork []HostFirewallRulesetIpNetwork `xml:"HostFirewallRulesetIpNetwork,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3213,7 +3213,7 @@ func init() {
 }
 
 type ArrayOfHostGraphicsConfigDeviceType struct {
-	HostGraphicsConfigDeviceType []HostGraphicsConfigDeviceType `xml:"HostGraphicsConfigDeviceType,omitempty" json:"HostGraphicsConfigDeviceType,omitempty"`
+	HostGraphicsConfigDeviceType []HostGraphicsConfigDeviceType `xml:"HostGraphicsConfigDeviceType,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3221,7 +3221,7 @@ func init() {
 }
 
 type ArrayOfHostGraphicsInfo struct {
-	HostGraphicsInfo []HostGraphicsInfo `xml:"HostGraphicsInfo,omitempty" json:"HostGraphicsInfo,omitempty"`
+	HostGraphicsInfo []HostGraphicsInfo `xml:"HostGraphicsInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3229,7 +3229,7 @@ func init() {
 }
 
 type ArrayOfHostHardwareElementInfo struct {
-	HostHardwareElementInfo []BaseHostHardwareElementInfo `xml:"HostHardwareElementInfo,omitempty,typeattr" json:"HostHardwareElementInfo,omitempty"`
+	HostHardwareElementInfo []BaseHostHardwareElementInfo `xml:"HostHardwareElementInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3237,7 +3237,7 @@ func init() {
 }
 
 type ArrayOfHostHostBusAdapter struct {
-	HostHostBusAdapter []BaseHostHostBusAdapter `xml:"HostHostBusAdapter,omitempty,typeattr" json:"HostHostBusAdapter,omitempty"`
+	HostHostBusAdapter []BaseHostHostBusAdapter `xml:"HostHostBusAdapter,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3245,7 +3245,7 @@ func init() {
 }
 
 type ArrayOfHostInternetScsiHbaIscsiIpv6Address struct {
-	HostInternetScsiHbaIscsiIpv6Address []HostInternetScsiHbaIscsiIpv6Address `xml:"HostInternetScsiHbaIscsiIpv6Address,omitempty" json:"HostInternetScsiHbaIscsiIpv6Address,omitempty"`
+	HostInternetScsiHbaIscsiIpv6Address []HostInternetScsiHbaIscsiIpv6Address `xml:"HostInternetScsiHbaIscsiIpv6Address,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3253,7 +3253,7 @@ func init() {
 }
 
 type ArrayOfHostInternetScsiHbaParamValue struct {
-	HostInternetScsiHbaParamValue []HostInternetScsiHbaParamValue `xml:"HostInternetScsiHbaParamValue,omitempty" json:"HostInternetScsiHbaParamValue,omitempty"`
+	HostInternetScsiHbaParamValue []HostInternetScsiHbaParamValue `xml:"HostInternetScsiHbaParamValue,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3261,7 +3261,7 @@ func init() {
 }
 
 type ArrayOfHostInternetScsiHbaSendTarget struct {
-	HostInternetScsiHbaSendTarget []HostInternetScsiHbaSendTarget `xml:"HostInternetScsiHbaSendTarget,omitempty" json:"HostInternetScsiHbaSendTarget,omitempty"`
+	HostInternetScsiHbaSendTarget []HostInternetScsiHbaSendTarget `xml:"HostInternetScsiHbaSendTarget,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3269,7 +3269,7 @@ func init() {
 }
 
 type ArrayOfHostInternetScsiHbaStaticTarget struct {
-	HostInternetScsiHbaStaticTarget []HostInternetScsiHbaStaticTarget `xml:"HostInternetScsiHbaStaticTarget,omitempty" json:"HostInternetScsiHbaStaticTarget,omitempty"`
+	HostInternetScsiHbaStaticTarget []HostInternetScsiHbaStaticTarget `xml:"HostInternetScsiHbaStaticTarget,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3277,7 +3277,7 @@ func init() {
 }
 
 type ArrayOfHostIoFilterInfo struct {
-	HostIoFilterInfo []HostIoFilterInfo `xml:"HostIoFilterInfo,omitempty" json:"HostIoFilterInfo,omitempty"`
+	HostIoFilterInfo []HostIoFilterInfo `xml:"HostIoFilterInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3285,7 +3285,7 @@ func init() {
 }
 
 type ArrayOfHostIpConfigIpV6Address struct {
-	HostIpConfigIpV6Address []HostIpConfigIpV6Address `xml:"HostIpConfigIpV6Address,omitempty" json:"HostIpConfigIpV6Address,omitempty"`
+	HostIpConfigIpV6Address []HostIpConfigIpV6Address `xml:"HostIpConfigIpV6Address,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3293,7 +3293,7 @@ func init() {
 }
 
 type ArrayOfHostIpRouteEntry struct {
-	HostIpRouteEntry []HostIpRouteEntry `xml:"HostIpRouteEntry,omitempty" json:"HostIpRouteEntry,omitempty"`
+	HostIpRouteEntry []HostIpRouteEntry `xml:"HostIpRouteEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3301,7 +3301,7 @@ func init() {
 }
 
 type ArrayOfHostIpRouteOp struct {
-	HostIpRouteOp []HostIpRouteOp `xml:"HostIpRouteOp,omitempty" json:"HostIpRouteOp,omitempty"`
+	HostIpRouteOp []HostIpRouteOp `xml:"HostIpRouteOp,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3309,7 +3309,7 @@ func init() {
 }
 
 type ArrayOfHostLowLevelProvisioningManagerDiskLayoutSpec struct {
-	HostLowLevelProvisioningManagerDiskLayoutSpec []HostLowLevelProvisioningManagerDiskLayoutSpec `xml:"HostLowLevelProvisioningManagerDiskLayoutSpec,omitempty" json:"HostLowLevelProvisioningManagerDiskLayoutSpec,omitempty"`
+	HostLowLevelProvisioningManagerDiskLayoutSpec []HostLowLevelProvisioningManagerDiskLayoutSpec `xml:"HostLowLevelProvisioningManagerDiskLayoutSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3317,7 +3317,7 @@ func init() {
 }
 
 type ArrayOfHostLowLevelProvisioningManagerFileDeleteResult struct {
-	HostLowLevelProvisioningManagerFileDeleteResult []HostLowLevelProvisioningManagerFileDeleteResult `xml:"HostLowLevelProvisioningManagerFileDeleteResult,omitempty" json:"HostLowLevelProvisioningManagerFileDeleteResult,omitempty"`
+	HostLowLevelProvisioningManagerFileDeleteResult []HostLowLevelProvisioningManagerFileDeleteResult `xml:"HostLowLevelProvisioningManagerFileDeleteResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3325,7 +3325,7 @@ func init() {
 }
 
 type ArrayOfHostLowLevelProvisioningManagerFileDeleteSpec struct {
-	HostLowLevelProvisioningManagerFileDeleteSpec []HostLowLevelProvisioningManagerFileDeleteSpec `xml:"HostLowLevelProvisioningManagerFileDeleteSpec,omitempty" json:"HostLowLevelProvisioningManagerFileDeleteSpec,omitempty"`
+	HostLowLevelProvisioningManagerFileDeleteSpec []HostLowLevelProvisioningManagerFileDeleteSpec `xml:"HostLowLevelProvisioningManagerFileDeleteSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3333,7 +3333,7 @@ func init() {
 }
 
 type ArrayOfHostLowLevelProvisioningManagerFileReserveResult struct {
-	HostLowLevelProvisioningManagerFileReserveResult []HostLowLevelProvisioningManagerFileReserveResult `xml:"HostLowLevelProvisioningManagerFileReserveResult,omitempty" json:"HostLowLevelProvisioningManagerFileReserveResult,omitempty"`
+	HostLowLevelProvisioningManagerFileReserveResult []HostLowLevelProvisioningManagerFileReserveResult `xml:"HostLowLevelProvisioningManagerFileReserveResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3341,7 +3341,7 @@ func init() {
 }
 
 type ArrayOfHostLowLevelProvisioningManagerFileReserveSpec struct {
-	HostLowLevelProvisioningManagerFileReserveSpec []HostLowLevelProvisioningManagerFileReserveSpec `xml:"HostLowLevelProvisioningManagerFileReserveSpec,omitempty" json:"HostLowLevelProvisioningManagerFileReserveSpec,omitempty"`
+	HostLowLevelProvisioningManagerFileReserveSpec []HostLowLevelProvisioningManagerFileReserveSpec `xml:"HostLowLevelProvisioningManagerFileReserveSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3349,7 +3349,7 @@ func init() {
 }
 
 type ArrayOfHostLowLevelProvisioningManagerSnapshotLayoutSpec struct {
-	HostLowLevelProvisioningManagerSnapshotLayoutSpec []HostLowLevelProvisioningManagerSnapshotLayoutSpec `xml:"HostLowLevelProvisioningManagerSnapshotLayoutSpec,omitempty" json:"HostLowLevelProvisioningManagerSnapshotLayoutSpec,omitempty"`
+	HostLowLevelProvisioningManagerSnapshotLayoutSpec []HostLowLevelProvisioningManagerSnapshotLayoutSpec `xml:"HostLowLevelProvisioningManagerSnapshotLayoutSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3357,7 +3357,7 @@ func init() {
 }
 
 type ArrayOfHostMemberHealthCheckResult struct {
-	HostMemberHealthCheckResult []BaseHostMemberHealthCheckResult `xml:"HostMemberHealthCheckResult,omitempty,typeattr" json:"HostMemberHealthCheckResult,omitempty"`
+	HostMemberHealthCheckResult []BaseHostMemberHealthCheckResult `xml:"HostMemberHealthCheckResult,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3365,7 +3365,7 @@ func init() {
 }
 
 type ArrayOfHostMemberRuntimeInfo struct {
-	HostMemberRuntimeInfo []HostMemberRuntimeInfo `xml:"HostMemberRuntimeInfo,omitempty" json:"HostMemberRuntimeInfo,omitempty"`
+	HostMemberRuntimeInfo []HostMemberRuntimeInfo `xml:"HostMemberRuntimeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3373,7 +3373,7 @@ func init() {
 }
 
 type ArrayOfHostMemoryTierInfo struct {
-	HostMemoryTierInfo []HostMemoryTierInfo `xml:"HostMemoryTierInfo,omitempty" json:"HostMemoryTierInfo,omitempty"`
+	HostMemoryTierInfo []HostMemoryTierInfo `xml:"HostMemoryTierInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3381,7 +3381,7 @@ func init() {
 }
 
 type ArrayOfHostMultipathInfoLogicalUnit struct {
-	HostMultipathInfoLogicalUnit []HostMultipathInfoLogicalUnit `xml:"HostMultipathInfoLogicalUnit,omitempty" json:"HostMultipathInfoLogicalUnit,omitempty"`
+	HostMultipathInfoLogicalUnit []HostMultipathInfoLogicalUnit `xml:"HostMultipathInfoLogicalUnit,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3389,7 +3389,7 @@ func init() {
 }
 
 type ArrayOfHostMultipathInfoPath struct {
-	HostMultipathInfoPath []HostMultipathInfoPath `xml:"HostMultipathInfoPath,omitempty" json:"HostMultipathInfoPath,omitempty"`
+	HostMultipathInfoPath []HostMultipathInfoPath `xml:"HostMultipathInfoPath,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3397,7 +3397,7 @@ func init() {
 }
 
 type ArrayOfHostMultipathStateInfoPath struct {
-	HostMultipathStateInfoPath []HostMultipathStateInfoPath `xml:"HostMultipathStateInfoPath,omitempty" json:"HostMultipathStateInfoPath,omitempty"`
+	HostMultipathStateInfoPath []HostMultipathStateInfoPath `xml:"HostMultipathStateInfoPath,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3405,7 +3405,7 @@ func init() {
 }
 
 type ArrayOfHostNasVolumeConfig struct {
-	HostNasVolumeConfig []HostNasVolumeConfig `xml:"HostNasVolumeConfig,omitempty" json:"HostNasVolumeConfig,omitempty"`
+	HostNasVolumeConfig []HostNasVolumeConfig `xml:"HostNasVolumeConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3413,7 +3413,7 @@ func init() {
 }
 
 type ArrayOfHostNatService struct {
-	HostNatService []HostNatService `xml:"HostNatService,omitempty" json:"HostNatService,omitempty"`
+	HostNatService []HostNatService `xml:"HostNatService,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3421,7 +3421,7 @@ func init() {
 }
 
 type ArrayOfHostNatServiceConfig struct {
-	HostNatServiceConfig []HostNatServiceConfig `xml:"HostNatServiceConfig,omitempty" json:"HostNatServiceConfig,omitempty"`
+	HostNatServiceConfig []HostNatServiceConfig `xml:"HostNatServiceConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3429,7 +3429,7 @@ func init() {
 }
 
 type ArrayOfHostNatServicePortForwardSpec struct {
-	HostNatServicePortForwardSpec []HostNatServicePortForwardSpec `xml:"HostNatServicePortForwardSpec,omitempty" json:"HostNatServicePortForwardSpec,omitempty"`
+	HostNatServicePortForwardSpec []HostNatServicePortForwardSpec `xml:"HostNatServicePortForwardSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3437,7 +3437,7 @@ func init() {
 }
 
 type ArrayOfHostNetStackInstance struct {
-	HostNetStackInstance []HostNetStackInstance `xml:"HostNetStackInstance,omitempty" json:"HostNetStackInstance,omitempty"`
+	HostNetStackInstance []HostNetStackInstance `xml:"HostNetStackInstance,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3445,7 +3445,7 @@ func init() {
 }
 
 type ArrayOfHostNetworkConfigNetStackSpec struct {
-	HostNetworkConfigNetStackSpec []HostNetworkConfigNetStackSpec `xml:"HostNetworkConfigNetStackSpec,omitempty" json:"HostNetworkConfigNetStackSpec,omitempty"`
+	HostNetworkConfigNetStackSpec []HostNetworkConfigNetStackSpec `xml:"HostNetworkConfigNetStackSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3453,7 +3453,7 @@ func init() {
 }
 
 type ArrayOfHostNumaNode struct {
-	HostNumaNode []HostNumaNode `xml:"HostNumaNode,omitempty" json:"HostNumaNode,omitempty"`
+	HostNumaNode []HostNumaNode `xml:"HostNumaNode,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3461,7 +3461,7 @@ func init() {
 }
 
 type ArrayOfHostNumericSensorInfo struct {
-	HostNumericSensorInfo []HostNumericSensorInfo `xml:"HostNumericSensorInfo,omitempty" json:"HostNumericSensorInfo,omitempty"`
+	HostNumericSensorInfo []HostNumericSensorInfo `xml:"HostNumericSensorInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3469,7 +3469,7 @@ func init() {
 }
 
 type ArrayOfHostNvmeConnectSpec struct {
-	HostNvmeConnectSpec []HostNvmeConnectSpec `xml:"HostNvmeConnectSpec,omitempty" json:"HostNvmeConnectSpec,omitempty"`
+	HostNvmeConnectSpec []HostNvmeConnectSpec `xml:"HostNvmeConnectSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3477,7 +3477,7 @@ func init() {
 }
 
 type ArrayOfHostNvmeController struct {
-	HostNvmeController []HostNvmeController `xml:"HostNvmeController,omitempty" json:"HostNvmeController,omitempty"`
+	HostNvmeController []HostNvmeController `xml:"HostNvmeController,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3485,7 +3485,7 @@ func init() {
 }
 
 type ArrayOfHostNvmeDisconnectSpec struct {
-	HostNvmeDisconnectSpec []HostNvmeDisconnectSpec `xml:"HostNvmeDisconnectSpec,omitempty" json:"HostNvmeDisconnectSpec,omitempty"`
+	HostNvmeDisconnectSpec []HostNvmeDisconnectSpec `xml:"HostNvmeDisconnectSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3493,7 +3493,7 @@ func init() {
 }
 
 type ArrayOfHostNvmeDiscoveryLogEntry struct {
-	HostNvmeDiscoveryLogEntry []HostNvmeDiscoveryLogEntry `xml:"HostNvmeDiscoveryLogEntry,omitempty" json:"HostNvmeDiscoveryLogEntry,omitempty"`
+	HostNvmeDiscoveryLogEntry []HostNvmeDiscoveryLogEntry `xml:"HostNvmeDiscoveryLogEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3501,7 +3501,7 @@ func init() {
 }
 
 type ArrayOfHostNvmeNamespace struct {
-	HostNvmeNamespace []HostNvmeNamespace `xml:"HostNvmeNamespace,omitempty" json:"HostNvmeNamespace,omitempty"`
+	HostNvmeNamespace []HostNvmeNamespace `xml:"HostNvmeNamespace,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3509,7 +3509,7 @@ func init() {
 }
 
 type ArrayOfHostNvmeTopologyInterface struct {
-	HostNvmeTopologyInterface []HostNvmeTopologyInterface `xml:"HostNvmeTopologyInterface,omitempty" json:"HostNvmeTopologyInterface,omitempty"`
+	HostNvmeTopologyInterface []HostNvmeTopologyInterface `xml:"HostNvmeTopologyInterface,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3517,7 +3517,7 @@ func init() {
 }
 
 type ArrayOfHostOpaqueNetworkInfo struct {
-	HostOpaqueNetworkInfo []HostOpaqueNetworkInfo `xml:"HostOpaqueNetworkInfo,omitempty" json:"HostOpaqueNetworkInfo,omitempty"`
+	HostOpaqueNetworkInfo []HostOpaqueNetworkInfo `xml:"HostOpaqueNetworkInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3525,7 +3525,7 @@ func init() {
 }
 
 type ArrayOfHostOpaqueSwitch struct {
-	HostOpaqueSwitch []HostOpaqueSwitch `xml:"HostOpaqueSwitch,omitempty" json:"HostOpaqueSwitch,omitempty"`
+	HostOpaqueSwitch []HostOpaqueSwitch `xml:"HostOpaqueSwitch,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3533,7 +3533,7 @@ func init() {
 }
 
 type ArrayOfHostOpaqueSwitchPhysicalNicZone struct {
-	HostOpaqueSwitchPhysicalNicZone []HostOpaqueSwitchPhysicalNicZone `xml:"HostOpaqueSwitchPhysicalNicZone,omitempty" json:"HostOpaqueSwitchPhysicalNicZone,omitempty"`
+	HostOpaqueSwitchPhysicalNicZone []HostOpaqueSwitchPhysicalNicZone `xml:"HostOpaqueSwitchPhysicalNicZone,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3541,7 +3541,7 @@ func init() {
 }
 
 type ArrayOfHostPatchManagerStatus struct {
-	HostPatchManagerStatus []HostPatchManagerStatus `xml:"HostPatchManagerStatus,omitempty" json:"HostPatchManagerStatus,omitempty"`
+	HostPatchManagerStatus []HostPatchManagerStatus `xml:"HostPatchManagerStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3549,7 +3549,7 @@ func init() {
 }
 
 type ArrayOfHostPatchManagerStatusPrerequisitePatch struct {
-	HostPatchManagerStatusPrerequisitePatch []HostPatchManagerStatusPrerequisitePatch `xml:"HostPatchManagerStatusPrerequisitePatch,omitempty" json:"HostPatchManagerStatusPrerequisitePatch,omitempty"`
+	HostPatchManagerStatusPrerequisitePatch []HostPatchManagerStatusPrerequisitePatch `xml:"HostPatchManagerStatusPrerequisitePatch,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3557,7 +3557,7 @@ func init() {
 }
 
 type ArrayOfHostPathSelectionPolicyOption struct {
-	HostPathSelectionPolicyOption []HostPathSelectionPolicyOption `xml:"HostPathSelectionPolicyOption,omitempty" json:"HostPathSelectionPolicyOption,omitempty"`
+	HostPathSelectionPolicyOption []HostPathSelectionPolicyOption `xml:"HostPathSelectionPolicyOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3565,7 +3565,7 @@ func init() {
 }
 
 type ArrayOfHostPciDevice struct {
-	HostPciDevice []HostPciDevice `xml:"HostPciDevice,omitempty" json:"HostPciDevice,omitempty"`
+	HostPciDevice []HostPciDevice `xml:"HostPciDevice,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3573,7 +3573,7 @@ func init() {
 }
 
 type ArrayOfHostPciPassthruConfig struct {
-	HostPciPassthruConfig []BaseHostPciPassthruConfig `xml:"HostPciPassthruConfig,omitempty,typeattr" json:"HostPciPassthruConfig,omitempty"`
+	HostPciPassthruConfig []BaseHostPciPassthruConfig `xml:"HostPciPassthruConfig,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3581,7 +3581,7 @@ func init() {
 }
 
 type ArrayOfHostPciPassthruInfo struct {
-	HostPciPassthruInfo []BaseHostPciPassthruInfo `xml:"HostPciPassthruInfo,omitempty,typeattr" json:"HostPciPassthruInfo,omitempty"`
+	HostPciPassthruInfo []BaseHostPciPassthruInfo `xml:"HostPciPassthruInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3589,7 +3589,7 @@ func init() {
 }
 
 type ArrayOfHostPlacedVirtualNicIdentifier struct {
-	HostPlacedVirtualNicIdentifier []HostPlacedVirtualNicIdentifier `xml:"HostPlacedVirtualNicIdentifier,omitempty" json:"HostPlacedVirtualNicIdentifier,omitempty"`
+	HostPlacedVirtualNicIdentifier []HostPlacedVirtualNicIdentifier `xml:"HostPlacedVirtualNicIdentifier,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3597,7 +3597,7 @@ func init() {
 }
 
 type ArrayOfHostPlugStoreTopologyAdapter struct {
-	HostPlugStoreTopologyAdapter []HostPlugStoreTopologyAdapter `xml:"HostPlugStoreTopologyAdapter,omitempty" json:"HostPlugStoreTopologyAdapter,omitempty"`
+	HostPlugStoreTopologyAdapter []HostPlugStoreTopologyAdapter `xml:"HostPlugStoreTopologyAdapter,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3605,7 +3605,7 @@ func init() {
 }
 
 type ArrayOfHostPlugStoreTopologyDevice struct {
-	HostPlugStoreTopologyDevice []HostPlugStoreTopologyDevice `xml:"HostPlugStoreTopologyDevice,omitempty" json:"HostPlugStoreTopologyDevice,omitempty"`
+	HostPlugStoreTopologyDevice []HostPlugStoreTopologyDevice `xml:"HostPlugStoreTopologyDevice,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3613,7 +3613,7 @@ func init() {
 }
 
 type ArrayOfHostPlugStoreTopologyPath struct {
-	HostPlugStoreTopologyPath []HostPlugStoreTopologyPath `xml:"HostPlugStoreTopologyPath,omitempty" json:"HostPlugStoreTopologyPath,omitempty"`
+	HostPlugStoreTopologyPath []HostPlugStoreTopologyPath `xml:"HostPlugStoreTopologyPath,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3621,7 +3621,7 @@ func init() {
 }
 
 type ArrayOfHostPlugStoreTopologyPlugin struct {
-	HostPlugStoreTopologyPlugin []HostPlugStoreTopologyPlugin `xml:"HostPlugStoreTopologyPlugin,omitempty" json:"HostPlugStoreTopologyPlugin,omitempty"`
+	HostPlugStoreTopologyPlugin []HostPlugStoreTopologyPlugin `xml:"HostPlugStoreTopologyPlugin,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3629,7 +3629,7 @@ func init() {
 }
 
 type ArrayOfHostPlugStoreTopologyTarget struct {
-	HostPlugStoreTopologyTarget []HostPlugStoreTopologyTarget `xml:"HostPlugStoreTopologyTarget,omitempty" json:"HostPlugStoreTopologyTarget,omitempty"`
+	HostPlugStoreTopologyTarget []HostPlugStoreTopologyTarget `xml:"HostPlugStoreTopologyTarget,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3637,7 +3637,7 @@ func init() {
 }
 
 type ArrayOfHostPnicNetworkResourceInfo struct {
-	HostPnicNetworkResourceInfo []HostPnicNetworkResourceInfo `xml:"HostPnicNetworkResourceInfo,omitempty" json:"HostPnicNetworkResourceInfo,omitempty"`
+	HostPnicNetworkResourceInfo []HostPnicNetworkResourceInfo `xml:"HostPnicNetworkResourceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3645,7 +3645,7 @@ func init() {
 }
 
 type ArrayOfHostPortGroup struct {
-	HostPortGroup []HostPortGroup `xml:"HostPortGroup,omitempty" json:"HostPortGroup,omitempty"`
+	HostPortGroup []HostPortGroup `xml:"HostPortGroup,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3653,7 +3653,7 @@ func init() {
 }
 
 type ArrayOfHostPortGroupConfig struct {
-	HostPortGroupConfig []HostPortGroupConfig `xml:"HostPortGroupConfig,omitempty" json:"HostPortGroupConfig,omitempty"`
+	HostPortGroupConfig []HostPortGroupConfig `xml:"HostPortGroupConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3661,7 +3661,7 @@ func init() {
 }
 
 type ArrayOfHostPortGroupPort struct {
-	HostPortGroupPort []HostPortGroupPort `xml:"HostPortGroupPort,omitempty" json:"HostPortGroupPort,omitempty"`
+	HostPortGroupPort []HostPortGroupPort `xml:"HostPortGroupPort,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3669,7 +3669,7 @@ func init() {
 }
 
 type ArrayOfHostPortGroupProfile struct {
-	HostPortGroupProfile []HostPortGroupProfile `xml:"HostPortGroupProfile,omitempty" json:"HostPortGroupProfile,omitempty"`
+	HostPortGroupProfile []HostPortGroupProfile `xml:"HostPortGroupProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3677,7 +3677,7 @@ func init() {
 }
 
 type ArrayOfHostPowerPolicy struct {
-	HostPowerPolicy []HostPowerPolicy `xml:"HostPowerPolicy,omitempty" json:"HostPowerPolicy,omitempty"`
+	HostPowerPolicy []HostPowerPolicy `xml:"HostPowerPolicy,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3685,7 +3685,7 @@ func init() {
 }
 
 type ArrayOfHostProfileManagerCompositionResultResultElement struct {
-	HostProfileManagerCompositionResultResultElement []HostProfileManagerCompositionResultResultElement `xml:"HostProfileManagerCompositionResultResultElement,omitempty" json:"HostProfileManagerCompositionResultResultElement,omitempty"`
+	HostProfileManagerCompositionResultResultElement []HostProfileManagerCompositionResultResultElement `xml:"HostProfileManagerCompositionResultResultElement,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3693,7 +3693,7 @@ func init() {
 }
 
 type ArrayOfHostProfileManagerCompositionValidationResultResultElement struct {
-	HostProfileManagerCompositionValidationResultResultElement []HostProfileManagerCompositionValidationResultResultElement `xml:"HostProfileManagerCompositionValidationResultResultElement,omitempty" json:"HostProfileManagerCompositionValidationResultResultElement,omitempty"`
+	HostProfileManagerCompositionValidationResultResultElement []HostProfileManagerCompositionValidationResultResultElement `xml:"HostProfileManagerCompositionValidationResultResultElement,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3701,7 +3701,7 @@ func init() {
 }
 
 type ArrayOfHostProfileManagerHostToConfigSpecMap struct {
-	HostProfileManagerHostToConfigSpecMap []HostProfileManagerHostToConfigSpecMap `xml:"HostProfileManagerHostToConfigSpecMap,omitempty" json:"HostProfileManagerHostToConfigSpecMap,omitempty"`
+	HostProfileManagerHostToConfigSpecMap []HostProfileManagerHostToConfigSpecMap `xml:"HostProfileManagerHostToConfigSpecMap,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3709,7 +3709,7 @@ func init() {
 }
 
 type ArrayOfHostProfilesEntityCustomizations struct {
-	HostProfilesEntityCustomizations []BaseHostProfilesEntityCustomizations `xml:"HostProfilesEntityCustomizations,omitempty,typeattr" json:"HostProfilesEntityCustomizations,omitempty"`
+	HostProfilesEntityCustomizations []BaseHostProfilesEntityCustomizations `xml:"HostProfilesEntityCustomizations,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3717,7 +3717,7 @@ func init() {
 }
 
 type ArrayOfHostProtocolEndpoint struct {
-	HostProtocolEndpoint []HostProtocolEndpoint `xml:"HostProtocolEndpoint,omitempty" json:"HostProtocolEndpoint,omitempty"`
+	HostProtocolEndpoint []HostProtocolEndpoint `xml:"HostProtocolEndpoint,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3725,7 +3725,7 @@ func init() {
 }
 
 type ArrayOfHostProxySwitch struct {
-	HostProxySwitch []HostProxySwitch `xml:"HostProxySwitch,omitempty" json:"HostProxySwitch,omitempty"`
+	HostProxySwitch []HostProxySwitch `xml:"HostProxySwitch,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3733,7 +3733,7 @@ func init() {
 }
 
 type ArrayOfHostProxySwitchConfig struct {
-	HostProxySwitchConfig []HostProxySwitchConfig `xml:"HostProxySwitchConfig,omitempty" json:"HostProxySwitchConfig,omitempty"`
+	HostProxySwitchConfig []HostProxySwitchConfig `xml:"HostProxySwitchConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3741,7 +3741,7 @@ func init() {
 }
 
 type ArrayOfHostProxySwitchHostLagConfig struct {
-	HostProxySwitchHostLagConfig []HostProxySwitchHostLagConfig `xml:"HostProxySwitchHostLagConfig,omitempty" json:"HostProxySwitchHostLagConfig,omitempty"`
+	HostProxySwitchHostLagConfig []HostProxySwitchHostLagConfig `xml:"HostProxySwitchHostLagConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3749,7 +3749,7 @@ func init() {
 }
 
 type ArrayOfHostPtpConfigPtpPort struct {
-	HostPtpConfigPtpPort []HostPtpConfigPtpPort `xml:"HostPtpConfigPtpPort,omitempty" json:"HostPtpConfigPtpPort,omitempty"`
+	HostPtpConfigPtpPort []HostPtpConfigPtpPort `xml:"HostPtpConfigPtpPort,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3757,7 +3757,7 @@ func init() {
 }
 
 type ArrayOfHostQualifiedName struct {
-	HostQualifiedName []HostQualifiedName `xml:"HostQualifiedName,omitempty" json:"HostQualifiedName,omitempty"`
+	HostQualifiedName []HostQualifiedName `xml:"HostQualifiedName,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3765,7 +3765,7 @@ func init() {
 }
 
 type ArrayOfHostRdmaDevice struct {
-	HostRdmaDevice []HostRdmaDevice `xml:"HostRdmaDevice,omitempty" json:"HostRdmaDevice,omitempty"`
+	HostRdmaDevice []HostRdmaDevice `xml:"HostRdmaDevice,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3773,7 +3773,7 @@ func init() {
 }
 
 type ArrayOfHostRuntimeInfoNetStackInstanceRuntimeInfo struct {
-	HostRuntimeInfoNetStackInstanceRuntimeInfo []HostRuntimeInfoNetStackInstanceRuntimeInfo `xml:"HostRuntimeInfoNetStackInstanceRuntimeInfo,omitempty" json:"HostRuntimeInfoNetStackInstanceRuntimeInfo,omitempty"`
+	HostRuntimeInfoNetStackInstanceRuntimeInfo []HostRuntimeInfoNetStackInstanceRuntimeInfo `xml:"HostRuntimeInfoNetStackInstanceRuntimeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3781,7 +3781,7 @@ func init() {
 }
 
 type ArrayOfHostScsiDisk struct {
-	HostScsiDisk []HostScsiDisk `xml:"HostScsiDisk,omitempty" json:"HostScsiDisk,omitempty"`
+	HostScsiDisk []HostScsiDisk `xml:"HostScsiDisk,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3789,7 +3789,7 @@ func init() {
 }
 
 type ArrayOfHostScsiDiskPartition struct {
-	HostScsiDiskPartition []HostScsiDiskPartition `xml:"HostScsiDiskPartition,omitempty" json:"HostScsiDiskPartition,omitempty"`
+	HostScsiDiskPartition []HostScsiDiskPartition `xml:"HostScsiDiskPartition,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3797,7 +3797,7 @@ func init() {
 }
 
 type ArrayOfHostScsiTopologyInterface struct {
-	HostScsiTopologyInterface []HostScsiTopologyInterface `xml:"HostScsiTopologyInterface,omitempty" json:"HostScsiTopologyInterface,omitempty"`
+	HostScsiTopologyInterface []HostScsiTopologyInterface `xml:"HostScsiTopologyInterface,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3805,7 +3805,7 @@ func init() {
 }
 
 type ArrayOfHostScsiTopologyLun struct {
-	HostScsiTopologyLun []HostScsiTopologyLun `xml:"HostScsiTopologyLun,omitempty" json:"HostScsiTopologyLun,omitempty"`
+	HostScsiTopologyLun []HostScsiTopologyLun `xml:"HostScsiTopologyLun,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3813,7 +3813,7 @@ func init() {
 }
 
 type ArrayOfHostScsiTopologyTarget struct {
-	HostScsiTopologyTarget []HostScsiTopologyTarget `xml:"HostScsiTopologyTarget,omitempty" json:"HostScsiTopologyTarget,omitempty"`
+	HostScsiTopologyTarget []HostScsiTopologyTarget `xml:"HostScsiTopologyTarget,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3821,7 +3821,7 @@ func init() {
 }
 
 type ArrayOfHostService struct {
-	HostService []HostService `xml:"HostService,omitempty" json:"HostService,omitempty"`
+	HostService []HostService `xml:"HostService,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3829,7 +3829,7 @@ func init() {
 }
 
 type ArrayOfHostServiceConfig struct {
-	HostServiceConfig []HostServiceConfig `xml:"HostServiceConfig,omitempty" json:"HostServiceConfig,omitempty"`
+	HostServiceConfig []HostServiceConfig `xml:"HostServiceConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3837,7 +3837,7 @@ func init() {
 }
 
 type ArrayOfHostSharedGpuCapabilities struct {
-	HostSharedGpuCapabilities []HostSharedGpuCapabilities `xml:"HostSharedGpuCapabilities,omitempty" json:"HostSharedGpuCapabilities,omitempty"`
+	HostSharedGpuCapabilities []HostSharedGpuCapabilities `xml:"HostSharedGpuCapabilities,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3845,7 +3845,7 @@ func init() {
 }
 
 type ArrayOfHostSnmpDestination struct {
-	HostSnmpDestination []HostSnmpDestination `xml:"HostSnmpDestination,omitempty" json:"HostSnmpDestination,omitempty"`
+	HostSnmpDestination []HostSnmpDestination `xml:"HostSnmpDestination,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3853,7 +3853,7 @@ func init() {
 }
 
 type ArrayOfHostSriovDevicePoolInfo struct {
-	HostSriovDevicePoolInfo []BaseHostSriovDevicePoolInfo `xml:"HostSriovDevicePoolInfo,omitempty,typeattr" json:"HostSriovDevicePoolInfo,omitempty"`
+	HostSriovDevicePoolInfo []BaseHostSriovDevicePoolInfo `xml:"HostSriovDevicePoolInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3861,7 +3861,7 @@ func init() {
 }
 
 type ArrayOfHostSslThumbprintInfo struct {
-	HostSslThumbprintInfo []HostSslThumbprintInfo `xml:"HostSslThumbprintInfo,omitempty" json:"HostSslThumbprintInfo,omitempty"`
+	HostSslThumbprintInfo []HostSslThumbprintInfo `xml:"HostSslThumbprintInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3869,7 +3869,7 @@ func init() {
 }
 
 type ArrayOfHostStorageArrayTypePolicyOption struct {
-	HostStorageArrayTypePolicyOption []HostStorageArrayTypePolicyOption `xml:"HostStorageArrayTypePolicyOption,omitempty" json:"HostStorageArrayTypePolicyOption,omitempty"`
+	HostStorageArrayTypePolicyOption []HostStorageArrayTypePolicyOption `xml:"HostStorageArrayTypePolicyOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3877,7 +3877,7 @@ func init() {
 }
 
 type ArrayOfHostStorageElementInfo struct {
-	HostStorageElementInfo []HostStorageElementInfo `xml:"HostStorageElementInfo,omitempty" json:"HostStorageElementInfo,omitempty"`
+	HostStorageElementInfo []HostStorageElementInfo `xml:"HostStorageElementInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3885,7 +3885,7 @@ func init() {
 }
 
 type ArrayOfHostStorageOperationalInfo struct {
-	HostStorageOperationalInfo []HostStorageOperationalInfo `xml:"HostStorageOperationalInfo,omitempty" json:"HostStorageOperationalInfo,omitempty"`
+	HostStorageOperationalInfo []HostStorageOperationalInfo `xml:"HostStorageOperationalInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3893,7 +3893,7 @@ func init() {
 }
 
 type ArrayOfHostStorageSystemDiskLocatorLedResult struct {
-	HostStorageSystemDiskLocatorLedResult []HostStorageSystemDiskLocatorLedResult `xml:"HostStorageSystemDiskLocatorLedResult,omitempty" json:"HostStorageSystemDiskLocatorLedResult,omitempty"`
+	HostStorageSystemDiskLocatorLedResult []HostStorageSystemDiskLocatorLedResult `xml:"HostStorageSystemDiskLocatorLedResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3901,7 +3901,7 @@ func init() {
 }
 
 type ArrayOfHostStorageSystemScsiLunResult struct {
-	HostStorageSystemScsiLunResult []HostStorageSystemScsiLunResult `xml:"HostStorageSystemScsiLunResult,omitempty" json:"HostStorageSystemScsiLunResult,omitempty"`
+	HostStorageSystemScsiLunResult []HostStorageSystemScsiLunResult `xml:"HostStorageSystemScsiLunResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3909,7 +3909,7 @@ func init() {
 }
 
 type ArrayOfHostStorageSystemVmfsVolumeResult struct {
-	HostStorageSystemVmfsVolumeResult []HostStorageSystemVmfsVolumeResult `xml:"HostStorageSystemVmfsVolumeResult,omitempty" json:"HostStorageSystemVmfsVolumeResult,omitempty"`
+	HostStorageSystemVmfsVolumeResult []HostStorageSystemVmfsVolumeResult `xml:"HostStorageSystemVmfsVolumeResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3917,7 +3917,7 @@ func init() {
 }
 
 type ArrayOfHostSubSpecification struct {
-	HostSubSpecification []HostSubSpecification `xml:"HostSubSpecification,omitempty" json:"HostSubSpecification,omitempty"`
+	HostSubSpecification []HostSubSpecification `xml:"HostSubSpecification,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3925,7 +3925,7 @@ func init() {
 }
 
 type ArrayOfHostSystemIdentificationInfo struct {
-	HostSystemIdentificationInfo []HostSystemIdentificationInfo `xml:"HostSystemIdentificationInfo,omitempty" json:"HostSystemIdentificationInfo,omitempty"`
+	HostSystemIdentificationInfo []HostSystemIdentificationInfo `xml:"HostSystemIdentificationInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3933,7 +3933,7 @@ func init() {
 }
 
 type ArrayOfHostSystemResourceInfo struct {
-	HostSystemResourceInfo []HostSystemResourceInfo `xml:"HostSystemResourceInfo,omitempty" json:"HostSystemResourceInfo,omitempty"`
+	HostSystemResourceInfo []HostSystemResourceInfo `xml:"HostSystemResourceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3941,7 +3941,7 @@ func init() {
 }
 
 type ArrayOfHostSystemSwapConfigurationSystemSwapOption struct {
-	HostSystemSwapConfigurationSystemSwapOption []BaseHostSystemSwapConfigurationSystemSwapOption `xml:"HostSystemSwapConfigurationSystemSwapOption,omitempty,typeattr" json:"HostSystemSwapConfigurationSystemSwapOption,omitempty"`
+	HostSystemSwapConfigurationSystemSwapOption []BaseHostSystemSwapConfigurationSystemSwapOption `xml:"HostSystemSwapConfigurationSystemSwapOption,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -3949,7 +3949,7 @@ func init() {
 }
 
 type ArrayOfHostTpmDigestInfo struct {
-	HostTpmDigestInfo []HostTpmDigestInfo `xml:"HostTpmDigestInfo,omitempty" json:"HostTpmDigestInfo,omitempty"`
+	HostTpmDigestInfo []HostTpmDigestInfo `xml:"HostTpmDigestInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3957,7 +3957,7 @@ func init() {
 }
 
 type ArrayOfHostTpmEventLogEntry struct {
-	HostTpmEventLogEntry []HostTpmEventLogEntry `xml:"HostTpmEventLogEntry,omitempty" json:"HostTpmEventLogEntry,omitempty"`
+	HostTpmEventLogEntry []HostTpmEventLogEntry `xml:"HostTpmEventLogEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3965,7 +3965,7 @@ func init() {
 }
 
 type ArrayOfHostTrustAuthorityAttestationInfo struct {
-	HostTrustAuthorityAttestationInfo []HostTrustAuthorityAttestationInfo `xml:"HostTrustAuthorityAttestationInfo,omitempty" json:"HostTrustAuthorityAttestationInfo,omitempty"`
+	HostTrustAuthorityAttestationInfo []HostTrustAuthorityAttestationInfo `xml:"HostTrustAuthorityAttestationInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3973,7 +3973,7 @@ func init() {
 }
 
 type ArrayOfHostUnresolvedVmfsExtent struct {
-	HostUnresolvedVmfsExtent []HostUnresolvedVmfsExtent `xml:"HostUnresolvedVmfsExtent,omitempty" json:"HostUnresolvedVmfsExtent,omitempty"`
+	HostUnresolvedVmfsExtent []HostUnresolvedVmfsExtent `xml:"HostUnresolvedVmfsExtent,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3981,7 +3981,7 @@ func init() {
 }
 
 type ArrayOfHostUnresolvedVmfsResolutionResult struct {
-	HostUnresolvedVmfsResolutionResult []HostUnresolvedVmfsResolutionResult `xml:"HostUnresolvedVmfsResolutionResult,omitempty" json:"HostUnresolvedVmfsResolutionResult,omitempty"`
+	HostUnresolvedVmfsResolutionResult []HostUnresolvedVmfsResolutionResult `xml:"HostUnresolvedVmfsResolutionResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3989,7 +3989,7 @@ func init() {
 }
 
 type ArrayOfHostUnresolvedVmfsResolutionSpec struct {
-	HostUnresolvedVmfsResolutionSpec []HostUnresolvedVmfsResolutionSpec `xml:"HostUnresolvedVmfsResolutionSpec,omitempty" json:"HostUnresolvedVmfsResolutionSpec,omitempty"`
+	HostUnresolvedVmfsResolutionSpec []HostUnresolvedVmfsResolutionSpec `xml:"HostUnresolvedVmfsResolutionSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -3997,7 +3997,7 @@ func init() {
 }
 
 type ArrayOfHostUnresolvedVmfsVolume struct {
-	HostUnresolvedVmfsVolume []HostUnresolvedVmfsVolume `xml:"HostUnresolvedVmfsVolume,omitempty" json:"HostUnresolvedVmfsVolume,omitempty"`
+	HostUnresolvedVmfsVolume []HostUnresolvedVmfsVolume `xml:"HostUnresolvedVmfsVolume,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4005,7 +4005,7 @@ func init() {
 }
 
 type ArrayOfHostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption struct {
-	HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption []HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption `xml:"HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption,omitempty" json:"HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption,omitempty"`
+	HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption []HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption `xml:"HostVFlashManagerVFlashCacheConfigInfoVFlashModuleConfigOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4013,7 +4013,7 @@ func init() {
 }
 
 type ArrayOfHostVMotionCompatibility struct {
-	HostVMotionCompatibility []HostVMotionCompatibility `xml:"HostVMotionCompatibility,omitempty" json:"HostVMotionCompatibility,omitempty"`
+	HostVMotionCompatibility []HostVMotionCompatibility `xml:"HostVMotionCompatibility,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4021,7 +4021,7 @@ func init() {
 }
 
 type ArrayOfHostVirtualNic struct {
-	HostVirtualNic []HostVirtualNic `xml:"HostVirtualNic,omitempty" json:"HostVirtualNic,omitempty"`
+	HostVirtualNic []HostVirtualNic `xml:"HostVirtualNic,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4029,7 +4029,7 @@ func init() {
 }
 
 type ArrayOfHostVirtualNicConfig struct {
-	HostVirtualNicConfig []HostVirtualNicConfig `xml:"HostVirtualNicConfig,omitempty" json:"HostVirtualNicConfig,omitempty"`
+	HostVirtualNicConfig []HostVirtualNicConfig `xml:"HostVirtualNicConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4037,7 +4037,7 @@ func init() {
 }
 
 type ArrayOfHostVirtualNicManagerNicTypeSelection struct {
-	HostVirtualNicManagerNicTypeSelection []HostVirtualNicManagerNicTypeSelection `xml:"HostVirtualNicManagerNicTypeSelection,omitempty" json:"HostVirtualNicManagerNicTypeSelection,omitempty"`
+	HostVirtualNicManagerNicTypeSelection []HostVirtualNicManagerNicTypeSelection `xml:"HostVirtualNicManagerNicTypeSelection,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4045,7 +4045,7 @@ func init() {
 }
 
 type ArrayOfHostVirtualSwitch struct {
-	HostVirtualSwitch []HostVirtualSwitch `xml:"HostVirtualSwitch,omitempty" json:"HostVirtualSwitch,omitempty"`
+	HostVirtualSwitch []HostVirtualSwitch `xml:"HostVirtualSwitch,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4053,7 +4053,7 @@ func init() {
 }
 
 type ArrayOfHostVirtualSwitchConfig struct {
-	HostVirtualSwitchConfig []HostVirtualSwitchConfig `xml:"HostVirtualSwitchConfig,omitempty" json:"HostVirtualSwitchConfig,omitempty"`
+	HostVirtualSwitchConfig []HostVirtualSwitchConfig `xml:"HostVirtualSwitchConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4061,7 +4061,7 @@ func init() {
 }
 
 type ArrayOfHostVmciAccessManagerAccessSpec struct {
-	HostVmciAccessManagerAccessSpec []HostVmciAccessManagerAccessSpec `xml:"HostVmciAccessManagerAccessSpec,omitempty" json:"HostVmciAccessManagerAccessSpec,omitempty"`
+	HostVmciAccessManagerAccessSpec []HostVmciAccessManagerAccessSpec `xml:"HostVmciAccessManagerAccessSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4069,7 +4069,7 @@ func init() {
 }
 
 type ArrayOfHostVmfsRescanResult struct {
-	HostVmfsRescanResult []HostVmfsRescanResult `xml:"HostVmfsRescanResult,omitempty" json:"HostVmfsRescanResult,omitempty"`
+	HostVmfsRescanResult []HostVmfsRescanResult `xml:"HostVmfsRescanResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4077,7 +4077,7 @@ func init() {
 }
 
 type ArrayOfHostVsanInternalSystemCmmdsQuery struct {
-	HostVsanInternalSystemCmmdsQuery []HostVsanInternalSystemCmmdsQuery `xml:"HostVsanInternalSystemCmmdsQuery,omitempty" json:"HostVsanInternalSystemCmmdsQuery,omitempty"`
+	HostVsanInternalSystemCmmdsQuery []HostVsanInternalSystemCmmdsQuery `xml:"HostVsanInternalSystemCmmdsQuery,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4085,7 +4085,7 @@ func init() {
 }
 
 type ArrayOfHostVsanInternalSystemDeleteVsanObjectsResult struct {
-	HostVsanInternalSystemDeleteVsanObjectsResult []HostVsanInternalSystemDeleteVsanObjectsResult `xml:"HostVsanInternalSystemDeleteVsanObjectsResult,omitempty" json:"HostVsanInternalSystemDeleteVsanObjectsResult,omitempty"`
+	HostVsanInternalSystemDeleteVsanObjectsResult []HostVsanInternalSystemDeleteVsanObjectsResult `xml:"HostVsanInternalSystemDeleteVsanObjectsResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4093,7 +4093,7 @@ func init() {
 }
 
 type ArrayOfHostVsanInternalSystemVsanObjectOperationResult struct {
-	HostVsanInternalSystemVsanObjectOperationResult []HostVsanInternalSystemVsanObjectOperationResult `xml:"HostVsanInternalSystemVsanObjectOperationResult,omitempty" json:"HostVsanInternalSystemVsanObjectOperationResult,omitempty"`
+	HostVsanInternalSystemVsanObjectOperationResult []HostVsanInternalSystemVsanObjectOperationResult `xml:"HostVsanInternalSystemVsanObjectOperationResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4101,7 +4101,7 @@ func init() {
 }
 
 type ArrayOfHostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult struct {
-	HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult []HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult `xml:"HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult,omitempty" json:"HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult,omitempty"`
+	HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult []HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult `xml:"HostVsanInternalSystemVsanPhysicalDiskDiagnosticsResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4109,7 +4109,7 @@ func init() {
 }
 
 type ArrayOfHttpNfcLeaseDatastoreLeaseInfo struct {
-	HttpNfcLeaseDatastoreLeaseInfo []HttpNfcLeaseDatastoreLeaseInfo `xml:"HttpNfcLeaseDatastoreLeaseInfo,omitempty" json:"HttpNfcLeaseDatastoreLeaseInfo,omitempty"`
+	HttpNfcLeaseDatastoreLeaseInfo []HttpNfcLeaseDatastoreLeaseInfo `xml:"HttpNfcLeaseDatastoreLeaseInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4117,7 +4117,7 @@ func init() {
 }
 
 type ArrayOfHttpNfcLeaseDeviceUrl struct {
-	HttpNfcLeaseDeviceUrl []HttpNfcLeaseDeviceUrl `xml:"HttpNfcLeaseDeviceUrl,omitempty" json:"HttpNfcLeaseDeviceUrl,omitempty"`
+	HttpNfcLeaseDeviceUrl []HttpNfcLeaseDeviceUrl `xml:"HttpNfcLeaseDeviceUrl,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4125,7 +4125,7 @@ func init() {
 }
 
 type ArrayOfHttpNfcLeaseHostInfo struct {
-	HttpNfcLeaseHostInfo []HttpNfcLeaseHostInfo `xml:"HttpNfcLeaseHostInfo,omitempty" json:"HttpNfcLeaseHostInfo,omitempty"`
+	HttpNfcLeaseHostInfo []HttpNfcLeaseHostInfo `xml:"HttpNfcLeaseHostInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4133,7 +4133,7 @@ func init() {
 }
 
 type ArrayOfHttpNfcLeaseManifestEntry struct {
-	HttpNfcLeaseManifestEntry []HttpNfcLeaseManifestEntry `xml:"HttpNfcLeaseManifestEntry,omitempty" json:"HttpNfcLeaseManifestEntry,omitempty"`
+	HttpNfcLeaseManifestEntry []HttpNfcLeaseManifestEntry `xml:"HttpNfcLeaseManifestEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4141,7 +4141,7 @@ func init() {
 }
 
 type ArrayOfHttpNfcLeaseProbeResult struct {
-	HttpNfcLeaseProbeResult []HttpNfcLeaseProbeResult `xml:"HttpNfcLeaseProbeResult,omitempty" json:"HttpNfcLeaseProbeResult,omitempty"`
+	HttpNfcLeaseProbeResult []HttpNfcLeaseProbeResult `xml:"HttpNfcLeaseProbeResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4149,7 +4149,7 @@ func init() {
 }
 
 type ArrayOfHttpNfcLeaseSourceFile struct {
-	HttpNfcLeaseSourceFile []HttpNfcLeaseSourceFile `xml:"HttpNfcLeaseSourceFile,omitempty" json:"HttpNfcLeaseSourceFile,omitempty"`
+	HttpNfcLeaseSourceFile []HttpNfcLeaseSourceFile `xml:"HttpNfcLeaseSourceFile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4157,7 +4157,7 @@ func init() {
 }
 
 type ArrayOfID struct {
-	ID []ID `xml:"ID,omitempty" json:"ID,omitempty"`
+	ID []ID `xml:"ID,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4165,7 +4165,7 @@ func init() {
 }
 
 type ArrayOfImportOperationBulkFaultFaultOnImport struct {
-	ImportOperationBulkFaultFaultOnImport []ImportOperationBulkFaultFaultOnImport `xml:"ImportOperationBulkFaultFaultOnImport,omitempty" json:"ImportOperationBulkFaultFaultOnImport,omitempty"`
+	ImportOperationBulkFaultFaultOnImport []ImportOperationBulkFaultFaultOnImport `xml:"ImportOperationBulkFaultFaultOnImport,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4173,7 +4173,7 @@ func init() {
 }
 
 type ArrayOfImportSpec struct {
-	ImportSpec []BaseImportSpec `xml:"ImportSpec,omitempty,typeattr" json:"ImportSpec,omitempty"`
+	ImportSpec []BaseImportSpec `xml:"ImportSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4181,7 +4181,7 @@ func init() {
 }
 
 type ArrayOfInt struct {
-	Int []int32 `xml:"int,omitempty" json:"int,omitempty"`
+	Int []int32 `xml:"int,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4189,7 +4189,7 @@ func init() {
 }
 
 type ArrayOfIoFilterHostIssue struct {
-	IoFilterHostIssue []IoFilterHostIssue `xml:"IoFilterHostIssue,omitempty" json:"IoFilterHostIssue,omitempty"`
+	IoFilterHostIssue []IoFilterHostIssue `xml:"IoFilterHostIssue,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4197,7 +4197,7 @@ func init() {
 }
 
 type ArrayOfIpPool struct {
-	IpPool []IpPool `xml:"IpPool,omitempty" json:"IpPool,omitempty"`
+	IpPool []IpPool `xml:"IpPool,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4205,7 +4205,7 @@ func init() {
 }
 
 type ArrayOfIpPoolAssociation struct {
-	IpPoolAssociation []IpPoolAssociation `xml:"IpPoolAssociation,omitempty" json:"IpPoolAssociation,omitempty"`
+	IpPoolAssociation []IpPoolAssociation `xml:"IpPoolAssociation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4213,7 +4213,7 @@ func init() {
 }
 
 type ArrayOfIpPoolManagerIpAllocation struct {
-	IpPoolManagerIpAllocation []IpPoolManagerIpAllocation `xml:"IpPoolManagerIpAllocation,omitempty" json:"IpPoolManagerIpAllocation,omitempty"`
+	IpPoolManagerIpAllocation []IpPoolManagerIpAllocation `xml:"IpPoolManagerIpAllocation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4221,7 +4221,7 @@ func init() {
 }
 
 type ArrayOfIscsiDependencyEntity struct {
-	IscsiDependencyEntity []IscsiDependencyEntity `xml:"IscsiDependencyEntity,omitempty" json:"IscsiDependencyEntity,omitempty"`
+	IscsiDependencyEntity []IscsiDependencyEntity `xml:"IscsiDependencyEntity,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4229,7 +4229,7 @@ func init() {
 }
 
 type ArrayOfIscsiPortInfo struct {
-	IscsiPortInfo []IscsiPortInfo `xml:"IscsiPortInfo,omitempty" json:"IscsiPortInfo,omitempty"`
+	IscsiPortInfo []IscsiPortInfo `xml:"IscsiPortInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4237,7 +4237,7 @@ func init() {
 }
 
 type ArrayOfKernelModuleInfo struct {
-	KernelModuleInfo []KernelModuleInfo `xml:"KernelModuleInfo,omitempty" json:"KernelModuleInfo,omitempty"`
+	KernelModuleInfo []KernelModuleInfo `xml:"KernelModuleInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4245,7 +4245,7 @@ func init() {
 }
 
 type ArrayOfKeyAnyValue struct {
-	KeyAnyValue []KeyAnyValue `xml:"KeyAnyValue,omitempty" json:"KeyAnyValue,omitempty"`
+	KeyAnyValue []KeyAnyValue `xml:"KeyAnyValue,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4253,7 +4253,7 @@ func init() {
 }
 
 type ArrayOfKeyValue struct {
-	KeyValue []KeyValue `xml:"KeyValue,omitempty" json:"KeyValue,omitempty"`
+	KeyValue []KeyValue `xml:"KeyValue,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4261,7 +4261,7 @@ func init() {
 }
 
 type ArrayOfKmipClusterInfo struct {
-	KmipClusterInfo []KmipClusterInfo `xml:"KmipClusterInfo,omitempty" json:"KmipClusterInfo,omitempty"`
+	KmipClusterInfo []KmipClusterInfo `xml:"KmipClusterInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4269,7 +4269,7 @@ func init() {
 }
 
 type ArrayOfKmipServerInfo struct {
-	KmipServerInfo []KmipServerInfo `xml:"KmipServerInfo,omitempty" json:"KmipServerInfo,omitempty"`
+	KmipServerInfo []KmipServerInfo `xml:"KmipServerInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4277,7 +4277,7 @@ func init() {
 }
 
 type ArrayOfLicenseAssignmentManagerLicenseAssignment struct {
-	LicenseAssignmentManagerLicenseAssignment []LicenseAssignmentManagerLicenseAssignment `xml:"LicenseAssignmentManagerLicenseAssignment,omitempty" json:"LicenseAssignmentManagerLicenseAssignment,omitempty"`
+	LicenseAssignmentManagerLicenseAssignment []LicenseAssignmentManagerLicenseAssignment `xml:"LicenseAssignmentManagerLicenseAssignment,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4285,7 +4285,7 @@ func init() {
 }
 
 type ArrayOfLicenseAvailabilityInfo struct {
-	LicenseAvailabilityInfo []LicenseAvailabilityInfo `xml:"LicenseAvailabilityInfo,omitempty" json:"LicenseAvailabilityInfo,omitempty"`
+	LicenseAvailabilityInfo []LicenseAvailabilityInfo `xml:"LicenseAvailabilityInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4293,7 +4293,7 @@ func init() {
 }
 
 type ArrayOfLicenseFeatureInfo struct {
-	LicenseFeatureInfo []LicenseFeatureInfo `xml:"LicenseFeatureInfo,omitempty" json:"LicenseFeatureInfo,omitempty"`
+	LicenseFeatureInfo []LicenseFeatureInfo `xml:"LicenseFeatureInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4301,7 +4301,7 @@ func init() {
 }
 
 type ArrayOfLicenseManagerLicenseInfo struct {
-	LicenseManagerLicenseInfo []LicenseManagerLicenseInfo `xml:"LicenseManagerLicenseInfo,omitempty" json:"LicenseManagerLicenseInfo,omitempty"`
+	LicenseManagerLicenseInfo []LicenseManagerLicenseInfo `xml:"LicenseManagerLicenseInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4309,7 +4309,7 @@ func init() {
 }
 
 type ArrayOfLicenseReservationInfo struct {
-	LicenseReservationInfo []LicenseReservationInfo `xml:"LicenseReservationInfo,omitempty" json:"LicenseReservationInfo,omitempty"`
+	LicenseReservationInfo []LicenseReservationInfo `xml:"LicenseReservationInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4317,7 +4317,7 @@ func init() {
 }
 
 type ArrayOfLocalizableMessage struct {
-	LocalizableMessage []LocalizableMessage `xml:"LocalizableMessage,omitempty" json:"LocalizableMessage,omitempty"`
+	LocalizableMessage []LocalizableMessage `xml:"LocalizableMessage,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4325,7 +4325,7 @@ func init() {
 }
 
 type ArrayOfLocalizationManagerMessageCatalog struct {
-	LocalizationManagerMessageCatalog []LocalizationManagerMessageCatalog `xml:"LocalizationManagerMessageCatalog,omitempty" json:"LocalizationManagerMessageCatalog,omitempty"`
+	LocalizationManagerMessageCatalog []LocalizationManagerMessageCatalog `xml:"LocalizationManagerMessageCatalog,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4333,7 +4333,7 @@ func init() {
 }
 
 type ArrayOfLong struct {
-	Long []int64 `xml:"long,omitempty" json:"long,omitempty"`
+	Long []int64 `xml:"long,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4341,7 +4341,7 @@ func init() {
 }
 
 type ArrayOfManagedEntityStatus struct {
-	ManagedEntityStatus []ManagedEntityStatus `xml:"ManagedEntityStatus,omitempty" json:"ManagedEntityStatus,omitempty"`
+	ManagedEntityStatus []ManagedEntityStatus `xml:"ManagedEntityStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4349,7 +4349,7 @@ func init() {
 }
 
 type ArrayOfManagedObjectReference struct {
-	ManagedObjectReference []ManagedObjectReference `xml:"ManagedObjectReference,omitempty" json:"ManagedObjectReference,omitempty"`
+	ManagedObjectReference []ManagedObjectReference `xml:"ManagedObjectReference,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4357,7 +4357,7 @@ func init() {
 }
 
 type ArrayOfMethodActionArgument struct {
-	MethodActionArgument []MethodActionArgument `xml:"MethodActionArgument,omitempty" json:"MethodActionArgument,omitempty"`
+	MethodActionArgument []MethodActionArgument `xml:"MethodActionArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4365,7 +4365,7 @@ func init() {
 }
 
 type ArrayOfMethodFault struct {
-	MethodFault []BaseMethodFault `xml:"MethodFault,omitempty,typeattr" json:"MethodFault,omitempty"`
+	MethodFault []BaseMethodFault `xml:"MethodFault,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4373,7 +4373,7 @@ func init() {
 }
 
 type ArrayOfMissingObject struct {
-	MissingObject []MissingObject `xml:"MissingObject,omitempty" json:"MissingObject,omitempty"`
+	MissingObject []MissingObject `xml:"MissingObject,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4381,7 +4381,7 @@ func init() {
 }
 
 type ArrayOfMissingProperty struct {
-	MissingProperty []MissingProperty `xml:"MissingProperty,omitempty" json:"MissingProperty,omitempty"`
+	MissingProperty []MissingProperty `xml:"MissingProperty,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4389,7 +4389,7 @@ func init() {
 }
 
 type ArrayOfMultipleCertificatesVerifyFaultThumbprintData struct {
-	MultipleCertificatesVerifyFaultThumbprintData []MultipleCertificatesVerifyFaultThumbprintData `xml:"MultipleCertificatesVerifyFaultThumbprintData,omitempty" json:"MultipleCertificatesVerifyFaultThumbprintData,omitempty"`
+	MultipleCertificatesVerifyFaultThumbprintData []MultipleCertificatesVerifyFaultThumbprintData `xml:"MultipleCertificatesVerifyFaultThumbprintData,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4397,7 +4397,7 @@ func init() {
 }
 
 type ArrayOfNasStorageProfile struct {
-	NasStorageProfile []NasStorageProfile `xml:"NasStorageProfile,omitempty" json:"NasStorageProfile,omitempty"`
+	NasStorageProfile []NasStorageProfile `xml:"NasStorageProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4405,7 +4405,7 @@ func init() {
 }
 
 type ArrayOfNetIpConfigInfoIpAddress struct {
-	NetIpConfigInfoIpAddress []NetIpConfigInfoIpAddress `xml:"NetIpConfigInfoIpAddress,omitempty" json:"NetIpConfigInfoIpAddress,omitempty"`
+	NetIpConfigInfoIpAddress []NetIpConfigInfoIpAddress `xml:"NetIpConfigInfoIpAddress,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4413,7 +4413,7 @@ func init() {
 }
 
 type ArrayOfNetIpConfigSpecIpAddressSpec struct {
-	NetIpConfigSpecIpAddressSpec []NetIpConfigSpecIpAddressSpec `xml:"NetIpConfigSpecIpAddressSpec,omitempty" json:"NetIpConfigSpecIpAddressSpec,omitempty"`
+	NetIpConfigSpecIpAddressSpec []NetIpConfigSpecIpAddressSpec `xml:"NetIpConfigSpecIpAddressSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4421,7 +4421,7 @@ func init() {
 }
 
 type ArrayOfNetIpRouteConfigInfoIpRoute struct {
-	NetIpRouteConfigInfoIpRoute []NetIpRouteConfigInfoIpRoute `xml:"NetIpRouteConfigInfoIpRoute,omitempty" json:"NetIpRouteConfigInfoIpRoute,omitempty"`
+	NetIpRouteConfigInfoIpRoute []NetIpRouteConfigInfoIpRoute `xml:"NetIpRouteConfigInfoIpRoute,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4429,7 +4429,7 @@ func init() {
 }
 
 type ArrayOfNetIpRouteConfigSpecIpRouteSpec struct {
-	NetIpRouteConfigSpecIpRouteSpec []NetIpRouteConfigSpecIpRouteSpec `xml:"NetIpRouteConfigSpecIpRouteSpec,omitempty" json:"NetIpRouteConfigSpecIpRouteSpec,omitempty"`
+	NetIpRouteConfigSpecIpRouteSpec []NetIpRouteConfigSpecIpRouteSpec `xml:"NetIpRouteConfigSpecIpRouteSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4437,7 +4437,7 @@ func init() {
 }
 
 type ArrayOfNetIpStackInfoDefaultRouter struct {
-	NetIpStackInfoDefaultRouter []NetIpStackInfoDefaultRouter `xml:"NetIpStackInfoDefaultRouter,omitempty" json:"NetIpStackInfoDefaultRouter,omitempty"`
+	NetIpStackInfoDefaultRouter []NetIpStackInfoDefaultRouter `xml:"NetIpStackInfoDefaultRouter,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4445,7 +4445,7 @@ func init() {
 }
 
 type ArrayOfNetIpStackInfoNetToMedia struct {
-	NetIpStackInfoNetToMedia []NetIpStackInfoNetToMedia `xml:"NetIpStackInfoNetToMedia,omitempty" json:"NetIpStackInfoNetToMedia,omitempty"`
+	NetIpStackInfoNetToMedia []NetIpStackInfoNetToMedia `xml:"NetIpStackInfoNetToMedia,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4453,7 +4453,7 @@ func init() {
 }
 
 type ArrayOfNetStackInstanceProfile struct {
-	NetStackInstanceProfile []NetStackInstanceProfile `xml:"NetStackInstanceProfile,omitempty" json:"NetStackInstanceProfile,omitempty"`
+	NetStackInstanceProfile []NetStackInstanceProfile `xml:"NetStackInstanceProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4461,7 +4461,7 @@ func init() {
 }
 
 type ArrayOfNoPermissionEntityPrivileges struct {
-	NoPermissionEntityPrivileges []NoPermissionEntityPrivileges `xml:"NoPermissionEntityPrivileges,omitempty" json:"NoPermissionEntityPrivileges,omitempty"`
+	NoPermissionEntityPrivileges []NoPermissionEntityPrivileges `xml:"NoPermissionEntityPrivileges,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4469,7 +4469,7 @@ func init() {
 }
 
 type ArrayOfNsxHostVNicProfile struct {
-	NsxHostVNicProfile []NsxHostVNicProfile `xml:"NsxHostVNicProfile,omitempty" json:"NsxHostVNicProfile,omitempty"`
+	NsxHostVNicProfile []NsxHostVNicProfile `xml:"NsxHostVNicProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4477,7 +4477,7 @@ func init() {
 }
 
 type ArrayOfNumericRange struct {
-	NumericRange []NumericRange `xml:"NumericRange,omitempty" json:"NumericRange,omitempty"`
+	NumericRange []NumericRange `xml:"NumericRange,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4485,7 +4485,7 @@ func init() {
 }
 
 type ArrayOfNvdimmDimmInfo struct {
-	NvdimmDimmInfo []NvdimmDimmInfo `xml:"NvdimmDimmInfo,omitempty" json:"NvdimmDimmInfo,omitempty"`
+	NvdimmDimmInfo []NvdimmDimmInfo `xml:"NvdimmDimmInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4493,7 +4493,7 @@ func init() {
 }
 
 type ArrayOfNvdimmGuid struct {
-	NvdimmGuid []NvdimmGuid `xml:"NvdimmGuid,omitempty" json:"NvdimmGuid,omitempty"`
+	NvdimmGuid []NvdimmGuid `xml:"NvdimmGuid,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4501,7 +4501,7 @@ func init() {
 }
 
 type ArrayOfNvdimmInterleaveSetInfo struct {
-	NvdimmInterleaveSetInfo []NvdimmInterleaveSetInfo `xml:"NvdimmInterleaveSetInfo,omitempty" json:"NvdimmInterleaveSetInfo,omitempty"`
+	NvdimmInterleaveSetInfo []NvdimmInterleaveSetInfo `xml:"NvdimmInterleaveSetInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4509,7 +4509,7 @@ func init() {
 }
 
 type ArrayOfNvdimmNamespaceDetails struct {
-	NvdimmNamespaceDetails []NvdimmNamespaceDetails `xml:"NvdimmNamespaceDetails,omitempty" json:"NvdimmNamespaceDetails,omitempty"`
+	NvdimmNamespaceDetails []NvdimmNamespaceDetails `xml:"NvdimmNamespaceDetails,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4517,7 +4517,7 @@ func init() {
 }
 
 type ArrayOfNvdimmNamespaceInfo struct {
-	NvdimmNamespaceInfo []NvdimmNamespaceInfo `xml:"NvdimmNamespaceInfo,omitempty" json:"NvdimmNamespaceInfo,omitempty"`
+	NvdimmNamespaceInfo []NvdimmNamespaceInfo `xml:"NvdimmNamespaceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4525,7 +4525,7 @@ func init() {
 }
 
 type ArrayOfNvdimmRegionInfo struct {
-	NvdimmRegionInfo []NvdimmRegionInfo `xml:"NvdimmRegionInfo,omitempty" json:"NvdimmRegionInfo,omitempty"`
+	NvdimmRegionInfo []NvdimmRegionInfo `xml:"NvdimmRegionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4533,7 +4533,7 @@ func init() {
 }
 
 type ArrayOfObjectContent struct {
-	ObjectContent []ObjectContent `xml:"ObjectContent,omitempty" json:"ObjectContent,omitempty"`
+	ObjectContent []ObjectContent `xml:"ObjectContent,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4541,7 +4541,7 @@ func init() {
 }
 
 type ArrayOfObjectSpec struct {
-	ObjectSpec []ObjectSpec `xml:"ObjectSpec,omitempty" json:"ObjectSpec,omitempty"`
+	ObjectSpec []ObjectSpec `xml:"ObjectSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4549,7 +4549,7 @@ func init() {
 }
 
 type ArrayOfObjectUpdate struct {
-	ObjectUpdate []ObjectUpdate `xml:"ObjectUpdate,omitempty" json:"ObjectUpdate,omitempty"`
+	ObjectUpdate []ObjectUpdate `xml:"ObjectUpdate,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4557,7 +4557,7 @@ func init() {
 }
 
 type ArrayOfOpaqueNetworkTargetInfo struct {
-	OpaqueNetworkTargetInfo []OpaqueNetworkTargetInfo `xml:"OpaqueNetworkTargetInfo,omitempty" json:"OpaqueNetworkTargetInfo,omitempty"`
+	OpaqueNetworkTargetInfo []OpaqueNetworkTargetInfo `xml:"OpaqueNetworkTargetInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4565,7 +4565,7 @@ func init() {
 }
 
 type ArrayOfOptionDef struct {
-	OptionDef []OptionDef `xml:"OptionDef,omitempty" json:"OptionDef,omitempty"`
+	OptionDef []OptionDef `xml:"OptionDef,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4573,7 +4573,7 @@ func init() {
 }
 
 type ArrayOfOptionProfile struct {
-	OptionProfile []OptionProfile `xml:"OptionProfile,omitempty" json:"OptionProfile,omitempty"`
+	OptionProfile []OptionProfile `xml:"OptionProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4581,7 +4581,7 @@ func init() {
 }
 
 type ArrayOfOptionValue struct {
-	OptionValue []BaseOptionValue `xml:"OptionValue,omitempty,typeattr" json:"OptionValue,omitempty"`
+	OptionValue []BaseOptionValue `xml:"OptionValue,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4589,7 +4589,7 @@ func init() {
 }
 
 type ArrayOfOvfConsumerOstNode struct {
-	OvfConsumerOstNode []OvfConsumerOstNode `xml:"OvfConsumerOstNode,omitempty" json:"OvfConsumerOstNode,omitempty"`
+	OvfConsumerOstNode []OvfConsumerOstNode `xml:"OvfConsumerOstNode,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4597,7 +4597,7 @@ func init() {
 }
 
 type ArrayOfOvfConsumerOvfSection struct {
-	OvfConsumerOvfSection []OvfConsumerOvfSection `xml:"OvfConsumerOvfSection,omitempty" json:"OvfConsumerOvfSection,omitempty"`
+	OvfConsumerOvfSection []OvfConsumerOvfSection `xml:"OvfConsumerOvfSection,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4605,7 +4605,7 @@ func init() {
 }
 
 type ArrayOfOvfDeploymentOption struct {
-	OvfDeploymentOption []OvfDeploymentOption `xml:"OvfDeploymentOption,omitempty" json:"OvfDeploymentOption,omitempty"`
+	OvfDeploymentOption []OvfDeploymentOption `xml:"OvfDeploymentOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4613,7 +4613,7 @@ func init() {
 }
 
 type ArrayOfOvfFile struct {
-	OvfFile []OvfFile `xml:"OvfFile,omitempty" json:"OvfFile,omitempty"`
+	OvfFile []OvfFile `xml:"OvfFile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4621,7 +4621,7 @@ func init() {
 }
 
 type ArrayOfOvfFileItem struct {
-	OvfFileItem []OvfFileItem `xml:"OvfFileItem,omitempty" json:"OvfFileItem,omitempty"`
+	OvfFileItem []OvfFileItem `xml:"OvfFileItem,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4629,7 +4629,7 @@ func init() {
 }
 
 type ArrayOfOvfNetworkInfo struct {
-	OvfNetworkInfo []OvfNetworkInfo `xml:"OvfNetworkInfo,omitempty" json:"OvfNetworkInfo,omitempty"`
+	OvfNetworkInfo []OvfNetworkInfo `xml:"OvfNetworkInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4637,7 +4637,7 @@ func init() {
 }
 
 type ArrayOfOvfNetworkMapping struct {
-	OvfNetworkMapping []OvfNetworkMapping `xml:"OvfNetworkMapping,omitempty" json:"OvfNetworkMapping,omitempty"`
+	OvfNetworkMapping []OvfNetworkMapping `xml:"OvfNetworkMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4645,7 +4645,7 @@ func init() {
 }
 
 type ArrayOfOvfOptionInfo struct {
-	OvfOptionInfo []OvfOptionInfo `xml:"OvfOptionInfo,omitempty" json:"OvfOptionInfo,omitempty"`
+	OvfOptionInfo []OvfOptionInfo `xml:"OvfOptionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4653,7 +4653,7 @@ func init() {
 }
 
 type ArrayOfOvfResourceMap struct {
-	OvfResourceMap []OvfResourceMap `xml:"OvfResourceMap,omitempty" json:"OvfResourceMap,omitempty"`
+	OvfResourceMap []OvfResourceMap `xml:"OvfResourceMap,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4661,7 +4661,7 @@ func init() {
 }
 
 type ArrayOfPerfCounterInfo struct {
-	PerfCounterInfo []PerfCounterInfo `xml:"PerfCounterInfo,omitempty" json:"PerfCounterInfo,omitempty"`
+	PerfCounterInfo []PerfCounterInfo `xml:"PerfCounterInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4669,7 +4669,7 @@ func init() {
 }
 
 type ArrayOfPerfEntityMetricBase struct {
-	PerfEntityMetricBase []BasePerfEntityMetricBase `xml:"PerfEntityMetricBase,omitempty,typeattr" json:"PerfEntityMetricBase,omitempty"`
+	PerfEntityMetricBase []BasePerfEntityMetricBase `xml:"PerfEntityMetricBase,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4677,7 +4677,7 @@ func init() {
 }
 
 type ArrayOfPerfInterval struct {
-	PerfInterval []PerfInterval `xml:"PerfInterval,omitempty" json:"PerfInterval,omitempty"`
+	PerfInterval []PerfInterval `xml:"PerfInterval,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4685,7 +4685,7 @@ func init() {
 }
 
 type ArrayOfPerfMetricId struct {
-	PerfMetricId []PerfMetricId `xml:"PerfMetricId,omitempty" json:"PerfMetricId,omitempty"`
+	PerfMetricId []PerfMetricId `xml:"PerfMetricId,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4693,7 +4693,7 @@ func init() {
 }
 
 type ArrayOfPerfMetricSeries struct {
-	PerfMetricSeries []BasePerfMetricSeries `xml:"PerfMetricSeries,omitempty,typeattr" json:"PerfMetricSeries,omitempty"`
+	PerfMetricSeries []BasePerfMetricSeries `xml:"PerfMetricSeries,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4701,7 +4701,7 @@ func init() {
 }
 
 type ArrayOfPerfMetricSeriesCSV struct {
-	PerfMetricSeriesCSV []PerfMetricSeriesCSV `xml:"PerfMetricSeriesCSV,omitempty" json:"PerfMetricSeriesCSV,omitempty"`
+	PerfMetricSeriesCSV []PerfMetricSeriesCSV `xml:"PerfMetricSeriesCSV,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4709,7 +4709,7 @@ func init() {
 }
 
 type ArrayOfPerfQuerySpec struct {
-	PerfQuerySpec []PerfQuerySpec `xml:"PerfQuerySpec,omitempty" json:"PerfQuerySpec,omitempty"`
+	PerfQuerySpec []PerfQuerySpec `xml:"PerfQuerySpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4717,7 +4717,7 @@ func init() {
 }
 
 type ArrayOfPerfSampleInfo struct {
-	PerfSampleInfo []PerfSampleInfo `xml:"PerfSampleInfo,omitempty" json:"PerfSampleInfo,omitempty"`
+	PerfSampleInfo []PerfSampleInfo `xml:"PerfSampleInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4725,7 +4725,7 @@ func init() {
 }
 
 type ArrayOfPerformanceManagerCounterLevelMapping struct {
-	PerformanceManagerCounterLevelMapping []PerformanceManagerCounterLevelMapping `xml:"PerformanceManagerCounterLevelMapping,omitempty" json:"PerformanceManagerCounterLevelMapping,omitempty"`
+	PerformanceManagerCounterLevelMapping []PerformanceManagerCounterLevelMapping `xml:"PerformanceManagerCounterLevelMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4733,7 +4733,7 @@ func init() {
 }
 
 type ArrayOfPermission struct {
-	Permission []Permission `xml:"Permission,omitempty" json:"Permission,omitempty"`
+	Permission []Permission `xml:"Permission,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4741,7 +4741,7 @@ func init() {
 }
 
 type ArrayOfPermissionProfile struct {
-	PermissionProfile []PermissionProfile `xml:"PermissionProfile,omitempty" json:"PermissionProfile,omitempty"`
+	PermissionProfile []PermissionProfile `xml:"PermissionProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4749,7 +4749,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNic struct {
-	PhysicalNic []PhysicalNic `xml:"PhysicalNic,omitempty" json:"PhysicalNic,omitempty"`
+	PhysicalNic []PhysicalNic `xml:"PhysicalNic,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4757,7 +4757,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNicConfig struct {
-	PhysicalNicConfig []PhysicalNicConfig `xml:"PhysicalNicConfig,omitempty" json:"PhysicalNicConfig,omitempty"`
+	PhysicalNicConfig []PhysicalNicConfig `xml:"PhysicalNicConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4765,7 +4765,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNicHintInfo struct {
-	PhysicalNicHintInfo []PhysicalNicHintInfo `xml:"PhysicalNicHintInfo,omitempty" json:"PhysicalNicHintInfo,omitempty"`
+	PhysicalNicHintInfo []PhysicalNicHintInfo `xml:"PhysicalNicHintInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4773,7 +4773,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNicIpHint struct {
-	PhysicalNicIpHint []PhysicalNicIpHint `xml:"PhysicalNicIpHint,omitempty" json:"PhysicalNicIpHint,omitempty"`
+	PhysicalNicIpHint []PhysicalNicIpHint `xml:"PhysicalNicIpHint,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4781,7 +4781,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNicLinkInfo struct {
-	PhysicalNicLinkInfo []PhysicalNicLinkInfo `xml:"PhysicalNicLinkInfo,omitempty" json:"PhysicalNicLinkInfo,omitempty"`
+	PhysicalNicLinkInfo []PhysicalNicLinkInfo `xml:"PhysicalNicLinkInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4789,7 +4789,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNicNameHint struct {
-	PhysicalNicNameHint []PhysicalNicNameHint `xml:"PhysicalNicNameHint,omitempty" json:"PhysicalNicNameHint,omitempty"`
+	PhysicalNicNameHint []PhysicalNicNameHint `xml:"PhysicalNicNameHint,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4797,7 +4797,7 @@ func init() {
 }
 
 type ArrayOfPhysicalNicProfile struct {
-	PhysicalNicProfile []PhysicalNicProfile `xml:"PhysicalNicProfile,omitempty" json:"PhysicalNicProfile,omitempty"`
+	PhysicalNicProfile []PhysicalNicProfile `xml:"PhysicalNicProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4805,7 +4805,7 @@ func init() {
 }
 
 type ArrayOfPlacementAffinityRule struct {
-	PlacementAffinityRule []PlacementAffinityRule `xml:"PlacementAffinityRule,omitempty" json:"PlacementAffinityRule,omitempty"`
+	PlacementAffinityRule []PlacementAffinityRule `xml:"PlacementAffinityRule,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4813,7 +4813,7 @@ func init() {
 }
 
 type ArrayOfPlacementSpec struct {
-	PlacementSpec []PlacementSpec `xml:"PlacementSpec,omitempty" json:"PlacementSpec,omitempty"`
+	PlacementSpec []PlacementSpec `xml:"PlacementSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4821,7 +4821,7 @@ func init() {
 }
 
 type ArrayOfPnicUplinkProfile struct {
-	PnicUplinkProfile []PnicUplinkProfile `xml:"PnicUplinkProfile,omitempty" json:"PnicUplinkProfile,omitempty"`
+	PnicUplinkProfile []PnicUplinkProfile `xml:"PnicUplinkProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4829,7 +4829,7 @@ func init() {
 }
 
 type ArrayOfPodDiskLocator struct {
-	PodDiskLocator []PodDiskLocator `xml:"PodDiskLocator,omitempty" json:"PodDiskLocator,omitempty"`
+	PodDiskLocator []PodDiskLocator `xml:"PodDiskLocator,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4837,7 +4837,7 @@ func init() {
 }
 
 type ArrayOfPolicyOption struct {
-	PolicyOption []BasePolicyOption `xml:"PolicyOption,omitempty,typeattr" json:"PolicyOption,omitempty"`
+	PolicyOption []BasePolicyOption `xml:"PolicyOption,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4845,7 +4845,7 @@ func init() {
 }
 
 type ArrayOfPrivilegeAvailability struct {
-	PrivilegeAvailability []PrivilegeAvailability `xml:"PrivilegeAvailability,omitempty" json:"PrivilegeAvailability,omitempty"`
+	PrivilegeAvailability []PrivilegeAvailability `xml:"PrivilegeAvailability,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4853,7 +4853,7 @@ func init() {
 }
 
 type ArrayOfProductComponentInfo struct {
-	ProductComponentInfo []ProductComponentInfo `xml:"ProductComponentInfo,omitempty" json:"ProductComponentInfo,omitempty"`
+	ProductComponentInfo []ProductComponentInfo `xml:"ProductComponentInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4861,7 +4861,7 @@ func init() {
 }
 
 type ArrayOfProfileApplyProfileProperty struct {
-	ProfileApplyProfileProperty []ProfileApplyProfileProperty `xml:"ProfileApplyProfileProperty,omitempty" json:"ProfileApplyProfileProperty,omitempty"`
+	ProfileApplyProfileProperty []ProfileApplyProfileProperty `xml:"ProfileApplyProfileProperty,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4869,7 +4869,7 @@ func init() {
 }
 
 type ArrayOfProfileDeferredPolicyOptionParameter struct {
-	ProfileDeferredPolicyOptionParameter []ProfileDeferredPolicyOptionParameter `xml:"ProfileDeferredPolicyOptionParameter,omitempty" json:"ProfileDeferredPolicyOptionParameter,omitempty"`
+	ProfileDeferredPolicyOptionParameter []ProfileDeferredPolicyOptionParameter `xml:"ProfileDeferredPolicyOptionParameter,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4877,7 +4877,7 @@ func init() {
 }
 
 type ArrayOfProfileDescriptionSection struct {
-	ProfileDescriptionSection []ProfileDescriptionSection `xml:"ProfileDescriptionSection,omitempty" json:"ProfileDescriptionSection,omitempty"`
+	ProfileDescriptionSection []ProfileDescriptionSection `xml:"ProfileDescriptionSection,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4885,7 +4885,7 @@ func init() {
 }
 
 type ArrayOfProfileExecuteError struct {
-	ProfileExecuteError []ProfileExecuteError `xml:"ProfileExecuteError,omitempty" json:"ProfileExecuteError,omitempty"`
+	ProfileExecuteError []ProfileExecuteError `xml:"ProfileExecuteError,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4893,7 +4893,7 @@ func init() {
 }
 
 type ArrayOfProfileExpression struct {
-	ProfileExpression []BaseProfileExpression `xml:"ProfileExpression,omitempty,typeattr" json:"ProfileExpression,omitempty"`
+	ProfileExpression []BaseProfileExpression `xml:"ProfileExpression,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4901,7 +4901,7 @@ func init() {
 }
 
 type ArrayOfProfileExpressionMetadata struct {
-	ProfileExpressionMetadata []ProfileExpressionMetadata `xml:"ProfileExpressionMetadata,omitempty" json:"ProfileExpressionMetadata,omitempty"`
+	ProfileExpressionMetadata []ProfileExpressionMetadata `xml:"ProfileExpressionMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4909,7 +4909,7 @@ func init() {
 }
 
 type ArrayOfProfileMetadata struct {
-	ProfileMetadata []ProfileMetadata `xml:"ProfileMetadata,omitempty" json:"ProfileMetadata,omitempty"`
+	ProfileMetadata []ProfileMetadata `xml:"ProfileMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4917,7 +4917,7 @@ func init() {
 }
 
 type ArrayOfProfileMetadataProfileOperationMessage struct {
-	ProfileMetadataProfileOperationMessage []ProfileMetadataProfileOperationMessage `xml:"ProfileMetadataProfileOperationMessage,omitempty" json:"ProfileMetadataProfileOperationMessage,omitempty"`
+	ProfileMetadataProfileOperationMessage []ProfileMetadataProfileOperationMessage `xml:"ProfileMetadataProfileOperationMessage,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4925,7 +4925,7 @@ func init() {
 }
 
 type ArrayOfProfileMetadataProfileSortSpec struct {
-	ProfileMetadataProfileSortSpec []ProfileMetadataProfileSortSpec `xml:"ProfileMetadataProfileSortSpec,omitempty" json:"ProfileMetadataProfileSortSpec,omitempty"`
+	ProfileMetadataProfileSortSpec []ProfileMetadataProfileSortSpec `xml:"ProfileMetadataProfileSortSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4933,7 +4933,7 @@ func init() {
 }
 
 type ArrayOfProfileParameterMetadata struct {
-	ProfileParameterMetadata []ProfileParameterMetadata `xml:"ProfileParameterMetadata,omitempty" json:"ProfileParameterMetadata,omitempty"`
+	ProfileParameterMetadata []ProfileParameterMetadata `xml:"ProfileParameterMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4941,7 +4941,7 @@ func init() {
 }
 
 type ArrayOfProfileParameterMetadataParameterRelationMetadata struct {
-	ProfileParameterMetadataParameterRelationMetadata []ProfileParameterMetadataParameterRelationMetadata `xml:"ProfileParameterMetadataParameterRelationMetadata,omitempty" json:"ProfileParameterMetadataParameterRelationMetadata,omitempty"`
+	ProfileParameterMetadataParameterRelationMetadata []ProfileParameterMetadataParameterRelationMetadata `xml:"ProfileParameterMetadataParameterRelationMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4949,7 +4949,7 @@ func init() {
 }
 
 type ArrayOfProfilePolicy struct {
-	ProfilePolicy []ProfilePolicy `xml:"ProfilePolicy,omitempty" json:"ProfilePolicy,omitempty"`
+	ProfilePolicy []ProfilePolicy `xml:"ProfilePolicy,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4957,7 +4957,7 @@ func init() {
 }
 
 type ArrayOfProfilePolicyMetadata struct {
-	ProfilePolicyMetadata []ProfilePolicyMetadata `xml:"ProfilePolicyMetadata,omitempty" json:"ProfilePolicyMetadata,omitempty"`
+	ProfilePolicyMetadata []ProfilePolicyMetadata `xml:"ProfilePolicyMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4965,7 +4965,7 @@ func init() {
 }
 
 type ArrayOfProfilePolicyOptionMetadata struct {
-	ProfilePolicyOptionMetadata []BaseProfilePolicyOptionMetadata `xml:"ProfilePolicyOptionMetadata,omitempty,typeattr" json:"ProfilePolicyOptionMetadata,omitempty"`
+	ProfilePolicyOptionMetadata []BaseProfilePolicyOptionMetadata `xml:"ProfilePolicyOptionMetadata,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -4973,7 +4973,7 @@ func init() {
 }
 
 type ArrayOfProfileProfileStructureProperty struct {
-	ProfileProfileStructureProperty []ProfileProfileStructureProperty `xml:"ProfileProfileStructureProperty,omitempty" json:"ProfileProfileStructureProperty,omitempty"`
+	ProfileProfileStructureProperty []ProfileProfileStructureProperty `xml:"ProfileProfileStructureProperty,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4981,7 +4981,7 @@ func init() {
 }
 
 type ArrayOfProfilePropertyPath struct {
-	ProfilePropertyPath []ProfilePropertyPath `xml:"ProfilePropertyPath,omitempty" json:"ProfilePropertyPath,omitempty"`
+	ProfilePropertyPath []ProfilePropertyPath `xml:"ProfilePropertyPath,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4989,7 +4989,7 @@ func init() {
 }
 
 type ArrayOfProfileUpdateFailedUpdateFailure struct {
-	ProfileUpdateFailedUpdateFailure []ProfileUpdateFailedUpdateFailure `xml:"ProfileUpdateFailedUpdateFailure,omitempty" json:"ProfileUpdateFailedUpdateFailure,omitempty"`
+	ProfileUpdateFailedUpdateFailure []ProfileUpdateFailedUpdateFailure `xml:"ProfileUpdateFailedUpdateFailure,omitempty" json:"_value"`
 }
 
 func init() {
@@ -4997,7 +4997,7 @@ func init() {
 }
 
 type ArrayOfPropertyChange struct {
-	PropertyChange []PropertyChange `xml:"PropertyChange,omitempty" json:"PropertyChange,omitempty"`
+	PropertyChange []PropertyChange `xml:"PropertyChange,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5005,7 +5005,7 @@ func init() {
 }
 
 type ArrayOfPropertyFilterSpec struct {
-	PropertyFilterSpec []PropertyFilterSpec `xml:"PropertyFilterSpec,omitempty" json:"PropertyFilterSpec,omitempty"`
+	PropertyFilterSpec []PropertyFilterSpec `xml:"PropertyFilterSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5013,7 +5013,7 @@ func init() {
 }
 
 type ArrayOfPropertyFilterUpdate struct {
-	PropertyFilterUpdate []PropertyFilterUpdate `xml:"PropertyFilterUpdate,omitempty" json:"PropertyFilterUpdate,omitempty"`
+	PropertyFilterUpdate []PropertyFilterUpdate `xml:"PropertyFilterUpdate,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5021,7 +5021,7 @@ func init() {
 }
 
 type ArrayOfPropertySpec struct {
-	PropertySpec []PropertySpec `xml:"PropertySpec,omitempty" json:"PropertySpec,omitempty"`
+	PropertySpec []PropertySpec `xml:"PropertySpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5029,7 +5029,7 @@ func init() {
 }
 
 type ArrayOfRelation struct {
-	Relation []Relation `xml:"Relation,omitempty" json:"Relation,omitempty"`
+	Relation []Relation `xml:"Relation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5037,7 +5037,7 @@ func init() {
 }
 
 type ArrayOfReplicationInfoDiskSettings struct {
-	ReplicationInfoDiskSettings []ReplicationInfoDiskSettings `xml:"ReplicationInfoDiskSettings,omitempty" json:"ReplicationInfoDiskSettings,omitempty"`
+	ReplicationInfoDiskSettings []ReplicationInfoDiskSettings `xml:"ReplicationInfoDiskSettings,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5045,7 +5045,7 @@ func init() {
 }
 
 type ArrayOfResourceConfigSpec struct {
-	ResourceConfigSpec []ResourceConfigSpec `xml:"ResourceConfigSpec,omitempty" json:"ResourceConfigSpec,omitempty"`
+	ResourceConfigSpec []ResourceConfigSpec `xml:"ResourceConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5053,7 +5053,7 @@ func init() {
 }
 
 type ArrayOfRetrieveVStorageObjSpec struct {
-	RetrieveVStorageObjSpec []RetrieveVStorageObjSpec `xml:"RetrieveVStorageObjSpec,omitempty" json:"RetrieveVStorageObjSpec,omitempty"`
+	RetrieveVStorageObjSpec []RetrieveVStorageObjSpec `xml:"RetrieveVStorageObjSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5061,7 +5061,7 @@ func init() {
 }
 
 type ArrayOfScheduledTaskDetail struct {
-	ScheduledTaskDetail []ScheduledTaskDetail `xml:"ScheduledTaskDetail,omitempty" json:"ScheduledTaskDetail,omitempty"`
+	ScheduledTaskDetail []ScheduledTaskDetail `xml:"ScheduledTaskDetail,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5069,7 +5069,7 @@ func init() {
 }
 
 type ArrayOfScsiLun struct {
-	ScsiLun []BaseScsiLun `xml:"ScsiLun,omitempty,typeattr" json:"ScsiLun,omitempty"`
+	ScsiLun []BaseScsiLun `xml:"ScsiLun,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5077,7 +5077,7 @@ func init() {
 }
 
 type ArrayOfScsiLunDescriptor struct {
-	ScsiLunDescriptor []ScsiLunDescriptor `xml:"ScsiLunDescriptor,omitempty" json:"ScsiLunDescriptor,omitempty"`
+	ScsiLunDescriptor []ScsiLunDescriptor `xml:"ScsiLunDescriptor,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5085,7 +5085,7 @@ func init() {
 }
 
 type ArrayOfScsiLunDurableName struct {
-	ScsiLunDurableName []ScsiLunDurableName `xml:"ScsiLunDurableName,omitempty" json:"ScsiLunDurableName,omitempty"`
+	ScsiLunDurableName []ScsiLunDurableName `xml:"ScsiLunDurableName,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5093,7 +5093,7 @@ func init() {
 }
 
 type ArrayOfSelectionSet struct {
-	SelectionSet []BaseSelectionSet `xml:"SelectionSet,omitempty,typeattr" json:"SelectionSet,omitempty"`
+	SelectionSet []BaseSelectionSet `xml:"SelectionSet,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5101,7 +5101,7 @@ func init() {
 }
 
 type ArrayOfSelectionSpec struct {
-	SelectionSpec []BaseSelectionSpec `xml:"SelectionSpec,omitempty,typeattr" json:"SelectionSpec,omitempty"`
+	SelectionSpec []BaseSelectionSpec `xml:"SelectionSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5109,7 +5109,7 @@ func init() {
 }
 
 type ArrayOfServiceConsolePortGroupProfile struct {
-	ServiceConsolePortGroupProfile []ServiceConsolePortGroupProfile `xml:"ServiceConsolePortGroupProfile,omitempty" json:"ServiceConsolePortGroupProfile,omitempty"`
+	ServiceConsolePortGroupProfile []ServiceConsolePortGroupProfile `xml:"ServiceConsolePortGroupProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5117,7 +5117,7 @@ func init() {
 }
 
 type ArrayOfServiceLocator struct {
-	ServiceLocator []ServiceLocator `xml:"ServiceLocator,omitempty" json:"ServiceLocator,omitempty"`
+	ServiceLocator []ServiceLocator `xml:"ServiceLocator,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5125,7 +5125,7 @@ func init() {
 }
 
 type ArrayOfServiceManagerServiceInfo struct {
-	ServiceManagerServiceInfo []ServiceManagerServiceInfo `xml:"ServiceManagerServiceInfo,omitempty" json:"ServiceManagerServiceInfo,omitempty"`
+	ServiceManagerServiceInfo []ServiceManagerServiceInfo `xml:"ServiceManagerServiceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5133,7 +5133,7 @@ func init() {
 }
 
 type ArrayOfServiceProfile struct {
-	ServiceProfile []ServiceProfile `xml:"ServiceProfile,omitempty" json:"ServiceProfile,omitempty"`
+	ServiceProfile []ServiceProfile `xml:"ServiceProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5141,7 +5141,7 @@ func init() {
 }
 
 type ArrayOfShort struct {
-	Short []int16 `xml:"short,omitempty" json:"short,omitempty"`
+	Short []int16 `xml:"short,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5149,7 +5149,7 @@ func init() {
 }
 
 type ArrayOfSoftwarePackage struct {
-	SoftwarePackage []SoftwarePackage `xml:"SoftwarePackage,omitempty" json:"SoftwarePackage,omitempty"`
+	SoftwarePackage []SoftwarePackage `xml:"SoftwarePackage,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5157,7 +5157,7 @@ func init() {
 }
 
 type ArrayOfStaticRouteProfile struct {
-	StaticRouteProfile []StaticRouteProfile `xml:"StaticRouteProfile,omitempty" json:"StaticRouteProfile,omitempty"`
+	StaticRouteProfile []StaticRouteProfile `xml:"StaticRouteProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5165,7 +5165,7 @@ func init() {
 }
 
 type ArrayOfStorageDrsOptionSpec struct {
-	StorageDrsOptionSpec []StorageDrsOptionSpec `xml:"StorageDrsOptionSpec,omitempty" json:"StorageDrsOptionSpec,omitempty"`
+	StorageDrsOptionSpec []StorageDrsOptionSpec `xml:"StorageDrsOptionSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5173,7 +5173,7 @@ func init() {
 }
 
 type ArrayOfStorageDrsPlacementRankVmSpec struct {
-	StorageDrsPlacementRankVmSpec []StorageDrsPlacementRankVmSpec `xml:"StorageDrsPlacementRankVmSpec,omitempty" json:"StorageDrsPlacementRankVmSpec,omitempty"`
+	StorageDrsPlacementRankVmSpec []StorageDrsPlacementRankVmSpec `xml:"StorageDrsPlacementRankVmSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5181,7 +5181,7 @@ func init() {
 }
 
 type ArrayOfStorageDrsVmConfigInfo struct {
-	StorageDrsVmConfigInfo []StorageDrsVmConfigInfo `xml:"StorageDrsVmConfigInfo,omitempty" json:"StorageDrsVmConfigInfo,omitempty"`
+	StorageDrsVmConfigInfo []StorageDrsVmConfigInfo `xml:"StorageDrsVmConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5189,7 +5189,7 @@ func init() {
 }
 
 type ArrayOfStorageDrsVmConfigSpec struct {
-	StorageDrsVmConfigSpec []StorageDrsVmConfigSpec `xml:"StorageDrsVmConfigSpec,omitempty" json:"StorageDrsVmConfigSpec,omitempty"`
+	StorageDrsVmConfigSpec []StorageDrsVmConfigSpec `xml:"StorageDrsVmConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5197,7 +5197,7 @@ func init() {
 }
 
 type ArrayOfStoragePerformanceSummary struct {
-	StoragePerformanceSummary []StoragePerformanceSummary `xml:"StoragePerformanceSummary,omitempty" json:"StoragePerformanceSummary,omitempty"`
+	StoragePerformanceSummary []StoragePerformanceSummary `xml:"StoragePerformanceSummary,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5205,7 +5205,7 @@ func init() {
 }
 
 type ArrayOfStorageRequirement struct {
-	StorageRequirement []StorageRequirement `xml:"StorageRequirement,omitempty" json:"StorageRequirement,omitempty"`
+	StorageRequirement []StorageRequirement `xml:"StorageRequirement,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5213,7 +5213,7 @@ func init() {
 }
 
 type ArrayOfString struct {
-	String []string `xml:"string,omitempty" json:"string,omitempty"`
+	String []string `xml:"string,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5221,7 +5221,7 @@ func init() {
 }
 
 type ArrayOfStructuredCustomizations struct {
-	StructuredCustomizations []StructuredCustomizations `xml:"StructuredCustomizations,omitempty" json:"StructuredCustomizations,omitempty"`
+	StructuredCustomizations []StructuredCustomizations `xml:"StructuredCustomizations,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5229,7 +5229,7 @@ func init() {
 }
 
 type ArrayOfSystemEventInfo struct {
-	SystemEventInfo []SystemEventInfo `xml:"SystemEventInfo,omitempty" json:"SystemEventInfo,omitempty"`
+	SystemEventInfo []SystemEventInfo `xml:"SystemEventInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5237,7 +5237,7 @@ func init() {
 }
 
 type ArrayOfTag struct {
-	Tag []Tag `xml:"Tag,omitempty" json:"Tag,omitempty"`
+	Tag []Tag `xml:"Tag,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5245,7 +5245,7 @@ func init() {
 }
 
 type ArrayOfTaskInfo struct {
-	TaskInfo []TaskInfo `xml:"TaskInfo,omitempty" json:"TaskInfo,omitempty"`
+	TaskInfo []TaskInfo `xml:"TaskInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5253,7 +5253,7 @@ func init() {
 }
 
 type ArrayOfTaskInfoState struct {
-	TaskInfoState []TaskInfoState `xml:"TaskInfoState,omitempty" json:"TaskInfoState,omitempty"`
+	TaskInfoState []TaskInfoState `xml:"TaskInfoState,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5261,7 +5261,7 @@ func init() {
 }
 
 type ArrayOfTypeDescription struct {
-	TypeDescription []BaseTypeDescription `xml:"TypeDescription,omitempty,typeattr" json:"TypeDescription,omitempty"`
+	TypeDescription []BaseTypeDescription `xml:"TypeDescription,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5269,7 +5269,7 @@ func init() {
 }
 
 type ArrayOfUpdateVirtualMachineFilesResultFailedVmFileInfo struct {
-	UpdateVirtualMachineFilesResultFailedVmFileInfo []UpdateVirtualMachineFilesResultFailedVmFileInfo `xml:"UpdateVirtualMachineFilesResultFailedVmFileInfo,omitempty" json:"UpdateVirtualMachineFilesResultFailedVmFileInfo,omitempty"`
+	UpdateVirtualMachineFilesResultFailedVmFileInfo []UpdateVirtualMachineFilesResultFailedVmFileInfo `xml:"UpdateVirtualMachineFilesResultFailedVmFileInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5277,7 +5277,7 @@ func init() {
 }
 
 type ArrayOfUri struct {
-	Uri []string `xml:"uri,omitempty" json:"uri,omitempty"`
+	Uri []string `xml:"uri,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5285,7 +5285,7 @@ func init() {
 }
 
 type ArrayOfUsbScanCodeSpecKeyEvent struct {
-	UsbScanCodeSpecKeyEvent []UsbScanCodeSpecKeyEvent `xml:"UsbScanCodeSpecKeyEvent,omitempty" json:"UsbScanCodeSpecKeyEvent,omitempty"`
+	UsbScanCodeSpecKeyEvent []UsbScanCodeSpecKeyEvent `xml:"UsbScanCodeSpecKeyEvent,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5293,7 +5293,7 @@ func init() {
 }
 
 type ArrayOfUserGroupProfile struct {
-	UserGroupProfile []UserGroupProfile `xml:"UserGroupProfile,omitempty" json:"UserGroupProfile,omitempty"`
+	UserGroupProfile []UserGroupProfile `xml:"UserGroupProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5301,7 +5301,7 @@ func init() {
 }
 
 type ArrayOfUserPrivilegeResult struct {
-	UserPrivilegeResult []UserPrivilegeResult `xml:"UserPrivilegeResult,omitempty" json:"UserPrivilegeResult,omitempty"`
+	UserPrivilegeResult []UserPrivilegeResult `xml:"UserPrivilegeResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5309,7 +5309,7 @@ func init() {
 }
 
 type ArrayOfUserProfile struct {
-	UserProfile []UserProfile `xml:"UserProfile,omitempty" json:"UserProfile,omitempty"`
+	UserProfile []UserProfile `xml:"UserProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5317,7 +5317,7 @@ func init() {
 }
 
 type ArrayOfUserSearchResult struct {
-	UserSearchResult []BaseUserSearchResult `xml:"UserSearchResult,omitempty,typeattr" json:"UserSearchResult,omitempty"`
+	UserSearchResult []BaseUserSearchResult `xml:"UserSearchResult,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5325,7 +5325,7 @@ func init() {
 }
 
 type ArrayOfUserSession struct {
-	UserSession []UserSession `xml:"UserSession,omitempty" json:"UserSession,omitempty"`
+	UserSession []UserSession `xml:"UserSession,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5333,7 +5333,7 @@ func init() {
 }
 
 type ArrayOfVASAStorageArray struct {
-	VASAStorageArray []VASAStorageArray `xml:"VASAStorageArray,omitempty" json:"VASAStorageArray,omitempty"`
+	VASAStorageArray []VASAStorageArray `xml:"VASAStorageArray,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5341,7 +5341,7 @@ func init() {
 }
 
 type ArrayOfVASAStorageArrayDiscoverySvcInfo struct {
-	VASAStorageArrayDiscoverySvcInfo []VASAStorageArrayDiscoverySvcInfo `xml:"VASAStorageArrayDiscoverySvcInfo,omitempty" json:"VASAStorageArrayDiscoverySvcInfo,omitempty"`
+	VASAStorageArrayDiscoverySvcInfo []VASAStorageArrayDiscoverySvcInfo `xml:"VASAStorageArrayDiscoverySvcInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5349,7 +5349,7 @@ func init() {
 }
 
 type ArrayOfVAppCloneSpecNetworkMappingPair struct {
-	VAppCloneSpecNetworkMappingPair []VAppCloneSpecNetworkMappingPair `xml:"VAppCloneSpecNetworkMappingPair,omitempty" json:"VAppCloneSpecNetworkMappingPair,omitempty"`
+	VAppCloneSpecNetworkMappingPair []VAppCloneSpecNetworkMappingPair `xml:"VAppCloneSpecNetworkMappingPair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5357,7 +5357,7 @@ func init() {
 }
 
 type ArrayOfVAppCloneSpecResourceMap struct {
-	VAppCloneSpecResourceMap []VAppCloneSpecResourceMap `xml:"VAppCloneSpecResourceMap,omitempty" json:"VAppCloneSpecResourceMap,omitempty"`
+	VAppCloneSpecResourceMap []VAppCloneSpecResourceMap `xml:"VAppCloneSpecResourceMap,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5365,7 +5365,7 @@ func init() {
 }
 
 type ArrayOfVAppEntityConfigInfo struct {
-	VAppEntityConfigInfo []VAppEntityConfigInfo `xml:"VAppEntityConfigInfo,omitempty" json:"VAppEntityConfigInfo,omitempty"`
+	VAppEntityConfigInfo []VAppEntityConfigInfo `xml:"VAppEntityConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5373,7 +5373,7 @@ func init() {
 }
 
 type ArrayOfVAppOvfSectionInfo struct {
-	VAppOvfSectionInfo []VAppOvfSectionInfo `xml:"VAppOvfSectionInfo,omitempty" json:"VAppOvfSectionInfo,omitempty"`
+	VAppOvfSectionInfo []VAppOvfSectionInfo `xml:"VAppOvfSectionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5381,7 +5381,7 @@ func init() {
 }
 
 type ArrayOfVAppOvfSectionSpec struct {
-	VAppOvfSectionSpec []VAppOvfSectionSpec `xml:"VAppOvfSectionSpec,omitempty" json:"VAppOvfSectionSpec,omitempty"`
+	VAppOvfSectionSpec []VAppOvfSectionSpec `xml:"VAppOvfSectionSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5389,7 +5389,7 @@ func init() {
 }
 
 type ArrayOfVAppProductInfo struct {
-	VAppProductInfo []VAppProductInfo `xml:"VAppProductInfo,omitempty" json:"VAppProductInfo,omitempty"`
+	VAppProductInfo []VAppProductInfo `xml:"VAppProductInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5397,7 +5397,7 @@ func init() {
 }
 
 type ArrayOfVAppProductSpec struct {
-	VAppProductSpec []VAppProductSpec `xml:"VAppProductSpec,omitempty" json:"VAppProductSpec,omitempty"`
+	VAppProductSpec []VAppProductSpec `xml:"VAppProductSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5405,7 +5405,7 @@ func init() {
 }
 
 type ArrayOfVAppPropertyInfo struct {
-	VAppPropertyInfo []VAppPropertyInfo `xml:"VAppPropertyInfo,omitempty" json:"VAppPropertyInfo,omitempty"`
+	VAppPropertyInfo []VAppPropertyInfo `xml:"VAppPropertyInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5413,7 +5413,7 @@ func init() {
 }
 
 type ArrayOfVAppPropertySpec struct {
-	VAppPropertySpec []VAppPropertySpec `xml:"VAppPropertySpec,omitempty" json:"VAppPropertySpec,omitempty"`
+	VAppPropertySpec []VAppPropertySpec `xml:"VAppPropertySpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5421,7 +5421,7 @@ func init() {
 }
 
 type ArrayOfVMwareDVSPvlanConfigSpec struct {
-	VMwareDVSPvlanConfigSpec []VMwareDVSPvlanConfigSpec `xml:"VMwareDVSPvlanConfigSpec,omitempty" json:"VMwareDVSPvlanConfigSpec,omitempty"`
+	VMwareDVSPvlanConfigSpec []VMwareDVSPvlanConfigSpec `xml:"VMwareDVSPvlanConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5429,7 +5429,7 @@ func init() {
 }
 
 type ArrayOfVMwareDVSPvlanMapEntry struct {
-	VMwareDVSPvlanMapEntry []VMwareDVSPvlanMapEntry `xml:"VMwareDVSPvlanMapEntry,omitempty" json:"VMwareDVSPvlanMapEntry,omitempty"`
+	VMwareDVSPvlanMapEntry []VMwareDVSPvlanMapEntry `xml:"VMwareDVSPvlanMapEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5437,7 +5437,7 @@ func init() {
 }
 
 type ArrayOfVMwareDVSVspanConfigSpec struct {
-	VMwareDVSVspanConfigSpec []VMwareDVSVspanConfigSpec `xml:"VMwareDVSVspanConfigSpec,omitempty" json:"VMwareDVSVspanConfigSpec,omitempty"`
+	VMwareDVSVspanConfigSpec []VMwareDVSVspanConfigSpec `xml:"VMwareDVSVspanConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5445,7 +5445,7 @@ func init() {
 }
 
 type ArrayOfVMwareDvsLacpGroupConfig struct {
-	VMwareDvsLacpGroupConfig []VMwareDvsLacpGroupConfig `xml:"VMwareDvsLacpGroupConfig,omitempty" json:"VMwareDvsLacpGroupConfig,omitempty"`
+	VMwareDvsLacpGroupConfig []VMwareDvsLacpGroupConfig `xml:"VMwareDvsLacpGroupConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5453,7 +5453,7 @@ func init() {
 }
 
 type ArrayOfVMwareDvsLacpGroupSpec struct {
-	VMwareDvsLacpGroupSpec []VMwareDvsLacpGroupSpec `xml:"VMwareDvsLacpGroupSpec,omitempty" json:"VMwareDvsLacpGroupSpec,omitempty"`
+	VMwareDvsLacpGroupSpec []VMwareDvsLacpGroupSpec `xml:"VMwareDvsLacpGroupSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5461,7 +5461,7 @@ func init() {
 }
 
 type ArrayOfVMwareVspanSession struct {
-	VMwareVspanSession []VMwareVspanSession `xml:"VMwareVspanSession,omitempty" json:"VMwareVspanSession,omitempty"`
+	VMwareVspanSession []VMwareVspanSession `xml:"VMwareVspanSession,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5469,7 +5469,7 @@ func init() {
 }
 
 type ArrayOfVStorageObjectAssociations struct {
-	VStorageObjectAssociations []VStorageObjectAssociations `xml:"VStorageObjectAssociations,omitempty" json:"VStorageObjectAssociations,omitempty"`
+	VStorageObjectAssociations []VStorageObjectAssociations `xml:"VStorageObjectAssociations,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5477,7 +5477,7 @@ func init() {
 }
 
 type ArrayOfVStorageObjectAssociationsVmDiskAssociations struct {
-	VStorageObjectAssociationsVmDiskAssociations []VStorageObjectAssociationsVmDiskAssociations `xml:"VStorageObjectAssociationsVmDiskAssociations,omitempty" json:"VStorageObjectAssociationsVmDiskAssociations,omitempty"`
+	VStorageObjectAssociationsVmDiskAssociations []VStorageObjectAssociationsVmDiskAssociations `xml:"VStorageObjectAssociationsVmDiskAssociations,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5485,7 +5485,7 @@ func init() {
 }
 
 type ArrayOfVStorageObjectSnapshotInfoVStorageObjectSnapshot struct {
-	VStorageObjectSnapshotInfoVStorageObjectSnapshot []VStorageObjectSnapshotInfoVStorageObjectSnapshot `xml:"VStorageObjectSnapshotInfoVStorageObjectSnapshot,omitempty" json:"VStorageObjectSnapshotInfoVStorageObjectSnapshot,omitempty"`
+	VStorageObjectSnapshotInfoVStorageObjectSnapshot []VStorageObjectSnapshotInfoVStorageObjectSnapshot `xml:"VStorageObjectSnapshotInfoVStorageObjectSnapshot,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5493,7 +5493,7 @@ func init() {
 }
 
 type ArrayOfVVolHostPE struct {
-	VVolHostPE []VVolHostPE `xml:"VVolHostPE,omitempty" json:"VVolHostPE,omitempty"`
+	VVolHostPE []VVolHostPE `xml:"VVolHostPE,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5501,7 +5501,7 @@ func init() {
 }
 
 type ArrayOfVVolVmConfigFileUpdateResultFailedVmConfigFileInfo struct {
-	VVolVmConfigFileUpdateResultFailedVmConfigFileInfo []VVolVmConfigFileUpdateResultFailedVmConfigFileInfo `xml:"VVolVmConfigFileUpdateResultFailedVmConfigFileInfo,omitempty" json:"VVolVmConfigFileUpdateResultFailedVmConfigFileInfo,omitempty"`
+	VVolVmConfigFileUpdateResultFailedVmConfigFileInfo []VVolVmConfigFileUpdateResultFailedVmConfigFileInfo `xml:"VVolVmConfigFileUpdateResultFailedVmConfigFileInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5509,7 +5509,7 @@ func init() {
 }
 
 type ArrayOfVchaNodeRuntimeInfo struct {
-	VchaNodeRuntimeInfo []VchaNodeRuntimeInfo `xml:"VchaNodeRuntimeInfo,omitempty" json:"VchaNodeRuntimeInfo,omitempty"`
+	VchaNodeRuntimeInfo []VchaNodeRuntimeInfo `xml:"VchaNodeRuntimeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5517,7 +5517,7 @@ func init() {
 }
 
 type ArrayOfVimVasaProviderInfo struct {
-	VimVasaProviderInfo []VimVasaProviderInfo `xml:"VimVasaProviderInfo,omitempty" json:"VimVasaProviderInfo,omitempty"`
+	VimVasaProviderInfo []VimVasaProviderInfo `xml:"VimVasaProviderInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5525,7 +5525,7 @@ func init() {
 }
 
 type ArrayOfVimVasaProviderStatePerArray struct {
-	VimVasaProviderStatePerArray []VimVasaProviderStatePerArray `xml:"VimVasaProviderStatePerArray,omitempty" json:"VimVasaProviderStatePerArray,omitempty"`
+	VimVasaProviderStatePerArray []VimVasaProviderStatePerArray `xml:"VimVasaProviderStatePerArray,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5533,7 +5533,7 @@ func init() {
 }
 
 type ArrayOfVirtualAppLinkInfo struct {
-	VirtualAppLinkInfo []VirtualAppLinkInfo `xml:"VirtualAppLinkInfo,omitempty" json:"VirtualAppLinkInfo,omitempty"`
+	VirtualAppLinkInfo []VirtualAppLinkInfo `xml:"VirtualAppLinkInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5541,7 +5541,7 @@ func init() {
 }
 
 type ArrayOfVirtualDevice struct {
-	VirtualDevice []BaseVirtualDevice `xml:"VirtualDevice,omitempty,typeattr" json:"VirtualDevice,omitempty"`
+	VirtualDevice []BaseVirtualDevice `xml:"VirtualDevice,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5549,7 +5549,7 @@ func init() {
 }
 
 type ArrayOfVirtualDeviceBackingOption struct {
-	VirtualDeviceBackingOption []BaseVirtualDeviceBackingOption `xml:"VirtualDeviceBackingOption,omitempty,typeattr" json:"VirtualDeviceBackingOption,omitempty"`
+	VirtualDeviceBackingOption []BaseVirtualDeviceBackingOption `xml:"VirtualDeviceBackingOption,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5557,7 +5557,7 @@ func init() {
 }
 
 type ArrayOfVirtualDeviceConfigSpec struct {
-	VirtualDeviceConfigSpec []BaseVirtualDeviceConfigSpec `xml:"VirtualDeviceConfigSpec,omitempty,typeattr" json:"VirtualDeviceConfigSpec,omitempty"`
+	VirtualDeviceConfigSpec []BaseVirtualDeviceConfigSpec `xml:"VirtualDeviceConfigSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5565,7 +5565,7 @@ func init() {
 }
 
 type ArrayOfVirtualDeviceOption struct {
-	VirtualDeviceOption []BaseVirtualDeviceOption `xml:"VirtualDeviceOption,omitempty,typeattr" json:"VirtualDeviceOption,omitempty"`
+	VirtualDeviceOption []BaseVirtualDeviceOption `xml:"VirtualDeviceOption,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5573,7 +5573,7 @@ func init() {
 }
 
 type ArrayOfVirtualDisk struct {
-	VirtualDisk []VirtualDisk `xml:"VirtualDisk,omitempty" json:"VirtualDisk,omitempty"`
+	VirtualDisk []VirtualDisk `xml:"VirtualDisk,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5581,7 +5581,7 @@ func init() {
 }
 
 type ArrayOfVirtualDiskDeltaDiskFormatsSupported struct {
-	VirtualDiskDeltaDiskFormatsSupported []VirtualDiskDeltaDiskFormatsSupported `xml:"VirtualDiskDeltaDiskFormatsSupported,omitempty" json:"VirtualDiskDeltaDiskFormatsSupported,omitempty"`
+	VirtualDiskDeltaDiskFormatsSupported []VirtualDiskDeltaDiskFormatsSupported `xml:"VirtualDiskDeltaDiskFormatsSupported,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5589,7 +5589,7 @@ func init() {
 }
 
 type ArrayOfVirtualDiskId struct {
-	VirtualDiskId []VirtualDiskId `xml:"VirtualDiskId,omitempty" json:"VirtualDiskId,omitempty"`
+	VirtualDiskId []VirtualDiskId `xml:"VirtualDiskId,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5597,7 +5597,7 @@ func init() {
 }
 
 type ArrayOfVirtualDiskRuleSpec struct {
-	VirtualDiskRuleSpec []VirtualDiskRuleSpec `xml:"VirtualDiskRuleSpec,omitempty" json:"VirtualDiskRuleSpec,omitempty"`
+	VirtualDiskRuleSpec []VirtualDiskRuleSpec `xml:"VirtualDiskRuleSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5605,7 +5605,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineBaseIndependentFilterSpec struct {
-	VirtualMachineBaseIndependentFilterSpec []BaseVirtualMachineBaseIndependentFilterSpec `xml:"VirtualMachineBaseIndependentFilterSpec,omitempty,typeattr" json:"VirtualMachineBaseIndependentFilterSpec,omitempty"`
+	VirtualMachineBaseIndependentFilterSpec []BaseVirtualMachineBaseIndependentFilterSpec `xml:"VirtualMachineBaseIndependentFilterSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5613,7 +5613,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineBootOptionsBootableDevice struct {
-	VirtualMachineBootOptionsBootableDevice []BaseVirtualMachineBootOptionsBootableDevice `xml:"VirtualMachineBootOptionsBootableDevice,omitempty,typeattr" json:"VirtualMachineBootOptionsBootableDevice,omitempty"`
+	VirtualMachineBootOptionsBootableDevice []BaseVirtualMachineBootOptionsBootableDevice `xml:"VirtualMachineBootOptionsBootableDevice,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5621,7 +5621,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineCdromInfo struct {
-	VirtualMachineCdromInfo []VirtualMachineCdromInfo `xml:"VirtualMachineCdromInfo,omitempty" json:"VirtualMachineCdromInfo,omitempty"`
+	VirtualMachineCdromInfo []VirtualMachineCdromInfo `xml:"VirtualMachineCdromInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5629,7 +5629,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineCertThumbprint struct {
-	VirtualMachineCertThumbprint []VirtualMachineCertThumbprint `xml:"VirtualMachineCertThumbprint,omitempty" json:"VirtualMachineCertThumbprint,omitempty"`
+	VirtualMachineCertThumbprint []VirtualMachineCertThumbprint `xml:"VirtualMachineCertThumbprint,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5637,7 +5637,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineConfigInfoDatastoreUrlPair struct {
-	VirtualMachineConfigInfoDatastoreUrlPair []VirtualMachineConfigInfoDatastoreUrlPair `xml:"VirtualMachineConfigInfoDatastoreUrlPair,omitempty" json:"VirtualMachineConfigInfoDatastoreUrlPair,omitempty"`
+	VirtualMachineConfigInfoDatastoreUrlPair []VirtualMachineConfigInfoDatastoreUrlPair `xml:"VirtualMachineConfigInfoDatastoreUrlPair,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5645,7 +5645,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineConfigOptionDescriptor struct {
-	VirtualMachineConfigOptionDescriptor []VirtualMachineConfigOptionDescriptor `xml:"VirtualMachineConfigOptionDescriptor,omitempty" json:"VirtualMachineConfigOptionDescriptor,omitempty"`
+	VirtualMachineConfigOptionDescriptor []VirtualMachineConfigOptionDescriptor `xml:"VirtualMachineConfigOptionDescriptor,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5653,7 +5653,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineConfigSpec struct {
-	VirtualMachineConfigSpec []VirtualMachineConfigSpec `xml:"VirtualMachineConfigSpec,omitempty" json:"VirtualMachineConfigSpec,omitempty"`
+	VirtualMachineConfigSpec []VirtualMachineConfigSpec `xml:"VirtualMachineConfigSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5661,7 +5661,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineConnection struct {
-	VirtualMachineConnection []BaseVirtualMachineConnection `xml:"VirtualMachineConnection,omitempty,typeattr" json:"VirtualMachineConnection,omitempty"`
+	VirtualMachineConnection []BaseVirtualMachineConnection `xml:"VirtualMachineConnection,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5669,7 +5669,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineCpuIdInfoSpec struct {
-	VirtualMachineCpuIdInfoSpec []VirtualMachineCpuIdInfoSpec `xml:"VirtualMachineCpuIdInfoSpec,omitempty" json:"VirtualMachineCpuIdInfoSpec,omitempty"`
+	VirtualMachineCpuIdInfoSpec []VirtualMachineCpuIdInfoSpec `xml:"VirtualMachineCpuIdInfoSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5677,7 +5677,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineDatastoreInfo struct {
-	VirtualMachineDatastoreInfo []VirtualMachineDatastoreInfo `xml:"VirtualMachineDatastoreInfo,omitempty" json:"VirtualMachineDatastoreInfo,omitempty"`
+	VirtualMachineDatastoreInfo []VirtualMachineDatastoreInfo `xml:"VirtualMachineDatastoreInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5685,7 +5685,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineDatastoreVolumeOption struct {
-	VirtualMachineDatastoreVolumeOption []VirtualMachineDatastoreVolumeOption `xml:"VirtualMachineDatastoreVolumeOption,omitempty" json:"VirtualMachineDatastoreVolumeOption,omitempty"`
+	VirtualMachineDatastoreVolumeOption []VirtualMachineDatastoreVolumeOption `xml:"VirtualMachineDatastoreVolumeOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5693,7 +5693,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineDeviceRuntimeInfo struct {
-	VirtualMachineDeviceRuntimeInfo []VirtualMachineDeviceRuntimeInfo `xml:"VirtualMachineDeviceRuntimeInfo,omitempty" json:"VirtualMachineDeviceRuntimeInfo,omitempty"`
+	VirtualMachineDeviceRuntimeInfo []VirtualMachineDeviceRuntimeInfo `xml:"VirtualMachineDeviceRuntimeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5701,7 +5701,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineDisplayTopology struct {
-	VirtualMachineDisplayTopology []VirtualMachineDisplayTopology `xml:"VirtualMachineDisplayTopology,omitempty" json:"VirtualMachineDisplayTopology,omitempty"`
+	VirtualMachineDisplayTopology []VirtualMachineDisplayTopology `xml:"VirtualMachineDisplayTopology,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5709,7 +5709,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineDvxClassInfo struct {
-	VirtualMachineDvxClassInfo []VirtualMachineDvxClassInfo `xml:"VirtualMachineDvxClassInfo,omitempty" json:"VirtualMachineDvxClassInfo,omitempty"`
+	VirtualMachineDvxClassInfo []VirtualMachineDvxClassInfo `xml:"VirtualMachineDvxClassInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5717,7 +5717,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineDynamicPassthroughInfo struct {
-	VirtualMachineDynamicPassthroughInfo []VirtualMachineDynamicPassthroughInfo `xml:"VirtualMachineDynamicPassthroughInfo,omitempty" json:"VirtualMachineDynamicPassthroughInfo,omitempty"`
+	VirtualMachineDynamicPassthroughInfo []VirtualMachineDynamicPassthroughInfo `xml:"VirtualMachineDynamicPassthroughInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5725,7 +5725,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFeatureRequirement struct {
-	VirtualMachineFeatureRequirement []VirtualMachineFeatureRequirement `xml:"VirtualMachineFeatureRequirement,omitempty" json:"VirtualMachineFeatureRequirement,omitempty"`
+	VirtualMachineFeatureRequirement []VirtualMachineFeatureRequirement `xml:"VirtualMachineFeatureRequirement,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5733,7 +5733,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFileLayoutDiskLayout struct {
-	VirtualMachineFileLayoutDiskLayout []VirtualMachineFileLayoutDiskLayout `xml:"VirtualMachineFileLayoutDiskLayout,omitempty" json:"VirtualMachineFileLayoutDiskLayout,omitempty"`
+	VirtualMachineFileLayoutDiskLayout []VirtualMachineFileLayoutDiskLayout `xml:"VirtualMachineFileLayoutDiskLayout,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5741,7 +5741,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFileLayoutExDiskLayout struct {
-	VirtualMachineFileLayoutExDiskLayout []VirtualMachineFileLayoutExDiskLayout `xml:"VirtualMachineFileLayoutExDiskLayout,omitempty" json:"VirtualMachineFileLayoutExDiskLayout,omitempty"`
+	VirtualMachineFileLayoutExDiskLayout []VirtualMachineFileLayoutExDiskLayout `xml:"VirtualMachineFileLayoutExDiskLayout,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5749,7 +5749,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFileLayoutExDiskUnit struct {
-	VirtualMachineFileLayoutExDiskUnit []VirtualMachineFileLayoutExDiskUnit `xml:"VirtualMachineFileLayoutExDiskUnit,omitempty" json:"VirtualMachineFileLayoutExDiskUnit,omitempty"`
+	VirtualMachineFileLayoutExDiskUnit []VirtualMachineFileLayoutExDiskUnit `xml:"VirtualMachineFileLayoutExDiskUnit,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5757,7 +5757,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFileLayoutExFileInfo struct {
-	VirtualMachineFileLayoutExFileInfo []VirtualMachineFileLayoutExFileInfo `xml:"VirtualMachineFileLayoutExFileInfo,omitempty" json:"VirtualMachineFileLayoutExFileInfo,omitempty"`
+	VirtualMachineFileLayoutExFileInfo []VirtualMachineFileLayoutExFileInfo `xml:"VirtualMachineFileLayoutExFileInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5765,7 +5765,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFileLayoutExSnapshotLayout struct {
-	VirtualMachineFileLayoutExSnapshotLayout []VirtualMachineFileLayoutExSnapshotLayout `xml:"VirtualMachineFileLayoutExSnapshotLayout,omitempty" json:"VirtualMachineFileLayoutExSnapshotLayout,omitempty"`
+	VirtualMachineFileLayoutExSnapshotLayout []VirtualMachineFileLayoutExSnapshotLayout `xml:"VirtualMachineFileLayoutExSnapshotLayout,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5773,7 +5773,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFileLayoutSnapshotLayout struct {
-	VirtualMachineFileLayoutSnapshotLayout []VirtualMachineFileLayoutSnapshotLayout `xml:"VirtualMachineFileLayoutSnapshotLayout,omitempty" json:"VirtualMachineFileLayoutSnapshotLayout,omitempty"`
+	VirtualMachineFileLayoutSnapshotLayout []VirtualMachineFileLayoutSnapshotLayout `xml:"VirtualMachineFileLayoutSnapshotLayout,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5781,7 +5781,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineFloppyInfo struct {
-	VirtualMachineFloppyInfo []VirtualMachineFloppyInfo `xml:"VirtualMachineFloppyInfo,omitempty" json:"VirtualMachineFloppyInfo,omitempty"`
+	VirtualMachineFloppyInfo []VirtualMachineFloppyInfo `xml:"VirtualMachineFloppyInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5789,7 +5789,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineIdeDiskDeviceInfo struct {
-	VirtualMachineIdeDiskDeviceInfo []VirtualMachineIdeDiskDeviceInfo `xml:"VirtualMachineIdeDiskDeviceInfo,omitempty" json:"VirtualMachineIdeDiskDeviceInfo,omitempty"`
+	VirtualMachineIdeDiskDeviceInfo []VirtualMachineIdeDiskDeviceInfo `xml:"VirtualMachineIdeDiskDeviceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5797,7 +5797,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineIdeDiskDevicePartitionInfo struct {
-	VirtualMachineIdeDiskDevicePartitionInfo []VirtualMachineIdeDiskDevicePartitionInfo `xml:"VirtualMachineIdeDiskDevicePartitionInfo,omitempty" json:"VirtualMachineIdeDiskDevicePartitionInfo,omitempty"`
+	VirtualMachineIdeDiskDevicePartitionInfo []VirtualMachineIdeDiskDevicePartitionInfo `xml:"VirtualMachineIdeDiskDevicePartitionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5805,7 +5805,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineLegacyNetworkSwitchInfo struct {
-	VirtualMachineLegacyNetworkSwitchInfo []VirtualMachineLegacyNetworkSwitchInfo `xml:"VirtualMachineLegacyNetworkSwitchInfo,omitempty" json:"VirtualMachineLegacyNetworkSwitchInfo,omitempty"`
+	VirtualMachineLegacyNetworkSwitchInfo []VirtualMachineLegacyNetworkSwitchInfo `xml:"VirtualMachineLegacyNetworkSwitchInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5813,7 +5813,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineMessage struct {
-	VirtualMachineMessage []VirtualMachineMessage `xml:"VirtualMachineMessage,omitempty" json:"VirtualMachineMessage,omitempty"`
+	VirtualMachineMessage []VirtualMachineMessage `xml:"VirtualMachineMessage,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5821,7 +5821,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineMetadataManagerVmMetadataInput struct {
-	VirtualMachineMetadataManagerVmMetadataInput []VirtualMachineMetadataManagerVmMetadataInput `xml:"VirtualMachineMetadataManagerVmMetadataInput,omitempty" json:"VirtualMachineMetadataManagerVmMetadataInput,omitempty"`
+	VirtualMachineMetadataManagerVmMetadataInput []VirtualMachineMetadataManagerVmMetadataInput `xml:"VirtualMachineMetadataManagerVmMetadataInput,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5829,7 +5829,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineMetadataManagerVmMetadataResult struct {
-	VirtualMachineMetadataManagerVmMetadataResult []VirtualMachineMetadataManagerVmMetadataResult `xml:"VirtualMachineMetadataManagerVmMetadataResult,omitempty" json:"VirtualMachineMetadataManagerVmMetadataResult,omitempty"`
+	VirtualMachineMetadataManagerVmMetadataResult []VirtualMachineMetadataManagerVmMetadataResult `xml:"VirtualMachineMetadataManagerVmMetadataResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5837,7 +5837,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineNetworkInfo struct {
-	VirtualMachineNetworkInfo []VirtualMachineNetworkInfo `xml:"VirtualMachineNetworkInfo,omitempty" json:"VirtualMachineNetworkInfo,omitempty"`
+	VirtualMachineNetworkInfo []VirtualMachineNetworkInfo `xml:"VirtualMachineNetworkInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5845,7 +5845,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineParallelInfo struct {
-	VirtualMachineParallelInfo []VirtualMachineParallelInfo `xml:"VirtualMachineParallelInfo,omitempty" json:"VirtualMachineParallelInfo,omitempty"`
+	VirtualMachineParallelInfo []VirtualMachineParallelInfo `xml:"VirtualMachineParallelInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5853,7 +5853,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachinePciPassthroughInfo struct {
-	VirtualMachinePciPassthroughInfo []BaseVirtualMachinePciPassthroughInfo `xml:"VirtualMachinePciPassthroughInfo,omitempty,typeattr" json:"VirtualMachinePciPassthroughInfo,omitempty"`
+	VirtualMachinePciPassthroughInfo []BaseVirtualMachinePciPassthroughInfo `xml:"VirtualMachinePciPassthroughInfo,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5861,7 +5861,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachinePciSharedGpuPassthroughInfo struct {
-	VirtualMachinePciSharedGpuPassthroughInfo []VirtualMachinePciSharedGpuPassthroughInfo `xml:"VirtualMachinePciSharedGpuPassthroughInfo,omitempty" json:"VirtualMachinePciSharedGpuPassthroughInfo,omitempty"`
+	VirtualMachinePciSharedGpuPassthroughInfo []VirtualMachinePciSharedGpuPassthroughInfo `xml:"VirtualMachinePciSharedGpuPassthroughInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5869,7 +5869,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachinePrecisionClockInfo struct {
-	VirtualMachinePrecisionClockInfo []VirtualMachinePrecisionClockInfo `xml:"VirtualMachinePrecisionClockInfo,omitempty" json:"VirtualMachinePrecisionClockInfo,omitempty"`
+	VirtualMachinePrecisionClockInfo []VirtualMachinePrecisionClockInfo `xml:"VirtualMachinePrecisionClockInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5877,7 +5877,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineProfileDetailsDiskProfileDetails struct {
-	VirtualMachineProfileDetailsDiskProfileDetails []VirtualMachineProfileDetailsDiskProfileDetails `xml:"VirtualMachineProfileDetailsDiskProfileDetails,omitempty" json:"VirtualMachineProfileDetailsDiskProfileDetails,omitempty"`
+	VirtualMachineProfileDetailsDiskProfileDetails []VirtualMachineProfileDetailsDiskProfileDetails `xml:"VirtualMachineProfileDetailsDiskProfileDetails,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5885,7 +5885,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineProfileSpec struct {
-	VirtualMachineProfileSpec []BaseVirtualMachineProfileSpec `xml:"VirtualMachineProfileSpec,omitempty,typeattr" json:"VirtualMachineProfileSpec,omitempty"`
+	VirtualMachineProfileSpec []BaseVirtualMachineProfileSpec `xml:"VirtualMachineProfileSpec,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -5893,7 +5893,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachinePropertyRelation struct {
-	VirtualMachinePropertyRelation []VirtualMachinePropertyRelation `xml:"VirtualMachinePropertyRelation,omitempty" json:"VirtualMachinePropertyRelation,omitempty"`
+	VirtualMachinePropertyRelation []VirtualMachinePropertyRelation `xml:"VirtualMachinePropertyRelation,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5901,7 +5901,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineQuickStatsMemoryTierStats struct {
-	VirtualMachineQuickStatsMemoryTierStats []VirtualMachineQuickStatsMemoryTierStats `xml:"VirtualMachineQuickStatsMemoryTierStats,omitempty" json:"VirtualMachineQuickStatsMemoryTierStats,omitempty"`
+	VirtualMachineQuickStatsMemoryTierStats []VirtualMachineQuickStatsMemoryTierStats `xml:"VirtualMachineQuickStatsMemoryTierStats,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5909,7 +5909,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineRelocateSpecDiskLocator struct {
-	VirtualMachineRelocateSpecDiskLocator []VirtualMachineRelocateSpecDiskLocator `xml:"VirtualMachineRelocateSpecDiskLocator,omitempty" json:"VirtualMachineRelocateSpecDiskLocator,omitempty"`
+	VirtualMachineRelocateSpecDiskLocator []VirtualMachineRelocateSpecDiskLocator `xml:"VirtualMachineRelocateSpecDiskLocator,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5917,7 +5917,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineScsiDiskDeviceInfo struct {
-	VirtualMachineScsiDiskDeviceInfo []VirtualMachineScsiDiskDeviceInfo `xml:"VirtualMachineScsiDiskDeviceInfo,omitempty" json:"VirtualMachineScsiDiskDeviceInfo,omitempty"`
+	VirtualMachineScsiDiskDeviceInfo []VirtualMachineScsiDiskDeviceInfo `xml:"VirtualMachineScsiDiskDeviceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5925,7 +5925,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineScsiPassthroughInfo struct {
-	VirtualMachineScsiPassthroughInfo []VirtualMachineScsiPassthroughInfo `xml:"VirtualMachineScsiPassthroughInfo,omitempty" json:"VirtualMachineScsiPassthroughInfo,omitempty"`
+	VirtualMachineScsiPassthroughInfo []VirtualMachineScsiPassthroughInfo `xml:"VirtualMachineScsiPassthroughInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5933,7 +5933,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineSerialInfo struct {
-	VirtualMachineSerialInfo []VirtualMachineSerialInfo `xml:"VirtualMachineSerialInfo,omitempty" json:"VirtualMachineSerialInfo,omitempty"`
+	VirtualMachineSerialInfo []VirtualMachineSerialInfo `xml:"VirtualMachineSerialInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5941,7 +5941,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineSnapshotTree struct {
-	VirtualMachineSnapshotTree []VirtualMachineSnapshotTree `xml:"VirtualMachineSnapshotTree,omitempty" json:"VirtualMachineSnapshotTree,omitempty"`
+	VirtualMachineSnapshotTree []VirtualMachineSnapshotTree `xml:"VirtualMachineSnapshotTree,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5949,7 +5949,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineSoundInfo struct {
-	VirtualMachineSoundInfo []VirtualMachineSoundInfo `xml:"VirtualMachineSoundInfo,omitempty" json:"VirtualMachineSoundInfo,omitempty"`
+	VirtualMachineSoundInfo []VirtualMachineSoundInfo `xml:"VirtualMachineSoundInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5957,7 +5957,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineSriovInfo struct {
-	VirtualMachineSriovInfo []VirtualMachineSriovInfo `xml:"VirtualMachineSriovInfo,omitempty" json:"VirtualMachineSriovInfo,omitempty"`
+	VirtualMachineSriovInfo []VirtualMachineSriovInfo `xml:"VirtualMachineSriovInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5965,7 +5965,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineSummary struct {
-	VirtualMachineSummary []VirtualMachineSummary `xml:"VirtualMachineSummary,omitempty" json:"VirtualMachineSummary,omitempty"`
+	VirtualMachineSummary []VirtualMachineSummary `xml:"VirtualMachineSummary,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5973,7 +5973,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineUsageOnDatastore struct {
-	VirtualMachineUsageOnDatastore []VirtualMachineUsageOnDatastore `xml:"VirtualMachineUsageOnDatastore,omitempty" json:"VirtualMachineUsageOnDatastore,omitempty"`
+	VirtualMachineUsageOnDatastore []VirtualMachineUsageOnDatastore `xml:"VirtualMachineUsageOnDatastore,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5981,7 +5981,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineUsbInfo struct {
-	VirtualMachineUsbInfo []VirtualMachineUsbInfo `xml:"VirtualMachineUsbInfo,omitempty" json:"VirtualMachineUsbInfo,omitempty"`
+	VirtualMachineUsbInfo []VirtualMachineUsbInfo `xml:"VirtualMachineUsbInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5989,7 +5989,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVFlashModuleInfo struct {
-	VirtualMachineVFlashModuleInfo []VirtualMachineVFlashModuleInfo `xml:"VirtualMachineVFlashModuleInfo,omitempty" json:"VirtualMachineVFlashModuleInfo,omitempty"`
+	VirtualMachineVFlashModuleInfo []VirtualMachineVFlashModuleInfo `xml:"VirtualMachineVFlashModuleInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5997,7 +5997,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVMCIDeviceFilterSpec struct {
-	VirtualMachineVMCIDeviceFilterSpec []VirtualMachineVMCIDeviceFilterSpec `xml:"VirtualMachineVMCIDeviceFilterSpec,omitempty" json:"VirtualMachineVMCIDeviceFilterSpec,omitempty"`
+	VirtualMachineVMCIDeviceFilterSpec []VirtualMachineVMCIDeviceFilterSpec `xml:"VirtualMachineVMCIDeviceFilterSpec,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6005,7 +6005,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVcpuConfig struct {
-	VirtualMachineVcpuConfig []VirtualMachineVcpuConfig `xml:"VirtualMachineVcpuConfig,omitempty" json:"VirtualMachineVcpuConfig,omitempty"`
+	VirtualMachineVcpuConfig []VirtualMachineVcpuConfig `xml:"VirtualMachineVcpuConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6013,7 +6013,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVendorDeviceGroupInfo struct {
-	VirtualMachineVendorDeviceGroupInfo []VirtualMachineVendorDeviceGroupInfo `xml:"VirtualMachineVendorDeviceGroupInfo,omitempty" json:"VirtualMachineVendorDeviceGroupInfo,omitempty"`
+	VirtualMachineVendorDeviceGroupInfo []VirtualMachineVendorDeviceGroupInfo `xml:"VirtualMachineVendorDeviceGroupInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6021,7 +6021,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVendorDeviceGroupInfoComponentDeviceInfo struct {
-	VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo []VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo `xml:"VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo,omitempty" json:"VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo,omitempty"`
+	VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo []VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo `xml:"VirtualMachineVendorDeviceGroupInfoComponentDeviceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6029,7 +6029,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVgpuDeviceInfo struct {
-	VirtualMachineVgpuDeviceInfo []VirtualMachineVgpuDeviceInfo `xml:"VirtualMachineVgpuDeviceInfo,omitempty" json:"VirtualMachineVgpuDeviceInfo,omitempty"`
+	VirtualMachineVgpuDeviceInfo []VirtualMachineVgpuDeviceInfo `xml:"VirtualMachineVgpuDeviceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6037,7 +6037,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVgpuProfileInfo struct {
-	VirtualMachineVgpuProfileInfo []VirtualMachineVgpuProfileInfo `xml:"VirtualMachineVgpuProfileInfo,omitempty" json:"VirtualMachineVgpuProfileInfo,omitempty"`
+	VirtualMachineVgpuProfileInfo []VirtualMachineVgpuProfileInfo `xml:"VirtualMachineVgpuProfileInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6045,7 +6045,7 @@ func init() {
 }
 
 type ArrayOfVirtualMachineVirtualDeviceGroupsDeviceGroup struct {
-	VirtualMachineVirtualDeviceGroupsDeviceGroup []BaseVirtualMachineVirtualDeviceGroupsDeviceGroup `xml:"VirtualMachineVirtualDeviceGroupsDeviceGroup,omitempty,typeattr" json:"VirtualMachineVirtualDeviceGroupsDeviceGroup,omitempty"`
+	VirtualMachineVirtualDeviceGroupsDeviceGroup []BaseVirtualMachineVirtualDeviceGroupsDeviceGroup `xml:"VirtualMachineVirtualDeviceGroupsDeviceGroup,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -6053,7 +6053,7 @@ func init() {
 }
 
 type ArrayOfVirtualNicManagerNetConfig struct {
-	VirtualNicManagerNetConfig []VirtualNicManagerNetConfig `xml:"VirtualNicManagerNetConfig,omitempty" json:"VirtualNicManagerNetConfig,omitempty"`
+	VirtualNicManagerNetConfig []VirtualNicManagerNetConfig `xml:"VirtualNicManagerNetConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6061,7 +6061,7 @@ func init() {
 }
 
 type ArrayOfVirtualPCIPassthroughAllowedDevice struct {
-	VirtualPCIPassthroughAllowedDevice []VirtualPCIPassthroughAllowedDevice `xml:"VirtualPCIPassthroughAllowedDevice,omitempty" json:"VirtualPCIPassthroughAllowedDevice,omitempty"`
+	VirtualPCIPassthroughAllowedDevice []VirtualPCIPassthroughAllowedDevice `xml:"VirtualPCIPassthroughAllowedDevice,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6069,7 +6069,7 @@ func init() {
 }
 
 type ArrayOfVirtualSCSISharing struct {
-	VirtualSCSISharing []VirtualSCSISharing `xml:"VirtualSCSISharing,omitempty" json:"VirtualSCSISharing,omitempty"`
+	VirtualSCSISharing []VirtualSCSISharing `xml:"VirtualSCSISharing,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6077,7 +6077,7 @@ func init() {
 }
 
 type ArrayOfVirtualSwitchProfile struct {
-	VirtualSwitchProfile []VirtualSwitchProfile `xml:"VirtualSwitchProfile,omitempty" json:"VirtualSwitchProfile,omitempty"`
+	VirtualSwitchProfile []VirtualSwitchProfile `xml:"VirtualSwitchProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6085,7 +6085,7 @@ func init() {
 }
 
 type ArrayOfVmEventArgument struct {
-	VmEventArgument []VmEventArgument `xml:"VmEventArgument,omitempty" json:"VmEventArgument,omitempty"`
+	VmEventArgument []VmEventArgument `xml:"VmEventArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6093,7 +6093,7 @@ func init() {
 }
 
 type ArrayOfVmPodConfigForPlacement struct {
-	VmPodConfigForPlacement []VmPodConfigForPlacement `xml:"VmPodConfigForPlacement,omitempty" json:"VmPodConfigForPlacement,omitempty"`
+	VmPodConfigForPlacement []VmPodConfigForPlacement `xml:"VmPodConfigForPlacement,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6101,7 +6101,7 @@ func init() {
 }
 
 type ArrayOfVmPortGroupProfile struct {
-	VmPortGroupProfile []VmPortGroupProfile `xml:"VmPortGroupProfile,omitempty" json:"VmPortGroupProfile,omitempty"`
+	VmPortGroupProfile []VmPortGroupProfile `xml:"VmPortGroupProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6109,7 +6109,7 @@ func init() {
 }
 
 type ArrayOfVmfsConfigOption struct {
-	VmfsConfigOption []VmfsConfigOption `xml:"VmfsConfigOption,omitempty" json:"VmfsConfigOption,omitempty"`
+	VmfsConfigOption []VmfsConfigOption `xml:"VmfsConfigOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6117,7 +6117,7 @@ func init() {
 }
 
 type ArrayOfVmfsDatastoreOption struct {
-	VmfsDatastoreOption []VmfsDatastoreOption `xml:"VmfsDatastoreOption,omitempty" json:"VmfsDatastoreOption,omitempty"`
+	VmfsDatastoreOption []VmfsDatastoreOption `xml:"VmfsDatastoreOption,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6125,7 +6125,7 @@ func init() {
 }
 
 type ArrayOfVnicPortArgument struct {
-	VnicPortArgument []VnicPortArgument `xml:"VnicPortArgument,omitempty" json:"VnicPortArgument,omitempty"`
+	VnicPortArgument []VnicPortArgument `xml:"VnicPortArgument,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6133,7 +6133,7 @@ func init() {
 }
 
 type ArrayOfVsanHostConfigInfo struct {
-	VsanHostConfigInfo []VsanHostConfigInfo `xml:"VsanHostConfigInfo,omitempty" json:"VsanHostConfigInfo,omitempty"`
+	VsanHostConfigInfo []VsanHostConfigInfo `xml:"VsanHostConfigInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6141,7 +6141,7 @@ func init() {
 }
 
 type ArrayOfVsanHostConfigInfoNetworkInfoPortConfig struct {
-	VsanHostConfigInfoNetworkInfoPortConfig []VsanHostConfigInfoNetworkInfoPortConfig `xml:"VsanHostConfigInfoNetworkInfoPortConfig,omitempty" json:"VsanHostConfigInfoNetworkInfoPortConfig,omitempty"`
+	VsanHostConfigInfoNetworkInfoPortConfig []VsanHostConfigInfoNetworkInfoPortConfig `xml:"VsanHostConfigInfoNetworkInfoPortConfig,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6149,7 +6149,7 @@ func init() {
 }
 
 type ArrayOfVsanHostDiskMapInfo struct {
-	VsanHostDiskMapInfo []VsanHostDiskMapInfo `xml:"VsanHostDiskMapInfo,omitempty" json:"VsanHostDiskMapInfo,omitempty"`
+	VsanHostDiskMapInfo []VsanHostDiskMapInfo `xml:"VsanHostDiskMapInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6157,7 +6157,7 @@ func init() {
 }
 
 type ArrayOfVsanHostDiskMapResult struct {
-	VsanHostDiskMapResult []VsanHostDiskMapResult `xml:"VsanHostDiskMapResult,omitempty" json:"VsanHostDiskMapResult,omitempty"`
+	VsanHostDiskMapResult []VsanHostDiskMapResult `xml:"VsanHostDiskMapResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6165,7 +6165,7 @@ func init() {
 }
 
 type ArrayOfVsanHostDiskMapping struct {
-	VsanHostDiskMapping []VsanHostDiskMapping `xml:"VsanHostDiskMapping,omitempty" json:"VsanHostDiskMapping,omitempty"`
+	VsanHostDiskMapping []VsanHostDiskMapping `xml:"VsanHostDiskMapping,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6173,7 +6173,7 @@ func init() {
 }
 
 type ArrayOfVsanHostDiskResult struct {
-	VsanHostDiskResult []VsanHostDiskResult `xml:"VsanHostDiskResult,omitempty" json:"VsanHostDiskResult,omitempty"`
+	VsanHostDiskResult []VsanHostDiskResult `xml:"VsanHostDiskResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6181,7 +6181,7 @@ func init() {
 }
 
 type ArrayOfVsanHostMembershipInfo struct {
-	VsanHostMembershipInfo []VsanHostMembershipInfo `xml:"VsanHostMembershipInfo,omitempty" json:"VsanHostMembershipInfo,omitempty"`
+	VsanHostMembershipInfo []VsanHostMembershipInfo `xml:"VsanHostMembershipInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6189,7 +6189,7 @@ func init() {
 }
 
 type ArrayOfVsanHostRuntimeInfoDiskIssue struct {
-	VsanHostRuntimeInfoDiskIssue []VsanHostRuntimeInfoDiskIssue `xml:"VsanHostRuntimeInfoDiskIssue,omitempty" json:"VsanHostRuntimeInfoDiskIssue,omitempty"`
+	VsanHostRuntimeInfoDiskIssue []VsanHostRuntimeInfoDiskIssue `xml:"VsanHostRuntimeInfoDiskIssue,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6197,7 +6197,7 @@ func init() {
 }
 
 type ArrayOfVsanNewPolicyBatch struct {
-	VsanNewPolicyBatch []VsanNewPolicyBatch `xml:"VsanNewPolicyBatch,omitempty" json:"VsanNewPolicyBatch,omitempty"`
+	VsanNewPolicyBatch []VsanNewPolicyBatch `xml:"VsanNewPolicyBatch,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6205,7 +6205,7 @@ func init() {
 }
 
 type ArrayOfVsanPolicyChangeBatch struct {
-	VsanPolicyChangeBatch []VsanPolicyChangeBatch `xml:"VsanPolicyChangeBatch,omitempty" json:"VsanPolicyChangeBatch,omitempty"`
+	VsanPolicyChangeBatch []VsanPolicyChangeBatch `xml:"VsanPolicyChangeBatch,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6213,7 +6213,7 @@ func init() {
 }
 
 type ArrayOfVsanPolicySatisfiability struct {
-	VsanPolicySatisfiability []VsanPolicySatisfiability `xml:"VsanPolicySatisfiability,omitempty" json:"VsanPolicySatisfiability,omitempty"`
+	VsanPolicySatisfiability []VsanPolicySatisfiability `xml:"VsanPolicySatisfiability,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6221,7 +6221,7 @@ func init() {
 }
 
 type ArrayOfVsanUpgradeSystemNetworkPartitionInfo struct {
-	VsanUpgradeSystemNetworkPartitionInfo []VsanUpgradeSystemNetworkPartitionInfo `xml:"VsanUpgradeSystemNetworkPartitionInfo,omitempty" json:"VsanUpgradeSystemNetworkPartitionInfo,omitempty"`
+	VsanUpgradeSystemNetworkPartitionInfo []VsanUpgradeSystemNetworkPartitionInfo `xml:"VsanUpgradeSystemNetworkPartitionInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6229,7 +6229,7 @@ func init() {
 }
 
 type ArrayOfVsanUpgradeSystemPreflightCheckIssue struct {
-	VsanUpgradeSystemPreflightCheckIssue []BaseVsanUpgradeSystemPreflightCheckIssue `xml:"VsanUpgradeSystemPreflightCheckIssue,omitempty,typeattr" json:"VsanUpgradeSystemPreflightCheckIssue,omitempty"`
+	VsanUpgradeSystemPreflightCheckIssue []BaseVsanUpgradeSystemPreflightCheckIssue `xml:"VsanUpgradeSystemPreflightCheckIssue,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -6237,7 +6237,7 @@ func init() {
 }
 
 type ArrayOfVsanUpgradeSystemUpgradeHistoryItem struct {
-	VsanUpgradeSystemUpgradeHistoryItem []BaseVsanUpgradeSystemUpgradeHistoryItem `xml:"VsanUpgradeSystemUpgradeHistoryItem,omitempty,typeattr" json:"VsanUpgradeSystemUpgradeHistoryItem,omitempty"`
+	VsanUpgradeSystemUpgradeHistoryItem []BaseVsanUpgradeSystemUpgradeHistoryItem `xml:"VsanUpgradeSystemUpgradeHistoryItem,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -6245,7 +6245,7 @@ func init() {
 }
 
 type ArrayOfVslmTagEntry struct {
-	VslmTagEntry []VslmTagEntry `xml:"VslmTagEntry,omitempty" json:"VslmTagEntry,omitempty"`
+	VslmTagEntry []VslmTagEntry `xml:"VslmTagEntry,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6253,7 +6253,7 @@ func init() {
 }
 
 type ArrayOfVslmInfrastructureObjectPolicy struct {
-	VslmInfrastructureObjectPolicy []VslmInfrastructureObjectPolicy `xml:"vslmInfrastructureObjectPolicy,omitempty" json:"vslmInfrastructureObjectPolicy,omitempty"`
+	VslmInfrastructureObjectPolicy []VslmInfrastructureObjectPolicy `xml:"vslmInfrastructureObjectPolicy,omitempty" json:"_value"`
 }
 
 func init() {
@@ -6278,7 +6278,7 @@ func init() {
 }
 
 type AssignUserToGroupRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	User  string                 `xml:"user" json:"user"`
 	Group string                 `xml:"group" json:"group"`
 }
@@ -6297,7 +6297,7 @@ func init() {
 }
 
 type AssociateProfileRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -6309,7 +6309,7 @@ type AssociateProfileResponse struct {
 }
 
 type AttachDiskRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	DiskId        ID                     `xml:"diskId" json:"diskId"`
 	Datastore     ManagedObjectReference `xml:"datastore" json:"datastore"`
 	ControllerKey int32                  `xml:"controllerKey,omitempty" json:"controllerKey,omitempty"`
@@ -6337,7 +6337,7 @@ func init() {
 }
 
 type AttachScsiLunExRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid []string               `xml:"lunUuid" json:"lunUuid"`
 }
 
@@ -6356,7 +6356,7 @@ type AttachScsiLunEx_TaskResponse struct {
 }
 
 type AttachScsiLunRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid string                 `xml:"lunUuid" json:"lunUuid"`
 }
 
@@ -6374,7 +6374,7 @@ func init() {
 }
 
 type AttachTagToVStorageObjectRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Id       ID                     `xml:"id" json:"id"`
 	Category string                 `xml:"category" json:"category"`
 	Tag      string                 `xml:"tag" json:"tag"`
@@ -6394,7 +6394,7 @@ func init() {
 }
 
 type AttachVmfsExtentRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsPath string                 `xml:"vmfsPath" json:"vmfsPath"`
 	Extent   HostScsiDiskPartition  `xml:"extent" json:"extent"`
 }
@@ -6513,7 +6513,7 @@ func init() {
 }
 
 type AutoStartPowerOffRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -6530,7 +6530,7 @@ func init() {
 }
 
 type AutoStartPowerOnRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -6583,7 +6583,7 @@ func init() {
 }
 
 type BackupFirmwareConfigurationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -6670,7 +6670,7 @@ func init() {
 }
 
 type BatchAddHostsToClusterRequestType struct {
-	This          ManagedObjectReference        `xml:"_this" json:"_this"`
+	This          ManagedObjectReference        `xml:"_this" json:"-"`
 	Cluster       ManagedObjectReference        `xml:"cluster" json:"cluster"`
 	NewHosts      []FolderNewHostSpec           `xml:"newHosts,omitempty" json:"newHosts,omitempty"`
 	ExistingHosts []ManagedObjectReference      `xml:"existingHosts,omitempty" json:"existingHosts,omitempty"`
@@ -6693,7 +6693,7 @@ type BatchAddHostsToCluster_TaskResponse struct {
 }
 
 type BatchAddStandaloneHostsRequestType struct {
-	This         ManagedObjectReference        `xml:"_this" json:"_this"`
+	This         ManagedObjectReference        `xml:"_this" json:"-"`
 	NewHosts     []FolderNewHostSpec           `xml:"newHosts,omitempty" json:"newHosts,omitempty"`
 	CompResSpec  BaseComputeResourceConfigSpec `xml:"compResSpec,omitempty,typeattr" json:"compResSpec,omitempty"`
 	AddConnected bool                          `xml:"addConnected" json:"addConnected"`
@@ -6720,7 +6720,7 @@ func init() {
 }
 
 type BatchQueryConnectInfoRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	HostSpecs []HostConnectSpec      `xml:"hostSpecs,omitempty" json:"hostSpecs,omitempty"`
 }
 
@@ -6752,7 +6752,7 @@ func init() {
 }
 
 type BindVnicRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	IScsiHbaName string                 `xml:"iScsiHbaName" json:"iScsiHbaName"`
 	VnicDevice   string                 `xml:"vnicDevice" json:"vnicDevice"`
 }
@@ -6806,7 +6806,7 @@ func init() {
 }
 
 type BrowseDiagnosticLogRequestType struct {
-	This  ManagedObjectReference  `xml:"_this" json:"_this"`
+	This  ManagedObjectReference  `xml:"_this" json:"-"`
 	Host  *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	Key   string                  `xml:"key" json:"key"`
 	Start int32                   `xml:"start,omitempty" json:"start,omitempty"`
@@ -6842,7 +6842,7 @@ func init() {
 }
 
 type CanProvisionObjectsRequestType struct {
-	This                 ManagedObjectReference `xml:"_this" json:"_this"`
+	This                 ManagedObjectReference `xml:"_this" json:"-"`
 	Npbs                 []VsanNewPolicyBatch   `xml:"npbs" json:"npbs"`
 	IgnoreSatisfiability *bool                  `xml:"ignoreSatisfiability" json:"ignoreSatisfiability,omitempty"`
 }
@@ -6862,7 +6862,7 @@ func init() {
 }
 
 type CancelRecommendationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  string                 `xml:"key" json:"key"`
 }
 
@@ -6880,7 +6880,7 @@ func init() {
 }
 
 type CancelRetrievePropertiesExRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Token string                 `xml:"token" json:"token"`
 }
 
@@ -6898,7 +6898,7 @@ func init() {
 }
 
 type CancelStorageDrsRecommendationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  []string               `xml:"key" json:"key"`
 }
 
@@ -6916,7 +6916,7 @@ func init() {
 }
 
 type CancelTaskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -6933,7 +6933,7 @@ func init() {
 }
 
 type CancelWaitForUpdatesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -7464,7 +7464,7 @@ func init() {
 }
 
 type CertMgrRefreshCACertificatesAndCRLsRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -7483,7 +7483,7 @@ type CertMgrRefreshCACertificatesAndCRLs_TaskResponse struct {
 }
 
 type CertMgrRefreshCertificatesRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -7502,7 +7502,7 @@ type CertMgrRefreshCertificates_TaskResponse struct {
 }
 
 type CertMgrRevokeCertificatesRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -7527,7 +7527,7 @@ func init() {
 }
 
 type ChangeAccessModeRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Principal  string                 `xml:"principal" json:"principal"`
 	IsGroup    bool                   `xml:"isGroup" json:"isGroup"`
 	AccessMode HostAccessMode         `xml:"accessMode" json:"accessMode"`
@@ -7547,7 +7547,7 @@ func init() {
 }
 
 type ChangeFileAttributesInGuestRequestType struct {
-	This           ManagedObjectReference  `xml:"_this" json:"_this"`
+	This           ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm             ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth           BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	GuestFilePath  string                  `xml:"guestFilePath" json:"guestFilePath"`
@@ -7562,7 +7562,7 @@ type ChangeFileAttributesInGuestResponse struct {
 }
 
 type ChangeKeyRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	NewKey CryptoKeyPlain         `xml:"newKey" json:"newKey"`
 }
 
@@ -7587,7 +7587,7 @@ func init() {
 }
 
 type ChangeLockdownModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Mode HostLockdownMode       `xml:"mode" json:"mode"`
 }
 
@@ -7605,7 +7605,7 @@ func init() {
 }
 
 type ChangeNFSUserPasswordRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Password string                 `xml:"password" json:"password"`
 }
 
@@ -7623,7 +7623,7 @@ func init() {
 }
 
 type ChangeOwnerRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Owner      string                  `xml:"owner" json:"owner"`
@@ -7643,7 +7643,7 @@ func init() {
 }
 
 type ChangePasswordRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	User        string                 `xml:"user" json:"user"`
 	OldPassword string                 `xml:"oldPassword" json:"oldPassword"`
 	NewPassword string                 `xml:"newPassword" json:"newPassword"`
@@ -7669,7 +7669,7 @@ func init() {
 }
 
 type CheckAddHostEvcRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	CnxSpec HostConnectSpec        `xml:"cnxSpec" json:"cnxSpec"`
 }
 
@@ -7688,7 +7688,7 @@ type CheckAddHostEvc_TaskResponse struct {
 }
 
 type CheckAnswerFileStatusRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -7707,7 +7707,7 @@ type CheckAnswerFileStatus_TaskResponse struct {
 }
 
 type CheckCloneRequestType struct {
-	This     ManagedObjectReference  `xml:"_this" json:"_this"`
+	This     ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference  `xml:"vm" json:"vm"`
 	Folder   ManagedObjectReference  `xml:"folder" json:"folder"`
 	Name     string                  `xml:"name" json:"name"`
@@ -7730,7 +7730,7 @@ type CheckClone_TaskResponse struct {
 }
 
 type CheckCompatibilityRequestType struct {
-	This     ManagedObjectReference  `xml:"_this" json:"_this"`
+	This     ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference  `xml:"vm" json:"vm"`
 	Host     *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	Pool     *ManagedObjectReference `xml:"pool,omitempty" json:"pool,omitempty"`
@@ -7752,7 +7752,7 @@ type CheckCompatibility_TaskResponse struct {
 }
 
 type CheckComplianceRequestType struct {
-	This    ManagedObjectReference   `xml:"_this" json:"_this"`
+	This    ManagedObjectReference   `xml:"_this" json:"-"`
 	Profile []ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 	Entity  []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
@@ -7772,7 +7772,7 @@ type CheckCompliance_TaskResponse struct {
 }
 
 type CheckConfigureEvcModeRequestType struct {
-	This               ManagedObjectReference `xml:"_this" json:"_this"`
+	This               ManagedObjectReference `xml:"_this" json:"-"`
 	EvcModeKey         string                 `xml:"evcModeKey" json:"evcModeKey"`
 	EvcGraphicsModeKey string                 `xml:"evcGraphicsModeKey,omitempty" json:"evcGraphicsModeKey,omitempty"`
 }
@@ -7798,7 +7798,7 @@ func init() {
 }
 
 type CheckCustomizationResourcesRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	GuestOs string                 `xml:"guestOs" json:"guestOs"`
 }
 
@@ -7816,7 +7816,7 @@ func init() {
 }
 
 type CheckCustomizationSpecRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec CustomizationSpec      `xml:"spec" json:"spec"`
 }
 
@@ -7834,7 +7834,7 @@ func init() {
 }
 
 type CheckForUpdatesRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Version string                 `xml:"version,omitempty" json:"version,omitempty"`
 }
 
@@ -7847,7 +7847,7 @@ type CheckForUpdatesResponse struct {
 }
 
 type CheckHostPatchRequestType struct {
-	This       ManagedObjectReference                     `xml:"_this" json:"_this"`
+	This       ManagedObjectReference                     `xml:"_this" json:"-"`
 	MetaUrls   []string                                   `xml:"metaUrls,omitempty" json:"metaUrls,omitempty"`
 	BundleUrls []string                                   `xml:"bundleUrls,omitempty" json:"bundleUrls,omitempty"`
 	Spec       *HostPatchManagerPatchManagerOperationSpec `xml:"spec,omitempty" json:"spec,omitempty"`
@@ -7868,7 +7868,7 @@ type CheckHostPatch_TaskResponse struct {
 }
 
 type CheckInstantCloneRequestType struct {
-	This     ManagedObjectReference         `xml:"_this" json:"_this"`
+	This     ManagedObjectReference         `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference         `xml:"vm" json:"vm"`
 	Spec     VirtualMachineInstantCloneSpec `xml:"spec" json:"spec"`
 	TestType []string                       `xml:"testType,omitempty" json:"testType,omitempty"`
@@ -7895,7 +7895,7 @@ func init() {
 }
 
 type CheckLicenseFeatureRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Host       *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	FeatureKey string                  `xml:"featureKey" json:"featureKey"`
 }
@@ -7909,7 +7909,7 @@ type CheckLicenseFeatureResponse struct {
 }
 
 type CheckMigrateRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference   `xml:"vm" json:"vm"`
 	Host     *ManagedObjectReference  `xml:"host,omitempty" json:"host,omitempty"`
 	Pool     *ManagedObjectReference  `xml:"pool,omitempty" json:"pool,omitempty"`
@@ -7932,7 +7932,7 @@ type CheckMigrate_TaskResponse struct {
 }
 
 type CheckPowerOnRequestType struct {
-	This     ManagedObjectReference  `xml:"_this" json:"_this"`
+	This     ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference  `xml:"vm" json:"vm"`
 	Host     *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	Pool     *ManagedObjectReference `xml:"pool,omitempty" json:"pool,omitempty"`
@@ -7954,7 +7954,7 @@ type CheckPowerOn_TaskResponse struct {
 }
 
 type CheckProfileComplianceRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
 
@@ -7973,7 +7973,7 @@ type CheckProfileCompliance_TaskResponse struct {
 }
 
 type CheckRelocateRequestType struct {
-	This     ManagedObjectReference     `xml:"_this" json:"_this"`
+	This     ManagedObjectReference     `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference     `xml:"vm" json:"vm"`
 	Spec     VirtualMachineRelocateSpec `xml:"spec" json:"spec"`
 	TestType []string                   `xml:"testType,omitempty" json:"testType,omitempty"`
@@ -8007,7 +8007,7 @@ func init() {
 }
 
 type CheckVmConfigRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	Spec     VirtualMachineConfigSpec `xml:"spec" json:"spec"`
 	Vm       *ManagedObjectReference  `xml:"vm,omitempty" json:"vm,omitempty"`
 	Host     *ManagedObjectReference  `xml:"host,omitempty" json:"host,omitempty"`
@@ -8047,7 +8047,7 @@ func init() {
 }
 
 type ClearComplianceStatusRequestType struct {
-	This    ManagedObjectReference   `xml:"_this" json:"_this"`
+	This    ManagedObjectReference   `xml:"_this" json:"-"`
 	Profile []ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 	Entity  []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
@@ -8066,7 +8066,7 @@ func init() {
 }
 
 type ClearNFSUserRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -8083,7 +8083,7 @@ func init() {
 }
 
 type ClearSystemEventLogRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -8100,7 +8100,7 @@ func init() {
 }
 
 type ClearTriggeredAlarmsRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Filter AlarmFilterSpec        `xml:"filter" json:"filter"`
 }
 
@@ -8118,7 +8118,7 @@ func init() {
 }
 
 type ClearVStorageObjectControlFlagsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Id           ID                     `xml:"id" json:"id"`
 	Datastore    ManagedObjectReference `xml:"datastore" json:"datastore"`
 	ControlFlags []string               `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
@@ -8166,7 +8166,7 @@ func init() {
 }
 
 type CloneSessionRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	CloneTicket string                 `xml:"cloneTicket" json:"cloneTicket"`
 }
 
@@ -8179,7 +8179,7 @@ type CloneSessionResponse struct {
 }
 
 type CloneVAppRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Name   string                 `xml:"name" json:"name"`
 	Target ManagedObjectReference `xml:"target" json:"target"`
 	Spec   VAppCloneSpec          `xml:"spec" json:"spec"`
@@ -8200,7 +8200,7 @@ type CloneVApp_TaskResponse struct {
 }
 
 type CloneVMRequestType struct {
-	This   ManagedObjectReference  `xml:"_this" json:"_this"`
+	This   ManagedObjectReference  `xml:"_this" json:"-"`
 	Folder ManagedObjectReference  `xml:"folder" json:"folder"`
 	Name   string                  `xml:"name" json:"name"`
 	Spec   VirtualMachineCloneSpec `xml:"spec" json:"spec"`
@@ -8221,7 +8221,7 @@ type CloneVM_TaskResponse struct {
 }
 
 type CloneVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Spec      VslmCloneSpec          `xml:"spec" json:"spec"`
@@ -8248,7 +8248,7 @@ func init() {
 }
 
 type CloseInventoryViewFolderRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -9062,7 +9062,7 @@ func init() {
 }
 
 type ClusterEnterMaintenanceModeRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Host   []ManagedObjectReference `xml:"host" json:"host"`
 	Option []BaseOptionValue        `xml:"option,omitempty,typeattr" json:"option,omitempty"`
 }
@@ -9737,7 +9737,7 @@ func init() {
 }
 
 type CompositeHostProfileRequestType struct {
-	This                   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This                   ManagedObjectReference   `xml:"_this" json:"-"`
 	Source                 ManagedObjectReference   `xml:"source" json:"source"`
 	Targets                []ManagedObjectReference `xml:"targets,omitempty" json:"targets,omitempty"`
 	ToBeMerged             *HostApplyProfile        `xml:"toBeMerged,omitempty" json:"toBeMerged,omitempty"`
@@ -9783,7 +9783,7 @@ func init() {
 }
 
 type ComputeDiskPartitionInfoForResizeRequestType struct {
-	This            ManagedObjectReference      `xml:"_this" json:"_this"`
+	This            ManagedObjectReference      `xml:"_this" json:"-"`
 	Partition       HostScsiDiskPartition       `xml:"partition" json:"partition"`
 	BlockRange      HostDiskPartitionBlockRange `xml:"blockRange" json:"blockRange"`
 	PartitionFormat string                      `xml:"partitionFormat,omitempty" json:"partitionFormat,omitempty"`
@@ -9798,7 +9798,7 @@ type ComputeDiskPartitionInfoForResizeResponse struct {
 }
 
 type ComputeDiskPartitionInfoRequestType struct {
-	This            ManagedObjectReference  `xml:"_this" json:"_this"`
+	This            ManagedObjectReference  `xml:"_this" json:"-"`
 	DevicePath      string                  `xml:"devicePath" json:"devicePath"`
 	Layout          HostDiskPartitionLayout `xml:"layout" json:"layout"`
 	PartitionFormat string                  `xml:"partitionFormat,omitempty" json:"partitionFormat,omitempty"`
@@ -9947,7 +9947,7 @@ func init() {
 }
 
 type ConfigureCryptoKeyRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	KeyId *CryptoKeyId           `xml:"keyId,omitempty" json:"keyId,omitempty"`
 }
 
@@ -9959,7 +9959,7 @@ type ConfigureCryptoKeyResponse struct {
 }
 
 type ConfigureDatastoreIORMRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Spec      StorageIORMConfigSpec  `xml:"spec" json:"spec"`
 }
@@ -9985,7 +9985,7 @@ func init() {
 }
 
 type ConfigureDatastorePrincipalRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	UserName string                 `xml:"userName" json:"userName"`
 	Password string                 `xml:"password,omitempty" json:"password,omitempty"`
 }
@@ -9998,7 +9998,7 @@ type ConfigureDatastorePrincipalResponse struct {
 }
 
 type ConfigureEvcModeRequestType struct {
-	This               ManagedObjectReference `xml:"_this" json:"_this"`
+	This               ManagedObjectReference `xml:"_this" json:"-"`
 	EvcModeKey         string                 `xml:"evcModeKey" json:"evcModeKey"`
 	EvcGraphicsModeKey string                 `xml:"evcGraphicsModeKey,omitempty" json:"evcGraphicsModeKey,omitempty"`
 }
@@ -10018,7 +10018,7 @@ type ConfigureEvcMode_TaskResponse struct {
 }
 
 type ConfigureHCIRequestType struct {
-	This        ManagedObjectReference                         `xml:"_this" json:"_this"`
+	This        ManagedObjectReference                         `xml:"_this" json:"-"`
 	ClusterSpec ClusterComputeResourceHCIConfigSpec            `xml:"clusterSpec" json:"clusterSpec"`
 	HostInputs  []ClusterComputeResourceHostConfigurationInput `xml:"hostInputs,omitempty" json:"hostInputs,omitempty"`
 }
@@ -10038,7 +10038,7 @@ type ConfigureHCI_TaskResponse struct {
 }
 
 type ConfigureHostCacheRequestType struct {
-	This ManagedObjectReference     `xml:"_this" json:"_this"`
+	This ManagedObjectReference     `xml:"_this" json:"-"`
 	Spec HostCacheConfigurationSpec `xml:"spec" json:"spec"`
 }
 
@@ -10063,7 +10063,7 @@ func init() {
 }
 
 type ConfigureLicenseSourceRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Host          *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	LicenseSource BaseLicenseSource       `xml:"licenseSource,typeattr" json:"licenseSource"`
 }
@@ -10082,7 +10082,7 @@ func init() {
 }
 
 type ConfigurePowerPolicyRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  int32                  `xml:"key" json:"key"`
 }
 
@@ -10094,7 +10094,7 @@ type ConfigurePowerPolicyResponse struct {
 }
 
 type ConfigureStorageDrsForPodRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Pod    ManagedObjectReference `xml:"pod" json:"pod"`
 	Spec   StorageDrsConfigSpec   `xml:"spec" json:"spec"`
 	Modify bool                   `xml:"modify" json:"modify"`
@@ -10115,7 +10115,7 @@ type ConfigureStorageDrsForPod_TaskResponse struct {
 }
 
 type ConfigureVFlashResourceExRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	DevicePath []string               `xml:"devicePath,omitempty" json:"devicePath,omitempty"`
 }
 
@@ -10184,7 +10184,7 @@ func init() {
 }
 
 type ConnectNvmeControllerExRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	ConnectSpec []HostNvmeConnectSpec  `xml:"connectSpec,omitempty" json:"connectSpec,omitempty"`
 }
 
@@ -10203,7 +10203,7 @@ type ConnectNvmeControllerEx_TaskResponse struct {
 }
 
 type ConnectNvmeControllerRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	ConnectSpec HostNvmeConnectSpec    `xml:"connectSpec" json:"connectSpec"`
 }
 
@@ -10232,7 +10232,7 @@ func init() {
 }
 
 type ConsolidateVMDisksRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -10256,7 +10256,7 @@ func init() {
 }
 
 type ContinueRetrievePropertiesExRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Token string                 `xml:"token" json:"token"`
 }
 
@@ -10275,7 +10275,7 @@ func init() {
 }
 
 type ConvertNamespacePathToUuidPathRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter   *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	NamespaceUrl string                  `xml:"namespaceUrl" json:"namespaceUrl"`
 }
@@ -10289,7 +10289,7 @@ type ConvertNamespacePathToUuidPathResponse struct {
 }
 
 type CopyDatastoreFileRequestType struct {
-	This                  ManagedObjectReference  `xml:"_this" json:"_this"`
+	This                  ManagedObjectReference  `xml:"_this" json:"-"`
 	SourceName            string                  `xml:"sourceName" json:"sourceName"`
 	SourceDatacenter      *ManagedObjectReference `xml:"sourceDatacenter,omitempty" json:"sourceDatacenter,omitempty"`
 	DestinationName       string                  `xml:"destinationName" json:"destinationName"`
@@ -10312,7 +10312,7 @@ type CopyDatastoreFile_TaskResponse struct {
 }
 
 type CopyVirtualDiskRequestType struct {
-	This             ManagedObjectReference  `xml:"_this" json:"_this"`
+	This             ManagedObjectReference  `xml:"_this" json:"-"`
 	SourceName       string                  `xml:"sourceName" json:"sourceName"`
 	SourceDatacenter *ManagedObjectReference `xml:"sourceDatacenter,omitempty" json:"sourceDatacenter,omitempty"`
 	DestName         string                  `xml:"destName" json:"destName"`
@@ -10434,7 +10434,7 @@ func init() {
 }
 
 type CreateAlarmRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 	Spec   BaseAlarmSpec          `xml:"spec,typeattr" json:"spec"`
 }
@@ -10448,7 +10448,7 @@ type CreateAlarmResponse struct {
 }
 
 type CreateChildVMRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Config VirtualMachineConfigSpec `xml:"config" json:"config"`
 	Host   *ManagedObjectReference  `xml:"host,omitempty" json:"host,omitempty"`
 }
@@ -10480,7 +10480,7 @@ func init() {
 }
 
 type CreateClusterExRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 	Spec ClusterConfigSpecEx    `xml:"spec" json:"spec"`
 }
@@ -10494,7 +10494,7 @@ type CreateClusterExResponse struct {
 }
 
 type CreateClusterRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 	Spec ClusterConfigSpec      `xml:"spec" json:"spec"`
 }
@@ -10514,7 +10514,7 @@ func init() {
 }
 
 type CreateCollectorForEventsRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Filter EventFilterSpec        `xml:"filter" json:"filter"`
 }
 
@@ -10533,7 +10533,7 @@ func init() {
 }
 
 type CreateCollectorForTasksRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Filter TaskFilterSpec         `xml:"filter" json:"filter"`
 }
 
@@ -10552,7 +10552,7 @@ func init() {
 }
 
 type CreateContainerViewRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Container ManagedObjectReference `xml:"container" json:"container"`
 	Type      []string               `xml:"type,omitempty" json:"type,omitempty"`
 	Recursive bool                   `xml:"recursive" json:"recursive"`
@@ -10573,7 +10573,7 @@ func init() {
 }
 
 type CreateCustomizationSpecRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Item CustomizationSpecItem  `xml:"item" json:"item"`
 }
 
@@ -10585,7 +10585,7 @@ type CreateCustomizationSpecResponse struct {
 }
 
 type CreateDVPortgroupRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec DVPortgroupConfigSpec  `xml:"spec" json:"spec"`
 }
 
@@ -10604,7 +10604,7 @@ type CreateDVPortgroup_TaskResponse struct {
 }
 
 type CreateDVSRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec DVSCreateSpec          `xml:"spec" json:"spec"`
 }
 
@@ -10629,7 +10629,7 @@ func init() {
 }
 
 type CreateDatacenterRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -10648,7 +10648,7 @@ func init() {
 }
 
 type CreateDefaultProfileRequestType struct {
-	This            ManagedObjectReference  `xml:"_this" json:"_this"`
+	This            ManagedObjectReference  `xml:"_this" json:"-"`
 	ProfileType     string                  `xml:"profileType" json:"profileType"`
 	ProfileTypeName string                  `xml:"profileTypeName,omitempty" json:"profileTypeName,omitempty"`
 	Profile         *ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
@@ -10669,7 +10669,7 @@ func init() {
 }
 
 type CreateDescriptorRequestType struct {
-	This ManagedObjectReference    `xml:"_this" json:"_this"`
+	This ManagedObjectReference    `xml:"_this" json:"-"`
 	Obj  ManagedObjectReference    `xml:"obj" json:"obj"`
 	Cdp  OvfCreateDescriptorParams `xml:"cdp" json:"cdp"`
 }
@@ -10689,7 +10689,7 @@ func init() {
 }
 
 type CreateDiagnosticPartitionRequestType struct {
-	This ManagedObjectReference            `xml:"_this" json:"_this"`
+	This ManagedObjectReference            `xml:"_this" json:"-"`
 	Spec HostDiagnosticPartitionCreateSpec `xml:"spec" json:"spec"`
 }
 
@@ -10707,7 +10707,7 @@ func init() {
 }
 
 type CreateDirectoryRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore   ManagedObjectReference `xml:"datastore" json:"datastore"`
 	DisplayName string                 `xml:"displayName,omitempty" json:"displayName,omitempty"`
 	Policy      string                 `xml:"policy,omitempty" json:"policy,omitempty"`
@@ -10723,7 +10723,7 @@ type CreateDirectoryResponse struct {
 }
 
 type CreateDiskFromSnapshotRequestType struct {
-	This       ManagedObjectReference          `xml:"_this" json:"_this"`
+	This       ManagedObjectReference          `xml:"_this" json:"-"`
 	Id         ID                              `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference          `xml:"datastore" json:"datastore"`
 	SnapshotId ID                              `xml:"snapshotId" json:"snapshotId"`
@@ -10748,7 +10748,7 @@ type CreateDiskFromSnapshot_TaskResponse struct {
 }
 
 type CreateDiskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec VslmCreateSpec         `xml:"spec" json:"spec"`
 }
 
@@ -10773,7 +10773,7 @@ func init() {
 }
 
 type CreateFilterRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	Spec           PropertyFilterSpec     `xml:"spec" json:"spec"`
 	PartialUpdates bool                   `xml:"partialUpdates" json:"partialUpdates"`
 }
@@ -10793,7 +10793,7 @@ func init() {
 }
 
 type CreateFolderRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -10812,7 +10812,7 @@ func init() {
 }
 
 type CreateGroupRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Group BaseHostAccountSpec    `xml:"group,typeattr" json:"group"`
 }
 
@@ -10830,7 +10830,7 @@ func init() {
 }
 
 type CreateImportSpecRequestType struct {
-	This          ManagedObjectReference    `xml:"_this" json:"_this"`
+	This          ManagedObjectReference    `xml:"_this" json:"-"`
 	OvfDescriptor string                    `xml:"ovfDescriptor" json:"ovfDescriptor"`
 	ResourcePool  ManagedObjectReference    `xml:"resourcePool" json:"resourcePool"`
 	Datastore     ManagedObjectReference    `xml:"datastore" json:"datastore"`
@@ -10852,7 +10852,7 @@ func init() {
 }
 
 type CreateInventoryViewRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -10870,7 +10870,7 @@ func init() {
 }
 
 type CreateIpPoolRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Dc   ManagedObjectReference `xml:"dc" json:"dc"`
 	Pool IpPool                 `xml:"pool" json:"pool"`
 }
@@ -10896,7 +10896,7 @@ func init() {
 }
 
 type CreateListViewFromViewRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	View ManagedObjectReference `xml:"view" json:"view"`
 }
 
@@ -10909,7 +10909,7 @@ type CreateListViewFromViewResponse struct {
 }
 
 type CreateListViewRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Obj  []ManagedObjectReference `xml:"obj,omitempty" json:"obj,omitempty"`
 }
 
@@ -10928,7 +10928,7 @@ func init() {
 }
 
 type CreateLocalDatastoreRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 	Path string                 `xml:"path" json:"path"`
 }
@@ -10948,7 +10948,7 @@ func init() {
 }
 
 type CreateNasDatastoreRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec HostNasVolumeSpec      `xml:"spec" json:"spec"`
 }
 
@@ -10961,7 +10961,7 @@ type CreateNasDatastoreResponse struct {
 }
 
 type CreateNvdimmNamespaceRequestType struct {
-	This       ManagedObjectReference    `xml:"_this" json:"_this"`
+	This       ManagedObjectReference    `xml:"_this" json:"-"`
 	CreateSpec NvdimmNamespaceCreateSpec `xml:"createSpec" json:"createSpec"`
 }
 
@@ -10980,7 +10980,7 @@ type CreateNvdimmNamespace_TaskResponse struct {
 }
 
 type CreateNvdimmPMemNamespaceRequestType struct {
-	This       ManagedObjectReference        `xml:"_this" json:"_this"`
+	This       ManagedObjectReference        `xml:"_this" json:"-"`
 	CreateSpec NvdimmPMemNamespaceCreateSpec `xml:"createSpec" json:"createSpec"`
 }
 
@@ -11005,7 +11005,7 @@ func init() {
 }
 
 type CreateNvmeOverRdmaAdapterRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	RdmaDeviceName string                 `xml:"rdmaDeviceName" json:"rdmaDeviceName"`
 }
 
@@ -11023,7 +11023,7 @@ func init() {
 }
 
 type CreateObjectScheduledTaskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Obj  ManagedObjectReference `xml:"obj" json:"obj"`
 	Spec BaseScheduledTaskSpec  `xml:"spec,typeattr" json:"spec"`
 }
@@ -11043,7 +11043,7 @@ func init() {
 }
 
 type CreatePerfIntervalRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	IntervalId PerfInterval           `xml:"intervalId" json:"intervalId"`
 }
 
@@ -11061,7 +11061,7 @@ func init() {
 }
 
 type CreateProfileRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	CreateSpec BaseProfileCreateSpec  `xml:"createSpec,typeattr" json:"createSpec"`
 }
 
@@ -11080,7 +11080,7 @@ func init() {
 }
 
 type CreatePropertyCollectorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -11098,7 +11098,7 @@ func init() {
 }
 
 type CreateRegistryKeyInGuestRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm         ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth       BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	KeyName    GuestRegKeyNameSpec     `xml:"keyName" json:"keyName"`
@@ -11120,7 +11120,7 @@ func init() {
 }
 
 type CreateResourcePoolRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 	Spec ResourceConfigSpec     `xml:"spec" json:"spec"`
 }
@@ -11140,7 +11140,7 @@ func init() {
 }
 
 type CreateScheduledTaskRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 	Spec   BaseScheduledTaskSpec  `xml:"spec,typeattr" json:"spec"`
 }
@@ -11154,7 +11154,7 @@ type CreateScheduledTaskResponse struct {
 }
 
 type CreateScreenshotRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -11172,7 +11172,7 @@ type CreateScreenshot_TaskResponse struct {
 }
 
 type CreateSecondaryVMExRequestType struct {
-	This ManagedObjectReference    `xml:"_this" json:"_this"`
+	This ManagedObjectReference    `xml:"_this" json:"-"`
 	Host *ManagedObjectReference   `xml:"host,omitempty" json:"host,omitempty"`
 	Spec *FaultToleranceConfigSpec `xml:"spec,omitempty" json:"spec,omitempty"`
 }
@@ -11192,7 +11192,7 @@ type CreateSecondaryVMEx_TaskResponse struct {
 }
 
 type CreateSecondaryVMRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -11211,7 +11211,7 @@ type CreateSecondaryVM_TaskResponse struct {
 }
 
 type CreateSnapshotExRequestType struct {
-	This        ManagedObjectReference             `xml:"_this" json:"_this"`
+	This        ManagedObjectReference             `xml:"_this" json:"-"`
 	Name        string                             `xml:"name" json:"name"`
 	Description string                             `xml:"description,omitempty" json:"description,omitempty"`
 	Memory      bool                               `xml:"memory" json:"memory"`
@@ -11233,7 +11233,7 @@ type CreateSnapshotEx_TaskResponse struct {
 }
 
 type CreateSnapshotRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Name        string                 `xml:"name" json:"name"`
 	Description string                 `xml:"description,omitempty" json:"description,omitempty"`
 	Memory      bool                   `xml:"memory" json:"memory"`
@@ -11261,7 +11261,7 @@ func init() {
 }
 
 type CreateSoftwareAdapterRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec BaseHostHbaCreateSpec  `xml:"spec,typeattr" json:"spec"`
 }
 
@@ -11279,7 +11279,7 @@ func init() {
 }
 
 type CreateStoragePodRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -11309,7 +11309,7 @@ func init() {
 }
 
 type CreateTaskRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	Obj           ManagedObjectReference `xml:"obj" json:"obj"`
 	TaskTypeId    string                 `xml:"taskTypeId" json:"taskTypeId"`
 	InitiatedBy   string                 `xml:"initiatedBy,omitempty" json:"initiatedBy,omitempty"`
@@ -11333,7 +11333,7 @@ func init() {
 }
 
 type CreateTemporaryDirectoryInGuestRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth          BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Prefix        string                  `xml:"prefix" json:"prefix"`
@@ -11356,7 +11356,7 @@ func init() {
 }
 
 type CreateTemporaryFileInGuestRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth          BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Prefix        string                  `xml:"prefix" json:"prefix"`
@@ -11379,7 +11379,7 @@ func init() {
 }
 
 type CreateUserRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	User BaseHostAccountSpec    `xml:"user,typeattr" json:"user"`
 }
 
@@ -11397,7 +11397,7 @@ func init() {
 }
 
 type CreateVAppRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	ResSpec    ResourceConfigSpec      `xml:"resSpec" json:"resSpec"`
 	ConfigSpec VAppConfigSpec          `xml:"configSpec" json:"configSpec"`
@@ -11413,7 +11413,7 @@ type CreateVAppResponse struct {
 }
 
 type CreateVMRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Config VirtualMachineConfigSpec `xml:"config" json:"config"`
 	Pool   ManagedObjectReference   `xml:"pool" json:"pool"`
 	Host   *ManagedObjectReference  `xml:"host,omitempty" json:"host,omitempty"`
@@ -11434,7 +11434,7 @@ type CreateVM_TaskResponse struct {
 }
 
 type CreateVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Spec       BaseVirtualDiskSpec     `xml:"spec,typeattr" json:"spec"`
@@ -11461,7 +11461,7 @@ func init() {
 }
 
 type CreateVmfsDatastoreRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Spec VmfsDatastoreCreateSpec `xml:"spec" json:"spec"`
 }
 
@@ -11480,7 +11480,7 @@ func init() {
 }
 
 type CreateVvolDatastoreRequestType struct {
-	This ManagedObjectReference               `xml:"_this" json:"_this"`
+	This ManagedObjectReference               `xml:"_this" json:"-"`
 	Spec HostDatastoreSystemVvolDatastoreSpec `xml:"spec" json:"spec"`
 }
 
@@ -11535,7 +11535,7 @@ func init() {
 }
 
 type CryptoManagerHostDisableRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -11552,7 +11552,7 @@ func init() {
 }
 
 type CryptoManagerHostEnableRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	InitialKey CryptoKeyPlain         `xml:"initialKey" json:"initialKey"`
 }
 
@@ -11570,7 +11570,7 @@ func init() {
 }
 
 type CryptoManagerHostPrepareRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -11719,7 +11719,7 @@ func init() {
 }
 
 type CryptoUnlockRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -11743,7 +11743,7 @@ func init() {
 }
 
 type CurrentTimeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -12235,7 +12235,7 @@ func init() {
 }
 
 type CustomizationSpecItemToXmlRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Item CustomizationSpecItem  `xml:"item" json:"item"`
 }
 
@@ -12372,7 +12372,7 @@ func init() {
 }
 
 type CustomizeGuestRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm           ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth         BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Spec         CustomizationSpec       `xml:"spec" json:"spec"`
@@ -12394,7 +12394,7 @@ type CustomizeGuest_TaskResponse struct {
 }
 
 type CustomizeVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec CustomizationSpec      `xml:"spec" json:"spec"`
 }
 
@@ -12623,7 +12623,7 @@ func init() {
 }
 
 type DVPortgroupRollbackRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	EntityBackup *EntityBackupConfig    `xml:"entityBackup,omitempty" json:"entityBackup,omitempty"`
 }
 
@@ -12867,7 +12867,7 @@ func init() {
 }
 
 type DVSManagerExportEntityRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	SelectionSet []BaseSelectionSet     `xml:"selectionSet,typeattr" json:"selectionSet"`
 }
 
@@ -12886,7 +12886,7 @@ type DVSManagerExportEntity_TaskResponse struct {
 }
 
 type DVSManagerImportEntityRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	EntityBackup []EntityBackupConfig   `xml:"entityBackup" json:"entityBackup"`
 	ImportType   string                 `xml:"importType" json:"importType"`
 }
@@ -12912,7 +12912,7 @@ func init() {
 }
 
 type DVSManagerLookupDvPortGroupRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	SwitchUuid   string                 `xml:"switchUuid" json:"switchUuid"`
 	PortgroupKey string                 `xml:"portgroupKey" json:"portgroupKey"`
 }
@@ -13024,7 +13024,7 @@ func init() {
 }
 
 type DVSRollbackRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	EntityBackup *EntityBackupConfig    `xml:"entityBackup,omitempty" json:"entityBackup,omitempty"`
 }
 
@@ -13461,7 +13461,7 @@ func init() {
 }
 
 type DatastoreEnterMaintenanceModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -13493,7 +13493,7 @@ func init() {
 }
 
 type DatastoreExitMaintenanceModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -13714,7 +13714,7 @@ func init() {
 }
 
 type DecodeLicenseRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	LicenseKey string                 `xml:"licenseKey" json:"licenseKey"`
 }
 
@@ -13733,7 +13733,7 @@ func init() {
 }
 
 type DefragmentAllDisksRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -13744,7 +13744,7 @@ type DefragmentAllDisksResponse struct {
 }
 
 type DefragmentVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -13770,7 +13770,7 @@ func init() {
 }
 
 type DeleteCustomizationSpecRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -13782,7 +13782,7 @@ type DeleteCustomizationSpecResponse struct {
 }
 
 type DeleteDatastoreFileRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -13814,7 +13814,7 @@ func init() {
 }
 
 type DeleteDirectoryInGuestRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth          BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	DirectoryPath string                  `xml:"directoryPath" json:"directoryPath"`
@@ -13829,7 +13829,7 @@ type DeleteDirectoryInGuestResponse struct {
 }
 
 type DeleteDirectoryRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter    *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	DatastorePath string                  `xml:"datastorePath" json:"datastorePath"`
 }
@@ -13854,7 +13854,7 @@ func init() {
 }
 
 type DeleteFileInGuestRequestType struct {
-	This     ManagedObjectReference  `xml:"_this" json:"_this"`
+	This     ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth     BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	FilePath string                  `xml:"filePath" json:"filePath"`
@@ -13868,7 +13868,7 @@ type DeleteFileInGuestResponse struct {
 }
 
 type DeleteFileRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	DatastorePath string                 `xml:"datastorePath" json:"datastorePath"`
 }
 
@@ -13886,7 +13886,7 @@ func init() {
 }
 
 type DeleteHostSpecificationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Host ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -13904,7 +13904,7 @@ func init() {
 }
 
 type DeleteHostSubSpecificationRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Host        ManagedObjectReference `xml:"host" json:"host"`
 	SubSpecName string                 `xml:"subSpecName" json:"subSpecName"`
 }
@@ -13917,7 +13917,7 @@ type DeleteHostSubSpecificationResponse struct {
 }
 
 type DeleteNvdimmBlockNamespacesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -13935,7 +13935,7 @@ type DeleteNvdimmBlockNamespaces_TaskResponse struct {
 }
 
 type DeleteNvdimmNamespaceRequestType struct {
-	This       ManagedObjectReference    `xml:"_this" json:"_this"`
+	This       ManagedObjectReference    `xml:"_this" json:"-"`
 	DeleteSpec NvdimmNamespaceDeleteSpec `xml:"deleteSpec" json:"deleteSpec"`
 }
 
@@ -13960,7 +13960,7 @@ func init() {
 }
 
 type DeleteRegistryKeyInGuestRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm        ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth      BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	KeyName   GuestRegKeyNameSpec     `xml:"keyName" json:"keyName"`
@@ -13981,7 +13981,7 @@ func init() {
 }
 
 type DeleteRegistryValueInGuestRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm        ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth      BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	ValueName GuestRegValueNameSpec   `xml:"valueName" json:"valueName"`
@@ -14001,7 +14001,7 @@ func init() {
 }
 
 type DeleteScsiLunStateRequestType struct {
-	This             ManagedObjectReference `xml:"_this" json:"_this"`
+	This             ManagedObjectReference `xml:"_this" json:"-"`
 	LunCanonicalName string                 `xml:"lunCanonicalName" json:"lunCanonicalName"`
 }
 
@@ -14013,7 +14013,7 @@ type DeleteScsiLunStateResponse struct {
 }
 
 type DeleteSnapshotRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId ID                     `xml:"snapshotId" json:"snapshotId"`
@@ -14034,7 +14034,7 @@ type DeleteSnapshot_TaskResponse struct {
 }
 
 type DeleteVStorageObjectExRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -14054,7 +14054,7 @@ type DeleteVStorageObjectEx_TaskResponse struct {
 }
 
 type DeleteVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -14080,7 +14080,7 @@ func init() {
 }
 
 type DeleteVffsVolumeStateRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VffsUuid string                 `xml:"vffsUuid" json:"vffsUuid"`
 }
 
@@ -14092,7 +14092,7 @@ type DeleteVffsVolumeStateResponse struct {
 }
 
 type DeleteVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -14118,7 +14118,7 @@ func init() {
 }
 
 type DeleteVmfsVolumeStateRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid string                 `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -14136,7 +14136,7 @@ func init() {
 }
 
 type DeleteVsanObjectsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids []string               `xml:"uuids" json:"uuids"`
 	Force *bool                  `xml:"force" json:"force,omitempty"`
 }
@@ -14190,7 +14190,7 @@ func init() {
 }
 
 type DeselectVnicForNicTypeRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	NicType string                 `xml:"nicType" json:"nicType"`
 	Device  string                 `xml:"device" json:"device"`
 }
@@ -14203,7 +14203,7 @@ type DeselectVnicForNicTypeResponse struct {
 }
 
 type DeselectVnicRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14294,7 +14294,7 @@ func init() {
 }
 
 type DestroyChildrenRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14311,7 +14311,7 @@ func init() {
 }
 
 type DestroyCollectorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14328,7 +14328,7 @@ func init() {
 }
 
 type DestroyDatastoreRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14345,7 +14345,7 @@ func init() {
 }
 
 type DestroyIpPoolRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Dc    ManagedObjectReference `xml:"dc" json:"dc"`
 	Id    int32                  `xml:"id" json:"id"`
 	Force bool                   `xml:"force" json:"force"`
@@ -14365,7 +14365,7 @@ func init() {
 }
 
 type DestroyNetworkRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14382,7 +14382,7 @@ func init() {
 }
 
 type DestroyProfileRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14399,7 +14399,7 @@ func init() {
 }
 
 type DestroyPropertyCollectorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14416,7 +14416,7 @@ func init() {
 }
 
 type DestroyPropertyFilterRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14427,7 +14427,7 @@ type DestroyPropertyFilterResponse struct {
 }
 
 type DestroyRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14441,7 +14441,7 @@ func init() {
 }
 
 type DestroyVffsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VffsPath string                 `xml:"vffsPath" json:"vffsPath"`
 }
 
@@ -14459,7 +14459,7 @@ func init() {
 }
 
 type DestroyViewRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14480,7 +14480,7 @@ type Destroy_TaskResponse struct {
 }
 
 type DetachDiskRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	DiskId ID                     `xml:"diskId" json:"diskId"`
 }
 
@@ -14505,7 +14505,7 @@ func init() {
 }
 
 type DetachScsiLunExRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid []string               `xml:"lunUuid" json:"lunUuid"`
 }
 
@@ -14524,7 +14524,7 @@ type DetachScsiLunEx_TaskResponse struct {
 }
 
 type DetachScsiLunRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid string                 `xml:"lunUuid" json:"lunUuid"`
 }
 
@@ -14542,7 +14542,7 @@ func init() {
 }
 
 type DetachTagFromVStorageObjectRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Id       ID                     `xml:"id" json:"id"`
 	Category string                 `xml:"category" json:"category"`
 	Tag      string                 `xml:"tag" json:"tag"`
@@ -14781,7 +14781,7 @@ func init() {
 }
 
 type DisableAlarmRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Alarm  ManagedObjectReference `xml:"alarm" json:"alarm"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
@@ -14800,7 +14800,7 @@ func init() {
 }
 
 type DisableClusteredVmdkSupportRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -14812,7 +14812,7 @@ type DisableClusteredVmdkSupportResponse struct {
 }
 
 type DisableEvcModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14836,7 +14836,7 @@ func init() {
 }
 
 type DisableFeatureRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Host       *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	FeatureKey string                  `xml:"featureKey" json:"featureKey"`
 }
@@ -14856,7 +14856,7 @@ func init() {
 }
 
 type DisableHyperThreadingRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -14873,7 +14873,7 @@ func init() {
 }
 
 type DisableMultipathPathRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	PathName string                 `xml:"pathName" json:"pathName"`
 }
 
@@ -14891,7 +14891,7 @@ func init() {
 }
 
 type DisableRulesetRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -14903,7 +14903,7 @@ type DisableRulesetResponse struct {
 }
 
 type DisableSecondaryVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference `xml:"vm" json:"vm"`
 }
 
@@ -14928,7 +14928,7 @@ func init() {
 }
 
 type DisableSmartCardAuthenticationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -15003,7 +15003,7 @@ func init() {
 }
 
 type DisconnectHostRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -15027,7 +15027,7 @@ func init() {
 }
 
 type DisconnectNvmeControllerExRequestType struct {
-	This           ManagedObjectReference   `xml:"_this" json:"_this"`
+	This           ManagedObjectReference   `xml:"_this" json:"-"`
 	DisconnectSpec []HostNvmeDisconnectSpec `xml:"disconnectSpec,omitempty" json:"disconnectSpec,omitempty"`
 }
 
@@ -15046,7 +15046,7 @@ type DisconnectNvmeControllerEx_TaskResponse struct {
 }
 
 type DisconnectNvmeControllerRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	DisconnectSpec HostNvmeDisconnectSpec `xml:"disconnectSpec" json:"disconnectSpec"`
 }
 
@@ -15078,7 +15078,7 @@ func init() {
 }
 
 type DiscoverFcoeHbasRequestType struct {
-	This     ManagedObjectReference      `xml:"_this" json:"_this"`
+	This     ManagedObjectReference      `xml:"_this" json:"-"`
 	FcoeSpec FcoeConfigFcoeSpecification `xml:"fcoeSpec" json:"fcoeSpec"`
 }
 
@@ -15096,7 +15096,7 @@ func init() {
 }
 
 type DiscoverNvmeControllersRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	DiscoverSpec HostNvmeDiscoverSpec   `xml:"discoverSpec" json:"discoverSpec"`
 }
 
@@ -15249,7 +15249,7 @@ func init() {
 }
 
 type DissociateProfileRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
 
@@ -15651,7 +15651,7 @@ func init() {
 }
 
 type DoesCustomizationSpecExistRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -15686,7 +15686,7 @@ func init() {
 }
 
 type DownloadDescriptionTreeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -15730,7 +15730,7 @@ func init() {
 }
 
 type DropConnectionsRequestType struct {
-	This              ManagedObjectReference         `xml:"_this" json:"_this"`
+	This              ManagedObjectReference         `xml:"_this" json:"-"`
 	ListOfConnections []BaseVirtualMachineConnection `xml:"listOfConnections,omitempty,typeattr" json:"listOfConnections,omitempty"`
 }
 
@@ -15911,7 +15911,7 @@ func init() {
 }
 
 type DuplicateCustomizationSpecRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Name    string                 `xml:"name" json:"name"`
 	NewName string                 `xml:"newName" json:"newName"`
 }
@@ -16609,7 +16609,7 @@ func init() {
 }
 
 type DvsReconfigureVmVnicNetworkResourcePoolRequestType struct {
-	This       ManagedObjectReference            `xml:"_this" json:"_this"`
+	This       ManagedObjectReference            `xml:"_this" json:"-"`
 	ConfigSpec []DvsVmVnicResourcePoolConfigSpec `xml:"configSpec" json:"configSpec"`
 }
 
@@ -17154,7 +17154,7 @@ func init() {
 }
 
 type EagerZeroVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -17210,7 +17210,7 @@ func init() {
 }
 
 type EnableAlarmActionsRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Entity  ManagedObjectReference `xml:"entity" json:"entity"`
 	Enabled bool                   `xml:"enabled" json:"enabled"`
 }
@@ -17223,7 +17223,7 @@ type EnableAlarmActionsResponse struct {
 }
 
 type EnableAlarmRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Alarm  ManagedObjectReference `xml:"alarm" json:"alarm"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
@@ -17242,7 +17242,7 @@ func init() {
 }
 
 type EnableClusteredVmdkSupportRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -17260,7 +17260,7 @@ func init() {
 }
 
 type EnableCryptoRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	KeyPlain CryptoKeyPlain         `xml:"keyPlain" json:"keyPlain"`
 }
 
@@ -17278,7 +17278,7 @@ func init() {
 }
 
 type EnableFeatureRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Host       *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	FeatureKey string                  `xml:"featureKey" json:"featureKey"`
 }
@@ -17298,7 +17298,7 @@ func init() {
 }
 
 type EnableHyperThreadingRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -17315,7 +17315,7 @@ func init() {
 }
 
 type EnableMultipathPathRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	PathName string                 `xml:"pathName" json:"pathName"`
 }
 
@@ -17333,7 +17333,7 @@ func init() {
 }
 
 type EnableNetworkResourceManagementRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Enable bool                   `xml:"enable" json:"enable"`
 }
 
@@ -17351,7 +17351,7 @@ func init() {
 }
 
 type EnableRulesetRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -17363,7 +17363,7 @@ type EnableRulesetResponse struct {
 }
 
 type EnableSecondaryVMRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
@@ -17389,7 +17389,7 @@ func init() {
 }
 
 type EnableSmartCardAuthenticationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -17422,7 +17422,7 @@ func init() {
 }
 
 type EnterLockdownModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -17433,7 +17433,7 @@ type EnterLockdownModeResponse struct {
 }
 
 type EnterMaintenanceModeRequestType struct {
-	This                  ManagedObjectReference `xml:"_this" json:"_this"`
+	This                  ManagedObjectReference `xml:"_this" json:"-"`
 	Timeout               int32                  `xml:"timeout" json:"timeout"`
 	EvacuatePoweredOffVms *bool                  `xml:"evacuatePoweredOffVms" json:"evacuatePoweredOffVms,omitempty"`
 	MaintenanceSpec       *HostMaintenanceSpec   `xml:"maintenanceSpec,omitempty" json:"maintenanceSpec,omitempty"`
@@ -17567,7 +17567,7 @@ func init() {
 }
 
 type EstimateDatabaseSizeRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	DbSizeParam DatabaseSizeParam      `xml:"dbSizeParam" json:"dbSizeParam"`
 }
 
@@ -17580,7 +17580,7 @@ type EstimateDatabaseSizeResponse struct {
 }
 
 type EstimateStorageForConsolidateSnapshotsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -17604,7 +17604,7 @@ func init() {
 }
 
 type EsxAgentHostManagerUpdateConfigRequestType struct {
-	This       ManagedObjectReference            `xml:"_this" json:"_this"`
+	This       ManagedObjectReference            `xml:"_this" json:"-"`
 	ConfigInfo HostEsxAgentHostManagerConfigInfo `xml:"configInfo" json:"configInfo"`
 }
 
@@ -17616,7 +17616,7 @@ type EsxAgentHostManagerUpdateConfigResponse struct {
 }
 
 type EvacuateVsanNodeRequestType struct {
-	This            ManagedObjectReference `xml:"_this" json:"_this"`
+	This            ManagedObjectReference `xml:"_this" json:"-"`
 	MaintenanceSpec HostMaintenanceSpec    `xml:"maintenanceSpec" json:"maintenanceSpec"`
 	Timeout         int32                  `xml:"timeout" json:"timeout"`
 }
@@ -17652,7 +17652,7 @@ func init() {
 }
 
 type EvcManagerRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -17839,7 +17839,7 @@ func init() {
 }
 
 type ExecuteHostProfileRequestType struct {
-	This          ManagedObjectReference                 `xml:"_this" json:"_this"`
+	This          ManagedObjectReference                 `xml:"_this" json:"-"`
 	Host          ManagedObjectReference                 `xml:"host" json:"host"`
 	DeferredParam []ProfileDeferredPolicyOptionParameter `xml:"deferredParam,omitempty" json:"deferredParam,omitempty"`
 }
@@ -17859,7 +17859,7 @@ func init() {
 }
 
 type ExecuteSimpleCommandRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Arguments []string               `xml:"arguments,omitempty" json:"arguments,omitempty"`
 }
 
@@ -17878,7 +17878,7 @@ func init() {
 }
 
 type ExitLockdownModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -17897,7 +17897,7 @@ func init() {
 }
 
 type ExitMaintenanceModeRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Timeout int32                  `xml:"timeout" json:"timeout"`
 }
 
@@ -17946,7 +17946,7 @@ func init() {
 }
 
 type ExpandVmfsDatastoreRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference  `xml:"datastore" json:"datastore"`
 	Spec      VmfsDatastoreExpandSpec `xml:"spec" json:"spec"`
 }
@@ -17966,7 +17966,7 @@ func init() {
 }
 
 type ExpandVmfsExtentRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsPath string                 `xml:"vmfsPath" json:"vmfsPath"`
 	Extent   HostScsiDiskPartition  `xml:"extent" json:"extent"`
 }
@@ -18025,7 +18025,7 @@ func init() {
 }
 
 type ExportAnswerFileRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Host ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -18050,7 +18050,7 @@ func init() {
 }
 
 type ExportProfileRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -18068,7 +18068,7 @@ func init() {
 }
 
 type ExportSnapshotRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -18086,7 +18086,7 @@ func init() {
 }
 
 type ExportVAppRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -18104,7 +18104,7 @@ func init() {
 }
 
 type ExportVmRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -18164,7 +18164,7 @@ func init() {
 }
 
 type ExtendDiskRequestType struct {
-	This            ManagedObjectReference `xml:"_this" json:"_this"`
+	This            ManagedObjectReference `xml:"_this" json:"-"`
 	Id              ID                     `xml:"id" json:"id"`
 	Datastore       ManagedObjectReference `xml:"datastore" json:"datastore"`
 	NewCapacityInMB int64                  `xml:"newCapacityInMB" json:"newCapacityInMB"`
@@ -18185,7 +18185,7 @@ type ExtendDisk_TaskResponse struct {
 }
 
 type ExtendHCIRequestType struct {
-	This           ManagedObjectReference                         `xml:"_this" json:"_this"`
+	This           ManagedObjectReference                         `xml:"_this" json:"-"`
 	HostInputs     []ClusterComputeResourceHostConfigurationInput `xml:"hostInputs,omitempty" json:"hostInputs,omitempty"`
 	VSanConfigSpec *SDDCBase                                      `xml:"vSanConfigSpec,omitempty" json:"vSanConfigSpec,omitempty"`
 }
@@ -18211,7 +18211,7 @@ func init() {
 }
 
 type ExtendVffsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	VffsPath   string                 `xml:"vffsPath" json:"vffsPath"`
 	DevicePath string                 `xml:"devicePath" json:"devicePath"`
 	Spec       *HostDiskPartitionSpec `xml:"spec,omitempty" json:"spec,omitempty"`
@@ -18225,7 +18225,7 @@ type ExtendVffsResponse struct {
 }
 
 type ExtendVirtualDiskRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Name          string                  `xml:"name" json:"name"`
 	Datacenter    *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	NewCapacityKb int64                   `xml:"newCapacityKb" json:"newCapacityKb"`
@@ -18253,7 +18253,7 @@ func init() {
 }
 
 type ExtendVmfsDatastoreRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference  `xml:"datastore" json:"datastore"`
 	Spec      VmfsDatastoreExtendSpec `xml:"spec" json:"spec"`
 }
@@ -18479,7 +18479,7 @@ func init() {
 }
 
 type ExtractOvfEnvironmentRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -18917,7 +18917,7 @@ func init() {
 }
 
 type FetchAuditRecordsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Token string                 `xml:"token,omitempty" json:"token,omitempty"`
 }
 
@@ -18936,7 +18936,7 @@ func init() {
 }
 
 type FetchDVPortKeysRequestType struct {
-	This     ManagedObjectReference                `xml:"_this" json:"_this"`
+	This     ManagedObjectReference                `xml:"_this" json:"-"`
 	Criteria *DistributedVirtualSwitchPortCriteria `xml:"criteria,omitempty" json:"criteria,omitempty"`
 }
 
@@ -18955,7 +18955,7 @@ func init() {
 }
 
 type FetchDVPortsRequestType struct {
-	This     ManagedObjectReference                `xml:"_this" json:"_this"`
+	This     ManagedObjectReference                `xml:"_this" json:"-"`
 	Criteria *DistributedVirtualSwitchPortCriteria `xml:"criteria,omitempty" json:"criteria,omitempty"`
 }
 
@@ -18974,7 +18974,7 @@ func init() {
 }
 
 type FetchSystemEventLogRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -18992,7 +18992,7 @@ func init() {
 }
 
 type FetchUserPrivilegeOnEntitiesRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	Entities []ManagedObjectReference `xml:"entities" json:"entities"`
 	UserName string                   `xml:"userName" json:"userName"`
 }
@@ -19219,7 +19219,7 @@ func init() {
 }
 
 type FindAllByDnsNameRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	DnsName    string                  `xml:"dnsName" json:"dnsName"`
 	VmSearch   bool                    `xml:"vmSearch" json:"vmSearch"`
@@ -19240,7 +19240,7 @@ func init() {
 }
 
 type FindAllByIpRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Ip         string                  `xml:"ip" json:"ip"`
 	VmSearch   bool                    `xml:"vmSearch" json:"vmSearch"`
@@ -19261,7 +19261,7 @@ func init() {
 }
 
 type FindAllByUuidRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter   *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Uuid         string                  `xml:"uuid" json:"uuid"`
 	VmSearch     bool                    `xml:"vmSearch" json:"vmSearch"`
@@ -19283,7 +19283,7 @@ func init() {
 }
 
 type FindAssociatedProfileRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -19302,7 +19302,7 @@ func init() {
 }
 
 type FindByDatastorePathRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Datacenter ManagedObjectReference `xml:"datacenter" json:"datacenter"`
 	Path       string                 `xml:"path" json:"path"`
 }
@@ -19322,7 +19322,7 @@ func init() {
 }
 
 type FindByDnsNameRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	DnsName    string                  `xml:"dnsName" json:"dnsName"`
 	VmSearch   bool                    `xml:"vmSearch" json:"vmSearch"`
@@ -19343,7 +19343,7 @@ func init() {
 }
 
 type FindByInventoryPathRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	InventoryPath string                 `xml:"inventoryPath" json:"inventoryPath"`
 }
 
@@ -19362,7 +19362,7 @@ func init() {
 }
 
 type FindByIpRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Ip         string                  `xml:"ip" json:"ip"`
 	VmSearch   bool                    `xml:"vmSearch" json:"vmSearch"`
@@ -19383,7 +19383,7 @@ func init() {
 }
 
 type FindByUuidRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Datacenter   *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Uuid         string                  `xml:"uuid" json:"uuid"`
 	VmSearch     bool                    `xml:"vmSearch" json:"vmSearch"`
@@ -19405,7 +19405,7 @@ func init() {
 }
 
 type FindChildRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 	Name   string                 `xml:"name" json:"name"`
 }
@@ -19425,7 +19425,7 @@ func init() {
 }
 
 type FindExtensionRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
 }
 
@@ -19444,7 +19444,7 @@ func init() {
 }
 
 type FindRulesForVmRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference `xml:"vm" json:"vm"`
 }
 
@@ -19584,7 +19584,7 @@ func init() {
 }
 
 type FormatVffsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	CreateSpec HostVffsSpec           `xml:"createSpec" json:"createSpec"`
 }
 
@@ -19603,7 +19603,7 @@ func init() {
 }
 
 type FormatVmfsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	CreateSpec HostVmfsSpec           `xml:"createSpec" json:"createSpec"`
 }
 
@@ -19854,7 +19854,7 @@ func init() {
 }
 
 type GenerateCertificateSigningRequestByDnRequestType struct {
-	This              ManagedObjectReference `xml:"_this" json:"_this"`
+	This              ManagedObjectReference `xml:"_this" json:"-"`
 	DistinguishedName string                 `xml:"distinguishedName" json:"distinguishedName"`
 }
 
@@ -19867,7 +19867,7 @@ type GenerateCertificateSigningRequestByDnResponse struct {
 }
 
 type GenerateCertificateSigningRequestRequestType struct {
-	This                     ManagedObjectReference `xml:"_this" json:"_this"`
+	This                     ManagedObjectReference `xml:"_this" json:"-"`
 	UseIpAddressAsCommonName bool                   `xml:"useIpAddressAsCommonName" json:"useIpAddressAsCommonName"`
 }
 
@@ -19886,7 +19886,7 @@ func init() {
 }
 
 type GenerateClientCsrRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster KeyProviderId          `xml:"cluster" json:"cluster"`
 }
 
@@ -19905,7 +19905,7 @@ func init() {
 }
 
 type GenerateConfigTaskListRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ConfigSpec HostConfigSpec         `xml:"configSpec" json:"configSpec"`
 	Host       ManagedObjectReference `xml:"host" json:"host"`
 }
@@ -19919,7 +19919,7 @@ type GenerateConfigTaskListResponse struct {
 }
 
 type GenerateHostConfigTaskSpecRequestType struct {
-	This      ManagedObjectReference     `xml:"_this" json:"_this"`
+	This      ManagedObjectReference     `xml:"_this" json:"-"`
 	HostsInfo []StructuredCustomizations `xml:"hostsInfo,omitempty" json:"hostsInfo,omitempty"`
 }
 
@@ -19938,7 +19938,7 @@ type GenerateHostConfigTaskSpec_TaskResponse struct {
 }
 
 type GenerateHostProfileTaskListRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ConfigSpec HostConfigSpec         `xml:"configSpec" json:"configSpec"`
 	Host       ManagedObjectReference `xml:"host" json:"host"`
 }
@@ -19964,7 +19964,7 @@ func init() {
 }
 
 type GenerateKeyRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	KeyProvider *KeyProviderId         `xml:"keyProvider,omitempty" json:"keyProvider,omitempty"`
 }
 
@@ -19977,7 +19977,7 @@ type GenerateKeyResponse struct {
 }
 
 type GenerateLogBundlesRequestType struct {
-	This           ManagedObjectReference   `xml:"_this" json:"_this"`
+	This           ManagedObjectReference   `xml:"_this" json:"-"`
 	IncludeDefault bool                     `xml:"includeDefault" json:"includeDefault"`
 	Host           []ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
@@ -20003,7 +20003,7 @@ func init() {
 }
 
 type GenerateSelfSignedClientCertRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster KeyProviderId          `xml:"cluster" json:"cluster"`
 }
 
@@ -20054,7 +20054,7 @@ func init() {
 }
 
 type GetAlarmRequestType struct {
-	This   ManagedObjectReference  `xml:"_this" json:"_this"`
+	This   ManagedObjectReference  `xml:"_this" json:"-"`
 	Entity *ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
 
@@ -20073,7 +20073,7 @@ func init() {
 }
 
 type GetAlarmStateRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -20092,7 +20092,7 @@ func init() {
 }
 
 type GetCustomizationSpecRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -20111,7 +20111,7 @@ func init() {
 }
 
 type GetDefaultKmsClusterRequestType struct {
-	This             ManagedObjectReference  `xml:"_this" json:"_this"`
+	This             ManagedObjectReference  `xml:"_this" json:"-"`
 	Entity           *ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 	DefaultsToParent *bool                   `xml:"defaultsToParent" json:"defaultsToParent,omitempty"`
 }
@@ -20131,7 +20131,7 @@ func init() {
 }
 
 type GetPublicKeyRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -20149,7 +20149,7 @@ func init() {
 }
 
 type GetResourceUsageRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -20167,7 +20167,7 @@ func init() {
 }
 
 type GetSiteInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -20185,7 +20185,7 @@ func init() {
 }
 
 type GetSystemVMsRestrictedDatastoresRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -20203,7 +20203,7 @@ func init() {
 }
 
 type GetVchaClusterHealthRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -20221,7 +20221,7 @@ func init() {
 }
 
 type GetVsanObjExtAttrsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids []string               `xml:"uuids" json:"uuids"`
 }
 
@@ -21006,7 +21006,7 @@ func init() {
 }
 
 type HasMonitoredEntityRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 	Entity     ManagedObjectReference `xml:"entity" json:"entity"`
 }
@@ -21026,7 +21026,7 @@ func init() {
 }
 
 type HasPrivilegeOnEntitiesRequestType struct {
-	This      ManagedObjectReference   `xml:"_this" json:"_this"`
+	This      ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity    []ManagedObjectReference `xml:"entity" json:"entity"`
 	SessionId string                   `xml:"sessionId" json:"sessionId"`
 	PrivId    []string                 `xml:"privId,omitempty" json:"privId,omitempty"`
@@ -21047,7 +21047,7 @@ func init() {
 }
 
 type HasPrivilegeOnEntityRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Entity    ManagedObjectReference `xml:"entity" json:"entity"`
 	SessionId string                 `xml:"sessionId" json:"sessionId"`
 	PrivId    []string               `xml:"privId,omitempty" json:"privId,omitempty"`
@@ -21068,7 +21068,7 @@ func init() {
 }
 
 type HasProviderRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -21087,7 +21087,7 @@ func init() {
 }
 
 type HasUserPrivilegeOnEntitiesRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	Entities []ManagedObjectReference `xml:"entities" json:"entities"`
 	UserName string                   `xml:"userName" json:"userName"`
 	PrivId   []string                 `xml:"privId,omitempty" json:"privId,omitempty"`
@@ -21658,7 +21658,7 @@ func init() {
 }
 
 type HostClearVStorageObjectControlFlagsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Id           ID                     `xml:"id" json:"id"`
 	Datastore    ManagedObjectReference `xml:"datastore" json:"datastore"`
 	ControlFlags []string               `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
@@ -21672,7 +21672,7 @@ type HostClearVStorageObjectControlFlagsResponse struct {
 }
 
 type HostCloneVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Spec      VslmCloneSpec          `xml:"spec" json:"spec"`
@@ -22043,7 +22043,7 @@ func init() {
 }
 
 type HostConfigVFlashCacheRequestType struct {
-	This ManagedObjectReference                 `xml:"_this" json:"_this"`
+	This ManagedObjectReference                 `xml:"_this" json:"-"`
 	Spec HostVFlashManagerVFlashCacheConfigSpec `xml:"spec" json:"spec"`
 }
 
@@ -22061,7 +22061,7 @@ func init() {
 }
 
 type HostConfigureVFlashResourceRequestType struct {
-	This ManagedObjectReference                    `xml:"_this" json:"_this"`
+	This ManagedObjectReference                    `xml:"_this" json:"-"`
 	Spec HostVFlashManagerVFlashResourceConfigSpec `xml:"spec" json:"spec"`
 }
 
@@ -22208,7 +22208,7 @@ func init() {
 }
 
 type HostCreateDiskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec VslmCreateSpec         `xml:"spec" json:"spec"`
 }
 
@@ -22452,7 +22452,7 @@ func init() {
 }
 
 type HostDeleteVStorageObjectExRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -22472,7 +22472,7 @@ type HostDeleteVStorageObjectEx_TaskResponse struct {
 }
 
 type HostDeleteVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -22880,7 +22880,7 @@ func init() {
 }
 
 type HostExtendDiskRequestType struct {
-	This            ManagedObjectReference `xml:"_this" json:"_this"`
+	This            ManagedObjectReference `xml:"_this" json:"-"`
 	Id              ID                     `xml:"id" json:"id"`
 	Datastore       ManagedObjectReference `xml:"datastore" json:"datastore"`
 	NewCapacityInMB int64                  `xml:"newCapacityInMB" json:"newCapacityInMB"`
@@ -23235,7 +23235,7 @@ func init() {
 }
 
 type HostGetVFlashModuleDefaultConfigRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	VFlashModule string                 `xml:"vFlashModule" json:"vFlashModule"`
 }
 
@@ -23418,7 +23418,7 @@ func init() {
 }
 
 type HostImageConfigGetAcceptanceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -23436,7 +23436,7 @@ func init() {
 }
 
 type HostImageConfigGetProfileRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -23515,7 +23515,7 @@ func init() {
 }
 
 type HostInflateDiskRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -24107,7 +24107,7 @@ func init() {
 }
 
 type HostListVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -25745,7 +25745,7 @@ func init() {
 }
 
 type HostProfileResetValidationStateRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -26001,7 +26001,7 @@ func init() {
 }
 
 type HostReconcileDatastoreInventoryRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -26034,7 +26034,7 @@ func init() {
 }
 
 type HostRegisterDiskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Path string                 `xml:"path" json:"path"`
 	Name string                 `xml:"name,omitempty" json:"name,omitempty"`
 }
@@ -26058,7 +26058,7 @@ func init() {
 }
 
 type HostRelocateVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Spec      VslmRelocateSpec       `xml:"spec" json:"spec"`
@@ -26085,7 +26085,7 @@ func init() {
 }
 
 type HostRemoveVFlashResourceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -26110,7 +26110,7 @@ func init() {
 }
 
 type HostRenameVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Name      string                 `xml:"name" json:"name"`
@@ -26141,7 +26141,7 @@ func init() {
 }
 
 type HostRetrieveVStorageInfrastructureObjectPolicyRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -26166,7 +26166,7 @@ func init() {
 }
 
 type HostRetrieveVStorageObjectMetadataRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId *ID                    `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
@@ -26188,7 +26188,7 @@ func init() {
 }
 
 type HostRetrieveVStorageObjectMetadataValueRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId *ID                    `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
@@ -26204,7 +26204,7 @@ type HostRetrieveVStorageObjectMetadataValueResponse struct {
 }
 
 type HostRetrieveVStorageObjectRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	Id            ID                     `xml:"id" json:"id"`
 	Datastore     ManagedObjectReference `xml:"datastore" json:"datastore"`
 	DiskInfoFlags []string               `xml:"diskInfoFlags,omitempty" json:"diskInfoFlags,omitempty"`
@@ -26225,7 +26225,7 @@ func init() {
 }
 
 type HostRetrieveVStorageObjectStateRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -26308,7 +26308,7 @@ func init() {
 }
 
 type HostScheduleReconcileDatastoreInventoryRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -26495,7 +26495,7 @@ func init() {
 }
 
 type HostSetVStorageObjectControlFlagsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Id           ID                     `xml:"id" json:"id"`
 	Datastore    ManagedObjectReference `xml:"datastore" json:"datastore"`
 	ControlFlags []string               `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
@@ -26640,7 +26640,7 @@ func init() {
 }
 
 type HostSpecGetUpdatedHostsRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	StartChangeID string                 `xml:"startChangeID,omitempty" json:"startChangeID,omitempty"`
 	EndChangeID   string                 `xml:"endChangeID,omitempty" json:"endChangeID,omitempty"`
 }
@@ -27289,7 +27289,7 @@ func init() {
 }
 
 type HostUpdateVStorageObjectMetadataExRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Metadata   []KeyValue             `xml:"metadata,omitempty" json:"metadata,omitempty"`
@@ -27311,7 +27311,7 @@ type HostUpdateVStorageObjectMetadataEx_TaskResponse struct {
 }
 
 type HostUpdateVStorageObjectMetadataRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Metadata   []KeyValue             `xml:"metadata,omitempty" json:"metadata,omitempty"`
@@ -27524,7 +27524,7 @@ func init() {
 }
 
 type HostVStorageObjectCreateDiskFromSnapshotRequestType struct {
-	This             ManagedObjectReference          `xml:"_this" json:"_this"`
+	This             ManagedObjectReference          `xml:"_this" json:"-"`
 	Id               ID                              `xml:"id" json:"id"`
 	Datastore        ManagedObjectReference          `xml:"datastore" json:"datastore"`
 	SnapshotId       ID                              `xml:"snapshotId" json:"snapshotId"`
@@ -27550,7 +27550,7 @@ type HostVStorageObjectCreateDiskFromSnapshot_TaskResponse struct {
 }
 
 type HostVStorageObjectCreateSnapshotRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Id          ID                     `xml:"id" json:"id"`
 	Datastore   ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Description string                 `xml:"description" json:"description"`
@@ -27571,7 +27571,7 @@ type HostVStorageObjectCreateSnapshot_TaskResponse struct {
 }
 
 type HostVStorageObjectDeleteSnapshotRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId ID                     `xml:"snapshotId" json:"snapshotId"`
@@ -27598,7 +27598,7 @@ func init() {
 }
 
 type HostVStorageObjectRetrieveSnapshotInfoRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -27612,7 +27612,7 @@ type HostVStorageObjectRetrieveSnapshotInfoResponse struct {
 }
 
 type HostVStorageObjectRevertRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId ID                     `xml:"snapshotId" json:"snapshotId"`
@@ -28084,7 +28084,7 @@ func init() {
 }
 
 type HttpNfcLeaseAbortRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Fault *LocalizedMethodFault  `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
@@ -28113,7 +28113,7 @@ func init() {
 }
 
 type HttpNfcLeaseCompleteRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -28158,7 +28158,7 @@ func init() {
 }
 
 type HttpNfcLeaseGetManifestRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -28229,7 +28229,7 @@ func init() {
 }
 
 type HttpNfcLeaseProbeUrlsRequestType struct {
-	This    ManagedObjectReference   `xml:"_this" json:"_this"`
+	This    ManagedObjectReference   `xml:"_this" json:"-"`
 	Files   []HttpNfcLeaseSourceFile `xml:"files,omitempty" json:"files,omitempty"`
 	Timeout int32                    `xml:"timeout,omitempty" json:"timeout,omitempty"`
 }
@@ -28249,7 +28249,7 @@ func init() {
 }
 
 type HttpNfcLeaseProgressRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Percent int32                  `xml:"percent" json:"percent"`
 }
 
@@ -28261,7 +28261,7 @@ type HttpNfcLeaseProgressResponse struct {
 }
 
 type HttpNfcLeasePullFromUrlsRequestType struct {
-	This  ManagedObjectReference   `xml:"_this" json:"_this"`
+	This  ManagedObjectReference   `xml:"_this" json:"-"`
 	Files []HttpNfcLeaseSourceFile `xml:"files,omitempty" json:"files,omitempty"`
 }
 
@@ -28286,7 +28286,7 @@ func init() {
 }
 
 type HttpNfcLeaseSetManifestChecksumTypeRequestType struct {
-	This                      ManagedObjectReference `xml:"_this" json:"_this"`
+	This                      ManagedObjectReference `xml:"_this" json:"-"`
 	DeviceUrlsToChecksumTypes []KeyValue             `xml:"deviceUrlsToChecksumTypes,omitempty" json:"deviceUrlsToChecksumTypes,omitempty"`
 }
 
@@ -28370,7 +28370,7 @@ func init() {
 }
 
 type ImpersonateUserRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	UserName string                 `xml:"userName" json:"userName"`
 	Locale   string                 `xml:"locale,omitempty" json:"locale,omitempty"`
 }
@@ -28384,7 +28384,7 @@ type ImpersonateUserResponse struct {
 }
 
 type ImportCertificateForCAMRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	CertPath  string                 `xml:"certPath" json:"certPath"`
 	CamServer string                 `xml:"camServer" json:"camServer"`
 }
@@ -28465,7 +28465,7 @@ func init() {
 }
 
 type ImportUnmanagedSnapshotRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Vdisk      string                  `xml:"vdisk" json:"vdisk"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	VvolId     string                  `xml:"vvolId" json:"vvolId"`
@@ -28485,7 +28485,7 @@ func init() {
 }
 
 type ImportVAppRequestType struct {
-	This   ManagedObjectReference  `xml:"_this" json:"_this"`
+	This   ManagedObjectReference  `xml:"_this" json:"-"`
 	Spec   BaseImportSpec          `xml:"spec,typeattr" json:"spec"`
 	Folder *ManagedObjectReference `xml:"folder,omitempty" json:"folder,omitempty"`
 	Host   *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
@@ -28677,7 +28677,7 @@ func init() {
 }
 
 type InflateDiskRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -28697,7 +28697,7 @@ type InflateDisk_TaskResponse struct {
 }
 
 type InflateVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -28735,7 +28735,7 @@ func init() {
 }
 
 type InitializeDisksRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Mapping []VsanHostDiskMapping  `xml:"mapping" json:"mapping"`
 }
 
@@ -28760,7 +28760,7 @@ func init() {
 }
 
 type InitiateFileTransferFromGuestRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth          BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	GuestFilePath string                  `xml:"guestFilePath" json:"guestFilePath"`
@@ -28781,7 +28781,7 @@ func init() {
 }
 
 type InitiateFileTransferToGuestRequestType struct {
-	This           ManagedObjectReference  `xml:"_this" json:"_this"`
+	This           ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm             ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth           BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	GuestFilePath  string                  `xml:"guestFilePath" json:"guestFilePath"`
@@ -28799,7 +28799,7 @@ type InitiateFileTransferToGuestResponse struct {
 }
 
 type InstallHostPatchRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Repository HostPatchManagerLocator `xml:"repository" json:"repository"`
 	UpdateID   string                  `xml:"updateID" json:"updateID"`
 	Force      *bool                   `xml:"force" json:"force,omitempty"`
@@ -28810,7 +28810,7 @@ func init() {
 }
 
 type InstallHostPatchV2RequestType struct {
-	This       ManagedObjectReference                     `xml:"_this" json:"_this"`
+	This       ManagedObjectReference                     `xml:"_this" json:"-"`
 	MetaUrls   []string                                   `xml:"metaUrls,omitempty" json:"metaUrls,omitempty"`
 	BundleUrls []string                                   `xml:"bundleUrls,omitempty" json:"bundleUrls,omitempty"`
 	VibUrls    []string                                   `xml:"vibUrls,omitempty" json:"vibUrls,omitempty"`
@@ -28842,7 +28842,7 @@ type InstallHostPatch_TaskResponse struct {
 }
 
 type InstallIoFilterRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	VibUrl  string                 `xml:"vibUrl" json:"vibUrl"`
 	CompRes ManagedObjectReference `xml:"compRes" json:"compRes"`
 }
@@ -28868,7 +28868,7 @@ func init() {
 }
 
 type InstallServerCertificateRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Cert string                 `xml:"cert" json:"cert"`
 }
 
@@ -28886,7 +28886,7 @@ func init() {
 }
 
 type InstallSmartCardTrustAnchorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Cert string                 `xml:"cert" json:"cert"`
 }
 
@@ -28898,7 +28898,7 @@ type InstallSmartCardTrustAnchorResponse struct {
 }
 
 type InstantCloneRequestType struct {
-	This ManagedObjectReference         `xml:"_this" json:"_this"`
+	This ManagedObjectReference         `xml:"_this" json:"-"`
 	Spec VirtualMachineInstantCloneSpec `xml:"spec" json:"spec"`
 }
 
@@ -30261,7 +30261,7 @@ func init() {
 }
 
 type IsKmsClusterActiveRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster *KeyProviderId         `xml:"cluster,omitempty" json:"cluster,omitempty"`
 }
 
@@ -30280,7 +30280,7 @@ func init() {
 }
 
 type IsSharedGraphicsActiveRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -30556,7 +30556,7 @@ func init() {
 }
 
 type JoinDomainRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	DomainName string                 `xml:"domainName" json:"domainName"`
 	UserName   string                 `xml:"userName" json:"userName"`
 	Password   string                 `xml:"password" json:"password"`
@@ -30567,7 +30567,7 @@ func init() {
 }
 
 type JoinDomainWithCAMRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	DomainName string                 `xml:"domainName" json:"domainName"`
 	CamServer  string                 `xml:"camServer" json:"camServer"`
 }
@@ -30784,7 +30784,7 @@ func init() {
 }
 
 type LeaveCurrentDomainRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Force bool                   `xml:"force" json:"force"`
 }
 
@@ -31200,7 +31200,7 @@ func init() {
 }
 
 type ListCACertificateRevocationListsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -31218,7 +31218,7 @@ func init() {
 }
 
 type ListCACertificatesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -31236,7 +31236,7 @@ func init() {
 }
 
 type ListFilesInGuestRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm           ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth         BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	FilePath     string                  `xml:"filePath" json:"filePath"`
@@ -31260,7 +31260,7 @@ func init() {
 }
 
 type ListGuestAliasesRequestType struct {
-	This     ManagedObjectReference  `xml:"_this" json:"_this"`
+	This     ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm       ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth     BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Username string                  `xml:"username" json:"username"`
@@ -31281,7 +31281,7 @@ func init() {
 }
 
 type ListGuestMappedAliasesRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 }
@@ -31301,7 +31301,7 @@ func init() {
 }
 
 type ListKeysRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Limit *int32                 `xml:"limit" json:"limit,omitempty"`
 }
 
@@ -31320,7 +31320,7 @@ func init() {
 }
 
 type ListKmipServersRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Limit *int32                 `xml:"limit" json:"limit,omitempty"`
 }
 
@@ -31339,7 +31339,7 @@ func init() {
 }
 
 type ListKmsClustersRequestType struct {
-	This                 ManagedObjectReference `xml:"_this" json:"_this"`
+	This                 ManagedObjectReference `xml:"_this" json:"-"`
 	IncludeKmsServers    *bool                  `xml:"includeKmsServers" json:"includeKmsServers,omitempty"`
 	ManagementTypeFilter int32                  `xml:"managementTypeFilter,omitempty" json:"managementTypeFilter,omitempty"`
 	StatusFilter         int32                  `xml:"statusFilter,omitempty" json:"statusFilter,omitempty"`
@@ -31360,7 +31360,7 @@ func init() {
 }
 
 type ListProcessesInGuestRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Pids []int64                 `xml:"pids,omitempty" json:"pids,omitempty"`
@@ -31381,7 +31381,7 @@ func init() {
 }
 
 type ListRegistryKeysInGuestRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm           ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth         BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	KeyName      GuestRegKeyNameSpec     `xml:"keyName" json:"keyName"`
@@ -31404,7 +31404,7 @@ func init() {
 }
 
 type ListRegistryValuesInGuestRequestType struct {
-	This          ManagedObjectReference  `xml:"_this" json:"_this"`
+	This          ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth          BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	KeyName       GuestRegKeyNameSpec     `xml:"keyName" json:"keyName"`
@@ -31427,7 +31427,7 @@ func init() {
 }
 
 type ListSmartCardTrustAnchorsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -31445,7 +31445,7 @@ func init() {
 }
 
 type ListTagsAttachedToVStorageObjectRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   ID                     `xml:"id" json:"id"`
 }
 
@@ -31464,7 +31464,7 @@ func init() {
 }
 
 type ListVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -31483,7 +31483,7 @@ func init() {
 }
 
 type ListVStorageObjectsAttachedToTagRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Category string                 `xml:"category" json:"category"`
 	Tag      string                 `xml:"tag" json:"tag"`
 }
@@ -31616,7 +31616,7 @@ func init() {
 }
 
 type LogUserEventRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 	Msg    string                 `xml:"msg" json:"msg"`
 }
@@ -31641,7 +31641,7 @@ func init() {
 }
 
 type LoginBySSPIRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Base64Token string                 `xml:"base64Token" json:"base64Token"`
 	Locale      string                 `xml:"locale,omitempty" json:"locale,omitempty"`
 }
@@ -31661,7 +31661,7 @@ func init() {
 }
 
 type LoginByTokenRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Locale string                 `xml:"locale,omitempty" json:"locale,omitempty"`
 }
 
@@ -31680,7 +31680,7 @@ func init() {
 }
 
 type LoginExtensionByCertificateRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
 	Locale       string                 `xml:"locale,omitempty" json:"locale,omitempty"`
 }
@@ -31700,7 +31700,7 @@ func init() {
 }
 
 type LoginExtensionBySubjectNameRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
 	Locale       string                 `xml:"locale,omitempty" json:"locale,omitempty"`
 }
@@ -31714,7 +31714,7 @@ type LoginExtensionBySubjectNameResponse struct {
 }
 
 type LoginRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	UserName string                 `xml:"userName" json:"userName"`
 	Password string                 `xml:"password" json:"password"`
 	Locale   string                 `xml:"locale,omitempty" json:"locale,omitempty"`
@@ -31735,7 +31735,7 @@ func init() {
 }
 
 type LogoutRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -31774,7 +31774,7 @@ func init() {
 }
 
 type LookupDvPortGroupRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	PortgroupKey string                 `xml:"portgroupKey" json:"portgroupKey"`
 }
 
@@ -31793,7 +31793,7 @@ func init() {
 }
 
 type LookupVmOverheadMemoryRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference `xml:"vm" json:"vm"`
 	Host ManagedObjectReference `xml:"host" json:"host"`
 }
@@ -31852,7 +31852,7 @@ func init() {
 }
 
 type MakeDirectoryInGuestRequestType struct {
-	This                    ManagedObjectReference  `xml:"_this" json:"_this"`
+	This                    ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm                      ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth                    BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	DirectoryPath           string                  `xml:"directoryPath" json:"directoryPath"`
@@ -31867,7 +31867,7 @@ type MakeDirectoryInGuestResponse struct {
 }
 
 type MakeDirectoryRequestType struct {
-	This                    ManagedObjectReference  `xml:"_this" json:"_this"`
+	This                    ManagedObjectReference  `xml:"_this" json:"-"`
 	Name                    string                  `xml:"name" json:"name"`
 	Datacenter              *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	CreateParentDirectories *bool                   `xml:"createParentDirectories" json:"createParentDirectories,omitempty"`
@@ -31881,7 +31881,7 @@ type MakeDirectoryResponse struct {
 }
 
 type MakePrimaryVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference `xml:"vm" json:"vm"`
 }
 
@@ -31946,7 +31946,7 @@ func init() {
 }
 
 type MarkAsLocalRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ScsiDiskUuid string                 `xml:"scsiDiskUuid" json:"scsiDiskUuid"`
 }
 
@@ -31965,7 +31965,7 @@ type MarkAsLocal_TaskResponse struct {
 }
 
 type MarkAsNonLocalRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ScsiDiskUuid string                 `xml:"scsiDiskUuid" json:"scsiDiskUuid"`
 }
 
@@ -31984,7 +31984,7 @@ type MarkAsNonLocal_TaskResponse struct {
 }
 
 type MarkAsNonSsdRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ScsiDiskUuid string                 `xml:"scsiDiskUuid" json:"scsiDiskUuid"`
 }
 
@@ -32003,7 +32003,7 @@ type MarkAsNonSsd_TaskResponse struct {
 }
 
 type MarkAsSsdRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ScsiDiskUuid string                 `xml:"scsiDiskUuid" json:"scsiDiskUuid"`
 }
 
@@ -32028,7 +32028,7 @@ func init() {
 }
 
 type MarkAsTemplateRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -32045,7 +32045,7 @@ func init() {
 }
 
 type MarkAsVirtualMachineRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Pool ManagedObjectReference  `xml:"pool" json:"pool"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
@@ -32064,7 +32064,7 @@ func init() {
 }
 
 type MarkDefaultRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	ClusterId KeyProviderId          `xml:"clusterId" json:"clusterId"`
 }
 
@@ -32082,7 +32082,7 @@ func init() {
 }
 
 type MarkForRemovalRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	HbaName string                 `xml:"hbaName" json:"hbaName"`
 	Remove  bool                   `xml:"remove" json:"remove"`
 }
@@ -32101,7 +32101,7 @@ func init() {
 }
 
 type MarkPerenniallyReservedExRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid []string               `xml:"lunUuid,omitempty" json:"lunUuid,omitempty"`
 	State   bool                   `xml:"state" json:"state"`
 }
@@ -32121,7 +32121,7 @@ type MarkPerenniallyReservedEx_TaskResponse struct {
 }
 
 type MarkPerenniallyReservedRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid string                 `xml:"lunUuid" json:"lunUuid"`
 	State   bool                   `xml:"state" json:"state"`
 }
@@ -32140,7 +32140,7 @@ func init() {
 }
 
 type MarkServiceProviderEntitiesRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
 
@@ -32251,7 +32251,7 @@ func init() {
 }
 
 type MergeDvsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Dvs  ManagedObjectReference `xml:"dvs" json:"dvs"`
 }
 
@@ -32276,7 +32276,7 @@ func init() {
 }
 
 type MergePermissionsRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	SrcRoleId int32                  `xml:"srcRoleId" json:"srcRoleId"`
 	DstRoleId int32                  `xml:"dstRoleId" json:"dstRoleId"`
 }
@@ -32400,7 +32400,7 @@ func init() {
 }
 
 type MigrateVMRequestType struct {
-	This     ManagedObjectReference     `xml:"_this" json:"_this"`
+	This     ManagedObjectReference     `xml:"_this" json:"-"`
 	Pool     *ManagedObjectReference    `xml:"pool,omitempty" json:"pool,omitempty"`
 	Host     *ManagedObjectReference    `xml:"host,omitempty" json:"host,omitempty"`
 	Priority VirtualMachineMovePriority `xml:"priority" json:"priority"`
@@ -32777,7 +32777,7 @@ func init() {
 }
 
 type ModifyListViewRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Add    []ManagedObjectReference `xml:"add,omitempty" json:"add,omitempty"`
 	Remove []ManagedObjectReference `xml:"remove,omitempty" json:"remove,omitempty"`
 }
@@ -32843,7 +32843,7 @@ func init() {
 }
 
 type MountToolsInstallerRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -32860,7 +32860,7 @@ func init() {
 }
 
 type MountVffsVolumeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VffsUuid string                 `xml:"vffsUuid" json:"vffsUuid"`
 }
 
@@ -32878,7 +32878,7 @@ func init() {
 }
 
 type MountVmfsVolumeExRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid []string               `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -32897,7 +32897,7 @@ type MountVmfsVolumeEx_TaskResponse struct {
 }
 
 type MountVmfsVolumeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid string                 `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -32909,7 +32909,7 @@ type MountVmfsVolumeResponse struct {
 }
 
 type MoveDVPortRequestType struct {
-	This                    ManagedObjectReference `xml:"_this" json:"_this"`
+	This                    ManagedObjectReference `xml:"_this" json:"-"`
 	PortKey                 []string               `xml:"portKey" json:"portKey"`
 	DestinationPortgroupKey string                 `xml:"destinationPortgroupKey,omitempty" json:"destinationPortgroupKey,omitempty"`
 }
@@ -32929,7 +32929,7 @@ type MoveDVPort_TaskResponse struct {
 }
 
 type MoveDatastoreFileRequestType struct {
-	This                  ManagedObjectReference  `xml:"_this" json:"_this"`
+	This                  ManagedObjectReference  `xml:"_this" json:"-"`
 	SourceName            string                  `xml:"sourceName" json:"sourceName"`
 	SourceDatacenter      *ManagedObjectReference `xml:"sourceDatacenter,omitempty" json:"sourceDatacenter,omitempty"`
 	DestinationName       string                  `xml:"destinationName" json:"destinationName"`
@@ -32958,7 +32958,7 @@ func init() {
 }
 
 type MoveDirectoryInGuestRequestType struct {
-	This             ManagedObjectReference  `xml:"_this" json:"_this"`
+	This             ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm               ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth             BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	SrcDirectoryPath string                  `xml:"srcDirectoryPath" json:"srcDirectoryPath"`
@@ -32979,7 +32979,7 @@ func init() {
 }
 
 type MoveFileInGuestRequestType struct {
-	This        ManagedObjectReference  `xml:"_this" json:"_this"`
+	This        ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm          ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth        BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	SrcFilePath string                  `xml:"srcFilePath" json:"srcFilePath"`
@@ -32995,7 +32995,7 @@ type MoveFileInGuestResponse struct {
 }
 
 type MoveHostIntoRequestType struct {
-	This         ManagedObjectReference  `xml:"_this" json:"_this"`
+	This         ManagedObjectReference  `xml:"_this" json:"-"`
 	Host         ManagedObjectReference  `xml:"host" json:"host"`
 	ResourcePool *ManagedObjectReference `xml:"resourcePool,omitempty" json:"resourcePool,omitempty"`
 }
@@ -33015,7 +33015,7 @@ type MoveHostInto_TaskResponse struct {
 }
 
 type MoveIntoFolderRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	List []ManagedObjectReference `xml:"list" json:"list"`
 }
 
@@ -33034,7 +33034,7 @@ type MoveIntoFolder_TaskResponse struct {
 }
 
 type MoveIntoRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -33049,7 +33049,7 @@ func init() {
 }
 
 type MoveIntoResourcePoolRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	List []ManagedObjectReference `xml:"list" json:"list"`
 }
 
@@ -33071,7 +33071,7 @@ type MoveInto_TaskResponse struct {
 }
 
 type MoveVirtualDiskRequestType struct {
-	This             ManagedObjectReference          `xml:"_this" json:"_this"`
+	This             ManagedObjectReference          `xml:"_this" json:"-"`
 	SourceName       string                          `xml:"sourceName" json:"sourceName"`
 	SourceDatacenter *ManagedObjectReference         `xml:"sourceDatacenter,omitempty" json:"sourceDatacenter,omitempty"`
 	DestName         string                          `xml:"destName" json:"destName"`
@@ -34958,7 +34958,7 @@ func init() {
 }
 
 type OpenInventoryViewFolderRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -35096,7 +35096,7 @@ func init() {
 }
 
 type OverwriteCustomizationSpecRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Item CustomizationSpecItem  `xml:"item" json:"item"`
 }
 
@@ -36645,7 +36645,7 @@ func init() {
 }
 
 type ParseDescriptorRequestType struct {
-	This          ManagedObjectReference   `xml:"_this" json:"_this"`
+	This          ManagedObjectReference   `xml:"_this" json:"-"`
 	OvfDescriptor string                   `xml:"ovfDescriptor" json:"ovfDescriptor"`
 	Pdp           OvfParseDescriptorParams `xml:"pdp" json:"pdp"`
 }
@@ -37015,7 +37015,7 @@ func init() {
 }
 
 type PerformDvsProductSpecOperationRequestType struct {
-	This        ManagedObjectReference               `xml:"_this" json:"_this"`
+	This        ManagedObjectReference               `xml:"_this" json:"-"`
 	Operation   string                               `xml:"operation" json:"operation"`
 	ProductSpec *DistributedVirtualSwitchProductSpec `xml:"productSpec,omitempty" json:"productSpec,omitempty"`
 }
@@ -37041,7 +37041,7 @@ func init() {
 }
 
 type PerformVsanUpgradePreflightCheckRequestType struct {
-	This            ManagedObjectReference `xml:"_this" json:"_this"`
+	This            ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster         ManagedObjectReference `xml:"cluster" json:"cluster"`
 	DowngradeFormat *bool                  `xml:"downgradeFormat" json:"downgradeFormat,omitempty"`
 }
@@ -37055,7 +37055,7 @@ type PerformVsanUpgradePreflightCheckResponse struct {
 }
 
 type PerformVsanUpgradeRequestType struct {
-	This                   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This                   ManagedObjectReference   `xml:"_this" json:"-"`
 	Cluster                ManagedObjectReference   `xml:"cluster" json:"cluster"`
 	PerformObjectUpgrade   *bool                    `xml:"performObjectUpgrade" json:"performObjectUpgrade,omitempty"`
 	DowngradeFormat        *bool                    `xml:"downgradeFormat" json:"downgradeFormat,omitempty"`
@@ -37362,7 +37362,7 @@ func init() {
 }
 
 type PlaceVmRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	PlacementSpec PlacementSpec          `xml:"placementSpec" json:"placementSpec"`
 }
 
@@ -37556,7 +37556,7 @@ func init() {
 }
 
 type PostEventRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	EventToPost BaseEvent              `xml:"eventToPost,typeattr" json:"eventToPost"`
 	TaskInfo    *TaskInfo              `xml:"taskInfo,omitempty" json:"taskInfo,omitempty"`
 }
@@ -37575,7 +37575,7 @@ func init() {
 }
 
 type PostHealthUpdatesRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 	Updates    []HealthUpdate         `xml:"updates,omitempty" json:"updates,omitempty"`
 }
@@ -37588,7 +37588,7 @@ type PostHealthUpdatesResponse struct {
 }
 
 type PowerDownHostToStandByRequestType struct {
-	This                  ManagedObjectReference `xml:"_this" json:"_this"`
+	This                  ManagedObjectReference `xml:"_this" json:"-"`
 	TimeoutSec            int32                  `xml:"timeoutSec" json:"timeoutSec"`
 	EvacuatePoweredOffVms *bool                  `xml:"evacuatePoweredOffVms" json:"evacuatePoweredOffVms,omitempty"`
 }
@@ -37608,7 +37608,7 @@ type PowerDownHostToStandBy_TaskResponse struct {
 }
 
 type PowerOffVAppRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Force bool                   `xml:"force" json:"force"`
 }
 
@@ -37627,7 +37627,7 @@ type PowerOffVApp_TaskResponse struct {
 }
 
 type PowerOffVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -37683,7 +37683,7 @@ func init() {
 }
 
 type PowerOnMultiVMRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Vm     []ManagedObjectReference `xml:"vm" json:"vm"`
 	Option []BaseOptionValue        `xml:"option,omitempty,typeattr" json:"option,omitempty"`
 }
@@ -37703,7 +37703,7 @@ type PowerOnMultiVM_TaskResponse struct {
 }
 
 type PowerOnVAppRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -37721,7 +37721,7 @@ type PowerOnVApp_TaskResponse struct {
 }
 
 type PowerOnVMRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -37760,7 +37760,7 @@ func init() {
 }
 
 type PowerUpHostFromStandByRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	TimeoutSec int32                  `xml:"timeoutSec" json:"timeoutSec"`
 }
 
@@ -37785,7 +37785,7 @@ func init() {
 }
 
 type PrepareCryptoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38240,7 +38240,7 @@ func init() {
 }
 
 type PromoteDisksRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Unlink bool                   `xml:"unlink" json:"unlink"`
 	Disks  []VirtualDisk          `xml:"disks,omitempty" json:"disks,omitempty"`
 }
@@ -38314,7 +38314,7 @@ func init() {
 }
 
 type PutUsbScanCodesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec UsbScanCodeSpec        `xml:"spec" json:"spec"`
 }
 
@@ -38350,7 +38350,7 @@ func init() {
 }
 
 type QueryAnswerFileStatusRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -38369,7 +38369,7 @@ func init() {
 }
 
 type QueryAssignedLicensesRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	EntityId string                 `xml:"entityId,omitempty" json:"entityId,omitempty"`
 }
 
@@ -38388,7 +38388,7 @@ func init() {
 }
 
 type QueryAvailableDisksForVmfsRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Datastore *ManagedObjectReference `xml:"datastore,omitempty" json:"datastore,omitempty"`
 }
 
@@ -38407,7 +38407,7 @@ func init() {
 }
 
 type QueryAvailableDvsSpecRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Recommended *bool                  `xml:"recommended" json:"recommended,omitempty"`
 }
 
@@ -38426,7 +38426,7 @@ func init() {
 }
 
 type QueryAvailablePartitionRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38444,7 +38444,7 @@ func init() {
 }
 
 type QueryAvailablePerfMetricRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Entity     ManagedObjectReference `xml:"entity" json:"entity"`
 	BeginTime  *time.Time             `xml:"beginTime" json:"beginTime,omitempty"`
 	EndTime    *time.Time             `xml:"endTime" json:"endTime,omitempty"`
@@ -38466,7 +38466,7 @@ func init() {
 }
 
 type QueryAvailableSsdsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VffsPath string                 `xml:"vffsPath,omitempty" json:"vffsPath,omitempty"`
 }
 
@@ -38485,7 +38485,7 @@ func init() {
 }
 
 type QueryAvailableTimeZonesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38503,7 +38503,7 @@ func init() {
 }
 
 type QueryBootDevicesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38521,7 +38521,7 @@ func init() {
 }
 
 type QueryBoundVnicsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	IScsiHbaName string                 `xml:"iScsiHbaName" json:"iScsiHbaName"`
 }
 
@@ -38540,7 +38540,7 @@ func init() {
 }
 
 type QueryCandidateNicsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	IScsiHbaName string                 `xml:"iScsiHbaName" json:"iScsiHbaName"`
 }
 
@@ -38559,7 +38559,7 @@ func init() {
 }
 
 type QueryChangedDiskAreasRequestType struct {
-	This        ManagedObjectReference  `xml:"_this" json:"_this"`
+	This        ManagedObjectReference  `xml:"_this" json:"-"`
 	Snapshot    *ManagedObjectReference `xml:"snapshot,omitempty" json:"snapshot,omitempty"`
 	DeviceKey   int32                   `xml:"deviceKey" json:"deviceKey"`
 	StartOffset int64                   `xml:"startOffset" json:"startOffset"`
@@ -38581,7 +38581,7 @@ func init() {
 }
 
 type QueryCmmdsRequestType struct {
-	This    ManagedObjectReference             `xml:"_this" json:"_this"`
+	This    ManagedObjectReference             `xml:"_this" json:"-"`
 	Queries []HostVsanInternalSystemCmmdsQuery `xml:"queries" json:"queries"`
 }
 
@@ -38600,7 +38600,7 @@ func init() {
 }
 
 type QueryCompatibleHostForExistingDvsRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Container ManagedObjectReference `xml:"container" json:"container"`
 	Recursive bool                   `xml:"recursive" json:"recursive"`
 	Dvs       ManagedObjectReference `xml:"dvs" json:"dvs"`
@@ -38621,7 +38621,7 @@ func init() {
 }
 
 type QueryCompatibleHostForNewDvsRequestType struct {
-	This              ManagedObjectReference               `xml:"_this" json:"_this"`
+	This              ManagedObjectReference               `xml:"_this" json:"-"`
 	Container         ManagedObjectReference               `xml:"container" json:"container"`
 	Recursive         bool                                 `xml:"recursive" json:"recursive"`
 	SwitchProductSpec *DistributedVirtualSwitchProductSpec `xml:"switchProductSpec,omitempty" json:"switchProductSpec,omitempty"`
@@ -38642,7 +38642,7 @@ func init() {
 }
 
 type QueryCompatibleVmnicsFromHostsRequestType struct {
-	This  ManagedObjectReference   `xml:"_this" json:"_this"`
+	This  ManagedObjectReference   `xml:"_this" json:"-"`
 	Hosts []ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
 	Dvs   ManagedObjectReference   `xml:"dvs" json:"dvs"`
 }
@@ -38662,7 +38662,7 @@ func init() {
 }
 
 type QueryComplianceStatusRequestType struct {
-	This    ManagedObjectReference   `xml:"_this" json:"_this"`
+	This    ManagedObjectReference   `xml:"_this" json:"-"`
 	Profile []ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 	Entity  []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
@@ -38688,7 +38688,7 @@ func init() {
 }
 
 type QueryConfigOptionDescriptorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38706,7 +38706,7 @@ func init() {
 }
 
 type QueryConfigOptionExRequestType struct {
-	This ManagedObjectReference                   `xml:"_this" json:"_this"`
+	This ManagedObjectReference                   `xml:"_this" json:"-"`
 	Spec *EnvironmentBrowserConfigOptionQuerySpec `xml:"spec,omitempty" json:"spec,omitempty"`
 }
 
@@ -38719,7 +38719,7 @@ type QueryConfigOptionExResponse struct {
 }
 
 type QueryConfigOptionRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Key  string                  `xml:"key,omitempty" json:"key,omitempty"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
@@ -38739,7 +38739,7 @@ func init() {
 }
 
 type QueryConfigTargetRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -38758,7 +38758,7 @@ func init() {
 }
 
 type QueryConfiguredModuleOptionStringRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name" json:"name"`
 }
 
@@ -38777,7 +38777,7 @@ func init() {
 }
 
 type QueryConnectionInfoRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	Hostname      string                 `xml:"hostname" json:"hostname"`
 	Port          int32                  `xml:"port" json:"port"`
 	Username      string                 `xml:"username" json:"username"`
@@ -38800,7 +38800,7 @@ func init() {
 }
 
 type QueryConnectionInfoViaSpecRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec HostConnectSpec        `xml:"spec" json:"spec"`
 }
 
@@ -38819,7 +38819,7 @@ func init() {
 }
 
 type QueryConnectionsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38837,7 +38837,7 @@ func init() {
 }
 
 type QueryCryptoKeyStatusRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	KeyIds         []CryptoKeyId          `xml:"keyIds,omitempty" json:"keyIds,omitempty"`
 	CheckKeyBitMap int32                  `xml:"checkKeyBitMap" json:"checkKeyBitMap"`
 }
@@ -38857,7 +38857,7 @@ func init() {
 }
 
 type QueryDatastorePerformanceSummaryRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -38876,7 +38876,7 @@ func init() {
 }
 
 type QueryDateTimeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -38894,7 +38894,7 @@ func init() {
 }
 
 type QueryDescriptionsRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -38913,7 +38913,7 @@ func init() {
 }
 
 type QueryDisksForVsanRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	CanonicalName []string               `xml:"canonicalName,omitempty" json:"canonicalName,omitempty"`
 }
 
@@ -38932,7 +38932,7 @@ func init() {
 }
 
 type QueryDisksUsingFilterRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 	CompRes  ManagedObjectReference `xml:"compRes" json:"compRes"`
 }
@@ -38952,7 +38952,7 @@ func init() {
 }
 
 type QueryDvsByUuidRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Uuid string                 `xml:"uuid" json:"uuid"`
 }
 
@@ -38971,7 +38971,7 @@ func init() {
 }
 
 type QueryDvsCheckCompatibilityRequestType struct {
-	This           ManagedObjectReference                                 `xml:"_this" json:"_this"`
+	This           ManagedObjectReference                                 `xml:"_this" json:"-"`
 	HostContainer  DistributedVirtualSwitchManagerHostContainer           `xml:"hostContainer" json:"hostContainer"`
 	DvsProductSpec *DistributedVirtualSwitchManagerDvsProductSpec         `xml:"dvsProductSpec,omitempty" json:"dvsProductSpec,omitempty"`
 	HostFilterSpec []BaseDistributedVirtualSwitchManagerHostDvsFilterSpec `xml:"hostFilterSpec,omitempty,typeattr" json:"hostFilterSpec,omitempty"`
@@ -38992,7 +38992,7 @@ func init() {
 }
 
 type QueryDvsCompatibleHostSpecRequestType struct {
-	This              ManagedObjectReference               `xml:"_this" json:"_this"`
+	This              ManagedObjectReference               `xml:"_this" json:"-"`
 	SwitchProductSpec *DistributedVirtualSwitchProductSpec `xml:"switchProductSpec,omitempty" json:"switchProductSpec,omitempty"`
 }
 
@@ -39011,7 +39011,7 @@ func init() {
 }
 
 type QueryDvsConfigTargetRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	Dvs  *ManagedObjectReference `xml:"dvs,omitempty" json:"dvs,omitempty"`
 }
@@ -39031,7 +39031,7 @@ func init() {
 }
 
 type QueryDvsFeatureCapabilityRequestType struct {
-	This              ManagedObjectReference               `xml:"_this" json:"_this"`
+	This              ManagedObjectReference               `xml:"_this" json:"-"`
 	SwitchProductSpec *DistributedVirtualSwitchProductSpec `xml:"switchProductSpec,omitempty" json:"switchProductSpec,omitempty"`
 }
 
@@ -39050,7 +39050,7 @@ func init() {
 }
 
 type QueryEventsRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Filter EventFilterSpec        `xml:"filter" json:"filter"`
 }
 
@@ -39069,7 +39069,7 @@ func init() {
 }
 
 type QueryExpressionMetadataRequestType struct {
-	This           ManagedObjectReference  `xml:"_this" json:"_this"`
+	This           ManagedObjectReference  `xml:"_this" json:"-"`
 	ExpressionName []string                `xml:"expressionName,omitempty" json:"expressionName,omitempty"`
 	Profile        *ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 }
@@ -39089,7 +39089,7 @@ func init() {
 }
 
 type QueryExtensionIpAllocationUsageRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKeys []string               `xml:"extensionKeys,omitempty" json:"extensionKeys,omitempty"`
 }
 
@@ -39114,7 +39114,7 @@ func init() {
 }
 
 type QueryFaultToleranceCompatibilityExRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	ForLegacyFt *bool                  `xml:"forLegacyFt" json:"forLegacyFt,omitempty"`
 }
 
@@ -39127,7 +39127,7 @@ type QueryFaultToleranceCompatibilityExResponse struct {
 }
 
 type QueryFaultToleranceCompatibilityRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39145,7 +39145,7 @@ func init() {
 }
 
 type QueryFilterEntitiesRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 }
 
@@ -39164,7 +39164,7 @@ func init() {
 }
 
 type QueryFilterInfoIdsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 }
 
@@ -39183,7 +39183,7 @@ func init() {
 }
 
 type QueryFilterListRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 }
 
@@ -39202,7 +39202,7 @@ func init() {
 }
 
 type QueryFilterNameRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 }
 
@@ -39221,7 +39221,7 @@ func init() {
 }
 
 type QueryFirmwareConfigUploadURLRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39239,7 +39239,7 @@ func init() {
 }
 
 type QueryHealthUpdateInfosRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 }
 
@@ -39258,7 +39258,7 @@ func init() {
 }
 
 type QueryHealthUpdatesRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 }
 
@@ -39277,7 +39277,7 @@ func init() {
 }
 
 type QueryHostConnectionInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39289,7 +39289,7 @@ type QueryHostConnectionInfoResponse struct {
 }
 
 type QueryHostPatchRequestType struct {
-	This ManagedObjectReference                     `xml:"_this" json:"_this"`
+	This ManagedObjectReference                     `xml:"_this" json:"-"`
 	Spec *HostPatchManagerPatchManagerOperationSpec `xml:"spec,omitempty" json:"spec,omitempty"`
 }
 
@@ -39314,7 +39314,7 @@ func init() {
 }
 
 type QueryHostProfileMetadataRequestType struct {
-	This        ManagedObjectReference  `xml:"_this" json:"_this"`
+	This        ManagedObjectReference  `xml:"_this" json:"-"`
 	ProfileName []string                `xml:"profileName,omitempty" json:"profileName,omitempty"`
 	Profile     *ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 }
@@ -39334,7 +39334,7 @@ func init() {
 }
 
 type QueryHostStatusRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39352,7 +39352,7 @@ func init() {
 }
 
 type QueryHostsWithAttachedLunRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid string                 `xml:"lunUuid" json:"lunUuid"`
 }
 
@@ -39371,7 +39371,7 @@ func init() {
 }
 
 type QueryIORMConfigOptionRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Host ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -39390,7 +39390,7 @@ func init() {
 }
 
 type QueryIPAllocationsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Dc           ManagedObjectReference `xml:"dc" json:"dc"`
 	PoolId       int32                  `xml:"poolId" json:"poolId"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
@@ -39411,7 +39411,7 @@ func init() {
 }
 
 type QueryIoFilterInfoRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	CompRes ManagedObjectReference `xml:"compRes" json:"compRes"`
 }
 
@@ -39430,7 +39430,7 @@ func init() {
 }
 
 type QueryIoFilterIssuesRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 	CompRes  ManagedObjectReference `xml:"compRes" json:"compRes"`
 }
@@ -39450,7 +39450,7 @@ func init() {
 }
 
 type QueryIpPoolsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Dc   ManagedObjectReference `xml:"dc" json:"dc"`
 }
 
@@ -39469,7 +39469,7 @@ func init() {
 }
 
 type QueryLicenseSourceAvailabilityRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -39488,7 +39488,7 @@ func init() {
 }
 
 type QueryLicenseUsageRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -39507,7 +39507,7 @@ func init() {
 }
 
 type QueryLockdownExceptionsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39525,7 +39525,7 @@ func init() {
 }
 
 type QueryManagedByRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
 }
 
@@ -39544,7 +39544,7 @@ func init() {
 }
 
 type QueryMaxQueueDepthRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -39569,7 +39569,7 @@ func init() {
 }
 
 type QueryMemoryOverheadExRequestType struct {
-	This         ManagedObjectReference   `xml:"_this" json:"_this"`
+	This         ManagedObjectReference   `xml:"_this" json:"-"`
 	VmConfigInfo VirtualMachineConfigInfo `xml:"vmConfigInfo" json:"vmConfigInfo"`
 }
 
@@ -39582,7 +39582,7 @@ type QueryMemoryOverheadExResponse struct {
 }
 
 type QueryMemoryOverheadRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	MemorySize   int64                  `xml:"memorySize" json:"memorySize"`
 	VideoRamSize int32                  `xml:"videoRamSize,omitempty" json:"videoRamSize,omitempty"`
 	NumVcpus     int32                  `xml:"numVcpus" json:"numVcpus"`
@@ -39603,7 +39603,7 @@ func init() {
 }
 
 type QueryMigrationDependenciesRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	PnicDevice []string               `xml:"pnicDevice" json:"pnicDevice"`
 }
 
@@ -39622,7 +39622,7 @@ func init() {
 }
 
 type QueryModulesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39640,7 +39640,7 @@ func init() {
 }
 
 type QueryMonitoredEntitiesRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 }
 
@@ -39659,7 +39659,7 @@ func init() {
 }
 
 type QueryNFSUserRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39677,7 +39677,7 @@ func init() {
 }
 
 type QueryNetConfigRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	NicType string                 `xml:"nicType" json:"nicType"`
 }
 
@@ -39696,7 +39696,7 @@ func init() {
 }
 
 type QueryNetworkHintRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device []string               `xml:"device,omitempty" json:"device,omitempty"`
 }
 
@@ -39715,7 +39715,7 @@ func init() {
 }
 
 type QueryObjectsOnPhysicalVsanDiskRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Disks []string               `xml:"disks" json:"disks"`
 }
 
@@ -39734,7 +39734,7 @@ func init() {
 }
 
 type QueryOptionsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Name string                 `xml:"name,omitempty" json:"name,omitempty"`
 }
 
@@ -39753,7 +39753,7 @@ func init() {
 }
 
 type QueryPartitionCreateDescRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	DiskUuid       string                 `xml:"diskUuid" json:"diskUuid"`
 	DiagnosticType string                 `xml:"diagnosticType" json:"diagnosticType"`
 }
@@ -39773,7 +39773,7 @@ func init() {
 }
 
 type QueryPartitionCreateOptionsRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	StorageType    string                 `xml:"storageType" json:"storageType"`
 	DiagnosticType string                 `xml:"diagnosticType" json:"diagnosticType"`
 }
@@ -39793,7 +39793,7 @@ func init() {
 }
 
 type QueryPathSelectionPolicyOptionsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39817,7 +39817,7 @@ func init() {
 }
 
 type QueryPerfCompositeRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	QuerySpec PerfQuerySpec          `xml:"querySpec" json:"querySpec"`
 }
 
@@ -39842,7 +39842,7 @@ func init() {
 }
 
 type QueryPerfCounterByLevelRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Level int32                  `xml:"level" json:"level"`
 }
 
@@ -39855,7 +39855,7 @@ type QueryPerfCounterByLevelResponse struct {
 }
 
 type QueryPerfCounterRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	CounterId []int32                `xml:"counterId" json:"counterId"`
 }
 
@@ -39874,7 +39874,7 @@ func init() {
 }
 
 type QueryPerfProviderSummaryRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
@@ -39887,7 +39887,7 @@ type QueryPerfProviderSummaryResponse struct {
 }
 
 type QueryPerfRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	QuerySpec []PerfQuerySpec        `xml:"querySpec" json:"querySpec"`
 }
 
@@ -39906,7 +39906,7 @@ func init() {
 }
 
 type QueryPhysicalVsanDisksRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Props []string               `xml:"props,omitempty" json:"props,omitempty"`
 }
 
@@ -39925,7 +39925,7 @@ func init() {
 }
 
 type QueryPnicStatusRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	PnicDevice string                 `xml:"pnicDevice" json:"pnicDevice"`
 }
 
@@ -39944,7 +39944,7 @@ func init() {
 }
 
 type QueryPolicyMetadataRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	PolicyName []string                `xml:"policyName,omitempty" json:"policyName,omitempty"`
 	Profile    *ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 }
@@ -39964,7 +39964,7 @@ func init() {
 }
 
 type QueryProductLockerLocationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -39982,7 +39982,7 @@ func init() {
 }
 
 type QueryProfileStructureRequestType struct {
-	This    ManagedObjectReference  `xml:"_this" json:"_this"`
+	This    ManagedObjectReference  `xml:"_this" json:"-"`
 	Profile *ManagedObjectReference `xml:"profile,omitempty" json:"profile,omitempty"`
 }
 
@@ -40001,7 +40001,7 @@ func init() {
 }
 
 type QueryProviderListRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40019,7 +40019,7 @@ func init() {
 }
 
 type QueryProviderNameRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -40038,7 +40038,7 @@ func init() {
 }
 
 type QueryResourceConfigOptionRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40056,7 +40056,7 @@ func init() {
 }
 
 type QueryServiceListRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	ServiceName string                 `xml:"serviceName,omitempty" json:"serviceName,omitempty"`
 	Location    []string               `xml:"location,omitempty" json:"location,omitempty"`
 }
@@ -40076,7 +40076,7 @@ func init() {
 }
 
 type QueryStorageArrayTypePolicyOptionsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40094,7 +40094,7 @@ func init() {
 }
 
 type QuerySupportedFeaturesRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -40113,7 +40113,7 @@ func init() {
 }
 
 type QuerySupportedNetworkOffloadSpecRequestType struct {
-	This              ManagedObjectReference              `xml:"_this" json:"_this"`
+	This              ManagedObjectReference              `xml:"_this" json:"-"`
 	SwitchProductSpec DistributedVirtualSwitchProductSpec `xml:"switchProductSpec" json:"switchProductSpec"`
 }
 
@@ -40132,7 +40132,7 @@ func init() {
 }
 
 type QuerySyncingVsanObjectsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids []string               `xml:"uuids,omitempty" json:"uuids,omitempty"`
 }
 
@@ -40151,7 +40151,7 @@ func init() {
 }
 
 type QuerySystemUsersRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40169,7 +40169,7 @@ func init() {
 }
 
 type QueryTargetCapabilitiesRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -40188,7 +40188,7 @@ func init() {
 }
 
 type QueryTpmAttestationReportRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40206,7 +40206,7 @@ func init() {
 }
 
 type QueryUnmonitoredHostsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 	Cluster    ManagedObjectReference `xml:"cluster" json:"cluster"`
 }
@@ -40226,7 +40226,7 @@ func init() {
 }
 
 type QueryUnownedFilesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40244,7 +40244,7 @@ func init() {
 }
 
 type QueryUnresolvedVmfsVolumeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40262,7 +40262,7 @@ func init() {
 }
 
 type QueryUnresolvedVmfsVolumesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40280,7 +40280,7 @@ func init() {
 }
 
 type QueryUsedVlanIdInDvsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40298,7 +40298,7 @@ func init() {
 }
 
 type QueryVMotionCompatibilityExRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Vm   []ManagedObjectReference `xml:"vm" json:"vm"`
 	Host []ManagedObjectReference `xml:"host" json:"host"`
 }
@@ -40318,7 +40318,7 @@ type QueryVMotionCompatibilityEx_TaskResponse struct {
 }
 
 type QueryVMotionCompatibilityRequestType struct {
-	This          ManagedObjectReference   `xml:"_this" json:"_this"`
+	This          ManagedObjectReference   `xml:"_this" json:"-"`
 	Vm            ManagedObjectReference   `xml:"vm" json:"vm"`
 	Host          []ManagedObjectReference `xml:"host" json:"host"`
 	Compatibility []string                 `xml:"compatibility,omitempty" json:"compatibility,omitempty"`
@@ -40339,7 +40339,7 @@ func init() {
 }
 
 type QueryVirtualDiskFragmentationRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -40359,7 +40359,7 @@ func init() {
 }
 
 type QueryVirtualDiskGeometryRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -40379,7 +40379,7 @@ func init() {
 }
 
 type QueryVirtualDiskUuidRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -40399,7 +40399,7 @@ func init() {
 }
 
 type QueryVmfsConfigOptionRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40417,7 +40417,7 @@ func init() {
 }
 
 type QueryVmfsDatastoreCreateOptionsRequestType struct {
-	This             ManagedObjectReference `xml:"_this" json:"_this"`
+	This             ManagedObjectReference `xml:"_this" json:"-"`
 	DevicePath       string                 `xml:"devicePath" json:"devicePath"`
 	VmfsMajorVersion int32                  `xml:"vmfsMajorVersion,omitempty" json:"vmfsMajorVersion,omitempty"`
 }
@@ -40437,7 +40437,7 @@ func init() {
 }
 
 type QueryVmfsDatastoreExpandOptionsRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -40456,7 +40456,7 @@ func init() {
 }
 
 type QueryVmfsDatastoreExtendOptionsRequestType struct {
-	This                     ManagedObjectReference `xml:"_this" json:"_this"`
+	This                     ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore                ManagedObjectReference `xml:"datastore" json:"datastore"`
 	DevicePath               string                 `xml:"devicePath" json:"devicePath"`
 	SuppressExpandCandidates *bool                  `xml:"suppressExpandCandidates" json:"suppressExpandCandidates,omitempty"`
@@ -40477,7 +40477,7 @@ func init() {
 }
 
 type QueryVnicStatusRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	VnicDevice string                 `xml:"vnicDevice" json:"vnicDevice"`
 }
 
@@ -40496,7 +40496,7 @@ func init() {
 }
 
 type QueryVsanObjectUuidsByFilterRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids   []string               `xml:"uuids,omitempty" json:"uuids,omitempty"`
 	Limit   *int32                 `xml:"limit" json:"limit,omitempty"`
 	Version int32                  `xml:"version,omitempty" json:"version,omitempty"`
@@ -40517,7 +40517,7 @@ func init() {
 }
 
 type QueryVsanObjectsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids []string               `xml:"uuids,omitempty" json:"uuids,omitempty"`
 }
 
@@ -40536,7 +40536,7 @@ func init() {
 }
 
 type QueryVsanStatisticsRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Labels []string               `xml:"labels" json:"labels"`
 }
 
@@ -40555,7 +40555,7 @@ func init() {
 }
 
 type QueryVsanUpgradeStatusRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster ManagedObjectReference `xml:"cluster" json:"cluster"`
 }
 
@@ -40701,7 +40701,7 @@ func init() {
 }
 
 type ReadEnvironmentVariableInGuestRequestType struct {
-	This  ManagedObjectReference  `xml:"_this" json:"_this"`
+	This  ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm    ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth  BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Names []string                `xml:"names,omitempty" json:"names,omitempty"`
@@ -40736,7 +40736,7 @@ func init() {
 }
 
 type ReadNextEventsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	MaxCount int32                  `xml:"maxCount" json:"maxCount"`
 }
 
@@ -40755,7 +40755,7 @@ func init() {
 }
 
 type ReadNextTasksRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	MaxCount int32                  `xml:"maxCount" json:"maxCount"`
 }
 
@@ -40791,7 +40791,7 @@ func init() {
 }
 
 type ReadPreviousEventsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	MaxCount int32                  `xml:"maxCount" json:"maxCount"`
 }
 
@@ -40810,7 +40810,7 @@ func init() {
 }
 
 type ReadPreviousTasksRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	MaxCount int32                  `xml:"maxCount" json:"maxCount"`
 }
 
@@ -40829,7 +40829,7 @@ func init() {
 }
 
 type RebootGuestRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40840,7 +40840,7 @@ type RebootGuestResponse struct {
 }
 
 type RebootHostRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Force bool                   `xml:"force" json:"force"`
 }
 
@@ -40881,7 +40881,7 @@ func init() {
 }
 
 type RecommendDatastoresRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	StorageSpec StoragePlacementSpec   `xml:"storageSpec" json:"storageSpec"`
 }
 
@@ -40900,7 +40900,7 @@ func init() {
 }
 
 type RecommendHostsForVmRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Pool *ManagedObjectReference `xml:"pool,omitempty" json:"pool,omitempty"`
 }
@@ -40914,7 +40914,7 @@ type RecommendHostsForVmResponse struct {
 }
 
 type RecommissionVsanNodeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -40932,7 +40932,7 @@ type RecommissionVsanNode_TaskResponse struct {
 }
 
 type ReconcileDatastoreInventoryRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -40951,7 +40951,7 @@ type ReconcileDatastoreInventory_TaskResponse struct {
 }
 
 type ReconfigVMRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Spec VirtualMachineConfigSpec `xml:"spec" json:"spec"`
 }
 
@@ -40976,7 +40976,7 @@ func init() {
 }
 
 type ReconfigurationSatisfiableRequestType struct {
-	This                 ManagedObjectReference  `xml:"_this" json:"_this"`
+	This                 ManagedObjectReference  `xml:"_this" json:"-"`
 	Pcbs                 []VsanPolicyChangeBatch `xml:"pcbs" json:"pcbs"`
 	IgnoreSatisfiability *bool                   `xml:"ignoreSatisfiability" json:"ignoreSatisfiability,omitempty"`
 }
@@ -40996,7 +40996,7 @@ func init() {
 }
 
 type ReconfigureAlarmRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec BaseAlarmSpec          `xml:"spec,typeattr" json:"spec"`
 }
 
@@ -41014,7 +41014,7 @@ func init() {
 }
 
 type ReconfigureAutostartRequestType struct {
-	This ManagedObjectReference     `xml:"_this" json:"_this"`
+	This ManagedObjectReference     `xml:"_this" json:"-"`
 	Spec HostAutoStartManagerConfig `xml:"spec" json:"spec"`
 }
 
@@ -41026,7 +41026,7 @@ type ReconfigureAutostartResponse struct {
 }
 
 type ReconfigureClusterRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Spec   ClusterConfigSpec      `xml:"spec" json:"spec"`
 	Modify bool                   `xml:"modify" json:"modify"`
 }
@@ -41046,7 +41046,7 @@ type ReconfigureCluster_TaskResponse struct {
 }
 
 type ReconfigureComputeResourceRequestType struct {
-	This   ManagedObjectReference        `xml:"_this" json:"_this"`
+	This   ManagedObjectReference        `xml:"_this" json:"-"`
 	Spec   BaseComputeResourceConfigSpec `xml:"spec,typeattr" json:"spec"`
 	Modify bool                          `xml:"modify" json:"modify"`
 }
@@ -41066,7 +41066,7 @@ type ReconfigureComputeResource_TaskResponse struct {
 }
 
 type ReconfigureDVPortRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Port []DVPortConfigSpec     `xml:"port" json:"port"`
 }
 
@@ -41085,7 +41085,7 @@ type ReconfigureDVPort_TaskResponse struct {
 }
 
 type ReconfigureDVPortgroupRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec DVPortgroupConfigSpec  `xml:"spec" json:"spec"`
 }
 
@@ -41104,7 +41104,7 @@ type ReconfigureDVPortgroup_TaskResponse struct {
 }
 
 type ReconfigureDatacenterRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Spec   DatacenterConfigSpec   `xml:"spec" json:"spec"`
 	Modify bool                   `xml:"modify" json:"modify"`
 }
@@ -41130,7 +41130,7 @@ func init() {
 }
 
 type ReconfigureDomObjectRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Uuid   string                 `xml:"uuid" json:"uuid"`
 	Policy string                 `xml:"policy" json:"policy"`
 }
@@ -41143,7 +41143,7 @@ type ReconfigureDomObjectResponse struct {
 }
 
 type ReconfigureDvsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec BaseDVSConfigSpec      `xml:"spec,typeattr" json:"spec"`
 }
 
@@ -41162,7 +41162,7 @@ type ReconfigureDvs_TaskResponse struct {
 }
 
 type ReconfigureHostForDASRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41186,7 +41186,7 @@ func init() {
 }
 
 type ReconfigureScheduledTaskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec BaseScheduledTaskSpec  `xml:"spec,typeattr" json:"spec"`
 }
 
@@ -41204,7 +41204,7 @@ func init() {
 }
 
 type ReconfigureServiceConsoleReservationRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	CfgBytes int64                  `xml:"cfgBytes" json:"cfgBytes"`
 }
 
@@ -41222,7 +41222,7 @@ func init() {
 }
 
 type ReconfigureSnmpAgentRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec HostSnmpConfigSpec     `xml:"spec" json:"spec"`
 }
 
@@ -41240,7 +41240,7 @@ func init() {
 }
 
 type ReconfigureVirtualMachineReservationRequestType struct {
-	This ManagedObjectReference              `xml:"_this" json:"_this"`
+	This ManagedObjectReference              `xml:"_this" json:"-"`
 	Spec VirtualMachineMemoryReservationSpec `xml:"spec" json:"spec"`
 }
 
@@ -41252,7 +41252,7 @@ type ReconfigureVirtualMachineReservationResponse struct {
 }
 
 type ReconnectHostRequestType struct {
-	This          ManagedObjectReference   `xml:"_this" json:"_this"`
+	This          ManagedObjectReference   `xml:"_this" json:"-"`
 	CnxSpec       *HostConnectSpec         `xml:"cnxSpec,omitempty" json:"cnxSpec,omitempty"`
 	ReconnectSpec *HostSystemReconnectSpec `xml:"reconnectSpec,omitempty" json:"reconnectSpec,omitempty"`
 }
@@ -41299,7 +41299,7 @@ func init() {
 }
 
 type RectifyDvsHostRequestType struct {
-	This  ManagedObjectReference   `xml:"_this" json:"_this"`
+	This  ManagedObjectReference   `xml:"_this" json:"-"`
 	Hosts []ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
 }
 
@@ -41318,7 +41318,7 @@ type RectifyDvsHost_TaskResponse struct {
 }
 
 type RectifyDvsOnHostRequestType struct {
-	This  ManagedObjectReference   `xml:"_this" json:"_this"`
+	This  ManagedObjectReference   `xml:"_this" json:"-"`
 	Hosts []ManagedObjectReference `xml:"hosts" json:"hosts"`
 }
 
@@ -41359,7 +41359,7 @@ func init() {
 }
 
 type RefreshDVPortStateRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	PortKeys []string               `xml:"portKeys,omitempty" json:"portKeys,omitempty"`
 }
 
@@ -41377,7 +41377,7 @@ func init() {
 }
 
 type RefreshDatastoreRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41394,7 +41394,7 @@ func init() {
 }
 
 type RefreshDatastoreStorageInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41411,7 +41411,7 @@ func init() {
 }
 
 type RefreshDateTimeSystemRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41428,7 +41428,7 @@ func init() {
 }
 
 type RefreshFirewallRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41445,7 +41445,7 @@ func init() {
 }
 
 type RefreshGraphicsManagerRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41462,7 +41462,7 @@ func init() {
 }
 
 type RefreshHealthStatusSystemRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41479,7 +41479,7 @@ func init() {
 }
 
 type RefreshNetworkSystemRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41496,7 +41496,7 @@ func init() {
 }
 
 type RefreshRecommendationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41507,7 +41507,7 @@ type RefreshRecommendationResponse struct {
 }
 
 type RefreshRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41524,7 +41524,7 @@ func init() {
 }
 
 type RefreshRuntimeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41541,7 +41541,7 @@ func init() {
 }
 
 type RefreshServicesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41558,7 +41558,7 @@ func init() {
 }
 
 type RefreshStorageDrsRecommendationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Pod  ManagedObjectReference `xml:"pod" json:"pod"`
 }
 
@@ -41570,7 +41570,7 @@ type RefreshStorageDrsRecommendationResponse struct {
 }
 
 type RefreshStorageDrsRecommendationsForPodRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Pod  ManagedObjectReference `xml:"pod" json:"pod"`
 }
 
@@ -41595,7 +41595,7 @@ func init() {
 }
 
 type RefreshStorageInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41612,7 +41612,7 @@ func init() {
 }
 
 type RefreshStorageSystemRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41623,7 +41623,7 @@ type RefreshStorageSystemResponse struct {
 }
 
 type RegisterChildVMRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Path string                  `xml:"path" json:"path"`
 	Name string                  `xml:"name,omitempty" json:"name,omitempty"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
@@ -41650,7 +41650,7 @@ func init() {
 }
 
 type RegisterDiskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Path string                 `xml:"path" json:"path"`
 	Name string                 `xml:"name,omitempty" json:"name,omitempty"`
 }
@@ -41670,7 +41670,7 @@ func init() {
 }
 
 type RegisterExtensionRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Extension Extension              `xml:"extension" json:"extension"`
 }
 
@@ -41688,7 +41688,7 @@ func init() {
 }
 
 type RegisterHealthUpdateProviderRequestType struct {
-	This             ManagedObjectReference `xml:"_this" json:"_this"`
+	This             ManagedObjectReference `xml:"_this" json:"-"`
 	Name             string                 `xml:"name" json:"name"`
 	HealthUpdateInfo []HealthUpdateInfo     `xml:"healthUpdateInfo,omitempty" json:"healthUpdateInfo,omitempty"`
 }
@@ -41708,7 +41708,7 @@ func init() {
 }
 
 type RegisterKmipServerRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Server KmipServerSpec         `xml:"server" json:"server"`
 }
 
@@ -41726,7 +41726,7 @@ func init() {
 }
 
 type RegisterKmsClusterRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	ClusterId      KeyProviderId          `xml:"clusterId" json:"clusterId"`
 	ManagementType string                 `xml:"managementType,omitempty" json:"managementType,omitempty"`
 }
@@ -41739,7 +41739,7 @@ type RegisterKmsClusterResponse struct {
 }
 
 type RegisterVMRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Path       string                  `xml:"path" json:"path"`
 	Name       string                  `xml:"name,omitempty" json:"name,omitempty"`
 	AsTemplate bool                    `xml:"asTemplate" json:"asTemplate"`
@@ -41780,7 +41780,7 @@ func init() {
 }
 
 type ReleaseCredentialsInGuestRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 }
@@ -41799,7 +41799,7 @@ func init() {
 }
 
 type ReleaseIpAllocationRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Dc           ManagedObjectReference `xml:"dc" json:"dc"`
 	PoolId       int32                  `xml:"poolId" json:"poolId"`
 	AllocationId string                 `xml:"allocationId" json:"allocationId"`
@@ -41819,7 +41819,7 @@ func init() {
 }
 
 type ReleaseManagedSnapshotRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Vdisk      string                  `xml:"vdisk" json:"vdisk"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -41838,7 +41838,7 @@ func init() {
 }
 
 type ReloadRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41849,7 +41849,7 @@ type ReloadResponse struct {
 }
 
 type RelocateVMRequestType struct {
-	This     ManagedObjectReference     `xml:"_this" json:"_this"`
+	This     ManagedObjectReference     `xml:"_this" json:"-"`
 	Spec     VirtualMachineRelocateSpec `xml:"spec" json:"spec"`
 	Priority VirtualMachineMovePriority `xml:"priority,omitempty" json:"priority,omitempty"`
 }
@@ -41869,7 +41869,7 @@ type RelocateVM_TaskResponse struct {
 }
 
 type RelocateVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Spec      VslmRelocateSpec       `xml:"spec" json:"spec"`
@@ -41918,7 +41918,7 @@ func init() {
 }
 
 type RemoveAlarmRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -41929,7 +41929,7 @@ type RemoveAlarmResponse struct {
 }
 
 type RemoveAllSnapshotsRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Consolidate *bool                  `xml:"consolidate" json:"consolidate,omitempty"`
 }
 
@@ -41954,7 +41954,7 @@ func init() {
 }
 
 type RemoveAssignedLicenseRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	EntityId string                 `xml:"entityId" json:"entityId"`
 }
 
@@ -41972,7 +41972,7 @@ func init() {
 }
 
 type RemoveAuthorizationRoleRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	RoleId     int32                  `xml:"roleId" json:"roleId"`
 	FailIfUsed bool                   `xml:"failIfUsed" json:"failIfUsed"`
 }
@@ -41991,7 +41991,7 @@ func init() {
 }
 
 type RemoveCustomFieldDefRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  int32                  `xml:"key" json:"key"`
 }
 
@@ -42009,7 +42009,7 @@ func init() {
 }
 
 type RemoveDatastoreExRequestType struct {
-	This      ManagedObjectReference   `xml:"_this" json:"_this"`
+	This      ManagedObjectReference   `xml:"_this" json:"-"`
 	Datastore []ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -42028,7 +42028,7 @@ type RemoveDatastoreEx_TaskResponse struct {
 }
 
 type RemoveDatastoreRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -42040,7 +42040,7 @@ type RemoveDatastoreResponse struct {
 }
 
 type RemoveDiskMappingRequestType struct {
-	This            ManagedObjectReference `xml:"_this" json:"_this"`
+	This            ManagedObjectReference `xml:"_this" json:"-"`
 	Mapping         []VsanHostDiskMapping  `xml:"mapping" json:"mapping"`
 	MaintenanceSpec *HostMaintenanceSpec   `xml:"maintenanceSpec,omitempty" json:"maintenanceSpec,omitempty"`
 	Timeout         int32                  `xml:"timeout,omitempty" json:"timeout,omitempty"`
@@ -42061,7 +42061,7 @@ type RemoveDiskMapping_TaskResponse struct {
 }
 
 type RemoveDiskRequestType struct {
-	This            ManagedObjectReference `xml:"_this" json:"_this"`
+	This            ManagedObjectReference `xml:"_this" json:"-"`
 	Disk            []HostScsiDisk         `xml:"disk" json:"disk"`
 	MaintenanceSpec *HostMaintenanceSpec   `xml:"maintenanceSpec,omitempty" json:"maintenanceSpec,omitempty"`
 	Timeout         int32                  `xml:"timeout,omitempty" json:"timeout,omitempty"`
@@ -42088,7 +42088,7 @@ func init() {
 }
 
 type RemoveEntityPermissionRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Entity  ManagedObjectReference `xml:"entity" json:"entity"`
 	User    string                 `xml:"user" json:"user"`
 	IsGroup bool                   `xml:"isGroup" json:"isGroup"`
@@ -42128,7 +42128,7 @@ func init() {
 }
 
 type RemoveFilterEntitiesRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	FilterId string                   `xml:"filterId" json:"filterId"`
 	Entities []ManagedObjectReference `xml:"entities,omitempty" json:"entities,omitempty"`
 }
@@ -42141,7 +42141,7 @@ type RemoveFilterEntitiesResponse struct {
 }
 
 type RemoveFilterRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 }
 
@@ -42159,7 +42159,7 @@ func init() {
 }
 
 type RemoveGroupRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	GroupName string                 `xml:"groupName" json:"groupName"`
 }
 
@@ -42183,7 +42183,7 @@ func init() {
 }
 
 type RemoveGuestAliasByCertRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm         ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth       BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Username   string                  `xml:"username" json:"username"`
@@ -42198,7 +42198,7 @@ type RemoveGuestAliasByCertResponse struct {
 }
 
 type RemoveGuestAliasRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm         ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth       BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Username   string                  `xml:"username" json:"username"`
@@ -42220,7 +42220,7 @@ func init() {
 }
 
 type RemoveInternetScsiSendTargetsRequestType struct {
-	This           ManagedObjectReference          `xml:"_this" json:"_this"`
+	This           ManagedObjectReference          `xml:"_this" json:"-"`
 	IScsiHbaDevice string                          `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	Targets        []HostInternetScsiHbaSendTarget `xml:"targets" json:"targets"`
 	Force          *bool                           `xml:"force" json:"force,omitempty"`
@@ -42240,7 +42240,7 @@ func init() {
 }
 
 type RemoveInternetScsiStaticTargetsRequestType struct {
-	This           ManagedObjectReference            `xml:"_this" json:"_this"`
+	This           ManagedObjectReference            `xml:"_this" json:"-"`
 	IScsiHbaDevice string                            `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	Targets        []HostInternetScsiHbaStaticTarget `xml:"targets" json:"targets"`
 }
@@ -42259,7 +42259,7 @@ func init() {
 }
 
 type RemoveKeyRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Key   CryptoKeyId            `xml:"key" json:"key"`
 	Force bool                   `xml:"force" json:"force"`
 }
@@ -42278,7 +42278,7 @@ func init() {
 }
 
 type RemoveKeysRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Keys  []CryptoKeyId          `xml:"keys,omitempty" json:"keys,omitempty"`
 	Force bool                   `xml:"force" json:"force"`
 }
@@ -42298,7 +42298,7 @@ func init() {
 }
 
 type RemoveKmipServerRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ClusterId  KeyProviderId          `xml:"clusterId" json:"clusterId"`
 	ServerName string                 `xml:"serverName" json:"serverName"`
 }
@@ -42323,7 +42323,7 @@ func init() {
 }
 
 type RemoveLicenseLabelRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	LicenseKey string                 `xml:"licenseKey" json:"licenseKey"`
 	LabelKey   string                 `xml:"labelKey" json:"labelKey"`
 }
@@ -42336,7 +42336,7 @@ type RemoveLicenseLabelResponse struct {
 }
 
 type RemoveLicenseRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	LicenseKey string                 `xml:"licenseKey" json:"licenseKey"`
 }
 
@@ -42354,7 +42354,7 @@ func init() {
 }
 
 type RemoveMonitoredEntitiesRequestType struct {
-	This       ManagedObjectReference   `xml:"_this" json:"_this"`
+	This       ManagedObjectReference   `xml:"_this" json:"-"`
 	ProviderId string                   `xml:"providerId" json:"providerId"`
 	Entities   []ManagedObjectReference `xml:"entities,omitempty" json:"entities,omitempty"`
 }
@@ -42373,7 +42373,7 @@ func init() {
 }
 
 type RemoveNetworkResourcePoolRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  []string               `xml:"key" json:"key"`
 }
 
@@ -42391,7 +42391,7 @@ func init() {
 }
 
 type RemoveNvmeOverRdmaAdapterRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	HbaDeviceName string                 `xml:"hbaDeviceName" json:"hbaDeviceName"`
 }
 
@@ -42409,7 +42409,7 @@ func init() {
 }
 
 type RemovePerfIntervalRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	SamplePeriod int32                  `xml:"samplePeriod" json:"samplePeriod"`
 }
 
@@ -42427,7 +42427,7 @@ func init() {
 }
 
 type RemovePortGroupRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	PgName string                 `xml:"pgName" json:"pgName"`
 }
 
@@ -42445,7 +42445,7 @@ func init() {
 }
 
 type RemoveScheduledTaskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -42462,7 +42462,7 @@ func init() {
 }
 
 type RemoveServiceConsoleVirtualNicRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device string                 `xml:"device" json:"device"`
 }
 
@@ -42486,7 +42486,7 @@ func init() {
 }
 
 type RemoveSmartCardTrustAnchorByFingerprintRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Fingerprint string                 `xml:"fingerprint" json:"fingerprint"`
 	Digest      string                 `xml:"digest" json:"digest"`
 }
@@ -42499,7 +42499,7 @@ type RemoveSmartCardTrustAnchorByFingerprintResponse struct {
 }
 
 type RemoveSmartCardTrustAnchorRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Issuer string                 `xml:"issuer" json:"issuer"`
 	Serial string                 `xml:"serial" json:"serial"`
 }
@@ -42512,7 +42512,7 @@ type RemoveSmartCardTrustAnchorResponse struct {
 }
 
 type RemoveSnapshotRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	RemoveChildren bool                   `xml:"removeChildren" json:"removeChildren"`
 	Consolidate    *bool                  `xml:"consolidate" json:"consolidate,omitempty"`
 }
@@ -42538,7 +42538,7 @@ func init() {
 }
 
 type RemoveSoftwareAdapterRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	HbaDeviceName string                 `xml:"hbaDeviceName" json:"hbaDeviceName"`
 }
 
@@ -42556,7 +42556,7 @@ func init() {
 }
 
 type RemoveUserRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	UserName string                 `xml:"userName" json:"userName"`
 }
 
@@ -42574,7 +42574,7 @@ func init() {
 }
 
 type RemoveVirtualNicRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device string                 `xml:"device" json:"device"`
 }
 
@@ -42592,7 +42592,7 @@ func init() {
 }
 
 type RemoveVirtualSwitchRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	VswitchName string                 `xml:"vswitchName" json:"vswitchName"`
 }
 
@@ -42610,7 +42610,7 @@ func init() {
 }
 
 type RenameCustomFieldDefRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  int32                  `xml:"key" json:"key"`
 	Name string                 `xml:"name" json:"name"`
 }
@@ -42629,7 +42629,7 @@ func init() {
 }
 
 type RenameCustomizationSpecRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Name    string                 `xml:"name" json:"name"`
 	NewName string                 `xml:"newName" json:"newName"`
 }
@@ -42648,7 +42648,7 @@ func init() {
 }
 
 type RenameDatastoreRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	NewName string                 `xml:"newName" json:"newName"`
 }
 
@@ -42660,7 +42660,7 @@ type RenameDatastoreResponse struct {
 }
 
 type RenameRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	NewName string                 `xml:"newName" json:"newName"`
 }
 
@@ -42675,7 +42675,7 @@ func init() {
 }
 
 type RenameSnapshotRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Name        string                 `xml:"name,omitempty" json:"name,omitempty"`
 	Description string                 `xml:"description,omitempty" json:"description,omitempty"`
 }
@@ -42694,7 +42694,7 @@ func init() {
 }
 
 type RenameVStorageObjectRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Name      string                 `xml:"name" json:"name"`
@@ -42724,7 +42724,7 @@ func init() {
 }
 
 type ReplaceCACertificatesAndCRLsRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	CaCert []string               `xml:"caCert" json:"caCert"`
 	CaCrl  []string               `xml:"caCrl,omitempty" json:"caCrl,omitempty"`
 }
@@ -42743,7 +42743,7 @@ func init() {
 }
 
 type ReplaceSmartCardTrustAnchorsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Certs []string               `xml:"certs,omitempty" json:"certs,omitempty"`
 }
 
@@ -42989,7 +42989,7 @@ func init() {
 }
 
 type RescanAllHbaRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43006,7 +43006,7 @@ func init() {
 }
 
 type RescanHbaRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	HbaDevice string                 `xml:"hbaDevice" json:"hbaDevice"`
 }
 
@@ -43024,7 +43024,7 @@ func init() {
 }
 
 type RescanVffsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43041,7 +43041,7 @@ func init() {
 }
 
 type RescanVmfsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43058,7 +43058,7 @@ func init() {
 }
 
 type ResetCollectorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43075,7 +43075,7 @@ func init() {
 }
 
 type ResetCounterLevelMappingRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Counters []int32                `xml:"counters" json:"counters"`
 }
 
@@ -43093,7 +43093,7 @@ func init() {
 }
 
 type ResetEntityPermissionsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Entity     ManagedObjectReference `xml:"entity" json:"entity"`
 	Permission []Permission           `xml:"permission,omitempty" json:"permission,omitempty"`
 }
@@ -43112,7 +43112,7 @@ func init() {
 }
 
 type ResetFirmwareToFactoryDefaultsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43129,7 +43129,7 @@ func init() {
 }
 
 type ResetGuestInformationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43152,7 +43152,7 @@ func init() {
 }
 
 type ResetListViewFromViewRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	View ManagedObjectReference `xml:"view" json:"view"`
 }
 
@@ -43164,7 +43164,7 @@ type ResetListViewFromViewResponse struct {
 }
 
 type ResetListViewRequestType struct {
-	This ManagedObjectReference   `xml:"_this" json:"_this"`
+	This ManagedObjectReference   `xml:"_this" json:"-"`
 	Obj  []ManagedObjectReference `xml:"obj,omitempty" json:"obj,omitempty"`
 }
 
@@ -43183,7 +43183,7 @@ func init() {
 }
 
 type ResetSystemHealthInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43194,7 +43194,7 @@ type ResetSystemHealthInfoResponse struct {
 }
 
 type ResetVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43212,7 +43212,7 @@ type ResetVM_TaskResponse struct {
 }
 
 type ResignatureUnresolvedVmfsVolumeRequestType struct {
-	This           ManagedObjectReference            `xml:"_this" json:"_this"`
+	This           ManagedObjectReference            `xml:"_this" json:"-"`
 	ResolutionSpec HostUnresolvedVmfsResignatureSpec `xml:"resolutionSpec" json:"resolutionSpec"`
 }
 
@@ -43231,7 +43231,7 @@ type ResignatureUnresolvedVmfsVolume_TaskResponse struct {
 }
 
 type ResolveInstallationErrorsOnClusterRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 	Cluster  ManagedObjectReference `xml:"cluster" json:"cluster"`
 }
@@ -43251,7 +43251,7 @@ type ResolveInstallationErrorsOnCluster_TaskResponse struct {
 }
 
 type ResolveInstallationErrorsOnHostRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 	Host     ManagedObjectReference `xml:"host" json:"host"`
 }
@@ -43277,7 +43277,7 @@ func init() {
 }
 
 type ResolveMultipleUnresolvedVmfsVolumesExRequestType struct {
-	This           ManagedObjectReference             `xml:"_this" json:"_this"`
+	This           ManagedObjectReference             `xml:"_this" json:"-"`
 	ResolutionSpec []HostUnresolvedVmfsResolutionSpec `xml:"resolutionSpec" json:"resolutionSpec"`
 }
 
@@ -43296,7 +43296,7 @@ type ResolveMultipleUnresolvedVmfsVolumesEx_TaskResponse struct {
 }
 
 type ResolveMultipleUnresolvedVmfsVolumesRequestType struct {
-	This           ManagedObjectReference             `xml:"_this" json:"_this"`
+	This           ManagedObjectReference             `xml:"_this" json:"-"`
 	ResolutionSpec []HostUnresolvedVmfsResolutionSpec `xml:"resolutionSpec" json:"resolutionSpec"`
 }
 
@@ -43539,7 +43539,7 @@ func init() {
 }
 
 type RestartServiceConsoleVirtualNicRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device string                 `xml:"device" json:"device"`
 }
 
@@ -43551,7 +43551,7 @@ type RestartServiceConsoleVirtualNicResponse struct {
 }
 
 type RestartServiceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -43569,7 +43569,7 @@ func init() {
 }
 
 type RestoreFirmwareConfigurationRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Force bool                   `xml:"force" json:"force"`
 }
 
@@ -43617,7 +43617,7 @@ func init() {
 }
 
 type RetrieveAllPermissionsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43641,7 +43641,7 @@ func init() {
 }
 
 type RetrieveAnswerFileForProfileRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Host         ManagedObjectReference `xml:"host" json:"host"`
 	ApplyProfile HostApplyProfile       `xml:"applyProfile" json:"applyProfile"`
 }
@@ -43655,7 +43655,7 @@ type RetrieveAnswerFileForProfileResponse struct {
 }
 
 type RetrieveAnswerFileRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Host ManagedObjectReference `xml:"host" json:"host"`
 }
 
@@ -43674,7 +43674,7 @@ func init() {
 }
 
 type RetrieveArgumentDescriptionRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	EventTypeId string                 `xml:"eventTypeId" json:"eventTypeId"`
 }
 
@@ -43693,7 +43693,7 @@ func init() {
 }
 
 type RetrieveClientCertRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster KeyProviderId          `xml:"cluster" json:"cluster"`
 }
 
@@ -43712,7 +43712,7 @@ func init() {
 }
 
 type RetrieveClientCsrRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster KeyProviderId          `xml:"cluster" json:"cluster"`
 }
 
@@ -43731,7 +43731,7 @@ func init() {
 }
 
 type RetrieveDasAdvancedRuntimeInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43749,7 +43749,7 @@ func init() {
 }
 
 type RetrieveDescriptionRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43767,7 +43767,7 @@ func init() {
 }
 
 type RetrieveDiskPartitionInfoRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	DevicePath []string               `xml:"devicePath" json:"devicePath"`
 }
 
@@ -43786,7 +43786,7 @@ func init() {
 }
 
 type RetrieveDynamicPassthroughInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43804,7 +43804,7 @@ func init() {
 }
 
 type RetrieveEntityPermissionsRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Entity    ManagedObjectReference `xml:"entity" json:"entity"`
 	Inherited bool                   `xml:"inherited" json:"inherited"`
 }
@@ -43824,7 +43824,7 @@ func init() {
 }
 
 type RetrieveEntityScheduledTaskRequestType struct {
-	This   ManagedObjectReference  `xml:"_this" json:"_this"`
+	This   ManagedObjectReference  `xml:"_this" json:"-"`
 	Entity *ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
 
@@ -43843,7 +43843,7 @@ func init() {
 }
 
 type RetrieveFreeEpcMemoryRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43861,7 +43861,7 @@ func init() {
 }
 
 type RetrieveHardwareUptimeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43879,7 +43879,7 @@ func init() {
 }
 
 type RetrieveHostAccessControlEntriesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -43903,7 +43903,7 @@ func init() {
 }
 
 type RetrieveHostCustomizationsForProfileRequestType struct {
-	This         ManagedObjectReference   `xml:"_this" json:"_this"`
+	This         ManagedObjectReference   `xml:"_this" json:"-"`
 	Hosts        []ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
 	ApplyProfile HostApplyProfile         `xml:"applyProfile" json:"applyProfile"`
 }
@@ -43917,7 +43917,7 @@ type RetrieveHostCustomizationsForProfileResponse struct {
 }
 
 type RetrieveHostCustomizationsRequestType struct {
-	This  ManagedObjectReference   `xml:"_this" json:"_this"`
+	This  ManagedObjectReference   `xml:"_this" json:"-"`
 	Hosts []ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
 }
 
@@ -43936,7 +43936,7 @@ func init() {
 }
 
 type RetrieveHostSpecificationRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Host     ManagedObjectReference `xml:"host" json:"host"`
 	FromHost bool                   `xml:"fromHost" json:"fromHost"`
 }
@@ -43956,7 +43956,7 @@ func init() {
 }
 
 type RetrieveKmipServerCertRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	KeyProvider KeyProviderId          `xml:"keyProvider" json:"keyProvider"`
 	Server      KmipServerInfo         `xml:"server" json:"server"`
 }
@@ -43970,7 +43970,7 @@ type RetrieveKmipServerCertResponse struct {
 }
 
 type RetrieveKmipServersStatusRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Clusters []KmipClusterInfo      `xml:"clusters,omitempty" json:"clusters,omitempty"`
 }
 
@@ -43995,7 +43995,7 @@ func init() {
 }
 
 type RetrieveObjectScheduledTaskRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Obj  *ManagedObjectReference `xml:"obj,omitempty" json:"obj,omitempty"`
 }
 
@@ -44024,7 +44024,7 @@ func init() {
 }
 
 type RetrieveProductComponentsRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44048,7 +44048,7 @@ func init() {
 }
 
 type RetrievePropertiesExRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	SpecSet []PropertyFilterSpec   `xml:"specSet" json:"specSet"`
 	Options RetrieveOptions        `xml:"options" json:"options"`
 }
@@ -44062,7 +44062,7 @@ type RetrievePropertiesExResponse struct {
 }
 
 type RetrievePropertiesRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	SpecSet []PropertyFilterSpec   `xml:"specSet" json:"specSet"`
 }
 
@@ -44092,7 +44092,7 @@ func init() {
 }
 
 type RetrieveRolePermissionsRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	RoleId int32                  `xml:"roleId" json:"roleId"`
 }
 
@@ -44111,7 +44111,7 @@ func init() {
 }
 
 type RetrieveSelfSignedClientCertRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster KeyProviderId          `xml:"cluster" json:"cluster"`
 }
 
@@ -44130,7 +44130,7 @@ func init() {
 }
 
 type RetrieveServiceContentRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44148,7 +44148,7 @@ func init() {
 }
 
 type RetrieveServiceProviderEntitiesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44166,7 +44166,7 @@ func init() {
 }
 
 type RetrieveSnapshotDetailsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId ID                     `xml:"snapshotId" json:"snapshotId"`
@@ -44187,7 +44187,7 @@ func init() {
 }
 
 type RetrieveSnapshotInfoRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -44207,7 +44207,7 @@ func init() {
 }
 
 type RetrieveUserGroupsRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	Domain         string                 `xml:"domain,omitempty" json:"domain,omitempty"`
 	SearchStr      string                 `xml:"searchStr" json:"searchStr"`
 	BelongsToGroup string                 `xml:"belongsToGroup,omitempty" json:"belongsToGroup,omitempty"`
@@ -44232,7 +44232,7 @@ func init() {
 }
 
 type RetrieveVStorageInfrastructureObjectPolicyRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -44268,7 +44268,7 @@ func init() {
 }
 
 type RetrieveVStorageObjectAssociationsRequestType struct {
-	This ManagedObjectReference    `xml:"_this" json:"_this"`
+	This ManagedObjectReference    `xml:"_this" json:"-"`
 	Ids  []RetrieveVStorageObjSpec `xml:"ids,omitempty" json:"ids,omitempty"`
 }
 
@@ -44281,7 +44281,7 @@ type RetrieveVStorageObjectAssociationsResponse struct {
 }
 
 type RetrieveVStorageObjectRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	Id            ID                     `xml:"id" json:"id"`
 	Datastore     ManagedObjectReference `xml:"datastore" json:"datastore"`
 	DiskInfoFlags []string               `xml:"diskInfoFlags,omitempty" json:"diskInfoFlags,omitempty"`
@@ -44302,7 +44302,7 @@ func init() {
 }
 
 type RetrieveVStorageObjectStateRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Id        ID                     `xml:"id" json:"id"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
@@ -44322,7 +44322,7 @@ func init() {
 }
 
 type RetrieveVendorDeviceGroupInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44340,7 +44340,7 @@ func init() {
 }
 
 type RetrieveVgpuDeviceInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44358,7 +44358,7 @@ func init() {
 }
 
 type RetrieveVgpuProfileInfoRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44370,7 +44370,7 @@ type RetrieveVgpuProfileInfoResponse struct {
 }
 
 type RevertToCurrentSnapshotRequestType struct {
-	This            ManagedObjectReference  `xml:"_this" json:"_this"`
+	This            ManagedObjectReference  `xml:"_this" json:"-"`
 	Host            *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	SuppressPowerOn *bool                   `xml:"suppressPowerOn" json:"suppressPowerOn,omitempty"`
 }
@@ -44390,7 +44390,7 @@ type RevertToCurrentSnapshot_TaskResponse struct {
 }
 
 type RevertToSnapshotRequestType struct {
-	This            ManagedObjectReference  `xml:"_this" json:"_this"`
+	This            ManagedObjectReference  `xml:"_this" json:"-"`
 	Host            *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	SuppressPowerOn *bool                   `xml:"suppressPowerOn" json:"suppressPowerOn,omitempty"`
 }
@@ -44410,7 +44410,7 @@ type RevertToSnapshot_TaskResponse struct {
 }
 
 type RevertVStorageObjectRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId ID                     `xml:"snapshotId" json:"snapshotId"`
@@ -44437,7 +44437,7 @@ func init() {
 }
 
 type RewindCollectorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44551,7 +44551,7 @@ func init() {
 }
 
 type RunScheduledTaskRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -44578,7 +44578,7 @@ func init() {
 }
 
 type RunVsanPhysicalDiskDiagnosticsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Disks []string               `xml:"disks,omitempty" json:"disks,omitempty"`
 }
 
@@ -44681,7 +44681,7 @@ func init() {
 }
 
 type ScanHostPatchRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Repository HostPatchManagerLocator `xml:"repository" json:"repository"`
 	UpdateID   []string                `xml:"updateID,omitempty" json:"updateID,omitempty"`
 }
@@ -44691,7 +44691,7 @@ func init() {
 }
 
 type ScanHostPatchV2RequestType struct {
-	This       ManagedObjectReference                     `xml:"_this" json:"_this"`
+	This       ManagedObjectReference                     `xml:"_this" json:"-"`
 	MetaUrls   []string                                   `xml:"metaUrls,omitempty" json:"metaUrls,omitempty"`
 	BundleUrls []string                                   `xml:"bundleUrls,omitempty" json:"bundleUrls,omitempty"`
 	Spec       *HostPatchManagerPatchManagerOperationSpec `xml:"spec,omitempty" json:"spec,omitempty"`
@@ -44728,7 +44728,7 @@ func init() {
 }
 
 type ScheduleReconcileDatastoreInventoryRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -44980,7 +44980,7 @@ func init() {
 }
 
 type SearchDatastoreRequestType struct {
-	This          ManagedObjectReference          `xml:"_this" json:"_this"`
+	This          ManagedObjectReference          `xml:"_this" json:"-"`
 	DatastorePath string                          `xml:"datastorePath" json:"datastorePath"`
 	SearchSpec    *HostDatastoreBrowserSearchSpec `xml:"searchSpec,omitempty" json:"searchSpec,omitempty"`
 }
@@ -44990,7 +44990,7 @@ func init() {
 }
 
 type SearchDatastoreSubFoldersRequestType struct {
-	This          ManagedObjectReference          `xml:"_this" json:"_this"`
+	This          ManagedObjectReference          `xml:"_this" json:"-"`
 	DatastorePath string                          `xml:"datastorePath" json:"datastorePath"`
 	SearchSpec    *HostDatastoreBrowserSearchSpec `xml:"searchSpec,omitempty" json:"searchSpec,omitempty"`
 }
@@ -45114,7 +45114,7 @@ func init() {
 }
 
 type SelectActivePartitionRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Partition *HostScsiDiskPartition `xml:"partition,omitempty" json:"partition,omitempty"`
 }
 
@@ -45138,7 +45138,7 @@ func init() {
 }
 
 type SelectVnicForNicTypeRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	NicType string                 `xml:"nicType" json:"nicType"`
 	Device  string                 `xml:"device" json:"device"`
 }
@@ -45151,7 +45151,7 @@ type SelectVnicForNicTypeResponse struct {
 }
 
 type SelectVnicRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device string                 `xml:"device" json:"device"`
 }
 
@@ -45200,7 +45200,7 @@ func init() {
 }
 
 type SendNMIRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -45225,7 +45225,7 @@ func init() {
 }
 
 type SendTestNotificationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -45414,7 +45414,7 @@ func init() {
 }
 
 type SessionIsActiveRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	SessionID string                 `xml:"sessionID" json:"sessionID"`
 	UserName  string                 `xml:"userName" json:"userName"`
 }
@@ -45499,7 +45499,7 @@ func init() {
 }
 
 type SetCollectorPageSizeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	MaxCount int32                  `xml:"maxCount" json:"maxCount"`
 }
 
@@ -45517,7 +45517,7 @@ func init() {
 }
 
 type SetCryptoModeRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	CryptoMode string                 `xml:"cryptoMode" json:"cryptoMode"`
 }
 
@@ -45535,7 +45535,7 @@ func init() {
 }
 
 type SetDefaultKmsClusterRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Entity    *ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 	ClusterId *KeyProviderId          `xml:"clusterId,omitempty" json:"clusterId,omitempty"`
 }
@@ -45554,7 +45554,7 @@ func init() {
 }
 
 type SetDisplayTopologyRequestType struct {
-	This     ManagedObjectReference          `xml:"_this" json:"_this"`
+	This     ManagedObjectReference          `xml:"_this" json:"-"`
 	Displays []VirtualMachineDisplayTopology `xml:"displays" json:"displays"`
 }
 
@@ -45572,7 +45572,7 @@ func init() {
 }
 
 type SetEntityPermissionsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Entity     ManagedObjectReference `xml:"entity" json:"entity"`
 	Permission []Permission           `xml:"permission,omitempty" json:"permission,omitempty"`
 }
@@ -45591,7 +45591,7 @@ func init() {
 }
 
 type SetExtensionCertificateRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey   string                 `xml:"extensionKey" json:"extensionKey"`
 	CertificatePem string                 `xml:"certificatePem,omitempty" json:"certificatePem,omitempty"`
 }
@@ -45610,7 +45610,7 @@ func init() {
 }
 
 type SetFieldRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Entity ManagedObjectReference `xml:"entity" json:"entity"`
 	Key    int32                  `xml:"key" json:"key"`
 	Value  string                 `xml:"value" json:"value"`
@@ -45630,7 +45630,7 @@ func init() {
 }
 
 type SetLicenseEditionRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Host       *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 	FeatureKey string                  `xml:"featureKey,omitempty" json:"featureKey,omitempty"`
 }
@@ -45649,7 +45649,7 @@ func init() {
 }
 
 type SetLocaleRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Locale string                 `xml:"locale" json:"locale"`
 }
 
@@ -45667,7 +45667,7 @@ func init() {
 }
 
 type SetMaxQueueDepthRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Datastore ManagedObjectReference `xml:"datastore" json:"datastore"`
 	MaxQdepth int64                  `xml:"maxQdepth" json:"maxQdepth"`
 }
@@ -45686,7 +45686,7 @@ func init() {
 }
 
 type SetMultipathLunPolicyRequestType struct {
-	This   ManagedObjectReference                 `xml:"_this" json:"_this"`
+	This   ManagedObjectReference                 `xml:"_this" json:"-"`
 	LunId  string                                 `xml:"lunId" json:"lunId"`
 	Policy BaseHostMultipathInfoLogicalUnitPolicy `xml:"policy,typeattr" json:"policy"`
 }
@@ -45705,7 +45705,7 @@ func init() {
 }
 
 type SetNFSUserRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	User     string                 `xml:"user" json:"user"`
 	Password string                 `xml:"password" json:"password"`
 }
@@ -45724,7 +45724,7 @@ func init() {
 }
 
 type SetPublicKeyRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
 	PublicKey    string                 `xml:"publicKey" json:"publicKey"`
 }
@@ -45743,7 +45743,7 @@ func init() {
 }
 
 type SetRegistryValueInGuestRequestType struct {
-	This  ManagedObjectReference  `xml:"_this" json:"_this"`
+	This  ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm    ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth  BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Value GuestRegValueSpec       `xml:"value" json:"value"`
@@ -45763,7 +45763,7 @@ func init() {
 }
 
 type SetScreenResolutionRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Width  int32                  `xml:"width" json:"width"`
 	Height int32                  `xml:"height" json:"height"`
 }
@@ -45782,7 +45782,7 @@ func init() {
 }
 
 type SetTaskDescriptionRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Description LocalizableMessage     `xml:"description" json:"description"`
 }
 
@@ -45800,7 +45800,7 @@ func init() {
 }
 
 type SetTaskStateRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	State  TaskInfoState          `xml:"state" json:"state"`
 	Result AnyType                `xml:"result,omitempty,typeattr" json:"result,omitempty"`
 	Fault  *LocalizedMethodFault  `xml:"fault,omitempty" json:"fault,omitempty"`
@@ -45820,7 +45820,7 @@ func init() {
 }
 
 type SetVStorageObjectControlFlagsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	Id           ID                     `xml:"id" json:"id"`
 	Datastore    ManagedObjectReference `xml:"datastore" json:"datastore"`
 	ControlFlags []string               `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
@@ -45840,7 +45840,7 @@ func init() {
 }
 
 type SetVirtualDiskUuidRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Uuid       string                  `xml:"uuid" json:"uuid"`
@@ -45906,7 +45906,7 @@ func init() {
 }
 
 type ShrinkVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 	Copy       *bool                   `xml:"copy" json:"copy,omitempty"`
@@ -45933,7 +45933,7 @@ func init() {
 }
 
 type ShutdownGuestRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -45944,7 +45944,7 @@ type ShutdownGuestResponse struct {
 }
 
 type ShutdownHostRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Force bool                   `xml:"force" json:"force"`
 }
 
@@ -46264,7 +46264,7 @@ func init() {
 }
 
 type StageHostPatchRequestType struct {
-	This       ManagedObjectReference                     `xml:"_this" json:"_this"`
+	This       ManagedObjectReference                     `xml:"_this" json:"-"`
 	MetaUrls   []string                                   `xml:"metaUrls,omitempty" json:"metaUrls,omitempty"`
 	BundleUrls []string                                   `xml:"bundleUrls,omitempty" json:"bundleUrls,omitempty"`
 	VibUrls    []string                                   `xml:"vibUrls,omitempty" json:"vibUrls,omitempty"`
@@ -46286,7 +46286,7 @@ type StageHostPatch_TaskResponse struct {
 }
 
 type StampAllRulesWithUuidRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -46310,7 +46310,7 @@ func init() {
 }
 
 type StandbyGuestRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -46321,7 +46321,7 @@ type StandbyGuestResponse struct {
 }
 
 type StartGuestNetworkRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 }
@@ -46347,7 +46347,7 @@ func init() {
 }
 
 type StartProgramInGuestRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Spec BaseGuestProgramSpec    `xml:"spec,typeattr" json:"spec"`
@@ -46362,7 +46362,7 @@ type StartProgramInGuestResponse struct {
 }
 
 type StartRecordingRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Name        string                 `xml:"name" json:"name"`
 	Description string                 `xml:"description,omitempty" json:"description,omitempty"`
 }
@@ -46382,7 +46382,7 @@ type StartRecording_TaskResponse struct {
 }
 
 type StartReplayingRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	ReplaySnapshot ManagedObjectReference `xml:"replaySnapshot" json:"replaySnapshot"`
 }
 
@@ -46407,7 +46407,7 @@ func init() {
 }
 
 type StartServiceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -46443,7 +46443,7 @@ func init() {
 }
 
 type StopRecordingRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -46461,7 +46461,7 @@ type StopRecording_TaskResponse struct {
 }
 
 type StopReplayingRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -46485,7 +46485,7 @@ func init() {
 }
 
 type StopServiceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -47198,7 +47198,7 @@ func init() {
 }
 
 type SuspendVAppRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -47216,7 +47216,7 @@ type SuspendVApp_TaskResponse struct {
 }
 
 type SuspendVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -47619,7 +47619,7 @@ func init() {
 }
 
 type TerminateFaultTolerantVMRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   *ManagedObjectReference `xml:"vm,omitempty" json:"vm,omitempty"`
 }
 
@@ -47644,7 +47644,7 @@ func init() {
 }
 
 type TerminateProcessInGuestRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 	Pid  int64                   `xml:"pid" json:"pid"`
@@ -47664,7 +47664,7 @@ func init() {
 }
 
 type TerminateSessionRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	SessionId []string               `xml:"sessionId" json:"sessionId"`
 }
 
@@ -47682,7 +47682,7 @@ func init() {
 }
 
 type TerminateVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -47699,7 +47699,7 @@ func init() {
 }
 
 type TestTimeServiceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -48048,7 +48048,7 @@ func init() {
 }
 
 type TurnDiskLocatorLedOffRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	ScsiDiskUuids []string               `xml:"scsiDiskUuids" json:"scsiDiskUuids"`
 }
 
@@ -48067,7 +48067,7 @@ type TurnDiskLocatorLedOff_TaskResponse struct {
 }
 
 type TurnDiskLocatorLedOnRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	ScsiDiskUuids []string               `xml:"scsiDiskUuids" json:"scsiDiskUuids"`
 }
 
@@ -48086,7 +48086,7 @@ type TurnDiskLocatorLedOn_TaskResponse struct {
 }
 
 type TurnOffFaultToleranceForVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -48137,7 +48137,7 @@ func init() {
 }
 
 type UnassignUserFromGroupRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	User  string                 `xml:"user" json:"user"`
 	Group string                 `xml:"group" json:"group"`
 }
@@ -48156,7 +48156,7 @@ func init() {
 }
 
 type UnbindVnicRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	IScsiHbaName string                 `xml:"iScsiHbaName" json:"iScsiHbaName"`
 	VnicDevice   string                 `xml:"vnicDevice" json:"vnicDevice"`
 	Force        bool                   `xml:"force" json:"force"`
@@ -48245,7 +48245,7 @@ func init() {
 }
 
 type UninstallHostPatchRequestType struct {
-	This        ManagedObjectReference                     `xml:"_this" json:"_this"`
+	This        ManagedObjectReference                     `xml:"_this" json:"-"`
 	BulletinIds []string                                   `xml:"bulletinIds,omitempty" json:"bulletinIds,omitempty"`
 	Spec        *HostPatchManagerPatchManagerOperationSpec `xml:"spec,omitempty" json:"spec,omitempty"`
 }
@@ -48265,7 +48265,7 @@ type UninstallHostPatch_TaskResponse struct {
 }
 
 type UninstallIoFilterRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 	CompRes  ManagedObjectReference `xml:"compRes" json:"compRes"`
 }
@@ -48291,7 +48291,7 @@ func init() {
 }
 
 type UninstallServiceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Id   string                 `xml:"id" json:"id"`
 }
 
@@ -48324,7 +48324,7 @@ func init() {
 }
 
 type UnmapVmfsVolumeExRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid []string               `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -48349,7 +48349,7 @@ func init() {
 }
 
 type UnmarkServiceProviderEntitiesRequestType struct {
-	This   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This   ManagedObjectReference   `xml:"_this" json:"-"`
 	Entity []ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
 }
 
@@ -48361,7 +48361,7 @@ type UnmarkServiceProviderEntitiesResponse struct {
 }
 
 type UnmountDiskMappingRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Mapping []VsanHostDiskMapping  `xml:"mapping" json:"mapping"`
 }
 
@@ -48386,7 +48386,7 @@ func init() {
 }
 
 type UnmountForceMountedVmfsVolumeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid string                 `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -48404,7 +48404,7 @@ func init() {
 }
 
 type UnmountToolsInstallerRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -48421,7 +48421,7 @@ func init() {
 }
 
 type UnmountVffsVolumeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VffsUuid string                 `xml:"vffsUuid" json:"vffsUuid"`
 }
 
@@ -48439,7 +48439,7 @@ func init() {
 }
 
 type UnmountVmfsVolumeExRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid []string               `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -48458,7 +48458,7 @@ type UnmountVmfsVolumeEx_TaskResponse struct {
 }
 
 type UnmountVmfsVolumeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid string                 `xml:"vmfsUuid" json:"vmfsUuid"`
 }
 
@@ -48486,7 +48486,7 @@ func init() {
 }
 
 type UnregisterAndDestroyRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -48510,7 +48510,7 @@ func init() {
 }
 
 type UnregisterExtensionRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ExtensionKey string                 `xml:"extensionKey" json:"extensionKey"`
 }
 
@@ -48528,7 +48528,7 @@ func init() {
 }
 
 type UnregisterHealthUpdateProviderRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ProviderId string                 `xml:"providerId" json:"providerId"`
 }
 
@@ -48546,7 +48546,7 @@ func init() {
 }
 
 type UnregisterKmsClusterRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	ClusterId KeyProviderId          `xml:"clusterId" json:"clusterId"`
 }
 
@@ -48564,7 +48564,7 @@ func init() {
 }
 
 type UnregisterVMRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -48665,7 +48665,7 @@ func init() {
 }
 
 type UpdateAnswerFileRequestType struct {
-	This       ManagedObjectReference   `xml:"_this" json:"_this"`
+	This       ManagedObjectReference   `xml:"_this" json:"-"`
 	Host       ManagedObjectReference   `xml:"host" json:"host"`
 	ConfigSpec BaseAnswerFileCreateSpec `xml:"configSpec,typeattr" json:"configSpec"`
 }
@@ -48691,7 +48691,7 @@ func init() {
 }
 
 type UpdateAssignableHardwareConfigRequestType struct {
-	This   ManagedObjectReference       `xml:"_this" json:"_this"`
+	This   ManagedObjectReference       `xml:"_this" json:"-"`
 	Config HostAssignableHardwareConfig `xml:"config" json:"config"`
 }
 
@@ -48709,7 +48709,7 @@ func init() {
 }
 
 type UpdateAssignedLicenseRequestType struct {
-	This              ManagedObjectReference `xml:"_this" json:"_this"`
+	This              ManagedObjectReference `xml:"_this" json:"-"`
 	Entity            string                 `xml:"entity" json:"entity"`
 	LicenseKey        string                 `xml:"licenseKey" json:"licenseKey"`
 	EntityDisplayName string                 `xml:"entityDisplayName,omitempty" json:"entityDisplayName,omitempty"`
@@ -48730,7 +48730,7 @@ func init() {
 }
 
 type UpdateAuthorizationRoleRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	RoleId  int32                  `xml:"roleId" json:"roleId"`
 	NewName string                 `xml:"newName" json:"newName"`
 	PrivIds []string               `xml:"privIds,omitempty" json:"privIds,omitempty"`
@@ -48750,7 +48750,7 @@ func init() {
 }
 
 type UpdateBootDeviceRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Key  string                 `xml:"key" json:"key"`
 }
 
@@ -48768,7 +48768,7 @@ func init() {
 }
 
 type UpdateChildResourceConfigurationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec []ResourceConfigSpec   `xml:"spec" json:"spec"`
 }
 
@@ -48786,7 +48786,7 @@ func init() {
 }
 
 type UpdateClusterProfileRequestType struct {
-	This   ManagedObjectReference       `xml:"_this" json:"_this"`
+	This   ManagedObjectReference       `xml:"_this" json:"-"`
 	Config BaseClusterProfileConfigSpec `xml:"config,typeattr" json:"config"`
 }
 
@@ -48804,7 +48804,7 @@ func init() {
 }
 
 type UpdateConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Name   string                 `xml:"name,omitempty" json:"name,omitempty"`
 	Config *ResourceConfigSpec    `xml:"config,omitempty" json:"config,omitempty"`
 }
@@ -48823,7 +48823,7 @@ func init() {
 }
 
 type UpdateConsoleIpRouteConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config BaseHostIpRouteConfig  `xml:"config,typeattr" json:"config"`
 }
 
@@ -48841,7 +48841,7 @@ func init() {
 }
 
 type UpdateCounterLevelMappingRequestType struct {
-	This            ManagedObjectReference                  `xml:"_this" json:"_this"`
+	This            ManagedObjectReference                  `xml:"_this" json:"-"`
 	CounterLevelMap []PerformanceManagerCounterLevelMapping `xml:"counterLevelMap" json:"counterLevelMap"`
 }
 
@@ -48853,7 +48853,7 @@ type UpdateCounterLevelMappingResponse struct {
 }
 
 type UpdateDVSHealthCheckConfigRequestType struct {
-	This              ManagedObjectReference     `xml:"_this" json:"_this"`
+	This              ManagedObjectReference     `xml:"_this" json:"-"`
 	HealthCheckConfig []BaseDVSHealthCheckConfig `xml:"healthCheckConfig,typeattr" json:"healthCheckConfig"`
 }
 
@@ -48872,7 +48872,7 @@ type UpdateDVSHealthCheckConfig_TaskResponse struct {
 }
 
 type UpdateDVSLacpGroupConfigRequestType struct {
-	This          ManagedObjectReference   `xml:"_this" json:"_this"`
+	This          ManagedObjectReference   `xml:"_this" json:"-"`
 	LacpGroupSpec []VMwareDvsLacpGroupSpec `xml:"lacpGroupSpec" json:"lacpGroupSpec"`
 }
 
@@ -48903,7 +48903,7 @@ func init() {
 }
 
 type UpdateDateTimeConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config HostDateTimeConfig     `xml:"config" json:"config"`
 }
 
@@ -48915,7 +48915,7 @@ type UpdateDateTimeConfigResponse struct {
 }
 
 type UpdateDateTimeRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	DateTime time.Time              `xml:"dateTime" json:"dateTime"`
 }
 
@@ -48933,7 +48933,7 @@ func init() {
 }
 
 type UpdateDefaultPolicyRequestType struct {
-	This          ManagedObjectReference    `xml:"_this" json:"_this"`
+	This          ManagedObjectReference    `xml:"_this" json:"-"`
 	DefaultPolicy HostFirewallDefaultPolicy `xml:"defaultPolicy" json:"defaultPolicy"`
 }
 
@@ -48951,7 +48951,7 @@ func init() {
 }
 
 type UpdateDiskPartitionsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	DevicePath string                 `xml:"devicePath" json:"devicePath"`
 	Spec       HostDiskPartitionSpec  `xml:"spec" json:"spec"`
 }
@@ -48970,7 +48970,7 @@ func init() {
 }
 
 type UpdateDnsConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config BaseHostDnsConfig      `xml:"config,typeattr" json:"config"`
 }
 
@@ -48988,7 +48988,7 @@ func init() {
 }
 
 type UpdateDvsCapabilityRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Capability DVSCapability          `xml:"capability" json:"capability"`
 }
 
@@ -49006,7 +49006,7 @@ func init() {
 }
 
 type UpdateExtensionRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Extension Extension              `xml:"extension" json:"extension"`
 }
 
@@ -49024,7 +49024,7 @@ func init() {
 }
 
 type UpdateFlagsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FlagInfo HostFlagInfo           `xml:"flagInfo" json:"flagInfo"`
 }
 
@@ -49042,7 +49042,7 @@ func init() {
 }
 
 type UpdateGraphicsConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config HostGraphicsConfig     `xml:"config" json:"config"`
 }
 
@@ -49054,7 +49054,7 @@ type UpdateGraphicsConfigResponse struct {
 }
 
 type UpdateHostCustomizationsRequestType struct {
-	This                ManagedObjectReference                  `xml:"_this" json:"_this"`
+	This                ManagedObjectReference                  `xml:"_this" json:"-"`
 	HostToConfigSpecMap []HostProfileManagerHostToConfigSpecMap `xml:"hostToConfigSpecMap,omitempty" json:"hostToConfigSpecMap,omitempty"`
 }
 
@@ -49079,7 +49079,7 @@ func init() {
 }
 
 type UpdateHostImageAcceptanceLevelRequestType struct {
-	This               ManagedObjectReference `xml:"_this" json:"_this"`
+	This               ManagedObjectReference `xml:"_this" json:"-"`
 	NewAcceptanceLevel string                 `xml:"newAcceptanceLevel" json:"newAcceptanceLevel"`
 }
 
@@ -49097,7 +49097,7 @@ func init() {
 }
 
 type UpdateHostProfileRequestType struct {
-	This   ManagedObjectReference    `xml:"_this" json:"_this"`
+	This   ManagedObjectReference    `xml:"_this" json:"-"`
 	Config BaseHostProfileConfigSpec `xml:"config,typeattr" json:"config"`
 }
 
@@ -49115,7 +49115,7 @@ func init() {
 }
 
 type UpdateHostSpecificationRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Host     ManagedObjectReference `xml:"host" json:"host"`
 	HostSpec HostSpecification      `xml:"hostSpec" json:"hostSpec"`
 }
@@ -49134,7 +49134,7 @@ func init() {
 }
 
 type UpdateHostSubSpecificationRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Host        ManagedObjectReference `xml:"host" json:"host"`
 	HostSubSpec HostSubSpecification   `xml:"hostSubSpec" json:"hostSubSpec"`
 }
@@ -49153,7 +49153,7 @@ func init() {
 }
 
 type UpdateHppMultipathLunPolicyRequestType struct {
-	This   ManagedObjectReference                `xml:"_this" json:"_this"`
+	This   ManagedObjectReference                `xml:"_this" json:"-"`
 	LunId  string                                `xml:"lunId" json:"lunId"`
 	Policy HostMultipathInfoHppLogicalUnitPolicy `xml:"policy" json:"policy"`
 }
@@ -49172,7 +49172,7 @@ func init() {
 }
 
 type UpdateInternetScsiAdvancedOptionsRequestType struct {
-	This           ManagedObjectReference          `xml:"_this" json:"_this"`
+	This           ManagedObjectReference          `xml:"_this" json:"-"`
 	IScsiHbaDevice string                          `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	TargetSet      *HostInternetScsiHbaTargetSet   `xml:"targetSet,omitempty" json:"targetSet,omitempty"`
 	Options        []HostInternetScsiHbaParamValue `xml:"options" json:"options"`
@@ -49192,7 +49192,7 @@ func init() {
 }
 
 type UpdateInternetScsiAliasRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	IScsiHbaDevice string                 `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	IScsiAlias     string                 `xml:"iScsiAlias" json:"iScsiAlias"`
 }
@@ -49211,7 +49211,7 @@ func init() {
 }
 
 type UpdateInternetScsiAuthenticationPropertiesRequestType struct {
-	This                     ManagedObjectReference                      `xml:"_this" json:"_this"`
+	This                     ManagedObjectReference                      `xml:"_this" json:"-"`
 	IScsiHbaDevice           string                                      `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	AuthenticationProperties HostInternetScsiHbaAuthenticationProperties `xml:"authenticationProperties" json:"authenticationProperties"`
 	TargetSet                *HostInternetScsiHbaTargetSet               `xml:"targetSet,omitempty" json:"targetSet,omitempty"`
@@ -49231,7 +49231,7 @@ func init() {
 }
 
 type UpdateInternetScsiDigestPropertiesRequestType struct {
-	This             ManagedObjectReference              `xml:"_this" json:"_this"`
+	This             ManagedObjectReference              `xml:"_this" json:"-"`
 	IScsiHbaDevice   string                              `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	TargetSet        *HostInternetScsiHbaTargetSet       `xml:"targetSet,omitempty" json:"targetSet,omitempty"`
 	DigestProperties HostInternetScsiHbaDigestProperties `xml:"digestProperties" json:"digestProperties"`
@@ -49251,7 +49251,7 @@ func init() {
 }
 
 type UpdateInternetScsiDiscoveryPropertiesRequestType struct {
-	This                ManagedObjectReference                 `xml:"_this" json:"_this"`
+	This                ManagedObjectReference                 `xml:"_this" json:"-"`
 	IScsiHbaDevice      string                                 `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	DiscoveryProperties HostInternetScsiHbaDiscoveryProperties `xml:"discoveryProperties" json:"discoveryProperties"`
 }
@@ -49270,7 +49270,7 @@ func init() {
 }
 
 type UpdateInternetScsiIPPropertiesRequestType struct {
-	This           ManagedObjectReference          `xml:"_this" json:"_this"`
+	This           ManagedObjectReference          `xml:"_this" json:"-"`
 	IScsiHbaDevice string                          `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	IpProperties   HostInternetScsiHbaIPProperties `xml:"ipProperties" json:"ipProperties"`
 }
@@ -49289,7 +49289,7 @@ func init() {
 }
 
 type UpdateInternetScsiNameRequestType struct {
-	This           ManagedObjectReference `xml:"_this" json:"_this"`
+	This           ManagedObjectReference `xml:"_this" json:"-"`
 	IScsiHbaDevice string                 `xml:"iScsiHbaDevice" json:"iScsiHbaDevice"`
 	IScsiName      string                 `xml:"iScsiName" json:"iScsiName"`
 }
@@ -49308,7 +49308,7 @@ func init() {
 }
 
 type UpdateIpConfigRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	IpConfig HostIpConfig           `xml:"ipConfig" json:"ipConfig"`
 }
 
@@ -49326,7 +49326,7 @@ func init() {
 }
 
 type UpdateIpPoolRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Dc   ManagedObjectReference `xml:"dc" json:"dc"`
 	Pool IpPool                 `xml:"pool" json:"pool"`
 }
@@ -49345,7 +49345,7 @@ func init() {
 }
 
 type UpdateIpRouteConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config BaseHostIpRouteConfig  `xml:"config,typeattr" json:"config"`
 }
 
@@ -49363,7 +49363,7 @@ func init() {
 }
 
 type UpdateIpRouteTableConfigRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config HostIpRouteTableConfig `xml:"config" json:"config"`
 }
 
@@ -49381,7 +49381,7 @@ func init() {
 }
 
 type UpdateIpmiRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	IpmiInfo HostIpmiInfo           `xml:"ipmiInfo" json:"ipmiInfo"`
 }
 
@@ -49399,7 +49399,7 @@ func init() {
 }
 
 type UpdateKmipServerRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Server KmipServerSpec         `xml:"server" json:"server"`
 }
 
@@ -49417,7 +49417,7 @@ func init() {
 }
 
 type UpdateKmsSignedCsrClientCertRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster     KeyProviderId          `xml:"cluster" json:"cluster"`
 	Certificate string                 `xml:"certificate" json:"certificate"`
 }
@@ -49442,7 +49442,7 @@ func init() {
 }
 
 type UpdateLicenseLabelRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	LicenseKey string                 `xml:"licenseKey" json:"licenseKey"`
 	LabelKey   string                 `xml:"labelKey" json:"labelKey"`
 	LabelValue string                 `xml:"labelValue" json:"labelValue"`
@@ -49456,7 +49456,7 @@ type UpdateLicenseLabelResponse struct {
 }
 
 type UpdateLicenseRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	LicenseKey string                 `xml:"licenseKey" json:"licenseKey"`
 	Labels     []KeyValue             `xml:"labels,omitempty" json:"labels,omitempty"`
 }
@@ -49476,7 +49476,7 @@ func init() {
 }
 
 type UpdateLinkedChildrenRequestType struct {
-	This         ManagedObjectReference   `xml:"_this" json:"_this"`
+	This         ManagedObjectReference   `xml:"_this" json:"-"`
 	AddChangeSet []VirtualAppLinkInfo     `xml:"addChangeSet,omitempty" json:"addChangeSet,omitempty"`
 	RemoveSet    []ManagedObjectReference `xml:"removeSet,omitempty" json:"removeSet,omitempty"`
 }
@@ -49495,7 +49495,7 @@ func init() {
 }
 
 type UpdateLocalSwapDatastoreRequestType struct {
-	This      ManagedObjectReference  `xml:"_this" json:"_this"`
+	This      ManagedObjectReference  `xml:"_this" json:"-"`
 	Datastore *ManagedObjectReference `xml:"datastore,omitempty" json:"datastore,omitempty"`
 }
 
@@ -49513,7 +49513,7 @@ func init() {
 }
 
 type UpdateLockdownExceptionsRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Users []string               `xml:"users,omitempty" json:"users,omitempty"`
 }
 
@@ -49531,7 +49531,7 @@ func init() {
 }
 
 type UpdateModuleOptionStringRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Name    string                 `xml:"name" json:"name"`
 	Options string                 `xml:"options" json:"options"`
 }
@@ -49550,7 +49550,7 @@ func init() {
 }
 
 type UpdateNetworkConfigRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Config     HostNetworkConfig      `xml:"config" json:"config"`
 	ChangeMode string                 `xml:"changeMode" json:"changeMode"`
 }
@@ -49570,7 +49570,7 @@ func init() {
 }
 
 type UpdateNetworkResourcePoolRequestType struct {
-	This       ManagedObjectReference             `xml:"_this" json:"_this"`
+	This       ManagedObjectReference             `xml:"_this" json:"-"`
 	ConfigSpec []DVSNetworkResourcePoolConfigSpec `xml:"configSpec" json:"configSpec"`
 }
 
@@ -49588,7 +49588,7 @@ func init() {
 }
 
 type UpdateOptionsRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ChangedValue []BaseOptionValue      `xml:"changedValue,typeattr" json:"changedValue"`
 }
 
@@ -49606,7 +49606,7 @@ func init() {
 }
 
 type UpdatePassthruConfigRequestType struct {
-	This   ManagedObjectReference      `xml:"_this" json:"_this"`
+	This   ManagedObjectReference      `xml:"_this" json:"-"`
 	Config []BaseHostPciPassthruConfig `xml:"config,typeattr" json:"config"`
 }
 
@@ -49624,7 +49624,7 @@ func init() {
 }
 
 type UpdatePerfIntervalRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	Interval PerfInterval           `xml:"interval" json:"interval"`
 }
 
@@ -49642,7 +49642,7 @@ func init() {
 }
 
 type UpdatePhysicalNicLinkSpeedRequestType struct {
-	This      ManagedObjectReference `xml:"_this" json:"_this"`
+	This      ManagedObjectReference `xml:"_this" json:"-"`
 	Device    string                 `xml:"device" json:"device"`
 	LinkSpeed *PhysicalNicLinkInfo   `xml:"linkSpeed,omitempty" json:"linkSpeed,omitempty"`
 }
@@ -49661,7 +49661,7 @@ func init() {
 }
 
 type UpdatePortGroupRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	PgName  string                 `xml:"pgName" json:"pgName"`
 	Portgrp HostPortGroupSpec      `xml:"portgrp" json:"portgrp"`
 }
@@ -49674,7 +49674,7 @@ type UpdatePortGroupResponse struct {
 }
 
 type UpdateProductLockerLocationRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Path string                 `xml:"path" json:"path"`
 }
 
@@ -49699,7 +49699,7 @@ func init() {
 }
 
 type UpdateProgressRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	PercentDone int32                  `xml:"percentDone" json:"percentDone"`
 }
 
@@ -49717,7 +49717,7 @@ func init() {
 }
 
 type UpdateReferenceHostRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Host *ManagedObjectReference `xml:"host,omitempty" json:"host,omitempty"`
 }
 
@@ -49735,7 +49735,7 @@ func init() {
 }
 
 type UpdateRulesetRequestType struct {
-	This ManagedObjectReference         `xml:"_this" json:"_this"`
+	This ManagedObjectReference         `xml:"_this" json:"-"`
 	Id   string                         `xml:"id" json:"id"`
 	Spec HostFirewallRulesetRulesetSpec `xml:"spec" json:"spec"`
 }
@@ -49754,7 +49754,7 @@ func init() {
 }
 
 type UpdateScsiLunDisplayNameRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	LunUuid     string                 `xml:"lunUuid" json:"lunUuid"`
 	DisplayName string                 `xml:"displayName" json:"displayName"`
 }
@@ -49773,7 +49773,7 @@ func init() {
 }
 
 type UpdateSelfSignedClientCertRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster     KeyProviderId          `xml:"cluster" json:"cluster"`
 	Certificate string                 `xml:"certificate" json:"certificate"`
 }
@@ -49792,7 +49792,7 @@ func init() {
 }
 
 type UpdateServiceConsoleVirtualNicRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device string                 `xml:"device" json:"device"`
 	Nic    HostVirtualNicSpec     `xml:"nic" json:"nic"`
 }
@@ -49811,7 +49811,7 @@ func init() {
 }
 
 type UpdateServiceMessageRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Message string                 `xml:"message" json:"message"`
 }
 
@@ -49829,7 +49829,7 @@ func init() {
 }
 
 type UpdateServicePolicyRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Id     string                 `xml:"id" json:"id"`
 	Policy string                 `xml:"policy" json:"policy"`
 }
@@ -49860,7 +49860,7 @@ func init() {
 }
 
 type UpdateSoftwareInternetScsiEnabledRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Enabled bool                   `xml:"enabled" json:"enabled"`
 }
 
@@ -49878,7 +49878,7 @@ func init() {
 }
 
 type UpdateSystemResourcesRequestType struct {
-	This         ManagedObjectReference `xml:"_this" json:"_this"`
+	This         ManagedObjectReference `xml:"_this" json:"-"`
 	ResourceInfo HostSystemResourceInfo `xml:"resourceInfo" json:"resourceInfo"`
 }
 
@@ -49896,7 +49896,7 @@ func init() {
 }
 
 type UpdateSystemSwapConfigurationRequestType struct {
-	This          ManagedObjectReference      `xml:"_this" json:"_this"`
+	This          ManagedObjectReference      `xml:"_this" json:"-"`
 	SysSwapConfig HostSystemSwapConfiguration `xml:"sysSwapConfig" json:"sysSwapConfig"`
 }
 
@@ -49914,7 +49914,7 @@ func init() {
 }
 
 type UpdateSystemUsersRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Users []string               `xml:"users,omitempty" json:"users,omitempty"`
 }
 
@@ -49932,7 +49932,7 @@ func init() {
 }
 
 type UpdateUserRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	User BaseHostAccountSpec    `xml:"user,typeattr" json:"user"`
 }
 
@@ -49950,7 +49950,7 @@ func init() {
 }
 
 type UpdateVAppConfigRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Spec VAppConfigSpec         `xml:"spec" json:"spec"`
 }
 
@@ -49962,7 +49962,7 @@ type UpdateVAppConfigResponse struct {
 }
 
 type UpdateVStorageInfrastructureObjectPolicyRequestType struct {
-	This ManagedObjectReference             `xml:"_this" json:"_this"`
+	This ManagedObjectReference             `xml:"_this" json:"-"`
 	Spec VslmInfrastructureObjectPolicySpec `xml:"spec" json:"spec"`
 }
 
@@ -49981,7 +49981,7 @@ type UpdateVStorageInfrastructureObjectPolicy_TaskResponse struct {
 }
 
 type UpdateVStorageObjectCryptoRequestType struct {
-	This        ManagedObjectReference          `xml:"_this" json:"_this"`
+	This        ManagedObjectReference          `xml:"_this" json:"-"`
 	Id          ID                              `xml:"id" json:"id"`
 	Datastore   ManagedObjectReference          `xml:"datastore" json:"datastore"`
 	Profile     []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile,omitempty"`
@@ -50003,7 +50003,7 @@ type UpdateVStorageObjectCrypto_TaskResponse struct {
 }
 
 type UpdateVStorageObjectPolicyRequestType struct {
-	This      ManagedObjectReference          `xml:"_this" json:"_this"`
+	This      ManagedObjectReference          `xml:"_this" json:"-"`
 	Id        ID                              `xml:"id" json:"id"`
 	Datastore ManagedObjectReference          `xml:"datastore" json:"datastore"`
 	Profile   []BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr" json:"profile,omitempty"`
@@ -50024,7 +50024,7 @@ type UpdateVStorageObjectPolicy_TaskResponse struct {
 }
 
 type UpdateVVolVirtualMachineFilesRequestType struct {
-	This         ManagedObjectReference               `xml:"_this" json:"_this"`
+	This         ManagedObjectReference               `xml:"_this" json:"-"`
 	FailoverPair []DatastoreVVolContainerFailoverPair `xml:"failoverPair,omitempty" json:"failoverPair,omitempty"`
 }
 
@@ -50043,7 +50043,7 @@ type UpdateVVolVirtualMachineFiles_TaskResponse struct {
 }
 
 type UpdateVirtualMachineFilesRequestType struct {
-	This                      ManagedObjectReference            `xml:"_this" json:"_this"`
+	This                      ManagedObjectReference            `xml:"_this" json:"-"`
 	MountPathDatastoreMapping []DatastoreMountPathDatastorePair `xml:"mountPathDatastoreMapping" json:"mountPathDatastoreMapping"`
 }
 
@@ -50089,7 +50089,7 @@ func init() {
 }
 
 type UpdateVirtualNicRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Device string                 `xml:"device" json:"device"`
 	Nic    HostVirtualNicSpec     `xml:"nic" json:"nic"`
 }
@@ -50108,7 +50108,7 @@ func init() {
 }
 
 type UpdateVirtualSwitchRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	VswitchName string                 `xml:"vswitchName" json:"vswitchName"`
 	Spec        HostVirtualSwitchSpec  `xml:"spec" json:"spec"`
 }
@@ -50127,7 +50127,7 @@ func init() {
 }
 
 type UpdateVmfsUnmapBandwidthRequestType struct {
-	This               ManagedObjectReference `xml:"_this" json:"_this"`
+	This               ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid           string                 `xml:"vmfsUuid" json:"vmfsUuid"`
 	UnmapBandwidthSpec VmfsUnmapBandwidthSpec `xml:"unmapBandwidthSpec" json:"unmapBandwidthSpec"`
 }
@@ -50146,7 +50146,7 @@ func init() {
 }
 
 type UpdateVmfsUnmapPriorityRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsUuid      string                 `xml:"vmfsUuid" json:"vmfsUuid"`
 	UnmapPriority string                 `xml:"unmapPriority" json:"unmapPriority"`
 }
@@ -50159,7 +50159,7 @@ type UpdateVmfsUnmapPriorityResponse struct {
 }
 
 type UpdateVsanRequestType struct {
-	This   ManagedObjectReference `xml:"_this" json:"_this"`
+	This   ManagedObjectReference `xml:"_this" json:"-"`
 	Config VsanHostConfigInfo     `xml:"config" json:"config"`
 }
 
@@ -50196,7 +50196,7 @@ func init() {
 }
 
 type UpgradeIoFilterRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	FilterId string                 `xml:"filterId" json:"filterId"`
 	CompRes  ManagedObjectReference `xml:"compRes" json:"compRes"`
 	VibUrl   string                 `xml:"vibUrl" json:"vibUrl"`
@@ -50217,7 +50217,7 @@ type UpgradeIoFilter_TaskResponse struct {
 }
 
 type UpgradeToolsRequestType struct {
-	This             ManagedObjectReference `xml:"_this" json:"_this"`
+	This             ManagedObjectReference `xml:"_this" json:"-"`
 	InstallerOptions string                 `xml:"installerOptions,omitempty" json:"installerOptions,omitempty"`
 }
 
@@ -50236,7 +50236,7 @@ type UpgradeTools_TaskResponse struct {
 }
 
 type UpgradeVMRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Version string                 `xml:"version,omitempty" json:"version,omitempty"`
 }
 
@@ -50261,7 +50261,7 @@ func init() {
 }
 
 type UpgradeVmLayoutRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -50278,7 +50278,7 @@ func init() {
 }
 
 type UpgradeVmfsRequestType struct {
-	This     ManagedObjectReference `xml:"_this" json:"_this"`
+	This     ManagedObjectReference `xml:"_this" json:"-"`
 	VmfsPath string                 `xml:"vmfsPath" json:"vmfsPath"`
 }
 
@@ -50296,7 +50296,7 @@ func init() {
 }
 
 type UpgradeVsanObjectsRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Uuids      []string               `xml:"uuids" json:"uuids"`
 	NewVersion int32                  `xml:"newVersion" json:"newVersion"`
 }
@@ -50348,7 +50348,7 @@ func init() {
 }
 
 type UploadClientCertRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster     KeyProviderId          `xml:"cluster" json:"cluster"`
 	Certificate string                 `xml:"certificate" json:"certificate"`
 	PrivateKey  string                 `xml:"privateKey" json:"privateKey"`
@@ -50368,7 +50368,7 @@ func init() {
 }
 
 type UploadKmipServerCertRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Cluster     KeyProviderId          `xml:"cluster" json:"cluster"`
 	Certificate string                 `xml:"certificate" json:"certificate"`
 }
@@ -50883,7 +50883,7 @@ func init() {
 }
 
 type VCenterUpdateVStorageObjectMetadataExRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	Id         ID                     `xml:"id" json:"id"`
 	Datastore  ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Metadata   []KeyValue             `xml:"metadata,omitempty" json:"metadata,omitempty"`
@@ -51581,7 +51581,7 @@ func init() {
 }
 
 type VStorageObjectCreateSnapshotRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Id          ID                     `xml:"id" json:"id"`
 	Datastore   ManagedObjectReference `xml:"datastore" json:"datastore"`
 	Description string                 `xml:"description" json:"description"`
@@ -51686,7 +51686,7 @@ func init() {
 }
 
 type ValidateCredentialsInGuestRequestType struct {
-	This ManagedObjectReference  `xml:"_this" json:"_this"`
+	This ManagedObjectReference  `xml:"_this" json:"-"`
 	Vm   ManagedObjectReference  `xml:"vm" json:"vm"`
 	Auth BaseGuestAuthentication `xml:"auth,typeattr" json:"auth"`
 }
@@ -51705,7 +51705,7 @@ func init() {
 }
 
 type ValidateHCIConfigurationRequestType struct {
-	This          ManagedObjectReference               `xml:"_this" json:"_this"`
+	This          ManagedObjectReference               `xml:"_this" json:"-"`
 	HciConfigSpec *ClusterComputeResourceHCIConfigSpec `xml:"hciConfigSpec,omitempty" json:"hciConfigSpec,omitempty"`
 	Hosts         []ManagedObjectReference             `xml:"hosts,omitempty" json:"hosts,omitempty"`
 }
@@ -51725,7 +51725,7 @@ func init() {
 }
 
 type ValidateHostProfileCompositionRequestType struct {
-	This                   ManagedObjectReference   `xml:"_this" json:"_this"`
+	This                   ManagedObjectReference   `xml:"_this" json:"-"`
 	Source                 ManagedObjectReference   `xml:"source" json:"source"`
 	Targets                []ManagedObjectReference `xml:"targets,omitempty" json:"targets,omitempty"`
 	ToBeMerged             *HostApplyProfile        `xml:"toBeMerged,omitempty" json:"toBeMerged,omitempty"`
@@ -51750,7 +51750,7 @@ type ValidateHostProfileComposition_TaskResponse struct {
 }
 
 type ValidateHostRequestType struct {
-	This          ManagedObjectReference `xml:"_this" json:"_this"`
+	This          ManagedObjectReference `xml:"_this" json:"-"`
 	OvfDescriptor string                 `xml:"ovfDescriptor" json:"ovfDescriptor"`
 	Host          ManagedObjectReference `xml:"host" json:"host"`
 	Vhp           OvfValidateHostParams  `xml:"vhp" json:"vhp"`
@@ -51771,7 +51771,7 @@ func init() {
 }
 
 type ValidateMigrationRequestType struct {
-	This     ManagedObjectReference   `xml:"_this" json:"_this"`
+	This     ManagedObjectReference   `xml:"_this" json:"-"`
 	Vm       []ManagedObjectReference `xml:"vm" json:"vm"`
 	State    VirtualMachinePowerState `xml:"state,omitempty" json:"state,omitempty"`
 	TestType []string                 `xml:"testType,omitempty" json:"testType,omitempty"`
@@ -51794,7 +51794,7 @@ func init() {
 }
 
 type ValidateStoragePodConfigRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Pod  ManagedObjectReference `xml:"pod" json:"pod"`
 	Spec StorageDrsConfigSpec   `xml:"spec" json:"spec"`
 }
@@ -58825,7 +58825,7 @@ func init() {
 }
 
 type VstorageObjectVCenterQueryChangedDiskAreasRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	Id          ID                     `xml:"id" json:"id"`
 	Datastore   ManagedObjectReference `xml:"datastore" json:"datastore"`
 	SnapshotId  ID                     `xml:"snapshotId" json:"snapshotId"`
@@ -58864,7 +58864,7 @@ func init() {
 }
 
 type WaitForUpdatesExRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Version string                 `xml:"version,omitempty" json:"version,omitempty"`
 	Options *WaitOptions           `xml:"options,omitempty" json:"options,omitempty"`
 }
@@ -58878,7 +58878,7 @@ type WaitForUpdatesExResponse struct {
 }
 
 type WaitForUpdatesRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Version string                 `xml:"version,omitempty" json:"version,omitempty"`
 }
 
@@ -59040,7 +59040,7 @@ func init() {
 }
 
 type XmlToCustomizationSpecItemRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	SpecItemXml string                 `xml:"specItemXml" json:"specItemXml"`
 }
 
@@ -59053,7 +59053,7 @@ type XmlToCustomizationSpecItemResponse struct {
 }
 
 type ZeroFillVirtualDiskRequestType struct {
-	This       ManagedObjectReference  `xml:"_this" json:"_this"`
+	This       ManagedObjectReference  `xml:"_this" json:"-"`
 	Name       string                  `xml:"name" json:"name"`
 	Datacenter *ManagedObjectReference `xml:"datacenter,omitempty" json:"datacenter,omitempty"`
 }
@@ -59073,7 +59073,7 @@ type ZeroFillVirtualDisk_TaskResponse struct {
 }
 
 type ConfigureVchaRequestType struct {
-	This       ManagedObjectReference `xml:"_this" json:"_this"`
+	This       ManagedObjectReference `xml:"_this" json:"-"`
 	ConfigSpec VchaClusterConfigSpec  `xml:"configSpec" json:"configSpec"`
 }
 
@@ -59092,7 +59092,7 @@ type ConfigureVcha_TaskResponse struct {
 }
 
 type CreatePassiveNodeRequestType struct {
-	This                  ManagedObjectReference    `xml:"_this" json:"_this"`
+	This                  ManagedObjectReference    `xml:"_this" json:"-"`
 	PassiveDeploymentSpec PassiveNodeDeploymentSpec `xml:"passiveDeploymentSpec" json:"passiveDeploymentSpec"`
 	SourceVcSpec          SourceNodeSpec            `xml:"sourceVcSpec" json:"sourceVcSpec"`
 }
@@ -59112,7 +59112,7 @@ type CreatePassiveNode_TaskResponse struct {
 }
 
 type CreateWitnessNodeRequestType struct {
-	This                  ManagedObjectReference `xml:"_this" json:"_this"`
+	This                  ManagedObjectReference `xml:"_this" json:"-"`
 	WitnessDeploymentSpec BaseNodeDeploymentSpec `xml:"witnessDeploymentSpec,typeattr" json:"witnessDeploymentSpec"`
 	SourceVcSpec          SourceNodeSpec         `xml:"sourceVcSpec" json:"sourceVcSpec"`
 }
@@ -59132,7 +59132,7 @@ type CreateWitnessNode_TaskResponse struct {
 }
 
 type DeployVchaRequestType struct {
-	This           ManagedObjectReference    `xml:"_this" json:"_this"`
+	This           ManagedObjectReference    `xml:"_this" json:"-"`
 	DeploymentSpec VchaClusterDeploymentSpec `xml:"deploymentSpec" json:"deploymentSpec"`
 }
 
@@ -59151,7 +59151,7 @@ type DeployVcha_TaskResponse struct {
 }
 
 type DestroyVchaRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -59175,7 +59175,7 @@ func init() {
 }
 
 type FetchSoftwarePackagesRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -59193,7 +59193,7 @@ func init() {
 }
 
 type GetClusterModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -59211,7 +59211,7 @@ func init() {
 }
 
 type GetVchaConfigRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -59223,7 +59223,7 @@ type GetVchaConfigResponse struct {
 }
 
 type InitiateFailoverRequestType struct {
-	This    ManagedObjectReference `xml:"_this" json:"_this"`
+	This    ManagedObjectReference `xml:"_this" json:"-"`
 	Planned bool                   `xml:"planned" json:"planned"`
 }
 
@@ -59248,7 +59248,7 @@ func init() {
 }
 
 type InstallDateRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -59260,7 +59260,7 @@ type InstallDateResponse struct {
 }
 
 type PrepareVchaRequestType struct {
-	This        ManagedObjectReference `xml:"_this" json:"_this"`
+	This        ManagedObjectReference `xml:"_this" json:"-"`
 	NetworkSpec VchaClusterNetworkSpec `xml:"networkSpec" json:"networkSpec"`
 }
 
@@ -59285,7 +59285,7 @@ func init() {
 }
 
 type QueryDatacenterConfigOptionDescriptorRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {
@@ -59297,7 +59297,7 @@ type QueryDatacenterConfigOptionDescriptorResponse struct {
 }
 
 type ReloadVirtualMachineFromPathRequestType struct {
-	This              ManagedObjectReference `xml:"_this" json:"_this"`
+	This              ManagedObjectReference `xml:"_this" json:"-"`
 	ConfigurationPath string                 `xml:"configurationPath" json:"configurationPath"`
 }
 
@@ -59316,7 +59316,7 @@ type ReloadVirtualMachineFromPath_TaskResponse struct {
 }
 
 type SetClusterModeRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 	Mode string                 `xml:"mode" json:"mode"`
 }
 
@@ -59341,7 +59341,7 @@ func init() {
 }
 
 type SetCustomValueRequestType struct {
-	This  ManagedObjectReference `xml:"_this" json:"_this"`
+	This  ManagedObjectReference `xml:"_this" json:"-"`
 	Key   string                 `xml:"key" json:"key"`
 	Value string                 `xml:"value" json:"value"`
 }
@@ -59354,7 +59354,7 @@ type SetCustomValueResponse struct {
 }
 
 type UnregisterVAppRequestType struct {
-	This ManagedObjectReference `xml:"_this" json:"_this"`
+	This ManagedObjectReference `xml:"_this" json:"-"`
 }
 
 func init() {

@@ -24,7 +24,7 @@ import (
 )
 
 type ArrayOfPbmCapabilityConstraintInstance struct {
-	PbmCapabilityConstraintInstance []PbmCapabilityConstraintInstance `xml:"PbmCapabilityConstraintInstance,omitempty" json:"PbmCapabilityConstraintInstance,omitempty"`
+	PbmCapabilityConstraintInstance []PbmCapabilityConstraintInstance `xml:"PbmCapabilityConstraintInstance,omitempty" json:"_value"`
 }
 
 func init() {
@@ -32,7 +32,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityInstance struct {
-	PbmCapabilityInstance []PbmCapabilityInstance `xml:"PbmCapabilityInstance,omitempty" json:"PbmCapabilityInstance,omitempty"`
+	PbmCapabilityInstance []PbmCapabilityInstance `xml:"PbmCapabilityInstance,omitempty" json:"_value"`
 }
 
 func init() {
@@ -40,7 +40,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityMetadata struct {
-	PbmCapabilityMetadata []PbmCapabilityMetadata `xml:"PbmCapabilityMetadata,omitempty" json:"PbmCapabilityMetadata,omitempty"`
+	PbmCapabilityMetadata []PbmCapabilityMetadata `xml:"PbmCapabilityMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -48,7 +48,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityMetadataPerCategory struct {
-	PbmCapabilityMetadataPerCategory []PbmCapabilityMetadataPerCategory `xml:"PbmCapabilityMetadataPerCategory,omitempty" json:"PbmCapabilityMetadataPerCategory,omitempty"`
+	PbmCapabilityMetadataPerCategory []PbmCapabilityMetadataPerCategory `xml:"PbmCapabilityMetadataPerCategory,omitempty" json:"_value"`
 }
 
 func init() {
@@ -56,7 +56,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityPropertyInstance struct {
-	PbmCapabilityPropertyInstance []PbmCapabilityPropertyInstance `xml:"PbmCapabilityPropertyInstance,omitempty" json:"PbmCapabilityPropertyInstance,omitempty"`
+	PbmCapabilityPropertyInstance []PbmCapabilityPropertyInstance `xml:"PbmCapabilityPropertyInstance,omitempty" json:"_value"`
 }
 
 func init() {
@@ -64,7 +64,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityPropertyMetadata struct {
-	PbmCapabilityPropertyMetadata []PbmCapabilityPropertyMetadata `xml:"PbmCapabilityPropertyMetadata,omitempty" json:"PbmCapabilityPropertyMetadata,omitempty"`
+	PbmCapabilityPropertyMetadata []PbmCapabilityPropertyMetadata `xml:"PbmCapabilityPropertyMetadata,omitempty" json:"_value"`
 }
 
 func init() {
@@ -72,7 +72,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilitySchema struct {
-	PbmCapabilitySchema []PbmCapabilitySchema `xml:"PbmCapabilitySchema,omitempty" json:"PbmCapabilitySchema,omitempty"`
+	PbmCapabilitySchema []PbmCapabilitySchema `xml:"PbmCapabilitySchema,omitempty" json:"_value"`
 }
 
 func init() {
@@ -80,7 +80,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilitySubProfile struct {
-	PbmCapabilitySubProfile []PbmCapabilitySubProfile `xml:"PbmCapabilitySubProfile,omitempty" json:"PbmCapabilitySubProfile,omitempty"`
+	PbmCapabilitySubProfile []PbmCapabilitySubProfile `xml:"PbmCapabilitySubProfile,omitempty" json:"_value"`
 }
 
 func init() {
@@ -88,7 +88,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityVendorNamespaceInfo struct {
-	PbmCapabilityVendorNamespaceInfo []PbmCapabilityVendorNamespaceInfo `xml:"PbmCapabilityVendorNamespaceInfo,omitempty" json:"PbmCapabilityVendorNamespaceInfo,omitempty"`
+	PbmCapabilityVendorNamespaceInfo []PbmCapabilityVendorNamespaceInfo `xml:"PbmCapabilityVendorNamespaceInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -96,7 +96,7 @@ func init() {
 }
 
 type ArrayOfPbmCapabilityVendorResourceTypeInfo struct {
-	PbmCapabilityVendorResourceTypeInfo []PbmCapabilityVendorResourceTypeInfo `xml:"PbmCapabilityVendorResourceTypeInfo,omitempty" json:"PbmCapabilityVendorResourceTypeInfo,omitempty"`
+	PbmCapabilityVendorResourceTypeInfo []PbmCapabilityVendorResourceTypeInfo `xml:"PbmCapabilityVendorResourceTypeInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -104,7 +104,7 @@ func init() {
 }
 
 type ArrayOfPbmCompliancePolicyStatus struct {
-	PbmCompliancePolicyStatus []PbmCompliancePolicyStatus `xml:"PbmCompliancePolicyStatus,omitempty" json:"PbmCompliancePolicyStatus,omitempty"`
+	PbmCompliancePolicyStatus []PbmCompliancePolicyStatus `xml:"PbmCompliancePolicyStatus,omitempty" json:"_value"`
 }
 
 func init() {
@@ -112,7 +112,7 @@ func init() {
 }
 
 type ArrayOfPbmComplianceResult struct {
-	PbmComplianceResult []PbmComplianceResult `xml:"PbmComplianceResult,omitempty" json:"PbmComplianceResult,omitempty"`
+	PbmComplianceResult []PbmComplianceResult `xml:"PbmComplianceResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -120,7 +120,7 @@ func init() {
 }
 
 type ArrayOfPbmDatastoreSpaceStatistics struct {
-	PbmDatastoreSpaceStatistics []PbmDatastoreSpaceStatistics `xml:"PbmDatastoreSpaceStatistics,omitempty" json:"PbmDatastoreSpaceStatistics,omitempty"`
+	PbmDatastoreSpaceStatistics []PbmDatastoreSpaceStatistics `xml:"PbmDatastoreSpaceStatistics,omitempty" json:"_value"`
 }
 
 func init() {
@@ -128,7 +128,7 @@ func init() {
 }
 
 type ArrayOfPbmDefaultProfileInfo struct {
-	PbmDefaultProfileInfo []PbmDefaultProfileInfo `xml:"PbmDefaultProfileInfo,omitempty" json:"PbmDefaultProfileInfo,omitempty"`
+	PbmDefaultProfileInfo []PbmDefaultProfileInfo `xml:"PbmDefaultProfileInfo,omitempty" json:"_value"`
 }
 
 func init() {
@@ -136,7 +136,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementCompatibilityResult struct {
-	PbmPlacementCompatibilityResult []PbmPlacementCompatibilityResult `xml:"PbmPlacementCompatibilityResult,omitempty" json:"PbmPlacementCompatibilityResult,omitempty"`
+	PbmPlacementCompatibilityResult []PbmPlacementCompatibilityResult `xml:"PbmPlacementCompatibilityResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -144,7 +144,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementHub struct {
-	PbmPlacementHub []PbmPlacementHub `xml:"PbmPlacementHub,omitempty" json:"PbmPlacementHub,omitempty"`
+	PbmPlacementHub []PbmPlacementHub `xml:"PbmPlacementHub,omitempty" json:"_value"`
 }
 
 func init() {
@@ -152,7 +152,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementMatchingResources struct {
-	PbmPlacementMatchingResources []BasePbmPlacementMatchingResources `xml:"PbmPlacementMatchingResources,omitempty,typeattr" json:"PbmPlacementMatchingResources,omitempty"`
+	PbmPlacementMatchingResources []BasePbmPlacementMatchingResources `xml:"PbmPlacementMatchingResources,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -160,7 +160,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementRequirement struct {
-	PbmPlacementRequirement []BasePbmPlacementRequirement `xml:"PbmPlacementRequirement,omitempty,typeattr" json:"PbmPlacementRequirement,omitempty"`
+	PbmPlacementRequirement []BasePbmPlacementRequirement `xml:"PbmPlacementRequirement,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -168,7 +168,7 @@ func init() {
 }
 
 type ArrayOfPbmPlacementResourceUtilization struct {
-	PbmPlacementResourceUtilization []PbmPlacementResourceUtilization `xml:"PbmPlacementResourceUtilization,omitempty" json:"PbmPlacementResourceUtilization,omitempty"`
+	PbmPlacementResourceUtilization []PbmPlacementResourceUtilization `xml:"PbmPlacementResourceUtilization,omitempty" json:"_value"`
 }
 
 func init() {
@@ -176,7 +176,7 @@ func init() {
 }
 
 type ArrayOfPbmProfile struct {
-	PbmProfile []BasePbmProfile `xml:"PbmProfile,omitempty,typeattr" json:"PbmProfile,omitempty"`
+	PbmProfile []BasePbmProfile `xml:"PbmProfile,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
@@ -184,7 +184,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileId struct {
-	PbmProfileId []PbmProfileId `xml:"PbmProfileId,omitempty" json:"PbmProfileId,omitempty"`
+	PbmProfileId []PbmProfileId `xml:"PbmProfileId,omitempty" json:"_value"`
 }
 
 func init() {
@@ -192,7 +192,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileOperationOutcome struct {
-	PbmProfileOperationOutcome []PbmProfileOperationOutcome `xml:"PbmProfileOperationOutcome,omitempty" json:"PbmProfileOperationOutcome,omitempty"`
+	PbmProfileOperationOutcome []PbmProfileOperationOutcome `xml:"PbmProfileOperationOutcome,omitempty" json:"_value"`
 }
 
 func init() {
@@ -200,7 +200,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileResourceType struct {
-	PbmProfileResourceType []PbmProfileResourceType `xml:"PbmProfileResourceType,omitempty" json:"PbmProfileResourceType,omitempty"`
+	PbmProfileResourceType []PbmProfileResourceType `xml:"PbmProfileResourceType,omitempty" json:"_value"`
 }
 
 func init() {
@@ -208,7 +208,7 @@ func init() {
 }
 
 type ArrayOfPbmProfileType struct {
-	PbmProfileType []PbmProfileType `xml:"PbmProfileType,omitempty" json:"PbmProfileType,omitempty"`
+	PbmProfileType []PbmProfileType `xml:"PbmProfileType,omitempty" json:"_value"`
 }
 
 func init() {
@@ -216,7 +216,7 @@ func init() {
 }
 
 type ArrayOfPbmQueryProfileResult struct {
-	PbmQueryProfileResult []PbmQueryProfileResult `xml:"PbmQueryProfileResult,omitempty" json:"PbmQueryProfileResult,omitempty"`
+	PbmQueryProfileResult []PbmQueryProfileResult `xml:"PbmQueryProfileResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -224,7 +224,7 @@ func init() {
 }
 
 type ArrayOfPbmQueryReplicationGroupResult struct {
-	PbmQueryReplicationGroupResult []PbmQueryReplicationGroupResult `xml:"PbmQueryReplicationGroupResult,omitempty" json:"PbmQueryReplicationGroupResult,omitempty"`
+	PbmQueryReplicationGroupResult []PbmQueryReplicationGroupResult `xml:"PbmQueryReplicationGroupResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -232,7 +232,7 @@ func init() {
 }
 
 type ArrayOfPbmRollupComplianceResult struct {
-	PbmRollupComplianceResult []PbmRollupComplianceResult `xml:"PbmRollupComplianceResult,omitempty" json:"PbmRollupComplianceResult,omitempty"`
+	PbmRollupComplianceResult []PbmRollupComplianceResult `xml:"PbmRollupComplianceResult,omitempty" json:"_value"`
 }
 
 func init() {
@@ -240,7 +240,7 @@ func init() {
 }
 
 type ArrayOfPbmServerObjectRef struct {
-	PbmServerObjectRef []PbmServerObjectRef `xml:"PbmServerObjectRef,omitempty" json:"PbmServerObjectRef,omitempty"`
+	PbmServerObjectRef []PbmServerObjectRef `xml:"PbmServerObjectRef,omitempty" json:"_value"`
 }
 
 func init() {

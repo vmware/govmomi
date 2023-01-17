@@ -386,16 +386,24 @@ class Element < Simple
     end
   end
 
-  def dump_field(io)
+  def dump_field(io, json_tag="")
     xmlTag = name
     xmlTag += ",omitempty" if need_omitempty?
     xmlTag += ",typeattr" if need_typeattr?
     tag = "%s %s `xml:\"%s\"" % [var_name, var_type, xmlTag]
 
-    jsonTag = name
-    jsonTag += ",omitempty" if json_omitempty?
+    jsonTag = ""
+    if json_tag != ""
+      jsonTag = json_tag # Caller-provided JSON tag
+    elsif var_name == "This" && var_type == "ManagedObjectReference"
+      jsonTag = "-"      # For marshal/unmarshal operations using a type
+                         # discriminator
+    else
+      jsonTag = name
+      jsonTag += ",omitempty" if json_omitempty?
+    end
+    
     tag += " json:\"%s\"" % [jsonTag]
-
     io.print "%s`\n" % [tag]
   end
 
@@ -492,6 +500,13 @@ class ComplexType < Simple
   end
 
   class Sequence < Simple
+    attr_accessor :array_of
+
+    def initialize(node, array_of=false)
+      super(node)
+      self.array_of = array_of
+    end
+
     def sequence
       sequence = @node.at_xpath(".//xsd:sequence")
       if sequence != nil
@@ -516,7 +531,7 @@ class ComplexType < Simple
       end
 
       elements.each do |e|
-        e.dump_field(io)
+        e.dump_field(io, json_tag=self.array_of ? "_value" : "")
       end
     end
 
@@ -558,7 +573,7 @@ class ComplexType < Simple
                    when "complexContent"
                      ComplexContent.new(@node)
                    when "sequence"
-                     Sequence.new(@node)
+                     Sequence.new(@node, self.name.start_with?("ArrayOf"))
                    else
                      raise "don't know what to do for element: %s..." % cs.first.name
                    end
