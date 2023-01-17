@@ -17,9 +17,11 @@ limitations under the License.
 package simulator
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"fmt"
+	"hash"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -32,9 +34,15 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type metadata struct {
+	sha1 []byte
+	size int64
+}
+
 type HttpNfcLease struct {
 	mo.HttpNfcLease
-	files map[string]string
+	files    map[string]string
+	metadata map[string]metadata
 }
 
 var (
@@ -62,12 +70,12 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 	}
 
 	status := http.StatusOK
-	var dst io.Writer
+	var dst hash.Hash
 	var src io.ReadCloser
 
 	switch r.Method {
 	case http.MethodPut, http.MethodPost:
-		dst = ioutil.Discard
+		dst = sha1.New()
 		src = r.Body
 	case http.MethodGet:
 		f, err := os.Open(file)
@@ -82,6 +90,12 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 
 	n, err := io.Copy(dst, src)
 	_ = src.Close()
+	if dst != nil {
+		lease.metadata[name] = metadata{
+			sha1: dst.Sum(nil),
+			size: n,
+		}
+	}
 
 	msg := fmt.Sprintf("transferred %d bytes", n)
 	if err != nil {
@@ -101,7 +115,8 @@ func NewHttpNfcLease(ctx *Context, entity types.ManagedObjectReference) *HttpNfc
 			},
 			State: types.HttpNfcLeaseStateReady,
 		},
-		files: make(map[string]string),
+		files:    make(map[string]string),
+		metadata: make(map[string]metadata),
 	}
 
 	ctx.Session.Put(lease)
@@ -133,5 +148,30 @@ func (l *HttpNfcLease) HttpNfcLeaseProgress(ctx *Context, req *types.HttpNfcLeas
 
 	return &methods.HttpNfcLeaseProgressBody{
 		Res: new(types.HttpNfcLeaseProgressResponse),
+	}
+}
+
+func (l *HttpNfcLease) getDeviceKey(name string) string {
+	for _, devUrl := range l.Info.DeviceUrl {
+		if name == devUrl.TargetId {
+			return devUrl.Key
+		}
+	}
+	return "unknown"
+}
+
+func (l *HttpNfcLease) HttpNfcLeaseGetManifest(ctx *Context, req *types.HttpNfcLeaseGetManifest) soap.HasFault {
+	entries := []types.HttpNfcLeaseManifestEntry{}
+	for name, md := range l.metadata {
+		entries = append(entries, types.HttpNfcLeaseManifestEntry{
+			Key:  l.getDeviceKey(name),
+			Sha1: hex.EncodeToString(md.sha1),
+			Size: md.size,
+		})
+	}
+	return &methods.HttpNfcLeaseGetManifestBody{
+		Res: &types.HttpNfcLeaseGetManifestResponse{
+			Returnval: entries,
+		},
 	}
 }

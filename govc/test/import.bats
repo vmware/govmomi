@@ -42,6 +42,16 @@ load test_helper
   assert_success
 }
 
+@test "import.ova with checksum validation" {
+  vcsim_env -app 1
+
+  run govc import.ova -name=bad-checksum-vm -m "$GOVC_IMAGES/$TTYLINUX_NAME-bad-checksum.ova"
+  assert_failure # vmdk checksum mismatch
+
+  run govc import.ova -name=good-checksum-vm -m "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+}
+
 @test "import.ova with iso" {
   vcsim_env
 
