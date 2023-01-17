@@ -3097,6 +3097,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
   -host=                 Host system [GOVC_HOST]
+  -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
@@ -3111,6 +3112,7 @@ Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
   -host=                 Host system [GOVC_HOST]
+  -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]

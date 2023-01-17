@@ -22,6 +22,7 @@ import (
 	"flag"
 	"fmt"
 	"path"
+	"strings"
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/govc/cli"
@@ -44,7 +45,8 @@ type ovfx struct {
 	*ArchiveFlag
 	*OptionsFlag
 
-	Name string
+	Name           string
+	VerifyManifest bool
 
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
@@ -74,6 +76,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.OptionsFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.Name, "name", "", "Name to use for new entity")
+	f.BoolVar(&cmd.VerifyManifest, "m", false, "Verify checksum of uploaded files against manifest (.mf)")
 }
 
 func (cmd *ovfx) Process(ctx context.Context) error {
@@ -315,6 +318,13 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		}
 	}
 
+	if cmd.VerifyManifest {
+		err = cmd.readManifest(fpath)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	lease, err := cmd.ResourcePool.ImportVApp(ctx, spec.ImportSpec, folder, host)
 	if err != nil {
 		return nil, err
@@ -355,5 +365,74 @@ func (cmd *ovfx) Upload(ctx context.Context, lease *nfc.Lease, item nfc.FileItem
 		Progress:      logger,
 	}
 
-	return lease.Upload(ctx, item, f, opts)
+	err = lease.Upload(ctx, item, f, opts)
+	if err != nil {
+		return err
+	}
+
+	if cmd.VerifyManifest {
+		mapImportKeyToKey := func(urls []types.HttpNfcLeaseDeviceUrl, importKey string) string {
+			for _, url := range urls {
+				if url.ImportKey == importKey {
+					return url.Key
+				}
+			}
+			return ""
+		}
+		leaseInfo, err := lease.Wait(ctx, nil)
+		if err != nil {
+			return err
+		}
+		return cmd.validateChecksum(ctx, lease, file, mapImportKeyToKey(leaseInfo.DeviceUrl, item.DeviceId))
+	}
+	return nil
+}
+
+func (cmd *ovfx) validateChecksum(ctx context.Context, lease *nfc.Lease, file string, key string) error {
+	sum, found := cmd.manifest[file]
+	if !found {
+		msg := fmt.Sprintf("missing checksum for %v in manifest file", file)
+		return errors.New(msg)
+	}
+	// Perform the checksum match eagerly, after each file upload, instead
+	// of after uploading all the files, to provide fail-fast behavior.
+	// (Trade-off here is multiple GetManifest() API calls to the server.)
+	manifests, err := lease.GetManifest(ctx)
+	if err != nil {
+		return err
+	}
+	for _, m := range manifests {
+		if m.Key == key {
+			// Compare server-side computed checksum of uploaded file
+			// against the client's manifest entry (assuming client's
+			// manifest has correct checksums - client doesn't compute
+			// checksum of the file before uploading).
+
+			// Try matching sha1 first (newer versions have moved to sha256).
+			if strings.ToUpper(sum.Algorithm) == "SHA1" {
+				if sum.Checksum != m.Sha1 {
+					msg := fmt.Sprintf("manifest checksum %v mismatch with uploaded checksum %v for file %v",
+						sum.Checksum, m.Sha1, file)
+					return errors.New(msg)
+				}
+				// Uploaded file checksum computed by server matches with local manifest entry.
+				return nil
+			}
+			// If not sha1, check for other types (in a separate field).
+			if !strings.EqualFold(sum.Algorithm, m.ChecksumType) {
+				msg := fmt.Sprintf("manifest checksum type %v mismatch with uploaded checksum type %v for file %v",
+					sum.Algorithm, m.ChecksumType, file)
+				return errors.New(msg)
+			}
+			if !strings.EqualFold(sum.Checksum, m.Checksum) {
+				msg := fmt.Sprintf("manifest checksum %v mismatch with uploaded checksum %v for file %v",
+					sum.Checksum, m.Checksum, file)
+				return errors.New(msg)
+			}
+			// Uploaded file checksum computed by server matches with local manifest entry.
+			return nil
+		}
+	}
+	msg := fmt.Sprintf("missing manifest entry on server for uploaded file %v (key %v), manifests=%#v", file, key, manifests)
+	return errors.New(msg)
 }
