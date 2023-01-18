@@ -32,6 +32,7 @@ import (
 	"strings"
 
 	"github.com/vmware/govmomi/ovf"
+	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
 )
@@ -40,6 +41,8 @@ import (
 // only encapsulates some common archive related functionality.
 type ArchiveFlag struct {
 	Archive
+
+	manifest map[string]*library.Checksum
 }
 
 func newArchiveFlag(ctx context.Context) (*ArchiveFlag, context.Context) {
@@ -70,6 +73,22 @@ func (f *ArchiveFlag) ReadEnvelope(data []byte) (*ovf.Envelope, error) {
 	}
 
 	return e, nil
+}
+
+func (f *ArchiveFlag) readManifest(fpath string) error {
+	base := filepath.Base(fpath)
+	ext := filepath.Ext(base)
+	mfName := strings.Replace(base, ext, ".mf", 1)
+
+	mf, _, err := f.Open(mfName)
+	if err != nil {
+		msg := fmt.Sprintf("manifest %q: %s", mf, err)
+		fmt.Fprintln(os.Stderr, msg)
+		return errors.New(msg)
+	}
+	f.manifest, err = library.ReadManifest(mf)
+	_ = mf.Close()
+	return err
 }
 
 type Archive interface {

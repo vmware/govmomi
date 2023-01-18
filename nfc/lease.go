@@ -71,17 +71,17 @@ func (l *Lease) Complete(ctx context.Context) error {
 }
 
 // GetManifest wraps methods.GetManifest
-func (l *Lease) GetManifest(ctx context.Context) error {
+func (l *Lease) GetManifest(ctx context.Context) ([]types.HttpNfcLeaseManifestEntry, error) {
 	req := types.HttpNfcLeaseGetManifest{
 		This: l.Reference(),
 	}
 
-	_, err := methods.HttpNfcLeaseGetManifest(ctx, l.c, &req)
+	res, err := methods.HttpNfcLeaseGetManifest(ctx, l.c, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return res.Returnval, nil
 }
 
 // Progress wraps methods.Progress
