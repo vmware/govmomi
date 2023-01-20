@@ -267,6 +267,15 @@ EOF
   netip=$(govc object.collect -json -s vm/$vm guest.net | jq -r .[].Val.GuestNicInfo[].IpAddress[0])
   [ "$netip" = "$ip" ]
 
+  run govc vm.ip $vm # covers VirtualMachine.WaitForIP
+  assert_success "$ip"
+
+  run govc vm.ip -a $vm # covers VirtualMachine.WaitForNetIP
+  assert_success "$ip"
+
+  run govc vm.ip -n ethernet-0 $vm # covers VirtualMachine.WaitForNetIP
+  assert_success "$ip"
+
   run govc vm.power -s $vm
   assert_success
 
