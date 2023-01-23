@@ -825,7 +825,7 @@ load test_helper
   # test that each vm has a unique vmdk path
   for item in fileName uuid;  do
     items=$(govc object.collect -json -type m / config.hardware.device | \
-              jq ".changeSet[].val.VirtualDevice[].backing.$item | select(. != null)")
+              jq ".changeSet[].val._value[].backing.$item | select(. != null)")
 
     nitems=$(wc -l <<<"$items")
     uitems=$(sort -u <<<"$items" | wc -l)

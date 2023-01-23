@@ -145,14 +145,6 @@ func main() {
 	}
 
 	var err error
-	out := os.Stdout
-
-	if *env != "-" {
-		out, err = os.OpenFile(*env, os.O_WRONLY, 0)
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 
 	if err = updateHostTemplate(u.Host); err != nil {
 		log.Fatal(err)
@@ -222,7 +214,19 @@ func main() {
 		}
 	}
 
-	fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
+	out := os.Stdout
+
+	if *env != "-" {
+		out, err = os.OpenFile(*env, os.O_WRONLY, 0)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	_, err = fmt.Fprintf(out, "export GOVC_URL=%s GOVC_SIM_PID=%d\n", s.URL, os.Getpid())
+	if err != nil {
+		log.Fatal(err)
+	}
 	if out != os.Stdout {
 		err = out.Close()
 		if err != nil {
@@ -233,7 +237,7 @@ func main() {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGINT, syscall.SIGTERM)
 	if *stdinExit {
-		fmt.Fprintf(out, "Press any key to exit")
+		fmt.Println("Press any key to exit")
 		go func() {
 			os.Stdin.Read(make([]byte, 1))
 			sig <- syscall.SIGTERM
