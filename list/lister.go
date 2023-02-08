@@ -312,6 +312,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 
 	fields := []string{
 		"host",
+		"network",
 		"resourcePool",
 	}
 
@@ -327,6 +328,7 @@ func (l Lister) ListComputeResource(ctx context.Context) ([]Element, error) {
 
 	childTypes := []string{
 		"HostSystem",
+		"Network",
 		"ResourcePool",
 	}
 

@@ -69,7 +69,7 @@ func TestFinderVPX(t *testing.T) {
 		{"ManagedObjectList", "/F[01]", 2},
 		{"ManagedObjectListChildren", "/*", m.Datacenter + 3},
 		{"ManagedObjectListChildren", "/*/*", 19},
-		{"ManagedObjectListChildren", "/*/*/*", 25},
+		{"ManagedObjectListChildren", "/*/*/*", 31},
 		{"FolderList", "/*", m.Folder},
 		{"DatacenterList", "/F0/*", 1},
 		{"DatacenterList", "/DC0", 1},
