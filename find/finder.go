@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -784,6 +784,11 @@ func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.Network
 	}
 
 	if len(ns) == 0 {
+		net, nerr := f.networkByID(ctx, path)
+		if nerr == nil {
+			return []object.NetworkReference{net}, nil
+		}
+
 		return nil, &NotFoundError{"network", path}
 	}
 
@@ -805,12 +810,6 @@ func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.Network
 func (f *Finder) Network(ctx context.Context, path string) (object.NetworkReference, error) {
 	networks, err := f.NetworkList(ctx, path)
 	if err != nil {
-		if _, ok := err.(*NotFoundError); ok {
-			net, nerr := f.networkByID(ctx, path)
-			if nerr == nil {
-				return net, nil
-			}
-		}
 		return nil, err
 	}
 
