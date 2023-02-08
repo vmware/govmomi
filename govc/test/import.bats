@@ -197,6 +197,11 @@ load test_helper
   assert_success # switch_name/portgroup_name is unique
   grep -v "invalid NetworkMapping.Name" <<<"$output"
 
+  options=$(jq ".NetworkMapping[].Network = \"/DC0/host/DC0_C0/DC0_DVPG0\"" <<<"$spec")
+
+  run govc import.ovf -name ttylinux3 -options - "$ovf" <<<"$options"
+  assert_success # cluster path is unique
+
   switch=$(govc find -i network -name DVS0)
   id=$(govc find -i network -config.distributedVirtualSwitch "$switch" -name NSX-dvpg)
   options=$(jq ".NetworkMapping[].Network = \"$id\"" <<<"$spec")

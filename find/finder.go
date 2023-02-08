@@ -798,6 +798,7 @@ func (f *Finder) NetworkList(ctx context.Context, path string) ([]object.Network
 // Examples:
 // - Name:                "dvpg-1"
 // - Inventory Path:      "vds-1/dvpg-1"
+// - Cluster Path:        "/dc-1/host/cluster-1/dvpg-1"
 // - ManagedObject ID:    "DistributedVirtualPortgroup:dvportgroup-53"
 // - Logical Switch UUID: "da2a59b8-2450-4cb2-b5cc-79c4c1d2144c"
 // - Segment ID:          "/infra/segments/vnet_ce50e69b-1784-4a14-9206-ffd7f1f146f7"
