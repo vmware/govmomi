@@ -3228,7 +3228,7 @@ Examples:
   govc library.create -pub library_name
 
 Options:
-  -d=                    Description of library
+  -d=<nil>               Description of library
   -ds=                   Datastore [GOVC_DATASTORE]
   -policy=               Security Policy ID
   -pub=<nil>             Publish library
@@ -3580,7 +3580,7 @@ Examples:
   govc library.update -d "new item description" -n "new-item-name" my-library/my-item
 
 Options:
-  -d=                    Library or item description
+  -d=<nil>               Library or item description
   -n=                    Library or item name
 ```
 
