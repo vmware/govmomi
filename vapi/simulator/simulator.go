@@ -1865,7 +1865,7 @@ func (s *handler) libraryItemOVF(w http.ResponseWriter, r *http.Request) {
 				ID:               id,
 				LibraryID:        l.Library.ID,
 				Name:             req.Spec.Name,
-				Description:      req.Spec.Description,
+				Description:      &req.Spec.Description,
 				Type:             library.ItemTypeOVF,
 				CreationTime:     types.NewTime(time.Now()),
 				LastModifiedTime: types.NewTime(time.Now()),

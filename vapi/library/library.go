@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,7 +37,7 @@ type StorageBackings struct {
 // Library  provides methods to create, read, update, delete, and enumerate libraries.
 type Library struct {
 	CreationTime          *time.Time        `json:"creation_time,omitempty"`
-	Description           string            `json:"description,omitempty"`
+	Description           *string           `json:"description,omitempty"`
 	ID                    string            `json:"id,omitempty"`
 	LastModifiedTime      *time.Time        `json:"last_modified_time,omitempty"`
 	LastSyncTime          *time.Time        `json:"last_sync_time,omitempty"`
@@ -120,7 +120,7 @@ func (l *Library) Patch(src *Library) {
 	if src.Name != "" {
 		l.Name = src.Name
 	}
-	if src.Description != "" {
+	if src.Description != nil {
 		l.Description = src.Description
 	}
 	if src.Version != "" {

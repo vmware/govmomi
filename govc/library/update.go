@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,7 +29,8 @@ import (
 type update struct {
 	*flags.ClientFlag
 
-	name, desc string
+	name string
+	desc *string
 }
 
 func init() {
@@ -41,7 +42,7 @@ func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.name, "n", "", "Library or item name")
-	f.StringVar(&cmd.desc, "d", "", "Library or item description")
+	f.Var(flags.NewOptionalString(&cmd.desc), "d", "Library or item description")
 }
 
 func (cmd *update) Usage() string {
@@ -76,17 +77,21 @@ func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {
 	switch t := res.GetResult().(type) {
 	case library.Library:
 		lib := &library.Library{
-			ID:          t.ID,
-			Name:        cmd.name,
-			Description: cmd.desc,
+			ID:   t.ID,
+			Name: cmd.name,
+		}
+		if cmd.desc != nil {
+			lib.Description = cmd.desc
 		}
 		t.Patch(lib)
 		return m.UpdateLibrary(ctx, &t)
 	case library.Item:
 		item := &library.Item{
-			ID:          t.ID,
-			Name:        cmd.name,
-			Description: cmd.desc,
+			ID:   t.ID,
+			Name: cmd.name,
+		}
+		if cmd.desc != nil {
+			item.Description = cmd.desc
 		}
 		t.Patch(item)
 		return m.UpdateLibraryItem(ctx, item)

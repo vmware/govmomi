@@ -44,7 +44,7 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.sub.AutomaticSyncEnabled = new(bool)
 	cmd.sub.OnDemand = new(bool)
 
-	f.StringVar(&cmd.library.Description, "d", "", "Description of library")
+	f.Var(flags.NewOptionalString(&cmd.library.Description), "d", "Description of library")
 	f.StringVar(&cmd.sub.SubscriptionURL, "sub", "", "Subscribe to library URL")
 	f.StringVar(&cmd.sub.UserName, "sub-username", "", "Subscription username")
 	f.StringVar(&cmd.sub.Password, "sub-password", "", "Subscription password")
