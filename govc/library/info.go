@@ -168,7 +168,9 @@ func (r infoResultsWriter) writeLibrary(
 	fmt.Fprintf(w, "Name:\t%s\n", v.Name)
 	fmt.Fprintf(w, "  ID:\t%s\n", v.ID)
 	fmt.Fprintf(w, "  Path:\t%s\n", res.GetPath())
-	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
+	if v.Description != nil {
+		fmt.Fprintf(w, "  Description:\t%s\n", *v.Description)
+	}
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
 	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  Security Policy ID\t%s\n", v.SecurityPolicyID)
@@ -216,7 +218,9 @@ func (r infoResultsWriter) writeItem(
 	fmt.Fprintf(w, "Name:\t%s\n", v.Name)
 	fmt.Fprintf(w, "  ID:\t%s\n", v.ID)
 	fmt.Fprintf(w, "  Path:\t%s\n", res.GetPath())
-	fmt.Fprintf(w, "  Description:\t%s\n", v.Description)
+	if v.Description != nil {
+		fmt.Fprintf(w, "  Description:\t%s\n", *v.Description)
+	}
 	fmt.Fprintf(w, "  Type:\t%s\n", v.Type)
 	fmt.Fprintf(w, "  Size:\t%s\n", units.ByteSize(v.Size))
 	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
