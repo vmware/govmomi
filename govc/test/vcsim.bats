@@ -421,19 +421,47 @@ EOF
 }
 
 @test "vcsim auth" {
+  vcsim_start
+
+  run env GOVC_USERNAME=anybody GOVC_PASSWORD=anything govc ls -u "$(govc env GOVC_URL)"
+  assert_success
+
+  vcsim_stop
+
   vcsim_start -username nobody -password nothing
 
   run govc ls
   assert_success
 
+  run govc tags.ls
+  assert_success
+
   run env GOVC_USERNAME=nobody GOVC_PASSWORD=nothing govc ls -u "$(govc env GOVC_URL)"
+  assert_success
+
+  run env GOVC_USERNAME=nobody GOVC_PASSWORD=nothing govc tags.ls -u "$(govc env GOVC_URL)"
   assert_success
 
   run govc ls -u "user:pass@$(govc env GOVC_URL)"
   assert_failure
 
+  run govc tags.ls -u "user:pass@$(govc env GOVC_URL)"
+  assert_failure
+
   run env GOVC_USERNAME=user GOVC_PASSWORD=pass govc ls -u "$(govc env GOVC_URL)"
   assert_failure
+
+  run env GOVC_USERNAME=user GOVC_PASSWORD=pass govc tags.ls -u "$(govc env GOVC_URL)"
+  assert_failure
+
+  run govc sso.user.create -p pass user
+  assert_success
+
+  run govc ls -u "user:pass@$(govc env GOVC_URL)"
+  assert_success
+
+  run govc tags.ls -u "user:pass@$(govc env GOVC_URL)"
+  assert_success
 
   vcsim_stop
 
