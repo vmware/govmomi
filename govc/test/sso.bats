@@ -60,3 +60,87 @@ load test_helper
   assert_matches "Local OS"
   assert_matches "ActiveDirectory"
 }
+
+@test "sso.user" {
+  vcsim_env
+
+  run govc sso.user.ls
+  assert_success
+
+  run govc sso.user.create -p password govc
+  assert_success
+
+  run govc sso.user.ls
+  assert_success
+  assert_matches govc
+
+  run govc sso.user.ls -s
+  assert_success ""
+
+  run govc sso.user.create -p password govc
+  assert_failure # duplicate name
+
+  run govc sso.user.update -p newpassword govc
+  assert_success
+
+  run govc sso.user.rm govc
+  assert_success
+
+  run govc sso.user.rm govc
+  assert_failure # does not exist
+
+  run govc sso.user.create -C dummy-cert govc
+  assert_success
+
+  run govc sso.user.update -C new-cert govc
+  assert_success
+
+  run govc sso.user.ls -s
+  assert_success
+  assert_matches govc
+}
+
+@test "sso.group" {
+  vcsim_env
+
+  run govc sso.group.ls
+  assert_success
+
+  run govc sso.group.create bats
+  assert_success
+
+  run govc sso.group.create -d "govc CLI" govc
+  assert_success
+
+  run govc sso.group.ls
+  assert_success
+  assert_matches "govc CLI"
+
+  run govc sso.group.update -d "govmomi/govc CLI" govc
+  assert_success
+  run govc sso.group.ls
+  assert_success
+  assert_matches "govmomi/govc CLI"
+
+  run govc sso.group.update -a user govc
+  assert_success
+
+  govc sso.user.id | grep "groups=govc"
+
+  run govc sso.group.update -r user govc
+  assert_success
+  govc sso.user.id | grep -v "groups=govc"
+
+  run govc sso.group.update -g -a govc bats
+  assert_success
+
+  run govc sso.group.ls govc
+  assert_success
+  assert_matches bats
+
+  run govc sso.group.rm govc
+  assert_success
+
+  run govc sso.group.rm govc
+  assert_failure # does not exist
+}
