@@ -178,6 +178,8 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewOptionalBool(&cmd.MemoryHotAddEnabled), "memory-hot-add-enabled", "Enable memory hot add")
 	f.Var(flags.NewOptionalBool(&cmd.MemoryReservationLockedToMax), "memory-pin", "Reserve all guest memory")
 	f.Var(flags.NewOptionalBool(&cmd.CpuHotAddEnabled), "cpu-hot-add-enabled", "Enable CPU hot add")
+	cmd.Flags = &types.VirtualMachineFlagInfo{}
+	f.Var(flags.NewOptionalBool(&cmd.Flags.VvtdEnabled), "iommu-enabled", "Enable IOMMU")
 
 	f.StringVar(&cmd.hwUpgradePolicy, "scheduled-hw-upgrade-policy", "", fmt.Sprintf("Schedule hardware upgrade policy (%s)", strings.Join(hwUpgradePolicies, "|")))
 }
@@ -226,6 +228,10 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	setAllocation(&cmd.MemoryAllocation)
 	if reflect.DeepEqual(cmd.Tools, new(types.ToolsConfigInfo)) {
 		cmd.Tools = nil // no flags set, avoid sending <tools/> in the request
+	}
+
+	if reflect.DeepEqual(cmd.Flags, new(types.VirtualMachineFlagInfo)) {
+		cmd.Flags = nil // no flags set, avoid sending <flags/> in the request
 	}
 
 	if err = cmd.setLatency(); err != nil {
