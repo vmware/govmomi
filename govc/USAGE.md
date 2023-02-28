@@ -5606,6 +5606,7 @@ Options:
   -e=[]                          ExtraConfig. <key>=<value>
   -f=[]                          ExtraConfig. <key>=<absolute path to file>
   -g=                            Guest OS
+  -iommu-enabled=<nil>           Enable IOMMU
   -latency=                      Latency sensitivity (low|normal|high)
   -m=0                           Size in MB of memory
   -mem.limit=<nil>               Memory limit in MB
