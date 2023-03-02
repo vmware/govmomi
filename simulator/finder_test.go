@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -69,7 +69,7 @@ func TestFinderVPX(t *testing.T) {
 		{"ManagedObjectList", "/F[01]", 2},
 		{"ManagedObjectListChildren", "/*", m.Datacenter + 3},
 		{"ManagedObjectListChildren", "/*/*", 19},
-		{"ManagedObjectListChildren", "/*/*/*", 25},
+		{"ManagedObjectListChildren", "/*/*/*", 31},
 		{"FolderList", "/*", m.Folder},
 		{"DatacenterList", "/F0/*", 1},
 		{"DatacenterList", "/DC0", 1},
