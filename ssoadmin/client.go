@@ -533,3 +533,41 @@ func (c *Client) SetDefaultDomains(ctx context.Context, domain string) error {
 	_, err := methods.SetDefaultDomains(ctx, c, &req)
 	return err
 }
+
+func (c *Client) RegisterLdap(ctx context.Context, stype string, name string, alias string, details types.LdapIdentitySourceDetails, auth types.SsoAdminIdentitySourceManagementServiceAuthenticationCredentails) error {
+	req := types.RegisterLdap{
+		This:               c.ServiceContent.IdentitySourceManagementService,
+		ServerType:         stype,
+		DomainName:         name,
+		DomainAlias:        alias,
+		Details:            details,
+		AuthenticationType: "password",
+		AuthnCredentials:   &auth,
+	}
+
+	_, err := methods.RegisterLdap(ctx, c, &req)
+	return err
+}
+
+func (c *Client) UpdateLdap(ctx context.Context, name string, details types.LdapIdentitySourceDetails) error {
+	req := types.UpdateLdap{
+		This:       c.ServiceContent.IdentitySourceManagementService,
+		DomainName: name,
+		Details:    details,
+	}
+
+	_, err := methods.UpdateLdap(ctx, c, &req)
+	return err
+}
+
+func (c *Client) UpdateLdapAuthnType(ctx context.Context, name string, auth types.SsoAdminIdentitySourceManagementServiceAuthenticationCredentails) error {
+	req := types.UpdateLdapAuthnType{
+		This:               c.ServiceContent.IdentitySourceManagementService,
+		DomainName:         name,
+		AuthenticationType: "password",
+		AuthnCredentials:   &auth,
+	}
+
+	_, err := methods.UpdateLdapAuthnType(ctx, c, &req)
+	return err
+}

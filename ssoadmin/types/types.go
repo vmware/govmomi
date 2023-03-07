@@ -1534,6 +1534,29 @@ func init() {
 type ProbeConnectivityResponse struct {
 }
 
+type RegisterLdap RegisterLdapRequestType
+
+func init() {
+	types.Add("sso:RegisterLdap", reflect.TypeOf((*RegisterLdap)(nil)).Elem())
+}
+
+type RegisterLdapRequestType struct {
+	This               types.ManagedObjectReference                                      `xml:"_this"`
+	ServerType         string                                                            `xml:"serverType"`
+	DomainName         string                                                            `xml:"domainName"`
+	DomainAlias        string                                                            `xml:"domainAlias,omitempty"`
+	Details            LdapIdentitySourceDetails                                         `xml:"details"`
+	AuthenticationType string                                                            `xml:"authenticationType"`
+	AuthnCredentials   *SsoAdminIdentitySourceManagementServiceAuthenticationCredentails `xml:"authnCredentials,omitempty"`
+}
+
+func init() {
+	types.Add("sso:RegisterLdapRequestType", reflect.TypeOf((*RegisterLdapRequestType)(nil)).Elem())
+}
+
+type RegisterLdapResponse struct {
+}
+
 type RemoveFromLocalGroup RemoveFromLocalGroupRequestType
 
 func init() {
@@ -1817,6 +1840,17 @@ func init() {
 type SetSignerIdentityResponse struct {
 }
 
+type SsoAdminIdentitySourceManagementServiceAuthenticationCredentails struct {
+	types.DynamicData
+
+	Username string `xml:"username"`
+	Password string `xml:"password"`
+}
+
+func init() {
+	types.Add("sso:SsoAdminIdentitySourceManagementServiceAuthenticationCredentails", reflect.TypeOf((*SsoAdminIdentitySourceManagementServiceAuthenticationCredentails)(nil)).Elem())
+}
+
 type SsoAdminServiceInstance SsoAdminServiceInstanceRequestType
 
 func init() {
@@ -1909,6 +1943,45 @@ func init() {
 }
 
 type UpdateExternalDomainDetailsResponse struct {
+}
+
+type UpdateLdap UpdateLdapRequestType
+
+func init() {
+	types.Add("sso:UpdateLdap", reflect.TypeOf((*UpdateLdap)(nil)).Elem())
+}
+
+type UpdateLdapRequestType struct {
+	This       types.ManagedObjectReference `xml:"_this"`
+	DomainName string                       `xml:"name"`
+	Details    LdapIdentitySourceDetails    `xml:"details"`
+}
+
+func init() {
+	types.Add("sso:UpdateLdapRequestType", reflect.TypeOf((*UpdateLdapRequestType)(nil)).Elem())
+}
+
+type UpdateLdapResponse struct {
+}
+
+type UpdateLdapAuthnType UpdateLdapAuthnTypeRequestType
+
+func init() {
+	types.Add("sso:UpdateLdapAuthnType", reflect.TypeOf((*UpdateLdapAuthnType)(nil)).Elem())
+}
+
+type UpdateLdapAuthnTypeRequestType struct {
+	This               types.ManagedObjectReference                                      `xml:"_this"`
+	DomainName         string                                                            `xml:"name"`
+	AuthenticationType string                                                            `xml:"authnType"`
+	AuthnCredentials   *SsoAdminIdentitySourceManagementServiceAuthenticationCredentails `xml:"authnCredentials,omitempty"`
+}
+
+func init() {
+	types.Add("sso:UpdateLdapAuthnTypeRequestType", reflect.TypeOf((*UpdateLdapAuthnTypeRequestType)(nil)).Elem())
+}
+
+type UpdateLdapAuthnTypeResponse struct {
 }
 
 type UpdateLocalGroupDetails UpdateLocalGroupDetailsRequestType

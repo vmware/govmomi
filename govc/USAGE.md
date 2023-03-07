@@ -284,6 +284,7 @@ but appear via `govc $cmd -h`:
  - [sso.group.update](#ssogroupupdate)
  - [sso.idp.default.ls](#ssoidpdefaultls)
  - [sso.idp.default.update](#ssoidpdefaultupdate)
+ - [sso.idp.ldap.update](#ssoidpldapupdate)
  - [sso.idp.ls](#ssoidpls)
  - [sso.lpp.info](#ssolppinfo)
  - [sso.lpp.update](#ssolppupdate)
@@ -4798,6 +4799,28 @@ Examples:
   govc sso.idp.default.update NAME
 
 Options:
+```
+
+## sso.idp.ldap.update
+
+```
+Usage: govc sso.idp.ldap.update [OPTIONS] NAME
+
+Update SSO ldap identity provider source.
+
+Examples:
+  govc sso.idp.ldap.update  -FriendlyName CORPLOCAL corp.local
+
+Options:
+  -AuthPassword=               Password
+  -AuthUsername=               Username
+  -DomainAlias=                DomainAlias
+  -FailoverUrl=                FailoverUrl
+  -FriendlyName=               FriendlyName
+  -GroupBaseDn=                GroupBaseDn
+  -PrimaryUrl=                 PrimaryUrl
+  -ServerType=ActiveDirectory  ServerType
+  -UserBaseDn=                 UserBaseDn
 ```
 
 ## sso.idp.ls
