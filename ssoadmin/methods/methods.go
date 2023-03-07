@@ -1223,6 +1223,26 @@ func ProbeConnectivity(ctx context.Context, r soap.RoundTripper, req *types.Prob
 	return resBody.Res, nil
 }
 
+type RegisterLdapBody struct {
+	Req    *types.RegisterLdap         `xml:"urn:sso RegisterLdap,omitempty"`
+	Res    *types.RegisterLdapResponse `xml:"urn:sso RegisterLdapResponse,omitempty"`
+	Fault_ *soap.Fault                 `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *RegisterLdapBody) Fault() *soap.Fault { return b.Fault_ }
+
+func RegisterLdap(ctx context.Context, r soap.RoundTripper, req *types.RegisterLdap) (*types.RegisterLdapResponse, error) {
+	var reqBody, resBody RegisterLdapBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type RemoveFromLocalGroupBody struct {
 	Req    *types.RemoveFromLocalGroup         `xml:"urn:sso RemoveFromLocalGroup,omitempty"`
 	Res    *types.RemoveFromLocalGroupResponse `xml:"urn:sso RemoveFromLocalGroupResponse,omitempty"`
@@ -1613,6 +1633,46 @@ func (b *UpdateExternalDomainDetailsBody) Fault() *soap.Fault { return b.Fault_ 
 
 func UpdateExternalDomainDetails(ctx context.Context, r soap.RoundTripper, req *types.UpdateExternalDomainDetails) (*types.UpdateExternalDomainDetailsResponse, error) {
 	var reqBody, resBody UpdateExternalDomainDetailsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type UpdateLdapBody struct {
+	Req    *types.UpdateLdap         `xml:"urn:sso UpdateLdap,omitempty"`
+	Res    *types.UpdateLdapResponse `xml:"urn:sso UpdateLdapResponse,omitempty"`
+	Fault_ *soap.Fault               `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *UpdateLdapBody) Fault() *soap.Fault { return b.Fault_ }
+
+func UpdateLdap(ctx context.Context, r soap.RoundTripper, req *types.UpdateLdap) (*types.UpdateLdapResponse, error) {
+	var reqBody, resBody UpdateLdapBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type UpdateLdapAuthnTypeBody struct {
+	Req    *types.UpdateLdapAuthnType         `xml:"urn:sso UpdateLdapAuthnType,omitempty"`
+	Res    *types.UpdateLdapAuthnTypeResponse `xml:"urn:sso UpdateLdapAuthnTypeResponse,omitempty"`
+	Fault_ *soap.Fault                        `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *UpdateLdapAuthnTypeBody) Fault() *soap.Fault { return b.Fault_ }
+
+func UpdateLdapAuthnType(ctx context.Context, r soap.RoundTripper, req *types.UpdateLdapAuthnType) (*types.UpdateLdapAuthnTypeResponse, error) {
+	var reqBody, resBody UpdateLdapAuthnTypeBody
 
 	reqBody.Req = req
 
