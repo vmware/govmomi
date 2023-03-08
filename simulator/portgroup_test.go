@@ -158,3 +158,71 @@ func TestPortgroupBackingWithNSX(t *testing.T) {
 		}
 	}, model)
 }
+
+func TestPortgroupUplinkFlag(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	defer m.Remove()
+
+	c := m.Service.client
+
+	dvs := object.NewDistributedVirtualSwitch(c,
+		Map.Any("DistributedVirtualSwitch").Reference())
+
+	// pg1 with uplink=true, pg2 with uplink=false, pg3 with nil uplink field
+	pgTypes := map[string]*bool{"pg1": new(bool), "pg2": new(bool), "pg3": nil}
+	*pgTypes["pg1"], *pgTypes["pg2"] = true, false
+
+	for pgName, uplink := range pgTypes {
+		spec := []types.DVPortgroupConfigSpec{
+			{
+				Name:   pgName,
+				Uplink: uplink,
+			},
+		}
+
+		task, err := dvs.AddPortgroup(ctx, spec)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	pgs := Map.All("DistributedVirtualPortgroup")
+	for _, obj := range pgs {
+		pg := obj.(*DistributedVirtualPortgroup)
+		if val, ok := pgTypes[pg.Config.Name]; ok {
+			if pg.Config.Uplink == nil && val == nil {
+				delete(pgTypes, pg.Config.Name)
+				continue
+			}
+			if pg.Config.Uplink == nil && val != nil {
+				t.Fatalf("expect pg.Config.Uplink==nil; got %v,%v",
+					pg.Config.Uplink, val)
+			}
+			if pg.Config.Uplink != nil && val == nil {
+				t.Fatalf("expect pg.Config.Uplink!=nil; got %v,%v",
+					pg.Config.Uplink, val)
+			}
+			if *pg.Config.Uplink != *val {
+				t.Fatalf("expect *pg.Config.Uplink==*val; got %v,%v",
+					*pg.Config.Uplink, *val)
+			}
+			delete(pgTypes, pg.Config.Name)
+		}
+	}
+	if len(pgTypes) != 0 {
+		t.Fatalf("failed to find portgroups %v", pgs)
+	}
+}

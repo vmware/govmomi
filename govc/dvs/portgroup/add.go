@@ -63,6 +63,11 @@ The '-auto-expand' option is labeled in the UI as "Port allocation".
 The default value is false, behaves as the UI labeled "Fixed" choice.
 When given '-auto-expand=true', behaves as the UI labeled "Elastic" choice.
 
+The '-uplink' is optional argument. Absence of '-uplink' argument sets <nil> value
+When given '-uplink' without value sets uplink field to true
+When given '-uplink=false' sets uplink field to false
+When given '-uplink=true' sets uplink field to true
+
 Examples:
   govc dvs.create DSwitch
   govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork

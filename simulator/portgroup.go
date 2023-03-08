@@ -48,6 +48,7 @@ func (s *DistributedVirtualPortgroup) ReconfigureDVPortgroupTask(ctx *Context, r
 		s.Config.LogicalSwitchUuid = req.Spec.LogicalSwitchUuid
 		s.Config.BackingType = req.Spec.BackingType
 
+		s.Config.Uplink = req.Spec.Uplink
 		return nil, nil
 	})
 
