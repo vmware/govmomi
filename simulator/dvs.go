@@ -46,6 +46,7 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 			pg := &DistributedVirtualPortgroup{}
 			pg.Name = spec.Name
 			pg.Entity().Name = pg.Name
+
 			// Standard AddDVPortgroupTask() doesn't allow duplicate names, but NSX 3.0 does create some DVPGs with the same name.
 			// Allow duplicate names using this prefix so we can reproduce and test this condition.
 			if strings.HasPrefix(pg.Name, "NSX-") || spec.BackingType == string(types.DistributedVirtualPortgroupBackingTypeNsx) {
