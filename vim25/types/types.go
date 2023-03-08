@@ -12550,6 +12550,7 @@ type DVPortgroupConfigSpec struct {
 	VendorSpecificConfig         []DistributedVirtualSwitchKeyedOpaqueBlob `xml:"vendorSpecificConfig,omitempty" json:"vendorSpecificConfig,omitempty"`
 	AutoExpand                   *bool                                     `xml:"autoExpand" json:"autoExpand,omitempty"`
 	VmVnicNetworkResourcePoolKey string                                    `xml:"vmVnicNetworkResourcePoolKey,omitempty" json:"vmVnicNetworkResourcePoolKey,omitempty"`
+	Uplink                       *bool                                     `xml:"uplink" json:"uplink,omitempty"`
 	TransportZoneUuid            string                                    `xml:"transportZoneUuid,omitempty" json:"transportZoneUuid,omitempty"`
 	TransportZoneName            string                                    `xml:"transportZoneName,omitempty" json:"transportZoneName,omitempty"`
 	LogicalSwitchUuid            string                                    `xml:"logicalSwitchUuid,omitempty" json:"logicalSwitchUuid,omitempty"`
