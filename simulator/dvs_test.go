@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/task"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -277,5 +278,172 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 				}
 			}
 		})
+	}
+}
+
+func TestDVSAddHostToSpecificPortgroup(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client
+
+	finder := find.NewFinder(c, false)
+	dc, _ := finder.DatacenterList(ctx, "*")
+	finder.SetDatacenter(dc[0])
+	folders, _ := dc[0].Folders(ctx)
+	hosts, _ := finder.HostSystemList(ctx, "*/*")
+
+	var spec types.DVSCreateSpec
+	spec.ConfigSpec = &types.VMwareDVSConfigSpec{}
+	spec.ConfigSpec.GetDVSConfigSpec().Name = "DVS1"
+
+	dtask, err := folders.NetworkFolder.CreateDVS(ctx, spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	info, err := dtask.WaitForResult(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dvs := object.NewDistributedVirtualSwitch(c, info.Result.(types.ManagedObjectReference))
+
+	dswitch := dvs
+	pgs := []struct {
+		portGroupName string
+		uplink        bool
+	}{
+		{"upg0", true}, //Add hosts to specified portgroup
+		{"", false},    //Remove hosts from DVS
+		{"upg1", true}, //Add hosts to specified portgroup
+	}
+	for _, pgDet := range pgs {
+		var (
+			pgKey     string
+			pg        mo.DistributedVirtualPortgroup
+			portGroup *object.DistributedVirtualPortgroup
+			backing   *types.DistributedVirtualSwitchHostMemberPnicBacking
+		)
+
+		//Create Configuration
+		config := &types.DVSConfigSpec{}
+		if pgDet.portGroupName != "" {
+			dtask, err = dswitch.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{
+				{Name: pgDet.portGroupName, NumPorts: 1, Uplink: &pgDet.uplink}})
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			err = dtask.Wait(ctx)
+			if err != nil {
+				t.Fatalf("%s", err)
+			}
+
+			prtgrp, err := finder.Network(ctx, pgDet.portGroupName)
+			if err != nil {
+				t.Fatalf("%s", err)
+			}
+			var ok bool
+			portGroup, ok = prtgrp.(*object.DistributedVirtualPortgroup)
+			if !ok {
+				t.Fatalf("failed to convert %T to %T", prtgrp, portGroup)
+			}
+			err = portGroup.Properties(ctx, portGroup.Reference(), []string{"config"}, &pg)
+			if err != nil {
+				t.Fatalf("%s", err)
+			}
+			pgKey = pg.Config.Key
+
+			backing = new(types.DistributedVirtualSwitchHostMemberPnicBacking)
+			backing.PnicSpec = append(backing.PnicSpec, types.DistributedVirtualSwitchHostMemberPnicSpec{
+				PnicDevice:         "vmnic0",
+				UplinkPortgroupKey: pgKey,
+			})
+		}
+
+		//Apply Configuration
+		for _, host := range hosts {
+			config.Host = append(config.Host,
+				types.DistributedVirtualSwitchHostMemberConfigSpec{Host: host.Reference()})
+		}
+		operation := types.ConfigSpecOperationAdd
+		if pgDet.portGroupName == "" {
+			operation = types.ConfigSpecOperationRemove
+		}
+
+		for i := range config.Host {
+			config.Host[i].Operation = string(operation)
+			config.Host[i].Backing = backing
+		}
+
+		dtask, err = dswitch.Reconfigure(ctx, config)
+		if err != nil {
+			t.Fatalf("%s", err)
+		}
+		err = dtask.Wait(ctx)
+		if err != nil {
+			t.Fatalf("%s", err)
+		}
+
+		//Validate Configuration
+		if pgDet.portGroupName != "" {
+			prtgrps, err := finder.NetworkList(ctx, "upg*")
+			if err != nil {
+				t.Fatalf("%s", err)
+			}
+
+			fetchedHosts := make(map[string]map[string]struct{})
+			for _, prtgrp := range prtgrps {
+				portGroup, ok := prtgrp.(*object.DistributedVirtualPortgroup)
+				if !ok {
+					t.Fatalf("failed to convert %T to %T", prtgrp, portGroup)
+				}
+				err = portGroup.Properties(ctx, portGroup.Reference(), []string{"config", "host"}, &pg)
+				if err != nil {
+					t.Fatalf("%s", err)
+				}
+				fetchedHosts[pg.Config.Name] = make(map[string]struct{})
+				for _, hobj := range pg.Host {
+					var h mo.HostSystem
+					err := object.NewHostSystem(c, hobj).Properties(ctx, hobj.Reference(),
+						[]string{"managedEntity"}, &h)
+					if err != nil {
+						t.Fatalf("%s", err)
+					}
+					hostKey := h.ExtensibleManagedObject.Self.Value
+					fetchedHosts[pg.Config.Name][hostKey] = struct{}{}
+				}
+				for pgName, fHosts := range fetchedHosts {
+					if pgName == pgDet.portGroupName { //All hosts should get added in this pg
+						if len(fHosts) != len(hosts) {
+							t.Fatalf("fetched hosts %v does not match with %v\n",
+								len(fHosts), len(hosts))
+						}
+					} else { //No host should get added to other pgs
+						if len(fHosts) != 0 {
+							t.Fatalf("fetched hosts %v found in portgroup %v\n",
+								fHosts, pgName)
+						}
+					}
+				}
+			}
+		}
+	}
+
+	dtask, err = dvs.Destroy(ctx)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = dtask.Wait(ctx)
+	if err != nil {
+		t.Fatal(err)
 	}
 }
