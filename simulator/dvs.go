@@ -197,12 +197,24 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				members = append(members, member.Host)
 				parent := ctx.Map.Get(*host.HostSystem.Parent)
 
+				hostPnicBacking, _ := member.Backing.(*types.DistributedVirtualSwitchHostMemberPnicBacking)
 				var pgs []types.ManagedObjectReference
 				for _, ref := range s.Portgroup {
 					pg := ctx.Map.Get(ref).(*DistributedVirtualPortgroup)
 					pgs = append(pgs, ref)
 
-					pgHosts := append(pg.Host, member.Host)
+					pgHosts := make([]types.ManagedObjectReference, 0)
+					if hostPnicBacking != nil {
+						for _, pnicSpec := range hostPnicBacking.PnicSpec {
+							if pnicSpec.UplinkPortgroupKey == pg.Config.Key {
+								pgHosts = append(pg.Host, member.Host)
+								break //found right portgroup
+							}
+						}
+					} else {
+						pgHosts = append(pg.Host, member.Host)
+					}
+
 					ctx.Map.Update(pg, []types.PropertyChange{
 						{Name: "host", Val: pgHosts},
 					})

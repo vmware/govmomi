@@ -35,6 +35,8 @@ type add struct {
 
 	path string
 	pnic string
+
+	portgroup string
 }
 
 func init() {
@@ -47,6 +49,7 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar(&cmd.path, "dvs", "", "DVS path")
 	f.StringVar(&cmd.pnic, "pnic", "vmnic0", "Name of the host physical NIC")
+	f.StringVar(&cmd.portgroup, "portgroup", "", "DVS portgroup name")
 }
 
 func (cmd *add) Process(ctx context.Context) error {
@@ -87,6 +90,27 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 		return fmt.Errorf("%s (%T) is not of type %T", cmd.path, net, dvs)
 	}
 
+	uplinkPortgroupKey := ""
+	if cmd.portgroup != "" {
+		prtgrp, err := finder.Network(ctx, cmd.portgroup)
+		if err != nil {
+			return err
+		}
+		portgroup, ok := prtgrp.(*object.DistributedVirtualPortgroup)
+		if !ok {
+			return fmt.Errorf("%s (%T) is not of type %T", cmd.portgroup, prtgrp, portgroup)
+		}
+		var pg mo.DistributedVirtualPortgroup
+		err = portgroup.Properties(ctx, portgroup.Reference(), []string{"config"}, &pg)
+		if err != nil {
+			return err
+		}
+		if pg.Config.Uplink == nil || !*pg.Config.Uplink {
+			return fmt.Errorf("%s is not an uplink portgroup", cmd.portgroup)
+		}
+		uplinkPortgroupKey = pg.Config.Key
+	}
+
 	var s mo.DistributedVirtualSwitch
 	err = dvs.Properties(ctx, dvs.Reference(), []string{"config"}, &s)
 	if err != nil {
@@ -97,7 +121,8 @@ func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	for _, vmnic := range strings.Split(cmd.pnic, ",") {
 		backing.PnicSpec = append(backing.PnicSpec, types.DistributedVirtualSwitchHostMemberPnicSpec{
-			PnicDevice: strings.TrimSpace(vmnic),
+			PnicDevice:         strings.TrimSpace(vmnic),
+			UplinkPortgroupKey: uplinkPortgroupKey,
 		})
 	}
 
