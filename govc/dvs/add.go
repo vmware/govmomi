@@ -67,7 +67,11 @@ func (cmd *add) Description() string {
 	return `Add hosts to DVS.
 
 Examples:
-  govc dvs.add -dvs dvsName -pnic vmnic1 hostA hostB hostC`
+  govc dvs.add -dvs dvsName -pnic vmnic1 hostA hostB hostC
+ 
+  Optional Parameter: -portgroup <pgname> 
+  Makes sure that hosts gets added to only specified portgroup of DVS
+  `
 }
 
 func (cmd *add) Run(ctx context.Context, f *flag.FlagSet) error {
