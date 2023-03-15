@@ -1788,11 +1788,16 @@ Add hosts to DVS.
 
 Examples:
   govc dvs.add -dvs dvsName -pnic vmnic1 hostA hostB hostC
+ 
+  Optional Parameter: -portgroup <pgname> 
+  Makes sure that hosts gets added to only specified portgroup of DVS
+  
 
 Options:
   -dvs=                  DVS path
   -host=                 Host system [GOVC_HOST]
   -pnic=vmnic0           Name of the host physical NIC
+  -portgroup=            DVS portgroup name
 ```
 
 ## dvs.change
