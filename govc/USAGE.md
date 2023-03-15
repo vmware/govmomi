@@ -1853,6 +1853,11 @@ The '-auto-expand' option is labeled in the UI as "Port allocation".
 The default value is false, behaves as the UI labeled "Fixed" choice.
 When given '-auto-expand=true', behaves as the UI labeled "Elastic" choice.
 
+The '-uplink' is optional argument. Absence of '-uplink' argument sets <nil> value
+When given '-uplink' without value sets uplink field to true
+When given '-uplink=false' sets uplink field to false
+When given '-uplink=true' sets uplink field to true
+
 Examples:
   govc dvs.create DSwitch
   govc dvs.portgroup.add -dvs DSwitch -type earlyBinding -nports 16 ExternalNetwork
@@ -1864,6 +1869,7 @@ Options:
   -dvs=                  DVS path
   -nports=128            Number of ports
   -type=earlyBinding     Portgroup type (earlyBinding|lateBinding|ephemeral)
+  -uplink=<nil>          uplink=true means uplink Portgroup
   -vlan=0                VLAN ID
   -vlan-mode=vlan        vlan mode (vlan|trunking)
   -vlan-range=0-4094     VLAN Ranges with comma delimited
@@ -1884,6 +1890,7 @@ Options:
   -auto-expand=<nil>     Ignore the limit on the number of ports
   -nports=0              Number of ports
   -type=earlyBinding     Portgroup type (earlyBinding|lateBinding|ephemeral)
+  -uplink=<nil>          uplink=true means uplink Portgroup
   -vlan=0                VLAN ID
   -vlan-mode=vlan        vlan mode (vlan|trunking)
   -vlan-range=0-4094     VLAN Ranges with comma delimited
