@@ -35,7 +35,7 @@ help: ## Display this help
 .PHONY: $(GOLANGCI_LINT)
 golangci-lint: $(GOLANGCI_LINT) ## Install golangci-lint
 $(GOLANGCI_LINT): go.mod
-	go build -tags=tools -o $@ github.com/golangci/golangci-lint/cmd/golangci-lint
+	go build -tags=govmomi_tools -o $@ github.com/golangci/golangci-lint/cmd/golangci-lint
 
 
 ## --------------------------------------

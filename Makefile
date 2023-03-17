@@ -58,7 +58,7 @@ lint-go: $(GOLANGCI_LINT) ## Lint codebase
 	$(GOLANGCI_LINT) run -v $(GOLANGCI_LINT_FLAGS)
 
 .PHONY: lint-go-full
-lint-go-full: GOLANGCI_LINT_FLAGS = --fast=false
+lint-go-full: GOLANGCI_LINT_FLAGS = --fast=false --max-same-issues=200
 lint-go-full: lint-go ## Run slower linters to detect possible issues
 
 .PHONY: fix

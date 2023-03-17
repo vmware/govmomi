@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -198,9 +198,9 @@ func (s *Server) OpenFile(name string, mode int32) (File, error) {
 // Note that callers on the VMX side that reach this path are only concerned with:
 // - does the file exist?
 // - size:
-//   + used for UI progress with desktop Drag-N-Drop operations, which toolbox does not support.
-//   + sent to as Content-Length header in response to GET of FileTransferInformation.Url,
-//     if the first ReadV3 size is > HGFS_LARGE_PACKET_MAX
+// + used for UI progress with desktop Drag-N-Drop operations, which toolbox does not support.
+// + sent to as Content-Length header in response to GET of FileTransferInformation.Url,
+// if the first ReadV3 size is > HGFS_LARGE_PACKET_MAX
 func (s *Server) Stat(name string) (os.FileInfo, error) {
 	u := urlParse(name)
 
