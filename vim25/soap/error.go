@@ -17,9 +17,11 @@ limitations under the License.
 package soap
 
 import (
+	"crypto/x509"
 	"encoding/json"
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -126,4 +128,28 @@ func IsVimFault(err error) bool {
 
 func ToVimFault(err error) types.BaseMethodFault {
 	return err.(vimFaultError).fault
+}
+
+func IsCertificateUntrusted(err error) bool {
+	switch err.(type) {
+	case x509.UnknownAuthorityError, x509.HostnameError:
+		return true
+	}
+
+	// The err variable may not be a special type of x509 or HTTP
+	// error that can be validated by a type assertion. The err variable is
+	// in fact be an *errors.errorString.
+
+	msgs := []string{
+		"certificate is not trusted",
+		"certificate signed by unknown authority",
+	}
+
+	for _, msg := range msgs {
+		if strings.HasSuffix(err.Error(), msg) {
+			return true
+		}
+	}
+
+	return false
 }
