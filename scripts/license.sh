@@ -7,7 +7,7 @@ header_dir=$(dirname $0)/headers
 tmpfile=$(mktemp)
 trap "rm -f ${tmpfile}" EXIT
 
-git ls-files | while read file; do
+git diff --name-status main | awk '{print $2}' | while read file; do
   years=( $(git log --format='%ai' $file | cut -d- -f1 | sort -u) )
   num_years=${#years[@]}
 
@@ -25,7 +25,7 @@ git ls-files | while read file; do
   fi
 
   case "$file" in
-    vim25/xml/*)
+    vim25/{json,xml}/*)
       # Ignore
       ;;
     *.go)
@@ -45,4 +45,3 @@ git ls-files | while read file; do
       ;;
   esac
 done
-

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -1022,8 +1022,9 @@ var vmwOUI = net.HardwareAddr([]byte{0x0, 0xc, 0x29})
 
 // From http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.vsphere.networking.doc%2FGUID-DC7478FF-DC44-4625-9AD7-38208C56A552.html
 // "The host generates generateMAC addresses that consists of the VMware OUI 00:0C:29 and the last three octets in hexadecimal
-//  format of the virtual machine UUID.  The virtual machine UUID is based on a hash calculated by using the UUID of the
-//  ESXi physical machine and the path to the configuration file (.vmx) of the virtual machine."
+//
+//	format of the virtual machine UUID.  The virtual machine UUID is based on a hash calculated by using the UUID of the
+//	ESXi physical machine and the path to the configuration file (.vmx) of the virtual machine."
 func (vm *VirtualMachine) generateMAC(unit int32) string {
 	id := []byte(vm.Config.Uuid)
 

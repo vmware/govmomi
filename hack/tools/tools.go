@@ -1,4 +1,5 @@
-// +build tools
+//go:build govmomi_tools
+// +build govmomi_tools
 
 /*
 Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.

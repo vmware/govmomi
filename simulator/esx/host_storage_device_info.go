@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,7 +20,8 @@ import "github.com/vmware/govmomi/vim25/types"
 
 // HostStorageDeviceInfo is the default template for the HostSystem config.storageDevice property.
 // Capture method:
-//   govc object.collect -s -dump HostSystem:ha-host config.storageDevice
+//
+//	govc object.collect -s -dump HostSystem:ha-host config.storageDevice
 var HostStorageDeviceInfo = types.HostStorageDeviceInfo{
 	HostBusAdapter: []types.BaseHostHostBusAdapter{
 		&types.HostParallelScsiHba{

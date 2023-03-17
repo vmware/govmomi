@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -113,7 +113,6 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 // The detail for the progress update is set to an empty string. If the task
 // finishes in the error state, the error instance is passed through as well.
 // Note that this error is the same error that is returned by this function.
-//
 func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Collector, s progress.Sinker) (*types.TaskInfo, error) {
 	cb := &taskCallback{}
 
