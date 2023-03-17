@@ -19,7 +19,6 @@ package simulator
 import (
 	"context"
 	"crypto/tls"
-	"crypto/x509"
 	"errors"
 	"io"
 	"io/ioutil"
@@ -328,9 +327,9 @@ func TestServeHTTPS(t *testing.T) {
 		t.Fatalf("err type=%T", err)
 	}
 
-	_, ok = uerr.Err.(x509.UnknownAuthorityError)
+	ok = soap.IsCertificateUntrusted(uerr.Err)
 	if !ok {
-		t.Fatalf("err type=%T", uerr.Err)
+		t.Fatalf("err type=%T (%s)", uerr.Err, uerr.Err)
 	}
 
 	sinfo := ts.CertificateInfo()
