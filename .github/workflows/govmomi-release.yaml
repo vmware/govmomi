@@ -55,7 +55,7 @@ jobs:
           fi
 
           # check it starts with "v"
-          if [[ ${{ inputs.tag }} != v* ]]; then 
+          if [[ ${{ inputs.tag }} != v* ]]; then
             echo "::error:: tag must have a \"v\" prefix"
             exit 1
           fi
@@ -72,7 +72,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v4
         with:
-          go-version: 1.18
+          go-version: 1.20
 
       - name: Update version.go
         run: |
@@ -99,9 +99,9 @@ jobs:
 
           # find latest tag sorted by semver ref
           LATEST=$(git tag --sort=v:refname | tail -1)
-          
+
           # check whether the new tag is also the latest
-          if [[ $LATEST == $TAG ]]; then 
+          if [[ $LATEST == $TAG ]]; then
             echo "::set-output name=islatest::true"
           else
             echo "::set-output name=islatest::false"
@@ -186,7 +186,7 @@ jobs:
           body: |
             ### Update CHANGELOG.md for new release.
 
-            > **Note** 
+            > **Note**
             > Due to a [limitation](https://github.com/peter-evans/create-pull-request/blob/master/docs/concepts-guidelines.md#triggering-further-workflow-runs) in Github Actions please **close and immediately reopen** this PR to trigger the required workflow checks before merging.
 
       - name: Pull Request Information
