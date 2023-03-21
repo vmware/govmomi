@@ -138,7 +138,11 @@ func (e *Executor) Execute(req *internal.ExecuteSoapRequest, res interface{}) er
 
 	if x.Returnval != nil {
 		if x.Returnval.Fault != nil {
-			return errors.New(x.Returnval.Fault.FaultMsg)
+			msg := x.Returnval.Fault.FaultMsg
+			if x.Returnval.Fault.FaultDetail != "" {
+				msg = fmt.Sprintf("%s %s", msg, x.Returnval.Fault.FaultDetail)
+			}
+			return errors.New(msg)
 		}
 
 		if err := xml.Unmarshal([]byte(x.Returnval.Response), res); err != nil {
