@@ -266,14 +266,22 @@ func (s *handler) AttachedObjects(tag vim.VslmTagEntry) ([]vim.ManagedObjectRefe
 	}
 	var ids []vim.ManagedObjectReference
 	for id := range s.Association[t.ID] {
-		ids = append(ids, vim.ManagedObjectReference(id))
+		ids = append(
+			ids,
+			vim.ManagedObjectReference{
+				Type:  id.Type,
+				Value: id.Value,
+			})
 	}
 	return ids, nil
 }
 
 // AttachedTags is meant for internal use via simulator.Registry.tagManager
 func (s *handler) AttachedTags(ref vim.ManagedObjectReference) ([]vim.VslmTagEntry, vim.BaseMethodFault) {
-	oid := internal.AssociatedObject(ref)
+	oid := internal.AssociatedObject{
+		Type:  ref.Type,
+		Value: ref.Value,
+	}
 	var tags []vim.VslmTagEntry
 	for id, objs := range s.Association {
 		if objs[oid] {
@@ -294,7 +302,10 @@ func (s *handler) AttachTag(ref vim.ManagedObjectReference, tag vim.VslmTagEntry
 	if t == nil {
 		return new(vim.NotFound)
 	}
-	s.Association[t.ID][internal.AssociatedObject(ref)] = true
+	s.Association[t.ID][internal.AssociatedObject{
+		Type:  ref.Type,
+		Value: ref.Value,
+	}] = true
 	return nil
 }
 
@@ -304,7 +315,10 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 	if t == nil {
 		return new(vim.NotFound)
 	}
-	delete(s.Association[t.ID], internal.AssociatedObject(id))
+	delete(s.Association[t.ID], internal.AssociatedObject{
+		Type:  id.Type,
+		Value: id.Value,
+	})
 	return nil
 }
 
@@ -1924,7 +1938,10 @@ func (s *handler) libraryItemOVFID(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				return err
 			}
-			id := vcenter.ResourceID(info.Entity)
+			id := vcenter.ResourceID{
+				Type:  info.Entity.Type,
+				Value: info.Entity.Value,
+			}
 			d.Succeeded = true
 			d.ResourceID = &id
 			return nil
