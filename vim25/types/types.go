@@ -31937,8 +31937,9 @@ func init() {
 }
 
 type ManagedObjectReference struct {
-	Type  string `xml:"type,attr" json:"type"`
-	Value string `xml:",chardata" json:"value"`
+	Type       string `xml:"type,attr" json:"type"`
+	Value      string `xml:",chardata" json:"value"`
+	ServerGUID string `xml:"serverGuid,attr,omitempty" json:"serverGuid,omitempty"`
 }
 
 func init() {

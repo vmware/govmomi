@@ -59,7 +59,10 @@ type AssociatedObject struct {
 
 // Reference implements mo.Reference
 func (o AssociatedObject) Reference() types.ManagedObjectReference {
-	return types.ManagedObjectReference(o)
+	return types.ManagedObjectReference{
+		Type:  o.Type,
+		Value: o.Value,
+	}
 }
 
 // Association for tag-association requests.
@@ -69,9 +72,11 @@ type Association struct {
 
 // NewAssociation returns an Association, converting ref to an AssociatedObject.
 func NewAssociation(ref mo.Reference) Association {
-	obj := AssociatedObject(ref.Reference())
 	return Association{
-		ObjectID: &obj,
+		ObjectID: &AssociatedObject{
+			Type:  ref.Reference().Type,
+			Value: ref.Reference().Value,
+		},
 	}
 }
 

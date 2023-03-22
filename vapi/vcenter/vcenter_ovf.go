@@ -297,8 +297,10 @@ func (c *Manager) DeployLibraryItem(ctx context.Context, libraryItemID string, d
 		return nil, err
 	}
 	if res.Succeeded {
-		ref := types.ManagedObjectReference(*res.ResourceID)
-		return &ref, nil
+		return &types.ManagedObjectReference{
+			Type:  res.ResourceID.Type,
+			Value: res.ResourceID.Value,
+		}, nil
 	}
 	return nil, res.Error
 }
