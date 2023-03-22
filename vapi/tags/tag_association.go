@@ -81,7 +81,11 @@ func (c *Manager) AttachTagToMultipleObjects(ctx context.Context, tagID string, 
 
 	var ids []internal.AssociatedObject
 	for i := range refs {
-		ids = append(ids, internal.AssociatedObject(refs[i].Reference()))
+		ref := refs[i].Reference()
+		ids = append(ids, internal.AssociatedObject{
+			Type:  ref.Type,
+			Value: ref.Value,
+		})
 	}
 
 	spec := struct {
@@ -116,7 +120,10 @@ func (c *Manager) AttachMultipleTagsToObject(ctx context.Context, tagIDs []strin
 		}
 	}
 
-	obj := internal.AssociatedObject(ref.Reference())
+	obj := internal.AssociatedObject{
+		Type:  ref.Reference().Type,
+		Value: ref.Reference().Value,
+	}
 	spec := struct {
 		ObjectID internal.AssociatedObject `json:"object_id"`
 		TagIDs   []string                  `json:"tag_ids"`
@@ -166,7 +173,10 @@ func (c *Manager) DetachMultipleTagsFromObject(ctx context.Context, tagIDs []str
 		}
 	}
 
-	obj := internal.AssociatedObject(ref.Reference())
+	obj := internal.AssociatedObject{
+		Type:  ref.Reference().Type,
+		Value: ref.Reference().Value,
+	}
 	spec := struct {
 		ObjectID internal.AssociatedObject `json:"object_id"`
 		TagIDs   []string                  `json:"tag_ids"`
@@ -337,7 +347,11 @@ func (t *AttachedTags) UnmarshalJSON(b []byte) error {
 func (c *Manager) ListAttachedTagsOnObjects(ctx context.Context, objectID []mo.Reference) ([]AttachedTags, error) {
 	var ids []internal.AssociatedObject
 	for i := range objectID {
-		ids = append(ids, internal.AssociatedObject(objectID[i].Reference()))
+		ref := objectID[i].Reference()
+		ids = append(ids, internal.AssociatedObject{
+			Type:  ref.Type,
+			Value: ref.Value,
+		})
 	}
 
 	spec := struct {

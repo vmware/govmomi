@@ -469,6 +469,7 @@ class ComplexType < Simple
       extension = @node.at_xpath(".//xsd:extension")
       type = extension["base"].split(":", 2)[1]
       io.print "Value %s `xml:\",chardata\" json:\"value\"`\n" % type
+      io.print "ServerGUID %s `xml:\"serverGuid,attr,omitempty\" json:\"serverGuid,omitempty\"`\n" % type
     end
 
     def peek

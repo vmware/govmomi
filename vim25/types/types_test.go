@@ -17,11 +17,72 @@ limitations under the License.
 package types
 
 import (
+	"bytes"
 	"reflect"
+	"strings"
 	"testing"
 
+	"github.com/vmware/govmomi/vim25/json"
 	"github.com/vmware/govmomi/vim25/xml"
 )
+
+func TestManagedObjectReference(t *testing.T) {
+
+	testCases := []struct {
+		name    string
+		obj     ManagedObjectReference
+		expXML  string
+		expJSON string
+	}{
+		{
+			name: "with server GUID",
+			obj: ManagedObjectReference{
+				Type:       "fake",
+				Value:      "fake",
+				ServerGUID: "fake",
+			},
+			expXML:  `<ManagedObjectReference type="fake" serverGuid="fake">fake</ManagedObjectReference>`,
+			expJSON: `{"_typeName":"ManagedObjectReference","type":"fake","value":"fake","serverGuid":"fake"}`,
+		},
+		{
+			name: "sans server GUID",
+			obj: ManagedObjectReference{
+				Type:  "fake",
+				Value: "fake",
+			},
+			expXML:  `<ManagedObjectReference type="fake">fake</ManagedObjectReference>`,
+			expJSON: `{"_typeName":"ManagedObjectReference","type":"fake","value":"fake"}`,
+		},
+	}
+
+	for i := range testCases {
+		tc := testCases[i] // capture the test case
+
+		t.Run(tc.name, func(t *testing.T) {
+			t.Run("xml", func(t *testing.T) {
+				act, err := xml.Marshal(tc.obj)
+				if err != nil {
+					t.Fatal(err)
+				}
+				if e, a := tc.expXML, string(act); e != a {
+					t.Fatalf("failed to marshal MoRef to XML: exp=%s, act=%s", e, a)
+				}
+			})
+			t.Run("json", func(t *testing.T) {
+				var w bytes.Buffer
+				enc := json.NewEncoder(&w)
+				enc.SetIndent("", "")
+				enc.SetDiscriminator("_typeName", "_value", "")
+				if err := enc.Encode(tc.obj); err != nil {
+					t.Fatal(err)
+				}
+				if e, a := tc.expJSON, strings.TrimRight(w.String(), "\n"); e != a {
+					t.Fatalf("failed to marshal MoRef to JSON: exp=%s, act=%s", e, a)
+				}
+			})
+		})
+	}
+}
 
 func TestVirtualMachineConfigSpec(t *testing.T) {
 	spec := VirtualMachineConfigSpec{
