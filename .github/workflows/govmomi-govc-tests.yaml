@@ -72,6 +72,11 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-${{ matrix.go-version }}-
 
+      - name: Install socat
+        run: |
+          sudo apt-get update -y && \
+          sudo apt-get install -y socat
+
       - name: Run ${{ matrix.cmd }}
         run: |
           make ${{ matrix.cmd }}

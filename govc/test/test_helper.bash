@@ -56,7 +56,12 @@ vcsim_start() {
 
     vcsim -l 127.0.0.1:0 -E "$GOVC_SIM_ENV" "$@" &
 
-    eval "$(cat "$GOVC_SIM_ENV")"
+    # Use socat with -T1 so the command will time out in -T seconds
+    # to prevent tests from hanging occasionally in GitHub Actions.
+    # This may still result in a failed test, but it won't block and
+    # should identify the cause of the hanging tests on GH Actions as
+    # related to the theorized issue of the named pipe used here.
+    eval "$(socat -u -T1 $GOVC_SIM_ENV -)"
 }
 
 vcsim_stop() {
