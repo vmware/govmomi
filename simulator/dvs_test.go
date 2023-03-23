@@ -205,7 +205,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			&types.DistributedVirtualSwitchPortCriteria{},
 			[]types.DistributedVirtualPort{
 				{PortgroupKey: pgs[0].Value, Key: "0"},
-				{PortgroupKey: pgs[1].Value, Key: "0"},
+				{PortgroupKey: pgs[1].Value, Key: "1"},
 			},
 		},
 		{
@@ -225,7 +225,7 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 				Inside:       types.NewBool(false),
 			},
 			[]types.DistributedVirtualPort{
-				{PortgroupKey: pgs[1].Value, Key: "0"},
+				{PortgroupKey: pgs[1].Value, Key: "1"},
 			},
 		},
 		{
@@ -233,14 +233,18 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			&types.DistributedVirtualSwitchPortCriteria{
 				PortKey: []string{"1"},
 			},
-			[]types.DistributedVirtualPort{},
+			[]types.DistributedVirtualPort{
+				{PortgroupKey: pgs[1].Value, Key: "1"},
+			},
 		},
 		{
 			"connected",
 			&types.DistributedVirtualSwitchPortCriteria{
 				Connected: types.NewBool(true),
 			},
-			[]types.DistributedVirtualPort{},
+			[]types.DistributedVirtualPort{
+				{PortgroupKey: pgs[1].Value, Key: "1"},
+			},
 		},
 		{
 			"not connected",
@@ -249,7 +253,6 @@ func TestFetchDVPortsCriteria(t *testing.T) {
 			},
 			[]types.DistributedVirtualPort{
 				{PortgroupKey: pgs[0].Value, Key: "0"},
-				{PortgroupKey: pgs[1].Value, Key: "0"},
 			},
 		},
 	}
@@ -446,4 +449,110 @@ func TestDVSAddHostToSpecificPortgroup(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+}
+
+func TestDVPortsConnecteeDetails(t *testing.T) {
+	m := VPX()
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	c := m.Service.client
+
+	finder := find.NewFinder(c, false)
+	dc, _ := finder.DatacenterList(ctx, "*")
+	finder.SetDatacenter(dc[0])
+	folders, _ := dc[0].Folders(ctx)
+	hosts, _ := finder.HostSystemList(ctx, "*/*")
+
+	var spec types.DVSCreateSpec
+	spec.ConfigSpec = &types.VMwareDVSConfigSpec{}
+	spec.ConfigSpec.GetDVSConfigSpec().Name = "DVS1"
+
+	dtask, err := folders.NetworkFolder.CreateDVS(ctx, spec)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	info, err := dtask.WaitForResult(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	dvs := object.NewDistributedVirtualSwitch(c, info.Result.(types.ManagedObjectReference))
+
+	dswitch := dvs
+	var pg mo.DistributedVirtualPortgroup
+
+	uplink := true
+	pgName := "upg0"
+
+	config := &types.DVSConfigSpec{}
+	dtask, err = dswitch.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{
+		{Name: pgName, NumPorts: int32(len(hosts)), Uplink: &uplink}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = dtask.Wait(ctx)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	prtgrp, err := finder.Network(ctx, pgName)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	portGroup, ok := prtgrp.(*object.DistributedVirtualPortgroup)
+	if !ok {
+		t.Fatalf("failed to convert %T to %T", prtgrp, portGroup)
+	}
+	err = portGroup.Properties(ctx, portGroup.Reference(), []string{"config"}, &pg)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	backing := new(types.DistributedVirtualSwitchHostMemberPnicBacking)
+	backing.PnicSpec = append(backing.PnicSpec, types.DistributedVirtualSwitchHostMemberPnicSpec{
+		PnicDevice:         "vmnic0",
+		UplinkPortgroupKey: pg.Config.Key,
+	})
+
+	expHosts := make(map[types.ManagedObjectReference]struct{})
+	for _, host := range hosts {
+		expHosts[host.Reference()] = struct{}{}
+		config.Host = append(config.Host,
+			types.DistributedVirtualSwitchHostMemberConfigSpec{Host: host.Reference()})
+	}
+	operation := types.ConfigSpecOperationAdd
+
+	for i := range config.Host {
+		config.Host[i].Operation = string(operation)
+		config.Host[i].Backing = backing
+	}
+
+	dtask, err = dswitch.Reconfigure(ctx, config)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	err = dtask.Wait(ctx)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	dvps, err := dswitch.FetchDVPorts(ctx, nil)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	for _, dvp := range dvps {
+		if dvp.Connectee != nil {
+			delete(expHosts, *dvp.Connectee.ConnectedEntity)
+		}
+	}
+	if len(expHosts) != 0 {
+		t.Fatalf("some hosts %v are not present in DVP connected entity", expHosts)
+	}
+
 }

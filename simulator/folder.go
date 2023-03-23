@@ -606,7 +606,7 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			ProductInfo: req.Spec.ProductInfo,
 			Description: spec.Description,
 		}
-
+		dvs.portConnDetails = make(map[string]map[string]connecteeDetails)
 		configInfo := &types.VMwareDVSConfigInfo{
 			DVSConfigInfo: types.DVSConfigInfo{
 				Uuid:                                dvs.Uuid,
