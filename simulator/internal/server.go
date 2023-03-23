@@ -286,15 +286,18 @@ func (s *Server) wrap() {
 	s.Config.ConnState = func(c net.Conn, cs http.ConnState) {
 		s.mu.Lock()
 		defer s.mu.Unlock()
+
 		switch cs {
 		case http.StateNew:
-			s.wg.Add(1)
 			if _, exists := s.conns[c]; exists {
 				panic("invalid state transition")
 			}
 			if s.conns == nil {
 				s.conns = make(map[net.Conn]http.ConnState)
 			}
+			// Add c to the set of tracked conns and increment it to the
+			// waitgroup.
+			s.wg.Add(1)
 			s.conns[c] = cs
 			if s.closed {
 				// Probably just a socket-late-binding dial from
@@ -321,7 +324,14 @@ func (s *Server) wrap() {
 				s.closeConn(c)
 			}
 		case http.StateHijacked, http.StateClosed:
-			s.forgetConn(c)
+			// Remove c from the set of tracked conns and decrement it from the
+			// waitgroup, unless it was previously removed.
+			if _, ok := s.conns[c]; ok {
+				delete(s.conns, c)
+				// Keep Close from returning until the user's ConnState hook
+				// (if any) finishes.
+				defer s.wg.Done()
+			}
 		}
 		if oldHook != nil {
 			oldHook(c, cs)
@@ -339,15 +349,5 @@ func (s *Server) closeConnChan(c net.Conn, done chan<- struct{}) {
 	c.Close()
 	if done != nil {
 		done <- struct{}{}
-	}
-}
-
-// forgetConn removes c from the set of tracked conns and decrements it from the
-// waitgroup, unless it was previously removed.
-// s.mu must be held.
-func (s *Server) forgetConn(c net.Conn) {
-	if _, ok := s.conns[c]; ok {
-		delete(s.conns, c)
-		s.wg.Done()
 	}
 }
