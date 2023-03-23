@@ -23,6 +23,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
@@ -31,6 +32,7 @@ import (
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -2087,5 +2089,130 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 
 	if len(vmm.LayoutEx.File) != fileLayoutExCount {
 		t.Errorf("expected %d, got %d", fileLayoutExCount, len(vmm.LayoutEx.File))
+	}
+}
+
+func TestCreateVmWithAdditionToPortGroup(t *testing.T) {
+	ctx := context.Background()
+
+	m := VPX()
+	m.Datastore = 1
+	defer m.Remove()
+
+	err := m.Create()
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	s := m.Service.NewServer()
+	defer s.Close()
+
+	c := m.Service.client
+	time.Sleep(2 * time.Second)
+	finder := find.NewFinder(c, false)
+	dc, _ := finder.DatacenterList(ctx, "*")
+	finder.SetDatacenter(dc[0])
+	folders, err := dc[0].Folders(ctx)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	folder := folders.DatastoreFolder
+	rp := Map.Any("ResourcePool").(*ResourcePool)
+	pool := object.NewResourcePool(c, rp.Reference())
+	vswitch := Map.Any("DistributedVirtualSwitch").(*DistributedVirtualSwitch)
+	dvs0 := object.NewDistributedVirtualSwitch(c, vswitch.Reference())
+	dtask, err := dvs0.AddPortgroup(ctx, []types.DVPortgroupConfigSpec{
+		{Name: "dvp1", NumPorts: 4, Uplink: new(bool)}})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	err = dtask.Wait(ctx)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	prtgrp, err := finder.Network(ctx, "dvp1")
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	var ok bool
+	portGroup, ok := prtgrp.(*object.DistributedVirtualPortgroup)
+	if !ok {
+		t.Fatalf("failed to convert %T to %T", prtgrp, portGroup)
+	}
+	var pg mo.DistributedVirtualPortgroup
+	err = portGroup.Properties(ctx, portGroup.Reference(), []string{"config"}, &pg)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+
+	// different set of devices from Model.Create's
+	var devices object.VirtualDeviceList
+	net, err := finder.NetworkOrDefault(context.TODO(), "dvp1")
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	backing, err := net.EthernetCardBackingInfo(context.TODO())
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	nic, err := devices.CreateEthernetCard("vmxnet3", backing)
+	if err != nil {
+		t.Fatalf("%s", err)
+	}
+	ide, _ := devices.CreateIDEController()
+	cdrom, _ := devices.CreateCdrom(ide.(*types.VirtualIDEController))
+	scsi, _ := devices.CreateSCSIController("scsi")
+	disk := &types.VirtualDisk{
+		CapacityInKB: 1024,
+		VirtualDevice: types.VirtualDevice{
+			Backing: new(types.VirtualDiskFlatVer2BackingInfo),
+		},
+	}
+
+	devices = append(devices, nic)
+	devices = append(devices, ide, cdrom, scsi)
+	devices.AssignController(disk, scsi.(*types.VirtualLsiLogicController))
+	devices = append(devices, disk)
+	create, _ := devices.ConfigSpec(types.VirtualDeviceConfigSpecOperationAdd)
+
+	spec := types.VirtualMachineConfigSpec{
+		Name:         "foo",
+		GuestId:      string(types.VirtualMachineGuestOsIdentifierOtherGuest),
+		DeviceChange: create,
+		Files: &types.VirtualMachineFileInfo{
+			VmPathName: "[LocalDS_0]",
+		},
+	}
+
+	ctask, _ := folder.CreateVM(ctx, spec, pool, nil)
+	info, err := ctask.WaitForResult(ctx, nil)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	vm := Map.Get(info.Result.(types.ManagedObjectReference)).(*VirtualMachine)
+	expect := len(esx.VirtualDevice) + len(devices)
+	ndevice := len(vm.Config.Hardware.Device)
+
+	if expect != ndevice {
+		t.Errorf("expected %d, got %d", expect, ndevice)
+	}
+
+	dvs := Map.Get(dvs0.Reference()).(*DistributedVirtualSwitch)
+	fetchedPorts := dvs.dvPortgroups(nil)
+	notFound := true
+	for _, port := range fetchedPorts {
+		if port.Connectee != nil &&
+			port.Connectee.Type == vm.Self.Type &&
+			port.Connectee.ConnectedEntity != nil &&
+			*port.Connectee.ConnectedEntity == vm.Reference() {
+			notFound = false
+			break
+		}
+	}
+	if notFound {
+		t.Fatalf("could not find vm %v in pg %v", vm, pg)
 	}
 }

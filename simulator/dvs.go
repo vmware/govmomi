@@ -29,10 +29,18 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type connecteeDetails struct {
+	key string
+	typ string
+	ref types.ManagedObjectReference
+}
+
 type DistributedVirtualSwitch struct {
 	mo.DistributedVirtualSwitch
 
 	types.FetchDVPortsResponse
+
+	portConnDetails map[string]map[string]connecteeDetails
 }
 
 func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
@@ -208,7 +216,21 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 						for _, pnicSpec := range hostPnicBacking.PnicSpec {
 							if pnicSpec.UplinkPortgroupKey == pg.Config.Key {
 								pgHosts = append(pg.Host, member.Host)
-								break //found right portgroup
+								portConn, ok := s.portConnDetails[pg.Key]
+								if !ok {
+									portConn = make(map[string]connecteeDetails)
+									s.portConnDetails[pg.Key] = portConn
+								}
+								for _, pk := range pg.PortKeys {
+									if _, ok := portConn[pk]; !ok {
+										portConn[pk] = connecteeDetails{
+											key: pnicSpec.PnicDevice,
+											typ: member.Host.Type,
+											ref: member.Host,
+										}
+										break //assigned port
+									}
+								}
 							}
 						}
 					} else {
@@ -287,18 +309,30 @@ func (s *DistributedVirtualSwitch) dvPortgroups(criteria *types.DistributedVirtu
 		return res
 	}
 
+	lastKey := 0
 	for _, ref := range s.Portgroup {
 		pg := Map.Get(ref).(*DistributedVirtualPortgroup)
-
+		portConn := s.portConnDetails[pg.Key]
 		for _, key := range pg.PortKeys {
+			var con *types.DistributedVirtualSwitchPortConnectee
+			if conn, ok := portConn[key]; ok {
+				con = &types.DistributedVirtualSwitchPortConnectee{
+					Type: conn.typ,
+					NicKey: strings.ReplaceAll(conn.key,
+						"key-vim.host.VirtualNic-", ""),
+					ConnectedEntity: &conn.ref,
+				}
+			}
 			res = append(res, types.DistributedVirtualPort{
 				DvsUuid:      s.Uuid,
-				Key:          key,
+				Key:          strconv.Itoa(lastKey),
 				PortgroupKey: pg.Key,
 				Config: types.DVPortConfigInfo{
 					Setting: pg.Config.DefaultPortConfig,
 				},
+				Connectee: con,
 			})
+			lastKey++
 		}
 	}
 
