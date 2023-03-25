@@ -14,6 +14,9 @@ load test_helper
   run govc ls -json
   assert_success
 
+  run govc ls -xml
+  assert_success
+
   # list entire inventory
   run govc ls '/**'
   assert_success
