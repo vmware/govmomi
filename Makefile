@@ -145,14 +145,5 @@ govc-test: ## Runs govc bats tests
 	./govc/test/images/update.sh
 	(cd govc/test && ./vendor/github.com/bats-core/bats-core/bin/bats -t .)
 
-.PHONY: govc-test-sso
-govc-test-sso: install
-	./govc/test/images/update.sh
-	(cd govc/test && SSO_BATS=1 ./vendor/github.com/bats-core/bats-core/bin/bats -t sso.bats)
-
-.PHONY: govc-test-sso-assert-cert
-govc-test-sso-assert-cert:
-	SSO_BATS_ASSERT_CERT=1 $(MAKE) govc-test-sso
-
 .PHONY: test
 test: go-test govc-test	## Runs go-test and govc-test
