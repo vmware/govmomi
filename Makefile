@@ -143,12 +143,12 @@ go-test: ## Runs go unit tests with race detector enabled
 govc-test: install
 govc-test: ## Runs govc bats tests
 	./govc/test/images/update.sh
-	(cd govc/test && ./vendor/github.com/sstephenson/bats/libexec/bats -t .)
+	(cd govc/test && ./vendor/github.com/bats-core/bats-core/bin/bats -t .)
 
 .PHONY: govc-test-sso
 govc-test-sso: install
 	./govc/test/images/update.sh
-	(cd govc/test && SSO_BATS=1 ./vendor/github.com/sstephenson/bats/libexec/bats -t sso.bats)
+	(cd govc/test && SSO_BATS=1 ./vendor/github.com/bats-core/bats-core/bin/bats -t sso.bats)
 
 .PHONY: govc-test-sso-assert-cert
 govc-test-sso-assert-cert:

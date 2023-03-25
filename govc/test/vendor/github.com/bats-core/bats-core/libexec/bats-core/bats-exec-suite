@@ -1,0 +1,467 @@
+#!/usr/bin/env bash
+set -e
+
+count_only_flag=''
+filter=''
+num_jobs=${BATS_NUMBER_OF_PARALLEL_JOBS:-1}
+bats_no_parallelize_across_files=${BATS_NO_PARALLELIZE_ACROSS_FILES-}
+bats_no_parallelize_within_files=
+filter_status=''
+filter_tags_list=()
+flags=('--dummy-flag') # add a dummy flag to prevent unset variable errors on empty array expansion in old bash versions
+setup_suite_file=''
+BATS_TRACE_LEVEL="${BATS_TRACE_LEVEL:-0}"
+BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=
+
+abort() {
+  printf 'Error: %s\n' "$1" >&2
+  exit 1
+}
+
+# shellcheck source=lib/bats-core/common.bash disable=SC2153
+source "$BATS_ROOT/lib/bats-core/common.bash"
+
+while [[ "$#" -ne 0 ]]; do
+  case "$1" in
+  -c)
+    count_only_flag=1
+    ;;
+  -f)
+    shift
+    filter="$1"
+    ;;
+  -j)
+    shift
+    num_jobs="$1"
+    flags+=('-j' "$num_jobs")
+    ;;
+  -T)
+    flags+=('-T')
+    ;;
+  -x)
+    flags+=('-x')
+    ;;
+  --no-parallelize-across-files)
+    bats_no_parallelize_across_files=1
+    ;;
+  --no-parallelize-within-files)
+    bats_no_parallelize_within_files=1
+    flags+=("--no-parallelize-within-files")
+    ;;
+  --filter-status)
+    shift
+    filter_status="$1"
+    ;;
+  --filter-tags)
+    shift
+    IFS=, read -ra tags <<<"$1" || true
+    if ((${#tags[@]} > 0)); then
+      for ((i = 0; i < ${#tags[@]}; ++i)); do
+        bats_trim "tags[$i]" "${tags[$i]}"
+      done
+      bats_sort sorted_tags "${tags[@]}"
+      IFS=, filter_tags_list+=("${sorted_tags[*]}")
+    else
+      filter_tags_list+=("")
+    fi
+    ;;
+  --dummy-flag) ;;
+
+  --trace)
+    flags+=('--trace')
+    ((++BATS_TRACE_LEVEL)) # avoid returning 0
+    ;;
+  --print-output-on-failure)
+    flags+=(--print-output-on-failure)
+    ;;
+  --show-output-of-passing-tests)
+    flags+=(--show-output-of-passing-tests)
+    BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS=1
+    ;;
+  --verbose-run)
+    flags+=(--verbose-run)
+    ;;
+  --gather-test-outputs-in)
+    shift
+    flags+=(--gather-test-outputs-in "$1")
+    ;;
+  --setup-suite-file)
+    shift
+    setup_suite_file="$1"
+    ;;
+  *)
+    break
+    ;;
+  esac
+  shift
+done
+
+if [[ "$num_jobs" != 1 ]]; then
+  if ! type -p parallel >/dev/null && parallel --version &>/dev/null && [[ -z "$bats_no_parallelize_across_files" ]]; then
+    abort "Cannot execute \"${num_jobs}\" jobs without GNU parallel"
+  fi
+  # shellcheck source=lib/bats-core/semaphore.bash
+  source "${BATS_ROOT}/lib/bats-core/semaphore.bash"
+  bats_semaphore_setup
+fi
+
+# create a file that contains all (filtered) tests to run from all files
+TESTS_LIST_FILE="${BATS_RUN_TMPDIR}/test_list_file.txt"
+focus_mode=
+bats_gather_tests() {
+  local line test_line tags
+  all_tests=()
+  for filename in "$@"; do
+    if [[ ! -f "$filename" ]]; then
+      abort "Test file \"${filename}\" does not exist"
+    fi
+
+    test_names=()
+    test_dupes=()
+    while read -r line; do
+      if [[ ! "$line" =~ ^bats_test_function\  ]]; then
+        continue
+      fi
+      line="${line%$'\r'}"
+      line="${line#* }"
+      TAG_REGEX="--tags '(.*)' (.*)"
+      if [[ "$line" =~ $TAG_REGEX ]]; then
+        IFS=, read -ra tags <<<"${BASH_REMATCH[1]}" || true
+        line="${BASH_REMATCH[2]}"
+      else
+        tags=()
+      fi
+      # is this test focused?
+      if bats_all_in tags 'bats:focus'; then
+        if [[ $focus_mode == 1 ]]; then
+          # focused tests in focus mode should just be registered
+          :
+        else
+          # the current test enables focus mode ...
+          focus_mode=1
+          # ... -> remove previously found, unfocused tests
+          all_tests=()
+          : > "$TESTS_LIST_FILE"
+        fi
+      elif [[ $focus_mode == 1 ]]; then
+        # the current test is not focused but focus mode is enabled -> filter out
+        continue
+        # no else -> unfocused tests outside focus mode should just be registered
+      fi
+      if [[ ${#filter_tags_list[@]} -gt 0 ]]; then
+        local match=
+        for filter_tags in "${filter_tags_list[@]}"; do
+          # empty search tags only match empty test tags!
+          if [[ -z "$filter_tags" ]]; then
+            if [[ ${#tags[@]} -eq 0 ]]; then
+              match=1
+              break
+            fi
+            continue
+          fi
+          local -a positive_filter_tags=() negative_filter_tags=()
+          IFS=, read -ra filter_tags <<<"$filter_tags" || true
+          for filter_tag in "${filter_tags[@]}"; do
+            if [[ $filter_tag == !* ]]; then
+              bats_trim filter_tag "${filter_tag#!}"
+              negative_filter_tags+=("${filter_tag}")
+            else
+              positive_filter_tags+=("${filter_tag}")
+            fi
+          done
+          if bats_append_arrays_as_args positive_filter_tags -- bats_all_in tags &&
+            ! bats_append_arrays_as_args negative_filter_tags -- bats_any_in tags; then
+            match=1
+          fi
+        done
+        if [[ -z "$match" ]]; then
+          continue
+        fi
+      fi
+      test_line=$(printf "%s\t%s" "$filename" "$line")
+      all_tests+=("$test_line")
+      printf "%s\n" "$test_line" >>"$TESTS_LIST_FILE"
+      # avoid unbound variable errors on empty array expansion with old bash versions
+      if [[ ${#test_names[@]} -gt 0 && " ${test_names[*]} " == *" $line "* ]]; then
+        test_dupes+=("$line")
+        continue
+      fi
+      test_names+=("$line")
+    done < <(BATS_TEST_FILTER="$filter" bats-preprocess "$filename")
+
+    if [[ "${#test_dupes[@]}" -ne 0 ]]; then
+      abort "Duplicate test name(s) in file \"${filename}\": ${test_dupes[*]}"
+    fi
+  done
+
+  test_count="${#all_tests[@]}"
+}
+
+TEST_ROOT=${1-}
+TEST_ROOT=${TEST_ROOT%/*}
+BATS_RUN_LOGS_DIRECTORY="$TEST_ROOT/.bats/run-logs"
+if [[ ! -d "$BATS_RUN_LOGS_DIRECTORY" ]]; then
+  if [[ -n "$filter_status" ]]; then
+    printf "Error: --filter-status needs '%s/' to save failed tests. Please create this folder, add it to .gitignore and try again.\n" "$BATS_RUN_LOGS_DIRECTORY"
+    exit 1
+  else
+    BATS_RUN_LOGS_DIRECTORY=
+  fi
+  # discard via sink instead of having a conditional later
+  export BATS_RUNLOG_FILE='/dev/null'
+else
+  # use UTC (-u) to avoid problems with TZ changes
+  BATS_RUNLOG_DATE=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+  export BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}.log"
+  if [[ ! -w "$BATS_RUN_LOGS_DIRECTORY" ]]; then
+    printf "WARNING: Cannot write in %s. This run will not write a log!\n" "$BATS_RUN_LOGS_DIRECTORY" >&2
+    BATS_RUNLOG_FILE='/dev/null' # disable runlog file
+  fi
+fi
+
+bats_gather_tests "$@"
+
+if [[ -n "$filter_status" ]]; then
+  case "$filter_status" in
+  failed)
+    bats_filter_test_by_status() { # <line>
+      ! bats_binary_search "$1" "passed_tests"
+    }
+    ;;
+  passed)
+    bats_filter_test_by_status() {
+      ! bats_binary_search "$1" "failed_tests"
+    }
+    ;;
+  missed)
+    bats_filter_test_by_status() {
+      ! bats_binary_search "$1" "failed_tests" && ! bats_binary_search "$1" "passed_tests"
+    }
+    ;;
+  *)
+    printf "Error: Unknown value '%s' for --filter-status. Valid values are 'failed' and 'missed'.\n" "$filter_status" >&2
+    exit 1
+    ;;
+  esac
+
+  if IFS='' read -d $'\n' -r BATS_PREVIOUS_RUNLOG_FILE < <(ls -1r "$BATS_RUN_LOGS_DIRECTORY"); then
+    BATS_PREVIOUS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/$BATS_PREVIOUS_RUNLOG_FILE"
+    if [[ $BATS_PREVIOUS_RUNLOG_FILE == "$BATS_RUNLOG_FILE" ]]; then
+      count=$(find "$BATS_RUN_LOGS_DIRECTORY" -name "$BATS_RUNLOG_DATE*" | wc -l)
+      BATS_RUNLOG_FILE="$BATS_RUN_LOGS_DIRECTORY/${BATS_RUNLOG_DATE}-$count.log"
+    fi
+    failed_tests=()
+    passed_tests=()
+    # store tests that were already filtered out in the last run for the same filter reason
+    last_filtered_tests=()
+    i=0
+    while read -rd $'\n' line; do
+      ((++i))
+      case "$line" in
+      "passed "*)
+        passed_tests+=("${line#passed }")
+        ;;
+      "failed "*)
+        failed_tests+=("${line#failed }")
+        ;;
+      "status-filtered $filter_status"*) # pick up tests that were filtered in the last round for the same status
+        last_filtered_tests+=("${line#status-filtered "$filter_status" }")
+        ;;
+      "status-filtered "*) # ignore other status-filtered lines
+        ;;
+      "#"*) # allow for comments
+        ;;
+      *)
+        printf "Error: %s:%d: Invalid format: %s\n" "$BATS_PREVIOUS_RUNLOG_FILE" "$i" "$line" >&2
+        exit 1
+        ;;
+      esac
+    done < <(sort "$BATS_PREVIOUS_RUNLOG_FILE")
+
+    filtered_tests=()
+    for line in "${all_tests[@]}"; do
+      if bats_filter_test_by_status "$line" && ! bats_binary_search "$line" last_filtered_tests; then
+        printf "%s\n" "$line"
+        filtered_tests+=("$line")
+      else
+        printf "status-filtered %s %s\n" "$filter_status" "$line" >>"$BATS_RUNLOG_FILE"
+      fi
+    done >"$TESTS_LIST_FILE"
+
+    # save filtered tests to exclude them again in next round
+    for test_line in "${last_filtered_tests[@]}"; do
+      printf "status-filtered %s %s\n" "$filter_status" "$test_line"
+    done >>"$BATS_RUNLOG_FILE"
+
+    test_count="${#filtered_tests[@]}"
+    if [[ ${#failed_tests[@]} -eq 0 && ${#filtered_tests[@]} -eq 0 ]]; then
+      printf "There where no failed tests in the last recorded run.\n" >&2
+    fi
+  else
+    printf "No recording of previous runs found. Running all tests!\n" >&2
+  fi
+fi
+
+if [[ -n "$count_only_flag" ]]; then
+  printf '%d\n' "${test_count}"
+  exit
+fi
+
+if [[ -n "$bats_no_parallelize_across_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
+  abort "The flag --no-parallelize-across-files requires at least --jobs 2"
+fi
+
+if [[ -n "$bats_no_parallelize_within_files" ]] && [[ ! "$num_jobs" -gt 1 ]]; then
+  abort "The flag --no-parallelize-across-files requires at least --jobs 2"
+fi
+
+# only abort on the lowest levels
+trap 'BATS_INTERRUPTED=true' INT
+
+if [[ -n "$focus_mode" ]]; then
+  printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+fi
+
+bats_exec_suite_status=0
+printf '1..%d\n' "${test_count}"
+
+# No point on continuing if there's no tests.
+if [[ "${test_count}" == 0 ]]; then
+  exit
+fi
+
+export BATS_SUITE_TMPDIR="${BATS_RUN_TMPDIR}/suite"
+if ! mkdir "$BATS_SUITE_TMPDIR"; then
+  printf '%s\n' "Failed to create BATS_SUITE_TMPDIR" >&2
+  exit 1
+fi
+
+# Deduplicate filenames (without reordering) to avoid running duplicate tests n by n times.
+# (see https://github.com/bats-core/bats-core/issues/329)
+# If a file was specified multiple times, we already got it repeatedly in our TESTS_LIST_FILE.
+# Thus, it suffices to bats-exec-file it once to run all repeated tests on it.
+IFS=$'\n' read -d '' -r -a BATS_UNIQUE_TEST_FILENAMES < <(printf "%s\n" "$@" | nl | sort -k 2 | uniq -f 1 | sort -n | cut -f 2-) || true
+
+# shellcheck source=lib/bats-core/tracing.bash
+source "$BATS_ROOT/lib/bats-core/tracing.bash"
+bats_setup_tracing
+
+trap bats_suite_exit_trap EXIT
+
+exec 3<&1
+
+# shellcheck disable=SC2317
+bats_suite_exit_trap() {
+  local print_bats_out="${BATS_SHOW_OUTPUT_OF_SUCCEEDING_TESTS}"
+  if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" || -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
+    if [[ -z "${BATS_SETUP_SUITE_COMPLETED}" ]]; then
+      printf "not ok 1 setup_suite\n"
+    elif [[ -z "${BATS_TEARDOWN_SUITE_COMPLETED}" ]]; then
+      printf "not ok %d teardown_suite\n" $((test_count + 1))
+    fi
+    local stack_trace
+    bats_get_failure_stack_trace stack_trace
+    bats_print_stack_trace "${stack_trace[@]}"
+    bats_print_failed_command "${stack_trace[@]}"
+    print_bats_out=1
+    bats_exec_suite_status=1
+  fi
+
+  if [[ -n "$print_bats_out" ]]; then
+    bats_prefix_lines_for_tap_output <"$BATS_OUT"
+  fi
+
+  if [[ ${BATS_INTERRUPTED-NOTSET} != NOTSET ]]; then
+    printf "\n# Received SIGINT, aborting ...\n\n"
+  fi
+
+  if [[ -d "$BATS_RUN_LOGS_DIRECTORY" && -n "${BATS_INTERRUPTED:-}" ]]; then
+    # aborting a test run with CTRL+C does not save the runlog file
+    [[ "$BATS_RUNLOG_FILE" != /dev/null ]] && rm "$BATS_RUNLOG_FILE"
+  fi
+  exit "$bats_exec_suite_status"
+} >&3
+
+bats_run_teardown_suite() {
+  local bats_teardown_suite_status=0
+  # avoid being called twice, in case this is not called through bats_teardown_suite_trap
+  # but from the end of file
+  trap bats_suite_exit_trap EXIT
+  BATS_TEARDOWN_SUITE_COMPLETED=
+  teardown_suite >>"$BATS_OUT" 2>&1 || bats_teardown_suite_status=$?
+  if ((bats_teardown_suite_status == 0)); then
+    BATS_TEARDOWN_SUITE_COMPLETED=1
+  elif [[ -n "${BATS_SETUP_SUITE_COMPLETED:-}" ]]; then
+    BATS_DEBUG_LAST_STACK_TRACE_IS_VALID=1
+    BATS_ERROR_STATUS=$bats_teardown_suite_status
+    return $BATS_ERROR_STATUS
+  fi
+}
+
+# shellcheck disable=SC2317
+bats_teardown_suite_trap() {
+  bats_run_teardown_suite
+  bats_suite_exit_trap
+}
+
+teardown_suite() {
+  :
+}
+
+trap bats_teardown_suite_trap EXIT
+
+BATS_OUT="$BATS_RUN_TMPDIR/suite.out"
+if [[ -n "$setup_suite_file" ]]; then
+  setup_suite() {
+    printf "%s does not define \`setup_suite()\`\n" "$setup_suite_file" >&2
+    return 1
+  }
+
+  # shellcheck disable=SC2034 # will be used in the sourced file below
+  BATS_TEST_FILENAME="$setup_suite_file"
+  # shellcheck source=lib/bats-core/test_functions.bash
+  source "$BATS_ROOT/lib/bats-core/test_functions.bash"
+
+  # shellcheck disable=SC1090
+  source "$setup_suite_file"
+
+  set -eET
+  export BATS_SETUP_SUITE_COMPLETED=
+  setup_suite >>"$BATS_OUT" 2>&1
+  BATS_SETUP_SUITE_COMPLETED=1
+  set +ET
+else
+  # prevent exit trap from printing an error because of incomplete setup_suite,
+  # when there was none to execute
+  BATS_SETUP_SUITE_COMPLETED=1
+fi
+
+if [[ "$num_jobs" -gt 1 ]] && [[ -z "$bats_no_parallelize_across_files" ]]; then
+  # run files in parallel to get the maximum pool of parallel tasks
+  # shellcheck disable=SC2086,SC2068
+  # we need to handle the quoting of ${flags[@]} ourselves,
+  # because parallel can only quote it as one
+  parallel --keep-order --jobs "$num_jobs" bats-exec-file "$(printf "%q " "${flags[@]}")" "{}" "$TESTS_LIST_FILE" ::: "${BATS_UNIQUE_TEST_FILENAMES[@]}" 2>&1 || bats_exec_suite_status=1
+else
+  for filename in "${BATS_UNIQUE_TEST_FILENAMES[@]}"; do
+    if [[ "${BATS_INTERRUPTED-NOTSET}" != NOTSET ]]; then
+      bats_exec_suite_status=130 # bash's code for SIGINT exits
+      break
+    fi
+    bats-exec-file "${flags[@]}" "$filename" "${TESTS_LIST_FILE}" || bats_exec_suite_status=1
+  done
+fi
+
+set -eET
+bats_run_teardown_suite
+
+if [[ "$focus_mode" == 1 && $bats_exec_suite_status -eq 0 ]]; then 
+  if [[ ${BATS_NO_FAIL_FOCUS_RUN-} == 1 ]]; then
+    printf "WARNING: This test run only contains tests tagged \`bats:focus\`!\n"
+  else
+    printf "Marking test run as failed due to \`bats:focus\` tag. (Set \`BATS_NO_FAIL_FOCUS_RUN=1\` to disable.)\n" >&2
+    bats_exec_suite_status=1
+  fi
+fi
+
+exit "$bats_exec_suite_status" # the actual exit code will be set by the exit trap using bats_exec_suite_status
