@@ -600,7 +600,7 @@ load test_helper
   assert_success
   result=$(govc device.ls -vm "$vm" | grep -c disk-)
   [ "$result" -eq 1 ]
-  govc device.info -json -vm "$vm" disk-* | jq .Devices[].Backing.Sharing | grep -v sharingMultiWriter
+  govc device.info -json -vm "$vm" disk-* | jq .Devices[].backing.sharing | grep -v sharingMultiWriter
 
   name=$(new_id)
 
@@ -618,7 +618,7 @@ load test_helper
 
   run govc vm.disk.create -vm "$vm" -name "$vm/shared.vmdk" -size 1G -eager -thick -sharing sharingMultiWriter
   assert_success
-  govc device.info -json -vm "$vm" disk-* | jq .Devices[].Backing.Sharing | grep sharingMultiWriter
+  govc device.info -json -vm "$vm" disk-* | jq .Devices[].backing.sharing | grep sharingMultiWriter
 
   run govc vm.power -on "$vm"
   assert_success

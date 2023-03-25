@@ -22,6 +22,7 @@ fi
 readlink=$(type -p greadlink readlink | head -1)
 xargs=$(type -p gxargs xargs | head -1)
 mktemp=$(type -p gmktemp mktemp | head -1)
+timeout=$(type -p gtimeout timeout | head -1)
 
 BATS_TEST_DIRNAME=$($readlink -nf $BATS_TEST_DIRNAME)
 
@@ -54,15 +55,22 @@ vcsim_start() {
     export GOVC_SIM_ENV
     mkfifo "$GOVC_SIM_ENV"
 
-    vcsim -l 127.0.0.1:0 -E "$GOVC_SIM_ENV" "$@" &
+    if [ -z "$timeout" ] ; then
+      vcsim -l 127.0.0.1:0 -E "$GOVC_SIM_ENV" "$@" &
+    else
+      timeout -s QUIT 5m vcsim -l 127.0.0.1:0 -E "$GOVC_SIM_ENV" "$@" &
+    fi
+    pid=$!
 
-    eval "$(cat "$GOVC_SIM_ENV")"
+    eval "$(head -n1 "$GOVC_SIM_ENV")"
+    rm -f "$GOVC_SIM_ENV"
+    GOVC_SIM_PID=$pid
 }
 
 vcsim_stop() {
-  kill "$GOVC_SIM_PID"
-  wait "$GOVC_SIM_PID"
-  rm -f "$GOVC_SIM_ENV"
+  if kill "$GOVC_SIM_PID" 2>/dev/null ; then
+    wait "$GOVC_SIM_PID"
+  fi
   unset GOVC_SIM_PID
 }
 
