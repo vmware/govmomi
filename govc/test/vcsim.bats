@@ -220,6 +220,9 @@ EOF
 
   govc object.collect -type ComputeResource -n 1 / name &
   pid=$!
+  # give some time for the above to park in WaitForUpdates,
+  # otherwise the rename may happen first and collect will hang as it missed the update
+  sleep .2
 
   run govc object.rename /DC0/host/DC0_C0 DC0_C0b
   assert_success
@@ -228,6 +231,7 @@ EOF
 
   govc object.collect -type ClusterComputeResource -n 1 / name &
   pid=$!
+  sleep .2
 
   run govc object.rename /DC0/host/DC0_C0b DC0_C0
   assert_success
