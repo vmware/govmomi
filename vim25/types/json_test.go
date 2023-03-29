@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2022-2022 VMware, Inc. All Rights Reserved.
+Copyright (c) 2022-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,160 +18,79 @@ package types
 
 import (
 	"bytes"
-	"fmt"
 	"os"
-	"strings"
+	"reflect"
 	"testing"
 	"time"
 
 	"github.com/google/go-cmp/cmp"
-
-	"github.com/vmware/govmomi/vim25/json"
+	"github.com/stretchr/testify/assert"
 )
 
-func TestJSONMarshalVirtualMachineConfigSpec(t *testing.T) {
-	var w bytes.Buffer
-	enc := json.NewEncoder(&w)
-	enc.SetIndent("", "  ")
-	enc.SetDiscriminator("_typeName", "_value", "")
-
-	if err := enc.Encode(VirtualMachineConfigSpec{
-		Name: "Hello, world.",
-		DeviceChange: []BaseVirtualDeviceConfigSpec{
-			&VirtualDeviceConfigSpec{
-				Operation:     VirtualDeviceConfigSpecOperationAdd,
-				FileOperation: VirtualDeviceConfigSpecFileOperationCreate,
-				Device: &VirtualVmxnet3{
-					VirtualVmxnet: VirtualVmxnet{
-						VirtualEthernetCard: VirtualEthernetCard{
-							VirtualDevice: VirtualDevice{
-								Key: 3,
-							},
-							MacAddress: "00:11:22:33:44:55:66:88",
-						},
-					},
-				},
-			},
-		},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	act, exp := w.String(), virtualMachineConfigSpecWithDeviceChangesJSON
-	if act != exp {
-		t.Errorf("act json != exp json\nact=%s\nexp=%s", act, exp)
-	}
+var serializationTests = []struct {
+	name   string
+	file   string
+	data   interface{}
+	goType reflect.Type
+}{
+	{
+		name:   "vminfo",
+		file:   "./testdata/vminfo.json",
+		data:   &vmInfoObjForTests,
+		goType: reflect.TypeOf(VirtualMachineConfigInfo{}),
+	},
+	{
+		name:   "retrieveResult",
+		file:   "./testdata/retrieveResult.json",
+		data:   &retrieveResultForTests,
+		goType: reflect.TypeOf(RetrieveResult{}),
+	},
 }
 
-func TestJSONUnmarshalVirtualMachineConfigSpec(t *testing.T) {
-	dec := json.NewDecoder(strings.NewReader(virtualMachineConfigSpecWithVAppConfigJSON))
-	dec.SetDiscriminator("_typeName", "_value", "", json.DiscriminatorToTypeFunc(TypeFunc()))
+func TestSerialization(t *testing.T) {
+	for _, test := range serializationTests {
+		t.Run(test.name+" Decode", func(t *testing.T) {
+			f, err := os.Open(test.file)
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer f.Close()
 
-	var obj VirtualMachineConfigSpec
-	if err := dec.Decode(&obj); err != nil {
-		t.Fatal(err)
-	}
+			dec := NewJSONDecoder(f)
 
-	var w bytes.Buffer
-	enc := json.NewEncoder(&w)
-	enc.SetIndent("", "  ")
-	enc.SetDiscriminator("_typeName", "_value", "")
+			data := reflect.New(test.goType).Interface()
+			if err := dec.Decode(data); err != nil {
+				t.Fatal(err)
+			}
 
-	if err := enc.Encode(obj); err != nil {
-		t.Fatal(err)
-	}
+			a, e := data, test.data
 
-	act, exp := w.String(), virtualMachineConfigSpecWithVAppConfigJSON
-	if act != exp {
-		t.Errorf("act json != exp json\nact=%s\nexp=%s", act, exp)
-	}
-}
+			if diff := cmp.Diff(a, e); diff != "" {
+				t.Errorf("mismatched %v: %s", test.name, diff)
+			}
+		})
 
-func TestJSONUnmarshalVirtualMachineConfigInfo(t *testing.T) {
-	f, err := os.Open("./testdata/virtualMachineConfigInfo.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	defer f.Close()
+		t.Run(test.name+" Encode", func(t *testing.T) {
+			expJSON, err := os.ReadFile(test.file)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-	dec := json.NewDecoder(f)
-	dec.SetDiscriminator("_typeName", "_value", "", json.DiscriminatorToTypeFunc(TypeFunc()))
+			var w bytes.Buffer
+			_ = w
+			enc := NewJSONEncoder(&w)
 
-	var obj VirtualMachineConfigInfo
-	if err := dec.Decode(&obj); err != nil {
-		t.Fatal(err)
-	}
+			if err := enc.Encode(test.data); err != nil {
+				t.Fatal(err)
+			}
 
-	if diff := cmp.Diff(obj, virtualMachineConfigInfoObjForTestData); diff != "" {
-		t.Errorf("mismatched VirtualMachineConfigInfo: %s", diff)
-		fmt.Println(diff)
+			expected, actual := string(expJSON), w.String()
+			assert.JSONEq(t, expected, actual)
+		})
 	}
 }
 
-const virtualMachineConfigSpecWithDeviceChangesJSON = `{
-  "_typeName": "VirtualMachineConfigSpec",
-  "name": "Hello, world.",
-  "deviceChange": [
-    {
-      "_typeName": "VirtualDeviceConfigSpec",
-      "operation": "add",
-      "fileOperation": "create",
-      "device": {
-        "_typeName": "VirtualVmxnet3",
-        "key": 3,
-        "macAddress": "00:11:22:33:44:55:66:88"
-      }
-    }
-  ]
-}
-`
-
-const virtualMachineConfigSpecWithVAppConfigJSON = `{
-  "_typeName": "VirtualMachineConfigSpec",
-  "name": "Hello, world.",
-  "vAppConfig": {
-    "_typeName": "VmConfigSpec",
-    "product": [
-      {
-        "_typeName": "VAppProductSpec",
-        "operation": "add",
-        "info": {
-          "_typeName": "VAppProductInfo",
-          "key": 1,
-          "name": "p1"
-        }
-      }
-    ],
-    "installBootRequired": false
-  }
-}
-`
-
-func mustParseTime(layout, value string) time.Time {
-	t, err := time.Parse(layout, value)
-	if err != nil {
-		panic(err)
-	}
-	return t
-}
-
-func addrOfMustParseTime(layout, value string) *time.Time {
-	t := mustParseTime(layout, value)
-	return &t
-}
-
-func addrOfBool(v bool) *bool {
-	return &v
-}
-
-func addrOfInt32(v int32) *int32 {
-	return &v
-}
-
-func addrOfInt64(v int64) *int64 {
-	return &v
-}
-
-var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMachineConfigInfo{
+var vmInfoObjForTests = VirtualMachineConfigInfo{
 	ChangeVersion:         "2022-12-12T11:48:35.473645Z",
 	Modified:              mustParseTime(time.RFC3339, "1970-01-01T00:00:00Z"),
 	Name:                  "test",
@@ -180,12 +99,12 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 	Uuid:                  "422ca90b-853b-1101-3350-759f747730cc",
 	CreateDate:            addrOfMustParseTime(time.RFC3339, "2022-12-12T11:47:24.685785Z"),
 	InstanceUuid:          "502cc2a5-1f06-2890-6d70-ba2c55c5c2b7",
-	NpivTemporaryDisabled: addrOfBool(true),
-	LocationId:            "",
+	NpivTemporaryDisabled: NewBool(true),
+	LocationId:            "Earth",
 	Template:              false,
 	GuestId:               "vmwarePhoton64Guest",
 	AlternateGuestName:    "",
-	Annotation:            "",
+	Annotation:            "Hello, world.",
 	Files: VirtualMachineFileInfo{
 		VmPathName:        "[datastore1] test/test.vmx",
 		SnapshotDirectory: "[datastore1] test/",
@@ -193,34 +112,34 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 		LogDirectory:      "[datastore1] test/",
 	},
 	Tools: &ToolsConfigInfo{
-		ToolsVersion:            0,
-		AfterPowerOn:            addrOfBool(true),
-		AfterResume:             addrOfBool(true),
-		BeforeGuestStandby:      addrOfBool(true),
-		BeforeGuestShutdown:     addrOfBool(true),
+		ToolsVersion:            1,
+		AfterPowerOn:            NewBool(true),
+		AfterResume:             NewBool(true),
+		BeforeGuestStandby:      NewBool(true),
+		BeforeGuestShutdown:     NewBool(true),
 		BeforeGuestReboot:       nil,
 		ToolsUpgradePolicy:      "manual",
-		SyncTimeWithHostAllowed: addrOfBool(true),
-		SyncTimeWithHost:        addrOfBool(false),
+		SyncTimeWithHostAllowed: NewBool(true),
+		SyncTimeWithHost:        NewBool(false),
 		LastInstallInfo: &ToolsConfigInfoToolsLastInstallInfo{
 			Counter: 0,
 		},
 	},
 	Flags: VirtualMachineFlagInfo{
-		EnableLogging:            addrOfBool(true),
-		UseToe:                   addrOfBool(false),
-		RunWithDebugInfo:         addrOfBool(false),
+		EnableLogging:            NewBool(true),
+		UseToe:                   NewBool(false),
+		RunWithDebugInfo:         NewBool(false),
 		MonitorType:              "release",
 		HtSharing:                "any",
-		SnapshotDisabled:         addrOfBool(false),
-		SnapshotLocked:           addrOfBool(false),
-		DiskUuidEnabled:          addrOfBool(false),
+		SnapshotDisabled:         NewBool(false),
+		SnapshotLocked:           NewBool(false),
+		DiskUuidEnabled:          NewBool(false),
 		SnapshotPowerOffBehavior: "powerOff",
-		RecordReplayEnabled:      addrOfBool(false),
+		RecordReplayEnabled:      NewBool(false),
 		FaultToleranceType:       "unset",
-		CbrcCacheEnabled:         addrOfBool(false),
-		VvtdEnabled:              addrOfBool(false),
-		VbsEnabled:               addrOfBool(false),
+		CbrcCacheEnabled:         NewBool(false),
+		VvtdEnabled:              NewBool(false),
+		VbsEnabled:               NewBool(false),
 	},
 	DefaultPowerOps: VirtualMachineDefaultPowerOpInfo{
 		PowerOffType:        "soft",
@@ -231,14 +150,14 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 		DefaultResetType:    "soft",
 		StandbyAction:       "checkpoint",
 	},
-	RebootPowerOff: addrOfBool(false),
+	RebootPowerOff: NewBool(false),
 	Hardware: VirtualHardware{
 		NumCPU:              1,
 		NumCoresPerSocket:   1,
-		AutoCoresPerSocket:  addrOfBool(true),
+		AutoCoresPerSocket:  NewBool(true),
 		MemoryMB:            2048,
-		VirtualICH7MPresent: addrOfBool(false),
-		VirtualSMCPresent:   addrOfBool(false),
+		VirtualICH7MPresent: NewBool(false),
+		VirtualSMCPresent:   NewBool(false),
 		Device: []BaseVirtualDevice{
 			&VirtualIDEController{
 				VirtualController: VirtualController{
@@ -310,7 +229,7 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 						Summary: "Keyboard",
 					},
 					ControllerKey: 300,
-					UnitNumber:    addrOfInt32(0),
+					UnitNumber:    NewInt32(0),
 				},
 			},
 			&VirtualPointingDevice{
@@ -319,12 +238,12 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 					DeviceInfo: &Description{Label: "Pointing device", Summary: "Pointing device; Device"},
 					Backing: &VirtualPointingDeviceDeviceBackingInfo{
 						VirtualDeviceDeviceBackingInfo: VirtualDeviceDeviceBackingInfo{
-							UseAutoDetect: addrOfBool(false),
+							UseAutoDetect: NewBool(false),
 						},
 						HostPointingDevice: "autodetect",
 					},
 					ControllerKey: 300,
-					UnitNumber:    addrOfInt32(1),
+					UnitNumber:    NewInt32(1),
 				},
 			},
 			&VirtualMachineVideoCard{
@@ -332,12 +251,12 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 					Key:           500,
 					DeviceInfo:    &Description{Label: "Video card ", Summary: "Video card"},
 					ControllerKey: 100,
-					UnitNumber:    addrOfInt32(0),
+					UnitNumber:    NewInt32(0),
 				},
 				VideoRamSizeInKB:       4096,
 				NumDisplays:            1,
-				UseAutoDetect:          addrOfBool(false),
-				Enable3DSupport:        addrOfBool(false),
+				UseAutoDetect:          NewBool(false),
+				Enable3DSupport:        NewBool(false),
 				Use3dRenderer:          "automatic",
 				GraphicsMemorySizeInKB: 262144,
 			},
@@ -351,11 +270,11 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 							"virtual machine communication interface",
 					},
 					ControllerKey: 100,
-					UnitNumber:    addrOfInt32(17),
+					UnitNumber:    NewInt32(17),
 				},
 				Id:                             -1,
-				AllowUnrestrictedCommunication: addrOfBool(false),
-				FilterEnable:                   addrOfBool(true),
+				AllowUnrestrictedCommunication: NewBool(false),
+				FilterEnable:                   NewBool(true),
 			},
 			&ParaVirtualSCSIController{
 				VirtualSCSIController: VirtualSCSIController{
@@ -367,11 +286,11 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 								Summary: "VMware paravirtual SCSI",
 							},
 							ControllerKey: 100,
-							UnitNumber:    addrOfInt32(3),
+							UnitNumber:    NewInt32(3),
 						},
 						Device: []int32{2000},
 					},
-					HotAddRemove:       addrOfBool(true),
+					HotAddRemove:       NewBool(true),
 					SharedBus:          "noSharing",
 					ScsiCtlrUnitNumber: 7,
 				},
@@ -386,7 +305,7 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 								Summary: "AHCI",
 							},
 							ControllerKey: 100,
-							UnitNumber:    addrOfInt32(24),
+							UnitNumber:    NewInt32(24),
 						},
 						Device: []int32{16000},
 					},
@@ -401,12 +320,12 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 					},
 					Backing: &VirtualCdromRemotePassthroughBackingInfo{
 						VirtualDeviceRemoteDeviceBackingInfo: VirtualDeviceRemoteDeviceBackingInfo{
-							UseAutoDetect: addrOfBool(false),
+							UseAutoDetect: NewBool(false),
 						},
 					},
 					Connectable:   &VirtualDeviceConnectInfo{AllowGuestControl: true, Status: "untried"},
 					ControllerKey: 15000,
-					UnitNumber:    addrOfInt32(0),
+					UnitNumber:    NewInt32(0),
 				},
 			},
 			&VirtualDisk{
@@ -418,41 +337,42 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 					},
 					Backing: &VirtualDiskFlatVer2BackingInfo{
 						VirtualDeviceFileBackingInfo: VirtualDeviceFileBackingInfo{
-							FileName: "[datastore1] test/test.vmdk",
+							BackingObjectId: "1",
+							FileName:        "[datastore1] test/test.vmdk",
 							Datastore: &ManagedObjectReference{
 								Type:  "Datastore",
 								Value: "datastore-21",
 							},
 						},
 						DiskMode:               "persistent",
-						Split:                  addrOfBool(false),
-						WriteThrough:           addrOfBool(false),
-						ThinProvisioned:        addrOfBool(false),
-						EagerlyScrub:           addrOfBool(false),
+						Split:                  NewBool(false),
+						WriteThrough:           NewBool(false),
+						ThinProvisioned:        NewBool(false),
+						EagerlyScrub:           NewBool(false),
 						Uuid:                   "6000C298-df15-fe89-ddcb-8ea33329595d",
 						ContentId:              "e4e1a794c6307ce7906a3973fffffffe",
 						ChangeId:               "",
 						Parent:                 nil,
 						DeltaDiskFormat:        "",
-						DigestEnabled:          addrOfBool(false),
+						DigestEnabled:          NewBool(false),
 						DeltaGrainSize:         0,
 						DeltaDiskFormatVariant: "",
 						Sharing:                "sharingNone",
 						KeyId:                  nil,
 					},
 					ControllerKey: 1000,
-					UnitNumber:    addrOfInt32(0),
+					UnitNumber:    NewInt32(0),
 				},
 				CapacityInKB:    4194304,
 				CapacityInBytes: 4294967296,
 				Shares:          &SharesInfo{Shares: 1000, Level: "normal"},
 				StorageIOAllocation: &StorageIOAllocationInfo{
-					Limit:       addrOfInt64(-1),
+					Limit:       NewInt64(-1),
 					Shares:      &SharesInfo{Shares: 1000, Level: "normal"},
-					Reservation: addrOfInt32(0),
+					Reservation: NewInt32(0),
 				},
 				DiskObjectId:               "1-2000",
-				NativeUnmanagedLinkedClone: addrOfBool(false),
+				NativeUnmanagedLinkedClone: NewBool(false),
 			},
 			&VirtualVmxnet3{
 				VirtualVmxnet: VirtualVmxnet{
@@ -466,7 +386,7 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 							Backing: &VirtualEthernetCardNetworkBackingInfo{
 								VirtualDeviceDeviceBackingInfo: VirtualDeviceDeviceBackingInfo{
 									DeviceName:    "VM Network",
-									UseAutoDetect: addrOfBool(false),
+									UseAutoDetect: NewBool(false),
 								},
 								Network: &ManagedObjectReference{
 									Type:  "Network",
@@ -479,23 +399,23 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 								Status:         "untried",
 							},
 							ControllerKey: 100,
-							UnitNumber:    addrOfInt32(7),
+							UnitNumber:    NewInt32(7),
 						},
 						AddressType:      "assigned",
 						MacAddress:       "00:50:56:ac:4d:ed",
-						WakeOnLanEnabled: addrOfBool(true),
+						WakeOnLanEnabled: NewBool(true),
 						ResourceAllocation: &VirtualEthernetCardResourceAllocation{
-							Reservation: addrOfInt64(0),
+							Reservation: NewInt64(0),
 							Share: SharesInfo{
 								Shares: 50,
 								Level:  "normal",
 							},
-							Limit: addrOfInt64(-1),
+							Limit: NewInt64(-1),
 						},
-						UptCompatibilityEnabled: addrOfBool(true),
+						UptCompatibilityEnabled: NewBool(true),
 					},
 				},
-				Uptv2Enabled: addrOfBool(false),
+				Uptv2Enabled: NewBool(false),
 			},
 			&VirtualUSBXHCIController{
 				VirtualController: VirtualController{
@@ -509,29 +429,29 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 							PciSlotNumber: -1,
 						},
 						ControllerKey: 100,
-						UnitNumber:    addrOfInt32(23),
+						UnitNumber:    NewInt32(23),
 					},
 				},
 
-				AutoConnectDevices: addrOfBool(false),
+				AutoConnectDevices: NewBool(false),
 			},
 		},
 		MotherboardLayout:   "i440bxHostBridge",
 		SimultaneousThreads: 1,
 	},
 	CpuAllocation: &ResourceAllocationInfo{
-		Reservation:           addrOfInt64(0),
-		ExpandableReservation: addrOfBool(false),
-		Limit:                 addrOfInt64(-1),
+		Reservation:           NewInt64(0),
+		ExpandableReservation: NewBool(false),
+		Limit:                 NewInt64(-1),
 		Shares: &SharesInfo{
 			Shares: 1000,
 			Level:  SharesLevelNormal,
 		},
 	},
 	MemoryAllocation: &ResourceAllocationInfo{
-		Reservation:           addrOfInt64(0),
-		ExpandableReservation: addrOfBool(false),
-		Limit:                 addrOfInt64(-1),
+		Reservation:           NewInt64(0),
+		ExpandableReservation: NewBool(false),
+		Limit:                 NewInt64(-1),
 		Shares: &SharesInfo{
 			Shares: 20480,
 			Level:  SharesLevelNormal,
@@ -540,9 +460,9 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 	LatencySensitivity: &LatencySensitivity{
 		Level: LatencySensitivitySensitivityLevelNormal,
 	},
-	MemoryHotAddEnabled: addrOfBool(false),
-	CpuHotAddEnabled:    addrOfBool(false),
-	CpuHotRemoveEnabled: addrOfBool(false),
+	MemoryHotAddEnabled: NewBool(false),
+	CpuHotAddEnabled:    NewBool(false),
+	CpuHotRemoveEnabled: NewBool(false),
 	ExtraConfig: []BaseOptionValue{
 		&OptionValue{Key: "nvram", Value: "test.nvram"},
 		&OptionValue{Key: "svga.present", Value: "TRUE"},
@@ -580,28 +500,29 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 	},
 	SwapPlacement: "inherit",
 	BootOptions: &VirtualMachineBootOptions{
-		EnterBIOSSetup:       addrOfBool(false),
-		EfiSecureBootEnabled: addrOfBool(false),
-		BootRetryEnabled:     addrOfBool(false),
+		EnterBIOSSetup:       NewBool(false),
+		EfiSecureBootEnabled: NewBool(false),
+		BootDelay:            1,
+		BootRetryEnabled:     NewBool(false),
 		BootRetryDelay:       10000,
 		NetworkBootProtocol:  "ipv4",
 	},
 	FtInfo:                       nil,
 	RepConfig:                    nil,
 	VAppConfig:                   nil,
-	VAssertsEnabled:              addrOfBool(false),
-	ChangeTrackingEnabled:        addrOfBool(false),
+	VAssertsEnabled:              NewBool(false),
+	ChangeTrackingEnabled:        NewBool(false),
 	Firmware:                     "bios",
 	MaxMksConnections:            -1,
-	GuestAutoLockEnabled:         addrOfBool(true),
+	GuestAutoLockEnabled:         NewBool(true),
 	ManagedBy:                    nil,
-	MemoryReservationLockedToMax: addrOfBool(false),
+	MemoryReservationLockedToMax: NewBool(false),
 	InitialOverhead: &VirtualMachineConfigInfoOverheadInfo{
 		InitialMemoryReservation: 214446080,
 		InitialSwapReservation:   2541883392,
 	},
-	NestedHVEnabled: addrOfBool(false),
-	VPMCEnabled:     addrOfBool(false),
+	NestedHVEnabled: NewBool(false),
+	VPMCEnabled:     NewBool(false),
 	ScheduledHardwareUpgradeInfo: &ScheduledHardwareUpgradeInfo{
 		UpgradePolicy:                  "never",
 		ScheduledHardwareUpgradeStatus: "none",
@@ -615,34 +536,249 @@ var virtualMachineConfigInfoObjForTestData VirtualMachineConfigInfo = VirtualMac
 		0x94, 0x94, 0x99, 0xee,
 		0x17, 0x5d, 0xdd, 0xa3,
 	},
-	MessageBusTunnelEnabled: addrOfBool(false),
+	MessageBusTunnelEnabled: NewBool(false),
 	GuestIntegrityInfo: &VirtualMachineGuestIntegrityInfo{
-		Enabled: addrOfBool(false),
+		Enabled: NewBool(false),
 	},
 	MigrateEncryption: "opportunistic",
 	SgxInfo: &VirtualMachineSgxInfo{
 		FlcMode:            "unlocked",
-		RequireAttestation: addrOfBool(false),
+		RequireAttestation: NewBool(false),
 	},
 	ContentLibItemInfo:      nil,
 	FtEncryptionMode:        "ftEncryptionOpportunistic",
 	GuestMonitoringModeInfo: &VirtualMachineGuestMonitoringModeInfo{},
-	SevEnabled:              addrOfBool(false),
+	SevEnabled:              NewBool(false),
 	NumaInfo: &VirtualMachineVirtualNumaInfo{
-		AutoCoresPerNumaNode:    addrOfBool(true),
-		VnumaOnCpuHotaddExposed: addrOfBool(false),
+		AutoCoresPerNumaNode:    NewBool(true),
+		VnumaOnCpuHotaddExposed: NewBool(false),
 	},
-	PmemFailoverEnabled:          addrOfBool(false),
-	VmxStatsCollectionEnabled:    addrOfBool(true),
-	VmOpNotificationToAppEnabled: addrOfBool(false),
+	PmemFailoverEnabled:          NewBool(false),
+	VmxStatsCollectionEnabled:    NewBool(true),
+	VmOpNotificationToAppEnabled: NewBool(false),
 	VmOpNotificationTimeout:      -1,
 	DeviceSwap: &VirtualMachineVirtualDeviceSwap{
 		LsiToPvscsi: &VirtualMachineVirtualDeviceSwapDeviceSwapInfo{
-			Enabled:    addrOfBool(true),
-			Applicable: addrOfBool(false),
+			Enabled:    NewBool(true),
+			Applicable: NewBool(false),
 			Status:     "none",
 		},
 	},
 	Pmem:         nil,
 	DeviceGroups: &VirtualMachineVirtualDeviceGroups{},
+}
+
+var retrieveResultForTests = RetrieveResult{
+	Token: "",
+	Objects: []ObjectContent{
+
+		{
+
+			DynamicData: DynamicData{},
+			Obj: ManagedObjectReference{
+
+				Type:  "Folder",
+				Value: "group-d1",
+			},
+			PropSet: []DynamicProperty{
+				{
+
+					Name: "alarmActionsEnabled",
+					Val:  true,
+				},
+				{
+
+					Name: "availableField",
+					Val: ArrayOfCustomFieldDef{
+
+						CustomFieldDef: []CustomFieldDef{},
+					},
+				},
+
+				{
+
+					Name: "childEntity",
+					Val: ArrayOfManagedObjectReference{
+						ManagedObjectReference: []ManagedObjectReference{},
+					},
+				},
+				{
+					Name: "childType",
+					Val: ArrayOfString{
+						String: []string{
+							"Folder",
+							"Datacenter"},
+					},
+				},
+				{
+					Name: "configIssue",
+					Val: ArrayOfEvent{
+						Event: []BaseEvent{},
+					},
+				},
+				{
+					Name: "configStatus",
+					Val:  ManagedEntityStatusGray},
+				{
+					Name: "customValue",
+					Val: ArrayOfCustomFieldValue{
+						CustomFieldValue: []BaseCustomFieldValue{},
+					},
+				},
+				{
+					Name: "declaredAlarmState",
+					Val: ArrayOfAlarmState{
+						AlarmState: []AlarmState{
+							{
+								Key: "alarm-328.group-d1",
+								Entity: ManagedObjectReference{
+									Type:  "Folder",
+									Value: "group-d1"},
+								Alarm: ManagedObjectReference{
+									Type:  "Alarm",
+									Value: "alarm-328"},
+								OverallStatus: "gray",
+								Time:          time.Date(2023, time.January, 14, 8, 57, 35, 279575000, time.UTC),
+								Acknowledged:  NewBool(false),
+							},
+							{
+								Key: "alarm-327.group-d1",
+								Entity: ManagedObjectReference{
+									Type:  "Folder",
+									Value: "group-d1"},
+								Alarm: ManagedObjectReference{
+									Type:  "Alarm",
+									Value: "alarm-327"},
+								OverallStatus: "green",
+								Time:          time.Date(2023, time.January, 14, 8, 56, 40, 83607000, time.UTC),
+								Acknowledged:  NewBool(false),
+								EventKey:      756,
+							},
+							{
+								DynamicData: DynamicData{},
+								Key:         "alarm-326.group-d1",
+								Entity: ManagedObjectReference{
+									Type:  "Folder",
+									Value: "group-d1"},
+								Alarm: ManagedObjectReference{
+									Type:  "Alarm",
+									Value: "alarm-326"},
+								OverallStatus: "green",
+								Time: time.Date(2023,
+									time.January,
+									14,
+									8,
+									56,
+									35,
+									82616000,
+									time.UTC),
+								Acknowledged: NewBool(false),
+								EventKey:     751,
+							},
+						},
+					},
+				},
+				{
+					Name: "disabledMethod",
+					Val: ArrayOfString{
+						String: []string{},
+					},
+				},
+				{
+					Name: "effectiveRole",
+					Val: ArrayOfInt{
+						Int: []int32{-1},
+					},
+				},
+				{
+					Name: "name",
+					Val:  "Datacenters"},
+				{
+					Name: "overallStatus",
+					Val:  ManagedEntityStatusGray},
+				{
+					Name: "permission",
+					Val: ArrayOfPermission{
+						Permission: []Permission{
+							{
+								Entity: &ManagedObjectReference{
+									Value: "group-d1",
+									Type:  "Folder",
+								},
+								Principal: "VSPHERE.LOCAL\\vmware-vsm-2bd917c6-e084-4d1f-988d-a68f7525cc94",
+								Group:     false,
+								RoleId:    1034,
+								Propagate: true},
+							{
+								Entity: &ManagedObjectReference{
+									Value: "group-d1",
+									Type:  "Folder",
+								},
+								Principal: "VSPHERE.LOCAL\\topologysvc-2bd917c6-e084-4d1f-988d-a68f7525cc94",
+								Group:     false,
+								RoleId:    1024,
+								Propagate: true},
+							{
+								Entity: &ManagedObjectReference{
+									Value: "group-d1",
+									Type:  "Folder",
+								},
+								Principal: "VSPHERE.LOCAL\\vpxd-extension-2bd917c6-e084-4d1f-988d-a68f7525cc94",
+								Group:     false,
+								RoleId:    -1,
+								Propagate: true},
+						},
+					},
+				},
+				{
+					Name: "recentTask",
+					Val: ArrayOfManagedObjectReference{
+						ManagedObjectReference: []ManagedObjectReference{
+							{
+								Type:  "Task",
+								Value: "task-186"},
+							{
+								Type:  "Task",
+								Value: "task-187"},
+							{
+								Type:  "Task",
+								Value: "task-188"},
+						},
+					},
+				},
+				{
+					Name: "tag",
+					Val: ArrayOfTag{
+						Tag: []Tag{},
+					},
+				},
+				{
+					Name: "triggeredAlarmState",
+					Val: ArrayOfAlarmState{
+						AlarmState: []AlarmState{},
+					},
+				},
+				{
+					Name: "value",
+					Val: ArrayOfCustomFieldValue{
+						CustomFieldValue: []BaseCustomFieldValue{},
+					},
+				},
+			},
+			MissingSet: nil,
+		},
+	},
+}
+
+func mustParseTime(layout, value string) time.Time {
+	t, err := time.Parse(layout, value)
+	if err != nil {
+		panic(err)
+	}
+	return t
+}
+
+func addrOfMustParseTime(layout, value string) *time.Time {
+	t := mustParseTime(layout, value)
+	return &t
 }

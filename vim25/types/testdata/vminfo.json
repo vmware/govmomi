@@ -9,11 +9,11 @@
     "createDate": "2022-12-12T11:47:24.685785Z",
     "instanceUuid": "502cc2a5-1f06-2890-6d70-ba2c55c5c2b7",
     "npivTemporaryDisabled": true,
-    "locationId": "",
+    "locationId": "Earth",
     "template": false,
     "guestId": "vmwarePhoton64Guest",
     "alternateGuestName": "",
-    "annotation": "",
+    "annotation": "Hello, world.",
     "files": {
         "_typeName": "VirtualMachineFileInfo",
         "vmPathName": "[datastore1] test/test.vmx",
@@ -23,7 +23,7 @@
     },
     "tools": {
         "_typeName": "ToolsConfigInfo",
-        "toolsVersion": 0,
+        "toolsVersion": 1,
         "afterPowerOn": true,
         "afterResume": true,
         "beforeGuestStandby": true,
@@ -249,10 +249,11 @@
                     "_typeName": "VirtualDiskFlatVer2BackingInfo",
                     "fileName": "[datastore1] test/test.vmdk",
                     "datastore": {
+                        "_typeName": "ManagedObjectReference",
                         "value": "datastore-21",
                         "type": "Datastore"
                     },
-                    "backingObjectId": "",
+                    "backingObjectId": "1",
                     "diskMode": "persistent",
                     "split": false,
                     "writeThrough": false,
@@ -298,6 +299,7 @@
                     "deviceName": "VM Network",
                     "useAutoDetect": false,
                     "network": {
+                        "_typeName": "ManagedObjectReference",
                         "value": "network-27",
                         "type": "Network"
                     }
@@ -582,7 +584,7 @@
     "swapPlacement": "inherit",
     "bootOptions": {
         "_typeName": "VirtualMachineBootOptions",
-        "bootDelay": 0,
+        "bootDelay": 1,
         "enterBIOSSetup": false,
         "efiSecureBootEnabled": false,
         "bootRetryEnabled": false,

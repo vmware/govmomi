@@ -1,0 +1,258 @@
+{
+    "_typeName": "RetrieveResult",
+    "objects": [
+        {
+            "_typeName": "ObjectContent",
+            "obj": {
+                "_typeName": "ManagedObjectReference",
+                "value": "group-d1",
+                "type": "Folder"
+            },
+            "propSet": [
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "alarmActionsEnabled",
+                    "val": {
+                        "_typeName": "boolean",
+                        "_value": true
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "availableField",
+                    "val": {
+                        "_typeName": "ArrayOfCustomFieldDef",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "childEntity",
+                    "val": {
+                        "_typeName": "ArrayOfManagedObjectReference",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "childType",
+                    "val": {
+                        "_typeName": "ArrayOfString",
+                        "_value": ["Folder", "Datacenter"]
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "configIssue",
+                    "val": {
+                        "_typeName": "ArrayOfEvent",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "configStatus",
+                    "val": {
+                        "_typeName": "ManagedEntityStatus",
+                        "_value": "gray"
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "customValue",
+                    "val": {
+                        "_typeName": "ArrayOfCustomFieldValue",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "declaredAlarmState",
+                    "val": {
+                        "_typeName": "ArrayOfAlarmState",
+                        "_value": [
+                            {
+                                "_typeName": "AlarmState",
+                                "key": "alarm-328.group-d1",
+                                "entity": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "group-d1",
+                                    "type": "Folder"
+                                },
+                                "alarm": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "alarm-328",
+                                    "type": "Alarm"
+                                },
+                                "overallStatus": "gray",
+                                "time": "2023-01-14T08:57:35.279575Z",
+                                "acknowledged": false
+                            },
+                            {
+                                "_typeName": "AlarmState",
+                                "key": "alarm-327.group-d1",
+                                "entity": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "group-d1",
+                                    "type": "Folder"
+                                },
+                                "alarm": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "alarm-327",
+                                    "type": "Alarm"
+                                },
+                                "overallStatus": "green",
+                                "time": "2023-01-14T08:56:40.083607Z",
+                                "acknowledged": false,
+                                "eventKey": 756
+                            },
+                            {
+                                "_typeName": "AlarmState",
+                                "key": "alarm-326.group-d1",
+                                "entity": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "group-d1",
+                                    "type": "Folder"
+                                },
+                                "alarm": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "alarm-326",
+                                    "type": "Alarm"
+                                },
+                                "overallStatus": "green",
+                                "time": "2023-01-14T08:56:35.082616Z",
+                                "acknowledged": false,
+                                "eventKey": 751
+                            }
+                        ]
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "disabledMethod",
+                    "val": {
+                        "_typeName": "ArrayOfString",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "effectiveRole",
+                    "val": {
+                        "_typeName": "ArrayOfInt",
+                        "_value": [-1]
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "name",
+                    "val": {
+                        "_typeName": "string",
+                        "_value": "Datacenters"
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "overallStatus",
+                    "val": {
+                        "_typeName": "ManagedEntityStatus",
+                        "_value": "gray"
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "permission",
+                    "val": {
+                        "_typeName": "ArrayOfPermission",
+                        "_value": [
+                            {
+                                "_typeName": "Permission",
+                                "entity": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "group-d1",
+                                    "type": "Folder"
+                                },
+                                "principal": "VSPHERE.LOCAL\\vmware-vsm-2bd917c6-e084-4d1f-988d-a68f7525cc94",
+                                "group": false,
+                                "roleId": 1034,
+                                "propagate": true
+                            },
+                            {
+                                "_typeName": "Permission",
+                                "entity": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "group-d1",
+                                    "type": "Folder"
+                                },
+                                "principal": "VSPHERE.LOCAL\\topologysvc-2bd917c6-e084-4d1f-988d-a68f7525cc94",
+                                "group": false,
+                                "roleId": 1024,
+                                "propagate": true
+                            },
+                            {
+                                "_typeName": "Permission",
+                                "entity": {
+                                    "_typeName": "ManagedObjectReference",
+                                    "value": "group-d1",
+                                    "type": "Folder"
+                                },
+                                "principal": "VSPHERE.LOCAL\\vpxd-extension-2bd917c6-e084-4d1f-988d-a68f7525cc94",
+                                "group": false,
+                                "roleId": -1,
+                                "propagate": true
+                            }
+                        ]
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "recentTask",
+                    "val": {
+                        "_typeName": "ArrayOfManagedObjectReference",
+                        "_value": [
+                            {
+                                "_typeName": "ManagedObjectReference",
+                                "value": "task-186",
+                                "type": "Task"
+                            },
+                            {
+                                "_typeName": "ManagedObjectReference",
+                                "value": "task-187",
+                                "type": "Task"
+                            },
+                            {
+                                "_typeName": "ManagedObjectReference",
+                                "value": "task-188",
+                                "type": "Task"
+                            }
+                        ]
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "tag",
+                    "val": {
+                        "_typeName": "ArrayOfTag",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "triggeredAlarmState",
+                    "val": {
+                        "_typeName": "ArrayOfAlarmState",
+                        "_value": []
+                    }
+                },
+                {
+                    "_typeName": "DynamicProperty",
+                    "name": "value",
+                    "val": {
+                        "_typeName": "ArrayOfCustomFieldValue",
+                        "_value": []
+                    }
+                }
+            ]
+        }
+    ]
+}
