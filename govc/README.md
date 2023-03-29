@@ -170,6 +170,9 @@ using environment variables. The following environment variables are used by
 
 * `GOVC_VIM_VERSION`: Vim version defaults to `6.0`
 
+* `GOVC_VI_JSON`: Uses JSON transport instead of SOAP (Experimental; Usable only
+for vim25 APIs in vCenter 8.0u1)
+
 ## Troubleshooting
 
 ### Verbose Flag
