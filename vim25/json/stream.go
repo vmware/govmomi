@@ -41,26 +41,21 @@ func (dec *Decoder) UseNumber() { dec.d.useNumber = true }
 // non-ignored, exported fields in the destination.
 func (dec *Decoder) DisallowUnknownFields() { dec.d.disallowUnknownFields = true }
 
-// SetDiscriminator tells the decoder toe check if JSON objects include a
+// SetDiscriminator tells the decoder to check if JSON objects include a
 // discriminator that specifies the Go type into which the object should be
 // decoded.
-// Struct values are encoded with a field (typeFieldName) that specifies the
-// struct's Go type.
-// Primitive values are encoded as a struct a field (typeFieldName) that
-// specifies the primitive value's Go type and a field (valueFieldName) that
-// specifies the actual value.
-// Struct and primitive values may also optionally be encoded with a field
-// (byAddrFieldName) that specifies whether the Go type is a pointer to another
-// Go type. If byAddrFieldName is "", then the optional field will not be added.
-// An optional typeFn may be provided that is used by the decoder to look up a
-// Go type from its name specified by typeFieldName. Built-in types are handled
-// automatically by the decoder and will be ignored if they are returned by the
-// typeFn.
-// Calling SetDiscriminator("", "", "", nil) disables the discriminator.
-func (dec *Decoder) SetDiscriminator(typeFieldName, valueFieldName, byAddrFieldName string, typeFn DiscriminatorToTypeFunc) {
+// Map and struct values are encoded as JSON objects as normal, but with an
+// additional field (typeFieldName) that specifies the object's Go type.
+// All other values are encoded inside an outer JSON object with a field
+// (typeFieldName) that specifies the value's Go type and a field
+// (valueFieldName) that specifies the actual value.
+// An optional typeFn may be provided to enable looking up custom types based
+// on type name strings. Built-in types are handled automatically and will be
+// ignored if they are returned by the typeFn.
+// Calling SetDiscriminator("", "", nil) disables the discriminator.
+func (dec *Decoder) SetDiscriminator(typeFieldName, valueFieldName string, typeFn DiscriminatorToTypeFunc) {
 	dec.d.discriminatorTypeFieldName = typeFieldName
 	dec.d.discriminatorValueFieldName = valueFieldName
-	dec.d.discriminatorByAddrFieldName = byAddrFieldName
 	dec.d.discriminatorToTypeFn = typeFn
 }
 
@@ -210,9 +205,10 @@ type Encoder struct {
 	indentPrefix string
 	indentValue  string
 
-	discriminatorTypeFieldName   string
-	discriminatorValueFieldName  string
-	discriminatorByAddrFieldName string
+	discriminatorTypeFieldName  string
+	discriminatorValueFieldName string
+	discriminatorEncodeMode     DiscriminatorEncodeMode
+	typeToDiscriminatorFn       TypeToDiscriminatorFunc
 }
 
 // NewEncoder returns a new encoder that writes to w.
@@ -231,10 +227,11 @@ func (enc *Encoder) Encode(v interface{}) error {
 	}
 	e := newEncodeState()
 	err := e.marshal(v, encOpts{
-		escapeHTML:                   enc.escapeHTML,
-		discriminatorTypeFieldName:   enc.discriminatorTypeFieldName,
-		discriminatorValueFieldName:  enc.discriminatorValueFieldName,
-		discriminatorByAddrFieldName: enc.discriminatorByAddrFieldName,
+		escapeHTML:                  enc.escapeHTML,
+		discriminatorTypeFieldName:  enc.discriminatorTypeFieldName,
+		discriminatorValueFieldName: enc.discriminatorValueFieldName,
+		discriminatorEncodeMode:     enc.discriminatorEncodeMode,
+		discriminatorValueFn:        enc.typeToDiscriminatorFn,
 	})
 	if err != nil {
 		return err
@@ -286,21 +283,34 @@ func (enc *Encoder) SetEscapeHTML(on bool) {
 	enc.escapeHTML = on
 }
 
-// SetDiscriminator specifies that values stored in interfaces should be
-// encoded with information about the stored value's Go type.
-// Struct values are encoded with a field (typeFieldName) that specifies the
-// struct's Go type.
-// Primitive values are encoded as a struct a field (typeFieldName) that
-// specifies the primitive value's Go type and a field (valueFieldName) that
-// specifies the actual value.
-// Struct and primitive values may also optionally be encoded with a field
-// (byAddrFieldName) that specifies whether the Go type is a pointer to another
-// Go type. If byAddrFieldName is "", then the optional field will not be added.
-// Calling SetDiscriminator("", "", "") disables the discriminator.
-func (enc *Encoder) SetDiscriminator(typeFieldName, valueFieldName, byAddrFieldName string) {
+// SetDiscriminator specifies that a value stored in an interface should be
+// encoded with information about the value's Go type.
+// Map and struct values are encoded as JSON objects as normal, but with an
+// additional field (typeFieldName) that specifies the object's Go type.
+// All other values are encoded inside an outer JSON object with a field
+// (typeFieldName) that specifies the value's Go type and a field
+// (valueFieldName) that specifies the actual value.
+// A mask (mode) is available to control the encoder's behavior.
+// Calling SetDiscriminator("", "", 0) disables the discriminator.
+func (enc *Encoder) SetDiscriminator(typeFieldName, valueFieldName string, mode DiscriminatorEncodeMode) {
 	enc.discriminatorTypeFieldName = typeFieldName
 	enc.discriminatorValueFieldName = valueFieldName
-	enc.discriminatorByAddrFieldName = byAddrFieldName
+	enc.discriminatorEncodeMode = mode
+	enc.typeToDiscriminatorFn = DefaultDiscriminatorFunc
+}
+
+// SetTypeToDiscriminatorFunc allows for customizing the discriminator value for
+// different types. This may be useful if the golang struct names do not match
+// the desired values. One example would be if discriminator values in a
+// protocol require special characters or start with lowercase letter. The
+// TypeToDiscriminatorFunc implementation may return empty string to suppress
+// the rendering of discriminator for specific type(s).
+func (enc *Encoder) SetTypeToDiscriminatorFunc(f TypeToDiscriminatorFunc) {
+	if f == nil {
+		enc.typeToDiscriminatorFn = DefaultDiscriminatorFunc
+		return
+	}
+	enc.typeToDiscriminatorFn = f
 }
 
 // RawMessage is a raw encoded JSON value.
@@ -336,7 +346,6 @@ var _ Unmarshaler = (*RawMessage)(nil)
 //	Number, for JSON numbers
 //	string, for JSON string literals
 //	nil, for JSON null
-//
 type Token interface{}
 
 const (

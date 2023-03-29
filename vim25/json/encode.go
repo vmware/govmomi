@@ -77,31 +77,31 @@ import (
 //
 // Examples of struct field tags and their meanings:
 //
-//   // Field appears in JSON as key "myName".
-//   Field int `json:"myName"`
+//	// Field appears in JSON as key "myName".
+//	Field int `json:"myName"`
 //
-//   // Field appears in JSON as key "myName" and
-//   // the field is omitted from the object if its value is empty,
-//   // as defined above.
-//   Field int `json:"myName,omitempty"`
+//	// Field appears in JSON as key "myName" and
+//	// the field is omitted from the object if its value is empty,
+//	// as defined above.
+//	Field int `json:"myName,omitempty"`
 //
-//   // Field appears in JSON as key "Field" (the default), but
-//   // the field is skipped if empty.
-//   // Note the leading comma.
-//   Field int `json:",omitempty"`
+//	// Field appears in JSON as key "Field" (the default), but
+//	// the field is skipped if empty.
+//	// Note the leading comma.
+//	Field int `json:",omitempty"`
 //
-//   // Field is ignored by this package.
-//   Field int `json:"-"`
+//	// Field is ignored by this package.
+//	Field int `json:"-"`
 //
-//   // Field appears in JSON as key "-".
-//   Field int `json:"-,"`
+//	// Field appears in JSON as key "-".
+//	Field int `json:"-,"`
 //
 // The "string" option signals that a field is stored as JSON inside a
 // JSON-encoded string. It applies only to fields of string, floating point,
 // integer, or boolean types. This extra level of encoding is sometimes used
 // when communicating with JavaScript programs:
 //
-//    Int64String int64 `json:",string"`
+//	Int64String int64 `json:",string"`
 //
 // The key name will be used if it's a non-empty string consisting of
 // only Unicode letters, digits, and ASCII punctuation except quotation
@@ -154,7 +154,6 @@ import (
 // JSON cannot represent cyclic data structures and Marshal does not
 // handle them. Passing cyclic structures to Marshal will result in
 // an error.
-//
 func Marshal(v interface{}) ([]byte, error) {
 	e := newEncodeState()
 
@@ -295,6 +294,12 @@ type encodeState struct {
 	// reasonable amount of nested pointers deep.
 	ptrLevel uint
 	ptrSeen  map[interface{}]struct{}
+
+	// discriminatorEncodeTypeName is set to true when the type name should
+	// be encoded along with a map or struct value. The flag is flipped back
+	// to false as soon as the type name is encoded to prevent impacting
+	// subsequent values.
+	discriminatorEncodeTypeName bool
 }
 
 const startDetectingCyclesAfter = 1000
@@ -309,6 +314,7 @@ func newEncodeState() *encodeState {
 			panic("ptrEncoder.encode should have emptied ptrSeen via defers")
 		}
 		e.ptrLevel = 0
+		e.discriminatorEncodeTypeName = false
 		return e
 	}
 	return &encodeState{ptrSeen: make(map[interface{}]struct{})}
@@ -318,6 +324,8 @@ func newEncodeState() *encodeState {
 // Panics with errors are wrapped in jsonError so that the top-level recover
 // can distinguish intentional panics from this package.
 type jsonError struct{ error }
+
+var interfaceType = reflect.TypeOf((*interface{})(nil)).Elem()
 
 func (e *encodeState) marshal(v interface{}, opts encOpts) (err error) {
 	defer func() {
@@ -329,7 +337,13 @@ func (e *encodeState) marshal(v interface{}, opts encOpts) (err error) {
 			}
 		}
 	}()
-	e.reflectValue(reflect.ValueOf(v), opts)
+
+	val := reflect.ValueOf(v)
+	if val.IsValid() && opts.isDiscriminatorSet() && opts.discriminatorEncodeMode.root() {
+		val = val.Convert(interfaceType)
+	}
+	e.reflectValue(val, opts)
+
 	return nil
 }
 
@@ -370,7 +384,9 @@ type encOpts struct {
 	// see Encoder.SetDiscriminator
 	discriminatorValueFieldName string
 	// see Encoder.SetDiscriminator
-	discriminatorByAddrFieldName string
+	discriminatorValueFn TypeToDiscriminatorFunc
+	// see Encoder.SetDiscriminator
+	discriminatorEncodeMode DiscriminatorEncodeMode
 }
 
 type encoderFunc func(e *encodeState, v reflect.Value, opts encOpts)
@@ -715,14 +731,12 @@ func isValidNumber(s string) bool {
 }
 
 func interfaceEncoder(e *encodeState, v reflect.Value, opts encOpts) {
-	if opts.isDiscriminatorSet() {
-		de := discriminatorInterfaceEncoder{}
-		if de.encode(e, v, opts) {
-			return
-		}
-	}
 	if v.IsNil() {
 		e.WriteString("null")
+		return
+	}
+	if opts.isDiscriminatorSet() {
+		discriminatorInterfaceEncode(e, v, opts)
 		return
 	}
 	e.reflectValue(v.Elem(), opts)
@@ -733,9 +747,7 @@ func unsupportedTypeEncoder(e *encodeState, v reflect.Value, _ encOpts) {
 }
 
 type structEncoder struct {
-	fields   structFields
-	typeName string
-	byAddr   bool
+	fields structFields
 }
 
 type structFields struct {
@@ -746,9 +758,7 @@ type structFields struct {
 func (se structEncoder) encode(e *encodeState, v reflect.Value, opts encOpts) {
 	next := byte('{')
 	if opts.isDiscriminatorSet() {
-		de := discriminatorStructEncoder{structEncoder: se}
-		de.encode(e, v, opts)
-		next = byte(',')
+		next = discriminatorStructEncode(e, v, opts)
 	}
 FieldLoop:
 	for i := range se.fields.list {
@@ -788,7 +798,7 @@ FieldLoop:
 }
 
 func newStructEncoder(t reflect.Type) encoderFunc {
-	se := structEncoder{fields: cachedTypeFields(t), typeName: t.Name()}
+	se := structEncoder{fields: cachedTypeFields(t)}
 	return se.encode
 }
 
@@ -812,6 +822,10 @@ func (me mapEncoder) encode(e *encodeState, v reflect.Value, opts encOpts) {
 		defer delete(e.ptrSeen, ptr)
 	}
 	e.WriteByte('{')
+
+	if opts.isDiscriminatorSet() {
+		discriminatorMapEncode(e, v, opts)
+	}
 
 	// Extract and sort the keys.
 	sv := make([]reflectWithString, v.Len())
