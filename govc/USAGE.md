@@ -361,6 +361,9 @@ but appear via `govc $cmd -h`:
  - [vm.vnc](#vmvnc)
  - [volume.ls](#volumels)
  - [volume.rm](#volumerm)
+ - [volume.snapshot.create](#volumesnapshotcreate)
+ - [volume.snapshot.ls](#volumesnapshotls)
+ - [volume.snapshot.rm](#volumesnapshotrm)
  - [vsan.change](#vsanchange)
  - [vsan.info](#vsaninfo)
 
@@ -6333,6 +6336,59 @@ consider using 'govc disk.ls -R' to reconcile the datastore inventory.
 
 Examples:
   govc volume.rm f75989dc-95b9-4db7-af96-8583f24bc59d
+
+Options:
+```
+
+## volume.snapshot.create
+
+```
+Usage: govc volume.snapshot.create [OPTIONS] [ID] [DESC]
+
+Create snapshot of volume ID with description DESC.
+
+Examples:
+  govc volume.snapshot.create df86393b-5ae0-4fca-87d0-b692dbc67d45 my-snapshot
+  govc volume.snapshot.create -i df86393b-5ae0-4fca-87d0-b692dbc67d45 my-snapshot
+
+Options:
+  -i=false               Output snapshot ID and volume ID only
+```
+
+## volume.snapshot.ls
+
+```
+Usage: govc volume.snapshot.ls [OPTIONS] [ID]...
+
+List all snapshots of volume ID.
+
+Use a list of volume IDs to list all snapshots of multiple volumes at once.
+
+Examples:
+  govc volume.snapshot.ls df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc volume.snapshot.ls -i df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc volume.snapshot.ls -l df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc volume.snapshot.ls -l $(govc volume.ls -i)
+
+Options:
+  -i=false               List snapshot ID and volume ID only
+  -l=false               Long listing format
+```
+
+## volume.snapshot.rm
+
+```
+Usage: govc volume.snapshot.rm [OPTIONS] [SNAP_ID VOL_ID]...
+
+Remove snapshot SNAP_ID from volume VOL_ID.
+
+Use a list of [SNAP_ID VOL_ID] pairs to remove multiple snapshots at once.
+
+Examples:
+  govc volume.snapshot.rm f75989dc-95b9-4db7-af96-8583f24bc59d df86393b-5ae0-4fca-87d0-b692dbc67d45
+  govc volume.snapshot.rm $(govc volume.snapshot.ls -i df86393b-5ae0-4fca-87d0-b692dbc67d45)
+  govc volume.snapshot.rm $(govc volume.snapshot.create -i df86393b-5ae0-4fca-87d0-b692dbc67d45 my-snapshot)
+  govc volume.snapshot.rm $(govc volume.snapshot.ls -i $(govc volume.ls -i))
 
 Options:
 ```
