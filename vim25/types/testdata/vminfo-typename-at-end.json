@@ -1,0 +1,651 @@
+{
+    "changeVersion": "2022-12-12T11:48:35.473645Z",
+    "modified": "1970-01-01T00:00:00Z",
+    "name": "test",
+    "guestFullName": "VMware Photon OS (64-bit)",
+    "version": "vmx-20",
+    "uuid": "422ca90b-853b-1101-3350-759f747730cc",
+    "createDate": "2022-12-12T11:47:24.685785Z",
+    "instanceUuid": "502cc2a5-1f06-2890-6d70-ba2c55c5c2b7",
+    "npivTemporaryDisabled": true,
+    "locationId": "Earth",
+    "template": false,
+    "guestId": "vmwarePhoton64Guest",
+    "alternateGuestName": "",
+    "annotation": "Hello, world.",
+    "files": {
+        "_typeName": "VirtualMachineFileInfo",
+        "vmPathName": "[datastore1] test/test.vmx",
+        "snapshotDirectory": "[datastore1] test/",
+        "suspendDirectory": "[datastore1] test/",
+        "logDirectory": "[datastore1] test/"
+    },
+    "tools": {
+        "_typeName": "ToolsConfigInfo",
+        "toolsVersion": 1,
+        "afterPowerOn": true,
+        "afterResume": true,
+        "beforeGuestStandby": true,
+        "beforeGuestShutdown": true,
+        "toolsUpgradePolicy": "manual",
+        "syncTimeWithHostAllowed": true,
+        "syncTimeWithHost": false,
+        "lastInstallInfo": {
+            "_typeName": "ToolsConfigInfoToolsLastInstallInfo",
+            "counter": 0
+        }
+    },
+    "flags": {
+        "_typeName": "VirtualMachineFlagInfo",
+        "enableLogging": true,
+        "useToe": false,
+        "runWithDebugInfo": false,
+        "monitorType": "release",
+        "htSharing": "any",
+        "snapshotDisabled": false,
+        "snapshotLocked": false,
+        "diskUuidEnabled": false,
+        "snapshotPowerOffBehavior": "powerOff",
+        "recordReplayEnabled": false,
+        "faultToleranceType": "unset",
+        "cbrcCacheEnabled": false,
+        "vvtdEnabled": false,
+        "vbsEnabled": false
+    },
+    "defaultPowerOps": {
+        "_typeName": "VirtualMachineDefaultPowerOpInfo",
+        "powerOffType": "soft",
+        "suspendType": "hard",
+        "resetType": "soft",
+        "defaultPowerOffType": "soft",
+        "defaultSuspendType": "hard",
+        "defaultResetType": "soft",
+        "standbyAction": "checkpoint"
+    },
+    "rebootPowerOff": false,
+    "hardware": {
+        "_typeName": "VirtualHardware",
+        "numCPU": 1,
+        "numCoresPerSocket": 1,
+        "autoCoresPerSocket": true,
+        "memoryMB": 2048,
+        "virtualICH7MPresent": false,
+        "virtualSMCPresent": false,
+        "device": [
+            {
+                "_typeName": "VirtualIDEController",
+                "key": 200,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "IDE 0",
+                    "summary": "IDE 0"
+                },
+                "busNumber": 0
+            },
+            {
+                "_typeName": "VirtualIDEController",
+                "key": 201,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "IDE 1",
+                    "summary": "IDE 1"
+                },
+                "busNumber": 1
+            },
+            {
+                "_typeName": "VirtualPS2Controller",
+                "key": 300,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "PS2 controller 0",
+                    "summary": "PS2 controller 0"
+                },
+                "busNumber": 0,
+                "device": [600, 700]
+            },
+            {
+                "_typeName": "VirtualPCIController",
+                "key": 100,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "PCI controller 0",
+                    "summary": "PCI controller 0"
+                },
+                "busNumber": 0,
+                "device": [500, 12000, 14000, 1000, 15000, 4000]
+            },
+            {
+                "_typeName": "VirtualSIOController",
+                "key": 400,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "SIO controller 0",
+                    "summary": "SIO controller 0"
+                },
+                "busNumber": 0
+            },
+            {
+                "_typeName": "VirtualKeyboard",
+                "key": 600,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "Keyboard",
+                    "summary": "Keyboard"
+                },
+                "controllerKey": 300,
+                "unitNumber": 0
+            },
+            {
+                "_typeName": "VirtualPointingDevice",
+                "key": 700,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "Pointing device",
+                    "summary": "Pointing device; Device"
+                },
+                "backing": {
+                    "_typeName": "VirtualPointingDeviceDeviceBackingInfo",
+                    "deviceName": "",
+                    "useAutoDetect": false,
+                    "hostPointingDevice": "autodetect"
+                },
+                "controllerKey": 300,
+                "unitNumber": 1
+            },
+            {
+                "_typeName": "VirtualMachineVideoCard",
+                "key": 500,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "Video card ",
+                    "summary": "Video card"
+                },
+                "controllerKey": 100,
+                "unitNumber": 0,
+                "videoRamSizeInKB": 4096,
+                "numDisplays": 1,
+                "useAutoDetect": false,
+                "enable3DSupport": false,
+                "use3dRenderer": "automatic",
+                "graphicsMemorySizeInKB": 262144
+            },
+            {
+                "_typeName": "VirtualMachineVMCIDevice",
+                "key": 12000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "VMCI device",
+                    "summary": "Device on the virtual machine PCI bus that provides support for the virtual machine communication interface"
+                },
+                "controllerKey": 100,
+                "unitNumber": 17,
+                "id": -1,
+                "allowUnrestrictedCommunication": false,
+                "filterEnable": true
+            },
+            {
+                "_typeName": "ParaVirtualSCSIController",
+                "key": 1000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "SCSI controller 0",
+                    "summary": "VMware paravirtual SCSI"
+                },
+                "controllerKey": 100,
+                "unitNumber": 3,
+                "busNumber": 0,
+                "device": [2000],
+                "hotAddRemove": true,
+                "sharedBus": "noSharing",
+                "scsiCtlrUnitNumber": 7
+            },
+            {
+                "_typeName": "VirtualAHCIController",
+                "key": 15000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "SATA controller 0",
+                    "summary": "AHCI"
+                },
+                "controllerKey": 100,
+                "unitNumber": 24,
+                "busNumber": 0,
+                "device": [16000]
+            },
+            {
+                "_typeName": "VirtualCdrom",
+                "key": 16000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "CD/DVD drive 1",
+                    "summary": "Remote device"
+                },
+                "backing": {
+                    "_typeName": "VirtualCdromRemotePassthroughBackingInfo",
+                    "deviceName": "",
+                    "useAutoDetect": false,
+                    "exclusive": false
+                },
+                "connectable": {
+                    "_typeName": "VirtualDeviceConnectInfo",
+                    "startConnected": false,
+                    "allowGuestControl": true,
+                    "connected": false,
+                    "status": "untried"
+                },
+                "controllerKey": 15000,
+                "unitNumber": 0
+            },
+            {
+                "_typeName": "VirtualDisk",
+                "key": 2000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "Hard disk 1",
+                    "summary": "4,194,304 KB"
+                },
+                "backing": {
+                    "_typeName": "VirtualDiskFlatVer2BackingInfo",
+                    "fileName": "[datastore1] test/test.vmdk",
+                    "datastore": {
+                        "_typeName": "ManagedObjectReference",
+                        "value": "datastore-21",
+                        "type": "Datastore"
+                    },
+                    "backingObjectId": "1",
+                    "diskMode": "persistent",
+                    "split": false,
+                    "writeThrough": false,
+                    "thinProvisioned": false,
+                    "eagerlyScrub": false,
+                    "uuid": "6000C298-df15-fe89-ddcb-8ea33329595d",
+                    "contentId": "e4e1a794c6307ce7906a3973fffffffe",
+                    "digestEnabled": false,
+                    "sharing": "sharingNone"
+                },
+                "controllerKey": 1000,
+                "unitNumber": 0,
+                "capacityInKB": 4194304,
+                "capacityInBytes": 4294967296,
+                "shares": {
+                    "_typeName": "SharesInfo",
+                    "shares": 1000,
+                    "level": "normal"
+                },
+                "storageIOAllocation": {
+                    "_typeName": "StorageIOAllocationInfo",
+                    "limit": -1,
+                    "shares": {
+                        "_typeName": "SharesInfo",
+                        "shares": 1000,
+                        "level": "normal"
+                    },
+                    "reservation": 0
+                },
+                "diskObjectId": "1-2000",
+                "nativeUnmanagedLinkedClone": false
+            },
+            {
+                "_typeName": "VirtualVmxnet3",
+                "key": 4000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "Network adapter 1",
+                    "summary": "VM Network"
+                },
+                "backing": {
+                    "_typeName": "VirtualEthernetCardNetworkBackingInfo",
+                    "deviceName": "VM Network",
+                    "useAutoDetect": false,
+                    "network": {
+                        "_typeName": "ManagedObjectReference",
+                        "value": "network-27",
+                        "type": "Network"
+                    }
+                },
+                "connectable": {
+                    "_typeName": "VirtualDeviceConnectInfo",
+                    "migrateConnect": "unset",
+                    "startConnected": true,
+                    "allowGuestControl": false,
+                    "connected": false,
+                    "status": "untried"
+                },
+                "controllerKey": 100,
+                "unitNumber": 7,
+                "addressType": "assigned",
+                "macAddress": "00:50:56:ac:4d:ed",
+                "wakeOnLanEnabled": true,
+                "resourceAllocation": {
+                    "_typeName": "VirtualEthernetCardResourceAllocation",
+                    "reservation": 0,
+                    "share": {
+                        "_typeName": "SharesInfo",
+                        "shares": 50,
+                        "level": "normal"
+                    },
+                    "limit": -1
+                },
+                "uptCompatibilityEnabled": true,
+                "uptv2Enabled": false
+            },
+            {
+                "_typeName": "VirtualUSBXHCIController",
+                "key": 14000,
+                "deviceInfo": {
+                    "_typeName": "Description",
+                    "label": "USB xHCI controller ",
+                    "summary": "USB xHCI controller"
+                },
+                "slotInfo": {
+                    "_typeName": "VirtualDevicePciBusSlotInfo",
+                    "pciSlotNumber": -1
+                },
+                "controllerKey": 100,
+                "unitNumber": 23,
+                "busNumber": 0,
+                "autoConnectDevices": false
+            }
+        ],
+        "motherboardLayout": "i440bxHostBridge",
+        "simultaneousThreads": 1
+    },
+    "cpuAllocation": {
+        "_typeName": "ResourceAllocationInfo",
+        "reservation": 0,
+        "expandableReservation": false,
+        "limit": -1,
+        "shares": {
+            "_typeName": "SharesInfo",
+            "shares": 1000,
+            "level": "normal"
+        }
+    },
+    "memoryAllocation": {
+        "_typeName": "ResourceAllocationInfo",
+        "reservation": 0,
+        "expandableReservation": false,
+        "limit": -1,
+        "shares": {
+            "_typeName": "SharesInfo",
+            "shares": 20480,
+            "level": "normal"
+        }
+    },
+    "latencySensitivity": {
+        "_typeName": "LatencySensitivity",
+        "level": "normal"
+    },
+    "memoryHotAddEnabled": false,
+    "cpuHotAddEnabled": false,
+    "cpuHotRemoveEnabled": false,
+    "extraConfig": [
+        {
+            "_typeName": "OptionValue",
+            "key": "nvram",
+            "value": {
+                "_typeName": "string",
+                "_value": "test.nvram"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "svga.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge0.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge4.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge4.virtualDev",
+            "value": {
+                "_typeName": "string",
+                "_value": "pcieRootPort"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge4.functions",
+            "value": {
+                "_typeName": "string",
+                "_value": "8"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge5.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge5.virtualDev",
+            "value": {
+                "_typeName": "string",
+                "_value": "pcieRootPort"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge5.functions",
+            "value": {
+                "_typeName": "string",
+                "_value": "8"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge6.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge6.virtualDev",
+            "value": {
+                "_typeName": "string",
+                "_value": "pcieRootPort"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge6.functions",
+            "value": {
+                "_typeName": "string",
+                "_value": "8"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge7.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge7.virtualDev",
+            "value": {
+                "_typeName": "string",
+                "_value": "pcieRootPort"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "pciBridge7.functions",
+            "value": {
+                "_typeName": "string",
+                "_value": "8"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "hpet0.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "RemoteDisplay.maxConnections",
+            "value": {
+                "_typeName": "string",
+                "_value": "-1"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "sched.cpu.latencySensitivity",
+            "value": {
+                "_typeName": "string",
+                "_value": "normal"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "vmware.tools.internalversion",
+            "value": {
+                "_typeName": "string",
+                "_value": "0"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "vmware.tools.requiredversion",
+            "value": {
+                "_typeName": "string",
+                "_value": "12352"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "migrate.hostLogState",
+            "value": {
+                "_typeName": "string",
+                "_value": "none"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "migrate.migrationId",
+            "value": {
+                "_typeName": "string",
+                "_value": "0"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "migrate.hostLog",
+            "value": {
+                "_typeName": "string",
+                "_value": "test-36f94569.hlog"
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "viv.moid",
+            "value": {
+                "_typeName": "string",
+                "_value": "c5b34aa9-d962-4a74-b7d2-b83ec683ba1b:vm-28:lIgQ2t7v24n2nl3N7K3m6IHW2OoPF4CFrJd5N+Tdfio="
+            }
+        }
+    ],
+    "datastoreUrl": [
+        {
+            "_typeName": "VirtualMachineConfigInfoDatastoreUrlPair",
+            "name": "datastore1",
+            "url": "/vmfs/volumes/63970ed8-4abddd2a-62d7-02003f49c37d"
+        }
+    ],
+    "swapPlacement": "inherit",
+    "bootOptions": {
+        "_typeName": "VirtualMachineBootOptions",
+        "bootDelay": 1,
+        "enterBIOSSetup": false,
+        "efiSecureBootEnabled": false,
+        "bootRetryEnabled": false,
+        "bootRetryDelay": 10000,
+        "networkBootProtocol": "ipv4"
+    },
+    "vAssertsEnabled": false,
+    "changeTrackingEnabled": false,
+    "firmware": "bios",
+    "maxMksConnections": -1,
+    "guestAutoLockEnabled": true,
+    "memoryReservationLockedToMax": false,
+    "initialOverhead": {
+        "_typeName": "VirtualMachineConfigInfoOverheadInfo",
+        "initialMemoryReservation": 214446080,
+        "initialSwapReservation": 2541883392
+    },
+    "nestedHVEnabled": false,
+    "vPMCEnabled": false,
+    "scheduledHardwareUpgradeInfo": {
+        "_typeName": "ScheduledHardwareUpgradeInfo",
+        "upgradePolicy": "never",
+        "scheduledHardwareUpgradeStatus": "none"
+    },
+    "vmxConfigChecksum": "afenntHCIUtsIHcKlJSZ7hdd3aM=",
+    "messageBusTunnelEnabled": false,
+    "guestIntegrityInfo": {
+        "_typeName": "VirtualMachineGuestIntegrityInfo",
+        "enabled": false
+    },
+    "migrateEncryption": "opportunistic",
+    "sgxInfo": {
+        "_typeName": "VirtualMachineSgxInfo",
+        "epcSize": 0,
+        "flcMode": "unlocked",
+        "requireAttestation": false
+    },
+    "ftEncryptionMode": "ftEncryptionOpportunistic",
+    "guestMonitoringModeInfo": {
+        "_typeName": "VirtualMachineGuestMonitoringModeInfo"
+    },
+    "sevEnabled": false,
+    "numaInfo": {
+        "_typeName": "VirtualMachineVirtualNumaInfo",
+        "autoCoresPerNumaNode": true,
+        "vnumaOnCpuHotaddExposed": false
+    },
+    "pmemFailoverEnabled": false,
+    "vmxStatsCollectionEnabled": true,
+    "vmOpNotificationToAppEnabled": false,
+    "vmOpNotificationTimeout": -1,
+    "deviceSwap": {
+        "_typeName": "VirtualMachineVirtualDeviceSwap",
+        "lsiToPvscsi": {
+            "_typeName": "VirtualMachineVirtualDeviceSwapDeviceSwapInfo",
+            "enabled": true,
+            "applicable": false,
+            "status": "none"
+        }
+    },
+    "deviceGroups": {
+        "_typeName": "VirtualMachineVirtualDeviceGroups"
+    },
+    "_typeName": "VirtualMachineConfigInfo"
+}

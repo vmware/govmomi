@@ -19,10 +19,10 @@ package types
 import (
 	"bytes"
 	"reflect"
-	"strings"
 	"testing"
 
-	"github.com/vmware/govmomi/vim25/json"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
@@ -70,15 +70,12 @@ func TestManagedObjectReference(t *testing.T) {
 			})
 			t.Run("json", func(t *testing.T) {
 				var w bytes.Buffer
-				enc := json.NewEncoder(&w)
-				enc.SetIndent("", "")
-				enc.SetDiscriminator("_typeName", "_value", "")
+				enc := NewJSONEncoder(&w)
 				if err := enc.Encode(tc.obj); err != nil {
 					t.Fatal(err)
 				}
-				if e, a := tc.expJSON, strings.TrimRight(w.String(), "\n"); e != a {
-					t.Fatalf("failed to marshal MoRef to JSON: exp=%s, act=%s", e, a)
-				}
+				assert.JSONEq(t, tc.expJSON, w.String(),
+					"failed to marshal MoRef to JSON")
 			})
 		})
 	}
