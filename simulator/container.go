@@ -249,6 +249,7 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 
 	var args []string
 	var env []string
+	mountDMI := true
 
 	for _, opt := range vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
@@ -260,6 +261,13 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 			}
 
 			continue
+		}
+		if val.Key == "RUN.mountdmi" {
+			var mount bool
+			err := json.Unmarshal([]byte(val.Value.(string)), &mount)
+			if err == nil {
+				mountDMI = mount
+			}
 		}
 		if strings.HasPrefix(val.Key, "guestinfo.") {
 			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
@@ -278,10 +286,12 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 	c.name = fmt.Sprintf("vcsim-%s-%s", sanitizeName(vm.Name), vm.uid)
 	run := append([]string{"docker", "run", "-d", "--name", c.name}, env...)
 
-	if err := c.createDMI(vm, c.name); err != nil {
-		return
+	if mountDMI {
+		if err := c.createDMI(vm, c.name); err != nil {
+			return
+		}
+		run = append(run, "-v", fmt.Sprintf("%s:%s:ro", c.name, "/sys/class/dmi/id"))
 	}
-	run = append(run, "-v", fmt.Sprintf("%s:%s:ro", c.name, "/sys/class/dmi/id"))
 
 	args = append(run, args...)
 	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
