@@ -250,6 +250,7 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 	var args []string
 	var env []string
 	mountDMI := true
+	ports := make(map[string]string)
 
 	for _, opt := range vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
@@ -269,6 +270,11 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 				mountDMI = mount
 			}
 		}
+		if strings.HasPrefix(val.Key, "RUN.port.") {
+			sKey := strings.Split(val.Key, ".")
+			containerPort := sKey[len(sKey)-1]
+			ports[containerPort] = val.Value.(string)
+		}
 		if strings.HasPrefix(val.Key, "guestinfo.") {
 			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
 			env = append(env, "--env", fmt.Sprintf("VMX_%s=%s", key, val.Value.(string)))
@@ -281,6 +287,12 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 	if len(env) != 0 {
 		// Configure env as the data access method for cloud-init-vmware-guestinfo
 		env = append(env, "--env", "VMX_GUESTINFO=true")
+	}
+	if len(ports) != 0 {
+		// Publish the specified container ports
+		for containerPort, hostPort := range ports {
+			env = append(env, "-p", fmt.Sprintf("%s:%s", hostPort, containerPort))
+		}
 	}
 
 	c.name = fmt.Sprintf("vcsim-%s-%s", sanitizeName(vm.Name), vm.uid)
