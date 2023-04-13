@@ -1,0 +1,22 @@
+{
+    "_typeName": "VirtualMachineConfigInfo",
+    "name": "test",
+    "extraConfig": [
+        {
+            "_typeName": "OptionValue",
+            "key": "nvram",
+            "value": {
+                "_typeName": "string",
+                "_value": true
+            }
+        },
+        {
+            "_typeName": "OptionValue",
+            "key": "svga.present",
+            "value": {
+                "_typeName": "string",
+                "_value": "TRUE"
+            }
+        }
+    ]
+}

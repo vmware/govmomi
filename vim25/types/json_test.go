@@ -28,10 +28,11 @@ import (
 )
 
 var serializationTests = []struct {
-	name   string
-	file   string
-	data   interface{}
-	goType reflect.Type
+	name      string
+	file      string
+	data      interface{}
+	goType    reflect.Type
+	expDecErr string
 }{
 	{
 		name:   "vminfo",
@@ -44,6 +45,13 @@ var serializationTests = []struct {
 		file:   "./testdata/retrieveResult.json",
 		data:   &retrieveResultForTests,
 		goType: reflect.TypeOf(RetrieveResult{}),
+	},
+	{
+		name:      "vminfo-invalid-type-name-value",
+		file:      "./testdata/vminfo-invalid-type-name-value.json",
+		data:      &vmInfoObjForTests,
+		goType:    reflect.TypeOf(VirtualMachineConfigInfo{}),
+		expDecErr: `json: cannot unmarshal bool into Go struct field VirtualMachineConfigInfo.extraConfig of type string`,
 	},
 }
 
@@ -58,19 +66,29 @@ func TestSerialization(t *testing.T) {
 
 			dec := NewJSONDecoder(f)
 
+			ee := test.expDecErr
 			data := reflect.New(test.goType).Interface()
 			if err := dec.Decode(data); err != nil {
-				t.Fatal(err)
-			}
-
-			a, e := data, test.data
-
-			if diff := cmp.Diff(a, e); diff != "" {
-				t.Errorf("mismatched %v: %s", test.name, diff)
+				if ee != err.Error() {
+					t.Errorf("expected error mismatch: e=%v, a=%v", ee, err)
+				} else if ee == "" {
+					t.Errorf("unexpected error: %v", err)
+				}
+			} else if ee != "" {
+				t.Errorf("expected error did not occur: %v", ee)
+			} else {
+				a, e := data, test.data
+				if diff := cmp.Diff(a, e); diff != "" {
+					t.Errorf("mismatched %v: %s", test.name, diff)
+				}
 			}
 		})
 
 		t.Run(test.name+" Encode", func(t *testing.T) {
+			if test.expDecErr != "" {
+				t.Skip("skipping due to expected decode error")
+			}
+
 			expJSON, err := os.ReadFile(test.file)
 			if err != nil {
 				t.Fatal(err)

@@ -80,6 +80,11 @@ var discriminatorTests = []struct {
 	dd                bool
 	discriminatorFunc json.TypeToDiscriminatorFunc
 }{
+
+	// invalid type/value combinations
+	{obj: true, str: `{"_t":"string","_v":true}`, expStr: `{"_t":"bool","_v":true}`, expDecErr: `json: cannot unmarshal bool into Go value of type string`, mode: json.DiscriminatorEncodeTypeNameRootValue},
+	{obj: DS1{F1: true}, str: `{"f1":{"_t":"string","_v":true}}`, expStr: `{"f1":{"_t":"bool","_v":true}}`, expDecErr: `json: cannot unmarshal bool into Go struct field DS1.f1 of type string`},
+
 	// encode/decode nil/null works as expected
 	{obj: nil, str: `null`},
 	{obj: nil, str: `null`, mode: json.DiscriminatorEncodeTypeNameRootValue},
@@ -207,7 +212,7 @@ var discriminatorTests = []struct {
 	// address of primitive values stored in interface with >0 methods where only the address
 	// of the value satisfies the interface.
 	//
-	// Unmarshaling the JSON into the object causes the deocder to check to see if the JSON objects
+	// Unmarshaling the JSON into the object causes the decoder to check to see if the JSON objects
 	// can be stored in DS7.F1, finding out that they cannot due to all the types implementing
 	// DS7.F1 by-address. Thus the decoder will then check to see if the value can be assigned to
 	// DS7.F1 by-address, which will work.
@@ -301,7 +306,7 @@ var discriminatorTests = []struct {
 	// discriminator type not a string
 	{obj: DS1{}, str: `{"f1":{"_t":0,"_v":1}}`, expStr: `{"f1":null}`, expDecErr: "json: discriminator type at offset 12 is not string"},
 
-	// discriminator not used for non-iterface field
+	// discriminator not used for non-interface field
 	{obj: DS8{F1: DS3{F1: "hello"}}, str: `{"f1":{"f1":"hello"}}`},
 	{obj: DS8{F1: DS3{F1: "hello"}}, str: `{"_t":"DS8","f1":{"f1":"hello"}}`, mode: json.DiscriminatorEncodeTypeNameRootValue},
 	{obj: DS8{F1: DS3{F1: "hello"}}, str: `{"_t":"DS8","f1":{"_t":"DS3","f1":"hello"}}`, mode: json.DiscriminatorEncodeTypeNameRootValue | json.DiscriminatorEncodeTypeNameAllObjects},
@@ -399,7 +404,7 @@ func TestDiscriminator(t *testing.T) {
 
 func testDiscriminatorEncode(t *testing.T) {
 	for _, tc := range discriminatorTests {
-		tc := tc // caputre the loop variable
+		tc := tc // capture the loop variable
 		t.Run("", func(t *testing.T) {
 			ee := tc.expEncErr
 			var w bytes.Buffer
@@ -431,7 +436,7 @@ func testDiscriminatorEncode(t *testing.T) {
 
 func testDiscriminatorDecode(t *testing.T) {
 	for _, tc := range discriminatorTests {
-		tc := tc // caputre the loop variable
+		tc := tc // capture the loop variable
 		t.Run("", func(t *testing.T) {
 			ee := tc.expDecErr
 			dec := json.NewDecoder(strings.NewReader(tc.str))
@@ -722,6 +727,8 @@ func assertEqual(t *testing.T, a, b interface{}) {
 		t.Fatalf("b is nil, a is %T, %+v", a, a)
 		return
 	}
+
+	// t.Logf("a=%[1]T %+[1]v, b=%[2]T %+[2]v", a, b)
 
 	var (
 		ok bool
