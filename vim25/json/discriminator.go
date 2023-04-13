@@ -266,6 +266,19 @@ func (d *decodeState) discriminatorGetValue() (reflect.Value, error) {
 		return reflect.Value{}, err
 	}
 
+	// Check the saved error as well since the decoder.value function does not
+	// always return an error. If the reflected value is still zero, then it is
+	// likely the decoder was unable to decode the value.
+	if err := dd.savedError; err != nil {
+		switch v.Kind() {
+		case reflect.Ptr, reflect.Interface:
+			v = v.Elem()
+		}
+		if v.IsZero() {
+			return reflect.Value{}, err
+		}
+	}
+
 	return v, nil
 }
 
