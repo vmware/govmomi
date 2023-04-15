@@ -60,9 +60,12 @@ func TestSearch(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	_, ok = ref.(*Network)
+	network, ok := ref.(*Network)
 	if !ok {
 		t.Errorf("Expected Network: %#v", ref)
+	}
+	if network.GetInventoryPath() != "/ha-datacenter/network/VM Network" {
+		t.Errorf("%q != %q\n", network.GetInventoryPath(), "/ha-datacenter/network/VM Network")
 	}
 
 	crs, err := folders.HostFolder.Children(context.Background())
