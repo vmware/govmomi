@@ -268,7 +268,7 @@ func TestQueryAvailablePerfMetric(t *testing.T) {
 
 }
 
-func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32) error {
+func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32, maxSample int32) error {
 	c := m.Service.client
 
 	p := performance.NewManager(c)
@@ -277,7 +277,7 @@ func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32) e
 	//
 	qs := []types.PerfQuerySpec{
 		{
-			MaxSample:  4,
+			MaxSample:  maxSample,
 			IntervalId: interval,
 			MetricId:   []types.PerfMetricId{{CounterId: 1, Instance: ""}},
 			Entity:     e.Reference(),
@@ -297,6 +297,12 @@ func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32) e
 	if len(ms) == 0 {
 		return errors.New("Empty metric series")
 	}
+	for _, em := range ms {
+		if len(em.SampleInfo) == 0 {
+			return errors.New("Empty SampleInfo")
+		}
+	}
+
 	return nil
 }
 
@@ -312,22 +318,24 @@ func TestQueryPerf(t *testing.T) {
 
 	defer m.Remove()
 
-	if err := testPerfQuery(ctx, m, Map.Any("VirtualMachine"), 20); err != nil {
-		t.Fatal(err)
-	}
-	if err := testPerfQuery(ctx, m, Map.Any("HostSystem"), 20); err != nil {
-		t.Fatal(err)
-	}
-	if err := testPerfQuery(ctx, m, Map.Any("ClusterComputeResource"), 300); err != nil {
-		t.Fatal(err)
-	}
-	if err := testPerfQuery(ctx, m, Map.Any("Datastore"), 300); err != nil {
-		t.Fatal(err)
-	}
-	if err := testPerfQuery(ctx, m, Map.Any("Datacenter"), 300); err != nil {
-		t.Fatal(err)
-	}
-	if err := testPerfQuery(ctx, m, Map.Any("ResourcePool"), 300); err != nil {
-		t.Fatal(err)
+	for _, maxSample := range []int32{4, 0} {
+		if err := testPerfQuery(ctx, m, Map.Any("VirtualMachine"), 20, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQuery(ctx, m, Map.Any("HostSystem"), 20, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQuery(ctx, m, Map.Any("ClusterComputeResource"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQuery(ctx, m, Map.Any("Datastore"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQuery(ctx, m, Map.Any("Datacenter"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQuery(ctx, m, Map.Any("ResourcePool"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
 	}
 }
