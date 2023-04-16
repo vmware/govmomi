@@ -30,8 +30,7 @@ func NewLogWriterCloser() *LogWriterCloser {
 }
 
 func (lwc *LogWriterCloser) Write(p []byte) (n int, err error) {
-	fmt.Fprint(os.Stderr, string(Scrub(p)))
-	return len(p), nil
+	return fmt.Fprintln(os.Stderr, string(Scrub(p)))
 }
 
 func (lwc *LogWriterCloser) Close() error {
@@ -42,6 +41,10 @@ type LogProvider struct {
 }
 
 func (s *LogProvider) NewFile(p string) io.WriteCloser {
+	// Print the name of the file we would be creating
+	if _, err := fmt.Fprintln(os.Stderr, p); err != nil {
+		return nil
+	}
 	return NewLogWriterCloser()
 }
 
