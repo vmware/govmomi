@@ -42,8 +42,16 @@ load test_helper
   run govc disk.create -datastore-cluster $pod "$id"
   assert_failure
 
+  run govc find $pod -type s
+  assert_success
+  [ ${#lines[@]} -eq 0 ]
+
   run govc object.mv /DC0/datastore/LocalDS_{1,2} $pod
   assert_success
+
+  run govc find $pod -type s
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
 
   run govc disk.create -datastore-cluster $pod -size 10M "$id"
   assert_success
