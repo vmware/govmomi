@@ -19,6 +19,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/vmware/govmomi/performance"
@@ -306,6 +307,53 @@ func testPerfQuery(ctx context.Context, m *Model, e mo.Entity, interval int32, m
 	return nil
 }
 
+func testPerfQueryCSV(ctx context.Context, m *Model, e mo.Entity, interval int32, maxSample int32) error {
+	c := m.Service.client
+
+	p := performance.NewManager(c)
+
+	// Single metric, single VM
+	//
+	qs := []types.PerfQuerySpec{
+		{
+			MaxSample:  maxSample,
+			IntervalId: interval,
+			MetricId:   []types.PerfMetricId{{CounterId: 1, Instance: ""}},
+			Entity:     e.Reference(),
+			Format:     string(types.PerfFormatCsv),
+		},
+	}
+	series, err := p.Query(ctx, qs)
+	if err != nil {
+		return err
+	}
+	if len(series) == 0 {
+		return errors.New("Empty result set")
+	}
+	for i := range series {
+		s, ok := series[i].(*types.PerfEntityMetricCSV)
+		if !ok {
+			panic(fmt.Errorf("expected type %T, got: %T", s, series[i]))
+		}
+		if len(s.SampleInfoCSV) == 0 {
+			return errors.New("Empty SampleInfoCSV")
+		}
+		if len(strings.Split(s.SampleInfoCSV, ",")) == 0 {
+			return errors.New("SampleInfoCSV not in CSV format")
+		}
+		for _, v := range s.Value {
+			if len(v.Value) == 0 {
+				return errors.New("Empty PerfEntityMetricCSV.Value")
+			}
+			if len(strings.Split(v.Value, ",")) == 0 {
+				return errors.New("PerfEntityMetricCSV.Value not in CSV format")
+			}
+		}
+	}
+
+	return nil
+}
+
 func TestQueryPerf(t *testing.T) {
 	ctx := context.Background()
 
@@ -335,6 +383,26 @@ func TestQueryPerf(t *testing.T) {
 			t.Fatal(err)
 		}
 		if err := testPerfQuery(ctx, m, Map.Any("ResourcePool"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+
+		//csv format
+		if err := testPerfQueryCSV(ctx, m, Map.Any("VirtualMachine"), 20, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQueryCSV(ctx, m, Map.Any("HostSystem"), 20, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQueryCSV(ctx, m, Map.Any("ClusterComputeResource"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQueryCSV(ctx, m, Map.Any("Datastore"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQueryCSV(ctx, m, Map.Any("Datacenter"), 300, maxSample); err != nil {
+			t.Fatal(err)
+		}
+		if err := testPerfQueryCSV(ctx, m, Map.Any("ResourcePool"), 300, maxSample); err != nil {
 			t.Fatal(err)
 		}
 	}
