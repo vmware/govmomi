@@ -347,6 +347,9 @@ func (v *verbose) missingSet(o types.ManagedObjectReference, m []types.MissingPr
 
 func (v *verbose) updateSet(u *types.UpdateSet) []string {
 	var s []string
+	if u == nil {
+		return s
+	}
 	for _, f := range u.FilterSet {
 		for _, o := range f.ObjectSet {
 			for _, c := range o.ChangeSet {
