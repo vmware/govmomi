@@ -492,7 +492,7 @@ func (m *Model) Create() error {
 	// 1 NIC per VM, backed by a DVPG if Model.Portgroup > 0
 	vmnet := esx.EthernetCard.Backing
 
-	// addHost adds a cluster host or a stanalone host.
+	// addHost adds a cluster host or a standalone host.
 	addHost := func(name string, f func(types.HostConnectSpec) (*object.Task, error)) (*object.HostSystem, error) {
 		spec := types.HostConnectSpec{
 			HostName: name,
@@ -855,7 +855,7 @@ func (m *Model) Remove() {
 	Map.m.Lock()
 	for _, obj := range Map.objects {
 		if vm, ok := obj.(*VirtualMachine); ok {
-			vm.run.remove(vm)
+			vm.svm.remove(SpoofContext())
 		}
 	}
 	Map.m.Unlock()
