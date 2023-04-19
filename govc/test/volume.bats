@@ -8,3 +8,16 @@ load test_helper
   run govc volume.ls
   assert_success ""
 }
+
+@test "volume.snapshot" {
+  vcsim_env
+
+  run govc volume.snapshot.ls
+  assert_failure
+
+  run govc volume.snapshot.rm
+  assert_failure
+
+  run govc volume.snapshot.create
+  assert_failure
+}
