@@ -46,7 +46,7 @@ type VirtualMachine struct {
 
 	log string
 	sid int32
-	run container
+	svm *simVM
 	uid uuid.UUID
 	imc *types.CustomizationSpec
 }
@@ -452,6 +452,10 @@ func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec)
 	}
 	if len(changes) != 0 {
 		Map.Update(vm, changes)
+	}
+
+	if vm.svm == nil {
+		vm.svm = createSimulationVM(vm)
 	}
 }
 
@@ -1610,14 +1614,23 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			return nil, new(types.InvalidState)
 		}
 
-		c.run.start(c.ctx, c.VirtualMachine)
+		err := c.svm.start(c.ctx)
+		if err != nil {
+			return nil, &types.MissingPowerOnConfiguration{
+				VAppConfigFault: types.VAppConfigFault{
+					VimFault: types.VimFault{
+						MethodFault: types.MethodFault{
+							FaultCause: &types.LocalizedMethodFault{
+								Fault:            &types.SystemErrorFault{Reason: err.Error()},
+								LocalizedMessage: err.Error()}}}}}
+		}
 		c.ctx.postEvent(
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
 		c.customize(c.ctx)
 	case types.VirtualMachinePowerStatePoweredOff:
-		c.run.stop(c.ctx, c.VirtualMachine)
+		c.svm.stop(c.ctx)
 		c.ctx.postEvent(
 			&types.VmStoppingEvent{VmEvent: event},
 			&types.VmPoweredOffEvent{VmEvent: event},
@@ -1630,7 +1643,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			}
 		}
 
-		c.run.pause(c.ctx, c.VirtualMachine)
+		c.svm.pause(c.ctx)
 		c.ctx.postEvent(
 			&types.VmSuspendingEvent{VmEvent: event},
 			&types.VmSuspendedEvent{VmEvent: event},
@@ -1737,7 +1750,7 @@ func (vm *VirtualMachine) RebootGuest(ctx *Context, req *types.RebootGuest) soap
 	}
 
 	if vm.Guest.ToolsRunningStatus == string(types.VirtualMachineToolsRunningStatusGuestToolsRunning) {
-		vm.run.restart(ctx, vm)
+		vm.svm.restart(ctx)
 		body.Res = new(types.RebootGuestResponse)
 	} else {
 		body.Fault_ = Fault("", new(types.ToolsUnavailable))
@@ -1825,7 +1838,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 			Datacenter: &dc.Self,
 		})
 
-		vm.run.remove(vm)
+		vm.svm.remove(ctx)
 
 		return nil, nil
 	})
@@ -2321,7 +2334,7 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 	ctx.postEvent(&types.VmGuestShutdownEvent{VmEvent: event})
 
 	_ = CreateTask(vm, "shutdownGuest", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		vm.run.stop(ctx, vm)
+		vm.svm.stop(ctx)
 
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{Name: "runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
@@ -2354,7 +2367,7 @@ func (vm *VirtualMachine) StandbyGuest(ctx *Context, c *types.StandbyGuest) soap
 	ctx.postEvent(&types.VmGuestStandbyEvent{VmEvent: event})
 
 	_ = CreateTask(vm, "standbyGuest", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		vm.run.pause(ctx, vm)
+		vm.svm.pause(ctx)
 
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{Name: "runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
