@@ -49,6 +49,7 @@ but appear via `govc $cmd -h`:
  - [cluster.module.rm](#clustermodulerm)
  - [cluster.module.vm.add](#clustermodulevmadd)
  - [cluster.module.vm.rm](#clustermodulevmrm)
+ - [cluster.mv](#clustermv)
  - [cluster.override.change](#clusteroverridechange)
  - [cluster.override.info](#clusteroverrideinfo)
  - [cluster.override.remove](#clusteroverrideremove)
@@ -616,6 +617,22 @@ Examples:
 
 Options:
   -id=                   Module ID
+```
+
+## cluster.mv
+
+```
+Usage: govc cluster.mv [OPTIONS]
+
+Move HOST to CLUSTER.
+
+The hosts are moved to the cluster specified by the 'cluster' flag.
+
+Examples:
+  govc cluster.mv -cluster ClusterA host1 host2
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
 ```
 
 ## cluster.override.change
