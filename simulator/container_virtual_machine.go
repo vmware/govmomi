@@ -51,6 +51,26 @@ type simVM struct {
 	c  *container
 }
 
+// createSimulationVM inspects the provided VirtualMachine and creates a simVM binding for it if
+// the vm.Config.ExtraConfig set contains a key "RUN.container".
+// If the ExtraConfig set does not contain that key, this returns nil.
+// Methods on the simVM type are written to check for nil object so the return from this call can be blindly
+// assigned and invoked without the caller caring about whether a binding for a backing container was warranted.
+func createSimulationVM(vm *VirtualMachine) *simVM {
+	svm := &simVM{
+		vm: vm,
+	}
+
+	for _, opt := range vm.Config.ExtraConfig {
+		val := opt.GetOptionValue()
+		if val.Key == "RUN.container" {
+			return svm
+		}
+	}
+
+	return nil
+}
+
 // applies container network settings to vm.Guest properties.
 func (svm *simVM) syncNetworkConfigToVMGuestProperties() error {
 	if svm == nil {
@@ -131,8 +151,8 @@ func (svm *simVM) prepareGuestOperation(auth types.BaseGuestAuthentication) type
 	return nil
 }
 
-// createDMI writes BIOS UUID DMI files to a container volume
-func (svm *simVM) createDMI() error {
+// populateDMI writes BIOS UUID DMI files to a container volume
+func (svm *simVM) populateDMI() error {
 	if svm.c == nil {
 		return nil
 	}
@@ -154,27 +174,8 @@ func (svm *simVM) createDMI() error {
 		},
 	}
 
-	return svm.c.populateVolume("dmi", files)
-}
-
-// createSimulationVM inspects the provided VirtualMachine and creates a simulationVM binding for it if
-// the vm.Config.ExtraConfig set contains a key "RUN.container".
-// If the ExtraConfig set does not contain that key, this returns nil.
-// Methods on the simVM type are written to check for nil object so the return from this call can be blindly
-// assigned and invoked without the caller caring about whether a binding for a backing container was warranted.
-func createSimulationVM(vm *VirtualMachine) *simVM {
-	svm := &simVM{
-		vm: vm,
-	}
-
-	for _, opt := range vm.Config.ExtraConfig {
-		val := opt.GetOptionValue()
-		if val.Key == "RUN.container" {
-			return svm
-		}
-	}
-
-	return nil
+	_, err := svm.c.createVolume("dmi", []string{deleteWithContainer}, files)
+	return err
 }
 
 // start runs the container if specified by the RUN.container extraConfig property.
@@ -268,10 +269,10 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	if mountDMI {
-		// not combined with the test assembling volumes because we want to have the container name
-		// set so the volume can be named based on that.
-		// TODO: rework volume creation to use labels and consider ditching the reliance on names for association
-		err = svm.createDMI()
+		// not combined with the test assembling volumes because we want to have the container name first.
+		// cannot add a label to a volume after creation, so if we want to associate with the container ID the
+		// container must come first
+		err = svm.populateDMI()
 		if err != nil {
 			return err
 		}
@@ -328,13 +329,15 @@ func (svm *simVM) start(ctx *Context) error {
 
 // stop the container (if any) for the given vm.
 func (svm *simVM) stop(ctx *Context) error {
-	if svm != nil {
-		err := svm.c.stop(ctx)
-		if err != nil {
-			log.Printf("%s %s: %s", svm.vm.Name, "stop", err)
+	if svm == nil || svm.c == nil {
+		return nil
+	}
 
-			return err
-		}
+	err := svm.c.stop(ctx)
+	if err != nil {
+		log.Printf("%s %s: %s", svm.vm.Name, "stop", err)
+
+		return err
 	}
 
 	ctx.Map.Update(svm.vm, toolsNotRunning)
@@ -344,13 +347,15 @@ func (svm *simVM) stop(ctx *Context) error {
 
 // pause the container (if any) for the given vm.
 func (svm *simVM) pause(ctx *Context) error {
-	if svm != nil {
-		err := svm.c.pause(ctx)
-		if err != nil {
-			log.Printf("%s %s: %s", svm.vm.Name, "pause", err)
+	if svm == nil || svm.c == nil {
+		return nil
+	}
 
-			return err
-		}
+	err := svm.c.pause(ctx)
+	if err != nil {
+		log.Printf("%s %s: %s", svm.vm.Name, "pause", err)
+
+		return err
 	}
 
 	ctx.Map.Update(svm.vm, toolsNotRunning)
@@ -360,13 +365,15 @@ func (svm *simVM) pause(ctx *Context) error {
 
 // restart the container (if any) for the given vm.
 func (svm *simVM) restart(ctx *Context) error {
-	if svm != nil {
-		err := svm.c.restart(ctx)
-		if err != nil {
-			log.Printf("%s %s: %s", svm.vm.Name, "restart", err)
+	if svm == nil || svm.c == nil {
+		return nil
+	}
 
-			return err
-		}
+	err := svm.c.restart(ctx)
+	if err != nil {
+		log.Printf("%s %s: %s", svm.vm.Name, "restart", err)
+
+		return err
 	}
 
 	ctx.Map.Update(svm.vm, toolsRunning)
@@ -376,20 +383,22 @@ func (svm *simVM) restart(ctx *Context) error {
 
 // remove the container (if any) for the given vm.
 func (svm *simVM) remove(ctx *Context) error {
-	if svm != nil {
-		err := svm.c.remove(ctx)
-		if err != nil {
-			log.Printf("%s %s: %s", svm.vm.Name, "remove", err)
+	if svm == nil || svm.c == nil {
+		return nil
+	}
 
-			return err
-		}
+	err := svm.c.remove(ctx)
+	if err != nil {
+		log.Printf("%s %s: %s", svm.vm.Name, "remove", err)
+
+		return err
 	}
 
 	return nil
 }
 
 func (svm *simVM) exec(ctx *Context, auth types.BaseGuestAuthentication, args []string) (string, types.BaseMethodFault) {
-	if svm == nil {
+	if svm == nil || svm.c == nil {
 		return "", nil
 	}
 

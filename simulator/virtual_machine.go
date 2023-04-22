@@ -1814,6 +1814,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 	task := CreateTask(vm, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if dc == nil {
 			return nil, &types.ManagedObjectNotFound{Obj: vm.Self} // If our Parent was destroyed, so were we.
+			// TODO: should this also trigger container removal?
 		}
 
 		r := vm.UnregisterVM(ctx, &types.UnregisterVM{
@@ -1838,7 +1839,14 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 			Datacenter: &dc.Self,
 		})
 
-		vm.svm.remove(ctx)
+		err := vm.svm.remove(ctx)
+		if err != nil {
+			return nil, &types.RuntimeFault{
+				MethodFault: types.MethodFault{
+					FaultCause: &types.LocalizedMethodFault{
+						Fault:            &types.SystemErrorFault{Reason: err.Error()},
+						LocalizedMessage: err.Error()}}}
+		}
 
 		return nil, nil
 	})
