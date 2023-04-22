@@ -50,6 +50,7 @@ var HostConfigInfo = types.HostConfigInfo{
 	ConsoleReservation:        (*types.ServiceConsoleReservationInfo)(nil),
 	VirtualMachineReservation: (*types.VirtualMachineMemoryReservationInfo)(nil),
 	StorageDevice:             &HostStorageDeviceInfo,
+	FileSystemVolume:          &HostFileSystemVolumeInfo,
 	SystemFile:                nil,
 	Network: &types.HostNetworkInfo{
 		Vswitch: []types.HostVirtualSwitch{

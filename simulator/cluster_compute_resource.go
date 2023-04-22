@@ -66,7 +66,7 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 	}
 
 	host := NewHostSystem(template)
-	host.configure(spec, add.req.AsConnected)
+	host.configure(task.ctx, spec, add.req.AsConnected)
 
 	task.ctx.Map.PutEntity(cr, task.ctx.Map.NewEntity(host))
 	host.Summary.Host = &host.Self

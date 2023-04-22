@@ -128,6 +128,7 @@ func Example_runContainer() {
 
 		// Create a new VM
 		task, err := f.VmFolder.CreateVM(ctx, spec, pool, nil)
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -152,7 +153,7 @@ func Example_runContainer() {
 		cmd.Stdout = &buf
 		err = cmd.Run()
 		res := buf.String()
-		// TODO: look at switching to assert/require instead of raw tests
+
 		if err != nil || strings.TrimSpace(res) != fcontent {
 			log.Fatal(err, buf.String())
 		}

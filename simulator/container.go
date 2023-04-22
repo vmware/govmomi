@@ -36,6 +36,10 @@ var (
 	shell = "/bin/sh"
 )
 
+const (
+	deleteWithContainer = "lifecycle=container"
+)
+
 func init() {
 	if sh, err := exec.LookPath("bash"); err != nil {
 		shell = sh
@@ -156,25 +160,52 @@ func copyFromGuest(id string, src string, sink func(int64, io.Reader) error) err
 	return errors.Join(err, errwait)
 }
 
-// populateVolume creates a volume tightly associated with the specified container, populated with the provided files
+// createVolume creates a volume populated with the provided files
 // If the header.Size is omitted or set to zero, then len(content+1) is used.
-func populateVolume(containerName string, volumeName string, files []tarEntry) error {
+// Docker appears to treat this volume create command as idempotent so long as it's identical
+// to an existing volume, so we can use this both for creating volumes inline in container create (for labelling) and
+// for population after.
+// returns:
+//
+//	uid - string
+//	err - error or nil
+func createVolume(volumeName string, labels []string, files []tarEntry) (string, error) {
 	image := os.Getenv("VCSIM_BUSYBOX")
 	if image == "" {
 		image = "busybox"
 	}
 
 	// TODO: do we need to cap name lengths so as not to overflow?
-	name := sanitizeName(containerName) + "--" + sanitizeName(volumeName)
-	cmd := exec.Command("docker", "run", "--rm", "-i", "-v", name+":"+"/"+name, image, "tar", "-C", "/"+name, "-xf", "-")
+	name := sanitizeName(volumeName)
+	uid := ""
+
+	// label the volume if specified - this requires the volume be created before use
+	if len(labels) > 0 {
+		run := []string{"volume", "create"}
+		for i := range labels {
+			run = append(run, "--label", labels[i])
+		}
+		run = append(run, name)
+		cmd := exec.Command("docker", run...)
+		out, err := cmd.Output()
+		if err != nil {
+			return "", err
+		}
+		uid = strings.TrimSpace(string(out))
+	}
+
+	run := []string{"run", "--rm", "-i"}
+	run = append(run, "-v", name+":/"+name)
+	run = append(run, image, "tar", "-C", "/"+name, "-xf", "-")
+	cmd := exec.Command("docker", run...)
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
-		return err
+		return uid, err
 	}
 
 	err = cmd.Start()
 	if err != nil {
-		return err
+		return uid, err
 	}
 
 	tw := tar.NewWriter(stdin)
@@ -211,10 +242,10 @@ func populateVolume(containerName string, volumeName string, files []tarEntry) e
 		}
 		log.Printf("%s %s: %s %s", name, cmd.Args, err, stderr)
 
-		return errors.Join(err, err3)
+		return uid, errors.Join(err, err3)
 	}
 
-	return err
+	return uid, err
 }
 
 // create
@@ -223,7 +254,7 @@ func populateVolume(containerName string, volumeName string, files []tarEntry) e
 //   - networks - set of bridges to connect the container to
 //   - volumes - colon separated tuple of volume name to mount path. Passed directly to docker via -v so mount options can be postfixed.
 //   - env - array of environment vairables in name=value form
-//   - image - the name of the container image to use, including tag
+//   - optsAndImage - pass-though options and must include at least the container image to use, including tag if necessary
 //   - args - the command+args to pass to the container
 func create(ctx *Context, name string, id string, networks []string, volumes []string, ports []string, env []string, image string, args []string) (*container, error) {
 	if len(image) == 0 {
@@ -232,6 +263,12 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 
 	var c container
 	c.name = constructContainerName(name, id)
+
+	for i := range volumes {
+		// we'll pre-create anonymous volumes, simply for labelling consistency
+		volName := strings.Split(volumes[i], ":")
+		createVolume(volName[0], []string{deleteWithContainer, "container=" + c.name}, nil)
+	}
 
 	// assemble env
 	var dockerNet []string
@@ -282,9 +319,9 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 	return &c, nil
 }
 
-// populateVolume takes the specified files and writes them into a volume named for the container.
-func (c *container) populateVolume(name string, files []tarEntry) error {
-	return populateVolume(c.name, name, files)
+// createVolume takes the specified files and writes them into a volume named for the container.
+func (c *container) createVolume(name string, labels []string, files []tarEntry) (string, error) {
+	return createVolume(c.name+"--"+name, append(labels, "container="+c.name), files)
 }
 
 // inspect retrieves and parses container properties into directly usable struct
@@ -423,9 +460,10 @@ func (c *container) exec(ctx *Context, args []string) (string, error) {
 }
 
 // remove the container (if any) for the given vm. Considers removal of an uninitialized container success.
+// Also removes volumes and networks that indicate they are lifecycle coupled with this container.
 // returns:
 //
-//	err - joined err from deletion of container and matching volume name
+//	err - joined err from deletion of container and any volumes or networks that have coupled lifecycle
 func (c *container) remove(ctx *Context) error {
 	if c.id == "" {
 		// consider absence success
@@ -436,16 +474,44 @@ func (c *container) remove(ctx *Context) error {
 	err := cmd.Run()
 	if err != nil {
 		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+		return err
 	}
 
-	// TODO: modify this to list all volumes with c.name prefix and delete them - necessary because populateVolume was generalized
-	cmd = exec.Command("docker", "volume", "rm", "-f", c.name)
-	err2 := cmd.Run()
-	if err2 != nil {
-		log.Printf("%s %s: %s", c.name, cmd.Args, err2)
+	cmd = exec.Command("docker", "volume", "ls", "-q", "--filter", "label=container="+c.name, "--filter", "label="+deleteWithContainer)
+	volumesToReap, lsverr := cmd.Output()
+	if lsverr != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, lsverr)
 	}
 
-	combinedErr := errors.Join(err, err2)
+	var rmverr error
+	if len(volumesToReap) > 0 {
+		run := []string{"volume", "rm", "-f"}
+		run = append(run, strings.Split(string(volumesToReap), "\n")...)
+		cmd = exec.Command("docker", run...)
+		rmverr = cmd.Run()
+		if rmverr != nil {
+			log.Printf("%s %s: %s", c.name, cmd.Args, rmverr)
+		}
+	}
+
+	cmd = exec.Command("docker", "network", "ls", "-q", "--filter", "label=container="+c.name, "--filter", "label="+deleteWithContainer)
+	networksToReap, lsnerr := cmd.Output()
+	if lsnerr != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, lsnerr)
+	}
+
+	var rmnerr error
+	if len(networksToReap) > 0 {
+		run := []string{"network", "rm", "-f"}
+		run = append(run, strings.Split(string(volumesToReap), "\n")...)
+		cmd = exec.Command("docker", run...)
+		rmnerr = cmd.Run()
+		if rmnerr != nil {
+			log.Printf("%s %s: %s", c.name, cmd.Args, rmnerr)
+		}
+	}
+
+	combinedErr := errors.Join(err, lsverr, rmverr, lsnerr, rmnerr)
 
 	if combinedErr == nil {
 		c.id = ""

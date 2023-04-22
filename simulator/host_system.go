@@ -34,6 +34,8 @@ var (
 
 type HostSystem struct {
 	mo.HostSystem
+
+	sh *simHost
 }
 
 func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
@@ -72,6 +74,9 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	deepCopy(hs.Config, cfg)
 	hs.Config = cfg
 
+	simOption := types.OptionDef{ElementDescription: types.ElementDescription{Key: "RUN.container"}}
+	hs.Config.OptionDef = append(hs.Config.OptionDef, simOption)
+
 	config := []struct {
 		ref **types.ManagedObjectReference
 		obj mo.Reference
@@ -92,7 +97,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	return hs
 }
 
-func (h *HostSystem) configure(spec types.HostConnectSpec, connected bool) {
+func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connected bool) {
 	h.Runtime.ConnectionState = types.HostSystemConnectionStateDisconnected
 	if connected {
 		h.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
@@ -106,6 +111,15 @@ func (h *HostSystem) configure(spec types.HostConnectSpec, connected bool) {
 	id := newUUID(h.Name)
 	h.Summary.Hardware.Uuid = id
 	h.Hardware.SystemInfo.Uuid = id
+
+	// bind to a simulation host with container backing if specified by options
+	// TODO: decide whether to require this at host creation or allow binding during a reconfigure
+	// TODO: handle the error return
+	var err error
+	h.sh, err = createSimulationHost(ctx, h)
+	if err != nil {
+		panic("failed to create simulation host and no path to return error: " + err.Error())
+	}
 }
 
 func (h *HostSystem) event() types.HostEvent {
@@ -207,7 +221,7 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 
 	pool := NewResourcePool()
 	host := NewHostSystem(template)
-	host.configure(spec, false)
+	host.configure(ctx, spec, false)
 
 	summary := new(types.ComputeResourceSummary)
 	addComputeResource(summary, host)
@@ -247,6 +261,17 @@ func (h *HostSystem) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.Has
 
 		f := ctx.Map.getEntityParent(h, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, h.Reference())
+		err := h.sh.remove(ctx)
+
+		if err != nil {
+			return nil, &types.RuntimeFault{
+				MethodFault: types.MethodFault{
+					FaultCause: &types.LocalizedMethodFault{
+						Fault:            &types.SystemErrorFault{Reason: err.Error()},
+						LocalizedMessage: err.Error()}}}
+		}
+
+		// TODO: should there be events on lifecycle operations as with VMs?
 
 		return nil, nil
 	})
