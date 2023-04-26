@@ -5,6 +5,7 @@ for var in $(env | grep GOVC_) ; do
 done
 
 common_opts=$(cat <<EOF
+  -h                        Show this message
   -cert=                    Certificate [GOVC_CERTIFICATE]
   -debug=false              Store debug logs [GOVC_DEBUG]
   -trace=false              Write SOAP/REST traffic to stderr
@@ -46,7 +47,7 @@ EOF
 
 printf "%s\n\`\`\`\n\n" "${common_opts}"
 
-cmds=($(govc -h | grep -v Usage))
+cmds=($(govc -h | sed '1,/^Available commands:$/d'))
 
 opts=($(cut -s -d= -f1 <<<"$common_opts" | xargs -n1 | sed -e 's/^/\\/'))
 filter=$(printf "|%s=" "${opts[@]}")
