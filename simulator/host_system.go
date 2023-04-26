@@ -17,6 +17,7 @@ limitations under the License.
 package simulator
 
 import (
+	"fmt"
 	"net"
 	"os"
 	"time"
@@ -30,6 +31,8 @@ import (
 
 var (
 	hostPortUnique = os.Getenv("VCSIM_HOST_PORT_UNIQUE") == "true"
+
+	globalHostCount = 0
 )
 
 type HostSystem struct {
@@ -44,6 +47,10 @@ func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
 }
 
 func NewHostSystem(host mo.HostSystem) *HostSystem {
+	// lets us construct non-conflicting hostname automatically if omitted
+	// does not use the unique port to avoid constraints on port, such as >1024
+	globalHostCount++
+
 	if hostPortUnique { // configure unique port for each host
 		port := &esx.HostSystem.Summary.Config.Port
 		*port++
@@ -74,6 +81,11 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	deepCopy(hs.Config, cfg)
 	hs.Config = cfg
 
+	// copy over the reference advanced options so each host can have it's own, allowing hosts to be configured for
+	// container backing individually
+	deepCopy(esx.AdvancedOptions, &cfg.Option)
+
+	// add a supported option to the AdvancedOption manager
 	simOption := types.OptionDef{ElementDescription: types.ElementDescription{Key: "RUN.container"}}
 	hs.Config.OptionDef = append(hs.Config.OptionDef, simOption)
 
@@ -83,7 +95,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	}{
 		{&hs.ConfigManager.DatastoreSystem, &HostDatastoreSystem{Host: &hs.HostSystem}},
 		{&hs.ConfigManager.NetworkSystem, NewHostNetworkSystem(&hs.HostSystem)},
-		{&hs.ConfigManager.AdvancedOption, NewOptionManager(nil, esx.Setting)},
+		{&hs.ConfigManager.AdvancedOption, NewOptionManager(nil, nil, &hs.Config.Option)},
 		{&hs.ConfigManager.FirewallSystem, NewHostFirewallSystem(&hs.HostSystem)},
 		{&hs.ConfigManager.StorageSystem, NewHostStorageSystem(&hs.HostSystem)},
 	}
@@ -102,7 +114,10 @@ func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connect
 	if connected {
 		h.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
 	}
-	if net.ParseIP(spec.HostName) != nil {
+
+	if spec.HostName == "" {
+		spec.HostName = fmt.Sprintf("esx-%d", globalHostCount)
+	} else if net.ParseIP(spec.HostName) != nil {
 		h.Config.Network.Vnic[0].Spec.Ip.IpAddress = spec.HostName
 	}
 
@@ -119,6 +134,32 @@ func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connect
 	h.sh, err = createSimulationHost(ctx, h)
 	if err != nil {
 		panic("failed to create simulation host and no path to return error: " + err.Error())
+	}
+}
+
+// configureContainerBacking sets up _this_ host for simulation using a container backing.
+// Args:
+//
+//	image - the container image with which to simulate the host
+//	mounts - array of mount info that should be translated into /vmfs/volumes/... mounts backed by container volumes
+func (h *HostSystem) configureContainerBacking(ctx *Context, image string, mounts []types.HostFileSystemMountInfo) {
+	option := &types.OptionValue{
+		Key:   "RUN.container",
+		Value: image,
+	}
+
+	advOpts := Map.Get(h.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	fault := advOpts.UpdateOptions(&types.UpdateOptions{ChangedValue: []types.BaseOptionValue{option}}).Fault()
+	if fault != nil {
+		panic(fault)
+	}
+
+	h.Config.FileSystemVolume = nil
+	if mounts != nil {
+		h.Config.FileSystemVolume = &types.HostFileSystemVolumeInfo{
+			VolumeTypeList: []string{"VMFS", "OTHER"},
+			MountInfo:      mounts,
+		}
 	}
 }
 

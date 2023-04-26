@@ -28,19 +28,45 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// OptionManager is used in at least two locations for ESX:
+// 1. ServiceContent.setting - this is empty on ESX and //TODO on VC
+// 2. ConfigManager.advancedOption - this is where the bulk of the ESX settings are found
 type OptionManager struct {
 	mo.OptionManager
+
+	// mirror is an array to keep in sync with OptionManager.Settings. Necessary because we use append.
+	// uni-directional - changes made to the mirrored array are not reflected back to Settings
+	mirror *[]types.BaseOptionValue
 }
 
-func NewOptionManager(ref *types.ManagedObjectReference, setting []types.BaseOptionValue) object.Reference {
+func asOptionManager(ctx *Context, obj mo.Reference) (*OptionManager, bool) {
+	om, ok := ctx.Map.Get(obj.Reference()).(*OptionManager)
+	return om, ok
+}
+
+// NewOptionManager constructs the type. If mirror is non-nil it takes precedence over settings, and settings is ignored.
+// Args:
+//   - ref - used to set OptionManager.Self if non-nil
+//   - setting - initial options, may be nil.
+//   - mirror - options array to keep updated with the OptionManager.Settings, may be nil.
+func NewOptionManager(ref *types.ManagedObjectReference, setting []types.BaseOptionValue, mirror *[]types.BaseOptionValue) object.Reference {
 	s := &OptionManager{}
+
+	s.Setting = setting
+	if mirror != nil {
+		s.mirror = mirror
+		s.Setting = *mirror
+	}
+
 	if ref != nil {
 		s.Self = *ref
 	}
-	s.Setting = setting
+
 	return s
 }
 
+// init constructs the OptionManager for ServiceContent.setting from the template directories.
+// This does _not_ construct the OptionManager for ConfigManager.advancedOption.
 func (m *OptionManager) init(r *Registry) {
 	if len(m.Setting) == 0 {
 		if r.IsVPX() {
@@ -103,6 +129,9 @@ func (m *OptionManager) UpdateOptions(req *types.UpdateOptions) soap.HasFault {
 		}
 
 		m.Setting = append(m.Setting, change)
+		if m.mirror != nil {
+			*m.mirror = m.Setting
+		}
 	}
 
 	body.Res = new(types.UpdateOptionsResponse)
