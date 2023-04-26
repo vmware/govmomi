@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -50,17 +51,13 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 		host: host,
 	}
 
-	simulated := false
-	for _, opt := range host.HostSystem.Config.Option {
-		val := opt.GetOptionValue()
-		if val.Key == "RUN.container" {
-			simulated = true
-			break
+	advOpts := ctx.Map.Get(host.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	fault := advOpts.QueryOptions(&types.QueryOptions{Name: "RUN.container"}).(*methods.QueryOptionsBody).Fault()
+	if fault != nil {
+		if _, ok := fault.VimFault().(*types.InvalidName); ok {
+			return nil, nil
 		}
-	}
-
-	if !simulated {
-		return nil, nil
+		return nil, fmt.Errorf("errror retrieving container backing from host config manager: %+v", fault.VimFault())
 	}
 
 	// assemble env
@@ -70,20 +67,10 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 	var symlinkCmds [][]string
 
 	var err error
-	// purge template filesystem info - this is either going to be replaced with user supplied info from HostConnectSpec.DynamicData or the
-	// default sim setup
-	// TODO: move this into DynamicData in the HostConnectSpec? Perhaps provide a method to populate the dyndata with a "default" sim config
-	if host.Config.FileSystemVolume == nil {
-		host.Config.FileSystemVolume = &types.HostFileSystemVolumeInfo{
-			VolumeTypeList: []string{"VMFS", "OTHER"},
-		}
-	}
-	if host.Config.FileSystemVolume.MountInfo == nil {
-		host.Config.FileSystemVolume.MountInfo = defaultSimVolumes
-	}
 
-	// TODO: handle the case that neither name nor GUID are specified for the host
-	containerName := constructContainerName("esx"+host.Summary.Config.Name, host.Summary.Host.ServerGUID)
+	hName := host.Summary.Config.Name
+	hUuid := host.Summary.Hardware.Uuid
+	containerName := constructContainerName(hName, hUuid)
 
 	for i := range host.Config.FileSystemVolume.MountInfo {
 		info := &host.Config.FileSystemVolume.MountInfo[i]
@@ -156,7 +143,7 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 
 	// if there's a DVS that doesn't have a bridge, create the bridge
 
-	sh.c, err = create(ctx, "esx"+host.Summary.Config.Name, host.Summary.Host.ServerGUID, dockerNet, dockerVol, nil, dockerEnv, "alpine", []string{"sleep", "infinity"})
+	sh.c, err = create(ctx, hName, hUuid, dockerNet, dockerVol, nil, dockerEnv, "alpine", []string{"sleep", "infinity"})
 	if err != nil {
 		return nil, err
 	}
@@ -182,6 +169,10 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 // remove destroys the container associated with the host and any volumes with labels specifying their lifecycle
 // is coupled with the container
 func (sh *simHost) remove(ctx *Context) error {
+	if sh == nil {
+		return nil
+	}
+
 	return sh.c.remove(ctx)
 }
 
