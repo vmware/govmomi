@@ -156,7 +156,7 @@ load test_helper
 
   run govc -h
   assert_success
-  assert_matches "Usage of govc:"
+  assert_matches "Usage: govc <COMMAND> \[COMMON OPTIONS\] \[PATH\]..."
 
   run govc -enoent
   assert_failure
@@ -172,7 +172,7 @@ load test_helper
 
   run govc nope
   assert_failure
-  assert_matches "Usage of govc:"
+  assert_matches "Usage: govc <COMMAND> \[COMMON OPTIONS\] \[PATH\]..."
 
   run govc power
   assert_failure

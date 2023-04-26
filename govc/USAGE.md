@@ -6,6 +6,7 @@ The following common options are filtered out in this document,
 but appear via `govc $cmd -h`:
 
 ```
+  -h                        Show this message
   -cert=                    Certificate [GOVC_CERTIFICATE]
   -debug=false              Store debug logs [GOVC_DEBUG]
   -trace=false              Write SOAP/REST traffic to stderr
