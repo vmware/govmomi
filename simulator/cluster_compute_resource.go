@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -345,6 +345,40 @@ func (c *ClusterComputeResource) ReconfigureComputeResourceTask(ctx *Context, re
 
 	return &methods.ReconfigureComputeResource_TaskBody{
 		Res: &types.ReconfigureComputeResource_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (c *ClusterComputeResource) MoveIntoTask(ctx *Context, req *types.MoveInto_Task) soap.HasFault {
+	task := CreateTask(c, "moveInto", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		for _, ref := range req.Host {
+			host := ctx.Map.Get(ref).(*HostSystem)
+
+			if *host.Parent == c.Self {
+				return nil, new(types.DuplicateName) // host already in this cluster
+			}
+
+			switch parent := ctx.Map.Get(*host.Parent).(type) {
+			case *ClusterComputeResource:
+				if !host.Runtime.InMaintenanceMode {
+					return nil, new(types.InvalidState)
+				}
+
+				RemoveReference(&parent.Host, ref)
+			case *mo.ComputeResource:
+				ctx.Map.Remove(ctx, parent.Self)
+			}
+
+			c.Host = append(c.Host, ref)
+			host.Parent = &c.Self
+		}
+
+		return nil, nil
+	})
+
+	return &methods.MoveInto_TaskBody{
+		Res: &types.MoveInto_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
 	}

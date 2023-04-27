@@ -327,3 +327,62 @@ _EOF_
   run govc cluster.module.ls -id $id
   assert_failure
 }
+
+@test "cluster.mv" {
+  vcsim_env -host 4 -cluster 2
+
+  # start with 4 hosts in each cluster
+  run govc find -type h /DC0/host/DC0_C0
+  assert_success
+  [ ${#lines[@]} -eq 4 ]
+
+  run govc find -type h /DC0/host/DC0_C1
+  assert_success
+  [ ${#lines[@]} -eq 4 ]
+
+  run govc cluster.mv -cluster DC0_C1 DC0_C0_H*
+  assert_failure
+
+  run govc host.maintenance.enter DC0_C0_H*
+  assert_success
+
+  # move 1 host from C0 to C1
+  run govc cluster.mv -cluster DC0_C1 DC0_C0_H2
+  assert_success
+
+  run govc find -type h /DC0/host/DC0_C0
+  assert_success
+  [ ${#lines[@]} -eq 3 ]
+
+  run govc find -type h /DC0/host/DC0_C1
+  assert_success
+  [ ${#lines[@]} -eq 5 ]
+
+  # move remaining 3 hosts from C0 to C1
+  run govc cluster.mv -cluster DC0_C1 DC0_C0_H{0,1,3}
+  assert_success
+
+  run govc find -type h /DC0/host/DC0_C0
+  assert_success
+  [ ${#lines[@]} -eq 0 ]
+
+  run govc find -type h /DC0/host/DC0_C1
+  assert_success
+  [ ${#lines[@]} -eq 8 ]
+
+  # move a standalone host into the cluster
+  run govc cluster.mv -cluster DC0_C1 DC0_H0
+  assert_success
+
+  run govc find -type h /DC0/host/DC0_C1
+  assert_success
+  [ ${#lines[@]} -eq 9 ]
+
+  run govc cluster.mv -cluster DC0_C1 DC0_C0_H*
+  assert_failure # hosts are already in the cluster
+
+  # TODO: vcsim's MoveIntoFolder_Task only supports moving from folders
+  # # move a cluster host to a standalone host
+  # run govc object.mv /DC0/host/DC0_C1/DC0_H0 /DC0/host
+  # assert_success
+}
