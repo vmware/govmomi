@@ -603,6 +603,26 @@ func AddStandaloneHost_Task(ctx context.Context, r soap.RoundTripper, req *types
 	return resBody.Res, nil
 }
 
+type ConnectPnicLLDPEndpoint_TaskBody struct {
+	Req    *types.ConnectPnicLLDPEndpoint_Task         `xml:"urn:vim25 ConnectPnicLLDPEndpoint_Task,omitempty"`
+	Res    *types.ConnectPnicLLDPEndpoint_TaskResponse `xml:"ConnectPnicLLDPEndpoint_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                                 `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *ConnectPnicLLDPEndpoint_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func ConnectPnicLLDPEndpoint_Task(ctx context.Context, r soap.RoundTripper, req *types.ConnectPnicLLDPEndpoint_Task) (*types.ConnectPnicLLDPEndpoint_TaskResponse, error) {
+	var reqBody, resBody ConnectPnicLLDPEndpoint_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type AddVirtualNicBody struct {
 	Req    *types.AddVirtualNic         `xml:"urn:vim25 AddVirtualNic,omitempty"`
 	Res    *types.AddVirtualNicResponse `xml:"AddVirtualNicResponse,omitempty"`

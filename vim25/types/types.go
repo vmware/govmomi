@@ -22116,6 +22116,34 @@ func init() {
 	t["HostConnectInfoNetworkInfo"] = reflect.TypeOf((*HostConnectInfoNetworkInfo)(nil)).Elem()
 }
 
+type ConnectPnicLLDPEndpointType struct {
+	This ManagedObjectReference   `xml:"_this" json:"-"`
+	Spec HostPnicLLDPEndpointSpec `xml:"spec" json:"spec"`
+}
+
+func init() {
+	t["ConnectPnicLLDPEndpointType"] = reflect.TypeOf((*ConnectPnicLLDPEndpointType)(nil)).Elem()
+}
+
+type ConnectPnicLLDPEndpoint_Task ConnectPnicLLDPEndpointType
+
+func init() {
+	t["ConnectPnicLLDPEndpoint_Task"] = reflect.TypeOf((*ConnectPnicLLDPEndpoint_Task)(nil)).Elem()
+}
+
+type ConnectPnicLLDPEndpoint_TaskResponse struct {
+	Returnval ManagedObjectReference `xml:"returnval" json:"returnval"`
+}
+
+type HostPnicLLDPEndpointSpec struct {
+	DynamicData
+
+	ChassisID  string
+	PortID     string
+	SystemName string
+	NicName    string
+}
+
 type HostConnectSpec struct {
 	DynamicData
 

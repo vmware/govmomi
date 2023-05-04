@@ -17,11 +17,19 @@ limitations under the License.
 package simulator
 
 import (
+	"fmt"
+
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
+
+type lldpEndpoint struct {
+	chassisID  string
+	portID     string
+	systemName string
+}
 
 type HostNetworkSystem struct {
 	mo.HostNetworkSystem
@@ -29,6 +37,8 @@ type HostNetworkSystem struct {
 	Host *mo.HostSystem
 
 	types.QueryNetworkHintResponse
+
+	lldpEndpoints map[string]lldpEndpoint //key is pnic name
 }
 
 func NewHostNetworkSystem(host *mo.HostSystem) *HostNetworkSystem {
@@ -45,6 +55,7 @@ func NewHostNetworkSystem(host *mo.HostSystem) *HostNetworkSystem {
 				Portgroup: host.Config.Network.Portgroup,
 			},
 		},
+		lldpEndpoints: make(map[string]lldpEndpoint),
 	}
 }
 
@@ -197,10 +208,42 @@ func (s *HostNetworkSystem) UpdateNetworkConfig(req *types.UpdateNetworkConfig) 
 	}
 }
 
+func (h *HostNetworkSystem) ConnectPnicLLDPEndpointTask(ctx *Context,
+	c *types.ConnectPnicLLDPEndpoint_Task) soap.HasFault {
+	fmt.Printf("------> inside ConnectPnicLLDPEndpoint %+v %+v\n", c.This, c.Spec)
+	r := &methods.ConnectPnicLLDPEndpoint_TaskBody{}
+
+	r.Res = &types.ConnectPnicLLDPEndpoint_TaskResponse{}
+
+	h.lldpEndpoints[c.Spec.NicName] = lldpEndpoint{
+		chassisID:  c.Spec.ChassisID,
+		portID:     c.Spec.PortID,
+		systemName: c.Spec.SystemName,
+	}
+
+	return r
+}
+
 func (s *HostNetworkSystem) QueryNetworkHint(req *types.QueryNetworkHint) soap.HasFault {
+	fmt.Printf("inside QueryNetworkHint %+v\n", s.lldpEndpoints)
+	var info []types.PhysicalNicHintInfo
+	for _, nic := range s.Host.Config.Network.Pnic {
+		lldpEndpoint, ok := s.lldpEndpoints[nic.Device]
+		if !ok {
+			continue
+		}
+		info = append(info, types.PhysicalNicHintInfo{
+			Device: nic.Device,
+			LldpInfo: &types.LinkLayerDiscoveryProtocolInfo{ChassisId: lldpEndpoint.chassisID,
+				PortId: lldpEndpoint.portID,
+				Parameter: []types.KeyAnyValue{
+					{Key: "System Name", Value: lldpEndpoint.systemName},
+				},
+			},
+		})
+	}
+
 	return &methods.QueryNetworkHintBody{
-		Res: &types.QueryNetworkHintResponse{
-			Returnval: s.QueryNetworkHintResponse.Returnval,
-		},
+		Res: &types.QueryNetworkHintResponse{Returnval: info},
 	}
 }
