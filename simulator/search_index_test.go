@@ -127,6 +127,20 @@ func TestSearchIndex(t *testing.T) {
 		if ref.Reference() != host.Reference() {
 			t.Errorf("moref mismatch %s != %s", ref, host.Reference())
 		}
+
+		rootFolder, err := finder.Folder(ctx, "/")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		ref, err = si.FindByInventoryPath(ctx, "/")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if ref.Reference() != rootFolder.Reference() {
+			t.Errorf("moref mismatch %s != %s", ref, rootFolder.Reference())
+		}
 	}
 }
 
@@ -215,7 +229,7 @@ func TestSearchIndexFindChild(t *testing.T) {
 		t.Error("expected ManagedObjectNotFound fault")
 	}
 
-	for _, path := range []string{"", "/", "/enoent"} {
+	for _, path := range []string{"", "/enoent"} {
 		ref, err := si.FindByInventoryPath(ctx, path)
 		if err != nil {
 			t.Fatal(err)
