@@ -17,6 +17,7 @@ limitations under the License.
 package types
 
 import (
+	"net/url"
 	"reflect"
 	"time"
 )
@@ -1629,7 +1630,7 @@ func init() {
 }
 
 type ArrayOfAnyURI struct {
-	AnyURI []string `xml:"anyURI,omitempty" json:"_value"`
+	AnyURI []url.URL `xml:"anyURI,omitempty" json:"_value"`
 }
 
 func init() {
@@ -5277,7 +5278,7 @@ func init() {
 }
 
 type ArrayOfUri struct {
-	Uri []string `xml:"uri,omitempty" json:"_value"`
+	Uri []url.URL `xml:"uri,omitempty" json:"_value"`
 }
 
 func init() {

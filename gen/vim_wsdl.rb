@@ -275,7 +275,7 @@ class Simple
       when "base64Binary"
         t = "[]byte"
       when "anyURI"
-        t = "string"
+        t = "url.URL"
       else
         raise "unknown type: %s" % t
       end
