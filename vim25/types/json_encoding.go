@@ -31,11 +31,12 @@ const (
 
 var discriminatorTypeRegistry = map[string]reflect.Type{
 	"boolean": reflect.TypeOf(true),
-	"byte":    reflect.TypeOf(int8(0)),
+	"byte":    reflect.TypeOf(uint8(0)),
 	"short":   reflect.TypeOf(int16(0)),
 	"int":     reflect.TypeOf(int32(0)),
 	"long":    reflect.TypeOf(int64(0)),
-	"float":   reflect.TypeOf(float64(0)),
+	"float":   reflect.TypeOf(float32(0)),
+	"double":  reflect.TypeOf(float64(0)),
 	"string":  reflect.TypeOf(""),
 }
 
@@ -61,11 +62,12 @@ func NewJSONDecoder(r io.Reader) *json.Decoder {
 // VMOMI primitive names
 var discriminatorNamesRegistry = map[reflect.Type]string{
 	reflect.TypeOf(true):       "boolean",
-	reflect.TypeOf(int8(0)):    "byte",
+	reflect.TypeOf(uint8(0)):   "byte",
 	reflect.TypeOf(int16(0)):   "short",
 	reflect.TypeOf(int32(0)):   "int",
 	reflect.TypeOf(int64(0)):   "long",
-	reflect.TypeOf(float64(0)): "float",
+	reflect.TypeOf(float32(0)): "float",
+	reflect.TypeOf(float64(0)): "double",
 	reflect.TypeOf(""):         "string",
 }
 

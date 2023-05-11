@@ -480,15 +480,15 @@ func discriminatorParseTypeName(
 		// type is a pointer.
 		n, p := indirectTypeName(tn)
 
-		// First look up the type in the built-in type registry.
-		t, ok := discriminatorTypeRegistry[n]
+		var t reflect.Type
+		ok := false
+		// look up the type in the external registry to allow name override.
+		if typeFn != nil {
+			t, ok = typeFn(n)
+		}
 		if !ok {
-			// If not found in the type registry then see if the type
-			// is returne from the optional type function.
-			if typeFn == nil {
-				return nil, false
-			}
-			if t, ok = typeFn(n); !ok {
+			// Use the built-in registry if the external registry fails
+			if t, ok = discriminatorTypeRegistry[n]; !ok {
 				return nil, false
 			}
 		}
