@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"io"
 	"reflect"
+	"time"
 
 	"github.com/vmware/govmomi/vim25/json"
 )
@@ -30,14 +31,16 @@ const (
 )
 
 var discriminatorTypeRegistry = map[string]reflect.Type{
-	"boolean": reflect.TypeOf(true),
-	"byte":    reflect.TypeOf(uint8(0)),
-	"short":   reflect.TypeOf(int16(0)),
-	"int":     reflect.TypeOf(int32(0)),
-	"long":    reflect.TypeOf(int64(0)),
-	"float":   reflect.TypeOf(float32(0)),
-	"double":  reflect.TypeOf(float64(0)),
-	"string":  reflect.TypeOf(""),
+	"boolean":  reflect.TypeOf(true),
+	"byte":     reflect.TypeOf(uint8(0)),
+	"short":    reflect.TypeOf(int16(0)),
+	"int":      reflect.TypeOf(int32(0)),
+	"long":     reflect.TypeOf(int64(0)),
+	"float":    reflect.TypeOf(float32(0)),
+	"double":   reflect.TypeOf(float64(0)),
+	"string":   reflect.TypeOf(""),
+	"binary":   reflect.TypeOf([]byte{}),
+	"dateTime": reflect.TypeOf(time.Now()),
 }
 
 // NewJSONDecoder creates JSON decoder configured for VMOMI.
@@ -69,6 +72,8 @@ var discriminatorNamesRegistry = map[reflect.Type]string{
 	reflect.TypeOf(float32(0)): "float",
 	reflect.TypeOf(float64(0)): "double",
 	reflect.TypeOf(""):         "string",
+	reflect.TypeOf([]byte{}):   "binary",
+	reflect.TypeOf(time.Now()): "dateTime",
 }
 
 // NewJSONEncoder creates JSON encoder configured for VMOMI.
