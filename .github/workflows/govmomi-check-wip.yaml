@@ -24,4 +24,4 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - name: Check WIP in PR Title
-        uses: embano1/wip@v1
+        uses: embano1/wip@v2
