@@ -74,7 +74,6 @@ var discriminatorNamesRegistry = map[reflect.Type]string{
 // NewJSONEncoder creates JSON encoder configured for VMOMI.
 func NewJSONEncoder(w *bytes.Buffer) *json.Encoder {
 	enc := json.NewEncoder(w)
-	enc.SetIndent("", "  ")
 	enc.SetDiscriminator(
 		discriminatorMemberName,
 		primitiveValueMemberName,
