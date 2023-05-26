@@ -110,6 +110,12 @@ func TestSerialization(t *testing.T) {
 }
 
 func TestOptionValueSerialization(t *testing.T) {
+	tv, e := time.Parse(time.RFC3339Nano, "2022-12-12T11:48:35.473645Z")
+	if e != nil {
+		t.Log("Cannot parse test timestamp. This is coding error.")
+		t.Fail()
+		return
+	}
 	options := []struct {
 		name    string
 		wire    string
@@ -165,6 +171,82 @@ func TestOptionValueSerialization(t *testing.T) {
 			wire: `{"_typeName": "OptionValue","key": "option1",
 				"value": {"_typeName": "string","_value": "test"}}`,
 			binding: OptionValue{Key: "option1", Value: "test"},
+		},
+		{
+			name: "dateTime", // time.Time
+			wire: `{"_typeName": "OptionValue","key": "option1",
+				"value": {"_typeName": "dateTime","_value": "2022-12-12T11:48:35.473645Z"}}`,
+			binding: OptionValue{Key: "option1", Value: tv},
+		},
+		{
+			name: "binary", // []byte
+			wire: `{"_typeName": "OptionValue","key": "option1",
+				"value": {"_typeName": "binary","_value": "SGVsbG8="}}`,
+			binding: OptionValue{Key: "option1", Value: []byte("Hello")},
+		},
+		// during serialization we have no way to guess that a string is to be
+		// converted to uri. Using net.URL solves this. It is a breaking change.
+		// See https://github.com/vmware/govmomi/pull/3123
+		// {
+		// 	name: "anyURI", // string
+		// 	wire: `{"_typeName": "OptionValue","key": "option1",
+		// 		"value": {"_typeName": "anyURI","_value": "http://hello"}}`,
+		// 	binding: OptionValue{Key: "option1", Value: "test"},
+		// },
+		{
+			name: "enum",
+			wire: `{"_typeName": "OptionValue","key": "option1",
+				"value": {"_typeName": "CustomizationNetBIOSMode","_value": "enableNetBIOS"}}`,
+			binding: OptionValue{Key: "option1", Value: CustomizationNetBIOSModeEnableNetBIOS},
+		},
+		// There is no ArrayOfCustomizationNetBIOSMode type emitted i.e. no enum
+		// array types are emitted in govmomi.
+		// We can process these in the serialization logic i.e. discover or
+		// prepend the "ArrayOf" prefix
+		// {
+		// 	name: "array of enum",
+		// 	wire: `{
+		//		"_typeName": "OptionValue",
+		//		"key": "option1",
+		// 		"value": {"_typeName": "ArrayOfCustomizationNetBIOSMode",
+		//                "_value": ["enableNetBIOS"]}}`,
+		// 	binding: OptionValue{Key: "option1",
+		//		Value: []CustomizationNetBIOSMode{
+		//			CustomizationNetBIOSModeEnableNetBIOS
+		//		}},
+		// },
+
+		// array of struct is weird. Do we want to unmarshal this as
+		// []ClusterHostRecommendation directly? Why do we want to use
+		// ArrayOfClusterHostRecommendation wrapper?
+		// if SOAP does it then I guess back compat is a big reason.
+		{
+			name: "array of struct",
+			wire: `{"_typeName": "OptionValue","key": "option1",
+				"value": {"_typeName": "ArrayOfClusterHostRecommendation","_value": [
+					{
+						"_typeName":"ClusterHostRecommendation",
+						"host": {
+							"_typeName": "ManagedObjectReference",
+							"type": "HostSystem",
+							"value": "host-42"
+						},
+						"rating":42
+					}]}}`,
+			binding: OptionValue{
+				Key: "option1",
+				Value: ArrayOfClusterHostRecommendation{
+					ClusterHostRecommendation: []ClusterHostRecommendation{
+						{
+							Host: ManagedObjectReference{
+								Type:  "HostSystem",
+								Value: "host-42",
+							},
+							Rating: 42,
+						},
+					},
+				},
+			},
 		},
 	}
 
