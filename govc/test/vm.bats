@@ -238,20 +238,45 @@ load test_helper
   run govc vm.power -on -off $vm
   assert_failure
 
+  # off -> on
   run govc vm.power -on $vm
   assert_success
   run vm_power_state $vm
   assert_success "poweredOn"
+  run govc vm.power -on $vm
+  assert_failure # already powered on
 
+  # on -> shutdown
+  run govc vm.power -s $vm
+  assert_success
+  run vm_power_state $vm
+  assert_success "poweredOff"
+  run govc vm.power -off $vm
+  assert_failure # already powered off
+  run govc vm.power -on $vm
+  assert_success
+
+  # on -> suspended
   run govc vm.power -suspend $vm
   assert_success
   run vm_power_state $vm
   assert_success "suspended"
+  run govc vm.power -suspend $vm
+  assert_failure # already suspended
 
+  # suspended -> on
   run govc vm.power -on $vm
   assert_success
   run vm_power_state $vm
   assert_success "poweredOn"
+
+  # on -> standby
+  run govc vm.power -standby $vm
+  assert_success
+  run vm_power_state $vm
+  assert_success "suspended"
+  run govc vm.power -standby $vm
+  assert_failure # already suspended
 }
 
 @test "vm.power -on -M" {

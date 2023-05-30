@@ -6206,6 +6206,7 @@ Options:
   -r=false               Reboot guest
   -reset=false           Power reset
   -s=false               Shutdown guest
+  -standby=false         Standby guest
   -suspend=false         Power suspend
   -wait=true             Wait for the operation to complete
 ```
