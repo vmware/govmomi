@@ -2278,8 +2278,8 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 
 func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) soap.HasFault {
 	r := &methods.ShutdownGuestBody{}
-	// should be poweron
-	if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOff {
+
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
 		r.Fault_ = Fault("", &types.InvalidPowerState{
 			RequestedState: types.VirtualMachinePowerStatePoweredOn,
 			ExistingState:  vm.Runtime.PowerState,
@@ -2287,9 +2287,6 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 
 		return r
 	}
-	// change state
-	vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
-	vm.Summary.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
 
 	event := vm.event()
 	ctx.postEvent(
@@ -2304,6 +2301,35 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 	})
 
 	r.Res = new(types.ShutdownGuestResponse)
+
+	return r
+}
+
+func (vm *VirtualMachine) StandbyGuest(ctx *Context, c *types.StandbyGuest) soap.HasFault {
+	r := &methods.StandbyGuestBody{}
+
+	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
+		r.Fault_ = Fault("", &types.InvalidPowerState{
+			RequestedState: types.VirtualMachinePowerStatePoweredOn,
+			ExistingState:  vm.Runtime.PowerState,
+		})
+
+		return r
+	}
+
+	event := vm.event()
+	ctx.postEvent(
+		&types.VmGuestStandbyEvent{VmEvent: event},
+		&types.VmSuspendedEvent{VmEvent: event},
+	)
+	vm.run.pause(ctx, vm)
+
+	ctx.Map.Update(vm, []types.PropertyChange{
+		{Name: "runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
+		{Name: "summary.runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
+	})
+
+	r.Res = new(types.StandbyGuestResponse)
 
 	return r
 }
