@@ -2289,16 +2289,20 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 	}
 
 	event := vm.event()
-	ctx.postEvent(
-		&types.VmGuestShutdownEvent{VmEvent: event},
-		&types.VmPoweredOffEvent{VmEvent: event},
-	)
-	vm.run.stop(ctx, vm)
+	ctx.postEvent(&types.VmGuestShutdownEvent{VmEvent: event})
 
-	ctx.Map.Update(vm, []types.PropertyChange{
-		{Name: "runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
-		{Name: "summary.runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
-	})
+	_ = CreateTask(vm, "shutdownGuest", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		vm.run.stop(ctx, vm)
+
+		ctx.Map.Update(vm, []types.PropertyChange{
+			{Name: "runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
+			{Name: "summary.runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
+		})
+
+		ctx.postEvent(&types.VmPoweredOffEvent{VmEvent: event})
+
+		return nil, nil
+	}).Run(ctx)
 
 	r.Res = new(types.ShutdownGuestResponse)
 
@@ -2318,16 +2322,20 @@ func (vm *VirtualMachine) StandbyGuest(ctx *Context, c *types.StandbyGuest) soap
 	}
 
 	event := vm.event()
-	ctx.postEvent(
-		&types.VmGuestStandbyEvent{VmEvent: event},
-		&types.VmSuspendedEvent{VmEvent: event},
-	)
-	vm.run.pause(ctx, vm)
+	ctx.postEvent(&types.VmGuestStandbyEvent{VmEvent: event})
 
-	ctx.Map.Update(vm, []types.PropertyChange{
-		{Name: "runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
-		{Name: "summary.runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
-	})
+	_ = CreateTask(vm, "standbyGuest", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		vm.run.pause(ctx, vm)
+
+		ctx.Map.Update(vm, []types.PropertyChange{
+			{Name: "runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
+			{Name: "summary.runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
+		})
+
+		ctx.postEvent(&types.VmSuspendedEvent{VmEvent: event})
+
+		return nil, nil
+	}).Run(ctx)
 
 	r.Res = new(types.StandbyGuestResponse)
 
