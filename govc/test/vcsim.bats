@@ -283,6 +283,10 @@ EOF
   run govc vm.power -s $vm
   assert_success
 
+  # wait for power state == off after guest shutdown above
+  run govc object.collect -s vm/$vm -runtime.powerState poweredOff
+  assert_success
+
   run docker inspect -f '{{.State.Status}}' "$name"
   assert_success "exited"
 

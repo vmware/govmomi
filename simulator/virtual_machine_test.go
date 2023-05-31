@@ -23,6 +23,7 @@ import (
 	"os"
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
@@ -1616,46 +1617,63 @@ func TestReconfigureDevicesDatastoreFreespace(t *testing.T) {
 }
 
 func TestShutdownGuest(t *testing.T) {
-	// use the default vm for testing
-	ctx := context.Background()
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
 
-	for _, model := range []*Model{ESX(), VPX()} {
-		defer model.Remove()
-		err := model.Create()
-		if err != nil {
-			t.Fatal(err)
-		}
+		for _, timeout := range []bool{false, true} {
+			if timeout {
+				// ShutdownGuest will return right away, but powerState
+				// is not updated until the internal task completes
+				TaskDelay.MethodDelay = map[string]int{
+					"ShutdownGuest": 500, // delay 500ms
+				}
+			}
 
-		s := model.Service.NewServer()
-		defer s.Close()
+			err := vm.ShutdownGuest(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
 
-		c, err := govmomi.NewClient(ctx, s.URL, true)
-		if err != nil {
-			t.Fatal(err)
-		}
+			wait := ctx
+			var cancel context.CancelFunc
+			if timeout {
+				wait, cancel = context.WithTimeout(ctx, time.Millisecond*250) // wait < task delay
+				defer cancel()
+			}
 
-		vm := object.NewVirtualMachine(c.Client, Map.Any("VirtualMachine").Reference())
-		// shutdown the vm
-		err = vm.ShutdownGuest(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
-		// state should be poweroff
-		state, err := vm.PowerState(ctx)
-		if err != nil {
-			t.Fatal(err)
-		}
+			err = vm.WaitForPowerState(wait, types.VirtualMachinePowerStatePoweredOff)
+			if timeout {
+				if err == nil {
+					t.Error("expected timeout")
+				}
+				// wait for power state to change, else next test may fail
+				err = vm.WaitForPowerState(ctx, types.VirtualMachinePowerStatePoweredOff)
+				if err != nil {
+					t.Fatal(err)
+				}
 
-		if state != types.VirtualMachinePowerStatePoweredOff {
-			t.Errorf("state=%s", state)
-		}
+			} else {
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
 
-		// shutdown a poweroff vm should fail
-		err = vm.ShutdownGuest(ctx)
-		if err == nil {
-			t.Error("expected error: InvalidPowerState")
+			// shutdown a poweroff vm should fail
+			err = vm.ShutdownGuest(ctx)
+			if err == nil {
+				t.Error("expected error: InvalidPowerState")
+			}
+
+			task, err := vm.PowerOn(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
+			err = task.Wait(ctx)
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
-	}
+	})
 }
 
 func TestVmSnapshot(t *testing.T) {
