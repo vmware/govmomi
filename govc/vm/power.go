@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -37,6 +37,7 @@ type power struct {
 	Reset    bool
 	Reboot   bool
 	Shutdown bool
+	Standby  bool
 	Suspend  bool
 	Force    bool
 	Multi    bool
@@ -60,6 +61,7 @@ func (cmd *power) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.Suspend, "suspend", false, "Power suspend")
 	f.BoolVar(&cmd.Reboot, "r", false, "Reboot guest")
 	f.BoolVar(&cmd.Shutdown, "s", false, "Shutdown guest")
+	f.BoolVar(&cmd.Standby, "standby", false, "Standby guest")
 	f.BoolVar(&cmd.Force, "force", false, "Force (ignore state error and hard shutdown/reboot if tools unavailable)")
 	f.BoolVar(&cmd.Multi, "M", false, "Use Datacenter.PowerOnMultiVM method instead of VirtualMachine.PowerOnVM")
 	f.BoolVar(&cmd.Wait, "wait", true, "Wait for the operation to complete")
@@ -85,7 +87,7 @@ func (cmd *power) Process(ctx context.Context) error {
 	if err := cmd.SearchFlag.Process(ctx); err != nil {
 		return err
 	}
-	opts := []bool{cmd.On, cmd.Off, cmd.Reset, cmd.Suspend, cmd.Reboot, cmd.Shutdown}
+	opts := []bool{cmd.On, cmd.Off, cmd.Reset, cmd.Suspend, cmd.Reboot, cmd.Shutdown, cmd.Standby}
 	selected := false
 
 	for _, opt := range opts {
@@ -187,6 +189,13 @@ func (cmd *power) Run(ctx context.Context, f *flag.FlagSet) error {
 
 			if err != nil && cmd.Force && isToolsUnavailable(err) {
 				task, err = vm.PowerOff(ctx)
+			}
+		case cmd.Standby:
+			fmt.Fprintf(cmd, "Standby guest %s... ", vm.Reference())
+			err = vm.StandbyGuest(ctx)
+
+			if err != nil && cmd.Force && isToolsUnavailable(err) {
+				task, err = vm.Suspend(ctx)
 			}
 		}
 
