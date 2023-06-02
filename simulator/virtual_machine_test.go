@@ -1627,6 +1627,7 @@ func TestShutdownGuest(t *testing.T) {
 				// is not updated until the internal task completes
 				TaskDelay.MethodDelay = map[string]int{
 					"ShutdownGuest": 500, // delay 500ms
+					"LockHandoff":   0,   // don't lock vm during the delay
 				}
 			}
 
@@ -1638,6 +1639,16 @@ func TestShutdownGuest(t *testing.T) {
 			wait := ctx
 			var cancel context.CancelFunc
 			if timeout {
+				state, err := vm.PowerState(ctx)
+				if err != nil {
+					t.Fatal(err)
+				}
+
+				// with the task delay, should still be on at this point
+				if state != types.VirtualMachinePowerStatePoweredOn {
+					t.Errorf("state=%s", state)
+				}
+
 				wait, cancel = context.WithTimeout(ctx, time.Millisecond*250) // wait < task delay
 				defer cancel()
 			}

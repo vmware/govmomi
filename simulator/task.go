@@ -110,10 +110,21 @@ func (t *Task) Run(ctx *Context) types.ManagedObjectReference {
 
 	// in most cases, the caller already holds this lock, and we would like
 	// the lock to be held across the "hand off" to the async goroutine.
-	unlock := vimMap.AcquireLock(ctx, tr)
-
+	// however, with a TaskDelay, PropertyCollector (for example) cannot read
+	// any object properties while the lock is held.
+	handoff := true
+	if v, ok := TaskDelay.MethodDelay["LockHandoff"]; ok {
+		handoff = v != 0
+	}
+	var unlock func()
+	if handoff {
+		unlock = vimMap.AcquireLock(ctx, tr)
+	}
 	go func() {
 		TaskDelay.delay(t.Info.Name)
+		if !handoff {
+			unlock = vimMap.AcquireLock(ctx, tr)
+		}
 		res, err := t.Execute(t)
 		unlock()
 
