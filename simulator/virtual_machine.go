@@ -400,7 +400,36 @@ func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec)
 		val := c.GetOptionValue()
 		key := strings.TrimPrefix(extraConfigKey(val.Key), "SET.")
 		if key == val.Key {
-			vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
+			keyIndex := -1
+			for i := range vm.Config.ExtraConfig {
+				bov := vm.Config.ExtraConfig[i]
+				if bov == nil {
+					continue
+				}
+				ov := bov.GetOptionValue()
+				if ov == nil {
+					continue
+				}
+				if ov.Key == key {
+					keyIndex = i
+					break
+				}
+			}
+			if keyIndex < 0 {
+				vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
+			} else {
+				if s, ok := val.Value.(string); ok && s == "" {
+					// Remove existing element
+					l := len(vm.Config.ExtraConfig)
+					vm.Config.ExtraConfig[keyIndex] = vm.Config.ExtraConfig[l-1]
+					vm.Config.ExtraConfig[l-1] = nil
+					vm.Config.ExtraConfig = vm.Config.ExtraConfig[:l-1]
+				} else {
+					// Update existing element
+					vm.Config.ExtraConfig[keyIndex].GetOptionValue().Value = val.Value
+				}
+			}
+
 			continue
 		}
 		changes = append(changes, types.PropertyChange{Name: key, Val: val.Value})

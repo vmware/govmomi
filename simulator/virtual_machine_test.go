@@ -32,6 +32,7 @@ import (
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -2106,4 +2107,68 @@ func TestVmRefreshStorageInfo(t *testing.T) {
 	if len(vmm.LayoutEx.File) != fileLayoutExCount {
 		t.Errorf("expected %d, got %d", fileLayoutExCount, len(vmm.LayoutEx.File))
 	}
+}
+
+func TestApplyExtraConfig(t *testing.T) {
+
+	applyAndAssertExtraConfigValue := func(
+		ctx context.Context,
+		vm *object.VirtualMachine,
+		val string,
+		assertDoesNotExist bool) {
+
+		task, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{
+					Key:   "hello",
+					Value: val,
+				},
+			},
+		})
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := task.Wait(ctx); err != nil {
+			t.Fatal(err)
+		}
+
+		var moVM mo.VirtualMachine
+		if err := vm.Properties(
+			ctx,
+			vm.Reference(),
+			[]string{"config.extraConfig"},
+			&moVM); err != nil {
+			t.Fatal(err)
+		}
+		if moVM.Config == nil {
+			t.Fatal("nil config")
+		}
+		var found bool
+		for i := range moVM.Config.ExtraConfig {
+			bov := moVM.Config.ExtraConfig[i]
+			if bov == nil {
+				continue
+			}
+			ov := bov.GetOptionValue()
+			if ov == nil {
+				continue
+			}
+			if ov.Key == "hello" {
+				if ov.Value != val {
+					t.Fatalf("invalid ExtraConfig value: expected=%s, actual=%v", val, ov.Value)
+				}
+				found = true
+			}
+		}
+		if !assertDoesNotExist && !found {
+			t.Fatal("failed to apply ExtraConfig")
+		}
+	}
+
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
+		applyAndAssertExtraConfigValue(ctx, vm, "world", false)
+		applyAndAssertExtraConfigValue(ctx, vm, "there", false)
+		applyAndAssertExtraConfigValue(ctx, vm, "", true)
+	})
 }
