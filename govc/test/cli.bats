@@ -158,6 +158,10 @@ load test_helper
   assert_success
   assert_matches "Usage: govc <COMMAND> \[COMMON OPTIONS\] \[PATH\]..."
 
+  run govc --help
+  assert_success
+  assert_matches "Usage: govc <COMMAND> \[COMMON OPTIONS\] \[PATH\]..."
+
   run govc -enoent
   assert_failure
 
