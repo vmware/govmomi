@@ -167,7 +167,8 @@ func Run(args []string) int {
 	hw := os.Stderr
 	rc := 1
 	hwrc := func(arg string) {
-		if arg == "-h" {
+		arg = strings.TrimLeft(arg, "-")
+		if arg == "h" || arg == "help" {
 			hw = os.Stdout
 			rc = 0
 		}
