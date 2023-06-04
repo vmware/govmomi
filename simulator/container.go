@@ -275,6 +275,11 @@ func (c *container) start(ctx *Context, vm *VirtualMachine) {
 			containerPort := sKey[len(sKey)-1]
 			ports[containerPort] = val.Value.(string)
 		}
+		if strings.HasPrefix(val.Key, "RUN.env.") {
+			sKey := strings.Split(val.Key, ".")
+			envKey := sKey[len(sKey)-1]
+			env = append(env, "--env", fmt.Sprintf("%s=%s", envKey, val.Value.(string)))
+		}
 		if strings.HasPrefix(val.Key, "guestinfo.") {
 			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
 			env = append(env, "--env", fmt.Sprintf("VMX_%s=%s", key, val.Value.(string)))
