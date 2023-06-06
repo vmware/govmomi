@@ -23,6 +23,7 @@ import (
 	"io"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 	"text/tabwriter"
@@ -55,7 +56,56 @@ func generalHelp(w io.Writer, filter string) {
 	}
 
 	if len(matches) == 0 {
-		fmt.Fprintf(w, "Usage of %s:\n", os.Args[0])
+		fmt.Fprintf(w, `Usage: %[1]s <COMMAND> [COMMON OPTIONS] [PATH]...
+
+govmomi is a Go library for interacting with VMware vSphere APIs (ESXi and/or
+vCenter Server).
+It is licensed under the Apache License, Version 2.0
+
+%[1]s is the CLI for govmomi.
+
+The available commands are listed below. A detailed description of each
+command can be displayed with "govc <COMMAND> -h". The description of all
+commands can be also found at https://via.vmw.com/GJ98hk .
+
+Examples:
+  show usage of a command:       govc <COMMAND> -h
+  show toplevel structure:       govc ls
+  show datacenter summary:       govc datacenter.info
+  show all VMs:                  govc find -type m
+  upload a ISO file:             govc datastore.upload -ds datastore1 ./config.iso vm-name/config.iso
+
+Common options:
+  -h                        Show this message
+  -cert=                    Certificate [GOVC_CERTIFICATE]
+  -debug=false              Store debug logs [GOVC_DEBUG]
+  -trace=false              Write SOAP/REST traffic to stderr
+  -verbose=false            Write request/response data to stderr
+  -dump=false               Enable output dump
+  -json=false               Enable JSON output
+  -xml=false                Enable XML output
+  -k=false                  Skip verification of server certificate [GOVC_INSECURE]
+  -key=                     Private key [GOVC_PRIVATE_KEY]
+  -persist-session=true     Persist session to disk [GOVC_PERSIST_SESSION]
+  -tls-ca-certs=            TLS CA certificates file [GOVC_TLS_CA_CERTS]
+  -tls-known-hosts=         TLS known hosts file [GOVC_TLS_KNOWN_HOSTS]
+  -u=                       ESX or vCenter URL [GOVC_URL]
+  -vim-namespace=urn:vim25  Vim namespace [GOVC_VIM_NAMESPACE]
+  -vim-version=6.0          Vim version [GOVC_VIM_VERSION]
+  -dc=                      Datacenter [GOVC_DATACENTER]
+  -host.dns=                Find host by FQDN
+  -host.ip=                 Find host by IP address
+  -host.ipath=              Find host by inventory path
+  -host.uuid=               Find host by UUID
+  -vm.dns=                  Find VM by FQDN
+  -vm.ip=                   Find VM by IP address
+  -vm.ipath=                Find VM by inventory path
+  -vm.path=                 Find VM by path to .vmx file
+  -vm.uuid=                 Find VM by UUID
+
+Available commands:
+`, filepath.Base(os.Args[0]))
+
 	} else {
 		fmt.Fprintf(w, "%s: command '%s' not found, did you mean:\n", os.Args[0], filter)
 		cmds = matches
@@ -117,7 +167,8 @@ func Run(args []string) int {
 	hw := os.Stderr
 	rc := 1
 	hwrc := func(arg string) {
-		if arg == "-h" {
+		arg = strings.TrimLeft(arg, "-")
+		if arg == "h" || arg == "help" {
 			hw = os.Stdout
 			rc = 0
 		}
