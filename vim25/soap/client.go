@@ -40,7 +40,6 @@ import (
 	"runtime"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/vmware/govmomi/internal/version"
 	"github.com/vmware/govmomi/vim25/progress"
@@ -516,8 +515,6 @@ func (c *Client) UnmarshalJSON(b []byte) error {
 	return nil
 }
 
-type kindContext struct{}
-
 func (c *Client) setInsecureCookies(res *http.Response) {
 	cookies := res.Cookies()
 	if len(cookies) != 0 {
@@ -553,20 +550,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, f func(*http.Respons
 		ext = d.debugRequest(req)
 	}
 
-	tstart := time.Now()
 	res, err := c.Client.Do(req.WithContext(ctx))
-	tstop := time.Now()
-
-	if d.enabled() {
-		var name string
-		if kind, ok := ctx.Value(kindContext{}).(HasFault); ok {
-			name = fmt.Sprintf("%T", kind)
-		} else {
-			name = fmt.Sprintf("%s %s", req.Method, req.URL)
-		}
-		d.logf("%6dms (%s)", tstop.Sub(tstart)/time.Millisecond, name)
-	}
-
 	if err != nil {
 		return err
 	}
@@ -680,7 +664,7 @@ func (c *Client) soapRoundTrip(ctx context.Context, reqBody, resBody HasFault) e
 	}
 	req.Header.Set(`SOAPAction`, action)
 
-	return c.Do(context.WithValue(ctx, kindContext{}, resBody), req, func(res *http.Response) error {
+	return c.Do(ctx, req, func(res *http.Response) error {
 		switch res.StatusCode {
 		case http.StatusOK:
 			// OK
