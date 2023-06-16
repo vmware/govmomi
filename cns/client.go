@@ -44,6 +44,10 @@ var (
 		Type:  "CnsVolumeManager",
 		Value: "cns-volume-manager",
 	}
+	CnsDebugManagerInstance = vimtypes.ManagedObjectReference{
+		Type:  "CnsDebugManager",
+		Value: "cns-debug-manager",
+	}
 )
 
 type Client struct {
@@ -277,6 +281,23 @@ func (c *Client) ReconfigVolumePolicy(ctx context.Context, PolicyReconfigSpecs [
 		VolumePolicyReconfigSpecs: PolicyReconfigSpecs,
 	}
 	res, err := methods.CnsReconfigVolumePolicy(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+	return object.NewTask(c.vim25Client, res.Returnval), nil
+}
+
+// SyncDatastore calls the CnsSyncDatastore API
+// Note: To be used only by VMware's internal support tools.
+// This API triggers a manual sync of internal CNS and FCD DBs which otherwise happens periodially,
+// with fullsync it forces synchronization of complete tables.
+func (c *Client) SyncDatastore(ctx context.Context, dsURL string, fullSync bool) (*object.Task, error) {
+	req := cnstypes.CnsSyncDatastore{
+		This:         CnsDebugManagerInstance,
+		DatastoreUrl: dsURL,
+		FullSync:     &fullSync,
+	}
+	res, err := methods.CnsSyncDatastore(ctx, c, &req)
 	if err != nil {
 		return nil, err
 	}

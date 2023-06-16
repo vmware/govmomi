@@ -28,7 +28,9 @@ import (
 
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25/debug"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/soap"
 
 	"github.com/vmware/govmomi"
@@ -109,6 +111,15 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
+
+	props := []string{"info", "summary"}
+	pc := property.DefaultCollector(c.Client)
+	var dsSummaries []mo.Datastore
+	err = pc.Retrieve(ctx, []vim25types.ManagedObjectReference{ds.Reference()}, props, &dsSummaries)
+	if err != nil {
+		t.Fatal(err)
+	}
+	dsUrl := dsSummaries[0].Summary.Url
 
 	var dsList []vim25types.ManagedObjectReference
 	dsList = append(dsList, ds.Reference())
@@ -1344,6 +1355,41 @@ func TestClient(t *testing.T) {
 		}
 		t.Logf("reconfigpolicy on volume %v with policy %+v successful\n", volumeId, spbmPolicyId4Reconfig)
 	}
+
+	// Test CnsSyncDatastore API
+	t.Logf("Calling syncDatastore on %v ...\n", dsUrl)
+	syncDatastoreTask, err := cnsClient.SyncDatastore(ctx, dsUrl, false)
+	if err != nil {
+		t.Errorf("Failed to sync datastore %v. Error: %+v \n", dsUrl, err)
+		t.Fatal(err)
+	}
+	syncDatastoreTaskInfo, err := GetTaskInfo(ctx, syncDatastoreTask)
+	if err != nil {
+		t.Errorf("Failed to get sync datastore taskInfo. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if syncDatastoreTaskInfo.State != vim25types.TaskInfoStateSuccess {
+		t.Errorf("Failed to sync datastore. Error: %+v \n", syncDatastoreTaskInfo.Error)
+		t.Fatalf("%+v", syncDatastoreTaskInfo.Error)
+	}
+	t.Logf("syncDatastore on %v successful\n", dsUrl)
+
+	t.Logf("Calling syncDatastore on %v with fullsync...\n", dsUrl)
+	syncDatastoreTask, err = cnsClient.SyncDatastore(ctx, dsUrl, true)
+	if err != nil {
+		t.Errorf("Failed to sync datastore %v with full sync. Error: %+v \n", dsUrl, err)
+		t.Fatal(err)
+	}
+	syncDatastoreTaskInfo, err = GetTaskInfo(ctx, syncDatastoreTask)
+	if err != nil {
+		t.Errorf("Failed to get sync datastore taskInfo with full sync. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	if syncDatastoreTaskInfo.State != vim25types.TaskInfoStateSuccess {
+		t.Errorf("Failed to sync datastore with full sync. Error: %+v \n", syncDatastoreTaskInfo.Error)
+		t.Fatalf("%+v", syncDatastoreTaskInfo.Error)
+	}
+	t.Logf("syncDatastore on %v with full sync successful\n", dsUrl)
 }
 
 // isvSphereVersion70U3orAbove checks if specified version is 7.0 Update 3 or higher
