@@ -346,3 +346,24 @@ func CnsReconfigVolumePolicy(ctx context.Context, r soap.RoundTripper, req *type
 
 	return resBody.Res, nil
 }
+
+type CnsSyncDatastoreBody struct {
+	Req    *types.CnsSyncDatastore         `xml:"urn:vsan CnsSyncDatastore,omitempty"`
+	Res    *types.CnsSyncDatastoreResponse `xml:"urn:vsan CnsSyncDatastoreResponse,omitempty"`
+	Fault_ *soap.Fault                     `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CnsSyncDatastoreBody) Fault() *soap.Fault { return b.Fault_ }
+
+// Note: To be used only by VMware's internal support tools.
+func CnsSyncDatastore(ctx context.Context, r soap.RoundTripper, req *types.CnsSyncDatastore) (*types.CnsSyncDatastoreResponse, error) {
+	var reqBody, resBody CnsSyncDatastoreBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}

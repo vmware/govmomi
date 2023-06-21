@@ -909,3 +909,23 @@ type CnsVolumePolicyReconfigSpec struct {
 func init() {
 	types.Add("vsan:CnsVolumePolicyReconfigSpec", reflect.TypeOf((*CnsVolumePolicyReconfigSpec)(nil)).Elem())
 }
+
+type CnsSyncDatastore CnsSyncDatastoreRequestType
+
+func init() {
+	types.Add("vsan:CnsSyncDatastore", reflect.TypeOf((*CnsSyncDatastore)(nil)).Elem())
+}
+
+type CnsSyncDatastoreRequestType struct {
+	This         types.ManagedObjectReference `xml:"_this"`
+	DatastoreUrl string                       `xml:"datastoreUrl,omitempty"`
+	FullSync     *bool                        `xml:"fullSync"`
+}
+
+func init() {
+	types.Add("vsan:CnsSyncDatastoreRequestType", reflect.TypeOf((*CnsSyncDatastoreRequestType)(nil)).Elem())
+}
+
+type CnsSyncDatastoreResponse struct {
+	Returnval types.ManagedObjectReference `xml:"returnval"`
+}
