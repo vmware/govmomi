@@ -698,7 +698,7 @@ func TestPickController(t *testing.T) {
 			t.Errorf("expected controller key: %d, got: %d\n", test.key, key)
 		}
 
-		unit := list.newUnitNumber(c)
+		unit := list.newUnitNumber(c, 0)
 		if unit != test.unit {
 			t.Errorf("expected unit number: %d, got: %d\n", test.unit, unit)
 		}
