@@ -133,30 +133,34 @@ func ParseURL(s string) (*url.URL, error) {
 }
 
 func NewClient(u *url.URL, insecure bool) *Client {
+	var t *http.Transport
+
+	if d, ok := http.DefaultTransport.(*http.Transport); ok {
+		t = d.Clone()
+	} else {
+		t = new(http.Transport)
+	}
+
+	return newClientWithTransport(u, insecure, t)
+}
+
+func newClientWithTransport(u *url.URL, insecure bool, t *http.Transport) *Client {
 	c := Client{
 		u: u,
 		k: insecure,
 		d: newDebug(),
+		t: t,
 
 		Types: types.TypeFunc(),
 	}
 
-	// Initialize http.RoundTripper on client, so we can customize it below
-	if t, ok := http.DefaultTransport.(*http.Transport); ok {
-		c.t = &http.Transport{
-			Proxy:                 t.Proxy,
-			DialContext:           t.DialContext,
-			MaxIdleConns:          t.MaxIdleConns,
-			IdleConnTimeout:       t.IdleConnTimeout,
-			TLSHandshakeTimeout:   t.TLSHandshakeTimeout,
-			ExpectContinueTimeout: t.ExpectContinueTimeout,
-		}
-	} else {
-		c.t = new(http.Transport)
-	}
-
 	c.hosts = make(map[string]string)
-	c.t.TLSClientConfig = &tls.Config{InsecureSkipVerify: c.k}
+	if c.k {
+		if c.t.TLSClientConfig == nil {
+			c.t.TLSClientConfig = new(tls.Config)
+		}
+		c.t.TLSClientConfig.InsecureSkipVerify = c.k
+	}
 
 	// Always set DialTLS and DialTLSContext, even if InsecureSkipVerify=true,
 	// because of how certificate verification has been delegated to the host's
@@ -186,6 +190,10 @@ func (c *Client) DefaultTransport() *http.Transport {
 
 // NewServiceClient creates a NewClient with the given URL.Path and namespace.
 func (c *Client) NewServiceClient(path string, namespace string) *Client {
+	return c.newServiceClientWithTransport(path, namespace, c.t)
+}
+
+func (c *Client) newServiceClientWithTransport(path string, namespace string, t *http.Transport) *Client {
 	vc := c.URL()
 	u, err := url.Parse(path)
 	if err != nil {
@@ -196,12 +204,8 @@ func (c *Client) NewServiceClient(path string, namespace string) *Client {
 		u.Host = vc.Host
 	}
 
-	client := NewClient(u, c.k)
+	client := newClientWithTransport(u, c.k, t)
 	client.Namespace = "urn:" + namespace
-	client.DefaultTransport().TLSClientConfig = c.DefaultTransport().TLSClientConfig
-	if cert := c.Certificate(); cert != nil {
-		client.SetCertificate(*cert)
-	}
 
 	// Copy the trusted thumbprints
 	c.hostsMu.Lock()
@@ -445,7 +449,8 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 // to the SDK tunnel virtual host.  Use of the SDK tunnel is required by LoginExtensionByCertificate()
 // and optional for other methods.
 func (c *Client) Tunnel() *Client {
-	tunnel := c.NewServiceClient(c.u.Path, c.Namespace)
+	tunnel := c.newServiceClientWithTransport(c.u.Path, c.Namespace, c.DefaultTransport().Clone())
+
 	t := tunnel.Client.Transport.(*http.Transport)
 	// Proxy to vCenter host on port 80
 	host := tunnel.u.Hostname()
