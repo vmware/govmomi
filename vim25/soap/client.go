@@ -141,7 +141,24 @@ func NewClient(u *url.URL, insecure bool) *Client {
 		t = new(http.Transport)
 	}
 
-	return newClientWithTransport(u, insecure, t)
+	if insecure {
+		if t.TLSClientConfig == nil {
+			t.TLSClientConfig = new(tls.Config)
+		}
+		t.TLSClientConfig.InsecureSkipVerify = insecure
+	}
+
+	c := newClientWithTransport(u, insecure, t)
+
+	// Always set DialTLS and DialTLSContext, even if InsecureSkipVerify=true,
+	// because of how certificate verification has been delegated to the host's
+	// PKI framework in Go 1.18. Please see the following links for more info:
+	//
+	//   * https://tip.golang.org/doc/go1.18 (search for "Certificate.Verify")
+	//   * https://github.com/square/certigo/issues/264
+	t.DialTLSContext = c.dialTLSContext
+
+	return c
 }
 
 func newClientWithTransport(u *url.URL, insecure bool, t *http.Transport) *Client {
@@ -155,20 +172,6 @@ func newClientWithTransport(u *url.URL, insecure bool, t *http.Transport) *Clien
 	}
 
 	c.hosts = make(map[string]string)
-	if c.k {
-		if c.t.TLSClientConfig == nil {
-			c.t.TLSClientConfig = new(tls.Config)
-		}
-		c.t.TLSClientConfig.InsecureSkipVerify = c.k
-	}
-
-	// Always set DialTLS and DialTLSContext, even if InsecureSkipVerify=true,
-	// because of how certificate verification has been delegated to the host's
-	// PKI framework in Go 1.18. Please see the following links for more info:
-	//
-	//   * https://tip.golang.org/doc/go1.18 (search for "Certificate.Verify")
-	//   * https://github.com/square/certigo/issues/264
-	c.t.DialTLSContext = c.dialTLSContext
 
 	c.Client.Transport = c.t
 	c.Client.Jar, _ = cookiejar.New(nil)
