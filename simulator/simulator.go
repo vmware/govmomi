@@ -26,7 +26,6 @@ import (
 	"encoding/pem"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -98,7 +97,7 @@ type Server struct {
 // New returns an initialized simulator Service instance
 func New(instance *ServiceInstance) *Service {
 	s := &Service{
-		readAll: ioutil.ReadAll,
+		readAll: io.ReadAll,
 		sm:      Map.SessionManager(),
 		sdk:     make(map[string]*Registry),
 	}
@@ -772,7 +771,7 @@ func (s *Server) CertificateFile() (string, error) {
 		return s.caFile, nil
 	}
 
-	f, err := ioutil.TempFile("", "vcsim-")
+	f, err := os.CreateTemp("", "vcsim-")
 	if err != nil {
 		return "", err
 	}

@@ -22,7 +22,6 @@ import (
 	"compress/gzip"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -36,7 +35,7 @@ import (
 func TestReadArchive(t *testing.T) {
 	Trace = testing.Verbose()
 
-	dir, err := ioutil.TempDir("", "toolbox-")
+	dir, err := os.MkdirTemp("", "toolbox-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +49,7 @@ func TestReadArchive(t *testing.T) {
 		for _, p := range dirs {
 			data := bytes.NewBufferString(strings.Repeat("X", i+1024))
 
-			f, ferr := ioutil.TempFile(p, fmt.Sprintf("file-%d-", i))
+			f, ferr := os.CreateTemp(p, fmt.Sprintf("file-%d-", i))
 			if ferr != nil {
 				t.Fatal(ferr)
 			}
@@ -147,7 +146,7 @@ func TestReadArchive(t *testing.T) {
 		files = append(files, header.Name)
 
 		if header.Typeflag == tar.TypeReg {
-			_, err = io.Copy(ioutil.Discard, tr)
+			_, err = io.Copy(io.Discard, tr)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -169,7 +168,7 @@ func TestReadArchive(t *testing.T) {
 func TestWriteArchive(t *testing.T) {
 	Trace = testing.Verbose()
 
-	dir, err := ioutil.TempDir("", "toolbox-")
+	dir, err := os.MkdirTemp("", "toolbox-")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -282,7 +281,7 @@ func TestWriteArchive(t *testing.T) {
 		t.Errorf("status=%d", status)
 	}
 
-	files, err := ioutil.ReadDir(dir)
+	files, err := os.ReadDir(dir)
 	if err != nil {
 		t.Error(err)
 	}

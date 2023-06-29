@@ -19,7 +19,7 @@ package rest_test
 import (
 	"bytes"
 	"context"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"strings"
 	"testing"
@@ -90,7 +90,7 @@ func TestWithHeaders(t *testing.T) {
 		}
 
 		// Read the raw response.
-		data, err := ioutil.ReadAll(&res.Buffer)
+		data, err := io.ReadAll(&res.Buffer)
 		if err != nil {
 			t.Fatal(err)
 		}

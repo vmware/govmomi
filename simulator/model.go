@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/rand"
 	"os"
@@ -368,7 +367,7 @@ func (m *Model) decode(path string, data interface{}) error {
 func (m *Model) loadMethod(obj mo.Reference, dir string) error {
 	dir = filepath.Join(dir, obj.Reference().Encode())
 
-	info, err := ioutil.ReadDir(dir)
+	info, err := os.ReadDir(dir)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil
@@ -823,7 +822,7 @@ func (m *Model) CreateInfrastructure(ctx *Context) error {
 }
 
 func (m *Model) createTempDir(dc string, name string) (string, error) {
-	dir, err := ioutil.TempDir("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
+	dir, err := os.MkdirTemp("", fmt.Sprintf("govcsim-%s-%s-", dc, name))
 	if err == nil {
 		m.dirs = append(m.dirs, dir)
 	}

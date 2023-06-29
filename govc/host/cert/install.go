@@ -21,7 +21,6 @@ import (
 	"context"
 	"flag"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 
@@ -80,7 +79,7 @@ func (cmd *install) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		cert = buf.String()
 	} else {
-		b, err := ioutil.ReadFile(filepath.Clean(name))
+		b, err := os.ReadFile(filepath.Clean(name))
 		if err != nil {
 			return err
 		}

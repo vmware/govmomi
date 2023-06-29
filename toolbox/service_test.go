@@ -22,7 +22,6 @@ import (
 	"errors"
 	"flag"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -195,7 +194,7 @@ func TestServiceErrors(t *testing.T) {
 	Trace = true
 	if !testing.Verbose() {
 		// cover TraceChannel but discard output
-		traceLog = ioutil.Discard
+		traceLog = io.Discard
 	}
 
 	netInterfaceAddrs = func() ([]net.Addr, error) {

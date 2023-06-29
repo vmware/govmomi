@@ -26,7 +26,7 @@ import (
 	"encoding/pem"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"math/big"
 	"os"
 	"strings"
@@ -150,7 +150,7 @@ func (cmd *setcert) Run(ctx context.Context, f *flag.FlagSet) error {
 	key := f.Arg(0)
 
 	if cmd.cert == "-" {
-		b, err := ioutil.ReadAll(os.Stdin)
+		b, err := io.ReadAll(os.Stdin)
 		if err != nil {
 			return err
 		}

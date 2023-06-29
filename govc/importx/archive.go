@@ -24,7 +24,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path"
@@ -63,7 +62,7 @@ func (f *ArchiveFlag) ReadOvf(fpath string) ([]byte, error) {
 	}
 	defer r.Close()
 
-	return ioutil.ReadAll(r)
+	return io.ReadAll(r)
 }
 
 func (f *ArchiveFlag) ReadEnvelope(data []byte) (*ovf.Envelope, error) {

@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -101,14 +100,14 @@ func Example_runContainer() {
 			log.Fatal(err)
 		}
 		f, _ := dc.Folders(ctx)
-		dir, err := ioutil.TempDir("", "example")
+		dir, err := os.MkdirTemp("", "example")
 		if err != nil {
 			log.Fatal(err)
 		}
 		os.Chmod(dir, 0755)
 		fpath := filepath.Join(dir, "index.html")
 		fcontent := "foo"
-		ioutil.WriteFile(fpath, []byte(fcontent), 0644)
+		os.WriteFile(fpath, []byte(fcontent), 0644)
 		// just in case umask gets in the way
 		os.Chmod(fpath, 0644)
 		defer os.RemoveAll(dir)

@@ -21,7 +21,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"os"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -71,7 +71,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return fmt.Errorf("only vsphere specs are accepted right now")
 	}
 
-	manifestFile, err := ioutil.ReadFile(manifest[0])
+	manifestFile, err := os.ReadFile(manifest[0])
 	if err != nil {
 		return fmt.Errorf("failed to read manifest file: %s", err)
 	}

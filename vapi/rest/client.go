@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"strings"
@@ -195,7 +194,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 		case http.StatusNoContent:
 		case http.StatusBadRequest:
 			// TODO: structured error types
-			detail, err := ioutil.ReadAll(res.Body)
+			detail, err := io.ReadAll(res.Body)
 			if err != nil {
 				return err
 			}

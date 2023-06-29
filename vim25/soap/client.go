@@ -27,7 +27,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -267,7 +266,7 @@ func (c *Client) SetRootCAs(pemPaths string) error {
 	pool := x509.NewCertPool()
 
 	for _, name := range filepath.SplitList(pemPaths) {
-		pem, err := ioutil.ReadFile(filepath.Clean(name))
+		pem, err := os.ReadFile(filepath.Clean(name))
 		if err != nil {
 			return err
 		}

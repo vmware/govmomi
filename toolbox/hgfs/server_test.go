@@ -18,7 +18,6 @@ package hgfs
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path"
 	"runtime"
@@ -341,7 +340,7 @@ func TestWriteV3(t *testing.T) {
 
 	Trace = testing.Verbose()
 
-	f, err := ioutil.TempFile("", "toolbox")
+	f, err := os.CreateTemp("", "toolbox")
 	if err != nil {
 		t.Fatal(err)
 	}

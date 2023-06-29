@@ -19,7 +19,6 @@ package simulator
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"os"
@@ -916,7 +915,7 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 			continue
 		}
 
-		files, err := ioutil.ReadDir(directory)
+		files, err := os.ReadDir(directory)
 		if err != nil {
 			body.Fault_ = Fault("", ctx.Map.FileManager().fault(directory, err, new(types.CannotAccessFile)))
 			return body
@@ -927,8 +926,8 @@ func (vm *VirtualMachine) RefreshStorageInfo(ctx *Context, req *types.RefreshSto
 				Datastore: p.Datastore,
 				Path:      strings.TrimPrefix(file.Name(), datastore.Info.GetDatastoreInfo().Url),
 			}
-
-			vm.addFileLayoutEx(datastorePath, file.Size())
+			info, _ := file.Info()
+			vm.addFileLayoutEx(datastorePath, info.Size())
 		}
 	}
 
