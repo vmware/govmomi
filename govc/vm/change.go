@@ -20,7 +20,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"io/ioutil"
+	"os"
 	"reflect"
 	"strings"
 
@@ -58,7 +58,7 @@ func (e *extraConfigFile) Set(v string) error {
 
 	var fileContents = ""
 	if len(r[1]) > 0 {
-		contents, err := ioutil.ReadFile(r[1])
+		contents, err := os.ReadFile(r[1])
 		if err != nil {
 			return fmt.Errorf("failed to parse extraConfigFile '%s': %w", v, err)
 		}

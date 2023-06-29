@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -108,7 +107,7 @@ func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 	var log io.Writer = os.Stdout
 	isStdout := one && dst == "-"
 	if isStdout {
-		log = ioutil.Discard
+		log = io.Discard
 	}
 
 	session, err := m.CreateLibraryItemDownloadSession(ctx, library.Session{

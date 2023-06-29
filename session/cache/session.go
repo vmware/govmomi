@@ -21,7 +21,6 @@ import (
 	"crypto/sha1"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"os/user"
@@ -187,7 +186,7 @@ func localTicket(ctx context.Context, m *session.Manager) (*url.Userinfo, error)
 		return nil, err
 	}
 
-	password, err := ioutil.ReadFile(ticket.PasswordFilePath)
+	password, err := os.ReadFile(ticket.PasswordFilePath)
 	if err != nil {
 		return nil, err
 	}

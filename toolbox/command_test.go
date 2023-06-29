@@ -23,7 +23,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -105,7 +105,7 @@ func TestVixRelayedCommandHandler(t *testing.T) {
 	Trace = true
 	if !testing.Verbose() {
 		// cover Trace paths but discard output
-		traceLog = ioutil.Discard
+		traceLog = io.Discard
 	}
 
 	in := new(mockChannelIn)
@@ -298,7 +298,7 @@ func TestVixInitiateFileTransfer(t *testing.T) {
 
 	request := new(vix.ListFilesRequest)
 
-	f, err := ioutil.TempFile("", "toolbox")
+	f, err := os.CreateTemp("", "toolbox")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -345,7 +345,7 @@ func TestVixInitiateFileTransferWrite(t *testing.T) {
 
 	request := new(vix.InitiateFileTransferToGuestRequest)
 
-	f, err := ioutil.TempFile("", "toolbox")
+	f, err := os.CreateTemp("", "toolbox")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -894,7 +894,7 @@ func TestVixFileChangeAttributes(t *testing.T) {
 
 	c := NewCommandClient()
 
-	f, err := ioutil.TempFile("", "toolbox-")
+	f, err := os.CreateTemp("", "toolbox-")
 	if err != nil {
 		t.Fatal(err)
 	}

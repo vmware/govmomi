@@ -22,7 +22,6 @@ import (
 	"bytes"
 	"compress/gzip"
 	"io"
-	"io/ioutil"
 	"log"
 	"math"
 	"net/url"
@@ -139,7 +138,7 @@ func (h *ArchiveHandler) newArchiveFromGuest(u *url.URL) (File, error) {
 	}
 
 	var z io.Writer = w
-	var c io.Closer = ioutil.NopCloser(nil)
+	var c io.Closer = io.NopCloser(nil)
 
 	switch u.Query().Get("format") {
 	case "tgz":
@@ -194,7 +193,7 @@ func (h *ArchiveHandler) newArchiveToGuest(u *url.URL) (File, error) {
 		c := func() error {
 			// Drain the pipe of tar trailer data (two null blocks)
 			if cerr == nil {
-				_, _ = io.Copy(ioutil.Discard, a.Reader)
+				_, _ = io.Copy(io.Discard, a.Reader)
 			}
 			return nil
 		}

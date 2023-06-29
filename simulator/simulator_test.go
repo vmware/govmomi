@@ -21,7 +21,6 @@ import (
 	"crypto/tls"
 	"errors"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -306,7 +305,7 @@ func TestServeHTTPS(t *testing.T) {
 	ts := s.NewServer()
 	defer ts.Close()
 
-	ts.Config.ErrorLog = log.New(ioutil.Discard, "", 0) // silence benign "TLS handshake error" log messages
+	ts.Config.ErrorLog = log.New(io.Discard, "", 0) // silence benign "TLS handshake error" log messages
 
 	ctx := context.Background()
 

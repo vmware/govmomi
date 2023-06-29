@@ -28,7 +28,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -1802,7 +1801,7 @@ func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *libra
 	}
 
 	name := item.ovf()
-	desc, err := ioutil.ReadFile(filepath.Join(libraryPath(lib, item.ID), name))
+	desc, err := os.ReadFile(filepath.Join(libraryPath(lib, item.ID), name))
 	if err != nil {
 		return nil, err
 	}

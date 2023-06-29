@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"reflect"
@@ -86,7 +85,7 @@ func TestGetResultPtr(t *testing.T) {
 func TestErrorUnmarshal(t *testing.T) {
 	headers := http.Header{}
 	headers.Set("content-type", "application/json")
-	body := ioutil.NopCloser(strings.NewReader(`{
+	body := io.NopCloser(strings.NewReader(`{
 		"_typeName": "InvalidLogin",
 		"faultstring": "Cannot complete login due to an incorrect user name or password."
 	}`))
@@ -140,7 +139,7 @@ func TestErrorUnmarshal(t *testing.T) {
 func TestSuccessUnmarshal(t *testing.T) {
 	headers := http.Header{}
 	headers.Set("content-type", "application/json")
-	body := ioutil.NopCloser(strings.NewReader(`{
+	body := io.NopCloser(strings.NewReader(`{
 		"_typeName": "UserSession",
 		"key": "527025b6-f0f4-144e-0d36-a7aaf2eb21da",
 		"userName": "VSPHERE.LOCAL\\Administrator",
@@ -242,7 +241,7 @@ func TestFullRequestCycle(t *testing.T) {
 			return &http.Response{
 				StatusCode:    200,
 				Header:        headers,
-				Body:          ioutil.NopCloser(strings.NewReader(body)),
+				Body:          io.NopCloser(strings.NewReader(body)),
 				ContentLength: 100, // Fake length to avoid check for empty body
 			}, nil
 		},

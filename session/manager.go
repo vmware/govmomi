@@ -18,7 +18,6 @@ package session
 
 import (
 	"context"
-	"io/ioutil"
 	"net/url"
 	"os"
 	"strings"
@@ -47,7 +46,7 @@ func Secret(value string) (string, error) {
 	if len(value) == 0 {
 		return value, nil
 	}
-	contents, err := ioutil.ReadFile(value)
+	contents, err := os.ReadFile(value)
 	if err != nil {
 		if os.IsPermission(err) {
 			return "", err
