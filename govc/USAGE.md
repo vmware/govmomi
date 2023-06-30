@@ -1419,6 +1419,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -3470,6 +3471,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
 ```
 
@@ -5700,6 +5702,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -snapshot=             Snapshot name to clone from
@@ -5771,6 +5774,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -version=              ESXi hardware version [5.0|5.5|6.0|6.5|6.7|7.0]
@@ -5985,6 +5989,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -vm=                   Virtual machine [GOVC_VM]
 ```
@@ -6137,6 +6142,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -6159,6 +6165,7 @@ Options:
   -net=                  Network [GOVC_NETWORK]
   -net.adapter=e1000     Network adapter type
   -net.address=          Network hardware address
+  -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
