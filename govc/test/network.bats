@@ -140,7 +140,7 @@ load test_helper
 }
 
 @test "network adapter" {
-  vcsim_env -esx
+  vcsim_env
 
   vm=$(new_id)
   run govc vm.create -on=false -net.adapter=enoent $vm
@@ -164,6 +164,26 @@ load test_helper
   # validate each NIC has a unique MAC
   macs=$(govc device.info -vm "$vm" -json ethernet-* | jq -r .Devices[].MacAddress | uniq | wc -l)
   assert_equal 2 "$macs"
+
+  # validate -net.protocol. VM Network not compatible with vmxnet3vrdma, so create on dvgp under existing DVS0
+  run govc dvs.portgroup.add -dvs DVS0 -type ephemeral NSX-dvpg
+  assert_success
+
+  # add a valid vmxnet3vrdma adapter with valid protocal
+  run govc vm.network.add -vm $vm -net.adapter vmxnet3vrdma -net "DVS0/NSX-dvpg" -net.protocol=rocev2
+  assert_success
+
+  # add a valid vmxnet3vrdma adapter with valid protocal
+  run govc vm.network.add -vm $vm -net.adapter vmxnet3vrdma -net "DVS0/NSX-dvpg" -net.protocol=rocev1
+  assert_success
+
+  # invalid value for -net.protocol
+  run govc vm.network.add -vm $vm -net.adapter vmxnet3vrdma -net "DVS0/NSX-dvpg" -net.protocol=what
+  assert_failure "govc: invalid device protocol 'what'"
+
+  # invalid combination for -net.adapter and -net.protocol
+  run govc vm.network.add -vm $vm -net.adapter e1000e -net "DVS0/NSX-dvpg" -net.protocol=rocev2
+  assert_failure "govc: device protocol is only supported for vmxnet3vrdma at the moment"
 }
 
 @test "network flag required" {
