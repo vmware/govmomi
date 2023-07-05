@@ -65,6 +65,7 @@ Refer to the [CHANGELOG][govmomi-changelog] for version to version changes.
 * [Kubernetes vSphere Cloud Provider][project-k8s-cloud-provider]
 * [Kubernetes Cluster API][project-k8s-cluster-api]
 * [OPS][project-nanovms-ops]
+* [OpenTelemetry Collector Contrib][opentelemetry-collector-contrib]
 * [Packer Plugin for VMware vSphere][project-hashicorp-packer-plugin-vsphere]
 * [Rancher][project-rancher]
 * [Terraform Provider for VMware vSphere][project-hashicorp-terraform-provider-vsphere]
@@ -102,6 +103,7 @@ Follows pyvmomi and rbvmomi: language prefix + the vSphere acronym "VM Object Ma
 [go-reference]: https://pkg.go.dev/github.com/vmware/govmomi
 [go-report-card]: https://goreportcard.com/report/github.com/vmware/govmomi
 [go-version]: https://github.com/vmware/govmomi
+[opentelemetry-collector-contrib]: https://github.com/open-telemetry/opentelemetry-collector-contrib
 [project-docker-linuxKit]: https://github.com/linuxkit/linuxkit/tree/master/src/cmd/linuxkit
 [project-elastic-agent]: https://github.com/elastic/integrations/tree/main/packages/vsphere
 [project-gru]: https://github.com/dnaeon/gru
