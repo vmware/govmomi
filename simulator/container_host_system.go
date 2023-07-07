@@ -36,51 +36,35 @@ const GB = 1000 * MB
 const TB = 1000 * GB
 const PB = 1000 * TB
 
+const (
+	advOptPrefixPnicToUnderlayPrefix = "RUN.underlay."
+	advOptContainerBackingImage      = "RUN.container"
+)
+
 type simHost struct {
 	host *HostSystem
 	c    *container
 }
 
-// createSimulationHost inspects the provided HostSystem and creates a simHost binding for it if
-// the vm.Config.ExtraConfig set contains a key "RUN.container".
-// If the ExtraConfig set does not contain that key, this returns nil.
-// Methods on the simHost type are written to check for nil object so the return from this call can be blindly
-// assigned and invoked without the caller caring about whether a binding for a backing container was warranted.
-func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
-	sh := &simHost{
-		host: host,
-	}
-
-	advOpts := ctx.Map.Get(host.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
-	fault := advOpts.QueryOptions(&types.QueryOptions{Name: "RUN.container"}).(*methods.QueryOptionsBody).Fault()
-	if fault != nil {
-		if _, ok := fault.VimFault().(*types.InvalidName); ok {
-			return nil, nil
-		}
-		return nil, fmt.Errorf("errror retrieving container backing from host config manager: %+v", fault.VimFault())
-	}
-
-	// assemble env
-	var dockerEnv []string
+// createSimHostMounts iterates over the provide filesystem mount info, creating docker volumes. It does _not_ delete volumes
+// already created if creation of one fails.
+// Returns:
+// volume mounts: mount options suitable to pass directly to docker
+// exec commands: a set of commands to run in the sim host after creation
+// error: if construction of the above outputs fails
+func createSimHostMounts(ctx *Context, containerName string, mounts []types.HostFileSystemMountInfo) ([]string, [][]string, error) {
 	var dockerVol []string
-	var dockerNet []string
 	var symlinkCmds [][]string
 
-	var err error
-
-	hName := host.Summary.Config.Name
-	hUuid := host.Summary.Hardware.Uuid
-	containerName := constructContainerName(hName, hUuid)
-
-	for i := range host.Config.FileSystemVolume.MountInfo {
-		info := &host.Config.FileSystemVolume.MountInfo[i]
+	for i := range mounts {
+		info := &mounts[i]
 		name := info.Volume.GetHostFileSystemVolume().Name
 
 		// NOTE: if we ever need persistence cross-invocation we can look at encoding the disk info as a label
 		labels := []string{"name=" + name, "container=" + containerName, deleteWithContainer}
 		dockerUuid, err := createVolume("", labels, nil)
 		if err != nil {
-			return nil, err
+			return nil, nil, err
 		}
 
 		uuid := volumeIDtoHostVolumeUUID(dockerUuid)
@@ -125,6 +109,10 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 		}
 
 		dockerVol = append(dockerVol, fmt.Sprintf("%s:/vmfs/volumes/%s:%s", dockerUuid, uuid, opt))
+
+		// create symlinks from /vmfs/volumes/ for the Volume Name - the direct mount (path) is only the uuid
+		// ? can we do this via a script in the ESX image instead of via exec?
+		// ? are the volume names exposed in any manner inside the host? They must be because these mounts exist but where does that come from? Chicken and egg problem? ConfigStore?
 		symlinkCmds = append(symlinkCmds, []string{"ln", "-s", fmt.Sprintf("/vmfs/volumes/%s", uuid), fmt.Sprintf("/vmfs/volumes/%s", name)})
 		if strings.HasPrefix(name, "OSDATA") {
 			symlinkCmds = append(symlinkCmds, []string{"mkdir", "-p", "/var/lib/vmware"})
@@ -132,36 +120,153 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 		}
 	}
 
-	// TODO: extract the underlay's from a topology config
-	// create a bridge for each broadcast domain a pnic is connected to
-	dockerNet = append(dockerNet, defaultUnderlayBridgeName)
+	return dockerVol, symlinkCmds, nil
+}
 
-	// TODO: add in vSwitches if we know them at this point
+// createSimHostNetworks creates the networks for the host if not already created. Because we expect multiple hosts on the same network to act as a cluster
+// it's likely that only the first host will create networks.
+// This includes:
+// * bridge network per-pNIC
+// * bridge network per-DVS
+//
+// Returns:
+// * array of networks to attach to
+// * array of commands to run
+// * error
+func createSimHostNetworks(ctx *Context, containerName string, networkInfo *types.HostNetworkInfo, advOpts *OptionManager) ([]string, [][]string, error) {
+	var dockerNet []string
+	var cmds [][]string
 
-	// - a pnic does not have an IP so this is purely a connectivity statement, not a network identity
-	// ? how is this underlay topology expressed? Initially we can assume a flat topology with all hosts on the same broadcast domain
+	existingNets := make(map[string]string)
 
-	// if there's a DVS that doesn't have a bridge, create the bridge
+	// a pnic does not have an IP so this is purely a connectivity statement, not a network identity, however this is not how docker works
+	// so we're going to end up with a veth (our pnic) that does have an IP assigned.
+	// For now we're going to simply ignore that IP. //TODO: figure out whether we _need_ to do something with it at this point
+	for i := range networkInfo.Pnic {
+		pnicName := networkInfo.Pnic[i].Device
 
+		bridge := getPnicUnderlay(advOpts, pnicName)
+
+		if pnic, attached := existingNets[bridge]; attached {
+			return nil, nil, fmt.Errorf("cannot attach multiple pNICs to the same underlay: %s and %s both attempting to connect to %s for %s", pnic, pnicName, bridge, containerName)
+		}
+
+		_, err := createBridge(bridge)
+		if err != nil {
+			return nil, nil, err
+		}
+
+		dockerNet = append(dockerNet, bridge)
+		existingNets[bridge] = pnicName
+	}
+
+	return dockerNet, cmds, nil
+}
+
+func getPnicUnderlay(advOpts *OptionManager, pnicName string) string {
+	queryRes := advOpts.QueryOptions(&types.QueryOptions{Name: advOptPrefixPnicToUnderlayPrefix + pnicName}).(*methods.QueryOptionsBody).Res
+	return queryRes.Returnval[0].GetOptionValue().Value.(string)
+}
+
+// createSimulationHostcreates a simHost binding if the host.ConfigManager.AdvancedOption set contains a key "RUN.container".
+// If the set does not contain that key, this returns nil.
+// Methods on the simHost type are written to check for nil object so the return from this call can be blindly
+// assigned and invoked without the caller caring about whether a binding for a backing container was warranted.
+//
+// The created simhost is based off of the details of the supplied host system.
+// VMFS locations are created based on FileSystemMountInfo
+// Bridge networks are created to simulate underlay networks - one per pNIC. You cannot connect two pNICs to the same underlay.
+//
+// On Network connectivity - initially this is using docker network constructs. This means we cannot easily use nested "ip netns" so we cannot
+// have a perfect representation of the ESX structure: pnic(veth)->vswtich(bridge)->{vmk,vnic}(veth)
+// Instead we have the following:
+// * bridge network per underlay - everything connects directly to the underlay
+// * VMs/CRXs connect to the underlay dictated by the Uplink pNIC attached to their vSwitch
+// * hostd vmknic gets the "host" container IP - we don't currently support multiple vmknics with different IPs
+// * no support for mocking VLANs
+func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
+	sh := &simHost{
+		host: host,
+	}
+
+	advOpts := ctx.Map.Get(host.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	fault := advOpts.QueryOptions(&types.QueryOptions{Name: "RUN.container"}).(*methods.QueryOptionsBody).Fault()
+	if fault != nil {
+		if _, ok := fault.VimFault().(*types.InvalidName); ok {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("errror retrieving container backing from host config manager: %+v", fault.VimFault())
+	}
+
+	// assemble env
+	var dockerEnv []string
+
+	var execCmds [][]string
+
+	var err error
+
+	hName := host.Summary.Config.Name
+	hUuid := host.Summary.Hardware.Uuid
+	containerName := constructContainerName(hName, hUuid)
+
+	// create volumes and mounts
+	dockerVol, volCmds, err := createSimHostMounts(ctx, containerName, host.Config.FileSystemVolume.MountInfo)
+	if err != nil {
+		return nil, err
+	}
+	execCmds = append(execCmds, volCmds...)
+
+	// create networks
+	dockerNet, netCmds, err := createSimHostNetworks(ctx, containerName, host.Config.Network, advOpts)
+	if err != nil {
+		return nil, err
+	}
+	execCmds = append(execCmds, netCmds...)
+
+	// create the container
 	sh.c, err = create(ctx, hName, hUuid, dockerNet, dockerVol, nil, dockerEnv, "alpine", []string{"sleep", "infinity"})
 	if err != nil {
 		return nil, err
 	}
 
+	// start the container
 	err = sh.c.start(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	// create symlinks from /vmfs/volumes/ for the Volume Name - the direct mount (path) is only the uuid
-	// ? can we do this via a script in the ESX image? are the volume names exposed in any manner instead the host? They must be because these mounts exist
-	// but where does that come from? Chicken and egg problem? ConfigStore?
-	for _, symlink := range symlinkCmds {
-		_, err := sh.c.exec(ctx, symlink)
+	// run post-creation steps
+	for _, cmd := range execCmds {
+		_, err := sh.c.exec(ctx, cmd)
 		if err != nil {
 			return nil, err
 		}
 	}
+
+	_, detail, err := sh.c.inspect()
+
+	for i := range host.Config.Network.Pnic {
+		pnic := &host.Config.Network.Pnic[i]
+		bridge := getPnicUnderlay(advOpts, pnic.Device)
+		settings := detail.NetworkSettings.Networks[bridge]
+
+		// it doesn't really make sense at an ESX level to set this information as IP bindings are associated with
+		// vnics (VMs) or vmknics (daemons such as hostd).
+		// However it's a useful location to stash this info in a manner that can be retrieved at a later date.
+		pnic.Spec.Ip.IpAddress = settings.IPAddress
+		pnic.Spec.Ip.SubnetMask = prefixToMask(settings.IPPrefixLen)
+
+		pnic.Mac = settings.MacAddress
+	}
+
+	// update the active "management" nicType with the container IP for vmnic0
+	netconfig, err := host.getNetConfigInterface(ctx, "management")
+	if err != nil {
+		return nil, err
+	}
+	netconfig.vmk.Spec.Ip.IpAddress = netconfig.uplink.Spec.Ip.IpAddress
+	netconfig.vmk.Spec.Ip.SubnetMask = netconfig.uplink.Spec.Ip.SubnetMask
+	netconfig.vmk.Spec.Mac = netconfig.uplink.Mac
 
 	return sh, nil
 }

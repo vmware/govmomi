@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"net"
 	"os"
 	"os/exec"
 	"path"
@@ -38,6 +39,7 @@ var (
 
 const (
 	deleteWithContainer = "lifecycle=container"
+	createdByVcsim      = "createdBy=vcsim"
 )
 
 func init() {
@@ -97,6 +99,11 @@ func extractNameAndUid(containerName string) (name string, uid string, err error
 	return parts[0], parts[1], nil
 }
 
+func prefixToMask(prefix int) string {
+	mask := net.CIDRMask(prefix, 32)
+	return fmt.Sprintf("%d.%d.%d.%d", mask[0], mask[1], mask[2], mask[3])
+}
+
 type tarEntry struct {
 	header  *tar.Header
 	content []byte
@@ -129,12 +136,16 @@ func copyToGuest(id string, dest string, length int64, reader io.Reader) error {
 
 	_, err = io.Copy(tw, reader)
 
-	errin := tw.Close()
-	errout := stdin.Close()
+	twErr := tw.Close()
+	stdinErr := stdin.Close()
 
-	errwait := cmd.Wait()
+	waitErr := cmd.Wait()
 
-	return errors.Join(err, errout, errin, errwait)
+	if err != nil || twErr != nil || stdinErr != nil || waitErr != nil {
+		return fmt.Errorf("copy: {%s}, tw: {%s}, stdin: {%s}, wait: {%s}", err, twErr, stdinErr, waitErr)
+	}
+
+	return nil
 }
 
 func copyFromGuest(id string, src string, sink func(int64, io.Reader) error) error {
@@ -155,9 +166,13 @@ func copyFromGuest(id string, src string, sink func(int64, io.Reader) error) err
 	}
 
 	err = sink(header.Size, tr)
-	errwait := cmd.Wait()
+	waitErr := cmd.Wait()
 
-	return errors.Join(err, errwait)
+	if err != nil || waitErr != nil {
+		return fmt.Errorf("err: {%s}, wait: {%s}", err, waitErr)
+	}
+
+	return nil
 }
 
 // createVolume creates a volume populated with the provided files
@@ -192,6 +207,10 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (string,
 			return "", err
 		}
 		uid = strings.TrimSpace(string(out))
+
+		if name == "" {
+			name = uid
+		}
 	}
 
 	run := []string{"run", "--rm", "-i"}
@@ -231,21 +250,106 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (string,
 		}
 	}
 
-	err1 := tw.Close()
-	err2 := stdin.Close()
-	err = errors.Join(err1, err2)
+	err = nil
+	twErr := tw.Close()
+	stdinErr := stdin.Close()
+	if twErr != nil || stdinErr != nil {
+		err = fmt.Errorf("tw: {%s}, stdin: {%s}", twErr, stdinErr)
+	}
 
-	if err3 := cmd.Wait(); err3 != nil {
+	if waitErr := cmd.Wait(); waitErr != nil {
 		stderr := ""
-		if xerr, ok := err.(*exec.ExitError); ok {
+		if xerr, ok := waitErr.(*exec.ExitError); ok {
 			stderr = string(xerr.Stderr)
 		}
-		log.Printf("%s %s: %s %s", name, cmd.Args, err, stderr)
+		log.Printf("%s %s: %s %s", name, cmd.Args, waitErr, stderr)
 
-		return uid, errors.Join(err, err3)
+		err = fmt.Errorf("%s, wait: {%s}", err, waitErr)
+		return uid, err
 	}
 
 	return uid, err
+}
+
+func getBridge(bridgeName string) (string, error) {
+	// {"CreatedAt":"2023-07-11 19:22:25.45027052 +0000 UTC","Driver":"bridge","ID":"fe52c7502c5d","IPv6":"false","Internal":"false","Labels":"goodbye=,hello=","Name":"testnet","Scope":"local"}
+	// podman has distinctly different fields at v4.4.1 so commented out fields that don't match. We only actually care about ID
+	type bridgeNet struct {
+		// CreatedAt string
+		Driver string
+		ID     string
+		// IPv6      string
+		// Internal  string
+		// Labels    string
+		Name string
+		// Scope     string
+	}
+
+	// if the underlay bridge already exists, return that
+	// we don't check for a specific label or similar so that it's possible to use a bridge created by other frameworks for composite testing
+	var bridge bridgeNet
+	cmd := exec.Command("docker", "network", "ls", "--format", "json", "-f", fmt.Sprintf("name=%s$", bridgeName))
+	out, err := cmd.Output()
+	if err != nil {
+		log.Printf("vcsim %s: %s", cmd.Args, err)
+		return "", err
+	}
+
+	// unfortunately docker returns an empty string not an empty json doc and podman returns '[]'
+	// podman also returns an array of matches even when there's only one, so we normalize.
+	str := strings.TrimSpace(string(out))
+	str = strings.TrimPrefix(str, "[")
+	str = strings.TrimSuffix(str, "]")
+	if len(str) == 0 {
+		return "", nil
+	}
+
+	err = json.Unmarshal([]byte(str), &bridge)
+	if err != nil {
+		log.Printf("vcsim %s: %s", cmd.Args, err)
+		return "", err
+	}
+
+	return bridge.ID, nil
+}
+
+// createBridge creates a bridge network if one does not already exist
+// returns:
+//
+//	uid - string
+//	err - error or nil
+func createBridge(bridgeName string, labels ...string) (string, error) {
+
+	id, err := getBridge(bridgeName)
+	if err != nil {
+		return "", err
+	}
+
+	if id != "" {
+		return id, nil
+	}
+
+	run := []string{"network", "create", "--label", createdByVcsim}
+	for i := range labels {
+		run = append(run, "--label", labels[i])
+	}
+	run = append(run, bridgeName)
+
+	cmd := exec.Command("docker", run...)
+	out, err := cmd.Output()
+	if err != nil {
+		log.Printf("vcsim %s: %s: %s", cmd.Args, out, err)
+		return "", err
+	}
+
+	// docker returns the ID regardless of whether you supply a name when creating the network, however
+	// podman returns the pretty name, so we have to normalize
+	id, err = getBridge(bridgeName)
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
 }
 
 // create
@@ -511,13 +615,12 @@ func (c *container) remove(ctx *Context) error {
 		}
 	}
 
-	combinedErr := errors.Join(err, lsverr, rmverr, lsnerr, rmnerr)
-
-	if combinedErr == nil {
-		c.id = ""
+	if err != nil || lsverr != nil || rmverr != nil || lsnerr != nil || rmnerr != nil {
+		return fmt.Errorf("err: {%s}, lsverr: {%s}, rmverr: {%s}, lsnerr:{%s}, rmerr: {%s}", err, lsverr, rmverr, lsnerr, rmnerr)
 	}
 
-	return combinedErr
+	c.id = ""
+	return nil
 }
 
 // watchContainer monitors the underlying container and updates
@@ -552,9 +655,8 @@ func (c *container) watchContainer(ctx *Context, updateFn func(*Context, *contai
 				}
 
 				updateErr := updateFn(ctx, &details, c)
-				err = errors.Join(rmErr, updateErr)
-				if removing && err == nil {
-					// if we don't succeed we want to re-try
+				// if we don't succeed we want to re-try
+				if removing && rmErr == nil && updateErr == nil {
 					ticker.Stop()
 					return
 				}
