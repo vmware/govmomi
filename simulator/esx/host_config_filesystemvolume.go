@@ -33,6 +33,7 @@ const PB = 1000 * TB
 // HostConfigInfo is the default template for the HostSystem config property.
 // Capture method:
 // govc object.collect -s -dump HostSystem:ha-host config.fileSystemVolume
+//   - slightly modified for uuids and DiskName
 var HostFileSystemVolumeInfo = types.HostFileSystemVolumeInfo{
 	VolumeTypeList: []string{"VMFS", "NFS", "NFS41", "vsan", "VVOL", "VFFS", "OTHER", "PMEM"},
 	MountInfo: []types.HostFileSystemMountInfo{

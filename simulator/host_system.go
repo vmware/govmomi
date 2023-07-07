@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/vmware/govmomi/simulator/esx"
@@ -32,6 +33,8 @@ import (
 var (
 	hostPortUnique = os.Getenv("VCSIM_HOST_PORT_UNIQUE") == "true"
 
+	globalLock sync.Mutex
+	// globalHostCount is used to construct unique hostnames. Should be consumed under globalLock.
 	globalHostCount = 0
 )
 
@@ -47,10 +50,6 @@ func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
 }
 
 func NewHostSystem(host mo.HostSystem) *HostSystem {
-	// lets us construct non-conflicting hostname automatically if omitted
-	// does not use the unique port to avoid constraints on port, such as >1024
-	globalHostCount++
-
 	if hostPortUnique { // configure unique port for each host
 		port := &esx.HostSystem.Summary.Config.Port
 		*port++
@@ -86,7 +85,8 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	deepCopy(esx.AdvancedOptions, &cfg.Option)
 
 	// add a supported option to the AdvancedOption manager
-	simOption := types.OptionDef{ElementDescription: types.ElementDescription{Key: "RUN.container"}}
+	simOption := types.OptionDef{ElementDescription: types.ElementDescription{Key: advOptContainerBackingImage}}
+	// TODO: how do we enter patterns here? Or should we stick to a list in the value?
 	hs.Config.OptionDef = append(hs.Config.OptionDef, simOption)
 
 	config := []struct {
@@ -115,8 +115,16 @@ func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connect
 		h.Runtime.ConnectionState = types.HostSystemConnectionStateConnected
 	}
 
+	// lets us construct non-conflicting hostname automatically if omitted
+	// does not use the unique port instead to avoid constraints on port, such as >1024
+
+	globalLock.Lock()
+	instanceID := globalHostCount
+	globalHostCount++
+	globalLock.Unlock()
+
 	if spec.HostName == "" {
-		spec.HostName = fmt.Sprintf("esx-%d", globalHostCount)
+		spec.HostName = fmt.Sprintf("esx-%d", instanceID)
 	} else if net.ParseIP(spec.HostName) != nil {
 		h.Config.Network.Vnic[0].Spec.Ip.IpAddress = spec.HostName
 	}
@@ -127,9 +135,6 @@ func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connect
 	h.Summary.Hardware.Uuid = id
 	h.Hardware.SystemInfo.Uuid = id
 
-	// bind to a simulation host with container backing if specified by options
-	// TODO: decide whether to require this at host creation or allow binding during a reconfigure
-	// TODO: handle the error return
 	var err error
 	h.sh, err = createSimulationHost(ctx, h)
 	if err != nil {
@@ -140,11 +145,22 @@ func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connect
 // configureContainerBacking sets up _this_ host for simulation using a container backing.
 // Args:
 //
-//	image - the container image with which to simulate the host
-//	mounts - array of mount info that should be translated into /vmfs/volumes/... mounts backed by container volumes
-func (h *HostSystem) configureContainerBacking(ctx *Context, image string, mounts []types.HostFileSystemMountInfo) {
+//		image - the container image with which to simulate the host
+//		mounts - array of mount info that should be translated into /vmfs/volumes/... mounts backed by container volumes
+//	 	networks - names of bridges to use for underlays. Will create a pNIC for each. The first will be treated as the management network.
+//
+// Restrictions adopted from createSimulationHost:
+// * no mock of VLAN connectivity
+// * only a single vmknic, used for "the management IP"
+// * pNIC connectivity does not directly impact VMs/vmks using it as uplink
+//
+// The pnics will be named using standard pattern, ie. vmnic0, vmnic1, ...
+// This will sanity check the NetConfig for "management" nicType to ensure that it maps through PortGroup->vSwitch->pNIC to vmnic0.
+//
+// TODO: figure out which other HostVirtualNicSpec's need to be updated with IP, eg. Config.vMotion, Config.Network.vNIC
+func (h *HostSystem) configureContainerBacking(ctx *Context, image string, mounts []types.HostFileSystemMountInfo, networks ...string) error {
 	option := &types.OptionValue{
-		Key:   "RUN.container",
+		Key:   advOptContainerBackingImage,
 		Value: image,
 	}
 
@@ -161,6 +177,200 @@ func (h *HostSystem) configureContainerBacking(ctx *Context, image string, mount
 			MountInfo:      mounts,
 		}
 	}
+
+	// force at least a management network
+	if len(networks) == 0 {
+		networks = []string{defaultUnderlayBridgeName}
+	}
+
+	// purge pNICs from the template - it makes no sense to keep them for a sim host
+	h.Config.Network.Pnic = make([]types.PhysicalNic, len(networks))
+
+	// purge any IPs and MACs associated with existing NetConfigs for the host
+	for cfgIdx := range h.Config.VirtualNicManagerInfo.NetConfig {
+		config := &h.Config.VirtualNicManagerInfo.NetConfig[cfgIdx]
+		for candidateIdx := range config.CandidateVnic {
+			candidate := &config.CandidateVnic[candidateIdx]
+			candidate.Spec.Ip.IpAddress = "0.0.0.0"
+			candidate.Spec.Ip.SubnetMask = "0.0.0.0"
+			candidate.Spec.Mac = "00:00:00:00:00:00"
+		}
+	}
+
+	// The presence of a pNIC is used to indicate connectivity to a specific underlay. We construct an empty pNIC entry and specify the underly via
+	// host.ConfigManager.AdvancedOptions. The pNIC will be populated with the MAC (accurate) and IP (divergence - we need to stash it somewhere) for the veth.
+	// We create a NetConfig "management" entry for the first pNIC - this will be populated with the IP of the "host" container.
+
+	// create a pNIC for each underlay
+	for i, net := range networks {
+		name := fmt.Sprintf("vmnic%d", i)
+
+		// we don't have a natural field for annotating which pNIC is connected to which network, so stash it in an adv option.
+		option := &types.OptionValue{
+			Key:   advOptPrefixPnicToUnderlayPrefix + name,
+			Value: net,
+		}
+		fault = advOpts.UpdateOptions(&types.UpdateOptions{ChangedValue: []types.BaseOptionValue{option}}).Fault()
+		if fault != nil {
+			panic(fault)
+		}
+
+		h.Config.Network.Pnic[i] = types.PhysicalNic{
+			Key:             "key-vim.host.PhysicalNic-" + name,
+			Device:          name,
+			Pci:             fmt.Sprintf("0000:%2d:00.0", i+1),
+			Driver:          "vcsim-bridge",
+			DriverVersion:   "1.2.10.0",
+			FirmwareVersion: "1.57, 0x80000185",
+			LinkSpeed: &types.PhysicalNicLinkInfo{
+				SpeedMb: 10000,
+				Duplex:  true,
+			},
+			ValidLinkSpecification: []types.PhysicalNicLinkInfo{
+				{
+					SpeedMb: 10000,
+					Duplex:  true,
+				},
+			},
+			Spec: types.PhysicalNicSpec{
+				Ip:                            &types.HostIpConfig{},
+				LinkSpeed:                     (*types.PhysicalNicLinkInfo)(nil),
+				EnableEnhancedNetworkingStack: types.NewBool(false),
+				EnsInterruptEnabled:           types.NewBool(false),
+			},
+			WakeOnLanSupported: false,
+			Mac:                "00:00:00:00:00:00",
+			FcoeConfiguration: &types.FcoeConfig{
+				PriorityClass: 3,
+				SourceMac:     "00:00:00:00:00:00",
+				VlanRange: []types.FcoeConfigVlanRange{
+					{},
+				},
+				Capabilities: types.FcoeConfigFcoeCapabilities{},
+				FcoeActive:   false,
+			},
+			VmDirectPathGen2Supported:             types.NewBool(false),
+			VmDirectPathGen2SupportedMode:         "",
+			ResourcePoolSchedulerAllowed:          types.NewBool(false),
+			ResourcePoolSchedulerDisallowedReason: nil,
+			AutoNegotiateSupported:                types.NewBool(true),
+			EnhancedNetworkingStackSupported:      types.NewBool(false),
+			EnsInterruptSupported:                 types.NewBool(false),
+			RdmaDevice:                            "",
+			DpuId:                                 "",
+		}
+	}
+
+	// sanity check that everything's hung together sufficiently well
+	details, err := h.getNetConfigInterface(ctx, "management")
+	if err != nil {
+		return err
+	}
+
+	if details.uplink == nil || details.uplink.Device != "vmnic0" {
+		return fmt.Errorf("Config provided for host %s does not result in a consistent 'management' NetConfig that's bound to 'vmnic0'", h.Name)
+	}
+
+	return nil
+}
+
+// netConfigDetails is used to packaged up all the related network entities associated with a NetConfig binding
+type netConfigDetails struct {
+	nicType   string
+	netconfig *types.VirtualNicManagerNetConfig
+	vmk       *types.HostVirtualNic
+	netstack  *types.HostNetStackInstance
+	portgroup *types.HostPortGroup
+	vswitch   *types.HostVirtualSwitch
+	uplink    *types.PhysicalNic
+}
+
+// getNetConfigInterface returns the set of constructs active for a given nicType (eg. "management", "vmotion")
+// This method is provided because the Config structure held by HostSystem is heavily interconnected but serialized and not cross-linked with pointers.
+// As such there's a _lot_ of cross-referencing that needs to be done to navigate.
+// The pNIC returned is the uplink associated with the vSwitch for the netconfig
+func (h *HostSystem) getNetConfigInterface(ctx *Context, nicType string) (*netConfigDetails, error) {
+	details := &netConfigDetails{
+		nicType: nicType,
+	}
+
+	for i := range h.Config.VirtualNicManagerInfo.NetConfig {
+		if h.Config.VirtualNicManagerInfo.NetConfig[i].NicType == nicType {
+			details.netconfig = &h.Config.VirtualNicManagerInfo.NetConfig[i]
+			break
+		}
+	}
+	if details.netconfig == nil {
+		return nil, fmt.Errorf("no matching NetConfig for NicType=%s", nicType)
+	}
+
+	if details.netconfig.SelectedVnic == nil {
+		return details, nil
+	}
+
+	vnicKey := details.netconfig.SelectedVnic[0]
+	for i := range details.netconfig.CandidateVnic {
+		if details.netconfig.CandidateVnic[i].Key == vnicKey {
+			details.vmk = &details.netconfig.CandidateVnic[i]
+			break
+		}
+	}
+	if details.vmk == nil {
+		panic(fmt.Sprintf("NetConfig for host %s references non-existant vNIC key %s for %s nicType", h.Name, vnicKey, nicType))
+	}
+
+	portgroupName := details.vmk.Portgroup
+	netstackKey := details.vmk.Spec.NetStackInstanceKey
+
+	for i := range h.Config.Network.NetStackInstance {
+		if h.Config.Network.NetStackInstance[i].Key == netstackKey {
+			details.netstack = &h.Config.Network.NetStackInstance[i]
+			break
+		}
+	}
+	if details.netstack == nil {
+		panic(fmt.Sprintf("NetConfig for host %s references non-existant NetStack key %s for %s nicType", h.Name, netstackKey, nicType))
+	}
+
+	for i := range h.Config.Network.Portgroup {
+		// TODO: confirm correctness of this - seems weird it references the Spec.Name instead of the key like everything else.
+		if h.Config.Network.Portgroup[i].Spec.Name == portgroupName {
+			details.portgroup = &h.Config.Network.Portgroup[i]
+			break
+		}
+	}
+	if details.portgroup == nil {
+		panic(fmt.Sprintf("NetConfig for host %s references non-existant PortGroup name %s for %s nicType", h.Name, portgroupName, nicType))
+	}
+
+	vswitchKey := details.portgroup.Vswitch
+	for i := range h.Config.Network.Vswitch {
+		if h.Config.Network.Vswitch[i].Key == vswitchKey {
+			details.vswitch = &h.Config.Network.Vswitch[i]
+			break
+		}
+	}
+	if details.vswitch == nil {
+		panic(fmt.Sprintf("NetConfig for host %s references non-existant vSwitch key %s for %s nicType", h.Name, vswitchKey, nicType))
+	}
+
+	if len(details.vswitch.Pnic) != 1 {
+		// to change this, look at the Active NIC in the NicTeamingPolicy, but for now not worth it
+		panic(fmt.Sprintf("vSwitch %s for host %s has multiple pNICs associated which is not supported.", vswitchKey, h.Name))
+	}
+
+	pnicKey := details.vswitch.Pnic[0]
+	for i := range h.Config.Network.Pnic {
+		if h.Config.Network.Pnic[i].Key == pnicKey {
+			details.uplink = &h.Config.Network.Pnic[i]
+			break
+		}
+	}
+	if details.uplink == nil {
+		panic(fmt.Sprintf("NetConfig for host %s references non-existant pNIC key %s for %s nicType", h.Name, pnicKey, nicType))
+	}
+
+	return details, nil
 }
 
 func (h *HostSystem) event() types.HostEvent {

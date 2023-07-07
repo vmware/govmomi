@@ -21,6 +21,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
@@ -172,11 +173,16 @@ func TestHostContainerBacking(t *testing.T) {
 	ctx := SpoofContext()
 
 	hs := NewHostSystem(esx.HostSystem)
-	hs.configureContainerBacking(ctx, "alpine", defaultSimVolumes)
+	hs.configureContainerBacking(ctx, "alpine", defaultSimVolumes, "vcsim-mgmt-underlay")
+
+	details, err := hs.getNetConfigInterface(ctx, "management")
+	assert.NoError(t, err, "Expected no error from management netconfig check")
+	assert.Equal(t, "0.0.0.0", details.vmk.Spec.Ip.IpAddress, "Expected IP to be empty prior to container creation")
 
 	hs.configure(ctx, types.HostConnectSpec{}, true)
 
-	//TODO: assert there's a container representing the host (consider a separate test for matching datastores and networks)
+	assert.NoError(t, err, "Expected no error from management netconfig check")
+	assert.NotEqual(t, "0.0.0.0", details.vmk.Spec.Ip.IpAddress, "Expected management IP to set after container creation")
 
 	hs.sh.remove(ctx)
 }
@@ -194,17 +200,27 @@ func TestMultipleSimHost(t *testing.T) {
 	hs := NewHostSystem(esx.HostSystem)
 	hs.configureContainerBacking(ctx, "alpine", defaultSimVolumes)
 
-	hs.configure(ctx, types.HostConnectSpec{}, true)
-	// TODO: assert container present
-
 	hs2 := NewHostSystem(esx.HostSystem)
 	hs2.configureContainerBacking(ctx, "alpine", defaultSimVolumes)
 
+	details, err := hs.getNetConfigInterface(ctx, "management")
+	assert.NoError(t, err, "Expected no error from management netconfig check")
+	assert.Equal(t, "0.0.0.0", details.vmk.Spec.Ip.IpAddress, "Expected IP to be empty prior to container creation")
+
+	hs.configure(ctx, types.HostConnectSpec{}, true)
+
+	details2, err := hs2.getNetConfigInterface(ctx, "management")
+	assert.NoError(t, err, "Expected no error from management netconfig check")
+	assert.Equal(t, "0.0.0.0", details2.vmk.Spec.Ip.IpAddress, "Expected IP to be empty prior to container creation")
+
 	hs2.configure(ctx, types.HostConnectSpec{}, true)
-	// TODO: assert 2nd container present
+
+	assert.NotEqual(t, details.vmk.Spec.Ip.IpAddress, details2.vmk.Spec.Ip.IpAddress, "Expected hosts to get different IPs")
 
 	hs.sh.remove(ctx)
 
-	// TODO: assert one container plus volumes left
+	// TODO: assert one container plus volumes left - need to wait for
+	// https://github.com/containers/podman/issues/19219 to be fixed for podman to work - otherwise all volumes get removed
+	// with the first host removed
 	hs2.sh.remove(ctx)
 }
