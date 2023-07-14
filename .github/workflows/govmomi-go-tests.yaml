@@ -60,3 +60,6 @@ jobs:
           TEST_TIMEOUT: 5m
           TEST_OPTS: ""
         run: make go-test
+      - name: Debug with tmate on failure
+        if: ${{ failure() }}
+        uses: mxschmitt/action-tmate@v3
