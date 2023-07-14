@@ -159,7 +159,7 @@ func Example_runContainer() {
 		}
 
 		// Count the number of bytes in feature_test.go via nginx going via port remap on host
-		cmd = exec.Command("docker", "run", "--rm", "--network=host", "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s", ip))
+		cmd = exec.Command("curl", "-f", "http://localhost:8888")
 		buf.Reset()
 		cmd.Stdout = &buf
 		err = cmd.Run()
