@@ -288,10 +288,10 @@ func getBridge(bridgeName string) (string, error) {
 	// if the underlay bridge already exists, return that
 	// we don't check for a specific label or similar so that it's possible to use a bridge created by other frameworks for composite testing
 	var bridge bridgeNet
-	cmd := exec.Command("docker", "network", "ls", "--format", "json", "-f", fmt.Sprintf("name=%s$", bridgeName))
+	cmd := exec.Command("docker", "network", "ls", "--format={{json .}}", "-f", fmt.Sprintf("name=%s$", bridgeName))
 	out, err := cmd.Output()
 	if err != nil {
-		log.Printf("vcsim %s: %s", cmd.Args, err)
+		log.Printf("vcsim %s: %s, %s", cmd.Args, err, out)
 		return "", err
 	}
 
@@ -306,7 +306,7 @@ func getBridge(bridgeName string) (string, error) {
 
 	err = json.Unmarshal([]byte(str), &bridge)
 	if err != nil {
-		log.Printf("vcsim %s: %s", cmd.Args, err)
+		log.Printf("vcsim %s: %s, %s", cmd.Args, err, str)
 		return "", err
 	}
 
@@ -586,15 +586,16 @@ func (c *container) remove(ctx *Context) error {
 	if lsverr != nil {
 		log.Printf("%s %s: %s", c.name, cmd.Args, lsverr)
 	}
+	log.Printf("%s volumes: %s", c.name, volumesToReap)
 
 	var rmverr error
 	if len(volumesToReap) > 0 {
 		run := []string{"volume", "rm", "-f"}
 		run = append(run, strings.Split(string(volumesToReap), "\n")...)
 		cmd = exec.Command("docker", run...)
-		rmverr = cmd.Run()
+		out, rmverr := cmd.Output()
 		if rmverr != nil {
-			log.Printf("%s %s: %s", c.name, cmd.Args, rmverr)
+			log.Printf("%s %s: %s, %s", c.name, cmd.Args, rmverr, out)
 		}
 	}
 

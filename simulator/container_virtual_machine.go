@@ -34,6 +34,8 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+const ContainerBackingOptionKey = "RUN.container"
+
 var (
 	toolsRunning = []types.PropertyChange{
 		{Name: "guest.toolsStatus", Val: types.VirtualMachineToolsStatusToolsOk},
@@ -63,7 +65,7 @@ func createSimulationVM(vm *VirtualMachine) *simVM {
 
 	for _, opt := range vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
-		if val.Key == "RUN.container" {
+		if val.Key == ContainerBackingOptionKey {
 			return svm
 		}
 	}
@@ -203,7 +205,7 @@ func (svm *simVM) start(ctx *Context) error {
 
 	for _, opt := range svm.vm.Config.ExtraConfig {
 		val := opt.GetOptionValue()
-		if val.Key == "RUN.container" {
+		if val.Key == ContainerBackingOptionKey {
 			run := val.Value.(string)
 			err := json.Unmarshal([]byte(run), &args)
 			if err != nil {

@@ -394,7 +394,8 @@ func extraConfigKey(key string) string {
 	return key
 }
 
-func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec) {
+func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+	var removedContainerBacking bool
 	var changes []types.PropertyChange
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()
@@ -419,6 +420,9 @@ func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec)
 				vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
 			} else {
 				if s, ok := val.Value.(string); ok && s == "" {
+					if key == ContainerBackingOptionKey {
+						removedContainerBacking = true
+					}
 					// Remove existing element
 					l := len(vm.Config.ExtraConfig)
 					vm.Config.ExtraConfig[keyIndex] = vm.Config.ExtraConfig[l-1]
@@ -450,13 +454,48 @@ func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec)
 			)
 		}
 	}
+
+	// create the container backing before we publish the updates so the simVM is available before handlers
+	// get triggered
+	var fault types.BaseMethodFault
+	if vm.svm == nil {
+		vm.svm = createSimulationVM(vm)
+
+		// check to see if the VM is already powered on - if so we need to retroactively hit that path here
+		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
+			err := vm.svm.start(ctx)
+			if err != nil {
+				// don't attempt to undo the changes already made - just return an error
+				// we'll retry the svm.start operation on pause/restart calls
+				fault = &types.VAppConfigFault{
+					VimFault: types.VimFault{
+						MethodFault: types.MethodFault{
+							FaultCause: &types.LocalizedMethodFault{
+								Fault:            &types.SystemErrorFault{Reason: err.Error()},
+								LocalizedMessage: err.Error()}}}}
+			}
+		}
+	} else if removedContainerBacking {
+		err := vm.svm.remove(ctx)
+		if err == nil {
+			vm.svm = nil
+		} else {
+			// don't attempt to undo the changes already made - just return an error
+			// we'll retry the svm.start operation on pause/restart calls
+			fault = &types.VAppConfigFault{
+				VimFault: types.VimFault{
+					MethodFault: types.MethodFault{
+						FaultCause: &types.LocalizedMethodFault{
+							Fault:            &types.SystemErrorFault{Reason: err.Error()},
+							LocalizedMessage: err.Error()}}}}
+		}
+	}
+
 	if len(changes) != 0 {
 		Map.Update(vm, changes)
 	}
 
-	if vm.svm == nil {
-		vm.svm = createSimulationVM(vm)
-	}
+	return fault
 }
 
 func validateGuestID(id string) types.BaseMethodFault {
@@ -1499,6 +1538,7 @@ func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.Bas
 func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 
+	var err types.BaseMethodFault
 	for i, change := range spec.DeviceChange {
 		dspec := change.GetVirtualDeviceConfigSpec()
 		device := dspec.Device.GetVirtualDevice()
@@ -1535,7 +1575,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 			}
 
 			key := device.Key
-			err := vm.configureDevice(ctx, devices, dspec, nil)
+			err = vm.configureDevice(ctx, devices, dspec, nil)
 			if err != nil {
 				return err
 			}
@@ -1562,7 +1602,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 				device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
 			}
 
-			err := vm.configureDevice(ctx, devices, dspec, oldDevice)
+			err = vm.configureDevice(ctx, devices, dspec, oldDevice)
 			if err != nil {
 				return err
 			}
@@ -1577,9 +1617,16 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 		{Name: "config.hardware.device", Val: []types.BaseVirtualDevice(devices)},
 	})
 
-	vm.updateDiskLayouts()
+	err = vm.updateDiskLayouts()
+	if err != nil {
+		return err
+	}
 
-	vm.applyExtraConfig(spec) // Do this after device config, as some may apply to the devices themselves (e.g. ethernet -> guest.net)
+	// Do this after device config, as some may apply to the devices themselves (e.g. ethernet -> guest.net)
+	err = vm.applyExtraConfig(ctx, spec)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
