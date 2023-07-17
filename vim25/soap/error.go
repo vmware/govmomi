@@ -19,6 +19,7 @@ package soap
 import (
 	"crypto/x509"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"reflect"
 	"strings"
@@ -131,8 +132,18 @@ func ToVimFault(err error) types.BaseMethodFault {
 }
 
 func IsCertificateUntrusted(err error) bool {
-	switch err.(type) {
-	case x509.UnknownAuthorityError, x509.HostnameError:
+	// golang 1.20 introduce a new type to wrap 509 errors. So instead of
+	// casting the type, now we check the error chain contains the
+	// x509 error or not.
+	x509UnknownAuthorityErr := &x509.UnknownAuthorityError{}
+	ok := errors.As(err, x509UnknownAuthorityErr)
+	if ok {
+		return true
+	}
+
+	x509HostNameErr := &x509.HostnameError{}
+	ok = errors.As(err, x509HostNameErr)
+	if ok {
 		return true
 	}
 
