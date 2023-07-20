@@ -188,7 +188,7 @@ upload_file() {
 }
 
 @test "datastore.upload" {
-  esx_env
+  vcsim_env -esx
 
   name=$(new_id)
   echo -n "Hello world" | govc datastore.upload - "$name"
@@ -196,6 +196,12 @@ upload_file() {
   run govc datastore.download "$name" -
   assert_success
   assert_output "Hello world"
+
+  run env GOVMOMI_DATASTORE_ACCESS_SCHEME=invalid govc datastore.upload datastore.bats datastore.bats
+  assert_failure
+
+  run env GOVMOMI_DATASTORE_ACCESS_SCHEME=https govc datastore.upload datastore.bats datastore.bats
+  assert_success
 }
 
 @test "datastore.tail" {
