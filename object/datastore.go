@@ -83,8 +83,14 @@ func (d Datastore) Path(path string) string {
 func (d Datastore) NewURL(path string) *url.URL {
 	u := d.c.URL()
 
+	scheme := u.Scheme
+	// In rare cases where vCenter and ESX are accessed using different schemes.
+	if overrideScheme := os.Getenv("GOVMOMI_DATASTORE_ACCESS_SCHEME"); overrideScheme != "" {
+		scheme = overrideScheme
+	}
+
 	return &url.URL{
-		Scheme: u.Scheme,
+		Scheme: scheme,
 		Host:   u.Host,
 		Path:   fmt.Sprintf("/folder/%s", path),
 		RawQuery: url.Values{
