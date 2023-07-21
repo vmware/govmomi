@@ -107,6 +107,10 @@ doc: install
 doc: ## Generates govc USAGE.md
 	./govc/usage.sh > ./govc/USAGE.md
 
+.PHONY: generate-types
+generate-types: ## Generate the types
+	$(MAKE) -C ./gen/ $@
+
 
 ## --------------------------------------
 ## Tests
