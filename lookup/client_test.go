@@ -30,31 +30,16 @@ import (
 	"github.com/vmware/govmomi/sts"
 	"github.com/vmware/govmomi/vim25"
 
-	_ "github.com/vmware/govmomi/lookup/simulator"
+	lsim "github.com/vmware/govmomi/lookup/simulator"
 	_ "github.com/vmware/govmomi/ssoadmin/simulator"
 	_ "github.com/vmware/govmomi/sts/simulator"
 )
-
-// make the path of all lookup service urls invalid
-func breakLookupServiceURLs() {
-	setting := simulator.Map.OptionManager().Setting
-
-	for _, s := range setting {
-		o := s.GetOptionValue()
-		if strings.HasSuffix(o.Key, ".uri") {
-			val := o.Value.(string)
-			u, _ := url.Parse(val)
-			u.Path = "/enoent" + u.Path
-			o.Value = u.String()
-		}
-	}
-}
 
 // test lookup.EndpointURL usage by the ssoadmin and sts clients
 func TestEndpointURL(t *testing.T) {
 	// these client calls should fail since we'll break the URL paths
 	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
-		breakLookupServiceURLs()
+		lsim.BreakLookupServiceURLs()
 
 		{
 			_, err := ssoadmin.NewClient(ctx, vc)

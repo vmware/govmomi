@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -421,7 +421,9 @@ func (s *Service) HandleFunc(pattern string, handler func(http.ResponseWriter, *
 
 // RegisterSDK adds an HTTP handler for the Registry's Path and Namespace.
 // If r.Path is already registered, r's objects are added to the existing Registry.
-func (s *Service) RegisterSDK(r *Registry) {
+// An optional set of aliases can be provided to register the same handler for
+// multiple paths.
+func (s *Service) RegisterSDK(r *Registry, alias ...string) {
 	if existing, ok := s.sdk[r.Path]; ok {
 		for id, obj := range r.objects {
 			existing.objects[id] = obj
@@ -435,6 +437,11 @@ func (s *Service) RegisterSDK(r *Registry) {
 
 	s.sdk[r.Path] = r
 	s.ServeMux.HandleFunc(r.Path, s.ServeSDK)
+
+	for _, p := range alias {
+		s.sdk[p] = r
+		s.ServeMux.HandleFunc(p, s.ServeSDK)
+	}
 }
 
 // StatusSDK can be used to simulate an /sdk HTTP response code other than 200.
@@ -654,12 +661,9 @@ func defaultIP(addr *net.TCPAddr) string {
 
 // NewServer returns an http Server instance for the given service
 func (s *Service) NewServer() *Server {
-	s.RegisterSDK(Map)
+	s.RegisterSDK(Map, Map.Path+"/vimService")
 
 	mux := s.ServeMux
-	vim := Map.Path + "/vimService"
-	s.sdk[vim] = s.sdk[vim25.Path]
-	mux.HandleFunc(vim, s.ServeSDK)
 	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
 	mux.HandleFunc(guestPrefix, ServeGuest)

@@ -876,9 +876,10 @@ func (m *Model) Run(f func(context.Context, *vim25.Client) error) error {
 		if err != nil {
 			return err
 		}
+		// Only force TLS if the provided model didn't have any Service.
+		m.Service.TLS = new(tls.Config)
 	}
 
-	m.Service.TLS = new(tls.Config)
 	m.Service.RegisterEndpoints = true
 
 	s := m.Service.NewServer()

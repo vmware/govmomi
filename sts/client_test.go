@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package sts
+package sts_test
 
 import (
 	"context"
@@ -27,9 +27,16 @@ import (
 	"testing"
 	"time"
 
+	"github.com/stretchr/testify/require"
+
+	lsim "github.com/vmware/govmomi/lookup/simulator"
 	"github.com/vmware/govmomi/session"
+	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/ssoadmin"
+	_ "github.com/vmware/govmomi/ssoadmin/simulator"
 	"github.com/vmware/govmomi/ssoadmin/types"
+	"github.com/vmware/govmomi/sts"
+	_ "github.com/vmware/govmomi/sts/simulator"
 	"github.com/vmware/govmomi/vapi/rest"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -47,8 +54,8 @@ import (
 // % tail -f /var/log/vmware/sso/vmware-rest-idm-http.log
 
 // solutionUserCreate ensures that solution user "govmomi-test" exists for uses with the tests that follow.
-func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client, vc *vim25.Client) error {
-	s, err := sts.Issue(ctx, TokenRequest{Userinfo: info})
+func solutionUserCreate(ctx context.Context, info *url.Userinfo, stsClient *sts.Client, vc *vim25.Client) error {
+	s, err := stsClient.Issue(ctx, sts.TokenRequest{Userinfo: info})
 	if err != nil {
 		return err
 	}
@@ -59,7 +66,7 @@ func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client, vc
 	}
 
 	header := soap.Header{Security: s}
-	if err = admin.Login(sts.WithHeader(ctx, header)); err != nil {
+	if err = admin.Login(stsClient.WithHeader(ctx, header)); err != nil {
 		return err
 	}
 
@@ -80,7 +87,7 @@ func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client, vc
 	}
 
 	if user == nil {
-		block, _ := pem.Decode([]byte(LocalhostCert))
+		block, _ := pem.Decode([]byte(sts.LocalhostCert))
 		details := types.AdminSolutionDetails{
 			Certificate: base64.StdEncoding.EncodeToString(block.Bytes),
 			Description: "govmomi test solution user",
@@ -100,7 +107,7 @@ func solutionUserCreate(ctx context.Context, info *url.Userinfo, sts *Client, vc
 }
 
 func solutionUserCert() *tls.Certificate {
-	cert, err := tls.X509KeyPair(LocalhostCert, LocalhostKey)
+	cert, err := tls.X509KeyPair(sts.LocalhostCert, sts.LocalhostKey)
 	if err != nil {
 		panic(err)
 	}
@@ -129,21 +136,21 @@ func TestIssueHOK(t *testing.T) {
 		t.SkipNow()
 	}
 
-	sts, err := NewClient(ctx, c)
+	stsClient, err := sts.NewClient(ctx, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err = solutionUserCreate(ctx, u.User, sts, c); err != nil {
+	if err = solutionUserCreate(ctx, u.User, stsClient, c); err != nil {
 		t.Fatal(err)
 	}
 
-	req := TokenRequest{
+	req := sts.TokenRequest{
 		Certificate: solutionUserCert(),
 		Delegatable: true,
 	}
 
-	s, err := sts.Issue(ctx, req)
+	s, err := stsClient.Issue(ctx, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -197,7 +204,7 @@ func TestIssueTokenByToken(t *testing.T) {
 	}
 	_ = vc2.UseServiceVersion()
 
-	sts1, err := NewClient(ctx, vc1)
+	sts1, err := sts.NewClient(ctx, vc1)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -206,12 +213,12 @@ func TestIssueTokenByToken(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	sts2, err := NewClient(ctx, vc2)
+	sts2, err := sts.NewClient(ctx, vc2)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req1 := TokenRequest{
+	req1 := sts.TokenRequest{
 		Certificate: solutionUserCert(),
 		Delegatable: true,
 	}
@@ -260,22 +267,22 @@ func TestIssueBearer(t *testing.T) {
 		t.SkipNow()
 	}
 
-	sts, err := NewClient(ctx, c)
+	stsClient, err := sts.NewClient(ctx, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
 	// Test that either Certificate or Userinfo is set.
-	_, err = sts.Issue(ctx, TokenRequest{})
+	_, err = stsClient.Issue(ctx, sts.TokenRequest{})
 	if err == nil {
 		t.Error("expected error")
 	}
 
-	req := TokenRequest{
+	req := sts.TokenRequest{
 		Userinfo: u.User,
 	}
 
-	s, err := sts.Issue(ctx, req)
+	s, err := stsClient.Issue(ctx, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -317,27 +324,27 @@ func TestIssueActAs(t *testing.T) {
 		t.SkipNow()
 	}
 
-	sts, err := NewClient(ctx, c)
+	stsClient, err := sts.NewClient(ctx, c)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if err = solutionUserCreate(ctx, u.User, sts, c); err != nil {
+	if err = solutionUserCreate(ctx, u.User, stsClient, c); err != nil {
 		t.Fatal(err)
 	}
 
-	req := TokenRequest{
+	req := sts.TokenRequest{
 		Delegatable: true,
 		Renewable:   true,
 		Userinfo:    u.User,
 	}
 
-	s, err := sts.Issue(ctx, req)
+	s, err := stsClient.Issue(ctx, req)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	req = TokenRequest{
+	req = sts.TokenRequest{
 		Lifetime:    24 * time.Hour,
 		Token:       s.Token,
 		ActAs:       true,
@@ -346,7 +353,7 @@ func TestIssueActAs(t *testing.T) {
 		Certificate: solutionUserCert(),
 	}
 
-	s, err = sts.Issue(ctx, req)
+	s, err = stsClient.Issue(ctx, req)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -370,7 +377,7 @@ func TestIssueActAs(t *testing.T) {
 		req.Lifetime = 24 * time.Hour
 		req.Token = s.Token
 		log.Printf("extending lifetime from %s", s.Lifetime.Expires.Sub(s.Lifetime.Created))
-		s, err = sts.Renew(ctx, req)
+		s, err = stsClient.Renew(ctx, req)
 		if err != nil {
 			t.Fatal(err)
 		}
@@ -379,4 +386,35 @@ func TestIssueActAs(t *testing.T) {
 	}
 
 	t.Logf("expires in %s", s.Lifetime.Expires.Sub(s.Lifetime.Created))
+}
+
+func TestNewClient(t *testing.T) {
+	t.Run("Happy path client creation", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, client *vim25.Client) {
+			_, err := sts.NewClient(ctx, client)
+			require.NoError(t, err)
+		})
+	})
+
+	t.Run("STS client should work with Envoy sidecar even when lookup service is down", func(t *testing.T) {
+		model := simulator.VPX()
+
+		model.Create()
+		simulator.Test(func(ctx context.Context, client *vim25.Client) {
+			lsim.BreakLookupServiceURLs()
+			// Map Envoy sidecar on the same port as the vcsim client.
+			os.Setenv("GOVMOMI_ENVOY_SIDECAR_PORT", client.Client.URL().Port())
+			os.Setenv("GOVMOMI_ENVOY_SIDECAR_HOST", client.Client.URL().Hostname())
+
+			c, err := sts.NewClient(ctx, client)
+			require.NoError(t, err)
+
+			req := sts.TokenRequest{
+				Userinfo: url.UserPassword("foo", "bar"),
+			}
+
+			_, err = c.Issue(ctx, req)
+			require.NoError(t, err)
+		}, model)
+	})
 }

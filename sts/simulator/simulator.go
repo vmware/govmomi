@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/sts"
 	"github.com/vmware/govmomi/sts/internal"
 	"github.com/vmware/govmomi/vim25/soap"
 	vim "github.com/vmware/govmomi/vim25/types"
@@ -36,6 +37,7 @@ func init() {
 		if r.IsVPX() {
 			path, handler := New(s.Listen, r.OptionManager().Setting)
 			s.Handle(path, handler)
+			s.Handle(sts.SystemPath, handler)
 		}
 	})
 }
