@@ -72,7 +72,7 @@ git checkout ${RELEASE}
 
 # build for the host OS/ARCH, otherwise omit --single-target
 # binaries are placed in respective subdirectories in ./dist/
-goreleaser build --rm-dist --single-target
+goreleaser build --clean --single-target
 ```
 
 ## Usage
