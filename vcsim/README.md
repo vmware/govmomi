@@ -65,7 +65,7 @@ git checkout ${RELEASE}
 
 # build for the host OS/ARCH, otherwise omit --single-target
 # binaries are placed in respective subdirectories in ./dist/
-goreleaser build --rm-dist --single-target
+goreleaser build --clean --single-target
 ```
 
 ## Usage
@@ -148,7 +148,7 @@ Usage of vcsim:
 
 ### Version Information
 
-To print detailed (build) information for vcsim run: `vcsim version`. 
+To print detailed (build) information for vcsim run: `vcsim version`.
 
 ## Examples
 
