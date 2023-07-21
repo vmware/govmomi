@@ -31,7 +31,7 @@ import (
 func init() {
 	simulator.RegisterEndpoint(func(s *simulator.Service, r *simulator.Registry) {
 		if r.IsVPX() {
-			s.RegisterSDK(New(r, s.Listen))
+			s.RegisterSDK(New(r, s.Listen), ssoadmin.SystemPath)
 		}
 	})
 }

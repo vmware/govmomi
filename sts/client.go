@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -20,9 +20,11 @@ import (
 	"context"
 	"crypto/tls"
 	"errors"
+	"fmt"
 	"net/url"
 	"time"
 
+	internalhelpers "github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/lookup"
 	"github.com/vmware/govmomi/lookup/types"
 	"github.com/vmware/govmomi/sts/internal"
@@ -31,8 +33,10 @@ import (
 )
 
 const (
-	Namespace = "oasis:names:tc:SAML:2.0:assertion"
-	Path      = "/sts/STSService"
+	Namespace  = "oasis:names:tc:SAML:2.0:assertion"
+	basePath   = "/sts"
+	Path       = basePath + "/STSService"
+	SystemPath = basePath + "/system-STSService/sdk"
 )
 
 // Client is a soap.Client targeting the STS (Secure Token Service) API endpoint.
@@ -42,11 +46,16 @@ type Client struct {
 	RoundTripper soap.RoundTripper
 }
 
-// NewClient returns a client targeting the STS API endpoint.
-// The Client.URL will be set to that of the Lookup Service's endpoint registration,
-// as the SSO endpoint can be external to vCenter.  If the Lookup Service is not available,
-// URL defaults to Path on the vim25.Client.URL.Host.
-func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
+func getEndpointURL(ctx context.Context, c *vim25.Client) string {
+	// Services running on vCenter can bypass lookup service using the
+	// system-STSService path. This avoids the need to lookup the system domain.
+	if usingSidecar := internalhelpers.UsingEnvoySidecar(c); usingSidecar {
+		return fmt.Sprintf("http://%s%s", c.URL().Host, SystemPath)
+	}
+	return getEndpointURLFromLookupService(ctx, c)
+}
+
+func getEndpointURLFromLookupService(ctx context.Context, c *vim25.Client) string {
 	filter := &types.LookupServiceRegistrationFilter{
 		ServiceType: &types.LookupServiceRegistrationServiceType{
 			Product: "com.vmware.cis",
@@ -58,7 +67,16 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 		},
 	}
 
-	url := lookup.EndpointURL(ctx, c, Path, filter)
+	return lookup.EndpointURL(ctx, c, Path, filter)
+}
+
+// NewClient returns a client targeting the STS API endpoint.
+// The Client.URL will be set to that of the Lookup Service's endpoint registration,
+// as the SSO endpoint can be external to vCenter.  If the Lookup Service is not available,
+// URL defaults to Path on the vim25.Client.URL.Host.
+func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
+
+	url := getEndpointURL(ctx, c)
 	sc := c.Client.NewServiceClient(url, Namespace)
 
 	return &Client{sc, sc}, nil

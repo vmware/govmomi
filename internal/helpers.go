@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,8 +18,10 @@ package internal
 
 import (
 	"net"
+	"os"
 	"path"
 
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -60,4 +62,19 @@ func HostSystemManagementIPs(config []types.VirtualNicManagerNetConfig) []net.IP
 	}
 
 	return ips
+}
+
+// UsingEnvoySidecar determines if the given *vim25.Client is using vCenter's
+// local Envoy sidecar (as opposed to using the HTTPS port.)
+// Returns a boolean indicating whether to use the sidecar or not.
+func UsingEnvoySidecar(c *vim25.Client) bool {
+	envoySidecarPort := os.Getenv("GOVMOMI_ENVOY_SIDECAR_PORT")
+	if envoySidecarPort == "" {
+		envoySidecarPort = "1080"
+	}
+	envoySidecarHost := os.Getenv("GOVMOMI_ENVOY_SIDECAR_HOST")
+	if envoySidecarHost == "" {
+		envoySidecarHost = "localhost"
+	}
+	return c.URL().Hostname() == envoySidecarHost && c.URL().Scheme == "http" && c.URL().Port() == envoySidecarPort
 }
