@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Copyright (c) 2014-2022 VMware, Inc. All Rights Reserved.
+# Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,6 +15,14 @@
 # limitations under the License.
 
 set -e
+
+ensure_rb_vmodl() {
+  mkdir -p ./rbvmomi
+  [ -f ./rbvmomi/vmodl.db ] || \
+    curl -sSLo \
+      ./rbvmomi/vmodl.db \
+      https://github.com/vmware-archive/rbvmomi/raw/master/vmodl.db
+}
 
 generate() {
   dst="$1"
@@ -46,6 +54,28 @@ generate() {
     popd >/dev/null
   done
 }
+
+update_vim_version() {
+  sed -i'.bak' -e 's~^[[:blank:]]\{1,\}Version[[:blank:]]\{1,\}=.\{1,\}$~Version = '"\"${1}\""'~g' ../vim25/client.go
+  rm -f ../vim25/client.go.bak
+  go fmt ../vim25/client.go
+}
+
+#
+# Make sure the vmodl.db file exists.
+#
+ensure_rb_vmodl
+
+#
+# The VIM API version used by the vim25 client.
+#
+VIM_VERSION="${VIM_VERSION:-8.0.0.1}"
+
+#
+# Update the vim25 client's VIM version.
+#
+update_vim_version "${VIM_VERSION}"
+
 
 #
 # All types derive from vSphere 8.0 GA, vcenter-all build 20519528.
