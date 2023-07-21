@@ -80,7 +80,7 @@ brews:
   - name: govc
     ids:
       - govcbuild
-    tap:
+    repository:
       owner: govmomi
       name: homebrew-tap
       # TODO: create token in specified tap repo, add as secret to govmomi repo and reference in release workflow
@@ -100,7 +100,7 @@ brews:
   - name: vcsim
     ids:
       - vcsimbuild
-    tap:
+    repository:
       owner: govmomi
       name: homebrew-tap
       # TODO: create token in specified tap repo, add as secret to govmomi repo and reference in release workflow
