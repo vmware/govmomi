@@ -83,7 +83,7 @@ jobs:
         with:
           version: latest
           # snapshot will disable push/release
-          args: release --rm-dist --snapshot --release-notes RELEASE_CHANGELOG.md
+          args: release --clean --snapshot --release-notes RELEASE_CHANGELOG.md
 
       - name: Verify git clean
         shell: bash
