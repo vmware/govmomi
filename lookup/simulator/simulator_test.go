@@ -70,7 +70,7 @@ func TestClient(t *testing.T) {
 
 	// test filters that should return 1 service
 	filters := []*types.LookupServiceRegistrationFilter{
-		&types.LookupServiceRegistrationFilter{
+		{
 			ServiceType: &types.LookupServiceRegistrationServiceType{
 				Product: "com.vmware.cis",
 				Type:    "vcenterserver",
@@ -80,15 +80,19 @@ func TestClient(t *testing.T) {
 				Type:     "com.vmware.vim",
 			},
 		},
-		&types.LookupServiceRegistrationFilter{
+		{
 			ServiceType: &types.LookupServiceRegistrationServiceType{
 				Type: "cs.identity",
 			},
+			EndpointType: &types.LookupServiceRegistrationEndpointType{
+				Protocol: "wsTrust",
+			},
 		},
-		&types.LookupServiceRegistrationFilter{
+		{
 			ServiceType: &types.LookupServiceRegistrationServiceType{},
 			EndpointType: &types.LookupServiceRegistrationEndpointType{
 				Protocol: "vmomi",
+				Type:     "com.vmware.vim",
 			},
 		},
 	}
@@ -117,15 +121,15 @@ func TestClient(t *testing.T) {
 
 	// "empty" filters should return all services
 	filters = []*types.LookupServiceRegistrationFilter{
-		&types.LookupServiceRegistrationFilter{},
-		&types.LookupServiceRegistrationFilter{
+		{},
+		{
 			ServiceType:  new(types.LookupServiceRegistrationServiceType),
 			EndpointType: new(types.LookupServiceRegistrationEndpointType),
 		},
-		&types.LookupServiceRegistrationFilter{
+		{
 			EndpointType: new(types.LookupServiceRegistrationEndpointType),
 		},
-		&types.LookupServiceRegistrationFilter{
+		{
 			ServiceType: new(types.LookupServiceRegistrationServiceType),
 		},
 	}
@@ -136,7 +140,7 @@ func TestClient(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if len(info) != 3 {
+		if len(info) != 4 {
 			t.Errorf("len=%d", len(info))
 		}
 	}

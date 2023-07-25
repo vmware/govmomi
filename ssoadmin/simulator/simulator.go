@@ -140,6 +140,15 @@ func New(vc *simulator.Registry, u *url.URL) *simulator.Registry {
 	r.Namespace = ssoadmin.Namespace
 	r.Path = ssoadmin.Path
 
+	settings := vc.OptionManager().Setting
+	for i := range settings {
+		setting := settings[i].GetOptionValue()
+		if setting.Key == "config.vpxd.sso.admin.uri" {
+			endpoint, _ := url.Parse(setting.Value.(string))
+			r.Path = endpoint.Path
+		}
+	}
+
 	r.Put(&ServiceInstance{
 		ManagedObjectReference: ssoadmin.ServiceInstance,
 	})
