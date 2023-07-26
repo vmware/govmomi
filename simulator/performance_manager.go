@@ -44,25 +44,28 @@ var historicProviderSummary = types.PerfProviderSummary{
 
 type PerformanceManager struct {
 	mo.PerformanceManager
-	vmMetrics         []types.PerfMetricId
-	hostMetrics       []types.PerfMetricId
-	rpMetrics         []types.PerfMetricId
-	clusterMetrics    []types.PerfMetricId
-	datastoreMetrics  []types.PerfMetricId
-	datacenterMetrics []types.PerfMetricId
-	perfCounterIndex  map[int32]types.PerfCounterInfo
-	metricData        map[string]map[int32][]int64
+	historicalInterval []types.PerfInterval
+	vmMetrics          []types.PerfMetricId
+	hostMetrics        []types.PerfMetricId
+	rpMetrics          []types.PerfMetricId
+	clusterMetrics     []types.PerfMetricId
+	datastoreMetrics   []types.PerfMetricId
+	datacenterMetrics  []types.PerfMetricId
+	perfCounterIndex   map[int32]types.PerfCounterInfo
+	metricData         map[string]map[int32][]int64
 }
 
 func (m *PerformanceManager) init(r *Registry) {
 	if r.IsESX() {
 		m.PerfCounter = esx.PerfCounter
+		m.historicalInterval = esx.HistoricalInterval
 		m.hostMetrics = esx.HostMetrics
 		m.vmMetrics = esx.VmMetrics
 		m.rpMetrics = esx.ResourcePoolMetrics
 		m.metricData = esx.MetricData
 	} else {
 		m.PerfCounter = vpx.PerfCounter
+		m.historicalInterval = vpx.HistoricalInterval
 		m.hostMetrics = vpx.HostMetrics
 		m.vmMetrics = vpx.VmMetrics
 		m.rpMetrics = vpx.ResourcePoolMetrics
