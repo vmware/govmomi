@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,6 +65,30 @@ func registrationInfo() []types.LookupServiceRegistrationInfo {
 							EndpointType: types.LookupServiceRegistrationEndpointType{
 								Protocol: "wsTrust",
 								Type:     "com.vmware.cis.cs.identity.sso",
+							},
+							SslTrust: trust,
+						},
+					},
+				},
+				OwnerId: admin,
+				ServiceType: types.LookupServiceRegistrationServiceType{
+					Product: "com.vmware.cis",
+					Type:    "cs.identity",
+				},
+			},
+			ServiceId: siteID + ":" + uuid.New().String(),
+			SiteId:    siteID,
+		},
+		{
+			LookupServiceRegistrationCommonServiceInfo: types.LookupServiceRegistrationCommonServiceInfo{
+				LookupServiceRegistrationMutableServiceInfo: types.LookupServiceRegistrationMutableServiceInfo{
+					ServiceVersion: lookup.Version,
+					ServiceEndpoints: []types.LookupServiceRegistrationEndpoint{
+						{
+							Url: opts["config.vpxd.sso.admin.uri"],
+							EndpointType: types.LookupServiceRegistrationEndpointType{
+								Protocol: "vmomi",
+								Type:     "com.vmware.cis.cs.identity.admin",
 							},
 							SslTrust: trust,
 						},

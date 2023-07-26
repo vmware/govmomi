@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -14,40 +14,101 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package lookup
+package lookup_test
+
+// lookup/simulator/simulator_test.go has more tests
 
 import (
 	"context"
 	"net/http"
+	"net/url"
 	"strings"
 	"testing"
 
-	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/simulator"
-	"github.com/vmware/govmomi/simulator/vpx"
+	"github.com/vmware/govmomi/ssoadmin"
+	"github.com/vmware/govmomi/sts"
+	"github.com/vmware/govmomi/vim25"
+
+	_ "github.com/vmware/govmomi/lookup/simulator"
+	_ "github.com/vmware/govmomi/ssoadmin/simulator"
+	_ "github.com/vmware/govmomi/sts/simulator"
 )
 
-func TestClient(t *testing.T) {
-	// lookup/simulator/simulator_test.go has the functional test..
-	// in this test we just verify requests to /lookup/sdk return 404
-	s := simulator.New(simulator.NewServiceInstance(simulator.SpoofContext(), vpx.ServiceContent, vpx.RootFolder))
+// make the path of all lookup service urls invalid
+func breakLookupServiceURLs() {
+	setting := simulator.Map.OptionManager().Setting
 
-	ts := s.NewServer()
-	defer ts.Close()
-
-	ctx := context.Background()
-
-	vc, err := govmomi.NewClient(ctx, ts.URL, true)
-	if err != nil {
-		t.Fatal(err)
+	for _, s := range setting {
+		o := s.GetOptionValue()
+		if strings.HasSuffix(o.Key, ".uri") {
+			val := o.Value.(string)
+			u, _ := url.Parse(val)
+			u.Path = "/enoent" + u.Path
+			o.Value = u.String()
+		}
 	}
+}
 
-	_, err = NewClient(ctx, vc.Client)
-	if err == nil {
-		t.Fatal("expected error")
-	}
+// test lookup.EndpointURL usage by the ssoadmin and sts clients
+func TestEndpointURL(t *testing.T) {
+	// these client calls should fail since we'll break the URL paths
+	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
+		breakLookupServiceURLs()
 
-	if !strings.Contains(err.Error(), http.StatusText(404)) {
-		t.Errorf("err=%s", err)
-	}
+		{
+			_, err := ssoadmin.NewClient(ctx, vc)
+			if err == nil {
+				t.Error("expected error")
+			}
+			if !strings.Contains(err.Error(), http.StatusText(404)) {
+				t.Error(err)
+			}
+		}
+
+		{
+			c, err := sts.NewClient(ctx, vc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req := sts.TokenRequest{
+				Userinfo: url.UserPassword("Administrator@VSPHERE.LOCAL", "password"),
+			}
+			_, err = c.Issue(ctx, req)
+			if err == nil {
+				t.Error("expected error")
+			}
+			if !strings.Contains(err.Error(), http.StatusText(404)) {
+				t.Error(err)
+			}
+		}
+	})
+
+	// these client calls should not fail
+	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
+		{
+			// NewClient calls ServiceInstance methods
+			_, err := ssoadmin.NewClient(ctx, vc)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		{
+			c, err := sts.NewClient(ctx, vc)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			req := sts.TokenRequest{
+				Userinfo: url.UserPassword("Administrator@VSPHERE.LOCAL", "password"),
+			}
+
+			_, err = c.Issue(ctx, req)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+	})
 }

@@ -24,7 +24,7 @@ load test_helper
 
   [ -z "$(govc sso.service.ls -t enoent)" ]
 
-  run govc sso.service.ls -t cs.identity -U
+  run govc sso.service.ls -t cs.identity -P wsTrust -U
   assert_success "$sts"
 
   run govc sso.service.ls -t sso:sts -U
