@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"strings"
+	"sync"
 
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
@@ -30,6 +31,7 @@ import (
 
 type OptionManager struct {
 	mo.OptionManager
+	lock sync.Mutex
 }
 
 func NewOptionManager(ref *types.ManagedObjectReference, setting []types.BaseOptionValue) object.Reference {
@@ -42,6 +44,9 @@ func NewOptionManager(ref *types.ManagedObjectReference, setting []types.BaseOpt
 }
 
 func (m *OptionManager) init(r *Registry) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
 	if len(m.Setting) == 0 {
 		if r.IsVPX() {
 			m.Setting = vpx.Setting
@@ -54,6 +59,9 @@ func (m *OptionManager) init(r *Registry) {
 func (m *OptionManager) QueryOptions(req *types.QueryOptions) soap.HasFault {
 	body := &methods.QueryOptionsBody{}
 	res := &types.QueryOptionsResponse{}
+
+	m.lock.Lock()
+	defer m.lock.Unlock()
 
 	for _, opt := range m.Setting {
 		if strings.HasPrefix(opt.GetOptionValue().Key, req.Name) {
@@ -70,6 +78,7 @@ func (m *OptionManager) QueryOptions(req *types.QueryOptions) soap.HasFault {
 	return body
 }
 
+// find requires holding the lock.
 func (m *OptionManager) find(key string) *types.OptionValue {
 	for _, opt := range m.Setting {
 		setting := opt.GetOptionValue()
@@ -82,6 +91,9 @@ func (m *OptionManager) find(key string) *types.OptionValue {
 
 func (m *OptionManager) UpdateOptions(req *types.UpdateOptions) soap.HasFault {
 	body := new(methods.UpdateOptionsBody)
+
+	m.lock.Lock()
+	defer m.lock.Unlock()
 
 	for _, change := range req.ChangedValue {
 		setting := change.GetOptionValue()
