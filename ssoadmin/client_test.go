@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,47 +14,57 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package ssoadmin
+package ssoadmin_test
 
 import (
 	"context"
-	"log"
 	"os"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
+	lsim "github.com/vmware/govmomi/lookup/simulator"
+	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/ssoadmin"
+	_ "github.com/vmware/govmomi/ssoadmin/simulator"
+	"github.com/vmware/govmomi/ssoadmin/types"
+	_ "github.com/vmware/govmomi/sts/simulator"
 	"github.com/vmware/govmomi/vim25"
-	"github.com/vmware/govmomi/vim25/soap"
 )
 
 func TestClient(t *testing.T) {
-	ctx := context.Background()
-	url := os.Getenv("GOVC_TEST_URL")
-	if url == "" {
-		t.SkipNow()
-	}
+	t.Run("Happy path using lookup service", func(t *testing.T) {
+		simulator.Test(func(ctx context.Context, client *vim25.Client) {
+			c, err := ssoadmin.NewClient(ctx, client)
+			require.NoError(t, err)
 
-	u, err := soap.ParseURL(url)
-	if err != nil {
-		t.Fatal(err)
-	}
+			verifyClient(t, ctx, c)
+		})
+	})
+	t.Run("With Envoy sidecar and a malfunctioning lookup service, ssoadmin client creation should still succeed", func(t *testing.T) {
+		model := simulator.VPX()
+		model.Create()
+		simulator.Test(func(ctx context.Context, client *vim25.Client) {
+			// Map Envoy sidecar on the same port as the vcsim client.
+			os.Setenv("GOVMOMI_ENVOY_SIDECAR_PORT", client.Client.URL().Port())
+			os.Setenv("GOVMOMI_ENVOY_SIDECAR_HOST", client.Client.URL().Hostname())
 
-	c, err := vim25.NewClient(ctx, soap.NewClient(u, true))
-	if err != nil {
-		log.Fatal(err)
-	}
+			lsim.BreakLookupServiceURLs()
 
-	if !c.IsVC() {
-		t.SkipNow()
-	}
+			c, err := ssoadmin.NewClient(ctx, client)
+			require.NoError(t, err)
 
-	admin, err := NewClient(ctx, c)
-	if err != nil {
-		t.Fatal(err)
-	}
+			verifyClient(t, ctx, c)
+		}, model)
+	})
+}
 
-	if err = admin.Login(ctx); err == nil {
-		t.Error("expected error") // soap.Header.Security not set
-	}
+func verifyClient(t *testing.T, ctx context.Context, c *ssoadmin.Client) {
+	err := c.CreatePersonUser(ctx, "testuser", types.AdminPersonDetails{FirstName: "test", LastName: "user"}, "password")
+	require.NoError(t, err)
 
-	// sts/client_test.go tests the success paths
+	user, err := c.FindUser(ctx, "testuser")
+	require.NoError(t, err)
+	require.Equal(t, &types.AdminUser{Id: types.PrincipalId{Name: "testuser", Domain: "vsphere.local"}, Kind: "person"}, user)
+
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018-2022 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -18,11 +18,13 @@ package ssoadmin
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"path"
 	"reflect"
 	"strings"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/lookup"
 	ltypes "github.com/vmware/govmomi/lookup/types"
 	"github.com/vmware/govmomi/ssoadmin/methods"
@@ -33,9 +35,11 @@ import (
 )
 
 const (
-	Namespace = "sso"
-	Version   = "version2"
-	Path      = "/sso-adminserver" + vim25.Path
+	Namespace  = "sso"
+	Version    = "version2"
+	basePath   = "/sso-adminserver"
+	Path       = basePath + vim25.Path
+	SystemPath = basePath + "/system-sdk"
 )
 
 var (
@@ -63,7 +67,16 @@ func init() {
 	vim.Add("SsoAdminFaultDuplicateSolutionCertificateFaultFault", reflect.TypeOf((*vim.InvalidArgument)(nil)).Elem())
 }
 
-func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
+func getEndpointURL(ctx context.Context, c *vim25.Client) string {
+	// Services running on vCenter can bypass lookup service using the
+	// system-sdk path. This avoids the need to lookup the system domain.
+	if useSidecar := internal.UsingEnvoySidecar(c); useSidecar {
+		return fmt.Sprintf("http://%s%s", c.URL().Host, SystemPath)
+	}
+	return getEndpointURLFromLookupService(ctx, c)
+}
+
+func getEndpointURLFromLookupService(ctx context.Context, c *vim25.Client) string {
 	filter := &ltypes.LookupServiceRegistrationFilter{
 		ServiceType: &ltypes.LookupServiceRegistrationServiceType{
 			Product: "com.vmware.cis",
@@ -75,8 +88,12 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 		},
 	}
 
-	url := lookup.EndpointURL(ctx, c, Path, filter)
-	sc := c.Client.NewServiceClient(url, Namespace)
+	return lookup.EndpointURL(ctx, c, Path, filter)
+}
+
+func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
+	url := getEndpointURL(ctx, c)
+	sc := c.NewServiceClient(url, Namespace)
 	sc.Version = Version
 
 	admin := &Client{
@@ -85,7 +102,7 @@ func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 		Domain:       "vsphere.local", // Default
 		Limit:        math.MaxInt32,
 	}
-	if url != Path {
+	if url != Path && !internal.UsingEnvoySidecar(c) {
 		admin.Domain = path.Base(url)
 	}
 
