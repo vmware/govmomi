@@ -28,11 +28,11 @@ details for your test configuration.
 
 ## Checklist:
 
-- [ ] My code follows the `CONTRIBUTION`
-  [guidelines](https://github.com/vmware/govmomi/blob/main/CONTRIBUTING.md) of
-  this project
+- [ ] My code follows the `CONTRIBUTION` [guidelines] of this project
 - [ ] I have commented my code, particularly in hard-to-understand areas
 - [ ] I have made corresponding changes to the documentation
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
 - [ ] Any dependent changes have been merged
+
+[guidelines]: https://github.com/vmware/govmomi/blob/main/CONTRIBUTING.md
