@@ -87,6 +87,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 	// add a supported option to the AdvancedOption manager
 	simOption := types.OptionDef{ElementDescription: types.ElementDescription{Key: advOptContainerBackingImage}}
 	// TODO: how do we enter patterns here? Or should we stick to a list in the value?
+	// patterns become necessary if we want to enforce correctness on options for RUN.underlay.<pnic> or allow RUN.port.xxx
 	hs.Config.OptionDef = append(hs.Config.OptionDef, simOption)
 
 	config := []struct {
@@ -156,8 +157,6 @@ func (h *HostSystem) configure(ctx *Context, spec types.HostConnectSpec, connect
 //
 // The pnics will be named using standard pattern, ie. vmnic0, vmnic1, ...
 // This will sanity check the NetConfig for "management" nicType to ensure that it maps through PortGroup->vSwitch->pNIC to vmnic0.
-//
-// TODO: figure out which other HostVirtualNicSpec's need to be updated with IP, eg. Config.vMotion, Config.Network.vNIC
 func (h *HostSystem) configureContainerBacking(ctx *Context, image string, mounts []types.HostFileSystemMountInfo, networks ...string) error {
 	option := &types.OptionValue{
 		Key:   advOptContainerBackingImage,

@@ -39,6 +39,7 @@ const PB = 1000 * TB
 const (
 	advOptPrefixPnicToUnderlayPrefix = "RUN.underlay."
 	advOptContainerBackingImage      = "RUN.container"
+	defaultUnderlayBridgeName        = "vcsim-underlay"
 )
 
 type simHost struct {
@@ -133,6 +134,8 @@ func createSimHostMounts(ctx *Context, containerName string, mounts []types.Host
 // * array of networks to attach to
 // * array of commands to run
 // * error
+//
+// TODO: implement bridge network per DVS - not needed until container backed VMs are "created" on container backed "hosts"
 func createSimHostNetworks(ctx *Context, containerName string, networkInfo *types.HostNetworkInfo, advOpts *OptionManager) ([]string, [][]string, error) {
 	var dockerNet []string
 	var cmds [][]string
@@ -140,8 +143,8 @@ func createSimHostNetworks(ctx *Context, containerName string, networkInfo *type
 	existingNets := make(map[string]string)
 
 	// a pnic does not have an IP so this is purely a connectivity statement, not a network identity, however this is not how docker works
-	// so we're going to end up with a veth (our pnic) that does have an IP assigned.
-	// For now we're going to simply ignore that IP. //TODO: figure out whether we _need_ to do something with it at this point
+	// so we're going to end up with a veth (our pnic) that does have an IP assigned. That IP will end up being used in a NetConfig structure associated
+	// with the pNIC. See HostSystem.getNetConfigInterface.
 	for i := range networkInfo.Pnic {
 		pnicName := networkInfo.Pnic[i].Device
 
@@ -357,5 +360,3 @@ var defaultSimVolumes = []types.HostFileSystemMountInfo{
 		},
 	},
 }
-
-const defaultUnderlayBridgeName = "vcsim-underlay"

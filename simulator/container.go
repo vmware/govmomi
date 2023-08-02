@@ -18,7 +18,9 @@ package simulator
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -30,11 +32,13 @@ import (
 	"path"
 	"regexp"
 	"strings"
+	"sync"
 	"time"
 )
 
 var (
-	shell = "/bin/sh"
+	shell      = "/bin/sh"
+	eventWatch eventWatcher
 )
 
 const (
@@ -48,10 +52,26 @@ func init() {
 	}
 }
 
+type eventWatcher struct {
+	sync.Mutex
+
+	stdin   io.WriteCloser
+	stdout  io.ReadCloser
+	process *os.Process
+
+	// watches is a map of container IDs to container objects
+	watches map[string]*container
+}
+
 // container provides methods to manage a container within a simulator VM lifecycle.
 type container struct {
+	sync.Mutex
+
 	id   string
 	name string
+
+	cancelWatch context.CancelFunc
+	changes     chan struct{}
 }
 
 type networkSettings struct {
@@ -112,7 +132,6 @@ type tarEntry struct {
 // From https://docs.docker.com/engine/reference/commandline/cp/ :
 // > It is not possible to copy certain system files such as resources under /proc, /sys, /dev, tmpfs, and mounts created by the user in the container.
 // > However, you can still copy such files by manually running tar in docker exec.
-// TODO: look at whether this can useful combine with populateVolume for the tar portion or whether the duplication is low enough to make sense
 func copyToGuest(id string, dest string, length int64, reader io.Reader) error {
 	cmd := exec.Command("docker", "exec", "-i", id, "tar", "Cxf", path.Dir(dest), "-")
 	cmd.Stderr = os.Stderr
@@ -190,7 +209,6 @@ func createVolume(volumeName string, labels []string, files []tarEntry) (string,
 		image = "busybox"
 	}
 
-	// TODO: do we need to cap name lengths so as not to overflow?
 	name := sanitizeName(volumeName)
 	uid := ""
 
@@ -367,6 +385,7 @@ func create(ctx *Context, name string, id string, networks []string, volumes []s
 
 	var c container
 	c.name = constructContainerName(name, id)
+	c.changes = make(chan struct{})
 
 	for i := range volumes {
 		// we'll pre-create anonymous volumes, simply for labelling consistency
@@ -437,7 +456,11 @@ func (c *container) createVolume(name string, labels []string, files []tarEntry)
 //		* if c.id is empty, or docker returns "No such object", will return an uninitializedContainer error
 //		* err from either execution or parsing of json output
 func (c *container) inspect() (out []byte, detail containerDetails, err error) {
-	if c.id == "" {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
 		err = uninitializedContainer(errors.New("inspect of uninitialized container"))
 		return
 	}
@@ -472,7 +495,11 @@ func (c *container) inspect() (out []byte, detail containerDetails, err error) {
 // start
 //   - if the container already exists, start it or unpause it.
 func (c *container) start(ctx *Context) error {
-	if c.id == "" {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
 		return uninitializedContainer(errors.New("start of uninitialized container"))
 	}
 
@@ -497,7 +524,11 @@ func (c *container) start(ctx *Context) error {
 
 // pause the container (if any) for the given vm.
 func (c *container) pause(ctx *Context) error {
-	if c.id == "" {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
 		return uninitializedContainer(errors.New("pause of uninitialized container"))
 	}
 
@@ -512,7 +543,11 @@ func (c *container) pause(ctx *Context) error {
 
 // restart the container (if any) for the given vm.
 func (c *container) restart(ctx *Context) error {
-	if c.id == "" {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
 		return uninitializedContainer(errors.New("restart of uninitialized container"))
 	}
 
@@ -527,7 +562,11 @@ func (c *container) restart(ctx *Context) error {
 
 // stop the container (if any) for the given vm.
 func (c *container) stop(ctx *Context) error {
-	if c.id == "" {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
 		return uninitializedContainer(errors.New("stop of uninitialized container"))
 	}
 
@@ -548,7 +587,11 @@ func (c *container) stop(ctx *Context) error {
 //			* uninitializedContainer error - if c.id is empty
 //		   	* err from cmd execution
 func (c *container) exec(ctx *Context, args []string) (string, error) {
-	if c.id == "" {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
 		return "", uninitializedContainer(errors.New("exec into uninitialized container"))
 	}
 
@@ -569,6 +612,9 @@ func (c *container) exec(ctx *Context, args []string) (string, error) {
 //
 //	err - joined err from deletion of container and any volumes or networks that have coupled lifecycle
 func (c *container) remove(ctx *Context) error {
+	c.Lock()
+	defer c.Unlock()
+
 	if c.id == "" {
 		// consider absence success
 		return nil
@@ -620,8 +666,29 @@ func (c *container) remove(ctx *Context) error {
 		return fmt.Errorf("err: {%s}, lsverr: {%s}, rmverr: {%s}, lsnerr:{%s}, rmerr: {%s}", err, lsverr, rmverr, lsnerr, rmnerr)
 	}
 
+	if c.cancelWatch != nil {
+		c.cancelWatch()
+		eventWatch.ignore(c)
+	}
 	c.id = ""
 	return nil
+}
+
+// updated is a simple trigger allowing a caller to indicate that something has likely changed about the container
+// and interested parties should re-inspect as needed.
+func (c *container) updated() {
+	consolidationWindow := 250 * time.Millisecond
+	if d, err := time.ParseDuration(os.Getenv("VCSIM_EVENT_CONSOLIDATION_WINDOW")); err == nil {
+		consolidationWindow = d
+	}
+
+	select {
+	case c.changes <- struct{}{}:
+		time.Sleep(consolidationWindow)
+		// as this is only a hint to avoid waiting for the full inspect interval, we don't care about accumulating
+		// multiple triggers. We do pause to allow large numbers of sequential updates to consolidate
+	default:
+	}
 }
 
 // watchContainer monitors the underlying container and updates
@@ -630,43 +697,137 @@ func (c *container) remove(ctx *Context) error {
 // returns:
 //
 //	err - uninitializedContainer error - if c.id is empty
-func (c *container) watchContainer(ctx *Context, updateFn func(*Context, *containerDetails, *container) error) error {
+func (c *container) watchContainer(ctx context.Context, updateFn func(*containerDetails, *container) error) error {
+	c.Lock()
+	defer c.Unlock()
+
 	if c.id == "" {
 		return uninitializedContainer(errors.New("Attempt to watch uninitialized container"))
 	}
 
+	eventWatch.watch(c)
+
+	cancelCtx, cancelFunc := context.WithCancel(ctx)
+	c.cancelWatch = cancelFunc
+
 	// Update the VM from the container at regular intervals until the done
 	// channel is closed.
 	go func() {
-		inspectInterval := time.Duration(5 * time.Second)
+		inspectInterval := 10 * time.Second
 		if d, err := time.ParseDuration(os.Getenv("VCSIM_INSPECT_INTERVAL")); err == nil {
 			inspectInterval = d
 		}
 		ticker := time.NewTicker(inspectInterval)
 
+		update := func() {
+			_, details, err := c.inspect()
+			var rmErr error
+			var removing bool
+			if _, ok := err.(uninitializedContainer); ok {
+				removing = true
+				rmErr = c.remove(SpoofContext())
+			}
+
+			updateErr := updateFn(&details, c)
+			// if we don't succeed we want to re-try
+			if removing && rmErr == nil && updateErr == nil {
+				ticker.Stop()
+				return
+			}
+			if updateErr != nil {
+				log.Printf("vcsim container watch: %s %s", c.id, updateErr)
+			}
+		}
+
 		for {
 			select {
+			case <-c.changes:
+				update()
 			case <-ticker.C:
-				_, details, err := c.inspect()
-				var rmErr error
-				var removing bool
-				if _, ok := err.(uninitializedContainer); ok {
-					removing = true
-					rmErr = c.remove(ctx)
-				}
-
-				updateErr := updateFn(ctx, &details, c)
-				// if we don't succeed we want to re-try
-				if removing && rmErr == nil && updateErr == nil {
-					ticker.Stop()
-					return
-				}
-				// TODO: log err?
-			case <-ctx.Done():
+				update()
+			case <-cancelCtx.Done():
 				return
 			}
 		}
 	}()
 
 	return nil
+}
+
+func (w *eventWatcher) watch(c *container) {
+	w.Lock()
+	defer w.Unlock()
+
+	if w.watches == nil {
+		w.watches = make(map[string]*container)
+	}
+
+	w.watches[c.id] = c
+
+	if w.stdin == nil {
+		cmd := exec.Command("docker", "events", "--format", "'{{.ID}}'", "--filter", "Type=container")
+		w.stdout, _ = cmd.StdoutPipe()
+		w.stdin, _ = cmd.StdinPipe()
+		err := cmd.Start()
+		if err != nil {
+			log.Printf("docker event watcher: %s %s", cmd.Args, err)
+			w.stdin = nil
+			w.stdout = nil
+			w.process = nil
+
+			return
+		}
+
+		w.process = cmd.Process
+
+		go w.monitor()
+	}
+}
+
+func (w *eventWatcher) ignore(c *container) {
+	w.Lock()
+
+	delete(w.watches, c.id)
+
+	if len(w.watches) == 0 && w.stdin != nil {
+		w.stop()
+	}
+
+	w.Unlock()
+}
+
+func (w *eventWatcher) monitor() {
+	w.Lock()
+	watches := len(w.watches)
+	w.Unlock()
+
+	if watches == 0 {
+		return
+	}
+
+	scanner := bufio.NewScanner(w.stdout)
+	for scanner.Scan() {
+		id := strings.TrimSpace(scanner.Text())
+
+		w.Lock()
+		container := w.watches[id]
+		w.Unlock()
+
+		if container != nil {
+			// this is called in a routine to allow an event consolidation window
+			go container.updated()
+		}
+	}
+}
+
+func (w *eventWatcher) stop() {
+	if w.stdin != nil {
+		w.stdin.Close()
+		w.stdin = nil
+	}
+	if w.stdout != nil {
+		w.stdout.Close()
+		w.stdout = nil
+	}
+	w.process.Kill()
 }

@@ -478,7 +478,11 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 	} else if removedContainerBacking {
 		err := vm.svm.remove(ctx)
 		if err == nil {
+			// remove link from container to VM so callbacks no longer reflect state
+			vm.svm.vm = nil
+			// nil container backing reference to return this to a pure in-mem simulated VM
 			vm.svm = nil
+
 		} else {
 			// don't attempt to undo the changes already made - just return an error
 			// we'll retry the svm.start operation on pause/restart calls
