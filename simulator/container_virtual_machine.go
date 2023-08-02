@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"archive/tar"
+	"context"
 	"encoding/hex"
 	"encoding/json"
 	"errors"
@@ -294,14 +295,16 @@ func (svm *simVM) start(ctx *Context) error {
 		log.Printf("%s inspect %s: %s", svm.vm.Name, svm.c.id, err)
 	}
 
-	callback := func(ctx *Context, details *containerDetails, c *container) error {
+	callback := func(details *containerDetails, c *container) error {
 		spoofctx := SpoofContext()
 
-		if c.id == "" {
-			// If the container cannot be found then destroy this VM.
-			// TODO: figure out if we should pass the vm/container via ctx or otherwise from the callback - this might cause locking issues.
+		if c.id == "" && svm.vm != nil {
+			// If the container cannot be found then destroy this VM unless the VM is no longer configured for container backing (svm.vm == nil)
 			taskRef := svm.vm.DestroyTask(spoofctx, &types.Destroy_Task{This: svm.vm.Self}).(*methods.Destroy_TaskBody).Res.Returnval
-			task := ctx.Map.Get(taskRef).(*Task)
+			task, ok := spoofctx.Map.Get(taskRef).(*Task)
+			if !ok {
+				panic(fmt.Sprintf("couldn't retrieve task for moref %+q while deleting VM %s", taskRef, svm.vm.Name))
+			}
 
 			// Wait for the task to complete and see if there is an error.
 			task.Wait()
@@ -317,10 +320,10 @@ func (svm *simVM) start(ctx *Context) error {
 	}
 
 	// Start watching the container resource.
-	err = svm.c.watchContainer(ctx, callback)
+	err = svm.c.watchContainer(context.Background(), callback)
 	if _, ok := err.(uninitializedContainer); ok {
 		// the container has been deleted before we could watch, despite successful launch so clean up.
-		callback(ctx, nil, svm.c)
+		callback(nil, svm.c)
 
 		// successful launch so nil the error
 		return nil

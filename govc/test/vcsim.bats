@@ -340,7 +340,7 @@ EOF
   run docker inspect -f '{{.State.Status}}' "$name"
   assert_success "running"
 
-  run docker volume inspect "$name"
+  run docker volume inspect "$name--dmi"
   assert_success
 
   run govc vm.destroy $vm
