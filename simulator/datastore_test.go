@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -27,6 +27,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -85,7 +86,12 @@ func TestRefreshDatastore(t *testing.T) {
 			},
 		}
 
-		res := ds.RefreshDatastore(nil)
+		r := ds.RefreshDatastore(nil)
+		res, ok := r.(*methods.RefreshDatastoreBody)
+		if !ok {
+			t.Fatalf("Unexpected response type: %T", r)
+		}
+
 		err := res.Fault()
 
 		if test.fail {
@@ -95,6 +101,9 @@ func TestRefreshDatastore(t *testing.T) {
 		} else {
 			if err != nil {
 				t.Error(err)
+			}
+			if res.Res == nil {
+				t.Errorf("Invalid response: %v", res)
 			}
 		}
 	}
