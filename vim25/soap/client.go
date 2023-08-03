@@ -114,6 +114,7 @@ func ParseURL(s string) (*url.URL, error) {
 			s = "https://" + s
 		}
 
+		s := strings.TrimSuffix(s, "/")
 		u, err = url.Parse(s)
 		if err != nil {
 			return nil, err

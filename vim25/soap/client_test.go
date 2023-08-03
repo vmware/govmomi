@@ -22,6 +22,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"reflect"
 	"testing"
 )
 
@@ -155,4 +156,76 @@ func setCAsOnClient(cas string) error {
 	client := NewClient(url, insecure)
 
 	return client.SetRootCAs(cas)
+}
+
+func TestParseURL(t *testing.T) {
+	tests := []struct {
+		name    string
+		s       string
+		want    *url.URL
+		wantErr bool
+	}{
+		{
+			name: "empty URL should return null",
+			want: nil,
+		},
+		{
+			name: "just endpoint should return full URL",
+			s:    "some.vcenter.tld",
+			want: &url.URL{
+				Scheme: "https",
+				Path:   "/sdk",
+				Host:   "some.vcenter.tld",
+				User:   url.UserPassword("", ""),
+			},
+		},
+		{
+			name: "URL with / on suffix should be trimmed",
+			s:    "https://some.vcenter.tld/",
+			want: &url.URL{
+				Scheme: "https",
+				Path:   "/sdk",
+				Host:   "some.vcenter.tld",
+				User:   url.UserPassword("", ""),
+			},
+		},
+		{
+			name: "URL with user and password should be used",
+			s:    "https://user:password@some.vcenter.tld",
+			want: &url.URL{
+				Scheme: "https",
+				Path:   "/sdk",
+				Host:   "some.vcenter.tld",
+				User:   url.UserPassword("user", "password"),
+			},
+		},
+		{
+			name: "existing path should be used",
+			s:    "https://some.vcenter.tld/othersdk",
+			want: &url.URL{
+				Scheme: "https",
+				Path:   "/othersdk",
+				Host:   "some.vcenter.tld",
+				User:   url.UserPassword("", ""),
+			},
+		},
+		{
+			name:    "Invalid URL should be rejected",
+			s:       "https://user:password@some.vcenter.tld:xpto1234",
+			want:    nil,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := ParseURL(tt.s)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("ParseURL() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("ParseURL() = %v, want %v", got, tt.want)
+			}
+		})
+	}
 }
