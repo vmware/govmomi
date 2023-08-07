@@ -20,21 +20,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/types"
 )
-
-const KiB = 1024
-const MiB = 1024 * KiB
-const GiB = 1024 * MiB
-const TiB = 1024 * GiB
-const Pib = 1024 * TiB
-
-const KB = 1000
-const MB = 1000 * KB
-const GB = 1000 * MB
-const TB = 1000 * GB
-const PB = 1000 * TB
 
 const (
 	advOptPrefixPnicToUnderlayPrefix = "RUN.underlay."
@@ -74,8 +63,8 @@ func createSimHostMounts(ctx *Context, containerName string, mounts []types.Host
 		switch vol := info.Volume.(type) {
 		case *types.HostVmfsVolume:
 			vol.BlockSizeMb = 1
-			vol.BlockSize = KiB
-			vol.UnmapGranularity = KiB
+			vol.BlockSize = units.KB
+			vol.UnmapGranularity = units.KB
 			vol.UnmapPriority = "low"
 			vol.MajorVersion = 6
 			vol.Version = "6.82"
@@ -309,7 +298,7 @@ var defaultSimVolumes = []types.HostFileSystemMountInfo{
 			HostFileSystemVolume: types.HostFileSystemVolume{
 				Type:     "VMFS",
 				Name:     "datastore1",
-				Capacity: 1 * TiB,
+				Capacity: 1 * units.TB,
 			},
 			Extent: []types.HostScsiDiskPartition{
 				{
@@ -326,7 +315,7 @@ var defaultSimVolumes = []types.HostFileSystemMountInfo{
 			HostFileSystemVolume: types.HostFileSystemVolume{
 				Type:     "OTHER",
 				Name:     "OSDATA-%__UUID__%",
-				Capacity: 128 * GiB,
+				Capacity: 128 * units.GB,
 			},
 			Extent: []types.HostScsiDiskPartition{
 				{
@@ -343,7 +332,7 @@ var defaultSimVolumes = []types.HostFileSystemMountInfo{
 			HostFileSystemVolume: types.HostFileSystemVolume{
 				Type:     "OTHER",
 				Name:     "BOOTBANK1",
-				Capacity: 4 * GiB,
+				Capacity: 4 * units.GB,
 			},
 		},
 	},
@@ -355,7 +344,7 @@ var defaultSimVolumes = []types.HostFileSystemMountInfo{
 			HostFileSystemVolume: types.HostFileSystemVolume{
 				Type:     "OTHER",
 				Name:     "BOOTBANK2",
-				Capacity: 4 * GiB,
+				Capacity: 4 * units.GB,
 			},
 		},
 	},

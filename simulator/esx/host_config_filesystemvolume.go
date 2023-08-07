@@ -16,19 +16,10 @@ limitations under the License.
 
 package esx
 
-import "github.com/vmware/govmomi/vim25/types"
-
-const KiB = 1024
-const MiB = 1024 * KiB
-const GiB = 1024 * MiB
-const TiB = 1024 * GiB
-const Pib = 1024 * TiB
-
-const KB = 1000
-const MB = 1000 * KB
-const GB = 1000 * MB
-const TB = 1000 * GB
-const PB = 1000 * TB
+import (
+	"github.com/vmware/govmomi/units"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 // HostConfigInfo is the default template for the HostSystem config property.
 // Capture method:
@@ -50,14 +41,14 @@ var HostFileSystemVolumeInfo = types.HostFileSystemVolumeInfo{
 				HostFileSystemVolume: types.HostFileSystemVolume{
 					Type:     "VMFS",
 					Name:     "datastore1",
-					Capacity: 3.5 * TiB,
+					Capacity: 3.5 * units.TB,
 				},
 				BlockSizeMb:        1,
-				BlockSize:          KiB,
-				UnmapGranularity:   KiB,
+				BlockSize:          units.KB,
+				UnmapGranularity:   units.KB,
 				UnmapPriority:      "low",
 				UnmapBandwidthSpec: (*types.VmfsUnmapBandwidthSpec)(nil),
-				MaxBlocks:          61 * MiB,
+				MaxBlocks:          61 * units.MB,
 				MajorVersion:       6,
 				Version:            "6.82",
 				Uuid:               "deadbeef-01234567-89ab-cdef00000003",
@@ -88,14 +79,14 @@ var HostFileSystemVolumeInfo = types.HostFileSystemVolumeInfo{
 				HostFileSystemVolume: types.HostFileSystemVolume{
 					Type:     "OTHER",
 					Name:     "OSDATA-deadbeef-01234567-89ab-cdef00000002",
-					Capacity: 128 * GiB,
+					Capacity: 128 * units.GB,
 				},
 				BlockSizeMb:        1,
-				BlockSize:          KiB,
+				BlockSize:          units.KB,
 				UnmapGranularity:   0,
 				UnmapPriority:      "",
 				UnmapBandwidthSpec: (*types.VmfsUnmapBandwidthSpec)(nil),
-				MaxBlocks:          256 * KiB,
+				MaxBlocks:          256 * units.KB,
 				MajorVersion:       1,
 				Version:            "1.00",
 				Uuid:               "deadbeef-01234567-89ab-cdef00000002",
@@ -126,7 +117,7 @@ var HostFileSystemVolumeInfo = types.HostFileSystemVolumeInfo{
 				HostFileSystemVolume: types.HostFileSystemVolume{
 					Type:     "OTHER",
 					Name:     "BOOTBANK1",
-					Capacity: 4 * GiB,
+					Capacity: 4 * units.GB,
 				},
 			},
 			VStorageSupport: "",
@@ -144,7 +135,7 @@ var HostFileSystemVolumeInfo = types.HostFileSystemVolumeInfo{
 				HostFileSystemVolume: types.HostFileSystemVolume{
 					Type:     "OTHER",
 					Name:     "BOOTBANK2",
-					Capacity: 4 * GiB,
+					Capacity: 4 * units.GB,
 				},
 			},
 			VStorageSupport: "",

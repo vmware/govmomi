@@ -163,7 +163,7 @@ func (h *HostSystem) configureContainerBacking(ctx *Context, image string, mount
 		Value: image,
 	}
 
-	advOpts := Map.Get(h.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
+	advOpts := ctx.Map.Get(h.ConfigManager.AdvancedOption.Reference()).(*OptionManager)
 	fault := advOpts.UpdateOptions(&types.UpdateOptions{ChangedValue: []types.BaseOptionValue{option}}).Fault()
 	if fault != nil {
 		panic(fault)
