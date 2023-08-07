@@ -27,6 +27,8 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25"
@@ -39,14 +41,22 @@ import (
 // port - the port to forward to the container port 80
 func constructNginxBacking(t *testing.T, content string, port int) []types.BaseOptionValue {
 	dir := t.TempDir()
+	// experience shows that a parent directory created as part of the TempDir call may not have
+	// o+rx, preventing use within a container that doesn't have the same uid
 	for dirpart := dir; dirpart != "/"; dirpart = filepath.Dir(dirpart) {
 		os.Chmod(dirpart, 0755)
+		stat, err := os.Stat(dirpart)
+		require.Nil(t, err, "must be able to check file and directory permissions")
+		require.NotZero(t, stat.Mode()&0005, "does not have o+rx permissions", dirpart)
 	}
 
 	fpath := filepath.Join(dir, "index.html")
-	os.WriteFile(fpath, []byte(content), 0644)
+	err := os.WriteFile(fpath, []byte(content), 0644)
+	require.Nil(t, err, "Expected to cleanly write content to file: %s", err)
+
 	// just in case umask gets in the way
-	os.Chmod(fpath, 0644)
+	err = os.Chmod(fpath, 0644)
+	require.Nil(t, err, "Expected to cleanly set file permissions on content: %s", err)
 
 	args := fmt.Sprintf("-v '%s:/usr/share/nginx/html:ro' nginx", dir)
 
