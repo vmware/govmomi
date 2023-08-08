@@ -20,6 +20,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
@@ -127,9 +129,9 @@ func TestNewHostSystem(t *testing.T) {
 	}
 
 	hs := NewHostSystem(esx.HostSystem)
-	if hs.Summary.Runtime != &hs.Runtime {
-		t.Fatal("expected hs.Summary.Runtime == &hs.Runtime; got !=")
-	}
+
+	assert.Equal(t, &hs.Runtime, hs.Summary.Runtime, "expected pointer to runtime in summary")
+	assert.False(t, esx.AdvancedOptions[0] == hs.Config.Option[0], "expected each host to have it's own advanced options")
 }
 
 func TestDestroyHostSystem(t *testing.T) {

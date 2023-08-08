@@ -18,29 +18,32 @@ package simulator
 
 import (
 	"archive/tar"
+	"bufio"
 	"bytes"
-	"encoding/hex"
+	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"log"
-	"net/http"
+	"net"
 	"os"
 	"os/exec"
 	"path"
 	"regexp"
-	"strconv"
 	"strings"
+	"sync"
 	"time"
-
-	"github.com/google/uuid"
-
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 var (
-	shell = "/bin/sh"
+	shell      = "/bin/sh"
+	eventWatch eventWatcher
+)
+
+const (
+	deleteWithContainer = "lifecycle=container"
+	createdByVcsim      = "createdBy=vcsim"
 )
 
 func init() {
@@ -49,10 +52,26 @@ func init() {
 	}
 }
 
+type eventWatcher struct {
+	sync.Mutex
+
+	stdin   io.WriteCloser
+	stdout  io.ReadCloser
+	process *os.Process
+
+	// watches is a map of container IDs to container objects
+	watches map[string]*container
+}
+
 // container provides methods to manage a container within a simulator VM lifecycle.
 type container struct {
+	sync.Mutex
+
 	id   string
 	name string
+
+	cancelWatch context.CancelFunc
+	changes     chan struct{}
 }
 
 type networkSettings struct {
@@ -62,101 +81,19 @@ type networkSettings struct {
 	MacAddress  string
 }
 
-// inspect applies container network settings to vm.Guest properties.
-func (c *container) inspect(vm *VirtualMachine) error {
-	if c.id == "" {
-		return nil
+type containerDetails struct {
+	State struct {
+		Running bool
+		Paused  bool
 	}
-
-	var objects []struct {
-		State struct {
-			Running bool
-			Paused  bool
-		}
-		NetworkSettings struct {
-			networkSettings
-			Networks map[string]networkSettings
-		}
+	NetworkSettings struct {
+		networkSettings
+		Networks map[string]networkSettings
 	}
-
-	cmd := exec.Command("docker", "inspect", c.id)
-	out, err := cmd.Output()
-	if err != nil {
-		return err
-	}
-	if err = json.NewDecoder(bytes.NewReader(out)).Decode(&objects); err != nil {
-		return err
-	}
-
-	vm.Config.Annotation = strings.Join(cmd.Args, " ")
-	vm.logPrintf("%s: %s", vm.Config.Annotation, string(out))
-
-	for _, o := range objects {
-		s := o.NetworkSettings.networkSettings
-
-		for _, n := range o.NetworkSettings.Networks {
-			s = n
-			break
-		}
-
-		if o.State.Paused {
-			vm.Runtime.PowerState = types.VirtualMachinePowerStateSuspended
-		} else if o.State.Running {
-			vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOn
-		} else {
-			vm.Runtime.PowerState = types.VirtualMachinePowerStatePoweredOff
-		}
-
-		vm.Guest.IpAddress = s.IPAddress
-		vm.Summary.Guest.IpAddress = s.IPAddress
-
-		if len(vm.Guest.Net) != 0 {
-			net := &vm.Guest.Net[0]
-			net.IpAddress = []string{s.IPAddress}
-			net.MacAddress = s.MacAddress
-			net.IpConfig = &types.NetIpConfigInfo{
-				IpAddress: []types.NetIpConfigInfoIpAddress{{
-					IpAddress:    s.IPAddress,
-					PrefixLength: int32(s.IPPrefixLen),
-					State:        string(types.NetIpConfigInfoIpAddressStatusPreferred),
-				}},
-			}
-		}
-
-		for _, d := range vm.Config.Hardware.Device {
-			if eth, ok := d.(types.BaseVirtualEthernetCard); ok {
-				eth.GetVirtualEthernetCard().MacAddress = s.MacAddress
-				break
-			}
-		}
-	}
-
-	return nil
 }
 
-func (c *container) prepareGuestOperation(
-	vm *VirtualMachine,
-	auth types.BaseGuestAuthentication) types.BaseMethodFault {
-
-	if c.id == "" {
-		return new(types.GuestOperationsUnavailable)
-	}
-	if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOn {
-		return &types.InvalidPowerState{
-			RequestedState: types.VirtualMachinePowerStatePoweredOn,
-			ExistingState:  vm.Runtime.PowerState,
-		}
-	}
-	switch creds := auth.(type) {
-	case *types.NamePasswordAuthentication:
-		if creds.Username == "" || creds.Password == "" {
-			return new(types.InvalidGuestLogin)
-		}
-	default:
-		return new(types.InvalidGuestLogin)
-	}
-	return nil
-}
+type unknownContainer error
+type uninitializedContainer error
 
 var sanitizeNameRx = regexp.MustCompile(`[\(\)\s]`)
 
@@ -164,14 +101,40 @@ func sanitizeName(name string) string {
 	return sanitizeNameRx.ReplaceAllString(name, "-")
 }
 
-// createDMI writes BIOS UUID DMI files to a container volume
-func (c *container) createDMI(vm *VirtualMachine, name string) error {
-	image := os.Getenv("VCSIM_BUSYBOX")
-	if image == "" {
-		image = "busybox"
+func constructContainerName(name, uid string) string {
+	return fmt.Sprintf("vcsim-%s-%s", sanitizeName(name), uid)
+}
+
+func constructVolumeName(containerName, uid, volumeName string) string {
+	return constructContainerName(containerName, uid) + "--" + sanitizeName(volumeName)
+}
+
+func extractNameAndUid(containerName string) (name string, uid string, err error) {
+	parts := strings.Split(strings.TrimPrefix(containerName, "vcsim-"), "-")
+	if len(parts) != 2 {
+		err = fmt.Errorf("container name does not match expected vcsim-name-uid format: %s", containerName)
+		return
 	}
 
-	cmd := exec.Command("docker", "run", "--rm", "-i", "-v", name+":"+"/"+name, image, "tar", "-C", "/"+name, "-xf", "-")
+	return parts[0], parts[1], nil
+}
+
+func prefixToMask(prefix int) string {
+	mask := net.CIDRMask(prefix, 32)
+	return fmt.Sprintf("%d.%d.%d.%d", mask[0], mask[1], mask[2], mask[3])
+}
+
+type tarEntry struct {
+	header  *tar.Header
+	content []byte
+}
+
+// From https://docs.docker.com/engine/reference/commandline/cp/ :
+// > It is not possible to copy certain system files such as resources under /proc, /sys, /dev, tmpfs, and mounts created by the user in the container.
+// > However, you can still copy such files by manually running tar in docker exec.
+func copyToGuest(id string, dest string, length int64, reader io.Reader) error {
+	cmd := exec.Command("docker", "exec", "-i", id, "tar", "Cxf", path.Dir(dest), "-")
+	cmd.Stderr = os.Stderr
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return err
@@ -183,343 +146,29 @@ func (c *container) createDMI(vm *VirtualMachine, name string) error {
 	}
 
 	tw := tar.NewWriter(stdin)
+	_ = tw.WriteHeader(&tar.Header{
+		Name:    path.Base(dest),
+		Size:    length,
+		Mode:    0444,
+		ModTime: time.Now(),
+	})
 
-	dmi := []struct {
-		name string
-		val  func(uuid.UUID) string
-	}{
-		{"product_uuid", productUUID},
-		{"product_serial", productSerial},
-	}
+	_, err = io.Copy(tw, reader)
 
-	for _, file := range dmi {
-		val := file.val(vm.uid)
-		_ = tw.WriteHeader(&tar.Header{
-			Name:    file.name,
-			Size:    int64(len(val) + 1),
-			Mode:    0444,
-			ModTime: time.Now(),
-		})
-		_, _ = fmt.Fprintln(tw, val)
-	}
+	twErr := tw.Close()
+	stdinErr := stdin.Close()
 
-	_ = tw.Close()
-	_ = stdin.Close()
+	waitErr := cmd.Wait()
 
-	if err := cmd.Wait(); err != nil {
-		stderr := ""
-		if xerr, ok := err.(*exec.ExitError); ok {
-			stderr = string(xerr.Stderr)
-		}
-		log.Printf("%s %s: %s %s", vm.Name, cmd.Args, err, stderr)
-		return err
+	if err != nil || twErr != nil || stdinErr != nil || waitErr != nil {
+		return fmt.Errorf("copy: {%s}, tw: {%s}, stdin: {%s}, wait: {%s}", err, twErr, stdinErr, waitErr)
 	}
 
 	return nil
 }
 
-var (
-	toolsRunning = []types.PropertyChange{
-		{Name: "guest.toolsStatus", Val: types.VirtualMachineToolsStatusToolsOk},
-		{Name: "guest.toolsRunningStatus", Val: string(types.VirtualMachineToolsRunningStatusGuestToolsRunning)},
-	}
-
-	toolsNotRunning = []types.PropertyChange{
-		{Name: "guest.toolsStatus", Val: types.VirtualMachineToolsStatusToolsNotRunning},
-		{Name: "guest.toolsRunningStatus", Val: string(types.VirtualMachineToolsRunningStatusGuestToolsNotRunning)},
-	}
-)
-
-// start runs the container if specified by the RUN.container extraConfig property.
-func (c *container) start(ctx *Context, vm *VirtualMachine) {
-	if c.id != "" {
-		start := "start"
-		if vm.Runtime.PowerState == types.VirtualMachinePowerStateSuspended {
-			start = "unpause"
-		}
-		cmd := exec.Command("docker", start, c.id)
-		err := cmd.Run()
-		if err != nil {
-			log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
-		} else {
-			ctx.Map.Update(vm, toolsRunning)
-		}
-		return
-	}
-
-	var args []string
-	var env []string
-	mountDMI := true
-	ports := make(map[string]string)
-
-	for _, opt := range vm.Config.ExtraConfig {
-		val := opt.GetOptionValue()
-		if val.Key == "RUN.container" {
-			run := val.Value.(string)
-			err := json.Unmarshal([]byte(run), &args)
-			if err != nil {
-				args = []string{run}
-			}
-
-			continue
-		}
-		if val.Key == "RUN.mountdmi" {
-			var mount bool
-			err := json.Unmarshal([]byte(val.Value.(string)), &mount)
-			if err == nil {
-				mountDMI = mount
-			}
-		}
-		if strings.HasPrefix(val.Key, "RUN.port.") {
-			sKey := strings.Split(val.Key, ".")
-			containerPort := sKey[len(sKey)-1]
-			ports[containerPort] = val.Value.(string)
-		}
-		if strings.HasPrefix(val.Key, "RUN.env.") {
-			sKey := strings.Split(val.Key, ".")
-			envKey := sKey[len(sKey)-1]
-			env = append(env, "--env", fmt.Sprintf("%s=%s", envKey, val.Value.(string)))
-		}
-		if strings.HasPrefix(val.Key, "guestinfo.") {
-			key := strings.Replace(strings.ToUpper(val.Key), ".", "_", -1)
-			env = append(env, "--env", fmt.Sprintf("VMX_%s=%s", key, val.Value.(string)))
-		}
-	}
-
-	if len(args) == 0 {
-		return
-	}
-	if len(env) != 0 {
-		// Configure env as the data access method for cloud-init-vmware-guestinfo
-		env = append(env, "--env", "VMX_GUESTINFO=true")
-	}
-	if len(ports) != 0 {
-		// Publish the specified container ports
-		for containerPort, hostPort := range ports {
-			env = append(env, "-p", fmt.Sprintf("%s:%s", hostPort, containerPort))
-		}
-	}
-
-	c.name = fmt.Sprintf("vcsim-%s-%s", sanitizeName(vm.Name), vm.uid)
-	run := append([]string{"docker", "run", "-d", "--name", c.name}, env...)
-
-	if mountDMI {
-		if err := c.createDMI(vm, c.name); err != nil {
-			return
-		}
-		run = append(run, "-v", fmt.Sprintf("%s:%s:ro", c.name, "/sys/class/dmi/id"))
-	}
-
-	args = append(run, args...)
-	cmd := exec.Command(shell, "-c", strings.Join(args, " "))
-	out, err := cmd.Output()
-	if err != nil {
-		stderr := ""
-		if xerr, ok := err.(*exec.ExitError); ok {
-			stderr = string(xerr.Stderr)
-		}
-		log.Printf("%s %s: %s %s", vm.Name, cmd.Args, err, stderr)
-		return
-	}
-
-	ctx.Map.Update(vm, toolsRunning)
-	c.id = strings.TrimSpace(string(out))
-	vm.logPrintf("%s %s: %s", cmd.Path, cmd.Args, c.id)
-
-	if err = c.inspect(vm); err != nil {
-		log.Printf("%s inspect %s: %s", vm.Name, c.id, err)
-	}
-
-	// Start watching the container resource.
-	go c.watchContainer(vm)
-}
-
-// watchContainer monitors the underlying container and updates the VM
-// properties based on the container status. This occurs until either
-// the container or the VM is removed.
-func (c *container) watchContainer(vm *VirtualMachine) {
-
-	inspectInterval := time.Duration(5 * time.Second)
-	if d, err := time.ParseDuration(os.Getenv("VCSIM_INSPECT_INTERVAL")); err == nil {
-		inspectInterval = d
-	}
-
-	var (
-		ctx    = SpoofContext()
-		done   = make(chan struct{})
-		ticker = time.NewTicker(inspectInterval)
-	)
-
-	stopUpdatingVmFromContainer := func() {
-		ticker.Stop()
-		close(done)
-	}
-
-	destroyVm := func() {
-		// If the container cannot be found then destroy this VM.
-		taskRef := vm.DestroyTask(ctx, &types.Destroy_Task{
-			This: vm.Self,
-		}).(*methods.Destroy_TaskBody).Res.Returnval
-		task := ctx.Map.Get(taskRef).(*Task)
-
-		// Wait for the task to complete and see if there is an error.
-		task.Wait()
-		if task.Info.Error != nil {
-			vm.logPrintf("failed to destroy vm: err=%v", *task.Info.Error)
-		}
-	}
-
-	updateVmFromContainer := func() {
-		// Exit the monitor loop if the VM was removed from the API side.
-		if c.id == "" {
-			stopUpdatingVmFromContainer()
-			return
-		}
-
-		if err := c.inspect(vm); err != nil {
-			// If there is an error inspecting the container because it no
-			// longer exists, then destroy the VM as well. Please note the
-			// reason this logic does not invoke stopUpdatingVmFromContainer
-			// is because that will be handled the next time this function
-			// is entered and c.id is empty.
-			if err, ok := err.(*exec.ExitError); ok {
-				if strings.Contains(string(err.Stderr), "No such object") {
-					destroyVm()
-				}
-			}
-		}
-	}
-
-	// Update the VM from the container at regular intervals until the done
-	// channel is closed.
-	for {
-		select {
-		case <-ticker.C:
-			ctx.WithLock(vm, updateVmFromContainer)
-		case <-done:
-			return
-		}
-	}
-}
-
-// stop the container (if any) for the given vm.
-func (c *container) stop(ctx *Context, vm *VirtualMachine) {
-	if c.id == "" {
-		return
-	}
-
-	cmd := exec.Command("docker", "stop", c.id)
-	err := cmd.Run()
-	if err != nil {
-		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
-	} else {
-		ctx.Map.Update(vm, toolsNotRunning)
-	}
-}
-
-// pause the container (if any) for the given vm.
-func (c *container) pause(ctx *Context, vm *VirtualMachine) {
-	if c.id == "" {
-		return
-	}
-
-	cmd := exec.Command("docker", "pause", c.id)
-	err := cmd.Run()
-	if err != nil {
-		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
-	} else {
-		ctx.Map.Update(vm, toolsNotRunning)
-	}
-}
-
-// restart the container (if any) for the given vm.
-func (c *container) restart(ctx *Context, vm *VirtualMachine) {
-	if c.id == "" {
-		return
-	}
-
-	cmd := exec.Command("docker", "restart", c.id)
-	err := cmd.Run()
-	if err != nil {
-		log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
-	} else {
-		ctx.Map.Update(vm, toolsRunning)
-	}
-}
-
-// remove the container (if any) for the given vm.
-func (c *container) remove(vm *VirtualMachine) {
-	if c.id == "" {
-		return
-	}
-
-	args := [][]string{
-		{"rm", "-v", "-f", c.id},
-		{"volume", "rm", "-f", c.name},
-	}
-
-	for i := range args {
-		cmd := exec.Command("docker", args[i]...)
-		err := cmd.Run()
-		if err != nil {
-			log.Printf("%s %s: %s", vm.Name, cmd.Args, err)
-		}
-	}
-
-	c.id = ""
-}
-
-func (c *container) exec(ctx *Context, vm *VirtualMachine, auth types.BaseGuestAuthentication, args []string) (string, types.BaseMethodFault) {
-	fault := vm.run.prepareGuestOperation(vm, auth)
-	if fault != nil {
-		return "", fault
-	}
-
-	args = append([]string{"exec", vm.run.id}, args...)
-	cmd := exec.Command("docker", args...)
-
-	res, err := cmd.CombinedOutput()
-	if err != nil {
-		log.Printf("%s: %s (%s)", vm.Self, cmd.Args, string(res))
-		return "", new(types.GuestOperationsFault)
-	}
-
-	return strings.TrimSpace(string(res)), nil
-}
-
-// From https://docs.docker.com/engine/reference/commandline/cp/ :
-// > It is not possible to copy certain system files such as resources under /proc, /sys, /dev, tmpfs, and mounts created by the user in the container.
-// > However, you can still copy such files by manually running tar in docker exec.
-func guestUpload(id string, file string, r *http.Request) error {
-	cmd := exec.Command("docker", "exec", "-i", id, "tar", "Cxf", path.Dir(file), "-")
-	cmd.Stderr = os.Stderr
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return err
-	}
-	if err = cmd.Start(); err != nil {
-		return err
-	}
-
-	tw := tar.NewWriter(stdin)
-	_ = tw.WriteHeader(&tar.Header{
-		Name:    path.Base(file),
-		Size:    r.ContentLength,
-		Mode:    0444,
-		ModTime: time.Now(),
-	})
-
-	_, _ = io.Copy(tw, r.Body)
-
-	_ = tw.Close()
-	_ = stdin.Close()
-	_ = r.Body.Close()
-
-	return cmd.Wait()
-}
-
-func guestDownload(id string, file string, w http.ResponseWriter) error {
-	cmd := exec.Command("docker", "exec", id, "tar", "Ccf", path.Dir(file), "-", path.Base(file))
+func copyFromGuest(id string, src string, sink func(int64, io.Reader) error) error {
+	cmd := exec.Command("docker", "exec", id, "tar", "Ccf", path.Dir(src), "-", path.Base(src))
 	cmd.Stderr = os.Stderr
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
@@ -535,78 +184,650 @@ func guestDownload(id string, file string, w http.ResponseWriter) error {
 		return err
 	}
 
-	w.Header().Set("Content-Length", strconv.FormatInt(header.Size, 10))
-	_, _ = io.Copy(w, tr)
+	err = sink(header.Size, tr)
+	waitErr := cmd.Wait()
 
-	return cmd.Wait()
-}
-
-const guestPrefix = "/guestFile/"
-
-// ServeGuest handles container guest file upload/download
-func ServeGuest(w http.ResponseWriter, r *http.Request) {
-	// Real vCenter form: /guestFile?id=139&token=...
-	// vcsim form:        /guestFile/tmp/foo/bar?id=ebc8837b8cb6&token=...
-
-	id := r.URL.Query().Get("id")
-	file := strings.TrimPrefix(r.URL.Path, guestPrefix[:len(guestPrefix)-1])
-	var err error
-
-	switch r.Method {
-	case http.MethodPut:
-		err = guestUpload(id, file, r)
-	case http.MethodGet:
-		err = guestDownload(id, file, w)
-	default:
-		w.WriteHeader(http.StatusMethodNotAllowed)
-		return
+	if err != nil || waitErr != nil {
+		return fmt.Errorf("err: {%s}, wait: {%s}", err, waitErr)
 	}
 
-	if err != nil {
-		log.Printf("%s %s: %s", r.Method, r.URL, err)
-		w.WriteHeader(http.StatusInternalServerError)
-	}
+	return nil
 }
 
-// productSerial returns the uuid in /sys/class/dmi/id/product_serial format
-func productSerial(id uuid.UUID) string {
-	var dst [len(id)*2 + len(id) - 1]byte
+// createVolume creates a volume populated with the provided files
+// If the header.Size is omitted or set to zero, then len(content+1) is used.
+// Docker appears to treat this volume create command as idempotent so long as it's identical
+// to an existing volume, so we can use this both for creating volumes inline in container create (for labelling) and
+// for population after.
+// returns:
+//
+//	uid - string
+//	err - error or nil
+func createVolume(volumeName string, labels []string, files []tarEntry) (string, error) {
+	image := os.Getenv("VCSIM_BUSYBOX")
+	if image == "" {
+		image = "busybox"
+	}
 
-	j := 0
-	for i := 0; i < len(id); i++ {
-		hex.Encode(dst[j:j+2], id[i:i+1])
-		j += 3
-		if j < len(dst) {
-			s := j - 1
-			if s == len(dst)/2 {
-				dst[s] = '-'
-			} else {
-				dst[s] = ' '
-			}
+	name := sanitizeName(volumeName)
+	uid := ""
+
+	// label the volume if specified - this requires the volume be created before use
+	if len(labels) > 0 {
+		run := []string{"volume", "create"}
+		for i := range labels {
+			run = append(run, "--label", labels[i])
+		}
+		run = append(run, name)
+		cmd := exec.Command("docker", run...)
+		out, err := cmd.Output()
+		if err != nil {
+			return "", err
+		}
+		uid = strings.TrimSpace(string(out))
+
+		if name == "" {
+			name = uid
 		}
 	}
 
-	return fmt.Sprintf("VMware-%s", string(dst[:]))
+	run := []string{"run", "--rm", "-i"}
+	run = append(run, "-v", name+":/"+name)
+	run = append(run, image, "tar", "-C", "/"+name, "-xf", "-")
+	cmd := exec.Command("docker", run...)
+	stdin, err := cmd.StdinPipe()
+	if err != nil {
+		return uid, err
+	}
+
+	err = cmd.Start()
+	if err != nil {
+		return uid, err
+	}
+
+	tw := tar.NewWriter(stdin)
+
+	for _, file := range files {
+		header := file.header
+
+		if header.Size == 0 && len(file.content) > 0 {
+			header.Size = int64(len(file.content))
+		}
+
+		if header.ModTime.IsZero() {
+			header.ModTime = time.Now()
+		}
+
+		if header.Mode == 0 {
+			header.Mode = 0444
+		}
+
+		tarErr := tw.WriteHeader(header)
+		if tarErr == nil {
+			_, tarErr = tw.Write(file.content)
+		}
+	}
+
+	err = nil
+	twErr := tw.Close()
+	stdinErr := stdin.Close()
+	if twErr != nil || stdinErr != nil {
+		err = fmt.Errorf("tw: {%s}, stdin: {%s}", twErr, stdinErr)
+	}
+
+	if waitErr := cmd.Wait(); waitErr != nil {
+		stderr := ""
+		if xerr, ok := waitErr.(*exec.ExitError); ok {
+			stderr = string(xerr.Stderr)
+		}
+		log.Printf("%s %s: %s %s", name, cmd.Args, waitErr, stderr)
+
+		err = fmt.Errorf("%s, wait: {%s}", err, waitErr)
+		return uid, err
+	}
+
+	return uid, err
 }
 
-// productUUID returns the uuid in /sys/class/dmi/id/product_uuid format
-func productUUID(id uuid.UUID) string {
-	var dst [36]byte
+func getBridge(bridgeName string) (string, error) {
+	// {"CreatedAt":"2023-07-11 19:22:25.45027052 +0000 UTC","Driver":"bridge","ID":"fe52c7502c5d","IPv6":"false","Internal":"false","Labels":"goodbye=,hello=","Name":"testnet","Scope":"local"}
+	// podman has distinctly different fields at v4.4.1 so commented out fields that don't match. We only actually care about ID
+	type bridgeNet struct {
+		// CreatedAt string
+		Driver string
+		ID     string
+		// IPv6      string
+		// Internal  string
+		// Labels    string
+		Name string
+		// Scope     string
+	}
 
-	hex.Encode(dst[0:2], id[3:4])
-	hex.Encode(dst[2:4], id[2:3])
-	hex.Encode(dst[4:6], id[1:2])
-	hex.Encode(dst[6:8], id[0:1])
-	dst[8] = '-'
-	hex.Encode(dst[9:11], id[5:6])
-	hex.Encode(dst[11:13], id[4:5])
-	dst[13] = '-'
-	hex.Encode(dst[14:16], id[7:8])
-	hex.Encode(dst[16:18], id[6:7])
-	dst[18] = '-'
-	hex.Encode(dst[19:23], id[8:10])
-	dst[23] = '-'
-	hex.Encode(dst[24:], id[10:])
+	// if the underlay bridge already exists, return that
+	// we don't check for a specific label or similar so that it's possible to use a bridge created by other frameworks for composite testing
+	var bridge bridgeNet
+	cmd := exec.Command("docker", "network", "ls", "--format={{json .}}", "-f", fmt.Sprintf("name=%s$", bridgeName))
+	out, err := cmd.Output()
+	if err != nil {
+		log.Printf("vcsim %s: %s, %s", cmd.Args, err, out)
+		return "", err
+	}
 
-	return strings.ToUpper(string(dst[:]))
+	// unfortunately docker returns an empty string not an empty json doc and podman returns '[]'
+	// podman also returns an array of matches even when there's only one, so we normalize.
+	str := strings.TrimSpace(string(out))
+	str = strings.TrimPrefix(str, "[")
+	str = strings.TrimSuffix(str, "]")
+	if len(str) == 0 {
+		return "", nil
+	}
+
+	err = json.Unmarshal([]byte(str), &bridge)
+	if err != nil {
+		log.Printf("vcsim %s: %s, %s", cmd.Args, err, str)
+		return "", err
+	}
+
+	return bridge.ID, nil
+}
+
+// createBridge creates a bridge network if one does not already exist
+// returns:
+//
+//	uid - string
+//	err - error or nil
+func createBridge(bridgeName string, labels ...string) (string, error) {
+
+	id, err := getBridge(bridgeName)
+	if err != nil {
+		return "", err
+	}
+
+	if id != "" {
+		return id, nil
+	}
+
+	run := []string{"network", "create", "--label", createdByVcsim}
+	for i := range labels {
+		run = append(run, "--label", labels[i])
+	}
+	run = append(run, bridgeName)
+
+	cmd := exec.Command("docker", run...)
+	out, err := cmd.Output()
+	if err != nil {
+		log.Printf("vcsim %s: %s: %s", cmd.Args, out, err)
+		return "", err
+	}
+
+	// docker returns the ID regardless of whether you supply a name when creating the network, however
+	// podman returns the pretty name, so we have to normalize
+	id, err = getBridge(bridgeName)
+	if err != nil {
+		return "", err
+	}
+
+	return id, nil
+}
+
+// create
+//   - name - pretty name, eg. vm name
+//   - id - uuid or similar - this is merged into container name rather than dictating containerID
+//   - networks - set of bridges to connect the container to
+//   - volumes - colon separated tuple of volume name to mount path. Passed directly to docker via -v so mount options can be postfixed.
+//   - env - array of environment vairables in name=value form
+//   - optsAndImage - pass-though options and must include at least the container image to use, including tag if necessary
+//   - args - the command+args to pass to the container
+func create(ctx *Context, name string, id string, networks []string, volumes []string, ports []string, env []string, image string, args []string) (*container, error) {
+	if len(image) == 0 {
+		return nil, errors.New("cannot create container backing without an image")
+	}
+
+	var c container
+	c.name = constructContainerName(name, id)
+	c.changes = make(chan struct{})
+
+	for i := range volumes {
+		// we'll pre-create anonymous volumes, simply for labelling consistency
+		volName := strings.Split(volumes[i], ":")
+		createVolume(volName[0], []string{deleteWithContainer, "container=" + c.name}, nil)
+	}
+
+	// assemble env
+	var dockerNet []string
+	var dockerVol []string
+	var dockerPort []string
+	var dockerEnv []string
+
+	for i := range env {
+		dockerEnv = append(dockerEnv, "--env", env[i])
+	}
+
+	for i := range volumes {
+		dockerVol = append(dockerVol, "-v", volumes[i])
+	}
+
+	for i := range ports {
+		dockerPort = append(dockerPort, "-p", ports[i])
+	}
+
+	for i := range networks {
+		dockerNet = append(dockerNet, "--network", networks[i])
+	}
+
+	run := []string{"docker", "create", "--name", c.name}
+	run = append(run, dockerNet...)
+	run = append(run, dockerVol...)
+	run = append(run, dockerPort...)
+	run = append(run, dockerEnv...)
+	run = append(run, image)
+	run = append(run, args...)
+
+	// this combines all the run options into a single string that's passed to /bin/bash -c as the single argument to force bash parsing.
+	// TODO: make this configurable behaviour so users also have the option of not escaping everything for bash
+	cmd := exec.Command(shell, "-c", strings.Join(run, " "))
+	out, err := cmd.Output()
+	if err != nil {
+		stderr := ""
+		if xerr, ok := err.(*exec.ExitError); ok {
+			stderr = string(xerr.Stderr)
+		}
+		log.Printf("%s %s: %s %s", name, cmd.Args, err, stderr)
+
+		return nil, err
+	}
+
+	c.id = strings.TrimSpace(string(out))
+
+	return &c, nil
+}
+
+// createVolume takes the specified files and writes them into a volume named for the container.
+func (c *container) createVolume(name string, labels []string, files []tarEntry) (string, error) {
+	return createVolume(c.name+"--"+name, append(labels, "container="+c.name), files)
+}
+
+// inspect retrieves and parses container properties into directly usable struct
+// returns:
+//
+//	out - the stdout of the command
+//	detail - basic struct populated with container details
+//	err:
+//		* if c.id is empty, or docker returns "No such object", will return an uninitializedContainer error
+//		* err from either execution or parsing of json output
+func (c *container) inspect() (out []byte, detail containerDetails, err error) {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
+		err = uninitializedContainer(errors.New("inspect of uninitialized container"))
+		return
+	}
+
+	var details []containerDetails
+
+	cmd := exec.Command("docker", "inspect", c.id)
+	out, err = cmd.Output()
+	if eErr, ok := err.(*exec.ExitError); ok {
+		if strings.Contains(string(eErr.Stderr), "No such object") {
+			err = uninitializedContainer(errors.New("inspect of uninitialized container"))
+		}
+	}
+
+	if err != nil {
+		return
+	}
+
+	if err = json.NewDecoder(bytes.NewReader(out)).Decode(&details); err != nil {
+		return
+	}
+
+	if len(details) != 1 {
+		err = fmt.Errorf("multiple containers (%d) match ID: %s", len(details), c.id)
+		return
+	}
+
+	detail = details[0]
+	return
+}
+
+// start
+//   - if the container already exists, start it or unpause it.
+func (c *container) start(ctx *Context) error {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
+		return uninitializedContainer(errors.New("start of uninitialized container"))
+	}
+
+	start := "start"
+	_, detail, err := c.inspect()
+	if err != nil {
+		return err
+	}
+
+	if detail.State.Paused {
+		start = "unpause"
+	}
+
+	cmd := exec.Command("docker", start, c.id)
+	err = cmd.Run()
+	if err != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+	}
+
+	return err
+}
+
+// pause the container (if any) for the given vm.
+func (c *container) pause(ctx *Context) error {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
+		return uninitializedContainer(errors.New("pause of uninitialized container"))
+	}
+
+	cmd := exec.Command("docker", "pause", c.id)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+	}
+
+	return err
+}
+
+// restart the container (if any) for the given vm.
+func (c *container) restart(ctx *Context) error {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
+		return uninitializedContainer(errors.New("restart of uninitialized container"))
+	}
+
+	cmd := exec.Command("docker", "restart", c.id)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+	}
+
+	return err
+}
+
+// stop the container (if any) for the given vm.
+func (c *container) stop(ctx *Context) error {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
+		return uninitializedContainer(errors.New("stop of uninitialized container"))
+	}
+
+	cmd := exec.Command("docker", "stop", c.id)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+	}
+
+	return err
+}
+
+// exec invokes the specified command, with executable being the first of the args, in the specified container
+// returns
+//
+//	 string - combined stdout and stderr from command
+//	 err
+//			* uninitializedContainer error - if c.id is empty
+//		   	* err from cmd execution
+func (c *container) exec(ctx *Context, args []string) (string, error) {
+	c.Lock()
+	id := c.id
+	c.Unlock()
+
+	if id == "" {
+		return "", uninitializedContainer(errors.New("exec into uninitialized container"))
+	}
+
+	args = append([]string{"exec", c.id}, args...)
+	cmd := exec.Command("docker", args...)
+	res, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("%s: %s (%s)", c.name, cmd.Args, string(res))
+		return "", err
+	}
+
+	return strings.TrimSpace(string(res)), nil
+}
+
+// remove the container (if any) for the given vm. Considers removal of an uninitialized container success.
+// Also removes volumes and networks that indicate they are lifecycle coupled with this container.
+// returns:
+//
+//	err - joined err from deletion of container and any volumes or networks that have coupled lifecycle
+func (c *container) remove(ctx *Context) error {
+	c.Lock()
+	defer c.Unlock()
+
+	if c.id == "" {
+		// consider absence success
+		return nil
+	}
+
+	cmd := exec.Command("docker", "rm", "-v", "-f", c.id)
+	err := cmd.Run()
+	if err != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, err)
+		return err
+	}
+
+	cmd = exec.Command("docker", "volume", "ls", "-q", "--filter", "label=container="+c.name, "--filter", "label="+deleteWithContainer)
+	volumesToReap, lsverr := cmd.Output()
+	if lsverr != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, lsverr)
+	}
+	log.Printf("%s volumes: %s", c.name, volumesToReap)
+
+	var rmverr error
+	if len(volumesToReap) > 0 {
+		run := []string{"volume", "rm", "-f"}
+		run = append(run, strings.Split(string(volumesToReap), "\n")...)
+		cmd = exec.Command("docker", run...)
+		out, rmverr := cmd.Output()
+		if rmverr != nil {
+			log.Printf("%s %s: %s, %s", c.name, cmd.Args, rmverr, out)
+		}
+	}
+
+	cmd = exec.Command("docker", "network", "ls", "-q", "--filter", "label=container="+c.name, "--filter", "label="+deleteWithContainer)
+	networksToReap, lsnerr := cmd.Output()
+	if lsnerr != nil {
+		log.Printf("%s %s: %s", c.name, cmd.Args, lsnerr)
+	}
+
+	var rmnerr error
+	if len(networksToReap) > 0 {
+		run := []string{"network", "rm", "-f"}
+		run = append(run, strings.Split(string(volumesToReap), "\n")...)
+		cmd = exec.Command("docker", run...)
+		rmnerr = cmd.Run()
+		if rmnerr != nil {
+			log.Printf("%s %s: %s", c.name, cmd.Args, rmnerr)
+		}
+	}
+
+	if err != nil || lsverr != nil || rmverr != nil || lsnerr != nil || rmnerr != nil {
+		return fmt.Errorf("err: {%s}, lsverr: {%s}, rmverr: {%s}, lsnerr:{%s}, rmerr: {%s}", err, lsverr, rmverr, lsnerr, rmnerr)
+	}
+
+	if c.cancelWatch != nil {
+		c.cancelWatch()
+		eventWatch.ignore(c)
+	}
+	c.id = ""
+	return nil
+}
+
+// updated is a simple trigger allowing a caller to indicate that something has likely changed about the container
+// and interested parties should re-inspect as needed.
+func (c *container) updated() {
+	consolidationWindow := 250 * time.Millisecond
+	if d, err := time.ParseDuration(os.Getenv("VCSIM_EVENT_CONSOLIDATION_WINDOW")); err == nil {
+		consolidationWindow = d
+	}
+
+	select {
+	case c.changes <- struct{}{}:
+		time.Sleep(consolidationWindow)
+		// as this is only a hint to avoid waiting for the full inspect interval, we don't care about accumulating
+		// multiple triggers. We do pause to allow large numbers of sequential updates to consolidate
+	default:
+	}
+}
+
+// watchContainer monitors the underlying container and updates
+// properties based on the container status. This occurs until either
+// the container or the VM is removed.
+// returns:
+//
+//	err - uninitializedContainer error - if c.id is empty
+func (c *container) watchContainer(ctx context.Context, updateFn func(*containerDetails, *container) error) error {
+	c.Lock()
+	defer c.Unlock()
+
+	if c.id == "" {
+		return uninitializedContainer(errors.New("Attempt to watch uninitialized container"))
+	}
+
+	eventWatch.watch(c)
+
+	cancelCtx, cancelFunc := context.WithCancel(ctx)
+	c.cancelWatch = cancelFunc
+
+	// Update the VM from the container at regular intervals until the done
+	// channel is closed.
+	go func() {
+		inspectInterval := 10 * time.Second
+		if d, err := time.ParseDuration(os.Getenv("VCSIM_INSPECT_INTERVAL")); err == nil {
+			inspectInterval = d
+		}
+		ticker := time.NewTicker(inspectInterval)
+
+		update := func() {
+			_, details, err := c.inspect()
+			var rmErr error
+			var removing bool
+			if _, ok := err.(uninitializedContainer); ok {
+				removing = true
+				rmErr = c.remove(SpoofContext())
+			}
+
+			updateErr := updateFn(&details, c)
+			// if we don't succeed we want to re-try
+			if removing && rmErr == nil && updateErr == nil {
+				ticker.Stop()
+				return
+			}
+			if updateErr != nil {
+				log.Printf("vcsim container watch: %s %s", c.id, updateErr)
+			}
+		}
+
+		for {
+			select {
+			case <-c.changes:
+				update()
+			case <-ticker.C:
+				update()
+			case <-cancelCtx.Done():
+				return
+			}
+		}
+	}()
+
+	return nil
+}
+
+func (w *eventWatcher) watch(c *container) {
+	w.Lock()
+	defer w.Unlock()
+
+	if w.watches == nil {
+		w.watches = make(map[string]*container)
+	}
+
+	w.watches[c.id] = c
+
+	if w.stdin == nil {
+		cmd := exec.Command("docker", "events", "--format", "'{{.ID}}'", "--filter", "Type=container")
+		w.stdout, _ = cmd.StdoutPipe()
+		w.stdin, _ = cmd.StdinPipe()
+		err := cmd.Start()
+		if err != nil {
+			log.Printf("docker event watcher: %s %s", cmd.Args, err)
+			w.stdin = nil
+			w.stdout = nil
+			w.process = nil
+
+			return
+		}
+
+		w.process = cmd.Process
+
+		go w.monitor()
+	}
+}
+
+func (w *eventWatcher) ignore(c *container) {
+	w.Lock()
+
+	delete(w.watches, c.id)
+
+	if len(w.watches) == 0 && w.stdin != nil {
+		w.stop()
+	}
+
+	w.Unlock()
+}
+
+func (w *eventWatcher) monitor() {
+	w.Lock()
+	watches := len(w.watches)
+	w.Unlock()
+
+	if watches == 0 {
+		return
+	}
+
+	scanner := bufio.NewScanner(w.stdout)
+	for scanner.Scan() {
+		id := strings.TrimSpace(scanner.Text())
+
+		w.Lock()
+		container := w.watches[id]
+		w.Unlock()
+
+		if container != nil {
+			// this is called in a routine to allow an event consolidation window
+			go container.updated()
+		}
+	}
+}
+
+func (w *eventWatcher) stop() {
+	if w.stdin != nil {
+		w.stdin.Close()
+		w.stdin = nil
+	}
+	if w.stdout != nil {
+		w.stdout.Close()
+		w.stdout = nil
+	}
+	w.process.Kill()
 }

@@ -18,6 +18,8 @@ package vpx
 
 import "github.com/vmware/govmomi/vim25/types"
 
+// TODO: figure out whether this is Setting or AdvancedOptions - see esx/setting.go for the difference
+
 // Setting is captured from VC's ServiceContent.OptionManager.setting
 var Setting = []types.BaseOptionValue{
 	// This list is currently pruned to include sso options only with sso.enabled set to false

@@ -26,6 +26,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
@@ -121,11 +122,13 @@ func Example_runContainer() {
 			},
 			ExtraConfig: []types.BaseOptionValue{
 				&types.OptionValue{Key: "RUN.container", Value: args}, // run nginx
+				&types.OptionValue{Key: "RUN.port.80", Value: "8888"}, // test port remap
 			},
 		}
 
 		// Create a new VM
 		task, err := f.VmFolder.CreateVM(ctx, spec, pool, nil)
+
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -144,13 +147,25 @@ func Example_runContainer() {
 
 		ip, _ := vm.WaitForIP(ctx, true) // Returns the docker container's IP
 
-		// Count the number of bytes in feature_test.go via nginx
+		// Count the number of bytes in feature_test.go via nginx going direct to the container
 		cmd := exec.Command("docker", "run", "--rm", "curlimages/curl", "curl", "-f", fmt.Sprintf("http://%s", ip))
 		var buf bytes.Buffer
 		cmd.Stdout = &buf
 		err = cmd.Run()
-		if err != nil {
-			log.Fatal(err)
+		res := buf.String()
+
+		if err != nil || strings.TrimSpace(res) != fcontent {
+			log.Fatal(err, buf.String())
+		}
+
+		// Count the number of bytes in feature_test.go via nginx going via port remap on host
+		cmd = exec.Command("curl", "-f", "http://localhost:8888")
+		buf.Reset()
+		cmd.Stdout = &buf
+		err = cmd.Run()
+		res = buf.String()
+		if err != nil || strings.TrimSpace(res) != fcontent {
+			log.Fatal(err, buf.String())
 		}
 
 		// PowerOff stops the container

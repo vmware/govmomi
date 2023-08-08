@@ -136,7 +136,7 @@ endif
 
 .PHONY: go-test
 go-test: ## Runs go unit tests with race detector enabled
-	GORACE=$(GORACE) $(GO) test \
+	GORACE=$(GORACE) CGO_ENABLED=1 $(GO) test \
   -count $(TEST_COUNT) \
   -race \
   -timeout $(TEST_TIMEOUT) \

@@ -46,7 +46,7 @@ type VirtualMachine struct {
 
 	log string
 	sid int32
-	run container
+	svm *simVM
 	uid uuid.UUID
 	imc *types.CustomizationSpec
 }
@@ -394,7 +394,8 @@ func extraConfigKey(key string) string {
 	return key
 }
 
-func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec) {
+func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+	var removedContainerBacking bool
 	var changes []types.PropertyChange
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()
@@ -419,6 +420,9 @@ func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec)
 				vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
 			} else {
 				if s, ok := val.Value.(string); ok && s == "" {
+					if key == ContainerBackingOptionKey {
+						removedContainerBacking = true
+					}
 					// Remove existing element
 					l := len(vm.Config.ExtraConfig)
 					vm.Config.ExtraConfig[keyIndex] = vm.Config.ExtraConfig[l-1]
@@ -450,9 +454,52 @@ func (vm *VirtualMachine) applyExtraConfig(spec *types.VirtualMachineConfigSpec)
 			)
 		}
 	}
+
+	// create the container backing before we publish the updates so the simVM is available before handlers
+	// get triggered
+	var fault types.BaseMethodFault
+	if vm.svm == nil {
+		vm.svm = createSimulationVM(vm)
+
+		// check to see if the VM is already powered on - if so we need to retroactively hit that path here
+		if vm.Runtime.PowerState == types.VirtualMachinePowerStatePoweredOn {
+			err := vm.svm.start(ctx)
+			if err != nil {
+				// don't attempt to undo the changes already made - just return an error
+				// we'll retry the svm.start operation on pause/restart calls
+				fault = &types.VAppConfigFault{
+					VimFault: types.VimFault{
+						MethodFault: types.MethodFault{
+							FaultCause: &types.LocalizedMethodFault{
+								Fault:            &types.SystemErrorFault{Reason: err.Error()},
+								LocalizedMessage: err.Error()}}}}
+			}
+		}
+	} else if removedContainerBacking {
+		err := vm.svm.remove(ctx)
+		if err == nil {
+			// remove link from container to VM so callbacks no longer reflect state
+			vm.svm.vm = nil
+			// nil container backing reference to return this to a pure in-mem simulated VM
+			vm.svm = nil
+
+		} else {
+			// don't attempt to undo the changes already made - just return an error
+			// we'll retry the svm.start operation on pause/restart calls
+			fault = &types.VAppConfigFault{
+				VimFault: types.VimFault{
+					MethodFault: types.MethodFault{
+						FaultCause: &types.LocalizedMethodFault{
+							Fault:            &types.SystemErrorFault{Reason: err.Error()},
+							LocalizedMessage: err.Error()}}}}
+		}
+	}
+
 	if len(changes) != 0 {
 		Map.Update(vm, changes)
 	}
+
+	return fault
 }
 
 func validateGuestID(id string) types.BaseMethodFault {
@@ -1495,6 +1542,7 @@ func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.Bas
 func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
 	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 
+	var err types.BaseMethodFault
 	for i, change := range spec.DeviceChange {
 		dspec := change.GetVirtualDeviceConfigSpec()
 		device := dspec.Device.GetVirtualDevice()
@@ -1531,7 +1579,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 			}
 
 			key := device.Key
-			err := vm.configureDevice(ctx, devices, dspec, nil)
+			err = vm.configureDevice(ctx, devices, dspec, nil)
 			if err != nil {
 				return err
 			}
@@ -1558,7 +1606,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 				device.DeviceInfo.GetDescription().Summary = "" // regenerate summary
 			}
 
-			err := vm.configureDevice(ctx, devices, dspec, oldDevice)
+			err = vm.configureDevice(ctx, devices, dspec, oldDevice)
 			if err != nil {
 				return err
 			}
@@ -1573,9 +1621,16 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 		{Name: "config.hardware.device", Val: []types.BaseVirtualDevice(devices)},
 	})
 
-	vm.updateDiskLayouts()
+	err = vm.updateDiskLayouts()
+	if err != nil {
+		return err
+	}
 
-	vm.applyExtraConfig(spec) // Do this after device config, as some may apply to the devices themselves (e.g. ethernet -> guest.net)
+	// Do this after device config, as some may apply to the devices themselves (e.g. ethernet -> guest.net)
+	err = vm.applyExtraConfig(ctx, spec)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -1610,14 +1665,23 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			return nil, new(types.InvalidState)
 		}
 
-		c.run.start(c.ctx, c.VirtualMachine)
+		err := c.svm.start(c.ctx)
+		if err != nil {
+			return nil, &types.MissingPowerOnConfiguration{
+				VAppConfigFault: types.VAppConfigFault{
+					VimFault: types.VimFault{
+						MethodFault: types.MethodFault{
+							FaultCause: &types.LocalizedMethodFault{
+								Fault:            &types.SystemErrorFault{Reason: err.Error()},
+								LocalizedMessage: err.Error()}}}}}
+		}
 		c.ctx.postEvent(
 			&types.VmStartingEvent{VmEvent: event},
 			&types.VmPoweredOnEvent{VmEvent: event},
 		)
 		c.customize(c.ctx)
 	case types.VirtualMachinePowerStatePoweredOff:
-		c.run.stop(c.ctx, c.VirtualMachine)
+		c.svm.stop(c.ctx)
 		c.ctx.postEvent(
 			&types.VmStoppingEvent{VmEvent: event},
 			&types.VmPoweredOffEvent{VmEvent: event},
@@ -1630,7 +1694,7 @@ func (c *powerVMTask) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 			}
 		}
 
-		c.run.pause(c.ctx, c.VirtualMachine)
+		c.svm.pause(c.ctx)
 		c.ctx.postEvent(
 			&types.VmSuspendingEvent{VmEvent: event},
 			&types.VmSuspendedEvent{VmEvent: event},
@@ -1737,7 +1801,7 @@ func (vm *VirtualMachine) RebootGuest(ctx *Context, req *types.RebootGuest) soap
 	}
 
 	if vm.Guest.ToolsRunningStatus == string(types.VirtualMachineToolsRunningStatusGuestToolsRunning) {
-		vm.run.restart(ctx, vm)
+		vm.svm.restart(ctx)
 		body.Res = new(types.RebootGuestResponse)
 	} else {
 		body.Fault_ = Fault("", new(types.ToolsUnavailable))
@@ -1801,6 +1865,7 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 	task := CreateTask(vm, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		if dc == nil {
 			return nil, &types.ManagedObjectNotFound{Obj: vm.Self} // If our Parent was destroyed, so were we.
+			// TODO: should this also trigger container removal?
 		}
 
 		r := vm.UnregisterVM(ctx, &types.UnregisterVM{
@@ -1825,7 +1890,14 @@ func (vm *VirtualMachine) DestroyTask(ctx *Context, req *types.Destroy_Task) soa
 			Datacenter: &dc.Self,
 		})
 
-		vm.run.remove(vm)
+		err := vm.svm.remove(ctx)
+		if err != nil {
+			return nil, &types.RuntimeFault{
+				MethodFault: types.MethodFault{
+					FaultCause: &types.LocalizedMethodFault{
+						Fault:            &types.SystemErrorFault{Reason: err.Error()},
+						LocalizedMessage: err.Error()}}}
+		}
 
 		return nil, nil
 	})
@@ -2321,7 +2393,7 @@ func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) so
 	ctx.postEvent(&types.VmGuestShutdownEvent{VmEvent: event})
 
 	_ = CreateTask(vm, "shutdownGuest", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		vm.run.stop(ctx, vm)
+		vm.svm.stop(ctx)
 
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{Name: "runtime.powerState", Val: types.VirtualMachinePowerStatePoweredOff},
@@ -2354,7 +2426,7 @@ func (vm *VirtualMachine) StandbyGuest(ctx *Context, c *types.StandbyGuest) soap
 	ctx.postEvent(&types.VmGuestStandbyEvent{VmEvent: event})
 
 	_ = CreateTask(vm, "standbyGuest", func(*Task) (types.AnyType, types.BaseMethodFault) {
-		vm.run.pause(ctx, vm)
+		vm.svm.pause(ctx)
 
 		ctx.Map.Update(vm, []types.PropertyChange{
 			{Name: "runtime.powerState", Val: types.VirtualMachinePowerStateSuspended},
