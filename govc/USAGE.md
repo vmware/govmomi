@@ -3153,6 +3153,7 @@ Usage: govc import.ova [OPTIONS] PATH_TO_OVA
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
+  -hidden=false          Enable hidden properties
   -host=                 Host system [GOVC_HOST]
   -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
@@ -3168,6 +3169,7 @@ Usage: govc import.ovf [OPTIONS] PATH_TO_OVF
 Options:
   -ds=                   Datastore [GOVC_DATASTORE]
   -folder=               Inventory folder [GOVC_FOLDER]
+  -hidden=false          Enable hidden properties
   -host=                 Host system [GOVC_HOST]
   -m=false               Verify checksum of uploaded files against manifest (.mf)
   -name=                 Name to use for new entity
@@ -3181,6 +3183,7 @@ Options:
 Usage: govc import.spec [OPTIONS] PATH_TO_OVF_OR_OVA
 
 Options:
+  -hidden=false          Enable hidden properties
 ```
 
 ## import.vmdk

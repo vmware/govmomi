@@ -211,3 +211,32 @@ load test_helper
   assert_success # using raw MO id
   grep "invalid NetworkMapping.Name" <<<"$output"
 }
+
+@test "import properties" {
+  vcsim_env
+
+  ovf=../../ovf/fixtures/properties.ovf
+
+  govc import.spec $ovf | grep -q -v nfs_mount
+
+  options=$(govc import.spec -hidden $ovf)
+
+  grep -q -v vm.name <<<"$options"
+  grep -q nfs_mount <<<"$options"
+
+  run govc import.ovf -name "$(new_id)" -options - "$ovf" <<<"$options"
+  assert_success # hidden options but no value changes
+
+  run govc import.ovf -options - "$ovf" <<<"${options//transfer/other}"
+  assert_failure # userConfigurable=false
+
+  id=$(new_id)
+  run govc import.ovf -name "$id" -hidden -options - "$ovf" <<<"${options//transfer/other}"
+  assert_success # userConfigurable=true
+
+  config=$(govc object.collect -o -json "vm/$id" | jq .config.vAppConfig)
+  name=$(jq -r .product[0].name <<<"$config")
+  version=$(jq -r .product[0].version <<<"$config")
+  assert_equal ttylinux "$name"
+  assert_equal 16.1 "$version"
+}

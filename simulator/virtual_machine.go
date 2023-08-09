@@ -141,6 +141,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 		InstanceUuid:      newUUID(strings.ToUpper(spec.Files.VmPathName)),
 		Version:           esx.HardwareVersion,
 		Firmware:          string(types.GuestOsDescriptorFirmwareTypeBios),
+		VAppConfig:        spec.VAppConfig,
 		Files: &types.VirtualMachineFileInfo{
 			SnapshotDirectory: dsPath,
 			SuspendDirectory:  dsPath,
@@ -337,18 +338,20 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 
 // updateVAppProperty updates the simulator VM with the specified VApp properties.
 func (vm *VirtualMachine) updateVAppProperty(spec *types.VmConfigSpec) types.BaseMethodFault {
-	ps := make([]types.VAppPropertyInfo, 0)
-
-	if vm.Config.VAppConfig != nil && vm.Config.VAppConfig.GetVmConfigInfo() != nil {
-		ps = vm.Config.VAppConfig.GetVmConfigInfo().Property
+	if vm.Config.VAppConfig == nil {
+		vm.Config.VAppConfig = &types.VmConfigInfo{}
 	}
+
+	info := vm.Config.VAppConfig.GetVmConfigInfo()
+	propertyInfo := info.Property
+	productInfo := info.Product
 
 	for _, prop := range spec.Property {
 		var foundIndex int
 		exists := false
 		// Check if the specified property exists or not. This helps rejecting invalid
 		// operations (e.g., Adding a VApp property that already exists)
-		for i, p := range ps {
+		for i, p := range propertyInfo {
 			if p.Key == prop.Info.Key {
 				exists = true
 				foundIndex = i
@@ -361,25 +364,54 @@ func (vm *VirtualMachine) updateVAppProperty(spec *types.VmConfigSpec) types.Bas
 			if exists {
 				return new(types.InvalidArgument)
 			}
-			ps = append(ps, *prop.Info)
+			propertyInfo = append(propertyInfo, *prop.Info)
 		case types.ArrayUpdateOperationEdit:
 			if !exists {
 				return new(types.InvalidArgument)
 			}
-			ps[foundIndex] = *prop.Info
+			propertyInfo[foundIndex] = *prop.Info
 		case types.ArrayUpdateOperationRemove:
 			if !exists {
 				return new(types.InvalidArgument)
 			}
-			ps = append(ps[:foundIndex], ps[foundIndex+1:]...)
+			propertyInfo = append(propertyInfo[:foundIndex], propertyInfo[foundIndex+1:]...)
 		}
 	}
 
-	if vm.Config.VAppConfig == nil {
-		vm.Config.VAppConfig = &types.VmConfigInfo{}
+	for _, prod := range spec.Product {
+		var foundIndex int
+		exists := false
+		// Check if the specified product exists or not. This helps rejecting invalid
+		// operations (e.g., Adding a VApp product that already exists)
+		for i, p := range productInfo {
+			if p.Key == prod.Info.Key {
+				exists = true
+				foundIndex = i
+				break
+			}
+		}
+
+		switch prod.Operation {
+		case types.ArrayUpdateOperationAdd:
+			if exists {
+				return new(types.InvalidArgument)
+			}
+			productInfo = append(productInfo, *prod.Info)
+		case types.ArrayUpdateOperationEdit:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			productInfo[foundIndex] = *prod.Info
+		case types.ArrayUpdateOperationRemove:
+			if !exists {
+				return new(types.InvalidArgument)
+			}
+			productInfo = append(productInfo[:foundIndex], productInfo[foundIndex+1:]...)
+		}
 	}
 
-	vm.Config.VAppConfig.GetVmConfigInfo().Property = ps
+	info.Product = productInfo
+	info.Property = propertyInfo
 
 	return nil
 }

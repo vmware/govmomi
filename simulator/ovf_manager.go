@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -111,6 +111,7 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 
 	ds := ctx.Map.Get(req.Datastore).(*Datastore)
 	path := object.DatastorePath{Datastore: ds.Name}
+	vapp := &types.VAppConfigSpec{}
 	spec := &types.VirtualMachineImportSpec{
 		ConfigSpec: types.VirtualMachineConfigSpec{
 			Name:    req.Cisp.EntityName,
@@ -122,8 +123,57 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 			NumCPUs:           1,
 			NumCoresPerSocket: 1,
 			MemoryMB:          32,
+			VAppConfig:        vapp,
 		},
 		ResPoolEntity: &req.ResourcePool,
+	}
+
+	index := 0
+	for i, product := range env.VirtualSystem.Product {
+		vapp.Product = append(vapp.Product, types.VAppProductSpec{
+			ArrayUpdateSpec: types.ArrayUpdateSpec{
+				Operation: types.ArrayUpdateOperationAdd,
+			},
+			Info: &types.VAppProductInfo{
+				Key:        int32(i),
+				ClassId:    toString(product.Class),
+				InstanceId: toString(product.Instance),
+				Name:       product.Product,
+				Vendor:     product.Vendor,
+				Version:    product.Version,
+			},
+		})
+
+		for _, p := range product.Property {
+			key := product.Key(p)
+			val := ""
+
+			for _, m := range req.Cisp.PropertyMapping {
+				if m.Key == key {
+					val = m.Value
+				}
+			}
+
+			vapp.Property = append(vapp.Property, types.VAppPropertySpec{
+				ArrayUpdateSpec: types.ArrayUpdateSpec{
+					Operation: types.ArrayUpdateOperationAdd,
+				},
+				Info: &types.VAppPropertyInfo{
+					Key:              int32(index),
+					ClassId:          toString(product.Class),
+					InstanceId:       toString(product.Instance),
+					Id:               p.Key,
+					Category:         product.Category,
+					Label:            toString(p.Label),
+					Type:             p.Type,
+					UserConfigurable: p.UserConfigurable,
+					DefaultValue:     toString(p.Default),
+					Value:            val,
+					Description:      toString(p.Description),
+				},
+			})
+			index++
+		}
 	}
 
 	if req.Cisp.DeploymentOption == "" && env.DeploymentOption != nil {
