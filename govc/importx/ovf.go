@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@ limitations under the License.
 package importx
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"flag"
@@ -47,6 +48,7 @@ type ovfx struct {
 
 	Name           string
 	VerifyManifest bool
+	Hidden         bool
 
 	Client       *vim25.Client
 	Datacenter   *object.Datacenter
@@ -77,6 +79,7 @@ func (cmd *ovfx) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.StringVar(&cmd.Name, "name", "", "Name to use for new entity")
 	f.BoolVar(&cmd.VerifyManifest, "m", false, "Verify checksum of uploaded files against manifest (.mf)")
+	f.BoolVar(&cmd.Hidden, "hidden", false, "Enable hidden properties")
 }
 
 func (cmd *ovfx) Process(ctx context.Context) error {
@@ -242,6 +245,13 @@ func (cmd *ovfx) Import(fpath string) (*types.ManagedObjectReference, error) {
 		name = e.VirtualSystem.ID
 		if e.VirtualSystem.Name != nil {
 			name = *e.VirtualSystem.Name
+		}
+
+		if cmd.Hidden {
+			// TODO: userConfigurable is optional and defaults to false, so we should *add* userConfigurable=true
+			// if not set for a Property. But, there'd be a bunch more work involved to preserve other data in doing
+			// a complete xml.Marshal of the .ovf
+			o = bytes.ReplaceAll(o, []byte(`userConfigurable="false"`), []byte(`userConfigurable="true"`))
 		}
 	}
 

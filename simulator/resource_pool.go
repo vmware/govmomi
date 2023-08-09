@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -217,59 +217,98 @@ func (p *ResourcePool) ImportVApp(ctx *Context, req *types.ImportVApp) soap.HasF
 		folder = ctx.Map.Get(*req.Folder).(*Folder)
 	}
 
-	res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
-		This:   folder.Self,
-		Config: spec.ConfigSpec,
-		Pool:   p.Self,
-		Host:   req.Host,
-	})
-
-	ctask := ctx.Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
-	ctask.Wait()
-
-	if ctask.Info.Error != nil {
-		body.Fault_ = Fault("", ctask.Info.Error.Fault)
-		return body
-	}
-
-	lease := NewHttpNfcLease(ctx, ctask.Info.Result.(types.ManagedObjectReference))
+	lease := newHttpNfcLease(ctx)
 	ref := lease.Reference()
-	lease.Info.Lease = ref
 
-	vm := ctx.Map.Get(lease.Info.Entity).(*VirtualMachine)
-	device := object.VirtualDeviceList(vm.Config.Hardware.Device)
-	ndevice := make(map[string]int)
-	for _, d := range device {
-		info, ok := d.GetVirtualDevice().Backing.(types.BaseVirtualDeviceFileBackingInfo)
-		if !ok {
-			continue
+	CreateTask(p, "ImportVAppLRO", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		if vapp, ok := spec.ConfigSpec.VAppConfig.(*types.VAppConfigSpec); ok {
+			for _, p := range vapp.Property {
+				if p.Info == nil || isTrue(p.Info.UserConfigurable) {
+					continue
+				}
+
+				if p.Info.Value == "" || p.Info.Value == p.Info.DefaultValue {
+					continue
+				}
+
+				fault := &types.NotUserConfigurableProperty{
+					VAppPropertyFault: types.VAppPropertyFault{
+						Id:       p.Info.Id,
+						Category: p.Info.Category,
+						Label:    p.Info.Label,
+						Type:     p.Info.Type,
+						Value:    p.Info.Value,
+					},
+				}
+
+				lease.error(ctx, &types.LocalizedMethodFault{
+					LocalizedMessage: fmt.Sprintf("Property %s.%s is not user configurable", p.Info.ClassId, p.Info.Id),
+					Fault:            fault,
+				})
+
+				return nil, fault
+			}
 		}
-		var file object.DatastorePath
-		file.FromString(info.GetVirtualDeviceFileBackingInfo().FileName)
-		name := path.Base(file.Path)
-		ds := vm.findDatastore(file.Datastore)
-		lease.files[name] = path.Join(ds.Info.GetDatastoreInfo().Url, file.Path)
 
-		_, disk := d.(*types.VirtualDisk)
-		kind := device.Type(d)
-		n := ndevice[kind]
-		ndevice[kind]++
-
-		lease.Info.DeviceUrl = append(lease.Info.DeviceUrl, types.HttpNfcLeaseDeviceUrl{
-			Key:       fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
-			ImportKey: fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
-			Url: (&url.URL{
-				Scheme: "https",
-				Host:   "*",
-				Path:   nfcPrefix + path.Join(ref.Value, name),
-			}).String(),
-			SslThumbprint: "",
-			Disk:          types.NewBool(disk),
-			TargetId:      name,
-			DatastoreKey:  "",
-			FileSize:      0,
+		res := folder.CreateVMTask(ctx, &types.CreateVM_Task{
+			This:   folder.Self,
+			Config: spec.ConfigSpec,
+			Pool:   p.Self,
+			Host:   req.Host,
 		})
-	}
+
+		ctask := ctx.Map.Get(res.(*methods.CreateVM_TaskBody).Res.Returnval).(*Task)
+		ctask.Wait()
+
+		if ctask.Info.Error != nil {
+			lease.error(ctx, ctask.Info.Error)
+			return nil, ctask.Info.Error.Fault
+		}
+
+		mref := ctask.Info.Result.(types.ManagedObjectReference)
+		vm := ctx.Map.Get(mref).(*VirtualMachine)
+		device := object.VirtualDeviceList(vm.Config.Hardware.Device)
+		ndevice := make(map[string]int)
+		var urls []types.HttpNfcLeaseDeviceUrl
+
+		for _, d := range device {
+			info, ok := d.GetVirtualDevice().Backing.(types.BaseVirtualDeviceFileBackingInfo)
+			if !ok {
+				continue
+			}
+			var file object.DatastorePath
+			file.FromString(info.GetVirtualDeviceFileBackingInfo().FileName)
+			name := path.Base(file.Path)
+			ds := vm.findDatastore(file.Datastore)
+			lease.files[name] = path.Join(ds.Info.GetDatastoreInfo().Url, file.Path)
+
+			_, disk := d.(*types.VirtualDisk)
+			kind := device.Type(d)
+			n := ndevice[kind]
+			ndevice[kind]++
+
+			urls = append(urls, types.HttpNfcLeaseDeviceUrl{
+				Key:       fmt.Sprintf("/%s/%s:%d", vm.Self.Value, kind, n),
+				ImportKey: fmt.Sprintf("/%s/%s:%d", vm.Name, kind, n),
+				Url: (&url.URL{
+					Scheme: "https",
+					Host:   "*",
+					Path:   nfcPrefix + path.Join(ref.Value, name),
+				}).String(),
+				SslThumbprint: "",
+				Disk:          types.NewBool(disk),
+				TargetId:      name,
+				DatastoreKey:  "",
+				FileSize:      0,
+			})
+		}
+
+		lease.ready(ctx, mref, urls)
+
+		// TODO: keep this task running until lease timeout or marked completed by the client
+
+		return nil, nil
+	}).Run(ctx)
 
 	body.Res = &types.ImportVAppResponse{
 		Returnval: ref,
