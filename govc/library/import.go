@@ -168,7 +168,9 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 	session, err := m.CreateLibraryItemUpdateSession(ctx, library.Session{
 		LibraryItemID: cmd.ID,
 	})
-
+	if err != nil {
+		return err
+	}
 	if cmd.pull {
 		_, err = m.AddLibraryItemFileFromURI(ctx, session, filepath.Base(file), file)
 		if err != nil {
