@@ -168,6 +168,15 @@ func (m FileManager) TransferURL(ctx context.Context, u string) (*url.URL, error
 		return turl, nil // won't matter if the VM was powered off since the call to InitiateFileTransfer will fail
 	}
 
+	// VC supports the use of a Unix domain socket for guest file transfers.
+	if internal.UsingEnvoySidecar(m.c) {
+		// Rewrite the URL in the format unix://
+		// Reciever must use a custom dialer.
+		// Nil check performed above, so Host is safe to access.
+		return internal.HostGatewayTransferURL(turl, *vm.Runtime.Host), nil
+	}
+
+	// Determine host thumbprint, address etc. to be able to trust host.
 	props := []string{
 		"name",
 		"runtime.connectionState",
