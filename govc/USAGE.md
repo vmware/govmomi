@@ -586,10 +586,14 @@ Usage: govc cluster.module.rm [OPTIONS] ID
 
 Delete cluster module ID.
 
+If ID is "-", read a list from stdin.
+
 Examples:
   govc cluster.module.rm module_id
+  govc cluster.module.rm - < input-file.txt
 
 Options:
+  -ignore-not-found=false  Treat "404 Not Found" as a successful delete.
 ```
 
 ## cluster.module.vm.add

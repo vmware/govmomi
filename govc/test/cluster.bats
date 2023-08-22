@@ -326,6 +326,30 @@ _EOF_
 
   run govc cluster.module.ls -id $id
   assert_failure
+
+  run govc cluster.module.rm "does_not_exist"
+  assert_failure
+
+  run govc cluster.module.rm --ignore-not-found "does_not_exist"
+  assert_success
+
+  run govc cluster.module.create -cluster DC0_C0
+  assert_success
+
+  id="$output"
+
+  run govc cluster.module.create -cluster DC0_C0
+  assert_success
+
+  id2="$output"
+
+  run govc cluster.module.rm --ignore-not-found "-" <<_EOF_
+$id
+does_not_exist
+$id2
+_EOF_
+  assert_success
+
 }
 
 @test "cluster.mv" {
