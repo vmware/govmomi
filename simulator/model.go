@@ -477,10 +477,11 @@ func (m *Model) Create() error {
 	ctx := SpoofContext()
 	m.Service = New(NewServiceInstance(ctx, m.ServiceContent, m.RootFolder))
 	ctx.Map = Map
-	return m.CreateInfrastructure(ctx, m.Service.client)
+	return m.CreateInfrastructure(ctx)
 }
 
-func (m *Model) CreateInfrastructure(ctx *Context, client *vim25.Client) error {
+func (m *Model) CreateInfrastructure(ctx *Context) error {
+	client := m.Service.client
 	root := object.NewRootFolder(client)
 
 	// After all hosts are created, this var is used to mount the host datastores.
