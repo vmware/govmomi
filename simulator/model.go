@@ -477,7 +477,10 @@ func (m *Model) Create() error {
 	ctx := SpoofContext()
 	m.Service = New(NewServiceInstance(ctx, m.ServiceContent, m.RootFolder))
 	ctx.Map = Map
+	return m.CreateInfrastructure(ctx)
+}
 
+func (m *Model) CreateInfrastructure(ctx *Context) error {
 	client := m.Service.client
 	root := object.NewRootFolder(client)
 
