@@ -85,6 +85,8 @@ func (cmd *tree) Process(ctx context.Context) error {
 
 func (cmd *tree) write(level int, parent string, pref *types.ManagedObjectReference, st []types.VirtualMachineSnapshotTree) {
 	for _, s := range st {
+		s := s // avoid implicit memory aliasing
+
 		sname := s.Name
 
 		if cmd.fullPath && parent != "" {
