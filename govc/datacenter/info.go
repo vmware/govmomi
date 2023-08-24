@@ -163,7 +163,7 @@ func (r *infoResult) Write(w io.Writer) error {
 
 		manager := view.NewManager(r.client)
 
-		v, err := manager.CreateContainerView(r.ctx, r.client.ServiceContent.RootFolder, []string{"VirtualMachine"}, true)
+		v, err := manager.CreateContainerView(r.ctx, o.Reference(), []string{"VirtualMachine"}, true)
 		if err != nil {
 			return err
 		}
