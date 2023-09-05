@@ -109,6 +109,8 @@ import (
 	_ "github.com/vmware/govmomi/govc/vm/option"
 	_ "github.com/vmware/govmomi/govc/vm/rdm"
 	_ "github.com/vmware/govmomi/govc/vm/snapshot"
+	_ "github.com/vmware/govmomi/govc/vm/tpm2"
+	_ "github.com/vmware/govmomi/govc/vm/tpm2/cert"
 	_ "github.com/vmware/govmomi/govc/volume"
 	_ "github.com/vmware/govmomi/govc/volume/snapshot"
 	_ "github.com/vmware/govmomi/govc/vsan"

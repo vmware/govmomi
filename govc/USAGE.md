@@ -358,6 +358,9 @@ but appear via `govc $cmd -h`:
  - [vm.rdm.attach](#vmrdmattach)
  - [vm.rdm.ls](#vmrdmls)
  - [vm.register](#vmregister)
+ - [vm.tpm2.cert.get](#vmtpm2certget)
+ - [vm.tpm2.cert.ls](#vmtpm2certls)
+ - [vm.tpm2.seal](#vmtpm2seal)
  - [vm.unregister](#vmunregister)
  - [vm.upgrade](#vmupgrade)
  - [vm.vnc](#vmvnc)
@@ -6282,6 +6285,55 @@ Options:
   -name=                 Name of the VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -template=false        Mark VM as template
+```
+
+## vm.tpm2.cert.get
+
+```
+Usage: govc vm.tpm2.cert.get [OPTIONS]
+
+Get certificate by fingerprint.
+
+Examples:
+  govc vm.tpm2.cert.get -vm VM -fingerprint 41:5D:F1:AE:B9:F2:B1:22:9F:79:B7:FF:DA:55:5B:86
+
+Options:
+  -fingerprint=          Fingerprint of cert to get. Use vm.tpm2.ls to see available certs."
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.tpm2.cert.ls
+
+```
+Usage: govc vm.tpm2.cert.ls [OPTIONS]
+
+List endorsement key certificates.
+
+Examples:
+  govc vm.tpm2.cert.ls -vm VM
+  govc vm.tpm2.cert.ls -vm VM -G ecc
+
+Options:
+  -G=                    Public key algorithm. Either "rsa", "ecc", or "ecdsa"
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.tpm2.seal
+
+```
+Usage: govc vm.tpm2.seal [OPTIONS]
+
+Seal plain-text data to the VM's TPM2 endorsement key.
+
+Examples:
+  govc vm.tpm2.seal -vm VM -in plain.txt
+  echo "Hello, world" | govc vm.tpm2.seal -vm VM
+  echo "Seal with ECC." | govc vm.tpm2.seal -vm VM -G ecc
+
+Options:
+  -G=rsa                 Public key algorithm. Either "rsa", "ecc", or "ecdsa"
+  -in=-                  Input data. Defaults to STDIN via "-"
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## vm.unregister
