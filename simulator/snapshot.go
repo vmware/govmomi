@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ import (
 
 type VirtualMachineSnapshot struct {
 	mo.VirtualMachineSnapshot
+	DataSets map[string]*DataSet
 }
 
 func (v *VirtualMachineSnapshot) createSnapshotFiles() types.BaseMethodFault {
@@ -158,6 +159,7 @@ func (v *VirtualMachineSnapshot) RevertToSnapshotTask(ctx *Context, req *types.R
 		vm := ctx.Map.Get(v.Vm).(*VirtualMachine)
 
 		ctx.WithLock(vm, func() {
+			vm.DataSets = copyDataSetsForVmClone(v.DataSets)
 			ctx.Map.Update(vm, []types.PropertyChange{
 				{Name: "snapshot.currentSnapshot", Val: v.Self},
 			})

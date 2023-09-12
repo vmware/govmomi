@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -50,6 +50,7 @@ import (
 	_ "github.com/vmware/govmomi/vapi/cluster/simulator"
 	_ "github.com/vmware/govmomi/vapi/namespace/simulator"
 	_ "github.com/vmware/govmomi/vapi/simulator"
+	_ "github.com/vmware/govmomi/vapi/vm/simulator"
 	_ "github.com/vmware/govmomi/vsan/simulator"
 )
 
