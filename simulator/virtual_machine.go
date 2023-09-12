@@ -43,6 +43,7 @@ import (
 
 type VirtualMachine struct {
 	mo.VirtualMachine
+	DataSets map[string]*DataSet
 
 	log string
 	sid int32
@@ -165,6 +166,7 @@ func NewVirtualMachine(ctx *Context, parent types.ManagedObjectReference, spec *
 	vm.Summary.QuickStats.GuestHeartbeatStatus = types.ManagedEntityStatusGray
 	vm.Summary.OverallStatus = types.ManagedEntityStatusGreen
 	vm.ConfigStatus = types.ManagedEntityStatusGreen
+	vm.DataSets = make(map[string]*DataSet)
 
 	// put vm in the folder only if no errors occurred
 	f, _ := asFolderMO(folder)
@@ -2011,6 +2013,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		}
 		config := types.VirtualMachineConfigSpec{
 			Name:    req.Name,
+			Version: vm.Config.Version,
 			GuestId: vm.Config.GuestId,
 			Files: &types.VirtualMachineFileInfo{
 				VmPathName: vmx.String(),
@@ -2075,6 +2078,7 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 		if req.Spec.Config != nil && req.Spec.Config.DeviceChange != nil {
 			clone.configureDevices(ctx, &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.Config.DeviceChange})
 		}
+		clone.DataSets = copyDataSetsForVmClone(vm.DataSets)
 
 		if req.Spec.Template {
 			_ = clone.MarkAsTemplate(&types.MarkAsTemplate{This: clone.Self})
@@ -2280,6 +2284,7 @@ func (vm *VirtualMachine) CreateSnapshotTask(ctx *Context, req *types.CreateSnap
 		snapshot := &VirtualMachineSnapshot{}
 		snapshot.Vm = vm.Reference()
 		snapshot.Config = *vm.Config
+		snapshot.DataSets = copyDataSetsForVmClone(vm.DataSets)
 
 		ctx.Map.Put(snapshot)
 
@@ -2337,8 +2342,10 @@ func (vm *VirtualMachine) RevertToCurrentSnapshotTask(ctx *Context, req *types.R
 
 		return body
 	}
+	snapshot := ctx.Map.Get(*vm.Snapshot.CurrentSnapshot).(*VirtualMachineSnapshot)
 
 	task := CreateTask(vm, "revertSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		vm.DataSets = copyDataSetsForVmClone(snapshot.DataSets)
 		return nil, nil
 	})
 
