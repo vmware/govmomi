@@ -220,6 +220,10 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 			if cmd.ResourcePool, err = cmd.ResourcePoolFlag.ResourcePool(); err != nil {
 				return err
 			}
+		} else {
+			if cmd.ResourcePool, err = cmd.Cluster.ResourcePool(ctx); err != nil {
+				return err
+			}
 		}
 	}
 
