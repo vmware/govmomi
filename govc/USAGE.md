@@ -339,6 +339,15 @@ but appear via `govc $cmd -h`:
  - [vm.console](#vmconsole)
  - [vm.create](#vmcreate)
  - [vm.customize](#vmcustomize)
+ - [vm.dataset.create](#vmdatasetcreate)
+ - [vm.dataset.entry.get](#vmdatasetentryget)
+ - [vm.dataset.entry.ls](#vmdatasetentryls)
+ - [vm.dataset.entry.rm](#vmdatasetentryrm)
+ - [vm.dataset.entry.set](#vmdatasetentryset)
+ - [vm.dataset.info](#vmdatasetinfo)
+ - [vm.dataset.ls](#vmdatasetls)
+ - [vm.dataset.rm](#vmdatasetrm)
+ - [vm.dataset.update](#vmdatasetupdate)
  - [vm.destroy](#vmdestroy)
  - [vm.disk.attach](#vmdiskattach)
  - [vm.disk.change](#vmdiskchange)
@@ -5851,6 +5860,154 @@ Options:
   -type=Linux            Customization type if spec NAME is not specified (Linux|Windows)
   -tz=                   Time zone
   -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.create
+
+```
+Usage: govc vm.dataset.create [OPTIONS] NAME
+
+Create data set on a VM.
+
+This command will output the ID of the new data set.
+
+Examples:
+  govc vm.dataset.create -vm $vm -d "Data set for project 2" -host-access READ_WRITE -guest-access READ_ONLY com.example.project2
+  govc vm.dataset.create -vm $vm -d "Data set for project 3" -omit-from-snapshot=false com.example.project3
+
+Options:
+  -d=                        Description
+  -guest-access=READ_WRITE   Access to the data set entries from the VM guest OS (NONE|READ_ONLY|READ_WRITE)
+  -host-access=READ_WRITE    Access to the data set entries from the ESXi host and the vCenter (NONE|READ_ONLY|READ_WRITE)
+  -omit-from-snapshot=<nil>  Omit the data set from snapshots and clones of the VM (defaults to false)
+  -vm=                       Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.entry.get
+
+```
+Usage: govc vm.dataset.entry.get [OPTIONS] KEY
+
+Read the value of a data set entry.
+
+Examples:
+  govc vm.dataset.entry.get -vm $vm -dataset com.example.project2 somekey
+
+Options:
+  -dataset=              Data set name or ID
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.entry.ls
+
+```
+Usage: govc vm.dataset.entry.ls [OPTIONS]
+
+List the keys of the entries in a data set.
+
+Examples:
+  govc vm.dataset.entry.ls -vm $vm -dataset com.example.project2
+
+Options:
+  -dataset=              Data set name or ID
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.entry.rm
+
+```
+Usage: govc vm.dataset.entry.rm [OPTIONS] KEY
+
+Delete data set entry.
+
+Examples:
+  govc vm.dataset.entry.rm -vm $vm -dataset com.example.project2 somekey
+
+Options:
+  -dataset=              Data set name or ID
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.entry.set
+
+```
+Usage: govc vm.dataset.entry.set [OPTIONS] KEY VALUE
+
+Set the value of a data set entry.
+
+Examples:
+  govc vm.dataset.entry.set -vm $vm -dataset com.example.project2 somekey somevalue
+
+Options:
+  -dataset=              Data set name or ID
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.info
+
+```
+Usage: govc vm.dataset.info [OPTIONS] NAME
+
+Display data set information.
+
+Examples:
+  govc vm.dataset.info -vm $vm
+  govc vm.dataset.info -vm $vm com.example.project2
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.ls
+
+```
+Usage: govc vm.dataset.ls [OPTIONS]
+
+List datasets.
+
+Examples:
+  govc vm.dataset.ls -vm $vm
+  govc vm.dataset.ls -vm $vm -json | jq '.[].description'
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.rm
+
+```
+Usage: govc vm.dataset.rm [OPTIONS] NAME
+
+Delete data set.
+
+Fails if the data set has entries, unless the '-force' flag is set.
+
+Examples:
+  govc vm.dataset.rm -vm $vm com.example.project2
+  govc vm.dataset.rm -vm $vm -force=true com.example.project3
+
+Options:
+  -force=false           Delete the data set even if it has entries
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.dataset.update
+
+```
+Usage: govc vm.dataset.update [OPTIONS] NAME
+
+Update data set.
+	
+Examples:
+  govc vm.dataset.update -vm $vm -d "New description." -guest-access READ_ONLY com.example.project2
+  govc vm.dataset.update -vm $vm -omit-from-snapshot=false com.example.project3
+
+Options:
+  -d=                        Description
+  -guest-access=             Access to the data set entries from the VM guest OS (NONE|READ_ONLY|READ_WRITE)
+  -host-access=              Access to the data set entries from the ESXi host and the vCenter (NONE|READ_ONLY|READ_WRITE)
+  -omit-from-snapshot=<nil>  Omit the data set from snapshots and clones of the VM
+  -vm=                       Virtual machine [GOVC_VM]
 ```
 
 ## vm.destroy
