@@ -96,6 +96,7 @@ but appear via `govc $cmd -h`:
  - [device.floppy.insert](#devicefloppyinsert)
  - [device.info](#deviceinfo)
  - [device.ls](#devicels)
+ - [device.model.tree](#devicemodeltree)
  - [device.pci.add](#devicepciadd)
  - [device.pci.ls](#devicepcils)
  - [device.pci.remove](#devicepciremove)
@@ -1442,6 +1443,23 @@ Examples:
 Options:
   -boot=false            List devices configured in the VM's boot options
   -vm=                   Virtual machine [GOVC_VM]
+```
+
+## device.model.tree
+
+```
+Usage: govc device.model.tree [OPTIONS]
+
+Print the device model as a tree.
+
+Examples:
+  govc device.model.tree
+  govc device.model.tree VirtualEthernetCard
+  govc device.model.tree -backings
+  govc device.model.tree -backings VirtualDiskRawDiskVer2BackingInfo
+
+Options:
+  -backings=false  Print the devices backings
 ```
 
 ## device.pci.add
