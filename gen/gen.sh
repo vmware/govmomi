@@ -80,7 +80,7 @@ update_vim_version "${VIM_VERSION}"
 #
 # All types derive from vSphere 8.0 GA, vcenter-all build 20519528.
 #
-export COPYRIGHT_DATE_RANGE="2014-2022"
+export COPYRIGHT_DATE_RANGE="2014-2023"
 
 #
 # FORCE_BASE_INTERFACE_FOR_TYPES defines the types that we want to

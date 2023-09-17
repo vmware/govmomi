@@ -16,12 +16,22 @@ $:.unshift(File.expand_path(File.dirname(__FILE__)))
 
 require "vim_wsdl"
 
+require "yaml"
+
 if !File.directory?(ARGV.first)
   raise "first argument not a directory"
 end
 
 target = ARGV[1]
-wsdl = WSDL.new(WSDL.read target+".wsdl")
+
+# Load the vijson yaml to fetch vijson schemas.
+vijson_path = File.join(File.expand_path("../sdk", __FILE__), target+".yaml")
+vijson = nil
+if File.exists?(vijson_path)
+  vijson = YAML::load(File.open(vijson_path))["components"]["schemas"]
+end
+
+wsdl = WSDL.new(WSDL.read(target+".wsdl"), vijson)
 wsdl.validate_assumptions!
 wsdl.peek()
 

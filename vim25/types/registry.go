@@ -21,7 +21,17 @@ import (
 	"strings"
 )
 
-var t = map[string]reflect.Type{}
+var (
+	t = map[string]reflect.Type{}
+
+	// minAPIVersionForType is used to lookup the minimum API version for which
+	// a type is valid.
+	minAPIVersionForType = map[string]string{}
+
+	// minAPIVersionForEnumValue is used to lookup the minimum API version for
+	// which an enum value is valid.
+	minAPIVersionForEnumValue = map[string]map[string]string{}
+)
 
 func Add(name string, kind reflect.Type) {
 	t[name] = kind
