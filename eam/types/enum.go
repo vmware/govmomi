@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -101,4 +101,82 @@ const (
 
 func init() {
 	types.Add("eam:EsxAgentManagerMaintenanceModePolicy", reflect.TypeOf((*EsxAgentManagerMaintenanceModePolicy)(nil)).Elem())
+}
+
+type HooksExternalProcessingResult string
+
+const (
+	HooksExternalProcessingResultSUCCESS         = HooksExternalProcessingResult("SUCCESS")
+	HooksExternalProcessingResultUNKNOWN_ERROR   = HooksExternalProcessingResult("UNKNOWN_ERROR")
+	HooksExternalProcessingResultVM_CONFIG_ERROR = HooksExternalProcessingResult("VM_CONFIG_ERROR")
+)
+
+func init() {
+	types.Add("eam:HooksExternalProcessingResult", reflect.TypeOf((*HooksExternalProcessingResult)(nil)).Elem())
+}
+
+type HooksHookType string
+
+const (
+	HooksHookTypePOST_PROVISIONING = HooksHookType("POST_PROVISIONING")
+	HooksHookTypePRE_POWER_ON      = HooksHookType("PRE_POWER_ON")
+	HooksHookTypePOST_POWER_ON     = HooksHookType("POST_POWER_ON")
+)
+
+func init() {
+	types.Add("eam:HooksHookType", reflect.TypeOf((*HooksHookType)(nil)).Elem())
+}
+
+type SolutionsInvalidReason string
+
+const (
+	SolutionsInvalidReasonINVALID_OVF_DESCRIPTOR = SolutionsInvalidReason("INVALID_OVF_DESCRIPTOR")
+	SolutionsInvalidReasonINACCESSBLE_VM_SOURCE  = SolutionsInvalidReason("INACCESSBLE_VM_SOURCE")
+	SolutionsInvalidReasonINVALID_NETWORKS       = SolutionsInvalidReason("INVALID_NETWORKS")
+	SolutionsInvalidReasonINVALID_DATASTORES     = SolutionsInvalidReason("INVALID_DATASTORES")
+	SolutionsInvalidReasonINVALID_RESOURCE_POOL  = SolutionsInvalidReason("INVALID_RESOURCE_POOL")
+	SolutionsInvalidReasonINVALID_FOLDER         = SolutionsInvalidReason("INVALID_FOLDER")
+	SolutionsInvalidReasonINVALID_PROPERTIES     = SolutionsInvalidReason("INVALID_PROPERTIES")
+	SolutionsInvalidReasonINVALID_TRANSITION     = SolutionsInvalidReason("INVALID_TRANSITION")
+)
+
+func init() {
+	types.Add("eam:SolutionsInvalidReason", reflect.TypeOf((*SolutionsInvalidReason)(nil)).Elem())
+}
+
+type SolutionsNonComplianceReason string
+
+const (
+	SolutionsNonComplianceReasonWORKING       = SolutionsNonComplianceReason("WORKING")
+	SolutionsNonComplianceReasonISSUE         = SolutionsNonComplianceReason("ISSUE")
+	SolutionsNonComplianceReasonIN_HOOK       = SolutionsNonComplianceReason("IN_HOOK")
+	SolutionsNonComplianceReasonOBSOLETE_SPEC = SolutionsNonComplianceReason("OBSOLETE_SPEC")
+	SolutionsNonComplianceReasonNO_SPEC       = SolutionsNonComplianceReason("NO_SPEC")
+)
+
+func init() {
+	types.Add("eam:SolutionsNonComplianceReason", reflect.TypeOf((*SolutionsNonComplianceReason)(nil)).Elem())
+}
+
+type SolutionsVMDeploymentOptimization string
+
+const (
+	SolutionsVMDeploymentOptimizationALL_CLONES       = SolutionsVMDeploymentOptimization("ALL_CLONES")
+	SolutionsVMDeploymentOptimizationFULL_CLONES_ONLY = SolutionsVMDeploymentOptimization("FULL_CLONES_ONLY")
+	SolutionsVMDeploymentOptimizationNO_CLONES        = SolutionsVMDeploymentOptimization("NO_CLONES")
+)
+
+func init() {
+	types.Add("eam:SolutionsVMDeploymentOptimization", reflect.TypeOf((*SolutionsVMDeploymentOptimization)(nil)).Elem())
+}
+
+type SolutionsVMDiskProvisioning string
+
+const (
+	SolutionsVMDiskProvisioningTHIN  = SolutionsVMDiskProvisioning("THIN")
+	SolutionsVMDiskProvisioningTHICK = SolutionsVMDiskProvisioning("THICK")
+)
+
+func init() {
+	types.Add("eam:SolutionsVMDiskProvisioning", reflect.TypeOf((*SolutionsVMDiskProvisioning)(nil)).Elem())
 }

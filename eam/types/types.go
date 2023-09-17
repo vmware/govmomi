@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -381,12 +381,100 @@ func init() {
 	types.Add("eam:ArrayOfAgentVibMatchingRule", reflect.TypeOf((*ArrayOfAgentVibMatchingRule)(nil)).Elem())
 }
 
+type ArrayOfHooksHookInfo struct {
+	HooksHookInfo []HooksHookInfo `xml:"HooksHookInfo,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfHooksHookInfo", reflect.TypeOf((*ArrayOfHooksHookInfo)(nil)).Elem())
+}
+
 type ArrayOfIssue struct {
 	Issue []BaseIssue `xml:"Issue,omitempty,typeattr" json:"_value"`
 }
 
 func init() {
 	types.Add("eam:ArrayOfIssue", reflect.TypeOf((*ArrayOfIssue)(nil)).Elem())
+}
+
+type ArrayOfSolutionsHookConfig struct {
+	SolutionsHookConfig []SolutionsHookConfig `xml:"SolutionsHookConfig,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsHookConfig", reflect.TypeOf((*ArrayOfSolutionsHookConfig)(nil)).Elem())
+}
+
+type ArrayOfSolutionsHostApplicationResult struct {
+	SolutionsHostApplicationResult []SolutionsHostApplicationResult `xml:"SolutionsHostApplicationResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsHostApplicationResult", reflect.TypeOf((*ArrayOfSolutionsHostApplicationResult)(nil)).Elem())
+}
+
+type ArrayOfSolutionsHostComplianceResult struct {
+	SolutionsHostComplianceResult []SolutionsHostComplianceResult `xml:"SolutionsHostComplianceResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsHostComplianceResult", reflect.TypeOf((*ArrayOfSolutionsHostComplianceResult)(nil)).Elem())
+}
+
+type ArrayOfSolutionsOvfProperty struct {
+	SolutionsOvfProperty []SolutionsOvfProperty `xml:"SolutionsOvfProperty,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsOvfProperty", reflect.TypeOf((*ArrayOfSolutionsOvfProperty)(nil)).Elem())
+}
+
+type ArrayOfSolutionsSolutionApplicationResult struct {
+	SolutionsSolutionApplicationResult []SolutionsSolutionApplicationResult `xml:"SolutionsSolutionApplicationResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsSolutionApplicationResult", reflect.TypeOf((*ArrayOfSolutionsSolutionApplicationResult)(nil)).Elem())
+}
+
+type ArrayOfSolutionsSolutionComplianceResult struct {
+	SolutionsSolutionComplianceResult []SolutionsSolutionComplianceResult `xml:"SolutionsSolutionComplianceResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsSolutionComplianceResult", reflect.TypeOf((*ArrayOfSolutionsSolutionComplianceResult)(nil)).Elem())
+}
+
+type ArrayOfSolutionsSolutionConfig struct {
+	SolutionsSolutionConfig []SolutionsSolutionConfig `xml:"SolutionsSolutionConfig,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsSolutionConfig", reflect.TypeOf((*ArrayOfSolutionsSolutionConfig)(nil)).Elem())
+}
+
+type ArrayOfSolutionsSolutionValidationResult struct {
+	SolutionsSolutionValidationResult []SolutionsSolutionValidationResult `xml:"SolutionsSolutionValidationResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsSolutionValidationResult", reflect.TypeOf((*ArrayOfSolutionsSolutionValidationResult)(nil)).Elem())
+}
+
+type ArrayOfSolutionsStoragePolicy struct {
+	SolutionsStoragePolicy []BaseSolutionsStoragePolicy `xml:"SolutionsStoragePolicy,omitempty,typeattr" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsStoragePolicy", reflect.TypeOf((*ArrayOfSolutionsStoragePolicy)(nil)).Elem())
+}
+
+type ArrayOfSolutionsTransitionInfo struct {
+	SolutionsTransitionInfo []SolutionsTransitionInfo `xml:"SolutionsTransitionInfo,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsTransitionInfo", reflect.TypeOf((*ArrayOfSolutionsTransitionInfo)(nil)).Elem())
 }
 
 type ArrayOfVibVibInfo struct {
@@ -582,12 +670,6 @@ func init() {
 	types.Add("eam:DisabledClusterFault", reflect.TypeOf((*DisabledClusterFault)(nil)).Elem())
 }
 
-type DisabledClusterFaultFault DisabledClusterFault
-
-func init() {
-	types.Add("eam:DisabledClusterFaultFault", reflect.TypeOf((*DisabledClusterFaultFault)(nil)).Elem())
-}
-
 type EamAppFault struct {
 	EamRuntimeFault
 }
@@ -650,12 +732,6 @@ type EamInvalidState struct {
 
 func init() {
 	types.Add("eam:EamInvalidState", reflect.TypeOf((*EamInvalidState)(nil)).Elem())
-}
-
-type EamInvalidStateFault EamInvalidState
-
-func init() {
-	types.Add("eam:EamInvalidStateFault", reflect.TypeOf((*EamInvalidStateFault)(nil)).Elem())
 }
 
 type EamInvalidVibPackage struct {
@@ -741,12 +817,6 @@ func init() {
 	types.Add("eam:ExtensibleIssue", reflect.TypeOf((*ExtensibleIssue)(nil)).Elem())
 }
 
-type GetMaintenanceModePolicy GetMaintenanceModePolicyRequestType
-
-func init() {
-	types.Add("eam:GetMaintenanceModePolicy", reflect.TypeOf((*GetMaintenanceModePolicy)(nil)).Elem())
-}
-
 type GetMaintenanceModePolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 }
@@ -755,8 +825,40 @@ func init() {
 	types.Add("eam:GetMaintenanceModePolicyRequestType", reflect.TypeOf((*GetMaintenanceModePolicyRequestType)(nil)).Elem())
 }
 
-type GetMaintenanceModePolicyResponse struct {
-	Returnval string `xml:"returnval" json:"returnval"`
+type HooksHookInfo struct {
+	types.DynamicData
+
+	Vm       types.ManagedObjectReference `xml:"vm" json:"vm"`
+	Solution string                       `xml:"solution" json:"solution"`
+	HookType string                       `xml:"hookType" json:"hookType"`
+	RaisedAt time.Time                    `xml:"raisedAt" json:"raisedAt"`
+}
+
+func init() {
+	types.Add("eam:HooksHookInfo", reflect.TypeOf((*HooksHookInfo)(nil)).Elem())
+}
+
+type HooksHookListSpec struct {
+	types.DynamicData
+
+	Solutions []string                       `xml:"solutions,omitempty" json:"solutions,omitempty"`
+	Hosts     []types.ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
+}
+
+func init() {
+	types.Add("eam:HooksHookListSpec", reflect.TypeOf((*HooksHookListSpec)(nil)).Elem())
+}
+
+type HooksHookProcessSpec struct {
+	types.DynamicData
+
+	Vm               types.ManagedObjectReference `xml:"vm" json:"vm"`
+	HookType         string                       `xml:"hookType" json:"hookType"`
+	ProcessingResult string                       `xml:"processingResult" json:"processingResult"`
+}
+
+func init() {
+	types.Add("eam:HooksHookProcessSpec", reflect.TypeOf((*HooksHookProcessSpec)(nil)).Elem())
 }
 
 type HostInMaintenanceMode struct {
@@ -1354,12 +1456,6 @@ func init() {
 type ScanForUnknownAgentVmResponse struct {
 }
 
-type SetMaintenanceModePolicy SetMaintenanceModePolicyRequestType
-
-func init() {
-	types.Add("eam:SetMaintenanceModePolicy", reflect.TypeOf((*SetMaintenanceModePolicy)(nil)).Elem())
-}
-
 type SetMaintenanceModePolicyRequestType struct {
 	This   types.ManagedObjectReference `xml:"_this" json:"_this"`
 	Policy string                       `xml:"policy" json:"policy"`
@@ -1369,7 +1465,268 @@ func init() {
 	types.Add("eam:SetMaintenanceModePolicyRequestType", reflect.TypeOf((*SetMaintenanceModePolicyRequestType)(nil)).Elem())
 }
 
-type SetMaintenanceModePolicyResponse struct {
+type SolutionsApplicationResult struct {
+	types.DynamicData
+
+	Hosts []SolutionsHostApplicationResult `xml:"hosts,omitempty" json:"hosts,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsApplicationResult", reflect.TypeOf((*SolutionsApplicationResult)(nil)).Elem())
+}
+
+type SolutionsApplySpec struct {
+	types.DynamicData
+
+	DesiredState  []SolutionsSolutionConfig      `xml:"desiredState,omitempty" json:"desiredState,omitempty"`
+	TransitionMap []SolutionsTransitionInfo      `xml:"transitionMap,omitempty" json:"transitionMap,omitempty"`
+	Solutions     []string                       `xml:"solutions,omitempty" json:"solutions,omitempty"`
+	Hosts         []types.ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsApplySpec", reflect.TypeOf((*SolutionsApplySpec)(nil)).Elem())
+}
+
+type SolutionsComplianceResult struct {
+	types.DynamicData
+
+	Compliant bool                            `xml:"compliant" json:"compliant"`
+	Hosts     []SolutionsHostComplianceResult `xml:"hosts,omitempty" json:"hosts,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsComplianceResult", reflect.TypeOf((*SolutionsComplianceResult)(nil)).Elem())
+}
+
+type SolutionsComplianceSpec struct {
+	types.DynamicData
+
+	DesiredState []SolutionsSolutionConfig      `xml:"desiredState,omitempty" json:"desiredState,omitempty"`
+	Solutions    []string                       `xml:"solutions,omitempty" json:"solutions,omitempty"`
+	Hosts        []types.ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsComplianceSpec", reflect.TypeOf((*SolutionsComplianceSpec)(nil)).Elem())
+}
+
+type SolutionsHookAcknowledgeConfig struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("eam:SolutionsHookAcknowledgeConfig", reflect.TypeOf((*SolutionsHookAcknowledgeConfig)(nil)).Elem())
+}
+
+type SolutionsHookConfig struct {
+	types.DynamicData
+
+	Type            string                             `xml:"type" json:"type"`
+	Acknowledgement BaseSolutionsHookAcknowledgeConfig `xml:"acknowledgement,typeattr" json:"acknowledgement"`
+}
+
+func init() {
+	types.Add("eam:SolutionsHookConfig", reflect.TypeOf((*SolutionsHookConfig)(nil)).Elem())
+}
+
+type SolutionsHostApplicationResult struct {
+	types.DynamicData
+
+	Host            types.ManagedObjectReference         `xml:"host" json:"host"`
+	Started         bool                                 `xml:"started" json:"started"`
+	HostOperational bool                                 `xml:"hostOperational" json:"hostOperational"`
+	Solutions       []SolutionsSolutionApplicationResult `xml:"solutions,omitempty" json:"solutions,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsHostApplicationResult", reflect.TypeOf((*SolutionsHostApplicationResult)(nil)).Elem())
+}
+
+type SolutionsHostBoundSolutionConfig struct {
+	SolutionsTypeSpecificSolutionConfig
+
+	PreferHostConfiguration *bool                          `xml:"preferHostConfiguration" json:"preferHostConfiguration,omitempty"`
+	Networks                []types.ManagedObjectReference `xml:"networks,omitempty" json:"networks,omitempty"`
+	Datastores              []types.ManagedObjectReference `xml:"datastores,omitempty" json:"datastores,omitempty"`
+	Vmci                    []string                       `xml:"vmci,omitempty" json:"vmci,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsHostBoundSolutionConfig", reflect.TypeOf((*SolutionsHostBoundSolutionConfig)(nil)).Elem())
+}
+
+type SolutionsHostComplianceResult struct {
+	types.DynamicData
+
+	Host      types.ManagedObjectReference        `xml:"host" json:"host"`
+	Compliant bool                                `xml:"compliant" json:"compliant"`
+	Solutions []SolutionsSolutionComplianceResult `xml:"solutions,omitempty" json:"solutions,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsHostComplianceResult", reflect.TypeOf((*SolutionsHostComplianceResult)(nil)).Elem())
+}
+
+type SolutionsInteractiveHookAcknowledgeConfig struct {
+	SolutionsHookAcknowledgeConfig
+}
+
+func init() {
+	types.Add("eam:SolutionsInteractiveHookAcknowledgeConfig", reflect.TypeOf((*SolutionsInteractiveHookAcknowledgeConfig)(nil)).Elem())
+}
+
+type SolutionsOvfProperty struct {
+	types.DynamicData
+
+	Key   string `xml:"key" json:"key"`
+	Value string `xml:"value" json:"value"`
+}
+
+func init() {
+	types.Add("eam:SolutionsOvfProperty", reflect.TypeOf((*SolutionsOvfProperty)(nil)).Elem())
+}
+
+type SolutionsProfileIdStoragePolicy struct {
+	SolutionsStoragePolicy
+
+	ProfileId string `xml:"profileId" json:"profileId"`
+}
+
+func init() {
+	types.Add("eam:SolutionsProfileIdStoragePolicy", reflect.TypeOf((*SolutionsProfileIdStoragePolicy)(nil)).Elem())
+}
+
+type SolutionsSolutionApplicationResult struct {
+	types.DynamicData
+
+	Solution   string                            `xml:"solution" json:"solution"`
+	Installing bool                              `xml:"installing" json:"installing"`
+	Validation SolutionsSolutionValidationResult `xml:"validation" json:"validation"`
+}
+
+func init() {
+	types.Add("eam:SolutionsSolutionApplicationResult", reflect.TypeOf((*SolutionsSolutionApplicationResult)(nil)).Elem())
+}
+
+type SolutionsSolutionComplianceResult struct {
+	types.DynamicData
+
+	Solution            string                        `xml:"solution" json:"solution"`
+	Compliant           bool                          `xml:"compliant" json:"compliant"`
+	Installing          bool                          `xml:"installing" json:"installing"`
+	NonComplianceReason string                        `xml:"nonComplianceReason,omitempty" json:"nonComplianceReason,omitempty"`
+	Vm                  *types.ManagedObjectReference `xml:"vm,omitempty" json:"vm,omitempty"`
+	UpgradingVm         *types.ManagedObjectReference `xml:"upgradingVm,omitempty" json:"upgradingVm,omitempty"`
+	Hook                *HooksHookInfo                `xml:"hook,omitempty" json:"hook,omitempty"`
+	Issues              []BaseIssue                   `xml:"issues,omitempty,typeattr" json:"issues,omitempty"`
+	SolutionConfig      *SolutionsSolutionConfig      `xml:"solutionConfig,omitempty" json:"solutionConfig,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsSolutionComplianceResult", reflect.TypeOf((*SolutionsSolutionComplianceResult)(nil)).Elem())
+}
+
+type SolutionsSolutionConfig struct {
+	types.DynamicData
+
+	Solution                 string                                  `xml:"solution" json:"solution"`
+	Name                     string                                  `xml:"name" json:"name"`
+	Version                  string                                  `xml:"version" json:"version"`
+	VmSource                 BaseSolutionsVMSource                   `xml:"vmSource,typeattr" json:"vmSource"`
+	UuidVmName               bool                                    `xml:"uuidVmName" json:"uuidVmName"`
+	ResourcePool             *types.ManagedObjectReference           `xml:"resourcePool,omitempty" json:"resourcePool,omitempty"`
+	Folder                   *types.ManagedObjectReference           `xml:"folder,omitempty" json:"folder,omitempty"`
+	OvfProperties            []SolutionsOvfProperty                  `xml:"ovfProperties,omitempty" json:"ovfProperties,omitempty"`
+	StoragePolicies          []BaseSolutionsStoragePolicy            `xml:"storagePolicies,omitempty,typeattr" json:"storagePolicies,omitempty"`
+	VmDiskProvisioning       string                                  `xml:"vmDiskProvisioning,omitempty" json:"vmDiskProvisioning,omitempty"`
+	VmDeploymentOptimization string                                  `xml:"vmDeploymentOptimization,omitempty" json:"vmDeploymentOptimization,omitempty"`
+	TypeSpecificConfig       BaseSolutionsTypeSpecificSolutionConfig `xml:"typeSpecificConfig,typeattr" json:"typeSpecificConfig"`
+	Hooks                    []SolutionsHookConfig                   `xml:"hooks,omitempty" json:"hooks,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsSolutionConfig", reflect.TypeOf((*SolutionsSolutionConfig)(nil)).Elem())
+}
+
+type SolutionsSolutionValidationResult struct {
+	types.DynamicData
+
+	Solution      string `xml:"solution" json:"solution"`
+	Valid         bool   `xml:"valid" json:"valid"`
+	InvalidReason string `xml:"invalidReason,omitempty" json:"invalidReason,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsSolutionValidationResult", reflect.TypeOf((*SolutionsSolutionValidationResult)(nil)).Elem())
+}
+
+type SolutionsStoragePolicy struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("eam:SolutionsStoragePolicy", reflect.TypeOf((*SolutionsStoragePolicy)(nil)).Elem())
+}
+
+type SolutionsTransitionInfo struct {
+	types.DynamicData
+
+	Solution string `xml:"solution" json:"solution"`
+	AgencyId string `xml:"agencyId" json:"agencyId"`
+}
+
+func init() {
+	types.Add("eam:SolutionsTransitionInfo", reflect.TypeOf((*SolutionsTransitionInfo)(nil)).Elem())
+}
+
+type SolutionsTypeSpecificSolutionConfig struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("eam:SolutionsTypeSpecificSolutionConfig", reflect.TypeOf((*SolutionsTypeSpecificSolutionConfig)(nil)).Elem())
+}
+
+type SolutionsUrlVMSource struct {
+	SolutionsVMSource
+
+	OvfUrl         string `xml:"ovfUrl" json:"ovfUrl"`
+	CertificatePEM string `xml:"certificatePEM,omitempty" json:"certificatePEM,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsUrlVMSource", reflect.TypeOf((*SolutionsUrlVMSource)(nil)).Elem())
+}
+
+type SolutionsVMSource struct {
+	types.DynamicData
+}
+
+func init() {
+	types.Add("eam:SolutionsVMSource", reflect.TypeOf((*SolutionsVMSource)(nil)).Elem())
+}
+
+type SolutionsValidateSpec struct {
+	types.DynamicData
+
+	DesiredState  []SolutionsSolutionConfig `xml:"desiredState" json:"desiredState"`
+	TransitionMap []SolutionsTransitionInfo `xml:"transitionMap,omitempty" json:"transitionMap,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsValidateSpec", reflect.TypeOf((*SolutionsValidateSpec)(nil)).Elem())
+}
+
+type SolutionsValidationResult struct {
+	types.DynamicData
+
+	Valid          bool                                `xml:"valid" json:"valid"`
+	SolutionResult []SolutionsSolutionValidationResult `xml:"solutionResult,omitempty" json:"solutionResult,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsValidationResult", reflect.TypeOf((*SolutionsValidationResult)(nil)).Elem())
 }
 
 type Uninstall UninstallRequestType

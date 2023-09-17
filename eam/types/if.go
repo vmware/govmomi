@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -234,6 +234,50 @@ type BasePersonalityAgentPMIssue interface {
 
 func init() {
 	types.Add("BasePersonalityAgentPMIssue", reflect.TypeOf((*PersonalityAgentPMIssue)(nil)).Elem())
+}
+
+func (b *SolutionsHookAcknowledgeConfig) GetSolutionsHookAcknowledgeConfig() *SolutionsHookAcknowledgeConfig {
+	return b
+}
+
+type BaseSolutionsHookAcknowledgeConfig interface {
+	GetSolutionsHookAcknowledgeConfig() *SolutionsHookAcknowledgeConfig
+}
+
+func init() {
+	types.Add("BaseSolutionsHookAcknowledgeConfig", reflect.TypeOf((*SolutionsHookAcknowledgeConfig)(nil)).Elem())
+}
+
+func (b *SolutionsStoragePolicy) GetSolutionsStoragePolicy() *SolutionsStoragePolicy { return b }
+
+type BaseSolutionsStoragePolicy interface {
+	GetSolutionsStoragePolicy() *SolutionsStoragePolicy
+}
+
+func init() {
+	types.Add("BaseSolutionsStoragePolicy", reflect.TypeOf((*SolutionsStoragePolicy)(nil)).Elem())
+}
+
+func (b *SolutionsTypeSpecificSolutionConfig) GetSolutionsTypeSpecificSolutionConfig() *SolutionsTypeSpecificSolutionConfig {
+	return b
+}
+
+type BaseSolutionsTypeSpecificSolutionConfig interface {
+	GetSolutionsTypeSpecificSolutionConfig() *SolutionsTypeSpecificSolutionConfig
+}
+
+func init() {
+	types.Add("BaseSolutionsTypeSpecificSolutionConfig", reflect.TypeOf((*SolutionsTypeSpecificSolutionConfig)(nil)).Elem())
+}
+
+func (b *SolutionsVMSource) GetSolutionsVMSource() *SolutionsVMSource { return b }
+
+type BaseSolutionsVMSource interface {
+	GetSolutionsVMSource() *SolutionsVMSource
+}
+
+func init() {
+	types.Add("BaseSolutionsVMSource", reflect.TypeOf((*SolutionsVMSource)(nil)).Elem())
 }
 
 func (b *VibIssue) GetVibIssue() *VibIssue { return b }
