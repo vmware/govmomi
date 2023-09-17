@@ -69,7 +69,7 @@ ensure_rb_vmodl
 #
 # The VIM API version used by the vim25 client.
 #
-VIM_VERSION="${VIM_VERSION:-8.0.0.1}"
+VIM_VERSION="${VIM_VERSION:-8.0.1.0}"
 
 #
 # Update the vim25 client's VIM version.
@@ -78,7 +78,7 @@ update_vim_version "${VIM_VERSION}"
 
 
 #
-# All types derive from vSphere 8.0 GA, vcenter-all build 20519528.
+# All types derive from vSphere 8.0U1c GA, vcenter-all build 22088981.
 #
 export COPYRIGHT_DATE_RANGE="2014-2023"
 
@@ -89,20 +89,20 @@ export COPYRIGHT_DATE_RANGE="2014-2023"
 #
 export FORCE_BASE_INTERFACE_FOR_TYPES="AgencyConfigInfo"
 
-# ./sdk/ contains the contents of wsdl.zip from vimbase build 20031402.
+# ./sdk/ contains the contents of wsdl.zip from vimbase build 21886307.
 generate "../vim25" "vim" "./rbvmomi/vmodl.db" # from github.com/vmware/rbvmomi@v3.0.0
 generate "../pbm" "pbm"
 generate "../vslm" "vslm"
 generate "../sms" "sms"
 
 # ./sdk/ contains the files eam-messagetypes.xsd and eam-types.xsd from
-# eam-wsdl.zip, from eam-vcenter build 20031438.
+# eam-wsdl.zip, from eam-vcenter build 21054104.
 #
 # Please note the EAM files are also available at the following, public URL --
 # http://bit.ly/eam-sdk, therefore the WSDL resource for EAM are in fact
 # public. A specific build was obtained in order to match the same build as
 # used for the file from above, wsdl.zip.
-COPYRIGHT_DATE_RANGE=2021 generate "../eam" "eam"
+COPYRIGHT_DATE_RANGE="2021-2023" generate "../eam" "eam"
 
 # originally generated, then manually pruned as there are several vim25 types that are duplicated.
 # generate "../lookup" "lookup" # lookup.wsdl from build 4571810
