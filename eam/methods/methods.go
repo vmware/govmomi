@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -173,26 +173,6 @@ func (b *DestroyAgencyBody) Fault() *soap.Fault { return b.Fault_ }
 
 func DestroyAgency(ctx context.Context, r soap.RoundTripper, req *types.DestroyAgency) (*types.DestroyAgencyResponse, error) {
 	var reqBody, resBody DestroyAgencyBody
-
-	reqBody.Req = req
-
-	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
-		return nil, err
-	}
-
-	return resBody.Res, nil
-}
-
-type GetMaintenanceModePolicyBody struct {
-	Req    *types.GetMaintenanceModePolicy         `xml:"urn:eam GetMaintenanceModePolicy,omitempty"`
-	Res    *types.GetMaintenanceModePolicyResponse `xml:"urn:eam GetMaintenanceModePolicyResponse,omitempty"`
-	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
-}
-
-func (b *GetMaintenanceModePolicyBody) Fault() *soap.Fault { return b.Fault_ }
-
-func GetMaintenanceModePolicy(ctx context.Context, r soap.RoundTripper, req *types.GetMaintenanceModePolicy) (*types.GetMaintenanceModePolicyResponse, error) {
-	var reqBody, resBody GetMaintenanceModePolicyBody
 
 	reqBody.Req = req
 
@@ -393,26 +373,6 @@ func (b *ScanForUnknownAgentVmBody) Fault() *soap.Fault { return b.Fault_ }
 
 func ScanForUnknownAgentVm(ctx context.Context, r soap.RoundTripper, req *types.ScanForUnknownAgentVm) (*types.ScanForUnknownAgentVmResponse, error) {
 	var reqBody, resBody ScanForUnknownAgentVmBody
-
-	reqBody.Req = req
-
-	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
-		return nil, err
-	}
-
-	return resBody.Res, nil
-}
-
-type SetMaintenanceModePolicyBody struct {
-	Req    *types.SetMaintenanceModePolicy         `xml:"urn:eam SetMaintenanceModePolicy,omitempty"`
-	Res    *types.SetMaintenanceModePolicyResponse `xml:"urn:eam SetMaintenanceModePolicyResponse,omitempty"`
-	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
-}
-
-func (b *SetMaintenanceModePolicyBody) Fault() *soap.Fault { return b.Fault_ }
-
-func SetMaintenanceModePolicy(ctx context.Context, r soap.RoundTripper, req *types.SetMaintenanceModePolicy) (*types.SetMaintenanceModePolicyResponse, error) {
-	var reqBody, resBody SetMaintenanceModePolicyBody
 
 	reqBody.Req = req
 
