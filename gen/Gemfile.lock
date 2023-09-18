@@ -9,6 +9,7 @@ GEM
     racc (1.6.2)
     test-unit (3.2.3)
       power_assert
+    yaml (0.2.1)
 
 PLATFORMS
   ruby
@@ -16,6 +17,7 @@ PLATFORMS
 DEPENDENCIES
   nokogiri (>= 1.11.0)
   test-unit
+  yaml
 
 BUNDLED WITH
    1.17.2

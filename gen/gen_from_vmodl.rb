@@ -211,7 +211,7 @@ if !File.directory?(ARGV.first)
   raise "first argument not a directory"
 end
 
-wsdl = WSDL.new(WSDL.read ARGV[1]+".wsdl")
+wsdl = WSDL.new(WSDL.read(ARGV[1]+".wsdl"), nil)
 wsdl.validate_assumptions!
 wsdl.peek()
 

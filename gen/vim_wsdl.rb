@@ -15,8 +15,28 @@
 require "nokogiri"
 require "test/unit"
 
+# SINCE_API_FORMAT is used to capture the minimum API version for which some API
+# symbol is valid.
+SINCE_API_FORMAT = /^\*\*\*Since:\*\*\* \w+? API (.+)$/
+
+# ENCLOSED_BY_ASTERIK_FORMAT is used to capture words enclosed by a single
+# asterik on either side.
+ENCLOSED_BY_ASTERIK_FORMAT = /\*([^\s]+)\*/
+
+# POSSIBLE_VALUE_FORMAT is used to capture a possible enum value.
+POSSIBLE_VALUE_FORMAT = /^- `([^`]+?)`(?:: (.*))?$/
+
 $namespaces = %w(vim25)
 $force_base_interface_for_types = ENV['FORCE_BASE_INTERFACE_FOR_TYPES']
+
+def sanitize_line(line)
+  line.gsub!("***Required privileges:***", "Required privileges:")
+  line.gsub!(ENCLOSED_BY_ASTERIK_FORMAT, '`\1`')
+  if line.start_with?("- ") || line.start_with?("  ")
+    line = "    " + line
+  end
+  return line
+end
 
 def valid_ns?(t)
   $namespaces.include?(t)
@@ -33,11 +53,21 @@ def ucfirst(v)
   v[0].capitalize + v[1..-1]
 end
 
-def init_type(io, name, kind)
+def init_type(io, name, kind, minApiVersion=nil, minApiVersionsForValues=nil)
   t = "reflect.TypeOf((*#{ucfirst kind})(nil)).Elem()"
 
   io.print "func init() {\n"
 
+  if minApiVersion != nil
+    io.print "minAPIVersionForType[\"#{name}\"] = \"#{minApiVersion}\"\n"
+  end
+  if minApiVersionsForValues != nil
+    io.print "minAPIVersionForEnumValue[\"#{name}\"] = map[string]string{\n"
+    minApiVersionsForValues.each do |k, v|
+      io.print "\t\t\"#{k}\": \"#{v}\",\n"
+    end
+    io.print "}\n"
+  end
   if $target == "vim25"
     io.print "t[\"#{name}\"] = #{t}\n"
   else
@@ -115,9 +145,12 @@ class Peek
 end
 
 class EnumValue
-  def initialize(type, value)
+  attr_reader :comments
+
+  def initialize(type, value, comments)
     @type = type
     @value = value
+    @comments = comments
   end
 
   def type_name
@@ -141,6 +174,9 @@ class EnumValue
   end
 
   def dump(io)
+    if @comments
+      io.print @comments
+    end
     io.print "%s = %s(\"%s\")\n" % [var_name, type_name, var_value]
   end
 end
@@ -149,9 +185,20 @@ class Simple
   include Test::Unit::Assertions
 
   attr_accessor :name, :type
+  attr_reader :vijson, :vijson_props
 
-  def initialize(node)
+  def initialize(node, vijson)
     @node = node
+    @vijson = vijson
+
+    if vijson != nil && name != nil
+      ucfirstName = ucfirst(name)
+      if vijson.has_key?(ucfirstName)
+        if vijson[ucfirstName].has_key?("properties")
+          @vijson_props = vijson[ucfirstName]["properties"]
+        end
+      end
+    end
   end
 
   def name
@@ -354,8 +401,8 @@ class Simple
 end
 
 class Element < Simple
-  def initialize(node)
-    super(node)
+  def initialize(node, vijson)
+    super(node, vijson)
   end
 
   def has_type?
@@ -367,14 +414,24 @@ class Element < Simple
     assert_equal 1, cs.length
     assert_equal "complexType", cs.first.name
 
-    t = ComplexType.new(cs.first)
+    t = ComplexType.new(cs.first, @vijson)
     t.name = self.name
     t
   end
 
   def dump(io)
     if has_type?
-      io.print "type %s %s\n\n" % [ucfirst(name), var_type]
+      ucfirstName = ucfirst(name)
+      if @vijson != nil
+        if @vijson.has_key?(ucfirstName)
+          if @vijson[ucfirstName].has_key?("description")
+            @vijson[ucfirstName]["description"].each_line do |line|
+              io.print "// #{sanitize_line(line)}"
+            end
+          end
+        end
+      end
+      io.print "type %s %s\n\n" % [ucfirstName, var_type]
     else
       child.dump(io)
     end
@@ -386,7 +443,7 @@ class Element < Simple
     end
   end
 
-  def dump_field(io, json_tag="")
+  def dump_field(io, json_tag="", vijson_props=nil)
     xmlTag = name
     xmlTag += ",omitempty" if need_omitempty?
     xmlTag += ",typeattr" if need_typeattr?
@@ -402,8 +459,35 @@ class Element < Simple
       jsonTag = name
       jsonTag += ",omitempty" if json_omitempty?
     end
-    
     tag += " json:\"%s\"" % [jsonTag]
+
+    # Print the field's comments as well as determining whether or not the field
+    # has a comment with a line that matches the following regex with a
+    # capturing group to parse the API version:
+    #
+    #   ***Since:*** vSphere API (.+)$
+    #
+    # If the comments do contain this line, it will not be printed, instead the
+    # captured version is added to the field's Go tags to persist the minimum
+    # API version for the field.
+    if vijson_props != nil
+      if vijson_props.has_key?(name)
+        if vijson_props[name].has_key?("description")
+          comments = []
+          vijson_props[name]["description"].each_line do |line|
+            m = line.match(SINCE_API_FORMAT)
+            if m == nil
+              comments.append("// #{sanitize_line(line)}")
+            else
+              tag += " vim:\"%s\"" % [m[1]]
+              comments.pop(1)
+            end
+          end
+          io.print comments.join()
+        end
+      end
+    end
+
     io.print "%s`\n" % [tag]
   end
 
@@ -440,18 +524,117 @@ class SimpleType < Simple
   end
 
   def dump(io)
+    ucfirstName = ucfirst(name)
+    posValCmnts = {}
+    if @vijson != nil
+      ucfirstNameEnum = ucfirstName + "_enum"
+      if @vijson.has_key?(ucfirstNameEnum)
+        if @vijson[ucfirstNameEnum].has_key?("description")
+          comments = []
+          posValCur = nil
+          posValSectionActive = false
+          @vijson[ucfirstNameEnum]["description"].each_line do |line|
+            if line.match?(SINCE_API_FORMAT)
+              comments.pop(1)
+              if posValCur != nil
+                posValCmnts[posValCur].pop(1)
+              end
+            elsif line.start_with?("Possible values:")
+              comments.pop(1)
+              posValSectionActive = true
+            elsif posValSectionActive
+              if line == ""
+                comments.pop(1)
+                posValSectionActive = false
+              else
+                m = line.match(POSSIBLE_VALUE_FORMAT)
+                if m != nil
+                  posValCur = m[1]
+                  if m[2] == nil
+                    posValCmnts[posValCur] = []
+                  elsif !line.match?(SINCE_API_FORMAT)
+                    posValCmnts[posValCur] = ["// #{sanitize_line(m[2])}\n"]
+                  end
+                else
+                  line.sub!(/^\s{2}/, '')
+                  if line.match?(SINCE_API_FORMAT)
+                    posValCmnts[posValCur].pop(1)
+                  else
+                    posValCmnts[posValCur].append("// #{sanitize_line(line)}")
+                  end
+                end
+              end
+            else
+              comments.append("// #{sanitize_line(line)}")
+            end
+          end
+          io.print comments.join()
+        end
+      end
+    end
+    io.print "type %s string\n\n" % ucfirstName
+
     enums = @node.xpath(".//xsd:enumeration").map do |n|
-      EnumValue.new(self, n["value"])
+      comments = nil
+      if posValCmnts.has_key?(n["value"])
+        comments = posValCmnts[n["value"]].join()
+      end
+      EnumValue.new(self, n["value"], comments)
     end
 
-    io.print "type %s string\n\n" % ucfirst(name)
     io.print "const (\n"
     enums.each { |e| e.dump(io) }
     io.print ")\n\n"
   end
 
   def dump_init(io)
-    init_type io, name, name
+    ucfirstName = ucfirst(name)
+    minApiVersion = nil
+    minApiVersionsForValues = {}
+    if @vijson != nil
+      ucfirstNameEnum = ucfirstName + "_enum"
+      if @vijson.has_key?(ucfirstNameEnum)
+        if @vijson[ucfirstNameEnum].has_key?("description")
+          posValCur = nil
+          posValSectionActive = false
+          @vijson[ucfirstNameEnum]["description"].each_line do |line|
+            m = line.match(SINCE_API_FORMAT)
+            if m != nil
+              minApiVersion = m[1]
+            elsif line.start_with?("Possible values:")
+              posValSectionActive = true
+            elsif posValSectionActive
+              if line == ""
+                posValSectionActive = false
+              else
+                m = line.match(POSSIBLE_VALUE_FORMAT)
+                if m != nil
+                  posValCur = m[1]
+                  if m[2] != nil
+                    m = m[2].match(SINCE_API_FORMAT)
+                    if m != nil
+                      minApiVersionsForValues[posValCur] = m[1]
+                    end
+                  end
+                else
+                  line.sub!(/^\s{2}/, '')
+                  m = line.match(SINCE_API_FORMAT)
+                  if m != nil
+                    minApiVersionsForValues[posValCur] = m[1]
+                  end
+                end
+              end
+            end
+          end
+        end
+      end
+    end
+
+    if minApiVersionsForValues.size() == 0
+      minApiVersionsForValues = nil
+    end
+
+    init_type io, name, name, minApiVersion, minApiVersionsForValues
   end
 
   def peek
@@ -462,7 +645,7 @@ end
 class ComplexType < Simple
   class SimpleContent < Simple
     def dump(io)
-      attr = Attribute.new(@node.at_xpath(".//xsd:attribute"))
+      attr = Attribute.new(@node.at_xpath(".//xsd:attribute"), @vijson)
       attr.dump_field(io)
 
       # HACK DELUXE(PN)
@@ -488,23 +671,23 @@ class ComplexType < Simple
     end
 
     def dump(io)
-      Sequence.new(@node).dump(io, base)
+      Sequence.new(@node, @vijson).dump(io, base)
     end
 
     def dump_interface(io, name)
-      Sequence.new(@node).dump_interface(io, name)
+      Sequence.new(@node, @vijson).dump_interface(io, name)
     end
 
     def peek
-      Sequence.new(@node).peek(vim_type(base))
+      Sequence.new(@node, @vijson).peek(vim_type(base))
     end
   end
 
   class Sequence < Simple
     attr_accessor :array_of
 
-    def initialize(node, array_of=false)
-      super(node)
+    def initialize(node, vijson, array_of=false)
+      super(node, vijson)
       self.array_of = array_of
     end
 
@@ -512,7 +695,7 @@ class ComplexType < Simple
       sequence = @node.at_xpath(".//xsd:sequence")
       if sequence != nil
         sequence.element_children.map do |n|
-          Element.new(n)
+          Element.new(n, @vijson)
         end
       else
         nil
@@ -532,7 +715,7 @@ class ComplexType < Simple
       end
 
       elements.each do |e|
-        e.dump_field(io, json_tag=self.array_of ? "_value" : "")
+        e.dump_field(io, json_tag=self.array_of ? "_value" : "", vijson_props=@vijson_props)
       end
     end
 
@@ -570,11 +753,11 @@ class ComplexType < Simple
 
                    case cs.first.name
                    when "simpleContent"
-                     SimpleContent.new(@node)
+                     SimpleContent.new(@node, @vijson)
                    when "complexContent"
-                     ComplexContent.new(@node)
+                     ComplexContent.new(@node, @vijson)
                    when "sequence"
-                     Sequence.new(@node, self.name.start_with?("ArrayOf"))
+                     Sequence.new(@node, @vijson, self.name.start_with?("ArrayOf"))
                    else
                      raise "don't know what to do for element: %s..." % cs.first.name
                    end
@@ -583,11 +766,41 @@ class ComplexType < Simple
   end
 
   def dump_init(io)
-    init_type io, name, name
+    minApiVersion = nil
+    ucfirstName = ucfirst(name)
+    if @vijson != nil
+      if @vijson.has_key?(ucfirstName)
+        if @vijson[ucfirstName].has_key?("description")
+          @vijson[ucfirstName]["description"].each_line do |line|
+            m = line.match(SINCE_API_FORMAT)
+            if m != nil
+              minApiVersion = m[1]
+              break
+            end
+          end
+        end
+      end
+    end
+    init_type io, name, name, minApiVersion
   end
 
   def dump(io)
     ucfirstName = ucfirst(name)
+    if @vijson != nil
+      if @vijson.has_key?(ucfirstName)
+        if @vijson[ucfirstName].has_key?("description")
+          comments = []
+          @vijson[ucfirstName]["description"].each_line do |line|
+            if line.match?(SINCE_API_FORMAT)
+              comments.pop(1)
+            else
+              comments.append("// #{sanitize_line(line)}")
+            end
+          end
+          io.print comments.join()
+        end
+      end
+    end
     io.print "type %s struct {\n" % ucfirstName
     klass.dump(io) if klass
     io.print "}\n\n"
@@ -603,9 +816,11 @@ class Schema
   include Test::Unit::Assertions
 
   attr_accessor :namespace
+  attr_reader :vijson
 
-  def initialize(xml)
+  def initialize(xml, vijson)
     @xml = Nokogiri::XML.parse(xml)
+    @vijson = vijson
     @namespace = @xml.root.attr("targetNamespace").split(":", 2)[1]
     @xml
   end
@@ -717,7 +932,7 @@ class Schema
         when "include", "import"
           next
         when "element"
-          e = Element.new(n)
+          e = Element.new(n, @vijson)
           if e.has_type? && e.vim_type?
             if e.ns == $target
               yield e
@@ -726,9 +941,9 @@ class Schema
             yield e
           end
         when "simpleType"
-          yield SimpleType.new(n)
+          yield SimpleType.new(n, @vijson)
         when "complexType"
-          yield ComplexType.new(n)
+          yield ComplexType.new(n, @vijson)
         else
           raise "unknown child: %s" % n.name
         end
@@ -740,13 +955,13 @@ class Schema
 
   def imports
     @imports ||= @xml.root.xpath(".//xmlns:import").map do |n|
-      Schema.new(WSDL.read n["schemaLocation"])
+      Schema.new(WSDL.read(n["schemaLocation"]), @vijson)
     end
   end
 
   def includes
     @includes ||= @xml.root.xpath(".//xmlns:include").map do |n|
-      Schema.new(WSDL.read n["schemaLocation"])
+      Schema.new(WSDL.read(n["schemaLocation"]), @vijson)
     end
   end
 end
@@ -850,6 +1065,7 @@ end
 
 class WSDL
   attr_reader :xml
+  attr_reader :vijson
 
   PATH = File.expand_path("../sdk", __FILE__)
 
@@ -857,8 +1073,9 @@ class WSDL
     File.open(File.join(PATH, file))
   end
 
-  def initialize(xml)
+  def initialize(xml, vijson)
     @xml = Nokogiri::XML.parse(xml)
+    @vijson = vijson
     $target = @xml.root["targetNamespace"].split(":", 2)[1]
 
     unless $namespaces.include? $target
@@ -882,7 +1099,7 @@ class WSDL
 
   def schemas
     @schemas ||= @xml.xpath('.//xmlns:types/xsd:schema').map do |n|
-      Schema.new(n.to_xml)
+      Schema.new(n.to_xml, @vijson)
     end
   end
 
