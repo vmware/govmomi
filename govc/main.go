@@ -104,6 +104,8 @@ import (
 	_ "github.com/vmware/govmomi/govc/vcsa/shutdown"
 	_ "github.com/vmware/govmomi/govc/version"
 	_ "github.com/vmware/govmomi/govc/vm"
+	_ "github.com/vmware/govmomi/govc/vm/dataset"
+	_ "github.com/vmware/govmomi/govc/vm/dataset/entry"
 	_ "github.com/vmware/govmomi/govc/vm/disk"
 	_ "github.com/vmware/govmomi/govc/vm/guest"
 	_ "github.com/vmware/govmomi/govc/vm/network"

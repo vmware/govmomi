@@ -168,7 +168,6 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 		{internal.VCenterOVFLibraryItem + "/", s.libraryItemOVFID},
 		{internal.VCenterVMTXLibraryItem, s.libraryItemCreateTemplate},
 		{internal.VCenterVMTXLibraryItem + "/", s.libraryItemTemplateID},
-		{internal.VCenterVM + "/", s.vmID},
 		{internal.DebugEcho, s.debugEcho},
 		// /api/ patterns.
 		{internal.SecurityPoliciesPath, s.librarySecurityPolicies},
@@ -325,6 +324,7 @@ func (s *handler) DetachTag(id vim.ManagedObjectReference, tag vim.VslmTagEntry)
 // StatusOK responds with http.StatusOK and encodes val, if specified, to JSON
 // For use with "/api" endpoints.
 func StatusOK(w http.ResponseWriter, val ...interface{}) {
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	if len(val) == 0 {
 		return
@@ -371,6 +371,60 @@ func BadRequest(w http.ResponseWriter, kind string) {
 	if err != nil {
 		log.Panic(err)
 	}
+}
+
+// ApiErrorAlreadyExists responds with a REST error of type "ALREADY_EXISTS".
+// For use with "/api" endpoints.
+func ApiErrorAlreadyExists(w http.ResponseWriter) {
+	apiError(w, http.StatusBadRequest, "ALREADY_EXISTS")
+}
+
+// ApiErrorGeneral responds with a REST error of type "ERROR".
+// For use with "/api" endpoints.
+func ApiErrorGeneral(w http.ResponseWriter) {
+	apiError(w, http.StatusInternalServerError, "ERROR")
+}
+
+// ApiErrorInvalidArgument responds with a REST error of type "INVALID_ARGUMENT".
+// For use with "/api" endpoints.
+func ApiErrorInvalidArgument(w http.ResponseWriter) {
+	apiError(w, http.StatusBadRequest, "INVALID_ARGUMENT")
+}
+
+// ApiErrorNotAllowedInCurrentState responds with a REST error of type "NOT_ALLOWED_IN_CURRENT_STATE".
+// For use with "/api" endpoints.
+func ApiErrorNotAllowedInCurrentState(w http.ResponseWriter) {
+	apiError(w, http.StatusBadRequest, "NOT_ALLOWED_IN_CURRENT_STATE")
+}
+
+// ApiErrorNotFound responds with a REST error of type "NOT_FOUND".
+// For use with "/api" endpoints.
+func ApiErrorNotFound(w http.ResponseWriter) {
+	apiError(w, http.StatusNotFound, "NOT_FOUND")
+}
+
+// ApiErrorResourceInUse responds with a REST error of type "RESOURCE_IN_USE".
+// For use with "/api" endpoints.
+func ApiErrorResourceInUse(w http.ResponseWriter) {
+	apiError(w, http.StatusBadRequest, "RESOURCE_IN_USE")
+}
+
+// ApiErrorUnauthorized responds with a REST error of type "UNAUTHORIZED".
+// For use with "/api" endpoints.
+func ApiErrorUnauthorized(w http.ResponseWriter) {
+	apiError(w, http.StatusBadRequest, "UNAUTHORIZED")
+}
+
+// ApiErrorUnsupported responds with a REST error of type "UNSUPPORTED".
+// For use with "/api" endpoints.
+func ApiErrorUnsupported(w http.ResponseWriter) {
+	apiError(w, http.StatusBadRequest, "UNSUPPORTED")
+}
+
+func apiError(w http.ResponseWriter, statusCode int, errorType string) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(statusCode)
+	w.Write([]byte(fmt.Sprintf(`{"error_type":"%s", "messages":[]}`, errorType)))
 }
 
 func (*handler) error(w http.ResponseWriter, err error) {
@@ -2278,17 +2332,6 @@ func (s *handler) libraryTrustedCertificatesID(w http.ResponseWriter, r *http.Re
 		delete(s.Trust, id)
 	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
-	}
-}
-
-func (s *handler) vmID(w http.ResponseWriter, r *http.Request) {
-	id := path.Base(r.URL.Path)
-
-	switch r.Method {
-	case http.MethodDelete:
-		s.deleteVM(&types.ManagedObjectReference{Type: "VirtualMachine", Value: id})
-	default:
-		http.NotFound(w, r)
 	}
 }
 
