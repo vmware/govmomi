@@ -70,6 +70,7 @@ func (add *addHost) Run(task *Task) (types.AnyType, types.BaseMethodFault) {
 
 	task.ctx.Map.PutEntity(cr, task.ctx.Map.NewEntity(host))
 	host.Summary.Host = &host.Self
+	host.Config.Host = host.Self
 
 	cr.Host = append(cr.Host, host.Reference())
 	addComputeResource(cr.Summary.GetComputeResourceSummary(), host)
