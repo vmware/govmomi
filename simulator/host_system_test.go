@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -68,6 +69,18 @@ func TestDefaultESX(t *testing.T) {
 	if pool.Name() != "Resources" {
 		t.Fail()
 	}
+}
+
+func TestDefaultVPX(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		for _, e := range Map.All("HostSystem") {
+			host := e.(*HostSystem)
+			// issue #3221
+			if host.Config.Host != host.Self {
+				t.Errorf("config.host=%s", host.Config.Host)
+			}
+		}
+	})
 }
 
 func TestMaintenanceMode(t *testing.T) {

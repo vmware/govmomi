@@ -486,6 +486,7 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 
 	ctx.Map.PutEntity(cr, ctx.Map.NewEntity(host))
 	host.Summary.Host = &host.Self
+	host.Config.Host = host.Self
 
 	ctx.Map.PutEntity(cr, ctx.Map.NewEntity(pool))
 
