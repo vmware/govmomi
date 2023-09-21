@@ -21,13 +21,16 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"sync"
 
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // Create a view of all hosts in the inventory, printing host names that belong to a cluster and excluding standalone hosts.
@@ -173,4 +176,71 @@ func ExampleContainerView_Find() {
 		return v.Destroy(ctx)
 	}, model)
 	// Output: 4
+}
+
+// This example uses a single PropertyCollector with ListView for waiting on updates to N tasks
+func ExampleListView_tasks() {
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		list, err := view.NewManager(c).CreateListView(ctx, nil)
+		if err != nil {
+			return err
+		}
+
+		defer list.Destroy(ctx)
+
+		vms, err := find.NewFinder(c).VirtualMachineList(ctx, "*")
+		if err != nil {
+			return err
+		}
+
+		result := map[types.TaskInfoState]int{}
+		n := len(vms)
+		p := property.DefaultCollector(c)
+
+		// wait for any updates to tasks in our list view
+		filter := new(property.WaitFilter).Add(list.Reference(), "Task", []string{"info"}, list.TraversalSpec())
+
+		var werr error
+		var wg sync.WaitGroup
+		wg.Add(n)
+		go func() { // WaitForUpdates blocks until func returns true
+			werr = property.WaitForUpdates(ctx, p, filter, func(updates []types.ObjectUpdate) bool {
+				for _, update := range updates {
+					for _, change := range update.ChangeSet {
+						info := change.Val.(types.TaskInfo)
+
+						switch info.State {
+						case types.TaskInfoStateSuccess, types.TaskInfoStateError:
+							_ = list.Remove(ctx, []types.ManagedObjectReference{update.Obj})
+							result[info.State]++
+							n--
+							wg.Done()
+						}
+					}
+				}
+
+				return n == 0
+			})
+		}()
+
+		for _, vm := range vms {
+			task, err := vm.PowerOff(ctx)
+			if err != nil {
+				return err
+			}
+			err = list.Add(ctx, []types.ManagedObjectReference{task.Reference()})
+			if err != nil {
+				return err
+			}
+		}
+
+		wg.Wait() // wait until all tasks complete and WaitForUpdates returns
+
+		for state, n := range result {
+			fmt.Printf("%s=%d", state, n)
+		}
+
+		return werr
+	})
+	// Output: success=4
 }
