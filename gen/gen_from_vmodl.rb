@@ -109,7 +109,7 @@ class Prop
   end
 
   def var_tag
-    "mo:\"%s\"" % name
+    "json:\"%s\"" % name
   end
 
   def dump(io)

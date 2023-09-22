@@ -17,7 +17,7 @@ require "test/unit"
 
 # SINCE_API_FORMAT is used to capture the minimum API version for which some API
 # symbol is valid.
-SINCE_API_FORMAT = /^\*\*\*Since:\*\*\* \w+? API (.+)$/
+SINCE_API_FORMAT = /^\*\*\*Since:\*\*\* \w+? API (?:Release )?(.+)$/
 
 # ENCLOSED_BY_ASTERIK_FORMAT is used to capture words enclosed by a single
 # asterik on either side.
@@ -58,23 +58,31 @@ def init_type(io, name, kind, minApiVersion=nil, minApiVersionsForValues=nil)
 
   io.print "func init() {\n"
 
-  if minApiVersion != nil
-    io.print "minAPIVersionForType[\"#{name}\"] = \"#{minApiVersion}\"\n"
-  end
-  if minApiVersionsForValues != nil
-    io.print "minAPIVersionForEnumValue[\"#{name}\"] = map[string]string{\n"
-    minApiVersionsForValues.each do |k, v|
-      io.print "\t\t\"#{k}\": \"#{v}\",\n"
-    end
-    io.print "}\n"
-  end
   if $target == "vim25"
     io.print "t[\"#{name}\"] = #{t}\n"
+    if minApiVersion != nil
+      io.print "minAPIVersionForType[\"#{name}\"] = \"#{minApiVersion}\"\n"
+    end
+    if minApiVersionsForValues != nil
+      io.print "minAPIVersionForEnumValue[\"#{name}\"] = map[string]string{\n"
+      minApiVersionsForValues.each do |k, v|
+        io.print "\t\t\"#{k}\": \"#{v}\",\n"
+      end
+      io.print "}\n"
+    end
   else
     unless name.start_with? "Base"
       name = "#{$target}:#{name}"
     end
     io.print "types.Add(\"#{name}\", #{t})\n"
+    if minApiVersion != nil
+      io.print "types.AddMinAPIVersionForType(\"#{name}\", \"#{minApiVersion}\")\n"
+    end
+    if minApiVersionsForValues != nil
+      minApiVersionsForValues.each do |k, v|
+        io.print "types.AddMinAPIVersionForEnumValue(\"#{name}\", \"#{k}\", \"#{v}\")\n"
+      end
+    end
   end
 
   io.print "}\n\n"
