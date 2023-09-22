@@ -62,6 +62,16 @@ func init() {
 	types.Add("BaseAgentIssue", reflect.TypeOf((*AgentIssue)(nil)).Elem())
 }
 
+func (b *AgentSslTrust) GetAgentSslTrust() *AgentSslTrust { return b }
+
+type BaseAgentSslTrust interface {
+	GetAgentSslTrust() *AgentSslTrust
+}
+
+func init() {
+	types.Add("BaseAgentSslTrust", reflect.TypeOf((*AgentSslTrust)(nil)).Elem())
+}
+
 func (b *AgentStoragePolicy) GetAgentStoragePolicy() *AgentStoragePolicy { return b }
 
 type BaseAgentStoragePolicy interface {
@@ -298,6 +308,16 @@ type BaseVibNotInstalled interface {
 
 func init() {
 	types.Add("BaseVibNotInstalled", reflect.TypeOf((*VibNotInstalled)(nil)).Elem())
+}
+
+func (b *VibVibServicesSslTrust) GetVibVibServicesSslTrust() *VibVibServicesSslTrust { return b }
+
+type BaseVibVibServicesSslTrust interface {
+	GetVibVibServicesSslTrust() *VibVibServicesSslTrust
+}
+
+func init() {
+	types.Add("BaseVibVibServicesSslTrust", reflect.TypeOf((*VibVibServicesSslTrust)(nil)).Elem())
 }
 
 func (b *VmDeployed) GetVmDeployed() *VmDeployed { return b }

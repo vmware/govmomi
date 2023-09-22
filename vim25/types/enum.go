@@ -78,6 +78,7 @@ const (
 )
 
 func init() {
+	t["ActionType"] = reflect.TypeOf((*ActionType)(nil)).Elem()
 	minAPIVersionForType["ActionType"] = "2.5"
 	minAPIVersionForEnumValue["ActionType"] = map[string]string{
 		"HostMaintenanceV1":   "5.0",
@@ -86,7 +87,6 @@ func init() {
 		"PlacementV1":         "6.0",
 		"HostInfraUpdateHaV1": "6.5",
 	}
-	t["ActionType"] = reflect.TypeOf((*ActionType)(nil)).Elem()
 }
 
 // Types of affinities.
@@ -125,8 +125,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["AgentInstallFailedReason"] = "4.0"
 	t["AgentInstallFailedReason"] = reflect.TypeOf((*AgentInstallFailedReason)(nil)).Elem()
+	minAPIVersionForType["AgentInstallFailedReason"] = "4.0"
 }
 
 type AlarmFilterSpecAlarmTypeByEntity string
@@ -141,8 +141,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["AlarmFilterSpecAlarmTypeByEntity"] = "6.7"
 	t["AlarmFilterSpecAlarmTypeByEntity"] = reflect.TypeOf((*AlarmFilterSpecAlarmTypeByEntity)(nil)).Elem()
+	minAPIVersionForType["AlarmFilterSpecAlarmTypeByEntity"] = "6.7"
 }
 
 // Alarm triggering type.
@@ -160,8 +160,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["AlarmFilterSpecAlarmTypeByTrigger"] = "6.7"
 	t["AlarmFilterSpecAlarmTypeByTrigger"] = reflect.TypeOf((*AlarmFilterSpecAlarmTypeByTrigger)(nil)).Elem()
+	minAPIVersionForType["AlarmFilterSpecAlarmTypeByTrigger"] = "6.7"
 }
 
 type AnswerFileValidationInfoStatus string
@@ -176,8 +176,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["AnswerFileValidationInfoStatus"] = "6.7"
 	t["AnswerFileValidationInfoStatus"] = reflect.TypeOf((*AnswerFileValidationInfoStatus)(nil)).Elem()
+	minAPIVersionForType["AnswerFileValidationInfoStatus"] = "6.7"
 }
 
 type ApplyHostProfileConfigurationResultStatus string
@@ -208,8 +208,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ApplyHostProfileConfigurationResultStatus"] = "6.5"
 	t["ApplyHostProfileConfigurationResultStatus"] = reflect.TypeOf((*ApplyHostProfileConfigurationResultStatus)(nil)).Elem()
+	minAPIVersionForType["ApplyHostProfileConfigurationResultStatus"] = "6.5"
 }
 
 // This list specifies the type of operation being performed on the array.
@@ -312,8 +312,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["BaseConfigInfoDiskFileBackingInfoProvisioningType"] = "6.5"
 	t["BaseConfigInfoDiskFileBackingInfoProvisioningType"] = reflect.TypeOf((*BaseConfigInfoDiskFileBackingInfoProvisioningType)(nil)).Elem()
+	minAPIVersionForType["BaseConfigInfoDiskFileBackingInfoProvisioningType"] = "6.5"
 }
 
 type BatchResultResult string
@@ -324,8 +324,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["BatchResultResult"] = "6.0"
 	t["BatchResultResult"] = reflect.TypeOf((*BatchResultResult)(nil)).Elem()
+	minAPIVersionForType["BatchResultResult"] = "6.0"
 }
 
 type CannotEnableVmcpForClusterReason string
@@ -336,8 +336,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["CannotEnableVmcpForClusterReason"] = "6.0"
 	t["CannotEnableVmcpForClusterReason"] = reflect.TypeOf((*CannotEnableVmcpForClusterReason)(nil)).Elem()
+	minAPIVersionForType["CannotEnableVmcpForClusterReason"] = "6.0"
 }
 
 type CannotMoveFaultToleranceVmMoveType string
@@ -350,8 +350,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["CannotMoveFaultToleranceVmMoveType"] = "4.0"
 	t["CannotMoveFaultToleranceVmMoveType"] = reflect.TypeOf((*CannotMoveFaultToleranceVmMoveType)(nil)).Elem()
+	minAPIVersionForType["CannotMoveFaultToleranceVmMoveType"] = "4.0"
 }
 
 type CannotPowerOffVmInClusterOperation string
@@ -368,8 +368,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["CannotPowerOffVmInClusterOperation"] = "5.0"
 	t["CannotPowerOffVmInClusterOperation"] = reflect.TypeOf((*CannotPowerOffVmInClusterOperation)(nil)).Elem()
+	minAPIVersionForType["CannotPowerOffVmInClusterOperation"] = "5.0"
 }
 
 type CannotUseNetworkReason string
@@ -390,12 +390,12 @@ const (
 )
 
 func init() {
+	t["CannotUseNetworkReason"] = reflect.TypeOf((*CannotUseNetworkReason)(nil)).Elem()
 	minAPIVersionForType["CannotUseNetworkReason"] = "5.5"
 	minAPIVersionForEnumValue["CannotUseNetworkReason"] = map[string]string{
 		"NetworkUnderMaintenance": "7.0",
 		"MismatchedEnsMode":       "7.0",
 	}
-	t["CannotUseNetworkReason"] = reflect.TypeOf((*CannotUseNetworkReason)(nil)).Elem()
 }
 
 // The types of tests which can requested by any of the methods in either
@@ -434,11 +434,11 @@ const (
 )
 
 func init() {
+	t["CheckTestType"] = reflect.TypeOf((*CheckTestType)(nil)).Elem()
 	minAPIVersionForType["CheckTestType"] = "4.0"
 	minAPIVersionForEnumValue["CheckTestType"] = map[string]string{
 		"networkTests": "5.5",
 	}
-	t["CheckTestType"] = reflect.TypeOf((*CheckTestType)(nil)).Elem()
 }
 
 // HCIWorkflowState identifies the state of the cluser from the perspective of HCI
@@ -458,8 +458,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterComputeResourceHCIWorkflowState"] = "6.7.1"
 	t["ClusterComputeResourceHCIWorkflowState"] = reflect.TypeOf((*ClusterComputeResourceHCIWorkflowState)(nil)).Elem()
+	minAPIVersionForType["ClusterComputeResourceHCIWorkflowState"] = "6.7.1"
 }
 
 type ClusterComputeResourceVcsHealthStatus string
@@ -474,20 +474,22 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterComputeResourceVcsHealthStatus"] = "7.0.1.1"
 	t["ClusterComputeResourceVcsHealthStatus"] = reflect.TypeOf((*ClusterComputeResourceVcsHealthStatus)(nil)).Elem()
+	minAPIVersionForType["ClusterComputeResourceVcsHealthStatus"] = "7.0.1.1"
 }
 
 type ClusterCryptoConfigInfoCryptoMode string
 
 const (
-	ClusterCryptoConfigInfoCryptoModeOnDemand    = ClusterCryptoConfigInfoCryptoMode("onDemand")
+	// Put each host into the crypto safe state automatically when needed.
+	ClusterCryptoConfigInfoCryptoModeOnDemand = ClusterCryptoConfigInfoCryptoMode("onDemand")
+	// Put each host into the crypto safe state immediately.
 	ClusterCryptoConfigInfoCryptoModeForceEnable = ClusterCryptoConfigInfoCryptoMode("forceEnable")
 )
 
 func init() {
-	minAPIVersionForType["ClusterCryptoConfigInfoCryptoMode"] = "7.0"
 	t["ClusterCryptoConfigInfoCryptoMode"] = reflect.TypeOf((*ClusterCryptoConfigInfoCryptoMode)(nil)).Elem()
+	minAPIVersionForType["ClusterCryptoConfigInfoCryptoMode"] = "7.0"
 }
 
 // The `ClusterDasAamNodeStateDasState_enum` enumerated type defines
@@ -521,8 +523,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterDasAamNodeStateDasState"] = "4.0"
 	t["ClusterDasAamNodeStateDasState"] = reflect.TypeOf((*ClusterDasAamNodeStateDasState)(nil)).Elem()
+	minAPIVersionForType["ClusterDasAamNodeStateDasState"] = "4.0"
 }
 
 // The policy to determine the candidates from which vCenter Server can
@@ -553,8 +555,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterDasConfigInfoHBDatastoreCandidate"] = "5.0"
 	t["ClusterDasConfigInfoHBDatastoreCandidate"] = reflect.TypeOf((*ClusterDasConfigInfoHBDatastoreCandidate)(nil)).Elem()
+	minAPIVersionForType["ClusterDasConfigInfoHBDatastoreCandidate"] = "5.0"
 }
 
 // Possible states of an HA service.
@@ -570,8 +572,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterDasConfigInfoServiceState"] = "4.0"
 	t["ClusterDasConfigInfoServiceState"] = reflect.TypeOf((*ClusterDasConfigInfoServiceState)(nil)).Elem()
+	minAPIVersionForType["ClusterDasConfigInfoServiceState"] = "4.0"
 }
 
 // The `ClusterDasConfigInfoVmMonitoringState_enum` enum defines values that indicate
@@ -615,8 +617,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterDasConfigInfoVmMonitoringState"] = "4.1"
 	t["ClusterDasConfigInfoVmMonitoringState"] = reflect.TypeOf((*ClusterDasConfigInfoVmMonitoringState)(nil)).Elem()
+	minAPIVersionForType["ClusterDasConfigInfoVmMonitoringState"] = "4.1"
 }
 
 // The `ClusterDasFdmAvailabilityState_enum` enumeration describes the
@@ -718,8 +720,11 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterDasFdmAvailabilityState"] = "5.0"
 	t["ClusterDasFdmAvailabilityState"] = reflect.TypeOf((*ClusterDasFdmAvailabilityState)(nil)).Elem()
+	minAPIVersionForType["ClusterDasFdmAvailabilityState"] = "5.0"
+	minAPIVersionForEnumValue["ClusterDasFdmAvailabilityState"] = map[string]string{
+		"retry": "8.0.0.0",
+	}
 }
 
 // The `ClusterDasVmSettingsIsolationResponse_enum` enum defines
@@ -787,11 +792,11 @@ const (
 )
 
 func init() {
+	t["ClusterDasVmSettingsIsolationResponse"] = reflect.TypeOf((*ClusterDasVmSettingsIsolationResponse)(nil)).Elem()
 	minAPIVersionForType["ClusterDasVmSettingsIsolationResponse"] = "2.5"
 	minAPIVersionForEnumValue["ClusterDasVmSettingsIsolationResponse"] = map[string]string{
 		"shutdown": "2.5u2",
 	}
-	t["ClusterDasVmSettingsIsolationResponse"] = reflect.TypeOf((*ClusterDasVmSettingsIsolationResponse)(nil)).Elem()
 }
 
 // The `ClusterDasVmSettingsRestartPriority_enum` enum defines
@@ -837,12 +842,12 @@ const (
 )
 
 func init() {
+	t["ClusterDasVmSettingsRestartPriority"] = reflect.TypeOf((*ClusterDasVmSettingsRestartPriority)(nil)).Elem()
 	minAPIVersionForType["ClusterDasVmSettingsRestartPriority"] = "2.5"
 	minAPIVersionForEnumValue["ClusterDasVmSettingsRestartPriority"] = map[string]string{
 		"lowest":  "6.5",
 		"highest": "6.5",
 	}
-	t["ClusterDasVmSettingsRestartPriority"] = reflect.TypeOf((*ClusterDasVmSettingsRestartPriority)(nil)).Elem()
 }
 
 // Describes the operation type of the action.
@@ -858,8 +863,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterHostInfraUpdateHaModeActionOperationType"] = "6.5"
 	t["ClusterHostInfraUpdateHaModeActionOperationType"] = reflect.TypeOf((*ClusterHostInfraUpdateHaModeActionOperationType)(nil)).Elem()
+	minAPIVersionForType["ClusterHostInfraUpdateHaModeActionOperationType"] = "6.5"
 }
 
 type ClusterInfraUpdateHaConfigInfoBehaviorType string
@@ -874,8 +879,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterInfraUpdateHaConfigInfoBehaviorType"] = "6.5"
 	t["ClusterInfraUpdateHaConfigInfoBehaviorType"] = reflect.TypeOf((*ClusterInfraUpdateHaConfigInfoBehaviorType)(nil)).Elem()
+	minAPIVersionForType["ClusterInfraUpdateHaConfigInfoBehaviorType"] = "6.5"
 }
 
 type ClusterInfraUpdateHaConfigInfoRemediationType string
@@ -890,8 +895,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterInfraUpdateHaConfigInfoRemediationType"] = "6.5"
 	t["ClusterInfraUpdateHaConfigInfoRemediationType"] = reflect.TypeOf((*ClusterInfraUpdateHaConfigInfoRemediationType)(nil)).Elem()
+	minAPIVersionForType["ClusterInfraUpdateHaConfigInfoRemediationType"] = "6.5"
 }
 
 type ClusterPowerOnVmOption string
@@ -921,8 +926,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterPowerOnVmOption"] = "4.1"
 	t["ClusterPowerOnVmOption"] = reflect.TypeOf((*ClusterPowerOnVmOption)(nil)).Elem()
+	minAPIVersionForType["ClusterPowerOnVmOption"] = "4.1"
 }
 
 type ClusterProfileServiceType string
@@ -939,8 +944,22 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterProfileServiceType"] = "4.0"
 	t["ClusterProfileServiceType"] = reflect.TypeOf((*ClusterProfileServiceType)(nil)).Elem()
+	minAPIVersionForType["ClusterProfileServiceType"] = "4.0"
+}
+
+type ClusterSystemVMsConfigInfoDeploymentMode string
+
+const (
+	// System VMs are fully managed by the system.
+	ClusterSystemVMsConfigInfoDeploymentModeSYSTEM_MANAGED = ClusterSystemVMsConfigInfoDeploymentMode("SYSTEM_MANAGED")
+	// System VMs are absent on the managed entity.
+	ClusterSystemVMsConfigInfoDeploymentModeABSENT = ClusterSystemVMsConfigInfoDeploymentMode("ABSENT")
+)
+
+func init() {
+	t["ClusterSystemVMsConfigInfoDeploymentMode"] = reflect.TypeOf((*ClusterSystemVMsConfigInfoDeploymentMode)(nil)).Elem()
+	minAPIVersionForType["ClusterSystemVMsConfigInfoDeploymentMode"] = "8.0.2.0"
 }
 
 // The VM policy settings that determine the response to
@@ -980,8 +999,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterVmComponentProtectionSettingsStorageVmReaction"] = "6.0"
 	t["ClusterVmComponentProtectionSettingsStorageVmReaction"] = reflect.TypeOf((*ClusterVmComponentProtectionSettingsStorageVmReaction)(nil)).Elem()
+	minAPIVersionForType["ClusterVmComponentProtectionSettingsStorageVmReaction"] = "6.0"
 }
 
 // If an APD condition clears after an APD timeout condition has been declared and before
@@ -1006,8 +1025,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared"] = "6.0"
 	t["ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared"] = reflect.TypeOf((*ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared)(nil)).Elem()
+	minAPIVersionForType["ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared"] = "6.0"
 }
 
 type ClusterVmReadinessReadyCondition string
@@ -1039,8 +1058,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ClusterVmReadinessReadyCondition"] = "6.5"
 	t["ClusterVmReadinessReadyCondition"] = reflect.TypeOf((*ClusterVmReadinessReadyCondition)(nil)).Elem()
+	minAPIVersionForType["ClusterVmReadinessReadyCondition"] = "6.5"
 }
 
 type ComplianceResultStatus string
@@ -1057,11 +1076,11 @@ const (
 )
 
 func init() {
+	t["ComplianceResultStatus"] = reflect.TypeOf((*ComplianceResultStatus)(nil)).Elem()
 	minAPIVersionForType["ComplianceResultStatus"] = "4.0"
 	minAPIVersionForEnumValue["ComplianceResultStatus"] = map[string]string{
 		"running": "6.7",
 	}
-	t["ComplianceResultStatus"] = reflect.TypeOf((*ComplianceResultStatus)(nil)).Elem()
 }
 
 type ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState string
@@ -1077,8 +1096,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState"] = "5.0"
 	t["ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState"] = reflect.TypeOf((*ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState)(nil)).Elem()
+	minAPIVersionForType["ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState"] = "5.0"
 }
 
 type ConfigSpecOperation string
@@ -1093,11 +1112,10 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ConfigSpecOperation"] = "4.0"
 	t["ConfigSpecOperation"] = reflect.TypeOf((*ConfigSpecOperation)(nil)).Elem()
+	minAPIVersionForType["ConfigSpecOperation"] = "4.0"
 }
 
-// Key management type.
 type CryptoManagerHostKeyManagementType string
 
 const (
@@ -1108,6 +1126,7 @@ const (
 
 func init() {
 	t["CryptoManagerHostKeyManagementType"] = reflect.TypeOf((*CryptoManagerHostKeyManagementType)(nil)).Elem()
+	minAPIVersionForType["CryptoManagerHostKeyManagementType"] = "8.0.1.0"
 }
 
 type CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason string
@@ -1128,11 +1147,11 @@ const (
 )
 
 func init() {
+	t["CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason"] = reflect.TypeOf((*CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason)(nil)).Elem()
 	minAPIVersionForType["CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason"] = "6.7.2"
 	minAPIVersionForEnumValue["CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason"] = map[string]string{
 		"KeyStateManagedByTrustAuthority": "7.0",
 	}
-	t["CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason"] = reflect.TypeOf((*CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason)(nil)).Elem()
 }
 
 type CustomizationFailedReasonCode string
@@ -1149,13 +1168,13 @@ const (
 )
 
 func init() {
+	t["CustomizationFailedReasonCode"] = reflect.TypeOf((*CustomizationFailedReasonCode)(nil)).Elem()
 	minAPIVersionForType["CustomizationFailedReasonCode"] = "7.0"
 	minAPIVersionForEnumValue["CustomizationFailedReasonCode"] = map[string]string{
 		"customizationDisabled": "7.0.1.0",
 		"rawDataIsNotSupported": "7.0.3.0",
 		"wrongMetadataFormat":   "7.0.3.0",
 	}
-	t["CustomizationFailedReasonCode"] = reflect.TypeOf((*CustomizationFailedReasonCode)(nil)).Elem()
 }
 
 // Enumeration of AutoMode values.
@@ -1214,8 +1233,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["CustomizationSysprepRebootOption"] = "2.5"
 	t["CustomizationSysprepRebootOption"] = reflect.TypeOf((*CustomizationSysprepRebootOption)(nil)).Elem()
+	minAPIVersionForType["CustomizationSysprepRebootOption"] = "2.5"
 }
 
 // Set of possible values for
@@ -1241,8 +1260,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DVPortStatusVmDirectPathGen2InactiveReasonNetwork"] = "4.1"
 	t["DVPortStatusVmDirectPathGen2InactiveReasonNetwork"] = reflect.TypeOf((*DVPortStatusVmDirectPathGen2InactiveReasonNetwork)(nil)).Elem()
+	minAPIVersionForType["DVPortStatusVmDirectPathGen2InactiveReasonNetwork"] = "4.1"
 }
 
 // Set of possible values for
@@ -1266,8 +1285,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DVPortStatusVmDirectPathGen2InactiveReasonOther"] = "4.1"
 	t["DVPortStatusVmDirectPathGen2InactiveReasonOther"] = reflect.TypeOf((*DVPortStatusVmDirectPathGen2InactiveReasonOther)(nil)).Elem()
+	minAPIVersionForType["DVPortStatusVmDirectPathGen2InactiveReasonOther"] = "4.1"
 }
 
 type DVSMacLimitPolicyType string
@@ -1278,8 +1297,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DVSMacLimitPolicyType"] = "6.7"
 	t["DVSMacLimitPolicyType"] = reflect.TypeOf((*DVSMacLimitPolicyType)(nil)).Elem()
+	minAPIVersionForType["DVSMacLimitPolicyType"] = "6.7"
 }
 
 type DasConfigFaultDasConfigFaultReason string
@@ -1312,6 +1331,7 @@ const (
 )
 
 func init() {
+	t["DasConfigFaultDasConfigFaultReason"] = reflect.TypeOf((*DasConfigFaultDasConfigFaultReason)(nil)).Elem()
 	minAPIVersionForType["DasConfigFaultDasConfigFaultReason"] = "4.0"
 	minAPIVersionForEnumValue["DasConfigFaultDasConfigFaultReason"] = map[string]string{
 		"NoDatastoresConfigured":     "5.1",
@@ -1321,7 +1341,6 @@ func init() {
 		"SetDesiredImageSpecFailed":  "7.0",
 		"ApplyHAVibsOnClusterFailed": "7.0",
 	}
-	t["DasConfigFaultDasConfigFaultReason"] = reflect.TypeOf((*DasConfigFaultDasConfigFaultReason)(nil)).Elem()
 }
 
 // Deprecated as of VI API 2.5, use `ClusterDasVmSettingsRestartPriority_enum`.
@@ -1366,8 +1385,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DatastoreAccessible"] = "4.0"
 	t["DatastoreAccessible"] = reflect.TypeOf((*DatastoreAccessible)(nil)).Elem()
+	minAPIVersionForType["DatastoreAccessible"] = "4.0"
 }
 
 type DatastoreSummaryMaintenanceModeState string
@@ -1385,8 +1404,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DatastoreSummaryMaintenanceModeState"] = "5.0"
 	t["DatastoreSummaryMaintenanceModeState"] = reflect.TypeOf((*DatastoreSummaryMaintenanceModeState)(nil)).Elem()
+	minAPIVersionForType["DatastoreSummaryMaintenanceModeState"] = "5.0"
 }
 
 type DayOfWeek string
@@ -1416,13 +1435,11 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DeviceNotSupportedReason"] = "2.5"
 	t["DeviceNotSupportedReason"] = reflect.TypeOf((*DeviceNotSupportedReason)(nil)).Elem()
+	minAPIVersionForType["DeviceNotSupportedReason"] = "2.5"
 }
 
 // The list of Device Protocols.
-//
-// Device protocol could be either NVMe or SCSI
 type DeviceProtocol string
 
 const (
@@ -1432,6 +1449,7 @@ const (
 
 func init() {
 	t["DeviceProtocol"] = reflect.TypeOf((*DeviceProtocol)(nil)).Elem()
+	minAPIVersionForType["DeviceProtocol"] = "8.0.1.0"
 }
 
 // Pre-defined constants for possible creators of log files.
@@ -1455,10 +1473,10 @@ const (
 )
 
 func init() {
+	t["DiagnosticManagerLogCreator"] = reflect.TypeOf((*DiagnosticManagerLogCreator)(nil)).Elem()
 	minAPIVersionForEnumValue["DiagnosticManagerLogCreator"] = map[string]string{
 		"recordLog": "2.5",
 	}
-	t["DiagnosticManagerLogCreator"] = reflect.TypeOf((*DiagnosticManagerLogCreator)(nil)).Elem()
 }
 
 // Constants for defined formats.
@@ -1516,8 +1534,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DisallowedChangeByServiceDisallowedChange"] = "5.0"
 	t["DisallowedChangeByServiceDisallowedChange"] = reflect.TypeOf((*DisallowedChangeByServiceDisallowedChange)(nil)).Elem()
+	minAPIVersionForType["DisallowedChangeByServiceDisallowedChange"] = "5.0"
 }
 
 // The `DistributedVirtualPortgroupBackingType_enum` enum defines
@@ -1537,8 +1555,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualPortgroupBackingType"] = "7.0"
 	t["DistributedVirtualPortgroupBackingType"] = reflect.TypeOf((*DistributedVirtualPortgroupBackingType)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualPortgroupBackingType"] = "7.0"
 }
 
 // The meta tag names recognizable in the
@@ -1554,8 +1572,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualPortgroupMetaTagName"] = "4.0"
 	t["DistributedVirtualPortgroupMetaTagName"] = reflect.TypeOf((*DistributedVirtualPortgroupMetaTagName)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualPortgroupMetaTagName"] = "4.0"
 }
 
 // The `DistributedVirtualPortgroupPortgroupType_enum` enum defines
@@ -1592,8 +1610,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualPortgroupPortgroupType"] = "4.0"
 	t["DistributedVirtualPortgroupPortgroupType"] = reflect.TypeOf((*DistributedVirtualPortgroupPortgroupType)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualPortgroupPortgroupType"] = "4.0"
 }
 
 type DistributedVirtualSwitchHostInfrastructureTrafficClass string
@@ -1624,13 +1642,13 @@ const (
 )
 
 func init() {
+	t["DistributedVirtualSwitchHostInfrastructureTrafficClass"] = reflect.TypeOf((*DistributedVirtualSwitchHostInfrastructureTrafficClass)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualSwitchHostInfrastructureTrafficClass"] = "5.5"
 	minAPIVersionForEnumValue["DistributedVirtualSwitchHostInfrastructureTrafficClass"] = map[string]string{
 		"vdp":       "6.0",
 		"backupNfc": "7.0.1.0",
 		"nvmetcp":   "7.0.3.0",
 	}
-	t["DistributedVirtualSwitchHostInfrastructureTrafficClass"] = reflect.TypeOf((*DistributedVirtualSwitchHostInfrastructureTrafficClass)(nil)).Elem()
 }
 
 type DistributedVirtualSwitchHostMemberHostComponentState string
@@ -1652,8 +1670,20 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualSwitchHostMemberHostComponentState"] = "4.0"
 	t["DistributedVirtualSwitchHostMemberHostComponentState"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostComponentState)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchHostMemberHostComponentState"] = "4.0"
+}
+
+// Describe the runtime state of the uplink.
+type DistributedVirtualSwitchHostMemberHostUplinkStateState string
+
+const (
+	DistributedVirtualSwitchHostMemberHostUplinkStateStateActive  = DistributedVirtualSwitchHostMemberHostUplinkStateState("active")
+	DistributedVirtualSwitchHostMemberHostUplinkStateStateStandby = DistributedVirtualSwitchHostMemberHostUplinkStateState("standby")
+)
+
+func init() {
+	t["DistributedVirtualSwitchHostMemberHostUplinkStateState"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostUplinkStateState)(nil)).Elem()
 }
 
 type DistributedVirtualSwitchHostMemberTransportZoneType string
@@ -1666,8 +1696,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualSwitchHostMemberTransportZoneType"] = "7.0"
 	t["DistributedVirtualSwitchHostMemberTransportZoneType"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberTransportZoneType)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchHostMemberTransportZoneType"] = "7.0"
 }
 
 type DistributedVirtualSwitchNetworkResourceControlVersion string
@@ -1680,8 +1710,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualSwitchNetworkResourceControlVersion"] = "6.0"
 	t["DistributedVirtualSwitchNetworkResourceControlVersion"] = reflect.TypeOf((*DistributedVirtualSwitchNetworkResourceControlVersion)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchNetworkResourceControlVersion"] = "6.0"
 }
 
 // List of possible teaming modes supported by the vNetwork Distributed
@@ -1709,8 +1739,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualSwitchNicTeamingPolicyMode"] = "4.1"
 	t["DistributedVirtualSwitchNicTeamingPolicyMode"] = reflect.TypeOf((*DistributedVirtualSwitchNicTeamingPolicyMode)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchNicTeamingPolicyMode"] = "4.1"
 }
 
 type DistributedVirtualSwitchPortConnecteeConnecteeType string
@@ -1729,8 +1759,11 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualSwitchPortConnecteeConnecteeType"] = "4.0"
 	t["DistributedVirtualSwitchPortConnecteeConnecteeType"] = reflect.TypeOf((*DistributedVirtualSwitchPortConnecteeConnecteeType)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchPortConnecteeConnecteeType"] = "4.0"
+	minAPIVersionForEnumValue["DistributedVirtualSwitchPortConnecteeConnecteeType"] = map[string]string{
+		"systemCrxVnic": "8.0.1.0",
+	}
 }
 
 type DistributedVirtualSwitchProductSpecOperationType string
@@ -1778,8 +1811,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DistributedVirtualSwitchProductSpecOperationType"] = "4.0"
 	t["DistributedVirtualSwitchProductSpecOperationType"] = reflect.TypeOf((*DistributedVirtualSwitchProductSpecOperationType)(nil)).Elem()
+	minAPIVersionForType["DistributedVirtualSwitchProductSpecOperationType"] = "4.0"
 }
 
 type DpmBehavior string
@@ -1796,8 +1829,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DpmBehavior"] = "2.5"
 	t["DpmBehavior"] = reflect.TypeOf((*DpmBehavior)(nil)).Elem()
+	minAPIVersionForType["DpmBehavior"] = "2.5"
 }
 
 type DrsBehavior string
@@ -1829,8 +1862,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DrsInjectorWorkloadCorrelationState"] = "5.1"
 	t["DrsInjectorWorkloadCorrelationState"] = reflect.TypeOf((*DrsInjectorWorkloadCorrelationState)(nil)).Elem()
+	minAPIVersionForType["DrsInjectorWorkloadCorrelationState"] = "5.1"
 }
 
 // Deprecated as of VI API 2.5 use `RecommendationReasonCode_enum`.
@@ -1869,8 +1902,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DvsEventPortBlockState"] = "6.5"
 	t["DvsEventPortBlockState"] = reflect.TypeOf((*DvsEventPortBlockState)(nil)).Elem()
+	minAPIVersionForType["DvsEventPortBlockState"] = "6.5"
 }
 
 // Network Filter on Failure Type.
@@ -1887,8 +1920,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DvsFilterOnFailure"] = "5.5"
 	t["DvsFilterOnFailure"] = reflect.TypeOf((*DvsFilterOnFailure)(nil)).Elem()
+	minAPIVersionForType["DvsFilterOnFailure"] = "5.5"
 }
 
 // Network Traffic Rule direction types.
@@ -1909,8 +1942,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["DvsNetworkRuleDirectionType"] = "5.5"
 	t["DvsNetworkRuleDirectionType"] = reflect.TypeOf((*DvsNetworkRuleDirectionType)(nil)).Elem()
+	minAPIVersionForType["DvsNetworkRuleDirectionType"] = "5.5"
 }
 
 // The `EntityImportType_enum` enum defines the import type for a
@@ -1962,8 +1995,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["EntityImportType"] = "5.1"
 	t["EntityImportType"] = reflect.TypeOf((*EntityImportType)(nil)).Elem()
+	minAPIVersionForType["EntityImportType"] = "5.1"
 }
 
 // The `EntityType_enum` enum identifies
@@ -1978,8 +2011,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["EntityType"] = "5.1"
 	t["EntityType"] = reflect.TypeOf((*EntityType)(nil)).Elem()
+	minAPIVersionForType["EntityType"] = "5.1"
 }
 
 type EventAlarmExpressionComparisonOperator string
@@ -2000,8 +2033,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["EventAlarmExpressionComparisonOperator"] = "4.0"
 	t["EventAlarmExpressionComparisonOperator"] = reflect.TypeOf((*EventAlarmExpressionComparisonOperator)(nil)).Elem()
+	minAPIVersionForType["EventAlarmExpressionComparisonOperator"] = "4.0"
 }
 
 type EventCategory string
@@ -2035,8 +2068,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["EventEventSeverity"] = "4.0"
 	t["EventEventSeverity"] = reflect.TypeOf((*EventEventSeverity)(nil)).Elem()
+	minAPIVersionForType["EventEventSeverity"] = "4.0"
 }
 
 // This option specifies how to select events based on child relationships
@@ -2103,8 +2136,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["FileSystemMountInfoVStorageSupportStatus"] = "4.1"
 	t["FileSystemMountInfoVStorageSupportStatus"] = reflect.TypeOf((*FileSystemMountInfoVStorageSupportStatus)(nil)).Elem()
+	minAPIVersionForType["FileSystemMountInfoVStorageSupportStatus"] = "4.1"
 }
 
 type FolderDesiredHostState string
@@ -2117,8 +2150,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["FolderDesiredHostState"] = "6.7.1"
 	t["FolderDesiredHostState"] = reflect.TypeOf((*FolderDesiredHostState)(nil)).Elem()
+	minAPIVersionForType["FolderDesiredHostState"] = "6.7.1"
 }
 
 type FtIssuesOnHostHostSelectionType string
@@ -2133,8 +2166,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["FtIssuesOnHostHostSelectionType"] = "4.0"
 	t["FtIssuesOnHostHostSelectionType"] = reflect.TypeOf((*FtIssuesOnHostHostSelectionType)(nil)).Elem()
+	minAPIVersionForType["FtIssuesOnHostHostSelectionType"] = "4.0"
 }
 
 type GuestFileType string
@@ -2150,8 +2183,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["GuestFileType"] = "5.0"
 	t["GuestFileType"] = reflect.TypeOf((*GuestFileType)(nil)).Elem()
+	minAPIVersionForType["GuestFileType"] = "5.0"
 }
 
 type GuestInfoAppStateType string
@@ -2169,8 +2202,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["GuestInfoAppStateType"] = "5.5"
 	t["GuestInfoAppStateType"] = reflect.TypeOf((*GuestInfoAppStateType)(nil)).Elem()
+	minAPIVersionForType["GuestInfoAppStateType"] = "5.5"
 }
 
 type GuestInfoCustomizationStatus string
@@ -2191,8 +2224,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["GuestInfoCustomizationStatus"] = "7.0.2.0"
 	t["GuestInfoCustomizationStatus"] = reflect.TypeOf((*GuestInfoCustomizationStatus)(nil)).Elem()
+	minAPIVersionForType["GuestInfoCustomizationStatus"] = "7.0.2.0"
 }
 
 type GuestOsDescriptorFirmwareType string
@@ -2205,8 +2238,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["GuestOsDescriptorFirmwareType"] = "5.0"
 	t["GuestOsDescriptorFirmwareType"] = reflect.TypeOf((*GuestOsDescriptorFirmwareType)(nil)).Elem()
+	minAPIVersionForType["GuestOsDescriptorFirmwareType"] = "5.0"
 }
 
 type GuestOsDescriptorSupportLevel string
@@ -2234,13 +2267,13 @@ const (
 )
 
 func init() {
+	t["GuestOsDescriptorSupportLevel"] = reflect.TypeOf((*GuestOsDescriptorSupportLevel)(nil)).Elem()
 	minAPIVersionForType["GuestOsDescriptorSupportLevel"] = "5.0"
 	minAPIVersionForEnumValue["GuestOsDescriptorSupportLevel"] = map[string]string{
 		"unsupported": "5.1",
 		"deprecated":  "5.1",
 		"techPreview": "5.1",
 	}
-	t["GuestOsDescriptorSupportLevel"] = reflect.TypeOf((*GuestOsDescriptorSupportLevel)(nil)).Elem()
 }
 
 // End guest quiesce phase error types.
@@ -2276,8 +2309,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["GuestRegKeyWowSpec"] = "6.0"
 	t["GuestRegKeyWowSpec"] = reflect.TypeOf((*GuestRegKeyWowSpec)(nil)).Elem()
+	minAPIVersionForType["GuestRegKeyWowSpec"] = "6.0"
 }
 
 type HealthUpdateInfoComponentType string
@@ -2291,8 +2324,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HealthUpdateInfoComponentType"] = "6.5"
 	t["HealthUpdateInfoComponentType"] = reflect.TypeOf((*HealthUpdateInfoComponentType)(nil)).Elem()
+	minAPIVersionForType["HealthUpdateInfoComponentType"] = "6.5"
 }
 
 // Defines different access modes that a user may have on the host for
@@ -2339,8 +2372,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostAccessMode"] = "6.0"
 	t["HostAccessMode"] = reflect.TypeOf((*HostAccessMode)(nil)).Elem()
+	minAPIVersionForType["HostAccessMode"] = "6.0"
 }
 
 type HostActiveDirectoryAuthenticationCertificateDigest string
@@ -2350,8 +2383,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostActiveDirectoryAuthenticationCertificateDigest"] = "6.0"
 	t["HostActiveDirectoryAuthenticationCertificateDigest"] = reflect.TypeOf((*HostActiveDirectoryAuthenticationCertificateDigest)(nil)).Elem()
+	minAPIVersionForType["HostActiveDirectoryAuthenticationCertificateDigest"] = "6.0"
 }
 
 type HostActiveDirectoryInfoDomainMembershipStatus string
@@ -2377,8 +2410,20 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostActiveDirectoryInfoDomainMembershipStatus"] = "4.1"
 	t["HostActiveDirectoryInfoDomainMembershipStatus"] = reflect.TypeOf((*HostActiveDirectoryInfoDomainMembershipStatus)(nil)).Elem()
+	minAPIVersionForType["HostActiveDirectoryInfoDomainMembershipStatus"] = "4.1"
+}
+
+type HostBIOSInfoFirmwareType string
+
+const (
+	HostBIOSInfoFirmwareTypeBIOS = HostBIOSInfoFirmwareType("BIOS")
+	HostBIOSInfoFirmwareTypeUEFI = HostBIOSInfoFirmwareType("UEFI")
+)
+
+func init() {
+	t["HostBIOSInfoFirmwareType"] = reflect.TypeOf((*HostBIOSInfoFirmwareType)(nil)).Elem()
+	minAPIVersionForType["HostBIOSInfoFirmwareType"] = "8.0.2.0"
 }
 
 // Deprecated as of vSphere API 7.0, use
@@ -2411,6 +2456,7 @@ const (
 )
 
 func init() {
+	t["HostCapabilityFtUnsupportedReason"] = reflect.TypeOf((*HostCapabilityFtUnsupportedReason)(nil)).Elem()
 	minAPIVersionForType["HostCapabilityFtUnsupportedReason"] = "4.1"
 	minAPIVersionForEnumValue["HostCapabilityFtUnsupportedReason"] = map[string]string{
 		"unsupportedProduct":  "6.0",
@@ -2418,7 +2464,6 @@ func init() {
 		"cpuHwmmuUnsupported": "6.0",
 		"cpuHvDisabled":       "6.0",
 	}
-	t["HostCapabilityFtUnsupportedReason"] = reflect.TypeOf((*HostCapabilityFtUnsupportedReason)(nil)).Elem()
 }
 
 type HostCapabilityUnmapMethodSupported string
@@ -2434,8 +2479,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostCapabilityUnmapMethodSupported"] = "6.7"
 	t["HostCapabilityUnmapMethodSupported"] = reflect.TypeOf((*HostCapabilityUnmapMethodSupported)(nil)).Elem()
+	minAPIVersionForType["HostCapabilityUnmapMethodSupported"] = "6.7"
 }
 
 type HostCapabilityVmDirectPathGen2UnsupportedReason string
@@ -2454,8 +2499,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostCapabilityVmDirectPathGen2UnsupportedReason"] = "4.1"
 	t["HostCapabilityVmDirectPathGen2UnsupportedReason"] = reflect.TypeOf((*HostCapabilityVmDirectPathGen2UnsupportedReason)(nil)).Elem()
+	minAPIVersionForType["HostCapabilityVmDirectPathGen2UnsupportedReason"] = "4.1"
 }
 
 // The status of a given certificate as computed per the soft and the hard
@@ -2501,11 +2546,10 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostCertificateManagerCertificateInfoCertificateStatus"] = "6.0"
 	t["HostCertificateManagerCertificateInfoCertificateStatus"] = reflect.TypeOf((*HostCertificateManagerCertificateInfoCertificateStatus)(nil)).Elem()
+	minAPIVersionForType["HostCertificateManagerCertificateInfoCertificateStatus"] = "6.0"
 }
 
-// Certificate type supported by Host
 type HostCertificateManagerCertificateKind string
 
 const (
@@ -2517,6 +2561,7 @@ const (
 
 func init() {
 	t["HostCertificateManagerCertificateKind"] = reflect.TypeOf((*HostCertificateManagerCertificateKind)(nil)).Elem()
+	minAPIVersionForType["HostCertificateManagerCertificateKind"] = "8.0.1.0"
 }
 
 // This is a global mode on a configuration specification indicating
@@ -2557,10 +2602,10 @@ const (
 )
 
 func init() {
+	t["HostConfigChangeOperation"] = reflect.TypeOf((*HostConfigChangeOperation)(nil)).Elem()
 	minAPIVersionForEnumValue["HostConfigChangeOperation"] = map[string]string{
 		"ignore": "5.5",
 	}
-	t["HostConfigChangeOperation"] = reflect.TypeOf((*HostConfigChangeOperation)(nil)).Elem()
 }
 
 type HostCpuPackageVendor string
@@ -2569,15 +2614,15 @@ const (
 	HostCpuPackageVendorUnknown = HostCpuPackageVendor("unknown")
 	HostCpuPackageVendorIntel   = HostCpuPackageVendor("intel")
 	HostCpuPackageVendorAmd     = HostCpuPackageVendor("amd")
-	// `**Since:**` vSphere API 6.7.1
+	// `**Since:**` vSphere API Release 6.7.1
 	HostCpuPackageVendorHygon = HostCpuPackageVendor("hygon")
 )
 
 func init() {
+	t["HostCpuPackageVendor"] = reflect.TypeOf((*HostCpuPackageVendor)(nil)).Elem()
 	minAPIVersionForEnumValue["HostCpuPackageVendor"] = map[string]string{
 		"hygon": "6.7.1",
 	}
-	t["HostCpuPackageVendor"] = reflect.TypeOf((*HostCpuPackageVendor)(nil)).Elem()
 }
 
 type HostCpuPowerManagementInfoPolicyType string
@@ -2589,8 +2634,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostCpuPowerManagementInfoPolicyType"] = "4.0"
 	t["HostCpuPowerManagementInfoPolicyType"] = reflect.TypeOf((*HostCpuPowerManagementInfoPolicyType)(nil)).Elem()
+	minAPIVersionForType["HostCpuPowerManagementInfoPolicyType"] = "4.0"
 }
 
 type HostCryptoState string
@@ -2613,14 +2658,13 @@ const (
 )
 
 func init() {
+	t["HostCryptoState"] = reflect.TypeOf((*HostCryptoState)(nil)).Elem()
 	minAPIVersionForType["HostCryptoState"] = "6.5"
 	minAPIVersionForEnumValue["HostCryptoState"] = map[string]string{
 		"pendingIncapable": "7.0",
 	}
-	t["HostCryptoState"] = reflect.TypeOf((*HostCryptoState)(nil)).Elem()
 }
 
-// The enum defines the distributed virtual switch mode.
 type HostDVSConfigSpecSwitchMode string
 
 const (
@@ -2632,6 +2676,7 @@ const (
 
 func init() {
 	t["HostDVSConfigSpecSwitchMode"] = reflect.TypeOf((*HostDVSConfigSpecSwitchMode)(nil)).Elem()
+	minAPIVersionForType["HostDVSConfigSpecSwitchMode"] = "8.0.0.1"
 }
 
 type HostDasErrorEventHostDasErrorReason string
@@ -2656,11 +2701,11 @@ const (
 )
 
 func init() {
+	t["HostDasErrorEventHostDasErrorReason"] = reflect.TypeOf((*HostDasErrorEventHostDasErrorReason)(nil)).Elem()
 	minAPIVersionForType["HostDasErrorEventHostDasErrorReason"] = "4.0"
 	minAPIVersionForEnumValue["HostDasErrorEventHostDasErrorReason"] = map[string]string{
 		"isolationAddressUnpingable": "4.1",
 	}
-	t["HostDasErrorEventHostDasErrorReason"] = reflect.TypeOf((*HostDasErrorEventHostDasErrorReason)(nil)).Elem()
 }
 
 type HostDateTimeInfoProtocol string
@@ -2673,8 +2718,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostDateTimeInfoProtocol"] = "7.0"
 	t["HostDateTimeInfoProtocol"] = reflect.TypeOf((*HostDateTimeInfoProtocol)(nil)).Elem()
+	minAPIVersionForType["HostDateTimeInfoProtocol"] = "7.0"
 }
 
 // The set of digest methods that can be used by TPM to calculate the PCR
@@ -2688,17 +2733,18 @@ const (
 	//
 	// MD5.
 	HostDigestInfoDigestMethodTypeMD5 = HostDigestInfoDigestMethodType("MD5")
-	// `**Since:**` vSphere API 6.7
+	// `**Since:**` vSphere API Release 6.7
 	HostDigestInfoDigestMethodTypeSHA256 = HostDigestInfoDigestMethodType("SHA256")
-	// `**Since:**` vSphere API 6.7
+	// `**Since:**` vSphere API Release 6.7
 	HostDigestInfoDigestMethodTypeSHA384 = HostDigestInfoDigestMethodType("SHA384")
-	// `**Since:**` vSphere API 6.7
+	// `**Since:**` vSphere API Release 6.7
 	HostDigestInfoDigestMethodTypeSHA512 = HostDigestInfoDigestMethodType("SHA512")
-	// `**Since:**` vSphere API 6.7
+	// `**Since:**` vSphere API Release 6.7
 	HostDigestInfoDigestMethodTypeSM3_256 = HostDigestInfoDigestMethodType("SM3_256")
 )
 
 func init() {
+	t["HostDigestInfoDigestMethodType"] = reflect.TypeOf((*HostDigestInfoDigestMethodType)(nil)).Elem()
 	minAPIVersionForType["HostDigestInfoDigestMethodType"] = "4.0"
 	minAPIVersionForEnumValue["HostDigestInfoDigestMethodType"] = map[string]string{
 		"SHA256":  "6.7",
@@ -2706,7 +2752,6 @@ func init() {
 		"SHA512":  "6.7",
 		"SM3_256": "6.7",
 	}
-	t["HostDigestInfoDigestMethodType"] = reflect.TypeOf((*HostDigestInfoDigestMethodType)(nil)).Elem()
 }
 
 // This enum specifies the supported digest verification settings.
@@ -2729,8 +2774,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostDigestVerificationSetting"] = "7.0.3.0"
 	t["HostDigestVerificationSetting"] = reflect.TypeOf((*HostDigestVerificationSetting)(nil)).Elem()
+	minAPIVersionForType["HostDigestVerificationSetting"] = "7.0.3.0"
 }
 
 type HostDisconnectedEventReasonCode string
@@ -2757,6 +2802,7 @@ const (
 )
 
 func init() {
+	t["HostDisconnectedEventReasonCode"] = reflect.TypeOf((*HostDisconnectedEventReasonCode)(nil)).Elem()
 	minAPIVersionForType["HostDisconnectedEventReasonCode"] = "4.0"
 	minAPIVersionForEnumValue["HostDisconnectedEventReasonCode"] = map[string]string{
 		"agentOutOfDate":         "4.1",
@@ -2764,7 +2810,6 @@ func init() {
 		"unknown":                "4.1",
 		"vcVRAMCapacityExceeded": "5.1",
 	}
-	t["HostDisconnectedEventReasonCode"] = reflect.TypeOf((*HostDisconnectedEventReasonCode)(nil)).Elem()
 }
 
 // List of partition format types.
@@ -2777,8 +2822,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostDiskPartitionInfoPartitionFormat"] = "5.0"
 	t["HostDiskPartitionInfoPartitionFormat"] = reflect.TypeOf((*HostDiskPartitionInfoPartitionFormat)(nil)).Elem()
+	minAPIVersionForType["HostDiskPartitionInfoPartitionFormat"] = "5.0"
 }
 
 // List of symbol partition types
@@ -2792,15 +2837,15 @@ const (
 	HostDiskPartitionInfoTypeExtended      = HostDiskPartitionInfoType("extended")
 	HostDiskPartitionInfoTypeNtfs          = HostDiskPartitionInfoType("ntfs")
 	HostDiskPartitionInfoTypeVmkDiagnostic = HostDiskPartitionInfoType("vmkDiagnostic")
-	// `**Since:**` vSphere API 5.5
+	// `**Since:**` vSphere API Release 5.5
 	HostDiskPartitionInfoTypeVffs = HostDiskPartitionInfoType("vffs")
 )
 
 func init() {
+	t["HostDiskPartitionInfoType"] = reflect.TypeOf((*HostDiskPartitionInfoType)(nil)).Elem()
 	minAPIVersionForEnumValue["HostDiskPartitionInfoType"] = map[string]string{
 		"vffs": "5.5",
 	}
-	t["HostDiskPartitionInfoType"] = reflect.TypeOf((*HostDiskPartitionInfoType)(nil)).Elem()
 }
 
 // Set of possible values for
@@ -2822,8 +2867,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostFeatureVersionKey"] = "4.1"
 	t["HostFeatureVersionKey"] = reflect.TypeOf((*HostFeatureVersionKey)(nil)).Elem()
+	minAPIVersionForType["HostFeatureVersionKey"] = "4.1"
 }
 
 type HostFileSystemVolumeFileSystemType string
@@ -2869,6 +2914,7 @@ const (
 )
 
 func init() {
+	t["HostFileSystemVolumeFileSystemType"] = reflect.TypeOf((*HostFileSystemVolumeFileSystemType)(nil)).Elem()
 	minAPIVersionForType["HostFileSystemVolumeFileSystemType"] = "6.0"
 	minAPIVersionForEnumValue["HostFileSystemVolumeFileSystemType"] = map[string]string{
 		"NFS41": "6.0",
@@ -2878,7 +2924,6 @@ func init() {
 		"PMEM":  "6.7",
 		"vsanD": "7.0.1.0",
 	}
-	t["HostFileSystemVolumeFileSystemType"] = reflect.TypeOf((*HostFileSystemVolumeFileSystemType)(nil)).Elem()
 }
 
 // Enumeration of port directions.
@@ -2901,8 +2946,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostFirewallRulePortType"] = "5.0"
 	t["HostFirewallRulePortType"] = reflect.TypeOf((*HostFirewallRulePortType)(nil)).Elem()
+	minAPIVersionForType["HostFirewallRulePortType"] = "5.0"
 }
 
 // Set of valid port protocols.
@@ -2915,6 +2960,31 @@ const (
 
 func init() {
 	t["HostFirewallRuleProtocol"] = reflect.TypeOf((*HostFirewallRuleProtocol)(nil)).Elem()
+}
+
+type HostFirewallSystemRuleSetId string
+
+const (
+	HostFirewallSystemRuleSetIdFaultTolerance = HostFirewallSystemRuleSetId("faultTolerance")
+	HostFirewallSystemRuleSetIdFdm            = HostFirewallSystemRuleSetId("fdm")
+	HostFirewallSystemRuleSetIdUpdateManager  = HostFirewallSystemRuleSetId("updateManager")
+	HostFirewallSystemRuleSetIdVpxHeartbeats  = HostFirewallSystemRuleSetId("vpxHeartbeats")
+)
+
+func init() {
+	t["HostFirewallSystemRuleSetId"] = reflect.TypeOf((*HostFirewallSystemRuleSetId)(nil)).Elem()
+	minAPIVersionForType["HostFirewallSystemRuleSetId"] = "8.0.2.0"
+}
+
+type HostFirewallSystemServiceName string
+
+const (
+	HostFirewallSystemServiceNameVpxa = HostFirewallSystemServiceName("vpxa")
+)
+
+func init() {
+	t["HostFirewallSystemServiceName"] = reflect.TypeOf((*HostFirewallSystemServiceName)(nil)).Elem()
+	minAPIVersionForType["HostFirewallSystemServiceName"] = "8.0.2.0"
 }
 
 // The vendor definition for type of Field Replaceable Unit (FRU).
@@ -2944,8 +3014,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostGraphicsConfigGraphicsType"] = "6.5"
 	t["HostGraphicsConfigGraphicsType"] = reflect.TypeOf((*HostGraphicsConfigGraphicsType)(nil)).Elem()
+	minAPIVersionForType["HostGraphicsConfigGraphicsType"] = "6.5"
 }
 
 type HostGraphicsConfigSharedPassthruAssignmentPolicy string
@@ -2958,8 +3028,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostGraphicsConfigSharedPassthruAssignmentPolicy"] = "6.5"
 	t["HostGraphicsConfigSharedPassthruAssignmentPolicy"] = reflect.TypeOf((*HostGraphicsConfigSharedPassthruAssignmentPolicy)(nil)).Elem()
+	minAPIVersionForType["HostGraphicsConfigSharedPassthruAssignmentPolicy"] = "6.5"
 }
 
 type HostGraphicsInfoGraphicsType string
@@ -2982,11 +3052,11 @@ const (
 )
 
 func init() {
+	t["HostGraphicsInfoGraphicsType"] = reflect.TypeOf((*HostGraphicsInfoGraphicsType)(nil)).Elem()
 	minAPIVersionForType["HostGraphicsInfoGraphicsType"] = "5.5"
 	minAPIVersionForEnumValue["HostGraphicsInfoGraphicsType"] = map[string]string{
 		"sharedDirect": "6.5",
 	}
-	t["HostGraphicsInfoGraphicsType"] = reflect.TypeOf((*HostGraphicsInfoGraphicsType)(nil)).Elem()
 }
 
 type HostHardwareElementStatus string
@@ -3007,8 +3077,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostHardwareElementStatus"] = "2.5"
 	t["HostHardwareElementStatus"] = reflect.TypeOf((*HostHardwareElementStatus)(nil)).Elem()
+	minAPIVersionForType["HostHardwareElementStatus"] = "2.5"
 }
 
 type HostHasComponentFailureHostComponentType string
@@ -3018,8 +3088,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostHasComponentFailureHostComponentType"] = "6.0"
 	t["HostHasComponentFailureHostComponentType"] = reflect.TypeOf((*HostHasComponentFailureHostComponentType)(nil)).Elem()
+	minAPIVersionForType["HostHasComponentFailureHostComponentType"] = "6.0"
 }
 
 type HostImageAcceptanceLevel string
@@ -3036,8 +3106,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostImageAcceptanceLevel"] = "5.0"
 	t["HostImageAcceptanceLevel"] = reflect.TypeOf((*HostImageAcceptanceLevel)(nil)).Elem()
+	minAPIVersionForType["HostImageAcceptanceLevel"] = "5.0"
 }
 
 type HostIncompatibleForFaultToleranceReason string
@@ -3050,8 +3120,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostIncompatibleForFaultToleranceReason"] = "4.0"
 	t["HostIncompatibleForFaultToleranceReason"] = reflect.TypeOf((*HostIncompatibleForFaultToleranceReason)(nil)).Elem()
+	minAPIVersionForType["HostIncompatibleForFaultToleranceReason"] = "4.0"
 }
 
 type HostIncompatibleForRecordReplayReason string
@@ -3064,8 +3134,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostIncompatibleForRecordReplayReason"] = "4.0"
 	t["HostIncompatibleForRecordReplayReason"] = reflect.TypeOf((*HostIncompatibleForRecordReplayReason)(nil)).Elem()
+	minAPIVersionForType["HostIncompatibleForRecordReplayReason"] = "4.0"
 }
 
 // The type of CHAP authentication setting to use.
@@ -3086,8 +3156,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostInternetScsiHbaChapAuthenticationType"] = "4.0"
 	t["HostInternetScsiHbaChapAuthenticationType"] = reflect.TypeOf((*HostInternetScsiHbaChapAuthenticationType)(nil)).Elem()
+	minAPIVersionForType["HostInternetScsiHbaChapAuthenticationType"] = "4.0"
 }
 
 // The type of integrity checks to use.
@@ -3110,8 +3180,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostInternetScsiHbaDigestType"] = "4.0"
 	t["HostInternetScsiHbaDigestType"] = reflect.TypeOf((*HostInternetScsiHbaDigestType)(nil)).Elem()
+	minAPIVersionForType["HostInternetScsiHbaDigestType"] = "4.0"
 }
 
 type HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType string
@@ -3134,8 +3204,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType"] = "6.0"
 	t["HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType"] = reflect.TypeOf((*HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType)(nil)).Elem()
+	minAPIVersionForType["HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType"] = "6.0"
 }
 
 type HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation string
@@ -3146,8 +3216,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation"] = "6.0"
 	t["HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation"] = reflect.TypeOf((*HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation)(nil)).Elem()
+	minAPIVersionForType["HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation"] = "6.0"
 }
 
 type HostInternetScsiHbaNetworkBindingSupportType string
@@ -3159,8 +3229,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostInternetScsiHbaNetworkBindingSupportType"] = "5.0"
 	t["HostInternetScsiHbaNetworkBindingSupportType"] = reflect.TypeOf((*HostInternetScsiHbaNetworkBindingSupportType)(nil)).Elem()
+	minAPIVersionForType["HostInternetScsiHbaNetworkBindingSupportType"] = "5.0"
 }
 
 // The method of discovery of an iScsi target.
@@ -3180,8 +3250,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostInternetScsiHbaStaticTargetTargetDiscoveryMethod"] = "5.1"
 	t["HostInternetScsiHbaStaticTargetTargetDiscoveryMethod"] = reflect.TypeOf((*HostInternetScsiHbaStaticTargetTargetDiscoveryMethod)(nil)).Elem()
+	minAPIVersionForType["HostInternetScsiHbaStaticTargetTargetDiscoveryMethod"] = "5.1"
 }
 
 // This specifies how the ipv6 address is configured for the interface.
@@ -3208,8 +3278,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostIpConfigIpV6AddressConfigType"] = "4.0"
 	t["HostIpConfigIpV6AddressConfigType"] = reflect.TypeOf((*HostIpConfigIpV6AddressConfigType)(nil)).Elem()
+	minAPIVersionForType["HostIpConfigIpV6AddressConfigType"] = "4.0"
 }
 
 type HostIpConfigIpV6AddressStatus string
@@ -3236,8 +3306,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostIpConfigIpV6AddressStatus"] = "4.0"
 	t["HostIpConfigIpV6AddressStatus"] = reflect.TypeOf((*HostIpConfigIpV6AddressStatus)(nil)).Elem()
+	minAPIVersionForType["HostIpConfigIpV6AddressStatus"] = "4.0"
 }
 
 type HostLicensableResourceKey string
@@ -3258,8 +3328,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostLicensableResourceKey"] = "5.0"
 	t["HostLicensableResourceKey"] = reflect.TypeOf((*HostLicensableResourceKey)(nil)).Elem()
+	minAPIVersionForType["HostLicensableResourceKey"] = "5.0"
 }
 
 type HostLockdownMode string
@@ -3279,8 +3349,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostLockdownMode"] = "6.0"
 	t["HostLockdownMode"] = reflect.TypeOf((*HostLockdownMode)(nil)).Elem()
+	minAPIVersionForType["HostLockdownMode"] = "6.0"
 }
 
 // This enum defines the possible types of file types that can be reserved
@@ -3293,8 +3363,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostLowLevelProvisioningManagerFileType"] = "6.0"
 	t["HostLowLevelProvisioningManagerFileType"] = reflect.TypeOf((*HostLowLevelProvisioningManagerFileType)(nil)).Elem()
+	minAPIVersionForType["HostLowLevelProvisioningManagerFileType"] = "6.0"
 }
 
 type HostLowLevelProvisioningManagerReloadTarget string
@@ -3310,8 +3380,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostLowLevelProvisioningManagerReloadTarget"] = "4.0"
 	t["HostLowLevelProvisioningManagerReloadTarget"] = reflect.TypeOf((*HostLowLevelProvisioningManagerReloadTarget)(nil)).Elem()
+	minAPIVersionForType["HostLowLevelProvisioningManagerReloadTarget"] = "4.0"
 }
 
 type HostMaintenanceSpecPurpose string
@@ -3321,8 +3391,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostMaintenanceSpecPurpose"] = "7.0"
 	t["HostMaintenanceSpecPurpose"] = reflect.TypeOf((*HostMaintenanceSpecPurpose)(nil)).Elem()
+	minAPIVersionForType["HostMaintenanceSpecPurpose"] = "7.0"
 }
 
 // Enumeration of flags pertaining to a memory tier.
@@ -3361,8 +3431,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostMemoryTierFlags"] = "7.0.3.0"
 	t["HostMemoryTierFlags"] = reflect.TypeOf((*HostMemoryTierFlags)(nil)).Elem()
+	minAPIVersionForType["HostMemoryTierFlags"] = "7.0.3.0"
 }
 
 type HostMemoryTierType string
@@ -3375,8 +3445,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostMemoryTierType"] = "7.0.3.0"
 	t["HostMemoryTierType"] = reflect.TypeOf((*HostMemoryTierType)(nil)).Elem()
+	minAPIVersionForType["HostMemoryTierType"] = "7.0.3.0"
 }
 
 type HostMemoryTieringType string
@@ -3392,8 +3462,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostMemoryTieringType"] = "7.0.3.0"
 	t["HostMemoryTieringType"] = reflect.TypeOf((*HostMemoryTieringType)(nil)).Elem()
+	minAPIVersionForType["HostMemoryTieringType"] = "7.0.3.0"
 }
 
 // A datastore can become inaccessible due to a number of reasons as
@@ -3434,8 +3504,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostMountInfoInaccessibleReason"] = "5.1"
 	t["HostMountInfoInaccessibleReason"] = reflect.TypeOf((*HostMountInfoInaccessibleReason)(nil)).Elem()
+	minAPIVersionForType["HostMountInfoInaccessibleReason"] = "5.1"
 }
 
 // NFS mount request can be failed due to a number of reasons as
@@ -3443,7 +3513,6 @@ func init() {
 //
 // The reason for the mount failure is reported in
 // `HostMountInfo.mountFailedReason`. This is applicable only for those
-// datastores to which mount retry is configured.
 type HostMountInfoMountFailedReason string
 
 const (
@@ -3471,6 +3540,7 @@ const (
 
 func init() {
 	t["HostMountInfoMountFailedReason"] = reflect.TypeOf((*HostMountInfoMountFailedReason)(nil)).Elem()
+	minAPIVersionForType["HostMountInfoMountFailedReason"] = "8.0.0.1"
 }
 
 // Defines the access mode of the datastore.
@@ -3514,11 +3584,11 @@ const (
 )
 
 func init() {
+	t["HostNasVolumeSecurityType"] = reflect.TypeOf((*HostNasVolumeSecurityType)(nil)).Elem()
 	minAPIVersionForType["HostNasVolumeSecurityType"] = "6.0"
 	minAPIVersionForEnumValue["HostNasVolumeSecurityType"] = map[string]string{
 		"SEC_KRB5I": "6.5",
 	}
-	t["HostNasVolumeSecurityType"] = reflect.TypeOf((*HostNasVolumeSecurityType)(nil)).Elem()
 }
 
 type HostNetStackInstanceCongestionControlAlgorithmType string
@@ -3535,8 +3605,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostNetStackInstanceCongestionControlAlgorithmType"] = "5.5"
 	t["HostNetStackInstanceCongestionControlAlgorithmType"] = reflect.TypeOf((*HostNetStackInstanceCongestionControlAlgorithmType)(nil)).Elem()
+	minAPIVersionForType["HostNetStackInstanceCongestionControlAlgorithmType"] = "5.5"
 }
 
 type HostNetStackInstanceSystemStackKey string
@@ -3555,12 +3625,14 @@ const (
 )
 
 func init() {
+	t["HostNetStackInstanceSystemStackKey"] = reflect.TypeOf((*HostNetStackInstanceSystemStackKey)(nil)).Elem()
 	minAPIVersionForType["HostNetStackInstanceSystemStackKey"] = "5.5"
 	minAPIVersionForEnumValue["HostNetStackInstanceSystemStackKey"] = map[string]string{
 		"vmotion":             "6.0",
 		"vSphereProvisioning": "6.0",
+		"mirror":              "8.0.0.1",
+		"ops":                 "8.0.0.1",
 	}
-	t["HostNetStackInstanceSystemStackKey"] = reflect.TypeOf((*HostNetStackInstanceSystemStackKey)(nil)).Elem()
 }
 
 // Health state of the numeric sensor as reported by the sensor probes.
@@ -3583,8 +3655,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostNumericSensorHealthState"] = "2.5"
 	t["HostNumericSensorHealthState"] = reflect.TypeOf((*HostNumericSensorHealthState)(nil)).Elem()
+	minAPIVersionForType["HostNumericSensorHealthState"] = "2.5"
 }
 
 // Sensor Types for specific hardware component are either based on
@@ -3620,6 +3692,7 @@ const (
 )
 
 func init() {
+	t["HostNumericSensorType"] = reflect.TypeOf((*HostNumericSensorType)(nil)).Elem()
 	minAPIVersionForType["HostNumericSensorType"] = "2.5"
 	minAPIVersionForEnumValue["HostNumericSensorType"] = map[string]string{
 		"processor":   "6.5",
@@ -3631,7 +3704,6 @@ func init() {
 		"cable":       "6.5",
 		"watchdog":    "6.5",
 	}
-	t["HostNumericSensorType"] = reflect.TypeOf((*HostNumericSensorType)(nil)).Elem()
 }
 
 // This enum represents the supported NVM subsystem types.
@@ -3687,8 +3759,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostNvmeTransportParametersNvmeAddressFamily"] = "7.0"
 	t["HostNvmeTransportParametersNvmeAddressFamily"] = reflect.TypeOf((*HostNvmeTransportParametersNvmeAddressFamily)(nil)).Elem()
+	minAPIVersionForType["HostNvmeTransportParametersNvmeAddressFamily"] = "7.0"
 }
 
 // The set of NVM Express over Fabrics transport types.
@@ -3713,11 +3785,11 @@ const (
 )
 
 func init() {
+	t["HostNvmeTransportType"] = reflect.TypeOf((*HostNvmeTransportType)(nil)).Elem()
 	minAPIVersionForType["HostNvmeTransportType"] = "7.0"
 	minAPIVersionForEnumValue["HostNvmeTransportType"] = map[string]string{
 		"tcp": "7.0.3.0",
 	}
-	t["HostNvmeTransportType"] = reflect.TypeOf((*HostNvmeTransportType)(nil)).Elem()
 }
 
 type HostOpaqueSwitchOpaqueSwitchState string
@@ -3734,11 +3806,11 @@ const (
 )
 
 func init() {
+	t["HostOpaqueSwitchOpaqueSwitchState"] = reflect.TypeOf((*HostOpaqueSwitchOpaqueSwitchState)(nil)).Elem()
 	minAPIVersionForType["HostOpaqueSwitchOpaqueSwitchState"] = "6.0"
 	minAPIVersionForEnumValue["HostOpaqueSwitchOpaqueSwitchState"] = map[string]string{
 		"maintenance": "7.0",
 	}
-	t["HostOpaqueSwitchOpaqueSwitchState"] = reflect.TypeOf((*HostOpaqueSwitchOpaqueSwitchState)(nil)).Elem()
 }
 
 // The installation state if the update is installed on the server.
@@ -3820,8 +3892,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostPowerOperationType"] = "2.5"
 	t["HostPowerOperationType"] = reflect.TypeOf((*HostPowerOperationType)(nil)).Elem()
+	minAPIVersionForType["HostPowerOperationType"] = "2.5"
 }
 
 // The `HostProfileManagerAnswerFileStatus_enum` enum
@@ -3848,8 +3920,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProfileManagerAnswerFileStatus"] = "5.0"
 	t["HostProfileManagerAnswerFileStatus"] = reflect.TypeOf((*HostProfileManagerAnswerFileStatus)(nil)).Elem()
+	minAPIVersionForType["HostProfileManagerAnswerFileStatus"] = "5.0"
 }
 
 type HostProfileManagerCompositionResultResultElementStatus string
@@ -3860,8 +3932,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProfileManagerCompositionResultResultElementStatus"] = "6.5"
 	t["HostProfileManagerCompositionResultResultElementStatus"] = reflect.TypeOf((*HostProfileManagerCompositionResultResultElementStatus)(nil)).Elem()
+	minAPIVersionForType["HostProfileManagerCompositionResultResultElementStatus"] = "6.5"
 }
 
 type HostProfileManagerCompositionValidationResultResultElementStatus string
@@ -3872,8 +3944,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProfileManagerCompositionValidationResultResultElementStatus"] = "6.5"
 	t["HostProfileManagerCompositionValidationResultResultElementStatus"] = reflect.TypeOf((*HostProfileManagerCompositionValidationResultResultElementStatus)(nil)).Elem()
+	minAPIVersionForType["HostProfileManagerCompositionValidationResultResultElementStatus"] = "6.5"
 }
 
 // The `HostProfileManagerTaskListRequirement_enum` enum
@@ -3892,8 +3964,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProfileManagerTaskListRequirement"] = "6.0"
 	t["HostProfileManagerTaskListRequirement"] = reflect.TypeOf((*HostProfileManagerTaskListRequirement)(nil)).Elem()
+	minAPIVersionForType["HostProfileManagerTaskListRequirement"] = "6.0"
 }
 
 type HostProfileValidationFailureInfoUpdateType string
@@ -3910,8 +3982,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProfileValidationFailureInfoUpdateType"] = "6.7"
 	t["HostProfileValidationFailureInfoUpdateType"] = reflect.TypeOf((*HostProfileValidationFailureInfoUpdateType)(nil)).Elem()
+	minAPIVersionForType["HostProfileValidationFailureInfoUpdateType"] = "6.7"
 }
 
 type HostProfileValidationState string
@@ -3923,8 +3995,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProfileValidationState"] = "6.7"
 	t["HostProfileValidationState"] = reflect.TypeOf((*HostProfileValidationState)(nil)).Elem()
+	minAPIVersionForType["HostProfileValidationState"] = "6.7"
 }
 
 // Deprecated from all vmodl version above @released("6.0").
@@ -3936,8 +4008,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProtocolEndpointPEType"] = "6.0"
 	t["HostProtocolEndpointPEType"] = reflect.TypeOf((*HostProtocolEndpointPEType)(nil)).Elem()
+	minAPIVersionForType["HostProtocolEndpointPEType"] = "6.0"
 }
 
 type HostProtocolEndpointProtocolEndpointType string
@@ -3949,8 +4021,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostProtocolEndpointProtocolEndpointType"] = "6.5"
 	t["HostProtocolEndpointProtocolEndpointType"] = reflect.TypeOf((*HostProtocolEndpointProtocolEndpointType)(nil)).Elem()
+	minAPIVersionForType["HostProtocolEndpointProtocolEndpointType"] = "6.5"
 }
 
 type HostPtpConfigDeviceType string
@@ -3970,8 +4042,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostPtpConfigDeviceType"] = "7.0.3.0"
 	t["HostPtpConfigDeviceType"] = reflect.TypeOf((*HostPtpConfigDeviceType)(nil)).Elem()
+	minAPIVersionForType["HostPtpConfigDeviceType"] = "7.0.3.0"
 }
 
 type HostQualifiedNameType string
@@ -3984,8 +4056,11 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostQualifiedNameType"] = "7.0.3.0"
 	t["HostQualifiedNameType"] = reflect.TypeOf((*HostQualifiedNameType)(nil)).Elem()
+	minAPIVersionForType["HostQualifiedNameType"] = "7.0.3.0"
+	minAPIVersionForEnumValue["HostQualifiedNameType"] = map[string]string{
+		"vvolNvmeQualifiedName": "8.0.0.0",
+	}
 }
 
 // Possible RDMA device connection states.
@@ -4039,8 +4114,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostRdmaDeviceConnectionState"] = "7.0"
 	t["HostRdmaDeviceConnectionState"] = reflect.TypeOf((*HostRdmaDeviceConnectionState)(nil)).Elem()
+	minAPIVersionForType["HostRdmaDeviceConnectionState"] = "7.0"
 }
 
 // Deprecated as of vSphere API 6.0.
@@ -4059,8 +4134,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostReplayUnsupportedReason"] = "4.0"
 	t["HostReplayUnsupportedReason"] = reflect.TypeOf((*HostReplayUnsupportedReason)(nil)).Elem()
+	minAPIVersionForType["HostReplayUnsupportedReason"] = "4.0"
 }
 
 type HostRuntimeInfoNetStackInstanceRuntimeInfoState string
@@ -4077,8 +4152,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = "5.5"
 	t["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = reflect.TypeOf((*HostRuntimeInfoNetStackInstanceRuntimeInfoState)(nil)).Elem()
+	minAPIVersionForType["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = "5.5"
 }
 
 type HostRuntimeInfoStateEncryptionInfoProtectionMode string
@@ -4091,8 +4166,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostRuntimeInfoStateEncryptionInfoProtectionMode"] = "7.0.3.0"
 	t["HostRuntimeInfoStateEncryptionInfoProtectionMode"] = reflect.TypeOf((*HostRuntimeInfoStateEncryptionInfoProtectionMode)(nil)).Elem()
+	minAPIVersionForType["HostRuntimeInfoStateEncryptionInfoProtectionMode"] = "7.0.3.0"
 }
 
 type HostRuntimeInfoStatelessNvdsMigrationState string
@@ -4107,8 +4182,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostRuntimeInfoStatelessNvdsMigrationState"] = "7.0.2.0"
 	t["HostRuntimeInfoStatelessNvdsMigrationState"] = reflect.TypeOf((*HostRuntimeInfoStatelessNvdsMigrationState)(nil)).Elem()
+	minAPIVersionForType["HostRuntimeInfoStatelessNvdsMigrationState"] = "7.0.2.0"
 }
 
 // Set of valid service policy strings.
@@ -4136,8 +4211,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostSevInfoSevState"] = "7.0.1.0"
 	t["HostSevInfoSevState"] = reflect.TypeOf((*HostSevInfoSevState)(nil)).Elem()
+	minAPIVersionForType["HostSevInfoSevState"] = "7.0.1.0"
 }
 
 type HostSgxInfoFlcModes string
@@ -4157,8 +4232,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostSgxInfoFlcModes"] = "7.0"
 	t["HostSgxInfoFlcModes"] = reflect.TypeOf((*HostSgxInfoFlcModes)(nil)).Elem()
+	minAPIVersionForType["HostSgxInfoFlcModes"] = "7.0"
 }
 
 type HostSgxInfoSgxStates string
@@ -4186,11 +4261,10 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostSgxInfoSgxStates"] = "7.0"
 	t["HostSgxInfoSgxStates"] = reflect.TypeOf((*HostSgxInfoSgxStates)(nil)).Elem()
+	minAPIVersionForType["HostSgxInfoSgxStates"] = "7.0"
 }
 
-// SGX registration status for ESX host.
 type HostSgxRegistrationInfoRegistrationStatus string
 
 const (
@@ -4204,9 +4278,9 @@ const (
 
 func init() {
 	t["HostSgxRegistrationInfoRegistrationStatus"] = reflect.TypeOf((*HostSgxRegistrationInfoRegistrationStatus)(nil)).Elem()
+	minAPIVersionForType["HostSgxRegistrationInfoRegistrationStatus"] = "8.0.0.1"
 }
 
-// SGX host registration type.
 type HostSgxRegistrationInfoRegistrationType string
 
 const (
@@ -4219,6 +4293,7 @@ const (
 
 func init() {
 	t["HostSgxRegistrationInfoRegistrationType"] = reflect.TypeOf((*HostSgxRegistrationInfoRegistrationType)(nil)).Elem()
+	minAPIVersionForType["HostSgxRegistrationInfoRegistrationType"] = "8.0.0.1"
 }
 
 type HostSnmpAgentCapability string
@@ -4233,8 +4308,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostSnmpAgentCapability"] = "4.0"
 	t["HostSnmpAgentCapability"] = reflect.TypeOf((*HostSnmpAgentCapability)(nil)).Elem()
+	minAPIVersionForType["HostSnmpAgentCapability"] = "4.0"
 }
 
 type HostStandbyMode string
@@ -4252,8 +4327,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostStandbyMode"] = "4.1"
 	t["HostStandbyMode"] = reflect.TypeOf((*HostStandbyMode)(nil)).Elem()
+	minAPIVersionForType["HostStandbyMode"] = "4.1"
 }
 
 type HostStorageProtocol string
@@ -4266,8 +4341,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostStorageProtocol"] = "7.0"
 	t["HostStorageProtocol"] = reflect.TypeOf((*HostStorageProtocol)(nil)).Elem()
+	minAPIVersionForType["HostStorageProtocol"] = "7.0"
 }
 
 // Defines a host's connection state.
@@ -4312,13 +4387,13 @@ const (
 )
 
 func init() {
+	t["HostSystemIdentificationInfoIdentifier"] = reflect.TypeOf((*HostSystemIdentificationInfoIdentifier)(nil)).Elem()
 	minAPIVersionForType["HostSystemIdentificationInfoIdentifier"] = "2.5"
 	minAPIVersionForEnumValue["HostSystemIdentificationInfoIdentifier"] = map[string]string{
 		"OemSpecificString":        "5.0",
 		"EnclosureSerialNumberTag": "6.0",
 		"SerialNumberTag":          "6.0",
 	}
-	t["HostSystemIdentificationInfoIdentifier"] = reflect.TypeOf((*HostSystemIdentificationInfoIdentifier)(nil)).Elem()
 }
 
 type HostSystemPowerState string
@@ -4356,8 +4431,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostSystemPowerState"] = "2.5"
 	t["HostSystemPowerState"] = reflect.TypeOf((*HostSystemPowerState)(nil)).Elem()
+	minAPIVersionForType["HostSystemPowerState"] = "2.5"
 }
 
 type HostSystemRemediationStateState string
@@ -4378,8 +4453,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostSystemRemediationStateState"] = "6.7"
 	t["HostSystemRemediationStateState"] = reflect.TypeOf((*HostSystemRemediationStateState)(nil)).Elem()
+	minAPIVersionForType["HostSystemRemediationStateState"] = "6.7"
 }
 
 type HostTpmAttestationInfoAcceptanceStatus string
@@ -4392,8 +4467,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostTpmAttestationInfoAcceptanceStatus"] = "6.7"
 	t["HostTpmAttestationInfoAcceptanceStatus"] = reflect.TypeOf((*HostTpmAttestationInfoAcceptanceStatus)(nil)).Elem()
+	minAPIVersionForType["HostTpmAttestationInfoAcceptanceStatus"] = "6.7"
 }
 
 type HostTrustAuthorityAttestationInfoAttestationStatus string
@@ -4408,8 +4483,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostTrustAuthorityAttestationInfoAttestationStatus"] = "7.0.1.0"
 	t["HostTrustAuthorityAttestationInfoAttestationStatus"] = reflect.TypeOf((*HostTrustAuthorityAttestationInfoAttestationStatus)(nil)).Elem()
+	minAPIVersionForType["HostTrustAuthorityAttestationInfoAttestationStatus"] = "7.0.1.0"
 }
 
 // Reasons for identifying the disk extent
@@ -4424,8 +4499,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostUnresolvedVmfsExtentUnresolvedReason"] = "4.0"
 	t["HostUnresolvedVmfsExtentUnresolvedReason"] = reflect.TypeOf((*HostUnresolvedVmfsExtentUnresolvedReason)(nil)).Elem()
+	minAPIVersionForType["HostUnresolvedVmfsExtentUnresolvedReason"] = "4.0"
 }
 
 type HostUnresolvedVmfsResolutionSpecVmfsUuidResolution string
@@ -4446,8 +4521,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostUnresolvedVmfsResolutionSpecVmfsUuidResolution"] = "4.0"
 	t["HostUnresolvedVmfsResolutionSpecVmfsUuidResolution"] = reflect.TypeOf((*HostUnresolvedVmfsResolutionSpecVmfsUuidResolution)(nil)).Elem()
+	minAPIVersionForType["HostUnresolvedVmfsResolutionSpecVmfsUuidResolution"] = "4.0"
 }
 
 type HostVirtualNicManagerNicType string
@@ -4483,8 +4558,8 @@ const (
 	// (i.e.
 	//
 	// the NFC traffic between ESX hosts as a part of a VC initiated
-	// provisioning operations like cold-migrations, clones, storage vmotion
-	// with snapshots etc.
+	// provisioning operations like cold-migrations, clones, snapshot and
+	// cold data in hot migration).
 	HostVirtualNicManagerNicTypeVSphereProvisioning = HostVirtualNicManagerNicType("vSphereProvisioning")
 	// The VirtualNic is used for Virtual SAN witness traffic.
 	//
@@ -4510,6 +4585,7 @@ const (
 )
 
 func init() {
+	t["HostVirtualNicManagerNicType"] = reflect.TypeOf((*HostVirtualNicManagerNicType)(nil)).Elem()
 	minAPIVersionForType["HostVirtualNicManagerNicType"] = "4.0"
 	minAPIVersionForEnumValue["HostVirtualNicManagerNicType"] = map[string]string{
 		"vSphereReplication":    "5.1",
@@ -4522,7 +4598,6 @@ func init() {
 		"nvmeTcp":               "7.0.3.0",
 		"nvmeRdma":              "7.0.3.0",
 	}
-	t["HostVirtualNicManagerNicType"] = reflect.TypeOf((*HostVirtualNicManagerNicType)(nil)).Elem()
 }
 
 type HostVmciAccessManagerMode string
@@ -4537,8 +4612,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostVmciAccessManagerMode"] = "5.0"
 	t["HostVmciAccessManagerMode"] = reflect.TypeOf((*HostVmciAccessManagerMode)(nil)).Elem()
+	minAPIVersionForType["HostVmciAccessManagerMode"] = "5.0"
 }
 
 // VMFS unmap bandwidth policy.
@@ -4554,8 +4629,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostVmfsVolumeUnmapBandwidthPolicy"] = "6.7"
 	t["HostVmfsVolumeUnmapBandwidthPolicy"] = reflect.TypeOf((*HostVmfsVolumeUnmapBandwidthPolicy)(nil)).Elem()
+	minAPIVersionForType["HostVmfsVolumeUnmapBandwidthPolicy"] = "6.7"
 }
 
 // VMFS unmap priority.
@@ -4571,8 +4646,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HostVmfsVolumeUnmapPriority"] = "6.5"
 	t["HostVmfsVolumeUnmapPriority"] = reflect.TypeOf((*HostVmfsVolumeUnmapPriority)(nil)).Elem()
+	minAPIVersionForType["HostVmfsVolumeUnmapPriority"] = "6.5"
 }
 
 type HttpNfcLeaseManifestEntryChecksumType string
@@ -4583,8 +4658,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HttpNfcLeaseManifestEntryChecksumType"] = "6.7"
 	t["HttpNfcLeaseManifestEntryChecksumType"] = reflect.TypeOf((*HttpNfcLeaseManifestEntryChecksumType)(nil)).Elem()
+	minAPIVersionForType["HttpNfcLeaseManifestEntryChecksumType"] = "6.7"
 }
 
 type HttpNfcLeaseMode string
@@ -4600,8 +4675,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HttpNfcLeaseMode"] = "6.7"
 	t["HttpNfcLeaseMode"] = reflect.TypeOf((*HttpNfcLeaseMode)(nil)).Elem()
+	minAPIVersionForType["HttpNfcLeaseMode"] = "6.7"
 }
 
 type HttpNfcLeaseState string
@@ -4619,8 +4694,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["HttpNfcLeaseState"] = "4.0"
 	t["HttpNfcLeaseState"] = reflect.TypeOf((*HttpNfcLeaseState)(nil)).Elem()
+	minAPIVersionForType["HttpNfcLeaseState"] = "4.0"
 }
 
 type IncompatibleHostForVmReplicationIncompatibleReason string
@@ -4634,8 +4709,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["IncompatibleHostForVmReplicationIncompatibleReason"] = "6.0"
 	t["IncompatibleHostForVmReplicationIncompatibleReason"] = reflect.TypeOf((*IncompatibleHostForVmReplicationIncompatibleReason)(nil)).Elem()
+	minAPIVersionForType["IncompatibleHostForVmReplicationIncompatibleReason"] = "6.0"
 }
 
 // The available iSNS discovery methods.
@@ -4663,8 +4738,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["InvalidDasConfigArgumentEntryForInvalidArgument"] = "5.1"
 	t["InvalidDasConfigArgumentEntryForInvalidArgument"] = reflect.TypeOf((*InvalidDasConfigArgumentEntryForInvalidArgument)(nil)).Elem()
+	minAPIVersionForType["InvalidDasConfigArgumentEntryForInvalidArgument"] = "5.1"
 }
 
 type InvalidProfileReferenceHostReason string
@@ -4677,8 +4752,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["InvalidProfileReferenceHostReason"] = "5.0"
 	t["InvalidProfileReferenceHostReason"] = reflect.TypeOf((*InvalidProfileReferenceHostReason)(nil)).Elem()
+	minAPIVersionForType["InvalidProfileReferenceHostReason"] = "5.0"
 }
 
 type IoFilterOperation string
@@ -4693,8 +4768,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["IoFilterOperation"] = "6.0"
 	t["IoFilterOperation"] = reflect.TypeOf((*IoFilterOperation)(nil)).Elem()
+	minAPIVersionForType["IoFilterOperation"] = "6.0"
 }
 
 type IoFilterType string
@@ -4719,11 +4794,11 @@ const (
 )
 
 func init() {
+	t["IoFilterType"] = reflect.TypeOf((*IoFilterType)(nil)).Elem()
 	minAPIVersionForType["IoFilterType"] = "6.5"
 	minAPIVersionForEnumValue["IoFilterType"] = map[string]string{
 		"dataCapture": "7.0.2.1",
 	}
-	t["IoFilterType"] = reflect.TypeOf((*IoFilterType)(nil)).Elem()
 }
 
 type IscsiPortInfoPathStatus string
@@ -4746,8 +4821,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["IscsiPortInfoPathStatus"] = "5.0"
 	t["IscsiPortInfoPathStatus"] = reflect.TypeOf((*IscsiPortInfoPathStatus)(nil)).Elem()
+	minAPIVersionForType["IscsiPortInfoPathStatus"] = "5.0"
 }
 
 type KmipClusterInfoKmsManagementType string
@@ -4756,16 +4831,16 @@ const (
 	KmipClusterInfoKmsManagementTypeUnknown        = KmipClusterInfoKmsManagementType("unknown")
 	KmipClusterInfoKmsManagementTypeVCenter        = KmipClusterInfoKmsManagementType("vCenter")
 	KmipClusterInfoKmsManagementTypeTrustAuthority = KmipClusterInfoKmsManagementType("trustAuthority")
-	// `**Since:**` vSphere API 7.0.2.0
+	// `**Since:**` vSphere API Release 7.0.2.0
 	KmipClusterInfoKmsManagementTypeNativeProvider = KmipClusterInfoKmsManagementType("nativeProvider")
 )
 
 func init() {
+	t["KmipClusterInfoKmsManagementType"] = reflect.TypeOf((*KmipClusterInfoKmsManagementType)(nil)).Elem()
 	minAPIVersionForType["KmipClusterInfoKmsManagementType"] = "7.0"
 	minAPIVersionForEnumValue["KmipClusterInfoKmsManagementType"] = map[string]string{
 		"nativeProvider": "7.0.2.0",
 	}
-	t["KmipClusterInfoKmsManagementType"] = reflect.TypeOf((*KmipClusterInfoKmsManagementType)(nil)).Elem()
 }
 
 // Enumeration of the nominal latency-sensitive values which can be
@@ -4801,8 +4876,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["LatencySensitivitySensitivityLevel"] = "5.1"
 	t["LatencySensitivitySensitivityLevel"] = reflect.TypeOf((*LatencySensitivitySensitivityLevel)(nil)).Elem()
+	minAPIVersionForType["LatencySensitivitySensitivityLevel"] = "5.1"
 }
 
 type LicenseAssignmentFailedReason string
@@ -4819,8 +4894,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["LicenseAssignmentFailedReason"] = "4.0"
 	t["LicenseAssignmentFailedReason"] = reflect.TypeOf((*LicenseAssignmentFailedReason)(nil)).Elem()
+	minAPIVersionForType["LicenseAssignmentFailedReason"] = "4.0"
 }
 
 // Some licenses may only be allowed to load from a specified source.
@@ -4836,8 +4911,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["LicenseFeatureInfoSourceRestriction"] = "2.5"
 	t["LicenseFeatureInfoSourceRestriction"] = reflect.TypeOf((*LicenseFeatureInfoSourceRestriction)(nil)).Elem()
+	minAPIVersionForType["LicenseFeatureInfoSourceRestriction"] = "2.5"
 }
 
 // Describes the state of the feature.
@@ -4971,12 +5046,12 @@ const (
 )
 
 func init() {
+	t["LicenseManagerLicenseKey"] = reflect.TypeOf((*LicenseManagerLicenseKey)(nil)).Elem()
 	minAPIVersionForEnumValue["LicenseManagerLicenseKey"] = map[string]string{
 		"vcExpress":  "2.5",
 		"serverHost": "2.5",
 		"drsPower":   "2.5",
 	}
-	t["LicenseManagerLicenseKey"] = reflect.TypeOf((*LicenseManagerLicenseKey)(nil)).Elem()
 }
 
 // Deprecated as of vSphere API 4.0, this is not used by the system.
@@ -4994,8 +5069,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["LicenseManagerState"] = "2.5"
 	t["LicenseManagerState"] = reflect.TypeOf((*LicenseManagerState)(nil)).Elem()
+	minAPIVersionForType["LicenseManagerState"] = "2.5"
 }
 
 // Describes the reservation state of a license.
@@ -5044,8 +5119,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["LinkDiscoveryProtocolConfigOperationType"] = "4.0"
 	t["LinkDiscoveryProtocolConfigOperationType"] = reflect.TypeOf((*LinkDiscoveryProtocolConfigOperationType)(nil)).Elem()
+	minAPIVersionForType["LinkDiscoveryProtocolConfigOperationType"] = "4.0"
 }
 
 type LinkDiscoveryProtocolConfigProtocolType string
@@ -5058,8 +5133,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["LinkDiscoveryProtocolConfigProtocolType"] = "4.0"
 	t["LinkDiscoveryProtocolConfigProtocolType"] = reflect.TypeOf((*LinkDiscoveryProtocolConfigProtocolType)(nil)).Elem()
+	minAPIVersionForType["LinkDiscoveryProtocolConfigProtocolType"] = "4.0"
 }
 
 // The Status enumeration defines a general "health" value for a managed entity.
@@ -5123,8 +5198,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NetBIOSConfigInfoMode"] = "4.1"
 	t["NetBIOSConfigInfoMode"] = reflect.TypeOf((*NetBIOSConfigInfoMode)(nil)).Elem()
+	minAPIVersionForType["NetBIOSConfigInfoMode"] = "4.1"
 }
 
 // This specifies how an IP address was obtained for a given interface.
@@ -5154,8 +5229,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NetIpConfigInfoIpAddressOrigin"] = "4.1"
 	t["NetIpConfigInfoIpAddressOrigin"] = reflect.TypeOf((*NetIpConfigInfoIpAddressOrigin)(nil)).Elem()
+	minAPIVersionForType["NetIpConfigInfoIpAddressOrigin"] = "4.1"
 }
 
 type NetIpConfigInfoIpAddressStatus string
@@ -5182,8 +5257,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NetIpConfigInfoIpAddressStatus"] = "4.1"
 	t["NetIpConfigInfoIpAddressStatus"] = reflect.TypeOf((*NetIpConfigInfoIpAddressStatus)(nil)).Elem()
+	minAPIVersionForType["NetIpConfigInfoIpAddressStatus"] = "4.1"
 }
 
 // IP Stack keeps state on entries in IpNetToMedia table to perform
@@ -5205,8 +5280,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NetIpStackInfoEntryType"] = "4.1"
 	t["NetIpStackInfoEntryType"] = reflect.TypeOf((*NetIpStackInfoEntryType)(nil)).Elem()
+	minAPIVersionForType["NetIpStackInfoEntryType"] = "4.1"
 }
 
 // The set of values used to determine ordering of default routers.
@@ -5220,8 +5295,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NetIpStackInfoPreference"] = "4.1"
 	t["NetIpStackInfoPreference"] = reflect.TypeOf((*NetIpStackInfoPreference)(nil)).Elem()
+	minAPIVersionForType["NetIpStackInfoPreference"] = "4.1"
 }
 
 type NotSupportedDeviceForFTDeviceType string
@@ -5234,8 +5309,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NotSupportedDeviceForFTDeviceType"] = "4.1"
 	t["NotSupportedDeviceForFTDeviceType"] = reflect.TypeOf((*NotSupportedDeviceForFTDeviceType)(nil)).Elem()
+	minAPIVersionForType["NotSupportedDeviceForFTDeviceType"] = "4.1"
 }
 
 type NumVirtualCpusIncompatibleReason string
@@ -5252,8 +5327,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NumVirtualCpusIncompatibleReason"] = "4.0"
 	t["NumVirtualCpusIncompatibleReason"] = reflect.TypeOf((*NumVirtualCpusIncompatibleReason)(nil)).Elem()
+	minAPIVersionForType["NumVirtualCpusIncompatibleReason"] = "4.0"
 }
 
 type NvdimmInterleaveSetState string
@@ -5266,8 +5341,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmInterleaveSetState"] = "6.7"
 	t["NvdimmInterleaveSetState"] = reflect.TypeOf((*NvdimmInterleaveSetState)(nil)).Elem()
+	minAPIVersionForType["NvdimmInterleaveSetState"] = "6.7"
 }
 
 type NvdimmNamespaceDetailsHealthStatus string
@@ -5286,8 +5361,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmNamespaceDetailsHealthStatus"] = "6.7.1"
 	t["NvdimmNamespaceDetailsHealthStatus"] = reflect.TypeOf((*NvdimmNamespaceDetailsHealthStatus)(nil)).Elem()
+	minAPIVersionForType["NvdimmNamespaceDetailsHealthStatus"] = "6.7.1"
 }
 
 type NvdimmNamespaceDetailsState string
@@ -5302,8 +5377,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmNamespaceDetailsState"] = "6.7.1"
 	t["NvdimmNamespaceDetailsState"] = reflect.TypeOf((*NvdimmNamespaceDetailsState)(nil)).Elem()
+	minAPIVersionForType["NvdimmNamespaceDetailsState"] = "6.7.1"
 }
 
 type NvdimmNamespaceHealthStatus string
@@ -5326,8 +5401,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmNamespaceHealthStatus"] = "6.7"
 	t["NvdimmNamespaceHealthStatus"] = reflect.TypeOf((*NvdimmNamespaceHealthStatus)(nil)).Elem()
+	minAPIVersionForType["NvdimmNamespaceHealthStatus"] = "6.7"
 }
 
 type NvdimmNamespaceState string
@@ -5342,8 +5417,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmNamespaceState"] = "6.7"
 	t["NvdimmNamespaceState"] = reflect.TypeOf((*NvdimmNamespaceState)(nil)).Elem()
+	minAPIVersionForType["NvdimmNamespaceState"] = "6.7"
 }
 
 type NvdimmNamespaceType string
@@ -5356,8 +5431,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmNamespaceType"] = "6.7"
 	t["NvdimmNamespaceType"] = reflect.TypeOf((*NvdimmNamespaceType)(nil)).Elem()
+	minAPIVersionForType["NvdimmNamespaceType"] = "6.7"
 }
 
 type NvdimmNvdimmHealthInfoState string
@@ -5372,8 +5447,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmNvdimmHealthInfoState"] = "6.7"
 	t["NvdimmNvdimmHealthInfoState"] = reflect.TypeOf((*NvdimmNvdimmHealthInfoState)(nil)).Elem()
+	minAPIVersionForType["NvdimmNvdimmHealthInfoState"] = "6.7"
 }
 
 type NvdimmRangeType string
@@ -5398,8 +5473,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["NvdimmRangeType"] = "6.7"
 	t["NvdimmRangeType"] = reflect.TypeOf((*NvdimmRangeType)(nil)).Elem()
+	minAPIVersionForType["NvdimmRangeType"] = "6.7"
 }
 
 // Enumeration of different kinds of updates.
@@ -5436,8 +5511,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["OvfConsumerOstNodeType"] = "5.0"
 	t["OvfConsumerOstNodeType"] = reflect.TypeOf((*OvfConsumerOstNodeType)(nil)).Elem()
+	minAPIVersionForType["OvfConsumerOstNodeType"] = "5.0"
 }
 
 // Types of disk provisioning that can be set for the disk in the deployed OVF
@@ -5491,12 +5566,12 @@ const (
 )
 
 func init() {
+	t["OvfCreateImportSpecParamsDiskProvisioningType"] = reflect.TypeOf((*OvfCreateImportSpecParamsDiskProvisioningType)(nil)).Elem()
 	minAPIVersionForType["OvfCreateImportSpecParamsDiskProvisioningType"] = "4.1"
 	minAPIVersionForEnumValue["OvfCreateImportSpecParamsDiskProvisioningType"] = map[string]string{
 		"seSparse":         "5.1",
 		"eagerZeroedThick": "5.0",
 	}
-	t["OvfCreateImportSpecParamsDiskProvisioningType"] = reflect.TypeOf((*OvfCreateImportSpecParamsDiskProvisioningType)(nil)).Elem()
 }
 
 // The format in which performance counter data is returned.
@@ -5617,14 +5692,15 @@ const (
 )
 
 func init() {
+	t["PerformanceManagerUnit"] = reflect.TypeOf((*PerformanceManagerUnit)(nil)).Elem()
 	minAPIVersionForEnumValue["PerformanceManagerUnit"] = map[string]string{
 		"microsecond": "4.0",
 		"watt":        "4.1",
 		"joule":       "4.1",
 		"teraBytes":   "6.0",
 		"celsius":     "6.5",
+		"nanosecond":  "8.0.0.1",
 	}
-	t["PerformanceManagerUnit"] = reflect.TypeOf((*PerformanceManagerUnit)(nil)).Elem()
 }
 
 type PhysicalNicResourcePoolSchedulerDisallowedReason string
@@ -5639,8 +5715,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["PhysicalNicResourcePoolSchedulerDisallowedReason"] = "4.1"
 	t["PhysicalNicResourcePoolSchedulerDisallowedReason"] = reflect.TypeOf((*PhysicalNicResourcePoolSchedulerDisallowedReason)(nil)).Elem()
+	minAPIVersionForType["PhysicalNicResourcePoolSchedulerDisallowedReason"] = "4.1"
 }
 
 type PhysicalNicVmDirectPathGen2SupportedMode string
@@ -5650,8 +5726,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["PhysicalNicVmDirectPathGen2SupportedMode"] = "4.1"
 	t["PhysicalNicVmDirectPathGen2SupportedMode"] = reflect.TypeOf((*PhysicalNicVmDirectPathGen2SupportedMode)(nil)).Elem()
+	minAPIVersionForType["PhysicalNicVmDirectPathGen2SupportedMode"] = "4.1"
 }
 
 // Rule scope determines conditions when an affinity rule is
@@ -5675,8 +5751,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["PlacementAffinityRuleRuleScope"] = "6.0"
 	t["PlacementAffinityRuleRuleScope"] = reflect.TypeOf((*PlacementAffinityRuleRuleScope)(nil)).Elem()
+	minAPIVersionForType["PlacementAffinityRuleRuleScope"] = "6.0"
 }
 
 // Rule type determines how the affinity rule is to be enforced:
@@ -5699,8 +5775,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["PlacementAffinityRuleRuleType"] = "6.0"
 	t["PlacementAffinityRuleRuleType"] = reflect.TypeOf((*PlacementAffinityRuleRuleType)(nil)).Elem()
+	minAPIVersionForType["PlacementAffinityRuleRuleType"] = "6.0"
 }
 
 type PlacementSpecPlacementType string
@@ -5717,8 +5793,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["PlacementSpecPlacementType"] = "6.0"
 	t["PlacementSpecPlacementType"] = reflect.TypeOf((*PlacementSpecPlacementType)(nil)).Elem()
+	minAPIVersionForType["PlacementSpecPlacementType"] = "6.0"
 }
 
 // The type of component connected to a port group.
@@ -5765,8 +5841,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ProfileExecuteResultStatus"] = "4.0"
 	t["ProfileExecuteResultStatus"] = reflect.TypeOf((*ProfileExecuteResultStatus)(nil)).Elem()
+	minAPIVersionForType["ProfileExecuteResultStatus"] = "4.0"
 }
 
 // Enumerates different operations supported for comparing
@@ -5782,8 +5858,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ProfileNumericComparator"] = "4.0"
 	t["ProfileNumericComparator"] = reflect.TypeOf((*ProfileNumericComparator)(nil)).Elem()
+	minAPIVersionForType["ProfileNumericComparator"] = "4.0"
 }
 
 type ProfileParameterMetadataRelationType string
@@ -5803,8 +5879,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ProfileParameterMetadataRelationType"] = "6.7"
 	t["ProfileParameterMetadataRelationType"] = reflect.TypeOf((*ProfileParameterMetadataRelationType)(nil)).Elem()
+	minAPIVersionForType["ProfileParameterMetadataRelationType"] = "6.7"
 }
 
 // Enumeration of possible changes to a property.
@@ -5840,8 +5916,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["QuarantineModeFaultFaultType"] = "6.5"
 	t["QuarantineModeFaultFaultType"] = reflect.TypeOf((*QuarantineModeFaultFaultType)(nil)).Elem()
+	minAPIVersionForType["QuarantineModeFaultFaultType"] = "6.5"
 }
 
 // Quiescing is a boolean flag in `ReplicationConfigSpec`
@@ -5866,8 +5942,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["QuiesceMode"] = "6.0"
 	t["QuiesceMode"] = reflect.TypeOf((*QuiesceMode)(nil)).Elem()
+	minAPIVersionForType["QuiesceMode"] = "6.0"
 }
 
 type RecommendationReasonCode string
@@ -5939,11 +6015,14 @@ const (
 	RecommendationReasonCodeVmHostAntiAffinityPolicy = RecommendationReasonCode("vmHostAntiAffinityPolicy")
 	// Fix VM-VM anti-affinity policy violations
 	RecommendationReasonCodeVmAntiAffinityPolicy = RecommendationReasonCode("vmAntiAffinityPolicy")
-	// `**Since:**` vSphere API 7.0.2.0
+	// `**Since:**` vSphere API Release 7.0.2.0
 	RecommendationReasonCodeBalanceVsanUsage = RecommendationReasonCode("balanceVsanUsage")
+	// Optimize assignable hardware resource orchestration
+	RecommendationReasonCodeAhPlacementOptimization = RecommendationReasonCode("ahPlacementOptimization")
 )
 
 func init() {
+	t["RecommendationReasonCode"] = reflect.TypeOf((*RecommendationReasonCode)(nil)).Elem()
 	minAPIVersionForType["RecommendationReasonCode"] = "2.5"
 	minAPIVersionForEnumValue["RecommendationReasonCode"] = map[string]string{
 		"checkResource":                   "4.0",
@@ -5969,8 +6048,8 @@ func init() {
 		"vmHostAntiAffinityPolicy":        "6.8.7",
 		"vmAntiAffinityPolicy":            "6.8.7",
 		"balanceVsanUsage":                "7.0.2.0",
+		"ahPlacementOptimization":         "8.0.2.0",
 	}
-	t["RecommendationReasonCode"] = reflect.TypeOf((*RecommendationReasonCode)(nil)).Elem()
 }
 
 // Pre-defined constants for possible recommendation types.
@@ -5983,8 +6062,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["RecommendationType"] = "2.5"
 	t["RecommendationType"] = reflect.TypeOf((*RecommendationType)(nil)).Elem()
+	minAPIVersionForType["RecommendationType"] = "2.5"
 }
 
 type ReplicationDiskConfigFaultReasonForFault string
@@ -6007,8 +6086,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ReplicationDiskConfigFaultReasonForFault"] = "5.0"
 	t["ReplicationDiskConfigFaultReasonForFault"] = reflect.TypeOf((*ReplicationDiskConfigFaultReasonForFault)(nil)).Elem()
+	minAPIVersionForType["ReplicationDiskConfigFaultReasonForFault"] = "5.0"
 }
 
 type ReplicationVmConfigFaultReasonForFault string
@@ -6053,13 +6132,13 @@ const (
 )
 
 func init() {
+	t["ReplicationVmConfigFaultReasonForFault"] = reflect.TypeOf((*ReplicationVmConfigFaultReasonForFault)(nil)).Elem()
 	minAPIVersionForType["ReplicationVmConfigFaultReasonForFault"] = "5.0"
 	minAPIVersionForEnumValue["ReplicationVmConfigFaultReasonForFault"] = map[string]string{
 		"encryptedVm":        "6.5",
 		"invalidThumbprint":  "6.7",
 		"incompatibleDevice": "6.7",
 	}
-	t["ReplicationVmConfigFaultReasonForFault"] = reflect.TypeOf((*ReplicationVmConfigFaultReasonForFault)(nil)).Elem()
 }
 
 type ReplicationVmFaultReasonForFault string
@@ -6095,12 +6174,12 @@ const (
 )
 
 func init() {
+	t["ReplicationVmFaultReasonForFault"] = reflect.TypeOf((*ReplicationVmFaultReasonForFault)(nil)).Elem()
 	minAPIVersionForType["ReplicationVmFaultReasonForFault"] = "5.0"
 	minAPIVersionForEnumValue["ReplicationVmFaultReasonForFault"] = map[string]string{
 		"closeDiskError": "6.5",
 		"groupExist":     "6.7",
 	}
-	t["ReplicationVmFaultReasonForFault"] = reflect.TypeOf((*ReplicationVmFaultReasonForFault)(nil)).Elem()
 }
 
 type ReplicationVmInProgressFaultActivity string
@@ -6113,8 +6192,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ReplicationVmInProgressFaultActivity"] = "6.0"
 	t["ReplicationVmInProgressFaultActivity"] = reflect.TypeOf((*ReplicationVmInProgressFaultActivity)(nil)).Elem()
+	minAPIVersionForType["ReplicationVmInProgressFaultActivity"] = "6.0"
 }
 
 type ReplicationVmState string
@@ -6144,8 +6223,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ReplicationVmState"] = "5.0"
 	t["ReplicationVmState"] = reflect.TypeOf((*ReplicationVmState)(nil)).Elem()
+	minAPIVersionForType["ReplicationVmState"] = "5.0"
 }
 
 type ResourceConfigSpecScaleSharesBehavior string
@@ -6158,8 +6237,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ResourceConfigSpecScaleSharesBehavior"] = "7.0"
 	t["ResourceConfigSpecScaleSharesBehavior"] = reflect.TypeOf((*ResourceConfigSpecScaleSharesBehavior)(nil)).Elem()
+	minAPIVersionForType["ResourceConfigSpecScaleSharesBehavior"] = "7.0"
 }
 
 // The policy setting used to determine when to perform scheduled
@@ -6175,8 +6254,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ScheduledHardwareUpgradeInfoHardwareUpgradePolicy"] = "5.1"
 	t["ScheduledHardwareUpgradeInfoHardwareUpgradePolicy"] = reflect.TypeOf((*ScheduledHardwareUpgradeInfoHardwareUpgradePolicy)(nil)).Elem()
+	minAPIVersionForType["ScheduledHardwareUpgradeInfoHardwareUpgradePolicy"] = "5.1"
 }
 
 type ScheduledHardwareUpgradeInfoHardwareUpgradeStatus string
@@ -6197,8 +6276,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ScheduledHardwareUpgradeInfoHardwareUpgradeStatus"] = "5.1"
 	t["ScheduledHardwareUpgradeInfoHardwareUpgradeStatus"] = reflect.TypeOf((*ScheduledHardwareUpgradeInfoHardwareUpgradeStatus)(nil)).Elem()
+	minAPIVersionForType["ScheduledHardwareUpgradeInfoHardwareUpgradeStatus"] = "5.1"
 }
 
 type ScsiDiskType string
@@ -6217,11 +6296,11 @@ const (
 )
 
 func init() {
+	t["ScsiDiskType"] = reflect.TypeOf((*ScsiDiskType)(nil)).Elem()
 	minAPIVersionForType["ScsiDiskType"] = "6.5"
 	minAPIVersionForEnumValue["ScsiDiskType"] = map[string]string{
 		"SoftwareEmulated4k": "6.7",
 	}
-	t["ScsiDiskType"] = reflect.TypeOf((*ScsiDiskType)(nil)).Elem()
 }
 
 // An indicator of the utility of Descriptor in being used as an
@@ -6243,8 +6322,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ScsiLunDescriptorQuality"] = "4.0"
 	t["ScsiLunDescriptorQuality"] = reflect.TypeOf((*ScsiLunDescriptorQuality)(nil)).Elem()
+	minAPIVersionForType["ScsiLunDescriptorQuality"] = "4.0"
 }
 
 // The Operational state of the LUN
@@ -6275,12 +6354,12 @@ const (
 )
 
 func init() {
+	t["ScsiLunState"] = reflect.TypeOf((*ScsiLunState)(nil)).Elem()
 	minAPIVersionForEnumValue["ScsiLunState"] = map[string]string{
 		"off":      "4.0",
 		"quiesced": "4.0",
 		"timeout":  "5.1",
 	}
-	t["ScsiLunState"] = reflect.TypeOf((*ScsiLunState)(nil)).Elem()
 }
 
 // The list of SCSI device types.
@@ -6331,8 +6410,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ScsiLunVStorageSupportStatus"] = "4.1"
 	t["ScsiLunVStorageSupportStatus"] = reflect.TypeOf((*ScsiLunVStorageSupportStatus)(nil)).Elem()
+	minAPIVersionForType["ScsiLunVStorageSupportStatus"] = "4.1"
 }
 
 type SessionManagerGenericServiceTicketTicketType string
@@ -6347,8 +6426,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["SessionManagerGenericServiceTicketTicketType"] = "7.0.2.0"
 	t["SessionManagerGenericServiceTicketTicketType"] = reflect.TypeOf((*SessionManagerGenericServiceTicketTicketType)(nil)).Elem()
+	minAPIVersionForType["SessionManagerGenericServiceTicketTicketType"] = "7.0.2.0"
 }
 
 type SessionManagerHttpServiceRequestSpecMethod string
@@ -6365,8 +6444,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["SessionManagerHttpServiceRequestSpecMethod"] = "5.0"
 	t["SessionManagerHttpServiceRequestSpecMethod"] = reflect.TypeOf((*SessionManagerHttpServiceRequestSpecMethod)(nil)).Elem()
+	minAPIVersionForType["SessionManagerHttpServiceRequestSpecMethod"] = "5.0"
 }
 
 // Simplified shares notation.
@@ -6412,8 +6491,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["SimpleCommandEncoding"] = "2.5"
 	t["SimpleCommandEncoding"] = reflect.TypeOf((*SimpleCommandEncoding)(nil)).Elem()
+	minAPIVersionForType["SimpleCommandEncoding"] = "2.5"
 }
 
 // The available SLP discovery methods.
@@ -6447,8 +6526,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["SoftwarePackageConstraint"] = "6.5"
 	t["SoftwarePackageConstraint"] = reflect.TypeOf((*SoftwarePackageConstraint)(nil)).Elem()
+	minAPIVersionForType["SoftwarePackageConstraint"] = "6.5"
 }
 
 type SoftwarePackageVibType string
@@ -6464,8 +6543,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["SoftwarePackageVibType"] = "6.5"
 	t["SoftwarePackageVibType"] = reflect.TypeOf((*SoftwarePackageVibType)(nil)).Elem()
+	minAPIVersionForType["SoftwarePackageVibType"] = "6.5"
 }
 
 // The operation on the target state.
@@ -6500,8 +6579,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["StorageDrsPodConfigInfoBehavior"] = "5.0"
 	t["StorageDrsPodConfigInfoBehavior"] = reflect.TypeOf((*StorageDrsPodConfigInfoBehavior)(nil)).Elem()
+	minAPIVersionForType["StorageDrsPodConfigInfoBehavior"] = "5.0"
 }
 
 type StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode string
@@ -6514,8 +6593,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode"] = "6.0"
 	t["StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode"] = reflect.TypeOf((*StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode)(nil)).Elem()
+	minAPIVersionForType["StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode"] = "6.0"
 }
 
 // User specification of congestion threshold mode on a given datastore
@@ -6534,8 +6613,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["StorageIORMThresholdMode"] = "5.1"
 	t["StorageIORMThresholdMode"] = reflect.TypeOf((*StorageIORMThresholdMode)(nil)).Elem()
+	minAPIVersionForType["StorageIORMThresholdMode"] = "5.1"
 }
 
 type StoragePlacementSpecPlacementType string
@@ -6552,8 +6631,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["StoragePlacementSpecPlacementType"] = "5.0"
 	t["StoragePlacementSpecPlacementType"] = reflect.TypeOf((*StoragePlacementSpecPlacementType)(nil)).Elem()
+	minAPIVersionForType["StoragePlacementSpecPlacementType"] = "5.0"
 }
 
 // This option specifies how to select tasks based on child relationships
@@ -6628,8 +6707,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["ThirdPartyLicenseAssignmentFailedReason"] = "5.0"
 	t["ThirdPartyLicenseAssignmentFailedReason"] = reflect.TypeOf((*ThirdPartyLicenseAssignmentFailedReason)(nil)).Elem()
+	minAPIVersionForType["ThirdPartyLicenseAssignmentFailedReason"] = "5.0"
 }
 
 // The policy setting used to determine when tools are auto-upgraded for
@@ -6652,8 +6731,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["UpgradePolicy"] = "2.5"
 	t["UpgradePolicy"] = reflect.TypeOf((*UpgradePolicy)(nil)).Elem()
+	minAPIVersionForType["UpgradePolicy"] = "2.5"
 }
 
 type VAppAutoStartAction string
@@ -6679,8 +6758,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VAppAutoStartAction"] = "4.0"
 	t["VAppAutoStartAction"] = reflect.TypeOf((*VAppAutoStartAction)(nil)).Elem()
+	minAPIVersionForType["VAppAutoStartAction"] = "4.0"
 }
 
 // The cloned VMs can either be provisioned the same way as the VMs
@@ -6704,8 +6783,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VAppCloneSpecProvisioningType"] = "4.1"
 	t["VAppCloneSpecProvisioningType"] = reflect.TypeOf((*VAppCloneSpecProvisioningType)(nil)).Elem()
+	minAPIVersionForType["VAppCloneSpecProvisioningType"] = "4.1"
 }
 
 type VAppIPAssignmentInfoAllocationSchemes string
@@ -6719,8 +6798,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VAppIPAssignmentInfoAllocationSchemes"] = "4.0"
 	t["VAppIPAssignmentInfoAllocationSchemes"] = reflect.TypeOf((*VAppIPAssignmentInfoAllocationSchemes)(nil)).Elem()
+	minAPIVersionForType["VAppIPAssignmentInfoAllocationSchemes"] = "4.0"
 }
 
 type VAppIPAssignmentInfoIpAllocationPolicy string
@@ -6751,11 +6830,11 @@ const (
 )
 
 func init() {
+	t["VAppIPAssignmentInfoIpAllocationPolicy"] = reflect.TypeOf((*VAppIPAssignmentInfoIpAllocationPolicy)(nil)).Elem()
 	minAPIVersionForType["VAppIPAssignmentInfoIpAllocationPolicy"] = "4.0"
 	minAPIVersionForEnumValue["VAppIPAssignmentInfoIpAllocationPolicy"] = map[string]string{
 		"fixedAllocatedPolicy": "5.1",
 	}
-	t["VAppIPAssignmentInfoIpAllocationPolicy"] = reflect.TypeOf((*VAppIPAssignmentInfoIpAllocationPolicy)(nil)).Elem()
 }
 
 type VAppIPAssignmentInfoProtocols string
@@ -6768,8 +6847,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VAppIPAssignmentInfoProtocols"] = "4.0"
 	t["VAppIPAssignmentInfoProtocols"] = reflect.TypeOf((*VAppIPAssignmentInfoProtocols)(nil)).Elem()
+	minAPIVersionForType["VAppIPAssignmentInfoProtocols"] = "4.0"
 }
 
 type VFlashModuleNotSupportedReason string
@@ -6783,8 +6862,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VFlashModuleNotSupportedReason"] = "5.5"
 	t["VFlashModuleNotSupportedReason"] = reflect.TypeOf((*VFlashModuleNotSupportedReason)(nil)).Elem()
+	minAPIVersionForType["VFlashModuleNotSupportedReason"] = "5.5"
 }
 
 // Types of a host's compatibility with a designated virtual machine
@@ -6835,8 +6914,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareDVSTeamingMatchStatus"] = "5.1"
 	t["VMwareDVSTeamingMatchStatus"] = reflect.TypeOf((*VMwareDVSTeamingMatchStatus)(nil)).Elem()
+	minAPIVersionForType["VMwareDVSTeamingMatchStatus"] = "5.1"
 }
 
 type VMwareDVSVspanSessionEncapType string
@@ -6851,8 +6930,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareDVSVspanSessionEncapType"] = "6.5"
 	t["VMwareDVSVspanSessionEncapType"] = reflect.TypeOf((*VMwareDVSVspanSessionEncapType)(nil)).Elem()
+	minAPIVersionForType["VMwareDVSVspanSessionEncapType"] = "6.5"
 }
 
 type VMwareDVSVspanSessionType string
@@ -6880,8 +6959,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareDVSVspanSessionType"] = "5.1"
 	t["VMwareDVSVspanSessionType"] = reflect.TypeOf((*VMwareDVSVspanSessionType)(nil)).Elem()
+	minAPIVersionForType["VMwareDVSVspanSessionType"] = "5.1"
 }
 
 type VMwareDvsLacpApiVersion string
@@ -6898,8 +6977,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareDvsLacpApiVersion"] = "5.5"
 	t["VMwareDvsLacpApiVersion"] = reflect.TypeOf((*VMwareDvsLacpApiVersion)(nil)).Elem()
+	minAPIVersionForType["VMwareDvsLacpApiVersion"] = "5.5"
 }
 
 type VMwareDvsLacpLoadBalanceAlgorithm string
@@ -6949,8 +7028,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareDvsLacpLoadBalanceAlgorithm"] = "5.5"
 	t["VMwareDvsLacpLoadBalanceAlgorithm"] = reflect.TypeOf((*VMwareDvsLacpLoadBalanceAlgorithm)(nil)).Elem()
+	minAPIVersionForType["VMwareDvsLacpLoadBalanceAlgorithm"] = "5.5"
 }
 
 type VMwareDvsMulticastFilteringMode string
@@ -6963,8 +7042,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareDvsMulticastFilteringMode"] = "6.0"
 	t["VMwareDvsMulticastFilteringMode"] = reflect.TypeOf((*VMwareDvsMulticastFilteringMode)(nil)).Elem()
+	minAPIVersionForType["VMwareDvsMulticastFilteringMode"] = "6.0"
 }
 
 type VMwareUplinkLacpMode string
@@ -6977,8 +7056,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareUplinkLacpMode"] = "5.1"
 	t["VMwareUplinkLacpMode"] = reflect.TypeOf((*VMwareUplinkLacpMode)(nil)).Elem()
+	minAPIVersionForType["VMwareUplinkLacpMode"] = "5.1"
 }
 
 type VMwareUplinkLacpTimeoutMode string
@@ -6995,8 +7074,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VMwareUplinkLacpTimeoutMode"] = "7.0.2.0"
 	t["VMwareUplinkLacpTimeoutMode"] = reflect.TypeOf((*VMwareUplinkLacpTimeoutMode)(nil)).Elem()
+	minAPIVersionForType["VMwareUplinkLacpTimeoutMode"] = "7.0.2.0"
 }
 
 // Consumption type constants.
@@ -7010,8 +7089,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VStorageObjectConsumptionType"] = "6.5"
 	t["VStorageObjectConsumptionType"] = reflect.TypeOf((*VStorageObjectConsumptionType)(nil)).Elem()
+	minAPIVersionForType["VStorageObjectConsumptionType"] = "6.5"
 }
 
 // Deprecated as of vSphere API 4.0, use `CheckTestType_enum` instead.
@@ -7076,8 +7155,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VchaClusterMode"] = "6.5"
 	t["VchaClusterMode"] = reflect.TypeOf((*VchaClusterMode)(nil)).Elem()
+	minAPIVersionForType["VchaClusterMode"] = "6.5"
 }
 
 type VchaClusterState string
@@ -7100,8 +7179,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VchaClusterState"] = "6.5"
 	t["VchaClusterState"] = reflect.TypeOf((*VchaClusterState)(nil)).Elem()
+	minAPIVersionForType["VchaClusterState"] = "6.5"
 }
 
 type VchaNodeRole string
@@ -7126,8 +7205,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VchaNodeRole"] = "6.5"
 	t["VchaNodeRole"] = reflect.TypeOf((*VchaNodeRole)(nil)).Elem()
+	minAPIVersionForType["VchaNodeRole"] = "6.5"
 }
 
 // VchaNodeState enum defines possible state a node can be in a
@@ -7141,8 +7220,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VchaNodeState"] = "6.5"
 	t["VchaNodeState"] = reflect.TypeOf((*VchaNodeState)(nil)).Elem()
+	minAPIVersionForType["VchaNodeState"] = "6.5"
 }
 
 type VchaState string
@@ -7159,8 +7238,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VchaState"] = "6.5"
 	t["VchaState"] = reflect.TypeOf((*VchaState)(nil)).Elem()
+	minAPIVersionForType["VchaState"] = "6.5"
 }
 
 // The VAppState type defines the set of states a vApp can be
@@ -7182,14 +7261,13 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualAppVAppState"] = "4.0"
 	t["VirtualAppVAppState"] = reflect.TypeOf((*VirtualAppVAppState)(nil)).Elem()
+	minAPIVersionForType["VirtualAppVAppState"] = "4.0"
 }
 
 // Describes the change mode of the device.
 //
 // Applies only to virtual disks during VirtualDeviceSpec.Operation "add"
-// that have no VirtualDeviceSpec.FileOperation set.
 type VirtualDeviceConfigSpecChangeMode string
 
 const (
@@ -7199,6 +7277,7 @@ const (
 
 func init() {
 	t["VirtualDeviceConfigSpecChangeMode"] = reflect.TypeOf((*VirtualDeviceConfigSpecChangeMode)(nil)).Elem()
+	minAPIVersionForType["VirtualDeviceConfigSpecChangeMode"] = "8.0.0.1"
 }
 
 // The type of operation being performed on the backing of a virtual device.
@@ -7263,8 +7342,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDeviceConnectInfoMigrateConnectOp"] = "6.7"
 	t["VirtualDeviceConnectInfoMigrateConnectOp"] = reflect.TypeOf((*VirtualDeviceConnectInfoMigrateConnectOp)(nil)).Elem()
+	minAPIVersionForType["VirtualDeviceConnectInfoMigrateConnectOp"] = "6.7"
 }
 
 type VirtualDeviceConnectInfoStatus string
@@ -7290,8 +7369,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDeviceConnectInfoStatus"] = "4.0"
 	t["VirtualDeviceConnectInfoStatus"] = reflect.TypeOf((*VirtualDeviceConnectInfoStatus)(nil)).Elem()
+	minAPIVersionForType["VirtualDeviceConnectInfoStatus"] = "4.0"
 }
 
 // All known file extensions.
@@ -7330,8 +7409,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDeviceURIBackingOptionDirection"] = "4.1"
 	t["VirtualDeviceURIBackingOptionDirection"] = reflect.TypeOf((*VirtualDeviceURIBackingOptionDirection)(nil)).Elem()
+	minAPIVersionForType["VirtualDeviceURIBackingOptionDirection"] = "4.1"
 }
 
 type VirtualDiskAdapterType string
@@ -7346,8 +7425,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDiskAdapterType"] = "2.5"
 	t["VirtualDiskAdapterType"] = reflect.TypeOf((*VirtualDiskAdapterType)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskAdapterType"] = "2.5"
 }
 
 // All known compatibility modes for raw disk mappings.
@@ -7386,11 +7465,11 @@ const (
 )
 
 func init() {
+	t["VirtualDiskDeltaDiskFormat"] = reflect.TypeOf((*VirtualDiskDeltaDiskFormat)(nil)).Elem()
 	minAPIVersionForType["VirtualDiskDeltaDiskFormat"] = "5.0"
 	minAPIVersionForEnumValue["VirtualDiskDeltaDiskFormat"] = map[string]string{
 		"seSparseFormat": "5.1",
 	}
-	t["VirtualDiskDeltaDiskFormat"] = reflect.TypeOf((*VirtualDiskDeltaDiskFormat)(nil)).Elem()
 }
 
 type VirtualDiskDeltaDiskFormatVariant string
@@ -7403,8 +7482,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDiskDeltaDiskFormatVariant"] = "6.0"
 	t["VirtualDiskDeltaDiskFormatVariant"] = reflect.TypeOf((*VirtualDiskDeltaDiskFormatVariant)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskDeltaDiskFormatVariant"] = "6.0"
 }
 
 // The list of known disk modes.
@@ -7446,8 +7525,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDiskRuleSpecRuleType"] = "6.7"
 	t["VirtualDiskRuleSpecRuleType"] = reflect.TypeOf((*VirtualDiskRuleSpecRuleType)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskRuleSpecRuleType"] = "6.7"
 }
 
 // The sharing mode of the virtual disk.
@@ -7464,8 +7543,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDiskSharing"] = "6.0"
 	t["VirtualDiskSharing"] = reflect.TypeOf((*VirtualDiskSharing)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskSharing"] = "6.0"
 }
 
 type VirtualDiskType string
@@ -7552,6 +7631,7 @@ const (
 )
 
 func init() {
+	t["VirtualDiskType"] = reflect.TypeOf((*VirtualDiskType)(nil)).Elem()
 	minAPIVersionForType["VirtualDiskType"] = "2.5"
 	minAPIVersionForEnumValue["VirtualDiskType"] = map[string]string{
 		"seSparse":         "5.1",
@@ -7559,7 +7639,6 @@ func init() {
 		"sparseMonolithic": "4.0",
 		"flatMonolithic":   "4.0",
 	}
-	t["VirtualDiskType"] = reflect.TypeOf((*VirtualDiskType)(nil)).Elem()
 }
 
 type VirtualDiskVFlashCacheConfigInfoCacheConsistencyType string
@@ -7573,8 +7652,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDiskVFlashCacheConfigInfoCacheConsistencyType"] = "5.5"
 	t["VirtualDiskVFlashCacheConfigInfoCacheConsistencyType"] = reflect.TypeOf((*VirtualDiskVFlashCacheConfigInfoCacheConsistencyType)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskVFlashCacheConfigInfoCacheConsistencyType"] = "5.5"
 }
 
 type VirtualDiskVFlashCacheConfigInfoCacheMode string
@@ -7595,8 +7674,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualDiskVFlashCacheConfigInfoCacheMode"] = "5.5"
 	t["VirtualDiskVFlashCacheConfigInfoCacheMode"] = reflect.TypeOf((*VirtualDiskVFlashCacheConfigInfoCacheMode)(nil)).Elem()
+	minAPIVersionForType["VirtualDiskVFlashCacheConfigInfoCacheMode"] = "5.5"
 }
 
 // Possible device names for legacy network backing option are listed below.
@@ -7636,7 +7715,6 @@ func init() {
 	t["VirtualEthernetCardMacType"] = reflect.TypeOf((*VirtualEthernetCardMacType)(nil)).Elem()
 }
 
-// Motherboard layout of the VM.
 type VirtualHardwareMotherboardLayout string
 
 const (
@@ -7648,6 +7726,7 @@ const (
 
 func init() {
 	t["VirtualHardwareMotherboardLayout"] = reflect.TypeOf((*VirtualHardwareMotherboardLayout)(nil)).Elem()
+	minAPIVersionForType["VirtualHardwareMotherboardLayout"] = "8.0.0.1"
 }
 
 type VirtualMachineAppHeartbeatStatusType string
@@ -7662,8 +7741,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineAppHeartbeatStatusType"] = "4.1"
 	t["VirtualMachineAppHeartbeatStatusType"] = reflect.TypeOf((*VirtualMachineAppHeartbeatStatusType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineAppHeartbeatStatusType"] = "4.1"
 }
 
 type VirtualMachineBootOptionsNetworkBootProtocolType string
@@ -7680,11 +7759,10 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineBootOptionsNetworkBootProtocolType"] = "6.0"
 	t["VirtualMachineBootOptionsNetworkBootProtocolType"] = reflect.TypeOf((*VirtualMachineBootOptionsNetworkBootProtocolType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineBootOptionsNetworkBootProtocolType"] = "6.0"
 }
 
-// Set of supported hash algorithms for thumbprints.
 type VirtualMachineCertThumbprintHashAlgorithm string
 
 const (
@@ -7694,10 +7772,10 @@ const (
 
 func init() {
 	t["VirtualMachineCertThumbprintHashAlgorithm"] = reflect.TypeOf((*VirtualMachineCertThumbprintHashAlgorithm)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineCertThumbprintHashAlgorithm"] = "7.0.3.1"
 }
 
 // TPM provisioning policies used when cloning a VM with a virtual TPM
-// device.
 type VirtualMachineCloneSpecTpmProvisionPolicy string
 
 const (
@@ -7715,6 +7793,7 @@ const (
 
 func init() {
 	t["VirtualMachineCloneSpecTpmProvisionPolicy"] = reflect.TypeOf((*VirtualMachineCloneSpecTpmProvisionPolicy)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineCloneSpecTpmProvisionPolicy"] = "8.0.0.1"
 }
 
 type VirtualMachineConfigInfoNpivWwnType string
@@ -7729,8 +7808,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineConfigInfoNpivWwnType"] = "2.5"
 	t["VirtualMachineConfigInfoNpivWwnType"] = reflect.TypeOf((*VirtualMachineConfigInfoNpivWwnType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineConfigInfoNpivWwnType"] = "2.5"
 }
 
 // Available choices for virtual machine swapfile placement policy.
@@ -7762,8 +7841,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineConfigInfoSwapPlacementType"] = "2.5"
 	t["VirtualMachineConfigInfoSwapPlacementType"] = reflect.TypeOf((*VirtualMachineConfigInfoSwapPlacementType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineConfigInfoSwapPlacementType"] = "2.5"
 }
 
 // The set of valid encrypted Fault Tolerance modes for a VM.
@@ -7788,8 +7867,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineConfigSpecEncryptedFtModes"] = "7.0.2.0"
 	t["VirtualMachineConfigSpecEncryptedFtModes"] = reflect.TypeOf((*VirtualMachineConfigSpecEncryptedFtModes)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineConfigSpecEncryptedFtModes"] = "7.0.2.0"
 }
 
 // The set of valid encrypted vMotion modes for a VM.
@@ -7811,8 +7890,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineConfigSpecEncryptedVMotionModes"] = "6.5"
 	t["VirtualMachineConfigSpecEncryptedVMotionModes"] = reflect.TypeOf((*VirtualMachineConfigSpecEncryptedVMotionModes)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineConfigSpecEncryptedVMotionModes"] = "6.5"
 }
 
 type VirtualMachineConfigSpecNpivWwnOp string
@@ -7833,11 +7912,11 @@ const (
 )
 
 func init() {
+	t["VirtualMachineConfigSpecNpivWwnOp"] = reflect.TypeOf((*VirtualMachineConfigSpecNpivWwnOp)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineConfigSpecNpivWwnOp"] = "2.5"
 	minAPIVersionForEnumValue["VirtualMachineConfigSpecNpivWwnOp"] = map[string]string{
 		"extend": "4.0",
 	}
-	t["VirtualMachineConfigSpecNpivWwnOp"] = reflect.TypeOf((*VirtualMachineConfigSpecNpivWwnOp)(nil)).Elem()
 }
 
 // The connectivity state of a virtual machine.
@@ -7894,8 +7973,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineCryptoState"] = "6.7"
 	t["VirtualMachineCryptoState"] = reflect.TypeOf((*VirtualMachineCryptoState)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineCryptoState"] = "6.7"
 }
 
 type VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther string
@@ -7918,8 +7997,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther"] = "4.1"
 	t["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther"] = reflect.TypeOf((*VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther"] = "4.1"
 }
 
 type VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm string
@@ -7985,11 +8064,11 @@ const (
 )
 
 func init() {
+	t["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm"] = reflect.TypeOf((*VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm"] = "4.1"
 	minAPIVersionForEnumValue["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm"] = map[string]string{
 		"vmNptVMCIActive": "5.1",
 	}
-	t["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm"] = reflect.TypeOf((*VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm)(nil)).Elem()
 }
 
 // The FaultToleranceState type defines a simple set of states for a
@@ -8037,8 +8116,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineFaultToleranceState"] = "4.0"
 	t["VirtualMachineFaultToleranceState"] = reflect.TypeOf((*VirtualMachineFaultToleranceState)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineFaultToleranceState"] = "4.0"
 }
 
 // The FaultToleranceType defines the type of fault tolerance, if any,
@@ -8054,11 +8133,11 @@ const (
 )
 
 func init() {
+	t["VirtualMachineFaultToleranceType"] = reflect.TypeOf((*VirtualMachineFaultToleranceType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineFaultToleranceType"] = "6.0"
 	minAPIVersionForEnumValue["VirtualMachineFaultToleranceType"] = map[string]string{
 		"unset": "6.0",
 	}
-	t["VirtualMachineFaultToleranceType"] = reflect.TypeOf((*VirtualMachineFaultToleranceType)(nil)).Elem()
 }
 
 type VirtualMachineFileLayoutExFileType string
@@ -8123,20 +8202,22 @@ const (
 )
 
 func init() {
+	t["VirtualMachineFileLayoutExFileType"] = reflect.TypeOf((*VirtualMachineFileLayoutExFileType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineFileLayoutExFileType"] = "4.0"
 	minAPIVersionForEnumValue["VirtualMachineFileLayoutExFileType"] = map[string]string{
-		"digestDescriptor":     "5.0",
-		"digestExtent":         "5.0",
-		"diskReplicationState": "5.0",
-		"namespaceData":        "5.1",
-		"snapshotMemory":       "6.0",
-		"snapshotManifestList": "5.0",
-		"suspendMemory":        "6.0",
-		"uwswap":               "5.0",
-		"ftMetadata":           "6.0",
-		"guestCustomization":   "6.0",
+		"digestDescriptor":      "5.0",
+		"digestExtent":          "5.0",
+		"diskReplicationState":  "5.0",
+		"namespaceData":         "5.1",
+		"dataSetsDiskModeStore": "8.0.0.0",
+		"dataSetsVmModeStore":   "8.0.0.0",
+		"snapshotMemory":        "6.0",
+		"snapshotManifestList":  "5.0",
+		"suspendMemory":         "6.0",
+		"uwswap":                "5.0",
+		"ftMetadata":            "6.0",
+		"guestCustomization":    "6.0",
 	}
-	t["VirtualMachineFileLayoutExFileType"] = reflect.TypeOf((*VirtualMachineFileLayoutExFileType)(nil)).Elem()
 }
 
 type VirtualMachineFlagInfoMonitorType string
@@ -8151,8 +8232,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineFlagInfoMonitorType"] = "2.5"
 	t["VirtualMachineFlagInfoMonitorType"] = reflect.TypeOf((*VirtualMachineFlagInfoMonitorType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineFlagInfoMonitorType"] = "2.5"
 }
 
 type VirtualMachineFlagInfoVirtualExecUsage string
@@ -8167,8 +8248,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineFlagInfoVirtualExecUsage"] = "4.0"
 	t["VirtualMachineFlagInfoVirtualExecUsage"] = reflect.TypeOf((*VirtualMachineFlagInfoVirtualExecUsage)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineFlagInfoVirtualExecUsage"] = "4.0"
 }
 
 type VirtualMachineFlagInfoVirtualMmuUsage string
@@ -8183,8 +8264,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineFlagInfoVirtualMmuUsage"] = "2.5"
 	t["VirtualMachineFlagInfoVirtualMmuUsage"] = reflect.TypeOf((*VirtualMachineFlagInfoVirtualMmuUsage)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineFlagInfoVirtualMmuUsage"] = "2.5"
 }
 
 // Fork child type.
@@ -8202,8 +8283,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineForkConfigInfoChildType"] = "6.0"
 	t["VirtualMachineForkConfigInfoChildType"] = reflect.TypeOf((*VirtualMachineForkConfigInfoChildType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineForkConfigInfoChildType"] = "6.0"
 }
 
 // Guest operating system family constants.
@@ -8225,10 +8306,10 @@ const (
 )
 
 func init() {
+	t["VirtualMachineGuestOsFamily"] = reflect.TypeOf((*VirtualMachineGuestOsFamily)(nil)).Elem()
 	minAPIVersionForEnumValue["VirtualMachineGuestOsFamily"] = map[string]string{
 		"darwinGuestFamily": "5.0",
 	}
-	t["VirtualMachineGuestOsFamily"] = reflect.TypeOf((*VirtualMachineGuestOsFamily)(nil)).Elem()
 }
 
 // Guest operating system identifier.
@@ -8628,6 +8709,7 @@ const (
 )
 
 func init() {
+	t["VirtualMachineGuestOsIdentifier"] = reflect.TypeOf((*VirtualMachineGuestOsIdentifier)(nil)).Elem()
 	minAPIVersionForEnumValue["VirtualMachineGuestOsIdentifier"] = map[string]string{
 		"winNetDatacenterGuest":      "2.5",
 		"winLonghornGuest":           "2.5",
@@ -8642,15 +8724,20 @@ func init() {
 		"windows9Guest":              "6.0",
 		"windows9_64Guest":           "6.0",
 		"windows9Server64Guest":      "6.0",
+		"windows11_64Guest":          "8.0.0.1",
+		"windows12_64Guest":          "8.0.0.1",
 		"windowsHyperVGuest":         "5.5",
 		"windows2019srv_64Guest":     "7.0",
 		"windows2019srvNext_64Guest": "7.0.1.0",
+		"windows2022srvNext_64Guest": "8.0.0.1",
 		"freebsd11Guest":             "6.7",
 		"freebsd11_64Guest":          "6.7",
 		"freebsd12Guest":             "6.7",
 		"freebsd12_64Guest":          "6.7",
 		"freebsd13Guest":             "7.0.1.0",
 		"freebsd13_64Guest":          "7.0.1.0",
+		"freebsd14Guest":             "8.0.0.1",
+		"freebsd14_64Guest":          "8.0.0.1",
 		"rhel5Guest":                 "2.5",
 		"rhel5_64Guest":              "2.5",
 		"rhel6Guest":                 "4.0",
@@ -8684,11 +8771,11 @@ func init() {
 		"sles15_64Guest":             "6.7",
 		"sles16_64Guest":             "7.0.1.0",
 		"mandrakeGuest":              "5.5",
-		"mandrivaGuest":              "4.0",
-		"mandriva64Guest":            "4.0",
-		"turboLinux64Guest":          "4.0",
-		"debian4Guest":               "4.0",
-		"debian4_64Guest":            "4.0",
+		"mandrivaGuest":              "2.5 U2",
+		"mandriva64Guest":            "2.5 U2",
+		"turboLinux64Guest":          "2.5 U2",
+		"debian4Guest":               "2.5 U2",
+		"debian4_64Guest":            "2.5 U2",
 		"debian5Guest":               "4.0",
 		"debian5_64Guest":            "4.0",
 		"debian6Guest":               "5.0",
@@ -8703,8 +8790,10 @@ func init() {
 		"debian10_64Guest":           "6.5",
 		"debian11Guest":              "7.0",
 		"debian11_64Guest":           "7.0",
-		"asianux3Guest":              "4.0",
-		"asianux3_64Guest":           "4.0",
+		"debian12Guest":              "8.0.0.1",
+		"debian12_64Guest":           "8.0.0.1",
+		"asianux3Guest":              "2.5 U2",
+		"asianux3_64Guest":           "2.5 U2",
 		"asianux4Guest":              "4.0",
 		"asianux4_64Guest":           "4.0",
 		"asianux5_64Guest":           "6.0",
@@ -8720,16 +8809,18 @@ func init() {
 		"other3xLinuxGuest":          "5.5",
 		"other4xLinuxGuest":          "6.7",
 		"other5xLinuxGuest":          "7.0.1.0",
+		"other6xLinuxGuest":          "8.0.0.1",
 		"genericLinuxGuest":          "5.5",
 		"other3xLinux64Guest":        "5.5",
 		"other4xLinux64Guest":        "6.7",
 		"other5xLinux64Guest":        "7.0.1.0",
+		"other6xLinux64Guest":        "8.0.0.1",
 		"solaris11_64Guest":          "5.0",
 		"eComStationGuest":           "4.1",
 		"eComStation2Guest":          "5.0",
-		"openServer5Guest":           "4.0",
-		"openServer6Guest":           "4.0",
-		"unixWare7Guest":             "4.0",
+		"openServer5Guest":           "2.5 U2",
+		"openServer6Guest":           "2.5 U2",
+		"unixWare7Guest":             "2.5 U2",
 		"darwin64Guest":              "4.0",
 		"darwin10Guest":              "5.0",
 		"darwin10_64Guest":           "5.0",
@@ -8745,16 +8836,20 @@ func init() {
 		"darwin19_64Guest":           "7.0",
 		"darwin20_64Guest":           "7.0.1.0",
 		"darwin21_64Guest":           "7.0.1.0",
+		"darwin22_64Guest":           "8.0.0.1",
+		"darwin23_64Guest":           "8.0.0.1",
 		"vmkernelGuest":              "5.0",
 		"vmkernel5Guest":             "5.0",
 		"vmkernel6Guest":             "6.0",
 		"vmkernel65Guest":            "6.5",
 		"vmkernel7Guest":             "7.0",
+		"vmkernel8Guest":             "8.0.0.1",
 		"amazonlinux2_64Guest":       "6.7.1",
 		"amazonlinux3_64Guest":       "7.0.1.0",
 		"crxPod1Guest":               "7.0",
+		"rockylinux_64Guest":         "8.0.0.1",
+		"almalinux_64Guest":          "8.0.0.1",
 	}
-	t["VirtualMachineGuestOsIdentifier"] = reflect.TypeOf((*VirtualMachineGuestOsIdentifier)(nil)).Elem()
 }
 
 // The possible hints that the guest could display about current tasks
@@ -8820,8 +8915,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineMemoryAllocationPolicy"] = "2.5"
 	t["VirtualMachineMemoryAllocationPolicy"] = reflect.TypeOf((*VirtualMachineMemoryAllocationPolicy)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineMemoryAllocationPolicy"] = "2.5"
 }
 
 type VirtualMachineMetadataManagerVmMetadataOp string
@@ -8834,8 +8929,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineMetadataManagerVmMetadataOp"] = "5.5"
 	t["VirtualMachineMetadataManagerVmMetadataOp"] = reflect.TypeOf((*VirtualMachineMetadataManagerVmMetadataOp)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineMetadataManagerVmMetadataOp"] = "5.5"
 }
 
 // This enum contains a list of valid owner values for
@@ -8846,8 +8941,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineMetadataManagerVmMetadataOwnerOwner"] = "5.5"
 	t["VirtualMachineMetadataManagerVmMetadataOwnerOwner"] = reflect.TypeOf((*VirtualMachineMetadataManagerVmMetadataOwnerOwner)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineMetadataManagerVmMetadataOwnerOwner"] = "5.5"
 }
 
 // MovePriority is an enumeration of values that indicate the priority of the task
@@ -8891,11 +8986,11 @@ const (
 )
 
 func init() {
+	t["VirtualMachineNeedSecondaryReason"] = reflect.TypeOf((*VirtualMachineNeedSecondaryReason)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineNeedSecondaryReason"] = "4.0"
 	minAPIVersionForEnumValue["VirtualMachineNeedSecondaryReason"] = map[string]string{
 		"checkpointError": "6.0",
 	}
-	t["VirtualMachineNeedSecondaryReason"] = reflect.TypeOf((*VirtualMachineNeedSecondaryReason)(nil)).Elem()
 }
 
 type VirtualMachinePowerOffBehavior string
@@ -8912,11 +9007,11 @@ const (
 )
 
 func init() {
+	t["VirtualMachinePowerOffBehavior"] = reflect.TypeOf((*VirtualMachinePowerOffBehavior)(nil)).Elem()
 	minAPIVersionForType["VirtualMachinePowerOffBehavior"] = "2.5"
 	minAPIVersionForEnumValue["VirtualMachinePowerOffBehavior"] = map[string]string{
 		"take": "6.0",
 	}
-	t["VirtualMachinePowerOffBehavior"] = reflect.TypeOf((*VirtualMachinePowerOffBehavior)(nil)).Elem()
 }
 
 // The list of possible default power operations available for the virtual machine
@@ -8977,8 +9072,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineRecordReplayState"] = "4.0"
 	t["VirtualMachineRecordReplayState"] = reflect.TypeOf((*VirtualMachineRecordReplayState)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineRecordReplayState"] = "4.0"
 }
 
 // Specifies how a virtual disk is moved or copied to a
@@ -9055,11 +9150,11 @@ const (
 )
 
 func init() {
+	t["VirtualMachineRelocateDiskMoveOptions"] = reflect.TypeOf((*VirtualMachineRelocateDiskMoveOptions)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineRelocateDiskMoveOptions"] = "4.0"
 	minAPIVersionForEnumValue["VirtualMachineRelocateDiskMoveOptions"] = map[string]string{
 		"moveAllDiskBackingsAndConsolidate": "5.1",
 	}
-	t["VirtualMachineRelocateDiskMoveOptions"] = reflect.TypeOf((*VirtualMachineRelocateDiskMoveOptions)(nil)).Elem()
 }
 
 // Deprecated as of vSphere API 5.0.
@@ -9115,8 +9210,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineSgxInfoFlcModes"] = "7.0"
 	t["VirtualMachineSgxInfoFlcModes"] = reflect.TypeOf((*VirtualMachineSgxInfoFlcModes)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineSgxInfoFlcModes"] = "7.0"
 }
 
 // The list of possible standby actions that the virtual machine can take
@@ -9189,13 +9284,13 @@ const (
 )
 
 func init() {
+	t["VirtualMachineTicketType"] = reflect.TypeOf((*VirtualMachineTicketType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineTicketType"] = "4.1"
 	minAPIVersionForEnumValue["VirtualMachineTicketType"] = map[string]string{
 		"webmks":          "6.0",
 		"guestIntegrity":  "6.7",
 		"webRemoteDevice": "7.0",
 	}
-	t["VirtualMachineTicketType"] = reflect.TypeOf((*VirtualMachineTicketType)(nil)).Elem()
 }
 
 type VirtualMachineToolsInstallType string
@@ -9222,8 +9317,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineToolsInstallType"] = "6.5"
 	t["VirtualMachineToolsInstallType"] = reflect.TypeOf((*VirtualMachineToolsInstallType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineToolsInstallType"] = "6.5"
 }
 
 // Current running status of VMware Tools running in the guest
@@ -9239,8 +9334,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineToolsRunningStatus"] = "4.0"
 	t["VirtualMachineToolsRunningStatus"] = reflect.TypeOf((*VirtualMachineToolsRunningStatus)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineToolsRunningStatus"] = "4.0"
 }
 
 // Deprecated as of vSphere API 4.0 use `VirtualMachineToolsVersionStatus_enum`
@@ -9298,6 +9393,7 @@ const (
 )
 
 func init() {
+	t["VirtualMachineToolsVersionStatus"] = reflect.TypeOf((*VirtualMachineToolsVersionStatus)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineToolsVersionStatus"] = "4.0"
 	minAPIVersionForEnumValue["VirtualMachineToolsVersionStatus"] = map[string]string{
 		"guestToolsTooOld":       "5.0",
@@ -9306,7 +9402,6 @@ func init() {
 		"guestToolsTooNew":       "5.0",
 		"guestToolsBlacklisted":  "5.0",
 	}
-	t["VirtualMachineToolsVersionStatus"] = reflect.TypeOf((*VirtualMachineToolsVersionStatus)(nil)).Elem()
 }
 
 type VirtualMachineUsbInfoFamily string
@@ -9356,8 +9451,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineUsbInfoFamily"] = "2.5"
 	t["VirtualMachineUsbInfoFamily"] = reflect.TypeOf((*VirtualMachineUsbInfoFamily)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineUsbInfoFamily"] = "2.5"
 }
 
 type VirtualMachineUsbInfoSpeed string
@@ -9380,12 +9475,13 @@ const (
 )
 
 func init() {
+	t["VirtualMachineUsbInfoSpeed"] = reflect.TypeOf((*VirtualMachineUsbInfoSpeed)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineUsbInfoSpeed"] = "2.5"
 	minAPIVersionForEnumValue["VirtualMachineUsbInfoSpeed"] = map[string]string{
-		"superSpeed":     "5.0",
-		"superSpeedPlus": "6.8.7",
+		"superSpeed":       "5.0",
+		"superSpeedPlus":   "6.8.7",
+		"superSpeed20Gbps": "7.0.3.2",
 	}
-	t["VirtualMachineUsbInfoSpeed"] = reflect.TypeOf((*VirtualMachineUsbInfoSpeed)(nil)).Elem()
 }
 
 // Set of possible values for action field in FilterSpec.
@@ -9399,8 +9495,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVMCIDeviceAction"] = "6.0"
 	t["VirtualMachineVMCIDeviceAction"] = reflect.TypeOf((*VirtualMachineVMCIDeviceAction)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVMCIDeviceAction"] = "6.0"
 }
 
 type VirtualMachineVMCIDeviceDirection string
@@ -9415,8 +9511,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVMCIDeviceDirection"] = "6.0"
 	t["VirtualMachineVMCIDeviceDirection"] = reflect.TypeOf((*VirtualMachineVMCIDeviceDirection)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVMCIDeviceDirection"] = "6.0"
 }
 
 type VirtualMachineVMCIDeviceProtocol string
@@ -9444,11 +9540,10 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVMCIDeviceProtocol"] = "6.0"
 	t["VirtualMachineVMCIDeviceProtocol"] = reflect.TypeOf((*VirtualMachineVMCIDeviceProtocol)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVMCIDeviceProtocol"] = "6.0"
 }
 
-// Type of component device.
 type VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType string
 
 const (
@@ -9460,6 +9555,7 @@ const (
 
 func init() {
 	t["VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType"] = reflect.TypeOf((*VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType"] = "8.0.0.1"
 }
 
 type VirtualMachineVgpuProfileInfoProfileClass string
@@ -9470,8 +9566,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVgpuProfileInfoProfileClass"] = "7.0.3.0"
 	t["VirtualMachineVgpuProfileInfoProfileClass"] = reflect.TypeOf((*VirtualMachineVgpuProfileInfoProfileClass)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVgpuProfileInfoProfileClass"] = "7.0.3.0"
 }
 
 type VirtualMachineVgpuProfileInfoProfileSharing string
@@ -9484,8 +9580,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVgpuProfileInfoProfileSharing"] = "7.0.3.0"
 	t["VirtualMachineVgpuProfileInfoProfileSharing"] = reflect.TypeOf((*VirtualMachineVgpuProfileInfoProfileSharing)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVgpuProfileInfoProfileSharing"] = "7.0.3.0"
 }
 
 type VirtualMachineVideoCardUse3dRenderer string
@@ -9500,8 +9596,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVideoCardUse3dRenderer"] = "5.1"
 	t["VirtualMachineVideoCardUse3dRenderer"] = reflect.TypeOf((*VirtualMachineVideoCardUse3dRenderer)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVideoCardUse3dRenderer"] = "5.1"
 }
 
 type VirtualMachineVirtualDeviceSwapDeviceSwapStatus string
@@ -9521,6 +9617,7 @@ const (
 
 func init() {
 	t["VirtualMachineVirtualDeviceSwapDeviceSwapStatus"] = reflect.TypeOf((*VirtualMachineVirtualDeviceSwapDeviceSwapStatus)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVirtualDeviceSwapDeviceSwapStatus"] = "8.0.0.1"
 }
 
 type VirtualMachineVirtualPMemSnapshotMode string
@@ -9536,8 +9633,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineVirtualPMemSnapshotMode"] = "7.0.3.0"
 	t["VirtualMachineVirtualPMemSnapshotMode"] = reflect.TypeOf((*VirtualMachineVirtualPMemSnapshotMode)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineVirtualPMemSnapshotMode"] = "7.0.3.0"
 }
 
 // The VSS Snapshot Context
@@ -9557,8 +9654,20 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualMachineWindowsQuiesceSpecVssBackupContext"] = "6.5"
 	t["VirtualMachineWindowsQuiesceSpecVssBackupContext"] = reflect.TypeOf((*VirtualMachineWindowsQuiesceSpecVssBackupContext)(nil)).Elem()
+	minAPIVersionForType["VirtualMachineWindowsQuiesceSpecVssBackupContext"] = "6.5"
+}
+
+type VirtualNVMEControllerSharing string
+
+const (
+	VirtualNVMEControllerSharingNoSharing       = VirtualNVMEControllerSharing("noSharing")
+	VirtualNVMEControllerSharingPhysicalSharing = VirtualNVMEControllerSharing("physicalSharing")
+)
+
+func init() {
+	t["VirtualNVMEControllerSharing"] = reflect.TypeOf((*VirtualNVMEControllerSharing)(nil)).Elem()
+	minAPIVersionForType["VirtualNVMEControllerSharing"] = "8.0.2.0"
 }
 
 // The valid choices for host pointing devices are:
@@ -9644,8 +9753,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VirtualVmxnet3VrdmaOptionDeviceProtocols"] = "6.7"
 	t["VirtualVmxnet3VrdmaOptionDeviceProtocols"] = reflect.TypeOf((*VirtualVmxnet3VrdmaOptionDeviceProtocols)(nil)).Elem()
+	minAPIVersionForType["VirtualVmxnet3VrdmaOptionDeviceProtocols"] = "6.7"
 }
 
 type VmDasBeingResetEventReasonCode string
@@ -9662,12 +9771,12 @@ const (
 )
 
 func init() {
+	t["VmDasBeingResetEventReasonCode"] = reflect.TypeOf((*VmDasBeingResetEventReasonCode)(nil)).Elem()
 	minAPIVersionForType["VmDasBeingResetEventReasonCode"] = "4.1"
 	minAPIVersionForEnumValue["VmDasBeingResetEventReasonCode"] = map[string]string{
 		"appImmediateResetRequest": "5.5",
 		"vmcpResetApdCleared":      "6.0",
 	}
-	t["VmDasBeingResetEventReasonCode"] = reflect.TypeOf((*VmDasBeingResetEventReasonCode)(nil)).Elem()
 }
 
 type VmFailedStartingSecondaryEventFailureReason string
@@ -9688,8 +9797,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VmFailedStartingSecondaryEventFailureReason"] = "4.0"
 	t["VmFailedStartingSecondaryEventFailureReason"] = reflect.TypeOf((*VmFailedStartingSecondaryEventFailureReason)(nil)).Elem()
+	minAPIVersionForType["VmFailedStartingSecondaryEventFailureReason"] = "4.0"
 }
 
 type VmFaultToleranceConfigIssueReasonForIssue string
@@ -9748,7 +9857,7 @@ const (
 	VmFaultToleranceConfigIssueReasonForIssueEsxAgentVm = VmFaultToleranceConfigIssueReasonForIssue("esxAgentVm")
 	// The virtual machine video device has 3D enabled
 	VmFaultToleranceConfigIssueReasonForIssueVideo3dEnabled = VmFaultToleranceConfigIssueReasonForIssue("video3dEnabled")
-	// `**Since:**` vSphere API 5.1
+	// `**Since:**` vSphere API Release 5.1
 	VmFaultToleranceConfigIssueReasonForIssueHasUnsupportedDisk = VmFaultToleranceConfigIssueReasonForIssue("hasUnsupportedDisk")
 	// FT logging nic does not have desired bandwidth
 	VmFaultToleranceConfigIssueReasonForIssueInsufficientBandwidth = VmFaultToleranceConfigIssueReasonForIssue("insufficientBandwidth")
@@ -9781,6 +9890,7 @@ const (
 )
 
 func init() {
+	t["VmFaultToleranceConfigIssueReasonForIssue"] = reflect.TypeOf((*VmFaultToleranceConfigIssueReasonForIssue)(nil)).Elem()
 	minAPIVersionForType["VmFaultToleranceConfigIssueReasonForIssue"] = "4.0"
 	minAPIVersionForEnumValue["VmFaultToleranceConfigIssueReasonForIssue"] = map[string]string{
 		"esxAgentVm":                "5.0",
@@ -9798,7 +9908,6 @@ func init() {
 		"tooMuchMemory":             "6.7",
 		"unsupportedPMemHAFailOver": "7.0.2.0",
 	}
-	t["VmFaultToleranceConfigIssueReasonForIssue"] = reflect.TypeOf((*VmFaultToleranceConfigIssueReasonForIssue)(nil)).Elem()
 }
 
 type VmFaultToleranceInvalidFileBackingDeviceType string
@@ -9817,8 +9926,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VmFaultToleranceInvalidFileBackingDeviceType"] = "4.0"
 	t["VmFaultToleranceInvalidFileBackingDeviceType"] = reflect.TypeOf((*VmFaultToleranceInvalidFileBackingDeviceType)(nil)).Elem()
+	minAPIVersionForType["VmFaultToleranceInvalidFileBackingDeviceType"] = "4.0"
 }
 
 type VmShutdownOnIsolationEventOperation string
@@ -9831,8 +9940,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VmShutdownOnIsolationEventOperation"] = "4.0"
 	t["VmShutdownOnIsolationEventOperation"] = reflect.TypeOf((*VmShutdownOnIsolationEventOperation)(nil)).Elem()
+	minAPIVersionForType["VmShutdownOnIsolationEventOperation"] = "4.0"
 }
 
 type VmwareDistributedVirtualSwitchPvlanPortType string
@@ -9853,8 +9962,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VmwareDistributedVirtualSwitchPvlanPortType"] = "4.0"
 	t["VmwareDistributedVirtualSwitchPvlanPortType"] = reflect.TypeOf((*VmwareDistributedVirtualSwitchPvlanPortType)(nil)).Elem()
+	minAPIVersionForType["VmwareDistributedVirtualSwitchPvlanPortType"] = "4.0"
 }
 
 type VsanDiskIssueType string
@@ -9866,8 +9975,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VsanDiskIssueType"] = "5.5"
 	t["VsanDiskIssueType"] = reflect.TypeOf((*VsanDiskIssueType)(nil)).Elem()
+	minAPIVersionForType["VsanDiskIssueType"] = "5.5"
 }
 
 // The action to take with regard to storage objects upon decommissioning
@@ -9885,8 +9994,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VsanHostDecommissionModeObjectAction"] = "5.5"
 	t["VsanHostDecommissionModeObjectAction"] = reflect.TypeOf((*VsanHostDecommissionModeObjectAction)(nil)).Elem()
+	minAPIVersionForType["VsanHostDecommissionModeObjectAction"] = "5.5"
 }
 
 // Values used for indicating a disk's status for use by the VSAN service.
@@ -9913,8 +10022,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VsanHostDiskResultState"] = "5.5"
 	t["VsanHostDiskResultState"] = reflect.TypeOf((*VsanHostDiskResultState)(nil)).Elem()
+	minAPIVersionForType["VsanHostDiskResultState"] = "5.5"
 }
 
 // A `VsanHostHealthState_enum` represents the state of a participating
@@ -9931,8 +10040,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VsanHostHealthState"] = "5.5"
 	t["VsanHostHealthState"] = reflect.TypeOf((*VsanHostHealthState)(nil)).Elem()
+	minAPIVersionForType["VsanHostHealthState"] = "5.5"
 }
 
 // A `VsanHostNodeState_enum` represents the state of participation of a host
@@ -9973,8 +10082,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VsanHostNodeState"] = "5.5"
 	t["VsanHostNodeState"] = reflect.TypeOf((*VsanHostNodeState)(nil)).Elem()
+	minAPIVersionForType["VsanHostNodeState"] = "5.5"
 }
 
 type VsanUpgradeSystemUpgradeHistoryDiskGroupOpType string
@@ -9987,8 +10096,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["VsanUpgradeSystemUpgradeHistoryDiskGroupOpType"] = "6.0"
 	t["VsanUpgradeSystemUpgradeHistoryDiskGroupOpType"] = reflect.TypeOf((*VsanUpgradeSystemUpgradeHistoryDiskGroupOpType)(nil)).Elem()
+	minAPIVersionForType["VsanUpgradeSystemUpgradeHistoryDiskGroupOpType"] = "6.0"
 }
 
 type WeekOfMonth string
@@ -10015,8 +10124,8 @@ const (
 )
 
 func init() {
-	minAPIVersionForType["WillLoseHAProtectionResolution"] = "5.0"
 	t["WillLoseHAProtectionResolution"] = reflect.TypeOf((*WillLoseHAProtectionResolution)(nil)).Elem()
+	minAPIVersionForType["WillLoseHAProtectionResolution"] = "5.0"
 }
 
 type VslmDiskInfoFlag string
