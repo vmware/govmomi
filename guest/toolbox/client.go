@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/vmware/govmomi/guest"
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
@@ -284,6 +285,10 @@ func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64
 
 	p := soap.DefaultDownload
 
+	if internal.UsingEnvoySidecar(c.ProcessManager.Client()) {
+		vc = internal.ClientWithEnvoyHostGateway(vc)
+	}
+
 	f, n, err := vc.Download(ctx, u, &p)
 	if err != nil {
 		return nil, n, err
@@ -339,6 +344,10 @@ func (c *Client) Upload(ctx context.Context, src io.Reader, dst string, p soap.U
 	u, err := c.FileManager.TransferURL(ctx, url)
 	if err != nil {
 		return err
+	}
+
+	if internal.UsingEnvoySidecar(c.ProcessManager.Client()) {
+		vc = internal.ClientWithEnvoyHostGateway(vc)
 	}
 
 	return vc.Client.Upload(ctx, src, u, &p)
