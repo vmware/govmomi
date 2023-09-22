@@ -32,7 +32,7 @@ import (
 
 const (
 	Namespace = "vim25"
-	Version   = "8.0.1.0"
+	Version   = "8.0.2.0"
 	Path      = "/sdk"
 )
 

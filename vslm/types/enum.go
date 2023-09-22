@@ -25,7 +25,9 @@ import (
 type VslmEventType string
 
 const (
-	VslmEventTypePreFcdMigrateEvent  = VslmEventType("preFcdMigrateEvent")
+	// Event type used to notify that FCD is going to be relocated.
+	VslmEventTypePreFcdMigrateEvent = VslmEventType("preFcdMigrateEvent")
+	// Event type used to notify FCD has been relocated.
 	VslmEventTypePostFcdMigrateEvent = VslmEventType("postFcdMigrateEvent")
 )
 
@@ -33,47 +35,76 @@ func init() {
 	types.Add("vslm:VslmEventType", reflect.TypeOf((*VslmEventType)(nil)).Elem())
 }
 
+// The possible states of the vlsm event processing.
 type VslmEventVslmEventInfoState string
 
 const (
+	// When the event has been successfully processed.
 	VslmEventVslmEventInfoStateSuccess = VslmEventVslmEventInfoState("success")
-	VslmEventVslmEventInfoStateError   = VslmEventVslmEventInfoState("error")
+	// When there is error while processing the event.
+	VslmEventVslmEventInfoStateError = VslmEventVslmEventInfoState("error")
 )
 
 func init() {
 	types.Add("vslm:VslmEventVslmEventInfoState", reflect.TypeOf((*VslmEventVslmEventInfoState)(nil)).Elem())
 }
 
+// List of possible states of a task.
 type VslmTaskInfoState string
 
 const (
-	VslmTaskInfoStateQueued  = VslmTaskInfoState("queued")
+	// When there are too many tasks for threads to handle.
+	VslmTaskInfoStateQueued = VslmTaskInfoState("queued")
+	// When the busy thread is freed from its current task by
+	// finishing the task, it picks a queued task to run.
+	//
+	// Then the queued tasks are marked as running.
 	VslmTaskInfoStateRunning = VslmTaskInfoState("running")
+	// When a running task has completed.
 	VslmTaskInfoStateSuccess = VslmTaskInfoState("success")
-	VslmTaskInfoStateError   = VslmTaskInfoState("error")
+	// When a running task has encountered an error.
+	VslmTaskInfoStateError = VslmTaskInfoState("error")
 )
 
 func init() {
 	types.Add("vslm:VslmTaskInfoState", reflect.TypeOf((*VslmTaskInfoState)(nil)).Elem())
 }
 
+// The `VslmVsoVStorageObjectQuerySpecQueryFieldEnum_enum` enumerated
+// type defines the searchable fields.
 type VslmVsoVStorageObjectQuerySpecQueryFieldEnum string
 
 const (
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumId              = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("id")
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumName            = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("name")
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumCapacity        = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("capacity")
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumCreateTime      = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("createTime")
+	// Indicates `BaseConfigInfo.id` as the searchable field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumId = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("id")
+	// Indicates `BaseConfigInfo.name` as the searchable
+	// field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumName = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("name")
+	// Indicates `vim.vslm.VStorageObject#capacityInMB` as the
+	// searchable field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumCapacity = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("capacity")
+	// Indicates `BaseConfigInfo.createTime` as the searchable
+	// field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumCreateTime = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("createTime")
+	// Indicates
+	// `BaseConfigInfoFileBackingInfo.backingObjectId` as the
+	// searchable field.
 	VslmVsoVStorageObjectQuerySpecQueryFieldEnumBackingObjectId = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("backingObjectId")
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumDatastoreMoId   = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("datastoreMoId")
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataKey     = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("metadataKey")
-	VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataValue   = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("metadataValue")
+	// Indicates `BaseConfigInfoBackingInfo.datastore` as the
+	// searchable field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumDatastoreMoId = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("datastoreMoId")
+	// Indicates it as the searchable field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataKey = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("metadataKey")
+	// Indicates it as the searchable field.
+	VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataValue = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("metadataValue")
 )
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectQuerySpecQueryFieldEnum", reflect.TypeOf((*VslmVsoVStorageObjectQuerySpecQueryFieldEnum)(nil)).Elem())
 }
 
+// The `VslmVsoVStorageObjectQuerySpecQueryOperatorEnum_enum` enumerated
+// type defines the operators to use for constructing the query criteria.
 type VslmVsoVStorageObjectQuerySpecQueryOperatorEnum string
 
 const (
