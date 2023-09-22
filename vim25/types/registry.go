@@ -37,6 +37,20 @@ func Add(name string, kind reflect.Type) {
 	t[name] = kind
 }
 
+func AddMinAPIVersionForType(name, minAPIVersion string) {
+	minAPIVersionForType[name] = minAPIVersion
+}
+
+func AddMinAPIVersionForEnumValue(enumName, enumValue, minAPIVersion string) {
+	if v, ok := minAPIVersionForEnumValue[enumName]; ok {
+		v[enumValue] = minAPIVersion
+	} else {
+		minAPIVersionForEnumValue[enumName] = map[string]string{
+			enumValue: minAPIVersion,
+		}
+	}
+}
+
 type Func func(string) (reflect.Type, bool)
 
 func TypeFunc() Func {
