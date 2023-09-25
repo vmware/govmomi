@@ -82,7 +82,10 @@ func buildName(fn string, f reflect.StructField) string {
 
 	motag := f.Tag.Get("json")
 	if motag != "" {
-		return fn + motag
+		tokens := strings.Split(motag, ",")
+		if tokens[0] != "" {
+			return fn + tokens[0]
+		}
 	}
 
 	xmltag := f.Tag.Get("xml")
