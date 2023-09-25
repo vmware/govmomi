@@ -76,9 +76,9 @@ func (cmd *info) Description() string {
 Examples:
   govc device.info -vm $name
   govc device.info -vm $name disk-*
-  govc device.info -vm $name -json disk-* | jq -r .Devices[].Backing.Uuid
-  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].Backing.FileName # vmdk path
-  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].MacAddress`
+  govc device.info -vm $name -json disk-* | jq -r .Devices[].backing.uuid
+  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].backing.fileName # vmdk path
+  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].macAddress`
 }
 
 func match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList {

@@ -59,7 +59,7 @@ System information including the name, type, version, and build number.
 
 Examples:
   govc about
-  govc about -json | jq -r .About.ProductLineId`
+  govc about -json | jq -r .About.productLineId`
 }
 
 func (cmd *about) Process(ctx context.Context) error {

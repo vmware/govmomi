@@ -63,7 +63,7 @@ All SOAP sessions are listed by default. The '-S' flag will limit this list to t
 
 Examples:
   govc session.ls
-  govc session.ls -json | jq -r .CurrentSession.Key`
+  govc session.ls -json | jq -r .currentSession.key`
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
