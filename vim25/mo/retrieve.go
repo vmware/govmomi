@@ -77,7 +77,7 @@ func ApplyPropertyChange(obj Reference, changes []types.PropertyChange) {
 	for _, p := range changes {
 		rv, ok := t.props[p.Name]
 		if !ok {
-			continue
+			panic(p.Name + " not found")
 		}
 
 		assignValue(v, rv, reflect.ValueOf(p.Val))

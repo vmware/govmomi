@@ -480,7 +480,7 @@ load test_helper
   run govc vm.change -nested-hv-enabled=true -vm "$id"
   assert_success
 
-  hv=$(govc vm.info -json "$id" | jq '.[][0].Config.nestedHVEnabled')
+  hv=$(govc vm.info -json "$id" | jq '.[][0].config.nestedHVEnabled')
   assert_equal "$hv" "true"
 }
 

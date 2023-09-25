@@ -128,7 +128,7 @@ EOF
   run govc object.collect -s $vm summary.guest.ipAddress
   assert_success "10.0.0.1"
 
-  netip=$(govc object.collect -json -o $vm guest.net | jq -r .Guest.net[].ipAddress[0])
+  netip=$(govc object.collect -json -o $vm guest.net | jq -r .guest.net[].ipAddress[0])
   [ "$netip" = "10.0.0.1" ]
 
   run govc vm.info -vm.ip 10.0.0.1
@@ -268,7 +268,7 @@ EOF
   run govc object.collect -s vm/$vm summary.guest.ipAddress
   assert_success "$ip"
 
-  netip=$(govc object.collect -json -o vm/$vm guest.net | jq -r .Guest.net[].ipAddress[0])
+  netip=$(govc object.collect -json -o vm/$vm guest.net | jq -r .guest.net[].ipAddress[0])
   [ "$netip" = "$ip" ]
 
   run govc vm.ip $vm # covers VirtualMachine.WaitForIP

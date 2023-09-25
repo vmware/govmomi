@@ -250,7 +250,11 @@ func (m ObjectManager) RegisterDisk(ctx context.Context, path, name string) (*ty
 		return &res.Returnval, nil
 	}
 
-	res, err := methods.HostRegisterDisk(ctx, m.c, (*types.HostRegisterDisk)(&req))
+	res, err := methods.HostRegisterDisk(ctx, m.c, &types.HostRegisterDisk{
+		This: m.Reference(),
+		Path: path,
+		Name: name,
+	})
 	if err != nil {
 		return nil, err
 	}
