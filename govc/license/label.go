@@ -50,7 +50,7 @@ func (cmd *label) Description() string {
 Examples:
   govc license.label.set 00000-00000-00000-00000-00000 team cnx # add/set label
   govc license.label.set 00000-00000-00000-00000-00000 team ""  # remove label
-  govc license.ls -json | jq '.[] | select(.Labels[].Key == "team") | .LicenseKey'`
+  govc license.ls -json | jq '.[] | select(.labels[].key == "team") | .licenseKey'`
 }
 
 func (cmd *label) Run(ctx context.Context, f *flag.FlagSet) error {
