@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -161,7 +161,10 @@ func (cmd *ovfx) Prepare(f *flag.FlagSet) (string, error) {
 
 func (cmd *ovfx) Map(op []Property) (p []types.KeyValue) {
 	for _, v := range op {
-		p = append(p, v.KeyValue)
+		p = append(p, types.KeyValue{
+			Key:   v.Key,
+			Value: v.Value,
+		})
 	}
 
 	return
