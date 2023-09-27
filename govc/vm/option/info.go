@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,16 +25,13 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/property"
-	"github.com/vmware/govmomi/vim25/methods"
-	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
 type info struct {
-	*flags.ClusterFlag
-	*flags.HostSystemFlag
-	*flags.VirtualMachineFlag
+	flags.EnvBrowser
+
+	key string
 }
 
 func init() {
@@ -42,24 +39,9 @@ func init() {
 }
 
 func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClusterFlag, ctx = flags.NewClusterFlag(ctx)
-	cmd.ClusterFlag.Register(ctx, f)
+	cmd.EnvBrowser.Register(ctx, f)
 
-	cmd.HostSystemFlag, ctx = flags.NewHostSystemFlag(ctx)
-	cmd.HostSystemFlag.Register(ctx, f)
-
-	cmd.VirtualMachineFlag, ctx = flags.NewVirtualMachineFlag(ctx)
-	cmd.VirtualMachineFlag.Register(ctx, f)
-}
-
-func (cmd *info) Process(ctx context.Context) error {
-	if err := cmd.ClusterFlag.Process(ctx); err != nil {
-		return err
-	}
-	if err := cmd.HostSystemFlag.Process(ctx); err != nil {
-		return err
-	}
-	return cmd.VirtualMachineFlag.Process(ctx)
+	f.StringVar(&cmd.key, "id", "", "Option descriptor key")
 }
 
 func (cmd *info) Usage() string {
@@ -83,63 +65,23 @@ Examples:
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	vmf := cmd.VirtualMachineFlag
-
-	c, err := vmf.Client()
+	b, err := cmd.Browser(ctx)
 	if err != nil {
 		return err
 	}
-
-	var ref types.ManagedObjectReference
 
 	host, err := cmd.HostSystemIfSpecified()
 	if err != nil {
 		return err
 	}
-	vm, err := cmd.VirtualMachine()
-	if err != nil {
-		return err
-	}
-	if vm == nil {
-		if host == nil {
-			finder, ferr := cmd.ClusterFlag.Finder()
-			if ferr != nil {
-				return ferr
-			}
 
-			cr, ferr := finder.ComputeResourceOrDefault(ctx, cmd.ClusterFlag.Name)
-			if ferr != nil {
-				return ferr
-			}
-			ref = cr.Reference()
-		} else {
-			var h mo.HostSystem
-			err = host.Properties(ctx, host.Reference(), []string{"parent"}, &h)
-			if err != nil {
-				return err
-			}
-			ref = *h.Parent
-		}
-	} else {
-		ref = vm.Reference()
-	}
-
-	var content []types.ObjectContent
-
-	err = property.DefaultCollector(c).RetrieveOne(ctx, ref, []string{"environmentBrowser"}, &content)
-	if err != nil {
-		return err
-	}
-
-	req := types.QueryConfigOptionEx{
-		This: content[0].PropSet[0].Val.(types.ManagedObjectReference),
-	}
+	var req *types.EnvironmentBrowserConfigOptionQuerySpec
 
 	spec := func() *types.EnvironmentBrowserConfigOptionQuerySpec {
-		if req.Spec == nil {
-			req.Spec = new(types.EnvironmentBrowserConfigOptionQuerySpec)
+		if req == nil {
+			req = new(types.EnvironmentBrowserConfigOptionQuerySpec)
 		}
-		return req.Spec
+		return req
 	}
 
 	if f.NArg() != 0 {
@@ -150,12 +92,16 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		spec().Host = types.NewReference(host.Reference())
 	}
 
-	opt, err := methods.QueryConfigOptionEx(ctx, c, &req)
+	if cmd.key != "" {
+		spec().Key = cmd.key
+	}
+
+	opt, err := b.QueryConfigOption(ctx, req)
 	if err != nil {
 		return err
 	}
 
-	return vmf.WriteResult(&infoResult{opt.Returnval})
+	return cmd.VirtualMachineFlag.WriteResult(&infoResult{opt})
 }
 
 type infoResult struct {

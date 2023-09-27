@@ -81,7 +81,7 @@ func (cmd *attach) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	vmConfigOptions, err := vm.QueryConfigTarget(ctx)
+	vmConfigOptions, err := queryConfigTarget(ctx, vm)
 	if err != nil {
 		return err
 	}

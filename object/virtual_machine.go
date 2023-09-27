@@ -438,6 +438,17 @@ func (v VirtualMachine) Device(ctx context.Context) (VirtualDeviceList, error) {
 	return VirtualDeviceList(o.Config.Hardware.Device), nil
 }
 
+func (v VirtualMachine) EnvironmentBrowser(ctx context.Context) (*EnvironmentBrowser, error) {
+	var vm mo.VirtualMachine
+
+	err := v.Properties(ctx, v.Reference(), []string{"environmentBrowser"}, &vm)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewEnvironmentBrowser(v.c, vm.EnvironmentBrowser), nil
+}
+
 func (v VirtualMachine) HostSystem(ctx context.Context) (*HostSystem, error) {
 	var o mo.VirtualMachine
 
@@ -916,27 +927,6 @@ func (v VirtualMachine) Unregister(ctx context.Context) error {
 
 	_, err := methods.UnregisterVM(ctx, v.Client(), &req)
 	return err
-}
-
-// QueryEnvironmentBrowser is a helper to get the environmentBrowser property.
-func (v VirtualMachine) QueryConfigTarget(ctx context.Context) (*types.ConfigTarget, error) {
-	var vm mo.VirtualMachine
-
-	err := v.Properties(ctx, v.Reference(), []string{"environmentBrowser"}, &vm)
-	if err != nil {
-		return nil, err
-	}
-
-	req := types.QueryConfigTarget{
-		This: vm.EnvironmentBrowser,
-	}
-
-	res, err := methods.QueryConfigTarget(ctx, v.Client(), &req)
-	if err != nil {
-		return nil, err
-	}
-
-	return res.Returnval, nil
 }
 
 func (v VirtualMachine) MountToolsInstaller(ctx context.Context) error {
