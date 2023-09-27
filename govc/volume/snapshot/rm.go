@@ -70,7 +70,7 @@ Examples:
 }
 
 type rmResult struct {
-	VolumeResults []*types.CnsSnapshotDeleteResult
+	VolumeResults []*types.CnsSnapshotDeleteResult `json:"volumeResults"`
 	cmd           *rm
 }
 

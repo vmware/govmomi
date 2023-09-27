@@ -38,7 +38,7 @@ upload_file() {
 }
 
 @test "datastore.ls-R" {
-  esx_env
+  vcsim_env -esx
 
   dir=$(new_id)
 
@@ -57,26 +57,26 @@ upload_file() {
 
   # without -R
   json=$(govc datastore.ls -json -l -p "$dir")
-  result=$(jq -r .[].File[].Path <<<"$json" | wc -l)
+  result=$(jq -r .[].file[].path <<<"$json" | wc -l)
   [ "$result" -eq 6 ]
 
-  result=$(jq -r .[].FolderPath <<<"$json" | wc -l)
+  result=$(jq -r .[].folderPath <<<"$json" | wc -l)
   [ "$result" -eq 1 ]
 
   # with -R
   json=$(govc datastore.ls -json -l -p -R "$dir")
-  result=$(jq -r .[].File[].Path <<<"$json" | wc -l)
+  result=$(jq -r .[].file[].path <<<"$json" | wc -l)
   [ "$result" -eq 15 ]
 
-  result=$(jq -r .[].FolderPath <<<"$json" | wc -l)
+  result=$(jq -r .[].folderPath <<<"$json" | wc -l)
   [ "$result" -eq 7 ]
 
   # with -R -a
   json=$(govc datastore.ls -json -l -p -R -a "$dir")
-  result=$(jq -r .[].File[].Path <<<"$json" | wc -l)
+  result=$(jq -r .[].file[].path <<<"$json" | wc -l)
   [ "$result" -eq 21 ]
 
-  result=$(jq -r .[].FolderPath <<<"$json" | wc -l)
+  result=$(jq -r .[].folderPath <<<"$json" | wc -l)
   [ "$result" -eq 10 ]
 }
 
@@ -378,13 +378,13 @@ upload_file() {
   run govc datastore.disk.create -size 10MB "$vmdk"
   assert_success
 
-  type=$(govc datastore.disk.info -json "$vmdk" | jq -r .[].DiskType)
+  type=$(govc datastore.disk.info -json "$vmdk" | jq -r .[].diskType)
   [ "$type" = "thin" ]
 
   run govc datastore.disk.inflate "$vmdk"
   assert_success
 
-  type=$(govc datastore.disk.info -json "$vmdk" | jq -r .[].DiskType)
+  type=$(govc datastore.disk.info -json "$vmdk" | jq -r .[].diskType)
   [ "$type" = "eagerZeroedThick" ]
 
   run govc datastore.disk.shrink "$vmdk"

@@ -71,7 +71,7 @@ Examples:
 }
 
 type createResult struct {
-	VolumeResults *types.CnsSnapshotCreateResult
+	VolumeResults *types.CnsSnapshotCreateResult `json:"volumeResults"`
 	cmd           *create
 }
 

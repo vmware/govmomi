@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2016-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -112,7 +112,7 @@ Examples:
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
   govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
   govc object.collect -json $vm config | \ # use -json + jq to search array elements
-    jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'`, atable)
+    jq -r '.[] | select(.val.hardware.device[].macAddress == "00:0c:29:0c:73:c0") | .val.name'`, atable)
 }
 
 var stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()

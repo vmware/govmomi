@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -57,7 +57,7 @@ func (cmd *usage) Description() string {
 Examples:
   govc cluster.usage ClusterName
   govc cluster.usage -S ClusterName # summarize shared storage only
-  govc cluster.usage -json ClusterName | jq -r .CPU.Summary.Usage`
+  govc cluster.usage -json ClusterName | jq -r .cpu.summary.usage`
 }
 
 func (cmd *usage) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -124,18 +124,18 @@ func (cmd *usage) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 type ResourceUsageSummary struct {
-	Used     string
-	Free     string
-	Capacity string
-	Usage    string
+	Used     string `json:"used"`
+	Free     string `json:"free"`
+	Capacity string `json:"capacity"`
+	Usage    string `json:"usage"`
 }
 
 type ResourceUsage struct {
-	Used     int64
-	Free     int64
-	Capacity int64
-	Usage    float64
-	Summary  ResourceUsageSummary
+	Used     int64                `json:"used"`
+	Free     int64                `json:"free"`
+	Capacity int64                `json:"capacity"`
+	Usage    float64              `json:"usage"`
+	Summary  ResourceUsageSummary `json:"summary"`
 }
 
 func (r *ResourceUsage) summarize(f func(int64) string) {
@@ -163,9 +163,9 @@ func size(val int64) string {
 }
 
 type Usage struct {
-	Memory  ResourceUsage
-	CPU     ResourceUsage
-	Storage ResourceUsage
+	Memory  ResourceUsage `json:"memory"`
+	CPU     ResourceUsage `json:"cpu"`
+	Storage ResourceUsage `json:"storage"`
 }
 
 func (r *Usage) Write(w io.Writer) error {

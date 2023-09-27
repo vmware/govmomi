@@ -416,7 +416,7 @@ load test_helper
     # If VM is not found (using -json flag): Valid json output, exit code==0
     run env GOVC_INDENT=false govc vm.info -json $id
     assert_success
-    assert_line "{\"VirtualMachines\":null}"
+    assert_line "{\"virtualMachines\":null}"
 
     run govc vm.info -dump $id
     assert_success
@@ -581,7 +581,7 @@ load test_helper
 }
 
 @test "vm.create iso" {
-  esx_env
+  vcsim_env -esx
 
   upload_iso
 
@@ -593,9 +593,9 @@ load test_helper
   run govc vm.create -iso $GOVC_TEST_ISO -on=false $vm
   assert_success
 
-  run govc device.info -vm $vm cdrom-3000
+  run govc device.info -vm $vm cdrom-*
   assert_success
-  assert_line "Controller: ide-200"
+  assert_line "Type: VirtualCdrom"
   assert_line "Summary: ISO [${GOVC_DATASTORE##*/}] $GOVC_TEST_ISO"
 }
 
@@ -625,7 +625,7 @@ load test_helper
   assert_success
   result=$(govc device.ls -vm "$vm" | grep -c disk-)
   [ "$result" -eq 1 ]
-  govc device.info -json -vm "$vm" disk-* | jq .Devices[].backing.sharing | grep -v sharingMultiWriter
+  govc device.info -json -vm "$vm" disk-* | jq .devices[].backing.sharing | grep -v sharingMultiWriter
 
   name=$(new_id)
 
@@ -643,7 +643,7 @@ load test_helper
 
   run govc vm.disk.create -vm "$vm" -name "$vm/shared.vmdk" -size 1G -eager -thick -sharing sharingMultiWriter
   assert_success
-  govc device.info -json -vm "$vm" disk-* | jq .Devices[].backing.sharing | grep sharingMultiWriter
+  govc device.info -json -vm "$vm" disk-* | jq .devices[].backing.sharing | grep sharingMultiWriter
 
   run govc vm.power -on "$vm"
   assert_success
@@ -671,7 +671,7 @@ load test_helper
   run govc vm.disk.change -vm "$vm" -disk.filePath "[$GOVC_DATASTORE] $vm/shared.vmdk" -sharing sharingNone
   assert_success
 
-  ! govc device.info -json -vm "$vm" disk-* | jq .Devices[].Backing.Sharing | grep sharingMultiWriter
+  ! govc device.info -json -vm "$vm" disk-* | jq .devices[].backing.sharing | grep sharingMultiWriter
 }
 
 @test "vm.disk.create" {
@@ -798,7 +798,7 @@ load test_helper
   run govc vm.clone -vm "$vm" -host.ipath /DC0/host/DC0_C0/DC0_C0_H0 -annotation $$ "$clone"
   assert_success
 
-  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].backing)
+  backing=$(govc device.info -json -vm "$clone" disk-* | jq .devices[].backing)
   assert_equal false "$(jq .eagerlyScrub <<<"$backing")"
   assert_equal true "$(jq .thinProvisioned <<<"$backing")"
 
@@ -835,7 +835,7 @@ load test_helper
   run govc vm.disk.create -vm "$vm" -thick -eager -size 10M -name "$vm/data.vmdk"
   assert_success
 
-  backing=$(govc device.info -json -vm "$vm" disk-* | jq .Devices[].backing)
+  backing=$(govc device.info -json -vm "$vm" disk-* | jq .devices[].backing)
   assert_equal true "$(jq .eagerlyScrub <<<"$backing")"
   assert_equal false "$(jq .thinProvisioned <<<"$backing")"
 
@@ -843,7 +843,7 @@ load test_helper
   run govc vm.clone -vm "$vm" "$clone"
   assert_success
 
-  backing=$(govc device.info -json -vm "$clone" disk-* | jq .Devices[].backing)
+  backing=$(govc device.info -json -vm "$clone" disk-* | jq .devices[].backing)
   assert_equal true "$(jq .eagerlyScrub <<<"$backing")"
   assert_equal false "$(jq .thinProvisioned <<<"$backing")"
 

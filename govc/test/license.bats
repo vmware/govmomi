@@ -4,7 +4,7 @@ load test_helper
 
 # These tests should only run against a server running an evaluation license.
 verify_evaluation() {
-  if [ "$(govc license.ls -json | jq -r .[0].EditionKey)" != "eval" ]; then
+  if [ "$(govc license.ls -json | jq -r .[0].editionKey)" != "eval" ]; then
     skip "requires evaluation license"
   fi
 }
@@ -56,7 +56,7 @@ get_nlabel() {
   assert_success
 
   # Expect the test instance to run in evaluation mode
-  assert_equal "Evaluation Mode" "$(get_key 00000-00000-00000-00000-00000 <<<$output | jq -r ".Name")"
+  assert_equal "Evaluation Mode" "$(get_key 00000-00000-00000-00000-00000 <<<$output | jq -r ".name")"
 }
 
 @test "license.decode" {

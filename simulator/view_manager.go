@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -227,7 +227,7 @@ func (m *ViewManager) CreateListView(ctx *Context, req *types.CreateListView) so
 	body := new(methods.CreateListViewBody)
 	list := new(ListView)
 
-	if err := list.add(req.Obj); err != nil {
+	if err := list.add(ctx, req.Obj); err != nil {
 		body.Fault_ = Fault("", err)
 		return body
 	}
@@ -245,13 +245,13 @@ type ListView struct {
 	mo.ListView
 }
 
-func (v *ListView) update() {
-	Map.Update(v, []types.PropertyChange{{Name: "view", Val: v.View}})
+func (v *ListView) update(ctx *Context) {
+	ctx.Map.Update(v, []types.PropertyChange{{Name: "view", Val: v.View}})
 }
 
-func (v *ListView) add(refs []types.ManagedObjectReference) *types.ManagedObjectNotFound {
+func (v *ListView) add(ctx *Context, refs []types.ManagedObjectReference) *types.ManagedObjectNotFound {
 	for _, ref := range refs {
-		obj := Map.Get(ref)
+		obj := ctx.Session.Get(ref)
 		if obj == nil {
 			return &types.ManagedObjectNotFound{Obj: ref}
 		}
@@ -265,14 +265,14 @@ func (v *ListView) DestroyView(ctx *Context, c *types.DestroyView) soap.HasFault
 	return destroyView(c.This)
 }
 
-func (v *ListView) ModifyListView(req *types.ModifyListView) soap.HasFault {
+func (v *ListView) ModifyListView(ctx *Context, req *types.ModifyListView) soap.HasFault {
 	body := new(methods.ModifyListViewBody)
 
 	for _, ref := range req.Remove {
 		RemoveReference(&v.View, ref)
 	}
 
-	if err := v.add(req.Add); err != nil {
+	if err := v.add(ctx, req.Add); err != nil {
 		body.Fault_ = Fault("", err)
 		return body
 	}
@@ -280,25 +280,25 @@ func (v *ListView) ModifyListView(req *types.ModifyListView) soap.HasFault {
 	body.Res = new(types.ModifyListViewResponse)
 
 	if len(req.Remove) != 0 || len(req.Add) != 0 {
-		v.update()
+		v.update(ctx)
 	}
 
 	return body
 }
 
-func (v *ListView) ResetListView(req *types.ResetListView) soap.HasFault {
+func (v *ListView) ResetListView(ctx *Context, req *types.ResetListView) soap.HasFault {
 	body := new(methods.ResetListViewBody)
 
 	v.View = nil
 
-	if err := v.add(req.Obj); err != nil {
+	if err := v.add(ctx, req.Obj); err != nil {
 		body.Fault_ = Fault("", err)
 		return body
 	}
 
 	body.Res = new(types.ResetListViewResponse)
 
-	v.update()
+	v.update(ctx)
 
 	return body
 }

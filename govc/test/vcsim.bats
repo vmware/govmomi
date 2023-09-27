@@ -59,11 +59,11 @@ EOF
   run curl -skf "$url/debug/vars"
   assert_success
 
-  model=$(curl -sfk "$url/debug/vars" | jq .vcsim.Model)
-  [ "$(jq .Datacenter <<<"$model")" == "2" ]
-  [ "$(jq .Cluster <<<"$model")" == "6" ]
-  [ "$(jq .Machine <<<"$model")" == "0" ]
-  [ "$(jq .Datastore <<<"$model")" == "0" ]
+  model=$(curl -sfk "$url/debug/vars" | jq .vcsim.model)
+  [ "$(jq .datacenter <<<"$model")" == "2" ]
+  [ "$(jq .cluster <<<"$model")" == "6" ]
+  [ "$(jq .machine <<<"$model")" == "0" ]
+  [ "$(jq .datastore <<<"$model")" == "0" ]
 
   run govc about
   assert_success
@@ -102,7 +102,7 @@ EOF
 
   VCSIM_HOST_PORT_UNIQUE=true vcsim_start -l "$url"
 
-  hosts=$(curl -sk "https://$url/debug/vars" | jq .vcsim.Model.Host)
+  hosts=$(curl -sk "https://$url/debug/vars" | jq .vcsim.model.host)
   ports=$(govc object.collect -s -type h / summary.config.port | uniq -u | wc -l)
   assert_equal "$ports" "$hosts" # all host ports should be unique
   grep -v "$port" <<<"$ports" # host ports should not include vcsim port

@@ -197,7 +197,7 @@ _EOF_
   assert_failure # no changes specified
 
   # DRS override
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DRS.enabled"
+  query=".overrides[] | select(.name == \"DC0_C0_RP0_VM0\") | .drs.enabled"
 
   run govc cluster.override.change -vm DC0_C0_RP0_VM0 -drs-enabled=false
   assert_success
@@ -211,7 +211,7 @@ _EOF_
   assert_success
 
   # DAS override
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .DAS.dasSettings.restartPriority"
+  query=".overrides[] | select(.name == \"DC0_C0_RP0_VM0\") | .das.dasSettings.restartPriority"
 
   [ "$(govc cluster.override.info -json | jq -r "$query")" != "high" ]
 
@@ -220,13 +220,13 @@ _EOF_
   [ "$(govc cluster.override.info -json | jq -r "$query")" == "high" ]
 
   # Orchestration override
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.vmReadiness.postReadyDelay"
+  query=".overrides[] | select(.name == \"DC0_C0_RP0_VM0\") | .orchestration.vmReadiness.postReadyDelay"
 
   run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-additional-delay 60
   assert_success
   [ "$(govc cluster.override.info -json | jq -r "$query")" == "60" ]
 
-  query=".Overrides[] | select(.Name == \"DC0_C0_RP0_VM0\") | .Orchestration.vmReadiness.readyCondition"
+  query=".overrides[] | select(.name == \"DC0_C0_RP0_VM0\") | .orchestration.vmReadiness.readyCondition"
 
   run govc cluster.override.change -vm DC0_C0_RP0_VM0 -ha-ready-condition poweredOn
   assert_success
@@ -252,8 +252,8 @@ _EOF_
     ip=$(govc object.collect -o -json host/DC0_C0/10.0.0.42 | jq -r .config.network.vnic[].spec.ip.ipAddress)
 
     assert_equal 10.0.0.42 "$ip"
-    govc host.info -json '*' | jq -r .HostSystems[].config.network.vnic[].spec.ip
-    name=$(govc host.info -json -host.ip 10.0.0.42 | jq -r .HostSystems[].name)
+    govc host.info -json '*' | jq -r .hostSystems[].config.network.vnic[].spec.ip
+    name=$(govc host.info -json -host.ip 10.0.0.42 | jq -r .hostSystems[].name)
     assert_equal 10.0.0.42 "$name"
 }
 
@@ -266,7 +266,7 @@ _EOF_
   run govc cluster.usage DC0_C0
   assert_success
 
-  memory=$(govc cluster.usage -json DC0_C0 | jq -r .Memory.Summary.Usage)
+  memory=$(govc cluster.usage -json DC0_C0 | jq -r .memory.summary.usage)
   [ "$memory" = "34.3" ]
 }
 

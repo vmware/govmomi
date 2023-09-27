@@ -392,7 +392,7 @@ System information including the name, type, version, and build number.
 
 Examples:
   govc about
-  govc about -json | jq -r .About.productLineId
+  govc about -json | jq -r .about.productLineId
 
 Options:
   -c=false               Include client info
@@ -411,7 +411,7 @@ If the '-k' flag is provided, about.cert will return with exit code 0 in this ca
 The SHA1 thumbprint can also be used as '-thumbprint' for the 'host.add' and 'cluster.add' commands.
 
 Examples:
-  govc about.cert -k -json | jq -r .ThumbprintSHA1
+  govc about.cert -k -json | jq -r .thumbprintSHA1
   govc about.cert -k -show | sudo tee /usr/local/share/ca-certificates/host.crt
   govc about.cert -k -thumbprint | tee -a ~/.govmomi/known_hosts
 
@@ -853,7 +853,7 @@ Cluster resource usage summary.
 Examples:
   govc cluster.usage ClusterName
   govc cluster.usage -S ClusterName # summarize shared storage only
-  govc cluster.usage -json ClusterName | jq -r .CPU.Summary.Usage
+  govc cluster.usage -json ClusterName | jq -r .cpu.summary.usage
 
 Options:
   -S=false               Exclude host local storage
@@ -1425,9 +1425,9 @@ Device info for VM.
 Examples:
   govc device.info -vm $name
   govc device.info -vm $name disk-*
-  govc device.info -vm $name -json disk-* | jq -r .Devices[].backing.uuid
-  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].backing.fileName # vmdk path
-  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].macAddress
+  govc device.info -vm $name -json disk-* | jq -r .devices[].backing.uuid
+  govc device.info -vm $name -json 'disk-*' | jq -r .devices[].backing.fileName # vmdk path
+  govc device.info -vm $name -json ethernet-0 | jq -r .devices[].macAddress
 
 Options:
   -net=                  Network [GOVC_NETWORK]
@@ -1447,7 +1447,7 @@ List devices for VM.
 Examples:
   govc device.ls -vm $name
   govc device.ls -vm $name disk-*
-  govc device.ls -vm $name -json | jq '.Devices[].Name'
+  govc device.ls -vm $name -json | jq '.devices[].name'
 
 Options:
   -boot=false            List devices configured in the VM's boot options
@@ -4188,7 +4188,7 @@ Examples:
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
   govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
   govc object.collect -json $vm config | \ # use -json + jq to search array elements
-    jq -r '.[] | select(.Val.Hardware.Device[].MacAddress == "00:0c:29:0c:73:c0") | .Val.Name'
+    jq -r '.[] | select(.val.hardware.device[].macAddress == "00:0c:29:0c:73:c0") | .val.name'
 
 Options:
   -O=false               Output the CreateFilter request itself
@@ -6183,7 +6183,7 @@ List IPs for VM.
 By default the vm.ip command depends on vmware-tools to report the 'guest.ipAddress' field and will
 wait until it has done so.  This value can also be obtained using:
 
-  govc vm.info -json $vm | jq -r .VirtualMachines[].guest.ipAddress
+  govc vm.info -json $vm | jq -r .virtualMachines[].guest.ipAddress
 
 When given the '-a' flag, only IP addresses for which there is a corresponding virtual nic are listed.
 If there are multiple nics, the listed addresses will be comma delimited.  The '-a' flag depends on
@@ -6193,7 +6193,7 @@ by tools for which there is no virtual nic are not included, for example that of
 
 These values can also be obtained using:
 
-  govc vm.info -json $vm | jq -r .VirtualMachines[].guest.net[].ipConfig.ipAddress[].ipAddress
+  govc vm.info -json $vm | jq -r .virtualMachines[].guest.net[].ipConfig.ipAddress[].ipAddress
 
 When given the '-n' flag, filters '-a' behavior to the nic specified by MAC address or device name.
 
