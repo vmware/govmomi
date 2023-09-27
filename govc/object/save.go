@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -113,11 +113,29 @@ func saveDVS(ctx context.Context, c *vim25.Client, ref types.ManagedObjectRefere
 }
 
 func saveEnvironmentBrowser(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
-	res, err := methods.QueryConfigOption(ctx, c, &types.QueryConfigOption{This: ref})
-	if err != nil {
-		return nil, err
+	var save []saveMethod
+	{
+		res, err := methods.QueryConfigOption(ctx, c, &types.QueryConfigOption{This: ref})
+		if err != nil {
+			return nil, err
+		}
+		save = append(save, saveMethod{"QueryConfigOption", res})
 	}
-	return []saveMethod{{"QueryConfigOption", res}}, nil
+	{
+		res, err := methods.QueryConfigTarget(ctx, c, &types.QueryConfigTarget{This: ref})
+		if err != nil {
+			return nil, err
+		}
+		save = append(save, saveMethod{"QueryConfigTarget", res})
+	}
+	{
+		res, err := methods.QueryTargetCapabilities(ctx, c, &types.QueryTargetCapabilities{This: ref})
+		if err != nil {
+			return nil, err
+		}
+		save = append(save, saveMethod{"QueryTargetCapabilities", res})
+	}
+	return save, nil
 }
 
 func saveHostNetworkSystem(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {

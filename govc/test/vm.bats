@@ -1114,6 +1114,22 @@ load test_helper
   [ ${#lines[@]} -ge 100 ]
 }
 
+@test "vm.target.info" {
+  vcsim_env
+
+  run govc vm.target.info -host "$GOVC_HOST"
+  assert_success
+
+  run govc vm.target.info -cluster "$(dirname "$GOVC_HOST")"
+  assert_success
+
+  run govc vm.target.info -vm DC0_H0_VM0
+  assert_success
+
+  run govc vm.target.info -json
+  assert_success
+}
+
 @test "vm.customize" {
   vcsim_env
 

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,10 @@ import (
 type EnvironmentBrowser struct {
 	mo.EnvironmentBrowser
 
-	types.QueryConfigOptionResponse
+	QueryConfigTargetResponse           types.QueryConfigTargetResponse
+	QueryConfigOptionResponse           types.QueryConfigOptionResponse
+	QueryConfigOptionDescriptorResponse types.QueryConfigOptionDescriptorResponse
+	QueryTargetCapabilitiesResponse     types.QueryTargetCapabilitiesResponse
 }
 
 func newEnvironmentBrowser() *types.ManagedObjectReference {
@@ -135,7 +138,13 @@ func (b *EnvironmentBrowser) QueryConfigOptionEx(req *types.QueryConfigOptionEx)
 
 func (b *EnvironmentBrowser) QueryConfigOptionDescriptor(ctx *Context, req *types.QueryConfigOptionDescriptor) soap.HasFault {
 	body := &methods.QueryConfigOptionDescriptorBody{
-		Res: new(types.QueryConfigOptionDescriptorResponse),
+		Res: &types.QueryConfigOptionDescriptorResponse{
+			Returnval: b.QueryConfigOptionDescriptorResponse.Returnval,
+		},
+	}
+
+	if body.Res.Returnval != nil {
+		return body
 	}
 
 	body.Res.Returnval = []types.VirtualMachineConfigOptionDescriptor{{
@@ -154,12 +163,18 @@ func (b *EnvironmentBrowser) QueryConfigOptionDescriptor(ctx *Context, req *type
 func (b *EnvironmentBrowser) QueryConfigTarget(ctx *Context, req *types.QueryConfigTarget) soap.HasFault {
 	body := &methods.QueryConfigTargetBody{
 		Res: &types.QueryConfigTargetResponse{
-			Returnval: &types.ConfigTarget{
-				SmcPresent: types.NewBool(false),
-			},
+			Returnval: b.QueryConfigTargetResponse.Returnval,
 		},
 	}
-	target := body.Res.Returnval
+
+	if body.Res.Returnval != nil {
+		return body
+	}
+
+	target := &types.ConfigTarget{
+		SmcPresent: types.NewBool(false),
+	}
+	body.Res.Returnval = target
 
 	var hosts []types.ManagedObjectReference
 	if req.Host == nil {
@@ -229,6 +244,25 @@ func (b *EnvironmentBrowser) QueryConfigTarget(ctx *Context, req *types.QueryCon
 				})
 			}
 		}
+	}
+
+	return body
+}
+
+func (b *EnvironmentBrowser) QueryTargetCapabilities(ctx *Context, req *types.QueryTargetCapabilities) soap.HasFault {
+	body := &methods.QueryTargetCapabilitiesBody{
+		Res: &types.QueryTargetCapabilitiesResponse{
+			Returnval: b.QueryTargetCapabilitiesResponse.Returnval,
+		},
+	}
+
+	if body.Res.Returnval != nil {
+		return body
+	}
+
+	body.Res.Returnval = &types.HostCapability{
+		VmotionSupported:         true,
+		MaintenanceModeSupported: true,
 	}
 
 	return body

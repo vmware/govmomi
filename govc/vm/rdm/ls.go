@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,6 +27,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -75,7 +76,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	vmConfigOptions, err := vm.QueryConfigTarget(ctx)
+	vmConfigOptions, err := queryConfigTarget(ctx, vm)
 	if err != nil {
 		return err
 	}
@@ -106,4 +107,12 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "  UIDS:\t%s\n", strings.Join(uids, " ,"))
 	}
 	return tw.Flush()
+}
+
+func queryConfigTarget(ctx context.Context, m *object.VirtualMachine) (*types.ConfigTarget, error) {
+	b, err := m.EnvironmentBrowser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return b.QueryConfigTarget(ctx, nil)
 }
