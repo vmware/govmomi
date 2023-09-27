@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -171,7 +171,7 @@ func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
 				k = fmt.Sprintf("%s.%s", k, *p.Instance)
 			}
 
-			np := Property{KeyValue: types.KeyValue{Key: k, Value: d}}
+			np := Property{KeyValue: KeyValue{Key: k, Value: d}}
 			if cmd.Verbose() {
 				np.Spec = &p.Property[i]
 			}

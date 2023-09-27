@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -29,8 +29,39 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+type KeyValue struct {
+	Key   string
+	Value string
+}
+
+// case insensitive for Key + Value
+func (kv *KeyValue) UnmarshalJSON(b []byte) error {
+	e := struct {
+		types.KeyValue
+		Key   *string
+		Value *string
+	}{
+		types.KeyValue{}, &kv.Key, &kv.Value,
+	}
+
+	err := json.Unmarshal(b, &e)
+	if err != nil {
+		return err
+	}
+
+	if kv.Key == "" {
+		kv.Key = e.KeyValue.Key // "key"
+	}
+
+	if kv.Value == "" {
+		kv.Value = e.KeyValue.Value // "value"
+	}
+
+	return nil
+}
+
 type Property struct {
-	types.KeyValue
+	KeyValue
 	Spec *ovf.Property `json:",omitempty"`
 }
 
