@@ -34,17 +34,17 @@ EOS
   assert_line "Name: $id"
 
   json=$(govc extension.info -json $id)
-  label=$(jq -r .Extensions[].Description.Label <<<"$json")
+  label=$(jq -r .extensions[].description.label <<<"$json")
   assert_equal "govc" "$label"
 
   # change label and update extension
-  json=$(jq -r '.Extensions[] | .Description.Label = "novc"' <<<"$json")
+  json=$(jq -r '.extensions[] | .description.label = "novc"' <<<"$json")
   run govc extension.register -update $id <<<"$json"
   assert_success
 
   # check label changed in info output
   json=$(govc extension.info -json $id)
-  label=$(jq -r .Extensions[].Description.Label <<<"$json")
+  label=$(jq -r .extensions[].description.label <<<"$json")
   assert_equal "novc" "$label"
 
   # set extension certificate to generated certificate

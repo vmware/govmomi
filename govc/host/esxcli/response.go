@@ -24,9 +24,9 @@ import (
 type Values map[string][]string
 
 type Response struct {
-	Info   *CommandInfoMethod
-	Values []Values
-	String string
+	Info   *CommandInfoMethod `json:"info"`
+	Values []Values           `json:"values"`
+	String string             `json:"string"`
 }
 
 func (v Values) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {

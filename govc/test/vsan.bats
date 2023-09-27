@@ -7,7 +7,7 @@ load test_helper
 
   run govc vsan.info -json DC0_C0
   assert_success
-  config=$(jq .Clusters[].Info.UnmapConfig <<<"$output")
+  config=$(jq .clusters[].info.UnmapConfig <<<"$output")
   assert_equal null "$config"
 
   run govc vsan.change DC0_C0
@@ -19,6 +19,6 @@ load test_helper
   run govc vsan.info -json DC0_C0
   assert_success
 
-  config=$(jq .Clusters[].Info.UnmapConfig.Enable <<<"$output")
+  config=$(jq .clusters[].info.UnmapConfig.Enable <<<"$output")
   assert_equal true "$config"
 }

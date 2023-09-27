@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017-2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,32 +75,32 @@ type Model struct {
 
 	// Datacenter specifies the number of Datacenter entities to create
 	// Name prefix: DC, vcsim flag: -dc
-	Datacenter int
+	Datacenter int `json:"datacenter"`
 
 	// Portgroup specifies the number of DistributedVirtualPortgroup entities to create per Datacenter
 	// Name prefix: DVPG, vcsim flag: -pg
-	Portgroup int
+	Portgroup int `json:"portgroup"`
 
 	// PortgroupNSX specifies the number NSX backed DistributedVirtualPortgroup entities to create per Datacenter
 	// Name prefix: NSXPG, vcsim flag: -nsx-pg
-	PortgroupNSX int
+	PortgroupNSX int `json:"portgroupNSX"`
 
 	// OpaqueNetwork specifies the number of OpaqueNetwork entities to create per Datacenter,
 	// with Summary.OpaqueNetworkType set to nsx.LogicalSwitch and Summary.OpaqueNetworkId to a random uuid.
 	// Name prefix: NSX, vcsim flag: -nsx
-	OpaqueNetwork int
+	OpaqueNetwork int `json:"opaqueNetwork"`
 
 	// Host specifies the number of standalone HostSystems entities to create per Datacenter
 	// Name prefix: H, vcsim flag: -standalone-host
-	Host int `json:",omitempty"`
+	Host int `json:"host,omitempty"`
 
 	// Cluster specifies the number of ClusterComputeResource entities to create per Datacenter
 	// Name prefix: C, vcsim flag: -cluster
-	Cluster int
+	Cluster int `json:"cluster"`
 
 	// ClusterHost specifies the number of HostSystems entities to create within a Cluster
 	// Name prefix: H, vcsim flag: -host
-	ClusterHost int `json:",omitempty"`
+	ClusterHost int `json:"clusterHost,omitempty"`
 
 	// Pool specifies the number of ResourcePool entities to create per Cluster
 	// Note that every cluster has a root ResourcePool named "Resources", as real vCenter does.
@@ -110,13 +110,13 @@ type Model struct {
 	// Note that this flag is not effective on standalone hosts.
 	// For example: /DC0/host/DC0_C0/Resources/DC0_C0_RP1
 	// Name prefix: RP, vcsim flag: -pool
-	Pool int
+	Pool int `json:"pool"`
 
 	// Datastore specifies the number of Datastore entities to create
 	// Each Datastore will have temporary local file storage and will be mounted
 	// on every HostSystem created by the ModelConfig
 	// Name prefix: LocalDS, vcsim flag: -ds
-	Datastore int
+	Datastore int `json:"datastore"`
 
 	// Machine specifies the number of VirtualMachine entities to create per
 	// ResourcePool. If the pool flag is specified, the specified number of virtual
@@ -125,21 +125,21 @@ type Model struct {
 	// prefixed with RP0. On standalone hosts, machines are always deployed into the
 	// root resource pool without any prefix.
 	// Name prefix: VM, vcsim flag: -vm
-	Machine int
+	Machine int `json:"machine"`
 
 	// Folder specifies the number of Datacenter to place within a Folder.
 	// This includes a folder for the Datacenter itself and its host, vm, network and datastore folders.
 	// All resources for the Datacenter are placed within these folders, rather than the top-level folders.
 	// Name prefix: F, vcsim flag: -folder
-	Folder int
+	Folder int `json:"folder"`
 
 	// App specifies the number of VirtualApp to create per Cluster
 	// Name prefix: APP, vcsim flag: -app
-	App int
+	App int `json:"app"`
 
 	// Pod specifies the number of StoragePod to create per Cluster
 	// Name prefix: POD, vcsim flag: -pod
-	Pod int
+	Pod int `json:"pod"`
 
 	// Delay configurations
 	DelayConfig DelayConfig `json:"-"`

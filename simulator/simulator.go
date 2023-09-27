@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -338,8 +338,8 @@ func (r *response) MarshalXML(e *xml.Encoder, start xml.StartElement) error {
 // About generates some info about the simulator.
 func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 	var about struct {
-		Methods []string
-		Types   []string
+		Methods []string `json:"methods"`
+		Types   []string `json:"types"`
 	}
 
 	seen := make(map[string]bool)

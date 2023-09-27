@@ -60,7 +60,7 @@ EOF
   govc guest.ls "$script" | grep 65534
   govc guest.chmod 0755 "$script"
   pid=$(govc guest.start "$script" '>&' /tmp/disk.log)
-  status=$(govc guest.ps -p "$pid" -json -X | jq .ProcessInfo[].ExitCode)
+  status=$(govc guest.ps -p "$pid" -json -X | jq .processInfo[].exitCode)
   govc guest.download /tmp/disk.log -
   if [ "$status" -ne "0" ] ; then
     exit 1
@@ -77,7 +77,7 @@ EOF
   govc guest.download /etc/motd - | grep -v Chop
 
   pid=$(govc guest.start /bin/sync)
-  status=$(govc guest.ps -p "$pid" -json -X | jq .ProcessInfo[].ExitCode)
+  status=$(govc guest.ps -p "$pid" -json -X | jq .processInfo[].exitCode)
   if [ "$status" -ne "0" ] ; then
     exit 1
   fi
@@ -91,7 +91,7 @@ EOF
   echo "Verifying data persistence..."
   govc guest.download /etc/motd - | grep $grepf Chop
   pid=$(govc guest.start /bin/mount /dev/hdb1 /data)
-  status=$(govc guest.ps -p "$pid" -json -X | jq .ProcessInfo[].ExitCode)
+  status=$(govc guest.ps -p "$pid" -json -X | jq .processInfo[].exitCode)
 
   if [ "$persist" = "true" ] ; then
     govc guest.ls /data

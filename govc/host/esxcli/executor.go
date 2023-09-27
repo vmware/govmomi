@@ -27,8 +27,8 @@ import (
 )
 
 type Fault struct {
-	Message string
-	Detail  string
+	Message string `json:"message"`
+	Detail  string `json:"detail"`
 }
 
 func (f Fault) Error() string {

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,33 +31,33 @@ type Command struct {
 }
 
 type CommandInfoItem struct {
-	Name        string `xml:"name"`
-	DisplayName string `xml:"displayName"`
-	Help        string `xml:"help"`
+	Name        string `xml:"name" json:"name"`
+	DisplayName string `xml:"displayName" json:"displayName"`
+	Help        string `xml:"help" json:"help"`
 }
 
 type CommandInfoParam struct {
 	CommandInfoItem
-	Aliases []string `xml:"aliases"`
-	Flag    bool     `xml:"flag"`
+	Aliases []string `xml:"aliases" json:"aliases"`
+	Flag    bool     `xml:"flag" json:"flag"`
 }
 
 type CommandInfoHint struct {
-	Key   string `xml:"key"`
-	Value string `xml:"value"`
+	Key   string `xml:"key" json:"key"`
+	Value string `xml:"value" json:"value"`
 }
 
 type CommandInfoHints []CommandInfoHint
 
 type CommandInfoMethod struct {
 	CommandInfoItem
-	Param []CommandInfoParam `xml:"param"`
-	Hints CommandInfoHints   `xml:"hints"`
+	Param []CommandInfoParam `xml:"param" json:"param"`
+	Hints CommandInfoHints   `xml:"hints" json:"hints"`
 }
 
 type CommandInfo struct {
 	CommandInfoItem
-	Method []*CommandInfoMethod `xml:"method"`
+	Method []*CommandInfoMethod `xml:"method" json:"method"`
 }
 
 func NewCommand(args []string) *Command {

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,7 +62,7 @@ If the '-k' flag is provided, about.cert will return with exit code 0 in this ca
 The SHA1 thumbprint can also be used as '-thumbprint' for the 'host.add' and 'cluster.add' commands.
 
 Examples:
-  govc about.cert -k -json | jq -r .ThumbprintSHA1
+  govc about.cert -k -json | jq -r .thumbprintSHA1
   govc about.cert -k -show | sudo tee /usr/local/share/ca-certificates/host.crt
   govc about.cert -k -thumbprint | tee -a ~/.govmomi/known_hosts`
 }

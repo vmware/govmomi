@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,7 +58,7 @@ func (cmd *ls) Description() string {
 Examples:
   govc device.ls -vm $name
   govc device.ls -vm $name disk-*
-  govc device.ls -vm $name -json | jq '.Devices[].Name'`
+  govc device.ls -vm $name -json | jq '.devices[].name'`
 }
 
 func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -102,9 +102,9 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 type lsDevice struct {
-	Name    string
-	Type    string
-	Summary string
+	Name    string `json:"name"`
+	Type    string `json:"type"`
+	Summary string `json:"summary"`
 }
 
 func toLsList(devices object.VirtualDeviceList) []lsDevice {
@@ -122,7 +122,7 @@ func toLsList(devices object.VirtualDeviceList) []lsDevice {
 }
 
 type lsResult struct {
-	Devices []lsDevice
+	Devices []lsDevice `json:"devices"`
 	list    object.VirtualDeviceList
 }
 

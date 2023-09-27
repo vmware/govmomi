@@ -17,11 +17,7 @@ git diff --name-status main | awk '{print $2}' | while read file; do
     yearA=${years[0]}
     yearB=${years[$((${num_years}-1))]}
 
-    if [ ${yearA} == ${yearB} ]; then
-      export YEARS="${yearA}"
-    else
-      export YEARS="${yearA}-${yearB}"
-    fi
+    export YEARS="${yearA}-${yearB}"
   fi
 
   case "$file" in

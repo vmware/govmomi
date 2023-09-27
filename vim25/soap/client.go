@@ -79,10 +79,10 @@ type Client struct {
 	hostsMu sync.Mutex
 	hosts   map[string]string
 
-	Namespace string // Vim namespace
-	Version   string // Vim version
-	Types     types.Func
-	UserAgent string
+	Namespace string     `json:"namespace"` // Vim namespace
+	Version   string     `json:"version"`   // Vim version
+	Types     types.Func `json:"types"`
+	UserAgent string     `json:"userAgent"`
 
 	cookie          string
 	insecureCookies bool
@@ -487,11 +487,11 @@ func (c *Client) URL() *url.URL {
 }
 
 type marshaledClient struct {
-	Cookies  []*http.Cookie
-	URL      *url.URL
-	Insecure bool
-	Version  string
-	UseJSON  bool
+	Cookies  []*http.Cookie `json:"cookies"`
+	URL      *url.URL       `json:"url"`
+	Insecure bool           `json:"insecure"`
+	Version  string         `json:"version"`
+	UseJSON  bool           `json:"useJSON"`
 }
 
 // MarshalJSON writes the Client configuration to JSON.
