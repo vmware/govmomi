@@ -3,7 +3,7 @@
 ;; Author: The govc developers
 ;; URL: https://github.com/vmware/govmomi/tree/main/govc/emacs
 ;; Keywords: convenience
-;; Version: 0.18.0
+;; Version: 0.31.0
 ;; Package-Requires: ((emacs "24.3") (dash "1.5.0") (s "1.9.0") (magit-popup "2.0.50") (json-mode "1.6.0"))
 
 ;; This file is NOT part of GNU Emacs.
@@ -1148,12 +1148,12 @@ Optionally filter by FILTER and inherit SESSION."
 (defun govc-datastore-ls-entries ()
   "Wrapper for govc datastore.ls."
   (let* ((data (govc-json "datastore.ls" "-l" "-p" govc-filter))
-         (file (plist-get (elt data 0) :File)))
+         (file (plist-get (elt data 0) :file)))
     (-map (lambda (ent)
-            (let ((name (plist-get ent :Path))
-                  (size (plist-get ent :FileSize))
-                  (time (plist-get ent :Modification))
-                  (user (plist-get ent :Owner)))
+            (let ((name (plist-get ent :path))
+                  (size (or (plist-get ent :fileSize) 0))
+                  (time (plist-get ent :modification))
+                  (user (plist-get ent :owner)))
               (list (concat govc-filter name)
                     (vector (file-size-human-readable size)
                             (current-time-string (date-to-time time))
@@ -1507,13 +1507,13 @@ With prefix \\[universal-argument] ARG, launches an interactive console (VMRC)."
          (info))
     (mapc
      (lambda (vm)
-       (let* ((config (plist-get vm :Config))
-              (name (plist-get config :Name)))
+       (let* ((config (plist-get vm :config))
+              (name (plist-get config :name)))
          (mapc (lambda (x)
-                 (let ((key (plist-get x :Key))
-                       (val (plist-get x :Value)))
+                 (let ((key (plist-get x :key))
+                       (val (plist-get x :value)))
                    (push (list key (vector key val)) info)))
-               (plist-get config :ExtraConfig))
+               (plist-get config :extraConfig))
          (if (> (length vms) 1)
              (push (list name (vector "vm.name" name)) info))))
      vms)

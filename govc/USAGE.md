@@ -392,7 +392,7 @@ System information including the name, type, version, and build number.
 
 Examples:
   govc about
-  govc about -json | jq -r .About.ProductLineId
+  govc about -json | jq -r .About.productLineId
 
 Options:
   -c=false               Include client info
@@ -1425,9 +1425,9 @@ Device info for VM.
 Examples:
   govc device.info -vm $name
   govc device.info -vm $name disk-*
-  govc device.info -vm $name -json disk-* | jq -r .Devices[].Backing.Uuid
-  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].Backing.FileName # vmdk path
-  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].MacAddress
+  govc device.info -vm $name -json disk-* | jq -r .Devices[].backing.uuid
+  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].backing.fileName # vmdk path
+  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].macAddress
 
 Options:
   -net=                  Network [GOVC_NETWORK]
@@ -3707,7 +3707,7 @@ Set license labels.
 Examples:
   govc license.label.set 00000-00000-00000-00000-00000 team cnx # add/set label
   govc license.label.set 00000-00000-00000-00000-00000 team ""  # remove label
-  govc license.ls -json | jq '.[] | select(.Labels[].Key == "team") | .LicenseKey'
+  govc license.ls -json | jq '.[] | select(.labels[].key == "team") | .licenseKey'
 
 Options:
 ```
@@ -4668,7 +4668,7 @@ All SOAP sessions are listed by default. The '-S' flag will limit this list to t
 
 Examples:
   govc session.ls
-  govc session.ls -json | jq -r .CurrentSession.Key
+  govc session.ls -json | jq -r .currentSession.key
 
 Options:
   -S=false               List current SOAP session
@@ -6183,7 +6183,7 @@ List IPs for VM.
 By default the vm.ip command depends on vmware-tools to report the 'guest.ipAddress' field and will
 wait until it has done so.  This value can also be obtained using:
 
-  govc vm.info -json $vm | jq -r .VirtualMachines[].Guest.IpAddress
+  govc vm.info -json $vm | jq -r .VirtualMachines[].guest.ipAddress
 
 When given the '-a' flag, only IP addresses for which there is a corresponding virtual nic are listed.
 If there are multiple nics, the listed addresses will be comma delimited.  The '-a' flag depends on
@@ -6193,7 +6193,7 @@ by tools for which there is no virtual nic are not included, for example that of
 
 These values can also be obtained using:
 
-  govc vm.info -json $vm | jq -r .VirtualMachines[].Guest.Net[].IpConfig.IpAddress[].IpAddress
+  govc vm.info -json $vm | jq -r .VirtualMachines[].guest.net[].ipConfig.ipAddress[].ipAddress
 
 When given the '-n' flag, filters '-a' behavior to the nic specified by MAC address or device name.
 
@@ -6363,7 +6363,7 @@ By default, supported guest OS IDs and full name are listed.
 Examples:
   govc vm.option.info -cluster C0
   govc vm.option.info -cluster C0 -dump ubuntu64Guest
-  govc vm.option.info -cluster C0 -json | jq .GuestOSDescriptor[].Id
+  govc vm.option.info -cluster C0 -json | jq .guestOSDescriptor[].id
   govc vm.option.info -host my_hostname
   govc vm.option.info -vm my_vm
 

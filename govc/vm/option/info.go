@@ -77,7 +77,7 @@ By default, supported guest OS IDs and full name are listed.
 Examples:
   govc vm.option.info -cluster C0
   govc vm.option.info -cluster C0 -dump ubuntu64Guest
-  govc vm.option.info -cluster C0 -json | jq .GuestOSDescriptor[].Id
+  govc vm.option.info -cluster C0 -json | jq .guestOSDescriptor[].id
   govc vm.option.info -host my_hostname
   govc vm.option.info -vm my_vm`
 }
