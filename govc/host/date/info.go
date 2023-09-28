@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -65,8 +65,8 @@ func (cmd *info) Process(ctx context.Context) error {
 
 type dateInfo struct {
 	types.HostDateTimeInfo
-	Service *types.HostService
-	Current *time.Time
+	Service *types.HostService `json:"service"`
+	Current *time.Time         `json:"current"`
 }
 
 func (info *dateInfo) servers() string {

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -76,9 +76,9 @@ func (cmd *info) Description() string {
 Examples:
   govc device.info -vm $name
   govc device.info -vm $name disk-*
-  govc device.info -vm $name -json disk-* | jq -r .Devices[].backing.uuid
-  govc device.info -vm $name -json 'disk-*' | jq -r .Devices[].backing.fileName # vmdk path
-  govc device.info -vm $name -json ethernet-0 | jq -r .Devices[].macAddress`
+  govc device.info -vm $name -json disk-* | jq -r .devices[].backing.uuid
+  govc device.info -vm $name -json 'disk-*' | jq -r .devices[].backing.fileName # vmdk path
+  govc device.info -vm $name -json ethernet-0 | jq -r .devices[].macAddress`
 }
 
 func match(p string, devices object.VirtualDeviceList) object.VirtualDeviceList {
@@ -166,8 +166,8 @@ func toInfoList(devices object.VirtualDeviceList) []infoDevice {
 }
 
 type infoDevice struct {
-	Name string
-	Type string
+	Name string `json:"name"`
+	Type string `json:"type"`
 	types.BaseVirtualDevice
 }
 
@@ -183,7 +183,7 @@ func (d *infoDevice) MarshalJSON() ([]byte, error) {
 }
 
 type infoResult struct {
-	Devices []infoDevice
+	Devices []infoDevice `json:"devices"`
 	// need the full list of devices to lookup attached devices and controllers
 	list object.VirtualDeviceList
 }

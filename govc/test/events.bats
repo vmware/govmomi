@@ -17,11 +17,11 @@ load test_helper
   [ ${#lines[@]} -le $nevents ]
 
   # test keys in json
-  [ "$(govc events -l -n 1 -json | jq -r 'has("CreatedTime")')" = "true" ]
-  [ "$(govc events -l -n 1 -json | jq -r 'has("Category")')" = "true" ]
-  [ "$(govc events -l -n 1 -json | jq -r 'has("Message")')" = "true" ]
-  [ "$(govc events -l -n 1 -json | jq -r 'has("Type")')" = "true" ]
-  [ "$(govc events -l -n 1 -json | jq -r 'has("Key")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("createdTime")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("category")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("message")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("type")')" = "true" ]
+  [ "$(govc events -l -n 1 -json | jq -r 'has("key")')" = "true" ]
 }
 
 @test "events host" {
@@ -33,7 +33,7 @@ load test_helper
 }
 
 @test "events vm" {
-  esx_env
+  vcsim_env
 
   vm=$(new_id)
 
@@ -58,7 +58,7 @@ load test_helper
   [ ${#lines[@]} -gt $nevents ]
   nevents=${#lines[@]}
 
-  run govc events vm
+  run govc events vm/*
   assert_success
   [ ${#lines[@]} -ge $nevents ]
 
@@ -79,7 +79,7 @@ load test_helper
 }
 
 @test "events json" {
-  esx_env
+  vcsim_env
 
   # make sure we fmt.Printf properly
   govc events | grep -v '%!s(MISSING)'

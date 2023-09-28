@@ -77,7 +77,7 @@ Examples:
 }
 
 type lsResult struct {
-	Entries []*types.CnsSnapshotQueryResultEntry
+	Entries []*types.CnsSnapshotQueryResultEntry `json:"entries"`
 	cmd     *ls
 }
 

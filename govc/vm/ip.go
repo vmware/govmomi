@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,7 +68,7 @@ func (cmd *ip) Description() string {
 By default the vm.ip command depends on vmware-tools to report the 'guest.ipAddress' field and will
 wait until it has done so.  This value can also be obtained using:
 
-  govc vm.info -json $vm | jq -r .VirtualMachines[].guest.ipAddress
+  govc vm.info -json $vm | jq -r .virtualMachines[].guest.ipAddress
 
 When given the '-a' flag, only IP addresses for which there is a corresponding virtual nic are listed.
 If there are multiple nics, the listed addresses will be comma delimited.  The '-a' flag depends on
@@ -78,7 +78,7 @@ by tools for which there is no virtual nic are not included, for example that of
 
 These values can also be obtained using:
 
-  govc vm.info -json $vm | jq -r .VirtualMachines[].guest.net[].ipConfig.ipAddress[].ipAddress
+  govc vm.info -json $vm | jq -r .virtualMachines[].guest.net[].ipConfig.ipAddress[].ipAddress
 
 When given the '-n' flag, filters '-a' behavior to the nic specified by MAC address or device name.
 

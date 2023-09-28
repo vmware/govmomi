@@ -2,7 +2,7 @@
 load test_helper
 
 @test "host info esx" {
-  esx_env
+  vcsim_env
 
   run govc host.info
   assert_success
@@ -18,7 +18,7 @@ load test_helper
   done
 
   # avoid hardcoding the esxbox hostname
-  local name=$(govc ls '/*/host/*' | grep -v Resources)
+  local name=$(govc ls -t HostSystem '/*/host/*' | head -1)
 
   run govc host.info -host "$name"
   assert_success
@@ -31,10 +31,11 @@ load test_helper
   run govc host.info -host.ipath "$name"
   assert_success
 
-  run govc host.info -host.dns "$(basename $(dirname $name))"
+  run govc host.info -host.dns localhost
   assert_success
 
-  uuid=$(govc host.info -json | jq -r .HostSystems[].Hardware.SystemInfo.Uuid)
+  uuid=$(govc host.info -json | jq -r .hostSystems[].hardware.systemInfo.uuid)
+
   run govc host.info -host.uuid "$uuid"
   assert_success
 
@@ -74,7 +75,7 @@ load test_helper
   run govc host.info -host.dns $(basename "$name")
   assert_failure # TODO: SearchIndex:SearchIndex does not implement: FindByDnsName
 
-  uuid=$(govc host.info -host "$name" -json | jq -r .HostSystems[].summary.hardware.uuid)
+  uuid=$(govc host.info -host "$name" -json | jq -r .hostSystems[].summary.hardware.uuid)
   run govc host.info -host.uuid "$uuid"
   assert_success
 
@@ -184,8 +185,8 @@ load test_helper
   run govc host.cert.info -json
   assert_success
 
-  expires=$(govc host.cert.info -json | jq -r .NotAfter)
-  about_expires=$(govc about.cert -json | jq -r .NotAfter)
+  expires=$(govc host.cert.info -json | jq -r .notAfter)
+  about_expires=$(govc about.cert -json | jq -r .notAfter)
   assert_equal "$expires" "$about_expires"
 }
 
@@ -210,8 +211,8 @@ load test_helper
 @test "host.cert.import" {
   esx_env
 
-  issuer=$(govc host.cert.info -json | jq -r .Issuer)
-  expires=$(govc host.cert.info -json | jq -r .NotAfter)
+  issuer=$(govc host.cert.info -json | jq -r .issuer)
+  expires=$(govc host.cert.info -json | jq -r .notAfter)
 
   # only mess with the cert if its already been signed by our test CA
   if [[ "$issuer" != CN=govc-ca,* ]] ; then
@@ -219,13 +220,13 @@ load test_helper
   fi
 
   govc host.cert.csr -ip | ./host_cert_sign.sh | govc host.cert.import
-  expires2=$(govc host.cert.info -json | jq -r .NotAfter)
+  expires2=$(govc host.cert.info -json | jq -r .notAfter)
 
   # cert expiration should have changed
   [ "$expires" != "$expires2" ]
 
   # verify hostd is using the new cert too
-  expires=$(govc about.cert -json | jq -r .NotAfter)
+  expires=$(govc about.cert -json | jq -r .notAfter)
   assert_equal "$expires" "$expires2"
 
   # our cert is not trusted against the system CA list

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,15 +58,15 @@ func (cmd *info) Process(ctx context.Context) error {
 
 type Override struct {
 	id            types.ManagedObjectReference
-	Name          string
-	Host          string                            `json:",omitempty"`
-	DRS           *types.ClusterDrsVmConfigInfo     `json:",omitempty"`
-	DAS           *types.ClusterDasVmConfigInfo     `json:",omitempty"`
-	Orchestration *types.ClusterVmOrchestrationInfo `json:",omitempty"`
+	Name          string                            `json:"name"`
+	Host          string                            `json:"host,omitempty"`
+	DRS           *types.ClusterDrsVmConfigInfo     `json:"drs,omitempty"`
+	DAS           *types.ClusterDasVmConfigInfo     `json:"das,omitempty"`
+	Orchestration *types.ClusterVmOrchestrationInfo `json:"orchestration,omitempty"`
 }
 
 type infoResult struct {
-	Overrides map[string]*Override
+	Overrides map[string]*Override `json:"overrides"`
 }
 
 func (r *infoResult) Write(w io.Writer) error {

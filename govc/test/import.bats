@@ -16,7 +16,7 @@ load test_helper
   assert_success
 
   # link ovf/ova to datastore so we can test with an http source
-  dir=$(govc datastore.info -json | jq -r .Datastores[].info.url)
+  dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
   ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
 
   run govc import.spec "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"

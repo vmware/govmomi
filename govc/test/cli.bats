@@ -28,13 +28,13 @@ load test_helper
   run govc about -dump -l
   assert_success
 
-  version=$(govc about -json -c | jq -r .Client.Version)
+  version=$(govc about -json -c | jq -r .client.version)
   assert_equal 8.0.2.0 "$version" # govc's default version
 
-  version=$(govc about -json -c -vim-version "" | jq -r .Client.Version)
+  version=$(govc about -json -c -vim-version "" | jq -r .client.version)
   assert_equal uE53DA "$version" # vcsim's service version
 
-  version=$(govc about -json -c -vim-version 6.8.2 | jq -r .Client.Version)
+  version=$(govc about -json -c -vim-version 6.8.2 | jq -r .client.version)
   assert_equal 6.8.2 "$version" # client specified version
 
   run govc about -trace

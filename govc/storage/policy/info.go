@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -80,13 +80,13 @@ Examples:
 }
 
 type Policy struct {
-	Profile              types.BasePbmProfile
-	CompliantVM          []string
-	CompatibleDatastores []string
+	Profile              types.BasePbmProfile `json:"profile"`
+	CompliantVM          []string             `json:"compliantVM"`
+	CompatibleDatastores []string             `json:"compatibleDatastores"`
 }
 
 type infoResult struct {
-	Policies []Policy
+	Policies []Policy `json:"policies"`
 	cmd      *info
 }
 

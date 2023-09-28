@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,15 +64,15 @@ Examples:
 }
 
 type Info struct {
-	Object types.ManagedObjectReference
-	Path   string
-	Name   string
-	Key    string
-	Value  string
+	Object types.ManagedObjectReference `json:"object"`
+	Path   string                       `json:"path"`
+	Name   string                       `json:"name"`
+	Key    string                       `json:"key"`
+	Value  string                       `json:"value"`
 }
 
 type infoResult struct {
-	Info []Info
+	Info []Info `json:"info"`
 }
 
 func (r *infoResult) Write(w io.Writer) error {

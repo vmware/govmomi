@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -59,7 +59,7 @@ System information including the name, type, version, and build number.
 
 Examples:
   govc about
-  govc about -json | jq -r .About.productLineId`
+  govc about -json | jq -r .about.productLineId`
 }
 
 func (cmd *about) Process(ctx context.Context) error {
@@ -96,9 +96,9 @@ func (cmd *about) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 type infoResult struct {
-	Content *types.ServiceContent `json:",omitempty"`
-	About   *types.AboutInfo      `json:",omitempty"`
-	Client  *soap.Client          `json:",omitempty"`
+	Content *types.ServiceContent `json:"content,omitempty"`
+	About   *types.AboutInfo      `json:"about,omitempty"`
+	Client  *soap.Client          `json:"client,omitempty"`
 	a       *types.AboutInfo
 }
 
