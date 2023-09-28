@@ -363,11 +363,14 @@ but appear via `govc $cmd -h`:
  - [vm.network.add](#vmnetworkadd)
  - [vm.network.change](#vmnetworkchange)
  - [vm.option.info](#vmoptioninfo)
+ - [vm.option.ls](#vmoptionls)
  - [vm.power](#vmpower)
  - [vm.question](#vmquestion)
  - [vm.rdm.attach](#vmrdmattach)
  - [vm.rdm.ls](#vmrdmls)
  - [vm.register](#vmregister)
+ - [vm.target.cap.ls](#vmtargetcapls)
+ - [vm.target.info](#vmtargetinfo)
  - [vm.unregister](#vmunregister)
  - [vm.upgrade](#vmupgrade)
  - [vm.vnc](#vmvnc)
@@ -6370,6 +6373,23 @@ Examples:
 Options:
   -cluster=              Cluster [GOVC_CLUSTER]
   -host=                 Host system [GOVC_HOST]
+  -id=                   Option descriptor key
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.option.ls
+
+```
+Usage: govc vm.option.ls [OPTIONS]
+
+List VM config option keys for CLUSTER.
+
+Examples:
+  govc vm.option.ls -cluster C0
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -host=                 Host system [GOVC_HOST]
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
@@ -6457,6 +6477,52 @@ Options:
   -name=                 Name of the VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -template=false        Mark VM as template
+```
+
+## vm.target.cap.ls
+
+```
+Usage: govc vm.target.cap.ls [OPTIONS]
+
+List VM config target capabilities.
+
+The config target data contains capabilities about the execution environment for a VM
+in the given CLUSTER, and optionally for a specific HOST.
+
+Examples:
+  govc vm.target.cap.ls -cluster C0
+  govc vm.target.cap.ls -host my_hostname
+  govc vm.target.cap.ls -vm my_vm
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -host=                 Host system [GOVC_HOST]
+  -vm=                   Virtual machine [GOVC_VM]
+```
+
+## vm.target.info
+
+```
+Usage: govc vm.target.info [OPTIONS]
+
+VM config target info.
+
+The config target data contains information about the execution environment for a VM
+in the given CLUSTER, and optionally for a specific HOST.
+
+Examples:
+  govc vm.target.info -cluster C0
+  govc vm.target.info -host my_hostname
+  govc vm.target.info -vm my_vm
+
+Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
+  -datastore=true        Include Datastores
+  -device=true           Include Devices
+  -disk=false            Include Disks
+  -host=                 Host system [GOVC_HOST]
+  -network=true          Include Networks
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## vm.unregister

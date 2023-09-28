@@ -26,6 +26,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -71,7 +72,7 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		return flag.ErrHelp
 	}
 
-	vmConfigOptions, err := vm.QueryConfigTarget(ctx)
+	vmConfigOptions, err := queryConfigTarget(ctx, vm)
 	if err != nil {
 		return err
 	}
@@ -92,4 +93,12 @@ func (r *infoResult) Write(w io.Writer) error {
 		fmt.Fprintf(tw, "%s\t%s\t%s\t%s\n", info.SystemId, pd.Id, pd.VendorName, pd.DeviceName)
 	}
 	return tw.Flush()
+}
+
+func queryConfigTarget(ctx context.Context, m *object.VirtualMachine) (*types.ConfigTarget, error) {
+	b, err := m.EnvironmentBrowser(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return b.QueryConfigTarget(ctx, nil)
 }
