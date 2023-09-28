@@ -284,6 +284,7 @@ func (c *Client) Download(ctx context.Context, src string) (io.ReadCloser, int64
 	}
 
 	p := soap.DefaultDownload
+	p.Close = true // disable Keep-Alive connection to ESX
 
 	if internal.UsingEnvoySidecar(c.ProcessManager.Client()) {
 		vc = internal.ClientWithEnvoyHostGateway(vc)
@@ -345,6 +346,8 @@ func (c *Client) Upload(ctx context.Context, src io.Reader, dst string, p soap.U
 	if err != nil {
 		return err
 	}
+
+	p.Close = true // disable Keep-Alive connection to ESX
 
 	if internal.UsingEnvoySidecar(c.ProcessManager.Client()) {
 		vc = internal.ClientWithEnvoyHostGateway(vc)

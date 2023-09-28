@@ -278,7 +278,10 @@ func (d Datastore) uploadTicket(ctx context.Context, path string, param *soap.Up
 		return nil, nil, err
 	}
 
-	p.Ticket = ticket
+	if ticket != nil {
+		p.Ticket = ticket
+		p.Close = true // disable Keep-Alive connection to ESX
+	}
 
 	return u, &p, nil
 }
@@ -294,7 +297,10 @@ func (d Datastore) downloadTicket(ctx context.Context, path string, param *soap.
 		return nil, nil, err
 	}
 
-	p.Ticket = ticket
+	if ticket != nil {
+		p.Ticket = ticket
+		p.Close = true // disable Keep-Alive connection to ESX
+	}
 
 	return u, &p, nil
 }

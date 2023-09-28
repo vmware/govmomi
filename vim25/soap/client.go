@@ -727,6 +727,7 @@ type Upload struct {
 	Headers       map[string]string
 	Ticket        *http.Cookie
 	Progress      progress.Sinker
+	Close         bool
 }
 
 var DefaultUpload = Upload{
@@ -754,7 +755,7 @@ func (c *Client) Upload(ctx context.Context, f io.Reader, u *url.URL, param *Upl
 	}
 
 	req = req.WithContext(ctx)
-
+	req.Close = param.Close
 	req.ContentLength = param.ContentLength
 	req.Header.Set("Content-Type", param.Type)
 
@@ -812,6 +813,7 @@ type Download struct {
 	Ticket   *http.Cookie
 	Progress progress.Sinker
 	Writer   io.Writer
+	Close    bool
 }
 
 var DefaultDownload = Download{
@@ -826,6 +828,7 @@ func (c *Client) DownloadRequest(ctx context.Context, u *url.URL, param *Downloa
 	}
 
 	req = req.WithContext(ctx)
+	req.Close = param.Close
 
 	for k, v := range param.Headers {
 		req.Header.Add(k, v)
