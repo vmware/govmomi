@@ -23,7 +23,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
 	"os"
@@ -373,7 +372,7 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		switch cmd.method {
 		case http.MethodPost, http.MethodPut, http.MethodPatch:
 			// strings.Reader here as /api wants a Content-Length header
-			b, err := ioutil.ReadAll(os.Stdin)
+			b, err := io.ReadAll(os.Stdin)
 			if err != nil {
 				return err
 			}

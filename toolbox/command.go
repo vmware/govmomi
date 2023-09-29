@@ -22,7 +22,6 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"path/filepath"
@@ -322,7 +321,7 @@ func (c *CommandServer) CreateTemporaryFile(header vix.CommandRequestHeader, dat
 		return nil, err
 	}
 
-	f, err := ioutil.TempFile(r.DirectoryPath, r.FilePrefix+"vmware")
+	f, err := os.CreateTemp(r.DirectoryPath, r.FilePrefix+"vmware")
 	if err != nil {
 		return nil, err
 	}
@@ -342,7 +341,7 @@ func (c *CommandServer) CreateTemporaryDirectory(header vix.CommandRequestHeader
 		return nil, err
 	}
 
-	name, err := ioutil.TempDir(r.DirectoryPath, r.FilePrefix+"vmware")
+	name, err := os.MkdirTemp(r.DirectoryPath, r.FilePrefix+"vmware")
 	if err != nil {
 		return nil, err
 	}
@@ -501,9 +500,13 @@ func (c *CommandServer) ListFiles(header vix.CommandRequestHeader, data []byte) 
 
 	if info.IsDir() {
 		dir = r.GuestPathName
-		files, err = ioutil.ReadDir(r.GuestPathName)
+		entries, err := os.ReadDir(r.GuestPathName)
 		if err != nil {
 			return nil, err
+		}
+		for _, entry := range entries {
+			file, _ := entry.Info()
+			files = append(files, file)
 		}
 	} else {
 		dir = filepath.Dir(r.GuestPathName)

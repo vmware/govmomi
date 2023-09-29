@@ -21,7 +21,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net"
 	"net/url"
 	"os"
@@ -392,7 +391,7 @@ func (m *Manager) Stat(u *url.URL) (os.FileInfo, error) {
 
 	pf := &File{
 		name:   name,
-		Closer: ioutil.NopCloser(nil), // via hgfs, nop for stdout and stderr
+		Closer: io.NopCloser(nil), // via hgfs, nop for stdout and stderr
 	}
 
 	var r *bytes.Buffer
