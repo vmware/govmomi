@@ -1876,6 +1876,23 @@ func (s *handler) libraryDeploy(ctx context.Context, c *vim25.Client, lib *libra
 		return nil, errors.New(spec.Error[0].LocalizedMessage)
 	}
 
+	if config != nil {
+		if vmImportSpec, ok := spec.ImportSpec.(*types.VirtualMachineImportSpec); ok {
+			var configSpecs []types.BaseVirtualDeviceConfigSpec
+
+			// Remove devices that we don't want to carry over from the import spec. Otherwise, since we
+			// just reconfigure the VM with the provided ConfigSpec later these devices won't be removed.
+			for _, d := range vmImportSpec.ConfigSpec.DeviceChange {
+				switch d.GetVirtualDeviceConfigSpec().Device.(type) {
+				case types.BaseVirtualEthernetCard:
+				default:
+					configSpecs = append(configSpecs, d)
+				}
+			}
+			vmImportSpec.ConfigSpec.DeviceChange = configSpecs
+		}
+	}
+
 	req := types.ImportVApp{
 		This:   pool,
 		Spec:   spec.ImportSpec,
