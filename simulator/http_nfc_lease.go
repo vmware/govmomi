@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -106,14 +106,35 @@ func ServeNFC(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(status)
 }
 
-func NewHttpNfcLease(ctx *Context, entity types.ManagedObjectReference) *HttpNfcLease {
+func (l *HttpNfcLease) error(ctx *Context, err *types.LocalizedMethodFault) {
+	ctx.WithLock(l, func() {
+		ctx.Map.Update(l, []types.PropertyChange{
+			{Name: "state", Val: types.HttpNfcLeaseStateError},
+			{Name: "error", Val: err},
+		})
+	})
+}
+
+func (l *HttpNfcLease) ready(ctx *Context, entity types.ManagedObjectReference, urls []types.HttpNfcLeaseDeviceUrl) {
+	info := &types.HttpNfcLeaseInfo{
+		Lease:        l.Self,
+		Entity:       entity,
+		DeviceUrl:    urls,
+		LeaseTimeout: 300,
+	}
+
+	ctx.WithLock(l, func() {
+		ctx.Map.Update(l, []types.PropertyChange{
+			{Name: "state", Val: types.HttpNfcLeaseStateReady},
+			{Name: "info", Val: info},
+		})
+	})
+}
+
+func newHttpNfcLease(ctx *Context) *HttpNfcLease {
 	lease := &HttpNfcLease{
 		HttpNfcLease: mo.HttpNfcLease{
-			Info: &types.HttpNfcLeaseInfo{
-				Entity:       entity,
-				LeaseTimeout: 30000,
-			},
-			State: types.HttpNfcLeaseStateReady,
+			State: types.HttpNfcLeaseStateInitializing,
 		},
 		files:    make(map[string]string),
 		metadata: make(map[string]metadata),
