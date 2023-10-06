@@ -211,7 +211,7 @@ func ExampleListView_tasks() {
 
 						switch info.State {
 						case types.TaskInfoStateSuccess, types.TaskInfoStateError:
-							_ = list.Remove(ctx, []types.ManagedObjectReference{update.Obj})
+							_, _ = list.Remove(ctx, []types.ManagedObjectReference{update.Obj})
 							result[info.State]++
 							n--
 							wg.Done()
@@ -228,7 +228,7 @@ func ExampleListView_tasks() {
 			if err != nil {
 				return err
 			}
-			err = list.Add(ctx, []types.ManagedObjectReference{task.Reference()})
+			_, err = list.Add(ctx, []types.ManagedObjectReference{task.Reference()})
 			if err != nil {
 				return err
 			}
