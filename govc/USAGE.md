@@ -3476,6 +3476,7 @@ Examples:
   govc library.session.ls -json | jq .
 
 Options:
+  -i=false               List session item files (with -json only)
 ```
 
 ## library.session.rm
@@ -3487,9 +3488,11 @@ Remove a library item update session.
 
 Examples:
   govc library.session.rm session_id
+  govc library.session.rm -i session_id foo.ovf
 
 Options:
   -f=false               Cancel session if active
+  -i=false               Remove session item file
 ```
 
 ## library.subscriber.create

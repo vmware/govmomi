@@ -55,6 +55,7 @@ import (
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	vim "github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
@@ -1342,8 +1343,88 @@ func (s *handler) libraryItemUpdateSessionID(w http.ResponseWriter, r *http.Requ
 	}
 }
 
+func (s *handler) libraryItemProbe(endpoint library.TransferEndpoint) *library.ProbeResult {
+	p := &library.ProbeResult{
+		Status: "SUCCESS",
+	}
+
+	result := func() *library.ProbeResult {
+		for i, m := range p.ErrorMessages {
+			p.ErrorMessages[i].DefaultMessage = fmt.Sprintf(m.DefaultMessage, m.Args[0])
+		}
+		return p
+	}
+
+	u, err := url.Parse(endpoint.URI)
+	if err != nil {
+		p.Status = "INVALID_URL"
+		p.ErrorMessages = []rest.LocalizableMessage{{
+			Args:           []string{endpoint.URI},
+			ID:             "com.vmware.vdcs.cls-main.invalid_url_format",
+			DefaultMessage: "Invalid URL format for %s",
+		}}
+		return result()
+	}
+
+	if u.Scheme != "http" && u.Scheme != "https" {
+		p.Status = "INVALID_URL"
+		p.ErrorMessages = []rest.LocalizableMessage{{
+			Args:           []string{endpoint.URI},
+			ID:             "com.vmware.vdcs.cls-main.file_probe_unsupported_uri_scheme",
+			DefaultMessage: "The specified URI %s is not supported",
+		}}
+		return result()
+	}
+
+	res, err := http.Head(endpoint.URI)
+	if err != nil {
+		id := "com.vmware.vdcs.cls-main.http_request_error"
+		p.Status = "INVALID_URL"
+
+		if soap.IsCertificateUntrusted(err) {
+			var info object.HostCertificateInfo
+			_ = info.FromURL(u, nil)
+
+			id = "com.vmware.vdcs.cls-main.http_request_error_peer_not_authenticated"
+			p.Status = "CERTIFICATE_ERROR"
+			p.SSLThumbprint = info.ThumbprintSHA1
+		}
+
+		p.ErrorMessages = []rest.LocalizableMessage{{
+			Args:           []string{err.Error()},
+			ID:             id,
+			DefaultMessage: "HTTP request error: %s",
+		}}
+
+		return result()
+	}
+	_ = res.Body.Close()
+
+	if res.TLS != nil {
+		p.SSLThumbprint = soap.ThumbprintSHA1(res.TLS.PeerCertificates[0])
+	}
+
+	return result()
+}
+
 func (s *handler) libraryItemUpdateSessionFile(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodGet {
+	switch r.Method {
+	case http.MethodPost:
+		switch s.action(r) {
+		case "probe":
+			var spec struct {
+				SourceEndpoint library.TransferEndpoint `json:"source_endpoint"`
+			}
+			if s.decode(r, w, &spec) {
+				res := s.libraryItemProbe(spec.SourceEndpoint)
+				OK(w, res)
+			}
+		default:
+			http.NotFound(w, r)
+		}
+		return
+	case http.MethodGet:
+	default:
 		w.WriteHeader(http.StatusMethodNotAllowed)
 		return
 	}
@@ -1443,10 +1524,20 @@ func (s *handler) libraryItemUpdateSessionFileID(w http.ResponseWriter, r *http.
 		}
 		OK(w, ids)
 	case "remove":
+		if up.State != "ACTIVE" {
+			s.error(w, fmt.Errorf("removeFile not allowed in state %s", up.State))
+			return
+		}
 		delete(s.Update, id)
 		OK(w)
 	case "validate":
-		// TODO
+		if up.State != "ACTIVE" {
+			BadRequest(w, "com.vmware.vapi.std.errors.not_allowed_in_current_state")
+			return
+		}
+		var res library.UpdateFileValidation
+		// TODO check missing_files, validate .ovf
+		OK(w, res)
 	}
 }
 

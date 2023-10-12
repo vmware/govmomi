@@ -177,6 +177,11 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 			return err
 		}
 
+		err = m.CompleteLibraryItemUpdateSession(ctx, session)
+		if err != nil {
+			return err
+		}
+
 		return m.WaitOnLibraryItemUpdateSession(ctx, session, 3*time.Second, nil)
 	}
 
