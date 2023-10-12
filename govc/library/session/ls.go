@@ -31,6 +31,8 @@ import (
 type ls struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	files bool
 }
 
 func init() {
@@ -42,6 +44,8 @@ func (cmd *ls) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.files, "i", false, "List session item files (with -json only)")
 }
 
 func (cmd *ls) Process(ctx context.Context) error {
@@ -59,8 +63,14 @@ Examples:
   govc library.session.ls -json | jq .`
 }
 
+type librarySession struct {
+	*library.Session
+	LibraryItemPath string `json:"library_item_path"`
+}
+
 type info struct {
-	Sessions []*library.Session `json:"sessions"`
+	Sessions []librarySession `json:"sessions"`
+	Files    map[string]any   `json:"files"`
 	kind     string
 }
 
@@ -70,7 +80,7 @@ func (i *info) Write(w io.Writer) error {
 
 	for _, s := range i.Sessions {
 		_, _ = fmt.Fprintf(tw, "%s\t%s\t%s\t%s\t%d\t%s\t%s\n",
-			s.ID, s.LibraryItemID, i.kind, s.LibraryItemContentVersion, s.ClientProgress, s.State,
+			s.ID, s.LibraryItemPath, i.kind, s.LibraryItemContentVersion, s.ClientProgress, s.State,
 			s.ExpirationTime.Format("2006-01-02 15:04"))
 	}
 
@@ -102,26 +112,46 @@ func (cmd *ls) Run(ctx context.Context, f *flag.FlagSet) error {
 		if len(ids) == 0 {
 			continue
 		}
-		var sessions []*library.Session
+		i := &info{
+			Files: make(map[string]any),
+			kind:  k.kind,
+		}
 
 		for _, id := range ids {
 			session, err := k.get(ctx, id)
 			if err != nil {
 				return err
 			}
+			var path string
 			item, err := m.GetLibraryItem(ctx, session.LibraryItemID)
-			if err != nil {
-				return err
+			if err == nil {
+				// can only show library path if item exists
+				lib, err := m.GetLibraryByID(ctx, item.LibraryID)
+				if err != nil {
+					return err
+				}
+				path = fmt.Sprintf("/%s/%s", lib.Name, item.Name)
 			}
-			lib, err := m.GetLibraryByID(ctx, item.LibraryID)
-			if err != nil {
-				return err
+			i.Sessions = append(i.Sessions, librarySession{session, path})
+			if !cmd.files {
+				continue
 			}
-			session.LibraryItemID = fmt.Sprintf("/%s/%s", lib.Name, item.Name)
-			sessions = append(sessions, session)
+			if k.kind == "Update" {
+				f, err := m.ListLibraryItemUpdateSessionFile(ctx, id)
+				if err != nil {
+					return err
+				}
+				i.Files[id] = f
+			} else {
+				f, err := m.ListLibraryItemDownloadSessionFile(ctx, id)
+				if err != nil {
+					return err
+				}
+				i.Files[id] = f
+			}
 		}
 
-		err = cmd.WriteResult(&info{sessions, k.kind})
+		err = cmd.WriteResult(i)
 		if err != nil {
 			return err
 		}
