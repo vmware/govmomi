@@ -227,8 +227,8 @@ func (m *ViewManager) CreateListView(ctx *Context, req *types.CreateListView) so
 	body := new(methods.CreateListViewBody)
 	list := new(ListView)
 
-	if err := list.add(ctx, req.Obj); err != nil {
-		body.Fault_ = Fault("", err)
+	if refs := list.add(ctx, req.Obj); len(refs) != 0 {
+		body.Fault_ = Fault("", &types.ManagedObjectNotFound{Obj: refs[0]})
 		return body
 	}
 
@@ -249,15 +249,16 @@ func (v *ListView) update(ctx *Context) {
 	ctx.Map.Update(v, []types.PropertyChange{{Name: "view", Val: v.View}})
 }
 
-func (v *ListView) add(ctx *Context, refs []types.ManagedObjectReference) *types.ManagedObjectNotFound {
+func (v *ListView) add(ctx *Context, refs []types.ManagedObjectReference) []types.ManagedObjectReference {
+	var unresolved []types.ManagedObjectReference
 	for _, ref := range refs {
 		obj := ctx.Session.Get(ref)
 		if obj == nil {
-			return &types.ManagedObjectNotFound{Obj: ref}
+			unresolved = append(unresolved, ref)
 		}
 		v.View = append(v.View, ref)
 	}
-	return nil
+	return unresolved
 }
 
 func (v *ListView) DestroyView(ctx *Context, c *types.DestroyView) soap.HasFault {
@@ -266,18 +267,18 @@ func (v *ListView) DestroyView(ctx *Context, c *types.DestroyView) soap.HasFault
 }
 
 func (v *ListView) ModifyListView(ctx *Context, req *types.ModifyListView) soap.HasFault {
-	body := new(methods.ModifyListViewBody)
+	body := &methods.ModifyListViewBody{
+		Res: new(types.ModifyListViewResponse),
+	}
+
+	body.Res.Returnval = v.add(ctx, req.Add)
 
 	for _, ref := range req.Remove {
 		RemoveReference(&v.View, ref)
+		if ctx.Map.Get(ref) == nil {
+			body.Res.Returnval = append(body.Res.Returnval, ref)
+		}
 	}
-
-	if err := v.add(ctx, req.Add); err != nil {
-		body.Fault_ = Fault("", err)
-		return body
-	}
-
-	body.Res = new(types.ModifyListViewResponse)
 
 	if len(req.Remove) != 0 || len(req.Add) != 0 {
 		v.update(ctx)
@@ -287,16 +288,13 @@ func (v *ListView) ModifyListView(ctx *Context, req *types.ModifyListView) soap.
 }
 
 func (v *ListView) ResetListView(ctx *Context, req *types.ResetListView) soap.HasFault {
-	body := new(methods.ResetListViewBody)
+	body := &methods.ResetListViewBody{
+		Res: new(types.ResetListViewResponse),
+	}
 
 	v.View = nil
 
-	if err := v.add(ctx, req.Obj); err != nil {
-		body.Fault_ = Fault("", err)
-		return body
-	}
-
-	body.Res = new(types.ResetListViewResponse)
+	body.Res.Returnval = v.add(ctx, req.Obj)
 
 	v.update(ctx)
 

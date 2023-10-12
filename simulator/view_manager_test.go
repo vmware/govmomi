@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"context"
+	"log"
 	"sync"
 	"testing"
 
@@ -197,4 +198,29 @@ func TestViewManager_CreateContainerView(t *testing.T) {
 	if err != nil {
 		t.Errorf("Failed to run simulation: %s", err.Error())
 	}
+}
+
+func TestListViewModify(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		list, err := view.NewManager(c).CreateListView(ctx, nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		defer list.Destroy(ctx)
+
+		add := []types.ManagedObjectReference{
+			c.ServiceContent.RootFolder,
+			{Type: "Folder", Value: "invalid"},
+		}
+
+		refs, err := list.Add(ctx, add)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		if len(refs) != 1 {
+			t.Errorf("unresolved refs=%s", refs)
+		}
+	})
 }

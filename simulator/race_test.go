@@ -187,7 +187,7 @@ func TestRace(t *testing.T) {
 					if terr != nil {
 						t.Error(terr)
 					}
-					terr = lv.Add(ctx, []types.ManagedObjectReference{r.Result.(types.ManagedObjectReference)})
+					_, terr = lv.Add(ctx, []types.ManagedObjectReference{r.Result.(types.ManagedObjectReference)})
 					if terr != nil {
 						t.Error(terr)
 					}
@@ -221,7 +221,7 @@ func TestRace(t *testing.T) {
 						time.AfterFunc(100*time.Millisecond, func() {
 							defer wg.Done()
 
-							_ = lv.Remove(ctx, []types.ManagedObjectReference{vm.Reference()})
+							_, _ = lv.Remove(ctx, []types.ManagedObjectReference{vm.Reference()})
 							task, _ := vm.PowerOff(ctx)
 							_ = task.Wait(ctx)
 						})
