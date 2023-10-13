@@ -23,6 +23,8 @@ import (
 	"io"
 	"net/url"
 	"os"
+	"time"
+	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -38,6 +40,9 @@ type console struct {
 	h5      bool
 	wss     bool
 	capture string
+
+	sleep   int
+	multi	int
 }
 
 func init() {
@@ -50,7 +55,10 @@ func (cmd *console) Register(ctx context.Context, f *flag.FlagSet) {
 
 	f.BoolVar(&cmd.h5, "h5", false, "Generate HTML5 UI console link")
 	f.BoolVar(&cmd.wss, "wss", false, "Generate WebSocket console link")
+
 	f.StringVar(&cmd.capture, "capture", "", "Capture console screen shot to file")
+	f.IntVar(&cmd.sleep, "sleep", 0, "Sleep before capture")
+	f.IntVar(&cmd.multi, "multi", 1, "Capture multiple intervals")
 }
 
 func (cmd *console) Process(ctx context.Context) error {
@@ -72,12 +80,13 @@ open VMRC console URLs.
 
 Examples:
   govc vm.console my-vm
-  govc vm.console -capture screen.png my-vm  # screen capture
-  govc vm.console -capture - my-vm | display # screen capture to stdout
-  open $(govc vm.console my-vm)              # MacOSX VMRC
-  open $(govc vm.console -h5 my-vm)          # MacOSX H5
-  xdg-open $(govc vm.console my-vm)          # Linux VMRC
-  xdg-open $(govc vm.console -h5 my-vm)      # Linux H5`
+  govc vm.console -capture screen.png my-vm				# screen capture
+  govc vm.console -capture - my-vm | display 				# screen capture to stdout
+  govc vm.console -capture "{vm}-{r}.png" -multi 5 -sleep 2 my-vm 	# multiple, timed screenshots
+  open $(govc vm.console my-vm)              				# MacOSX VMRC
+  open $(govc vm.console -h5 my-vm)          				# MacOSX H5
+  xdg-open $(govc vm.console my-vm)          				# Linux VMRC
+  xdg-open $(govc vm.console -h5 my-vm)      				# Linux H5`
 }
 
 func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -106,27 +115,72 @@ func (cmd *console) Run(ctx context.Context, f *flag.FlagSet) error {
 	u := c.URL()
 
 	if cmd.capture != "" {
-		u.Path = "/screen"
-		query := url.Values{"id": []string{vm.Reference().Value}}
-		u.RawQuery = query.Encode()
+		multi := cmd.multi
+		startTime := time.Now()
 
-		param := soap.DefaultDownload
-
-		if cmd.capture == "-" {
-			w, _, derr := c.Download(ctx, u, &param)
-			if derr != nil {
-				return derr
-			}
-
-			_, err = io.Copy(os.Stdout, w)
-			if err != nil {
-				return err
-			}
-
-			return w.Close()
+		if multi < 1 || cmd.capture == "-" {
+			multi = 1
 		}
 
-		return c.DownloadFile(ctx, cmd.capture, u, &param)
+		err := error(nil)
+		ms := cmd.sleep*1000
+
+		//accumulate runtime instead of multiplying in the loop
+		//this is not the real runtime but what would be expected running through the loop in 0ms processing time
+		expectedrunms := 0
+		//waiting a little bit less because we are expecting 50ms runtime due to https download and storing
+		expectedworktime := 50
+
+		for n := 0; n < multi && err == nil; n++ {
+			now := time.Now()
+
+			if cmd.sleep > 0 {
+				//calculate against startTime so that delays do not accumulate
+				diff := int(now.UnixMilli()-startTime.UnixMilli())-expectedrunms
+				relsleep := (ms-diff-expectedworktime)
+				
+				if relsleep > 0 {
+					if relsleep > ms {
+						relsleep = ms
+					}
+					time.Sleep(time.Duration(relsleep) * time.Millisecond) 
+				}
+				expectedrunms += ms
+			}
+
+			u.Path = "/screen"
+			query := url.Values{"id": []string{vm.Reference().Value}}
+			u.RawQuery = query.Encode()
+
+			param := soap.DefaultDownload
+
+			if cmd.capture == "-" {
+				w, _, derr := c.Download(ctx, u, &param)
+				if derr != nil {
+					return derr
+				}
+
+				_, err = io.Copy(os.Stdout, w)
+				if err != nil {
+					return err
+				}
+
+				return w.Close()
+			} else {
+				// -capture "vm-{r}.png" for a relative name
+				// relative is the unix time relative to the start time
+				// this can be handy if you want capture the time between screenshots but unix time is unreadable
+				
+				fileName := cmd.capture
+				fileName = strings.Replace(fileName,"{vm}",vm.Name(),-1)
+				fileName = strings.Replace(fileName,"{d}",fmt.Sprintf("%06d",n),-1)
+				fileName = strings.Replace(fileName,"{n}",fmt.Sprintf("%d",n),-1)
+				fileName = strings.Replace(fileName,"{u}",fmt.Sprintf("%d",now.Unix()),-1)
+				fileName = strings.Replace(fileName,"{r}",fmt.Sprintf("%06d",(now.Unix()-startTime.Unix())),-1)
+				err = c.DownloadFile(ctx, fileName, u, &param)
+			}
+		}
+		return err
 	}
 
 	if cmd.wss {
