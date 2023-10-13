@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/soap"
+	"github.com/vmware/govmomi/vim25/types"
 )
 
 // Client extends soap.Client to support JSON encoding, while inheriting security features, debug tracing and session persistence.
@@ -177,6 +178,11 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 		if err := s.SignRequest(req); err != nil {
 			return err
 		}
+	}
+
+	// OperationID (see soap.Client.soapRoundTrip)
+	if id, ok := ctx.Value(types.ID{}).(string); ok {
+		req.Header.Add("X-Request-ID", id)
 	}
 
 	if headers, ok := ctx.Value(headersContext{}).(http.Header); ok {
