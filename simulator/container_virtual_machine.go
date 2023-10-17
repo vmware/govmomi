@@ -131,7 +131,7 @@ func (svm *simVM) syncNetworkConfigToVMGuestProperties() error {
 }
 
 func (svm *simVM) prepareGuestOperation(auth types.BaseGuestAuthentication) types.BaseMethodFault {
-	if svm != nil && (svm.c == nil || svm.c.id == "") {
+	if svm == nil || svm.c == nil || svm.c.id == "" {
 		return new(types.GuestOperationsUnavailable)
 	}
 
