@@ -410,3 +410,15 @@ _EOF_
   # run govc object.mv /DC0/host/DC0_C1/DC0_H0 /DC0/host
   # assert_success
 }
+
+@test "cluster.change" {
+  vcsim_env
+
+  run govc cluster.change -drs-enabled -ha-enabled -ha-admission-control-enabled=false /DC0/host/DC0_C0
+  assert_success
+
+  config=$(govc object.collect -o -json /DC0/host/DC0_C0 | jq .configurationEx)
+  assert_equal true "$(jq -r .drsConfig.enabled <<<"$config")"
+  assert_equal true "$(jq -r .dasConfig.enabled <<<"$config")"
+  assert_equal false "$(jq -r .dasConfig.admissionControlEnabled <<<"$config")"
+}
