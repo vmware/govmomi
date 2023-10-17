@@ -86,6 +86,24 @@ func (c *ClusterComputeResource) AddHostTask(ctx *Context, add *types.AddHost_Ta
 	}
 }
 
+func (c *ClusterComputeResource) update(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
+	if cspec.DasConfig != nil {
+		if val := cspec.DasConfig.Enabled; val != nil {
+			cfg.DasConfig.Enabled = val
+		}
+		if val := cspec.DasConfig.AdmissionControlEnabled; val != nil {
+			cfg.DasConfig.AdmissionControlEnabled = val
+		}
+	}
+	if cspec.DrsConfig != nil {
+		if val := cspec.DrsConfig.Enabled; val != nil {
+			cfg.DrsConfig.Enabled = val
+		}
+	}
+
+	return nil
+}
+
 func (c *ClusterComputeResource) updateRules(cfg *types.ClusterConfigInfoEx, cspec *types.ClusterConfigSpecEx) types.BaseMethodFault {
 	for _, spec := range cspec.RulesSpec {
 		var i int
@@ -328,6 +346,7 @@ func (c *ClusterComputeResource) ReconfigureComputeResourceTask(ctx *Context, re
 		}
 
 		updates := []func(*types.ClusterConfigInfoEx, *types.ClusterConfigSpecEx) types.BaseMethodFault{
+			c.update,
 			c.updateRules,
 			c.updateGroups,
 			c.updateOverridesDAS,

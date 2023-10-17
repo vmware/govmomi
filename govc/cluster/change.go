@@ -64,6 +64,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 
 	// HA
 	f.Var(flags.NewOptionalBool(&cmd.DasConfig.Enabled), "ha-enabled", "Enable HA")
+	f.Var(flags.NewOptionalBool(&cmd.DasConfig.AdmissionControlEnabled), "ha-admission-control-enabled", "Enable HA admission control")
 
 	// vSAN
 	f.Var(flags.NewOptionalBool(&cmd.VsanConfig.Enabled), "vsan-enabled", "Enable vSAN")
@@ -91,6 +92,10 @@ Examples:
 }
 
 func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() == 0 {
+		return flag.ErrHelp
+	}
+
 	finder, err := cmd.Finder()
 	if err != nil {
 		return err
