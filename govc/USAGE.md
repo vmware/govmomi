@@ -462,12 +462,13 @@ Examples:
   govc cluster.change -drs-vmotion-rate=4 ClusterC
 
 Options:
-  -drs-enabled=<nil>     Enable DRS
-  -drs-mode=             DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
-  -drs-vmotion-rate=0    Aggressiveness of vMotions (1-5)
-  -ha-enabled=<nil>      Enable HA
-  -vsan-autoclaim=<nil>  Autoclaim storage on cluster hosts
-  -vsan-enabled=<nil>    Enable vSAN
+  -drs-enabled=<nil>                   Enable DRS
+  -drs-mode=                           DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
+  -drs-vmotion-rate=0                  Aggressiveness of vMotions (1-5)
+  -ha-admission-control-enabled=<nil>  Enable HA admission control
+  -ha-enabled=<nil>                    Enable HA
+  -vsan-autoclaim=<nil>                Autoclaim storage on cluster hosts
+  -vsan-enabled=<nil>                  Enable vSAN
 ```
 
 ## cluster.create
