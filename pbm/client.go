@@ -285,3 +285,31 @@ func (c *Client) GetProfileNameByID(ctx context.Context, profileID string) (stri
 	}
 	return "", fmt.Errorf("no pbm profile found with id: %q", profileID)
 }
+
+func (c *Client) QueryAssociatedProfile(ctx context.Context, entity types.PbmServerObjectRef) ([]types.PbmProfileId, error) {
+	req := types.PbmQueryAssociatedProfile{
+		This:   c.ServiceContent.ProfileManager,
+		Entity: entity,
+	}
+
+	res, err := methods.PbmQueryAssociatedProfile(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
+
+func (c *Client) QueryAssociatedProfiles(ctx context.Context, entities []types.PbmServerObjectRef) ([]types.PbmQueryProfileResult, error) {
+	req := types.PbmQueryAssociatedProfiles{
+		This:     c.ServiceContent.ProfileManager,
+		Entities: entities,
+	}
+
+	res, err := methods.PbmQueryAssociatedProfiles(ctx, c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Returnval, nil
+}
