@@ -551,3 +551,59 @@ EOF
   # remove generated cert and key
   rm "$pem".{crt,key}
 }
+
+@test "library.session" {
+  vcsim_env
+
+  run govc library.session.ls
+  assert_success
+
+  run govc library.create my-content
+  assert_success
+
+  run govc library.import /my-content "$GOVC_IMAGES/$TTYLINUX_NAME.ova"
+  assert_success
+
+  run govc library.session.ls
+  assert_success
+  assert_matches ttylinux
+
+  run govc library.session.ls -json
+  assert_success
+
+  run govc library.session.ls -json -i
+  assert_success
+
+  n=$(govc library.session.ls -json -i | jq '.files[] | length')
+  assert_equal 2 "$n" # .ovf + .vmdk
+
+  id=$(govc library.session.ls -json | jq -r .sessions[].id)
+
+  run govc library.session.rm -i "$id" ttylinux-pc_i486-16.1.ovf
+  assert_failure # removeFile not allowed in state DONE
+  assert_matches "500 Internal Server Error"
+
+  run govc library.session.rm "$id"
+  assert_success
+}
+
+@test "library.probe" {
+  vcsim_env
+
+  export GOVC_SHOW_UNRELEASED=true
+
+  run govc library.probe
+  assert_failure
+
+  run govc library.probe https://www.vmware.com
+  assert_success
+
+  run govc library.probe -f ftp://www.vmware.com
+  if [ "$status" -ne 22 ]; then
+    flunk $(printf "expected failed exit status=22, got status=%d" $status)
+  fi
+
+  run govc library.probe -json ftp://www.vmware.com
+  assert_success
+  assert_matches INVALID_URL
+}
