@@ -1709,3 +1709,45 @@ func TestPropertyCollectorNoPathSet(t *testing.T) {
 		t.Fatalf("len(content)=%d", len(content))
 	}
 }
+
+func TestLcFirst(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: "ABC", expected: "aBC"},
+		{input: "abc", expected: "abc"},
+		{input: "", expected: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			actual := lcFirst(tt.input)
+
+			if actual != tt.expected {
+				t.Errorf("%q != %q", actual, tt.expected)
+			}
+		})
+	}
+}
+
+func TestUcFirst(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{input: "ABC", expected: "ABC"},
+		{input: "abc", expected: "Abc"},
+		{input: "", expected: ""},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.input, func(t *testing.T) {
+			actual := ucFirst(tt.input)
+
+			if actual != tt.expected {
+				t.Errorf("%q != %q", actual, tt.expected)
+			}
+		})
+	}
+}
