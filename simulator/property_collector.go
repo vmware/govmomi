@@ -248,10 +248,16 @@ func toString(v *string) string {
 }
 
 func lcFirst(s string) string {
+	if len(s) < 1 {
+		return s
+	}
 	return strings.ToLower(s[:1]) + s[1:]
 }
 
 func ucFirst(s string) string {
+	if len(s) < 1 {
+		return s
+	}
 	return strings.ToUpper(s[:1]) + s[1:]
 }
 
