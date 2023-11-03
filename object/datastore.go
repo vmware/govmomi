@@ -68,6 +68,31 @@ func NewDatastore(c *vim25.Client, ref types.ManagedObjectReference) *Datastore 
 	}
 }
 
+// FindInventoryPath sets InventoryPath and DatacenterPath,
+// needed by NewURL() to compose an upload/download endpoint URL
+func (d *Datastore) FindInventoryPath(ctx context.Context) error {
+	entities, err := mo.Ancestors(ctx, d.c, d.c.ServiceContent.PropertyCollector, d.r)
+	if err != nil {
+		return err
+	}
+
+	val := "/"
+
+	for _, entity := range entities {
+		if entity.Parent == nil {
+			continue // root folder
+		}
+		val = path.Join(val, entity.Name)
+		if entity.Self.Type == "Datacenter" {
+			d.DatacenterPath = val
+		}
+	}
+
+	d.InventoryPath = val
+
+	return nil
+}
+
 func (d Datastore) Path(path string) string {
 	var p DatastorePath
 	if p.FromString(path) {
@@ -99,11 +124,6 @@ func (d Datastore) NewURL(path string) *url.URL {
 			"dsName": []string{d.Name()},
 		}.Encode(),
 	}
-}
-
-// URL is deprecated, use NewURL instead.
-func (d Datastore) URL(ctx context.Context, dc *Datacenter, path string) (*url.URL, error) {
-	return d.NewURL(path), nil
 }
 
 func (d Datastore) Browser(ctx context.Context) (*HostDatastoreBrowser, error) {
@@ -186,6 +206,10 @@ func (d Datastore) HostContext(ctx context.Context, host *HostSystem) context.Co
 // that can be used along with the ticket cookie to access the given path.  An host is chosen at random unless the
 // the given Context was created with a specific host via the HostContext method.
 func (d Datastore) ServiceTicket(ctx context.Context, path string, method string) (*url.URL, *http.Cookie, error) {
+	if d.InventoryPath == "" {
+		_ = d.FindInventoryPath(ctx)
+	}
+
 	u := d.NewURL(path)
 
 	host, ok := ctx.Value(datastoreServiceTicketHostKey{}).(*HostSystem)
