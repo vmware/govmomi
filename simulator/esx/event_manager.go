@@ -263,4 +263,28 @@ var EventInfo = []types.EventDescriptionEventDetail{
 		Category:    "info",
 		FullFormat:  "DRS powered On {{.Vm.Name}} on {{.Host.Name}} in {{.Datacenter.Name}}",
 	},
+	{
+		Key:         "DvsCreatedEvent",
+		Description: "vSphere Distributed Switch created",
+		Category:    "info",
+		FullFormat:  "A vSphere Distributed Switch {{.Dvs.Name}} was created in {{.Datacenter.Name}}.",
+	},
+	{
+		Key:         "DvsDestroyedEvent",
+		Description: "vSphere Distributed Switch deleted",
+		Category:    "info",
+		FullFormat:  "vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}} was deleted.",
+	},
+	{
+		Key:         "DVPortgroupCreatedEvent",
+		Description: "dvPort group created",
+		Category:    "info",
+		FullFormat:  "dvPort group {{.Net.Name}} in {{.Datacenter.Name}} was added to switch {{.Dvs.Name}}.",
+	},
+	{
+		Key:         "DVPortgroupDestroyedEvent",
+		Description: "dvPort group deleted",
+		Category:    "info",
+		FullFormat:  "dvPort group {{.Net.Name}} in {{.Datacenter.Name}} was deleted.",
+	},
 }

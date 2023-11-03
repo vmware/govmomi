@@ -35,6 +35,24 @@ type DistributedVirtualSwitch struct {
 	types.FetchDVPortsResponse
 }
 
+func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
+	return &types.DvsEventArgument{
+		EntityEventArgument: types.EntityEventArgument{
+			Name: s.Name,
+		},
+		Dvs: s.Self,
+	}
+}
+
+func (s *DistributedVirtualSwitch) event() types.DvsEvent {
+	return types.DvsEvent{
+		Event: types.Event{
+			Datacenter: datacenterEventArgument(s),
+			Dvs:        s.eventArgument(),
+		},
+	}
+}
+
 func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
@@ -152,6 +170,10 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 					{Name: "network", Val: computeNetworks},
 				})
 			}
+
+			ctx.postEvent(&types.DVPortgroupCreatedEvent{
+				DVPortgroupEvent: pg.event(ctx),
+			})
 		}
 
 		ctx.Map.Update(s, []types.PropertyChange{
@@ -258,6 +280,7 @@ func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, s.Reference())
+		ctx.postEvent(&types.DvsDestroyedEvent{DvsEvent: s.event()})
 		return nil, nil
 	})
 

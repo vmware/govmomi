@@ -219,6 +219,14 @@ load test_helper
   run govc dvs.create "$id"
   assert_success
 
+  run govc events -type DvsCreatedEvent
+  assert_success
+  assert_matches "vSphere Distributed Switch $id was created"
+
+  run govc events -type DVPortgroupCreatedEvent
+  assert_success
+  assert_matches "was added to switch"
+
   local host=$GOVC_HOST
 
   run govc dvs.add -dvs "$id" "$host"
@@ -245,9 +253,17 @@ load test_helper
   info=$(govc dvs.portgroup.info -json "$id" | jq  '.port[].config.setting.vlan | select(.vlanId == 3123)')
   [ -n "$info" ]
 
-  info=$(govc dvs.portgroup.info -json "$id" | jq  '.port[].config.setting.Vlan | select(.vlanId == 7777)')
+  info=$(govc dvs.portgroup.info -json "$id" | jq  '.port[].config.setting.vlan | select(.vlanId == 7777)')
   [ -z "$info" ]
 
   run govc object.destroy "network/${id}-ExternalNetwork" "network/${id}-InternalNetwork" "network/${id}"
   assert_success
+
+  run govc events -type DvsDestroyedEvent
+  assert_success
+  assert_matches "vSphere Distributed Switch $id in DC0 was deleted"
+
+  run govc events -type DVPortgroupDestroyedEvent
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
 }

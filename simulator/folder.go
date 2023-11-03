@@ -645,6 +645,11 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			}
 		}
 
+		ctx.postEvent(&types.DvsCreatedEvent{
+			DvsEvent: dvs.event(),
+			Parent:   folderEventArgument(&f.Folder),
+		})
+
 		dvs.AddDVPortgroupTask(ctx, &types.AddDVPortgroup_Task{
 			Spec: []types.DVPortgroupConfigSpec{{
 				Name:     dvs.Name + "-DVUplinks" + strings.TrimPrefix(dvs.Self.Value, "dvs"),
