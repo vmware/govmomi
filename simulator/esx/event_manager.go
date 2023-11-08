@@ -276,6 +276,24 @@ var EventInfo = []types.EventDescriptionEventDetail{
 		FullFormat:  "vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}} was deleted.",
 	},
 	{
+		Key:         "DvsReconfiguredEvent",
+		Description: "vSphere Distributed Switch reconfigured",
+		Category:    "info",
+		FullFormat:  "The vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}} was reconfigured.",
+	},
+	{
+		Key:         "DvsHostJoinedEvent",
+		Description: "Host joined the vSphere Distributed Switch",
+		Category:    "info",
+		FullFormat:  "The host {{.HostJoined.Name}} joined the vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}}.",
+	},
+	{
+		Key:         "DvsHostLeftEvent",
+		Description: "Host left vSphere Distributed Switch",
+		Category:    "info",
+		FullFormat:  "The host {{.HostLeft.Name}} left the vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}}.",
+	},
+	{
 		Key:         "DVPortgroupCreatedEvent",
 		Description: "dvPort group created",
 		Category:    "info",

@@ -13,6 +13,13 @@ load test_helper
   assert_equal cdp "$(jq -r .config.linkDiscoveryProtocolConfig.protocol <<<"$dvs")"
   assert_equal 1500 "$(jq -r .config.maxMtu <<<"$dvs")"
   assert_equal 6.6.0 "$(jq -r .summary.productInfo.version <<<"$dvs")"
+
+  run govc dvs.add -dvs DVS1 DC0_H0
+  assert_success
+
+  run govc events -type DvsHostJoinedEvent
+  assert_success
+  assert_matches "DC0_H0 joined the vSphere Distributed Switch DVS1"
 }
 
 @test "network dvs backing" {
@@ -150,6 +157,11 @@ load test_helper
 
   run govc device.info -vm $vm ethernet-*
   assert_success
+
+  dups=$(govc vm.info -json '*' | jq -r '.virtualMachines[].config.hardware.device[].macAddress | select(. != null)' | uniq -d)
+  if [ -n "$dups" ] ; then
+    flunk "duplicate MACs: $dups"
+  fi
 }
 
 @test "network adapter" {
