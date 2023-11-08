@@ -2,6 +2,19 @@
 
 load test_helper
 
+@test "network dvs" {
+  vcsim_env
+
+  run govc dvs.create -discovery-protocol cdp -product-version 6.6.0 -mtu 1500 DVS1
+  assert_success
+
+  dvs=$(govc object.collect -o -json network/DVS1)
+
+  assert_equal cdp "$(jq -r .config.linkDiscoveryProtocolConfig.protocol <<<"$dvs")"
+  assert_equal 1500 "$(jq -r .config.maxMtu <<<"$dvs")"
+  assert_equal 6.6.0 "$(jq -r .summary.productInfo.version <<<"$dvs")"
+}
+
 @test "network dvs backing" {
   vcsim_env
 
