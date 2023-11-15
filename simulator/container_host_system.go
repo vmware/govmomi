@@ -236,7 +236,9 @@ func createSimulationHost(ctx *Context, host *HostSystem) (*simHost, error) {
 	}
 
 	_, detail, err := sh.c.inspect()
-
+	if err != nil {
+		return nil, err
+	}
 	for i := range host.Config.Network.Pnic {
 		pnic := &host.Config.Network.Pnic[i]
 		bridge := getPnicUnderlay(advOpts, pnic.Device)
