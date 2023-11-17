@@ -27,6 +27,23 @@ type DistributedVirtualPortgroup struct {
 	mo.DistributedVirtualPortgroup
 }
 
+func (p *DistributedVirtualPortgroup) event(ctx *Context) types.DVPortgroupEvent {
+	dvs := ctx.Map.Get(*p.Config.DistributedVirtualSwitch).(*DistributedVirtualSwitch)
+
+	return types.DVPortgroupEvent{
+		Event: types.Event{
+			Datacenter: datacenterEventArgument(p),
+			Net: &types.NetworkEventArgument{
+				EntityEventArgument: types.EntityEventArgument{
+					Name: p.Name,
+				},
+				Network: p.Self,
+			},
+			Dvs: dvs.eventArgument(),
+		},
+	}
+}
+
 func (s *DistributedVirtualPortgroup) RenameTask(ctx *Context, req *types.Rename_Task) soap.HasFault {
 	canDup := s.DistributedVirtualPortgroup.Config.BackingType == string(types.DistributedVirtualPortgroupBackingTypeNsx)
 
@@ -66,6 +83,7 @@ func (s *DistributedVirtualPortgroup) DestroyTask(ctx *Context, req *types.Destr
 
 		f := ctx.Map.getEntityParent(vswitch, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, s.Reference())
+		ctx.postEvent(&types.DVPortgroupDestroyedEvent{DVPortgroupEvent: s.event(ctx)})
 
 		return nil, nil
 	})

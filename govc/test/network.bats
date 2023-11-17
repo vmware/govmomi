@@ -2,6 +2,26 @@
 
 load test_helper
 
+@test "network dvs" {
+  vcsim_env
+
+  run govc dvs.create -discovery-protocol cdp -product-version 6.6.0 -mtu 1500 DVS1
+  assert_success
+
+  dvs=$(govc object.collect -o -json network/DVS1)
+
+  assert_equal cdp "$(jq -r .config.linkDiscoveryProtocolConfig.protocol <<<"$dvs")"
+  assert_equal 1500 "$(jq -r .config.maxMtu <<<"$dvs")"
+  assert_equal 6.6.0 "$(jq -r .summary.productInfo.version <<<"$dvs")"
+
+  run govc dvs.add -dvs DVS1 DC0_H0
+  assert_success
+
+  run govc events -type DvsHostJoinedEvent
+  assert_success
+  assert_matches "DC0_H0 joined the vSphere Distributed Switch DVS1"
+}
+
 @test "network dvs backing" {
   vcsim_env
 
@@ -137,6 +157,11 @@ load test_helper
 
   run govc device.info -vm $vm ethernet-*
   assert_success
+
+  dups=$(govc vm.info -json '*' | jq -r '.virtualMachines[].config.hardware.device[].macAddress | select(. != null)' | uniq -d)
+  if [ -n "$dups" ] ; then
+    flunk "duplicate MACs: $dups"
+  fi
 }
 
 @test "network adapter" {
@@ -219,6 +244,14 @@ load test_helper
   run govc dvs.create "$id"
   assert_success
 
+  run govc events -type DvsCreatedEvent
+  assert_success
+  assert_matches "vSphere Distributed Switch $id was created"
+
+  run govc events -type DVPortgroupCreatedEvent
+  assert_success
+  assert_matches "was added to switch"
+
   local host=$GOVC_HOST
 
   run govc dvs.add -dvs "$id" "$host"
@@ -245,9 +278,17 @@ load test_helper
   info=$(govc dvs.portgroup.info -json "$id" | jq  '.port[].config.setting.vlan | select(.vlanId == 3123)')
   [ -n "$info" ]
 
-  info=$(govc dvs.portgroup.info -json "$id" | jq  '.port[].config.setting.Vlan | select(.vlanId == 7777)')
+  info=$(govc dvs.portgroup.info -json "$id" | jq  '.port[].config.setting.vlan | select(.vlanId == 7777)')
   [ -z "$info" ]
 
   run govc object.destroy "network/${id}-ExternalNetwork" "network/${id}-InternalNetwork" "network/${id}"
   assert_success
+
+  run govc events -type DvsDestroyedEvent
+  assert_success
+  assert_matches "vSphere Distributed Switch $id in DC0 was deleted"
+
+  run govc events -type DVPortgroupDestroyedEvent
+  assert_success
+  [ ${#lines[@]} -eq 2 ]
 }

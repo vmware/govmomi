@@ -263,4 +263,46 @@ var EventInfo = []types.EventDescriptionEventDetail{
 		Category:    "info",
 		FullFormat:  "DRS powered On {{.Vm.Name}} on {{.Host.Name}} in {{.Datacenter.Name}}",
 	},
+	{
+		Key:         "DvsCreatedEvent",
+		Description: "vSphere Distributed Switch created",
+		Category:    "info",
+		FullFormat:  "A vSphere Distributed Switch {{.Dvs.Name}} was created in {{.Datacenter.Name}}.",
+	},
+	{
+		Key:         "DvsDestroyedEvent",
+		Description: "vSphere Distributed Switch deleted",
+		Category:    "info",
+		FullFormat:  "vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}} was deleted.",
+	},
+	{
+		Key:         "DvsReconfiguredEvent",
+		Description: "vSphere Distributed Switch reconfigured",
+		Category:    "info",
+		FullFormat:  "The vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}} was reconfigured.",
+	},
+	{
+		Key:         "DvsHostJoinedEvent",
+		Description: "Host joined the vSphere Distributed Switch",
+		Category:    "info",
+		FullFormat:  "The host {{.HostJoined.Name}} joined the vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}}.",
+	},
+	{
+		Key:         "DvsHostLeftEvent",
+		Description: "Host left vSphere Distributed Switch",
+		Category:    "info",
+		FullFormat:  "The host {{.HostLeft.Name}} left the vSphere Distributed Switch {{.Dvs.Name}} in {{.Datacenter.Name}}.",
+	},
+	{
+		Key:         "DVPortgroupCreatedEvent",
+		Description: "dvPort group created",
+		Category:    "info",
+		FullFormat:  "dvPort group {{.Net.Name}} in {{.Datacenter.Name}} was added to switch {{.Dvs.Name}}.",
+	},
+	{
+		Key:         "DVPortgroupDestroyedEvent",
+		Description: "dvPort group deleted",
+		Category:    "info",
+		FullFormat:  "dvPort group {{.Net.Name}} in {{.Datacenter.Name}} was deleted.",
+	},
 }

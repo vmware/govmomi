@@ -35,6 +35,24 @@ type DistributedVirtualSwitch struct {
 	types.FetchDVPortsResponse
 }
 
+func (s *DistributedVirtualSwitch) eventArgument() *types.DvsEventArgument {
+	return &types.DvsEventArgument{
+		EntityEventArgument: types.EntityEventArgument{
+			Name: s.Name,
+		},
+		Dvs: s.Self,
+	}
+}
+
+func (s *DistributedVirtualSwitch) event() types.DvsEvent {
+	return types.DvsEvent{
+		Event: types.Event{
+			Datacenter: datacenterEventArgument(s),
+			Dvs:        s.eventArgument(),
+		},
+	}
+}
+
 func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.AddDVPortgroup_Task) soap.HasFault {
 	task := CreateTask(s, "addDVPortgroup", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
@@ -152,6 +170,10 @@ func (s *DistributedVirtualSwitch) AddDVPortgroupTask(ctx *Context, c *types.Add
 					{Name: "network", Val: computeNetworks},
 				})
 			}
+
+			ctx.postEvent(&types.DVPortgroupCreatedEvent{
+				DVPortgroupEvent: pg.event(ctx),
+			})
 		}
 
 		ctx.Map.Update(s, []types.PropertyChange{
@@ -215,6 +237,10 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 					}
 				}
 
+				ctx.postEvent(&types.DvsHostJoinedEvent{
+					DvsEvent:   s.event(),
+					HostJoined: *host.eventArgument(),
+				})
 			case types.ConfigSpecOperationRemove:
 				for _, ref := range host.Vm {
 					vm := ctx.Map.Get(ref).(*VirtualMachine)
@@ -227,6 +253,11 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 				}
 
 				RemoveReference(&members, member.Host)
+
+				ctx.postEvent(&types.DvsHostLeftEvent{
+					DvsEvent: s.event(),
+					HostLeft: *host.eventArgument(),
+				})
 			case types.ConfigSpecOperationEdit:
 				return nil, &types.NotSupported{}
 			}
@@ -234,6 +265,11 @@ func (s *DistributedVirtualSwitch) ReconfigureDvsTask(ctx *Context, req *types.R
 
 		ctx.Map.Update(s, []types.PropertyChange{
 			{Name: "summary.hostMember", Val: members},
+		})
+
+		ctx.postEvent(&types.DvsReconfiguredEvent{
+			DvsEvent:   s.event(),
+			ConfigSpec: spec,
 		})
 
 		return nil, nil
@@ -256,8 +292,11 @@ func (s *DistributedVirtualSwitch) FetchDVPorts(req *types.FetchDVPorts) soap.Ha
 
 func (s *DistributedVirtualSwitch) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.HasFault {
 	task := CreateTask(s, "destroy", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		// TODO: should return ResourceInUse fault if any VM is using a port on this switch
+		// and past that, remove refs from each host.Network, etc
 		f := ctx.Map.getEntityParent(s, "Folder").(*Folder)
 		folderRemoveChild(ctx, &f.Folder, s.Reference())
+		ctx.postEvent(&types.DvsDestroyedEvent{DvsEvent: s.event()})
 		return nil, nil
 	})
 

@@ -628,6 +628,15 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 			},
 		}
 
+		if spec, ok := req.Spec.ConfigSpec.(*types.VMwareDVSConfigSpec); ok {
+			configInfo.LinkDiscoveryProtocolConfig = spec.LinkDiscoveryProtocolConfig
+			configInfo.MaxMtu = spec.MaxMtu
+			configInfo.IpfixConfig = spec.IpfixConfig
+			configInfo.LacpApiVersion = spec.LacpApiVersion
+			configInfo.MulticastFilteringMode = spec.MulticastFilteringMode
+			configInfo.NetworkOffloadSpecId = spec.NetworkOffloadSpecId
+		}
+
 		if spec.Contact != nil {
 			configInfo.Contact = *spec.Contact
 		}
@@ -644,6 +653,11 @@ func (f *Folder) CreateDVSTask(ctx *Context, req *types.CreateDVS_Task) soap.Has
 				ForwardingClass: "etherswitch",
 			}
 		}
+
+		ctx.postEvent(&types.DvsCreatedEvent{
+			DvsEvent: dvs.event(),
+			Parent:   folderEventArgument(&f.Folder),
+		})
 
 		dvs.AddDVPortgroupTask(ctx, &types.AddDVPortgroup_Task{
 			Spec: []types.DVPortgroupConfigSpec{{

@@ -240,11 +240,14 @@ func (s *Service) RoundTrip(ctx context.Context, request, response soap.HasFault
 
 	// Every request has a "This" field.
 	this := req.Elem().FieldByName("This")
+	// Copy request body
+	body := reflect.New(req.Type().Elem())
+	deepCopy(req.Interface(), body.Interface())
 
 	method := &Method{
 		Name: req.Elem().Type().Name(),
 		This: this.Interface().(types.ManagedObjectReference),
-		Body: req.Interface(),
+		Body: body.Interface(),
 	}
 
 	res := s.call(&Context{
