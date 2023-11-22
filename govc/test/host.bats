@@ -114,6 +114,20 @@ load test_helper
   govc host.vnic.info -json | jq .
 }
 
+@test "host.vnic.hint" {
+  vcsim_env
+
+  run govc host.vnic.hint -xml -host DC0_C0_H0
+  assert_success
+
+  run govc host.disconnect DC0_C0_H0
+  assert_success
+
+  run govc host.vnic.hint -xml -host DC0_C0_H0
+  assert_failure
+  assert_matches HostNotConnected "$output"
+}
+
 @test "host.vswitch.info" {
   vcsim_env -esx
 

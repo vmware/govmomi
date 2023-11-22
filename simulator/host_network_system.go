@@ -198,6 +198,12 @@ func (s *HostNetworkSystem) UpdateNetworkConfig(req *types.UpdateNetworkConfig) 
 }
 
 func (s *HostNetworkSystem) QueryNetworkHint(req *types.QueryNetworkHint) soap.HasFault {
+	if s.Host.Runtime.ConnectionState != types.HostSystemConnectionStateConnected {
+		return &methods.QueryNetworkHintBody{
+			Fault_: Fault("", &types.HostNotConnected{}),
+		}
+	}
+
 	return &methods.QueryNetworkHintBody{
 		Res: &types.QueryNetworkHintResponse{
 			Returnval: s.QueryNetworkHintResponse.Returnval,

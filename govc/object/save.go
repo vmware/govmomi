@@ -31,6 +31,7 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vim25/xml"
 )
@@ -153,6 +154,16 @@ var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedO
 	"HostNetworkSystem":              saveHostNetworkSystem,
 }
 
+func isNotConnected(err error) bool {
+	if soap.IsSoapFault(err) {
+		switch soap.ToSoapFault(err).VimFault().(type) {
+		case types.HostNotConnected:
+			return true
+		}
+	}
+	return false
+}
+
 func (cmd *save) save(content []types.ObjectContent) error {
 	for _, x := range content {
 		x.MissingSet = nil // drop any NoPermission faults
@@ -174,6 +185,9 @@ func (cmd *save) save(content []types.ObjectContent) error {
 		if method, ok := saveObjects[x.Obj.Type]; ok {
 			objs, err := method(context.Background(), c, x.Obj)
 			if err != nil {
+				if isNotConnected(err) {
+					continue
+				}
 				return err
 			}
 			dir := filepath.Join(cmd.dir, ref)
