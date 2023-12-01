@@ -77,11 +77,12 @@ func main() {
 	flag.IntVar(&model.OpaqueNetwork, "nsx", model.OpaqueNetwork, "Number of NSX backed opaque networks")
 	flag.IntVar(&model.Folder, "folder", model.Folder, "Number of folders")
 	flag.BoolVar(&model.Autostart, "autostart", model.Autostart, "Autostart model created VMs")
+	flag.IntVar(&model.CryptoManagerKmip, "cryptomanager-kmip", model.CryptoManagerKmip, "CryptoManagerKmip Enabled or not")
 	v := &model.ServiceContent.About.ApiVersion
 	flag.StringVar(v, "api-version", *v, "API version")
 
 	isESX := flag.Bool("esx", false, "Simulate standalone ESX")
-	isTLS := flag.Bool("tls", true, "Enable TLS")
+	isTLS := flag.Bool("tls", false, "Enable TLS")
 	cert := flag.String("tlscert", "", "Path to TLS certificate file")
 	key := flag.String("tlskey", "", "Path to TLS key file")
 	env := flag.String("E", "-", "Output vcsim variables to the given fifo or stdout")
@@ -93,12 +94,21 @@ func main() {
 	trace := flag.String("trace-file", "", "Trace output file (defaults to stderr)")
 	stdinExit := flag.Bool("stdinexit", false, "Press any key to exit")
 	dir := flag.String("load", "", "Load model from directory")
+	iskms := flag.Bool("kmip", false, "Enable CryptoManagerKmip")
 
 	flag.IntVar(&model.DelayConfig.Delay, "delay", model.DelayConfig.Delay, "Method response delay across all methods")
 	methodDelayP := flag.String("method-delay", "", "Delay per method on the form 'method1:delay1,method2:delay2...'")
 	flag.Float64Var(&model.DelayConfig.DelayJitter, "delay-jitter", model.DelayConfig.DelayJitter, "Delay jitter coefficient of variation (tip: 0.5 is a good starting value)")
 
 	flag.Parse()
+
+	if *iskms {
+		model.CryptoManagerKmip = 1
+		fmt.Printf("CryptoManagerKmip Enabled\n")
+		simulator.CreateKey()
+
+		os.Exit(0)
+	}
 
 	if *trace != "" {
 		var err error
