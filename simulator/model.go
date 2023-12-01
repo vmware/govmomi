@@ -132,6 +132,9 @@ type Model struct {
 	// Name prefix: F, vcsim flag: -folder
 	Folder int `json:"folder"`
 
+	//CryptoManagerKmip specifies if KMS is enabled or not
+	CryptoManagerKmip int `json:"cryptomanagrkmip"`
+
 	// App specifies the number of VirtualApp to create per Cluster
 	// Name prefix: APP, vcsim flag: -app
 	App int `json:"app"`
@@ -168,16 +171,38 @@ func ESX() *Model {
 // VPX is the default Model for a vCenter instance
 func VPX() *Model {
 	return &Model{
-		ServiceContent: vpx.ServiceContent,
-		RootFolder:     vpx.RootFolder,
-		Autostart:      true,
-		Datacenter:     1,
-		Portgroup:      1,
-		Host:           1,
-		Cluster:        1,
-		ClusterHost:    3,
-		Datastore:      1,
-		Machine:        2,
+		ServiceContent:    vpx.ServiceContent,
+		RootFolder:        vpx.RootFolder,
+		Autostart:         true,
+		Datacenter:        1,
+		Portgroup:         1,
+		Host:              1,
+		Cluster:           1,
+		ClusterHost:       3,
+		Datastore:         1,
+		Machine:           2,
+		CryptoManagerKmip: 1,
+		DelayConfig: DelayConfig{
+			Delay:       0,
+			DelayJitter: 0,
+			MethodDelay: nil,
+		},
+	}
+}
+
+func KMS() *Model {
+	return &Model{
+		ServiceContent:    vpx.ServiceContent,
+		RootFolder:        vpx.RootFolder,
+		Autostart:         true,
+		Datacenter:        1,
+		Portgroup:         1,
+		Host:              1,
+		Cluster:           1,
+		ClusterHost:       3,
+		Datastore:         1,
+		Machine:           2,
+		CryptoManagerKmip: 1,
 		DelayConfig: DelayConfig{
 			Delay:       0,
 			DelayJitter: 0,
@@ -220,6 +245,8 @@ func (m *Model) Count() Model {
 			count.Pod++
 		case "OpaqueNetwork":
 			count.OpaqueNetwork++
+		case "CryptoManagerKmip":
+			count.CryptoManagerKmip++
 		}
 	}
 
@@ -235,6 +262,7 @@ var kinds = map[string]reflect.Type{
 	"AuthorizationManager":            reflect.TypeOf((*AuthorizationManager)(nil)).Elem(),
 	"ClusterComputeResource":          reflect.TypeOf((*ClusterComputeResource)(nil)).Elem(),
 	"CustomFieldsManager":             reflect.TypeOf((*CustomFieldsManager)(nil)).Elem(),
+	"CryptoManagerKmip":               reflect.TypeOf((*CryptoManagerKmip)(nil)).Elem(),
 	"CustomizationSpecManager":        reflect.TypeOf((*CustomizationSpecManager)(nil)).Elem(),
 	"Datacenter":                      reflect.TypeOf((*Datacenter)(nil)).Elem(),
 	"Datastore":                       reflect.TypeOf((*Datastore)(nil)).Elem(),
