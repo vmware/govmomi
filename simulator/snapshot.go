@@ -111,7 +111,7 @@ func (v *VirtualMachineSnapshot) removeSnapshotFiles(ctx *Context) types.BaseMet
 }
 
 func (v *VirtualMachineSnapshot) RemoveSnapshotTask(ctx *Context, req *types.RemoveSnapshot_Task) soap.HasFault {
-	task := CreateTask(v, "removeSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+	task := CreateTask(v.Vm, "removeSnapshot", func(t *Task) (types.AnyType, types.BaseMethodFault) {
 		var changes []types.PropertyChange
 
 		vm := ctx.Map.Get(v.Vm).(*VirtualMachine)
