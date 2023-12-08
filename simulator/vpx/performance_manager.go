@@ -18,6 +18,45 @@ package vpx
 
 import "github.com/vmware/govmomi/vim25/types"
 
+// HistoricalInterval is the default template for the PerformanceManager historicalInterval property.
+// Capture method:
+//
+//	govc object.collect -s -dump PerformanceManager:Perfmgr historicalInterval
+var HistoricalInterval = []types.PerfInterval{
+	{
+		Enabled:        true,
+		Key:            1,
+		Length:         86400,
+		Level:          1,
+		Name:           "Past Day",
+		SamplingPeriod: 300,
+	},
+	{
+		Enabled:        true,
+		Key:            2,
+		Length:         604800,
+		Level:          1,
+		Name:           "Past Week",
+		SamplingPeriod: 1800,
+	},
+	{
+		Enabled:        true,
+		Key:            1,
+		Length:         2592000,
+		Level:          1,
+		Name:           "Past Month",
+		SamplingPeriod: 7200,
+	},
+	{
+		Enabled:        true,
+		Key:            1,
+		Length:         31536000,
+		Level:          1,
+		Name:           "Past Year",
+		SamplingPeriod: 86400,
+	},
+}
+
 // PerfCounter is the default template for the PerformanceManager perfCounter property.
 // Capture method:
 //   govc object.collect -s -dump PerformanceManager:PerfMgr perfCounter
