@@ -27,9 +27,8 @@ import (
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vapi/internal"
 	"github.com/vmware/govmomi/vapi/rest"
-	"github.com/vmware/govmomi/vim25"
-
 	_ "github.com/vmware/govmomi/vapi/simulator"
+	"github.com/vmware/govmomi/vim25"
 )
 
 func TestSession(t *testing.T) {
@@ -57,6 +56,12 @@ func TestSession(t *testing.T) {
 
 		if session == nil {
 			t.Fatal("expected non-nil session")
+		}
+
+		path := c.Resource("/xpto/bla")
+		err = c.Do(ctx, path.Request(http.MethodGet), nil)
+		if !rest.IsStatusError(err, http.StatusNotFound) {
+			t.Fatal("expecting error to be 'StatusNotFound'", err)
 		}
 	})
 }
