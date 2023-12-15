@@ -122,7 +122,7 @@ jobs:
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' ${TAG}
 
       - name: Archive CHANGELOG
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         continue-on-error: true
         with:
           name: CHANGELOG
