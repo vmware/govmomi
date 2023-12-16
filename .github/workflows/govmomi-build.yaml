@@ -69,7 +69,7 @@ jobs:
           docker run --rm -v $PWD:/workdir ${IMAGE}@sha256:${IMAGE_SHA} --next-tag ${NEXT_TAG} -o RELEASE_CHANGELOG.md --sort semver --tag-filter-pattern '^v[0-9]+' ${NEXT_TAG}
 
       - name: Archive CHANGELOG
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: CHANGELOG
           path: |
@@ -99,7 +99,7 @@ jobs:
       # make artifacts available for inspection
       # https://docs.github.com/en/actions/guides/storing-workflow-data-as-artifacts
       - name: Archive run artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: dist
           # upload only some artifacts for introspection to keep storage size small (delete after 1d)
