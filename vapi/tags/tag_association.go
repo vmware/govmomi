@@ -331,6 +331,7 @@ func (t *AttachedTags) UnmarshalJSON(b []byte) error {
 	var o struct {
 		ObjectID internal.AssociatedObject `json:"object_id"`
 		TagIDs   []string                  `json:"tag_ids"`
+		Tags     []Tag                     `json:"tags,omitempty"`
 	}
 	err := json.Unmarshal(b, &o)
 	if err != nil {
@@ -339,6 +340,7 @@ func (t *AttachedTags) UnmarshalJSON(b []byte) error {
 
 	t.ObjectID = o.ObjectID
 	t.TagIDs = o.TagIDs
+	t.Tags = o.Tags
 
 	return nil
 }
