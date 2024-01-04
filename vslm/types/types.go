@@ -23,7 +23,6 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-// A boxed array of `VslmDatastoreSyncStatus`. To be used in `Any` placeholders.
 type ArrayOfVslmDatastoreSyncStatus struct {
 	VslmDatastoreSyncStatus []VslmDatastoreSyncStatus `xml:"VslmDatastoreSyncStatus,omitempty" json:"_value"`
 }
@@ -32,7 +31,6 @@ func init() {
 	types.Add("vslm:ArrayOfVslmDatastoreSyncStatus", reflect.TypeOf((*ArrayOfVslmDatastoreSyncStatus)(nil)).Elem())
 }
 
-// A boxed array of `VslmQueryDatastoreInfoResult`. To be used in `Any` placeholders.
 type ArrayOfVslmQueryDatastoreInfoResult struct {
 	VslmQueryDatastoreInfoResult []VslmQueryDatastoreInfoResult `xml:"VslmQueryDatastoreInfoResult,omitempty" json:"_value"`
 }
@@ -41,7 +39,6 @@ func init() {
 	types.Add("vslm:ArrayOfVslmQueryDatastoreInfoResult", reflect.TypeOf((*ArrayOfVslmQueryDatastoreInfoResult)(nil)).Elem())
 }
 
-// A boxed array of `VslmVsoVStorageObjectAssociations`. To be used in `Any` placeholders.
 type ArrayOfVslmVsoVStorageObjectAssociations struct {
 	VslmVsoVStorageObjectAssociations []VslmVsoVStorageObjectAssociations `xml:"VslmVsoVStorageObjectAssociations,omitempty" json:"_value"`
 }
@@ -50,7 +47,6 @@ func init() {
 	types.Add("vslm:ArrayOfVslmVsoVStorageObjectAssociations", reflect.TypeOf((*ArrayOfVslmVsoVStorageObjectAssociations)(nil)).Elem())
 }
 
-// A boxed array of `VslmVsoVStorageObjectAssociationsVmDiskAssociation`. To be used in `Any` placeholders.
 type ArrayOfVslmVsoVStorageObjectAssociationsVmDiskAssociation struct {
 	VslmVsoVStorageObjectAssociationsVmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty" json:"_value"`
 }
@@ -59,7 +55,6 @@ func init() {
 	types.Add("vslm:ArrayOfVslmVsoVStorageObjectAssociationsVmDiskAssociation", reflect.TypeOf((*ArrayOfVslmVsoVStorageObjectAssociationsVmDiskAssociation)(nil)).Elem())
 }
 
-// A boxed array of `VslmVsoVStorageObjectQuerySpec`. To be used in `Any` placeholders.
 type ArrayOfVslmVsoVStorageObjectQuerySpec struct {
 	VslmVsoVStorageObjectQuerySpec []VslmVsoVStorageObjectQuerySpec `xml:"VslmVsoVStorageObjectQuerySpec,omitempty" json:"_value"`
 }
@@ -68,7 +63,6 @@ func init() {
 	types.Add("vslm:ArrayOfVslmVsoVStorageObjectQuerySpec", reflect.TypeOf((*ArrayOfVslmVsoVStorageObjectQuerySpec)(nil)).Elem())
 }
 
-// A boxed array of `VslmVsoVStorageObjectResult`. To be used in `Any` placeholders.
 type ArrayOfVslmVsoVStorageObjectResult struct {
 	VslmVsoVStorageObjectResult []VslmVsoVStorageObjectResult `xml:"VslmVsoVStorageObjectResult,omitempty" json:"_value"`
 }
@@ -77,7 +71,6 @@ func init() {
 	types.Add("vslm:ArrayOfVslmVsoVStorageObjectResult", reflect.TypeOf((*ArrayOfVslmVsoVStorageObjectResult)(nil)).Elem())
 }
 
-// A boxed array of `VslmVsoVStorageObjectSnapshotResult`. To be used in `Any` placeholders.
 type ArrayOfVslmVsoVStorageObjectSnapshotResult struct {
 	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty" json:"_value"`
 }
@@ -104,9 +97,6 @@ type RetrieveContentResponse struct {
 	Returnval VslmServiceInstanceContent `xml:"returnval" json:"returnval"`
 }
 
-// This data object type describes system information.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmAboutInfo struct {
 	types.DynamicData
 
@@ -121,30 +111,12 @@ func init() {
 	types.Add("vslm:VslmAboutInfo", reflect.TypeOf((*VslmAboutInfo)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmAttachDisk_Task`.
 type VslmAttachDiskRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual disk to be operated. See
-	// `ID`
-	Id types.ID `xml:"id" json:"id"`
-	// The virtual machine where the virtual disk is to be attached.
-	//
-	// Refers instance of `VirtualMachine`.
-	Vm types.ManagedObjectReference `xml:"vm" json:"vm"`
-	// Key of the controller the disk will connect to.
-	// It can be unset if there is only one controller
-	// (SCSI or SATA) with the available slot in the
-	// virtual machine. If there are multiple SCSI or
-	// SATA controllers available, user must specify
-	// the controller; if there is no available
-	// controllers, a `MissingController`
-	// fault will be thrown.
-	ControllerKey int32 `xml:"controllerKey,omitempty" json:"controllerKey,omitempty"`
-	// The unit number of the attached disk on its controller.
-	// If unset, the next available slot on the specified
-	// controller or the only available controller will be
-	// assigned to the attached disk.
-	UnitNumber *int32 `xml:"unitNumber" json:"unitNumber,omitempty"`
+	This          types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id            types.ID                     `xml:"id" json:"id"`
+	Vm            types.ManagedObjectReference `xml:"vm" json:"vm"`
+	ControllerKey int32                        `xml:"controllerKey,omitempty" json:"controllerKey,omitempty"`
+	UnitNumber    *int32                       `xml:"unitNumber" json:"unitNumber,omitempty"`
 }
 
 func init() {
@@ -167,16 +139,11 @@ func init() {
 	types.Add("vslm:VslmAttachTagToVStorageObject", reflect.TypeOf((*VslmAttachTagToVStorageObject)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmAttachTagToVStorageObject`.
 type VslmAttachTagToVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The identifier(ID) of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The category to which the tag belongs.
-	Category string `xml:"category" json:"category"`
-	// The tag which has to be associated with the virtual storage
-	// object.
-	Tag string `xml:"tag" json:"tag"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id       types.ID                     `xml:"id" json:"id"`
+	Category string                       `xml:"category" json:"category"`
+	Tag      string                       `xml:"tag" json:"tag"`
 }
 
 func init() {
@@ -209,15 +176,10 @@ func init() {
 	types.Add("vslm:VslmClearVStorageObjectControlFlags", reflect.TypeOf((*VslmClearVStorageObjectControlFlags)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmClearVStorageObjectControlFlags`.
 type VslmClearVStorageObjectControlFlagsRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// control flags enum array to be cleared on the
-	// VStorageObject. All control flags not included
-	// in the array remain intact.
-	ControlFlags []string `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id           types.ID                     `xml:"id" json:"id"`
+	ControlFlags []string                     `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
 }
 
 func init() {
@@ -227,14 +189,10 @@ func init() {
 type VslmClearVStorageObjectControlFlagsResponse struct {
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmCloneVStorageObject_Task`.
 type VslmCloneVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The specification for cloning the virtual storage
-	// object.
-	Spec types.VslmCloneSpec `xml:"spec" json:"spec"`
+	Id   types.ID                     `xml:"id" json:"id"`
+	Spec types.VslmCloneSpec          `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -251,25 +209,14 @@ type VslmCloneVStorageObject_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmCreateDiskFromSnapshot_Task`.
 type VslmCreateDiskFromSnapshotRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of the virtual storage object.
-	SnapshotId types.ID `xml:"snapshotId" json:"snapshotId"`
-	// A user friendly name to be associated with the new disk.
-	Name string `xml:"name" json:"name"`
-	// SPBM Profile requirement on the new virtual storage object.
-	// If not specified datastore default policy would be
-	// assigned.
-	Profile []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
-	// Crypto information of the new disk.
-	Crypto *types.CryptoSpec `xml:"crypto,omitempty" json:"crypto,omitempty"`
-	// Relative location in the specified datastore where disk needs
-	// to be created. If not specified disk gets created at the
-	// defualt VStorageObject location on the specified datastore.
-	Path string `xml:"path,omitempty" json:"path,omitempty"`
+	This       types.ManagedObjectReference      `xml:"_this" json:"_this"`
+	Id         types.ID                          `xml:"id" json:"id"`
+	SnapshotId types.ID                          `xml:"snapshotId" json:"snapshotId"`
+	Name       string                            `xml:"name" json:"name"`
+	Profile    []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
+	Crypto     *types.CryptoSpec                 `xml:"crypto,omitempty" json:"crypto,omitempty"`
+	Path       string                            `xml:"path,omitempty" json:"path,omitempty"`
 }
 
 func init() {
@@ -286,12 +233,9 @@ type VslmCreateDiskFromSnapshot_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmCreateDisk_Task`.
 type VslmCreateDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The specification of the virtual storage object
-	// to be created.
-	Spec types.VslmCreateSpec `xml:"spec" json:"spec"`
+	Spec types.VslmCreateSpec         `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -308,13 +252,10 @@ type VslmCreateDisk_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmCreateSnapshot_Task`.
 type VslmCreateSnapshotRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// A short description to be associated with the snapshot.
-	Description string `xml:"description" json:"description"`
+	This        types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id          types.ID                     `xml:"id" json:"id"`
+	Description string                       `xml:"description" json:"description"`
 }
 
 func init() {
@@ -331,46 +272,25 @@ type VslmCreateSnapshot_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// DatastoreSyncStatus shows the catalog sync status of a datastore
-// and is returned as a result of the VStorageObjectManager
-// getGlobalCatalogSyncStatus API.
-//
-// When syncVClock == objectVClock the global catalog is in sync with the
-// local catalog
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmDatastoreSyncStatus struct {
 	types.DynamicData
 
-	// The datastore URL as specified in `DatastoreInfo.url`
-	DatastoreURL string `xml:"datastoreURL" json:"datastoreURL"`
-	ObjectVClock int64  `xml:"objectVClock" json:"objectVClock"`
-	SyncVClock   int64  `xml:"syncVClock" json:"syncVClock"`
-	// The time representing the last successfull sync of the datastore.
-	SyncTime *time.Time `xml:"syncTime" json:"syncTime,omitempty"`
-	// The number of retries for the Datastore synchronization in failure
-	// cases.
-	NumberOfRetries int32 `xml:"numberOfRetries,omitempty" json:"numberOfRetries,omitempty"`
-	// The fault is set in case of error conditions.
-	//
-	// If the fault is set,
-	// the objectVClock and syncVClock will be set to -1L.
-	// Possible Faults:
-	// SyncFault If specified datastoreURL failed to sync.
-	Error *types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
+	DatastoreURL    string                      `xml:"datastoreURL" json:"datastoreURL"`
+	ObjectVClock    int64                       `xml:"objectVClock" json:"objectVClock"`
+	SyncVClock      int64                       `xml:"syncVClock" json:"syncVClock"`
+	SyncTime        *time.Time                  `xml:"syncTime" json:"syncTime,omitempty"`
+	NumberOfRetries int32                       `xml:"numberOfRetries,omitempty" json:"numberOfRetries,omitempty"`
+	Error           *types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmDatastoreSyncStatus", reflect.TypeOf((*VslmDatastoreSyncStatus)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmDeleteSnapshot_Task`.
 type VslmDeleteSnapshotRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of a virtual storage object.
-	SnapshotId types.ID `xml:"snapshotId" json:"snapshotId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId" json:"snapshotId"`
 }
 
 func init() {
@@ -387,11 +307,9 @@ type VslmDeleteSnapshot_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmDeleteVStorageObject_Task`.
 type VslmDeleteVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object to be deleted.
-	Id types.ID `xml:"id" json:"id"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -414,16 +332,11 @@ func init() {
 	types.Add("vslm:VslmDetachTagFromVStorageObject", reflect.TypeOf((*VslmDetachTagFromVStorageObject)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmDetachTagFromVStorageObject`.
 type VslmDetachTagFromVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The identifier(ID) of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The category to which the tag belongs.
-	Category string `xml:"category" json:"category"`
-	// The tag which has to be disassociated with the virtual storage
-	// object.
-	Tag string `xml:"tag" json:"tag"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id       types.ID                     `xml:"id" json:"id"`
+	Category string                       `xml:"category" json:"category"`
+	Tag      string                       `xml:"tag" json:"tag"`
 }
 
 func init() {
@@ -433,13 +346,10 @@ func init() {
 type VslmDetachTagFromVStorageObjectResponse struct {
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmExtendDisk_Task`.
 type VslmExtendDiskRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual disk to be extended.
-	Id types.ID `xml:"id" json:"id"`
-	// The new capacity of the virtual disk in MB.
-	NewCapacityInMB int64 `xml:"newCapacityInMB" json:"newCapacityInMB"`
+	This            types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id              types.ID                     `xml:"id" json:"id"`
+	NewCapacityInMB int64                        `xml:"newCapacityInMB" json:"newCapacityInMB"`
 }
 
 func init() {
@@ -456,13 +366,9 @@ type VslmExtendDisk_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The super class for all VSLM Faults.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmFault struct {
 	types.MethodFault
 
-	// The fault message if available.
 	Msg string `xml:"msg,omitempty" json:"msg,omitempty"`
 }
 
@@ -476,11 +382,9 @@ func init() {
 	types.Add("vslm:VslmFaultFault", reflect.TypeOf((*VslmFaultFault)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmInflateDisk_Task`.
 type VslmInflateDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual disk to be inflated.
-	Id types.ID `xml:"id" json:"id"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -503,11 +407,9 @@ func init() {
 	types.Add("vslm:VslmListTagsAttachedToVStorageObject", reflect.TypeOf((*VslmListTagsAttachedToVStorageObject)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmListTagsAttachedToVStorageObject`.
 type VslmListTagsAttachedToVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -524,14 +426,10 @@ func init() {
 	types.Add("vslm:VslmListVStorageObjectForSpec", reflect.TypeOf((*VslmListVStorageObjectForSpec)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmListVStorageObjectForSpec`.
 type VslmListVStorageObjectForSpecRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// Query defined using array of
-	// `VslmVsoVStorageObjectQuerySpec` objects.
-	Query []VslmVsoVStorageObjectQuerySpec `xml:"query,omitempty" json:"query,omitempty"`
-	// Maximum number of virtual storage object IDs to return.
-	MaxResult int32 `xml:"maxResult" json:"maxResult"`
+	This      types.ManagedObjectReference     `xml:"_this" json:"_this"`
+	Query     []VslmVsoVStorageObjectQuerySpec `xml:"query,omitempty" json:"query,omitempty"`
+	MaxResult int32                            `xml:"maxResult" json:"maxResult"`
 }
 
 func init() {
@@ -548,13 +446,10 @@ func init() {
 	types.Add("vslm:VslmListVStorageObjectsAttachedToTag", reflect.TypeOf((*VslmListVStorageObjectsAttachedToTag)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmListVStorageObjectsAttachedToTag`.
 type VslmListVStorageObjectsAttachedToTagRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The category to which the tag belongs.
-	Category string `xml:"category" json:"category"`
-	// The tag to be queried.
-	Tag string `xml:"tag" json:"tag"`
+	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Category string                       `xml:"category" json:"category"`
+	Tag      string                       `xml:"tag" json:"tag"`
 }
 
 func init() {
@@ -571,15 +466,9 @@ func init() {
 	types.Add("vslm:VslmLoginByToken", reflect.TypeOf((*VslmLoginByToken)(nil)).Elem())
 }
 
-// The parameters of `VslmSessionManager.VslmLoginByToken`.
 type VslmLoginByTokenRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The delegated token will be retrieved by the
-	// client and delegated to VSLM. VSLM will use this token, on user's
-	// behalf, to login to VC for authorization purposes. It is necessary
-	// to convert the token to XML because the SAML token itself is
-	// not a VMODL Data Object and cannot be used as a parameter.
-	DelegatedTokenXml string `xml:"delegatedTokenXml" json:"delegatedTokenXml"`
+	This              types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DelegatedTokenXml string                       `xml:"delegatedTokenXml" json:"delegatedTokenXml"`
 }
 
 func init() {
@@ -612,32 +501,12 @@ func init() {
 	types.Add("vslm:VslmQueryChangedDiskAreas", reflect.TypeOf((*VslmQueryChangedDiskAreas)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmQueryChangedDiskAreas`.
 type VslmQueryChangedDiskAreasRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of a virtual storage object for
-	// which changes that have been made since "changeId"
-	// should be computed.
-	SnapshotId types.ID `xml:"snapshotId" json:"snapshotId"`
-	// Start Offset in bytes at which to start computing
-	// changes. Typically, callers will make multiple calls
-	// to this function, starting with startOffset 0 and then
-	// examine the "length" property in the returned
-	// DiskChangeInfo structure, repeatedly calling
-	// queryChangedDiskAreas until a map for the entire
-	// virtual disk has been obtained.
-	StartOffset int64 `xml:"startOffset" json:"startOffset"`
-	// Identifier referring to a point in the past that should
-	// be used as the point in time at which to begin including
-	// changes to the disk in the result. A typical use case
-	// would be a backup application obtaining a changeId from
-	// a virtual disk's backing info when performing a backup.
-	// When a subsequent incremental backup is to be performed,
-	// this change Id can be used to obtain a list of changed
-	// areas on disk.
-	ChangeId string `xml:"changeId" json:"changeId"`
+	This        types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id          types.ID                     `xml:"id" json:"id"`
+	SnapshotId  types.ID                     `xml:"snapshotId" json:"snapshotId"`
+	StartOffset int64                        `xml:"startOffset" json:"startOffset"`
+	ChangeId    string                       `xml:"changeId" json:"changeId"`
 }
 
 func init() {
@@ -654,12 +523,9 @@ func init() {
 	types.Add("vslm:VslmQueryDatastoreInfo", reflect.TypeOf((*VslmQueryDatastoreInfo)(nil)).Elem())
 }
 
-// The parameters of `VslmStorageLifecycleManager.VslmQueryDatastoreInfo`.
 type VslmQueryDatastoreInfoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The datastore URL as specified in
-	// `DatastoreInfo.url`
-	DatastoreUrl string `xml:"datastoreUrl" json:"datastoreUrl"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DatastoreUrl string                       `xml:"datastoreUrl" json:"datastoreUrl"`
 }
 
 func init() {
@@ -670,26 +536,11 @@ type VslmQueryDatastoreInfoResponse struct {
 	Returnval []VslmQueryDatastoreInfoResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
-// The `VslmQueryDatastoreInfoResult` provides mapping information
-// between `Datacenter` and `Datastore`.
-//
-// This API is returned as a result of
-// `VslmStorageLifecycleManager.VslmQueryDatastoreInfo` invocation.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmQueryDatastoreInfoResult struct {
 	types.DynamicData
 
-	// Indicates the datacenter containing the
-	// `VslmQueryDatastoreInfoResult.datastore`.
-	//
-	// Refers instance of `Datacenter`.
 	Datacenter types.ManagedObjectReference `xml:"datacenter" json:"datacenter"`
-	// Indicates the datastore which is contained within the
-	// `VslmQueryDatastoreInfoResult.datacenter`.
-	//
-	// Refers instance of `Datastore`.
-	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
+	Datastore  types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
 func init() {
@@ -708,11 +559,9 @@ func init() {
 	types.Add("vslm:VslmQueryGlobalCatalogSyncStatusForDatastore", reflect.TypeOf((*VslmQueryGlobalCatalogSyncStatusForDatastore)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmQueryGlobalCatalogSyncStatusForDatastore`.
 type VslmQueryGlobalCatalogSyncStatusForDatastoreRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// URL of the datastore to check synchronization status for
-	DatastoreURL string `xml:"datastoreURL" json:"datastoreURL"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DatastoreURL string                       `xml:"datastoreURL" json:"datastoreURL"`
 }
 
 func init() {
@@ -771,12 +620,8 @@ type VslmQueryTaskResultResponse struct {
 	Returnval types.AnyType `xml:"returnval,omitempty,typeattr" json:"returnval,omitempty"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmReconcileDatastoreInventory_Task`.
 type VslmReconcileDatastoreInventoryRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The datastore that needs to be reconciled.
-	//
-	// Refers instance of `Datastore`.
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
 	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -800,15 +645,10 @@ func init() {
 	types.Add("vslm:VslmRegisterDisk", reflect.TypeOf((*VslmRegisterDisk)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRegisterDisk`.
 type VslmRegisterDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// URL path to the virtual disk.
-	Path string `xml:"path" json:"path"`
-	// The descriptive name of the disk object. If
-	// unset the name will be automatically determined
-	// from the path. @see vim.vslm.BaseConfigInfo.name
-	Name string `xml:"name,omitempty" json:"name,omitempty"`
+	Path string                       `xml:"path" json:"path"`
+	Name string                       `xml:"name,omitempty" json:"name,omitempty"`
 }
 
 func init() {
@@ -819,14 +659,10 @@ type VslmRegisterDiskResponse struct {
 	Returnval types.VStorageObject `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRelocateVStorageObject_Task`.
 type VslmRelocateVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The specification for relocation of the virtual
-	// storage object.
-	Spec types.VslmRelocateSpec `xml:"spec" json:"spec"`
+	Id   types.ID                     `xml:"id" json:"id"`
+	Spec types.VslmRelocateSpec       `xml:"spec" json:"spec"`
 }
 
 func init() {
@@ -849,13 +685,10 @@ func init() {
 	types.Add("vslm:VslmRenameVStorageObject", reflect.TypeOf((*VslmRenameVStorageObject)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRenameVStorageObject`.
 type VslmRenameVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object to be renamed.
-	Id types.ID `xml:"id" json:"id"`
-	// The new name for the virtual storage object.
-	Name string `xml:"name" json:"name"`
+	Id   types.ID                     `xml:"id" json:"id"`
+	Name string                       `xml:"name" json:"name"`
 }
 
 func init() {
@@ -871,13 +704,10 @@ func init() {
 	types.Add("vslm:VslmRetrieveSnapshotDetails", reflect.TypeOf((*VslmRetrieveSnapshotDetails)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveSnapshotDetails`.
 type VslmRetrieveSnapshotDetailsRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of a virtual storage object.
-	SnapshotId types.ID `xml:"snapshotId" json:"snapshotId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId" json:"snapshotId"`
 }
 
 func init() {
@@ -894,11 +724,9 @@ func init() {
 	types.Add("vslm:VslmRetrieveSnapshotInfo", reflect.TypeOf((*VslmRetrieveSnapshotInfo)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveSnapshotInfo`.
 type VslmRetrieveSnapshotInfoRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -915,12 +743,8 @@ func init() {
 	types.Add("vslm:VslmRetrieveVStorageInfrastructureObjectPolicy", reflect.TypeOf((*VslmRetrieveVStorageInfrastructureObjectPolicy)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageInfrastructureObjectPolicy`.
 type VslmRetrieveVStorageInfrastructureObjectPolicyRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// Datastore on which policy needs to be retrieved.
-	//
-	// Refers instance of `Datastore`.
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
 	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -944,11 +768,9 @@ func init() {
 	types.Add("vslm:VslmRetrieveVStorageObjectAssociations", reflect.TypeOf((*VslmRetrieveVStorageObjectAssociations)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectAssociations`.
 type VslmRetrieveVStorageObjectAssociationsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The IDs of the virtual storage objects of the query.
-	Ids []types.ID `xml:"ids,omitempty" json:"ids,omitempty"`
+	Ids  []types.ID                   `xml:"ids,omitempty" json:"ids,omitempty"`
 }
 
 func init() {
@@ -965,15 +787,11 @@ func init() {
 	types.Add("vslm:VslmRetrieveVStorageObjectMetadata", reflect.TypeOf((*VslmRetrieveVStorageObjectMetadata)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectMetadata`.
 type VslmRetrieveVStorageObjectMetadataRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of virtual storage object.
-	SnapshotId *types.ID `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
-	// The prefix of the metadata key that needs to be retrieved
-	Prefix string `xml:"prefix,omitempty" json:"prefix,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId *types.ID                    `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
+	Prefix     string                       `xml:"prefix,omitempty" json:"prefix,omitempty"`
 }
 
 func init() {
@@ -990,15 +808,11 @@ func init() {
 	types.Add("vslm:VslmRetrieveVStorageObjectMetadataValue", reflect.TypeOf((*VslmRetrieveVStorageObjectMetadataValue)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectMetadataValue`.
 type VslmRetrieveVStorageObjectMetadataValueRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of virtual storage object.
-	SnapshotId *types.ID `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
-	// The key for the the virtual storage object
-	Key string `xml:"key" json:"key"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId *types.ID                    `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
+	Key        string                       `xml:"key" json:"key"`
 }
 
 func init() {
@@ -1009,11 +823,9 @@ type VslmRetrieveVStorageObjectMetadataValueResponse struct {
 	Returnval string `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObject`.
 type VslmRetrieveVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object to be retrieved.
-	Id types.ID `xml:"id" json:"id"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -1030,11 +842,9 @@ func init() {
 	types.Add("vslm:VslmRetrieveVStorageObjectState", reflect.TypeOf((*VslmRetrieveVStorageObjectState)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectState`.
 type VslmRetrieveVStorageObjectStateRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object the state to be retrieved.
-	Id types.ID `xml:"id" json:"id"`
+	Id   types.ID                     `xml:"id" json:"id"`
 }
 
 func init() {
@@ -1051,12 +861,9 @@ func init() {
 	types.Add("vslm:VslmRetrieveVStorageObjects", reflect.TypeOf((*VslmRetrieveVStorageObjects)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjects`.
 type VslmRetrieveVStorageObjectsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The array of IDs of the virtual storage object to be
-	// retrieved.
-	Ids []types.ID `xml:"ids,omitempty" json:"ids,omitempty"`
+	Ids  []types.ID                   `xml:"ids,omitempty" json:"ids,omitempty"`
 }
 
 func init() {
@@ -1067,13 +874,10 @@ type VslmRetrieveVStorageObjectsResponse struct {
 	Returnval []VslmVsoVStorageObjectResult `xml:"returnval,omitempty" json:"returnval,omitempty"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmRevertVStorageObject_Task`.
 type VslmRevertVStorageObjectRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// The ID of the snapshot of a virtual storage object.
-	SnapshotId types.ID `xml:"snapshotId" json:"snapshotId"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	SnapshotId types.ID                     `xml:"snapshotId" json:"snapshotId"`
 }
 
 func init() {
@@ -1096,12 +900,8 @@ func init() {
 	types.Add("vslm:VslmScheduleReconcileDatastoreInventory", reflect.TypeOf((*VslmScheduleReconcileDatastoreInventory)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmScheduleReconcileDatastoreInventory`.
 type VslmScheduleReconcileDatastoreInventoryRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The datastore that needs to be reconciled.
-	//
-	// Refers instance of `Datastore`.
+	This      types.ManagedObjectReference `xml:"_this" json:"_this"`
 	Datastore types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 }
 
@@ -1112,30 +912,12 @@ func init() {
 type VslmScheduleReconcileDatastoreInventoryResponse struct {
 }
 
-// The `VslmServiceInstanceContent` data object defines properties for the
-// `VslmServiceInstance` managed object.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmServiceInstanceContent struct {
 	types.DynamicData
 
-	// Contains information that identifies the Storage Lifecycle Management
-	// service.
-	AboutInfo VslmAboutInfo `xml:"aboutInfo" json:"aboutInfo"`
-	// `VslmSessionManager` contains login APIs to connect to VSLM
-	// service.
-	//
-	// Refers instance of `VslmSessionManager`.
-	SessionManager types.ManagedObjectReference `xml:"sessionManager" json:"sessionManager"`
-	// `VslmVStorageObjectManager` contains virtual storage object
-	// APIs.
-	//
-	// Refers instance of `VslmVStorageObjectManager`.
-	VStorageObjectManager types.ManagedObjectReference `xml:"vStorageObjectManager" json:"vStorageObjectManager"`
-	// `VslmStorageLifecycleManager` contains callback APIs to VSLM
-	// service.
-	//
-	// Refers instance of `VslmStorageLifecycleManager`.
+	AboutInfo               VslmAboutInfo                `xml:"aboutInfo" json:"aboutInfo"`
+	SessionManager          types.ManagedObjectReference `xml:"sessionManager" json:"sessionManager"`
+	VStorageObjectManager   types.ManagedObjectReference `xml:"vStorageObjectManager" json:"vStorageObjectManager"`
 	StorageLifecycleManager types.ManagedObjectReference `xml:"storageLifecycleManager" json:"storageLifecycleManager"`
 }
 
@@ -1149,15 +931,10 @@ func init() {
 	types.Add("vslm:VslmSetVStorageObjectControlFlags", reflect.TypeOf((*VslmSetVStorageObjectControlFlags)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmSetVStorageObjectControlFlags`.
 type VslmSetVStorageObjectControlFlagsRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// control flags enum array to be set on the
-	// VStorageObject. All control flags not included
-	// in the array remain intact.
-	ControlFlags []string `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id           types.ID                     `xml:"id" json:"id"`
+	ControlFlags []string                     `xml:"controlFlags,omitempty" json:"controlFlags,omitempty"`
 }
 
 func init() {
@@ -1173,19 +950,11 @@ func init() {
 	types.Add("vslm:VslmSyncDatastore", reflect.TypeOf((*VslmSyncDatastore)(nil)).Elem())
 }
 
-// The parameters of `VslmStorageLifecycleManager.VslmSyncDatastore`.
 type VslmSyncDatastoreRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The datastore URL as specified in
-	// `DatastoreInfo.url`
-	DatastoreUrl string `xml:"datastoreUrl" json:"datastoreUrl"`
-	// If this is set to true, all information for this datastore
-	// will be discarded from the catalog and reloaded from the
-	// datastore's catalog
-	FullSync bool `xml:"fullSync" json:"fullSync"`
-	// If set, this call blocks until fcdId is persisited into db
-	// if this fcdId is not found in queue, assume persisted and return
-	FcdId *types.ID `xml:"fcdId,omitempty" json:"fcdId,omitempty"`
+	This         types.ManagedObjectReference `xml:"_this" json:"_this"`
+	DatastoreUrl string                       `xml:"datastoreUrl" json:"datastoreUrl"`
+	FullSync     bool                         `xml:"fullSync" json:"fullSync"`
+	FcdId        *types.ID                    `xml:"fcdId,omitempty" json:"fcdId,omitempty"`
 }
 
 func init() {
@@ -1195,27 +964,6 @@ func init() {
 type VslmSyncDatastoreResponse struct {
 }
 
-// An SyncFault fault is thrown when there is a failure to synchronize
-// the FCD global catalog information with the local catalog information.
-//
-// Pandora synchronizes the datastore periodically in the background, it
-// recovers from any transient failures affecting the datastore or
-// individual FCDs. In cases where the sync fault needs to be resolved
-// immediately, explicitly triggering a
-// `vslm.vso.StorageLifecycleManager#syncDatastore` should resolve the
-// issue, unless there are underlying infrastructure issues affecting the
-// datastore or FCD. If the fault is ignored there is
-// a possibility that the FCD is unrecognized by Pandora or Pandora
-// DB having stale information, consequently, affecting the return of
-// `VslmVStorageObjectManager.VslmListVStorageObjectForSpec` and
-// `VslmVStorageObjectManager.VslmRetrieveVStorageObjects` APIs.
-// In cases where the `VslmSyncFault.id` is specified,
-// the client can explicitly trigger
-// `vslm.vso.StorageLifecycleManager#syncDatastore` to resolve
-// the issue, else, could ignore the fault in anticipation of Pandora
-// automatically resolving the error.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmSyncFault struct {
 	VslmFault
 
@@ -1232,104 +980,38 @@ func init() {
 	types.Add("vslm:VslmSyncFaultFault", reflect.TypeOf((*VslmSyncFaultFault)(nil)).Elem())
 }
 
-// This data object type contains all information about a VSLM task.
-//
-// A task represents an operation performed by VirtualCenter or ESX.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmTaskInfo struct {
 	types.DynamicData
 
-	// The unique key for the task.
-	Key string `xml:"key" json:"key"`
-	// The managed object that represents this task.
-	//
-	// Refers instance of `VslmTask`.
-	Task types.ManagedObjectReference `xml:"task" json:"task"`
-	// The description field of the task describes the current phase of
-	// operation of the task.
-	//
-	// For a task that does a single monolithic
-	// activity, this will be fixed and unchanging.
-	// For tasks that have various substeps, this field will change
-	// as the task progresses from one phase to another.
-	Description *types.LocalizableMessage `xml:"description,omitempty" json:"description,omitempty"`
-	// The name of the operation that created the task.
-	//
-	// This is not set
-	// for internal tasks.
-	Name string `xml:"name,omitempty" json:"name,omitempty"`
-	// An identifier for this operation.
-	//
-	// This includes publicly visible
-	// internal tasks and is a lookup in the TaskDescription methodInfo
-	// data object.
-	DescriptionId string `xml:"descriptionId" json:"descriptionId"`
-	// Managed entity to which the operation applies.
-	//
-	// Refers instance of `ManagedEntity`.
-	Entity *types.ManagedObjectReference `xml:"entity,omitempty" json:"entity,omitempty"`
-	// The name of the managed entity, locale-specific, retained for the
-	// history collector database.
-	EntityName string `xml:"entityName,omitempty" json:"entityName,omitempty"`
-	// If the state of the task is "running", then this property is a list of
-	// managed entities that the operation has locked, with a shared lock.
-	//
-	// Refers instances of `ManagedEntity`.
-	Locked []types.ManagedObjectReference `xml:"locked,omitempty" json:"locked,omitempty"`
-	// Runtime status of the task.
-	State VslmTaskInfoState `xml:"state" json:"state"`
-	// Flag to indicate whether or not the client requested
-	// cancellation of the task.
-	Cancelled bool `xml:"cancelled" json:"cancelled"`
-	// Flag to indicate whether or not the cancel task operation is supported.
-	Cancelable bool `xml:"cancelable" json:"cancelable"`
-	// If the task state is "error", then this property contains the fault code.
-	Error *types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
-	// If the task state is "success", then this property may be used
-	// to hold a return value.
-	Result types.AnyType `xml:"result,omitempty,typeattr" json:"result,omitempty"`
-	// If the task state is "running", then this property contains a
-	// progress measurement, expressed as percentage completed, from 0 to 100.
-	//
-	// If this property is not set, then the command does not report progress.
-	Progress int32 `xml:"progress,omitempty" json:"progress,omitempty"`
-	// Kind of entity responsible for creating this task.
-	Reason BaseVslmTaskReason `xml:"reason,typeattr" json:"reason"`
-	// Time stamp when the task was created.
-	QueueTime time.Time `xml:"queueTime" json:"queueTime"`
-	// Time stamp when the task started running.
-	StartTime *time.Time `xml:"startTime" json:"startTime,omitempty"`
-	// Time stamp when the task was completed (whether success or failure).
-	CompleteTime *time.Time `xml:"completeTime" json:"completeTime,omitempty"`
-	// Event chain ID that leads to the corresponding events.
-	EventChainId int32 `xml:"eventChainId" json:"eventChainId"`
-	// The user entered tag to identify the operations and their side effects
-	ChangeTag string `xml:"changeTag,omitempty" json:"changeTag,omitempty"`
-	// Tasks can be created by another task.
-	//
-	// This shows `VslmTaskInfo.key` of the task spun off this task. This is to
-	// track causality between tasks.
-	ParentTaskKey string `xml:"parentTaskKey,omitempty" json:"parentTaskKey,omitempty"`
-	// Tasks can be created by another task and such creation can go on for
-	// multiple levels.
-	//
-	// This is the `VslmTaskInfo.key` of the task
-	// that started the chain of tasks.
-	RootTaskKey string `xml:"rootTaskKey,omitempty" json:"rootTaskKey,omitempty"`
-	// The activation Id is a client-provided token to link an API call with a task.
-	ActivationId string `xml:"activationId,omitempty" json:"activationId,omitempty"`
+	Key           string                         `xml:"key" json:"key"`
+	Task          types.ManagedObjectReference   `xml:"task" json:"task"`
+	Description   *types.LocalizableMessage      `xml:"description,omitempty" json:"description,omitempty"`
+	Name          string                         `xml:"name,omitempty" json:"name,omitempty"`
+	DescriptionId string                         `xml:"descriptionId" json:"descriptionId"`
+	Entity        *types.ManagedObjectReference  `xml:"entity,omitempty" json:"entity,omitempty"`
+	EntityName    string                         `xml:"entityName,omitempty" json:"entityName,omitempty"`
+	Locked        []types.ManagedObjectReference `xml:"locked,omitempty" json:"locked,omitempty"`
+	State         VslmTaskInfoState              `xml:"state" json:"state"`
+	Cancelled     bool                           `xml:"cancelled" json:"cancelled"`
+	Cancelable    bool                           `xml:"cancelable" json:"cancelable"`
+	Error         *types.LocalizedMethodFault    `xml:"error,omitempty" json:"error,omitempty"`
+	Result        types.AnyType                  `xml:"result,omitempty,typeattr" json:"result,omitempty"`
+	Progress      int32                          `xml:"progress,omitempty" json:"progress,omitempty"`
+	Reason        BaseVslmTaskReason             `xml:"reason,typeattr" json:"reason"`
+	QueueTime     time.Time                      `xml:"queueTime" json:"queueTime"`
+	StartTime     *time.Time                     `xml:"startTime" json:"startTime,omitempty"`
+	CompleteTime  *time.Time                     `xml:"completeTime" json:"completeTime,omitempty"`
+	EventChainId  int32                          `xml:"eventChainId" json:"eventChainId"`
+	ChangeTag     string                         `xml:"changeTag,omitempty" json:"changeTag,omitempty"`
+	ParentTaskKey string                         `xml:"parentTaskKey,omitempty" json:"parentTaskKey,omitempty"`
+	RootTaskKey   string                         `xml:"rootTaskKey,omitempty" json:"rootTaskKey,omitempty"`
+	ActivationId  string                         `xml:"activationId,omitempty" json:"activationId,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmTaskInfo", reflect.TypeOf((*VslmTaskInfo)(nil)).Elem())
 }
 
-// Base type for all task reasons.
-//
-// Task reasons represent the kind of entity responsible for a task's creation.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmTaskReason struct {
 	types.DynamicData
 }
@@ -1338,43 +1020,23 @@ func init() {
 	types.Add("vslm:VslmTaskReason", reflect.TypeOf((*VslmTaskReason)(nil)).Elem())
 }
 
-// Indicates that the task was queued by an alarm.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmTaskReasonAlarm struct {
 	VslmTaskReason
 
-	// The name of the alarm that queued the task, retained in the history
-	// collector database.
-	AlarmName string `xml:"alarmName" json:"alarmName"`
-	// The alarm object that queued the task.
-	//
-	// Refers instance of `Alarm`.
-	Alarm types.ManagedObjectReference `xml:"alarm" json:"alarm"`
-	// The name of the managed entity on which the alarm is triggered,
-	// retained in the history collector database.
-	EntityName string `xml:"entityName" json:"entityName"`
-	// The managed entity object on which the alarm is triggered.
-	//
-	// Refers instance of `ManagedEntity`.
-	Entity types.ManagedObjectReference `xml:"entity" json:"entity"`
+	AlarmName  string                       `xml:"alarmName" json:"alarmName"`
+	Alarm      types.ManagedObjectReference `xml:"alarm" json:"alarm"`
+	EntityName string                       `xml:"entityName" json:"entityName"`
+	Entity     types.ManagedObjectReference `xml:"entity" json:"entity"`
 }
 
 func init() {
 	types.Add("vslm:VslmTaskReasonAlarm", reflect.TypeOf((*VslmTaskReasonAlarm)(nil)).Elem())
 }
 
-// Indicates that the task was queued by a scheduled task.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmTaskReasonSchedule struct {
 	VslmTaskReason
 
-	// The name of the scheduled task that queued this task.
-	Name string `xml:"name" json:"name"`
-	// The scheduledTask object that queued this task.
-	//
-	// Refers instance of `ScheduledTask`.
+	Name          string                       `xml:"name" json:"name"`
 	ScheduledTask types.ManagedObjectReference `xml:"scheduledTask" json:"scheduledTask"`
 }
 
@@ -1382,9 +1044,6 @@ func init() {
 	types.Add("vslm:VslmTaskReasonSchedule", reflect.TypeOf((*VslmTaskReasonSchedule)(nil)).Elem())
 }
 
-// Indicates that the task was started by the system (a default task).
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmTaskReasonSystem struct {
 	VslmTaskReason
 }
@@ -1393,13 +1052,9 @@ func init() {
 	types.Add("vslm:VslmTaskReasonSystem", reflect.TypeOf((*VslmTaskReasonSystem)(nil)).Elem())
 }
 
-// Indicates that the task was queued by a specific user.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmTaskReasonUser struct {
 	VslmTaskReason
 
-	// Name of the user that queued the task.
 	UserName string `xml:"userName" json:"userName"`
 }
 
@@ -1407,11 +1062,8 @@ func init() {
 	types.Add("vslm:VslmTaskReasonUser", reflect.TypeOf((*VslmTaskReasonUser)(nil)).Elem())
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmUpdateVStorageInfrastructureObjectPolicy_Task`.
 type VslmUpdateVStorageInfrastructureObjectPolicyRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// specification to assign a SPBM policy to FCD infrastructure
-	// object.
+	This types.ManagedObjectReference             `xml:"_this" json:"_this"`
 	Spec types.VslmInfrastructureObjectPolicySpec `xml:"spec" json:"spec"`
 }
 
@@ -1429,16 +1081,11 @@ type VslmUpdateVStorageInfrastructureObjectPolicy_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmUpdateVStorageObjectMetadata_Task`.
 type VslmUpdateVStorageObjectMetadataRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// array of key/value strings. (keys must be unique
-	// within the list)
-	Metadata []types.KeyValue `xml:"metadata,omitempty" json:"metadata,omitempty"`
-	// array of keys need to be deleted
-	DeleteKeys []string `xml:"deleteKeys,omitempty" json:"deleteKeys,omitempty"`
+	This       types.ManagedObjectReference `xml:"_this" json:"_this"`
+	Id         types.ID                     `xml:"id" json:"id"`
+	Metadata   []types.KeyValue             `xml:"metadata,omitempty" json:"metadata,omitempty"`
+	DeleteKeys []string                     `xml:"deleteKeys,omitempty" json:"deleteKeys,omitempty"`
 }
 
 func init() {
@@ -1455,15 +1102,11 @@ type VslmUpdateVStorageObjectMetadata_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmUpdateVstorageObjectCrypto_Task`.
 type VslmUpdateVstorageObjectCryptoRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// New profile requirement on the virtual storage object.
-	Profile []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
-	// The crypto information of each disk on the chain.
-	DisksCrypto *types.DiskCryptoSpec `xml:"disksCrypto,omitempty" json:"disksCrypto,omitempty"`
+	This        types.ManagedObjectReference      `xml:"_this" json:"_this"`
+	Id          types.ID                          `xml:"id" json:"id"`
+	Profile     []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
+	DisksCrypto *types.DiskCryptoSpec             `xml:"disksCrypto,omitempty" json:"disksCrypto,omitempty"`
 }
 
 func init() {
@@ -1480,12 +1123,9 @@ type VslmUpdateVstorageObjectCrypto_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// The parameters of `VslmVStorageObjectManager.VslmUpdateVstorageObjectPolicy_Task`.
 type VslmUpdateVstorageObjectPolicyRequestType struct {
-	This types.ManagedObjectReference `xml:"_this" json:"_this"`
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// New profile requirement on the virtual storage object.
+	This    types.ManagedObjectReference      `xml:"_this" json:"_this"`
+	Id      types.ID                          `xml:"id" json:"id"`
 	Profile []types.VirtualMachineProfileSpec `xml:"profile,omitempty" json:"profile,omitempty"`
 }
 
@@ -1503,169 +1143,80 @@ type VslmUpdateVstorageObjectPolicy_TaskResponse struct {
 	Returnval types.ManagedObjectReference `xml:"returnval" json:"returnval"`
 }
 
-// This data object is a key-value pair whose key is the virtual storage
-// object id, and value is the vm association information.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectAssociations struct {
 	types.DynamicData
 
-	// ID of this virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// Array of vm associations related to the virtual storage object.
+	Id                types.ID                                             `xml:"id" json:"id"`
 	VmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"vmDiskAssociation,omitempty" json:"vmDiskAssociation,omitempty"`
-	// Received error while generating associations.
-	Fault *types.LocalizedMethodFault `xml:"fault,omitempty" json:"fault,omitempty"`
+	Fault             *types.LocalizedMethodFault                          `xml:"fault,omitempty" json:"fault,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectAssociations", reflect.TypeOf((*VslmVsoVStorageObjectAssociations)(nil)).Elem())
 }
 
-// This data object contains infomation of a VM Disk association.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectAssociationsVmDiskAssociation struct {
 	types.DynamicData
 
-	// ID of the virtual machine.
-	VmId string `xml:"vmId" json:"vmId"`
-	// Device key of the disk attached to the VM.
-	DiskKey int32 `xml:"diskKey" json:"diskKey"`
+	VmId    string `xml:"vmId" json:"vmId"`
+	DiskKey int32  `xml:"diskKey" json:"diskKey"`
 }
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectAssociationsVmDiskAssociation", reflect.TypeOf((*VslmVsoVStorageObjectAssociationsVmDiskAssociation)(nil)).Elem())
 }
 
-// The `VslmVsoVStorageObjectQueryResult` contains the result of
-// `vslm.vso.VStorageObjectManager#listVStorageObjectForSpec` API.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectQueryResult struct {
 	types.DynamicData
 
-	// If set to false, more results were found than could be returned (either
-	// limited by maxResult input argument in the
-	// `vslm.vso.VStorageObjectManager#listVStorageObjectForSpec` API or
-	// truncated because the number of results exceeded the internal limit).
-	AllRecordsReturned bool `xml:"allRecordsReturned" json:"allRecordsReturned"`
-	// IDs of the VStorageObjects matching the query criteria
-	// NOTE: This field will be removed once the dev/qe code is refactored.
-	//
-	// IDs will be returned in ascending order. If
-	// `VslmVsoVStorageObjectQueryResult.allRecordsReturned` is set to false,
-	// to get the additional results, repeat the query with ID last ID as
-	// part of the query spec `VslmVsoVStorageObjectQuerySpec`.
-	Id []types.ID `xml:"id,omitempty" json:"id,omitempty"`
-	// Results of the query criteria.
-	//
-	// `vim.vslm.VStorageObjectResult#id` IDs will be returned in
-	// ascending order. If `VslmVsoVStorageObjectQueryResult.allRecordsReturned`
-	// is set to false,then, to get the additional results, repeat the query
-	// with ID last ID as part of the query spec
-	// `VslmVsoVStorageObjectQuerySpec`.
-	QueryResults []VslmVsoVStorageObjectResult `xml:"queryResults,omitempty" json:"queryResults,omitempty"`
+	AllRecordsReturned bool                          `xml:"allRecordsReturned" json:"allRecordsReturned"`
+	Id                 []types.ID                    `xml:"id,omitempty" json:"id,omitempty"`
+	QueryResults       []VslmVsoVStorageObjectResult `xml:"queryResults,omitempty" json:"queryResults,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectQueryResult", reflect.TypeOf((*VslmVsoVStorageObjectQueryResult)(nil)).Elem())
 }
 
-// The `VslmVsoVStorageObjectQuerySpec` describes the criteria to query
-// VStorageObject from global catalog.
-//
-// `VslmVsoVStorageObjectQuerySpec` is sent as input to
-// `vslm.vso.VStorageObjectManager#listVStorageObjectForSpec` API.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectQuerySpec struct {
 	types.DynamicData
 
-	// This field specifies the searchable field.
-	//
-	// This can be one of the values from
-	// `VslmVsoVStorageObjectQuerySpecQueryFieldEnum_enum`.
-	QueryField string `xml:"queryField" json:"queryField"`
-	// This field specifies the operator to compare the searchable field
-	// `VslmVsoVStorageObjectQuerySpec.queryField` with the specified
-	// value `VslmVsoVStorageObjectQuerySpec.queryValue`.
-	//
-	// This can be one of the values from
-	// `vslm.vso.VStorageObjectQuerySpec.QueryFieldOperator`.
-	QueryOperator string `xml:"queryOperator" json:"queryOperator"`
-	// This field specifies the value to be compared with the searchable field.
-	QueryValue []string `xml:"queryValue,omitempty" json:"queryValue,omitempty"`
+	QueryField    string   `xml:"queryField" json:"queryField"`
+	QueryOperator string   `xml:"queryOperator" json:"queryOperator"`
+	QueryValue    []string `xml:"queryValue,omitempty" json:"queryValue,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectQuerySpec", reflect.TypeOf((*VslmVsoVStorageObjectQuerySpec)(nil)).Elem())
 }
 
-// The `VslmVsoVStorageObjectResult` contains the result objects of
-// `VslmVsoVStorageObjectQueryResult` which is returned as a result of
-// `slm.vso.VStorageObjectManager#listVStorageObjectForSpec` and
-// `slm.vso.VStorageObjectManager#retrieveVStorageObjects` APIs.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectResult struct {
 	types.DynamicData
 
-	// The ID of the virtual storage object.
-	Id types.ID `xml:"id" json:"id"`
-	// Name of FCD.
-	Name string `xml:"name,omitempty" json:"name,omitempty"`
-	// The size in MB of this object.
-	//
-	// If the faults are set,
-	// then the capacityInMB will be -1
-	CapacityInMB int64 `xml:"capacityInMB" json:"capacityInMB"`
-	// The create time information of the FCD.
-	CreateTime *time.Time `xml:"createTime" json:"createTime,omitempty"`
-	// The Datastore URL containing the FCD.
-	DatastoreUrl string `xml:"datastoreUrl,omitempty" json:"datastoreUrl,omitempty"`
-	// The disk path of the FCD.
-	DiskPath string `xml:"diskPath,omitempty" json:"diskPath,omitempty"`
-	// The rolled up used capacity of the FCD and it's snapshots.
-	//
-	// Returns -1L if the space information is currently unavailable.
-	UsedCapacityInMB int64 `xml:"usedCapacityInMB,omitempty" json:"usedCapacityInMB,omitempty"`
-	// The ID of the backing object of the virtual storage object.
-	BackingObjectId *types.ID `xml:"backingObjectId,omitempty" json:"backingObjectId,omitempty"`
-	// VStorageObjectSnapshotResult array containing information about all the
-	// snapshots of the virtual storage object.
-	SnapshotInfo []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty" json:"snapshotInfo,omitempty"`
-	// Metadata array of key/value strings.
-	Metadata []types.KeyValue `xml:"metadata,omitempty" json:"metadata,omitempty"`
-	// The fault is set in case of error conditions and this property will
-	// have the reason.
-	//
-	// Possible Faults:
-	// NotFound If specified virtual storage object cannot be found.
-	Error *types.LocalizedMethodFault `xml:"error,omitempty" json:"error,omitempty"`
+	Id               types.ID                              `xml:"id" json:"id"`
+	Name             string                                `xml:"name,omitempty" json:"name,omitempty"`
+	CapacityInMB     int64                                 `xml:"capacityInMB" json:"capacityInMB"`
+	CreateTime       *time.Time                            `xml:"createTime" json:"createTime,omitempty"`
+	DatastoreUrl     string                                `xml:"datastoreUrl,omitempty" json:"datastoreUrl,omitempty"`
+	DiskPath         string                                `xml:"diskPath,omitempty" json:"diskPath,omitempty"`
+	UsedCapacityInMB int64                                 `xml:"usedCapacityInMB,omitempty" json:"usedCapacityInMB,omitempty"`
+	BackingObjectId  *types.ID                             `xml:"backingObjectId,omitempty" json:"backingObjectId,omitempty"`
+	SnapshotInfo     []VslmVsoVStorageObjectSnapshotResult `xml:"snapshotInfo,omitempty" json:"snapshotInfo,omitempty"`
+	Metadata         []types.KeyValue                      `xml:"metadata,omitempty" json:"metadata,omitempty"`
+	Error            *types.LocalizedMethodFault           `xml:"error,omitempty" json:"error,omitempty"`
 }
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectResult", reflect.TypeOf((*VslmVsoVStorageObjectResult)(nil)).Elem())
 }
 
-// The `VslmVsoVStorageObjectSnapshotResult` contains brief information about a
-// snapshot of the object `VslmVsoVStorageObjectResult` which is returned as a
-// result of `slm.vso.VStorageObjectManager#retrieveVStorageObjects` API.
-//
-// This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectSnapshotResult struct {
 	types.DynamicData
 
-	// The ID of the vsan object backing a snapshot of the virtual storage
-	// object.
-	BackingObjectId types.ID `xml:"backingObjectId" json:"backingObjectId"`
-	// The description user passed in when creating this snapshot.
-	Description string `xml:"description,omitempty" json:"description,omitempty"`
-	// The ID of this snapshot, created and used in fcd layer.
-	SnapshotId *types.ID `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
-	// The file path of this snapshot.
-	DiskPath string `xml:"diskPath,omitempty" json:"diskPath,omitempty"`
+	BackingObjectId types.ID  `xml:"backingObjectId" json:"backingObjectId"`
+	Description     string    `xml:"description,omitempty" json:"description,omitempty"`
+	SnapshotId      *types.ID `xml:"snapshotId,omitempty" json:"snapshotId,omitempty"`
+	DiskPath        string    `xml:"diskPath,omitempty" json:"diskPath,omitempty"`
 }
 
 func init() {

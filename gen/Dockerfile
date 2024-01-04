@@ -56,7 +56,7 @@ RUN apt-get install -y rbenv && \
     rbenv install 2.7.6 && \
     rbenv rehash && \
     rbenv global 2.7.6 && \
-    gem install bundler
+    gem install bundler -v 2.4.22
 
 
 ## --------------------------------------
