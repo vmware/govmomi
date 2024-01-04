@@ -143,6 +143,7 @@ func main() {
 			}
 		}
 		model.DelayConfig.MethodDelay = m
+		simulator.TaskDelay.MethodDelay = m
 	}
 
 	var err error
