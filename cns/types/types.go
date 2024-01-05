@@ -612,7 +612,7 @@ type CnsSnapshotNotFoundFault struct {
 	CnsFault
 
 	VolumeId   CnsVolumeId   `xml:"volumeId,omitempty"`
-	SnapshotId CnsSnapshotId `xml:"snapshotId"`
+	SnapshotId CnsSnapshotId `xml:"SnapshotId"`
 }
 
 func init() {
@@ -623,7 +623,7 @@ type CnsSnapshotCreatedFault struct {
 	CnsFault
 
 	VolumeId   CnsVolumeId                  `xml:"volumeId"`
-	SnapshotId CnsSnapshotId                `xml:"snapshotId"`
+	SnapshotId CnsSnapshotId                `xml:"SnapshotId"`
 	Datastore  types.ManagedObjectReference `xml:"datastore"`
 }
 
