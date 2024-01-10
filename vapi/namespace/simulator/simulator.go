@@ -84,7 +84,7 @@ func enabledClusters(c *govmomi.Client) ([]types.ManagedObjectReference, error) 
 	}
 	defer func() { _ = v.Destroy(ctx) }()
 
-	return v.Find(ctx, kind, property.Filter{"name": "WCP-*"})
+	return v.Find(ctx, kind, property.Match{"name": "WCP-*"})
 }
 
 func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {

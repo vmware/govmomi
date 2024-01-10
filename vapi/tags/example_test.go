@@ -91,7 +91,7 @@ func ExampleManager_GetAttachedTagsOnObjects() {
 			log.Fatal(err)
 		}
 
-		vms, err := v.Find(ctx, nil, property.Filter{}) // List all VMs in the inventory
+		vms, err := v.Find(ctx, nil, property.Match{}) // List all VMs in the inventory
 		if err != nil {
 			return err
 		}

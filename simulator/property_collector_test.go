@@ -498,7 +498,7 @@ func TestWaitForUpdatesOneUpdateCalculation(t *testing.T) {
 		types.VirtualMachinePowerStatePoweredOn:  vm.PowerOff,
 	}
 
-	err = pc.CreateFilter(ctx, filter.CreateFilter)
+	_, err = pc.CreateFilter(ctx, filter.CreateFilter)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -1495,7 +1495,7 @@ func TestPropertyCollectorSession(t *testing.T) { // aka issue-923
 		pc := property.DefaultCollector(c.Client)
 		filter := new(property.WaitFilter).Add(c.ServiceContent.RootFolder, "Folder", []string{"name"})
 
-		if err = pc.CreateFilter(ctx, filter.CreateFilter); err != nil {
+		if _, err = pc.CreateFilter(ctx, filter.CreateFilter); err != nil {
 			t.Fatal(err)
 		}
 

@@ -125,7 +125,7 @@ func TestClient(t *testing.T) {
 	} else {
 		var cluster mo.ClusterComputeResource
 
-		err = v.RetrieveWithFilter(ctx, kind, []string{"datastore"}, &cluster, property.Filter{"name": clusterName})
+		err = v.RetrieveWithFilter(ctx, kind, []string{"datastore"}, &cluster, property.Match{"name": clusterName})
 		if err != nil {
 			t.Fatal(err)
 		}

@@ -165,7 +165,7 @@ Examples:
 }
 
 // rootMatch returns true if the root object path should be printed
-func (cmd *find) rootMatch(ctx context.Context, root object.Reference, client *vim25.Client, filter property.Filter) bool {
+func (cmd *find) rootMatch(ctx context.Context, root object.Reference, client *vim25.Client, filter property.Match) bool {
 	ref := root.Reference()
 
 	if !cmd.kind.wanted(ref.Type) {
@@ -285,7 +285,7 @@ func (cmd *find) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	filter := property.Filter{}
+	filter := property.Match{}
 
 	if len(props)%2 != 0 {
 		return flag.ErrHelp
