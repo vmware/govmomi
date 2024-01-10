@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ package property
 import (
 	"context"
 	"errors"
+	"fmt"
+	"sync"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -27,11 +29,19 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
+// ErrConcurrentCollector is returned from WaitForUpdates, WaitForUpdatesEx,
+// or CheckForUpdates if any of those calls are unable to obtain an exclusive
+// lock for the property collector.
+var ErrConcurrentCollector = fmt.Errorf(
+	"only one goroutine may invoke WaitForUpdates, WaitForUpdatesEx, " +
+		"or CheckForUpdates on a given PropertyCollector")
+
 // Collector models the PropertyCollector managed object.
 //
 // For more information, see:
 // http://pubs.vmware.com/vsphere-60/index.jsp?topic=%2Fcom.vmware.wssdk.apiref.doc%2Fvmodl.query.PropertyCollector.html
 type Collector struct {
+	mu           sync.Mutex
 	roundTripper soap.RoundTripper
 	reference    types.ManagedObjectReference
 }
@@ -46,7 +56,7 @@ func DefaultCollector(c *vim25.Client) *Collector {
 	return &p
 }
 
-func (p Collector) Reference() types.ManagedObjectReference {
+func (p *Collector) Reference() types.ManagedObjectReference {
 	return p.reference
 }
 
@@ -85,18 +95,28 @@ func (p *Collector) Destroy(ctx context.Context) error {
 	return nil
 }
 
-func (p *Collector) CreateFilter(ctx context.Context, req types.CreateFilter) error {
+func (p *Collector) CreateFilter(ctx context.Context, req types.CreateFilter) (*Filter, error) {
 	req.This = p.Reference()
 
-	_, err := methods.CreateFilter(ctx, p.roundTripper, &req)
+	resp, err := methods.CreateFilter(ctx, p.roundTripper, &req)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &Filter{roundTripper: p.roundTripper, reference: resp.Returnval}, nil
 }
 
-func (p *Collector) WaitForUpdates(ctx context.Context, version string, opts ...*types.WaitOptions) (*types.UpdateSet, error) {
+// Deprecated: Please use WaitForUpdatesEx instead.
+func (p *Collector) WaitForUpdates(
+	ctx context.Context,
+	version string,
+	opts ...*types.WaitOptions) (*types.UpdateSet, error) {
+
+	if !p.mu.TryLock() {
+		return nil, ErrConcurrentCollector
+	}
+	defer p.mu.Unlock()
+
 	req := types.WaitForUpdatesEx{
 		This:    p.Reference(),
 		Version: version,
@@ -187,8 +207,15 @@ func (p *Collector) Retrieve(ctx context.Context, objs []types.ManagedObjectRefe
 	return mo.LoadObjectContent(res.Returnval, dst)
 }
 
-// RetrieveWithFilter populates dst as Retrieve does, but only for entities matching the given filter.
-func (p *Collector) RetrieveWithFilter(ctx context.Context, objs []types.ManagedObjectReference, ps []string, dst interface{}, filter Filter) error {
+// RetrieveWithFilter populates dst as Retrieve does, but only for entities
+// that match the specified filter.
+func (p *Collector) RetrieveWithFilter(
+	ctx context.Context,
+	objs []types.ManagedObjectReference,
+	ps []string,
+	dst interface{},
+	filter Match) error {
+
 	if len(filter) == 0 {
 		return p.Retrieve(ctx, objs, ps, dst)
 	}
@@ -200,7 +227,7 @@ func (p *Collector) RetrieveWithFilter(ctx context.Context, objs []types.Managed
 		return err
 	}
 
-	objs = filter.MatchObjectContent(content)
+	objs = filter.ObjectContent(content)
 
 	if len(objs) == 0 {
 		return nil
@@ -213,4 +240,72 @@ func (p *Collector) RetrieveWithFilter(ctx context.Context, objs []types.Managed
 func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectReference, ps []string, dst interface{}) error {
 	var objs = []types.ManagedObjectReference{obj}
 	return p.Retrieve(ctx, objs, ps, dst)
+}
+
+// WaitForUpdatesEx waits for any of the specified properties of the specified
+// managed object to change. It calls the specified function for every update it
+// receives. If this function returns false, it continues waiting for
+// subsequent updates. If this function returns true, it stops waiting and
+// returns.
+//
+// If the Context is canceled, a call to CancelWaitForUpdates() is made and its
+// error value is returned.
+//
+// By default, ObjectUpdate.MissingSet faults are not propagated to the returned
+// error, set WaitFilter.PropagateMissing=true to enable MissingSet fault
+// propagation.
+func (p *Collector) WaitForUpdatesEx(
+	ctx context.Context,
+	opts WaitOptions,
+	onUpdatesFn func([]types.ObjectUpdate) bool) error {
+
+	if !p.mu.TryLock() {
+		return ErrConcurrentCollector
+	}
+	defer p.mu.Unlock()
+
+	req := types.WaitForUpdatesEx{
+		This:    p.Reference(),
+		Options: opts.Options,
+	}
+
+	for {
+		res, err := methods.WaitForUpdatesEx(ctx, p.roundTripper, &req)
+		if err != nil {
+			if ctx.Err() == context.Canceled {
+				return p.CancelWaitForUpdates(context.Background())
+			}
+			return err
+		}
+
+		set := res.Returnval
+		if set == nil {
+			if req.Options != nil && req.Options.MaxWaitSeconds != nil {
+				return nil // WaitOptions.MaxWaitSeconds exceeded
+			}
+			// Retry if the result came back empty
+			continue
+		}
+
+		req.Version = set.Version
+		opts.Truncated = false
+		if set.Truncated != nil {
+			opts.Truncated = *set.Truncated
+		}
+
+		for _, fs := range set.FilterSet {
+			if opts.PropagateMissing {
+				for i := range fs.ObjectSet {
+					for _, p := range fs.ObjectSet[i].MissingSet {
+						// Same behavior as mo.ObjectContentToType()
+						return soap.WrapVimFault(p.Fault.Fault)
+					}
+				}
+			}
+
+			if onUpdatesFn(fs.ObjectSet) {
+				return nil
+			}
+		}
+	}
 }

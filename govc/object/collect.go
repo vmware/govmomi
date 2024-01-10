@@ -53,7 +53,7 @@ type collect struct {
 	kind   kinds
 	wait   time.Duration
 
-	filter property.Filter
+	filter property.Match
 	obj    string
 }
 
@@ -263,7 +263,7 @@ func (cmd *collect) match(update types.ObjectUpdate) bool {
 	}
 
 	for _, c := range update.ChangeSet {
-		if cmd.filter.MatchProperty(types.DynamicProperty{Name: c.Name, Val: c.Val}) {
+		if cmd.filter.Property(types.DynamicProperty{Name: c.Name, Val: c.Val}) {
 			return true
 		}
 	}
@@ -279,7 +279,7 @@ func (cmd *collect) toFilter(f *flag.FlagSet, props []string) ([]string, error) 
 		return props, nil
 	}
 
-	cmd.filter = property.Filter{props[0][1:]: props[1]}
+	cmd.filter = property.Match{props[0][1:]: props[1]}
 
 	return cmd.filter.Keys(), nil
 }

@@ -332,7 +332,7 @@ func TestSessionManagerPropertyCollector(t *testing.T) {
 		PartialUpdates: true,
 	}
 
-	if err = pc.CreateFilter(ctx, filter); err != nil {
+	if _, err = pc.CreateFilter(ctx, filter); err != nil {
 		t.Fatal(err)
 	}
 

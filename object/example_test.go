@@ -446,7 +446,7 @@ func ExampleCustomFieldsManager_Set() {
 		}
 
 		// filter used to find objects with "backup=true"
-		filter := property.Filter{"customValue": &types.CustomFieldStringValue{
+		filter := property.Match{"customValue": &types.CustomFieldStringValue{
 			CustomFieldValue: types.CustomFieldValue{Key: field.Key},
 			Value:            "true",
 		}}

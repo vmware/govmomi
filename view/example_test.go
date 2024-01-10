@@ -117,7 +117,7 @@ func ExampleContainerView_RetrieveWithFilter() {
 		var vms []mo.VirtualMachine
 		var names []string
 
-		err = v.RetrieveWithFilter(ctx, kind, []string{"name"}, &vms, property.Filter{"name": "*_VM1"})
+		err = v.RetrieveWithFilter(ctx, kind, []string{"name"}, &vms, property.Match{"name": "*_VM1"})
 		if err != nil {
 			return err
 		}
@@ -154,7 +154,7 @@ func ExampleContainerView_Find() {
 			log.Fatal(err)
 		}
 
-		vms, err := v.Find(ctx, kind, property.Filter{})
+		vms, err := v.Find(ctx, kind, property.Match{})
 		if err != nil {
 			return err
 		}

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -99,7 +99,7 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 	}
 }
 
-// Wait waits for a task to finish with either success or failure. It does so
+// WaitEx waits for a task to finish with either success or failure. It does so
 // by waiting for the "info" property of task managed object to change. The
 // function returns when it finds the task in the "success" or "error" state.
 // In the former case, the return value is nil. In the latter case the return
@@ -113,7 +113,12 @@ func (t *taskCallback) fn(pc []types.PropertyChange) bool {
 // The detail for the progress update is set to an empty string. If the task
 // finishes in the error state, the error instance is passed through as well.
 // Note that this error is the same error that is returned by this function.
-func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Collector, s progress.Sinker) (*types.TaskInfo, error) {
+func WaitEx(
+	ctx context.Context,
+	ref types.ManagedObjectReference,
+	pc *property.Collector,
+	s progress.Sinker) (*types.TaskInfo, error) {
+
 	cb := &taskCallback{}
 
 	// Include progress sink if specified
@@ -122,19 +127,29 @@ func Wait(ctx context.Context, ref types.ManagedObjectReference, pc *property.Co
 		defer close(cb.ch)
 	}
 
-	filter := &property.WaitFilter{PropagateMissing: true}
+	filter := &property.WaitFilter{
+		WaitOptions: property.WaitOptions{
+			PropagateMissing: true,
+		},
+	}
 	filter.Add(ref, ref.Type, []string{"info"})
 
-	err := property.WaitForUpdates(ctx, pc, filter, func(updates []types.ObjectUpdate) bool {
-		for _, update := range updates {
-			if cb.fn(update.ChangeSet) {
-				return true
+	if err := property.WaitForUpdatesEx(
+		ctx,
+		pc,
+		filter,
+		func(updates []types.ObjectUpdate) bool {
+			for _, update := range updates {
+				// Only look at updates for the expected task object.
+				if update.Obj == ref {
+					if cb.fn(update.ChangeSet) {
+						return true
+					}
+				}
 			}
-		}
+			return false
+		}); err != nil {
 
-		return false
-	})
-	if err != nil {
 		return nil, err
 	}
 

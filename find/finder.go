@@ -835,7 +835,7 @@ func (f *Finder) networkByID(ctx context.Context, path string) (object.NetworkRe
 	}
 	defer v.Destroy(ctx)
 
-	filter := property.Filter{
+	filter := property.Match{
 		"config.logicalSwitchUuid": path,
 		"config.segmentId":         path,
 	}
