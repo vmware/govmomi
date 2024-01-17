@@ -59,9 +59,10 @@ const (
 )
 
 // defaultUserAgent is the default user agent string, e.g.
-// "govmomi/0.28.0 (go1.18.3;linux;amd64)"
+// "govc govmomi/0.28.0 (go1.18.3;linux;amd64)"
 var defaultUserAgent = fmt.Sprintf(
-	"%s/%s (%s)",
+	"%s %s/%s (%s)",
+	execName(),
 	version.ClientName,
 	version.ClientVersion,
 	strings.Join([]string{runtime.Version(), runtime.GOOS, runtime.GOARCH}, ";"),
@@ -926,4 +927,13 @@ func (c *Client) DownloadFile(ctx context.Context, file string, u *url.URL, para
 	}
 
 	return c.WriteFile(ctx, file, rc, contentLength, param.Progress, param.Writer)
+}
+
+// execName gets the name of the executable for the current process
+func execName() string {
+	name, err := os.Executable()
+	if err != nil {
+		return "N/A"
+	}
+	return strings.TrimSuffix(filepath.Base(name), ".exe")
 }
