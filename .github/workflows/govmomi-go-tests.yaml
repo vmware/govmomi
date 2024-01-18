@@ -44,7 +44,7 @@ jobs:
         id: go
 
       - name: Restore Go cache
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             ~/.cache/go-build
