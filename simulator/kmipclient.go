@@ -29,7 +29,7 @@ func initClient() (*client, error) {
 		}
 	*/
 	// GetCertFromVault(keyVaultName, certname)
-	c.kclient.Endpoint = "0.0.0.0:5696"
+	c.kclient.Endpoint = "127.0.0.1:5696"
 	c.kclient.TLSConfig = &tls.Config{}
 	kmip.DefaultClientTLSConfig(c.kclient.TLSConfig)
 	// Skip server cert verification

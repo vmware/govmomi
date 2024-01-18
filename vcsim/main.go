@@ -104,19 +104,19 @@ func main() {
 
 	if *iskms {
 		model.CryptoManagerKmip = 1
-		fmt.Printf("CryptoManagerKmip Enabled\n")
+		log.Printf("CryptoManagerKmip Enabled\n")
 		id, err := simulator.CreateKey()
-		fmt.Printf("keyID  : %v , error: %v\n", id, err)
+		log.Printf("keyID  : %v , error: %v\n", id, err)
 		if err != nil {
-			fmt.Printf("Error creating key: %v\n", err)
+			log.Printf("Error creating key: %v\n", err)
 			os.Exit(1)
 		}
 		err = simulator.GetKey(id)
 		if err != nil {
-			fmt.Printf("Error getting key: %v\n", err)
+			log.Printf("Error getting key: %v\n", err)
 			os.Exit(2)
 		}
-		fmt.Printf("Key created and retrieved successfully!\n")
+		log.Printf("Key created and retrieved successfully!\n")
 		os.Exit(0)
 	}
 

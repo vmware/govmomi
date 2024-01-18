@@ -1,7 +1,7 @@
 package simulator
 
 import (
-	"fmt"
+	"log"
 
 	kms "github.com/smira/go-kmip"
 	"github.com/vmware/govmomi/simulator/vpx"
@@ -46,19 +46,18 @@ func CreateKey() (string, error) {
 
 	kmip := Map.Get(*vpx.ServiceContent.CryptoManager).(*CryptoManagerKmip)
 	ans := kmip.IsKmsClusterActive("kmipcluster")
-	fmt.Println("Is Kms CLuster Active : ", ans)
-
+	log.Printf("Is Kms CLuster Active : %v", ans)
 	cl, err := initClient()
 	if err != nil {
-		fmt.Println("Error in initializing Client :", err)
+		log.Printf("Error in initializing Client : %v", err)
 		return "", err
 	}
 	err = cl.kclient.Connect()
 	if err != nil {
-		fmt.Println("Error in connecting Client :", err)
+		log.Printf("Error in connecting Client : %v", err)
 		return "", err
 	}
-	fmt.Println("Client connected!")
+	log.Printf("Client connected!")
 
 	var resp interface{}
 	for i := 0; i < 3; i++ {
@@ -69,10 +68,11 @@ func CreateKey() (string, error) {
 	}
 
 	if err != nil {
-		fmt.Println("Error in creating key (tried 3 times): ", err)
+		log.Printf("Error in creating key (tried 3 times): %v ", err)
 		return "", err
 	}
-	fmt.Println("CreateKey: resp: ", resp, "\n error: ", err)
+	log.Printf("CreateKey: resp: %v \n error: %v", resp, err)
+
 	response := resp.(kms.CreateResponse)
 
 	return response.UniqueIdentifier, nil
@@ -82,15 +82,15 @@ func GetKey(id string) error {
 
 	cl, err := initClient()
 	if err != nil {
-		fmt.Println("Error in initializing Client :", err)
+		log.Printf("Error in initializing Client : %v", err)
 		return err
 	}
 	err = cl.kclient.Connect()
 	if err != nil {
-		fmt.Println("Error in connecting Client :", err)
+		log.Printf("Error in connecting Client : %v", err)
 		return err
 	}
-	fmt.Println("Client connected!")
+	log.Printf("Client connected!")
 
 	var resp interface{}
 	for i := 0; i < 3; i++ {
@@ -101,9 +101,9 @@ func GetKey(id string) error {
 	}
 
 	if err != nil {
-		fmt.Println("Error in Getting key (tried 3 times): ", err)
+		log.Printf("Error in Getting key (tried 3 times): %v ", err)
 		return err
 	}
-	fmt.Println("GetKey: resp: ", resp, " error: ", err)
+	log.Printf("GetKey: resp: %v \n error: %v", resp, err)
 	return nil
 }
