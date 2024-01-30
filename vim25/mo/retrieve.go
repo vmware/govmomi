@@ -77,7 +77,11 @@ func ApplyPropertyChange(obj Reference, changes []types.PropertyChange) {
 	for _, p := range changes {
 		rv, ok := t.props[p.Name]
 		if !ok {
-			panic(p.Name + " not found")
+			// For now, skip unknown properties allowing PC updates to be triggered
+			// for partial updates (e.g. extensionList["my.extension"]).
+			// Ultimately we should support partial updates by assigning the value
+			// reflectively in assignValue.
+			continue
 		}
 
 		assignValue(v, rv, reflect.ValueOf(p.Val))
