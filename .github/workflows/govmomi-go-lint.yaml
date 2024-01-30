@@ -80,7 +80,7 @@ jobs:
           echo "${TEMP_PATH}" >> "$GITHUB_PATH"
 
       - id: boilerplate_txt
-        uses: andstor/file-existence-action@v2
+        uses: andstor/file-existence-action@v3
         with:
           files: ./hack/boilerplate/boilerplate.${{ matrix.extension }}.txt
 
