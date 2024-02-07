@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -2181,5 +2181,58 @@ func TestApplyExtraConfig(t *testing.T) {
 		applyAndAssertExtraConfigValue(ctx, vm, "world", false)
 		applyAndAssertExtraConfigValue(ctx, vm, "there", false)
 		applyAndAssertExtraConfigValue(ctx, vm, "", true)
+	})
+}
+
+func TestLastModifiedAndChangeVersionAreUpdated(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
+		var vmMo mo.VirtualMachine
+		if err := vm.Properties(
+			ctx,
+			vm.Reference(),
+			[]string{"config.modified", "config.changeVersion"},
+			&vmMo); err != nil {
+
+			t.Fatalf("failed to fetch initial vm props: %v", err)
+		}
+
+		oldModified := vmMo.Config.Modified
+		oldChangeVersion := vmMo.Config.ChangeVersion
+
+		tsk, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+			ExtraConfig: []types.BaseOptionValue{
+				&types.OptionValue{
+					Key:   "hello",
+					Value: "world",
+				},
+			},
+		})
+		if err != nil {
+			t.Fatalf("failed to call reconfigure api: %v", err)
+		}
+		if err := tsk.WaitEx(ctx); err != nil {
+			t.Fatalf("failed to reconfigure: %v", err)
+		}
+
+		if err := vm.Properties(
+			ctx,
+			vm.Reference(),
+			[]string{"config.modified", "config.changeVersion"},
+			&vmMo); err != nil {
+
+			t.Fatalf("failed to fetch vm props after reconfigure: %v", err)
+		}
+
+		newModified := vmMo.Config.Modified
+		newChangeVersion := vmMo.Config.ChangeVersion
+
+		if a, e := newModified, oldModified; a == e {
+			t.Errorf("config.modified was not updated: %v", a)
+		}
+
+		if a, e := newChangeVersion, oldChangeVersion; a == e {
+			t.Errorf("config.changeVersion was not updated: %v", a)
+		}
 	})
 }

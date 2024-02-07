@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -545,7 +545,13 @@ func validateGuestID(id string) types.BaseMethodFault {
 	return &types.InvalidArgument{InvalidProperty: "configSpec.guestId"}
 }
 
-func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+func (vm *VirtualMachine) configure(ctx *Context, spec *types.VirtualMachineConfigSpec) (result types.BaseMethodFault) {
+	defer func() {
+		if result == nil {
+			vm.updateLastModifiedAndChangeVersion(ctx)
+		}
+	}()
+
 	vm.apply(spec)
 
 	if spec.MemoryAllocation != nil {
@@ -2637,4 +2643,20 @@ func changeTrackingSupported(spec *types.VirtualMachineConfigSpec) bool {
 		}
 	}
 	return false
+}
+
+func (vm *VirtualMachine) updateLastModifiedAndChangeVersion(ctx *Context) {
+	modified := time.Now()
+	ctx.Map.Update(vm, []types.PropertyChange{
+		{
+			Name: "config.changeVersion",
+			Val:  fmt.Sprintf("%d", modified.UnixNano()),
+			Op:   types.PropertyChangeOpAssign,
+		},
+		{
+			Name: "config.modified",
+			Val:  modified,
+			Op:   types.PropertyChangeOpAssign,
+		},
+	})
 }
