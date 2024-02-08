@@ -18,10 +18,12 @@ package snapshot
 
 import (
 	"context"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -83,12 +85,80 @@ func (cmd *tree) Process(ctx context.Context) error {
 	return nil
 }
 
+type SnapshotRecord struct {
+	CreateTime        *time.Time       `json:"createTime,omitempty"`
+	Id                *string          `json:"id,omitempty"`
+	Size              *int             `json:"size,omitempty"`
+	Name              string           `json:"name"`
+	Description       *string          `json:"description,omitempty"`
+	IsCurrent         bool             `json:"current"`
+	ChildSnapshotList []SnapshotRecord `json:"childSnapshotList"`
+}
+
+func (cmd *tree) IsCurrent(vm mo.VirtualMachine, moref types.ManagedObjectReference) bool {
+	return vm.Snapshot.CurrentSnapshot.Value == moref.Value
+}
+
+func (cmd *tree) CreateTime(snapshot types.VirtualMachineSnapshotTree) *time.Time {
+	if cmd.date {
+		return &snapshot.CreateTime
+	}
+	return nil
+
+}
+
+func (cmd *tree) SnapshotId(snapshot types.VirtualMachineSnapshotTree) *string {
+	if cmd.id {
+		return &snapshot.Snapshot.Value
+	}
+	return nil
+}
+
+func (cmd *tree) SnapshotDescription(snapshot types.VirtualMachineSnapshotTree) *string {
+	if cmd.description {
+		return &snapshot.Description
+	}
+	return nil
+}
+
+func (cmd *tree) SnapshotSize(vm mo.VirtualMachine, snapshot types.ManagedObjectReference, parent *types.ManagedObjectReference) *int {
+	if cmd.size {
+		size := object.SnapshotSize(snapshot, parent, vm.LayoutEx, cmd.IsCurrent(vm, snapshot))
+		return &size
+	}
+	return nil
+}
+
+func (cmd *tree) makeSnapshotRecord(vm mo.VirtualMachine, node types.VirtualMachineSnapshotTree, parent *types.ManagedObjectReference) SnapshotRecord {
+
+	var SnapshotRecords []SnapshotRecord
+	for _, snapshot := range node.ChildSnapshotList {
+		SnapshotRecords = append(SnapshotRecords, cmd.makeSnapshotRecord(vm, snapshot, &node.Snapshot))
+	}
+	return SnapshotRecord{Name: node.Name,
+		Id:                cmd.SnapshotId(node),
+		CreateTime:        cmd.CreateTime(node),
+		Description:       cmd.SnapshotDescription(node),
+		ChildSnapshotList: SnapshotRecords,
+		Size:              cmd.SnapshotSize(vm, node.Snapshot, parent),
+		IsCurrent:         cmd.IsCurrent(vm, node.Snapshot)}
+
+}
+
+func (cmd *tree) writeJson(vm mo.VirtualMachine) {
+	var SnapshotRecords []SnapshotRecord
+	for _, rootSnapshot := range vm.Snapshot.RootSnapshotList {
+		SnapshotRecords = append(SnapshotRecords, cmd.makeSnapshotRecord(vm, rootSnapshot, nil))
+	}
+	b, _ := json.MarshalIndent(SnapshotRecords, "", "  ")
+	println(string(b))
+
+}
 func (cmd *tree) write(level int, parent string, pref *types.ManagedObjectReference, st []types.VirtualMachineSnapshotTree) {
 	for _, s := range st {
 		s := s // avoid implicit memory aliasing
 
 		sname := s.Name
-
 		if cmd.fullPath && parent != "" {
 			sname = path.Join(parent, sname)
 		}
@@ -126,7 +196,7 @@ func (cmd *tree) write(level int, parent string, pref *types.ManagedObjectRefere
 			}
 
 			if cmd.date {
-				attr = append(attr, s.CreateTime.Format("Jan 2 15:04"))
+				attr = append(attr, s.CreateTime.Format("2006-01-02T15:04:05Z07:00"))
 			}
 
 			if len(attr) > 0 {
@@ -178,8 +248,11 @@ func (cmd *tree) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cmd.info = o.Snapshot
 	cmd.layout = o.LayoutEx
-
-	cmd.write(0, "", nil, o.Snapshot.RootSnapshotList)
+	if cmd.JSON {
+		cmd.writeJson(o)
+	} else {
+		cmd.write(0, "", nil, o.Snapshot.RootSnapshotList)
+	}
 
 	return nil
 }
