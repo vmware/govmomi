@@ -1,6 +1,10 @@
 package simulator
 
 import (
+	"log"
+
+	kms "github.com/smira/go-kmip"
+	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -21,7 +25,6 @@ func (m *CryptoManagerKmip) init(r *Registry) {
 
 	root := r.content().CryptoManager // take the cryptomanager details from servicefolder
 	m.CryptoManagerKmip.Self = *root
-	//	m.CryptoManagerKmip =
 
 }
 
@@ -36,13 +39,71 @@ func (m *CryptoManagerKmip) IsKmsClusterActive(clusterId string) bool {
 	return false
 }
 
-// Add create/get key methods here and expose them as API so that we can call these APIs from BVTs
-func CreateKey() {
+func CreateKey() (string, error) {
+	model := VPX()
 
+	_ = New(NewServiceInstance(SpoofContext(), model.ServiceContent, model.RootFolder)) // 2nd pass panics w/o copying RoleList
+
+	kmip := Map.Get(*vpx.ServiceContent.CryptoManager).(*CryptoManagerKmip)
+	ans := kmip.IsKmsClusterActive("kmipcluster")
+	log.Printf("Is Kms CLuster Active : %v", ans)
+	cl, err := initClient()
+	if err != nil {
+		log.Printf("Error in initializing Client : %v", err)
+		return "", err
+	}
+	err = cl.kclient.Connect()
+	if err != nil {
+		log.Printf("Error in connecting Client : %v", err)
+		return "", err
+	}
+	log.Printf("Client connected!")
+
+	var resp interface{}
+	for i := 0; i < 3; i++ {
+		resp, err = cl.CreateKey()
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		log.Printf("Error in creating key (tried 3 times): %v ", err)
+		return "", err
+	}
+	log.Printf("CreateKey: resp: %v \n error: %v", resp, err)
+
+	response := resp.(kms.CreateResponse)
+
+	return response.UniqueIdentifier, nil
 }
 
-func GetKey() {
+func GetKey(id string) error {
 
+	cl, err := initClient()
+	if err != nil {
+		log.Printf("Error in initializing Client : %v", err)
+		return err
+	}
+	err = cl.kclient.Connect()
+	if err != nil {
+		log.Printf("Error in connecting Client : %v", err)
+		return err
+	}
+	log.Printf("Client connected!")
+
+	var resp interface{}
+	for i := 0; i < 3; i++ {
+		resp, err = cl.GetKey(id)
+		if err == nil {
+			break
+		}
+	}
+
+	if err != nil {
+		log.Printf("Error in Getting key (tried 3 times): %v ", err)
+		return err
+	}
+	log.Printf("GetKey: resp: %v \n error: %v", resp, err)
+	return nil
 }
-
-// create key and get key funcs here
