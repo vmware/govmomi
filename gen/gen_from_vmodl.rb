@@ -143,7 +143,7 @@ class Managed
     case @data["wsdl_base"]
     when nil, "ManagedObject", "View"
       include_ref_getter = true
-      io.print "Self types.ManagedObjectReference\n\n"
+      io.print "Self types.ManagedObjectReference `json:\"self\"`\n\n"
     else
       io.print "%s\n\n" % @data["wsdl_base"]
       if @data["wsdl_base"] == "ManagedEntity"
