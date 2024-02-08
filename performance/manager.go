@@ -395,10 +395,10 @@ func (m *Manager) SampleByName(ctx context.Context, spec types.PerfQuerySpec, me
 
 // MetricSeries contains the same data as types.PerfMetricIntSeries, but with the CounterId converted to Name.
 type MetricSeries struct {
-	Name     string
+	Name     string `json:"name"`
 	unit     string
-	Instance string
-	Value    []int64
+	Instance string  `json:"instance"`
+	Value    []int64 `json:"value"`
 }
 
 func (s *MetricSeries) Format(val int64) string {
@@ -423,10 +423,10 @@ func (s *MetricSeries) ValueCSV() string {
 
 // EntityMetric contains the same data as types.PerfEntityMetric, but with MetricSeries type for the Value field.
 type EntityMetric struct {
-	Entity types.ManagedObjectReference
+	Entity types.ManagedObjectReference `json:"entity"`
 
-	SampleInfo []types.PerfSampleInfo
-	Value      []MetricSeries
+	SampleInfo []types.PerfSampleInfo `json:"sampleInfo"`
+	Value      []MetricSeries         `json:"value"`
 }
 
 // SampleInfoCSV converts the SampleInfo field to a CSV string

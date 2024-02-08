@@ -179,7 +179,7 @@ func (d *infoDevice) MarshalJSON() ([]byte, error) {
 
 	// TODO: make use of "inline" tag if it comes to be: https://github.com/golang/go/issues/6213
 
-	return append([]byte(fmt.Sprintf(`{"Name":"%s","Type":"%s",`, d.Name, d.Type)), b[1:]...), err
+	return append([]byte(fmt.Sprintf(`{"name":"%s","type":"%s",`, d.Name, d.Type)), b[1:]...), err
 }
 
 type infoResult struct {

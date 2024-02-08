@@ -1503,7 +1503,7 @@ With prefix \\[universal-argument] ARG, launches an interactive console (VMRC)."
 (defun govc-vm-extra-config ()
   "Populate table with govc vm.info -e output."
   (let* ((data (govc-json "vm.info" govc-args))
-         (vms (plist-get data :VirtualMachines))
+         (vms (plist-get data :virtualMachines))
          (info))
     (mapc
      (lambda (vm)
