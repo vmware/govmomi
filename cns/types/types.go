@@ -392,10 +392,10 @@ func init() {
 type CnsBlockBackingDetails struct {
 	CnsBackingObjectDetails
 
-	BackingDiskId       string `xml:"backingDiskId,omitempty"`
-	BackingDiskUrlPath  string `xml:"backingDiskUrlPath,omitempty"`
-	BackingDiskObjectId string `xml:"backingDiskObjectId,omitempty"`
-	UsedCapacityInMb    int64  `xml:"usedCapacityInMb"`
+	BackingDiskId                  string `xml:"backingDiskId,omitempty"`
+	BackingDiskUrlPath             string `xml:"backingDiskUrlPath,omitempty"`
+	BackingDiskObjectId            string `xml:"backingDiskObjectId,omitempty"`
+	AggregatedSnapshotCapacityInMb int64  `xml:"aggregatedSnapshotCapacityInMb,omitempty"`
 }
 
 func init() {
