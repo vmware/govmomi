@@ -31,12 +31,6 @@ The code in the `govmomi` package is a wrapper for the code that is generated fr
 
 ## Installation
 
-### govmomi (Package)
-
-```bash
-go get -u github.com/vmware/govmomi
-```
-
 ### Binaries and Docker Images for `govc` and `vcsim`
 
 Installation instructions, released binaries, and Docker images are documented in the respective README files of [`govc`][govc] and [`vcsim`][vcsim].
