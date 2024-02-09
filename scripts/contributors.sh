@@ -10,4 +10,4 @@ cat <<EOF > "$file"
 
 EOF
 
-git log --format='%aN <%aE>' | sort -uf >> "$file"
+git log --format='%aN <%aE>' | grep -v '\[bot\]' | sort -uf >> "$file"
