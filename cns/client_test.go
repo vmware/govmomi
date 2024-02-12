@@ -376,6 +376,7 @@ func TestClient(t *testing.T) {
 	snapshotCreateResult := interface{}(createSnapshotsTaskResult).(*cnstypes.CnsSnapshotCreateResult)
 	snapshotId := snapshotCreateResult.Snapshot.SnapshotId.Id
 	snapshotCreateTime := snapshotCreateResult.Snapshot.CreateTime
+	t.Logf("snapshotCreateResult: %+v", pretty.Sprint(snapshotCreateResult))
 	t.Logf("CreateSnapshots: Snapshot created successfully. volumeId: %q, snapshot id %q, time stamp %+v, opId: %q", volumeId, snapshotId, snapshotCreateTime, createSnapshotsTaskInfo.ActivationId)
 
 	// Test QuerySnapshots API on 7.0 U3 or above
@@ -532,6 +533,7 @@ func TestClient(t *testing.T) {
 	}
 
 	snapshotDeleteResult := interface{}(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
+	t.Logf("snapshotDeleteResult: %+v", pretty.Sprint(snapshotCreateResult))
 	t.Logf("DeleteSnapshots: Snapshot deleted successfully. volumeId: %q, snapshot id %q, opId: %q", volumeId, snapshotDeleteResult.SnapshotId, deleteSnapshotsTaskInfo.ActivationId)
 
 	// Test Relocate API
