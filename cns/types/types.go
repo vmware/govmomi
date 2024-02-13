@@ -535,9 +535,10 @@ type CnsRelocateVolumeResponse struct {
 type CnsVolumeRelocateSpec struct {
 	types.DynamicData
 
-	VolumeId  CnsVolumeId                           `xml:"volumeId"`
-	Datastore types.ManagedObjectReference          `xml:"datastore"`
-	Profile   []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
+	VolumeId       CnsVolumeId                           `xml:"volumeId"`
+	Datastore      types.ManagedObjectReference          `xml:"datastore"`
+	Profile        []types.BaseVirtualMachineProfileSpec `xml:"profile,omitempty,typeattr"`
+	ServiceLocator *types.ServiceLocator                 `xml:"serviceLocator,omitempty"`
 }
 
 func init() {

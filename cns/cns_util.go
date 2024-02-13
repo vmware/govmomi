@@ -17,13 +17,21 @@ limitations under the License.
 package cns
 
 import (
+	"bytes"
 	"context"
+	"crypto/sha1"
+	"crypto/tls"
 	"errors"
+	"fmt"
 
+	"github.com/vmware/govmomi"
 	cnstypes "github.com/vmware/govmomi/cns/types"
 	"github.com/vmware/govmomi/object"
 	vim25types "github.com/vmware/govmomi/vim25/types"
 )
+
+// DefaultVCenterPort is the default port used to access vCenter.
+const DefaultVCenterPort string = "443"
 
 // GetTaskInfo gets the task info given a task
 func GetTaskInfo(ctx context.Context, task *object.Task) (*vim25types.TaskInfo, error) {
@@ -177,4 +185,58 @@ func dropUnknownVolumeMetadataUpdateSpecElements(c *Client, updateSpecList []cns
 		updateSpecList = updatedUpdateSpecList
 	}
 	return updateSpecList
+}
+
+// GetServiceLocatorInstance takes as input VC userName, VC password, VC client
+// and returns a service locator instance for the VC.
+func GetServiceLocatorInstance(ctx context.Context, userName string, password string, vcClient *govmomi.Client) (*vim25types.ServiceLocator, error) {
+	hostPortStr := fmt.Sprintf("%s:%s", vcClient.URL().Hostname(), DefaultVCenterPort)
+	url := fmt.Sprintf("https://%s/sdk", hostPortStr)
+
+	thumbprint, err := getSslThumbprint(ctx, hostPortStr, vcClient)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get ssl thumbprint. Error: %+v", err)
+	}
+
+	serviceLocatorInstance := &vim25types.ServiceLocator{
+		InstanceUuid: vcClient.ServiceContent.About.InstanceUuid,
+		Url:          url,
+		Credential: &vim25types.ServiceLocatorNamePassword{
+			Username: userName,
+			Password: password,
+		},
+		SslThumbprint: thumbprint,
+	}
+
+	return serviceLocatorInstance, nil
+}
+
+// getSslThumbprint connects to the given network address, initiates a TLS handshake
+// and retrieves the SSL thumprint from the resulting TLS connection.
+func getSslThumbprint(ctx context.Context, addr string, vcClient *govmomi.Client) (string, error) {
+	conn, err := vcClient.Client.DefaultTransport().DialTLSContext(ctx, "tcp", addr)
+	if err != nil {
+		return "", err
+	}
+	defer conn.Close()
+
+	tlsConn, ok := conn.(*tls.Conn)
+	if !ok {
+		return "", fmt.Errorf("cannot convert net connection to tls connection")
+	}
+
+	cert := tlsConn.ConnectionState().PeerCertificates[0]
+	thumbPrint := sha1.Sum(cert.Raw)
+
+	// Get hex representation for each byte of the thumbprint separated by colon.
+	// e.g. B9:12:79:B9:36:1B:B5:C1:2F:20:4A:DD:BD:0C:3D:31:82:99:CB:5C
+	var buf bytes.Buffer
+	for i, f := range thumbPrint {
+		if i > 0 {
+			fmt.Fprintf(&buf, ":")
+		}
+		fmt.Fprintf(&buf, "%02X", f)
+	}
+
+	return buf.String(), nil
 }
