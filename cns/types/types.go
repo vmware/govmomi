@@ -793,7 +793,8 @@ func init() {
 
 type CnsSnapshotCreateResult struct {
 	CnsSnapshotOperationResult
-	Snapshot CnsSnapshot `xml:"snapshot,omitempty"`
+	Snapshot                       CnsSnapshot `xml:"snapshot,omitempty"`
+	AggregatedSnapshotCapacityInMb int64       `xml:"aggregatedSnapshotCapacityInMb,omitempty"`
 }
 
 func init() {
@@ -802,7 +803,8 @@ func init() {
 
 type CnsSnapshotDeleteResult struct {
 	CnsSnapshotOperationResult
-	SnapshotId CnsSnapshotId `xml:"snapshotId,omitempty"`
+	SnapshotId                     CnsSnapshotId `xml:"snapshotId,omitempty"`
+	AggregatedSnapshotCapacityInMb int64         `xml:"aggregatedSnapshotCapacityInMb,omitempty"`
 }
 
 func init() {
