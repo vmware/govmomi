@@ -84,6 +84,7 @@ func (cmd *export) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	cmd.KeepAlive(c)
 
 	var names []string
 	m := library.NewManager(c)
