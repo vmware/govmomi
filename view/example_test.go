@@ -202,8 +202,9 @@ func ExampleListView_tasks() {
 
 		var werr error
 		var wg sync.WaitGroup
-		wg.Add(n)
+		wg.Add(1)
 		go func() { // WaitForUpdates blocks until func returns true
+			defer wg.Done()
 			werr = property.WaitForUpdates(ctx, p, filter, func(updates []types.ObjectUpdate) bool {
 				for _, update := range updates {
 					for _, change := range update.ChangeSet {
@@ -214,12 +215,14 @@ func ExampleListView_tasks() {
 							_, _ = list.Remove(ctx, []types.ManagedObjectReference{update.Obj})
 							result[info.State]++
 							n--
-							wg.Done()
+							if n == 0 {
+								return true
+							}
 						}
 					}
 				}
 
-				return n == 0
+				return false
 			})
 		}()
 

@@ -33,8 +33,8 @@ load test_helper
 
   run govc device.info -vm $vm -json
   assert_matches ethernet-
-  assert_matches '"Name":' # injected field
-  assert_matches '"Type":' # injected field
+  assert_matches '"name":' # injected field
+  assert_matches '"type":' # injected field
 }
 
 @test "device.boot" {
