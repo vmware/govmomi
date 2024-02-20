@@ -232,6 +232,7 @@ func (vm *VirtualMachine) apply(spec *types.VirtualMachineConfigSpec) {
 		{spec.InstanceUuid, &vm.Config.InstanceUuid},
 		{spec.InstanceUuid, &vm.Summary.Config.InstanceUuid},
 		{spec.Version, &vm.Config.Version},
+		{spec.Version, &vm.Summary.Config.HwVersion},
 		{spec.Files.VmPathName, &vm.Config.Files.VmPathName},
 		{spec.Files.VmPathName, &vm.Summary.Config.VmPathName},
 		{spec.Files.SnapshotDirectory, &vm.Config.Files.SnapshotDirectory},
@@ -1883,10 +1884,18 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 	body := &methods.UpgradeVM_TaskBody{}
 
 	task := CreateTask(vm, "upgradeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		if vm.Config.Version != esx.HardwareVersion {
-			ctx.Map.Update(vm, []types.PropertyChange{{
-				Name: "config.version", Val: esx.HardwareVersion,
-			}})
+		if req.Version == "" {
+			req.Version = esx.HardwareVersion
+		}
+		if req.Version != vm.Config.Version {
+			ctx.Map.Update(vm, []types.PropertyChange{
+				{
+					Name: "config.version", Val: req.Version,
+				},
+				{
+					Name: "summary.config.hwVersion", Val: req.Version,
+				},
+			})
 		}
 		return nil, nil
 	})

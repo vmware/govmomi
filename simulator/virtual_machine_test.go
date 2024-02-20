@@ -2236,3 +2236,69 @@ func TestLastModifiedAndChangeVersionAreUpdated(t *testing.T) {
 		}
 	})
 }
+
+func TestUpgradeVm(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		props := []string{"config.version", "summary.config.hwVersion"}
+		vm := object.NewVirtualMachine(c, Map.Any("VirtualMachine").Reference())
+
+		updateHwVersionAndAssert := func(updateFn func()) {
+			var vmMo mo.VirtualMachine
+			if err := vm.Properties(
+				ctx,
+				vm.Reference(),
+				props,
+				&vmMo); err != nil {
+
+				t.Fatalf("failed to fetch vm props: %v", err)
+			}
+
+			oldConfigVersion := vmMo.Config.Version
+			oldSummaryConfigVersion := vmMo.Summary.Config.HwVersion
+
+			updateFn()
+
+			if err := vm.Properties(
+				ctx,
+				vm.Reference(),
+				props,
+				&vmMo); err != nil {
+
+				t.Fatalf("failed to fetch vm props after reconfigure: %v", err)
+			}
+
+			newConfigVersion := vmMo.Config.Version
+			newSummaryConfigVersion := vmMo.Summary.Config.HwVersion
+
+			if a, e := newConfigVersion, oldConfigVersion; a == e {
+				t.Errorf("config.version was not updated: %v", a)
+			}
+
+			if a, e := newSummaryConfigVersion, oldSummaryConfigVersion; a == e {
+				t.Errorf("summary.config.hwVersion was not updated: %v", a)
+			}
+		}
+
+		updateHwVersionAndAssert(func() {
+			tsk, err := vm.Reconfigure(ctx, types.VirtualMachineConfigSpec{
+				Version: "vmx-123",
+			})
+			if err != nil {
+				t.Fatalf("failed to call reconfigure api: %v", err)
+			}
+			if err := tsk.WaitEx(ctx); err != nil {
+				t.Fatalf("failed to reconfigure: %v", err)
+			}
+		})
+
+		updateHwVersionAndAssert(func() {
+			tsk, err := vm.UpgradeVM(ctx, "vmx-456")
+			if err != nil {
+				t.Fatalf("failed to call upgradeVm api: %v", err)
+			}
+			if err := tsk.WaitEx(ctx); err != nil {
+				t.Fatalf("failed to upgradeVm: %v", err)
+			}
+		})
+	})
+}
