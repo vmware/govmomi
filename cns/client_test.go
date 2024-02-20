@@ -40,6 +40,7 @@ import (
 )
 
 const VSphere70u3VersionInt = 703
+const VSphere80u3VersionInt = 803
 
 func TestClient(t *testing.T) {
 	// set CNS_DEBUG to true if you need to emit soap traces from these tests
@@ -62,9 +63,13 @@ func TestClient(t *testing.T) {
 	// example: export BACKING_DISK_URL_PATH='https://vc-ip/folder/vmdkfilePath.vmdk?dcPath=DataCenterPath&dsName=DataStoreName'
 	backingDiskURLPath := os.Getenv("BACKING_DISK_URL_PATH")
 
+	// set REMOTE_VC_URL, REMOTE_DATACENTER only if you want to test cross-VC CNS operations.
+	// For instance, testing cross-VC volume migration.
+	remoteVcUrl := os.Getenv("REMOTE_VC_URL")
+	remoteDatacenter := os.Getenv("REMOTE_DATACENTER")
+
 	// if datastoreForMigration is not set, test for CNS Relocate API of a volume to another datastore is skipped.
 	// input format is same as CNS_DATASTORE. Format eg. "vSANDirect_10.92.217.162_mpx.vmhba0:C0:T2:L0"/ "vsandatastore"
-	// make sure that migration datastore is accessible from host on which CNS_DATASTORE is mounted.
 	datastoreForMigration := os.Getenv("CNS_MIGRATION_DATASTORE")
 
 	// if spbmPolicyId4Reconfig is not set, test for CnsReconfigVolumePolicy API will be skipped
@@ -74,7 +79,7 @@ func TestClient(t *testing.T) {
 	if url == "" || datacenter == "" || datastore == "" {
 		t.Skip("CNS_VC_URL or CNS_DATACENTER or CNS_DATASTORE is not set")
 	}
-	resporcePoolPath := os.Getenv("CNS_RESOURCE_POOL_PATH") // example "/datacenter-name/host/host-ip/Resources" or  /datacenter-name/host/cluster-name/Resources
+	resourcePoolPath := os.Getenv("CNS_RESOURCE_POOL_PATH") // example "/datacenter-name/host/host-ip/Resources" or  /datacenter-name/host/cluster-name/Resources
 	u, err := soap.ParseURL(url)
 	if err != nil {
 		t.Fatal(err)
@@ -539,14 +544,72 @@ func TestClient(t *testing.T) {
 	// Test Relocate API
 	// Relocate API is not supported on ReleaseVSAN67u3 and ReleaseVSAN70
 	// This API is available on vSphere 7.0u1 onward
-	if cnsClient.Version != ReleaseVSAN67u3 && cnsClient.Version != ReleaseVSAN70 && datastoreForMigration != "" {
-		migrationDS, err := finder.Datastore(ctx, datastoreForMigration)
-		if err != nil {
-			t.Fatal(err)
+	if cnsClient.Version != ReleaseVSAN67u3 && cnsClient.Version != ReleaseVSAN70 &&
+		datastoreForMigration != "" {
+
+		var migrationDS *object.Datastore
+		var serviceLocatorInstance *vim25types.ServiceLocator = nil
+
+		// Cross-VC migration.
+		// This is only supported on 8.0u3 onwards.
+		if remoteVcUrl != "" && isvSphereVersion80U3orAbove(ctx, c.ServiceContent.About) {
+			remoteUrl, err := soap.ParseURL(remoteVcUrl)
+			if err != nil {
+				t.Fatal(err)
+			}
+			remoteVcClient, err := govmomi.NewClient(ctx, remoteUrl, true)
+			if err != nil {
+				t.Fatal(err)
+			}
+			// UseServiceVersion sets soap.Client.Version to the current version of the service endpoint via /sdk/vsanServiceVersions.xml
+			remoteVcClient.UseServiceVersion("vsan")
+			remoteCnsClient, err := NewClient(ctx, remoteVcClient.Client)
+			if err != nil {
+				t.Fatal(err)
+			}
+			remoteFinder := find.NewFinder(remoteCnsClient.vim25Client, false)
+			remoteDc, err := remoteFinder.Datacenter(ctx, remoteDatacenter)
+			if err != nil {
+				t.Fatal(err)
+			}
+			remoteFinder.SetDatacenter(remoteDc)
+
+			migrationDS, err = remoteFinder.Datastore(ctx, datastoreForMigration)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+			// Get ServiceLocator instance for remote VC.
+			userName := remoteUrl.User.Username()
+			password, _ := remoteUrl.User.Password()
+			serviceLocatorInstance, err = GetServiceLocatorInstance(ctx, userName, password, remoteVcClient)
+			if err != nil {
+				t.Fatal(err)
+			}
+
+		} else {
+			// Same VC migration
+			migrationDS, err = finder.Datastore(ctx, datastoreForMigration)
+			if err != nil {
+				t.Fatal(err)
+			}
 		}
-		t.Logf("Relocating volume %v to datastore %+v", pretty.Sprint(volumeId), migrationDS.Reference())
-		relocateSpec := cnstypes.NewCnsBlockVolumeRelocateSpec(volumeId, migrationDS.Reference())
-		relocateTask, err := cnsClient.RelocateVolume(ctx, relocateSpec)
+
+		blockVolRelocateSpec := cnstypes.CnsBlockVolumeRelocateSpec{
+			CnsVolumeRelocateSpec: cnstypes.CnsVolumeRelocateSpec{
+				VolumeId: cnstypes.CnsVolumeId{
+					Id: volumeId,
+				},
+				Datastore: migrationDS.Reference(),
+			},
+		}
+		if serviceLocatorInstance != nil {
+			blockVolRelocateSpec.ServiceLocator = serviceLocatorInstance
+		}
+
+		t.Logf("Relocating volume using the spec: %+v", pretty.Sprint(blockVolRelocateSpec))
+
+		relocateTask, err := cnsClient.RelocateVolume(ctx, blockVolRelocateSpec)
 		if err != nil {
 			t.Errorf("Failed to migrate volume with Relocate API. Error: %+v \n", err)
 			t.Fatal(err)
@@ -780,10 +843,10 @@ func TestClient(t *testing.T) {
 		t.Fatal(err)
 	}
 	var resourcePool *object.ResourcePool
-	if resporcePoolPath == "" {
+	if resourcePoolPath == "" {
 		resourcePool, err = finder.DefaultResourcePool(ctx)
 	} else {
-		resourcePool, err = finder.ResourcePool(ctx, resporcePoolPath)
+		resourcePool, err = finder.ResourcePool(ctx, resourcePoolPath)
 	}
 	if err != nil {
 		t.Errorf("Error occurred while getting DefaultResourcePool. err: %+v", err)
@@ -932,6 +995,7 @@ func TestClient(t *testing.T) {
 			t.Logf("Successfully queried Volume using queryAsync API. queryVolumeAsyncTaskResult: %+v", pretty.Sprint(queryVolumeAsyncTaskResult))
 		}
 	}
+
 	// Test DeleteVolume API
 	t.Logf("Deleting volume: %+v", volumeIDList)
 	deleteTask, err := cnsClient.DeleteVolume(ctx, volumeIDList, true)
@@ -1410,6 +1474,29 @@ func isvSphereVersion70U3orAbove(ctx context.Context, aboutInfo vim25types.About
 		}
 		// Check if the current vSphere version is 7.0.3 or higher
 		if vSphereVersionInt >= VSphere70u3VersionInt {
+			return true
+		}
+	}
+	// For all other versions
+	return false
+}
+
+// isvSphereVersion80U3orAbove checks if specified version is 8.0 Update 3 or higher
+// The method takes aboutInfo{} as input which contains details about
+// VC version, build number and so on.
+// If the version is 8.0 Update 3 or higher, the method returns true, else returns false
+// along with appropriate errors during failure cases
+func isvSphereVersion80U3orAbove(ctx context.Context, aboutInfo vim25types.AboutInfo) bool {
+	items := strings.Split(aboutInfo.Version, ".")
+	version := strings.Join(items[:], "")
+	// Convert version string to string, Ex: "8.0.3" becomes 803, "8.0.3.1" becomes 703
+	if len(version) >= 3 {
+		vSphereVersionInt, err := strconv.Atoi(version[0:3])
+		if err != nil {
+			return false
+		}
+		// Check if the current vSphere version is 8.0.3 or higher
+		if vSphereVersionInt >= VSphere80u3VersionInt {
 			return true
 		}
 	}
