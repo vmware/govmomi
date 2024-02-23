@@ -32,17 +32,6 @@ import (
 	"github.com/vmware/govmomi/vim25/types"
 )
 
-var hardwareVersions = []struct {
-	esx, vmx string
-}{
-	{"5.0", "vmx-8"},
-	{"5.5", "vmx-10"},
-	{"6.0", "vmx-11"},
-	{"6.5", "vmx-13"},
-	{"6.7", "vmx-14"},
-	{"7.0", "vmx-17"},
-}
-
 var (
 	FirmwareTypes = []string{
 		string(types.GuestOsDescriptorFirmwareTypeBios),
@@ -138,12 +127,8 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
 
 	f.StringVar(&cmd.firmware, "firmware", FirmwareTypes[0], FirmwareUsage)
-	var versions []string
-	for i := range hardwareVersions {
-		versions = append(versions, hardwareVersions[i].esx)
-	}
 	f.StringVar(&cmd.version, "version", "",
-		fmt.Sprintf("ESXi hardware version [%s]", strings.Join(versions, "|")))
+		fmt.Sprintf("ESXi hardware version [%s]", strings.Join(types.GetESXiVersions(), "|")))
 
 	f.StringVar(&cmd.iso, "iso", "", "ISO path")
 	cmd.isoDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
@@ -342,12 +327,15 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 	var err error
 
 	if cmd.version != "" {
-		for i := range hardwareVersions {
-			if hardwareVersions[i].esx == cmd.version {
-				cmd.version = hardwareVersions[i].vmx
-				break
+		v, ok := types.GetHardwareVersionForESXi(cmd.version)
+		if !ok {
+			hv := types.HardwareVersion(cmd.version)
+			if !hv.IsValid() {
+				return nil, fmt.Errorf("invalid version: %s", cmd.version)
 			}
+			v = hv
 		}
+		cmd.version = v.String()
 	}
 
 	spec := &types.VirtualMachineConfigSpec{

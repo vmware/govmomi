@@ -1043,7 +1043,7 @@ load test_helper
   [[ "$version" > "vmx-10" ]]
 
   run govc vm.upgrade -vm "$vm"
-  assert_success
+  assert_failure
 
   run govc vm.create -on=false -version vmx-11 "$(new_id)"
   assert_success

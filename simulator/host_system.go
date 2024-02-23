@@ -435,12 +435,12 @@ func CreateDefaultESX(ctx *Context, f *Folder) {
 		Summary: summary,
 		Network: esx.Datacenter.Network,
 	}
-	cr.EnvironmentBrowser = newEnvironmentBrowser()
 	cr.Self = *host.Parent
 	cr.Name = host.Name
 	cr.Host = append(cr.Host, host.Reference())
 	host.Network = cr.Network
 	ctx.Map.PutEntity(cr, host)
+	cr.EnvironmentBrowser = newEnvironmentBrowser(ctx, host.Reference())
 
 	pool := NewResourcePool()
 	cr.ResourcePool = &pool.Self
@@ -480,11 +480,12 @@ func CreateStandaloneHost(ctx *Context, f *Folder, spec types.HostConnectSpec) (
 		ConfigurationEx: &types.ComputeResourceConfigInfo{
 			VmSwapPlacement: string(types.VirtualMachineConfigInfoSwapPlacementTypeVmDirectory),
 		},
-		Summary:            summary,
-		EnvironmentBrowser: newEnvironmentBrowser(),
+		Summary: summary,
 	}
 
 	ctx.Map.PutEntity(cr, ctx.Map.NewEntity(host))
+	cr.EnvironmentBrowser = newEnvironmentBrowser(ctx, host.Reference())
+
 	host.Summary.Host = &host.Self
 	host.Config.Host = host.Self
 
