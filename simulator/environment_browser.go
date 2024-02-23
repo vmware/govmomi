@@ -35,10 +35,99 @@ type EnvironmentBrowser struct {
 	QueryTargetCapabilitiesResponse     types.QueryTargetCapabilitiesResponse
 }
 
-func newEnvironmentBrowser() *types.ManagedObjectReference {
+func newEnvironmentBrowser(
+	ctx *Context,
+	hostRefs ...types.ManagedObjectReference) *types.ManagedObjectReference {
+
 	env := new(EnvironmentBrowser)
+	env.initDescriptorReturnVal(ctx, hostRefs...)
 	Map.Put(env)
 	return &env.Self
+}
+
+func (b *EnvironmentBrowser) addHost(
+	ctx *Context, hostRef types.ManagedObjectReference) {
+
+	// Get a set of unique hosts.
+	hostSet := map[types.ManagedObjectReference]struct{}{
+		hostRef: {},
+	}
+	for i := range b.QueryConfigOptionDescriptorResponse.Returnval {
+		cod := b.QueryConfigOptionDescriptorResponse.Returnval[i]
+		for j := range cod.Host {
+			if _, ok := hostSet[cod.Host[j]]; !ok {
+				hostSet[cod.Host[j]] = struct{}{}
+			}
+		}
+	}
+
+	// Get a list of unique hosts.
+	var hostRefs []types.ManagedObjectReference
+	for ref := range hostSet {
+		hostRefs = append(hostRefs, ref)
+	}
+
+	// Clear the descriptor's return val.
+	b.QueryConfigOptionDescriptorResponse.Returnval = nil
+
+	b.initDescriptorReturnVal(ctx, hostRefs...)
+}
+
+func (b *EnvironmentBrowser) initDescriptorReturnVal(
+	ctx *Context, hostRefs ...types.ManagedObjectReference) {
+
+	// Get the max supported hardware version for this list of hosts.
+	var maxHardwareVersion types.HardwareVersion
+	maxHardwareVersionForHost := map[types.ManagedObjectReference]types.HardwareVersion{}
+	for j := range hostRefs {
+		ref := hostRefs[j]
+		ctx.WithLock(ref, func() {
+			host := ctx.Map.Get(ref).(*HostSystem)
+			hostVersion := host.Config.Product.Version
+			hostHardwareVersion, ok := types.GetHardwareVersionForESXi(hostVersion)
+			if !ok {
+				return
+			}
+			maxHardwareVersionForHost[ref] = hostHardwareVersion
+			if maxHardwareVersion == "" {
+				maxHardwareVersion = hostHardwareVersion
+				return
+			}
+			if hostHardwareVersion.Int() > maxHardwareVersion.Int() {
+				maxHardwareVersion = hostHardwareVersion
+			}
+		})
+	}
+
+	if maxHardwareVersion == "" {
+		return
+	}
+
+	hardwareVersions := types.GetHardwareVersions()
+	for i := range hardwareVersions {
+		hv := hardwareVersions[i]
+		dco := hv.Int() == maxHardwareVersion.Int()
+		cod := types.VirtualMachineConfigOptionDescriptor{
+			Key:                 hv.String(),
+			Description:         hv.String(),
+			DefaultConfigOption: types.NewBool(dco),
+			CreateSupported:     types.NewBool(true),
+			RunSupported:        types.NewBool(true),
+			UpgradeSupported:    types.NewBool(true),
+		}
+		for hostRef, hostVer := range maxHardwareVersionForHost {
+			if hostVer.Int() >= hv.Int() {
+				cod.Host = append(cod.Host, hostRef)
+			}
+		}
+
+		b.QueryConfigOptionDescriptorResponse.Returnval = append(
+			b.QueryConfigOptionDescriptorResponse.Returnval, cod)
+
+		if dco {
+			break
+		}
+	}
 }
 
 func (b *EnvironmentBrowser) hosts(ctx *Context) []types.ManagedObjectReference {
@@ -142,20 +231,6 @@ func (b *EnvironmentBrowser) QueryConfigOptionDescriptor(ctx *Context, req *type
 			Returnval: b.QueryConfigOptionDescriptorResponse.Returnval,
 		},
 	}
-
-	if body.Res.Returnval != nil {
-		return body
-	}
-
-	body.Res.Returnval = []types.VirtualMachineConfigOptionDescriptor{{
-		Key:                 esx.HardwareVersion,
-		Description:         esx.HardwareVersion,
-		Host:                b.hosts(ctx),
-		CreateSupported:     types.NewBool(true),
-		DefaultConfigOption: types.NewBool(false),
-		RunSupported:        types.NewBool(true),
-		UpgradeSupported:    types.NewBool(true),
-	}}
 
 	return body
 }

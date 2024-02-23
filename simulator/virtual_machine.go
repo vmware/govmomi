@@ -1884,19 +1884,131 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 	body := &methods.UpgradeVM_TaskBody{}
 
 	task := CreateTask(vm, "upgradeVm", func(t *Task) (types.AnyType, types.BaseMethodFault) {
-		if req.Version == "" {
-			req.Version = esx.HardwareVersion
+
+		newInvalidStateFault := func(format string, args ...any) *types.InvalidState {
+			msg := fmt.Sprintf(format, args...)
+			return &types.InvalidState{
+				VimFault: types.VimFault{
+					MethodFault: types.MethodFault{
+						FaultCause: &types.LocalizedMethodFault{
+							Fault: &types.SystemErrorFault{
+								Reason: msg,
+							},
+							LocalizedMessage: msg,
+						},
+					},
+				},
+			}
 		}
-		if req.Version != vm.Config.Version {
-			ctx.Map.Update(vm, []types.PropertyChange{
-				{
-					Name: "config.version", Val: req.Version,
-				},
-				{
-					Name: "summary.config.hwVersion", Val: req.Version,
-				},
+
+		// InvalidPowerState
+		//
+		// 1. Is VM's power state anything other than powered off?
+		if vm.Runtime.PowerState != types.VirtualMachinePowerStatePoweredOff {
+			return nil, &types.InvalidPowerStateFault{
+				ExistingState:  vm.Runtime.PowerState,
+				RequestedState: types.VirtualMachinePowerStatePoweredOff,
+			}
+		}
+
+		// InvalidState
+		//
+		// 1. Is host on which VM is scheduled in maintenance mode?
+		// 2. Is VM a template?
+		// 3. Is VM already the latest hardware version?
+		var (
+			ebRef                     *types.ManagedObjectReference
+			latestHardwareVersion     string
+			hostRef                   = vm.Runtime.Host
+			supportedHardwareVersions = map[string]struct{}{}
+		)
+		if hostRef != nil {
+			var hostInMaintenanceMode bool
+			ctx.WithLock(*hostRef, func() {
+				host := ctx.Map.Get(*hostRef).(*HostSystem)
+				hostInMaintenanceMode = host.Runtime.InMaintenanceMode
+				switch host.Parent.Type {
+				case "ClusterComputeResource":
+					obj := ctx.Map.Get(*host.Parent).(*ClusterComputeResource)
+					ebRef = obj.EnvironmentBrowser
+				case "ComputeResource":
+					obj := ctx.Map.Get(*host.Parent).(*mo.ComputeResource)
+					ebRef = obj.EnvironmentBrowser
+				}
+			})
+			if hostInMaintenanceMode {
+				return nil, newInvalidStateFault("%s in maintenance mode", hostRef.Value)
+			}
+		}
+		if vm.Config.Template {
+			return nil, newInvalidStateFault("%s is template", vm.Reference().Value)
+		}
+		if ebRef != nil {
+			ctx.WithLock(*ebRef, func() {
+				eb := ctx.Map.Get(*ebRef).(*EnvironmentBrowser)
+				for i := range eb.QueryConfigOptionDescriptorResponse.Returnval {
+					cod := eb.QueryConfigOptionDescriptorResponse.Returnval[i]
+					for j := range cod.Host {
+						if cod.Host[j].Value == hostRef.Value {
+							supportedHardwareVersions[cod.Key] = struct{}{}
+						}
+						if latestHardwareVersion == "" {
+							if def := cod.DefaultConfigOption; def != nil && *def {
+								latestHardwareVersion = cod.Key
+							}
+						}
+					}
+				}
 			})
 		}
+
+		if latestHardwareVersion == "" {
+			latestHardwareVersion = esx.HardwareVersion
+		}
+		if vm.Config.Version == latestHardwareVersion {
+			return nil, newInvalidStateFault("%s is latest version", vm.Reference().Value)
+		}
+		if req.Version == "" {
+			req.Version = latestHardwareVersion
+		}
+
+		// NotSupported
+		targetVersion := types.HardwareVersion(req.Version)
+		if _, ok := supportedHardwareVersions[targetVersion.String()]; !ok {
+			msg := fmt.Sprintf("%s not supported", string(targetVersion))
+			return nil, &types.NotSupported{
+				RuntimeFault: types.RuntimeFault{
+					MethodFault: types.MethodFault{
+						FaultCause: &types.LocalizedMethodFault{
+							Fault: &types.SystemErrorFault{
+								Reason: msg,
+							},
+							LocalizedMessage: msg,
+						},
+					},
+				},
+			}
+		}
+
+		// AlreadyUpgraded
+		if targetVersion.Int() <= types.HardwareVersion(vm.Config.Version).Int() {
+			return nil, &types.AlreadyUpgradedFault{}
+		}
+
+		// InvalidArgument
+		if targetVersion.Int() < 3 {
+			return nil, &types.InvalidArgument{}
+		}
+
+		ctx.Map.Update(vm, []types.PropertyChange{
+			{
+				Name: "config.version", Val: targetVersion.String(),
+			},
+			{
+				Name: "summary.config.hwVersion", Val: targetVersion.String(),
+			},
+		})
+
 		return nil, nil
 	})
 
