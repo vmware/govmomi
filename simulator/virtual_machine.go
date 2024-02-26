@@ -1921,6 +1921,7 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 			latestHardwareVersion     string
 			hostRef                   = vm.Runtime.Host
 			supportedHardwareVersions = map[string]struct{}{}
+			vmHardwareVersionString   = vm.Config.Version
 		)
 		if hostRef != nil {
 			var hostInMaintenanceMode bool
@@ -1965,7 +1966,7 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 		if latestHardwareVersion == "" {
 			latestHardwareVersion = esx.HardwareVersion
 		}
-		if vm.Config.Version == latestHardwareVersion {
+		if vmHardwareVersionString == latestHardwareVersion {
 			return nil, newInvalidStateFault("%s is latest version", vm.Reference().Value)
 		}
 		if req.Version == "" {
@@ -1973,9 +1974,12 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 		}
 
 		// NotSupported
-		targetVersion := types.HardwareVersion(req.Version)
-		if _, ok := supportedHardwareVersions[targetVersion.String()]; !ok {
-			msg := fmt.Sprintf("%s not supported", string(targetVersion))
+		targetVersion, _ := types.ParseHardwareVersion(req.Version)
+		if targetVersion.IsValid() {
+			req.Version = targetVersion.String()
+		}
+		if _, ok := supportedHardwareVersions[req.Version]; !ok {
+			msg := fmt.Sprintf("%s not supported", req.Version)
 			return nil, &types.NotSupported{
 				RuntimeFault: types.RuntimeFault{
 					MethodFault: types.MethodFault{
@@ -1991,12 +1995,15 @@ func (vm *VirtualMachine) UpgradeVMTask(ctx *Context, req *types.UpgradeVM_Task)
 		}
 
 		// AlreadyUpgraded
-		if targetVersion.Int() <= types.HardwareVersion(vm.Config.Version).Int() {
+		vmHardwareVersion, _ := types.ParseHardwareVersion(vmHardwareVersionString)
+		if targetVersion.IsValid() && vmHardwareVersion.IsValid() &&
+			targetVersion <= vmHardwareVersion {
+
 			return nil, &types.AlreadyUpgradedFault{}
 		}
 
 		// InvalidArgument
-		if targetVersion.Int() < 3 {
+		if targetVersion < types.VMX3 {
 			return nil, &types.InvalidArgument{}
 		}
 
