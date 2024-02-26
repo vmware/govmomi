@@ -83,30 +83,27 @@ func (b *EnvironmentBrowser) initDescriptorReturnVal(
 		ref := hostRefs[j]
 		ctx.WithLock(ref, func() {
 			host := ctx.Map.Get(ref).(*HostSystem)
-			hostVersion := host.Config.Product.Version
-			hostHardwareVersion, ok := types.GetHardwareVersionForESXi(hostVersion)
-			if !ok {
-				return
-			}
+			hostVersion := types.MustParseESXiVersion(host.Config.Product.Version)
+			hostHardwareVersion := hostVersion.HardwareVersion()
 			maxHardwareVersionForHost[ref] = hostHardwareVersion
-			if maxHardwareVersion == "" {
+			if !maxHardwareVersion.IsValid() {
 				maxHardwareVersion = hostHardwareVersion
 				return
 			}
-			if hostHardwareVersion.Int() > maxHardwareVersion.Int() {
+			if hostHardwareVersion > maxHardwareVersion {
 				maxHardwareVersion = hostHardwareVersion
 			}
 		})
 	}
 
-	if maxHardwareVersion == "" {
+	if !maxHardwareVersion.IsValid() {
 		return
 	}
 
 	hardwareVersions := types.GetHardwareVersions()
 	for i := range hardwareVersions {
 		hv := hardwareVersions[i]
-		dco := hv.Int() == maxHardwareVersion.Int()
+		dco := hv == maxHardwareVersion
 		cod := types.VirtualMachineConfigOptionDescriptor{
 			Key:                 hv.String(),
 			Description:         hv.String(),
@@ -116,7 +113,7 @@ func (b *EnvironmentBrowser) initDescriptorReturnVal(
 			UpgradeSupported:    types.NewBool(true),
 		}
 		for hostRef, hostVer := range maxHardwareVersionForHost {
-			if hostVer.Int() >= hv.Int() {
+			if hostVer >= hv {
 				cod.Host = append(cod.Host, hostRef)
 			}
 		}

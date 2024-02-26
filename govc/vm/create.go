@@ -127,8 +127,14 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.annotation, "annotation", "", "VM description")
 
 	f.StringVar(&cmd.firmware, "firmware", FirmwareTypes[0], FirmwareUsage)
+
+	esxiVersions := types.GetESXiVersions()
+	esxiVersionStrings := make([]string, len(esxiVersions))
+	for i := range esxiVersions {
+		esxiVersionStrings[i] = esxiVersions[i].String()
+	}
 	f.StringVar(&cmd.version, "version", "",
-		fmt.Sprintf("ESXi hardware version [%s]", strings.Join(types.GetESXiVersions(), "|")))
+		fmt.Sprintf("ESXi hardware version [%s]", strings.Join(esxiVersionStrings, "|")))
 
 	f.StringVar(&cmd.iso, "iso", "", "ISO path")
 	cmd.isoDatastoreFlag, ctx = flags.NewCustomDatastoreFlag(ctx)
@@ -327,15 +333,13 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 	var err error
 
 	if cmd.version != "" {
-		v, ok := types.GetHardwareVersionForESXi(cmd.version)
-		if !ok {
-			hv := types.HardwareVersion(cmd.version)
-			if !hv.IsValid() {
-				return nil, fmt.Errorf("invalid version: %s", cmd.version)
-			}
-			v = hv
+		if v, _ := types.ParseESXiVersion(cmd.version); v.IsValid() {
+			cmd.version = v.HardwareVersion().String()
+		} else if v, _ := types.ParseHardwareVersion(cmd.version); v.IsValid() {
+			cmd.version = v.String()
+		} else {
+			return nil, fmt.Errorf("invalid version: %s", cmd.version)
 		}
-		cmd.version = v.String()
 	}
 
 	spec := &types.VirtualMachineConfigSpec{

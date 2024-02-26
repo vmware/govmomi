@@ -5818,7 +5818,7 @@ Options:
   -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
-  -version=              ESXi hardware version [8.0.2|8.0|7.0.2|7.0.1|7.0.0|6.7.2|6.7|6.5|6.0|5.5|5.1|5.0|4.0|3|2]
+  -version=              ESXi hardware version [2|3|4|5.0|5.1|5.5|6.0|6.5|6.7|6.7.2|7.0|7.0.1|7.0.2|8.0|8.0.1|8.0.2]
 ```
 
 ## vm.customize
