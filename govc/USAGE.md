@@ -41,6 +41,15 @@ but appear via `govc $cmd -h`:
  - [cluster.add](#clusteradd)
  - [cluster.change](#clusterchange)
  - [cluster.create](#clustercreate)
+ - [cluster.draft.commit](#clusterdraftcommit)
+ - [cluster.draft.component.add](#clusterdraftcomponentadd)
+ - [cluster.draft.component.info](#clusterdraftcomponentinfo)
+ - [cluster.draft.component.ls](#clusterdraftcomponentls)
+ - [cluster.draft.component.rm](#clusterdraftcomponentrm)
+ - [cluster.draft.create](#clusterdraftcreate)
+ - [cluster.draft.info](#clusterdraftinfo)
+ - [cluster.draft.ls](#clusterdraftls)
+ - [cluster.draft.rm](#clusterdraftrm)
  - [cluster.group.change](#clustergroupchange)
  - [cluster.group.create](#clustergroupcreate)
  - [cluster.group.ls](#clustergroupls)
@@ -334,6 +343,10 @@ but appear via `govc $cmd -h`:
  - [vcsa.shutdown.poweroff](#vcsashutdownpoweroff)
  - [vcsa.shutdown.reboot](#vcsashutdownreboot)
  - [version](#version)
+ - [vlcm.depot.offline.create](#vlcmdepotofflinecreate)
+ - [vlcm.depot.offline.info](#vlcmdepotofflineinfo)
+ - [vlcm.depot.offline.ls](#vlcmdepotofflinels)
+ - [vlcm.depot.offline.rm](#vlcmdepotofflinerm)
  - [vm.change](#vmchange)
  - [vm.clone](#vmclone)
  - [vm.console](#vmconsole)
@@ -487,6 +500,149 @@ Examples:
 
 Options:
   -folder=               Inventory folder [GOVC_FOLDER]
+```
+
+## cluster.draft.commit
+
+```
+Usage: govc cluster.draft.commit [OPTIONS] CLUSTER
+
+Commits the provided software draft.  
+
+Execution will block the terminal for the duration of the task. 
+
+Examples:
+  govc cluster.draft.commit -cluster-id=domain-c21 -draft-id=13
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.component.add
+
+```
+Usage: govc cluster.draft.component.add [OPTIONS] CLUSTER
+
+Adds a new component to the software draft.  
+
+Examples:
+  govc cluster.draft.component.add -cluster-id=domain-c21 -draft-id=13 -component-id=NVD-AIE-800 -component-version=550.54.10-1OEM.800.1.0.20613240
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -component-id=         The identifier of the software component.
+  -component-version=    The version of the software component.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.component.info
+
+```
+Usage: govc cluster.draft.component.info [OPTIONS] CLUSTER
+
+Displays the details of a component in a software draft.  
+
+Examples:
+  govc cluster.draft.component.info -cluster-id=domain-c21 -draft-id=13 -component-id=NVD-AIE-800
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -component-id=         The identifier of the software component.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.component.ls
+
+```
+Usage: govc cluster.draft.component.ls [OPTIONS] CLUSTER
+
+Displays the list of components in a software draft.
+
+Examples:
+  govc cluster.draft.component.ls -cluster-id=domain-c21 -draft-id=13
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.component.rm
+
+```
+Usage: govc cluster.draft.component.rm [OPTIONS] CLUSTER
+
+Removes a component from a software draft.  
+
+Examples:
+  govc cluster.draft.component.rm -cluster-id=domain-c21 -draft-id=13 -component-id=NVD-AIE-800
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -component-id=         The identifier of the software component.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.create
+
+```
+Usage: govc cluster.draft.create [OPTIONS] CLUSTER
+
+Creates a new software draft.
+
+There can be only one active draft at a time on every cluster.
+
+Examples:
+  govc cluster.draft.create -cluster-id=domain-c21
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+```
+
+## cluster.draft.info
+
+```
+Usage: govc cluster.draft.info [OPTIONS] CLUSTER
+
+Displays the details of a software draft.
+
+Examples:
+  govc cluster.draft.info -cluster-id=domain-c21 -draft-id=13
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.ls
+
+```
+Usage: govc cluster.draft.ls [OPTIONS] CLUSTER
+
+Displays the list of software drafts.
+
+Examples:
+  govc cluster.draft.ls -cluster-id=domain-c21
+  govc cluster.draft.ls -cluster-id=domain-c21 -owners=stoyan1,stoyan2
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -owners=               A comma-separated list of owners to filter by.
+```
+
+## cluster.draft.rm
+
+```
+Usage: govc cluster.draft.rm [OPTIONS] CLUSTER
+
+Discards a software draft.
+
+Examples:
+  govc cluster.draft.rm -cluster-id=domain-c21 -draft-id=13
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -draft-id=             The identifier of the software draft.
 ```
 
 ## cluster.group.change
@@ -5657,6 +5813,72 @@ Usage: govc version [OPTIONS]
 Options:
   -l=false   Print detailed govc version information
   -require=  Require govc version >= this value
+```
+
+## vlcm.depot.offline.create
+
+```
+Usage: govc vlcm.depot.offline.create [OPTIONS] VLCM
+
+Creates an offline image depot.
+
+Execution will block the terminal for the duration of the task. 
+
+Examples:
+  govc vlcm.depot.offline.create -l=<https://your.server.com/filepath>
+  govc vlcm.depot.offline.create -l=<https://your.server.com/filepath> -source-type=PULL
+  govc vlcm.depot.offline.create -file-id=<your file identifier> -source-type=PUSH
+  govc vlcm.depot.offline.create -l=<https://your.server.com/filepath> -source-type=PULL -d="This is a depot used for testing" -owner-data="After all, why not? Why shouldn't I keep it?"
+
+Options:
+  -d=                    An optional description
+  -file-id=              File identifier. Only used when source-type is PUSH
+  -l=                    The URL to the depot contents. Only applicable when source-type is PULL
+  -owner-data=           Optional data about the depot's owner
+  -source-type=PULL      The depot source type. The default is PULL
+```
+
+## vlcm.depot.offline.info
+
+```
+Usage: govc vlcm.depot.offline.info [OPTIONS] VLCM
+
+Displays the contents of an offline image depot. 
+
+Examples:
+  govc vlcm.depot.offline.info -depot-id=<your depot's identifier>
+
+Options:
+  -depot-id=             The identifier of the depot. Use the 'ls' command to see the list of depots.
+```
+
+## vlcm.depot.offline.ls
+
+```
+Usage: govc vlcm.depot.offline.ls [OPTIONS] VLCM
+
+Displays the list of offline image depots. 
+
+Examples:
+  govc vlcm.depot.offline.ls
+
+Options:
+```
+
+## vlcm.depot.offline.rm
+
+```
+Usage: govc vlcm.depot.offline.rm [OPTIONS] VLCM
+
+Deletes an offline image depot.
+
+Execution will block the terminal for the duration of the task. 
+
+Examples:
+  govc vlcm.depot.offline.rm -depot-id=<your depot's identifier>
+
+Options:
+  -depot-id=             The identifier of the depot. Use the 'ls' command to see the list of depots.
 ```
 
 ## vm.change

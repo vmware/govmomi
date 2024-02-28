@@ -37,6 +37,12 @@ func (r *Resource) String() string {
 	return r.u.String()
 }
 
+// WithSubpath appends the provided subpath to the URL.Path
+func (r *Resource) WithSubpath(subpath string) *Resource {
+	r.u.Path += "/" + subpath
+	return r
+}
+
 // WithID appends id to the URL.Path
 func (r *Resource) WithID(id string) *Resource {
 	r.u.Path += "/id:" + id
