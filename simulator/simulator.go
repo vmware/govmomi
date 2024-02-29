@@ -350,6 +350,7 @@ func (s *Service) About(w http.ResponseWriter, r *http.Request) {
 
 	for _, sdk := range s.sdk {
 		for _, obj := range sdk.objects {
+			fmt.Println("The object types as " + obj.Reference().Type)
 			kind := obj.Reference().Type
 			if seen[kind] {
 				continue
