@@ -205,6 +205,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, resBody interface{})
 		switch res.StatusCode {
 		case http.StatusOK:
 		case http.StatusCreated:
+		case http.StatusAccepted:
 		case http.StatusNoContent:
 		case http.StatusBadRequest:
 			// TODO: structured error types
