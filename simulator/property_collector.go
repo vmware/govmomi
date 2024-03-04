@@ -855,9 +855,12 @@ func (pc *PropertyCollector) Fetch(ctx *Context, req *internal.Fetch) soap.HasFa
 
 	obj := res.(*methods.RetrievePropertiesExBody).Res.Returnval.Objects[0]
 	if len(obj.PropSet) == 0 {
-		fault := obj.MissingSet[0].Fault
-		body.Fault_ = Fault(fault.LocalizedMessage, fault.Fault)
-		return body
+		if len(obj.MissingSet) > 0 {
+			fault := obj.MissingSet[0].Fault
+			body.Fault_ = Fault(fault.LocalizedMessage, fault.Fault)
+			return body
+		}
+		return res
 	}
 
 	body.Res = &internal.FetchResponse{

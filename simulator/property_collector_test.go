@@ -29,6 +29,7 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator/esx"
+	"github.com/vmware/govmomi/simulator/internal"
 	"github.com/vmware/govmomi/simulator/vpx"
 	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
@@ -680,6 +681,20 @@ func TestPropertyCollectorWithUnsetValues(t *testing.T) {
 		err = property.Wait(ctx, pc, vmRef, propSet, f(true))
 		if err != nil {
 			t.Error(err)
+		}
+
+		// internal Fetch() method used by ovftool and pyvmomi
+		for _, prop := range propSet {
+			body := &internal.FetchBody{
+				Req: &internal.Fetch{
+					This: vm.Reference(),
+					Prop: prop,
+				},
+			}
+
+			if err := client.RoundTrip(ctx, body, body); err != nil {
+				t.Error(err)
+			}
 		}
 	}
 }
