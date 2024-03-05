@@ -39,12 +39,16 @@ type Handler struct {
 
 	Depots          map[string]depots.SettingsDepotsOfflineInfo
 	DepotComponents map[string]depots.SettingsDepotsOfflineContentInfo
+	BaseImages      []depots.BaseImagesSummary
 
 	SoftwareDrafts     map[string]clusters.SettingsClustersSoftwareDraftsMetadata
 	SoftwareComponents map[string]clusters.SettingsComponentInfo
+	ClusterImage       *clusters.SettingsBaseImageInfo
 
 	depotCounter int
 	draftCounter int
+
+	vlcmEnabled bool
 }
 
 // New creates a Handler instance
@@ -53,9 +57,11 @@ func New(u *url.URL) *Handler {
 		URL:                u,
 		Depots:             make(map[string]depots.SettingsDepotsOfflineInfo),
 		DepotComponents:    make(map[string]depots.SettingsDepotsOfflineContentInfo),
+		BaseImages:         createMockBaseImages(),
 		SoftwareDrafts:     make(map[string]clusters.SettingsClustersSoftwareDraftsMetadata),
 		SoftwareComponents: make(map[string]clusters.SettingsComponentInfo),
 		depotCounter:       0,
+		vlcmEnabled:        false,
 	}
 }
 
@@ -63,6 +69,7 @@ func (h *Handler) Register(s *simulator.Service, r *simulator.Registry) {
 	if r.IsVPX() {
 		s.HandleFunc(depots.DepotsOfflinePath, h.depotsOffline)
 		s.HandleFunc(depots.DepotsOfflinePath+"/", h.depotsOffline)
+		s.HandleFunc(depots.BaseImagesPath, h.baseImages)
 		s.HandleFunc("/api/esx/settings/clusters/", h.clusters)
 	}
 }
@@ -126,69 +133,76 @@ func (h *Handler) depotsOffline(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (h *Handler) baseImages(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, h.BaseImages)
+	}
+}
+
 func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 	subpath := r.URL.Path[len("/api/esx/settings/clusters"):]
 	segments := strings.Split(subpath, "/")
 
-	if len(segments) < 4 || segments[2] != "software" || segments[3] != "drafts" {
-		vapi.ApiErrorUnsupported(w)
+	if len(segments) > 3 && segments[2] == "software" && segments[3] == "drafts" {
+		segments = segments[4:]
+		if len(segments) > 2 && segments[1] == "software" && segments[2] == "components" {
+			h.clustersSoftwareDraftsComponents(w, r, segments)
+			return
+		} else if len(segments) > 2 && segments[1] == "software" && segments[2] == "base-image" {
+			h.clustersSoftwareDraftsBaseImage(w, r)
+			return
+		} else {
+			h.clustersSoftwareDrafts(w, r, segments)
+			return
+		}
+	} else if len(segments) > 3 && segments[2] == "enablement" && segments[3] == "software" {
+		h.clustersSoftwareEnablement(w, r)
 		return
+	}
+
+	vapi.ApiErrorUnsupported(w)
+}
+
+func (h *Handler) clustersSoftwareDrafts(w http.ResponseWriter, r *http.Request, subpath []string) {
+	var draftId *string
+	if len(subpath) > 0 {
+		draftId = &subpath[0]
 	}
 
 	switch r.Method {
 	case http.MethodGet:
-		id := fmt.Sprintf("%d", h.draftCounter)
-		if isEndpointSoftwareComponents(segments, id) {
-			if len(segments) > 7 {
-				if comp, contains := h.SoftwareComponents[segments[7]]; contains {
-					vapi.StatusOK(w, comp)
-				} else {
-					vapi.ApiErrorNotFound(w)
-				}
-			} else {
-				vapi.StatusOK(w, h.SoftwareComponents)
-			}
-			return
-		}
-
-		if len(segments) > 4 {
-			if draft, contains := h.SoftwareDrafts[id]; contains {
-				vapi.StatusOK(w, draft)
-			} else {
+		if draftId != nil {
+			if draft, contains := h.SoftwareDrafts[*draftId]; !contains {
 				vapi.ApiErrorNotFound(w)
+				return
+			} else {
+				vapi.StatusOK(w, draft)
 			}
 		} else {
 			vapi.StatusOK(w, h.SoftwareDrafts)
 		}
 	case http.MethodDelete:
-		id := fmt.Sprintf("%d", h.draftCounter)
-		// component delete
-		if isEndpointSoftwareComponents(segments, id) {
-			if len(segments) > 7 {
-				delete(h.SoftwareComponents, segments[7])
-				vapi.StatusOK(w, "")
+		if draftId != nil {
+			if _, contains := h.SoftwareDrafts[*draftId]; !contains {
+				vapi.ApiErrorNotFound(w)
 				return
+			} else {
+				delete(h.SoftwareDrafts, *draftId)
+				vapi.StatusOK(w)
 			}
 		}
-
-		// draft delete
-		if len(segments) > 4 && segments[4] == id {
-			delete(h.SoftwareDrafts, id)
-			vapi.StatusOK(w, "")
-			return
-		}
-
-		vapi.ApiErrorNotFound(w)
 	case http.MethodPost:
 		if strings.Contains(r.URL.RawQuery, "action=commit") {
-			id := fmt.Sprintf("%d", h.draftCounter)
-			if len(segments) > 4 && segments[4] == id {
-				delete(h.SoftwareDrafts, id)
-				vapi.StatusOK(w, "")
-			} else {
-				vapi.ApiErrorNotFound(w)
+			if draftId != nil {
+				if _, contains := h.SoftwareDrafts[*draftId]; !contains {
+					vapi.ApiErrorNotFound(w)
+					return
+				} else {
+					delete(h.SoftwareDrafts, *draftId)
+					vapi.StatusOK(w)
+				}
 			}
-			return
 		}
 		// Only one active draft is permitted
 		if len(h.SoftwareDrafts) > 0 {
@@ -198,16 +212,35 @@ func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 
 		h.draftCounter += 1
 		draft := clusters.SettingsClustersSoftwareDraftsMetadata{}
-		id := fmt.Sprintf("%d", h.draftCounter)
-		h.SoftwareDrafts[id] = draft
-		vapi.StatusOK(w, id)
-	case http.MethodPatch:
-		id := fmt.Sprintf("%d", h.draftCounter)
-		if !isEndpointSoftwareComponents(segments, id) {
-			vapi.ApiErrorUnsupported(w)
-			return
-		}
+		newDraftId := fmt.Sprintf("%d", h.draftCounter)
+		h.SoftwareDrafts[newDraftId] = draft
+		vapi.StatusOK(w, newDraftId)
+	}
+}
 
+func (h *Handler) clustersSoftwareDraftsComponents(w http.ResponseWriter, r *http.Request, subpath []string) {
+	switch r.Method {
+	case http.MethodGet:
+		if len(subpath) > 3 {
+			if comp, contains := h.SoftwareComponents[subpath[3]]; contains {
+				vapi.StatusOK(w, comp)
+			} else {
+				vapi.ApiErrorNotFound(w)
+			}
+		} else {
+			vapi.StatusOK(w, h.SoftwareComponents)
+		}
+	case http.MethodDelete:
+		if len(subpath) > 3 {
+			compId := subpath[3]
+			if comp, contains := h.SoftwareComponents[compId]; contains {
+				delete(h.SoftwareComponents, compId)
+				vapi.StatusOK(w, comp)
+			} else {
+				vapi.ApiErrorNotFound(w)
+			}
+		}
+	case http.MethodPatch:
 		var spec clusters.SoftwareComponentsUpdateSpec
 		if vapi.Decode(r, w, &spec) {
 			for k, v := range spec.ComponentsToSet {
@@ -220,9 +253,36 @@ func (h *Handler) clusters(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func isEndpointSoftwareComponents(subpathSegments []string, draftId string) bool {
-	return len(subpathSegments) > 6 &&
-		subpathSegments[4] == draftId &&
-		subpathSegments[5] == "software" &&
-		subpathSegments[6] == "components"
+func (h *Handler) clustersSoftwareDraftsBaseImage(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, h.ClusterImage)
+	case http.MethodPut:
+		var spec clusters.SettingsBaseImageSpec
+		if vapi.Decode(r, w, &spec) {
+			h.ClusterImage = &clusters.SettingsBaseImageInfo{Version: spec.Version}
+			vapi.StatusOK(w)
+		} else {
+			vapi.ApiErrorInvalidArgument(w)
+		}
+	}
+}
+
+func (h *Handler) clustersSoftwareEnablement(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		vapi.StatusOK(w, clusters.SoftwareManagementInfo{Enabled: h.vlcmEnabled})
+	case http.MethodPut:
+		h.vlcmEnabled = true
+		vapi.StatusOK(w)
+	}
+}
+
+func createMockBaseImages() []depots.BaseImagesSummary {
+	baseImage := depots.BaseImagesSummary{
+		DisplayName:    "DummyImage",
+		DisplayVersion: "0.0.1",
+		Version:        "0.0.1",
+	}
+	return []depots.BaseImagesSummary{baseImage}
 }

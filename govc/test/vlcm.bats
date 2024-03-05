@@ -163,3 +163,29 @@ location="http://127.0.0.1:9999/files/custom_driver.zip"
   assert_failure
   assert_matches "404 Not Found"
 }
+
+@test "cluster.draft.baseimage.set" {
+  vcsim_env
+
+  run govc cluster.draft.create -cluster-id=domain-c21
+  assert_success
+
+  run govc cluster.draft.baseimage.set -cluster-id=domain-c21 -draft-id=1 -version=1.0.0
+  assert_success
+
+  baseimg=$(govc cluster.draft.baseimage.info -cluster-id=domain-c21 -draft-id=1)
+
+  assert_equal "1.0.0" $(echo $baseimg | jq -r '.version')
+}
+
+@test "cluster.vlcm.enable" {
+  vcsim_env
+
+  res=$(govc cluster.vlcm.info -cluster-id=domain-c21)
+  assert_equal "false" $(echo $res | jq -r '.enabled')
+
+  run govc cluster.vlcm.enable -cluster-id=domain-c21
+
+  res=$(govc cluster.vlcm.info -cluster-id=domain-c21)
+  assert_equal "true" $(echo $res | jq -r '.enabled')
+}

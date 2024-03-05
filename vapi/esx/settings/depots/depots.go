@@ -25,10 +25,13 @@ import (
 )
 
 const (
+	basePath = "/api/esx/settings"
 	// DepotsOfflinePath The endpoint for the offline depots API
-	DepotsOfflinePath = "/api/esx/settings/depots/offline"
+	DepotsOfflinePath = basePath + "/depots/offline"
 	// DepotsOfflineContentPath The endpoint for retrieving the components in a depot
 	DepotsOfflineContentPath = DepotsOfflinePath + "/%s/content"
+	// BaseImagesPath The endpoint for retrieving the list of base ESXi images
+	BaseImagesPath = basePath + "/depot-content/base-images"
 )
 
 // Manager extends rest.Client, adding vLCM related methods.
@@ -115,6 +118,17 @@ type SettingsDepotsOfflineContentInfo struct {
 	MetadataBundles map[string][]SettingsDepotsMetadataInfo `json:"metadata_bundles"`
 }
 
+// BaseImagesSummary is a type mapping for
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/data-structures/Settings/DepotContent/BaseImages/Summary/
+type BaseImagesSummary struct {
+	DisplayName    string `json:"display_name"`
+	DisplayVersion string `json:"display_version"`
+	Kb             string `json:"kb"`
+	ReleaseDate    string `json:"release_date"`
+	Summary        string `json:"summary"`
+	Version        string `json:"version"`
+}
+
 // GetOfflineDepot retrieves an offline depot by its identifier
 // https://developer.vmware.com/apis/vsphere-automation/latest/esx/api/esx/settings/depots/offline/depot/get/
 func (c *Manager) GetOfflineDepot(depotId string) (SettingsDepotsOfflineSummary, error) {
@@ -157,5 +171,14 @@ func (c *Manager) GetOfflineDepotContent(depotId string) (SettingsDepotsOfflineC
 	path := c.Resource(fmt.Sprintf(DepotsOfflineContentPath, depotId))
 	req := path.Request(http.MethodGet)
 	var res SettingsDepotsOfflineContentInfo
+	return res, c.Do(context.Background(), req, &res)
+}
+
+// ListBaseImages retrieves the available ESXi versions
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/api/esx/settings/depot-content/base-images/get/
+func (c *Manager) ListBaseImages() ([]BaseImagesSummary, error) {
+	path := c.Resource(BaseImagesPath)
+	req := path.Request(http.MethodGet)
+	var res []BaseImagesSummary
 	return res, c.Do(context.Background(), req, &res)
 }
