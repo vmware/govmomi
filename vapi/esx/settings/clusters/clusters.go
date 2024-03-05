@@ -26,9 +26,15 @@ import (
 )
 
 const (
+	basePath = "/api/esx/settings"
 	// SoftwareDraftsPath The endpoint for the software drafts API
-	SoftwareDraftsPath     = "/api/esx/settings/clusters/%s/software/drafts"
+	SoftwareDraftsPath = basePath + "/clusters/%s/software/drafts"
+	// SoftwareComponentsPath The endpoint for retrieving the custom components in a software draft
 	SoftwareComponentsPath = SoftwareDraftsPath + "/%s/software/components"
+	// BaseImagePath The endpoint for retrieving the base image of a software draft
+	BaseImagePath = SoftwareDraftsPath + "/%s/software/base-image"
+	// SoftwareEnablementPath The endpoint for retrieving the vLCM status (enabled/disabled) of a cluster
+	SoftwareEnablementPath = basePath + "/clusters/%s/enablement/software"
 )
 
 // Manager extends rest.Client, adding Software Drafts related methods.
@@ -169,6 +175,24 @@ type SettingsClustersSoftwareDraftsCommitSpec struct {
 	Message string `json:"message,omitempty"`
 }
 
+// SettingsBaseImageSpec is a type mapping for
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/data-structures/Settings/BaseImageSpec/
+type SettingsBaseImageSpec struct {
+	Version string `json:"version"`
+}
+
+// EnableSoftwareManagementSpec is a type mapping for
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/data-structures/Settings/Clusters/Enablement/Software/EnableSpec/
+type EnableSoftwareManagementSpec struct {
+	SkipSoftwareCheck bool `json:"skip_software_check"`
+}
+
+// SoftwareManagementInfo is a type mapping for
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/data-structures/Settings/Clusters/Enablement/Software/Info/
+type SoftwareManagementInfo struct {
+	Enabled bool `json:"enabled"`
+}
+
 // ListSoftwareDrafts retrieves the software drafts for a cluster
 // https://developer.vmware.com/apis/vsphere-automation/latest/esx/api/esx/settings/clusters/cluster/software/drafts/get/
 func (c *Manager) ListSoftwareDrafts(clusterId string, owners *[]string) (map[string]SettingsClustersSoftwareDraftsMetadata, error) {
@@ -250,4 +274,39 @@ func (c *Manager) RemoveSoftwareDraftComponents(clusterId, draftId, component st
 	path := c.Resource(fmt.Sprintf(SoftwareComponentsPath, clusterId, draftId)).WithSubpath(component)
 	req := path.Request(http.MethodDelete)
 	return c.Do(context.Background(), req, nil)
+}
+
+// GetSoftwareDraftBaseImage retrieves the ESXi image version on the specified draft
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/api/esx/settings/clusters/cluster/software/drafts/draft/software/base-image/get
+func (c *Manager) GetSoftwareDraftBaseImage(clusterId, draftId string) (SettingsBaseImageInfo, error) {
+	path := c.Resource(fmt.Sprintf(BaseImagePath, clusterId, draftId))
+	req := path.Request(http.MethodGet)
+	var res SettingsBaseImageInfo
+	return res, c.Do(context.Background(), req, &res)
+}
+
+// SetSoftwareDraftBaseImage sets the ESXi image version on the specified draft
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/settings/clusters.software.drafts.software.base_image/put
+func (c *Manager) SetSoftwareDraftBaseImage(clusterId, draftId, version string) error {
+	path := c.Resource(fmt.Sprintf(BaseImagePath, clusterId, draftId))
+	req := path.Request(http.MethodPut, SettingsBaseImageSpec{Version: version})
+	return c.Do(context.Background(), req, nil)
+}
+
+// EnableSoftwareManagement enables vLCM on the cluster
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/settings/clusters.enablement.software/put
+func (c *Manager) EnableSoftwareManagement(clusterId string, skipCheck bool) (string, error) {
+	path := c.Resource(fmt.Sprintf(SoftwareEnablementPath, clusterId)).WithParam("vmw-task", "true")
+	req := path.Request(http.MethodPut, EnableSoftwareManagementSpec{SkipSoftwareCheck: skipCheck})
+	var res string
+	return res, c.Do(context.Background(), req, &res)
+}
+
+// GetSoftwareManagement checks whether vLCM is enabled on the cluster
+// https://developer.vmware.com/apis/vsphere-automation/latest/esx/api/esx/settings/clusters/cluster/enablement/software/get/
+func (c *Manager) GetSoftwareManagement(clusterId string) (SoftwareManagementInfo, error) {
+	path := c.Resource(fmt.Sprintf(SoftwareEnablementPath, clusterId))
+	req := path.Request(http.MethodGet)
+	var res SoftwareManagementInfo
+	return res, c.Do(context.Background(), req, &res)
 }

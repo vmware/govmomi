@@ -41,6 +41,8 @@ but appear via `govc $cmd -h`:
  - [cluster.add](#clusteradd)
  - [cluster.change](#clusterchange)
  - [cluster.create](#clustercreate)
+ - [cluster.draft.baseimage.info](#clusterdraftbaseimageinfo)
+ - [cluster.draft.baseimage.set](#clusterdraftbaseimageset)
  - [cluster.draft.commit](#clusterdraftcommit)
  - [cluster.draft.component.add](#clusterdraftcomponentadd)
  - [cluster.draft.component.info](#clusterdraftcomponentinfo)
@@ -70,6 +72,8 @@ but appear via `govc $cmd -h`:
  - [cluster.rule.remove](#clusterruleremove)
  - [cluster.stretch](#clusterstretch)
  - [cluster.usage](#clusterusage)
+ - [cluster.vlcm.enable](#clustervlcmenable)
+ - [cluster.vlcm.info](#clustervlcminfo)
  - [datacenter.create](#datacentercreate)
  - [datacenter.info](#datacenterinfo)
  - [datastore.cluster.change](#datastoreclusterchange)
@@ -343,6 +347,7 @@ but appear via `govc $cmd -h`:
  - [vcsa.shutdown.poweroff](#vcsashutdownpoweroff)
  - [vcsa.shutdown.reboot](#vcsashutdownreboot)
  - [version](#version)
+ - [vlcm.depot.baseimages.ls](#vlcmdepotbaseimagesls)
  - [vlcm.depot.offline.create](#vlcmdepotofflinecreate)
  - [vlcm.depot.offline.info](#vlcmdepotofflineinfo)
  - [vlcm.depot.offline.ls](#vlcmdepotofflinels)
@@ -500,6 +505,37 @@ Examples:
 
 Options:
   -folder=               Inventory folder [GOVC_FOLDER]
+```
+
+## cluster.draft.baseimage.info
+
+```
+Usage: govc cluster.draft.baseimage.info [OPTIONS] CLUSTER
+
+Displays the base image version of a software draft.
+
+Examples:
+  govc cluster.draft.baseimage.info -cluster-id=domain-c21 -draft-id=13
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -draft-id=             The identifier of the software draft.
+```
+
+## cluster.draft.baseimage.set
+
+```
+Usage: govc cluster.draft.baseimage.set [OPTIONS] CLUSTER
+
+Sets the ESXi base image on the software draft.
+
+Examples:
+  govc cluster.draft.baseimage.set -cluster-id=domain-c21 -draft-id=31
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -draft-id=             The identifier of the software draft.
+  -version=              The identifier of the ESXi image version.
 ```
 
 ## cluster.draft.commit
@@ -1017,6 +1053,37 @@ Examples:
 
 Options:
   -S=false               Exclude host local storage
+```
+
+## cluster.vlcm.enable
+
+```
+Usage: govc cluster.vlcm.enable [OPTIONS] CLUSTER
+
+Enables vLCM on the provided cluster
+
+This operation is irreversible
+
+Examples:
+  govc cluster.vlcm.enable -cluster-id=domain-c21
+
+Options:
+  -cluster-id=           The identifier of the cluster.
+  -skip-check=false      Whether to skip the software check after enabling vLCM
+```
+
+## cluster.vlcm.info
+
+```
+Usage: govc cluster.vlcm.info [OPTIONS] CLUSTER
+
+Displays the software management status of a cluster.
+
+Examples:
+  govc cluster.vlcm.info -cluster-id=domain-c21
+
+Options:
+  -cluster-id=           The identifier of the cluster.
 ```
 
 ## datacenter.create
@@ -5813,6 +5880,19 @@ Usage: govc version [OPTIONS]
 Options:
   -l=false   Print detailed govc version information
   -require=  Require govc version >= this value
+```
+
+## vlcm.depot.baseimages.ls
+
+```
+Usage: govc vlcm.depot.baseimages.ls [OPTIONS] VLCM
+
+Displays the list of available ESXi base images. 
+
+Examples:
+  govc vlcm.depot.baseimages.ls
+
+Options:
 ```
 
 ## vlcm.depot.offline.create
