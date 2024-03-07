@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -105,6 +105,10 @@ func getManagedObject(obj mo.Reference) reflect.Value {
 		}
 		rval = rval.Field(0)
 		rtype = rval.Type()
+		if rtype.Kind() == reflect.Pointer {
+			rval = rval.Elem()
+			rtype = rval.Type()
+		}
 	}
 
 	return rval
