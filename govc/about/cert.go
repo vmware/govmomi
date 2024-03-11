@@ -89,7 +89,7 @@ func (r *certResult) Write(w io.Writer) error {
 
 	if r.cmd.thumbprint {
 		u := r.cmd.Session.URL
-		_, err := fmt.Fprintf(w, "%s %s\n", u.Host, r.info.ThumbprintSHA1)
+		_, err := fmt.Fprintf(w, "%s %s\n", u.Host, r.info.ThumbprintSHA256)
 		return err
 	}
 
