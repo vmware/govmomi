@@ -59,7 +59,7 @@ load test_helper
   run govc about.cert -show
   assert_success
 
-  # with -k=true we get thumbprint output and exit 0
+  # with -k=true we get sha256 thumbprint output and exit 0
   thumbprint=$(govc about.cert -k=true -thumbprint)
 
   # with -k=true we get thumbprint output and exit 60
@@ -77,6 +77,12 @@ load test_helper
 
   run govc about -k=false -tls-known-hosts <(echo "nope nope")
   assert_failure
+
+  # sha1 backwards compatibility
+  host=$(awk '{print $1}'<<<"$thumbprint")
+  sha1=$(govc about.cert -k=true -json | jq -r .thumbprintSHA1)
+  run govc about -k=false -tls-known-hosts <(echo "$host $sha1")
+  assert_success
 }
 
 @test "version" {

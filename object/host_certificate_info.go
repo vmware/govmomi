@@ -17,7 +17,6 @@ limitations under the License.
 package object
 
 import (
-	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"crypto/x509/pkix"
@@ -58,14 +57,7 @@ func (info *HostCertificateInfo) FromCertificate(cert *x509.Certificate) *HostCe
 	info.Subject = info.fromName(info.subjectName)
 
 	info.ThumbprintSHA1 = soap.ThumbprintSHA1(cert)
-
-	// SHA-256 for info purposes only, API fields all use SHA-1
-	sum := sha256.Sum256(cert.Raw)
-	hex := make([]string, len(sum))
-	for i, b := range sum {
-		hex[i] = fmt.Sprintf("%02X", b)
-	}
-	info.ThumbprintSHA256 = strings.Join(hex, ":")
+	info.ThumbprintSHA256 = soap.ThumbprintSHA256(cert)
 
 	if info.Status == "" {
 		info.Status = string(types.HostCertificateManagerCertificateInfoCertificateStatusUnknown)
