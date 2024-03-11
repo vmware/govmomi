@@ -23,6 +23,7 @@ import (
 	"log"
 	"net/url"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/lookup/methods"
 	"github.com/vmware/govmomi/lookup/types"
 	"github.com/vmware/govmomi/object"
@@ -55,9 +56,9 @@ type Client struct {
 
 // NewClient returns a client targeting the SSO Lookup Service API endpoint.
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
-	// PSC may be external, attempt to derive from sts.uri
 	path := &url.URL{Path: Path}
-	if c.ServiceContent.Setting != nil {
+	// PSC may be external, attempt to derive from sts.uri if not using envoy sidecar
+	if !internal.UsingEnvoySidecar(c) && c.ServiceContent.Setting != nil {
 		m := object.NewOptionManager(c, *c.ServiceContent.Setting)
 		opts, err := m.Query(ctx, "config.vpxd.sso.sts.uri")
 		if err == nil && len(opts) == 1 {
