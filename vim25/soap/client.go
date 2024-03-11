@@ -21,6 +21,7 @@ import (
 	"bytes"
 	"context"
 	"crypto/sha1"
+	"crypto/sha256"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/json"
@@ -387,6 +388,20 @@ func ThumbprintSHA1(cert *x509.Certificate) string {
 	return strings.Join(hex, ":")
 }
 
+// ThumbprintSHA256 returns the sha256 thumbprint of the given cert.
+func ThumbprintSHA256(cert *x509.Certificate) string {
+	sum := sha256.Sum256(cert.Raw)
+	hex := make([]string, len(sum))
+	for i, b := range sum {
+		hex[i] = fmt.Sprintf("%02X", b)
+	}
+	return strings.Join(hex, ":")
+}
+
+func thumbprintMatches(thumbprint string, cert *x509.Certificate) bool {
+	return thumbprint == ThumbprintSHA256(cert) || thumbprint == ThumbprintSHA1(cert)
+}
+
 func (c *Client) dialTLSContext(
 	ctx context.Context,
 	network, addr string) (net.Conn, error) {
@@ -418,14 +433,13 @@ func (c *Client) dialTLSContext(
 	}
 
 	cert := conn.ConnectionState().PeerCertificates[0]
-	peer := ThumbprintSHA1(cert)
-	if thumbprint != peer {
-		_ = conn.Close()
-
-		return nil, fmt.Errorf("host %q thumbprint does not match %q", addr, thumbprint)
+	if thumbprintMatches(thumbprint, cert) {
+		return conn, nil
 	}
 
-	return conn, nil
+	_ = conn.Close()
+
+	return nil, fmt.Errorf("host %q thumbprint does not match %q", addr, thumbprint)
 }
 
 // splitHostPort is similar to net.SplitHostPort,
