@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -243,6 +243,7 @@ var kinds = map[string]reflect.Type{
 	"DistributedVirtualSwitchManager": reflect.TypeOf((*DistributedVirtualSwitchManager)(nil)).Elem(),
 	"EnvironmentBrowser":              reflect.TypeOf((*EnvironmentBrowser)(nil)).Elem(),
 	"EventManager":                    reflect.TypeOf((*EventManager)(nil)).Elem(),
+	"ExtensionManager":                reflect.TypeOf((*ExtensionManager)(nil)).Elem(),
 	"FileManager":                     reflect.TypeOf((*FileManager)(nil)).Elem(),
 	"Folder":                          reflect.TypeOf((*Folder)(nil)).Elem(),
 	"GuestOperationsManager":          reflect.TypeOf((*GuestOperationsManager)(nil)).Elem(),
