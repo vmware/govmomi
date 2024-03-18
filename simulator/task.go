@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,7 +22,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -180,4 +182,92 @@ func (t *Task) Wait() {
 	for isRunning() {
 		time.Sleep(10 * time.Millisecond)
 	}
+}
+
+func (t *Task) isDone() bool {
+	return t.Info.State == types.TaskInfoStateError || t.Info.State == types.TaskInfoStateSuccess
+}
+
+func (t *Task) SetTaskState(ctx *Context, req *types.SetTaskState) soap.HasFault {
+	body := new(methods.SetTaskStateBody)
+
+	if t.isDone() {
+		body.Fault_ = Fault("", new(types.InvalidState))
+		return body
+	}
+
+	changes := []types.PropertyChange{
+		{Name: "info.state", Val: req.State},
+	}
+
+	switch req.State {
+	case types.TaskInfoStateRunning:
+		changes = append(changes, types.PropertyChange{Name: "info.startTime", Val: time.Now()})
+	case types.TaskInfoStateError, types.TaskInfoStateSuccess:
+		changes = append(changes, types.PropertyChange{Name: "info.completeTime", Val: time.Now()})
+
+		if req.Fault != nil {
+			changes = append(changes, types.PropertyChange{Name: "info.error", Val: req.Fault})
+		}
+		if req.Result != nil {
+			changes = append(changes, types.PropertyChange{Name: "info.result", Val: req.Result})
+		}
+	}
+
+	ctx.Map.Update(t, changes)
+
+	body.Res = new(types.SetTaskStateResponse)
+	return body
+}
+
+func (t *Task) SetTaskDescription(ctx *Context, req *types.SetTaskDescription) soap.HasFault {
+	body := new(methods.SetTaskDescriptionBody)
+
+	if t.isDone() {
+		body.Fault_ = Fault("", new(types.InvalidState))
+		return body
+	}
+
+	ctx.Map.Update(t, []types.PropertyChange{{Name: "info.description", Val: req.Description}})
+
+	body.Res = new(types.SetTaskDescriptionResponse)
+	return body
+}
+
+func (t *Task) UpdateProgress(ctx *Context, req *types.UpdateProgress) soap.HasFault {
+	body := new(methods.UpdateProgressBody)
+
+	if t.Info.State != types.TaskInfoStateRunning {
+		body.Fault_ = Fault("", new(types.InvalidState))
+		return body
+	}
+
+	ctx.Map.Update(t, []types.PropertyChange{{Name: "info.progress", Val: req.PercentDone}})
+
+	body.Res = new(types.UpdateProgressResponse)
+	return body
+}
+
+func (t *Task) CancelTask(ctx *Context, req *types.CancelTask) soap.HasFault {
+	body := new(methods.CancelTaskBody)
+
+	if t.isDone() {
+		body.Fault_ = Fault("", new(types.InvalidState))
+		return body
+	}
+
+	changes := []types.PropertyChange{
+		{Name: "info.canceled", Val: true},
+		{Name: "info.completeTime", Val: time.Now()},
+		{Name: "info.state", Val: types.TaskInfoStateError},
+		{Name: "info.error", Val: &types.LocalizedMethodFault{
+			Fault:            &types.RequestCanceled{},
+			LocalizedMessage: "The task was canceled by a user",
+		}},
+	}
+
+	ctx.Map.Update(t, changes)
+
+	body.Res = new(types.CancelTaskResponse)
+	return body
 }

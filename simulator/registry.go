@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -570,6 +570,11 @@ func (r *Registry) CustomFieldsManager() *CustomFieldsManager {
 // TenantManager returns TenantManager singleton
 func (r *Registry) TenantManager() *TenantManager {
 	return r.Get(r.content().TenantManager.Reference()).(*TenantManager)
+}
+
+// ExtensionManager returns the ExtensionManager singleton
+func (r *Registry) ExtensionManager() *ExtensionManager {
+	return r.Get(r.content().ExtensionManager.Reference()).(*ExtensionManager)
 }
 
 func (r *Registry) MarshalJSON() ([]byte, error) {

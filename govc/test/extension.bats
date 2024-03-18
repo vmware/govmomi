@@ -3,9 +3,7 @@
 load test_helper
 
 @test "extension" {
-  vcsim_env_todo
-
-  govc extension.info | grep Name: | grep govc-test | awk '{print $2}' | $xargs -r govc extension.unregister
+  vcsim_env
 
   run govc extension.info enoent
   assert_failure
@@ -51,16 +49,7 @@ EOS
   run govc extension.setcert -cert-pem '+' $id
   assert_success
 
-  # test client certificate authentication
-  (
-    # remove password from env, set user to extension id and turn of session cache
-    govc_url_to_vars
-    unset GOVC_PASSWORD
-    GOVC_USERNAME=$id
-    export GOVC_PERSIST_SESSION=false
-    run govc about -cert "${id}.crt" -key "${id}.key"
-    assert_success
-  )
+  # client certificate authentication is tested in session.bats
 
   # remove generated cert and key
   rm ${id}.{crt,key}
