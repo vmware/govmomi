@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/x509"
 	"encoding/base64"
+	"fmt"
 	"log"
 	"net/url"
 
@@ -119,6 +120,10 @@ func (c *Client) SiteID(ctx context.Context) (string, error) {
 // If the endpoint is found, its TLS certificate is also added to the vim25.Client's trusted host thumbprints.
 // If the Lookup Service is not available, the given path is returned as the default.
 func EndpointURL(ctx context.Context, c *vim25.Client, path string, filter *types.LookupServiceRegistrationFilter) string {
+	// Services running on vCenter can bypass lookup service.
+	if useSidecar := internal.UsingEnvoySidecar(c); useSidecar {
+		return fmt.Sprintf("http://%s%s", c.URL().Host, path)
+	}
 	if lu, err := NewClient(ctx, c); err == nil {
 		info, _ := lu.List(ctx, filter)
 		if len(info) != 0 && len(info[0].ServiceEndpoints) != 0 {

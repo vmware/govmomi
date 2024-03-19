@@ -20,11 +20,16 @@ package lookup_test
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"net/url"
+	"os"
 	"strings"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
+	"github.com/vmware/govmomi/lookup"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/ssoadmin"
 	"github.com/vmware/govmomi/sts"
@@ -69,7 +74,6 @@ func TestEndpointURL(t *testing.T) {
 			}
 		}
 	})
-
 	// these client calls should not fail
 	simulator.Test(func(ctx context.Context, vc *vim25.Client) {
 		{
@@ -95,5 +99,20 @@ func TestEndpointURL(t *testing.T) {
 				t.Fatal(err)
 			}
 		}
+	})
+
+	t.Run("With Envoy sidecar and a malfunctioning lookup service, endpoint url should still succeed", func(t *testing.T) {
+		model := simulator.VPX()
+		model.Create()
+		simulator.Test(func(ctx context.Context, vc *vim25.Client) {
+			lsim.BreakLookupServiceURLs()
+			// Map Envoy sidecar on the same port as the vcsim client.
+			os.Setenv("GOVMOMI_ENVOY_SIDECAR_PORT", vc.Client.URL().Port())
+			os.Setenv("GOVMOMI_ENVOY_SIDECAR_HOST", vc.Client.URL().Hostname())
+			testPath := "/fake/path"
+			expectedUrl := fmt.Sprintf("http://%s%s", vc.Client.URL().Host, testPath)
+			url := lookup.EndpointURL(ctx, vc, testPath, nil)
+			require.Equal(t, expectedUrl, url)
+		}, model)
 	})
 }
