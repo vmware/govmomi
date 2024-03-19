@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"os"
 	"text/tabwriter"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -72,27 +71,36 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	list, err := m.List(ctx)
-	if err != nil {
-		return err
+	var res infoResult
+	exts := make(map[string]types.Extension)
+
+	if f.NArg() == 1 {
+		e, err := m.Find(ctx, f.Arg(0))
+		if err != nil {
+			return err
+		}
+		if e != nil {
+			exts[f.Arg(0)] = *e
+		}
+	} else {
+		list, err := m.List(ctx)
+		if err != nil {
+			return err
+		}
+		if f.NArg() == 0 {
+			res.Extensions = list
+		} else {
+			for _, e := range list {
+				exts[e.Key] = e
+			}
+		}
 	}
 
-	var res infoResult
-
-	if f.NArg() == 0 {
-		res.Extensions = list
-	} else {
-		exts := make(map[string]types.Extension)
-		for _, e := range list {
-			exts[e.Key] = e
-		}
-
-		for _, key := range f.Args() {
-			if e, ok := exts[key]; ok {
-				res.Extensions = append(res.Extensions, e)
-			} else {
-				return fmt.Errorf("extension %s not found", key)
-			}
+	for _, key := range f.Args() {
+		if e, ok := exts[key]; ok {
+			res.Extensions = append(res.Extensions, e)
+		} else {
+			return fmt.Errorf("extension %s not found", key)
 		}
 	}
 
@@ -104,7 +112,7 @@ type infoResult struct {
 }
 
 func (r *infoResult) Write(w io.Writer) error {
-	tw := tabwriter.NewWriter(os.Stdout, 2, 0, 2, ' ', 0)
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
 
 	for _, e := range r.Extensions {
 		fmt.Fprintf(tw, "Name:\t%s\n", e.Key)

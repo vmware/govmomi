@@ -8,10 +8,10 @@ load test_helper
   run govc extension.info enoent
   assert_failure
 
-  id=$(new_id)
+  run govc extension.info
+  assert_success
 
-  result=$(govc extension.info | grep $id | wc -l)
-  [ $result -eq 0 ]
+  id=$(new_id)
 
   # register extension
   run govc extension.register $id <<EOS
@@ -54,9 +54,12 @@ EOS
   # remove generated cert and key
   rm ${id}.{crt,key}
 
+  run govc extension.info $(govc extension.info -json | jq -r .extensions[].key)
+  assert_success
+
   run govc extension.unregister $id
   assert_success
 
-  result=$(govc extension.info | grep $id | wc -l)
-  [ $result -eq 0 ]
+  run govc extension.info $id
+  assert_failure
 }
