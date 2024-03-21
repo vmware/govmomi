@@ -22,6 +22,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
+	"golang.org/x/term"
 	"net/url"
 	"os"
 	"os/signal"
@@ -230,6 +231,16 @@ func (flag *ClientFlag) Process(ctx context.Context) error {
 		flag.password, err = session.Secret(flag.password)
 		if err != nil {
 			return err
+		}
+		if flag.password == "" {
+			fmt.Printf("Enter password and press enter: ")
+			stdin := 0
+			p, err := term.ReadPassword(stdin)
+			if err != nil {
+				return err
+			}
+			flag.password = string(p[:])
+			fmt.Printf("\n")
 		}
 
 		// Override username if set
