@@ -151,7 +151,7 @@ func (cmd *tree) writeJson(vm mo.VirtualMachine) {
 		SnapshotRecords = append(SnapshotRecords, cmd.makeSnapshotRecord(vm, rootSnapshot, nil))
 	}
 	b, _ := json.MarshalIndent(SnapshotRecords, "", "  ")
-	println(string(b))
+	fmt.Println(string(b))
 
 }
 func (cmd *tree) write(level int, parent string, pref *types.ManagedObjectReference, st []types.VirtualMachineSnapshotTree) {
