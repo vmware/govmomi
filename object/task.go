@@ -44,13 +44,17 @@ func NewTask(c *vim25.Client, ref types.ManagedObjectReference) *Task {
 	return &t
 }
 
-// Deprecated: Please use WaitEx instead.
+// Wait waits for a task to complete.
+// NOTE: This method create a thread-safe PropertyCollector instance per-call, so it is thread safe.
+// The downside of this approach is the additional resource usage on the vCenter side for each call.
 func (t *Task) Wait(ctx context.Context) error {
 	_, err := t.WaitForResult(ctx, nil)
 	return err
 }
 
-// Deprecated: Please use WaitForResultEx instead.
+// WaitForResult wait for a task to complete.
+// NOTE: This method create a thread-safe PropertyCollector instance per-call, so it is thread safe.
+// The downside of this approach is the additional resource usage on the vCenter side for each call.
 func (t *Task) WaitForResult(ctx context.Context, s ...progress.Sinker) (taskInfo *types.TaskInfo, result error) {
 	var pr progress.Sinker
 	if len(s) == 1 {
@@ -79,11 +83,17 @@ func (t *Task) WaitForResult(ctx context.Context, s ...progress.Sinker) (taskInf
 	return task.WaitEx(ctx, t.Reference(), p, pr)
 }
 
+// WaitEx waits for a task to complete.
+// NOTE: This method use the same PropertyCollector instance in each call, thus reducing resource usage on the vCenter side.
+// The downside of this approach is that this method is not thread safe.
 func (t *Task) WaitEx(ctx context.Context) error {
 	_, err := t.WaitForResultEx(ctx, nil)
 	return err
 }
 
+// WaitForResultEx waits for a task to complete.
+// NOTE: This method use the same PropertyCollector instance in each call, thus reducing resource usage on the vCenter side.
+// The downside of this approach is that this method is not thread safe.
 func (t *Task) WaitForResultEx(ctx context.Context, s ...progress.Sinker) (*types.TaskInfo, error) {
 	var pr progress.Sinker
 	if len(s) == 1 {
