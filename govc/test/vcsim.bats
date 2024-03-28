@@ -36,8 +36,8 @@ EOF
 
   # compile + run examples against vcsim
   for main in ../../examples/*/main.go ; do
-    # TODO: #2567 #2476
-    if [[ $main =~ task|alarm ]]; then
+    # TODO: #2476
+    if [[ $main =~ alarm ]]; then
       continue
     fi
     run go run "$main" -insecure -url "$GOVC_URL"

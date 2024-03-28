@@ -156,7 +156,12 @@ func TestEventManagerRead(t *testing.T) {
 		}
 	}()
 
-	spec := types.EventFilterSpec{}
+	spec := types.EventFilterSpec{
+		Entity: &types.EventFilterSpecByEntity{
+			Entity:    vc.Client.ServiceContent.RootFolder,
+			Recursion: types.EventFilterSpecRecursionOptionChildren,
+		},
+	}
 	em := event.NewManager(vc.Client)
 	c, err := em.CreateCollectorForEvents(ctx, spec)
 	if err != nil {
@@ -168,6 +173,9 @@ func TestEventManagerRead(t *testing.T) {
 		t.Fatal(err)
 	}
 	nevents := len(page)
+	if nevents == 0 {
+		t.Fatal("no recent events")
+	}
 	tests := []struct {
 		max    int
 		rewind bool
@@ -241,7 +249,11 @@ func TestEventManagerRead(t *testing.T) {
 		t.Errorf("expected 0 events, got %d", len(events))
 	}
 
-	err = em.PostEvent(ctx, &types.GeneralEvent{Message: "vcsim"})
+	event := &types.GeneralEvent{Message: "vcsim"}
+	event.Datacenter = &types.DatacenterEventArgument{
+		Datacenter: Map.Any("Datacenter").Reference(),
+	}
+	err = em.PostEvent(ctx, event)
 	if err != nil {
 		t.Fatal(err)
 	}

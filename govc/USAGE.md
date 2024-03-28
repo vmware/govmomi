@@ -5594,14 +5594,22 @@ By default, all recent tasks are included (via TaskManager), but can be limited 
 to a specific inventory object.
 
 Examples:
-  govc tasks
+  govc tasks        # tasks completed within the past 10 minutes
+  govc tasks -b 24h # tasks completed within the past 24 hours
+  govc tasks -s queued -s running # incomplete tasks
+  govc tasks -s error -s success  # completed tasks
+  govc tasks -r /dc1/vm/Namespaces # tasks for VMs in this Folder only
   govc tasks -f
   govc tasks -f /dc1/host/cluster1
 
 Options:
+  -b=0s                  Begin time of task history
+  -e=0s                  End time of task history
   -f=false               Follow recent task updates
   -l=false               Use long task description
   -n=25                  Output the last N tasks
+  -r=false               Include child entities when PATH is specified
+  -s=[]                  Task states
 ```
 
 ## tree

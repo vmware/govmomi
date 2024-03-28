@@ -7,13 +7,38 @@ load test_helper
 
   run govc tasks
   assert_success
-}
 
-@test "tasks host" {
-  vcsim_env
+  run govc tasks vm/DC0_H0_VM0
+  assert_success
+  assert_matches PowerOn
+
+  run govc tasks vm/DC0_H0_VM0 vm/DC0_H0_VM1
+  assert_failure # > 1 arg
 
   run govc tasks 'host/*'
+  assert_failure # matches 2 objects
+
+  run govc tasks -b 1h
   assert_success
+  [ ${#lines[@]} -gt 10 ]
+
+  run govc tasks -r /DC0/vm
+  assert_success
+  assert_matches CreateVm
+  assert_matches PowerOn
+}
+
+@test "tasks esx" {
+  vcsim_env -esx
+
+  run govc tasks
+  assert_success
+
+  run govc tasks -b 1h
+  assert_failure # TaskHistoryCollector not supported on ESX
+
+  run govc tasks -r
+  assert_failure # TaskHistoryCollector not supported on ESX
 }
 
 @test "task.create" {
