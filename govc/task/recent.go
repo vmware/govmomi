@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,11 +22,15 @@ import (
 	"fmt"
 	"io"
 	"strings"
+	"time"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/property"
+	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -37,6 +41,13 @@ type recent struct {
 	max    int
 	follow bool
 	long   bool
+
+	state flags.StringList
+	begin time.Duration
+	end   time.Duration
+	r     bool
+
+	plain bool
 }
 
 func init() {
@@ -50,6 +61,10 @@ func (cmd *recent) Register(ctx context.Context, f *flag.FlagSet) {
 	f.IntVar(&cmd.max, "n", 25, "Output the last N tasks")
 	f.BoolVar(&cmd.follow, "f", false, "Follow recent task updates")
 	f.BoolVar(&cmd.long, "l", false, "Use long task description")
+	f.Var(&cmd.state, "s", "Task states")
+	f.DurationVar(&cmd.begin, "b", 0, "Begin time of task history")
+	f.DurationVar(&cmd.end, "e", 0, "End time of task history")
+	f.BoolVar(&cmd.r, "r", false, "Include child entities when PATH is specified")
 }
 
 func (cmd *recent) Description() string {
@@ -64,7 +79,11 @@ By default, all recent tasks are included (via TaskManager), but can be limited 
 to a specific inventory object.
 
 Examples:
-  govc tasks
+  govc tasks        # tasks completed within the past 10 minutes
+  govc tasks -b 24h # tasks completed within the past 24 hours
+  govc tasks -s queued -s running # incomplete tasks
+  govc tasks -s error -s success  # completed tasks
+  govc tasks -r /dc1/vm/Namespaces # tasks for VMs in this Folder only
   govc tasks -f
   govc tasks -f /dc1/host/cluster1`
 }
@@ -80,12 +99,16 @@ func (cmd *recent) Process(ctx context.Context) error {
 	return nil
 }
 
+// chop middle of s if len(s) > n
 func chop(s string, n int) string {
-	if len(s) < n {
+	diff := len(s) - n
+	if diff <= 0 {
 		return s
 	}
+	diff /= 2
+	m := len(s) / 2
 
-	return s[:n-1] + "*"
+	return s[:m-diff] + "*" + s[1+m+diff:]
 }
 
 // taskName describes the tasks similar to the ESX ui
@@ -101,7 +124,112 @@ func taskName(info *types.TaskInfo) string {
 	}
 }
 
+type history struct {
+	*task.HistoryCollector
+
+	cmd *recent
+}
+
+func (h *history) Collect(ctx context.Context, f func([]types.TaskInfo)) error {
+	for {
+		tasks, err := h.ReadNextTasks(ctx, 10)
+		if err != nil {
+			return err
+		}
+
+		if len(tasks) == 0 {
+			if h.cmd.follow {
+				// TODO: this only follows new events.
+				// need to watch TaskHistoryCollector.LatestPage for updates to existing Tasks
+				time.Sleep(time.Second)
+				continue
+			}
+			break
+		}
+
+		f(tasks)
+	}
+	return nil
+}
+
+type collector interface {
+	Collect(context.Context, func([]types.TaskInfo)) error
+	Destroy(context.Context) error
+}
+
+// useRecent returns true if any options are specified that require use of TaskHistoryCollector
+func (cmd *recent) useRecent() bool {
+	return cmd.begin == 0 && cmd.end == 0 && !cmd.r && len(cmd.state) == 0
+}
+
+func (cmd *recent) newCollector(ctx context.Context, c *vim25.Client, ref *types.ManagedObjectReference) (collector, error) {
+	if cmd.useRecent() {
+		// original flavor of this command that uses `RecentTask` instead of `TaskHistoryCollector`
+		if ref == nil {
+			ref = c.ServiceContent.TaskManager
+		}
+
+		v, err := view.NewManager(c).CreateTaskView(ctx, ref)
+		if err != nil {
+			return nil, err
+		}
+
+		v.Follow = cmd.follow && cmd.plain
+		return v, nil
+	}
+
+	m := task.NewManager(c)
+	r := types.TaskFilterSpecRecursionOptionSelf
+	if ref == nil {
+		ref = &c.ServiceContent.RootFolder
+		cmd.r = true
+	}
+
+	now, err := methods.GetCurrentTime(ctx, c) // vCenter server time (UTC)
+	if err != nil {
+		return nil, err
+	}
+
+	if cmd.r {
+		r = types.TaskFilterSpecRecursionOptionAll
+	}
+
+	if cmd.begin == 0 {
+		cmd.begin = 10 * time.Minute
+	}
+
+	filter := types.TaskFilterSpec{
+		Entity: &types.TaskFilterSpecByEntity{
+			Entity:    *ref,
+			Recursion: r,
+		},
+		Time: &types.TaskFilterSpecByTime{
+			TimeType:  types.TaskFilterSpecTimeOptionStartedTime,
+			BeginTime: types.NewTime(now.Add(-cmd.begin)),
+		},
+	}
+
+	for _, state := range cmd.state {
+		filter.State = append(filter.State, types.TaskInfoState(state))
+	}
+
+	if cmd.end != 0 {
+		filter.Time.EndTime = types.NewTime(now.Add(-cmd.end))
+	}
+
+	collector, err := m.CreateCollectorForTasks(ctx, filter)
+	if err != nil {
+		return nil, err
+	}
+
+	return &history{collector, cmd}, nil
+}
+
 func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
+	if f.NArg() > 1 {
+		return flag.ErrHelp
+	}
+
 	c, err := cmd.Client()
 	if err != nil {
 		return err
@@ -134,31 +262,33 @@ func (cmd *recent) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 	}
 
-	watch := *m
+	var watch *types.ManagedObjectReference
 
 	if f.NArg() == 1 {
 		refs, merr := cmd.ManagedObjects(ctx, f.Args())
 		if merr != nil {
 			return merr
 		}
-		watch = refs[0]
+		if len(refs) != 1 {
+			return fmt.Errorf("%s matches %d objects", f.Arg(0), len(refs))
+		}
+		watch = &refs[0]
 	}
 
-	v, err := view.NewManager(c).CreateTaskView(ctx, &watch)
+	// writes dump/json/xml once even if follow is specified, otherwise syntax error occurs
+	cmd.plain = !(cmd.Dump || cmd.JSON || cmd.XML)
+
+	v, err := cmd.newCollector(ctx, c, watch)
 	if err != nil {
-		return nil
+		return err
 	}
 
 	defer func() {
 		_ = v.Destroy(context.Background())
 	}()
 
-	// writes dump/json/xml once even if follow is specified, otherwise syntax error occurs
-	writesPlain := !(cmd.Dump || cmd.JSON || cmd.XML)
-	v.Follow = cmd.follow && writesPlain
-
 	res := &taskResult{name: tn}
-	if writesPlain {
+	if cmd.plain {
 		res.WriteHeader(cmd.Out)
 	}
 
@@ -207,17 +337,18 @@ func (t *taskResult) Write(w io.Writer) error {
 			user = strings.TrimPrefix(user, "com.vmware.") // e.g. com.vmware.vsan.health
 		}
 
-		queued := info.QueueTime.Format(stamp)
+		queued := "-"
 		start := "-"
 		end := start
 
 		if info.StartTime != nil {
 			start = info.StartTime.Format(stamp)
+			queued = info.StartTime.Sub(info.QueueTime).Round(time.Millisecond).String()
 		}
 
 		msg := fmt.Sprintf("%2d%% %s", info.Progress, info.Task)
 
-		if info.CompleteTime != nil {
+		if info.CompleteTime != nil && info.StartTime != nil {
 			msg = info.CompleteTime.Sub(*info.StartTime).String()
 
 			if info.State == types.TaskInfoStateError {

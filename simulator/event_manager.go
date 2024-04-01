@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2018 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,20 +32,15 @@ import (
 )
 
 var (
-	maxPageSize = 1000
-	logEvents   = false
+	logEvents = false
 )
 
 type EventManager struct {
 	mo.EventManager
 
-	root types.ManagedObjectReference
-
-	history *list.List
-	key     int32
-
-	collectors map[types.ManagedObjectReference]*EventHistoryCollector
-	templates  map[string]*template.Template
+	history   *history
+	key       int32
+	templates map[string]*template.Template
 }
 
 func (m *EventManager) init(r *Registry) {
@@ -53,11 +48,11 @@ func (m *EventManager) init(r *Registry) {
 		m.Description.EventInfo = esx.EventInfo
 	}
 	if m.MaxCollector == 0 {
-		m.MaxCollector = 1000
+		// In real VC this default can be changed via OptionManager "event.maxCollectors"
+		m.MaxCollector = maxCollectors
 	}
-	m.root = r.content().RootFolder
-	m.history = list.New()
-	m.collectors = make(map[types.ManagedObjectReference]*EventHistoryCollector)
+
+	m.history = newHistory()
 	m.templates = make(map[string]*template.Template)
 }
 
@@ -67,17 +62,14 @@ func (m *EventManager) createCollector(ctx *Context, req *types.CreateCollectorF
 		return nil, err
 	}
 
-	if len(m.collectors) >= int(m.MaxCollector) {
+	if len(m.history.collectors) >= int(m.MaxCollector) {
 		return nil, Fault("Too many event collectors to create", new(types.InvalidState))
 	}
 
 	collector := &EventHistoryCollector{
-		m:    m,
-		page: list.New(),
-		size: size,
+		HistoryCollector: newHistoryCollector(ctx, m.history, size),
 	}
 	collector.Filter = req.Filter
-	collector.fillPage()
 
 	return collector, nil
 }
@@ -90,18 +82,18 @@ func (m *EventManager) CreateCollectorForEvents(ctx *Context, req *types.CreateC
 		return body
 	}
 
-	ref := ctx.Session.Put(collector).Reference()
-	m.collectors[ref] = collector
+	collector.fill = func(x *Context) { m.fillPage(x, collector) }
+	collector.fill(ctx)
 
 	body.Res = &types.CreateCollectorForEventsResponse{
-		Returnval: ref,
+		Returnval: m.history.add(ctx, collector),
 	}
 
 	return body
 }
 
 func (m *EventManager) QueryEvents(ctx *Context, req *types.QueryEvents) soap.HasFault {
-	if Map.IsESX() {
+	if ctx.Map.IsESX() {
 		return &methods.QueryEventsBody{
 			Fault_: Fault("", new(types.NotImplemented)),
 		}
@@ -113,6 +105,8 @@ func (m *EventManager) QueryEvents(ctx *Context, req *types.QueryEvents) soap.Ha
 		body.Fault_ = err
 		return body
 	}
+
+	m.fillPage(ctx, collector)
 
 	body.Res = &types.QueryEventsResponse{
 		Returnval: collector.GetLatestPage(),
@@ -150,13 +144,6 @@ func (m *EventManager) formatMessage(event types.BaseEvent) {
 	}
 }
 
-func pushEvent(l *list.List, event types.BaseEvent) {
-	if l.Len() > maxPageSize*5 {
-		l.Remove(l.Front()) // Prune history
-	}
-	l.PushBack(event)
-}
-
 func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFault {
 	m.key++
 	event := req.EventToPost.GetEvent()
@@ -167,13 +154,14 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 
 	m.formatMessage(req.EventToPost)
 
-	pushEvent(m.history, req.EventToPost)
+	pushHistory(m.history.page, req.EventToPost)
 
-	for _, c := range m.collectors {
+	for _, hc := range m.history.collectors {
+		c := hc.(*EventHistoryCollector)
 		ctx.WithLock(c, func() {
-			if c.eventMatches(req.EventToPost) {
-				pushEvent(c.page, req.EventToPost)
-				Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
+			if c.eventMatches(ctx, req.EventToPost) {
+				pushHistory(c.page, req.EventToPost)
+				ctx.Map.Update(c, []types.PropertyChange{{Name: "latestPage", Val: c.GetLatestPage()}})
 			}
 		})
 	}
@@ -186,10 +174,7 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 type EventHistoryCollector struct {
 	mo.EventHistoryCollector
 
-	m    *EventManager
-	size int
-	page *list.List
-	pos  *list.Element
+	*HistoryCollector
 }
 
 // doEntityEventArgument calls f for each entity argument in the event.
@@ -250,53 +235,53 @@ func eventFilterSelf(event types.BaseEvent, self types.ManagedObjectReference) b
 }
 
 // eventFilterChildren returns true if a child of self is one of the entity arguments in the event.
-func eventFilterChildren(event types.BaseEvent, self types.ManagedObjectReference) bool {
+func eventFilterChildren(ctx *Context, root types.ManagedObjectReference, event types.BaseEvent) bool {
 	return doEntityEventArgument(event, func(ref types.ManagedObjectReference, _ *types.EntityEventArgument) bool {
 		seen := false
 
 		var match func(types.ManagedObjectReference)
 
 		match = func(child types.ManagedObjectReference) {
-			if child == self {
+			if child == ref {
 				seen = true
 				return
 			}
 
-			walk(child, match)
+			walk(ctx.Map.Get(child), match)
 		}
 
-		walk(ref, match)
+		walk(ctx.Map.Get(root), match)
 
 		return seen
 	})
 }
 
 // entityMatches returns true if the spec Entity filter matches the event.
-func (c *EventHistoryCollector) entityMatches(event types.BaseEvent, spec *types.EventFilterSpec) bool {
+func (c *EventHistoryCollector) entityMatches(ctx *Context, event types.BaseEvent, spec *types.EventFilterSpec) bool {
 	e := spec.Entity
 	if e == nil {
 		return true
 	}
 
-	isRootFolder := c.m.root == e.Entity
+	isRootFolder := c.root == e.Entity
 
 	switch e.Recursion {
 	case types.EventFilterSpecRecursionOptionSelf:
 		return isRootFolder || eventFilterSelf(event, e.Entity)
 	case types.EventFilterSpecRecursionOptionChildren:
-		return eventFilterChildren(event, e.Entity)
+		return eventFilterChildren(ctx, e.Entity, event)
 	case types.EventFilterSpecRecursionOptionAll:
 		if isRootFolder || eventFilterSelf(event, e.Entity) {
 			return true
 		}
-		return eventFilterChildren(event, e.Entity)
+		return eventFilterChildren(ctx, e.Entity, event)
 	}
 
 	return false
 }
 
 // typeMatches returns true if one of the spec EventTypeId types matches the event.
-func (c *EventHistoryCollector) typeMatches(event types.BaseEvent, spec *types.EventFilterSpec) bool {
+func (c *EventHistoryCollector) typeMatches(_ *Context, event types.BaseEvent, spec *types.EventFilterSpec) bool {
 	if len(spec.EventTypeId) == 0 {
 		return true
 	}
@@ -322,7 +307,7 @@ func (c *EventHistoryCollector) typeMatches(event types.BaseEvent, spec *types.E
 	return false
 }
 
-func (c *EventHistoryCollector) timeMatches(event types.BaseEvent, spec *types.EventFilterSpec) bool {
+func (c *EventHistoryCollector) timeMatches(_ *Context, event types.BaseEvent, spec *types.EventFilterSpec) bool {
 	if spec.Time == nil {
 		return true
 	}
@@ -345,10 +330,10 @@ func (c *EventHistoryCollector) timeMatches(event types.BaseEvent, spec *types.E
 }
 
 // eventMatches returns true one of the filters matches the event.
-func (c *EventHistoryCollector) eventMatches(event types.BaseEvent) bool {
+func (c *EventHistoryCollector) eventMatches(ctx *Context, event types.BaseEvent) bool {
 	spec := c.Filter.(types.EventFilterSpec)
 
-	matchers := []func(types.BaseEvent, *types.EventFilterSpec) bool{
+	matchers := []func(*Context, types.BaseEvent, *types.EventFilterSpec) bool{
 		c.typeMatches,
 		c.timeMatches,
 		c.entityMatches,
@@ -356,7 +341,7 @@ func (c *EventHistoryCollector) eventMatches(event types.BaseEvent) bool {
 	}
 
 	for _, match := range matchers {
-		if !match(event, &spec) {
+		if !match(ctx, event, &spec) {
 			return false
 		}
 	}
@@ -365,93 +350,29 @@ func (c *EventHistoryCollector) eventMatches(event types.BaseEvent) bool {
 }
 
 // fillPage copies the manager's latest events into the collector's page with Filter applied.
-func (c *EventHistoryCollector) fillPage() {
-	for e := c.m.history.Front(); e != nil; e = e.Next() {
-		event := e.Value.(types.BaseEvent)
+func (m *EventManager) fillPage(ctx *Context, c *EventHistoryCollector) {
+	m.history.Lock()
+	defer m.history.Unlock()
 
-		if c.eventMatches(event) {
+	for e := m.history.page.Front(); e != nil; e = e.Next() {
+		event := e.Value.(types.BaseEvent)
+		if c.eventMatches(ctx, event) {
 			c.page.PushBack(event)
 		}
 	}
 }
 
-func validatePageSize(count int32) (int, *soap.Fault) {
-	size := int(count)
-
-	if size == 0 {
-		size = 10 // defaultPageSize
-	} else if size < 0 || size > maxPageSize {
-		return -1, Fault("", &types.InvalidArgument{InvalidProperty: "maxCount"})
-	}
-
-	return size, nil
-}
-
-func (c *EventHistoryCollector) SetCollectorPageSize(ctx *Context, req *types.SetCollectorPageSize) soap.HasFault {
-	body := new(methods.SetCollectorPageSizeBody)
-	size, err := validatePageSize(req.MaxCount)
-	if err != nil {
-		body.Fault_ = err
-		return body
-	}
-
-	c.size = size
-	c.page = list.New()
-	ctx.WithLock(c.m, c.fillPage)
-
-	body.Res = new(types.SetCollectorPageSizeResponse)
-	return body
-}
-
-func (c *EventHistoryCollector) ResetCollector(ctx *Context, req *types.ResetCollector) soap.HasFault {
-	c.pos = c.page.Back()
-
-	return &methods.ResetCollectorBody{
-		Res: new(types.ResetCollectorResponse),
-	}
-}
-
-func (c *EventHistoryCollector) RewindCollector(ctx *Context, req *types.RewindCollector) soap.HasFault {
-	c.pos = c.page.Front()
-
-	return &methods.RewindCollectorBody{
-		Res: new(types.RewindCollectorResponse),
-	}
-}
-
-// readEvents returns the next max Events from the EventManager's history
-func (c *EventHistoryCollector) readEvents(ctx *Context, max int32, next func() *list.Element) []types.BaseEvent {
-	var events []types.BaseEvent
-
-	for i := 0; i < int(max); i++ {
-		e := next()
-		if e == nil {
-			break
-		}
-
-		events = append(events, e.Value.(types.BaseEvent))
-		c.pos = e
-	}
-
-	return events
-}
-
 func (c *EventHistoryCollector) ReadNextEvents(ctx *Context, req *types.ReadNextEvents) soap.HasFault {
 	body := &methods.ReadNextEventsBody{}
 	if req.MaxCount <= 0 {
-		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "maxCount"})
+		body.Fault_ = Fault("", errInvalidArgMaxCount)
 		return body
 	}
 	body.Res = new(types.ReadNextEventsResponse)
 
-	next := func() *list.Element {
-		if c.pos != nil {
-			return c.pos.Next()
-		}
-		return c.page.Front()
-	}
-
-	body.Res.Returnval = c.readEvents(ctx, req.MaxCount, next)
+	c.next(req.MaxCount, func(e *list.Element) {
+		body.Res.Returnval = append(body.Res.Returnval, e.Value.(types.BaseEvent))
+	})
 
 	return body
 }
@@ -459,33 +380,16 @@ func (c *EventHistoryCollector) ReadNextEvents(ctx *Context, req *types.ReadNext
 func (c *EventHistoryCollector) ReadPreviousEvents(ctx *Context, req *types.ReadPreviousEvents) soap.HasFault {
 	body := &methods.ReadPreviousEventsBody{}
 	if req.MaxCount <= 0 {
-		body.Fault_ = Fault("", &types.InvalidArgument{InvalidProperty: "maxCount"})
+		body.Fault_ = Fault("", errInvalidArgMaxCount)
 		return body
 	}
 	body.Res = new(types.ReadPreviousEventsResponse)
 
-	next := func() *list.Element {
-		if c.pos != nil {
-			return c.pos.Prev()
-		}
-		return c.page.Back()
-	}
-
-	body.Res.Returnval = c.readEvents(ctx, req.MaxCount, next)
-
-	return body
-}
-
-func (c *EventHistoryCollector) DestroyCollector(ctx *Context, req *types.DestroyCollector) soap.HasFault {
-	ctx.Session.Remove(ctx, req.This)
-
-	ctx.WithLock(c.m, func() {
-		delete(c.m.collectors, req.This)
+	c.prev(req.MaxCount, func(e *list.Element) {
+		body.Res.Returnval = append(body.Res.Returnval, e.Value.(types.BaseEvent))
 	})
 
-	return &methods.DestroyCollectorBody{
-		Res: new(types.DestroyCollectorResponse),
-	}
+	return body
 }
 
 func (c *EventHistoryCollector) GetLatestPage() []types.BaseEvent {

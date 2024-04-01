@@ -615,7 +615,7 @@ EOF
 
   n=$(ls "$dir"/*.xml | wc -l)
   rm -rf "$dir"
-  assert_equal 6 "$n"
+  assert_equal 10 "$n"
 }
 
 @test "tree" {
