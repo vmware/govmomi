@@ -26,6 +26,7 @@ import (
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -272,4 +273,37 @@ func TestFinderDefaultHostVPX(t *testing.T) {
 	if !ok {
 		t.Errorf("unexpected error type=%T", err)
 	}
+}
+
+func TestFinderDestroyedParentResourcePool(t *testing.T) {
+	Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c)
+
+		rp, err := finder.ResourcePool(ctx, "/DC0/host/DC0_C0/Resources")
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		foo, err := rp.Create(ctx, "foo", types.DefaultResourceConfigSpec())
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		bar, err := foo.Create(ctx, "bar", types.DefaultResourceConfigSpec())
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		task, err := foo.Destroy(ctx)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := task.WaitEx(ctx); err != nil {
+			t.Fatal(err)
+		}
+
+		if _, err := finder.Element(ctx, bar.Reference()); err != nil {
+			t.Fatal(err)
+		}
+	})
 }

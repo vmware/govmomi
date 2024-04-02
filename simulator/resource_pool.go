@@ -483,7 +483,11 @@ func (p *ResourcePool) DestroyTask(ctx *Context, req *types.Destroy_Task) soap.H
 			RemoveReference(&parent.ResourcePool, req.This)
 
 			// The grandchildren become children of the parent (rp)
-			parent.ResourcePool = append(parent.ResourcePool, p.ResourcePool.ResourcePool...)
+			for _, ref := range p.ResourcePool.ResourcePool {
+				child := ctx.Map.Get(ref).(*ResourcePool)
+				ctx.WithLock(child, func() { child.Parent = &parent.Self })
+				parent.ResourcePool = append(parent.ResourcePool, ref)
+			}
 		})
 
 		// And VMs move to the parent
