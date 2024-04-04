@@ -239,6 +239,17 @@ EOF
   wait $pid
 }
 
+@test "vcsim issue #3396" {
+  vcsim_env
+
+  govc pool.create /DC0/host/DC0_C0/Resources/foo
+  govc pool.create /DC0/host/DC0_C0/Resources/foo/bar
+  govc find -l /DC0/host/DC0_C0/Resources
+  govc pool.destroy /DC0/host/DC0_C0/Resources/foo
+  # prior to the fix, "bar"'s Parent was still "foo", causing the following to hang
+  govc find -l /DC0/host/DC0_C0/Resources
+}
+
 @test "vcsim run container" {
   require_docker
 
