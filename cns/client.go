@@ -61,7 +61,6 @@ type Client struct {
 // NewClient creates a new CNS client
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
-	sc.Namespace = c.Namespace
 	sc.Version = c.Version
 	return &Client{sc, sc, c}, nil
 }
