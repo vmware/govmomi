@@ -142,9 +142,37 @@ func (p *Collector) CancelWaitForUpdates(ctx context.Context) error {
 	return err
 }
 
+// RetrieveProperties wraps RetrievePropertiesEx and ContinueRetrievePropertiesEx to collect properties in batches.
 func (p *Collector) RetrieveProperties(ctx context.Context, req types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
 	req.This = p.Reference()
-	return methods.RetrieveProperties(ctx, p.roundTripper, &req)
+	rx, err := methods.RetrievePropertiesEx(ctx, p.roundTripper, &types.RetrievePropertiesEx{
+		This:    req.This,
+		SpecSet: req.SpecSet,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	if rx.Returnval == nil {
+		return &types.RetrievePropertiesResponse{}, nil
+	}
+
+	objects := rx.Returnval.Objects
+	token := rx.Returnval.Token
+
+	for token != "" {
+		cx, err := methods.ContinueRetrievePropertiesEx(ctx, p.roundTripper, &types.ContinueRetrievePropertiesEx{
+			This:  req.This,
+			Token: token,
+		})
+		if err != nil {
+			return nil, err
+		}
+		token = cx.Returnval.Token
+		objects = append(objects, cx.Returnval.Objects...)
+	}
+
+	return &types.RetrievePropertiesResponse{Returnval: objects}, nil
 }
 
 // Retrieve loads properties for a slice of managed objects. The dst argument
