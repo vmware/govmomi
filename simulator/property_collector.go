@@ -26,6 +26,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
+
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/internal"
 	"github.com/vmware/govmomi/vim25"
@@ -523,6 +525,62 @@ func (pc *PropertyCollector) DestroyPropertyCollector(ctx *Context, c *types.Des
 	return body
 }
 
+var retrievePropertiesExBook sync.Map
+
+type retrievePropertiesExPage struct {
+	MaxObjects int32
+	Objects    []types.ObjectContent
+}
+
+func (pc *PropertyCollector) ContinueRetrievePropertiesEx(ctx *Context, r *types.ContinueRetrievePropertiesEx) soap.HasFault {
+	body := &methods.ContinueRetrievePropertiesExBody{}
+
+	if r.Token == "" {
+		body.Fault_ = Fault("", &types.InvalidPropertyFault{Name: "token"})
+		return body
+	}
+
+	obj, ok := retrievePropertiesExBook.LoadAndDelete(r.Token)
+	if !ok {
+		body.Fault_ = Fault("", &types.InvalidPropertyFault{Name: "token"})
+		return body
+	}
+
+	page := obj.(retrievePropertiesExPage)
+
+	var (
+		objsToStore  []types.ObjectContent
+		objsToReturn []types.ObjectContent
+	)
+	for i := range page.Objects {
+		if page.MaxObjects <= 0 || i < int(page.MaxObjects) {
+			objsToReturn = append(objsToReturn, page.Objects[i])
+		} else {
+			objsToStore = append(objsToStore, page.Objects[i])
+		}
+	}
+
+	if len(objsToStore) > 0 {
+		body.Res = &types.ContinueRetrievePropertiesExResponse{}
+		body.Res.Returnval.Token = uuid.NewString()
+		retrievePropertiesExBook.Store(
+			body.Res.Returnval.Token,
+			retrievePropertiesExPage{
+				MaxObjects: page.MaxObjects,
+				Objects:    objsToStore,
+			})
+	}
+
+	if len(objsToReturn) > 0 {
+		if body.Res == nil {
+			body.Res = &types.ContinueRetrievePropertiesExResponse{}
+		}
+		body.Res.Returnval.Objects = objsToReturn
+	}
+
+	return body
+}
+
 func (pc *PropertyCollector) RetrievePropertiesEx(ctx *Context, r *types.RetrievePropertiesEx) soap.HasFault {
 	body := &methods.RetrievePropertiesExBody{}
 
@@ -537,7 +595,28 @@ func (pc *PropertyCollector) RetrievePropertiesEx(ctx *Context, r *types.Retriev
 		}
 	} else {
 		objects := res.Objects[:0]
-		for _, o := range res.Objects {
+
+		var (
+			objsToStore  []types.ObjectContent
+			objsToReturn []types.ObjectContent
+		)
+		for i := range res.Objects {
+			if r.Options.MaxObjects <= 0 || i < int(r.Options.MaxObjects) {
+				objsToReturn = append(objsToReturn, res.Objects[i])
+			} else {
+				objsToStore = append(objsToStore, res.Objects[i])
+			}
+		}
+
+		if len(objsToStore) > 0 {
+			res.Token = uuid.NewString()
+			retrievePropertiesExBook.Store(res.Token, retrievePropertiesExPage{
+				MaxObjects: r.Options.MaxObjects,
+				Objects:    objsToStore,
+			})
+		}
+
+		for _, o := range objsToReturn {
 			propSet := o.PropSet[:0]
 			for _, p := range o.PropSet {
 				if p.Val != nil {

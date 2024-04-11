@@ -187,7 +187,10 @@ func ExampleCollector_WaitForUpdatesEx_addingRemovingPropertyFilters() {
 		}
 
 		// Now create a property filter that will catch the update.
-		pf, err := pc.CreateFilter(ctx, getDatacenterToVMFolderFilter(datacenter))
+		pf, err := pc.CreateFilter(
+			ctx,
+			types.CreateFilter{Spec: getDatacenterToVMFolderFilter(datacenter)},
+		)
 		if err != nil {
 			return fmt.Errorf("failed to create dc2vm property filter: %w", err)
 		}

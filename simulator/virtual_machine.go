@@ -2184,10 +2184,6 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 				VmPathName: vmx.String(),
 			},
 		}
-		if req.Spec.Config != nil {
-			config.ExtraConfig = req.Spec.Config.ExtraConfig
-			config.InstanceUuid = req.Spec.Config.InstanceUuid
-		}
 
 		// Copying hardware properties
 		config.NumCPUs = vm.Config.Hardware.NumCPU
@@ -2222,6 +2218,14 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 				Device:        device,
 				FileOperation: fop,
 			})
+		}
+
+		if dst, src := config, req.Spec.Config; src != nil {
+			dst.ExtraConfig = src.ExtraConfig
+			copyNonEmptyValue(&dst.Uuid, &src.Uuid)
+			copyNonEmptyValue(&dst.InstanceUuid, &src.InstanceUuid)
+			copyNonEmptyValue(&dst.NumCPUs, &src.NumCPUs)
+			copyNonEmptyValue(&dst.MemoryMB, &src.MemoryMB)
 		}
 
 		res := ctx.Map.Get(req.Folder).(vmFolder).CreateVMTask(ctx, &types.CreateVM_Task{
@@ -2262,6 +2266,17 @@ func (vm *VirtualMachine) CloneVMTask(ctx *Context, req *types.CloneVM_Task) soa
 			Returnval: task.Run(ctx),
 		},
 	}
+}
+
+func copyNonEmptyValue[T comparable](dst, src *T) {
+	if dst == nil || src == nil {
+		return
+	}
+	var t T
+	if *src == t {
+		return
+	}
+	*dst = *src
 }
 
 func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Task) soap.HasFault {

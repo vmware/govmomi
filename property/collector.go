@@ -143,11 +143,23 @@ func (p *Collector) CancelWaitForUpdates(ctx context.Context) error {
 }
 
 // RetrieveProperties wraps RetrievePropertiesEx and ContinueRetrievePropertiesEx to collect properties in batches.
-func (p *Collector) RetrieveProperties(ctx context.Context, req types.RetrieveProperties) (*types.RetrievePropertiesResponse, error) {
+func (p *Collector) RetrieveProperties(
+	ctx context.Context,
+	req types.RetrieveProperties,
+	maxObjectsArgs ...int32) (*types.RetrievePropertiesResponse, error) {
+
+	var opts types.RetrieveOptions
+	if l := len(maxObjectsArgs); l > 1 {
+		return nil, fmt.Errorf("maxObjectsArgs accepts a single value")
+	} else if l == 1 {
+		opts.MaxObjects = maxObjectsArgs[0]
+	}
+
 	req.This = p.Reference()
 	rx, err := methods.RetrievePropertiesEx(ctx, p.roundTripper, &types.RetrievePropertiesEx{
 		This:    req.This,
 		SpecSet: req.SpecSet,
+		Options: opts,
 	})
 	if err != nil {
 		return nil, err
