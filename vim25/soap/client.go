@@ -34,6 +34,7 @@ import (
 	"net/http/cookiejar"
 	"net/url"
 	"os"
+	"path"
 	"path/filepath"
 	"reflect"
 	"regexp"
@@ -475,6 +476,42 @@ func (c *Client) SetCertificate(cert tls.Certificate) {
 
 	// Extension or HoK certificate
 	t.TLSClientConfig.Certificates = []tls.Certificate{cert}
+}
+
+// UseServiceVersion sets Client.Version to the current version of the service endpoint via /sdk/vimServiceVersions.xml
+func (c *Client) UseServiceVersion(kind ...string) error {
+	ns := "vim"
+	if len(kind) != 0 {
+		ns = kind[0]
+	}
+
+	u := c.URL()
+	u.Path = path.Join("/sdk", ns+"ServiceVersions.xml")
+
+	res, err := c.Get(u.String())
+	if err != nil {
+		return err
+	}
+
+	if res.StatusCode != http.StatusOK {
+		return fmt.Errorf("http.Get(%s): %s", u.Path, err)
+	}
+
+	v := struct {
+		Namespace *string `xml:"namespace>name"`
+		Version   *string `xml:"namespace>version"`
+	}{
+		&c.Namespace,
+		&c.Version,
+	}
+
+	err = xml.NewDecoder(res.Body).Decode(&v)
+	_ = res.Body.Close()
+	if err != nil {
+		return fmt.Errorf("xml.Decode(%s): %s", u.Path, err)
+	}
+
+	return nil
 }
 
 // Tunnel returns a Client configured to proxy requests through vCenter's http port 80,
