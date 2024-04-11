@@ -155,33 +155,13 @@ func (p *Collector) RetrieveProperties(
 		opts.MaxObjects = maxObjectsArgs[0]
 	}
 
-	req.This = p.Reference()
-	rx, err := methods.RetrievePropertiesEx(ctx, p.roundTripper, &types.RetrievePropertiesEx{
-		This:    req.This,
+	objects, err := mo.RetrievePropertiesEx(ctx, p.roundTripper, types.RetrievePropertiesEx{
+		This:    p.Reference(),
 		SpecSet: req.SpecSet,
 		Options: opts,
 	})
 	if err != nil {
 		return nil, err
-	}
-
-	if rx.Returnval == nil {
-		return &types.RetrievePropertiesResponse{}, nil
-	}
-
-	objects := rx.Returnval.Objects
-	token := rx.Returnval.Token
-
-	for token != "" {
-		cx, err := methods.ContinueRetrievePropertiesEx(ctx, p.roundTripper, &types.ContinueRetrievePropertiesEx{
-			This:  req.This,
-			Token: token,
-		})
-		if err != nil {
-			return nil, err
-		}
-		token = cx.Returnval.Token
-		objects = append(objects, cx.Returnval.Objects...)
 	}
 
 	return &types.RetrievePropertiesResponse{Returnval: objects}, nil
