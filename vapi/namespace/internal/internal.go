@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2020 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,6 +22,9 @@ const (
 	NamespaceDistributedSwitchCompatibility = "/api/vcenter/namespace-management/distributed-switch-compatibility"
 	NamespaceEdgeClusterCompatibility       = "/api/vcenter/namespace-management/edge-cluster-compatibility"
 	SupervisorServicesPath                  = "/api/vcenter/namespace-management/supervisor-services"
+
+	NamespacesPath = "/api/vcenter/namespaces/instances"
+	VmClassesPath  = "/api/vcenter/namespace-management/virtual-machine-classes"
 )
 
 type SupportBundleToken struct {
