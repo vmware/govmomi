@@ -430,7 +430,6 @@ func (flag *ClientFlag) CnsClient() (*cns.Client, error) {
 	if err != nil {
 		return nil, err
 	}
-	_ = vc.UseServiceVersion("vsan")
 
 	c, err := cns.NewClient(context.Background(), vc)
 	if err != nil {

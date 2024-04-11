@@ -494,7 +494,7 @@ func (c *Client) UseServiceVersion(kind ...string) error {
 	}
 
 	if res.StatusCode != http.StatusOK {
-		return fmt.Errorf("http.Get(%s): %s", u.Path, err)
+		return fmt.Errorf("http.Get(%s): %s", u.Path, res.Status)
 	}
 
 	v := struct {

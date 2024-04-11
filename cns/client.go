@@ -61,9 +61,25 @@ type Client struct {
 // NewClient creates a new CNS client
 func NewClient(ctx context.Context, c *vim25.Client) (*Client, error) {
 	sc := c.Client.NewServiceClient(Path, Namespace)
-	sc.Namespace = c.Namespace
-	sc.Version = c.Version
-	return &Client{sc, sc, c}, nil
+
+	// Use current vCenter vsan version by default
+	err := sc.UseServiceVersion(Namespace)
+	if err != nil {
+		return nil, err
+	}
+
+	// PropertyCollector related methods (task.Wait) need to send requests to vim25.Path (/sdk).
+	// This vim25.Client shares the same http.Transport and Namespace/Version, but requests to '/sdk'
+	rt := sc.NewServiceClient(vim25.Path, Namespace)
+	rt.Version = sc.Version
+
+	vc := &vim25.Client{
+		ServiceContent: c.ServiceContent,
+		Client:         rt,
+		RoundTripper:   rt,
+	}
+
+	return &Client{sc, sc, vc}, nil
 }
 
 // RoundTrip dispatches to the RoundTripper field.
