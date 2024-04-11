@@ -648,3 +648,181 @@ func (c *Manager) ListCompatibleEdgeClusters(ctx context.Context, clusterId stri
 		WithPathEncodedParam("distributed_switch", switchId)
 	return result, c.Do(ctx, listUrl.Request(http.MethodGet), &result)
 }
+
+// NamespacesInstanceStats https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/Stats/
+type NamespacesInstanceStats struct {
+	CpuUsed     int64 `json:"cpu_used"`
+	MemoryUsed  int64 `json:"memory_used"`
+	StorageUsed int64 `json:"storage_used"`
+}
+
+// NamespacesInstanceSummary https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/Summary/
+type NamespacesInstanceSummary struct {
+	ClusterId            string                  `json:"cluster"`
+	Namespace            string                  `json:"namespace"`
+	ConfigStatus         string                  `json:"config_status"`
+	Description          string                  `json:"description"`
+	Stats                NamespacesInstanceStats `json:"stats"`
+	SelfServiceNamespace bool                    `json:"self_service_namespace,omitempty"`
+}
+
+type LocalizableMessage struct {
+	Details  interface{} `json:"details"`
+	Severity string      `json:"severity"`
+}
+
+// NamespacesInstanceInfo https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/Info/
+type NamespacesInstanceInfo struct {
+	ClusterId            string                  `json:"cluster"`
+	ConfigStatus         string                  `json:"config_status"`
+	Description          string                  `json:"description"`
+	Stats                NamespacesInstanceStats `json:"stats"`
+	SelfServiceNamespace bool                    `json:"self_service_namespace,omitempty"`
+	Messages             []LocalizableMessage    `json:"message"`
+	VmServiceSpec        VmServiceSpec           `json:"vm_service_spec,omitempty"`
+}
+
+// NamespacesInstanceCreateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/CreateSpec/
+type NamespacesInstanceCreateSpec struct {
+	Cluster       string        `json:"cluster"`
+	Namespace     string        `json:"namespace"`
+	VmServiceSpec VmServiceSpec `json:"vm_service_spec,omitempty"`
+}
+
+// VmServiceSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/VMServiceSpec/
+type VmServiceSpec struct {
+	ContentLibraries []string `json:"content_libraries,omitempty"`
+	VmClasses        []string `json:"vm_classes,omitempty"`
+}
+
+// NamespacesInstanceUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/UpdateSpec/
+type NamespacesInstanceUpdateSpec struct {
+	VmServiceSpec VmServiceSpec `json:"vm_service_spec,omitempty"`
+}
+
+// ListNamespaces https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/get/
+func (c *Manager) ListNamespaces(ctx context.Context) ([]NamespacesInstanceSummary, error) {
+	resource := c.Resource(internal.NamespacesPath)
+	request := resource.Request(http.MethodGet)
+	var result []NamespacesInstanceSummary
+	return result, c.Do(ctx, request, &result)
+}
+
+// GetNamespace https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/get/
+func (c *Manager) GetNamespace(ctx context.Context, namespace string) (NamespacesInstanceInfo, error) {
+	resource := c.Resource(internal.NamespacesPath).WithSubpath(namespace)
+	request := resource.Request(http.MethodGet)
+	var result NamespacesInstanceInfo
+	return result, c.Do(ctx, request, &result)
+}
+
+// CreateNamespace https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/post/
+func (c *Manager) CreateNamespace(ctx context.Context, spec NamespacesInstanceCreateSpec) error {
+	resource := c.Resource(internal.NamespacesPath)
+	request := resource.Request(http.MethodPost, spec)
+	return c.Do(ctx, request, nil)
+}
+
+// UpdateNamespace https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/patch/
+func (c *Manager) UpdateNamespace(ctx context.Context, namespace string, spec NamespacesInstanceUpdateSpec) error {
+	resource := c.Resource(internal.NamespacesPath).WithSubpath(namespace)
+	request := resource.Request(http.MethodPatch, spec)
+	return c.Do(ctx, request, nil)
+}
+
+// DeleteNamespace https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/namespace/delete/
+func (c *Manager) DeleteNamespace(ctx context.Context, namespace string) error {
+	resource := c.Resource(internal.NamespacesPath).WithSubpath(namespace)
+	request := resource.Request(http.MethodDelete)
+	return c.Do(ctx, request, nil)
+}
+
+// VirtualMachineClassInfo https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/Info/
+type VirtualMachineClassInfo struct {
+	ConfigStatus      string               `json:"config_status"`
+	Description       string               `json:"description"`
+	Id                string               `json:"id"`
+	CpuCount          int64                `json:"cpu_count"`
+	MemoryMb          int64                `json:"memory_mb"`
+	Messages          []LocalizableMessage `json:"messages"`
+	Namespaces        []string             `json:"namespaces"`
+	Vms               []string             `json:"vms"`
+	Devices           VirtualDevices       `json:"devices"`
+	CpuReservation    int64                `json:"cpu_reservation,omitempty"`
+	MemoryReservation int64                `json:"memory_reservation,omitempty"`
+}
+
+// VirtualMachineClassCreateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/CreateSpec/
+type VirtualMachineClassCreateSpec struct {
+	Id                string         `json:"id"`
+	CpuCount          int64          `json:"cpu_count"`
+	MemoryMb          int64          `json:"memory_MB"`
+	CpuReservation    int64          `json:"cpu_reservation,omitempty"`
+	MemoryReservation int64          `json:"memory_reservation,omitempty"`
+	Devices           VirtualDevices `json:"devices"`
+}
+
+// VirtualMachineClassUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/UpdateSpec/
+type VirtualMachineClassUpdateSpec struct {
+	Id                string         `json:"id"`
+	CpuCount          int64          `json:"cpu_count"`
+	MemoryMb          int64          `json:"memory_MB"`
+	CpuReservation    int64          `json:"cpu_reservation,omitempty"`
+	MemoryReservation int64          `json:"memory_reservation,omitempty"`
+	Devices           VirtualDevices `json:"devices"`
+}
+
+// DirectPathIoDevice https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/DynamicDirectPathIODevice/
+type DirectPathIoDevice struct {
+	CustomLabel string `json:"custom_label,omitempty"`
+	DeviceId    int64  `json:"device_id"`
+	VendorId    int64  `json:"vendor_id"`
+}
+
+// VgpuDevice https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/VGPUDevice/
+type VgpuDevice struct {
+	ProfileName string `json:"profile_name"`
+}
+
+// VirtualDevices https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/VirtualDevices/
+type VirtualDevices struct {
+	DirectPathIoDevices []DirectPathIoDevice `json:"direct_path_io_devices,omitempty"`
+	VgpuDevices         []VgpuDevice         `json:"vgpu_devices,omitempty"`
+}
+
+// ListVmClasses https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespace-management/virtual-machine-classes/get/
+func (c *Manager) ListVmClasses(ctx context.Context) ([]VirtualMachineClassInfo, error) {
+	resource := c.Resource(internal.VmClassesPath)
+	request := resource.Request(http.MethodGet)
+	var result []VirtualMachineClassInfo
+	return result, c.Do(ctx, request, &result)
+}
+
+// GetVmClass https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespace-management/virtual-machine-classes/vm_class/get/
+func (c *Manager) GetVmClass(ctx context.Context, vmClass string) (VirtualMachineClassInfo, error) {
+	resource := c.Resource(internal.VmClassesPath).WithSubpath(vmClass)
+	request := resource.Request(http.MethodGet)
+	var result VirtualMachineClassInfo
+	return result, c.Do(ctx, request, &result)
+}
+
+// CreateVmClass https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespace-management/virtual-machine-classes/post/
+func (c *Manager) CreateVmClass(ctx context.Context, spec VirtualMachineClassCreateSpec) error {
+	resource := c.Resource(internal.VmClassesPath)
+	request := resource.Request(http.MethodPost, spec)
+	return c.Do(ctx, request, nil)
+}
+
+// DeleteVmClass https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespace-management/virtual-machine-classes/vm_class/delete/
+func (c *Manager) DeleteVmClass(ctx context.Context, vmClass string) error {
+	resource := c.Resource(internal.VmClassesPath).WithSubpath(vmClass)
+	request := resource.Request(http.MethodDelete)
+	return c.Do(ctx, request, nil)
+}
+
+// UpdateVmClass https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespace-management/virtual-machine-classes/vm_class/patch/
+func (c *Manager) UpdateVmClass(ctx context.Context, vmClass string, spec VirtualMachineClassUpdateSpec) error {
+	resource := c.Resource(internal.VmClassesPath).WithSubpath(vmClass)
+	request := resource.Request(http.MethodPatch, spec)
+	return c.Do(ctx, request, nil)
+}
