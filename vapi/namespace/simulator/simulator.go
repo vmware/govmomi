@@ -281,7 +281,6 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 		if len(subpath) > 0 {
 			if entry, contains := namespacesMap[subpath]; contains {
 				var spec namespace.NamespacesInstanceUpdateSpec
-				// If vapi.Decode fails it sets the status to bad request
 				if vapi.Decode(r, w, &spec) {
 					entry.VmServiceSpec = spec.VmServiceSpec
 					vapi.StatusOK(w)
@@ -292,7 +291,6 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 		vapi.ApiErrorNotFound(w)
 	case http.MethodPost:
 		var spec namespace.NamespacesInstanceCreateSpec
-		// If vapi.Decode fails it sets the status to bad request
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}
@@ -346,7 +344,6 @@ func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 		if len(subpath) > 0 {
 			if entry, contains := vmClassesMap[subpath]; contains {
 				var spec namespace.VirtualMachineClassUpdateSpec
-				// If vapi.Decode fails it sets the status to bad request
 				if !vapi.Decode(r, w, &spec) {
 					return
 				}
@@ -365,7 +362,6 @@ func (h *Handler) vmClasses(w http.ResponseWriter, r *http.Request) {
 		vapi.ApiErrorNotFound(w)
 	case http.MethodPost:
 		var spec namespace.VirtualMachineClassCreateSpec
-		// If vapi.Decode fails it sets the status to bad request
 		if !vapi.Decode(r, w, &spec) {
 			return
 		}

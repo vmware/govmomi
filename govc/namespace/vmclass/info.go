@@ -19,8 +19,11 @@ package vmclass
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io"
+	"text/tabwriter"
 
+	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vapi/namespace"
 
 	"github.com/vmware/govmomi/govc/cli"
@@ -30,7 +33,13 @@ import (
 type infoResult namespace.VirtualMachineClassInfo
 
 func (r infoResult) Write(w io.Writer) error {
-	return nil
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+
+	fmt.Fprintf(tw, "ID:\t%s\n", r.Id)
+	fmt.Fprintf(tw, "CPUs:\t%d\n", r.CpuCount)
+	fmt.Fprintf(tw, "Memory:\t%s\n", units.ByteSize(r.MemoryMb*1024*1024))
+
+	return tw.Flush()
 }
 
 type info struct {
@@ -47,6 +56,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -65,15 +75,18 @@ func (cmd *info) Usage() string {
 }
 
 func (cmd *info) Description() string {
-	return `Displays the details of a virtual machine class. 
+	return `Displays the details of a virtual machine class.
 
 Examples:
   govc namespace.vmclass.info test-class`
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	rc, err := cmd.RestClient()
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
 
+	rc, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}
@@ -81,11 +94,9 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	nm := namespace.NewManager(rc)
 
 	d, err := nm.GetVmClass(ctx, f.Arg(0))
-
 	if err != nil {
 		return err
 	}
 
-	cmd.JSON = !cmd.All()
 	return cmd.WriteResult(infoResult(d))
 }
