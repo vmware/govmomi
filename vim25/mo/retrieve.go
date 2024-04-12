@@ -158,16 +158,49 @@ func LoadObjectContent(content []types.ObjectContent, dst interface{}) error {
 	return nil
 }
 
+// RetrievePropertiesEx wraps RetrievePropertiesEx and ContinueRetrievePropertiesEx to collect properties in batches.
+func RetrievePropertiesEx(ctx context.Context, r soap.RoundTripper, req types.RetrievePropertiesEx) ([]types.ObjectContent, error) {
+	rx, err := methods.RetrievePropertiesEx(ctx, r, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	if rx.Returnval == nil {
+		return nil, nil
+	}
+
+	objects := rx.Returnval.Objects
+	token := rx.Returnval.Token
+
+	for token != "" {
+		cx, err := methods.ContinueRetrievePropertiesEx(ctx, r, &types.ContinueRetrievePropertiesEx{
+			This:  req.This,
+			Token: token,
+		})
+		if err != nil {
+			return nil, err
+		}
+
+		token = cx.Returnval.Token
+		objects = append(objects, cx.Returnval.Objects...)
+	}
+
+	return objects, nil
+}
+
 // RetrievePropertiesForRequest calls the RetrieveProperties method with the
 // specified request and decodes the response struct into the value pointed to
 // by dst.
 func RetrievePropertiesForRequest(ctx context.Context, r soap.RoundTripper, req types.RetrieveProperties, dst interface{}) error {
-	res, err := methods.RetrieveProperties(ctx, r, &req)
+	objects, err := RetrievePropertiesEx(ctx, r, types.RetrievePropertiesEx{
+		This:    req.This,
+		SpecSet: req.SpecSet,
+	})
 	if err != nil {
 		return err
 	}
 
-	return LoadObjectContent(res.Returnval, dst)
+	return LoadObjectContent(objects, dst)
 }
 
 // RetrieveProperties retrieves the properties of the managed object specified

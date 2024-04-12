@@ -66,7 +66,9 @@ func TestWaitForUpdatesEx(t *testing.T) {
 				cancelCtx,
 				pc,
 				&property.WaitFilter{
-					CreateFilter: getDatacenterToVMFolderFilter(datacenter),
+					CreateFilter: types.CreateFilter{
+						Spec: getDatacenterToVMFolderFilter(datacenter),
+					},
 					WaitOptions: property.WaitOptions{
 						Options: &types.WaitOptions{
 							MaxWaitSeconds: addrOf(int32(3)),
@@ -108,6 +110,45 @@ func TestWaitForUpdatesEx(t *testing.T) {
 	}, model)
 }
 
+func TestRetrievePropertiesOneAtATime(t *testing.T) {
+	model := simulator.VPX()
+	model.Datacenter = 1
+	model.Cluster = 0
+	model.Pool = 0
+	model.Machine = 3
+	model.Autostart = false
+
+	simulator.Test(func(ctx context.Context, c *vim25.Client) {
+		finder := find.NewFinder(c, true)
+		datacenter, err := finder.DefaultDatacenter(ctx)
+		if err != nil {
+			t.Fatalf("default datacenter not found: %s", err)
+		}
+		finder.SetDatacenter(datacenter)
+		pc := property.DefaultCollector(c)
+
+		resp, err := pc.RetrieveProperties(ctx, types.RetrieveProperties{
+			SpecSet: []types.PropertyFilterSpec{
+				getDatacenterToVMFolderFilter(datacenter),
+			},
+		}, 1)
+		if err != nil {
+			t.Fatalf("failed to retrieve properties one object at a time: %s", err)
+		}
+
+		vmRefs := map[types.ManagedObjectReference]struct{}{}
+		for i := range resp.Returnval {
+			oc := resp.Returnval[i]
+			vmRefs[oc.Obj] = struct{}{}
+		}
+
+		if a, e := len(vmRefs), 3; a != 3 {
+			t.Fatalf("unexpected number of vms: a=%d, e=%d", a, e)
+		}
+
+	}, model)
+}
+
 func waitForPowerStateChanges(
 	ctx context.Context,
 	vm *object.VirtualMachine,
@@ -139,52 +180,50 @@ func waitForPowerStateChanges(
 	return false
 }
 
-func getDatacenterToVMFolderFilter(dc *object.Datacenter) types.CreateFilter {
+func getDatacenterToVMFolderFilter(dc *object.Datacenter) types.PropertyFilterSpec {
 	// Define a wait filter that looks for updates to VM power
 	// states for VMs under the specified datacenter.
-	return types.CreateFilter{
-		Spec: types.PropertyFilterSpec{
-			ObjectSet: []types.ObjectSpec{
-				{
-					Obj:  dc.Reference(),
-					Skip: addrOf(true),
-					SelectSet: []types.BaseSelectionSpec{
-						// Datacenter --> VM folder
-						&types.TraversalSpec{
-							SelectionSpec: types.SelectionSpec{
-								Name: "dcToVMFolder",
-							},
-							Type: "Datacenter",
-							Path: "vmFolder",
-							SelectSet: []types.BaseSelectionSpec{
-								&types.SelectionSpec{
-									Name: "visitFolders",
-								},
-							},
+	return types.PropertyFilterSpec{
+		ObjectSet: []types.ObjectSpec{
+			{
+				Obj:  dc.Reference(),
+				Skip: addrOf(true),
+				SelectSet: []types.BaseSelectionSpec{
+					// Datacenter --> VM folder
+					&types.TraversalSpec{
+						SelectionSpec: types.SelectionSpec{
+							Name: "dcToVMFolder",
 						},
-						// Folder --> children (folder / VM)
-						&types.TraversalSpec{
-							SelectionSpec: types.SelectionSpec{
+						Type: "Datacenter",
+						Path: "vmFolder",
+						SelectSet: []types.BaseSelectionSpec{
+							&types.SelectionSpec{
 								Name: "visitFolders",
 							},
-							Type: "Folder",
-							// Folder --> children (folder / VM)
-							Path: "childEntity",
-							SelectSet: []types.BaseSelectionSpec{
-								// Folder --> child folder
-								&types.SelectionSpec{
-									Name: "visitFolders",
-								},
+						},
+					},
+					// Folder --> children (folder / VM)
+					&types.TraversalSpec{
+						SelectionSpec: types.SelectionSpec{
+							Name: "visitFolders",
+						},
+						Type: "Folder",
+						// Folder --> children (folder / VM)
+						Path: "childEntity",
+						SelectSet: []types.BaseSelectionSpec{
+							// Folder --> child folder
+							&types.SelectionSpec{
+								Name: "visitFolders",
 							},
 						},
 					},
 				},
 			},
-			PropSet: []types.PropertySpec{
-				{
-					Type:    "VirtualMachine",
-					PathSet: []string{"runtime.powerState"},
-				},
+		},
+		PropSet: []types.PropertySpec{
+			{
+				Type:    "VirtualMachine",
+				PathSet: []string{"runtime.powerState"},
 			},
 		},
 	}
