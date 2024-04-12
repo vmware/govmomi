@@ -19,7 +19,10 @@ package namespace
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io"
+	"strings"
+	"text/tabwriter"
 
 	"github.com/vmware/govmomi/vapi/namespace"
 
@@ -30,7 +33,12 @@ import (
 type infoResult namespace.NamespacesInstanceInfo
 
 func (r infoResult) Write(w io.Writer) error {
-	return nil
+	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
+	fmt.Fprintf(tw, "Cluster:\t%s\n", r.ClusterId)
+	fmt.Fprintf(tw, "Status:\t%s\n", r.ConfigStatus)
+	fmt.Fprintf(tw, "VM Classes:\t%s\n", strings.Join(r.VmServiceSpec.VmClasses, ","))
+	fmt.Fprintf(tw, "VM Libraries:\t%s\n", strings.Join(r.VmServiceSpec.ContentLibraries, ","))
+	return tw.Flush()
 }
 
 type info struct {
@@ -47,6 +55,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
+	cmd.OutputFlag.Register(ctx, f)
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -65,15 +74,18 @@ func (cmd *info) Usage() string {
 }
 
 func (cmd *info) Description() string {
-	return `Displays the details of a vSphere Namespace. 
+	return `Displays the details of a vSphere Namespace.
 
 Examples:
   govc namespace.info test-namespace`
 }
 
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
-	rc, err := cmd.RestClient()
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
 
+	rc, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}
@@ -81,11 +93,9 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	nm := namespace.NewManager(rc)
 
 	d, err := nm.GetNamespace(ctx, f.Arg(0))
-
 	if err != nil {
 		return err
 	}
 
-	cmd.JSON = !cmd.All()
 	return cmd.WriteResult(infoResult(d))
 }

@@ -19,7 +19,6 @@ package namespace
 import (
 	"context"
 	"flag"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
@@ -29,8 +28,8 @@ import (
 type create struct {
 	*flags.ClientFlag
 
-	libraries string
-	vmClasses string
+	libraries flags.StringList
+	vmClasses flags.StringList
 	spec      namespace.NamespacesInstanceCreateSpec
 }
 
@@ -43,36 +42,42 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag.Register(ctx, f)
 
 	f.StringVar(&cmd.spec.Cluster, "supervisor", "", "The identifier of the Supervisor.")
-	f.StringVar(&cmd.spec.Namespace, "namespace", "", "The name of the vSphere Namespace.")
-	f.StringVar(&cmd.libraries, "content-libraries", "", "The identifiers of the content libraries to associate with the vSphere Namespace.")
-	f.StringVar(&cmd.vmClasses, "vm-classes", "", "The identifiers of the virtual machine classes to associate with the vSphere Namespace.")
+	f.Var(&cmd.libraries, "library", "Content library IDs to associate with the vSphere Namespace.")
+	f.Var(&cmd.vmClasses, "vm-class", "Virtual machine class IDs to associate with the vSphere Namespace.")
+}
+
+func (*create) Usage() string {
+	return "NAME"
 }
 
 func (cmd *create) Process(ctx context.Context) error {
-	if len(cmd.libraries) > 0 {
-		cmd.spec.VmServiceSpec.ContentLibraries = strings.Split(cmd.libraries, ",")
-	}
-	if len(cmd.vmClasses) > 0 {
-		cmd.spec.VmServiceSpec.VmClasses = strings.Split(cmd.vmClasses, ",")
-	}
+	cmd.spec.VmServiceSpec.ContentLibraries = cmd.libraries
+	cmd.spec.VmServiceSpec.VmClasses = cmd.vmClasses
+
 	return cmd.ClientFlag.Process(ctx)
 }
 
 func (cmd *create) Description() string {
-	return `Creates a new vSphere Namespace on a Supervisor. 
+	return `Creates a new vSphere Namespace on a Supervisor.
+
+The '-library' and '-vm-class' flags can each be specified multiple times.
 
 Examples:
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7,dca9cc16-9460-4da0-802c-4aa148ac6cf7
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -vm-classes=best-effort-2xlarge
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -vm-classes=best-effort-2xlarge,best-effort-4xlarge
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7,dca9cc16-9460-4da0-802c-4aa148ac6cf7 -vm-classes=best-effort-2xlarge,best-effort-4xlarge`
+  govc namespace.create -supervisor=domain-c1 test-namespace
+  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
+  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
+  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge test-namespace
+  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge -vm-class best-effort-4xlarge test-namespace
+  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	rc, err := cmd.RestClient()
+	cmd.spec.Namespace = f.Arg(0)
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
 
+	rc, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}

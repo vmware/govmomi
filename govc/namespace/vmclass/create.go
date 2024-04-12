@@ -39,31 +39,34 @@ func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.spec.Id, "name", "", "The name of the virtual machine class.")
 	f.Int64Var(&cmd.spec.CpuCount, "cpus", 0, "The number of CPUs.")
 	f.Int64Var(&cmd.spec.MemoryMb, "memory", 0, "The amount of memory (in MB).")
 }
 
-func (cmd *create) Process(ctx context.Context) error {
-	return cmd.ClientFlag.Process(ctx)
+func (*create) Usage() string {
+	return "NAME"
 }
 
 func (cmd *create) Description() string {
-	return `Creates a new virtual machine class. 
+	return `Creates a new virtual machine class.
 
- The name of the virtual machine class has DNS_LABEL restrictions
- as specified in "https://tools.ietf.org/html/rfc1123". It
- must be an alphanumeric (a-z and 0-9) string and with maximum length
- of 63 characters and with the '-' character allowed anywhere except
- the first or last character. This name is unique in this vCenter server.
+The name of the virtual machine class has DNS_LABEL restrictions
+as specified in "https://tools.ietf.org/html/rfc1123". It
+must be an alphanumeric (a-z and 0-9) string and with maximum length
+of 63 characters and with the '-' character allowed anywhere except
+the first or last character. This name is unique in this vCenter server.
 
 Examples:
-  govc namespace.vmclass.create -name=test-class-01 -cpus=8 -memory=8192`
+  govc namespace.vmclass.create -cpus=8 -memory=8192 test-class-01`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
-	rc, err := cmd.RestClient()
+	cmd.spec.Id = f.Arg(0)
+	if f.NArg() != 1 {
+		return flag.ErrHelp
+	}
 
+	rc, err := cmd.RestClient()
 	if err != nil {
 		return err
 	}

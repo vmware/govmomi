@@ -4284,23 +4284,24 @@ Options:
 ## namespace.create
 
 ```
-Usage: govc namespace.create [OPTIONS]
+Usage: govc namespace.create [OPTIONS] NAME
 
-Creates a new vSphere Namespace on a Supervisor. 
+Creates a new vSphere Namespace on a Supervisor.
+
+The '-library' and '-vm-class' flags can each be specified multiple times.
 
 Examples:
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7,dca9cc16-9460-4da0-802c-4aa148ac6cf7
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -vm-classes=best-effort-2xlarge
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -vm-classes=best-effort-2xlarge,best-effort-4xlarge
-  govc namespace.create -namespace=test-namespace -supervisor=domain-c1 -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7,dca9cc16-9460-4da0-802c-4aa148ac6cf7 -vm-classes=best-effort-2xlarge,best-effort-4xlarge
+  govc namespace.create -supervisor=domain-c1 test-namespace
+  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
+  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
+  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge test-namespace
+  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge -vm-class best-effort-4xlarge test-namespace
+  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
 
 Options:
-  -content-libraries=    The identifiers of the content libraries to associate with the vSphere Namespace.
-  -namespace=            The name of the vSphere Namespace.
+  -library=[]            Content library IDs to associate with the vSphere Namespace.
   -supervisor=           The identifier of the Supervisor.
-  -vm-classes=           The identifiers of the virtual machine classes to associate with the vSphere Namespace.
+  -vm-class=[]           Virtual machine class IDs to associate with the vSphere Namespace.
 ```
 
 ## namespace.info
@@ -4308,7 +4309,7 @@ Options:
 ```
 Usage: govc namespace.info [OPTIONS] NAME
 
-Displays the details of a vSphere Namespace. 
+Displays the details of a vSphere Namespace.
 
 Examples:
   govc namespace.info test-namespace
@@ -4341,7 +4342,7 @@ Options:
 ```
 Usage: govc namespace.ls [OPTIONS]
 
-Displays the list of vSphere Namespaces. 
+Displays the list of vSphere Namespaces.
 
 Examples:
   govc namespace.ls
@@ -4449,40 +4450,39 @@ Options:
 ```
 Usage: govc namespace.update [OPTIONS] NAME
 
-Modifies an existing vSphere Namespace on a Supervisor. 
+Modifies an existing vSphere Namespace on a Supervisor.
 
 Examples:
-  govc namespace.update -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.update -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7,617a3ee3-a2ff-4311-9a7c-0016ccf958bd test-namespace
-  govc namespace.update -vm-classes=best-effort-2xlarge test-namespace
-  govc namespace.update -vm-classes=best-effort-2xlarge,best-effort-4xlarge test-namespace
-  govc namespace.update -content-libraries=dca9cc16-9460-4da0-802c-4aa148ac6cf7,617a3ee3-a2ff-4311-9a7c-0016ccf958bd -vm-classes=best-effort-2xlarge,best-effort-4xlarge test-namespace
+  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
+  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=617a3ee3-a2ff-4311-9a7c-0016ccf958bd test-namespace
+  govc namespace.update -vm-class=best-effort-2xlarge test-namespace
+  govc namespace.update -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
+  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=617a3ee3-a2ff-4311-9a7c-0016ccf958bd -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
 
 Options:
-  -content-libraries=    The list of content libraries to associate with the vSphere Namespace.
-  -vm-classes=           The list of virtual machine classes to associate with the vSphere Namespace.
+  -library=[]            Content library IDs to associate with the vSphere Namespace.
+  -vm-class=[]           Virtual machine class IDs to associate with the vSphere Namespace.
 ```
 
 ## namespace.vmclass.create
 
 ```
-Usage: govc namespace.vmclass.create [OPTIONS]
+Usage: govc namespace.vmclass.create [OPTIONS] NAME
 
-Creates a new virtual machine class. 
+Creates a new virtual machine class.
 
- The name of the virtual machine class has DNS_LABEL restrictions
- as specified in "https://tools.ietf.org/html/rfc1123". It
- must be an alphanumeric (a-z and 0-9) string and with maximum length
- of 63 characters and with the '-' character allowed anywhere except
- the first or last character. This name is unique in this vCenter server.
+The name of the virtual machine class has DNS_LABEL restrictions
+as specified in "https://tools.ietf.org/html/rfc1123". It
+must be an alphanumeric (a-z and 0-9) string and with maximum length
+of 63 characters and with the '-' character allowed anywhere except
+the first or last character. This name is unique in this vCenter server.
 
 Examples:
-  govc namespace.vmclass.create -name=test-class-01 -cpus=8 -memory=8192
+  govc namespace.vmclass.create -cpus=8 -memory=8192 test-class-01
 
 Options:
   -cpus=0                The number of CPUs.
   -memory=0              The amount of memory (in MB).
-  -name=                 The name of the virtual machine class.
 ```
 
 ## namespace.vmclass.info
@@ -4490,7 +4490,7 @@ Options:
 ```
 Usage: govc namespace.vmclass.info [OPTIONS] NAME
 
-Displays the details of a virtual machine class. 
+Displays the details of a virtual machine class.
 
 Examples:
   govc namespace.vmclass.info test-class
@@ -4503,7 +4503,7 @@ Options:
 ```
 Usage: govc namespace.vmclass.ls [OPTIONS]
 
-Displays the list of virtual machine classes. 
+Displays the list of virtual machine classes.
 
 Examples:
   govc namespace.vmclass.ls
