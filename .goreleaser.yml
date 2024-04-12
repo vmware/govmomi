@@ -37,6 +37,7 @@ nfpms:
   - package_name: govmomi
     builds:
       - govc
+      - vcsim
     homepage: https://github.com/vmware/govmomi
     maintainer: Doug MacEachern <dougm@vmware.com>
     description: |-
