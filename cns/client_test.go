@@ -100,8 +100,6 @@ func TestClient(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	// UseServiceVersion sets soap.Client.Version to the current version of the service endpoint via /sdk/vsanServiceVersions.xml
-	c.UseServiceVersion("vsan")
 	cnsClient, err := NewClient(ctx, c.Client)
 	if err != nil {
 		t.Fatal(err)
@@ -561,8 +559,6 @@ func TestClient(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			// UseServiceVersion sets soap.Client.Version to the current version of the service endpoint via /sdk/vsanServiceVersions.xml
-			remoteVcClient.UseServiceVersion("vsan")
 			remoteCnsClient, err := NewClient(ctx, remoteVcClient.Client)
 			if err != nil {
 				t.Fatal(err)

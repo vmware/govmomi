@@ -630,6 +630,22 @@ func (s *Service) ServiceVersions(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, versions, s.client.ServiceContent.About.ApiVersion)
 }
 
+// ServiceVersionsVsan handler for the /sdk/vsanServiceVersions.xml path.
+func (s *Service) ServiceVersionsVsan(w http.ResponseWriter, r *http.Request) {
+	const versions = xml.Header + `<namespaces version="1.0">
+ <namespace>
+  <name>urn:vsan</name>
+  <version>%s</version>
+  <priorVersions>
+   <version>6.7</version>
+   <version>6.6</version>
+  </priorVersions>
+ </namespace>
+</namespaces>
+`
+	fmt.Fprintf(w, versions, s.client.ServiceContent.About.ApiVersion)
+}
+
 // defaultIP returns addr.IP if specified, otherwise attempts to find a non-loopback ipv4 IP
 func defaultIP(addr *net.TCPAddr) string {
 	if !addr.IP.IsUnspecified() {
@@ -667,6 +683,7 @@ func (s *Service) NewServer() *Server {
 
 	mux := s.ServeMux
 	mux.HandleFunc(Map.Path+"/vimServiceVersions.xml", s.ServiceVersions)
+	mux.HandleFunc(Map.Path+"/vsanServiceVersions.xml", s.ServiceVersionsVsan)
 	mux.HandleFunc(folderPrefix, s.ServeDatastore)
 	mux.HandleFunc(guestPrefix, ServeGuest)
 	mux.HandleFunc(nfcPrefix, ServeNFC)
