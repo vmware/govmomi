@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -321,4 +321,12 @@ func (c *Manager) DeleteSubscriber(ctx context.Context, library *Library, subscr
 	id := internal.SubscriptionDestination{ID: subscriber}
 	url := c.Resource(internal.Subscriptions).WithID(library.ID).WithAction("delete")
 	return c.Do(ctx, url.Request(http.MethodPost, &id), nil)
+}
+
+// EvictSubscribedLibrary evicts the cached content of an on-demand subscribed library.
+// This operation allows the cached content of a subscribed library to be removed to free up storage capacity.
+func (c *Manager) EvictSubscribedLibrary(ctx context.Context, library *Library) error {
+	path := internal.SubscribedLibraryPath
+	url := c.Resource(path).WithID(library.ID).WithAction("evict")
+	return c.Do(ctx, url.Request(http.MethodPost), nil)
 }

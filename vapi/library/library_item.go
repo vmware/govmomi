@@ -206,3 +206,11 @@ func (c *Manager) FindLibraryItems(
 	var res []string
 	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }
+
+// EvictSubscribedLibraryItem evicts the cached content of a library item in an on-demand subscribed library.
+// This operation allows the cached content of a subscribed library item to be removed to free up storage capacity.
+func (c *Manager) EvictSubscribedLibraryItem(ctx context.Context, item *Item) error {
+	path := internal.SubscribedLibraryItem
+	url := c.Resource(path).WithID(item.ID).WithAction("evict")
+	return c.Do(ctx, url.Request(http.MethodPost), nil)
+}

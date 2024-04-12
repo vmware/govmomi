@@ -905,6 +905,19 @@ func (s *handler) library(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (content *content) cached(val bool) {
+	for _, item := range content.Item {
+		item.cached(val)
+	}
+}
+
+func (item *item) cached(val bool) {
+	item.Cached = val
+	for _, file := range item.File {
+		file.Cached = types.NewBool(val)
+	}
+}
+
 func (s *handler) publish(w http.ResponseWriter, r *http.Request, sids []internal.SubscriptionDestination, l *content, vmtx *item) bool {
 	var ids []string
 	if len(sids) == 0 {
@@ -991,10 +1004,14 @@ func (s *handler) libraryID(w http.ResponseWriter, r *http.Request) {
 		case "sync":
 			if l.Type == "SUBSCRIBED" {
 				l.LastSyncTime = types.NewTime(time.Now())
+				l.cached(true)
 				OK(w)
 			} else {
 				http.NotFound(w, r)
 			}
+		case "evict":
+			l.cached(false)
+			OK(w)
 		}
 	case http.MethodGet:
 		OK(w, l)
@@ -1242,8 +1259,9 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 
 			OK(w, id)
 		case "sync":
-			if l.Type == "SUBSCRIBED" {
+			if l.Type == "SUBSCRIBED" || l.Publication != nil {
 				item.LastSyncTime = types.NewTime(time.Now())
+				item.cached(true)
 				OK(w)
 			} else {
 				http.NotFound(w, r)
@@ -1255,6 +1273,9 @@ func (s *handler) libraryItemID(w http.ResponseWriter, r *http.Request) {
 					OK(w)
 				}
 			}
+		case "evict":
+			item.cached(false)
+			OK(w, id)
 		}
 	case http.MethodGet:
 		OK(w, item)
@@ -2309,6 +2330,7 @@ func (s *handler) libraryItemTemplateID(w http.ResponseWriter, r *http.Request) 
 			return
 		}
 
+		item.cached(true)
 		ref, err := s.cloneVM(item.Template.Value, spec.Name, p, spec.DiskStorage)
 		if err != nil {
 			BadRequest(w, err.Error())
