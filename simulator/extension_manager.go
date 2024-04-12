@@ -67,6 +67,21 @@ func (m *ExtensionManager) init(r *Registry) {
 	}
 }
 
+func (m *ExtensionManager) FindExtension(ctx *Context, req *types.FindExtension) soap.HasFault {
+	body := &methods.FindExtensionBody{
+		Res: new(types.FindExtensionResponse),
+	}
+
+	for _, x := range m.ExtensionList {
+		if x.Key == req.ExtensionKey {
+			body.Res.Returnval = &x
+			break
+		}
+	}
+
+	return body
+}
+
 func (m *ExtensionManager) RegisterExtension(ctx *Context, req *types.RegisterExtension) soap.HasFault {
 	body := &methods.RegisterExtensionBody{}
 
