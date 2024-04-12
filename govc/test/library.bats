@@ -607,3 +607,47 @@ EOF
   assert_success
   assert_matches INVALID_URL
 }
+
+@test "library.sublibevict" {
+  vcsim_env
+
+  run govc library.create -pub published-content
+  assert_success
+  id="$output"
+
+  url="https://$(govc env GOVC_URL)/cls/vcsp/lib/$id"
+
+  run govc library.info published-content
+  assert_success
+  assert_matches "Publication:"
+  assert_matches "$url"
+
+  run govc library.import published-content "$GOVC_IMAGES/ttylinux-latest.ova"
+  assert_success
+
+  run govc library.create -sub "$url" -sub-ondemand=true subscribed-content
+  assert_success
+
+  run govc library.info subscribed-content
+  assert_success
+  assert_matches "Subscription:"
+  assert_matches "$url"
+
+  run govc library.ls subscribed-content/ttylinux-latest/
+  assert_success
+  assert_matches "/subscribed-content/ttylinux-latest/ttylinux-pc_i486-16.1.ovf"
+
+  run govc library.sync subscribed-content/ttylinux-latest
+  assert_success
+
+  result=$(govc library.info -l subscribed-content/ttylinux-latest)
+  echo "$result"
+  # assert cached is true
+
+  run govc library.evict subscribed-content
+  assert_success
+
+  # assert cached is false
+}
+
+

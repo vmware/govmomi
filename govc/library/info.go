@@ -223,6 +223,7 @@ func (r infoResultsWriter) writeItem(
 	}
 	fmt.Fprintf(w, "  Type:\t%s\n", v.Type)
 	fmt.Fprintf(w, "  Size:\t%s\n", units.ByteSize(v.Size))
+	fmt.Fprintf(w, "  Cached:\t%t\n", v.Cached)
 	fmt.Fprintf(w, "  Created:\t%s\n", v.CreationTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  Modified:\t%s\n", v.LastModifiedTime.Format(time.ANSIC))
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
