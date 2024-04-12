@@ -217,6 +217,7 @@ but appear via `govc $cmd -h`:
  - [library.cp](#librarycp)
  - [library.create](#librarycreate)
  - [library.deploy](#librarydeploy)
+ - [library.evict](#libraryevict)
  - [library.export](#libraryexport)
  - [library.import](#libraryimport)
  - [library.info](#libraryinfo)
@@ -3547,6 +3548,20 @@ Options:
   -options=              Options spec file path for VM deployment
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -profile=              Storage profile
+```
+
+## library.evict
+
+```
+Usage: govc library.evict [OPTIONS] LIBRARY NAME | ITEM NAME
+
+Evict library NAME or item NAME.
+
+Examples:
+  govc library.evict subscribed-library
+  govc library.evict subscribed-library/item
+
+Options:
 ```
 
 ## library.export

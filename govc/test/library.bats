@@ -608,7 +608,7 @@ EOF
   assert_matches INVALID_URL
 }
 
-@test "library.sublibevict" {
+@test "library.evict" {
   vcsim_env
 
   run govc library.create -pub published-content
@@ -640,14 +640,16 @@ EOF
   run govc library.sync subscribed-content/ttylinux-latest
   assert_success
 
-  result=$(govc library.info -l subscribed-content/ttylinux-latest)
-  echo "$result"
-  # assert cached is true
+  # assert cached is false after item sync
+  cached=$(govc library.info subscribed-content/ttylinux-latest | grep Cached: | awk '{print $2}')
+  assert_equal "true" "$cached"
 
-  run govc library.evict subscribed-content
+  run govc library.evict subscribed-content/ttylinux-latest
   assert_success
 
-  # assert cached is false
+  # assert cached is false after library item evict
+  cached=$(govc library.info subscribed-content/ttylinux-latest | grep Cached: | awk '{print $2}')
+  assert_equal "false" "$cached"
 }
 
 
