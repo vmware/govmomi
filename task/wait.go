@@ -141,7 +141,7 @@ func WaitEx(
 		func(updates []types.ObjectUpdate) bool {
 			for _, update := range updates {
 				// Only look at updates for the expected task object.
-				if update.Obj == ref {
+				if update.Obj.Value == ref.Value && update.Obj.Type == ref.Type {
 					if cb.fn(update.ChangeSet) {
 						return true
 					}
