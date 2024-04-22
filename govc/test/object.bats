@@ -411,6 +411,66 @@ EOF
   govc object.collect -O -json | jq .
 }
 
+@test "object.collect index" {
+  vcsim_env
+
+  export GOVC_VM=/DC0/vm/DC0_H0_VM0
+
+  # NOTE: '-o' flag uses RetrievePropertiesEx() and mo.ObjectContentToType()
+  # By default, WaitForUpdatesEx() is used with raw types.ObjectContent
+
+  run govc object.collect -o $GOVC_VM 'config.hardware[4000]'
+  assert_failure
+
+  run govc object.collect -o $GOVC_VM 'config.hardware.device[4000'
+  assert_failure
+
+  run govc object.collect -o $GOVC_VM 'config.hardware.device["4000"]'
+  assert_failure # Key is int, not string
+
+  run govc object.collect -o -json $GOVC_VM 'config.hardware.device[4000]'
+  assert_success
+
+  run jq -r .config.hardware.device[].deviceInfo.label <<<"$output"
+  assert_success ethernet-0
+
+  run govc object.collect -o $GOVC_VM 'config.hardware.device[4000].enoent'
+  assert_failure # InvalidProperty
+
+  run govc object.collect -o -json $GOVC_VM 'config.hardware.device[4000].deviceInfo.label'
+  assert_success
+
+  run govc object.collect -s $GOVC_VM 'config.hardware.device[4000].deviceInfo.label'
+  assert_success ethernet-0
+
+  run govc object.collect -o $GOVC_VM 'config.extraConfig[guestinfo.a]'
+  assert_failure # string Key requires quotes
+
+  run govc object.collect -o $GOVC_VM 'config["guestinfo.a"]'
+  assert_failure
+
+  run govc object.collect -o $GOVC_VM 'config.extraConfig["guestinfo.a"]'
+  assert_success # Key does not exist, not an error
+
+  run govc vm.change -e "guestinfo.a=1" -e "guestinfo.b=2"
+  assert_success
+
+  run govc object.collect -json $GOVC_VM 'config.extraConfig["guestinfo.b"]'
+  assert_success
+
+  run jq -r .[].val.value <<<"$output"
+  assert_success 2
+
+  run govc object.collect -o -json $GOVC_VM 'config.extraConfig["guestinfo.b"]'
+  assert_success
+
+  run jq -r .config.extraConfig[].value <<<"$output"
+  assert_success 2
+
+  run govc object.collect -s $GOVC_VM 'config.extraConfig["guestinfo.b"].value'
+  assert_success 2
+}
+
 @test "object.find" {
   vcsim_env -ds 2
 
