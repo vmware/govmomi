@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ import (
 // TransferEndpoint provides information on the source of a library item file.
 type TransferEndpoint struct {
 	URI                      string `json:"uri,omitempty"`
+	SSLCertificate           string `json:"ssl_certificate,omitempty"`
 	SSLCertificateThumbprint string `json:"ssl_certificate_thumbprint,omitempty"`
 }
 
@@ -107,7 +108,11 @@ func (c *Manager) AddLibraryItemFileFromURI(ctx context.Context, sessionID, name
 		if err != nil {
 			return nil, err
 		}
-		source.SSLCertificateThumbprint = res.SSLThumbprint
+		if res.SSLCertificate != "" {
+			source.SSLCertificate = res.SSLCertificate
+		} else {
+			source.SSLCertificateThumbprint = res.SSLThumbprint
+		}
 	}
 
 	return c.AddLibraryItemFile(ctx, sessionID, file)
