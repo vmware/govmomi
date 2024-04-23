@@ -1184,7 +1184,10 @@ func getDiskSize(disk *types.VirtualDisk) int64 {
 
 func changedDiskSize(oldDisk *types.VirtualDisk, newDiskSpec *types.VirtualDisk) (int64, bool) {
 	// capacity cannot be decreased
-	if newDiskSpec.CapacityInBytes < oldDisk.CapacityInBytes || newDiskSpec.CapacityInKB < oldDisk.CapacityInKB {
+	if newDiskSpec.CapacityInBytes > 0 && newDiskSpec.CapacityInBytes < oldDisk.CapacityInBytes {
+		return 0, false
+	}
+	if newDiskSpec.CapacityInKB > 0 && newDiskSpec.CapacityInKB < oldDisk.CapacityInKB {
 		return 0, false
 	}
 
@@ -1196,10 +1199,13 @@ func changedDiskSize(oldDisk *types.VirtualDisk, newDiskSpec *types.VirtualDisk)
 		return newDiskSpec.CapacityInBytes, true
 	}
 
-	// CapacityInBytes and CapacityInKB indicate different values
-	if newDiskSpec.CapacityInBytes != newDiskSpec.CapacityInKB*1024 {
-		return 0, false
+	// if both set, CapacityInBytes and CapacityInKB must be the same
+	if newDiskSpec.CapacityInBytes > 0 && newDiskSpec.CapacityInKB > 0 {
+		if newDiskSpec.CapacityInBytes != newDiskSpec.CapacityInKB*1024 {
+			return 0, false
+		}
 	}
+
 	return newDiskSpec.CapacityInBytes, true
 }
 

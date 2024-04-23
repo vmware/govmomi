@@ -686,8 +686,15 @@ load test_helper
 
   run govc vm.disk.create -vm "$vm" -name "$vm/$name" -size 1M
   assert_success
-  result=$(govc device.ls -vm "$vm" | grep -c disk-)
+  disk=$(govc device.ls -vm "$vm" disk-* | awk '{print $1}')
+  result=$(grep -c disk- <<<"$disk")
   [ "$result" -eq 1 ]
+
+  run govc vm.disk.change -vm "$vm" -disk.name "$disk" -size 2M
+  assert_success
+
+  run govc vm.disk.change -vm "$vm" -disk.name "$disk" -size 1M
+  assert_failure # cannot shrink disk
 }
 
 @test "vm.disk.attach" {
