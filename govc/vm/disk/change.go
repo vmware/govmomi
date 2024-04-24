@@ -153,9 +153,13 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if int64(cmd.bytes) != 0 {
-		editdisk.CapacityInKB = int64(cmd.bytes) / 1024
+		editdisk.CapacityInBytes = int64(cmd.bytes)
+		editdisk.CapacityInKB = int64(0) // zero deprecated field
 	}
 
+	if editdisk.StorageIOAllocation == nil {
+		editdisk.StorageIOAllocation = new(types.StorageIOAllocationInfo)
+	}
 	editdisk.StorageIOAllocation.Limit = cmd.limit
 
 	switch backing := editdisk.Backing.(type) {
