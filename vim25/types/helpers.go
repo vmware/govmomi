@@ -23,6 +23,14 @@ import (
 	"time"
 )
 
+func EnumValuesAsStrings[T ~string](enumValues []T) []string {
+	stringValues := make([]string, len(enumValues))
+	for i := range enumValues {
+		stringValues[i] = string(enumValues[i])
+	}
+	return stringValues
+}
+
 func NewBool(v bool) *bool {
 	return &v
 }

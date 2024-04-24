@@ -49,6 +49,24 @@ const (
 	ActionParameterAlarm = ActionParameter("alarm")
 )
 
+func (e ActionParameter) Values() []ActionParameter {
+	return []ActionParameter{
+		ActionParameterTargetName,
+		ActionParameterAlarmName,
+		ActionParameterOldStatus,
+		ActionParameterNewStatus,
+		ActionParameterTriggeringSummary,
+		ActionParameterDeclaringSummary,
+		ActionParameterEventDescription,
+		ActionParameterTarget,
+		ActionParameterAlarm,
+	}
+}
+
+func (e ActionParameter) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ActionParameter"] = reflect.TypeOf((*ActionParameter)(nil)).Elem()
 }
@@ -77,6 +95,23 @@ const (
 	ActionTypeHostInfraUpdateHaV1 = ActionType("HostInfraUpdateHaV1")
 )
 
+func (e ActionType) Values() []ActionType {
+	return []ActionType{
+		ActionTypeMigrationV1,
+		ActionTypeVmPowerV1,
+		ActionTypeHostPowerV1,
+		ActionTypeHostMaintenanceV1,
+		ActionTypeStorageMigrationV1,
+		ActionTypeStoragePlacementV1,
+		ActionTypePlacementV1,
+		ActionTypeHostInfraUpdateHaV1,
+	}
+}
+
+func (e ActionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ActionType"] = reflect.TypeOf((*ActionType)(nil)).Elem()
 	minAPIVersionForType["ActionType"] = "2.5"
@@ -96,6 +131,17 @@ const (
 	AffinityTypeMemory = AffinityType("memory")
 	AffinityTypeCpu    = AffinityType("cpu")
 )
+
+func (e AffinityType) Values() []AffinityType {
+	return []AffinityType{
+		AffinityTypeMemory,
+		AffinityTypeCpu,
+	}
+}
+
+func (e AffinityType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["AffinityType"] = reflect.TypeOf((*AffinityType)(nil)).Elem()
@@ -124,6 +170,24 @@ const (
 	AgentInstallFailedReasonUnknownInstallerError = AgentInstallFailedReason("UnknownInstallerError")
 )
 
+func (e AgentInstallFailedReason) Values() []AgentInstallFailedReason {
+	return []AgentInstallFailedReason{
+		AgentInstallFailedReasonNotEnoughSpaceOnDevice,
+		AgentInstallFailedReasonPrepareToUpgradeFailed,
+		AgentInstallFailedReasonAgentNotRunning,
+		AgentInstallFailedReasonAgentNotReachable,
+		AgentInstallFailedReasonInstallTimedout,
+		AgentInstallFailedReasonSignatureVerificationFailed,
+		AgentInstallFailedReasonAgentUploadFailed,
+		AgentInstallFailedReasonAgentUploadTimedout,
+		AgentInstallFailedReasonUnknownInstallerError,
+	}
+}
+
+func (e AgentInstallFailedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["AgentInstallFailedReason"] = reflect.TypeOf((*AgentInstallFailedReason)(nil)).Elem()
 	minAPIVersionForType["AgentInstallFailedReason"] = "4.0"
@@ -139,6 +203,18 @@ const (
 	// VM alarms
 	AlarmFilterSpecAlarmTypeByEntityEntityTypeVm = AlarmFilterSpecAlarmTypeByEntity("entityTypeVm")
 )
+
+func (e AlarmFilterSpecAlarmTypeByEntity) Values() []AlarmFilterSpecAlarmTypeByEntity {
+	return []AlarmFilterSpecAlarmTypeByEntity{
+		AlarmFilterSpecAlarmTypeByEntityEntityTypeAll,
+		AlarmFilterSpecAlarmTypeByEntityEntityTypeHost,
+		AlarmFilterSpecAlarmTypeByEntityEntityTypeVm,
+	}
+}
+
+func (e AlarmFilterSpecAlarmTypeByEntity) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["AlarmFilterSpecAlarmTypeByEntity"] = reflect.TypeOf((*AlarmFilterSpecAlarmTypeByEntity)(nil)).Elem()
@@ -159,6 +235,18 @@ const (
 	AlarmFilterSpecAlarmTypeByTriggerTriggerTypeMetric = AlarmFilterSpecAlarmTypeByTrigger("triggerTypeMetric")
 )
 
+func (e AlarmFilterSpecAlarmTypeByTrigger) Values() []AlarmFilterSpecAlarmTypeByTrigger {
+	return []AlarmFilterSpecAlarmTypeByTrigger{
+		AlarmFilterSpecAlarmTypeByTriggerTriggerTypeAll,
+		AlarmFilterSpecAlarmTypeByTriggerTriggerTypeEvent,
+		AlarmFilterSpecAlarmTypeByTriggerTriggerTypeMetric,
+	}
+}
+
+func (e AlarmFilterSpecAlarmTypeByTrigger) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["AlarmFilterSpecAlarmTypeByTrigger"] = reflect.TypeOf((*AlarmFilterSpecAlarmTypeByTrigger)(nil)).Elem()
 	minAPIVersionForType["AlarmFilterSpecAlarmTypeByTrigger"] = "6.7"
@@ -174,6 +262,18 @@ const (
 	// Answer File validation failed to generate default.
 	AnswerFileValidationInfoStatusFailed_defaults = AnswerFileValidationInfoStatus("failed_defaults")
 )
+
+func (e AnswerFileValidationInfoStatus) Values() []AnswerFileValidationInfoStatus {
+	return []AnswerFileValidationInfoStatus{
+		AnswerFileValidationInfoStatusSuccess,
+		AnswerFileValidationInfoStatusFailed,
+		AnswerFileValidationInfoStatusFailed_defaults,
+	}
+}
+
+func (e AnswerFileValidationInfoStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["AnswerFileValidationInfoStatus"] = reflect.TypeOf((*AnswerFileValidationInfoStatus)(nil)).Elem()
@@ -207,6 +307,23 @@ const (
 	ApplyHostProfileConfigurationResultStatusCanceled = ApplyHostProfileConfigurationResultStatus("canceled")
 )
 
+func (e ApplyHostProfileConfigurationResultStatus) Values() []ApplyHostProfileConfigurationResultStatus {
+	return []ApplyHostProfileConfigurationResultStatus{
+		ApplyHostProfileConfigurationResultStatusSuccess,
+		ApplyHostProfileConfigurationResultStatusFailed,
+		ApplyHostProfileConfigurationResultStatusReboot_failed,
+		ApplyHostProfileConfigurationResultStatusStateless_reboot_failed,
+		ApplyHostProfileConfigurationResultStatusCheck_compliance_failed,
+		ApplyHostProfileConfigurationResultStatusState_not_satisfied,
+		ApplyHostProfileConfigurationResultStatusExit_maintenancemode_failed,
+		ApplyHostProfileConfigurationResultStatusCanceled,
+	}
+}
+
+func (e ApplyHostProfileConfigurationResultStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ApplyHostProfileConfigurationResultStatus"] = reflect.TypeOf((*ApplyHostProfileConfigurationResultStatus)(nil)).Elem()
 	minAPIVersionForType["ApplyHostProfileConfigurationResultStatus"] = "6.5"
@@ -227,6 +344,18 @@ const (
 	// indicates changes to an element in the array.
 	ArrayUpdateOperationEdit = ArrayUpdateOperation("edit")
 )
+
+func (e ArrayUpdateOperation) Values() []ArrayUpdateOperation {
+	return []ArrayUpdateOperation{
+		ArrayUpdateOperationAdd,
+		ArrayUpdateOperationRemove,
+		ArrayUpdateOperationEdit,
+	}
+}
+
+func (e ArrayUpdateOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ArrayUpdateOperation"] = reflect.TypeOf((*ArrayUpdateOperation)(nil)).Elem()
@@ -260,6 +389,21 @@ const (
 	AutoStartActionSuspend = AutoStartAction("suspend")
 )
 
+func (e AutoStartAction) Values() []AutoStartAction {
+	return []AutoStartAction{
+		AutoStartActionNone,
+		AutoStartActionSystemDefault,
+		AutoStartActionPowerOn,
+		AutoStartActionPowerOff,
+		AutoStartActionGuestShutdown,
+		AutoStartActionSuspend,
+	}
+}
+
+func (e AutoStartAction) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["AutoStartAction"] = reflect.TypeOf((*AutoStartAction)(nil)).Elem()
 }
@@ -288,6 +432,18 @@ const (
 	AutoStartWaitHeartbeatSettingSystemDefault = AutoStartWaitHeartbeatSetting("systemDefault")
 )
 
+func (e AutoStartWaitHeartbeatSetting) Values() []AutoStartWaitHeartbeatSetting {
+	return []AutoStartWaitHeartbeatSetting{
+		AutoStartWaitHeartbeatSettingYes,
+		AutoStartWaitHeartbeatSettingNo,
+		AutoStartWaitHeartbeatSettingSystemDefault,
+	}
+}
+
+func (e AutoStartWaitHeartbeatSetting) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["AutoStartWaitHeartbeatSetting"] = reflect.TypeOf((*AutoStartWaitHeartbeatSetting)(nil)).Elem()
 }
@@ -311,6 +467,18 @@ const (
 	BaseConfigInfoDiskFileBackingInfoProvisioningTypeLazyZeroedThick = BaseConfigInfoDiskFileBackingInfoProvisioningType("lazyZeroedThick")
 )
 
+func (e BaseConfigInfoDiskFileBackingInfoProvisioningType) Values() []BaseConfigInfoDiskFileBackingInfoProvisioningType {
+	return []BaseConfigInfoDiskFileBackingInfoProvisioningType{
+		BaseConfigInfoDiskFileBackingInfoProvisioningTypeThin,
+		BaseConfigInfoDiskFileBackingInfoProvisioningTypeEagerZeroedThick,
+		BaseConfigInfoDiskFileBackingInfoProvisioningTypeLazyZeroedThick,
+	}
+}
+
+func (e BaseConfigInfoDiskFileBackingInfoProvisioningType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["BaseConfigInfoDiskFileBackingInfoProvisioningType"] = reflect.TypeOf((*BaseConfigInfoDiskFileBackingInfoProvisioningType)(nil)).Elem()
 	minAPIVersionForType["BaseConfigInfoDiskFileBackingInfoProvisioningType"] = "6.5"
@@ -323,6 +491,17 @@ const (
 	BatchResultResultFail    = BatchResultResult("fail")
 )
 
+func (e BatchResultResult) Values() []BatchResultResult {
+	return []BatchResultResult{
+		BatchResultResultSuccess,
+		BatchResultResultFail,
+	}
+}
+
+func (e BatchResultResult) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["BatchResultResult"] = reflect.TypeOf((*BatchResultResult)(nil)).Elem()
 	minAPIVersionForType["BatchResultResult"] = "6.0"
@@ -334,6 +513,16 @@ const (
 	// APD timeout has been disabled on one of the host
 	CannotEnableVmcpForClusterReasonAPDTimeoutDisabled = CannotEnableVmcpForClusterReason("APDTimeoutDisabled")
 )
+
+func (e CannotEnableVmcpForClusterReason) Values() []CannotEnableVmcpForClusterReason {
+	return []CannotEnableVmcpForClusterReason{
+		CannotEnableVmcpForClusterReasonAPDTimeoutDisabled,
+	}
+}
+
+func (e CannotEnableVmcpForClusterReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CannotEnableVmcpForClusterReason"] = reflect.TypeOf((*CannotEnableVmcpForClusterReason)(nil)).Elem()
@@ -348,6 +537,17 @@ const (
 	// Move out of the cluster
 	CannotMoveFaultToleranceVmMoveTypeCluster = CannotMoveFaultToleranceVmMoveType("cluster")
 )
+
+func (e CannotMoveFaultToleranceVmMoveType) Values() []CannotMoveFaultToleranceVmMoveType {
+	return []CannotMoveFaultToleranceVmMoveType{
+		CannotMoveFaultToleranceVmMoveTypeResourcePool,
+		CannotMoveFaultToleranceVmMoveTypeCluster,
+	}
+}
+
+func (e CannotMoveFaultToleranceVmMoveType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CannotMoveFaultToleranceVmMoveType"] = reflect.TypeOf((*CannotMoveFaultToleranceVmMoveType)(nil)).Elem()
@@ -366,6 +566,19 @@ const (
 	// guest suspend
 	CannotPowerOffVmInClusterOperationGuestSuspend = CannotPowerOffVmInClusterOperation("guestSuspend")
 )
+
+func (e CannotPowerOffVmInClusterOperation) Values() []CannotPowerOffVmInClusterOperation {
+	return []CannotPowerOffVmInClusterOperation{
+		CannotPowerOffVmInClusterOperationSuspend,
+		CannotPowerOffVmInClusterOperationPowerOff,
+		CannotPowerOffVmInClusterOperationGuestShutdown,
+		CannotPowerOffVmInClusterOperationGuestSuspend,
+	}
+}
+
+func (e CannotPowerOffVmInClusterOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CannotPowerOffVmInClusterOperation"] = reflect.TypeOf((*CannotPowerOffVmInClusterOperation)(nil)).Elem()
@@ -388,6 +601,21 @@ const (
 	// Source and destination networks do not have same ENS(Enhanced Network Stack) mode
 	CannotUseNetworkReasonMismatchedEnsMode = CannotUseNetworkReason("MismatchedEnsMode")
 )
+
+func (e CannotUseNetworkReason) Values() []CannotUseNetworkReason {
+	return []CannotUseNetworkReason{
+		CannotUseNetworkReasonNetworkReservationNotSupported,
+		CannotUseNetworkReasonMismatchedNetworkPolicies,
+		CannotUseNetworkReasonMismatchedDvsVersionOrVendor,
+		CannotUseNetworkReasonVMotionToUnsupportedNetworkType,
+		CannotUseNetworkReasonNetworkUnderMaintenance,
+		CannotUseNetworkReasonMismatchedEnsMode,
+	}
+}
+
+func (e CannotUseNetworkReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CannotUseNetworkReason"] = reflect.TypeOf((*CannotUseNetworkReason)(nil)).Elem()
@@ -433,6 +661,20 @@ const (
 	CheckTestTypeNetworkTests = CheckTestType("networkTests")
 )
 
+func (e CheckTestType) Values() []CheckTestType {
+	return []CheckTestType{
+		CheckTestTypeSourceTests,
+		CheckTestTypeHostTests,
+		CheckTestTypeResourcePoolTests,
+		CheckTestTypeDatastoreTests,
+		CheckTestTypeNetworkTests,
+	}
+}
+
+func (e CheckTestType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["CheckTestType"] = reflect.TypeOf((*CheckTestType)(nil)).Elem()
 	minAPIVersionForType["CheckTestType"] = "4.0"
@@ -457,6 +699,18 @@ const (
 	ClusterComputeResourceHCIWorkflowStateInvalid = ClusterComputeResourceHCIWorkflowState("invalid")
 )
 
+func (e ClusterComputeResourceHCIWorkflowState) Values() []ClusterComputeResourceHCIWorkflowState {
+	return []ClusterComputeResourceHCIWorkflowState{
+		ClusterComputeResourceHCIWorkflowStateIn_progress,
+		ClusterComputeResourceHCIWorkflowStateDone,
+		ClusterComputeResourceHCIWorkflowStateInvalid,
+	}
+}
+
+func (e ClusterComputeResourceHCIWorkflowState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterComputeResourceHCIWorkflowState"] = reflect.TypeOf((*ClusterComputeResourceHCIWorkflowState)(nil)).Elem()
 	minAPIVersionForType["ClusterComputeResourceHCIWorkflowState"] = "6.7.1"
@@ -473,6 +727,18 @@ const (
 	ClusterComputeResourceVcsHealthStatusNonhealthy = ClusterComputeResourceVcsHealthStatus("nonhealthy")
 )
 
+func (e ClusterComputeResourceVcsHealthStatus) Values() []ClusterComputeResourceVcsHealthStatus {
+	return []ClusterComputeResourceVcsHealthStatus{
+		ClusterComputeResourceVcsHealthStatusHealthy,
+		ClusterComputeResourceVcsHealthStatusDegraded,
+		ClusterComputeResourceVcsHealthStatusNonhealthy,
+	}
+}
+
+func (e ClusterComputeResourceVcsHealthStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterComputeResourceVcsHealthStatus"] = reflect.TypeOf((*ClusterComputeResourceVcsHealthStatus)(nil)).Elem()
 	minAPIVersionForType["ClusterComputeResourceVcsHealthStatus"] = "7.0.1.1"
@@ -486,6 +752,17 @@ const (
 	// Put each host into the crypto safe state immediately.
 	ClusterCryptoConfigInfoCryptoModeForceEnable = ClusterCryptoConfigInfoCryptoMode("forceEnable")
 )
+
+func (e ClusterCryptoConfigInfoCryptoMode) Values() []ClusterCryptoConfigInfoCryptoMode {
+	return []ClusterCryptoConfigInfoCryptoMode{
+		ClusterCryptoConfigInfoCryptoModeOnDemand,
+		ClusterCryptoConfigInfoCryptoModeForceEnable,
+	}
+}
+
+func (e ClusterCryptoConfigInfoCryptoMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterCryptoConfigInfoCryptoMode"] = reflect.TypeOf((*ClusterCryptoConfigInfoCryptoMode)(nil)).Elem()
@@ -522,6 +799,23 @@ const (
 	ClusterDasAamNodeStateDasStateNodeFailed = ClusterDasAamNodeStateDasState("nodeFailed")
 )
 
+func (e ClusterDasAamNodeStateDasState) Values() []ClusterDasAamNodeStateDasState {
+	return []ClusterDasAamNodeStateDasState{
+		ClusterDasAamNodeStateDasStateUninitialized,
+		ClusterDasAamNodeStateDasStateInitialized,
+		ClusterDasAamNodeStateDasStateConfiguring,
+		ClusterDasAamNodeStateDasStateUnconfiguring,
+		ClusterDasAamNodeStateDasStateRunning,
+		ClusterDasAamNodeStateDasStateError,
+		ClusterDasAamNodeStateDasStateAgentShutdown,
+		ClusterDasAamNodeStateDasStateNodeFailed,
+	}
+}
+
+func (e ClusterDasAamNodeStateDasState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterDasAamNodeStateDasState"] = reflect.TypeOf((*ClusterDasAamNodeStateDasState)(nil)).Elem()
 	minAPIVersionForType["ClusterDasAamNodeStateDasState"] = "4.0"
@@ -554,6 +848,18 @@ const (
 	ClusterDasConfigInfoHBDatastoreCandidateAllFeasibleDsWithUserPreference = ClusterDasConfigInfoHBDatastoreCandidate("allFeasibleDsWithUserPreference")
 )
 
+func (e ClusterDasConfigInfoHBDatastoreCandidate) Values() []ClusterDasConfigInfoHBDatastoreCandidate {
+	return []ClusterDasConfigInfoHBDatastoreCandidate{
+		ClusterDasConfigInfoHBDatastoreCandidateUserSelectedDs,
+		ClusterDasConfigInfoHBDatastoreCandidateAllFeasibleDs,
+		ClusterDasConfigInfoHBDatastoreCandidateAllFeasibleDsWithUserPreference,
+	}
+}
+
+func (e ClusterDasConfigInfoHBDatastoreCandidate) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterDasConfigInfoHBDatastoreCandidate"] = reflect.TypeOf((*ClusterDasConfigInfoHBDatastoreCandidate)(nil)).Elem()
 	minAPIVersionForType["ClusterDasConfigInfoHBDatastoreCandidate"] = "5.0"
@@ -570,6 +876,17 @@ const (
 	// HA service is enabled.
 	ClusterDasConfigInfoServiceStateEnabled = ClusterDasConfigInfoServiceState("enabled")
 )
+
+func (e ClusterDasConfigInfoServiceState) Values() []ClusterDasConfigInfoServiceState {
+	return []ClusterDasConfigInfoServiceState{
+		ClusterDasConfigInfoServiceStateDisabled,
+		ClusterDasConfigInfoServiceStateEnabled,
+	}
+}
+
+func (e ClusterDasConfigInfoServiceState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterDasConfigInfoServiceState"] = reflect.TypeOf((*ClusterDasConfigInfoServiceState)(nil)).Elem()
@@ -607,14 +924,26 @@ const (
 	// property.
 	ClusterDasConfigInfoVmMonitoringStateVmMonitoringOnly = ClusterDasConfigInfoVmMonitoringState("vmMonitoringOnly")
 	// HA response to both guest and application heartbeat failure is enabled.
-	//     - To retrieve the guest heartbeat status, use the
-	//       `VirtualMachine*.*VirtualMachine.guestHeartbeatStatus`
-	//       property.
-	//     - To retrieve the application heartbeat status, use the
-	//       `GuestInfo*.*GuestInfo.appHeartbeatStatus`
-	//       property.
+	//   - To retrieve the guest heartbeat status, use the
+	//     `VirtualMachine*.*VirtualMachine.guestHeartbeatStatus`
+	//     property.
+	//   - To retrieve the application heartbeat status, use the
+	//     `GuestInfo*.*GuestInfo.appHeartbeatStatus`
+	//     property.
 	ClusterDasConfigInfoVmMonitoringStateVmAndAppMonitoring = ClusterDasConfigInfoVmMonitoringState("vmAndAppMonitoring")
 )
+
+func (e ClusterDasConfigInfoVmMonitoringState) Values() []ClusterDasConfigInfoVmMonitoringState {
+	return []ClusterDasConfigInfoVmMonitoringState{
+		ClusterDasConfigInfoVmMonitoringStateVmMonitoringDisabled,
+		ClusterDasConfigInfoVmMonitoringStateVmMonitoringOnly,
+		ClusterDasConfigInfoVmMonitoringStateVmAndAppMonitoring,
+	}
+}
+
+func (e ClusterDasConfigInfoVmMonitoringState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterDasConfigInfoVmMonitoringState"] = reflect.TypeOf((*ClusterDasConfigInfoVmMonitoringState)(nil)).Elem()
@@ -700,15 +1029,15 @@ const (
 	//
 	// This
 	// state is reported in two unlikely situations.
-	//     - First, it is reported by
-	//       a master if the host responds to ICMP pings sent by the master over the
-	//       management network but the FDM on the host cannot be reached by the master.
-	//       This situation will occur if the FDM is unable to run or exit the
-	//       uninitialized state.
-	//     - Second, it is reported by vCenter Server if it cannot connect to a
-	//       master nor the FDM for the host. This situation would occur if all hosts
-	//       in the cluster failed but vCenter Server is still running. It may also
-	//       occur if all FDMs are unable to run or exit the uninitialized state.
+	//   - First, it is reported by
+	//     a master if the host responds to ICMP pings sent by the master over the
+	//     management network but the FDM on the host cannot be reached by the master.
+	//     This situation will occur if the FDM is unable to run or exit the
+	//     uninitialized state.
+	//   - Second, it is reported by vCenter Server if it cannot connect to a
+	//     master nor the FDM for the host. This situation would occur if all hosts
+	//     in the cluster failed but vCenter Server is still running. It may also
+	//     occur if all FDMs are unable to run or exit the uninitialized state.
 	ClusterDasFdmAvailabilityStateFdmUnreachable = ClusterDasFdmAvailabilityState("fdmUnreachable")
 	// Config/Reconfig/upgrade operation has failed in first attempt and
 	// a retry of these operations is scheduled.
@@ -718,6 +1047,26 @@ const (
 	// This state is reported by vCenter.
 	ClusterDasFdmAvailabilityStateRetry = ClusterDasFdmAvailabilityState("retry")
 )
+
+func (e ClusterDasFdmAvailabilityState) Values() []ClusterDasFdmAvailabilityState {
+	return []ClusterDasFdmAvailabilityState{
+		ClusterDasFdmAvailabilityStateUninitialized,
+		ClusterDasFdmAvailabilityStateElection,
+		ClusterDasFdmAvailabilityStateMaster,
+		ClusterDasFdmAvailabilityStateConnectedToMaster,
+		ClusterDasFdmAvailabilityStateNetworkPartitionedFromMaster,
+		ClusterDasFdmAvailabilityStateNetworkIsolated,
+		ClusterDasFdmAvailabilityStateHostDown,
+		ClusterDasFdmAvailabilityStateInitializationError,
+		ClusterDasFdmAvailabilityStateUninitializationError,
+		ClusterDasFdmAvailabilityStateFdmUnreachable,
+		ClusterDasFdmAvailabilityStateRetry,
+	}
+}
+
+func (e ClusterDasFdmAvailabilityState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterDasFdmAvailabilityState"] = reflect.TypeOf((*ClusterDasFdmAvailabilityState)(nil)).Elem()
@@ -791,6 +1140,19 @@ const (
 	ClusterDasVmSettingsIsolationResponseClusterIsolationResponse = ClusterDasVmSettingsIsolationResponse("clusterIsolationResponse")
 )
 
+func (e ClusterDasVmSettingsIsolationResponse) Values() []ClusterDasVmSettingsIsolationResponse {
+	return []ClusterDasVmSettingsIsolationResponse{
+		ClusterDasVmSettingsIsolationResponseNone,
+		ClusterDasVmSettingsIsolationResponsePowerOff,
+		ClusterDasVmSettingsIsolationResponseShutdown,
+		ClusterDasVmSettingsIsolationResponseClusterIsolationResponse,
+	}
+}
+
+func (e ClusterDasVmSettingsIsolationResponse) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterDasVmSettingsIsolationResponse"] = reflect.TypeOf((*ClusterDasVmSettingsIsolationResponse)(nil)).Elem()
 	minAPIVersionForType["ClusterDasVmSettingsIsolationResponse"] = "2.5"
@@ -841,6 +1203,22 @@ const (
 	ClusterDasVmSettingsRestartPriorityClusterRestartPriority = ClusterDasVmSettingsRestartPriority("clusterRestartPriority")
 )
 
+func (e ClusterDasVmSettingsRestartPriority) Values() []ClusterDasVmSettingsRestartPriority {
+	return []ClusterDasVmSettingsRestartPriority{
+		ClusterDasVmSettingsRestartPriorityDisabled,
+		ClusterDasVmSettingsRestartPriorityLowest,
+		ClusterDasVmSettingsRestartPriorityLow,
+		ClusterDasVmSettingsRestartPriorityMedium,
+		ClusterDasVmSettingsRestartPriorityHigh,
+		ClusterDasVmSettingsRestartPriorityHighest,
+		ClusterDasVmSettingsRestartPriorityClusterRestartPriority,
+	}
+}
+
+func (e ClusterDasVmSettingsRestartPriority) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterDasVmSettingsRestartPriority"] = reflect.TypeOf((*ClusterDasVmSettingsRestartPriority)(nil)).Elem()
 	minAPIVersionForType["ClusterDasVmSettingsRestartPriority"] = "2.5"
@@ -862,6 +1240,18 @@ const (
 	ClusterHostInfraUpdateHaModeActionOperationTypeEnterMaintenance = ClusterHostInfraUpdateHaModeActionOperationType("enterMaintenance")
 )
 
+func (e ClusterHostInfraUpdateHaModeActionOperationType) Values() []ClusterHostInfraUpdateHaModeActionOperationType {
+	return []ClusterHostInfraUpdateHaModeActionOperationType{
+		ClusterHostInfraUpdateHaModeActionOperationTypeEnterQuarantine,
+		ClusterHostInfraUpdateHaModeActionOperationTypeExitQuarantine,
+		ClusterHostInfraUpdateHaModeActionOperationTypeEnterMaintenance,
+	}
+}
+
+func (e ClusterHostInfraUpdateHaModeActionOperationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterHostInfraUpdateHaModeActionOperationType"] = reflect.TypeOf((*ClusterHostInfraUpdateHaModeActionOperationType)(nil)).Elem()
 	minAPIVersionForType["ClusterHostInfraUpdateHaModeActionOperationType"] = "6.5"
@@ -878,6 +1268,17 @@ const (
 	ClusterInfraUpdateHaConfigInfoBehaviorTypeAutomated = ClusterInfraUpdateHaConfigInfoBehaviorType("Automated")
 )
 
+func (e ClusterInfraUpdateHaConfigInfoBehaviorType) Values() []ClusterInfraUpdateHaConfigInfoBehaviorType {
+	return []ClusterInfraUpdateHaConfigInfoBehaviorType{
+		ClusterInfraUpdateHaConfigInfoBehaviorTypeManual,
+		ClusterInfraUpdateHaConfigInfoBehaviorTypeAutomated,
+	}
+}
+
+func (e ClusterInfraUpdateHaConfigInfoBehaviorType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterInfraUpdateHaConfigInfoBehaviorType"] = reflect.TypeOf((*ClusterInfraUpdateHaConfigInfoBehaviorType)(nil)).Elem()
 	minAPIVersionForType["ClusterInfraUpdateHaConfigInfoBehaviorType"] = "6.5"
@@ -893,6 +1294,17 @@ const (
 	// to be placed in Maintenance Mode.
 	ClusterInfraUpdateHaConfigInfoRemediationTypeMaintenanceMode = ClusterInfraUpdateHaConfigInfoRemediationType("MaintenanceMode")
 )
+
+func (e ClusterInfraUpdateHaConfigInfoRemediationType) Values() []ClusterInfraUpdateHaConfigInfoRemediationType {
+	return []ClusterInfraUpdateHaConfigInfoRemediationType{
+		ClusterInfraUpdateHaConfigInfoRemediationTypeQuarantineMode,
+		ClusterInfraUpdateHaConfigInfoRemediationTypeMaintenanceMode,
+	}
+}
+
+func (e ClusterInfraUpdateHaConfigInfoRemediationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterInfraUpdateHaConfigInfoRemediationType"] = reflect.TypeOf((*ClusterInfraUpdateHaConfigInfoRemediationType)(nil)).Elem()
@@ -925,6 +1337,17 @@ const (
 	ClusterPowerOnVmOptionReserveResources = ClusterPowerOnVmOption("ReserveResources")
 )
 
+func (e ClusterPowerOnVmOption) Values() []ClusterPowerOnVmOption {
+	return []ClusterPowerOnVmOption{
+		ClusterPowerOnVmOptionOverrideAutomationLevel,
+		ClusterPowerOnVmOptionReserveResources,
+	}
+}
+
+func (e ClusterPowerOnVmOption) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterPowerOnVmOption"] = reflect.TypeOf((*ClusterPowerOnVmOption)(nil)).Elem()
 	minAPIVersionForType["ClusterPowerOnVmOption"] = "4.1"
@@ -943,6 +1366,19 @@ const (
 	ClusterProfileServiceTypeFT = ClusterProfileServiceType("FT")
 )
 
+func (e ClusterProfileServiceType) Values() []ClusterProfileServiceType {
+	return []ClusterProfileServiceType{
+		ClusterProfileServiceTypeDRS,
+		ClusterProfileServiceTypeHA,
+		ClusterProfileServiceTypeDPM,
+		ClusterProfileServiceTypeFT,
+	}
+}
+
+func (e ClusterProfileServiceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterProfileServiceType"] = reflect.TypeOf((*ClusterProfileServiceType)(nil)).Elem()
 	minAPIVersionForType["ClusterProfileServiceType"] = "4.0"
@@ -956,6 +1392,17 @@ const (
 	// System VMs are absent on the managed entity.
 	ClusterSystemVMsConfigInfoDeploymentModeABSENT = ClusterSystemVMsConfigInfoDeploymentMode("ABSENT")
 )
+
+func (e ClusterSystemVMsConfigInfoDeploymentMode) Values() []ClusterSystemVMsConfigInfoDeploymentMode {
+	return []ClusterSystemVMsConfigInfoDeploymentMode{
+		ClusterSystemVMsConfigInfoDeploymentModeSYSTEM_MANAGED,
+		ClusterSystemVMsConfigInfoDeploymentModeABSENT,
+	}
+}
+
+func (e ClusterSystemVMsConfigInfoDeploymentMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterSystemVMsConfigInfoDeploymentMode"] = reflect.TypeOf((*ClusterSystemVMsConfigInfoDeploymentMode)(nil)).Elem()
@@ -998,6 +1445,20 @@ const (
 	ClusterVmComponentProtectionSettingsStorageVmReactionClusterDefault = ClusterVmComponentProtectionSettingsStorageVmReaction("clusterDefault")
 )
 
+func (e ClusterVmComponentProtectionSettingsStorageVmReaction) Values() []ClusterVmComponentProtectionSettingsStorageVmReaction {
+	return []ClusterVmComponentProtectionSettingsStorageVmReaction{
+		ClusterVmComponentProtectionSettingsStorageVmReactionDisabled,
+		ClusterVmComponentProtectionSettingsStorageVmReactionWarning,
+		ClusterVmComponentProtectionSettingsStorageVmReactionRestartConservative,
+		ClusterVmComponentProtectionSettingsStorageVmReactionRestartAggressive,
+		ClusterVmComponentProtectionSettingsStorageVmReactionClusterDefault,
+	}
+}
+
+func (e ClusterVmComponentProtectionSettingsStorageVmReaction) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterVmComponentProtectionSettingsStorageVmReaction"] = reflect.TypeOf((*ClusterVmComponentProtectionSettingsStorageVmReaction)(nil)).Elem()
 	minAPIVersionForType["ClusterVmComponentProtectionSettingsStorageVmReaction"] = "6.0"
@@ -1023,6 +1484,18 @@ const (
 	// per-VM settings.
 	ClusterVmComponentProtectionSettingsVmReactionOnAPDClearedUseClusterDefault = ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared("useClusterDefault")
 )
+
+func (e ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared) Values() []ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared {
+	return []ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared{
+		ClusterVmComponentProtectionSettingsVmReactionOnAPDClearedNone,
+		ClusterVmComponentProtectionSettingsVmReactionOnAPDClearedReset,
+		ClusterVmComponentProtectionSettingsVmReactionOnAPDClearedUseClusterDefault,
+	}
+}
+
+func (e ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared"] = reflect.TypeOf((*ClusterVmComponentProtectionSettingsVmReactionOnAPDCleared)(nil)).Elem()
@@ -1057,6 +1530,20 @@ const (
 	ClusterVmReadinessReadyConditionUseClusterDefault = ClusterVmReadinessReadyCondition("useClusterDefault")
 )
 
+func (e ClusterVmReadinessReadyCondition) Values() []ClusterVmReadinessReadyCondition {
+	return []ClusterVmReadinessReadyCondition{
+		ClusterVmReadinessReadyConditionNone,
+		ClusterVmReadinessReadyConditionPoweredOn,
+		ClusterVmReadinessReadyConditionGuestHbStatusGreen,
+		ClusterVmReadinessReadyConditionAppHbStatusGreen,
+		ClusterVmReadinessReadyConditionUseClusterDefault,
+	}
+}
+
+func (e ClusterVmReadinessReadyCondition) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ClusterVmReadinessReadyCondition"] = reflect.TypeOf((*ClusterVmReadinessReadyCondition)(nil)).Elem()
 	minAPIVersionForType["ClusterVmReadinessReadyCondition"] = "6.5"
@@ -1074,6 +1561,19 @@ const (
 	// Compliance check on this host is running.
 	ComplianceResultStatusRunning = ComplianceResultStatus("running")
 )
+
+func (e ComplianceResultStatus) Values() []ComplianceResultStatus {
+	return []ComplianceResultStatus{
+		ComplianceResultStatusCompliant,
+		ComplianceResultStatusNonCompliant,
+		ComplianceResultStatusUnknown,
+		ComplianceResultStatusRunning,
+	}
+}
+
+func (e ComplianceResultStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ComplianceResultStatus"] = reflect.TypeOf((*ComplianceResultStatus)(nil)).Elem()
@@ -1095,6 +1595,18 @@ const (
 	ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateUnknown = ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState("unknown")
 )
 
+func (e ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState) Values() []ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState {
+	return []ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState{
+		ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateLicensed,
+		ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateUnlicensed,
+		ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseStateUnknown,
+	}
+}
+
+func (e ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState"] = reflect.TypeOf((*ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState)(nil)).Elem()
 	minAPIVersionForType["ComputeResourceHostSPBMLicenseInfoHostSPBMLicenseState"] = "5.0"
@@ -1111,6 +1623,18 @@ const (
 	ConfigSpecOperationRemove = ConfigSpecOperation("remove")
 )
 
+func (e ConfigSpecOperation) Values() []ConfigSpecOperation {
+	return []ConfigSpecOperation{
+		ConfigSpecOperationAdd,
+		ConfigSpecOperationEdit,
+		ConfigSpecOperationRemove,
+	}
+}
+
+func (e ConfigSpecOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ConfigSpecOperation"] = reflect.TypeOf((*ConfigSpecOperation)(nil)).Elem()
 	minAPIVersionForType["ConfigSpecOperation"] = "4.0"
@@ -1123,6 +1647,18 @@ const (
 	CryptoManagerHostKeyManagementTypeInternal = CryptoManagerHostKeyManagementType("internal")
 	CryptoManagerHostKeyManagementTypeExternal = CryptoManagerHostKeyManagementType("external")
 )
+
+func (e CryptoManagerHostKeyManagementType) Values() []CryptoManagerHostKeyManagementType {
+	return []CryptoManagerHostKeyManagementType{
+		CryptoManagerHostKeyManagementTypeUnknown,
+		CryptoManagerHostKeyManagementTypeInternal,
+		CryptoManagerHostKeyManagementTypeExternal,
+	}
+}
+
+func (e CryptoManagerHostKeyManagementType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CryptoManagerHostKeyManagementType"] = reflect.TypeOf((*CryptoManagerHostKeyManagementType)(nil)).Elem()
@@ -1146,6 +1682,21 @@ const (
 	CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateManagedByTrustAuthority = CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason("KeyStateManagedByTrustAuthority")
 )
 
+func (e CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason) Values() []CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason {
+	return []CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason{
+		CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateMissingInCache,
+		CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateClusterInvalid,
+		CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateClusterUnreachable,
+		CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateMissingInKMS,
+		CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateNotActiveOrEnabled,
+		CryptoManagerKmipCryptoKeyStatusKeyUnavailableReasonKeyStateManagedByTrustAuthority,
+	}
+}
+
+func (e CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason"] = reflect.TypeOf((*CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason)(nil)).Elem()
 	minAPIVersionForType["CryptoManagerKmipCryptoKeyStatusKeyUnavailableReason"] = "6.7.2"
@@ -1166,6 +1717,19 @@ const (
 	// The cloud-init meta data is not valid format
 	CustomizationFailedReasonCodeWrongMetadataFormat = CustomizationFailedReasonCode("wrongMetadataFormat")
 )
+
+func (e CustomizationFailedReasonCode) Values() []CustomizationFailedReasonCode {
+	return []CustomizationFailedReasonCode{
+		CustomizationFailedReasonCodeUserDefinedScriptDisabled,
+		CustomizationFailedReasonCodeCustomizationDisabled,
+		CustomizationFailedReasonCodeRawDataIsNotSupported,
+		CustomizationFailedReasonCodeWrongMetadataFormat,
+	}
+}
+
+func (e CustomizationFailedReasonCode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CustomizationFailedReasonCode"] = reflect.TypeOf((*CustomizationFailedReasonCode)(nil)).Elem()
@@ -1190,6 +1754,17 @@ const (
 	CustomizationLicenseDataModePerSeat = CustomizationLicenseDataMode("perSeat")
 )
 
+func (e CustomizationLicenseDataMode) Values() []CustomizationLicenseDataMode {
+	return []CustomizationLicenseDataMode{
+		CustomizationLicenseDataModePerServer,
+		CustomizationLicenseDataModePerSeat,
+	}
+}
+
+func (e CustomizationLicenseDataMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["CustomizationLicenseDataMode"] = reflect.TypeOf((*CustomizationLicenseDataMode)(nil)).Elem()
 }
@@ -1205,6 +1780,18 @@ const (
 	// Never use NetBIOS.
 	CustomizationNetBIOSModeDisableNetBIOS = CustomizationNetBIOSMode("disableNetBIOS")
 )
+
+func (e CustomizationNetBIOSMode) Values() []CustomizationNetBIOSMode {
+	return []CustomizationNetBIOSMode{
+		CustomizationNetBIOSModeEnableNetBIOSViaDhcp,
+		CustomizationNetBIOSModeEnableNetBIOS,
+		CustomizationNetBIOSModeDisableNetBIOS,
+	}
+}
+
+func (e CustomizationNetBIOSMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CustomizationNetBIOSMode"] = reflect.TypeOf((*CustomizationNetBIOSMode)(nil)).Elem()
@@ -1231,6 +1818,18 @@ const (
 	// sealed state.
 	CustomizationSysprepRebootOptionShutdown = CustomizationSysprepRebootOption("shutdown")
 )
+
+func (e CustomizationSysprepRebootOption) Values() []CustomizationSysprepRebootOption {
+	return []CustomizationSysprepRebootOption{
+		CustomizationSysprepRebootOptionReboot,
+		CustomizationSysprepRebootOptionNoreboot,
+		CustomizationSysprepRebootOptionShutdown,
+	}
+}
+
+func (e CustomizationSysprepRebootOption) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["CustomizationSysprepRebootOption"] = reflect.TypeOf((*CustomizationSysprepRebootOption)(nil)).Elem()
@@ -1259,6 +1858,19 @@ const (
 	DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptDisabledForPort = DVPortStatusVmDirectPathGen2InactiveReasonNetwork("portNptDisabledForPort")
 )
 
+func (e DVPortStatusVmDirectPathGen2InactiveReasonNetwork) Values() []DVPortStatusVmDirectPathGen2InactiveReasonNetwork {
+	return []DVPortStatusVmDirectPathGen2InactiveReasonNetwork{
+		DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptIncompatibleDvs,
+		DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptNoCompatibleNics,
+		DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptNoVirtualFunctionsAvailable,
+		DVPortStatusVmDirectPathGen2InactiveReasonNetworkPortNptDisabledForPort,
+	}
+}
+
+func (e DVPortStatusVmDirectPathGen2InactiveReasonNetwork) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DVPortStatusVmDirectPathGen2InactiveReasonNetwork"] = reflect.TypeOf((*DVPortStatusVmDirectPathGen2InactiveReasonNetwork)(nil)).Elem()
 	minAPIVersionForType["DVPortStatusVmDirectPathGen2InactiveReasonNetwork"] = "4.1"
@@ -1284,6 +1896,17 @@ const (
 	DVPortStatusVmDirectPathGen2InactiveReasonOtherPortNptIncompatibleConnectee = DVPortStatusVmDirectPathGen2InactiveReasonOther("portNptIncompatibleConnectee")
 )
 
+func (e DVPortStatusVmDirectPathGen2InactiveReasonOther) Values() []DVPortStatusVmDirectPathGen2InactiveReasonOther {
+	return []DVPortStatusVmDirectPathGen2InactiveReasonOther{
+		DVPortStatusVmDirectPathGen2InactiveReasonOtherPortNptIncompatibleHost,
+		DVPortStatusVmDirectPathGen2InactiveReasonOtherPortNptIncompatibleConnectee,
+	}
+}
+
+func (e DVPortStatusVmDirectPathGen2InactiveReasonOther) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DVPortStatusVmDirectPathGen2InactiveReasonOther"] = reflect.TypeOf((*DVPortStatusVmDirectPathGen2InactiveReasonOther)(nil)).Elem()
 	minAPIVersionForType["DVPortStatusVmDirectPathGen2InactiveReasonOther"] = "4.1"
@@ -1295,6 +1918,17 @@ const (
 	DVSMacLimitPolicyTypeAllow = DVSMacLimitPolicyType("allow")
 	DVSMacLimitPolicyTypeDrop  = DVSMacLimitPolicyType("drop")
 )
+
+func (e DVSMacLimitPolicyType) Values() []DVSMacLimitPolicyType {
+	return []DVSMacLimitPolicyType{
+		DVSMacLimitPolicyTypeAllow,
+		DVSMacLimitPolicyTypeDrop,
+	}
+}
+
+func (e DVSMacLimitPolicyType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DVSMacLimitPolicyType"] = reflect.TypeOf((*DVSMacLimitPolicyType)(nil)).Elem()
@@ -1329,6 +1963,26 @@ const (
 	// The ApplyHA call to Personality Manager failed
 	DasConfigFaultDasConfigFaultReasonApplyHAVibsOnClusterFailed = DasConfigFaultDasConfigFaultReason("ApplyHAVibsOnClusterFailed")
 )
+
+func (e DasConfigFaultDasConfigFaultReason) Values() []DasConfigFaultDasConfigFaultReason {
+	return []DasConfigFaultDasConfigFaultReason{
+		DasConfigFaultDasConfigFaultReasonHostNetworkMisconfiguration,
+		DasConfigFaultDasConfigFaultReasonHostMisconfiguration,
+		DasConfigFaultDasConfigFaultReasonInsufficientPrivileges,
+		DasConfigFaultDasConfigFaultReasonNoPrimaryAgentAvailable,
+		DasConfigFaultDasConfigFaultReasonOther,
+		DasConfigFaultDasConfigFaultReasonNoDatastoresConfigured,
+		DasConfigFaultDasConfigFaultReasonCreateConfigVvolFailed,
+		DasConfigFaultDasConfigFaultReasonVSanNotSupportedOnHost,
+		DasConfigFaultDasConfigFaultReasonDasNetworkMisconfiguration,
+		DasConfigFaultDasConfigFaultReasonSetDesiredImageSpecFailed,
+		DasConfigFaultDasConfigFaultReasonApplyHAVibsOnClusterFailed,
+	}
+}
+
+func (e DasConfigFaultDasConfigFaultReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DasConfigFaultDasConfigFaultReason"] = reflect.TypeOf((*DasConfigFaultDasConfigFaultReason)(nil)).Elem()
@@ -1371,6 +2025,19 @@ const (
 	DasVmPriorityHigh = DasVmPriority("high")
 )
 
+func (e DasVmPriority) Values() []DasVmPriority {
+	return []DasVmPriority{
+		DasVmPriorityDisabled,
+		DasVmPriorityLow,
+		DasVmPriorityMedium,
+		DasVmPriorityHigh,
+	}
+}
+
+func (e DasVmPriority) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DasVmPriority"] = reflect.TypeOf((*DasVmPriority)(nil)).Elem()
 }
@@ -1383,6 +2050,17 @@ const (
 	// Is not accessible
 	DatastoreAccessibleFalse = DatastoreAccessible("False")
 )
+
+func (e DatastoreAccessible) Values() []DatastoreAccessible {
+	return []DatastoreAccessible{
+		DatastoreAccessibleTrue,
+		DatastoreAccessibleFalse,
+	}
+}
+
+func (e DatastoreAccessible) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DatastoreAccessible"] = reflect.TypeOf((*DatastoreAccessible)(nil)).Elem()
@@ -1403,6 +2081,18 @@ const (
 	DatastoreSummaryMaintenanceModeStateInMaintenance = DatastoreSummaryMaintenanceModeState("inMaintenance")
 )
 
+func (e DatastoreSummaryMaintenanceModeState) Values() []DatastoreSummaryMaintenanceModeState {
+	return []DatastoreSummaryMaintenanceModeState{
+		DatastoreSummaryMaintenanceModeStateNormal,
+		DatastoreSummaryMaintenanceModeStateEnteringMaintenance,
+		DatastoreSummaryMaintenanceModeStateInMaintenance,
+	}
+}
+
+func (e DatastoreSummaryMaintenanceModeState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DatastoreSummaryMaintenanceModeState"] = reflect.TypeOf((*DatastoreSummaryMaintenanceModeState)(nil)).Elem()
 	minAPIVersionForType["DatastoreSummaryMaintenanceModeState"] = "5.0"
@@ -1420,6 +2110,22 @@ const (
 	DayOfWeekSaturday  = DayOfWeek("saturday")
 )
 
+func (e DayOfWeek) Values() []DayOfWeek {
+	return []DayOfWeek{
+		DayOfWeekSunday,
+		DayOfWeekMonday,
+		DayOfWeekTuesday,
+		DayOfWeekWednesday,
+		DayOfWeekThursday,
+		DayOfWeekFriday,
+		DayOfWeekSaturday,
+	}
+}
+
+func (e DayOfWeek) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DayOfWeek"] = reflect.TypeOf((*DayOfWeek)(nil)).Elem()
 }
@@ -1434,6 +2140,17 @@ const (
 	DeviceNotSupportedReasonGuest = DeviceNotSupportedReason("guest")
 )
 
+func (e DeviceNotSupportedReason) Values() []DeviceNotSupportedReason {
+	return []DeviceNotSupportedReason{
+		DeviceNotSupportedReasonHost,
+		DeviceNotSupportedReasonGuest,
+	}
+}
+
+func (e DeviceNotSupportedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DeviceNotSupportedReason"] = reflect.TypeOf((*DeviceNotSupportedReason)(nil)).Elem()
 	minAPIVersionForType["DeviceNotSupportedReason"] = "2.5"
@@ -1446,6 +2163,17 @@ const (
 	DeviceProtocolNVMe = DeviceProtocol("NVMe")
 	DeviceProtocolSCSI = DeviceProtocol("SCSI")
 )
+
+func (e DeviceProtocol) Values() []DeviceProtocol {
+	return []DeviceProtocol{
+		DeviceProtocolNVMe,
+		DeviceProtocolSCSI,
+	}
+}
+
+func (e DeviceProtocol) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DeviceProtocol"] = reflect.TypeOf((*DeviceProtocol)(nil)).Elem()
@@ -1472,6 +2200,22 @@ const (
 	DiagnosticManagerLogCreatorRecordLog = DiagnosticManagerLogCreator("recordLog")
 )
 
+func (e DiagnosticManagerLogCreator) Values() []DiagnosticManagerLogCreator {
+	return []DiagnosticManagerLogCreator{
+		DiagnosticManagerLogCreatorVpxd,
+		DiagnosticManagerLogCreatorVpxa,
+		DiagnosticManagerLogCreatorHostd,
+		DiagnosticManagerLogCreatorServerd,
+		DiagnosticManagerLogCreatorInstall,
+		DiagnosticManagerLogCreatorVpxClient,
+		DiagnosticManagerLogCreatorRecordLog,
+	}
+}
+
+func (e DiagnosticManagerLogCreator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DiagnosticManagerLogCreator"] = reflect.TypeOf((*DiagnosticManagerLogCreator)(nil)).Elem()
 	minAPIVersionForEnumValue["DiagnosticManagerLogCreator"] = map[string]string{
@@ -1488,6 +2232,16 @@ const (
 	// A standard ASCII-based line-based log file.
 	DiagnosticManagerLogFormatPlain = DiagnosticManagerLogFormat("plain")
 )
+
+func (e DiagnosticManagerLogFormat) Values() []DiagnosticManagerLogFormat {
+	return []DiagnosticManagerLogFormat{
+		DiagnosticManagerLogFormatPlain,
+	}
+}
+
+func (e DiagnosticManagerLogFormat) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DiagnosticManagerLogFormat"] = reflect.TypeOf((*DiagnosticManagerLogFormat)(nil)).Elem()
@@ -1506,6 +2260,17 @@ const (
 	DiagnosticPartitionStorageTypeNetworkAttached = DiagnosticPartitionStorageType("networkAttached")
 )
 
+func (e DiagnosticPartitionStorageType) Values() []DiagnosticPartitionStorageType {
+	return []DiagnosticPartitionStorageType{
+		DiagnosticPartitionStorageTypeDirectAttached,
+		DiagnosticPartitionStorageTypeNetworkAttached,
+	}
+}
+
+func (e DiagnosticPartitionStorageType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DiagnosticPartitionStorageType"] = reflect.TypeOf((*DiagnosticPartitionStorageType)(nil)).Elem()
 }
@@ -1522,6 +2287,17 @@ const (
 	DiagnosticPartitionTypeMultiHost  = DiagnosticPartitionType("multiHost")
 )
 
+func (e DiagnosticPartitionType) Values() []DiagnosticPartitionType {
+	return []DiagnosticPartitionType{
+		DiagnosticPartitionTypeSingleHost,
+		DiagnosticPartitionTypeMultiHost,
+	}
+}
+
+func (e DiagnosticPartitionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DiagnosticPartitionType"] = reflect.TypeOf((*DiagnosticPartitionType)(nil)).Elem()
 }
@@ -1532,6 +2308,16 @@ const (
 	// Online extend disk operation.
 	DisallowedChangeByServiceDisallowedChangeHotExtendDisk = DisallowedChangeByServiceDisallowedChange("hotExtendDisk")
 )
+
+func (e DisallowedChangeByServiceDisallowedChange) Values() []DisallowedChangeByServiceDisallowedChange {
+	return []DisallowedChangeByServiceDisallowedChange{
+		DisallowedChangeByServiceDisallowedChangeHotExtendDisk,
+	}
+}
+
+func (e DisallowedChangeByServiceDisallowedChange) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DisallowedChangeByServiceDisallowedChange"] = reflect.TypeOf((*DisallowedChangeByServiceDisallowedChange)(nil)).Elem()
@@ -1554,6 +2340,17 @@ const (
 	DistributedVirtualPortgroupBackingTypeNsx = DistributedVirtualPortgroupBackingType("nsx")
 )
 
+func (e DistributedVirtualPortgroupBackingType) Values() []DistributedVirtualPortgroupBackingType {
+	return []DistributedVirtualPortgroupBackingType{
+		DistributedVirtualPortgroupBackingTypeStandard,
+		DistributedVirtualPortgroupBackingTypeNsx,
+	}
+}
+
+func (e DistributedVirtualPortgroupBackingType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DistributedVirtualPortgroupBackingType"] = reflect.TypeOf((*DistributedVirtualPortgroupBackingType)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualPortgroupBackingType"] = "7.0"
@@ -1570,6 +2367,18 @@ const (
 	// This tag will be expanded to the current index of the port.
 	DistributedVirtualPortgroupMetaTagNamePortIndex = DistributedVirtualPortgroupMetaTagName("portIndex")
 )
+
+func (e DistributedVirtualPortgroupMetaTagName) Values() []DistributedVirtualPortgroupMetaTagName {
+	return []DistributedVirtualPortgroupMetaTagName{
+		DistributedVirtualPortgroupMetaTagNameDvsName,
+		DistributedVirtualPortgroupMetaTagNamePortgroupName,
+		DistributedVirtualPortgroupMetaTagNamePortIndex,
+	}
+}
+
+func (e DistributedVirtualPortgroupMetaTagName) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DistributedVirtualPortgroupMetaTagName"] = reflect.TypeOf((*DistributedVirtualPortgroupMetaTagName)(nil)).Elem()
@@ -1589,8 +2398,6 @@ const (
 	// a `VirtualMachine` when the virtual machine is reconfigured to
 	// connect to the portgroup.
 	DistributedVirtualPortgroupPortgroupTypeEarlyBinding = DistributedVirtualPortgroupPortgroupType("earlyBinding")
-	//
-	//
 	// Deprecated as of vSphere API 5.0.
 	//
 	// A free `DistributedVirtualPort` will be selected and
@@ -1608,6 +2415,18 @@ const (
 	// at power on.
 	DistributedVirtualPortgroupPortgroupTypeEphemeral = DistributedVirtualPortgroupPortgroupType("ephemeral")
 )
+
+func (e DistributedVirtualPortgroupPortgroupType) Values() []DistributedVirtualPortgroupPortgroupType {
+	return []DistributedVirtualPortgroupPortgroupType{
+		DistributedVirtualPortgroupPortgroupTypeEarlyBinding,
+		DistributedVirtualPortgroupPortgroupTypeLateBinding,
+		DistributedVirtualPortgroupPortgroupTypeEphemeral,
+	}
+}
+
+func (e DistributedVirtualPortgroupPortgroupType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DistributedVirtualPortgroupPortgroupType"] = reflect.TypeOf((*DistributedVirtualPortgroupPortgroupType)(nil)).Elem()
@@ -1641,6 +2460,26 @@ const (
 	DistributedVirtualSwitchHostInfrastructureTrafficClassNvmetcp = DistributedVirtualSwitchHostInfrastructureTrafficClass("nvmetcp")
 )
 
+func (e DistributedVirtualSwitchHostInfrastructureTrafficClass) Values() []DistributedVirtualSwitchHostInfrastructureTrafficClass {
+	return []DistributedVirtualSwitchHostInfrastructureTrafficClass{
+		DistributedVirtualSwitchHostInfrastructureTrafficClassManagement,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassFaultTolerance,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassVmotion,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassVirtualMachine,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassISCSI,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassNfs,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassHbr,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassVsan,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassVdp,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassBackupNfc,
+		DistributedVirtualSwitchHostInfrastructureTrafficClassNvmetcp,
+	}
+}
+
+func (e DistributedVirtualSwitchHostInfrastructureTrafficClass) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DistributedVirtualSwitchHostInfrastructureTrafficClass"] = reflect.TypeOf((*DistributedVirtualSwitchHostInfrastructureTrafficClass)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualSwitchHostInfrastructureTrafficClass"] = "5.5"
@@ -1669,6 +2508,21 @@ const (
 	DistributedVirtualSwitchHostMemberHostComponentStateDown = DistributedVirtualSwitchHostMemberHostComponentState("down")
 )
 
+func (e DistributedVirtualSwitchHostMemberHostComponentState) Values() []DistributedVirtualSwitchHostMemberHostComponentState {
+	return []DistributedVirtualSwitchHostMemberHostComponentState{
+		DistributedVirtualSwitchHostMemberHostComponentStateUp,
+		DistributedVirtualSwitchHostMemberHostComponentStatePending,
+		DistributedVirtualSwitchHostMemberHostComponentStateOutOfSync,
+		DistributedVirtualSwitchHostMemberHostComponentStateWarning,
+		DistributedVirtualSwitchHostMemberHostComponentStateDisconnected,
+		DistributedVirtualSwitchHostMemberHostComponentStateDown,
+	}
+}
+
+func (e DistributedVirtualSwitchHostMemberHostComponentState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DistributedVirtualSwitchHostMemberHostComponentState"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostComponentState)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualSwitchHostMemberHostComponentState"] = "4.0"
@@ -1681,6 +2535,17 @@ const (
 	DistributedVirtualSwitchHostMemberHostUplinkStateStateActive  = DistributedVirtualSwitchHostMemberHostUplinkStateState("active")
 	DistributedVirtualSwitchHostMemberHostUplinkStateStateStandby = DistributedVirtualSwitchHostMemberHostUplinkStateState("standby")
 )
+
+func (e DistributedVirtualSwitchHostMemberHostUplinkStateState) Values() []DistributedVirtualSwitchHostMemberHostUplinkStateState {
+	return []DistributedVirtualSwitchHostMemberHostUplinkStateState{
+		DistributedVirtualSwitchHostMemberHostUplinkStateStateActive,
+		DistributedVirtualSwitchHostMemberHostUplinkStateStateStandby,
+	}
+}
+
+func (e DistributedVirtualSwitchHostMemberHostUplinkStateState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DistributedVirtualSwitchHostMemberHostUplinkStateState"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberHostUplinkStateState)(nil)).Elem()
@@ -1695,6 +2560,17 @@ const (
 	DistributedVirtualSwitchHostMemberTransportZoneTypeOverlay = DistributedVirtualSwitchHostMemberTransportZoneType("overlay")
 )
 
+func (e DistributedVirtualSwitchHostMemberTransportZoneType) Values() []DistributedVirtualSwitchHostMemberTransportZoneType {
+	return []DistributedVirtualSwitchHostMemberTransportZoneType{
+		DistributedVirtualSwitchHostMemberTransportZoneTypeVlan,
+		DistributedVirtualSwitchHostMemberTransportZoneTypeOverlay,
+	}
+}
+
+func (e DistributedVirtualSwitchHostMemberTransportZoneType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DistributedVirtualSwitchHostMemberTransportZoneType"] = reflect.TypeOf((*DistributedVirtualSwitchHostMemberTransportZoneType)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualSwitchHostMemberTransportZoneType"] = "7.0"
@@ -1708,6 +2584,17 @@ const (
 	// Network Resource Control API version 3
 	DistributedVirtualSwitchNetworkResourceControlVersionVersion3 = DistributedVirtualSwitchNetworkResourceControlVersion("version3")
 )
+
+func (e DistributedVirtualSwitchNetworkResourceControlVersion) Values() []DistributedVirtualSwitchNetworkResourceControlVersion {
+	return []DistributedVirtualSwitchNetworkResourceControlVersion{
+		DistributedVirtualSwitchNetworkResourceControlVersionVersion2,
+		DistributedVirtualSwitchNetworkResourceControlVersionVersion3,
+	}
+}
+
+func (e DistributedVirtualSwitchNetworkResourceControlVersion) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DistributedVirtualSwitchNetworkResourceControlVersion"] = reflect.TypeOf((*DistributedVirtualSwitchNetworkResourceControlVersion)(nil)).Elem()
@@ -1738,6 +2625,20 @@ const (
 	DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_loadbased = DistributedVirtualSwitchNicTeamingPolicyMode("loadbalance_loadbased")
 )
 
+func (e DistributedVirtualSwitchNicTeamingPolicyMode) Values() []DistributedVirtualSwitchNicTeamingPolicyMode {
+	return []DistributedVirtualSwitchNicTeamingPolicyMode{
+		DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_ip,
+		DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_srcmac,
+		DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_srcid,
+		DistributedVirtualSwitchNicTeamingPolicyModeFailover_explicit,
+		DistributedVirtualSwitchNicTeamingPolicyModeLoadbalance_loadbased,
+	}
+}
+
+func (e DistributedVirtualSwitchNicTeamingPolicyMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DistributedVirtualSwitchNicTeamingPolicyMode"] = reflect.TypeOf((*DistributedVirtualSwitchNicTeamingPolicyMode)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualSwitchNicTeamingPolicyMode"] = "4.1"
@@ -1757,6 +2658,20 @@ const (
 	// The port connects to a Virtual NIC in a System CRX VM.
 	DistributedVirtualSwitchPortConnecteeConnecteeTypeSystemCrxVnic = DistributedVirtualSwitchPortConnecteeConnecteeType("systemCrxVnic")
 )
+
+func (e DistributedVirtualSwitchPortConnecteeConnecteeType) Values() []DistributedVirtualSwitchPortConnecteeConnecteeType {
+	return []DistributedVirtualSwitchPortConnecteeConnecteeType{
+		DistributedVirtualSwitchPortConnecteeConnecteeTypePnic,
+		DistributedVirtualSwitchPortConnecteeConnecteeTypeVmVnic,
+		DistributedVirtualSwitchPortConnecteeConnecteeTypeHostConsoleVnic,
+		DistributedVirtualSwitchPortConnecteeConnecteeTypeHostVmkVnic,
+		DistributedVirtualSwitchPortConnecteeConnecteeTypeSystemCrxVnic,
+	}
+}
+
+func (e DistributedVirtualSwitchPortConnecteeConnecteeType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DistributedVirtualSwitchPortConnecteeConnecteeType"] = reflect.TypeOf((*DistributedVirtualSwitchPortConnecteeConnecteeType)(nil)).Elem()
@@ -1810,6 +2725,20 @@ const (
 	DistributedVirtualSwitchProductSpecOperationTypeUpdateBundleInfo = DistributedVirtualSwitchProductSpecOperationType("updateBundleInfo")
 )
 
+func (e DistributedVirtualSwitchProductSpecOperationType) Values() []DistributedVirtualSwitchProductSpecOperationType {
+	return []DistributedVirtualSwitchProductSpecOperationType{
+		DistributedVirtualSwitchProductSpecOperationTypePreInstall,
+		DistributedVirtualSwitchProductSpecOperationTypeUpgrade,
+		DistributedVirtualSwitchProductSpecOperationTypeNotifyAvailableUpgrade,
+		DistributedVirtualSwitchProductSpecOperationTypeProceedWithUpgrade,
+		DistributedVirtualSwitchProductSpecOperationTypeUpdateBundleInfo,
+	}
+}
+
+func (e DistributedVirtualSwitchProductSpecOperationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DistributedVirtualSwitchProductSpecOperationType"] = reflect.TypeOf((*DistributedVirtualSwitchProductSpecOperationType)(nil)).Elem()
 	minAPIVersionForType["DistributedVirtualSwitchProductSpecOperationType"] = "4.0"
@@ -1827,6 +2756,17 @@ const (
 	// recommendations automatically.
 	DpmBehaviorAutomated = DpmBehavior("automated")
 )
+
+func (e DpmBehavior) Values() []DpmBehavior {
+	return []DpmBehavior{
+		DpmBehaviorManual,
+		DpmBehaviorAutomated,
+	}
+}
+
+func (e DpmBehavior) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DpmBehavior"] = reflect.TypeOf((*DpmBehavior)(nil)).Elem()
@@ -1849,6 +2789,18 @@ const (
 	DrsBehaviorFullyAutomated = DrsBehavior("fullyAutomated")
 )
 
+func (e DrsBehavior) Values() []DrsBehavior {
+	return []DrsBehavior{
+		DrsBehaviorManual,
+		DrsBehaviorPartiallyAutomated,
+		DrsBehaviorFullyAutomated,
+	}
+}
+
+func (e DrsBehavior) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DrsBehavior"] = reflect.TypeOf((*DrsBehavior)(nil)).Elem()
 }
@@ -1860,6 +2812,17 @@ const (
 	DrsInjectorWorkloadCorrelationStateCorrelated   = DrsInjectorWorkloadCorrelationState("Correlated")
 	DrsInjectorWorkloadCorrelationStateUncorrelated = DrsInjectorWorkloadCorrelationState("Uncorrelated")
 )
+
+func (e DrsInjectorWorkloadCorrelationState) Values() []DrsInjectorWorkloadCorrelationState {
+	return []DrsInjectorWorkloadCorrelationState{
+		DrsInjectorWorkloadCorrelationStateCorrelated,
+		DrsInjectorWorkloadCorrelationStateUncorrelated,
+	}
+}
+
+func (e DrsInjectorWorkloadCorrelationState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DrsInjectorWorkloadCorrelationState"] = reflect.TypeOf((*DrsInjectorWorkloadCorrelationState)(nil)).Elem()
@@ -1884,6 +2847,20 @@ const (
 	DrsRecommendationReasonCodeHostMaint = DrsRecommendationReasonCode("hostMaint")
 )
 
+func (e DrsRecommendationReasonCode) Values() []DrsRecommendationReasonCode {
+	return []DrsRecommendationReasonCode{
+		DrsRecommendationReasonCodeFairnessCpuAvg,
+		DrsRecommendationReasonCodeFairnessMemAvg,
+		DrsRecommendationReasonCodeJointAffin,
+		DrsRecommendationReasonCodeAntiAffin,
+		DrsRecommendationReasonCodeHostMaint,
+	}
+}
+
+func (e DrsRecommendationReasonCode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["DrsRecommendationReasonCode"] = reflect.TypeOf((*DrsRecommendationReasonCode)(nil)).Elem()
 }
@@ -1900,6 +2877,19 @@ const (
 	// The dvs port is in unknown state
 	DvsEventPortBlockStateUnknown = DvsEventPortBlockState("unknown")
 )
+
+func (e DvsEventPortBlockState) Values() []DvsEventPortBlockState {
+	return []DvsEventPortBlockState{
+		DvsEventPortBlockStateUnset,
+		DvsEventPortBlockStateBlocked,
+		DvsEventPortBlockStateUnblocked,
+		DvsEventPortBlockStateUnknown,
+	}
+}
+
+func (e DvsEventPortBlockState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DvsEventPortBlockState"] = reflect.TypeOf((*DvsEventPortBlockState)(nil)).Elem()
@@ -1918,6 +2908,17 @@ const (
 	// Denies all the packets when the Filter fails to configure.
 	DvsFilterOnFailureFailClosed = DvsFilterOnFailure("failClosed")
 )
+
+func (e DvsFilterOnFailure) Values() []DvsFilterOnFailure {
+	return []DvsFilterOnFailure{
+		DvsFilterOnFailureFailOpen,
+		DvsFilterOnFailureFailClosed,
+	}
+}
+
+func (e DvsFilterOnFailure) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DvsFilterOnFailure"] = reflect.TypeOf((*DvsFilterOnFailure)(nil)).Elem()
@@ -1940,6 +2941,18 @@ const (
 	// both incoming and outgoing packets.
 	DvsNetworkRuleDirectionTypeBoth = DvsNetworkRuleDirectionType("both")
 )
+
+func (e DvsNetworkRuleDirectionType) Values() []DvsNetworkRuleDirectionType {
+	return []DvsNetworkRuleDirectionType{
+		DvsNetworkRuleDirectionTypeIncomingPackets,
+		DvsNetworkRuleDirectionTypeOutgoingPackets,
+		DvsNetworkRuleDirectionTypeBoth,
+	}
+}
+
+func (e DvsNetworkRuleDirectionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["DvsNetworkRuleDirectionType"] = reflect.TypeOf((*DvsNetworkRuleDirectionType)(nil)).Elem()
@@ -1994,6 +3007,18 @@ const (
 	EntityImportTypeApplyToEntitySpecified = EntityImportType("applyToEntitySpecified")
 )
 
+func (e EntityImportType) Values() []EntityImportType {
+	return []EntityImportType{
+		EntityImportTypeCreateEntityWithNewIdentifier,
+		EntityImportTypeCreateEntityWithOriginalIdentifier,
+		EntityImportTypeApplyToEntitySpecified,
+	}
+}
+
+func (e EntityImportType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["EntityImportType"] = reflect.TypeOf((*EntityImportType)(nil)).Elem()
 	minAPIVersionForType["EntityImportType"] = "5.1"
@@ -2009,6 +3034,17 @@ const (
 	// Indicates the exported entity is a `DistributedVirtualPortgroup`.
 	EntityTypeDistributedVirtualPortgroup = EntityType("distributedVirtualPortgroup")
 )
+
+func (e EntityType) Values() []EntityType {
+	return []EntityType{
+		EntityTypeDistributedVirtualSwitch,
+		EntityTypeDistributedVirtualPortgroup,
+	}
+}
+
+func (e EntityType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["EntityType"] = reflect.TypeOf((*EntityType)(nil)).Elem()
@@ -2032,6 +3068,21 @@ const (
 	EventAlarmExpressionComparisonOperatorDoesNotEndWith = EventAlarmExpressionComparisonOperator("doesNotEndWith")
 )
 
+func (e EventAlarmExpressionComparisonOperator) Values() []EventAlarmExpressionComparisonOperator {
+	return []EventAlarmExpressionComparisonOperator{
+		EventAlarmExpressionComparisonOperatorEquals,
+		EventAlarmExpressionComparisonOperatorNotEqualTo,
+		EventAlarmExpressionComparisonOperatorStartsWith,
+		EventAlarmExpressionComparisonOperatorDoesNotStartWith,
+		EventAlarmExpressionComparisonOperatorEndsWith,
+		EventAlarmExpressionComparisonOperatorDoesNotEndWith,
+	}
+}
+
+func (e EventAlarmExpressionComparisonOperator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["EventAlarmExpressionComparisonOperator"] = reflect.TypeOf((*EventAlarmExpressionComparisonOperator)(nil)).Elem()
 	minAPIVersionForType["EventAlarmExpressionComparisonOperator"] = "4.0"
@@ -2050,6 +3101,19 @@ const (
 	EventCategoryUser = EventCategory("user")
 )
 
+func (e EventCategory) Values() []EventCategory {
+	return []EventCategory{
+		EventCategoryInfo,
+		EventCategoryWarning,
+		EventCategoryError,
+		EventCategoryUser,
+	}
+}
+
+func (e EventCategory) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["EventCategory"] = reflect.TypeOf((*EventCategory)(nil)).Elem()
 }
@@ -2066,6 +3130,19 @@ const (
 	// A user-related message
 	EventEventSeverityUser = EventEventSeverity("user")
 )
+
+func (e EventEventSeverity) Values() []EventEventSeverity {
+	return []EventEventSeverity{
+		EventEventSeverityError,
+		EventEventSeverityWarning,
+		EventEventSeverityInfo,
+		EventEventSeverityUser,
+	}
+}
+
+func (e EventEventSeverity) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["EventEventSeverity"] = reflect.TypeOf((*EventEventSeverity)(nil)).Elem()
@@ -2093,6 +3170,18 @@ const (
 	EventFilterSpecRecursionOptionAll = EventFilterSpecRecursionOption("all")
 )
 
+func (e EventFilterSpecRecursionOption) Values() []EventFilterSpecRecursionOption {
+	return []EventFilterSpecRecursionOption{
+		EventFilterSpecRecursionOptionSelf,
+		EventFilterSpecRecursionOptionChildren,
+		EventFilterSpecRecursionOptionAll,
+	}
+}
+
+func (e EventFilterSpecRecursionOption) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["EventFilterSpecRecursionOption"] = reflect.TypeOf((*EventFilterSpecRecursionOption)(nil)).Elem()
 }
@@ -2106,6 +3195,19 @@ const (
 	FibreChannelPortTypePointToPoint = FibreChannelPortType("pointToPoint")
 	FibreChannelPortTypeUnknown      = FibreChannelPortType("unknown")
 )
+
+func (e FibreChannelPortType) Values() []FibreChannelPortType {
+	return []FibreChannelPortType{
+		FibreChannelPortTypeFabric,
+		FibreChannelPortTypeLoop,
+		FibreChannelPortTypePointToPoint,
+		FibreChannelPortTypeUnknown,
+	}
+}
+
+func (e FibreChannelPortType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["FibreChannelPortType"] = reflect.TypeOf((*FibreChannelPortType)(nil)).Elem()
@@ -2135,6 +3237,18 @@ const (
 	FileSystemMountInfoVStorageSupportStatusVStorageUnknown = FileSystemMountInfoVStorageSupportStatus("vStorageUnknown")
 )
 
+func (e FileSystemMountInfoVStorageSupportStatus) Values() []FileSystemMountInfoVStorageSupportStatus {
+	return []FileSystemMountInfoVStorageSupportStatus{
+		FileSystemMountInfoVStorageSupportStatusVStorageSupported,
+		FileSystemMountInfoVStorageSupportStatusVStorageUnsupported,
+		FileSystemMountInfoVStorageSupportStatusVStorageUnknown,
+	}
+}
+
+func (e FileSystemMountInfoVStorageSupportStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["FileSystemMountInfoVStorageSupportStatus"] = reflect.TypeOf((*FileSystemMountInfoVStorageSupportStatus)(nil)).Elem()
 	minAPIVersionForType["FileSystemMountInfoVStorageSupportStatus"] = "4.1"
@@ -2148,6 +3262,17 @@ const (
 	// Add host in non-maintenance mode.
 	FolderDesiredHostStateNon_maintenance = FolderDesiredHostState("non_maintenance")
 )
+
+func (e FolderDesiredHostState) Values() []FolderDesiredHostState {
+	return []FolderDesiredHostState{
+		FolderDesiredHostStateMaintenance,
+		FolderDesiredHostStateNon_maintenance,
+	}
+}
+
+func (e FolderDesiredHostState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["FolderDesiredHostState"] = reflect.TypeOf((*FolderDesiredHostState)(nil)).Elem()
@@ -2165,6 +3290,18 @@ const (
 	FtIssuesOnHostHostSelectionTypeDrs = FtIssuesOnHostHostSelectionType("drs")
 )
 
+func (e FtIssuesOnHostHostSelectionType) Values() []FtIssuesOnHostHostSelectionType {
+	return []FtIssuesOnHostHostSelectionType{
+		FtIssuesOnHostHostSelectionTypeUser,
+		FtIssuesOnHostHostSelectionTypeVc,
+		FtIssuesOnHostHostSelectionTypeDrs,
+	}
+}
+
+func (e FtIssuesOnHostHostSelectionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["FtIssuesOnHostHostSelectionType"] = reflect.TypeOf((*FtIssuesOnHostHostSelectionType)(nil)).Elem()
 	minAPIVersionForType["FtIssuesOnHostHostSelectionType"] = "4.0"
@@ -2181,6 +3318,18 @@ const (
 	// symbolic link
 	GuestFileTypeSymlink = GuestFileType("symlink")
 )
+
+func (e GuestFileType) Values() []GuestFileType {
+	return []GuestFileType{
+		GuestFileTypeFile,
+		GuestFileTypeDirectory,
+		GuestFileTypeSymlink,
+	}
+}
+
+func (e GuestFileType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["GuestFileType"] = reflect.TypeOf((*GuestFileType)(nil)).Elem()
@@ -2200,6 +3349,18 @@ const (
 	// Guest's application agent asks for immediate reset
 	GuestInfoAppStateTypeAppStateNeedReset = GuestInfoAppStateType("appStateNeedReset")
 )
+
+func (e GuestInfoAppStateType) Values() []GuestInfoAppStateType {
+	return []GuestInfoAppStateType{
+		GuestInfoAppStateTypeNone,
+		GuestInfoAppStateTypeAppStateOk,
+		GuestInfoAppStateTypeAppStateNeedReset,
+	}
+}
+
+func (e GuestInfoAppStateType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["GuestInfoAppStateType"] = reflect.TypeOf((*GuestInfoAppStateType)(nil)).Elem()
@@ -2223,6 +3384,20 @@ const (
 	GuestInfoCustomizationStatusTOOLSDEPLOYPKG_FAILED = GuestInfoCustomizationStatus("TOOLSDEPLOYPKG_FAILED")
 )
 
+func (e GuestInfoCustomizationStatus) Values() []GuestInfoCustomizationStatus {
+	return []GuestInfoCustomizationStatus{
+		GuestInfoCustomizationStatusTOOLSDEPLOYPKG_IDLE,
+		GuestInfoCustomizationStatusTOOLSDEPLOYPKG_PENDING,
+		GuestInfoCustomizationStatusTOOLSDEPLOYPKG_RUNNING,
+		GuestInfoCustomizationStatusTOOLSDEPLOYPKG_SUCCEEDED,
+		GuestInfoCustomizationStatusTOOLSDEPLOYPKG_FAILED,
+	}
+}
+
+func (e GuestInfoCustomizationStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["GuestInfoCustomizationStatus"] = reflect.TypeOf((*GuestInfoCustomizationStatus)(nil)).Elem()
 	minAPIVersionForType["GuestInfoCustomizationStatus"] = "7.0.2.0"
@@ -2236,6 +3411,17 @@ const (
 	// Extensible Firmware Interface
 	GuestOsDescriptorFirmwareTypeEfi = GuestOsDescriptorFirmwareType("efi")
 )
+
+func (e GuestOsDescriptorFirmwareType) Values() []GuestOsDescriptorFirmwareType {
+	return []GuestOsDescriptorFirmwareType{
+		GuestOsDescriptorFirmwareTypeBios,
+		GuestOsDescriptorFirmwareTypeEfi,
+	}
+}
+
+func (e GuestOsDescriptorFirmwareType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["GuestOsDescriptorFirmwareType"] = reflect.TypeOf((*GuestOsDescriptorFirmwareType)(nil)).Elem()
@@ -2266,6 +3452,22 @@ const (
 	GuestOsDescriptorSupportLevelTechPreview = GuestOsDescriptorSupportLevel("techPreview")
 )
 
+func (e GuestOsDescriptorSupportLevel) Values() []GuestOsDescriptorSupportLevel {
+	return []GuestOsDescriptorSupportLevel{
+		GuestOsDescriptorSupportLevelExperimental,
+		GuestOsDescriptorSupportLevelLegacy,
+		GuestOsDescriptorSupportLevelTerminated,
+		GuestOsDescriptorSupportLevelSupported,
+		GuestOsDescriptorSupportLevelUnsupported,
+		GuestOsDescriptorSupportLevelDeprecated,
+		GuestOsDescriptorSupportLevelTechPreview,
+	}
+}
+
+func (e GuestOsDescriptorSupportLevel) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["GuestOsDescriptorSupportLevel"] = reflect.TypeOf((*GuestOsDescriptorSupportLevel)(nil)).Elem()
 	minAPIVersionForType["GuestOsDescriptorSupportLevel"] = "5.0"
@@ -2283,6 +3485,16 @@ const (
 	// Fail the end phase of guest quiesce creation.
 	GuestQuiesceEndGuestQuiesceErrorFailure = GuestQuiesceEndGuestQuiesceError("failure")
 )
+
+func (e GuestQuiesceEndGuestQuiesceError) Values() []GuestQuiesceEndGuestQuiesceError {
+	return []GuestQuiesceEndGuestQuiesceError{
+		GuestQuiesceEndGuestQuiesceErrorFailure,
+	}
+}
+
+func (e GuestQuiesceEndGuestQuiesceError) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["GuestQuiesceEndGuestQuiesceError"] = reflect.TypeOf((*GuestQuiesceEndGuestQuiesceError)(nil)).Elem()
@@ -2308,6 +3520,18 @@ const (
 	GuestRegKeyWowSpecWOW64 = GuestRegKeyWowSpec("WOW64")
 )
 
+func (e GuestRegKeyWowSpec) Values() []GuestRegKeyWowSpec {
+	return []GuestRegKeyWowSpec{
+		GuestRegKeyWowSpecWOWNative,
+		GuestRegKeyWowSpecWOW32,
+		GuestRegKeyWowSpecWOW64,
+	}
+}
+
+func (e GuestRegKeyWowSpec) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["GuestRegKeyWowSpec"] = reflect.TypeOf((*GuestRegKeyWowSpec)(nil)).Elem()
 	minAPIVersionForType["GuestRegKeyWowSpec"] = "6.0"
@@ -2322,6 +3546,20 @@ const (
 	HealthUpdateInfoComponentTypeNetwork = HealthUpdateInfoComponentType("Network")
 	HealthUpdateInfoComponentTypeStorage = HealthUpdateInfoComponentType("Storage")
 )
+
+func (e HealthUpdateInfoComponentType) Values() []HealthUpdateInfoComponentType {
+	return []HealthUpdateInfoComponentType{
+		HealthUpdateInfoComponentTypeMemory,
+		HealthUpdateInfoComponentTypePower,
+		HealthUpdateInfoComponentTypeFan,
+		HealthUpdateInfoComponentTypeNetwork,
+		HealthUpdateInfoComponentTypeStorage,
+	}
+}
+
+func (e HealthUpdateInfoComponentType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HealthUpdateInfoComponentType"] = reflect.TypeOf((*HealthUpdateInfoComponentType)(nil)).Elem()
@@ -2371,6 +3609,20 @@ const (
 	HostAccessModeAccessOther = HostAccessMode("accessOther")
 )
 
+func (e HostAccessMode) Values() []HostAccessMode {
+	return []HostAccessMode{
+		HostAccessModeAccessNone,
+		HostAccessModeAccessAdmin,
+		HostAccessModeAccessNoAccess,
+		HostAccessModeAccessReadOnly,
+		HostAccessModeAccessOther,
+	}
+}
+
+func (e HostAccessMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostAccessMode"] = reflect.TypeOf((*HostAccessMode)(nil)).Elem()
 	minAPIVersionForType["HostAccessMode"] = "6.0"
@@ -2381,6 +3633,16 @@ type HostActiveDirectoryAuthenticationCertificateDigest string
 const (
 	HostActiveDirectoryAuthenticationCertificateDigestSHA1 = HostActiveDirectoryAuthenticationCertificateDigest("SHA1")
 )
+
+func (e HostActiveDirectoryAuthenticationCertificateDigest) Values() []HostActiveDirectoryAuthenticationCertificateDigest {
+	return []HostActiveDirectoryAuthenticationCertificateDigest{
+		HostActiveDirectoryAuthenticationCertificateDigestSHA1,
+	}
+}
+
+func (e HostActiveDirectoryAuthenticationCertificateDigest) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostActiveDirectoryAuthenticationCertificateDigest"] = reflect.TypeOf((*HostActiveDirectoryAuthenticationCertificateDigest)(nil)).Elem()
@@ -2409,6 +3671,22 @@ const (
 	HostActiveDirectoryInfoDomainMembershipStatusOtherProblem = HostActiveDirectoryInfoDomainMembershipStatus("otherProblem")
 )
 
+func (e HostActiveDirectoryInfoDomainMembershipStatus) Values() []HostActiveDirectoryInfoDomainMembershipStatus {
+	return []HostActiveDirectoryInfoDomainMembershipStatus{
+		HostActiveDirectoryInfoDomainMembershipStatusUnknown,
+		HostActiveDirectoryInfoDomainMembershipStatusOk,
+		HostActiveDirectoryInfoDomainMembershipStatusNoServers,
+		HostActiveDirectoryInfoDomainMembershipStatusClientTrustBroken,
+		HostActiveDirectoryInfoDomainMembershipStatusServerTrustBroken,
+		HostActiveDirectoryInfoDomainMembershipStatusInconsistentTrust,
+		HostActiveDirectoryInfoDomainMembershipStatusOtherProblem,
+	}
+}
+
+func (e HostActiveDirectoryInfoDomainMembershipStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostActiveDirectoryInfoDomainMembershipStatus"] = reflect.TypeOf((*HostActiveDirectoryInfoDomainMembershipStatus)(nil)).Elem()
 	minAPIVersionForType["HostActiveDirectoryInfoDomainMembershipStatus"] = "4.1"
@@ -2420,6 +3698,17 @@ const (
 	HostBIOSInfoFirmwareTypeBIOS = HostBIOSInfoFirmwareType("BIOS")
 	HostBIOSInfoFirmwareTypeUEFI = HostBIOSInfoFirmwareType("UEFI")
 )
+
+func (e HostBIOSInfoFirmwareType) Values() []HostBIOSInfoFirmwareType {
+	return []HostBIOSInfoFirmwareType{
+		HostBIOSInfoFirmwareTypeBIOS,
+		HostBIOSInfoFirmwareTypeUEFI,
+	}
+}
+
+func (e HostBIOSInfoFirmwareType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostBIOSInfoFirmwareType"] = reflect.TypeOf((*HostBIOSInfoFirmwareType)(nil)).Elem()
@@ -2455,6 +3744,24 @@ const (
 	HostCapabilityFtUnsupportedReasonCpuHvDisabled = HostCapabilityFtUnsupportedReason("cpuHvDisabled")
 )
 
+func (e HostCapabilityFtUnsupportedReason) Values() []HostCapabilityFtUnsupportedReason {
+	return []HostCapabilityFtUnsupportedReason{
+		HostCapabilityFtUnsupportedReasonVMotionNotLicensed,
+		HostCapabilityFtUnsupportedReasonMissingVMotionNic,
+		HostCapabilityFtUnsupportedReasonMissingFTLoggingNic,
+		HostCapabilityFtUnsupportedReasonFtNotLicensed,
+		HostCapabilityFtUnsupportedReasonHaAgentIssue,
+		HostCapabilityFtUnsupportedReasonUnsupportedProduct,
+		HostCapabilityFtUnsupportedReasonCpuHvUnsupported,
+		HostCapabilityFtUnsupportedReasonCpuHwmmuUnsupported,
+		HostCapabilityFtUnsupportedReasonCpuHvDisabled,
+	}
+}
+
+func (e HostCapabilityFtUnsupportedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostCapabilityFtUnsupportedReason"] = reflect.TypeOf((*HostCapabilityFtUnsupportedReason)(nil)).Elem()
 	minAPIVersionForType["HostCapabilityFtUnsupportedReason"] = "4.1"
@@ -2478,6 +3785,18 @@ const (
 	HostCapabilityUnmapMethodSupportedDynamic = HostCapabilityUnmapMethodSupported("dynamic")
 )
 
+func (e HostCapabilityUnmapMethodSupported) Values() []HostCapabilityUnmapMethodSupported {
+	return []HostCapabilityUnmapMethodSupported{
+		HostCapabilityUnmapMethodSupportedPriority,
+		HostCapabilityUnmapMethodSupportedFixed,
+		HostCapabilityUnmapMethodSupportedDynamic,
+	}
+}
+
+func (e HostCapabilityUnmapMethodSupported) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostCapabilityUnmapMethodSupported"] = reflect.TypeOf((*HostCapabilityUnmapMethodSupported)(nil)).Elem()
 	minAPIVersionForType["HostCapabilityUnmapMethodSupported"] = "6.7"
@@ -2497,6 +3816,18 @@ const (
 	// The host is configured to disable VMDirectPath Gen 2.
 	HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptDisabled = HostCapabilityVmDirectPathGen2UnsupportedReason("hostNptDisabled")
 )
+
+func (e HostCapabilityVmDirectPathGen2UnsupportedReason) Values() []HostCapabilityVmDirectPathGen2UnsupportedReason {
+	return []HostCapabilityVmDirectPathGen2UnsupportedReason{
+		HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptIncompatibleProduct,
+		HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptIncompatibleHardware,
+		HostCapabilityVmDirectPathGen2UnsupportedReasonHostNptDisabled,
+	}
+}
+
+func (e HostCapabilityVmDirectPathGen2UnsupportedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostCapabilityVmDirectPathGen2UnsupportedReason"] = reflect.TypeOf((*HostCapabilityVmDirectPathGen2UnsupportedReason)(nil)).Elem()
@@ -2545,6 +3876,21 @@ const (
 	HostCertificateManagerCertificateInfoCertificateStatusGood = HostCertificateManagerCertificateInfoCertificateStatus("good")
 )
 
+func (e HostCertificateManagerCertificateInfoCertificateStatus) Values() []HostCertificateManagerCertificateInfoCertificateStatus {
+	return []HostCertificateManagerCertificateInfoCertificateStatus{
+		HostCertificateManagerCertificateInfoCertificateStatusUnknown,
+		HostCertificateManagerCertificateInfoCertificateStatusExpired,
+		HostCertificateManagerCertificateInfoCertificateStatusExpiring,
+		HostCertificateManagerCertificateInfoCertificateStatusExpiringShortly,
+		HostCertificateManagerCertificateInfoCertificateStatusExpirationImminent,
+		HostCertificateManagerCertificateInfoCertificateStatusGood,
+	}
+}
+
+func (e HostCertificateManagerCertificateInfoCertificateStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostCertificateManagerCertificateInfoCertificateStatus"] = reflect.TypeOf((*HostCertificateManagerCertificateInfoCertificateStatus)(nil)).Elem()
 	minAPIVersionForType["HostCertificateManagerCertificateInfoCertificateStatus"] = "6.0"
@@ -2558,6 +3904,17 @@ const (
 	// VASA Client certificate used for communication with VASA Provider
 	HostCertificateManagerCertificateKindVASAClient = HostCertificateManagerCertificateKind("VASAClient")
 )
+
+func (e HostCertificateManagerCertificateKind) Values() []HostCertificateManagerCertificateKind {
+	return []HostCertificateManagerCertificateKind{
+		HostCertificateManagerCertificateKindMachine,
+		HostCertificateManagerCertificateKindVASAClient,
+	}
+}
+
+func (e HostCertificateManagerCertificateKind) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostCertificateManagerCertificateKind"] = reflect.TypeOf((*HostCertificateManagerCertificateKind)(nil)).Elem()
@@ -2577,6 +3934,17 @@ const (
 	// desired state of the managed object.
 	HostConfigChangeModeReplace = HostConfigChangeMode("replace")
 )
+
+func (e HostConfigChangeMode) Values() []HostConfigChangeMode {
+	return []HostConfigChangeMode{
+		HostConfigChangeModeModify,
+		HostConfigChangeModeReplace,
+	}
+}
+
+func (e HostConfigChangeMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostConfigChangeMode"] = reflect.TypeOf((*HostConfigChangeMode)(nil)).Elem()
@@ -2601,6 +3969,19 @@ const (
 	HostConfigChangeOperationIgnore = HostConfigChangeOperation("ignore")
 )
 
+func (e HostConfigChangeOperation) Values() []HostConfigChangeOperation {
+	return []HostConfigChangeOperation{
+		HostConfigChangeOperationAdd,
+		HostConfigChangeOperationRemove,
+		HostConfigChangeOperationEdit,
+		HostConfigChangeOperationIgnore,
+	}
+}
+
+func (e HostConfigChangeOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostConfigChangeOperation"] = reflect.TypeOf((*HostConfigChangeOperation)(nil)).Elem()
 	minAPIVersionForEnumValue["HostConfigChangeOperation"] = map[string]string{
@@ -2618,6 +3999,19 @@ const (
 	HostCpuPackageVendorHygon = HostCpuPackageVendor("hygon")
 )
 
+func (e HostCpuPackageVendor) Values() []HostCpuPackageVendor {
+	return []HostCpuPackageVendor{
+		HostCpuPackageVendorUnknown,
+		HostCpuPackageVendorIntel,
+		HostCpuPackageVendorAmd,
+		HostCpuPackageVendorHygon,
+	}
+}
+
+func (e HostCpuPackageVendor) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostCpuPackageVendor"] = reflect.TypeOf((*HostCpuPackageVendor)(nil)).Elem()
 	minAPIVersionForEnumValue["HostCpuPackageVendor"] = map[string]string{
@@ -2632,6 +4026,18 @@ const (
 	HostCpuPowerManagementInfoPolicyTypeStaticPolicy  = HostCpuPowerManagementInfoPolicyType("staticPolicy")
 	HostCpuPowerManagementInfoPolicyTypeDynamicPolicy = HostCpuPowerManagementInfoPolicyType("dynamicPolicy")
 )
+
+func (e HostCpuPowerManagementInfoPolicyType) Values() []HostCpuPowerManagementInfoPolicyType {
+	return []HostCpuPowerManagementInfoPolicyType{
+		HostCpuPowerManagementInfoPolicyTypeOff,
+		HostCpuPowerManagementInfoPolicyTypeStaticPolicy,
+		HostCpuPowerManagementInfoPolicyTypeDynamicPolicy,
+	}
+}
+
+func (e HostCpuPowerManagementInfoPolicyType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostCpuPowerManagementInfoPolicyType"] = reflect.TypeOf((*HostCpuPowerManagementInfoPolicyType)(nil)).Elem()
@@ -2657,6 +4063,19 @@ const (
 	HostCryptoStatePendingIncapable = HostCryptoState("pendingIncapable")
 )
 
+func (e HostCryptoState) Values() []HostCryptoState {
+	return []HostCryptoState{
+		HostCryptoStateIncapable,
+		HostCryptoStatePrepared,
+		HostCryptoStateSafe,
+		HostCryptoStatePendingIncapable,
+	}
+}
+
+func (e HostCryptoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostCryptoState"] = reflect.TypeOf((*HostCryptoState)(nil)).Elem()
 	minAPIVersionForType["HostCryptoState"] = "6.5"
@@ -2673,6 +4092,17 @@ const (
 	// ENS mode which skips packet parsing and flow table lookup.
 	HostDVSConfigSpecSwitchModeMux = HostDVSConfigSpecSwitchMode("mux")
 )
+
+func (e HostDVSConfigSpecSwitchMode) Values() []HostDVSConfigSpecSwitchMode {
+	return []HostDVSConfigSpecSwitchMode{
+		HostDVSConfigSpecSwitchModeNormal,
+		HostDVSConfigSpecSwitchModeMux,
+	}
+}
+
+func (e HostDVSConfigSpecSwitchMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostDVSConfigSpecSwitchMode"] = reflect.TypeOf((*HostDVSConfigSpecSwitchMode)(nil)).Elem()
@@ -2700,6 +4130,23 @@ const (
 	HostDasErrorEventHostDasErrorReasonOther = HostDasErrorEventHostDasErrorReason("other")
 )
 
+func (e HostDasErrorEventHostDasErrorReason) Values() []HostDasErrorEventHostDasErrorReason {
+	return []HostDasErrorEventHostDasErrorReason{
+		HostDasErrorEventHostDasErrorReasonConfigFailed,
+		HostDasErrorEventHostDasErrorReasonTimeout,
+		HostDasErrorEventHostDasErrorReasonCommunicationInitFailed,
+		HostDasErrorEventHostDasErrorReasonHealthCheckScriptFailed,
+		HostDasErrorEventHostDasErrorReasonAgentFailed,
+		HostDasErrorEventHostDasErrorReasonAgentShutdown,
+		HostDasErrorEventHostDasErrorReasonIsolationAddressUnpingable,
+		HostDasErrorEventHostDasErrorReasonOther,
+	}
+}
+
+func (e HostDasErrorEventHostDasErrorReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostDasErrorEventHostDasErrorReason"] = reflect.TypeOf((*HostDasErrorEventHostDasErrorReason)(nil)).Elem()
 	minAPIVersionForType["HostDasErrorEventHostDasErrorReason"] = "4.0"
@@ -2717,6 +4164,17 @@ const (
 	HostDateTimeInfoProtocolPtp = HostDateTimeInfoProtocol("ptp")
 )
 
+func (e HostDateTimeInfoProtocol) Values() []HostDateTimeInfoProtocol {
+	return []HostDateTimeInfoProtocol{
+		HostDateTimeInfoProtocolNtp,
+		HostDateTimeInfoProtocolPtp,
+	}
+}
+
+func (e HostDateTimeInfoProtocol) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostDateTimeInfoProtocol"] = reflect.TypeOf((*HostDateTimeInfoProtocol)(nil)).Elem()
 	minAPIVersionForType["HostDateTimeInfoProtocol"] = "7.0"
@@ -2727,8 +4185,6 @@ type HostDigestInfoDigestMethodType string
 
 const (
 	HostDigestInfoDigestMethodTypeSHA1 = HostDigestInfoDigestMethodType("SHA1")
-	//
-	//
 	// Deprecated as of vSphere API 6.7.
 	//
 	// MD5.
@@ -2742,6 +4198,21 @@ const (
 	// `**Since:**` vSphere API Release 6.7
 	HostDigestInfoDigestMethodTypeSM3_256 = HostDigestInfoDigestMethodType("SM3_256")
 )
+
+func (e HostDigestInfoDigestMethodType) Values() []HostDigestInfoDigestMethodType {
+	return []HostDigestInfoDigestMethodType{
+		HostDigestInfoDigestMethodTypeSHA1,
+		HostDigestInfoDigestMethodTypeMD5,
+		HostDigestInfoDigestMethodTypeSHA256,
+		HostDigestInfoDigestMethodTypeSHA384,
+		HostDigestInfoDigestMethodTypeSHA512,
+		HostDigestInfoDigestMethodTypeSM3_256,
+	}
+}
+
+func (e HostDigestInfoDigestMethodType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostDigestInfoDigestMethodType"] = reflect.TypeOf((*HostDigestInfoDigestMethodType)(nil)).Elem()
@@ -2773,6 +4244,19 @@ const (
 	HostDigestVerificationSettingHeaderAndData = HostDigestVerificationSetting("headerAndData")
 )
 
+func (e HostDigestVerificationSetting) Values() []HostDigestVerificationSetting {
+	return []HostDigestVerificationSetting{
+		HostDigestVerificationSettingDigestDisabled,
+		HostDigestVerificationSettingHeaderOnly,
+		HostDigestVerificationSettingDataOnly,
+		HostDigestVerificationSettingHeaderAndData,
+	}
+}
+
+func (e HostDigestVerificationSetting) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostDigestVerificationSetting"] = reflect.TypeOf((*HostDigestVerificationSetting)(nil)).Elem()
 	minAPIVersionForType["HostDigestVerificationSetting"] = "7.0.3.0"
@@ -2801,6 +4285,24 @@ const (
 	HostDisconnectedEventReasonCodeVcVRAMCapacityExceeded = HostDisconnectedEventReasonCode("vcVRAMCapacityExceeded")
 )
 
+func (e HostDisconnectedEventReasonCode) Values() []HostDisconnectedEventReasonCode {
+	return []HostDisconnectedEventReasonCode{
+		HostDisconnectedEventReasonCodeSslThumbprintVerifyFailed,
+		HostDisconnectedEventReasonCodeLicenseExpired,
+		HostDisconnectedEventReasonCodeAgentUpgrade,
+		HostDisconnectedEventReasonCodeUserRequest,
+		HostDisconnectedEventReasonCodeInsufficientLicenses,
+		HostDisconnectedEventReasonCodeAgentOutOfDate,
+		HostDisconnectedEventReasonCodePasswordDecryptFailure,
+		HostDisconnectedEventReasonCodeUnknown,
+		HostDisconnectedEventReasonCodeVcVRAMCapacityExceeded,
+	}
+}
+
+func (e HostDisconnectedEventReasonCode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostDisconnectedEventReasonCode"] = reflect.TypeOf((*HostDisconnectedEventReasonCode)(nil)).Elem()
 	minAPIVersionForType["HostDisconnectedEventReasonCode"] = "4.0"
@@ -2821,6 +4323,18 @@ const (
 	HostDiskPartitionInfoPartitionFormatUnknown = HostDiskPartitionInfoPartitionFormat("unknown")
 )
 
+func (e HostDiskPartitionInfoPartitionFormat) Values() []HostDiskPartitionInfoPartitionFormat {
+	return []HostDiskPartitionInfoPartitionFormat{
+		HostDiskPartitionInfoPartitionFormatGpt,
+		HostDiskPartitionInfoPartitionFormatMbr,
+		HostDiskPartitionInfoPartitionFormatUnknown,
+	}
+}
+
+func (e HostDiskPartitionInfoPartitionFormat) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostDiskPartitionInfoPartitionFormat"] = reflect.TypeOf((*HostDiskPartitionInfoPartitionFormat)(nil)).Elem()
 	minAPIVersionForType["HostDiskPartitionInfoPartitionFormat"] = "5.0"
@@ -2840,6 +4354,23 @@ const (
 	// `**Since:**` vSphere API Release 5.5
 	HostDiskPartitionInfoTypeVffs = HostDiskPartitionInfoType("vffs")
 )
+
+func (e HostDiskPartitionInfoType) Values() []HostDiskPartitionInfoType {
+	return []HostDiskPartitionInfoType{
+		HostDiskPartitionInfoTypeNone,
+		HostDiskPartitionInfoTypeVmfs,
+		HostDiskPartitionInfoTypeLinuxNative,
+		HostDiskPartitionInfoTypeLinuxSwap,
+		HostDiskPartitionInfoTypeExtended,
+		HostDiskPartitionInfoTypeNtfs,
+		HostDiskPartitionInfoTypeVmkDiagnostic,
+		HostDiskPartitionInfoTypeVffs,
+	}
+}
+
+func (e HostDiskPartitionInfoType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostDiskPartitionInfoType"] = reflect.TypeOf((*HostDiskPartitionInfoType)(nil)).Elem()
@@ -2865,6 +4396,16 @@ const (
 	// Z refers to VMkernal Fault Tolerance version
 	HostFeatureVersionKeyFaultTolerance = HostFeatureVersionKey("faultTolerance")
 )
+
+func (e HostFeatureVersionKey) Values() []HostFeatureVersionKey {
+	return []HostFeatureVersionKey{
+		HostFeatureVersionKeyFaultTolerance,
+	}
+}
+
+func (e HostFeatureVersionKey) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostFeatureVersionKey"] = reflect.TypeOf((*HostFeatureVersionKey)(nil)).Elem()
@@ -2913,6 +4454,25 @@ const (
 	HostFileSystemVolumeFileSystemTypeOTHER = HostFileSystemVolumeFileSystemType("OTHER")
 )
 
+func (e HostFileSystemVolumeFileSystemType) Values() []HostFileSystemVolumeFileSystemType {
+	return []HostFileSystemVolumeFileSystemType{
+		HostFileSystemVolumeFileSystemTypeVMFS,
+		HostFileSystemVolumeFileSystemTypeNFS,
+		HostFileSystemVolumeFileSystemTypeNFS41,
+		HostFileSystemVolumeFileSystemTypeCIFS,
+		HostFileSystemVolumeFileSystemTypeVsan,
+		HostFileSystemVolumeFileSystemTypeVFFS,
+		HostFileSystemVolumeFileSystemTypeVVOL,
+		HostFileSystemVolumeFileSystemTypePMEM,
+		HostFileSystemVolumeFileSystemTypeVsanD,
+		HostFileSystemVolumeFileSystemTypeOTHER,
+	}
+}
+
+func (e HostFileSystemVolumeFileSystemType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostFileSystemVolumeFileSystemType"] = reflect.TypeOf((*HostFileSystemVolumeFileSystemType)(nil)).Elem()
 	minAPIVersionForType["HostFileSystemVolumeFileSystemType"] = "6.0"
@@ -2934,6 +4494,17 @@ const (
 	HostFirewallRuleDirectionOutbound = HostFirewallRuleDirection("outbound")
 )
 
+func (e HostFirewallRuleDirection) Values() []HostFirewallRuleDirection {
+	return []HostFirewallRuleDirection{
+		HostFirewallRuleDirectionInbound,
+		HostFirewallRuleDirectionOutbound,
+	}
+}
+
+func (e HostFirewallRuleDirection) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostFirewallRuleDirection"] = reflect.TypeOf((*HostFirewallRuleDirection)(nil)).Elem()
 }
@@ -2944,6 +4515,17 @@ const (
 	HostFirewallRulePortTypeSrc = HostFirewallRulePortType("src")
 	HostFirewallRulePortTypeDst = HostFirewallRulePortType("dst")
 )
+
+func (e HostFirewallRulePortType) Values() []HostFirewallRulePortType {
+	return []HostFirewallRulePortType{
+		HostFirewallRulePortTypeSrc,
+		HostFirewallRulePortTypeDst,
+	}
+}
+
+func (e HostFirewallRulePortType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostFirewallRulePortType"] = reflect.TypeOf((*HostFirewallRulePortType)(nil)).Elem()
@@ -2958,6 +4540,17 @@ const (
 	HostFirewallRuleProtocolUdp = HostFirewallRuleProtocol("udp")
 )
 
+func (e HostFirewallRuleProtocol) Values() []HostFirewallRuleProtocol {
+	return []HostFirewallRuleProtocol{
+		HostFirewallRuleProtocolTcp,
+		HostFirewallRuleProtocolUdp,
+	}
+}
+
+func (e HostFirewallRuleProtocol) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostFirewallRuleProtocol"] = reflect.TypeOf((*HostFirewallRuleProtocol)(nil)).Elem()
 }
@@ -2971,6 +4564,19 @@ const (
 	HostFirewallSystemRuleSetIdVpxHeartbeats  = HostFirewallSystemRuleSetId("vpxHeartbeats")
 )
 
+func (e HostFirewallSystemRuleSetId) Values() []HostFirewallSystemRuleSetId {
+	return []HostFirewallSystemRuleSetId{
+		HostFirewallSystemRuleSetIdFaultTolerance,
+		HostFirewallSystemRuleSetIdFdm,
+		HostFirewallSystemRuleSetIdUpdateManager,
+		HostFirewallSystemRuleSetIdVpxHeartbeats,
+	}
+}
+
+func (e HostFirewallSystemRuleSetId) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostFirewallSystemRuleSetId"] = reflect.TypeOf((*HostFirewallSystemRuleSetId)(nil)).Elem()
 	minAPIVersionForType["HostFirewallSystemRuleSetId"] = "8.0.2.0"
@@ -2981,6 +4587,16 @@ type HostFirewallSystemServiceName string
 const (
 	HostFirewallSystemServiceNameVpxa = HostFirewallSystemServiceName("vpxa")
 )
+
+func (e HostFirewallSystemServiceName) Values() []HostFirewallSystemServiceName {
+	return []HostFirewallSystemServiceName{
+		HostFirewallSystemServiceNameVpxa,
+	}
+}
+
+func (e HostFirewallSystemServiceName) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostFirewallSystemServiceName"] = reflect.TypeOf((*HostFirewallSystemServiceName)(nil)).Elem()
@@ -2995,6 +4611,18 @@ const (
 	HostFruFruTypeBoard     = HostFruFruType("board")
 	HostFruFruTypeProduct   = HostFruFruType("product")
 )
+
+func (e HostFruFruType) Values() []HostFruFruType {
+	return []HostFruFruType{
+		HostFruFruTypeUndefined,
+		HostFruFruTypeBoard,
+		HostFruFruTypeProduct,
+	}
+}
+
+func (e HostFruFruType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostFruFruType"] = reflect.TypeOf((*HostFruFruType)(nil)).Elem()
@@ -3013,6 +4641,17 @@ const (
 	HostGraphicsConfigGraphicsTypeSharedDirect = HostGraphicsConfigGraphicsType("sharedDirect")
 )
 
+func (e HostGraphicsConfigGraphicsType) Values() []HostGraphicsConfigGraphicsType {
+	return []HostGraphicsConfigGraphicsType{
+		HostGraphicsConfigGraphicsTypeShared,
+		HostGraphicsConfigGraphicsTypeSharedDirect,
+	}
+}
+
+func (e HostGraphicsConfigGraphicsType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostGraphicsConfigGraphicsType"] = reflect.TypeOf((*HostGraphicsConfigGraphicsType)(nil)).Elem()
 	minAPIVersionForType["HostGraphicsConfigGraphicsType"] = "6.5"
@@ -3026,6 +4665,17 @@ const (
 	// Consolidation policy: group like VMs on GPU until fully loaded.
 	HostGraphicsConfigSharedPassthruAssignmentPolicyConsolidation = HostGraphicsConfigSharedPassthruAssignmentPolicy("consolidation")
 )
+
+func (e HostGraphicsConfigSharedPassthruAssignmentPolicy) Values() []HostGraphicsConfigSharedPassthruAssignmentPolicy {
+	return []HostGraphicsConfigSharedPassthruAssignmentPolicy{
+		HostGraphicsConfigSharedPassthruAssignmentPolicyPerformance,
+		HostGraphicsConfigSharedPassthruAssignmentPolicyConsolidation,
+	}
+}
+
+func (e HostGraphicsConfigSharedPassthruAssignmentPolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostGraphicsConfigSharedPassthruAssignmentPolicy"] = reflect.TypeOf((*HostGraphicsConfigSharedPassthruAssignmentPolicy)(nil)).Elem()
@@ -3050,6 +4700,19 @@ const (
 	// vGPU shared passthrough).
 	HostGraphicsInfoGraphicsTypeSharedDirect = HostGraphicsInfoGraphicsType("sharedDirect")
 )
+
+func (e HostGraphicsInfoGraphicsType) Values() []HostGraphicsInfoGraphicsType {
+	return []HostGraphicsInfoGraphicsType{
+		HostGraphicsInfoGraphicsTypeBasic,
+		HostGraphicsInfoGraphicsTypeShared,
+		HostGraphicsInfoGraphicsTypeDirect,
+		HostGraphicsInfoGraphicsTypeSharedDirect,
+	}
+}
+
+func (e HostGraphicsInfoGraphicsType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostGraphicsInfoGraphicsType"] = reflect.TypeOf((*HostGraphicsInfoGraphicsType)(nil)).Elem()
@@ -3076,6 +4739,19 @@ const (
 	HostHardwareElementStatusRed = HostHardwareElementStatus("Red")
 )
 
+func (e HostHardwareElementStatus) Values() []HostHardwareElementStatus {
+	return []HostHardwareElementStatus{
+		HostHardwareElementStatusUnknown,
+		HostHardwareElementStatusGreen,
+		HostHardwareElementStatusYellow,
+		HostHardwareElementStatusRed,
+	}
+}
+
+func (e HostHardwareElementStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostHardwareElementStatus"] = reflect.TypeOf((*HostHardwareElementStatus)(nil)).Elem()
 	minAPIVersionForType["HostHardwareElementStatus"] = "2.5"
@@ -3086,6 +4762,16 @@ type HostHasComponentFailureHostComponentType string
 const (
 	HostHasComponentFailureHostComponentTypeDatastore = HostHasComponentFailureHostComponentType("Datastore")
 )
+
+func (e HostHasComponentFailureHostComponentType) Values() []HostHasComponentFailureHostComponentType {
+	return []HostHasComponentFailureHostComponentType{
+		HostHasComponentFailureHostComponentTypeDatastore,
+	}
+}
+
+func (e HostHasComponentFailureHostComponentType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostHasComponentFailureHostComponentType"] = reflect.TypeOf((*HostHasComponentFailureHostComponentType)(nil)).Elem()
@@ -3105,6 +4791,19 @@ const (
 	HostImageAcceptanceLevelCommunity = HostImageAcceptanceLevel("community")
 )
 
+func (e HostImageAcceptanceLevel) Values() []HostImageAcceptanceLevel {
+	return []HostImageAcceptanceLevel{
+		HostImageAcceptanceLevelVmware_certified,
+		HostImageAcceptanceLevelVmware_accepted,
+		HostImageAcceptanceLevelPartner,
+		HostImageAcceptanceLevelCommunity,
+	}
+}
+
+func (e HostImageAcceptanceLevel) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostImageAcceptanceLevel"] = reflect.TypeOf((*HostImageAcceptanceLevel)(nil)).Elem()
 	minAPIVersionForType["HostImageAcceptanceLevel"] = "5.0"
@@ -3119,6 +4818,17 @@ const (
 	HostIncompatibleForFaultToleranceReasonProcessor = HostIncompatibleForFaultToleranceReason("processor")
 )
 
+func (e HostIncompatibleForFaultToleranceReason) Values() []HostIncompatibleForFaultToleranceReason {
+	return []HostIncompatibleForFaultToleranceReason{
+		HostIncompatibleForFaultToleranceReasonProduct,
+		HostIncompatibleForFaultToleranceReasonProcessor,
+	}
+}
+
+func (e HostIncompatibleForFaultToleranceReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostIncompatibleForFaultToleranceReason"] = reflect.TypeOf((*HostIncompatibleForFaultToleranceReason)(nil)).Elem()
 	minAPIVersionForType["HostIncompatibleForFaultToleranceReason"] = "4.0"
@@ -3132,6 +4842,17 @@ const (
 	// The product supports record/replay but the host CPU does not.
 	HostIncompatibleForRecordReplayReasonProcessor = HostIncompatibleForRecordReplayReason("processor")
 )
+
+func (e HostIncompatibleForRecordReplayReason) Values() []HostIncompatibleForRecordReplayReason {
+	return []HostIncompatibleForRecordReplayReason{
+		HostIncompatibleForRecordReplayReasonProduct,
+		HostIncompatibleForRecordReplayReasonProcessor,
+	}
+}
+
+func (e HostIncompatibleForRecordReplayReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostIncompatibleForRecordReplayReason"] = reflect.TypeOf((*HostIncompatibleForRecordReplayReason)(nil)).Elem()
@@ -3154,6 +4875,19 @@ const (
 	HostInternetScsiHbaChapAuthenticationTypeChapPreferred   = HostInternetScsiHbaChapAuthenticationType("chapPreferred")
 	HostInternetScsiHbaChapAuthenticationTypeChapRequired    = HostInternetScsiHbaChapAuthenticationType("chapRequired")
 )
+
+func (e HostInternetScsiHbaChapAuthenticationType) Values() []HostInternetScsiHbaChapAuthenticationType {
+	return []HostInternetScsiHbaChapAuthenticationType{
+		HostInternetScsiHbaChapAuthenticationTypeChapProhibited,
+		HostInternetScsiHbaChapAuthenticationTypeChapDiscouraged,
+		HostInternetScsiHbaChapAuthenticationTypeChapPreferred,
+		HostInternetScsiHbaChapAuthenticationTypeChapRequired,
+	}
+}
+
+func (e HostInternetScsiHbaChapAuthenticationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostInternetScsiHbaChapAuthenticationType"] = reflect.TypeOf((*HostInternetScsiHbaChapAuthenticationType)(nil)).Elem()
@@ -3179,6 +4913,19 @@ const (
 	HostInternetScsiHbaDigestTypeDigestRequired    = HostInternetScsiHbaDigestType("digestRequired")
 )
 
+func (e HostInternetScsiHbaDigestType) Values() []HostInternetScsiHbaDigestType {
+	return []HostInternetScsiHbaDigestType{
+		HostInternetScsiHbaDigestTypeDigestProhibited,
+		HostInternetScsiHbaDigestTypeDigestDiscouraged,
+		HostInternetScsiHbaDigestTypeDigestPreferred,
+		HostInternetScsiHbaDigestTypeDigestRequired,
+	}
+}
+
+func (e HostInternetScsiHbaDigestType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostInternetScsiHbaDigestType"] = reflect.TypeOf((*HostInternetScsiHbaDigestType)(nil)).Elem()
 	minAPIVersionForType["HostInternetScsiHbaDigestType"] = "4.0"
@@ -3203,6 +4950,19 @@ const (
 	HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationTypeOther = HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType("Other")
 )
 
+func (e HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType) Values() []HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType {
+	return []HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType{
+		HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationTypeDHCP,
+		HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationTypeAutoConfigured,
+		HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationTypeStatic,
+		HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationTypeOther,
+	}
+}
+
+func (e HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType"] = reflect.TypeOf((*HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType)(nil)).Elem()
 	minAPIVersionForType["HostInternetScsiHbaIscsiIpv6AddressAddressConfigurationType"] = "6.0"
@@ -3214,6 +4974,17 @@ const (
 	HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperationAdd    = HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation("add")
 	HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperationRemove = HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation("remove")
 )
+
+func (e HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation) Values() []HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation {
+	return []HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation{
+		HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperationAdd,
+		HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperationRemove,
+	}
+}
+
+func (e HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation"] = reflect.TypeOf((*HostInternetScsiHbaIscsiIpv6AddressIPv6AddressOperation)(nil)).Elem()
@@ -3227,6 +4998,18 @@ const (
 	HostInternetScsiHbaNetworkBindingSupportTypeOptional     = HostInternetScsiHbaNetworkBindingSupportType("optional")
 	HostInternetScsiHbaNetworkBindingSupportTypeRequired     = HostInternetScsiHbaNetworkBindingSupportType("required")
 )
+
+func (e HostInternetScsiHbaNetworkBindingSupportType) Values() []HostInternetScsiHbaNetworkBindingSupportType {
+	return []HostInternetScsiHbaNetworkBindingSupportType{
+		HostInternetScsiHbaNetworkBindingSupportTypeNotsupported,
+		HostInternetScsiHbaNetworkBindingSupportTypeOptional,
+		HostInternetScsiHbaNetworkBindingSupportTypeRequired,
+	}
+}
+
+func (e HostInternetScsiHbaNetworkBindingSupportType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostInternetScsiHbaNetworkBindingSupportType"] = reflect.TypeOf((*HostInternetScsiHbaNetworkBindingSupportType)(nil)).Elem()
@@ -3248,6 +5031,20 @@ const (
 	HostInternetScsiHbaStaticTargetTargetDiscoveryMethodIsnsMethod       = HostInternetScsiHbaStaticTargetTargetDiscoveryMethod("isnsMethod")
 	HostInternetScsiHbaStaticTargetTargetDiscoveryMethodUnknownMethod    = HostInternetScsiHbaStaticTargetTargetDiscoveryMethod("unknownMethod")
 )
+
+func (e HostInternetScsiHbaStaticTargetTargetDiscoveryMethod) Values() []HostInternetScsiHbaStaticTargetTargetDiscoveryMethod {
+	return []HostInternetScsiHbaStaticTargetTargetDiscoveryMethod{
+		HostInternetScsiHbaStaticTargetTargetDiscoveryMethodStaticMethod,
+		HostInternetScsiHbaStaticTargetTargetDiscoveryMethodSendTargetMethod,
+		HostInternetScsiHbaStaticTargetTargetDiscoveryMethodSlpMethod,
+		HostInternetScsiHbaStaticTargetTargetDiscoveryMethodIsnsMethod,
+		HostInternetScsiHbaStaticTargetTargetDiscoveryMethodUnknownMethod,
+	}
+}
+
+func (e HostInternetScsiHbaStaticTargetTargetDiscoveryMethod) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostInternetScsiHbaStaticTargetTargetDiscoveryMethod"] = reflect.TypeOf((*HostInternetScsiHbaStaticTargetTargetDiscoveryMethod)(nil)).Elem()
@@ -3277,6 +5074,20 @@ const (
 	HostIpConfigIpV6AddressConfigTypeRandom = HostIpConfigIpV6AddressConfigType("random")
 )
 
+func (e HostIpConfigIpV6AddressConfigType) Values() []HostIpConfigIpV6AddressConfigType {
+	return []HostIpConfigIpV6AddressConfigType{
+		HostIpConfigIpV6AddressConfigTypeOther,
+		HostIpConfigIpV6AddressConfigTypeManual,
+		HostIpConfigIpV6AddressConfigTypeDhcp,
+		HostIpConfigIpV6AddressConfigTypeLinklayer,
+		HostIpConfigIpV6AddressConfigTypeRandom,
+	}
+}
+
+func (e HostIpConfigIpV6AddressConfigType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostIpConfigIpV6AddressConfigType"] = reflect.TypeOf((*HostIpConfigIpV6AddressConfigType)(nil)).Elem()
 	minAPIVersionForType["HostIpConfigIpV6AddressConfigType"] = "4.0"
@@ -3305,6 +5116,22 @@ const (
 	HostIpConfigIpV6AddressStatusDuplicate = HostIpConfigIpV6AddressStatus("duplicate")
 )
 
+func (e HostIpConfigIpV6AddressStatus) Values() []HostIpConfigIpV6AddressStatus {
+	return []HostIpConfigIpV6AddressStatus{
+		HostIpConfigIpV6AddressStatusPreferred,
+		HostIpConfigIpV6AddressStatusDeprecated,
+		HostIpConfigIpV6AddressStatusInvalid,
+		HostIpConfigIpV6AddressStatusInaccessible,
+		HostIpConfigIpV6AddressStatusUnknown,
+		HostIpConfigIpV6AddressStatusTentative,
+		HostIpConfigIpV6AddressStatusDuplicate,
+	}
+}
+
+func (e HostIpConfigIpV6AddressStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostIpConfigIpV6AddressStatus"] = reflect.TypeOf((*HostIpConfigIpV6AddressStatus)(nil)).Elem()
 	minAPIVersionForType["HostIpConfigIpV6AddressStatus"] = "4.0"
@@ -3327,6 +5154,21 @@ const (
 	HostLicensableResourceKeyNumVmsStarting = HostLicensableResourceKey("numVmsStarting")
 )
 
+func (e HostLicensableResourceKey) Values() []HostLicensableResourceKey {
+	return []HostLicensableResourceKey{
+		HostLicensableResourceKeyNumCpuPackages,
+		HostLicensableResourceKeyNumCpuCores,
+		HostLicensableResourceKeyMemorySize,
+		HostLicensableResourceKeyMemoryForVms,
+		HostLicensableResourceKeyNumVmsStarted,
+		HostLicensableResourceKeyNumVmsStarting,
+	}
+}
+
+func (e HostLicensableResourceKey) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostLicensableResourceKey"] = reflect.TypeOf((*HostLicensableResourceKey)(nil)).Elem()
 	minAPIVersionForType["HostLicensableResourceKey"] = "5.0"
@@ -3348,6 +5190,18 @@ const (
 	HostLockdownModeLockdownStrict = HostLockdownMode("lockdownStrict")
 )
 
+func (e HostLockdownMode) Values() []HostLockdownMode {
+	return []HostLockdownMode{
+		HostLockdownModeLockdownDisabled,
+		HostLockdownModeLockdownNormal,
+		HostLockdownModeLockdownStrict,
+	}
+}
+
+func (e HostLockdownMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostLockdownMode"] = reflect.TypeOf((*HostLockdownMode)(nil)).Elem()
 	minAPIVersionForType["HostLockdownMode"] = "6.0"
@@ -3361,6 +5215,18 @@ const (
 	HostLowLevelProvisioningManagerFileTypeVirtualDisk = HostLowLevelProvisioningManagerFileType("VirtualDisk")
 	HostLowLevelProvisioningManagerFileTypeDirectory   = HostLowLevelProvisioningManagerFileType("Directory")
 )
+
+func (e HostLowLevelProvisioningManagerFileType) Values() []HostLowLevelProvisioningManagerFileType {
+	return []HostLowLevelProvisioningManagerFileType{
+		HostLowLevelProvisioningManagerFileTypeFile,
+		HostLowLevelProvisioningManagerFileTypeVirtualDisk,
+		HostLowLevelProvisioningManagerFileTypeDirectory,
+	}
+}
+
+func (e HostLowLevelProvisioningManagerFileType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostLowLevelProvisioningManagerFileType"] = reflect.TypeOf((*HostLowLevelProvisioningManagerFileType)(nil)).Elem()
@@ -3379,6 +5245,17 @@ const (
 	HostLowLevelProvisioningManagerReloadTargetSnapshotConfig = HostLowLevelProvisioningManagerReloadTarget("snapshotConfig")
 )
 
+func (e HostLowLevelProvisioningManagerReloadTarget) Values() []HostLowLevelProvisioningManagerReloadTarget {
+	return []HostLowLevelProvisioningManagerReloadTarget{
+		HostLowLevelProvisioningManagerReloadTargetCurrentConfig,
+		HostLowLevelProvisioningManagerReloadTargetSnapshotConfig,
+	}
+}
+
+func (e HostLowLevelProvisioningManagerReloadTarget) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostLowLevelProvisioningManagerReloadTarget"] = reflect.TypeOf((*HostLowLevelProvisioningManagerReloadTarget)(nil)).Elem()
 	minAPIVersionForType["HostLowLevelProvisioningManagerReloadTarget"] = "4.0"
@@ -3389,6 +5266,16 @@ type HostMaintenanceSpecPurpose string
 const (
 	HostMaintenanceSpecPurposeHostUpgrade = HostMaintenanceSpecPurpose("hostUpgrade")
 )
+
+func (e HostMaintenanceSpecPurpose) Values() []HostMaintenanceSpecPurpose {
+	return []HostMaintenanceSpecPurpose{
+		HostMaintenanceSpecPurposeHostUpgrade,
+	}
+}
+
+func (e HostMaintenanceSpecPurpose) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostMaintenanceSpecPurpose"] = reflect.TypeOf((*HostMaintenanceSpecPurpose)(nil)).Elem()
@@ -3430,6 +5317,18 @@ const (
 	HostMemoryTierFlagsCachingTier = HostMemoryTierFlags("cachingTier")
 )
 
+func (e HostMemoryTierFlags) Values() []HostMemoryTierFlags {
+	return []HostMemoryTierFlags{
+		HostMemoryTierFlagsMemoryTier,
+		HostMemoryTierFlagsPersistentTier,
+		HostMemoryTierFlagsCachingTier,
+	}
+}
+
+func (e HostMemoryTierFlags) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostMemoryTierFlags"] = reflect.TypeOf((*HostMemoryTierFlags)(nil)).Elem()
 	minAPIVersionForType["HostMemoryTierFlags"] = "7.0.3.0"
@@ -3443,6 +5342,17 @@ const (
 	// Persistent memory.
 	HostMemoryTierTypePMem = HostMemoryTierType("PMem")
 )
+
+func (e HostMemoryTierType) Values() []HostMemoryTierType {
+	return []HostMemoryTierType{
+		HostMemoryTierTypeDRAM,
+		HostMemoryTierTypePMem,
+	}
+}
+
+func (e HostMemoryTierType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostMemoryTierType"] = reflect.TypeOf((*HostMemoryTierType)(nil)).Elem()
@@ -3460,6 +5370,17 @@ const (
 	// Intel's Memory Mode.
 	HostMemoryTieringTypeHardwareTiering = HostMemoryTieringType("hardwareTiering")
 )
+
+func (e HostMemoryTieringType) Values() []HostMemoryTieringType {
+	return []HostMemoryTieringType{
+		HostMemoryTieringTypeNoTiering,
+		HostMemoryTieringTypeHardwareTiering,
+	}
+}
+
+func (e HostMemoryTieringType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostMemoryTieringType"] = reflect.TypeOf((*HostMemoryTieringType)(nil)).Elem()
@@ -3503,6 +5424,18 @@ const (
 	HostMountInfoInaccessibleReasonPermanentDeviceLoss = HostMountInfoInaccessibleReason("PermanentDeviceLoss")
 )
 
+func (e HostMountInfoInaccessibleReason) Values() []HostMountInfoInaccessibleReason {
+	return []HostMountInfoInaccessibleReason{
+		HostMountInfoInaccessibleReasonAllPathsDown_Start,
+		HostMountInfoInaccessibleReasonAllPathsDown_Timeout,
+		HostMountInfoInaccessibleReasonPermanentDeviceLoss,
+	}
+}
+
+func (e HostMountInfoInaccessibleReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostMountInfoInaccessibleReason"] = reflect.TypeOf((*HostMountInfoInaccessibleReason)(nil)).Elem()
 	minAPIVersionForType["HostMountInfoInaccessibleReason"] = "5.1"
@@ -3538,6 +5471,24 @@ const (
 	HostMountInfoMountFailedReasonOTHERS = HostMountInfoMountFailedReason("OTHERS")
 )
 
+func (e HostMountInfoMountFailedReason) Values() []HostMountInfoMountFailedReason {
+	return []HostMountInfoMountFailedReason{
+		HostMountInfoMountFailedReasonCONNECT_FAILURE,
+		HostMountInfoMountFailedReasonMOUNT_NOT_SUPPORTED,
+		HostMountInfoMountFailedReasonNFS_NOT_SUPPORTED,
+		HostMountInfoMountFailedReasonMOUNT_DENIED,
+		HostMountInfoMountFailedReasonMOUNT_NOT_DIR,
+		HostMountInfoMountFailedReasonVOLUME_LIMIT_EXCEEDED,
+		HostMountInfoMountFailedReasonCONN_LIMIT_EXCEEDED,
+		HostMountInfoMountFailedReasonMOUNT_EXISTS,
+		HostMountInfoMountFailedReasonOTHERS,
+	}
+}
+
+func (e HostMountInfoMountFailedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostMountInfoMountFailedReason"] = reflect.TypeOf((*HostMountInfoMountFailedReason)(nil)).Elem()
 	minAPIVersionForType["HostMountInfoMountFailedReason"] = "8.0.0.1"
@@ -3552,6 +5503,17 @@ const (
 	// The host system has read-only access to the file system.
 	HostMountModeReadOnly = HostMountMode("readOnly")
 )
+
+func (e HostMountMode) Values() []HostMountMode {
+	return []HostMountMode{
+		HostMountModeReadWrite,
+		HostMountModeReadOnly,
+	}
+}
+
+func (e HostMountMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostMountMode"] = reflect.TypeOf((*HostMountMode)(nil)).Elem()
@@ -3583,6 +5545,18 @@ const (
 	HostNasVolumeSecurityTypeSEC_KRB5I = HostNasVolumeSecurityType("SEC_KRB5I")
 )
 
+func (e HostNasVolumeSecurityType) Values() []HostNasVolumeSecurityType {
+	return []HostNasVolumeSecurityType{
+		HostNasVolumeSecurityTypeAUTH_SYS,
+		HostNasVolumeSecurityTypeSEC_KRB5,
+		HostNasVolumeSecurityTypeSEC_KRB5I,
+	}
+}
+
+func (e HostNasVolumeSecurityType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostNasVolumeSecurityType"] = reflect.TypeOf((*HostNasVolumeSecurityType)(nil)).Elem()
 	minAPIVersionForType["HostNasVolumeSecurityType"] = "6.0"
@@ -3604,6 +5578,17 @@ const (
 	HostNetStackInstanceCongestionControlAlgorithmTypeCubic = HostNetStackInstanceCongestionControlAlgorithmType("cubic")
 )
 
+func (e HostNetStackInstanceCongestionControlAlgorithmType) Values() []HostNetStackInstanceCongestionControlAlgorithmType {
+	return []HostNetStackInstanceCongestionControlAlgorithmType{
+		HostNetStackInstanceCongestionControlAlgorithmTypeNewreno,
+		HostNetStackInstanceCongestionControlAlgorithmTypeCubic,
+	}
+}
+
+func (e HostNetStackInstanceCongestionControlAlgorithmType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostNetStackInstanceCongestionControlAlgorithmType"] = reflect.TypeOf((*HostNetStackInstanceCongestionControlAlgorithmType)(nil)).Elem()
 	minAPIVersionForType["HostNetStackInstanceCongestionControlAlgorithmType"] = "5.5"
@@ -3623,6 +5608,20 @@ const (
 	// Stack key used for ops applications
 	HostNetStackInstanceSystemStackKeyOps = HostNetStackInstanceSystemStackKey("ops")
 )
+
+func (e HostNetStackInstanceSystemStackKey) Values() []HostNetStackInstanceSystemStackKey {
+	return []HostNetStackInstanceSystemStackKey{
+		HostNetStackInstanceSystemStackKeyDefaultTcpipStack,
+		HostNetStackInstanceSystemStackKeyVmotion,
+		HostNetStackInstanceSystemStackKeyVSphereProvisioning,
+		HostNetStackInstanceSystemStackKeyMirror,
+		HostNetStackInstanceSystemStackKeyOps,
+	}
+}
+
+func (e HostNetStackInstanceSystemStackKey) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostNetStackInstanceSystemStackKey"] = reflect.TypeOf((*HostNetStackInstanceSystemStackKey)(nil)).Elem()
@@ -3653,6 +5652,19 @@ const (
 	// components.
 	HostNumericSensorHealthStateRed = HostNumericSensorHealthState("red")
 )
+
+func (e HostNumericSensorHealthState) Values() []HostNumericSensorHealthState {
+	return []HostNumericSensorHealthState{
+		HostNumericSensorHealthStateUnknown,
+		HostNumericSensorHealthStateGreen,
+		HostNumericSensorHealthStateYellow,
+		HostNumericSensorHealthStateRed,
+	}
+}
+
+func (e HostNumericSensorHealthState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostNumericSensorHealthState"] = reflect.TypeOf((*HostNumericSensorHealthState)(nil)).Elem()
@@ -3691,6 +5703,28 @@ const (
 	HostNumericSensorTypeWatchdog = HostNumericSensorType("watchdog")
 )
 
+func (e HostNumericSensorType) Values() []HostNumericSensorType {
+	return []HostNumericSensorType{
+		HostNumericSensorTypeFan,
+		HostNumericSensorTypePower,
+		HostNumericSensorTypeTemperature,
+		HostNumericSensorTypeVoltage,
+		HostNumericSensorTypeOther,
+		HostNumericSensorTypeProcessor,
+		HostNumericSensorTypeMemory,
+		HostNumericSensorTypeStorage,
+		HostNumericSensorTypeSystemBoard,
+		HostNumericSensorTypeBattery,
+		HostNumericSensorTypeBios,
+		HostNumericSensorTypeCable,
+		HostNumericSensorTypeWatchdog,
+	}
+}
+
+func (e HostNumericSensorType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostNumericSensorType"] = reflect.TypeOf((*HostNumericSensorType)(nil)).Elem()
 	minAPIVersionForType["HostNumericSensorType"] = "2.5"
@@ -3716,6 +5750,17 @@ const (
 	HostNvmeDiscoveryLogSubsystemTypeNvm = HostNvmeDiscoveryLogSubsystemType("nvm")
 )
 
+func (e HostNvmeDiscoveryLogSubsystemType) Values() []HostNvmeDiscoveryLogSubsystemType {
+	return []HostNvmeDiscoveryLogSubsystemType{
+		HostNvmeDiscoveryLogSubsystemTypeDiscovery,
+		HostNvmeDiscoveryLogSubsystemTypeNvm,
+	}
+}
+
+func (e HostNvmeDiscoveryLogSubsystemType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostNvmeDiscoveryLogSubsystemType"] = reflect.TypeOf((*HostNvmeDiscoveryLogSubsystemType)(nil)).Elem()
 }
@@ -3731,6 +5776,18 @@ const (
 	// Requirements are not specified
 	HostNvmeDiscoveryLogTransportRequirementsRequirementsNotSpecified = HostNvmeDiscoveryLogTransportRequirements("requirementsNotSpecified")
 )
+
+func (e HostNvmeDiscoveryLogTransportRequirements) Values() []HostNvmeDiscoveryLogTransportRequirements {
+	return []HostNvmeDiscoveryLogTransportRequirements{
+		HostNvmeDiscoveryLogTransportRequirementsSecureChannelRequired,
+		HostNvmeDiscoveryLogTransportRequirementsSecureChannelNotRequired,
+		HostNvmeDiscoveryLogTransportRequirementsRequirementsNotSpecified,
+	}
+}
+
+func (e HostNvmeDiscoveryLogTransportRequirements) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostNvmeDiscoveryLogTransportRequirements"] = reflect.TypeOf((*HostNvmeDiscoveryLogTransportRequirements)(nil)).Elem()
@@ -3758,6 +5815,21 @@ const (
 	HostNvmeTransportParametersNvmeAddressFamilyUnknown = HostNvmeTransportParametersNvmeAddressFamily("unknown")
 )
 
+func (e HostNvmeTransportParametersNvmeAddressFamily) Values() []HostNvmeTransportParametersNvmeAddressFamily {
+	return []HostNvmeTransportParametersNvmeAddressFamily{
+		HostNvmeTransportParametersNvmeAddressFamilyIpv4,
+		HostNvmeTransportParametersNvmeAddressFamilyIpv6,
+		HostNvmeTransportParametersNvmeAddressFamilyInfiniBand,
+		HostNvmeTransportParametersNvmeAddressFamilyFc,
+		HostNvmeTransportParametersNvmeAddressFamilyLoopback,
+		HostNvmeTransportParametersNvmeAddressFamilyUnknown,
+	}
+}
+
+func (e HostNvmeTransportParametersNvmeAddressFamily) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostNvmeTransportParametersNvmeAddressFamily"] = reflect.TypeOf((*HostNvmeTransportParametersNvmeAddressFamily)(nil)).Elem()
 	minAPIVersionForType["HostNvmeTransportParametersNvmeAddressFamily"] = "7.0"
@@ -3784,6 +5856,21 @@ const (
 	HostNvmeTransportTypeUnsupported = HostNvmeTransportType("unsupported")
 )
 
+func (e HostNvmeTransportType) Values() []HostNvmeTransportType {
+	return []HostNvmeTransportType{
+		HostNvmeTransportTypePcie,
+		HostNvmeTransportTypeFibreChannel,
+		HostNvmeTransportTypeRdma,
+		HostNvmeTransportTypeTcp,
+		HostNvmeTransportTypeLoopback,
+		HostNvmeTransportTypeUnsupported,
+	}
+}
+
+func (e HostNvmeTransportType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostNvmeTransportType"] = reflect.TypeOf((*HostNvmeTransportType)(nil)).Elem()
 	minAPIVersionForType["HostNvmeTransportType"] = "7.0"
@@ -3805,6 +5892,19 @@ const (
 	HostOpaqueSwitchOpaqueSwitchStateMaintenance = HostOpaqueSwitchOpaqueSwitchState("maintenance")
 )
 
+func (e HostOpaqueSwitchOpaqueSwitchState) Values() []HostOpaqueSwitchOpaqueSwitchState {
+	return []HostOpaqueSwitchOpaqueSwitchState{
+		HostOpaqueSwitchOpaqueSwitchStateUp,
+		HostOpaqueSwitchOpaqueSwitchStateWarning,
+		HostOpaqueSwitchOpaqueSwitchStateDown,
+		HostOpaqueSwitchOpaqueSwitchStateMaintenance,
+	}
+}
+
+func (e HostOpaqueSwitchOpaqueSwitchState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostOpaqueSwitchOpaqueSwitchState"] = reflect.TypeOf((*HostOpaqueSwitchOpaqueSwitchState)(nil)).Elem()
 	minAPIVersionForType["HostOpaqueSwitchOpaqueSwitchState"] = "6.0"
@@ -3822,6 +5922,17 @@ const (
 	// Indicates if the newly installed image is active on the server
 	HostPatchManagerInstallStateImageActive = HostPatchManagerInstallState("imageActive")
 )
+
+func (e HostPatchManagerInstallState) Values() []HostPatchManagerInstallState {
+	return []HostPatchManagerInstallState{
+		HostPatchManagerInstallStateHostRestarted,
+		HostPatchManagerInstallStateImageActive,
+	}
+}
+
+func (e HostPatchManagerInstallState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostPatchManagerInstallState"] = reflect.TypeOf((*HostPatchManagerInstallState)(nil)).Elem()
@@ -3847,6 +5958,22 @@ const (
 	// The integrity validation failed.
 	HostPatchManagerIntegrityStatusValidationError = HostPatchManagerIntegrityStatus("validationError")
 )
+
+func (e HostPatchManagerIntegrityStatus) Values() []HostPatchManagerIntegrityStatus {
+	return []HostPatchManagerIntegrityStatus{
+		HostPatchManagerIntegrityStatusValidated,
+		HostPatchManagerIntegrityStatusKeyNotFound,
+		HostPatchManagerIntegrityStatusKeyRevoked,
+		HostPatchManagerIntegrityStatusKeyExpired,
+		HostPatchManagerIntegrityStatusDigestMismatch,
+		HostPatchManagerIntegrityStatusNotEnoughSignatures,
+		HostPatchManagerIntegrityStatusValidationError,
+	}
+}
+
+func (e HostPatchManagerIntegrityStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostPatchManagerIntegrityStatus"] = reflect.TypeOf((*HostPatchManagerIntegrityStatus)(nil)).Elem()
@@ -3875,6 +6002,21 @@ const (
 	HostPatchManagerReasonConflictLib = HostPatchManagerReason("conflictLib")
 )
 
+func (e HostPatchManagerReason) Values() []HostPatchManagerReason {
+	return []HostPatchManagerReason{
+		HostPatchManagerReasonObsoleted,
+		HostPatchManagerReasonMissingPatch,
+		HostPatchManagerReasonMissingLib,
+		HostPatchManagerReasonHasDependentPatch,
+		HostPatchManagerReasonConflictPatch,
+		HostPatchManagerReasonConflictLib,
+	}
+}
+
+func (e HostPatchManagerReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostPatchManagerReason"] = reflect.TypeOf((*HostPatchManagerReason)(nil)).Elem()
 }
@@ -3891,6 +6033,17 @@ const (
 	HostPowerOperationTypePowerOff = HostPowerOperationType("powerOff")
 )
 
+func (e HostPowerOperationType) Values() []HostPowerOperationType {
+	return []HostPowerOperationType{
+		HostPowerOperationTypePowerOn,
+		HostPowerOperationTypePowerOff,
+	}
+}
+
+func (e HostPowerOperationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostPowerOperationType"] = reflect.TypeOf((*HostPowerOperationType)(nil)).Elem()
 	minAPIVersionForType["HostPowerOperationType"] = "2.5"
@@ -3905,19 +6058,31 @@ const (
 	// Answer file is not valid.
 	//
 	// The file is either missing or incomplete.
-	//     - To produce an answer file, pass host-specific data (user input) to the
-	//       `HostProfileManager*.*HostProfileManager.ApplyHostConfig_Task`
-	//       method.
-	//     - To produce a complete answer file, call the
-	//       `HostProfile*.*HostProfile.ExecuteHostProfile`
-	//       method and fill in any missing parameters in the returned
-	//       `ProfileExecuteResult*.*ProfileExecuteResult.requireInput`
-	//       list. After you execute the profile successfully, you can pass the complete required
-	//       input list to the apply method.
+	//   - To produce an answer file, pass host-specific data (user input) to the
+	//     `HostProfileManager*.*HostProfileManager.ApplyHostConfig_Task`
+	//     method.
+	//   - To produce a complete answer file, call the
+	//     `HostProfile*.*HostProfile.ExecuteHostProfile`
+	//     method and fill in any missing parameters in the returned
+	//     `ProfileExecuteResult*.*ProfileExecuteResult.requireInput`
+	//     list. After you execute the profile successfully, you can pass the complete required
+	//     input list to the apply method.
 	HostProfileManagerAnswerFileStatusInvalid = HostProfileManagerAnswerFileStatus("invalid")
 	// Answer file status is not known.
 	HostProfileManagerAnswerFileStatusUnknown = HostProfileManagerAnswerFileStatus("unknown")
 )
+
+func (e HostProfileManagerAnswerFileStatus) Values() []HostProfileManagerAnswerFileStatus {
+	return []HostProfileManagerAnswerFileStatus{
+		HostProfileManagerAnswerFileStatusValid,
+		HostProfileManagerAnswerFileStatusInvalid,
+		HostProfileManagerAnswerFileStatusUnknown,
+	}
+}
+
+func (e HostProfileManagerAnswerFileStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostProfileManagerAnswerFileStatus"] = reflect.TypeOf((*HostProfileManagerAnswerFileStatus)(nil)).Elem()
@@ -3931,6 +6096,17 @@ const (
 	HostProfileManagerCompositionResultResultElementStatusError   = HostProfileManagerCompositionResultResultElementStatus("error")
 )
 
+func (e HostProfileManagerCompositionResultResultElementStatus) Values() []HostProfileManagerCompositionResultResultElementStatus {
+	return []HostProfileManagerCompositionResultResultElementStatus{
+		HostProfileManagerCompositionResultResultElementStatusSuccess,
+		HostProfileManagerCompositionResultResultElementStatusError,
+	}
+}
+
+func (e HostProfileManagerCompositionResultResultElementStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostProfileManagerCompositionResultResultElementStatus"] = reflect.TypeOf((*HostProfileManagerCompositionResultResultElementStatus)(nil)).Elem()
 	minAPIVersionForType["HostProfileManagerCompositionResultResultElementStatus"] = "6.5"
@@ -3942,6 +6118,17 @@ const (
 	HostProfileManagerCompositionValidationResultResultElementStatusSuccess = HostProfileManagerCompositionValidationResultResultElementStatus("success")
 	HostProfileManagerCompositionValidationResultResultElementStatusError   = HostProfileManagerCompositionValidationResultResultElementStatus("error")
 )
+
+func (e HostProfileManagerCompositionValidationResultResultElementStatus) Values() []HostProfileManagerCompositionValidationResultResultElementStatus {
+	return []HostProfileManagerCompositionValidationResultResultElementStatus{
+		HostProfileManagerCompositionValidationResultResultElementStatusSuccess,
+		HostProfileManagerCompositionValidationResultResultElementStatusError,
+	}
+}
+
+func (e HostProfileManagerCompositionValidationResultResultElementStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostProfileManagerCompositionValidationResultResultElementStatus"] = reflect.TypeOf((*HostProfileManagerCompositionValidationResultResultElementStatus)(nil)).Elem()
@@ -3963,6 +6150,17 @@ const (
 	HostProfileManagerTaskListRequirementRebootRequired = HostProfileManagerTaskListRequirement("rebootRequired")
 )
 
+func (e HostProfileManagerTaskListRequirement) Values() []HostProfileManagerTaskListRequirement {
+	return []HostProfileManagerTaskListRequirement{
+		HostProfileManagerTaskListRequirementMaintenanceModeRequired,
+		HostProfileManagerTaskListRequirementRebootRequired,
+	}
+}
+
+func (e HostProfileManagerTaskListRequirement) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostProfileManagerTaskListRequirement"] = reflect.TypeOf((*HostProfileManagerTaskListRequirement)(nil)).Elem()
 	minAPIVersionForType["HostProfileManagerTaskListRequirement"] = "6.0"
@@ -3981,6 +6179,19 @@ const (
 	HostProfileValidationFailureInfoUpdateTypeCompose = HostProfileValidationFailureInfoUpdateType("Compose")
 )
 
+func (e HostProfileValidationFailureInfoUpdateType) Values() []HostProfileValidationFailureInfoUpdateType {
+	return []HostProfileValidationFailureInfoUpdateType{
+		HostProfileValidationFailureInfoUpdateTypeHostBased,
+		HostProfileValidationFailureInfoUpdateTypeImport,
+		HostProfileValidationFailureInfoUpdateTypeEdit,
+		HostProfileValidationFailureInfoUpdateTypeCompose,
+	}
+}
+
+func (e HostProfileValidationFailureInfoUpdateType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostProfileValidationFailureInfoUpdateType"] = reflect.TypeOf((*HostProfileValidationFailureInfoUpdateType)(nil)).Elem()
 	minAPIVersionForType["HostProfileValidationFailureInfoUpdateType"] = "6.7"
@@ -3993,6 +6204,18 @@ const (
 	HostProfileValidationStateRunning = HostProfileValidationState("Running")
 	HostProfileValidationStateFailed  = HostProfileValidationState("Failed")
 )
+
+func (e HostProfileValidationState) Values() []HostProfileValidationState {
+	return []HostProfileValidationState{
+		HostProfileValidationStateReady,
+		HostProfileValidationStateRunning,
+		HostProfileValidationStateFailed,
+	}
+}
+
+func (e HostProfileValidationState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostProfileValidationState"] = reflect.TypeOf((*HostProfileValidationState)(nil)).Elem()
@@ -4007,6 +6230,17 @@ const (
 	HostProtocolEndpointPETypeNas   = HostProtocolEndpointPEType("nas")
 )
 
+func (e HostProtocolEndpointPEType) Values() []HostProtocolEndpointPEType {
+	return []HostProtocolEndpointPEType{
+		HostProtocolEndpointPETypeBlock,
+		HostProtocolEndpointPETypeNas,
+	}
+}
+
+func (e HostProtocolEndpointPEType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostProtocolEndpointPEType"] = reflect.TypeOf((*HostProtocolEndpointPEType)(nil)).Elem()
 	minAPIVersionForType["HostProtocolEndpointPEType"] = "6.0"
@@ -4019,6 +6253,18 @@ const (
 	HostProtocolEndpointProtocolEndpointTypeNfs   = HostProtocolEndpointProtocolEndpointType("nfs")
 	HostProtocolEndpointProtocolEndpointTypeNfs4x = HostProtocolEndpointProtocolEndpointType("nfs4x")
 )
+
+func (e HostProtocolEndpointProtocolEndpointType) Values() []HostProtocolEndpointProtocolEndpointType {
+	return []HostProtocolEndpointProtocolEndpointType{
+		HostProtocolEndpointProtocolEndpointTypeScsi,
+		HostProtocolEndpointProtocolEndpointTypeNfs,
+		HostProtocolEndpointProtocolEndpointTypeNfs4x,
+	}
+}
+
+func (e HostProtocolEndpointProtocolEndpointType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostProtocolEndpointProtocolEndpointType"] = reflect.TypeOf((*HostProtocolEndpointProtocolEndpointType)(nil)).Elem()
@@ -4041,6 +6287,18 @@ const (
 	HostPtpConfigDeviceTypePciPassthruNic = HostPtpConfigDeviceType("pciPassthruNic")
 )
 
+func (e HostPtpConfigDeviceType) Values() []HostPtpConfigDeviceType {
+	return []HostPtpConfigDeviceType{
+		HostPtpConfigDeviceTypeNone,
+		HostPtpConfigDeviceTypeVirtualNic,
+		HostPtpConfigDeviceTypePciPassthruNic,
+	}
+}
+
+func (e HostPtpConfigDeviceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostPtpConfigDeviceType"] = reflect.TypeOf((*HostPtpConfigDeviceType)(nil)).Elem()
 	minAPIVersionForType["HostPtpConfigDeviceType"] = "7.0.3.0"
@@ -4054,6 +6312,17 @@ const (
 	// The NVMe Qualified Name (NQN) of this host used by Vvol.
 	HostQualifiedNameTypeVvolNvmeQualifiedName = HostQualifiedNameType("vvolNvmeQualifiedName")
 )
+
+func (e HostQualifiedNameType) Values() []HostQualifiedNameType {
+	return []HostQualifiedNameType{
+		HostQualifiedNameTypeNvmeQualifiedName,
+		HostQualifiedNameTypeVvolNvmeQualifiedName,
+	}
+}
+
+func (e HostQualifiedNameType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostQualifiedNameType"] = reflect.TypeOf((*HostQualifiedNameType)(nil)).Elem()
@@ -4113,6 +6382,21 @@ const (
 	HostRdmaDeviceConnectionStateActiveDefer = HostRdmaDeviceConnectionState("activeDefer")
 )
 
+func (e HostRdmaDeviceConnectionState) Values() []HostRdmaDeviceConnectionState {
+	return []HostRdmaDeviceConnectionState{
+		HostRdmaDeviceConnectionStateUnknown,
+		HostRdmaDeviceConnectionStateDown,
+		HostRdmaDeviceConnectionStateInit,
+		HostRdmaDeviceConnectionStateArmed,
+		HostRdmaDeviceConnectionStateActive,
+		HostRdmaDeviceConnectionStateActiveDefer,
+	}
+}
+
+func (e HostRdmaDeviceConnectionState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostRdmaDeviceConnectionState"] = reflect.TypeOf((*HostRdmaDeviceConnectionState)(nil)).Elem()
 	minAPIVersionForType["HostRdmaDeviceConnectionState"] = "7.0"
@@ -4133,6 +6417,21 @@ const (
 	HostReplayUnsupportedReasonUnknown             = HostReplayUnsupportedReason("unknown")
 )
 
+func (e HostReplayUnsupportedReason) Values() []HostReplayUnsupportedReason {
+	return []HostReplayUnsupportedReason{
+		HostReplayUnsupportedReasonIncompatibleProduct,
+		HostReplayUnsupportedReasonIncompatibleCpu,
+		HostReplayUnsupportedReasonHvDisabled,
+		HostReplayUnsupportedReasonCpuidLimitSet,
+		HostReplayUnsupportedReasonOldBIOS,
+		HostReplayUnsupportedReasonUnknown,
+	}
+}
+
+func (e HostReplayUnsupportedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostReplayUnsupportedReason"] = reflect.TypeOf((*HostReplayUnsupportedReason)(nil)).Elem()
 	minAPIVersionForType["HostReplayUnsupportedReason"] = "4.0"
@@ -4151,6 +6450,19 @@ const (
 	HostRuntimeInfoNetStackInstanceRuntimeInfoStateActivating = HostRuntimeInfoNetStackInstanceRuntimeInfoState("activating")
 )
 
+func (e HostRuntimeInfoNetStackInstanceRuntimeInfoState) Values() []HostRuntimeInfoNetStackInstanceRuntimeInfoState {
+	return []HostRuntimeInfoNetStackInstanceRuntimeInfoState{
+		HostRuntimeInfoNetStackInstanceRuntimeInfoStateInactive,
+		HostRuntimeInfoNetStackInstanceRuntimeInfoStateActive,
+		HostRuntimeInfoNetStackInstanceRuntimeInfoStateDeactivating,
+		HostRuntimeInfoNetStackInstanceRuntimeInfoStateActivating,
+	}
+}
+
+func (e HostRuntimeInfoNetStackInstanceRuntimeInfoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = reflect.TypeOf((*HostRuntimeInfoNetStackInstanceRuntimeInfoState)(nil)).Elem()
 	minAPIVersionForType["HostRuntimeInfoNetStackInstanceRuntimeInfoState"] = "5.5"
@@ -4164,6 +6476,17 @@ const (
 	// Encryption is TPM protected.
 	HostRuntimeInfoStateEncryptionInfoProtectionModeTpm = HostRuntimeInfoStateEncryptionInfoProtectionMode("tpm")
 )
+
+func (e HostRuntimeInfoStateEncryptionInfoProtectionMode) Values() []HostRuntimeInfoStateEncryptionInfoProtectionMode {
+	return []HostRuntimeInfoStateEncryptionInfoProtectionMode{
+		HostRuntimeInfoStateEncryptionInfoProtectionModeNone,
+		HostRuntimeInfoStateEncryptionInfoProtectionModeTpm,
+	}
+}
+
+func (e HostRuntimeInfoStateEncryptionInfoProtectionMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostRuntimeInfoStateEncryptionInfoProtectionMode"] = reflect.TypeOf((*HostRuntimeInfoStateEncryptionInfoProtectionMode)(nil)).Elem()
@@ -4180,6 +6503,18 @@ const (
 	// The host is disconnected from VC.
 	HostRuntimeInfoStatelessNvdsMigrationStateUnknown = HostRuntimeInfoStatelessNvdsMigrationState("unknown")
 )
+
+func (e HostRuntimeInfoStatelessNvdsMigrationState) Values() []HostRuntimeInfoStatelessNvdsMigrationState {
+	return []HostRuntimeInfoStatelessNvdsMigrationState{
+		HostRuntimeInfoStatelessNvdsMigrationStateReady,
+		HostRuntimeInfoStatelessNvdsMigrationStateNotNeeded,
+		HostRuntimeInfoStatelessNvdsMigrationStateUnknown,
+	}
+}
+
+func (e HostRuntimeInfoStatelessNvdsMigrationState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostRuntimeInfoStatelessNvdsMigrationState"] = reflect.TypeOf((*HostRuntimeInfoStatelessNvdsMigrationState)(nil)).Elem()
@@ -4198,6 +6533,18 @@ const (
 	HostServicePolicyOff = HostServicePolicy("off")
 )
 
+func (e HostServicePolicy) Values() []HostServicePolicy {
+	return []HostServicePolicy{
+		HostServicePolicyOn,
+		HostServicePolicyAutomatic,
+		HostServicePolicyOff,
+	}
+}
+
+func (e HostServicePolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostServicePolicy"] = reflect.TypeOf((*HostServicePolicy)(nil)).Elem()
 }
@@ -4209,6 +6556,18 @@ const (
 	HostSevInfoSevStateInitialized   = HostSevInfoSevState("initialized")
 	HostSevInfoSevStateWorking       = HostSevInfoSevState("working")
 )
+
+func (e HostSevInfoSevState) Values() []HostSevInfoSevState {
+	return []HostSevInfoSevState{
+		HostSevInfoSevStateUninitialized,
+		HostSevInfoSevStateInitialized,
+		HostSevInfoSevStateWorking,
+	}
+}
+
+func (e HostSevInfoSevState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostSevInfoSevState"] = reflect.TypeOf((*HostSevInfoSevState)(nil)).Elem()
@@ -4230,6 +6589,18 @@ const (
 	// initialized with Intel's public key hash.
 	HostSgxInfoFlcModesUnlocked = HostSgxInfoFlcModes("unlocked")
 )
+
+func (e HostSgxInfoFlcModes) Values() []HostSgxInfoFlcModes {
+	return []HostSgxInfoFlcModes{
+		HostSgxInfoFlcModesOff,
+		HostSgxInfoFlcModesLocked,
+		HostSgxInfoFlcModesUnlocked,
+	}
+}
+
+func (e HostSgxInfoFlcModes) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostSgxInfoFlcModes"] = reflect.TypeOf((*HostSgxInfoFlcModes)(nil)).Elem()
@@ -4260,6 +6631,23 @@ const (
 	HostSgxInfoSgxStatesEnabled = HostSgxInfoSgxStates("enabled")
 )
 
+func (e HostSgxInfoSgxStates) Values() []HostSgxInfoSgxStates {
+	return []HostSgxInfoSgxStates{
+		HostSgxInfoSgxStatesNotPresent,
+		HostSgxInfoSgxStatesDisabledBIOS,
+		HostSgxInfoSgxStatesDisabledCFW101,
+		HostSgxInfoSgxStatesDisabledCPUMismatch,
+		HostSgxInfoSgxStatesDisabledNoFLC,
+		HostSgxInfoSgxStatesDisabledNUMAUnsup,
+		HostSgxInfoSgxStatesDisabledMaxEPCRegs,
+		HostSgxInfoSgxStatesEnabled,
+	}
+}
+
+func (e HostSgxInfoSgxStates) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostSgxInfoSgxStates"] = reflect.TypeOf((*HostSgxInfoSgxStates)(nil)).Elem()
 	minAPIVersionForType["HostSgxInfoSgxStates"] = "7.0"
@@ -4276,6 +6664,18 @@ const (
 	HostSgxRegistrationInfoRegistrationStatusComplete = HostSgxRegistrationInfoRegistrationStatus("complete")
 )
 
+func (e HostSgxRegistrationInfoRegistrationStatus) Values() []HostSgxRegistrationInfoRegistrationStatus {
+	return []HostSgxRegistrationInfoRegistrationStatus{
+		HostSgxRegistrationInfoRegistrationStatusNotApplicable,
+		HostSgxRegistrationInfoRegistrationStatusIncomplete,
+		HostSgxRegistrationInfoRegistrationStatusComplete,
+	}
+}
+
+func (e HostSgxRegistrationInfoRegistrationStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostSgxRegistrationInfoRegistrationStatus"] = reflect.TypeOf((*HostSgxRegistrationInfoRegistrationStatus)(nil)).Elem()
 	minAPIVersionForType["HostSgxRegistrationInfoRegistrationStatus"] = "8.0.0.1"
@@ -4290,6 +6690,17 @@ const (
 	// Indicates that new CPU package was added.
 	HostSgxRegistrationInfoRegistrationTypeAddPackage = HostSgxRegistrationInfoRegistrationType("addPackage")
 )
+
+func (e HostSgxRegistrationInfoRegistrationType) Values() []HostSgxRegistrationInfoRegistrationType {
+	return []HostSgxRegistrationInfoRegistrationType{
+		HostSgxRegistrationInfoRegistrationTypeManifest,
+		HostSgxRegistrationInfoRegistrationTypeAddPackage,
+	}
+}
+
+func (e HostSgxRegistrationInfoRegistrationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostSgxRegistrationInfoRegistrationType"] = reflect.TypeOf((*HostSgxRegistrationInfoRegistrationType)(nil)).Elem()
@@ -4306,6 +6717,18 @@ const (
 	// Allows for agent configuration only
 	HostSnmpAgentCapabilityCONFIGURATION = HostSnmpAgentCapability("CONFIGURATION")
 )
+
+func (e HostSnmpAgentCapability) Values() []HostSnmpAgentCapability {
+	return []HostSnmpAgentCapability{
+		HostSnmpAgentCapabilityCOMPLETE,
+		HostSnmpAgentCapabilityDIAGNOSTICS,
+		HostSnmpAgentCapabilityCONFIGURATION,
+	}
+}
+
+func (e HostSnmpAgentCapability) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostSnmpAgentCapability"] = reflect.TypeOf((*HostSnmpAgentCapability)(nil)).Elem()
@@ -4326,6 +6749,19 @@ const (
 	HostStandbyModeNone = HostStandbyMode("none")
 )
 
+func (e HostStandbyMode) Values() []HostStandbyMode {
+	return []HostStandbyMode{
+		HostStandbyModeEntering,
+		HostStandbyModeExiting,
+		HostStandbyModeIn,
+		HostStandbyModeNone,
+	}
+}
+
+func (e HostStandbyMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostStandbyMode"] = reflect.TypeOf((*HostStandbyMode)(nil)).Elem()
 	minAPIVersionForType["HostStandbyMode"] = "4.1"
@@ -4339,6 +6775,17 @@ const (
 	// The Non-Volatile Memory Express (NVME) protocol.
 	HostStorageProtocolNvme = HostStorageProtocol("nvme")
 )
+
+func (e HostStorageProtocol) Values() []HostStorageProtocol {
+	return []HostStorageProtocol{
+		HostStorageProtocolScsi,
+		HostStorageProtocolNvme,
+	}
+}
+
+func (e HostStorageProtocol) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostStorageProtocol"] = reflect.TypeOf((*HostStorageProtocol)(nil)).Elem()
@@ -4367,6 +6814,18 @@ const (
 	HostSystemConnectionStateDisconnected = HostSystemConnectionState("disconnected")
 )
 
+func (e HostSystemConnectionState) Values() []HostSystemConnectionState {
+	return []HostSystemConnectionState{
+		HostSystemConnectionStateConnected,
+		HostSystemConnectionStateNotResponding,
+		HostSystemConnectionStateDisconnected,
+	}
+}
+
+func (e HostSystemConnectionState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostSystemConnectionState"] = reflect.TypeOf((*HostSystemConnectionState)(nil)).Elem()
 }
@@ -4385,6 +6844,20 @@ const (
 	// The Serial Number tag of the system
 	HostSystemIdentificationInfoIdentifierSerialNumberTag = HostSystemIdentificationInfoIdentifier("SerialNumberTag")
 )
+
+func (e HostSystemIdentificationInfoIdentifier) Values() []HostSystemIdentificationInfoIdentifier {
+	return []HostSystemIdentificationInfoIdentifier{
+		HostSystemIdentificationInfoIdentifierAssetTag,
+		HostSystemIdentificationInfoIdentifierServiceTag,
+		HostSystemIdentificationInfoIdentifierOemSpecificString,
+		HostSystemIdentificationInfoIdentifierEnclosureSerialNumberTag,
+		HostSystemIdentificationInfoIdentifierSerialNumberTag,
+	}
+}
+
+func (e HostSystemIdentificationInfoIdentifier) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostSystemIdentificationInfoIdentifier"] = reflect.TypeOf((*HostSystemIdentificationInfoIdentifier)(nil)).Elem()
@@ -4430,6 +6903,19 @@ const (
 	HostSystemPowerStateUnknown = HostSystemPowerState("unknown")
 )
 
+func (e HostSystemPowerState) Values() []HostSystemPowerState {
+	return []HostSystemPowerState{
+		HostSystemPowerStatePoweredOn,
+		HostSystemPowerStatePoweredOff,
+		HostSystemPowerStateStandBy,
+		HostSystemPowerStateUnknown,
+	}
+}
+
+func (e HostSystemPowerState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostSystemPowerState"] = reflect.TypeOf((*HostSystemPowerState)(nil)).Elem()
 	minAPIVersionForType["HostSystemPowerState"] = "2.5"
@@ -4452,6 +6938,21 @@ const (
 	HostSystemRemediationStateStateRemediationFailed = HostSystemRemediationStateState("remediationFailed")
 )
 
+func (e HostSystemRemediationStateState) Values() []HostSystemRemediationStateState {
+	return []HostSystemRemediationStateState{
+		HostSystemRemediationStateStateRemediationReady,
+		HostSystemRemediationStateStatePrecheckRemediationRunning,
+		HostSystemRemediationStateStatePrecheckRemediationComplete,
+		HostSystemRemediationStateStatePrecheckRemediationFailed,
+		HostSystemRemediationStateStateRemediationRunning,
+		HostSystemRemediationStateStateRemediationFailed,
+	}
+}
+
+func (e HostSystemRemediationStateState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostSystemRemediationStateState"] = reflect.TypeOf((*HostSystemRemediationStateState)(nil)).Elem()
 	minAPIVersionForType["HostSystemRemediationStateState"] = "6.7"
@@ -4465,6 +6966,17 @@ const (
 	// TPM attestation succeeded.
 	HostTpmAttestationInfoAcceptanceStatusAccepted = HostTpmAttestationInfoAcceptanceStatus("accepted")
 )
+
+func (e HostTpmAttestationInfoAcceptanceStatus) Values() []HostTpmAttestationInfoAcceptanceStatus {
+	return []HostTpmAttestationInfoAcceptanceStatus{
+		HostTpmAttestationInfoAcceptanceStatusNotAccepted,
+		HostTpmAttestationInfoAcceptanceStatusAccepted,
+	}
+}
+
+func (e HostTpmAttestationInfoAcceptanceStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostTpmAttestationInfoAcceptanceStatus"] = reflect.TypeOf((*HostTpmAttestationInfoAcceptanceStatus)(nil)).Elem()
@@ -4482,6 +6994,18 @@ const (
 	HostTrustAuthorityAttestationInfoAttestationStatusUnknown = HostTrustAuthorityAttestationInfoAttestationStatus("unknown")
 )
 
+func (e HostTrustAuthorityAttestationInfoAttestationStatus) Values() []HostTrustAuthorityAttestationInfoAttestationStatus {
+	return []HostTrustAuthorityAttestationInfoAttestationStatus{
+		HostTrustAuthorityAttestationInfoAttestationStatusAttested,
+		HostTrustAuthorityAttestationInfoAttestationStatusNotAttested,
+		HostTrustAuthorityAttestationInfoAttestationStatusUnknown,
+	}
+}
+
+func (e HostTrustAuthorityAttestationInfoAttestationStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostTrustAuthorityAttestationInfoAttestationStatus"] = reflect.TypeOf((*HostTrustAuthorityAttestationInfoAttestationStatus)(nil)).Elem()
 	minAPIVersionForType["HostTrustAuthorityAttestationInfoAttestationStatus"] = "7.0.1.0"
@@ -4497,6 +7021,17 @@ const (
 	// VMFS 'uuid' does not match
 	HostUnresolvedVmfsExtentUnresolvedReasonUuidConflict = HostUnresolvedVmfsExtentUnresolvedReason("uuidConflict")
 )
+
+func (e HostUnresolvedVmfsExtentUnresolvedReason) Values() []HostUnresolvedVmfsExtentUnresolvedReason {
+	return []HostUnresolvedVmfsExtentUnresolvedReason{
+		HostUnresolvedVmfsExtentUnresolvedReasonDiskIdMismatch,
+		HostUnresolvedVmfsExtentUnresolvedReasonUuidConflict,
+	}
+}
+
+func (e HostUnresolvedVmfsExtentUnresolvedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostUnresolvedVmfsExtentUnresolvedReason"] = reflect.TypeOf((*HostUnresolvedVmfsExtentUnresolvedReason)(nil)).Elem()
@@ -4519,6 +7054,17 @@ const (
 	// head extent needs to be specified.
 	HostUnresolvedVmfsResolutionSpecVmfsUuidResolutionForceMount = HostUnresolvedVmfsResolutionSpecVmfsUuidResolution("forceMount")
 )
+
+func (e HostUnresolvedVmfsResolutionSpecVmfsUuidResolution) Values() []HostUnresolvedVmfsResolutionSpecVmfsUuidResolution {
+	return []HostUnresolvedVmfsResolutionSpecVmfsUuidResolution{
+		HostUnresolvedVmfsResolutionSpecVmfsUuidResolutionResignature,
+		HostUnresolvedVmfsResolutionSpecVmfsUuidResolutionForceMount,
+	}
+}
+
+func (e HostUnresolvedVmfsResolutionSpecVmfsUuidResolution) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostUnresolvedVmfsResolutionSpecVmfsUuidResolution"] = reflect.TypeOf((*HostUnresolvedVmfsResolutionSpecVmfsUuidResolution)(nil)).Elem()
@@ -4584,6 +7130,27 @@ const (
 	HostVirtualNicManagerNicTypeNvmeRdma = HostVirtualNicManagerNicType("nvmeRdma")
 )
 
+func (e HostVirtualNicManagerNicType) Values() []HostVirtualNicManagerNicType {
+	return []HostVirtualNicManagerNicType{
+		HostVirtualNicManagerNicTypeVmotion,
+		HostVirtualNicManagerNicTypeFaultToleranceLogging,
+		HostVirtualNicManagerNicTypeVSphereReplication,
+		HostVirtualNicManagerNicTypeVSphereReplicationNFC,
+		HostVirtualNicManagerNicTypeManagement,
+		HostVirtualNicManagerNicTypeVsan,
+		HostVirtualNicManagerNicTypeVSphereProvisioning,
+		HostVirtualNicManagerNicTypeVsanWitness,
+		HostVirtualNicManagerNicTypeVSphereBackupNFC,
+		HostVirtualNicManagerNicTypePtp,
+		HostVirtualNicManagerNicTypeNvmeTcp,
+		HostVirtualNicManagerNicTypeNvmeRdma,
+	}
+}
+
+func (e HostVirtualNicManagerNicType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostVirtualNicManagerNicType"] = reflect.TypeOf((*HostVirtualNicManagerNicType)(nil)).Elem()
 	minAPIVersionForType["HostVirtualNicManagerNicType"] = "4.0"
@@ -4611,6 +7178,18 @@ const (
 	HostVmciAccessManagerModeRevoke = HostVmciAccessManagerMode("revoke")
 )
 
+func (e HostVmciAccessManagerMode) Values() []HostVmciAccessManagerMode {
+	return []HostVmciAccessManagerMode{
+		HostVmciAccessManagerModeGrant,
+		HostVmciAccessManagerModeReplace,
+		HostVmciAccessManagerModeRevoke,
+	}
+}
+
+func (e HostVmciAccessManagerMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostVmciAccessManagerMode"] = reflect.TypeOf((*HostVmciAccessManagerMode)(nil)).Elem()
 	minAPIVersionForType["HostVmciAccessManagerMode"] = "5.0"
@@ -4627,6 +7206,17 @@ const (
 	// Unmaps bandwidth is a dynamic value with lower and upper limits
 	HostVmfsVolumeUnmapBandwidthPolicyDynamic = HostVmfsVolumeUnmapBandwidthPolicy("dynamic")
 )
+
+func (e HostVmfsVolumeUnmapBandwidthPolicy) Values() []HostVmfsVolumeUnmapBandwidthPolicy {
+	return []HostVmfsVolumeUnmapBandwidthPolicy{
+		HostVmfsVolumeUnmapBandwidthPolicyFixed,
+		HostVmfsVolumeUnmapBandwidthPolicyDynamic,
+	}
+}
+
+func (e HostVmfsVolumeUnmapBandwidthPolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HostVmfsVolumeUnmapBandwidthPolicy"] = reflect.TypeOf((*HostVmfsVolumeUnmapBandwidthPolicy)(nil)).Elem()
@@ -4645,6 +7235,17 @@ const (
 	HostVmfsVolumeUnmapPriorityLow = HostVmfsVolumeUnmapPriority("low")
 )
 
+func (e HostVmfsVolumeUnmapPriority) Values() []HostVmfsVolumeUnmapPriority {
+	return []HostVmfsVolumeUnmapPriority{
+		HostVmfsVolumeUnmapPriorityNone,
+		HostVmfsVolumeUnmapPriorityLow,
+	}
+}
+
+func (e HostVmfsVolumeUnmapPriority) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HostVmfsVolumeUnmapPriority"] = reflect.TypeOf((*HostVmfsVolumeUnmapPriority)(nil)).Elem()
 	minAPIVersionForType["HostVmfsVolumeUnmapPriority"] = "6.5"
@@ -4656,6 +7257,17 @@ const (
 	HttpNfcLeaseManifestEntryChecksumTypeSha1   = HttpNfcLeaseManifestEntryChecksumType("sha1")
 	HttpNfcLeaseManifestEntryChecksumTypeSha256 = HttpNfcLeaseManifestEntryChecksumType("sha256")
 )
+
+func (e HttpNfcLeaseManifestEntryChecksumType) Values() []HttpNfcLeaseManifestEntryChecksumType {
+	return []HttpNfcLeaseManifestEntryChecksumType{
+		HttpNfcLeaseManifestEntryChecksumTypeSha1,
+		HttpNfcLeaseManifestEntryChecksumTypeSha256,
+	}
+}
+
+func (e HttpNfcLeaseManifestEntryChecksumType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HttpNfcLeaseManifestEntryChecksumType"] = reflect.TypeOf((*HttpNfcLeaseManifestEntryChecksumType)(nil)).Elem()
@@ -4673,6 +7285,17 @@ const (
 	// See `HttpNfcLease.HttpNfcLeasePullFromUrls_Task`
 	HttpNfcLeaseModePull = HttpNfcLeaseMode("pull")
 )
+
+func (e HttpNfcLeaseMode) Values() []HttpNfcLeaseMode {
+	return []HttpNfcLeaseMode{
+		HttpNfcLeaseModePushOrGet,
+		HttpNfcLeaseModePull,
+	}
+}
+
+func (e HttpNfcLeaseMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["HttpNfcLeaseMode"] = reflect.TypeOf((*HttpNfcLeaseMode)(nil)).Elem()
@@ -4693,6 +7316,19 @@ const (
 	HttpNfcLeaseStateError = HttpNfcLeaseState("error")
 )
 
+func (e HttpNfcLeaseState) Values() []HttpNfcLeaseState {
+	return []HttpNfcLeaseState{
+		HttpNfcLeaseStateInitializing,
+		HttpNfcLeaseStateReady,
+		HttpNfcLeaseStateDone,
+		HttpNfcLeaseStateError,
+	}
+}
+
+func (e HttpNfcLeaseState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["HttpNfcLeaseState"] = reflect.TypeOf((*HttpNfcLeaseState)(nil)).Elem()
 	minAPIVersionForType["HttpNfcLeaseState"] = "4.0"
@@ -4708,6 +7344,17 @@ const (
 	IncompatibleHostForVmReplicationIncompatibleReasonNetCompression = IncompatibleHostForVmReplicationIncompatibleReason("netCompression")
 )
 
+func (e IncompatibleHostForVmReplicationIncompatibleReason) Values() []IncompatibleHostForVmReplicationIncompatibleReason {
+	return []IncompatibleHostForVmReplicationIncompatibleReason{
+		IncompatibleHostForVmReplicationIncompatibleReasonRpo,
+		IncompatibleHostForVmReplicationIncompatibleReasonNetCompression,
+	}
+}
+
+func (e IncompatibleHostForVmReplicationIncompatibleReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["IncompatibleHostForVmReplicationIncompatibleReason"] = reflect.TypeOf((*IncompatibleHostForVmReplicationIncompatibleReason)(nil)).Elem()
 	minAPIVersionForType["IncompatibleHostForVmReplicationIncompatibleReason"] = "6.0"
@@ -4721,6 +7368,18 @@ const (
 	InternetScsiSnsDiscoveryMethodIsnsDhcp   = InternetScsiSnsDiscoveryMethod("isnsDhcp")
 	InternetScsiSnsDiscoveryMethodIsnsSlp    = InternetScsiSnsDiscoveryMethod("isnsSlp")
 )
+
+func (e InternetScsiSnsDiscoveryMethod) Values() []InternetScsiSnsDiscoveryMethod {
+	return []InternetScsiSnsDiscoveryMethod{
+		InternetScsiSnsDiscoveryMethodIsnsStatic,
+		InternetScsiSnsDiscoveryMethodIsnsDhcp,
+		InternetScsiSnsDiscoveryMethodIsnsSlp,
+	}
+}
+
+func (e InternetScsiSnsDiscoveryMethod) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["InternetScsiSnsDiscoveryMethod"] = reflect.TypeOf((*InternetScsiSnsDiscoveryMethod)(nil)).Elem()
@@ -4737,6 +7396,18 @@ const (
 	InvalidDasConfigArgumentEntryForInvalidArgumentVmConfig = InvalidDasConfigArgumentEntryForInvalidArgument("vmConfig")
 )
 
+func (e InvalidDasConfigArgumentEntryForInvalidArgument) Values() []InvalidDasConfigArgumentEntryForInvalidArgument {
+	return []InvalidDasConfigArgumentEntryForInvalidArgument{
+		InvalidDasConfigArgumentEntryForInvalidArgumentAdmissionControl,
+		InvalidDasConfigArgumentEntryForInvalidArgumentUserHeartbeatDs,
+		InvalidDasConfigArgumentEntryForInvalidArgumentVmConfig,
+	}
+}
+
+func (e InvalidDasConfigArgumentEntryForInvalidArgument) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["InvalidDasConfigArgumentEntryForInvalidArgument"] = reflect.TypeOf((*InvalidDasConfigArgumentEntryForInvalidArgument)(nil)).Elem()
 	minAPIVersionForType["InvalidDasConfigArgumentEntryForInvalidArgument"] = "5.1"
@@ -4750,6 +7421,17 @@ const (
 	// There is no reference host associated with the profile.
 	InvalidProfileReferenceHostReasonMissingReferenceHost = InvalidProfileReferenceHostReason("missingReferenceHost")
 )
+
+func (e InvalidProfileReferenceHostReason) Values() []InvalidProfileReferenceHostReason {
+	return []InvalidProfileReferenceHostReason{
+		InvalidProfileReferenceHostReasonIncompatibleVersion,
+		InvalidProfileReferenceHostReasonMissingReferenceHost,
+	}
+}
+
+func (e InvalidProfileReferenceHostReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["InvalidProfileReferenceHostReason"] = reflect.TypeOf((*InvalidProfileReferenceHostReason)(nil)).Elem()
@@ -4766,6 +7448,18 @@ const (
 	// Upgrade an IO Filter.
 	IoFilterOperationUpgrade = IoFilterOperation("upgrade")
 )
+
+func (e IoFilterOperation) Values() []IoFilterOperation {
+	return []IoFilterOperation{
+		IoFilterOperationInstall,
+		IoFilterOperationUninstall,
+		IoFilterOperationUpgrade,
+	}
+}
+
+func (e IoFilterOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["IoFilterOperation"] = reflect.TypeOf((*IoFilterOperation)(nil)).Elem()
@@ -4792,6 +7486,23 @@ const (
 	// Lightweight Data Capture.
 	IoFilterTypeDataCapture = IoFilterType("dataCapture")
 )
+
+func (e IoFilterType) Values() []IoFilterType {
+	return []IoFilterType{
+		IoFilterTypeCache,
+		IoFilterTypeReplication,
+		IoFilterTypeEncryption,
+		IoFilterTypeCompression,
+		IoFilterTypeInspection,
+		IoFilterTypeDatastoreIoControl,
+		IoFilterTypeDataProvider,
+		IoFilterTypeDataCapture,
+	}
+}
+
+func (e IoFilterType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["IoFilterType"] = reflect.TypeOf((*IoFilterType)(nil)).Elem()
@@ -4820,6 +7531,19 @@ const (
 	IscsiPortInfoPathStatusLastActive = IscsiPortInfoPathStatus("lastActive")
 )
 
+func (e IscsiPortInfoPathStatus) Values() []IscsiPortInfoPathStatus {
+	return []IscsiPortInfoPathStatus{
+		IscsiPortInfoPathStatusNotUsed,
+		IscsiPortInfoPathStatusActive,
+		IscsiPortInfoPathStatusStandBy,
+		IscsiPortInfoPathStatusLastActive,
+	}
+}
+
+func (e IscsiPortInfoPathStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["IscsiPortInfoPathStatus"] = reflect.TypeOf((*IscsiPortInfoPathStatus)(nil)).Elem()
 	minAPIVersionForType["IscsiPortInfoPathStatus"] = "5.0"
@@ -4834,6 +7558,19 @@ const (
 	// `**Since:**` vSphere API Release 7.0.2.0
 	KmipClusterInfoKmsManagementTypeNativeProvider = KmipClusterInfoKmsManagementType("nativeProvider")
 )
+
+func (e KmipClusterInfoKmsManagementType) Values() []KmipClusterInfoKmsManagementType {
+	return []KmipClusterInfoKmsManagementType{
+		KmipClusterInfoKmsManagementTypeUnknown,
+		KmipClusterInfoKmsManagementTypeVCenter,
+		KmipClusterInfoKmsManagementTypeTrustAuthority,
+		KmipClusterInfoKmsManagementTypeNativeProvider,
+	}
+}
+
+func (e KmipClusterInfoKmsManagementType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["KmipClusterInfoKmsManagementType"] = reflect.TypeOf((*KmipClusterInfoKmsManagementType)(nil)).Elem()
@@ -4860,8 +7597,6 @@ const (
 	LatencySensitivitySensitivityLevelMedium = LatencySensitivitySensitivityLevel("medium")
 	// The relative latency-sensitivity high value.
 	LatencySensitivitySensitivityLevelHigh = LatencySensitivitySensitivityLevel("high")
-	//
-	//
 	// Deprecated as of vSphere API Ver 6.0. Value will be ignored and
 	// treated as "normal" latency sensitivity.
 	//
@@ -4874,6 +7609,20 @@ const (
 	// set also.
 	LatencySensitivitySensitivityLevelCustom = LatencySensitivitySensitivityLevel("custom")
 )
+
+func (e LatencySensitivitySensitivityLevel) Values() []LatencySensitivitySensitivityLevel {
+	return []LatencySensitivitySensitivityLevel{
+		LatencySensitivitySensitivityLevelLow,
+		LatencySensitivitySensitivityLevelNormal,
+		LatencySensitivitySensitivityLevelMedium,
+		LatencySensitivitySensitivityLevelHigh,
+		LatencySensitivitySensitivityLevelCustom,
+	}
+}
+
+func (e LatencySensitivitySensitivityLevel) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["LatencySensitivitySensitivityLevel"] = reflect.TypeOf((*LatencySensitivitySensitivityLevel)(nil)).Elem()
@@ -4893,6 +7642,19 @@ const (
 	LicenseAssignmentFailedReasonHostsUnmanageableByVirtualCenterWithoutLicenseServer = LicenseAssignmentFailedReason("hostsUnmanageableByVirtualCenterWithoutLicenseServer")
 )
 
+func (e LicenseAssignmentFailedReason) Values() []LicenseAssignmentFailedReason {
+	return []LicenseAssignmentFailedReason{
+		LicenseAssignmentFailedReasonKeyEntityMismatch,
+		LicenseAssignmentFailedReasonDowngradeDisallowed,
+		LicenseAssignmentFailedReasonInventoryNotManageableByVirtualCenter,
+		LicenseAssignmentFailedReasonHostsUnmanageableByVirtualCenterWithoutLicenseServer,
+	}
+}
+
+func (e LicenseAssignmentFailedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["LicenseAssignmentFailedReason"] = reflect.TypeOf((*LicenseAssignmentFailedReason)(nil)).Elem()
 	minAPIVersionForType["LicenseAssignmentFailedReason"] = "4.0"
@@ -4909,6 +7671,18 @@ const (
 	// The feature's license can only come from a file.
 	LicenseFeatureInfoSourceRestrictionFile = LicenseFeatureInfoSourceRestriction("file")
 )
+
+func (e LicenseFeatureInfoSourceRestriction) Values() []LicenseFeatureInfoSourceRestriction {
+	return []LicenseFeatureInfoSourceRestriction{
+		LicenseFeatureInfoSourceRestrictionUnrestricted,
+		LicenseFeatureInfoSourceRestrictionServed,
+		LicenseFeatureInfoSourceRestrictionFile,
+	}
+}
+
+func (e LicenseFeatureInfoSourceRestriction) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["LicenseFeatureInfoSourceRestriction"] = reflect.TypeOf((*LicenseFeatureInfoSourceRestriction)(nil)).Elem()
@@ -4931,6 +7705,18 @@ const (
 	LicenseFeatureInfoStateOptional = LicenseFeatureInfoState("optional")
 )
 
+func (e LicenseFeatureInfoState) Values() []LicenseFeatureInfoState {
+	return []LicenseFeatureInfoState{
+		LicenseFeatureInfoStateEnabled,
+		LicenseFeatureInfoStateDisabled,
+		LicenseFeatureInfoStateOptional,
+	}
+}
+
+func (e LicenseFeatureInfoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["LicenseFeatureInfoState"] = reflect.TypeOf((*LicenseFeatureInfoState)(nil)).Elem()
 }
@@ -4951,6 +7737,20 @@ const (
 	// One license is acquired per virtual machine.
 	LicenseFeatureInfoUnitVm = LicenseFeatureInfoUnit("vm")
 )
+
+func (e LicenseFeatureInfoUnit) Values() []LicenseFeatureInfoUnit {
+	return []LicenseFeatureInfoUnit{
+		LicenseFeatureInfoUnitHost,
+		LicenseFeatureInfoUnitCpuCore,
+		LicenseFeatureInfoUnitCpuPackage,
+		LicenseFeatureInfoUnitServer,
+		LicenseFeatureInfoUnitVm,
+	}
+}
+
+func (e LicenseFeatureInfoUnit) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["LicenseFeatureInfoUnit"] = reflect.TypeOf((*LicenseFeatureInfoUnit)(nil)).Elem()
@@ -5045,6 +7845,32 @@ const (
 	LicenseManagerLicenseKeyDas = LicenseManagerLicenseKey("das")
 )
 
+func (e LicenseManagerLicenseKey) Values() []LicenseManagerLicenseKey {
+	return []LicenseManagerLicenseKey{
+		LicenseManagerLicenseKeyEsxFull,
+		LicenseManagerLicenseKeyEsxVmtn,
+		LicenseManagerLicenseKeyEsxExpress,
+		LicenseManagerLicenseKeySan,
+		LicenseManagerLicenseKeyIscsi,
+		LicenseManagerLicenseKeyNas,
+		LicenseManagerLicenseKeyVsmp,
+		LicenseManagerLicenseKeyBackup,
+		LicenseManagerLicenseKeyVc,
+		LicenseManagerLicenseKeyVcExpress,
+		LicenseManagerLicenseKeyEsxHost,
+		LicenseManagerLicenseKeyGsxHost,
+		LicenseManagerLicenseKeyServerHost,
+		LicenseManagerLicenseKeyDrsPower,
+		LicenseManagerLicenseKeyVmotion,
+		LicenseManagerLicenseKeyDrs,
+		LicenseManagerLicenseKeyDas,
+	}
+}
+
+func (e LicenseManagerLicenseKey) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["LicenseManagerLicenseKey"] = reflect.TypeOf((*LicenseManagerLicenseKey)(nil)).Elem()
 	minAPIVersionForEnumValue["LicenseManagerLicenseKey"] = map[string]string{
@@ -5067,6 +7893,19 @@ const (
 	// Initialization has failed or grace period expired.
 	LicenseManagerStateFault = LicenseManagerState("fault")
 )
+
+func (e LicenseManagerState) Values() []LicenseManagerState {
+	return []LicenseManagerState{
+		LicenseManagerStateInitializing,
+		LicenseManagerStateNormal,
+		LicenseManagerStateMarginal,
+		LicenseManagerStateFault,
+	}
+}
+
+func (e LicenseManagerState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["LicenseManagerState"] = reflect.TypeOf((*LicenseManagerState)(nil)).Elem()
@@ -5097,6 +7936,19 @@ const (
 	LicenseReservationInfoStateLicensed = LicenseReservationInfoState("licensed")
 )
 
+func (e LicenseReservationInfoState) Values() []LicenseReservationInfoState {
+	return []LicenseReservationInfoState{
+		LicenseReservationInfoStateNotUsed,
+		LicenseReservationInfoStateNoLicense,
+		LicenseReservationInfoStateUnlicensedUse,
+		LicenseReservationInfoStateLicensed,
+	}
+}
+
+func (e LicenseReservationInfoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["LicenseReservationInfoState"] = reflect.TypeOf((*LicenseReservationInfoState)(nil)).Elem()
 }
@@ -5118,6 +7970,19 @@ const (
 	LinkDiscoveryProtocolConfigOperationTypeBoth = LinkDiscoveryProtocolConfigOperationType("both")
 )
 
+func (e LinkDiscoveryProtocolConfigOperationType) Values() []LinkDiscoveryProtocolConfigOperationType {
+	return []LinkDiscoveryProtocolConfigOperationType{
+		LinkDiscoveryProtocolConfigOperationTypeNone,
+		LinkDiscoveryProtocolConfigOperationTypeListen,
+		LinkDiscoveryProtocolConfigOperationTypeAdvertise,
+		LinkDiscoveryProtocolConfigOperationTypeBoth,
+	}
+}
+
+func (e LinkDiscoveryProtocolConfigOperationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["LinkDiscoveryProtocolConfigOperationType"] = reflect.TypeOf((*LinkDiscoveryProtocolConfigOperationType)(nil)).Elem()
 	minAPIVersionForType["LinkDiscoveryProtocolConfigOperationType"] = "4.0"
@@ -5131,6 +7996,17 @@ const (
 	// Link Layer Discovery Protocol
 	LinkDiscoveryProtocolConfigProtocolTypeLldp = LinkDiscoveryProtocolConfigProtocolType("lldp")
 )
+
+func (e LinkDiscoveryProtocolConfigProtocolType) Values() []LinkDiscoveryProtocolConfigProtocolType {
+	return []LinkDiscoveryProtocolConfigProtocolType{
+		LinkDiscoveryProtocolConfigProtocolTypeCdp,
+		LinkDiscoveryProtocolConfigProtocolTypeLldp,
+	}
+}
+
+func (e LinkDiscoveryProtocolConfigProtocolType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["LinkDiscoveryProtocolConfigProtocolType"] = reflect.TypeOf((*LinkDiscoveryProtocolConfigProtocolType)(nil)).Elem()
@@ -5151,6 +8027,19 @@ const (
 	ManagedEntityStatusRed = ManagedEntityStatus("red")
 )
 
+func (e ManagedEntityStatus) Values() []ManagedEntityStatus {
+	return []ManagedEntityStatus{
+		ManagedEntityStatusGray,
+		ManagedEntityStatusGreen,
+		ManagedEntityStatusYellow,
+		ManagedEntityStatusRed,
+	}
+}
+
+func (e ManagedEntityStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ManagedEntityStatus"] = reflect.TypeOf((*ManagedEntityStatus)(nil)).Elem()
 }
@@ -5164,6 +8053,17 @@ const (
 	// Test if the target metric item is below the given red or yellow values.
 	MetricAlarmOperatorIsBelow = MetricAlarmOperator("isBelow")
 )
+
+func (e MetricAlarmOperator) Values() []MetricAlarmOperator {
+	return []MetricAlarmOperator{
+		MetricAlarmOperatorIsAbove,
+		MetricAlarmOperatorIsBelow,
+	}
+}
+
+func (e MetricAlarmOperator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["MetricAlarmOperator"] = reflect.TypeOf((*MetricAlarmOperator)(nil)).Elem()
@@ -5179,6 +8079,20 @@ const (
 	MultipathStateDead     = MultipathState("dead")
 	MultipathStateUnknown  = MultipathState("unknown")
 )
+
+func (e MultipathState) Values() []MultipathState {
+	return []MultipathState{
+		MultipathStateStandby,
+		MultipathStateActive,
+		MultipathStateDisabled,
+		MultipathStateDead,
+		MultipathStateUnknown,
+	}
+}
+
+func (e MultipathState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["MultipathState"] = reflect.TypeOf((*MultipathState)(nil)).Elem()
@@ -5196,6 +8110,19 @@ const (
 	// DHCP server decides whether or not to use NetBIOS.
 	NetBIOSConfigInfoModeEnabledViaDHCP = NetBIOSConfigInfoMode("enabledViaDHCP")
 )
+
+func (e NetBIOSConfigInfoMode) Values() []NetBIOSConfigInfoMode {
+	return []NetBIOSConfigInfoMode{
+		NetBIOSConfigInfoModeUnknown,
+		NetBIOSConfigInfoModeEnabled,
+		NetBIOSConfigInfoModeDisabled,
+		NetBIOSConfigInfoModeEnabledViaDHCP,
+	}
+}
+
+func (e NetBIOSConfigInfoMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["NetBIOSConfigInfoMode"] = reflect.TypeOf((*NetBIOSConfigInfoMode)(nil)).Elem()
@@ -5228,6 +8155,20 @@ const (
 	NetIpConfigInfoIpAddressOriginRandom = NetIpConfigInfoIpAddressOrigin("random")
 )
 
+func (e NetIpConfigInfoIpAddressOrigin) Values() []NetIpConfigInfoIpAddressOrigin {
+	return []NetIpConfigInfoIpAddressOrigin{
+		NetIpConfigInfoIpAddressOriginOther,
+		NetIpConfigInfoIpAddressOriginManual,
+		NetIpConfigInfoIpAddressOriginDhcp,
+		NetIpConfigInfoIpAddressOriginLinklayer,
+		NetIpConfigInfoIpAddressOriginRandom,
+	}
+}
+
+func (e NetIpConfigInfoIpAddressOrigin) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NetIpConfigInfoIpAddressOrigin"] = reflect.TypeOf((*NetIpConfigInfoIpAddressOrigin)(nil)).Elem()
 	minAPIVersionForType["NetIpConfigInfoIpAddressOrigin"] = "4.1"
@@ -5256,6 +8197,22 @@ const (
 	NetIpConfigInfoIpAddressStatusDuplicate = NetIpConfigInfoIpAddressStatus("duplicate")
 )
 
+func (e NetIpConfigInfoIpAddressStatus) Values() []NetIpConfigInfoIpAddressStatus {
+	return []NetIpConfigInfoIpAddressStatus{
+		NetIpConfigInfoIpAddressStatusPreferred,
+		NetIpConfigInfoIpAddressStatusDeprecated,
+		NetIpConfigInfoIpAddressStatusInvalid,
+		NetIpConfigInfoIpAddressStatusInaccessible,
+		NetIpConfigInfoIpAddressStatusUnknown,
+		NetIpConfigInfoIpAddressStatusTentative,
+		NetIpConfigInfoIpAddressStatusDuplicate,
+	}
+}
+
+func (e NetIpConfigInfoIpAddressStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NetIpConfigInfoIpAddressStatus"] = reflect.TypeOf((*NetIpConfigInfoIpAddressStatus)(nil)).Elem()
 	minAPIVersionForType["NetIpConfigInfoIpAddressStatus"] = "4.1"
@@ -5279,6 +8236,19 @@ const (
 	NetIpStackInfoEntryTypeManual = NetIpStackInfoEntryType("manual")
 )
 
+func (e NetIpStackInfoEntryType) Values() []NetIpStackInfoEntryType {
+	return []NetIpStackInfoEntryType{
+		NetIpStackInfoEntryTypeOther,
+		NetIpStackInfoEntryTypeInvalid,
+		NetIpStackInfoEntryTypeDynamic,
+		NetIpStackInfoEntryTypeManual,
+	}
+}
+
+func (e NetIpStackInfoEntryType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NetIpStackInfoEntryType"] = reflect.TypeOf((*NetIpStackInfoEntryType)(nil)).Elem()
 	minAPIVersionForType["NetIpStackInfoEntryType"] = "4.1"
@@ -5294,6 +8264,19 @@ const (
 	NetIpStackInfoPreferenceHigh     = NetIpStackInfoPreference("high")
 )
 
+func (e NetIpStackInfoPreference) Values() []NetIpStackInfoPreference {
+	return []NetIpStackInfoPreference{
+		NetIpStackInfoPreferenceReserved,
+		NetIpStackInfoPreferenceLow,
+		NetIpStackInfoPreferenceMedium,
+		NetIpStackInfoPreferenceHigh,
+	}
+}
+
+func (e NetIpStackInfoPreference) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NetIpStackInfoPreference"] = reflect.TypeOf((*NetIpStackInfoPreference)(nil)).Elem()
 	minAPIVersionForType["NetIpStackInfoPreference"] = "4.1"
@@ -5308,6 +8291,17 @@ const (
 	NotSupportedDeviceForFTDeviceTypeParaVirtualSCSIController = NotSupportedDeviceForFTDeviceType("paraVirtualSCSIController")
 )
 
+func (e NotSupportedDeviceForFTDeviceType) Values() []NotSupportedDeviceForFTDeviceType {
+	return []NotSupportedDeviceForFTDeviceType{
+		NotSupportedDeviceForFTDeviceTypeVirtualVmxnet3,
+		NotSupportedDeviceForFTDeviceTypeParaVirtualSCSIController,
+	}
+}
+
+func (e NotSupportedDeviceForFTDeviceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NotSupportedDeviceForFTDeviceType"] = reflect.TypeOf((*NotSupportedDeviceForFTDeviceType)(nil)).Elem()
 	minAPIVersionForType["NotSupportedDeviceForFTDeviceType"] = "4.1"
@@ -5316,8 +8310,6 @@ func init() {
 type NumVirtualCpusIncompatibleReason string
 
 const (
-	//
-	//
 	// Deprecated as of vSphere API 6.0.
 	//
 	// The virtual machine needs to support record/replay functionality.
@@ -5325,6 +8317,17 @@ const (
 	// The virtual machine is enabled for fault tolerance.
 	NumVirtualCpusIncompatibleReasonFaultTolerance = NumVirtualCpusIncompatibleReason("faultTolerance")
 )
+
+func (e NumVirtualCpusIncompatibleReason) Values() []NumVirtualCpusIncompatibleReason {
+	return []NumVirtualCpusIncompatibleReason{
+		NumVirtualCpusIncompatibleReasonRecordReplay,
+		NumVirtualCpusIncompatibleReasonFaultTolerance,
+	}
+}
+
+func (e NumVirtualCpusIncompatibleReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["NumVirtualCpusIncompatibleReason"] = reflect.TypeOf((*NumVirtualCpusIncompatibleReason)(nil)).Elem()
@@ -5339,6 +8342,17 @@ const (
 	// Interleave set is valid and active
 	NvdimmInterleaveSetStateActive = NvdimmInterleaveSetState("active")
 )
+
+func (e NvdimmInterleaveSetState) Values() []NvdimmInterleaveSetState {
+	return []NvdimmInterleaveSetState{
+		NvdimmInterleaveSetStateInvalid,
+		NvdimmInterleaveSetStateActive,
+	}
+}
+
+func (e NvdimmInterleaveSetState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["NvdimmInterleaveSetState"] = reflect.TypeOf((*NvdimmInterleaveSetState)(nil)).Elem()
@@ -5360,6 +8374,20 @@ const (
 	NvdimmNamespaceDetailsHealthStatusLabelInconsistent = NvdimmNamespaceDetailsHealthStatus("labelInconsistent")
 )
 
+func (e NvdimmNamespaceDetailsHealthStatus) Values() []NvdimmNamespaceDetailsHealthStatus {
+	return []NvdimmNamespaceDetailsHealthStatus{
+		NvdimmNamespaceDetailsHealthStatusNormal,
+		NvdimmNamespaceDetailsHealthStatusMissing,
+		NvdimmNamespaceDetailsHealthStatusLabelMissing,
+		NvdimmNamespaceDetailsHealthStatusInterleaveBroken,
+		NvdimmNamespaceDetailsHealthStatusLabelInconsistent,
+	}
+}
+
+func (e NvdimmNamespaceDetailsHealthStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NvdimmNamespaceDetailsHealthStatus"] = reflect.TypeOf((*NvdimmNamespaceDetailsHealthStatus)(nil)).Elem()
 	minAPIVersionForType["NvdimmNamespaceDetailsHealthStatus"] = "6.7.1"
@@ -5375,6 +8403,18 @@ const (
 	// Namespace is valid and is in use
 	NvdimmNamespaceDetailsStateInUse = NvdimmNamespaceDetailsState("inUse")
 )
+
+func (e NvdimmNamespaceDetailsState) Values() []NvdimmNamespaceDetailsState {
+	return []NvdimmNamespaceDetailsState{
+		NvdimmNamespaceDetailsStateInvalid,
+		NvdimmNamespaceDetailsStateNotInUse,
+		NvdimmNamespaceDetailsStateInUse,
+	}
+}
+
+func (e NvdimmNamespaceDetailsState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["NvdimmNamespaceDetailsState"] = reflect.TypeOf((*NvdimmNamespaceDetailsState)(nil)).Elem()
@@ -5400,6 +8440,22 @@ const (
 	NvdimmNamespaceHealthStatusBadBlockSize = NvdimmNamespaceHealthStatus("badBlockSize")
 )
 
+func (e NvdimmNamespaceHealthStatus) Values() []NvdimmNamespaceHealthStatus {
+	return []NvdimmNamespaceHealthStatus{
+		NvdimmNamespaceHealthStatusNormal,
+		NvdimmNamespaceHealthStatusMissing,
+		NvdimmNamespaceHealthStatusLabelMissing,
+		NvdimmNamespaceHealthStatusInterleaveBroken,
+		NvdimmNamespaceHealthStatusLabelInconsistent,
+		NvdimmNamespaceHealthStatusBttCorrupt,
+		NvdimmNamespaceHealthStatusBadBlockSize,
+	}
+}
+
+func (e NvdimmNamespaceHealthStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NvdimmNamespaceHealthStatus"] = reflect.TypeOf((*NvdimmNamespaceHealthStatus)(nil)).Elem()
 	minAPIVersionForType["NvdimmNamespaceHealthStatus"] = "6.7"
@@ -5416,6 +8472,18 @@ const (
 	NvdimmNamespaceStateInUse = NvdimmNamespaceState("inUse")
 )
 
+func (e NvdimmNamespaceState) Values() []NvdimmNamespaceState {
+	return []NvdimmNamespaceState{
+		NvdimmNamespaceStateInvalid,
+		NvdimmNamespaceStateNotInUse,
+		NvdimmNamespaceStateInUse,
+	}
+}
+
+func (e NvdimmNamespaceState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NvdimmNamespaceState"] = reflect.TypeOf((*NvdimmNamespaceState)(nil)).Elem()
 	minAPIVersionForType["NvdimmNamespaceState"] = "6.7"
@@ -5429,6 +8497,17 @@ const (
 	// Persistent mode namespace
 	NvdimmNamespaceTypePersistentNamespace = NvdimmNamespaceType("persistentNamespace")
 )
+
+func (e NvdimmNamespaceType) Values() []NvdimmNamespaceType {
+	return []NvdimmNamespaceType{
+		NvdimmNamespaceTypeBlockNamespace,
+		NvdimmNamespaceTypePersistentNamespace,
+	}
+}
+
+func (e NvdimmNamespaceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["NvdimmNamespaceType"] = reflect.TypeOf((*NvdimmNamespaceType)(nil)).Elem()
@@ -5445,6 +8524,17 @@ const (
 	// Potential data loss.
 	NvdimmNvdimmHealthInfoStateError = NvdimmNvdimmHealthInfoState("error")
 )
+
+func (e NvdimmNvdimmHealthInfoState) Values() []NvdimmNvdimmHealthInfoState {
+	return []NvdimmNvdimmHealthInfoState{
+		NvdimmNvdimmHealthInfoStateNormal,
+		NvdimmNvdimmHealthInfoStateError,
+	}
+}
+
+func (e NvdimmNvdimmHealthInfoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["NvdimmNvdimmHealthInfoState"] = reflect.TypeOf((*NvdimmNvdimmHealthInfoState)(nil)).Elem()
@@ -5472,6 +8562,23 @@ const (
 	NvdimmRangeTypePersistentVirtualCDRange = NvdimmRangeType("persistentVirtualCDRange")
 )
 
+func (e NvdimmRangeType) Values() []NvdimmRangeType {
+	return []NvdimmRangeType{
+		NvdimmRangeTypeVolatileRange,
+		NvdimmRangeTypePersistentRange,
+		NvdimmRangeTypeControlRange,
+		NvdimmRangeTypeBlockRange,
+		NvdimmRangeTypeVolatileVirtualDiskRange,
+		NvdimmRangeTypeVolatileVirtualCDRange,
+		NvdimmRangeTypePersistentVirtualDiskRange,
+		NvdimmRangeTypePersistentVirtualCDRange,
+	}
+}
+
+func (e NvdimmRangeType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["NvdimmRangeType"] = reflect.TypeOf((*NvdimmRangeType)(nil)).Elem()
 	minAPIVersionForType["NvdimmRangeType"] = "6.7"
@@ -5495,6 +8602,18 @@ const (
 	ObjectUpdateKindLeave = ObjectUpdateKind("leave")
 )
 
+func (e ObjectUpdateKind) Values() []ObjectUpdateKind {
+	return []ObjectUpdateKind{
+		ObjectUpdateKindModify,
+		ObjectUpdateKindEnter,
+		ObjectUpdateKindLeave,
+	}
+}
+
+func (e ObjectUpdateKind) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ObjectUpdateKind"] = reflect.TypeOf((*ObjectUpdateKind)(nil)).Elem()
 }
@@ -5509,6 +8628,18 @@ const (
 	OvfConsumerOstNodeTypeVirtualSystem           = OvfConsumerOstNodeType("virtualSystem")
 	OvfConsumerOstNodeTypeVirtualSystemCollection = OvfConsumerOstNodeType("virtualSystemCollection")
 )
+
+func (e OvfConsumerOstNodeType) Values() []OvfConsumerOstNodeType {
+	return []OvfConsumerOstNodeType{
+		OvfConsumerOstNodeTypeEnvelope,
+		OvfConsumerOstNodeTypeVirtualSystem,
+		OvfConsumerOstNodeTypeVirtualSystemCollection,
+	}
+}
+
+func (e OvfConsumerOstNodeType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["OvfConsumerOstNodeType"] = reflect.TypeOf((*OvfConsumerOstNodeType)(nil)).Elem()
@@ -5565,6 +8696,25 @@ const (
 	OvfCreateImportSpecParamsDiskProvisioningTypeFlat = OvfCreateImportSpecParamsDiskProvisioningType("flat")
 )
 
+func (e OvfCreateImportSpecParamsDiskProvisioningType) Values() []OvfCreateImportSpecParamsDiskProvisioningType {
+	return []OvfCreateImportSpecParamsDiskProvisioningType{
+		OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicSparse,
+		OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicFlat,
+		OvfCreateImportSpecParamsDiskProvisioningTypeTwoGbMaxExtentSparse,
+		OvfCreateImportSpecParamsDiskProvisioningTypeTwoGbMaxExtentFlat,
+		OvfCreateImportSpecParamsDiskProvisioningTypeThin,
+		OvfCreateImportSpecParamsDiskProvisioningTypeThick,
+		OvfCreateImportSpecParamsDiskProvisioningTypeSeSparse,
+		OvfCreateImportSpecParamsDiskProvisioningTypeEagerZeroedThick,
+		OvfCreateImportSpecParamsDiskProvisioningTypeSparse,
+		OvfCreateImportSpecParamsDiskProvisioningTypeFlat,
+	}
+}
+
+func (e OvfCreateImportSpecParamsDiskProvisioningType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["OvfCreateImportSpecParamsDiskProvisioningType"] = reflect.TypeOf((*OvfCreateImportSpecParamsDiskProvisioningType)(nil)).Elem()
 	minAPIVersionForType["OvfCreateImportSpecParamsDiskProvisioningType"] = "4.1"
@@ -5583,6 +8733,17 @@ const (
 	// Counters returned in comma-separate value (CSV) format.
 	PerfFormatCsv = PerfFormat("csv")
 )
+
+func (e PerfFormat) Values() []PerfFormat {
+	return []PerfFormat{
+		PerfFormatNormal,
+		PerfFormatCsv,
+	}
+}
+
+func (e PerfFormat) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["PerfFormat"] = reflect.TypeOf((*PerfFormat)(nil)).Elem()
@@ -5619,6 +8780,18 @@ const (
 	PerfStatsTypeRate = PerfStatsType("rate")
 )
 
+func (e PerfStatsType) Values() []PerfStatsType {
+	return []PerfStatsType{
+		PerfStatsTypeAbsolute,
+		PerfStatsTypeDelta,
+		PerfStatsTypeRate,
+	}
+}
+
+func (e PerfStatsType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["PerfStatsType"] = reflect.TypeOf((*PerfStatsType)(nil)).Elem()
 }
@@ -5646,6 +8819,21 @@ const (
 	// The counter is never rolled up.
 	PerfSummaryTypeNone = PerfSummaryType("none")
 )
+
+func (e PerfSummaryType) Values() []PerfSummaryType {
+	return []PerfSummaryType{
+		PerfSummaryTypeAverage,
+		PerfSummaryTypeMaximum,
+		PerfSummaryTypeMinimum,
+		PerfSummaryTypeLatest,
+		PerfSummaryTypeSummation,
+		PerfSummaryTypeNone,
+	}
+}
+
+func (e PerfSummaryType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["PerfSummaryType"] = reflect.TypeOf((*PerfSummaryType)(nil)).Elem()
@@ -5691,6 +8879,30 @@ const (
 	PerformanceManagerUnitNanosecond = PerformanceManagerUnit("nanosecond")
 )
 
+func (e PerformanceManagerUnit) Values() []PerformanceManagerUnit {
+	return []PerformanceManagerUnit{
+		PerformanceManagerUnitPercent,
+		PerformanceManagerUnitKiloBytes,
+		PerformanceManagerUnitMegaBytes,
+		PerformanceManagerUnitMegaHertz,
+		PerformanceManagerUnitNumber,
+		PerformanceManagerUnitMicrosecond,
+		PerformanceManagerUnitMillisecond,
+		PerformanceManagerUnitSecond,
+		PerformanceManagerUnitKiloBytesPerSecond,
+		PerformanceManagerUnitMegaBytesPerSecond,
+		PerformanceManagerUnitWatt,
+		PerformanceManagerUnitJoule,
+		PerformanceManagerUnitTeraBytes,
+		PerformanceManagerUnitCelsius,
+		PerformanceManagerUnitNanosecond,
+	}
+}
+
+func (e PerformanceManagerUnit) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["PerformanceManagerUnit"] = reflect.TypeOf((*PerformanceManagerUnit)(nil)).Elem()
 	minAPIVersionForEnumValue["PerformanceManagerUnit"] = map[string]string{
@@ -5714,6 +8926,17 @@ const (
 	PhysicalNicResourcePoolSchedulerDisallowedReasonHardwareUnsupported = PhysicalNicResourcePoolSchedulerDisallowedReason("hardwareUnsupported")
 )
 
+func (e PhysicalNicResourcePoolSchedulerDisallowedReason) Values() []PhysicalNicResourcePoolSchedulerDisallowedReason {
+	return []PhysicalNicResourcePoolSchedulerDisallowedReason{
+		PhysicalNicResourcePoolSchedulerDisallowedReasonUserOptOut,
+		PhysicalNicResourcePoolSchedulerDisallowedReasonHardwareUnsupported,
+	}
+}
+
+func (e PhysicalNicResourcePoolSchedulerDisallowedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["PhysicalNicResourcePoolSchedulerDisallowedReason"] = reflect.TypeOf((*PhysicalNicResourcePoolSchedulerDisallowedReason)(nil)).Elem()
 	minAPIVersionForType["PhysicalNicResourcePoolSchedulerDisallowedReason"] = "4.1"
@@ -5724,6 +8947,16 @@ type PhysicalNicVmDirectPathGen2SupportedMode string
 const (
 	PhysicalNicVmDirectPathGen2SupportedModeUpt = PhysicalNicVmDirectPathGen2SupportedMode("upt")
 )
+
+func (e PhysicalNicVmDirectPathGen2SupportedMode) Values() []PhysicalNicVmDirectPathGen2SupportedMode {
+	return []PhysicalNicVmDirectPathGen2SupportedMode{
+		PhysicalNicVmDirectPathGen2SupportedModeUpt,
+	}
+}
+
+func (e PhysicalNicVmDirectPathGen2SupportedMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["PhysicalNicVmDirectPathGen2SupportedMode"] = reflect.TypeOf((*PhysicalNicVmDirectPathGen2SupportedMode)(nil)).Elem()
@@ -5750,6 +8983,19 @@ const (
 	PlacementAffinityRuleRuleScopeDatastore = PlacementAffinityRuleRuleScope("datastore")
 )
 
+func (e PlacementAffinityRuleRuleScope) Values() []PlacementAffinityRuleRuleScope {
+	return []PlacementAffinityRuleRuleScope{
+		PlacementAffinityRuleRuleScopeCluster,
+		PlacementAffinityRuleRuleScopeHost,
+		PlacementAffinityRuleRuleScopeStoragePod,
+		PlacementAffinityRuleRuleScopeDatastore,
+	}
+}
+
+func (e PlacementAffinityRuleRuleScope) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["PlacementAffinityRuleRuleScope"] = reflect.TypeOf((*PlacementAffinityRuleRuleScope)(nil)).Elem()
 	minAPIVersionForType["PlacementAffinityRuleRuleScope"] = "6.0"
@@ -5774,6 +9020,19 @@ const (
 	PlacementAffinityRuleRuleTypeSoftAntiAffinity = PlacementAffinityRuleRuleType("softAntiAffinity")
 )
 
+func (e PlacementAffinityRuleRuleType) Values() []PlacementAffinityRuleRuleType {
+	return []PlacementAffinityRuleRuleType{
+		PlacementAffinityRuleRuleTypeAffinity,
+		PlacementAffinityRuleRuleTypeAntiAffinity,
+		PlacementAffinityRuleRuleTypeSoftAffinity,
+		PlacementAffinityRuleRuleTypeSoftAntiAffinity,
+	}
+}
+
+func (e PlacementAffinityRuleRuleType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["PlacementAffinityRuleRuleType"] = reflect.TypeOf((*PlacementAffinityRuleRuleType)(nil)).Elem()
 	minAPIVersionForType["PlacementAffinityRuleRuleType"] = "6.0"
@@ -5791,6 +9050,19 @@ const (
 	// Clone a VM
 	PlacementSpecPlacementTypeClone = PlacementSpecPlacementType("clone")
 )
+
+func (e PlacementSpecPlacementType) Values() []PlacementSpecPlacementType {
+	return []PlacementSpecPlacementType{
+		PlacementSpecPlacementTypeCreate,
+		PlacementSpecPlacementTypeReconfigure,
+		PlacementSpecPlacementTypeRelocate,
+		PlacementSpecPlacementTypeClone,
+	}
+}
+
+func (e PlacementSpecPlacementType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["PlacementSpecPlacementType"] = reflect.TypeOf((*PlacementSpecPlacementType)(nil)).Elem()
@@ -5811,6 +9083,19 @@ const (
 	// This port group serves an entity of unspecified kind.
 	PortGroupConnecteeTypeUnknown = PortGroupConnecteeType("unknown")
 )
+
+func (e PortGroupConnecteeType) Values() []PortGroupConnecteeType {
+	return []PortGroupConnecteeType{
+		PortGroupConnecteeTypeVirtualMachine,
+		PortGroupConnecteeTypeSystemManagement,
+		PortGroupConnecteeTypeHost,
+		PortGroupConnecteeTypeUnknown,
+	}
+}
+
+func (e PortGroupConnecteeType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["PortGroupConnecteeType"] = reflect.TypeOf((*PortGroupConnecteeType)(nil)).Elem()
@@ -5840,6 +9125,18 @@ const (
 	ProfileExecuteResultStatusError = ProfileExecuteResultStatus("error")
 )
 
+func (e ProfileExecuteResultStatus) Values() []ProfileExecuteResultStatus {
+	return []ProfileExecuteResultStatus{
+		ProfileExecuteResultStatusSuccess,
+		ProfileExecuteResultStatusNeedInput,
+		ProfileExecuteResultStatusError,
+	}
+}
+
+func (e ProfileExecuteResultStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ProfileExecuteResultStatus"] = reflect.TypeOf((*ProfileExecuteResultStatus)(nil)).Elem()
 	minAPIVersionForType["ProfileExecuteResultStatus"] = "4.0"
@@ -5856,6 +9153,21 @@ const (
 	ProfileNumericComparatorGreaterThanEqual = ProfileNumericComparator("greaterThanEqual")
 	ProfileNumericComparatorGreaterThan      = ProfileNumericComparator("greaterThan")
 )
+
+func (e ProfileNumericComparator) Values() []ProfileNumericComparator {
+	return []ProfileNumericComparator{
+		ProfileNumericComparatorLessThan,
+		ProfileNumericComparatorLessThanEqual,
+		ProfileNumericComparatorEqual,
+		ProfileNumericComparatorNotEqual,
+		ProfileNumericComparatorGreaterThanEqual,
+		ProfileNumericComparatorGreaterThan,
+	}
+}
+
+func (e ProfileNumericComparator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ProfileNumericComparator"] = reflect.TypeOf((*ProfileNumericComparator)(nil)).Elem()
@@ -5878,6 +9190,20 @@ const (
 	ProfileParameterMetadataRelationTypeValidation_relation = ProfileParameterMetadataRelationType("validation_relation")
 )
 
+func (e ProfileParameterMetadataRelationType) Values() []ProfileParameterMetadataRelationType {
+	return []ProfileParameterMetadataRelationType{
+		ProfileParameterMetadataRelationTypeDynamic_relation,
+		ProfileParameterMetadataRelationTypeExtensible_relation,
+		ProfileParameterMetadataRelationTypeLocalizable_relation,
+		ProfileParameterMetadataRelationTypeStatic_relation,
+		ProfileParameterMetadataRelationTypeValidation_relation,
+	}
+}
+
+func (e ProfileParameterMetadataRelationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ProfileParameterMetadataRelationType"] = reflect.TypeOf((*ProfileParameterMetadataRelationType)(nil)).Elem()
 	minAPIVersionForType["ProfileParameterMetadataRelationType"] = "6.7"
@@ -5892,6 +9218,19 @@ const (
 	PropertyChangeOpAssign         = PropertyChangeOp("assign")
 	PropertyChangeOpIndirectRemove = PropertyChangeOp("indirectRemove")
 )
+
+func (e PropertyChangeOp) Values() []PropertyChangeOp {
+	return []PropertyChangeOp{
+		PropertyChangeOpAdd,
+		PropertyChangeOpRemove,
+		PropertyChangeOpAssign,
+		PropertyChangeOpIndirectRemove,
+	}
+}
+
+func (e PropertyChangeOp) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["PropertyChangeOp"] = reflect.TypeOf((*PropertyChangeOp)(nil)).Elem()
@@ -5914,6 +9253,18 @@ const (
 	// are not evacuated.
 	QuarantineModeFaultFaultTypeCorrectionImpact = QuarantineModeFaultFaultType("CorrectionImpact")
 )
+
+func (e QuarantineModeFaultFaultType) Values() []QuarantineModeFaultFaultType {
+	return []QuarantineModeFaultFaultType{
+		QuarantineModeFaultFaultTypeNoCompatibleNonQuarantinedHost,
+		QuarantineModeFaultFaultTypeCorrectionDisallowed,
+		QuarantineModeFaultFaultTypeCorrectionImpact,
+	}
+}
+
+func (e QuarantineModeFaultFaultType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["QuarantineModeFaultFaultType"] = reflect.TypeOf((*QuarantineModeFaultFaultType)(nil)).Elem()
@@ -5940,6 +9291,18 @@ const (
 	// `VirtualMachine`.
 	QuiesceModeNone = QuiesceMode("none")
 )
+
+func (e QuiesceMode) Values() []QuiesceMode {
+	return []QuiesceMode{
+		QuiesceModeApplication,
+		QuiesceModeFilesystem,
+		QuiesceModeNone,
+	}
+}
+
+func (e QuiesceMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["QuiesceMode"] = reflect.TypeOf((*QuiesceMode)(nil)).Elem()
@@ -6021,6 +9384,50 @@ const (
 	RecommendationReasonCodeAhPlacementOptimization = RecommendationReasonCode("ahPlacementOptimization")
 )
 
+func (e RecommendationReasonCode) Values() []RecommendationReasonCode {
+	return []RecommendationReasonCode{
+		RecommendationReasonCodeFairnessCpuAvg,
+		RecommendationReasonCodeFairnessMemAvg,
+		RecommendationReasonCodeJointAffin,
+		RecommendationReasonCodeAntiAffin,
+		RecommendationReasonCodeHostMaint,
+		RecommendationReasonCodeEnterStandby,
+		RecommendationReasonCodeReservationCpu,
+		RecommendationReasonCodeReservationMem,
+		RecommendationReasonCodePowerOnVm,
+		RecommendationReasonCodePowerSaving,
+		RecommendationReasonCodeIncreaseCapacity,
+		RecommendationReasonCodeCheckResource,
+		RecommendationReasonCodeUnreservedCapacity,
+		RecommendationReasonCodeVmHostHardAffinity,
+		RecommendationReasonCodeVmHostSoftAffinity,
+		RecommendationReasonCodeBalanceDatastoreSpaceUsage,
+		RecommendationReasonCodeBalanceDatastoreIOLoad,
+		RecommendationReasonCodeBalanceDatastoreIOPSReservation,
+		RecommendationReasonCodeDatastoreMaint,
+		RecommendationReasonCodeVirtualDiskJointAffin,
+		RecommendationReasonCodeVirtualDiskAntiAffin,
+		RecommendationReasonCodeDatastoreSpaceOutage,
+		RecommendationReasonCodeStoragePlacement,
+		RecommendationReasonCodeIolbDisabledInternal,
+		RecommendationReasonCodeXvmotionPlacement,
+		RecommendationReasonCodeNetworkBandwidthReservation,
+		RecommendationReasonCodeHostInDegradation,
+		RecommendationReasonCodeHostExitDegradation,
+		RecommendationReasonCodeMaxVmsConstraint,
+		RecommendationReasonCodeFtConstraints,
+		RecommendationReasonCodeVmHostAffinityPolicy,
+		RecommendationReasonCodeVmHostAntiAffinityPolicy,
+		RecommendationReasonCodeVmAntiAffinityPolicy,
+		RecommendationReasonCodeBalanceVsanUsage,
+		RecommendationReasonCodeAhPlacementOptimization,
+	}
+}
+
+func (e RecommendationReasonCode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["RecommendationReasonCode"] = reflect.TypeOf((*RecommendationReasonCode)(nil)).Elem()
 	minAPIVersionForType["RecommendationReasonCode"] = "2.5"
@@ -6061,6 +9468,16 @@ const (
 	RecommendationTypeV1 = RecommendationType("V1")
 )
 
+func (e RecommendationType) Values() []RecommendationType {
+	return []RecommendationType{
+		RecommendationTypeV1,
+	}
+}
+
+func (e RecommendationType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["RecommendationType"] = reflect.TypeOf((*RecommendationType)(nil)).Elem()
 	minAPIVersionForType["RecommendationType"] = "2.5"
@@ -6084,6 +9501,22 @@ const (
 	// Attempting to re-configure the disk's replication ID
 	ReplicationDiskConfigFaultReasonForFaultReconfigureDiskReplicationIdNotAllowed = ReplicationDiskConfigFaultReasonForFault("reconfigureDiskReplicationIdNotAllowed")
 )
+
+func (e ReplicationDiskConfigFaultReasonForFault) Values() []ReplicationDiskConfigFaultReasonForFault {
+	return []ReplicationDiskConfigFaultReasonForFault{
+		ReplicationDiskConfigFaultReasonForFaultDiskNotFound,
+		ReplicationDiskConfigFaultReasonForFaultDiskTypeNotSupported,
+		ReplicationDiskConfigFaultReasonForFaultInvalidDiskKey,
+		ReplicationDiskConfigFaultReasonForFaultInvalidDiskReplicationId,
+		ReplicationDiskConfigFaultReasonForFaultDuplicateDiskReplicationId,
+		ReplicationDiskConfigFaultReasonForFaultInvalidPersistentFilePath,
+		ReplicationDiskConfigFaultReasonForFaultReconfigureDiskReplicationIdNotAllowed,
+	}
+}
+
+func (e ReplicationDiskConfigFaultReasonForFault) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ReplicationDiskConfigFaultReasonForFault"] = reflect.TypeOf((*ReplicationDiskConfigFaultReasonForFault)(nil)).Elem()
@@ -6131,6 +9564,32 @@ const (
 	ReplicationVmConfigFaultReasonForFaultIncompatibleDevice = ReplicationVmConfigFaultReasonForFault("incompatibleDevice")
 )
 
+func (e ReplicationVmConfigFaultReasonForFault) Values() []ReplicationVmConfigFaultReasonForFault {
+	return []ReplicationVmConfigFaultReasonForFault{
+		ReplicationVmConfigFaultReasonForFaultIncompatibleHwVersion,
+		ReplicationVmConfigFaultReasonForFaultInvalidVmReplicationId,
+		ReplicationVmConfigFaultReasonForFaultInvalidGenerationNumber,
+		ReplicationVmConfigFaultReasonForFaultOutOfBoundsRpoValue,
+		ReplicationVmConfigFaultReasonForFaultInvalidDestinationIpAddress,
+		ReplicationVmConfigFaultReasonForFaultInvalidDestinationPort,
+		ReplicationVmConfigFaultReasonForFaultInvalidExtraVmOptions,
+		ReplicationVmConfigFaultReasonForFaultStaleGenerationNumber,
+		ReplicationVmConfigFaultReasonForFaultReconfigureVmReplicationIdNotAllowed,
+		ReplicationVmConfigFaultReasonForFaultCannotRetrieveVmReplicationConfiguration,
+		ReplicationVmConfigFaultReasonForFaultReplicationAlreadyEnabled,
+		ReplicationVmConfigFaultReasonForFaultInvalidPriorConfiguration,
+		ReplicationVmConfigFaultReasonForFaultReplicationNotEnabled,
+		ReplicationVmConfigFaultReasonForFaultReplicationConfigurationFailed,
+		ReplicationVmConfigFaultReasonForFaultEncryptedVm,
+		ReplicationVmConfigFaultReasonForFaultInvalidThumbprint,
+		ReplicationVmConfigFaultReasonForFaultIncompatibleDevice,
+	}
+}
+
+func (e ReplicationVmConfigFaultReasonForFault) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ReplicationVmConfigFaultReasonForFault"] = reflect.TypeOf((*ReplicationVmConfigFaultReasonForFault)(nil)).Elem()
 	minAPIVersionForType["ReplicationVmConfigFaultReasonForFault"] = "5.0"
@@ -6173,6 +9632,24 @@ const (
 	ReplicationVmFaultReasonForFaultGroupExist = ReplicationVmFaultReasonForFault("groupExist")
 )
 
+func (e ReplicationVmFaultReasonForFault) Values() []ReplicationVmFaultReasonForFault {
+	return []ReplicationVmFaultReasonForFault{
+		ReplicationVmFaultReasonForFaultNotConfigured,
+		ReplicationVmFaultReasonForFaultPoweredOff,
+		ReplicationVmFaultReasonForFaultSuspended,
+		ReplicationVmFaultReasonForFaultPoweredOn,
+		ReplicationVmFaultReasonForFaultOfflineReplicating,
+		ReplicationVmFaultReasonForFaultInvalidState,
+		ReplicationVmFaultReasonForFaultInvalidInstanceId,
+		ReplicationVmFaultReasonForFaultCloseDiskError,
+		ReplicationVmFaultReasonForFaultGroupExist,
+	}
+}
+
+func (e ReplicationVmFaultReasonForFault) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ReplicationVmFaultReasonForFault"] = reflect.TypeOf((*ReplicationVmFaultReasonForFault)(nil)).Elem()
 	minAPIVersionForType["ReplicationVmFaultReasonForFault"] = "5.0"
@@ -6190,6 +9667,17 @@ const (
 	// Delta updates to generate a consistent instance
 	ReplicationVmInProgressFaultActivityDelta = ReplicationVmInProgressFaultActivity("delta")
 )
+
+func (e ReplicationVmInProgressFaultActivity) Values() []ReplicationVmInProgressFaultActivity {
+	return []ReplicationVmInProgressFaultActivity{
+		ReplicationVmInProgressFaultActivityFullSync,
+		ReplicationVmInProgressFaultActivityDelta,
+	}
+}
+
+func (e ReplicationVmInProgressFaultActivity) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ReplicationVmInProgressFaultActivity"] = reflect.TypeOf((*ReplicationVmInProgressFaultActivity)(nil)).Elem()
@@ -6222,6 +9710,21 @@ const (
 	ReplicationVmStateError = ReplicationVmState("error")
 )
 
+func (e ReplicationVmState) Values() []ReplicationVmState {
+	return []ReplicationVmState{
+		ReplicationVmStateNone,
+		ReplicationVmStatePaused,
+		ReplicationVmStateSyncing,
+		ReplicationVmStateIdle,
+		ReplicationVmStateActive,
+		ReplicationVmStateError,
+	}
+}
+
+func (e ReplicationVmState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ReplicationVmState"] = reflect.TypeOf((*ReplicationVmState)(nil)).Elem()
 	minAPIVersionForType["ReplicationVmState"] = "5.0"
@@ -6235,6 +9738,17 @@ const (
 	// Scale both CPU and memory shares
 	ResourceConfigSpecScaleSharesBehaviorScaleCpuAndMemoryShares = ResourceConfigSpecScaleSharesBehavior("scaleCpuAndMemoryShares")
 )
+
+func (e ResourceConfigSpecScaleSharesBehavior) Values() []ResourceConfigSpecScaleSharesBehavior {
+	return []ResourceConfigSpecScaleSharesBehavior{
+		ResourceConfigSpecScaleSharesBehaviorDisabled,
+		ResourceConfigSpecScaleSharesBehaviorScaleCpuAndMemoryShares,
+	}
+}
+
+func (e ResourceConfigSpecScaleSharesBehavior) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ResourceConfigSpecScaleSharesBehavior"] = reflect.TypeOf((*ResourceConfigSpecScaleSharesBehavior)(nil)).Elem()
@@ -6253,6 +9767,18 @@ const (
 	ScheduledHardwareUpgradeInfoHardwareUpgradePolicyAlways = ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("always")
 )
 
+func (e ScheduledHardwareUpgradeInfoHardwareUpgradePolicy) Values() []ScheduledHardwareUpgradeInfoHardwareUpgradePolicy {
+	return []ScheduledHardwareUpgradeInfoHardwareUpgradePolicy{
+		ScheduledHardwareUpgradeInfoHardwareUpgradePolicyNever,
+		ScheduledHardwareUpgradeInfoHardwareUpgradePolicyOnSoftPowerOff,
+		ScheduledHardwareUpgradeInfoHardwareUpgradePolicyAlways,
+	}
+}
+
+func (e ScheduledHardwareUpgradeInfoHardwareUpgradePolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ScheduledHardwareUpgradeInfoHardwareUpgradePolicy"] = reflect.TypeOf((*ScheduledHardwareUpgradeInfoHardwareUpgradePolicy)(nil)).Elem()
 	minAPIVersionForType["ScheduledHardwareUpgradeInfoHardwareUpgradePolicy"] = "5.1"
@@ -6269,11 +9795,24 @@ const (
 	ScheduledHardwareUpgradeInfoHardwareUpgradeStatusSuccess = ScheduledHardwareUpgradeInfoHardwareUpgradeStatus("success")
 	// Upgrade failed.
 	//
-	// For more information about the failure
+	// # For more information about the failure
 	//
 	// See also `ScheduledHardwareUpgradeInfo.fault`.
 	ScheduledHardwareUpgradeInfoHardwareUpgradeStatusFailed = ScheduledHardwareUpgradeInfoHardwareUpgradeStatus("failed")
 )
+
+func (e ScheduledHardwareUpgradeInfoHardwareUpgradeStatus) Values() []ScheduledHardwareUpgradeInfoHardwareUpgradeStatus {
+	return []ScheduledHardwareUpgradeInfoHardwareUpgradeStatus{
+		ScheduledHardwareUpgradeInfoHardwareUpgradeStatusNone,
+		ScheduledHardwareUpgradeInfoHardwareUpgradeStatusPending,
+		ScheduledHardwareUpgradeInfoHardwareUpgradeStatusSuccess,
+		ScheduledHardwareUpgradeInfoHardwareUpgradeStatusFailed,
+	}
+}
+
+func (e ScheduledHardwareUpgradeInfoHardwareUpgradeStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ScheduledHardwareUpgradeInfoHardwareUpgradeStatus"] = reflect.TypeOf((*ScheduledHardwareUpgradeInfoHardwareUpgradeStatus)(nil)).Elem()
@@ -6294,6 +9833,20 @@ const (
 	// Unknown type.
 	ScsiDiskTypeUnknown = ScsiDiskType("unknown")
 )
+
+func (e ScsiDiskType) Values() []ScsiDiskType {
+	return []ScsiDiskType{
+		ScsiDiskTypeNative512,
+		ScsiDiskTypeEmulated512,
+		ScsiDiskTypeNative4k,
+		ScsiDiskTypeSoftwareEmulated4k,
+		ScsiDiskTypeUnknown,
+	}
+}
+
+func (e ScsiDiskType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ScsiDiskType"] = reflect.TypeOf((*ScsiDiskType)(nil)).Elem()
@@ -6320,6 +9873,19 @@ const (
 	// identification and correlation across hosts.
 	ScsiLunDescriptorQualityUnknownQuality = ScsiLunDescriptorQuality("unknownQuality")
 )
+
+func (e ScsiLunDescriptorQuality) Values() []ScsiLunDescriptorQuality {
+	return []ScsiLunDescriptorQuality{
+		ScsiLunDescriptorQualityHighQuality,
+		ScsiLunDescriptorQualityMediumQuality,
+		ScsiLunDescriptorQualityLowQuality,
+		ScsiLunDescriptorQualityUnknownQuality,
+	}
+}
+
+func (e ScsiLunDescriptorQuality) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ScsiLunDescriptorQuality"] = reflect.TypeOf((*ScsiLunDescriptorQuality)(nil)).Elem()
@@ -6353,6 +9919,23 @@ const (
 	ScsiLunStateTimeout = ScsiLunState("timeout")
 )
 
+func (e ScsiLunState) Values() []ScsiLunState {
+	return []ScsiLunState{
+		ScsiLunStateUnknownState,
+		ScsiLunStateOk,
+		ScsiLunStateError,
+		ScsiLunStateOff,
+		ScsiLunStateQuiesced,
+		ScsiLunStateDegraded,
+		ScsiLunStateLostCommunication,
+		ScsiLunStateTimeout,
+	}
+}
+
+func (e ScsiLunState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ScsiLunState"] = reflect.TypeOf((*ScsiLunState)(nil)).Elem()
 	minAPIVersionForEnumValue["ScsiLunState"] = map[string]string{
@@ -6384,6 +9967,28 @@ const (
 	ScsiLunTypeUnknown                = ScsiLunType("unknown")
 )
 
+func (e ScsiLunType) Values() []ScsiLunType {
+	return []ScsiLunType{
+		ScsiLunTypeDisk,
+		ScsiLunTypeTape,
+		ScsiLunTypePrinter,
+		ScsiLunTypeProcessor,
+		ScsiLunTypeWorm,
+		ScsiLunTypeCdrom,
+		ScsiLunTypeScanner,
+		ScsiLunTypeOpticalDevice,
+		ScsiLunTypeMediaChanger,
+		ScsiLunTypeCommunications,
+		ScsiLunTypeStorageArrayController,
+		ScsiLunTypeEnclosure,
+		ScsiLunTypeUnknown,
+	}
+}
+
+func (e ScsiLunType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ScsiLunType"] = reflect.TypeOf((*ScsiLunType)(nil)).Elem()
 }
@@ -6409,6 +10014,18 @@ const (
 	ScsiLunVStorageSupportStatusVStorageUnknown = ScsiLunVStorageSupportStatus("vStorageUnknown")
 )
 
+func (e ScsiLunVStorageSupportStatus) Values() []ScsiLunVStorageSupportStatus {
+	return []ScsiLunVStorageSupportStatus{
+		ScsiLunVStorageSupportStatusVStorageSupported,
+		ScsiLunVStorageSupportStatusVStorageUnsupported,
+		ScsiLunVStorageSupportStatusVStorageUnknown,
+	}
+}
+
+func (e ScsiLunVStorageSupportStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ScsiLunVStorageSupportStatus"] = reflect.TypeOf((*ScsiLunVStorageSupportStatus)(nil)).Elem()
 	minAPIVersionForType["ScsiLunVStorageSupportStatus"] = "4.1"
@@ -6424,6 +10041,18 @@ const (
 	// Ticket used for service request on a VC
 	SessionManagerGenericServiceTicketTicketTypeVcServiceTicket = SessionManagerGenericServiceTicketTicketType("VcServiceTicket")
 )
+
+func (e SessionManagerGenericServiceTicketTicketType) Values() []SessionManagerGenericServiceTicketTicketType {
+	return []SessionManagerGenericServiceTicketTicketType{
+		SessionManagerGenericServiceTicketTicketTypeHttpNfcServiceTicket,
+		SessionManagerGenericServiceTicketTicketTypeHostServiceTicket,
+		SessionManagerGenericServiceTicketTicketTypeVcServiceTicket,
+	}
+}
+
+func (e SessionManagerGenericServiceTicketTicketType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["SessionManagerGenericServiceTicketTicketType"] = reflect.TypeOf((*SessionManagerGenericServiceTicketTicketType)(nil)).Elem()
@@ -6442,6 +10071,23 @@ const (
 	SessionManagerHttpServiceRequestSpecMethodHttpTrace   = SessionManagerHttpServiceRequestSpecMethod("httpTrace")
 	SessionManagerHttpServiceRequestSpecMethodHttpConnect = SessionManagerHttpServiceRequestSpecMethod("httpConnect")
 )
+
+func (e SessionManagerHttpServiceRequestSpecMethod) Values() []SessionManagerHttpServiceRequestSpecMethod {
+	return []SessionManagerHttpServiceRequestSpecMethod{
+		SessionManagerHttpServiceRequestSpecMethodHttpOptions,
+		SessionManagerHttpServiceRequestSpecMethodHttpGet,
+		SessionManagerHttpServiceRequestSpecMethodHttpHead,
+		SessionManagerHttpServiceRequestSpecMethodHttpPost,
+		SessionManagerHttpServiceRequestSpecMethodHttpPut,
+		SessionManagerHttpServiceRequestSpecMethodHttpDelete,
+		SessionManagerHttpServiceRequestSpecMethodHttpTrace,
+		SessionManagerHttpServiceRequestSpecMethodHttpConnect,
+	}
+}
+
+func (e SessionManagerHttpServiceRequestSpecMethod) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["SessionManagerHttpServiceRequestSpecMethod"] = reflect.TypeOf((*SessionManagerHttpServiceRequestSpecMethod)(nil)).Elem()
@@ -6473,6 +10119,19 @@ const (
 	SharesLevelCustom = SharesLevel("custom")
 )
 
+func (e SharesLevel) Values() []SharesLevel {
+	return []SharesLevel{
+		SharesLevelLow,
+		SharesLevelNormal,
+		SharesLevelHigh,
+		SharesLevelCustom,
+	}
+}
+
+func (e SharesLevel) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["SharesLevel"] = reflect.TypeOf((*SharesLevel)(nil)).Elem()
 }
@@ -6489,6 +10148,18 @@ const (
 	SimpleCommandEncodingHEX    = SimpleCommandEncoding("HEX")
 	SimpleCommandEncodingSTRING = SimpleCommandEncoding("STRING")
 )
+
+func (e SimpleCommandEncoding) Values() []SimpleCommandEncoding {
+	return []SimpleCommandEncoding{
+		SimpleCommandEncodingCSV,
+		SimpleCommandEncodingHEX,
+		SimpleCommandEncodingSTRING,
+	}
+}
+
+func (e SimpleCommandEncoding) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["SimpleCommandEncoding"] = reflect.TypeOf((*SimpleCommandEncoding)(nil)).Elem()
@@ -6511,6 +10182,19 @@ const (
 	SlpDiscoveryMethodSlpManual = SlpDiscoveryMethod("slpManual")
 )
 
+func (e SlpDiscoveryMethod) Values() []SlpDiscoveryMethod {
+	return []SlpDiscoveryMethod{
+		SlpDiscoveryMethodSlpDhcp,
+		SlpDiscoveryMethodSlpAutoUnicast,
+		SlpDiscoveryMethodSlpAutoMulticast,
+		SlpDiscoveryMethodSlpManual,
+	}
+}
+
+func (e SlpDiscoveryMethod) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["SlpDiscoveryMethod"] = reflect.TypeOf((*SlpDiscoveryMethod)(nil)).Elem()
 }
@@ -6524,6 +10208,20 @@ const (
 	SoftwarePackageConstraintGreaterThanEqual = SoftwarePackageConstraint("greaterThanEqual")
 	SoftwarePackageConstraintGreaterThan      = SoftwarePackageConstraint("greaterThan")
 )
+
+func (e SoftwarePackageConstraint) Values() []SoftwarePackageConstraint {
+	return []SoftwarePackageConstraint{
+		SoftwarePackageConstraintEquals,
+		SoftwarePackageConstraintLessThan,
+		SoftwarePackageConstraintLessThanEqual,
+		SoftwarePackageConstraintGreaterThanEqual,
+		SoftwarePackageConstraintGreaterThan,
+	}
+}
+
+func (e SoftwarePackageConstraint) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["SoftwarePackageConstraint"] = reflect.TypeOf((*SoftwarePackageConstraint)(nil)).Elem()
@@ -6542,6 +10240,18 @@ const (
 	SoftwarePackageVibTypeMeta = SoftwarePackageVibType("meta")
 )
 
+func (e SoftwarePackageVibType) Values() []SoftwarePackageVibType {
+	return []SoftwarePackageVibType{
+		SoftwarePackageVibTypeBootbank,
+		SoftwarePackageVibTypeTools,
+		SoftwarePackageVibTypeMeta,
+	}
+}
+
+func (e SoftwarePackageVibType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["SoftwarePackageVibType"] = reflect.TypeOf((*SoftwarePackageVibType)(nil)).Elem()
 	minAPIVersionForType["SoftwarePackageVibType"] = "6.5"
@@ -6556,6 +10266,17 @@ const (
 	// Test if the target state does not match the given red or yellow states.
 	StateAlarmOperatorIsUnequal = StateAlarmOperator("isUnequal")
 )
+
+func (e StateAlarmOperator) Values() []StateAlarmOperator {
+	return []StateAlarmOperator{
+		StateAlarmOperatorIsEqual,
+		StateAlarmOperatorIsUnequal,
+	}
+}
+
+func (e StateAlarmOperator) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["StateAlarmOperator"] = reflect.TypeOf((*StateAlarmOperator)(nil)).Elem()
@@ -6578,6 +10299,17 @@ const (
 	StorageDrsPodConfigInfoBehaviorAutomated = StorageDrsPodConfigInfoBehavior("automated")
 )
 
+func (e StorageDrsPodConfigInfoBehavior) Values() []StorageDrsPodConfigInfoBehavior {
+	return []StorageDrsPodConfigInfoBehavior{
+		StorageDrsPodConfigInfoBehaviorManual,
+		StorageDrsPodConfigInfoBehaviorAutomated,
+	}
+}
+
+func (e StorageDrsPodConfigInfoBehavior) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["StorageDrsPodConfigInfoBehavior"] = reflect.TypeOf((*StorageDrsPodConfigInfoBehavior)(nil)).Elem()
 	minAPIVersionForType["StorageDrsPodConfigInfoBehavior"] = "5.0"
@@ -6591,6 +10323,17 @@ const (
 	// Threshold as an absolute value of free space in GBs
 	StorageDrsSpaceLoadBalanceConfigSpaceThresholdModeFreeSpace = StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode("freeSpace")
 )
+
+func (e StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode) Values() []StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode {
+	return []StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode{
+		StorageDrsSpaceLoadBalanceConfigSpaceThresholdModeUtilization,
+		StorageDrsSpaceLoadBalanceConfigSpaceThresholdModeFreeSpace,
+	}
+}
+
+func (e StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode"] = reflect.TypeOf((*StorageDrsSpaceLoadBalanceConfigSpaceThresholdMode)(nil)).Elem()
@@ -6612,6 +10355,17 @@ const (
 	StorageIORMThresholdModeManual = StorageIORMThresholdMode("manual")
 )
 
+func (e StorageIORMThresholdMode) Values() []StorageIORMThresholdMode {
+	return []StorageIORMThresholdMode{
+		StorageIORMThresholdModeAutomatic,
+		StorageIORMThresholdModeManual,
+	}
+}
+
+func (e StorageIORMThresholdMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["StorageIORMThresholdMode"] = reflect.TypeOf((*StorageIORMThresholdMode)(nil)).Elem()
 	minAPIVersionForType["StorageIORMThresholdMode"] = "5.1"
@@ -6629,6 +10383,19 @@ const (
 	// Clone a VM.
 	StoragePlacementSpecPlacementTypeClone = StoragePlacementSpecPlacementType("clone")
 )
+
+func (e StoragePlacementSpecPlacementType) Values() []StoragePlacementSpecPlacementType {
+	return []StoragePlacementSpecPlacementType{
+		StoragePlacementSpecPlacementTypeCreate,
+		StoragePlacementSpecPlacementTypeReconfigure,
+		StoragePlacementSpecPlacementTypeRelocate,
+		StoragePlacementSpecPlacementTypeClone,
+	}
+}
+
+func (e StoragePlacementSpecPlacementType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["StoragePlacementSpecPlacementType"] = reflect.TypeOf((*StoragePlacementSpecPlacementType)(nil)).Elem()
@@ -6656,6 +10423,18 @@ const (
 	TaskFilterSpecRecursionOptionAll = TaskFilterSpecRecursionOption("all")
 )
 
+func (e TaskFilterSpecRecursionOption) Values() []TaskFilterSpecRecursionOption {
+	return []TaskFilterSpecRecursionOption{
+		TaskFilterSpecRecursionOptionSelf,
+		TaskFilterSpecRecursionOptionChildren,
+		TaskFilterSpecRecursionOptionAll,
+	}
+}
+
+func (e TaskFilterSpecRecursionOption) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["TaskFilterSpecRecursionOption"] = reflect.TypeOf((*TaskFilterSpecRecursionOption)(nil)).Elem()
 }
@@ -6671,6 +10450,18 @@ const (
 	// The time stamp when the task finished.
 	TaskFilterSpecTimeOptionCompletedTime = TaskFilterSpecTimeOption("completedTime")
 )
+
+func (e TaskFilterSpecTimeOption) Values() []TaskFilterSpecTimeOption {
+	return []TaskFilterSpecTimeOption{
+		TaskFilterSpecTimeOptionQueuedTime,
+		TaskFilterSpecTimeOptionStartedTime,
+		TaskFilterSpecTimeOptionCompletedTime,
+	}
+}
+
+func (e TaskFilterSpecTimeOption) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["TaskFilterSpecTimeOption"] = reflect.TypeOf((*TaskFilterSpecTimeOption)(nil)).Elem()
@@ -6693,6 +10484,19 @@ const (
 	TaskInfoStateError = TaskInfoState("error")
 )
 
+func (e TaskInfoState) Values() []TaskInfoState {
+	return []TaskInfoState{
+		TaskInfoStateQueued,
+		TaskInfoStateRunning,
+		TaskInfoStateSuccess,
+		TaskInfoStateError,
+	}
+}
+
+func (e TaskInfoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["TaskInfoState"] = reflect.TypeOf((*TaskInfoState)(nil)).Elem()
 }
@@ -6705,6 +10509,17 @@ const (
 	// The 3rd party module we are trying to license is not installed.
 	ThirdPartyLicenseAssignmentFailedReasonModuleNotInstalled = ThirdPartyLicenseAssignmentFailedReason("moduleNotInstalled")
 )
+
+func (e ThirdPartyLicenseAssignmentFailedReason) Values() []ThirdPartyLicenseAssignmentFailedReason {
+	return []ThirdPartyLicenseAssignmentFailedReason{
+		ThirdPartyLicenseAssignmentFailedReasonLicenseAssignmentFailed,
+		ThirdPartyLicenseAssignmentFailedReasonModuleNotInstalled,
+	}
+}
+
+func (e ThirdPartyLicenseAssignmentFailedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["ThirdPartyLicenseAssignmentFailedReason"] = reflect.TypeOf((*ThirdPartyLicenseAssignmentFailedReason)(nil)).Elem()
@@ -6729,6 +10544,17 @@ const (
 	// virtual machine and it is rebooted if necessary.
 	UpgradePolicyUpgradeAtPowerCycle = UpgradePolicy("upgradeAtPowerCycle")
 )
+
+func (e UpgradePolicy) Values() []UpgradePolicy {
+	return []UpgradePolicy{
+		UpgradePolicyManual,
+		UpgradePolicyUpgradeAtPowerCycle,
+	}
+}
+
+func (e UpgradePolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["UpgradePolicy"] = reflect.TypeOf((*UpgradePolicy)(nil)).Elem()
@@ -6757,6 +10583,20 @@ const (
 	VAppAutoStartActionSuspend = VAppAutoStartAction("suspend")
 )
 
+func (e VAppAutoStartAction) Values() []VAppAutoStartAction {
+	return []VAppAutoStartAction{
+		VAppAutoStartActionNone,
+		VAppAutoStartActionPowerOn,
+		VAppAutoStartActionPowerOff,
+		VAppAutoStartActionGuestShutdown,
+		VAppAutoStartActionSuspend,
+	}
+}
+
+func (e VAppAutoStartAction) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VAppAutoStartAction"] = reflect.TypeOf((*VAppAutoStartAction)(nil)).Elem()
 	minAPIVersionForType["VAppAutoStartAction"] = "4.0"
@@ -6782,6 +10622,18 @@ const (
 	VAppCloneSpecProvisioningTypeThick = VAppCloneSpecProvisioningType("thick")
 )
 
+func (e VAppCloneSpecProvisioningType) Values() []VAppCloneSpecProvisioningType {
+	return []VAppCloneSpecProvisioningType{
+		VAppCloneSpecProvisioningTypeSameAsSource,
+		VAppCloneSpecProvisioningTypeThin,
+		VAppCloneSpecProvisioningTypeThick,
+	}
+}
+
+func (e VAppCloneSpecProvisioningType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VAppCloneSpecProvisioningType"] = reflect.TypeOf((*VAppCloneSpecProvisioningType)(nil)).Elem()
 	minAPIVersionForType["VAppCloneSpecProvisioningType"] = "4.1"
@@ -6796,6 +10648,17 @@ const (
 	// properties provided in the OVF environment.
 	VAppIPAssignmentInfoAllocationSchemesOvfenv = VAppIPAssignmentInfoAllocationSchemes("ovfenv")
 )
+
+func (e VAppIPAssignmentInfoAllocationSchemes) Values() []VAppIPAssignmentInfoAllocationSchemes {
+	return []VAppIPAssignmentInfoAllocationSchemes{
+		VAppIPAssignmentInfoAllocationSchemesDhcp,
+		VAppIPAssignmentInfoAllocationSchemesOvfenv,
+	}
+}
+
+func (e VAppIPAssignmentInfoAllocationSchemes) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VAppIPAssignmentInfoAllocationSchemes"] = reflect.TypeOf((*VAppIPAssignmentInfoAllocationSchemes)(nil)).Elem()
@@ -6829,6 +10692,19 @@ const (
 	VAppIPAssignmentInfoIpAllocationPolicyFixedAllocatedPolicy = VAppIPAssignmentInfoIpAllocationPolicy("fixedAllocatedPolicy")
 )
 
+func (e VAppIPAssignmentInfoIpAllocationPolicy) Values() []VAppIPAssignmentInfoIpAllocationPolicy {
+	return []VAppIPAssignmentInfoIpAllocationPolicy{
+		VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy,
+		VAppIPAssignmentInfoIpAllocationPolicyTransientPolicy,
+		VAppIPAssignmentInfoIpAllocationPolicyFixedPolicy,
+		VAppIPAssignmentInfoIpAllocationPolicyFixedAllocatedPolicy,
+	}
+}
+
+func (e VAppIPAssignmentInfoIpAllocationPolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VAppIPAssignmentInfoIpAllocationPolicy"] = reflect.TypeOf((*VAppIPAssignmentInfoIpAllocationPolicy)(nil)).Elem()
 	minAPIVersionForType["VAppIPAssignmentInfoIpAllocationPolicy"] = "4.0"
@@ -6846,6 +10722,17 @@ const (
 	VAppIPAssignmentInfoProtocolsIPv6 = VAppIPAssignmentInfoProtocols("IPv6")
 )
 
+func (e VAppIPAssignmentInfoProtocols) Values() []VAppIPAssignmentInfoProtocols {
+	return []VAppIPAssignmentInfoProtocols{
+		VAppIPAssignmentInfoProtocolsIPv4,
+		VAppIPAssignmentInfoProtocolsIPv6,
+	}
+}
+
+func (e VAppIPAssignmentInfoProtocols) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VAppIPAssignmentInfoProtocols"] = reflect.TypeOf((*VAppIPAssignmentInfoProtocols)(nil)).Elem()
 	minAPIVersionForType["VAppIPAssignmentInfoProtocols"] = "4.0"
@@ -6860,6 +10747,20 @@ const (
 	VFlashModuleNotSupportedReasonCacheReservationNotSupported     = VFlashModuleNotSupportedReason("CacheReservationNotSupported")
 	VFlashModuleNotSupportedReasonDiskSizeNotSupported             = VFlashModuleNotSupportedReason("DiskSizeNotSupported")
 )
+
+func (e VFlashModuleNotSupportedReason) Values() []VFlashModuleNotSupportedReason {
+	return []VFlashModuleNotSupportedReason{
+		VFlashModuleNotSupportedReasonCacheModeNotSupported,
+		VFlashModuleNotSupportedReasonCacheConsistencyTypeNotSupported,
+		VFlashModuleNotSupportedReasonCacheBlockSizeNotSupported,
+		VFlashModuleNotSupportedReasonCacheReservationNotSupported,
+		VFlashModuleNotSupportedReasonDiskSizeNotSupported,
+	}
+}
+
+func (e VFlashModuleNotSupportedReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VFlashModuleNotSupportedReason"] = reflect.TypeOf((*VFlashModuleNotSupportedReason)(nil)).Elem()
@@ -6883,6 +10784,17 @@ const (
 	// and is compatible with the virtual machine.
 	VMotionCompatibilityTypeSoftware = VMotionCompatibilityType("software")
 )
+
+func (e VMotionCompatibilityType) Values() []VMotionCompatibilityType {
+	return []VMotionCompatibilityType{
+		VMotionCompatibilityTypeCpu,
+		VMotionCompatibilityTypeSoftware,
+	}
+}
+
+func (e VMotionCompatibilityType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VMotionCompatibilityType"] = reflect.TypeOf((*VMotionCompatibilityType)(nil)).Elem()
@@ -6913,6 +10825,19 @@ const (
 	VMwareDVSTeamingMatchStatusNonIphashMismatch = VMwareDVSTeamingMatchStatus("nonIphashMismatch")
 )
 
+func (e VMwareDVSTeamingMatchStatus) Values() []VMwareDVSTeamingMatchStatus {
+	return []VMwareDVSTeamingMatchStatus{
+		VMwareDVSTeamingMatchStatusIphashMatch,
+		VMwareDVSTeamingMatchStatusNonIphashMatch,
+		VMwareDVSTeamingMatchStatusIphashMismatch,
+		VMwareDVSTeamingMatchStatusNonIphashMismatch,
+	}
+}
+
+func (e VMwareDVSTeamingMatchStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VMwareDVSTeamingMatchStatus"] = reflect.TypeOf((*VMwareDVSTeamingMatchStatus)(nil)).Elem()
 	minAPIVersionForType["VMwareDVSTeamingMatchStatus"] = "5.1"
@@ -6929,6 +10854,18 @@ const (
 	VMwareDVSVspanSessionEncapTypeErspan3 = VMwareDVSVspanSessionEncapType("erspan3")
 )
 
+func (e VMwareDVSVspanSessionEncapType) Values() []VMwareDVSVspanSessionEncapType {
+	return []VMwareDVSVspanSessionEncapType{
+		VMwareDVSVspanSessionEncapTypeGre,
+		VMwareDVSVspanSessionEncapTypeErspan2,
+		VMwareDVSVspanSessionEncapTypeErspan3,
+	}
+}
+
+func (e VMwareDVSVspanSessionEncapType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VMwareDVSVspanSessionEncapType"] = reflect.TypeOf((*VMwareDVSVspanSessionEncapType)(nil)).Elem()
 	minAPIVersionForType["VMwareDVSVspanSessionEncapType"] = "6.5"
@@ -6937,8 +10874,6 @@ func init() {
 type VMwareDVSVspanSessionType string
 
 const (
-	//
-	//
 	// Deprecated as of vSphere API 5.1.
 	//
 	// In mixedDestMirror session, Distributed Ports can be used as source entities,
@@ -6958,6 +10893,20 @@ const (
 	VMwareDVSVspanSessionTypeEncapsulatedRemoteMirrorSource = VMwareDVSVspanSessionType("encapsulatedRemoteMirrorSource")
 )
 
+func (e VMwareDVSVspanSessionType) Values() []VMwareDVSVspanSessionType {
+	return []VMwareDVSVspanSessionType{
+		VMwareDVSVspanSessionTypeMixedDestMirror,
+		VMwareDVSVspanSessionTypeDvPortMirror,
+		VMwareDVSVspanSessionTypeRemoteMirrorSource,
+		VMwareDVSVspanSessionTypeRemoteMirrorDest,
+		VMwareDVSVspanSessionTypeEncapsulatedRemoteMirrorSource,
+	}
+}
+
+func (e VMwareDVSVspanSessionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VMwareDVSVspanSessionType"] = reflect.TypeOf((*VMwareDVSVspanSessionType)(nil)).Elem()
 	minAPIVersionForType["VMwareDVSVspanSessionType"] = "5.1"
@@ -6966,8 +10915,6 @@ func init() {
 type VMwareDvsLacpApiVersion string
 
 const (
-	//
-	//
 	// Deprecated as of vSphere API 7.0u1.
 	//
 	// One Link Aggregation Control Protocol group in the switch
@@ -6975,6 +10922,17 @@ const (
 	// Multiple Link Aggregation Control Protocol in the switch.
 	VMwareDvsLacpApiVersionMultipleLag = VMwareDvsLacpApiVersion("multipleLag")
 )
+
+func (e VMwareDvsLacpApiVersion) Values() []VMwareDvsLacpApiVersion {
+	return []VMwareDvsLacpApiVersion{
+		VMwareDvsLacpApiVersionSingleLag,
+		VMwareDvsLacpApiVersionMultipleLag,
+	}
+}
+
+func (e VMwareDvsLacpApiVersion) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VMwareDvsLacpApiVersion"] = reflect.TypeOf((*VMwareDvsLacpApiVersion)(nil)).Elem()
@@ -7027,6 +10985,35 @@ const (
 	VMwareDvsLacpLoadBalanceAlgorithmSrcPortId = VMwareDvsLacpLoadBalanceAlgorithm("srcPortId")
 )
 
+func (e VMwareDvsLacpLoadBalanceAlgorithm) Values() []VMwareDvsLacpLoadBalanceAlgorithm {
+	return []VMwareDvsLacpLoadBalanceAlgorithm{
+		VMwareDvsLacpLoadBalanceAlgorithmSrcMac,
+		VMwareDvsLacpLoadBalanceAlgorithmDestMac,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcDestMac,
+		VMwareDvsLacpLoadBalanceAlgorithmDestIpVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcIpVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcDestIpVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmDestTcpUdpPort,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcTcpUdpPort,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcDestTcpUdpPort,
+		VMwareDvsLacpLoadBalanceAlgorithmDestIpTcpUdpPort,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcIpTcpUdpPort,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcDestIpTcpUdpPort,
+		VMwareDvsLacpLoadBalanceAlgorithmDestIpTcpUdpPortVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcIpTcpUdpPortVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcDestIpTcpUdpPortVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmDestIp,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcIp,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcDestIp,
+		VMwareDvsLacpLoadBalanceAlgorithmVlan,
+		VMwareDvsLacpLoadBalanceAlgorithmSrcPortId,
+	}
+}
+
+func (e VMwareDvsLacpLoadBalanceAlgorithm) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VMwareDvsLacpLoadBalanceAlgorithm"] = reflect.TypeOf((*VMwareDvsLacpLoadBalanceAlgorithm)(nil)).Elem()
 	minAPIVersionForType["VMwareDvsLacpLoadBalanceAlgorithm"] = "5.5"
@@ -7041,6 +11028,17 @@ const (
 	VMwareDvsMulticastFilteringModeSnooping = VMwareDvsMulticastFilteringMode("snooping")
 )
 
+func (e VMwareDvsMulticastFilteringMode) Values() []VMwareDvsMulticastFilteringMode {
+	return []VMwareDvsMulticastFilteringMode{
+		VMwareDvsMulticastFilteringModeLegacyFiltering,
+		VMwareDvsMulticastFilteringModeSnooping,
+	}
+}
+
+func (e VMwareDvsMulticastFilteringMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VMwareDvsMulticastFilteringMode"] = reflect.TypeOf((*VMwareDvsMulticastFilteringMode)(nil)).Elem()
 	minAPIVersionForType["VMwareDvsMulticastFilteringMode"] = "6.0"
@@ -7054,6 +11052,17 @@ const (
 	// Link Aggregation Control Protocol acts as "speak when spoken to".
 	VMwareUplinkLacpModePassive = VMwareUplinkLacpMode("passive")
 )
+
+func (e VMwareUplinkLacpMode) Values() []VMwareUplinkLacpMode {
+	return []VMwareUplinkLacpMode{
+		VMwareUplinkLacpModeActive,
+		VMwareUplinkLacpModePassive,
+	}
+}
+
+func (e VMwareUplinkLacpMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VMwareUplinkLacpMode"] = reflect.TypeOf((*VMwareUplinkLacpMode)(nil)).Elem()
@@ -7073,6 +11082,17 @@ const (
 	VMwareUplinkLacpTimeoutModeSlow = VMwareUplinkLacpTimeoutMode("slow")
 )
 
+func (e VMwareUplinkLacpTimeoutMode) Values() []VMwareUplinkLacpTimeoutMode {
+	return []VMwareUplinkLacpTimeoutMode{
+		VMwareUplinkLacpTimeoutModeFast,
+		VMwareUplinkLacpTimeoutModeSlow,
+	}
+}
+
+func (e VMwareUplinkLacpTimeoutMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VMwareUplinkLacpTimeoutMode"] = reflect.TypeOf((*VMwareUplinkLacpTimeoutMode)(nil)).Elem()
 	minAPIVersionForType["VMwareUplinkLacpTimeoutMode"] = "7.0.2.0"
@@ -7087,6 +11107,16 @@ const (
 	// Disk type.
 	VStorageObjectConsumptionTypeDisk = VStorageObjectConsumptionType("disk")
 )
+
+func (e VStorageObjectConsumptionType) Values() []VStorageObjectConsumptionType {
+	return []VStorageObjectConsumptionType{
+		VStorageObjectConsumptionTypeDisk,
+	}
+}
+
+func (e VStorageObjectConsumptionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VStorageObjectConsumptionType"] = reflect.TypeOf((*VStorageObjectConsumptionType)(nil)).Elem()
@@ -7129,6 +11159,19 @@ const (
 	ValidateMigrationTestTypeResourceTests = ValidateMigrationTestType("resourceTests")
 )
 
+func (e ValidateMigrationTestType) Values() []ValidateMigrationTestType {
+	return []ValidateMigrationTestType{
+		ValidateMigrationTestTypeSourceTests,
+		ValidateMigrationTestTypeCompatibilityTests,
+		ValidateMigrationTestTypeDiskAccessibilityTests,
+		ValidateMigrationTestTypeResourceTests,
+	}
+}
+
+func (e ValidateMigrationTestType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["ValidateMigrationTestType"] = reflect.TypeOf((*ValidateMigrationTestType)(nil)).Elem()
 }
@@ -7154,6 +11197,18 @@ const (
 	VchaClusterModeMaintenance = VchaClusterMode("maintenance")
 )
 
+func (e VchaClusterMode) Values() []VchaClusterMode {
+	return []VchaClusterMode{
+		VchaClusterModeEnabled,
+		VchaClusterModeDisabled,
+		VchaClusterModeMaintenance,
+	}
+}
+
+func (e VchaClusterMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VchaClusterMode"] = reflect.TypeOf((*VchaClusterMode)(nil)).Elem()
 	minAPIVersionForType["VchaClusterMode"] = "6.5"
@@ -7177,6 +11232,18 @@ const (
 	// All three nodes are isolated from each other.
 	VchaClusterStateIsolated = VchaClusterState("isolated")
 )
+
+func (e VchaClusterState) Values() []VchaClusterState {
+	return []VchaClusterState{
+		VchaClusterStateHealthy,
+		VchaClusterStateDegraded,
+		VchaClusterStateIsolated,
+	}
+}
+
+func (e VchaClusterState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VchaClusterState"] = reflect.TypeOf((*VchaClusterState)(nil)).Elem()
@@ -7204,6 +11271,18 @@ const (
 	VchaNodeRoleWitness = VchaNodeRole("witness")
 )
 
+func (e VchaNodeRole) Values() []VchaNodeRole {
+	return []VchaNodeRole{
+		VchaNodeRoleActive,
+		VchaNodeRolePassive,
+		VchaNodeRoleWitness,
+	}
+}
+
+func (e VchaNodeRole) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VchaNodeRole"] = reflect.TypeOf((*VchaNodeRole)(nil)).Elem()
 	minAPIVersionForType["VchaNodeRole"] = "6.5"
@@ -7218,6 +11297,17 @@ const (
 	// Node is down and has left the VCHA Cluster.
 	VchaNodeStateDown = VchaNodeState("down")
 )
+
+func (e VchaNodeState) Values() []VchaNodeState {
+	return []VchaNodeState{
+		VchaNodeStateUp,
+		VchaNodeStateDown,
+	}
+}
+
+func (e VchaNodeState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VchaNodeState"] = reflect.TypeOf((*VchaNodeState)(nil)).Elem()
@@ -7236,6 +11326,19 @@ const (
 	// VC appliance has been prepared for VCHA cluster configuration.
 	VchaStatePrepared = VchaState("prepared")
 )
+
+func (e VchaState) Values() []VchaState {
+	return []VchaState{
+		VchaStateConfigured,
+		VchaStateNotConfigured,
+		VchaStateInvalid,
+		VchaStatePrepared,
+	}
+}
+
+func (e VchaState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VchaState"] = reflect.TypeOf((*VchaState)(nil)).Elem()
@@ -7260,6 +11363,19 @@ const (
 	VirtualAppVAppStateStopping = VirtualAppVAppState("stopping")
 )
 
+func (e VirtualAppVAppState) Values() []VirtualAppVAppState {
+	return []VirtualAppVAppState{
+		VirtualAppVAppStateStarted,
+		VirtualAppVAppStateStopped,
+		VirtualAppVAppStateStarting,
+		VirtualAppVAppStateStopping,
+	}
+}
+
+func (e VirtualAppVAppState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualAppVAppState"] = reflect.TypeOf((*VirtualAppVAppState)(nil)).Elem()
 	minAPIVersionForType["VirtualAppVAppState"] = "4.0"
@@ -7274,6 +11390,17 @@ const (
 	VirtualDeviceConfigSpecChangeModeFail = VirtualDeviceConfigSpecChangeMode("fail")
 	VirtualDeviceConfigSpecChangeModeSkip = VirtualDeviceConfigSpecChangeMode("skip")
 )
+
+func (e VirtualDeviceConfigSpecChangeMode) Values() []VirtualDeviceConfigSpecChangeMode {
+	return []VirtualDeviceConfigSpecChangeMode{
+		VirtualDeviceConfigSpecChangeModeFail,
+		VirtualDeviceConfigSpecChangeModeSkip,
+	}
+}
+
+func (e VirtualDeviceConfigSpecChangeMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDeviceConfigSpecChangeMode"] = reflect.TypeOf((*VirtualDeviceConfigSpecChangeMode)(nil)).Elem()
@@ -7296,6 +11423,18 @@ const (
 	VirtualDeviceConfigSpecFileOperationReplace = VirtualDeviceConfigSpecFileOperation("replace")
 )
 
+func (e VirtualDeviceConfigSpecFileOperation) Values() []VirtualDeviceConfigSpecFileOperation {
+	return []VirtualDeviceConfigSpecFileOperation{
+		VirtualDeviceConfigSpecFileOperationCreate,
+		VirtualDeviceConfigSpecFileOperationDestroy,
+		VirtualDeviceConfigSpecFileOperationReplace,
+	}
+}
+
+func (e VirtualDeviceConfigSpecFileOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDeviceConfigSpecFileOperation"] = reflect.TypeOf((*VirtualDeviceConfigSpecFileOperation)(nil)).Elem()
 }
@@ -7313,6 +11452,18 @@ const (
 	// Specifies changes to the virtual device specification.
 	VirtualDeviceConfigSpecOperationEdit = VirtualDeviceConfigSpecOperation("edit")
 )
+
+func (e VirtualDeviceConfigSpecOperation) Values() []VirtualDeviceConfigSpecOperation {
+	return []VirtualDeviceConfigSpecOperation{
+		VirtualDeviceConfigSpecOperationAdd,
+		VirtualDeviceConfigSpecOperationRemove,
+		VirtualDeviceConfigSpecOperationEdit,
+	}
+}
+
+func (e VirtualDeviceConfigSpecOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDeviceConfigSpecOperation"] = reflect.TypeOf((*VirtualDeviceConfigSpecOperation)(nil)).Elem()
@@ -7341,6 +11492,18 @@ const (
 	VirtualDeviceConnectInfoMigrateConnectOpUnset = VirtualDeviceConnectInfoMigrateConnectOp("unset")
 )
 
+func (e VirtualDeviceConnectInfoMigrateConnectOp) Values() []VirtualDeviceConnectInfoMigrateConnectOp {
+	return []VirtualDeviceConnectInfoMigrateConnectOp{
+		VirtualDeviceConnectInfoMigrateConnectOpConnect,
+		VirtualDeviceConnectInfoMigrateConnectOpDisconnect,
+		VirtualDeviceConnectInfoMigrateConnectOpUnset,
+	}
+}
+
+func (e VirtualDeviceConnectInfoMigrateConnectOp) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDeviceConnectInfoMigrateConnectOp"] = reflect.TypeOf((*VirtualDeviceConnectInfoMigrateConnectOp)(nil)).Elem()
 	minAPIVersionForType["VirtualDeviceConnectInfoMigrateConnectOp"] = "6.7"
@@ -7368,6 +11531,19 @@ const (
 	VirtualDeviceConnectInfoStatusUntried = VirtualDeviceConnectInfoStatus("untried")
 )
 
+func (e VirtualDeviceConnectInfoStatus) Values() []VirtualDeviceConnectInfoStatus {
+	return []VirtualDeviceConnectInfoStatus{
+		VirtualDeviceConnectInfoStatusOk,
+		VirtualDeviceConnectInfoStatusRecoverableError,
+		VirtualDeviceConnectInfoStatusUnrecoverableError,
+		VirtualDeviceConnectInfoStatusUntried,
+	}
+}
+
+func (e VirtualDeviceConnectInfoStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDeviceConnectInfoStatus"] = reflect.TypeOf((*VirtualDeviceConnectInfoStatus)(nil)).Elem()
 	minAPIVersionForType["VirtualDeviceConnectInfoStatus"] = "4.0"
@@ -7391,6 +11567,20 @@ const (
 	VirtualDeviceFileExtensionRdm = VirtualDeviceFileExtension("rdm")
 )
 
+func (e VirtualDeviceFileExtension) Values() []VirtualDeviceFileExtension {
+	return []VirtualDeviceFileExtension{
+		VirtualDeviceFileExtensionIso,
+		VirtualDeviceFileExtensionFlp,
+		VirtualDeviceFileExtensionVmdk,
+		VirtualDeviceFileExtensionDsk,
+		VirtualDeviceFileExtensionRdm,
+	}
+}
+
+func (e VirtualDeviceFileExtension) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDeviceFileExtension"] = reflect.TypeOf((*VirtualDeviceFileExtension)(nil)).Elem()
 }
@@ -7408,6 +11598,17 @@ const (
 	VirtualDeviceURIBackingOptionDirectionClient = VirtualDeviceURIBackingOptionDirection("client")
 )
 
+func (e VirtualDeviceURIBackingOptionDirection) Values() []VirtualDeviceURIBackingOptionDirection {
+	return []VirtualDeviceURIBackingOptionDirection{
+		VirtualDeviceURIBackingOptionDirectionServer,
+		VirtualDeviceURIBackingOptionDirectionClient,
+	}
+}
+
+func (e VirtualDeviceURIBackingOptionDirection) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDeviceURIBackingOptionDirection"] = reflect.TypeOf((*VirtualDeviceURIBackingOptionDirection)(nil)).Elem()
 	minAPIVersionForType["VirtualDeviceURIBackingOptionDirection"] = "4.1"
@@ -7423,6 +11624,18 @@ const (
 	// Use LSILogic emulation for the virtual disk
 	VirtualDiskAdapterTypeLsiLogic = VirtualDiskAdapterType("lsiLogic")
 )
+
+func (e VirtualDiskAdapterType) Values() []VirtualDiskAdapterType {
+	return []VirtualDiskAdapterType{
+		VirtualDiskAdapterTypeIde,
+		VirtualDiskAdapterTypeBusLogic,
+		VirtualDiskAdapterTypeLsiLogic,
+	}
+}
+
+func (e VirtualDiskAdapterType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskAdapterType"] = reflect.TypeOf((*VirtualDiskAdapterType)(nil)).Elem()
@@ -7449,6 +11662,17 @@ const (
 	VirtualDiskCompatibilityModePhysicalMode = VirtualDiskCompatibilityMode("physicalMode")
 )
 
+func (e VirtualDiskCompatibilityMode) Values() []VirtualDiskCompatibilityMode {
+	return []VirtualDiskCompatibilityMode{
+		VirtualDiskCompatibilityModeVirtualMode,
+		VirtualDiskCompatibilityModePhysicalMode,
+	}
+}
+
+func (e VirtualDiskCompatibilityMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDiskCompatibilityMode"] = reflect.TypeOf((*VirtualDiskCompatibilityMode)(nil)).Elem()
 }
@@ -7463,6 +11687,18 @@ const (
 	// Flex-SE redo-log based format
 	VirtualDiskDeltaDiskFormatSeSparseFormat = VirtualDiskDeltaDiskFormat("seSparseFormat")
 )
+
+func (e VirtualDiskDeltaDiskFormat) Values() []VirtualDiskDeltaDiskFormat {
+	return []VirtualDiskDeltaDiskFormat{
+		VirtualDiskDeltaDiskFormatRedoLogFormat,
+		VirtualDiskDeltaDiskFormatNativeFormat,
+		VirtualDiskDeltaDiskFormatSeSparseFormat,
+	}
+}
+
+func (e VirtualDiskDeltaDiskFormat) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskDeltaDiskFormat"] = reflect.TypeOf((*VirtualDiskDeltaDiskFormat)(nil)).Elem()
@@ -7480,6 +11716,17 @@ const (
 	// vsanSparse based redo-log format
 	VirtualDiskDeltaDiskFormatVariantVsanSparseVariant = VirtualDiskDeltaDiskFormatVariant("vsanSparseVariant")
 )
+
+func (e VirtualDiskDeltaDiskFormatVariant) Values() []VirtualDiskDeltaDiskFormatVariant {
+	return []VirtualDiskDeltaDiskFormatVariant{
+		VirtualDiskDeltaDiskFormatVariantVmfsSparseVariant,
+		VirtualDiskDeltaDiskFormatVariantVsanSparseVariant,
+	}
+}
+
+func (e VirtualDiskDeltaDiskFormatVariant) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskDeltaDiskFormatVariant"] = reflect.TypeOf((*VirtualDiskDeltaDiskFormatVariant)(nil)).Elem()
@@ -7507,6 +11754,21 @@ const (
 	VirtualDiskModeAppend = VirtualDiskMode("append")
 )
 
+func (e VirtualDiskMode) Values() []VirtualDiskMode {
+	return []VirtualDiskMode{
+		VirtualDiskModePersistent,
+		VirtualDiskModeNonpersistent,
+		VirtualDiskModeUndoable,
+		VirtualDiskModeIndependent_persistent,
+		VirtualDiskModeIndependent_nonpersistent,
+		VirtualDiskModeAppend,
+	}
+}
+
+func (e VirtualDiskMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDiskMode"] = reflect.TypeOf((*VirtualDiskMode)(nil)).Elem()
 }
@@ -7523,6 +11785,18 @@ const (
 	// SDRS will be disabled for the disks in the list.
 	VirtualDiskRuleSpecRuleTypeDisabled = VirtualDiskRuleSpecRuleType("disabled")
 )
+
+func (e VirtualDiskRuleSpecRuleType) Values() []VirtualDiskRuleSpecRuleType {
+	return []VirtualDiskRuleSpecRuleType{
+		VirtualDiskRuleSpecRuleTypeAffinity,
+		VirtualDiskRuleSpecRuleTypeAntiAffinity,
+		VirtualDiskRuleSpecRuleTypeDisabled,
+	}
+}
+
+func (e VirtualDiskRuleSpecRuleType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskRuleSpecRuleType"] = reflect.TypeOf((*VirtualDiskRuleSpecRuleType)(nil)).Elem()
@@ -7541,6 +11815,17 @@ const (
 	// The virtual disk is shared between multiple virtual machines.
 	VirtualDiskSharingSharingMultiWriter = VirtualDiskSharing("sharingMultiWriter")
 )
+
+func (e VirtualDiskSharing) Values() []VirtualDiskSharing {
+	return []VirtualDiskSharing{
+		VirtualDiskSharingSharingNone,
+		VirtualDiskSharingSharingMultiWriter,
+	}
+}
+
+func (e VirtualDiskSharing) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskSharing"] = reflect.TypeOf((*VirtualDiskSharing)(nil)).Elem()
@@ -7614,8 +11899,6 @@ const (
 	// other VMware products. This format is only applicable as a destination
 	// format in a clone operation, and not usable for disk creation.
 	VirtualDiskTypeFlatMonolithic = VirtualDiskType("flatMonolithic")
-	//
-	//
 	// Deprecated as of vSphere API 4.x, use `eagerZeroedThick` instead
 	// for clustering application, and `preallocated` for other applications.
 	//
@@ -7629,6 +11912,28 @@ const (
 	// preferred over this format.
 	VirtualDiskTypeThick = VirtualDiskType("thick")
 )
+
+func (e VirtualDiskType) Values() []VirtualDiskType {
+	return []VirtualDiskType{
+		VirtualDiskTypePreallocated,
+		VirtualDiskTypeThin,
+		VirtualDiskTypeSeSparse,
+		VirtualDiskTypeRdm,
+		VirtualDiskTypeRdmp,
+		VirtualDiskTypeRaw,
+		VirtualDiskTypeDelta,
+		VirtualDiskTypeSparse2Gb,
+		VirtualDiskTypeThick2Gb,
+		VirtualDiskTypeEagerZeroedThick,
+		VirtualDiskTypeSparseMonolithic,
+		VirtualDiskTypeFlatMonolithic,
+		VirtualDiskTypeThick,
+	}
+}
+
+func (e VirtualDiskType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskType"] = reflect.TypeOf((*VirtualDiskType)(nil)).Elem()
@@ -7650,6 +11955,17 @@ const (
 	// Cache data consistency is not guaranteed after a crash.
 	VirtualDiskVFlashCacheConfigInfoCacheConsistencyTypeWeak = VirtualDiskVFlashCacheConfigInfoCacheConsistencyType("weak")
 )
+
+func (e VirtualDiskVFlashCacheConfigInfoCacheConsistencyType) Values() []VirtualDiskVFlashCacheConfigInfoCacheConsistencyType {
+	return []VirtualDiskVFlashCacheConfigInfoCacheConsistencyType{
+		VirtualDiskVFlashCacheConfigInfoCacheConsistencyTypeStrong,
+		VirtualDiskVFlashCacheConfigInfoCacheConsistencyTypeWeak,
+	}
+}
+
+func (e VirtualDiskVFlashCacheConfigInfoCacheConsistencyType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualDiskVFlashCacheConfigInfoCacheConsistencyType"] = reflect.TypeOf((*VirtualDiskVFlashCacheConfigInfoCacheConsistencyType)(nil)).Elem()
@@ -7673,6 +11989,17 @@ const (
 	VirtualDiskVFlashCacheConfigInfoCacheModeWrite_back = VirtualDiskVFlashCacheConfigInfoCacheMode("write_back")
 )
 
+func (e VirtualDiskVFlashCacheConfigInfoCacheMode) Values() []VirtualDiskVFlashCacheConfigInfoCacheMode {
+	return []VirtualDiskVFlashCacheConfigInfoCacheMode{
+		VirtualDiskVFlashCacheConfigInfoCacheModeWrite_thru,
+		VirtualDiskVFlashCacheConfigInfoCacheModeWrite_back,
+	}
+}
+
+func (e VirtualDiskVFlashCacheConfigInfoCacheMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualDiskVFlashCacheConfigInfoCacheMode"] = reflect.TypeOf((*VirtualDiskVFlashCacheConfigInfoCacheMode)(nil)).Elem()
 	minAPIVersionForType["VirtualDiskVFlashCacheConfigInfoCacheMode"] = "5.5"
@@ -7695,6 +12022,18 @@ const (
 	VirtualEthernetCardLegacyNetworkDeviceNameHostonly = VirtualEthernetCardLegacyNetworkDeviceName("hostonly")
 )
 
+func (e VirtualEthernetCardLegacyNetworkDeviceName) Values() []VirtualEthernetCardLegacyNetworkDeviceName {
+	return []VirtualEthernetCardLegacyNetworkDeviceName{
+		VirtualEthernetCardLegacyNetworkDeviceNameBridged,
+		VirtualEthernetCardLegacyNetworkDeviceNameNat,
+		VirtualEthernetCardLegacyNetworkDeviceNameHostonly,
+	}
+}
+
+func (e VirtualEthernetCardLegacyNetworkDeviceName) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualEthernetCardLegacyNetworkDeviceName"] = reflect.TypeOf((*VirtualEthernetCardLegacyNetworkDeviceName)(nil)).Elem()
 }
@@ -7711,6 +12050,18 @@ const (
 	VirtualEthernetCardMacTypeAssigned = VirtualEthernetCardMacType("assigned")
 )
 
+func (e VirtualEthernetCardMacType) Values() []VirtualEthernetCardMacType {
+	return []VirtualEthernetCardMacType{
+		VirtualEthernetCardMacTypeManual,
+		VirtualEthernetCardMacTypeGenerated,
+		VirtualEthernetCardMacTypeAssigned,
+	}
+}
+
+func (e VirtualEthernetCardMacType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualEthernetCardMacType"] = reflect.TypeOf((*VirtualEthernetCardMacType)(nil)).Elem()
 }
@@ -7723,6 +12074,17 @@ const (
 	// Multiple ACPI host bridges.
 	VirtualHardwareMotherboardLayoutAcpiHostBridges = VirtualHardwareMotherboardLayout("acpiHostBridges")
 )
+
+func (e VirtualHardwareMotherboardLayout) Values() []VirtualHardwareMotherboardLayout {
+	return []VirtualHardwareMotherboardLayout{
+		VirtualHardwareMotherboardLayoutI440bxHostBridge,
+		VirtualHardwareMotherboardLayoutAcpiHostBridges,
+	}
+}
+
+func (e VirtualHardwareMotherboardLayout) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualHardwareMotherboardLayout"] = reflect.TypeOf((*VirtualHardwareMotherboardLayout)(nil)).Elem()
@@ -7739,6 +12101,18 @@ const (
 	// Heartbeating has stopped
 	VirtualMachineAppHeartbeatStatusTypeAppStatusRed = VirtualMachineAppHeartbeatStatusType("appStatusRed")
 )
+
+func (e VirtualMachineAppHeartbeatStatusType) Values() []VirtualMachineAppHeartbeatStatusType {
+	return []VirtualMachineAppHeartbeatStatusType{
+		VirtualMachineAppHeartbeatStatusTypeAppStatusGray,
+		VirtualMachineAppHeartbeatStatusTypeAppStatusGreen,
+		VirtualMachineAppHeartbeatStatusTypeAppStatusRed,
+	}
+}
+
+func (e VirtualMachineAppHeartbeatStatusType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineAppHeartbeatStatusType"] = reflect.TypeOf((*VirtualMachineAppHeartbeatStatusType)(nil)).Elem()
@@ -7758,6 +12132,17 @@ const (
 	VirtualMachineBootOptionsNetworkBootProtocolTypeIpv6 = VirtualMachineBootOptionsNetworkBootProtocolType("ipv6")
 )
 
+func (e VirtualMachineBootOptionsNetworkBootProtocolType) Values() []VirtualMachineBootOptionsNetworkBootProtocolType {
+	return []VirtualMachineBootOptionsNetworkBootProtocolType{
+		VirtualMachineBootOptionsNetworkBootProtocolTypeIpv4,
+		VirtualMachineBootOptionsNetworkBootProtocolTypeIpv6,
+	}
+}
+
+func (e VirtualMachineBootOptionsNetworkBootProtocolType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineBootOptionsNetworkBootProtocolType"] = reflect.TypeOf((*VirtualMachineBootOptionsNetworkBootProtocolType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineBootOptionsNetworkBootProtocolType"] = "6.0"
@@ -7769,6 +12154,16 @@ const (
 	// SHA256
 	VirtualMachineCertThumbprintHashAlgorithmSha256 = VirtualMachineCertThumbprintHashAlgorithm("sha256")
 )
+
+func (e VirtualMachineCertThumbprintHashAlgorithm) Values() []VirtualMachineCertThumbprintHashAlgorithm {
+	return []VirtualMachineCertThumbprintHashAlgorithm{
+		VirtualMachineCertThumbprintHashAlgorithmSha256,
+	}
+}
+
+func (e VirtualMachineCertThumbprintHashAlgorithm) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineCertThumbprintHashAlgorithm"] = reflect.TypeOf((*VirtualMachineCertThumbprintHashAlgorithm)(nil)).Elem()
@@ -7791,6 +12186,17 @@ const (
 	VirtualMachineCloneSpecTpmProvisionPolicyReplace = VirtualMachineCloneSpecTpmProvisionPolicy("replace")
 )
 
+func (e VirtualMachineCloneSpecTpmProvisionPolicy) Values() []VirtualMachineCloneSpecTpmProvisionPolicy {
+	return []VirtualMachineCloneSpecTpmProvisionPolicy{
+		VirtualMachineCloneSpecTpmProvisionPolicyCopy,
+		VirtualMachineCloneSpecTpmProvisionPolicyReplace,
+	}
+}
+
+func (e VirtualMachineCloneSpecTpmProvisionPolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineCloneSpecTpmProvisionPolicy"] = reflect.TypeOf((*VirtualMachineCloneSpecTpmProvisionPolicy)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineCloneSpecTpmProvisionPolicy"] = "8.0.0.1"
@@ -7806,6 +12212,18 @@ const (
 	// This set of WWNs is provided by the client.
 	VirtualMachineConfigInfoNpivWwnTypeExternal = VirtualMachineConfigInfoNpivWwnType("external")
 )
+
+func (e VirtualMachineConfigInfoNpivWwnType) Values() []VirtualMachineConfigInfoNpivWwnType {
+	return []VirtualMachineConfigInfoNpivWwnType{
+		VirtualMachineConfigInfoNpivWwnTypeVc,
+		VirtualMachineConfigInfoNpivWwnTypeHost,
+		VirtualMachineConfigInfoNpivWwnTypeExternal,
+	}
+}
+
+func (e VirtualMachineConfigInfoNpivWwnType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineConfigInfoNpivWwnType"] = reflect.TypeOf((*VirtualMachineConfigInfoNpivWwnType)(nil)).Elem()
@@ -7840,6 +12258,18 @@ const (
 	VirtualMachineConfigInfoSwapPlacementTypeHostLocal = VirtualMachineConfigInfoSwapPlacementType("hostLocal")
 )
 
+func (e VirtualMachineConfigInfoSwapPlacementType) Values() []VirtualMachineConfigInfoSwapPlacementType {
+	return []VirtualMachineConfigInfoSwapPlacementType{
+		VirtualMachineConfigInfoSwapPlacementTypeInherit,
+		VirtualMachineConfigInfoSwapPlacementTypeVmDirectory,
+		VirtualMachineConfigInfoSwapPlacementTypeHostLocal,
+	}
+}
+
+func (e VirtualMachineConfigInfoSwapPlacementType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineConfigInfoSwapPlacementType"] = reflect.TypeOf((*VirtualMachineConfigInfoSwapPlacementType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineConfigInfoSwapPlacementType"] = "2.5"
@@ -7866,6 +12296,18 @@ const (
 	VirtualMachineConfigSpecEncryptedFtModesFtEncryptionRequired = VirtualMachineConfigSpecEncryptedFtModes("ftEncryptionRequired")
 )
 
+func (e VirtualMachineConfigSpecEncryptedFtModes) Values() []VirtualMachineConfigSpecEncryptedFtModes {
+	return []VirtualMachineConfigSpecEncryptedFtModes{
+		VirtualMachineConfigSpecEncryptedFtModesFtEncryptionDisabled,
+		VirtualMachineConfigSpecEncryptedFtModesFtEncryptionOpportunistic,
+		VirtualMachineConfigSpecEncryptedFtModesFtEncryptionRequired,
+	}
+}
+
+func (e VirtualMachineConfigSpecEncryptedFtModes) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineConfigSpecEncryptedFtModes"] = reflect.TypeOf((*VirtualMachineConfigSpecEncryptedFtModes)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineConfigSpecEncryptedFtModes"] = "7.0.2.0"
@@ -7889,6 +12331,18 @@ const (
 	VirtualMachineConfigSpecEncryptedVMotionModesRequired = VirtualMachineConfigSpecEncryptedVMotionModes("required")
 )
 
+func (e VirtualMachineConfigSpecEncryptedVMotionModes) Values() []VirtualMachineConfigSpecEncryptedVMotionModes {
+	return []VirtualMachineConfigSpecEncryptedVMotionModes{
+		VirtualMachineConfigSpecEncryptedVMotionModesDisabled,
+		VirtualMachineConfigSpecEncryptedVMotionModesOpportunistic,
+		VirtualMachineConfigSpecEncryptedVMotionModesRequired,
+	}
+}
+
+func (e VirtualMachineConfigSpecEncryptedVMotionModes) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineConfigSpecEncryptedVMotionModes"] = reflect.TypeOf((*VirtualMachineConfigSpecEncryptedVMotionModes)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineConfigSpecEncryptedVMotionModes"] = "6.5"
@@ -7910,6 +12364,19 @@ const (
 	// Generate a new set of WWNs and append them to the existing list
 	VirtualMachineConfigSpecNpivWwnOpExtend = VirtualMachineConfigSpecNpivWwnOp("extend")
 )
+
+func (e VirtualMachineConfigSpecNpivWwnOp) Values() []VirtualMachineConfigSpecNpivWwnOp {
+	return []VirtualMachineConfigSpecNpivWwnOp{
+		VirtualMachineConfigSpecNpivWwnOpGenerate,
+		VirtualMachineConfigSpecNpivWwnOpSet,
+		VirtualMachineConfigSpecNpivWwnOpRemove,
+		VirtualMachineConfigSpecNpivWwnOpExtend,
+	}
+}
+
+func (e VirtualMachineConfigSpecNpivWwnOp) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineConfigSpecNpivWwnOp"] = reflect.TypeOf((*VirtualMachineConfigSpecNpivWwnOp)(nil)).Elem()
@@ -7958,6 +12425,20 @@ const (
 	VirtualMachineConnectionStateInvalid = VirtualMachineConnectionState("invalid")
 )
 
+func (e VirtualMachineConnectionState) Values() []VirtualMachineConnectionState {
+	return []VirtualMachineConnectionState{
+		VirtualMachineConnectionStateConnected,
+		VirtualMachineConnectionStateDisconnected,
+		VirtualMachineConnectionStateOrphaned,
+		VirtualMachineConnectionStateInaccessible,
+		VirtualMachineConnectionStateInvalid,
+	}
+}
+
+func (e VirtualMachineConnectionState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineConnectionState"] = reflect.TypeOf((*VirtualMachineConnectionState)(nil)).Elem()
 }
@@ -7971,6 +12452,17 @@ const (
 	// on the ESX host where the VM is registered.
 	VirtualMachineCryptoStateLocked = VirtualMachineCryptoState("locked")
 )
+
+func (e VirtualMachineCryptoState) Values() []VirtualMachineCryptoState {
+	return []VirtualMachineCryptoState{
+		VirtualMachineCryptoStateUnlocked,
+		VirtualMachineCryptoStateLocked,
+	}
+}
+
+func (e VirtualMachineCryptoState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineCryptoState"] = reflect.TypeOf((*VirtualMachineCryptoState)(nil)).Elem()
@@ -7995,6 +12487,17 @@ const (
 	// device.
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOtherVmNptIncompatibleNetwork = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther("vmNptIncompatibleNetwork")
 )
+
+func (e VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther) Values() []VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther {
+	return []VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther{
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOtherVmNptIncompatibleHost,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOtherVmNptIncompatibleNetwork,
+	}
+}
+
+func (e VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther"] = reflect.TypeOf((*VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonOther)(nil)).Elem()
@@ -8026,8 +12529,6 @@ const (
 	// The virtual machine does not have full memory reservation
 	// required to activate VMDirectPath Gen 2.
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptInsufficientMemoryReservation = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm("vmNptInsufficientMemoryReservation")
-	//
-	//
 	// Deprecated as of vSphere API 6.0.
 	//
 	// The virtual machine is configured for Fault Tolerance or
@@ -8062,6 +12563,29 @@ const (
 	// passthrough mode.
 	VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptVMCIActive = VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm("vmNptVMCIActive")
 )
+
+func (e VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm) Values() []VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm {
+	return []VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm{
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleGuest,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleGuestDriver,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleAdapterType,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptDisabledOrDisconnectedAdapter,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleAdapterFeatures,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptIncompatibleBackingType,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptInsufficientMemoryReservation,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptFaultToleranceOrRecordReplayConfigured,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptConflictingIOChainConfigured,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptMonitorBlocks,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptConflictingOperationInProgress,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptRuntimeError,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptOutOfIntrVector,
+		VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVmVmNptVMCIActive,
+	}
+}
+
+func (e VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm"] = reflect.TypeOf((*VirtualMachineDeviceRuntimeInfoVirtualEthernetCardRuntimeStateVmDirectPathGen2InactiveReasonVm)(nil)).Elem()
@@ -8115,6 +12639,21 @@ const (
 	VirtualMachineFaultToleranceStateRunning = VirtualMachineFaultToleranceState("running")
 )
 
+func (e VirtualMachineFaultToleranceState) Values() []VirtualMachineFaultToleranceState {
+	return []VirtualMachineFaultToleranceState{
+		VirtualMachineFaultToleranceStateNotConfigured,
+		VirtualMachineFaultToleranceStateDisabled,
+		VirtualMachineFaultToleranceStateEnabled,
+		VirtualMachineFaultToleranceStateNeedSecondary,
+		VirtualMachineFaultToleranceStateStarting,
+		VirtualMachineFaultToleranceStateRunning,
+	}
+}
+
+func (e VirtualMachineFaultToleranceState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineFaultToleranceState"] = reflect.TypeOf((*VirtualMachineFaultToleranceState)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineFaultToleranceState"] = "4.0"
@@ -8131,6 +12670,18 @@ const (
 	// Checkpointing
 	VirtualMachineFaultToleranceTypeCheckpointing = VirtualMachineFaultToleranceType("checkpointing")
 )
+
+func (e VirtualMachineFaultToleranceType) Values() []VirtualMachineFaultToleranceType {
+	return []VirtualMachineFaultToleranceType{
+		VirtualMachineFaultToleranceTypeUnset,
+		VirtualMachineFaultToleranceTypeRecordReplay,
+		VirtualMachineFaultToleranceTypeCheckpointing,
+	}
+}
+
+func (e VirtualMachineFaultToleranceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineFaultToleranceType"] = reflect.TypeOf((*VirtualMachineFaultToleranceType)(nil)).Elem()
@@ -8201,6 +12752,40 @@ const (
 	VirtualMachineFileLayoutExFileTypeGuestCustomization = VirtualMachineFileLayoutExFileType("guestCustomization")
 )
 
+func (e VirtualMachineFileLayoutExFileType) Values() []VirtualMachineFileLayoutExFileType {
+	return []VirtualMachineFileLayoutExFileType{
+		VirtualMachineFileLayoutExFileTypeConfig,
+		VirtualMachineFileLayoutExFileTypeExtendedConfig,
+		VirtualMachineFileLayoutExFileTypeDiskDescriptor,
+		VirtualMachineFileLayoutExFileTypeDiskExtent,
+		VirtualMachineFileLayoutExFileTypeDigestDescriptor,
+		VirtualMachineFileLayoutExFileTypeDigestExtent,
+		VirtualMachineFileLayoutExFileTypeDiskReplicationState,
+		VirtualMachineFileLayoutExFileTypeLog,
+		VirtualMachineFileLayoutExFileTypeStat,
+		VirtualMachineFileLayoutExFileTypeNamespaceData,
+		VirtualMachineFileLayoutExFileTypeDataSetsDiskModeStore,
+		VirtualMachineFileLayoutExFileTypeDataSetsVmModeStore,
+		VirtualMachineFileLayoutExFileTypeNvram,
+		VirtualMachineFileLayoutExFileTypeSnapshotData,
+		VirtualMachineFileLayoutExFileTypeSnapshotMemory,
+		VirtualMachineFileLayoutExFileTypeSnapshotList,
+		VirtualMachineFileLayoutExFileTypeSnapshotManifestList,
+		VirtualMachineFileLayoutExFileTypeSuspend,
+		VirtualMachineFileLayoutExFileTypeSuspendMemory,
+		VirtualMachineFileLayoutExFileTypeSwap,
+		VirtualMachineFileLayoutExFileTypeUwswap,
+		VirtualMachineFileLayoutExFileTypeCore,
+		VirtualMachineFileLayoutExFileTypeScreenshot,
+		VirtualMachineFileLayoutExFileTypeFtMetadata,
+		VirtualMachineFileLayoutExFileTypeGuestCustomization,
+	}
+}
+
+func (e VirtualMachineFileLayoutExFileType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineFileLayoutExFileType"] = reflect.TypeOf((*VirtualMachineFileLayoutExFileType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineFileLayoutExFileType"] = "4.0"
@@ -8231,6 +12816,18 @@ const (
 	VirtualMachineFlagInfoMonitorTypeStats = VirtualMachineFlagInfoMonitorType("stats")
 )
 
+func (e VirtualMachineFlagInfoMonitorType) Values() []VirtualMachineFlagInfoMonitorType {
+	return []VirtualMachineFlagInfoMonitorType{
+		VirtualMachineFlagInfoMonitorTypeRelease,
+		VirtualMachineFlagInfoMonitorTypeDebug,
+		VirtualMachineFlagInfoMonitorTypeStats,
+	}
+}
+
+func (e VirtualMachineFlagInfoMonitorType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineFlagInfoMonitorType"] = reflect.TypeOf((*VirtualMachineFlagInfoMonitorType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineFlagInfoMonitorType"] = "2.5"
@@ -8247,6 +12844,18 @@ const (
 	VirtualMachineFlagInfoVirtualExecUsageHvOff = VirtualMachineFlagInfoVirtualExecUsage("hvOff")
 )
 
+func (e VirtualMachineFlagInfoVirtualExecUsage) Values() []VirtualMachineFlagInfoVirtualExecUsage {
+	return []VirtualMachineFlagInfoVirtualExecUsage{
+		VirtualMachineFlagInfoVirtualExecUsageHvAuto,
+		VirtualMachineFlagInfoVirtualExecUsageHvOn,
+		VirtualMachineFlagInfoVirtualExecUsageHvOff,
+	}
+}
+
+func (e VirtualMachineFlagInfoVirtualExecUsage) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineFlagInfoVirtualExecUsage"] = reflect.TypeOf((*VirtualMachineFlagInfoVirtualExecUsage)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineFlagInfoVirtualExecUsage"] = "4.0"
@@ -8262,6 +12871,18 @@ const (
 	// Do not use nested page table hardware support.
 	VirtualMachineFlagInfoVirtualMmuUsageOff = VirtualMachineFlagInfoVirtualMmuUsage("off")
 )
+
+func (e VirtualMachineFlagInfoVirtualMmuUsage) Values() []VirtualMachineFlagInfoVirtualMmuUsage {
+	return []VirtualMachineFlagInfoVirtualMmuUsage{
+		VirtualMachineFlagInfoVirtualMmuUsageAutomatic,
+		VirtualMachineFlagInfoVirtualMmuUsageOn,
+		VirtualMachineFlagInfoVirtualMmuUsageOff,
+	}
+}
+
+func (e VirtualMachineFlagInfoVirtualMmuUsage) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineFlagInfoVirtualMmuUsage"] = reflect.TypeOf((*VirtualMachineFlagInfoVirtualMmuUsage)(nil)).Elem()
@@ -8281,6 +12902,18 @@ const (
 	// The virtual machine is a non-persistent child.
 	VirtualMachineForkConfigInfoChildTypeNonpersistent = VirtualMachineForkConfigInfoChildType("nonpersistent")
 )
+
+func (e VirtualMachineForkConfigInfoChildType) Values() []VirtualMachineForkConfigInfoChildType {
+	return []VirtualMachineForkConfigInfoChildType{
+		VirtualMachineForkConfigInfoChildTypeNone,
+		VirtualMachineForkConfigInfoChildTypePersistent,
+		VirtualMachineForkConfigInfoChildTypeNonpersistent,
+	}
+}
+
+func (e VirtualMachineForkConfigInfoChildType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineForkConfigInfoChildType"] = reflect.TypeOf((*VirtualMachineForkConfigInfoChildType)(nil)).Elem()
@@ -8304,6 +12937,21 @@ const (
 	// Other operating systems
 	VirtualMachineGuestOsFamilyOtherGuestFamily = VirtualMachineGuestOsFamily("otherGuestFamily")
 )
+
+func (e VirtualMachineGuestOsFamily) Values() []VirtualMachineGuestOsFamily {
+	return []VirtualMachineGuestOsFamily{
+		VirtualMachineGuestOsFamilyWindowsGuest,
+		VirtualMachineGuestOsFamilyLinuxGuest,
+		VirtualMachineGuestOsFamilyNetwareGuest,
+		VirtualMachineGuestOsFamilySolarisGuest,
+		VirtualMachineGuestOsFamilyDarwinGuestFamily,
+		VirtualMachineGuestOsFamilyOtherGuestFamily,
+	}
+}
+
+func (e VirtualMachineGuestOsFamily) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineGuestOsFamily"] = reflect.TypeOf((*VirtualMachineGuestOsFamily)(nil)).Elem()
@@ -8708,6 +13356,210 @@ const (
 	VirtualMachineGuestOsIdentifierOtherGuest64 = VirtualMachineGuestOsIdentifier("otherGuest64")
 )
 
+func (e VirtualMachineGuestOsIdentifier) Values() []VirtualMachineGuestOsIdentifier {
+	return []VirtualMachineGuestOsIdentifier{
+		VirtualMachineGuestOsIdentifierDosGuest,
+		VirtualMachineGuestOsIdentifierWin31Guest,
+		VirtualMachineGuestOsIdentifierWin95Guest,
+		VirtualMachineGuestOsIdentifierWin98Guest,
+		VirtualMachineGuestOsIdentifierWinMeGuest,
+		VirtualMachineGuestOsIdentifierWinNTGuest,
+		VirtualMachineGuestOsIdentifierWin2000ProGuest,
+		VirtualMachineGuestOsIdentifierWin2000ServGuest,
+		VirtualMachineGuestOsIdentifierWin2000AdvServGuest,
+		VirtualMachineGuestOsIdentifierWinXPHomeGuest,
+		VirtualMachineGuestOsIdentifierWinXPProGuest,
+		VirtualMachineGuestOsIdentifierWinXPPro64Guest,
+		VirtualMachineGuestOsIdentifierWinNetWebGuest,
+		VirtualMachineGuestOsIdentifierWinNetStandardGuest,
+		VirtualMachineGuestOsIdentifierWinNetEnterpriseGuest,
+		VirtualMachineGuestOsIdentifierWinNetDatacenterGuest,
+		VirtualMachineGuestOsIdentifierWinNetBusinessGuest,
+		VirtualMachineGuestOsIdentifierWinNetStandard64Guest,
+		VirtualMachineGuestOsIdentifierWinNetEnterprise64Guest,
+		VirtualMachineGuestOsIdentifierWinLonghornGuest,
+		VirtualMachineGuestOsIdentifierWinLonghorn64Guest,
+		VirtualMachineGuestOsIdentifierWinNetDatacenter64Guest,
+		VirtualMachineGuestOsIdentifierWinVistaGuest,
+		VirtualMachineGuestOsIdentifierWinVista64Guest,
+		VirtualMachineGuestOsIdentifierWindows7Guest,
+		VirtualMachineGuestOsIdentifierWindows7_64Guest,
+		VirtualMachineGuestOsIdentifierWindows7Server64Guest,
+		VirtualMachineGuestOsIdentifierWindows8Guest,
+		VirtualMachineGuestOsIdentifierWindows8_64Guest,
+		VirtualMachineGuestOsIdentifierWindows8Server64Guest,
+		VirtualMachineGuestOsIdentifierWindows9Guest,
+		VirtualMachineGuestOsIdentifierWindows9_64Guest,
+		VirtualMachineGuestOsIdentifierWindows9Server64Guest,
+		VirtualMachineGuestOsIdentifierWindows11_64Guest,
+		VirtualMachineGuestOsIdentifierWindows12_64Guest,
+		VirtualMachineGuestOsIdentifierWindowsHyperVGuest,
+		VirtualMachineGuestOsIdentifierWindows2019srv_64Guest,
+		VirtualMachineGuestOsIdentifierWindows2019srvNext_64Guest,
+		VirtualMachineGuestOsIdentifierWindows2022srvNext_64Guest,
+		VirtualMachineGuestOsIdentifierFreebsdGuest,
+		VirtualMachineGuestOsIdentifierFreebsd64Guest,
+		VirtualMachineGuestOsIdentifierFreebsd11Guest,
+		VirtualMachineGuestOsIdentifierFreebsd11_64Guest,
+		VirtualMachineGuestOsIdentifierFreebsd12Guest,
+		VirtualMachineGuestOsIdentifierFreebsd12_64Guest,
+		VirtualMachineGuestOsIdentifierFreebsd13Guest,
+		VirtualMachineGuestOsIdentifierFreebsd13_64Guest,
+		VirtualMachineGuestOsIdentifierFreebsd14Guest,
+		VirtualMachineGuestOsIdentifierFreebsd14_64Guest,
+		VirtualMachineGuestOsIdentifierRedhatGuest,
+		VirtualMachineGuestOsIdentifierRhel2Guest,
+		VirtualMachineGuestOsIdentifierRhel3Guest,
+		VirtualMachineGuestOsIdentifierRhel3_64Guest,
+		VirtualMachineGuestOsIdentifierRhel4Guest,
+		VirtualMachineGuestOsIdentifierRhel4_64Guest,
+		VirtualMachineGuestOsIdentifierRhel5Guest,
+		VirtualMachineGuestOsIdentifierRhel5_64Guest,
+		VirtualMachineGuestOsIdentifierRhel6Guest,
+		VirtualMachineGuestOsIdentifierRhel6_64Guest,
+		VirtualMachineGuestOsIdentifierRhel7Guest,
+		VirtualMachineGuestOsIdentifierRhel7_64Guest,
+		VirtualMachineGuestOsIdentifierRhel8_64Guest,
+		VirtualMachineGuestOsIdentifierRhel9_64Guest,
+		VirtualMachineGuestOsIdentifierCentosGuest,
+		VirtualMachineGuestOsIdentifierCentos64Guest,
+		VirtualMachineGuestOsIdentifierCentos6Guest,
+		VirtualMachineGuestOsIdentifierCentos6_64Guest,
+		VirtualMachineGuestOsIdentifierCentos7Guest,
+		VirtualMachineGuestOsIdentifierCentos7_64Guest,
+		VirtualMachineGuestOsIdentifierCentos8_64Guest,
+		VirtualMachineGuestOsIdentifierCentos9_64Guest,
+		VirtualMachineGuestOsIdentifierOracleLinuxGuest,
+		VirtualMachineGuestOsIdentifierOracleLinux64Guest,
+		VirtualMachineGuestOsIdentifierOracleLinux6Guest,
+		VirtualMachineGuestOsIdentifierOracleLinux6_64Guest,
+		VirtualMachineGuestOsIdentifierOracleLinux7Guest,
+		VirtualMachineGuestOsIdentifierOracleLinux7_64Guest,
+		VirtualMachineGuestOsIdentifierOracleLinux8_64Guest,
+		VirtualMachineGuestOsIdentifierOracleLinux9_64Guest,
+		VirtualMachineGuestOsIdentifierSuseGuest,
+		VirtualMachineGuestOsIdentifierSuse64Guest,
+		VirtualMachineGuestOsIdentifierSlesGuest,
+		VirtualMachineGuestOsIdentifierSles64Guest,
+		VirtualMachineGuestOsIdentifierSles10Guest,
+		VirtualMachineGuestOsIdentifierSles10_64Guest,
+		VirtualMachineGuestOsIdentifierSles11Guest,
+		VirtualMachineGuestOsIdentifierSles11_64Guest,
+		VirtualMachineGuestOsIdentifierSles12Guest,
+		VirtualMachineGuestOsIdentifierSles12_64Guest,
+		VirtualMachineGuestOsIdentifierSles15_64Guest,
+		VirtualMachineGuestOsIdentifierSles16_64Guest,
+		VirtualMachineGuestOsIdentifierNld9Guest,
+		VirtualMachineGuestOsIdentifierOesGuest,
+		VirtualMachineGuestOsIdentifierSjdsGuest,
+		VirtualMachineGuestOsIdentifierMandrakeGuest,
+		VirtualMachineGuestOsIdentifierMandrivaGuest,
+		VirtualMachineGuestOsIdentifierMandriva64Guest,
+		VirtualMachineGuestOsIdentifierTurboLinuxGuest,
+		VirtualMachineGuestOsIdentifierTurboLinux64Guest,
+		VirtualMachineGuestOsIdentifierUbuntuGuest,
+		VirtualMachineGuestOsIdentifierUbuntu64Guest,
+		VirtualMachineGuestOsIdentifierDebian4Guest,
+		VirtualMachineGuestOsIdentifierDebian4_64Guest,
+		VirtualMachineGuestOsIdentifierDebian5Guest,
+		VirtualMachineGuestOsIdentifierDebian5_64Guest,
+		VirtualMachineGuestOsIdentifierDebian6Guest,
+		VirtualMachineGuestOsIdentifierDebian6_64Guest,
+		VirtualMachineGuestOsIdentifierDebian7Guest,
+		VirtualMachineGuestOsIdentifierDebian7_64Guest,
+		VirtualMachineGuestOsIdentifierDebian8Guest,
+		VirtualMachineGuestOsIdentifierDebian8_64Guest,
+		VirtualMachineGuestOsIdentifierDebian9Guest,
+		VirtualMachineGuestOsIdentifierDebian9_64Guest,
+		VirtualMachineGuestOsIdentifierDebian10Guest,
+		VirtualMachineGuestOsIdentifierDebian10_64Guest,
+		VirtualMachineGuestOsIdentifierDebian11Guest,
+		VirtualMachineGuestOsIdentifierDebian11_64Guest,
+		VirtualMachineGuestOsIdentifierDebian12Guest,
+		VirtualMachineGuestOsIdentifierDebian12_64Guest,
+		VirtualMachineGuestOsIdentifierAsianux3Guest,
+		VirtualMachineGuestOsIdentifierAsianux3_64Guest,
+		VirtualMachineGuestOsIdentifierAsianux4Guest,
+		VirtualMachineGuestOsIdentifierAsianux4_64Guest,
+		VirtualMachineGuestOsIdentifierAsianux5_64Guest,
+		VirtualMachineGuestOsIdentifierAsianux7_64Guest,
+		VirtualMachineGuestOsIdentifierAsianux8_64Guest,
+		VirtualMachineGuestOsIdentifierAsianux9_64Guest,
+		VirtualMachineGuestOsIdentifierOpensuseGuest,
+		VirtualMachineGuestOsIdentifierOpensuse64Guest,
+		VirtualMachineGuestOsIdentifierFedoraGuest,
+		VirtualMachineGuestOsIdentifierFedora64Guest,
+		VirtualMachineGuestOsIdentifierCoreos64Guest,
+		VirtualMachineGuestOsIdentifierVmwarePhoton64Guest,
+		VirtualMachineGuestOsIdentifierOther24xLinuxGuest,
+		VirtualMachineGuestOsIdentifierOther26xLinuxGuest,
+		VirtualMachineGuestOsIdentifierOtherLinuxGuest,
+		VirtualMachineGuestOsIdentifierOther3xLinuxGuest,
+		VirtualMachineGuestOsIdentifierOther4xLinuxGuest,
+		VirtualMachineGuestOsIdentifierOther5xLinuxGuest,
+		VirtualMachineGuestOsIdentifierOther6xLinuxGuest,
+		VirtualMachineGuestOsIdentifierGenericLinuxGuest,
+		VirtualMachineGuestOsIdentifierOther24xLinux64Guest,
+		VirtualMachineGuestOsIdentifierOther26xLinux64Guest,
+		VirtualMachineGuestOsIdentifierOther3xLinux64Guest,
+		VirtualMachineGuestOsIdentifierOther4xLinux64Guest,
+		VirtualMachineGuestOsIdentifierOther5xLinux64Guest,
+		VirtualMachineGuestOsIdentifierOther6xLinux64Guest,
+		VirtualMachineGuestOsIdentifierOtherLinux64Guest,
+		VirtualMachineGuestOsIdentifierSolaris6Guest,
+		VirtualMachineGuestOsIdentifierSolaris7Guest,
+		VirtualMachineGuestOsIdentifierSolaris8Guest,
+		VirtualMachineGuestOsIdentifierSolaris9Guest,
+		VirtualMachineGuestOsIdentifierSolaris10Guest,
+		VirtualMachineGuestOsIdentifierSolaris10_64Guest,
+		VirtualMachineGuestOsIdentifierSolaris11_64Guest,
+		VirtualMachineGuestOsIdentifierOs2Guest,
+		VirtualMachineGuestOsIdentifierEComStationGuest,
+		VirtualMachineGuestOsIdentifierEComStation2Guest,
+		VirtualMachineGuestOsIdentifierNetware4Guest,
+		VirtualMachineGuestOsIdentifierNetware5Guest,
+		VirtualMachineGuestOsIdentifierNetware6Guest,
+		VirtualMachineGuestOsIdentifierOpenServer5Guest,
+		VirtualMachineGuestOsIdentifierOpenServer6Guest,
+		VirtualMachineGuestOsIdentifierUnixWare7Guest,
+		VirtualMachineGuestOsIdentifierDarwinGuest,
+		VirtualMachineGuestOsIdentifierDarwin64Guest,
+		VirtualMachineGuestOsIdentifierDarwin10Guest,
+		VirtualMachineGuestOsIdentifierDarwin10_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin11Guest,
+		VirtualMachineGuestOsIdentifierDarwin11_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin12_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin13_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin14_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin15_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin16_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin17_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin18_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin19_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin20_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin21_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin22_64Guest,
+		VirtualMachineGuestOsIdentifierDarwin23_64Guest,
+		VirtualMachineGuestOsIdentifierVmkernelGuest,
+		VirtualMachineGuestOsIdentifierVmkernel5Guest,
+		VirtualMachineGuestOsIdentifierVmkernel6Guest,
+		VirtualMachineGuestOsIdentifierVmkernel65Guest,
+		VirtualMachineGuestOsIdentifierVmkernel7Guest,
+		VirtualMachineGuestOsIdentifierVmkernel8Guest,
+		VirtualMachineGuestOsIdentifierAmazonlinux2_64Guest,
+		VirtualMachineGuestOsIdentifierAmazonlinux3_64Guest,
+		VirtualMachineGuestOsIdentifierCrxPod1Guest,
+		VirtualMachineGuestOsIdentifierRockylinux_64Guest,
+		VirtualMachineGuestOsIdentifierAlmalinux_64Guest,
+		VirtualMachineGuestOsIdentifierOtherGuest,
+		VirtualMachineGuestOsIdentifierOtherGuest64,
+	}
+}
+
+func (e VirtualMachineGuestOsIdentifier) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineGuestOsIdentifier"] = reflect.TypeOf((*VirtualMachineGuestOsIdentifier)(nil)).Elem()
 	minAPIVersionForEnumValue["VirtualMachineGuestOsIdentifier"] = map[string]string{
@@ -8865,6 +13717,21 @@ const (
 	VirtualMachineGuestStateUnknown      = VirtualMachineGuestState("unknown")
 )
 
+func (e VirtualMachineGuestState) Values() []VirtualMachineGuestState {
+	return []VirtualMachineGuestState{
+		VirtualMachineGuestStateRunning,
+		VirtualMachineGuestStateShuttingDown,
+		VirtualMachineGuestStateResetting,
+		VirtualMachineGuestStateStandby,
+		VirtualMachineGuestStateNotRunning,
+		VirtualMachineGuestStateUnknown,
+	}
+}
+
+func (e VirtualMachineGuestState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineGuestState"] = reflect.TypeOf((*VirtualMachineGuestState)(nil)).Elem()
 }
@@ -8899,6 +13766,18 @@ const (
 	VirtualMachineHtSharingInternal = VirtualMachineHtSharing("internal")
 )
 
+func (e VirtualMachineHtSharing) Values() []VirtualMachineHtSharing {
+	return []VirtualMachineHtSharing{
+		VirtualMachineHtSharingAny,
+		VirtualMachineHtSharingNone,
+		VirtualMachineHtSharingInternal,
+	}
+}
+
+func (e VirtualMachineHtSharing) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineHtSharing"] = reflect.TypeOf((*VirtualMachineHtSharing)(nil)).Elem()
 }
@@ -8914,6 +13793,18 @@ const (
 	VirtualMachineMemoryAllocationPolicySwapMost = VirtualMachineMemoryAllocationPolicy("swapMost")
 )
 
+func (e VirtualMachineMemoryAllocationPolicy) Values() []VirtualMachineMemoryAllocationPolicy {
+	return []VirtualMachineMemoryAllocationPolicy{
+		VirtualMachineMemoryAllocationPolicySwapNone,
+		VirtualMachineMemoryAllocationPolicySwapSome,
+		VirtualMachineMemoryAllocationPolicySwapMost,
+	}
+}
+
+func (e VirtualMachineMemoryAllocationPolicy) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineMemoryAllocationPolicy"] = reflect.TypeOf((*VirtualMachineMemoryAllocationPolicy)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineMemoryAllocationPolicy"] = "2.5"
@@ -8928,6 +13819,17 @@ const (
 	VirtualMachineMetadataManagerVmMetadataOpRemove = VirtualMachineMetadataManagerVmMetadataOp("Remove")
 )
 
+func (e VirtualMachineMetadataManagerVmMetadataOp) Values() []VirtualMachineMetadataManagerVmMetadataOp {
+	return []VirtualMachineMetadataManagerVmMetadataOp{
+		VirtualMachineMetadataManagerVmMetadataOpUpdate,
+		VirtualMachineMetadataManagerVmMetadataOpRemove,
+	}
+}
+
+func (e VirtualMachineMetadataManagerVmMetadataOp) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineMetadataManagerVmMetadataOp"] = reflect.TypeOf((*VirtualMachineMetadataManagerVmMetadataOp)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineMetadataManagerVmMetadataOp"] = "5.5"
@@ -8939,6 +13841,16 @@ type VirtualMachineMetadataManagerVmMetadataOwnerOwner string
 const (
 	VirtualMachineMetadataManagerVmMetadataOwnerOwnerComVmwareVsphereHA = VirtualMachineMetadataManagerVmMetadataOwnerOwner("ComVmwareVsphereHA")
 )
+
+func (e VirtualMachineMetadataManagerVmMetadataOwnerOwner) Values() []VirtualMachineMetadataManagerVmMetadataOwnerOwner {
+	return []VirtualMachineMetadataManagerVmMetadataOwnerOwner{
+		VirtualMachineMetadataManagerVmMetadataOwnerOwnerComVmwareVsphereHA,
+	}
+}
+
+func (e VirtualMachineMetadataManagerVmMetadataOwnerOwner) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineMetadataManagerVmMetadataOwnerOwner"] = reflect.TypeOf((*VirtualMachineMetadataManagerVmMetadataOwnerOwner)(nil)).Elem()
@@ -8960,6 +13872,18 @@ const (
 	// The task of moving this virtual machine is the default priority.
 	VirtualMachineMovePriorityDefaultPriority = VirtualMachineMovePriority("defaultPriority")
 )
+
+func (e VirtualMachineMovePriority) Values() []VirtualMachineMovePriority {
+	return []VirtualMachineMovePriority{
+		VirtualMachineMovePriorityLowPriority,
+		VirtualMachineMovePriorityHighPriority,
+		VirtualMachineMovePriorityDefaultPriority,
+	}
+}
+
+func (e VirtualMachineMovePriority) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineMovePriority"] = reflect.TypeOf((*VirtualMachineMovePriority)(nil)).Elem()
@@ -8985,6 +13909,22 @@ const (
 	VirtualMachineNeedSecondaryReasonOther = VirtualMachineNeedSecondaryReason("other")
 )
 
+func (e VirtualMachineNeedSecondaryReason) Values() []VirtualMachineNeedSecondaryReason {
+	return []VirtualMachineNeedSecondaryReason{
+		VirtualMachineNeedSecondaryReasonInitializing,
+		VirtualMachineNeedSecondaryReasonDivergence,
+		VirtualMachineNeedSecondaryReasonLostConnection,
+		VirtualMachineNeedSecondaryReasonPartialHardwareFailure,
+		VirtualMachineNeedSecondaryReasonUserAction,
+		VirtualMachineNeedSecondaryReasonCheckpointError,
+		VirtualMachineNeedSecondaryReasonOther,
+	}
+}
+
+func (e VirtualMachineNeedSecondaryReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineNeedSecondaryReason"] = reflect.TypeOf((*VirtualMachineNeedSecondaryReason)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineNeedSecondaryReason"] = "4.0"
@@ -9006,6 +13946,19 @@ const (
 	VirtualMachinePowerOffBehaviorTake = VirtualMachinePowerOffBehavior("take")
 )
 
+func (e VirtualMachinePowerOffBehavior) Values() []VirtualMachinePowerOffBehavior {
+	return []VirtualMachinePowerOffBehavior{
+		VirtualMachinePowerOffBehaviorPowerOff,
+		VirtualMachinePowerOffBehaviorRevert,
+		VirtualMachinePowerOffBehaviorPrompt,
+		VirtualMachinePowerOffBehaviorTake,
+	}
+}
+
+func (e VirtualMachinePowerOffBehavior) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachinePowerOffBehavior"] = reflect.TypeOf((*VirtualMachinePowerOffBehavior)(nil)).Elem()
 	minAPIVersionForType["VirtualMachinePowerOffBehavior"] = "2.5"
@@ -9022,6 +13975,18 @@ const (
 	VirtualMachinePowerOpTypeHard   = VirtualMachinePowerOpType("hard")
 	VirtualMachinePowerOpTypePreset = VirtualMachinePowerOpType("preset")
 )
+
+func (e VirtualMachinePowerOpType) Values() []VirtualMachinePowerOpType {
+	return []VirtualMachinePowerOpType{
+		VirtualMachinePowerOpTypeSoft,
+		VirtualMachinePowerOpTypeHard,
+		VirtualMachinePowerOpTypePreset,
+	}
+}
+
+func (e VirtualMachinePowerOpType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachinePowerOpType"] = reflect.TypeOf((*VirtualMachinePowerOpType)(nil)).Elem()
@@ -9052,6 +14017,18 @@ const (
 	VirtualMachinePowerStateSuspended = VirtualMachinePowerState("suspended")
 )
 
+func (e VirtualMachinePowerState) Values() []VirtualMachinePowerState {
+	return []VirtualMachinePowerState{
+		VirtualMachinePowerStatePoweredOff,
+		VirtualMachinePowerStatePoweredOn,
+		VirtualMachinePowerStateSuspended,
+	}
+}
+
+func (e VirtualMachinePowerState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachinePowerState"] = reflect.TypeOf((*VirtualMachinePowerState)(nil)).Elem()
 }
@@ -9070,6 +14047,18 @@ const (
 	// in record or replay.
 	VirtualMachineRecordReplayStateInactive = VirtualMachineRecordReplayState("inactive")
 )
+
+func (e VirtualMachineRecordReplayState) Values() []VirtualMachineRecordReplayState {
+	return []VirtualMachineRecordReplayState{
+		VirtualMachineRecordReplayStateRecording,
+		VirtualMachineRecordReplayStateReplaying,
+		VirtualMachineRecordReplayStateInactive,
+	}
+}
+
+func (e VirtualMachineRecordReplayState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineRecordReplayState"] = reflect.TypeOf((*VirtualMachineRecordReplayState)(nil)).Elem()
@@ -9149,6 +14138,20 @@ const (
 	VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndConsolidate = VirtualMachineRelocateDiskMoveOptions("moveAllDiskBackingsAndConsolidate")
 )
 
+func (e VirtualMachineRelocateDiskMoveOptions) Values() []VirtualMachineRelocateDiskMoveOptions {
+	return []VirtualMachineRelocateDiskMoveOptions{
+		VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndAllowSharing,
+		VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndDisallowSharing,
+		VirtualMachineRelocateDiskMoveOptionsMoveChildMostDiskBacking,
+		VirtualMachineRelocateDiskMoveOptionsCreateNewChildDiskBacking,
+		VirtualMachineRelocateDiskMoveOptionsMoveAllDiskBackingsAndConsolidate,
+	}
+}
+
+func (e VirtualMachineRelocateDiskMoveOptions) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineRelocateDiskMoveOptions"] = reflect.TypeOf((*VirtualMachineRelocateDiskMoveOptions)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineRelocateDiskMoveOptions"] = "4.0"
@@ -9167,6 +14170,17 @@ const (
 	VirtualMachineRelocateTransformationFlat   = VirtualMachineRelocateTransformation("flat")
 	VirtualMachineRelocateTransformationSparse = VirtualMachineRelocateTransformation("sparse")
 )
+
+func (e VirtualMachineRelocateTransformation) Values() []VirtualMachineRelocateTransformation {
+	return []VirtualMachineRelocateTransformation{
+		VirtualMachineRelocateTransformationFlat,
+		VirtualMachineRelocateTransformationSparse,
+	}
+}
+
+func (e VirtualMachineRelocateTransformation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineRelocateTransformation"] = reflect.TypeOf((*VirtualMachineRelocateTransformation)(nil)).Elem()
@@ -9190,6 +14204,27 @@ const (
 	VirtualMachineScsiPassthroughTypeUnknown   = VirtualMachineScsiPassthroughType("unknown")
 )
 
+func (e VirtualMachineScsiPassthroughType) Values() []VirtualMachineScsiPassthroughType {
+	return []VirtualMachineScsiPassthroughType{
+		VirtualMachineScsiPassthroughTypeDisk,
+		VirtualMachineScsiPassthroughTypeTape,
+		VirtualMachineScsiPassthroughTypePrinter,
+		VirtualMachineScsiPassthroughTypeProcessor,
+		VirtualMachineScsiPassthroughTypeWorm,
+		VirtualMachineScsiPassthroughTypeCdrom,
+		VirtualMachineScsiPassthroughTypeScanner,
+		VirtualMachineScsiPassthroughTypeOptical,
+		VirtualMachineScsiPassthroughTypeMedia,
+		VirtualMachineScsiPassthroughTypeCom,
+		VirtualMachineScsiPassthroughTypeRaid,
+		VirtualMachineScsiPassthroughTypeUnknown,
+	}
+}
+
+func (e VirtualMachineScsiPassthroughType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineScsiPassthroughType"] = reflect.TypeOf((*VirtualMachineScsiPassthroughType)(nil)).Elem()
 }
@@ -9209,6 +14244,17 @@ const (
 	VirtualMachineSgxInfoFlcModesUnlocked = VirtualMachineSgxInfoFlcModes("unlocked")
 )
 
+func (e VirtualMachineSgxInfoFlcModes) Values() []VirtualMachineSgxInfoFlcModes {
+	return []VirtualMachineSgxInfoFlcModes{
+		VirtualMachineSgxInfoFlcModesLocked,
+		VirtualMachineSgxInfoFlcModesUnlocked,
+	}
+}
+
+func (e VirtualMachineSgxInfoFlcModes) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineSgxInfoFlcModes"] = reflect.TypeOf((*VirtualMachineSgxInfoFlcModes)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineSgxInfoFlcModes"] = "7.0"
@@ -9222,6 +14268,17 @@ const (
 	VirtualMachineStandbyActionTypeCheckpoint     = VirtualMachineStandbyActionType("checkpoint")
 	VirtualMachineStandbyActionTypePowerOnSuspend = VirtualMachineStandbyActionType("powerOnSuspend")
 )
+
+func (e VirtualMachineStandbyActionType) Values() []VirtualMachineStandbyActionType {
+	return []VirtualMachineStandbyActionType{
+		VirtualMachineStandbyActionTypeCheckpoint,
+		VirtualMachineStandbyActionTypePowerOnSuspend,
+	}
+}
+
+func (e VirtualMachineStandbyActionType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineStandbyActionType"] = reflect.TypeOf((*VirtualMachineStandbyActionType)(nil)).Elem()
@@ -9240,6 +14297,17 @@ const (
 	VirtualMachineTargetInfoConfigurationTagClusterWide = VirtualMachineTargetInfoConfigurationTag("clusterWide")
 )
 
+func (e VirtualMachineTargetInfoConfigurationTag) Values() []VirtualMachineTargetInfoConfigurationTag {
+	return []VirtualMachineTargetInfoConfigurationTag{
+		VirtualMachineTargetInfoConfigurationTagCompliant,
+		VirtualMachineTargetInfoConfigurationTagClusterWide,
+	}
+}
+
+func (e VirtualMachineTargetInfoConfigurationTag) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineTargetInfoConfigurationTag"] = reflect.TypeOf((*VirtualMachineTargetInfoConfigurationTag)(nil)).Elem()
 }
@@ -9247,21 +14315,15 @@ func init() {
 type VirtualMachineTicketType string
 
 const (
-	//
-	//
 	// Deprecated as of vSphere API 8.0. Use `webmks` instead.
 	//
 	// Remote mouse-keyboard-screen ticket.
 	VirtualMachineTicketTypeMks = VirtualMachineTicketType("mks")
-	//
-	//
 	// Deprecated as of vSphere 8.0 API. Use `webRemoteDevice`
 	// instead.
 	//
 	// Remote device ticket.
 	VirtualMachineTicketTypeDevice = VirtualMachineTicketType("device")
-	//
-	//
 	// Deprecated as of vSphere 6.6.3 API. Use
 	// `GuestOperationsManager` instead.
 	//
@@ -9282,6 +14344,21 @@ const (
 	// Remote device over WebSocket ticket.
 	VirtualMachineTicketTypeWebRemoteDevice = VirtualMachineTicketType("webRemoteDevice")
 )
+
+func (e VirtualMachineTicketType) Values() []VirtualMachineTicketType {
+	return []VirtualMachineTicketType{
+		VirtualMachineTicketTypeMks,
+		VirtualMachineTicketTypeDevice,
+		VirtualMachineTicketTypeGuestControl,
+		VirtualMachineTicketTypeWebmks,
+		VirtualMachineTicketTypeGuestIntegrity,
+		VirtualMachineTicketTypeWebRemoteDevice,
+	}
+}
+
+func (e VirtualMachineTicketType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineTicketType"] = reflect.TypeOf((*VirtualMachineTicketType)(nil)).Elem()
@@ -9316,6 +14393,20 @@ const (
 	VirtualMachineToolsInstallTypeGuestToolsTypeOpenVMTools = VirtualMachineToolsInstallType("guestToolsTypeOpenVMTools")
 )
 
+func (e VirtualMachineToolsInstallType) Values() []VirtualMachineToolsInstallType {
+	return []VirtualMachineToolsInstallType{
+		VirtualMachineToolsInstallTypeGuestToolsTypeUnknown,
+		VirtualMachineToolsInstallTypeGuestToolsTypeMSI,
+		VirtualMachineToolsInstallTypeGuestToolsTypeTar,
+		VirtualMachineToolsInstallTypeGuestToolsTypeOSP,
+		VirtualMachineToolsInstallTypeGuestToolsTypeOpenVMTools,
+	}
+}
+
+func (e VirtualMachineToolsInstallType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineToolsInstallType"] = reflect.TypeOf((*VirtualMachineToolsInstallType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineToolsInstallType"] = "6.5"
@@ -9332,6 +14423,18 @@ const (
 	// VMware Tools is starting.
 	VirtualMachineToolsRunningStatusGuestToolsExecutingScripts = VirtualMachineToolsRunningStatus("guestToolsExecutingScripts")
 )
+
+func (e VirtualMachineToolsRunningStatus) Values() []VirtualMachineToolsRunningStatus {
+	return []VirtualMachineToolsRunningStatus{
+		VirtualMachineToolsRunningStatusGuestToolsNotRunning,
+		VirtualMachineToolsRunningStatusGuestToolsRunning,
+		VirtualMachineToolsRunningStatusGuestToolsExecutingScripts,
+	}
+}
+
+func (e VirtualMachineToolsRunningStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineToolsRunningStatus"] = reflect.TypeOf((*VirtualMachineToolsRunningStatus)(nil)).Elem()
@@ -9356,6 +14459,19 @@ const (
 	VirtualMachineToolsStatusToolsOk = VirtualMachineToolsStatus("toolsOk")
 )
 
+func (e VirtualMachineToolsStatus) Values() []VirtualMachineToolsStatus {
+	return []VirtualMachineToolsStatus{
+		VirtualMachineToolsStatusToolsNotInstalled,
+		VirtualMachineToolsStatusToolsNotRunning,
+		VirtualMachineToolsStatusToolsOld,
+		VirtualMachineToolsStatusToolsOk,
+	}
+}
+
+func (e VirtualMachineToolsStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineToolsStatus"] = reflect.TypeOf((*VirtualMachineToolsStatus)(nil)).Elem()
 }
@@ -9366,8 +14482,6 @@ type VirtualMachineToolsVersionStatus string
 const (
 	// VMware Tools has never been installed.
 	VirtualMachineToolsVersionStatusGuestToolsNotInstalled = VirtualMachineToolsVersionStatus("guestToolsNotInstalled")
-	//
-	//
 	// Deprecated as of vSphere API 5.1 value is not reported by
 	// toolsVersionStatus2, instead more detailed status is reported.
 	//
@@ -9391,6 +14505,24 @@ const (
 	// known to have a grave bug and should be immediately upgraded.
 	VirtualMachineToolsVersionStatusGuestToolsBlacklisted = VirtualMachineToolsVersionStatus("guestToolsBlacklisted")
 )
+
+func (e VirtualMachineToolsVersionStatus) Values() []VirtualMachineToolsVersionStatus {
+	return []VirtualMachineToolsVersionStatus{
+		VirtualMachineToolsVersionStatusGuestToolsNotInstalled,
+		VirtualMachineToolsVersionStatusGuestToolsNeedUpgrade,
+		VirtualMachineToolsVersionStatusGuestToolsCurrent,
+		VirtualMachineToolsVersionStatusGuestToolsUnmanaged,
+		VirtualMachineToolsVersionStatusGuestToolsTooOld,
+		VirtualMachineToolsVersionStatusGuestToolsSupportedOld,
+		VirtualMachineToolsVersionStatusGuestToolsSupportedNew,
+		VirtualMachineToolsVersionStatusGuestToolsTooNew,
+		VirtualMachineToolsVersionStatusGuestToolsBlacklisted,
+	}
+}
+
+func (e VirtualMachineToolsVersionStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineToolsVersionStatus"] = reflect.TypeOf((*VirtualMachineToolsVersionStatus)(nil)).Elem()
@@ -9450,6 +14582,34 @@ const (
 	VirtualMachineUsbInfoFamilyUnknownFamily = VirtualMachineUsbInfoFamily("unknownFamily")
 )
 
+func (e VirtualMachineUsbInfoFamily) Values() []VirtualMachineUsbInfoFamily {
+	return []VirtualMachineUsbInfoFamily{
+		VirtualMachineUsbInfoFamilyAudio,
+		VirtualMachineUsbInfoFamilyHid,
+		VirtualMachineUsbInfoFamilyHid_bootable,
+		VirtualMachineUsbInfoFamilyPhysical,
+		VirtualMachineUsbInfoFamilyCommunication,
+		VirtualMachineUsbInfoFamilyImaging,
+		VirtualMachineUsbInfoFamilyPrinter,
+		VirtualMachineUsbInfoFamilyStorage,
+		VirtualMachineUsbInfoFamilyHub,
+		VirtualMachineUsbInfoFamilySmart_card,
+		VirtualMachineUsbInfoFamilySecurity,
+		VirtualMachineUsbInfoFamilyVideo,
+		VirtualMachineUsbInfoFamilyWireless,
+		VirtualMachineUsbInfoFamilyBluetooth,
+		VirtualMachineUsbInfoFamilyWusb,
+		VirtualMachineUsbInfoFamilyPda,
+		VirtualMachineUsbInfoFamilyVendor_specific,
+		VirtualMachineUsbInfoFamilyOther,
+		VirtualMachineUsbInfoFamilyUnknownFamily,
+	}
+}
+
+func (e VirtualMachineUsbInfoFamily) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineUsbInfoFamily"] = reflect.TypeOf((*VirtualMachineUsbInfoFamily)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineUsbInfoFamily"] = "2.5"
@@ -9474,6 +14634,22 @@ const (
 	VirtualMachineUsbInfoSpeedUnknownSpeed = VirtualMachineUsbInfoSpeed("unknownSpeed")
 )
 
+func (e VirtualMachineUsbInfoSpeed) Values() []VirtualMachineUsbInfoSpeed {
+	return []VirtualMachineUsbInfoSpeed{
+		VirtualMachineUsbInfoSpeedLow,
+		VirtualMachineUsbInfoSpeedFull,
+		VirtualMachineUsbInfoSpeedHigh,
+		VirtualMachineUsbInfoSpeedSuperSpeed,
+		VirtualMachineUsbInfoSpeedSuperSpeedPlus,
+		VirtualMachineUsbInfoSpeedSuperSpeed20Gbps,
+		VirtualMachineUsbInfoSpeedUnknownSpeed,
+	}
+}
+
+func (e VirtualMachineUsbInfoSpeed) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineUsbInfoSpeed"] = reflect.TypeOf((*VirtualMachineUsbInfoSpeed)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineUsbInfoSpeed"] = "2.5"
@@ -9494,6 +14670,17 @@ const (
 	VirtualMachineVMCIDeviceActionDeny = VirtualMachineVMCIDeviceAction("deny")
 )
 
+func (e VirtualMachineVMCIDeviceAction) Values() []VirtualMachineVMCIDeviceAction {
+	return []VirtualMachineVMCIDeviceAction{
+		VirtualMachineVMCIDeviceActionAllow,
+		VirtualMachineVMCIDeviceActionDeny,
+	}
+}
+
+func (e VirtualMachineVMCIDeviceAction) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineVMCIDeviceAction"] = reflect.TypeOf((*VirtualMachineVMCIDeviceAction)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineVMCIDeviceAction"] = "6.0"
@@ -9509,6 +14696,18 @@ const (
 	// all of the above
 	VirtualMachineVMCIDeviceDirectionAnyDirection = VirtualMachineVMCIDeviceDirection("anyDirection")
 )
+
+func (e VirtualMachineVMCIDeviceDirection) Values() []VirtualMachineVMCIDeviceDirection {
+	return []VirtualMachineVMCIDeviceDirection{
+		VirtualMachineVMCIDeviceDirectionGuest,
+		VirtualMachineVMCIDeviceDirectionHost,
+		VirtualMachineVMCIDeviceDirectionAnyDirection,
+	}
+}
+
+func (e VirtualMachineVMCIDeviceDirection) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineVMCIDeviceDirection"] = reflect.TypeOf((*VirtualMachineVMCIDeviceDirection)(nil)).Elem()
@@ -9539,6 +14738,21 @@ const (
 	VirtualMachineVMCIDeviceProtocolAnyProtocol = VirtualMachineVMCIDeviceProtocol("anyProtocol")
 )
 
+func (e VirtualMachineVMCIDeviceProtocol) Values() []VirtualMachineVMCIDeviceProtocol {
+	return []VirtualMachineVMCIDeviceProtocol{
+		VirtualMachineVMCIDeviceProtocolHypervisor,
+		VirtualMachineVMCIDeviceProtocolDoorbell,
+		VirtualMachineVMCIDeviceProtocolQueuepair,
+		VirtualMachineVMCIDeviceProtocolDatagram,
+		VirtualMachineVMCIDeviceProtocolStream,
+		VirtualMachineVMCIDeviceProtocolAnyProtocol,
+	}
+}
+
+func (e VirtualMachineVMCIDeviceProtocol) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineVMCIDeviceProtocol"] = reflect.TypeOf((*VirtualMachineVMCIDeviceProtocol)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineVMCIDeviceProtocol"] = "6.0"
@@ -9553,6 +14767,19 @@ const (
 	VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentTypeDvx         = VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType("dvx")
 )
 
+func (e VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType) Values() []VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType {
+	return []VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType{
+		VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentTypePciPassthru,
+		VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentTypeNvidiaVgpu,
+		VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentTypeSriovNic,
+		VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentTypeDvx,
+	}
+}
+
+func (e VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType"] = reflect.TypeOf((*VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineVendorDeviceGroupInfoComponentDeviceInfoComponentType"] = "8.0.0.1"
@@ -9564,6 +14791,17 @@ const (
 	VirtualMachineVgpuProfileInfoProfileClassCompute = VirtualMachineVgpuProfileInfoProfileClass("compute")
 	VirtualMachineVgpuProfileInfoProfileClassQuadro  = VirtualMachineVgpuProfileInfoProfileClass("quadro")
 )
+
+func (e VirtualMachineVgpuProfileInfoProfileClass) Values() []VirtualMachineVgpuProfileInfoProfileClass {
+	return []VirtualMachineVgpuProfileInfoProfileClass{
+		VirtualMachineVgpuProfileInfoProfileClassCompute,
+		VirtualMachineVgpuProfileInfoProfileClassQuadro,
+	}
+}
+
+func (e VirtualMachineVgpuProfileInfoProfileClass) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineVgpuProfileInfoProfileClass"] = reflect.TypeOf((*VirtualMachineVgpuProfileInfoProfileClass)(nil)).Elem()
@@ -9578,6 +14816,17 @@ const (
 	// Multi-instance GPU partitioning
 	VirtualMachineVgpuProfileInfoProfileSharingMig = VirtualMachineVgpuProfileInfoProfileSharing("mig")
 )
+
+func (e VirtualMachineVgpuProfileInfoProfileSharing) Values() []VirtualMachineVgpuProfileInfoProfileSharing {
+	return []VirtualMachineVgpuProfileInfoProfileSharing{
+		VirtualMachineVgpuProfileInfoProfileSharingTimeSliced,
+		VirtualMachineVgpuProfileInfoProfileSharingMig,
+	}
+}
+
+func (e VirtualMachineVgpuProfileInfoProfileSharing) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineVgpuProfileInfoProfileSharing"] = reflect.TypeOf((*VirtualMachineVgpuProfileInfoProfileSharing)(nil)).Elem()
@@ -9594,6 +14843,18 @@ const (
 	// Render 3D with graphics hardware.
 	VirtualMachineVideoCardUse3dRendererHardware = VirtualMachineVideoCardUse3dRenderer("hardware")
 )
+
+func (e VirtualMachineVideoCardUse3dRenderer) Values() []VirtualMachineVideoCardUse3dRenderer {
+	return []VirtualMachineVideoCardUse3dRenderer{
+		VirtualMachineVideoCardUse3dRendererAutomatic,
+		VirtualMachineVideoCardUse3dRendererSoftware,
+		VirtualMachineVideoCardUse3dRendererHardware,
+	}
+}
+
+func (e VirtualMachineVideoCardUse3dRenderer) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineVideoCardUse3dRenderer"] = reflect.TypeOf((*VirtualMachineVideoCardUse3dRenderer)(nil)).Elem()
@@ -9615,6 +14876,20 @@ const (
 	VirtualMachineVirtualDeviceSwapDeviceSwapStatusCompleted = VirtualMachineVirtualDeviceSwapDeviceSwapStatus("completed")
 )
 
+func (e VirtualMachineVirtualDeviceSwapDeviceSwapStatus) Values() []VirtualMachineVirtualDeviceSwapDeviceSwapStatus {
+	return []VirtualMachineVirtualDeviceSwapDeviceSwapStatus{
+		VirtualMachineVirtualDeviceSwapDeviceSwapStatusNone,
+		VirtualMachineVirtualDeviceSwapDeviceSwapStatusScheduled,
+		VirtualMachineVirtualDeviceSwapDeviceSwapStatusInprogress,
+		VirtualMachineVirtualDeviceSwapDeviceSwapStatusFailed,
+		VirtualMachineVirtualDeviceSwapDeviceSwapStatusCompleted,
+	}
+}
+
+func (e VirtualMachineVirtualDeviceSwapDeviceSwapStatus) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineVirtualDeviceSwapDeviceSwapStatus"] = reflect.TypeOf((*VirtualMachineVirtualDeviceSwapDeviceSwapStatus)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineVirtualDeviceSwapDeviceSwapStatus"] = "8.0.0.1"
@@ -9631,6 +14906,17 @@ const (
 	// Virtual NVDIMMs are erased and recreated upon snapshot reverts.
 	VirtualMachineVirtualPMemSnapshotModeIndependent_eraseonrevert = VirtualMachineVirtualPMemSnapshotMode("independent_eraseonrevert")
 )
+
+func (e VirtualMachineVirtualPMemSnapshotMode) Values() []VirtualMachineVirtualPMemSnapshotMode {
+	return []VirtualMachineVirtualPMemSnapshotMode{
+		VirtualMachineVirtualPMemSnapshotModeIndependent_persistent,
+		VirtualMachineVirtualPMemSnapshotModeIndependent_eraseonrevert,
+	}
+}
+
+func (e VirtualMachineVirtualPMemSnapshotMode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualMachineVirtualPMemSnapshotMode"] = reflect.TypeOf((*VirtualMachineVirtualPMemSnapshotMode)(nil)).Elem()
@@ -9653,6 +14939,18 @@ const (
 	VirtualMachineWindowsQuiesceSpecVssBackupContextCtx_file_share_backup = VirtualMachineWindowsQuiesceSpecVssBackupContext("ctx_file_share_backup")
 )
 
+func (e VirtualMachineWindowsQuiesceSpecVssBackupContext) Values() []VirtualMachineWindowsQuiesceSpecVssBackupContext {
+	return []VirtualMachineWindowsQuiesceSpecVssBackupContext{
+		VirtualMachineWindowsQuiesceSpecVssBackupContextCtx_auto,
+		VirtualMachineWindowsQuiesceSpecVssBackupContextCtx_backup,
+		VirtualMachineWindowsQuiesceSpecVssBackupContextCtx_file_share_backup,
+	}
+}
+
+func (e VirtualMachineWindowsQuiesceSpecVssBackupContext) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualMachineWindowsQuiesceSpecVssBackupContext"] = reflect.TypeOf((*VirtualMachineWindowsQuiesceSpecVssBackupContext)(nil)).Elem()
 	minAPIVersionForType["VirtualMachineWindowsQuiesceSpecVssBackupContext"] = "6.5"
@@ -9664,6 +14962,17 @@ const (
 	VirtualNVMEControllerSharingNoSharing       = VirtualNVMEControllerSharing("noSharing")
 	VirtualNVMEControllerSharingPhysicalSharing = VirtualNVMEControllerSharing("physicalSharing")
 )
+
+func (e VirtualNVMEControllerSharing) Values() []VirtualNVMEControllerSharing {
+	return []VirtualNVMEControllerSharing{
+		VirtualNVMEControllerSharingNoSharing,
+		VirtualNVMEControllerSharingPhysicalSharing,
+	}
+}
+
+func (e VirtualNVMEControllerSharing) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualNVMEControllerSharing"] = reflect.TypeOf((*VirtualNVMEControllerSharing)(nil)).Elem()
@@ -9692,6 +15001,23 @@ const (
 	VirtualPointingDeviceHostChoicePs2 = VirtualPointingDeviceHostChoice("ps2")
 )
 
+func (e VirtualPointingDeviceHostChoice) Values() []VirtualPointingDeviceHostChoice {
+	return []VirtualPointingDeviceHostChoice{
+		VirtualPointingDeviceHostChoiceAutodetect,
+		VirtualPointingDeviceHostChoiceIntellimouseExplorer,
+		VirtualPointingDeviceHostChoiceIntellimousePs2,
+		VirtualPointingDeviceHostChoiceLogitechMouseman,
+		VirtualPointingDeviceHostChoiceMicrosoft_serial,
+		VirtualPointingDeviceHostChoiceMouseSystems,
+		VirtualPointingDeviceHostChoiceMousemanSerial,
+		VirtualPointingDeviceHostChoicePs2,
+	}
+}
+
+func (e VirtualPointingDeviceHostChoice) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualPointingDeviceHostChoice"] = reflect.TypeOf((*VirtualPointingDeviceHostChoice)(nil)).Elem()
 }
@@ -9712,6 +15038,18 @@ const (
 	// residing on different physical hosts.
 	VirtualSCSISharingPhysicalSharing = VirtualSCSISharing("physicalSharing")
 )
+
+func (e VirtualSCSISharing) Values() []VirtualSCSISharing {
+	return []VirtualSCSISharing{
+		VirtualSCSISharingNoSharing,
+		VirtualSCSISharingVirtualSharing,
+		VirtualSCSISharingPhysicalSharing,
+	}
+}
+
+func (e VirtualSCSISharing) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualSCSISharing"] = reflect.TypeOf((*VirtualSCSISharing)(nil)).Elem()
@@ -9739,6 +15077,17 @@ const (
 	VirtualSerialPortEndPointServer = VirtualSerialPortEndPoint("server")
 )
 
+func (e VirtualSerialPortEndPoint) Values() []VirtualSerialPortEndPoint {
+	return []VirtualSerialPortEndPoint{
+		VirtualSerialPortEndPointClient,
+		VirtualSerialPortEndPointServer,
+	}
+}
+
+func (e VirtualSerialPortEndPoint) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VirtualSerialPortEndPoint"] = reflect.TypeOf((*VirtualSerialPortEndPoint)(nil)).Elem()
 }
@@ -9751,6 +15100,17 @@ const (
 	// A RoCEv2 device.
 	VirtualVmxnet3VrdmaOptionDeviceProtocolsRocev2 = VirtualVmxnet3VrdmaOptionDeviceProtocols("rocev2")
 )
+
+func (e VirtualVmxnet3VrdmaOptionDeviceProtocols) Values() []VirtualVmxnet3VrdmaOptionDeviceProtocols {
+	return []VirtualVmxnet3VrdmaOptionDeviceProtocols{
+		VirtualVmxnet3VrdmaOptionDeviceProtocolsRocev1,
+		VirtualVmxnet3VrdmaOptionDeviceProtocolsRocev2,
+	}
+}
+
+func (e VirtualVmxnet3VrdmaOptionDeviceProtocols) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VirtualVmxnet3VrdmaOptionDeviceProtocols"] = reflect.TypeOf((*VirtualVmxnet3VrdmaOptionDeviceProtocols)(nil)).Elem()
@@ -9769,6 +15129,19 @@ const (
 	// reset issued by VMCP when APD cleared
 	VmDasBeingResetEventReasonCodeVmcpResetApdCleared = VmDasBeingResetEventReasonCode("vmcpResetApdCleared")
 )
+
+func (e VmDasBeingResetEventReasonCode) Values() []VmDasBeingResetEventReasonCode {
+	return []VmDasBeingResetEventReasonCode{
+		VmDasBeingResetEventReasonCodeVmtoolsHeartbeatFailure,
+		VmDasBeingResetEventReasonCodeAppHeartbeatFailure,
+		VmDasBeingResetEventReasonCodeAppImmediateResetRequest,
+		VmDasBeingResetEventReasonCodeVmcpResetApdCleared,
+	}
+}
+
+func (e VmDasBeingResetEventReasonCode) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VmDasBeingResetEventReasonCode"] = reflect.TypeOf((*VmDasBeingResetEventReasonCode)(nil)).Elem()
@@ -9796,6 +15169,19 @@ const (
 	VmFailedStartingSecondaryEventFailureReasonMigrateFailed = VmFailedStartingSecondaryEventFailureReason("migrateFailed")
 )
 
+func (e VmFailedStartingSecondaryEventFailureReason) Values() []VmFailedStartingSecondaryEventFailureReason {
+	return []VmFailedStartingSecondaryEventFailureReason{
+		VmFailedStartingSecondaryEventFailureReasonIncompatibleHost,
+		VmFailedStartingSecondaryEventFailureReasonLoginFailed,
+		VmFailedStartingSecondaryEventFailureReasonRegisterVmFailed,
+		VmFailedStartingSecondaryEventFailureReasonMigrateFailed,
+	}
+}
+
+func (e VmFailedStartingSecondaryEventFailureReason) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VmFailedStartingSecondaryEventFailureReason"] = reflect.TypeOf((*VmFailedStartingSecondaryEventFailureReason)(nil)).Elem()
 	minAPIVersionForType["VmFailedStartingSecondaryEventFailureReason"] = "4.0"
@@ -9809,16 +15195,12 @@ const (
 	// There is already a secondary virtual machine for the primary
 	// virtual machine
 	VmFaultToleranceConfigIssueReasonForIssueMoreThanOneSecondary = VmFaultToleranceConfigIssueReasonForIssue("moreThanOneSecondary")
-	//
-	//
 	// Deprecated as of vSphere API 6.0.
 	//
 	// The virtual machine does not support record/replay.
 	//
 	// Vm::Capability.RecordReplaySupported is false.
 	VmFaultToleranceConfigIssueReasonForIssueRecordReplayNotSupported = VmFaultToleranceConfigIssueReasonForIssue("recordReplayNotSupported")
-	//
-	//
 	// Deprecated as of vSphere API 6.0.
 	//
 	// It is not possible to turn on Fault Tolerance on this powered-on VM.
@@ -9889,6 +15271,46 @@ const (
 	VmFaultToleranceConfigIssueReasonForIssueUnsupportedPMemHAFailOver = VmFaultToleranceConfigIssueReasonForIssue("unsupportedPMemHAFailOver")
 )
 
+func (e VmFaultToleranceConfigIssueReasonForIssue) Values() []VmFaultToleranceConfigIssueReasonForIssue {
+	return []VmFaultToleranceConfigIssueReasonForIssue{
+		VmFaultToleranceConfigIssueReasonForIssueHaNotEnabled,
+		VmFaultToleranceConfigIssueReasonForIssueMoreThanOneSecondary,
+		VmFaultToleranceConfigIssueReasonForIssueRecordReplayNotSupported,
+		VmFaultToleranceConfigIssueReasonForIssueReplayNotSupported,
+		VmFaultToleranceConfigIssueReasonForIssueTemplateVm,
+		VmFaultToleranceConfigIssueReasonForIssueMultipleVCPU,
+		VmFaultToleranceConfigIssueReasonForIssueHostInactive,
+		VmFaultToleranceConfigIssueReasonForIssueFtUnsupportedHardware,
+		VmFaultToleranceConfigIssueReasonForIssueFtUnsupportedProduct,
+		VmFaultToleranceConfigIssueReasonForIssueMissingVMotionNic,
+		VmFaultToleranceConfigIssueReasonForIssueMissingFTLoggingNic,
+		VmFaultToleranceConfigIssueReasonForIssueThinDisk,
+		VmFaultToleranceConfigIssueReasonForIssueVerifySSLCertificateFlagNotSet,
+		VmFaultToleranceConfigIssueReasonForIssueHasSnapshots,
+		VmFaultToleranceConfigIssueReasonForIssueNoConfig,
+		VmFaultToleranceConfigIssueReasonForIssueFtSecondaryVm,
+		VmFaultToleranceConfigIssueReasonForIssueHasLocalDisk,
+		VmFaultToleranceConfigIssueReasonForIssueEsxAgentVm,
+		VmFaultToleranceConfigIssueReasonForIssueVideo3dEnabled,
+		VmFaultToleranceConfigIssueReasonForIssueHasUnsupportedDisk,
+		VmFaultToleranceConfigIssueReasonForIssueInsufficientBandwidth,
+		VmFaultToleranceConfigIssueReasonForIssueHasNestedHVConfiguration,
+		VmFaultToleranceConfigIssueReasonForIssueHasVFlashConfiguration,
+		VmFaultToleranceConfigIssueReasonForIssueUnsupportedProduct,
+		VmFaultToleranceConfigIssueReasonForIssueCpuHvUnsupported,
+		VmFaultToleranceConfigIssueReasonForIssueCpuHwmmuUnsupported,
+		VmFaultToleranceConfigIssueReasonForIssueCpuHvDisabled,
+		VmFaultToleranceConfigIssueReasonForIssueHasEFIFirmware,
+		VmFaultToleranceConfigIssueReasonForIssueTooManyVCPUs,
+		VmFaultToleranceConfigIssueReasonForIssueTooMuchMemory,
+		VmFaultToleranceConfigIssueReasonForIssueUnsupportedPMemHAFailOver,
+	}
+}
+
+func (e VmFaultToleranceConfigIssueReasonForIssue) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VmFaultToleranceConfigIssueReasonForIssue"] = reflect.TypeOf((*VmFaultToleranceConfigIssueReasonForIssue)(nil)).Elem()
 	minAPIVersionForType["VmFaultToleranceConfigIssueReasonForIssue"] = "4.0"
@@ -9925,6 +15347,20 @@ const (
 	VmFaultToleranceInvalidFileBackingDeviceTypeVirtualDisk = VmFaultToleranceInvalidFileBackingDeviceType("virtualDisk")
 )
 
+func (e VmFaultToleranceInvalidFileBackingDeviceType) Values() []VmFaultToleranceInvalidFileBackingDeviceType {
+	return []VmFaultToleranceInvalidFileBackingDeviceType{
+		VmFaultToleranceInvalidFileBackingDeviceTypeVirtualFloppy,
+		VmFaultToleranceInvalidFileBackingDeviceTypeVirtualCdrom,
+		VmFaultToleranceInvalidFileBackingDeviceTypeVirtualSerialPort,
+		VmFaultToleranceInvalidFileBackingDeviceTypeVirtualParallelPort,
+		VmFaultToleranceInvalidFileBackingDeviceTypeVirtualDisk,
+	}
+}
+
+func (e VmFaultToleranceInvalidFileBackingDeviceType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VmFaultToleranceInvalidFileBackingDeviceType"] = reflect.TypeOf((*VmFaultToleranceInvalidFileBackingDeviceType)(nil)).Elem()
 	minAPIVersionForType["VmFaultToleranceInvalidFileBackingDeviceType"] = "4.0"
@@ -9938,6 +15374,17 @@ const (
 	// The virtual machine was powered off because shut down failed
 	VmShutdownOnIsolationEventOperationPoweredOff = VmShutdownOnIsolationEventOperation("poweredOff")
 )
+
+func (e VmShutdownOnIsolationEventOperation) Values() []VmShutdownOnIsolationEventOperation {
+	return []VmShutdownOnIsolationEventOperation{
+		VmShutdownOnIsolationEventOperationShutdown,
+		VmShutdownOnIsolationEventOperationPoweredOff,
+	}
+}
+
+func (e VmShutdownOnIsolationEventOperation) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VmShutdownOnIsolationEventOperation"] = reflect.TypeOf((*VmShutdownOnIsolationEventOperation)(nil)).Elem()
@@ -9961,6 +15408,18 @@ const (
 	VmwareDistributedVirtualSwitchPvlanPortTypeCommunity = VmwareDistributedVirtualSwitchPvlanPortType("community")
 )
 
+func (e VmwareDistributedVirtualSwitchPvlanPortType) Values() []VmwareDistributedVirtualSwitchPvlanPortType {
+	return []VmwareDistributedVirtualSwitchPvlanPortType{
+		VmwareDistributedVirtualSwitchPvlanPortTypePromiscuous,
+		VmwareDistributedVirtualSwitchPvlanPortTypeIsolated,
+		VmwareDistributedVirtualSwitchPvlanPortTypeCommunity,
+	}
+}
+
+func (e VmwareDistributedVirtualSwitchPvlanPortType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VmwareDistributedVirtualSwitchPvlanPortType"] = reflect.TypeOf((*VmwareDistributedVirtualSwitchPvlanPortType)(nil)).Elem()
 	minAPIVersionForType["VmwareDistributedVirtualSwitchPvlanPortType"] = "4.0"
@@ -9973,6 +15432,18 @@ const (
 	VsanDiskIssueTypeStampMismatch = VsanDiskIssueType("stampMismatch")
 	VsanDiskIssueTypeUnknown       = VsanDiskIssueType("unknown")
 )
+
+func (e VsanDiskIssueType) Values() []VsanDiskIssueType {
+	return []VsanDiskIssueType{
+		VsanDiskIssueTypeNonExist,
+		VsanDiskIssueTypeStampMismatch,
+		VsanDiskIssueTypeUnknown,
+	}
+}
+
+func (e VsanDiskIssueType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VsanDiskIssueType"] = reflect.TypeOf((*VsanDiskIssueType)(nil)).Elem()
@@ -9992,6 +15463,18 @@ const (
 	// object data is removed from the host.
 	VsanHostDecommissionModeObjectActionEvacuateAllData = VsanHostDecommissionModeObjectAction("evacuateAllData")
 )
+
+func (e VsanHostDecommissionModeObjectAction) Values() []VsanHostDecommissionModeObjectAction {
+	return []VsanHostDecommissionModeObjectAction{
+		VsanHostDecommissionModeObjectActionNoAction,
+		VsanHostDecommissionModeObjectActionEnsureObjectAccessibility,
+		VsanHostDecommissionModeObjectActionEvacuateAllData,
+	}
+}
+
+func (e VsanHostDecommissionModeObjectAction) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VsanHostDecommissionModeObjectAction"] = reflect.TypeOf((*VsanHostDecommissionModeObjectAction)(nil)).Elem()
@@ -10021,6 +15504,18 @@ const (
 	VsanHostDiskResultStateIneligible = VsanHostDiskResultState("ineligible")
 )
 
+func (e VsanHostDiskResultState) Values() []VsanHostDiskResultState {
+	return []VsanHostDiskResultState{
+		VsanHostDiskResultStateInUse,
+		VsanHostDiskResultStateEligible,
+		VsanHostDiskResultStateIneligible,
+	}
+}
+
+func (e VsanHostDiskResultState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VsanHostDiskResultState"] = reflect.TypeOf((*VsanHostDiskResultState)(nil)).Elem()
 	minAPIVersionForType["VsanHostDiskResultState"] = "5.5"
@@ -10038,6 +15533,18 @@ const (
 	// Node is considered unhealthy.
 	VsanHostHealthStateUnhealthy = VsanHostHealthState("unhealthy")
 )
+
+func (e VsanHostHealthState) Values() []VsanHostHealthState {
+	return []VsanHostHealthState{
+		VsanHostHealthStateUnknown,
+		VsanHostHealthStateHealthy,
+		VsanHostHealthStateUnhealthy,
+	}
+}
+
+func (e VsanHostHealthState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VsanHostHealthState"] = reflect.TypeOf((*VsanHostHealthState)(nil)).Elem()
@@ -10081,6 +15588,25 @@ const (
 	VsanHostNodeStateDecommissioning = VsanHostNodeState("decommissioning")
 )
 
+func (e VsanHostNodeState) Values() []VsanHostNodeState {
+	return []VsanHostNodeState{
+		VsanHostNodeStateError,
+		VsanHostNodeStateDisabled,
+		VsanHostNodeStateAgent,
+		VsanHostNodeStateMaster,
+		VsanHostNodeStateBackup,
+		VsanHostNodeStateStarting,
+		VsanHostNodeStateStopping,
+		VsanHostNodeStateEnteringMaintenanceMode,
+		VsanHostNodeStateExitingMaintenanceMode,
+		VsanHostNodeStateDecommissioning,
+	}
+}
+
+func (e VsanHostNodeState) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["VsanHostNodeState"] = reflect.TypeOf((*VsanHostNodeState)(nil)).Elem()
 	minAPIVersionForType["VsanHostNodeState"] = "5.5"
@@ -10094,6 +15620,17 @@ const (
 	// Disk group is being removed.
 	VsanUpgradeSystemUpgradeHistoryDiskGroupOpTypeRemove = VsanUpgradeSystemUpgradeHistoryDiskGroupOpType("remove")
 )
+
+func (e VsanUpgradeSystemUpgradeHistoryDiskGroupOpType) Values() []VsanUpgradeSystemUpgradeHistoryDiskGroupOpType {
+	return []VsanUpgradeSystemUpgradeHistoryDiskGroupOpType{
+		VsanUpgradeSystemUpgradeHistoryDiskGroupOpTypeAdd,
+		VsanUpgradeSystemUpgradeHistoryDiskGroupOpTypeRemove,
+	}
+}
+
+func (e VsanUpgradeSystemUpgradeHistoryDiskGroupOpType) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["VsanUpgradeSystemUpgradeHistoryDiskGroupOpType"] = reflect.TypeOf((*VsanUpgradeSystemUpgradeHistoryDiskGroupOpType)(nil)).Elem()
@@ -10110,6 +15647,20 @@ const (
 	WeekOfMonthLast   = WeekOfMonth("last")
 )
 
+func (e WeekOfMonth) Values() []WeekOfMonth {
+	return []WeekOfMonth{
+		WeekOfMonthFirst,
+		WeekOfMonthSecond,
+		WeekOfMonthThird,
+		WeekOfMonthFourth,
+		WeekOfMonthLast,
+	}
+}
+
+func (e WeekOfMonth) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["WeekOfMonth"] = reflect.TypeOf((*WeekOfMonth)(nil)).Elem()
 }
@@ -10122,6 +15673,17 @@ const (
 	// relocate resolution
 	WillLoseHAProtectionResolutionRelocate = WillLoseHAProtectionResolution("relocate")
 )
+
+func (e WillLoseHAProtectionResolution) Values() []WillLoseHAProtectionResolution {
+	return []WillLoseHAProtectionResolution{
+		WillLoseHAProtectionResolutionSvmotion,
+		WillLoseHAProtectionResolutionRelocate,
+	}
+}
+
+func (e WillLoseHAProtectionResolution) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["WillLoseHAProtectionResolution"] = reflect.TypeOf((*WillLoseHAProtectionResolution)(nil)).Elem()
@@ -10154,6 +15716,36 @@ const (
 	VslmDiskInfoFlagCbtEnabled              = VslmDiskInfoFlag("cbtEnabled")
 )
 
+func (e VslmDiskInfoFlag) Values() []VslmDiskInfoFlag {
+	return []VslmDiskInfoFlag{
+		VslmDiskInfoFlagId,
+		VslmDiskInfoFlagDescriptorVersion,
+		VslmDiskInfoFlagBackingObjectId,
+		VslmDiskInfoFlagPath,
+		VslmDiskInfoFlagParentPath,
+		VslmDiskInfoFlagName,
+		VslmDiskInfoFlagDeviceName,
+		VslmDiskInfoFlagCapacity,
+		VslmDiskInfoFlagAllocated,
+		VslmDiskInfoFlagType,
+		VslmDiskInfoFlagConsumers,
+		VslmDiskInfoFlagTentativeState,
+		VslmDiskInfoFlagCreateTime,
+		VslmDiskInfoFlagIoFilter,
+		VslmDiskInfoFlagControlFlags,
+		VslmDiskInfoFlagKeepAfterVmDelete,
+		VslmDiskInfoFlagRelocationDisabled,
+		VslmDiskInfoFlagKeyId,
+		VslmDiskInfoFlagKeyProviderId,
+		VslmDiskInfoFlagNativeSnapshotSupported,
+		VslmDiskInfoFlagCbtEnabled,
+	}
+}
+
+func (e VslmDiskInfoFlag) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	t["vslmDiskInfoFlag"] = reflect.TypeOf((*VslmDiskInfoFlag)(nil)).Elem()
 }
@@ -10165,6 +15757,18 @@ const (
 	VslmVStorageObjectControlFlagDisableRelocation          = VslmVStorageObjectControlFlag("disableRelocation")
 	VslmVStorageObjectControlFlagEnableChangedBlockTracking = VslmVStorageObjectControlFlag("enableChangedBlockTracking")
 )
+
+func (e VslmVStorageObjectControlFlag) Values() []VslmVStorageObjectControlFlag {
+	return []VslmVStorageObjectControlFlag{
+		VslmVStorageObjectControlFlagKeepAfterDeleteVm,
+		VslmVStorageObjectControlFlagDisableRelocation,
+		VslmVStorageObjectControlFlagEnableChangedBlockTracking,
+	}
+}
+
+func (e VslmVStorageObjectControlFlag) Strings() []string {
+	return EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	t["vslmVStorageObjectControlFlag"] = reflect.TypeOf((*VslmVStorageObjectControlFlag)(nil)).Elem()
