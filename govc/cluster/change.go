@@ -27,12 +27,7 @@ import (
 )
 
 func DrsBehaviorUsage() string {
-	drsModes := []string{
-		string(types.DrsBehaviorManual),
-		string(types.DrsBehaviorPartiallyAutomated),
-		string(types.DrsBehaviorFullyAutomated),
-	}
-
+	drsModes := types.DrsBehavior("").Strings()
 	return "DRS behavior for virtual machines: " + strings.Join(drsModes, ", ")
 }
 

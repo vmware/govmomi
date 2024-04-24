@@ -593,6 +593,13 @@ class SimpleType < Simple
     io.print "const (\n"
     enums.each { |e| e.dump(io) }
     io.print ")\n\n"
+
+    io.print "func(e %1$s) Values() []%1$s {\n\treturn []%1$s{\n" % ucfirstName
+    enums.each { |e| io.print("\t\t%s,\n" % e.var_name()) }
+    io.print "\t}\n}\n\n"
+
+    io.print "func(e %1$s) Strings() []string {\n\treturn EnumValuesAsStrings(e.Values())\n}\n\n" % ucfirstName
+
   end
 
   def dump_init(io)
