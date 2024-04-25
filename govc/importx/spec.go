@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,28 +31,11 @@ import (
 )
 
 var (
-	allDiskProvisioningOptions = []string{
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeFlat),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicSparse),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicFlat),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeTwoGbMaxExtentSparse),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeTwoGbMaxExtentFlat),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeThin),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeThick),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeSeSparse),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeEagerZeroedThick),
-		string(types.OvfCreateImportSpecParamsDiskProvisioningTypeSparse),
-	}
-	allIPAllocationPolicyOptions = []string{
-		string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
-		string(types.VAppIPAssignmentInfoIpAllocationPolicyTransientPolicy),
-		string(types.VAppIPAssignmentInfoIpAllocationPolicyFixedPolicy),
-		string(types.VAppIPAssignmentInfoIpAllocationPolicyFixedAllocatedPolicy),
-	}
-	allIPProtocolOptions = []string{
-		string(types.VAppIPAssignmentInfoProtocolsIPv4),
-		string(types.VAppIPAssignmentInfoProtocolsIPv6),
-	}
+	allDiskProvisioningOptions = types.OvfCreateImportSpecParamsDiskProvisioningType("").Strings()
+
+	allIPAllocationPolicyOptions = types.VAppIPAssignmentInfoIpAllocationPolicy("").Strings()
+
+	allIPProtocolOptions = types.VAppIPAssignmentInfoProtocols("").Strings()
 )
 
 type spec struct {

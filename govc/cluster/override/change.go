@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,26 +52,14 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar((*string)(&cmd.drs.Behavior), "drs-mode", "", cluster.DrsBehaviorUsage())
 
 	// HA
-	rp := []string{
-		string(types.ClusterDasVmSettingsRestartPriorityDisabled),
-		string(types.ClusterDasVmSettingsRestartPriorityLowest),
-		string(types.ClusterDasVmSettingsRestartPriorityLow),
-		string(types.ClusterDasVmSettingsRestartPriorityMedium),
-		string(types.ClusterDasVmSettingsRestartPriorityHigh),
-		string(types.ClusterDasVmSettingsRestartPriorityHighest),
-	}
+	rp := types.ClusterDasVmSettingsRestartPriority("").Strings()
 	cmd.das.DasSettings = new(types.ClusterDasVmSettings)
 
 	f.StringVar((*string)(&cmd.das.DasSettings.RestartPriority), "ha-restart-priority", "", "HA restart priority: "+strings.Join(rp, ", "))
 
 	f.Var(flags.NewInt32(&cmd.orc.VmReadiness.PostReadyDelay), "ha-additional-delay", "HA Additional Delay")
 
-	rc := []string{
-		string(types.ClusterVmReadinessReadyConditionPoweredOn),
-		string(types.ClusterVmReadinessReadyConditionGuestHbStatusGreen),
-		string(types.ClusterVmReadinessReadyConditionAppHbStatusGreen),
-		string(types.ClusterVmReadinessReadyConditionUseClusterDefault),
-	}
+	rc := types.ClusterVmReadinessReadyCondition("").Strings()
 	f.StringVar((*string)(&cmd.orc.VmReadiness.ReadyCondition), "ha-ready-condition", "", "HA VM Ready Condition (Start next priority VMs when): "+strings.Join(rc, ", "))
 }
 

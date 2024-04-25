@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,11 +42,7 @@ func init() {
 	cli.Register("host.autostart.add", &add{})
 }
 
-var waitHeartbeatTypes = []string{
-	string(types.AutoStartWaitHeartbeatSettingSystemDefault),
-	string(types.AutoStartWaitHeartbeatSettingYes),
-	string(types.AutoStartWaitHeartbeatSettingNo),
-}
+var waitHeartbeatTypes = types.AutoStartWaitHeartbeatSetting("").Strings()
 
 func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.AutostartFlag, ctx = newAutostartFlag(ctx)
@@ -60,7 +56,7 @@ func (cmd *add) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(flags.NewInt32(&cmd.StopDelay), "stop-delay", "Stop Delay")
 	f.StringVar(&cmd.StartAction, "start-action", "powerOn", "Start Action")
 	f.StringVar(&cmd.StopAction, "stop-action", "systemDefault", "Stop Action")
-	f.StringVar(&cmd.WaitForHeartbeat, "wait", waitHeartbeatTypes[0],
+	f.StringVar(&cmd.WaitForHeartbeat, "wait", string(types.AutoStartWaitHeartbeatSettingSystemDefault),
 		fmt.Sprintf("Wait for Hearbeat Setting (%s)", strings.Join(waitHeartbeatTypes, "|")))
 }
 
