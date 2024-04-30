@@ -19,6 +19,7 @@ package library
 import (
 	"bufio"
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 	"strings"
@@ -87,7 +88,7 @@ func (c *Manager) AddLibraryItemFile(ctx context.Context, sessionID string, upda
 }
 
 // AddLibraryItemFileFromURI adds a file from a remote URI.
-func (c *Manager) AddLibraryItemFileFromURI(ctx context.Context, sessionID, name, uri string) (*UpdateFile, error) {
+func (c *Manager) AddLibraryItemFileFromURI(ctx context.Context, sessionID, name, uri string, checksum ...Checksum) (*UpdateFile, error) {
 	source := &TransferEndpoint{
 		URI: uri,
 	}
@@ -96,6 +97,12 @@ func (c *Manager) AddLibraryItemFileFromURI(ctx context.Context, sessionID, name
 		Name:           name,
 		SourceType:     "PULL",
 		SourceEndpoint: source,
+	}
+
+	if len(checksum) == 1 && checksum[0].Checksum != "" {
+		file.Checksum = &checksum[0]
+	} else if len(checksum) > 1 {
+		return nil, fmt.Errorf("expected 0 or 1 checksum, got %d", len(checksum))
 	}
 
 	if res, err := c.Head(uri); err == nil {
