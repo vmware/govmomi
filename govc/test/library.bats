@@ -187,7 +187,8 @@ load test_helper
   dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
   ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
 
-  run govc library.import -pull my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
+  # vcsim doesn't verify checksums. Use a fake checksum and a possible algorithm to ensure the args are accepted.
+  run govc library.import -pull -c=fake -a=SHA1 my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
   assert_success
 
   run govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux
@@ -196,7 +197,8 @@ load test_helper
   run govc vm.info ttylinux
   assert_success
 
-  run govc library.import -pull -n ttylinux-unpacked my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  # vcsim doesn't verify checksums. Use a fake checksum and a possible algorithm to ensure the args are accepted.
+  run govc library.import -pull -c=fake -a=MD5 -n ttylinux-unpacked my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
   assert_success
 
   item_id=$(govc library.info -json /my-content/ttylinux-unpacked | jq -r .[].id)

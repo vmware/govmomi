@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -38,6 +38,7 @@ type item struct {
 	*flags.ClientFlag
 	*flags.OutputFlag
 	library.Item
+	library.Checksum
 
 	manifest bool
 	pull     bool
@@ -58,6 +59,8 @@ func (cmd *item) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.Type, "t", "", "Library item type")
 	f.BoolVar(&cmd.manifest, "m", false, "Require ova manifest")
 	f.BoolVar(&cmd.pull, "pull", false, "Pull library item from http endpoint")
+	f.StringVar(&cmd.Checksum.Checksum, "c", "", "Checksum value to verify the pulled library item")
+	f.StringVar(&cmd.Checksum.Algorithm, "a", "SHA256", "Algorithm used to calculate the checksum. Possible values are: SHA1, MD5, SHA256 (default), SHA512")
 }
 
 func (cmd *item) Usage() string {
@@ -74,7 +77,8 @@ Examples:
   govc library.import library_id file.iso # Use library id if multiple libraries have the same name
   govc library.import library_name/item_name file.ova # update existing item
   govc library.import library_name http://example.com/file.ovf # download and push to vCenter
-  govc library.import -pull library_name http://example.com/file.ova # direct pull from vCenter`
+  govc library.import -pull library_name http://example.com/file.ova # direct pull from vCenter
+  govc library.import -pull -c=<checksum> -a=<SHA1|MD5|SHA256|SHA512> library_name http://example.com/file.ova # direct pull from vCenter with checksum validation`
 }
 
 func (cmd *item) Process(ctx context.Context) error {
@@ -87,6 +91,16 @@ func (cmd *item) Process(ctx context.Context) error {
 func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 	if f.NArg() != 2 {
 		return flag.ErrHelp
+	}
+
+	// Checksums are verified after the file is uploaded to a server.
+	// Check the algorithm and fail early if it's not supported.
+	if cmd.pull && cmd.Checksum.Checksum != "" {
+		switch cmd.Checksum.Algorithm {
+		case "SHA1", "MD5", "SHA256", "SHA512":
+		default:
+			return fmt.Errorf("invalid checksum algorithm: %s", cmd.Checksum.Algorithm)
+		}
 	}
 
 	file := f.Arg(1)
@@ -172,7 +186,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 	if cmd.pull {
-		_, err = m.AddLibraryItemFileFromURI(ctx, session, filepath.Base(file), file)
+		_, err = m.AddLibraryItemFileFromURI(ctx, session, filepath.Base(file), file, cmd.Checksum)
 		if err != nil {
 			return err
 		}

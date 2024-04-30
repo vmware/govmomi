@@ -3613,8 +3613,11 @@ Examples:
   govc library.import library_name/item_name file.ova # update existing item
   govc library.import library_name http://example.com/file.ovf # download and push to vCenter
   govc library.import -pull library_name http://example.com/file.ova # direct pull from vCenter
+  govc library.import -pull -c=<checksum> -a=<SHA1|MD5|SHA256|SHA512> library_name http://example.com/file.ova # direct pull from vCenter with checksum validation
 
 Options:
+  -a=SHA256              Algorithm used to calculate the checksum. Possible values are: SHA1, MD5, SHA256 (default), SHA512
+  -c=                    Checksum value to verify the pulled library item
   -m=false               Require ova manifest
   -n=                    Library item name
   -pull=false            Pull library item from http endpoint
