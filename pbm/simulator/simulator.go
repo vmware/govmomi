@@ -242,3 +242,26 @@ func (m *PlacementSolver) PbmCheckRequirements(req *types.PbmCheckRequirements) 
 
 	return body
 }
+
+func (m *PlacementSolver) PbmCheckCompatibility(req *types.PbmCheckCompatibility) soap.HasFault {
+	body := new(methods.PbmCheckCompatibilityBody)
+	body.Res = new(types.PbmCheckCompatibilityResponse)
+
+	for _, ds := range simulator.Map.All("Datastore") {
+		// TODO: filter
+		ref := ds.Reference()
+		body.Res.Returnval = append(body.Res.Returnval, types.PbmPlacementCompatibilityResult{
+			Hub: types.PbmPlacementHub{
+				HubType: ref.Type,
+				HubId:   ref.Value,
+			},
+			MatchingResources: nil,
+			HowMany:           0,
+			Utilization:       nil,
+			Warning:           nil,
+			Error:             nil,
+		})
+	}
+
+	return body
+}
