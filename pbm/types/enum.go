@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -33,6 +33,18 @@ const (
 	PbmAssociateAndApplyPolicyStatusPolicyStatusInvalid = PbmAssociateAndApplyPolicyStatusPolicyStatus("invalid")
 )
 
+func (e PbmAssociateAndApplyPolicyStatusPolicyStatus) Values() []PbmAssociateAndApplyPolicyStatusPolicyStatus {
+	return []PbmAssociateAndApplyPolicyStatusPolicyStatus{
+		PbmAssociateAndApplyPolicyStatusPolicyStatusSuccess,
+		PbmAssociateAndApplyPolicyStatusPolicyStatusFailed,
+		PbmAssociateAndApplyPolicyStatusPolicyStatusInvalid,
+	}
+}
+
+func (e PbmAssociateAndApplyPolicyStatusPolicyStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmAssociateAndApplyPolicyStatusPolicyStatus", reflect.TypeOf((*PbmAssociateAndApplyPolicyStatusPolicyStatus)(nil)).Elem())
 }
@@ -58,6 +70,17 @@ const (
 	PbmBuiltinGenericTypeVMW_SET = PbmBuiltinGenericType("VMW_SET")
 )
 
+func (e PbmBuiltinGenericType) Values() []PbmBuiltinGenericType {
+	return []PbmBuiltinGenericType{
+		PbmBuiltinGenericTypeVMW_RANGE,
+		PbmBuiltinGenericTypeVMW_SET,
+	}
+}
+
+func (e PbmBuiltinGenericType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmBuiltinGenericType", reflect.TypeOf((*PbmBuiltinGenericType)(nil)).Elem())
 }
@@ -80,9 +103,9 @@ const (
 	// Unsigned long value.
 	//
 	// This datatype supports the following constraint values.
-	//     - Single value
-	//     - Full or partial range of values (`PbmCapabilityRange`)
-	//     - Discrete set of values (`PbmCapabilityDiscreteSet`)
+	//   - Single value
+	//   - Full or partial range of values (`PbmCapabilityRange`)
+	//   - Discrete set of values (`PbmCapabilityDiscreteSet`)
 	PbmBuiltinTypeXSD_LONG = PbmBuiltinType("XSD_LONG")
 	// Datatype not supported.
 	PbmBuiltinTypeXSD_SHORT = PbmBuiltinType("XSD_SHORT")
@@ -93,9 +116,9 @@ const (
 	// Integer value.
 	//
 	// This datatype supports the following constraint values.
-	//     - Single value
-	//     - Full or partial range of values (`PbmCapabilityRange`)
-	//     - Discrete set of values (`PbmCapabilityDiscreteSet`)
+	//   - Single value
+	//   - Full or partial range of values (`PbmCapabilityRange`)
+	//   - Discrete set of values (`PbmCapabilityDiscreteSet`)
 	PbmBuiltinTypeXSD_INT = PbmBuiltinType("XSD_INT")
 	// String value.
 	//
@@ -108,9 +131,9 @@ const (
 	//
 	// This datatype supports the following
 	// constraint values.
-	//     - Single value
-	//     - Full or partial range of values (`PbmCapabilityRange`)
-	//     - Discrete set of values (`PbmCapabilityDiscreteSet`)
+	//   - Single value
+	//   - Full or partial range of values (`PbmCapabilityRange`)
+	//   - Discrete set of values (`PbmCapabilityDiscreteSet`)
 	PbmBuiltinTypeXSD_DOUBLE = PbmBuiltinType("XSD_DOUBLE")
 	// Date and time value.
 	PbmBuiltinTypeXSD_DATETIME = PbmBuiltinType("XSD_DATETIME")
@@ -118,12 +141,31 @@ const (
 	//
 	// This datatype supports
 	// the following constraint values.
-	//     - Single value
-	//     - Full or partial range of values (`PbmCapabilityRange`)
-	//     - Discrete set of values (`PbmCapabilityDiscreteSet`)
+	//   - Single value
+	//   - Full or partial range of values (`PbmCapabilityRange`)
+	//   - Discrete set of values (`PbmCapabilityDiscreteSet`)
 	PbmBuiltinTypeVMW_TIMESPAN = PbmBuiltinType("VMW_TIMESPAN")
 	PbmBuiltinTypeVMW_POLICY   = PbmBuiltinType("VMW_POLICY")
 )
+
+func (e PbmBuiltinType) Values() []PbmBuiltinType {
+	return []PbmBuiltinType{
+		PbmBuiltinTypeXSD_LONG,
+		PbmBuiltinTypeXSD_SHORT,
+		PbmBuiltinTypeXSD_INTEGER,
+		PbmBuiltinTypeXSD_INT,
+		PbmBuiltinTypeXSD_STRING,
+		PbmBuiltinTypeXSD_BOOLEAN,
+		PbmBuiltinTypeXSD_DOUBLE,
+		PbmBuiltinTypeXSD_DATETIME,
+		PbmBuiltinTypeVMW_TIMESPAN,
+		PbmBuiltinTypeVMW_POLICY,
+	}
+}
+
+func (e PbmBuiltinType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmBuiltinType", reflect.TypeOf((*PbmBuiltinType)(nil)).Elem())
@@ -138,6 +180,16 @@ type PbmCapabilityOperator string
 const (
 	PbmCapabilityOperatorNOT = PbmCapabilityOperator("NOT")
 )
+
+func (e PbmCapabilityOperator) Values() []PbmCapabilityOperator {
+	return []PbmCapabilityOperator{
+		PbmCapabilityOperatorNOT,
+	}
+}
+
+func (e PbmCapabilityOperator) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmCapabilityOperator", reflect.TypeOf((*PbmCapabilityOperator)(nil)).Elem())
@@ -167,6 +219,22 @@ const (
 	PbmCapabilityTimeUnitTypeYEARS = PbmCapabilityTimeUnitType("YEARS")
 )
 
+func (e PbmCapabilityTimeUnitType) Values() []PbmCapabilityTimeUnitType {
+	return []PbmCapabilityTimeUnitType{
+		PbmCapabilityTimeUnitTypeSECONDS,
+		PbmCapabilityTimeUnitTypeMINUTES,
+		PbmCapabilityTimeUnitTypeHOURS,
+		PbmCapabilityTimeUnitTypeDAYS,
+		PbmCapabilityTimeUnitTypeWEEKS,
+		PbmCapabilityTimeUnitTypeMONTHS,
+		PbmCapabilityTimeUnitTypeYEARS,
+	}
+}
+
+func (e PbmCapabilityTimeUnitType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmCapabilityTimeUnitType", reflect.TypeOf((*PbmCapabilityTimeUnitType)(nil)).Elem())
 }
@@ -187,6 +255,18 @@ const (
 	// Compliance calculation failed due to some exception.
 	PbmComplianceResultComplianceTaskStatusFailed = PbmComplianceResultComplianceTaskStatus("failed")
 )
+
+func (e PbmComplianceResultComplianceTaskStatus) Values() []PbmComplianceResultComplianceTaskStatus {
+	return []PbmComplianceResultComplianceTaskStatus{
+		PbmComplianceResultComplianceTaskStatusInProgress,
+		PbmComplianceResultComplianceTaskStatusSuccess,
+		PbmComplianceResultComplianceTaskStatusFailed,
+	}
+}
+
+func (e PbmComplianceResultComplianceTaskStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmComplianceResultComplianceTaskStatus", reflect.TypeOf((*PbmComplianceResultComplianceTaskStatus)(nil)).Elem())
@@ -221,6 +301,20 @@ const (
 	PbmComplianceStatusOutOfDate = PbmComplianceStatus("outOfDate")
 )
 
+func (e PbmComplianceStatus) Values() []PbmComplianceStatus {
+	return []PbmComplianceStatus{
+		PbmComplianceStatusCompliant,
+		PbmComplianceStatusNonCompliant,
+		PbmComplianceStatusUnknown,
+		PbmComplianceStatusNotApplicable,
+		PbmComplianceStatusOutOfDate,
+	}
+}
+
+func (e PbmComplianceStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmComplianceStatus", reflect.TypeOf((*PbmComplianceStatus)(nil)).Elem())
 }
@@ -235,6 +329,17 @@ const (
 	// Refers to TRUSTED\_ROOTS keystore.
 	PbmDebugManagerKeystoreNameTRUSTED_ROOTS = PbmDebugManagerKeystoreName("TRUSTED_ROOTS")
 )
+
+func (e PbmDebugManagerKeystoreName) Values() []PbmDebugManagerKeystoreName {
+	return []PbmDebugManagerKeystoreName{
+		PbmDebugManagerKeystoreNameSMS,
+		PbmDebugManagerKeystoreNameTRUSTED_ROOTS,
+	}
+}
+
+func (e PbmDebugManagerKeystoreName) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmDebugManagerKeystoreName", reflect.TypeOf((*PbmDebugManagerKeystoreName)(nil)).Elem())
@@ -267,6 +372,19 @@ const (
 	PbmHealthStatusForEntityUnknown = PbmHealthStatusForEntity("unknown")
 )
 
+func (e PbmHealthStatusForEntity) Values() []PbmHealthStatusForEntity {
+	return []PbmHealthStatusForEntity{
+		PbmHealthStatusForEntityRed,
+		PbmHealthStatusForEntityYellow,
+		PbmHealthStatusForEntityGreen,
+		PbmHealthStatusForEntityUnknown,
+	}
+}
+
+func (e PbmHealthStatusForEntity) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmHealthStatusForEntity", reflect.TypeOf((*PbmHealthStatusForEntity)(nil)).Elem())
 }
@@ -288,6 +406,22 @@ const (
 	PbmIofilterInfoFilterTypeDATASTOREIOCONTROL = PbmIofilterInfoFilterType("DATASTOREIOCONTROL")
 )
 
+func (e PbmIofilterInfoFilterType) Values() []PbmIofilterInfoFilterType {
+	return []PbmIofilterInfoFilterType{
+		PbmIofilterInfoFilterTypeINSPECTION,
+		PbmIofilterInfoFilterTypeCOMPRESSION,
+		PbmIofilterInfoFilterTypeENCRYPTION,
+		PbmIofilterInfoFilterTypeREPLICATION,
+		PbmIofilterInfoFilterTypeCACHE,
+		PbmIofilterInfoFilterTypeDATAPROVIDER,
+		PbmIofilterInfoFilterTypeDATASTOREIOCONTROL,
+	}
+}
+
+func (e PbmIofilterInfoFilterType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmIofilterInfoFilterType", reflect.TypeOf((*PbmIofilterInfoFilterType)(nil)).Elem())
 }
@@ -305,7 +439,27 @@ const (
 	PbmLineOfServiceInfoLineOfServiceEnumDATA_PROVIDER        = PbmLineOfServiceInfoLineOfServiceEnum("DATA_PROVIDER")
 	PbmLineOfServiceInfoLineOfServiceEnumDATASTORE_IO_CONTROL = PbmLineOfServiceInfoLineOfServiceEnum("DATASTORE_IO_CONTROL")
 	PbmLineOfServiceInfoLineOfServiceEnumDATA_PROTECTION      = PbmLineOfServiceInfoLineOfServiceEnum("DATA_PROTECTION")
+	PbmLineOfServiceInfoLineOfServiceEnumSTRETCHED_CLUSTER    = PbmLineOfServiceInfoLineOfServiceEnum("STRETCHED_CLUSTER")
 )
+
+func (e PbmLineOfServiceInfoLineOfServiceEnum) Values() []PbmLineOfServiceInfoLineOfServiceEnum {
+	return []PbmLineOfServiceInfoLineOfServiceEnum{
+		PbmLineOfServiceInfoLineOfServiceEnumINSPECTION,
+		PbmLineOfServiceInfoLineOfServiceEnumCOMPRESSION,
+		PbmLineOfServiceInfoLineOfServiceEnumENCRYPTION,
+		PbmLineOfServiceInfoLineOfServiceEnumREPLICATION,
+		PbmLineOfServiceInfoLineOfServiceEnumCACHING,
+		PbmLineOfServiceInfoLineOfServiceEnumPERSISTENCE,
+		PbmLineOfServiceInfoLineOfServiceEnumDATA_PROVIDER,
+		PbmLineOfServiceInfoLineOfServiceEnumDATASTORE_IO_CONTROL,
+		PbmLineOfServiceInfoLineOfServiceEnumDATA_PROTECTION,
+		PbmLineOfServiceInfoLineOfServiceEnumSTRETCHED_CLUSTER,
+	}
+}
+
+func (e PbmLineOfServiceInfoLineOfServiceEnum) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmLineOfServiceInfoLineOfServiceEnum", reflect.TypeOf((*PbmLineOfServiceInfoLineOfServiceEnum)(nil)).Elem())
@@ -334,6 +488,23 @@ const (
 	PbmLoggingConfigurationComponentVmomi = PbmLoggingConfigurationComponent("vmomi")
 )
 
+func (e PbmLoggingConfigurationComponent) Values() []PbmLoggingConfigurationComponent {
+	return []PbmLoggingConfigurationComponent{
+		PbmLoggingConfigurationComponentPbm,
+		PbmLoggingConfigurationComponentVslm,
+		PbmLoggingConfigurationComponentSms,
+		PbmLoggingConfigurationComponentSpbm,
+		PbmLoggingConfigurationComponentSps,
+		PbmLoggingConfigurationComponentHttpclient_header,
+		PbmLoggingConfigurationComponentHttpclient_content,
+		PbmLoggingConfigurationComponentVmomi,
+	}
+}
+
+func (e PbmLoggingConfigurationComponent) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmLoggingConfigurationComponent", reflect.TypeOf((*PbmLoggingConfigurationComponent)(nil)).Elem())
 }
@@ -350,6 +521,18 @@ const (
 	// Refers to TRACE level logging.
 	PbmLoggingConfigurationLogLevelTRACE = PbmLoggingConfigurationLogLevel("TRACE")
 )
+
+func (e PbmLoggingConfigurationLogLevel) Values() []PbmLoggingConfigurationLogLevel {
+	return []PbmLoggingConfigurationLogLevel{
+		PbmLoggingConfigurationLogLevelINFO,
+		PbmLoggingConfigurationLogLevelDEBUG,
+		PbmLoggingConfigurationLogLevelTRACE,
+	}
+}
+
+func (e PbmLoggingConfigurationLogLevel) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmLoggingConfigurationLogLevel", reflect.TypeOf((*PbmLoggingConfigurationLogLevel)(nil)).Elem())
@@ -384,6 +567,23 @@ const (
 	PbmObjectTypeUnknown = PbmObjectType("unknown")
 )
 
+func (e PbmObjectType) Values() []PbmObjectType {
+	return []PbmObjectType{
+		PbmObjectTypeVirtualMachine,
+		PbmObjectTypeVirtualMachineAndDisks,
+		PbmObjectTypeVirtualDiskId,
+		PbmObjectTypeVirtualDiskUUID,
+		PbmObjectTypeDatastore,
+		PbmObjectTypeVsanObjectId,
+		PbmObjectTypeFileShareId,
+		PbmObjectTypeUnknown,
+	}
+}
+
+func (e PbmObjectType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmObjectType", reflect.TypeOf((*PbmObjectType)(nil)).Elem())
 }
@@ -404,6 +604,20 @@ const (
 	// Indicates clone operation of an entity.
 	PbmOperationCLONE = PbmOperation("CLONE")
 )
+
+func (e PbmOperation) Values() []PbmOperation {
+	return []PbmOperation{
+		PbmOperationCREATE,
+		PbmOperationREGISTER,
+		PbmOperationRECONFIGURE,
+		PbmOperationMIGRATE,
+		PbmOperationCLONE,
+	}
+}
+
+func (e PbmOperation) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmOperation", reflect.TypeOf((*PbmOperation)(nil)).Elem())
@@ -427,6 +641,18 @@ const (
 	// as the space is used.
 	PbmPolicyAssociationVolumeAllocationTypeConserveSpaceWhenPossible = PbmPolicyAssociationVolumeAllocationType("ConserveSpaceWhenPossible")
 )
+
+func (e PbmPolicyAssociationVolumeAllocationType) Values() []PbmPolicyAssociationVolumeAllocationType {
+	return []PbmPolicyAssociationVolumeAllocationType{
+		PbmPolicyAssociationVolumeAllocationTypeFullyInitialized,
+		PbmPolicyAssociationVolumeAllocationTypeReserveSpace,
+		PbmPolicyAssociationVolumeAllocationTypeConserveSpaceWhenPossible,
+	}
+}
+
+func (e PbmPolicyAssociationVolumeAllocationType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmPolicyAssociationVolumeAllocationType", reflect.TypeOf((*PbmPolicyAssociationVolumeAllocationType)(nil)).Elem())
@@ -459,6 +685,18 @@ const (
 	PbmProfileCategoryEnumDATA_SERVICE_POLICY = PbmProfileCategoryEnum("DATA_SERVICE_POLICY")
 )
 
+func (e PbmProfileCategoryEnum) Values() []PbmProfileCategoryEnum {
+	return []PbmProfileCategoryEnum{
+		PbmProfileCategoryEnumREQUIREMENT,
+		PbmProfileCategoryEnumRESOURCE,
+		PbmProfileCategoryEnumDATA_SERVICE_POLICY,
+	}
+}
+
+func (e PbmProfileCategoryEnum) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmProfileCategoryEnum", reflect.TypeOf((*PbmProfileCategoryEnum)(nil)).Elem())
 }
@@ -473,6 +711,16 @@ const (
 	// Indicates resources that support storage profiles.
 	PbmProfileResourceTypeEnumSTORAGE = PbmProfileResourceTypeEnum("STORAGE")
 )
+
+func (e PbmProfileResourceTypeEnum) Values() []PbmProfileResourceTypeEnum {
+	return []PbmProfileResourceTypeEnum{
+		PbmProfileResourceTypeEnumSTORAGE,
+	}
+}
+
+func (e PbmProfileResourceTypeEnum) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmProfileResourceTypeEnum", reflect.TypeOf((*PbmProfileResourceTypeEnum)(nil)).Elem())
@@ -496,6 +744,20 @@ const (
 	PbmSystemCreatedProfileTypeVsanMaxDefaultProfile = PbmSystemCreatedProfileType("VsanMaxDefaultProfile")
 )
 
+func (e PbmSystemCreatedProfileType) Values() []PbmSystemCreatedProfileType {
+	return []PbmSystemCreatedProfileType{
+		PbmSystemCreatedProfileTypeVsanDefaultProfile,
+		PbmSystemCreatedProfileTypeVVolDefaultProfile,
+		PbmSystemCreatedProfileTypePmemDefaultProfile,
+		PbmSystemCreatedProfileTypeVmcManagementProfile,
+		PbmSystemCreatedProfileTypeVsanMaxDefaultProfile,
+	}
+}
+
+func (e PbmSystemCreatedProfileType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("pbm:PbmSystemCreatedProfileType", reflect.TypeOf((*PbmSystemCreatedProfileType)(nil)).Elem())
 }
@@ -514,6 +776,19 @@ const (
 	// Indicates clone operation of a virtual machine.
 	PbmVmOperationCLONE = PbmVmOperation("CLONE")
 )
+
+func (e PbmVmOperation) Values() []PbmVmOperation {
+	return []PbmVmOperation{
+		PbmVmOperationCREATE,
+		PbmVmOperationRECONFIGURE,
+		PbmVmOperationMIGRATE,
+		PbmVmOperationCLONE,
+	}
+}
+
+func (e PbmVmOperation) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmVmOperation", reflect.TypeOf((*PbmVmOperation)(nil)).Elem())
@@ -534,6 +809,18 @@ const (
 	// swap volume
 	PbmVvolTypeSwap = PbmVvolType("Swap")
 )
+
+func (e PbmVvolType) Values() []PbmVvolType {
+	return []PbmVvolType{
+		PbmVvolTypeConfig,
+		PbmVvolTypeData,
+		PbmVvolTypeSwap,
+	}
+}
+
+func (e PbmVvolType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("pbm:PbmVvolType", reflect.TypeOf((*PbmVvolType)(nil)).Elem())

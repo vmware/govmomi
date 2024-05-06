@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,6 +24,8 @@ import (
 )
 
 // A boxed array of `VslmDatastoreSyncStatus`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmDatastoreSyncStatus struct {
 	VslmDatastoreSyncStatus []VslmDatastoreSyncStatus `xml:"VslmDatastoreSyncStatus,omitempty" json:"_value"`
 }
@@ -33,6 +35,8 @@ func init() {
 }
 
 // A boxed array of `VslmQueryDatastoreInfoResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmQueryDatastoreInfoResult struct {
 	VslmQueryDatastoreInfoResult []VslmQueryDatastoreInfoResult `xml:"VslmQueryDatastoreInfoResult,omitempty" json:"_value"`
 }
@@ -42,6 +46,8 @@ func init() {
 }
 
 // A boxed array of `VslmVsoVStorageObjectAssociations`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmVsoVStorageObjectAssociations struct {
 	VslmVsoVStorageObjectAssociations []VslmVsoVStorageObjectAssociations `xml:"VslmVsoVStorageObjectAssociations,omitempty" json:"_value"`
 }
@@ -51,6 +57,8 @@ func init() {
 }
 
 // A boxed array of `VslmVsoVStorageObjectAssociationsVmDiskAssociation`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmVsoVStorageObjectAssociationsVmDiskAssociation struct {
 	VslmVsoVStorageObjectAssociationsVmDiskAssociation []VslmVsoVStorageObjectAssociationsVmDiskAssociation `xml:"VslmVsoVStorageObjectAssociationsVmDiskAssociation,omitempty" json:"_value"`
 }
@@ -60,6 +68,8 @@ func init() {
 }
 
 // A boxed array of `VslmVsoVStorageObjectQuerySpec`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmVsoVStorageObjectQuerySpec struct {
 	VslmVsoVStorageObjectQuerySpec []VslmVsoVStorageObjectQuerySpec `xml:"VslmVsoVStorageObjectQuerySpec,omitempty" json:"_value"`
 }
@@ -69,6 +79,8 @@ func init() {
 }
 
 // A boxed array of `VslmVsoVStorageObjectResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmVsoVStorageObjectResult struct {
 	VslmVsoVStorageObjectResult []VslmVsoVStorageObjectResult `xml:"VslmVsoVStorageObjectResult,omitempty" json:"_value"`
 }
@@ -78,6 +90,8 @@ func init() {
 }
 
 // A boxed array of `VslmVsoVStorageObjectSnapshotResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type ArrayOfVslmVsoVStorageObjectSnapshotResult struct {
 	VslmVsoVStorageObjectSnapshotResult []VslmVsoVStorageObjectSnapshotResult `xml:"VslmVsoVStorageObjectSnapshotResult,omitempty" json:"_value"`
 }
@@ -122,6 +136,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmAttachDisk_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmAttachDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual disk to be operated. See
@@ -168,6 +184,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmAttachTagToVStorageObject`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmAttachTagToVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The identifier(ID) of the virtual storage object.
@@ -210,6 +228,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmClearVStorageObjectControlFlags`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmClearVStorageObjectControlFlagsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -228,6 +248,8 @@ type VslmClearVStorageObjectControlFlagsResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmCloneVStorageObject_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmCloneVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -252,6 +274,8 @@ type VslmCloneVStorageObject_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmCreateDiskFromSnapshot_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmCreateDiskFromSnapshotRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -287,6 +311,8 @@ type VslmCreateDiskFromSnapshot_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmCreateDisk_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmCreateDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The specification of the virtual storage object
@@ -309,6 +335,8 @@ type VslmCreateDisk_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmCreateSnapshot_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmCreateSnapshotRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -365,6 +393,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmDeleteSnapshot_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmDeleteSnapshotRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -388,6 +418,8 @@ type VslmDeleteSnapshot_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmDeleteVStorageObject_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmDeleteVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object to be deleted.
@@ -415,6 +447,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmDetachTagFromVStorageObject`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmDetachTagFromVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The identifier(ID) of the virtual storage object.
@@ -434,6 +468,8 @@ type VslmDetachTagFromVStorageObjectResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmExtendDisk_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmExtendDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual disk to be extended.
@@ -477,6 +513,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmInflateDisk_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmInflateDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual disk to be inflated.
@@ -504,6 +542,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmListTagsAttachedToVStorageObject`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmListTagsAttachedToVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -525,6 +565,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmListVStorageObjectForSpec`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmListVStorageObjectForSpecRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Query defined using array of
@@ -549,6 +591,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmListVStorageObjectsAttachedToTag`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmListVStorageObjectsAttachedToTagRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The category to which the tag belongs.
@@ -572,6 +616,8 @@ func init() {
 }
 
 // The parameters of `VslmSessionManager.VslmLoginByToken`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmLoginByTokenRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The delegated token will be retrieved by the
@@ -613,6 +659,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmQueryChangedDiskAreas`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmQueryChangedDiskAreasRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -655,6 +703,8 @@ func init() {
 }
 
 // The parameters of `VslmStorageLifecycleManager.VslmQueryDatastoreInfo`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmQueryDatastoreInfoRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The datastore URL as specified in
@@ -709,6 +759,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmQueryGlobalCatalogSyncStatusForDatastore`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmQueryGlobalCatalogSyncStatusForDatastoreRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// URL of the datastore to check synchronization status for
@@ -772,6 +824,8 @@ type VslmQueryTaskResultResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmReconcileDatastoreInventory_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmReconcileDatastoreInventoryRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The datastore that needs to be reconciled.
@@ -801,6 +855,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRegisterDisk`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRegisterDiskRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// URL path to the virtual disk.
@@ -820,6 +876,8 @@ type VslmRegisterDiskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRelocateVStorageObject_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRelocateVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -850,6 +908,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRenameVStorageObject`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRenameVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object to be renamed.
@@ -872,6 +932,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveSnapshotDetails`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveSnapshotDetailsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -895,6 +957,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveSnapshotInfo`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveSnapshotInfoRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -916,6 +980,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageInfrastructureObjectPolicy`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageInfrastructureObjectPolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Datastore on which policy needs to be retrieved.
@@ -945,6 +1011,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectAssociations`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageObjectAssociationsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The IDs of the virtual storage objects of the query.
@@ -966,6 +1034,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectMetadata`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageObjectMetadataRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -991,6 +1061,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectMetadataValue`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageObjectMetadataValueRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -1010,6 +1082,8 @@ type VslmRetrieveVStorageObjectMetadataValueResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObject`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object to be retrieved.
@@ -1031,6 +1105,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjectState`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageObjectStateRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object the state to be retrieved.
@@ -1052,6 +1128,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRetrieveVStorageObjects`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRetrieveVStorageObjectsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The array of IDs of the virtual storage object to be
@@ -1068,6 +1146,8 @@ type VslmRetrieveVStorageObjectsResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmRevertVStorageObject_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmRevertVStorageObjectRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -1097,6 +1177,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmScheduleReconcileDatastoreInventory`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmScheduleReconcileDatastoreInventoryRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The datastore that needs to be reconciled.
@@ -1150,6 +1232,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmSetVStorageObjectControlFlags`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmSetVStorageObjectControlFlagsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -1174,6 +1258,8 @@ func init() {
 }
 
 // The parameters of `VslmStorageLifecycleManager.VslmSyncDatastore`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmSyncDatastoreRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The datastore URL as specified in
@@ -1202,7 +1288,7 @@ type VslmSyncDatastoreResponse struct {
 // recovers from any transient failures affecting the datastore or
 // individual FCDs. In cases where the sync fault needs to be resolved
 // immediately, explicitly triggering a
-// `vslm.vso.StorageLifecycleManager#syncDatastore` should resolve the
+// `VslmStorageLifecycleManager.VslmSyncDatastore` should resolve the
 // issue, unless there are underlying infrastructure issues affecting the
 // datastore or FCD. If the fault is ignored there is
 // a possibility that the FCD is unrecognized by Pandora or Pandora
@@ -1211,7 +1297,7 @@ type VslmSyncDatastoreResponse struct {
 // `VslmVStorageObjectManager.VslmRetrieveVStorageObjects` APIs.
 // In cases where the `VslmSyncFault.id` is specified,
 // the client can explicitly trigger
-// `vslm.vso.StorageLifecycleManager#syncDatastore` to resolve
+// `VslmStorageLifecycleManager.VslmSyncDatastore` to resolve
 // the issue, else, could ignore the fault in anticipation of Pandora
 // automatically resolving the error.
 //
@@ -1408,6 +1494,8 @@ func init() {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmUpdateVStorageInfrastructureObjectPolicy_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmUpdateVStorageInfrastructureObjectPolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// specification to assign a SPBM policy to FCD infrastructure
@@ -1430,6 +1518,8 @@ type VslmUpdateVStorageInfrastructureObjectPolicy_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmUpdateVStorageObjectMetadata_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmUpdateVStorageObjectMetadataRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -1456,6 +1546,8 @@ type VslmUpdateVStorageObjectMetadata_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmUpdateVstorageObjectCrypto_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmUpdateVstorageObjectCryptoRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -1481,6 +1573,8 @@ type VslmUpdateVstorageObjectCrypto_TaskResponse struct {
 }
 
 // The parameters of `VslmVStorageObjectManager.VslmUpdateVstorageObjectPolicy_Task`.
+//
+// This structure may be used only with operations rendered under `/vslm`.
 type VslmUpdateVstorageObjectPolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The ID of the virtual storage object.
@@ -1539,7 +1633,7 @@ func init() {
 }
 
 // The `VslmVsoVStorageObjectQueryResult` contains the result of
-// `vslm.vso.VStorageObjectManager#listVStorageObjectForSpec` API.
+// `VslmVStorageObjectManager.VslmListVStorageObjectForSpec` API.
 //
 // This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectQueryResult struct {
@@ -1547,7 +1641,7 @@ type VslmVsoVStorageObjectQueryResult struct {
 
 	// If set to false, more results were found than could be returned (either
 	// limited by maxResult input argument in the
-	// `vslm.vso.VStorageObjectManager#listVStorageObjectForSpec` API or
+	// `VslmVStorageObjectManager.VslmListVStorageObjectForSpec` API or
 	// truncated because the number of results exceeded the internal limit).
 	AllRecordsReturned bool `xml:"allRecordsReturned" json:"allRecordsReturned"`
 	// IDs of the VStorageObjects matching the query criteria
@@ -1555,15 +1649,15 @@ type VslmVsoVStorageObjectQueryResult struct {
 	//
 	// IDs will be returned in ascending order. If
 	// `VslmVsoVStorageObjectQueryResult.allRecordsReturned` is set to false,
-	// to get the additional results, repeat the query with ID last ID as
+	// to get the additional results, repeat the query with ID &gt; last ID as
 	// part of the query spec `VslmVsoVStorageObjectQuerySpec`.
 	Id []types.ID `xml:"id,omitempty" json:"id,omitempty"`
 	// Results of the query criteria.
 	//
-	// `vim.vslm.VStorageObjectResult#id` IDs will be returned in
+	// `IDs` will be returned in
 	// ascending order. If `VslmVsoVStorageObjectQueryResult.allRecordsReturned`
 	// is set to false,then, to get the additional results, repeat the query
-	// with ID last ID as part of the query spec
+	// with ID &gt; last ID as part of the query spec
 	// `VslmVsoVStorageObjectQuerySpec`.
 	QueryResults []VslmVsoVStorageObjectResult `xml:"queryResults,omitempty" json:"queryResults,omitempty"`
 }
@@ -1576,7 +1670,7 @@ func init() {
 // VStorageObject from global catalog.
 //
 // `VslmVsoVStorageObjectQuerySpec` is sent as input to
-// `vslm.vso.VStorageObjectManager#listVStorageObjectForSpec` API.
+// `VslmVStorageObjectManager.VslmListVStorageObjectForSpec` API.
 //
 // This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectQuerySpec struct {
@@ -1591,8 +1685,7 @@ type VslmVsoVStorageObjectQuerySpec struct {
 	// `VslmVsoVStorageObjectQuerySpec.queryField` with the specified
 	// value `VslmVsoVStorageObjectQuerySpec.queryValue`.
 	//
-	// This can be one of the values from
-	// `vslm.vso.VStorageObjectQuerySpec.QueryFieldOperator`.
+	// This can be one of the values from `VslmVsoVStorageObjectQuerySpecQueryOperatorEnum_enum`.
 	QueryOperator string `xml:"queryOperator" json:"queryOperator"`
 	// This field specifies the value to be compared with the searchable field.
 	QueryValue []string `xml:"queryValue,omitempty" json:"queryValue,omitempty"`
@@ -1604,8 +1697,8 @@ func init() {
 
 // The `VslmVsoVStorageObjectResult` contains the result objects of
 // `VslmVsoVStorageObjectQueryResult` which is returned as a result of
-// `slm.vso.VStorageObjectManager#listVStorageObjectForSpec` and
-// `slm.vso.VStorageObjectManager#retrieveVStorageObjects` APIs.
+// `VslmVStorageObjectManager.VslmListVStorageObjectForSpec` and
+// `VslmVStorageObjectManager.VslmRetrieveVStorageObjects` APIs.
 //
 // This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectResult struct {
@@ -1651,7 +1744,7 @@ func init() {
 
 // The `VslmVsoVStorageObjectSnapshotResult` contains brief information about a
 // snapshot of the object `VslmVsoVStorageObjectResult` which is returned as a
-// result of `slm.vso.VStorageObjectManager#retrieveVStorageObjects` API.
+// result of `VslmVStorageObjectManager.VslmRetrieveVStorageObjects` API.
 //
 // This structure may be used only with operations rendered under `/vslm`.
 type VslmVsoVStorageObjectSnapshotResult struct {

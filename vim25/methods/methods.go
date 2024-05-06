@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -2533,6 +2533,26 @@ func (b *CreateCollectorForTasksBody) Fault() *soap.Fault { return b.Fault_ }
 
 func CreateCollectorForTasks(ctx context.Context, r soap.RoundTripper, req *types.CreateCollectorForTasks) (*types.CreateCollectorForTasksResponse, error) {
 	var reqBody, resBody CreateCollectorForTasksBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type CreateCollectorWithInfoFilterForTasksBody struct {
+	Req    *types.CreateCollectorWithInfoFilterForTasks         `xml:"urn:vim25 CreateCollectorWithInfoFilterForTasks,omitempty"`
+	Res    *types.CreateCollectorWithInfoFilterForTasksResponse `xml:"CreateCollectorWithInfoFilterForTasksResponse,omitempty"`
+	Fault_ *soap.Fault                                          `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *CreateCollectorWithInfoFilterForTasksBody) Fault() *soap.Fault { return b.Fault_ }
+
+func CreateCollectorWithInfoFilterForTasks(ctx context.Context, r soap.RoundTripper, req *types.CreateCollectorWithInfoFilterForTasks) (*types.CreateCollectorWithInfoFilterForTasksResponse, error) {
+	var reqBody, resBody CreateCollectorWithInfoFilterForTasksBody
 
 	reqBody.Req = req
 
@@ -6883,6 +6903,26 @@ func HostProfileResetValidationState(ctx context.Context, r soap.RoundTripper, r
 	return resBody.Res, nil
 }
 
+type HostQueryVirtualDiskUuidBody struct {
+	Req    *types.HostQueryVirtualDiskUuid         `xml:"urn:vim25 HostQueryVirtualDiskUuid,omitempty"`
+	Res    *types.HostQueryVirtualDiskUuidResponse `xml:"HostQueryVirtualDiskUuidResponse,omitempty"`
+	Fault_ *soap.Fault                             `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *HostQueryVirtualDiskUuidBody) Fault() *soap.Fault { return b.Fault_ }
+
+func HostQueryVirtualDiskUuid(ctx context.Context, r soap.RoundTripper, req *types.HostQueryVirtualDiskUuid) (*types.HostQueryVirtualDiskUuidResponse, error) {
+	var reqBody, resBody HostQueryVirtualDiskUuidBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type HostReconcileDatastoreInventory_TaskBody struct {
 	Req    *types.HostReconcileDatastoreInventory_Task         `xml:"urn:vim25 HostReconcileDatastoreInventory_Task,omitempty"`
 	Res    *types.HostReconcileDatastoreInventory_TaskResponse `xml:"HostReconcileDatastoreInventory_TaskResponse,omitempty"`
@@ -7113,6 +7153,26 @@ func (b *HostSetVStorageObjectControlFlagsBody) Fault() *soap.Fault { return b.F
 
 func HostSetVStorageObjectControlFlags(ctx context.Context, r soap.RoundTripper, req *types.HostSetVStorageObjectControlFlags) (*types.HostSetVStorageObjectControlFlagsResponse, error) {
 	var reqBody, resBody HostSetVStorageObjectControlFlagsBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type HostSetVirtualDiskUuid_TaskBody struct {
+	Req    *types.HostSetVirtualDiskUuid_Task         `xml:"urn:vim25 HostSetVirtualDiskUuid_Task,omitempty"`
+	Res    *types.HostSetVirtualDiskUuid_TaskResponse `xml:"HostSetVirtualDiskUuid_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                                `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *HostSetVirtualDiskUuid_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func HostSetVirtualDiskUuid_Task(ctx context.Context, r soap.RoundTripper, req *types.HostSetVirtualDiskUuid_Task) (*types.HostSetVirtualDiskUuid_TaskResponse, error) {
+	var reqBody, resBody HostSetVirtualDiskUuid_TaskBody
 
 	reqBody.Req = req
 
@@ -8963,6 +9023,26 @@ func MoveVirtualDisk_Task(ctx context.Context, r soap.RoundTripper, req *types.M
 	return resBody.Res, nil
 }
 
+type NotifyAffectedServicesBody struct {
+	Req    *types.NotifyAffectedServices         `xml:"urn:vim25 NotifyAffectedServices,omitempty"`
+	Res    *types.NotifyAffectedServicesResponse `xml:"NotifyAffectedServicesResponse,omitempty"`
+	Fault_ *soap.Fault                           `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *NotifyAffectedServicesBody) Fault() *soap.Fault { return b.Fault_ }
+
+func NotifyAffectedServices(ctx context.Context, r soap.RoundTripper, req *types.NotifyAffectedServices) (*types.NotifyAffectedServicesResponse, error) {
+	var reqBody, resBody NotifyAffectedServicesBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type OpenInventoryViewFolderBody struct {
 	Req    *types.OpenInventoryViewFolder         `xml:"urn:vim25 OpenInventoryViewFolder,omitempty"`
 	Res    *types.OpenInventoryViewFolderResponse `xml:"OpenInventoryViewFolderResponse,omitempty"`
@@ -9313,6 +9393,26 @@ func (b *PromoteDisks_TaskBody) Fault() *soap.Fault { return b.Fault_ }
 
 func PromoteDisks_Task(ctx context.Context, r soap.RoundTripper, req *types.PromoteDisks_Task) (*types.PromoteDisks_TaskResponse, error) {
 	var reqBody, resBody PromoteDisks_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type ProvisionServerPrivateKeyBody struct {
+	Req    *types.ProvisionServerPrivateKey         `xml:"urn:vim25 ProvisionServerPrivateKey,omitempty"`
+	Res    *types.ProvisionServerPrivateKeyResponse `xml:"ProvisionServerPrivateKeyResponse,omitempty"`
+	Fault_ *soap.Fault                              `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *ProvisionServerPrivateKeyBody) Fault() *soap.Fault { return b.Fault_ }
+
+func ProvisionServerPrivateKey(ctx context.Context, r soap.RoundTripper, req *types.ProvisionServerPrivateKey) (*types.ProvisionServerPrivateKeyResponse, error) {
+	var reqBody, resBody ProvisionServerPrivateKeyBody
 
 	reqBody.Req = req
 
@@ -11513,6 +11613,26 @@ func (b *QueryVirtualDiskUuidBody) Fault() *soap.Fault { return b.Fault_ }
 
 func QueryVirtualDiskUuid(ctx context.Context, r soap.RoundTripper, req *types.QueryVirtualDiskUuid) (*types.QueryVirtualDiskUuidResponse, error) {
 	var reqBody, resBody QueryVirtualDiskUuidBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type QueryVirtualDiskUuidExBody struct {
+	Req    *types.QueryVirtualDiskUuidEx         `xml:"urn:vim25 QueryVirtualDiskUuidEx,omitempty"`
+	Res    *types.QueryVirtualDiskUuidExResponse `xml:"QueryVirtualDiskUuidExResponse,omitempty"`
+	Fault_ *soap.Fault                           `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *QueryVirtualDiskUuidExBody) Fault() *soap.Fault { return b.Fault_ }
+
+func QueryVirtualDiskUuidEx(ctx context.Context, r soap.RoundTripper, req *types.QueryVirtualDiskUuidEx) (*types.QueryVirtualDiskUuidExResponse, error) {
+	var reqBody, resBody QueryVirtualDiskUuidExBody
 
 	reqBody.Req = req
 
@@ -15763,6 +15883,26 @@ func SetVirtualDiskUuid(ctx context.Context, r soap.RoundTripper, req *types.Set
 	return resBody.Res, nil
 }
 
+type SetVirtualDiskUuidEx_TaskBody struct {
+	Req    *types.SetVirtualDiskUuidEx_Task         `xml:"urn:vim25 SetVirtualDiskUuidEx_Task,omitempty"`
+	Res    *types.SetVirtualDiskUuidEx_TaskResponse `xml:"SetVirtualDiskUuidEx_TaskResponse,omitempty"`
+	Fault_ *soap.Fault                              `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *SetVirtualDiskUuidEx_TaskBody) Fault() *soap.Fault { return b.Fault_ }
+
+func SetVirtualDiskUuidEx_Task(ctx context.Context, r soap.RoundTripper, req *types.SetVirtualDiskUuidEx_Task) (*types.SetVirtualDiskUuidEx_TaskResponse, error) {
+	var reqBody, resBody SetVirtualDiskUuidEx_TaskBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
 type ShrinkVirtualDisk_TaskBody struct {
 	Req    *types.ShrinkVirtualDisk_Task         `xml:"urn:vim25 ShrinkVirtualDisk_Task,omitempty"`
 	Res    *types.ShrinkVirtualDisk_TaskResponse `xml:"ShrinkVirtualDisk_TaskResponse,omitempty"`
@@ -18933,6 +19073,26 @@ func (b *SetCustomValueBody) Fault() *soap.Fault { return b.Fault_ }
 
 func SetCustomValue(ctx context.Context, r soap.RoundTripper, req *types.SetCustomValue) (*types.SetCustomValueResponse, error) {
 	var reqBody, resBody SetCustomValueBody
+
+	reqBody.Req = req
+
+	if err := r.RoundTrip(ctx, &reqBody, &resBody); err != nil {
+		return nil, err
+	}
+
+	return resBody.Res, nil
+}
+
+type StartDpuFailoverBody struct {
+	Req    *types.StartDpuFailover         `xml:"urn:vim25 startDpuFailover,omitempty"`
+	Res    *types.StartDpuFailoverResponse `xml:"startDpuFailoverResponse,omitempty"`
+	Fault_ *soap.Fault                     `xml:"http://schemas.xmlsoap.org/soap/envelope/ Fault,omitempty"`
+}
+
+func (b *StartDpuFailoverBody) Fault() *soap.Fault { return b.Fault_ }
+
+func StartDpuFailover(ctx context.Context, r soap.RoundTripper, req *types.StartDpuFailover) (*types.StartDpuFailoverResponse, error) {
+	var reqBody, resBody StartDpuFailoverBody
 
 	reqBody.Req = req
 

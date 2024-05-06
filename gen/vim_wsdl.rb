@@ -598,7 +598,11 @@ class SimpleType < Simple
     enums.each { |e| io.print("\t\t%s,\n" % e.var_name()) }
     io.print "\t}\n}\n\n"
 
-    io.print "func(e %1$s) Strings() []string {\n\treturn EnumValuesAsStrings(e.Values())\n}\n\n" % ucfirstName
+    if $target == "vim25"
+      io.print "func(e %1$s) Strings() []string {\n\treturn EnumValuesAsStrings(e.Values())\n}\n\n" % ucfirstName
+    else
+      io.print "func(e %1$s) Strings() []string {\n\treturn types.EnumValuesAsStrings(e.Values())\n}\n\n" % ucfirstName
+    end
 
   end
 

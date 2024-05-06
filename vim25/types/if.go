@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -614,6 +614,28 @@ type BaseDVSFeatureCapability interface {
 
 func init() {
 	t["BaseDVSFeatureCapability"] = reflect.TypeOf((*DVSFeatureCapability)(nil)).Elem()
+}
+
+func (b *DVSFilterSpecConnecteeSpec) GetDVSFilterSpecConnecteeSpec() *DVSFilterSpecConnecteeSpec {
+	return b
+}
+
+type BaseDVSFilterSpecConnecteeSpec interface {
+	GetDVSFilterSpecConnecteeSpec() *DVSFilterSpecConnecteeSpec
+}
+
+func init() {
+	t["BaseDVSFilterSpecConnecteeSpec"] = reflect.TypeOf((*DVSFilterSpecConnecteeSpec)(nil)).Elem()
+}
+
+func (b *DVSFilterSpecVlanSpec) GetDVSFilterSpecVlanSpec() *DVSFilterSpecVlanSpec { return b }
+
+type BaseDVSFilterSpecVlanSpec interface {
+	GetDVSFilterSpecVlanSpec() *DVSFilterSpecVlanSpec
+}
+
+func init() {
+	t["BaseDVSFilterSpecVlanSpec"] = reflect.TypeOf((*DVSFilterSpecVlanSpec)(nil)).Elem()
 }
 
 func (b *DVSHealthCheckCapability) GetDVSHealthCheckCapability() *DVSHealthCheckCapability { return b }
@@ -1788,6 +1810,16 @@ type BaseIoFilterInfo interface {
 
 func init() {
 	t["BaseIoFilterInfo"] = reflect.TypeOf((*IoFilterInfo)(nil)).Elem()
+}
+
+func (b *IoFilterManagerSslTrust) GetIoFilterManagerSslTrust() *IoFilterManagerSslTrust { return b }
+
+type BaseIoFilterManagerSslTrust interface {
+	GetIoFilterManagerSslTrust() *IoFilterManagerSslTrust
+}
+
+func init() {
+	t["BaseIoFilterManagerSslTrust"] = reflect.TypeOf((*IoFilterManagerSslTrust)(nil)).Elem()
 }
 
 func (b *IpAddress) GetIpAddress() *IpAddress { return b }

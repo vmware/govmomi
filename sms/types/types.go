@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -107,6 +107,8 @@ func init() {
 }
 
 // A boxed array of `BackingStoragePool`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfBackingStoragePool struct {
 	BackingStoragePool []BackingStoragePool `xml:"BackingStoragePool,omitempty" json:"_value"`
 }
@@ -116,6 +118,8 @@ func init() {
 }
 
 // A boxed array of `DatastoreBackingPoolMapping`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfDatastoreBackingPoolMapping struct {
 	DatastoreBackingPoolMapping []DatastoreBackingPoolMapping `xml:"DatastoreBackingPoolMapping,omitempty" json:"_value"`
 }
@@ -125,6 +129,8 @@ func init() {
 }
 
 // A boxed array of `DatastorePair`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfDatastorePair struct {
 	DatastorePair []DatastorePair `xml:"DatastorePair,omitempty" json:"_value"`
 }
@@ -134,6 +140,8 @@ func init() {
 }
 
 // A boxed array of `DeviceId`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfDeviceId struct {
 	DeviceId []BaseDeviceId `xml:"DeviceId,omitempty,typeattr" json:"_value"`
 }
@@ -143,6 +151,8 @@ func init() {
 }
 
 // A boxed array of `FaultDomainProviderMapping`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfFaultDomainProviderMapping struct {
 	FaultDomainProviderMapping []FaultDomainProviderMapping `xml:"FaultDomainProviderMapping,omitempty" json:"_value"`
 }
@@ -152,6 +162,8 @@ func init() {
 }
 
 // A boxed array of `GroupOperationResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfGroupOperationResult struct {
 	GroupOperationResult []BaseGroupOperationResult `xml:"GroupOperationResult,omitempty,typeattr" json:"_value"`
 }
@@ -161,6 +173,8 @@ func init() {
 }
 
 // A boxed array of `NameValuePair`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfNameValuePair struct {
 	NameValuePair []NameValuePair `xml:"NameValuePair,omitempty" json:"_value"`
 }
@@ -170,6 +184,8 @@ func init() {
 }
 
 // A boxed array of `PointInTimeReplicaInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfPointInTimeReplicaInfo struct {
 	PointInTimeReplicaInfo []PointInTimeReplicaInfo `xml:"PointInTimeReplicaInfo,omitempty" json:"_value"`
 }
@@ -179,6 +195,8 @@ func init() {
 }
 
 // A boxed array of `PolicyAssociation`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfPolicyAssociation struct {
 	PolicyAssociation []PolicyAssociation `xml:"PolicyAssociation,omitempty" json:"_value"`
 }
@@ -188,6 +206,8 @@ func init() {
 }
 
 // A boxed array of `QueryReplicationPeerResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfQueryReplicationPeerResult struct {
 	QueryReplicationPeerResult []QueryReplicationPeerResult `xml:"QueryReplicationPeerResult,omitempty" json:"_value"`
 }
@@ -197,6 +217,8 @@ func init() {
 }
 
 // A boxed array of `RecoveredDevice`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfRecoveredDevice struct {
 	RecoveredDevice []RecoveredDevice `xml:"RecoveredDevice,omitempty" json:"_value"`
 }
@@ -206,6 +228,8 @@ func init() {
 }
 
 // A boxed array of `RecoveredDiskInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfRecoveredDiskInfo struct {
 	RecoveredDiskInfo []RecoveredDiskInfo `xml:"RecoveredDiskInfo,omitempty" json:"_value"`
 }
@@ -215,6 +239,8 @@ func init() {
 }
 
 // A boxed array of `RelatedStorageArray`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfRelatedStorageArray struct {
 	RelatedStorageArray []RelatedStorageArray `xml:"RelatedStorageArray,omitempty" json:"_value"`
 }
@@ -224,6 +250,8 @@ func init() {
 }
 
 // A boxed array of `ReplicaIntervalQueryResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfReplicaIntervalQueryResult struct {
 	ReplicaIntervalQueryResult []ReplicaIntervalQueryResult `xml:"ReplicaIntervalQueryResult,omitempty" json:"_value"`
 }
@@ -233,6 +261,8 @@ func init() {
 }
 
 // A boxed array of `ReplicationGroupData`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfReplicationGroupData struct {
 	ReplicationGroupData []ReplicationGroupData `xml:"ReplicationGroupData,omitempty" json:"_value"`
 }
@@ -242,6 +272,8 @@ func init() {
 }
 
 // A boxed array of `ReplicationTargetInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfReplicationTargetInfo struct {
 	ReplicationTargetInfo []ReplicationTargetInfo `xml:"ReplicationTargetInfo,omitempty" json:"_value"`
 }
@@ -251,6 +283,8 @@ func init() {
 }
 
 // A boxed array of `SmsProviderInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfSmsProviderInfo struct {
 	SmsProviderInfo []BaseSmsProviderInfo `xml:"SmsProviderInfo,omitempty,typeattr" json:"_value"`
 }
@@ -260,6 +294,8 @@ func init() {
 }
 
 // A boxed array of `SourceGroupMemberInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfSourceGroupMemberInfo struct {
 	SourceGroupMemberInfo []SourceGroupMemberInfo `xml:"SourceGroupMemberInfo,omitempty" json:"_value"`
 }
@@ -269,6 +305,8 @@ func init() {
 }
 
 // A boxed array of `StorageAlarm`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageAlarm struct {
 	StorageAlarm []StorageAlarm `xml:"StorageAlarm,omitempty" json:"_value"`
 }
@@ -278,6 +316,8 @@ func init() {
 }
 
 // A boxed array of `StorageArray`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageArray struct {
 	StorageArray []StorageArray `xml:"StorageArray,omitempty" json:"_value"`
 }
@@ -287,6 +327,8 @@ func init() {
 }
 
 // A boxed array of `StorageContainer`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageContainer struct {
 	StorageContainer []StorageContainer `xml:"StorageContainer,omitempty" json:"_value"`
 }
@@ -296,6 +338,8 @@ func init() {
 }
 
 // A boxed array of `StorageFileSystem`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageFileSystem struct {
 	StorageFileSystem []StorageFileSystem `xml:"StorageFileSystem,omitempty" json:"_value"`
 }
@@ -305,6 +349,8 @@ func init() {
 }
 
 // A boxed array of `StorageFileSystemInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageFileSystemInfo struct {
 	StorageFileSystemInfo []StorageFileSystemInfo `xml:"StorageFileSystemInfo,omitempty" json:"_value"`
 }
@@ -314,6 +360,8 @@ func init() {
 }
 
 // A boxed array of `StorageLun`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageLun struct {
 	StorageLun []StorageLun `xml:"StorageLun,omitempty" json:"_value"`
 }
@@ -323,6 +371,8 @@ func init() {
 }
 
 // A boxed array of `StoragePort`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStoragePort struct {
 	StoragePort []BaseStoragePort `xml:"StoragePort,omitempty,typeattr" json:"_value"`
 }
@@ -332,6 +382,8 @@ func init() {
 }
 
 // A boxed array of `StorageProcessor`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfStorageProcessor struct {
 	StorageProcessor []StorageProcessor `xml:"StorageProcessor,omitempty" json:"_value"`
 }
@@ -341,6 +393,8 @@ func init() {
 }
 
 // A boxed array of `SupportedVendorModelMapping`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfSupportedVendorModelMapping struct {
 	SupportedVendorModelMapping []SupportedVendorModelMapping `xml:"SupportedVendorModelMapping,omitempty" json:"_value"`
 }
@@ -350,6 +404,8 @@ func init() {
 }
 
 // A boxed array of `TargetDeviceId`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfTargetDeviceId struct {
 	TargetDeviceId []TargetDeviceId `xml:"TargetDeviceId,omitempty" json:"_value"`
 }
@@ -359,6 +415,8 @@ func init() {
 }
 
 // A boxed array of `TargetGroupMemberInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ArrayOfTargetGroupMemberInfo struct {
 	TargetGroupMemberInfo []BaseTargetGroupMemberInfo `xml:"TargetGroupMemberInfo,omitempty,typeattr" json:"_value"`
 }
@@ -455,7 +513,7 @@ func init() {
 	types.Add("sms:CertificateAuthorityFaultFault", reflect.TypeOf((*CertificateAuthorityFaultFault)(nil)).Elem())
 }
 
-// This exception is thrown if `sms.Provider.VasaProviderInfo#retainVasaProviderCertificate`
+// This exception is thrown if `VasaProviderInfo.retainVasaProviderCertificate`
 // is true and the provider uses a certificate issued by a Certificate Authority,
 // but the root certificate of the Certificate Authority is not imported to VECS truststore
 // before attempting the provider registration.
@@ -495,18 +553,18 @@ func init() {
 // able to make successful SSL trust verification of the server's certificate.
 //
 // Reasons for this might be that the certificate provided via the API
-// `Agent.ConfigInfo.ovfSslTrust` and `Agent.ConfigInfo.vibSslTrust`
+// `AgentConfigInfo.ovfSslTrust` and `AgentConfigInfo.vibSslTrust`
 // or via the script /usr/lib/vmware-eam/bin/eam-utility.py
 //   - is invalid.
 //   - does not match the server's certificate.
 //
 // If there is no provided certificate, the fault is thrown when the server's
 // certificate is not trusted by the system or is invalid - @see
-// `Agent.ConfigInfo.ovfSslTrust` and
-// `Agent.ConfigInfo.vibSslTrust`.
+// `AgentConfigInfo.ovfSslTrust` and
+// `AgentConfigInfo.vibSslTrust`.
 // To enable Agency creation 1) provide a valid certificate used by the
-// server hosting the `Agent.ConfigInfo.ovfPackageUrl` or
-// `Agent.ConfigInfo#vibUrl` or 2) ensure the server's certificate is
+// server hosting the `AgentConfigInfo.ovfPackageUrl` or
+// `AgentConfigInfo.vibUrl` or 2) ensure the server's certificate is
 // signed by a CA trusted by the system. Then retry the operation, vSphere
 // ESX Agent Manager will retry the SSL trust verification and proceed with
 // reaching the desired state.
@@ -566,6 +624,7 @@ func init() {
 type DatastoreBackingPoolMapping struct {
 	types.DynamicData
 
+	// Refers instances of `Datastore`.
 	Datastore          []types.ManagedObjectReference `xml:"datastore" json:"datastore"`
 	BackingStoragePool []BackingStoragePool           `xml:"backingStoragePool,omitempty" json:"backingStoragePool,omitempty"`
 }
@@ -582,7 +641,9 @@ func init() {
 type DatastorePair struct {
 	types.DynamicData
 
+	// Refers instance of `Datastore`.
 	Datastore1 types.ManagedObjectReference `xml:"datastore1" json:"datastore1"`
+	// Refers instance of `Datastore`.
 	Datastore2 types.ManagedObjectReference `xml:"datastore2" json:"datastore2"`
 }
 
@@ -711,6 +772,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.FailoverReplicationGroup_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type FailoverReplicationGroupRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Settings for the failover.
@@ -914,7 +977,7 @@ func init() {
 // The base class for any operation on a replication group.
 //
 // Usually, there is an
-// operation specific SuccessResult
+// operation specific &lt;Operation&gt;SuccessResult
 //
 // This structure may be used only with operations rendered under `/sms`.
 type GroupOperationResult struct {
@@ -1275,6 +1338,7 @@ func init() {
 	types.Add("sms:PointInTimeReplicaId", reflect.TypeOf((*PointInTimeReplicaId)(nil)).Elem())
 }
 
+// This structure may be used only with operations rendered under `/sms`.
 type PointInTimeReplicaInfo struct {
 	types.DynamicData
 
@@ -1327,6 +1391,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.PrepareFailoverReplicationGroup_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type PrepareFailoverReplicationGroupRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// List of replication group IDs.
@@ -1374,11 +1440,13 @@ func init() {
 }
 
 // The parameters of `VasaProvider.PromoteReplicationGroup_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type PromoteReplicationGroupRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Specifies an array of replication group IDs whose
-	// in-test devices (`ReplicationStateEnum#INTEST`) need to be
-	// promoted to failover `ReplicationStateEnum#FAILEDOVER` state.
+	// in-test devices (`INTEST`) need to be
+	// promoted to failover `FAILEDOVER` state.
 	PromoteParam PromoteParam `xml:"promoteParam" json:"promoteParam"`
 }
 
@@ -1619,6 +1687,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.QueryActiveAlarm`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryActiveAlarmRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Filter criteria for the alarm state.
@@ -1646,6 +1716,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryArrayAssociatedWithLun`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryArrayAssociatedWithLunRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `ScsiLun.canonicalName`
@@ -1662,6 +1734,8 @@ type QueryArrayAssociatedWithLunResponse struct {
 }
 
 // The parameters of `SmsStorageManager.QueryArray`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryArrayRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// List of `SmsProviderInfo.uid` for the VASA
@@ -1684,6 +1758,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryAssociatedBackingStoragePool`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryAssociatedBackingStoragePoolRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Unique identifier of a StorageLun or StorageFileSystem.
@@ -1708,6 +1784,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryDatastoreBackingPoolMapping`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryDatastoreBackingPoolMappingRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Array containing references to `Datastore` objects.
@@ -1731,6 +1809,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryDatastoreCapability`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryDatastoreCapabilityRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// reference to `Datastore`
@@ -1760,6 +1840,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryDrsMigrationCapabilityForPerformanceEx`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryDrsMigrationCapabilityForPerformanceExRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Array containing references to `Datastore` objects.
@@ -1777,6 +1859,8 @@ type QueryDrsMigrationCapabilityForPerformanceExResponse struct {
 }
 
 // The parameters of `SmsStorageManager.QueryDrsMigrationCapabilityForPerformance`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryDrsMigrationCapabilityForPerformanceRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Reference to the source `Datastore`
@@ -1822,6 +1906,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryFaultDomain`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryFaultDomainRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// spec for the query operation.
@@ -1843,6 +1929,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryFileSystemAssociatedWithArray`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryFileSystemAssociatedWithArrayRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageArray.uuid` for the StorageArray
@@ -1865,6 +1953,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryHostAssociatedWithLun`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryHostAssociatedWithLunRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageLun.uuid` for the StorageLun
@@ -1890,6 +1980,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryLunAssociatedWithArray`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryLunAssociatedWithArrayRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageArray.uuid` for the StorageArray
@@ -1912,6 +2004,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryLunAssociatedWithPort`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryLunAssociatedWithPortRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StoragePort.uuid` for the StoragePort
@@ -1937,6 +2031,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryNfsDatastoreAssociatedWithFileSystem`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryNfsDatastoreAssociatedWithFileSystemRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageFileSystem.uuid` for the
@@ -2018,6 +2114,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.QueryPointInTimeReplica`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryPointInTimeReplicaRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// List of replication group IDs.
@@ -2035,7 +2133,7 @@ type QueryPointInTimeReplicaResponse struct {
 }
 
 // Return type for successful
-// *vasaService#queryPointInTimeReplica(ReplicationGroupId[], QueryPointInTimeReplicaParam)*
+// `VasaProvider.QueryPointInTimeReplica`
 // operation.
 //
 // If the VASA provider decides that there are too many to return,
@@ -2081,6 +2179,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryPortAssociatedWithArray`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryPortAssociatedWithArrayRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageArray.uuid` for the StorageArray
@@ -2103,6 +2203,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryPortAssociatedWithLun`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryPortAssociatedWithLunRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageLun.uuid` for the StorageLun
@@ -2128,6 +2230,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryPortAssociatedWithProcessor`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryPortAssociatedWithProcessorRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageProcessor.uuid` for the
@@ -2153,6 +2257,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryProcessorAssociatedWithArray`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryProcessorAssociatedWithArrayRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageArray.uuid` for the StorageArray
@@ -2217,6 +2323,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryReplicationGroupInfo`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryReplicationGroupInfoRequestType struct {
 	This     types.ManagedObjectReference `xml:"_this" json:"_this"`
 	RgFilter ReplicationGroupFilter       `xml:"rgFilter" json:"rgFilter"`
@@ -2231,6 +2339,8 @@ type QueryReplicationGroupInfoResponse struct {
 }
 
 // The parameters of `VasaProvider.QueryReplicationGroup`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryReplicationGroupRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// List of replication group IDs.
@@ -2272,6 +2382,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.QueryReplicationPeer`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryReplicationPeerRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// An optional list of source fault domain ID.
@@ -2370,6 +2482,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryStorageContainer`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryStorageContainerRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageContainerSpec`
@@ -2409,6 +2523,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.QueryVmfsDatastoreAssociatedWithLun`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type QueryVmfsDatastoreAssociatedWithLunRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `StorageLun.uuid` for the StorageLun object
@@ -2519,6 +2635,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.RegisterProvider_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type RegisterProviderRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `SmsProviderSpec`
@@ -2618,10 +2736,10 @@ func init() {
 // vSphere will not set all the three fields.
 //
 // In other words, the following combinations of fields are allowed:
-// All the three fields are omitted.
-// `ReplicaQueryIntervalParam.fromDate` and `ReplicaQueryIntervalParam.toDate` are set.
-// `ReplicaQueryIntervalParam.fromDate` and `ReplicaQueryIntervalParam.number` are set.
-// `ReplicaQueryIntervalParam.toDate` and `ReplicaQueryIntervalParam.number` are set.
+//   - All the three fields are omitted.
+//   - `ReplicaQueryIntervalParam.fromDate` and `ReplicaQueryIntervalParam.toDate` are set.
+//   - `ReplicaQueryIntervalParam.fromDate` and `ReplicaQueryIntervalParam.number` are set.
+//   - `ReplicaQueryIntervalParam.toDate` and `ReplicaQueryIntervalParam.number` are set.
 //
 // When all the fields are omitted, VASA provider should return
 // `QueryPointInTimeReplicaSummaryResult`.
@@ -2702,10 +2820,12 @@ func init() {
 }
 
 // The parameters of `VasaProvider.ReverseReplicateGroup_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type ReverseReplicateGroupRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Array of replication groups (currently in
-	// `ReplicationState#FAILEDOVER` state) that need to be reversed.
+	// `FAILEDOVER` state) that need to be reversed.
 	GroupId []types.ReplicationGroupId `xml:"groupId,omitempty" json:"groupId,omitempty"`
 }
 
@@ -2842,6 +2962,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.SmsRefreshCACertificatesAndCRLs_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type SmsRefreshCACertificatesAndCRLsRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `SmsProviderInfo.uid` for providers
@@ -2991,7 +3113,7 @@ type SourceGroupMemberInfo struct {
 	//
 	// TODO: It is not clear if we
 	// really need this information, since the target side query can return the
-	// target - source relation information.
+	// target -&gt; source relation information.
 	TargetId []TargetDeviceId `xml:"targetId,omitempty" json:"targetId,omitempty"`
 }
 
@@ -3043,7 +3165,7 @@ type StorageAlarm struct {
 	// List of parameters (name/value) to be passed as input for message
 	ParameterList []NameValuePair `xml:"parameterList,omitempty" json:"parameterList,omitempty"`
 	// The ID of the object on which the alarm is raised; this is an object,
-	// since ID's may not always be `String`s.
+	// since ID's may not always be strings.
 	//
 	// vSphere will first use
 	// `StorageAlarm.alarmObject` if set, and if not uses `StorageAlarm.objectId`.
@@ -3133,6 +3255,8 @@ type StorageContainer struct {
 	// If the storage array is not capable of supporting mixed PEs for a storage container,
 	// the VVOL VASA provider sets this property to the supported endpoint type
 	VvolContainerType string `xml:"vvolContainerType,omitempty" json:"vvolContainerType,omitempty"`
+	// Indicates if this storage container is stretched
+	Stretched *bool `xml:"stretched" json:"stretched,omitempty"`
 }
 
 func init() {
@@ -3337,6 +3461,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.SyncReplicationGroup_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type SyncReplicationGroupRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// List of replication group IDs.
@@ -3425,7 +3551,7 @@ type TargetGroupInfo struct {
 	// Otherwise, this should be `TargetGroupMemberInfo`
 	Devices []BaseTargetGroupMemberInfo `xml:"devices,omitempty,typeattr" json:"devices,omitempty"`
 	// Whether the VASA provider is capable of executing
-	// `promoteReplicationGroup(ReplicationGroupId[])` for this
+	// `VasaProvider.PromoteReplicationGroup_Task` for this
 	// ReplicationGroup.
 	//
 	// False if not set. Note that this setting is per
@@ -3440,7 +3566,7 @@ func init() {
 }
 
 // Information about member virtual volumes in a ReplicationGroup
-// on the target when the state is `ReplicationStateEnum#TARGET`.
+// on the target when the state is `TARGET`.
 //
 // This need not include information about all the snapshots in
 // the ReplicationGroup.
@@ -3501,6 +3627,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.TestFailoverReplicationGroupStart_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type TestFailoverReplicationGroupStartRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Settings for the failover.
@@ -3522,6 +3650,8 @@ type TestFailoverReplicationGroupStart_TaskResponse struct {
 }
 
 // The parameters of `VasaProvider.TestFailoverReplicationGroupStop_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type TestFailoverReplicationGroupStopRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// Array of replication groups that need to stop test.
@@ -3573,6 +3703,8 @@ func init() {
 }
 
 // The parameters of `SmsStorageManager.UnregisterProvider_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type UnregisterProviderRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// `SmsProviderInfo.uid` for
@@ -3646,7 +3778,7 @@ type VasaProviderInfo struct {
 	// List of supported profiles at provider level.
 	//
 	// Must be one of the string
-	// values from \* `sms.provider.VasaProviderInfo#ProviderProfile`.
+	// values from `ProviderProfile_enum`.
 	SupportedProviderProfile []string `xml:"supportedProviderProfile,omitempty" json:"supportedProviderProfile,omitempty"`
 	// List containing mapping between storage arrays reported by the provider
 	// and information such as whether the provider is considered active for them.
@@ -3657,7 +3789,7 @@ type VasaProviderInfo struct {
 	// Provider certificate expiry date.
 	CertificateExpiryDate string `xml:"certificateExpiryDate,omitempty" json:"certificateExpiryDate,omitempty"`
 	// Provider certificate status
-	// This field holds values from `sms.Provider.VasaProviderInfo#CertificateStatus`
+	// This field holds values from `VasaProviderCertificateStatus_enum`
 	CertificateStatus string `xml:"certificateStatus,omitempty" json:"certificateStatus,omitempty"`
 	// Service location for the VASA endpoint that SMS is using
 	// to communicate with the provider.
@@ -3694,7 +3826,7 @@ type VasaProviderInfo struct {
 	ArrayIndependentProvider *bool `xml:"arrayIndependentProvider" json:"arrayIndependentProvider,omitempty"`
 	// Type of this VASA provider.
 	//
-	// This field will be equal to one of the values of `sms.provider.VasaProviderInfo#Type`.
+	// This field will be equal to one of the values of `VpType_enum`.
 	Type string `xml:"type,omitempty" json:"type,omitempty"`
 	// This field indicates the category of the provider and will be equal to one of the values of
 	// `VpCategory_enum`.
@@ -3797,6 +3929,8 @@ func init() {
 }
 
 // The parameters of `VasaProvider.VasaProviderSync_Task`.
+//
+// This structure may be used only with operations rendered under `/sms`.
 type VasaProviderSyncRequestType struct {
 	This    types.ManagedObjectReference `xml:"_this" json:"_this"`
 	ArrayId string                       `xml:"arrayId,omitempty" json:"arrayId,omitempty"`
