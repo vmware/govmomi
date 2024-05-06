@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015-2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,11 +84,7 @@ func init() {
 	cli.Register("vm.change", &change{})
 }
 
-var latencyLevels = []string{
-	string(types.LatencySensitivitySensitivityLevelLow),
-	string(types.LatencySensitivitySensitivityLevelNormal),
-	string(types.LatencySensitivitySensitivityLevelHigh),
-}
+var latencyLevels = types.LatencySensitivitySensitivityLevel("").Strings()
 
 // setLatency validates latency level if set
 func (cmd *change) setLatency() error {
@@ -106,11 +102,7 @@ func (cmd *change) setLatency() error {
 	return fmt.Errorf("latency must be one of: %s", strings.Join(latencyLevels, "|"))
 }
 
-var hwUpgradePolicies = []string{
-	string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicyOnSoftPowerOff),
-	string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicyNever),
-	string(types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicyAlways),
-}
+var hwUpgradePolicies = types.ScheduledHardwareUpgradeInfoHardwareUpgradePolicy("").Strings()
 
 // setHwUpgradePolicy validates hwUpgradePolicy if set
 func (cmd *change) setHwUpgradePolicy() error {

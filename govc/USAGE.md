@@ -876,8 +876,8 @@ Options:
   -drs-enabled=<nil>      Enable DRS
   -drs-mode=              DRS behavior for virtual machines: manual, partiallyAutomated, fullyAutomated
   -ha-additional-delay=0  HA Additional Delay
-  -ha-ready-condition=    HA VM Ready Condition (Start next priority VMs when): poweredOn, guestHbStatusGreen, appHbStatusGreen, useClusterDefault
-  -ha-restart-priority=   HA restart priority: disabled, lowest, low, medium, high, highest
+  -ha-ready-condition=    HA VM Ready Condition (Start next priority VMs when): none, poweredOn, guestHbStatusGreen, appHbStatusGreen, useClusterDefault
+  -ha-restart-priority=   HA restart priority: disabled, lowest, low, medium, high, highest, clusterRestartPriority
   -vm=                    Virtual machine [GOVC_VM]
 ```
 
@@ -2906,7 +2906,7 @@ Options:
   -start-order=-1             Start Order
   -stop-action=systemDefault  Stop Action
   -stop-delay=-1              Stop Delay
-  -wait=systemDefault         Wait for Hearbeat Setting (systemDefault|yes|no)
+  -wait=systemDefault         Wait for Hearbeat Setting (yes|no|systemDefault)
 ```
 
 ## host.autostart.configure
@@ -3338,7 +3338,7 @@ Usage: govc host.vnic.service [OPTIONS] SERVICE DEVICE
 
 Enable or disable service on a virtual nic device.
 
-Where SERVICE is one of: vmotion|faultToleranceLogging|vSphereReplication|vSphereReplicationNFC|management|vsan|vSphereProvisioning
+Where SERVICE is one of: vmotion|faultToleranceLogging|vSphereReplication|vSphereReplicationNFC|management|vsan|vSphereProvisioning|vsanWitness|vSphereBackupNFC|ptp|nvmeTcp|nvmeRdma
 Where DEVICE is one of: vmk0|vmk1|...
 
 Examples:
@@ -6188,7 +6188,7 @@ Options:
   -f=[]                          ExtraConfig. <key>=<absolute path to file>
   -g=                            Guest OS
   -iommu-enabled=<nil>           Enable IOMMU
-  -latency=                      Latency sensitivity (low|normal|high)
+  -latency=                      Latency sensitivity (low|normal|medium|high|custom)
   -m=0                           Size in MB of memory
   -mem.limit=<nil>               Memory limit in MB
   -mem.reservation=<nil>         Memory reservation in MB
@@ -6197,7 +6197,7 @@ Options:
   -memory-pin=<nil>              Reserve all guest memory
   -name=                         Display name
   -nested-hv-enabled=<nil>       Enable nested hardware-assisted virtualization
-  -scheduled-hw-upgrade-policy=  Schedule hardware upgrade policy (onSoftPowerOff|never|always)
+  -scheduled-hw-upgrade-policy=  Schedule hardware upgrade policy (never|onSoftPowerOff|always)
   -sync-time-with-host=<nil>     Enable SyncTimeWithHost
   -uuid=                         BIOS UUID
   -vm=                           Virtual machine [GOVC_VM]
