@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,17 @@ const (
 	VslmEventTypePostFcdMigrateEvent = VslmEventType("postFcdMigrateEvent")
 )
 
+func (e VslmEventType) Values() []VslmEventType {
+	return []VslmEventType{
+		VslmEventTypePreFcdMigrateEvent,
+		VslmEventTypePostFcdMigrateEvent,
+	}
+}
+
+func (e VslmEventType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("vslm:VslmEventType", reflect.TypeOf((*VslmEventType)(nil)).Elem())
 }
@@ -44,6 +55,17 @@ const (
 	// When there is error while processing the event.
 	VslmEventVslmEventInfoStateError = VslmEventVslmEventInfoState("error")
 )
+
+func (e VslmEventVslmEventInfoState) Values() []VslmEventVslmEventInfoState {
+	return []VslmEventVslmEventInfoState{
+		VslmEventVslmEventInfoStateSuccess,
+		VslmEventVslmEventInfoStateError,
+	}
+}
+
+func (e VslmEventVslmEventInfoState) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("vslm:VslmEventVslmEventInfoState", reflect.TypeOf((*VslmEventVslmEventInfoState)(nil)).Elem())
@@ -66,6 +88,19 @@ const (
 	VslmTaskInfoStateError = VslmTaskInfoState("error")
 )
 
+func (e VslmTaskInfoState) Values() []VslmTaskInfoState {
+	return []VslmTaskInfoState{
+		VslmTaskInfoStateQueued,
+		VslmTaskInfoStateRunning,
+		VslmTaskInfoStateSuccess,
+		VslmTaskInfoStateError,
+	}
+}
+
+func (e VslmTaskInfoState) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("vslm:VslmTaskInfoState", reflect.TypeOf((*VslmTaskInfoState)(nil)).Elem())
 }
@@ -80,7 +115,7 @@ const (
 	// Indicates `BaseConfigInfo.name` as the searchable
 	// field.
 	VslmVsoVStorageObjectQuerySpecQueryFieldEnumName = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("name")
-	// Indicates `vim.vslm.VStorageObject#capacityInMB` as the
+	// Indicates `VStorageObjectConfigInfo.capacityInMB` as the
 	// searchable field.
 	VslmVsoVStorageObjectQuerySpecQueryFieldEnumCapacity = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("capacity")
 	// Indicates `BaseConfigInfo.createTime` as the searchable
@@ -98,6 +133,23 @@ const (
 	// Indicates it as the searchable field.
 	VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataValue = VslmVsoVStorageObjectQuerySpecQueryFieldEnum("metadataValue")
 )
+
+func (e VslmVsoVStorageObjectQuerySpecQueryFieldEnum) Values() []VslmVsoVStorageObjectQuerySpecQueryFieldEnum {
+	return []VslmVsoVStorageObjectQuerySpecQueryFieldEnum{
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumId,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumName,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumCapacity,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumCreateTime,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumBackingObjectId,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumDatastoreMoId,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataKey,
+		VslmVsoVStorageObjectQuerySpecQueryFieldEnumMetadataValue,
+	}
+}
+
+func (e VslmVsoVStorageObjectQuerySpecQueryFieldEnum) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectQuerySpecQueryFieldEnum", reflect.TypeOf((*VslmVsoVStorageObjectQuerySpecQueryFieldEnum)(nil)).Elem())
@@ -118,6 +170,24 @@ const (
 	VslmVsoVStorageObjectQuerySpecQueryOperatorEnumStartsWith         = VslmVsoVStorageObjectQuerySpecQueryOperatorEnum("startsWith")
 	VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEndsWith           = VslmVsoVStorageObjectQuerySpecQueryOperatorEnum("endsWith")
 )
+
+func (e VslmVsoVStorageObjectQuerySpecQueryOperatorEnum) Values() []VslmVsoVStorageObjectQuerySpecQueryOperatorEnum {
+	return []VslmVsoVStorageObjectQuerySpecQueryOperatorEnum{
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEquals,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumNotEquals,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThan,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThan,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumLessThanOrEqual,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumGreaterThanOrEqual,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumContains,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumStartsWith,
+		VslmVsoVStorageObjectQuerySpecQueryOperatorEnumEndsWith,
+	}
+}
+
+func (e VslmVsoVStorageObjectQuerySpecQueryOperatorEnum) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("vslm:VslmVsoVStorageObjectQuerySpecQueryOperatorEnum", reflect.TypeOf((*VslmVsoVStorageObjectQuerySpecQueryOperatorEnum)(nil)).Elem())

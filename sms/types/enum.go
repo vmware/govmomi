@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -35,6 +35,23 @@ const (
 	AlarmTypeCertificateAlarm   = AlarmType("CertificateAlarm")
 )
 
+func (e AlarmType) Values() []AlarmType {
+	return []AlarmType{
+		AlarmTypeSpaceCapacityAlarm,
+		AlarmTypeCapabilityAlarm,
+		AlarmTypeStorageObjectAlarm,
+		AlarmTypeObjectAlarm,
+		AlarmTypeComplianceAlarm,
+		AlarmTypeManageabilityAlarm,
+		AlarmTypeReplicationAlarm,
+		AlarmTypeCertificateAlarm,
+	}
+}
+
+func (e AlarmType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:AlarmType", reflect.TypeOf((*AlarmType)(nil)).Elem())
 }
@@ -47,6 +64,18 @@ const (
 	BackingStoragePoolTypeDeduplicationPool                = BackingStoragePoolType("deduplicationPool")
 	BackingStoragePoolTypeThinAndDeduplicationCombinedPool = BackingStoragePoolType("thinAndDeduplicationCombinedPool")
 )
+
+func (e BackingStoragePoolType) Values() []BackingStoragePoolType {
+	return []BackingStoragePoolType{
+		BackingStoragePoolTypeThinProvisioningPool,
+		BackingStoragePoolTypeDeduplicationPool,
+		BackingStoragePoolTypeThinAndDeduplicationCombinedPool,
+	}
+}
+
+func (e BackingStoragePoolType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:BackingStoragePoolType", reflect.TypeOf((*BackingStoragePoolType)(nil)).Elem())
@@ -61,6 +90,19 @@ const (
 	BlockDeviceInterfaceFcoe       = BlockDeviceInterface("fcoe")
 	BlockDeviceInterfaceOtherBlock = BlockDeviceInterface("otherBlock")
 )
+
+func (e BlockDeviceInterface) Values() []BlockDeviceInterface {
+	return []BlockDeviceInterface{
+		BlockDeviceInterfaceFc,
+		BlockDeviceInterfaceIscsi,
+		BlockDeviceInterfaceFcoe,
+		BlockDeviceInterfaceOtherBlock,
+	}
+}
+
+func (e BlockDeviceInterface) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:BlockDeviceInterface", reflect.TypeOf((*BlockDeviceInterface)(nil)).Elem())
@@ -85,6 +127,28 @@ const (
 	EntityReferenceEntityTypeNasMount     = EntityReferenceEntityType("nasMount")
 )
 
+func (e EntityReferenceEntityType) Values() []EntityReferenceEntityType {
+	return []EntityReferenceEntityType{
+		EntityReferenceEntityTypeDatacenter,
+		EntityReferenceEntityTypeResourcePool,
+		EntityReferenceEntityTypeStoragePod,
+		EntityReferenceEntityTypeCluster,
+		EntityReferenceEntityTypeVm,
+		EntityReferenceEntityTypeDatastore,
+		EntityReferenceEntityTypeHost,
+		EntityReferenceEntityTypeVmFile,
+		EntityReferenceEntityTypeScsiPath,
+		EntityReferenceEntityTypeScsiTarget,
+		EntityReferenceEntityTypeScsiVolume,
+		EntityReferenceEntityTypeScsiAdapter,
+		EntityReferenceEntityTypeNasMount,
+	}
+}
+
+func (e EntityReferenceEntityType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:EntityReferenceEntityType", reflect.TypeOf((*EntityReferenceEntityType)(nil)).Elem())
 }
@@ -97,6 +161,17 @@ const (
 	FileSystemInterfaceOtherFileSystem = FileSystemInterface("otherFileSystem")
 )
 
+func (e FileSystemInterface) Values() []FileSystemInterface {
+	return []FileSystemInterface{
+		FileSystemInterfaceNfs,
+		FileSystemInterfaceOtherFileSystem,
+	}
+}
+
+func (e FileSystemInterface) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:FileSystemInterface", reflect.TypeOf((*FileSystemInterface)(nil)).Elem())
 }
@@ -106,6 +181,16 @@ type FileSystemInterfaceVersion string
 const (
 	FileSystemInterfaceVersionNFSV3_0 = FileSystemInterfaceVersion("NFSV3_0")
 )
+
+func (e FileSystemInterfaceVersion) Values() []FileSystemInterfaceVersion {
+	return []FileSystemInterfaceVersion{
+		FileSystemInterfaceVersionNFSV3_0,
+	}
+}
+
+func (e FileSystemInterfaceVersion) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:FileSystemInterfaceVersion", reflect.TypeOf((*FileSystemInterfaceVersion)(nil)).Elem())
@@ -120,6 +205,17 @@ const (
 	// Replication profile
 	ProviderProfileReplication = ProviderProfile("Replication")
 )
+
+func (e ProviderProfile) Values() []ProviderProfile {
+	return []ProviderProfile{
+		ProviderProfileProfileBasedManagement,
+		ProviderProfileReplication,
+	}
+}
+
+func (e ProviderProfile) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:ProviderProfile", reflect.TypeOf((*ProviderProfile)(nil)).Elem())
@@ -153,6 +249,20 @@ const (
 	ReplicationReplicationStateREMOTE_FAILEDOVER = ReplicationReplicationState("REMOTE_FAILEDOVER")
 )
 
+func (e ReplicationReplicationState) Values() []ReplicationReplicationState {
+	return []ReplicationReplicationState{
+		ReplicationReplicationStateSOURCE,
+		ReplicationReplicationStateTARGET,
+		ReplicationReplicationStateFAILEDOVER,
+		ReplicationReplicationStateINTEST,
+		ReplicationReplicationStateREMOTE_FAILEDOVER,
+	}
+}
+
+func (e ReplicationReplicationState) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:ReplicationReplicationState", reflect.TypeOf((*ReplicationReplicationState)(nil)).Elem())
 }
@@ -165,6 +275,18 @@ const (
 	SmsAlarmStatusGreen  = SmsAlarmStatus("Green")
 	SmsAlarmStatusYellow = SmsAlarmStatus("Yellow")
 )
+
+func (e SmsAlarmStatus) Values() []SmsAlarmStatus {
+	return []SmsAlarmStatus{
+		SmsAlarmStatusRed,
+		SmsAlarmStatusGreen,
+		SmsAlarmStatusYellow,
+	}
+}
+
+func (e SmsAlarmStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:SmsAlarmStatus", reflect.TypeOf((*SmsAlarmStatus)(nil)).Elem())
@@ -194,6 +316,33 @@ const (
 	SmsEntityTypeReplicationGroupEntity    = SmsEntityType("ReplicationGroupEntity")
 )
 
+func (e SmsEntityType) Values() []SmsEntityType {
+	return []SmsEntityType{
+		SmsEntityTypeStorageArrayEntity,
+		SmsEntityTypeStorageProcessorEntity,
+		SmsEntityTypeStoragePortEntity,
+		SmsEntityTypeStorageLunEntity,
+		SmsEntityTypeStorageFileSystemEntity,
+		SmsEntityTypeStorageCapabilityEntity,
+		SmsEntityTypeCapabilitySchemaEntity,
+		SmsEntityTypeCapabilityProfileEntity,
+		SmsEntityTypeDefaultProfileEntity,
+		SmsEntityTypeResourceAssociationEntity,
+		SmsEntityTypeStorageContainerEntity,
+		SmsEntityTypeStorageObjectEntity,
+		SmsEntityTypeMessageCatalogEntity,
+		SmsEntityTypeProtocolEndpointEntity,
+		SmsEntityTypeVirtualVolumeInfoEntity,
+		SmsEntityTypeBackingStoragePoolEntity,
+		SmsEntityTypeFaultDomainEntity,
+		SmsEntityTypeReplicationGroupEntity,
+	}
+}
+
+func (e SmsEntityType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:SmsEntityType", reflect.TypeOf((*SmsEntityType)(nil)).Elem())
 }
@@ -212,6 +361,19 @@ const (
 	SmsTaskStateError = SmsTaskState("error")
 )
 
+func (e SmsTaskState) Values() []SmsTaskState {
+	return []SmsTaskState{
+		SmsTaskStateQueued,
+		SmsTaskStateRunning,
+		SmsTaskStateSuccess,
+		SmsTaskStateError,
+	}
+}
+
+func (e SmsTaskState) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:SmsTaskState", reflect.TypeOf((*SmsTaskState)(nil)).Elem())
 }
@@ -226,6 +388,19 @@ const (
 	StorageContainerVvolContainerTypeEnumNVMe  = StorageContainerVvolContainerTypeEnum("NVMe")
 )
 
+func (e StorageContainerVvolContainerTypeEnum) Values() []StorageContainerVvolContainerTypeEnum {
+	return []StorageContainerVvolContainerTypeEnum{
+		StorageContainerVvolContainerTypeEnumNFS,
+		StorageContainerVvolContainerTypeEnumNFS4x,
+		StorageContainerVvolContainerTypeEnumSCSI,
+		StorageContainerVvolContainerTypeEnumNVMe,
+	}
+}
+
+func (e StorageContainerVvolContainerTypeEnum) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:StorageContainerVvolContainerTypeEnum", reflect.TypeOf((*StorageContainerVvolContainerTypeEnum)(nil)).Elem())
 }
@@ -238,6 +413,18 @@ const (
 	ThinProvisioningStatusYELLOW = ThinProvisioningStatus("YELLOW")
 	ThinProvisioningStatusGREEN  = ThinProvisioningStatus("GREEN")
 )
+
+func (e ThinProvisioningStatus) Values() []ThinProvisioningStatus {
+	return []ThinProvisioningStatus{
+		ThinProvisioningStatusRED,
+		ThinProvisioningStatusYELLOW,
+		ThinProvisioningStatusGREEN,
+	}
+}
+
+func (e ThinProvisioningStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:ThinProvisioningStatus", reflect.TypeOf((*ThinProvisioningStatus)(nil)).Elem())
@@ -252,6 +439,17 @@ const (
 	// Use id of an existing session that has logged-in from somewhere else.
 	VasaAuthenticationTypeUseSessionId = VasaAuthenticationType("UseSessionId")
 )
+
+func (e VasaAuthenticationType) Values() []VasaAuthenticationType {
+	return []VasaAuthenticationType{
+		VasaAuthenticationTypeLoginByToken,
+		VasaAuthenticationTypeUseSessionId,
+	}
+}
+
+func (e VasaAuthenticationType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:VasaAuthenticationType", reflect.TypeOf((*VasaAuthenticationType)(nil)).Elem())
@@ -279,6 +477,23 @@ const (
 	VasaProfileStorageDrsFileSystem = VasaProfile("storageDrsFileSystem")
 )
 
+func (e VasaProfile) Values() []VasaProfile {
+	return []VasaProfile{
+		VasaProfileBlockDevice,
+		VasaProfileFileSystem,
+		VasaProfileCapability,
+		VasaProfilePolicy,
+		VasaProfileObject,
+		VasaProfileStatistics,
+		VasaProfileStorageDrsBlockDevice,
+		VasaProfileStorageDrsFileSystem,
+	}
+}
+
+func (e VasaProfile) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:VasaProfile", reflect.TypeOf((*VasaProfile)(nil)).Elem())
 }
@@ -299,6 +514,20 @@ const (
 	VasaProviderCertificateStatusInvalid = VasaProviderCertificateStatus("invalid")
 )
 
+func (e VasaProviderCertificateStatus) Values() []VasaProviderCertificateStatus {
+	return []VasaProviderCertificateStatus{
+		VasaProviderCertificateStatusValid,
+		VasaProviderCertificateStatusExpirySoftLimitReached,
+		VasaProviderCertificateStatusExpiryHardLimitReached,
+		VasaProviderCertificateStatusExpired,
+		VasaProviderCertificateStatusInvalid,
+	}
+}
+
+func (e VasaProviderCertificateStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:VasaProviderCertificateStatus", reflect.TypeOf((*VasaProviderCertificateStatus)(nil)).Elem())
 }
@@ -317,6 +546,18 @@ const (
 	VasaProviderProfileCapability = VasaProviderProfile("capability")
 )
 
+func (e VasaProviderProfile) Values() []VasaProviderProfile {
+	return []VasaProviderProfile{
+		VasaProviderProfileBlockDevice,
+		VasaProviderProfileFileSystem,
+		VasaProviderProfileCapability,
+	}
+}
+
+func (e VasaProviderProfile) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("sms:VasaProviderProfile", reflect.TypeOf((*VasaProviderProfile)(nil)).Elem())
 }
@@ -334,8 +575,6 @@ const (
 	VasaProviderStatusOffline = VasaProviderStatus("offline")
 	// VASA Provider is connected, but sync operation failed.
 	VasaProviderStatusSyncError = VasaProviderStatus("syncError")
-	//
-	//
 	// Deprecated as of SMS API 4.0, this status is deprecated.
 	//
 	// VASA Provider is unreachable.
@@ -350,6 +589,21 @@ const (
 	// `VasaProvider.VasaProviderReconnect_Task`.
 	VasaProviderStatusDisconnected = VasaProviderStatus("disconnected")
 )
+
+func (e VasaProviderStatus) Values() []VasaProviderStatus {
+	return []VasaProviderStatus{
+		VasaProviderStatusOnline,
+		VasaProviderStatusOffline,
+		VasaProviderStatusSyncError,
+		VasaProviderStatusUnknown,
+		VasaProviderStatusConnected,
+		VasaProviderStatusDisconnected,
+	}
+}
+
+func (e VasaProviderStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:VasaProviderStatus", reflect.TypeOf((*VasaProviderStatus)(nil)).Elem())
@@ -368,6 +622,17 @@ const (
 	// to say either of IOFILTERS or VSAN category.
 	VpCategoryExternal = VpCategory("external")
 )
+
+func (e VpCategory) Values() []VpCategory {
+	return []VpCategory{
+		VpCategoryInternal,
+		VpCategoryExternal,
+	}
+}
+
+func (e VpCategory) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:VpCategory", reflect.TypeOf((*VpCategory)(nil)).Elem())
@@ -388,6 +653,18 @@ const (
 	// VASA provider type can be UNKNOWN when it is undergoing sync operation.
 	VpTypeUNKNOWN = VpType("UNKNOWN")
 )
+
+func (e VpType) Values() []VpType {
+	return []VpType{
+		VpTypePERSISTENCE,
+		VpTypeDATASERVICE,
+		VpTypeUNKNOWN,
+	}
+}
+
+func (e VpType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("sms:VpType", reflect.TypeOf((*VpType)(nil)).Elem())

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -30,6 +30,8 @@ func init() {
 }
 
 // The parameters of `Agency.AddIssue`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type AddIssueRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// A new issue.
@@ -52,7 +54,7 @@ type AgencyComputeResourceScope struct {
 
 	// Compute resources on which to deploy the agents.
 	//
-	// If `ConfigInfo#vmPlacementPolicy` is set, the array needs to
+	// If `AgencyConfigInfoEx.vmPlacementPolicy` is set, the array needs to
 	// contain exactly one cluster compute resource.
 	//
 	// Refers instances of `ComputeResource`.
@@ -81,7 +83,7 @@ type AgencyConfigInfo struct {
 	// ESX Agent Manager tries to find, from left to right in the array, a
 	// match for an `AgentConfigInfo` and stops searching at the first
 	// one that it finds.
-	// If `#vmPlacementPolicy` is set, the array needs to contain only a
+	// If `AgencyConfigInfoEx.vmPlacementPolicy` is set, the array needs to contain only a
 	// single agent config. In that case the agent config is not bound to a
 	// specific host, but to the whole cluster.
 	AgentConfig []AgentConfigInfo `xml:"agentConfig,omitempty" json:"agentConfig,omitempty"`
@@ -137,7 +139,7 @@ type AgencyConfigInfo struct {
 	//
 	// If not set or is set to <code>false</code>, virtual
 	// machines will not contain UUID in their name.
-	UseUuidVmName *bool `xml:"useUuidVmName" json:"useUuidVmName,omitempty" vim:"7.5"`
+	UseUuidVmName *bool `xml:"useUuidVmName" json:"useUuidVmName,omitempty"`
 	// Deprecated use automatically provisioned VMs and register hooks to
 	// have control post provisioning and power on.
 	//
@@ -145,7 +147,7 @@ type AgencyConfigInfo struct {
 	//
 	// If unset, defaults
 	// to false.
-	ManuallyProvisioned *bool `xml:"manuallyProvisioned" json:"manuallyProvisioned,omitempty" vim:"2.0"`
+	ManuallyProvisioned *bool `xml:"manuallyProvisioned" json:"manuallyProvisioned,omitempty"`
 	// Deprecated use automatically provisioned VMs and register hooks to
 	// have control post provisioning and power on.
 	//
@@ -154,7 +156,7 @@ type AgencyConfigInfo struct {
 	// If unset, defaults to
 	// false. This can only be set to true if
 	// `AgencyConfigInfo.manuallyProvisioned` is set to true.
-	ManuallyMonitored *bool `xml:"manuallyMonitored" json:"manuallyMonitored,omitempty" vim:"2.0"`
+	ManuallyMonitored *bool `xml:"manuallyMonitored" json:"manuallyMonitored,omitempty"`
 	// Deprecated vUM is no more consulted so this property has no sense
 	// anymore.
 	//
@@ -162,49 +164,49 @@ type AgencyConfigInfo struct {
 	// Update Manager is installed.
 	//
 	// If unset, defaults to false.
-	BypassVumEnabled *bool `xml:"bypassVumEnabled" json:"bypassVumEnabled,omitempty" vim:"2.0"`
+	BypassVumEnabled *bool `xml:"bypassVumEnabled" json:"bypassVumEnabled,omitempty"`
 	// Specifies the networks which to be configured on the agent VMs.
 	//
 	// This property is only applicable for pinned to host VMs - i.e.
-	// (`#vmPlacementPolicy`) is not set.
+	// (`AgencyConfigInfoEx.vmPlacementPolicy`) is not set.
 	//
 	// If not set or `AgencyConfigInfo.preferHostConfiguration` is set to true, the
 	// default host agent VM network (configured through
 	// vim.host.EsxAgentHostManager) is used, otherwise the first network from
 	// the array that is present on the host is used.
 	//
-	// At most one of `AgencyConfigInfo.agentVmNetwork` and `#vmNetworkMapping`
+	// At most one of `AgencyConfigInfo.agentVmNetwork` and `AgencyConfigInfoEx.vmNetworkMapping`
 	// needs to be set.
 	//
 	// Refers instances of `Network`.
-	AgentVmNetwork []types.ManagedObjectReference `xml:"agentVmNetwork,omitempty" json:"agentVmNetwork,omitempty" vim:"2.0"`
+	AgentVmNetwork []types.ManagedObjectReference `xml:"agentVmNetwork,omitempty" json:"agentVmNetwork,omitempty"`
 	// The datastores used to configure the storage on the agent VMs.
 	//
-	// This property is required if `#vmPlacementPolicy` is set and
-	// `#datastoreSelectionPolicy` is not set. In that case the first
+	// This property is required if `AgencyConfigInfoEx.vmPlacementPolicy` is set and
+	// `AgencyConfigInfoEx.datastoreSelectionPolicy` is not set. In that case the first
 	// element from the list is used.
 	//
 	// If not set or `AgencyConfigInfo.preferHostConfiguration` is set to true and
-	// `#vmPlacementPolicy` is not set, the default host agent VM
+	// `AgencyConfigInfoEx.vmPlacementPolicy` is not set, the default host agent VM
 	// datastore (configured through vim.host.EsxAgentHostManager) is used,
 	// otherwise the first datastore from the array that is present on the
 	// host is used.
 	//
-	// If `#vmPlacementPolicy` is set at most one of
-	// `AgencyConfigInfo.agentVmDatastore` and `#datastoreSelectionPolicy` needs
-	// to be set. If `#vmPlacementPolicy` is not set
-	// `#datastoreSelectionPolicy` takes precedence over
+	// If `AgencyConfigInfoEx.vmPlacementPolicy` is set at most one of
+	// `AgencyConfigInfo.agentVmDatastore` and `AgencyConfigInfoEx.datastoreSelectionPolicy` needs
+	// to be set. If `AgencyConfigInfoEx.vmPlacementPolicy` is not set
+	// `AgencyConfigInfoEx.datastoreSelectionPolicy` takes precedence over
 	// `AgencyConfigInfo.agentVmDatastore` .
 	//
 	// Refers instances of `Datastore`.
-	AgentVmDatastore []types.ManagedObjectReference `xml:"agentVmDatastore,omitempty" json:"agentVmDatastore,omitempty" vim:"2_5"`
+	AgentVmDatastore []types.ManagedObjectReference `xml:"agentVmDatastore,omitempty" json:"agentVmDatastore,omitempty"`
 	// If set to true the default agent VM datastore and network will take
-	// precedence over `Agency.ConfigInfo.agentVmNetwork` and
-	// `Agency.ConfigInfo.agentVmDatastore` when configuring the agent
+	// precedence over `AgencyConfigInfo.agentVmNetwork` and
+	// `AgencyConfigInfo.agentVmDatastore` when configuring the agent
 	// VMs.
 	//
-	// This property is not used if `#vmPlacementPolicy` is set.
-	PreferHostConfiguration *bool `xml:"preferHostConfiguration" json:"preferHostConfiguration,omitempty" vim:"2_5"`
+	// This property is not used if `AgencyConfigInfoEx.vmPlacementPolicy` is set.
+	PreferHostConfiguration *bool `xml:"preferHostConfiguration" json:"preferHostConfiguration,omitempty"`
 	// Deprecated that is a custom configuration that should be setup by the
 	// agency owner. One way is to use
 	// `AgencyConfigInfo.manuallyMarkAgentVmAvailableAfterPowerOn` or
@@ -213,7 +215,7 @@ type AgencyConfigInfo struct {
 	//
 	// If set, a property with id "ip" and value an IP from the pool is added
 	// to the vApp configuration of the deployed VMs.
-	IpPool *types.IpPool `xml:"ipPool,omitempty" json:"ipPool,omitempty" vim:"3.0"`
+	IpPool *types.IpPool `xml:"ipPool,omitempty" json:"ipPool,omitempty"`
 	// Defines the resource pools where VMs to be deployed.
 	//
 	// If specified, the VMs for every compute resouce in the scope will be
@@ -222,7 +224,7 @@ type AgencyConfigInfo struct {
 	// deployed under top level nested resource pool created for the agent
 	// VMs. If unable to create a nested resource pool, the root resource pool
 	// of the compute resource will be used.
-	ResourcePools []AgencyVMResourcePool `xml:"resourcePools,omitempty" json:"resourcePools,omitempty" vim:"6.9"`
+	ResourcePools []AgencyVMResourcePool `xml:"resourcePools,omitempty" json:"resourcePools,omitempty"`
 	// Defines the folders where VMs to be deployed.
 	//
 	// If specified, the VMs for every compute resouce in the scope will be
@@ -232,7 +234,7 @@ type AgencyConfigInfo struct {
 	// If not specified, the agent VMs for each compute resource will be
 	// deployed in top level folder created in each datacenter for the agent
 	// VMs.
-	Folders []AgencyVMFolder `xml:"folders,omitempty" json:"folders,omitempty" vim:"6.9"`
+	Folders []AgencyVMFolder `xml:"folders,omitempty" json:"folders,omitempty"`
 }
 
 func init() {
@@ -326,7 +328,6 @@ type AgencyVMFolder struct {
 
 func init() {
 	types.Add("eam:AgencyVMFolder", reflect.TypeOf((*AgencyVMFolder)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:AgencyVMFolder", "6.9")
 }
 
 // Represents the mapping of a VM resource pool to a compute resource.
@@ -350,7 +351,6 @@ type AgencyVMResourcePool struct {
 
 func init() {
 	types.Add("eam:AgencyVMResourcePool", reflect.TypeOf((*AgencyVMResourcePool)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:AgencyVMResourcePool", "6.9")
 }
 
 type Agency_Disable Agency_DisableRequestType
@@ -423,7 +423,7 @@ type AgentConfigInfo struct {
 	// be considered when matching an <code>AgentPackage</code> against a
 	// host.
 	// This property is not used if
-	// `Agency.ConfigInfo#vmPlacementPolicy` is set. It is client's
+	// `AgencyConfigInfoEx.vmPlacementPolicy` is set. It is client's
 	// responsibility to trigger an agency upgrade with a new
 	// `AgentConfigInfo.ovfPackageUrl`.
 	HostVersion string `xml:"hostVersion,omitempty" json:"hostVersion,omitempty"`
@@ -431,7 +431,7 @@ type AgentConfigInfo struct {
 	//
 	// If not set, no agent
 	// virtual machines are installed on the hosts covered by the scope.
-	// If `Agency.ConfigInfo#vmPlacementPolicy` is set, the VM needs to
+	// If `AgencyConfigInfoEx.vmPlacementPolicy` is set, the VM needs to
 	// be agnostic to the different host versions inside the cluster.
 	OvfPackageUrl string `xml:"ovfPackageUrl,omitempty" json:"ovfPackageUrl,omitempty"`
 	// Specifies an SSL trust policy to be use for verification of the
@@ -462,7 +462,7 @@ type AgentConfigInfo struct {
 	// same host, the install/uninstall behaviour is undefined (the VIB may
 	// remain installed, etc.).
 	//
-	// The property is not used if `Agency.ConfigInfo#vmPlacementPolicy`
+	// The property is not used if `AgencyConfigInfoEx.vmPlacementPolicy`
 	// is set.
 	VibUrl string `xml:"vibUrl,omitempty" json:"vibUrl,omitempty"`
 	// Specifies an SSL trust policy to be use for verification of the
@@ -480,14 +480,14 @@ type AgentConfigInfo struct {
 	//
 	// If set, the Vib, specified by vibUrl, will
 	// be installed either
-	//     - if there is installed Vib on the host which name and version match
-	//       the regular expressions in the corresponding rule
-	//     - or there isn't any installed Vib on the host with name which
-	//       matches the Vib name regular expression in the corresponding rule. Vib
-	//       matching rules are usually used for controlling VIB upgrades, in which
-	//       case the name regular expression matches any previous versions of the
-	//       agency Vib and version regular expression determines whether the
-	//       existing Vib should be upgraded.
+	//   - if there is installed Vib on the host which name and version match
+	//     the regular expressions in the corresponding rule
+	//   - or there isn't any installed Vib on the host with name which
+	//     matches the Vib name regular expression in the corresponding rule. Vib
+	//     matching rules are usually used for controlling VIB upgrades, in which
+	//     case the name regular expression matches any previous versions of the
+	//     agency Vib and version regular expression determines whether the
+	//     existing Vib should be upgraded.
 	//
 	// For every Vib in the Vib package, only one Vib matching rule can be
 	// defined. If specified more than one, it is not determined which one
@@ -495,7 +495,7 @@ type AgentConfigInfo struct {
 	// will be matched against the name of the Vib which will be installed.
 	// Only rules for Vibs which are defined in the Vib package metadata will
 	// be taken in account.
-	VibMatchingRules []AgentVibMatchingRule `xml:"vibMatchingRules,omitempty" json:"vibMatchingRules,omitempty" vim:"2_5"`
+	VibMatchingRules []AgentVibMatchingRule `xml:"vibMatchingRules,omitempty" json:"vibMatchingRules,omitempty"`
 	// Deprecated use VIB metadata to add such dependency.
 	//
 	// An optional name of a VIB.
@@ -503,11 +503,11 @@ type AgentConfigInfo struct {
 	// If set, no VIB is installed on the host. The
 	// host is checked if a VIB with vibName is already installed on it. Also
 	// the vibUrl must not be set together with the vibUrl.
-	VibName string `xml:"vibName,omitempty" json:"vibName,omitempty" vim:"2.0"`
+	VibName string `xml:"vibName,omitempty" json:"vibName,omitempty"`
 	// Deprecated that is a custom setup specific for a particular agency.
 	// The agency owner should do it using other means, e.g.
-	// `#manuallyMarkAgentVmAvailableAfterPowerOn` or
-	// `#manuallyMarkAgentVmAvailableAfterProvisioning`
+	// `AgencyConfigInfo.manuallyMarkAgentVmAvailableAfterPowerOn` or
+	// `AgencyConfigInfo.manuallyMarkAgentVmAvailableAfterProvisioning`
 	// hooks. Support for this has been removed. Seting this to
 	// <code>true</code> will no longer have any effect.
 	//
@@ -535,7 +535,7 @@ type AgentConfigInfo struct {
 	// AgentVM disk provisioning type.
 	//
 	// Defaults to `none` if not specified.
-	OvfDiskProvisioning string `xml:"ovfDiskProvisioning,omitempty" json:"ovfDiskProvisioning,omitempty" vim:"6.9"`
+	OvfDiskProvisioning string `xml:"ovfDiskProvisioning,omitempty" json:"ovfDiskProvisioning,omitempty"`
 	// Defines the storage policies configured on Agent VMs.
 	//
 	// Storage policies
@@ -543,7 +543,8 @@ type AgentConfigInfo struct {
 	// NOTE: The property needs to be configured on each update, otherwise
 	// vSphere ESX Agent Manager will unset this configuration for all future
 	// agent VMs.
-	VmStoragePolicies []BaseAgentStoragePolicy `xml:"vmStoragePolicies,omitempty,typeattr" json:"vmStoragePolicies,omitempty" vim:"7.0"`
+	VmStoragePolicies       []BaseAgentStoragePolicy `xml:"vmStoragePolicies,omitempty,typeattr" json:"vmStoragePolicies,omitempty"`
+	VmResourceConfiguration string                   `xml:"vmResourceConfiguration,omitempty" json:"vmResourceConfiguration,omitempty"`
 }
 
 func init() {
@@ -711,16 +712,16 @@ type AgentRuntimeInfo struct {
 	// An optional array of IDs of installed bulletins for this agent.
 	InstalledBulletin []string `xml:"installedBulletin,omitempty" json:"installedBulletin,omitempty"`
 	// Information about the installed vibs on the host.
-	InstalledVibs []VibVibInfo `xml:"installedVibs,omitempty" json:"installedVibs,omitempty" vim:"6.0"`
+	InstalledVibs []VibVibInfo `xml:"installedVibs,omitempty" json:"installedVibs,omitempty"`
 	// The agency this agent belongs to.
 	//
 	// Refers instance of `Agency`.
-	Agency *types.ManagedObjectReference `xml:"agency,omitempty" json:"agency,omitempty" vim:"2.0"`
+	Agency *types.ManagedObjectReference `xml:"agency,omitempty" json:"agency,omitempty"`
 	// Active VM hook.
 	//
 	// If present agent is actively waiting for `Agent.MarkAsAvailable`.
 	// See `AgentVmHook`.
-	VmHook *AgentVmHook `xml:"vmHook,omitempty" json:"vmHook,omitempty" vim:"6.7"`
+	VmHook *AgentVmHook `xml:"vmHook,omitempty" json:"vmHook,omitempty"`
 }
 
 func init() {
@@ -748,7 +749,6 @@ type AgentStoragePolicy struct {
 
 func init() {
 	types.Add("eam:AgentStoragePolicy", reflect.TypeOf((*AgentStoragePolicy)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:AgentStoragePolicy", "7.0")
 }
 
 // Deprecated vIB matching rules are no longer supported by EAM. Same
@@ -797,7 +797,6 @@ type AgentVmHook struct {
 
 func init() {
 	types.Add("eam:AgentVmHook", reflect.TypeOf((*AgentVmHook)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:AgentVmHook", "6.7")
 }
 
 // Specifies vSAN specific storage policy configured on Agent VMs.
@@ -816,10 +815,11 @@ type AgentVsanStoragePolicy struct {
 
 func init() {
 	types.Add("eam:AgentVsanStoragePolicy", reflect.TypeOf((*AgentVsanStoragePolicy)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:AgentVsanStoragePolicy", "7.0")
 }
 
 // A boxed array of `AgencyVMFolder`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfAgencyVMFolder struct {
 	AgencyVMFolder []AgencyVMFolder `xml:"AgencyVMFolder,omitempty" json:"_value"`
 }
@@ -829,6 +829,8 @@ func init() {
 }
 
 // A boxed array of `AgencyVMResourcePool`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfAgencyVMResourcePool struct {
 	AgencyVMResourcePool []AgencyVMResourcePool `xml:"AgencyVMResourcePool,omitempty" json:"_value"`
 }
@@ -838,6 +840,8 @@ func init() {
 }
 
 // A boxed array of `AgentConfigInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfAgentConfigInfo struct {
 	AgentConfigInfo []AgentConfigInfo `xml:"AgentConfigInfo,omitempty" json:"_value"`
 }
@@ -847,6 +851,8 @@ func init() {
 }
 
 // A boxed array of `AgentOvfEnvironmentInfoOvfProperty`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfAgentOvfEnvironmentInfoOvfProperty struct {
 	AgentOvfEnvironmentInfoOvfProperty []AgentOvfEnvironmentInfoOvfProperty `xml:"AgentOvfEnvironmentInfoOvfProperty,omitempty" json:"_value"`
 }
@@ -856,6 +862,8 @@ func init() {
 }
 
 // A boxed array of `AgentStoragePolicy`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfAgentStoragePolicy struct {
 	AgentStoragePolicy []BaseAgentStoragePolicy `xml:"AgentStoragePolicy,omitempty,typeattr" json:"_value"`
 }
@@ -865,6 +873,8 @@ func init() {
 }
 
 // A boxed array of `AgentVibMatchingRule`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfAgentVibMatchingRule struct {
 	AgentVibMatchingRule []AgentVibMatchingRule `xml:"AgentVibMatchingRule,omitempty" json:"_value"`
 }
@@ -873,7 +883,6 @@ func init() {
 	types.Add("eam:ArrayOfAgentVibMatchingRule", reflect.TypeOf((*ArrayOfAgentVibMatchingRule)(nil)).Elem())
 }
 
-// A boxed array of `HooksHookInfo`. To be used in `Any` placeholders.
 type ArrayOfHooksHookInfo struct {
 	HooksHookInfo []HooksHookInfo `xml:"HooksHookInfo,omitempty" json:"_value"`
 }
@@ -883,6 +892,8 @@ func init() {
 }
 
 // A boxed array of `Issue`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfIssue struct {
 	Issue []BaseIssue `xml:"Issue,omitempty,typeattr" json:"_value"`
 }
@@ -891,7 +902,31 @@ func init() {
 	types.Add("eam:ArrayOfIssue", reflect.TypeOf((*ArrayOfIssue)(nil)).Elem())
 }
 
+// A boxed array of `SolutionsClusterSolutionComplianceResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type ArrayOfSolutionsClusterSolutionComplianceResult struct {
+	SolutionsClusterSolutionComplianceResult []SolutionsClusterSolutionComplianceResult `xml:"SolutionsClusterSolutionComplianceResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsClusterSolutionComplianceResult", reflect.TypeOf((*ArrayOfSolutionsClusterSolutionComplianceResult)(nil)).Elem())
+}
+
+// A boxed array of `SolutionsDeploymentUnitComplianceResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type ArrayOfSolutionsDeploymentUnitComplianceResult struct {
+	SolutionsDeploymentUnitComplianceResult []SolutionsDeploymentUnitComplianceResult `xml:"SolutionsDeploymentUnitComplianceResult,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsDeploymentUnitComplianceResult", reflect.TypeOf((*ArrayOfSolutionsDeploymentUnitComplianceResult)(nil)).Elem())
+}
+
 // A boxed array of `SolutionsHookConfig`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsHookConfig struct {
 	SolutionsHookConfig []SolutionsHookConfig `xml:"SolutionsHookConfig,omitempty" json:"_value"`
 }
@@ -901,6 +936,8 @@ func init() {
 }
 
 // A boxed array of `SolutionsHostComplianceResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsHostComplianceResult struct {
 	SolutionsHostComplianceResult []SolutionsHostComplianceResult `xml:"SolutionsHostComplianceResult,omitempty" json:"_value"`
 }
@@ -910,6 +947,8 @@ func init() {
 }
 
 // A boxed array of `SolutionsOvfProperty`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsOvfProperty struct {
 	SolutionsOvfProperty []SolutionsOvfProperty `xml:"SolutionsOvfProperty,omitempty" json:"_value"`
 }
@@ -919,6 +958,8 @@ func init() {
 }
 
 // A boxed array of `SolutionsSolutionComplianceResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsSolutionComplianceResult struct {
 	SolutionsSolutionComplianceResult []SolutionsSolutionComplianceResult `xml:"SolutionsSolutionComplianceResult,omitempty" json:"_value"`
 }
@@ -928,6 +969,8 @@ func init() {
 }
 
 // A boxed array of `SolutionsSolutionConfig`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsSolutionConfig struct {
 	SolutionsSolutionConfig []SolutionsSolutionConfig `xml:"SolutionsSolutionConfig,omitempty" json:"_value"`
 }
@@ -937,6 +980,8 @@ func init() {
 }
 
 // A boxed array of `SolutionsSolutionValidationResult`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsSolutionValidationResult struct {
 	SolutionsSolutionValidationResult []SolutionsSolutionValidationResult `xml:"SolutionsSolutionValidationResult,omitempty" json:"_value"`
 }
@@ -946,6 +991,8 @@ func init() {
 }
 
 // A boxed array of `SolutionsStoragePolicy`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfSolutionsStoragePolicy struct {
 	SolutionsStoragePolicy []BaseSolutionsStoragePolicy `xml:"SolutionsStoragePolicy,omitempty,typeattr" json:"_value"`
 }
@@ -954,7 +1001,20 @@ func init() {
 	types.Add("eam:ArrayOfSolutionsStoragePolicy", reflect.TypeOf((*ArrayOfSolutionsStoragePolicy)(nil)).Elem())
 }
 
+// A boxed array of `SolutionsVMNetworkMapping`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type ArrayOfSolutionsVMNetworkMapping struct {
+	SolutionsVMNetworkMapping []SolutionsVMNetworkMapping `xml:"SolutionsVMNetworkMapping,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsVMNetworkMapping", reflect.TypeOf((*ArrayOfSolutionsVMNetworkMapping)(nil)).Elem())
+}
+
 // A boxed array of `VibVibInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ArrayOfVibVibInfo struct {
 	VibVibInfo []VibVibInfo `xml:"VibVibInfo,omitempty" json:"_value"`
 }
@@ -1026,18 +1086,18 @@ func init() {
 // able to make successful SSL trust verification of the server's certificate.
 //
 // Reasons for this might be that the certificate provided via the API
-// `Agent.ConfigInfo.ovfSslTrust` and `Agent.ConfigInfo.vibSslTrust`
+// `AgentConfigInfo.ovfSslTrust` and `AgentConfigInfo.vibSslTrust`
 // or via the script /usr/lib/vmware-eam/bin/eam-utility.py
 //   - is invalid.
 //   - does not match the server's certificate.
 //
 // If there is no provided certificate, the fault is thrown when the server's
 // certificate is not trusted by the system or is invalid - @see
-// `Agent.ConfigInfo.ovfSslTrust` and
-// `Agent.ConfigInfo.vibSslTrust`.
+// `AgentConfigInfo.ovfSslTrust` and
+// `AgentConfigInfo.vibSslTrust`.
 // To enable Agency creation 1) provide a valid certificate used by the
-// server hosting the `Agent.ConfigInfo.ovfPackageUrl` or
-// `Agent.ConfigInfo#vibUrl` or 2) ensure the server's certificate is
+// server hosting the `AgentConfigInfo.ovfPackageUrl` or
+// `AgentConfigInfo.vibUrl` or 2) ensure the server's certificate is
 // signed by a CA trusted by the system. Then retry the operation, vSphere
 // ESX Agent Manager will retry the SSL trust verification and proceed with
 // reaching the desired state.
@@ -1053,6 +1113,12 @@ type CertificateNotTrustedFault struct {
 func init() {
 	types.Add("eam:CertificateNotTrustedFault", reflect.TypeOf((*CertificateNotTrustedFault)(nil)).Elem())
 	types.AddMinAPIVersionForType("eam:CertificateNotTrustedFault", "8.2")
+}
+
+type CertificateNotTrustedFaultFault CertificateNotTrustedFault
+
+func init() {
+	types.Add("eam:CertificateNotTrustedFaultFault", reflect.TypeOf((*CertificateNotTrustedFaultFault)(nil)).Elem())
 }
 
 // Base class for all cluster bound agents.
@@ -1076,26 +1142,25 @@ type ClusterAgentAgentIssue struct {
 
 func init() {
 	types.Add("eam:ClusterAgentAgentIssue", reflect.TypeOf((*ClusterAgentAgentIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentAgentIssue", "6.9")
 }
 
 // The cluster agent Virtual Machine cannot be deployed, because vSphere ESX
 // Agent Manager is not able to make successful SSL trust verification of the
 // server's certificate, when establishing connection to the provided
-// `Agent.ConfigInfo#ovfPackageUrl`.
+// `AgentConfigInfo.ovfPackageUrl`.
 //
 // Reasons for this might be that the
-// certificate provided via the API `Agent.ConfigInfo.ovfSslTrust` or via
+// certificate provided via the API `AgentConfigInfo.ovfSslTrust` or via
 // the script /usr/lib/vmware-eam/bin/eam-utility.py
 //   - is invalid.
 //   - does not match the server's certificate.
 //
 // If there is no provided certificate, the issue is raised when the server's
 // certificate is not trusted by the system or invalid - @see
-// `Agent.ConfigInfo.ovfSslTrust`.
+// `AgentConfigInfo.ovfSslTrust`.
 // To remediate the cluster agent Virtual Machine deployment 1) provide a valid
 // certificate used by the server hosting the
-// `Agent.ConfigInfo.ovfPackageUrl` or 2) ensure the server's certificate
+// `AgentConfigInfo.ovfPackageUrl` or 2) ensure the server's certificate
 // is signed by a CA trusted by the system. Then resolve this issue, vSphere ESX
 // Agent Manager will retry the SSL trust verification and proceed with reaching
 // the desired state.
@@ -1113,6 +1178,22 @@ func init() {
 	types.AddMinAPIVersionForType("eam:ClusterAgentCertificateNotTrusted", "8.2")
 }
 
+type ClusterAgentHostInMaintenanceMode struct {
+	ClusterAgentVmIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentHostInMaintenanceMode", reflect.TypeOf((*ClusterAgentHostInMaintenanceMode)(nil)).Elem())
+}
+
+type ClusterAgentHostInPartialMaintenanceMode struct {
+	ClusterAgentVmIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentHostInPartialMaintenanceMode", reflect.TypeOf((*ClusterAgentHostInPartialMaintenanceMode)(nil)).Elem())
+}
+
 // The cluster agent Virtual Machine could not be powered-on, because the
 // cluster does not have enough CPU or memory resources.
 //
@@ -1127,7 +1208,6 @@ type ClusterAgentInsufficientClusterResources struct {
 
 func init() {
 	types.Add("eam:ClusterAgentInsufficientClusterResources", reflect.TypeOf((*ClusterAgentInsufficientClusterResources)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentInsufficientClusterResources", "6.9")
 }
 
 // The cluster agent Virtual Machine cannot be deployed, because any of the
@@ -1144,7 +1224,6 @@ type ClusterAgentInsufficientClusterSpace struct {
 
 func init() {
 	types.Add("eam:ClusterAgentInsufficientClusterSpace", reflect.TypeOf((*ClusterAgentInsufficientClusterSpace)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentInsufficientClusterSpace", "6.9")
 }
 
 // Invalid configuration is preventing a cluster agent virtual machine
@@ -1170,7 +1249,6 @@ type ClusterAgentInvalidConfig struct {
 
 func init() {
 	types.Add("eam:ClusterAgentInvalidConfig", reflect.TypeOf((*ClusterAgentInvalidConfig)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentInvalidConfig", "6.9")
 }
 
 // The cluster agent Virtual Machine cannot be deployed, because any of the
@@ -1194,7 +1272,6 @@ type ClusterAgentMissingClusterVmDatastore struct {
 
 func init() {
 	types.Add("eam:ClusterAgentMissingClusterVmDatastore", reflect.TypeOf((*ClusterAgentMissingClusterVmDatastore)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentMissingClusterVmDatastore", "6.9")
 }
 
 // The cluster agent Virtual Machine cannot be deployed, because the configured
@@ -1220,7 +1297,6 @@ type ClusterAgentMissingClusterVmNetwork struct {
 
 func init() {
 	types.Add("eam:ClusterAgentMissingClusterVmNetwork", reflect.TypeOf((*ClusterAgentMissingClusterVmNetwork)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentMissingClusterVmNetwork", "6.9")
 }
 
 // A cluster agent virtual machine needs to be provisioned, but an OVF property
@@ -1242,7 +1318,14 @@ type ClusterAgentOvfInvalidProperty struct {
 
 func init() {
 	types.Add("eam:ClusterAgentOvfInvalidProperty", reflect.TypeOf((*ClusterAgentOvfInvalidProperty)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentOvfInvalidProperty", "6.9")
+}
+
+type ClusterAgentVmInaccessible struct {
+	ClusterAgentVmIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentVmInaccessible", reflect.TypeOf((*ClusterAgentVmInaccessible)(nil)).Elem())
 }
 
 // Base class for all cluster bound Virtual Machines.
@@ -1259,7 +1342,6 @@ type ClusterAgentVmIssue struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmIssue", reflect.TypeOf((*ClusterAgentVmIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentVmIssue", "6.9")
 }
 
 // A cluster agent Virtual Machine is expected to be deployed on a cluster, but
@@ -1280,7 +1362,6 @@ type ClusterAgentVmNotDeployed struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmNotDeployed", reflect.TypeOf((*ClusterAgentVmNotDeployed)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentVmNotDeployed", "6.9")
 }
 
 // The cluster agent Virtual Machine can not be removed from a cluster.
@@ -1298,7 +1379,6 @@ type ClusterAgentVmNotRemoved struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmNotRemoved", reflect.TypeOf((*ClusterAgentVmNotRemoved)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentVmNotRemoved", "6.9")
 }
 
 // A cluster agent Virtual Machine is expected to be powered on, but the agent
@@ -1318,7 +1398,6 @@ type ClusterAgentVmPoweredOff struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmPoweredOff", reflect.TypeOf((*ClusterAgentVmPoweredOff)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentVmPoweredOff", "6.9")
 }
 
 // A cluster agent virtual machine is expected to be powered off, but the agent
@@ -1334,7 +1413,6 @@ type ClusterAgentVmPoweredOn struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmPoweredOn", reflect.TypeOf((*ClusterAgentVmPoweredOn)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentVmPoweredOn", "6.9")
 }
 
 // A cluster agent Virtual Machine is expected to be powered on, but the agent
@@ -1350,7 +1428,6 @@ type ClusterAgentVmSuspended struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmSuspended", reflect.TypeOf((*ClusterAgentVmSuspended)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ClusterAgentVmSuspended", "6.9")
 }
 
 type CreateAgency CreateAgencyRequestType
@@ -1360,6 +1437,8 @@ func init() {
 }
 
 // The parameters of `EsxAgentManager.CreateAgency`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type CreateAgencyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The configuration that describes how to deploy the agents in the
@@ -1415,6 +1494,12 @@ func init() {
 	types.AddMinAPIVersionForType("eam:DisabledClusterFault", "7.6")
 }
 
+type DisabledClusterFaultFault DisabledClusterFault
+
+func init() {
+	types.Add("eam:DisabledClusterFaultFault", reflect.TypeOf((*DisabledClusterFaultFault)(nil)).Elem())
+}
+
 // Application related error
 // As opposed to system errors, application ones are always function of the
 // input and the current state.
@@ -1433,7 +1518,6 @@ type EamAppFault struct {
 
 func init() {
 	types.Add("eam:EamAppFault", reflect.TypeOf((*EamAppFault)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:EamAppFault", "6.0")
 }
 
 type EamAppFaultFault BaseEamAppFault
@@ -1475,7 +1559,6 @@ type EamIOFault struct {
 
 func init() {
 	types.Add("eam:EamIOFault", reflect.TypeOf((*EamIOFault)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:EamIOFault", "6.0")
 }
 
 type EamIOFaultFault EamIOFault
@@ -1510,7 +1593,12 @@ type EamInvalidState struct {
 
 func init() {
 	types.Add("eam:EamInvalidState", reflect.TypeOf((*EamInvalidState)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:EamInvalidState", "7.1")
+}
+
+type EamInvalidStateFault EamInvalidState
+
+func init() {
+	types.Add("eam:EamInvalidStateFault", reflect.TypeOf((*EamInvalidStateFault)(nil)).Elem())
 }
 
 // Indicates for an invalid or unknown Vib package structure and/or format.
@@ -1596,7 +1684,6 @@ type EamServiceNotInitialized struct {
 
 func init() {
 	types.Add("eam:EamServiceNotInitialized", reflect.TypeOf((*EamServiceNotInitialized)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:EamServiceNotInitialized", "6.5")
 }
 
 type EamServiceNotInitializedFault EamServiceNotInitialized
@@ -1614,7 +1701,6 @@ type EamSystemFault struct {
 
 func init() {
 	types.Add("eam:EamSystemFault", reflect.TypeOf((*EamSystemFault)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:EamSystemFault", "6.5")
 }
 
 type EamSystemFaultFault EamSystemFault
@@ -1654,7 +1740,12 @@ type ExtensibleIssue struct {
 
 func init() {
 	types.Add("eam:ExtensibleIssue", reflect.TypeOf((*ExtensibleIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ExtensibleIssue", "2.0")
+}
+
+type GetMaintenanceModePolicy GetMaintenanceModePolicyRequestType
+
+func init() {
+	types.Add("eam:GetMaintenanceModePolicy", reflect.TypeOf((*GetMaintenanceModePolicy)(nil)).Elem())
 }
 
 type GetMaintenanceModePolicyRequestType struct {
@@ -1665,22 +1756,17 @@ func init() {
 	types.Add("eam:GetMaintenanceModePolicyRequestType", reflect.TypeOf((*GetMaintenanceModePolicyRequestType)(nil)).Elem())
 }
 
-// Contains information for a raised hook.
-//
-// This structure may be used only with operations rendered under `/eam`.
+type GetMaintenanceModePolicyResponse struct {
+	Returnval string `xml:"returnval" json:"returnval"`
+}
+
 type HooksHookInfo struct {
 	types.DynamicData
 
-	// Virtual Machine, the hook was raised for.
-	//
-	// Refers instance of `VirtualMachine`.
-	Vm types.ManagedObjectReference `xml:"vm" json:"vm"`
-	// Solution the Virtual Machine belongs to.
-	Solution string `xml:"solution" json:"solution"`
-	// Type of the hook `HooksHookType_enum`.
-	HookType string `xml:"hookType" json:"hookType"`
-	// Time the hook was raised.
-	RaisedAt time.Time `xml:"raisedAt" json:"raisedAt"`
+	Vm       types.ManagedObjectReference `xml:"vm" json:"vm"`
+	Solution string                       `xml:"solution" json:"solution"`
+	HookType string                       `xml:"hookType" json:"hookType"`
+	RaisedAt time.Time                    `xml:"raisedAt" json:"raisedAt"`
 }
 
 func init() {
@@ -1750,6 +1836,16 @@ type HostInMaintenanceMode struct {
 
 func init() {
 	types.Add("eam:HostInMaintenanceMode", reflect.TypeOf((*HostInMaintenanceMode)(nil)).Elem())
+}
+
+type HostInPartialMaintenanceMode struct {
+	AgentIssue
+
+	Vm *types.ManagedObjectReference `xml:"vm,omitempty" json:"vm,omitempty"`
+}
+
+func init() {
+	types.Add("eam:HostInPartialMaintenanceMode", reflect.TypeOf((*HostInPartialMaintenanceMode)(nil)).Elem())
 }
 
 // An agent virtual machine is expected to be removed from a host, but the agent virtual machine has not
@@ -1822,7 +1918,6 @@ type ImmediateHostRebootRequired struct {
 
 func init() {
 	types.Add("eam:ImmediateHostRebootRequired", reflect.TypeOf((*ImmediateHostRebootRequired)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ImmediateHostRebootRequired", "6.8")
 }
 
 // An agent virtual machine is expected to be deployed on a host, but the agent could not be
@@ -1909,7 +2004,6 @@ type IntegrityAgencyCannotDeleteSoftware struct {
 
 func init() {
 	types.Add("eam:IntegrityAgencyCannotDeleteSoftware", reflect.TypeOf((*IntegrityAgencyCannotDeleteSoftware)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:IntegrityAgencyCannotDeleteSoftware", "6.7")
 }
 
 // The software defined by an Agency cannot be staged in VUM.
@@ -1929,7 +2023,6 @@ type IntegrityAgencyCannotStageSoftware struct {
 
 func init() {
 	types.Add("eam:IntegrityAgencyCannotStageSoftware", reflect.TypeOf((*IntegrityAgencyCannotStageSoftware)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:IntegrityAgencyCannotStageSoftware", "6.7")
 }
 
 // Base class for all issues which occurred during EAM communication with
@@ -1942,7 +2035,6 @@ type IntegrityAgencyVUMIssue struct {
 
 func init() {
 	types.Add("eam:IntegrityAgencyVUMIssue", reflect.TypeOf((*IntegrityAgencyVUMIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:IntegrityAgencyVUMIssue", "6.7")
 }
 
 // VUM service is not available - its registered SOAP endpoint cannot be
@@ -1958,7 +2050,6 @@ type IntegrityAgencyVUMUnavailable struct {
 
 func init() {
 	types.Add("eam:IntegrityAgencyVUMUnavailable", reflect.TypeOf((*IntegrityAgencyVUMUnavailable)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:IntegrityAgencyVUMUnavailable", "6.7")
 }
 
 // An <code>InvalidAgencyScope</code> fault is thrown when the scope in an
@@ -2033,7 +2124,6 @@ type InvalidConfig struct {
 
 func init() {
 	types.Add("eam:InvalidConfig", reflect.TypeOf((*InvalidConfig)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:InvalidConfig", "6.9")
 }
 
 // This exception is thrown if `VasaProviderSpec.url` is malformed.
@@ -2185,7 +2275,6 @@ type ManagedHostNotReachable struct {
 
 func init() {
 	types.Add("eam:ManagedHostNotReachable", reflect.TypeOf((*ManagedHostNotReachable)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:ManagedHostNotReachable", "6.8")
 }
 
 type MarkAsAvailable MarkAsAvailableRequestType
@@ -2498,7 +2587,6 @@ type PersonalityAgencyCannotConfigureSolutions struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyCannotConfigureSolutions", reflect.TypeOf((*PersonalityAgencyCannotConfigureSolutions)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyCannotConfigureSolutions", "7.1")
 }
 
 // The offline depot could not be uploaded in Personality Manager.
@@ -2513,7 +2601,6 @@ type PersonalityAgencyCannotUploadDepot struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyCannotUploadDepot", reflect.TypeOf((*PersonalityAgencyCannotUploadDepot)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyCannotUploadDepot", "7.1")
 }
 
 // Base class for all offline depot (VIB) issues while communicating with
@@ -2529,7 +2616,6 @@ type PersonalityAgencyDepotIssue struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyDepotIssue", reflect.TypeOf((*PersonalityAgencyDepotIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyDepotIssue", "7.1")
 }
 
 // The offline depot was not available for download during communicating with
@@ -2542,7 +2628,6 @@ type PersonalityAgencyInaccessibleDepot struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyInaccessibleDepot", reflect.TypeOf((*PersonalityAgencyInaccessibleDepot)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyInaccessibleDepot", "7.1")
 }
 
 // The offline depot has missing or invalid metadata to be usable by
@@ -2555,7 +2640,6 @@ type PersonalityAgencyInvalidDepot struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyInvalidDepot", reflect.TypeOf((*PersonalityAgencyInvalidDepot)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyInvalidDepot", "7.1")
 }
 
 // Base class for all issues which occurred during EAM communication with
@@ -2568,7 +2652,6 @@ type PersonalityAgencyPMIssue struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyPMIssue", reflect.TypeOf((*PersonalityAgencyPMIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyPMIssue", "7.1")
 }
 
 // PM service is not available - its endpoint cannot be accessed or it is
@@ -2584,7 +2667,6 @@ type PersonalityAgencyPMUnavailable struct {
 
 func init() {
 	types.Add("eam:PersonalityAgencyPMUnavailable", reflect.TypeOf((*PersonalityAgencyPMUnavailable)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgencyPMUnavailable", "7.1")
 }
 
 // The agent workflow is blocked until its' required solutions are re-mediated
@@ -2600,7 +2682,6 @@ type PersonalityAgentAwaitingPMRemediation struct {
 
 func init() {
 	types.Add("eam:PersonalityAgentAwaitingPMRemediation", reflect.TypeOf((*PersonalityAgentAwaitingPMRemediation)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgentAwaitingPMRemediation", "7.1")
 }
 
 // The agent workflow is blocked by a failed agency operation with
@@ -2616,7 +2697,6 @@ type PersonalityAgentBlockedByAgencyOperation struct {
 
 func init() {
 	types.Add("eam:PersonalityAgentBlockedByAgencyOperation", reflect.TypeOf((*PersonalityAgentBlockedByAgencyOperation)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgentBlockedByAgencyOperation", "7.1")
 }
 
 // Base class for all issues which occurred during EAM communication with
@@ -2629,7 +2709,6 @@ type PersonalityAgentPMIssue struct {
 
 func init() {
 	types.Add("eam:PersonalityAgentPMIssue", reflect.TypeOf((*PersonalityAgentPMIssue)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:PersonalityAgentPMIssue", "7.1")
 }
 
 type QueryAgency QueryAgencyRequestType
@@ -2693,6 +2772,8 @@ func init() {
 }
 
 // The parameters of `EamObject.QueryIssue`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type QueryIssueRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// An optional array of issue keys. If not set, all issues for this
@@ -2733,6 +2814,8 @@ func init() {
 }
 
 // The parameters of `Agency.RegisterAgentVm`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type RegisterAgentVmRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The managed object reference to the agent VM.
@@ -2773,6 +2856,8 @@ type ResolveAllResponse struct {
 }
 
 // The parameters of `EamObject.Resolve`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type ResolveRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// A non-empty array of issue keys.
@@ -2804,7 +2889,15 @@ func init() {
 type ScanForUnknownAgentVmResponse struct {
 }
 
+type SetMaintenanceModePolicy SetMaintenanceModePolicyRequestType
+
+func init() {
+	types.Add("eam:SetMaintenanceModePolicy", reflect.TypeOf((*SetMaintenanceModePolicy)(nil)).Elem())
+}
+
 // The parameters of `EsxAgentManager.SetMaintenanceModePolicy`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type SetMaintenanceModePolicyRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The policy to use.
@@ -2813,6 +2906,10 @@ type SetMaintenanceModePolicyRequestType struct {
 
 func init() {
 	types.Add("eam:SetMaintenanceModePolicyRequestType", reflect.TypeOf((*SetMaintenanceModePolicyRequestType)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:SetMaintenanceModePolicyRequestType", "7.4")
+}
+
+type SetMaintenanceModePolicyResponse struct {
 }
 
 // Specification describing a desired state to be applied.
@@ -2823,31 +2920,98 @@ type SolutionsApplySpec struct {
 
 	// Complete desired state to be applied on the target entity.
 	//
-	// the solutions member limits which parts of this desired state to
+	// the `*solutions*` member limits which parts of this desired state to
 	// be applied
-	// If the solutions member is ommited.
-	// Any solution described in this structure will be applied on the
-	// target entity
-	// Any solution already existing on the target entity, but missing
-	// from this structure, will be deleted from the target entity
-	DesiredState []SolutionsSolutionConfig `xml:"desiredState,omitempty" json:"desiredState,omitempty"`
-	// If provided, limits the parts of the desiredState structure to
-	// be applied on the target entity.
 	//
-	// solutions that are also present in the desiredState
-	// structure will be applied on the target entity.
-	// solutions that are missing from the desiredState structure
-	// will be deleted from the target entity.
+	//	  If the `*solutions*` member is omitted.
+	//	- Any solution described in this structure will be applied on the
+	//	  target entity
+	//	- Any solution already existing on the target entity, but missing
+	//	  from this structure, will be deleted from the target entity
+	DesiredState []SolutionsSolutionConfig `xml:"desiredState,omitempty" json:"desiredState,omitempty"`
+	// If provided, limits the parts of the `*desiredState*` structure to
+	// be applied on the target entity.
+	//   - solutions that are also present in the `*desiredState*`
+	//     structure will be applied on the target entity.
+	//   - solutions that are missing from the `*desiredState*` structure
+	//     will be deleted from the target entity.
 	Solutions []string `xml:"solutions,omitempty" json:"solutions,omitempty"`
 	// Specifies exact hosts to apply the desired state to, instead of every
 	// host in the cluster.
 	//
+	// Applicable only to solutions with
+	// `SolutionsHostBoundSolutionConfig`.
+	//
 	// Refers instances of `HostSystem`.
 	Hosts []types.ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
+	// Deployment units on which solutions that are specified by the this
+	// structure need to be applied.
+	//
+	// Applicable only to solutions with
+	// `SolutionsClusterBoundSolutionConfig`.
+	//
+	// The deployment unit represents a single VM instance deployment. It is
+	// returned by the `Solutions.Compliance` operation.
+	//
+	// If omitted - the configured solutions by `SolutionsApplySpec.solutions` are applied
+	// on all of the deployment units in the cluster.
+	DeploymentUnits []string `xml:"deploymentUnits,omitempty" json:"deploymentUnits,omitempty"`
 }
 
 func init() {
 	types.Add("eam:SolutionsApplySpec", reflect.TypeOf((*SolutionsApplySpec)(nil)).Elem())
+}
+
+// Specifies cluster-bound solution configuration.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type SolutionsClusterBoundSolutionConfig struct {
+	SolutionsTypeSpecificSolutionConfig
+
+	// The number of instances of the specified VM to be deployed across the
+	// cluster.
+	VmCount int32 `xml:"vmCount" json:"vmCount"`
+	// VM placement policies to be configured on the VMs
+	// `SolutionsVmPlacementPolicy_enum` If omitted - no VM placement
+	// policies are configured.
+	VmPlacementPolicies []string `xml:"vmPlacementPolicies,omitempty" json:"vmPlacementPolicies,omitempty"`
+	// Networks to be configured on the VMs.
+	//
+	// If omitted - no VM networks are
+	// configured.
+	VmNetworks []SolutionsVMNetworkMapping `xml:"vmNetworks,omitempty" json:"vmNetworks,omitempty"`
+	// Datastores to be configured as a storage of the VMs.
+	//
+	// The first
+	// available datastore in the cluster is used. The collection cannot
+	// contain duplicate elements.
+	//
+	// Refers instances of `Datastore`.
+	Datastores []types.ManagedObjectReference `xml:"datastores" json:"datastores"`
+}
+
+func init() {
+	types.Add("eam:SolutionsClusterBoundSolutionConfig", reflect.TypeOf((*SolutionsClusterBoundSolutionConfig)(nil)).Elem())
+}
+
+// Result of a compliance check of a desired state for a solution with
+// `SolutionsClusterBoundSolutionConfig`.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type SolutionsClusterSolutionComplianceResult struct {
+	types.DynamicData
+
+	// The solution being checked for compliance.
+	Solution string `xml:"solution" json:"solution"`
+	// `True` if the solution is compliant with the described desired
+	// state, `False` - otherwise.
+	Compliant bool `xml:"compliant" json:"compliant"`
+	// Detailed per deployment-unit compliance result.
+	DeploymentUnits []SolutionsDeploymentUnitComplianceResult `xml:"deploymentUnits,omitempty" json:"deploymentUnits,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsClusterSolutionComplianceResult", reflect.TypeOf((*SolutionsClusterSolutionComplianceResult)(nil)).Elem())
 }
 
 // Result of a compliance check of a desired state on a compute resource.
@@ -2859,8 +3023,12 @@ type SolutionsComplianceResult struct {
 	// `True` if the compute resource is compliant with the described
 	// desired state, `False` - otherwise.
 	Compliant bool `xml:"compliant" json:"compliant"`
-	// Detailed per-host compliance result of the compute resource.
+	// Detailed per-host compliance result of the compute resource for
+	// solutions with `SolutionsHostBoundSolutionConfig`.
 	Hosts []SolutionsHostComplianceResult `xml:"hosts,omitempty" json:"hosts,omitempty"`
+	// Detailed per-solution unit compliance result of the compute resource
+	// for solutions with `SolutionsClusterBoundSolutionConfig`.
+	ClusterSolutionsCompliance []SolutionsClusterSolutionComplianceResult `xml:"clusterSolutionsCompliance,omitempty" json:"clusterSolutionsCompliance,omitempty"`
 }
 
 func init() {
@@ -2883,15 +3051,44 @@ type SolutionsComplianceSpec struct {
 	// Specifies exact solutions to be checked for compliance instead of the
 	// complete desired state.
 	Solutions []string `xml:"solutions,omitempty" json:"solutions,omitempty"`
-	// Specifies exact hosts to be checked for compliance, instead of every
-	// host in the cluster.
+	// Specifies exact hosts to be checked for compliance of all solutions
+	// with `SolutionsHostBoundSolutionConfig`.
+	//
+	// If omitted - the compliance is checked for all hosts in the cluster.
 	//
 	// Refers instances of `HostSystem`.
 	Hosts []types.ManagedObjectReference `xml:"hosts,omitempty" json:"hosts,omitempty"`
+	// Identifiers of the deployment units that to be checked for compliance
+	// of all solutions with `SolutionsClusterBoundSolutionConfig`.
+	//
+	// The deployment unit represents a single VM instance deployment.
+	//
+	// If omitted - the compliance is checked for all deployment units in the
+	// cluster.
+	DeploymentUnits []string `xml:"deploymentUnits,omitempty" json:"deploymentUnits,omitempty"`
 }
 
 func init() {
 	types.Add("eam:SolutionsComplianceSpec", reflect.TypeOf((*SolutionsComplianceSpec)(nil)).Elem())
+}
+
+// Result of a compliance check of a deployment unit.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type SolutionsDeploymentUnitComplianceResult struct {
+	types.DynamicData
+
+	// The deployment unit being checked for compliance.
+	DeploymentUnit string `xml:"deploymentUnit" json:"deploymentUnit"`
+	// `True` if the deployment unit is compliant with the described
+	// desired state, `False` - otherwise.
+	Compliant bool `xml:"compliant" json:"compliant"`
+	// Detailed compliance result of the deployment unit.
+	Compliance *SolutionsSolutionComplianceResult `xml:"compliance,omitempty" json:"compliance,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsDeploymentUnitComplianceResult", reflect.TypeOf((*SolutionsDeploymentUnitComplianceResult)(nil)).Elem())
 }
 
 // Specifies the acknowledgement type of a configured System Virtual
@@ -2941,10 +3138,12 @@ type SolutionsHostBoundSolutionConfig struct {
 	//
 	// Refers instances of `Network`.
 	Networks []types.ManagedObjectReference `xml:"networks,omitempty" json:"networks,omitempty"`
-	// datastores to place system Virutal Machine on.
+	// Datastores to be configured as a storage of the VMs.
 	//
-	// If omitted - default
-	// configured network on the host will be used.
+	// The first
+	// available datastore on the host is used. The collection cannot contain
+	// duplicate elements. If omitted - default configured datastore on the
+	// host will be used.
 	//
 	// Refers instances of `Datastore`.
 	Datastores []types.ManagedObjectReference `xml:"datastores,omitempty" json:"datastores,omitempty"`
@@ -2977,9 +3176,9 @@ func init() {
 	types.Add("eam:SolutionsHostComplianceResult", reflect.TypeOf((*SolutionsHostComplianceResult)(nil)).Elem())
 }
 
-// The user will have to (manually) invoke an API (`Hooks#process`) to
-// acknowledge, the user operations for this lifecycle hook have been
-// completed.
+// The user will have to (manually) invoke an API
+// (`Hooks.MarkAsProcessed`) to acknowledge, the user operations for
+// this lifecycle hook have been completed.
 //
 // This structure may be used only with operations rendered under `/eam`.
 type SolutionsInteractiveHookAcknowledgeConfig struct {
@@ -3070,13 +3269,8 @@ type SolutionsSolutionConfig struct {
 
 	// Solution, this configuration belongs to.
 	Solution string `xml:"solution" json:"solution"`
-	// Name of the solution.
-	//
-	// Will be utilized as a prefix for the system
-	// Virtual Machines' names created for the solution.
-	Name string `xml:"name" json:"name"`
-	// Version of the solution.
-	Version string `xml:"version" json:"version"`
+	Name     string `xml:"name" json:"name"`
+	Version  string `xml:"version" json:"version"`
 	// Source of the system Virtual Machine files.
 	VmSource BaseSolutionsVMSource `xml:"vmSource,typeattr" json:"vmSource"`
 	// If set to `True` - will insert an UUID in the system Virtual
@@ -3118,6 +3312,11 @@ type SolutionsSolutionConfig struct {
 	TypeSpecificConfig BaseSolutionsTypeSpecificSolutionConfig `xml:"typeSpecificConfig,typeattr" json:"typeSpecificConfig"`
 	// Lifecycle hooks for the solution's virtual machines.
 	Hooks []SolutionsHookConfig `xml:"hooks,omitempty" json:"hooks,omitempty"`
+	// VMs resource configuration.
+	//
+	// If omitted - the default resource
+	// configuration specified in the OVF descriptor is used.
+	VmResourceSpec *SolutionsVmResourceSpec `xml:"vmResourceSpec,omitempty" json:"vmResourceSpec,omitempty"`
 }
 
 func init() {
@@ -3192,15 +3391,41 @@ type SolutionsUrlVMSource struct {
 
 	// URL to the solution's system Virtual Machine OVF.
 	OvfUrl string `xml:"ovfUrl" json:"ovfUrl"`
+	// Overrides the OVF URL certificate validation.
+	//
+	// If `True` or
+	// `<unset>` - the certificate will be subject to standard trust
+	// validation, if `False` - any certificate will be considered
+	// trusted.
+	CertificateValidation *bool `xml:"certificateValidation" json:"certificateValidation,omitempty"`
 	// PEM encoded certificate to use to trust the URL.
 	//
-	// If omitted - will
-	// implicitly trust the URL.
+	// If omitted - URL will
+	// be trusted using well known methods.
 	CertificatePEM string `xml:"certificatePEM,omitempty" json:"certificatePEM,omitempty"`
 }
 
 func init() {
 	types.Add("eam:SolutionsUrlVMSource", reflect.TypeOf((*SolutionsUrlVMSource)(nil)).Elem())
+}
+
+// Represents the mapping of the logical network defined in the OVF
+// descriptor to the Virtual Infrastructure (VI) network.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type SolutionsVMNetworkMapping struct {
+	types.DynamicData
+
+	// Logical network name defined in the OVF descriptor.
+	Name string `xml:"name" json:"name"`
+	// VM network identifier.
+	//
+	// Refers instance of `Network`.
+	Id types.ManagedObjectReference `xml:"id" json:"id"`
+}
+
+func init() {
+	types.Add("eam:SolutionsVMNetworkMapping", reflect.TypeOf((*SolutionsVMNetworkMapping)(nil)).Elem())
 }
 
 // Specifies how to find the files of the system Virtual Machine to be
@@ -3244,6 +3469,26 @@ type SolutionsValidationResult struct {
 
 func init() {
 	types.Add("eam:SolutionsValidationResult", reflect.TypeOf((*SolutionsValidationResult)(nil)).Elem())
+}
+
+// Specifies the VM resource configurations.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type SolutionsVmResourceSpec struct {
+	types.DynamicData
+
+	// The VM deployment option that corresponds to the Configuration element
+	// of the DeploymentOptionSection in the OVF descriptor (e.g.
+	//
+	// "small",
+	// "medium", "large").
+	// If omitted - the default deployment option as specified in the OVF
+	// descriptor is used.
+	OvfDeploymentOption string `xml:"ovfDeploymentOption,omitempty" json:"ovfDeploymentOption,omitempty"`
+}
+
+func init() {
+	types.Add("eam:SolutionsVmResourceSpec", reflect.TypeOf((*SolutionsVmResourceSpec)(nil)).Elem())
 }
 
 type Uninstall UninstallRequestType
@@ -3292,6 +3537,8 @@ func init() {
 }
 
 // The parameters of `Agency.UnregisterAgentVm`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type UnregisterAgentVmRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The managed object reference to the agent VM.
@@ -3314,6 +3561,8 @@ func init() {
 }
 
 // The parameters of `Agency.Update`.
+//
+// This structure may be used only with operations rendered under `/eam`.
 type UpdateRequestType struct {
 	This types.ManagedObjectReference `xml:"_this" json:"_this"`
 	// The new configuration for this <code>Agency</code>
@@ -3364,7 +3613,6 @@ type VibCannotPutHostOutOfMaintenanceMode struct {
 
 func init() {
 	types.Add("eam:VibCannotPutHostOutOfMaintenanceMode", reflect.TypeOf((*VibCannotPutHostOutOfMaintenanceMode)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:VibCannotPutHostOutOfMaintenanceMode", "6.5")
 }
 
 // A VIB module is expected to be installed on a host, but the dependencies,
@@ -3380,7 +3628,6 @@ type VibDependenciesNotMetByHost struct {
 
 func init() {
 	types.Add("eam:VibDependenciesNotMetByHost", reflect.TypeOf((*VibDependenciesNotMetByHost)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:VibDependenciesNotMetByHost", "6.8")
 }
 
 // A VIB module is expected to be installed on a host, but it failed to install
@@ -3445,7 +3692,6 @@ type VibRequirementsNotMetByHost struct {
 
 func init() {
 	types.Add("eam:VibRequirementsNotMetByHost", reflect.TypeOf((*VibRequirementsNotMetByHost)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:VibRequirementsNotMetByHost", "6.8")
 }
 
 // A VIB module has been uploaded to the host, but will not be fully installed
@@ -3536,7 +3782,6 @@ type VibVibInfo struct {
 
 func init() {
 	types.Add("eam:VibVibInfo", reflect.TypeOf((*VibVibInfo)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:VibVibInfo", "6.0")
 }
 
 // A data entity providing information about software tags of a VIB
@@ -3550,7 +3795,6 @@ type VibVibInfoSoftwareTags struct {
 
 func init() {
 	types.Add("eam:VibVibInfoSoftwareTags", reflect.TypeOf((*VibVibInfoSoftwareTags)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:VibVibInfoSoftwareTags", "6.5")
 }
 
 // Specifies an SSL policy that trusts any SSL certificate.
@@ -3582,12 +3826,14 @@ func init() {
 	types.AddMinAPIVersionForType("eam:VibVibServicesPinnedPemCertificate", "8.2")
 }
 
+// This structure may be used only with operations rendered under `/eam`.
 type VibVibServicesSslTrust struct {
 	types.DynamicData
 }
 
 func init() {
 	types.Add("eam:VibVibServicesSslTrust", reflect.TypeOf((*VibVibServicesSslTrust)(nil)).Elem())
+	types.AddMinAPIVersionForType("eam:VibVibServicesSslTrust", "8.2")
 }
 
 // An agent virtual machine is corrupted.
@@ -3625,6 +3871,14 @@ type VmDeployed struct {
 
 func init() {
 	types.Add("eam:VmDeployed", reflect.TypeOf((*VmDeployed)(nil)).Elem())
+}
+
+type VmInaccessible struct {
+	VmIssue
+}
+
+func init() {
+	types.Add("eam:VmInaccessible", reflect.TypeOf((*VmInaccessible)(nil)).Elem())
 }
 
 // Base class for all issues related to the deployed virtual machine for a

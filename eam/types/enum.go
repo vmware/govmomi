@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,6 +37,17 @@ const (
 	AgencyVMPlacementPolicyVMAntiAffinitySoft = AgencyVMPlacementPolicyVMAntiAffinity("soft")
 )
 
+func (e AgencyVMPlacementPolicyVMAntiAffinity) Values() []AgencyVMPlacementPolicyVMAntiAffinity {
+	return []AgencyVMPlacementPolicyVMAntiAffinity{
+		AgencyVMPlacementPolicyVMAntiAffinityNone,
+		AgencyVMPlacementPolicyVMAntiAffinitySoft,
+	}
+}
+
+func (e AgencyVMPlacementPolicyVMAntiAffinity) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:AgencyVMPlacementPolicyVMAntiAffinity", reflect.TypeOf((*AgencyVMPlacementPolicyVMAntiAffinity)(nil)).Elem())
 }
@@ -58,10 +69,22 @@ const (
 	AgencyVMPlacementPolicyVMDataAffinitySoft = AgencyVMPlacementPolicyVMDataAffinity("soft")
 )
 
+func (e AgencyVMPlacementPolicyVMDataAffinity) Values() []AgencyVMPlacementPolicyVMDataAffinity {
+	return []AgencyVMPlacementPolicyVMDataAffinity{
+		AgencyVMPlacementPolicyVMDataAffinityNone,
+		AgencyVMPlacementPolicyVMDataAffinitySoft,
+	}
+}
+
+func (e AgencyVMPlacementPolicyVMDataAffinity) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:AgencyVMPlacementPolicyVMDataAffinity", reflect.TypeOf((*AgencyVMPlacementPolicyVMDataAffinity)(nil)).Elem())
 }
 
+// Defines the type of disk provisioning for the target Agent VMs.
 type AgentConfigInfoOvfDiskProvisioning string
 
 const (
@@ -76,9 +99,20 @@ const (
 	AgentConfigInfoOvfDiskProvisioningThick = AgentConfigInfoOvfDiskProvisioning("thick")
 )
 
+func (e AgentConfigInfoOvfDiskProvisioning) Values() []AgentConfigInfoOvfDiskProvisioning {
+	return []AgentConfigInfoOvfDiskProvisioning{
+		AgentConfigInfoOvfDiskProvisioningNone,
+		AgentConfigInfoOvfDiskProvisioningThin,
+		AgentConfigInfoOvfDiskProvisioningThick,
+	}
+}
+
+func (e AgentConfigInfoOvfDiskProvisioning) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:AgentConfigInfoOvfDiskProvisioning", reflect.TypeOf((*AgentConfigInfoOvfDiskProvisioning)(nil)).Elem())
-	types.AddMinAPIVersionForType("eam:AgentConfigInfoOvfDiskProvisioning", "6.9")
 }
 
 // Represents the state of the VM lifecycle.
@@ -93,9 +127,20 @@ const (
 	AgentVmHookVmStatePrePowerOn = AgentVmHookVmState("prePowerOn")
 )
 
+func (e AgentVmHookVmState) Values() []AgentVmHookVmState {
+	return []AgentVmHookVmState{
+		AgentVmHookVmStateProvisioned,
+		AgentVmHookVmStatePoweredOn,
+		AgentVmHookVmStatePrePowerOn,
+	}
+}
+
+func (e AgentVmHookVmState) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:AgentVmHookVmState", reflect.TypeOf((*AgentVmHookVmState)(nil)).Elem())
-	types.AddMinAPIVersionForEnumValue("eam:AgentVmHookVmState", "prePowerOn", "7.0")
 }
 
 // The <code>GoalState</code> enumeration defines the goal of the entity.
@@ -127,6 +172,18 @@ const (
 	EamObjectRuntimeInfoGoalStateUninstalled = EamObjectRuntimeInfoGoalState("uninstalled")
 )
 
+func (e EamObjectRuntimeInfoGoalState) Values() []EamObjectRuntimeInfoGoalState {
+	return []EamObjectRuntimeInfoGoalState{
+		EamObjectRuntimeInfoGoalStateEnabled,
+		EamObjectRuntimeInfoGoalStateDisabled,
+		EamObjectRuntimeInfoGoalStateUninstalled,
+	}
+}
+
+func (e EamObjectRuntimeInfoGoalState) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:EamObjectRuntimeInfoGoalState", reflect.TypeOf((*EamObjectRuntimeInfoGoalState)(nil)).Elem())
 }
@@ -149,6 +206,18 @@ const (
 	EamObjectRuntimeInfoStatusRed = EamObjectRuntimeInfoStatus("red")
 )
 
+func (e EamObjectRuntimeInfoStatus) Values() []EamObjectRuntimeInfoStatus {
+	return []EamObjectRuntimeInfoStatus{
+		EamObjectRuntimeInfoStatusGreen,
+		EamObjectRuntimeInfoStatusYellow,
+		EamObjectRuntimeInfoStatusRed,
+	}
+}
+
+func (e EamObjectRuntimeInfoStatus) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:EamObjectRuntimeInfoStatus", reflect.TypeOf((*EamObjectRuntimeInfoStatus)(nil)).Elem())
 }
@@ -169,6 +238,17 @@ const (
 	EsxAgentManagerMaintenanceModePolicyMultipleHosts = EsxAgentManagerMaintenanceModePolicy("multipleHosts")
 )
 
+func (e EsxAgentManagerMaintenanceModePolicy) Values() []EsxAgentManagerMaintenanceModePolicy {
+	return []EsxAgentManagerMaintenanceModePolicy{
+		EsxAgentManagerMaintenanceModePolicySingleHost,
+		EsxAgentManagerMaintenanceModePolicyMultipleHosts,
+	}
+}
+
+func (e EsxAgentManagerMaintenanceModePolicy) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:EsxAgentManagerMaintenanceModePolicy", reflect.TypeOf((*EsxAgentManagerMaintenanceModePolicy)(nil)).Elem())
 	types.AddMinAPIVersionForType("eam:EsxAgentManagerMaintenanceModePolicy", "7.4")
@@ -185,6 +265,17 @@ const (
 	// powered on.
 	HooksHookTypePOST_POWER_ON = HooksHookType("POST_POWER_ON")
 )
+
+func (e HooksHookType) Values() []HooksHookType {
+	return []HooksHookType{
+		HooksHookTypePOST_PROVISIONING,
+		HooksHookTypePOST_POWER_ON,
+	}
+}
+
+func (e HooksHookType) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("eam:HooksHookType", reflect.TypeOf((*HooksHookType)(nil)).Elem())
@@ -215,6 +306,23 @@ const (
 	SolutionsInvalidReasonINVALID_TRANSITION = SolutionsInvalidReason("INVALID_TRANSITION")
 )
 
+func (e SolutionsInvalidReason) Values() []SolutionsInvalidReason {
+	return []SolutionsInvalidReason{
+		SolutionsInvalidReasonINVALID_OVF_DESCRIPTOR,
+		SolutionsInvalidReasonINACCESSBLE_VM_SOURCE,
+		SolutionsInvalidReasonINVALID_NETWORKS,
+		SolutionsInvalidReasonINVALID_DATASTORES,
+		SolutionsInvalidReasonINVALID_RESOURCE_POOL,
+		SolutionsInvalidReasonINVALID_FOLDER,
+		SolutionsInvalidReasonINVALID_PROPERTIES,
+		SolutionsInvalidReasonINVALID_TRANSITION,
+	}
+}
+
+func (e SolutionsInvalidReason) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:SolutionsInvalidReason", reflect.TypeOf((*SolutionsInvalidReason)(nil)).Elem())
 }
@@ -234,14 +342,28 @@ const (
 	// An obsoleted spec is currently in application for this solution.
 	//
 	// This state should take precedence over:
-	// `WORKING`
-	// `ISSUE`
-	// `IN_HOOK`
+	//   - `WORKING`
+	//   - `ISSUE`
+	//   - `IN_HOOK`
 	SolutionsNonComplianceReasonOBSOLETE_SPEC = SolutionsNonComplianceReason("OBSOLETE_SPEC")
 	// Application for this solutiona has never been requested with
 	// `Solutions.Apply`.
 	SolutionsNonComplianceReasonNO_SPEC = SolutionsNonComplianceReason("NO_SPEC")
 )
+
+func (e SolutionsNonComplianceReason) Values() []SolutionsNonComplianceReason {
+	return []SolutionsNonComplianceReason{
+		SolutionsNonComplianceReasonWORKING,
+		SolutionsNonComplianceReasonISSUE,
+		SolutionsNonComplianceReasonIN_HOOK,
+		SolutionsNonComplianceReasonOBSOLETE_SPEC,
+		SolutionsNonComplianceReasonNO_SPEC,
+	}
+}
+
+func (e SolutionsNonComplianceReason) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
 
 func init() {
 	types.Add("eam:SolutionsNonComplianceReason", reflect.TypeOf((*SolutionsNonComplianceReason)(nil)).Elem())
@@ -261,6 +383,18 @@ const (
 	SolutionsVMDeploymentOptimizationNO_CLONES = SolutionsVMDeploymentOptimization("NO_CLONES")
 )
 
+func (e SolutionsVMDeploymentOptimization) Values() []SolutionsVMDeploymentOptimization {
+	return []SolutionsVMDeploymentOptimization{
+		SolutionsVMDeploymentOptimizationALL_CLONES,
+		SolutionsVMDeploymentOptimizationFULL_CLONES_ONLY,
+		SolutionsVMDeploymentOptimizationNO_CLONES,
+	}
+}
+
+func (e SolutionsVMDeploymentOptimization) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:SolutionsVMDeploymentOptimization", reflect.TypeOf((*SolutionsVMDeploymentOptimization)(nil)).Elem())
 }
@@ -275,6 +409,39 @@ const (
 	SolutionsVMDiskProvisioningTHICK = SolutionsVMDiskProvisioning("THICK")
 )
 
+func (e SolutionsVMDiskProvisioning) Values() []SolutionsVMDiskProvisioning {
+	return []SolutionsVMDiskProvisioning{
+		SolutionsVMDiskProvisioningTHIN,
+		SolutionsVMDiskProvisioningTHICK,
+	}
+}
+
+func (e SolutionsVMDiskProvisioning) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
 func init() {
 	types.Add("eam:SolutionsVMDiskProvisioning", reflect.TypeOf((*SolutionsVMDiskProvisioning)(nil)).Elem())
+}
+
+// Defines the DRS placement policies applied on the VMs.
+type SolutionsVmPlacementPolicy string
+
+const (
+	// VMs are anti-affined to each other.
+	SolutionsVmPlacementPolicyVM_VM_ANTI_AFFINITY = SolutionsVmPlacementPolicy("VM_VM_ANTI_AFFINITY")
+)
+
+func (e SolutionsVmPlacementPolicy) Values() []SolutionsVmPlacementPolicy {
+	return []SolutionsVmPlacementPolicy{
+		SolutionsVmPlacementPolicyVM_VM_ANTI_AFFINITY,
+	}
+}
+
+func (e SolutionsVmPlacementPolicy) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("eam:SolutionsVmPlacementPolicy", reflect.TypeOf((*SolutionsVmPlacementPolicy)(nil)).Elem())
 }
