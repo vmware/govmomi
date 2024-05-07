@@ -128,6 +128,7 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 		Flags:                        &ci.Flags,
 		ConsolePreferences:           ci.ConsolePreferences,
 		PowerOpInfo:                  &ci.DefaultPowerOps,
+		RebootPowerOff:               ci.RebootPowerOff,
 		NumCPUs:                      ci.Hardware.NumCPU,
 		VcpuConfig:                   ci.VcpuConfig,
 		NumCoresPerSocket:            ci.Hardware.NumCoresPerSocket,
@@ -137,14 +138,14 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 		CpuHotRemoveEnabled:          ci.CpuHotRemoveEnabled,
 		VirtualICH7MPresent:          ci.Hardware.VirtualICH7MPresent,
 		VirtualSMCPresent:            ci.Hardware.VirtualSMCPresent,
-		DeviceChange:                 make([]BaseVirtualDeviceConfigSpec, len(ci.Hardware.Device)),
+		DeviceChange:                 nil, // See below
 		CpuAllocation:                ci.CpuAllocation,
 		MemoryAllocation:             ci.MemoryAllocation,
 		LatencySensitivity:           ci.LatencySensitivity,
 		CpuAffinity:                  ci.CpuAffinity,
 		MemoryAffinity:               ci.MemoryAffinity,
 		NetworkShaper:                ci.NetworkShaper,
-		CpuFeatureMask:               make([]VirtualMachineCpuIdInfoSpec, len(ci.CpuFeatureMask)),
+		CpuFeatureMask:               nil, // See below
 		ExtraConfig:                  ci.ExtraConfig,
 		SwapPlacement:                ci.SwapPlacement,
 		BootOptions:                  ci.BootOptions,
@@ -163,20 +164,21 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 		MigrateEncryption:            ci.MigrateEncryption,
 		FtEncryptionMode:             ci.FtEncryptionMode,
 		SevEnabled:                   ci.SevEnabled,
-		PmemFailoverEnabled:          ci.PmemFailoverEnabled,
-		Pmem:                         ci.Pmem,
-		NpivWorldWideNameOp:          ci.NpivWorldWideNameType,
-		RebootPowerOff:               ci.RebootPowerOff,
+		MotherboardLayout:            ci.Hardware.MotherboardLayout,
 		ScheduledHardwareUpgradeInfo: ci.ScheduledHardwareUpgradeInfo,
 		SgxInfo:                      ci.SgxInfo,
 		GuestMonitoringModeInfo:      ci.GuestMonitoringModeInfo,
+		PmemFailoverEnabled:          ci.PmemFailoverEnabled,
 		VmxStatsCollectionEnabled:    ci.VmxStatsCollectionEnabled,
 		VmOpNotificationToAppEnabled: ci.VmOpNotificationToAppEnabled,
 		VmOpNotificationTimeout:      ci.VmOpNotificationTimeout,
 		DeviceSwap:                   ci.DeviceSwap,
 		SimultaneousThreads:          ci.Hardware.SimultaneousThreads,
+		Pmem:                         ci.Pmem,
 		DeviceGroups:                 ci.DeviceGroups,
-		MotherboardLayout:            ci.Hardware.MotherboardLayout,
+		FixedPassthruHotPlugEnabled:  ci.FixedPassthruHotPlugEnabled,
+		MetroFtEnabled:               ci.MetroFtEnabled,
+		MetroFtHostGroup:             ci.MetroFtHostGroup,
 	}
 
 	// Unassign the Files field if all of its fields are empty.
@@ -218,39 +220,36 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 		cs.PowerOpInfo = nil
 	}
 
-	for i := 0; i < len(cs.CpuFeatureMask); i++ {
-		cs.CpuFeatureMask[i] = VirtualMachineCpuIdInfoSpec{
-			ArrayUpdateSpec: ArrayUpdateSpec{
-				Operation: ArrayUpdateOperationAdd,
-			},
-			Info: &HostCpuIdInfo{
-				// TODO: Does DynamicData need to be copied?
-				//       It is an empty struct...
-				Level:  ci.CpuFeatureMask[i].Level,
-				Vendor: ci.CpuFeatureMask[i].Vendor,
-				Eax:    ci.CpuFeatureMask[i].Eax,
-				Ebx:    ci.CpuFeatureMask[i].Ebx,
-				Ecx:    ci.CpuFeatureMask[i].Ecx,
-				Edx:    ci.CpuFeatureMask[i].Edx,
-			},
+	if l := len(ci.CpuFeatureMask); l > 0 {
+		cs.CpuFeatureMask = make([]VirtualMachineCpuIdInfoSpec, l)
+		for i := 0; i < l; i++ {
+			cs.CpuFeatureMask[i] = VirtualMachineCpuIdInfoSpec{
+				ArrayUpdateSpec: ArrayUpdateSpec{
+					Operation: ArrayUpdateOperationAdd,
+				},
+				Info: &HostCpuIdInfo{
+					Level:  ci.CpuFeatureMask[i].Level,
+					Vendor: ci.CpuFeatureMask[i].Vendor,
+					Eax:    ci.CpuFeatureMask[i].Eax,
+					Ebx:    ci.CpuFeatureMask[i].Ebx,
+					Ecx:    ci.CpuFeatureMask[i].Ecx,
+					Edx:    ci.CpuFeatureMask[i].Edx,
+				},
+			}
 		}
 	}
 
-	for i := 0; i < len(cs.DeviceChange); i++ {
-		cs.DeviceChange[i] = &VirtualDeviceConfigSpec{
-			// TODO: Does DynamicData need to be copied?
-			//       It is an empty struct...
-			Operation:     VirtualDeviceConfigSpecOperationAdd,
-			FileOperation: VirtualDeviceConfigSpecFileOperationCreate,
-			Device:        ci.Hardware.Device[i],
-			// TODO: It is unclear how the profiles associated with the VM or
-			//       its hardware can be reintroduced/persisted in the
-			//       ConfigSpec.
-			Profile: nil,
-			// The backing will come from the device.
-			Backing: nil,
-			// TODO: Investigate futher.
-			FilterSpec: nil,
+	if l := len(ci.Hardware.Device); l > 0 {
+		cs.DeviceChange = make([]BaseVirtualDeviceConfigSpec, l)
+		for i := 0; i < l; i++ {
+			cs.DeviceChange[i] = &VirtualDeviceConfigSpec{
+				Operation:     VirtualDeviceConfigSpecOperationAdd,
+				FileOperation: VirtualDeviceConfigSpecFileOperationCreate,
+				Device:        ci.Hardware.Device[i],
+				Profile:       nil,
+				Backing:       nil,
+				FilterSpec:    nil,
+			}
 		}
 	}
 
