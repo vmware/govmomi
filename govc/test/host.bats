@@ -106,7 +106,7 @@ load test_helper
 }
 
 @test "host.vnic.info" {
-  esx_env
+  vcsim_env
 
   run govc host.vnic.info
   assert_success
