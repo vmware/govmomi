@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -31,6 +31,7 @@ const (
 	LibraryItemFileData            = "/com/vmware/cis/data"
 	LibraryItemPath                = "/com/vmware/content/library/item"
 	LibraryItemFilePath            = "/com/vmware/content/library/item/file"
+	LibraryItemStoragePath         = "/com/vmware/content/library/item/storage"
 	LibraryItemUpdateSession       = "/com/vmware/content/library/item/update-session"
 	LibraryItemUpdateSessionFile   = "/com/vmware/content/library/item/updatesession/file"
 	LibraryItemDownloadSession     = "/com/vmware/content/library/item/download-session"
