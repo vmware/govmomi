@@ -45,6 +45,8 @@ type customize struct {
 	dnsserver flags.StringList
 	dnssuffix flags.StringList
 	kind      string
+	username  string
+	org       string
 }
 
 func init() {
@@ -75,6 +77,8 @@ func (cmd *customize) Register(ctx context.Context, f *flag.FlagSet) {
 	f.Var(&cmd.dnssuffix, "dns-suffix", "DNS suffix list")
 	cmd.dnssuffix = nil
 	f.StringVar(&cmd.kind, "type", "Linux", "Customization type if spec NAME is not specified (Linux|Windows)")
+	f.StringVar(&cmd.username, "username", "", "Windows only : full name of the end user in firstname lastname format")
+	f.StringVar(&cmd.org, "org", "", "Windows only : name of the org that owns the VM")
 }
 
 func (cmd *customize) Usage() string {
@@ -211,12 +215,12 @@ func (cmd *customize) Run(ctx context.Context, f *flag.FlagSet) error {
 	sysprep, isWindows := spec.Identity.(*types.CustomizationSysprep)
 	linprep, _ := spec.Identity.(*types.CustomizationLinuxPrep)
 
-	if cmd.domain != "" {
-		if isWindows {
-			sysprep.Identification.JoinDomain = cmd.domain
-		} else {
-			linprep.Domain = cmd.domain
-		}
+	if isWindows {
+		sysprep.Identification.JoinDomain = cmd.domain
+		sysprep.UserData.FullName = cmd.username
+		sysprep.UserData.OrgName = cmd.org
+	} else {
+		linprep.Domain = cmd.domain
 	}
 
 	if len(cmd.dnsserver) != 0 {
