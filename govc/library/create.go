@@ -82,7 +82,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	cmd.library.Name = f.Arg(0)
 	cmd.library.Type = "LOCAL"
-	cmd.library.Storage = []library.StorageBackings{
+	cmd.library.Storage = []library.StorageBacking{
 		{
 			DatastoreID: ds.Reference().Value,
 			Type:        "DATASTORE",

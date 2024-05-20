@@ -48,7 +48,7 @@ func ExampleManager_CreateLibrary() {
 		id, err := m.CreateLibrary(ctx, library.Library{
 			Name: "example",
 			Type: "LOCAL",
-			Storage: []library.StorageBackings{{
+			Storage: []library.StorageBacking{{
 				DatastoreID: ds.Reference().Value,
 				Type:        "DATASTORE",
 			}},
