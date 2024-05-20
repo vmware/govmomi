@@ -52,6 +52,7 @@ import (
 	_ "github.com/vmware/govmomi/vapi/esx/settings/simulator"
 	_ "github.com/vmware/govmomi/vapi/namespace/simulator"
 	_ "github.com/vmware/govmomi/vapi/simulator"
+	_ "github.com/vmware/govmomi/vapi/vcenter/consumptiondomains/simulator"
 	_ "github.com/vmware/govmomi/vapi/vm/simulator"
 	_ "github.com/vmware/govmomi/vsan/simulator"
 )
