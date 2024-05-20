@@ -25,40 +25,76 @@ import (
 
 func TestParseHardwareVersion(t *testing.T) {
 	testCases := []struct {
-		name            string
-		in              string
-		expectedIsValid bool
-		expectedVersion HardwareVersion
-		expectedString  string
+		name                string
+		in                  string
+		expectedIsValid     bool
+		expectedIsSupported bool
+		expectedVersion     HardwareVersion
+		expectedString      string
 	}{
 		{
-			name: "EmptyString",
-			in:   "",
+			name:                "EmptyString",
+			in:                  "",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
 		},
 		{
-			name: "PrefixSansNumber",
-			in:   "vmx-",
+			name:                "PrefixSansNumber",
+			in:                  "vmx-",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
 		},
 		{
-			name:            "NumberSansPrefix",
-			in:              "13",
-			expectedIsValid: true,
-			expectedVersion: VMX13,
-			expectedString:  "vmx-13",
+			name:                "NumberSansPrefix",
+			in:                  "13",
+			expectedIsValid:     true,
+			expectedIsSupported: true,
+			expectedVersion:     VMX13,
+			expectedString:      "vmx-13",
 		},
 		{
-			name:            "vmx-13",
-			in:              "vmx-13",
-			expectedIsValid: true,
-			expectedVersion: VMX13,
-			expectedString:  "vmx-13",
+			name:                "PrefixAndNumber",
+			in:                  "vmx-13",
+			expectedIsValid:     true,
+			expectedIsSupported: true,
+			expectedVersion:     VMX13,
+			expectedString:      "vmx-13",
 		},
 		{
-			name:            "VMX-18",
-			in:              "VMX-18",
-			expectedIsValid: true,
-			expectedVersion: VMX18,
-			expectedString:  "vmx-18",
+			name:                "UpperPrefixAndNumber",
+			in:                  "VMX-18",
+			expectedIsValid:     true,
+			expectedIsSupported: true,
+			expectedVersion:     VMX18,
+			expectedString:      "vmx-18",
+		},
+		{
+			name:                "vmx-99",
+			in:                  "vmx-99",
+			expectedIsValid:     true,
+			expectedIsSupported: false,
+			expectedVersion:     HardwareVersion(99),
+			expectedString:      "vmx-99",
+		},
+		{
+			name:                "ETooLarge",
+			in:                  "vmx-512",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
+		},
+		{
+			name:                "ETooLarge2",
+			in:                  "512",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
 		},
 	}
 
@@ -73,13 +109,14 @@ func TestParseHardwareVersion(t *testing.T) {
 				if a, e := v.IsValid(), tc.expectedIsValid; a != e {
 					t.Errorf("unexpected invalid value: a=%v, e=%v", a, e)
 				}
-				if v.IsValid() {
-					if a, e := v, tc.expectedVersion; a != e {
-						t.Errorf("unexpected value: a=%v, e=%v", a, e)
-					}
-					if a, e := v.String(), tc.expectedString; a != e {
-						t.Errorf("unexpected string: a=%v, e=%v", a, e)
-					}
+				if a, e := v.IsSupported(), tc.expectedIsSupported; a != e {
+					t.Errorf("unexpected supported value: a=%v, e=%v", a, e)
+				}
+				if a, e := v, tc.expectedVersion; a != e {
+					t.Errorf("unexpected value: a=%v, e=%v", a, e)
+				}
+				if a, e := v.String(), tc.expectedString; a != e {
+					t.Errorf("unexpected string: a=%v, e=%v", a, e)
 				}
 			})
 		}
@@ -92,11 +129,12 @@ func TestHardwareVersion(t *testing.T) {
 	var uniqueExpectedVersions []HardwareVersion
 
 	type testCase struct {
-		name            string
-		in              string
-		expectedIsValid bool
-		expectedVersion HardwareVersion
-		expectedString  string
+		name                string
+		in                  string
+		expectedIsValid     bool
+		expectedIsSupported bool
+		expectedVersion     HardwareVersion
+		expectedString      string
 	}
 
 	testCasesForVersion := func(
@@ -109,45 +147,64 @@ func TestHardwareVersion(t *testing.T) {
 		szVersion := strconv.Itoa(version)
 		return []testCase{
 			{
-				name:            szVersion,
-				in:              szVersion,
-				expectedIsValid: true,
-				expectedVersion: expectedVersion,
-				expectedString:  expectedString,
+				name:                szVersion,
+				in:                  szVersion,
+				expectedIsValid:     true,
+				expectedIsSupported: true,
+				expectedVersion:     expectedVersion,
+				expectedString:      expectedString,
 			},
 			{
-				name:            "vmx-" + szVersion,
-				in:              "vmx-" + szVersion,
-				expectedIsValid: true,
-				expectedVersion: expectedVersion,
-				expectedString:  expectedString,
+				name:                "vmx-" + szVersion,
+				in:                  "vmx-" + szVersion,
+				expectedIsValid:     true,
+				expectedIsSupported: true,
+				expectedVersion:     expectedVersion,
+				expectedString:      expectedString,
 			},
 			{
-				name:            "VMX-" + szVersion,
-				in:              "VMX-" + szVersion,
-				expectedIsValid: true,
-				expectedVersion: expectedVersion,
-				expectedString:  expectedString,
+				name:                "VMX-" + szVersion,
+				in:                  "VMX-" + szVersion,
+				expectedIsValid:     true,
+				expectedIsSupported: true,
+				expectedVersion:     expectedVersion,
+				expectedString:      expectedString,
 			},
 		}
 	}
 
 	testCases := []testCase{
 		{
-			name: "EmptyString",
-			in:   "",
+			name:                "EmptyString",
+			in:                  "",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
 		},
 		{
-			name: "PrefixSansVersion",
-			in:   "vmx-",
+			name:                "PrefixSansVersion",
+			in:                  "vmx-",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
 		},
 		{
-			name: "PrefixAndInvalidVersion",
-			in:   "vmx-0",
+			name:                "PrefixAndInvalidVersion",
+			in:                  "vmx-0",
+			expectedIsValid:     false,
+			expectedIsSupported: false,
+			expectedVersion:     0,
+			expectedString:      "",
 		},
 		{
-			name: "InvalidVersion",
-			in:   "1",
+			name:                "UnsupportedVersion",
+			in:                  "1",
+			expectedIsValid:     true,
+			expectedIsSupported: false,
+			expectedVersion:     HardwareVersion(1),
+			expectedString:      "vmx-1",
 		},
 	}
 

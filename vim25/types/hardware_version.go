@@ -26,6 +26,10 @@ import (
 type HardwareVersion uint8
 
 const (
+	invalidHardwareVersion HardwareVersion = 0
+)
+
+const (
 	VMX3 HardwareVersion = iota + 3
 	VMX4
 
@@ -59,10 +63,22 @@ const (
 	MaxValidHardwareVersion = VMX21
 )
 
-func (hv HardwareVersion) IsValid() bool {
-	return hv != vmx5 &&
+// IsSupported returns true if the hardware version is known to and supported by
+// GoVmomi's generated types.
+func (hv HardwareVersion) IsSupported() bool {
+	return hv.IsValid() &&
+		hv != vmx5 &&
 		hv >= MinValidHardwareVersion &&
 		hv <= MaxValidHardwareVersion
+}
+
+// IsValid returns true if the hardware version is not valid.
+// Unlike IsSupported, this function returns true as long as the hardware
+// version is greater than 0.
+// For example, the result of parsing "abc" or "vmx-abc" is an invalid hardware
+// version, whereas the result of parsing "vmx-99" is valid, just not supported.
+func (hv HardwareVersion) IsValid() bool {
+	return hv != invalidHardwareVersion
 }
 
 func (hv HardwareVersion) String() string {
@@ -85,7 +101,10 @@ func (hv *HardwareVersion) UnmarshalText(text []byte) error {
 	return nil
 }
 
-var vmxRe = regexp.MustCompile(`(?i)^vmx-(\d+)$`)
+var (
+	vmxRe        = regexp.MustCompile(`(?i)^vmx-(\d+)$`)
+	vmxNumOnlyRe = regexp.MustCompile(`^(\d+)$`)
+)
 
 // MustParseHardwareVersion parses the provided string into a hardware version.
 func MustParseHardwareVersion(s string) HardwareVersion {
@@ -97,25 +116,35 @@ func MustParseHardwareVersion(s string) HardwareVersion {
 }
 
 // ParseHardwareVersion parses the provided string into a hardware version.
+// Supported formats include vmx-123 or 123. Please note that the parser will
+// only return an error if the supplied version does not match the supported
+// formats.
+// Once parsed, use the function IsSupported to determine if the hardware
+// version falls into the range of versions known to GoVmomi.
 func ParseHardwareVersion(s string) (HardwareVersion, error) {
-	var u uint64
 	if m := vmxRe.FindStringSubmatch(s); len(m) > 0 {
-		u, _ = strconv.ParseUint(m[1], 10, 8)
-	} else {
-		u, _ = strconv.ParseUint(s, 10, 8)
+		u, err := strconv.ParseUint(m[1], 10, 8)
+		if err != nil {
+			return invalidHardwareVersion, fmt.Errorf(
+				"failed to parse %s from %q as uint8: %w", m[1], s, err)
+		}
+		return HardwareVersion(u), nil
+	} else if m := vmxNumOnlyRe.FindStringSubmatch(s); len(m) > 0 {
+		u, err := strconv.ParseUint(m[1], 10, 8)
+		if err != nil {
+			return invalidHardwareVersion, fmt.Errorf(
+				"failed to parse %s as uint8: %w", m[1], err)
+		}
+		return HardwareVersion(u), nil
 	}
-	v := HardwareVersion(u)
-	if !v.IsValid() {
-		return 0, fmt.Errorf("invalid version: %q", s)
-	}
-	return v, nil
+	return invalidHardwareVersion, fmt.Errorf("invalid version: %q", s)
 }
 
 var hardwareVersions []HardwareVersion
 
 func init() {
 	for i := MinValidHardwareVersion; i <= MaxValidHardwareVersion; i++ {
-		if i.IsValid() {
+		if i.IsSupported() {
 			hardwareVersions = append(hardwareVersions, i)
 		}
 	}
