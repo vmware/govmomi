@@ -162,8 +162,10 @@ func (dc *Datacenter) PowerOnMultiVMTask(ctx *Context, req *types.PowerOnMultiVM
 		res.Attempted = []types.ClusterAttemptedVmInfo{}
 
 		for _, ref := range req.Vm {
-			vm := ctx.Map.Get(ref).(*VirtualMachine)
-
+			vm, ok := ctx.Map.Get(ref).(*VirtualMachine)
+			if !ok {
+				continue
+			}
 			// This task creates multiple subtasks which violates the assumption
 			// of 1:1 Context:Task, which results in data races in objects
 			// like the Simulator.Event manager. This is the minimum context

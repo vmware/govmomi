@@ -142,7 +142,10 @@ func TestDatacenterPowerOnMultiVMs(t *testing.T) {
 		}
 	}
 
-	dcTask, err := dc.PowerOnVM(ctx, testVMs)
+	// real VC ignores unknown VM refs
+	unknown := types.ManagedObjectReference{Type: "VirtualMachine", Value: "unknown"}
+
+	dcTask, err := dc.PowerOnVM(ctx, append(testVMs, unknown))
 	if err != nil {
 		t.Fatal(err)
 	}
