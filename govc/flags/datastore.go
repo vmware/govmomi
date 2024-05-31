@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,9 +20,12 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net/url"
 	"os"
 
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/vapi/library"
+	"github.com/vmware/govmomi/vapi/library/finder"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -147,4 +150,60 @@ func (f *DatastoreFlag) Stat(ctx context.Context, file string) (types.BaseFileIn
 
 	return ds.Stat(ctx, file)
 
+}
+
+func (f *DatastoreFlag) libraryPath(ctx context.Context, p string) (string, error) {
+	vc, err := f.Client()
+	if err != nil {
+		return "", err
+	}
+
+	rc, err := f.RestClient()
+	if err != nil {
+		return "", err
+	}
+
+	m := library.NewManager(rc)
+
+	r, err := finder.NewFinder(m).Find(ctx, p)
+	if err != nil {
+		return "", err
+	}
+
+	if len(r) != 1 {
+		return "", fmt.Errorf("%s: %d found", p, len(r))
+	}
+
+	return finder.NewPathFinder(m, vc).Path(ctx, r[0])
+}
+
+// FileBacking converts the given file path for use as VirtualDeviceFileBackingInfo.FileName.
+func (f *DatastoreFlag) FileBacking(ctx context.Context, file string, stat bool) (string, error) {
+	u, err := url.Parse(file)
+	if err != nil {
+		return "", err
+	}
+
+	switch u.Scheme {
+	case "library":
+		return f.libraryPath(ctx, u.Path)
+	case "ds":
+		// datastore url, e.g. ds:///vmfs/volumes/$uuid/...
+		return file, nil
+	}
+
+	var p object.DatastorePath
+	if p.FromString(file) {
+		// datastore is specified
+		return file, nil
+	}
+
+	if stat {
+		// Verify ISO exists
+		if _, err := f.Stat(ctx, file); err != nil {
+			return "", err
+		}
+	}
+
+	return f.DatastorePath(file)
 }

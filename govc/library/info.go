@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2018-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2018-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -22,8 +22,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"path"
-	"strings"
 	"text/tabwriter"
 	"time"
 
@@ -33,10 +31,6 @@ import (
 	"github.com/vmware/govmomi/units"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/library/finder"
-
-	"github.com/vmware/govmomi/property"
-	"github.com/vmware/govmomi/vim25/mo"
-	"github.com/vmware/govmomi/vim25/types"
 )
 
 type info struct {
@@ -47,8 +41,9 @@ type info struct {
 	long bool
 	link bool
 	url  bool
+	stor bool
 
-	names map[string]string
+	pathFinder *finder.PathFinder
 }
 
 func init() {
@@ -66,8 +61,7 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.long, "l", false, "Long listing format")
 	f.BoolVar(&cmd.link, "L", false, "List Datastore path only")
 	f.BoolVar(&cmd.url, "U", false, "List pub/sub URL(s) only")
-
-	cmd.names = make(map[string]string)
+	f.BoolVar(&cmd.stor, "s", false, "Include file specific storage details")
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -80,6 +74,8 @@ func (cmd *info) Process(ctx context.Context) error {
 func (cmd *info) Description() string {
 	return `Display library information.
 
+Note: the '-s' flag only applies to files, not items or the library itself.
+
 Examples:
   govc library.info
   govc library.info /lib1
@@ -87,7 +83,8 @@ Examples:
   govc library.info /lib1/item1
   govc library.info /lib1/item1/
   govc library.info */
-  govc device.cdrom.insert -vm $vm -device cdrom-3000 $(govc library.info -L /lib1/item1/file1)
+  govc library.info -L /lib1/item1/file1 # file path relative to Datastore
+  govc library.info -L -l /lib1/item1/file1 # file path including Datastore
   govc library.info -json | jq .
   govc library.info -json /lib1/item1 | jq .`
 }
@@ -96,6 +93,7 @@ type infoResultsWriter struct {
 	Result []finder.FindResult `json:"result"`
 	m      *library.Manager
 	cmd    *info
+	ctx    context.Context
 }
 
 func (r infoResultsWriter) MarshalJSON() ([]byte, error) {
@@ -113,7 +111,7 @@ func (r infoResultsWriter) Dump() interface{} {
 func (r infoResultsWriter) Write(w io.Writer) error {
 	if r.cmd.link {
 		for _, j := range r.Result {
-			p, err := r.cmd.getDatastoreFilePath(j)
+			p, err := r.cmd.pathFinder.Path(context.Background(), j)
 			if err != nil {
 				return err
 			}
@@ -180,8 +178,12 @@ func (r infoResultsWriter) writeLibrary(
 		fmt.Fprintf(w, "    Type:\t%s\n", d.Type)
 	}
 	if r.cmd.long {
-		fmt.Fprintf(w, "  Datastore Path:\t%s\n", r.cmd.getDatastorePath(res))
-		items, err := r.m.GetLibraryItems(context.Background(), v.ID)
+		p, err := r.cmd.pathFinder.Path(r.ctx, res)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "  Datastore Path:\t%s\n", p)
+		items, err := r.m.GetLibraryItems(r.ctx, v.ID)
 		if err != nil {
 			return err
 		}
@@ -234,7 +236,11 @@ func (r infoResultsWriter) writeItem(
 		fmt.Fprintf(w, "  Certificate Status:\t%s\n", v.CertificateVerification.Status)
 	}
 	if r.cmd.long {
-		fmt.Fprintf(w, "  Datastore Path:\t%s\n", r.cmd.getDatastorePath(res))
+		p, err := r.cmd.pathFinder.Path(r.ctx, res)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "  Datastore Path:\t%s\n", p)
 	}
 
 	return nil
@@ -253,7 +259,22 @@ func (r infoResultsWriter) writeFile(
 	fmt.Fprintf(w, "  Version:\t%s\n", v.Version)
 
 	if r.cmd.long {
-		fmt.Fprintf(w, "  Datastore Path:\t%s\n", r.cmd.getDatastorePath(res))
+		p, err := r.cmd.pathFinder.Path(r.ctx, res)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(w, "  Datastore Path:\t%s\n", p)
+	}
+	if r.cmd.stor {
+		s, err := r.m.GetLibraryItemStorage(r.ctx, res.GetParent().GetID(), v.Name)
+		if err != nil {
+			return err
+		}
+		for i := range s {
+			for _, uri := range s[i].StorageURIs {
+				fmt.Fprintf(w, "  Storage URI:\t%s\n", uri)
+			}
+		}
 	}
 
 	return nil
@@ -264,124 +285,18 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	vc, err := cmd.Client()
+	if err != nil {
+		return err
+	}
 
 	m := library.NewManager(c)
+	cmd.pathFinder = finder.NewPathFinder(m, vc)
 	finder := finder.NewFinder(m)
 	findResults, err := finder.Find(ctx, f.Args()...)
 	if err != nil {
 		return err
 	}
-	// Lookup the names(s) of the library's datastore(s).
-	for i := range findResults {
-		if t, ok := findResults[i].GetResult().(library.Library); ok {
-			for j := range t.Storage {
-				if t.Storage[j].Type == "DATASTORE" {
-					t.Storage[j].DatastoreID = cmd.getDatastoreName(t.Storage[j].DatastoreID)
-				}
-			}
-		}
-	}
-	return cmd.WriteResult(&infoResultsWriter{findResults, m, cmd})
-}
 
-func (cmd *info) getDatastoreName(id string) string {
-	if name, ok := cmd.names[id]; ok {
-		return name
-	}
-
-	c, err := cmd.Client()
-	if err != nil {
-		return id
-	}
-
-	obj := types.ManagedObjectReference{
-		Type:  "Datastore",
-		Value: id,
-	}
-	pc := property.DefaultCollector(c)
-	var me mo.ManagedEntity
-
-	err = pc.RetrieveOne(context.Background(), obj, []string{"name"}, &me)
-	if err != nil {
-		return id
-	}
-
-	cmd.names[id] = me.Name
-	return me.Name
-}
-
-func (cmd *info) getDatastorePath(r finder.FindResult) string {
-	p, _ := cmd.getDatastoreFilePath(r)
-	return p
-}
-
-func (cmd *info) getDatastoreFilePath(r finder.FindResult) (string, error) {
-	switch x := r.GetResult().(type) {
-	case library.Library:
-		id := ""
-		if len(x.Storage) != 0 {
-			id = cmd.getDatastoreName(x.Storage[0].DatastoreID)
-		}
-		return fmt.Sprintf("[%s] contentlib-%s", id, x.ID), nil
-	case library.Item:
-		return fmt.Sprintf("%s/%s", cmd.getDatastorePath(r.GetParent()), x.ID), nil
-	case library.File:
-		return cmd.getDatastoreFileItemPath(r)
-	default:
-		return "", fmt.Errorf("unsupported type=%T", x)
-	}
-}
-
-// getDatastoreFileItemPath returns the absolute datastore path for a library.File
-func (cmd *info) getDatastoreFileItemPath(r finder.FindResult) (string, error) {
-	name := r.GetName()
-	dir := cmd.getDatastorePath(r.GetParent())
-	p := path.Join(dir, name)
-
-	lib := r.GetParent().GetParent().GetResult().(library.Library)
-	if len(lib.Storage) == 0 {
-		return p, nil
-	}
-
-	ctx := context.Background()
-	c, err := cmd.Client()
-	if err != nil {
-		return p, err
-	}
-
-	ref := types.ManagedObjectReference{Type: "Datastore", Value: lib.Storage[0].DatastoreID}
-	ds := object.NewDatastore(c, ref)
-
-	b, err := ds.Browser(ctx)
-	if err != nil {
-		return p, err
-	}
-
-	// The file ID isn't available via the API, so we use DatastoreBrowser to search
-	ext := path.Ext(name)
-	pat := strings.Replace(name, ext, "*"+ext, 1)
-	spec := types.HostDatastoreBrowserSearchSpec{
-		MatchPattern: []string{pat},
-	}
-
-	task, err := b.SearchDatastore(ctx, dir, &spec)
-	if err != nil {
-		return p, err
-	}
-
-	info, err := task.WaitForResult(ctx, nil)
-	if err != nil {
-		return p, err
-	}
-
-	res, ok := info.Result.(types.HostDatastoreBrowserSearchResults)
-	if !ok {
-		return p, fmt.Errorf("search(%s) result type=%T", pat, info.Result)
-	}
-
-	if len(res.File) != 1 {
-		return p, fmt.Errorf("search(%s) result files=%d", pat, len(res.File))
-	}
-
-	return path.Join(dir, res.File[0].GetFileInfo().Path), nil
+	return cmd.WriteResult(&infoResultsWriter{findResults, m, cmd, ctx})
 }
