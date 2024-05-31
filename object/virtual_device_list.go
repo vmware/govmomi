@@ -361,6 +361,77 @@ func (l VirtualDeviceList) newNVMEBusNumber() int32 {
 	return -1
 }
 
+// FindSATAController will find the named SATA or AHCI controller if given, otherwise will pick an available controller.
+// An error is returned if the named controller is not found or not a SATA or AHCI controller. Or, if name is not
+// given and no available controller can be found.
+func (l VirtualDeviceList) FindSATAController(name string) (types.BaseVirtualController, error) {
+	if name != "" {
+		d := l.Find(name)
+		if d == nil {
+			return nil, fmt.Errorf("device '%s' not found", name)
+		}
+		switch c := d.(type) {
+		case *types.VirtualSATAController:
+			return c, nil
+		case *types.VirtualAHCIController:
+			return c, nil
+		default:
+			return nil, fmt.Errorf("%s is not a SATA or AHCI controller", name)
+		}
+	}
+
+	c := l.PickController((*types.VirtualSATAController)(nil))
+	if c == nil {
+		c = l.PickController((*types.VirtualAHCIController)(nil))
+	}
+	if c == nil {
+		return nil, errors.New("no available SATA or AHCI controller")
+	}
+
+	switch c := c.(type) {
+	case *types.VirtualSATAController:
+		return c, nil
+	case *types.VirtualAHCIController:
+		return c, nil
+	}
+
+	return nil, errors.New("unexpected controller type")
+}
+
+// CreateSATAController creates a new SATA controller.
+func (l VirtualDeviceList) CreateSATAController() (types.BaseVirtualDevice, error) {
+	sata := &types.VirtualAHCIController{}
+	sata.BusNumber = l.newSATABusNumber()
+	sata.Key = l.NewKey()
+
+	return sata, nil
+}
+
+var sataBusNumbers = []int{0, 1, 2, 3}
+
+// newSATABusNumber returns the bus number to use for adding a new SATA bus device.
+// -1 is returned if there are no bus numbers available.
+func (l VirtualDeviceList) newSATABusNumber() int32 {
+	var used []int
+
+	for _, d := range l.SelectByType((*types.VirtualSATAController)(nil)) {
+		num := d.(types.BaseVirtualController).GetVirtualController().BusNumber
+		if num >= 0 {
+			used = append(used, int(num))
+		} // else caller is creating a new vm using SATAControllerTypes
+	}
+
+	sort.Ints(used)
+
+	for i, n := range sataBusNumbers {
+		if i == len(used) || n != used[i] {
+			return int32(n)
+		}
+	}
+
+	return -1
+}
+
 // FindDiskController will find an existing ide or scsi disk controller.
 func (l VirtualDeviceList) FindDiskController(name string) (types.BaseVirtualController, error) {
 	switch {
@@ -370,6 +441,8 @@ func (l VirtualDeviceList) FindDiskController(name string) (types.BaseVirtualCon
 		return l.FindSCSIController("")
 	case name == "nvme":
 		return l.FindNVMEController("")
+	case name == "sata":
+		return l.FindSATAController("")
 	default:
 		if c, ok := l.Find(name).(types.BaseVirtualController); ok {
 			return c, nil
@@ -389,6 +462,8 @@ func (l VirtualDeviceList) PickController(kind types.BaseVirtualController) type
 			return num < 15
 		case *types.VirtualIDEController:
 			return num < 2
+		case types.BaseVirtualSATAController:
+			return num < 30
 		case *types.VirtualNVMEController:
 			return num < 8
 		default:
@@ -909,8 +984,6 @@ func (l VirtualDeviceList) Type(device types.BaseVirtualDevice) string {
 		return "pvscsi"
 	case *types.VirtualLsiLogicSASController:
 		return "lsilogic-sas"
-	case *types.VirtualNVMEController:
-		return "nvme"
 	case *types.VirtualPrecisionClock:
 		return "clock"
 	default:
