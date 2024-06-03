@@ -145,7 +145,11 @@ func (l *Lease) newLeaseInfo(li *types.HttpNfcLeaseInfo, items []types.OvfFileIt
 		// this is an import
 		for _, item := range items {
 			if device.ImportKey == item.DeviceId {
-				info.Items = append(info.Items, NewFileItem(u, item))
+				fi := NewFileItem(u, item)
+				fi.Thumbprint = device.SslThumbprint
+
+				info.Items = append(info.Items, fi)
+
 				break
 			}
 		}
