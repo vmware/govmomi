@@ -429,12 +429,19 @@ func extraConfigKey(key string) string {
 }
 
 func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+	if len(spec.ExtraConfig) == 0 {
+		return nil
+	}
 	var removedContainerBacking bool
 	var changes []types.PropertyChange
+	field := mo.Field{Path: "config.extraConfig"}
+
 	for _, c := range spec.ExtraConfig {
 		val := c.GetOptionValue()
 		key := strings.TrimPrefix(extraConfigKey(val.Key), "SET.")
 		if key == val.Key {
+			field.Key = key
+			op := types.PropertyChangeOpAssign
 			keyIndex := -1
 			for i := range vm.Config.ExtraConfig {
 				bov := vm.Config.ExtraConfig[i]
@@ -451,23 +458,26 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 				}
 			}
 			if keyIndex < 0 {
+				op = types.PropertyChangeOpAdd
 				vm.Config.ExtraConfig = append(vm.Config.ExtraConfig, c)
 			} else {
 				if s, ok := val.Value.(string); ok && s == "" {
+					op = types.PropertyChangeOpRemove
 					if key == ContainerBackingOptionKey {
 						removedContainerBacking = true
 					}
 					// Remove existing element
-					l := len(vm.Config.ExtraConfig)
-					vm.Config.ExtraConfig[keyIndex] = vm.Config.ExtraConfig[l-1]
-					vm.Config.ExtraConfig[l-1] = nil
-					vm.Config.ExtraConfig = vm.Config.ExtraConfig[:l-1]
+					vm.Config.ExtraConfig = append(
+						vm.Config.ExtraConfig[:keyIndex],
+						vm.Config.ExtraConfig[keyIndex+1:]...)
+					val = nil
 				} else {
 					// Update existing element
-					vm.Config.ExtraConfig[keyIndex].GetOptionValue().Value = val.Value
+					vm.Config.ExtraConfig[keyIndex] = val
 				}
 			}
 
+			changes = append(changes, types.PropertyChange{Name: field.String(), Val: val, Op: op})
 			continue
 		}
 		changes = append(changes, types.PropertyChange{Name: key, Val: val.Value})
@@ -529,9 +539,8 @@ func (vm *VirtualMachine) applyExtraConfig(ctx *Context, spec *types.VirtualMach
 		}
 	}
 
-	if len(changes) != 0 {
-		Map.Update(vm, changes)
-	}
+	change := types.PropertyChange{Name: field.Path, Val: vm.Config.ExtraConfig}
+	ctx.Map.Update(vm, append(changes, change))
 
 	return fault
 }
@@ -1586,6 +1595,8 @@ func (vm *VirtualMachine) genVmdkPath(p object.DatastorePath) (string, types.Bas
 }
 
 func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMachineConfigSpec) types.BaseMethodFault {
+	var changes []types.PropertyChange
+	field := mo.Field{Path: "config.hardware.device"}
 	devices := object.VirtualDeviceList(vm.Config.Hardware.Device)
 
 	var err types.BaseMethodFault
@@ -1593,6 +1604,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 		dspec := change.GetVirtualDeviceConfigSpec()
 		device := dspec.Device.GetVirtualDevice()
 		invalid := &types.InvalidDeviceSpec{DeviceIndex: int32(i)}
+		change := types.PropertyChange{}
 
 		switch dspec.FileOperation {
 		case types.VirtualDeviceConfigSpecFileOperationCreate:
@@ -1606,6 +1618,8 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 
 		switch dspec.Operation {
 		case types.VirtualDeviceConfigSpecOperationAdd:
+			change.Op = types.PropertyChangeOpAdd
+
 			if devices.FindByKey(device.Key) != nil && device.ControllerKey == 0 {
 				// Note: real ESX does not allow adding base controllers (ControllerKey = 0)
 				// after VM is created (returns success but device is not added).
@@ -1631,6 +1645,7 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 			}
 
 			devices = append(devices, dspec.Device)
+			change.Val = dspec.Device
 			if key != device.Key {
 				// Update ControllerKey refs
 				for i := range spec.DeviceChange {
@@ -1658,14 +1673,22 @@ func (vm *VirtualMachine) configureDevices(ctx *Context, spec *types.VirtualMach
 			}
 
 			devices = append(devices, dspec.Device)
+			change.Val = dspec.Device
 		case types.VirtualDeviceConfigSpecOperationRemove:
+			change.Op = types.PropertyChangeOpRemove
+
 			devices = vm.removeDevice(ctx, devices, dspec)
 		}
+
+		field.Key = device.Key
+		change.Name = field.String()
+		changes = append(changes, change)
 	}
 
-	ctx.Map.Update(vm, []types.PropertyChange{
-		{Name: "config.hardware.device", Val: []types.BaseVirtualDevice(devices)},
-	})
+	if len(changes) != 0 {
+		change := types.PropertyChange{Name: field.Path, Val: []types.BaseVirtualDevice(devices)}
+		ctx.Map.Update(vm, append(changes, change))
+	}
 
 	err = vm.updateDiskLayouts()
 	if err != nil {

@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2017 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,6 +68,22 @@ func (f *PropertyFilter) matches(ctx *Context, ref types.ManagedObjectReference,
 		for _, name := range p.PathSet {
 			if name == change.Name {
 				return true
+			}
+
+			var field mo.Field
+			if field.FromString(name) && field.Item != "" {
+				// "field[key].item" -> "field[key]"
+				item := field.Item
+				field.Item = ""
+				if field.String() == change.Name {
+					change.Name = name
+					change.Val, _ = fieldValue(reflect.ValueOf(change.Val), item)
+					return true
+				}
+			}
+
+			if field.FromString(change.Name) && field.Key != nil {
+				continue // case below does not apply to property index
 			}
 
 			// strings.HasPrefix("runtime.powerState", "runtime") == parent field matches

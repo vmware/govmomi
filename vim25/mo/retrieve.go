@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -75,16 +75,19 @@ func ApplyPropertyChange(obj Reference, changes []types.PropertyChange) {
 	v := reflect.ValueOf(obj)
 
 	for _, p := range changes {
-		rv, ok := t.props[p.Name]
-		if !ok {
-			// For now, skip unknown properties allowing PC updates to be triggered
-			// for partial updates (e.g. extensionList["my.extension"]).
-			// Ultimately we should support partial updates by assigning the value
-			// reflectively in assignValue.
-			continue
+		var field Field
+		if !field.FromString(p.Name) {
+			panic(p.Name + ": invalid property path")
 		}
 
-		assignValue(v, rv, reflect.ValueOf(p.Val))
+		rv, ok := t.props[field.Path]
+		if !ok {
+			panic(field.Path + ": property not found")
+		}
+
+		if field.Key == nil { // Key is only used for notifications
+			assignValue(v, rv, reflect.ValueOf(p.Val))
+		}
 	}
 }
 
