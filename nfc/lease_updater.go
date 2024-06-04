@@ -30,7 +30,9 @@ import (
 
 type FileItem struct {
 	types.OvfFileItem
-	URL *url.URL
+
+	URL        *url.URL
+	Thumbprint string
 
 	ch chan progress.Report
 }
