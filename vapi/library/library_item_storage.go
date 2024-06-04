@@ -43,11 +43,11 @@ func (c *Manager) ListLibraryItemStorage(ctx context.Context, id string) ([]Stor
 }
 
 // GetLibraryItemStorage returns the storage for a specific file in a library item.
-func (c *Manager) GetLibraryItemStorage(ctx context.Context, id, fileName string) (*Storage, error) {
+func (c *Manager) GetLibraryItemStorage(ctx context.Context, id, fileName string) ([]Storage, error) {
 	url := c.Resource(internal.LibraryItemStoragePath).WithID(id).WithAction("get")
 	spec := struct {
-		Name string `json:"name"`
+		Name string `json:"file_name"`
 	}{fileName}
-	var res Storage
-	return &res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
+	var res []Storage
+	return res, c.Do(ctx, url.Request(http.MethodPost, spec), &res)
 }

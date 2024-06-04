@@ -1553,6 +1553,7 @@ If device is not specified, the first CD-ROM device is used.
 
 Examples:
   govc device.cdrom.insert -vm vm-1 -device cdrom-3000 images/boot.iso
+  govc device.cdrom.insert -vm vm-1 library:/boot/linux/ubuntu.iso # Content Library ISO
 
 Options:
   -device=               CD-ROM device name
@@ -3631,6 +3632,8 @@ Usage: govc library.info [OPTIONS]
 
 Display library information.
 
+Note: the '-s' flag only applies to files, not items or the library itself.
+
 Examples:
   govc library.info
   govc library.info /lib1
@@ -3638,7 +3641,8 @@ Examples:
   govc library.info /lib1/item1
   govc library.info /lib1/item1/
   govc library.info */
-  govc device.cdrom.insert -vm $vm -device cdrom-3000 $(govc library.info -L /lib1/item1/file1)
+  govc library.info -L /lib1/item1/file1 # file path relative to Datastore
+  govc library.info -L -l /lib1/item1/file1 # file path including Datastore
   govc library.info -json | jq .
   govc library.info -json /lib1/item1 | jq .
 
@@ -3646,6 +3650,7 @@ Options:
   -L=false               List Datastore path only
   -U=false               List pub/sub URL(s) only
   -l=false               Long listing format
+  -s=false               Include file specific storage details
 ```
 
 ## library.ls
@@ -6284,6 +6289,7 @@ https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIde
 
 Examples:
   govc vm.create -on=false vm-name
+  govc vm.create -iso library:/boot/linux/ubuntu.iso vm-name # Content Library ISO
   govc vm.create -cluster cluster1 vm-name # use compute cluster placement
   govc vm.create -datastore-cluster dscluster vm-name # use datastore cluster placement
   govc vm.create -m 2048 -c 2 -g freebsd64Guest -net.adapter vmxnet3 -disk.controller pvscsi vm-name

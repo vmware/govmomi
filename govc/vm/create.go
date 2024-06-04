@@ -63,7 +63,6 @@ type create struct {
 
 	iso              string
 	isoDatastoreFlag *flags.DatastoreFlag
-	isoDatastore     *object.Datastore
 
 	disk              string
 	diskDatastoreFlag *flags.DatastoreFlag
@@ -195,6 +194,7 @@ https://code.vmware.com/apis/358/vsphere/doc/vim.vm.GuestOsDescriptor.GuestOsIde
 
 Examples:
   govc vm.create -on=false vm-name
+  govc vm.create -iso library:/boot/linux/ubuntu.iso vm-name # Content Library ISO
   govc vm.create -cluster cluster1 vm-name # use compute cluster placement
   govc vm.create -datastore-cluster dscluster vm-name # use datastore cluster placement
   govc vm.create -m 2048 -c 2 -g freebsd64Guest -net.adapter vmxnet3 -disk.controller pvscsi vm-name`
@@ -267,15 +267,11 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	// Verify ISO exists
 	if cmd.iso != "" {
-		_, err = cmd.isoDatastoreFlag.Stat(ctx, cmd.iso)
+		iso, err := cmd.isoDatastoreFlag.FileBacking(ctx, cmd.iso, true)
 		if err != nil {
 			return err
 		}
-
-		cmd.isoDatastore, err = cmd.isoDatastoreFlag.Datastore()
-		if err != nil {
-			return err
-		}
+		cmd.iso = iso
 	}
 
 	// Verify disk exists
@@ -505,7 +501,7 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 			return nil, err
 		}
 
-		cdrom = devices.InsertIso(cdrom, cmd.isoDatastore.Path(cmd.iso))
+		cdrom = devices.InsertIso(cdrom, cmd.iso)
 		devices = append(devices, cdrom)
 	}
 

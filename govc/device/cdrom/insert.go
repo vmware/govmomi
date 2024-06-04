@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -64,7 +64,8 @@ func (cmd *insert) Description() string {
 If device is not specified, the first CD-ROM device is used.
 
 Examples:
-  govc device.cdrom.insert -vm vm-1 -device cdrom-3000 images/boot.iso`
+  govc device.cdrom.insert -vm vm-1 -device cdrom-3000 images/boot.iso
+  govc device.cdrom.insert -vm vm-1 library:/boot/linux/ubuntu.iso # Content Library ISO`
 }
 
 func (cmd *insert) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -87,7 +88,7 @@ func (cmd *insert) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	iso, err := cmd.DatastorePath(f.Arg(0))
+	iso, err := cmd.FileBacking(ctx, f.Arg(0), false)
 	if err != nil {
 		return err
 	}

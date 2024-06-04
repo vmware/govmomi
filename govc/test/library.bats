@@ -64,10 +64,6 @@ load test_helper
 @test "library.import" {
   vcsim_env
 
-  run govc session.ls
-  assert_success
-  govc session.ls -json | jq .
-
   run govc library.create my-content
   assert_success
   library_id="$output"
@@ -171,9 +167,24 @@ load test_helper
   assert_matches "$TTYLINUX_NAME.ovf"
   assert_matches "$TTYLINUX_NAME-disk1.vmdk"
 
-  run govc session.ls
+  summary="ISO \[${GOVC_DATASTORE}\] contentlib-.*${TTYLINUX_NAME}.iso"
+
+  run govc vm.create -on=false -iso "library:/my-content/ttylinux-live/$TTYLINUX_NAME.iso" library-iso-test
   assert_success
-  govc session.ls -json | jq .
+
+  run govc device.info -vm library-iso-test cdrom-*
+  assert_success
+  assert_matches "$summary"
+
+  run govc device.cdrom.eject -vm library-iso-test
+  assert_success
+
+  run govc device.cdrom.insert -vm library-iso-test "library:/my-content/ttylinux-live/$TTYLINUX_NAME.iso"
+  assert_success
+
+  run govc device.info -vm library-iso-test cdrom-*
+  assert_success
+  assert_matches "$summary"
 }
 
 @test "library.deploy" {
@@ -187,8 +198,17 @@ load test_helper
   dir=$(govc datastore.info -json | jq -r .datastores[].info.url)
   ln -s "$GOVC_IMAGES/$TTYLINUX_NAME."* "$dir"
 
-  # vcsim doesn't verify checksums. Use a fake checksum and a possible algorithm to ensure the args are accepted.
-  run govc library.import -pull -c=fake -a=SHA1 my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
+  run govc library.import -c fake -pull my-content -n invalid-sha1 "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
+  assert_failure # invalid checksum
+
+  sum=$(sha256sum "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" | awk '{print $1}')
+  run govc library.import -c "$sum" -pull my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ovf"
+  assert_success
+
+  run govc library.info -s "/my-content/ttylinux-live/$TTYLINUX_NAME.ovf"
+  assert_success
+
+  run govc library.info -l -s /my-content/$TTYLINUX_NAME/$TTYLINUX_NAME.ovf
   assert_success
 
   run govc library.deploy "my-content/$TTYLINUX_NAME" ttylinux
@@ -197,8 +217,11 @@ load test_helper
   run govc vm.info ttylinux
   assert_success
 
-  # vcsim doesn't verify checksums. Use a fake checksum and a possible algorithm to ensure the args are accepted.
-  run govc library.import -pull -c=fake -a=MD5 -n ttylinux-unpacked my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  run govc library.import -pull -c fake -a MD5 -n invalid-md5 my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
+  assert_failure # invalid checksum
+
+  sum=$(md5sum "$GOVC_IMAGES/$TTYLINUX_NAME.ovf" | awk '{print $1}')
+  run govc library.import -pull -c "$sum" -a MD5 -n ttylinux-unpacked my-content "https://$(govc env GOVC_URL)/folder/$TTYLINUX_NAME.ova"
   assert_success
 
   item_id=$(govc library.info -json /my-content/ttylinux-unpacked | jq -r .[].id)
@@ -653,5 +676,3 @@ EOF
   cached=$(govc library.info subscribed-content/ttylinux-latest | grep Cached: | awk '{print $2}')
   assert_equal "false" "$cached"
 }
-
-
