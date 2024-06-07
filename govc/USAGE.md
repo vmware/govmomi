@@ -6366,9 +6366,11 @@ Options:
   -mac=[]                MAC address
   -name=                 Host name
   -netmask=[]            Netmask
+  -org=                  Windows only : name of the org that owns the VM
   -prefix=               Host name generator prefix
   -type=Linux            Customization type if spec NAME is not specified (Linux|Windows)
   -tz=                   Time zone
+  -username=             Windows only : full name of the end user in firstname lastname format
   -vm=                   Virtual machine [GOVC_VM]
 ```
 
