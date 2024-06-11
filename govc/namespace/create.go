@@ -26,11 +26,10 @@ import (
 )
 
 type create struct {
-	*flags.ClientFlag
+	*flags.ClusterFlag
+	*namespaceFlag
 
-	libraries flags.StringList
-	vmClasses flags.StringList
-	spec      namespace.NamespacesInstanceCreateSpec
+	spec namespace.NamespacesInstanceCreateSpec
 }
 
 func init() {
@@ -38,37 +37,49 @@ func init() {
 }
 
 func (cmd *create) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
+	cmd.ClusterFlag, ctx = flags.NewClusterFlag(ctx)
+	cmd.ClusterFlag.Register(ctx, f)
 
-	f.StringVar(&cmd.spec.Cluster, "supervisor", "", "The identifier of the Supervisor.")
-	f.Var(&cmd.libraries, "library", "Content library IDs to associate with the vSphere Namespace.")
-	f.Var(&cmd.vmClasses, "vm-class", "Virtual machine class IDs to associate with the vSphere Namespace.")
+	cmd.namespaceFlag = &namespaceFlag{}
+	cmd.namespaceFlag.Register(ctx, f)
+}
+
+func (cmd *create) Process(ctx context.Context) error {
+	if err := cmd.ClusterFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.namespaceFlag.Process(ctx); err != nil {
+		return err
+	}
+
+	cluster, err := cmd.Cluster()
+	if err != nil {
+		return err
+	}
+
+	cmd.spec.Cluster = cluster.Reference().Value
+	cmd.spec.StorageSpecs = cmd.storageSpec()
+	cmd.spec.VmServiceSpec = cmd.vmServiceSpec()
+
+	return nil
 }
 
 func (*create) Usage() string {
 	return "NAME"
 }
 
-func (cmd *create) Process(ctx context.Context) error {
-	cmd.spec.VmServiceSpec.ContentLibraries = cmd.libraries
-	cmd.spec.VmServiceSpec.VmClasses = cmd.vmClasses
-
-	return cmd.ClientFlag.Process(ctx)
-}
-
 func (cmd *create) Description() string {
 	return `Creates a new vSphere Namespace on a Supervisor.
 
-The '-library' and '-vm-class' flags can each be specified multiple times.
+The '-library', '-vmclass' and '-storage' flags can each be specified multiple times.
 
 Examples:
-  govc namespace.create -supervisor=domain-c1 test-namespace
-  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge test-namespace
-  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge -vm-class best-effort-4xlarge test-namespace
-  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace`
+  govc namespace.create -cluster C1 test-namespace
+  govc namespace.create -cluster C1 -library vmsvc test-namespace
+  govc namespace.create -cluster C1 -library vmsvc -library tkgs test-namespace -storage wcp-policy
+  govc namespace.create -cluster C1 -vmclass best-effort-2xlarge test-namespace
+  govc namespace.create -cluster C1 -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace
+  govc namespace.create -cluster C1 -library vmsvc -library tkgs -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace`
 }
 
 func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {

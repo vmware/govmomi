@@ -4311,20 +4311,21 @@ Usage: govc namespace.create [OPTIONS] NAME
 
 Creates a new vSphere Namespace on a Supervisor.
 
-The '-library' and '-vm-class' flags can each be specified multiple times.
+The '-library', '-vmclass' and '-storage' flags can each be specified multiple times.
 
 Examples:
-  govc namespace.create -supervisor=domain-c1 test-namespace
-  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge test-namespace
-  govc namespace.create -supervisor=domain-c1 -vm-class=best-effort-2xlarge -vm-class best-effort-4xlarge test-namespace
-  govc namespace.create -supervisor=domain-c1 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
+  govc namespace.create -cluster C1 test-namespace
+  govc namespace.create -cluster C1 -library vmsvc test-namespace
+  govc namespace.create -cluster C1 -library vmsvc -library tkgs test-namespace -storage wcp-policy
+  govc namespace.create -cluster C1 -vmclass best-effort-2xlarge test-namespace
+  govc namespace.create -cluster C1 -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace
+  govc namespace.create -cluster C1 -library vmsvc -library tkgs -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace
 
 Options:
+  -cluster=              Cluster [GOVC_CLUSTER]
   -library=[]            Content library IDs to associate with the vSphere Namespace.
-  -supervisor=           The identifier of the Supervisor.
-  -vm-class=[]           Virtual machine class IDs to associate with the vSphere Namespace.
+  -storage=[]            Storage profile IDs to associate with the vSphere Namespace.
+  -vmclass=[]            Virtual machine class IDs to associate with the vSphere Namespace.
 ```
 
 ## namespace.info
@@ -4476,15 +4477,16 @@ Usage: govc namespace.update [OPTIONS] NAME
 Modifies an existing vSphere Namespace on a Supervisor.
 
 Examples:
-  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=617a3ee3-a2ff-4311-9a7c-0016ccf958bd test-namespace
-  govc namespace.update -vm-class=best-effort-2xlarge test-namespace
-  govc namespace.update -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
-  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=617a3ee3-a2ff-4311-9a7c-0016ccf958bd -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
+  govc namespace.update -library vmsvc test-namespace
+  govc namespace.update -library vmsvc -library tkgs -storage wcp-policy test-namespace
+  govc namespace.update -vmclass best-effort-2xlarge test-namespace
+  govc namespace.update -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace
+  govc namespace.update -library vmsvc -library tkgs -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace
 
 Options:
   -library=[]            Content library IDs to associate with the vSphere Namespace.
-  -vm-class=[]           Virtual machine class IDs to associate with the vSphere Namespace.
+  -storage=[]            Storage profile IDs to associate with the vSphere Namespace.
+  -vmclass=[]            Virtual machine class IDs to associate with the vSphere Namespace.
 ```
 
 ## namespace.vmclass.create
@@ -6318,6 +6320,7 @@ Options:
   -net.protocol=         Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -on=true               Power on VM
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
+  -profile=              Storage profile name or ID
   -version=              ESXi hardware version [2|3|4|5.0|5.1|5.5|6.0|6.5|6.7|6.7.2|7.0|7.0.1|7.0.2|8.0|8.0.1|8.0.2]
 ```
 

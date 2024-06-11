@@ -117,14 +117,15 @@ load test_helper
 @test "namespace.create" {
     vcsim_env
 
-    run govc namespace.create -supervisor=domain-c1 test-namespace-1
+    run govc namespace.create -cluster DC0_C0 test-namespace-1
     assert_success
 
     ns=$(govc namespace.info -json test-namespace-1 | jq)
-    assert_equal "domain-c1" $(echo $ns | jq -r '."cluster"')
+    id=$(govc find -i -maxdepth 0 /DC0/host/DC0_C0 | cut -d: -f2)
+    assert_equal "$id" $(echo $ns | jq -r '."cluster"')
     assert_equal "0" $(echo $ns | jq -r '."vm_service_spec"."content_libraries"' | jq length)
 
-    run govc namespace.create -supervisor=domain-c1 -library=lib1 -library=lib2 test-namespace-2
+    run govc namespace.create -cluster DC0_C0 -library=lib1 -library=lib2 test-namespace-2
     assert_success
 
     ns=$(govc namespace.info -json test-namespace-2 | jq)
@@ -134,9 +135,9 @@ load test_helper
 @test "namespace.update" {
     vcsim_env
 
-    govc namespace.create -supervisor=domain-c1 test-namespace-1
+    govc namespace.create -cluster DC0_C0 test-namespace-1
 
-    run govc namespace.update -library=lib1 -library=lib2 -vm-class=class1 test-namespace-1
+    run govc namespace.update -library=lib1 -library=lib2 -vmclass=class1 test-namespace-1
     assert_success
 
     ns=$(govc namespace.info -json test-namespace-1 | jq)
@@ -154,7 +155,7 @@ load test_helper
     assert_equal "lib3" $(echo $ns | jq -r '."vm_service_spec"."content_libraries"[0]')
     assert_equal "0" $(echo $ns | jq -r '."vm_service_spec"."vm_classes"' | jq length)
 
-    run govc namespace.update -vm-class=class3 test-namespace-1
+    run govc namespace.update -vmclass=class3 test-namespace-1
     assert_success
 
     ns=$(govc namespace.info -json test-namespace-1 | jq)
@@ -162,7 +163,7 @@ load test_helper
     assert_equal "1" $(echo $ns | jq -r '."vm_service_spec"."vm_classes"' | jq length)
     assert_equal "class3" $(echo $ns | jq -r '."vm_service_spec"."vm_classes"[0]')
 
-    run govc namespace.update -library=lib4 -vm-class=class4 test-namespace-1
+    run govc namespace.update -library=lib4 -vmclass=class4 test-namespace-1
     assert_success
 
     ns=$(govc namespace.info -json test-namespace-1 | jq)
@@ -171,7 +172,7 @@ load test_helper
     assert_equal "1" $(echo $ns | jq -r '."vm_service_spec"."vm_classes"' | jq length)
     assert_equal "class4" $(echo $ns | jq -r '."vm_service_spec"."vm_classes"[0]')
 
-    run govc namespace.update -library=lib1 -library=lib2 -vm-class=class1 non-existing-namespace
+    run govc namespace.update -library=lib1 -library=lib2 -vmclass=class1 non-existing-namespace
     assert_failure
     assert_matches "404 Not Found"
 }
@@ -179,10 +180,11 @@ load test_helper
 @test "namespace.info" {
     vcsim_env
 
-    govc namespace.create -supervisor=domain-c1 test-namespace-1
+    govc namespace.create -cluster DC0_C0 test-namespace-1
 
     ns=$(govc namespace.info -json test-namespace-1 | jq)
-    assert_equal "domain-c1" $(echo $ns | jq -r '."cluster"')
+    id=$(govc find -i -maxdepth 0 /DC0/host/DC0_C0 | cut -d: -f2)
+    assert_equal "$id" $(echo $ns | jq -r '."cluster"')
 
     run govc namespace.info test-namespace-1
     assert_success
@@ -201,7 +203,7 @@ load test_helper
     ls=$(govc namespace.ls -json)
     assert_equal "0" $(echo $ls | jq length)
 
-    govc namespace.create -supervisor=domain-c1 test-namespace-1
+    govc namespace.create -cluster DC0_C0 test-namespace-1
     ls=$(govc namespace.ls -json)
     assert_equal "1" $(echo $ls | jq length)
     assert_equal "test-namespace-1" $(echo $ls | jq -r '.[0]."namespace"')
@@ -209,12 +211,13 @@ load test_helper
     run govc namespace.ls
     assert_success test-namespace-1
 
-    govc namespace.create -supervisor=domain-c1 test-namespace-2
+    govc namespace.create -cluster DC0_C0 test-namespace-2
     ls=$(govc namespace.ls -json)
     assert_equal "2" $(echo $ls | jq length)
-    assert_equal "domain-c1" $(echo $ls | jq -r '.[0]."cluster"')
+    id=$(govc find -i -maxdepth 0 /DC0/host/DC0_C0 | cut -d: -f2)
+    assert_equal "$id" $(echo $ls | jq -r '.[0]."cluster"')
     assert_matches "test-namespace-[0-9]+" $(echo $ls | jq -r '.[0]."namespace"')
-    assert_equal "domain-c1" $(echo $ls | jq -r '.[1]."cluster"')
+    assert_equal "$id" $(echo $ls | jq -r '.[1]."cluster"')
     assert_matches "test-namespace-[0-9]+" $(echo $ls | jq -r '.[1]."namespace"')
 }
 
@@ -225,7 +228,8 @@ load test_helper
     assert_failure
     assert_matches "404 Not Found"
 
-    govc namespace.create -supervisor=domain-c1 test-namespace-1
+    run govc namespace.create -cluster DC0_C0 test-namespace-1
+    assert_success
 
     run govc namespace.rm test-namespace-1
     assert_success

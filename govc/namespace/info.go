@@ -24,20 +24,72 @@ import (
 	"strings"
 	"text/tabwriter"
 
+	"github.com/vmware/govmomi/find"
+	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vapi/namespace"
+	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
 )
 
-type infoResult namespace.NamespacesInstanceInfo
+type infoResult struct {
+	namespace.NamespacesInstanceInfo
+
+	ctx context.Context
+	cmd *info
+}
 
 func (r infoResult) Write(w io.Writer) error {
+	c, err := r.cmd.Client()
+	if err != nil {
+		return err
+	}
+
+	rc, err := r.cmd.RestClient()
+	if err != nil {
+		return err
+	}
+	l := library.NewManager(rc)
+
+	pc, err := r.cmd.PbmClient()
+	if err != nil {
+		return err
+	}
+
+	var ids []string
+	for _, s := range r.StorageSpecs {
+		ids = append(ids, s.Policy)
+	}
+	m, err := pc.ProfileMap(r.ctx, ids...)
+	if err != nil {
+		return err
+	}
+
 	tw := tabwriter.NewWriter(w, 2, 0, 2, ' ', 0)
-	fmt.Fprintf(tw, "Cluster:\t%s\n", r.ClusterId)
+
+	cluster := types.ManagedObjectReference{Type: "ClusterComputeResource", Value: r.ClusterId}
+	path, err := find.InventoryPath(r.ctx, c, cluster)
+	if err != nil {
+		return err
+	}
+
+	fmt.Fprintf(tw, "Cluster:\t%s\n", path)
 	fmt.Fprintf(tw, "Status:\t%s\n", r.ConfigStatus)
 	fmt.Fprintf(tw, "VM Classes:\t%s\n", strings.Join(r.VmServiceSpec.VmClasses, ","))
-	fmt.Fprintf(tw, "VM Libraries:\t%s\n", strings.Join(r.VmServiceSpec.ContentLibraries, ","))
+
+	for _, s := range r.VmServiceSpec.ContentLibraries {
+		info, err := l.GetLibraryByID(r.ctx, s)
+		if err != nil {
+			return err
+		}
+		fmt.Fprintf(tw, "Content Library:\t%s\n", info.Name)
+	}
+
+	for _, s := range r.StorageSpecs {
+		fmt.Fprintf(tw, "Storage Policy:\t%s\n", m.Name[s.Policy].GetPbmProfile().Name)
+	}
+
 	return tw.Flush()
 }
 
@@ -97,5 +149,5 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	return cmd.WriteResult(infoResult(d))
+	return cmd.WriteResult(&infoResult{d, ctx, cmd})
 }
