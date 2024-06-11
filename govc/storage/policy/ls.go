@@ -74,33 +74,17 @@ Examples:
 }
 
 func ListProfiles(ctx context.Context, c *pbm.Client, name string) ([]types.BasePbmProfile, error) {
-	rtype := types.PbmProfileResourceType{
-		ResourceType: string(types.PbmProfileResourceTypeEnumSTORAGE),
-	}
-
-	category := types.PbmProfileCategoryEnumREQUIREMENT
-
-	ids, err := c.QueryProfile(ctx, rtype, string(category))
+	m, err := c.ProfileMap(ctx)
 	if err != nil {
 		return nil, err
 	}
-
-	profiles, err := c.RetrieveContent(ctx, ids)
-	if err != nil {
-		return nil, err
-	}
-
 	if name == "" {
-		return profiles, nil
+		return m.Profile, nil
 	}
-
-	for _, p := range profiles {
-		if p.GetPbmProfile().Name == name {
-			return []types.BasePbmProfile{p}, nil
-		}
+	if p, ok := m.Name[name]; ok {
+		return []types.BasePbmProfile{p}, nil
 	}
-
-	return c.RetrieveContent(ctx, []types.PbmProfileId{{UniqueId: name}})
+	return nil, fmt.Errorf("profile %q not found", name)
 }
 
 type lsResult struct {
