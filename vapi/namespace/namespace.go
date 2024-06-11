@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2020-2022 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -680,6 +680,7 @@ type NamespacesInstanceInfo struct {
 	SelfServiceNamespace bool                    `json:"self_service_namespace,omitempty"`
 	Messages             []LocalizableMessage    `json:"message"`
 	VmServiceSpec        VmServiceSpec           `json:"vm_service_spec,omitempty"`
+	StorageSpecs         []StorageSpec           `json:"storage_specs,omitempty"`
 }
 
 // NamespacesInstanceCreateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/CreateSpec/
@@ -687,6 +688,7 @@ type NamespacesInstanceCreateSpec struct {
 	Cluster       string        `json:"cluster"`
 	Namespace     string        `json:"namespace"`
 	VmServiceSpec VmServiceSpec `json:"vm_service_spec,omitempty"`
+	StorageSpecs  []StorageSpec `json:"storage_specs,omitempty"`
 }
 
 // VmServiceSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/VMServiceSpec/
@@ -695,9 +697,16 @@ type VmServiceSpec struct {
 	VmClasses        []string `json:"vm_classes,omitempty"`
 }
 
+// StorageSpec https://developer.broadcom.com/apis/vsphere-automation-api/v7.0U3/vcenter/data-structures/Namespaces_Instances_StorageSpec/
+type StorageSpec struct {
+	Policy string `json:"policy"`
+	Limit  int64  `json:"limit,omitempty"`
+}
+
 // NamespacesInstanceUpdateSpec https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/Namespaces/Instances/UpdateSpec/
 type NamespacesInstanceUpdateSpec struct {
 	VmServiceSpec VmServiceSpec `json:"vm_service_spec,omitempty"`
+	StorageSpecs  []StorageSpec `json:"storage_specs,omitempty"`
 }
 
 // ListNamespaces https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespaces/instances/get/
