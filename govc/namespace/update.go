@@ -21,16 +21,13 @@ import (
 	"flag"
 
 	"github.com/vmware/govmomi/govc/cli"
-	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/vapi/namespace"
 )
 
 type update struct {
-	*flags.ClientFlag
+	*namespaceFlag
 
-	libraries flags.StringList
-	vmClasses flags.StringList
-	spec      namespace.NamespacesInstanceUpdateSpec
+	spec namespace.NamespacesInstanceUpdateSpec
 }
 
 func init() {
@@ -38,18 +35,19 @@ func init() {
 }
 
 func (cmd *update) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
-	cmd.ClientFlag.Register(ctx, f)
-
-	f.Var(&cmd.libraries, "library", "Content library IDs to associate with the vSphere Namespace.")
-	f.Var(&cmd.vmClasses, "vm-class", "Virtual machine class IDs to associate with the vSphere Namespace.")
+	cmd.namespaceFlag = &namespaceFlag{}
+	cmd.namespaceFlag.Register(ctx, f)
 }
 
 func (cmd *update) Process(ctx context.Context) error {
-	cmd.spec.VmServiceSpec.ContentLibraries = cmd.libraries
-	cmd.spec.VmServiceSpec.VmClasses = cmd.vmClasses
+	if err := cmd.namespaceFlag.Process(ctx); err != nil {
+		return err
+	}
 
-	return cmd.ClientFlag.Process(ctx)
+	cmd.spec.StorageSpecs = cmd.storageSpec()
+	cmd.spec.VmServiceSpec = cmd.vmServiceSpec()
+
+	return nil
 }
 
 func (cmd *update) Usage() string {
@@ -60,11 +58,11 @@ func (cmd *update) Description() string {
 	return `Modifies an existing vSphere Namespace on a Supervisor.
 
 Examples:
-  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 test-namespace
-  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=617a3ee3-a2ff-4311-9a7c-0016ccf958bd test-namespace
-  govc namespace.update -vm-class=best-effort-2xlarge test-namespace
-  govc namespace.update -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace
-  govc namespace.update -library=dca9cc16-9460-4da0-802c-4aa148ac6cf7 -library=617a3ee3-a2ff-4311-9a7c-0016ccf958bd -vm-class=best-effort-2xlarge -vm-class=best-effort-4xlarge test-namespace`
+  govc namespace.update -library vmsvc test-namespace
+  govc namespace.update -library vmsvc -library tkgs -storage wcp-policy test-namespace
+  govc namespace.update -vmclass best-effort-2xlarge test-namespace
+  govc namespace.update -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace
+  govc namespace.update -library vmsvc -library tkgs -vmclass best-effort-2xlarge -vmclass best-effort-4xlarge test-namespace`
 }
 
 func (cmd *update) Run(ctx context.Context, f *flag.FlagSet) error {

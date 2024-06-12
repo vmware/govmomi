@@ -29,7 +29,6 @@ import (
 	"github.com/vmware/govmomi/govc/flags"
 	"github.com/vmware/govmomi/pbm/types"
 	"github.com/vmware/govmomi/property"
-	"github.com/vmware/govmomi/view"
 	vim "github.com/vmware/govmomi/vim25/types"
 )
 
@@ -120,36 +119,16 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
+	pc := property.DefaultCollector(vc)
+
 	profiles, err := ListProfiles(ctx, c, f.Arg(0))
 	if err != nil {
 		return err
 	}
 
-	pc := property.DefaultCollector(vc)
-	kind := []string{"Datastore"}
-	m := view.NewManager(vc)
-
-	v, err := m.CreateContainerView(ctx, vc.ServiceContent.RootFolder, kind, true)
+	ds, err := c.DatastoreMap(ctx, vc, vc.ServiceContent.RootFolder)
 	if err != nil {
 		return err
-	}
-
-	var content []vim.ObjectContent
-	err = v.Retrieve(ctx, kind, []string{"name"}, &content)
-	_ = v.Destroy(ctx)
-	if err != nil {
-		return err
-	}
-
-	dsmap := make(map[string]string)
-	var hubs []types.PbmPlacementHub
-
-	for _, ds := range content {
-		hubs = append(hubs, types.PbmPlacementHub{
-			HubType: ds.Obj.Type,
-			HubId:   ds.Obj.Value,
-		})
-		dsmap[ds.Obj.Value] = ds.PropSet[0].Val.(string)
 	}
 
 	var policies []Policy
@@ -183,6 +162,7 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 				}
 			}
 
+			var content []vim.ObjectContent
 			err = pc.Retrieve(ctx, refs, []string{"name"}, &content)
 			if err != nil {
 				return err
@@ -200,13 +180,13 @@ func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 				},
 			}
 
-			res, err := c.CheckRequirements(ctx, hubs, nil, req)
+			res, err := c.CheckRequirements(ctx, ds.PlacementHub, nil, req)
 			if err != nil {
 				return err
 			}
 
 			for _, hub := range res.CompatibleDatastores() {
-				policy.CompatibleDatastores = append(policy.CompatibleDatastores, dsmap[hub.HubId])
+				policy.CompatibleDatastores = append(policy.CompatibleDatastores, ds.Name[hub.HubId])
 			}
 		}
 
