@@ -26,3 +26,28 @@ load test_helper
     run govc storage.policy.info "vSAN Default Storage Policy"
     assert_success
 }
+
+@test "storage.policy.create" {
+  vcsim_env
+
+  run govc storage.policy.create MyStoragePolicy
+  assert_failure # at least one of -z or -tag required
+
+  run govc storage.policy.create -category my_cat -tag my_tag MyStoragePolicy
+  assert_success
+
+  run govc storage.policy.info MyStoragePolicy
+  assert_success
+
+  govc storage.policy.create -z MyZonalPolicy
+  assert_success
+
+  run govc storage.policy.info MyZonalPolicy
+  assert_success
+
+  run govc storage.policy.create -category my_cat -tag my_tag -z MyCombinedPolicy
+  assert_success
+
+  run govc storage.policy.info MyCombinedPolicy
+  assert_success
+}
