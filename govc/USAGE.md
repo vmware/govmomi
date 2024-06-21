@@ -5478,11 +5478,13 @@ Create VM Storage Policy.
 
 Examples:
   govc storage.policy.create -category my_cat -tag my_tag MyStoragePolicy # Tag based placement
+  govc storage.policy.create -z MyZonalPolicy # Zonal topology
 
 Options:
   -category=             Category
   -d=                    Description
   -tag=                  Tag
+  -z=false               Enable Zonal topology for multi-zone Supervisor
 ```
 
 ## storage.policy.info
