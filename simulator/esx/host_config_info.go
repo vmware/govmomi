@@ -16,7 +16,10 @@ limitations under the License.
 
 package esx
 
-import "github.com/vmware/govmomi/vim25/types"
+import (
+	"github.com/vmware/govmomi/simulator/internal"
+	"github.com/vmware/govmomi/vim25/types"
+)
 
 // HostConfigInfo is the default template for the HostSystem config property.
 // Capture method:
@@ -998,7 +1001,7 @@ var HostConfigInfo = types.HostConfigInfo{
 	Ipmi:              (*types.HostIpmiInfo)(nil),
 	SslThumbprintInfo: (*types.HostSslThumbprintInfo)(nil),
 	SslThumbprintData: nil,
-	Certificate:       []uint8{0x31, 0x30},
+	Certificate:       internal.LocalhostCert,
 	PciPassthruInfo:   nil,
 	AuthenticationManagerInfo: &types.HostAuthenticationManagerInfo{
 		AuthConfig: []types.BaseHostAuthenticationStoreInfo{

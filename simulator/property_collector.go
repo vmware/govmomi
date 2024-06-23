@@ -131,6 +131,10 @@ func wrapValue(rval reflect.Value, rtype reflect.Type) interface{} {
 			pval = &types.ArrayOfByte{
 				Byte: v,
 			}
+		case types.ByteSlice:
+			pval = &types.ArrayOfByte{
+				Byte: v,
+			}
 		case []int16:
 			pval = &types.ArrayOfShort{
 				Short: v,

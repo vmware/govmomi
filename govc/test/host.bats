@@ -159,6 +159,17 @@ load test_helper
 
     run govc host.storage.info -t hba
     assert_success
+
+    names=$(govc host.storage.info -json | jq -r .storageDeviceInfo.scsiLun[].alternateName[].data)
+    # given data is hex encoded []byte and:
+    #   [0] == encoding
+    #   [1] == type
+    #   [2] == ?
+    #   [3] == length
+    # validate name is at least 2 char x 4
+    for name in $names; do
+      [ "${#name}" -ge 8 ]
+    done
 }
 
 @test "host.options" {

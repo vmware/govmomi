@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -2431,7 +2431,7 @@ func init() {
 
 // A boxed array of `PrimitiveByte`. To be used in `Any` placeholders.
 type ArrayOfByte struct {
-	Byte []byte `xml:"byte,omitempty" json:"_value"`
+	Byte ByteSlice `xml:"byte,omitempty" json:"_value"`
 }
 
 func init() {
@@ -18385,7 +18385,7 @@ type CustomizationSpec struct {
 	// Both the client and the server can use this to determine if
 	// stored passwords can be decrypted by the server or if the passwords need to be
 	// re-entered and re-encrypted before the specification can be used.
-	EncryptionKey []byte `xml:"encryptionKey,omitempty" json:"encryptionKey,omitempty"`
+	EncryptionKey ByteSlice `xml:"encryptionKey,omitempty" json:"encryptionKey,omitempty"`
 }
 
 func init() {
@@ -34873,7 +34873,7 @@ type HostConfigInfo struct {
 	// SSL Thumbprints registered on this host.
 	SslThumbprintData []HostSslThumbprintInfo `xml:"sslThumbprintData,omitempty" json:"sslThumbprintData,omitempty"`
 	// Full Host Certificate in PEM format, if known
-	Certificate []byte `xml:"certificate,omitempty" json:"certificate,omitempty"`
+	Certificate ByteSlice `xml:"certificate,omitempty" json:"certificate,omitempty"`
 	// PCI passthrough information.
 	PciPassthruInfo []BaseHostPciPassthruInfo `xml:"pciPassthruInfo,omitempty,typeattr" json:"pciPassthruInfo,omitempty"`
 	// Current authentication configuration.
@@ -36351,7 +36351,7 @@ type HostDigestInfo struct {
 	DigestMethod string `xml:"digestMethod" json:"digestMethod"`
 	// The variable length byte array containing the digest value calculated by
 	// the specified digestMethod.
-	DigestValue []byte `xml:"digestValue" json:"digestValue"`
+	DigestValue ByteSlice `xml:"digestValue" json:"digestValue"`
 	// The name of the object from which this digest value is calcaulated.
 	ObjectName string `xml:"objectName,omitempty" json:"objectName,omitempty"`
 }
@@ -44877,7 +44877,7 @@ type HostSubSpecification struct {
 	// Time at which the host sub specification was created.
 	CreatedTime time.Time `xml:"createdTime" json:"createdTime"`
 	// The host sub specification data
-	Data []byte `xml:"data,omitempty" json:"data,omitempty"`
+	Data ByteSlice `xml:"data,omitempty" json:"data,omitempty"`
 	// The host sub specification data in Binary for wire efficiency.
 	BinaryData []byte `xml:"binaryData,omitempty" json:"binaryData,omitempty"`
 }
@@ -45374,7 +45374,7 @@ type HostTpmEventDetails struct {
 	DynamicData
 
 	// Value of the Platform Configuration Register (PCR) for this event.
-	DataHash []byte `xml:"dataHash" json:"dataHash"`
+	DataHash ByteSlice `xml:"dataHash" json:"dataHash"`
 	// Method in which the digest hash is calculated.
 	//
 	// The set of possible
@@ -45434,7 +45434,7 @@ type HostTpmOptionEventDetails struct {
 	// This array exposes the raw contents of the settings file (or files) that were
 	// passed to kernel during the boot up process, and, therefore, should be treated
 	// accordingly.
-	BootOptions []byte `xml:"bootOptions,omitempty" json:"bootOptions,omitempty"`
+	BootOptions ByteSlice `xml:"bootOptions,omitempty" json:"bootOptions,omitempty"`
 }
 
 func init() {
@@ -71958,7 +71958,7 @@ type ScsiLun struct {
 	// For a SCSI-3 compliant device this property is derived from the
 	// standard inquiry data. For devices that are not SCSI-3 compliant this
 	// property is not defined.
-	StandardInquiry []byte `xml:"standardInquiry,omitempty" json:"standardInquiry,omitempty"`
+	StandardInquiry ByteSlice `xml:"standardInquiry,omitempty" json:"standardInquiry,omitempty"`
 	// The queue depth of SCSI device.
 	QueueDepth int32 `xml:"queueDepth,omitempty" json:"queueDepth,omitempty"`
 	// The operational states of the LUN.
@@ -72078,7 +72078,7 @@ type ScsiLunDurableName struct {
 	// along with the payload for data obtained from page 83h, and is the
 	// payload for data obtained from page 80h of the Vital Product Data
 	// (VPD).
-	Data []byte `xml:"data,omitempty" json:"data,omitempty"`
+	Data ByteSlice `xml:"data,omitempty" json:"data,omitempty"`
 }
 
 func init() {
