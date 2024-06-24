@@ -100,6 +100,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 		{&hs.ConfigManager.AdvancedOption, NewOptionManager(nil, nil, &hs.Config.Option)},
 		{&hs.ConfigManager.FirewallSystem, NewHostFirewallSystem(&hs.HostSystem)},
 		{&hs.ConfigManager.StorageSystem, NewHostStorageSystem(&hs.HostSystem)},
+		{&hs.ConfigManager.CertificateManager, NewHostCertificateManager(&hs.HostSystem)},
 	}
 
 	for _, c := range config {

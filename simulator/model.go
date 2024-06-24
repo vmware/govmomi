@@ -250,6 +250,7 @@ var kinds = map[string]reflect.Type{
 	"HostDatastoreBrowser":            reflect.TypeOf((*HostDatastoreBrowser)(nil)).Elem(),
 	"HostLocalAccountManager":         reflect.TypeOf((*HostLocalAccountManager)(nil)).Elem(),
 	"HostNetworkSystem":               reflect.TypeOf((*HostNetworkSystem)(nil)).Elem(),
+	"HostCertificateManager":          reflect.TypeOf((*HostCertificateManager)(nil)).Elem(),
 	"HostSystem":                      reflect.TypeOf((*HostSystem)(nil)).Elem(),
 	"IpPoolManager":                   reflect.TypeOf((*IpPoolManager)(nil)).Elem(),
 	"LicenseManager":                  reflect.TypeOf((*LicenseManager)(nil)).Elem(),

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -263,6 +263,7 @@ func updateHostTemplate(ip string) error {
 	if err != nil {
 		return err
 	}
+	esx.HostSystem.Summary.ManagementServerIp = addr
 	if port != "0" { // server starts after the model is created, skipping auto-selected ports for now
 		n, err := strconv.Atoi(port)
 		if err != nil {

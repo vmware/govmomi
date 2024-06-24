@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -23,6 +23,7 @@ import (
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -117,7 +118,13 @@ func (m HostCertificateManager) InstallServerCertificate(ctx context.Context, ce
 		Req: &types.Refresh{This: m.Reference()},
 	}
 
-	return m.Client().RoundTrip(ctx, &body, &body)
+	err = m.Client().RoundTrip(ctx, &body, &body)
+	if err != nil && soap.IsSoapFault(err) {
+		if _, ok := soap.ToSoapFault(err).VimFault().(types.MethodNotFound); ok {
+			return nil
+		}
+	}
+	return err
 }
 
 // ListCACertificateRevocationLists returns the SSL CRLs of Certificate Authorities that are trusted by the host system.
