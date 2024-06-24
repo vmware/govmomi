@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2014-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2014-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -67,6 +67,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/host/portgroup"
 	_ "github.com/vmware/govmomi/govc/host/service"
 	_ "github.com/vmware/govmomi/govc/host/storage"
+	_ "github.com/vmware/govmomi/govc/host/tpm"
 	_ "github.com/vmware/govmomi/govc/host/vnic"
 	_ "github.com/vmware/govmomi/govc/host/vswitch"
 	_ "github.com/vmware/govmomi/govc/importx"

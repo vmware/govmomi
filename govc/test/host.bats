@@ -289,3 +289,13 @@ load test_helper
   status=$(govc host.info| grep -i "State"| awk '{print $2}')
   assert_equal 'connected' $status
 }
+
+@test "host.tpm" {
+  vcsim_env
+
+  run govc host.tpm.info
+  assert_success
+
+  run govc host.tpm.report
+  assert_success
+}

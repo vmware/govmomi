@@ -147,11 +147,20 @@ func saveHostNetworkSystem(ctx context.Context, c *vim25.Client, ref types.Manag
 	return []saveMethod{{"QueryNetworkHint", res}}, nil
 }
 
+func saveHostSystem(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
+	res, err := methods.QueryTpmAttestationReport(ctx, c, &types.QueryTpmAttestationReport{This: ref})
+	if err != nil {
+		return nil, err
+	}
+	return []saveMethod{{"QueryTpmAttestationReport", res}}, nil
+}
+
 // saveObjects maps object types to functions that can save data that isn't available via the PropertyCollector
 var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedObjectReference) ([]saveMethod, error){
 	"VmwareDistributedVirtualSwitch": saveDVS,
 	"EnvironmentBrowser":             saveEnvironmentBrowser,
 	"HostNetworkSystem":              saveHostNetworkSystem,
+	"HostSystem":                     saveHostSystem,
 }
 
 func isNotConnected(err error) bool {

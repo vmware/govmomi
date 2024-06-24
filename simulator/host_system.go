@@ -42,6 +42,8 @@ type HostSystem struct {
 	mo.HostSystem
 
 	sh *simHost
+
+	types.QueryTpmAttestationReportResponse
 }
 
 func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
@@ -586,5 +588,11 @@ func (h *HostSystem) ReconnectHostTask(ctx *Context, spec *types.ReconnectHost_T
 		Res: &types.ReconnectHost_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
+	}
+}
+
+func (s *HostSystem) QueryTpmAttestationReport(req *types.QueryTpmAttestationReport) soap.HasFault {
+	return &methods.QueryTpmAttestationReportBody{
+		Res: &s.QueryTpmAttestationReportResponse,
 	}
 }
