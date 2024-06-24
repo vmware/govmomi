@@ -159,6 +159,17 @@ load test_helper
 
     run govc host.storage.info -t hba
     assert_success
+
+    names=$(govc host.storage.info -json | jq -r .storageDeviceInfo.scsiLun[].alternateName[].data)
+    # given data is hex encoded []byte and:
+    #   [0] == encoding
+    #   [1] == type
+    #   [2] == ?
+    #   [3] == length
+    # validate name is at least 2 char x 4
+    for name in $names; do
+      [ "${#name}" -ge 8 ]
+    done
 }
 
 @test "host.options" {
@@ -191,7 +202,7 @@ load test_helper
 }
 
 @test "host.cert.info" {
-  esx_env
+  vcsim_env -esx
 
   run govc host.cert.info
   assert_success
@@ -202,10 +213,16 @@ load test_helper
   expires=$(govc host.cert.info -json | jq -r .notAfter)
   about_expires=$(govc about.cert -json | jq -r .notAfter)
   assert_equal "$expires" "$about_expires"
+
+  run govc host.cert.info -show
+  assert_success
+
+  run openssl x509 -text <<<"$output"
+  assert_success
 }
 
 @test "host.cert.csr" {
-  esx_env
+  vcsim_env -esx
 
   #   Requested Extensions:
   #       X509v3 Subject Alternative Name:
@@ -223,15 +240,9 @@ load test_helper
 }
 
 @test "host.cert.import" {
-  esx_env
+  vcsim_env -esx
 
-  issuer=$(govc host.cert.info -json | jq -r .issuer)
   expires=$(govc host.cert.info -json | jq -r .notAfter)
-
-  # only mess with the cert if its already been signed by our test CA
-  if [[ "$issuer" != CN=govc-ca,* ]] ; then
-    skip "host cert not signed by govc-ca"
-  fi
 
   govc host.cert.csr -ip | ./host_cert_sign.sh | govc host.cert.import
   expires2=$(govc host.cert.info -json | jq -r .notAfter)
@@ -240,16 +251,8 @@ load test_helper
   [ "$expires" != "$expires2" ]
 
   # verify hostd is using the new cert too
-  expires=$(govc about.cert -json | jq -r .notAfter)
+  expires=$(govc host.cert.info -json | jq -r .notAfter)
   assert_equal "$expires" "$expires2"
-
-  # our cert is not trusted against the system CA list
-  status=$(govc about.cert | grep Status:)
-  assert_matches ERROR "$status"
-
-  # with our CA trusted, the cert should be too
-  status=$(govc about.cert -tls-ca-certs ./govc_ca.pem | grep Status:)
-  assert_matches good "$status"
 }
 
 @test "host.date.info" {
@@ -285,4 +288,14 @@ load test_helper
   assert_success
   status=$(govc host.info| grep -i "State"| awk '{print $2}')
   assert_equal 'connected' $status
+}
+
+@test "host.tpm" {
+  vcsim_env
+
+  run govc host.tpm.info
+  assert_success
+
+  run govc host.tpm.report
+  assert_success
 }

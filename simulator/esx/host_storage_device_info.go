@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -93,15 +93,15 @@ var HostStorageDeviceInfo = types.HostStorageDeviceInfo{
 				{
 					Namespace:   "GENERIC_VPD",
 					NamespaceId: 0x5,
-					Data:        []uint8{0x2d, 0x37, 0x39},
+					Data:        []uint8{0x0, 0x0, 0x0, 0x4, 0x0, 0xb0, 0xb1, 0xb2},
 				},
 				{
 					Namespace:   "GENERIC_VPD",
 					NamespaceId: 0x5,
-					Data:        []uint8{0x30},
+					Data:        []uint8{0x0, 0xb2, 0x0, 0x4, 0x1, 0x60, 0x0, 0x0},
 				},
 			},
-			StandardInquiry:  []uint8{0x30},
+			StandardInquiry:  []uint8{0x0, 0x0, 0x6, 0x2, 0x1f, 0x0, 0x0, 0x72},
 			QueueDepth:       0,
 			OperationalState: []string{"ok"},
 			Capabilities:     &types.ScsiLunCapabilities{},
@@ -143,15 +143,15 @@ var HostStorageDeviceInfo = types.HostStorageDeviceInfo{
 					{
 						Namespace:   "GENERIC_VPD",
 						NamespaceId: 0x5,
-						Data:        []uint8{0x2d, 0x37, 0x39},
+						Data:        []uint8{0x0, 0x0, 0x0, 0x4, 0x0, 0xb0, 0xb1, 0xb2},
 					},
 					{
 						Namespace:   "GENERIC_VPD",
 						NamespaceId: 0x5,
-						Data:        []uint8{0x30},
+						Data:        []uint8{0x0, 0xb2, 0x0, 0x4, 0x1, 0x60, 0x0, 0x0},
 					},
 				},
-				StandardInquiry:  []uint8{0x30},
+				StandardInquiry:  []uint8{0x0, 0x0, 0x6, 0x2, 0x1f, 0x0, 0x0, 0x72},
 				QueueDepth:       1024,
 				OperationalState: []string{"ok"},
 				Capabilities:     &types.ScsiLunCapabilities{},

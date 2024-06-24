@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -147,11 +147,20 @@ func saveHostNetworkSystem(ctx context.Context, c *vim25.Client, ref types.Manag
 	return []saveMethod{{"QueryNetworkHint", res}}, nil
 }
 
+func saveHostSystem(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
+	res, err := methods.QueryTpmAttestationReport(ctx, c, &types.QueryTpmAttestationReport{This: ref})
+	if err != nil {
+		return nil, err
+	}
+	return []saveMethod{{"QueryTpmAttestationReport", res}}, nil
+}
+
 // saveObjects maps object types to functions that can save data that isn't available via the PropertyCollector
 var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedObjectReference) ([]saveMethod, error){
 	"VmwareDistributedVirtualSwitch": saveDVS,
 	"EnvironmentBrowser":             saveEnvironmentBrowser,
 	"HostNetworkSystem":              saveHostNetworkSystem,
+	"HostSystem":                     saveHostSystem,
 }
 
 func isNotConnected(err error) bool {
@@ -191,7 +200,7 @@ func (cmd *save) save(content []types.ObjectContent) error {
 				return err
 			}
 			dir := filepath.Join(cmd.dir, ref)
-			if err = os.Mkdir(dir, 0755); err != nil {
+			if err = os.MkdirAll(dir, 0755); err != nil {
 				return err
 			}
 			for _, obj := range objs {
@@ -328,6 +337,9 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 							Name: "hostVirtualNicManagerTraversalSpec",
 						},
 						&types.SelectionSpec{
+							Name: "hostCertificateManagerTraversalSpec",
+						},
+						&types.SelectionSpec{
 							Name: "entityTraversalSpec",
 						},
 					},
@@ -362,6 +374,13 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 				},
 				&types.TraversalSpec{
 					SelectionSpec: types.SelectionSpec{
+						Name: "hostCertificateManagerTraversalSpec",
+					},
+					Type: "HostSystem",
+					Path: "configManager.certificateManager",
+				},
+				&types.TraversalSpec{
+					SelectionSpec: types.SelectionSpec{
 						Name: "hostDatastoreSystemTraversalSpec",
 					},
 					Type: "HostSystem",
@@ -382,6 +401,7 @@ func (cmd *save) Run(ctx context.Context, f *flag.FlagSet) error {
 			{Type: "HostDatastoreSystem", All: all},
 			{Type: "HostNetworkSystem", All: all},
 			{Type: "HostVirtualNicManager", All: all},
+			{Type: "HostCertificateManager", All: all},
 			{Type: "ManagedEntity", All: all},
 			{Type: "Task", All: all},
 		},

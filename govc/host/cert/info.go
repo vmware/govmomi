@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,14 +19,18 @@ package cert
 import (
 	"context"
 	"flag"
+	"fmt"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
+	"github.com/vmware/govmomi/vim25/mo"
 )
 
 type info struct {
 	*flags.HostSystemFlag
 	*flags.OutputFlag
+
+	show bool
 }
 
 func init() {
@@ -39,6 +43,8 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 
 	cmd.OutputFlag, ctx = flags.NewOutputFlag(ctx)
 	cmd.OutputFlag.Register(ctx, f)
+
+	f.BoolVar(&cmd.show, "show", false, "Show PEM encoded server certificate only")
 }
 
 func (cmd *info) Description() string {
@@ -58,6 +64,16 @@ func (cmd *info) Process(ctx context.Context) error {
 func (cmd *info) Run(ctx context.Context, f *flag.FlagSet) error {
 	host, err := cmd.HostSystem()
 	if err != nil {
+		return err
+	}
+
+	if cmd.show {
+		var props mo.HostSystem
+		err = host.Properties(ctx, host.Reference(), []string{"config.certificate"}, &props)
+		if err != nil {
+			return err
+		}
+		_, err = fmt.Fprint(cmd.Out, string(props.Config.Certificate))
 		return err
 	}
 

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -1736,7 +1736,7 @@ var HostSystem = mo.HostSystem{
 		OverallStatus:      "gray",
 		RebootRequired:     false,
 		CustomValue:        nil,
-		ManagementServerIp: "",
+		ManagementServerIp: "127.0.0.1",
 		MaxEVCModeKey:      "",
 		CurrentEVCModeKey:  "",
 		Gateway:            (*types.HostListSummaryGatewaySummary)(nil),

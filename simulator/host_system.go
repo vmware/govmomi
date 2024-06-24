@@ -42,6 +42,8 @@ type HostSystem struct {
 	mo.HostSystem
 
 	sh *simHost
+
+	types.QueryTpmAttestationReportResponse
 }
 
 func asHostSystemMO(obj mo.Reference) (*mo.HostSystem, bool) {
@@ -100,6 +102,7 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 		{&hs.ConfigManager.AdvancedOption, NewOptionManager(nil, nil, &hs.Config.Option)},
 		{&hs.ConfigManager.FirewallSystem, NewHostFirewallSystem(&hs.HostSystem)},
 		{&hs.ConfigManager.StorageSystem, NewHostStorageSystem(&hs.HostSystem)},
+		{&hs.ConfigManager.CertificateManager, NewHostCertificateManager(&hs.HostSystem)},
 	}
 
 	for _, c := range config {
@@ -585,5 +588,11 @@ func (h *HostSystem) ReconnectHostTask(ctx *Context, spec *types.ReconnectHost_T
 		Res: &types.ReconnectHost_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
+	}
+}
+
+func (s *HostSystem) QueryTpmAttestationReport(req *types.QueryTpmAttestationReport) soap.HasFault {
+	return &methods.QueryTpmAttestationReportBody{
+		Res: &s.QueryTpmAttestationReportResponse,
 	}
 }

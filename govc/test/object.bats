@@ -338,6 +338,28 @@ load test_helper
   assert_success
 }
 
+@test "object.collect bytes" {
+  vcsim_env
+
+  host=$(govc find / -type h | head -1)
+
+  # ArrayOfByte with PEM encoded cert
+  govc object.collect -s "$host" config.certificate | \
+    base64 -d | openssl x509 -text
+
+  # []byte field with PEM encoded cert
+  govc object.collect -s -json "$host" config | jq -r .certificate | \
+    base64 -d | openssl x509 -text
+
+  # ArrayOfByte with DER encoded cert
+  govc object.collect -s CustomizationSpecManager:CustomizationSpecManager encryptionKey | \
+    base64 -d | openssl x509 -inform DER -text
+
+  # []byte field with DER encoded cert
+  govc object.collect -o -json CustomizationSpecManager:CustomizationSpecManager | jq -r .encryptionKey | \
+    base64 -d | openssl x509 -inform DER -text
+}
+
 @test "object.collect view" {
   vcsim_env -dc 2 -folder 1
 

@@ -18,6 +18,7 @@ package object
 
 import (
 	"context"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -111,8 +112,8 @@ Examples:
   govc object.collect -R create-filter-request.xml -O # convert filter to Go code
   govc object.collect -s vm/my-vm summary.runtime.host | xargs govc ls -L # inventory path of VM's host
   govc object.collect -dump -o "network/VM Network" # output Managed Object structure as Go code
-  govc object.collect -json $vm config | \ # use -json + jq to search array elements
-    jq -r '.[] | select(.val.hardware.device[].macAddress == "00:0c:29:0c:73:c0") | .val.name'`, atable)
+  govc object.collect -json -s $vm config | \ # use -json + jq to search array elements
+    jq -r 'select(.hardware.device[].macAddress == "00:50:56:99:c4:27") | .name'`, atable)
 }
 
 var stringer = reflect.TypeOf((*fmt.Stringer)(nil)).Elem()
@@ -123,11 +124,11 @@ type change struct {
 }
 
 func (pc *change) MarshalJSON() ([]byte, error) {
-	if len(pc.cmd.kind) == 0 {
+	if len(pc.cmd.kind) == 0 && !pc.cmd.simple {
 		return json.Marshal(pc.Update.ChangeSet)
 	}
 
-	return json.Marshal(pc.Update)
+	return json.Marshal(pc.Dump())
 }
 
 func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
@@ -153,6 +154,15 @@ func (pc *change) output(name string, rval reflect.Value, rtype reflect.Type) {
 		}
 
 		etype := rtype.Elem()
+
+		if etype.Kind() == reflect.Uint8 {
+			if v, ok := rval.Interface().(types.ByteSlice); ok {
+				s = base64.StdEncoding.EncodeToString(v) // ArrayOfByte
+			} else {
+				s = fmt.Sprintf("%x", rval.Interface().([]byte)) // ArrayOfBase64Binary
+			}
+			break
+		}
 
 		if etype.Kind() != reflect.Interface && etype.Kind() != reflect.Struct || etype.Implements(stringer) {
 			var val []string
