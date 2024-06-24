@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2021-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -112,12 +112,12 @@ func (r *infoResult) Write(w io.Writer) error {
 	for _, cluster := range r.Clusters {
 		fmt.Fprintf(tw, "Path:\t%s\n", cluster.Path)
 		fmt.Fprintf(tw, "  Enabled:\t%t\n", *cluster.Info.Enabled)
-		unmapEnabled := false
 		if unmap := cluster.Info.UnmapConfig; unmap != nil {
-			unmapEnabled = unmap.Enable
+			fmt.Fprintf(tw, "  Unmap Enabled:\t%t\n", unmap.Enable)
 		}
-
-		fmt.Fprintf(tw, "  Unmap Enabled:\t%t\n", unmapEnabled)
+		if fs := cluster.Info.FileServiceConfig; fs != nil {
+			fmt.Fprintf(tw, "  FileService Enabled:\t%t\n", fs.Enabled)
+		}
 	}
 
 	return tw.Flush()
