@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2021 VMware, Inc. All Rights Reserved.
+Copyright (c) 2021-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -30,6 +30,7 @@ type change struct {
 	*flags.DatacenterFlag
 
 	unmap *bool
+	fs    *bool
 }
 
 func init() {
@@ -41,6 +42,7 @@ func (cmd *change) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatacenterFlag.Register(ctx, f)
 
 	f.Var(flags.NewOptionalBool(&cmd.unmap), "unmap-enabled", "Enable Unmap")
+	f.Var(flags.NewOptionalBool(&cmd.fs), "file-service-enabled", "Enable FileService")
 }
 
 func (cmd *change) Usage() string {
@@ -80,10 +82,14 @@ func (cmd *change) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	var spec types.VimVsanReconfigSpec
 
+	if cmd.unmap == nil && cmd.fs == nil {
+		return flag.ErrHelp
+	}
 	if cmd.unmap != nil {
 		spec.UnmapConfig = &types.VsanUnmapConfig{Enable: *cmd.unmap}
-	} else {
-		return flag.ErrHelp
+	}
+	if cmd.fs != nil {
+		spec.FileServiceConfig = &types.VsanFileServiceConfig{Enabled: *cmd.fs}
 	}
 
 	task, err := c.VsanClusterReconfig(ctx, cluster.Reference(), spec)

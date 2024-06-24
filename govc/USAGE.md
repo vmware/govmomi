@@ -7224,7 +7224,8 @@ Examples:
   govc vsan.change -unmap-enabled=false ClusterA # disable unmap
 
 Options:
-  -unmap-enabled=<nil>   Enable Unmap
+  -file-service-enabled=<nil>  Enable FileService
+  -unmap-enabled=<nil>         Enable Unmap
 ```
 
 ## vsan.info
