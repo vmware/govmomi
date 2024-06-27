@@ -87,4 +87,5 @@ var ServiceContent = types.ServiceContent{
 	HealthUpdateManager:         &types.ManagedObjectReference{Type: "HealthUpdateManager", Value: "HealthUpdateManager"},
 	FailoverClusterConfigurator: &types.ManagedObjectReference{Type: "FailoverClusterConfigurator", Value: "FailoverClusterConfigurator"},
 	FailoverClusterManager:      &types.ManagedObjectReference{Type: "FailoverClusterManager", Value: "FailoverClusterManager"},
+	TenantManager:               &types.ManagedObjectReference{Type: "TenantTenantManager", Value: "TenantManager"},
 }

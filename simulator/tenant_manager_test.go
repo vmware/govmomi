@@ -25,8 +25,6 @@ import (
 
 	"github.com/vmware/govmomi"
 	"github.com/vmware/govmomi/object"
-	"github.com/vmware/govmomi/vim25"
-	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -43,69 +41,7 @@ func sortMoRefSlice(a []types.ManagedObjectReference) {
 	})
 }
 
-func TestTenantManagerForOldClients(t *testing.T) {
-	// ServiceContent TenantManager field is not present in older (<6.9.1) vmodl
-	// (e.g. response to RetrieveServiceConent() API or propery collector on
-	// ServiceInstance object), this field should be set only if the client is newer.
-	// Currently TenantManager is not set in vpx simulator's ServiceContent, and
-	// would be added once simulator supports client vmodl versioning properly.
-	t.Skip("needs vmodl versioning")
-
-	ctx := context.Background()
-	m := VPX()
-	defer m.Remove()
-
-	err := m.Create()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	s := m.Service.NewServer()
-	defer s.Close()
-
-	// Ensure non-nil moref being returned for ServiceContent.TenantManger for newer vim version clients.
-	newSoapClient := soap.NewClient(s.URL, true)
-	newSoapClient.Version = "6.9.1"
-	newVimClient, err := vim25.NewClient(ctx, newSoapClient)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if newVimClient.ServiceContent.TenantManager == nil {
-		t.Fatal("Expected retrieved ServiceContent.TenantManager to be non-nil")
-	}
-
-	// Ensure non-nil moref being returned for ServiceContent.TenantManger for default version used in vim25 client.
-	defaultSoapClient := soap.NewClient(s.URL, true)
-	// No version being set for soap client
-	defaultVimClient, err := vim25.NewClient(ctx, defaultSoapClient)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if defaultVimClient.ServiceContent.TenantManager == nil {
-		t.Fatal("Expected retrieved ServiceContent.TenantManager to be non-nil")
-	}
-
-	// Ensure nil being returned for ServiceContent.TenantManger for older vim version clients.
-	oldSoapClient := soap.NewClient(s.URL, true)
-	oldSoapClient.Version = "6.5"
-	oldVimClient, err := vim25.NewClient(ctx, oldSoapClient)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if oldVimClient.ServiceContent.TenantManager != nil {
-		t.Fatalf("Expected retrieved ServiceContent.TenantManager to be nil but found %v", oldVimClient.ServiceContent.TenantManager)
-	}
-
-}
-
 func TestTenantManagerVPX(t *testing.T) {
-	// ServiceContent TenantManager field is not present in older (<6.9.1) vmodl
-	// (e.g. response to RetrieveServiceConent() API or propery collector on
-	// ServiceInstance object), this field should be set only if the client is newer.
-	// Currently TenantManager is not set in vpx simulator's ServiceContent, and
-	// would be added once simulator supports client vmodl versioning properly.
-	t.Skip("needs vmodl versioning")
-
 	ctx := context.Background()
 	m := VPX()
 	defer m.Remove()
