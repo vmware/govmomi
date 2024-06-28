@@ -35,9 +35,6 @@ type typeInfo struct {
 
 	// Map property names to field indices.
 	props map[string][]int
-
-	// Use base type for interface indices.
-	base bool
 }
 
 var typeInfoLock sync.RWMutex
@@ -68,20 +65,22 @@ func typeInfoForType(tname string) *typeInfo {
 
 func baseType(ftyp reflect.Type) reflect.Type {
 	base := strings.TrimPrefix(ftyp.Name(), "Base")
+	switch base {
+	case "MethodFault":
+		return nil
+	}
 	if kind, ok := types.TypeFunc()(base); ok {
 		return kind
 	}
-	return ftyp
+	return nil
 }
 
-func newTypeInfo(typ reflect.Type, base ...bool) *typeInfo {
+func newTypeInfo(typ reflect.Type) *typeInfo {
 	t := typeInfo{
 		typ:   typ,
 		props: make(map[string][]int),
 	}
-	if len(base) == 1 {
-		t.base = base[0]
-	}
+
 	t.build(typ, "", []int{})
 
 	return &t
@@ -170,13 +169,16 @@ func (t *typeInfo) build(typ reflect.Type, fn string, fi []int) {
 			t.build(ftyp, fnc, fic)
 		}
 
+		// Base type can only access base fields, for example Datastore.Info
+		// is types.BaseDataStore, so we create a new(types.DatastoreInfo)
 		// Indexed property path may traverse into array element fields.
 		// When interface, use the base type to index fields.
 		// For example, BaseVirtualDevice:
 		//   config.hardware.device[4000].deviceInfo.label
-		if t.base && ftyp.Kind() == reflect.Interface {
-			base := baseType(ftyp)
-			t.build(base, fnc, fic)
+		if ftyp.Kind() == reflect.Interface {
+			if base := baseType(ftyp); base != nil {
+				t.build(base, fnc, fic)
+			}
 		}
 	}
 }
@@ -283,7 +285,7 @@ func assignValue(val reflect.Value, fi []int, pv reflect.Value, field ...string)
 					item = reflect.New(rt.Elem())
 				}
 
-				field := newTypeInfo(item.Type(), true)
+				field := newTypeInfo(item.Type())
 				if ix, ok := field.props[path]; ok {
 					assignValue(item, ix, pv)
 				}
