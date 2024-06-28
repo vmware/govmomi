@@ -21,10 +21,13 @@ import (
 	"fmt"
 	"net/url"
 	"path"
+	"strings"
 
 	"github.com/vmware/govmomi/object"
+	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 )
 
@@ -129,4 +132,51 @@ func (f *PathFinder) datastoreName(ctx context.Context, id string) (string, erro
 
 	f.cache[id] = name
 	return name, nil
+}
+
+// ResolveLibraryItemStorage transforms StorageURIs Datastore url (uuid) to Datastore name.
+func (f *PathFinder) ResolveLibraryItemStorage(ctx context.Context, storage []library.Storage) error {
+	// TODO:
+	// - reuse PathFinder.cache
+	// - the transform here isn't Content Library specific, but is currently the only known use case
+	backing := map[string]*mo.Datastore{}
+	var ids []types.ManagedObjectReference
+
+	// don't think we can have more than 1 Datastore backing currently, future proof anyhow
+	for _, item := range storage {
+		id := item.StorageBacking.DatastoreID
+		if _, ok := backing[id]; ok {
+			continue
+		}
+		backing[id] = nil
+		ids = append(ids, types.ManagedObjectReference{Type: "Datastore", Value: id})
+	}
+
+	var ds []mo.Datastore
+	pc := property.DefaultCollector(f.c)
+	if err := pc.Retrieve(ctx, ids, []string{"name", "info.url"}, &ds); err != nil {
+		return err
+	}
+
+	for i := range ds {
+		backing[ds[i].Self.Value] = &ds[i]
+	}
+
+	for _, item := range storage {
+		b := backing[item.StorageBacking.DatastoreID]
+		dsurl := b.Info.GetDatastoreInfo().Url
+
+		for i := range item.StorageURIs {
+			u := strings.TrimPrefix(item.StorageURIs[i], dsurl)
+			u = strings.TrimPrefix(u, "/")
+			u = strings.SplitN(u, "?", 2)[0] // strip query, if any
+
+			item.StorageURIs[i] = (&object.DatastorePath{
+				Datastore: b.Name,
+				Path:      u,
+			}).String()
+		}
+	}
+
+	return nil
 }
