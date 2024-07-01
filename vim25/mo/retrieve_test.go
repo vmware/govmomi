@@ -211,3 +211,32 @@ func TestEventReferences(t *testing.T) {
 		t.Errorf("%d refs", n)
 	}
 }
+
+func TestDatastoreInfoURL(t *testing.T) {
+	// Datastore.Info is types.BaseDatastoreInfo
+	// LoadObjectContent() should populate Info with the base type (*types.DatastoreInfo) in this case
+	content := []types.ObjectContent{
+		{
+			Obj: types.ManagedObjectReference{Type: "Datastore", Value: "datastore-48", ServerGUID: ""},
+			PropSet: []types.DynamicProperty{
+				{
+					Name: "info.url",
+					Val:  "ds:///vmfs/volumes/666d7a79-cb0d28b2-57c8-0645602e1b58/",
+				},
+			},
+			MissingSet: nil,
+		},
+	}
+
+	var ds Datastore
+
+	if err := LoadObjectContent(content, &ds); err != nil {
+		t.Fatal(err)
+	}
+
+	info := ds.Info.GetDatastoreInfo()
+
+	if info.Url != content[0].PropSet[0].Val.(string) {
+		t.Errorf("info.url=%s", info.Url)
+	}
+}
