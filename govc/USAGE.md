@@ -81,6 +81,7 @@ but appear via `govc $cmd -h`:
  - [datastore.cp](#datastorecp)
  - [datastore.create](#datastorecreate)
  - [datastore.disk.create](#datastorediskcreate)
+ - [datastore.disk.extend](#datastorediskextend)
  - [datastore.disk.inflate](#datastorediskinflate)
  - [datastore.disk.info](#datastorediskinfo)
  - [datastore.disk.shrink](#datastorediskshrink)
@@ -1220,6 +1221,23 @@ Options:
   -f=false               Force
   -size=10.0GB           Size of new disk
   -uuid=                 Disk UUID
+```
+
+## datastore.disk.extend
+
+```
+Usage: govc datastore.disk.extend [OPTIONS] VMDK
+
+Extend VMDK on DS.
+
+Examples:
+  govc datastore.disk.extend disks/disk1.vmdk -size=24G
+  govc datastore.disk.extend disks/disk1.vmdk -size=24G -eagerZero=true
+
+Options:
+  -ds=                   Datastore [GOVC_DATASTORE]
+  -eagerZero=false       If true, the extended part of the disk will be explicitly filled with zeroes
+  -size=0B               New capacity for the disk
 ```
 
 ## datastore.disk.inflate

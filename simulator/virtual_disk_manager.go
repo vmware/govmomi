@@ -19,6 +19,7 @@ package simulator
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/google/uuid"
@@ -76,7 +77,54 @@ func vdmCreateVirtualDisk(op types.VirtualDeviceConfigSpecFileOperation, req *ty
 			return fm.fault(name, err, new(types.CannotCreateFile))
 		}
 
+		if req.Spec != nil {
+			var spec interface{} = req.Spec
+			fileBackedSpec, ok := spec.(*types.FileBackedVirtualDiskSpec)
+
+			if !ok {
+				return fm.fault(name, nil, new(types.FileFault))
+			}
+
+			if _, err = f.WriteString(strconv.FormatInt(fileBackedSpec.CapacityKb, 10)); err != nil {
+				return fm.fault(name, err, new(types.FileFault))
+			}
+		}
+
 		_ = f.Close()
+	}
+
+	return nil
+}
+
+func vdmExtendVirtualDisk(req *types.ExtendVirtualDisk_Task) types.BaseMethodFault {
+	fm := Map.FileManager()
+
+	file, fault := fm.resolve(req.Datacenter, req.Name)
+	if fault != nil {
+		return fault
+	}
+
+	for _, name := range vdmNames(file) {
+		_, err := os.Stat(name)
+		if err == nil {
+			content, err := os.ReadFile(name)
+			if err != nil {
+				return fm.fault(name, err, new(types.FileFault))
+			}
+
+			capacity, err := strconv.Atoi(string(content))
+			if err != nil {
+				return fm.fault(name, err, new(types.FileFault))
+			}
+
+			if int64(capacity) > req.NewCapacityKb {
+				// cannot shrink disk
+				return fm.fault(name, nil, new(types.FileFault))
+			}
+			return nil
+		} else {
+			return fm.fault(name, nil, new(types.FileNotFound))
+		}
 	}
 
 	return nil
@@ -92,6 +140,21 @@ func (m *VirtualDiskManager) CreateVirtualDiskTask(ctx *Context, req *types.Crea
 
 	return &methods.CreateVirtualDisk_TaskBody{
 		Res: &types.CreateVirtualDisk_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (m *VirtualDiskManager) ExtendVirtualDiskTask(ctx *Context, req *types.ExtendVirtualDisk_Task) soap.HasFault {
+	task := CreateTask(m, "extendVirtualDisk", func(*Task) (types.AnyType, types.BaseMethodFault) {
+		if err := vdmExtendVirtualDisk(req); err != nil {
+			return "", err
+		}
+		return req.Name, nil
+	})
+
+	return &methods.ExtendVirtualDisk_TaskBody{
+		Res: &types.ExtendVirtualDisk_TaskResponse{
 			Returnval: task.Run(ctx),
 		},
 	}

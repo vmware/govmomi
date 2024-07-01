@@ -94,6 +94,33 @@ func (m VirtualDiskManager) CreateVirtualDisk(
 	return NewTask(m.c, res.Returnval), nil
 }
 
+// ExtendVirtualDisk extends an existing virtual disk.
+func (m VirtualDiskManager) ExtendVirtualDisk(
+	ctx context.Context,
+	name string, datacenter *Datacenter,
+	capacityKb int64,
+	eagerZero *bool) (*Task, error) {
+
+	req := types.ExtendVirtualDisk_Task{
+		This:          m.Reference(),
+		Name:          name,
+		NewCapacityKb: capacityKb,
+		EagerZero:     eagerZero,
+	}
+
+	if datacenter != nil {
+		ref := datacenter.Reference()
+		req.Datacenter = &ref
+	}
+
+	res, err := methods.ExtendVirtualDisk_Task(ctx, m.c, &req)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewTask(m.c, res.Returnval), nil
+}
+
 // MoveVirtualDisk moves a virtual disk.
 func (m VirtualDiskManager) MoveVirtualDisk(
 	ctx context.Context,
