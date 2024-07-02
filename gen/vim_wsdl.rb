@@ -262,7 +262,7 @@ class Simple
 
   def pointer_type?
     ["UnitNumber"].include?(var_name) or
-      optional? && ["IpPoolId", "OwnerId", "GroupId", "MaxWaitSeconds", "Reservation", "Limit", "OverheadLimit", "ResourceReductionToToleratePercent"].include?(var_name)
+      optional? && ["CoresPerNumaNode", "IpPoolId", "OwnerId", "GroupId", "MaxWaitSeconds", "Reservation", "Limit", "OverheadLimit", "ResourceReductionToToleratePercent"].include?(var_name)
   end
 
   def var_type

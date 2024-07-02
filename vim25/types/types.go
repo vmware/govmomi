@@ -91361,7 +91361,7 @@ type VirtualMachineVirtualNuma struct {
 	// vNUMA node.
 	// If set to be non zero, VM uses the value as vNUMA node size.
 	// If unset, the VM continue to follow the behavior in last poweron.
-	CoresPerNumaNode int32 `xml:"coresPerNumaNode,omitempty" json:"coresPerNumaNode,omitempty"`
+	CoresPerNumaNode *int32 `xml:"coresPerNumaNode" json:"coresPerNumaNode,omitempty"`
 	// Capability to expose virtual NUMA when CPU hotadd is enabled.
 	//
 	// If set to true, ESXi will consider exposing virtual NUMA to
@@ -91389,7 +91389,7 @@ type VirtualMachineVirtualNumaInfo struct {
 	// field should be ignored.
 	// In other cases, this field represents the virtual NUMA node size
 	// seen by the guest.
-	CoresPerNumaNode int32 `xml:"coresPerNumaNode,omitempty" json:"coresPerNumaNode,omitempty"`
+	CoresPerNumaNode *int32 `xml:"coresPerNumaNode" json:"coresPerNumaNode,omitempty"`
 	// Whether coresPerNode is determined automatically.
 	AutoCoresPerNumaNode *bool `xml:"autoCoresPerNumaNode" json:"autoCoresPerNumaNode,omitempty"`
 	// Whether virtual NUMA topology is exposed when CPU hotadd is
