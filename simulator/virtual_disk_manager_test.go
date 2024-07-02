@@ -86,6 +86,32 @@ func TestVirtualDiskManager(t *testing.T) {
 	}
 
 	qname := name
+	for i, fail := range []bool{false, true, true} {
+		if i == 1 {
+			spec.CapacityKb = 0
+		}
+
+		if i == 2 {
+			qname += "_missing_file"
+		}
+		task, err := dm.ExtendVirtualDisk(ctx, qname, nil, spec.CapacityKb*2, nil)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		err = task.Wait(ctx)
+		if fail {
+			if err == nil {
+				t.Error("expected error")
+			}
+		} else {
+			if err != nil {
+				t.Error(err)
+			}
+		}
+	}
+
+	qname = name
 	for _, fail := range []bool{false, true} {
 		id, err := dm.QueryVirtualDiskUuid(ctx, qname, nil)
 		if fail {
