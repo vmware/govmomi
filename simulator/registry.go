@@ -572,6 +572,16 @@ func (r *Registry) TenantManager() *TenantManager {
 	return r.Get(r.content().TenantManager.Reference()).(*TenantManager)
 }
 
+// VmCompatibilityChecker returns VmCompatibilityChecker singleton
+func (r *Registry) VmCompatibilityChecker() *VmCompatibilityChecker {
+	return r.Get(r.content().VmCompatibilityChecker.Reference()).(*VmCompatibilityChecker)
+}
+
+// VmProvisioningChecker returns VmProvisioningChecker singleton
+func (r *Registry) VmProvisioningChecker() *VmProvisioningChecker {
+	return r.Get(r.content().VmProvisioningChecker.Reference()).(*VmProvisioningChecker)
+}
+
 // ExtensionManager returns the ExtensionManager singleton
 func (r *Registry) ExtensionManager() *ExtensionManager {
 	return r.Get(r.content().ExtensionManager.Reference()).(*ExtensionManager)
