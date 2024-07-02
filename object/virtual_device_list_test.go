@@ -762,6 +762,34 @@ func TestCreateSCSIController(t *testing.T) {
 	}
 }
 
+func TestCreateSATAController(t *testing.T) {
+	for _, l := range []VirtualDeviceList{SATAControllerTypes(), devices} {
+		_, err := l.CreateSATAController()
+		if err != nil {
+			t.Error("should fail")
+		}
+
+		_, err = l.CreateSATAController()
+		if err != nil {
+			t.Error(err)
+		}
+	}
+}
+
+func TestCreateAHCIController(t *testing.T) {
+	for _, l := range []VirtualDeviceList{AHCIControllerTypes(), devices} {
+		_, err := l.CreateAHCIController()
+		if err != nil {
+			t.Error("should fail")
+		}
+
+		_, err = l.CreateAHCIController()
+		if err != nil {
+			t.Error(err)
+		}
+	}
+}
+
 func TestCreateEthernetCard(t *testing.T) {
 	_, err := EthernetCardTypes().CreateEthernetCard("enoent", nil)
 	if err == nil {
