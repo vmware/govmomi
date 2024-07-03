@@ -6869,6 +6869,10 @@ Options:
   -ds=                       Datastore [GOVC_DATASTORE]
   -folder=                   Inventory folder [GOVC_FOLDER]
   -host=                     Host system [GOVC_HOST]
+  -net=                      Network [GOVC_NETWORK]
+  -net.adapter=e1000         Network adapter type
+  -net.address=              Network hardware address
+  -net.protocol=             Network device protocol. Applicable to vmxnet3vrdma. Default to 'rocev2'
   -pool=                     Resource pool [GOVC_RESOURCE_POOL]
   -priority=defaultPriority  The task priority
   -vm=                       Virtual machine [GOVC_VM]

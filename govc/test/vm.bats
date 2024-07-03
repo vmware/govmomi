@@ -959,6 +959,15 @@ load test_helper
 
   run govc object.collect -s "vm/new-folder/$vm" parent
   assert_success
+
+  run govc vm.info -r "$vm"
+  assert_matches "Network: +DC0_DVPG0"
+
+  run govc vm.migrate -host "$host0" -net "VM Network" "$vm"
+  assert_success
+
+  run govc vm.info -r "$vm"
+  assert_matches "Network: +VM Network"
 }
 
 @test "object name with slash" {

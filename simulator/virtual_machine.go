@@ -2345,6 +2345,11 @@ func (vm *VirtualMachine) RelocateVMTask(ctx *Context, req *types.RelocateVM_Tas
 			})
 		}
 
+		cspec := &types.VirtualMachineConfigSpec{DeviceChange: req.Spec.DeviceChange}
+		if err := vm.configureDevices(ctx, cspec); err != nil {
+			return nil, err
+		}
+
 		ctx.postEvent(&types.VmMigratedEvent{
 			VmEvent:          vm.event(),
 			SourceHost:       *ctx.Map.Get(*vm.Runtime.Host).(*HostSystem).eventArgument(),
