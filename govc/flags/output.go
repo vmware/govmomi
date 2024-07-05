@@ -30,6 +30,7 @@ import (
 
 	"github.com/dougm/pretty"
 
+	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/task"
 	"github.com/vmware/govmomi/vim25/progress"
 	"github.com/vmware/govmomi/vim25/soap"
@@ -49,6 +50,7 @@ type OutputFlag struct {
 	TTY  bool
 	Dump bool
 	Out  io.Writer
+	Spec bool
 
 	formatError  bool
 	formatIndent bool
@@ -71,6 +73,9 @@ func (flag *OutputFlag) Register(ctx context.Context, f *flag.FlagSet) {
 		f.BoolVar(&flag.JSON, "json", false, "Enable JSON output")
 		f.BoolVar(&flag.XML, "xml", false, "Enable XML output")
 		f.BoolVar(&flag.Dump, "dump", false, "Enable Go output")
+		if cli.ShowUnreleased() {
+			f.BoolVar(&flag.Spec, "spec", false, "Output spec without sending request")
+		}
 		// Avoid adding more flags for now..
 		flag.formatIndent = os.Getenv("GOVC_INDENT") != "false"      // Default to indented output
 		flag.formatError = os.Getenv("GOVC_FORMAT_ERROR") != "false" // Default to formatted errors
@@ -156,6 +161,25 @@ func dumpValue(val interface{}) interface{} {
 	}
 
 	return val
+}
+
+type outputAny struct {
+	Value any
+}
+
+func (*outputAny) Write(io.Writer) error {
+	return nil
+}
+
+func (a *outputAny) Dump() interface{} {
+	return a.Value
+}
+
+func (flag *OutputFlag) WriteAny(val any) error {
+	if !flag.All() {
+		flag.XML = true
+	}
+	return flag.WriteResult(&outputAny{val})
 }
 
 func (flag *OutputFlag) WriteResult(result OutputWriter) error {

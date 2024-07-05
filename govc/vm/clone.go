@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2014-2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -243,6 +243,9 @@ func (cmd *clone) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
+	if cmd.Spec {
+		return nil
+	}
 
 	if cmd.cpus > 0 || cmd.memory > 0 || cmd.annotation != "" {
 		vmConfigSpec := types.VirtualMachineConfigSpec{}
@@ -469,6 +472,10 @@ func (cmd *clone) cloneVM(ctx context.Context) (*object.VirtualMachine, error) {
 		customSpec := customSpecItem.Spec
 		// set the customization
 		cloneSpec.Customization = &customSpec
+	}
+
+	if cmd.Spec {
+		return nil, cmd.WriteAny(cloneSpec)
 	}
 
 	task, err := cmd.VirtualMachine.Clone(ctx, cmd.Folder, cmd.name, *cloneSpec)

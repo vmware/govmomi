@@ -307,7 +307,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-	if cmd.place {
+	if cmd.place || cmd.Spec {
 		return nil
 	}
 	info, err := task.WaitForResult(ctx, nil)
@@ -490,7 +490,7 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 		return nil, fmt.Errorf("please provide either a cluster, datastore or datastore-cluster")
 	}
 
-	if !cmd.force {
+	if !cmd.force && !cmd.Spec {
 		vmxPath := fmt.Sprintf("%s/%s.vmx", cmd.name, cmd.name)
 
 		_, err := datastore.Stat(ctx, vmxPath)
@@ -504,6 +504,10 @@ func (cmd *create) createVM(ctx context.Context) (*object.Task, error) {
 
 	spec.Files = &types.VirtualMachineFileInfo{
 		VmPathName: fmt.Sprintf("[%s]", datastore.Name()),
+	}
+
+	if cmd.Spec {
+		return nil, cmd.WriteAny(spec)
 	}
 
 	return folder.CreateVM(ctx, *spec, cmd.ResourcePool, cmd.HostSystem)
