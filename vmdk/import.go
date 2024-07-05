@@ -10,7 +10,7 @@ You may obtain a copy of the License at
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-nSee the License for the specific language governing permissions and
+See the License for the specific language governing permissions and
 limitations under the License.
 */
 
@@ -41,8 +41,8 @@ var (
 	ErrInvalidFormat = errors.New("vmdk: invalid format (must be streamOptimized)")
 )
 
-// info is used to inspect a vmdk and generate an ovf template
-type info struct {
+// Info is used to inspect a vmdk and generate an ovf template
+type Info struct {
 	Header struct {
 		MagicNumber uint32
 		Version     uint32
@@ -56,15 +56,15 @@ type info struct {
 	ImportName string
 }
 
-// stat looks at the vmdk header to make sure the format is streamOptimized and
+// Stat looks at the vmdk header to make sure the format is streamOptimized and
 // extracts the disk capacity required to properly generate the ovf descriptor.
-func stat(name string) (*info, error) {
+func Stat(name string) (*Info, error) {
 	f, err := os.Open(filepath.Clean(name))
 	if err != nil {
 		return nil, err
 	}
 
-	var di info
+	var di Info
 
 	var buf bytes.Buffer
 
@@ -174,8 +174,8 @@ var ovfenv = `<?xml version="1.0" encoding="UTF-8"?>
   </VirtualSystem>
 </Envelope>`
 
-// ovf returns an expanded descriptor template
-func (di *info) ovf() (string, error) {
+// OVF returns an expanded descriptor template
+func (di *Info) OVF() (string, error) {
 	var buf bytes.Buffer
 
 	tmpl, err := template.New("ovf").Parse(ovfenv)
@@ -209,7 +209,7 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 	m := ovf.NewManager(c)
 	fm := datastore.NewFileManager(p.Datacenter, p.Force)
 
-	disk, err := stat(name)
+	disk, err := Stat(name)
 	if err != nil {
 		return err
 	}
@@ -245,7 +245,7 @@ func Import(ctx context.Context, c *vim25.Client, name string, datastore *object
 	}
 
 	// Expand the ovf template
-	descriptor, err := disk.ovf()
+	descriptor, err := disk.OVF()
 	if err != nil {
 		return err
 	}
