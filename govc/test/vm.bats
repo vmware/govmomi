@@ -1241,3 +1241,86 @@ load test_helper
   run govc vm.customize -vm DC0_H0_VM0 -ip 10.0.0.45 -netmask 255.255.0.0 -type Linux
   assert_success
 }
+
+@test "vm.check.config" {
+  vcsim_env -cluster 2
+
+  export GOVC_SHOW_UNRELEASED=true
+
+  vm=DC0_C0_RP0_VM0
+  run govc vm.create -spec -pool DC0_C0/Resources $vm
+  assert_success
+  spec="$output"
+
+  run govc vm.check.config -vm $vm <<<"$spec"
+  assert_success
+
+  # we can use any host in the VM's cluster
+  for host in $(govc find /DC0/host/DC0_C0 -type f) ; do
+    run govc vm.check.config -host "$host" <<<"$spec"
+    assert_success
+  done
+
+  run govc vm.check.config -host DC0_C1_H0 <<<"$spec"
+  assert_failure # pool and host do not belong to the same compute resource
+
+  run govc vm.check.config -pool DC0_C1/Resources <<<"$spec"
+  assert_failure # pool and host do not belong to the same compute resource
+
+  # spec.memoryMB
+  max_mem=$(govc object.collect -s DC0_C1_H0 capability.maxSupportedVmMemory)
+  run govc vm.create -spec -m "$((max_mem+100))" $vm
+  assert_success
+  spec="$output"
+
+  run govc vm.check.config -vm $vm -json <<<"$spec"
+  assert_success
+  assert_matches "outside the range"
+
+  # spec.numCPUs
+  max_cpu=$(govc object.collect -s "$host" summary.hardware.numCpuCores)
+  run govc vm.create -spec -c "$((max_cpu+100))" $vm
+  assert_success
+  spec="$output"
+
+  run govc vm.check.config -vm $vm -json <<<"$spec"
+  assert_success
+  assert_matches "vm requires 100 CPUs"
+
+  # spec.guestId
+  run govc vm.create -spec -g ttylinux -pool DC0_C0/Resources $vm
+  assert_success
+  spec="$output"
+
+  run govc vm.check.config -vm $vm -json <<<"$spec"
+  assert_success
+  assert_matches unsupported
+}
+
+@test "vm.check.compat" {
+  vcsim_env -cluster 2
+
+  export GOVC_SHOW_UNRELEASED=true
+
+  vm=DC0_C0_RP0_VM0
+
+  run govc vm.check.compat -vm $vm -pool DC0_C0/Resources
+  assert_success
+
+  run govc vm.check.compat -vm $vm -pool DC0_C1/Resources
+  assert_failure # InvalidArgument spec.pool
+}
+
+@test "vm.check.relocate" {
+  vcsim_env -cluster 2
+
+  export GOVC_SHOW_UNRELEASED=true
+
+  vm=DC0_C0_RP0_VM0
+  run govc vm.migrate -spec -pool DC0_C0/Resources $vm
+  assert_success
+  spec="$output"
+
+  run govc vm.check.relocate -vm $vm <<<"$spec"
+  assert_success
+}

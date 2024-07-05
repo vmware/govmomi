@@ -77,6 +77,10 @@ func NewHostSystem(host mo.HostSystem) *HostSystem {
 		info := *esx.HostHardwareInfo
 		hs.Hardware = &info
 	}
+	if hs.Capability == nil {
+		capability := *esx.HostCapability
+		hs.Capability = &capability
+	}
 
 	cfg := new(types.HostConfigInfo)
 	deepCopy(hs.Config, cfg)

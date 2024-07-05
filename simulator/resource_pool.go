@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2017-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2017-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -37,6 +37,17 @@ type ResourcePool struct {
 func asResourcePoolMO(obj mo.Reference) (*mo.ResourcePool, bool) {
 	rp, ok := getManagedObject(obj).Addr().Interface().(*mo.ResourcePool)
 	return rp, ok
+}
+
+func resourcePoolHosts(ctx *Context, pool *ResourcePool) []types.ManagedObjectReference {
+	switch owner := ctx.Map.Get(pool.Owner).(type) {
+	case *ClusterComputeResource:
+		return owner.Host
+	case *mo.ComputeResource:
+		return owner.Host
+	default:
+		return nil
+	}
 }
 
 func NewResourcePool() *ResourcePool {
