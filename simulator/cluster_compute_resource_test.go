@@ -18,9 +18,13 @@ package simulator
 
 import (
 	"context"
+	"path"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/vmware/govmomi"
+	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator/esx"
 	"github.com/vmware/govmomi/simulator/vpx"
@@ -83,6 +87,35 @@ func TestClusterVC(t *testing.T) {
 		t.Fatal(err)
 	}
 
+	// Enable DRS and HA for the cluster
+	clusterSpec := types.ClusterConfigSpecEx{
+		DrsConfig: &types.ClusterDrsConfigInfo{
+			Enabled:           types.NewBool(true),
+			DefaultVmBehavior: types.DrsBehaviorFullyAutomated, // Set DRS to fully automated
+		},
+		DasConfig: &types.ClusterDasConfigInfo{
+			Enabled: types.NewBool(true),
+		},
+	}
+
+	task, err := cluster.Reconfigure(ctx, &clusterSpec, true)
+	require.NoError(t, err)
+	err = task.Wait(ctx)
+	require.NoError(t, err)
+
+	// Check if DRS and HA is set
+
+	finder := find.NewFinder(c.Client, false).SetDatacenter(dc)
+	pathname := path.Join(dc.InventoryPath, "host", "cluster1")
+	clusterComputeResource, err := finder.ClusterComputeResource(ctx, pathname)
+	require.NoError(t, err)
+	clusterComputeInfo, err := clusterComputeResource.Configuration(ctx)
+	require.NoError(t, err)
+	require.NotNil(t, clusterComputeInfo.DrsConfig.Enabled)
+	require.NotNil(t, clusterComputeInfo.DasConfig.Enabled)
+	require.True(t, *clusterComputeInfo.DrsConfig.Enabled)
+	require.True(t, *clusterComputeInfo.DasConfig.Enabled)
+	require.True(t, clusterComputeInfo.DrsConfig.DefaultVmBehavior == types.DrsBehaviorFullyAutomated)
 	_, err = folders.HostFolder.CreateCluster(ctx, "cluster1", types.ClusterConfigSpecEx{})
 	if err == nil {
 		t.Error("expected DuplicateName error")
