@@ -43,7 +43,7 @@ type VirtualDiskInfo struct {
 // - VirtualDiskSparseVer2BackingInfo
 // - VirtualDiskRawDiskVer2BackingInfo
 //
-// These are the only backing types that have a Uuid property for comparing the
+// These are the only backing types that have a UUID property for comparing the
 // provided value.
 func GetVirtualDiskInfoByUUID(
 	ctx context.Context,
@@ -80,7 +80,7 @@ func GetVirtualDiskInfoByUUID(
 			&mo); err != nil {
 
 			return VirtualDiskInfo{},
-				fmt.Errorf("failed to retrieve properties %w", err)
+				fmt.Errorf("failed to retrieve properties: %w", err)
 		}
 	}
 

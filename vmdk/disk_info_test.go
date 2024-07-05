@@ -21,6 +21,7 @@ import (
 	"context"
 	"os"
 	"path"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -29,7 +30,9 @@ import (
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/simulator"
 	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/methods"
 	"github.com/vmware/govmomi/vim25/mo"
+	"github.com/vmware/govmomi/vim25/soap"
 	"github.com/vmware/govmomi/vim25/types"
 	"github.com/vmware/govmomi/vmdk"
 )
@@ -322,6 +325,10 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 	t.Run("fetch properties", func(t *testing.T) {
 		simulator.Test(func(ctx context.Context, c *vim25.Client) {
 
+			pc := &propertyCollectorWithFault{}
+			pc.Self = c.ServiceContent.PropertyCollector
+			simulator.Map.Put(pc)
+
 			finder := find.NewFinder(c, true)
 			datacenter, err := finder.DefaultDatacenter(ctx)
 			if err != nil {
@@ -414,6 +421,20 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 					err:      "client is nil",
 				},
 				{
+					name:     "failed to retrieve properties",
+					ctx:      context.Background(),
+					client:   c,
+					diskUUID: diskUUID,
+					mo: mo.VirtualMachine{
+						ManagedEntity: mo.ManagedEntity{
+							ExtensibleManagedObject: mo.ExtensibleManagedObject{
+								Self: vm.Reference(),
+							},
+						},
+					},
+					err: "failed to retrieve properties: ServerFaultCode: InvalidArgument",
+				},
+				{
 					name:            "fetchProperties is false but cached properties are missing",
 					ctx:             context.Background(),
 					client:          c,
@@ -461,6 +482,13 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 			for i := range testCases {
 				tc := testCases[i]
 				t.Run(tc.name, func(t *testing.T) {
+					if strings.HasPrefix(tc.err, "failed to retrieve properties:") {
+						propertyCollectorShouldFault = true
+						defer func() {
+							propertyCollectorShouldFault = false
+						}()
+					}
+
 					dii, err := vmdk.GetVirtualDiskInfoByUUID(
 						tc.ctx,
 						tc.client,
@@ -477,4 +505,23 @@ func TestGetVirtualDiskInfoByUUID(t *testing.T) {
 
 		})
 	})
+}
+
+var propertyCollectorShouldFault bool
+
+type propertyCollectorWithFault struct {
+	simulator.PropertyCollector
+}
+
+func (pc *propertyCollectorWithFault) RetrievePropertiesEx(
+	ctx *simulator.Context,
+	req *types.RetrievePropertiesEx) soap.HasFault {
+
+	if propertyCollectorShouldFault {
+		return &methods.RetrievePropertiesExBody{
+			Fault_: simulator.Fault("", &types.InvalidArgument{}),
+		}
+	}
+
+	return pc.PropertyCollector.RetrievePropertiesEx(ctx, req)
 }
