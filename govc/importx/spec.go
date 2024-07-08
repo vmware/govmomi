@@ -22,26 +22,17 @@ import (
 	"fmt"
 	"io"
 	"path"
-	"strings"
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/ovf"
-	"github.com/vmware/govmomi/vim25/types"
-)
-
-var (
-	allDiskProvisioningOptions = types.OvfCreateImportSpecParamsDiskProvisioningType("").Strings()
-
-	allIPAllocationPolicyOptions = types.VAppIPAssignmentInfoIpAllocationPolicy("").Strings()
-
-	allIPProtocolOptions = types.VAppIPAssignmentInfoProtocols("").Strings()
+	"github.com/vmware/govmomi/ovf/importer"
 )
 
 type spec struct {
-	*ArchiveFlag
 	*flags.ClientFlag
 	*flags.OutputFlag
+
+	Archive importer.Archive
 
 	hidden bool
 }
@@ -51,8 +42,6 @@ func init() {
 }
 
 func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
-	cmd.ArchiveFlag, ctx = newArchiveFlag(ctx)
-	cmd.ArchiveFlag.Register(ctx, f)
 	cmd.ClientFlag, ctx = flags.NewClientFlag(ctx)
 	cmd.ClientFlag.Register(ctx, f)
 
@@ -63,9 +52,6 @@ func (cmd *spec) Register(ctx context.Context, f *flag.FlagSet) {
 }
 
 func (cmd *spec) Process(ctx context.Context) error {
-	if err := cmd.ArchiveFlag.Process(ctx); err != nil {
-		return err
-	}
 	if err := cmd.ClientFlag.Process(ctx); err != nil {
 		return err
 	}
@@ -86,29 +72,29 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 	if len(fpath) > 0 {
 		switch path.Ext(fpath) {
 		case ".ovf":
-			cmd.Archive = &FileArchive{Path: fpath}
+			cmd.Archive = &importer.FileArchive{Path: fpath}
 		case "", ".ova":
-			cmd.Archive = &TapeArchive{Path: fpath}
+			cmd.Archive = &importer.TapeArchive{Path: fpath}
 			fpath = "*.ovf"
 		default:
 			return fmt.Errorf("invalid file extension %s", path.Ext(fpath))
 		}
 
-		if isRemotePath(f.Arg(0)) {
+		if importer.IsRemotePath(f.Arg(0)) {
 			client, err := cmd.Client()
 			if err != nil {
 				return err
 			}
 			switch archive := cmd.Archive.(type) {
-			case *FileArchive:
+			case *importer.FileArchive:
 				archive.Client = client
-			case *TapeArchive:
+			case *importer.TapeArchive:
 				archive.Client = client
 			}
 		}
 	}
 
-	env, err := cmd.Spec(fpath)
+	env, err := importer.Spec(fpath, cmd.Archive, cmd.hidden, cmd.Verbose())
 	if err != nil {
 		return err
 	}
@@ -120,114 +106,9 @@ func (cmd *spec) Run(ctx context.Context, f *flag.FlagSet) error {
 }
 
 type specResult struct {
-	*Options
+	*importer.Options
 }
 
 func (*specResult) Write(w io.Writer) error {
 	return nil
-}
-
-func (cmd *spec) Map(e *ovf.Envelope) (res []Property) {
-	if e == nil || e.VirtualSystem == nil {
-		return nil
-	}
-
-	for _, p := range e.VirtualSystem.Product {
-		for i, v := range p.Property {
-			if v.UserConfigurable == nil {
-				continue
-			}
-			if !*v.UserConfigurable && !cmd.hidden {
-				continue
-			}
-
-			d := ""
-			if v.Default != nil {
-				d = *v.Default
-			}
-
-			// vSphere only accept True/False as boolean values for some reason
-			if v.Type == "boolean" {
-				d = strings.Title(d)
-			}
-
-			np := Property{KeyValue: KeyValue{Key: p.Key(v), Value: d}}
-
-			if cmd.Verbose() {
-				np.Spec = &p.Property[i]
-			}
-
-			res = append(res, np)
-		}
-	}
-
-	return
-}
-
-func (cmd *spec) Spec(fpath string) (*Options, error) {
-	e := &ovf.Envelope{}
-	if fpath != "" {
-		d, err := cmd.ReadOvf(fpath)
-		if err != nil {
-			return nil, err
-		}
-
-		if e, err = cmd.ReadEnvelope(d); err != nil {
-			return nil, err
-		}
-	}
-
-	var deploymentOptions []string
-	if e.DeploymentOption != nil && e.DeploymentOption.Configuration != nil {
-		// add default first
-		for _, c := range e.DeploymentOption.Configuration {
-			if c.Default != nil && *c.Default {
-				deploymentOptions = append(deploymentOptions, c.ID)
-			}
-		}
-
-		for _, c := range e.DeploymentOption.Configuration {
-			if c.Default == nil || !*c.Default {
-				deploymentOptions = append(deploymentOptions, c.ID)
-			}
-		}
-	}
-
-	o := Options{
-		DiskProvisioning:   allDiskProvisioningOptions[0],
-		IPAllocationPolicy: allIPAllocationPolicyOptions[0],
-		IPProtocol:         allIPProtocolOptions[0],
-		MarkAsTemplate:     false,
-		PowerOn:            false,
-		WaitForIP:          false,
-		InjectOvfEnv:       false,
-		PropertyMapping:    cmd.Map(e),
-	}
-
-	if deploymentOptions != nil {
-		o.Deployment = deploymentOptions[0]
-	}
-
-	if e.VirtualSystem != nil && e.VirtualSystem.Annotation != nil {
-		for _, a := range e.VirtualSystem.Annotation {
-			o.Annotation += a.Annotation
-		}
-	}
-
-	if e.Network != nil {
-		for _, net := range e.Network.Networks {
-			o.NetworkMapping = append(o.NetworkMapping, Network{net.Name, ""})
-		}
-	}
-
-	if cmd.Verbose() {
-		if deploymentOptions != nil {
-			o.AllDeploymentOptions = deploymentOptions
-		}
-		o.AllDiskProvisioningOptions = allDiskProvisioningOptions
-		o.AllIPAllocationPolicyOptions = allIPAllocationPolicyOptions
-		o.AllIPProtocolOptions = allIPProtocolOptions
-	}
-
-	return &o, nil
 }

@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2023-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -14,14 +14,14 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-package importx_test
+package importer_test
 
 import (
 	"bytes"
 	"encoding/json"
 	"testing"
 
-	"github.com/vmware/govmomi/govc/importx"
+	"github.com/vmware/govmomi/ovf/importer"
 )
 
 func TestDecodeOptions(t *testing.T) {
@@ -52,7 +52,7 @@ func TestDecodeOptions(t *testing.T) {
   "Name": null
 }
 `)
-	var opts importx.Options
+	var opts importer.Options
 	err := json.NewDecoder(bytes.NewReader(spec)).Decode(&opts)
 	if err != nil {
 		t.Fatal(err)
