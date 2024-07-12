@@ -5,7 +5,7 @@ Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,7 @@ import (
 
 	"github.com/vmware/govmomi/govc/cli"
 	"github.com/vmware/govmomi/govc/flags"
-	"github.com/vmware/govmomi/govc/importx"
+	"github.com/vmware/govmomi/ovf/importer"
 	"github.com/vmware/govmomi/vapi/library"
 	"github.com/vmware/govmomi/vim25/soap"
 )
@@ -112,8 +112,9 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 	if err != nil {
 		return err
 	}
-	opener := importx.Opener{Client: client}
-	archive := &importx.ArchiveFlag{Archive: &importx.FileArchive{Path: file, Opener: opener}}
+	opener := importer.Opener{Client: client}
+	var archive importer.Archive
+	archive = &importer.FileArchive{Path: file, Opener: opener}
 
 	manifest := make(map[string]*library.Checksum)
 	if cmd.Name == "" {
@@ -122,7 +123,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 
 	switch ext {
 	case ".ova":
-		archive.Archive = &importx.TapeArchive{Path: file, Opener: opener}
+		archive = &importer.TapeArchive{Path: file, Opener: opener}
 		base = "*.ovf"
 		mf = "*.mf"
 		kind = library.ItemTypeOVF
@@ -206,7 +207,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		}
 		defer f.Close()
 
-		if e, ok := f.(*importx.TapeArchiveEntry); ok {
+		if e, ok := f.(*importer.TapeArchiveEntry); ok {
 			name = e.Name // expand path.Match's (e.g. "*.ovf" -> "name.ovf")
 		}
 
@@ -228,7 +229,7 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 		if err != nil {
 			return err
 		}
-		if cmd.OutputFlag.TTY {
+		if cmd.TTY {
 			logger := cmd.ProgressLogger(fmt.Sprintf("Uploading %s... ", name))
 			p.Progress = logger
 			defer logger.Wait()
@@ -241,12 +242,12 @@ func (cmd *item) Run(ctx context.Context, f *flag.FlagSet) error {
 	}
 
 	if cmd.Type == library.ItemTypeOVF {
-		o, err := archive.ReadOvf(base)
+		o, err := importer.ReadOvf(base, archive)
 		if err != nil {
 			return err
 		}
 
-		e, err := archive.ReadEnvelope(o)
+		e, err := importer.ReadEnvelope(o)
 		if err != nil {
 			return fmt.Errorf("failed to parse ovf: %s", err)
 		}

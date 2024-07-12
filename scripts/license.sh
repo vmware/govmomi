@@ -7,7 +7,7 @@ header_dir=$(dirname $0)/headers
 tmpfile=$(mktemp)
 trap "rm -f ${tmpfile}" EXIT
 
-git diff --name-status main | awk '{print $2}' | while read file; do
+git diff --name-status main | awk '{print $NF}' | while read file; do
   years=( $(git log --format='%ai' $file | cut -d- -f1 | sort -u) )
   num_years=${#years[@]}
 
