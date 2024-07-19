@@ -59,7 +59,7 @@ func (cmd *relocate) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	res, err := checker.CheckRelocate(ctx, vm.Reference(), spec, cmd.Test...)
+	res, err := checker.CheckRelocate(ctx, vm.Reference(), spec, cmd.testTypes...)
 	if err != nil {
 		return err
 	}

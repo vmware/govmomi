@@ -33,6 +33,28 @@ import (
 	"github.com/vmware/govmomi/vim25/xml"
 )
 
+var checkTestTypesList = []string{
+	string(types.CheckTestTypeDatastoreTests),
+	string(types.CheckTestTypeHostTests),
+	string(types.CheckTestTypeNetworkTests),
+	string(types.CheckTestTypeResourcePoolTests),
+	string(types.CheckTestTypeSourceTests),
+}
+
+type checkTestTypes []types.CheckTestType
+
+func (c *checkTestTypes) String() string {
+	return fmt.Sprint(*c)
+}
+
+func (c *checkTestTypes) Set(value string) error {
+	if !slices.Contains(checkTestTypesList, value) {
+		return fmt.Errorf("invalid CheckTestType value %q", value)
+	}
+	*c = append(*c, types.CheckTestType(value))
+	return nil
+}
+
 type checkFlag struct {
 	*flags.VirtualMachineFlag
 	*flags.HostSystemFlag
@@ -40,7 +62,7 @@ type checkFlag struct {
 
 	Machine, Host, Pool *types.ManagedObjectReference
 
-	Test []string
+	testTypes checkTestTypes
 }
 
 func (cmd *checkFlag) Register(ctx context.Context, f *flag.FlagSet) {
@@ -50,6 +72,8 @@ func (cmd *checkFlag) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.HostSystemFlag.Register(ctx, f)
 	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
 	cmd.ResourcePoolFlag.Register(ctx, f)
+
+	f.Var(&cmd.testTypes, "test", fmt.Sprintf("The set of tests to run (%s)", strings.Join(checkTestTypesList, ",")))
 }
 
 func (cmd *checkFlag) Process(ctx context.Context) error {

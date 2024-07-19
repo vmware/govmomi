@@ -44,13 +44,13 @@ func (c VmProvisioningChecker) CheckRelocate(
 	ctx context.Context,
 	vm types.ManagedObjectReference,
 	spec types.VirtualMachineRelocateSpec,
-	testTypes ...string) ([]types.CheckResult, error) {
+	testTypes ...types.CheckTestType) ([]types.CheckResult, error) {
 
 	req := types.CheckRelocate_Task{
 		This:     c.Reference(),
 		Vm:       vm,
 		Spec:     spec,
-		TestType: testTypes,
+		TestType: checkTestTypesToStrings(testTypes),
 	}
 
 	res, err := methods.CheckRelocate_Task(ctx, c.c, &req)
