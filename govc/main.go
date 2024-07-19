@@ -113,6 +113,7 @@ import (
 	_ "github.com/vmware/govmomi/govc/vlcm/depot/content/baseimages"
 	_ "github.com/vmware/govmomi/govc/vlcm/depot/offline"
 	_ "github.com/vmware/govmomi/govc/vm"
+	_ "github.com/vmware/govmomi/govc/vm/check"
 	_ "github.com/vmware/govmomi/govc/vm/dataset"
 	_ "github.com/vmware/govmomi/govc/vm/dataset/entry"
 	_ "github.com/vmware/govmomi/govc/vm/disk"

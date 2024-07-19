@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2016 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,6 +32,7 @@ type migrate struct {
 	*flags.ResourcePoolFlag
 	*flags.HostSystemFlag
 	*flags.DatastoreFlag
+	*flags.NetworkFlag
 	*flags.VirtualMachineFlag
 
 	priority types.VirtualMachineMovePriority
@@ -58,6 +59,9 @@ func (cmd *migrate) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.DatastoreFlag, ctx = flags.NewDatastoreFlag(ctx)
 	cmd.DatastoreFlag.Register(ctx, f)
 
+	cmd.NetworkFlag, ctx = flags.NewNetworkFlag(ctx)
+	cmd.NetworkFlag.Register(ctx, f)
+
 	f.StringVar((*string)(&cmd.priority), "priority", string(types.VirtualMachineMovePriorityDefaultPriority), "The task priority")
 }
 
@@ -75,6 +79,9 @@ func (cmd *migrate) Process(ctx context.Context) error {
 		return err
 	}
 	if err := cmd.DatastoreFlag.Process(ctx); err != nil {
+		return err
+	}
+	if err := cmd.NetworkFlag.Process(ctx); err != nil {
 		return err
 	}
 
@@ -95,7 +102,36 @@ Examples:
 }
 
 func (cmd *migrate) relocate(ctx context.Context, vm *object.VirtualMachine) error {
-	task, err := vm.Relocate(ctx, cmd.spec, cmd.priority)
+	spec := cmd.spec
+
+	if cmd.NetworkFlag.IsSet() {
+		dev, err := cmd.NetworkFlag.Device()
+		if err != nil {
+			return err
+		}
+
+		devices, err := vm.Device(ctx)
+		if err != nil {
+			return err
+		}
+
+		net := devices.SelectByType((*types.VirtualEthernetCard)(nil))
+		if len(net) != 1 {
+			return fmt.Errorf("-net specified, but %s has %d nics", vm.Name(), len(net))
+		}
+		cmd.NetworkFlag.Change(net[0], dev)
+
+		spec.DeviceChange = append(spec.DeviceChange, &types.VirtualDeviceConfigSpec{
+			Device:    net[0],
+			Operation: types.VirtualDeviceConfigSpecOperationEdit,
+		})
+	}
+
+	if cmd.VirtualMachineFlag.Spec {
+		return cmd.VirtualMachineFlag.WriteAny(spec)
+	}
+
+	task, err := vm.Relocate(ctx, spec, cmd.priority)
 	if err != nil {
 		return err
 	}
