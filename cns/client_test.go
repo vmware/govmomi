@@ -46,6 +46,12 @@ func TestClient(t *testing.T) {
 	// set CNS_DEBUG to true if you need to emit soap traces from these tests
 	// soap traces will be emitted in the govmomi/cns/.soap directory
 	// example export CNS_DEBUG='true'
+
+	os.Setenv("CNS_DATASTORE", "sharedVmfs-0")
+	os.Setenv("CNS_DATACENTER", "test-vpx-1720608104-28051-wcp.wcp-sanity")
+	os.Setenv("CNS_VC_URL", "Administrator@vsphere.local:UJTH8sHak-0t_hSu@10.78.163.98/sdk")
+	os.Setenv("CNS_DEBUG", "true")
+
 	enableDebug := os.Getenv("CNS_DEBUG")
 	soapTraceDirectory := ".soap"
 
@@ -137,6 +143,93 @@ func TestClient(t *testing.T) {
 	}
 	containerClusterArray = append(containerClusterArray, containerCluster)
 
+	t.Logf("############################################################### start CreateSnapshots")
+	// Test CreateSnapshot API
+	// Construct the CNS SnapshotCreateSpec list
+	volumeId1 := "626443ec-791f-4c9e-a8fd-d0539539dcf9"
+	desc1 := "example-vanilla-rwo-pvc"
+	var cnsSnapshotCreateSpecList1 []cnstypes.CnsSnapshotCreateSpec
+	cnsSnapshotCreateSpec1 := cnstypes.CnsSnapshotCreateSpec{
+		VolumeId: cnstypes.CnsVolumeId{
+			Id: volumeId1,
+		},
+		Description: desc1,
+	}
+	cnsSnapshotCreateSpecList1 = append(cnsSnapshotCreateSpecList1, cnsSnapshotCreateSpec1)
+	t.Logf("Creating snapshot using the spec: %+v", pretty.Sprint(cnsSnapshotCreateSpecList1))
+	c.Version = "FCD_QUERY_RTINFO_SKIP_RUNTIME_IOSZ"
+	cnsClient.Version = c.Version
+	t.Logf("---->c.Version: %+v", c.Version)
+	t.Logf("---->cnsClient.Version: %+v", cnsClient.Version)
+	createSnapshotsTask1, err := cnsClient.CreateSnapshots(ctx, cnsSnapshotCreateSpecList1)
+	if err != nil {
+		t.Errorf("Failed to get the task of CreateSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createSnapshotsTaskInfo1, err := GetTaskInfo(ctx, createSnapshotsTask1)
+	if err != nil {
+		t.Errorf("Failed to get the task info of CreateSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createSnapshotsTaskResult1, err := GetTaskResult(ctx, createSnapshotsTaskInfo1)
+	if err != nil {
+		t.Errorf("Failed to get the task result of CreateSnapshots. Error: %+v \n", err)
+		t.Fatal(err)
+	}
+	createSnapshotsOperationRes1 := createSnapshotsTaskResult1.GetCnsVolumeOperationResult()
+	if createSnapshotsOperationRes1.Fault != nil {
+		t.Fatalf("Failed to create snapshots: fault=%+v", createSnapshotsOperationRes1.Fault)
+	}
+
+	snapshotCreateResult1 := interface{}(createSnapshotsTaskResult1).(*cnstypes.CnsSnapshotCreateResult)
+	snapshotId1 := snapshotCreateResult1.Snapshot.SnapshotId.Id
+	snapshotCreateTime1 := snapshotCreateResult1.Snapshot.CreateTime
+	t.Logf("snapshotCreateResult: %+v", pretty.Sprint(snapshotCreateResult1))
+	t.Logf("CreateSnapshots: Snapshot created successfully. volumeId: %q, snapshot id %q, time stamp %+v, AggregatedSnapshotCapacityInMb: %d", volumeId1, snapshotId1, snapshotCreateTime1, snapshotCreateResult1.AggregatedSnapshotCapacityInMb)
+
+	t.Logf("############################################################### end CreateSnapshots")
+
+	// t.Logf("############################################################### start  QueryVolume")
+
+	// // Test QueryVolume API
+
+	// volumeId2 := "626443ec-791f-4c9e-a8fd-d0539539dcf9"
+	// var queryFilter2 cnstypes.CnsQueryFilter
+	// var volumeIDList2 []cnstypes.CnsVolumeId
+	// volumeIDList2 = append(volumeIDList2, cnstypes.CnsVolumeId{Id: volumeId2})
+	// queryFilter2.VolumeIds = volumeIDList2
+	// queryFilter2.StoragePolicyId = "43333687-ec93-4e67-a5bc-5fa84c4f3f9b"
+	// t.Logf("Calling QueryVolume using queryFilter: %+v", pretty.Sprint(queryFilter2))
+	// cnsClient.Version = "FCD_QUERY_RTINFO_SKIP_RUNTIME_IOSZ"
+	// queryResult, err := cnsClient.QueryVolume(ctx, queryFilter2)
+	// if err != nil {
+	// 	t.Errorf("Failed to query volume. Error: %+v \n", err)
+	// 	t.Fatal(err)
+	// }
+	// var snapshotSize2, aggrsize int64
+
+	// if len(queryResult.Volumes) > 0 {
+	// 	t.Logf("#check vol ######### %+v", queryResult.Volumes[0])
+	// 	t.Logf("#check vol size## %+v", queryResult.Volumes[0].BackingObjectDetails)
+
+	// 	val, ok := queryResult.Volumes[0].BackingObjectDetails.(*cnstypes.CnsBlockBackingDetails)
+	// 	if ok {
+	// 		t.Logf("############val: %v", val)
+	// 		aggrsize = val.AggregatedSnapshotCapacityInMb
+	// 		t.Logf("############aggrsize: %v", pretty.Sprint(aggrsize))
+	// 	}
+	// 	snapshotSize2 = queryResult.Volumes[0].BackingObjectDetails.GetCnsBackingObjectDetails().CapacityInMb
+
+	// 	t.Logf("############snapshotSize: %v", pretty.Sprint(snapshotSize2))
+
+	// } else {
+	// 	msg := fmt.Sprintf("failed to get the snapshot size by querying volume: %q", volumeId2)
+	// 	t.Fatal(msg)
+	// }
+	// t.Logf("CreateVolumeFromSnapshot: Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+
+	// t.Logf("Successfully Queried Volumes. queryResult: %+v", pretty.Sprint(queryResult))
+	// t.Logf("############################################################### end  QueryVolume")
 	// Test CreateVolume API
 	var cnsVolumeCreateSpecList []cnstypes.CnsVolumeCreateSpec
 	cnsVolumeCreateSpec := cnstypes.CnsVolumeCreateSpec{
@@ -536,7 +629,7 @@ func TestClient(t *testing.T) {
 	}
 
 	snapshotDeleteResult := interface{}(deleteSnapshotsTaskResult).(*cnstypes.CnsSnapshotDeleteResult)
-	t.Logf("snapshotDeleteResult: %+v", pretty.Sprint(snapshotCreateResult))
+	t.Logf("snapshotDeleteResult: %+v", pretty.Sprint(snapshotDeleteResult))
 	t.Logf("DeleteSnapshots: Snapshot deleted successfully. volumeId: %q, snapshot id %q, opId: %q", volumeId, snapshotDeleteResult.SnapshotId, deleteSnapshotsTaskInfo.ActivationId)
 
 	// Test Relocate API
