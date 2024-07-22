@@ -523,6 +523,14 @@ func (cmd *create) addStorage(devices object.VirtualDeviceList) (object.VirtualD
 
 			devices = append(devices, nvme)
 			cmd.controller = devices.Name(nvme)
+		} else if cmd.controller == "sata" {
+			sata, err := devices.CreateSATAController()
+			if err != nil {
+				return nil, err
+			}
+
+			devices = append(devices, sata)
+			cmd.controller = devices.Name(sata)
 		} else {
 			scsi, err := devices.CreateSCSIController(cmd.controller)
 			if err != nil {
