@@ -45,14 +45,14 @@ func (c VmCompatibilityChecker) CheckCompatibility(
 	vm types.ManagedObjectReference,
 	host *types.ManagedObjectReference,
 	pool *types.ManagedObjectReference,
-	testTypes ...string) ([]types.CheckResult, error) {
+	testTypes ...types.CheckTestType) ([]types.CheckResult, error) {
 
 	req := types.CheckCompatibility_Task{
 		This:     c.Reference(),
 		Vm:       vm,
 		Host:     host,
 		Pool:     pool,
-		TestType: testTypes,
+		TestType: checkTestTypesToStrings(testTypes),
 	}
 
 	res, err := methods.CheckCompatibility_Task(ctx, c.c, &req)
@@ -74,7 +74,7 @@ func (c VmCompatibilityChecker) CheckVmConfig(
 	vm *types.ManagedObjectReference,
 	host *types.ManagedObjectReference,
 	pool *types.ManagedObjectReference,
-	testTypes ...string) ([]types.CheckResult, error) {
+	testTypes ...types.CheckTestType) ([]types.CheckResult, error) {
 
 	req := types.CheckVmConfig_Task{
 		This:     c.Reference(),
@@ -82,7 +82,7 @@ func (c VmCompatibilityChecker) CheckVmConfig(
 		Vm:       vm,
 		Host:     host,
 		Pool:     pool,
-		TestType: testTypes,
+		TestType: checkTestTypesToStrings(testTypes),
 	}
 
 	res, err := methods.CheckVmConfig_Task(ctx, c.c, &req)
@@ -96,4 +96,16 @@ func (c VmCompatibilityChecker) CheckVmConfig(
 	}
 
 	return ti.Result.(types.ArrayOfCheckResult).CheckResult, nil
+}
+
+func checkTestTypesToStrings(testTypes []types.CheckTestType) []string {
+	if len(testTypes) == 0 {
+		return nil
+	}
+
+	s := make([]string, len(testTypes))
+	for i := range testTypes {
+		s[i] = string(testTypes[i])
+	}
+	return s
 }

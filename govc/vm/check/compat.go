@@ -35,7 +35,7 @@ func (cmd *compat) Description() string {
 	return `Check if VM can be placed on the given HOST in the given resource POOL.
 
 Examples:
-  govc vm.check.compat -vm my-vm -pool $pool`
+  govc vm.check.compat -vm my-vm -host $host -pool $pool`
 }
 
 func (cmd *compat) Run(ctx context.Context, f *flag.FlagSet) error {
@@ -53,7 +53,7 @@ func (cmd *compat) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	res, err := checker.CheckCompatibility(ctx, vm.Reference(), cmd.Host, cmd.Pool, cmd.Test...)
+	res, err := checker.CheckCompatibility(ctx, vm.Reference(), cmd.Host, cmd.Pool, cmd.testTypes...)
 	if err != nil {
 		return err
 	}

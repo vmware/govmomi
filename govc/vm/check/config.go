@@ -51,7 +51,7 @@ func (cmd *config) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	res, err := checker.CheckVmConfig(ctx, spec, cmd.Machine, cmd.Host, cmd.Pool, cmd.Test...)
+	res, err := checker.CheckVmConfig(ctx, spec, cmd.Machine, cmd.Host, cmd.Pool, cmd.testTypes...)
 	if err != nil {
 		return err
 	}
