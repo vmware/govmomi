@@ -294,6 +294,11 @@ func (c *EventHistoryCollector) typeMatches(_ *Context, event types.BaseEvent, s
 		}
 		return false
 	}
+
+	if x, ok := event.(*types.EventEx); ok {
+		return matches(x.EventTypeId)
+	}
+
 	kind := reflect.ValueOf(event).Elem().Type()
 
 	if matches(kind.Name()) {
