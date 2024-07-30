@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
+Copyright (c) 2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,6 +26,7 @@ import (
 // These are used to validate the overall structure of the string being parsed and to differentiate tokens as we are
 // processing them
 var (
+	blankRegexp         = regexp.MustCompile(`[[:blank:]]`)
 	validIntegerRegexp  = regexp.MustCompile(`^([1-9]\d*)$`)
 	validExponentRegexp = regexp.MustCompile(`^([1-9]\d*\^[1-9]\d*)$`)
 	validByteUnitRegexp = regexp.MustCompile(`((^|kilo|kibi|mega|mebi|giga|gibi)byte(s?)$)`)
@@ -47,41 +48,40 @@ var prefixMultipliers = map[string]int64{
 // ParseCapacityAllocationUnits validates the string s is a valid programmatic unit with respect to the base unit 'byte'
 // and parses the string to return the number of bytes s represents
 func ParseCapacityAllocationUnits(s string) int64 {
-	var capacityBytes int64
-
 	// Any strings which don't match against the regular expression are deemed invalid and zero is returned as the result
-	if validCapacityString(s) {
-		capacityBytes = 1
-		// Remove any whitespace in s and lowercase any alphabetic characters. Removal of whitespace is done after
-		// validating against the regular expression because whitespace is valid for the most part, but is not valid
-		// for exponential terms, e.g 2 ^ 10
-		s = strings.ToLower(regexp.MustCompile(`[[:blank:]]`).ReplaceAllString(s, ""))
-		// Split s on multiplication operator (*) so that we can just calculate integer multipliers. Each token will
-		// then be either an integer, an exponential term to be converted to an integer, or a unit term to be converted
-		// to an integer
-		tokens := strings.Split(s, "*")
+	if !validCapacityString(s) {
+		return 0
+	}
+	var capacityBytes int64 = 1
+	// Remove any whitespace in s and lowercase any alphabetic characters. Removal of whitespace is done after
+	// validating against the regular expression because whitespace is valid for the most part, but is not valid
+	// for exponential terms, e.g 2 ^ 10
+	s = strings.ToLower(blankRegexp.ReplaceAllString(s, ""))
+	// Split s on multiplication operator (*) so that we can just calculate integer multipliers. Each token will
+	// then be either an integer, an exponential term to be converted to an integer, or a unit term to be converted
+	// to an integer
+	tokens := strings.Split(s, "*")
 
-		// Loop through all tokens and convert any to integers if necessary and use to compute a running product
-		for _, token := range tokens {
-			switch {
-			// "" should be treated identically to "byte". capacityBytes is already set to 1 so there is nothing to do
-			case len(token) == 0:
-				continue
-			case validByteUnitString(token):
-				capacityBytes = capacityBytes * prefixMultipliers[strings.TrimSuffix(token, "s")]
-			case validExponentString(token):
-				p := strings.Split(token, "^")
-				b, _ := strconv.ParseInt(p[0], 10, 64)
-				e, _ := strconv.ParseInt(p[1], 10, 64)
-				capacityBytes = capacityBytes * int64(math.Pow(float64(b), float64(e)))
-			case validIntegerString(token):
-				n, _ := strconv.ParseInt(token, 10, 64)
-				capacityBytes = capacityBytes * n
-			default:
-				// This should be unreachable. validCapacityString should have filtered out anything that cannot be
-				// matched by the non-default cases
-				capacityBytes = 0
-			}
+	// Loop through all tokens and convert any to integers if necessary and use to compute a running product
+	for _, token := range tokens {
+		switch {
+		// "" should be treated identically to "byte". capacityBytes is already set to 1 so there is nothing to do
+		case len(token) == 0:
+			continue
+		case validByteUnitString(token):
+			capacityBytes = capacityBytes * prefixMultipliers[strings.TrimSuffix(token, "s")]
+		case validExponentString(token):
+			p := strings.Split(token, "^")
+			b, _ := strconv.ParseInt(p[0], 10, 64)
+			e, _ := strconv.ParseInt(p[1], 10, 64)
+			capacityBytes = capacityBytes * int64(math.Pow(float64(b), float64(e)))
+		case validIntegerString(token):
+			n, _ := strconv.ParseInt(token, 10, 64)
+			capacityBytes = capacityBytes * n
+		default:
+			// This should be unreachable. validCapacityString should have filtered out anything that cannot be
+			// matched by the non-default cases
+			capacityBytes = 0
 		}
 	}
 	return capacityBytes
