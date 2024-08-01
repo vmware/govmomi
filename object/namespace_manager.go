@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2016-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -73,4 +73,23 @@ func (nm DatastoreNamespaceManager) DeleteDirectory(ctx context.Context, dc *Dat
 	}
 
 	return nil
+}
+
+func (nm DatastoreNamespaceManager) ConvertNamespacePathToUuidPath(ctx context.Context, dc *Datacenter, datastoreURL string) (string, error) {
+	req := &types.ConvertNamespacePathToUuidPath{
+		This:         nm.Reference(),
+		NamespaceUrl: datastoreURL,
+	}
+
+	if dc != nil {
+		ref := dc.Reference()
+		req.Datacenter = &ref
+	}
+
+	res, err := methods.ConvertNamespacePathToUuidPath(ctx, nm.c, req)
+	if err != nil {
+		return "", err
+	}
+
+	return res.Returnval, nil
 }
