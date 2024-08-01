@@ -208,6 +208,9 @@ load test_helper
   run govc library.info -s "/my-content/ttylinux-live/$TTYLINUX_NAME.ovf"
   assert_success
 
+  run env GOVC_SHOW_UNRELEASED=true govc library.info -S "/my-content/ttylinux-live/$TTYLINUX_NAME.ovf"
+  assert_success
+
   run govc library.info -l -s /my-content/$TTYLINUX_NAME/$TTYLINUX_NAME.ovf
   assert_success
 
