@@ -23,6 +23,7 @@ import (
 	"path"
 	"strings"
 
+	"github.com/vmware/govmomi/internal"
 	"github.com/vmware/govmomi/object"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/vapi/library"
@@ -134,6 +135,29 @@ func (f *PathFinder) datastoreName(ctx context.Context, id string) (string, erro
 	return name, nil
 }
 
+func (f *PathFinder) convertPath(ctx context.Context, b *mo.Datastore, path string) (string, error) {
+	if !internal.IsDatastoreVSAN(*b) {
+		return path, nil
+	}
+
+	var dc *object.Datacenter
+
+	entities, err := mo.Ancestors(ctx, f.c, f.c.ServiceContent.PropertyCollector, b.Self)
+	if err != nil {
+		return "", err
+	}
+
+	for _, entity := range entities {
+		if entity.Self.Type == "Datacenter" {
+			dc = object.NewDatacenter(f.c, entity.Self)
+			break
+		}
+	}
+
+	m := object.NewDatastoreNamespaceManager(f.c)
+	return m.ConvertNamespacePathToUuidPath(ctx, dc, path)
+}
+
 // ResolveLibraryItemStorage transforms StorageURIs Datastore url (uuid) to Datastore name.
 func (f *PathFinder) ResolveLibraryItemStorage(ctx context.Context, storage []library.Storage) error {
 	// TODO:
@@ -154,7 +178,8 @@ func (f *PathFinder) ResolveLibraryItemStorage(ctx context.Context, storage []li
 
 	var ds []mo.Datastore
 	pc := property.DefaultCollector(f.c)
-	if err := pc.Retrieve(ctx, ids, []string{"name", "info.url"}, &ds); err != nil {
+	props := []string{"name", "summary.url", "summary.type"}
+	if err := pc.Retrieve(ctx, ids, props, &ds); err != nil {
 		return err
 	}
 
@@ -164,12 +189,21 @@ func (f *PathFinder) ResolveLibraryItemStorage(ctx context.Context, storage []li
 
 	for _, item := range storage {
 		b := backing[item.StorageBacking.DatastoreID]
-		dsurl := b.Info.GetDatastoreInfo().Url
+		dsurl := b.Summary.Url
 
 		for i := range item.StorageURIs {
-			u := strings.TrimPrefix(item.StorageURIs[i], dsurl)
+			uri, err := url.Parse(item.StorageURIs[i])
+			if err != nil {
+				return err
+			}
+			uri.Path = path.Clean(uri.Path) // required for ConvertNamespacePathToUuidPath()
+			uri.RawQuery = ""
+			u, err := f.convertPath(ctx, b, uri.String())
+			if err != nil {
+				return err
+			}
+			u = strings.TrimPrefix(u, dsurl)
 			u = strings.TrimPrefix(u, "/")
-			u = strings.SplitN(u, "?", 2)[0] // strip query, if any
 
 			item.StorageURIs[i] = (&object.DatastorePath{
 				Datastore: b.Name,
