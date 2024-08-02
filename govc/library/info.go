@@ -42,6 +42,7 @@ type info struct {
 	link bool
 	url  bool
 	stor bool
+	Stor bool
 
 	pathFinder *finder.PathFinder
 }
@@ -62,6 +63,9 @@ func (cmd *info) Register(ctx context.Context, f *flag.FlagSet) {
 	f.BoolVar(&cmd.link, "L", false, "List Datastore path only")
 	f.BoolVar(&cmd.url, "U", false, "List pub/sub URL(s) only")
 	f.BoolVar(&cmd.stor, "s", false, "Include file specific storage details")
+	if cli.ShowUnreleased() {
+		f.BoolVar(&cmd.Stor, "S", false, "Include file specific storage details (resolved)")
+	}
 }
 
 func (cmd *info) Process(ctx context.Context) error {
@@ -265,14 +269,22 @@ func (r infoResultsWriter) writeFile(
 		}
 		fmt.Fprintf(w, "  Datastore Path:\t%s\n", p)
 	}
-	if r.cmd.stor {
+	if r.cmd.stor || r.cmd.Stor {
+		label := "Storage URI"
 		s, err := r.m.GetLibraryItemStorage(r.ctx, res.GetParent().GetID(), v.Name)
 		if err != nil {
 			return err
 		}
+		if r.cmd.Stor {
+			label = "Resolved URI"
+			err = r.cmd.pathFinder.ResolveLibraryItemStorage(r.ctx, s)
+			if err != nil {
+				return err
+			}
+		}
 		for i := range s {
 			for _, uri := range s[i].StorageURIs {
-				fmt.Fprintf(w, "  Storage URI:\t%s\n", uri)
+				fmt.Fprintf(w, "  %s:\t%s\n", label, uri)
 			}
 		}
 	}

@@ -238,6 +238,7 @@ var kinds = map[string]reflect.Type{
 	"CustomizationSpecManager":           reflect.TypeOf((*CustomizationSpecManager)(nil)).Elem(),
 	"Datacenter":                         reflect.TypeOf((*Datacenter)(nil)).Elem(),
 	"Datastore":                          reflect.TypeOf((*Datastore)(nil)).Elem(),
+	"DatastoreNamespaceManager":          reflect.TypeOf((*DatastoreNamespaceManager)(nil)).Elem(),
 	"DistributedVirtualPortgroup":        reflect.TypeOf((*DistributedVirtualPortgroup)(nil)).Elem(),
 	"DistributedVirtualSwitch":           reflect.TypeOf((*DistributedVirtualSwitch)(nil)).Elem(),
 	"DistributedVirtualSwitchManager":    reflect.TypeOf((*DistributedVirtualSwitchManager)(nil)).Elem(),
