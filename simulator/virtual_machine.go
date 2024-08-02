@@ -1359,6 +1359,13 @@ func (vm *VirtualMachine) configureDevice(
 
 		summary = fmt.Sprintf("%s KB", numberToString(x.CapacityInKB, ','))
 		switch b := d.Backing.(type) {
+		case *types.VirtualDiskSparseVer2BackingInfo:
+			// Sparse disk creation not supported in ESX
+			return &types.DeviceUnsupportedForVmPlatform{
+				InvalidDeviceSpec: types.InvalidDeviceSpec{
+					InvalidVmConfig: types.InvalidVmConfig{Property: "VirtualDeviceSpec.device.backing"},
+				},
+			}
 		case types.BaseVirtualDeviceFileBackingInfo:
 			info := b.GetVirtualDeviceFileBackingInfo()
 			var path object.DatastorePath

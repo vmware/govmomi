@@ -305,6 +305,28 @@ func (m *OvfManager) CreateImportSpec(ctx *Context, req *types.CreateImportSpec)
 			}
 			path.Path = fmt.Sprintf("%s/disk-%d.vmdk", req.Cisp.EntityName, ndisk)
 			d := device.CreateDisk(c.(types.BaseVirtualController), ds.Reference(), path.String())
+
+			switch types.OvfCreateImportSpecParamsDiskProvisioningType(req.Cisp.DiskProvisioning) {
+			case "",
+				types.OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicFlat,
+				types.OvfCreateImportSpecParamsDiskProvisioningTypeFlat,
+				types.OvfCreateImportSpecParamsDiskProvisioningTypeEagerZeroedThick,
+				types.OvfCreateImportSpecParamsDiskProvisioningTypeThin,
+				types.OvfCreateImportSpecParamsDiskProvisioningTypeThick,
+				types.OvfCreateImportSpecParamsDiskProvisioningTypeSeSparse:
+				// OK
+			case types.OvfCreateImportSpecParamsDiskProvisioningTypeMonolithicSparse:
+				// results in DeviceUnsupportedForVmPlatform during import
+				d.VirtualDevice.Backing = new(types.VirtualDiskSparseVer2BackingInfo)
+			default:
+				result.Error = append(result.Error, types.LocalizedMethodFault{
+					Fault: &types.OvfUnsupportedDiskProvisioning{
+						DiskProvisioning: req.Cisp.DiskProvisioning,
+					},
+					LocalizedMessage: "Disk provisioning type not supported: " + req.Cisp.DiskProvisioning,
+				})
+			}
+
 			d.VirtualDevice.DeviceInfo = &types.Description{
 				Label: item.ElementName,
 			}
