@@ -3880,6 +3880,7 @@ Examples:
   govc library.sync -vmtx local-library subscribed-library # convert subscribed OVFs to local VMTX
 
 Options:
+  -f=false               Forcefully synchronize file content
   -folder=               Inventory folder [GOVC_FOLDER]
   -pool=                 Resource pool [GOVC_RESOURCE_POOL]
   -vmtx=                 Sync subscribed library to local library as VM Templates
