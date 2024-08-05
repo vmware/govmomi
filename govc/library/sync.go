@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2019 VMware, Inc. All Rights Reserved.
+Copyright (c) 2019-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-	http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,7 +31,8 @@ type sync struct {
 	*flags.FolderFlag
 	*flags.ResourcePoolFlag
 
-	vmtx string
+	force bool
+	vmtx  string
 }
 
 func init() {
@@ -45,6 +46,7 @@ func (cmd *sync) Register(ctx context.Context, f *flag.FlagSet) {
 	cmd.ResourcePoolFlag, ctx = flags.NewResourcePoolFlag(ctx)
 	cmd.ResourcePoolFlag.Register(ctx, f)
 
+	f.BoolVar(&cmd.force, "f", false, "Forcefully synchronize file content")
 	f.StringVar(&cmd.vmtx, "vmtx", "", "Sync subscribed library to local library as VM Templates")
 }
 
@@ -153,7 +155,7 @@ func (cmd *sync) Run(ctx context.Context, f *flag.FlagSet) error {
 	case library.Item:
 		lib := res.GetParent().GetResult().(library.Library)
 		if cmd.shouldSync(lib) {
-			if err = m.SyncLibraryItem(ctx, &t, false); err != nil {
+			if err = m.SyncLibraryItem(ctx, &t, cmd.force); err != nil {
 				return err
 			}
 		}
