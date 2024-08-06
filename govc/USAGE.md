@@ -38,6 +38,8 @@ but appear via `govc $cmd -h`:
 
  - [about](#about)
  - [about.cert](#aboutcert)
+ - [alarm.info](#alarminfo)
+ - [alarms](#alarms)
  - [cluster.add](#clusteradd)
  - [cluster.change](#clusterchange)
  - [cluster.create](#clustercreate)
@@ -453,6 +455,60 @@ Examples:
 Options:
   -show=false            Show PEM encoded server certificate only
   -thumbprint=false      Output host hash and thumbprint only
+```
+
+## alarm.info
+
+```
+Usage: govc alarm.info [OPTIONS] PATH
+
+Alarm definition info.
+
+Examples:
+  govc alarm.info
+  govc alarm.info /dc1/host/cluster1
+  govc alarm.info -n alarm.WCPRegisterVMFailedAlarm
+
+Options:
+  -n=[]                  Alarm name
+```
+
+## alarms
+
+```
+Usage: govc alarms [OPTIONS] [PATH]
+
+Show triggered or declared alarms.
+
+Triggered alarms: alarms triggered by this entity or by its descendants.
+Triggered alarms are propagated up the inventory hierarchy so that a user
+can readily tell when a descendant has triggered an alarm.
+
+Declared alarms: alarms that apply to this managed entity.
+Includes alarms defined on this entity and alarms inherited from the parent
+entity, or from any ancestors in the inventory hierarchy.
+
+PATH defaults to the root folder '/'.
+When PATH is provided it should be an absolute inventory path or relative
+to GOVC_DATACENTER. See also:
+  govc find -h
+  govc tree -h
+
+Examples:
+  govc alarms
+  govc alarms vm/folder/vm-name
+  govc alarms /dc1/host/cluster1
+  govc alarms /dc1/host/cluster1 -d
+
+  govc alarms -n alarm.WCPRegisterVMFailedAlarm
+  govc alarms -ack /dc1/host/cluster1
+  govc alarms -ack -n alarm.WCPRegisterVMFailedAlarm vm/vm-name
+
+Options:
+  -ack=false             Acknowledge alarms
+  -d=false               Show declared alarms
+  -l=false               Long listing output
+  -n=                    Filter by alarm name
 ```
 
 ## cluster.add
