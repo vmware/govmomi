@@ -99,9 +99,9 @@ func Spec(fpath string, a Archive, hidden, verbose bool) (*Options, error) {
 	}
 
 	o := Options{
-		DiskProvisioning:   allDiskProvisioningOptions[0],
-		IPAllocationPolicy: allIPAllocationPolicyOptions[0],
-		IPProtocol:         allIPProtocolOptions[0],
+		DiskProvisioning:   string(types.OvfCreateImportSpecParamsDiskProvisioningTypeFlat),
+		IPAllocationPolicy: string(types.VAppIPAssignmentInfoIpAllocationPolicyDhcpPolicy),
+		IPProtocol:         string(types.VAppIPAssignmentInfoProtocolsIPv4),
 		MarkAsTemplate:     false,
 		PowerOn:            false,
 		WaitForIP:          false,

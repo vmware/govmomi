@@ -212,6 +212,25 @@ load test_helper
   grep "invalid NetworkMapping.Name" <<<"$output"
 }
 
+@test "import invalid disk provisioning" {
+  vcsim_env
+
+  ovf="$GOVC_IMAGES/$TTYLINUX_NAME.ovf"
+
+  spec=$(govc import.spec "$GOVC_IMAGES/$TTYLINUX_NAME.ovf")
+
+  options=$(jq ".DiskProvisioning = \"enoent\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_failure "govc: Disk provisioning type not supported: enoent"
+
+  options=$(jq ".DiskProvisioning = \"monolithicSparse\"" <<<"$spec")
+
+  run govc import.ovf -options - "$ovf" <<<"$options"
+  assert_failure
+  assert_matches DeviceUnsupportedForVmPlatform
+}
+
 @test "import properties" {
   vcsim_env
 
