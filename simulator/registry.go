@@ -516,6 +516,15 @@ func (r *Registry) SearchIndex() *SearchIndex {
 	return r.Get(r.content().SearchIndex.Reference()).(*SearchIndex)
 }
 
+// AlarmManager returns the AlarmManager singleton
+func (r *Registry) AlarmManager() *AlarmManager {
+	ref := r.content().AlarmManager
+	if ref == nil {
+		return nil // ESX
+	}
+	return r.Get(*ref).(*AlarmManager)
+}
+
 // EventManager returns the EventManager singleton
 func (r *Registry) EventManager() *EventManager {
 	return r.Get(r.content().EventManager.Reference()).(*EventManager)
