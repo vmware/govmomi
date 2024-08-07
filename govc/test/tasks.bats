@@ -56,6 +56,15 @@ load test_helper
   assert_success
   task="$output"
 
+  run govc task.cancel "$task"
+  assert_success
+  cancelled=$(govc tasks -json | jq ".tasks[] | select(.key == \"$task\") | .cancelled")
+  assert_equal "true" "$cancelled"
+
+  run govc task.create "$id"
+  assert_success
+  task="$output"
+
   run govc task.set -s running "$task"
   assert_success
 
