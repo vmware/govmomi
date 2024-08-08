@@ -94,7 +94,7 @@ func (cmd *create) Run(ctx context.Context, f *flag.FlagSet) error {
 		return err
 	}
 
-	fmt.Println(res.Returnval.Task)
+	fmt.Println(res.Returnval.Task.Value)
 
 	return nil
 }

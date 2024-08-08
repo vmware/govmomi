@@ -257,7 +257,7 @@ func (t *Task) CancelTask(ctx *Context, req *types.CancelTask) soap.HasFault {
 	}
 
 	changes := []types.PropertyChange{
-		{Name: "info.canceled", Val: true},
+		{Name: "info.cancelled", Val: true},
 		{Name: "info.completeTime", Val: time.Now()},
 		{Name: "info.state", Val: types.TaskInfoStateError},
 		{Name: "info.error", Val: &types.LocalizedMethodFault{
