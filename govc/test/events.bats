@@ -93,3 +93,17 @@ load test_helper
   govc events 'vm/*'
   govc events -json 'vm/*' | jq .
 }
+
+@test "events post" {
+  vcsim_env
+
+  export GOVC_SHOW_UNRELEASED=true
+
+  run govc event.post -m testing123
+  assert_failure
+
+  run govc event.post -m testing123 /DC0
+  assert_success
+
+  govc events | grep testing123
+}

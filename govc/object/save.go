@@ -155,12 +155,26 @@ func saveHostSystem(ctx context.Context, c *vim25.Client, ref types.ManagedObjec
 	return []saveMethod{{"QueryTpmAttestationReport", res}}, nil
 }
 
+func saveAlarmManager(ctx context.Context, c *vim25.Client, ref types.ManagedObjectReference) ([]saveMethod, error) {
+	res, err := methods.GetAlarm(ctx, c, &types.GetAlarm{This: ref})
+	if err != nil {
+		return nil, err
+	}
+	pc := property.DefaultCollector(c)
+	var content []types.ObjectContent
+	if err = pc.Retrieve(ctx, res.Returnval, nil, &content); err != nil {
+		return nil, err
+	}
+	return []saveMethod{{"GetAlarm", res}, {"", content}}, nil
+}
+
 // saveObjects maps object types to functions that can save data that isn't available via the PropertyCollector
 var saveObjects = map[string]func(context.Context, *vim25.Client, types.ManagedObjectReference) ([]saveMethod, error){
 	"VmwareDistributedVirtualSwitch": saveDVS,
 	"EnvironmentBrowser":             saveEnvironmentBrowser,
 	"HostNetworkSystem":              saveHostNetworkSystem,
 	"HostSystem":                     saveHostSystem,
+	"AlarmManager":                   saveAlarmManager,
 }
 
 func isNotConnected(err error) bool {
@@ -204,6 +218,13 @@ func (cmd *save) save(content []types.ObjectContent) error {
 				return err
 			}
 			for _, obj := range objs {
+				if obj.Name == "" {
+					err = cmd.save(obj.Data.([]types.ObjectContent))
+					if err != nil {
+						return err
+					}
+					continue
+				}
 				err = cmd.write(filepath.Join(ref, obj.Name), obj.Data)
 				if err != nil {
 					return err

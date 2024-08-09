@@ -20,6 +20,7 @@ import (
 	"os"
 
 	_ "github.com/vmware/govmomi/govc/about"
+	_ "github.com/vmware/govmomi/govc/alarm"
 	"github.com/vmware/govmomi/govc/cli"
 	_ "github.com/vmware/govmomi/govc/cluster"
 	_ "github.com/vmware/govmomi/govc/cluster/draft"

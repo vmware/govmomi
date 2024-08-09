@@ -174,7 +174,7 @@ func (flag *DatacenterFlag) ManagedObject(ctx context.Context, arg string) (type
 		for _, o := range l {
 			objs = append(objs, o.Object.Reference())
 		}
-		return ref, fmt.Errorf("%d objects at path %q: %s", len(l), arg, objs)
+		return ref, fmt.Errorf("%d objects match %q: %s (unique inventory path required)", len(l), arg, objs)
 	}
 }
 
