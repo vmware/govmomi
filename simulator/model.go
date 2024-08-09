@@ -232,6 +232,7 @@ func (*Model) fmtName(prefix string, num int) string {
 
 // kinds maps managed object types to their vcsim wrapper types
 var kinds = map[string]reflect.Type{
+	"AlarmManager":                       reflect.TypeOf((*AlarmManager)(nil)).Elem(),
 	"AuthorizationManager":               reflect.TypeOf((*AuthorizationManager)(nil)).Elem(),
 	"ClusterComputeResource":             reflect.TypeOf((*ClusterComputeResource)(nil)).Elem(),
 	"CustomFieldsManager":                reflect.TypeOf((*CustomFieldsManager)(nil)).Elem(),

@@ -166,6 +166,10 @@ func (m *EventManager) PostEvent(ctx *Context, req *types.PostEvent) soap.HasFau
 		})
 	}
 
+	if m := ctx.Map.AlarmManager(); m != nil {
+		ctx.WithLock(m, func() { m.postEvent(ctx, req.EventToPost) })
+	}
+
 	return &methods.PostEventBody{
 		Res: new(types.PostEventResponse),
 	}
@@ -229,6 +233,11 @@ func doEntityEventArgument(event types.BaseEvent, f func(types.ManagedObjectRefe
 
 // eventFilterSelf returns true if self is one of the entity arguments in the event.
 func eventFilterSelf(event types.BaseEvent, self types.ManagedObjectReference) bool {
+	if x, ok := event.(*types.EventEx); ok {
+		if self.Type == x.ObjectType && self.Value == x.ObjectId {
+			return true
+		}
+	}
 	return doEntityEventArgument(event, func(ref types.ManagedObjectReference, _ *types.EntityEventArgument) bool {
 		return self == ref
 	})
@@ -280,6 +289,17 @@ func (c *EventHistoryCollector) entityMatches(ctx *Context, event types.BaseEven
 	return false
 }
 
+// chainMatches returns true if spec.EventChainId matches the event.
+func (c *EventHistoryCollector) chainMatches(_ *Context, event types.BaseEvent, spec *types.EventFilterSpec) bool {
+	e := event.GetEvent()
+	if spec.EventChainId != 0 {
+		if e.ChainId != spec.EventChainId {
+			return false
+		}
+	}
+	return true
+}
+
 // typeMatches returns true if one of the spec EventTypeId types matches the event.
 func (c *EventHistoryCollector) typeMatches(_ *Context, event types.BaseEvent, spec *types.EventFilterSpec) bool {
 	if len(spec.EventTypeId) == 0 {
@@ -294,6 +314,11 @@ func (c *EventHistoryCollector) typeMatches(_ *Context, event types.BaseEvent, s
 		}
 		return false
 	}
+
+	if x, ok := event.(*types.EventEx); ok {
+		return matches(x.EventTypeId)
+	}
+
 	kind := reflect.ValueOf(event).Elem().Type()
 
 	if matches(kind.Name()) {
@@ -334,6 +359,7 @@ func (c *EventHistoryCollector) eventMatches(ctx *Context, event types.BaseEvent
 	spec := c.Filter.(types.EventFilterSpec)
 
 	matchers := []func(*Context, types.BaseEvent, *types.EventFilterSpec) bool{
+		c.chainMatches,
 		c.typeMatches,
 		c.timeMatches,
 		c.entityMatches,

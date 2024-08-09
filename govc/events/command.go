@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2015-2023 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -117,11 +117,21 @@ func (cmd *events) printEvents(ctx context.Context, obj *types.ManagedObjectRefe
 			r.Key = event.Key
 		}
 
-		// if this is a TaskEvent gather a little more information
-		if t, ok := e.(*types.TaskEvent); ok {
+		switch x := e.(type) {
+		case *types.TaskEvent:
 			// some tasks won't have this information, so just use the event message
-			if t.Info.Entity != nil {
-				r.Message = fmt.Sprintf("%s (target=%s %s)", r.Message, t.Info.Entity.Type, t.Info.EntityName)
+			if x.Info.Entity != nil {
+				r.Message = fmt.Sprintf("%s (target=%s %s)", r.Message, x.Info.Entity.Type, x.Info.EntityName)
+			}
+		case *types.EventEx:
+			if r.Message == "" {
+				r.Message = x.Message
+			}
+			if x.ObjectId != "" {
+				r.Message = fmt.Sprintf("%s (%s)", r.Message, x.ObjectId)
+			}
+			if cmd.Long {
+				r.Type = x.EventTypeId
 			}
 		}
 
