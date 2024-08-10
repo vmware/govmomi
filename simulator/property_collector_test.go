@@ -18,6 +18,7 @@ package simulator
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"reflect"
 	"sync"
@@ -1762,6 +1763,73 @@ func TestUcFirst(t *testing.T) {
 
 			if actual != tt.expected {
 				t.Errorf("%q != %q", actual, tt.expected)
+			}
+		})
+	}
+}
+
+func TestPageUpdateSet(t *testing.T) {
+	max := defaultMaxObjectUpdates
+
+	sum := func(u []int) int {
+		total := 0
+		for i := range u {
+			total += u[i]
+		}
+		return total
+	}
+
+	sumUpdateSet := func(u *types.UpdateSet) int {
+		total := 0
+		for _, f := range u.FilterSet {
+			total += len(f.ObjectSet)
+		}
+		return total
+	}
+
+	tests := []struct {
+		filters int
+		objects []int
+	}{
+		{0, nil},
+		{1, []int{10}},
+		{1, []int{104}},
+		{3, []int{10, 0, 25}},
+		{1, []int{234, 21, 4}},
+		{2, []int{95, 32}},
+	}
+
+	for _, test := range tests {
+		name := fmt.Sprintf("%d filter %d objs", test.filters, sum(test.objects))
+		t.Run(name, func(t *testing.T) {
+			update := &types.UpdateSet{}
+
+			for i := 0; i < test.filters; i++ {
+				f := types.PropertyFilterUpdate{}
+				for j := 0; j < 156; j++ {
+					f.ObjectSet = append(f.ObjectSet, types.ObjectUpdate{})
+				}
+				update.FilterSet = append(update.FilterSet, f)
+			}
+
+			total := sumUpdateSet(update)
+			sum := 0
+
+			for {
+				pending := pageUpdateSet(update, max)
+				n := sumUpdateSet(update)
+				if n > max {
+					t.Fatalf("%d > %d", n, max)
+				}
+				sum += n
+				if pending == nil {
+					break
+				}
+				update = pending
+			}
+
+			if sum != total {
+				t.Fatalf("%d != %d", sum, total)
 			}
 		})
 	}

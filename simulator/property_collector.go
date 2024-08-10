@@ -41,6 +41,7 @@ type PropertyCollector struct {
 	mo.PropertyCollector
 
 	nopLocker
+	pending *types.UpdateSet
 	updates []types.ObjectUpdate
 	mu      sync.Mutex
 	cancel  context.CancelFunc
@@ -818,9 +819,47 @@ func (pc *PropertyCollector) apply(ctx *Context, update *types.UpdateSet) types.
 	return nil
 }
 
+// pageUpdateSet limits the given UpdateSet to max number of object updates.
+// nil is returned when not truncated, otherwise the remaining UpdateSet.
+func pageUpdateSet(update *types.UpdateSet, max int) *types.UpdateSet {
+	for i := range update.FilterSet {
+		set := update.FilterSet[i].ObjectSet
+		n := len(set)
+		if n+1 > max {
+			update.Truncated = types.NewBool(true)
+			f := types.PropertyFilterUpdate{
+				Filter:    update.FilterSet[i].Filter,
+				ObjectSet: update.FilterSet[i].ObjectSet[max:],
+			}
+			update.FilterSet[i].ObjectSet = update.FilterSet[i].ObjectSet[:max]
+
+			pending := &types.UpdateSet{
+				Version:   "P",
+				FilterSet: []types.PropertyFilterUpdate{f},
+			}
+
+			if len(update.FilterSet) > i {
+				pending.FilterSet = append(pending.FilterSet, update.FilterSet[i+1:]...)
+				update.FilterSet = update.FilterSet[:i+1]
+			}
+
+			return pending
+		}
+		max -= n
+	}
+	return nil
+}
+
+// WaitOptions.maxObjectUpdates says:
+// > PropertyCollector policy may still limit the total count
+// > to something less than maxObjectUpdates.
+// Seems to be "may" == "will" and the default max is 100.
+const defaultMaxObjectUpdates = 100 // vCenter's default
+
 func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpdatesEx) soap.HasFault {
 	wait, cancel := context.WithCancel(context.Background())
 	oneUpdate := false
+	maxObject := defaultMaxObjectUpdates
 	if r.Options != nil {
 		if max := r.Options.MaxWaitSeconds; max != nil {
 			// A value of 0 causes WaitForUpdatesEx to do one update calculation and return any results.
@@ -828,6 +867,9 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 			if *max > 0 {
 				wait, cancel = context.WithTimeout(context.Background(), time.Second*time.Duration(*max))
 			}
+		}
+		if max := r.Options.MaxObjectUpdates; max > 0 && max < defaultMaxObjectUpdates {
+			maxObject = int(max)
 		}
 	}
 	pc.mu.Lock()
@@ -844,6 +886,12 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 		Returnval: set,
 	}
 
+	if pc.pending != nil {
+		body.Res.Returnval = pc.pending
+		pc.pending = pageUpdateSet(body.Res.Returnval, maxObject)
+		return body
+	}
+
 	apply := func() bool {
 		if fault := pc.apply(ctx, set); fault != nil {
 			body.Fault_ = Fault("", fault)
@@ -857,6 +905,7 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 		ctx.Map.AddHandler(pc) // Listen for create, update, delete of managed objects
 		apply()                // Collect current state
 		set.Version = "-"      // Next request with Version set will wait via loop below
+		pc.pending = pageUpdateSet(body.Res.Returnval, maxObject)
 		return body
 	}
 
@@ -932,6 +981,7 @@ func (pc *PropertyCollector) WaitForUpdatesEx(ctx *Context, r *types.WaitForUpda
 				}
 			}
 			if len(set.FilterSet) != 0 {
+				pc.pending = pageUpdateSet(body.Res.Returnval, maxObject)
 				return body
 			}
 			if oneUpdate {
