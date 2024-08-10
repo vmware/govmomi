@@ -5137,6 +5137,7 @@ The session.login command can be used to:
 - Issue a SAML token
 - Renew a SAML token
 - Login using a SAML token
+- Impersonate a user
 - Avoid passing credentials to other govc commands
 - Send an authenticated raw HTTP request
 
@@ -5149,6 +5150,7 @@ Examples:
   govc session.ls -u root@host # Use the cached session with another command
   ticket=$(govc session.login -u root@host -clone)
   govc session.login -u root@host -ticket $ticket
+  govc session.login -u Administrator@vsphere.local:password@host -as other@vsphere.local
   govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key
   token=$(govc session.login -u host -cert user.crt -key user.key -issue) # HoK token
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
@@ -5161,6 +5163,7 @@ Examples:
 
 Options:
   -X=                    HTTP method
+  -as=                   Impersonate user
   -clone=false           Acquire clone ticket
   -cookie=               Set HTTP cookie for an existing session
   -extension=            Extension name

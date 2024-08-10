@@ -53,6 +53,7 @@ type login struct {
 	cookie string
 	token  string
 	ext    string
+	as     string
 	method string
 }
 
@@ -76,6 +77,7 @@ func (cmd *login) Register(ctx context.Context, f *flag.FlagSet) {
 	f.StringVar(&cmd.cookie, "cookie", "", "Set HTTP cookie for an existing session")
 	f.StringVar(&cmd.token, "token", "", "Use SAML token for login or as issue identity")
 	f.StringVar(&cmd.ext, "extension", "", "Extension name")
+	f.StringVar(&cmd.as, "as", "", "Impersonate user")
 	f.StringVar(&cmd.method, "X", "", "HTTP method")
 }
 
@@ -102,6 +104,7 @@ The session.login command can be used to:
 - Issue a SAML token
 - Renew a SAML token
 - Login using a SAML token
+- Impersonate a user
 - Avoid passing credentials to other govc commands
 - Send an authenticated raw HTTP request
 
@@ -114,6 +117,7 @@ Examples:
   govc session.ls -u root@host # Use the cached session with another command
   ticket=$(govc session.login -u root@host -clone)
   govc session.login -u root@host -ticket $ticket
+  govc session.login -u Administrator@vsphere.local:password@host -as other@vsphere.local
   govc session.login -u host -extension com.vmware.vsan.health -cert rui.crt -key rui.key
   token=$(govc session.login -u host -cert user.crt -key user.key -issue) # HoK token
   bearer=$(govc session.login -u user:pass@host -issue) # Bearer token
@@ -237,6 +241,14 @@ func (cmd *login) loginByExtension(ctx context.Context, c *vim25.Client) error {
 	return session.NewManager(c).LoginExtensionByCertificate(ctx, cmd.ext)
 }
 
+func (cmd *login) impersonateUser(ctx context.Context, c *vim25.Client) error {
+	m := session.NewManager(c)
+	if err := m.Login(ctx, cmd.Session.URL.User); err != nil {
+		return err
+	}
+	return m.ImpersonateUser(ctx, cmd.as)
+}
+
 func (cmd *login) setCookie(ctx context.Context, c *vim25.Client) error {
 	url := c.URL()
 	jar := c.Client.Jar
@@ -323,6 +335,8 @@ func (cmd *login) Run(ctx context.Context, f *flag.FlagSet) error {
 		cmd.Session.LoginREST = cmd.loginRestByToken
 	case cmd.ext != "":
 		cmd.Session.LoginSOAP = cmd.loginByExtension
+	case cmd.as != "":
+		cmd.Session.LoginSOAP = cmd.impersonateUser
 	case cmd.issue:
 		cmd.Session.LoginSOAP = nologinSOAP
 		cmd.Session.LoginREST = nologinREST
