@@ -130,6 +130,17 @@ load test_helper
     run govc tags.ls -u "$user@$host"
     assert_failure # logged out of persisted session
 
+    # ImpersonateUser
+
+    run govc session.login -as vcsim
+    assert_failure # user must have an existing session
+
+    run govc session.login -u vcsim:pass@"$host"
+    assert_success
+
+    run govc session.login -as vcsim
+    assert_success
+
     rm -rf "$dir"
 }
 

@@ -96,6 +96,17 @@ func (m *SessionManager) getSession(id string) (Session, bool) {
 	return s, ok
 }
 
+func (m *SessionManager) findSession(user string) (Session, bool) {
+	sessionMutex.Lock()
+	defer sessionMutex.Unlock()
+	for _, session := range m.sessions {
+		if session.UserName == user {
+			return session, true
+		}
+	}
+	return Session{}, false
+}
+
 func (m *SessionManager) delSession(id string) {
 	sessionMutex.Lock()
 	defer sessionMutex.Unlock()
@@ -264,6 +275,25 @@ func (s *SessionManager) CloneSession(ctx *Context, ticket *types.CloneSession) 
 		ctx.SetSession(session, true)
 
 		body.Res = &types.CloneSessionResponse{
+			Returnval: session.UserSession,
+		}
+	} else {
+		body.Fault_ = invalidLogin
+	}
+
+	return body
+}
+
+func (s *SessionManager) ImpersonateUser(ctx *Context, req *types.ImpersonateUser) soap.HasFault {
+	body := new(methods.ImpersonateUserBody)
+
+	session, exists := s.findSession(req.UserName)
+
+	if exists {
+		session.Key = uuid.New().String()
+		ctx.SetSession(session, true)
+
+		body.Res = &types.ImpersonateUserResponse{
 			Returnval: session.UserSession,
 		}
 	} else {
