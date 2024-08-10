@@ -153,7 +153,7 @@ func ExampleCollector_WaitForUpdatesEx_addingRemovingPropertyFilters() {
 		go func() {
 			if err := pc.WaitForUpdatesEx(
 				cancelCtx,
-				property.WaitOptions{},
+				&property.WaitOptions{},
 				func(updates []types.ObjectUpdate) bool {
 					return waitForPowerStateChanges(
 						cancelCtx,
@@ -265,7 +265,7 @@ func ExampleCollector_WaitForUpdatesEx_errConcurrentCollector() {
 
 		waitForChanges := func(chanErr chan error) {
 			defer close(chanErr)
-			chanErr <- pc.WaitForUpdatesEx(ctx, waitOptions, onUpdatesFn)
+			chanErr <- pc.WaitForUpdatesEx(ctx, &waitOptions, onUpdatesFn)
 		}
 
 		// Start two goroutines that wait for changes, but only one will begin
@@ -296,7 +296,7 @@ func ExampleCollector_WaitForUpdatesEx_errConcurrentCollector() {
 
 		// The third WaitForUpdatesEx call should be able to successfully obtain
 		// the lock since the other two calls are completed.
-		if err := pc.WaitForUpdatesEx(ctx, waitOptions, onUpdatesFn); err != nil {
+		if err := pc.WaitForUpdatesEx(ctx, &waitOptions, onUpdatesFn); err != nil {
 			return fmt.Errorf(
 				"unexpected error from third call to WaitForUpdatesEx: %s", err)
 		}

@@ -70,6 +70,21 @@ EOF
   assert_matches "govmomi simulator"
 }
 
+@test "truncated WaitForUpdatesEx" {
+  total=142 # 100 is the default MaxObjectUpdates
+  vcsim_env -standalone-host 0 -vm $total
+
+  url="https://$(govc env GOVC_URL)"
+
+  model=$(curl -sfk "$url/debug/vars" | jq .vcsim.model)
+  vms=$(jq .machine <<<"$model")
+  assert_equal $total "$vms" # sanity check
+
+  run govc object.collect -type m / name
+  assert_success
+  [ ${#lines[@]} -eq "$total" ]
+}
+
 @test "vcsim host placement" {
   vcsim_start -dc 0
 

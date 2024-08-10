@@ -276,7 +276,7 @@ func (p *Collector) RetrieveOne(ctx context.Context, obj types.ManagedObjectRefe
 // propagation.
 func (p *Collector) WaitForUpdatesEx(
 	ctx context.Context,
-	opts WaitOptions,
+	opts *WaitOptions,
 	onUpdatesFn func([]types.ObjectUpdate) bool) error {
 
 	if !p.mu.TryLock() {
