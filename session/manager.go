@@ -291,3 +291,19 @@ func (sm *Manager) UpdateServiceMessage(ctx context.Context, message string) err
 
 	return err
 }
+
+func (sm *Manager) ImpersonateUser(ctx context.Context, name string) error {
+	req := types.ImpersonateUser{
+		This:     sm.Reference(),
+		UserName: name,
+		Locale:   Locale,
+	}
+
+	res, err := methods.ImpersonateUser(ctx, sm.client, &req)
+	if err != nil {
+		return err
+	}
+
+	sm.userSession = &res.Returnval
+	return nil
+}
