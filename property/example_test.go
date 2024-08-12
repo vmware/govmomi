@@ -24,6 +24,7 @@ import (
 	"github.com/vmware/govmomi/find"
 	"github.com/vmware/govmomi/property"
 	"github.com/vmware/govmomi/simulator"
+	"github.com/vmware/govmomi/view"
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
@@ -153,7 +154,7 @@ func ExampleCollector_WaitForUpdatesEx_addingRemovingPropertyFilters() {
 		go func() {
 			if err := pc.WaitForUpdatesEx(
 				cancelCtx,
-				property.WaitOptions{},
+				&property.WaitOptions{},
 				func(updates []types.ObjectUpdate) bool {
 					return waitForPowerStateChanges(
 						cancelCtx,
@@ -265,7 +266,7 @@ func ExampleCollector_WaitForUpdatesEx_errConcurrentCollector() {
 
 		waitForChanges := func(chanErr chan error) {
 			defer close(chanErr)
-			chanErr <- pc.WaitForUpdatesEx(ctx, waitOptions, onUpdatesFn)
+			chanErr <- pc.WaitForUpdatesEx(ctx, &waitOptions, onUpdatesFn)
 		}
 
 		// Start two goroutines that wait for changes, but only one will begin
@@ -296,7 +297,7 @@ func ExampleCollector_WaitForUpdatesEx_errConcurrentCollector() {
 
 		// The third WaitForUpdatesEx call should be able to successfully obtain
 		// the lock since the other two calls are completed.
-		if err := pc.WaitForUpdatesEx(ctx, waitOptions, onUpdatesFn); err != nil {
+		if err := pc.WaitForUpdatesEx(ctx, &waitOptions, onUpdatesFn); err != nil {
 			return fmt.Errorf(
 				"unexpected error from third call to WaitForUpdatesEx: %s", err)
 		}
@@ -310,4 +311,67 @@ func ExampleCollector_WaitForUpdatesEx_errConcurrentCollector() {
 	// WaitForUpdatesEx call succeeded
 	// WaitForUpdatesEx call returned ErrConcurrentCollector
 	// WaitForUpdatesEx call succeeded
+}
+
+func ExampleCollector_WaitForUpdatesEx_pagination() {
+	model := simulator.VPX()
+	model.Cluster = 3
+	model.Machine = 42
+
+	simulator.Run(func(ctx context.Context, c *vim25.Client) error {
+		pc := property.DefaultCollector(c)
+		m := view.NewManager(c)
+
+		// Note: both types can be collected with 1 ContainerView and 1 PropertyFilter,
+		// but we are creating 2 PropertyFilter for example purposes.
+		kinds := []string{"HostSystem", "VirtualMachine"}
+		for _, kind := range kinds {
+			v, err := m.CreateContainerView(ctx, c.ServiceContent.RootFolder, []string{kind}, true)
+			if err != nil {
+				return err
+			}
+
+			defer v.Destroy(ctx)
+
+			filter := new(property.WaitFilter).Add(v.Reference(), kind, []string{"name"}, v.TraversalSpec())
+
+			f, err := pc.CreateFilter(ctx, filter.CreateFilter)
+			if err != nil {
+				return err
+			}
+
+			defer f.Destroy(ctx)
+		}
+
+		options := &property.WaitOptions{
+			Options: &types.WaitOptions{MaxObjectUpdates: 50},
+		}
+
+		// Callback is invoked once for each FilterSet:
+		// 1st WaitForUpdatesEx call returns 2 FilterSet, 10 hosts + 40 vms
+		// Next 4 calls are 1 FilterSet of 50, 50 and 28 vms
+		callbacks := 0
+		objects := make(map[string]int)
+
+		err := pc.WaitForUpdatesEx(ctx, options, func(updates []types.ObjectUpdate) bool {
+			for _, update := range updates {
+				objects[update.Obj.Type]++
+			}
+			callbacks++
+			return options.Truncated == false
+		})
+		if err != nil {
+			return err
+		}
+
+		fmt.Printf("%d Callbacks\n", callbacks)
+		for _, kind := range kinds {
+			fmt.Printf("%d %s\n", objects[kind], kind)
+		}
+		return nil
+	}, model)
+	// Output:
+	// 5 Callbacks
+	// 10 HostSystem
+	// 168 VirtualMachine
 }

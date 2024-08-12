@@ -123,7 +123,7 @@ func WaitForUpdates(
 		return err
 	}
 
-	return pc.WaitForUpdatesEx(ctx, filter.WaitOptions, onUpdatesFn)
+	return pc.WaitForUpdatesEx(ctx, &filter.WaitOptions, onUpdatesFn)
 }
 
 // WaitForUpdates waits for any of the specified properties of the specified
@@ -166,5 +166,5 @@ func WaitForUpdatesEx(
 
 	}()
 
-	return pc.WaitForUpdatesEx(ctx, filter.WaitOptions, onUpdatesFn)
+	return pc.WaitForUpdatesEx(ctx, &filter.WaitOptions, onUpdatesFn)
 }
