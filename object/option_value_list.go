@@ -19,6 +19,8 @@ package object
 import (
 	"fmt"
 	"reflect"
+	"slices"
+	"strings"
 
 	"github.com/vmware/govmomi/vim25/types"
 )
@@ -42,6 +44,65 @@ func OptionValueListFromMap[T any](in map[string]T) OptionValueList {
 		i++
 	}
 	return out
+}
+
+// IsTrue returns true if the specified key exists with an empty value or value
+// equal to 1, "1", "on", "t", true, "true", "y", or "yes".
+// All string comparisons are case-insensitive.
+func (ov OptionValueList) IsTrue(key string) bool {
+	return ov.isTrueOrFalse(key, true, 1, "", "1", "on", "t", "true", "y", "yes")
+}
+
+// IsFalse returns true if the specified key exists and has a value equal to
+// 0, "0", "f", false, "false", "n", "no", or "off".
+// All string comparisons are case-insensitive.
+func (ov OptionValueList) IsFalse(key string) bool {
+	return ov.isTrueOrFalse(key, false, 0, "0", "f", "false", "n", "no", "off")
+}
+
+func (ov OptionValueList) isTrueOrFalse(
+	key string,
+	boolVal bool,
+	numVal int,
+	strVals ...string) bool {
+
+	val, ok := ov.Get(key)
+	if !ok {
+		return false
+	}
+
+	switch tval := val.(type) {
+	case string:
+		return slices.Contains(strVals, strings.ToLower(tval))
+	case bool:
+		return tval == boolVal
+	case uint:
+		return tval == uint(numVal)
+	case uint8:
+		return tval == uint8(numVal)
+	case uint16:
+		return tval == uint16(numVal)
+	case uint32:
+		return tval == uint32(numVal)
+	case uint64:
+		return tval == uint64(numVal)
+	case int:
+		return tval == int(numVal)
+	case int8:
+		return tval == int8(numVal)
+	case int16:
+		return tval == int16(numVal)
+	case int32:
+		return tval == int32(numVal)
+	case int64:
+		return tval == int64(numVal)
+	case float32:
+		return tval == float32(numVal)
+	case float64:
+		return tval == float64(numVal)
+	}
+
+	return false
 }
 
 // Get returns the value if exists, otherwise nil is returned. The second return

@@ -17,6 +17,8 @@ limitations under the License.
 package object_test
 
 import (
+	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -110,6 +112,233 @@ func TestOptionValueList(t *testing.T) {
 				},
 			)
 		})
+	})
+
+	t.Run("IsTrueOrFalse", func(t *testing.T) {
+
+		type testCase struct {
+			name string
+			left object.OptionValueList
+			key  string
+			ok   bool
+		}
+
+		addBoolTestCases := func(b, ok bool) []testCase {
+			return []testCase{
+				{
+					name: fmt.Sprintf("a key with %v should return %v", b, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: b},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with %v should return %v", !b, !ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: !b},
+					},
+					key: sza,
+					ok:  !ok,
+				},
+			}
+		}
+
+		addNumericalTestCases := func(i int, ok bool) []testCase {
+			return []testCase{
+				{
+					name: fmt.Sprintf("a key with byte(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: byte(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with uint(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: uint(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with uint8(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: uint8(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with uint16(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: uint16(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with uint32(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: uint32(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with uint64(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: uint64(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+
+				{
+					name: fmt.Sprintf("a key with int(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: int(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with int8(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: int8(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with int16(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: int16(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with int32(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: int32(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with int64(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: int64(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+
+				{
+					name: fmt.Sprintf("a key with float32(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: float32(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+				{
+					name: fmt.Sprintf("a key with float64(%v) should return %v", i, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: float64(i)},
+					},
+					key: sza,
+					ok:  ok,
+				},
+			}
+		}
+
+		addTestCasesForPermutedString := func(s string, ok bool) []testCase {
+			var testCases []testCase
+			for _, s := range permuteByCase(s) {
+				testCases = append(testCases, testCase{
+					name: fmt.Sprintf("a key with %q should return %v", s, ok),
+					left: object.OptionValueList{
+						&types.OptionValue{Key: sza, Value: s},
+					},
+					key: sza,
+					ok:  ok,
+				})
+			}
+			return testCases
+		}
+
+		addTestCasesForPermutedStrings := func(ok bool, args ...string) []testCase {
+			var testCases []testCase
+			for i := range args {
+				testCases = append(testCases, addTestCasesForPermutedString(args[i], ok)...)
+			}
+			return testCases
+		}
+
+		baseTestCases := []testCase{
+			{
+				name: "a nil receiver should not panic and return false",
+				left: nil,
+				key:  "",
+				ok:   false,
+			},
+			{
+				name: "a non-existent key should return false",
+				left: object.OptionValueList{},
+				key:  "",
+				ok:   false,
+			},
+		}
+
+		runTests := func(t *testing.T, expected bool) {
+			testCases := append([]testCase{}, baseTestCases...)
+
+			for i := range baseTestCases {
+				tc := testCases[i]
+				t.Run(tc.name, func(t *testing.T) {
+					var ok bool
+					if expected {
+						assert.NotPanics(t, func() { ok = tc.left.IsTrue(tc.key) })
+						assert.Equal(t, tc.ok, ok)
+					} else {
+						assert.NotPanics(t, func() { ok = tc.left.IsFalse(tc.key) })
+						assert.Equal(t, tc.ok, ok)
+					}
+				})
+			}
+
+			testCases = append([]testCase{}, addBoolTestCases(true, expected)...)
+			testCases = append(testCases, addNumericalTestCases(0, !expected)...)
+			testCases = append(testCases, addNumericalTestCases(1, expected)...)
+			testCases = append(testCases, addTestCasesForPermutedStrings(expected, "", "1", "on", "t", "true", "y", "yes")...)
+			testCases = append(testCases, addTestCasesForPermutedStrings(!expected, "0", "f", "false", "n", "no", "off")...)
+
+			for i := range testCases {
+				tc := testCases[i]
+				t.Run(tc.name, func(t *testing.T) {
+					var ok bool
+					if expected {
+						assert.NotPanics(t, func() { ok = tc.left.IsTrue(tc.key) })
+						assert.Equal(t, tc.ok, ok)
+						assert.NotPanics(t, func() { ok = tc.left.IsFalse(tc.key) })
+						assert.Equal(t, !tc.ok, ok)
+					} else {
+						assert.NotPanics(t, func() { ok = tc.left.IsTrue(tc.key) })
+						assert.Equal(t, !tc.ok, ok)
+						assert.NotPanics(t, func() { ok = tc.left.IsFalse(tc.key) })
+						assert.Equal(t, tc.ok, ok)
+					}
+
+				})
+			}
+		}
+
+		t.Run("IsTrue", func(t *testing.T) { runTests(t, true) })
+		t.Run("IsFalse", func(t *testing.T) { runTests(t, false) })
+
 	})
 
 	t.Run("Get", func(t *testing.T) {
@@ -600,4 +829,28 @@ func TestOptionValueList(t *testing.T) {
 			})
 		}
 	})
+}
+
+func permuteByCase(s string) []string {
+	if len(s) == 0 {
+		return []string{s}
+	}
+
+	if len(s) == 1 {
+		lc := strings.ToLower(s)
+		uc := strings.ToUpper(s)
+		if lc == uc {
+			return []string{s}
+		}
+		return []string{lc, uc}
+	}
+
+	var p []string
+	for _, i := range permuteByCase(s[0:1]) {
+		for _, j := range permuteByCase(s[1:]) {
+			p = append(p, fmt.Sprintf("%s%s", i, j))
+		}
+	}
+
+	return p
 }
