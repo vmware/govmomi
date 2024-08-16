@@ -433,7 +433,8 @@ type AgentConfigInfo struct {
 	// virtual machines are installed on the hosts covered by the scope.
 	// If `AgencyConfigInfoEx.vmPlacementPolicy` is set, the VM needs to
 	// be agnostic to the different host versions inside the cluster.
-	OvfPackageUrl string `xml:"ovfPackageUrl,omitempty" json:"ovfPackageUrl,omitempty"`
+	OvfPackageUrl        string `xml:"ovfPackageUrl,omitempty" json:"ovfPackageUrl,omitempty"`
+	AuthenticationScheme string `xml:"authenticationScheme,omitempty" json:"authenticationScheme,omitempty"`
 	// Specifies an SSL trust policy to be use for verification of the
 	// server that hosts the `AgentConfigInfo.ovfPackageUrl`.
 	//
@@ -883,14 +884,6 @@ func init() {
 	types.Add("eam:ArrayOfAgentVibMatchingRule", reflect.TypeOf((*ArrayOfAgentVibMatchingRule)(nil)).Elem())
 }
 
-type ArrayOfHooksHookInfo struct {
-	HooksHookInfo []HooksHookInfo `xml:"HooksHookInfo,omitempty" json:"_value"`
-}
-
-func init() {
-	types.Add("eam:ArrayOfHooksHookInfo", reflect.TypeOf((*ArrayOfHooksHookInfo)(nil)).Elem())
-}
-
 // A boxed array of `Issue`. To be used in `Any` placeholders.
 //
 // This structure may be used only with operations rendered under `/eam`.
@@ -933,6 +926,17 @@ type ArrayOfSolutionsHookConfig struct {
 
 func init() {
 	types.Add("eam:ArrayOfSolutionsHookConfig", reflect.TypeOf((*ArrayOfSolutionsHookConfig)(nil)).Elem())
+}
+
+// A boxed array of `SolutionsHookInfo`. To be used in `Any` placeholders.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type ArrayOfSolutionsHookInfo struct {
+	SolutionsHookInfo []SolutionsHookInfo `xml:"SolutionsHookInfo,omitempty" json:"_value"`
+}
+
+func init() {
+	types.Add("eam:ArrayOfSolutionsHookInfo", reflect.TypeOf((*ArrayOfSolutionsHookInfo)(nil)).Elem())
 }
 
 // A boxed array of `SolutionsHostComplianceResult`. To be used in `Any` placeholders.
@@ -1320,6 +1324,22 @@ func init() {
 	types.Add("eam:ClusterAgentOvfInvalidProperty", reflect.TypeOf((*ClusterAgentOvfInvalidProperty)(nil)).Elem())
 }
 
+type ClusterAgentVmHookFailed struct {
+	ClusterAgentVmIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentVmHookFailed", reflect.TypeOf((*ClusterAgentVmHookFailed)(nil)).Elem())
+}
+
+type ClusterAgentVmHookTimedout struct {
+	ClusterAgentVmIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentVmHookTimedout", reflect.TypeOf((*ClusterAgentVmHookTimedout)(nil)).Elem())
+}
+
 type ClusterAgentVmInaccessible struct {
 	ClusterAgentVmIssue
 }
@@ -1413,6 +1433,14 @@ type ClusterAgentVmPoweredOn struct {
 
 func init() {
 	types.Add("eam:ClusterAgentVmPoweredOn", reflect.TypeOf((*ClusterAgentVmPoweredOn)(nil)).Elem())
+}
+
+type ClusterAgentVmProtected struct {
+	ClusterAgentVmIssue
+}
+
+func init() {
+	types.Add("eam:ClusterAgentVmProtected", reflect.TypeOf((*ClusterAgentVmProtected)(nil)).Elem())
 }
 
 // A cluster agent Virtual Machine is expected to be powered on, but the agent
@@ -1758,19 +1786,6 @@ func init() {
 
 type GetMaintenanceModePolicyResponse struct {
 	Returnval string `xml:"returnval" json:"returnval"`
-}
-
-type HooksHookInfo struct {
-	types.DynamicData
-
-	Vm       types.ManagedObjectReference `xml:"vm" json:"vm"`
-	Solution string                       `xml:"solution" json:"solution"`
-	HookType string                       `xml:"hookType" json:"hookType"`
-	RaisedAt time.Time                    `xml:"raisedAt" json:"raisedAt"`
-}
-
-func init() {
-	types.Add("eam:HooksHookInfo", reflect.TypeOf((*HooksHookInfo)(nil)).Elem())
 }
 
 // Limits the hooks reported to the user.
@@ -2987,7 +3002,8 @@ type SolutionsClusterBoundSolutionConfig struct {
 	// contain duplicate elements.
 	//
 	// Refers instances of `Datastore`.
-	Datastores []types.ManagedObjectReference `xml:"datastores" json:"datastores"`
+	Datastores []types.ManagedObjectReference  `xml:"datastores,omitempty" json:"datastores,omitempty"`
+	Devices    *types.VirtualMachineConfigSpec `xml:"devices,omitempty" json:"devices,omitempty"`
 }
 
 func init() {
@@ -3113,10 +3129,39 @@ type SolutionsHookConfig struct {
 	Type string `xml:"type" json:"type"`
 	// Type of acknoledgement of the configured hook.
 	Acknowledgement BaseSolutionsHookAcknowledgeConfig `xml:"acknowledgement,typeattr" json:"acknowledgement"`
+	// The maximum time in seconds to wait for a hook to be processed.
+	//
+	// An
+	// issue is raised if the time elapsed and the hook is still not
+	// processed.
+	// If omitted - defaults to 10 hours.
+	Timeout int64 `xml:"timeout,omitempty" json:"timeout,omitempty"`
 }
 
 func init() {
 	types.Add("eam:SolutionsHookConfig", reflect.TypeOf((*SolutionsHookConfig)(nil)).Elem())
+}
+
+// Contains information for a raised hook.
+//
+// This structure may be used only with operations rendered under `/eam`.
+type SolutionsHookInfo struct {
+	types.DynamicData
+
+	// Virtual Machine, the hook was raised for.
+	//
+	// Refers instance of `VirtualMachine`.
+	Vm types.ManagedObjectReference `xml:"vm" json:"vm"`
+	// Solution the Virtual Machine belongs to.
+	Solution string `xml:"solution" json:"solution"`
+	// Configuration of the hook.
+	Config SolutionsHookConfig `xml:"config" json:"config"`
+	// Time the hook was raised.
+	RaisedAt time.Time `xml:"raisedAt" json:"raisedAt"`
+}
+
+func init() {
+	types.Add("eam:SolutionsHookInfo", reflect.TypeOf((*SolutionsHookInfo)(nil)).Elem())
 }
 
 // Specifies host-bound solution configuration.
@@ -3248,7 +3293,7 @@ type SolutionsSolutionComplianceResult struct {
 	// Refers instance of `VirtualMachine`.
 	UpgradingVm *types.ManagedObjectReference `xml:"upgradingVm,omitempty" json:"upgradingVm,omitempty"`
 	// Hook, ESX Agent Manager is awaiting to be processed for this solution.
-	Hook *HooksHookInfo `xml:"hook,omitempty" json:"hook,omitempty"`
+	Hook *SolutionsHookInfo `xml:"hook,omitempty" json:"hook,omitempty"`
 	// Issues, ESX Agent Manager has encountered while attempting to acheive
 	// the solution's requested desired state.
 	Issues []BaseIssue `xml:"issues,omitempty,typeattr" json:"issues,omitempty"`
@@ -3269,10 +3314,14 @@ type SolutionsSolutionConfig struct {
 
 	// Solution, this configuration belongs to.
 	Solution string `xml:"solution" json:"solution"`
-	Name     string `xml:"name" json:"name"`
-	Version  string `xml:"version" json:"version"`
+	// Display name of the solution.
+	DisplayName string `xml:"displayName" json:"displayName"`
+	// Display version of the solution.
+	DisplayVersion string `xml:"displayVersion" json:"displayVersion"`
 	// Source of the system Virtual Machine files.
 	VmSource BaseSolutionsVMSource `xml:"vmSource,typeattr" json:"vmSource"`
+	// VM name prefix.
+	PrefixVmName string `xml:"prefixVmName" json:"prefixVmName"`
 	// If set to `True` - will insert an UUID in the system Virtual
 	// Machines' names created for the solution, otherwise - no additional
 	// UUID will be inserted in the system Virtual Machines' names.
@@ -3873,6 +3922,22 @@ func init() {
 	types.Add("eam:VmDeployed", reflect.TypeOf((*VmDeployed)(nil)).Elem())
 }
 
+type VmHookFailed struct {
+	VmIssue
+}
+
+func init() {
+	types.Add("eam:VmHookFailed", reflect.TypeOf((*VmHookFailed)(nil)).Elem())
+}
+
+type VmHookTimedout struct {
+	VmIssue
+}
+
+func init() {
+	types.Add("eam:VmHookTimedout", reflect.TypeOf((*VmHookTimedout)(nil)).Elem())
+}
+
 type VmInaccessible struct {
 	VmIssue
 }
@@ -3978,6 +4043,14 @@ type VmPoweredOn struct {
 
 func init() {
 	types.Add("eam:VmPoweredOn", reflect.TypeOf((*VmPoweredOn)(nil)).Elem())
+}
+
+type VmProtected struct {
+	VmIssue
+}
+
+func init() {
+	types.Add("eam:VmProtected", reflect.TypeOf((*VmProtected)(nil)).Elem())
 }
 
 // An agent virtual machine is expected to be deployed on a host, but the agent
