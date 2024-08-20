@@ -541,13 +541,13 @@ func (v VirtualMachine) RemoveDevice(ctx context.Context, keepFiles bool, device
 }
 
 // AttachDisk attaches the given disk to the VirtualMachine
-func (v VirtualMachine) AttachDisk(ctx context.Context, id string, datastore *Datastore, controllerKey int32, unitNumber int32) error {
+func (v VirtualMachine) AttachDisk(ctx context.Context, id string, datastore *Datastore, controllerKey int32, unitNumber *int32) error {
 	req := types.AttachDisk_Task{
 		This:          v.Reference(),
 		DiskId:        types.ID{Id: id},
 		Datastore:     datastore.Reference(),
 		ControllerKey: controllerKey,
-		UnitNumber:    &unitNumber,
+		UnitNumber:    unitNumber,
 	}
 
 	res, err := methods.AttachDisk_Task(ctx, v.c, &req)
