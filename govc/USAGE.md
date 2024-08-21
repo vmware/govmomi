@@ -6418,6 +6418,8 @@ Options:
   -disk=                 Disk path (to use existing) OR size (to create new, e.g. 20GB)
   -disk-datastore=       Datastore for disk file
   -disk.controller=scsi  Disk controller type
+  -disk.eager=false      Eagerly scrub new disk
+  -disk.thick=false      Thick provision new disk
   -ds=                   Datastore [GOVC_DATASTORE]
   -firmware=bios         Firmware type [bios|efi]
   -folder=               Inventory folder [GOVC_FOLDER]
