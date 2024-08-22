@@ -26,6 +26,14 @@ load test_helper
 
   govc disk.ls -json "$id" | jq .
 
+  vm=DC0_H0_VM0
+
+  run govc disk.attach -vm $vm "$id"
+  assert_success
+
+  run govc disk.detach -vm $vm "$id"
+  assert_success
+
   run govc disk.rm "$id"
   assert_success
 

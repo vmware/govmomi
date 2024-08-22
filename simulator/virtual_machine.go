@@ -2605,6 +2605,63 @@ func (vm *VirtualMachine) RemoveAllSnapshotsTask(ctx *Context, req *types.Remove
 	}
 }
 
+func (vm *VirtualMachine) fcd(ctx *Context, ds types.ManagedObjectReference, id types.ID) *VStorageObject {
+	m := ctx.Map.Get(*ctx.Map.content().VStorageObjectManager).(*VcenterVStorageObjectManager)
+	if ds.Value != "" {
+		return m.objects[ds][id]
+	}
+	for _, set := range m.objects {
+		for key, val := range set {
+			if key == id {
+				return val
+			}
+		}
+	}
+	return nil
+}
+
+func (vm *VirtualMachine) AttachDiskTask(ctx *Context, req *types.AttachDisk_Task) soap.HasFault {
+	task := CreateTask(vm, "attachDisk", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		fcd := vm.fcd(ctx, req.Datastore, req.DiskId)
+		if fcd == nil {
+			return nil, new(types.InvalidArgument)
+		}
+
+		fcd.Config.ConsumerId = []types.ID{{Id: vm.Config.Uuid}}
+
+		// TODO: add device
+
+		return nil, nil
+	})
+
+	return &methods.AttachDisk_TaskBody{
+		Res: &types.AttachDisk_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
+func (vm *VirtualMachine) DetachDiskTask(ctx *Context, req *types.DetachDisk_Task) soap.HasFault {
+	task := CreateTask(vm, "detachDisk", func(t *Task) (types.AnyType, types.BaseMethodFault) {
+		fcd := vm.fcd(ctx, types.ManagedObjectReference{}, req.DiskId)
+		if fcd == nil {
+			return nil, new(types.InvalidArgument)
+		}
+
+		fcd.Config.ConsumerId = nil
+
+		// TODO: remove device
+
+		return nil, nil
+	})
+
+	return &methods.DetachDisk_TaskBody{
+		Res: &types.DetachDisk_TaskResponse{
+			Returnval: task.Run(ctx),
+		},
+	}
+}
+
 func (vm *VirtualMachine) ShutdownGuest(ctx *Context, c *types.ShutdownGuest) soap.HasFault {
 	r := &methods.ShutdownGuestBody{}
 
