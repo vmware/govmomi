@@ -746,6 +746,14 @@ func (c *Manager) DeleteNamespace(ctx context.Context, namespace string) error {
 	return c.Do(ctx, request, nil)
 }
 
+// RegisterVM https://developer.broadcom.com/xapis/vsphere-automation-api/latest/vcenter/api/vcenter/namespaces/instances/namespace/registervm/post/
+func (c *Manager) RegisterVM(ctx context.Context, namespace string, spec RegisterVMSpec) (string, error) {
+	resource := c.Resource(internal.NamespacesPath).WithSubpath(namespace).WithSubpath("registervm")
+	request := resource.Request(http.MethodPost, spec)
+	var task string
+	return task, c.Do(ctx, request, &task)
+}
+
 // VirtualMachineClassInfo https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/data-structures/NamespaceManagement/VirtualMachineClasses/Info/
 type VirtualMachineClassInfo struct {
 	ConfigStatus      string               `json:"config_status"`
@@ -797,6 +805,11 @@ type VgpuDevice struct {
 type VirtualDevices struct {
 	DirectPathIoDevices []DirectPathIoDevice `json:"direct_path_io_devices,omitempty"`
 	VgpuDevices         []VgpuDevice         `json:"vgpu_devices,omitempty"`
+}
+
+// RegisterVMSpec https://developer.broadcom.com/xapis/vsphere-automation-api/latest/vcenter/data-structures/Namespaces_Instances_RegisterVMSpec/
+type RegisterVMSpec struct {
+	VM string `json:"vm"`
 }
 
 // ListVmClasses https://developer.vmware.com/apis/vsphere-automation/v7.0U3/vcenter/api/vcenter/namespace-management/virtual-machine-classes/get/
