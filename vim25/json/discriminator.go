@@ -354,7 +354,11 @@ func discriminatorInterfaceEncode(e *encodeState, v reflect.Value, opts encOpts)
 		e.discriminatorEncodeTypeName = true
 		newStructEncoder(v.Type())(e, v, opts)
 	case reflect.Ptr:
-		discriminatorInterfaceEncode(e, v, opts)
+		if v.IsZero() {
+			newPtrEncoder(v.Type())(e, v, opts)
+		} else {
+			discriminatorInterfaceEncode(e, v, opts)
+		}
 	default:
 		discriminatorValue := opts.discriminatorValueFn(v.Type())
 		if discriminatorValue == "" {
