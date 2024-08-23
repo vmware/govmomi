@@ -268,6 +268,7 @@ but appear via `govc $cmd -h`:
  - [namespace.info](#namespaceinfo)
  - [namespace.logs.download](#namespacelogsdownload)
  - [namespace.ls](#namespacels)
+ - [namespace.registervm](#namespaceregistervm)
  - [namespace.rm](#namespacerm)
  - [namespace.service.activate](#namespaceserviceactivate)
  - [namespace.service.create](#namespaceservicecreate)
@@ -4481,6 +4482,20 @@ Examples:
   govc namespace.ls
 
 Options:
+```
+
+## namespace.registervm
+
+```
+Usage: govc namespace.registervm [OPTIONS] NAME
+
+Register an existing virtual machine as VM Service managed VM.
+
+Examples:
+  govc namespace.registervm -vm my-vm my-namespace
+
+Options:
+  -vm=                   Virtual machine [GOVC_VM]
 ```
 
 ## namespace.rm
