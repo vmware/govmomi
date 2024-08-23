@@ -192,8 +192,13 @@ func New(u *url.URL, r *simulator.Registry) ([]string, http.Handler) {
 }
 
 func (s *handler) withClient(f func(context.Context, *vim25.Client) error) error {
+	return WithClient(s.URL, f)
+}
+
+// WithClient creates invokes f with an authenticated vim25.Client.
+func WithClient(u url.URL, f func(context.Context, *vim25.Client) error) error {
 	ctx := context.Background()
-	c, err := govmomi.NewClient(ctx, &s.URL, true)
+	c, err := govmomi.NewClient(ctx, &u, true)
 	if err != nil {
 		return err
 	}
@@ -201,6 +206,52 @@ func (s *handler) withClient(f func(context.Context, *vim25.Client) error) error
 		_ = c.Logout(ctx)
 	}()
 	return f(ctx, c.Client)
+}
+
+// RunTask creates a Task with the given spec and sets the task state based on error returned by f.
+func RunTask(u url.URL, spec types.CreateTask, f func(context.Context, *vim25.Client) error) string {
+	var id string
+
+	err := WithClient(u, func(ctx context.Context, c *vim25.Client) error {
+		spec.This = *c.ServiceContent.TaskManager
+		if spec.TaskTypeId == "" {
+			spec.TaskTypeId = "com.vmware.govmomi.simulator.test"
+		}
+		res, err := methods.CreateTask(ctx, c, &spec)
+		if err != nil {
+			return err
+		}
+
+		ref := res.Returnval.Task
+		task := object.NewTask(c, ref)
+		id = ref.Value + ":" + uuid.NewString()
+
+		if err = task.SetState(ctx, types.TaskInfoStateRunning, nil, nil); err != nil {
+			return err
+		}
+
+		var fault *types.LocalizedMethodFault
+		state := types.TaskInfoStateSuccess
+		if f != nil {
+			err = f(ctx, c)
+		}
+
+		if err != nil {
+			fault = &types.LocalizedMethodFault{
+				Fault:            &types.SystemError{Reason: err.Error()},
+				LocalizedMessage: err.Error(),
+			}
+			state = types.TaskInfoStateError
+		}
+
+		return task.SetState(ctx, state, nil, fault)
+	})
+
+	if err != nil {
+		panic(err) // should not happen
+	}
+
+	return id
 }
 
 // HandleFunc wraps the given handler with authorization checks and passes to http.ServeMux.HandleFunc
