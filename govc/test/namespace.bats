@@ -308,3 +308,21 @@ load test_helper
     run govc namespace.vmclass.rm test-class-1
     assert_success
 }
+
+@test "namespace.registervm" {
+  vcsim_env
+
+  vm=DC0_C0_RP0_VM0
+
+  run govc namespace.create -cluster DC0_C0 test-namespace-1
+  assert_success
+
+  run govc namespace.registervm -vm $vm test-namespace-1
+  assert_failure # missing resource.yaml
+
+  run govc vm.change -vm $vm -e vmservice.virtualmachine.resource.yaml=b64
+  assert_success
+
+  run govc namespace.registervm -vm $vm test-namespace-1
+  assert_success
+}
