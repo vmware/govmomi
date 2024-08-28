@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2015 VMware, Inc. All Rights Reserved.
+Copyright (c) 2015-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,7 +18,7 @@ package object
 
 import (
 	"context"
-	"fmt"
+	"path"
 
 	"github.com/vmware/govmomi/vim25"
 	"github.com/vmware/govmomi/vim25/methods"
@@ -69,8 +69,12 @@ func (d *Datacenter) Folders(ctx context.Context) (*DatacenterFolders, error) {
 		{"network", &df.NetworkFolder.InventoryPath},
 	}
 
+	dcPath := d.InventoryPath
+	if dcPath == "" {
+		dcPath = "/" + md.Name
+	}
 	for _, p := range paths {
-		*p.path = fmt.Sprintf("/%s/%s", md.Name, p.name)
+		*p.path = path.Join(dcPath, p.name)
 	}
 
 	return df, nil

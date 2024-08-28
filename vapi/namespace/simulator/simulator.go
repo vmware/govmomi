@@ -1,11 +1,11 @@
 /*
-Copyright (c) 2020-2022 VMware, Inc. All Rights Reserved.
+Copyright (c) 2020-2024 VMware, Inc. All Rights Reserved.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
 
-    http://www.apache.org/licenses/LICENSE-2.0
+http://www.apache.org/licenses/LICENSE-2.0
 
 Unless required by applicable law or agreed to in writing, software
 distributed under the License is distributed on an "AS IS" BASIS,
@@ -35,6 +35,8 @@ import (
 	"github.com/vmware/govmomi/vapi/namespace"
 	vapi "github.com/vmware/govmomi/vapi/simulator"
 	"github.com/vmware/govmomi/view"
+	"github.com/vmware/govmomi/vim25"
+	"github.com/vmware/govmomi/vim25/mo"
 	"github.com/vmware/govmomi/vim25/types"
 
 	"github.com/vmware/govmomi/vapi/namespace/internal"
@@ -250,7 +252,14 @@ var namespacesMap = make(map[string]*namespace.NamespacesInstanceInfo)
 
 func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 	subpath := r.URL.Path[len(internal.NamespacesPath):]
-	subpath = strings.Replace(subpath, "/", "", -1)
+	subpath = strings.TrimPrefix(subpath, "/")
+	// TODO: move to 1.22's https://go.dev/blog/routing-enhancements
+	route := strings.Split(subpath, "/")
+	subpath = route[0]
+	action := ""
+	if len(route) > 1 {
+		action = route[1]
+	}
 
 	switch r.Method {
 	case http.MethodGet:
@@ -290,6 +299,27 @@ func (h *Handler) namespaces(w http.ResponseWriter, r *http.Request) {
 
 		vapi.ApiErrorNotFound(w)
 	case http.MethodPost:
+		if action == "registervm" {
+			var spec namespace.RegisterVMSpec
+			if !vapi.Decode(r, w, &spec) {
+				return
+			}
+
+			ref := types.ManagedObjectReference{Type: "VirtualMachine", Value: spec.VM}
+			task := types.CreateTask{Obj: ref}
+			key := &mo.Field{Path: "config.extraConfig", Key: "vmservice.virtualmachine.resource.yaml"}
+
+			vapi.StatusOK(w, vapi.RunTask(*h.URL, task, func(ctx context.Context, c *vim25.Client) error {
+				var vm mo.VirtualMachine
+				_ = property.DefaultCollector(c).RetrieveOne(ctx, task.Obj, []string{key.String()}, &vm)
+				if vm.Config == nil || len(vm.Config.ExtraConfig) == 0 {
+					return fmt.Errorf("%s %s not found", task.Obj, key)
+				}
+				return nil
+			}))
+			return
+		}
+
 		var spec namespace.NamespacesInstanceCreateSpec
 		if !vapi.Decode(r, w, &spec) {
 			return

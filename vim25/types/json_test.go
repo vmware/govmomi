@@ -107,6 +107,109 @@ func TestSerialization(t *testing.T) {
 			assert.JSONEq(t, expected, actual)
 		})
 	}
+
+	t.Run("ConfigSpec", func(t *testing.T) {
+		t.Run("Encode", func(t *testing.T) {
+
+			var testCases = []struct {
+				name        string
+				data        any
+				expected    string
+				expectPanic bool
+			}{
+				{
+					name:     "nil ConfigSpec",
+					data:     (*VirtualMachineConfigSpec)(nil),
+					expected: "null",
+				},
+				{
+					name: "ConfigSpec with nil OptionValue value",
+					data: &VirtualMachineConfigSpec{
+						ExtraConfig: []BaseOptionValue{
+							&OptionValue{
+								Key:   "key1",
+								Value: nil,
+							},
+						},
+					},
+					expected: `{"_typeName":"VirtualMachineConfigSpec","extraConfig":[{"_typeName":"OptionValue","key":"key1","value":null}]}`,
+				},
+				{
+					name: "ConfigSpec with nil OptionValue interface value",
+					data: &VirtualMachineConfigSpec{
+						ExtraConfig: []BaseOptionValue{
+							&OptionValue{
+								Key:   "key1",
+								Value: (any)(nil),
+							},
+						},
+					},
+					expected: `{"_typeName":"VirtualMachineConfigSpec","extraConfig":[{"_typeName":"OptionValue","key":"key1","value":null}]}`,
+				},
+				{
+					name: "ConfigSpec with nil element in OptionValues",
+					data: &VirtualMachineConfigSpec{
+						ExtraConfig: []BaseOptionValue{
+							(*OptionValue)(nil),
+						},
+					},
+					expected: `{"_typeName":"VirtualMachineConfigSpec","extraConfig":[null]}`,
+				},
+				{
+					name: "ConfigSpec with nil ToolsConfigInfo",
+					data: &VirtualMachineConfigSpec{
+						Tools: (*ToolsConfigInfo)(nil),
+					},
+					expected: `{"_typeName":"VirtualMachineConfigSpec"}`,
+				},
+				{
+					name: "ConfigSpec with nil vAppConfig",
+					data: &VirtualMachineConfigSpec{
+						VAppConfig: nil,
+					},
+					expected: `{"_typeName":"VirtualMachineConfigSpec"}`,
+				},
+				{
+					name: "ConfigSpec with nil pointer vAppConfig ",
+					data: &VirtualMachineConfigSpec{
+						VAppConfig: (*VmConfigSpec)(nil),
+					},
+					expected: `{"_typeName":"VirtualMachineConfigSpec","vAppConfig":null}`,
+				},
+			}
+
+			for i := range testCases {
+				tc := testCases[i]
+				t.Run(tc.name, func(t *testing.T) {
+					var w bytes.Buffer
+					enc := NewJSONEncoder(&w)
+
+					var panicErr any
+
+					func() {
+						defer func() {
+							panicErr = recover()
+						}()
+						if err := enc.Encode(tc.data); err != nil {
+							t.Fatal(err)
+						}
+					}()
+
+					if tc.expectPanic && panicErr == nil {
+						t.Fatalf("did not panic, w=%v", w.String())
+					} else if tc.expectPanic && panicErr != nil {
+						t.Logf("expected panic occurred: %v\n", panicErr)
+					} else if !tc.expectPanic && panicErr != nil {
+						t.Fatalf("unexpected panic occurred: %v\n", panicErr)
+					} else if a, e := w.String(), tc.expected+"\n"; a != e {
+						t.Fatalf("act=%s != exp=%s", a, e)
+					} else {
+						t.Log(a)
+					}
+				})
+			}
+		})
+	})
 }
 
 func TestOptionValueSerialization(t *testing.T) {

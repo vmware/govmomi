@@ -84,6 +84,28 @@ func init() {
 	types.Add("eam:AgencyVMPlacementPolicyVMDataAffinity", reflect.TypeOf((*AgencyVMPlacementPolicyVMDataAffinity)(nil)).Elem())
 }
 
+type AgentConfigInfoAuthenticationScheme string
+
+const (
+	AgentConfigInfoAuthenticationSchemeNONE              = AgentConfigInfoAuthenticationScheme("NONE")
+	AgentConfigInfoAuthenticationSchemeVMWARE_SESSION_ID = AgentConfigInfoAuthenticationScheme("VMWARE_SESSION_ID")
+)
+
+func (e AgentConfigInfoAuthenticationScheme) Values() []AgentConfigInfoAuthenticationScheme {
+	return []AgentConfigInfoAuthenticationScheme{
+		AgentConfigInfoAuthenticationSchemeNONE,
+		AgentConfigInfoAuthenticationSchemeVMWARE_SESSION_ID,
+	}
+}
+
+func (e AgentConfigInfoAuthenticationScheme) Strings() []string {
+	return types.EnumValuesAsStrings(e.Values())
+}
+
+func init() {
+	types.Add("eam:AgentConfigInfoAuthenticationScheme", reflect.TypeOf((*AgentConfigInfoAuthenticationScheme)(nil)).Elem())
+}
+
 // Defines the type of disk provisioning for the target Agent VMs.
 type AgentConfigInfoOvfDiskProvisioning string
 

@@ -17,7 +17,12 @@ limitations under the License.
 package types
 
 import (
+	"fmt"
+	"reflect"
+	"slices"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"github.com/vmware/govmomi/vim25/xml"
 )
@@ -303,6 +308,168 @@ func TestVirtualMachineConfigInfoToConfigSpec(t *testing.T) {
 					"exp=%+v\n\nact=%+v\n\n"+
 					"exp.s=%s\n\nact.s=%s\n\n", e, a, eds, ads)
 			}
+		})
+	}
+}
+
+type toStringTestCase struct {
+	name     string
+	in       any
+	expected string
+}
+
+func newToStringTestCases[T any](in T, expected string) []toStringTestCase {
+	return newToStringTestCasesWithTestCaseName(
+		in, expected, reflect.TypeOf(in).Name())
+}
+
+func newToStringTestCasesWithTestCaseName[T any](
+	in T, expected, testCaseName string) []toStringTestCase {
+
+	return []toStringTestCase{
+		{
+			name:     testCaseName,
+			in:       in,
+			expected: expected,
+		},
+		{
+			name:     "*" + testCaseName,
+			in:       &[]T{in}[0],
+			expected: expected,
+		},
+		{
+			name:     "(any)(" + testCaseName + ")",
+			in:       (any)(in),
+			expected: expected,
+		},
+		{
+			name:     "(any)(*" + testCaseName + ")",
+			in:       (any)(&[]T{in}[0]),
+			expected: expected,
+		},
+		{
+			name:     "(any)((*" + testCaseName + ")(nil))",
+			in:       (any)((*T)(nil)),
+			expected: "null",
+		},
+	}
+}
+
+type toStringTypeWithErr struct {
+	errOnCall []int
+	callCount *int
+	doPanic   bool
+}
+
+func (t toStringTypeWithErr) String() string {
+	return "{}"
+}
+
+func (t toStringTypeWithErr) MarshalJSON() ([]byte, error) {
+	defer func() {
+		*t.callCount++
+	}()
+	if !slices.Contains(t.errOnCall, *t.callCount) {
+		return []byte{'{', '}'}, nil
+	}
+	if t.doPanic {
+		panic(fmt.Errorf("marshal json panic'd"))
+	}
+	return nil, fmt.Errorf("marshal json failed")
+}
+
+func TestToString(t *testing.T) {
+	const (
+		helloWorld = "Hello, world."
+	)
+
+	testCases := []toStringTestCase{
+		{
+			name:     "nil",
+			in:       nil,
+			expected: "null",
+		},
+	}
+
+	testCases = append(testCases, newToStringTestCases(
+		"Hello, world.", "Hello, world.")...)
+
+	testCases = append(testCases, newToStringTestCasesWithTestCaseName(
+		byte(1), "1", "byte")...)
+	testCases = append(testCases, newToStringTestCasesWithTestCaseName(
+		'a', "97", "rune")...)
+
+	testCases = append(testCases, newToStringTestCases(
+		true, "true")...)
+
+	testCases = append(testCases, newToStringTestCases(
+		complex(float32(1), float32(4)), "(1+4i)")...)
+	testCases = append(testCases, newToStringTestCases(
+		complex(float64(1), float64(4)), "(1+4i)")...)
+
+	testCases = append(testCases, newToStringTestCases(
+		float32(1.1), "1.1")...)
+	testCases = append(testCases, newToStringTestCases(
+		float64(1.1), "1.1")...)
+
+	testCases = append(testCases, newToStringTestCases(
+		int(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		int8(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		int16(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		int32(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		int64(1), "1")...)
+
+	testCases = append(testCases, newToStringTestCases(
+		uint(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		uint8(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		uint16(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		uint32(1), "1")...)
+	testCases = append(testCases, newToStringTestCases(
+		uint64(1), "1")...)
+
+	testCases = append(testCases, newToStringTestCases(
+		VirtualMachineConfigSpec{},
+		`{"_typeName":"VirtualMachineConfigSpec"}`)...)
+	testCases = append(testCases, newToStringTestCasesWithTestCaseName(
+		VirtualMachineConfigSpec{
+			VAppConfig: (*VmConfigSpec)(nil),
+		},
+		`{"_typeName":"VirtualMachineConfigSpec","vAppConfig":null}`,
+		"VirtualMachineConfigSpec w nil iface")...)
+
+	testCases = append(testCases, toStringTestCase{
+		name:     "MarshalJSON returns error on special encode",
+		in:       toStringTypeWithErr{callCount: new(int), errOnCall: []int{0}},
+		expected: "{}",
+	})
+	testCases = append(testCases, toStringTestCase{
+		name:     "MarshalJSON returns error on special and stdlib encode",
+		in:       toStringTypeWithErr{callCount: new(int), errOnCall: []int{0, 1}},
+		expected: "{}",
+	})
+	testCases = append(testCases, toStringTestCase{
+		name:     "MarshalJSON panics on special encode",
+		in:       toStringTypeWithErr{callCount: new(int), doPanic: true, errOnCall: []int{0}},
+		expected: "{}",
+	})
+	testCases = append(testCases, toStringTestCase{
+		name:     "MarshalJSON panics on special and stdlib encode",
+		in:       toStringTypeWithErr{callCount: new(int), doPanic: true, errOnCall: []int{0, 1}},
+		expected: "{}",
+	})
+
+	for i := range testCases {
+		tc := testCases[i]
+		t.Run(tc.name, func(t *testing.T) {
+			t.Parallel()
+			assert.Equal(t, tc.expected, ToString(tc.in))
 		})
 	}
 }

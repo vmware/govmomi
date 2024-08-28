@@ -17,6 +17,9 @@ limitations under the License.
 package types
 
 import (
+	"bytes"
+	"encoding/json"
+	"fmt"
 	"net/url"
 	"reflect"
 	"strings"
@@ -314,6 +317,78 @@ func (ci VirtualMachineConfigInfo) ToConfigSpec() VirtualMachineConfigSpec {
 	}
 
 	return cs
+}
+
+// ToString returns the string-ified version of the provided input value by
+// first attempting to encode the value to JSON using the vimtype JSON encoder,
+// and if that should fail, using the standard JSON encoder, and if that fails,
+// returning the value formatted with Sprintf("%v").
+//
+// Please note, this function is not intended to replace marshaling the data
+// to JSON using the normal workflows. This function is for when a string-ified
+// version of the data is needed for things like logging.
+func ToString(in AnyType) (s string) {
+	if in == nil {
+		return "null"
+	}
+
+	marshalWithSprintf := func() string {
+		return fmt.Sprintf("%v", in)
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			s = marshalWithSprintf()
+		}
+	}()
+
+	rv := reflect.ValueOf(in)
+	switch rv.Kind() {
+
+	case reflect.Bool,
+		reflect.Complex64, reflect.Complex128,
+		reflect.Float32, reflect.Float64:
+
+		return fmt.Sprintf("%v", in)
+
+	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
+		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
+		reflect.Uintptr:
+
+		return fmt.Sprintf("%d", in)
+
+	case reflect.String:
+		return in.(string)
+
+	case reflect.Interface, reflect.Pointer:
+		if rv.IsZero() {
+			return "null"
+		}
+		return ToString(rv.Elem().Interface())
+	}
+
+	marshalWithStdlibJSONEncoder := func() string {
+		data, err := json.Marshal(in)
+		if err != nil {
+			return marshalWithSprintf()
+		}
+		return string(data)
+	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			s = marshalWithStdlibJSONEncoder()
+		}
+	}()
+
+	var w bytes.Buffer
+	enc := NewJSONEncoder(&w)
+	if err := enc.Encode(in); err != nil {
+		return marshalWithStdlibJSONEncoder()
+	}
+
+	// Do not include the newline character added by the vimtype JSON encoder.
+	return strings.TrimSuffix(w.String(), "\n")
 }
 
 func init() {
